@@ -24,6 +24,10 @@ Each board has its **own source document** in `boards/` (per-board pin map + spe
 | H | **A/V Breakout** — audio + video (VGA/RCA/composite) | #64006H | `boards/addon-av-breakout-64006h.md` |
 | — | **Complete Accessory Set** | #64006-ES | (the set SKU containing all eight) |
 
+## Companion docs
+- **Images:** `assets/images-p2-eval-add-on-boards-2026-06-22/image-catalog.md` (17 figures — board photos corroborate pin maps; PCB-dimension drawings).
+- **Smart Pin mode mapping (DRAFT):** `p2-eval-add-on-boards-smartpin-mode-matrix.md` — which Smart Pin modes each board would exercise (for future tutorial/exercise scoping).
+
 ## Shared facts (all boards unless noted)
 - **Connector:** each board has a **2×6 pass-through socket**, compatible with any P2 development board carrying a 2×6 accessory header.
 - **Compatible systems:** P2 Eval Board (**#64000**); P2 Edge Module Breadboard (**#64020**) or P2 Edge Mini Breakout Board (**#64019**) with a P2 Edge Module (**#P2-EC**).

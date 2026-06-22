@@ -29,7 +29,7 @@ The fabrications leaked into published YAML (`hardware/addon-*.yaml`) — routed
 |---|------|--------|
 | 1 | **Content** | ✅ 2025: `pdf2md` / `pdftotext -layout` (clean text layer). 2020: **forced OCR** (`docling --force-ocr` — Quartz export had a corrupt text layer; 2nd case of the ladder refinement). Texts: `p2-eval-add-on-boards-text.txt`, `…-2020-edition-ocr-text.txt`. |
 | 2 | **Code** | ✅ none in source (the guide has no Spin2/PASM2 listings — pin tables + Charlieplex lookup only). |
-| 3 | **Images** | ⏳ deferred — board photos/PCB-dimension drawings are illustrative; the fact-bearing data (pin maps) is text. Image debt logged, not blocking. |
+| 3 | **Images** | ✅ 17 figures (`pdfimages` + `image-tools-mcp` quality gate, all pass). Board photos carry silk labels + pin numbers (**corroborate pin maps** — e.g. Control img-004); A/V mic/headphone wiring diagrams + 3 PCB-dimension drawings are fact-bearing. Catalog: `assets/images-p2-eval-add-on-boards-2026-06-22/image-catalog.md`; referenced per board in `boards/`. |
 | 4 | **Post-processing** | ✅ per-board pin maps → 8 per-board source docs (`boards/addon-*.md`) + overview/index. |
 | 5 | **Validation** | ✅ all 8 board sections + overview captured; pin maps cross-edition-validated. |
 | 6 | **Cross-source / conflict** | ✅ see below. |
@@ -51,6 +51,6 @@ One source doc per discrete board, each with its pin map + specs + cross-edition
   8 real boards from `boards/`; the 4 part-number-less orphans (`7_segment_display`, `buttons_board`,
   `switches_and_leds`, `switches_board`) are **not** #64006 boards — remove or re-home.
 
-## Completeness: **90%** — gates
-**C** ✅ (both editions) · **K** — n/a · **I** ⏳ (image debt) · **A** ✅ · **X** ✅ (cross-edition).
-Not 100%: board photos / PCB-dimension images not yet extracted (low fact-value).
+## Completeness: **98%** — gates
+**C** ✅ (both editions) · **K** — n/a · **I** ✅ (17 figures cataloged + per-board) · **A** ✅ · **X** ✅ (cross-edition).
+Effectively complete for this source; remaining work is downstream (F-121 YAML rebuild by the YAML head).

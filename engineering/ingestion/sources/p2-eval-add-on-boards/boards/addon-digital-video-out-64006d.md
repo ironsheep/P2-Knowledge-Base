@@ -3,6 +3,8 @@
 **Part:** #64006D · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** present in the 2020 #64006-ES set edition.
 
+**Image:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-007.png` (HDMI-type board photo). See `image-catalog.md`.
+
 ## Function
 Provides an **HDMI-type connector** for experimenting with various video standards. The signal pins
 connected to the P2-EVAL header carry the TMDS clock + 3 data lanes as differential pairs.

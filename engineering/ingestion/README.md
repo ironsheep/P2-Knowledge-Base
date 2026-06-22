@@ -58,7 +58,7 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 **Add-on boards (ride on headers)**  ‹AUTH "Add-On Modules"›
 | Source | Auth | C | K | I | A | X | Cmpl* |
 |--------|------|---|---|---|---|---|-------|
-| p2-eval-add-on-boards ‹#64006 series — 8 boards A–H + set SKU› | 🏆 | ✅ | — | ⏳ | ✅ | ✅ | ~90% _(**re-ingested cross-edition 2026-06-22** — prior extraction was **FABRICATED** (invented board lineup); now **8 per-board source docs** in `boards/` + overview; 2025 clean + 2020 `#64006-ES` forced-OCR, pin maps cross-validated; image debt. **F-121** → YAML head rebuilds `addon-*.yaml`)_ |
+| p2-eval-add-on-boards ‹#64006 series — 8 boards A–H + set SKU› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~98% _(**re-ingested cross-edition 2026-06-22** — prior extraction was **FABRICATED** (invented board lineup); now **8 per-board source docs** in `boards/` + overview + **17-image catalog** (photos corroborate pin maps; PCB-dimension drawings); 2025 clean + 2020 `#64006-ES` forced-OCR, pin maps cross-validated. **F-121** → YAML head rebuilds `addon-*.yaml`)_ |
 | universal-motor-driver | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~85% _(raw txt; no images/cross-source)_ |
 | hyperRam-n-hyperFlash | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 95% _(**ingested 2026-06-22**, forced-OCR — PDF text layer corrupt; pin map **triple-validated** (text∩OCR∩drawing); no code in source; 7 images. Standalone YAML pending → **F-122** (yaml head); part-numbers OCR-unverified → **G-009**)_ |
 

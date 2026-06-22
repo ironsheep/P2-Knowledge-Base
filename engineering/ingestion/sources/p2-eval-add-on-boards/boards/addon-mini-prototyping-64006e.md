@@ -3,6 +3,8 @@
 **Part:** #64006E · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** present in the 2020 #64006-ES set edition.
 
+**Images:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-008.png` (top-side grid), `img-009.png` (bottom-side ground strip). See `image-catalog.md`.
+
 ## Function
 An **8 × 12 grid of plated thru-holes** for custom prototyping.
 

@@ -3,6 +3,8 @@
 **Part:** #64006F · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** identical in the 2020 #64006-ES set edition.
 
+**Image:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-010.png` (twin microUSB photo). See `image-catalog.md`.
+
 ## Function
 Two **microUSB-type** sockets, each with two activity LEDs — lets the Propeller 2 behave as up to **two
 USB-type devices**, connecting to a USB host (computer or other USB-capable microcontroller). Two

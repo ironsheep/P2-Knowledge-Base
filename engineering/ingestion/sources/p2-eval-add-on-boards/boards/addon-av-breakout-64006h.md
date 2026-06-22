@@ -3,6 +3,8 @@
 **Part:** #64006H · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** present in the 2020 #64006-ES set edition (largest module).
 
+**Images:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-012.png` (board photo), `img-013.png` (mic-socket wiring), `img-014.png` (headphone-socket wiring), `img-015.png` (**PCB dimensions + pad layout**, 3.2×1.3 in). See `image-catalog.md`.
+
 ## Function
 Combined audio + video breakout:
 - Amplified Audio Out (80 mW) / headphone socket (3.5 mm stereo jack)

@@ -3,6 +3,8 @@
 **Part:** #64006C · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** present in the 2020 #64006-ES set edition.
 
+**Image:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-006.png` (8×7 Charlieplex grid photo). See `image-catalog.md`.
+
 ## Function
 An **8 × 7 grid of Charlieplexed green LEDs** — display text/graphics across **56 LEDs using only 8 I/O
 pins**. Charlieplexing exploits the one-way current flow of diodes plus the tri-state property of P2 I/O pins

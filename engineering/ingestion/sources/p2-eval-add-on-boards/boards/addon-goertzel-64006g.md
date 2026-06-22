@@ -4,6 +4,8 @@
 **Cross-edition delta:** the 2020 #64006-ES edition's Goertzel had **probe posts**; **v2.0 (Rev B) replaced
 them with touch switch pads** (the documented edition change). Pin map/function otherwise consistent.
 
+**Image:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-011.png` (Rev B touch-pad board photo). See `image-catalog.md`.
+
 ## Function
 A Goertzel experimenter board (Rev B) with **pads for non-contact switching / position sensing**. Pads
 **4, 5, 6** are typically used as on/off (switch-style) inputs; pads **0, 1, 2, 3, 7** form a set of Goertzel

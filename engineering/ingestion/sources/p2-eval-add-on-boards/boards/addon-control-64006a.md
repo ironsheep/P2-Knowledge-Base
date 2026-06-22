@@ -3,6 +3,8 @@
 **Part:** #64006A · **Series:** P2 Eval Add-on Boards (#64006) · **Source:** Product Guide v2.0 (1/12/2021)
 **Cross-edition:** identical in the 2020 #64006-ES set edition (pin map + function unchanged).
 
+**Images:** `../assets/images-p2-eval-add-on-boards-2026-06-22/img-004.png` (labeled photo — buttons 4–7, LEDs 0–3, silk "CONTROL"; **corroborates the pin map**), `img-003.png` (secondary). See `image-catalog.md`.
+
 ## Function
 Four push-buttons and four blue LEDs. The push-buttons give simple digital input control; each
 **active-high** push-button has a **470 Ω series resistor** so the I/O pin is driven low while the button is
