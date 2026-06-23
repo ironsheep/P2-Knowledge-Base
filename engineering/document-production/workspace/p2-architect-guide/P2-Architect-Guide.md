@@ -41,11 +41,12 @@
 \vspace{0.1cm}
 {\footnotesize
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{The Three Chapters}
+\textbf{The Four Chapters}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Ch 1 — Meet the Propeller 2
-\item Ch 2 — Putting It to Work
-\item Ch 3 — Thinking in P2 (Functional Decomposition)
+\item Ch 2 — Reading P2 Code
+\item Ch 3 — Putting It to Work
+\item Ch 4 — Thinking in P2 (Functional Decomposition)
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -111,18 +112,19 @@ This guide stands on work done by others:
 
 This guide is a distillation, not a primary source. It draws on, and points you back to, the trusted documents of the P2 Knowledge Base:
 
-- **The P2 Silicon Documentation** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind Chapters 1–2.
-- **The P2 Knowledge Base decomposition reasoning layer** — the golden home for Chapter 3's forces, planes, and worked derivation; the chapter derives from it and does not drift.
+- **The P2 Silicon Documentation** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind Chapter 1.
+- **The Spin2 documentation and the P2 Assembly Language Manual** — the language facts behind Chapter 2 ("Reading P2 Code").
+- **The P2 Knowledge Base decomposition reasoning layer** — the golden home for Chapter 4's forces, planes, and worked derivation; the chapter derives from it and does not drift.
 - **The P2 reference manuals** (Assembly Language, I/O & Smart Pins, Streamer, Debug) — the depth this orientation deliberately leaves to them (see *Where to Next*).
 
 ## How to Use This Guide
 
 This is a short, narrative guide, not a reference manual — it is meant to be *read*, and it is built so different readers can enter at different doors. Four paths:
 
-- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 puts it to work in real (compiling) code, and Chapter 3 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
-- **Coming from the Propeller 1?** You already own the model. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — then jump to Chapter 3 for the decomposition method, using Chapter 2 as a Spin2/PASM2 refresher.
-- **Already writing P2 code?** Go straight to Chapter 3. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating COGs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–2 as reference.
-- **An AI agent or tool?** The authoritative, machine-readable form of this material is the P2 Knowledge Base itself — in particular the decomposition reasoning layer that is Chapter 3's golden home. Read this guide for the narrative; consume the YAML for the facts.
+- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 teaches you to *read* P2 code (so the examples ahead aren't a mystery), Chapter 3 puts it to work in real (compiling) code, and Chapter 4 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
+- **Coming from the Propeller 1?** You already own the model — and Spin2 will look familiar. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — skim Chapter 2 for what's new in the language, then jump to Chapter 4 for the decomposition method, using Chapter 3 as a hands-on refresher.
+- **Already writing P2 code?** Go straight to Chapter 4. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating COGs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–3 as reference.
+- **An AI agent or tool?** The authoritative, machine-readable form of this material is the P2 Knowledge Base itself — in particular the decomposition reasoning layer that is Chapter 4's golden home. Read this guide for the narrative; consume the YAML for the facts.
 
 ## Conventions
 
