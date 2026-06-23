@@ -1,0 +1,20 @@
+CON
+  _clkfreq = 200_000_000
+  LED      = 56
+
+VAR
+  long stack[64]
+  long count                    ' a hub variable — every cog can see it
+
+PUB main()
+  cogspin(NEWCOG, ticker(@count), @stack)   ' worker updates count in hub
+  repeat
+    if count & 1                ' read what the worker left for us
+      pinhigh(LED)
+    else
+      pinlow(LED)
+
+PRI ticker(p)
+  repeat
+    long[p]++                   ' bump the shared value in hub
+    waitms(100)

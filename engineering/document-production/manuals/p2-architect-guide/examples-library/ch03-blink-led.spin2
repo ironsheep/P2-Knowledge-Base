@@ -1,0 +1,10 @@
+CON
+  _clkfreq = 200_000_000        ' system clock: 200 MHz
+  LED      = 56                 ' the pin our LED is on
+
+PUB main()
+  repeat                        ' do this forever
+    pinhigh(LED)                ' LED on
+    waitms(250)                 ' wait a quarter second
+    pinlow(LED)                 ' LED off
+    waitms(250)

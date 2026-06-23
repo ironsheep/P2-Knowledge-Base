@@ -1,0 +1,13 @@
+CON
+  _clkfreq = 200_000_000
+  LED      = 56
+
+PUB main()
+  repeat
+    toggleFast(LED)
+    waitms(250)
+
+PRI toggleFast(pin)
+  org
+    drvnot  pin                 ' one native instruction, full speed
+  end

@@ -556,7 +556,7 @@ them. Where a program makes a real choice, we'll stop and look at it.
 
 Here is a complete, working P2 program. It blinks an LED.
 
-```spin2
+```{.spin2 caption="ch03-blink-led.spin2"}
 CON
   _clkfreq = 200_000_000        ' system clock: 200 MHz
   LED      = 56                 ' the pin our LED is on
@@ -599,7 +599,7 @@ when you give a job to a cog of its own. You do that with `cogspin` — it takes
 method to run, hands it to an available cog, and that cog starts running it *alongside*
 the one you're already on.
 
-```spin2
+```{.spin2 caption="ch03-two-cog-blink.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_A    = 56
@@ -640,7 +640,7 @@ Independent cogs still need to talk. The simplest way is the hub: because hub me
 shared, a variable that lives there is visible to every cog. One cog writes it, another
 reads it — a mailbox.
 
-```spin2
+```{.spin2 caption="ch03-shared-mailbox.spin2"}
 CON
   _clkfreq = 200_000_000
   LED      = 56
@@ -699,7 +699,7 @@ three options, not a binary.
 That middle option looks like this — the same toggle, but done with one native
 instruction:
 
-```spin2
+```{.spin2 caption="ch03-inline-pasm-toggle.spin2"}
 CON
   _clkfreq = 200_000_000
   LED      = 56
