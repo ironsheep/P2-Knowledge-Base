@@ -44,17 +44,50 @@ discipline*) is a genuinely original framing no existing P2 document offers.
    sequential machines on parallel silicon (the capstone, Ch3).
 4. **AI code-generating agent** — served the same orientation via the KB YAML (dual-rendering, §8).
 
-## 5. The altitude arc — chapter architecture (~3 chapters; a GUIDED ASCENT)
+## 5. The altitude arc — chapter architecture (4 chapters; a GUIDED ASCENT)
 **Pedagogical spine (Stephen, 2026-06-22):** comfort first, abstraction last. Less-experienced engineers must
-feel at home with the P2 before we ask them to think like architects. So Chs 1–2 are concrete and welcoming —
-introduce and *use* the individual features; Ch3 (the meta / experienced-engineer lens) comes last and is
-deliberately earned. **The "spatial-computing fabric" thesis is itself meta — it anchors Ch3, NOT Ch1.**
+feel at home with the P2 before we ask them to think like architects. So Chs 1–3 are concrete and welcoming —
+picture the chip, learn to *read* its code, then *use* the features; Ch4 (the meta / experienced-engineer
+lens) comes last and is deliberately earned. **The "spatial-computing fabric" thesis is itself meta — it
+anchors Ch4, NOT Ch1.**
+
+**Ch2 added (Stephen, 2026-06-23):** the original 3-chapter plan assumed the reader could already read a
+structured language. But the primary audience includes people coming with **no P1, no Spin2, and no PASM2** —
+they have never seen a `CON`/`PUB`/`DAT` block, indentation-as-structure, or a PASM2 instruction. Showing the
+**language structure** is therefore essential, and it earned its own chapter rather than being crammed into
+the hands-on chapter. (The P1 ecosystem met this need with a separate "Propeller Programming Tutorial" that
+shipped in the Propeller Tool's on-line help — *not* in the bound manual; we fold that role into the guide.)
 
 | Ch | Title (working) | Altitude | Purpose | Defers to |
 |----|-----------------|----------|---------|-----------|
-| 1 | **Meet the Propeller 2** | the territory, concretely | warm, feature-first mental model: the parts you can picture — 8 cogs, pins, hub, smart pins, CORDIC, streamer/FIFO, events, memory/boot, clock — and what each *does*. Build intuition through features, NOT abstraction. (Quietly seed one idea: "each cog just keeps running, independently" — Ch3 cashes it in.) *Orient, don't spec.* | Silicon Doc, datasheet, the topic manuals |
-| 2 | **Putting It to Work** | the basics of doing | *use* the features — launch a cog, drive a pin, the Spin2-vs-PASM2 choice, the object/run-time model, hub sharing, boot/run. Comfort through doing; this is the "rich feature intro+use" chapter. | Spin2 v55, PASM2 manual, Smart Pins/Streamer guides |
-| 3 | **Thinking in P2 — Functional Decomposition** | the capstone (advanced) | *now* the spatial-computing thesis (space vs time) + the forces (resource ownership/timing, data-flow contracts, rate adaptation, emergent altitude) + the **first-contact procedure** + ONE worked derivation. **Teaches the METHOD of deriving an architecture — never prescribes one.** | the decomposition YAML layer (its golden home) |
+| 1 | **Meet the Propeller 2** | the territory, concretely | warm, feature-first mental model: the parts you can picture — 8 cogs, pins, hub, smart pins, CORDIC, streamer/FIFO, events, memory/boot, clock — and what each *does*. Build intuition through features, NOT abstraction. (Quietly seed one idea: "each cog just keeps running, independently" — Ch4 cashes it in.) *Orient, don't spec.* | Silicon Doc, datasheet, the topic manuals |
+| 2 | **Reading P2 Code** | the language, structurally | give a from-zero reader (no P1, no Spin2/PASM2) the structural literacy to read **every example in the guide**. Teach enough STRUCTURE to read fluently — NOT a language reference. | Spin2 v55 doc, PASM2 manual, DeSilva tutorial |
+| 3 | **Putting It to Work** | the basics of doing | *use* the features — launch a cog, drive a pin, the Spin2-vs-PASM2 choice, the object/run-time model, hub sharing, boot/run. Comfort through doing; this is the "rich feature intro+use" chapter. | Spin2 v55, PASM2 manual, Smart Pins/Streamer guides |
+| 4 | **Thinking in P2 — Functional Decomposition** | the capstone (advanced) | *now* the spatial-computing thesis (space vs time) + the forces (resource ownership/timing, data-flow contracts, rate adaptation, emergent altitude) + the **first-contact procedure** + ONE worked derivation. **Teaches the METHOD of deriving an architecture — never prescribes one.** | the decomposition YAML layer (its golden home) |
+
+### Ch2 "Reading P2 Code" — definition of done (the anti-shortchange contract)
+A reader with **no P1, no Spin2, no PASM2** must, after this chapter, be able to read every code example in
+the guide unaided. Each objective below must be covered (sourced from the Spin2 v55 doc + the PASM2 manual,
+never from memory):
+
+1. The six Spin2 block types — `CON` `OBJ` `VAR` `PUB` `PRI` `DAT` — and what each holds (`CON` is the
+   default/initial block; a block runs until the next block keyword).
+2. A file *is* an object; **at least one `PUB` is required** and execution begins at the **first `PUB`**.
+3. Method anatomy: `PUB name(params) : return | locals`; how one method calls another; built-ins like
+   `pinhigh`/`waitms` are **method calls, not keywords**.
+4. Objects compose: `OBJ` instantiates another file; you call `obj.method()`.
+5. **Indentation is structure** (no braces / `begin`–`end`); the `repeat` / `if` / `case` shapes.
+6. Values: `:=` (assign) vs `=` (constant); `_` digit groups, `$` hex, `%` binary; named constants.
+6a. **Line continuation `...`** — a line ending in `...` continues onto the next (rest of the line ignored);
+    this is *also* how the guide keeps long statements within the page width, so it appears in examples.
+7. Comments (`'` to end of line).
+8. PASM2 instruction anatomy: `{condition} mnemonic dest, source {effects} ' comment` — `#` immediate,
+   `##` full 32-bit immediate, `wc`/`wz` flag effects, conditional execution (`if_z`, …) exist (defer depth).
+9. Where PASM2 lives: a `DAT` cog program or inline `org`/`end`; even "pure assembly" sits in a Spin2 file.
+
+**Coverage gate:** after authoring, extract every Spin2/PASM2 construct used in ANY example across the whole
+guide and confirm each is introduced here (or is safe from context). Constructs to watch: `...`, `org`/`end`,
+`:=` vs `=`, `obj.method()`, and method-call-not-keyword.
 
 Front matter: the thesis + how to read (audiences/paths) + the accessible MCU↔FPGA hook (§5.1). Back matter:
 glossary (from `decomposition-glossary.yaml`) · a "where to go next" map into the reference manuals ·
@@ -171,8 +204,11 @@ by the link-out discipline (§2).
   "Architect's" leans advanced and slightly cuts against the welcoming goal; held as **aspirational** ("this
   guide makes you a P2 architect"), with the warm Ch1 + subtitle doing the welcoming. Revisit only if it
   reads as a gate.
-- **D2 — Three chapters:** ✅ keep three; **decomposition is LAST and earned**; Chs 1–2 are the rich,
-  concrete, comfort-building feature intro+use (§5).
+- **D2 — Four chapters** (revised 2026-06-23, was "three"): Ch1 picture the chip · **Ch2 read the code
+  (NEW)** · Ch3 put it to work · Ch4 think in P2. **decomposition is LAST and earned**; Chs 1–3 are the
+  concrete, comfort-building ascent (§5). The added Ch2 "Reading P2 Code" exists because the audience
+  includes readers with no P1/Spin2/PASM2 background who must be shown the language *structure* before any
+  example will read (its DoD is in §5).
 - **D3 — P1 migration:** ✅ **woven "P1 note:" sidebars** (not an appendix) — better for migrating P1 vets.
 - **D4 — Dual-target, reshaped for YAML:** ✅ lightweight, granular, on-demand YAML + warm human manual; same
   understanding, two shapes; not a 1:1 mirror (§8).

@@ -449,23 +449,242 @@ That's the whole cast: eight independent COGs, three tiers of memory tied togeth
 a take-turns hub, 64 smart pins doing I/O on their own, a shared CORDIC for math, a
 per-COG streamer for high-speed data, an event system for reacting to the world, one
 clock to set, and a ROM that boots you. You don't need to remember every detail — you
-just need the picture. With it in hand, the next chapter puts these parts to work:
+just need the picture. With it in hand, the next chapter makes sure you can *read* a P2
+program — the handful of structural rules that turn Spin2 and PASM2 from a wall of
+symbols into something legible — and the chapter after that puts these parts to work:
 we'll launch a COG, drive a pin, and see how a real P2 program is actually shaped.
+
+# Reading P2 Code
+
+Chapter 1 gave you the chip. Before we put it to work, let's make sure you can *read* a
+P2 program — because the chapters ahead are full of small examples, and they'll only
+teach you anything if the code on the page isn't a mystery. If you've never seen Spin2
+or PASM2, this chapter is your Rosetta stone: by the end you'll be able to read every
+example in this guide. We are deliberately *not* teaching the whole language here — the
+reference manuals do that, in depth — we're teaching its **shape**: the small set of
+structural rules that, once you know them, make P2 code legible. That's a much smaller
+thing to learn, and it's enough to follow along everywhere else.
+
+One orienting fact first: P2 code is written in *two* languages, and you'll see both.
+**Spin2** is the high-level language — readable, object-based, where most of a program
+lives. **PASM2** is the assembly language — the P2's native instructions, used for the
+small, time-critical pieces. Most of what you'll read is Spin2, so we start there; we
+meet PASM2 near the end of the chapter. You do not need to *write* either one to read
+this guide — you need to recognize their parts.
+
+## A program is an object — six kinds of block
+
+Here's the first and most useful thing to know: **a Spin2 file is an object**, and an
+object is built from just six kinds of *block*. Each block begins with a keyword in the
+far-left column, and runs until the next such keyword appears. Here is one of each, in a
+single skeleton — don't read it for what it *does* yet, just for its *shape*:
+
+```spin2
+CON                           ' constants: clock, pins, fixed values
+  _clkfreq = 200_000_000
+  LED      = 56
+
+OBJ                           ' other objects (files) this one builds on
+  serial : "jm_fullduplexserial"
+
+VAR                           ' this object's own variables
+  long  count
+
+PUB main()                    ' PUBlic method; first PUB runs
+  count := 0
+
+PRI helper(x) : result        ' a PRIvate method — an internal helper
+  result := x + 1
+
+DAT                           ' data, tables, and PASM2 code live here
+  greeting  byte  "hi", 0
+```
+
+That's the whole grammar of a P2 file at the top level. The six blocks:
+
+- **`CON` — constants.** Fixed values with names: the clock speed, pin numbers, sizes.
+  A file starts in `CON` mode even before you write the word, so constants can sit at
+  the very top.
+- **`OBJ` — objects.** The other files this one builds on — drivers, libraries, your own
+  code. More on these below.
+- **`VAR` — variables.** This object's own data. Every separate instance of the object
+  gets its own copy of its `VAR`s.
+- **`PUB` — public methods.** The object's *interface* — the methods other code may
+  call. **Every program needs at least one**, and the **first `PUB` is where execution
+  begins** (the boot ROM from Chapter 1 starts it on COG 0).
+- **`PRI` — private methods.** Internal helpers, callable only from inside this object.
+- **`DAT` — data.** Tables and fixed data — and, as we'll see, PASM2 code.
+
+You won't always use all six; a small program might be just `CON` and one `PUB`. But
+every P2 file you read is some arrangement of these blocks, so spotting the keywords in
+the left margin tells you instantly how the file is organized.
+
+::: p1note
+**P1 note — same as P1.** If you wrote Spin on the Propeller 1, this is home: the same
+`CON`/`OBJ`/`VAR`/`PUB`/`PRI`/`DAT` block structure, the same "a file is an object,"
+the same first-`PUB`-runs rule. Spin2 adds capabilities inside the blocks, but the
+skeleton is identical — you can skim this chapter and just note what's new.
+:::
+
+## Methods — how the work is organized
+
+A **method** is a named piece of code you can call — the P2's word for a function or
+subroutine. You've already seen the shape in the skeleton; here it is named:
+
+```spin2
+PUB blink(pin, count) : ok | i
+```
+
+Reading left to right: `PUB` (public) or `PRI` (private); the method's **name**; its
+**parameters** in parentheses (`pin`, `count` — the values the caller passes in); after
+the colon, an optional **return value** (`ok`); and after the bar, optional **local
+variables** (`i`) that exist only while the method runs. Most of those parts are
+optional — `PUB main()` is a complete, valid header.
+
+You call a method by naming it: `blink(56, 10)`. And here's a point that saves a
+beginner real confusion: many things that *look* like built-in keywords are actually
+just **method calls** — `pinhigh(LED)`, `waitms(250)`, `cogspin(...)` are all methods
+the language provides, called exactly the way you'd call your own. There's no separate
+category to memorize; if it has a name and parentheses, it's a method call.
+
+## Indentation is the structure
+
+This is the rule most likely to trip up a newcomer, so we'll say it plainly: **in
+Spin2, indentation defines structure.** There are no braces, no `begin`/`end`. A control
+statement owns exactly the lines indented beneath it. Look:
+
+```spin2
+PUB countdown(n)
+  repeat n                    ' indented lines = the loop body
+    pinhigh(LED)
+    waitms(100)
+    pinlow(LED)
+  pinhigh(LED)                ' un-indented: runs after the loop
+```
+
+The two `pin` calls and the `waitms` are inside the loop because they're indented under
+`repeat`; the final `pinhigh` is *not* indented under it, so it runs once after the loop
+finishes. The three shapes you'll meet most are `repeat` (loop — forever, a fixed count,
+or while a condition holds), `if`/`else` (choose), and `case` (choose among many). In
+every one, what's controlled is simply what's indented under it.
+
+## Values, names, and a line you'll see broken
+
+A few small things, and you'll have seen every kind of token the examples use:
+
+- **`:=` assigns; `=` defines a constant.** Inside a method, `count := 0` *puts* the
+  value 0 into the variable `count`. Inside `CON`, `LED = 56` *names* the constant 56.
+  Different jobs — assign with `:=`, name with `=`.
+- **Named constants over bare numbers.** We write `LED` once in `CON` and use the name
+  everywhere, rather than scattering `56` through the code. You'll see this habit
+  throughout the guide.
+- **Number forms.** Underscores group digits for readability (`200_000_000`); `$` marks
+  hexadecimal (`$1FF`); `%` marks binary (`%1101`). The underscores are purely cosmetic.
+- **`@name` means "the address of" `name`.** Most of the time you pass a variable's
+  *value*; sometimes a method needs to reach the variable (or buffer) itself, and you
+  hand it the address with `@` — you'll see `@stack`, `@count`, `@"some text"` in the
+  examples ahead.
+- **A comment** starts with a single quote `'` and runs to the end of the line.
+- **`...` continues a line.** A line that ends in three dots `...` continues onto the
+  next, as if the break weren't there — and the rest of the line after the `...` is
+  ignored, so a comment can sit there. We lean on this in the guide to keep a long
+  statement within the page margin, so you'll see it in examples:
+
+```spin2
+  x := first_term + second_term + third_term ...   ' continued below
+       + fourth_term
+```
+
+When you see a trailing `...`, just read on to the next line as one statement.
+
+## Objects — building from other files
+
+Back to `OBJ`, because composing objects is how real P2 programs are built. An `OBJ`
+block pulls in *another* Spin2 file and gives it a name; you then call that file's public
+methods through the name:
+
+```spin2
+OBJ
+  serial : "jm_fullduplexserial"    ' the driver file, as "serial"
+
+PUB main()
+  serial.start(63, 62, 115_200)     ' call a method through the name
+  serial.str(@"hello")
+```
+
+`serial` is an *instance* of the driver object; `serial.start(...)` calls the `start`
+method inside it. This is exactly how you use the community's drivers and your own code:
+each object minds its own data and exposes methods, and a top-level object wires several
+together. (The full object model — instances, arrays of objects, parameters — is in the
+*Spin2 Language Reference*.)
+
+## The other language: PASM2
+
+Everything so far has been Spin2. The P2's *other* language is **PASM2** — its native
+assembly, the actual instructions the COG runs. You reach for it only where timing has
+to be exact, but you'll *read* it often, because most drivers have a PASM2 core. So it's
+worth being able to recognize its shape too.
+
+A line of PASM2 is much flatter than Spin2 — one instruction per line:
+
+```pasm2
+loop    drvnot  #LED              ' toggle the LED pin
+        waitx   ##20_000_000      ' wait ~0.1 s at 200 MHz
+        jmp     #loop             ' do it again, forever
+```
+
+Read a line left to right: an optional **label** in the left column (`loop` — a name for
+this spot, so other instructions can jump to it); the **instruction** (`drvnot`,
+`waitx`, `jmp`); then its **operands**. A `#` before an operand means "this is an
+immediate value" — a literal number or address, not a register; `##` means a *full
+32-bit* immediate (needed for big values like `20_000_000`). Two more parts you'll see
+but don't need yet: some instructions end in a **flag effect** like `wc` or `wz` (the
+instruction updates a status flag), and any instruction can carry a **condition** prefix
+like `if_z` (run only when a flag is set). The deep meaning of all of these is the
+*P2 Assembly Language Manual*'s job; here, you just need to parse the line.
+
+PASM2 shows up in two places. A whole COG program lives in a **`DAT` block**; and a short
+burst can be dropped right inside a Spin2 method between `org` and `end`:
+
+```spin2
+PUB toggle(pin)
+  org                           ' a little PASM2, inline
+    drvnot  pin
+  end
+```
+
+Either way — and this is the thread back to Chapter 1's boot story — even a program
+that's "all assembly" still lives inside a Spin2 file. Spin2 is always the host.
+
+::: p1note
+**P1 note — changed in P2.** PASM2 will look familiar to a P1 assembly programmer — the
+label · instruction · destination, source · effects shape carries straight over. What's
+new is *scale*: far more instructions, the `##` full-width immediate, and richer
+conditionals. If you knew PASM1, you read PASM2 on sight; you'll just meet new mnemonics.
+:::
+
+## Where this leaves you
+
+You can now read a P2 program. You know a file is an object built from six kinds of
+block; that methods are the named pieces of work, and the first `PUB` is where things
+start; that indentation — not punctuation — is the structure; how values, names, and the
+`...` continuation look on the page; how objects compose through a name; and what a line
+of PASM2 is made of. That's the literacy every example in this guide assumes. With it in
+hand, the next chapter stops reading and starts *doing* — your first real program, a
+second COG, and the choices a P2 program actually makes.
 
 # Putting It to Work
 
-Now that you can picture the chip, let's use it. This chapter is about *doing* — by
+Now that you can picture the chip *and* read its code, let's use it. This chapter is about *doing* — by
 the end you'll have driven a pin, launched a second COG, shared data between COGs, and
 made the one decision every P2 program makes (Spin2 or PASM2?). The point isn't to
 teach you the whole language — the reference manuals do that, and we'll point you to
 them — it's to make the chip feel like something you can actually program. We'll keep
 the examples short, and every one of them compiles.
 
-A note before we start: P2 programs are written in **Spin2**, the P2's high-level
-language, and **PASM2**, its assembly language. Even a "pure assembly" program lives
-inside a Spin2 file structure. You don't need to know either language in depth to
-follow along — the examples are small and commented, and the goal is the *shape* of a
-P2 program, not its syntax.
+You met both of the P2's languages in Chapter 2 — Spin2 and PASM2 — so the examples
+below should read cleanly; this chapter is about putting them to work, not parsing
+them. Where a program makes a real choice, we'll stop and look at it.
 
 ## Your first program: drive a pin
 
@@ -1335,7 +1554,7 @@ yours to build.
 
 # Appendix A — Computing in Space and Time (Why We Borrow FPGA Language)
 
-Throughout this guide — and especially in Chapter 3 — we describe the P2 with words borrowed from
+Throughout this guide — and especially in Chapter 4 — we describe the P2 with words borrowed from
 the world of FPGAs and hardware design: *spatial*, *fabric*, *pipeline*, *dataflow*,
 *back-pressure*, *systolic*. The borrowing is deliberate and useful, but it carries a risk: taken
 too literally, those words would say the P2 *is* an FPGA, and it isn't. This appendix sets the
@@ -1373,7 +1592,7 @@ borrowing safe:
 - **We borrow the discipline, not the identity.** "Think spatially" means *assign one sustained job
   per element and let it run* — a design discipline. It does not mean the P2 reconfigures its
   silicon. Every spatial behavior on the P2 is something you *arrange in software*, which is also
-  why a sloppy decomposition can throw it away (the whole argument of Chapter 3).
+  why a sloppy decomposition can throw it away (the whole argument of Chapter 4).
 
 Hold those three in mind and the vocabulary is a gift: it imports decades of hardware-design
 reasoning about pipelines, latency, and dataflow into a software setting where it genuinely
@@ -1412,7 +1631,7 @@ behind both halves of that sentence.
 
 # Appendix B — Further Reading on Functional Decomposition
 
-Chapter 3's method rests on a body of published work older and deeper than the P2 itself. This is
+Chapter 4's method rests on a body of published work older and deeper than the P2 itself. This is
 the short list — each entry with a line on why it matters here. It runs along the two axes the
 chapter used: the **logical** axis (how to cut software well, independent of any chip) and the
 **physical and concurrent** axis (how parallel, communicating elements compute — the literature
@@ -1429,7 +1648,7 @@ and the generative stance the whole approach takes.
   Program and Systems Design.* Prentice-Hall, 1979.** Where *coupling* and *cohesion* come from —
   the measures behind a good seam: low coupling across COGs, high cohesion within one.
 - **Page-Jones, M. — *Fundamentals of Object-Oriented Design in UML.* Addison-Wesley, 1999.** Its
-  treatment of *connascence* is the sharpest tool in Chapter 3's "judging the cut" section — and the
+  treatment of *connascence* is the sharpest tool in Chapter 4's "judging the cut" section — and the
   source of the static-versus-dynamic distinction that, on the P2, separates a safe seam from a
   race.
 
@@ -1471,12 +1690,12 @@ and the generative stance the whole approach takes.
   latency tiers.
 - **Alexander, C. — *A Pattern Language: Towns, Buildings, Construction.* Oxford University Press,
   1977.** The source of the idea that patterns should *compose into a grammar* rather than sit in a
-  catalogue — exactly the stance Chapter 3 takes toward decomposition: a method that generates, not
+  catalogue — exactly the stance Chapter 4 takes toward decomposition: a method that generates, not
   a set of templates to copy.
 
 # Glossary
 
-Terms as this guide uses them, weighted toward the decomposition vocabulary of Chapter 3. For the
+Terms as this guide uses them, weighted toward the decomposition vocabulary of Chapter 4. For the
 silicon parts themselves — COG, hub, smart pin, CORDIC, streamer — see Chapter 1.
 
 **Altitude layering (Force 4).** The vertical decomposition force: within one ownership domain,
@@ -1582,10 +1801,10 @@ map.
   full object model, every built-in method and operator, the language's syntax in complete detail.
 - **To write assembly** — the *P2 Assembly Language Manual*: the PASM2 instruction set, the
   execution pipeline, COG start/stop, and the inter-COG coordination primitives (locks, atomic
-  access, COG attention) that Chapter 3's seams are built from. For a gentler, tutorial-style on-ramp
+  access, COG attention) that Chapter 4's seams are built from. For a gentler, tutorial-style on-ramp
   to PASM2, the *DeSilva PASM2 Tutorial* teaches the assembly language from the ground up.
 - **For I/O** — the *P2 I/O & Smart Pins User Guide* (the "Blue Book"): every smart-pin mode, with
-  examples — your first stop whenever a protocol might be absorbable at the pin (Chapter 3's
+  examples — your first stop whenever a protocol might be absorbable at the pin (Chapter 4's
   smart-pin triage).
 - **For high-speed data** — the *P2 Streamer Programming Guide*: the streamer in full, including the
   video (VGA, HDMI, composite), audio, and capture modes.
@@ -1595,11 +1814,12 @@ map.
 - **For the silicon itself** — the *Silicon Doc*: the foundational reference — CORDIC operations,
   the event system, boot sources, and the hardware-timing details the other manuals build on.
 - **For the decomposition theory in full** — the *decomposition reasoning layer* of the P2 Knowledge
-  Base, the golden home for Chapter 3's forces, planes, evaluation vocabulary, and worked
+  Base, the golden home for Chapter 4's forces, planes, evaluation vocabulary, and worked
   derivations, in more depth than a single chapter can carry.
 
 That is the library. Start where your current job points you, and let the picture from Chapter 1,
-the working shape from Chapter 2, and the method from Chapter 3 guide how you put the pieces
+the language from Chapter 2, the working shape from Chapter 3, and the method from Chapter 4
+guide how you put the pieces
 together.
 
 
