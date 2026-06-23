@@ -236,4 +236,19 @@ not arithmetic values; instruction/bit-field formatting per platform standards; 
 claims, unsourced numbers, **prescribed decompositions**.
 
 ---
+
+## 7. Code Line Budget
+
+- **Max code columns (K): 76**
+
+**Provenance:** inherited from the shared platform. The Architect's Guide is born on the unified
+`p2kb-platform-*` stack and renders code through the platform code box (`p2kb-platform-content.sty`
+Spin2/PASM2 blocks via `p2kb-platform-code-coloring.lua`) with the same page geometry and `Verbatim`
+inset as every other platform manual — so it inherits the platform's Latin-Modern-Mono-calibrated
+K=76 (the same budget the Assembly, Smart Pins, Streamer, DeSilva, Debug, and Single-Step manuals
+use). Code lines are audited against K=76 by `audit-code-line-length.py` at prepare-manual time;
+over-budget lines are shortened in opus-master (legal Spin2 `...` continuation or a named CON),
+never typeset-wrapped.
+
+---
 *Version 0.1 — initial creation guide, derived from PLANNING.md (2026-06-22).*

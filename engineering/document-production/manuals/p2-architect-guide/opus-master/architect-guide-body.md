@@ -365,7 +365,7 @@ VAR
   long stack[64]                ' work space for the second COG
 
 PUB main() | cog
-  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)   ' hand the job to another COG
+  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)  ' run on another COG
   blink(LED_B, 1000)            ' this COG keeps the slower blink for itself
 
 PRI blink(pin, ms)
