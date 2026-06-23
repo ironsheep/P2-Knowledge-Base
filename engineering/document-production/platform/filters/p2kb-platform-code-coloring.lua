@@ -88,6 +88,19 @@ local function is_mnemonic(word)
   return mnemonic_set[word:lower()] ~= nil
 end
 
+-- ===== GLYPH SUBSTITUTION (mono-font coverage) =====
+-- IBM Plex Mono lacks GREEK CAPITAL OMEGA (U+03A9) but DOES carry the
+-- canonically-equivalent OHM SIGN (U+2126), which is visually identical.
+-- Ω in code comments (e.g. resistor values like "15kΩ") is authored as U+03A9
+-- and would render as a missing-glyph box inside a mono code block. Remap it to
+-- U+2126 at render time so the ohm symbol prints; the markdown source is left
+-- untouched. Prose (Plex Sans) carries both codepoints, so this is mono-only.
+-- (Verified on the Forge via the ohm-probe round-trip, doc-style-change sprint.)
+-- Bytes: U+03A9 = CE A9, U+2126 = E2 84 A6 (both literal, no Lua pattern magic).
+local function ohm_fix(text)
+  return (text:gsub("\xCE\xA9", "\xE2\x84\xA6"))
+end
+
 -- Uppercase mnemonics in a single line of code (stops at comment)
 local function uppercase_mnemonics_in_line(line)
   -- Find comment start (single quote in IOSP)
@@ -140,7 +153,8 @@ local function uppercase_mnemonics(text)
   if #lines > 0 and lines[#lines] == "" and not text:match("\n$") then
     table.remove(lines)
   end
-  return table.concat(lines, "\n")
+  -- Mono code path: fix ohm glyph (Plex Mono lacks U+03A9) before typesetting.
+  return ohm_fix(table.concat(lines, "\n"))
 end
 
 -- ===== DIV HANDLER =====
@@ -167,7 +181,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for antipattern styling
       local latex_block = '\\begin{AntipatternBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                         '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{AntipatternBlock}'
@@ -189,8 +203,8 @@ function Div(div)
     if code_block then
       -- Return complete LaTeX block for Spin2 styling
       local latex_block = '\\begin{Spin2Block}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
-                         code_block.text .. '\n' ..
+                         '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
+                         ohm_fix(code_block.text) .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{Spin2Block}'
       return pandoc.RawBlock('latex', latex_block)
@@ -212,7 +226,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block using Verbatim
       local latex_block = '\\begin{IOSPBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                         '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{IOSPBlock}'
@@ -235,7 +249,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for CORDIC styling
       local latex_block = '\\begin{CORDICBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                         '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{CORDICBlock}'
@@ -258,7 +272,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for Multi-COG styling
       local latex_block = '\\begin{MultiCOGBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                         '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{MultiCOGBlock}'
@@ -435,7 +449,7 @@ function CodeBlock(cb)
   if classes:includes("iosp") or classes:includes("pasm") or classes:includes("pasm2") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{IOSPBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                       '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{IOSPBlock}'
@@ -444,8 +458,8 @@ function CodeBlock(cb)
   -- Check for spin2 language tag
   elseif classes:includes("spin2") then
     local latex_block = '\\begin{Spin2Block}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
-                       cb.text .. '\n' ..
+                       '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
+                       ohm_fix(cb.text) .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{Spin2Block}'
     return pandoc.RawBlock('latex', latex_block)
@@ -454,7 +468,7 @@ function CodeBlock(cb)
   elseif classes:includes("cordic") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{CORDICBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                       '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{CORDICBlock}'
@@ -464,27 +478,27 @@ function CodeBlock(cb)
   elseif classes:includes("multicog") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{MultiCOGBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                       '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{MultiCOGBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Antipattern code: ```antipattern -> AntipatternBlock (red). "What NOT to do."
-  -- Mnemonics uppercased like the other code colors; line numbers on. The DeSilva
-  -- tutorial authors any "wrong way" caption as prose ABOVE this fence (not inside).
+  -- Mnemonics uppercased like the other code colors. The DeSilva tutorial authors
+  -- any "wrong way" caption as prose ABOVE this fence (not inside).
   elseif classes:includes("antipattern") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{AntipatternBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                       '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{AntipatternBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Instruction syntax forms: ```syntax -> SyntaxBlock (slate, reference tier).
-  -- Line numbers ONLY when multi-line (single-line forms read cleaner without
-  -- a "1" gutter). Content is shown verbatim (KB-sourced, already uppercased).
+  -- No line-number gutter (numbers removed platform-wide). Content is shown
+  -- verbatim (KB-sourced, already uppercased).
   elseif classes:includes("spin-syntax") or classes:includes("syntax")
          or classes:includes("pasm-syntax") or classes:includes("debug-syntax")
          or classes:includes("debug-config") or classes:includes("debug-update") then
@@ -500,8 +514,6 @@ function CodeBlock(cb)
     --                                   Update phase, XXX_Update: directives sent
     --                                   after creation, incl. data feeds + CLEAR/SAVE)
     --   syntax / pasm-syntax         -> green, "PASM2 Syntax"
-    local is_debug = classes:includes("debug-config") or classes:includes("debug-update")
-                     or classes:includes("debug-syntax")
     local barcolor, title
     if classes:includes("spin-syntax") then
       barcolor, title = 'iosp-spin2-border', 'Spin2 Syntax'
@@ -512,13 +524,10 @@ function CodeBlock(cb)
     else
       barcolor, title = 'iosp-pasm2-border', 'PASM2 Syntax'
     end
-    -- Syntax forms read cleaner without a line-number gutter. DEBUG directive forms
-    -- never get numbers (a directive may show 2 variant lines, e.g. SET Cartesian /
-    -- polar); other syntax forms keep numbers only when genuinely multi-line.
-    local multiline = txt:find("\n") ~= nil
-    local verb = (multiline and not is_debug)
-      and '\\begin{Verbatim}[numbers=left,numbersep=6pt]\n'
-      or  '\\begin{Verbatim}\n'
+    -- Syntax forms read cleaner without a line-number gutter (numbers removed
+    -- platform-wide; blocks now continue across pages so the gutter is no longer
+    -- needed as a continuity cue).
+    local verb = '\\begin{Verbatim}\n'
     local latex_block = '\\begin{SyntaxBlock}{' .. barcolor .. '}\n' ..
                        '{\\footnotesize\\bfseries\\color{' .. barcolor .. '}' .. title .. '}\\par\\vspace{2pt}\n' ..
                        verb ..

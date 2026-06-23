@@ -34,10 +34,13 @@
 % ==================== CORE PACKAGES ====================
 
 % XeLaTeX font configuration
+% Body/headings = IBM Plex Sans, code = IBM Plex Mono. Loaded BY FILENAME (kpathsea):
+% by-name resolution fails for Plex on the Forge (only Latin Modern resolves by name).
+% Proven config from the sans-v5 font-comparison demo (variant B, adopted 2026-06-23).
 \RequirePackage{fontspec}
-\setmainfont{Latin Modern Roman}
-\setsansfont{Latin Modern Sans}
-\setmonofont{Latin Modern Mono}
+\setmainfont{IBMPlexSans}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\setsansfont{IBMPlexSans}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\setmonofont{IBMPlexMono}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
 
 \RequirePackage{microtype}
 \RequirePackage{graphicx}
@@ -162,6 +165,13 @@
   \vspace{8pt}%
 }
 
+% Stepped heading scale (distinct levels) — sans, bold. At the 11pt base these
+% relative sizes land at section 17.3pt / subsection 14.4pt / sub-subsection 12.0pt
+% (the sans-v5 demo scale; chapter stays \Huge = 24.8pt above).
+\titleformat*{\section}{\sffamily\bfseries\LARGE}
+\titleformat*{\subsection}{\sffamily\bfseries\Large}
+\titleformat*{\subsubsection}{\sffamily\bfseries\large}
+
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
 \titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}
@@ -254,10 +264,7 @@
 \RequirePackage{listings}
 \lstset{
   basicstyle=\footnotesize\ttfamily,
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  stepnumber=1,
-  numbersep=5pt,
+  numbers=none,
   xleftmargin=0pt,
   framexleftmargin=0pt,
   breaklines=true,
@@ -343,11 +350,13 @@
 \providecommand{\VerbBar}{|}
 \providecommand{\VERB}[1]{#1}
 
-% Highlighting environment
+% Block-only code shrink (fancyvrb): inline code stays at body size; IBM Plex Mono
+% is ~15% wider than LM Mono, so code BLOCKS render at 8.5pt to hold the line budget.
+\fvset{fontsize=\fontsize{8.5}{10.2}\selectfont}
+
+% Highlighting environment — line numbers removed (blocks now continue across pages
+% with visible framing, so the number gutter is no longer needed; reclaims width).
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{%
-  numbers=left,%
-  numberstyle=\tiny\color{gray},%
-  numbersep=5pt,%
   frame=single,%
   framesep=8pt,%
   formatcom=\color{black},%
