@@ -1,0 +1,23 @@
+CON
+  _clkfreq = 200_000_000
+  TACH_PIN = 20
+  PULSES_PER_REV = 1                       ' Hall sensor
+  SAMPLE_MS = 100
+
+PUB measure_rpm() : rpm | period, pulses
+  period := (_clkfreq / 1000) * SAMPLE_MS
+
+  PINFLOAT(TACH_PIN)
+  WRPIN(TACH_PIN, P_COUNT_RISES | P_SCHMITT_A)
+  WXPIN(TACH_PIN, period)
+  WYPIN(TACH_PIN, 0)
+  PINLOW(TACH_PIN)
+
+  repeat
+    repeat until PINREAD(TACH_PIN)
+    pulses := RDPIN(TACH_PIN)
+
+    ' RPM = (pulses / pulses_per_rev) * (60000 / sample_ms)
+    rpm := (pulses * 60000) / (PULSES_PER_REV * SAMPLE_MS)
+
+    DEBUG("RPM: ", UDEC_(rpm))

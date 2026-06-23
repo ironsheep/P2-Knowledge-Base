@@ -1,0 +1,23 @@
+CON
+  _clkfreq = 200_000_000
+  TRIG_PIN = 20
+  ECHO_PIN = 21
+
+PUB measure_distance_cm() : distance | echo_us
+  ' Configure echo pin for pulse timing
+  PINFLOAT(ECHO_PIN)
+  WRPIN(ECHO_PIN, P_HIGH_TICKS | P_SCHMITT_A)
+  PINLOW(ECHO_PIN)
+
+  ' Send 10µs trigger pulse
+  PINHIGH(TRIG_PIN)
+  WAITUS(10)
+  PINLOW(TRIG_PIN)
+
+  ' Wait for echo pulse to complete
+  repeat until PINREAD(ECHO_PIN)
+
+  echo_us := (RDPIN(ECHO_PIN) & $7FFF_FFFF) / (_clkfreq / 1_000_000)
+
+  ' Distance = (echo_time / 2) / 29.1 µs/cm
+  distance := echo_us / 58

@@ -300,7 +300,7 @@ Edge period = 1000 / 200MHz = 5 µs
 
 ### Example 1: Stepper Motor Step Pulse
 
-```spin2
+```{.spin2 caption="ch07-step-motor-pulses.spin2"}
 CON
   _clkfreq = 200_000_000
   STEP_PIN = 10

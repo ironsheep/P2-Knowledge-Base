@@ -441,7 +441,7 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
 
 ### Example 4: Precision Oscillator Calibration
 
-```spin2
+```{.spin2 caption="ch15-oscillator-calibration.spin2"}
 CON
   _clkfreq = 200_000_000
   REF_PIN = 20                                ' Reference signal input

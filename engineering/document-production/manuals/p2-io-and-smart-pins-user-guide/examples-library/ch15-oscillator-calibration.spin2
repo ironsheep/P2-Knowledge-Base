@@ -1,0 +1,34 @@
+CON
+  _clkfreq = 200_000_000
+  REF_PIN = 20                                ' Reference signal input
+  TARGET_FREQ = 10_000_000                    ' 10 MHz target
+
+PUB oscillator_calibration() | measured, error_ppm, periods
+  ' Use many periods for high precision
+  periods := 10000
+  PINSTART(REF_PIN, P_PERIODS_TICKS, periods, %00)
+
+  DEBUG("Oscillator Calibration")
+  DEBUG("Target: ", UDEC_(TARGET_FREQ), " Hz")
+
+  REPEAT
+    REPEAT UNTIL PINREAD(REF_PIN)
+
+    measured := RDPIN(REF_PIN)
+
+    ' Expected clocks for TARGET_FREQ over periods cycles
+    ' expected = periods * (sysclk / TARGET_FREQ)
+    ' error_ppm = ((measured - expected) * 1_000_000) / expected
+
+    ' Simplified: calculate measured frequency
+    measured := (periods * _clkfreq) / measured
+
+    ' Calculate error in ppm
+    if measured >= TARGET_FREQ
+      error_ppm := ((measured - TARGET_FREQ) * 1_000_000) / TARGET_FREQ
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (+", UDEC_(error_ppm), " ppm)")
+    else
+      error_ppm := ((TARGET_FREQ - measured) * 1_000_000) / TARGET_FREQ
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (-", UDEC_(error_ppm), " ppm)")

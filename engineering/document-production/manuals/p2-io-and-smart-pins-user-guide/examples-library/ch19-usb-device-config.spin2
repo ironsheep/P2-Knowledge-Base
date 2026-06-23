@@ -1,0 +1,20 @@
+CON
+  _clkfreq = 200_000_000
+  USB_DM = 56
+  USB_DP = 57
+
+PUB configure_usb() | baud
+  ' Reset both pins
+  PINFLOAT(USB_DM)
+  PINFLOAT(USB_DP)
+
+  ' Configure USB mode with output enabled
+  WRPIN(USB_DM, P_USB_PAIR | P_OE)
+
+  ' Set USB mode + baud on lower pin (D[15]=0 device, D[14]=1 full-speed)
+  baud := 12_000_000 / (clkfreq / $10000)
+  WXPIN(USB_DM, $4000 | baud)
+
+  ' Enable the USB pair
+  PINHIGH(USB_DM)
+  PINHIGH(USB_DP)

@@ -253,7 +253,7 @@ PUB main()
 
 ### Pin Setup
 
-```spin2
+```{.spin2 caption="ch19-usb-device-config.spin2"}
 CON
   _clkfreq = 200_000_000
   USB_DM = 56

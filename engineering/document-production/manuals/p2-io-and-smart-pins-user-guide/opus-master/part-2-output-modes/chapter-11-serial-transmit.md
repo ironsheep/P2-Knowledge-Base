@@ -398,7 +398,7 @@ PUB newline()
 
 ### Example 2: SPI Master (Mode 0)
 
-```spin2
+```{.spin2 caption="ch11-spi-master.spin2"}
 CON
   _clkfreq = 200_000_000
   MOSI_PIN = 41

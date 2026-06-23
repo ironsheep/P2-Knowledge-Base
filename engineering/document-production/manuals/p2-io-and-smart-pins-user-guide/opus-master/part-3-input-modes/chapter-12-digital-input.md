@@ -401,7 +401,7 @@ PASM2 TESTPN provides inverted read:
 
 ### Example 1: Button with LED
 
-```spin2
+```{.spin2 caption="ch12-button-schmitt-led.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56

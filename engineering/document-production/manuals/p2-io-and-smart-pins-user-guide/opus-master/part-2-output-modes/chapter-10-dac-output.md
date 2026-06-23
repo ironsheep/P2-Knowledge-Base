@@ -439,7 +439,7 @@ PUB set_2v5_reference()
 
 ### Example 2: Audio Waveform Generator
 
-```spin2
+```{.spin2 caption="ch10-audio-dac.spin2"}
 CON
   _clkfreq = 200_000_000
   AUDIO_PIN = 48

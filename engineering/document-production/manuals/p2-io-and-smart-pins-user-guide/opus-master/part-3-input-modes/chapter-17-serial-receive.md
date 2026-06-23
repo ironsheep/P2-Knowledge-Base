@@ -595,7 +595,7 @@ PRI send_spi_byte(b)
 
 ### Example 3: Command Parser
 
-```spin2
+```{.spin2 caption="ch17-uart-command-loop.spin2"}
 CON
   _clkfreq = 200_000_000
   RX_PIN = 21

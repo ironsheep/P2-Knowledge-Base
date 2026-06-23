@@ -413,7 +413,7 @@ Y range: 0 to 57,143
 
 ### Example 1: LED Brightness Control
 
-```spin2
+```{.spin2 caption="ch09-pwm-led-fade.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56

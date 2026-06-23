@@ -1,0 +1,14 @@
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56
+  BLINK_MS = 500
+
+PUB main()
+  ' Current-source for consistent brightness
+  WRPIN(LED_PIN, P_HIGH_1MA | P_LOW_FAST)
+  
+  repeat
+    PINHIGH(LED_PIN)
+    WAITMS(BLINK_MS)
+    PINLOW(LED_PIN)
+    WAITMS(BLINK_MS)

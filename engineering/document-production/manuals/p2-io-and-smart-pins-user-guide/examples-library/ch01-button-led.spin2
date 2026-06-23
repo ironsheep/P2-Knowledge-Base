@@ -1,0 +1,11 @@
+CON
+  _clkfreq = 200_000_000
+  BUTTON_PIN = 10
+  LED_PIN = 56
+
+PUB main()
+  repeat
+    if PINREAD(BUTTON_PIN) == 0       ' Active-low button
+      PINHIGH(LED_PIN)
+    else
+      PINLOW(LED_PIN)

@@ -1,0 +1,39 @@
+CON
+  _clkfreq = 200_000_000
+  REPO_PIN = 48
+  TEMP_SENSOR = 20
+
+VAR
+  long sensor_stack[64]
+
+PUB main()
+  ' Start sensor reading COG
+  COGSPIN(NEWCOG, sensor_cog(), @sensor_stack)
+
+  ' This COG reads the shared value
+  setup_repository_reader()
+
+  REPEAT
+    display_temperature(RQPIN(REPO_PIN))
+    WAITMS(500)
+
+PRI setup_repository_reader()
+  ' Just need to read - writer sets up the pin
+  ' Repository is already configured by sensor_cog
+
+PRI sensor_cog() | temp
+  ' Configure repository
+  WRPIN(REPO_PIN, P_REPOSITORY)
+  PINH(REPO_PIN)
+
+  REPEAT
+    temp := read_temperature_sensor()
+    WXPIN(REPO_PIN, temp)                       ' Share reading
+    WAITMS(100)
+
+PRI display_temperature(t)
+  ' Application-specific: render temperature value t
+
+PRI read_temperature_sensor() : t
+  ' Application-specific: return current temperature reading
+  t := 25

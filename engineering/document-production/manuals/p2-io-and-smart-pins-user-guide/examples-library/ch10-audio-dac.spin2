@@ -1,0 +1,37 @@
+CON
+  _clkfreq = 200_000_000
+  AUDIO_PIN = 48
+  SAMPLE_RATE = 44100
+
+VAR
+  long phase
+  long phase_inc
+
+PUB audio_init()
+  ' Initialize audio DAC at 44.1 kHz
+  PINFLOAT(AUDIO_PIN)
+  WRPIN(AUDIO_PIN, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
+  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Round to 256
+  WYPIN(AUDIO_PIN, $8000)                 ' Start at mid-scale
+  PINLOW(AUDIO_PIN)
+
+  phase := 0
+
+PUB set_frequency(hz)
+  ' Set sine wave frequency
+  phase_inc := hz FRAC SAMPLE_RATE
+
+PUB audio_sample() : sample | sine_val
+  ' Generate next audio sample
+  phase += phase_inc
+
+  ' Get sine value (-32767 to +32767) using CORDIC (length, angle, twist)
+  sine_val := QSIN(32767, phase, 0)
+
+  ' Convert to 16-bit unsigned (0 to 65535)
+  sample := sine_val + $8000
+
+PUB audio_output()
+  ' Output audio sample
+  repeat until PINREAD(AUDIO_PIN) & $8000_0000
+  WYPIN(AUDIO_PIN, audio_sample())

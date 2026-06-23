@@ -376,7 +376,7 @@ PUB main() | adc_value, led_bits, i
 
 ### Example 2: Audio Sampling
 
-```spin2
+```{.spin2 caption="ch16-adc-audio-capture.spin2"}
 CON
   _clkfreq = 200_000_000
   AUDIO_PIN = 46

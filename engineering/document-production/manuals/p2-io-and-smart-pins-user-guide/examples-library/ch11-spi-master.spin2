@@ -1,0 +1,45 @@
+CON
+  _clkfreq = 200_000_000
+  MOSI_PIN = 41
+  CLK_PIN = 40
+  CS_PIN = 39
+  SPI_PERIOD = 50                           ' 2 MHz at 200 MHz sysclk
+
+PUB spi_init()
+  ' Configure MOSI
+  PINFLOAT(MOSI_PIN)
+  WRPIN(MOSI_PIN, P_SYNC_TX | P_OE | P_MINUS1_B)
+  WXPIN(MOSI_PIN, %1_00111)                 ' Start-stop, 8 bits
+  PINLOW(MOSI_PIN)
+
+  ' Configure CLK
+  PINFLOAT(CLK_PIN)
+  WRPIN(CLK_PIN, P_TRANSITION | P_OE)
+  WXPIN(CLK_PIN, SPI_PERIOD)
+  PINLOW(CLK_PIN)
+
+  ' Configure CS (active low)
+  PINHIGH(CS_PIN)
+
+PUB spi_select()
+  PINLOW(CS_PIN)
+
+PUB spi_deselect()
+  PINHIGH(CS_PIN)
+
+PUB spi_tx_byte(value) | reversed
+  ' MSB first
+  reversed := value << 24
+  reversed := value REV 8
+
+  WYPIN(MOSI_PIN, reversed)
+  WYPIN(CLK_PIN, 16)                        ' 8 clock cycles
+
+  ' Wait for completion
+  repeat until PINREAD(MOSI_PIN)
+
+PUB spi_write_register(addr, value)
+  spi_select()
+  spi_tx_byte(addr)
+  spi_tx_byte(value)
+  spi_deselect()

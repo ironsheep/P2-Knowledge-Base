@@ -1,0 +1,19 @@
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56
+  BUTTON_PIN = 57
+
+PUB main()
+  ' Configure LED as output
+  PINLOW(LED_PIN)
+
+  ' Configure button with pull-up and Schmitt trigger
+  WRPIN(BUTTON_PIN, P_SCHMITT_A | P_HIGH_15K)
+  PINFLOAT(BUTTON_PIN)
+
+  ' Main loop
+  repeat
+    if NOT PINREAD(BUTTON_PIN)             ' Button pressed (active low)
+      PINHIGH(LED_PIN)
+    else
+      PINLOW(LED_PIN)

@@ -1,0 +1,36 @@
+CON
+  _clkfreq = 200_000_000
+  AUDIO_PIN = 46
+  SAMPLE_RATE = 44100
+  BUFFER_SIZE = 1024
+
+VAR
+  long audio_buffer[BUFFER_SIZE]
+  long buffer_index
+
+PUB main() | sample_period
+  ' Calculate sample period for 44.1 kHz
+  sample_period := _clkfreq / SAMPLE_RATE     ' ~4535 clocks
+
+  ' Configure ADC with SINC2 sampling
+  ' Use period override for exact rate
+  WRPIN(AUDIO_PIN, P_ADC_GIO | P_ADC)
+  WXPIN(AUDIO_PIN, %01_1100)                  ' SINC2 filter, base period
+  WYPIN(AUDIO_PIN, sample_period)             ' Override period
+  PINH(AUDIO_PIN)
+
+  REPEAT
+    capture_buffer()
+    process_audio()
+
+PRI capture_buffer() | i, last_acc, acc
+  last_acc := RDPIN(AUDIO_PIN)
+
+  REPEAT i FROM 0 TO BUFFER_SIZE-1
+    REPEAT UNTIL PINREAD(AUDIO_PIN)
+    acc := RDPIN(AUDIO_PIN)
+    audio_buffer[i] := acc - last_acc         ' SINC2 difference
+    last_acc := acc
+
+PRI process_audio()
+  ' Application-specific audio processing of audio_buffer[]

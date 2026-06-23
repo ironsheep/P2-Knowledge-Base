@@ -381,7 +381,7 @@ PRI get_next_sample() : sample
 
 ### Example 1: Shared Sensor Reading
 
-```spin2
+```{.spin2 caption="ch18-repository-multicog.spin2"}
 CON
   _clkfreq = 200_000_000
   REPO_PIN = 48

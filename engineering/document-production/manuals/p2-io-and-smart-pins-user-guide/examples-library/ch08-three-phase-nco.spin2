@@ -1,0 +1,34 @@
+CON
+  _clkfreq = 200_000_000
+  PHASE_A = 10
+  PHASE_B = 11
+  PHASE_C = 12
+  FREQ_HZ = 1000
+
+PUB three_phase_nco() | y_val, phase_120, phase_240
+  y_val := FREQ_HZ FRAC _clkfreq
+  
+  ' Phase offsets: 0°, 120°, 240°
+  phase_120 := 65536 / 3                  ' 21845
+  phase_240 := 65536 * 2 / 3              ' 43691
+  
+  ' Configure all three
+  PINFLOAT(PHASE_A)
+  PINFLOAT(PHASE_B)
+  PINFLOAT(PHASE_C)
+  
+  WRPIN(PHASE_A, P_NCO_FREQ | P_OE)
+  WRPIN(PHASE_B, P_NCO_FREQ | P_OE)
+  WRPIN(PHASE_C, P_NCO_FREQ | P_OE)
+  
+  WXPIN(PHASE_A, 1 | (0 << 16))           ' 0° phase
+  WXPIN(PHASE_B, 1 | (phase_120 << 16))   ' 120° phase
+  WXPIN(PHASE_C, 1 | (phase_240 << 16))   ' 240° phase
+  
+  ' Same frequency for all
+  WYPIN(PHASE_A, y_val)
+  WYPIN(PHASE_B, y_val)
+  WYPIN(PHASE_C, y_val)
+  
+  ' Enable all simultaneously
+  PINLOW(PHASE_A..PHASE_C)

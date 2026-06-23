@@ -1,0 +1,24 @@
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56
+  PWM_FREQ = 500                            ' 500 Hz (no flicker)
+
+PUB led_control() | frame, brightness
+  frame := _clkfreq / PWM_FREQ              ' 400,000
+  frame := frame <# 65535                   ' Limit to 16-bit
+
+  PINFLOAT(LED_PIN)
+  WRPIN(LED_PIN, P_PWM_SAWTOOTH | P_OE)
+  WXPIN(LED_PIN, 1 | (frame << 16))
+  WYPIN(LED_PIN, 0)                         ' Start at 0%
+  PINLOW(LED_PIN)
+
+  ' Fade up
+  repeat brightness from 0 to frame step frame/100
+    WYPIN(LED_PIN, brightness)
+    WAITMS(20)
+
+  ' Fade down
+  repeat brightness from frame to 0 step frame/100
+    WYPIN(LED_PIN, brightness)
+    WAITMS(20)

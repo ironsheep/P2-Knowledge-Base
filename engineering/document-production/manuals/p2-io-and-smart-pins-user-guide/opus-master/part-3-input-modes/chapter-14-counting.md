@@ -572,7 +572,7 @@ count_hub     long      0
 
 ### Example 4: RPM Measurement
 
-```spin2
+```{.spin2 caption="ch14-tachometer-rpm.spin2"}
 CON
   _clkfreq = 200_000_000
   TACH_PIN = 20

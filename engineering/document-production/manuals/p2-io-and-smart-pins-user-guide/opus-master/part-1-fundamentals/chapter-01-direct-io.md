@@ -1213,7 +1213,7 @@ delay         long      100_000_000     ' 0.5 seconds at 200 MHz
 
 ### Button-Controlled LED (Spin2)
 
-```spin2
+```{.spin2 caption="ch01-button-led.spin2"}
 CON
   _clkfreq = 200_000_000
   BUTTON_PIN = 10

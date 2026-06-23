@@ -1,0 +1,40 @@
+CON
+  _clkfreq = 200_000_000
+  RX_PIN = 21
+  BAUD = 115_200
+
+VAR
+  byte cmd_buffer[64]
+  long cmd_len
+
+PUB command_loop() | ch
+  PINSTART(RX_PIN, P_ASYNC_RX, ((_clkfreq / BAUD) << 16) | 7, 0)
+  cmd_len := 0
+
+  REPEAT
+    IF PINREAD(RX_PIN)
+      ch := RDPIN(RX_PIN) >> 24                 ' LSB-justify 8-bit byte
+
+      CASE ch
+        13:                                     ' Enter
+          cmd_buffer[cmd_len] := 0
+          execute_command(@cmd_buffer)
+          cmd_len := 0
+
+        8, 127:                                 ' Backspace/Delete
+          IF cmd_len > 0
+            cmd_len--
+
+        32..126:                                ' Printable
+          IF cmd_len < 63
+            cmd_buffer[cmd_len++] := ch
+
+PRI execute_command(ptr)
+  IF STRCOMP(ptr, STRING("help"))
+    send_string(STRING("Commands: help, status, reset"))
+  ELSEIF STRCOMP(ptr, STRING("status"))
+    send_string(STRING("System OK"))
+  ' ... more commands
+
+PRI send_string(ptr)
+  ' Application-specific: TX null-terminated string at ptr

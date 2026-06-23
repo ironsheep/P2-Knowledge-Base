@@ -465,7 +465,7 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
 
 ### Example 2: Ultrasonic Distance Measurement
 
-```spin2
+```{.spin2 caption="ch13-ultrasonic-distance.spin2"}
 CON
   _clkfreq = 200_000_000
   TRIG_PIN = 20

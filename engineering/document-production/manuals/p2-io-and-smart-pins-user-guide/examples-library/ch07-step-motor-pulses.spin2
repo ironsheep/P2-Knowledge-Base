@@ -1,0 +1,17 @@
+CON
+  _clkfreq = 200_000_000
+  STEP_PIN = 10
+  STEP_PERIOD = 400                       ' 2 µs period
+  STEP_HIGH = 200                         ' 1 µs high time
+
+PUB step_motor(steps) | ack
+  PINFLOAT(STEP_PIN)
+  WRPIN(STEP_PIN, P_PULSE | P_OE)
+  WXPIN(STEP_PIN, STEP_PERIOD | (STEP_HIGH << 16))
+  PINLOW(STEP_PIN)
+  
+  WYPIN(STEP_PIN, steps)                  ' Generate step pulses
+  
+  ' Wait for completion
+  repeat until PINREAD(STEP_PIN) == 1
+  ack := RDPIN(STEP_PIN)                  ' Acknowledge (discard value)

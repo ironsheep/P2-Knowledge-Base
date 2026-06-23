@@ -336,7 +336,7 @@ Smart pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). 
 
 ### Example 1: Status LED with Blink
 
-```spin2
+```{.spin2 caption="ch06-current-drive-blink.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56

@@ -211,7 +211,7 @@ WXPIN(pin, 1 | (phase_offset << 16))
 
 For phase-locked outputs (e.g., three-phase motor control):
 
-```spin2
+```{.spin2 caption="ch08-three-phase-nco.spin2"}
 CON
   _clkfreq = 200_000_000
   PHASE_A = 10
