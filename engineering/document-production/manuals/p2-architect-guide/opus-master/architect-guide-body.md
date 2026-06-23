@@ -105,7 +105,7 @@ which the rest of this chapter is about.
 
 For the assembly-level execution details — the instruction pipeline, how a COG
 fetches and runs code, starting and stopping COGs from PASM2 — see Part I of the
-*P2 Assembly Language Manual*.
+*P2 Assembly Language Reference*.
 
 ## Memory — three tiers, from tiny-and-fast to big-and-shared
 
@@ -163,7 +163,7 @@ keeps up with high-speed work in a way the P1's hub couldn't.
 :::
 
 Memory addressing, alignment, and the details of hub timing are covered in the
-*P2 Assembly Language Manual* (Part I) and the *Silicon Doc*.
+*P2 Assembly Language Reference* (Part I) and the *Parallax Propeller 2 Documentation v35 - Rev B/C*.
 
 ## Pins and smart pins — I/O that thinks for itself
 
@@ -213,7 +213,7 @@ would be slow in software into something the hardware just does for you.
 
 Here in the orientation we only need you to know it exists and that it's fast and
 shared. The complete list of operations and exactly how to invoke them lives in the
-*Silicon Doc*.
+*Parallax Propeller 2 Documentation v35 - Rev B/C*.
 
 ::: p1note
 **P1 note — new in P2:** The P1 had no hardware math engine — it shipped log,
@@ -267,7 +267,7 @@ it.
 :::
 
 The full set of event sources and how interrupts dispatch are documented in the
-*P2 Assembly Language Manual* (Part I) and the *Silicon Doc*.
+*P2 Assembly Language Reference* (Part I) and the *Parallax Propeller 2 Documentation v35 - Rev B/C*.
 
 ## The clock — one setting, the whole chip
 
@@ -299,7 +299,7 @@ interpreter.
 
 For everyday work you mostly don't think about this — your development tools handle
 loading — but it's good to know the path exists and that the pins used for booting
-become ordinary I/O once your program is up. The *Silicon Doc* and the boot
+become ordinary I/O once your program is up. The *Parallax Propeller 2 Documentation v35 - Rev B/C* and the boot
 documentation cover the boot sources and their fallback behavior in detail.
 
 ## Where this leaves us
@@ -482,7 +482,7 @@ PUB main()
 method inside it. This is exactly how you use the community's drivers and your own code:
 each object minds its own data and exposes methods, and a top-level object wires several
 together. (The full object model — instances, arrays of objects, parameters — is in the
-*Spin2 Language Reference*.)
+*Spin2 Reference Manual*.)
 
 ## The other language: PASM2
 
@@ -507,7 +507,7 @@ immediate value" — a literal number or address, not a register; `##` means a *
 but don't need yet: some instructions end in a **flag effect** like `wc` or `wz` (the
 instruction updates a status flag), and any instruction can carry a **condition** prefix
 like `if_z` (run only when a flag is set). The deep meaning of all of these is the
-*P2 Assembly Language Manual*'s job; here, you just need to parse the line.
+*P2 Assembly Language Reference*'s job; here, you just need to parse the line.
 
 PASM2 shows up in two places. A whole COG program lives in a **`DAT` block**; and a short
 burst can be dropped right inside a Spin2 method between `org` and `end`:
@@ -669,7 +669,7 @@ just agree on a spot in hub memory. Single hub reads and writes are *atomic* —
 always sees a whole value, never half-written — so this simple mailbox is safe. When a
 hand-off is more than one value, or several COGs might write at once, the P2 gives you
 **locks** (the 16 hardware locks from Chapter 1) to guard the exchange. The
-*P2 Assembly Language Manual* covers the coordination patterns in depth.
+*P2 Assembly Language Reference* covers the coordination patterns in depth.
 
 ::: p1note
 **P1 note — changed in P2:** Sharing through hub variables works just as it did on the
@@ -722,7 +722,7 @@ a program and drop to the metal exactly where it pays off.
 The honest guidance is the one most experienced P2 developers converge on: **write the
 application in Spin2, and give the time-critical jobs their own PASM2 COGs.** A typical
 P2 program uses both, and that's not a compromise — it's the intended shape. For the
-full languages, the *Spin2 Language Reference* and the *P2 Assembly Language Manual*
+full languages, the *Spin2 Reference Manual* and the *P2 Assembly Language Reference*
 are the deep references; this guide only wants you to know *which* tool fits *which*
 job.
 
@@ -744,7 +744,7 @@ That's how you use the community's drivers and your own: each object minds its o
 and exposes methods, and your top-level object wires them together. It's the same
 mental model as the `PUB`/`PRI` split you've already seen — public methods are the
 object's interface, private ones are its internals — scaled up to whole files. The
-*Spin2 Language Reference* is the place for the full object model (instances, arrays of
+*Spin2 Reference Manual* is the place for the full object model (instances, arrays of
 objects, parameter passing).
 
 ## How it boots and runs
@@ -867,8 +867,8 @@ buffer, a coordinator — are your *vocabulary*: the nouns. The **forces** are t
 the rules that decide which nouns to instantiate, how many of each, and where the
 boundaries between them fall. A vocabulary list tells you what words exist; only a grammar
 tells you how to build a correct sentence you've never spoken before. This chapter is about
-the grammar. (The vocabulary — the object archetypes — has its own reference in the
-knowledge base; we'll lean on it but not re-list it here.)
+the grammar. (The vocabulary — the object archetypes — we'll lean on as we go but not
+catalogue here; the point of the chapter is the grammar that puts them to work.)
 
 ### Two axes, co-designed
 
@@ -967,9 +967,9 @@ move some of those resources off COGs entirely.
 :::
 
 The fuller treatment of resource ownership — including the cases where a "shared bus"
-default breaks down — lives in the decomposition layer of the knowledge base; the P2
+default breaks down — is worked through in the robot example later in this chapter; the P2
 coordination mechanisms themselves (locks, atomic access, COG attention) are in the
-*P2 Assembly Language Manual*.
+*P2 Assembly Language Reference*.
 
 ### Force 2 — What does each seam promise?
 
@@ -1034,7 +1034,7 @@ The failure modes Force 2 prevents are two: blocking calls between COGs that qui
 one COG and read mid-update by another, producing torn reads that look like glitches. Both
 fixes are structural — choose the contract deliberately, and publish atomically. The deep
 treatment of inter-COG contracts and the coordination primitives is in the *P2 Assembly
-Language Manual*.
+Language Reference*.
 
 ### Force 3 — Where do two cadences meet?
 
@@ -1407,13 +1407,12 @@ skill that keeps you on the spatial side of the line we drew at the start: funct
 not funnelled back through one core.
 
 A closing word on how to hold all this. The forces, the procedure, and the judging tools are the method;
-the robot dog was only the method made visible. The richest, most complete treatment of this material —
-every force in full, the reference canon behind each judgment tool, more worked detail than a single chapter
-can carry — lives in the decomposition layer of the P2 knowledge base, which is the golden home for this
-theory and the place to go when a real design pushes past what we covered here. Appendix A takes up the
-space-versus-time thesis in depth, with an honest accounting of what the P2 borrows from FPGA thinking and
-what it doesn't; Appendix B is the reading list behind the whole discipline; and the glossary and the
-"where to next" map point you into the reference manuals for every part you'll actually program.
+the robot dog was only the method made visible. The reference canon behind each judgment tool — the
+published work this whole discipline rests on, in more depth than a single chapter can carry — is
+collected in Appendix B's reading list, the place to go when a real design pushes past what we covered
+here. Appendix A takes up the space-versus-time thesis in depth, with an honest accounting of what the P2
+borrows from FPGA thinking and what it doesn't; and the glossary and the "where to next" map point you
+into the reference manuals for every part you'll actually program.
 
 You have the picture, you can put it to work, and now you can think in P2. That's the guide. The rest is
 yours to build.
@@ -1663,9 +1662,9 @@ of a device stack, the one that speaks bits on the wire.
 This guide is the orientation layer; the reference manuals are where you go for depth. Here is the
 map.
 
-- **To write the high-level language** — the *Spin2 Language Reference* (current revision v55): the
+- **To write the high-level language** — the *Spin2 Reference Manual* (current revision v55): the
   full object model, every built-in method and operator, the language's syntax in complete detail.
-- **To write assembly** — the *P2 Assembly Language Manual*: the PASM2 instruction set, the
+- **To write assembly** — the *P2 Assembly Language Reference*: the PASM2 instruction set, the
   execution pipeline, COG start/stop, and the inter-COG coordination primitives (locks, atomic
   access, COG attention) that Chapter 4's seams are built from. For a gentler, tutorial-style on-ramp
   to PASM2, the *DeSilva PASM2 Tutorial* teaches the assembly language from the ground up.
@@ -1677,11 +1676,11 @@ map.
 - **For debugging and bring-up** — the *P2 Debug Window Manual* and the *P2 Single-Step Debugger
   Manual*: the on-chip DEBUG output windows and the single-step debugger, the tools behind Chapter
   3's per-layer bring-up tests (cross-cutting force C4).
-- **For the silicon itself** — the *Silicon Doc*: the foundational reference — CORDIC operations,
+- **For the silicon itself** — the *Parallax Propeller 2 Documentation v35 - Rev B/C*: the foundational reference — CORDIC operations,
   the event system, boot sources, and the hardware-timing details the other manuals build on.
-- **For the decomposition theory in full** — the *decomposition reasoning layer* of the P2 Knowledge
-  Base, the golden home for Chapter 4's forces, planes, evaluation vocabulary, and worked
-  derivations, in more depth than a single chapter can carry.
+- **For the decomposition theory in full** — Appendix A (the spatial/temporal framing) and Appendix B
+  (the reading list behind every force, plane, and judgment tool): the published canon Chapter 4's
+  method rests on, in more depth than a single chapter can carry.
 
 That is the library. Start where your current job points you, and let the picture from Chapter 1,
 the language from Chapter 2, the working shape from Chapter 3, and the method from Chapter 4
