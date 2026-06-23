@@ -48,12 +48,17 @@ This changelog documents critical issues discovered during document production t
 ## Directory Structure
 
 ```
-manuals/p2-io-and-smart-pins-user-guide/opus-master/  <- CANONICAL SOURCE (edit here)
-|-- P2-IO-and-Smart-Pins-User-Guide.md                # Master document
+manuals/p2-io-and-smart-pins-user-guide/opus-master/  <- CANONICAL SOURCE (EDIT HERE — opus-master only)
+|-- front-matter.md                                   # Front matter (multi-file master)
+|-- part-1-fundamentals/<chapter>.md                  # Chapters live in part-N/ folders
+|-- part-2-output-modes/<chapter>.md                  #   (NOT a single master file)
+|-- ... part-3 / part-4 / part-5-appendices/
 
-workspace/p2-io-and-smart-pins-user-guide/            <- YOU ARE HERE (production prep)
+workspace/p2-io-and-smart-pins-user-guide/            <- YOU ARE HERE (production prep — GENERATED, do NOT edit)
 |-- README.md                                         # This file
-|-- P2-IO-and-Smart-Pins-User-Guide.md                # Working copy (UNESCAPED)
+|-- P2-IO-and-Smart-Pins-User-Guide.md                # ASSEMBLED working copy: assemble-manual.sh
+|                                                     #   rm's + cat's the opus-master parts into this.
+|                                                     #   Any edit here is DESTROYED on the next assemble.
 |-- templates/
 |   +-- (template files)
 |-- filters/

@@ -80,9 +80,12 @@ scoped.
 
 Reader-facing scope = the opus-masters (`manuals/*/opus-master/*.md`) **and** their workspace render
 twins (`workspace/*/*.md`). The opus-master is the authored source; the workspace copy is a generated
-mirror. **Edit the master, then re-prepare** to regenerate the mirror — except where the body lives
-only in the workspace render (the I/O & Smart Pins guide), where the workspace file is the edit
-target. Every per-master edit in Elements 4/5 has a mirror line to verify.
+mirror. **Always edit the opus-master, then re-prepare** to regenerate the mirror — for **every**
+manual, no exceptions. (The I/O & Smart Pins guide was once thought to be an exception with the body
+living in the workspace render; that is wrong — its opus-master is a multi-file source
+[`opus-master/front-matter.md` + `part-N/<chapter>.md`] that `assemble-manual.sh` `rm`+`cat`s into the
+workspace render, so a workspace edit is destroyed on the next assemble. Edit the opus-master parts.)
+Every per-master edit in Elements 4/5 has a mirror line to verify.
 
 ---
 
@@ -236,8 +239,9 @@ Book") → P2 I/O & Smart Pins User Guide.
 **Inventory (reader-facing must-fix, ~8 files).** Each opus-master edit mirrors to its workspace twin.
 - **"Silicon Doc / Silicon Documentation"** → "Parallax Propeller 2 Documentation v35 - Rev B/C":
   Architect (front-matter.md:115; body 166, 216, 302, 1680 + workspace mirror), Streamer
-  (front-matter.md:144; body 205, 673 + mirror), I/O & Smart Pins (front-matter.md:135; workspace
-  body 4422, 8725, 11316), DeSilva (COMPLETE-OPUS-MASTER.md:5818 + mirror). ~30 line-hits.
+  (front-matter.md:144; body 205, 673 + mirror), I/O & Smart Pins (opus-master: front-matter.md:135;
+  ch07-pulse-transition:274, ch19-usb:117 — DONE #104), DeSilva (COMPLETE-OPUS-MASTER.md:5818 +
+  mirror). ~30 line-hits.
 - **"P2 Assembly Language Manual"** → **"P2 Assembly Language Reference"**: Architect
   (front-matter.md:116; body 108, 166, 270, 510, 672, 725, 972, 1668 + mirror). ~22 line-hits.
 - **"Spin2 Language Reference" / "Spin2 documentation"** → "Spin2 Reference Manual": Architect
