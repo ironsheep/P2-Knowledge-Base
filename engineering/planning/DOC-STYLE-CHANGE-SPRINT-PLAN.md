@@ -5,9 +5,28 @@ one shared corpus survey feeding three of them. This is a **plan** (a commitment
 specific changes across the manuals), not a study.*
 
 **Head:** Manual production (cross-cutting — not a single manual).
-**Status:** PLANNING. Element 1 (typography) and Element 2 (capitalization) decided; research
-complete for all five. Decisions for confirmation are listed at the top.
+**Status:** STARTED 2026-06-23 (sprint-start complete; see record below). All decisions + questions
+resolved; research complete for all five elements.
 **Date:** 2026-06-23.
+
+---
+
+## Sprint-start record (2026-06-23)
+
+- **Build number — bump only already-released documents, on approval.** This is a cross-cutting
+  manual sprint, so there is no single outgoing number. **When the style change is approved, bump
+  version numbers ONLY for documents that are already released** (a MINOR bump, re-shipped with the
+  style pass). **Unreleased / in-development manuals do not bump** — they absorb the style change and
+  receive their version at first release. The two pilots (P2 Architect's Guide, P2 I/O & Smart Pins
+  User Guide) are unreleased → no bump; their pilot regens are verification renders, not releases.
+- **Working tree — clean.** Three commits landed at start (plan + capitalization standard; Architect
+  Blue Book scrub; Silicon Doc DOCX source). No untracked files in the platform/manual blast radius.
+- **Tracking readiness.** 3 paused IOSP tasks (#54 expert-queue, #46 RECOMMEND_ADD disposition, #47
+  IOSP audit regen) are a **separate, externally-gated effort — left paused**, not folded into this
+  sprint. No completed tasks to archive; no in-progress leftovers.
+- **Entry baseline.** Manual head = no local build gate (PDF Forge handback). Baseline = each in-scope
+  manual's current clean render/audit state; the closeout exit assertion is **no render/audit
+  regression**. (baseline-health's YAML validators do not apply.)
 
 ---
 
@@ -301,3 +320,29 @@ Each carries a recommended resolution; the plan is final once these are settled.
   widest listings is a gating check inside the pilot, not an afterthought. The reclaimed line-number
   gutter (Element 3) partly offsets Plex Mono's extra width.
 - All other research is complete; no element carries an unresolved "figure it out later".
+
+---
+
+## Section ↔ task cross-reference (tag: `doc-style-change`)
+
+Elements 2/4/5 share one reviewed pass per manual, so they are delivered **distributed across the
+per-manual tasks** rather than as standalone tasks. Element 1's line-number removal rides the platform
+task; Element 3's library mechanism is its own task, then applied per-manual.
+
+| Plan § | Deliverable | Task(s) | seq |
+| --- | --- | --- | --- |
+| §1 Typography | Platform Plex/heading/8.5pt edit + D2 cleanup, pilot-verified | «#100» | 1 |
+| §1 Typography | Torture-instrument certification | «#101» | 2 |
+| §3 Code examples | Line-number removal (platform) | «#100» | 1 |
+| §3 Code examples | Example-library mechanism (convention + ZIP build + roster distribution) | «#102» | 3 |
+| §2+§4+§5+§3 | Per-manual style pass — Architect's Guide (E2+E4+E5+captions) | «#103» | 4 |
+| §2+§4+§3 | Per-manual style pass — I/O & Smart Pins User Guide | «#104» | 5 |
+| §2+§4+§3 | Per-manual style pass — Assembly Language Reference (incl. D5 redirect) | «#105» | 6 |
+| §2+§3 | Per-manual style pass — Debug Window Manual | «#106» | 7 |
+| §2+§4+§3 | Per-manual style pass — DeSilva PASM2 Tutorial | «#107» | 8 |
+| §2+§3 | Per-manual style pass — Single-Step Debugger Manual | «#108» | 9 |
+| §2+§4+§3 | Per-manual style pass — Streamer Programming Guide | «#109» | 10 |
+| §1+§3 close | Regen + release (already-released only) + roster ZIP links | «#110» | 11 |
+
+Per-manual coverage: **§2 (capitalization)** = all 7 passes; **§4 (titles)** = Architect, I/O & Smart
+Pins, Assembly, DeSilva, Streamer; **§5 (plumbing)** = Architect only.
