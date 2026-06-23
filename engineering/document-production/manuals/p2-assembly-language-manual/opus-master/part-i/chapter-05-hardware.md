@@ -268,7 +268,7 @@ Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:
 
 ### 5.2.4 Smart Pin Documentation
 
-Smart Pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete Smart Pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 Smart Pins Tutorial** (`p2-smart-pins-tutorial`). That manual provides essential reference material for Smart Pin programming.
+Smart Pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete Smart Pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 I/O & Smart Pins User Guide** (`p2-io-and-smart-pins-user-guide`). That guide provides essential reference material for Smart Pin programming.
 
 
 ## 5.3 Streamer {#streamer-overview}
