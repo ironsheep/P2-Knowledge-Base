@@ -175,6 +175,14 @@ need before we start writing code. We're not going to be exhaustive here; each p
 has a deep manual of its own, and we'll point you to it as we go. The goal right
 now is just to make the Propeller 2 feel familiar.
 
+```{=latex}
+\screenshotfig[width=0.9\linewidth]{inbox/assets/p2-edge-breakout.png}
+```
+
+::: {.figurecaption #fig:p2-edge-board}
+A P2 Edge module — the small board carrying the Propeller 2 chip — seated on a P2 Edge Breakout Board. This is the hardware the guide's examples assume. *(Image courtesy of Parallax Inc.)*
+:::
+
 If you've worked with a microcontroller before, the most useful thing to know up
 front is where the P2 sits. A conventional microcontroller does one thing at a time,
 very fast: a single instruction stream racing down a single core, and when you need
@@ -191,8 +199,13 @@ hardware." On the P2 you usually just hand each job its own piece of silicon.
 That idea — *give each job its own piece of silicon, and let it keep running* — is
 the thread that runs through this whole guide. Let's meet the pieces.
 
-> **[Figure — the whole chip at a glance: eight COGs around a central hub, with the
-> ring of 64 smart pins on the outside. Logged for the visual pass (PUNCH-LIST).]**
+```{=latex}
+\EightCogSimpleDiagram
+```
+
+::: {.figurecaption #fig:whole-chip}
+Eight independent COGs arranged around the shared hub, taking turns on a fixed rotation — the "egg beater." (The 64 smart pins live on the outside of the chip; we meet them a few pages on.)
+:::
 
 ## Eight COGs — eight little computers
 
@@ -252,8 +265,13 @@ where buffers and tables sit. It's far roomier than the private memories, with t
 trade-off that it's shared, so reaching it involves a brief, predictable wait for
 your turn (more on that next).
 
-> **[Figure — the three memory tiers: private COG RAM and LUT beside each processor,
-> the shared hub in the middle. Logged for the visual pass.]**
+```{=latex}
+\CogHubRelationshipDiagram
+```
+
+::: {.figurecaption #fig:memory-tiers}
+The memory tiers. Each COG's private RAM and LUT sit right next to the processor (fast, 2-cycle access); the 512 KB hub is shared by all eight (a few cycles' wait via the egg beater).
+:::
 
 ::: p1note
 **P1 note — changed in P2:** The shape is familiar — private COG RAM plus a shared
@@ -720,9 +738,13 @@ is, at bottom, the practice of keeping your design on the *spatial* side of that
 spreading function across the fabric instead of funnelling it back through a single core
 out of habit. Everything that follows is in service of that.
 
-> **[Figure — the space-vs-time spectrum: a temporal single-core MCU at one end, a spatial
-> FPGA at the other, and the P2 placed between them as a "coarse-grained spatial fabric"
-> of 8 COGs + 64 smart pins. Logged for the visual pass (PUNCH-LIST).]**
+```{=latex}
+\SpaceTimeSpectrumDiagram
+```
+
+::: {.figurecaption #fig:space-time}
+Computing in time vs. in space. A single-core microcontroller runs one instruction stream; an FPGA lays function out as parallel hardware. The Propeller 2 sits between them — a coarse-grained spatial fabric you assign function to.
+:::
 
 ::: p1note
 **P1 note — the idea is old, the room is new.** If you've built P1 designs, you've been
@@ -1274,9 +1296,13 @@ It fits, with COGs to spare, and nothing forces a re-cut. Now judge it with the 
 connascence that crosses a COG boundary (execution order on the command mailbox) was already tamed to static
 by the publish-last discipline. This is a min-cut.
 
-> **[Figure — the derived object-and-COG map for the example robot: bus-1 control COG with its three
-> cooperative tasks and four-tier motion stack, the bus-2/IO COG, the orchestrator, the smart-pin-owned
-> discrete signals, and the seams between them labeled by plane. Logged for the visual pass (PUNCH-LIST).]**
+```{=latex}
+\RobotDecompositionDiagram
+```
+
+::: {.figurecaption #fig:robot-decomposition}
+The object-and-COG map this derivation produced — read it for the moves, not the result. A different hardware mix yields a different, equally sound shape.
+:::
 
 Now step back and notice what just happened — and especially what *didn't*. We never started from a parts
 list and reached for the nearest matching template. We started from the *wires and the timing*, ran the

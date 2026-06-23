@@ -32,4 +32,10 @@
   coltitle=white, fonttitle=\sffamily\bfseries\small, title={P1 NOTE}
 }
 
+% ==================== FIGURE NUMBERING ====================
+% The guide uses NAMED, unnumbered chapters (Ch1/Ch2/Ch3 by title), so \thechapter
+% is 0 and the default \thefigure would render as "Figure 0.1, 0.2, ...". Number
+% figures continuously across the document instead: "Figure 1, 2, 3, ...".
+\renewcommand{\thefigure}{\arabic{figure}}
+
 \endinput

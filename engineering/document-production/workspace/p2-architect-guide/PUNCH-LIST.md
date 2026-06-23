@@ -5,29 +5,27 @@ archive section at closeout.
 
 ---
 
-## Deferred to the post-first-draft visual pass (DD5 — named carve-out)
+## Figures — AUTHORED & VERIFIED (test-v5, 2026-06-23)
 
-The v0.1.0 first draft is **prose-complete**; diagram authoring is its own effort
-and is explicitly out of the first-draft DoD (sprint plan §"Out of scope"). The
-chapters mark intended figure locations as `> **[Figure — …]**` placeholders; this
-section collects them for the visual pass once the draft is reviewed.
+All five figures are in the document and render clean (compile log clean, numbered
+Figure 1–5 continuously since the guide uses unnumbered named chapters —
+`\renewcommand{\thefigure}{\arabic{figure}}` in architect-local.sty). Macros live in
+`templates/p2kb-architect-diagrams.sty` (requires the shared `p2kb-platform-diagrams`).
 
-- [ ] **Figure inventory** — sweep `architect-guide-body.md` for `> **[Figure — …]**`
-      placeholders after the chapters are authored; list each here with its
-      chapter + within-chapter location, then build TikZ `\Diag*` macros in
-      `templates/p2kb-architect-diagrams.sty` (model: the Streamer diagrams stack).
-  - **Ch1 (Meet the P2), opener** — "the whole chip at a glance": 8 COGs around a
-    central hub, ring of 64 smart pins on the outside.
-  - **Ch1, §Memory** — the three memory tiers: private COG RAM + LUT beside each
-    processor, shared hub in the middle.
-  - **Ch2 (Putting It to Work)** — no figure placeholders (code-driven chapter).
-  - **Ch3 (Thinking in P2), §"Computing in space, not just in time"** — the space-vs-time
-    spectrum: a temporal single-core MCU at one end, a spatial FPGA at the other, the P2
-    between them as a coarse-grained spatial fabric of 8 COGs + 64 smart pins.
-  - **Ch3, §"Watching the method run: a walking robot"** — the derived object-and-COG map
-    for the example robot: bus-1 control COG (its three cooperative tasks + four-tier
-    motion stack), the bus-2/IO COG, the orchestrator, the smart-pin-owned discrete
-    signals, and the inter-COG seams labeled by plane (data/control/event).
+- [x] **Figure 1 (Ch1 opener)** — P2 Edge module on a Breakout Board. **Reused photo**
+      from the Parallax `64029-P2-Edge-Breakout-Board-Guide` (Parallax OK'd reuse;
+      attributed "Image courtesy of Parallax Inc."). `\screenshotfig`, keyline framed.
+- [x] **Figure 2 (Ch1 opener)** — 8 COGs around the hub. **Reused** `\EightCogSimpleDiagram`
+      (verbatim from the Assembly manual). Caption notes the smart-pin ring is not shown.
+- [x] **Figure 3 (Ch1 §Memory)** — memory hierarchy (per-COG RAM/LUT over shared hub).
+      **Reused** `\CogHubRelationshipDiagram` (verbatim from the Assembly manual).
+- [x] **Figure 4 (Ch3 space-vs-time)** — temporal↔spatial spectrum, P2 in between.
+      **NEW** `\SpaceTimeSpectrumDiagram`.
+- [x] **Figure 5 (Ch3 worked derivation)** — the robot's object-and-COG map, with the
+      "one machine's answer, not a template" banner. **NEW** `\RobotDecompositionDiagram`.
+
+Possible later polish (not blocking): Fig 5 is dense — the per-unit-calibration box sits
+a little tight against COG B; a List of Figures was deliberately omitted (narrative guide).
 - [ ] **Emoji / marker glyph — FINDING (test-v3):** the 💡 (U+1F4A1), ⚠ (U+26A0),
       and the U+FE0F variation selector are **dropped as missing glyphs** by the
       platform fonts (40 `Missing character` log lines, emoji only — no other glyph
