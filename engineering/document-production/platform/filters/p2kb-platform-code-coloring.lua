@@ -101,6 +101,26 @@ local function ohm_fix(text)
   return (text:gsub("\xCE\xA9", "\xE2\x84\xA6"))
 end
 
+-- ===== EXAMPLE-LIBRARY FILENAME CAPTION =====
+-- A *worked example* (a complete, runnable program — not a snippet) is tagged in
+-- the markdown with a filename caption attribute, e.g.
+--   ```{.spin2 caption="ch05-plot-gauge.spin2"}
+-- The caption attribute is the SINGLE SOURCE OF TRUTH for the example library:
+--   (a) here it prints a small, quiet filename inside the bottom of the code box so
+--       a reader can find that exact program in the manual's example-library ZIP, and
+--   (b) build-example-library.py extracts every caption-tagged block to a file of
+--       that name and zips them — so the shipped file is, verbatim, the printed block.
+-- Bare code blocks (no caption attribute) are snippets: no caption, not extracted.
+-- Returns '' when there is no caption, so un-curated manuals show nothing (no gate flag).
+local function example_caption(attribs)
+  local cap = attribs and attribs.caption
+  if not cap or cap == '' then return '' end
+  cap = cap:gsub('\\', '\\textbackslash{}')
+  cap = cap:gsub('([%%%$#&_{}])', '\\%1')
+  return '{\\par\\nopagebreak\\vspace{3pt}\\hfill\\footnotesize\\ttfamily\\color{black!50}'
+         .. cap .. '}\n'
+end
+
 -- Uppercase mnemonics in a single line of code (stops at comment)
 local function uppercase_mnemonics_in_line(line)
   -- Find comment start (single quote in IOSP)
@@ -452,6 +472,7 @@ function CodeBlock(cb)
                        '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
+                       example_caption(cb.attributes) ..
                        '\\end{IOSPBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
@@ -461,6 +482,7 @@ function CodeBlock(cb)
                        '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        ohm_fix(cb.text) .. '\n' ..
                        '\\end{Verbatim}\n' ..
+                       example_caption(cb.attributes) ..
                        '\\end{Spin2Block}'
     return pandoc.RawBlock('latex', latex_block)
 
@@ -471,6 +493,7 @@ function CodeBlock(cb)
                        '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
+                       example_caption(cb.attributes) ..
                        '\\end{CORDICBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
@@ -481,6 +504,7 @@ function CodeBlock(cb)
                        '\\begin{Verbatim}[xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
+                       example_caption(cb.attributes) ..
                        '\\end{MultiCOGBlock}'
     return pandoc.RawBlock('latex', latex_block)
 

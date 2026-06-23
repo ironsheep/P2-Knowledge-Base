@@ -189,11 +189,22 @@ copy still needs the file route — the ZIPs stay. But the distribution model ch
   area (next to where the PDF is downloaded).
 - **The link to each ZIP lives in the public manuals roster / release index** (the
   reader-facing "which manuals are available" download listing), not in the document body.
-- **Inside the document: only the per-block `example_NNN.spin2` filename caption** stays — it maps a
-  printed block to its file in the ZIP, but is a caption, not a link.
+- **Inside the document: only the per-block filename caption** stays — it maps a printed block to its
+  file in the ZIP, but is a caption, not a link.
 - **Per-example individual file links: NOT included** (decided 2026-06-23). Distribution is the
   whole-manual ZIP via the roster only; there are no per-example file links, inside or outside the
-  document. The `example_NNN.spin2` caption + the ZIP is the entire mechanism.
+  document. The filename caption + the ZIP is the entire mechanism.
+
+> **Mechanism established #102 (2026-06-23) — see
+> `engineering/document-production/methodology/example-library-mechanism.md`.** The library is
+> **curated, not auto-extracted**: only complete runnable worked examples get a file, reconciling with
+> the convention already shipped by the DEBUG Window Manual (semantic `chNN-description.spin2` names, a
+> README index). The naming is `chNN-description.spin2` (NOT the placeholder `example_NNN` this plan
+> first sketched). An example is marked by a **filename caption attribute on its code fence**
+> (` ```{.spin2 caption="chNN-…spin2"} `), which is the single source of truth for both the printed
+> caption (rendered by the code-coloring filter) and the extracted file
+> (`engineering/tools/conversion/build-example-library.py` → files + ZIP). Snippets stay uncaptioned
+> and unextracted. Proven end-to-end before rollout.
 
 **Integration point.** This adds a companion-artifact step to the release path: the release/roster
 process must publish each manual's example-library ZIP beside its PDF and add the ZIP link to the
@@ -202,8 +213,8 @@ in the skill-evolution candidates.
 
 **Verification.**
 - Normal: no code block shows a line-number gutter; framed blocks continue cleanly across page breaks;
-  each manual's ZIP downloads from the roster link and its files match the printed `example_NNN.spin2`
-  captions, whitespace intact.
+  each manual's ZIP downloads from the roster link and its files match the printed filename captions
+  (`chNN-description.spin2`), whitespace intact.
 - Edge (Q1): any prose that referenced a code line number ("on line 12") has been reworded — a block
   with no numbers must not be referenced by number.
 - Error: no example renders a stray gutter or mis-wrapped line; **no ZIP/download link appears inside
