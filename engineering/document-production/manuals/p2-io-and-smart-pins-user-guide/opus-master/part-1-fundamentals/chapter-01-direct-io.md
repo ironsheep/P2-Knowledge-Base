@@ -1,6 +1,6 @@
 # Chapter 1: Direct I/O - The Foundation {#ch1}
 
-Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex Smart Pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
+Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex smart pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
 
 ## 1.1 The Hardware Model
@@ -1090,7 +1090,7 @@ PUB main()
 
 ### PINCLEAR(PinField)
 
-Clears Smart Pin configuration.
+Clears smart pin configuration.
 
 **Function:** Resets pin to normal mode (P_NORMAL)
 
@@ -1101,7 +1101,7 @@ Clears Smart Pin configuration.
 PINCLEAR(10)                      ' Reset pin 10 to normal mode
 ```
 
-**Note:** Use this to disable Smart Pin modes and return to basic Direct I/O.
+**Note:** Use this to disable smart pin modes and return to basic Direct I/O.
 
 
 ## 1.9 Pin Span Operations
@@ -1250,4 +1250,4 @@ DAT           org
 ```
 
 
-*This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
+*This chapter establishes the foundational concepts of P2 pin control. All smart pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*

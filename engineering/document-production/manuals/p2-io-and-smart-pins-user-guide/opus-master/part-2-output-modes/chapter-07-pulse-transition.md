@@ -1,6 +1,6 @@
 # Chapter 7: Pulse and Transition Generation {#ch7}
 
-This chapter covers hardware-generated pulses and transitions using two Smart Pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
+This chapter covers hardware-generated pulses and transitions using two smart pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
 
 
 ## 7.1 Overview

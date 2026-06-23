@@ -1,6 +1,6 @@
 # Chapter 19: USB Host/Device {#ch19}
 
-This chapter covers the USB Smart Pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through Smart Pins, handling the differential signaling and timing while software manages the USB protocol stack.
+This chapter covers the USB smart pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through smart pins, handling the differential signaling and timing while software manages the USB protocol stack.
 
 
 ## 19.1 USB Overview
@@ -114,7 +114,7 @@ The USB mode uses the smart pin registers for configuration and data:
 | Y | Line-state and packet output, set via WYPIN on the lower pin (see table below) |
 | Z | Receiver data + 16-bit status word, read via RDPIN/RQPIN on the lower pin (see bit layout below) |
 
-**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: *Parallax Propeller 2 Documentation v35 - Rev B/C*, USB host/device mode.)
+**All smart pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: *Parallax Propeller 2 Documentation v35 - Rev B/C*, USB host/device mode.)
 
 #### Baud Rate — Worked Example
 
@@ -177,7 +177,7 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB Smart Pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
 :::
 
 
@@ -381,7 +381,7 @@ PINHIGH(even_pin+1)                             ' Enable DP
 
 ### Key Points
 
-- Smart Pin handles physical layer signaling
+- Smart pin handles physical layer signaling
 - Software must implement full USB protocol stack
 - Use existing libraries when possible
 - Supports USB 1.1 Full Speed and Low Speed only
@@ -396,4 +396,4 @@ PINHIGH(even_pin+1)                             ' Enable DP
 - P2 USB implementation examples from community members
 
 
-*This chapter covered the USB Smart Pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*
+*This chapter covered the USB smart pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*

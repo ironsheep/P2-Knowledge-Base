@@ -128,13 +128,13 @@ This guide would not exist without the contributions of many individuals and org
 
 **Parallax Inc.** for creating the Propeller 2 microcontroller and providing comprehensive reference documentation that forms the foundation of this work.
 
-**Chip Gracey** for the brilliant design of the P2 Smart Pin system and for maintaining detailed technical specifications.
+**Chip Gracey** for the brilliant design of the P2 smart pin system and for maintaining detailed technical specifications.
 
-**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the Smart Pin modes and identified critical details worth documenting.
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the smart pin modes and identified critical details worth documenting.
 
-**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the *Parallax Propeller 2 Documentation v35 - Rev B/C* with examples and further explanation — whose detailed Smart Pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
+**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the *Parallax Propeller 2 Documentation v35 - Rev B/C* with examples and further explanation — whose detailed smart pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
 
-This guide is a community-developed resource, created to make the P2's Smart Pin system more accessible to developers at all skill levels.
+This guide is a community-developed resource, created to make the P2's smart pin system more accessible to developers at all skill levels.
 
 
 ## How to Use This Guide
@@ -174,7 +174,7 @@ The Intent Index covers common tasks including:
 
 Readers who know which mode or feature they need can navigate directly:
 
-- **Quick Mode Selection Matrix** (below) - Visual overview of all 32 Smart Pin modes
+- **Quick Mode Selection Matrix** (below) - Visual overview of all 32 smart pin modes
 - **Appendix F: Complete Mode Reference** - Condensed reference for all modes
 - **Chapter index** - Direct chapter access by topic
 
@@ -196,7 +196,7 @@ Each mode chapter stands alone with complete configuration details, all applicab
 
 ### Register Notation
 
-The P2 Smart Pin system uses three internal registers:
+The P2 smart pin system uses three internal registers:
 
 | Register | Notation | Description |
 |----------|----------|-------------|
@@ -249,7 +249,7 @@ Cross-references use the format:
 
 ## Quick Mode Selection Matrix
 
-The following matrix provides a one-page overview of all 32 Smart Pin modes organized by function. Use this for quick navigation to the appropriate chapter.
+The following matrix provides a one-page overview of all 32 smart pin modes organized by function. Use this for quick navigation to the appropriate chapter.
 
 ### Output Modes
 
@@ -313,7 +313,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 15 |
 | **ADC Input** | ADC, ADC Ext, ADC Scope | 16 |
 | **Serial Receive** | Sync RX, Async RX | 17 |
-| **Inter-COG Sharing** | Repository | 18 |
+| **Inter-Cog Sharing** | Repository | 18 |
 | **USB** | USB Pair | 19 |
 
 

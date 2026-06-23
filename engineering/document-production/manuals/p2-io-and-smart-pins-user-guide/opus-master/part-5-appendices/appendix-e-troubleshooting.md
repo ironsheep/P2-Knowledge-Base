@@ -1,6 +1,6 @@
 # Appendix E: Troubleshooting
 
-This appendix provides problem/solution guidance for common Smart Pin issues organized by symptom.
+This appendix provides problem/solution guidance for common smart pin issues organized by symptom.
 
 ## Pin Not Responding
 
@@ -12,7 +12,7 @@ Pin appears completely inactive. No output changes, no IN flag, no measurements.
 1. **DIR not set** - Smart pin not enabled
 2. **WRPIN not executed** - Mode not configured
 3. **Wrong pin number** - Configuration applied to different pin
-4. **Pin used by another COG** - Conflicting configurations
+4. **Pin used by another cog** - Conflicting configurations
 
 ### Diagnostic Steps
 

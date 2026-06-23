@@ -36,7 +36,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **C flag** - State indicator in timing modes, Ch. 13
 - **Clock generation** - P_TRANSITION, P_NCO_FREQ, Ch. 7, 8
 - **Clock routing** - B-input for sync serial, Ch. 11, 17
-- **COG** - Processor core, inter-COG sharing Ch. 18
+- **Cog** - Processor core, inter-cog sharing Ch. 18
 - **Comparator input** - P_COMPARE_AB, Ch. 12
 - **Continuous mode** - X=0 for counting, Ch. 14
 - **Counter modes** - %01100-%01111, Ch. 14
@@ -96,7 +96,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **INA/INB** - Input registers, Ch. 12
 - **Input conditioning** - Schmitt, filter, compare, Ch. 12
 - **Input routing** - A/B input selection, Ch. 3
-- **Inter-COG** - Data sharing via Repository, Ch. 18
+- **Inter-cog** - Data sharing via Repository, Ch. 18
 - **Inversion** - P_INVERT_A, P_INVERT_B, P_INVERT_OUTPUT, App. B
 
 ### L
@@ -193,7 +193,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **P_QUADRATURE** - Quadrature encoder (%01011), Ch. 14, App. F
 - **P_REG_UP** - Gated increment (%01100), Ch. 14, App. F
 - **P_REG_UP_DOWN** - Up/down counter (%01101), Ch. 14, App. F
-- **P_REPOSITORY** - Inter-COG data (%00001), Ch. 18, App. F
+- **P_REPOSITORY** - Inter-cog data (%00001), Ch. 18, App. F
 - **P_SCHMITT_A** - Schmitt trigger A, Ch. 12
 - **P_STATE_TICKS** - Time both states (%10000), Ch. 13, App. F
 - **P_SYNC_IO** - Synchronous I/O, App. B

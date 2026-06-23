@@ -1,6 +1,6 @@
 # Chapter 4: Smart Pin Configuration {#ch4}
 
-This chapter documents the instructions and methods for configuring and interacting with Smart Pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish Smart Pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the Smart Pin without reading.
+This chapter documents the instructions and methods for configuring and interacting with smart pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish smart pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the smart pin without reading.
 
 
 ## 4.1 Configuration Instructions Overview
@@ -23,7 +23,7 @@ All configuration and acknowledge instructions execute in 2 clock cycles.
 
 WRPIN establishes the complete pin configuration including:
 
-- Smart Pin mode selection
+- Smart pin mode selection
 - Low-level pin configuration (drive strength, input mode)
 - Input routing and polarity
 - DIR/OUT control options
@@ -69,14 +69,14 @@ D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
 
 1. Pin is configured according to the D value
 2. IN bit is acknowledged (lowered)
-3. If DIR=0, Smart Pin remains in reset state
+3. If DIR=0, smart pin remains in reset state
 4. If DIR=1 and mode changes, behavior is unpredictable (always configure while DIR=0)
 
 ### Critical Requirements
 
-**Configure while DIR=0:** Smart Pins must be configured while held in reset (DIR=0). The proper sequence is:
+**Configure while DIR=0:** Smart pins must be configured while held in reset (DIR=0). The proper sequence is:
 
-1. DIRL to reset Smart Pin
+1. DIRL to reset smart pin
 2. WRPIN to configure
 3. WXPIN/WYPIN as needed
 4. DRVL/DRVH to enable
@@ -207,7 +207,7 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
 
 ### Function
 
-RDPIN reads the Z register and acknowledges the Smart Pin (lowers IN).
+RDPIN reads the Z register and acknowledges the smart pin (lowers IN).
 
 ```pasm-syntax
         RDPIN   D,{#}S          {WC}
@@ -245,10 +245,10 @@ result := RDPIN(Pin)
 
 Use RDPIN when:
 
-- The COG needs the result AND
-- The Smart Pin should be signaled that the result was consumed
+- The cog needs the result AND
+- The smart pin should be signaled that the result was consumed
 
-This is the normal read operation for single-COG access.
+This is the normal read operation for single-cog access.
 
 ### Examples
 
@@ -268,7 +268,7 @@ measurement := RDPIN(pin)                ' Read Z, acknowledge
 
 ### Function
 
-RQPIN reads the Z register WITHOUT acknowledging the Smart Pin. IN remains in its current state.
+RQPIN reads the Z register WITHOUT acknowledging the smart pin. IN remains in its current state.
 
 ```pasm-syntax
         RQPIN   D,{#}S          {WC}
@@ -286,13 +286,13 @@ result := RQPIN(Pin)
 
 ### When to Use RQPIN
 
-**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit Smart Pin bus and collide if two COGs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-COG caution in §3.3).
+**Multi-cog observation:** When multiple cogs need to read the same smart pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit smart pin bus and collide if two cogs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-cog caution in §3.3).
 
 **Non-destructive peek:** When checking results without signaling consumption.
 
 **Continuous modes:** Some modes (like totalizer counters) benefit from RQPIN for intermediate reads while RDPIN resets for the next period.
 
-### Example - Multi-COG Access
+### Example - Multi-Cog Access
 
 ```pasm2
 ' COG 0 (primary) uses RDPIN
@@ -307,7 +307,7 @@ result := RQPIN(Pin)
 
 ### Function
 
-AKPIN acknowledges the Smart Pin without reading the Z register.
+AKPIN acknowledges the smart pin without reading the Z register.
 
 ```pasm-syntax
         AKPIN   {#}Src
@@ -327,7 +327,7 @@ Or configure in PASM2 if needed.
 ### When to Use AKPIN
 
 - Resetting the IN flag without needing the data
-- Synchronizing Smart Pin timing without data consumption
+- Synchronizing smart pin timing without data consumption
 - Discarding an unwanted result
 
 ### Example
@@ -339,7 +339,7 @@ Or configure in PASM2 if needed.
 
 ## 4.8 The Standard Configuration Sequence
 
-All Smart Pin modes follow a common configuration pattern:
+All smart pin modes follow a common configuration pattern:
 
 ### Step 1: Reset the Smart Pin
 
@@ -397,7 +397,7 @@ PINHIGH(pin)                             ' DIR=1, start Smart Pin
               drvh      #pin              ' Enable Smart Pin
 ```
 
-**Note:** For output modes, DRVL vs DRVH doesn't affect the Smart Pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
+**Note:** For output modes, DRVL vs DRVH doesn't affect the smart pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
 
 ### Complete Example - NCO Frequency
 
@@ -436,11 +436,11 @@ PUB setup_nco() | y_value
 
 ### Purpose
 
-The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the DIR bit state.
+The `P_OE` constant (TT bits = %01) enables smart pin output regardless of the DIR bit state.
 
 ### When P_OE is Required
 
-**Output modes:** All Smart Pin modes that produce output require P_OE:
+**Output modes:** All smart pin modes that produce output require P_OE:
 
 - NCO frequency/duty (%00110, %00111)
 - PWM modes (%01000, %01001, %01010)
@@ -449,7 +449,7 @@ The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the D
 - DAC modes (%00001, %00010, %00011 in DAC mode)
 - USB (%11011)
 
-**Without P_OE:** The Smart Pin calculates output but doesn't drive the pin. This can be useful for:
+**Without P_OE:** The smart pin calculates output but doesn't drive the pin. This can be useful for:
 
 - Preparing output before enabling
 - Running the mode for internal timing without external output
@@ -474,7 +474,7 @@ WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 
 ## 4.10 Input Routing
 
-Smart Pins can receive input from the local pin or adjacent pins.
+Smart pins can receive input from the local pin or adjacent pins.
 
 ### A Input Selection
 
@@ -533,7 +533,7 @@ The B input is used for secondary signals (clock, quadrature channel B, etc.).
 | `P_FILT2_AB` | A and B both filtered using global filt2 settings |
 | `P_FILT3_AB` | A and B both filtered using global filt3 settings |
 
-When a pin is **not** in a Smart Pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a Smart Pin.
+When a pin is **not** in a smart pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a smart pin.
 
 ### Example - Quadrature Encoder
 
@@ -562,7 +562,7 @@ PINLOW(20)                                ' Enable
 
 ## 4.11 Span Operations
 
-All Smart Pin instructions support operating on multiple pins simultaneously.
+All smart pin instructions support operating on multiple pins simultaneously.
 
 ### Span Encoding
 
@@ -617,7 +617,7 @@ if result & $8000_0000                    ' Check bit 31 (mode-dependent)
 
 ## 4.13 The 2-Clock Acknowledge Delay
 
-After any instruction that acknowledges the Smart Pin (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN), two clock cycles must elapse before IN can be polled:
+After any instruction that acknowledges the smart pin (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN), two clock cycles must elapse before IN can be polled:
 
 ```pasm2
               rdpin     result, #pin      ' Acknowledge Smart Pin
@@ -687,4 +687,4 @@ WRPIN(pin, 0)
 `WRPIN(pin, 0)` clears a smart pin to `P_NORMAL` **at any time, including while it is running** — no `DIRL`/`DIRH` cycle is required. The reset-before-configure rule (§4.2) applies when *changing* to another active mode; returning to direct I/O with `#0` takes effect immediately.
 
 
-*This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*
+*This chapter covers the mechanics of smart pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*

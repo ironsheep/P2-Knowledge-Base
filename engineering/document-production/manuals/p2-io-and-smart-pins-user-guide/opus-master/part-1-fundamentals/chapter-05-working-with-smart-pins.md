@@ -1,15 +1,15 @@
 # Chapter 5: Working with Smart Pins {#ch5}
 
-This chapter covers practical patterns for Smart Pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all Smart Pin modes documented in Parts II through IV.
+This chapter covers practical patterns for smart pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all smart pin modes documented in Parts II through IV.
 
 
 ## 5.1 The Read/Acknowledge Cycle
 
 ### How IN and Acknowledge Work
 
-When a Smart Pin event occurs (measurement complete, data ready, etc.), the Smart Pin raises its IN flag. This signals to COGs that attention is needed.
+When a smart pin event occurs (measurement complete, data ready, etc.), the smart pin raises its IN flag. This signals to cogs that attention is needed.
 
-**Acknowledging instructions** (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN) lower the IN flag, signaling to the Smart Pin that the event was handled. This allows IN to be raised again for the next event.
+**Acknowledging instructions** (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN) lower the IN flag, signaling to the smart pin that the event was handled. This allows IN to be raised again for the next event.
 
 **Non-acknowledging read** (RQPIN) reads the result without lowering IN.
 
@@ -169,7 +169,7 @@ WYPIN(1, duty_1)
 
 ### Relative Pin Addressing
 
-Smart Pins can use adjacent pins for input:
+Smart pins can use adjacent pins for input:
 
 **Quadrature encoder (A on pin N, B on pin N+1):**
 ```spin2
@@ -214,9 +214,9 @@ WYPIN(phase_c, freq_value)
 PINLOW(phase_a..phase_c)
 ```
 
-### Multi-COG Access
+### Multi-Cog Access
 
-When multiple COGs need the same Smart Pin data:
+When multiple cogs need the same smart pin data:
 
 **Pattern: One owner, multiple observers**
 ```pasm2
@@ -269,7 +269,7 @@ PINSTART(pin, P_NCO_FREQ | P_OE, 1, freq)
 
 ### PINCLEAR - Reset to Normal
 
-PINCLEAR disables Smart Pin mode and returns to Direct I/O:
+PINCLEAR disables smart pin mode and returns to Direct I/O:
 
 ```spin2
 PINCLEAR(pin)                             ' Reset to P_NORMAL
@@ -326,12 +326,12 @@ DEBUG("Z register: ", UHEX_(value))
 **Erratic behavior:**
 
 - Configured while DIR=1 (should configure while DIR=0)
-- Multiple COGs acknowledging same pin
+- Multiple cogs acknowledging same pin
 - X or Y values out of valid range
 
 ### Debugging Checklist
 
-1. **Is DIR=1?** - Smart Pin must be enabled
+1. **Is DIR=1?** - Smart pin must be enabled
 2. **Is P_OE included?** - Required for output modes
 3. **Is mode correct?** - Verify mode bits in WRPIN value
 4. **Is X valid?** - Check period/parameter calculations
@@ -382,13 +382,13 @@ For high-frequency events:
 
 - Events faster than ~10 MHz at 200 MHz sysclk
 - Tight timing loops
-- Multiple Smart Pins requiring attention
+- Multiple smart pins requiring attention
 
 ### When Overhead is Negligible
 
 - Events slower than 1 MHz
 - Occasional configuration changes
-- Asynchronous operation (Smart Pin runs independently)
+- Asynchronous operation (smart pin runs independently)
 
 
 ## 5.7 Troubleshooting Quick Reference
@@ -400,7 +400,7 @@ For high-frequency events:
 | DIR state | Ensure DRVL/DRVH/PINLOW was executed after configuration |
 | WRPIN value | Verify mode bits are correct (%SSSSS field) |
 | Pin number | Confirm correct pin in all instructions |
-| COG conflict | Check if another COG is controlling the pin |
+| Cog conflict | Check if another Cog is controlling the pin |
 
 ### "No Output"
 
@@ -444,7 +444,7 @@ For high-frequency events:
 | Read timing | Read before next event overwrites result |
 | Bit width | Ensure Z interpretation matches mode |
 | C flag | Some modes put extra data in C flag |
-| Multi-COG | Only one COG should RDPIN; others use RQPIN |
+| Multi-Cog | Only one Cog should RDPIN; others use RQPIN |
 
 ### "Works Then Stops"
 
@@ -476,7 +476,7 @@ For high-frequency events:
 1. Use pin ranges for identical configurations
 2. Enable simultaneously for synchronization
 3. Use relative addressing for related pins
-4. Designate one COG as owner for shared pins
+4. Designate one cog as owner for shared pins
 
 ### Debugging
 
@@ -486,4 +486,4 @@ For high-frequency events:
 4. Verify calculations independently
 
 
-*This chapter completes Part I: Fundamentals. For specific Smart Pin mode documentation, proceed to Part II (Output Modes), Part III (Input Modes), or Part IV (Special Modes).*
+*This chapter completes Part I: Fundamentals. For specific smart pin mode documentation, proceed to Part II (Output Modes), Part III (Input Modes), or Part IV (Special Modes).*

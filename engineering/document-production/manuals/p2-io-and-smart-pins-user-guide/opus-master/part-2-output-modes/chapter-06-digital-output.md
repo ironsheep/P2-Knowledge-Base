@@ -1,6 +1,6 @@
 # Chapter 6: Digital Output {#ch6}
 
-This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "Smart Pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
+This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "smart pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
 
 ## 6.1 Overview
 
@@ -18,11 +18,11 @@ When WRPIN bits [5:1] = %00000, the pin operates in P_NORMAL mode—basic Direct
 
 - Simple on/off control (LEDs, relays, enables)
 - Software-timed signals (bit-banging)
-- Irregular patterns not suited to Smart Pin automation
+- Irregular patterns not suited to smart pin automation
 - Open-drain/open-collector interfaces
-- When COG control is preferred over autonomy
+- When cog control is preferred over autonomy
 
-**Consider Smart Pin modes (Chapters 7-11) for:**
+**Consider smart pin modes (Chapters 7-11) for:**
 
 - Precise timing requirements
 - Free-running oscillators
@@ -232,7 +232,7 @@ PINHIGH(pin)                              ' Enable and drive high
 
 ### Bit-Banging Serial
 
-For non-standard protocols or when Smart Pin serial modes don't fit:
+For non-standard protocols or when smart pin serial modes don't fit:
 
 ```spin2
 CON
@@ -316,21 +316,21 @@ The 3-clock output latency shifts *when* edges reach the pad but does not reduce
 
 ### When Direct I/O is Faster
 
-Direct I/O is faster than Smart Pins for:
+Direct I/O is faster than smart pins for:
 
 - Infrequent, irregular pulses
 - One-shot signals
 - Quick on/off without setup overhead
 
-Smart Pins are faster when:
+Smart pins are faster when:
 
 - Continuous waveforms are needed
-- COG should be free for other work
+- Cog should be free for other work
 - Precise timing independent of software
 
 ### Smart Pin Overhead
 
-Smart Pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, Smart Pin overhead is negligible.
+Smart pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, smart pin overhead is negligible.
 
 ## 6.5 Complete Examples
 

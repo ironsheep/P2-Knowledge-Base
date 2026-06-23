@@ -1,6 +1,6 @@
 # Chapter 14: Counting Modes {#ch14}
 
-This chapter covers Smart Pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
+This chapter covers smart pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
 
 ## 14.1 Counting Mode Overview
@@ -396,7 +396,7 @@ For modes using two inputs (A and B):
 | P_MINUS3_B | Pin - 3 |
 | P_OUTBIT_B | This pin's own OUT bit (software-driven) |
 
-`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a COG can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
+`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a cog can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
 
 ### Input Conditioning
 

@@ -1,6 +1,6 @@
-# Chapter 18: Repository and Inter-COG Data Sharing {#ch18}
+# Chapter 18: Repository and Inter-Cog Data Sharing {#ch18}
 
-This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-COG data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
+This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-cog data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 
 
 ## 18.1 Repository Concept
@@ -22,7 +22,7 @@ When not configured for DAC output, these modes create a shared data register:
 - **RDPIN/RQPIN** reads the stored long
 - **IN flag** indicates when new data has been written
 
-This enables lock-free data sharing between COGs through dedicated pin hardware.
+This enables lock-free data sharing between cogs through dedicated pin hardware.
 
 ### Mode Variants
 
@@ -37,7 +37,7 @@ This enables lock-free data sharing between COGs through dedicated pin hardware.
 
 ### Purpose
 
-The repository provides a hardware-arbitrated communication channel between COGs. Unlike hub RAM which may require locks for atomic access, the repository guarantees atomic 32-bit reads and writes.
+The repository provides a hardware-arbitrated communication channel between cogs. Unlike hub RAM which may require locks for atomic access, the repository guarantees atomic 32-bit reads and writes.
 
 ### Operation
 
@@ -81,9 +81,9 @@ DAT           org
 data          res       1
 ```
 
-### Multi-COG Sharing
+### Multi-Cog Sharing
 
-**Writer COG:**
+**Writer cog:**
 ```spin2
 PUB sensor_cog() | reading
   setup_repository()
@@ -94,7 +94,7 @@ PUB sensor_cog() | reading
     WAITMS(10)
 ```
 
-**Reader COGs:**
+**Reader cogs:**
 ```spin2
 PUB display_cog()
   REPEAT
@@ -341,7 +341,7 @@ PRI get_next_sample() : sample
 ```
 
 
-## 18.6 Comparison with Other Inter-COG Mechanisms
+## 18.6 Comparison with Other Inter-Cog Mechanisms
 
 ### Hub RAM
 
@@ -371,7 +371,7 @@ PRI get_next_sample() : sample
 
 ### When to Use Repository
 
-- Sharing single sensor reading across multiple COGs
+- Sharing single sensor reading across multiple cogs
 - Status flags and state indicators
 - Real-time data where latest value is sufficient
 - Simple producer-consumer patterns
@@ -423,7 +423,7 @@ PRI read_temperature_sensor() : t
   t := 25
 ```
 
-### Example 2: Multi-COG Status Flags
+### Example 2: Multi-Cog Status Flags
 
 ```spin2
 CON

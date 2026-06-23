@@ -1,6 +1,6 @@
 # Appendix F: Complete Mode Reference
 
-Quick reference for all 32 Smart Pin modes, organized by mode number.
+Quick reference for all 32 smart pin modes, organized by mode number.
 
 
 ## Mode Number Cross-Reference
@@ -74,9 +74,9 @@ state := PINREAD(pin)                    ' Read input
 ::: modecard
 ## Mode %00001: P_REPOSITORY / P_DAC_NOISE
 
-**Inter-COG data sharing or DAC noise generator**
+**Inter-cog data sharing or DAC noise generator**
 
-Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between COGs. With DAC enable: pseudo-random noise output.
+Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between cogs. With DAC enable: pseudo-random noise output.
 :::
 
 ### Register Usage
@@ -108,7 +108,7 @@ PINH(pin)
 ```
 
 ### Reference
-[Chapter 18: Repository and Inter-COG Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
+[Chapter 18: Repository and Inter-Cog Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
 
 
 ::: modecard

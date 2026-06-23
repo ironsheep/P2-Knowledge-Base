@@ -1,6 +1,6 @@
 # Appendix B: P_ Constants Quick Reference
 
-This appendix provides a complete reference for all P_ constants used in Smart Pin configuration.
+This appendix provides a complete reference for all P_ constants used in smart pin configuration.
 
 
 ## How to Use P_ Constants

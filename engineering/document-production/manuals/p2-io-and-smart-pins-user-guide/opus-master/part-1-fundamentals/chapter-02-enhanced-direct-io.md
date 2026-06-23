@@ -1,6 +1,6 @@
 # Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
-Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
+Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering smart pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
 ## 2.1 Overview
 
@@ -11,7 +11,7 @@ While Chapter 1 covered the fundamental DIR/OUT/IN operations, Enhanced Direct I
 - **Drive Strength Selection**: 8 options for high-side drive, 8 options for low-side drive
 - **Input Conditioning**: Logic level, Schmitt trigger, and comparator modes
 - **Input Routing**: Select from local pin or adjacent pins (-3 to +3)
-- **Basic Analog**: DAC output and ADC input without Smart Pin modes
+- **Basic Analog**: DAC output and ADC input without smart pin modes
 - **Polarity Control**: Invert input or output signals
 
 ### Configuration Method
@@ -241,7 +241,7 @@ Combine A and B inputs logically before use.
 
 ## 2.5 ADC Input Modes (Basic)
 
-Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. The result appears in the IN bit based on comparison.
+Basic ADC modes provide analog-to-digital conversion without smart pin modes. The result appears in the IN bit based on comparison.
 
 | Constant | Gain | Description |
 |----------|------|-------------|
@@ -254,7 +254,7 @@ Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. Th
 | `P_ADC_30X` | 31.6× | Higher gain |
 | `P_ADC_100X` | 100× | Maximum gain |
 
-**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use Smart Pin ADC modes (Chapter 17).
+**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use smart pin ADC modes (Chapter 17).
 
 **Example - Simple threshold detection:**
 ```spin2
@@ -265,7 +265,7 @@ PINFLOAT(adc_pin)
 
 ## 2.6 DAC Output Modes (Basic)
 
-Basic DAC modes provide digital-to-analog conversion without Smart Pin modes. The DAC value is encoded in the WRPIN configuration word.
+Basic DAC modes provide digital-to-analog conversion without smart pin modes. The DAC value is encoded in the WRPIN configuration word.
 
 | Constant | Impedance | Peak Voltage | Description |
 |----------|-----------|--------------|-------------|
@@ -307,7 +307,7 @@ PUB main()
   PINH(DAC_PIN)                           ' Enable DAC output
 ```
 
-**Note:** For dynamic DAC output with waveform generation, use Smart Pin DAC modes (Chapter 10).
+**Note:** For dynamic DAC output with waveform generation, use smart pin DAC modes (Chapter 10).
 
 ## 2.7 Level Comparison Modes
 
@@ -380,7 +380,7 @@ PINHIGH(led_pin)                          ' Actually drives low, LED on
 | `P_TT_11` | %11 | Combined |
 | `P_CHANNEL` | %01 | DAC channel enable (alias for P_OE) |
 
-**P_OE** is required when using Smart Pin modes that produce output. For P_NORMAL mode, it is not needed as DIR controls output directly.
+**P_OE** is required when using smart pin modes that produce output. For P_NORMAL mode, it is not needed as DIR controls output directly.
 
 ## 2.11 Combining Constants
 
@@ -511,7 +511,7 @@ WRPIN(pin, 0)                             ' Same effect
               wrpin     #0, pin           ' Reset to P_NORMAL
 ```
 
-This clears all enhanced configuration and Smart Pin modes, returning the pin to basic Direct I/O operation.
+This clears all enhanced configuration and smart pin modes, returning the pin to basic Direct I/O operation.
 
 ## 2.14 Quick Reference
 
@@ -538,4 +538,4 @@ This clears all enhanced configuration and Smart Pin modes, returning the pin to
 | P_LEVEL_* | Optional | Programmable threshold |
 
 
-*This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the Smart Pin configuration process, see Chapter 4.*
+*This chapter covers pin configuration without smart pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the smart pin configuration process, see Chapter 4.*

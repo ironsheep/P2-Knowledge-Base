@@ -1,13 +1,13 @@
 # Chapter 13: Timing Measurement {#ch13}
 
-This chapter covers Smart Pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
+This chapter covers smart pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
 
 
 ## 13.1 Timing Measurement Overview
 
 ### P2 Timing Capabilities
 
-The P2 Smart Pin timing modes provide hardware-based time measurement with clock-cycle resolution. All measurements are in system clock cycles.
+The P2 smart pin timing modes provide hardware-based time measurement with clock-cycle resolution. All measurements are in system clock cycles.
 
 | Mode | Function | Trigger |
 |------|----------|---------|

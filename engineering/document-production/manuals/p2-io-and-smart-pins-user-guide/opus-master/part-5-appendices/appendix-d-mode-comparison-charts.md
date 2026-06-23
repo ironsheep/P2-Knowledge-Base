@@ -1,6 +1,6 @@
 # Appendix D: Mode Comparison Charts
 
-This appendix provides comparison matrices to help select the appropriate Smart Pin mode for your application.
+This appendix provides comparison matrices to help select the appropriate smart pin mode for your application.
 
 ## Output Mode Comparison
 
