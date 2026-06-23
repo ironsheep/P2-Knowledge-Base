@@ -519,6 +519,13 @@ You won't always use all six; a small program might be just `CON` and one `PUB`.
 every P2 file you read is some arrangement of these blocks, so spotting the keywords in
 the left margin tells you instantly how the file is organized.
 
+One distinction to fix in your mind now, because it trips up nearly everyone at first:
+an **object and a COG are not the same thing**. An object is a unit of *code* — a file
+you write and compile. A COG (Chapter 1) is a *processor* that runs code. There's no
+fixed relationship between the two: the methods of one object might run on a single COG,
+be spread across several, or share a COG with other work. *What* runs *where* is a
+decision you make — and it's exactly what Chapter 4 is about.
+
 ::: p1note
 **P1 note — same as P1.** If you wrote Spin on the Propeller 1, this is home: the same
 `CON`/`OBJ`/`VAR`/`PUB`/`PRI`/`DAT` block structure, the same "a file is an object,"

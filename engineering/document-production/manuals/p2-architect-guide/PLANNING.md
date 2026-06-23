@@ -249,3 +249,29 @@ by the link-out discipline (§2).
    (positioning, altitude gradient, the warm-but-not-glib / not-prescriptive rules).
 3. Then opus-master authoring Ch1→Ch3, each verified against its source-map and (Ch3) the decomposition YAML,
    with the anti-prescription gate (§12) applied to every Ch3 section.
+
+## 15. Future / candidate additions (PARKED — not up next, don't forget)
+
+A small pipeline of things we may want, surfaced 2026-06-23 while reconciling against the **Propeller
+Manual v1.0** (ISBN 1‑928982‑38‑7). That edition carried *two* from-zero chapters that v1.2 removed
+(moved to the Propeller Tool on‑line help): **Ch2 "Using the Propeller Tool"** and **Ch3 "Propeller
+Programming Tutorial."** Our guide now has the language (Ch2 "Reading P2 Code"), but not the toolchain
+how‑to. Candidates:
+
+- **CANDIDATE CHAPTER — "Using {toolchain}"** (the modern analog of v1.0's "Using the Propeller Tool").
+  A from‑zero reader is told to "use your development tool" but never *how* to build, load, and see output.
+  Cover the actual P2 toolchains and the build→load→run→observe loop: **SPIN Tools IDE**; **VS Code + the
+  spin2 extension + `pnut-ts` (compiler) + `pnut-term-ts` (terminal / DEBUG window)**; loading to a board
+  (the Edge module we now picture in Ch1), and seeing `DEBUG`/serial output. `{toolchain}` is deliberately
+  a slot — the guide should not marry one IDE. Likely a short chapter or an appendix; revisit chapter
+  count if added (we're at four). **Not up next.**
+- **INGEST the v1.0/v1.01 Propeller Programming Tutorial** into the P1 corpus — logged as gap **G‑P1‑007**
+  (recoverable: v1.01 PDF archived at nagasm.org / archive.org). Value: a P1‑corpus source AND a pedagogy
+  model. NB it teaches **Spin1/PASM1**, so it's a *model* for our P2 Ch2, never a content source.
+
+**Done already (the v1.01 cross‑check, option B, 2026-06-23):** read the v1.01 tutorial's arc (12 exercises
+building `Output.spin`/`Blinker2.spin`: Concept → languages → **Objects** → first object → Cogs → Block
+Designators → **Objects vs. Cogs** → many‑objects/many‑cogs → clock/timing → library objects → numbers).
+It **validated** our Ch2 ordering (objects‑first, the six block designators, methods, then cogs). The one
+gap it surfaced — Parallax foregrounds *"there is no direct relationship between objects and cogs"* — is
+now closed: Ch2 gained an explicit **object ≠ COG** clarification.
