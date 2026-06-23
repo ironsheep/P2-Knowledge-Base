@@ -329,7 +329,7 @@ smart pin already does it in hardware** — usually one does.
 
 There are many smart-pin modes — enough to cover the common serial, timing,
 counting, and analog jobs — and rather than list them here, we'll send you to the
-deep reference. The *I/O & Smart Pins User Guide* (the "Blue Book") walks through
+deep reference. The *I/O & Smart Pins User Guide* walks through
 every mode with examples; this guide just wants you to know the pins are smart and to
 reach for them first.
 
@@ -1812,7 +1812,7 @@ map.
   execution pipeline, COG start/stop, and the inter-COG coordination primitives (locks, atomic
   access, COG attention) that Chapter 4's seams are built from. For a gentler, tutorial-style on-ramp
   to PASM2, the *DeSilva PASM2 Tutorial* teaches the assembly language from the ground up.
-- **For I/O** — the *P2 I/O & Smart Pins User Guide* (the "Blue Book"): every smart-pin mode, with
+- **For I/O** — the *P2 I/O & Smart Pins User Guide*: every smart-pin mode, with
   examples — your first stop whenever a protocol might be absorbable at the pin (Chapter 4's
   smart-pin triage).
 - **For high-speed data** — the *P2 Streamer Programming Guide*: the streamer in full, including the
