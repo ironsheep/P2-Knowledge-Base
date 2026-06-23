@@ -24,33 +24,116 @@
 {\large June 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 0.1.0 — First Draft\par}
+
+\vspace{0.25cm}
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Guide Organization},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{A short orientation to the Propeller 2 — and how to think in its parallel grain.}
+
+\vspace{0.1cm}
+{\footnotesize
+\begin{minipage}[t]{0.46\textwidth}
+\textbf{The Three Chapters}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Ch 1 — Meet the Propeller 2
+\item Ch 2 — Putting It to Work
+\item Ch 3 — Thinking in P2 (Functional Decomposition)
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.46\textwidth}
+\textbf{Reference}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Appendix A — Computing in Space and Time
+\item Appendix B — Further Reading
+\item Glossary
+\item Where to Next
+\end{itemize}
+\end{minipage}
+}
+\end{tcolorbox}
+\vspace{0.1cm}
+
+{\small Iron Sheep Productions, LLC\par}
+{\small P2 Knowledge Base Project\par}
 \end{center}
 
 \clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
 ```
 
-<!--
-================================================================================
-FRONT MATTER — SKELETON (scaffold §1 / task #93)
+# Copyright and License
 
-This file is a STRUCTURAL SKELETON only. The house-standard front matter is
-authored in §2 / task #98 (AFTER the chapters, so the conventions block reflects
-what the body actually uses). Per the sprint plan, §98 fills:
+Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
-  - Title page (above — title/subtitle/version per charter D1; DONE in skeleton)
-  - Organization / author panel  (charter D1 — Iron Sheep Productions, LLC)
-  - Copyright page
-  - How to use this guide = the FOUR reading paths
-      (newcomer / P1-vet / working-dev / agent — charter §5 + creation-guide §3.5)
-  - Conventions block
-      (COG-not-CPU · code constants not arithmetic · the "P1 note:" sidebar ·
-       the five-color code system)
+This work is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
 
-Reference implementation to model against:
-  ../../p2-streamer-programming-guide/opus-master/front-matter.md
-House standard:
-  engineering/document-production/standards/manual-front-matter-and-code-coloring-standard.md
-================================================================================
--->
+You are free to:
 
-> **[Front matter — authored in §2 (task #98). Title page above is the scaffold seed; organization panel, copyright, the four reading paths, and the conventions block are added once the chapters fix the conventions they use.]**
+- **Share** — copy and redistribute the material in any medium or format
+
+Under the following terms:
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made (for example, formatting or excerpting).
+- **NonCommercial** — You may not use the material for commercial purposes.
+- **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
+
+**Commercial use:** For uses that may be commercial (including paid courses, kits, or redistribution with products), please contact Iron Sheep Productions, LLC and Parallax Inc. (info@ironsheep.biz) for separate permission.
+
+To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+### Trademarks
+
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+
+## Acknowledgments
+
+This guide stands on work done by others:
+
+**Parallax Inc.** for the Propeller 2 microcontroller and the reference documentation that defines its behavior.
+
+**Chip Gracey** for designing the P2 — the eight-COG architecture, the smart pins, the CORDIC solver, and the streamer this guide teaches you to think with.
+
+**The P2 community** whose drivers, projects, and hard-won design habits shaped how this guide frames "thinking in P2."
+
+## Sources
+
+This guide is a distillation, not a primary source. It draws on, and points you back to, the trusted documents of the P2 Knowledge Base:
+
+- **The P2 Silicon Documentation** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind Chapters 1–2.
+- **The P2 Knowledge Base decomposition reasoning layer** — the golden home for Chapter 3's forces, planes, and worked derivation; the chapter derives from it and does not drift.
+- **The P2 reference manuals** (Assembly Language, I/O & Smart Pins, Streamer, Debug) — the depth this orientation deliberately leaves to them (see *Where to Next*).
+
+## How to Use This Guide
+
+This is a short, narrative guide, not a reference manual — it is meant to be *read*, and it is built so different readers can enter at different doors. Four paths:
+
+- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 puts it to work in real (compiling) code, and Chapter 3 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
+- **Coming from the Propeller 1?** You already own the model. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — then jump to Chapter 3 for the decomposition method, using Chapter 2 as a Spin2/PASM2 refresher.
+- **Already writing P2 code?** Go straight to Chapter 3. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating COGs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–2 as reference.
+- **An AI agent or tool?** The authoritative, machine-readable form of this material is the P2 Knowledge Base itself — in particular the decomposition reasoning layer that is Chapter 3's golden home. Read this guide for the narrative; consume the YAML for the facts.
+
+## Conventions
+
+A few conventions run through the whole guide:
+
+- **"COG," never "CPU" or "core."** The P2 community treats a COG as *the computer*, and so do we.
+- **Code shows named constants, not raw numbers.** Examples use the compiler's symbolic constants (a pin's name, `_clkfreq`) the way you'd actually write them — and every code example compiles.
+- **Code blocks are colored by language** — Spin2 in **blue**, PASM2 (assembly) in **green** — the same IDE-aligned scheme as the rest of the P2 manual family, so code is recognizable at a glance.
+- **"P1 note" sidebars** (bronze boxes) are short asides for readers migrating from the Propeller 1, each labeled *same as P1*, *changed in P2*, or *new in P2*. A newcomer can skip every one of them without losing the thread.
+- **Inline markers are used sparingly** — 💡 **Tip** for a non-obvious orientation insight, ⚠️ **Watch out** for a genuine pitfall. This is a narrative guide, not a reference peppered with boxes.
+
+```{=latex}
+\clearpage
+```

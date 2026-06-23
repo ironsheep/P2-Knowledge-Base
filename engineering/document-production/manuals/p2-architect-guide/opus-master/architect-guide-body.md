@@ -471,7 +471,7 @@ PRI toggleFast(pin)
   end
 ```
 
-The `org … end` block is real PASM2 running inside a Spin2 method. You don't need to
+The `org ... end` block is real PASM2 running inside a Spin2 method. You don't need to
 read assembly to take the point: the P2 lets you stay in comfortable Spin2 for most of
 a program and drop to the metal exactly where it pays off.
 
@@ -1214,8 +1214,9 @@ applies. Forget them, and the same words mislead.
 
 ## The terminology, mapped
 
-The table pins each borrowed term to its FPGA-world meaning, its P2 mapping, and — the column that
-does the guarding — where the mapping goes loose.
+Each borrowed term is pinned below to its FPGA-world meaning, its P2 mapping, and — the column that
+does the guarding — where the mapping goes loose. First, the vocabulary for *laying computation out*
+as parallel hardware:
 
 | Term | In the FPGA / hardware world | On the P2 | Where the mapping is loose |
 |------|------------------------------|-----------|----------------------------|
@@ -1225,6 +1226,12 @@ does the guarding — where the mapping goes loose.
 | Pipeline | Data through chained hardware stages, throughput set by the clock | Data through a chain of COGs, throughput set by the pipeline rate, not instruction count | Each COG stage runs software with its own latency; stages are not register-locked like hardware |
 | Dataflow | Computation driven by data availability along channels | COGs exchanging data through hub channels and mailboxes; correctness by data order | There is no hardware firing rule; the dataflow discipline is something you implement |
 | Systolic array | A regular array of cells rhythmically passing data to neighbors | COGs as pipeline stages handing data along, sometimes via adjacent-COG LUT sharing | Only adjacent COG pairs share a LUT; it is a small, irregular array, not a large regular mesh |
+
+Then the vocabulary for the *resources, timing, and dataflow* of the machine — ending with the one
+term that does not cross over at all:
+
+| Term | In the FPGA / hardware world | On the P2 | Where the mapping is loose |
+|------|------------------------------|-----------|----------------------------|
 | Resource lattice | (Loosely) the fixed grid of resources a design maps onto | The finite, heterogeneous set you budget against: 8 COGs, 64 smart pins, 1 CORDIC, 16 locks, hub bandwidth, LUT pairs | "Lattice" here means a fixed resource budget, not FPGA routing |
 | Back-pressure | A downstream consumer signalling it cannot keep up, throttling upstream | A slow consumer forcing a fast producer to wait at a seam; managed with buffers and the hub FIFO | Same concept, implemented in software at hub seams |
 | Latency / throughput | Time through a stage; rate of completed items | The same, measured against the system clock and the egg-beater rotation | Transfers cleanly — this pair means the same on both sides |
