@@ -63,7 +63,7 @@ promoted. Reconcile conventions against this roster at promotion.
 | Publication | Workspace | State |
 |-------------|-----------|-------|
 | Spin2 Reference Manual | `workspace/spin2-reference-manual/` | parked; may go forward |
-| P2 Architect's Guide *(provisional name)* | `manuals/p2-architect-guide/` + `workspace/p2-architect-guide/` | **in development — workspace stood up** (2026-06-22, v0.1.0) — slim orientation + functional-decomposition guide; the layer above the reference manuals. First manual born directly on the unified `p2kb-platform-*` stack. Charter: `manuals/p2-architect-guide/PLANNING.md`; build sprint: `engineering/planning/P2-ARCHITECT-GUIDE-FIRSTDRAFT-SPRINT-PLAN.md`. |
+| P2 Architect's Guide | `manuals/p2-architect-guide/` + `workspace/p2-architect-guide/` | **in development — v0.1.0 first draft COMPLETE** (2026-06-23) — **4 chapters** (Meet the P2 · Reading P2 Code · Putting It to Work · Thinking in P2) + back matter + 5 figures; production PDF generated clean on the Forge (48pp). Slim orientation + functional-decomposition guide; the layer above the reference manuals. First manual born directly on the unified `p2kb-platform-*` stack. Charter: `manuals/p2-architect-guide/PLANNING.md` (D2 = four chapters); sprint: `engineering/planning/P2-ARCHITECT-GUIDE-FIRSTDRAFT-SPRINT-PLAN.md`. **Next:** review pass, then `release-manual` when ready. |
 
 ## Instruments (not publications)
 
@@ -157,6 +157,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
 2026-06-19 20:44  PUBLISH   p2-streamer-programming-guide    (v1.0.1, 71pp — grounding-audit fixes + §3.5 clock accuracy + fenced callouts)
 2026-06-19 20:41  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (do not bold the English verb "fit" — subject-pronoun + article-object contexts)
 2026-06-19 19:10  PLATFORM  templates/p2kb-platform-content.sty       (add HardwareBlock graphite callout)

@@ -1,6 +1,13 @@
 # P2 Architect's Guide — First-Draft Build · Sprint Plan
 
-**Status:** rich-planning phase · 2026-06-22 · head **manual** · element `p2-architect-guide`
+**Status:** ✅ **SPRINT COMPLETE — v0.1.0 first draft** (closed out 2026-06-23). All 7 sprint tasks
+(#93–#99) done. The draft EXCEEDED the original 3-chapter DoD: a 4th chapter — **Ch2 "Reading P2
+Code"** — was added mid-sprint for readers with no P1/Spin2/PASM2 background (PLANNING D2), plus the
+figure pass (5 figures) and an edition cross-check against Propeller Manual v1.0. Production PDF
+generated clean on the Forge (48pp). Parked/follow-ups live in PLANNING §15 + PUNCH-LIST + gap G-P1-007.
+Next: a review pass, then `release-manual` when ready.
+
+_(original planning header)_ rich-planning phase · 2026-06-22 · head **manual** · element `p2-architect-guide`
 **Goal (DoD):** a **first-draft PDF in hand** — the manual generated through PDF Forge, verified
 complete (page count / outline / sections / cover / code rendering / callouts), defects logged.
 **Charter (spec):** `engineering/document-production/manuals/p2-architect-guide/PLANNING.md` +
