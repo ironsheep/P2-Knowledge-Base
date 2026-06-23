@@ -271,7 +271,7 @@ Edge period = 1000 / 200MHz = 5 µs
 | 250 MHz | 250 | 2500 |
 | 350 MHz | 350 | 3500 |
 
-*P2 is rated to 180 MHz; 250 MHz is a common overclock and 350 MHz is the practical ceiling. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (P2 Datasheet / Silicon Doc v35)*
+*P2 is rated to 180 MHz; 250 MHz is a common overclock and 350 MHz is the practical ceiling. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (P2 Datasheet / Parallax Propeller 2 Documentation v35 - Rev B/C)*
 
 
 ## 7.6 Comparison: When to Use Each Mode

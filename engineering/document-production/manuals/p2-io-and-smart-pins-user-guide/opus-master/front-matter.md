@@ -132,7 +132,7 @@ This guide would not exist without the contributions of many individuals and org
 
 **The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the Smart Pin modes and identified critical details worth documenting.
 
-**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the Silicon Documentation with examples and further explanation — whose detailed Smart Pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
+**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the *Parallax Propeller 2 Documentation v35 - Rev B/C* with examples and further explanation — whose detailed Smart Pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
 
 This guide is a community-developed resource, created to make the P2's Smart Pin system more accessible to developers at all skill levels.
 

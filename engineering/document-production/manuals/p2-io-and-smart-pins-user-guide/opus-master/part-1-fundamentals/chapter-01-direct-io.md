@@ -1176,7 +1176,7 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: P2 Assembly Language Manual.)
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: *P2 Assembly Language Reference*.)
 
 
 ## 1.11 Common Patterns

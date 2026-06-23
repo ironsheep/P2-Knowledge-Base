@@ -114,7 +114,7 @@ The USB mode uses the smart pin registers for configuration and data:
 | Y | Line-state and packet output, set via WYPIN on the lower pin (see table below) |
 | Z | Receiver data + 16-bit status word, read via RDPIN/RQPIN on the lower pin (see bit layout below) |
 
-**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
+**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: *Parallax Propeller 2 Documentation v35 - Rev B/C*, USB host/device mode.)
 
 #### Baud Rate — Worked Example
 
