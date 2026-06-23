@@ -579,7 +579,7 @@ is, at bottom, the practice of keeping your design on the *spatial* side of that
 spreading function across the fabric instead of funnelling it back through a single core
 out of habit. Everything that follows is in service of that.
 
-> **[Figure — the space↔time spectrum: a temporal single-core MCU at one end, a spatial
+> **[Figure — the space-vs-time spectrum: a temporal single-core MCU at one end, a spatial
 > FPGA at the other, and the P2 placed between them as a "coarse-grained spatial fabric"
 > of 8 COGs + 64 smart pins. Logged for the visual pass (PUNCH-LIST).]**
 
@@ -1168,34 +1168,262 @@ yours to build.
 
 # Appendix A — Computing in Space and Time (Why We Borrow FPGA Language)
 
-<!-- TASK #97 (plan §6). Temporal→spatial spectrum; honest WHAT-TRANSFERS /
-WHAT-DOESN'T (coarse-grained, still software, no place-and-route); the
-FPGA-terminology table (term · FPGA meaning · P2 mapping · where it's loose).
-SOURCE: architecture/decomposition/spatial-computing.yaml.
-ANTI-CASE: no sentence implies the P2 IS an FPGA. -->
+Throughout this guide — and especially in Chapter 3 — we describe the P2 with words borrowed from
+the world of FPGAs and hardware design: *spatial*, *fabric*, *pipeline*, *dataflow*,
+*back-pressure*, *systolic*. The borrowing is deliberate and useful, but it carries a risk: taken
+too literally, those words would say the P2 *is* an FPGA, and it isn't. This appendix sets the
+record straight — what the FPGA vocabulary buys us, and exactly where it stops.
 
-> **[Appendix A — authored in task #97.]**
+## The temporal-to-spatial spectrum
+
+Computation can be placed on a spectrum by *how* a machine does many things at once. At one end is
+the purely **temporal** machine: a single processor core executing one instruction stream, doing
+more only by running faster or by time-slicing that one core. At the other end is the purely
+**spatial** machine: an FPGA, where function is laid out as physical parallel hardware — many
+circuits computing simultaneously, configured by a synthesis tool, with no instruction stream at
+all.
+
+The P2 sits between these poles, nearer the spatial end than a conventional microcontroller but
+well short of an FPGA. Its eight deterministic COGs and sixty-four programmable smart pins are
+real, parallel computing elements you assign function to — that is the spatial character. But each
+element runs *software*, an instruction stream of its own — that is the temporal character it never
+sheds. The phrase the guide uses, **coarse-grained spatial fabric**, names exactly this in-between
+position: spatial in how you allocate function, temporal in how each element actually computes.
+
+## What transfers, and what doesn't
+
+The FPGA *mindset* transfers; the FPGA *claims* do not. Three honest qualifications keep the
+borrowing safe:
+
+- **The P2 is coarse-grained, not fine-grained.** An FPGA's fabric is a sea of logic gates and
+  routing you configure at the bit level. The P2's "fabric" is a handful of full 32-bit processors
+  and some smart pins. You allocate whole COGs to jobs; you do not wire gates. This is a difference
+  of *kind*, not degree.
+- **The P2 is still software.** You write programs and launch COGs. There is no
+  hardware-description language, no logic synthesis, and crucially **no place-and-route** — the step
+  that maps an FPGA design onto physical silicon has no P2 equivalent. The determinism a COG gives
+  you comes from fixed instruction timing, not from synthesized circuitry.
+- **We borrow the discipline, not the identity.** "Think spatially" means *assign one sustained job
+  per element and let it run* — a design discipline. It does not mean the P2 reconfigures its
+  silicon. Every spatial behavior on the P2 is something you *arrange in software*, which is also
+  why a sloppy decomposition can throw it away (the whole argument of Chapter 3).
+
+Hold those three in mind and the vocabulary is a gift: it imports decades of hardware-design
+reasoning about pipelines, latency, and dataflow into a software setting where it genuinely
+applies. Forget them, and the same words mislead.
+
+## The terminology, mapped
+
+The table pins each borrowed term to its FPGA-world meaning, its P2 mapping, and — the column that
+does the guarding — where the mapping goes loose.
+
+| Term | In the FPGA / hardware world | On the P2 | Where the mapping is loose |
+|------|------------------------------|-----------|----------------------------|
+| Spatial computing | Function laid out as physical parallel circuitry | Function assigned across COGs and smart pins, each running one job continuously | The P2 runs instruction streams; "spatial" is the *allocation* pattern, not literal gates |
+| Fabric | The sea of configurable logic blocks and routing | The 8 COGs + 64 smart pins + the hub interconnect you allocate onto | The P2 fabric is a few coarse elements, not a fine-grained gate array |
+| Coarse-grained | Processing elements larger than a single gate | Each element is a whole 32-bit processor or a smart pin | This is the defining gap — the P2 is far coarser than even a coarse-grained array |
+| Pipeline | Data through chained hardware stages, throughput set by the clock | Data through a chain of COGs, throughput set by the pipeline rate, not instruction count | Each COG stage runs software with its own latency; stages are not register-locked like hardware |
+| Dataflow | Computation driven by data availability along channels | COGs exchanging data through hub channels and mailboxes; correctness by data order | There is no hardware firing rule; the dataflow discipline is something you implement |
+| Systolic array | A regular array of cells rhythmically passing data to neighbors | COGs as pipeline stages handing data along, sometimes via adjacent-COG LUT sharing | Only adjacent COG pairs share a LUT; it is a small, irregular array, not a large regular mesh |
+| Resource lattice | (Loosely) the fixed grid of resources a design maps onto | The finite, heterogeneous set you budget against: 8 COGs, 64 smart pins, 1 CORDIC, 16 locks, hub bandwidth, LUT pairs | "Lattice" here means a fixed resource budget, not FPGA routing |
+| Back-pressure | A downstream consumer signalling it cannot keep up, throttling upstream | A slow consumer forcing a fast producer to wait at a seam; managed with buffers and the hub FIFO | Same concept, implemented in software at hub seams |
+| Latency / throughput | Time through a stage; rate of completed items | The same, measured against the system clock and the egg-beater rotation | Transfers cleanly — this pair means the same on both sides |
+| Latency-insensitive | Design so correctness depends on data order, not arrival time | Hub channels designed so hub jitter is harmless by construction | A discipline you adopt, not a property the silicon enforces for you |
+| GALS (globally asynchronous, locally synchronous) | Synchronous islands joined by an asynchronous interconnect | Locally-synchronous, deterministic COGs joined by the asynchronous hub fabric | An exact characterization — this one transfers well |
+| Place-and-route | The synthesis step mapping a design onto physical gates and wires | *(no equivalent)* — you write software and launch COGs; nothing is synthesized | The sharpest "does not transfer": there is no P2 place-and-route at all |
+
+The last row is the one to remember. The P2 borrows the FPGA's *way of thinking about parallel
+work* while remaining, start to finish, a software machine. Appendix B points you to the literature
+behind both halves of that sentence.
 
 # Appendix B — Further Reading on Functional Decomposition
 
-<!-- TASK #97 (plan §6). Two axes — logical (Parnas; Constantine & Yourdon;
-Page-Jones) and physical/concurrent (Hoare CSP + transputer/Occam; optional Kung
-systolic) — each with a one-line "why it's relevant to P2". Sources cited in
-decomposition-method.yaml. EVERY author/title/year VERIFIED before publish; marked
-NEEDS-VERIFICATION until checked. -->
+Chapter 3's method rests on a body of published work older and deeper than the P2 itself. This is
+the short list — each entry with a line on why it matters here. It runs along the two axes the
+chapter used: the **logical** axis (how to cut software well, independent of any chip) and the
+**physical and concurrent** axis (how parallel, communicating elements compute — the literature
+closest to what the P2 actually is). A third short group covers boundaries, real-time scheduling,
+and the generative stance the whole approach takes.
 
-> **[Appendix B — authored in task #97.]**
+## The logical axis — cohesion, coupling, and what to hide
+
+- **Parnas, D.L. — "On the Criteria To Be Used in Decomposing Systems into Modules." *Communications
+  of the ACM*, vol. 15, no. 12, 1972, pp. 1053–1058.** The origin of *information hiding*:
+  decompose around the decisions likely to change, not around processing steps. This is the
+  principle under Force 4 (layer by axis of change).
+- **Constantine, L.L. & Yourdon, E. — *Structured Design: Fundamentals of a Discipline of Computer
+  Program and Systems Design.* Prentice-Hall, 1979.** Where *coupling* and *cohesion* come from —
+  the measures behind a good seam: low coupling across COGs, high cohesion within one.
+- **Page-Jones, M. — *Fundamentals of Object-Oriented Design in UML.* Addison-Wesley, 1999.** Its
+  treatment of *connascence* is the sharpest tool in Chapter 3's "judging the cut" section — and the
+  source of the static-versus-dynamic distinction that, on the P2, separates a safe seam from a
+  race.
+
+## The physical and concurrent axis — communicating processes and dataflow
+
+- **Hoare, C.A.R. — "Communicating Sequential Processes." *Communications of the ACM*, vol. 21, no.
+  8, 1978, pp. 666–677; expanded as *Communicating Sequential Processes*, Prentice-Hall, 1985.** The
+  formal model in which COGs are processes and mailboxes are channels. If one work explains why the
+  P2's no-shared-OS, message-passing shape is sound, it is this one.
+- **INMOS Ltd. — *occam Programming Manual.* Prentice-Hall, 1984.** The Transputer's language —
+  independent processors, a message-passing fabric, no shared operating system. The P2 is very
+  nearly a Transputer reborn, and inherits its decades of correctness reasoning.
+- **Kahn, G. — "The Semantics of a Simple Language for Parallel Programming." *Proceedings of the
+  IFIP Congress 74*, Stockholm, 1974, pp. 471–475.** Kahn process networks: processes that
+  communicate only by blocking reads on FIFO channels are *determinate regardless of timing* — the
+  rule that makes inter-COG dataflow survive hub jitter.
+- **Kung, H.T. & Leiserson, C.E. — "Systolic Arrays (for VLSI)." In Mead, C. & Conway, L.,
+  *Introduction to VLSI Systems*, Addison-Wesley, 1980 (§8.3).** Rhythmic data passing through a
+  regular array of processing elements — the mental model for using COGs as pipeline stages.
+- **Lee, E.A. & Messerschmitt, D.G. — "Synchronous Data Flow." *Proceedings of the IEEE*, vol. 75,
+  no. 9, 1987, pp. 1235–1245.** Static data rates yield computable buffer sizes — the math behind
+  Force 3's rate adapters and the sizing of a buffer.
+- **Carloni, L.P., McMillan, K.L. & Sangiovanni-Vincentelli, A.L. — "Theory of Latency-Insensitive
+  Design." *IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems*, vol. 20,
+  no. 9, 2001, pp. 1059–1076.** Correctness by data *order*, not arrival *time* — the formal bridge
+  to the spatial domain and the discipline that makes hub jitter harmless.
+- **Chapiro, D.M. — *Globally-Asynchronous Locally-Synchronous Systems.* PhD thesis, Stanford
+  University, 1984.** The exact characterization of the P2 — locally synchronous COGs, an
+  asynchronous hub fabric — and the source of the clock-domain-crossing discipline Force 3 borrows.
+
+## Boundaries, real-time, and the generative stance
+
+- **Evans, E. — *Domain-Driven Design: Tackling Complexity in the Heart of Software.* Addison-Wesley,
+  2003.** *Bounded contexts* as subsystem boundaries with their own internal language — the
+  reasoning behind the external-interface translator (cross-cutting force C2).
+- **Liu, C.L. & Layland, J.W. — "Scheduling Algorithms for Multiprogramming in a Hard-Real-Time
+  Environment." *Journal of the ACM*, vol. 20, no. 1, 1973, pp. 46–61.** Rate-monotonic scheduling —
+  assigning urgency by cadence and reasoning about deadlines, the theory under the event plane's
+  latency tiers.
+- **Alexander, C. — *A Pattern Language: Towns, Buildings, Construction.* Oxford University Press,
+  1977.** The source of the idea that patterns should *compose into a grammar* rather than sit in a
+  catalogue — exactly the stance Chapter 3 takes toward decomposition: a method that generates, not
+  a set of templates to copy.
 
 # Glossary
 
-<!-- TASK #97 (plan §6). From decomposition-glossary.yaml; terms match the YAML. -->
+Terms as this guide uses them, weighted toward the decomposition vocabulary of Chapter 3. For the
+silicon parts themselves — COG, hub, smart pin, CORDIC, streamer — see Chapter 1.
 
-> **[Glossary — authored in task #97.]**
+**Altitude layering (Force 4).** The vertical decomposition force: within one ownership domain,
+stack objects so each tier does exactly one unit conversion and changes for exactly one reason —
+bits, then registers, then physical units, then behavior.
+
+**Back-pressure.** The resistance a seam imposes when a consumer cannot keep up with a producer;
+measured as the connascence crossing the seam times the cost of the channel that carries it. A good
+boundary minimizes it.
+
+**Coarse-grained spatial fabric.** The P2 seen as a modest number of real parallel computing
+elements (8 COGs, 64 smart pins) you assign function to — spatial in allocation, but built from
+whole processors rather than logic gates.
+
+**Cohesion.** How well the parts inside one object belong together. High cohesion within an object
+is the goal; it is the complement of coupling.
+
+**Connascence.** The relationship by which changing one element forces a change in another to stay
+correct. *Static* forms are visible in source (name, type, field order); *dynamic* forms are true
+only at run time (execution order, timing, value). On the P2, dynamic connascence crossing a COG
+boundary shows up as jitter and races.
+
+**Cooperative tasking (tasks-in-a-COG).** Several routines sharing one COG and one bus, each running
+at its own cadence and yielding at safe points — the resolution when one bus must serve several
+cadences (Force 1 against Force 3).
+
+**Coupling.** How much crosses between two objects — on the P2, a countable integer: longs per unit
+time, fields under a shared invariant, locks held across the cut. Minimize it.
+
+**Cross-cutting forces (C1–C5).** The concerns that place objects spanning or guarding the
+structural tree rather than sitting in it: safety override, external-interface translation, per-unit
+configuration, testability seam, and lifecycle/init order.
+
+**Data / control / event planes.** The three superimposed relationships in any inter-COG seam —
+bulk movement (data), commands and state (control), signalling and urgency (event) — each wanting
+its own mechanism.
+
+**Data-flow contract (Force 2).** The promise a seam makes: blocking call, latest-wins mailbox, ring
+buffer, request/response, or published telemetry. The contract sets the dependency direction and
+helps place the boundary.
+
+**Flat device list.** The failure mode Force 1 prevents: every chip a sibling driver under `main()`,
+the shape chosen by analogy rather than derived from the wiring. It compiles, then fails as flaky
+hardware the moment two COGs touch one resource.
+
+**Funnel.** A "smell": all data routed through one COG, rebuilding a sequential bottleneck whose
+loop rate caps the whole system.
+
+**GALS (globally asynchronous, locally synchronous).** The exact shape of the P2 — deterministic,
+locally-synchronous COGs joined by an asynchronous hub fabric — and the reason cadence crossings
+need deliberate handling.
+
+**Latency-insensitive.** A channel designed so correctness depends on the order data arrives, not
+the time — making hub jitter harmless by construction.
+
+**Min-cut.** The objective for a good boundary: draw it where the cohesion gained inside each piece
+exceeds the back-pressure across the cut.
+
+**Pipeline.** A chain of COGs through which data flows stage to stage; throughput is set by the
+pipeline's rate, not by any one stage's instruction count.
+
+**Publish-last.** The discipline of writing a multi-field update's payload first and bumping its
+signalling counter last, so a reader can never catch a torn value — a lockless hand-off made safe by
+single-long atomicity.
+
+**Rate adaptation (Force 3).** The force that inserts objects wherever two cadences meet:
+samplers/buffers at rate-domain crossings, and slew/easing engines where a discrete intent must
+become a continuous stream.
+
+**Resource budget.** The allocation table — COGs, smart pins, locks, CORDIC, hub bandwidth, LUT
+pairs, COG RAM — kept as a design artifact. "Running out of COGs" on it means the design is too
+coupled.
+
+**Resource lattice.** The finite, heterogeneous set of P2 resources a design allocates onto; the
+physical axis of decomposition.
+
+**Resource ownership (Force 1).** The correctness force: each serialized, stateful resource gets
+exactly one owning COG, with the object boundary tracing the wire.
+
+**Singleton vs. instance transport.** The transport's state model, decided by sharing topology — a
+shared singleton when several devices share one bus, a self-contained instance when a device is
+alone on its bus.
+
+**Slew / easing engine.** The object that turns a discrete command (a "step") into a smooth,
+rate-limited trajectory at a device's native frame rate.
+
+**Spatial computing.** Doing many things at once by laying function out across hardware elements
+rather than time-slicing one core; on the P2, the discipline of assigning one sustained job per COG
+or smart pin.
+
+**Systolic array.** A regular arrangement of processing elements that rhythmically pass data to
+their neighbors — the FPGA-world model behind using COGs as pipeline stages.
+
+**Transport (object).** The single owning object for a bus or serialized resource; the lowest tier
+of a device stack, the one that speaks bits on the wire.
 
 # Where to Next
 
-<!-- TASK #97 (plan §6). Map into the reference manuals (Spin2 v55, the PASM2
-Manual, Smart Pins & Streamer guides, Debug manual). Every link resolves to a real
-manual. -->
+This guide is the orientation layer; the reference manuals are where you go for depth. Here is the
+map.
 
-> **[Where-to-Next — authored in task #97.]**
+- **To write the high-level language** — the *Spin2 Language Reference* (current revision v55): the
+  full object model, every built-in method and operator, the language's syntax in complete detail.
+- **To write assembly** — the *P2 Assembly Language Manual*: the PASM2 instruction set, the
+  execution pipeline, COG start/stop, and the inter-COG coordination primitives (locks, atomic
+  access, COG attention) that Chapter 3's seams are built from. For a gentler, tutorial-style on-ramp
+  to PASM2, the *DeSilva PASM2 Tutorial* teaches the assembly language from the ground up.
+- **For I/O** — the *P2 I/O & Smart Pins User Guide* (the "Blue Book"): every smart-pin mode, with
+  examples — your first stop whenever a protocol might be absorbable at the pin (Chapter 3's
+  smart-pin triage).
+- **For high-speed data** — the *P2 Streamer Programming Guide*: the streamer in full, including the
+  video (VGA, HDMI, composite), audio, and capture modes.
+- **For debugging and bring-up** — the *P2 Debug Window Manual* and the *P2 Single-Step Debugger
+  Manual*: the on-chip DEBUG output windows and the single-step debugger, the tools behind Chapter
+  3's per-layer bring-up tests (cross-cutting force C4).
+- **For the silicon itself** — the *Silicon Doc*: the foundational reference — CORDIC operations,
+  the event system, boot sources, and the hardware-timing details the other manuals build on.
+- **For the decomposition theory in full** — the *decomposition reasoning layer* of the P2 Knowledge
+  Base, the golden home for Chapter 3's forces, planes, evaluation vocabulary, and worked
+  derivations, in more depth than a single chapter can carry.
+
+That is the library. Start where your current job points you, and let the picture from Chapter 1,
+the working shape from Chapter 2, and the method from Chapter 3 guide how you put the pieces
+together.

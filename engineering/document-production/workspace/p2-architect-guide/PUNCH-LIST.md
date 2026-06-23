@@ -21,7 +21,7 @@ section collects them for the visual pass once the draft is reviewed.
   - **Ch1, §Memory** — the three memory tiers: private COG RAM + LUT beside each
     processor, shared hub in the middle.
   - **Ch2 (Putting It to Work)** — no figure placeholders (code-driven chapter).
-  - **Ch3 (Thinking in P2), §"Computing in space, not just in time"** — the space↔time
+  - **Ch3 (Thinking in P2), §"Computing in space, not just in time"** — the space-vs-time
     spectrum: a temporal single-core MCU at one end, a spatial FPGA at the other, the P2
     between them as a coarse-grained spatial fabric of 8 COGs + 64 smart pins.
   - **Ch3, §"Watching the method run: a walking robot"** — the derived object-and-COG map
