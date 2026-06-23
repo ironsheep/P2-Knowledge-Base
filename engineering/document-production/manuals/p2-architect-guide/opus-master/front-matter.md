@@ -104,7 +104,7 @@ This guide stands on work done by others:
 
 **Parallax Inc.** for the Propeller 2 microcontroller and the reference documentation that defines its behavior.
 
-**Chip Gracey** for designing the P2 — the eight-COG architecture, the smart pins, the CORDIC solver, and the streamer this guide teaches you to think with.
+**Chip Gracey** for designing the P2 — the eight-cog architecture, the smart pins, the CORDIC solver, and the streamer this guide teaches you to think with.
 
 **The P2 community** whose drivers, projects, and hard-won design habits shaped how this guide frames "thinking in P2."
 
@@ -122,14 +122,14 @@ This is a short, narrative guide, not a reference manual — it is meant to be *
 
 - **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 teaches you to *read* P2 code (so the examples ahead aren't a mystery), Chapter 3 puts it to work in real (compiling) code, and Chapter 4 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
 - **Coming from the Propeller 1?** You already own the model — and Spin2 will look familiar. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — skim Chapter 2 for what's new in the language, then jump to Chapter 4 for the decomposition method, using Chapter 3 as a hands-on refresher.
-- **Already writing P2 code?** Go straight to Chapter 4. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating COGs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–3 as reference.
+- **Already writing P2 code?** Go straight to Chapter 4. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating cogs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–3 as reference.
 - **An AI agent or tool?** Read this guide for the narrative and the mental model — the way an experienced P2 developer thinks. The P2 reference manuals carry the exhaustive, authoritative facts the design decisions rest on.
 
 ## Conventions
 
 A few conventions run through the whole guide:
 
-- **"COG," never "CPU" or "core."** The P2 community treats a COG as *the computer*, and so do we.
+- **"cog," never "CPU" or "core."** The P2 community treats a cog as *the computer*, and so do we.
 - **Code shows named constants, not raw numbers.** Examples use the compiler's symbolic constants (a pin's name, `_clkfreq`) the way you'd actually write them — and every code example compiles.
 - **Code blocks are colored by language** — Spin2 in **blue**, PASM2 (assembly) in **green** — the same IDE-aligned scheme as the rest of the P2 manual family, so code is recognizable at a glance.
 - **"P1 note" sidebars** (bronze boxes) are short asides for readers migrating from the Propeller 1, each labeled *same as P1*, *changed in P2*, or *new in P2*. A newcomer can skip every one of them without losing the thread.

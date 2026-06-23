@@ -63,31 +63,31 @@ the thread that runs through this whole guide. Let's meet the pieces.
 ```
 
 ::: {.figurecaption #fig:whole-chip}
-Eight independent COGs arranged around the shared hub, taking turns on a fixed rotation — the "egg beater." (The 64 smart pins live on the outside of the chip; we meet them a few pages on.)
+Eight independent cogs arranged around the shared hub, taking turns on a fixed rotation — the "egg beater." (The 64 smart pins live on the outside of the chip; we meet them a few pages on.)
 :::
 
-## Eight COGs — eight little computers
+## Eight Cogs — eight little computers
 
-The heart of the P2 is its eight processors. Each one is called a **COG**, and the
-P2 community treats a COG as *the computer* — when a P2 programmer says "put that on
-its own COG," they mean "give that job its own processor." All eight are identical
+The heart of the P2 is its eight processors. Each one is called a **cog**, and the
+P2 community treats a cog as *the computer* — when a P2 programmer says "put that on
+its own cog," they mean "give that job its own processor." All eight are identical
 32-bit processors, numbered 0 through 7, and they all run at the same time, at full
 speed, without getting in each other's way.
 
 This is the part that surprises people coming from a normal microcontroller. There
 is no scheduler handing out time slices, no context-switching, no operating system
-quietly deciding who runs next. Each COG just keeps running its own program,
-independently, from start to finish. One COG can sit in a tight control loop forever
+quietly deciding who runs next. Each cog just keeps running its own program,
+independently, from start to finish. One cog can sit in a tight control loop forever
 while another talks to a sensor and a third drives a display — and none of them slows
-the others down. Because nothing interrupts a COG from the outside, its timing is
+the others down. Because nothing interrupts a cog from the outside, its timing is
 *deterministic*: the same code takes exactly the same number of clock cycles every
 time it runs. That predictability is why the P2 is so good at jobs where timing has
 to be exact, like generating video or driving a motor.
 
-Each COG has a little private memory of its own to hold its program and data, a fast
+Each cog has a little private memory of its own to hold its program and data, a fast
 hardware path for calls and returns, and even its own dedicated streaming engine for
-moving data at high speed (we'll get to that one shortly). You start a COG running
-with a single instruction and stop it with another; a stopped COG simply powers down
+moving data at high speed (we'll get to that one shortly). You start a cog running
+with a single instruction and stop it with another; a stopped cog simply powers down
 until you need it again.
 
 💡 **Tip:** The mental shift that makes the P2 click is to stop thinking "one
@@ -97,29 +97,29 @@ that.
 
 ::: p1note
 **P1 note — same as P1:** If you're coming from the Propeller 1, this part will feel
-like home: the P2 keeps the same eight-COG, shared-hub family architecture that
+like home: the P2 keeps the same eight-cog, shared-hub family architecture that
 defined the original Propeller. Eight symmetric processors, no interrupts required,
-deterministic timing — all still true. What changed is *how much* each COG can do,
+deterministic timing — all still true. What changed is *how much* each cog can do,
 which the rest of this chapter is about.
 :::
 
-For the assembly-level execution details — the instruction pipeline, how a COG
-fetches and runs code, starting and stopping COGs from PASM2 — see Part I of the
+For the assembly-level execution details — the instruction pipeline, how a cog
+fetches and runs code, starting and stopping cogs from PASM2 — see Part I of the
 *P2 Assembly Language Reference*.
 
 ## Memory — three tiers, from tiny-and-fast to big-and-shared
 
-A COG works with memory at three levels, and it's worth knowing them apart because
+A cog works with memory at three levels, and it's worth knowing them apart because
 the trade-off between them shapes a lot of P2 code.
 
-Closest and fastest is each COG's **private register RAM** — 512 longs (2 KB) that
-belong to that COG alone. It's small on purpose: it sits right next to the
+Closest and fastest is each cog's **private register RAM** — 512 longs (2 KB) that
+belong to that cog alone. It's small on purpose: it sits right next to the
 processor, so access is immediate. Right beside it is a second private block, the
 **lookup RAM** (the "LUT") — another 512 longs you can use for data, waveforms, or
 extra code. These two are private, quick, and limited.
 
-Then there's the **hub** — 512 KB of RAM shared by all eight COGs. This is the big
-common pool: where your larger programs live, where COGs leave data for each other,
+Then there's the **hub** — 512 KB of RAM shared by all eight cogs. This is the big
+common pool: where your larger programs live, where cogs leave data for each other,
 where buffers and tables sit. It's far roomier than the private memories, with the
 trade-off that it's shared, so reaching it involves a brief, predictable wait for
 your turn (more on that next).
@@ -129,29 +129,29 @@ your turn (more on that next).
 ```
 
 ::: {.figurecaption #fig:memory-tiers}
-The memory tiers. Each COG's private RAM and LUT sit right next to the processor (fast, 2-cycle access); the 512 KB hub is shared by all eight (a few cycles' wait via the egg beater).
+The memory tiers. Each cog's private RAM and LUT sit right next to the processor (fast, 2-cycle access); the 512 KB hub is shared by all eight (a few cycles' wait via the egg beater).
 :::
 
 ::: p1note
-**P1 note — changed in P2:** The shape is familiar — private COG RAM plus a shared
+**P1 note — changed in P2:** The shape is familiar — private cog RAM plus a shared
 hub — but the sizes are transformed. The P1 had 32 KB of hub; the P2 has **512 KB**.
-The 512-long COG register space is the same size you know, but the P2 *adds* the
-512-long LUT alongside it, which the P1 didn't have at all — and adjacent COGs can
+The 512-long cog register space is the same size you know, but the P2 *adds* the
+512-long LUT alongside it, which the P1 didn't have at all — and adjacent cogs can
 even share their LUTs for fast hand-offs.
 :::
 
-### How COGs share the hub — the "egg beater"
+### How Cogs share the hub — the "egg beater"
 
-Because all eight COGs share one hub, something has to decide who gets access when.
+Because all eight cogs share one hub, something has to decide who gets access when.
 On the P2 that "something" is a round-robin hardware mechanism nicknamed the **egg
-beater**, and the nice thing about it is that it's completely predictable. Each COG
+beater**, and the nice thing about it is that it's completely predictable. Each cog
 is guaranteed its own access slot on a fixed rotation, so a hub read or write never
 fails and never stalls unpredictably — at worst you wait a few clocks for your slot
 to come around. And once you're streaming a block of data, it flows at a rate of one
 long per clock. There's no bus contention to reason about and no priority fights;
 the hardware simply takes turns, forever, on schedule.
 
-This is the one place where a COG's timing depends on the others, and even here it's
+This is the one place where a cog's timing depends on the others, and even here it's
 bounded and knowable rather than random — which is exactly what you want when you're
 counting cycles.
 
@@ -167,20 +167,20 @@ Memory addressing, alignment, and the details of hub timing are covered in the
 
 ## Pins and smart pins — I/O that thinks for itself
 
-Around the outside of the chip are **64 I/O pins**, numbered P0 through P63. Any COG
+Around the outside of the chip are **64 I/O pins**, numbered P0 through P63. Any cog
 can read or drive any pin, so pins aren't owned by a particular processor — they're a
-shared resource, and you decide by convention which COG looks after which pin.
+shared resource, and you decide by convention which cog looks after which pin.
 
 What makes the P2's pins special is that each one is a **smart pin**: a small, self-
 contained piece of hardware built into the pin itself. You configure a smart pin for
 a job — measure a pulse, count edges, output a PWM signal, run a serial protocol, do
 analog-to-digital or digital-to-analog conversion — and then it just *does that job
-on its own*, without your COG babysitting it. Your COG sets it up once, and
+on its own*, without your cog babysitting it. Your cog sets it up once, and
 afterward only steps in to hand it new data or read back a result.
 
 This is a genuinely different way to do I/O. On most microcontrollers, holding a
 serial line or measuring a signal precisely means a core has to stay busy doing it.
-On the P2 you push that work out to the edge of the chip and free the COG entirely.
+On the P2 you push that work out to the edge of the chip and free the cog entirely.
 The guiding habit is: **before you write code to bit-bang a protocol, check whether a
 smart pin already does it in hardware** — usually one does.
 
@@ -193,21 +193,21 @@ reach for them first.
 ::: p1note
 **P1 note — new in P2:** This one has no P1 analog. The P1 had 32 plain
 general-purpose pins; the P2 has 64, and every one of them is a smart pin. If you
-spent P1 projects dedicating a COG to bit-bang a UART or a PWM, that work largely
+spent P1 projects dedicating a cog to bit-bang a UART or a PWM, that work largely
 moves into the pin hardware on the P2.
 :::
 
 ## The CORDIC solver — shared math hardware
 
 The P2 has a piece of dedicated math hardware called the **CORDIC solver**, shared by
-all eight COGs. You hand it a number — or a pair of numbers, or an angle — and it
+all eight cogs. You hand it a number — or a pair of numbers, or an angle — and it
 hands back results that would otherwise cost you a lot of code: full 32-bit
 multiply and divide, square roots, sines and cosines, vector rotations,
 logarithms and exponentials.
 
 It's *pipelined*, which means it works like an assembly line: you can feed it a
 steady stream of problems and it keeps producing answers, so several operations from
-a COG can be in flight at once. For anything involving real math — signal
+a cog can be in flight at once. For anything involving real math — signal
 processing, coordinate geometry, generating waveforms — the CORDIC turns work that
 would be slow in software into something the hardware just does for you.
 
@@ -224,10 +224,10 @@ code are now hardware operations.
 
 ## The streamer — moving data at full speed
 
-Each COG also has its own **streamer**: a dedicated engine for moving data between the
+Each cog also has its own **streamer**: a dedicated engine for moving data between the
 hub and the pins (or the analog converters) at the chip's full clock rate, without
-the COG having to shuttle each piece by hand. You point it at a block of hub memory
-and a destination, start it, and it streams — while your COG goes on to do something
+the cog having to shuttle each piece by hand. You point it at a block of hub memory
+and a destination, start it, and it streams — while your cog goes on to do something
 else.
 
 The streamer is how the P2 generates video — VGA, HDMI, and composite signals all
@@ -240,29 +240,29 @@ As with the smart pins, the point right now is just to know it's there. The
 video, audio, and capture modes.
 
 ::: p1note
-**P1 note — new in P2:** The P1 generated video with a simpler per-COG video
+**P1 note — new in P2:** The P1 generated video with a simpler per-cog video
 generator (the old `WAITVID` approach). The P2's streamer is a far more capable,
 general-purpose data mover — video is just one of the things it does.
 :::
 
 ## Events and interrupts — noticing when something happens
 
-Sometimes a COG needs to react to something: a pin changed, a timer reached a count,
-the CORDIC finished, the streamer is done. The P2 gives each COG a small **event**
-system for exactly this. A COG can watch for a hardware condition and then choose how
+Sometimes a cog needs to react to something: a pin changed, a timer reached a count,
+the CORDIC finished, the streamer is done. The P2 gives each cog a small **event**
+system for exactly this. A cog can watch for a hardware condition and then choose how
 to respond — check on it when convenient, pause until it happens, or let it trigger an
 **interrupt** that drops into a handler.
 
 What's worth knowing as a newcomer is that on the P2 events are a *convenience, not a
-necessity*. Because each COG runs its own program independently, you often don't need
-interrupts at all — you can simply dedicate a COG to a job and let it watch in a tight
+necessity*. Because each cog runs its own program independently, you often don't need
+interrupts at all — you can simply dedicate a cog to a job and let it watch in a tight
 loop, with perfectly predictable timing. Events and interrupts are there for when
 they genuinely simplify a design, not because the chip forces them on you.
 
 ::: p1note
-**P1 note — new in P2:** The P1 had no interrupts at all — it used the dedicate-a-COG,
+**P1 note — new in P2:** The P1 had no interrupts at all — it used the dedicate-a-cog,
 poll-in-a-loop model exclusively, and that model still works beautifully on the P2.
-The P2 *adds* a real event-and-interrupt system per COG as an option for when you want
+The P2 *adds* a real event-and-interrupt system per cog as an option for when you want
 it.
 :::
 
@@ -271,7 +271,7 @@ The full set of event sources and how interrupts dispatch are documented in the
 
 ## The clock — one setting, the whole chip
 
-All eight COGs and the hardware around them run from a single system clock, and you
+All eight cogs and the hardware around them run from a single system clock, and you
 choose its speed. The P2 has two built-in internal oscillators for when you don't
 need anything special — a fast one (around 20 MHz) that it starts up on, and a very
 slow, low-power one — and for real work you attach a crystal and let the P2's on-chip
@@ -280,7 +280,7 @@ You set this once, near the top of your program, and the whole chip runs from it
 
 The practical thing to remember: clock setup is a one-time decision you make up front,
 not something you fiddle with as you go. Once the chip is running at your chosen speed,
-every COG's deterministic timing is measured against that one clock.
+every cog's deterministic timing is measured against that one clock.
 
 ::: p1note
 **P1 note — changed in P2:** Same idea as the P1 — one system clock for the whole
@@ -293,7 +293,7 @@ P2 runs many times faster, well into the hundreds of megahertz.
 When the P2 powers up, a small program baked into its **ROM** takes over for the first
 few milliseconds. It looks at a few designated pins to decide where your program
 should come from — a serial connection from a host, an SPI flash chip, or a microSD
-card — loads it, and hands control to COG 0. That ROM also carries a couple of handy
+card — loads it, and hands control to Cog 0. That ROM also carries a couple of handy
 extras: a built-in monitor for poking at a running chip, and even a small Forth
 interpreter.
 
@@ -304,14 +304,14 @@ documentation cover the boot sources and their fallback behavior in detail.
 
 ## Where this leaves us
 
-That's the whole cast: eight independent COGs, three tiers of memory tied together by
+That's the whole cast: eight independent cogs, three tiers of memory tied together by
 a take-turns hub, 64 smart pins doing I/O on their own, a shared CORDIC for math, a
-per-COG streamer for high-speed data, an event system for reacting to the world, one
+per-cog streamer for high-speed data, an event system for reacting to the world, one
 clock to set, and a ROM that boots you. You don't need to remember every detail — you
 just need the picture. With it in hand, the next chapter makes sure you can *read* a P2
 program — the handful of structural rules that turn Spin2 and PASM2 from a wall of
 symbols into something legible — and the chapter after that puts these parts to work:
-we'll launch a COG, drive a pin, and see how a real P2 program is actually shaped.
+we'll launch a cog, drive a pin, and see how a real P2 program is actually shaped.
 
 # Reading P2 Code
 
@@ -370,7 +370,7 @@ That's the whole grammar of a P2 file at the top level. The six blocks:
   gets its own copy of its `VAR`s.
 - **`PUB` — public methods.** The object's *interface* — the methods other code may
   call. **Every program needs at least one**, and the **first `PUB` is where execution
-  begins** (the boot ROM from Chapter 1 starts it on COG 0).
+  begins** (the boot ROM from Chapter 1 starts it on Cog 0).
 - **`PRI` — private methods.** Internal helpers, callable only from inside this object.
 - **`DAT` — data.** Tables and fixed data — and, as we'll see, PASM2 code.
 
@@ -379,10 +379,10 @@ every P2 file you read is some arrangement of these blocks, so spotting the keyw
 the left margin tells you instantly how the file is organized.
 
 One distinction to fix in your mind now, because it trips up nearly everyone at first:
-an **object and a COG are not the same thing**. An object is a unit of *code* — a file
-you write and compile. A COG (Chapter 1) is a *processor* that runs code. There's no
-fixed relationship between the two: the methods of one object might run on a single COG,
-be spread across several, or share a COG with other work. *What* runs *where* is a
+an **object and a cog are not the same thing**. An object is a unit of *code* — a file
+you write and compile. A cog (Chapter 1) is a *processor* that runs code. There's no
+fixed relationship between the two: the methods of one object might run on a single cog,
+be spread across several, or share a cog with other work. *What* runs *where* is a
 decision you make — and it's exactly what Chapter 4 is about.
 
 ::: p1note
@@ -487,7 +487,7 @@ together. (The full object model — instances, arrays of objects, parameters �
 ## The other language: PASM2
 
 Everything so far has been Spin2. The P2's *other* language is **PASM2** — its native
-assembly, the actual instructions the COG runs. You reach for it only where timing has
+assembly, the actual instructions the cog runs. You reach for it only where timing has
 to be exact, but you'll *read* it often, because most drivers have a PASM2 core. So it's
 worth being able to recognize its shape too.
 
@@ -509,7 +509,7 @@ instruction updates a status flag), and any instruction can carry a **condition*
 like `if_z` (run only when a flag is set). The deep meaning of all of these is the
 *P2 Assembly Language Reference*'s job; here, you just need to parse the line.
 
-PASM2 shows up in two places. A whole COG program lives in a **`DAT` block**; and a short
+PASM2 shows up in two places. A whole cog program lives in a **`DAT` block**; and a short
 burst can be dropped right inside a Spin2 method between `org` and `end`:
 
 ```spin2
@@ -537,12 +537,12 @@ start; that indentation — not punctuation — is the structure; how values, na
 `...` continuation look on the page; how objects compose through a name; and what a line
 of PASM2 is made of. That's the literacy every example in this guide assumes. With it in
 hand, the next chapter stops reading and starts *doing* — your first real program, a
-second COG, and the choices a P2 program actually makes.
+second cog, and the choices a P2 program actually makes.
 
 # Putting It to Work
 
 Now that you can picture the chip *and* read its code, let's use it. This chapter is about *doing* — by
-the end you'll have driven a pin, launched a second COG, shared data between COGs, and
+the end you'll have driven a pin, launched a second cog, shared data between cogs, and
 made the one decision every P2 program makes (Spin2 or PASM2?). The point isn't to
 teach you the whole language — the reference manuals do that, and we'll point you to
 them — it's to make the chip feel like something you can actually program. We'll keep
@@ -577,7 +577,7 @@ program:
   time-related, like `waitms`, is measured against it. Giving the pin a name (`LED`)
   instead of scattering the number `56` through your code is the habit we'll keep.
 - Execution starts at the **first `PUB` method** — here, `main`. That's the entry
-  point; the chip runs it on COG 0 when your program loads.
+  point; the chip runs it on Cog 0 when your program loads.
 - `pinhigh`, `pinlow`, and `waitms` are built-in Spin2 methods. Driving a pin really
   is that direct — name the pin, set it high or low.
 
@@ -592,11 +592,11 @@ compiler works out the PLL settings for you. And pin numbers now run 0–63, not
 there are twice as many to reach for.
 :::
 
-## Adding a second COG
+## Adding a second Cog
 
-A blinking LED uses one COG and ignores the other seven. The moment that matters is
-when you give a job to a COG of its own. You do that with `cogspin` — it takes a
-method to run, hands it to an available COG, and that COG starts running it *alongside*
+A blinking LED uses one cog and ignores the other seven. The moment that matters is
+when you give a job to a cog of its own. You do that with `cogspin` — it takes a
+method to run, hands it to an available cog, and that cog starts running it *alongside*
 the one you're already on.
 
 ```spin2
@@ -606,11 +606,11 @@ CON
   LED_B    = 57
 
 VAR
-  long stack[64]                ' work space for the second COG
+  long stack[64]                ' work space for the second cog
 
 PUB main() | cog
-  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)  ' run on another COG
-  blink(LED_B, 1000)            ' this COG keeps the slower blink for itself
+  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)  ' run on another cog
+  blink(LED_B, 1000)            ' this cog keeps the slower blink for itself
 
 PRI blink(pin, ms)
   repeat
@@ -618,26 +618,26 @@ PRI blink(pin, ms)
     waitms(ms)
 ```
 
-When this runs, **two COGs are blinking at once** — one COG flips `LED_A` four times a
+When this runs, **two cogs are blinking at once** — one cog flips `LED_A` four times a
 second, the other flips `LED_B` once a second, and neither one waits on the other.
 That's the P2's whole personality in five lines: when you want something to happen in
 parallel, you don't reach for a timer interrupt or a scheduler — you hand the job to a
-COG and let it run.
+cog and let it run.
 
 Three details that generalize:
 
-- `NEWCOG` means "any free COG" — you usually don't care which one. `cogspin` returns
-  the COG number it actually used (or −1 if all eight were busy).
-- The new COG needs a little **stack** space in hub to work with; that's the
+- `NEWCOG` means "any free cog" — you usually don't care which one. `cogspin` returns
+  the cog number it actually used (or −1 if all eight were busy).
+- The new cog needs a little **stack** space in hub to work with; that's the
   `long stack[64]` we hand it with `@stack` (the `@` means "the address of").
-- `blink` is written once and used by both COGs. A `PUB` method is the public face of
+- `blink` is written once and used by both cogs. A `PUB` method is the public face of
   your code; a `PRI` method is private to the object. That `PUB`/`PRI` split *is* the
   P2's run-time model in miniature, which we'll come back to.
 
-## Sharing data between COGs
+## Sharing data between Cogs
 
-Independent COGs still need to talk. The simplest way is the hub: because hub memory is
-shared, a variable that lives there is visible to every COG. One COG writes it, another
+Independent cogs still need to talk. The simplest way is the hub: because hub memory is
+shared, a variable that lives there is visible to every cog. One cog writes it, another
 reads it — a mailbox.
 
 ```spin2
@@ -647,7 +647,7 @@ CON
 
 VAR
   long stack[64]
-  long count                    ' a hub variable — every COG can see it
+  long count                    ' a hub variable — every cog can see it
 
 PUB main()
   cogspin(NEWCOG, ticker(@count), @stack)   ' worker updates count in hub
@@ -663,11 +663,11 @@ PRI ticker(p)
     waitms(100)
 ```
 
-Here one COG does nothing but increment `count` ten times a second, and the other COG
-watches `count` and lights the LED on odd values. Neither COG calls the other; they
-just agree on a spot in hub memory. Single hub reads and writes are *atomic* — a COG
+Here one cog does nothing but increment `count` ten times a second, and the other cog
+watches `count` and lights the LED on odd values. Neither cog calls the other; they
+just agree on a spot in hub memory. Single hub reads and writes are *atomic* — a cog
 always sees a whole value, never half-written — so this simple mailbox is safe. When a
-hand-off is more than one value, or several COGs might write at once, the P2 gives you
+hand-off is more than one value, or several cogs might write at once, the P2 gives you
 **locks** (the 16 hardware locks from Chapter 1) to guard the exchange. The
 *P2 Assembly Language Reference* covers the coordination patterns in depth.
 
@@ -689,12 +689,12 @@ three options, not a binary.
   program can be large because the bytecodes live in the roomy hub. Reach for Spin2 for
   application logic, coordination, setup, and anything not on a tight timing budget.
 - **PASM2** is native assembly: it runs at the deterministic two-clocks-per-instruction
-  speed from Chapter 1, with cycle-exact timing. Reach for a dedicated PASM2 COG when a
+  speed from Chapter 1, with cycle-exact timing. Reach for a dedicated PASM2 cog when a
   job must be fast and precise — a video driver, a bit-banged protocol, a tight control
   loop.
 - **Inline PASM2** sits between them: a short burst of assembly dropped right inside a
   Spin2 method, for when you need native speed for a moment without dedicating a whole
-  COG to it.
+  cog to it.
 
 That middle option looks like this — the same toggle, but done with one native
 instruction:
@@ -720,7 +720,7 @@ read assembly to take the point: the P2 lets you stay in comfortable Spin2 for m
 a program and drop to the metal exactly where it pays off.
 
 The honest guidance is the one most experienced P2 developers converge on: **write the
-application in Spin2, and give the time-critical jobs their own PASM2 COGs.** A typical
+application in Spin2, and give the time-critical jobs their own PASM2 cogs.** A typical
 P2 program uses both, and that's not a compromise — it's the intended shape. For the
 full languages, the *Spin2 Reference Manual* and the *P2 Assembly Language Reference*
 are the deep references; this guide only wants you to know *which* tool fits *which*
@@ -750,30 +750,30 @@ objects, parameter passing).
 ## How it boots and runs
 
 You've now seen the run model without us naming it. When the P2 powers up, the boot ROM
-from Chapter 1 loads your program and starts your **first `PUB` method on COG 0**. From
-there, *your* code is in charge: COG 0 runs your top object's `main`, and it launches
-whatever other COGs the design needs with `cogspin` (for Spin2) or its assembly cousin
-`coginit` (for a dedicated PASM2 COG). There's no operating system underneath deciding
-what runs — the COGs you start are the COGs that run, exactly as you arranged them.
+from Chapter 1 loads your program and starts your **first `PUB` method on Cog 0**. From
+there, *your* code is in charge: Cog 0 runs your top object's `main`, and it launches
+whatever other cogs the design needs with `cogspin` (for Spin2) or its assembly cousin
+`coginit` (for a dedicated PASM2 cog). There's no operating system underneath deciding
+what runs — the cogs you start are the cogs that run, exactly as you arranged them.
 
-That is the entire run-time story: boot loads you, COG 0 starts your `main`, and your
-program spreads itself across as many of the eight COGs as it needs.
+That is the entire run-time story: boot loads you, Cog 0 starts your `main`, and your
+program spreads itself across as many of the eight cogs as it needs.
 
 ## Where this leaves us
 
-You can now read and shape a real P2 program: set the clock, drive a pin, launch a COG,
+You can now read and shape a real P2 program: set the clock, drive a pin, launch a cog,
 share data through hub, choose Spin2 or PASM2 for a given job, and compose objects. That
 is genuinely enough to build things. What it doesn't yet tell you is *how to decide what
-goes on which COG* in the first place — how to look at a whole problem and carve it into
+goes on which cog* in the first place — how to look at a whole problem and carve it into
 the right set of cooperating pieces. That decision is where the P2 rewards a little real
 thought, and it's what the final chapter is about.
 
 # Thinking in P2 (Functional Decomposition)
 
-You can already write a P2 program. You can launch a COG, drive a pin, share data
+You can already write a P2 program. You can launch a cog, drive a pin, share data
 through hub, and choose Spin2 or PASM2 for a given job. That's the hard part of getting
 started, and it's behind you. What's left is the part that turns a working program into a
-*good* design: looking at a whole problem and deciding what goes on which COG in the first
+*good* design: looking at a whole problem and deciding what goes on which cog in the first
 place — how to carve the machine into the right set of cooperating pieces. You're ready
 for that now, and this chapter is about how it's done.
 
@@ -797,7 +797,7 @@ moves, never to copy the answer — your machine will give a different, equally 
 ## Computing in space, not just in time
 
 Start with the idea that makes the rest of this chapter worth the effort. It's the one we
-quietly planted back in Chapter 1, when we said each COG just keeps running its own job,
+quietly planted back in Chapter 1, when we said each cog just keeps running its own job,
 independently. Here's where we cash it in.
 
 There are two very different ways a chip can compute. A conventional microcontroller
@@ -809,13 +809,13 @@ instruction stream at all. These aren't just two speeds; they're two fundamental
 different shapes of computation.
 
 The Propeller 2 lives between them, and closer to the spatial side than you might expect.
-Its eight independent, deterministic COGs and its sixty-four programmable smart pins form
+Its eight independent, deterministic cogs and its sixty-four programmable smart pins form
 what's best described as a **coarse-grained spatial fabric**: not the fine-grained sea of
 logic gates an FPGA gives you, but a modest number of real, parallel computing elements you
 can assign function to, each running its one job continuously. Decomposed well, a P2 design
 behaves like spatial hardware — parallel pipelines whose throughput is set by the *rate*
 data flows, not by how many instructions any one stage runs. Decomposed badly, the very
-same silicon collapses back into a slow sequential machine: one COG doing everything in
+same silicon collapses back into a slow sequential machine: one cog doing everything in
 turn while the other seven idle.
 
 That sentence is the reason this chapter exists. The whole discipline of P2 decomposition
@@ -833,11 +833,11 @@ Computing in time vs. in space. A single-core microcontroller runs one instructi
 
 ::: p1note
 **P1 note — the idea is old, the room is new.** If you've built P1 designs, you've been
-thinking spatially all along: dedicating a COG to a job and letting it run is exactly this
+thinking spatially all along: dedicating a cog to a job and letting it run is exactly this
 mindset, and the original Propeller pioneered it. What the P2 changes is how *much* fabric
 you have to lay function onto. Smart pins can now absorb an entire bit-banged protocol that
-used to cost you a whole COG; the CORDIC and the streamer take on work that used to live in
-COG code; the hub is sixteen times larger. The instinct transfers intact — you have
+used to cost you a whole cog; the CORDIC and the streamer take on work that used to live in
+cog code; the hub is sixteen times larger. The instinct transfers intact — you have
 far more space to spread into, and more reason to.
 :::
 
@@ -879,10 +879,10 @@ That axis is real and we'll use it — it rests on decades of solid work, which 
 points you to.
 
 The P2 adds a *second* axis, a physical one: **allocation onto a finite, heterogeneous
-resource lattice** — eight COGs, sixty-four smart pins, one shared CORDIC, sixteen locks, a
-bounded amount of hub bandwidth, adjacent-COG LUT sharing, the streamer. And here is the
+resource lattice** — eight cogs, sixty-four smart pins, one shared CORDIC, sixteen locks, a
+bounded amount of hub bandwidth, adjacent-cog LUT sharing, the streamer. And here is the
 insight that makes the P2 special to design for: *that physical axis is not only a
-constraint — it's a decomposition tool in its own right.* A COG is the strongest
+constraint — it's a decomposition tool in its own right.* A cog is the strongest
 encapsulation boundary the silicon offers: private memory, deterministic timing, no
 interference from its neighbors. A smart pin can *delete an entire software module* by
 absorbing its function into hardware. So "where does this boundary go?" and "what hardware
@@ -890,8 +890,8 @@ runs it?" are not two questions asked in sequence — they're one decision, made
 
 The two axes are co-designed, and they keep each other honest. A boundary chosen on the
 logical axis that ignores the lattice gives you an elegant module that can't actually run —
-no COG free to host it, or the hub saturated feeding it. A boundary chosen on the physical
-axis that ignores cohesion gives you a COG that owns three unrelated jobs and is impossible
+no cog free to host it, or the hub saturated feeding it. A boundary chosen on the physical
+axis that ignores cohesion gives you a cog that owns three unrelated jobs and is impossible
 to test. You reconcile both. When they genuinely conflict, the resource budget — an
 artifact we'll build later in the chapter — is what decides.
 
@@ -901,7 +901,7 @@ It's worth naming the mistake all of this exists to prevent, because it's the na
 to do and it looks fine right up until it doesn't. Call it the **flat device list**: every
 chip gets a driver, every driver is a sibling reachable from `main()`, and the shape was
 chosen by analogy to some example rather than derived from how the hardware is actually
-wired. It compiles. It even runs during single-COG bring-up. Then it fails — as
+wired. It compiles. It even runs during single-cog bring-up. Then it fails — as
 intermittent, timing-dependent, nearly-undebuggable flakiness — the first moment the
 derivation it skipped would have forbidden the cut. We'll see exactly how that happens when
 we meet Force 1. The cure is to derive the shape instead of guessing it, and that's what the
@@ -927,12 +927,12 @@ The first force asks a **correctness** question, not a style one. Of the four, i
 one that can make your program flatly *wrong* rather than merely inelegant, so it goes first.
 
 The question is: for each serialized, stateful hardware resource — an I²C bus, a one-wire
-LED chain, a smart pin in the middle of a transaction — *which single COG owns it?* And the
+LED chain, a smart pin in the middle of a transaction — *which single cog owns it?* And the
 answer the force insists on is: exactly one. One owner per resource, and the object boundary
 traces the **wire**, not your feature list.
 
 The reason is physical, and it comes straight out of the silicon. P2 pin outputs are
-OR'd together — there is no hardware referee arbitrating who gets the pin. If two COGs both
+OR'd together — there is no hardware referee arbitrating who gets the pin. If two cogs both
 drive the same SDA and SCL lines, they don't take polite turns; their outputs combine, and
 a bus transaction — which is a multi-step sequence (start, address, acknowledge, data, stop)
 that assumes a single agent in charge — is corrupted. This isn't "a race you might lose." A
@@ -940,19 +940,19 @@ bus is a stateful protocol, and a stateful protocol with two uncoordinated drive
 *guaranteed* to break. The chip gives you sixteen locks and atomic single-long hub access to
 coordinate shared *data* — but a lock can't un-corrupt a half-issued I²C frame. The clean
 coordination is therefore *structural*: make the resource un-shareable by giving it a single
-owning object in a single COG. The hardware's lack of a referee is precisely *why* ownership
+owning object in a single cog. The hardware's lack of a referee is precisely *why* ownership
 has to be explicit and singular in your software.
 
-So Force 1 makes the primary cut, and it's usually a COG boundary. Group the devices by
-which wire they sit on and what timing that wire has to meet; give each group one owning COG
+So Force 1 makes the primary cut, and it's usually a cog boundary. Group the devices by
+which wire they sit on and what timing that wire has to meet; give each group one owning cog
 and one transport object. And notice what decides the *shape* of that transport — it's the
-sharing topology, not the protocol. Several devices sharing one bus inside one COG want a
+sharing topology, not the protocol. Several devices sharing one bus inside one cog want a
 single shared transport with one configuration that the device drivers call into. One device
 alone on its own bus wants a self-contained transport with nothing to coordinate. You can end
 up with the *same protocol implemented twice with two different state models* — and that's
 correct, because how many things share the wire, not which protocol it is, decided the shape.
 
-⚠️ **Watch out:** the flat device list is this force ignored. The moment two COGs touch one
+⚠️ **Watch out:** the flat device list is this force ignored. The moment two cogs touch one
 bus, you get silent corruption that presents as flaky hardware — intermittent, timing-
 dependent, and miserable to debug from the symptom, because the symptom is three layers away
 from the cause. A design that picks its shape from *how many devices exist* rather than *who
@@ -961,20 +961,20 @@ shares a wire* has this failure built in from the start.
 ::: p1note
 **P1 note — same as P1, and just as strict.** Single ownership of a serialized resource was
 already the rule on the P1, for the same reason: its pins, too, gave you no hardware
-arbiter. If you internalized "one COG owns the bus" on the P1, that instinct is exactly
+arbiter. If you internalized "one cog owns the bus" on the P1, that instinct is exactly
 right here — the P2 hasn't relaxed it. What the P2 adds (next force but one) is a way to
-move some of those resources off COGs entirely.
+move some of those resources off cogs entirely.
 :::
 
 The fuller treatment of resource ownership — including the cases where a "shared bus"
 default breaks down — is worked through in the robot example later in this chapter; the P2
-coordination mechanisms themselves (locks, atomic access, COG attention) are in the
+coordination mechanisms themselves (locks, atomic access, cog attention) are in the
 *P2 Assembly Language Reference*.
 
 ### Force 2 — What does each seam promise?
 
-Once Force 1 has scattered work across several COGs, those COGs have to exchange data. The
-second force asks: for each place where two COGs meet — each *seam* — *what does the
+Once Force 1 has scattered work across several cogs, those cogs have to exchange data. The
+second force asks: for each place where two cogs meet — each *seam* — *what does the
 exchange promise?* Does the sender wait for the receiver? Does the receiver always see the
 freshest value, or every value? Who depends on whom?
 
@@ -990,8 +990,8 @@ boundary.
 
 Why is this a *design* act on the P2 rather than a detail? Because the P2 has no operating
 system underneath you — no message queue, no IPC layer, nothing imposing a coordination
-mechanism. Inter-COG coordination is whatever *you* build out of hub RAM, atomic single-long
-access, the sixteen locks, and COG-attention signalling. That absence is a feature: it means
+mechanism. Inter-cog coordination is whatever *you* build out of hub RAM, atomic single-long
+access, the sixteen locks, and cog-attention signalling. That absence is a feature: it means
 you choose the exact coupling your timing budget allows, with nothing forced on you. An
 engineer who thinks "there's no free message queue here — I am *choosing* the coupling"
 designs the seam deliberately. One who reaches for a blocking call out of habit quietly
@@ -1001,7 +1001,7 @@ one.
 #### One seam, three planes
 
 Here's the part that sharpens Force 2 from a single choice into a real tool. Every seam
-between two COGs is really *three* relationships superimposed, and each wants its own
+between two cogs is really *three* relationships superimposed, and each wants its own
 mechanism:
 
 - The **data plane** — bulk, rate-defined movement. Its concerns are throughput, buffering,
@@ -1011,7 +1011,7 @@ mechanism:
   ordering, who is allowed to write what. Its tools are hub mailboxes, locks, single-writer
   ownership of each shared long. Get it wrong and you *corrupt state* — an intermittent race.
 - The **event plane** — signalling and urgency. Its concerns are latency and priority; its
-  tools are COG-attention signalling, the event system, or deliberate polling. Get it wrong
+  tools are cog-attention signalling, the event system, or deliberate polling. Get it wrong
   and you *miss a deadline* — and that one stays silent until the field.
 
 Notice they're ranked by the cost of getting them wrong, and you spend your design care in
@@ -1029,11 +1029,11 @@ a reader that watches that counter can never catch a torn, half-written value �
 publish-last ordering makes a lockless hand-off safe. It costs nothing and it removes a
 whole category of glitch.
 
-The failure modes Force 2 prevents are two: blocking calls between COGs that quietly
+The failure modes Force 2 prevents are two: blocking calls between cogs that quietly
 *serialize* a system that was meant to run in parallel, and multi-long structures written by
-one COG and read mid-update by another, producing torn reads that look like glitches. Both
+one cog and read mid-update by another, producing torn reads that look like glitches. Both
 fixes are structural — choose the contract deliberately, and publish atomically. The deep
-treatment of inter-COG contracts and the coordination primitives is in the *P2 Assembly
+treatment of inter-cog contracts and the coordination primitives is in the *P2 Assembly
 Language Reference*.
 
 ### Force 3 — Where do two cadences meet?
@@ -1050,7 +1050,7 @@ that crossing to reconcile the rates?
 
 Because whenever data crosses a cadence boundary, *something must adapt the rate*, and that
 adapter is a distinct responsibility — so it's a distinct object. The P2 positively
-encourages you to put different time domains on different COGs and smart pins; that's what
+encourages you to put different time domains on different cogs and smart pins; that's what
 eight deterministic cores and sixty-four autonomous pins are *for*. But the instant you do,
 you've created the software equivalent of a clock-domain crossing — the same problem
 hardware engineers handle deliberately at the boundary between two clocks — and, like its
@@ -1074,9 +1074,9 @@ Two kinds of adapter fall out, and they're worth telling apart:
 And there's a third situation that belongs to this force, where it collides with Force 1 in a
 way worth seeing. Suppose several devices share *one* bus but want *different* cadences —
 servos at fifty hertz, an IMU at a hundred, a battery at one. Force 3 says "different cadences
-want separating," but Force 1 flatly forbids splitting the bus across COGs. They can't both
-win by cutting. The resolution isn't a second COG on the bus — it's **cooperative tasks
-within the single owning COG**: several small routines sharing that one COG and that one bus,
+want separating," but Force 1 flatly forbids splitting the bus across cogs. They can't both
+win by cutting. The resolution isn't a second cog on the bus — it's **cooperative tasks
+within the single owning cog**: several small routines sharing that one cog and that one bus,
 each running at its own cadence and yielding at transaction boundaries so the bus stays
 coherent. That's a first-class decomposition tool for "shared resource, multiple rates," and
 it's the kind of answer you only find by holding two forces in tension instead of applying one
@@ -1091,9 +1091,9 @@ straight to the actuator with no ramp between intent and motion.
 ::: p1note
 **P1 note — new room to cross into.** Rate adaptation was always a concern, but the P2 hands
 you far more places to put a time domain — sixty-four smart pins that each hold their own
-cadence autonomously, where the P1 had thirty-two plain pins and often a spare COG pressed
+cadence autonomously, where the P1 had thirty-two plain pins and often a spare cog pressed
 into bit-banging. That's a gift, but it's also *more cadence boundaries to cross*: every time
-you push a job out to a smart pin, you've created a crossing back to the COG that needs an
+you push a job out to a smart pin, you've created a crossing back to the cog that needs an
 adapter. The fabric got wider; mind the seams between its cells.
 :::
 
@@ -1103,7 +1103,7 @@ Spin2 pattern library; the smart-pin modes that let a pin hold its own time doma
 
 ### Force 4 — How high does each piece sit?
 
-The first three forces are horizontal: they decide which COG owns what, and how the pieces
+The first three forces are horizontal: they decide which cog owns what, and how the pieces
 talk across the gaps. The fourth is the *vertical* consequence that falls out once they've
 drawn the structure — which is why we call it emergent rather than primary. It answers the
 question every programmer eventually asks: *how much code goes in one object?*
@@ -1123,10 +1123,10 @@ when they sit in the same call chain. A line-count rule would never produce a cl
 four-tier device stack; the unit-conversion rule produces it automatically, because each unit
 boundary is exactly a place where the code above and below it change for different reasons.
 
-On the P2 this force negotiates against a hard limit, and you should know it's there: COG-
+On the P2 this force negotiates against a hard limit, and you should know it's there: cog-
 local memory is *tiny* — 512 longs of register RAM, of which 496 are usable for PASM code and
 data. Unlimited layering isn't free; each tier boundary costs a call and a little state. So the
-default is one tier per unit conversion, with an explicit escape: when a COG is genuinely tight
+default is one tier per unit conversion, with an explicit escape: when a cog is genuinely tight
 on memory, fold two adjacent tiers together — but say so, and never fold two tiers that change
 for *different* reasons just to save space, because that quietly rebuilds the monolith you were
 avoiding.
@@ -1140,11 +1140,11 @@ concerns, and the clean place you *would* have tested at is gone.
 
 Here's the thing the four-forces list can hide: the real skill isn't applying each force, it's
 *reconciling* them, because they pull against each other and against plain simplicity. You've
-already seen one tension — Force 1 says "one COG per bus," Force 3 says "different cadences want
+already seen one tension — Force 1 says "one cog per bus," Force 3 says "different cadences want
 separating," and when three cadences share one bus, the resolution is cooperative tasks inside
 the one owner. There are more like it. Force 2's instinct to decouple every seam reconciles
 against simplicity — not every hand-off needs a ring buffer; a latest-wins slot is usually
-enough. Force 4's instinct to layer everything reconciles against that tiny COG memory — deep
+enough. Force 4's instinct to layer everything reconciles against that tiny cog memory — deep
 stacks cost RAM and per-call overhead you may not have.
 
 None of these tensions has a formula. What you do is hold the forces together, let them argue,
@@ -1178,13 +1178,13 @@ concerns is what keeps them from getting smeared across everything. There are fi
   bring hardware up one layer at a time. The seam you can test at is the seam you should cut at —
   and the need to observe a layer often reveals a boundary you'd otherwise have fused.
 - **A lifecycle sequencer.** Objects have a *temporal* dependency graph: power and rails before
-  buses, a chip awake before you actuate it, COGs launched in a safe order. Someone has to own
+  buses, a chip awake before you actuate it, cogs launched in a safe order. Someone has to own
   that sequence.
 
 There's a reason several of these have to be *explicit* on the P2 specifically rather than
-emergent. COGs are independent — which is wonderful, because a hung COG won't drag the others
-down, but also means a hung COG won't stop driving its pins on its own, and means init ordering
-*isn't* implied by your call structure the way it is in a single-threaded program, because COGs
+emergent. Cogs are independent — which is wonderful, because a hung cog won't drag the others
+down, but also means a hung cog won't stop driving its pins on its own, and means init ordering
+*isn't* implied by your call structure the way it is in a single-threaded program, because cogs
 launch concurrently. The chip gives you deterministic, isolated cores; these cross-cutting
 objects are how you reimpose whole-machine guarantees — safety, ordering, calibration — back on
 top of that isolation. You can't assume they'll fall out of the design. You place them on
@@ -1202,23 +1202,23 @@ Everything so far has been about drawing boundaries. This section is about a num
 you when you've drawn them wrong.
 
 The P2's resource lattice is *finite*, and you should treat that as a design invariant rather than
-a thing you discover at the end. There are eight COGs, sixty-four smart pins, sixteen locks, one
-shared CORDIC, a bounded hub bandwidth, LUT sharing only between adjacent COG pairs, and 512 longs
-of memory per COG. None of those is negotiable. So a useful habit is to keep a **resource budget** —
+a thing you discover at the end. There are eight cogs, sixty-four smart pins, sixteen locks, one
+shared CORDIC, a bounded hub bandwidth, LUT sharing only between adjacent cog pairs, and 512 longs
+of memory per cog. None of those is negotiable. So a useful habit is to keep a **resource budget** —
 an allocation table you fill in *as you derive*, not a report you write afterward — listing which
-COG owns which timing domain, which pins run which mode, where each lock goes, how much hub traffic
+cog owns which timing domain, which pins run which mode, where each lock goes, how much hub traffic
 you're generating, and how much of each finite thing remains. A blank row in that table is a
 resource you forgot to account for.
 
-The budget earns its keep through one sharp signal. **"Running out of COGs" is the P2's concrete way
+The budget earns its keep through one sharp signal. **"Running out of cogs" is the P2's concrete way
 of telling you the design is too *coupled*.** When the lattice can't hold your proposed allocation,
 the boundaries are wrong — not the chip. So when you run short, the move is to *re-cut, not cram*:
-look for a funnel COG that's quietly doing several jobs, a protocol a smart pin could absorb to free
-a COG, or a seam whose coupling is so high it shouldn't have been cut where it was. There's an honest
-escape — when every COG genuinely owns one irreducible real-time job and nothing can be absorbed, the
+look for a funnel cog that's quietly doing several jobs, a protocol a smart pin could absorb to free
+a cog, or a seam whose coupling is so high it shouldn't have been cut where it was. There's an honest
+escape — when every cog genuinely owns one irreducible real-time job and nothing can be absorbed, the
 design is at capacity, and the answer is to reduce *scope* or move a concern off-chip, not to
-time-slice a real-time job onto a shared COG. But reach for that escape last, after you've tried to
-re-cut. Most "out of COGs" is too-coupled in disguise.
+time-slice a real-time job onto a shared cog. But reach for that escape last, after you've tried to
+re-cut. Most "out of cogs" is too-coupled in disguise.
 
 ## Judging the cut
 
@@ -1228,7 +1228,7 @@ slowing down for, because it turns "that seems cleaner" into something you can a
 
 Three tools, in increasing sharpness:
 
-**Coupling, as a countable integer.** On the P2, the coupling between two COGs is physical and
+**Coupling, as a countable integer.** On the P2, the coupling between two cogs is physical and
 *countable* — it stops being a vibe. Across any boundary you draw, count the longs that cross it per
 unit time, the fields that share an invariant (data that must change together to stay correct), and
 the locks held across the cut. Minimize that number. Two candidate cuts can be compared directly by
@@ -1240,10 +1240,10 @@ sides agreeing on a name, a type, a field order), and *dynamic* forms, true only
 sides agreeing on execution order, on timing, on a value relationship). The governing rule is:
 maximize connascence *inside* a boundary, minimize what *crosses* it, and *convert* the strong dynamic
 forms into weak static ones right at the seam. On the P2 the dangerous case is specific and worth
-memorizing: **dynamic connascence that crosses a COG boundary** — a timing assumption, an
+memorizing: **dynamic connascence that crosses a cog boundary** — a timing assumption, an
 execution-order assumption, a shared runtime value — because the hardware will faithfully express it as
 *jitter and races*. The publish-last discipline from Force 2 is exactly this conversion in action: it
-takes a dynamic execution-order dependency between two COGs and makes it safe by construction.
+takes a dynamic execution-order dependency between two cogs and makes it safe by construction.
 
 **Back-pressure, as a min-cut.** Put the two together and you can state precisely what a good boundary
 *is*. Every boundary carries a back-pressure equal to the connascence forced to cross it times the cost
@@ -1261,7 +1261,7 @@ the P2; Appendix B names the sources so you can go deeper when a problem outgrow
 
 We now have the forces, the cross-cutting objects, the budget, and the way to judge a result. The last
 thing you need is the *order* to apply them in — because the forces are orthogonal, but the work isn't:
-some choices depend on earlier ones (you can't pick a seam's contract before you know where the COG
+some choices depend on earlier ones (you can't pick a seam's contract before you know where the cog
 boundaries are). Here is the routine to run the first time you meet a hardware mix, before you write a
 single object. Think of it as a method you *adapt*, not a script you obey — the spine steps always run,
 and the others state when you can skip them.
@@ -1273,23 +1273,23 @@ You start from the **hardware edge and the timing budget**, and let the structur
    serialized resources. *(Always runs — everything downstream depends on it.)*
 2. **Triage against the smart pins.** For each peripheral, can a smart pin absorb its protocol entirely
    in hardware — PWM, serial, quadrature, an ADC or DAC, edge counting? The ones a pin can own drop out
-   of the COG-cadence problem completely. This is the physical axis used as a tool: a smart pin *deletes*
+   of the cog-cadence problem completely. This is the physical axis used as a tool: a smart pin *deletes*
    a software module. *(Skip for a protocol no pin mode covers — a multi-byte I²C transaction stays a
    software-owned resource.)*
 3. **Assign owners.** Group the survivors by bus and timing budget, and give each group exactly one
-   owning COG and one transport object. Let the sharing topology pick the transport's shape — shared
-   singleton for a shared bus, self-contained instance for a sole device. *(Always runs — this COG map
+   owning cog and one transport object. Let the sharing topology pick the transport's shape — shared
+   singleton for a shared bus, self-contained instance for a sole device. *(Always runs — this cog map
    gates every later choice.)*
 4. **List the cadences.** At what rate does each device want service, and where do two rates meet? This
    surfaces the rate-domain boundaries and the discrete-to-continuous paths. *(Skip only if everything
    runs at one shared cadence with no easing path.)*
 5. **Resolve same-bus rate conflicts.** Is any single bus serving multiple cadences? If so, the answer is
-   cooperative tasks *within* the owning COG, not a second COG on the bus. *(Skip when no bus serves
+   cooperative tasks *within* the owning cog, not a second cog on the bus. *(Skip when no bus serves
    multiple cadences.)*
-6. **Draw the seams.** For each inter-COG edge, what coupling does the deadline allow — and design its
-   data, control, and event planes separately. *(Skip for a single-COG design with no seams.)*
+6. **Draw the seams.** For each inter-cog edge, what coupling does the deadline allow — and design its
+   data, control, and event planes separately. *(Skip for a single-cog design with no seams.)*
 7. **Layer each branch.** Within each ownership domain, how many distinct unit conversions are there?
-   One tier each. *(Collapse tiers where COG memory is tight — and say so.)*
+   One tier each. *(Collapse tiers where cog memory is tight — and say so.)*
 8. **Place the cross-cutting objects.** Where do the safety override, the translator, the configuration,
    the test seams, and the sequencer go? *(Name the ones a given machine doesn't need, so the omission is
    a decision.)*
@@ -1297,10 +1297,10 @@ You start from the **hardware edge and the timing budget**, and let the structur
    reconciliation against the hardest deadline is what makes the output sound.)*
 
 One more property worth knowing: the procedure is **fractal**. After the top-level pass, you can run the
-very same routine *inside* a COG that owns a bus — it has its own internal cadences, its own seams between
+very same routine *inside* a cog that owns a bus — it has its own internal cadences, its own seams between
 cooperative tasks, its own layers. Apply it at whatever altitude you're working.
 
-When you're done, you hold two things: the object-and-COG set, and the resource budget that proves it
+When you're done, you hold two things: the object-and-cog set, and the resource budget that proves it
 fits. Judge it with the three tools from the last section before you commit a line of code.
 
 ## Watching the method run: a walking robot
@@ -1326,20 +1326,20 @@ Nothing about the object set is given. We *derive* it, by walking the procedure.
 **Steps 1–2 — enumerate, then triage.** The serialized resources are the two I²C buses and the three
 discrete pins. Now triage against the smart pins: the LED chain (precise serial framing), the buzzer
 (tone), and the ultrasonic ping-and-echo (pulse timing) each map to an autonomous smart-pin mode — the
-pin can own the protocol, so no COG bit-bangs any of them. The two I²C buses are multi-byte stateful
-protocols; they survive triage and need software owners. *Three peripherals just left the COG-cadence
+pin can own the protocol, so no cog bit-bangs any of them. The two I²C buses are multi-byte stateful
+protocols; they survive triage and need software owners. *Three peripherals just left the cog-cadence
 problem entirely* — that's the physical axis deleting work for us.
 
-**Step 3 — assign owners.** Bus 1 has three devices behind one timing budget, so it gets one owning COG
+**Step 3 — assign owners.** Bus 1 has three devices behind one timing budget, so it gets one owning cog
 and a *single shared transport* that three register-level chip drivers call into. Bus 2 has one device, so
-it gets a *different* owning COG and a *self-contained transport* with nothing to coordinate. The discrete
-smart pins are owned by whichever COG already owns their timing domain. Notice the same protocol — I²C —
+it gets a *different* owning cog and a *self-contained transport* with nothing to coordinate. The discrete
+smart pins are owned by whichever cog already owns their timing domain. Notice the same protocol — I²C —
 ended up with two different transport shapes, decided entirely by sharing topology.
 
 **Steps 4–5 — cadences, and the same-bus conflict.** Bus 1 serves three cadences at once: servos near
-50 Hz, the IMU near 100 Hz, the battery near 1 Hz. Force 1 won't let us split that bus across COGs, and
+50 Hz, the IMU near 100 Hz, the battery near 1 Hz. Force 1 won't let us split that bus across cogs, and
 Force 3 won't let us pretend the cadences are the same. So the resolution is three *cooperative tasks
-inside the bus-1 COG* — a sense task, a motion task, a slower dispatch task — each running at its own
+inside the bus-1 cog* — a sense task, a motion task, a slower dispatch task — each running at its own
 cadence and yielding at bus-transaction boundaries. We also flag one discrete-to-continuous path: a "walk"
 command has to become a smooth servo trajectory, so a slew engine is going to be needed.
 
@@ -1370,15 +1370,15 @@ guards or spans it.
 
 | Resource | This machine uses | Of the limit |
 |----------|-------------------|--------------|
-| COGs | orchestrator, bus-1 body-control, bus-2/IO — about three | 8 |
+| cogs | orchestrator, bus-1 body-control, bus-2/IO — about three | 8 |
 | Smart pins | the LED chain, buzzer, ultrasonic — three | 64 |
 | Locks | none — telemetry is single-writer atomic publish | 16 |
 | CORDIC | one shared engine, uncontended at this scale | one shared |
 | Hub bandwidth | modest — mailbox words, no bulk streaming | egg-beater rotation |
 
-It fits, with COGs to spare, and nothing forces a re-cut. Now judge it with the three tools: coupling is
+It fits, with cogs to spare, and nothing forces a re-cut. Now judge it with the three tools: coupling is
 *low* — telemetry crosses as atomic longs, with no shared invariant and no locks — and the one dynamic
-connascence that crosses a COG boundary (execution order on the command mailbox) was already tamed to static
+connascence that crosses a cog boundary (execution order on the command mailbox) was already tamed to static
 by the publish-last discipline. This is a min-cut.
 
 ```{=latex}
@@ -1386,14 +1386,14 @@ by the publish-last discipline. This is a min-cut.
 ```
 
 ::: {.figurecaption #fig:robot-decomposition}
-The object-and-COG map this derivation produced — read it for the moves, not the result. A different hardware mix yields a different, equally sound shape.
+The object-and-cog map this derivation produced — read it for the moves, not the result. A different hardware mix yields a different, equally sound shape.
 :::
 
 Now step back and notice what just happened — and especially what *didn't*. We never started from a parts
 list and reached for the nearest matching template. We started from the *wires and the timing*, ran the
 forces in order, and the object set *fell out*. Three things appeared that no catalogue could have handed
 us: the two I²C transports are the same protocol with different state models, decided by sharing topology;
-the rate adapters — the in-COG cooperative tasks and the slew engine — correspond to no chip and no feature,
+the rate adapters — the in-cog cooperative tasks and the slew engine — correspond to no chip and no feature,
 they fell out of rate *mismatches*; and the cross-cutting objects had nowhere to live until the tree was
 drawn, then each took a definite place. Run that same routine on *your* machine and you'll get a different
 object set, equally sound. The shape is the routine's output, not its input.
@@ -1435,7 +1435,7 @@ circuits computing simultaneously, configured by a synthesis tool, with no instr
 all.
 
 The P2 sits between these poles, nearer the spatial end than a conventional microcontroller but
-well short of an FPGA. Its eight deterministic COGs and sixty-four programmable smart pins are
+well short of an FPGA. Its eight deterministic cogs and sixty-four programmable smart pins are
 real, parallel computing elements you assign function to — that is the spatial character. But each
 element runs *software*, an instruction stream of its own — that is the temporal character it never
 sheds. The phrase the guide uses, **coarse-grained spatial fabric**, names exactly this in-between
@@ -1448,11 +1448,11 @@ borrowing safe:
 
 - **The P2 is coarse-grained, not fine-grained.** An FPGA's fabric is a sea of logic gates and
   routing you configure at the bit level. The P2's "fabric" is a handful of full 32-bit processors
-  and some smart pins. You allocate whole COGs to jobs; you do not wire gates. This is a difference
+  and some smart pins. You allocate whole cogs to jobs; you do not wire gates. This is a difference
   of *kind*, not degree.
-- **The P2 is still software.** You write programs and launch COGs. There is no
+- **The P2 is still software.** You write programs and launch cogs. There is no
   hardware-description language, no logic synthesis, and crucially **no place-and-route** — the step
-  that maps an FPGA design onto physical silicon has no P2 equivalent. The determinism a COG gives
+  that maps an FPGA design onto physical silicon has no P2 equivalent. The determinism a cog gives
   you comes from fixed instruction timing, not from synthesized circuitry.
 - **We borrow the discipline, not the identity.** "Think spatially" means *assign one sustained job
   per element and let it run* — a design discipline. It does not mean the P2 reconfigures its
@@ -1471,24 +1471,24 @@ as parallel hardware:
 
 | Term | In the FPGA / hardware world | On the P2 | Where the mapping is loose |
 |------|------------------------------|-----------|----------------------------|
-| Spatial computing | Function laid out as physical parallel circuitry | Function assigned across COGs and smart pins, each running one job continuously | The P2 runs instruction streams; "spatial" is the *allocation* pattern, not literal gates |
-| Fabric | The sea of configurable logic blocks and routing | The 8 COGs + 64 smart pins + the hub interconnect you allocate onto | The P2 fabric is a few coarse elements, not a fine-grained gate array |
+| Spatial computing | Function laid out as physical parallel circuitry | Function assigned across cogs and smart pins, each running one job continuously | The P2 runs instruction streams; "spatial" is the *allocation* pattern, not literal gates |
+| Fabric | The sea of configurable logic blocks and routing | The 8 cogs + 64 smart pins + the hub interconnect you allocate onto | The P2 fabric is a few coarse elements, not a fine-grained gate array |
 | Coarse-grained | Processing elements larger than a single gate | Each element is a whole 32-bit processor or a smart pin | This is the defining gap — the P2 is far coarser than even a coarse-grained array |
-| Pipeline | Data through chained hardware stages, throughput set by the clock | Data through a chain of COGs, throughput set by the pipeline rate, not instruction count | Each COG stage runs software with its own latency; stages are not register-locked like hardware |
-| Dataflow | Computation driven by data availability along channels | COGs exchanging data through hub channels and mailboxes; correctness by data order | There is no hardware firing rule; the dataflow discipline is something you implement |
-| Systolic array | A regular array of cells rhythmically passing data to neighbors | COGs as pipeline stages handing data along, sometimes via adjacent-COG LUT sharing | Only adjacent COG pairs share a LUT; it is a small, irregular array, not a large regular mesh |
+| Pipeline | Data through chained hardware stages, throughput set by the clock | Data through a chain of cogs, throughput set by the pipeline rate, not instruction count | Each cog stage runs software with its own latency; stages are not register-locked like hardware |
+| Dataflow | Computation driven by data availability along channels | cogs exchanging data through hub channels and mailboxes; correctness by data order | There is no hardware firing rule; the dataflow discipline is something you implement |
+| Systolic array | A regular array of cells rhythmically passing data to neighbors | cogs as pipeline stages handing data along, sometimes via adjacent-cog LUT sharing | Only adjacent cog pairs share a LUT; it is a small, irregular array, not a large regular mesh |
 
 Then the vocabulary for the *resources, timing, and dataflow* of the machine — ending with the one
 term that does not cross over at all:
 
 | Term | In the FPGA / hardware world | On the P2 | Where the mapping is loose |
 |------|------------------------------|-----------|----------------------------|
-| Resource lattice | (Loosely) the fixed grid of resources a design maps onto | The finite, heterogeneous set you budget against: 8 COGs, 64 smart pins, 1 CORDIC, 16 locks, hub bandwidth, LUT pairs | "Lattice" here means a fixed resource budget, not FPGA routing |
+| Resource lattice | (Loosely) the fixed grid of resources a design maps onto | The finite, heterogeneous set you budget against: 8 cogs, 64 smart pins, 1 CORDIC, 16 locks, hub bandwidth, LUT pairs | "Lattice" here means a fixed resource budget, not FPGA routing |
 | Back-pressure | A downstream consumer signalling it cannot keep up, throttling upstream | A slow consumer forcing a fast producer to wait at a seam; managed with buffers and the hub FIFO | Same concept, implemented in software at hub seams |
 | Latency / throughput | Time through a stage; rate of completed items | The same, measured against the system clock and the egg-beater rotation | Transfers cleanly — this pair means the same on both sides |
 | Latency-insensitive | Design so correctness depends on data order, not arrival time | Hub channels designed so hub jitter is harmless by construction | A discipline you adopt, not a property the silicon enforces for you |
-| GALS (globally asynchronous, locally synchronous) | Synchronous islands joined by an asynchronous interconnect | Locally-synchronous, deterministic COGs joined by the asynchronous hub fabric | An exact characterization — this one transfers well |
-| Place-and-route | The synthesis step mapping a design onto physical gates and wires | *(no equivalent)* — you write software and launch COGs; nothing is synthesized | The sharpest "does not transfer": there is no P2 place-and-route at all |
+| GALS (globally asynchronous, locally synchronous) | Synchronous islands joined by an asynchronous interconnect | Locally-synchronous, deterministic cogs joined by the asynchronous hub fabric | An exact characterization — this one transfers well |
+| Place-and-route | The synthesis step mapping a design onto physical gates and wires | *(no equivalent)* — you write software and launch cogs; nothing is synthesized | The sharpest "does not transfer": there is no P2 place-and-route at all |
 
 The last row is the one to remember. The P2 borrows the FPGA's *way of thinking about parallel
 work* while remaining, start to finish, a software machine. Appendix B points you to the literature
@@ -1511,7 +1511,7 @@ and the generative stance the whole approach takes.
   principle under Force 4 (layer by axis of change).
 - **Constantine, L.L. & Yourdon, E. — *Structured Design: Fundamentals of a Discipline of Computer
   Program and Systems Design.* Prentice-Hall, 1979.** Where *coupling* and *cohesion* come from —
-  the measures behind a good seam: low coupling across COGs, high cohesion within one.
+  the measures behind a good seam: low coupling across cogs, high cohesion within one.
 - **Page-Jones, M. — *Fundamentals of Object-Oriented Design in UML.* Addison-Wesley, 1999.** Its
   treatment of *connascence* is the sharpest tool in Chapter 4's "judging the cut" section — and the
   source of the static-versus-dynamic distinction that, on the P2, separates a safe seam from a
@@ -1521,7 +1521,7 @@ and the generative stance the whole approach takes.
 
 - **Hoare, C.A.R. — "Communicating Sequential Processes." *Communications of the ACM*, vol. 21, no.
   8, 1978, pp. 666–677; expanded as *Communicating Sequential Processes*, Prentice-Hall, 1985.** The
-  formal model in which COGs are processes and mailboxes are channels. If one work explains why the
+  formal model in which cogs are processes and mailboxes are channels. If one work explains why the
   P2's no-shared-OS, message-passing shape is sound, it is this one.
 - **INMOS Ltd. — *occam Programming Manual.* Prentice-Hall, 1984.** The Transputer's language —
   independent processors, a message-passing fabric, no shared operating system. The P2 is very
@@ -1529,10 +1529,10 @@ and the generative stance the whole approach takes.
 - **Kahn, G. — "The Semantics of a Simple Language for Parallel Programming." *Proceedings of the
   IFIP Congress 74*, Stockholm, 1974, pp. 471–475.** Kahn process networks: processes that
   communicate only by blocking reads on FIFO channels are *determinate regardless of timing* — the
-  rule that makes inter-COG dataflow survive hub jitter.
+  rule that makes inter-cog dataflow survive hub jitter.
 - **Kung, H.T. & Leiserson, C.E. — "Systolic Arrays (for VLSI)." In Mead, C. & Conway, L.,
   *Introduction to VLSI Systems*, Addison-Wesley, 1980 (§8.3).** Rhythmic data passing through a
-  regular array of processing elements — the mental model for using COGs as pipeline stages.
+  regular array of processing elements — the mental model for using cogs as pipeline stages.
 - **Lee, E.A. & Messerschmitt, D.G. — "Synchronous Data Flow." *Proceedings of the IEEE*, vol. 75,
   no. 9, 1987, pp. 1235–1245.** Static data rates yield computable buffer sizes — the math behind
   Force 3's rate adapters and the sizing of a buffer.
@@ -1541,7 +1541,7 @@ and the generative stance the whole approach takes.
   no. 9, 2001, pp. 1059–1076.** Correctness by data *order*, not arrival *time* — the formal bridge
   to the spatial domain and the discipline that makes hub jitter harmless.
 - **Chapiro, D.M. — *Globally-Asynchronous Locally-Synchronous Systems.* PhD thesis, Stanford
-  University, 1984.** The exact characterization of the P2 — locally synchronous COGs, an
+  University, 1984.** The exact characterization of the P2 — locally synchronous cogs, an
   asynchronous hub fabric — and the source of the clock-domain-crossing discipline Force 3 borrows.
 
 ## Boundaries, real-time, and the generative stance
@@ -1561,7 +1561,7 @@ and the generative stance the whole approach takes.
 # Glossary
 
 Terms as this guide uses them, weighted toward the decomposition vocabulary of Chapter 4. For the
-silicon parts themselves — COG, hub, smart pin, CORDIC, streamer — see Chapter 1.
+silicon parts themselves — cog, hub, smart pin, CORDIC, streamer — see Chapter 1.
 
 **Altitude layering (Force 4).** The vertical decomposition force: within one ownership domain,
 stack objects so each tier does exactly one unit conversion and changes for exactly one reason —
@@ -1572,7 +1572,7 @@ measured as the connascence crossing the seam times the cost of the channel that
 boundary minimizes it.
 
 **Coarse-grained spatial fabric.** The P2 seen as a modest number of real parallel computing
-elements (8 COGs, 64 smart pins) you assign function to — spatial in allocation, but built from
+elements (8 cogs, 64 smart pins) you assign function to — spatial in allocation, but built from
 whole processors rather than logic gates.
 
 **Cohesion.** How well the parts inside one object belong together. High cohesion within an object
@@ -1580,10 +1580,10 @@ is the goal; it is the complement of coupling.
 
 **Connascence.** The relationship by which changing one element forces a change in another to stay
 correct. *Static* forms are visible in source (name, type, field order); *dynamic* forms are true
-only at run time (execution order, timing, value). On the P2, dynamic connascence crossing a COG
+only at run time (execution order, timing, value). On the P2, dynamic connascence crossing a cog
 boundary shows up as jitter and races.
 
-**Cooperative tasking (tasks-in-a-COG).** Several routines sharing one COG and one bus, each running
+**Cooperative tasking (tasks-in-a-cog).** Several routines sharing one cog and one bus, each running
 at its own cadence and yielding at safe points — the resolution when one bus must serve several
 cadences (Force 1 against Force 3).
 
@@ -1594,7 +1594,7 @@ time, fields under a shared invariant, locks held across the cut. Minimize it.
 structural tree rather than sitting in it: safety override, external-interface translation, per-unit
 configuration, testability seam, and lifecycle/init order.
 
-**Data / control / event planes.** The three superimposed relationships in any inter-COG seam —
+**Data / control / event planes.** The three superimposed relationships in any inter-cog seam —
 bulk movement (data), commands and state (control), signalling and urgency (event) — each wanting
 its own mechanism.
 
@@ -1604,13 +1604,13 @@ helps place the boundary.
 
 **Flat device list.** The failure mode Force 1 prevents: every chip a sibling driver under `main()`,
 the shape chosen by analogy rather than derived from the wiring. It compiles, then fails as flaky
-hardware the moment two COGs touch one resource.
+hardware the moment two cogs touch one resource.
 
-**Funnel.** A "smell": all data routed through one COG, rebuilding a sequential bottleneck whose
+**Funnel.** A "smell": all data routed through one cog, rebuilding a sequential bottleneck whose
 loop rate caps the whole system.
 
 **GALS (globally asynchronous, locally synchronous).** The exact shape of the P2 — deterministic,
-locally-synchronous COGs joined by an asynchronous hub fabric — and the reason cadence crossings
+locally-synchronous cogs joined by an asynchronous hub fabric — and the reason cadence crossings
 need deliberate handling.
 
 **Latency-insensitive.** A channel designed so correctness depends on the order data arrives, not
@@ -1619,7 +1619,7 @@ the time — making hub jitter harmless by construction.
 **Min-cut.** The objective for a good boundary: draw it where the cohesion gained inside each piece
 exceeds the back-pressure across the cut.
 
-**Pipeline.** A chain of COGs through which data flows stage to stage; throughput is set by the
+**Pipeline.** A chain of cogs through which data flows stage to stage; throughput is set by the
 pipeline's rate, not by any one stage's instruction count.
 
 **Publish-last.** The discipline of writing a multi-field update's payload first and bumping its
@@ -1630,15 +1630,15 @@ single-long atomicity.
 samplers/buffers at rate-domain crossings, and slew/easing engines where a discrete intent must
 become a continuous stream.
 
-**Resource budget.** The allocation table — COGs, smart pins, locks, CORDIC, hub bandwidth, LUT
-pairs, COG RAM — kept as a design artifact. "Running out of COGs" on it means the design is too
+**Resource budget.** The allocation table — cogs, smart pins, locks, CORDIC, hub bandwidth, LUT
+pairs, cog RAM — kept as a design artifact. "Running out of cogs" on it means the design is too
 coupled.
 
 **Resource lattice.** The finite, heterogeneous set of P2 resources a design allocates onto; the
 physical axis of decomposition.
 
 **Resource ownership (Force 1).** The correctness force: each serialized, stateful resource gets
-exactly one owning COG, with the object boundary tracing the wire.
+exactly one owning cog, with the object boundary tracing the wire.
 
 **Singleton vs. instance transport.** The transport's state model, decided by sharing topology — a
 shared singleton when several devices share one bus, a self-contained instance when a device is
@@ -1648,11 +1648,11 @@ alone on its bus.
 rate-limited trajectory at a device's native frame rate.
 
 **Spatial computing.** Doing many things at once by laying function out across hardware elements
-rather than time-slicing one core; on the P2, the discipline of assigning one sustained job per COG
+rather than time-slicing one core; on the P2, the discipline of assigning one sustained job per cog
 or smart pin.
 
 **Systolic array.** A regular arrangement of processing elements that rhythmically pass data to
-their neighbors — the FPGA-world model behind using COGs as pipeline stages.
+their neighbors — the FPGA-world model behind using cogs as pipeline stages.
 
 **Transport (object).** The single owning object for a bus or serialized resource; the lowest tier
 of a device stack, the one that speaks bits on the wire.
@@ -1665,8 +1665,8 @@ map.
 - **To write the high-level language** — the *Spin2 Reference Manual* (current revision v55): the
   full object model, every built-in method and operator, the language's syntax in complete detail.
 - **To write assembly** — the *P2 Assembly Language Reference*: the PASM2 instruction set, the
-  execution pipeline, COG start/stop, and the inter-COG coordination primitives (locks, atomic
-  access, COG attention) that Chapter 4's seams are built from. For a gentler, tutorial-style on-ramp
+  execution pipeline, cog start/stop, and the inter-cog coordination primitives (locks, atomic
+  access, cog attention) that Chapter 4's seams are built from. For a gentler, tutorial-style on-ramp
   to PASM2, the *DeSilva PASM2 Tutorial* teaches the assembly language from the ground up.
 - **For I/O** — the *P2 I/O & Smart Pins User Guide*: every smart-pin mode, with
   examples — your first stop whenever a protocol might be absorbable at the pin (Chapter 4's
