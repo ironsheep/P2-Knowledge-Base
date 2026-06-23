@@ -6,6 +6,7 @@ Code"** — was added mid-sprint for readers with no P1/Spin2/PASM2 background (
 figure pass (5 figures) and an edition cross-check against Propeller Manual v1.0. Production PDF
 generated clean on the Forge (48pp). Parked/follow-ups live in PLANNING §15 + PUNCH-LIST + gap G-P1-007.
 Next: a review pass, then `release-manual` when ready.
+**Retrospective:** `engineering/history/sprints/2026-06-23-P2-Architect-Guide-FirstDraft-Retrospective.md`
 
 _(original planning header)_ rich-planning phase · 2026-06-22 · head **manual** · element `p2-architect-guide`
 **Goal (DoD):** a **first-draft PDF in hand** — the manual generated through PDF Forge, verified
