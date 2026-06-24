@@ -1,0 +1,57 @@
+% P2KB Getting-Started Guide LaTeX Template
+% Main template for Getting Started with the Propeller 2
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% LAYOUT: One-sided for PDF screen viewing
+% For physical print with binding, change to: twoside,openany
+%
+% Template Stack (PLATFORM-UNIFIED — see methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty - shared: geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty     - shared: code/reference box family, contmarkers, keep-together
+%   3. p2kb-getting-started-local.sty      - per-manual override (skin / local tail) — adds P1NoteBlock (DD1)
+%   4. p2kb-getting-started-diagrams.sty   - per-manual TikZ diagram content macros (inert stub for v0.1.0; DD5)
+%
+% This is the cleanest born-on-platform exemplar: it rides the SHARED platform .sty
+% and the SHARED p2kb-platform-* lua filters; only the two p2kb-getting-started-* locals
+% (plus the one local lua filter) are per-manual.
+
+\documentclass[11pt,letterpaper,oneside]{book}
+
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
+
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
+
+% ==================== LOAD PER-MANUAL OVERRIDE (skin / local tail / P1NoteBlock) ====================
+\usepackage{p2kb-getting-started-local}
+
+% ==================== LOAD PER-MANUAL DIAGRAMS ====================
+\usepackage{p2kb-getting-started-diagrams}
+
+% ==================== DOCUMENT METADATA ====================
+% These can be overridden by pandoc metadata
+\title{Getting Started with the Propeller 2}
+\author{Iron Sheep Productions, LLC}
+\date{June 2026}
+
+% ==================== ADDITIONAL SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% Load multicol (used by potential two-column appendices)
+\usepackage{multicol}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page - no headers/footers
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (includes title page at beginning)
+$body$
+
+\end{document}

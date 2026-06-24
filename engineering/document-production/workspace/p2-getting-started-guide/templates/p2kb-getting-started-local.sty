@@ -1,0 +1,41 @@
+% p2kb-getting-started-local.sty — Getting Started with the Propeller 2 per-manual override layer
+% Loaded AFTER p2kb-platform-content.sty so anything here overrides platform defaults.
+%
+% The Getting-Started Guide rides the shared iosp-* palette and the standard platform
+% code/reference box family with NO bespoke code/reference colours. Its ONE
+% manual-specific addition is the P1NoteBlock used for "P1 note:" migration sidebars
+% (charter D3; sprint DD1) — there is no platform environment for it, and baking an
+% manual-local class into the shared platform would pollute every manual.
+%
+% To override a platform default, redefine it here (e.g. \renewtcolorbox, \definecolor).
+% Add genuinely-new block types only after checking the block catalog
+% (methodology/presentation-block-catalog.md) and via its promotion gate.
+
+\ProvidesPackage{p2kb-getting-started-local}[2026/06/22 P2KB Getting-Started Guide per-manual override layer v1.0]
+
+% ==================== P1 NOTE SIDEBAR (DD1) ====================
+% A "P1 note:" migration sidebar — the same visual family as the platform prose
+% blocks (TipBlock/CautionBlock/HardwareBlock): enhanced/breakable, a thick left
+% rule, rounded corners, sans-serif title. Distinct warm-bronze palette so the
+% P1->P2 deltas read as their own thread without competing with the code colours.
+% The p2kb-getting-started-local.lua filter maps a `::: p1note` fenced div to this box.
+
+\definecolor{iosp-p1note-bg}{HTML}{FBF3E8}        % warm parchment (P1 heritage)
+\definecolor{iosp-p1note-border}{HTML}{B07A2E}    % aged bronze border
+
+\newtcolorbox{P1NoteBlock}{%
+  enhanced, breakable, contmarkers,
+  colback=iosp-p1note-bg, colframe=iosp-p1note-border, colbacktitle=iosp-p1note-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=12pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt,
+  coltitle=white, fonttitle=\sffamily\bfseries\small, title={P1 NOTE}
+}
+
+% ==================== FIGURE NUMBERING ====================
+% The guide uses NAMED, unnumbered chapters (Ch1/Ch2/Ch3 by title), so \thechapter
+% is 0 and the default \thefigure would render as "Figure 0.1, 0.2, ...". Number
+% figures continuously across the document instead: "Figure 1, 2, 3, ...".
+\renewcommand{\thefigure}{\arabic{figure}}
+
+\endinput

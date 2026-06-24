@@ -1,0 +1,16 @@
+CON
+  _clkfreq = 200_000_000
+  LED_A    = 56
+  LED_B    = 57
+
+VAR
+  long stack[64]                ' work space for the second cog
+
+PUB main() | cog
+  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)  ' run on another cog
+  blink(LED_B, 1000)            ' this cog keeps the slower blink for itself
+
+PRI blink(pin, ms)
+  repeat
+    pintoggle(pin)
+    waitms(ms)

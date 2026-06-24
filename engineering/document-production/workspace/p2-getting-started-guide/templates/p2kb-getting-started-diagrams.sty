@@ -1,0 +1,187 @@
+% P2KB Getting-Started Guide Diagrams Package
+% Per-manual TikZ diagram content macros for Getting Started with the Propeller 2.
+%
+% INERT STUB for v0.1.0 (sprint DD5): the first draft is prose-complete and ships
+% with NO \Diag* macros. Intended figure locations are marked in the body as
+%   > **[Figure — <description>]**
+% placeholders and logged to PUNCH-LIST.md for a post-first-draft visual pass.
+%
+% The shared TikZ palette, node/edge styles (the diagram block standard), and the
+% \diagramscale shrink-to-fit wrapper come from the platform diagrams base. When the
+% visual pass begins, define this manual's \Diag* macros below against those shared
+% styles (model: ../../p2-streamer-programming-guide/templates/p2kb-streamer-diagrams.sty).
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-getting-started-diagrams}[2026/06/22 P2KB Getting-Started Guide Diagrams Package v0.1 (inert stub)]
+
+\RequirePackage{p2kb-platform-diagrams}
+
+% Memory-tier fills (not in the shared palette; reused from the Assembly manual's
+% memory diagrams so the COG/LUT/Hub colors match across the manual family).
+\definecolor{mem-cog}{HTML}{E0F0E0}       % light green - COG RAM
+\definecolor{mem-hub}{HTML}{E0E0F0}       % light blue  - Hub RAM
+\definecolor{mem-lut}{HTML}{F0E0E0}       % light pink  - LUT RAM
+\definecolor{mem-special}{HTML}{F0F0E0}   % light yellow - special registers
+
+% ============================================================================
+% REUSED (verbatim) from the P2 Assembly Language Manual (p2kb-pasm2-diagrams.sty)
+% so the whole-chip and memory-hierarchy pictures match across the manual family.
+% ============================================================================
+
+% ---- Eight COGs around the shared Hub (Ch1 "the whole chip") ----
+\newcommand{\EightCogSimpleDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cogcircle/.style={circle, draw=diagram-border, fill=mem-cog, minimum size=1.3cm,
+                      align=center, font=\scriptsize\bfseries},
+    annotation/.style={font=\scriptsize, text=diagram-text},
+    spokestyle/.style={thick, diagram-border}
+]
+\draw[diagram-border, thick, fill=mem-hub] (0, 0) circle (1.0cm);
+\node[font=\footnotesize\bfseries] at (0, 0) {HUB};
+\draw[thick, green!50!black, ->] ([shift={(60:0.6cm)}]0,0) arc (60:-240:0.6cm);
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogcircle] (cog\i) at ({\angle}:2.7cm) {COG \i};
+    \draw[spokestyle] (cog\i) -- ({\angle}:1.05cm);
+}
+\node[annotation, text width=10cm, align=center] at (0, -4.3)
+    {All COGs access Hub simultaneously --- Max 8 clocks wait};
+\node[annotation, text width=10cm, align=center] at (0, -4.75)
+    {Each COG: Independent processor with 2KB RAM + 2KB LUT};
+\node[annotation, text width=10cm, align=center] at (0, -5.2)
+    {Hub: 512KB shared memory accessible by all COGs};
+\end{tikzpicture}
+\end{center}
+}
+
+% ---- Memory hierarchy: per-COG RAM/LUT over the shared Hub (Ch1 "Memory") ----
+\newcommand{\CogHubRelationshipDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    membox/.style={rectangle, draw=diagram-border, minimum width=2.5cm,
+                   minimum height=1.5cm, align=center, font=\small},
+    hubbox/.style={rectangle, draw=diagram-border, fill=mem-hub, minimum width=8cm,
+                   minimum height=1.5cm, align=center, font=\small},
+    annotation/.style={font=\scriptsize, text=diagram-text},
+    linestyle/.style={thick, draw=diagram-border, <->}
+]
+\node[font=\bfseries] at (0, 4) {Memory Hierarchy};
+\node[font=\small\bfseries] at (-5.5, 3) {Per-COG (Private)};
+\node[membox, fill=mem-cog] (cog0ram) at (-3.5, 1.5) {COG 0\\RAM\\2KB};
+\node[membox, fill=mem-lut] (cog0lut) at (-1, 1.5) {COG 0\\LUT\\2KB};
+\node[font=\small] at (0.5, 1.5) {...};
+\node[membox, fill=mem-cog] (cog7ram) at (2, 1.5) {COG 7\\RAM\\2KB};
+\node[membox, fill=mem-lut] (cog7lut) at (4.5, 1.5) {COG 7\\LUT\\2KB};
+\node[font=\small\bfseries] at (-5.5, -0.5) {Shared};
+\node[hubbox] (hub) at (0.5, -1.5) {Hub RAM --- 512KB Shared Memory};
+\draw[linestyle] (cog0ram) -- ($(hub.north) + (-3,0)$);
+\draw[linestyle] (cog0lut) -- ($(hub.north) + (-1.5,0)$);
+\draw[linestyle] (cog7ram) -- ($(hub.north) + (1.5,0)$);
+\draw[linestyle] (cog7lut) -- ($(hub.north) + (3,0)$);
+\node[annotation] at (0, -3) {COG RAM/LUT: Fast, private access (2 cycles)};
+\node[annotation] at (0, -3.5) {Hub: Slower, shared access (up to 8 cycles via egg-beater)};
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% NEW for the Getting-Started Guide (authored 2026-06-23, DD5 visual pass).
+% ============================================================================
+
+% ---- Ch3: the temporal-to-spatial spectrum, P2 in between ----
+\newcommand{\SpaceTimeSpectrumDiagram}{%
+\begin{center}
+\diagramscale{%
+\begin{tikzpicture}[
+    endbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                   align=center, text width=3cm, minimum height=1.2cm, font=\footnotesize,
+                   text=diagram-text, inner sep=4pt},
+    p2box/.style={rectangle, draw=diagram-border, fill=diagram-highlight, rounded corners=2pt,
+                  align=center, text width=4.5cm, minimum height=1.3cm, font=\footnotesize\bfseries,
+                  text=diagram-text, inner sep=4pt}
+]
+  \draw[line width=1.2pt, draw=diagram-border, {Stealth[length=3mm]}-{Stealth[length=3mm]}]
+      (0.5,0) -- (14.5,0);
+  \node[anchor=west, font=\footnotesize\bfseries, text=diagram-text] at (0.5,0.45) {computes in TIME};
+  \node[anchor=east, font=\footnotesize\bfseries, text=diagram-text] at (14.5,0.45) {computes in SPACE};
+  \node[endbox] (mcu)  at (2.0,-1.5)  {Single-core MCU\\\scriptsize one instruction stream, time-sliced};
+  \node[p2box]  (p2)   at (8.5,-1.55) {Propeller 2\\\scriptsize coarse-grained spatial fabric: 8 COGs + 64 smart pins};
+  \node[endbox] (fpga) at (13.0,-1.5) {FPGA\\\scriptsize function as parallel hardware, no instructions};
+  \draw[diagram-border, thin]        (2.0,0)  -- (2.0,-0.85);
+  \draw[diagram-border, line width=1pt] (8.5,0)  -- (8.5,-0.85);
+  \draw[diagram-border, thin]        (13.0,0) -- (13.0,-0.85);
+  \fill[diagram-highlight, draw=diagram-border] (8.5,0) circle (2.5pt);
+\end{tikzpicture}}
+\end{center}
+}
+
+% ---- Ch3: the worked derivation's object-and-COG map (ONE machine's answer) ----
+\newcommand{\RobotDecompositionDiagram}{%
+\begin{center}
+\diagramscale{%
+\begin{tikzpicture}[
+    font=\footnotesize,
+    cogwrap/.style={rectangle, draw=diagram-border, dashed, rounded corners=3pt, inner sep=7pt},
+    tier/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                 align=center, text width=4.3cm, minimum height=0.65cm, font=\scriptsize,
+                 text=diagram-text, inner sep=2pt},
+    toptier/.style={tier, fill=diagram-highlight},
+    xbox/.style={rectangle, draw=diagram-border, fill=reg-io, rounded corners=2pt,
+                 align=center, text width=3.8cm, minimum height=0.65cm, font=\scriptsize,
+                 text=diagram-text, inner sep=2pt},
+    spbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                  align=center, minimum height=0.55cm, font=\scriptsize, text=diagram-text, inner sep=3pt},
+    seam/.style={-{Stealth[length=2.4mm]}, line width=0.9pt, draw=diagram-border},
+    seamlbl/.style={font=\tiny, text=diagram-text, align=center, fill=white, inner sep=1.5pt},
+    note/.style={font=\scriptsize\itshape, text=diagram-text, align=center}
+]
+  % Orchestrator (top)
+  \node[rectangle, draw=diagram-border, fill=diagram-highlight, rounded corners=2pt,
+        align=center, text width=7.2cm, minimum height=0.95cm, text=diagram-text] (orch) at (5.6,9.3)
+       {\textbf{Orchestrator / sequencer}\\\scriptsize owns COG launch order \textperiodcentered{} hosts the safety supervisor (can halt \emph{all} motion)};
+  % COG A: 4-tier motion stack
+  \node[toptier] (t1) at (2.6,6.7) {Gait / pose policy};
+  \node[tier]    (t2) at (2.6,5.85){Leg inverse-kinematics\\\tiny foot-XYZ to joint degrees};
+  \node[tier]    (t3) at (2.6,5.0) {Servo semantics\\\tiny pulse width / channel};
+  \node[tier]    (t4) at (2.6,4.15){PWM-chip register driver};
+  \node[note, text width=4.5cm] (tasks) at (2.6,3.15)
+       {3 cooperative tasks --- sense \textperiodcentered{} motion \textperiodcentered{} dispatch --- share this one cog \& bus};
+  \node[cogwrap, fit=(t1)(t4)(tasks)] (cogA) {};
+  \node[font=\scriptsize\bfseries, text=diagram-text, anchor=south] at (cogA.north)
+       {COG A --- owns I\textsuperscript{2}C bus 1 (servos, IMU, battery; \textasciitilde50 Hz)};
+  \draw[diagram-border, thin] (t1) -- (t2); \draw[diagram-border, thin] (t2) -- (t3);
+  \draw[diagram-border, thin] (t3) -- (t4);
+  % COG B: voice + translator
+  \node[tier]  (vd) at (9.4,5.85) {Voice driver (instance)};
+  \node[xbox]  (xl) at (9.4,4.85) {Voice-to-command translator\\\tiny anti-corruption edge};
+  \node[cogwrap, fit=(vd)(xl)] (cogB) {};
+  \node[font=\scriptsize\bfseries, text=diagram-text, anchor=south] at (cogB.north)
+       {COG B --- owns I\textsuperscript{2}C bus 2 (voice, slow poll)};
+  % per-unit calibration (cross-cutting)
+  \node[xbox, text width=2.5cm] (cal) at (13.0,4.0) {Per-unit calibration (trims)};
+  % smart-pin-owned discretes (bottom)
+  \node[note, anchor=east] at (1.5,0.55) {Smart-pin-owned\\(no cog bit-bangs these):};
+  \node[spbox] (led) at (3.4,0.55) {LED chain};
+  \node[spbox] (buz) at (5.5,0.55) {Buzzer};
+  \node[spbox] (us)  at (8.1,0.55) {Ultrasonic ping/echo};
+  % seams (the three planes)
+  \draw[seam] (orch.south west) to[out=250,in=110]
+       node[seamlbl,pos=0.55]{command\\\textbf{CONTROL}\\latest-wins,\\publish-last} (cogA.north west);
+  \draw[seam] (cogA.north east) to[out=70,in=250]
+       node[seamlbl,pos=0.5]{telemetry\\\textbf{DATA}\\lock-free,\\1 writer} (orch.south);
+  \draw[seam] (cogB.north) to[out=100,in=350]
+       node[seamlbl,pos=0.5]{events\\\textbf{EVENT}\\freshness ctr} (orch.south east);
+  % ownership of smart pins + calibration feed (thin/dotted)
+  \draw[seam, densely dotted] (cogA.south) -- (led.north);
+  \draw[seam, densely dotted] (cogB.south) to[out=270,in=90] (us.north);
+  \draw[seam, densely dotted] (cal.west) -- (cogB.east);
+  % anti-prescription banner
+  \node[note, text width=12.5cm, text=diagram-accent] at (6.0,-0.7)
+       {\textbf{An illustration --- one machine's derived structure, not a template.}
+        A different hardware mix yields a different, equally sound shape.};
+\end{tikzpicture}}
+\end{center}
+}
+
+\endinput
