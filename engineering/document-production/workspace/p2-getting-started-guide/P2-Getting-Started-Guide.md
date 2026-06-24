@@ -868,7 +868,7 @@ A P2 program is built from **objects**. An object is a file with its own constan
 variables, and methods; you pull one in with an `OBJ` block and call its methods
 through a name:
 
-```
+```spin2
 OBJ
   serial : "jm_fullduplexserial"   ' a driver object, by filename
 
