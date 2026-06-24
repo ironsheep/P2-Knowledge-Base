@@ -157,6 +157,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-24 02:39  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0, 382pp — doc-style-change regen: lowercase-cog sweep + official titles + 15-example caption library; first build on the new Plex platform [#100 IBM Plex typography + no line-number gutter, #102 caption rendering]; clean log, captions render; IN DEVELOPMENT, not a public release)
 2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
 2026-06-19 20:44  PUBLISH   p2-streamer-programming-guide    (v1.0.1, 71pp — grounding-audit fixes + §3.5 clock accuracy + fenced callouts)
 2026-06-19 20:41  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (do not bold the English verb "fit" — subject-pronoun + article-object contexts)
