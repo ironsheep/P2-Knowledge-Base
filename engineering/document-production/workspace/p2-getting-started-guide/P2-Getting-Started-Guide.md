@@ -157,7 +157,7 @@ CONVENTIONS:
 ================================================================================
 -->
 
-# Meet the Propeller 2
+# Chapter 1: Meet the Propeller 2 {#ch-1}
 
 By the end of this chapter you'll be able to picture the whole chip — eight
 processors, one shared pool of memory, and a ring of clever pins around the
@@ -447,7 +447,7 @@ program — the handful of structural rules that turn Spin2 and PASM2 from a wal
 symbols into something legible — and the chapter after that puts these parts to work:
 we'll launch a cog, drive a pin, and see how a real P2 program is actually shaped.
 
-# Reading P2 Code
+# Chapter 2: Reading P2 Code {#ch-2}
 
 Chapter 1 gave you the chip. Before we put it to work, let's make sure you can *read* a
 P2 program — because the chapters ahead are full of small examples, and they'll only
@@ -673,7 +673,7 @@ of PASM2 is made of. That's the literacy every example in this guide assumes. Wi
 hand, the next chapter stops reading and starts *doing* — your first real program, a
 second cog, and the choices a P2 program actually makes.
 
-# Putting It to Work
+# Chapter 3: Putting It to Work {#ch-3}
 
 Now that you can picture the chip *and* read its code, let's use it. This chapter is about *doing* — by
 the end you'll have driven a pin, launched a second cog, shared data between cogs, and
