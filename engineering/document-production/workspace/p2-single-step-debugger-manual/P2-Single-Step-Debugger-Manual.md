@@ -117,7 +117,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 # Chapter 1: What Single-Step Debugging Is
 
 You have written a P2 program. You compile it, you run it, and it does not do
-what you expected. Maybe a value comes out wrong. Maybe one of your COGs seems
+what you expected. Maybe a value comes out wrong. Maybe one of your cogs seems
 to stop. Maybe everything *looks* fine but the timing is off. Now what?
 
 Without a debugger, your only window into the running chip is whatever you
@@ -135,14 +135,14 @@ This manual teaches you to use the P2's single-step debugger to do exactly that.
 
 ## What you can observe
 
-When the debugger has your program paused, you can see the live state of the COG
+When the debugger has your program paused, you can see the live state of the cog
 you are looking at:
 
-- **COG and LUT memory** — all 512 longs of COG RAM and 512 longs of LUT RAM,
+- **Cog and LUT memory** — all 512 longs of cog RAM and 512 longs of LUT RAM,
   with a *heat map* that shows which locations are being read and written.
 - **The flags** — the C (carry) and Z (zero) flags.
 - **The Program Counter (PC)** — exactly which instruction is next.
-- **Registers** — any COG register, including the special-function registers
+- **Registers** — any cog register, including the special-function registers
   (PTRA, PTRB, the I/O registers, the interrupt vectors, and more).
 - **Hub memory** — the shared RAM, shown as hex and as text.
 - **The call stack** — how deep into nested calls you are, and the return
@@ -162,7 +162,7 @@ You are not just watching — you are driving:
 - **Run** — let the program run freely.
 - **Break** — stop a freely-running program right now.
 - **Breakpoints** — mark places or conditions where the program should stop on
-  its own: a specific address, a `DEBUG` statement, a COG starting up, an
+  its own: a specific address, a `DEBUG` statement, a cog starting up, an
   interrupt, or an event.
 
 > A *breakpoint* is a marked spot where execution should pause so you can look
@@ -175,14 +175,14 @@ You are not just watching — you are driving:
 Use the single-step debugger when "add another print and run again" is not
 telling you enough — when you need to *see the machine's actual state* at a
 precise moment: tracking down a wrong value, understanding why a branch went the
-way it did, watching memory get corrupted, or following how two COGs interact.
+way it did, watching memory get corrupted, or following how two cogs interact.
 
 ## A note for readers coming from the P1
 
 If your background is the Propeller 1, two habits will trip you up, and this
 manual uses the P2 forms throughout:
 
-- Start a COG with **`COGSPIN`** / **`COGINIT`**, not the P1's `cognew`.
+- Start a cog with **`COGSPIN`** / **`COGINIT`**, not the P1's `cognew`.
 - Read the system counter with **`GETCT`**, not the P1's `CNT`.
 
 The single-step debugger itself is new to you regardless of which Propeller you
@@ -271,10 +271,10 @@ start
 a             res       1
 ```
 
-### A COG starting up
+### A Cog starting up
 
-When a COG is started with debugging active, the debugger can break as the COG
-begins — useful for catching a problem right at a COG's entry point. (You will
+When a cog is started with debugging active, the debugger can break as the cog
+begins — useful for catching a problem right at a cog's entry point. (You will
 turn this behavior on with the INIT breakpoint in Chapter 6.)
 
 ### Opening the debugger automatically (CON-block settings)
@@ -283,17 +283,17 @@ The three ways above all place a breakpoint *in your code*. You can also make th
 debugger open automatically — without adding a single `DEBUG` line — by defining
 a constant in your program's top-level `CON` block. These are read at compile
 time, so you still build with `pnut_ts -d`. Two of them open the debugger, and a
-third narrows down which COGs are watched:
+third narrows down which cogs are watched:
 
 | Constant | What it does |
 |----------|--------------|
 | `DEBUG_MAIN` | Simply *defining* this symbol breaks at the very start of your program, ready to single-step from the first instruction. |
-| `DEBUG_COGINIT` | Defining this symbol breaks every time a COG is started (COGINIT), catching each COG right at its entry point. |
-| `DEBUG_COGS` | An 8-bit mask choosing *which* COGs have debugging enabled — bit 0 is COG 0 through bit 7 for COG 7. A COG whose bit is **clear** runs with debugging off entirely: its `DEBUG` statements produce nothing and the debugger will not break in it. Defaults to all eight. |
+| `DEBUG_COGINIT` | Defining this symbol breaks every time a Cog is started (COGINIT), catching each Cog right at its entry point. |
+| `DEBUG_COGS` | An 8-bit mask choosing *which* Cogs have debugging enabled — bit 0 is Cog 0 through bit 7 for Cog 7. A Cog whose bit is **clear** runs with debugging off entirely: its `DEBUG` statements produce nothing and the debugger will not break in it. Defaults to all eight. |
 
 `DEBUG_MAIN` and `DEBUG_COGINIT` are switches: their mere presence in the `CON`
 block turns the behavior on, so you write them with no value. `DEBUG_COGS` does
-take a value, because it carries the COG mask:
+take a value, because it carries the cog mask:
 
 ```spin2
 CON
@@ -303,24 +303,24 @@ CON
 ```
 
 Reach for `DEBUG_MAIN` when you want to step from the very beginning;
-`DEBUG_COGINIT` is the one when the bug is in *how* a COG starts up. Use
-`DEBUG_COGS` to keep the noise down in a busy multi-COG program: clearing a
-COG's bit turns debugging off for that COG, so it never produces DEBUG output
-and the debugger never breaks in it — leaving you with only the COGs you actually
+`DEBUG_COGINIT` is the one when the bug is in *how* a cog starts up. Use
+`DEBUG_COGS` to keep the noise down in a busy multi-cog program: clearing a
+Cog's bit turns debugging off for that cog, so it never produces DEBUG output
+and the debugger never breaks in it — leaving you with only the cogs you actually
 care about. (`DEBUG_COGINIT` is the
 compile-time equivalent of the INIT breakpoint you will arm by hand in
 Chapter 6.)
 
 ## What "with debugging enabled" costs
 
-Debugging adds a small amount of code and RAM per COG so the chip can talk to
+Debugging adds a small amount of code and RAM per cog so the chip can talk to
 the host. For a finished release you simply compile without `-d` and the
 overhead is gone.
 
 
 # Chapter 3: Orientation — The Debugger Window
 
-When the debugger opens, you are looking at the full live state of one COG at
+When the debugger opens, you are looking at the full live state of one cog at
 once. It can feel busy at first. This chapter names each area and tells you what
 it is *for*; you do not need to memorize it — just know where to look.
 
@@ -337,8 +337,8 @@ whole window; the rest of this chapter walks through each pane in turn.
 
 ## The panes
 
-**COG / LUT register maps (left edge).** Two tall columns down the left of the
-window: all COG registers ($000 – $1FF) under **REG**, and all LUT registers
+**Cog / LUT register maps (left edge).** Two tall columns down the left of the
+window: all cog registers ($000 – $1FF) under **REG**, and all LUT registers
 ($200 – $3FF) under **LUT**, with the heat-map overlay showing read/write
 activity. This is where you spot "something is hammering this location" — in the
 figure below, the brighter band marks recently-touched LUT locations while the
@@ -349,7 +349,7 @@ the window, they are shown on their own here.
 \begin{figure}[H]
 \centering
 \screenshotfig[height=3.2in]{inbox/assets/reg-lut-heatmaps-tall.25.23.png}
-\caption{COG (REG) and LUT register heat-map columns.}
+\caption{cog (REG) and LUT register heat-map columns.}
 \end{figure}
 ```
 
@@ -489,7 +489,7 @@ else in this manual builds on those five moves.
 # Chapter 5: Commands and Controls
 
 These are the controls that drive a session. They are the same whether you
-reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a COG start.
+reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a cog start.
 
 ## Keyboard commands
 
@@ -505,9 +505,9 @@ reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a COG start.
 | **↑ / ↓** | Hub scroll | Scroll the hub data viewer one row (±$10) |
 | **PgUp / PgDn** | Hub page | Page the hub data viewer ($80 per press; $1000 with Ctrl, $10000 with Shift) |
 
-> **No key switches between COGs.** Each COG that hits a breakpoint opens its
+> **No key switches between cogs.** Each cog that hits a breakpoint opens its
 > **own window**, titled *Debugger - Cog N*; the windows cascade on screen as
-> they open. To work on a different COG, switch to its window. (The Tab key is
+> they open. To work on a different cog, switch to its window. (The Tab key is
 > intentionally inert inside the debugger window.)
 
 ## Mouse controls
@@ -535,10 +535,10 @@ A break-condition register controls which conditions are armed:
 | **MAIN** | main code executes |
 | **INT1 / INT2 / INT3** | the corresponding interrupt fires |
 | **DEBUG** | a `DEBUG` statement or `debug` instruction is reached |
-| **INIT** | a COG starts (COGINIT) |
+| **INIT** | a Cog starts (COGINIT) |
 | **EVENT** | a selected event triggers |
 | **ADDR** | execution reaches a chosen address |
-| **COGBRK** | another COG requests an asynchronous break |
+| **COGBRK** | another Cog requests an asynchronous break |
 
 You arm and disarm these with the condition buttons. **Left-click** a button to
 set that condition exclusively; **right-click** to toggle it without disturbing
@@ -568,13 +568,13 @@ than stopping every time when you are hunting an occasional case. Use the bare
 `DEBUG` here: a `DEBUG` with arguments inside (such as `DEBUG(UDEC(value))`)
 would send output to the display windows instead of breaking.
 
-## Asynchronous break between COGs (COGBRK)
+## Asynchronous break between Cogs (COGBRK)
 
-One COG can break another. Enable **BREAK** mode (press **B**) in the COG you
+One cog can break another. Enable **BREAK** mode (press **B**) in the cog you
 want to be interruptible; the break can then be fired across to it while you are
-stopped in another COG's debugger. This is how you stop a misbehaving worker COG
-— essential for multi-COG debugging (Chapter 8). One limitation to remember: an
-asynchronous break only lands while some COG is already sitting in its own
+stopped in another cog's debugger. This is how you stop a misbehaving worker cog
+— essential for multi-cog debugging (Chapter 8). One limitation to remember: an
+asynchronous break only lands while some cog is already sitting in its own
 debugger.
 
 
@@ -584,11 +584,11 @@ The reason to pause is to look. This chapter covers what you can inspect and how
 
 ## Memory
 
-**COG memory ($000 – $1FF).** 512 longs of COG RAM — your registers and code.
+**Cog memory ($000 – $1FF).** 512 longs of cog RAM — your registers and code.
 The heat map shows read/write activity, and the **Register Watch** pane lists
 locations automatically as they change.
 
-**LUT memory ($200 – $3FF).** 512 longs of lookup-table RAM, shared between COG
+**LUT memory ($200 – $3FF).** 512 longs of lookup-table RAM, shared between cog
 pairs (0–1, 2–3, 4–5, 6–7) and often used for fast data.
 
 **Hub memory.** The shared RAM, shown as hex with an ASCII column. Navigate with
@@ -599,7 +599,7 @@ digits.
 
 ## Registers and the special-function registers
 
-The special-function registers occupy the top of COG memory. Grouped by function,
+The special-function registers occupy the top of cog memory. Grouped by function,
 they are the interrupt vectors, the pointer/parameter registers, and the I/O
 registers:
 
@@ -693,12 +693,12 @@ b             res       1
 This instruction-by-instruction view is the most direct way to understand what a
 piece of PASM really does to the machine.
 
-## Multi-COG debugging
+## Multi-Cog debugging
 
-Each COG is debugged independently, and **each COG that breaks gets its own
-window** — titled *Debugger - Cog N*. To look at a different COG, switch to its
-window (the windows cascade on screen as they open). Because the COGs run in
-parallel, you typically arm breakpoints in each COG of interest and use COGBRK
+Each cog is debugged independently, and **each cog that breaks gets its own
+window** — titled *Debugger - Cog N*. To look at a different cog, switch to its
+window (the windows cascade on screen as they open). Because the cogs run in
+parallel, you typically arm breakpoints in each cog of interest and use COGBRK
 (Chapter 6) to coordinate stopping them.
 
 ```spin2
@@ -722,9 +722,9 @@ PRI blink(pin, half) | t
     waitct(t)
 ```
 
-Note the P2 idioms: **`COGSPIN`** to start the COG and **`GETCT`** / `waitct` for
+Note the P2 idioms: **`COGSPIN`** to start the cog and **`GETCT`** / `waitct` for
 timing. Both breakpoints are *argument-less* `DEBUG` statements — only that form
-opens the single-step debugger. The blink COG opens in **its own window**
+opens the single-step debugger. The blink cog opens in **its own window**
 (*Debugger - Cog N*); switch to that window to step through it on its own while
 `main` keeps running.
 
@@ -733,7 +733,7 @@ opens the single-step debugger. The blink COG opens in **its own window**
 When a value is being clobbered and you do not know by whom, lean on the heat
 maps. The debugger has no data watchpoint, but it *colors* every read and write:
 
-1. Keep the COG/LUT heat-map columns (or the hub heat-map) in view and step or
+1. Keep the cog/LUT heat-map columns (or the hub heat-map) in view and step or
    run between breakpoints, watching for write activity on the affected location.
 2. Watch the surrounding locations too — corruption often spills across
    neighbors.
@@ -791,14 +791,14 @@ DEBUG(UDEC(count))                  ' prints: count = 42  (auto label)
 - **Let the heat map point you.** Unexpected activity is a fast way to localize a
   bug you cannot otherwise see.
 - **Use COGBRK for parallel bugs.** Coordinated stopping is the key to making
-  sense of multi-COG behavior.
+  sense of multi-cog behavior.
 
 ## Troubleshooting
 
 | Symptom | Likely cause / fix |
 |---------|--------------------|
 | Debugger never appears | Did you compile with `pnut_ts -d`? Without `-d`, DEBUG is stripped. |
-| A COG will not respond | It may be stalled; check whether it is waiting (e.g. on an event or `waitct`). |
+| A Cog will not respond | It may be stalled; check whether it is waiting (e.g. on an event or `waitct`). |
 | Lost in hub memory | Click the hub heat-map to jump, or dial the address in with the scroll wheel. |
 | A breakpoint never hits | Re-check the address and that the matching condition (ADDR/DEBUG/INT…) is armed. |
 
@@ -816,7 +816,7 @@ there.
 | Broad P2 hardware compatibility | v35v |
 | Robust exception handling / stability | v35g |
 | Automatic clock-frequency adaptation; flash-debug support | v36 |
-| Advanced multi-COG debugging | v36 |
+| Advanced multi-Cog debugging | v36 |
 | Auto-triggering scope displays | v41 |
 | Complete feature set | v51 and later |
 

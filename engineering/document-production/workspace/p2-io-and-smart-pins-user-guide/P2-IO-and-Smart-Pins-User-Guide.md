@@ -128,13 +128,13 @@ This guide would not exist without the contributions of many individuals and org
 
 **Parallax Inc.** for creating the Propeller 2 microcontroller and providing comprehensive reference documentation that forms the foundation of this work.
 
-**Chip Gracey** for the brilliant design of the P2 Smart Pin system and for maintaining detailed technical specifications.
+**Chip Gracey** for the brilliant design of the P2 smart pin system and for maintaining detailed technical specifications.
 
-**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the Smart Pin modes and identified critical details worth documenting.
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the smart pin modes and identified critical details worth documenting.
 
-**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the Silicon Documentation with examples and further explanation — whose detailed Smart Pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
+**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the *Parallax Propeller 2 Documentation v35 - Rev B/C* with examples and further explanation — whose detailed smart pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
 
-This guide is a community-developed resource, created to make the P2's Smart Pin system more accessible to developers at all skill levels.
+This guide is a community-developed resource, created to make the P2's smart pin system more accessible to developers at all skill levels.
 
 
 ## How to Use This Guide
@@ -174,7 +174,7 @@ The Intent Index covers common tasks including:
 
 Readers who know which mode or feature they need can navigate directly:
 
-- **Quick Mode Selection Matrix** (below) - Visual overview of all 32 Smart Pin modes
+- **Quick Mode Selection Matrix** (below) - Visual overview of all 32 smart pin modes
 - **Appendix F: Complete Mode Reference** - Condensed reference for all modes
 - **Chapter index** - Direct chapter access by topic
 
@@ -196,7 +196,7 @@ Each mode chapter stands alone with complete configuration details, all applicab
 
 ### Register Notation
 
-The P2 Smart Pin system uses three internal registers:
+The P2 smart pin system uses three internal registers:
 
 | Register | Notation | Description |
 |----------|----------|-------------|
@@ -249,7 +249,7 @@ Cross-references use the format:
 
 ## Quick Mode Selection Matrix
 
-The following matrix provides a one-page overview of all 32 Smart Pin modes organized by function. Use this for quick navigation to the appropriate chapter.
+The following matrix provides a one-page overview of all 32 smart pin modes organized by function. Use this for quick navigation to the appropriate chapter.
 
 ### Output Modes
 
@@ -313,7 +313,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 15 |
 | **ADC Input** | ADC, ADC Ext, ADC Scope | 16 |
 | **Serial Receive** | Sync RX, Async RX | 17 |
-| **Inter-COG Sharing** | Repository | 18 |
+| **Inter-Cog Sharing** | Repository | 18 |
 | **USB** | USB Pair | 19 |
 
 
@@ -324,7 +324,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 
 # Chapter 1: Direct I/O - The Foundation {#ch1}
 
-Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex Smart Pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
+Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex smart pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
 
 ## 1.1 The Hardware Model
@@ -1414,7 +1414,7 @@ PUB main()
 
 ### PINCLEAR(PinField)
 
-Clears Smart Pin configuration.
+Clears smart pin configuration.
 
 **Function:** Resets pin to normal mode (P_NORMAL)
 
@@ -1425,7 +1425,7 @@ Clears Smart Pin configuration.
 PINCLEAR(10)                      ' Reset pin 10 to normal mode
 ```
 
-**Note:** Use this to disable Smart Pin modes and return to basic Direct I/O.
+**Note:** Use this to disable smart pin modes and return to basic Direct I/O.
 
 
 ## 1.9 Pin Span Operations
@@ -1500,7 +1500,7 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: P2 Assembly Language Manual.)
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: *P2 Assembly Language Reference*.)
 
 
 ## 1.11 Common Patterns
@@ -1537,7 +1537,7 @@ delay         long      100_000_000     ' 0.5 seconds at 200 MHz
 
 ### Button-Controlled LED (Spin2)
 
-```spin2
+```{.spin2 caption="ch01-button-led.spin2"}
 CON
   _clkfreq = 200_000_000
   BUTTON_PIN = 10
@@ -1574,11 +1574,11 @@ DAT           org
 ```
 
 
-*This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
+*This chapter establishes the foundational concepts of P2 pin control. All smart pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
 
 # Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
-Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
+Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering smart pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
 ## 2.1 Overview
 
@@ -1589,7 +1589,7 @@ While Chapter 1 covered the fundamental DIR/OUT/IN operations, Enhanced Direct I
 - **Drive Strength Selection**: 8 options for high-side drive, 8 options for low-side drive
 - **Input Conditioning**: Logic level, Schmitt trigger, and comparator modes
 - **Input Routing**: Select from local pin or adjacent pins (-3 to +3)
-- **Basic Analog**: DAC output and ADC input without Smart Pin modes
+- **Basic Analog**: DAC output and ADC input without smart pin modes
 - **Polarity Control**: Invert input or output signals
 
 ### Configuration Method
@@ -1819,7 +1819,7 @@ Combine A and B inputs logically before use.
 
 ## 2.5 ADC Input Modes (Basic)
 
-Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. The result appears in the IN bit based on comparison.
+Basic ADC modes provide analog-to-digital conversion without smart pin modes. The result appears in the IN bit based on comparison.
 
 | Constant | Gain | Description |
 |----------|------|-------------|
@@ -1832,7 +1832,7 @@ Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. Th
 | `P_ADC_30X` | 31.6× | Higher gain |
 | `P_ADC_100X` | 100× | Maximum gain |
 
-**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use Smart Pin ADC modes (Chapter 17).
+**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use smart pin ADC modes (Chapter 17).
 
 **Example - Simple threshold detection:**
 ```spin2
@@ -1843,7 +1843,7 @@ PINFLOAT(adc_pin)
 
 ## 2.6 DAC Output Modes (Basic)
 
-Basic DAC modes provide digital-to-analog conversion without Smart Pin modes. The DAC value is encoded in the WRPIN configuration word.
+Basic DAC modes provide digital-to-analog conversion without smart pin modes. The DAC value is encoded in the WRPIN configuration word.
 
 | Constant | Impedance | Peak Voltage | Description |
 |----------|-----------|--------------|-------------|
@@ -1885,7 +1885,7 @@ PUB main()
   PINH(DAC_PIN)                           ' Enable DAC output
 ```
 
-**Note:** For dynamic DAC output with waveform generation, use Smart Pin DAC modes (Chapter 10).
+**Note:** For dynamic DAC output with waveform generation, use smart pin DAC modes (Chapter 10).
 
 ## 2.7 Level Comparison Modes
 
@@ -1958,7 +1958,7 @@ PINHIGH(led_pin)                          ' Actually drives low, LED on
 | `P_TT_11` | %11 | Combined |
 | `P_CHANNEL` | %01 | DAC channel enable (alias for P_OE) |
 
-**P_OE** is required when using Smart Pin modes that produce output. For P_NORMAL mode, it is not needed as DIR controls output directly.
+**P_OE** is required when using smart pin modes that produce output. For P_NORMAL mode, it is not needed as DIR controls output directly.
 
 ## 2.11 Combining Constants
 
@@ -2089,7 +2089,7 @@ WRPIN(pin, 0)                             ' Same effect
               wrpin     #0, pin           ' Reset to P_NORMAL
 ```
 
-This clears all enhanced configuration and Smart Pin modes, returning the pin to basic Direct I/O operation.
+This clears all enhanced configuration and smart pin modes, returning the pin to basic Direct I/O operation.
 
 ## 2.14 Quick Reference
 
@@ -2116,11 +2116,11 @@ This clears all enhanced configuration and Smart Pin modes, returning the pin to
 | P_LEVEL_* | Optional | Programmable threshold |
 
 
-*This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the Smart Pin configuration process, see Chapter 4.*
+*This chapter covers pin configuration without smart pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the smart pin configuration process, see Chapter 4.*
 
 # Chapter 3: Smart Pin Architecture - Autonomous I/O {#ch3}
 
-Smart Pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a Smart Pin operates independently of the COG—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming COG cycles. This chapter establishes the mental model for understanding all Smart Pin modes documented in Parts II through IV.
+Smart pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a smart pin operates independently of the cog—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming cog cycles. This chapter establishes the mental model for understanding all smart pin modes documented in Parts II through IV.
 
 
 ## 3.1 The Autonomous Operation Concept
@@ -2129,40 +2129,40 @@ Smart Pins transform P2 I/O pins from simple input/output points into autonomous
 
 A traditional microcontroller pin requires continuous software attention. To generate a PWM signal, for example, software must toggle the pin at precise intervals. To measure an input pulse width, software must sample the pin and track timing. These operations consume CPU cycles and require precise interrupt handling.
 
-Smart Pins invert this model. Once configured:
+Smart pins invert this model. Once configured:
 
-- **The hardware generates signals autonomously** - PWM, serial data, NCO waveforms run without COG intervention
+- **The hardware generates signals autonomously** - PWM, serial data, NCO waveforms run without cog intervention
 - **The hardware measures signals autonomously** - Pulse widths, frequencies, quadrature positions accumulate in registers
-- **The COG interacts only when needed** - To read results, update parameters, or reconfigure
+- **The cog interacts only when needed** - To read results, update parameters, or reconfigure
 
 This autonomous operation enables:
 
 - **Precise timing** - Hardware-level timing accuracy, independent of software execution
-- **Multi-channel operation** - Every pin can run its own Smart Pin mode simultaneously
-- **Reduced COG load** - COGs spend time on computation rather than I/O bit-banging
+- **Multi-channel operation** - Every pin can run its own smart pin mode simultaneously
+- **Reduced cog load** - cogs spend time on computation rather than I/O bit-banging
 - **Deterministic behavior** - Hardware timing is unaffected by software complexity
 
-### The Relationship Between COG and Smart Pin
+### The Relationship Between Cog and Smart Pin
 
-Each Smart Pin operates as an independent state machine. The COG's role is:
+Each smart pin operates as an independent state machine. The cog's role is:
 
-1. **Configure** the Smart Pin (mode, parameters)
-2. **Enable** the Smart Pin (set DIR=1)
+1. **Configure** the smart pin (mode, parameters)
+2. **Enable** the smart pin (set DIR=1)
 3. **Monitor** the IN flag for events
 4. **Read** results when ready
 5. **Update** parameters as needed
 6. **Disable** when finished
 
-Between these interactions, the Smart Pin runs autonomously.
+Between these interactions, the smart pin runs autonomously.
 
 
 ## 3.2 The Three-Register Model
 
-Every Smart Pin has four 32-bit registers: a mode-configuration register written by WRPIN (the mode-control word, see §3.5), plus the three parameter/result registers—X, Y, and Z—described here. The mode register establishes *what* the pin does; X, Y, and Z carry the data it works with:
+Every smart pin has four 32-bit registers: a mode-configuration register written by WRPIN (the mode-control word, see §3.5), plus the three parameter/result registers—X, Y, and Z—described here. The mode register establishes *what* the pin does; X, Y, and Z carry the data it works with:
 
 ### X Register - Configuration and Parameters
 
-The X register holds configuration parameters that define **how** the Smart Pin operates. Its meaning varies by mode:
+The X register holds configuration parameters that define **how** the smart pin operates. Its meaning varies by mode:
 
 | Mode Category | Typical X Usage |
 |---------------|-----------------|
@@ -2185,30 +2185,30 @@ Y is written via the **WYPIN** instruction. For many modes, Y is updated repeate
 
 ### Z Register - Accumulator and Results
 
-The Z register is the Smart Pin's working register:
+The Z register is the smart pin's working register:
 
 - **Accumulators** - Counting events, timing measurements
 - **Phase accumulators** - NCO modes track phase in Z
-- **Output buffers** - Results for COG to read
+- **Output buffers** - Results for cog to read
 
-Z is read via **RDPIN** or **RQPIN**. Software cannot write Z directly—it is managed by the Smart Pin hardware.
+Z is read via **RDPIN** or **RQPIN**. Software cannot write Z directly—it is managed by the smart pin hardware.
 
 ### Register Initialization
 
-When a Smart Pin is reset (DIR transitions from 1 to 0), the registers are initialized according to the mode. Specific initialization behavior is documented in each mode's chapter.
+When a smart pin is reset (DIR transitions from 1 to 0), the registers are initialized according to the mode. Specific initialization behavior is documented in each mode's chapter.
 
 
 ## 3.3 The IN Bit - Event Signaling
 
 ### Purpose of the IN Bit
 
-Each Smart Pin has an **IN bit** that signals events to COGs. This is the same IN bit readable via TESTP/TESTPN, but its meaning changes when a Smart Pin mode is active.
+Each smart pin has an **IN bit** that signals events to cogs. This is the same IN bit readable via TESTP/TESTPN, but its meaning changes when a smart pin mode is active.
 
-In P_NORMAL mode (no Smart Pin):
+In P_NORMAL mode (no smart pin):
 
 - IN reflects the physical pin state
 
-In Smart Pin modes:
+In smart pin modes:
 
 - IN signals mode-specific events (data ready, measurement complete, overflow, etc.)
 
@@ -2226,7 +2226,7 @@ Each mode defines when it raises IN:
 
 ### Acknowledging IN
 
-When a COG interacts with a Smart Pin, the IN bit is **acknowledged** (lowered). This prepares the Smart Pin to signal the next event.
+When a cog interacts with a smart pin, the IN bit is **acknowledged** (lowered). This prepares the smart pin to signal the next event.
 
 **Instructions that acknowledge:**
 
@@ -2244,25 +2244,25 @@ When a COG interacts with a Smart Pin, the IN bit is **acknowledged** (lowered).
 
 After an acknowledge, it takes **two clock cycles** before the IN bit can be polled again:
 
-1. COG executes RDPIN/AKPIN/etc. (acknowledges Smart Pin)
+1. Cog executes RDPIN/AKPIN/etc. (acknowledges smart pin)
 2. One clock elapses
 3. Second clock elapses
 4. IN can now be polled via TESTP
 
 This timing matters in tight polling loops.
 
-### RQPIN for Multi-COG Access
+### RQPIN for Multi-Cog Access
 
-The **RQPIN** (read quiet) instruction reads the Z register without acknowledging. This allows multiple COGs to read the same Smart Pin's result without interfering with each other. Only one COG should acknowledge; others can use RQPIN to observe.
+The **RQPIN** (read quiet) instruction reads the Z register without acknowledging. This allows multiple cogs to read the same smart pin's result without interfering with each other. Only one cog should acknowledge; others can use RQPIN to observe.
 
 ::: caution
-**Multi-COG bus collisions.** Every COG reaches each Smart Pin over a shared 34-bit bus for write data and acknowledgment, and the Smart Pin **OR**s the incoming buses from all COGs together — the same way DIR and OUT bits are OR'd before reaching a pin. So if two or more COGs issue **WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN** to the *same* Smart Pin simultaneously, their bus data collides and corrupts. **RQPIN is the lone exception** — it does not use the acknowledge bus, so any number of COGs may RQPIN the same Smart Pin at once. Design multi-COG access so that only one COG configures and acknowledges a given Smart Pin; the others observe with RQPIN.
+**Multi-cog bus collisions.** Every cog reaches each smart pin over a shared 34-bit bus for write data and acknowledgment, and the smart pin **OR**s the incoming buses from all cogs together — the same way DIR and OUT bits are OR'd before reaching a pin. So if two or more cogs issue **WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN** to the *same* smart pin simultaneously, their bus data collides and corrupts. **RQPIN is the lone exception** — it does not use the acknowledge bus, so any number of cogs may RQPIN the same smart pin at once. Design multi-cog access so that only one cog configures and acknowledges a given smart pin; the others observe with RQPIN.
 :::
 
 
 ## 3.4 The Smart Pin State Machine
 
-Every Smart Pin follows a consistent state progression:
+Every smart pin follows a consistent state progression:
 
 ```{=latex}
 \DiagPinStates
@@ -2270,14 +2270,14 @@ Every Smart Pin follows a consistent state progression:
 
 ### State 1: Disabled (DIR=0)
 
-When DIR=0, the Smart Pin is held in reset:
+When DIR=0, the smart pin is held in reset:
 
-- The Smart Pin state machine is stopped
+- The smart pin state machine is stopped
 - IN is forced low
 - Registers are initialized to mode-specific values
 - Configuration instructions (WRPIN/WXPIN/WYPIN) are accepted
 
-**Important:** Always issue WRPIN (mode/routing configuration) while DIR=0 — changing the mode word while the pin is running (DIR=1) can cause unpredictable behavior. WXPIN and WYPIN are different: they are the normal runtime update path and work freely while the Smart Pin is running (DIR=1).
+**Important:** Always issue WRPIN (mode/routing configuration) while DIR=0 — changing the mode word while the pin is running (DIR=1) can cause unpredictable behavior. WXPIN and WYPIN are different: they are the normal runtime update path and work freely while the smart pin is running (DIR=1).
 
 ### State 2: Configured
 
@@ -2293,7 +2293,7 @@ Not all modes require all three. Some modes only need WRPIN; others need WRPIN +
 
 When DIR transitions from 0 to 1:
 
-- The Smart Pin begins autonomous operation
+- The smart pin begins autonomous operation
 - The state machine starts running
 - Mode-specific behavior commences
 
@@ -2301,18 +2301,18 @@ The direction can be set via:
 
 - DIRH - Set direction high (output mode)
 - DRVH/DRVL - Set direction high with specific output state
-- Note: For Smart Pins with P_OE set, output is enabled regardless of DIR
+- Note: For smart pins with P_OE set, output is enabled regardless of DIR
 
 ### State 4: Running
 
-The Smart Pin operates autonomously:
+The smart pin operates autonomously:
 
 - Generates outputs according to mode
 - Measures inputs according to mode
 - Updates Z register with results
 - Raises IN when events occur
 
-COG interaction during running:
+Cog interaction during running:
 
 - Read results via RDPIN/RQPIN
 - Update parameters via WXPIN/WYPIN
@@ -2320,12 +2320,12 @@ COG interaction during running:
 
 ### Reset
 
-To reset a Smart Pin without reconfiguring:
+To reset a smart pin without reconfiguring:
 
 1. Clear DIR (DIRL or FLTL)
 2. Set DIR (DIRH or DRVH/DRVL)
 
-This restarts the Smart Pin with current configuration. No need to repeat WRPIN/WXPIN/WYPIN.
+This restarts the smart pin with current configuration. No need to repeat WRPIN/WXPIN/WYPIN.
 
 To completely disable and return to normal mode:
 
@@ -2336,7 +2336,7 @@ To completely disable and return to normal mode:
 
 ### Mode Selection via WRPIN
 
-The Smart Pin mode is selected by bits [5:1] of the WRPIN D operand (bit 0 is always 0). With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
+The smart pin mode is selected by bits [5:1] of the WRPIN D operand (bit 0 is always 0). With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
 
 | Mode Bits | Category |
 |-----------|----------|
@@ -2366,12 +2366,12 @@ Generate signals on the pin—pulses, waveforms, serial data.
 Measure signals on the pin—timing, counting, frequency, analog levels.
 
 **Special Modes (Chapters 18-19):**
-Inter-COG data sharing (Repository) and USB.
+Inter-cog data sharing (Repository) and USB.
 
 
 ## 3.6 The Layered Configuration Model
 
-Smart Pin configuration is layered. Multiple aspects combine to define complete behavior:
+Smart pin configuration is layered. Multiple aspects combine to define complete behavior:
 
 ### Layer 1: Smart Pin Mode (bits [5:1])
 
@@ -2403,7 +2403,7 @@ The TT bits control output behavior:
 - P_OE (%01): Output enabled regardless of DIR
 - Without P_OE: DIR controls output enable
 
-For Smart Pin output modes, P_OE is required.
+For smart pin output modes, P_OE is required.
 
 ### Combining Layers
 
@@ -2415,7 +2415,7 @@ mode := P_NCO_FREQ | P_OE | P_HIGH_FAST | P_LOW_FAST
 
 This combines:
 
-- Smart Pin mode (P_NCO_FREQ)
+- Smart pin mode (P_NCO_FREQ)
 - Output enable (P_OE)
 - Drive strength (P_HIGH_FAST, P_LOW_FAST)
 
@@ -2445,7 +2445,7 @@ This combines:
 **Multi-channel parallel operation:**
 
 - Every pin can run independently
-- 64 simultaneous Smart Pin operations possible
+- 64 simultaneous smart pin operations possible
 
 ### Direct I/O May Be Better For
 
@@ -2462,18 +2462,18 @@ This combines:
 **Complex conditional logic:**
 
 - Where software decision-making determines output
-- Irregular patterns that don't fit Smart Pin modes
+- Irregular patterns that don't fit smart pin modes
 
 **Low pin count applications:**
 
-- When COG cycles are abundant
+- When cog cycles are abundant
 - When flexibility outweighs hardware efficiency
 
 ### Hybrid Approaches
 
-Many applications combine Smart Pins with Direct I/O:
+Many applications combine smart pins with Direct I/O:
 
-- Smart Pin for timing-critical signals (PWM, serial)
+- Smart pin for timing-critical signals (PWM, serial)
 - Direct I/O for control signals (enable, reset, status)
 
 
@@ -2481,15 +2481,15 @@ Many applications combine Smart Pins with Direct I/O:
 
 ### One Mode Per Pin
 
-Each pin can run exactly one Smart Pin mode at a time. To change modes:
+Each pin can run exactly one smart pin mode at a time. To change modes:
 
-1. Disable the Smart Pin (DIR=0)
+1. Disable the smart pin (DIR=0)
 2. Reconfigure with WRPIN
 3. Re-enable (DIR=1)
 
 ### Z Register is Read-Only to Software
 
-Software cannot directly write the Z register. Z is managed entirely by Smart Pin hardware. To "preset" a counter or phase, use the mode-specific mechanisms (often via X or Y registers, or by reset timing).
+Software cannot directly write the Z register. Z is managed entirely by smart pin hardware. To "preset" a counter or phase, use the mode-specific mechanisms (often via X or Y registers, or by reset timing).
 
 ### Acknowledge Timing
 
@@ -2509,7 +2509,7 @@ These details are documented in each mode's chapter.
 
 ## 3.9 Chapter Summary
 
-Smart Pins provide autonomous I/O operations through:
+Smart pins provide autonomous I/O operations through:
 
 1. **Three registers** (X, Y, Z) for configuration, input, and results
 2. **The IN bit** for event signaling
@@ -2517,14 +2517,14 @@ Smart Pins provide autonomous I/O operations through:
 4. **32 modes** selected by bits [5:1] of WRPIN
 5. **Layered configuration** combining mode, pin settings, input routing, and output control
 
-The key insight: once configured and enabled, Smart Pins operate independently. The COG is free to perform other work, interacting with the Smart Pin only to read results or update parameters.
+The key insight: once configured and enabled, smart pins operate independently. The cog is free to perform other work, interacting with the smart pin only to read results or update parameters.
 
 
-*This conceptual foundation applies to all Smart Pin modes. Proceed to Chapter 4 for the practical configuration process, or to Part II (Chapters 6-11) for specific output modes.*
+*This conceptual foundation applies to all smart pin modes. Proceed to Chapter 4 for the practical configuration process, or to Part II (Chapters 6-11) for specific output modes.*
 
 # Chapter 4: Smart Pin Configuration {#ch4}
 
-This chapter documents the instructions and methods for configuring and interacting with Smart Pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish Smart Pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the Smart Pin without reading.
+This chapter documents the instructions and methods for configuring and interacting with smart pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish smart pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the smart pin without reading.
 
 
 ## 4.1 Configuration Instructions Overview
@@ -2547,7 +2547,7 @@ All configuration and acknowledge instructions execute in 2 clock cycles.
 
 WRPIN establishes the complete pin configuration including:
 
-- Smart Pin mode selection
+- Smart pin mode selection
 - Low-level pin configuration (drive strength, input mode)
 - Input routing and polarity
 - DIR/OUT control options
@@ -2593,14 +2593,14 @@ D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
 
 1. Pin is configured according to the D value
 2. IN bit is acknowledged (lowered)
-3. If DIR=0, Smart Pin remains in reset state
+3. If DIR=0, smart pin remains in reset state
 4. If DIR=1 and mode changes, behavior is unpredictable (always configure while DIR=0)
 
 ### Critical Requirements
 
-**Configure while DIR=0:** Smart Pins must be configured while held in reset (DIR=0). The proper sequence is:
+**Configure while DIR=0:** Smart pins must be configured while held in reset (DIR=0). The proper sequence is:
 
-1. DIRL to reset Smart Pin
+1. DIRL to reset smart pin
 2. WRPIN to configure
 3. WXPIN/WYPIN as needed
 4. DRVL/DRVH to enable
@@ -2731,7 +2731,7 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
 
 ### Function
 
-RDPIN reads the Z register and acknowledges the Smart Pin (lowers IN).
+RDPIN reads the Z register and acknowledges the smart pin (lowers IN).
 
 ```pasm-syntax
         RDPIN   D,{#}S          {WC}
@@ -2769,10 +2769,10 @@ result := RDPIN(Pin)
 
 Use RDPIN when:
 
-- The COG needs the result AND
-- The Smart Pin should be signaled that the result was consumed
+- The cog needs the result AND
+- The smart pin should be signaled that the result was consumed
 
-This is the normal read operation for single-COG access.
+This is the normal read operation for single-cog access.
 
 ### Examples
 
@@ -2792,7 +2792,7 @@ measurement := RDPIN(pin)                ' Read Z, acknowledge
 
 ### Function
 
-RQPIN reads the Z register WITHOUT acknowledging the Smart Pin. IN remains in its current state.
+RQPIN reads the Z register WITHOUT acknowledging the smart pin. IN remains in its current state.
 
 ```pasm-syntax
         RQPIN   D,{#}S          {WC}
@@ -2810,13 +2810,13 @@ result := RQPIN(Pin)
 
 ### When to Use RQPIN
 
-**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit Smart Pin bus and collide if two COGs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-COG caution in §3.3).
+**Multi-cog observation:** When multiple cogs need to read the same smart pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit smart pin bus and collide if two cogs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-cog caution in §3.3).
 
 **Non-destructive peek:** When checking results without signaling consumption.
 
 **Continuous modes:** Some modes (like totalizer counters) benefit from RQPIN for intermediate reads while RDPIN resets for the next period.
 
-### Example - Multi-COG Access
+### Example - Multi-Cog Access
 
 ```pasm2
 ' COG 0 (primary) uses RDPIN
@@ -2831,7 +2831,7 @@ result := RQPIN(Pin)
 
 ### Function
 
-AKPIN acknowledges the Smart Pin without reading the Z register.
+AKPIN acknowledges the smart pin without reading the Z register.
 
 ```pasm-syntax
         AKPIN   {#}Src
@@ -2851,7 +2851,7 @@ Or configure in PASM2 if needed.
 ### When to Use AKPIN
 
 - Resetting the IN flag without needing the data
-- Synchronizing Smart Pin timing without data consumption
+- Synchronizing smart pin timing without data consumption
 - Discarding an unwanted result
 
 ### Example
@@ -2863,7 +2863,7 @@ Or configure in PASM2 if needed.
 
 ## 4.8 The Standard Configuration Sequence
 
-All Smart Pin modes follow a common configuration pattern:
+All smart pin modes follow a common configuration pattern:
 
 ### Step 1: Reset the Smart Pin
 
@@ -2921,7 +2921,7 @@ PINHIGH(pin)                             ' DIR=1, start Smart Pin
               drvh      #pin              ' Enable Smart Pin
 ```
 
-**Note:** For output modes, DRVL vs DRVH doesn't affect the Smart Pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
+**Note:** For output modes, DRVL vs DRVH doesn't affect the smart pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
 
 ### Complete Example - NCO Frequency
 
@@ -2960,11 +2960,11 @@ PUB setup_nco() | y_value
 
 ### Purpose
 
-The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the DIR bit state.
+The `P_OE` constant (TT bits = %01) enables smart pin output regardless of the DIR bit state.
 
 ### When P_OE is Required
 
-**Output modes:** All Smart Pin modes that produce output require P_OE:
+**Output modes:** All smart pin modes that produce output require P_OE:
 
 - NCO frequency/duty (%00110, %00111)
 - PWM modes (%01000, %01001, %01010)
@@ -2973,7 +2973,7 @@ The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the D
 - DAC modes (%00001, %00010, %00011 in DAC mode)
 - USB (%11011)
 
-**Without P_OE:** The Smart Pin calculates output but doesn't drive the pin. This can be useful for:
+**Without P_OE:** The smart pin calculates output but doesn't drive the pin. This can be useful for:
 
 - Preparing output before enabling
 - Running the mode for internal timing without external output
@@ -2998,7 +2998,7 @@ WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 
 ## 4.10 Input Routing
 
-Smart Pins can receive input from the local pin or adjacent pins.
+Smart pins can receive input from the local pin or adjacent pins.
 
 ### A Input Selection
 
@@ -3057,7 +3057,7 @@ The B input is used for secondary signals (clock, quadrature channel B, etc.).
 | `P_FILT2_AB` | A and B both filtered using global filt2 settings |
 | `P_FILT3_AB` | A and B both filtered using global filt3 settings |
 
-When a pin is **not** in a Smart Pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a Smart Pin.
+When a pin is **not** in a smart pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a smart pin.
 
 ### Example - Quadrature Encoder
 
@@ -3086,7 +3086,7 @@ PINLOW(20)                                ' Enable
 
 ## 4.11 Span Operations
 
-All Smart Pin instructions support operating on multiple pins simultaneously.
+All smart pin instructions support operating on multiple pins simultaneously.
 
 ### Span Encoding
 
@@ -3141,7 +3141,7 @@ if result & $8000_0000                    ' Check bit 31 (mode-dependent)
 
 ## 4.13 The 2-Clock Acknowledge Delay
 
-After any instruction that acknowledges the Smart Pin (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN), two clock cycles must elapse before IN can be polled:
+After any instruction that acknowledges the smart pin (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN), two clock cycles must elapse before IN can be polled:
 
 ```pasm2
               rdpin     result, #pin      ' Acknowledge Smart Pin
@@ -3211,20 +3211,20 @@ WRPIN(pin, 0)
 `WRPIN(pin, 0)` clears a smart pin to `P_NORMAL` **at any time, including while it is running** — no `DIRL`/`DIRH` cycle is required. The reset-before-configure rule (§4.2) applies when *changing* to another active mode; returning to direct I/O with `#0` takes effect immediately.
 
 
-*This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*
+*This chapter covers the mechanics of smart pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*
 
 # Chapter 5: Working with Smart Pins {#ch5}
 
-This chapter covers practical patterns for Smart Pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all Smart Pin modes documented in Parts II through IV.
+This chapter covers practical patterns for smart pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all smart pin modes documented in Parts II through IV.
 
 
 ## 5.1 The Read/Acknowledge Cycle
 
 ### How IN and Acknowledge Work
 
-When a Smart Pin event occurs (measurement complete, data ready, etc.), the Smart Pin raises its IN flag. This signals to COGs that attention is needed.
+When a smart pin event occurs (measurement complete, data ready, etc.), the smart pin raises its IN flag. This signals to cogs that attention is needed.
 
-**Acknowledging instructions** (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN) lower the IN flag, signaling to the Smart Pin that the event was handled. This allows IN to be raised again for the next event.
+**Acknowledging instructions** (WRPIN, WXPIN, WYPIN, RDPIN, AKPIN) lower the IN flag, signaling to the smart pin that the event was handled. This allows IN to be raised again for the next event.
 
 **Non-acknowledging read** (RQPIN) reads the result without lowering IN.
 
@@ -3384,7 +3384,7 @@ WYPIN(1, duty_1)
 
 ### Relative Pin Addressing
 
-Smart Pins can use adjacent pins for input:
+Smart pins can use adjacent pins for input:
 
 **Quadrature encoder (A on pin N, B on pin N+1):**
 ```spin2
@@ -3429,9 +3429,9 @@ WYPIN(phase_c, freq_value)
 PINLOW(phase_a..phase_c)
 ```
 
-### Multi-COG Access
+### Multi-Cog Access
 
-When multiple COGs need the same Smart Pin data:
+When multiple cogs need the same smart pin data:
 
 **Pattern: One owner, multiple observers**
 ```pasm2
@@ -3484,7 +3484,7 @@ PINSTART(pin, P_NCO_FREQ | P_OE, 1, freq)
 
 ### PINCLEAR - Reset to Normal
 
-PINCLEAR disables Smart Pin mode and returns to Direct I/O:
+PINCLEAR disables smart pin mode and returns to Direct I/O:
 
 ```spin2
 PINCLEAR(pin)                             ' Reset to P_NORMAL
@@ -3541,12 +3541,12 @@ DEBUG("Z register: ", UHEX_(value))
 **Erratic behavior:**
 
 - Configured while DIR=1 (should configure while DIR=0)
-- Multiple COGs acknowledging same pin
+- Multiple cogs acknowledging same pin
 - X or Y values out of valid range
 
 ### Debugging Checklist
 
-1. **Is DIR=1?** - Smart Pin must be enabled
+1. **Is DIR=1?** - Smart pin must be enabled
 2. **Is P_OE included?** - Required for output modes
 3. **Is mode correct?** - Verify mode bits in WRPIN value
 4. **Is X valid?** - Check period/parameter calculations
@@ -3597,13 +3597,13 @@ For high-frequency events:
 
 - Events faster than ~10 MHz at 200 MHz sysclk
 - Tight timing loops
-- Multiple Smart Pins requiring attention
+- Multiple smart pins requiring attention
 
 ### When Overhead is Negligible
 
 - Events slower than 1 MHz
 - Occasional configuration changes
-- Asynchronous operation (Smart Pin runs independently)
+- Asynchronous operation (smart pin runs independently)
 
 
 ## 5.7 Troubleshooting Quick Reference
@@ -3615,7 +3615,7 @@ For high-frequency events:
 | DIR state | Ensure DRVL/DRVH/PINLOW was executed after configuration |
 | WRPIN value | Verify mode bits are correct (%SSSSS field) |
 | Pin number | Confirm correct pin in all instructions |
-| COG conflict | Check if another COG is controlling the pin |
+| Cog conflict | Check if another Cog is controlling the pin |
 
 ### "No Output"
 
@@ -3659,7 +3659,7 @@ For high-frequency events:
 | Read timing | Read before next event overwrites result |
 | Bit width | Ensure Z interpretation matches mode |
 | C flag | Some modes put extra data in C flag |
-| Multi-COG | Only one COG should RDPIN; others use RQPIN |
+| Multi-Cog | Only one Cog should RDPIN; others use RQPIN |
 
 ### "Works Then Stops"
 
@@ -3691,7 +3691,7 @@ For high-frequency events:
 1. Use pin ranges for identical configurations
 2. Enable simultaneously for synchronization
 3. Use relative addressing for related pins
-4. Designate one COG as owner for shared pins
+4. Designate one cog as owner for shared pins
 
 ### Debugging
 
@@ -3701,14 +3701,14 @@ For high-frequency events:
 4. Verify calculations independently
 
 
-*This chapter completes Part I: Fundamentals. For specific Smart Pin mode documentation, proceed to Part II (Output Modes), Part III (Input Modes), or Part IV (Special Modes).*
+*This chapter completes Part I: Fundamentals. For specific smart pin mode documentation, proceed to Part II (Output Modes), Part III (Input Modes), or Part IV (Special Modes).*
 
 
 # Part II: Output Modes
 
 # Chapter 6: Digital Output {#ch6}
 
-This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "Smart Pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
+This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "smart pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
 
 ## 6.1 Overview
 
@@ -3726,11 +3726,11 @@ When WRPIN bits [5:1] = %00000, the pin operates in P_NORMAL mode—basic Direct
 
 - Simple on/off control (LEDs, relays, enables)
 - Software-timed signals (bit-banging)
-- Irregular patterns not suited to Smart Pin automation
+- Irregular patterns not suited to smart pin automation
 - Open-drain/open-collector interfaces
-- When COG control is preferred over autonomy
+- When cog control is preferred over autonomy
 
-**Consider Smart Pin modes (Chapters 7-11) for:**
+**Consider smart pin modes (Chapters 7-11) for:**
 
 - Precise timing requirements
 - Free-running oscillators
@@ -3940,7 +3940,7 @@ PINHIGH(pin)                              ' Enable and drive high
 
 ### Bit-Banging Serial
 
-For non-standard protocols or when Smart Pin serial modes don't fit:
+For non-standard protocols or when smart pin serial modes don't fit:
 
 ```spin2
 CON
@@ -4024,27 +4024,27 @@ The 3-clock output latency shifts *when* edges reach the pad but does not reduce
 
 ### When Direct I/O is Faster
 
-Direct I/O is faster than Smart Pins for:
+Direct I/O is faster than smart pins for:
 
 - Infrequent, irregular pulses
 - One-shot signals
 - Quick on/off without setup overhead
 
-Smart Pins are faster when:
+Smart pins are faster when:
 
 - Continuous waveforms are needed
-- COG should be free for other work
+- Cog should be free for other work
 - Precise timing independent of software
 
 ### Smart Pin Overhead
 
-Smart Pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, Smart Pin overhead is negligible.
+Smart pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, smart pin overhead is negligible.
 
 ## 6.5 Complete Examples
 
 ### Example 1: Status LED with Blink
 
-```spin2
+```{.spin2 caption="ch06-current-drive-blink.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56
@@ -4148,7 +4148,7 @@ PUB step_reverse(steps) | i
 
 # Chapter 7: Pulse and Transition Generation {#ch7}
 
-This chapter covers hardware-generated pulses and transitions using two Smart Pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
+This chapter covers hardware-generated pulses and transitions using two smart pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
 
 
 ## 7.1 Overview
@@ -4419,7 +4419,7 @@ Edge period = 1000 / 200MHz = 5 µs
 | 250 MHz | 250 | 2500 |
 | 350 MHz | 350 | 3500 |
 
-*P2 is rated to 180 MHz; 250 MHz is a common overclock and 350 MHz is the practical ceiling. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (P2 Datasheet / Silicon Doc v35)*
+*P2 is rated to 180 MHz; 250 MHz is a common overclock and 350 MHz is the practical ceiling. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (P2 Datasheet / Parallax Propeller 2 Documentation v35 - Rev B/C)*
 
 
 ## 7.6 Comparison: When to Use Each Mode
@@ -4448,7 +4448,7 @@ Edge period = 1000 / 200MHz = 5 µs
 
 ### Example 1: Stepper Motor Step Pulse
 
-```spin2
+```{.spin2 caption="ch07-step-motor-pulses.spin2"}
 CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
@@ -4789,7 +4789,7 @@ WXPIN(pin, 1 | (phase_offset << 16))
 
 For phase-locked outputs (e.g., three-phase motor control):
 
-```spin2
+```{.spin2 caption="ch08-three-phase-nco.spin2"}
 CON
   _clkfreq = 200_000_000
   PHASE_A = 10
@@ -5448,7 +5448,7 @@ Y range: 0 to 57,143
 
 ### Example 1: LED Brightness Control
 
-```spin2
+```{.spin2 caption="ch09-pwm-led-fade.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56
@@ -6074,7 +6074,7 @@ PUB set_2v5_reference()
 
 ### Example 2: Audio Waveform Generator
 
-```spin2
+```{.spin2 caption="ch10-audio-dac.spin2"}
 CON
   _clkfreq = 200_000_000
   AUDIO_PIN = 48
@@ -6665,7 +6665,7 @@ PUB newline()
 
 ### Example 2: SPI Master (Mode 0)
 
-```spin2
+```{.spin2 caption="ch11-spi-master.spin2"}
 CON
   _clkfreq = 200_000_000
   MOSI_PIN = 41
@@ -7253,7 +7253,7 @@ PASM2 TESTPN provides inverted read:
 
 ### Example 1: Button with LED
 
-```spin2
+```{.spin2 caption="ch12-button-schmitt-led.spin2"}
 CON
   _clkfreq = 200_000_000
   LED_PIN = 56
@@ -7449,14 +7449,14 @@ Theoretical maximum depends on sampling method:
 
 # Chapter 13: Timing Measurement {#ch13}
 
-This chapter covers Smart Pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
+This chapter covers smart pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
 
 
 ## 13.1 Timing Measurement Overview
 
 ### P2 Timing Capabilities
 
-The P2 Smart Pin timing modes provide hardware-based time measurement with clock-cycle resolution. All measurements are in system clock cycles.
+The P2 smart pin timing modes provide hardware-based time measurement with clock-cycle resolution. All measurements are in system clock cycles.
 
 | Mode | Function | Trigger |
 |------|----------|---------|
@@ -7914,7 +7914,7 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
 
 ### Example 2: Ultrasonic Distance Measurement
 
-```spin2
+```{.spin2 caption="ch13-ultrasonic-distance.spin2"}
 CON
   _clkfreq = 200_000_000
   TRIG_PIN = 20
@@ -8061,7 +8061,7 @@ duty_percent = high_clocks * 100 / (high_clocks + low_clocks)
 
 # Chapter 14: Counting Modes {#ch14}
 
-This chapter covers Smart Pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
+This chapter covers smart pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
 
 ## 14.1 Counting Mode Overview
@@ -8457,7 +8457,7 @@ For modes using two inputs (A and B):
 | P_MINUS3_B | Pin - 3 |
 | P_OUTBIT_B | This pin's own OUT bit (software-driven) |
 
-`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a COG can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
+`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a cog can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
 
 ### Input Conditioning
 
@@ -8633,7 +8633,7 @@ count_hub     long      0
 
 ### Example 4: RPM Measurement
 
-```spin2
+```{.spin2 caption="ch14-tachometer-rpm.spin2"}
 CON
   _clkfreq = 200_000_000
   TACH_PIN = 20
@@ -9149,7 +9149,7 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
 
 ### Example 4: Precision Oscillator Calibration
 
-```spin2
+```{.spin2 caption="ch15-oscillator-calibration.spin2"}
 CON
   _clkfreq = 200_000_000
   REF_PIN = 20                                ' Reference signal input
@@ -9691,7 +9691,7 @@ PUB main() | adc_value, led_bits, i
 
 ### Example 2: Audio Sampling
 
-```spin2
+```{.spin2 caption="ch16-adc-audio-capture.spin2"}
 CON
   _clkfreq = 200_000_000
   AUDIO_PIN = 46
@@ -10522,7 +10522,7 @@ PRI send_spi_byte(b)
 
 ### Example 3: Command Parser
 
-```spin2
+```{.spin2 caption="ch17-uart-command-loop.spin2"}
 CON
   _clkfreq = 200_000_000
   RX_PIN = 21
@@ -10637,9 +10637,9 @@ REPEAT UNTIL PINREAD(pin) OR (GETMS() >= deadline)
 
 # Part IV: Special Modes
 
-# Chapter 18: Repository and Inter-COG Data Sharing {#ch18}
+# Chapter 18: Repository and Inter-Cog Data Sharing {#ch18}
 
-This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-COG data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
+This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-cog data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 
 
 ## 18.1 Repository Concept
@@ -10661,7 +10661,7 @@ When not configured for DAC output, these modes create a shared data register:
 - **RDPIN/RQPIN** reads the stored long
 - **IN flag** indicates when new data has been written
 
-This enables lock-free data sharing between COGs through dedicated pin hardware.
+This enables lock-free data sharing between cogs through dedicated pin hardware.
 
 ### Mode Variants
 
@@ -10676,7 +10676,7 @@ This enables lock-free data sharing between COGs through dedicated pin hardware.
 
 ### Purpose
 
-The repository provides a hardware-arbitrated communication channel between COGs. Unlike hub RAM which may require locks for atomic access, the repository guarantees atomic 32-bit reads and writes.
+The repository provides a hardware-arbitrated communication channel between cogs. Unlike hub RAM which may require locks for atomic access, the repository guarantees atomic 32-bit reads and writes.
 
 ### Operation
 
@@ -10720,9 +10720,9 @@ DAT           org
 data          res       1
 ```
 
-### Multi-COG Sharing
+### Multi-Cog Sharing
 
-**Writer COG:**
+**Writer cog:**
 ```spin2
 PUB sensor_cog() | reading
   setup_repository()
@@ -10733,7 +10733,7 @@ PUB sensor_cog() | reading
     WAITMS(10)
 ```
 
-**Reader COGs:**
+**Reader cogs:**
 ```spin2
 PUB display_cog()
   REPEAT
@@ -10980,7 +10980,7 @@ PRI get_next_sample() : sample
 ```
 
 
-## 18.6 Comparison with Other Inter-COG Mechanisms
+## 18.6 Comparison with Other Inter-Cog Mechanisms
 
 ### Hub RAM
 
@@ -11010,7 +11010,7 @@ PRI get_next_sample() : sample
 
 ### When to Use Repository
 
-- Sharing single sensor reading across multiple COGs
+- Sharing single sensor reading across multiple cogs
 - Status flags and state indicators
 - Real-time data where latest value is sufficient
 - Simple producer-consumer patterns
@@ -11020,7 +11020,7 @@ PRI get_next_sample() : sample
 
 ### Example 1: Shared Sensor Reading
 
-```spin2
+```{.spin2 caption="ch18-repository-multicog.spin2"}
 CON
   _clkfreq = 200_000_000
   REPO_PIN = 48
@@ -11062,7 +11062,7 @@ PRI read_temperature_sensor() : t
   t := 25
 ```
 
-### Example 2: Multi-COG Status Flags
+### Example 2: Multi-Cog Status Flags
 
 ```spin2
 CON
@@ -11199,7 +11199,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
 # Chapter 19: USB Host/Device {#ch19}
 
-This chapter covers the USB Smart Pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through Smart Pins, handling the differential signaling and timing while software manages the USB protocol stack.
+This chapter covers the USB smart pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through smart pins, handling the differential signaling and timing while software manages the USB protocol stack.
 
 
 ## 19.1 USB Overview
@@ -11313,7 +11313,7 @@ The USB mode uses the smart pin registers for configuration and data:
 | Y | Line-state and packet output, set via WYPIN on the lower pin (see table below) |
 | Z | Receiver data + 16-bit status word, read via RDPIN/RQPIN on the lower pin (see bit layout below) |
 
-**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
+**All smart pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: *Parallax Propeller 2 Documentation v35 - Rev B/C*, USB host/device mode.)
 
 #### Baud Rate — Worked Example
 
@@ -11376,7 +11376,7 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB Smart Pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
 :::
 
 
@@ -11452,7 +11452,7 @@ PUB main()
 
 ### Pin Setup
 
-```spin2
+```{.spin2 caption="ch19-usb-device-config.spin2"}
 CON
   _clkfreq = 200_000_000
   USB_DM = 56
@@ -11580,7 +11580,7 @@ PINHIGH(even_pin+1)                             ' Enable DP
 
 ### Key Points
 
-- Smart Pin handles physical layer signaling
+- Smart pin handles physical layer signaling
 - Software must implement full USB protocol stack
 - Use existing libraries when possible
 - Supports USB 1.1 Full Speed and Low Speed only
@@ -11595,7 +11595,7 @@ PINHIGH(even_pin+1)                             ' Enable DP
 - P2 USB implementation examples from community members
 
 
-*This chapter covered the USB Smart Pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*
+*This chapter covered the USB smart pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*
 
 
 # Part V: Appendices
@@ -11675,12 +11675,12 @@ This appendix provides task-oriented navigation. Find what you want to accomplis
 
 ## Coordinate and Synchronize
 
-*Timing, events, and inter-COG coordination.*
+*Timing, events, and inter-cog coordination.*
 
 | I want to… | Go to | Primary mode | Also consider |
 |---|---|---|---|
 | Synchronize multiple pin outputs | [Ch 7](#chapter-7-pulse-and-transition-generation) | `SETSE1` / `WAITSE1` events | shared X base period |
-| Share data between COGs | [Ch 18](#chapter-18-repository-and-inter-cog-data-sharing) | `P_REPOSITORY` (%00001–%00011, non-DAC) | `RQPIN` for non-blocking reads |
+| Share data between Cogs | [Ch 18](#chapter-18-repository-and-inter-cog-data-sharing) | `P_REPOSITORY` (%00001–%00011, non-DAC) | `RQPIN` for non-blocking reads |
 | Precise timing control | [Ch 1](#chapter-1-direct-io---the-foundation) | 3-clock output/input latency (§1.2) | `TESTP` for 2-clock input path |
 | Generate synchronized waveforms | [Ch 8](#chapter-8-frequency-generation-nco) | multiple NCO pins, related freqs | common base period for phase |
 
@@ -11688,7 +11688,7 @@ This appendix provides task-oriented navigation. Find what you want to accomplis
 
 | Mode | Constant | Primary Use |
 |------|----------|-------------|
-| %00001 | P_REPOSITORY / P_DAC_NOISE | Inter-COG data / Noise |
+| %00001 | P_REPOSITORY / P_DAC_NOISE | Inter-Cog data / Noise |
 | %00010 | P_DAC_DITHER_RND | 16-bit DAC (random dither) |
 | %00011 | P_DAC_DITHER_PWM | 16-bit DAC (PWM dither) |
 | %00100 | P_PULSE | Pulse generation |
@@ -11722,7 +11722,7 @@ This appendix provides task-oriented navigation. Find what you want to accomplis
 
 # Appendix B: P_ Constants Quick Reference
 
-This appendix provides a complete reference for all P_ constants used in Smart Pin configuration.
+This appendix provides a complete reference for all P_ constants used in smart pin configuration.
 
 
 ## How to Use P_ Constants
@@ -12538,7 +12538,7 @@ rpm = (500 × 60 × 10) / 4000 = 75 RPM
 
 # Appendix D: Mode Comparison Charts
 
-This appendix provides comparison matrices to help select the appropriate Smart Pin mode for your application.
+This appendix provides comparison matrices to help select the appropriate smart pin mode for your application.
 
 ## Output Mode Comparison
 
@@ -12774,7 +12774,7 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 
 # Appendix E: Troubleshooting
 
-This appendix provides problem/solution guidance for common Smart Pin issues organized by symptom.
+This appendix provides problem/solution guidance for common smart pin issues organized by symptom.
 
 ## Pin Not Responding
 
@@ -12786,7 +12786,7 @@ Pin appears completely inactive. No output changes, no IN flag, no measurements.
 1. **DIR not set** - Smart pin not enabled
 2. **WRPIN not executed** - Mode not configured
 3. **Wrong pin number** - Configuration applied to different pin
-4. **Pin used by another COG** - Conflicting configurations
+4. **Pin used by another cog** - Conflicting configurations
 
 ### Diagnostic Steps
 
@@ -13399,7 +13399,7 @@ DEBUG("Sent: $55, Received: ", UHEX_(received))
 
 # Appendix F: Complete Mode Reference
 
-Quick reference for all 32 Smart Pin modes, organized by mode number.
+Quick reference for all 32 smart pin modes, organized by mode number.
 
 
 ## Mode Number Cross-Reference
@@ -13473,9 +13473,9 @@ state := PINREAD(pin)                    ' Read input
 ::: modecard
 ## Mode %00001: P_REPOSITORY / P_DAC_NOISE
 
-**Inter-COG data sharing or DAC noise generator**
+**Inter-cog data sharing or DAC noise generator**
 
-Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between COGs. With DAC enable: pseudo-random noise output.
+Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between cogs. With DAC enable: pseudo-random noise output.
 :::
 
 ### Register Usage
@@ -13507,7 +13507,7 @@ PINH(pin)
 ```
 
 ### Reference
-[Chapter 18: Repository and Inter-COG Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
+[Chapter 18: Repository and Inter-Cog Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
 
 
 ::: modecard
@@ -14634,7 +14634,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **C flag** - State indicator in timing modes, Ch. 13
 - **Clock generation** - P_TRANSITION, P_NCO_FREQ, Ch. 7, 8
 - **Clock routing** - B-input for sync serial, Ch. 11, 17
-- **COG** - Processor core, inter-COG sharing Ch. 18
+- **Cog** - Processor core, inter-cog sharing Ch. 18
 - **Comparator input** - P_COMPARE_AB, Ch. 12
 - **Continuous mode** - X=0 for counting, Ch. 14
 - **Counter modes** - %01100-%01111, Ch. 14
@@ -14694,7 +14694,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **INA/INB** - Input registers, Ch. 12
 - **Input conditioning** - Schmitt, filter, compare, Ch. 12
 - **Input routing** - A/B input selection, Ch. 3
-- **Inter-COG** - Data sharing via Repository, Ch. 18
+- **Inter-cog** - Data sharing via Repository, Ch. 18
 - **Inversion** - P_INVERT_A, P_INVERT_B, P_INVERT_OUTPUT, App. B
 
 ### L
@@ -14791,7 +14791,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **P_QUADRATURE** - Quadrature encoder (%01011), Ch. 14, App. F
 - **P_REG_UP** - Gated increment (%01100), Ch. 14, App. F
 - **P_REG_UP_DOWN** - Up/down counter (%01101), Ch. 14, App. F
-- **P_REPOSITORY** - Inter-COG data (%00001), Ch. 18, App. F
+- **P_REPOSITORY** - Inter-cog data (%00001), Ch. 18, App. F
 - **P_SCHMITT_A** - Schmitt trigger A, Ch. 12
 - **P_STATE_TICKS** - Time both states (%10000), Ch. 13, App. F
 - **P_SYNC_IO** - Synchronous I/O, App. B
