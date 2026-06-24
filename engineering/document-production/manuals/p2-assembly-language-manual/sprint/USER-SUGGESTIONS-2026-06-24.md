@@ -455,8 +455,37 @@ worth a comprehensive scan (not just the seed instances found in Batch 1):
        entry's syntax-block `---`, before **Result:**. Verify on completion
        (backtick-unescaping, fence balance, count). Grouped headers = one shared
        line. Source = Parallax CSV col-5 (no inference).
-3. **Phase 3 — Cross-ref + alternatives.** SCAN-1 (CLASS-C) and SCAN-2 (OBS-01
-   stacked alternatives + performance) across the full instruction set.
+3. **Phase 3 — Cross-ref + alternatives. ✅ DONE 2026-06-24.**
+   - **Discovery:** two read-only full-instruction-set scans. SCAN-1 (CLASS-C
+     cross-refs) = 20 grounded findings (CR-01..CR-20) + 4 held UNVERIFIED (incl.
+     MULPIX→SETPIX, which was *incorrect* — MULPIX has no SETPIX dependency).
+     SCAN-2 (OBS-01 alternatives) = 3 grounded (ALT-01/02/03) + 5 logged
+     non-findings (TJ/DJNZ/GETBYTE/MOVBYTS/SCA-as-idiom all ruled out).
+   - **SCAN-2 applied (all stacked per D1, with cycle deltas):** ALT-01 §2.2.4
+     min/max cmp+mov (6 clk) → FLE/FGE (4→2 clk); ALT-02 §3.5.3 conditional
+     assignment → FLE/FGE; ALT-03 §3.5.4 ABS fast-path (4→2 clk) promoted to a
+     stacked comparison.
+   - **🔴 BONUS DEFECT fixed (in ALT-02):** §3.5.3 line 400 claimed the min/max
+     idiom "takes exactly three clock cycles" — corrected to 6 clk (3 slots ×
+     2 clk; a cancelled conditional still costs its slot, per §4.4.3).
+   - **SCAN-1 applied — 19 of 20** in house style (prose-integrated, plain-uppercase
+     mnemonics, NOT arrow/bold callouts).
+     Part II (2 agents, every insertion grep-verified): CR-01 MUL→SCA, CR-02
+     MULS→SCAS, CR-06 MUXQ→SETQ, CR-03 ENCOD→DECOD, CR-04 BLNPIX→SETPIV, CR-05
+     INCMOD→DECMOD, CR-07 QMUL→MUL/GETQX/GETQY, CR-08 QDIV→SETQ/GETQX/GETQY, CR-09
+     NEGC→ABS, CR-10 RDLONG→SETQ2, CR-11 WRLONG→SETQ/SETQ2, CR-12 SUB→SUBX/SUBSX.
+     Part I (by hand): CR-15 §4.5.2→POLLCT/JCT, CR-16 §5.4.4→JSE/JNSE, CR-17
+     §6.4→ALTD/ALTS, CR-18 §3.6.2→MUXNIBS/MUXNITS, CR-19 §3.5.1→TESTB, CR-20
+     §5.2.3→BIT* family.
+   - **CR-13 NOT applied — verified already satisfied.** §5.1.1 line 25 (right after
+     the CORDIC table, same section) already names GETQX/GETQY with links; the
+     finding's premise ("not named until §5.1.7") inverted on close reading.
+   - **Verification:** all 12 Part II insertions grep-confirmed; no HTML-entity
+     leaks (files hold literal `>>`); all code-fence counts even in all 14 touched
+     files; all newly-added PASM2 code lines ≤ K=76 (trimmed one 85-char comment
+     in §2.2.4). CR-08's "after 55 clocks" confirmed grounded (§5.1.2 documents the
+     55-clock CORDIC period).
+   - **Files touched:** part-i ch02/03/04/05/06; part-ii instructions-b/e/i/m/n/q/r/s/w.
 4. **Phase 4 — Release.** One render + verify + release with version bump
    (released v3.0.0 → bump).
 

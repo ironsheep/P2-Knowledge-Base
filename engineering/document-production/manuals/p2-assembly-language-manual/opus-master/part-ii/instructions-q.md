@@ -35,7 +35,7 @@ Queue Divide
 
 QDIV performs high-precision unsigned division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
 
-The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not used) as the upper 32 bits with the Dest operand as the lower 32 bits: {SETQ, Dest}. The denominator is specified in the Src operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
+The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not used) as the upper 32 bits with the Dest operand as the lower 32 bits: {SETQ, Dest}. The denominator is specified in the Src operand. Supply the upper 32 bits of the numerator with SETQ before QDIV, then after 55 clocks read the quotient with GETQX and the remainder with GETQY.
 
 ```pasm2
         QDIV    ##1000000, #3  ' {0, 1000000} / 3
@@ -199,7 +199,7 @@ Queue Multiply
 
 **Explanation:**
 
-QMUL performs high-precision unsigned multiplication using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned integers (Dest × Src) and produces a full 64-bit product, avoiding the precision loss that would occur with standard 32-bit multiplication.
+QMUL performs high-precision unsigned multiplication using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned integers (Dest × Src) and produces a full 64-bit product, avoiding the precision loss that would occur with standard 32-bit multiplication. When both operands fit in 16 bits, the 2-clock MUL or MULS is faster; QMUL's 64-bit product is retrieved with GETQX for the low long and GETQY for the high long.
 
 After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
 

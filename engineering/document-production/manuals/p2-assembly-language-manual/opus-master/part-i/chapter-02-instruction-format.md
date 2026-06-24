@@ -175,6 +175,21 @@ Common patterns:
         if_nc   mov     min, b                  ' min = b if a >= b
 ```
 
+This always costs 6 clocks: the compare plus both conditional moves, since the cancelled move still occupies its 2-clock slot (see §4.4.3). For unsigned operands the FLE and FGE instructions do the same job in fewer instructions:
+
+```pasm2
+                mov     min, a                  ' min = a       (2 clk)
+                fle     min, b                  ' min = min(a,b) -> 4 clk
+```
+
+FLE forces its destination to the lesser of the two values (min), FGE to the greater (max). When the value is already in place, a single instruction suffices:
+
+```pasm2
+                fle     x, b                    ' x = min(x, b)      (2 clk)
+```
+
+So the unsigned min/max ladder runs 6 -> 4 -> 2 clocks. Use the signed variants FLES and FGES for signed operands.
+
 **Conditional Assignment:**
 ```pasm2
                 test    flags, #MASK    wz      ' Test bit

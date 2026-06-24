@@ -266,6 +266,8 @@ Direction and output control manage the physical pin state. The P2 provides four
 
 Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z=1 → output, Z=0 → input).
 
+The BIT family (BITL, BITH, BITC, BITNC, BITZ, BITNZ, BITNOT, BITRND) applies the same eight suffix variants to a bit of a destination register rather than a pin—the register-bit counterpart of these pin-control families.
+
 ### 5.2.4 Smart Pin Documentation
 
 Smart pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete smart pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 I/O & Smart Pins User Guide** (`p2-io-and-smart-pins-user-guide`). That guide provides essential reference material for smart pin programming.
@@ -405,7 +407,7 @@ Polling enables responsive event handling within loops. Code can check multiple 
                                                 '  event fired
 ```
 
-This pattern branches to handler code only when the event occurred.
+This pattern branches to handler code only when the event occurred. The event-branch family folds this poll-and-branch into a single instruction: JSE1–JSE4 jump when the selected event has fired, and their JNSE1–JNSE4 inverses jump when it has not—no separate flag test required.
 
 ### 5.4.5 Interrupt Philosophy
 

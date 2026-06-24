@@ -194,7 +194,7 @@ The assembler handles this automatically when `##` notation is used. Manual AUGS
 
 ## 6.4 Pointer Register Addressing (PTRA/PTRB)
 
-The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable hub memory addressing with automatic increment, decrement, and indexing.
+The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable hub memory addressing with automatic increment, decrement, and indexing. PTRA and PTRB index *hub* memory; for the equivalent computed indexing into a *cog-register* array, see the ALTD and ALTS modified-addressing instructions in §6.6.
 
 ### 6.4.1 Basic Pointer Access
 

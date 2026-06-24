@@ -418,6 +418,8 @@ For fixed-point math with 16-bit fractional parts:
         shr     temp, #16               ' Adjust for fixed-point scale
 ```
 
+For this multiply-then-shift-by-16 scaling pattern, SCA performs the same work in a single instruction: SCA computes `unsigned(D[15:0] × S[15:0]) >> 16` and substitutes the result directly as the next instruction's S operand.
+
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
 
@@ -521,6 +523,8 @@ For signed fixed-point math with 16-bit fractional parts:
         muls    temp, signed_frac2      ' Signed multiplication
         sar     temp, #16               ' Arithmetic shift to preserve sign
 ```
+
+For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in one instruction: `signed(D[15:0] × S[15:0]) >> 14`, where `$4000` represents 1.0, substituting the result into the next instruction's S operand.
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
@@ -712,7 +716,7 @@ Multiplex Q
 
 **Explanation:**
 
-MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
+MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. The mask is loaded into the Q register with SETQ executed immediately before MUXQ. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
 
 MUXQ must be preceded by SETQ to load the mask into Q:
 

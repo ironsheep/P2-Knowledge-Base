@@ -365,7 +365,7 @@ Testing whether a specific bit is set uses TEST with WZ:
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
 
-The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pattern works for testing any single bit or combination of bits—just construct the appropriate mask.
+The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pattern works for testing any single bit or combination of bits—just construct the appropriate mask. To test a single bit by its index rather than a mask constant, TESTB takes the bit number in S[4:0] and places that bit straight into C or Z, with no mask to build.
 
 ### 3.5.2 Multi-Precision Addition
 
@@ -397,7 +397,7 @@ Selecting between two values based on a comparison uses conditional moves:
         if_nc   mov     result, b               ' If a >= b, result = b
 ```
 
-This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves executes, storing the smaller value in result. The sequence takes exactly three clock cycles regardless of which value is smaller.
+This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves stores its value, but both occupy their slots: a cancelled conditional instruction still consumes its 2-clock execution time (see §4.4.3). The sequence therefore takes six clock cycles regardless of which value is smaller.
 
 For maximum of two values, invert the conditions:
 
@@ -406,6 +406,18 @@ For maximum of two values, invert the conditions:
         if_c    mov     result, b               ' If a < b, result = b
         if_nc   mov     result, a               ' If a >= b, result = a
 ```
+
+For unsigned operands, FLE and FGE collapse this to one or two instructions. FLE forces its destination to the lesser of the two values, FGE to the greater:
+
+```pasm2
+                mov     result, a               ' result = min(a, b)
+                fle     result, b               '   2 instr, 4 clk
+
+                mov     result, a               ' result = max(a, b)
+                fge     result, b               '   2 instr, 4 clk
+```
+
+When the value to be clamped is already in `result`, a single `fle result, b` or `fge result, b` does it in 2 clocks. Use the signed variants FLES and FGES for signed operands.
 
 ### 3.5.4 Branchless Absolute Value
 
@@ -422,7 +434,14 @@ The issue is a quirk of two's complement: the most negative value (-2,147,483,64
 
 For all other negative values, ABS correctly computes the absolute value and clears C. For -2,147,483,648, ABS leaves it unchanged and sets C, and the conditional NEG negates it back to itself (since negating $8000_0000 produces $8000_0000).
 
-Most code doesn't care about this edge case and can simply use `ABS result, value` without the conditional correction.
+Most code doesn't care about this edge case and can simply use `ABS result, value` on its own. That is the faster path as well: the conditional NEG always occupies its 2-clock slot even when cancelled, so the edge-case-safe form costs 4 clocks, while the bare ABS costs 2:
+
+```pasm2
+                abs     result, value   wc      ' edge-case safe   (4 clk)
+        if_c    neg     result                  '   ABS + cancelled NEG
+
+                abs     result, value           ' common case      (2 clk)
+```
 
 ### 3.5.5 Conditional Increment/Decrement
 
@@ -494,7 +513,7 @@ These instructions conditionally set or clear bits based on flag values. For exa
         muxc    output, #%0010          ' Copy bit 1 to output bit 1
 ```
 
-This pattern extracts and repositions bits based on flag tests, enabling bit-field manipulation.
+This pattern extracts and repositions bits based on flag tests, enabling bit-field manipulation. When the bits come from another register rather than a flag, MUXNIBS and MUXNITS merge whole nibbles or bit-pairs from a source in a single instruction—copying each non-zero nibble (or bit-pair) of the source into the destination.
 
 ### 3.6.3 Flag Preservation Patterns
 

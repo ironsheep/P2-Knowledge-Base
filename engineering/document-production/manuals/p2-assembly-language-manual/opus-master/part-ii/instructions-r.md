@@ -295,7 +295,7 @@ Read Long From hub
 
 RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
-If preceded by a SETQ instruction, burst reads of multiple longs can be performed.
+If preceded by a SETQ instruction, burst reads of multiple longs can be performed. Using SETQ2 instead of SETQ bursts the block into LUT RAM rather than cog RAM.
 
 If the WC or WCZ effect is specified, C is set to the MSB of the long.
 

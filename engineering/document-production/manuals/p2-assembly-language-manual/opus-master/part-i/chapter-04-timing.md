@@ -417,6 +417,8 @@ loop
 
 Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
 
+WAITCT1/2/3 block until the deadline is reached. When a cog must keep working instead of stalling, POLLCT1/2/3 check whether a counter deadline has passed without blocking, and JCT1/2/3 branch when it has—both reading the same CT1–CT3 events.
+
 ### 4.5.3 Pin-Based Synchronization
 
 Several instructions synchronize with pin state changes, enabling precise timing relative to external events:

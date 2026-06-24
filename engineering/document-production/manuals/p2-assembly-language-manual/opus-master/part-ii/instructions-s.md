@@ -1246,7 +1246,7 @@ Subtract
 
 **Explanation:**
 
-SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. To subtract unsigned multi-long values, use SUB followed by SUBX as described in Subtracting Two Multi-Long Values. SUB and SUBX are also used in subtracting signed multi-long values with SUBSX ending the sequence.
+SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. To subtract multi-long values, start with SUB on the lowest long, then chain SUBX for each higher long to extend the unsigned subtraction, and finish with SUBSX in place of the final SUBX when a signed result is wanted (see Chapter 3 §3.7).
 
 ```pasm2
         SUB     count, #1 WZ   ' Decrement count, set Z if zero

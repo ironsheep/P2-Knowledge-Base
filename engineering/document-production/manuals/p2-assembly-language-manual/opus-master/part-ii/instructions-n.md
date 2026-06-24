@@ -104,7 +104,7 @@ These instructions conditionally negate the value in Src (two-operand form) or D
 
 If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
-NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior.
+NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior. For absolute value directly, see ABS (and the branchless ABS-plus-conditional-NEG idiom taught in Chapter 3).
 
 If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or cleared (0) if positive.
 
