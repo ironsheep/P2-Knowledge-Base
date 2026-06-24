@@ -302,6 +302,15 @@ new in the next published artifact. Two checks:
 (finding)`. This dimension is the mechanical guarantee that the release contains exactly what we
 believe it contains and nothing errant.
 
+**EXHAUSTIVE — never sampled.** Itemize **every hunk** in the diff; spot-checking a subset of
+files/hunks is NOT acceptable here. A change that "got away from us" hides precisely in the hunk
+you didn't read, so file-level attribution ("this file is the lowercase sweep") is insufficient —
+a stray non-lowercase edit could ride inside a file you attributed to the sweep. Read every hunk,
+attribute every hunk. For a large diff, fan out by file-range to parallel agents, then verify each
+agent covered its full range (count hunks claimed vs `git diff` hunk count). If the changeset is
+still growing (e.g. a drain is in progress), run #15 against the FINAL pre-publish state — but when
+run, it is 100%.
+
 ---
 
 ## 6. Finding classification
