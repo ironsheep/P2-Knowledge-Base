@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-20T18:51:52.721540",
-    "total_entries": 1056,
-    "total_categories": 57,
-    "total_aliases": 1327,
+    "generated": "2026-06-24T19:15:02.573257",
+    "total_entries": 1053,
+    "total_categories": 56,
+    "total_aliases": 1326,
     "multi_target_aliases": 65,
     "source": "deliverables/ai/P2/"
   },
@@ -651,21 +651,16 @@
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout",
       "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
     ],
-    "hardware_addons": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay",
+    "hardware_eval_addon_boards": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout",
       "p2kbHwAddonControlBoardAddonControlBoard",
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash",
       "p2kbHwAddonLedMatrixAddonLedMatrix",
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
       "p2kbHwAddonSerialDeviceAddonSerialDevice",
       "p2kbHwAddonSerialHostAddonSerialHost",
-      "p2kbHwButtonsBoardButtonsBoard",
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "hardware_adapters": [
       "p2kbHwHub75AdapterHub75Adapter"
     ],
     "hardware_reference": [
@@ -676,11 +671,11 @@
     ]
   },
   "aliases": {
-    "#64006 ADD-ON": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay",
-      "p2kbHwButtonsBoardButtonsBoard",
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
-      "p2kbHwSwitchesBoardSwitchesBoard"
+    "#64004 ADD-ON BOARD": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "#64004 add-on board": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
     "#64006 ADD-ON BOARD": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout",
@@ -692,12 +687,6 @@
       "p2kbHwAddonSerialDeviceAddonSerialDevice",
       "p2kbHwAddonSerialHostAddonSerialHost"
     ],
-    "#64006 add-on": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay",
-      "p2kbHwButtonsBoardButtonsBoard",
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
     "#64006 add-on board": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout",
       "p2kbHwAddonControlBoardAddonControlBoard",
@@ -708,17 +697,14 @@
       "p2kbHwAddonSerialDeviceAddonSerialDevice",
       "p2kbHwAddonSerialHostAddonSerialHost"
     ],
-    "4 SWITCHES 4 LEDS": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
-    "4 switches 4 LEDs": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
     "64000": [
       "p2kbHwP2EvalBoardP2EvalBoard"
     ],
     "64000-ES": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "64004-ES": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
     "64006A": [
       "p2kbHwAddonControlBoardAddonControlBoard"
@@ -755,30 +741,6 @@
     ],
     "64032": [
       "p2kbHwHub75AdapterHub75Adapter"
-    ],
-    "7-SEGMENT ADD-ON BOARD": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
-    "7-SEGMENT DISPLAY": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
-    "7-segment add-on board": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
-    "7-segment display": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
-    "8 DIP SWITCHES ADD-ON": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "8 DIP switches add-on": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "8 PUSHBUTTONS ADD-ON": [
-      "p2kbHwButtonsBoardButtonsBoard"
-    ],
-    "8 pushbuttons add-on": [
-      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "A INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
@@ -947,9 +909,6 @@
     "BUTTONS AND LEDS BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
-    "BUTTONS BOARD": [
-      "p2kbHwButtonsBoardButtonsBoard"
-    ],
     "BYTE": [
       "p2kbSpin2Byte"
     ],
@@ -995,6 +954,9 @@
     ],
     "CARTESIAN": [
       "p2kbSpin2Plot"
+    ],
+    "CHARLIEPLEX LED BOARD": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
     "CHOOSE P2 BOARD": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
@@ -1077,6 +1039,9 @@
     ],
     "CROP": [
       "p2kbSpin2Plot"
+    ],
+    "Charlieplex LED board": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
     "DEBUG": [
       "p2kbPasm2Debug"
@@ -1188,12 +1153,6 @@
     ],
     "DIGITAL VIDEO OUT BOARD": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
-    ],
-    "DIP SWITCHES BOARD": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "DIP switches board": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
     ],
     "DIRC": [
       "p2kbPasm2Dirc"
@@ -1451,6 +1410,27 @@
       "p2kbPasm2Hubset",
       "p2kbSpin2Hubset"
     ],
+    "HYPER MEMORY BOARD": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HYPERFLASH ADD-ON": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HYPERRAM ADD-ON": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HYPERRAM HYPERFLASH BOARD": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HyperFlash add-on": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HyperRAM HyperFlash board": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "HyperRAM add-on": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
     "IJNZ": [
       "p2kbPasm2Ijnz"
     ],
@@ -1662,6 +1642,14 @@
     "LSTRING": [
       "p2kbSpin2Lstring"
     ],
+    "LUT LITERAL ADDRESS 0-255": [
+      "p2kbPasm2Rdlut",
+      "p2kbPasm2Wrlut"
+    ],
+    "LUT literal address 0-255": [
+      "p2kbPasm2Rdlut",
+      "p2kbPasm2Wrlut"
+    ],
     "Lissajous": [
       "p2kbSpin2ScopeXy"
     ],
@@ -1864,17 +1852,11 @@
     "P2 EDGE STANDARD MODULE": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
-    "P2 EVAL 7-SEGMENT": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
     "P2 EVAL A/V BREAKOUT ADD-ON BOARD": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
     "P2 EVAL BOARD": [
       "p2kbHwP2EvalBoardP2EvalBoard"
-    ],
-    "P2 EVAL BUTTONS": [
-      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "P2 EVAL CONTROL ADD-ON BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
@@ -1896,12 +1878,6 @@
     ],
     "P2 EVAL SERIAL HOST ADD-ON BOARD": [
       "p2kbHwAddonSerialHostAddonSerialHost"
-    ],
-    "P2 EVAL SWITCHES": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "P2 EVAL SWITCHES AND LEDS": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
     ],
     "P2 EVALUATION BOARD": [
       "p2kbHwP2EvalBoardP2EvalBoard"
@@ -1926,9 +1902,6 @@
     ],
     "P2 Edge standard module": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
-    ],
-    "P2 Eval 7-segment": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
     ],
     "P2 Eval A/V Breakout Add-on Board": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
@@ -1956,15 +1929,6 @@
     ],
     "P2 Eval Serial Host Add-on Board": [
       "p2kbHwAddonSerialHostAddonSerialHost"
-    ],
-    "P2 Eval buttons": [
-      "p2kbHwButtonsBoardButtonsBoard"
-    ],
-    "P2 Eval switches": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "P2 Eval switches and LEDs": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
     ],
     "P2 HARDWARE BUYING GUIDE": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
@@ -1995,6 +1959,12 @@
     ],
     "P2-EC32MB": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P2-ES EVAL HYPERRAM & HYPERFLASH ADD-ON BOARD": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "P2-ES Eval HyperRAM & HyperFlash Add-on Board": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
     "P8X32A FONT": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
@@ -2142,6 +2112,12 @@
     "PSRAM EDGE MODULE": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
+    "PSRAM NOR FLASH ADD-ON": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "PSRAM NOR flash add-on": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
     "PSRAM edge module": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
@@ -2153,9 +2129,6 @@
     ],
     "PUSHB": [
       "p2kbPasm2Pushb"
-    ],
-    "PUSHBUTTONS BOARD": [
-      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "P_BITDAC": [
       "p2kbArchSmartPins"
@@ -2255,6 +2228,18 @@
       "p2kbPasm2Rdlong"
     ],
     "RDLUT": [
+      "p2kbPasm2Rdlut"
+    ],
+    "RDLUT 256 COMPILE ERROR": [
+      "p2kbPasm2Rdlut"
+    ],
+    "RDLUT 256 compile error": [
+      "p2kbPasm2Rdlut"
+    ],
+    "RDLUT IMMEDIATE ADDRESS LIMIT": [
+      "p2kbPasm2Rdlut"
+    ],
+    "RDLUT immediate address limit": [
       "p2kbPasm2Rdlut"
     ],
     "RDPIN": [
@@ -2502,9 +2487,6 @@
     "SEUSSR": [
       "p2kbPasm2Seussr"
     ],
-    "SEVEN SEGMENT DISPLAY": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
     "SHL": [
       "p2kbPasm2Shl"
     ],
@@ -2613,15 +2595,6 @@
     "SUMZ": [
       "p2kbPasm2Sumz"
     ],
-    "SWITCHES AND LEDS BOARD": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
-    "SWITCHES BOARD": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
-    ],
-    "SWITCHES LEDS ADD-ON": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
     "TASK CONTINUE": [
       "p2kbSpin2Taskcont"
     ],
@@ -2725,11 +2698,29 @@
     "TT_BITS": [
       "p2kbArchSmartPins"
     ],
+    "USB DEVICE BOARD": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "USB HOST ADD-ON": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "USB device board": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "USB host add-on": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
     "VECTOR GRAPHICS": [
       "p2kbSpin2Plot"
     ],
+    "VGA AUDIO BOARD": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
     "VGA TEXT FONT": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "VGA audio board": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
     "VGA text font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
@@ -2851,6 +2842,18 @@
       "p2kbPasm2Wrlong"
     ],
     "WRLUT": [
+      "p2kbPasm2Wrlut"
+    ],
+    "WRLUT 256 COMPILE ERROR": [
+      "p2kbPasm2Wrlut"
+    ],
+    "WRLUT 256 compile error": [
+      "p2kbPasm2Wrlut"
+    ],
+    "WRLUT IMMEDIATE ADDRESS LIMIT": [
+      "p2kbPasm2Wrlut"
+    ],
+    "WRLUT immediate address limit": [
       "p2kbPasm2Wrlut"
     ],
     "WRNC": [
@@ -3125,9 +3128,6 @@
     ],
     "buttons and LEDs board": [
       "p2kbHwAddonControlBoardAddonControlBoard"
-    ],
-    "buttons board": [
-      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "byte": [
       "p2kbSpin2Byte"
@@ -3533,6 +3533,9 @@
     "hubset": [
       "p2kbPasm2Hubset",
       "p2kbSpin2Hubset"
+    ],
+    "hyper memory board": [
+      "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
     "ijnz": [
       "p2kbPasm2Ijnz"
@@ -4032,9 +4035,6 @@
     "pushb": [
       "p2kbPasm2Pushb"
     ],
-    "pushbuttons board": [
-      "p2kbHwButtonsBoardButtonsBoard"
-    ],
     "qcos": [
       "p2kbSpin2Qcos"
     ],
@@ -4336,9 +4336,6 @@
     "seussr": [
       "p2kbPasm2Seussr"
     ],
-    "seven segment display": [
-      "p2kbHw7SegmentDisplay7SegmentDisplay"
-    ],
     "several_objects": [
       "p2kbSpin2SeveralObjects"
     ],
@@ -4456,15 +4453,6 @@
     ],
     "sumz": [
       "p2kbPasm2Sumz"
-    ],
-    "switches LEDs add-on": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
-    "switches and LEDs board": [
-      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
-    ],
-    "switches board": [
-      "p2kbHwSwitchesBoardSwitchesBoard"
     ],
     "task continue": [
       "p2kbSpin2Taskcont"
@@ -5791,55 +5779,50 @@
       "mtime": 1780269492,
       "sha256": "ba99518e5dcfab12fee2bd93611b8104b09c1ca011860adcf3bde8f51e4a1f44"
     },
-    "p2kbHw7SegmentDisplay7SegmentDisplay": {
-      "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
-      "mtime": 1781325191,
-      "sha256": "59ee1febae6bff9fbd8cf80203893efef89fb18dde2f541f8d043b25f5509199"
-    },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1781325191,
-      "sha256": "5ed4f8d827fce914b23f6f6b0b340b6c1744651124242e967ead16a5e4087a0b"
+      "mtime": 1782328465,
+      "sha256": "465fa4de4424b0356b0b1e77304ee128af5a1d35c89ad4fd6f0ebd8088cf9110"
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1781325191,
-      "sha256": "16694ffdeff4649619acedd3bc125b161d3a6138c87ded2a49a0f7e0ae4c0cbd"
+      "mtime": 1782328465,
+      "sha256": "11cf1543810fb140dff3387791c2f4b64f5ed1ccd72a8e1c3200fdcbce59c450"
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
-      "mtime": 1781325191,
-      "sha256": "3082ef439b4bf0906e84bd5fc13e07b7ad50359c2bf8e2e133f8c8bad6bbfa8e"
+      "mtime": 1782328465,
+      "sha256": "57462c8cf05ac1837bb9908a202845e98fb9090dfa107361a28c8381af6c3283"
     },
     "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
       "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
-      "mtime": 1781325191,
-      "sha256": "b41d0d1b98b425652052dd05d5116e6f82004e6e80c2101327a139dbb395b28e"
+      "mtime": 1782328465,
+      "sha256": "4e3990eadb1a4bec63fb9cfbcf59dd5e0e0249cbd3d5ba6ba9a86d6cd421bb69"
+    },
+    "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash": {
+      "path": "deliverables/ai/P2/hardware/addon-hyperram-hyperflash.yaml",
+      "mtime": 1782328465,
+      "sha256": "abf8daa438e435fb8f3bda0ba1ebf50267ad28c09c9d51553f14d8fc94a234c5"
     },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1781325191,
-      "sha256": "bce6f169c29ac0e02ec404bd89a8ca318dca0989229c1da0faa8460bd45bf03e"
+      "mtime": 1782328465,
+      "sha256": "d80cfe4cde1afc9d8a7f8fa7ea90da95e88343cad9e2516559072f74e999d743"
     },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
-      "mtime": 1781325191,
-      "sha256": "4f1470a3f1d0918aea889cfea4202fecccc389147b81803098f25012911ef5a8"
+      "mtime": 1782328465,
+      "sha256": "e8dcedb17c448856bf8db99b57e32368ac9979705053544ad491e192cb752026"
     },
     "p2kbHwAddonSerialDeviceAddonSerialDevice": {
       "path": "deliverables/ai/P2/hardware/addon-serial-device.yaml",
-      "mtime": 1781325191,
-      "sha256": "047e2f0ad5a4047aa0691f594e4d757659e9c3dff9794273c8cfe254f6afa80d"
+      "mtime": 1782328465,
+      "sha256": "8e792efe1df71ebc527c8f7249bee80985528d820735fc1c9293517e7c7f791d"
     },
     "p2kbHwAddonSerialHostAddonSerialHost": {
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
-      "mtime": 1781325191,
-      "sha256": "34155f3e4a054a9a0e4e08d8f0e0f92814cba38e7689ba4e5987fc280929e08b"
-    },
-    "p2kbHwButtonsBoardButtonsBoard": {
-      "path": "deliverables/ai/P2/hardware/buttons_board.yaml",
-      "mtime": 1781325191,
-      "sha256": "08922437acdc0f04164585e2b71ac9ffe3654b856a344c5622d2af0afc1fea4b"
+      "mtime": 1782328465,
+      "sha256": "449dec66520b48edc894c4080a0686d2ec31d2049f62c066f9cb5ec2a1a98868"
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
@@ -5853,13 +5836,13 @@
     },
     "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-mini-breakout.yaml",
-      "mtime": 1781325191,
-      "sha256": "051ea57213f317834124575e9456dfa7773cd65299ca56d811de0622e1437d90"
+      "mtime": 1782328465,
+      "sha256": "29c73818e7ade4082e3da66b472e04988ca8ed9d9deddafb2f3a7016aab3b84e"
     },
     "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-standard-breakout.yaml",
-      "mtime": 1781325191,
-      "sha256": "33fe7c821fff3b1ca21546df97d8933f28ea5f65c9c8b5c433d46a014ac1a6c2"
+      "mtime": 1782328465,
+      "sha256": "fd468fe5e9209cea24f905b7294802c79a9485887f3e3a1e1f4522676917ea62"
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
@@ -5868,13 +5851,13 @@
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1781981347,
-      "sha256": "e2da03d855ef0ccdbecbdd607765e3f751a0e497e4385da5ac50c33368a22fee"
+      "mtime": 1782328465,
+      "sha256": "cc61c7b8c7ac9d5747fef54a7d065bd3212bd262e60a9423bb9e4c88c7e893e4"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
-      "mtime": 1781325191,
-      "sha256": "4d73e57a986484f383de22699885ed1885cf83cd5c678e2e980b3b11ba021043"
+      "mtime": 1782328465,
+      "sha256": "0e02242afa92ed1322c2a09a1c3ebb09acc3e70d338d5eadff658aa8ba8d06db"
     },
     "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet": {
       "path": "deliverables/ai/P2/hardware/p1_rom_font_character_set.yaml",
@@ -5883,8 +5866,8 @@
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
-      "mtime": 1781325191,
-      "sha256": "b339245baba26fe725a4347b1aeadbbedf84c063d0c08b700fc33330a63c8b0e"
+      "mtime": 1782328465,
+      "sha256": "a758723627ec6ca2f8b552763686d9da9a3fa96de0b55e775cd4bec2f8fafecc"
     },
     "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison": {
       "path": "deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml",
@@ -5895,16 +5878,6 @@
       "path": "deliverables/ai/P2/hardware/p2-hardware-selection-guide.yaml",
       "mtime": 1781981347,
       "sha256": "44f8988be8e0d9b09f1eb0866774a87e3a04cc7e40830e2c8dcf594f6762464e"
-    },
-    "p2kbHwSwitchesAndLedsSwitchesAndLeds": {
-      "path": "deliverables/ai/P2/hardware/switches_and_leds.yaml",
-      "mtime": 1781325191,
-      "sha256": "ed87a04a1a349335bad263ffd25ec75db23403b201ecc15a3a00ee50c2f3e9a8"
-    },
-    "p2kbHwSwitchesBoardSwitchesBoard": {
-      "path": "deliverables/ai/P2/hardware/switches_board.yaml",
-      "mtime": 1781325191,
-      "sha256": "a78fc6cc796835612572d7d37572bc8a5ba00bcbed62266d954e9fc80eec1e46"
     },
     "p2kbLanguageCaseSensitivity": {
       "path": "deliverables/ai/P2/language/fundamentals/case-sensitivity.yaml",
@@ -7318,8 +7291,8 @@
     },
     "p2kbPasm2Rdbyte": {
       "path": "deliverables/ai/P2/language/pasm2/rdbyte.yaml",
-      "mtime": 1764449566,
-      "sha256": "cbccf4f5f3a813fc1ff8813094d89c4223dc9f3ad7220b9db69c3ed93e2e3697"
+      "mtime": 1782328465,
+      "sha256": "869d3c86b78aacf0550a6a12d017427ef74670f8b3e4eef36553934192fc4e38"
     },
     "p2kbPasm2Rdfast": {
       "path": "deliverables/ai/P2/language/pasm2/rdfast.yaml",
@@ -7328,13 +7301,13 @@
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
-      "mtime": 1781325191,
-      "sha256": "1612a0b5afff83221ac4f76187617b197ad7d48ab2c8ae9682e2f775329ea5d2"
+      "mtime": 1782328465,
+      "sha256": "f9c64c808d2fa110f52184b340e76c5750b7b13e61adb71c05480a49ee35d03e"
     },
     "p2kbPasm2Rdlut": {
       "path": "deliverables/ai/P2/language/pasm2/rdlut.yaml",
-      "mtime": 1764449566,
-      "sha256": "f1f0650d3f83fb245c926f7719620ec1da5ef313e8ec9f3407bb1658205d23e2"
+      "mtime": 1782328465,
+      "sha256": "a759111a3dd43fdbe55c7615b6a20420ea9db6abf47acb0de32e36a830f0a2b6"
     },
     "p2kbPasm2Rdpin": {
       "path": "deliverables/ai/P2/language/pasm2/rdpin.yaml",
@@ -7343,8 +7316,8 @@
     },
     "p2kbPasm2Rdword": {
       "path": "deliverables/ai/P2/language/pasm2/rdword.yaml",
-      "mtime": 1777496128,
-      "sha256": "02568fa12eb23951d39f485dc2104222b227fd547897951a9c28936c3af4c1c0"
+      "mtime": 1782328465,
+      "sha256": "fa82d831dad6bf6ef53eb036c0b78672a3068227992e5ca3bdbc902cdf0b4ee4"
     },
     "p2kbPasm2PrRegisters": {
       "path": "deliverables/ai/P2/language/pasm2/registers/pr-registers.yaml",
@@ -7923,8 +7896,8 @@
     },
     "p2kbPasm2Wmlong": {
       "path": "deliverables/ai/P2/language/pasm2/wmlong.yaml",
-      "mtime": 1781325191,
-      "sha256": "2ba6ce5e9dfb38aa0aff5981d546d55ed7526e6c85a1823783dcb9dbd8a8ef4b"
+      "mtime": 1782328465,
+      "sha256": "4e0026f255ac0d92aa3e762c486558aad689ec3ed260fd35feef573e62a72427"
     },
     "p2kbPasm2Word": {
       "path": "deliverables/ai/P2/language/pasm2/word.yaml",
@@ -7938,8 +7911,8 @@
     },
     "p2kbPasm2Wrbyte": {
       "path": "deliverables/ai/P2/language/pasm2/wrbyte.yaml",
-      "mtime": 1781076792,
-      "sha256": "bf1a39cc487d1edc69bc72604573f8725cd1110013c49838a3a17316bdd14615"
+      "mtime": 1782328465,
+      "sha256": "f3b3d853e793935bb038c46f5728ea37fa2adbeb0a3a2ae33227ab8a62d832d7"
     },
     "p2kbPasm2Wrc": {
       "path": "deliverables/ai/P2/language/pasm2/wrc.yaml",
@@ -7953,13 +7926,13 @@
     },
     "p2kbPasm2Wrlong": {
       "path": "deliverables/ai/P2/language/pasm2/wrlong.yaml",
-      "mtime": 1781325191,
-      "sha256": "3ec599b5ab16d8c37e983083ae420092e0e241b659c9fd069a9d7d5014ff617a"
+      "mtime": 1782328465,
+      "sha256": "8117a7274388c0193bbd29bf48cbddb235f5f7ab650d779217c616b4aa3bfa7f"
     },
     "p2kbPasm2Wrlut": {
       "path": "deliverables/ai/P2/language/pasm2/wrlut.yaml",
-      "mtime": 1764449566,
-      "sha256": "665be04f9ae65d7995966bccf02335908b22d0c28a7e50c459b819228e409206"
+      "mtime": 1782328465,
+      "sha256": "983f28b02eb3d4c3f11c08ae6817142ac3b920909598adefc7f77e0939a4d5a5"
     },
     "p2kbPasm2Wrnc": {
       "path": "deliverables/ai/P2/language/pasm2/wrnc.yaml",
@@ -7978,8 +7951,8 @@
     },
     "p2kbPasm2Wrword": {
       "path": "deliverables/ai/P2/language/pasm2/wrword.yaml",
-      "mtime": 1777496128,
-      "sha256": "4d89fb1290e171468d090f380bd9d02b1a5af3a05d28a9b0b7773e7558144ef5"
+      "mtime": 1782328465,
+      "sha256": "b9c787a91b28be7eb92f5c52ce61de36ee5ccda15f5b12692edddf2ca1b91557"
     },
     "p2kbPasm2Wrz": {
       "path": "deliverables/ai/P2/language/pasm2/wrz.yaml",
