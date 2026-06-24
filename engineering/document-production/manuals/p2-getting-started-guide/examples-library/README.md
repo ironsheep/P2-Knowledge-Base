@@ -1,7 +1,7 @@
-# The P2 Architect's Guide — Examples Library
+# Getting Started with the Propeller 2 — Examples Library
 
-These are the complete, runnable Spin2 programs that appear in *The P2 Architect's
-Guide*, one file per worked example, named by the chapter it appears in.
+These are the complete, runnable Spin2 programs that appear in *Getting Started with
+the Propeller 2*, one file per worked example, named by the chapter it appears in.
 
 - **Exactly as printed.** Each file is the program shown in the guide, verbatim — the
   same code carried by the printed caption (e.g. `ch03-blink-led.spin2`) under the

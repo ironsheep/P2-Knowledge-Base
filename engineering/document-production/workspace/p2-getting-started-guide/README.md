@@ -48,21 +48,22 @@ The master filename `P2-Getting-Started-Guide.md` is sacred — never rename or 
 > `../../platform/` only if the manual store lacks them. Only the
 > `p2kb-getting-started-*` locals + the local filter are per-manual.
 
-## Conventions fixed at scaffold
+## Conventions
 
 - **`::: p1note` … `:::`** fenced div → `P1NoteBlock` (the P1→P2 migration sidebar).
+- **`::: tip`** fenced div → platform-styled Tip callout (not raw emoji).
 - Code is fenced ` ```spin2 ` / ` ```pasm2 ` and **pnut_ts-verified** (never code-divisions).
-- Figures deferred (DD5): mark intended locations as `> **[Figure — …]**` and log to `PUNCH-LIST.md`.
 
 ## Document Status
 
 | Item | Status |
 |------|--------|
 | Charter / creation-guide / voice-guide | **Complete** — `../../manuals/p2-getting-started-guide/{PLANNING,creation-guide,voice-guide}.md` |
-| Workspace + opus-master skeleton (this scaffold) | **Complete** (task #93) |
-| Chapters 1–3 | pending (tasks #94–#96) |
-| Back matter (Appendix A/B, glossary, where-to-next) | pending (task #97) |
-| Front matter (house standard) | pending (task #98) |
-| First Forge build + first-draft review (DoD) | pending (task #99) |
+| Chapters 1–3 + Where-to-Next | **Drafted** (split 2026-06-24 from the *P2 Architect's Guide* first draft — the orientation chapters) |
+| Front matter (house standard) | **Complete** |
+| Forge build / first-draft review | **Daemon-verified clean (24 pp, 2026-06-24)**; production staging via `prepare-manual` pending |
 
-Sprint plan: `engineering/planning/P2-ARCHITECT-GUIDE-FIRSTDRAFT-SPRINT-PLAN.md`.
+> **Origin:** this book is the orientation half of the original four-chapter
+> *P2 Architect's Guide* first draft. On 2026-06-24 that draft was split: Chapters 1–3
+> became this book; the functional-decomposition chapter, appendices, and glossary moved
+> to the sibling design book *The P2 Architect's Guide* (`../../manuals/p2-architect-guide/`).

@@ -1,27 +1,20 @@
 <!--
 ================================================================================
-THE P2 ARCHITECT'S GUIDE — BODY (single-file, per DD3)
+GETTING STARTED WITH THE PROPELLER 2 — BODY (single-file)
 
-This file is the canonical body source. It is assembled AFTER front-matter.md by
-assemble-manual.sh into P2-Architect-Guide.md for PDF Forge.
+Canonical body source. Assembled AFTER front-matter.md by assemble-manual.sh into
+P2-Getting-Started-Guide.md for PDF Forge.
 
-SCAFFOLD STATE (task #93): headings + authoring contracts only. Chapters and back
-matter are authored by the sprint tasks below — each section heading carries the
-task that fills it and its golden sources. Do NOT author content during scaffold;
-this skeleton exists so assemble-manual.sh has real structure to assemble and the
-template stack can be round-tripped.
+Chapters: Ch1 "Meet the Propeller 2" · Ch2 "Reading P2 Code" · Ch3 "Putting It to
+Work", then "Where to Next". (Split 2026-06-24 from the original 4-chapter P2
+Architect's Guide draft; functional decomposition + appendices + glossary moved to
+the design book, The P2 Architect's Guide, in manuals/p2-architect-guide/.)
 
-  Ch1  "Meet the Propeller 2"                  → task #94 (plan §3)
-  Ch2  "Putting It to Work"                    → task #95 (plan §4)
-  Ch3  "Thinking in P2 (Functional Decomp.)"  → task #96 (plan §5)
-  Appendix A / B, Glossary, Where-to-Next      → task #97 (plan §6)
-
-CONVENTIONS (fixed at scaffold; front matter §98 documents them):
-  - "P1 note:" migration sidebars use a fenced div:   ::: p1note  …  :::
-    (mapped by filters/p2kb-architect-local.lua → P1NoteBlock; DD1)
+CONVENTIONS:
+  - "P1 note" migration sidebars use a fenced div:  ::: p1note … :::
+    (mapped by filters/p2kb-getting-started-local.lua → P1NoteBlock)
+  - Tip asides use ::: tip fenced callouts (platform-styled box, not raw emoji)
   - Code is fenced ```spin2 / ```pasm2 and pnut_ts-verified (never code-divisions)
-  - Figures are deferred (DD5): mark intended locations as
-    > **[Figure — <description>]**  and log them to PUNCH-LIST.md
 ================================================================================
 -->
 

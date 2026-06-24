@@ -1,4 +1,8 @@
-# The P2 Architect's Guide — Punch List
+# Getting Started with the Propeller 2 — Punch List
+
+> Split 2026-06-24 from the *P2 Architect's Guide* first draft; the archived
+> sprint-closeout section below is that draft's history (it built five figures; this
+> orientation book carries the three that live in Chapters 1–3).
 
 Active-work register. Completed items are swept into the dated archive at the bottom at
 each closeout; the list above carries only **outstanding** work.

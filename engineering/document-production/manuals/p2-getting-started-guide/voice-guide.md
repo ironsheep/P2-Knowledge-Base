@@ -1,8 +1,14 @@
-# The P2 Architect's Guide — Voice Guide
+# Getting Started with the Propeller 2 — Voice Guide
 
-**Document:** The P2 Architect's Guide — Thinking in Cogs, Pins, and Forces
-**Purpose:** Define the writing voice — a warm, welcoming orientation that rises to careful design rigor without ever turning glib or prescriptive
-**Created:** 2026-06-22
+> **Split note (2026-06-24):** This guide was split from the original *P2 Architect's Guide*
+> first draft (4 chapters). This book is now the **Getting Started** orientation on-ramp — warm
+> and welcoming from start to finish. The rising-rigor / anti-prescription voice and the
+> functional-decomposition chapter moved with the design book, *The P2 Architect's Guide*
+> (folder `p2-architect-guide`).
+
+**Document:** Getting Started with the Propeller 2 — a warm orientation on-ramp
+**Purpose:** Define the writing voice — a warm, welcoming orientation that stays in one register the whole way through
+**Created:** 2026-06-22 (split into the Getting Started book 2026-06-24)
 **Companion:** `creation-guide.md` (what the manual is); `PLANNING.md` (why)
 
 ---
@@ -10,13 +16,14 @@
 ## 1. Voice Philosophy
 
 ### 1.1 The guiding principle
-> **This guide makes a newcomer feel at home with the Propeller 2, then — only once they're comfortable —
-> teaches them to think like an architect. It is warm the whole way up, and it never hands down answers.**
+> **This guide makes a newcomer feel at home with the Propeller 2 — what the chip is, how to read its code,
+> and how to put its features to work. It is warm, encouraging, and clear from start to finish: one register,
+> the whole way through.**
 
 Unlike the streamer/PASM2/Spin2 references (reference-primary with a teaching layer), this guide is the
-inverse: **orientation-primary**, with a rigor layer at the top. It does not switch between a "teaching voice"
-and a "reference voice." It speaks in **one voice that *modulates by altitude*** — the same warm mentor, going
-gradually more rigorous as the reader climbs.
+inverse: **orientation-primary**. It does not switch between a "teaching voice" and a "reference voice," and it
+does not change altitude between chapters — it speaks in **one warm mentor's voice** from Chapter 1 through
+"Where to Next."
 
 ### 1.2 Where we post — the spectrum
 Two existing documents bracket us, each "going too far" for our purpose:
@@ -31,22 +38,21 @@ We sit between them: **high warmth · low persona · content-driven density.** T
 care* — a senior developer explaining the chip at a whiteboard — **not** from adopting a character. We are
 warmer than the references and more disciplined than DeSilva.
 
-### 1.3 The core move — voice modulates by altitude
-The same voice, dialed differently per chapter:
+### 1.3 The core move — one warm register, start to finish
+The same voice in every chapter — warm, encouraging, clear:
 
-| Chapter | Warmth | Rigor | Notes |
-|---------|--------|-------|-------|
-| **Ch1 Meet the P2** | maximal | low | reassuring, feature-first, lots of intuition. Make the chip feel approachable. |
-| **Ch2 Putting It to Work** | maximal | low–moderate | encouraging, "here's how you actually do it." Comfort through doing. |
-| **Ch3 Thinking in P2** | **stays warm** | **high, never glib** | careful and precise; rigor carried by the worked example, not by lecturing; **never prescriptive**. The felt shift is "you're ready for this now." |
+| Chapter | Tone | Notes |
+|---------|------|-------|
+| **Ch1 Meet the Propeller 2** | warm, reassuring | feature-first, lots of intuition. Make the chip feel approachable. |
+| **Ch2 Reading P2 Code** | warm, encouraging | "here's how to read what you're looking at." Comfort through seeing it work. |
+| **Ch3 Putting It to Work** | warm, encouraging | "here's how you actually use these features." Comfort through doing. |
 
-The early chapters **earn the trust** that lets the reader follow into Ch3. Never condescend early; never turn
-cold or glib late.
+Never condescend; never turn cold or glib. The reader should feel welcomed and capable from the first page to
+the last.
 
 ### 1.4 Target audience
-Four readers (see `creation-guide.md` §1.2): newcomer, migrating P1 vet, working dev, AI agent. The single
-modulating voice serves all four — the newcomer rides the warmth up; the working dev drops straight into the
-rigorous summit and finds it still readable.
+Four readers (see `creation-guide.md` §1.2): newcomer, migrating P1 vet, working dev, AI agent. The single warm
+voice serves all four — the newcomer is welcomed in; the working dev still finds it clear and quick to scan.
 
 ---
 
@@ -59,29 +65,22 @@ rigorous summit and finds it still readable.
 | Address the reader warmly | "If you've used a microcontroller before, the first surprise is that there are eight of them." |
 | Motivate before detail | "You reach for a smart pin when you want a pin to *do* something — count, measure, output a waveform — without spending a cog on it." |
 | Differentiate by contrast | "A cog gives you a whole processor; a smart pin gives you one dedicated job at the edge. Reach for the smaller tool first." |
-| In Ch3: teach a technique | "Ask first: what is the *one* serialized resource here, and which single cog will own it? That answer makes your first cut." |
+| Walk the reader through reading code | "Read it top-down: this line names the pin, this one starts the smart pin, and this one waits for the result. Once you can spot that shape, every example looks familiar." |
 
 ### 2.2 What we DON'T
 | Avoid | Why | Instead |
 |-------|-----|---------|
 | Heavy persona / jokes / "Uff!" | That's DeSilva; we're low-persona | warmth through clarity |
 | Dictionary dryness | loses the newcomer | motivate, then state |
-| "Simply…", "just…", "obviously…" | dismissive of real difficulty (esp. Ch3) | state the step plainly |
+| "Simply…", "just…", "obviously…" | dismissive of real difficulty | state the step plainly |
 | Exhaustive enumeration | that's the reference manuals' job | orient + link out |
-| **"The right design is…", "you should structure it as…"** (Ch3) | **prescribes a unique-per-project outcome** | **"here's how to *derive* it; your answer will differ"** |
 | Hedging ("maybe", "probably") on facts | undermines authority | state sourced facts directly |
 | Marketing / undocumented roadmap | trust chain | present-tense, sourced facts |
 
-### 2.3 The anti-glibness rule (Ch3)
-Functional decomposition is not lightweight, so we never make it *sound* lightweight. No "it's easy," no
-"just split it up," no false reassurance. We respect the difficulty by being precise and by walking the reader
-through real reasoning. Difficulty is honored, not hidden — and never inflated to sound impressive either.
-
-### 2.4 The anti-prescription rule (Ch3) — load-bearing
-The final decomposition is unique to every project (PLANNING §5, creation-guide §3.4). Ch3 prose teaches
-*techniques for deriving*; it must never read as a recipe. The robot-dog derivation is always framed as **one
-machine's answer, shown to make the method visible** — never "do it this way." If a sentence could be quoted as
-a design rule out of context, rewrite it as a question the reader asks of *their* machine.
+### 2.3 The anti-glibness rule
+The P2's features aren't trivial, so we never make them *sound* trivial. No "it's easy," no "just wire it up,"
+no false reassurance. We respect real difficulty by being precise and by walking the reader through what's
+actually happening. Difficulty is honored, not hidden — and never inflated to sound impressive either.
 
 ---
 
@@ -107,7 +106,7 @@ Keep markers rare — this is a narrative guide, not a reference peppered with b
 ## 4. Terminology Standards
 | Canonical | Not | Note |
 |-----------|-----|------|
-| **COG** | CPU, core | the community treats the COG as the computer |
+| **cog** | CPU, core | the community treats the cog as the computer; **lowercase in prose**, capitalized only in headings/titles/numbered labels/sentence-start (never all-caps "COG") |
 | smart pin | smartpin, intelligent pin | canonical two words |
 | hub | main memory (alone) | "hub" / "hub RAM" |
 | Spin2 / PASM2 | Spin / PASM (when meaning P2) | reserve unqualified for P1 context |
@@ -120,54 +119,39 @@ Keep markers rare — this is a narrative guide, not a reference peppered with b
 
 ## 5. Section-Specific Voice
 
-### 5.1 Chapter openers (Chs 1–2)
+### 5.1 Chapter openers
 Warm advance organizer: what this chapter gives you and why it matters, in two or three sentences, before any
 detail. Example: ✅ *"By the end of this chapter you'll be able to picture the whole chip — eight processors,
 one shared hub, and a ring of clever pins — and know roughly what each part is for. That picture is all you need
 before we start writing code."*
 
-### 5.2 Feature introductions (Ch1)
+### 5.2 Feature introductions (Ch1 "Meet the Propeller 2")
 One or two plain sentences on what it is, then what it's *for*, then a link out. ✅ *"The CORDIC solver is a
 piece of math hardware shared by all eight cogs. You hand it an angle or a vector and it hands back sines,
 magnitudes, logarithms — the trigonometry you'd otherwise write by hand. (The full operation list is in the
 Silicon Doc; here, just know it's there and it's fast.)"*
 
-### 5.3 The decomposition chapter (Ch3)
-Rigorous, warm, derivational. Lead each force with the question it answers, give the failure mode if ignored,
-then show it deriving — not dictating. ✅ *"Force 1 asks a correctness question, not a style one: which single
-cog owns this serialized resource? Get it wrong and two cogs drive the same wire — there is no hardware referee.
-So the first cut traces the wire."* ❌ *"Put your I²C driver in its own cog."* (prescribes an outcome)
+### 5.3 Reading code (Ch2 "Reading P2 Code")
+Warm and walked-through. Show a short example, then read it line by line in plain language so the reader learns
+to recognize the shape. ✅ *"Don't try to memorize this — just notice the rhythm: name the pin, configure the
+smart pin, then read its result. Almost every example you'll meet follows that same three-beat pattern."*
 
-### 5.4 The worked derivation (robot dog)
-Frame it before and after as a demonstration. Open: *"Let's watch the method run on one machine — a walking
-robot dog. Yours will be different; the point is the moves, not the answer."* Close: *"Notice we never started
-from a parts list — we started from the wires and the timing, and the object set fell out. Run the same routine
-on your machine and you'll get a different, equally sound shape."*
-
----
-
-### 5.5 The appendices (reference register)
-The back-matter appendices drop to a **precise reference register** — lower warmth, factual, scannable (the
-"dictionary" voice is appropriate here). **Appendix A** (space/time + FPGA terminology) states the spectrum and
-the terminology table flatly, and **always carries the what-transfers/what-doesn't honesty** — never let the
-borrowed words imply the P2 *is* an FPGA. **Appendix B** (further reading) is a terse annotated list; every
-citation is real and verified (NEEDS-VERIFICATION until checked), each with a one-line "why it's relevant to P2."
+### 5.4 Putting features to work (Ch3 "Putting It to Work")
+Warm and encouraging — "here's how you actually use this." Motivate the feature, show it doing real work, and
+point at the reference for the full detail. ✅ *"When you want a pin to count edges for you, you hand the job to
+its smart pin and walk away — your cog is free for everything else. Here's the smallest version that works, and
+then where to go when you need more."*
 
 ## 6. Quality Checklist
-**Warmth & altitude**
-- [ ] Chs 1–2 read as welcoming; no abstraction that doesn't yet help the newcomer
-- [ ] Ch3 stays warm but rigorous; no "simply/just/easy"; difficulty honored
-- [ ] The felt tone shift into Ch3 is "you're ready," not "brace yourself"
-
-**Anti-prescription (Ch3)**
-- [ ] No sentence reads as a design rule out of context
-- [ ] The robot dog is framed as a demonstration, not a template, both before and after
-- [ ] Every force/section teaches a *technique for deriving*, not an outcome
+**Warmth & consistency**
+- [ ] Every chapter reads as welcoming; no abstraction that doesn't yet help the newcomer
+- [ ] No "simply/just/easy"; difficulty honored, never inflated
+- [ ] The tone is the same warm register from the first page to the last — no cold or glib turns
 
 **Discipline**
 - [ ] Link out, never duplicate the reference manuals
 - [ ] Low persona — warmth from clarity, not a character
-- [ ] "COG" not "CPU"; code constants not arithmetic; `pnut_ts`-verified code
+- [ ] "cog" not "CPU"/"core" (lowercase in prose); code constants not arithmetic; `pnut_ts`-verified code
 - [ ] No hedging on facts; no marketing; no undocumented roadmap claims
 
 ---
@@ -175,13 +159,12 @@ citation is real and verified (NEEDS-VERIFICATION until checked), each with a on
 ## 7. Summary — the voice equation
 ```
 Our Voice = a senior dev's whiteboard warmth
-          + reference-grade precision (dialed up by altitude)
+          + clear, careful precision
           − DeSilva's persona
           − the dictionary's coldness
-          − any prescribed answer
 ```
-A warm, welcoming orientation that respects the reader enough to take them somewhere real — and trusts them to
-derive their own design rather than handing them one.
+A warm, welcoming orientation — the same encouraging register from start to finish — that respects the reader
+enough to make the Propeller 2 genuinely approachable.
 
 ---
-*Version 0.1 — initial voice guide, derived from PLANNING.md §10 (2026-06-22).*
+*Version 0.1 — initial voice guide, derived from PLANNING.md §10 (2026-06-22); split into the Getting Started book 2026-06-24.*
