@@ -1,0 +1,137 @@
+component: P2-ES Eval HyperRAM & HyperFlash Add-on Board
+part_number: "64004-ES"
+series: "P2-ES Eval Add-on (limited edition)"
+manufacturer: "Parallax Inc."
+status: "limited_edition"
+p2kb_key: "p2kbHwAddonHyperRamHyperFlash"
+category: addon
+aliases:
+  - "HyperRAM add-on"
+  - "HyperFlash add-on"
+  - "HyperRAM HyperFlash board"
+  - "hyper memory board"
+  - "PSRAM NOR flash add-on"
+  - "P2-ES Eval HyperRAM & HyperFlash Add-on Board"
+  - "64004-ES"
+  - "#64004 add-on board"
+
+description: >-
+  Limited-edition 16 MB HyperRAM + 32 MB HyperFlash add-on for the
+  (also limited-edition) Propeller 2 ES Evaluation Board (#64000-ES). Dual 2x6
+  pass-through sockets stack on top of two adjacent P2-ES Eval Board I/O-pin
+  breakout edge headers (16 pins). Device A (lower) = HyperRAM 16 MB; Device B
+  (upper) = HyperFlash 32 MB. Each device may be RAM, Flash, or dual-memory
+  (de-/re-soldering required); the PCB carries configuration options for each.
+
+host_note: >-
+  Targets the #64000-ES (limited-edition ES) P2 Eval Board specifically. The
+  board does NOT source power via the passthrough header's 5V socket, so the
+  P2-ES Eval Board Rev B's ACC HDR jumper can remain in its default off position.
+
+# --- Eval-header board model (uniform across all eval-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 16
+  addressing: >-
+    actual_P2_pin = base_pin + offset (IO+0 .. IO+15). The board defines its
+    functions by OFFSET within a 16-pin P2 header block (two adjacent 8-pin
+    edge headers); the user chooses which block (base_pin) it mounts on.
+  base_pin_options: [0, 16, 32, 48]
+  base_pin_note: >-
+    Spans two adjacent 8-pin edge headers (16 consecutive pins). base_pin is the
+    first pin of that 16-pin block.
+
+# "direction" is the P2-side role from the source Type column:
+# MOSI = P2 output (out), MISO = P2 input (in), In/Out = bidirectional (bidir).
+signal_map:
+  - {offset: 0,  signal: "HyperBUS DQ0 (8-bit data bus)", direction: bidir, device: Both, notes: "Command, address, and data transferred on DQ[0..7] during read/write."}
+  - {offset: 1,  signal: "HyperBUS DQ1", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 2,  signal: "HyperBUS DQ2", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 3,  signal: "HyperBUS DQ3", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 4,  signal: "HyperBUS DQ4", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 5,  signal: "HyperBUS DQ5", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 6,  signal: "HyperBUS DQ6", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 7,  signal: "HyperBUS DQ7", direction: bidir, device: Both, notes: "8-bit data bus."}
+  - {offset: 8,  signal: "CK (clock, device A)", direction: out, device: A, notes: "Single-ended clock for device A."}
+  - {offset: 9,  signal: "CK (clock, device B)", direction: out, device: B, notes: "Single-ended clock for device B."}
+  - {offset: 10, signal: "RWDS (read/write data strobe, device A)", direction: bidir, device: A, notes: "Slave output during command/address; edge-aligned with read data; data-mask on write."}
+  - {offset: 11, signal: "RWDS (read/write data strobe, device B)", direction: bidir, device: B, notes: "As IO+10, for device B."}
+  - {offset: 12, signal: "CS# (chip select, device A)", direction: out, device: A, notes: "Bus transaction starts High->Low, ends Low->High."}
+  - {offset: 13, signal: "CS# (chip select, device B)", direction: out, device: B, notes: "Chip select for device B."}
+  - {offset: 14, signal: "INT# (interrupt, Flash only, device B)", direction: in, device: B, notes: "Open-drain interrupt output; Low indicates an internal event occurred."}
+  - {offset: 15, signal: "RESET# (hardware reset, both devices)", direction: out, device: Both, notes: "Low (default) = device self-initializes to Standby; assert High to enable HyperBUS. User-selectable 10K pull-down clears HyperRAM on Propeller reset."}
+
+devices:
+  device_a:
+    position: "lower"
+    preinstalled: "HyperRAM, 16 MB"
+  device_b:
+    position: "upper"
+    preinstalled: "HyperFlash, 32 MB"
+  note: "Each device may be a RAM, Flash, or dual-memory; memory-type configuration resistors set CS# routing per device."
+
+specifications:
+  ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
+  flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
+  voltage: "+3.3 VDC (supplied by the P2-ES Eval Board I/O LDO regulator)"
+  max_clock_rate: "100 MHz (200 MB/s) at 3.0 Vcc"
+  ram_current: "60 mA peak burst, 600 uA standby (CS# = High)"
+  flash_current: "100 mA peak burst, 25 uA standby (CS# = High)"
+  flash_endurance: "100,000 program/erase cycles"
+  flash_retention: "20-year data retention"
+  form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
+  mounting_hole: "2.5 mm (100 mil) hole, pad ring 4.5 mm (180 mil), connected to GND"
+  operating_temp: "-40 to +85 C (-40 to +185 F)"
+  pcb_dimensions: "1.0 x 1.9 in (25.4 x 48.3 mm)"
+
+configuration:
+  reset_pads: >-
+    Optional RES / GND pads access the HyperBUS reset signal. Standard: a shunt
+    across the center-and-right pads holds the module in reset until IO+15 is
+    asserted High. Alternate: move the shunt to left-and-center -> module
+    normally active; assert IO+15 or the RES pad Low to reset.
+  memory_type_resistors: >-
+    Per-device 2-position shunts (FLS/RAM) set device memory type by routing CS#
+    to the appropriate pin. Pre-installed device A = HyperRAM (shunt = RAM);
+    device B = HyperFlash (shunt = FLS).
+  series_resistors: "Each device has a 10K pull-up (CS# to 3.3V), a 10 ohm series on RWDS, and a 10 ohm series on CK."
+  decoupling: "Each HyperBUS memory has four decoupling caps - a 100 nF and a 1 uF per VccQ pin."
+  optional_pads: "Extra HyperBUS signals (INT / RSTO / CSx-BR / CSx-AF) for experimenting with alternate memory types; not supported/warrantied by Parallax."
+
+quick_start:
+  - "Place the add-on PCB chip-side-up over a pair of P2-ES Eval Board edge headers; align pins, press gently."
+  - "Strongly recommended: connect the auxiliary power supply to the P2-EVAL board's AUX USB port (power needs may exceed PC-USB)."
+  - "To enable the HyperBUS memory, assert RESET# (IO+15) High. Disable in user code by asserting RESET# Low."
+
+datasheets:
+  verify_status: "UNVERIFIED - OCR-transcribed; confirm against the ISSI datasheets / the 64004-ES product page before relying on these."
+  hyperram: "ISSI IS66WVH16M8BLL-100B1LI [VERIFY]"
+  hyperram_url: "http://www.issi.com/WW/pdf/66-67WVH16M8ALL-BLL.pdf [VERIFY]"
+  hyperflash: "ISSI IS26KL256S-DABL100 [VERIFY]"
+  hyperflash_url: "http://www.issi.com/WW/pdf/26KS-KL128S-256S-512S.pdf [VERIFY]"
+
+provenance:
+  board_revision: "A (schematic last updated 21 Jul 2019)"
+  copyright: "2019 Parallax Incorporated"
+  license: "Open Source Hardware, CC BY-SA 4.0"
+  product_guide_version: "1.0 (Original Release)"
+
+use_cases:
+  primary:
+    - "External memory expansion (16 MB RAM) for large buffers/framebuffers"
+    - "Non-volatile bulk storage (32 MB Flash)"
+    - "High-bandwidth HyperBUS memory experiments"
+  secondary:
+    - "Build-your-own hyper-memory configurations from the open-source design"
+
+limitations:
+  - "Limited edition; targets the #64000-ES limited-edition Eval Board"
+  - "Datasheet part numbers/URLs are OCR-transcribed and unverified"
+  - "Auxiliary power recommended (burst current may exceed PC-USB)"
+
+documentation:
+  primary: "64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0"
+
+ecosystem_position: "external_memory"
+hardware_family: "p2_eval_addons"
+size_class: "small_addon"

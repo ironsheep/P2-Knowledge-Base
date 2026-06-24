@@ -155,13 +155,11 @@ optimal_configurations:
   recommended:
     - module: "P2-EC"
       total_cost: "Module + Carrier"
-      pin_efficiency: "100%"
       use_case: "Standard professional development"
       
   functional_but_suboptimal:
     - module: "P2-EC32MB"
       total_cost: "Higher cost, oversized"
-      pin_efficiency: "62% (40 pins used)"
       use_case: "Standard form factor with memory needs"
       
 power_management:

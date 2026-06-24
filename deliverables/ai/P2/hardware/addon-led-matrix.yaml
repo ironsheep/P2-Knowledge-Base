@@ -1,182 +1,102 @@
-# P2 Eval LED Matrix Add-on Board - Hardware Specification
+component: P2 Eval LED Matrix Add-on Board
+part_number: "64006C"
+series: "P2 Eval Add-on Boards (#64006)"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonLedMatrix"
+category: addon
 aliases:
   - "LED matrix board"
   - "LED matrix add-on"
+  - "Charlieplex LED board"
   - "P2 Eval LED Matrix Add-on Board"
   - "64006C"
   - "#64006 add-on board"
-# Part Number: 64006C
-# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
-# Enhanced: 2025-12-27 with full code-generation technical details
 
-hardware_type: "addon_board"
-part_number: "64006C"
-p2kb_key: "p2kbHwAddonLedMatrix"
-manufacturer: "Parallax Inc."
-series: "P2 Eval Add-on Boards"
-status: "active_production"
+description: >-
+  An 8x7 grid of Charlieplexed green LEDs - 56 LEDs driven by only 8 I/O pins.
+  Charlieplexing exploits LED one-way current flow plus the tri-state property
+  of P2 pins: to light one LED, drive one pin HIGH and one LOW per the lookup
+  table, set both to INPUT to turn it off. Only one LED is lit at a time;
+  multiplexing faster than ~50 Hz removes visible flicker. Each lit LED draws
+  ~4 mA, so instantaneous current stays ~4 mA (vs ~224 mA if all 56 were on).
 
-basic_info:
-  name: "P2 Eval LED Matrix Add-on Board"
-  description: "8×7 grid of Charlieplexed green LEDs (56 LEDs total) using only 8 I/O pins"
-  category: "display"
-  form_factor: "small_addon"
+# --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 8
+  addressing: >-
+    actual_P2_pin = base_pin + offset. The board defines its functions by OFFSET
+    within an 8-pin eval-header group; the user chooses which header (base_pin)
+    it plugs into. base_pin is the first pin of that group.
+  base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
+  base_pin_caution: >-
+    Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
+    serial pins - not recommended.
+
+# All 8 pins are tri-state Charlieplex drive lines: each is driven HIGH (anode),
+# driven LOW (cathode), or floated (input) per the lookup. Direction is therefore
+# not a fixed out/in/bidir - it is per-LED tri-state. See charlieplex_grid.
+signal_map:
+  - {offset: 0, signal: "Charlieplex drive line 0", notes: "Tri-state: HIGH=anode, LOW=cathode, INPUT=off."}
+  - {offset: 1, signal: "Charlieplex drive line 1", notes: "Tri-state Charlieplex line."}
+  - {offset: 2, signal: "Charlieplex drive line 2", notes: "Tri-state Charlieplex line."}
+  - {offset: 3, signal: "Charlieplex drive line 3", notes: "Tri-state Charlieplex line."}
+  - {offset: 4, signal: "Charlieplex drive line 4", notes: "Tri-state Charlieplex line."}
+  - {offset: 5, signal: "Charlieplex drive line 5", notes: "Tri-state Charlieplex line."}
+  - {offset: 6, signal: "Charlieplex drive line 6", notes: "Tri-state Charlieplex line."}
+  - {offset: 7, signal: "Charlieplex drive line 7", notes: "Tri-state Charlieplex line."}
+
+# Physical 7-row x 8-column LED grid. Each cell is [high_offset, low_offset]:
+# to light the LED at (row, col), drive base_pin+high HIGH, base_pin+low LOW,
+# float all other pins. 7 x 8 = 56 LEDs. Matches the #64006C Product Guide table.
+charlieplex_grid:
+  format: "[high_offset, low_offset] per (row, col); drive base+high HIGH, base+low LOW, others INPUT"
+  rows:
+    row_1: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[1,0]]
+    row_2: [[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[2,0],[2,1]]
+    row_3: [[2,3],[2,4],[2,5],[2,6],[2,7],[3,0],[3,1],[3,2]]
+    row_4: [[3,4],[3,5],[3,6],[3,7],[4,0],[4,1],[4,2],[4,3]]
+    row_5: [[4,5],[4,6],[4,7],[5,0],[5,1],[5,2],[5,3],[5,4]]
+    row_6: [[5,6],[5,7],[6,0],[6,1],[6,2],[6,3],[6,4],[6,5]]
+    row_7: [[6,7],[7,0],[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]]
+
+display_specifications:
+  rows: 7
+  columns: 8
+  total_leds: 56
+  led_color: "Green"
+  led_current_ma: 4
+  control_method: "Charlieplexing (one LED lit at a time)"
+  simultaneous_leds: 1
 
 specifications:
   requires_host: true
+  io_pins_used: 8
   compatible_hosts:
     - "P2 Eval Board (64000)"
     - "P2 Edge Module Breadboard (64020)"
     - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
-
-  physical:
-    size: "Small module"
-    connector: "2x6 pass-through socket"
-    mounting: "Single M3 mounting hole connected to GND"
-    mounting_hardware: "M3 or UNC 4-40"
-    hole_diameter: "3.2mm (126 mil)"
-    pad_ring: "5mm (200 mil)"
-    standoff_recommendation: "9.5mm long standoff for support"
-
   electrical:
     supply_voltage: "3.3V from host"
     current_instantaneous_ma: 4
     current_average_ma: 4
-    io_pins_used: 8
-    refresh_rate_minimum_hz: 50
+  physical:
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
 
-# PIN MAPPING BY HEADER POSITION (MANDATORY)
-pin_mapping:
-  description: "Pin assignments when board is attached at each header position"
-
-  header_a:
-    base_pin: 0
-    p2_pins: "P0-P7"
-    pin_field: "P0 ADDPINS 7"
-    charlieplex_lines: ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7"]
-
-  header_b:
-    base_pin: 8
-    p2_pins: "P8-P15"
-    pin_field: "P8 ADDPINS 7"
-    charlieplex_lines: ["P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15"]
-
-  header_c:
-    base_pin: 16
-    p2_pins: "P16-P23"
-    pin_field: "P16 ADDPINS 7"
-    charlieplex_lines: ["P16", "P17", "P18", "P19", "P20", "P21", "P22", "P23"]
-
-  header_d:
-    base_pin: 24
-    p2_pins: "P24-P31"
-    pin_field: "P24 ADDPINS 7"
-    charlieplex_lines: ["P24", "P25", "P26", "P27", "P28", "P29", "P30", "P31"]
-
-  header_e:
-    base_pin: 32
-    p2_pins: "P32-P39"
-    pin_field: "P32 ADDPINS 7"
-    charlieplex_lines: ["P32", "P33", "P34", "P35", "P36", "P37", "P38", "P39"]
-
-  header_f:
-    base_pin: 40
-    p2_pins: "P40-P47"
-    pin_field: "P40 ADDPINS 7"
-    charlieplex_lines: ["P40", "P41", "P42", "P43", "P44", "P45", "P46", "P47"]
-
-  header_g:
-    base_pin: 48
-    p2_pins: "P48-P55"
-    pin_field: "P48 ADDPINS 7"
-    charlieplex_lines: ["P48", "P49", "P50", "P51", "P52", "P53", "P54", "P55"]
-
-  header_h:
-    base_pin: 56
-    p2_pins: "P56-P63"
-    note: "CAUTION: P58-P63 used by Flash SPI and Serial - not recommended"
-    pin_field: "P56 ADDPINS 7"
-    charlieplex_lines: ["P56", "P57", "P58", "P59", "P60", "P61", "P62", "P63"]
-
-# SIGNAL USAGE DEFINITIONS (MANDATORY)
-signals:
-  charlieplex_matrix:
-    count: 8
-    header_pins: [1, 2, 3, 4, 5, 6, 7, 8]
-    offset_from_base: [0, 1, 2, 3, 4, 5, 6, 7]
-    drive_type: "tri-state charlieplex"
-    function: "Charlieplexed LED matrix control"
-    direction: "bidirectional (output HIGH, output LOW, or input float)"
-
-  led_control:
-    method: "Each LED requires one pin HIGH (anode), one pin LOW (cathode), others floating"
-    formula: "p² - p = 8² - 8 = 56 LEDs from 8 pins"
-    simultaneous_leds: 1
-    persistence_of_vision: "Rapid switching >50Hz creates appearance of multiple LEDs lit"
-
-# DISPLAY SPECIFICATIONS
-display_specifications:
-  led_matrix:
-    rows: 7
-    columns: 8
-    total_leds: 56
-    led_color: "Green"
-    led_current_ma: 4
-    control_method: "Charlieplexing"
-    pins_required: 8
-
-  timing:
-    refresh_rate_hz: 120
-    pixels_per_cycle: 56
-    ticks_per_pixel: "clkfreq / 120 / 56"
-    minimum_refresh_hz: 50
-
-# CHARLIEPLEX LOOKUP TABLE
-# Format: LED position -> [anode_offset, cathode_offset]
-# To light LED: set base+anode HIGH, base+cathode LOW, all others INPUT
-charlieplex_lookup:
-  description: |
-    Lookup table for LED activation. High nibble = anode pin offset, low nibble = cathode pin offset.
-    To light LED at position N: PINHIGH(base + lut[N] >> 4), PINLOW(base + lut[N] & $F)
-  algorithm: |
-    For 8 pins (0-7), anode cycles 0-7, cathode cycles 0-7 skipping when equal to anode.
-    Row = anode, Column = cathode (skipping self)
-
-  # Row 0 (anode=0): cathodes 1-7
-  row_0: [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7]]
-
-  # Row 1 (anode=1): cathodes 0,2-7
-  row_1: [[1, 0], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]]
-
-  # Row 2 (anode=2): cathodes 0-1,3-7
-  row_2: [[2, 0], [2, 1], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7]]
-
-  # Row 3 (anode=3): cathodes 0-2,4-7
-  row_3: [[3, 0], [3, 1], [3, 2], [3, 4], [3, 5], [3, 6], [3, 7]]
-
-  # Row 4 (anode=4): cathodes 0-3,5-7
-  row_4: [[4, 0], [4, 1], [4, 2], [4, 3], [4, 5], [4, 6], [4, 7]]
-
-  # Row 5 (anode=5): cathodes 0-4,6-7
-  row_5: [[5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 6], [5, 7]]
-
-  # Row 6 (anode=6): cathodes 0-5,7
-  row_6: [[6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 7]]
-
-# PROTOCOL CONSTRAINTS
 protocol_constraints:
   charlieplex:
     max_simultaneous_leds: 1
     refresh_minimum_hz: 50
     refresh_recommended_hz: 120
     cog_required: true
-    cog_reason: "Continuous refresh loop needed for persistence of vision"
-
+    cog_reason: "Continuous refresh loop needed for persistence of vision."
   timing:
     pixel_on_time_us: "1000000 / (refresh_hz * 56)"
     at_120hz_pixel_us: 148
 
-# CODE PATTERNS (from OBEX 2856)
 code_patterns:
   spin2:
     obex_driver_usage: |
@@ -187,66 +107,25 @@ code_patterns:
         matrix.start(0)                  ' Start charlieplex cog at base pin 0
         matrix.putc("A")                 ' Display character 'A'
         matrix.scroll(@"Hello!", 100)    ' Scroll message with 100ms delay
-
-    initialization: |
-      VAR
-        long  cog
-        long  stack[32]
-        byte  pixels[7]                  ' 7 rows of 8 columns
-
-      PUB start(basepin) : result
-        cog := cogspin(NEWCOG, refresh_display(basepin), @stack) + 1
-        return cog
-
-    refresh_loop: |
-      PRI refresh_display(basepin) | pinfield, tix, a, k, t, r, bits
-        pinfield := basepin ADDPINS 7    ' All 8 pins in group
-
-        tix := (clkfreq / 120) / 56      ' Timing for 120Hz refresh
-
-        REPEAT
-          a := 0                         ' Anode offset
-          k := 1                         ' Cathode offset
-          t := getct()                   ' Start timing
-
-          REPEAT r FROM 0 TO 6           ' 7 rows
-            bits := pixels[r]            ' Get row bitmap
-            REPEAT 8                     ' 8 columns
-              IF (bits & %10000000)      ' LED on?
-                PINHIGH(basepin + a)     ' Anode high
-                PINLOW(basepin + k)      ' Cathode low
-              bits <<= 1                 ' Next column
-              IF (++k == 8)              ' Wrap cathode
-                ++a
-                k := 0
-              IF (k == a)                ' Skip when equal
-                ++k
-              waitct(t += tix)           ' Timing
-              PINFLOAT(pinfield)         ' All pins float (LED off)
-
-    plot_pixel: |
-      PUB plot(x, y, mode) | mask
-        ' Plot pixel at x (column 0-7), y (row 0-6)
-        ' mode: 0=off, 1=on, 2=toggle
-        IF ((x >= 0) && (x < 8))
-          IF ((y >= 0) && (y < 7))
-            mask := %10000000 >> x
-            CASE mode
-              0: pixels[y] &= !mask      ' Off
-              1: pixels[y] |= mask       ' On
-              2: pixels[y] ^= mask       ' Toggle
-
     manual_led_control: |
-      ' Light single LED without driver (for simple tests)
-      PUB light_led(basepin, anode_offset, cathode_offset)
-        PINFLOAT(basepin ADDPINS 7)      ' Float all first
-        PINHIGH(basepin + anode_offset)  ' Anode high
-        PINLOW(basepin + cathode_offset) ' Cathode low
+      ' Light a single LED without the driver (for simple tests)
+      PUB light_led(basepin, high_offset, low_offset)
+        PINFLOAT(basepin ADDPINS 7)      ' Float all 8 pins first
+        PINHIGH(basepin + high_offset)   ' Anode high
+        PINLOW(basepin + low_offset)     ' Cathode low
 
       PUB led_off(basepin)
         PINFLOAT(basepin ADDPINS 7)      ' Float all = all off
+    plot_pixel: |
+      PUB plot(x, y, mode) | mask
+        ' Plot pixel at x (column 0-7), y (row 0-6); mode 0=off 1=on 2=toggle
+        IF ((x >= 0) && (x < 8)) && ((y >= 0) && (y < 7))
+          mask := %10000000 >> x
+          CASE mode
+            0: pixels[y] &= !mask
+            1: pixels[y] |= mask
+            2: pixels[y] ^= mask
 
-# RESOURCE REFERENCES (MANDATORY - with URLs)
 resources:
   obex:
     id: 2856
@@ -256,111 +135,59 @@ resources:
     driver_file: "jm_p2-es_matrix.spin2"
     license: "MIT"
     features:
-      - "8x7 charlieplex refresh in dedicated cog"
-      - "ASCII character display with 5x7 font"
-      - "Text scrolling"
-      - "Pixel plotting and line drawing"
+      - "8x7 charlieplex refresh in a dedicated cog"
+      - "ASCII character display with a 5x7 font"
+      - "Text scrolling, pixel plotting, line drawing"
       - "Bar graph and level indicators"
-      - "Custom character support"
-
   quick_bytes:
     - title: "LED Matrix used as an I/O Test Utility"
       url: "https://www.parallax.com/i-o-test-utility-with-led-matrix/"
-      description: "Charlieplex lookup table implementation, persistence of vision"
-
-# Original content preserved and enhanced
-display_features:
-  text:
-    font: "5x7 pixel ASCII characters"
-    characters: "Space through tilde (32-126)"
-    custom_chars: "8 user-definable characters (index 1-8)"
-    scrolling: "Horizontal scrolling with blend transitions"
-
-  graphics:
-    resolution: "8x7 pixels (56 total)"
-    plot_modes: ["off", "on", "toggle"]
-    primitives: ["pixel", "line", "bar", "dot"]
-    animation: "Simple animations via pixel array updates"
+      description: "Charlieplex lookup table implementation, persistence of vision."
 
 use_cases:
   primary:
-    - "Text and graphic display applications"
-    - "Educational demonstrations of Charlieplexing"
-    - "Status indicators and visual feedback"
-    - "Simple scrolling message displays"
+    - "Scrolling text and message display"
+    - "Pixel graphics and simple animations"
+    - "Bar graphs and level indicators"
+    - "Educational Charlieplexing demonstrations"
   secondary:
-    - "Game displays and scoring"
-    - "Data visualization (bar graphs)"
-    - "Clock and timer displays"
-    - "Interactive learning projects"
+    - "Status display for embedded projects"
+    - "I/O test utility"
 
 advantages:
-  - "56 LEDs controlled with only 8 pins"
-  - "Efficient Charlieplexing implementation"
-  - "Low total current consumption (4mA)"
-  - "Excellent educational value for multiplexing concepts"
-  - "Fast P2 switching enables flicker-free operation"
-  - "Complete OBEX driver with font and graphics"
+  - "56 LEDs from only 8 I/O pins (Charlieplexing)"
+  - "Low instantaneous current (~4 mA, one LED at a time)"
+  - "OBEX driver provides text, scrolling, and graphics"
 
 limitations:
-  - "Only one LED can be lit at a time (requires multiplexing)"
-  - "Requires dedicated cog for continuous refresh"
-  - "Green LEDs only (not full color)"
-  - "Limited to 8×7 resolution"
-  - "Programming complexity higher than direct control"
-
-development_workflow:
-  - "Connect to host board via 2x6 connector"
-  - "Identify header position (A-H) to determine base pin"
-  - "Use OBEX jm_p2-es_matrix.spin2 driver"
-  - "Call start(basepin) to spawn refresh cog"
-  - "Use putc(), scroll(), plot() for display"
-  - "Driver handles all charlieplex timing automatically"
+  - "Only one LED truly lit at a time (relies on persistence of vision)"
+  - "Requires a dedicated cog for continuous refresh"
+  - "Green LEDs only"
+  - "Requires a P2 Eval Board or Edge system"
 
 compatibility:
   stacking:
-    position: "Any 2x6 header position on host board"
-    conflicts: "Uses 8 pins - check with other add-ons"
-    power_sharing: "Very low power - compatible with multiple boards"
-
-  performance_requirements:
-    cpu_usage: "Requires one cog for refresh loop"
-    timing_critical: "50Hz minimum refresh rate"
-    p2_suitability: "P2 multi-cog architecture ideal for this application"
-
-educational_value:
-  concepts_taught:
-    - "Charlieplexing multiplexing technique"
-    - "Tri-state I/O pin usage"
-    - "Persistence of vision principles"
-    - "Current limiting and LED control"
-    - "Matrix addressing schemes"
-    - "Refresh timing and flicker elimination"
-    - "Multi-cog programming"
+    position: "Any 2x6 header position on the host board"
+    power_sharing: "Low power - compatible with multiple boards"
 
 documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
-  related:
-    - "Charlieplexing Wikipedia article (referenced)"
-    - "P2 Smart Pins I/O programming guide"
-    - "LED matrix programming examples"
+
+educational:
+  value: "very_high"
+  complexity_level: "intermediate"
+  concepts_taught:
+    - "Charlieplexing (tri-state LED multiplexing)"
+    - "Persistence of vision and refresh timing"
+    - "Tri-state pin control (HIGH / LOW / float)"
+    - "Bitmap/font rendering"
 
 availability:
   vendor: "Parallax Inc."
-  website: "parallax.com"
   part_lookup: "Search for 64006C or LED Matrix Add-on"
-  bundle_option: "Part of complete accessory set (64006-ES)"
-  individual_purchase: "Available separately"
+  bundle_option: "Part of the complete accessory set (64006-ES)"
 
-quality_rating: "educational_excellent"
-recommendation_score: 5
-educational_value: "very_high"
-complexity_level: "intermediate"
-programming_challenge: "moderate_to_advanced"
-
-# Cross-references
 ecosystem_position: "display_demonstration"
 hardware_family: "p2_eval_addons"
 addon_series: "64006_series"
 size_class: "small_addon"
-multiplexing_technique: "charlieplexing"

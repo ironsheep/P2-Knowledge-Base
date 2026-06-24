@@ -10,14 +10,14 @@
 > resumes your thread, and routes you into the right head. This README is what you
 > read to see the *whole board* and decide where to push next.
 >
-> _Last refreshed: 2026-06-12._
+> _Last refreshed: 2026-06-24._
 
 ## The heads — status & next action
 
 | Head | Dashboard | Status at a glance | Next actionable |
 |------|-----------|--------------------|-----------------|
 | **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | 32 logical sources · 8 open gaps + 3 expert-Qs · **Smart Pins (Titus) rev5 ✅ today** | **Smart Pins manual cert audit** (uses Titus); then **5B verification fill** (~20 sources missing cross-source, image debt) |
-| **YAML (P2KB)** | registry → [`operations/P2KB-CORRECTION-FINDINGS.md`](operations/P2KB-CORRECTION-FINDINGS.md) · data → `deliverables/ai/P2/` | **v1.10.1 sweep DONE** (F-141…F-158 + G-001/002/003) · **open:** G-004 (USB remainder, Chip-gated) · G-005 (async-TX glitch, HW-confirm) · F-160 (pin-efficiency metric, decision) · F-121/122/123 (→ ingestion) | **v1.10.1 correction sweep** — internal-consistency batch + Silicon-backed Smart-Pin additions |
+| **YAML (P2KB)** | [`operations/YAML-HEAD-DASHBOARD.md`](operations/YAML-HEAD-DASHBOARD.md) · register → [`P2KB-CORRECTION-FINDINGS.md`](operations/P2KB-CORRECTION-FINDINGS.md) · data → `deliverables/ai/P2/` | **v1.11.0 in prep** — eval-header board model (10 boards standardized + HyperRAM authored + orphans removed) + F-161/F-160/F-162 · drains the Assembly-manual YAML gate · **open:** G-004/G-005 (Chip/HW-gated) | **Regenerate index + validate + release v1.11.0** |
 | **Manual** | [`document-production/README.md`](document-production/README.md) · roster → [`PUBLICATION-ROSTER.md`](document-production/PUBLICATION-ROSTER.md) | Assembly **v3.0.0** ✅ + DeSilva **v3.0.0** ✅ shipped · Single-Step in **tech review** (cover repaired 2026-06-12) · Debug-Window awaiting screenshots | **PASM/Assembly ref is DONE** (chip review is external). Next owned work: Debug-Window screenshots; Streamer review→release |
 | **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ Integrated v2.1 (2025-09-12) · 113 P2 objects · served via p2kb MCP | **Delta re-scan** vs the 2025-09-12 baseline |
 | **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process + dashboard home; owns the corrections register & lessons-learned | (infrastructure — supports the content heads) |

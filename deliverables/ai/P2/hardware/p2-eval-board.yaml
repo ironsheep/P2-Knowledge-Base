@@ -142,7 +142,7 @@ expansion_ecosystem:
     contents: "8 different add-on boards"
     compatibility: "Designed specifically for Eval Board"
   individual_addons:
-    - "HyperRAM & HyperFLASH Add-On (64004-ES)"
+    - "HyperRAM (16 MB) & HyperFlash (32 MB) Add-On (64004-ES) - 16-pin eval-header board; see addon-hyperram-hyperflash"
     - "microSD Add-on Board (64009)"
     - "Universal Motor Driver (64010)"
     - "RTC Add-on Board (64013)"

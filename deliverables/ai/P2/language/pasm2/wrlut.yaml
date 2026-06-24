@@ -28,3 +28,40 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:16.990804'
 category: Lookup Table
 oneliner: Write D to LUT address {#}S/PTRx
+aliases:
+- WRLUT immediate address limit
+- LUT literal address 0-255
+- WRLUT 256 compile error
+immediate_address_limit:
+  rule: >-
+    A plain immediate LUT address (WRLUT D,#S) is limited to #0-#255, the lower
+    half of the 512-long LUT. #256 and above are a hard compile error
+    ("Constant must be from 0 to 255") - not a wrap, not a silent runtime trap,
+    not a wrong-long write.
+  full_range_access: >-
+    To reach any LUT long (0-511), use a register operand holding the address
+    (WRLUT D, addrReg) or a PTRA/PTRB pointer, optionally indexed
+    (WRLUT D, PTRB[4]).
+  encoding_reason: >-
+    The 9-bit S address field's top bit (bit 8) is the pointer/expression
+    selector, not address bit 8. A literal cannot set it, so a literal spans
+    only bits 7:0 (0-255); a PTRx expression sets bit 8 to take the pointer
+    path, and a register operand carries the full 9-bit address.
+  augmented_form_warning: >-
+    Do NOT use the ## augmented form (WRLUT D,##500) to reach the upper half: it
+    compiles, but its low 9 bits set bit 8 and land on the pointer-decode path -
+    the AUGS high bits are meaningless for a 9-bit LUT address. Use a register or
+    PTRA/PTRB instead.
+  scope: >-
+    All 512 LUT longs are reachable; only the plain-literal addressing mode is
+    capped at the lower 256. The limit is on the immediate operand, not the
+    memory.
+  applies_to_family: >-
+    The 0-255 plain-immediate cap is shared by the whole hub-memory operand
+    family (RDLONG WRLONG RDBYTE WRBYTE RDWORD WRWORD WMLONG); it bites for LUT
+    specifically because LUT addresses are small numbers authors write as bare
+    literals.
+  authority: >-
+    Compiler-enforced in PNut-TS v1.55 (Spin2 v55), verified by compiling the
+    over-range case; corroborated by the Silicon Doc hub-operand bit-table
+    (0-prefixed literal vs 1-prefixed PTR expression).

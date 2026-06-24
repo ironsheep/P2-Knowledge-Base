@@ -28,7 +28,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64029 (Standard Breakout)"
       pin_access: 64
-      pin_efficiency: "100%"
       rating: "5_stars_perfect"
       use_case: "Full P2 development platform"
       cost_efficiency: "optimal"
@@ -36,7 +35,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64019 (Mini Breakout)"
       pin_access: 40
-      pin_efficiency: "62%"
       rating: "2_stars_limited"
       use_case: "Simple projects only"
       cost_efficiency: "underutilized"
@@ -44,7 +42,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
       pin_access: 64
-      pin_efficiency: "100%"
       rating: "5_stars_professional"
       use_case: "Complex prototyping and education"
       cost_efficiency: "professional_premium"
@@ -52,7 +49,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64029 (Standard Breakout)"
       pin_access: 40
-      pin_efficiency: "62%"
       rating: "3_stars_oversized"
       use_case: "Standard form factor with memory"
       cost_efficiency: "acceptable_but_oversized"
@@ -60,7 +56,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64019 (Mini Breakout)"
       pin_access: 40
-      pin_efficiency: "87%"
       rating: "5_stars_perfect"
       use_case: "Compact memory-intensive projects"
       cost_efficiency: "optimal_memory_solution"
@@ -68,7 +63,6 @@ edge_module_carrier_compatibility:
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
       pin_access: 40
-      pin_efficiency: "30%"
       rating: "2_stars_overkill"
       use_case: "Educational memory platform"
       cost_efficiency: "expensive_overkill"

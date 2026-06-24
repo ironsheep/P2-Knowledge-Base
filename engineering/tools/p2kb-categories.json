@@ -248,13 +248,9 @@
       "description": "Edge module carrier, breakout, and breadboard boards",
       "files": ["edge-breadboard-carrier", "edge-mini-breakout", "edge-standard-breakout"]
     },
-    "addons": {
-      "description": "P2 Eval add-on boards (#64006 set) and eval accessory boards",
-      "files": ["addon-av-breakout", "addon-control-board", "addon-digital-video-out", "addon-goertzel-touch", "addon-led-matrix", "addon-mini-prototyping", "addon-serial-device", "addon-serial-host", "7_segment_display", "buttons_board", "switches_and_leds", "switches_board"]
-    },
-    "adapters": {
-      "description": "Interface and peripheral adapter boards",
-      "files": ["hub75_adapter"]
+    "eval_addon_boards": {
+      "description": "Boards that occupy a P2 Eval Board accessory header (base + offset model): the #64006 add-on set, the HUB75 adapter, and the HyperRAM/HyperFlash module. Ask 'what eval boards do we know about?' -> this is the full list.",
+      "files": ["addon-control-board", "addon-serial-host", "addon-led-matrix", "addon-digital-video-out", "addon-mini-prototyping", "addon-serial-device", "addon-goertzel-touch", "addon-av-breakout", "hub75_adapter", "addon-hyperram-hyperflash"]
     },
     "reference": {
       "description": "Hardware selection, comparison, compatibility, and reference data",

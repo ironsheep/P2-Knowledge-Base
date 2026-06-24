@@ -31,3 +31,12 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.009591'
 category: Hub RAM
 oneliner: Read zero-extended word from hub RAM
+immediate_address_note: >-
+  A plain immediate source/address operand is limited to 0-255 (the 9-bit S
+  field's bit 8 is the pointer/expression selector, so a literal spans only bits
+  7:0). For 20-bit hub addresses this rarely matters - use a register, a
+  PTRA/PTRB pointer, or the ## augmented form for the full range. This cap is
+  shared across the hub-memory operand family (RDLONG WRLONG RDBYTE WRBYTE RDWORD
+  WRWORD WMLONG) and is felt most with RDLUT/WRLUT, where small LUT addresses are
+  written as bare literals. Authority: PNut-TS v1.55 (Spin2 v55); Silicon Doc
+  hub-operand bit-table.
