@@ -1,0 +1,17 @@
+PUB main() | i
+    repeat i from 0 to 7
+        coginit(COGEXEC_NEW, @counter, $1000 + (i * 4))
+    repeat
+        ' Monitor the counters in hub RAM
+        
+DAT
+        org     0
+counter mov     hub_ptr, ptra          ' Our hub address arrived in PTRA
+.loop   rdlong  value, hub_ptr
+        add     value, #1
+        wrlong  value, hub_ptr
+        waitx   ##1_000_000
+        jmp     #.loop
+        
+hub_ptr long    0
+value   long    0

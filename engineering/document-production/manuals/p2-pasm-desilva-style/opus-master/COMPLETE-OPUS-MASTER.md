@@ -303,7 +303,7 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 Ah, excellent question! In the real world, you'd typically launch this from Spin2 (the high-level language) like this:
 
-```spin2
+```{.spin2 caption="ch01-first-blink.spin2"}
 CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 
@@ -599,7 +599,7 @@ The practical result? Hub access is MUCH faster and more predictable. Instead of
 
 Here's a simple demonstration of multiple cogs working together:
 
-```spin2
+```{.spin2 caption="ch02-multicog-blink.spin2"}
 ' Multi-COG LED Pattern Demo
 PUB main() | i
     repeat i from 0 to 3
@@ -840,7 +840,7 @@ Look at what you now understand:
 ### Experiment 1: Cog Counter
 Start cogs to increment different hub locations. With COGEXEC_NEW, the loop will start up to 7 new cogs (since cog 0 runs Spin2):
 
-```spin2
+```{.spin2 caption="ch02-hub-counters.spin2"}
 PUB main() | i
     repeat i from 0 to 7
         coginit(COGEXEC_NEW, @counter, $1000 + (i * 4))
