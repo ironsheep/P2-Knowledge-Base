@@ -179,7 +179,7 @@ whose signature is `QSIN(length, step, stepsInCircle)` — it returns
 `length x sin(step / stepsInCircle x 2pi)`. Passing `360` for `stepsInCircle` lets
 you treat `step` as degrees.
 
-```spin2
+```{.spin2 caption="ch08-scope-xy-lissajous.spin2"}
 CON _clkfreq = 100_000_000
 
 PUB main() | ph, x, y

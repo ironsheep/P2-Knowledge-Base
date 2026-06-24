@@ -87,7 +87,7 @@ call it `Status`"; the second says "send this to `Status`." You can feed the sam
 window from many places in your program, and you can feed two windows the same data
 by naming both. A complete minimal program:
 
-```spin2
+```{.spin2 caption="ch01-getting-started-term.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main()

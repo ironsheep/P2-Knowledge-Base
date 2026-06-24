@@ -479,7 +479,7 @@ the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command
 new position — you re-send one command, not the primitives. In buffered mode the motion
 is flicker-free:
 
-```spin2
+```{.spin2 caption="ch05-plot-field.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | x
@@ -556,7 +556,7 @@ moved to the left-center so the wave sits around a center line — y already
 increases upward in the default coordinate system. The two worked instruments that
 follow put these same primitives to work on real tasks.
 
-```spin2
+```{.spin2 caption="ch05-plot-wave-scatter.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | x, y, angle, i, sx, sy
@@ -633,7 +633,7 @@ marks and a ring — is drawn the same way, so a complete analog gauge needs onl
 `LINE` and `CIRCLE`. This program sweeps a software-generated reading across a 240°
 scale, redrawing in buffered mode so it never flickers:
 
-```spin2
+```{.spin2 caption="ch05-plot-gauge.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, value, needle, i, tick
@@ -700,7 +700,7 @@ it for the integral term, forms the controller output (clamped, like a real
 actuator), and advances a first-order process model toward that output. The three
 histories are then drawn as three polylines across the canvas:
 
-```spin2
+```{.spin2 caption="ch05-plot-pid.spin2"}
 CON
   _clkfreq = 200_000_000
   STEPS = 256

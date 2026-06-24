@@ -55,7 +55,7 @@ ceiling on how fast a window can update.
 
 Here is a complete program that opens a text window and prints a value:
 
-```spin2
+```{.spin2 caption="ch02-term-print-value.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | reading
@@ -106,7 +106,7 @@ feeding a LOGIC trace — each exercises the full path from `DEBUG()` to a live
 window with no wiring at all. This program drives a text window from two software
 sources, a CORDIC sine and the RNG:
 
-```spin2
+```{.spin2 caption="ch02-term-signals.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | angle, wave, noise
@@ -143,7 +143,7 @@ For display windows to open at all, `DEBUG_PIN_TX` must be 62 — that is the pi
 `pnut_term_ts` listens on. The defaults already satisfy this; the symbols exist for
 the cases where you must move the link or limit which cogs participate.
 
-```spin2
+```{.spin2 caption="ch02-term-pin-config.spin2"}
 CON _clkfreq = 200_000_000
 
 CON

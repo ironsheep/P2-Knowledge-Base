@@ -85,7 +85,7 @@ This program opens a TERM window and lets the arrow keys nudge a number up and
 down. Up/Down change it by one; Left/Right by ten. The value is redrawn only when a
 key is actually pressed:
 
-```spin2
+```{.spin2 caption="ch12-keyboard-adjust.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | key, value
@@ -166,7 +166,7 @@ too.
 This program continuously displays the mouse state in a TERM window, clearing and
 redrawing each pass:
 
-```spin2
+```{.spin2 caption="ch12-mouse-pointer.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | mouse[7]

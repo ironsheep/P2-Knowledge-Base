@@ -235,7 +235,7 @@ frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
 vibration draws a **diagonal streak** down the waterfall — the run-up captured as
 a picture.
 
-```spin2
+```{.spin2 caption="ch10-spectro-runup.spin2"}
 CON
   _clkfreq = 200_000_000
 

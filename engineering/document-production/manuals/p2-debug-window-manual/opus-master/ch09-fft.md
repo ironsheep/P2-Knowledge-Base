@@ -253,7 +253,7 @@ accumulator; adding a fixed increment to a phase each sample sets that tone's
 frequency, and the size of the increment relative to a full `$1_0000_0000` turn
 fixes which bin the spike lands in.
 
-```spin2
+```{.spin2 caption="ch09-fft-spectrum.spin2"}
 CON
   _clkfreq = 180_000_000
 

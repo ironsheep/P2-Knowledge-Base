@@ -233,7 +233,7 @@ When a panel's *layout* is fixed — the labels never move, only the values chan
 draw the labels once, then overprint just the value fields in place with the `3`
 (set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
 
-```spin2
+```{.spin2 caption="ch03-term-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count

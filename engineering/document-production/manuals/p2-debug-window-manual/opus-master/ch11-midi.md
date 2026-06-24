@@ -163,7 +163,7 @@ This program needs nothing but a P2 and the host running `pnut_term_ts`. It
 generates its own MIDI bytes: it plays a C-major scale one note at a time, then a
 C-major chord using running status, then clears the keyboard.
 
-```spin2
+```{.spin2 caption="ch11-midi-scale-chord.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -200,7 +200,7 @@ chord keys light together for a second, then the keyboard goes dark.
 To see velocity at work, hold one note and raise the velocity each pass — the lit
 fill climbs higher each time:
 
-```spin2
+```{.spin2 caption="ch11-midi-velocity.spin2"}
 CON
   _clkfreq = 200_000_000
 

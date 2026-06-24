@@ -243,7 +243,7 @@ on three stacked SCOPE channels: a CORDIC sine (`QSIN`), a counter-driven triang
 and random noise from `GETRND`. It compiles with `pnut_ts` and runs on a bare P2
 board with `pnut_term_ts` open.
 
-```spin2
+```{.spin2 caption="ch07-scope-three-channel.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -302,7 +302,7 @@ capture** is one line of setup. Here the window waits for the signal to rise pas
 500 (armed below at −500, fired at or above 500 — `fire` >= `arm`, so rising) and
 freezes a 512-sample frame with the trigger point centered:
 
-```spin2
+```{.spin2 caption="ch07-scope-triggered.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -335,7 +335,7 @@ clean signal's range arms on the quiet signal and fires the moment a spike
 crosses it, freezing a 512-sample frame with the glitch centered, its lead-up to
 the left and its aftermath to the right:
 
-```spin2
+```{.spin2 caption="ch07-scope-glitch.spin2"}
 CON
   _clkfreq = 200_000_000
 

@@ -312,7 +312,7 @@ with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
 built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
 bright (hot):
 
-```spin2
+```{.spin2 caption="ch04-bitmap-heatmap.spin2"}
 CON
   _clkfreq = 200_000_000
   COLS = 32                                ' a 32x24 thermopile array

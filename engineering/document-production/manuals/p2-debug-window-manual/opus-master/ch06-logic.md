@@ -273,7 +273,7 @@ The decoding — knowing that this *is* SPI, that data is sampled on the rising 
 edge, that the byte is `$A5` — lives entirely in this Spin2 code. The window shows
 only the three waveforms; it does not know they are SPI.
 
-```spin2
+```{.spin2 caption="ch06-logic-spi-bus.spin2"}
 CON
   _clkfreq = 100_000_000
 

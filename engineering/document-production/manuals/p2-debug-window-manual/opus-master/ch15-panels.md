@@ -41,7 +41,7 @@ artwork at all. You draw the fixed labels once, then position the cursor with th
 it sits. [Chapter 3](#ch-3) develops this fully under "A positioned dashboard"; the
 technique in brief:
 
-```spin2
+```{.spin2 caption="ch15-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | angle, rpm, temp, volts
@@ -158,7 +158,7 @@ The example loads a background and a digit-font strip, then shows a live 3-digit
 reading by blitting one glyph per column (the font-strip pattern), erasing the box
 first by restoring background:
 
-```spin2
+```{.spin2 caption="ch15-panel-plot.spin2"}
 {Spin2_v50}
 CON _clkfreq = 200_000_000
 
@@ -218,7 +218,7 @@ Two patterns make a panel interactive:
 This panel draws two buttons and a value bar, and adjusts the value from either the
 arrow keys or a mouse click on a button. It recomposes only on a change:
 
-```spin2
+```{.spin2 caption="ch15-control-panel.spin2"}
 {Spin2_v50}
 CON _clkfreq = 200_000_000
 

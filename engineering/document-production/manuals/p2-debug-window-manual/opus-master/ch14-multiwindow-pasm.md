@@ -54,7 +54,7 @@ and your chosen arrangement reappears on every run.
 Once the windows exist, you feed them by name, one statement at a time. A loop that
 drives both is just both feeds in sequence:
 
-```spin2
+```{.spin2 caption="ch14-multiwindow.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -143,7 +143,7 @@ on) work exactly as in Spin2.
 Here a PASM program running in its own cog drives a SCOPE window, feeding it the
 value of a cog register:
 
-```spin2
+```{.spin2 caption="ch14-pasm-scope.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -172,7 +172,7 @@ per loop. The window opens and animates identically to a Spin2-driven one.
 Feeding a TERM from PASM works the same way. This cog reprints a register's value as
 hex on a text panel:
 
-```spin2
+```{.spin2 caption="ch14-pasm-terminal.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -196,7 +196,7 @@ n             long      0
 The same `DEBUG` also works in an **inline** `ORG`/`END` block inside a Spin2
 method, where the assembly shares the method's local variables:
 
-```spin2
+```{.spin2 caption="ch14-pasm-inline.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -265,7 +265,7 @@ so the SCOPE shows the waveform while the panel reports its numbers. The complet
 program below compiles with `pnut_ts` and runs on a bare P2 board with `pnut_term_ts`
 open — no wiring.
 
-```spin2
+```{.spin2 caption="ch14-scope-trace.spin2"}
 CON
   _clkfreq = 200_000_000
 

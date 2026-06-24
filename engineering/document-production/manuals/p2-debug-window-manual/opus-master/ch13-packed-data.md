@@ -107,7 +107,7 @@ This example feeds a two-channel LOGIC window with `LONGS_1BIT`. Each long carri
 generated in software with the random-number generator, so it runs on a bare board
 with no wiring:
 
-```spin2
+```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i
@@ -128,7 +128,7 @@ as long as the bits you want unpacked first land in the low end of the element.
 A scope works the same way. Here four 8-bit samples ride in each long under
 `LONGS_8BIT`, packed low byte first:
 
-```spin2
+```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i, ch
@@ -147,7 +147,7 @@ A BITMAP window unpacks the same formats into pixels. With a `LUT2` (two-bit) co
 mode you would pack with `LONGS_2BIT`; with a one-bit source you can drive a
 two-color image using `LONGS_1BIT`, sending one long per 32-pixel row segment:
 
-```spin2
+```{.spin2 caption="ch13-packed-bitmap-frame.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
