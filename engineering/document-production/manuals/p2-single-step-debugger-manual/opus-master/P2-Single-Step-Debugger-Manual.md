@@ -241,7 +241,7 @@ the window, they are shown on their own here.
 \begin{figure}[H]
 \centering
 \screenshotfig[height=3.2in]{inbox/assets/reg-lut-heatmaps-tall.25.23.png}
-\caption{COG (REG) and LUT register heat-map columns.}
+\caption{cog (REG) and LUT register heat-map columns.}
 \end{figure}
 ```
 
