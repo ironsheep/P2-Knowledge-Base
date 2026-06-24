@@ -17,6 +17,8 @@ Call Subroutine
 
 ---
 
+**Operation:** push {C, Z, 10'b0, PC[19:0]}; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
+
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, PC is set to the new address, and optionally C and Z are updated to new states.
 
 - Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use '\' to force absolute addressing.
@@ -36,7 +38,7 @@ Call Subroutine
 
 CALL records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by pushing to the stack (K), potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute a RET instruction, or an instruction with a _RET_ condition, to return to the recorded address (the instruction following the CALL) and optionally restore the C and Z flag state as it was prior.
 
-In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: `CALL #SendBit` or `CALL #\DebugStatus`.
+In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler encodes the relative or absolute form. Examples: `CALL #SendBit` or `CALL #\DebugStatus`.
 
 In the second syntax form, the format of the value at Dest is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. This syntax effectively swaps the flags and PC with the value in the Dest register (and RET swaps them back), making it convenient for switching between two threads.
 
@@ -61,6 +63,8 @@ Call Subroutine via PTRA
 
 ---
 
+**Operation:** write {C, Z, 10'b0, PC[19:0]} to hub[PTRA++]; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
+
 **Result:** Current C and Z flags and address of the next instruction are written to hub RAM at PTRA, PTRA is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
 - Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use '\' to force absolute addressing.
@@ -80,7 +84,7 @@ Call Subroutine via PTRA
 
 CALLA writes the current C and Z flags and the address of the next instruction into the 4-byte hub RAM location at PTRA, then increments PTRA by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
 
-In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly.
+In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler encodes the relative or absolute form.
 
 In the second syntax form, the format of the value at Dest is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits.
 
@@ -105,6 +109,8 @@ Call Subroutine via PTRB
 
 ---
 
+**Operation:** write {C, Z, 10'b0, PC[19:0]} to hub[PTRB++]; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
+
 **Result:** Current C and Z flags and address of the next instruction are written to hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
 - Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use '\' to force absolute addressing.
@@ -124,7 +130,7 @@ Call Subroutine via PTRB
 
 CALLB writes the current C and Z flags and the address of the next instruction into the 4-byte hub RAM location at PTRB, then increments PTRB by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
 
-In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly.
+In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler encodes the relative or absolute form.
 
 In the second syntax form, the format of the value at Dest is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits.
 
@@ -149,6 +155,8 @@ Call with Destination register
 
 ---
 
+**Operation:** `D = {C, Z, 10'b0, PC[19:0]}`; `C = S[31]`, `Z = S[30]`; PC = S**
+
 **Result:** Current C and Z flags and address of the next instruction are written to the specified register (PA, PB, PTRA, PTRB, or Dest), PC is set to the new address, and optionally C and Z are updated to new states.
 
 - PA|PB|PTRA|PTRB is the special register to store the current C and Z flags and next address into.
@@ -172,7 +180,7 @@ CALLD records the current state of the C and Z flags and the address of the next
 
 This instruction is typically used for the P2 DEBUG function.
 
-In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: `CALLD PA, #SendBit` or `CALLD PB, #\DebugStatus`.
+In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler encodes the relative or absolute form. Examples: `CALLD PA, #SendBit` or `CALLD PB, #\DebugStatus`.
 
 In the second syntax form, the format of the value at Src is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. If Src is a 9-bit literal (immediate), it will be sign-extended to 20 bits and used as a relative offset, giving a range of -256 to +255 instructions relative to the instruction following the CALLD. When relative, PC is adjusted by signed(Src) if cog/LUT execution, or by signed(Src * 4) if hub execution.
 
@@ -194,6 +202,8 @@ Call Subroutine with PA Parameter
 **CALLPA**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PA = D`; PC = S**
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PA, and PC is set to the address specified by Src.
 
@@ -230,6 +240,8 @@ Call Subroutine with PB Parameter
 **CALLPB**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PB = D`; PC = S**
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PB, and PC is set to the address specified by Src.
 
@@ -312,6 +324,8 @@ Compare Most Significant Bit
 
 ---
 
+**Operation:** `C = MSB of (D - S)`; `Z = (D == S)`
+
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
 - Dest is the register containing the value to compare with that of Src.
@@ -348,6 +362,8 @@ Compare Reverse
 **CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C = borrow of (S - D)`; `Z = (D == S)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -386,6 +402,8 @@ Compare Signed
 
 ---
 
+**Operation:** `C = signed-sign of (D - S)`; `Z = (D == S)`
+
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
 - Dest is the register containing the value to compare with that of Src.
@@ -404,11 +422,11 @@ Compare Signed
 
 CMPS compares the signed values of Dest and Src by subtracting Src from Dest and optionally setting the C and Z flags to indicate the comparison and operation results. The result of the subtraction is discarded; only the flags are affected. Dest is not modified.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if signed Dest is less than signed Src, or is cleared (0) if signed Dest is greater than or equal to signed Src. The comparison properly accounts for the sign bit.
+If the WC or WCZ effect is specified, the C flag is set (1) if signed Dest is less than signed Src, or is cleared (0) if signed Dest is greater than or equal to signed Src.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, or is cleared (0) if they are not equal.
 
-To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for the least significant long, optionally followed by CMPX for middle longs, and finally CMPSX for the most significant long. The final CMPSX accounts for sign extension properly. For example, to compare two 64-bit signed values:
+To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for the least significant long, optionally followed by CMPX for middle longs, and finally CMPSX for the most significant long. The final CMPSX uses signed interpretation for the most-significant long. For example, to compare two 64-bit signed values:
 
 ```pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs unsigned
@@ -428,6 +446,8 @@ Compare and Subtract
 **CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** if D >= S then `D = D - S`, `C = 1`, else D unchanged, `C = 0`
 
 **Result:** Dest is decremented by Src unless it is less than Src, and the comparison results are optionally written to the C and Z flags.
 
@@ -454,7 +474,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Dest was greater 
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals 0, or is cleared (0) if non-zero. Note that if no subtraction was performed (Dest < Src), Z reflects whether Dest was already zero.
 
-CMPSUB is particularly useful for implementing division algorithms, modulo operations, and other mathematical routines where conditional subtraction based on magnitude is needed.
+CMPSUB subtracts S from D only if D >= S, setting C on the subtraction. It is used in division algorithms, modulo operations, and other routines where conditional subtraction based on magnitude is needed.
 
 
 
@@ -468,6 +488,8 @@ Compare Signed Extended
 **CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C = signed-sign of (D - (S + C))`; `Z = Z AND (D == S + C)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -487,7 +509,7 @@ Compare Signed Extended
 
 CMPSX compares the signed values of Dest and Src plus C by subtracting Src + C from Dest and optionally setting the C and Z flags accordingly. The CMPSX instruction is used to perform signed multi-long comparisons, such as 64-bit comparisons. The result of the subtraction is discarded; only the flags are affected. Dest is not modified.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than Src + C (as multi-long signed values), or is cleared (0) otherwise. Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag. The comparison properly accounts for sign extension.
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than Src + C (as multi-long signed values), or is cleared (0) otherwise. Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest - (Src + C) is zero, or it is cleared (0) if non-zero. This allows the Z flag to cascade through multi-long comparisons, remaining set only if all compared longs are equal.
 
@@ -511,6 +533,8 @@ Compare Unsigned Extended
 **CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C = borrow of (D - (S + C))`; `Z = Z AND (D == S + C)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -554,6 +578,8 @@ Cog Attention
 **COGATN**  *{#}Dest*
 
 ---
+
+**Operation:** strobe ATN on every cog n (0..15) where `D[n] = 1`
 
 **Result:** The attention signal of one or more cogs is strobed.
 
@@ -638,6 +664,8 @@ Cog Identification
 **COGID**  *{#}Dest*  **{WC}**
 
 ---
+
+**Operation:** if no WC: `D = cog ID (0..15)`; if WC: `C = 1 if cog D[3:0] is on`
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
@@ -814,6 +842,8 @@ CRC Iterate Bit
 
 ---
 
+**Operation:** `if (C ^ D[0]) then D = (D >> 1) ^ S, else D = (D >> 1)`
+
 **Result:** Dest is updated with the next CRC iteration using the C flag and polynomial in Src.
 
 - Dest is a register containing the current CRC value and is where the updated CRC is written.
@@ -860,6 +890,8 @@ CRC Iterate Nibble
 **CRCNIB**  *Dest, {#}Src*
 
 ---
+
+**Operation:** CRCBIT × 4 using Q[31:28] and polynomial S; `Q = Q << 4`
 
 **Result:** Dest is updated with CRC iterations for a nibble, and Q is shifted left by 4 bits.
 

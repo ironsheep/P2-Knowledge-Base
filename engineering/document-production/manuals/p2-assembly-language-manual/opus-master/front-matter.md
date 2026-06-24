@@ -112,7 +112,7 @@ This manual would not exist without the contributions of many individuals and or
 
 **The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the instruction set and identified critical details worth documenting.
 
-**Open Source Contributors** who have developed tools, compilers, and applications that demonstrate the power and flexibility of PASM2.
+**Open Source Contributors** who have developed tools, compilers, and applications built with PASM2.
 
 This manual is a community-developed resource, created to make the P2's assembly language more accessible to developers at all skill levels.
 
@@ -127,13 +127,13 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **Experienced P1 Users**: See "For P1 Developers" below for a specification comparison and overview of new capabilities. Then use Part II as the primary reference—the instruction-by-instruction format will feel familiar.
 
-**Looking Up a Specific Instruction**: Go directly to Part II, which is organized alphabetically by instruction name. Each entry provides complete syntax, encoding, behavior, and examples.
+**Looking Up a Specific Instruction**: Go directly to Part II, which is organized alphabetically by instruction name. Each entry provides complete syntax, encoding, behavior, and examples. Section 2.8 explains how to read an entry.
 
 **Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
 
 ### For P1 Developers
 
-The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs sharing hub memory—while dramatically expanding capabilities.
+The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs sharing hub memory—while expanding capabilities.
 
 **Specification Comparison**
 
@@ -158,6 +158,8 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 - Wired-OR I/O model preventing pin contention
 - Hardware locks for inter-cog synchronization
 - Spin/PASM language structure
+
+Sequential hub access streams one long per clock; random hub access waits up to seven clocks to align—time-critical code runs from cog or LUT RAM (see Chapter 1).
 
 **New in P2**
 
@@ -322,19 +324,8 @@ This manual uses consistent cross-reference formats:
 
 ## About This Manual
 
-This manual represents a comprehensive effort to document the P2 Assembly Language (PASM2) in a format optimized for both human learning and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and extensive verification against the P2 silicon behavior.
+This manual documents the P2 Assembly Language (PASM2) in a format suited to both human reading and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and verification against P2 silicon behavior.
 
-The manual is designed to be:
-
-**Complete** — Every documented instruction, directive, constant, and special register is included with full details.
-
-**Accurate** — Information has been verified against official sources and tested on actual P2 hardware.
-
-**Accessible** — Content is organized for multiple skill levels and use cases, from learning to quick reference.
-
-**Structured** — Consistent formatting enables both human reading and programmatic parsing for tool development.
+It covers every documented instruction, directive, constant, and special register, verified against official sources and tested on P2 hardware. The consistent structure supports both human reading and programmatic parsing.
 
 We welcome feedback, corrections, and suggestions for improvement. This is a living document that will evolve with the P2 community's growing expertise.
-
-
-*You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*

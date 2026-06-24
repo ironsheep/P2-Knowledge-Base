@@ -15,6 +15,8 @@ Merge Bits Of Bytes
 
 ---
 
+**Operation:** `D = {D[31], D[23], D[15], D[7], … D[24], D[16], D[8], D[0]}`
+
 **Result:** Bits from each byte in D are rearranged into a specific merged pattern.
 
 - D is a register containing the value whose byte bits will be merged.
@@ -47,6 +49,8 @@ Merge Bits Of Words
 **MERGEW**  *D*
 
 ---
+
+**Operation:** `D = {D[31], D[15], D[30], D[14], … D[17], D[1], D[16], D[0]}`
 
 **Result:** Bits from each word in D are rearranged into a specific merged pattern.
 
@@ -102,7 +106,7 @@ The SETPIX instruction configures the pixel mixer mode, which determines how the
 
 This instruction executes in 7 clock cycles to perform the pixel arithmetic on all four bytes in parallel. The exact blending formula depends on the mode set by SETPIX, but typically implements standard pixel compositing operations used in graphics rendering, such as alpha blending, color multiplication, or additive blending.
 
-MIXPIX is essential for high-performance graphics operations, enabling real-time color mixing, transparency effects, and color space transformations without requiring multiple individual byte operations.
+MIXPIX blends two pixels per the configured mode in one operation.
 
 
 
@@ -116,6 +120,8 @@ Modify C flag
 **MODC**  *c*  **{WC}**
 
 ---
+
+**Operation:** `C = cccc[{C,Z}]`
 
 **Result:** The C flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -155,6 +161,8 @@ Modify C And Z Flags
 
 ---
 
+**Operation:** `C = cccc[{C,Z}]`; `Z = zzzz[{C,Z}]`
+
 **Result:** Both C and Z flags are set or cleared according to their modifiers and the current C and Z flag states.
 
 - c is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the C flag.
@@ -175,13 +183,13 @@ MODCZ provides simultaneous conditional modification of both the C and Z flags b
 
 The modifiers are applied as: C = cccc[{C,Z}] and Z = zzzz[{C,Z}], where {C,Z} forms a 2-bit index into each 4-bit modifier value. Both flags are updated simultaneously based on the same initial C and Z states, allowing complex boolean operations to be computed in parallel.
 
-This instruction enables sophisticated conditional logic operations without branching. For example, modifier values can implement logical operations like AND, OR, XOR between the flags, or conditional moves where one flag's new value depends on the other flag's current state.
+This instruction implements conditional logic operations without branching. For example, modifier values can implement logical operations like AND, OR, XOR between the flags, or conditional moves where one flag's new value depends on the other flag's current state.
 
 Common uses include implementing state machines where both flags represent state bits, performing multi-condition tests after comparison operations, and creating compact conditional code sequences that would otherwise require multiple instructions or branches.
 
 The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
-The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
+MODCZ updates both flags from the same initial flag state, which separate MODC/MODZ cannot do: with separate instructions, one flag update affects the other's calculation.
 
 **Modifier Constants:**
 
@@ -224,6 +232,8 @@ Modify Z flag
 **MODZ**  *z*  **{WZ}**
 
 ---
+
+**Operation:** `Z = zzzz[{C,Z}]`
 
 **Result:** The Z flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -322,6 +332,8 @@ Move Bytes
 
 ---
 
+**Operation:** `D = {D.BYTE[S[7:6]], D.BYTE[S[5:4]], D.BYTE[S[3:2]], D.BYTE[S[1:0]]}`
+
 **Result:** Bytes within D are rearranged according to the byte selection pattern in S.
 
 - D is a register containing the bytes to be rearranged.
@@ -364,6 +376,8 @@ Multiply
 **MUL**  *Dest, {#}Src*  **{WZ}**
 
 ---
+
+**Operation:** `D = unsigned(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`
 
 **Result:** The 32-bit unsigned product of the lower 16 bits of Dest and Src is stored in Dest.
 
@@ -419,6 +433,8 @@ Multiply Pixels
 
 ---
 
+**Operation:** for each byte n: `D.BYTE[n] = (D.BYTE[n] × S.BYTE[n]) / 255` ($FF = 1.0, $00 = 0.0)
+
 **Result:** Each byte of S is multiplied with the corresponding byte of D, with results stored in D.
 
 - D is a register containing four pixel bytes to be multiplied.
@@ -438,7 +454,7 @@ MULPIX performs parallel multiplication on four byte pairs, treating each byte a
 
 The multiplication treats bytes as 8-bit fractional values in the range 0.0 to 1.0. For each byte position, the operation computes: D.BYTE[n] = (D.BYTE[n] * S.BYTE[n]) / 255. The division by 255 is implicit in the fractional representation, where $FF * $FF = $FF (1.0 * 1.0 = 1.0).
 
-This instruction is essential for pixel color multiplication operations used in graphics rendering. For example, multiplying an RGB color by a brightness value: if D contains $80_60_40_20 (RGBA values) and S contains $80_80_80_FF (50% brightness on RGB, full alpha), each color component is reduced to 50% of its original value.
+MULPIX multiplies each color component of D by the corresponding component of S. For example, multiplying an RGB color by a brightness value: if D contains $80_60_40_20 (RGBA values) and S contains $80_80_80_FF (50% brightness on RGB, full alpha), each color component is reduced to 50% of its original value.
 
 MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
 
@@ -464,6 +480,8 @@ Multiply Signed
 
 ---
 
+**Operation:** `D = signed(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`
+
 **Result:** The 32-bit signed product of the signed lower 16 bits of Dest and Src is stored in Dest.
 
 - Dest is a register containing the signed 16-bit value to multiply with Src, and is where the signed 32-bit result is written.
@@ -482,13 +500,13 @@ Multiply Signed
 
 MULS performs a signed 16-bit by 16-bit multiplication, taking only the lower 16 bits from each of Dest and Src as signed values, multiplying them together, and storing the full signed 32-bit product into Dest. This is a fast 2-clock multiplication operation suitable for signed integer arithmetic and signed fixed-point calculations.
 
-The operation is: D = signed(D[15:0] * S[15:0]). The upper 16 bits of both Dest and Src are ignored during the multiplication. The lower 16 bits are treated as signed values (using two's complement representation), so values from $8000 (-32768) to $7FFF (+32767) are valid inputs. The 32-bit result is properly sign-extended to represent the full range of products.
+The operation is: D = signed(D[15:0] * S[15:0]). The upper 16 bits of both Dest and Src are ignored during the multiplication. The lower 16 bits are treated as signed values (using two's complement representation), so values from $8000 (-32768) to $7FFF (+32767) are valid inputs. The 32-bit result is the sign-extended product of the two signed 16-bit operands.
 
-For example, multiplying $FFFF_8000 (-32768 in lower 16 bits) by $0000_0002 (+2) produces $FFFF_0000 (-65536 as a signed 32-bit value). The upper 16 bits of the operands are ignored, and the result is correctly signed.
+For example, multiplying $FFFF_8000 (-32768 in lower 16 bits) by $0000_0002 (+2) produces $FFFF_0000 (-65536 as a signed 32-bit value). The upper 16 bits of the operands are ignored.
 
 If the WZ effect is specified, the Z flag is set (1) if either Dest or Src equals zero before the multiplication, or is cleared (0) if both are non-zero. Note that this tests the pre-multiplication values, not the result, providing a quick way to detect zero operands.
 
-MULS is commonly used for signed arithmetic and physics calculations:
+Signed scaling example:
 
 ```pasm2
         mov     velocity, signed_speed
@@ -525,6 +543,8 @@ Multiplex Flag To Bits
 **MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = (!S & D) | (S & {32{src}})` where src = C/!C/Z/!Z; `C = parity of result`
 
 **Result:** Each bit position in D where S has a 1 is set to the specified flag value. Optionally sets C to parity and Z if result is zero.
 
@@ -583,6 +603,8 @@ Multiplex Nibbles
 
 ---
 
+**Operation:** for each nibble n (0..7): if `S.NIBBLE[n] != 0` then `D.NIBBLE[n] = S.NIBBLE[n]`
+
 **Result:** Each non-zero nibble in Src replaces the corresponding nibble in Dest.
 
 - Dest is a register whose nibbles will be updated from Src.
@@ -627,6 +649,8 @@ Multiplex Nits
 
 ---
 
+**Operation:** for each 2-bit field n (0..15): if `S[2n+1:2n] != 0` then `D[2n+1:2n] = S[2n+1:2n]`
+
 **Result:** Each non-zero bit pair in Src replaces the corresponding bit pair in Dest.
 
 - Dest is a register whose bit pairs will be updated from Src.
@@ -670,6 +694,8 @@ Multiplex Q
 **MUXQ**  *Dest, {#}Src*
 
 ---
+
+**Operation:** `D = (D & !Q) | (S & Q)` (Q from prior SETQ)
 
 **Result:** Bits from Src are copied to Dest at positions where Q has 1 bits.
 
@@ -717,7 +743,7 @@ MUXQ is critical for parallel I/O operations, especially driving multiple pins s
         muxq    outa, rgb_data          ' Update all RGB pins together
 ```
 
-The Q register mask enables sophisticated bit manipulation:
+The Q register mask enables masked bit manipulation:
 
 ```pasm2
         ' Update specific configuration bits
@@ -725,7 +751,7 @@ The Q register mask enables sophisticated bit manipulation:
         muxq    config, new_values      ' Update only those bytes
 ```
 
-MUXQ is particularly valuable for HUB75 RGB panel driving and other applications requiring atomic multi-pin updates. It executes in 2 clock cycles, providing high-performance parallel bit operations essential for real-time graphics and control applications.
+MUXQ updates multiple bits of Dest in one 2-clock operation using the Q register as a mask.
 
 Unlike MUXC and MUXZ which replicate a single flag bit to all selected positions, MUXQ copies the actual corresponding bits from the source, enabling true parallel bit transfer operations.
 

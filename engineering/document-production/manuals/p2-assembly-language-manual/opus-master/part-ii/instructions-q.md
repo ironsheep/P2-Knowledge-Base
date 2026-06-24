@@ -15,6 +15,8 @@ Queue Divide
 
 ---
 
+**Operation:** CORDIC: `{SETQ-value or 0, D} / S` → GETQX = quotient, GETQY = remainder
+
 **Result:** Divides a 64-bit numerator by a 32-bit denominator, producing a 32-bit quotient (GETQX) and remainder (GETQY) 55 clocks later.
 
 - Dest is a register or literal containing the lower 32 bits of the 64-bit numerator.
@@ -57,6 +59,8 @@ Queue Exponential
 
 ---
 
+**Operation:** CORDIC: `2^D` (D as {5'whole, 27'frac}) → GETQX = number
+
 **Result:** Converts a 5:27-bit logarithm format into a 32-bit unsigned integer, retrieved via GETQX 55 clocks later.
 
 - Dest is a register or literal containing the 5:27-bit logarithm (5-bit exponent in bits [31:27], 27-bit fraction in bits [26:0]).
@@ -95,6 +99,8 @@ Queue Fractional Divide
 **QFRAC**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** CORDIC: `{D, SETQ-value or 0} / S` → GETQX = quotient, GETQY = remainder
 
 **Result:** Divides a 64-bit numerator by a 32-bit denominator, producing a 32-bit quotient (GETQX) and remainder (GETQY) 55 clocks later.
 
@@ -137,6 +143,8 @@ Queue Logarithm
 
 ---
 
+**Operation:** CORDIC: `log2(D)` → GETQX = {5'whole, 27'frac}
+
 **Result:** Converts a 32-bit unsigned integer into a 5:27-bit logarithm format, retrieved via GETQX 55 clocks later.
 
 - Dest is a register or literal containing the 32-bit unsigned integer input.
@@ -173,6 +181,8 @@ Queue Multiply
 **QMUL**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** CORDIC: `D × S` (unsigned) → GETQX = low product, GETQY = high product
 
 **Result:** Multiplies two 32-bit unsigned values, producing a 64-bit result with lower 32 bits via GETQX and upper 32 bits via GETQY, 55 clocks later.
 
@@ -214,6 +224,8 @@ Queue Rotate
 **QROTATE**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** CORDIC: rotate point (D, SETQ-value or 0) by angle S → GETQX = X, GETQY = Y
 
 **Result:** Rotates a coordinate pair around the origin, producing new X (GETQX) and Y (GETQY) coordinates 55 clocks later.
 
@@ -258,6 +270,8 @@ Queue Square Root
 
 ---
 
+**Operation:** CORDIC: `sqrt({S, D})` → GETQX = root
+
 **Result:** Calculates the square root of a 64-bit value, producing a 32-bit result via GETQX 55 clocks later.
 
 - Dest is a register or literal containing the lower 32 bits of the 64-bit input value.
@@ -299,6 +313,8 @@ Queue Vector
 **QVECTOR**  *{#}Dest, {#}Src*
 
 ---
+
+**Operation:** CORDIC: vector of point (D, S) → GETQX = length, GETQY = angle
 
 **Result:** Converts cartesian coordinates to polar form, producing length (GETQX) and angle (GETQY) 55 clocks later.
 

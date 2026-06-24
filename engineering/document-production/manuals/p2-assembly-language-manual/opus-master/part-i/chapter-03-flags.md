@@ -6,7 +6,7 @@ The P2 has two status flags that enable conditional execution and multi-precisio
 
 The P2's flag system differs from many processors in two important ways. First, flags persist until explicitly modified—an instruction without WC or WZ effects leaves flags unchanged, allowing flag values to be used by multiple subsequent instructions. Second, any instruction can be made conditional using IF_x prefixes, enabling deterministic branchless programming where instruction timing remains constant regardless of data values.
 
-These two features combine to create a powerful programming model where complex decision logic can be expressed without branches, maintaining cycle-accurate timing while reducing code size and improving readability.
+Together these let complex decision logic be expressed without branches, reducing code size and improving readability.
 
 
 ## 3.1 The C and Z Flags
@@ -37,7 +37,7 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 
 ### 3.1.3 Flag Persistence and Independence
 
-Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
+Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is deliberate and enables several patterns:
 
 ```pasm2
                 cmp     a, b            wcz     ' Set flags once
@@ -48,7 +48,7 @@ Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. 
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
 
-Each cog maintains its own C and Z flags completely independently. Flag values in cog 0 have no relationship to flag values in cog 1. This independence ensures parallel execution across cogs operates without interference.
+Each cog maintains its own C and Z flags completely independently. Flag values in cog 0 have no relationship to flag values in cog 1.
 
 
 ## 3.2 Flag Modification Effects
@@ -452,7 +452,7 @@ This checks whether `value` is in the range `[min, max)`. The first comparison t
 
 ## 3.6 Advanced Flag Usage
 
-Beyond basic conditional execution, the P2 provides specialized instructions for manipulating flags directly and using flags to control data flow. These advanced techniques enable sophisticated flag-based algorithms.
+Beyond basic conditional execution, the P2 provides specialized instructions for manipulating flags directly and using flags to control data flow. These techniques support flag-based algorithms.
 
 ### 3.6.1 Direct Flag Manipulation
 
@@ -698,7 +698,7 @@ Both terminology styles encode to identical condition codes—choose whichever r
 \item Conditional instructions consume 2 clock cycles whether they execute or not, maintaining deterministic timing
 \item Multi-precision arithmetic chains flag results between instructions using ADDX and SUBX
 \item Flag-based bit manipulation (MUXC, MUXZ) enables building bit patterns from sequential flag tests
-\item Each COG maintains independent C and Z flags with no cross-COG interaction
+\item Each cog maintains independent C and Z flags with no cross-cog interaction
 \end{keyconcepts}
 ```
 

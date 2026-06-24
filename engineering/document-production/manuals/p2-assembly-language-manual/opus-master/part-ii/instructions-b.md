@@ -20,6 +20,8 @@ Set Bit to Flag State
 
 ---
 
+**Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = src` where src = C (BITC) / !C (BITNC) / Z (BITZ) / !Z (BITNZ); `C,Z = original D[S[4:0]]`
+
 **Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates C and Z to the original bit state.
 
 - Dest is a register whose value will have bit(s) set to the flag state.
@@ -67,6 +69,8 @@ Bit High
 
 ---
 
+**Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = 1`; `C,Z = original D[S[4:0]]`
+
 **Result:** Dest bit(s) designated by Src are set to high (1).
 
 - Dest is a register whose value will have one or more bits set high.
@@ -103,6 +107,8 @@ Bit Low
 **BITL**  *Dest, {#}Src*  **{WCZ}**
 
 ---
+
+**Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = 0`; `C,Z = original D[S[4:0]]`
 
 **Result:** Dest bit(s) designated by Src are set to low (0).
 
@@ -141,6 +147,8 @@ Bit Not
 
 ---
 
+**Operation:** toggle `D[S[9:5]+S[4:0] : S[4:0]]`; `C,Z = original D[S[4:0]]`
+
 **Result:** Dest bit(s) designated by Src are toggled to their opposite state(s).
 
 - Dest is a register whose value will have one or more bits toggled.
@@ -177,6 +185,8 @@ Bit Random
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
 
 ---
+
+**Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = RND`; `C,Z = original D[S[4:0]]`
 
 **Result:** Dest bit(s) designated by Src are each set randomly to low or high.
 
@@ -251,6 +261,8 @@ Bit Mask
 **BMASK**  *Dest*
 
 ---
+
+**Operation:** `D = (2 << S[4:0]) - 1`
 
 **Result:** Bit mask of size Src+1, or Dest+1 (1 to 32 bits) is stored into Dest.
 

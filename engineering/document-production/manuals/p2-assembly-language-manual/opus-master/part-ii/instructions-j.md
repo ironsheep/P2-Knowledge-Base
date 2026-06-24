@@ -193,6 +193,8 @@ Jump
 
 ---
 
+**Operation:** `PC = D[19:0]`; `C = D[31]`, `Z = D[30]` (register-D form)
+
 **Result:** PC is set to the address specified by D or A.
 
 - D is a register containing the absolute jump address, and optionally flag values in bits [31:30].
@@ -239,6 +241,8 @@ Jump Relative
 **JMPREL**  *{#}D*
 
 ---
+
+**Operation:** cogex: `PC += D[19:0]`; hubex: `PC += D[17:0] << 2`
 
 **Result:** PC is incremented or decremented by the value in D.
 
@@ -326,7 +330,7 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
-The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
+The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for event-driven code. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
 
 
 

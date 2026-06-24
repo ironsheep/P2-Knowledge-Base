@@ -15,6 +15,8 @@ Zero Extend
 
 ---
 
+**Operation:** zero-extend D above bit S[4:0]; `C = result[31]`
+
 **Result:** Dest is zero-extended above the bit indicated by Src[4:0]. Optionally sets C to MSB of result and Z if result equals zero.
 
 - Dest is the register containing the value to zero-extend.
@@ -37,7 +39,7 @@ ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros, e
 
 For example, if Dest contains $FFFF_FFFF and Src contains 7, ZEROX clears bits 31 down to bit 8, leaving only bits 7-0 intact. The result in Dest becomes $0000_00FF.
 
-The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit positions 0 through 31 to be specified. This makes ZEROX particularly useful for extracting and zero-extending bit fields from packed data structures or network protocols.
+The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit positions 0 through 31 to be specified. ZEROX zero-extends Dest above the bit position in Src[4:0].
 
 ```pasm2
         ' Extract lower byte and zero-extend

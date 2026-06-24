@@ -20,6 +20,8 @@ Short description
 SYNTAX LINE(S)
 ```
 
+**Operation:** `pseudocode`  ← OPTIONAL — only where the result/flag formula is non-obvious (see §1.1)
+
 **Result:** Single sentence describing the outcome.
 
 - Parameter 1 description
@@ -38,6 +40,32 @@ Prose paragraphs...
 
 ---
 ```
+
+---
+
+## 1.1 The Operation Line (curated pseudocode)
+
+Directly after the syntax line (before **Result:**), an entry MAY carry an
+`**Operation:**` line: a compact, backticked pseudocode summary of the result
+and any non-default flag effects.
+
+**Add it only where it earns its place** — where the result/flag formula is not
+obvious from the mnemonic + syntax + one-line summary (bit-field shuffles,
+slice-indexed ops, signed/scaled math, non-obvious flag derivations, pixel ops,
+ALT next-instruction side-effects, encode/decode/CRC), or where the flag effects
+are non-default even when the value is obvious. Plain whole-register ops
+(MOV/ADD/SUB/AND/OR/CMP/NOP) do not get one.
+
+**Format:** result first, then C, then Z, separated by `; `; each expression in
+backticks. Example:
+
+```
+**Operation:** `D = signed(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`
+```
+
+**Source:** the Parallax instruction CSV (`P2 Instructions v35`, column 5),
+cross-checked against Appendix C / the P2KB YAML. Reformat the notation only —
+never invent semantics. See `voice-guide.md` §6.3.
 
 ---
 

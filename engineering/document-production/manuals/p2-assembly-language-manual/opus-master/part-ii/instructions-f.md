@@ -51,6 +51,8 @@ Force Greater or Equal
 
 ---
 
+**Operation:** if D < S then `D = S`, `C = 1`, else D unchanged, `C = 0`
+
 **Result:** Unsigned Dest is set to unsigned Src if Dest was less than Src.
 
 - Dest is a register containing the unsigned value to limit to a minimum of unsigned Src, and is where the result is written.
@@ -89,6 +91,8 @@ Force Greater or Equal Signed
 
 ---
 
+**Operation:** if D < S (signed) then `D = S`, `C = 1`, else D unchanged, `C = 0`
+
 **Result:** Signed Dest is set to signed Src if Dest was less than Src.
 
 - Dest is a register containing the signed value to limit to a minimum of signed Src, and is where the result is written.
@@ -112,8 +116,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited 
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-FGES is the signed counterpart to FGE and is used when working with signed values that need to be clamped to a minimum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
-
+FGES is the signed counterpart to FGE and is used when working with signed values that need to be clamped to a minimum threshold.
 
 
 ::: instrheader
@@ -126,6 +129,8 @@ Force Less or Equal
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** if D > S then `D = S`, `C = 1`, else D unchanged, `C = 0`
 
 **Result:** Unsigned Dest is set to unsigned Src if Dest was greater than Src.
 
@@ -165,6 +170,8 @@ Force Less or Equal Signed
 
 ---
 
+**Operation:** if D > S (signed) then `D = S`, `C = 1`, else D unchanged, `C = 0`
+
 **Result:** Signed Dest is set to signed Src if Dest was greater than Src.
 
 - Dest is a register containing the signed value to limit to a maximum of signed Src, and is where the result is written.
@@ -188,8 +195,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited 
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-FLES is the signed counterpart to FLE and is used when working with signed values that need to be clamped to a maximum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
-
+FLES is the signed counterpart to FLE and is used when working with signed values that need to be clamped to a maximum threshold.
 
 
 ::: instrheader
@@ -207,6 +213,8 @@ Float with Output Preset by flag
 **FLTNZ**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = src`, `DIR[pin range] = 0` (FLTC src=C, FLTNC src=!C, FLTZ src=Z, FLTNZ src=!Z); `C,Z = OUT bit`
 
 **Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets Z to original output state.
 
@@ -255,6 +263,8 @@ Float High
 
 ---
 
+**Operation:** `OUT[pin range] = 1`, `DIR[pin range] = 0`; `C,Z = OUT bit`
+
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of high.
 
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of high.
@@ -296,6 +306,8 @@ Float Low
 
 ---
 
+**Operation:** `OUT[pin range] = 0`, `DIR[pin range] = 0`; `C,Z = OUT bit`
+
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of low.
 
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of low.
@@ -336,6 +348,8 @@ Float Not
 **FLTNOT**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** toggle `OUT[pin range]`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the input direction and to their opposite output level(s).
 
@@ -379,6 +393,8 @@ Float Random
 **FLTRND**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = RND`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the input direction and each output level is set randomly low or high.
 

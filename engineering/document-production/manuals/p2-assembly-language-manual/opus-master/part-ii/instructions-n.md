@@ -16,6 +16,8 @@ Negate
 
 ---
 
+**Operation:** `D = -S`; `C = result[31]`
+
 **Result:** The Src or Dest value is negated and stored into Dest.
 
 - Dest is a register to receive the -Src value (syntax 1), or contains the value to negate (syntax 2).
@@ -65,6 +67,8 @@ Conditional Negate
 **NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** if cond then `D = -S`, else `D = S`; `C = result[31]` — cond: C (NEGC) / !C (NEGNC) / Z (NEGZ) / !Z (NEGNZ)
 
 **Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest. Optionally sets C to sign and Z if result is zero.
 
@@ -183,6 +187,8 @@ Bitwise Not
 **NOT**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = !S`; `C = !S[31]`
 
 **Result:** The bitwise NOT of Src or Dest is stored in Dest.
 

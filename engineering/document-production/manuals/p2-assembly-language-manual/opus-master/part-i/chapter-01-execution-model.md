@@ -24,11 +24,13 @@ The P2 contains eight identical processors called cogs (Cog Processors). Each co
 
 ### 1.1.1 Cog Independence
 
-Unlike conventional microcontrollers that use time-slicing or task switching, the P2 implements true parallel execution. Each cog runs at full clock speed simultaneously with all other cogs. There is no scheduler, no context switching overhead, and no need for traditional interrupts to handle multiple tasks.
+Unlike conventional microcontrollers that use time-slicing or task switching, the P2 implements true parallel execution: there is no scheduler, no context-switching overhead, and no need for interrupts to share the processor among tasks.
 
-This architecture provides deterministic timing. The same code executing on a cog takes exactly the same number of clock cycles every time it runs. This predictability makes the P2 ideal for real-time applications such as video generation, motor control, and protocol implementation where precise timing is essential.
+This architecture provides deterministic timing. The same code executing on a cog takes exactly the same number of clock cycles every time it runs. This predictability supports real-time work where instruction timing must be exact.
 
-Each cog operates independently. One cog can execute a tight control loop while another manages communications and a third handles user interface tasks. All eight cogs run simultaneously without interfering with each other's timing.
+One cog can run a tight control loop while another manages communications and a third handles the user interface, with no cog affecting another's timing.
+
+Cogs are independent in execution and timing, but they share one hub; random hub access costs up to seven clocks to align (§1.4.2), so time-critical inner loops keep their working set in cog or LUT RAM.
 
 ### 1.1.2 Cog Identification
 
@@ -84,7 +86,7 @@ PASM2 instructions use 9-bit fields to specify source (S) and destination (D) re
 Figure 1.3: LUT Memory Map
 :::
 
-Each cog has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main cog RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
+Each cog has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main cog RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory. Because cog RAM doubles as the register file, it is a cog's most constrained resource; the LUT gives each cog a second 512-long fast space for data tables and overflow code, so plan the split between them early in a design.
 
 ### 1.3.1 LUT Characteristics
 
@@ -92,11 +94,13 @@ LUT memory occupies a separate address space from cog RAM, addressed at $200-$3F
 
 LUT RAM can also execute code at the same speed as cog RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed cog RAM capacity. When the program counter is in the range $200-$3FF, the cog fetches instructions from LUT memory with the same deterministic timing as cog execution.
 
-The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications. A common application is paletted VGA display, where the LUT stores a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real-time.
+The LUT integrates with the P2's streamer and CORDIC subsystems. The streamer can output LUT contents to pins for waveform generation, and CORDIC operations can store results in LUT memory. For example, in paletted VGA display the LUT holds a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real time.
 
 ### 1.3.2 LUT Instructions
 
 `RDLUT` reads a value from LUT memory to a cog register. `WRLUT` writes a value from a cog register to LUT memory. These instructions work similarly to regular cog memory operations but target the separate LUT address space.
+
+⚠️ **Pitfall:** A literal LUT address reaches only the lower half—`RDLUT d, #0` through `RDLUT d, #255`. `RDLUT d, #256` and above do not assemble (the compiler reports `Constant must be from 0 to 255`). To reach any of the 512 LUT longs, use a register holding the address, or a `PTRA`/`PTRB` pointer with an optional index: `RDLUT d, addr` or `RDLUT d, PTRB[4]`. The 9-bit address field's top bit selects the pointer form, so a plain literal spans only 8 bits; pointers carry the full range.
 
 Programs often load the LUT with data from hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in hub memory.
 
@@ -110,7 +114,7 @@ Programs often load the LUT with data from hub memory at initialization using `S
 Figure 1.4: Eight-Cog Architecture with LUT Write Sharing
 :::
 
-The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent cog pairs. When a cog executes `SETLUTS #1`, the paired cog's `WRLUT` writes are copied into this cog's LUT via the LUT's second port. This is one-directional; for two-way mirroring both cogs of the pair must execute `SETLUTS #1`. Adjacent pairs are cogs 0-1, 2-3, 4-5, and 6-7. Each cog retains its own 512-long LUT; SETLUTS activates cross-cog write access rather than expanding LUT size. This feature supports producer-consumer patterns where one cog generates data that another cog consumes, eliminating the need to transfer data through hub memory.
+The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent cog pairs. When a cog executes `SETLUTS #1`, the paired cog's `WRLUT` writes are copied into this cog's LUT via the LUT's second port. This is one-directional; for two-way mirroring both cogs of the pair must execute `SETLUTS #1`. Adjacent pairs are cogs 0-1, 2-3, 4-5, and 6-7. Each cog retains its own 512-long LUT; SETLUTS activates cross-cog write access rather than expanding LUT size. This supports producer-consumer patterns: one cog writes data the paired cog reads directly, without a hub round-trip.
 
 
 ## 1.4 Hub Memory
@@ -153,7 +157,7 @@ PASM2 provides six primary instructions for hub memory access. `RDBYTE` reads a 
 
 The `SETQ` instruction enhances hub access efficiency by configuring burst transfers to cog RAM. SETQ followed by a hub read instruction loads multiple consecutive values in a single operation, amortizing the hub window wait time across many transfers. Similarly, `SETQ2` configures burst transfers to LUT RAM—use SETQ2 before RDLONG/WRLONG to transfer blocks directly between hub and LUT memory.
 
-For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous hub transfers. The FIFO prefetches data in the background, hiding hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for seamless ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
+For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous hub transfers. The FIFO prefetches data in the background, hiding hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
 
 Other hub-related instructions include lock instructions (`LOCKNEW`, `LOCKRET`, `LOCKTRY`, `LOCKREL`) for inter-cog synchronization, `HUBSET` for clock and system configuration, and `SETLUTS` for LUT sharing configuration between adjacent cogs.
 
@@ -174,7 +178,7 @@ Branch instructions incur additional overhead when taken. A conditional branch t
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding removes a major class of pipeline hazards present in simpler architectures (see Chapter 4 for timing detail).
 
-Register indirection instructions (ALTS, ALTD, ALTR, ALTB, ALTI) perform dynamic instruction modification within the pipeline. These instructions substitute computed addresses or values into the next instruction's source, destination, or result fields without modifying the actual program code in memory. The next instruction following any ALT instruction is shielded from interrupts, guaranteeing atomic execution of the ALT+target instruction pair. This pipeline-level modification supports powerful indirect addressing patterns while maintaining deterministic timing.
+Register indirection instructions (ALTS, ALTD, ALTR, ALTB, ALTI) perform dynamic instruction modification within the pipeline. These instructions substitute computed addresses or values into the next instruction's source, destination, or result fields without modifying the actual program code in memory. The next instruction following any ALT instruction is shielded from interrupts, guaranteeing atomic execution of the ALT+target instruction pair. This pipeline-level modification supports indirect addressing patterns while maintaining deterministic timing.
 
 
 ## 1.6 Execution Modes
@@ -215,16 +219,16 @@ Hub execution mode provides access to the full 512KB hub address space, enabling
 
 Programs switch between execution modes using `CALL` or `JMP` instructions. A cog executing from cog RAM can call or jump to hub addresses, and hub-executing code can call or jump to cog addresses. The program counter determines current mode: addresses $000-$3FF indicate cog/LUT execution, while higher addresses indicate hub execution.
 
-The hardware handles mode transitions transparently. The programmer specifies the target address, and the cog switches to the appropriate execution mode based on the address range. This seamless transition supports hybrid programs that place performance-critical code in cog RAM while maintaining larger program logic in hub RAM.
+The hardware handles mode transitions transparently. The programmer specifies the target address, and the cog switches to the appropriate execution mode based on the address range. This lets hybrid programs place performance-critical code in cog RAM while keeping larger program logic in hub RAM.
 
 
 ```{=latex}
 \begin{keyconcepts}
-\item The P2 has 8 independent COGs executing in true parallel
-\item Each COG has 512 longs of private RAM plus 512 longs of private LUT
-\item Hub memory (512KB) is shared among all COGs with deterministic access timing
+\item The P2 has 8 independent cogs executing in true parallel
+\item Each cog has 512 longs of private RAM plus 512 longs of private LUT
+\item Hub memory (512KB) is shared among all cogs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
-\item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)—three distinct execution modes
+\item Cogs can execute from cog RAM (fast), LUT RAM (fast), or hub RAM (larger capacity)—three distinct execution modes
 \item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
 \item The pipeline provides two-clock execution for most instructions
 \item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided

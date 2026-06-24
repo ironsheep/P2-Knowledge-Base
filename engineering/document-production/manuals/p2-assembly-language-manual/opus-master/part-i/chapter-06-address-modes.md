@@ -4,7 +4,7 @@
 
 PASM2 provides several addressing modes that determine how instruction operands are specified and how memory is accessed. Understanding these modes is essential for writing efficient code that accesses registers, immediate values, and hub memory correctly.
 
-This chapter covers all addressing modes from simple register access through the sophisticated pointer expressions used for hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
+This chapter covers all addressing modes from simple register access through the pointer expressions used for hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
 
 
 ## 6.1 Direct Register Addressing
@@ -194,7 +194,7 @@ The assembler handles this automatically when `##` notation is used. Manual AUGS
 
 ## 6.4 Pointer Register Addressing (PTRA/PTRB)
 
-The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable sophisticated hub memory addressing with automatic increment, decrement, and indexing.
+The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable hub memory addressing with automatic increment, decrement, and indexing.
 
 ### 6.4.1 Basic Pointer Access
 
@@ -595,7 +595,7 @@ For time-critical inner loops:
 
 ```{=latex}
 \begin{keyconcepts}
-\item Direct register addressing uses 9-bit fields to access COG RAM at addresses \$000-\$1FF
+\item Direct register addressing uses 9-bit fields to access cog RAM at addresses \$000-\$1FF
 \item The \# prefix creates 9-bit immediates (0-511); \#\# creates 32-bit immediates via AUGS/AUGD
 \item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
 \item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms

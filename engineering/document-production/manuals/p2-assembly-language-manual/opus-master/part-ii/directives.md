@@ -20,9 +20,9 @@ Within DAT blocks, the `$` symbol represents the current origin address:
 ```pasm2
 DAT
         ORG     0
-        ' $ = 0 (COG address 0)
+        ' $ = 0 (cog address 0)
         NOP
-        ' $ = 1 (COG address 1)
+        ' $ = 1 (cog address 1)
 
         ORGH    $400
         ' $ = $400 (Hub address $400)
@@ -49,9 +49,9 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 
 #### Syntax
 ```pasm2
-        ORG                     ' Reset to COG address 0, limit $1F8
-        ORG     address         ' Set COG address, auto-calculate limit
-        ORG     address, limit  ' Set COG address and limit
+        ORG                     ' Reset to cog address 0, limit $1F8
+        ORG     address         ' Set cog address, auto-calculate limit
+        ORG     address, limit  ' Set cog address and limit
 ```
 
 #### Parameters
@@ -76,14 +76,14 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
    - Sets cog address and limit to specified values
 
 #### Usage
-Use ORG to position code or data at specific cog/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
+Use ORG to position code or data at specific cog/LUT RAM addresses. This is used for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
 
 #### Example
 ```pasm2
-        ORG     0               ' Start at COG address 0
+        ORG     0               ' Start at cog address 0
 entry   jmp     #main           ' First instruction at address 0
 
-        ORG     $100            ' Start at COG address $100
+        ORG     $100            ' Start at cog address $100
 table   long    1, 2, 3         ' Data table at specific address
 
         ORG     $200            ' Start in LUT RAM
@@ -138,7 +138,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 | address | Target Cog address to advance to (0-$1FF), filling intervening space with zeros |
 
 #### Usage
-Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
+Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF starts data structures at exact addresses while maintaining a complete memory image. Used for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
 
 #### Example
 ```pasm2
@@ -173,7 +173,7 @@ block_end
 - Generates assembly error if target address is less than current address
 - ORG only changes the address counter without filling
 - Useful for creating fixed-layout binary structures
-- Essential for interrupt vector tables and memory-mapped structures
+- Used for interrupt vector tables and memory-mapped structures
 
 ⚠️ **Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
 
@@ -262,7 +262,7 @@ dispatch_table
         WORD    @routine2
         ALIGNL
 
-        ORG     $100            ' COG mode: register code
+        ORG     $100            ' cog mode: register code
 routine1
         MOV     PA, #1
         RET
@@ -618,7 +618,7 @@ Declare byte data with compile-time range validation. Works identically to BYTE 
 The combined range allows both signed (-128 to +127) and unsigned (0 to 255) byte values.
 
 #### Usage
-Use BYTEFIT instead of BYTE for compile-time verification that values fit in 8 bits. BYTEFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
+Use BYTEFIT instead of BYTE for compile-time verification that values fit in 8 bits. BYTEFIT catches overflow errors during assembly rather than silently truncating values. Useful when values come from calculations or changeable constants.
 
 #### Example
 ```pasm2
@@ -690,7 +690,7 @@ Declare word data with compile-time range validation. Works identically to WORD 
 The combined range allows both signed (-32768 to +32767) and unsigned (0 to 65535) word values.
 
 #### Usage
-Use WORDFIT instead of WORD for compile-time verification that values fit in 16 bits. WORDFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
+Use WORDFIT instead of WORD for compile-time verification that values fit in 16 bits. WORDFIT catches overflow errors during assembly rather than silently truncating values. Useful when values come from calculations or changeable constants.
 
 #### Example
 ```pasm2
@@ -931,7 +931,7 @@ DAT
 | `$$` | Special symbol evaluating to current iteration index (0 to count-1) |
 
 #### Usage
-Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO requires Spin2 v50 or later; place the {Spin2_v50} version directive at the start of the source file.
+Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is useful for generating repetitive code or data. DITTO requires Spin2 v50 or later; place the {Spin2_v50} version directive at the start of the source file.
 
 #### Example
 ```pasm2
@@ -1046,7 +1046,7 @@ Verify at compile time that the current address has not exceeded a specified lim
 | `496` | Decimal equivalent of $1F0 |
 
 #### Usage
-Use FIT to verify that code does not exceed available space. This is essential for cog code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
+Use FIT to verify that code does not exceed available space. This is used for cog code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
 
 FIT does nothing if the limit is not exceeded—it is purely a compile-time check.
 
@@ -1069,12 +1069,12 @@ vars    RES     10
 DAT
         ORG     0
 
-        ' COG code
+        ' cog code
         MOV     PA, #1
         CALL    #lut_routine
         JMP     #$
 
-        FIT     $200            ' Must fit in COG before LUT
+        FIT     $200            ' Must fit in cog before LUT
 
         ORG     $200            ' LUT code
 
@@ -1117,7 +1117,7 @@ DAT
 
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
-- Essential for cog code size verification
+- Used for cog code size verification
 - Special registers occupy cog addresses $1F0-$1FF
 - Use FIT $1F0 to ensure code does not overwrite special registers
 - FIT works in both cog mode and hub mode
@@ -1188,7 +1188,7 @@ DAT
 ma      RES     0               ' ma is alias for x (RES 0 = no space)
 x       RES     1               ' x occupies 1 long
 
-' Both ma and x refer to the same COG address
+' Both ma and x refer to the same cog address
 ```
 
 💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
@@ -1255,7 +1255,7 @@ Terminate an inline assembly block and return to Spin2 execution. The compiler a
 PUB/PRI MethodName() | locals
   ' Spin2 code
 
-  ORG                           ' Begin inline PASM (COG execution)
+  ORG                           ' Begin inline PASM (cog execution)
   ' ... PASM instructions ...
   END                           ' End inline PASM, implicit RET
 
@@ -1284,7 +1284,7 @@ PUB FastToggle(pin) | mask
 
   mask := 1 << pin              ' Spin2 code
 
-  ORG                           ' Begin inline PASM (COG execution)
+  ORG                           ' Begin inline PASM (cog execution)
                 DRVNOT  mask    ' Toggle the pin
   END                           ' End inline PASM, implicit RET
 
@@ -1389,5 +1389,5 @@ The P2 assembler's 15 directives provide complete control over memory layout and
 **Space Management**: RES, FIT control allocation and verify constraints
 **Inline Assembly**: END terminates inline PASM blocks within Spin2 methods
 
-These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.
+These directives execute at assembly time, shaping the binary output without affecting runtime execution.
 

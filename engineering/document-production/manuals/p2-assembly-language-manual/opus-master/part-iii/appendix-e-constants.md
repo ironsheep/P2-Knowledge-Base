@@ -595,14 +595,14 @@ For a DEBUG statement to produce output, both conditions must be met: the statem
 
 ```spin2
 CON
-  DEBUG_COGS = %00000011      ' Only COGs 0 and 1 produce output
+  DEBUG_COGS = %00000011      ' Only Cogs 0 and 1 produce output
 
 DAT
         org
-entry   debug("From COG 0")           ' Output appears
+entry   debug("From Cog 0")           ' Output appears
         cogspin(NEWCOG, worker, @stack)
 
-worker  debug("From worker")          ' Output only if on COG 0 or 1
+worker  debug("From worker")          ' Output only if on Cog 0 or 1
 ```
 
 #### Notes
@@ -918,7 +918,7 @@ PUB main()
 
 ## Hardware Configuration Constants
 
-The P2 provides extensive predefined constants for configuring its sophisticated hardware subsystems. These constants are documented in dedicated reference sections:
+The P2 provides extensive predefined constants for configuring its hardware subsystems. These constants are documented in dedicated reference sections:
 
 ### SmartPin Constants
 

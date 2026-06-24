@@ -488,7 +488,7 @@ CORDIC (Coordinate Rotation Digital Computer) instructions provide hardware-acce
 
 ## Streamer {#streamer-ref}
 
-Streamer instructions control the cog's dedicated DMA engine that autonomously transfers data between hub memory, LUT, and I/O pins. The streamer is essential for high-bandwidth applications like video output, audio streaming, and bulk data movement.
+Streamer instructions control the cog's dedicated DMA engine that autonomously transfers data between hub memory, LUT, and I/O pins. The streamer autonomously transfers data between hub memory, LUT, and I/O pins at high bandwidth.
 
 | Instruction | Description |
 |-------------|-------------|
@@ -528,7 +528,7 @@ Color space and pixel instructions provide hardware-accelerated graphics process
 
 ## Instruction Modification {#instruction-modification-ref}
 
-Instruction modification instructions (also known as register indirection) dynamically alter subsequent instructions by changing their source, destination, or bit index fields before execution. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
+Instruction modification instructions (also known as register indirection) dynamically alter subsequent instructions by changing their source, destination, or bit index fields before execution. They enable register arrays, computed addressing, and self-modifying code patterns for register arrays and computed addressing.
 
 | Instruction | Description |
 |-------------|-------------|

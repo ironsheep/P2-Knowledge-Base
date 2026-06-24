@@ -15,6 +15,8 @@ Shift Arithmetic Left
 
 ---
 
+**Operation:** `D = [63:32] of ({D, {32{D[0]}}} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
+
 **Result:** The bits of Dest are shifted left by Src bits, extending Dest[0] into new rightmost bits.
 
 - Dest is a register containing the value to arithmetically left shift.
@@ -50,6 +52,8 @@ Shift Arithmetic Right
 **SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = [31:0] of ({{32{D[31]}}, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
 **Result:** The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.
 
@@ -87,6 +91,8 @@ Scale
 
 ---
 
+**Operation:** next instruction's S = `unsigned(D[15:0] × S[15:0]) >> 16`
+
 **Result:** The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
 
 - Dest is a register containing the 16-bit value to multiply with Src.
@@ -105,7 +111,7 @@ Scale
 
 SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts the 32-bit product by 16 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled unsigned 16-bit values for subsequent operations.
 
-The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
+The instruction following SCA is shielded from interrupts. The scaled S value is applied to the next instruction before any interrupt can occur.
 
 ```pasm2
         SCA     factor, ##$8000  ' Scale by 0.5 (32768/65536)
@@ -125,6 +131,8 @@ Scale Signed
 
 ---
 
+**Operation:** next instruction's S = `signed(D[15:0] × S[15:0]) >> 14` ($4000 = 1.0, $C000 = -1.0)
+
 **Result:** The upper 18 bits of the signed product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
 
 - Dest is a register containing the signed 16-bit value to multiply with Src.
@@ -143,7 +151,7 @@ Scale Signed
 
 SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right shifts the 32-bit product by 14 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled signed values for subsequent operations.
 
-The instruction following SCAS is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
+The instruction following SCAS is shielded from interrupts. The scaled S value is applied to the next instruction before any interrupt can occur.
 
 
 
@@ -158,6 +166,8 @@ Set Byte
 **SETBYTE**  *{#}Src*
 
 ---
+
+**Operation:** `D.BYTE[N] = S[7:0]` (other bytes unchanged)
 
 **Result:** Src[7:0] is written to byte N (0-3) of Dest, or to another register byte described by prior ALTSB instruction.
 
@@ -342,6 +352,8 @@ Set Destination Field
 
 ---
 
+**Operation:** `D = {D[31:18], S[8:0], D[8:0]}`
+
 **Result:** The D field [17:9] of template Dest is set to Src[8:0].
 
 - Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
@@ -373,6 +385,8 @@ Set DACs
 **SETDACS**  *{#}Dest*
 
 ---
+
+**Operation:** `DAC3 = D[31:24]`, `DAC2 = D[23:16]`, `DAC1 = D[15:8]`, `DAC0 = D[7:0]`
 
 **Result:** DAC3 = Dest[31:24], DAC2 = Dest[23:16], DAC1 = Dest[15:8], DAC0 = Dest[7:0].
 
@@ -467,6 +481,8 @@ Set Nibble
 **SETNIB**  *{#}Src*
 
 ---
+
+**Operation:** `D.NIBBLE[N] = S[3:0]` (rest unchanged)
 
 **Result:** Src[3:0] is written to nibble N (0-7) of Dest, or to another register nibble described by prior ALTSN instruction.
 
@@ -643,7 +659,7 @@ Set Q For LUT Transfers
 
 **Explanation:**
 
-Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM for lookup tables, waveform tables, and large datasets.
 
 ```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
@@ -663,6 +679,8 @@ Set Result Field
 **SETR**  *Dest, {#}Src*
 
 ---
+
+**Operation:** `D = {D[31:28], S[8:0], D[18:0]}`
 
 **Result:** The Result field [27:19] of template Dest is set to Src[8:0].
 
@@ -695,6 +713,8 @@ Set Source Field
 **SETS**  *Dest, {#}Src*
 
 ---
+
+**Operation:** `D = {D[31:9], S[8:0]}`
 
 **Result:** The S field [8:0] of template Dest is set to Src[8:0].
 
@@ -794,6 +814,8 @@ Set Word
 **SETWORD**  *{#}Src*
 
 ---
+
+**Operation:** `D.WORD[N] = S[15:0]` (rest unchanged)
 
 **Result:** Src[15:0] is written to word N (0-1) of Dest, or to another register word described by prior ALTSW instruction.
 
@@ -920,6 +942,8 @@ Shift Left
 
 ---
 
+**Operation:** `D = [63:32] of ({D, 32'b0} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
+
 **Result:** The bits of Dest are shifted left by Src bits, inserting zeros (0) as new rightmost bits.
 
 - Dest is a register containing the value to left shift.
@@ -955,6 +979,8 @@ Shift Right
 **SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = [31:0] of ({32'b0, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
 **Result:** The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.
 
@@ -992,6 +1018,8 @@ Sign Extend
 
 ---
 
+**Operation:** sign-extend D from bit S[4:0]; `C = result[31]`
+
 **Result:** The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are updated to the resulting MSB and zero status.
 
 - Dest is a register containing the value to sign-extend above bit Src[4:0] and where the result is written.
@@ -1026,6 +1054,8 @@ Skip Instructions
 **SKIP**  *{#}Dest*
 
 ---
+
+**Operation:** cancel each of next instructions 0..31 where D[n] = 1
 
 **Result:** Subsequent instructions 0-31 are cancelled for each '1' bit in Dest[0]-Dest[31].
 
@@ -1062,6 +1092,8 @@ Skip Instructions Fast
 **SKIPF**  *{#}Dest*
 
 ---
+
+**Operation:** like SKIP but PC leaps over skipped cog/LUT instructions (per D bits)
 
 **Result:** Program counter leaps over cog/LUT instructions based on Dest bitmask.
 
@@ -1103,6 +1135,8 @@ Split Bits To Bytes
 
 ---
 
+**Operation:** `D = {D[31], D[27], D[23], D[19], … D[12], D[8], D[4], D[0]}`
+
 **Result:** Dest = {Dest[31], Dest[27], Dest[23], Dest[19], ...Dest[12], Dest[8], Dest[4], Dest[0]}.
 
 - Dest is a register to transform.
@@ -1131,6 +1165,8 @@ Split Bits To Words
 **SPLITW**  *Dest*
 
 ---
+
+**Operation:** `D = {D[31], D[29], D[27], D[25], … D[6], D[4], D[2], D[0]}`
 
 **Result:** Dest = {Dest[31], Dest[29], Dest[27], Dest[25], ...Dest[6], Dest[4], Dest[2], Dest[0]}.
 
@@ -1229,6 +1265,8 @@ Subtract Reverse
 
 ---
 
+**Operation:** `D = S - D`; `C = borrow of (S - D)`
+
 **Result:** Difference of unsigned Src and unsigned Dest is stored in Dest and optionally the C and Z flags are updated to the borrow and zero status.
 
 - Dest is a register containing the value to subtract from Src, and where the result is written.
@@ -1259,6 +1297,8 @@ Subtract Signed
 **SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D - S`; `C = signed-overflow of (D - S)`
 
 **Result:** Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.
 
@@ -1291,6 +1331,8 @@ Subtract Signed Extended
 
 ---
 
+**Operation:** `D = D - (S + C)`; `C = signed-overflow`; `Z = Z AND (result==0)`
+
 **Result:** Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended sign and zero status.
 
 - Dest is a register containing the value to subtract Src plus C from, and where the result is written.
@@ -1321,6 +1363,8 @@ Subtract Extended
 **SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D - (S + C)`; `Z = Z AND (result==0)`
 
 **Result:** Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended borrow and zero status.
 
@@ -1357,6 +1401,8 @@ Conditional Sum
 **SUMNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** if cond then `D = D - S`, else `D = D + S`; `C = signed-overflow of (D ± S)` — cond: C/!C/Z/!Z
 
 **Result:** Conditionally adds or subtracts Src from Dest based on flag state.
 

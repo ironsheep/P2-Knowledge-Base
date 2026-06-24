@@ -30,7 +30,7 @@ Execute Continue
 
 **Explanation:**
 
-XCONT buffers a new streamer command that executes automatically when the current command completes. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing seamless continuation of streamer operations without phase discontinuities.
+XCONT buffers a new streamer command that executes automatically when the current command completes. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing continuation of streamer operations without a phase discontinuity.
 
 This instruction enables chaining multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation.
 
@@ -66,7 +66,7 @@ Execute Initialize
 
 XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between the cog and hub memory or I/O pins.
 
-The streamer operates as a hardware DMA engine, transferring data without CPU intervention. The mode word in Dest configures critical parameters:
+The streamer operates as a hardware DMA engine, transferring data without cog intervention. The mode word in Dest configures critical parameters:
 
 - Transfer direction (input from pins to hub, output from hub to pins, or cog-only operations)
 - Number of pins involved in the transfer
@@ -82,7 +82,7 @@ XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
         WAITXFI                    ' Wait for completion
 ```
 
-This parallel operation eliminates CPU intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
+This parallel operation eliminates cog intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
 
 
 
@@ -96,6 +96,8 @@ Exclusive Or
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
 ---
+
+**Operation:** `D = D ^ S`; `C = parity of result`
 
 **Result:** Dest XOR Src is stored in Dest. Optionally sets C to parity of result and Z if result equals zero.
 
@@ -254,7 +256,7 @@ XZERO buffers a new streamer command that executes automatically when the curren
 
 The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation.
 
-This instruction enables chaining multiple streamer operations where each operation should start from a known phase state. This is particularly useful when switching between different streamer modes or when phase coherence between operations is not required.
+This instruction enables chaining multiple streamer operations where each operation should start from a known phase state. This applies when switching between different streamer modes or when phase coherence between operations is not required.
 
 The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
 

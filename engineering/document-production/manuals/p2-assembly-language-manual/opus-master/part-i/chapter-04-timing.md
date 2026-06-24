@@ -93,9 +93,9 @@ Clock frequency directly affects power consumption. Lower frequencies reduce pow
 
 The P2 operates from a system clock that can run up to 320 MHz. All instruction execution, memory access, and I/O operations occur in relation to this master clock. The clock source can be an internal RC oscillator for standalone operation, an external crystal for precision timing, or a PLL-multiplied clock for maximum performance.
 
-Every timing measurement in the P2 is expressed in clock cycles. At 320 MHz, one clock cycle represents 3.125 nanoseconds. This means that a two-cycle instruction completes in 6.25 nanoseconds—fast enough for demanding real-time applications like video generation, high-speed communication protocols, and precision motor control.
+Every timing measurement in the P2 is expressed in clock cycles. At 320 MHz, one clock cycle represents 3.125 nanoseconds. This means that a two-cycle instruction completes in 6.25 nanoseconds.
 
-Understanding cycle counts is fundamental to P2 programming because the processor provides cycle-accurate timing guarantees. When a program executes the same instruction sequence under the same conditions, it takes exactly the same number of clock cycles every time. This determinism distinguishes the P2 from processors with caches, speculative execution, or variable-latency memory systems.
+Understanding cycle counts is fundamental to P2 programming because the processor provides cycle-accurate timing (defined in Section 4.4).
 
 ### 4.2.2 Instruction Cycle Counts
 
@@ -198,7 +198,7 @@ The P2 includes a hardware FIFO (First In, First Out) buffer that provides the h
 
 **FIFO Architecture:**
 
-Each cog has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO contains (cogs+11) stages—with all 8 cogs active, this provides 19 stages of buffering. When in read mode, the FIFO loads continuously whenever fewer than (cogs+7) stages are filled, after which up to 5 more longs may stream in, potentially filling all stages. These metrics ensure the FIFO never underflows under any reading scenario.
+Each cog has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO contains (cogs+11) stages—with all 8 cogs active, this provides 19 stages of buffering. When in read mode, the FIFO loads continuously whenever fewer than (cogs+7) stages are filled, after which up to 5 more longs may stream in, potentially filling all stages. The FIFO refills before it can empty under continuous reading.
 
 **Setting Up the Read FIFO:**
 
@@ -262,7 +262,7 @@ The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. I
         ' ... FIFO seamlessly transitions to buffer B on wrap
 ```
 
-FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity enables dynamic, seamless streaming between hub RAM and pins/DACs—essential for continuous audio/video output where buffer switches must be glitch-free.
+FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity supports continuous streaming between hub RAM and pins/DACs with glitch-free buffer switches.
 
 **Variable-Length Data: RFVAR and RFVARS:**
 
@@ -298,13 +298,13 @@ To use FIFO operations, ensure your code executes from cog or LUT RAM.
 
 **FIFO and the streamer:**
 
-The streamer subsystem (described in Chapter 5) uses the FIFO for high-bandwidth data transfer to and from I/O pins. When the streamer is active, it shares the FIFO with FIFO access instructions. RDFAST/WRFAST configure the FIFO source or destination in hub memory; the streamer then moves data between the FIFO and pins at rates matching the system clock. This combination enables video generation, audio streaming, and high-speed data acquisition without per-sample CPU intervention.
+The streamer subsystem (described in Chapter 5) uses the FIFO for high-bandwidth data transfer to and from I/O pins. When the streamer is active, it shares the FIFO with FIFO access instructions. RDFAST/WRFAST configure the FIFO source or destination in hub memory; the streamer then moves data between the FIFO and pins at the system clock rate, without per-sample cog intervention.
 
 **Performance Considerations:**
 
 FIFO access provides near-instantaneous data transfer from the program's perspective—no hub window waiting, no variable latency. However, the FIFO has finite depth. If a program reads faster than the FIFO can refill (or writes faster than it can drain), the FIFO stalls waiting for hub access. For sustained maximum throughput, balance data production/consumption rate with the hub's aggregate bandwidth.
 
-The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data available or space available, respectively. This makes FIFO access ideal for streaming applications: video pixel generation, audio sample processing, high-speed communication protocols, and bulk data movement.
+The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data or space available, so they sustain streaming throughput.
 
 
 ## 4.4 Deterministic Timing
@@ -385,7 +385,7 @@ WAITX provides precise, cycle-accurate delays by pausing execution for a specifi
         waitx   ##100                   ' Wait exactly 100 cycles
 ```
 
-The instruction accepts a value specifying the delay duration. Execution resumes exactly after that many cycles have elapsed. This precision makes WAITX essential for timing-critical operations like bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.
+The instruction accepts a value specifying the delay duration. Execution resumes exactly after that many cycles have elapsed. This precision makes WAITX suited to timing-critical operations such as bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.
 
 WAITX delays are relative to when the instruction executes. If a program needs to generate a pulse every 1,000 cycles, using WAITX alone accumulates timing drift because the WAITX instruction itself consumes time, and the instructions between WAITX calls add additional cycles. For precise periodic timing without drift, the counter-based wait instructions provide better alternatives.
 
@@ -675,7 +675,7 @@ Because branch-heavy code pays the FIFO-refill penalty on every taken branch, co
 ```{=latex}
 \begin{keyconcepts}
 \item System clock configurable from 20 kHz (RCSLOW) to 320 MHz (PLL) via HUBSET
-\item Most COG instructions execute in exactly 2 clock cycles
+\item Most cog instructions execute in exactly 2 clock cycles
 \item Branch instructions take 2 cycles if not taken, 4 cycles if taken
 \item Hub access uses round-robin timing with 0-7 cycle wait for window
 \item Burst transfers (via SETQ) amortize Hub access overhead

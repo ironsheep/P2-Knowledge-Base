@@ -56,6 +56,8 @@ Get Byte
 
 ---
 
+**Operation:** `D = {24'b0, S.BYTE[N]}`
+
 **Result:** Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is written to Dest.
 
 - Dest is the register in which to store the byte.
@@ -91,6 +93,8 @@ Get System Counter
 **GETCT**  *Dest*  **{WC}**
 
 ---
+
+**Operation:** `D = CT[31:0]` (or `CT[63:32]` if WC)
 
 **Result:** The current value of the system counter CT is written to Dest.
 
@@ -133,6 +137,8 @@ Get Nibble
 **GETNIB**  *Dest*
 
 ---
+
+**Operation:** `D = {28'b0, S.NIBBLE[N]}`
 
 **Result:** Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written to Dest.
 
@@ -203,6 +209,8 @@ Get CORDIC X Result
 
 ---
 
+**Operation:** `D = CORDIC result X` (waits if not ready); `C = X[31]`
+
 **Result:** The CORDIC X result is written to Dest after waiting if necessary for the computation to complete.
 
 - Dest is a register where the CORDIC X result is written.
@@ -240,6 +248,8 @@ Get CORDIC Y Result
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = CORDIC result Y` (waits if not ready); `C = Y[31]`
 
 **Result:** The CORDIC Y result is written to Dest after waiting if necessary for the computation to complete.
 
@@ -279,6 +289,8 @@ Get Random Value
 **GETRND**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = RND[31:0]`; `C = RND[31]`; `Z = RND[30]`
 
 **Result:** The current pseudo-random value is written to Dest, or the random bits are stored in the C and Z flags.
 
@@ -321,6 +333,8 @@ Get Oscilloscope Samples
 
 ---
 
+**Operation:** `D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}`
+
 **Result:** Four 8-bit oscilloscope samples are written to Dest as D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}.
 
 - Dest is a register where the four oscilloscope samples are written.
@@ -357,6 +371,8 @@ Get Word
 
 ---
 
+**Operation:** `D = {16'b0, S.WORD[N]}`
+
 **Result:** Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction, is written to Dest.
 
 - Dest is the register in which to store the word.
@@ -392,6 +408,8 @@ Get Goertzel Accumulators
 **GETXACC**  *Dest*
 
 ---
+
+**Operation:** `D = Goertzel X accumulator`; the next instruction's S = Y accumulator; both accumulators are cleared
 
 **Result:** The streamer's Goertzel X accumulator is written to Dest, the Y accumulator is written to the next instruction's S field, and both accumulators are cleared.
 

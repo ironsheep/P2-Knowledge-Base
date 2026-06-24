@@ -22,7 +22,7 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 | Logarithm | [QLOG](#qlog) | Base-2 logarithm (5:27 fixed-point) in X |
 | Exponential | [QEXP](#qexp) | e^x approximation in X |
 
-Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
+Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. QMUL returns the full 64-bit product, which fixed-point arithmetic uses directly.
 
 ### 5.1.2 CORDIC Operation Flow
 
@@ -35,7 +35,7 @@ CORDIC operations follow a three-step pattern: queue the operation, wait for com
         getqy   product_hi                  ' Get high 32 bits
 ```
 
-The 55-clock computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the cog to execute unrelated instructions during the computation period.
+Efficient code interleaves CORDIC computations with other processing, keeping the cog productive while the coprocessor works.
 
 ### 5.1.3 CORDIC Pipelining
 
@@ -201,7 +201,7 @@ The large instruction count (99) creates an interrupt-free zone that terminates 
 
 ## 5.2 Smart Pins
 
-The P2 provides 64 smart pins, one per I/O pin, each containing a complete programmable peripheral. Smart pins eliminate the need for external support chips in many applications—a single smart pin can implement a UART transmitter and receiver, generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each smart pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The smart pin architecture offloads I/O processing from the cog, allowing precise timing and continuous operation without software intervention.
+The P2 provides 64 smart pins, one per I/O pin, each containing a complete programmable peripheral. A single smart pin can implement a UART transmitter and receiver, generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each smart pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The smart pin architecture offloads I/O processing from the cog, allowing precise timing and continuous operation without software intervention.
 
 ### 5.2.1 Smart Pin Architecture
 
@@ -214,7 +214,7 @@ Each smart pin integrates multiple hardware components that work together to imp
 - **ADC hardware:** Analog-to-digital conversion using sigma-delta and comparator techniques
 - **Timing hardware:** Counters and comparators for precise edge detection and pulse generation
 
-The smart pin's autonomous operation is particularly significant. Once configured, a smart pin operates independently of the cog—a UART smart pin transmits and receives bytes, a PWM smart pin generates continuous waveforms, an encoder smart pin tracks position changes, all without ongoing CPU attention. The cog interacts with smart pins only when new data arrives or new output is needed.
+Once configured, a smart pin operates independently of the cog—a UART smart pin transmits and receives bytes, a PWM smart pin generates continuous waveforms, an encoder smart pin tracks position changes, all without ongoing cog attention. The cog interacts with smart pins only when new data arrives or new output is needed.
 
 ### 5.2.2 Smart Pin Modes
 
@@ -273,18 +273,18 @@ Smart pin modes vary significantly in configuration and operation. The mode valu
 
 ## 5.3 Streamer {#streamer-overview}
 
-The streamer provides DMA-like high-speed data movement between hub memory and I/O pins. While smart pins handle byte-level serial I/O, the streamer specializes in bulk data transfer at rates matching the system clock—transferring pixels to displays, streaming audio samples to DACs, generating complex waveforms, or receiving high-speed ADC data. The streamer operates autonomously once configured, fetching data from hub memory and delivering it to output pins (or capturing from input pins) without cog intervention. This frees the cog to perform computations while data flows continuously.
+The streamer provides DMA-like high-speed data movement between hub memory and I/O pins. While smart pins handle byte-level serial I/O, the streamer moves bulk data between hub memory and pins at the system clock rate. The streamer operates autonomously once configured, fetching data from hub memory and delivering it to output pins (or capturing from input pins) without cog intervention. This frees the cog to perform computations while data flows continuously.
 
 ### 5.3.1 Streamer Capabilities
 
-The streamer excels at applications requiring continuous data flow at precise timing:
+Typical uses:
 
 - **RGB/pixel streaming:** Driving LED panels, VGA displays, or other parallel pixel interfaces requiring continuous refresh
 - **ADC/DAC streaming:** Audio applications where sample streams flow continuously between hub memory and audio hardware
-- **Waveform generation:** Creating complex analog waveforms through DAC output, including modulated signals
+- **Waveform generation:** Creating analog waveforms through DAC output, including modulated signals
 - **High-speed data acquisition:** Capturing parallel data from external ADCs or digital sensors
 
-The streamer's key characteristic is autonomy—once initialized with a hub memory address and transfer parameters, it fetches and outputs data without further CPU involvement. The cog can prepare the next buffer, perform signal processing on captured data, or execute unrelated tasks while the streamer handles data movement.
+Once initialized with a hub memory address and transfer parameters, the streamer fetches and outputs data without further cog involvement. The cog can prepare the next buffer, perform signal processing on captured data, or execute unrelated tasks while the streamer handles data movement.
 
 ### 5.3.2 Streamer Instructions
 
@@ -409,7 +409,7 @@ This pattern branches to handler code only when the event occurred.
 
 ### 5.4.5 Interrupt Philosophy
 
-The P2's 8-cog architecture fundamentally changes interrupt philosophy. Traditional single-processor systems use interrupts because no other mechanism provides responsive event handling—the single CPU must interrupt current work to handle urgent events. The P2 offers an alternative: dedicate a cog to event monitoring. A cog waiting for events responds with zero latency when events occur, requires no context save/restore overhead, and introduces no interrupt-related bugs. The cog dedicated to event handling becomes the "interrupt handler," continuously available.
+The P2's 8-cog architecture fundamentally changes interrupt philosophy. Traditional single-processor systems use interrupts because no other mechanism provides responsive event handling—the single processor must interrupt current work to handle urgent events. The P2 offers an alternative: dedicate a cog to event monitoring. A cog waiting for events responds immediately when events occur and needs no context save/restore. The cog dedicated to event handling becomes the "interrupt handler," continuously available.
 
 Interrupts remain valuable in specific scenarios:
 
@@ -422,7 +422,7 @@ When interrupts are necessary, the P2's three priority levels enable nested inte
 
 ## 5.5 Locks and Synchronization
 
-The P2 provides 16 hardware locks for inter-cog synchronization. When multiple cogs access shared resources—hub memory data structures, smart pin configurations, or hardware peripherals—locks ensure mutual exclusion, preventing race conditions and data corruption. Hardware locks offer atomic test-and-set operations that software alone cannot provide. A cog attempting to acquire a held lock receives immediate notification rather than unknowingly accessing contested resources. The 16 locks support complex applications where multiple cogs coordinate access to numerous shared resources.
+The P2 provides 16 hardware locks for inter-cog synchronization. When multiple cogs access shared resources—hub memory data structures, smart pin configurations, or hardware peripherals—locks ensure mutual exclusion, preventing race conditions and data corruption. Hardware locks offer atomic test-and-set operations that software alone cannot provide. A cog attempting to acquire a held lock receives immediate notification rather than unknowingly accessing contested resources. The 16 locks let multiple cogs coordinate access to several shared resources.
 
 ### 5.5.1 Lock Operations
 
@@ -452,7 +452,7 @@ critical_section
                 ' ... exclusive access to shared resource ...
                 wrlong  data, hub_addr          ' Safe: we hold the lock
 
-                lockrel lock_id                 ' Release for other COGs
+                lockrel lock_id                 ' Release for other cogs
 
                 ' ... additional work ...
                 jmp     #critical_section       ' Repeat access cycle
@@ -489,7 +489,7 @@ When multiple cogs share hardware resources (specific smart pin, display control
                 locktry display_lock    wc      ' Acquire display
         if_nc   jmp     #retry
                 ' ... draw graphics, write text ...
-                lockrel display_lock            ' Release for other COGs
+                lockrel display_lock            ' Release for other cogs
 ```
 
 **Producer/Consumer Synchronization:**
@@ -822,12 +822,12 @@ For a debug statement to produce output, both conditions must be met: the statem
 \item Smart Pins are 64 programmable I/O peripherals with local state machines
 \item The Streamer enables DMA-like high-speed data movement
 \item Events provide non-interrupt notification; interrupts are available when needed
-\item 16 hardware locks enable safe inter-COG synchronization
+\item 16 hardware locks enable safe inter-cog synchronization
 \item XBYTE provides 6-cycle bytecode dispatch for interpreters and VMs
 \item The P2 boots from RCFAST (\textasciitilde20 MHz) and detects boot source via pin pull-ups
 \item User code must configure the desired clock source after boot
 \item DEBUG provides serial output with formatters; can be disabled for production
-\item The 8-COG architecture often removes the need for interrupts (see Chapter 4: each COG runs deterministically; dedicate a COG to a task instead of interrupting one)
+\item The 8-cog architecture often removes the need for interrupts (see Chapter 4: each cog runs deterministically; dedicate a cog to a task instead of interrupting one)
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
 ```

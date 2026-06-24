@@ -23,6 +23,21 @@ This manual evolves the voice established in the Parallax PASM2 Manual Draft (20
 
 **Source Location:** `/engineering/ingestion/sources/pasm2-manual/`
 
+### 1.3 Narrative Brevity (Part I)
+
+Part I prose explains the mental model in the fewest words that remain **complete
+and accurate**. Prefer the short, harder-to-write explanation over the long one.
+Where a concept is documented authoritatively elsewhere in the manual,
+**cross-reference rather than re-explain**.
+
+**Surface honest tradeoffs.** Do not present a capability without its cost when
+that cost shapes how the reader actually writes code — e.g. introduce the
+eight-cog parallelism alongside the random-hub-access latency that constrains it.
+A reference that lists only strengths reads as marketing and misleads.
+
+This principle bears hardest on the **front-matter / preface and Chapter 1**,
+which were written first and carry the most redundancy and promotional residue.
+
 ---
 
 ## 2. Voice Analysis: Parallax Draft
@@ -169,6 +184,10 @@ where you need signed overflow detection, see ADDS.
 | Never minimize | "Simply use ADD" ❌ | Dismissive of complexity |
 | Never celebrate | "Congratulations!" ❌ | Tutorial voice |
 | Never assume context | "As you know..." ❌ | Reference must stand alone |
+| Never market or promote | "ideal for video generation, motor control" ❌ | Sells instead of states; dates badly |
+| Never reassure that the hardware is correct | "the result is properly sign-extended" ❌ | Congratulates the silicon; conveys nothing |
+| Never justify an example with a vague domain | "commonly used for physics calculations" ❌ | A domain name-drop carries no information |
+| Never restate a fact already given | intro → section → subsection each repeating "parallel execution" ❌ | Padding; state each fact once, then add only new detail |
 
 ### 4.3 Voice Comparison Table
 
@@ -195,10 +214,10 @@ Use these terms consistently throughout:
 |----------------|-----------|-------|
 | C flag | carry flag, C, carry | Always "C flag" in prose |
 | Z flag | zero flag, Z, zero | Always "Z flag" in prose |
-| COG | cog, Cog | All caps for the processor unit |
-| Hub | hub, HUB | Title case for shared memory |
+| cog | COG, CPU | **Lowercase "cog" in prose.** Capitalize **Cog** only at sentence start, in headings/titles, and in numbered forms (Cog 0–7). **Never all-caps "COG."** Use "cog," never "CPU," for the processor unit. (Corrected v1.1 — was wrongly "all caps"; conflicts with the applied cog-casing sweep + Parallax corpus.) |
+| hub | HUB | Same rule as **cog**: lowercase "hub" in plain reference prose; capitalize **Hub** only in titles/headings, special-meaning, or proper-noun uses. Be consistent, not artificial. |
 | LUT | lut, Lut | All caps (Lookup Table) |
-| register | location, address, variable | For COG memory locations |
+| register | location, address, variable | For cog memory locations |
 | immediate | literal, constant, value | For # prefixed values |
 | augmented immediate | long immediate, 32-bit literal | For ## prefixed values |
 | effect | modifier, flag effect | For WC, WZ, WCZ |
@@ -251,17 +270,32 @@ Bulleted list, each parameter explained:
 ❌ • Src - Where the source comes from (circular)
 ```
 
-### 6.3 Operation
+### 6.3 Operation (compact pseudocode line)
 
-Procedural description of what happens:
+A curated **Operation:** line gives a scannable formal summary of what the
+instruction does, placed immediately **after the syntax line and before
+Result:**. (This supersedes the earlier procedural step-by-step "Operation"
+idea, which the entries never used.)
+
+**Add it ONLY where it earns its place** — where the result/flag formula is NOT
+obvious from the mnemonic + syntax + one-line description (bit-field shuffles,
+slice-indexed ops, signed/scaled math, non-obvious flag derivations, pixel ops,
+ALT next-instruction side-effects, encode/decode/CRC), OR where the **flag
+effects are non-default** even if the value is obvious (e.g. logic ops where
+`C = parity`, shifts/rotates where C captures the shifted-out bit). Plain
+whole-register ops (MOV, ADD, SUB, AND-value, OR, XOR-value, CMP, NOP) do **not**
+get one.
+
+**Format:** backticked monospace; result first, then C, then Z, separated by
+`; `. **Source the expression from the Parallax instruction CSV** (column 5) —
+reformat notation only; never invent semantics (no inference).
 
 ```
-✅ "1. Read the value in Dest
-    2. Read the value in Src (or use immediate value)
-    3. Compute Dest + Src as unsigned 32-bit addition
-    4. Write the 32-bit result to Dest"
+✅ **Operation:** `D = signed(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`   (MULS)
+✅ **Operation:** `D = 1 << S[4:0]`                                       (DECOD)
 
-❌ "ADD adds Dest and Src." (circular, no detail)
+❌ A procedural 1-2-3-4 step list (too verbose for a scannable reference)
+❌ An Operation line on a self-evident op like MOV/ADD (noise, not signal)
 ```
 
 ### 6.4 Flag Effects
@@ -318,6 +352,11 @@ Before finalizing any instruction entry, verify:
 - [ ] No hedging language ("may," "might," "probably," "typically")
 - [ ] No tutorial voice ("let's," "congratulations," "simply")
 - [ ] Definitive statements only
+- [ ] No marketing / promotional framing (state capability as fact, don't sell it)
+- [ ] No hardware-correctness reassurance ("properly," "correctly," "automatically handles")
+- [ ] Examples lead with what the code does, not a vague application domain
+- [ ] Each fact stated once — no restatement across intro / section / subsection
+- [ ] Honest tradeoffs surfaced where the cost shapes how code is written (Part I)
 
 ### Terminology Consistency
 - [ ] "C flag" and "Z flag" (not "carry" or "zero")
@@ -367,5 +406,6 @@ A source-of-truth reference that not only tells you what every instruction does,
 
 ---
 
-*Last Updated: 2025-11-26*
-*Version: 1.0 - Initial Voice Guide*
+*Last Updated: 2026-06-24*
+*Version: 1.1 — Added brevity + de-marketing rules (§1.3, §4.2, §7): no marketing/promotion, no hardware-correctness reassurance, no vague-domain example justifications, say-each-fact-once, surface honest tradeoffs. Origin: P2 Assembly Language Reference user-suggestions sprint (`sprint/USER-SUGGESTIONS-2026-06-24.md`).*
+*Version: 1.0 - Initial Voice Guide (2025-11-26)*

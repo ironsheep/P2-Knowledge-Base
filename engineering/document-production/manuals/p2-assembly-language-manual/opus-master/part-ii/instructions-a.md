@@ -16,6 +16,8 @@ Absolute Value
 
 ---
 
+**Operation:** `D = abs(S)`; `C = S[31]`
+
 **Result:** Absolute Src (or Dest) value is stored in Dest.
 
 - Dest is the register in which to write the absolute value of Dest or Src.
@@ -83,7 +85,7 @@ To add unsigned multi-long values (64-bit or larger), use ADD for the least sign
         addx    value_hi, addend_hi        ' Add high longs with carry-in
 ```
 
-ADD and ADDX are also used for adding signed multi-long values, with ADDSX ending the sequence to properly handle sign extension.
+ADD and ADDX are also used for adding signed multi-long values, with ADDSX as the final instruction so C reflects the signed result.
 
 
 
@@ -101,6 +103,8 @@ Add and Set Counter Event Trigger
 **ADDCT3**  *Dest, {#}Src*
 
 ---
+
+**Operation:** `D = D + S`; arms the CTn event to fire when CT reaches the new D
 
 **Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
 
@@ -136,6 +140,8 @@ Add Pixels
 
 ---
 
+**Operation:** for each byte n: `D.BYTE[n] = min(D.BYTE[n] + S.BYTE[n], $FF)`
+
 **Result:** Src color value bytes are added into Dest color value bytes with full saturation.
 
 - Dest is a register containing the RGB color value to add Src to, and is where the result is written.
@@ -170,6 +176,8 @@ Add Signed
 
 ---
 
+**Operation:** `D = D + S`; `C = signed-overflow of (D + S)`
+
 **Result:** Sum of signed Src and signed Dest is stored in Dest.
 
 - Dest is a register containing the value to add Src to, and is where the result is written.
@@ -194,7 +202,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the summation res
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero.
 
-To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation to properly handle sign extension.
+To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation so C reflects the signed result.
 
 
 
@@ -208,6 +216,8 @@ Add Signed Extended
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D + S + C`; `C = signed-overflow`; `Z = Z AND (result==0)`
 
 **Result:** Sum of signed Src plus C and signed Dest is stored in Dest.
 
@@ -231,7 +241,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result is neg
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag state. This allows detection of a zero result across the entire multi-long value.
 
-To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation. ADDSX properly handles the sign extension for the most significant portion of the multi-long value.
+To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation. ADDSX gives the signed-result C flag for the most significant portion of the multi-long value.
 
 
 
@@ -245,6 +255,8 @@ Add Unsigned Extended
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D + S + C`; `Z = Z AND (result==0)`
 
 **Result:** Sum of unsigned Src plus C and unsigned Dest is stored in Dest.
 
@@ -350,6 +362,8 @@ Alter Bit
 
 ---
 
+**Operation:** next D field = (D[13:5] + S) & $1FF; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax 2.
 
 - Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction to operate on.
@@ -398,6 +412,8 @@ Alter Destination
 
 ---
 
+**Operation:** next D field = (D + S) & $1FF; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
@@ -442,6 +458,8 @@ Alter Get Byte
 **ALTGB**  *Dest*
 
 ---
+
+**Operation:** next GETBYTE/ROLBYTE: S field = (D[10:2] + S) & $1FF, N field = D[1:0]; then `D += signext(S[17:9])`
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2]) & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
 
@@ -489,6 +507,8 @@ Alter Get Nibble
 
 ---
 
+**Operation:** next GETNIB/ROLNIB: S field = (D[11:3] + S) & $1FF, N field = D[2:0]; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Src and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the next GETNIB / ROLNIB instruction to read.
@@ -534,6 +554,8 @@ Alter Get Word
 **ALTGW**  *Dest*
 
 ---
+
+**Operation:** next GETWORD/ROLWORD: S field = (D[9:1] + S) & $1FF, N field = D[0]; then `D += signext(S[17:9])`
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
@@ -621,6 +643,8 @@ Alter Result
 
 ---
 
+**Operation:** next result-reg field = (D + S) & $1FF; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
@@ -665,6 +689,8 @@ Alter Source
 
 ---
 
+**Operation:** next S field = (D + S) & $1FF; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Src value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
@@ -706,6 +732,8 @@ Alter Set Byte
 **ALTSB**  *Dest*
 
 ---
+
+**Operation:** next SETBYTE: D field = (D[10:2] + S) & $1FF, N field = D[1:0]; then `D += signext(S[17:9])`
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[10:2]) & $1FF (syntax 1), or just Dest[10:2] (syntax 2), and Num is set to Dest[1:0]. Dest is post-adjusted by auto-indexer.
 
@@ -750,6 +778,8 @@ Alter Set Nibble
 **ALTSN**  *Dest*
 
 ---
+
+**Operation:** next SETNIB: D field = (D[11:3] + S) & $1FF, N field = D[2:0]; then `D += signext(S[17:9])`
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
@@ -797,6 +827,8 @@ Alter Set Word
 
 ---
 
+**Operation:** next SETWORD: D field = (D[9:1] + S) & $1FF, N field = D[0]; then `D += signext(S[17:9])`
+
 **Result:** The next instruction's pipelined Dest and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
 - Dest is the register whose 10-bit value is the index, or the full word address, for the SETWORD instruction to operate on.
@@ -842,6 +874,8 @@ Bitwise And
 
 ---
 
+**Operation:** `D = D & S`; `C = parity of result`
+
 **Result:** Bitwise AND of Dest and Src is stored in Dest.
 
 - Dest is the register containing the value to bitwise AND with Src and is the destination in which to write the result.
@@ -883,6 +917,8 @@ And Not
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D & !S`; `C = parity of result`
 
 **Result:** Bitwise AND of Dest with inverse of Src is stored in Dest.
 
@@ -1004,6 +1040,8 @@ Augment Destination
 
 ---
 
+**Operation:** the next `#D` becomes the full 32-bit literal `{#n[22:0], #D[8:0]}`
+
 **Result:** The 23-bit value formed from Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
@@ -1039,6 +1077,8 @@ Augment Source
 **AUGS**  *#Src*
 
 ---
+
+**Operation:** the next `#S` becomes the full 32-bit literal `{#n[22:0], #S[8:0]}`
 
 **Result:** The 23-bit value formed from Src is queued to prefix the next literal Src occurrence (#Src) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 

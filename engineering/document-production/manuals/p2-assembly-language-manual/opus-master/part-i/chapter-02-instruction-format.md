@@ -805,7 +805,7 @@ routine         jmp     #.skip                  ' Jump to local label
 ' In ORGH (Hub) mode:
                 orgh
 hub_data        byte    "Hello", 0
-hub_routine     long    @routine                ' Hub address of COG routine
+hub_routine     long    @routine                ' Hub address of cog routine
 ```
 
 ### 2.10.4 Scope Boundary Rules

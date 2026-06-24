@@ -16,6 +16,8 @@ Encode Bit Position
 
 ---
 
+**Operation:** `D = position of top-most '1' in S (0..31)`; `C = (S != 0)`
+
 **Result:** The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
 
 - Dest is a register in which to store the encoded bit position value and optionally contains the 32-bit value to encode (syntax 2).
@@ -62,6 +64,8 @@ Execute with Skip Pattern
 **EXECF**  *{#}Dest*
 
 ---
+
+**Operation:** `PC = {10'b0, D[9:0]}`; SKIPF pattern = D[31:10]
 
 **Result:** PC is set to Dest[9:0] and the SKIPF pattern is set to Dest[31:10].
 

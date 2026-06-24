@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-161`**
+**Next finding ID: `F-162`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -172,6 +172,18 @@
 
 ### F-160 — `hardware/hardware-compatibility-matrix.yaml` `pin_efficiency` is an unsourced/undefined metric — `CONFIRMED (needs decision)`
 - The `pin_efficiency` percentages (e.g. P2-EC32MB rows: 62% / **87%** / **30%** at identical `pin_access: 40`) have **no sourced definition**. The column label is undefined; the only way to "correct" the inconsistent values is to *infer* a formula (`pin_access/64`) and compute them — which the no-inference rule forbids. The internally-inconsistent values (notably "30%" and "87%", unsupportable from any plausible denominator) remain in the file. **Decision needed (Stephen):** either supply a sourced definition for the metric, or remove the `pin_efficiency` field. Do **not** resolve by inference. Surfaced during the F-151 v1.10.1 work.
+
+### F-161 — `RDLUT`/`WRLUT` (and the hub-operand family) KB prose omits the immediate-address 0–255 limit — `CONFIRMED`
+- **AUTHORITATIVE SOURCE (read this first):** `engineering/ingestion/external-inputs/pnut_ts_facts/LUT-Immediate-Addressing-Briefing-for-Doc-Agents.md` — a self-contained, PNut-TS-source-verified briefing (cites `spinResolver.ts` `tryPtraPtrb()`, `parseUtils.ts` operand bindings) confirmed empirically against `pnut-ts` v1.55.0. Supersedes the forum post and is more complete than the initial Silicon-Doc-only read.
+- **Where:** `deliverables/ai/P2/language/pasm2/rdlut.yaml`, `wrlut.yaml` (primary). The same 0–255 plain-immediate cap is shared by the **whole hub-memory operand family** — `RDLONG WRLONG RDBYTE WRBYTE RDWORD WRWORD WMLONG` — so their YAMLs are in scope for a one-line note too (it rarely bites there: 20-bit hub addresses naturally use register/PTRx/`##`).
+- **The facts to represent (all CONFIRMED):**
+  1. A **plain immediate** LUT address (`RDLUT d,#S` / `WRLUT d,#S`) is limited to **`#0`–`#255`** (lower half). `#256`+ is a **hard compile error**: `Constant must be from 0 to 255` — NOT a silent runtime trap, NOT a wrap, NOT a wrong-long read.
+  2. The **full LUT (0–511)** is reachable via a **register operand** (`RDLUT d, addrReg`) **or** a **`PTRA`/`PTRB`** pointer, optionally indexed (`PTRB[4]`).
+  3. **Encoding reason:** the 9-bit `S` field's **bit 8 ($100) is the pointer/expression selector**, not address bit 8; a literal can't set it, so a literal spans only bits 7:0 (0–255). PTRx sets bit 8 deliberately; a register operand (`I=0`) carries the full 9-bit address.
+  4. **Do NOT recommend the `##` augmented form** for the upper half: `rdlut d,##500` *compiles* but its low 9 bits (`$1F4`) set bit 8, landing on the pointer-decode path — the AUGS high bits are meaningless for a 9-bit LUT address. Register or PTRx only.
+- **Doc guardrails (briefing §7):** don't say `#500` "wraps"/"reads wrong long" (it doesn't assemble); don't say "256 longs are inaccessible" (all 512 reachable — only the *literal* mode is capped); don't cite numeric opcode constants (bit-field diagrams only).
+- **Corroboration:** Silicon Doc bit-table `engineering/ingestion/sources/silicon-doc/part3-end.txt:172-218` (`0AAAAAAAA` literal vs `1SUPNNNNN` PTR expr). Surfaced during the p2-assembly-language-manual user-suggestions sprint (OBS-09), `sprint/USER-SUGGESTIONS-2026-06-24.md` (the manual will also document this — briefing §6 copy-paste callout).
+- **Fix (yaml head):** add the limit + register/PTRx route + the encoding reason to `rdlut.yaml`/`wrlut.yaml`; add a one-line shared-cap note to the hub RD/WR family. Trace every claim to the briefing (no inference). Honor the guardrails.
 
 ### F-159 — `language/spin2/operators/precedence.yaml` lists two fabricated equality operators (`===`, `<>>`) — `DONE`
 > **SURFACED + APPLIED 2026-06-20 (during v1.10.1 release verification).** The equality level carried `===` and `<>>` — neither is a Spin2 operator: **absent from the v55 operator table** and **both fail to compile** (`pnut-ts`: "Expected an expression term"). They were pre-existing (level-13 "Equality" before the F-153 v55 rebuild) and were carried forward by inference rather than verified. **Removed** both from the comparison/equality level. The sibling forms `!&&` / `!||` (kept) were compiler-checked the same pass and **do** compile — valid, retained. Verified: parse + crossref clean; pnut-ts re-probed.

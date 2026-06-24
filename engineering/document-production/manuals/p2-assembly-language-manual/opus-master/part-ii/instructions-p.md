@@ -15,6 +15,8 @@ Poll Attention event
 
 ---
 
+**Operation:** `C,Z = ATN event flag`; then clear flag
+
 **Result:** Attention event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -52,6 +54,8 @@ Poll Counter event
 
 ---
 
+**Operation:** `C,Z = CTn event flag`; then clear flag
+
 **Result:** CTn event flag state is optionally copied into C and/or Z, then the flag is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -87,6 +91,8 @@ Poll FIFO Block Wrap event
 
 ---
 
+**Operation:** `C,Z = FBW event flag`; then clear flag
+
 **Result:** FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -119,6 +125,8 @@ Poll Interrupt event
 **POLLINT**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C,Z = INT event flag`; then clear flag
 
 **Result:** Interrupt-occurred event flag is optionally copied into C and/or Z, then it is cleared.
 
@@ -153,6 +161,8 @@ Poll Pin Pattern event
 
 ---
 
+**Operation:** `C,Z = PAT event flag`; then clear flag
+
 **Result:** Pin-pattern-detected event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -185,6 +195,8 @@ Poll CORDIC Empty event
 **POLLQMT**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C,Z = QMT event flag`; then clear flag
 
 **Result:** CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.
 
@@ -224,6 +236,8 @@ Poll Selectable event
 
 ---
 
+**Operation:** `C,Z = SEn event flag`; then clear flag
+
 **Result:** SEn event flag state is optionally copied into C and/or Z, then the flag is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -260,6 +274,8 @@ Poll Streamer Finished event
 
 ---
 
+**Operation:** `C,Z = XFI event flag`; then clear flag
+
 **Result:** Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -292,6 +308,8 @@ Poll Streamer Empty event
 **POLLXMT**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C,Z = XMT event flag`; then clear flag
 
 **Result:** Streamer-empty event flag is optionally copied into C and/or Z, then it is cleared.
 
@@ -326,6 +344,8 @@ Poll streamer LUT Rollover event
 
 ---
 
+**Operation:** `C,Z = XRL event flag`; then clear flag
+
 **Result:** Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -359,6 +379,8 @@ Poll streamer NCO Rollover event
 
 ---
 
+**Operation:** `C,Z = XRO event flag`; then clear flag
+
 **Result:** Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then it is cleared.
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
@@ -391,6 +413,8 @@ Pop From Internal Stack
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = K (stack)`; `C = K[31]`
 
 **Result:** Dest receives the value from the K register.
 
@@ -428,6 +452,8 @@ Pop From hub stack A
 
 ---
 
+**Operation:** `D = hub[--PTRA]`; `C = long[31]`
+
 **Result:** Dest receives the long value from hub address --PTRA.
 
 - Dest is the register to receive the popped value.
@@ -463,6 +489,8 @@ Pop From hub stack B
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = hub[--PTRB]`; `C = long[31]`
 
 **Result:** Dest receives the long value from hub address --PTRB.
 
@@ -531,6 +559,8 @@ Push To hub stack A
 
 ---
 
+**Operation:** `hub[PTRA++] = D`
+
 **Result:** The long value from Dest is written to hub address PTRA++.
 
 - Dest is a register or 9-bit immediate value to push.
@@ -563,6 +593,8 @@ Push To hub stack B
 **PUSHB**  *{#}Dest*
 
 ---
+
+**Operation:** `hub[PTRB++] = D`
 
 **Result:** The long value from Dest is written to hub address PTRB++.
 

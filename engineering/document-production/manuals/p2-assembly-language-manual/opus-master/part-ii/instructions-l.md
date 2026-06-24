@@ -16,6 +16,8 @@ Load Address
 
 ---
 
+**Operation:** `{PA/PB/PTRA/PTRB} = {12'b0, address[19:0]}` (R=1: address = PC + A; R=0: address = A)
+
 **Result:** Address is loaded into the specified pointer register.
 
 - PA, PB, PTRA, or PTRB is the destination pointer register.
@@ -53,6 +55,8 @@ Allocate New lock
 
 ---
 
+**Operation:** `D = LOCK number (0..15)`; `C = 1 if no LOCK available`
+
 **Result:** D is written with an available lock number (0-15), or remains unchanged if no lock is available.
 
 - D is a register where the allocated lock number is written.
@@ -72,7 +76,7 @@ LOCKNEW requests a lock from the P2's hardware lock pool. The P2 provides 16 har
 
 If the WC effect is specified, the C flag is set (1) if no lock is available, or cleared (0) if a lock was successfully allocated. This allows the calling code to detect allocation failure and take appropriate action.
 
-Once a lock is allocated with LOCKNEW, it remains assigned until explicitly returned to the pool with LOCKRET. The allocated lock can then be used with LOCKTRY to acquire exclusive access and LOCKREL to release it. This allocation-try-release-return pattern ensures proper resource management in multi-cog systems.
+Once a lock is allocated with LOCKNEW, it remains assigned until explicitly returned to the pool with LOCKRET. The allocated lock can then be used with LOCKTRY to acquire exclusive access and LOCKREL to release it. This allocation-try-release-return pattern manages locks across multi-cog systems.
 
 LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. The instruction completes in 4 to 11 clock cycles depending on lock availability and contention.
 
@@ -88,6 +92,8 @@ Release lock
 **LOCKREL**  *{#}D*  **{WC}**
 
 ---
+
+**Operation:** release LOCK D[3:0]; if reg + WC: `D = owner cog id`, `C = LOCK status`
 
 **Result:** The lock specified by D[3:0] is released for other cogs to acquire.
 
@@ -145,7 +151,7 @@ The lock to return is specified by the lower 4 bits of D (D[3:0]), allowing lock
 
 LOCKRET should only be called on locks that are not currently held by any cog. Before returning a lock, ensure it has been released with LOCKREL. Returning a lock that is still held can cause synchronization failures in other cogs that may be waiting for or using that lock.
 
-The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKREL for each critical section, and LOCKRET when the lock is no longer needed for any purpose. This ensures efficient use of the limited pool of 16 hardware locks. The instruction completes in 2 to 9 clock cycles depending on hub access contention.
+The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKREL for each critical section, and LOCKRET when the lock is no longer needed for any purpose. LOCKRET returns the lock to the pool of 16 hardware locks for reuse. The instruction completes in 2 to 9 clock cycles depending on hub access contention.
 
 
 
@@ -159,6 +165,8 @@ Try To Acquire lock
 **LOCKTRY**  *{#}D*  **{WC}**
 
 ---
+
+**Operation:** try LOCK D[3:0]; `C = 1 if acquired`
 
 **Result:** Attempts to acquire the lock specified by D[3:0]. The C flag indicates success.
 
@@ -179,7 +187,7 @@ LOCKTRY attempts to acquire a lock using an atomic test-and-set operation. The l
 
 If the WC effect is specified, the C flag is set (1) if the lock was successfully acquired, or cleared (0) if the lock is already held by another cog. This non-blocking behavior allows the calling code to make immediate decisions: proceed with the protected operation if the lock was acquired, or take alternative action if it was not.
 
-LOCKTRY implements the critical section entry point in the standard lock pattern: try to acquire the lock, and only proceed if successful. The lock must be released with LOCKREL when the critical section completes. This ensures mutual exclusion, preventing multiple cogs from simultaneously accessing shared resources.
+LOCKTRY implements the critical section entry point in the standard lock pattern: try to acquire the lock, and only proceed if successful. The lock must be released with LOCKREL when the critical section completes. LOCKTRY/LOCKREL bound the critical section so only the holding cog accesses the shared resource.
 
 The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
 

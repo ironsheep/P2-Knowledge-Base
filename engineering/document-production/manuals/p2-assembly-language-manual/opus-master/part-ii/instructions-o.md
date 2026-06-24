@@ -16,6 +16,8 @@ Ones
 
 ---
 
+**Operation:** `D = number of '1' bits in S (0..32)`; `C = result[0]`
+
 **Result:** The number of high bits (1s) in Src, or Dest, is stored in Dest.
 
 - Dest is a register where the count of high bits is stored, and optionally contains the value to check (second syntax form).
@@ -55,6 +57,8 @@ Bitwise Or
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = D | S`; `C = parity of result`
 
 **Result:** Dest OR Src is stored in Dest.
 
@@ -107,6 +111,8 @@ Output By Flag State
 
 ---
 
+**Operation:** `OUT[pin range] = src` (src = C/!C/Z/!Z); `C,Z = OUT bit`
+
 **Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets C and Z to the original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
@@ -152,6 +158,8 @@ Output High
 
 ---
 
+**Operation:** `OUT[pin range] = 1`; `C,Z = OUT bit`
+
 **Result:** The I/O pin output level bit(s) described by Dest are set high (1).
 
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set high.
@@ -190,6 +198,8 @@ Output Low
 **OUTL**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = 0`; `C,Z = OUT bit`
 
 **Result:** The I/O pin output level bit(s) described by Dest are set low (0).
 
@@ -230,6 +240,8 @@ Output Not (Toggle)
 
 ---
 
+**Operation:** toggle `OUT[pin range]`; `C,Z = OUT bit`
+
 **Result:** The I/O pin output level bit(s) described by Dest are toggled to their opposite state(s).
 
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle.
@@ -268,6 +280,8 @@ Output Random
 **OUTRND**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = RND`; `C,Z = OUT bit`
 
 **Result:** The I/O pin output level bit(s) described by Dest are each set randomly to low or high.
 

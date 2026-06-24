@@ -25,6 +25,8 @@ Test
 
 ---
 
+**Operation:** `C = parity of (D & S)`; `Z = ((D & S) == 0)`
+
 **Result:** The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags.
 
 - Dest is a register whose value will be tested.
@@ -70,6 +72,8 @@ Test Bit
 **TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
+
+**Operation:** `C/Z = D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
 
 **Result:** The state of bit Src[4:0] of Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
 
@@ -118,6 +122,8 @@ Test Bit Negated
 
 ---
 
+**Operation:** `C/Z = !D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
+
 **Result:** The inverted state of bit Src[4:0] of Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
 
 - Dest is a register whose bit will be tested.
@@ -156,6 +162,8 @@ Test Not
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `C = parity of (D & !S)`; `Z = ((D & !S) == 0)`
 
 **Result:** The parity and zero-state of Dest bitwise ANDed with !Src is stored in the C and Z flags.
 
@@ -201,6 +209,8 @@ Test Pin / Test Pin Negated {#testpn}
 **TESTPN**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
+
+**Operation:** `C/Z = IN[D[5:0]]` (TESTP) / `!IN[D[5:0]]` (TESTPN); AND/OR/XOR modes combine
 
 **Result:** The state (TESTP) or inverted state (TESTPN) of the I/O pin described by Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
 
@@ -253,6 +263,8 @@ Test And Jump If Full / Not Full {#tjnf}
 
 ---
 
+**Operation:** jump to S** if D == $FFFF_FFFF (TJF) / D != $FFFF_FFFF (TJNF)
+
 **Result:** Dest is tested and conditionally jumps based on full state.
 
 - Dest is a register whose value is tested for full state.
@@ -293,6 +305,8 @@ Test And Jump If Signed / Not Signed {#tjns}
 **TJNS**  *Dest, {#}Src*
 
 ---
+
+**Operation:** jump to S** if D[31] == 1 (TJS) / D[31] == 0 (TJNS)
 
 **Result:** Dest is tested and conditionally jumps based on sign bit state.
 
@@ -383,6 +397,8 @@ Test And Jump If Overflow
 **TJV**  *Dest, {#}Src*
 
 ---
+
+**Operation:** jump to S** if D[31] != C (overflow; C = 'correct sign' from last add/sub)
 
 **Result:** Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a new relative (#Src) or absolute (Src) address.
 

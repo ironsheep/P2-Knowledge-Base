@@ -26,6 +26,8 @@ Decrement Modulus
 
 ---
 
+**Operation:** if D == 0 then `D = S`, `C = 1`, else `D = D - 1`, `C = 0`
+
 **Result:** If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset to Src.
 
 - Dest is a register containing the value to decrement down to 0 with modulus, and is where the result is written.
@@ -63,6 +65,8 @@ Decode Bit Position
 **DECOD**  *Dest*
 
 ---
+
+**Operation:** `D = 1 << S[4:0]`
 
 **Result:** A 32-bit value, with the bit position corresponding to Src or Dest value (0-31) set high, is stored in Dest.
 
@@ -105,6 +109,8 @@ Set Pin Direction by C flag {#dirnc}
 **DIRNC**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `DIR[pin range] = src` (DIRC src=C, DIRNC src=!C); `C,Z = DIR bit`
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to C or !C; the rest are left as-is.
 
@@ -150,6 +156,8 @@ Set Pin Direction High
 
 ---
 
+**Operation:** `DIR[pin range] = 1`; `C,Z = DIR bit`
+
 **Result:** The I/O pins described by Dest are set to output direction; the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output.
@@ -187,6 +195,8 @@ Set Pin Direction Low
 
 ---
 
+**Operation:** `DIR[pin range] = 0`; `C,Z = DIR bit`
+
 **Result:** The I/O pins described by Dest are set to input direction; the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input.
@@ -223,6 +233,8 @@ Direction Not
 **DIRNOT**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** toggle `DIR[pin range]`; `C,Z = DIR bit`
 
 **Result:** The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.
 
@@ -265,6 +277,8 @@ Set Pin Direction by Z flag {#dirnz}
 **DIRNZ**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `DIR[pin range] = src` (DIRZ src=Z, DIRNZ src=!Z); `C,Z = DIR bit`
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest are left as-is.
 
@@ -310,6 +324,8 @@ Direction Random
 
 ---
 
+**Operation:** `DIR[pin range] = RND`; `C,Z = DIR bit`
+
 **Result:** The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set randomly to input or output.
@@ -351,6 +367,8 @@ Decrement and Jump If Full
 
 ---
 
+**Operation:** `D = D - 1`; jump to S** if D == $FFFF_FFFF
+
 **Result:** Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
 - Dest is a register whose value is decremented and tested for full or not full.
@@ -384,6 +402,8 @@ Decrement and Jump If Not Full
 **DJNF**  *Dest, {#}Src*
 
 ---
+
+**Operation:** `D = D - 1`; jump to S** if D != $FFFF_FFFF
 
 **Result:** Dest is decremented. If the result does NOT equal $FFFF_FFFF (not full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -474,6 +494,8 @@ Drive Pins by C flag {#drvnc}
 
 ---
 
+**Operation:** `OUT[pin range] = src`, `DIR[pin range] = 1` (DRVC src=C, DRVNC src=!C); `C,Z = OUT bit`
+
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to C or !C; the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
@@ -516,6 +538,8 @@ Drive Pins High
 
 ---
 
+**Operation:** `OUT[pin range] = 1`, `DIR[pin range] = 1`; `C,Z = OUT bit`
+
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of high; the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and high output level.
@@ -554,6 +578,8 @@ Drive Pins Low
 **DRVL**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = 0`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low; the rest are left as-is.
 
@@ -595,6 +621,8 @@ Drive Not
 **DRVNOT**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** toggle `OUT[pin range]`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.
 
@@ -640,6 +668,8 @@ Drive Pins by Z flag {#drvnz}
 
 ---
 
+**Operation:** `OUT[pin range] = src`, `DIR[pin range] = 1` (DRVZ src=Z, DRVNZ src=!Z); `C,Z = OUT bit`
+
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to Z or !Z; the rest are left as-is.
 
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
@@ -681,6 +711,8 @@ Drive Random
 **DRVRND**  *{#}Dest*  **{WCZ}**
 
 ---
+
+**Operation:** `OUT[pin range] = RND`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the output direction and each output level is set randomly low or high; the rest are left as-is.
 

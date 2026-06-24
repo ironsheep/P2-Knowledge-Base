@@ -15,6 +15,8 @@ Rotate Carry Left
 
 ---
 
+**Operation:** `D = [63:32] of ({D, {32{C}}} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
+
 **Result:** The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
 
 - Dest is a register containing the value to rotate carry left.
@@ -52,6 +54,8 @@ Rotate Carry Right
 **RCR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = [31:0] of ({{32{C}}, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
 **Result:** The bits of Dest are shifted right by Src bits, inserting C as new MSBs.
 
@@ -91,6 +95,8 @@ Rotate Carry And Zero Left
 
 ---
 
+**Operation:** `D = {D[29:0], C, Z}`; `C = D[31]`, `Z = D[30]`
+
 **Result:** The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.
 
 - Dest is a register containing the value to rotate.
@@ -127,6 +133,8 @@ Rotate Carry And Zero Right
 
 ---
 
+**Operation:** `D = {C, Z, D[31:2]}`; `C = D[1]`, `Z = D[0]`
+
 **Result:** The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.
 
 - Dest is a register containing the value to rotate.
@@ -162,6 +170,8 @@ Read Byte From hub
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = zero-extend(hub byte)`; `C = byte[7]`
 
 **Result:** A zero-extended byte from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
@@ -256,6 +266,8 @@ Read Long From hub
 
 ---
 
+**Operation:** `D = hub long`; `C = long[31]` (prior SETQ/SETQ2 → block transfer)
+
 **Result:** A long from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
 - Dest is the register to receive the long value.
@@ -306,6 +318,8 @@ Read From LUT
 
 ---
 
+**Operation:** `D = LUT[S/PTRx]`; `C = data[31]`
+
 **Result:** Data from LUT address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
 - Dest is the register to receive the data.
@@ -324,11 +338,13 @@ Read From LUT
 
 RDLUT reads data from the Lookup Table at the address specified by Src (or pointer register) and loads it into Dest. The LUT is a 512-long (2KB) memory area in each cog that can be used for lookup tables, buffers, or general-purpose memory. The operation takes 3 clock cycles.
 
+⚠️ **Pitfall:** A literal address (`RDLUT Dest, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
+
 If the WC or WCZ effect is specified, C is set to the MSB of the data.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The LUT provides fast local memory access for frequently accessed data structures, making it ideal for sin/cos tables, gamma correction tables, and small data buffers.
+The LUT provides fast local memory access for frequently accessed data structures such as sin/cos tables, gamma correction tables, and small data buffers.
 
 
 
@@ -342,6 +358,8 @@ Read smart pin
 **RDPIN**  *Dest, {#}Src*  **{WC}**
 
 ---
+
+**Operation:** `D = smart-pin S[5:0] result`, acknowledge pin; `C = modal result`
 
 **Result:** Smart Pin Src[5:0] result is loaded into Dest, and the pin is acknowledged.
 
@@ -363,7 +381,7 @@ RDPIN reads the result value from the specified smart pin and acknowledges the p
 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
-Smart pins are powerful autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous CPU intervention. RDPIN retrieves the measured or received data after the pin signals completion.
+Smart pins are autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous cog intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
 
 
@@ -377,6 +395,8 @@ Read Word From hub
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = zero-extend(hub word)`; `C = word[15]`
 
 **Result:** A zero-extended word from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
@@ -426,6 +446,8 @@ Repeat Block
 
 ---
 
+**Operation:** repeat the next `D[8:0]` instructions `S` times (S = 0 → forever; D[8:0] = 0 → none)
+
 **Result:** The next Dest[8:0] instructions are executed Src times.
 
 - Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
@@ -446,7 +468,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution to maintain timing precision. REP adds no per-iteration overhead, so it suits tight timing-critical loops.
 
 **Critical Restrictions:**
 
@@ -649,6 +671,8 @@ Return From Subroutine
 
 ---
 
+**Operation:** pop K from stack; `C = K[31]`, `Z = K[30]`, `PC = K[19:0]`
+
 **Result:** The program counter, C flag, and Z flag are restored from the top of the hardware stack.
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
@@ -693,6 +717,8 @@ Return Via PTRA Stack
 
 ---
 
+**Operation:** `L = hub[--PTRA]`; `C = L[31]`, `Z = L[30]`, `PC = L[19:0]`
+
 **Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRA.
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
@@ -735,6 +761,8 @@ Return Via PTRB Stack
 **RETB**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `L = hub[--PTRB]`; `C = L[31]`, `Z = L[30]`, `PC = L[19:0]`
 
 **Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRB.
 
@@ -816,6 +844,8 @@ Reverse Bits
 
 ---
 
+**Operation:** `D = D[0:31]` (bit-reverse)
+
 **Result:** The 32-bit pattern in Dest is reversed (bits 31:0 become bits 0:31).
 
 - Dest is the register containing the bit pattern to reverse.
@@ -846,6 +876,8 @@ Read Byte Via FIFO
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = zero-extend(FIFO byte)`; `C = byte[7]`
 
 **Result:** A zero-extended byte from the FIFO is loaded into Dest.
 
@@ -883,6 +915,8 @@ Read Long Via FIFO
 
 ---
 
+**Operation:** `D = FIFO long`; `C = long[31]`
+
 **Result:** A long from the FIFO is loaded into Dest.
 
 - Dest is the register to receive the long value.
@@ -918,6 +952,8 @@ Read Variable Via FIFO
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = zero-extend(FIFO 1..4-byte value)`; `C = 0`
 
 **Result:** A zero-extended 1-4 byte value from the FIFO is loaded into Dest.
 
@@ -955,6 +991,8 @@ Read Signed Variable Via FIFO
 
 ---
 
+**Operation:** `D = sign-extend(FIFO 1..4-byte value)`; `C = value MSB`
+
 **Result:** A sign-extended 1-4 byte value from the FIFO is loaded into Dest.
 
 - Dest is the register to receive the sign-extended value.
@@ -988,6 +1026,8 @@ Read Word Via FIFO
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = zero-extend(FIFO word)`; `C = word[15]`
 
 **Result:** A zero-extended word from the FIFO is loaded into Dest.
 
@@ -1025,6 +1065,8 @@ Expand RGB Color
 
 ---
 
+**Operation:** `D = {D[15:11,15:13], D[10:5,10:9], D[4:0,4:2], 8'b0}` (5:6:5 → 8:8:8)
+
 **Result:** The 5:6:5 RGB value in Dest[15:0] is expanded into 8:8:8 format in Dest[31:8].
 
 - Dest contains 5:6:5 RGB in Dest[15:0], receives 8:8:8 RGB in Dest[31:8].
@@ -1056,6 +1098,8 @@ Squeeze RGB Color
 
 ---
 
+**Operation:** `D = {15'b0, D[31:27], D[23:18], D[15:11]}` (8:8:8 → 5:6:5)
+
 **Result:** The 8:8:8 RGB value in Dest[31:8] is compressed into 5:6:5 format in Dest[15:0].
 
 - Dest contains 8:8:8 RGB in Dest[31:8], receives 5:6:5 RGB in Dest[15:0].
@@ -1086,6 +1130,8 @@ Rotate Left
 **ROL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = [63:32] of ({D, D} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
 
 **Result:** The bits of Dest are rotated left by Src positions; departing MSBs are moved into LSBs.
 
@@ -1126,6 +1172,8 @@ Rotate Byte Left Into register
 
 ---
 
+**Operation:** `D = {D[23:0], S.BYTE[N]}`
+
 **Result:** Byte N (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left into Dest.
 
 - Dest is the register into which the byte is rotated.
@@ -1160,6 +1208,8 @@ Rotate Nibble Left Into register
 **ROLNIB**  *Dest*
 
 ---
+
+**Operation:** `D = {D[27:0], S.NIBBLE[N]}`
 
 **Result:** Nibble N (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is rotated left into Dest.
 
@@ -1196,6 +1246,8 @@ Rotate Word Left Into register
 
 ---
 
+**Operation:** `D = {D[15:0], S.WORD[N]}`
+
 **Result:** Word N (0-1) of Src, or a word from a source described by prior ALTGW instruction, is rotated left into Dest.
 
 - Dest is the register into which the word is rotated.
@@ -1229,6 +1281,8 @@ Rotate Right
 **ROR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** `D = [31:0] of ({D, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
 **Result:** The bits of Dest are rotated right by Src positions; departing LSBs are moved into MSBs.
 
@@ -1267,6 +1321,8 @@ Read Smart Pin Without Acknowledge
 **RQPIN**  *Dest, {#}Src*  **{WC}**
 
 ---
+
+**Operation:** `D = smart-pin S[5:0] result` (no ack — "quiet"); `C = modal result`
 
 **Result:** Smart Pin Src[5:0] result is loaded into Dest without clearing the pin's ready flag.
 

@@ -15,6 +15,8 @@ Wait For Attention
 
 ---
 
+**Operation:** wait for ATN event then clear; (prior SETQ = CT timeout) `C/Z = timeout`
+
 **Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -56,6 +58,8 @@ Wait For Counter event
 
 ---
 
+**Operation:** wait for CTn event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
+
 **Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -72,7 +76,7 @@ Wait For Counter event
 
 **Explanation:**
 
-WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3). Specifically, the flag is set when the MSB of (CT - CTx) equals 0, providing a precise mathematical definition of "passes" that handles counter wraparound correctly.
+WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3). Specifically, the flag is set when the MSB of (CT - CTx) equals 0, so the comparison is correct across counter wraparound.
 
 The flags are cleared by execution of ADDCT*n*, POLLCT*n*, WAITCT*n*, JCT*n*, or JNCT*n* instructions (where *n* is 1, 2, or 3).
 
@@ -90,6 +94,8 @@ Wait For FIFO Block Wrap
 **WAITFBW**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** wait for FBW event then clear; `C/Z = timeout`
 
 **Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
 
@@ -122,6 +128,8 @@ Wait For interrupt
 
 ---
 
+**Operation:** wait for INT event then clear; `C/Z = timeout`
+
 **Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -152,6 +160,8 @@ Wait For Pattern
 **WAITPAT**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** wait for PAT event then clear; `C/Z = timeout`
 
 **Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
 
@@ -194,6 +204,8 @@ Wait For Selectable event (1, 2, 3, Or 4)
 
 ---
 
+**Operation:** wait for SEn event then clear; `C/Z = timeout`
+
 **Result:** Waits for the specified selectable event flag (SE1-SE4) to be set, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -227,6 +239,8 @@ Wait Cycles
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** wait `2 + D` clocks; if WC/WZ/WCZ wait `2 + (D & RND)` clocks; `C/Z = 0`
 
 **Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears C and Z to 0 after completion.
 
@@ -264,6 +278,8 @@ Wait For Streamer Finished
 
 ---
 
+**Operation:** wait for XFI event then clear; `C/Z = timeout`
+
 **Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -294,6 +310,8 @@ Wait For Streamer Empty
 **WAITXMT**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** wait for XMT event then clear; `C/Z = timeout`
 
 **Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
 
@@ -326,6 +344,8 @@ Wait For streamer LUT Rollover
 
 ---
 
+**Operation:** wait for XRL event then clear; `C/Z = timeout`
+
 **Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
@@ -356,6 +376,8 @@ Wait For streamer NCO Rollover
 **WAITXRO**  **{WC|WZ|WCZ}**
 
 ---
+
+**Operation:** wait for XRO event then clear; `C/Z = timeout`
 
 **Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
 
@@ -481,6 +503,8 @@ Write Masked Long
 
 ---
 
+**Operation:** write only non-$00 bytes of D to hub[S/PTRx] (prior SETQ/SETQ2 → block transfer)
+
 **Result:** Writes only non-$00 bytes in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 
 - Dest is the long value with bytes to write (non-zero bytes only).
@@ -563,6 +587,8 @@ Write Flag To register
 
 ---
 
+**Operation:** `D = {31'b0, bit}` where bit = C (WRC) / !C (WRNC) / Z (WRZ) / !Z (WRNZ)
+
 **Result:** Writes 0 or 1 to Dest based on the specified flag condition:
 
 | Instruction | Dest value |
@@ -641,6 +667,8 @@ Write Long
 
 ---
 
+**Operation:** write D long to hub[S/PTRx] (prior SETQ/SETQ2 → block transfer)
+
 **Result:** Writes the long in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 
 - Dest is the long value to write (all 32 bits used).
@@ -705,6 +733,8 @@ Write LUT
 **Explanation:**
 
 WRLUT writes the value in Dest to the Lookup Table (LUT) at address Src/PTRx. The LUT is a 512-long (2KB) fast memory space.
+
+⚠️ **Pitfall:** A literal address (`WRLUT value, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
 
 When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511).
 
@@ -875,7 +905,7 @@ WYPIN sets the Y parameter of one or more smart pins. The Y register serves mult
 - For counter modes: Sets count value
 - For ADC modes: Initiates conversions
 
-Writing the Y register also acknowledges pin completion, clearing any completion flags. This dual purpose makes WYPIN essential for continuous smart pin operation—it both provides new data and signals that previous results have been processed.
+Writing the Y register also acknowledges pin completion, clearing any completion flags. Writing Y both supplies new data and acknowledges the previous result.
 
 ```pasm2
         WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
