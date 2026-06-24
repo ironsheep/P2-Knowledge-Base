@@ -430,6 +430,13 @@ Everything not listed above is inherited from the central skill body + the guide
 If a field is genuinely unknowable from in-repo sources, that absence is itself a finding — record
 it; do not invent a value.
 
+**Flag (do NOT remove) a superseded `AUDIT-PROCESS.md`.** If the manual folder still carries an
+`AUDIT-PROCESS.md` (the old per-manual process doc this skill replaces), note it in the onboarding
+output as "superseded by document-audit — queue for the consolidation pass." Do **not** delete it
+here: onboarding (like an audit run) is side-effect-free on repo structure. Retirement happens only
+in the consolidation pass (§11). And never confuse `AUDIT-PROCESS.md` (the process doc — retire it)
+with the `./audit/` folder (findings/run history — KEEP; Dimension #12 reads it).
+
 ---
 
 ## 11. Companion documents & consolidation note
@@ -444,5 +451,10 @@ it; do not invent a value.
 **Consolidation note (pending follow-on):** four manuals still carry a near-identical
 `AUDIT-PROCESS.md` (assembly, debug-window, IOSP, deSilva — debug-window's was the only one with
 the two-grounding-models improvement; the rest were stale). Those copies are **superseded by this
-skill**. Physically removing/archiving them and seeding the remaining manuals' descriptors is a
-separate, deliberate consolidation pass — do not delete them as a side effect of an audit run.
+skill**. Retiring them is a separate, deliberate consolidation pass — **never a side effect of an
+audit or onboarding run** — and per manual it goes: (1) **carry-across check** — confirm this skill
++ the manual's descriptor capture everything in that copy (don't delete what wasn't migrated;
+surface any gap); (2) **archive, don't hard-delete** — move the file to a git-ignored `./archive/`
+(git history is the real record; the archive-locally rule); (3) one manual at a time, reviewed.
+This is the `overlay-reconcile` motion (retire local docs as central catches up). Scope: only
+`AUDIT-PROCESS.md` — the `./audit/` findings/run history is untouched.
