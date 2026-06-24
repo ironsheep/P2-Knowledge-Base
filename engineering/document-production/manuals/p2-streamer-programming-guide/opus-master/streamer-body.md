@@ -202,7 +202,7 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). This exactness is also what eliminates per-pixel jitter — see [§3.4](#sec-3-4) for choosing a rate around it. [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
 
 ::: caution
-**Round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+**Round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 :::
 
 ## 3.3 Setting NCO Frequency {#sec-3-3}
@@ -670,7 +670,7 @@ repeat i from 0 to 511
 | Max amplitude | ±127 (full signed byte) | ±10 (prevents overflow) |
 
 ::: caution
-**SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
+**SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Goertzel example in the *Parallax Propeller 2 Documentation v35 - Rev B/C* uses for SINC2) to prevent accumulator overflow.
 :::
 
 ## 10.5 Reading Results {#sec-10-5}
