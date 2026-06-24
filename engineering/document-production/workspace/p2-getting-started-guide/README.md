@@ -61,7 +61,7 @@ The master filename `P2-Getting-Started-Guide.md` is sacred — never rename or 
 | Charter / creation-guide / voice-guide | **Complete** — `../../manuals/p2-getting-started-guide/{PLANNING,creation-guide,voice-guide}.md` |
 | Chapters 1–3 + Where-to-Next | **Drafted** (split 2026-06-24 from the *P2 Architect's Guide* first draft — the orientation chapters) |
 | Front matter (house standard) | **Complete** |
-| Forge build / first-draft review | **Daemon-verified clean (24 pp, 2026-06-24)**; production staging via `prepare-manual` pending |
+| Release | **v1.0.0 released 2026-06-24** (initial Community Review Edition, 25 pp) — release-gate audited + finalized; in `deliverables/documents/DOCs/` |
 
 > **Origin:** this book is the orientation half of the original four-chapter
 > *P2 Architect's Guide* first draft. On 2026-06-24 that draft was split: Chapters 1–3
