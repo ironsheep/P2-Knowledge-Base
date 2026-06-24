@@ -65,6 +65,7 @@ Apply the rules from `changelog-style-guide.md`. The guide is the authoritative 
 - **Inclusion test**: any entries the guide says to EXCLUDE that crept in (process notes, root-cause explanations, internal regressions, debugging details)
 - **Framing**: additive ("now provides X") vs confessional ("was wrong before") — most guides require additive
 - **Aggregation**: related fixes grouped vs itemized — flag over-itemization
+- **Initial-release form** (ENFORCE when the entry being audited is the **initial** release — the only `## v...` entry in the file, or one whose predecessor has no public README/tag baseline; see the guide's "Initial releases describe the document, not a delta"): an initial entry must NOT carry `### Added` / `### Changed` / `### Fixed` delta headings (there is no prior baseline to delta against), and must NOT recite the chapters/sections item-by-item (the document's own ToC already does that). It holistically describes what the document *is*. Flag a delta heading **or** a chapter-by-chapter recitation on an initial entry as **HIGH**.
 
 Additionally, apply these universal red-flag-phrase checks (independent of the per-manual guide, drawn from project-wide patterns):
 - Vague capability claims: `also provides`, `eliminates`, `automatically`, `synchronizes`, `mechanism for`, `enables`, `side effect`

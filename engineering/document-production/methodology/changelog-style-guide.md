@@ -39,6 +39,22 @@ Corollary: never write a `[X.Y.Z-skipped]` or `(Upcoming)` entry. If a version n
 
 ---
 
+## Initial releases describe the document, not a delta
+
+A first / initial release has no prior published baseline to change against. Two consequences:
+
+1. **No delta section headings.** Do NOT use `### Added`, `### Changed`, or `### Fixed` — they describe a *delta* from a previous release, and there is nothing before an initial entry. The entry simply **IS** the document.
+2. **No table-of-contents recitation.** Do NOT itemize the chapters/sections one by one — the document's own ToC already does that, and repeating it adds nothing for the reader. State **holistically** what the document is: its purpose, who it's for, and its scope.
+
+So an initial-release entry is a short, current-state **description of the document** — a release theme, plus at most a line on what makes it distinctive — not a delta and not a chapter list.
+
+- ✅ Initial: `**Initial release for community review.** <one–three sentences: what the document is, its role, what's distinctive>.`
+- ❌ Initial: an `### Added` heading; a bullet per chapter.
+
+Delta sections (`### Added` / `### Changed` / `### Fixed`) and per-item bullets belong only on a release that **follows** a prior published version, where they describe what changed since it. (An initial entry is identified as the **only** `## v...` entry in the file, or the one whose predecessor has no public README/tag baseline.)
+
+---
+
 ## What to Include
 
 - New documentation (instructions, directives, examples, subsystem coverage)
