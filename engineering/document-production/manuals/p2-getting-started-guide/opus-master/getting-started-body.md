@@ -80,7 +80,7 @@ to be exact, like generating video or driving a motor.
 Each cog has a little private memory of its own to hold its program and data, a fast
 hardware path for calls and returns, and even its own dedicated streaming engine for
 moving data at high speed (we'll get to that one shortly). You start a cog running
-with a single instruction and stop it with another; a stopped cog simply powers down
+with a single instruction and stop it with another; a stopped cog powers down
 until you need it again.
 
 ::: tip
@@ -124,7 +124,7 @@ your turn (more on that next).
 ```
 
 ::: {.figurecaption #fig:memory-tiers}
-The memory tiers. Each cog's private RAM and LUT sit right next to the processor (fast, 2-cycle access); the 512 KB hub is shared by all eight (a few cycles' wait via the egg beater).
+The memory tiers. Each cog's private RAM and LUT sit right next to the processor for fast, near-immediate access; the 512 KB hub is shared by all eight (a few cycles' wait via the egg beater).
 :::
 
 ::: p1note
@@ -144,7 +144,7 @@ is guaranteed its own access slot on a fixed rotation, so a hub read or write ne
 fails and never stalls unpredictably — at worst you wait a few clocks for your slot
 to come around. And once you're streaming a block of data, it flows at a rate of one
 long per clock. There's no bus contention to reason about and no priority fights;
-the hardware simply takes turns, forever, on schedule.
+the hardware takes turns, forever, on schedule.
 
 This is the one place where a cog's timing depends on the others, and even here it's
 bounded and knowable rather than random — which is exactly what you want when you're
@@ -181,7 +181,7 @@ smart pin already does it in hardware** — usually one does.
 
 There are many smart-pin modes — enough to cover the common serial, timing,
 counting, and analog jobs — and rather than list them here, we'll send you to the
-deep reference. The *I/O & Smart Pins User Guide* walks through
+deep reference. The *P2 I/O & Smart Pins User Guide* walks through
 every mode with examples; this guide just wants you to know the pins are smart and to
 reach for them first.
 
@@ -250,7 +250,7 @@ to respond — check on it when convenient, pause until it happens, or let it tr
 
 What's worth knowing as a newcomer is that on the P2 events are a *convenience, not a
 necessity*. Because each cog runs its own program independently, you often don't need
-interrupts at all — you can simply dedicate a cog to a job and let it watch in a tight
+interrupts at all — you can dedicate a cog to a job and let it watch in a tight
 loop, with perfectly predictable timing. Events and interrupts are there for when
 they genuinely simplify a design, not because the chip forces them on you.
 
@@ -378,7 +378,8 @@ an **object and a cog are not the same thing**. An object is a unit of *code* �
 you write and compile. A cog (Chapter 1) is a *processor* that runs code. There's no
 fixed relationship between the two: the methods of one object might run on a single cog,
 be spread across several, or share a cog with other work. *What* runs *where* is a
-decision you make — and it's exactly what Chapter 4 is about.
+decision you make — and deciding it well, for a whole system, is what the companion
+*P2 Architect's Guide* is about.
 
 ::: p1note
 **Same as P1.** If you wrote Spin on the Propeller 1, this is home: the same
@@ -427,7 +428,7 @@ The two `pin` calls and the `waitms` are inside the loop because they're indente
 `repeat`; the final `pinhigh` is *not* indented under it, so it runs once after the loop
 finishes. The three shapes you'll meet most are `repeat` (loop — forever, a fixed count,
 or while a condition holds), `if`/`else` (choose), and `case` (choose among many). In
-every one, what's controlled is simply what's indented under it.
+every one, what's controlled is what's indented under it.
 
 ## Values, names, and a line you'll see broken
 
@@ -681,7 +682,7 @@ Every P2 program makes one architectural choice, sometimes many times: should th
 piece of work be written in **Spin2** or **PASM2**? It helps to see it as a spectrum of
 three options, not a binary.
 
-- **Spin2** is the high-level language: objects, methods, expressions, easy to write
+- **Spin2** is the high-level language: objects, methods, expressions, quick to write
   and to read. It runs as interpreted bytecode, so it's slower than assembly, but your
   program can be large because the bytecodes live in the roomy hub. Reach for Spin2 for
   application logic, coordination, setup, and anything not on a tight timing budget.
@@ -763,7 +764,7 @@ share data through hub, choose Spin2 or PASM2 for a given job, and compose objec
 is genuinely enough to build things. What it doesn't yet tell you is *how to decide what
 goes on which cog* in the first place — how to look at a whole problem and carve it into
 the right set of cooperating pieces. That decision is where the P2 rewards a little real
-thought, and it's what the final chapter is about.
+thought, and it's what the companion *P2 Architect's Guide* is about.
 
 # Where to Next
 
