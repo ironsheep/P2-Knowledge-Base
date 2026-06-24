@@ -158,6 +158,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-24 21:32  PUBLISH   p2-getting-started-guide         (v0.1.0, 24pp — orientation book split from the architect draft; AG-09 "Chapter N:" headings; compile log clean, 0 overfull; IN DEVELOPMENT, not a public release)
 2026-06-24 21:01  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (AG-01: English-collision handling for call/push/ones/test — daemon-verified on Getting Started; other manuals low-urgency regen)
 2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
 2026-06-19 20:44  PUBLISH   p2-streamer-programming-guide    (v1.0.1, 71pp — grounding-audit fixes + §3.5 clock accuracy + fenced callouts)
