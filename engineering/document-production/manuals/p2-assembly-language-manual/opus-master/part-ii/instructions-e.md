@@ -65,7 +65,7 @@ Execute with Skip Pattern
 
 **Result:** PC is set to Dest[9:0] and the SKIPF pattern is set to Dest[31:10].
 
-- Dest is a register or immediate value 0-511 (augmentable to a full 32-bit value via AUGD). Bits [9:0] of the resulting Dest value specify the target COG/LUT address and bits [31:10] specify the 22-bit skip pattern.
+- Dest is a register or immediate value 0-511 (augmentable to a full 32-bit value via AUGD). Bits [9:0] of the resulting Dest value specify the target cog/LUT address and bits [31:10] specify the 22-bit skip pattern.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -79,13 +79,13 @@ Execute with Skip Pattern
 
 EXECF performs a combined jump and skip pattern operation. The instruction sets the program counter (PC) to the 10-bit address specified in Dest[9:0] and simultaneously loads the SKIPF pattern register with the value from Dest[31:10].
 
-The PC is set to the address formed by zero-extending Dest[9:0] to create a COG/LUT address: PC = {10'b0, Dest[9:0]}. This allows jumping to any location within the 1024-address COG/LUT memory space (addresses 0-511 for COG, 512-1023 for LUT).
+The PC is set to the address formed by zero-extending Dest[9:0] to create a cog/LUT address: PC = {10'b0, Dest[9:0]}. This allows jumping to any location within the 1024-address cog/LUT memory space (addresses 0-511 for cog, 512-1023 for LUT).
 
 The SKIPF pattern in Dest[31:10] provides a 22-bit pattern that controls which subsequent instructions will be skipped after the jump. Like SKIPF, this allows the PC to leap over instructions rather than cancelling them, providing fast conditional execution without the overhead of traditional branch instructions.
 
 EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
 
-The instruction takes 4 clock cycles to execute, regardless of whether it executes from COG/LUT or Hub memory.
+The instruction takes 4 clock cycles to execute, regardless of whether it executes from cog/LUT or hub memory.
 
 
 

@@ -10,7 +10,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 Use this alphabetical index to quickly check if a name is reserved. For detailed descriptions and usage context, see the categorized sections that follow.
 
-**Note:** P_* constants (Smart Pin, ~116 words) are listed in Appendix E. X_* constants (Streamer, ~78 words) are listed in Appendix F. Both prefixes are reserved.
+**Note:** P_* constants (smart pin, ~116 words) are listed in Appendix E. X_* constants (streamer, ~78 words) are listed in Appendix F. Both prefixes are reserved.
 
 ### A
 ```
@@ -278,7 +278,7 @@ Reserved words fall into six main categories:
 3. **Predefined Constants** (11 words) - Built-in constant values
 4. **Special Register Names** (16 words) - Special-purpose registers
 5. **Condition Keywords** (41 words) - Conditional execution prefixes
-6. **Effect Keywords** (9 words) - Flag modification suffixes
+6. **Effect Keywords** (9 words) - flag modification suffixes
 
 
 
@@ -375,11 +375,11 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **BYTEFIT** - Verify code fits in specified byte count
 - **DEBUG** - Insert debug statements (Spin2 feature)
 - **DITTO** - Repeat previous instruction encoding
-- **FIT** - Verify code fits in COG memory
+- **FIT** - Verify code fits in cog memory
 - **LONG** - Reserve/initialize long-sized data (32 bits)
-- **ORG** - Set assembly origin (COG address)
+- **ORG** - Set assembly origin (cog address)
 - **ORGF** - Set assembly origin with fill
-- **ORGH** - Set assembly origin (Hub address)
+- **ORGH** - Set assembly origin (hub address)
 - **RES** - Reserve uninitialized registers/memory
 - **WORD** - Reserve/initialize word-sized data (16 bits)
 - **WORDFIT** - Verify code fits in specified word count
@@ -402,31 +402,31 @@ Built-in constants that can be used in assembly expressions:
 
 Used with the COGINIT instruction to specify execution mode:
 
-- **COGEXEC** - Execute from COG RAM (base mode, `%0_0_0000`)
-- **COGEXEC_NEW** - Auto-select available COG, execute from COG RAM
-- **COGEXEC_NEW_PAIR** - Auto-select COG pair, execute from COG RAM
-- **HUBEXEC** - Execute from Hub RAM (base mode, `%0_1_0000`)
-- **HUBEXEC_NEW** - Auto-select available COG, execute from Hub RAM
-- **HUBEXEC_NEW_PAIR** - Auto-select COG pair, execute from Hub RAM
+- **COGEXEC** - Execute from cog RAM (base mode, `%0_0_0000`)
+- **COGEXEC_NEW** - Auto-select available cog, execute from cog RAM
+- **COGEXEC_NEW_PAIR** - Auto-select cog pair, execute from cog RAM
+- **HUBEXEC** - Execute from hub RAM (base mode, `%0_1_0000`)
+- **HUBEXEC_NEW** - Auto-select available cog, execute from hub RAM
+- **HUBEXEC_NEW_PAIR** - Auto-select cog pair, execute from hub RAM
 
-**Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic COG selection feature.
+**Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic cog selection feature.
 
 
 
 ## Special Register Names (16 words)
 
-Special-purpose registers mapped to COG RAM addresses `$1F0-$1FF`:
+Special-purpose registers mapped to cog RAM addresses `$1F0-$1FF`:
 
 ### Dual-Purpose Registers ($1F0-$1F7)
 
 Can be used as general RAM or special registers depending on enabled features:
 
-- **IJMP3** - Interrupt 3 jump address ($1F0, 496)
-- **IRET3** - Interrupt 3 return address ($1F1, 497)
-- **IJMP2** - Interrupt 2 jump address ($1F2, 498)
-- **IRET2** - Interrupt 2 return address ($1F3, 499)
-- **IJMP1** - Interrupt 1 jump address ($1F4, 500)
-- **IRET1** - Interrupt 1 return address ($1F5, 501)
+- **IJMP3** - interrupt 3 jump address ($1F0, 496)
+- **IRET3** - interrupt 3 return address ($1F1, 497)
+- **IJMP2** - interrupt 2 jump address ($1F2, 498)
+- **IRET2** - interrupt 2 return address ($1F3, 499)
+- **IJMP1** - interrupt 1 jump address ($1F4, 500)
+- **IRET1** - interrupt 1 return address ($1F5, 501)
 - **PA** - Multi-purpose register A ($1F6, 502)
 - **PB** - Multi-purpose register B ($1F7, 503)
 
@@ -434,8 +434,8 @@ Can be used as general RAM or special registers depending on enabled features:
 
 Always provide special functions when accessed:
 
-- **PTRA** - Pointer A to Hub RAM ($1F8, 504)
-- **PTRB** - Pointer B to Hub RAM ($1F9, 505)
+- **PTRA** - Pointer A to hub RAM ($1F8, 504)
+- **PTRB** - Pointer B to hub RAM ($1F9, 505)
 - **DIRA** - Direction register for pins 0-31 ($1FA, 506)
 - **DIRB** - Direction register for pins 32-63 ($1FB, 507)
 - **OUTA** - Output register for pins 0-31 ($1FC, 508)
@@ -631,10 +631,10 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 
 - **Part II** — Complete documentation of instructions, directives, constants, and special registers
 - **Chapter 3** — Detailed explanation of condition codes and effect modifiers
-- **Appendix E** — Smart Pin mode constants (P_* symbols, approximately 116 constants)
-- **Appendix F** — Streamer mode constants (X_* symbols, approximately 78 constants)
+- **Appendix E** — smart pin mode constants (P_* symbols, approximately 116 constants)
+- **Appendix F** — streamer mode constants (X_* symbols, approximately 78 constants)
 
-**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+**Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
 
 ## Spin2 Reserved Words
@@ -947,7 +947,7 @@ SET         SIGNED      SIZE        SQRT        STEP
 
 ### Smart Pin Constants (P_*)
 
-The complete list of Smart Pin configuration constants (116 constants) is documented in **Appendix E: Smart Pin Constants**. These include:
+The complete list of smart pin configuration constants (116 constants) is documented in **Appendix E: Smart Pin Constants**. These include:
 
 - Pin mode constants (P_ASYNC_TX, P_ASYNC_RX, P_SYNC_TX, etc.)
 - DAC configuration (P_DAC_*, P_BITDAC)
@@ -962,7 +962,7 @@ All P_* constants are reserved words and cannot be used as user-defined symbols.
 
 ### Streamer Constants (X_*)
 
-The complete list of Streamer mode constants (78 constants) is documented in **Appendix F: Streamer Constants**. These include:
+The complete list of streamer mode constants (78 constants) is documented in **Appendix F: Streamer Constants**. These include:
 
 - Immediate mode constants (X_IMM_*)
 - RF byte/word/long modes (X_RFBYTE_*, X_RFWORD_*, X_RFLONG_*)

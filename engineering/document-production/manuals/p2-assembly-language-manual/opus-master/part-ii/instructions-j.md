@@ -6,7 +6,7 @@ This section contains all PASM2 instructions beginning with the letter J.
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken (either context), 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
@@ -46,7 +46,7 @@ JATN checks the ATN (attention) event flag and conditionally jumps if the flag i
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 These instructions are useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
 
@@ -96,7 +96,7 @@ JCT1, JCT2, and JCT3 check their respective counter event flags and conditionall
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. JCTn instructions are commonly used for timing loops that wait until a counter fires, while JNCTn instructions enable polling loops that continue until a counter event occurs.
 
@@ -135,7 +135,7 @@ JFBW checks the FIFO interface block wrap event flag and jumps if set. JNFBW per
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 These instructions are useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface.
 
@@ -174,7 +174,7 @@ JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the 
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 These instructions provide a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow.
 
@@ -209,7 +209,7 @@ Jump
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 
@@ -223,9 +223,9 @@ The first syntax form (JMP D) reads the jump address from register D and sets PC
 
 The second syntax form (JMP #A) jumps to an immediate address. The R bit in the encoding determines whether the address is PC-relative (R=1) or absolute (R=0). By default, the assembler uses PC-relative addressing for # jumps. The backslash prefix (\) forces absolute addressing: JMP #\address.
 
-For PC-relative jumps in COG execution mode, the 20-bit address field is added to PC. For Hub execution mode, the lower 18 bits are shifted left by 2 (multiplied by 4) before being added to PC, since Hub addresses are long-aligned.
+For PC-relative jumps in cog execution mode, the 20-bit address field is added to PC. For hub execution mode, the lower 18 bits are shifted left by 2 (multiplied by 4) before being added to PC, since hub addresses are long-aligned.
 
-The instruction executes in 4 clock cycles in COG execution mode. In Hub execution mode, jumps take 13-20 clock cycles depending on Hub access timing.
+The instruction executes in 4 clock cycles in cog execution mode. In hub execution mode, jumps take 13-20 clock cycles depending on hub access timing.
 
 
 
@@ -242,7 +242,7 @@ Jump Relative
 
 **Result:** PC is incremented or decremented by the value in D.
 
-- D is a register or 9-bit literal specifying the signed offset in instructions. For COG execution, PC += D[19:0]. For Hub execution, PC += D[17:0] << 2.
+- D is a register or 9-bit literal specifying the signed offset in instructions. For cog execution, PC += D[19:0]. For hub execution, PC += D[17:0] << 2.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -253,7 +253,7 @@ Jump Relative
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 
@@ -263,11 +263,11 @@ Jump Relative
 
 JMPREL performs a relative jump by adding or subtracting the value in D to the current PC value. This allows position-independent code that can jump forward or backward by a specified number of instructions without knowing the absolute address.
 
-For COG execution mode, the lower 20 bits of D are added to PC. Positive values jump forward, negative values (in two's complement) jump backward. The offset is in units of instructions (longs).
+For cog execution mode, the lower 20 bits of D are added to PC. Positive values jump forward, negative values (in two's complement) jump backward. The offset is in units of instructions (longs).
 
-For Hub execution mode, the lower 18 bits of D are shifted left by 2 bits (multiplied by 4) before being added to PC. This accounts for the fact that Hub addresses are byte addresses and each instruction occupies 4 bytes. The offset is still conceptually in units of instructions.
+For hub execution mode, the lower 18 bits of D are shifted left by 2 bits (multiplied by 4) before being added to PC. This accounts for the fact that hub addresses are byte addresses and each instruction occupies 4 bytes. The offset is still conceptually in units of instructions.
 
-The instruction executes in 4 clock cycles in COG execution mode. In Hub execution mode, jumps take 13-20 clock cycles depending on Hub access timing.
+The instruction executes in 4 clock cycles in cog execution mode. In hub execution mode, jumps take 13-20 clock cycles depending on hub access timing.
 
 JMPREL is useful for implementing position-independent code, jump tables, and dynamic control flow where the jump offset is computed at runtime.
 
@@ -324,7 +324,7 @@ JSE1, JSE2, JSE3, and JSE4 check their respective selectable event flags and con
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
 
@@ -361,7 +361,7 @@ JPAT and JNPAT check the PAT (pattern match) event flag and conditionally jump t
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns. JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins.
 
@@ -398,7 +398,7 @@ JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results. JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
 
@@ -436,7 +436,7 @@ JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally ju
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes. JNXFI is useful for polling loops that wait until the streamer completes its operation.
 
@@ -473,7 +473,7 @@ JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump 
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties. JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data.
 
@@ -481,7 +481,7 @@ JXMT is useful for implementing continuous streaming operations where the code n
 
 ::: instrheader
 ## JXRL / JNXRL {#jxrl}
-Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
+Jump If streamer LUT Rollover Event Set / Clear {#jnxrl}
 
 [Events and Timing](#events-and-timing) - Jumps based on XRL event flag state.
 :::
@@ -510,7 +510,7 @@ JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditio
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, detecting when a complete cycle through the buffer has occurred. JNXRL is useful for detecting when a buffer boundary has not yet been crossed.
 
@@ -518,7 +518,7 @@ JXRL is useful for implementing circular buffer operations with the streamer usi
 
 ::: instrheader
 ## JXRO / JNXRO {#jxro}
-Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
+Jump If streamer NCO Rollover Event Set / Clear {#jnxro}
 
 [Events and Timing](#events-and-timing) - Jumps based on XRO event flag state.
 :::
@@ -547,7 +547,7 @@ JXRO and JNXRO check the XRO (streamer NCO rollover) event flag and conditionall
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
 JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers. JNXRO is useful for detecting the absence of NCO rollovers in the streaming operation.
 

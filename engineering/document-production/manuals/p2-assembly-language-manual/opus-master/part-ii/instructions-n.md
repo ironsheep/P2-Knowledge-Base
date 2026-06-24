@@ -110,7 +110,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 ::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-Cancel Interrupt
+Cancel interrupt
 
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::

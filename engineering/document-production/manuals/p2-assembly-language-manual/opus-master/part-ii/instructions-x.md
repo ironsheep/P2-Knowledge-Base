@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ## XCONT {#xcont}
 Execute Continue
 
-[Streamer](#streamer) - Buffers a streamer command continuing from current phase.
+[streamer](#streamer) - Buffers a streamer command continuing from current phase.
 :::
 
 **XCONT**  *{#}Dest, {#}Src*
@@ -42,7 +42,7 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ## XINIT {#xinit}
 Execute Initialize
 
-[Streamer](#streamer) - Issues a streamer command immediately with phase reset to zero.
+[streamer](#streamer) - Issues a streamer command immediately with phase reset to zero.
 :::
 
 **XINIT**  *{#}Dest, {#}Src*
@@ -189,7 +189,7 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ## XSTOP {#xstop}
 Execute Stop
 
-[Streamer](#streamer) - Immediately halts the active streamer operation.
+[streamer](#streamer) - Immediately halts the active streamer operation.
 :::
 
 **XSTOP**
@@ -228,7 +228,7 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. XSTO
 ## XZERO {#xzero}
 Execute Zero
 
-[Streamer](#streamer) - Buffers a streamer command with phase reset to zero.
+[streamer](#streamer) - Buffers a streamer command with phase reset to zero.
 :::
 
 **XZERO**  *{#}Dest, {#}Src*

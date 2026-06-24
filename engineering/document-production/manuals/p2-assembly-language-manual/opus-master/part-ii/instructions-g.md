@@ -8,14 +8,14 @@ This section contains all PASM2 instructions beginning with the letter G.
 ## GETBRK {#getbrk}
 Get Breakpoint Status
 
-[Interrupts](#interrupts) - Retrieves breakpoint or COG status information.
+[Interrupts](#interrupts) - Retrieves breakpoint or cog status information.
 :::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** Breakpoint or COG status information is retrieved into Dest based on the flag effect specified.
+**Result:** Breakpoint or cog status information is retrieved into Dest based on the flag effect specified.
 
 - Dest is a register where the status information is written.
 - WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
@@ -30,17 +30,17 @@ Get Breakpoint Status
 
 **Explanation:**
 
-GETBRK retrieves various breakpoint and COG status information into the Dest register. The specific information retrieved depends on which flag effect is specified.
+GETBRK retrieves various breakpoint and cog status information into the Dest register. The specific information retrieved depends on which flag effect is specified.
 
 When the WCZ effect is specified, GETBRK retrieves the full 32-bit ISR call address into Dest. This is the address where the debug interrupt service routine will resume execution after handling the breakpoint.
 
-When the WC effect is specified, GETBRK retrieves the 8-bit COG ID into Dest[7:0]. This identifies which COG triggered the breakpoint, useful in multi-COG debugging scenarios where a debug ISR needs to determine the calling COG.
+When the WC effect is specified, GETBRK retrieves the 8-bit cog ID into Dest[7:0]. This identifies which cog triggered the breakpoint, useful in multi-cog debugging scenarios where a debug ISR needs to determine the calling cog.
 
 When the WZ effect is specified, GETBRK retrieves the 8-bit breakpoint code into Dest[7:0]. This code was set by the BRK instruction and can be used for conditional breakpoint handling or to distinguish between different types of breakpoints.
 
 When no flag effects are specified, GETBRK retrieves the 16-bit skip pattern into Dest[15:0]. This pattern is used with the SKIPF instruction to selectively execute or skip subsequent instructions, typically within an ISR context.
 
-GETBRK is essential for implementing debug infrastructure and coordinating multi-COG debugging systems. It works in conjunction with BRK and SETBRK to provide comprehensive breakpoint support.
+GETBRK is essential for implementing debug infrastructure and coordinating multi-cog debugging systems. It works in conjunction with BRK and SETBRK to provide comprehensive breakpoint support.
 
 
 
@@ -109,7 +109,7 @@ Get System Counter
 
 GETCT retrieves the current value of the system counter CT into the Dest register. On Rev B/C silicon, the system counter is a 64-bit counter that is reset to zero on system reset and increments by one on every clock cycle. By default, the lower 32 bits (CT[31:0]) are returned in Dest.
 
-The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
+The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all cogs and provides the foundation for timing operations and synchronization.
 
 **64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
 
@@ -163,7 +163,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 Get FIFO Hub Pointer
 
-[Hub Memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
+[hub memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
 :::
 
 **GETPTR**  *Dest*
@@ -272,7 +272,7 @@ GETQY takes 2 clocks if the result is already available. If the result is not ye
 ## GETRND {#getrnd}
 Get Random Value
 
-[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
+[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the cog's RNG.
 :::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**\
@@ -296,7 +296,7 @@ Get Random Value
 
 **Explanation:**
 
-GETRND retrieves the current value from the pseudo-random number generator (RNG) that is unique to each COG. Each COG maintains its own independent RNG state that advances continuously.
+GETRND retrieves the current value from the pseudo-random number generator (RNG) that is unique to each cog. Each cog maintains its own independent RNG state that advances continuously.
 
 The first syntax form (GETRND Dest) writes the full 32-bit random value to the Dest register. This provides a complete random word for applications requiring random data, random seeds, or probabilistic algorithms.
 
@@ -304,7 +304,7 @@ The second syntax form (GETRND without Dest) is used when only random flag bits 
 
 If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the most significant bit of the current random value.
 
-If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per COG, meaning each COG's RNG produces independent bit sequences at this position, useful for multi-COG systems requiring independent randomness.
+If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per cog, meaning each cog's RNG produces independent bit sequences at this position, useful for multi-cog systems requiring independent randomness.
 
 The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128 - 1).
 
@@ -314,7 +314,7 @@ The random value is produced by the P2's Xoroshiro128** pseudo-random number gen
 ## GETSCP {#getscp}
 Get Oscilloscope Samples
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
 :::
 
 **GETSCP**  *Dest*
@@ -386,7 +386,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 Get Goertzel Accumulators
 
-[Streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
+[streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
 :::
 
 **GETXACC**  *Dest*

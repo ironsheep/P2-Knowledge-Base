@@ -164,7 +164,7 @@ The `_RET_` prefix adds overhead to the base instruction timing:
 
 | Execution Mode | Additional Cycles |
 |:---------------|:------------------|
-| COG/LUT | +2 cycles |
+| Cog/LUT | +2 cycles |
 | Hub | +11 to +18 cycles |
 
 ### B.3.7 Single-Instruction Subroutines

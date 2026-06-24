@@ -93,7 +93,7 @@ toggle_pin0                             ' Subroutine: toggle pin 0
 
 This is significantly faster than a separate instruction followed by RET.
 
-**Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in COG/LUT mode. In Hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
+**Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
 
 > **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
@@ -244,7 +244,7 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 | `D` | Destination register is written |
 | `D and PC` | Both destination and program counter written (for jumps/calls); rendered `D + PC*` in the tables |
 | `PC` | Only PC written |
-| `---` | Nothing written, or output goes to Hub/LUT memory rather than a COG register (compare, test, and memory-write instructions) |
+| `---` | Nothing written, or output goes to Hub/LUT memory rather than a Cog register (compare, test, and memory-write instructions) |
 | `OUTx` | Pin output state written |
 | `DIR bit` | A pin direction bit is written |
 | `OUT bit` | A pin output bit is written |
@@ -265,7 +265,7 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 | `2` | Always 2 clock cycles |
 | `2+` | Minimum 2 cycles, may be more |
 | `2 or 4` | 2 if condition false/not taken, 4 if true/taken |
-| `2 / 8-23` | COG mode cycles / Hub mode cycles |
+| `2 / 8-23` | Cog mode cycles / Hub mode cycles |
 | `9..35` | Variable range depending on operands |
 
 
@@ -316,7 +316,7 @@ Each unique machine code encoding = one table row. If two mnemonics produce diff
 
 ### 2.5.1 The Destination Field (D)
 
-The 9-bit D field (bits 17-9) addresses a COG register from $000 to $1FF:
+The 9-bit D field (bits 17-9) addresses a cog register from $000 to $1FF:
 
 - **Read and written:** Most ALU instructions read D, compute, and write result back to D
 - **Read only:** Compare instructions (CMP, CMPS, TEST) read D but do not modify it
@@ -334,7 +334,7 @@ The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 
 **Register mode (I = 0):**
 
-- S is a COG register address ($000-$1FF)
+- S is a cog register address ($000-$1FF)
 - The value in that register is used as the operand
 
 **Immediate mode (I = 1):**
@@ -532,8 +532,8 @@ From this entry:
 - **Syntax:** `{#}Src` means Src can be register or immediate; `{WC|WZ|WCZ}` means flag effects are optional
 - **Result:** The sum goes into Dest (Dest is modified)
 - **Encoding:** Opcode is 0001000 (7 bits); FX is CZI meaning all options available; takes 2 cycles
-- **C Flag:** Set if addition overflows (unsigned carry)
-- **Z Flag:** Set if result is zero
+- **C flag:** Set if addition overflows (unsigned carry)
+- **Z flag:** Set if result is zero
 
 ### 2.8.4 Using Categories for Discovery
 
@@ -781,12 +781,12 @@ PASM2 provides several operators for referencing labels in different contexts:
 
 | Operator | Meaning | Context |
 |----------|---------|---------|
-| `#label` | Immediate value (COG address) | PASM instructions |
+| `#label` | Immediate value (Cog address) | PASM instructions |
 | `#.local` | Immediate reference to local label | PASM instructions |
-| `#\label` | Absolute COG-relative address | Forces 9-bit COG address |
+| `#\label` | Absolute Cog-relative address | Forces 9-bit Cog address |
 | `@label` | Hub address of label | Spin2 or PASM |
 | `@@label` | Object-relative address | Spin2 or PASM |
-| `$` | Current COG address | PASM (ORG mode) |
+| `$` | Current Cog address | PASM (ORG mode) |
 | `$$` | Current Hub address | PASM (ORGH mode) |
 
 **Example:**

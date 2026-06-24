@@ -2,18 +2,18 @@
 
 <!-- Chapter covering all operand addressing modes in PASM2 -->
 
-PASM2 provides several addressing modes that determine how instruction operands are specified and how memory is accessed. Understanding these modes is essential for writing efficient code that accesses registers, immediate values, and Hub memory correctly.
+PASM2 provides several addressing modes that determine how instruction operands are specified and how memory is accessed. Understanding these modes is essential for writing efficient code that accesses registers, immediate values, and hub memory correctly.
 
-This chapter covers all addressing modes from simple register access through the sophisticated pointer expressions used for Hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
+This chapter covers all addressing modes from simple register access through the sophisticated pointer expressions used for hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
 
 
 ## 6.1 Direct Register Addressing
 
-The most basic addressing mode specifies COG registers directly by address. Both source and destination operands can use direct register addressing.
+The most basic addressing mode specifies cog registers directly by address. Both source and destination operands can use direct register addressing.
 
 ### 6.1.1 Register as Destination
 
-The destination field (D) in every instruction specifies a 9-bit COG register address ($000-$1FF). The instruction reads from and/or writes to this register:
+The destination field (D) in every instruction specifies a 9-bit cog register address ($000-$1FF). The instruction reads from and/or writes to this register:
 
 ```pasm2
         add     result, value           ' result is destination register
@@ -39,7 +39,7 @@ When the I bit (bit 18) is clear, the source field (S) specifies a register addr
         cmp     a, b            wc      ' b is source register (I=0)
 ```
 
-Direct register addressing provides single-cycle access to COG RAM. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
+Direct register addressing provides single-cycle access to cog RAM. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
 
 ### 6.1.3 Special Register Addresses
 
@@ -194,11 +194,11 @@ The assembler handles this automatically when `##` notation is used. Manual AUGS
 
 ## 6.4 Pointer Register Addressing (PTRA/PTRB)
 
-The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable sophisticated Hub memory addressing with automatic increment, decrement, and indexing.
+The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable sophisticated hub memory addressing with automatic increment, decrement, and indexing.
 
 ### 6.4.1 Basic Pointer Access
 
-The simplest pointer usage reads or writes Hub memory at the address in PTRA or PTRB:
+The simplest pointer usage reads or writes hub memory at the address in PTRA or PTRB:
 
 ```pasm2
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
@@ -236,7 +236,7 @@ Post-modify modes use the current pointer value for the memory access, then upda
 ```
 
 **Execution sequence for `RDLONG x, PTRA++`:**
-1. Read long from Hub address in PTRA
+1. Read long from hub address in PTRA
 2. Store value in register x
 3. Add 4 (SCALE for long) to PTRA
 
@@ -270,7 +270,7 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
 1. Add 4 (SCALE for long) to PTRA
-2. Read long from Hub address in updated PTRA
+2. Read long from hub address in updated PTRA
 3. Store value in register x
 
 Pre-modify is useful for stack operations and accessing elements relative to a base:
@@ -392,7 +392,7 @@ With AUGS, the index becomes a 20-bit value, and the index is **not scaled**—i
 
 ## 6.5 Block Transfers with SETQ and Pointers
 
-The SETQ instruction enables efficient multi-long transfers between Hub memory and COG/LUT RAM.
+The SETQ instruction enables efficient multi-long transfers between hub memory and cog/LUT RAM.
 
 ### 6.5.1 Basic Block Transfer
 
@@ -435,7 +435,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 
 ### 6.5.3 SETQ2 for LUT Transfers
 
-SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
+SETQ2 works like SETQ but transfers to/from LUT RAM instead of cog RAM:
 
 ```pasm2
         setq2   #31                     ' Transfer 32 longs
@@ -527,7 +527,7 @@ Hub memory instructions accept several address expression forms:
 
 ### 6.7.1 Register Address
 
-A register containing a Hub address:
+A register containing a hub address:
 
 ```pasm2
         mov     addr, ##$1000
@@ -536,7 +536,7 @@ A register containing a Hub address:
 
 ### 6.7.2 Immediate Address
 
-An 8-bit immediate Hub address (limited range):
+An 8-bit immediate hub address (limited range):
 
 ```pasm2
         rdlong  x, #$80                 ' Read from Hub address $80
@@ -544,7 +544,7 @@ An 8-bit immediate Hub address (limited range):
 
 ### 6.7.3 Augmented Immediate Address
 
-A 20-bit Hub address using AUGS:
+A 20-bit hub address using AUGS:
 
 ```pasm2
         rdlong  x, ##$12345             ' Read from Hub address $12345
@@ -582,14 +582,14 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub operations (9-16 clocks in COG/LUT mode, 9-26 clocks in HUB mode)
+**Variable:** Hub operations (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode)
 
 > **Timing Note:** Hub operations require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs). In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the maximum to 26 clocks.
 
 For time-critical inner loops:
-- Frequently-used values should reside in COG registers
+- Frequently-used values should reside in cog registers
 - Large constants should be pre-loaded before entering the loop
-- Sequential Hub access benefits from PTRx with ++/--
+- Sequential hub access benefits from PTRx with ++/--
 - Bulk data movement is most efficient with block transfers (SETQ)
 
 

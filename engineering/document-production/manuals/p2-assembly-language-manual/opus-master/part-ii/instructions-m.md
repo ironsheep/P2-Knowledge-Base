@@ -108,7 +108,7 @@ MIXPIX is essential for high-performance graphics operations, enabling real-time
 
 ::: instrheader
 ## MODC {#modc}
-Modify C Flag
+Modify C flag
 
 [Arithmetic Operations](#arithmetic-operations) - Sets or clears C flag based on a modifier and current flag states.
 :::
@@ -216,7 +216,7 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 
 ::: instrheader
 ## MODZ {#modz}
-Modify Z Flag
+Modify Z flag
 
 [Arithmetic Operations](#arithmetic-operations) - Sets or clears Z flag based on a modifier and current flag states.
 :::

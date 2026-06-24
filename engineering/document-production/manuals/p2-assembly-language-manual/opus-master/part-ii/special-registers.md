@@ -1,6 +1,6 @@
 # Special Registers
 
-The P2 provides a set of special-purpose registers that enable critical system functions including Hub RAM access, I/O control, interrupt handling, and timing operations. These registers fall into three categories: dual-purpose registers that can also serve as general RAM, fixed special registers with dedicated hardware functions, and non-memory-mapped registers accessed through specific instructions.
+The P2 provides a set of special-purpose registers that enable critical system functions including hub RAM access, I/O control, interrupt handling, and timing operations. These registers fall into three categories: dual-purpose registers that can also serve as general RAM, fixed special registers with dedicated hardware functions, and non-memory-mapped registers accessed through specific instructions.
 
 ## Register Architecture
 
@@ -222,11 +222,11 @@ Addresses $1D8-$1DF. Eight general-purpose registers with predefined symbols.
 
 ### PTRA {#ptra}
 
-Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F8. Pointer A to hub RAM. Primary pointer register for hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
-**Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. PTRA is a 32-bit register; its low 20 bits address the full 1 MB Hub RAM space. On COGINIT, the target cog's PTRA receives the SETQ value (typically a parameter-block hub address) if a SETQ was executed immediately before the COGINIT; otherwise PTRA is cleared to 0. This is the standard P2 mechanism for passing a 32-bit parameter or data-structure pointer to a launched cog.
+**Usage**: PTRA is the primary pointer for hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. PTRA is a 32-bit register; its low 20 bits address the full 1 MB hub RAM space. On COGINIT, the target cog's PTRA receives the SETQ value (typically a parameter-block hub address) if a SETQ was executed immediately before the COGINIT; otherwise PTRA is cleared to 0. This is the standard P2 mechanism for passing a 32-bit parameter or data-structure pointer to a launched cog.
 
 **Addressing Modes**:
 
@@ -266,11 +266,11 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 
 ### PTRB {#ptrb}
 
-Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F9. Pointer B to hub RAM. Secondary pointer register for hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
-**Usage**: PTRB is the secondary pointer for Hub RAM operations, providing the same capabilities as PTRA. Having two independent pointers enables efficient dual-buffer operations and complex memory access patterns. COGINIT writes the code start address to the target cog's PTRB, enabling position-independent code.
+**Usage**: PTRB is the secondary pointer for hub RAM operations, providing the same capabilities as PTRA. Having two independent pointers enables efficient dual-buffer operations and complex memory access patterns. COGINIT writes the code start address to the target cog's PTRB, enabling position-independent code.
 
 **Addressing Modes**:
 
@@ -472,13 +472,13 @@ Several critical registers exist outside the cog RAM address space and are acces
 
 ### Program Counter (PC)
 
-The program counter is a 20-bit register that holds the Hub RAM address of the currently executing instruction.
+The program counter is a 20-bit register that holds the hub RAM address of the currently executing instruction.
 
 **Access**: Read via GETPC, modified implicitly by jumps and calls
 
-**Range**: $00000-$FFFFF (full Hub address space)
+**Range**: $00000-$FFFFF (full hub address space)
 
-**Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in Hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
+**Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
 
 **Example**:
 ```pasm2
@@ -717,6 +717,6 @@ Timeout detection:
 
 **Pointer Auto-Modification**: When using PTRA++ or PTRB++ addressing modes, the pointer update occurs after the memory access completes. The modification affects subsequent operations using that pointer.
 
-**PC Wrap Behavior**: The program counter wraps at the 20-bit boundary ($FFFFF → $00000). Code executing near the top of Hub RAM must account for this wrap behavior.
+**PC Wrap Behavior**: The program counter wraps at the 20-bit boundary ($FFFFF → $00000). Code executing near the top of hub RAM must account for this wrap behavior.
 
 **Per-Cog Independence**: Each cog has its own independent copy of all special registers. Changes in one cog do not affect other cogs' registers, enabling parallel independent operation.

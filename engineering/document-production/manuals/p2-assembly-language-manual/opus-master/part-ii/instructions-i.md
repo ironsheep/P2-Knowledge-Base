@@ -6,7 +6,7 @@ This section contains all PASM2 instructions beginning with the letter I.
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.

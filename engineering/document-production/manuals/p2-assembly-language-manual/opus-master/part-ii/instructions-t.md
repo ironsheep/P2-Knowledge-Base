@@ -6,7 +6,7 @@ This section contains all PASM2 instructions beginning with the letter T.
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
@@ -187,7 +187,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 Test Pin / Test Pin Negated {#testpn}
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
 **TESTP**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
@@ -415,7 +415,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 ::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
-Trigger Interrupt (1, 2, Or 3)
+Trigger interrupt (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::

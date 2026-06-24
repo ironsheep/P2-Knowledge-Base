@@ -11,7 +11,7 @@ These two features combine to create a powerful programming model where complex 
 
 ## 3.1 The C and Z Flags
 
-Each COG maintains two independent status flags that track computation results and enable conditional execution. These flags are named C (Carry) and Z (Zero), but their meanings extend beyond these basic interpretations depending on the instruction that sets them.
+Each cog maintains two independent status flags that track computation results and enable conditional execution. These flags are named C (Carry) and Z (Zero), but their meanings extend beyond these basic interpretations depending on the instruction that sets them.
 
 ### 3.1.1 The C Flag (Carry/Borrow)
 
@@ -48,7 +48,7 @@ Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. 
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
 
-Each COG maintains its own C and Z flags completely independently. Flag values in COG 0 have no relationship to flag values in COG 1. This independence ensures parallel execution across COGs operates without interference.
+Each cog maintains its own C and Z flags completely independently. Flag values in cog 0 have no relationship to flag values in cog 1. This independence ensures parallel execution across cogs operates without interference.
 
 
 ## 3.2 Flag Modification Effects

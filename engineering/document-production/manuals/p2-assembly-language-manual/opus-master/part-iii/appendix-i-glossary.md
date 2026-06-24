@@ -8,7 +8,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 **A / Addr**
 : A 20-bit relative or absolute value used to change PC (the program counter). This field appears in branch and call instructions where the 20-bit address occupies the two low bits of the CZI/FX field (positions 19-18) together with the D and S fields; the R bit (position 20) selects relative (PC += A) vs. absolute (PC = A) addressing.
 
-**C / Carry Flag**
+**C / Carry flag**
 : A 1-bit persistent flag value representing a special state before or after instruction execution. Traditionally, the C flag indicates that an arithmetic operation resulted in a carry (addition) or borrow (subtraction). The P2 extends this with instruction-specific meanings for both input and output. When C appears in an instruction's opcode encoding, it indicates optional flag writing governed by the WC or WCZ effect.
 
 **CZI / FX Field**
@@ -24,30 +24,30 @@ This glossary defines the terms used throughout the instruction encoding tables,
 ## Flag and State Terms
 
 **H / Hub Long**
-: A Hub RAM long (4 bytes) used to store subroutine calling context states. This includes the C and Z flags plus the return address, allowing nested subroutine calls to preserve and restore processor state.
+: A hub RAM long (4 bytes) used to store subroutine calling context states. This includes the C and Z flags plus the return address, allowing nested subroutine calls to preserve and restore processor state.
 
-**I / Immediate Flag**
+**I / Immediate flag**
 : When set (I=1), the S field contains a literal value rather than a register address. When clear (I=0), the S field is a register address and the instruction reads from that register. The `#` prefix in source code sets this bit.
 
 **K / Stack**
 : The 8-level hardware stack used for subroutine calls and temporary storage. On CALL, the stack stores C, Z, and PC (return address). PUSH and POP provide general-purpose 32-bit value storage. Stack overflow/underflow wraps silently—there is no trap or error indication.
 
-**L / Literal Flag**
+**L / Literal flag**
 : When set (L=1), the D field contains a literal value rather than a register address. This is less common than immediate S operands and appears in specific instructions. The `#` prefix on the destination in source code sets this bit where valid.
 
 **N / Index Number**
 : A small index value (typically 0-1, 0-3, or 0-7) used as a third operand in some instructions. Examples include interrupt numbers (1-3), event selector indices, and bit position specifiers.
 
 **PC / Program Counter**
-: A dedicated internal register that determines the next instruction address. Automatically increments by 1 (COG/LUT execution) or 4 (Hub execution) after each instruction unless altered by a branch. Not directly accessible but affected by JMP, CALL, RET, and conditional branches.
+: A dedicated internal register that determines the next instruction address. Automatically increments by 1 (cog/LUT execution) or 4 (hub execution) after each instruction unless altered by a branch. Not directly accessible but affected by JMP, CALL, RET, and conditional branches.
 
-**R / Relative Flag**
+**R / Relative flag**
 : When set (R=1), the address field is interpreted relative to the current PC. When clear (R=0), the address is absolute. Relative addressing enables position-independent code. The `\` prefix forces absolute addressing; its absence allows relative.
 
 **Result**
 : The value written at the end of instruction execution. Usually stored in the Destination register, but some instructions write to special registers or memory instead. The Result value determines the Z flag when WZ is specified.
 
-**Z / Zero Flag**
+**Z / Zero flag**
 : A 1-bit persistent flag value traditionally indicating that an operation produced a zero result. The P2 extends this with instruction-specific meanings. When Z appears in an instruction's opcode encoding, it indicates optional flag writing governed by the WZ or WCZ effect. The Z flag is also used for equality testing in comparisons.
 
 
@@ -56,7 +56,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 **S / Src / Source**
 : The origin value that instructions operate with. Can be a 9-bit literal value (when I=1), a register address (when I=0), or a 32-bit augmented value (when preceded by AUGS or the `##` prefix). The S field occupies bits 8-0 of the instruction word.
 
-**W / Write Register**
+**W / Write register**
 : A 2-bit field (values 00-11) that selects which special register to write in certain instructions. The values map to PA (00), PB (01), PTRA (10), and PTRB (11). This appears in instructions that can target pointer registers.
 
 

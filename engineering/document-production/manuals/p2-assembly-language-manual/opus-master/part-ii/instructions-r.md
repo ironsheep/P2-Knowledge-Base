@@ -154,19 +154,19 @@ This instruction provides a compact way to shift two flag states into a register
 
 ::: instrheader
 ## RDBYTE {#rdbyte}
-Read Byte From Hub
+Read Byte From hub
 
-[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from Hub memory into a register.
+[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from hub memory into a register.
 :::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** A zero-extended byte from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+**Result:** A zero-extended byte from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
 - Dest is the register to receive the byte value.
-- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- Src/Ptr is a hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
@@ -178,9 +178,9 @@ Read Byte From Hub
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 9...16 |
+| Cog execution | 9...16 |
 | Hub execution | 9...26 |
-| COG with interrupts | 9...24 |
+| Cog with interrupts | 9...24 |
 | Hub with interrupts | 9...44 |
 
 
@@ -188,7 +188,7 @@ Read Byte From Hub
 
 **Explanation:**
 
-RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
+RDBYTE reads a byte from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
 
@@ -204,17 +204,17 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 ## RDFAST {#rdfast}
 Read Fast Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Begins fast Hub read operation via FIFO for high-throughput streaming.
+[hub memory Access](#hub-memory-access) - Begins fast hub read operation via FIFO for high-throughput streaming.
 :::
 
 **RDFAST**  *{#}Dest, {#}Src*
 
 ---
 
-**Result:** A fast read operation begins, filling the FIFO with data from Hub memory starting at address Src.
+**Result:** A fast read operation begins, filling the FIFO with data from hub memory starting at address Src.
 
 - Dest is a configuration value: Dest[31] = no-wait mode, Dest[13:0] = block size in 64-byte units (0 = maximum).
-- Src is the Hub memory start address (Src[19:0]) for the read operation.
+- Src is the hub memory start address (Src[19:0]) for the read operation.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -225,21 +225,21 @@ Read Fast Via FIFO
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 2 or WRFAST finish + 10...17 |
+| Cog execution | 2 or WRFAST finish + 10...17 |
 | Hub execution | *Not available—FIFO in use* |
-| COG with interrupts | 2 or WRFAST finish + 10...25 |
+| Cog with interrupts | 2 or WRFAST finish + 10...25 |
 | Hub with interrupts | *Not available—FIFO in use* |
 
-**Note:** FIFO operations require COG execution mode. When code runs from Hub memory, the FIFO is used for instruction fetch and cannot be redirected for data streaming.
+**Note:** FIFO operations require cog execution mode. When code runs from hub memory, the FIFO is used for instruction fetch and cannot be redirected for data streaming.
 
 
 **Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
 **Explanation:**
 
-RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from COG/LUT memory, not Hub memory.
+RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from cog/LUT memory, not hub memory.
 
-Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting Hub address. The FIFO automatically wraps at the block boundary.
+Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
 
 After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
@@ -247,19 +247,19 @@ After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read
 
 ::: instrheader
 ## RDLONG {#rdlong}
-Read Long From Hub
+Read Long From hub
 
-[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from Hub memory into a register.
+[hub memory Access](#hub-memory-access) - Reads a 32-bit long from hub memory into a register.
 :::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** A long from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+**Result:** A long from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
 - Dest is the register to receive the long value.
-- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- Src/Ptr is a hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
@@ -271,9 +271,9 @@ Read Long From Hub
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 9...16 |
+| Cog execution | 9...16 |
 | Hub execution | 9...26 |
-| COG with interrupts | 9...24 |
+| Cog with interrupts | 9...24 |
 | Hub with interrupts | 9...44 |
 
 
@@ -281,7 +281,7 @@ Read Long From Hub
 
 **Explanation:**
 
-RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
+RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple longs can be performed.
 
@@ -334,9 +334,9 @@ The LUT provides fast local memory access for frequently accessed data structure
 
 ::: instrheader
 ## RDPIN {#rdpin}
-Read Smart Pin
+Read smart pin
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads Smart Pin result and acknowledges, clearing the ready flag.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result and acknowledges, clearing the ready flag.
 :::
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
@@ -359,29 +359,29 @@ Read Smart Pin
 
 **Explanation:**
 
-RDPIN reads the result value from the specified Smart Pin and acknowledges the pin, clearing its "ready" flag. The result value depends on the pin's configured mode and represents measurement data such as pulse width, period, edge count, ADC value, or serial data.
+RDPIN reads the result value from the specified smart pin and acknowledges the pin, clearing its "ready" flag. The result value depends on the pin's configured mode and represents measurement data such as pulse width, period, edge count, ADC value, or serial data.
 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
-Smart Pins are powerful autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous CPU intervention. RDPIN retrieves the measured or received data after the pin signals completion.
+Smart pins are powerful autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous CPU intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
 
 
 ::: instrheader
 ## RDWORD {#rdword}
-Read Word From Hub
+Read Word From hub
 
-[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from Hub memory into a register.
+[hub memory Access](#hub-memory-access) - Reads a zero-extended word from hub memory into a register.
 :::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** A zero-extended word from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+**Result:** A zero-extended word from hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
 
 - Dest is the register to receive the word value.
-- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- Src/Ptr is a hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
@@ -393,9 +393,9 @@ Read Word From Hub
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 9...16 |
+| Cog execution | 9...16 |
 | Hub execution | 9...26 |
-| COG with interrupts | 9...24 |
+| Cog with interrupts | 9...24 |
 | Hub with interrupts | 9...44 |
 
 
@@ -403,7 +403,7 @@ Read Word From Hub
 
 **Explanation:**
 
-RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
+RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple words can be performed.
 
@@ -452,7 +452,7 @@ REP blocks cannot be nested. The P2 hardware uses a single internal counter for 
 
 - **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
 
-- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost (13+ clocks). For zero-overhead inner loops, execute REP from COG or LUT memory; for non-time-critical loops, hub-exec REP works correctly with the documented per-iteration penalty.
+- **Hub memory overhead:** When REP executes from hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost (13+ clocks). For zero-overhead inner loops, execute REP from cog or LUT memory; for non-time-critical loops, hub-exec REP works correctly with the documented per-iteration penalty.
 
 **Forbidden instructions in REP blocks:**
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
@@ -514,12 +514,12 @@ The `@label` end position is constrained by both the execution mode and the 9-bi
 
 | Memory Mode | Address Range | @label Constraint |
 |-------------|---------------|-------------------|
-| COG only | $000-$1FF | min(511 instructions, $1FF - current) |
-| COG + LUT | $000-$3FF | min(511 instructions, $3FF - current) |
+| Cog only | $000-$1FF | min(511 instructions, $1FF - current) |
+| Cog + LUT | $000-$3FF | min(511 instructions, $3FF - current) |
 | LUT only | $200-$3FF | min(511 instructions, $3FF - current) |
 | Hub (ORGH) | $00000-$7FFFF | 511 instructions (encoding limit) |
 
-REP blocks can span from COG RAM into LUT RAM when executing in combined COG+LUT mode.
+REP blocks can span from cog RAM into LUT RAM when executing in combined cog+LUT mode.
 
 **Interrupt Protection Pattern:**
 
@@ -603,7 +603,7 @@ Instructions within the REP block can also be conditional:
 
 ::: instrheader
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
-Resume From Interrupt
+Resume From interrupt
 
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
@@ -622,10 +622,10 @@ Resume From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
 
 
 **Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -662,7 +662,7 @@ Return From Subroutine
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 
@@ -693,7 +693,7 @@ Return Via PTRA Stack
 
 ---
 
-**Result:** The program counter, C flag, and Z flag are restored from Hub memory at --PTRA.
+**Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRA.
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
@@ -706,22 +706,22 @@ Return Via PTRA Stack
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 11...18 |
+| Cog execution | 11...18 |
 | Hub execution | 20...40 |
-| COG with interrupts | 11...26 |
+| Cog with interrupts | 11...26 |
 | Hub with interrupts | 20...70 |
 
 **Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
 **Explanation:**
 
-RETA returns from a subroutine by reading a Hub long from --PTRA. PTRA is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
+RETA returns from a subroutine by reading a hub long from --PTRA. PTRA is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
 
 If the WC or WCZ effect is specified, the C flag is restored from L[31].
 
 If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
-RETA is paired with CALLA for implementing software stacks in Hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
+RETA is paired with CALLA for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
 
 
@@ -736,7 +736,7 @@ Return Via PTRB Stack
 
 ---
 
-**Result:** The program counter, C flag, and Z flag are restored from Hub memory at --PTRB.
+**Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRB.
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
@@ -749,28 +749,28 @@ Return Via PTRB Stack
 
 | Context | Clocks |
 |:--------|:------:|
-| COG execution | 11...18 |
+| Cog execution | 11...18 |
 | Hub execution | 20...40 |
-| COG with interrupts | 11...26 |
+| Cog with interrupts | 11...26 |
 | Hub with interrupts | 20...70 |
 
 **Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
 **Explanation:**
 
-RETB returns from a subroutine by reading a Hub long from --PTRB. PTRB is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
+RETB returns from a subroutine by reading a hub long from --PTRB. PTRB is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
 
 If the WC or WCZ effect is specified, the C flag is restored from L[31].
 
 If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
-RETB is paired with CALLB for implementing software stacks in Hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
+RETB is paired with CALLB for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
 
 
 ::: instrheader
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
-Return From Interrupt
+Return From interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
@@ -789,10 +789,10 @@ Return From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
 
 
 **Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -840,7 +840,7 @@ This instruction is useful for processing binary data in different MSB/LSB order
 ## RFBYTE {#rfbyte}
 Read Byte Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
+[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
 :::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
@@ -876,7 +876,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFLONG {#rflong}
 Read Long Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
+[hub memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
 :::
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
@@ -912,7 +912,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFVAR {#rfvar}
 Read Variable Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
+[hub memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
@@ -948,7 +948,7 @@ The length of each value read is determined by the streamer configuration set up
 ## RFVARS {#rfvars}
 Read Signed Variable Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
+[hub memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
@@ -982,7 +982,7 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 ## RFWORD {#rfword}
 Read Word Via FIFO
 
-[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
+[hub memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
 :::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
@@ -1116,7 +1116,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 
 ::: instrheader
 ## ROLBYTE {#rolbyte}
-Rotate Byte Left Into Register
+Rotate Byte Left Into register
 
 [Arithmetic Operations](#arithmetic-operations) - Rotates a byte from source into destination register.
 :::
@@ -1151,7 +1151,7 @@ The second syntax form is intended for use after an ALTGB instruction in a loop 
 
 ::: instrheader
 ## ROLNIB {#rolnib}
-Rotate Nibble Left Into Register
+Rotate Nibble Left Into register
 
 [Arithmetic Operations](#arithmetic-operations) - Rotates a nibble from source into destination register.
 :::
@@ -1186,7 +1186,7 @@ The second syntax form is intended for use after an ALTGN instruction in a loop 
 
 ::: instrheader
 ## ROLWORD {#rolword}
-Rotate Word Left Into Register
+Rotate Word Left Into register
 
 [Arithmetic Operations](#arithmetic-operations) - Rotates a word from source into destination register.
 :::
@@ -1261,7 +1261,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 ## RQPIN {#rqpin}
 Read Smart Pin Without Acknowledge
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads Smart Pin result without clearing the ready flag.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result without clearing the ready flag.
 :::
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**
@@ -1284,7 +1284,7 @@ Read Smart Pin Without Acknowledge
 
 **Explanation:**
 
-RQPIN reads the result value from the specified Smart Pin without acknowledging the pin. Unlike RDPIN, this instruction does not clear the pin's "ready" flag, allowing the same result to be read multiple times or checked before being consumed.
+RQPIN reads the result value from the specified smart pin without acknowledging the pin. Unlike RDPIN, this instruction does not clear the pin's "ready" flag, allowing the same result to be read multiple times or checked before being consumed.
 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 

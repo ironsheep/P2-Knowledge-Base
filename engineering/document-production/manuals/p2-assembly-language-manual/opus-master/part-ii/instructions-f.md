@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter F.
 ## FBLOCK {#fblock}
 Set Next FIFO Block
 
-[Hub Memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
+[hub memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
 :::
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -18,7 +18,7 @@ Set Next FIFO Block
 **Result:** The next block parameters are configured for FIFO wraparound operations.
 
 - Dest is a register or 9-bit literal whose value specifies the block size in 64-byte units (0 = maximum size).
-- Src is a register or 9-bit literal whose value specifies the block start address in Hub memory.
+- Src is a register or 9-bit literal whose value specifies the block start address in hub memory.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -30,13 +30,13 @@ Set Next FIFO Block
 
 **Explanation:**
 
-FBLOCK configures the parameters for the next Hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in Hub memory for streaming read and write operations.
+FBLOCK configures the parameters for the next hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in hub memory for streaming read and write operations.
 
 Dest[13:0] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
 
-Src[19:0] specifies the starting address of the block in Hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
+Src[19:0] specifies the starting address of the block in hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
 
-FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between Hub memory and COG/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
+FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between hub memory and cog/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
 
 
 
@@ -194,9 +194,9 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 ::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-Float with Output Preset by Flag
+Float with Output Preset by flag
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
 \hypertarget{fltnc}{}\hypertarget{fltz}{}\hypertarget{fltnz}{}
@@ -248,7 +248,7 @@ If WCZ is specified, the C and Z flags are set to the original output state of t
 ## FLTH {#flth}
 Float High
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
 :::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -289,7 +289,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTL {#fltl}
 Float Low
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
 :::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -330,7 +330,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTNOT {#fltnot}
 Float Not
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -373,7 +373,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## FLTRND {#fltrnd}
 Float Random
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**

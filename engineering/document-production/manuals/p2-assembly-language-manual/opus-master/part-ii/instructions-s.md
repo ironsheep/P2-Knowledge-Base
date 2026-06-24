@@ -367,7 +367,7 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETDACS {#setdacs}
 Set DACs
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
 :::
 
 **SETDACS**  *{#}Dest*
@@ -499,7 +499,7 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 ## SETPAT {#setpat}
 Set Pin Pattern
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
 :::
 
 **SETPAT**  *{#}Dest, {#}Src*
@@ -585,9 +585,9 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 
 ::: instrheader
 ## SETQ {#setq}
-Set Q Register
+Set Q register
 
-[Hub Memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
+[hub memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
@@ -622,7 +622,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
 ## SETQ2 {#setq2}
 Set Q For LUT Transfers
 
-[Hub Memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
+[hub memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
 :::
 
 **SETQ2**  *{#}Dest*
@@ -643,7 +643,7 @@ Set Q For LUT Transfers
 
 **Explanation:**
 
-Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of COG RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
 
 ```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
@@ -681,7 +681,7 @@ Set Result Field
 
 SETR copies Src[8:0] to the Result field of the template Dest to be used with an ALTI instruction. Bits outside the Result field remain unaffected. The Result field does not exist in instruction opcodes, but takes its value from the D field, holding the address of a register for the instruction to use as its result destination upon execution.
 
-SETR can also be used in self-modifying register RAM code, though it affects the Instr field and upper two bits of the FX field rather than a non-existent Register field. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+SETR can also be used in self-modifying register RAM code, though it affects the Instr field and upper two bits of the FX field rather than a non-existent register field. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
 
 
 
@@ -721,7 +721,7 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETSCP {#setscp}
 Set Oscilloscope
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -746,7 +746,7 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 
 ::: instrheader
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
-Set Selectable Event (1, 2, 3, Or 4)
+Set Selectable event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
@@ -826,7 +826,7 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 ## SETXFRQ {#setxfrq}
 Set Streamer Frequency
 
-[Streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
+[streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
 :::
 
 **SETXFRQ**  *{#}Dest*
@@ -1079,11 +1079,11 @@ Skip Instructions Fast
 
 Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
 
-**CRITICAL: COG/LUT Memory Only**
+**CRITICAL: Cog/LUT Memory Only**
 
-SKIPF can ONLY leap over instructions when executing from **COG or LUT memory**. When SKIPF is executed from Hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the Hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of COG/LUT memory.
+SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**. When SKIPF is executed from hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of cog/LUT memory.
 
-**Best Practice:** Use SKIP for code in Hub memory (ORGH sections), SKIPF for code in COG/LUT memory (ORG sections).
+**Best Practice:** Use SKIP for code in hub memory (ORGH sections), SKIPF for code in cog/LUT memory (ORG sections).
 
 **REP Compatibility:**
 - SKIP is fully compatible with REP—cancellation maintains instruction counts

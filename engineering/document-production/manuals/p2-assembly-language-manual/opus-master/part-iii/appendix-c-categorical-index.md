@@ -416,7 +416,7 @@ Event instructions monitor and respond to system events including counter/timer 
 | [JXRL](#jxrl) | Jump to S if XRL event flag is set |
 | [JXRO](#jxro) | Jump to S if XRO event flag is set |
 
-### Inter-COG Attention
+### Inter-Cog Attention
 
 | Instruction | Description |
 |-------------|-------------|
@@ -445,11 +445,11 @@ Interrupt instructions control the cog's three-level interrupt system (INT1, INT
 | [TRGINT3](#trgint3) | Trigger INT3, regardless of STALLI mode |
 
 
-## COG Control and Locks {#cog-control-and-locks-ref}
+## Cog Control and Locks {#cog-control-and-locks-ref}
 
-COG control instructions manage cog operations including starting and stopping cogs, querying cog identity, and configuring hub-level system settings. Lock instructions provide mutex-style synchronization primitives for safe inter-cog resource sharing.
+Cog control instructions manage cog operations including starting and stopping cogs, querying cog identity, and configuring hub-level system settings. Lock instructions provide mutex-style synchronization primitives for safe inter-cog resource sharing.
 
-### COG Control
+### Cog Control
 
 | Instruction | Description |
 |-------------|-------------|

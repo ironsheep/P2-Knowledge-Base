@@ -34,7 +34,7 @@ Call Subroutine
 
 **Explanation:**
 
-CALL records the current state of the C and Z flags and the address of the next instruction (PC + 1 if COG/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute a RET instruction, or an instruction with a _RET_ condition, to return to the recorded address (the instruction following the CALL) and optionally restore the C and Z flag state as it was prior.
+CALL records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by pushing to the stack (K), potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute a RET instruction, or an instruction with a _RET_ condition, to return to the recorded address (the instruction following the CALL) and optionally restore the C and Z flag state as it was prior.
 
 In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: `CALL #SendBit` or `CALL #\DebugStatus`.
 
@@ -44,7 +44,7 @@ If the WC or WCZ effect is specified, the C flag is updated to match D[31], afte
 
 If the WZ or WCZ effect is specified, the Z flag is updated to match D[30], after its original state is recorded.
 
-The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
+The instruction takes 4 cycles for cog/LUT execution, or 13-20 cycles for hub execution.
 
 
 
@@ -61,7 +61,7 @@ Call Subroutine via PTRA
 
 ---
 
-**Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRA, PTRA is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
+**Result:** Current C and Z flags and address of the next instruction are written to hub RAM at PTRA, PTRA is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
 - Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use '\' to force absolute addressing.
 - Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
@@ -78,7 +78,7 @@ Call Subroutine via PTRA
 
 **Explanation:**
 
-CALLA writes the current C and Z flags and the address of the next instruction into the 4-byte Hub RAM location at PTRA, then increments PTRA by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
+CALLA writes the current C and Z flags and the address of the next instruction into the 4-byte hub RAM location at PTRA, then increments PTRA by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
 
 In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly.
 
@@ -88,7 +88,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
+CALLA is used for subroutine calls when hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
 
 
 
@@ -105,7 +105,7 @@ Call Subroutine via PTRB
 
 ---
 
-**Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
+**Result:** Current C and Z flags and address of the next instruction are written to hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
 - Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use '\' to force absolute addressing.
 - Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
@@ -122,7 +122,7 @@ Call Subroutine via PTRB
 
 **Explanation:**
 
-CALLB writes the current C and Z flags and the address of the next instruction into the 4-byte Hub RAM location at PTRB, then increments PTRB by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
+CALLB writes the current C and Z flags and the address of the next instruction into the 4-byte hub RAM location at PTRB, then increments PTRB by 4, sets PC to the new relative or absolute address, and optionally updates C and Z to new states.
 
 In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly.
 
@@ -132,13 +132,13 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
 
 
 
 ::: instrheader
 ## CALLD {#calld}
-Call with Destination Register
+Call with Destination register
 
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine saving return info to a register.
 :::
@@ -168,19 +168,19 @@ Call with Destination Register
 
 **Explanation:**
 
-CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if COG/LUT execution; PC + 4 if Hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD.
+CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD.
 
 This instruction is typically used for the P2 DEBUG function.
 
 In the first syntax form, `#Addr` and `#\Addr` encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: `CALLD PA, #SendBit` or `CALLD PB, #\DebugStatus`.
 
-In the second syntax form, the format of the value at Src is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. If Src is a 9-bit literal (immediate), it will be sign-extended to 20 bits and used as a relative offset, giving a range of -256 to +255 instructions relative to the instruction following the CALLD. When relative, PC is adjusted by signed(Src) if COG/LUT execution, or by signed(Src * 4) if Hub execution.
+In the second syntax form, the format of the value at Src is `CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA`. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. If Src is a 9-bit literal (immediate), it will be sign-extended to 20 bits and used as a relative offset, giving a range of -256 to +255 instructions relative to the instruction following the CALLD. When relative, PC is adjusted by signed(Src) if cog/LUT execution, or by signed(Src * 4) if hub execution.
 
 If the WC or WCZ effect is specified, the C flag is updated to match S[31], after its original state is recorded.
 
 If the WZ or WCZ effect is specified, the Z flag is updated to match S[30], after its original state is recorded.
 
-The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
+The instruction takes 4 cycles for cog/LUT execution, or 13-20 cycles for hub execution.
 
 
 
@@ -210,13 +210,13 @@ Call Subroutine with PA Parameter
 
 **Explanation:**
 
-CALLPA records the current state of the C and Z flags and the address of the next instruction (PC + 1 if COG/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PA, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
+CALLPA records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by pushing to the stack (K), copies the value of Dest to PA, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
 
 This instruction is useful for passing a parameter to a subroutine via the PA register while simultaneously calling that subroutine. The parameter can be an immediate value, making it convenient for subroutines that need a single argument.
 
 The Src operand determines the target address. If Src is preceded by #, it is treated as a relative address; otherwise it is an absolute address. If Src is a register, its lower 20 bits specify the absolute address to jump to.
 
-The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
+The instruction takes 4 cycles for cog/LUT execution, or 13-20 cycles for hub execution.
 
 
 
@@ -246,13 +246,13 @@ Call Subroutine with PB Parameter
 
 **Explanation:**
 
-CALLPB records the current state of the C and Z flags and the address of the next instruction (PC + 1 if COG/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PB, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
+CALLPB records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by pushing to the stack (K), copies the value of Dest to PB, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
 
 This instruction operates identically to CALLPA except it uses the PB register instead of PA. This is useful for passing a parameter to a subroutine via the PB register, or when both PA and PB need to be set by using CALLPA followed by CALLPB, or when the subroutine convention uses PB for parameters.
 
 The Src operand determines the target address. If Src is preceded by #, it is treated as a relative address; otherwise it is an absolute address. If Src is a register, its lower 20 bits specify the absolute address to jump to.
 
-The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
+The instruction takes 4 cycles for cog/LUT execution, or 13-20 cycles for hub execution.
 
 
 
@@ -571,7 +571,7 @@ Cog Attention
 
 COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
 
-In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in Hub RAM to differentiate requests.
+In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in hub RAM to differentiate requests.
 
 For example, to signal cog 3:
 
@@ -632,7 +632,7 @@ COGBRK is a specialized instruction primarily used by development and debugging 
 ## COGID {#cogid}
 Cog Identification
 
-[COG Control and Locks](#cog-control-and-locks) - Gets current cog ID or checks if a cog is running.
+[Cog Control and Locks](#cog-control-and-locks) - Gets current cog ID or checks if a cog is running.
 :::
 
 **COGID**  *{#}Dest*  **{WC}**
@@ -679,7 +679,7 @@ To check if cog 3 is running:
 ## COGINIT {#coginit}
 Cog Initialize
 
-[COG Control and Locks](#cog-control-and-locks) - Starts a cog to execute code from Hub RAM.
+[Cog Control and Locks](#cog-control-and-locks) - Starts a cog to execute code from hub RAM.
 :::
 
 **COGINIT**  *{#}Dest, {#}Src*  **{WC}**
@@ -703,11 +703,11 @@ Cog Initialize
 
 **Explanation:**
 
-COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from Hub RAM to be executed within COG/LUT RAM or to be executed right from Hub RAM.
+COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from hub RAM to be executed within cog/LUT RAM or to be executed right from hub RAM.
 
 The format of Dest is `%E_N_xVVV` where:
 
-- E controls loading (0=load from Hub, 1=no load/Hub exec)
+- E controls loading (0=load from hub, 1=no load/hub exec)
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
 
@@ -715,14 +715,14 @@ The following predefined constants encode these bit patterns:
 
 | Constant | Target | Execution | Description |
 |----------|--------|-----------|-------------|
-| COGEXEC + id | Specific COG | COG RAM | Load 496 longs from Hub to COG RAM, execute from COG |
-| HUBEXEC + id | Specific COG | Hub RAM | Execute directly from Hub RAM (no load) |
-| COGEXEC_NEW | Any free COG | COG RAM | Auto-select available COG, load and execute |
-| HUBEXEC_NEW | Any free COG | Hub RAM | Auto-select available COG, execute from Hub |
-| COGEXEC_NEW_PAIR | Adjacent pair | COG RAM | Auto-select adjacent COG pair for LUT sharing |
-| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent COG pair, Hub execution |
+| COGEXEC + id | Specific Cog | Cog RAM | Load 496 longs from Hub to Cog RAM, execute from Cog |
+| HUBEXEC + id | Specific Cog | Hub RAM | Execute directly from Hub RAM (no load) |
+| COGEXEC_NEW | Any free Cog | Cog RAM | Auto-select available Cog, load and execute |
+| HUBEXEC_NEW | Any free Cog | Hub RAM | Auto-select available Cog, execute from Hub |
+| COGEXEC_NEW_PAIR | Adjacent pair | Cog RAM | Auto-select adjacent Cog pair for LUT sharing |
+| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent Cog pair, Hub execution |
 
-For specific COG targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
+For specific cog targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
 
 The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA.
 
@@ -730,7 +730,7 @@ If the WC effect is specified, C is set (1) on failure or cleared (0) on success
 
 Common usage examples:
 
-Load and start a specific cog from Hub RAM:
+Load and start a specific cog from hub RAM:
 
 ```pasm2
         coginit #1, #$100             ' Load and start cog 1 from Hub $100
@@ -743,7 +743,7 @@ Start a free cog:
         if_c    jmp     #no_cog_available       ' Branch if no cog available
 ```
 
-Skip load and execute from Hub RAM:
+Skip load and execute from hub RAM:
 
 ```pasm2
         coginit #HUBEXEC+3, addr      ' Cog 3 hub exec mode
@@ -761,7 +761,7 @@ Start a cog pair for LUT sharing:
 ## COGSTOP {#cogstop}
 Cog Stop
 
-[COG Control and Locks](#cog-control-and-locks) - Stops and terminates a running cog.
+[Cog Control and Locks](#cog-control-and-locks) - Stops and terminates a running cog.
 :::
 
 **COGSTOP**  *{#}Dest*
@@ -799,7 +799,7 @@ To stop the current cog (terminate self):
         cogstop myid                  ' Stop myself
 ```
 
-COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any Hub memory it may have been using.
+COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any hub memory it may have been using.
 
 
 

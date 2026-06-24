@@ -1,10 +1,10 @@
 # Appendix G: Streamer Mode Constants
 
-PASM2 provides predefined constants for configuring the P2's Streamer—a powerful DMA-like engine that transfers data between hub RAM, LUT RAM, pins, and DAC outputs. These constants replace complex bit patterns with readable symbolic names.
+PASM2 provides predefined constants for configuring the P2's streamer—a powerful DMA-like engine that transfers data between hub RAM, LUT RAM, pins, and DAC outputs. These constants replace complex bit patterns with readable symbolic names.
 
 ## Streamer Overview
 
-The Streamer operates in conjunction with the FIFO and can:
+The streamer operates in conjunction with the FIFO and can:
 
 - Transfer data from hub RAM to pins/DACs (playback)
 - Transfer data from pins/ADCs to hub RAM (capture)
@@ -167,7 +167,7 @@ These modes perform digital signal processing operations.
 
 ## Control Flags
 
-These flags modify Streamer behavior and are combined with mode constants using OR.
+These flags modify streamer behavior and are combined with mode constants using OR.
 
 ### DAC Channel Selection
 
@@ -291,7 +291,7 @@ Streamer mode and control flags are combined using OR:
 
 ## Data Width Modes
 
-The Streamer supports various data packing/unpacking modes:
+The streamer supports various data packing/unpacking modes:
 
 | Mode | Meaning |
 |------|---------|
@@ -306,16 +306,16 @@ The Streamer supports various data packing/unpacking modes:
 
 ## Related Documentation
 
-**Chapter 5.3 (Streamer)** provides the architectural overview of the Streamer subsystem, including its relationship with the FIFO, capabilities, and programming model. Refer to that section for conceptual understanding before using these mode constants.
+**Chapter 5.3 (streamer)** provides the architectural overview of the streamer subsystem, including its relationship with the FIFO, capabilities, and programming model. Refer to that section for conceptual understanding before using these mode constants.
 
 ## Related Instructions
 
-- [XINIT](#xinit) — Initialize Streamer with mode and NCO rate
-- [XCONT](#xcont) — Continue Streamer with new parameters
-- [XSTOP](#xstop) — Stop Streamer operation
-- [XZERO](#xzero) — Zero Streamer and stop
+- [XINIT](#xinit) — Initialize streamer with mode and NCO rate
+- [XCONT](#xcont) — Continue streamer with new parameters
+- [XSTOP](#xstop) — Stop streamer operation
+- [XZERO](#xzero) — Zero streamer and stop
 - [RDFAST](#rdfast) — Set up hub-to-FIFO reading
 - [WRFAST](#wrfast) — Set up FIFO-to-hub writing
-- [SETLUTS](#setluts) — Configure LUT for Streamer use
+- [SETLUTS](#setluts) — Configure LUT for streamer use
 
 

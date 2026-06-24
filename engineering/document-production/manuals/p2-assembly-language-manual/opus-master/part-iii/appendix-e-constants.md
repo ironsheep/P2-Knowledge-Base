@@ -252,7 +252,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - Code size limited to 504 longs (2KB minus the 8 special-purpose registers at $1F8-$1FF)
 
 #### Related Constants
-- [HUBEXEC](#hubexec) — Hub execution mode constant
+- [HUBEXEC](#hubexec) — hub execution mode constant
 - [COGEXEC_NEW](#cogexec_new) — Auto-select available cog variant
 - [COGEXEC_NEW_PAIR](#cogexec_new_pair) — Auto-select adjacent cog pair variant
 
@@ -300,7 +300,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - Each cog maintains its own program counter for hub execution
 
 #### Related Constants
-- [COGEXEC](#cogexec) — Cog execution mode constant
+- [COGEXEC](#cogexec) — cog execution mode constant
 - [HUBEXEC_NEW](#hubexec_new) — Auto-select available cog variant
 - [HUBEXEC_NEW_PAIR](#hubexec_new_pair) — Auto-select adjacent cog pair variant
 
@@ -317,13 +317,13 @@ Auto-Select Cog For Cog Execution
 Auto-selects available cog for COGEXEC mode.
 :::
 
-Execution mode constant for automatically selecting an available cog with COG RAM execution.
+Execution mode constant for automatically selecting an available cog with cog RAM execution.
 
 #### Encoding
 Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves this to the appropriate bit pattern for COGINIT's Dest operand.
 
 #### Description
-COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 504 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
+COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 504 longs from hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
 ```pasm2
@@ -349,7 +349,7 @@ Auto-Select Cog Pair For Cog Execution
 Auto-selects adjacent cog pair for COGEXEC mode.
 :::
 
-Execution mode constant for automatically selecting an adjacent pair of available cogs with COG RAM execution.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with cog RAM execution.
 
 #### Encoding
 Combines COGEXEC base mode with both the N (new cog) and pair selection flags set.
@@ -382,13 +382,13 @@ Auto-Select Cog For Hub Execution
 Auto-selects available cog for HUBEXEC mode.
 :::
 
-Execution mode constant for automatically selecting an available cog with Hub RAM execution.
+Execution mode constant for automatically selecting an available cog with hub RAM execution.
 
 #### Encoding
 Combines HUBEXEC base mode with the N (new cog) flag set.
 
 #### Description
-HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 504-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
+HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from hub RAM without loading code to cog RAM. This mode removes the 504-long code size limitation at the cost of slower instruction fetch times due to hub access latency.
 
 #### Usage
 ```pasm2
@@ -400,7 +400,7 @@ HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start
 #### Notes
 - Hub execution allows unlimited code size
 - Instruction fetching uses the FIFO/streamer mechanism
-- Slower than cog execution due to Hub RAM access timing
+- Slower than cog execution due to hub RAM access timing
 - Use WC to detect failure and retrieve the launched cog's ID
 
 #### Related Constants
@@ -415,13 +415,13 @@ Auto-Select Cog Pair For Hub Execution
 Auto-selects adjacent cog pair for HUBEXEC mode.
 :::
 
-Execution mode constant for automatically selecting an adjacent pair of available cogs with Hub RAM execution.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with hub RAM execution.
 
 #### Encoding
 Combines HUBEXEC base mode with both the N (new cog) and pair selection flags set.
 
 #### Description
-HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from Hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
+HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
 
 #### Usage
 ```pasm2
@@ -555,7 +555,7 @@ entry   debug[DBG_INIT]("Starting")     ' COMPILED - bit 0 set
 #### Related Constants
 
 - [DEBUG_DISABLE](#debug-disable) — Global debug disable
-- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+- [DEBUG_COGS](#debug-cogs) — Runtime cog filtering
 
 
 
@@ -565,31 +565,31 @@ These constants configure the debug output system that handles all DEBUG stateme
 
 ::: constheader
 ### DEBUG_COGS {#debug-cogs}
-Debug-Enabled COG Mask
+Debug-Enabled Cog Mask
 
-8-bit mask specifying which COGs can produce debug output (bit N = COG N).
+8-bit mask specifying which cogs can produce debug output (bit N = Cog N).
 :::
 
-Runtime constant controlling which COGs can trigger debug output.
+Runtime constant controlling which cogs can trigger debug output.
 
 #### Value
 
-| Bit | COG | Binary Mask |
+| Bit | Cog | Binary Mask |
 |-----|-----|-------------|
-| 0 | COG 0 | %00000001 |
-| 1 | COG 1 | %00000010 |
-| 2 | COG 2 | %00000100 |
-| 3 | COG 3 | %00001000 |
-| 4 | COG 4 | %00010000 |
-| 5 | COG 5 | %00100000 |
-| 6 | COG 6 | %01000000 |
-| 7 | COG 7 | %10000000 |
+| 0 | Cog 0 | %00000001 |
+| 1 | Cog 1 | %00000010 |
+| 2 | Cog 2 | %00000100 |
+| 3 | Cog 3 | %00001000 |
+| 4 | Cog 4 | %00010000 |
+| 5 | Cog 5 | %00100000 |
+| 6 | Cog 6 | %01000000 |
+| 7 | Cog 7 | %10000000 |
 
 #### Description
 
-DEBUG_COGS controls runtime debug capability per COG. If a COG's bit is clear, DEBUG statements executing on that COG produce no output—the debug interrupt is ignored. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS controls runtime output permission.
+DEBUG_COGS controls runtime debug capability per cog. If a cog's bit is clear, DEBUG statements executing on that cog produce no output—the debug interrupt is ignored. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS controls runtime output permission.
 
-For a DEBUG statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK allows it or it's a standard `debug()`), and the executing COG must have its bit set in DEBUG_COGS.
+For a DEBUG statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK allows it or it's a standard `debug()`), and the executing cog must have its bit set in DEBUG_COGS.
 
 #### Usage
 
@@ -607,10 +607,10 @@ worker  debug("From worker")          ' Output only if on COG 0 or 1
 
 #### Notes
 
-- Default behavior (undefined): all COGs can produce debug output
+- Default behavior (undefined): all cogs can produce debug output
 - Must be defined as an integer constant
-- Reduces debug overhead in multi-COG applications
-- Useful for isolating debug output from specific COGs during development
+- Reduces debug overhead in multi-cog applications
+- Useful for isolating debug output from specific cogs during development
 
 #### Related Constants
 
@@ -868,18 +868,18 @@ PUB main()
 
 #### Related Constants
 
-- [DEBUG_COGINIT](#debug-coginit) — Break on COG initialization
+- [DEBUG_COGINIT](#debug-coginit) — Break on cog initialization
 
 
 
 ::: constheader
 ### DEBUG_COGINIT {#debug-coginit}
-Break on COG Initialization
+Break on Cog Initialization
 
-Triggers a breakpoint when any COG is initialized.
+Triggers a breakpoint when any cog is initialized.
 :::
 
-Configures the debugger to break on COG startup.
+Configures the debugger to break on cog startup.
 
 #### Value
 
@@ -890,7 +890,7 @@ Configures the debugger to break on COG startup.
 
 #### Description
 
-DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT or COGSPIN instruction executes. This enables debugging multi-COG applications by providing an opportunity to examine state before each new COG begins execution.
+DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT or COGSPIN instruction executes. This enables debugging multi-cog applications by providing an opportunity to examine state before each new cog begins execution.
 
 #### Usage
 
@@ -906,13 +906,13 @@ PUB main()
 
 - The value is irrelevant; defining the symbol enables the break
 - DEBUG_MAIN takes precedence if both are defined
-- Useful for debugging COG startup and inter-COG coordination
+- Useful for debugging cog startup and inter-cog coordination
 - Each COGINIT or COGSPIN triggers a separate break
 
 #### Related Constants
 
 - [DEBUG_MAIN](#debug-main) — Break at program start
-- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+- [DEBUG_COGS](#debug-cogs) — Runtime cog filtering
 
 
 
@@ -922,13 +922,13 @@ The P2 provides extensive predefined constants for configuring its sophisticated
 
 ### SmartPin Constants
 
-The P2's 64 Smart Pins each function as independent hardware peripherals. Over 50 predefined constants configure input selection, filtering, output control, and the 32 operating modes including DAC, ADC, PWM, serial communication, and counters.
+The P2's 64 smart pins each function as independent hardware peripherals. Over 50 predefined constants configure input selection, filtering, output control, and the 32 operating modes including DAC, ADC, PWM, serial communication, and counters.
 
 **See:** [SmartPin Configuration Constants](smartpin-constants.md)
 
 ### Streamer Constants
 
-The Streamer is the P2's DMA-like engine for high-bandwidth data transfer between hub RAM, LUT, pins, and DAC outputs. Over 80 predefined constants configure data sources, destinations, formats, color modes, and control flags.
+The streamer is the P2's DMA-like engine for high-bandwidth data transfer between hub RAM, LUT, pins, and DAC outputs. Over 80 predefined constants configure data sources, destinations, formats, color modes, and control flags.
 
 **See:** [Streamer Configuration Constants](streamer-constants.md)
 

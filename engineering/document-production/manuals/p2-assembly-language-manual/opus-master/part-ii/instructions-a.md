@@ -274,18 +274,18 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 
 ::: instrheader
 ## AKPIN {#akpin}
-Acknowledge Smart Pin
+Acknowledge smart pin
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Acknowledges Smart Pin(s) to allow future events.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Acknowledges smart pin(s) to allow future events.
 :::
 
 **AKPIN**  *{#}Src*
 
 ---
 
-**Result:** One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
+**Result:** One or more smart pins is acknowledged; lowering their corresponding IN signal(s).
 
-- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s) to acknowledge.
+- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the smart pin(s) to acknowledge.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -297,13 +297,13 @@ Acknowledge Smart Pin
 
 **Explanation:**
 
-AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN signal(s) so that future Smart Pin events may raise them again later.
+AKPIN acknowledges the smart pin(s) designated by Src. This lowers the corresponding IN signal(s) so that future smart pin events may raise them again later.
 
-Src[5:0] indicates the pin number (0-63). For a range of Smart Pins, Src[5:0] indicates the first pin number (0-63) and Src[10:6] indicates how many contiguous pins beyond the first should be affected (1-31).
+Src[5:0] indicates the pin number (0-63). For a range of smart pins, Src[5:0] indicates the first pin number (0-63) and Src[10:6] indicates how many contiguous pins beyond the first should be affected (1-31).
 
 A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range of up to 8 contiguous pins (Src[8:6]). If needed, use the augmented literal feature (##Src) to augment Src to the required 11-bit literal value, which automatically inserts an AUGS instruction prior.
 
-When Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit Smart Pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; in that case, SETQ's Dest[4:0] substitutes for value bits[10:6] for AKPIN's use.
+When Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit smart pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; in that case, SETQ's Dest[4:0] substitutes for value bits[10:6] for AKPIN's use.
 
 The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
@@ -332,9 +332,9 @@ Allow Interrupts
 
 **Explanation:**
 
-ALLOWI re-enables interrupt branching; the default on COG start. ALLOWI is the complement of the STALLI instruction. Both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
+ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI instruction. Both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
 
-When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the COG to respond to interrupt events normally.
+When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the cog to respond to interrupt events normally.
 
 
 
@@ -921,7 +921,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## ASMCLK {#asmclk}
 Set Clock Mode
 
-[COG Control and Locks](#cog-control-and-locks) - Configures system clock from CON symbols.
+[Cog Control and Locks](#cog-control-and-locks) - Configures system clock from CON symbols.
 :::
 
 **ASMCLK**
@@ -1020,7 +1020,7 @@ Augment Destination
 
 AUGD is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2 instructions have 9 bits available for literal Dest values; enough for many uses, but not all. AUGD augments the next occurrence of a literal Dest value to be a full 32-bits.
 
-When the instruction with the soon-to-be-augmented literal is later executed, the COG uses the lower 9 bits encoded in the instruction's Dest field and prepends AUGD's 23 bits to it.
+When the instruction with the soon-to-be-augmented literal is later executed, the cog uses the lower 9 bits encoded in the instruction's Dest field and prepends AUGD's 23 bits to it.
 
 All instructions following AUGD are shielded from interrupt until after the instruction with the newly-augmented literal Dest value is executed. Dest value augmentation occurs in the instruction pipeline only; code is not altered, value does not persist. SETQ/SETQ2 does not affect AUGD; the Q value passes through to the next instruction.
 
@@ -1056,7 +1056,7 @@ Augment Source
 
 AUGS is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2 instructions have 9 bits available for literal Src values; enough for many uses, but not all. AUGS augments the next occurrence of a literal Src value to be a full 32-bits.
 
-When the instruction with the soon-to-be-augmented literal is later executed, the COG uses the lower 9 bits encoded in the instruction's Src field and prepends AUGS's 23 bits to it.
+When the instruction with the soon-to-be-augmented literal is later executed, the cog uses the lower 9 bits encoded in the instruction's Src field and prepends AUGS's 23 bits to it.
 
 All instructions following AUGS are shielded from interrupt until after the instruction with the newly-augmented literal Src value is executed. Src value augmentation occurs in the instruction pipeline only; code is not altered, value does not persist. SETQ/SETQ2 does not affect AUGS; the Q value passes through to the next instruction.
 

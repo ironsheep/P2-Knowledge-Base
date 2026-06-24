@@ -6,7 +6,7 @@ This section contains all PASM2 instructions beginning with the letter D.
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
-| COG / LUT execution | 4 |
+| Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
 So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
@@ -96,9 +96,9 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 
 ::: instrheader
 ## DIRC / DIRNC {#dirc}
-Set Pin Direction by C Flag {#dirnc}
+Set Pin Direction by C flag {#dirnc}
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
 **DIRC**  *{#}Dest*  **{WCZ}**\
@@ -143,7 +143,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRH {#dirh}
 Set Pin Direction High
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction.
 :::
 
 **DIRH**  *{#}Dest*  **{WCZ}**
@@ -180,7 +180,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DIRL {#dirl}
 Set Pin Direction Low
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction.
 :::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
@@ -217,7 +217,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DIRNOT {#dirnot}
 Direction Not
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin direction to opposite state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Toggles pin direction to opposite state.
 :::
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
@@ -256,9 +256,9 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 ::: instrheader
 ## DIRZ / DIRNZ {#dirz}
-Set Pin Direction by Z Flag {#dirnz}
+Set Pin Direction by Z flag {#dirnz}
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
 **DIRZ**  *{#}Dest*  **{WCZ}**\
@@ -303,7 +303,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRRND {#dirrnd}
 Direction Random
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction to random state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction to random state.
 :::
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
@@ -406,7 +406,7 @@ This instruction is useful for implementing loops that continue until a register
 
 Dest is always written with the decremented value. PC is written only when the result in Dest is not full.
 
-The instruction executes in 2 clock cycles when the branch is not taken. When taken, it takes 4 clock cycles in COG/LUT execution, or 13–20 clock cycles in hub execution.
+The instruction executes in 2 clock cycles when the branch is not taken. When taken, it takes 4 clock cycles in cog/LUT execution, or 13–20 clock cycles in hub execution.
 
 
 
@@ -464,9 +464,9 @@ Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 
 
 ::: instrheader
 ## DRVC / DRVNC {#drvc}
-Drive Pins by C Flag {#drvnc}
+Drive Pins by C flag {#drvnc}
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
 **DRVC**  *{#}Dest*  **{WCZ}**\
@@ -509,7 +509,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DRVH {#drvh}
 Drive Pins High
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives high.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives high.
 :::
 
 **DRVH**  *{#}Dest*  **{WCZ}**
@@ -548,7 +548,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DRVL {#drvl}
 Drive Pins Low
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives low.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives low.
 :::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
@@ -589,7 +589,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVNOT {#drvnot}
 Drive Not
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and toggles output level.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and toggles output level.
 :::
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
@@ -630,9 +630,9 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 ::: instrheader
 ## DRVZ / DRVNZ {#drvz}
-Drive Pins by Z Flag {#drvnz}
+Drive Pins by Z flag {#drvnz}
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
 **DRVZ**  *{#}Dest*  **{WCZ}**\
@@ -675,7 +675,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## DRVRND {#drvrnd}
 Drive Random
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction with random output levels.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction with random output levels.
 :::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**

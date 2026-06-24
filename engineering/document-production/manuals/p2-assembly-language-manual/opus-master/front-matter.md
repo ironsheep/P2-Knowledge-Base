@@ -133,7 +133,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 ### For P1 Developers
 
-The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs sharing Hub memory—while dramatically expanding capabilities.
+The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs sharing hub memory—while dramatically expanding capabilities.
 
 **Specification Comparison**
 
@@ -142,42 +142,42 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | Clock | 80 MHz | 180 MHz recommended; 250 MHz typical overclock; 350 MHz absolute max¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
-| COG RAM | 512 longs | 512 + 512 LUT |
+| Cog RAM | 512 longs | 512 + 512 LUT |
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
-| Interrupts | None | 3 per COG |
+| Interrupts | None | 3 per Cog |
 | Instructions | ~60 | ~380 |
 
 ¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
 
 **Architecture That Transfers**
 
-- Eight independent COGs with true parallel execution
-- Shared Hub memory with round-robin deterministic access
-- Private COG RAM for fast local operations
+- Eight independent cogs with true parallel execution
+- Shared hub memory with round-robin deterministic access
+- Private cog RAM for fast local operations
 - Wired-OR I/O model preventing pin contention
-- Hardware locks for inter-COG synchronization
+- Hardware locks for inter-cog synchronization
 - Spin/PASM language structure
 
 **New in P2**
 
-- **Smart Pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
-- **Lookup RAM** — 512 additional longs per COG for tables and overflow code execution
+- **Smart pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
+- **Lookup RAM** — 512 additional longs per cog for tables and overflow code execution
 - **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
-- **Streamer** — Background DMA between Hub, LUT, and pins
-- **Digital Video** — Hardware HDMI/DVI output via Streamer
+- **Streamer** — Background DMA between hub, LUT, and pins
+- **Digital Video** — Hardware HDMI/DVI output via streamer
 - **FIFO** — Hardware FIFO for high-bandwidth hub streaming and hub execution
-- **Interrupts** — Three levels per COG (plus hidden debug interrupt) with 16 event sources
-- **Debug Interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
-- **COGATN** — Hardware inter-COG attention signaling
+- **Interrupts** — Three levels per cog (plus hidden debug interrupt) with 16 event sources
+- **Debug interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
+- **COGATN** — Hardware inter-cog attention signaling
 - **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
 - **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
-- **Hub Execution** — Run code directly from 512 KB Hub RAM
+- **Hub Execution** — Run code directly from 512 KB hub RAM
 
 **Changed from P1**
 
-- **Counters**: CTRA/CTRB replaced by Smart Pin event system
-- **Video**: VCFG/VSCL/WAITVID replaced by Streamer and DAC capabilities
+- **Counters**: CTRA/CTRB replaced by smart pin event system
+- **Video**: VCFG/VSCL/WAITVID replaced by streamer and DAC capabilities
 - **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
 - **Boot Pins**: P28-P31 changed to P58-P63
 
@@ -241,7 +241,7 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 **"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix A (Instruction Encoding Summary — C Effect / Z Effect columns)
 
-**"I need Smart Pin configuration values"** → Appendix F (Smart Pin Mode Constants)
+**"I need smart pin configuration values"** → Appendix F (Smart Pin Mode Constants)
 
 **"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 
@@ -293,7 +293,7 @@ Part II instruction entries include encoding tables with the following columns:
 
 **Opcode** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
 
-**CZI** — Flag effects field (3 bits). Controls which flags are updated and how.
+**CZI** — flag effects field (3 bits). Controls which flags are updated and how.
 
 **Dest** — Destination register (9 bits). Where the result is written.
 

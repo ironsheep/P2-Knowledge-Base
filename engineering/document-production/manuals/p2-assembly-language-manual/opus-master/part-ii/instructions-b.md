@@ -287,14 +287,14 @@ The first syntax form uses Src to specify the size, while the second syntax form
 ## BRK {#brk}
 Breakpoint
 
-[Interrupts](#interrupts) - Triggers a debug breakpoint in the current COG.
+[Interrupts](#interrupts) - Triggers a debug breakpoint in the current cog.
 :::
 
 **BRK**  *{#}Dest*
 
 ---
 
-**Result:** If debug interrupts are enabled, a debug interrupt is triggered in the current COG and Dest's value becomes the debug code or the next debug condition.
+**Result:** If debug interrupts are enabled, a debug interrupt is triggered in the current cog and Dest's value becomes the debug code or the next debug condition.
 
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code or condition depending on the state of execution (outside or inside of a Debug ISR).
 
@@ -308,7 +308,7 @@ Breakpoint
 
 **Explanation:**
 
-BRK triggers a breakpoint in the current COG and either defines a breakpoint code or the next breakpoint condition(s). The COG must have debug interrupts enabled, and if BRK is to be executed within the normal program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled from within a prior Debug ISR.
+BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the next breakpoint condition(s). The cog must have debug interrupts enabled, and if BRK is to be executed within the normal program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled from within a prior Debug ISR.
 
 During normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit code (from Dest[7:0]) which can be read within the Debug ISR using a GETBRK instruction. This allows the program to communicate debug information or trigger specific breakpoint handlers.
 

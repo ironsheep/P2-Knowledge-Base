@@ -104,7 +104,7 @@ Event instructions monitor and respond to system events including counter/timer 
 
 **Configuration:** [ADDCT1](#addct1), [ADDCT2](#addct1), [ADDCT3](#addct1), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse1), [SETSE3](#setse1), [SETSE4](#setse1)
 
-**Inter-COG:** [COGATN](#cogatn)
+**Inter-cog:** [COGATN](#cogatn)
 
 **Polling:** [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct1), [POLLCT3](#pollct1), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse1), [POLLSE3](#pollse1), [POLLSE4](#pollse1), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
 
@@ -124,9 +124,9 @@ Interrupt instructions control the cog's three-level interrupt system (INT1, INT
 
 ---
 
-## COG Control and Locks {#cog-control-and-locks}
+## Cog Control and Locks {#cog-control-and-locks}
 
-COG control instructions manage cog operations including starting and stopping cogs, querying cog identity, and configuring hub-level system settings. Lock instructions provide mutex-style synchronization primitives for safe inter-cog resource sharing.
+Cog control instructions manage cog operations including starting and stopping cogs, querying cog identity, and configuring hub-level system settings. Lock instructions provide mutex-style synchronization primitives for safe inter-cog resource sharing.
 
 [COGID](#cogid), [COGINIT](#coginit), [COGSTOP](#cogstop), [HUBSET](#hubset), [LOCKNEW](#locknew), [LOCKREL](#lockrel), [LOCKRET](#lockret), [LOCKTRY](#locktry)
 

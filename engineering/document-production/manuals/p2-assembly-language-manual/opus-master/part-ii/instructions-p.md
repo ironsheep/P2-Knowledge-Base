@@ -6,7 +6,7 @@ This section contains all PASM2 instructions beginning with the letter P.
 
 ::: instrheader
 ## POLLATN {#pollatn}
-Poll Attention Event
+Poll Attention event
 
 [Events and Timing](#events-and-timing) - Polls and clears the inter-cog attention event flag.
 :::
@@ -39,7 +39,7 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 ::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
-Poll Counter Event
+Poll Counter event
 
 [Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
@@ -78,7 +78,7 @@ These instructions enable time-based event polling without blocking execution. T
 
 ::: instrheader
 ## POLLFBW {#pollfbw}
-Poll FIFO Block Wrap Event
+Poll FIFO Block Wrap event
 
 [Events and Timing](#events-and-timing) - Polls and clears the FIFO block wrap event flag.
 :::
@@ -103,15 +103,15 @@ Poll FIFO Block Wrap Event
 
 POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
+The FIFO-interface-block-wrap event flag is set whenever the hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-This instruction enables circular buffer management for high-speed Hub RAM transfers.
+This instruction enables circular buffer management for high-speed hub RAM transfers.
 
 
 
 ::: instrheader
 ## POLLINT {#pollint}
-Poll Interrupt Event
+Poll Interrupt event
 
 [Events and Timing](#events-and-timing) - Polls and clears the interrupt-occurred event flag.
 :::
@@ -144,7 +144,7 @@ This instruction enables non-blocking interrupt handling.
 
 ::: instrheader
 ## POLLPAT {#pollpat}
-Poll Pin Pattern Event
+Poll Pin Pattern event
 
 [Events and Timing](#events-and-timing) - Polls and clears the pin pattern match event flag.
 :::
@@ -177,7 +177,7 @@ This instruction enables non-blocking pattern detection on input pins.
 
 ::: instrheader
 ## POLLQMT {#pollqmt}
-Poll CORDIC Empty Event
+Poll CORDIC Empty event
 
 [Events and Timing](#events-and-timing) - Polls and clears the CORDIC empty event flag.
 :::
@@ -210,7 +210,7 @@ This instruction enables error detection for CORDIC operations.
 
 ::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
-Poll Selectable Event
+Poll Selectable event
 
 [Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
@@ -251,7 +251,7 @@ The P2 provides four independent selectable event generators that can be configu
 
 ::: instrheader
 ## POLLXFI {#pollxfi}
-Poll Streamer Finished Event
+Poll Streamer Finished event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer finished event flag.
 :::
@@ -284,7 +284,7 @@ This instruction enables non-blocking management of the streamer subsystem.
 
 ::: instrheader
 ## POLLXMT {#pollxmt}
-Poll Streamer Empty Event
+Poll Streamer Empty event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer empty event flag.
 :::
@@ -317,7 +317,7 @@ This instruction enables pipelined streamer operations.
 
 ::: instrheader
 ## POLLXRL {#pollxrl}
-Poll Streamer LUT Rollover Event
+Poll streamer LUT Rollover event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer LUT rollover event flag.
 :::
@@ -350,7 +350,7 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 
 ::: instrheader
 ## POLLXRO {#pollxro}
-Poll Streamer NCO Rollover Event
+Poll streamer NCO Rollover event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer NCO rollover event flag.
 :::
@@ -419,16 +419,16 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 
 ::: instrheader
 ## POPA {#popa}
-Pop From Hub Stack A
+Pop From hub stack A
 
-[Hub Memory Access](#hub-memory-access) - Pops a long from Hub memory using PTRA as stack pointer.
+[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRA as stack pointer.
 :::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** Dest receives the long value from Hub address --PTRA.
+**Result:** Dest receives the long value from hub address --PTRA.
 
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
@@ -443,28 +443,28 @@ Pop From Hub Stack A
 
 **Explanation:**
 
-POPA reads a long from Hub address --PTRA into the destination register Dest. PTRA is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHA's post-increment write to PTRA++, this implements an ascending stack that grows upward in memory (toward higher addresses).
+POPA reads a long from hub address --PTRA into the destination register Dest. PTRA is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHA's post-increment write to PTRA++, this implements an ascending stack that grows upward in memory (toward higher addresses).
 
 If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-This instruction enables Hub RAM-based stacks for deep subroutine nesting and large temporary storage.
+This instruction enables hub RAM-based stacks for deep subroutine nesting and large temporary storage.
 
 
 
 ::: instrheader
 ## POPB {#popb}
-Pop From Hub Stack B
+Pop From hub stack B
 
-[Hub Memory Access](#hub-memory-access) - Pops a long from Hub memory using PTRB as stack pointer.
+[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRB as stack pointer.
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** Dest receives the long value from Hub address --PTRB.
+**Result:** Dest receives the long value from hub address --PTRB.
 
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
@@ -479,13 +479,13 @@ Pop From Hub Stack B
 
 **Explanation:**
 
-POPB reads a long from Hub address --PTRB into the destination register Dest. PTRB is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHB's post-increment write to PTRB++, this implements an ascending stack that grows upward (toward higher addresses) in memory.
+POPB reads a long from hub address --PTRB into the destination register Dest. PTRB is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHB's post-increment write to PTRB++, this implements an ascending stack that grows upward (toward higher addresses) in memory.
 
 If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
+Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
 
@@ -522,16 +522,16 @@ The P2 provides a single-level internal stack register K that is automatically u
 
 ::: instrheader
 ## PUSHA {#pusha}
-Push To Hub Stack A
+Push To hub stack A
 
-[Hub Memory Access](#hub-memory-access) - Pushes a long to Hub memory using PTRA as stack pointer.
+[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRA as stack pointer.
 :::
 
 **PUSHA**  *{#}Dest*
 
 ---
 
-**Result:** The long value from Dest is written to Hub address PTRA++.
+**Result:** The long value from Dest is written to hub address PTRA++.
 
 - Dest is a register or 9-bit immediate value to push.
 
@@ -545,26 +545,26 @@ Push To Hub Stack A
 
 **Explanation:**
 
-PUSHA writes the long value in Dest (or a 9-bit immediate value) to Hub address PTRA++. PTRA is automatically incremented by 4 after the write occurs (post-increment).
+PUSHA writes the long value in Dest (or a 9-bit immediate value) to hub address PTRA++. PTRA is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRA always points to the next available stack location after the push operation.
 
-PUSHA paired with POPA implements an ascending stack in Hub RAM (the pointer advances to higher addresses on each push).
+PUSHA paired with POPA implements an ascending stack in hub RAM (the pointer advances to higher addresses on each push).
 
 
 
 ::: instrheader
 ## PUSHB {#pushb}
-Push To Hub Stack B
+Push To hub stack B
 
-[Hub Memory Access](#hub-memory-access) - Pushes a long to Hub memory using PTRB as stack pointer.
+[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRB as stack pointer.
 :::
 
 **PUSHB**  *{#}Dest*
 
 ---
 
-**Result:** The long value from Dest is written to Hub address PTRB++.
+**Result:** The long value from Dest is written to hub address PTRB++.
 
 - Dest is a register or 9-bit immediate value to push.
 
@@ -578,10 +578,10 @@ Push To Hub Stack B
 
 **Explanation:**
 
-PUSHB writes the long value in Dest (or a 9-bit immediate value) to Hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
+PUSHB writes the long value in Dest (or a 9-bit immediate value) to hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
 
-Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
+Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 

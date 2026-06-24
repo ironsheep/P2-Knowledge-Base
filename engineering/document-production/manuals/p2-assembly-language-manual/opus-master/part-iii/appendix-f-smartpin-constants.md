@@ -1,6 +1,6 @@
 # Appendix F: Smart Pin Mode Constants
 
-PASM2 provides an extensive set of predefined constants for configuring the P2's 64 Smart Pins. These constants replace complex 32-bit configuration patterns with readable symbolic names, making SmartPin programming practical and maintainable.
+PASM2 provides an extensive set of predefined constants for configuring the P2's 64 smart pins. These constants replace complex 32-bit configuration patterns with readable symbolic names, making SmartPin programming practical and maintainable.
 
 ## SmartPin Configuration Word Structure
 

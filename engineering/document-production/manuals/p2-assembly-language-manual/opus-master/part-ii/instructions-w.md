@@ -43,7 +43,7 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
-Wait For Counter Event
+Wait For Counter event
 
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
@@ -105,7 +105,7 @@ Wait For FIFO Block Wrap
 
 **Explanation:**
 
-WAITFBW waits for a FIFO-interface-block-wrap event to occur, stalling the pipeline until the event flag is set. The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address.
+WAITFBW waits for a FIFO-interface-block-wrap event to occur, stalling the pipeline until the event flag is set. The FIFO-interface-block-wrap event flag is set whenever the hub RAM FIFO interface exhausts its block count and reloads its block count and start address.
 
 The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
@@ -113,7 +113,7 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 
 ::: instrheader
 ## WAITINT {#waitint}
-Wait For Interrupt
+Wait For interrupt
 
 [Events and Timing](#events-and-timing) - Waits for an interrupt event to occur.
 :::
@@ -180,7 +180,7 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 
 ::: instrheader
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
-Wait For Selectable Event (1, 2, 3, Or 4)
+Wait For Selectable event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
@@ -317,7 +317,7 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 
 ::: instrheader
 ## WAITXRL {#waitxrl}
-Wait For Streamer LUT Rollover
+Wait For streamer LUT Rollover
 
 [Events and Timing](#events-and-timing) - Waits for the streamer LUT RAM rollover event.
 :::
@@ -348,7 +348,7 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 
 ::: instrheader
 ## WAITXRO {#waitxro}
-Wait For Streamer NCO Rollover
+Wait For streamer NCO Rollover
 
 [Events and Timing](#events-and-timing) - Waits for the streamer NCO rollover event.
 :::
@@ -381,7 +381,7 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ## WFBYTE {#wfbyte}
 Write FIFO Byte
 
-[Hub Memory Access](#hub-memory-access) - Writes a byte to the Hub FIFO interface.
+[hub memory Access](#hub-memory-access) - Writes a byte to the hub FIFO interface.
 :::
 
 **WFBYTE**  *{#}Dest*
@@ -402,7 +402,7 @@ Write FIFO Byte
 
 **Explanation:**
 
-WFBYTE writes a byte from Dest[7:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
+WFBYTE writes a byte from Dest[7:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
 Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
@@ -412,7 +412,7 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ## WFLONG {#wflong}
 Write FIFO Long
 
-[Hub Memory Access](#hub-memory-access) - Writes a long to the Hub FIFO interface.
+[hub memory Access](#hub-memory-access) - Writes a long to the hub FIFO interface.
 :::
 
 **WFLONG**  *{#}Dest*
@@ -433,7 +433,7 @@ Write FIFO Long
 
 **Explanation:**
 
-WFLONG writes a long (32-bit value) from Dest[31:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
+WFLONG writes a long (32-bit value) from Dest[31:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
 All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
@@ -443,7 +443,7 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ## WFWORD {#wfword}
 Write FIFO Word
 
-[Hub Memory Access](#hub-memory-access) - Writes a word to the Hub FIFO interface.
+[hub memory Access](#hub-memory-access) - Writes a word to the hub FIFO interface.
 :::
 
 **WFWORD**  *{#}Dest*
@@ -464,7 +464,7 @@ Write FIFO Word
 
 **Explanation:**
 
-WFWORD writes a word (16-bit value) from Dest[15:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
+WFWORD writes a word (16-bit value) from Dest[15:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
 Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
@@ -474,7 +474,7 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ## WMLONG {#wmlong}
 Write Masked Long
 
-[Hub Memory Access](#hub-memory-access) - Writes only non-zero bytes to Hub RAM.
+[hub memory Access](#hub-memory-access) - Writes only non-zero bytes to hub RAM.
 :::
 
 **WMLONG**  *Dest, {#}Src/P*
@@ -496,7 +496,7 @@ Write Masked Long
 
 **Explanation:**
 
-WMLONG writes only non-zero bytes from Dest to Hub RAM at address Src. Each byte in Dest is examined: if the byte is $00, that byte position in Hub RAM is not modified; if the byte is non-zero, it is written to Hub RAM.
+WMLONG writes only non-zero bytes from Dest to hub RAM at address Src. Each byte in Dest is examined: if the byte is $00, that byte position in hub RAM is not modified; if the byte is non-zero, it is written to hub RAM.
 
 This masked write capability is useful for sprite graphics, text overlay, and other applications where selective pixel/byte updates are needed without affecting other data in the same long.
 
@@ -508,7 +508,7 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 ## WRBYTE {#wrbyte}
 Write Byte
 
-[Hub Memory Access](#hub-memory-access) - Writes a byte to Hub RAM.
+[hub memory Access](#hub-memory-access) - Writes a byte to hub RAM.
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
@@ -529,7 +529,7 @@ Write Byte
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 3...10 |
+| Cog / LUT execution | 3...10 |
 | Hub execution | 3...20 |
 
 
@@ -537,9 +537,9 @@ Write Byte
 
 **Explanation:**
 
-WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the lower 8 bits of Dest are written.
+WRBYTE writes the byte in Dest[7:0] to hub RAM at address Src/PTRx. Only the lower 8 bits of Dest are written.
 
-The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
 
 ```pasm2
         WRBYTE  value, ptra++  ' Write byte, increment pointer
@@ -549,7 +549,7 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 
 ::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
-Write Flag To Register
+Write Flag To register
 
 [Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
@@ -595,17 +595,17 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ## WRFAST {#wrfast}
 Write FIFO Setup
 
-[Hub Memory Access](#hub-memory-access) - Configures the Hub FIFO for fast writes.
+[hub memory Access](#hub-memory-access) - Configures the hub FIFO for fast writes.
 :::
 
 **WRFAST**  *{#}Dest, {#}Src*
 
 ---
 
-**Result:** Initializes the Hub FIFO for fast writes. Dest[31] = no wait, Dest[13:0] = block size in 64-byte units (0 = max), Src[19:0] = block start address.
+**Result:** Initializes the hub FIFO for fast writes. Dest[31] = no wait, Dest[13:0] = block size in 64-byte units (0 = max), Src[19:0] = block start address.
 
 - Dest contains configuration: bit 31 = nowait, bits 13:0 = block size.
-- Src contains Hub RAM start address (bits 19:0).
+- Src contains hub RAM start address (bits 19:0).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -617,11 +617,11 @@ Write FIFO Setup
 
 **Explanation:**
 
-WRFAST configures the Hub FIFO interface for fast streaming writes to Hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
+WRFAST configures the hub FIFO interface for fast streaming writes to hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
 
 Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if set, FIFO writes proceed without stalling.
 
-Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written.
+Src[19:0] specifies the starting hub RAM address. The FIFO automatically increments the address as data is written.
 
 ```pasm2
         WRFAST  #0, buffer_addr  ' Set up FIFO write to buffer
@@ -634,7 +634,7 @@ Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increme
 ## WRLONG {#wrlong}
 Write Long
 
-[Hub Memory Access](#hub-memory-access) - Writes a long to Hub RAM.
+[hub memory Access](#hub-memory-access) - Writes a long to hub RAM.
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
@@ -655,7 +655,7 @@ Write Long
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 3...10 |
+| Cog / LUT execution | 3...10 |
 | Hub execution | 3...20 |
 
 
@@ -663,11 +663,11 @@ Write Long
 
 **Explanation:**
 
-WRLONG writes the 32-bit value in Dest to Hub RAM at address Src/PTRx. All 32 bits of Dest are written.
+WRLONG writes the 32-bit value in Dest to hub RAM at address Src/PTRx. All 32 bits of Dest are written.
 
-The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment (minimum 3 cycles when the window is hit). When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment (minimum 3 cycles when the window is hit). When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
 
-Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
+Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to hub RAM in a burst transfer.
 
 ```pasm2
         SETQ    #16-1          ' Set up for 16-long block transfer
@@ -720,7 +720,7 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ## WRPIN {#wrpin}
 Write Pin Mode
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the operating mode of a Smart Pin.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the operating mode of a smart pin.
 :::
 
 **WRPIN**  *{#}Dest, {#}Src*
@@ -742,7 +742,7 @@ Write Pin Mode
 
 **Explanation:**
 
-WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 64 pins has a dedicated Smart Pin module capable of autonomous operation for PWM, serial I/O, pulse measurement, ADC, and many other functions.
+WRPIN configures the operating mode of one or more smart pins. Each of the P2's 64 pins has a dedicated smart pin module capable of autonomous operation for PWM, serial I/O, pulse measurement, ADC, and many other functions.
 
 **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
@@ -770,7 +770,7 @@ WRPIN #0, pin clears all smart pin configuration.
 ## WRWORD {#wrword}
 Write Word
 
-[Hub Memory Access](#hub-memory-access) - Writes a word to Hub RAM.
+[hub memory Access](#hub-memory-access) - Writes a word to hub RAM.
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
@@ -791,7 +791,7 @@ Write Word
 
 | Context | Clocks |
 |:--------|:------:|
-| COG / LUT execution | 3...10 |
+| Cog / LUT execution | 3...10 |
 | Hub execution | 3...20 |
 
 
@@ -799,9 +799,9 @@ Write Word
 
 **Explanation:**
 
-WRWORD writes the word (16-bit value) in Dest[15:0] to Hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
+WRWORD writes the word (16-bit value) in Dest[15:0] to hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
-The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
 
 
 
@@ -809,7 +809,7 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 ## WXPIN {#wxpin}
 Write Pin X Parameter
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the X parameter of a Smart Pin.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the X parameter of a smart pin.
 :::
 
 **WXPIN**  *{#}Dest, {#}Src*
@@ -831,7 +831,7 @@ Write Pin X Parameter
 
 **Explanation:**
 
-WXPIN sets the X parameter of one or more Smart Pins. The X register meaning depends on the smart pin mode:
+WXPIN sets the X parameter of one or more smart pins. The X register meaning depends on the smart pin mode:
 
 - For PWM modes: Sets frame period or duty cycle parameter
 - For serial modes: Controls bit timing and configuration
@@ -846,7 +846,7 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ## WYPIN {#wypin}
 Write Pin Y Parameter
 
-[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the Y parameter of a Smart Pin.
+[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the Y parameter of a smart pin.
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*
@@ -868,7 +868,7 @@ Write Pin Y Parameter
 
 **Explanation:**
 
-WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves multiple purposes depending on smart pin mode:
+WYPIN sets the Y parameter of one or more smart pins. The Y register serves multiple purposes depending on smart pin mode:
 
 - For PWM modes: Sets the base period
 - For SPI/serial modes: Controls data to transmit

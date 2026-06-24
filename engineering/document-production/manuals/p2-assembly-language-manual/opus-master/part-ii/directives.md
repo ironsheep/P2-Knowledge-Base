@@ -8,14 +8,14 @@ The P2 assembler provides 15 directives organized into seven functional categori
 
 ## Origin Control Directives
 
-Origin directives set the memory address where subsequent code or data will be assembled. The P2 distinguishes between COG RAM (0-$1FF), LUT RAM ($200-$3FF), and Hub RAM addresses.
+Origin directives set the memory address where subsequent code or data will be assembled. The P2 distinguishes between cog RAM (0-$1FF), LUT RAM ($200-$3FF), and hub RAM addresses.
 
 ### The $ Symbol (Current Origin)
 
 Within DAT blocks, the `$` symbol represents the current origin address:
 
-- **In COG mode** (after ORG): `$` returns the current COG address in longs (0-$3FF)
-- **In Hub mode** (after ORGH): `$` returns the current Hub address in bytes
+- **In cog mode** (after ORG): `$` returns the current cog address in longs (0-$3FF)
+- **In hub mode** (after ORGH): `$` returns the current hub address in bytes
 
 ```pasm2
 DAT
@@ -30,22 +30,22 @@ DAT
         ' $ = $401 (Hub address $401)
 ```
 
-### COG/LUT Memory Regions
+### Cog/LUT Memory Regions
 
 | Address Range | Memory | Notes |
 |---------------|--------|-------|
-| $000 - $1EF | COG RAM | General purpose registers |
-| $1F0 - $1FF | COG RAM | Special purpose registers (PTRA, DIRA, etc.) |
+| $000 - $1EF | Cog RAM | General purpose registers |
+| $1F0 - $1FF | Cog RAM | Special purpose registers (PTRA, DIRA, etc.) |
 | $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
 ### ORG {#org}
 Set Origin
 
-Sets assembly origin to a specific COG/LUT RAM address.
+Sets assembly origin to a specific cog/LUT RAM address.
 :::
 
-Set the assembly origin to a specific COG or LUT RAM address. All subsequent instructions assemble starting from this address.
+Set the assembly origin to a specific cog or LUT RAM address. All subsequent instructions assemble starting from this address.
 
 #### Syntax
 ```pasm2
@@ -57,26 +57,26 @@ Set the assembly origin to a specific COG or LUT RAM address. All subsequent ins
 #### Parameters
 | Parameter | Range | Description |
 |-----------|-------|-------------|
-| address | 0 to $400 | Starting COG/LUT address (in longs) |
+| address | 0 to $400 | Starting Cog/LUT address (in longs) |
 | limit | 0 to $400 | Maximum address for FIT checking (optional) |
 
 #### Auto-Limit Behavior
 
 1. **Without parameters** (`ORG`):
-   - Sets COG address to 0
-   - Sets limit to $1F8 (standard COG RAM limit, before special registers)
+   - Sets cog address to 0
+   - Sets limit to $1F8 (standard cog RAM limit, before special registers)
 
 2. **With address only** (`ORG address`):
-   - Sets COG address to specified value
+   - Sets cog address to specified value
    - Auto-calculates limit:
-     - If address < $200: limit = $200 (COG RAM boundary)
+     - If address < $200: limit = $200 (cog RAM boundary)
      - If address >= $200: limit = $400 (LUT RAM boundary)
 
 3. **With address and limit** (`ORG address, limit`):
-   - Sets COG address and limit to specified values
+   - Sets cog address and limit to specified values
 
 #### Usage
-Use ORG to position code or data at specific COG/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
+Use ORG to position code or data at specific cog/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
 
 #### Example
 ```pasm2
@@ -103,11 +103,11 @@ lut_code
 | Cannot precede with symbol | `This directive cannot be preceded by a symbol` |
 
 #### Notes
-- ORG affects COG/LUT RAM addresses (range 0-$3FF)
-- For Hub RAM addresses, use ORGH
+- ORG affects cog/LUT RAM addresses (range 0-$3FF)
+- For hub RAM addresses, use ORGH
 - To fill gaps between addresses with zeros, use ORGF
 - ORG sets the address counter without generating any bytes
-- DAT blocks start in Hub mode by default; use ORG to switch to COG mode
+- DAT blocks start in hub mode by default; use ORG to switch to cog mode
 
 ⚠️ **Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
@@ -135,7 +135,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| address | Target COG address to advance to (0-$1FF), filling intervening space with zeros |
+| address | Target Cog address to advance to (0-$1FF), filling intervening space with zeros |
 
 #### Usage
 Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
@@ -169,17 +169,17 @@ block_end
 
 #### Notes
 - ORGF fills the gap with zero bytes/longs to reach the target address
-- ORGF is only valid in COG mode (after ORG), not in Hub mode
+- ORGF is only valid in cog mode (after ORG), not in hub mode
 - Generates assembly error if target address is less than current address
 - ORG only changes the address counter without filling
 - Useful for creating fixed-layout binary structures
 - Essential for interrupt vector tables and memory-mapped structures
 
-⚠️ **Pitfall:** ORGF only works in COG mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
+⚠️ **Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
 
 #### Related Directives
 - [ORG](#org) — Set origin without fill
-- [ORGH](#orgh) — Set Hub RAM origin
+- [ORGH](#orgh) — Set hub RAM origin
 - [FIT](#fit) — Verify code fits
 - [RES](#res) — Reserve space without initialization
 
@@ -189,10 +189,10 @@ block_end
 ### ORGH {#orgh}
 Set Hub Origin
 
-Sets assembly origin to a Hub RAM address.
+Sets assembly origin to a hub RAM address.
 :::
 
-Set the assembly origin to a Hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
+Set the assembly origin to a hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
 
 #### Syntax
 ```pasm2
@@ -232,7 +232,7 @@ Set the assembly origin to a Hub RAM address. All subsequent code and data assem
 The $400 minimum for Spin2 objects reserves space for the Spin2 interpreter.
 
 #### Usage
-Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in Hub RAM. DAT blocks start in Hub mode by default. Use ORGH to explicitly set hub addresses or to switch back to Hub mode after using ORG.
+Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in hub RAM. DAT blocks start in hub mode by default. Use ORGH to explicitly set hub addresses or to switch back to hub mode after using ORG.
 
 #### Example
 ```pasm2
@@ -252,7 +252,7 @@ hubData LONG    $DEADBEEF       ' Hub address $1000
 
 #### Mode Switching
 
-A DAT block can switch between COG and Hub modes multiple times:
+A DAT block can switch between cog and hub modes multiple times:
 
 ```pasm2
 DAT
@@ -285,16 +285,16 @@ hub_data
 | Cannot precede with symbol | `This directive cannot be preceded by a symbol` |
 
 #### Notes
-- ORGH sets Hub RAM addresses for hub-exec code and hub data
+- ORGH sets hub RAM addresses for hub-exec code and hub data
 - Default address is $400 if not specified (in Spin2 objects)
-- Hub-exec code executes directly from Hub RAM without loading into COG
-- After ORGH, use ORG to switch to COG RAM addresses
-- DAT blocks start in Hub mode by default
+- Hub-exec code executes directly from hub RAM without loading into cog
+- After ORGH, use ORG to switch to cog RAM addresses
+- DAT blocks start in hub mode by default
 
-💡 **Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in COG or Hub mode.
+💡 **Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
 
 #### Related Directives
-- [ORG](#org) — Set COG RAM origin
+- [ORG](#org) — Set cog RAM origin
 - [ORGF](#orgf) — Set origin with fill
 - [FIT](#fit) — Verify code fits within limit
 
@@ -751,20 +751,20 @@ DAT
   data_statements
 ```
 
-**Result:** The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.
+**Result:** The next data element is long-aligned in hub RAM by emitting up to three bytes (each $00) prior.
 
 - *code_and_data_statements* are leading program code and/or data.
-- *data_statements* begin long-aligned in Hub RAM.
+- *data_statements* begin long-aligned in hub RAM.
 
 #### Explanation
 
-ALIGNL aligns the next data element to the beginning of the next long of Hub RAM. ALIGNL is important to use when code requires certain data to begin on a long boundary (for access convenience and speed).
+ALIGNL aligns the next data element to the beginning of the next long of hub RAM. ALIGNL is important to use when code requires certain data to begin on a long boundary (for access convenience and speed).
 
 ALIGNL is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
 
-The following creates a data table of a byte ($11), a word ($BBAA), and a long ($44332211) meant for access from Hub RAM.
+The following creates a data table of a byte ($11), a word ($BBAA), and a long ($44332211) meant for access from hub RAM.
 
 ```pasm2
 DAT
@@ -773,7 +773,7 @@ DAT
             long    $44332211
 ```
 
-This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
+This data is emitted into the hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
 ```{=latex}
 \AlignLBeforeDiagram
@@ -836,20 +836,20 @@ DAT
   data_statements
 ```
 
-**Result:** The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.
+**Result:** The next data element is word-aligned in hub RAM by emitting zero or one byte ($00) prior.
 
 - *code_and_data_statements* are leading program code and/or data.
-- *data_statements* begin word-aligned in Hub RAM.
+- *data_statements* begin word-aligned in hub RAM.
 
 #### Explanation
 
-ALIGNW aligns the next data element to the beginning of the next word of Hub RAM. ALIGNW is important to use when code requires certain data to begin on a word boundary (for access convenience and speed).
+ALIGNW aligns the next data element to the beginning of the next word of hub RAM. ALIGNW is important to use when code requires certain data to begin on a word boundary (for access convenience and speed).
 
 ALIGNW is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
 
-The following creates a data table of a byte ($11), two bytes ($AA, $BB), and a long ($44332211) meant for access from Hub RAM.
+The following creates a data table of a byte ($11), two bytes ($AA, $BB), and a long ($44332211) meant for access from hub RAM.
 
 ```pasm2
 DAT
@@ -858,7 +858,7 @@ DAT
             long    $44332211
 ```
 
-This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
+This data is emitted into the hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
 ```{=latex}
 \AlignWBeforeDiagram
@@ -989,7 +989,7 @@ DAT
 #### Notes
 - Requires Spin2 v50 or later — add {Spin2_v50} at the top of the file
 - Requires the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
-- Works in COG, LUT, and ORGH (hub) modes
+- Works in cog, LUT, and ORGH (hub) modes
 - `$$` can be used in any expression: `$$ * 2`, `1 << $$`, `BasePin + $$`
 - Replication occurs at compile time—no runtime overhead
 - Use constants for count to enable configuration: `DITTO NumChannels`
@@ -1004,7 +1004,7 @@ DAT
 
 ## Space Management Directives
 
-Space management directives control memory allocation and verify size constraints. FIT verifies that code fits within specified address limits, while RES reserves COG/LUT RAM space without initialization.
+Space management directives control memory allocation and verify size constraints. FIT verifies that code fits within specified address limits, while RES reserves cog/LUT RAM space without initialization.
 
 ::: dirheader
 ### FIT {#fit}
@@ -1023,11 +1023,11 @@ Verify at compile time that the current address has not exceeded a specified lim
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| limit | Maximum address (in longs for COG mode, bytes for Hub mode) |
+| limit | Maximum address (in longs for Cog mode, bytes for Hub mode) |
 
 #### Behavior by Mode
 
-**In COG Mode (after ORG):**
+**In Cog Mode (after ORG):**
 - `limit` is a long address (0 to $400)
 - Error: `Cog address exceeds FIT limit`
 
@@ -1039,18 +1039,18 @@ Verify at compile time that the current address has not exceeded a specified lim
 
 | Limit | Meaning |
 |-------|---------|
-| `$1F0` | User COG RAM (before special registers) |
-| `$1F8` | COG RAM (with some special registers) |
-| `$200` | Full COG RAM |
-| `$400` | COG + LUT RAM |
+| `$1F0` | User Cog RAM (before special registers) |
+| `$1F8` | Cog RAM (with some special registers) |
+| `$200` | Full Cog RAM |
+| `$400` | Cog + LUT RAM |
 | `496` | Decimal equivalent of $1F0 |
 
 #### Usage
-Use FIT to verify that code does not exceed available space. This is essential for COG code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
+Use FIT to verify that code does not exceed available space. This is essential for cog code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
 
 FIT does nothing if the limit is not exceeded—it is purely a compile-time check.
 
-#### Example: Standard COG Program
+#### Example: Standard Cog Program
 ```pasm2
 DAT
         ORG     0
@@ -1064,7 +1064,7 @@ vars    RES     10
         FIT     $1F0            ' Ensure user area only
 ```
 
-#### Example: Split COG/LUT Program
+#### Example: Split Cog/LUT Program
 ```pasm2
 DAT
         ORG     0
@@ -1112,17 +1112,17 @@ DAT
 | Restriction | Error |
 |-------------|-------|
 | Cannot have a preceding label | `This directive cannot be preceded by a symbol` |
-| Address exceeds COG limit | `Cog address exceeds FIT limit` |
+| Address exceeds Cog limit | `Cog address exceeds FIT limit` |
 | Address exceeds Hub limit | `Hub address exceeds FIT limit` |
 
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
-- Essential for COG code size verification
-- Special registers occupy COG addresses $1F0-$1FF
+- Essential for cog code size verification
+- Special registers occupy cog addresses $1F0-$1FF
 - Use FIT $1F0 to ensure code does not overwrite special registers
-- FIT works in both COG mode and Hub mode
+- FIT works in both cog mode and hub mode
 
-💡 **Tip:** Always add FIT after COG code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
+💡 **Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
 
 #### Related Directives
 - [ORG](#org) — Set origin address
@@ -1135,10 +1135,10 @@ DAT
 ### RES {#res}
 Reserve Space
 
-Allocates COG/LUT RAM without initialization.
+Allocates cog/LUT RAM without initialization.
 :::
 
-Reserve space in COG or LUT RAM without initializing. Allocates memory space but generates no object code.
+Reserve space in cog or LUT RAM without initializing. Allocates memory space but generates no object code.
 
 #### Syntax
 ```pasm2
@@ -1154,13 +1154,13 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 
 #### Key Characteristics
 
-1. **COG Mode Only** - RES only works after ORG, not in ORGH mode
-2. **No Object Code** - RES advances the COG address counter but produces no bytes in the object file
-3. **Uninitialized** - Reserved space contains whatever was previously in COG RAM
+1. **Cog Mode Only** - RES only works after ORG, not in ORGH mode
+2. **No Object Code** - RES advances the cog address counter but produces no bytes in the object file
+3. **Uninitialized** - Reserved space contains whatever was previously in cog RAM
 4. **Long-Aligned** - RES advances to the next long boundary before reserving
 
 #### Usage
-Use RES to allocate variables and buffers in COG RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in COG/LUT RAM—Hub RAM variables must use LONG with initial values or be allocated at runtime.
+Use RES to allocate variables and buffers in cog RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in cog/LUT RAM—hub RAM variables must use LONG with initial values or be allocated at runtime.
 
 #### Example
 ```pasm2
@@ -1200,7 +1200,7 @@ x       RES     1               ' x occupies 1 long
 | Initializes memory | No | Yes (to 0) |
 | Generates object code | No | Yes |
 | Valid in ORGH mode | No | Yes |
-| Use case | COG working registers | Initialized data |
+| Use case | Cog working registers | Initialized data |
 
 #### Working with Spin2 Structures
 
@@ -1221,14 +1221,14 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 | Exceeds limit | `Cog address exceeds limit` |
 
 #### Notes
-- RES only reserves space in COG/LUT RAM (not Hub RAM)
-- No Hub memory is allocated or affected
+- RES only reserves space in cog/LUT RAM (not hub RAM)
+- No hub memory is allocated or affected
 - Useful for variables and buffers that will be initialized at runtime
 - Advances address counter by count longs without generating binary data
-- Use LONG to declare initialized data in Hub RAM
+- Use LONG to declare initialized data in hub RAM
 - SIZEOF() enables correct sizing when working with Spin2 structures
 
-⚠️ **Pitfall:** RES cannot be used in Hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
+⚠️ **Pitfall:** RES cannot be used in hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data
@@ -1274,7 +1274,7 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 
 | Directive | Execution Location | Speed | Address Space |
 |-----------|-------------------|-------|---------------|
-| ORG | COG RAM | Fastest | $000-$11F (limited) |
+| ORG | Cog RAM | Fastest | $000-$11F (limited) |
 | ORGH | Hub RAM | Fast | Larger |
 
 #### Example: Pin Toggle
@@ -1372,7 +1372,7 @@ Programs using fewer than 32 software tasks leave the *lower* portion of `$100..
 💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
 
 #### Related Directives
-- [ORG](#org) — Set COG/LUT origin (begins inline block in methods)
+- [ORG](#org) — Set cog/LUT origin (begins inline block in methods)
 - [ORGH](#orgh) — Set hub origin (begins hub-exec inline block)
 
 

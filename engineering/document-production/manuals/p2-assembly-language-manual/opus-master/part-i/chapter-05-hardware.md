@@ -1,6 +1,6 @@
 # Chapter 5: Special Hardware Overview
 
-The P2 includes specialized hardware subsystems that extend beyond basic instruction execution. Understanding these subsystems enables advanced applications: the CORDIC coprocessor accelerates mathematical operations, Smart Pins provide programmable I/O peripherals, the Streamer enables high-speed data movement, events support responsive programming, hardware locks coordinate multi-COG applications, and debug hardware assists development. This chapter provides an overview of each subsystem; detailed instruction usage is covered in Part II, and complete subsystem documentation is available in specialized manuals.
+The P2 includes specialized hardware subsystems that extend beyond basic instruction execution. Understanding these subsystems enables advanced applications: the CORDIC coprocessor accelerates mathematical operations, smart pins provide programmable I/O peripherals, the streamer enables high-speed data movement, events support responsive programming, hardware locks coordinate multi-cog applications, and debug hardware assists development. This chapter provides an overview of each subsystem; detailed instruction usage is covered in Part II, and complete subsystem documentation is available in specialized manuals.
 
 
 ## 5.1 CORDIC Coprocessor {#cordic-overview}
@@ -35,11 +35,11 @@ CORDIC operations follow a three-step pattern: queue the operation, wait for com
         getqy   product_hi                  ' Get high 32 bits
 ```
 
-The 55-clock computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
+The 55-clock computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the cog to execute unrelated instructions during the computation period.
 
 ### 5.1.3 CORDIC Pipelining
 
-The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clocks. The pipeline is 54 stages deep; results are available 55 clocks after queuing (1 clock to enter the pipeline, 54 clocks to process). With 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
+The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each cog receives a CORDIC access slot every 8 clocks. The pipeline is 54 stages deep; results are available 55 clocks after queuing (1 clock to enter the pipeline, 54 clocks to process). With 8-clock access intervals, a single cog can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
 
 ### 5.1.4 The Pipeline Phases
 
@@ -80,7 +80,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 ### 5.1.5 Result Retrieval Timing
 
-The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the COG stalls until the result becomes available. This automatic stalling simplifies programming—you need not count cycles precisely—but can impact performance if you retrieve too early.
+The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the cog stalls until the result becomes available. This automatic stalling simplifies programming—you need not count cycles precisely—but can impact performance if you retrieve too early.
 
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
@@ -90,7 +90,7 @@ For non-blocking result checking, use POLLQMT to test whether the CORDIC pipelin
         if_nc   getqx   result              ' Retrieve if available
 ```
 
-The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
+The CORDIC generates event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
 
 ### 5.1.6 Practical Pipelining Example
 
@@ -201,11 +201,11 @@ The large instruction count (99) creates an interrupt-free zone that terminates 
 
 ## 5.2 Smart Pins
 
-The P2 provides 64 Smart Pins, one per I/O pin, each containing a complete programmable peripheral. Smart Pins eliminate the need for external support chips in many applications—a single Smart Pin can implement a UART transmitter and receiver, generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each Smart Pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The Smart Pin architecture offloads I/O processing from the COG, allowing precise timing and continuous operation without software intervention.
+The P2 provides 64 smart pins, one per I/O pin, each containing a complete programmable peripheral. Smart pins eliminate the need for external support chips in many applications—a single smart pin can implement a UART transmitter and receiver, generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each smart pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The smart pin architecture offloads I/O processing from the cog, allowing precise timing and continuous operation without software intervention.
 
 ### 5.2.1 Smart Pin Architecture
 
-Each Smart Pin integrates multiple hardware components that work together to implement various I/O functions:
+Each smart pin integrates multiple hardware components that work together to implement various I/O functions:
 
 - **Configurable I/O circuitry:** Programmable pull-up/down resistors, output drivers, and high-impedance (floating) modes
 - **Mode selection logic:** 32 distinct operating modes covering digital, analog, serial, and timing applications
@@ -214,11 +214,11 @@ Each Smart Pin integrates multiple hardware components that work together to imp
 - **ADC hardware:** Analog-to-digital conversion using sigma-delta and comparator techniques
 - **Timing hardware:** Counters and comparators for precise edge detection and pulse generation
 
-The Smart Pin's autonomous operation is particularly significant. Once configured, a Smart Pin operates independently of the COG—a UART Smart Pin transmits and receives bytes, a PWM Smart Pin generates continuous waveforms, an encoder Smart Pin tracks position changes, all without ongoing CPU attention. The COG interacts with Smart Pins only when new data arrives or new output is needed.
+The smart pin's autonomous operation is particularly significant. Once configured, a smart pin operates independently of the cog—a UART smart pin transmits and receives bytes, a PWM smart pin generates continuous waveforms, an encoder smart pin tracks position changes, all without ongoing CPU attention. The cog interacts with smart pins only when new data arrives or new output is needed.
 
 ### 5.2.2 Smart Pin Modes
 
-Smart Pins support 32 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
+Smart pins support 32 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
 | Category | Example Modes | Typical Applications |
 |----------|---------------|----------------------|
@@ -229,15 +229,15 @@ Smart Pins support 32 distinct modes organized into functional categories. Each 
 | Timing | Period measurement, pulse width measurement, timeout | Frequency measurement, event timing, watchdog |
 | Quadrature | Quadrature encoder input | Rotary encoder reading, motor position feedback |
 
-Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the Smart Pin's operation.
+Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the smart pin's operation.
 
 ### 5.2.3 Smart Pin Instructions
 
-Smart Pin operation involves three phases: configuration, communication, and direction/output control. PASM2 provides dedicated instructions for each phase.
+Smart pin operation involves three phases: configuration, communication, and direction/output control. PASM2 provides dedicated instructions for each phase.
 
 **Configuration Instructions:**
 
-Configuration establishes the Smart Pin's operating mode and parameters:
+Configuration establishes the smart pin's operating mode and parameters:
 
 - **WRPIN** - Write pin mode (selects one of 32 operating modes)
 - **WXPIN** - Write X parameter (mode-specific configuration value)
@@ -247,13 +247,13 @@ The three-register configuration pattern (mode, X, Y) provides each mode with su
 
 **Communication Instructions:**
 
-Communication instructions transfer data between the COG and Smart Pin:
+Communication instructions transfer data between the cog and smart pin:
 
-- **RDPIN** - Read Smart Pin data and acknowledge (clears ready flag)
-- **RQPIN** - Read Smart Pin data without acknowledge (preserves ready flag)
+- **RDPIN** - Read smart pin data and acknowledge (clears ready flag)
+- **RQPIN** - Read smart pin data without acknowledge (preserves ready flag)
 - **AKPIN** - Acknowledge only (clears ready flag without reading)
 
-The read-and-acknowledge pattern prevents missing data. A Smart Pin sets its ready flag when new data arrives; RDPIN retrieves the data and clears the flag in one atomic operation. RQPIN allows checking values without consuming data, useful for monitoring inputs.
+The read-and-acknowledge pattern prevents missing data. A smart pin sets its ready flag when new data arrives; RDPIN retrieves the data and clears the flag in one atomic operation. RQPIN allows checking values without consuming data, useful for monitoring inputs.
 
 **Direction and Output Control Instructions:**
 
@@ -268,23 +268,23 @@ Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:
 
 ### 5.2.4 Smart Pin Documentation
 
-Smart Pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete Smart Pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 I/O & Smart Pins User Guide** (`p2-io-and-smart-pins-user-guide`). That guide provides essential reference material for Smart Pin programming.
+Smart pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete smart pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 I/O & Smart Pins User Guide** (`p2-io-and-smart-pins-user-guide`). That guide provides essential reference material for smart pin programming.
 
 
 ## 5.3 Streamer {#streamer-overview}
 
-The Streamer provides DMA-like high-speed data movement between Hub memory and I/O pins. While Smart Pins handle byte-level serial I/O, the Streamer specializes in bulk data transfer at rates matching the system clock—transferring pixels to displays, streaming audio samples to DACs, generating complex waveforms, or receiving high-speed ADC data. The Streamer operates autonomously once configured, fetching data from Hub memory and delivering it to output pins (or capturing from input pins) without COG intervention. This frees the COG to perform computations while data flows continuously.
+The streamer provides DMA-like high-speed data movement between hub memory and I/O pins. While smart pins handle byte-level serial I/O, the streamer specializes in bulk data transfer at rates matching the system clock—transferring pixels to displays, streaming audio samples to DACs, generating complex waveforms, or receiving high-speed ADC data. The streamer operates autonomously once configured, fetching data from hub memory and delivering it to output pins (or capturing from input pins) without cog intervention. This frees the cog to perform computations while data flows continuously.
 
 ### 5.3.1 Streamer Capabilities
 
-The Streamer excels at applications requiring continuous data flow at precise timing:
+The streamer excels at applications requiring continuous data flow at precise timing:
 
 - **RGB/pixel streaming:** Driving LED panels, VGA displays, or other parallel pixel interfaces requiring continuous refresh
-- **ADC/DAC streaming:** Audio applications where sample streams flow continuously between Hub memory and audio hardware
+- **ADC/DAC streaming:** Audio applications where sample streams flow continuously between hub memory and audio hardware
 - **Waveform generation:** Creating complex analog waveforms through DAC output, including modulated signals
 - **High-speed data acquisition:** Capturing parallel data from external ADCs or digital sensors
 
-The Streamer's key characteristic is autonomy—once initialized with a Hub memory address and transfer parameters, it fetches and outputs data without further CPU involvement. The COG can prepare the next buffer, perform signal processing on captured data, or execute unrelated tasks while the Streamer handles data movement.
+The streamer's key characteristic is autonomy—once initialized with a hub memory address and transfer parameters, it fetches and outputs data without further CPU involvement. The cog can prepare the next buffer, perform signal processing on captured data, or execute unrelated tasks while the streamer handles data movement.
 
 ### 5.3.2 Streamer Instructions
 
@@ -295,14 +295,14 @@ Streamer operation involves configuration, initiation, and control. The instruct
 - **SETXFRQ** - Set streamer frequency (controls output sample rate)
 - **XINIT** - Initialize streamer transfer (configures mode and starts first transfer)
 - **XCONT** - Continue streamer operation (starts next transfer using current configuration)
-- **XZERO** - Zero-fill streamer output (outputs zeros without fetching Hub data)
+- **XZERO** - Zero-fill streamer output (outputs zeros without fetching hub data)
 - **XSTOP** - Stop streamer (halts transfer operation)
 
-The typical pattern initializes the Streamer with XINIT for the first buffer, then uses XCONT to chain subsequent buffers. SETXFRQ establishes the output timing, critical for audio sample rates or display refresh timing. XZERO allows inserting silence in audio streams or blanking periods in video signals without transferring Hub data.
+The typical pattern initializes the streamer with XINIT for the first buffer, then uses XCONT to chain subsequent buffers. SETXFRQ establishes the output timing, critical for audio sample rates or display refresh timing. XZERO allows inserting silence in audio streams or blanking periods in video signals without transferring hub data.
 
 ### 5.3.3 Streamer Modes
 
-The Streamer supports multiple operating modes, each optimized for specific data transfer patterns:
+The streamer supports multiple operating modes, each optimized for specific data transfer patterns:
 
 | Mode | Purpose | Typical Application |
 |------|---------|---------------------|
@@ -311,7 +311,7 @@ The Streamer supports multiple operating modes, each optimized for specific data
 | RF mode | Radio frequency output generation | RF signal generation, modulation |
 | Goertzel mode | DSP filtering during transfer | Frequency detection, tone decoding |
 
-Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets Hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns.
+Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns.
 
 ### 5.3.4 Streamer Configuration
 
@@ -326,12 +326,12 @@ Streamer commands are built by combining mode constants using OR operations. The
 
 The naming pattern `X_[source][size]_[pins]P_[dacs]DAC[bits]` describes the complete data path. For example, `X_RFBYTE_RGB8` reads bytes from hub RAM and interprets them as RGB 3:3:2 color values.
 
-**Complete X_* constant documentation, including all 78 mode constants with values and descriptions, appears in Appendix F (Streamer Mode Constants).** That appendix provides the detailed reference needed to configure the Streamer for specific applications, including usage examples for video streaming, audio DAC output, and ADC capture.
+**Complete X_* constant documentation, including all 78 mode constants with values and descriptions, appears in Appendix F (Streamer Mode Constants).** That appendix provides the detailed reference needed to configure the streamer for specific applications, including usage examples for video streaming, audio DAC output, and ADC capture.
 
 
 ## 5.4 Events and Interrupts
 
-The P2 supports event-driven programming through a comprehensive event system. Events notify code when specific conditions occur: counters reach target values, I/O pins match patterns, the Streamer completes transfers, the CORDIC finishes computations, or other COGs request attention. The P2 provides two response mechanisms: polling (checking event flags in code) and interrupts (automatic vectoring to handler code). The architecture favors polling—with 8 COGs available, dedicating one COG to event monitoring often provides better response than interrupt overhead. Interrupts remain available when needed, offering three priority levels for nested interrupt handling.
+The P2 supports event-driven programming through a comprehensive event system. Events notify code when specific conditions occur: counters reach target values, I/O pins match patterns, the streamer completes transfers, the CORDIC finishes computations, or other cogs request attention. The P2 provides two response mechanisms: polling (checking event flags in code) and interrupts (automatic vectoring to handler code). The architecture favors polling—with 8 cogs available, dedicating one cog to event monitoring often provides better response than interrupt overhead. Interrupts remain available when needed, offering three priority levels for nested interrupt handling.
 
 ### 5.4.1 Event Sources
 
@@ -339,7 +339,7 @@ The P2 defines numerous event sources, each representing a distinct hardware con
 
 | Event | Source | Typical Use |
 |-------|--------|-------------|
-| INT1, INT2, INT3 | Software-triggered interrupts | Inter-COG signaling, priority events |
+| INT1, INT2, INT3 | Software-triggered interrupts | Inter-Cog signaling, priority events |
 | CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
 | SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
 | PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
@@ -348,7 +348,7 @@ The P2 defines numerous event sources, each representing a distinct hardware con
 | XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
 | XRO | Streamer rollover | Circular buffer management |
 | XRL | Streamer read LUT $1FF | LUT-wrap timing event |
-| ATN | Attention from another COG | Inter-COG communication |
+| ATN | Attention from another Cog | Inter-Cog communication |
 | QMT | CORDIC operation complete | Math coprocessor completion |
 
 Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation).
@@ -371,21 +371,21 @@ Interrupt setup involves two steps: configuring the interrupt source and enablin
 
 - **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
 - **STALLI** - Stall (disable) interrupt processing
-- **ALLOWI** - Allow (enable) interrupt processing (default on COG start)
+- **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
 
 Each interrupt level (1, 2, 3) has independent configuration. Level 3 can interrupt level 2; level 2 can interrupt level 1; level 1 can interrupt normal execution. This provides priority-based interrupt handling when multiple urgent events require service.
 
 ### 5.4.3 Event Waiting
 
-Wait instructions block execution until the specified event occurs. The COG halts, consuming minimal power, until the event flag sets:
+Wait instructions block execution until the specified event occurs. The cog halts, consuming minimal power, until the event flag sets:
 
 - **WAITSE1, WAITSE2, WAITSE3, WAITSE4** - Wait for selectable event
 - **WAITINT** - Wait for any interrupt to occur
 - **WAITCT1, WAITCT2, WAITCT3** - Wait for counter event
-- **WAITATN** - Wait for attention from another COG
+- **WAITATN** - Wait for attention from another cog
 - **WAITPAT** - Wait for pin pattern match
 
-Wait instructions provide deterministic event response—the next instruction executes immediately after the event occurs. This pattern works well for COGs dedicated to event handling, where blocking behavior is acceptable.
+Wait instructions provide deterministic event response—the next instruction executes immediately after the event occurs. This pattern works well for cogs dedicated to event handling, where blocking behavior is acceptable.
 
 ### 5.4.4 Event Polling
 
@@ -409,12 +409,12 @@ This pattern branches to handler code only when the event occurred.
 
 ### 5.4.5 Interrupt Philosophy
 
-The P2's 8-COG architecture fundamentally changes interrupt philosophy. Traditional single-processor systems use interrupts because no other mechanism provides responsive event handling—the single CPU must interrupt current work to handle urgent events. The P2 offers an alternative: dedicate a COG to event monitoring. A COG waiting for events responds with zero latency when events occur, requires no context save/restore overhead, and introduces no interrupt-related bugs. The COG dedicated to event handling becomes the "interrupt handler," continuously available.
+The P2's 8-cog architecture fundamentally changes interrupt philosophy. Traditional single-processor systems use interrupts because no other mechanism provides responsive event handling—the single CPU must interrupt current work to handle urgent events. The P2 offers an alternative: dedicate a cog to event monitoring. A cog waiting for events responds with zero latency when events occur, requires no context save/restore overhead, and introduces no interrupt-related bugs. The cog dedicated to event handling becomes the "interrupt handler," continuously available.
 
 Interrupts remain valuable in specific scenarios:
 
-- **Emergency response:** Hardware failure detection requiring immediate response across all COGs
-- **Resource constraints:** When 8 COGs are fully utilized and event handling must share a COG
+- **Emergency response:** Hardware failure detection requiring immediate response across all cogs
+- **Resource constraints:** When 8 cogs are fully utilized and event handling must share a cog
 - **Legacy patterns:** When porting code from single-processor architectures
 
 When interrupts are necessary, the P2's three priority levels enable nested interrupt handling. A high-priority interrupt can preempt a low-priority handler, ensuring critical events receive immediate attention even during other interrupt processing.
@@ -422,7 +422,7 @@ When interrupts are necessary, the P2's three priority levels enable nested inte
 
 ## 5.5 Locks and Synchronization
 
-The P2 provides 16 hardware locks for inter-COG synchronization. When multiple COGs access shared resources—Hub memory data structures, Smart Pin configurations, or hardware peripherals—locks ensure mutual exclusion, preventing race conditions and data corruption. Hardware locks offer atomic test-and-set operations that software alone cannot provide. A COG attempting to acquire a held lock receives immediate notification rather than unknowingly accessing contested resources. The 16 locks support complex applications where multiple COGs coordinate access to numerous shared resources.
+The P2 provides 16 hardware locks for inter-cog synchronization. When multiple cogs access shared resources—hub memory data structures, smart pin configurations, or hardware peripherals—locks ensure mutual exclusion, preventing race conditions and data corruption. Hardware locks offer atomic test-and-set operations that software alone cannot provide. A cog attempting to acquire a held lock receives immediate notification rather than unknowingly accessing contested resources. The 16 locks support complex applications where multiple cogs coordinate access to numerous shared resources.
 
 ### 5.5.1 Lock Operations
 
@@ -433,9 +433,9 @@ Four instructions manage the complete lock lifecycle: allocation, acquisition, r
 | LOCKNEW | Allocate a new lock from the pool | C=0 if lock allocated, C=1 if pool empty |
 | LOCKRET | Return a lock to the pool | Lock becomes available for reallocation |
 | LOCKTRY | Try to acquire a lock | C=0 if already held/failed, C=1 if now acquired |
-| LOCKREL | Release a held lock | Lock becomes available for other COGs |
+| LOCKREL | Release a held lock | Lock becomes available for other Cogs |
 
-The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from the pool of available locks; LOCKRET returns the lock for reuse. This ensures lock IDs remain valid—if COG A uses lock 5, no other COG receives lock 5 from LOCKNEW until COG A returns it via LOCKRET.
+The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from the pool of available locks; LOCKRET returns the lock for reuse. This ensures lock IDs remain valid—if Cog A uses lock 5, no other cog receives lock 5 from LOCKNEW until Cog A returns it via LOCKRET.
 
 ### 5.5.2 Lock Usage Pattern
 
@@ -460,15 +460,15 @@ critical_section
 done            lockret lock_id                 ' Return lock to pool
 ```
 
-The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this COG has exclusive access—all other COGs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
+The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this cog has exclusive access—all other cogs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
 
 ### 5.5.3 Lock Synchronization Use Cases
 
-Locks solve multiple classes of multi-COG coordination problems:
+Locks solve multiple classes of multi-cog coordination problems:
 
 **Shared Data Structures:**
 
-When multiple COGs read and modify Hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
+When multiple cogs read and modify hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
 
 ```pasm2
                 locktry queue_lock      wc
@@ -479,11 +479,11 @@ When multiple COGs read and modify Hub memory data structures (queues, buffers, 
                 lockrel queue_lock              ' Complete atomic update
 ```
 
-Without the lock, two COGs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
+Without the lock, two cogs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
 
 **Hardware Resource Arbitration:**
 
-When multiple COGs share hardware resources (specific Smart Pin, display controller, audio output), locks coordinate exclusive access:
+When multiple cogs share hardware resources (specific smart pin, display controller, audio output), locks coordinate exclusive access:
 
 ```pasm2
                 locktry display_lock    wc      ' Acquire display
@@ -525,7 +525,7 @@ Each 32-bit LUT entry contains:
 
 | Bits | Content |
 |------|---------|
-| [9:0] | Handler address in COG/LUT RAM |
+| [9:0] | Handler address in Cog/LUT RAM |
 | [31:10] | SKIPF pattern (22 bits) |
 
 EXECF simultaneously branches and applies the skip pattern.
@@ -546,7 +546,7 @@ Smaller modes conserve LUT space. A compressed mode allows mixing individual and
 
 ### 5.6.4 Handler Requirements
 
-- **Location:** COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
+- **Location:** Cog RAM ($000-$1FF) or LUT RAM ($200-$3FF)
 - **Exit:** Must end with RET or _RET_
 - **Registers:** PA contains bytecode value; PB contains FIFO pointer
 
@@ -564,7 +564,7 @@ At reset, the P2 initializes to a known state before any user code executes:
 | Resource | Initial State |
 |----------|---------------|
 | Clock source | RCFAST (~20-30 MHz (typically ~24 MHz) internal RC oscillator) |
-| All COGs | Stopped (except COG 0) |
+| All Cogs | Stopped (except Cog 0) |
 | Hub RAM | Undefined contents |
 | I/O pins | High-impedance (floating) |
 | 64-bit counter | Cleared to zero |
@@ -628,7 +628,7 @@ The pins are available for user code to configure and use—but practical usage 
 
 ### 5.7.4 The Boot Sequence
 
-After reset, COG 0 loads and executes the boot ROM program (ROM_Booter.spin2). The boot sequence proceeds as follows:
+After reset, cog 0 loads and executes the boot ROM program (ROM_Booter.spin2). The boot sequence proceeds as follows:
 
 **Step 1: Check for SPI Flash**
 
@@ -637,7 +637,7 @@ If an external pull-up is detected on P61, the booter attempts SPI flash boot:
 1. Load the first 1024 bytes (256 longs) from SPI flash into hub RAM at $00000
 2. Compute the 32-bit sum of these 256 longs
 3. If the sum equals "Prop" ($706F7250), the data is valid:
-   - Copy the 256 longs from hub to COG 0 registers $000-$0FF
+   - Copy the 256 longs from hub to cog 0 registers $000-$0FF
    - If P59 is pulled down: execute immediately (`JMP #$000`)
    - Otherwise: wait for serial commands (100ms timeout), then execute
 
@@ -649,14 +649,14 @@ If SPI boot is not configured or fails checksum validation, the booter enters se
 2. Auto-detect baud rate from incoming data (9600 to 2,000,000 baud)
 3. Accept commands for up to 60 seconds
 4. If a valid program loads: execute via `COGINIT #0,#0`
-5. If timeout expires with no valid program: switch to RCSLOW (~20 kHz) and halt COG 0
+5. If timeout expires with no valid program: switch to RCSLOW (~20 kHz) and halt cog 0
 
 **Step 3: Program Execution**
 
 Once valid code is loaded, the booter launches it:
 
-- For SPI/SD boot: `JMP #$000` executes code now in COG 0's registers
-- For serial boot: `COGINIT #0,#0` relaunches COG 0 from hub address $00000
+- For SPI/SD boot: `JMP #$000` executes code now in cog 0's registers
+- For serial boot: `COGINIT #0,#0` relaunches cog 0 from hub address $00000
 
 In both cases, user code begins executing with the clock still in RCFAST mode. The program must configure the desired clock source if different timing is required.
 
@@ -718,7 +718,7 @@ The HUBSET instruction can trigger a hardware reset, returning the chip to the b
                                                     '  reboot chip
 ```
 
-This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
+This performs a full hardware reset—all cogs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
 
 
 ## 5.8 DEBUG Output
@@ -762,9 +762,9 @@ DEBUG supports graphical display windows including:
 
 Visual displays use a two-phase pattern: creation statement (with display type) establishes the window, update statements (backtick + name) send data points.
 
-### 5.8.4 Multi-COG Programs
+### 5.8.4 Multi-Cog Programs
 
-When multiple COGs execute DEBUG statements, the system automatically prefixes each message with the COG number (Cog0: through Cog7:). This applies to text output only; visual displays are typically dedicated to specific COGs.
+When multiple cogs execute DEBUG statements, the system automatically prefixes each message with the cog number (Cog0: through Cog7:). This applies to text output only; visual displays are typically dedicated to specific cogs.
 
 ### 5.8.5 Performance Considerations
 
@@ -809,9 +809,9 @@ DEBUG_MASK and DEBUG_COGS operate at different levels:
 | Constant | Level | Controls |
 |----------|-------|----------|
 | DEBUG_MASK | Compile-time | Whether `debug[N]()` generates code |
-| DEBUG_COGS | Runtime | Whether a COG can produce debug output |
+| DEBUG_COGS | Runtime | Whether a Cog can produce debug output |
 
-For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing COG must have its bit set in DEBUG_COGS.
+For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing cog must have its bit set in DEBUG_COGS.
 
 **See:** Appendix E (Debug Configuration Constants) for complete constant documentation including DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD, and breakpoint configuration.
 
