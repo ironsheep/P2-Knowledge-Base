@@ -243,35 +243,46 @@ local function is_english_context(word, prev_word, next_word, suffix)
 
   -- "test" as verb: "test the", "to test", "will test"
   if w == "test" then
+    if next == "instruction" or next == "performs" or next == "bits" then
+      return false
+    end
     if prev == "to" or prev == "will" or prev == "can" or prev == "could" or
        prev == "would" or prev == "should" or prev == "must" or prev == "the" or
-       prev == "a" then
+       prev == "a" or prev == "up" or prev == "unit" or prev == "each" or
+       prev == "one" or prev == "first" or prev == "smoke" or prev == "self" or
+       prev == "quick" or prev == "every" or prev == "manual" then
       return true
     end
     if next == "the" or next == "a" or next == "an" or next == "this" or
        next == "that" or next == "it" or next == "whether" or next == "if" or
-       next == "for" then
+       next == "for" or next == "per" or next == "case" or next == "cases" or
+       next == "suite" or next == "fails" or next == "passes" or next == "harness" or
+       next == "rig" or next == "bench" or next == "first" then
       return true
-    end
-    if next == "instruction" or next == "performs" or next == "bits" then
-      return false
     end
     return false
   end
 
   -- "call" as verb: "call the", "to call", "will call"
   if w == "call" then
+    if next == "instruction" or next == "performs" then
+      return false
+    end
     if prev == "to" or prev == "will" or prev == "can" or prev == "could" or
        prev == "would" or prev == "should" or prev == "must" or prev == "a" or
-       prev == "the" or prev == "function" or prev == "subroutine" then
+       prev == "the" or prev == "function" or prev == "subroutine" or
+       prev == "drivers" or prev == "driver" or prev == "they" or prev == "we" or
+       prev == "you" or prev == "code" or prev == "method" or prev == "methods" or
+       prev == "object" or prev == "objects" or prev == "caller" or prev == "callers" or
+       prev == "which" or prev == "that" then
       return true
     end
     if next == "the" or next == "a" or next == "an" or next == "this" or
-       next == "that" or next == "it" or next == "to" then
+       next == "that" or next == "it" or next == "to" or next == "into" or
+       next == "on" or next == "onto" or next == "for" or next == "out" or
+       next == "upon" or next == "back" or next == "them" or next == "these" or
+       next == "those" or next == "when" or next == "whenever" then
       return true
-    end
-    if next == "instruction" or next == "performs" then
-      return false
     end
     return false
   end
@@ -296,14 +307,20 @@ local function is_english_context(word, prev_word, next_word, suffix)
 
   -- "push" as verb: "push the", "to push"
   if w == "push" then
-    if prev == "to" or prev == "will" or prev == "can" then
-      return true
-    end
-    if next == "the" or next == "a" or next == "it" or next == "them" then
-      return true
-    end
     if next == "instruction" or next == "performs" then
       return false
+    end
+    if prev == "to" or prev == "will" or prev == "can" or prev == "you" or
+       prev == "we" or prev == "they" or prev == "i" or prev == "just" or
+       prev == "then" or prev == "instead" or prev == "must" or prev == "should" or
+       prev == "would" or prev == "could" or prev == "does" or prev == "do" then
+      return true
+    end
+    if next == "the" or next == "a" or next == "it" or next == "them" or
+       next == "that" or next == "this" or next == "those" or next == "these" or
+       next == "work" or next == "data" or next == "more" or next == "everything" or
+       next == "responsibility" or next == "logic" or next == "computation" then
+      return true
     end
     return false
   end
@@ -356,11 +373,15 @@ local function is_english_context(word, prev_word, next_word, suffix)
 
   -- "ones" as noun: "the ones", "which ones"
   if w == "ones" then
-    if prev == "the" or prev == "which" or prev == "these" or prev == "those" then
-      return true
-    end
     if next == "instruction" or next == "count" then
       return false
+    end
+    if prev == "the" or prev == "which" or prev == "these" or prev == "those" or
+       prev == "static" or prev == "dynamic" or prev == "weak" or prev == "strong" or
+       prev == "new" or prev == "old" or prev == "real" or prev == "good" or
+       prev == "bad" or prev == "right" or prev == "wrong" or prev == "small" or
+       prev == "big" or prev == "such" or prev == "other" or prev == "same" then
+      return true
     end
     return false
   end

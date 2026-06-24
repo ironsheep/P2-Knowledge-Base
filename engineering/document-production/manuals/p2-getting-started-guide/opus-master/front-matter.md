@@ -17,9 +17,9 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries The P2 Architect's Guide\par}
+{\fontsize{36}{42}\selectfont\bfseries Getting Started with the Propeller 2\par}
 \vspace{0.3cm}
-{\Large\itshape Thinking in Cogs, Pins, and Forces\par}
+{\Large\itshape Meet the Chip, Read Its Code, Put It to Work\par}
 \vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
@@ -36,27 +36,24 @@
   colbacktitle=gray!15,
   coltitle=black
 ]
-\textbf{A short orientation to the Propeller 2 — and how to think in its parallel grain.}
+\textbf{A short, friendly orientation to the Propeller 2 — meet the chip, learn to read its code, and put it to work.}
 
 \vspace{0.1cm}
 {\footnotesize
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{The Four Chapters}
+\textbf{The Three Chapters}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Ch 1 — Meet the Propeller 2
 \item Ch 2 — Reading P2 Code
 \item Ch 3 — Putting It to Work
-\item Ch 4 — Thinking in P2 (Functional Decomposition)
 \end{itemize}
 \end{minipage}%
 \hfill%
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{Reference}
+\textbf{Back Matter \& Next}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Appendix A — Computing in Space and Time
-\item Appendix B — Further Reading
-\item Glossary
-\item Where to Next
+\item Where to Next — the reference library
+\item Then: \textit{The P2 Architect's Guide}
 \end{itemize}
 \end{minipage}
 }
@@ -120,9 +117,9 @@ This guide is a distillation, not a primary source. It draws on, and points you 
 
 This is a short, narrative guide, not a reference manual — it is meant to be *read*, and it is built so different readers can enter at different doors. Four paths:
 
-- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 teaches you to *read* P2 code (so the examples ahead aren't a mystery), Chapter 3 puts it to work in real (compiling) code, and Chapter 4 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
-- **Coming from the Propeller 1?** You already own the model — and Spin2 will look familiar. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — skim Chapter 2 for what's new in the language, then jump to Chapter 4 for the decomposition method, using Chapter 3 as a hands-on refresher.
-- **Already writing P2 code?** Go straight to Chapter 4. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating cogs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–3 as reference.
+- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 teaches you to *read* P2 code (so the examples ahead aren't a mystery), and Chapter 3 puts it to work in real (compiling) code. Take the chapters in order; each earns the next.
+- **Coming from the Propeller 1?** You already own the model — and Spin2 will look familiar. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — skim Chapter 2 for what's new in the language, then read Chapter 3 as a hands-on refresher.
+- **Already writing P2 code?** Use this guide as a fast orientation and a reference for the chip and its code. When you're ready to design a *whole system* on the P2 — deriving the right set of cooperating cogs and objects rather than an accidental sequential program on parallel silicon — that's the companion volume, *The P2 Architect's Guide*.
 - **An AI agent or tool?** Read this guide for the narrative and the mental model — the way an experienced P2 developer thinks. The P2 reference manuals carry the exhaustive, authoritative facts the design decisions rest on.
 
 ## Conventions
@@ -133,7 +130,7 @@ A few conventions run through the whole guide:
 - **Code shows named constants, not raw numbers.** Examples use the compiler's symbolic constants (a pin's name, `_clkfreq`) the way you'd actually write them — and every code example compiles.
 - **Code blocks are colored by language** — Spin2 in **blue**, PASM2 (assembly) in **green** — the same IDE-aligned scheme as the rest of the P2 manual family, so code is recognizable at a glance.
 - **"P1 note" sidebars** (bronze boxes) are short asides for readers migrating from the Propeller 1, each labeled *same as P1*, *changed in P2*, or *new in P2*. A newcomer can skip every one of them without losing the thread.
-- **Inline markers are used sparingly** — 💡 **Tip** for a non-obvious orientation insight, ⚠️ **Watch out** for a genuine pitfall. This is a narrative guide, not a reference peppered with boxes.
+- **Callouts are used sparingly** — the occasional **Tip** box flags a non-obvious orientation insight. This is a narrative guide, not a reference peppered with boxes.
 
 ```{=latex}
 \clearpage
