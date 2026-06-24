@@ -8,19 +8,19 @@ Before the mode tables and bit fields, it helps to know what the streamer *is*, 
 
 ## 1.1 What the streamer is
 
-Every COG on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the COG's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
+Every cog on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the cog's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
 
-The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single COG produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
+The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single cog produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
 
-And because the streamer lives *inside* the COG, **each COG has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One COG can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
+And because the streamer lives *inside* the cog, **each cog has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One cog can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
 
 > **If you've used DMA before:** the streamer is a close cousin of a DMA channel, with two important additions. First, it has that built-in metronome, so it does *paced* transfers at an exact sample rate rather than "as fast as the bus allows." Second, it reshapes data as it moves — packing bits, expanding through a palette, converting color formats — instead of copying bytes verbatim. If you have never met DMA, don't worry: everything below stands on its own.
 
 ## 1.2 Why the streamer exists
 
-Generating precise, fast, repetitive signals in software is brutally expensive. Imagine driving a video display by hand: your code would have to write a new color to the pins every forty nanoseconds, forever, without ever slipping. A single loop like that would consume an entire COG and still stutter the moment anything interrupted it. The streamer exists so that this relentless, timed, repetitive work happens in hardware, leaving the COG free for the *interesting* part — drawing the next frame, decoding the next packet, running the game.
+Generating precise, fast, repetitive signals in software is brutally expensive. Imagine driving a video display by hand: your code would have to write a new color to the pins every forty nanoseconds, forever, without ever slipping. A single loop like that would consume an entire cog and still stutter the moment anything interrupted it. The streamer exists so that this relentless, timed, repetitive work happens in hardware, leaving the cog free for the *interesting* part — drawing the next frame, decoding the next packet, running the game.
 
-So why is it so complicated? Because one engine has to serve very different jobs: pushing video to a screen, playing audio through a DAC, capturing pins like a logic analyzer, sampling an analog input like an oscilloscope, generating tones, even detecting a specific frequency in an incoming signal. Rather than give each COG six narrow peripherals, the P2 gives it **one highly configurable engine**. The configurability is the complexity — and it is also the payoff. Learn the handful of knobs once, and the same engine does all of those jobs.
+So why is it so complicated? Because one engine has to serve very different jobs: pushing video to a screen, playing audio through a DAC, capturing pins like a logic analyzer, sampling an analog input like an oscilloscope, generating tones, even detecting a specific frequency in an incoming signal. Rather than give each cog six narrow peripherals, the P2 gives it **one highly configurable engine**. The configurability is the complexity — and it is also the payoff. Learn the handful of knobs once, and the same engine does all of those jobs.
 
 ## 1.3 A mental model: a paced, configurable pipe
 
@@ -76,15 +76,15 @@ You usually arrive at the streamer with an application already in mind. Find it 
 | Detecting a specific tone or frequency | Goertzel analysis | Ch. 10, Ch. 17 |
 | High-speed serial (fast SPI) | timed bit output, clocked by a smart pin | Ch. 16 |
 
-## 1.8 What each COG actually has
+## 1.8 What each Cog actually has
 
-For all that capability, the hardware budget is modest. Each COG contains exactly one streamer, with:
+For all that capability, the hardware budget is modest. Each cog contains exactly one streamer, with:
 
 - one 32-bit NCO (the metronome / phase accumulator);
 - one command buffer (it holds one queued command, so commands can hand off without a gap);
 - four 8-bit DAC channels (X0, X1, X2, X3);
 - one Goertzel analyzer;
-- access to the COG's LUT RAM (used as a palette or a waveform table).
+- access to the cog's LUT RAM (used as a palette or a waveform table).
 
 And it leans on a few neighboring P2 subsystems:
 
@@ -118,7 +118,7 @@ The streamer supports multiple data flow configurations:
 \DiagDataFlow
 ```
 
-**Output Paths (Hub → Pins/DACs):**
+**Output Paths (hub → Pins/DACs):**
 
 1. **Immediate → LUT → Pins/DACs**: S operand indexes LUT; LUT data drives output
 2. **Immediate → Pins/DACs**: S operand drives output directly
@@ -126,10 +126,10 @@ The streamer supports multiple data flow configurations:
 4. **RDFAST → Pins/DACs**: Hub data drives output directly
 5. **RDFAST → RGB → Pins/DACs**: Hub data passes through colorspace converter
 
-**Input Paths (Pins → Hub):**
+**Input Paths (Pins → hub):**
 
-1. **Pins → DACs/WRFAST**: Pin states written to Hub
-2. **ADC → DACs/WRFAST**: ADC readings written to Hub
+1. **Pins → DACs/WRFAST**: Pin states written to hub
+2. **ADC → DACs/WRFAST**: ADC readings written to hub
 
 **Special Path:**
 
@@ -147,7 +147,7 @@ Holds one pending command. Enables seamless transitions between streamer operati
 Handles data widths from 1-bit to 32-bit. Extracts and formats data according to mode.
 
 **LUT Interface:**
-Reads COG LUT RAM for palette expansion or waveform generation. 512 entries × 32 bits.
+Reads cog LUT RAM for palette expansion or waveform generation. 512 entries × 32 bits.
 
 **DAC Channels:**
 Four 8-bit channels (X0-X3) map to pins based on pin number LSBs. Configurable routing allows stereo, differential, or independent operation.
@@ -533,7 +533,7 @@ RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory eff
 
 # Chapter 8: WRFAST Input Modes {#ch-8}
 
-Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a COG into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
+Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a cog into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
 ::: caution
 **Run WRFAST before any capture command.** It primes that same hub FIFO to *receive* data (streamer → hub); until it does, captured data has no valid destination. This is the exact mirror of RDFAST (Chapter 6) — one FIFO, opposite direction.
@@ -571,7 +571,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 
 # Chapter 9: ADC Sampling Modes {#ch-9}
 
-ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a COG into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
+ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a cog into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
 
 ## 9.1 ADC Capture Modes
 
@@ -729,7 +729,7 @@ Many modes send data to the DAC channels, but none of them say *which* channels,
 
 - `--` = No override (SETDACS value used)
 - `!` = One's complement (inverted)
-- `X0`-`X3` = Streamer data channels
+- `X0`-`X3` = streamer data channels
 
 ## 11.2 DAC Pin Mapping {#sec-11-2}
 
@@ -820,7 +820,7 @@ mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
 mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF + pin<<17 + count
 ```
 
-**Input Modes:** D[23] must be 1 to write to Hub
+**Input Modes:** D[23] must be 1 to write to hub
 
 ```pasm2
 ' WRFAST enabled
@@ -1316,7 +1316,7 @@ The LUT can contain any waveform shape—sine, square, triangle, or arbitrary sa
 
 # Chapter 18: Integration Patterns
 
-The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple COGs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
+The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple cogs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
 
 ## 18.1 Double Buffering {#sec-18-1}
 
@@ -1341,18 +1341,18 @@ frame_loop      ' Start displaying current buffer
                 jmp     #frame_loop
 ```
 
-## 18.2 Multi-COG Video {#sec-18-2}
+## 18.2 Multi-Cog Video {#sec-18-2}
 
-Complex video systems span multiple COGs:
+Complex video systems span multiple cogs:
 
-| COG | Function |
+| Cog | Function |
 |-----|----------|
 | 0 | Main application |
 | 1 | Horizontal timing, pixel streaming |
 | 2 | Vertical timing, frame sync |
 | 3 | Sprite rendering |
 
-**Synchronization via Hub flags:**
+**Synchronization via hub flags:**
 
 ```pasm2
 ' COG 1: Signal line complete
@@ -1662,7 +1662,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 - Mode encoding table: [Appendix A](#app-a)
 - Mode field: [4.2](#sec-4-2)
 - Mode symbols: [13.1](#sec-13-1)
-- Multi-COG: [18.2](#sec-18-2)
+- Multi-cog: [18.2](#sec-18-2)
 
 ```{=latex}
 \indexletter{N}

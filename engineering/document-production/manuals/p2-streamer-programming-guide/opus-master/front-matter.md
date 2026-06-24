@@ -148,7 +148,7 @@ This guide draws on the following primary and community sources:
 
 ## How to Use This Guide
 
-This reference serves developers implementing high-speed I/O on the Propeller 2. It assumes familiarity with P2 COG/Hub architecture, basic PASM2 instructions, and RDFAST/WRFAST FIFO operations.
+This reference serves developers implementing high-speed I/O on the Propeller 2. It assumes familiarity with P2 cog/hub architecture, basic PASM2 instructions, and RDFAST/WRFAST FIFO operations.
 
 **Structure:**
 
