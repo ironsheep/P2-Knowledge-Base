@@ -10,10 +10,10 @@ commits). Newest entry first.
 
 ---
 
-## v0.1.0 — First Draft (in progress)
+## v1.0.0 (2026-06-24)
 
-**Status:** in development. Split 2026-06-24 from the original *P2 Architect's Guide*
-first draft.
+**Status:** initial public release — Community Review Edition. Split 2026-06-24 from the
+original *P2 Architect's Guide* first draft.
 
 The warm, welcoming **orientation on-ramp** to the Propeller 2 — the layer that sits
 below the reference manuals, teaching the mental model and the language and then
@@ -42,7 +42,9 @@ Propeller 2*.)
   (`::: tip`, was raw emoji); P1-note sidebar leads de-duplicated (the box already
   labels them); "six kinds of blocks"; and the shared mnemonic-bold filter taught not
   to bold the English words *call / push / ones / test*.
-- Daemon-verified: clean build, 24 pp.
+- Release-gate audited (drain gate GREEN) + finalized: redirected two forward-references
+  to the (split-out) decomposition chapter to the companion *P2 Architect's Guide*,
+  corrected the memory-tier access caption, and a voice pass.
+- Production-verified: clean compile log, 25 pp.
 
-_(In development — not yet a public release. Code examples pnut_ts-verified; code
-lines audited to K=76.)_
+_(Code examples pnut_ts-verified; code lines audited to K=76.)_

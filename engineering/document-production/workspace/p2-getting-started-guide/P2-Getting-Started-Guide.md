@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.1.0 — First Draft\par}
+{\large\color{blue}Version 1.0.0 — Community Review Edition\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
