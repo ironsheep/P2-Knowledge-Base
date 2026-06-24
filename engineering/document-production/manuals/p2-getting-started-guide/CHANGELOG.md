@@ -12,39 +12,20 @@ commits). Newest entry first.
 
 ## v1.0.0 (2026-06-24)
 
-**Status:** initial public release — Community Review Edition. Split 2026-06-24 from the
-original *P2 Architect's Guide* first draft.
+**Initial release for community review** — a warm orientation on-ramp to the Propeller 2,
+the layer below the reference manuals: picture the chip, learn to read its code, put it to
+work, then link out for depth.
 
-The warm, welcoming **orientation on-ramp** to the Propeller 2 — the layer that sits
-below the reference manuals, teaching the mental model and the language and then
-linking out rather than duplicating. It began as Chapters 1–3 of the *P2 Architect's
-Guide* first draft; on 2026-06-24 that draft was split into two books, and the
-orientation chapters became this one. (The functional-decomposition and system-design
-material moved to the sibling *P2 Architect's Guide — Designing Real Systems on the
-Propeller 2*.)
+### Added
 
-- **Three chapters**, authored from the trust-chain sources:
-  **Ch 1 "Meet the Propeller 2"** (the chip — architecture YAML + the *Parallax
-  Propeller 2 Documentation v35 - Rev B/C* + datasheet) · **Ch 2 "Reading P2 Code"**
-  (the language *structure* for readers new to Spin2/PASM2 — the six block types,
-  methods, indentation, the `...` continuation, objects, PASM2 anatomy — from the
-  Spin2 v55 doc + the Assembly manual) · **Ch 3 "Putting It to Work"** (hands-on,
-  pnut_ts-verified examples).
-- **Where to Next** back matter: a map into the reference manuals plus a hand-off to
-  *The P2 Architect's Guide* for real-system design. House-standard front matter with
-  the reader paths and conventions block.
-- **Three figures**, all in Chapter 1: a Parallax P2-Edge-on-Breakout photo, and two
-  diagrams reused from the Assembly manual (eight cogs around the hub; the memory
-  hierarchy).
-- Rides the shared **`p2kb-platform-*`** presentation stack with a thin
-  `p2kb-getting-started-*` local skin.
-- Walkthrough-review fixes folded in at the split: the Tip callouts fenced
-  (`::: tip`, was raw emoji); P1-note sidebar leads de-duplicated (the box already
-  labels them); "six kinds of blocks"; and the shared mnemonic-bold filter taught not
-  to bold the English words *call / push / ones / test*.
-- Release-gate audited (drain gate GREEN) + finalized: redirected two forward-references
-  to the (split-out) decomposition chapter to the companion *P2 Architect's Guide*,
-  corrected the memory-tier access caption, and a voice pass.
-- Production-verified: clean compile log, 25 pp.
-
-_(Code examples pnut_ts-verified; code lines audited to K=76.)_
+- **Chapter 1 — Meet the Propeller 2**: the whole chip pictured — eight cogs, the three
+  memory tiers, smart pins, the CORDIC solver, the streamer, events, the clock, and boot.
+- **Chapter 2 — Reading P2 Code**: the structural literacy to read every example — the six
+  block types, methods, indentation, objects, the `...` line continuation, and PASM2 anatomy.
+- **Chapter 3 — Putting It to Work**: hands-on, compiling examples — drive a pin, launch a
+  second cog, share data through hub, and choose Spin2 or PASM2.
+- **P1-migration sidebars** throughout — what's the same, changed, or new coming from the
+  Propeller 1.
+- **Where to Next**: a map into the P2 reference manuals and a hand-off to *The P2 Architect's
+  Guide* for whole-system design.
+- **Four runnable Spin2 examples**, compile-clean on a bare P2 board, plus three figures.
