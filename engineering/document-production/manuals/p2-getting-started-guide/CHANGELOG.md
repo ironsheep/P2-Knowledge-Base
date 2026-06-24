@@ -16,8 +16,6 @@ commits). Newest entry first.
 the layer below the reference manuals: picture the chip, learn to read its code, put it to
 work, then link out for depth.
 
-### Added
-
 - **Chapter 1 — Meet the Propeller 2**: the whole chip pictured — eight cogs, the three
   memory tiers, smart pins, the CORDIC solver, the streamer, events, the clock, and boot.
 - **Chapter 2 — Reading P2 Code**: the structural literacy to read every example — the six
