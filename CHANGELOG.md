@@ -20,6 +20,15 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.11.2] - 2026-06-25
+
+**CORDIC rotation, COGINIT, and LSTRING reference accuracy**
+
+### Changed
+- CORDIC vector rotation (QROTATE): the X coordinate comes from the D operand, the Y coordinate from the SETQ value, and the rotation angle from the S operand, with results retrieved via GETQX/GETQY.
+- COGINIT loads 504 longs ($000–$1F7) from hub into the target cog's registers.
+- LSTRING() documents its `{Spin2_v43}` version directive — the string composer is enabled once that directive (or later) leads the source file.
+
 ## [1.11.1] - 2026-06-25
 
 **PASM2 reference accuracy: GETBRK, the program counter, and signed flag semantics**

@@ -59,9 +59,10 @@ operations:
     instruction: "QROTATE"
     operation: "2D vector rotation by angle"
     setup: |
-      SETQ angle
-      QROTATE X,Y
-    result: "Rotated X in X result, rotated Y in Y result"
+      SETQ Y
+      QROTATE X, angle
+    operands: "X from D operand, Y from SETQ value (0 if SETQ omitted), angle from S operand"
+    result: "Rotated X in X result (GETQX), rotated Y in Y result (GETQY)"
     angle_format: "32-bit binary angle (0=$00000000, 90°=$40000000)"
     
   vector:

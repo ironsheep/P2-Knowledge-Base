@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-166`**
+**Next finding ID: `F-169`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -367,6 +367,24 @@
 
 ### F-165 — signed-flag family C-flag wording: "correct sign" standardized to "true sign" + `adds.yaml`/`subs.yaml` "bit 31" gloss tightened — `DONE`
 > **APPLIED 2026-06-25 (Assembly-manual release-gate follow-on).** Standardized the signed add/subtract/compare/sum family C-flag wording from "correct sign" to **"true sign"** (the manual's Chapter-3 lead term; also more arresting to readers) across `adds.yaml subs.yaml cmps.yaml cmpsx.yaml sumc.yaml sumnc.yaml sumz.yaml sumnz.yaml tjv.yaml`. Additionally tightened `adds.yaml`/`subs.yaml`, whose C field glossed the value as "i.e. bit 31 of the result" — imprecise for a single overflowing op (the truncated bit 31 is the wrong sign on overflow) — to **"the sign of (D ± S) at full precision (overflow-corrected)"**, matching the manual's audit-verified Chapter-3 definition and the family convention (CMPS = "true sign of A−B"). The core fact (C is the result's SIGN, **not** a signed-overflow indicator) was already correct; this is a terminology + precision alignment. **Note:** the exact single-instruction-overflow behavior (bit 31 vs overflow-corrected) rests on the documentary Chapter-3/Silicon framing; a hardware confirmation could make it empirical if desired. Verified: `validate-yaml-syntax` + `validate-crossref-keys` clean.
+
+---
+
+## DeSilva-tutorial release-gate audit batch (2026-06-25) — F-166…F-168
+
+> **Origin:** surfaced by the `p2-pasm-desilva-style` v3.0.1 release-gate audit
+> (`engineering/document-production/manuals/p2-pasm-desilva-style/audit/release-gate-2026-06-25.md`).
+> All three are manual-right / KB-wrong (or KB-incomplete); authority = the P2 Silicon Doc, the
+> per-instruction YAML, and `pnut-ts` v1.55 (version-gate probe). No inference.
+
+### F-166 — `architecture/cordic.yaml` `rotate.setup` has the QROTATE operands reversed — `DONE`
+> **APPLIED 2026-06-25:** `deliverables/ai/P2/architecture/cordic.yaml` `rotate` — the setup read `SETQ angle / QROTATE X,Y`, implying SETQ holds the angle and QROTATE takes X,Y. **Truth** (`language/pasm2/qrotate.yaml` + Silicon Doc "Rotate (X32,Y32) by Theta32"): **X from the D operand, Y from the SETQ value (0 if SETQ omitted), angle from the S operand**. Corrected to `SETQ Y / QROTATE X, angle` + added an explicit `operands:` line + GETQX/GETQY retrieval note. The DeSilva manual (Ch7 §2222-2229) was already correct. Authority: `qrotate.yaml` description/encoding + Silicon `p2-documentation.txt`. No inference.
+
+### F-167 — `architecture/hub.yaml` `coginit.load_size` says 496 longs; COGINIT loads 504 — `DONE`
+> **APPLIED 2026-06-25:** `deliverables/ai/P2/architecture/hub.yaml` `hub_operations.coginit.load_size` — `496 longs` → `504 longs ($000..$1F7)`. **Source:** Silicon Doc verbatim "The target cog loads its own registers **$000..$1F7** from the hub" (`p2-documentation.txt:764`); `$000-$1F7` = 504 longs. 496 is the **general-purpose** register count (`$000-$1EF`), a different fact (Silicon "RAM registers $000 through $1EF are general-purpose"). The DeSilva manual (Ch1 §473) was already correct. No inference.
+
+### F-168 — `language/spin2/methods/lstring.yaml` omits the `{Spin2_v43}` version gate — `DONE`
+> **APPLIED 2026-06-25:** `deliverables/ai/P2/language/spin2/methods/lstring.yaml` — added `requires_version: "Spin2_v43"` + `version_directive: "{Spin2_v43}"` (mirroring `methods/taskcont.yaml`) + a notes line. **KB was incomplete, not wrong** — LSTRING is valid but namespace-gated. Proven with `pnut-ts -d` v1.55: `debug(lstring("Status"))` and `addr := lstring("Command")` **fail without** a `{Spin2_v##}≥43` directive ("Expected an expression term") and **compile clean with** `{Spin2_v43}`. Authority: Spin2 v55 keyword-gating table ("v43 | LSTRING | Method | {Spin2_v43}"; introduced v42, gated v43). This corrected the audit's initial "compiler/KB discrepancy" suspicion — there is no discrepancy; the example just needs the gate. (Companion manual fix: the DeSilva Ch examples gain the gate + `BYTE()`/`LONG()` paren-constructor + `lookup`→non-keyword rename — handled in the manual, not here.)
 
 ---
 

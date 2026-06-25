@@ -136,7 +136,7 @@ shared_resources:
 hub_operations:
   coginit:
     description: "Start COG with hub code"
-    load_size: "496 longs from hub to COG"
+    load_size: "504 longs ($000..$1F7) from hub to the target cog"
     parameters: "PTRA and PTRB initialized"
     
   hub_execution:
