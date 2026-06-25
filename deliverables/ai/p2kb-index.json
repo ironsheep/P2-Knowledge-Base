@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-25T22:58:33.445668",
+    "generated": "2026-06-25T23:56:20.280470",
     "total_entries": 1053,
     "total_categories": 56,
     "total_aliases": 1326,
@@ -4786,8 +4786,8 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1782428268,
-      "sha256": "bb45416739c5d0ac242a9b809315124536166c9dcb023698217507f157ffae13"
+      "mtime": 1782431727,
+      "sha256": "050a11efbdb9c3dbffdd6352cf58c680d524c6cd2b7b7cb0f8a1317e8fbef5e6"
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
@@ -7111,8 +7111,8 @@
     },
     "p2kbPasm2Pi": {
       "path": "deliverables/ai/P2/language/pasm2/pi.yaml",
-      "mtime": 1764449566,
-      "sha256": "250a5cde1afa4932f672f6dd311aabec84688def87405f4ffae1bd42e65271b1"
+      "mtime": 1782431727,
+      "sha256": "e2d7ebec1b2ba9156709651859a48671756855b436c6873e33c5c9b0a0fc4dc2"
     },
     "p2kbPasm2Pollatn": {
       "path": "deliverables/ai/P2/language/pasm2/pollatn.yaml",
