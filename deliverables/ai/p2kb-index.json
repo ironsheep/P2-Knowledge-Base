@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-25T02:54:15.843736",
+    "generated": "2026-06-25T22:58:33.445668",
     "total_entries": 1053,
     "total_categories": 56,
     "total_aliases": 1326,
@@ -4786,8 +4786,8 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1781981347,
-      "sha256": "80d30b732e7215b529d614fd1db18c14e7b64a71ffc00c46f0c5442015a8195a"
+      "mtime": 1782428268,
+      "sha256": "bb45416739c5d0ac242a9b809315124536166c9dcb023698217507f157ffae13"
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
@@ -4866,8 +4866,8 @@
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
-      "mtime": 1777496128,
-      "sha256": "5f4d6f1662b234ddf1b26dc8838f35b9f1e11f93706dd7ba34afcedcbf34a32d"
+      "mtime": 1782428268,
+      "sha256": "0677c05aaf54185d162cd447e4ad1bc5529306c5d84d848ac410adc62c3a17f2"
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",
@@ -8801,8 +8801,8 @@
     },
     "p2kbSpin2Lstring": {
       "path": "deliverables/ai/P2/language/spin2/methods/lstring.yaml",
-      "mtime": 1777496128,
-      "sha256": "f1966ea35eb95aa8ef93b9bbdb4f0a8f3c4ebf5d326bebd9d8982cab6bfa5270"
+      "mtime": 1782428268,
+      "sha256": "f7a1dd7cfd9495755f96028becc7dfcf84cc986a1bda2281dbbfab158d22efea"
     },
     "p2kbSpin2Movbyts": {
       "path": "deliverables/ai/P2/language/spin2/methods/movbyts.yaml",

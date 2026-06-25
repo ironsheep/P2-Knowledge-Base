@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-06-25",
-    "last_updated": "2026-06-25T02:54:15.886709",
+    "last_updated": "2026-06-25T22:58:33.486981",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-25T02:54:15.886709",
+    "extraction_date": "2026-06-25T22:58:33.486981",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-25T02:54:15.886709",
+    "extraction_date": "2026-06-25T22:58:33.486981",
     "categories": {
       "keywords": {
         "count": 37,
@@ -26726,6 +26726,8 @@
             "type": "method",
             "description": "Create length-prefixed string constant\n",
             "category": "String Operations",
+            "requires_version": "Spin2_v43",
+            "version_directive": "{Spin2_v43}",
             "syntax": "address := LSTRING(StringLiteral)",
             "parameters": [
               {
@@ -26759,7 +26761,8 @@
               "Maximum length is 255 characters",
               "Useful for binary protocols",
               "More efficient than null-terminated for known-length strings",
-              "Stored in DAT section"
+              "Stored in DAT section",
+              "REQUIRES {Spin2_v43} or later version directive at start of source file (introduced v42, namespace-gated from v43); without it the compiler defaults to v41 and LSTRING is not recognized"
             ],
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
