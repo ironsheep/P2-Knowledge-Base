@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-20",
-    "last_updated": "2026-06-20T18:51:52.765943",
+    "release_date": "2026-06-25",
+    "last_updated": "2026-06-25T02:54:15.886709",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-20T18:51:52.765943",
+    "extraction_date": "2026-06-25T02:54:15.886709",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -252,19 +252,19 @@
               {
                 "bits": "EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "correct sign of (D +/- S)",
+                "c": "true sign of (D +/- S)",
                 "z": "1 then D = D - S, else D = D + S",
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *",
+            "description": "{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S). *",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to correct sign of result (D +/- S)",
+              "C": "Set to true sign of result (D +/- S)",
               "Z": "Set if result equals zero"
             },
             "parameters": [],
@@ -298,19 +298,19 @@
               {
                 "bits": "EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "sign of (D - S)",
+                "c": "true sign of (D - S)",
                 "z": "Result = 0",
                 "clocks": "2"
               }
             ],
-            "description": "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the correct sign of (D - S), i.e. bit 31 of the result (C=1 if negative, C=0 if non-negative); it is NOT a signed-underflow or borrow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
+            "description": "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D - S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT a signed-underflow or borrow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
             "result": "Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to sign of result (1 if negative)",
+              "C": "Set to true sign of result (1 if negative)",
               "Z": "Set if result equals zero"
             },
             "parameters": [
@@ -530,7 +530,7 @@
               {
                 "bits": "EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "\u2014",
-                "c": "correct sign of (D - (S + C))",
+                "c": "true sign of (D - (S + C))",
                 "z": "Z AND (D == S + C)",
                 "clocks": "2"
               }
@@ -542,7 +542,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set if signed D < (S + C), correct sign of difference",
+              "C": "Set if signed D < (S + C), true sign of difference",
               "Z": "Set if Z was set AND D == (S + C)"
             },
             "parameters": [
@@ -641,19 +641,19 @@
               {
                 "bits": "EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "1 then D = D - S, else D = D + S. C = correct sign of (D +/- S)",
+                "c": "1 then D = D - S, else D = D + S. C = true sign of (D +/- S)",
                 "z": "Result = 0",
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *",
+            "description": "{WC/WZ/WCZ}   Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S). *",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to correct sign of result (D +/- S)",
+              "C": "Set to true sign of result (D +/- S)",
               "Z": "Set if result equals zero"
             },
             "parameters": [],
@@ -1016,19 +1016,19 @@
               {
                 "bits": "EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "correct sign of (D +/- S)",
+                "c": "true sign of (D +/- S)",
                 "z": "0 then D = D - S, else D = D + S",
                 "clocks": "2"
               }
             ],
-            "description": "SUMNZ adjusts the signed Dest value by Src or -Src (depending on !Z) and stores the result into the Dest register. If !Z is true (Z=0), Dest = Dest - Src. If !Z is false (Z=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag is updated to the correct sign of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.",
+            "description": "SUMNZ adjusts the signed Dest value by Src or -Src (depending on !Z) and stores the result into the Dest register. If !Z is true (Z=0), Dest = Dest - Src. If !Z is false (Z=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag is updated to the true sign of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.",
             "result": "The sum of signed Dest and either Src or -Src (according to !Z) is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to correct sign of result (D +/- S)",
+              "C": "Set to true sign of result (D +/- S)",
               "Z": "Set if result equals zero"
             },
             "parameters": [
@@ -1430,19 +1430,19 @@
               {
                 "bits": "EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "0 then D = D - S, else D = D + S. C = correct sign of (D +/- S)",
+                "c": "0 then D = D - S, else D = D + S. C = true sign of (D +/- S)",
                 "z": "Result = 0",
                 "clocks": "2"
               }
             ],
-            "description": "SUMNC adjusts the signed Dest value by Src or -Src (depending on !C) and stores the result into the Dest register. If !C is true (C=0), Dest = Dest - Src. If !C is false (C=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag is updated to the correct sign of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.",
+            "description": "SUMNC adjusts the signed Dest value by Src or -Src (depending on !C) and stores the result into the Dest register. If !C is true (C=0), Dest = Dest - Src. If !C is false (C=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag is updated to the true sign of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.",
             "result": "The sum of signed Dest and either Src or -Src (according to !C) is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to correct sign of result (D +/- S)",
+              "C": "Set to true sign of result (D +/- S)",
               "Z": "Set if result equals zero"
             },
             "parameters": [
@@ -1858,7 +1858,7 @@
               {
                 "bits": "EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "sign of (D + S)",
+                "c": "true sign of (D + S)",
                 "z": "Result = 0",
                 "clocks": "2"
               }
@@ -1870,7 +1870,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to the true sign of the result -- correct sign of (D + S), bit 31 (1=negative, 0=non-negative); NOT signed overflow",
+              "C": "Set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected); 1=negative, 0=non-negative; NOT signed overflow",
               "Z": "Set if result equals zero"
             },
             "parameters": [
@@ -2504,7 +2504,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set if signed D < S (correct sign of difference)",
+              "C": "Set if signed D < S (true sign of difference)",
               "Z": "Set if D == S"
             },
             "parameters": [
@@ -12526,7 +12526,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Get breakpoint/cog status into D according to WC/WZ/WCZ.\n\nFlag modes determine what information is retrieved:\n- WCZ: D = 32-bit ISR call address\n- WC: D = 8-bit COG ID in D[7:0]\n- WZ: D = 8-bit breakpoint code in D[7:0]\n- No flags: D = 16-bit skip pattern in D[15:0]\n\nEssential for debug infrastructure and multi-COG coordination.\n",
+            "description": "Get cog status / debug-break information into D according to the flag effect. GETBRK REQUIRES a flag effect (WC, WZ, or WCZ); the no-flag form does not assemble.\n\nThe flag effect selects which information is retrieved:\n\n- WCZ (normal execution): C = 1 if STALLI mode / 0 if ALLOWI mode; Z = 1 if cog started in hubexec / 0 if cogexec. D holds cog internal status: D[22] colorspace converter active, D[21] streamer active, D[20] WRFAST(1)/RDFAST(0), D[19:16] INT3 selector, D[15:12] INT2 selector, D[11:08] INT1 selector, D[07:06]/D[05:04]/D[03:02] INT3/INT2/INT1 state (idle/pending/executing), D[01] STALLI mode, D[00] started in hubexec.\n- WCZ (during a debug ISR): additionally D[31:24] = 8-bit break code from the last 'BRK #/D' executed during normal execution, and C (also reflected in D[23]) = 1 if the debug interrupt was from a COGINIT, indicating the cog was (re)started.\n- WC: C = LSB of the SKIP/SKIPF/EXECF/XBYTE pattern. D[31:28] = 4-bit CALL depth since the pattern (skipping suspended if not %0000), D[27] = 1 SKIP / 0 SKIPF/EXECF/XBYTE mode, D[26] = LUT sharing enabled, D[25] = XBYTE pending on next _RET_/RET, D[24:16] = 9-bit XBYTE mode, D[15:00] = 16 event-trap flags.\n- WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or pattern queued if D <> 0. D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first.\n\nEssential for debug infrastructure and for inspecting skip/XBYTE state.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -14103,7 +14103,7 @@
                 "clocks": "2 or 4 / 2 or 13\u201320"
               }
             ],
-            "description": "TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx instruction. The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJV. The signed offset value is in units of whole instructions -- it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub code not required).",
+            "description": "TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the true sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx instruction. The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJV. The signed offset value is in units of whole instructions -- it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub code not required).",
             "result": "Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a new relative (#Src) or absolute (Src) address.",
             "timing": {
               "cycles": "2 not-taken / 4 taken (cog); 2 not-taken / 13-20 taken (hub-exec)",
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-20T18:51:52.765943",
+    "extraction_date": "2026-06-25T02:54:15.886709",
     "categories": {
       "keywords": {
         "count": 37,
