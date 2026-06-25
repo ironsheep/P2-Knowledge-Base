@@ -96,6 +96,36 @@ If a stale `## [X.Y.Z] - YYYY-MM-DD (Upcoming)` entry exists at the top (older p
 
 Ask the user directly in chat for the release theme and key bullets if not obvious from the working-tree diff (`git diff --stat`).
 
+## 4b. Update the YAML Head dashboard release ledger (MANDATORY every release)
+
+`engineering/operations/YAML-HEAD-DASHBOARD.md` carries the **Release ledger**
+(most-recent-first) — the YAML head's standing record of what shipped. It must
+gain a row **every** release; a release that updates the CHANGELOG but not this
+ledger leaves the head's dashboard lying about HEAD. Add the row in the same
+working-tree pass as the CHANGELOG so it ships in the content commit (Step 6a).
+
+Add a new top row to the `## Release ledger` table:
+
+```markdown
+| **vX.Y.Z** | YYYY-MM-DD | **[Theme].** [Engineering-facing summary: the findings drained (F-NNN), the gate(s) drained, the area touched]. |
+```
+
+Ledger conventions (match the existing rows):
+- **Newest row only is bolded** (`**vX.Y.Z**`). When you add the new top row,
+  **un-bold the previous top row's version** so exactly one row is bold.
+- If the previous top row shows `_pending_` in the Date column (a release authored
+  but not yet tagged), flip it to its real tag date now — never leave a shipped
+  version `_pending_`.
+- The ledger voice is **engineering-facing** (findings IDs, gates, internals) —
+  the *opposite* of the CHANGELOG's reader-facing voice. Name the `F-NNN`
+  findings and the manual gate(s) this release drains; the CHANGELOG never does.
+- Use the actual tag date (`git log -1 --format=%ci vX.Y.Z | cut -d' ' -f1`)
+  once tagged; if authoring pre-tag, use today's date (the tag will match).
+
+If the ledger has drifted behind the latest tag (older releases missing rows),
+backfill the missing rows from `CHANGELOG.md` + tag dates as part of this release
+— same drift-correction discipline as the README/CHANGELOG "Source of truth" note above.
+
 ## 5. Show plan, confirm
 
 Ask the user directly in chat (do NOT use the AskUserQuestion tool in this repo — see project memory). Show:
@@ -162,8 +192,10 @@ Stage all content changes EXPLICITLY — never use `git add .` or `git add -A`. 
 git add \
   <list each modified/new file or directory explicitly> \
   README.md \
-  CHANGELOG.md
+  CHANGELOG.md \
+  engineering/operations/YAML-HEAD-DASHBOARD.md
 # DO NOT add: deliverables/ai/p2kb-index.json or .gz at this step
+# The dashboard ledger row (Step 4b) ships in THIS content commit.
 ```
 
 Verify staging with `git status --short`. Confirm the index files are NOT staged.
@@ -294,6 +326,7 @@ Report:
 - New version: `vX.Y.Z`
 - Content commit hash + index commit hash
 - README badge updated, CHANGELOG entry added (style-guide compliant)
+- YAML Head dashboard release ledger row added (Step 4b)
 - Tag created, pushed
 - Local p2kb-mcp refresh status
 

@@ -145,8 +145,8 @@ programming_patterns:
       
   rotation_matrix:
     code: |
-      SETQ    angle
-      QROTATE x, y
+      SETQ    y_coord           ' Y from SETQ
+      QROTATE x_coord, angle    ' X from D operand, angle from S operand
       ' ... do other work ...
       GETQX   new_x
       GETQY   new_y

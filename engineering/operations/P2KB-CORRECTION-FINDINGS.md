@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-169`**
+**Next finding ID: `F-170`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -370,7 +370,7 @@
 
 ---
 
-## DeSilva-tutorial release-gate audit batch (2026-06-25) — F-166…F-168
+## DeSilva-tutorial release-gate audit batch (2026-06-25) — F-166…F-169
 
 > **Origin:** surfaced by the `p2-pasm-desilva-style` v3.0.1 release-gate audit
 > (`engineering/document-production/manuals/p2-pasm-desilva-style/audit/release-gate-2026-06-25.md`).
@@ -379,12 +379,16 @@
 
 ### F-166 — `architecture/cordic.yaml` `rotate.setup` has the QROTATE operands reversed — `DONE`
 > **APPLIED 2026-06-25:** `deliverables/ai/P2/architecture/cordic.yaml` `rotate` — the setup read `SETQ angle / QROTATE X,Y`, implying SETQ holds the angle and QROTATE takes X,Y. **Truth** (`language/pasm2/qrotate.yaml` + Silicon Doc "Rotate (X32,Y32) by Theta32"): **X from the D operand, Y from the SETQ value (0 if SETQ omitted), angle from the S operand**. Corrected to `SETQ Y / QROTATE X, angle` + added an explicit `operands:` line + GETQX/GETQY retrieval note. The DeSilva manual (Ch7 §2222-2229) was already correct. Authority: `qrotate.yaml` description/encoding + Silicon `p2-documentation.txt`. No inference.
+> **FOLLOW-ON (same v1.11.2 release):** a publish-time content probe caught that the first fix was **not data-set-wide** — the identical reversed pattern (`SETQ angle / QROTATE x, y`) survived in the **same file** under `programming_patterns.rotation_matrix`, and in `language/pasm2/pi.yaml`'s example. Both corrected to the authoritative operand order (`SETQ y_coord / QROTATE x_coord, angle`). `pi.yaml`'s deeper example defects are tracked separately under **F-169**. Lesson: sweep **every** occurrence in the data set, not just the one the manual audit cited.
 
 ### F-167 — `architecture/hub.yaml` `coginit.load_size` says 496 longs; COGINIT loads 504 — `DONE`
 > **APPLIED 2026-06-25:** `deliverables/ai/P2/architecture/hub.yaml` `hub_operations.coginit.load_size` — `496 longs` → `504 longs ($000..$1F7)`. **Source:** Silicon Doc verbatim "The target cog loads its own registers **$000..$1F7** from the hub" (`p2-documentation.txt:764`); `$000-$1F7` = 504 longs. 496 is the **general-purpose** register count (`$000-$1EF`), a different fact (Silicon "RAM registers $000 through $1EF are general-purpose"). The DeSilva manual (Ch1 §473) was already correct. No inference.
 
 ### F-168 — `language/spin2/methods/lstring.yaml` omits the `{Spin2_v43}` version gate — `DONE`
 > **APPLIED 2026-06-25:** `deliverables/ai/P2/language/spin2/methods/lstring.yaml` — added `requires_version: "Spin2_v43"` + `version_directive: "{Spin2_v43}"` (mirroring `methods/taskcont.yaml`) + a notes line. **KB was incomplete, not wrong** — LSTRING is valid but namespace-gated. Proven with `pnut-ts -d` v1.55: `debug(lstring("Status"))` and `addr := lstring("Command")` **fail without** a `{Spin2_v##}≥43` directive ("Expected an expression term") and **compile clean with** `{Spin2_v43}`. Authority: Spin2 v55 keyword-gating table ("v43 | LSTRING | Method | {Spin2_v43}"; introduced v42, gated v43). This corrected the audit's initial "compiler/KB discrepancy" suspicion — there is no discrepancy; the example just needs the gate. (Companion manual fix: the DeSilva Ch examples gain the gate + `BYTE()`/`LONG()` paren-constructor + `lookup`→non-keyword rename — handled in the manual, not here.)
+
+### F-169 — `language/pasm2/pi.yaml` examples misuse the IEEE-754 float PI as a CORDIC integer angle — `DONE`
+> **APPLIED 2026-06-25 (folded into v1.11.2):** surfaced while sweeping F-166 data-set-wide. `pi.yaml`'s two examples applied **integer** CORDIC/shift ops to the **float** bit-pattern of PI (`$40490FDB`): `shr angle,#1` presented as float-divide-by-2, `qrotate`/`qmul`/`qdiv` fed the float pattern as if it were a binary angle, and the operands were reversed (`qrotate angle, radius`). A notes line also claimed "full circle = `$80000000` (2^31)" — wrong: per `qrotate.yaml` `angle_format`, `$40000000`=90°, `$80000000`=**180°** (PI), and a full circle (2·PI) is `$1_0000_0000` (2^32, wraps to 0). **Fix:** replaced both examples with compile-verified (`pnut-ts` v1.55) correct ones — (1) `mov fnum, ##PI` to load the float for floating-point math, (2) a CORDIC rotation using a **binary** angle `##$4000_0000` (PI/2) with the correct `SETQ y / QROTATE x, angle / GETQX / GETQY` shape — and corrected the note to the authoritative binary-angle scale. The float PI constant value itself (`$40490FDB`) was already correct. Authority: `qrotate.yaml` `angle_format`/encoding + `pnut-ts` compile. No inference.
 
 ---
 

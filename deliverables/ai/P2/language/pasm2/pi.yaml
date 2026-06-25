@@ -15,29 +15,23 @@ usage: 'Use with CORDIC operations and floating-point calculations
 
   '
 examples:
-- code: 'mov     angle, PI           '' Load PI constant
-
-    shr     angle, #1           '' Divide by 2 for PI/2 (90 degrees)
-
-    qrotate angle, radius       '' Rotate by PI/2 radians
-
-    '
-  description: Using PI with CORDIC rotation
-- code: 'mov     x, PI               '' Start with PI
-
-    qmul    x, ##180            '' Multiply PI by 180
-
-    qdiv    x, ##$80000000      '' Divide by 2^31 for scaling
-
-    getqx   degrees             '' Get degrees conversion factor
-
-    '
-  description: Converting radians to degrees using PI
+- code: |
+    ' Load the IEEE-754 PI constant for floating-point math.
+    mov     fnum, ##PI          ' fnum = 3.141593 ($40490FDB, IEEE-754 single)
+  description: Loading the floating-point PI constant
+- code: |
+    ' CORDIC rotation uses 32-bit BINARY angles, NOT this IEEE-754 float.
+    ' PI radians (180 deg) = $8000_0000; PI/2 (90 deg) = $4000_0000.
+    SETQ    y_coord             ' Y coordinate from SETQ
+    QROTATE x_coord, ##$4000_0000  ' X from D operand, angle (PI/2) from S operand
+    GETQX   new_x               ' rotated X
+    GETQY   new_y               ' rotated Y
+  description: For CORDIC, PI is a binary angle ($8000_0000), not the float constant above
 notes:
 - Approximately 3.141592653589793
 - IEEE 754 single-precision format
 - Used primarily with CORDIC and floating-point operations
-- For CORDIC angles, full circle = $80000000 (2^31)
+- For CORDIC angles, a full circle (2*PI) = $1_0000_0000 (2^32, wraps to 0); PI (180 deg) = $8000_0000; PI/2 (90 deg) = $4000_0000
 related:
 - qrotate
 - qvector
