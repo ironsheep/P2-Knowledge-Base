@@ -42,6 +42,19 @@
 \setsansfont{IBMPlexSans}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
 \setmonofont{IBMPlexMono}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
 
+% ---- Missing-glyph fallback ----
+% IBM Plex Mono lacks a few technical Unicode glyphs that appear in code and
+% tables: Ω (U+03A9), μ (U+03BC), µ (U+00B5) — e.g. "1MΩ", "100μA". IBM Plex
+% Sans (the main font) HAS them, so body prose renders fine; only the mono font
+% drops them, and XeLaTeX does no automatic per-glyph fallback. Render these
+% three from the main font (\rmfamily = IBM Plex Sans) in normal text via
+% newunicodechar, and inside listings code via the lstset literate below.
+% Using \char (not the literal glyph) avoids newunicodechar self-recursion.
+\RequirePackage{newunicodechar}
+\newunicodechar{Ω}{{\rmfamily\char"03A9}}
+\newunicodechar{μ}{{\rmfamily\char"03BC}}
+\newunicodechar{µ}{{\rmfamily\char"00B5}}
+
 \RequirePackage{microtype}
 \RequirePackage{graphicx}
 \RequirePackage{amssymb}  % \square / \boxtimes for Pandoc task-list checkboxes (- [ ] / - [x])
@@ -279,7 +292,10 @@
   frame=single,
   frameround=tttt,
   rulecolor=\color{gray!40},
-  framesep=0pt
+  framesep=0pt,
+  % Render Ω/μ/µ from the main font inside code (Plex Mono lacks them) — see
+  % the missing-glyph fallback note in the font section above.
+  literate={Ω}{{\rmfamily\char"03A9}}1 {μ}{{\rmfamily\char"03BC}}1 {µ}{{\rmfamily\char"00B5}}1
 }
 
 % ==================== CHAPTER FORMATTING ====================

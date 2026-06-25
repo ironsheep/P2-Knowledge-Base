@@ -97,12 +97,12 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-### Trademarks
+## Trademarks
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 
-## Acknowledgments
+# Acknowledgments
 
 This manual would not exist without the contributions of many individuals and organizations:
 
@@ -117,11 +117,11 @@ This manual would not exist without the contributions of many individuals and or
 This manual is a community-developed resource, created to make the P2's assembly language more accessible to developers at all skill levels.
 
 
-## How to Use This Manual
+# How to Use This Manual
 
 This manual serves multiple audiences and use cases. The organization is designed to support both learning and reference workflows.
 
-### For Different Reader Types
+## For Different Reader Types
 
 **New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
 
@@ -131,7 +131,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
 
-### For P1 Developers
+## For P1 Developers
 
 The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs sharing hub memory—while expanding capabilities.
 
@@ -198,7 +198,7 @@ The R (result) bit from P1's ZCRI field was removed in P2. Result writing is now
 
 Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
 
-### Manual Structure
+## Manual Structure
 
 **Part I: Architectural Foundation** — Six chapters explaining how the P2 works:
 
@@ -229,7 +229,7 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 - Appendix I: Glossary
 - Appendix J: Known Bugs
 
-### Quick Navigation Guide
+## Quick Navigation Guide
 
 **"I need to find instruction X"** → Part II, Instructions section, alphabetically organized
 
@@ -248,9 +248,9 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 **"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 
 
-## Conventions Used in This Manual
+# Conventions Used in This Manual
 
-### Typography
+## Typography
 
 `Monospace font` is used for code examples, instruction names in syntax descriptions, register names, and literal values.
 
@@ -260,7 +260,7 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), and condition codes (IF_C, IF_Z).
 
-### Code Examples
+## Code Examples
 
 PASM2 code examples follow standard formatting conventions:
 
@@ -277,7 +277,7 @@ label           instruction     D,S             ' Comment
 - Comments start with a single quote (') and explain the operation
 - 8-character column alignment for readability
 
-### Special Markers
+## Special Markers
 
 Throughout this manual, special markers highlight important information:
 
@@ -287,7 +287,7 @@ Throughout this manual, special markers highlight important information:
 
 **Hardware**: Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
 
-### Instruction Encoding Tables
+## Instruction Encoding Tables
 
 Part II instruction entries include encoding tables with the following columns:
 
@@ -309,7 +309,7 @@ Part II instruction entries include encoding tables with the following columns:
 
 **Clks** — Execution time in system clock cycles.
 
-### Cross-References
+## Cross-References
 
 This manual uses consistent cross-reference formats:
 
@@ -322,7 +322,7 @@ This manual uses consistent cross-reference formats:
 **"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
 
 
-## About This Manual
+# About This Manual
 
 This manual documents the P2 Assembly Language (PASM2) in a format suited to both human reading and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and verification against P2 silicon behavior.
 
