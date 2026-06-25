@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-163`**
+**Next finding ID: `F-166`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -176,7 +176,7 @@
 ### F-160 — `hardware/hardware-compatibility-matrix.yaml` `pin_efficiency` is an unsourced/undefined metric — `FIXED 2026-06-24`
 - The `pin_efficiency` percentages (e.g. P2-EC32MB rows: 62% / **87%** / **30%** at identical `pin_access: 40`) have **no sourced definition**. The column label is undefined; the only way to "correct" the inconsistent values is to *infer* a formula (`pin_access/64`) and compute them — which the no-inference rule forbids. The internally-inconsistent values (notably "30%" and "87%", unsupportable from any plausible denominator) remain in the file. **Decision needed (Stephen):** either supply a sourced definition for the metric, or remove the `pin_efficiency` field. Do **not** resolve by inference. Surfaced during the F-151 v1.10.1 work.
 
-### F-161 — `RDLUT`/`WRLUT` (and the hub-operand family) KB prose omits the immediate-address 0–255 limit — `CONFIRMED`
+### F-161 — `RDLUT`/`WRLUT` (and the hub-operand family) KB prose omits the immediate-address 0–255 limit — `DONE`
 - **AUTHORITATIVE SOURCE (read this first):** `engineering/ingestion/external-inputs/pnut_ts_facts/LUT-Immediate-Addressing-Briefing-for-Doc-Agents.md` — a self-contained, PNut-TS-source-verified briefing (cites `spinResolver.ts` `tryPtraPtrb()`, `parseUtils.ts` operand bindings) confirmed empirically against `pnut-ts` v1.55.0. Supersedes the forum post and is more complete than the initial Silicon-Doc-only read.
 - **Where:** `deliverables/ai/P2/language/pasm2/rdlut.yaml`, `wrlut.yaml` (primary). The same 0–255 plain-immediate cap is shared by the **whole hub-memory operand family** — `RDLONG WRLONG RDBYTE WRBYTE RDWORD WRWORD WMLONG` — so their YAMLs are in scope for a one-line note too (it rarely bites there: 20-bit hub addresses naturally use register/PTRx/`##`).
 - **The facts to represent (all CONFIRMED):**
@@ -351,6 +351,22 @@
 - **What's wrong:** YAML says SPRITEDEF takes "then **256** RGBA color longs", implying the palette must always be 256 entries. It does NOT — you supply the palette entries the pixel bytes reference.
 - **Evidence:** v55 primary (spin2-v55-text.txt L1288): "Colors are longs which define the palette **referenced by the pixel bytes**." Compile-verified: a 2-color SPRITEDEF (`SPRITEDEF 0 2 2 0 1 1 0 $00000000 $FFFF0000`) compiles clean under `pnut-ts -d`. The manual's 2-color sprite examples are correct.
 - **Fix:** reword to "then the palette colors referenced by the pixel bytes (RGBA `$AARRGGBB` longs; up to 256)" — drop the implication that exactly 256 are required.
+
+## Assembly-manual release-gate audit batch (2026-06-24) — F-163…F-164
+
+> **Origin:** surfaced by the `p2-assembly-language-manual` release-gate audit
+> (`engineering/document-production/manuals/p2-assembly-language-manual/opus-master/audit/release-gate-2026-06-24.md`,
+> findings G-01 and C-01). Both are fabricated content in the P2KB YAML; authority = the P2 Silicon Doc
+> + `pnut-ts` (no-flag/instruction-existence). No inference.
+
+### F-163 — `language/pasm2/getbrk.yaml` carries FABRICATED flag semantics in `description` + `examples` — `DONE`
+> **APPLIED 2026-06-24:** `deliverables/ai/P2/language/pasm2/getbrk.yaml` — rewrote the `description` to the real flag semantics and replaced the three wrong examples. **Source:** Silicon Doc `engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:404-490`. The file claimed GETBRK had a no-flag form returning "16-bit skip pattern", and that WCZ=32-bit ISR call address, WC=8-bit COG ID, WZ=8-bit breakpoint code — **all fabricated**. Truth: GETBRK REQUIRES a flag effect (no-flag form does not assemble — `pnut-ts`: "Expected WC, WZ, or WCZ"). **WCZ** (normal exec) → C=STALLI/ALLOWI, Z=hubexec/cogexec start, D=cog internal status (D[22] colorspace, D[21] streamer, D[20] WRFAST/RDFAST, D[19:16]/[15:12]/[11:08] INT3/2/1 selectors, D[07:06]/[05:04]/[03:02] INT3/2/1 state, D[01] STALLI, D[00] hubexec); in a **debug ISR** additionally D[31:24]=8-bit break code from the last BRK and C/D[23]=COGINIT (re)start. **WC** → C=LSB of SKIP/SKIPF/EXECF/XBYTE pattern, D[31:28]=CALL depth, D[27] SKIP-vs-SKIPF/EXECF/XBYTE, D[26] LUT sharing, D[25] XBYTE pending, D[24:16] XBYTE mode, D[15:00]=16 event-trap flags. **WZ** → Z=1 if no pattern queued (D=0)/queued if D<>0, D=full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern (LSB-first). All four replacement examples compile-verified with `pnut-ts`. `related_instructions` left intact (BRK, COGBRK, NIXINT1/2/3 all exist; no SETBRK invented). Verified: parse + crossref clean.
+
+### F-164 — `language/pasm2/concepts/special_registers.yaml` cites a non-existent GETPC instruction — `DONE`
+> **APPLIED 2026-06-24:** `deliverables/ai/P2/language/pasm2/concepts/special_registers.yaml` (PC register `access`, ~L15) — replaced `Read via GETPC, modified by jumps/calls` with `No direct read instruction; captured as the return address saved by CALLD/CALL/CALLPA/CALLPB; modified by jumps/calls`. **Source:** `pnut-ts` rejects `getpc` ("Expected … assembly instruction"); there is no `getpc.yaml` and GETPC is absent from the instruction CSV. The PC has no dedicated read instruction; its value is captured implicitly as the return address a call saves. Verified idiom `calld reg, #$+1` then `and reg, ##$FFFFF` compiles and captures the 20-bit PC. Verified: parse + crossref clean.
+
+### F-165 — signed-flag family C-flag wording: "correct sign" standardized to "true sign" + `adds.yaml`/`subs.yaml` "bit 31" gloss tightened — `DONE`
+> **APPLIED 2026-06-25 (Assembly-manual release-gate follow-on).** Standardized the signed add/subtract/compare/sum family C-flag wording from "correct sign" to **"true sign"** (the manual's Chapter-3 lead term; also more arresting to readers) across `adds.yaml subs.yaml cmps.yaml cmpsx.yaml sumc.yaml sumnc.yaml sumz.yaml sumnz.yaml tjv.yaml`. Additionally tightened `adds.yaml`/`subs.yaml`, whose C field glossed the value as "i.e. bit 31 of the result" — imprecise for a single overflowing op (the truncated bit 31 is the wrong sign on overflow) — to **"the sign of (D ± S) at full precision (overflow-corrected)"**, matching the manual's audit-verified Chapter-3 definition and the family convention (CMPS = "true sign of A−B"). The core fact (C is the result's SIGN, **not** a signed-overflow indicator) was already correct; this is a terminology + precision alignment. **Note:** the exact single-instruction-overflow behavior (bit 31 vs overflow-corrected) rests on the documentary Chapter-3/Silicon framing; a hardware confirmation could make it empirical if desired. Verified: `validate-yaml-syntax` + `validate-crossref-keys` clean.
 
 ---
 

@@ -9,21 +9,35 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Get breakpoint/cog status into D according to WC/WZ/WCZ.
+description: 'Get cog status / debug-break information into D according to the flag
+  effect. GETBRK REQUIRES a flag effect (WC, WZ, or WCZ); the no-flag form does not
+  assemble.
 
 
-  Flag modes determine what information is retrieved:
-
-  - WCZ: D = 32-bit ISR call address
-
-  - WC: D = 8-bit COG ID in D[7:0]
-
-  - WZ: D = 8-bit breakpoint code in D[7:0]
-
-  - No flags: D = 16-bit skip pattern in D[15:0]
+  The flag effect selects which information is retrieved:
 
 
-  Essential for debug infrastructure and multi-COG coordination.
+  - WCZ (normal execution): C = 1 if STALLI mode / 0 if ALLOWI mode; Z = 1 if cog
+  started in hubexec / 0 if cogexec. D holds cog internal status: D[22] colorspace
+  converter active, D[21] streamer active, D[20] WRFAST(1)/RDFAST(0), D[19:16] INT3
+  selector, D[15:12] INT2 selector, D[11:08] INT1 selector, D[07:06]/D[05:04]/D[03:02]
+  INT3/INT2/INT1 state (idle/pending/executing), D[01] STALLI mode, D[00] started
+  in hubexec.
+
+  - WCZ (during a debug ISR): additionally D[31:24] = 8-bit break code from the last
+  ''BRK #/D'' executed during normal execution, and C (also reflected in D[23]) =
+  1 if the debug interrupt was from a COGINIT, indicating the cog was (re)started.
+
+  - WC: C = LSB of the SKIP/SKIPF/EXECF/XBYTE pattern. D[31:28] = 4-bit CALL depth
+  since the pattern (skipping suspended if not %0000), D[27] = 1 SKIP / 0 SKIPF/EXECF/XBYTE
+  mode, D[26] = LUT sharing enabled, D[25] = XBYTE pending on next _RET_/RET, D[24:16]
+  = 9-bit XBYTE mode, D[15:00] = 16 event-trap flags.
+
+  - WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or pattern queued
+  if D <> 0. D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first.
+
+
+  Essential for debug infrastructure and for inspecting skip/XBYTE state.
 
   '
 flags_affected:
@@ -32,35 +46,36 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-- name: Get Debug ISR Address
-  description: Retrieve current debug ISR entry point
-  code: "' Get address where debug ISR will resume\n        getbrk  isr_addr     \
-    \   wcz      ' Get full 32-bit address\n        \n        ' Save for later restoration\n\
-    \        mov     saved_isr, isr_addr\n"
-  source: Spin2_debugger.spin2
-- name: Identify Calling COG
-  description: Get ID of COG that triggered breakpoint
-  code: "' In debug ISR, identify which COG called us\n        getbrk  cog_id    \
-    \      wc       ' Get COG ID in D[7:0]\n        and     cog_id, #$07         \
-    \    ' Mask to COG number\n        \n        ' Use for COG-specific debug handling\n\
-    \        alts    cog_id, #cog_debug_table\n        mov     debug_ptr, 0-0    \
-    \       ' Get COG's debug data pointer\n"
-  source: Spin2_debugger.spin2
-- name: Get Breakpoint Code
-  description: Retrieve breakpoint code for conditional handling
-  code: "' Get breakpoint code to determine action\n        getbrk  brk_code     \
-    \   wz       ' Get code in D[7:0]\n        \n        ' Dispatch based on code\n\
-    \        cmp     brk_code, #1    wz\nif_z    jmp     #handle_trace\n        cmp\
-    \     brk_code, #2    wz  \nif_z    jmp     #handle_watch\n        cmp     brk_code,\
-    \ #3    wz\nif_z    jmp     #handle_assert\n"
-  source: debug_dispatcher
-- name: Get Skip Pattern
-  description: Retrieve instruction skip pattern for ISR
-  code: "' Get skip pattern for instruction skipping\n        getbrk  skip_pattern\
-    \             ' Get 16-bit pattern\n        \n        ' Apply skip pattern to\
-    \ following instructions\n        skipf   skip_pattern             ' Skip instructions\
-    \ per pattern\n        ' Instructions that may be skipped...\n"
-  source: conditional_execution
+- name: Read Cog Internal Status
+  description: Retrieve cog status with WCZ during normal execution
+  code: "' During normal execution, read cog internal status\n        getbrk  status\
+    \          wcz      ' C=STALLI mode, Z=hubexec start, D=cog status\n        \n\
+    \        ' Test whether the streamer is currently active (D[21])\n        test \
+    \   status, ##(1<<21)   wz\nif_nz   jmp     #streamer_busy\n"
+  source: Silicon Doc (GETBRK D WCZ)
+- name: Get Debug Break Code
+  description: In a debug ISR, recover the 8-bit break code from D[31:24] (WCZ)
+  code: "' In a debug ISR, WCZ returns the last BRK code in D[31:24]\n        getbrk\
+    \  brkinfo         wcz      ' D[31:24]=break code, C/D[23]=COGINIT (re)start\n \
+    \       shr     brkinfo, #24             ' isolate the 8-bit break code\n      \
+    \  \n        ' Dispatch based on the break code\n        cmp     brkinfo, #1   \
+    \  wz\nif_z    jmp     #handle_trace\n        cmp     brkinfo, #2     wz\nif_z \
+    \   jmp     #handle_watch\n"
+  source: Silicon Doc (GETBRK D WCZ, debug ISR)
+- name: Detect a Queued Skip Pattern
+  description: WZ reports whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued, and returns it
+  code: "' WZ: Z=1 if no pattern queued (D=0), D=32-bit pattern if queued\n       \
+    \ getbrk  pattern         wz       ' Z set when no pattern is pending\nif_z    jmp\
+    \     #no_pattern              ' nothing queued, skip applying it\n        \n  \
+    \      ' A pattern is queued; apply it LSB-first\n        skipf   pattern\n"
+  source: Silicon Doc (GETBRK D WZ)
+- name: Read Skip/XBYTE State Flags
+  description: WC returns the pattern LSB plus CALL depth, XBYTE mode, and event traps
+  code: "' WC: C=pattern LSB, D[15:00]=event-trap flags, D[31:16]=skip/XBYTE state\n\
+    \        getbrk  skipstate       wc       ' C=LSB of active pattern\n        \n\
+    \        ' Extract 4-bit CALL depth since the pattern (D[31:28])\n        mov  \
+    \   depth, skipstate\n        shr     depth, #28\n"
+  source: Silicon Doc (GETBRK D WC)
 related_instructions:
 - BRK: Trigger breakpoint with code (also configures breakpoint conditions when in Debug ISR)
 - COGBRK: Trigger breakpoint in another COG

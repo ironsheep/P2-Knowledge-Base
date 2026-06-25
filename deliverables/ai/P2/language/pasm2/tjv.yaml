@@ -5,7 +5,7 @@ category: Branch
 description: >-
   TJV tests the value in Dest against C and jumps to the address described by Src
   if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated
-  (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX /
+  (to the true sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX /
   SUMx instruction. The address (Src) can be absolute or relative. To specify an
   absolute address, Src must be a register containing a 20-bit address value. To
   specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to

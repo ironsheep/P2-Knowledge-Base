@@ -20,6 +20,24 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.11.1] - 2026-06-25
+
+**PASM2 reference accuracy: GETBRK, the program counter, and signed flag semantics**
+
+### Changed
+- GETBRK: complete per-flag-effect reference — cog internal status and the debug break code (WCZ), skip/XBYTE state and CALL depth (WC), and queued skip/XBYTE pattern detection (WZ), each with a worked example.
+- Program counter: access documented as the return address saved by CALLD/CALL/CALLPA/CALLPB.
+- Signed add and subtract: the C flag is documented as the true sign of the full-precision, overflow-corrected result.
+
+## [1.11.0] - 2026-06-24
+
+**Eval add-on board model and hub/LUT immediate-addressing contract**
+
+### Added
+- Eval add-on boards: a standardized, self-contained reference shape across the add-on board line, including a new HyperRAM/HyperFlash board.
+- RDLUT/WRLUT: the plain-immediate address range (0–255) is documented, with full 512-long LUT access via register or PTRA/PTRB operands.
+- Hub memory instructions (RDLONG/WRLONG, RDBYTE/WRBYTE, RDWORD/WRWORD, WMLONG): the shared plain-immediate addressing contract is documented.
+
 ## [1.10.1] - 2026-06-20
 
 **Smart Pin reference depth and language accuracy, with new silicon-grounded detail**

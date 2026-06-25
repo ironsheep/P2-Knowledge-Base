@@ -12,7 +12,7 @@ registers:
   program_counter:
     - name: PC
     - description: Program counter (20-bit)
-    - access: Read via GETPC, modified by jumps/calls
+    - access: No direct read instruction; captured as the return address saved by CALLD/CALL/CALLPA/CALLPB; modified by jumps/calls
     - range: $00000-$FFFFF (hub address space)
     - notes: Auto-increments, wraps at hub boundary
     

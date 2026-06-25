@@ -8,7 +8,7 @@ parameters:
 - Dest is the register containing the value to compare with that of Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 flags_affected:
-  C: Set if signed D < S (correct sign of difference)
+  C: Set if signed D < S (true sign of difference)
   Z: Set if D == S
 syntax_variants:
 - CMPS Dest, {#}Src {WC|WZ|WCZ}

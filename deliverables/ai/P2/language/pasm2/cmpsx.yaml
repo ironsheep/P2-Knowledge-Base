@@ -8,7 +8,7 @@ parameters:
 - Dest is the register containing the value to compare with that of Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 flags_affected:
-  C: Set if signed D < (S + C), correct sign of difference
+  C: Set if signed D < (S + C), true sign of difference
   Z: Set if Z was set AND D == (S + C)
 syntax_variants:
 - CMPSX Dest, {#}Src {WC|WZ|WCZ}
@@ -18,7 +18,7 @@ timing:
 encoding:
 - bits: EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS
   write: —
-  c: correct sign of (D - (S + C))
+  c: true sign of (D - (S + C))
   z: Z AND (D == S + C)
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

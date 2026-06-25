@@ -6,7 +6,7 @@ description: >-
   SUMNZ adjusts the signed Dest value by Src or -Src (depending on !Z) and stores
   the result into the Dest register. If !Z is true (Z=0), Dest = Dest - Src. If !Z
   is false (Z=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag
-  is updated to the correct sign of the result. If the WZ or WCZ effect is specified,
+  is updated to the true sign of the result. If the WZ or WCZ effect is specified,
   the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
 result: >-
   The sum of signed Dest and either Src or -Src (according to !Z) is stored in Dest
@@ -18,7 +18,7 @@ parameters:
   or !Z=0) or negated value (if Z=1 or !Z=1) is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set to correct sign of result (D +/- S)
+  C: Set to true sign of result (D +/- S)
   Z: Set if result equals zero
 timing:
   cycles: 2
@@ -26,7 +26,7 @@ timing:
 encoding:
 - bits: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: correct sign of (D +/- S)
+  c: true sign of (D +/- S)
   z: 0 then D = D - S, else D = D + S
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01

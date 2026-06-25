@@ -3,16 +3,16 @@ syntax: SUMC    D,{#}S   {WC/WZ/WCZ}
 encoding:
 - bits: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S)
+  c: 1 then D = D - S, else D = D + S. C = true sign of (D +/- S)
   z: Result = 0
   clocks: '2'
 timing:
   cycles: 2
   type: fixed
 description: '{WC/WZ/WCZ}   Sum +/-S into D by C. If C = 1 then D = D - S, else D
-  = D + S. C = correct sign of (D +/- S). *'
+  = D + S. C = true sign of (D +/- S). *'
 flags_affected:
-  C: Set to correct sign of result (D +/- S)
+  C: Set to true sign of result (D +/- S)
   Z: Set if result equals zero
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
