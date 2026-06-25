@@ -13,8 +13,6 @@ Poll Attention event
 
 **POLLATN**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = ATN event flag`; then clear flag
 
 **Result:** Attention event flag is optionally copied into C and/or Z, then it is cleared.
@@ -52,8 +50,6 @@ Poll Counter event
 **POLLCT2**  **{WC|WZ|WCZ}**\
 **POLLCT3**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = CTn event flag`; then clear flag
 
 **Result:** CTn event flag state is optionally copied into C and/or Z, then the flag is cleared.
@@ -89,8 +85,6 @@ Poll FIFO Block Wrap event
 
 **POLLFBW**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = FBW event flag`; then clear flag
 
 **Result:** FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared.
@@ -123,8 +117,6 @@ Poll Interrupt event
 :::
 
 **POLLINT**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `C,Z = INT event flag`; then clear flag
 
@@ -159,8 +151,6 @@ Poll Pin Pattern event
 
 **POLLPAT**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = PAT event flag`; then clear flag
 
 **Result:** Pin-pattern-detected event flag is optionally copied into C and/or Z, then it is cleared.
@@ -193,8 +183,6 @@ Poll CORDIC Empty event
 :::
 
 **POLLQMT**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `C,Z = QMT event flag`; then clear flag
 
@@ -234,8 +222,6 @@ Poll Selectable event
 **POLLSE3**  **{WC|WZ|WCZ}**\
 **POLLSE4**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = SEn event flag`; then clear flag
 
 **Result:** SEn event flag state is optionally copied into C and/or Z, then the flag is cleared.
@@ -272,8 +258,6 @@ Poll Streamer Finished event
 
 **POLLXFI**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = XFI event flag`; then clear flag
 
 **Result:** Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
@@ -307,8 +291,6 @@ Poll Streamer Empty event
 
 **POLLXMT**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C,Z = XMT event flag`; then clear flag
 
 **Result:** Streamer-empty event flag is optionally copied into C and/or Z, then it is cleared.
@@ -335,14 +317,12 @@ This instruction enables pipelined streamer operations.
 
 ::: instrheader
 ## POLLXRL {#pollxrl}
-Poll streamer LUT Rollover event
+Poll Streamer LUT Rollover event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer LUT rollover event flag.
 :::
 
 **POLLXRL**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `C,Z = XRL event flag`; then clear flag
 
@@ -370,14 +350,12 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 
 ::: instrheader
 ## POLLXRO {#pollxro}
-Poll streamer NCO Rollover event
+Poll Streamer NCO Rollover event
 
 [Events and Timing](#events-and-timing) - Polls and clears the streamer NCO rollover event flag.
 :::
 
 **POLLXRO**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `C,Z = XRO event flag`; then clear flag
 
@@ -411,8 +389,6 @@ Pop From Internal Stack
 :::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = K (stack)`; `C = K[31]`
 
@@ -450,8 +426,6 @@ Pop From hub stack A
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = hub[--PTRA]`; `C = long[31]`
 
 **Result:** Dest receives the long value from hub address --PTRA.
@@ -487,8 +461,6 @@ Pop From hub stack B
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = hub[--PTRB]`; `C = long[31]`
 
@@ -526,8 +498,6 @@ Push To Internal Stack
 
 **PUSH**  *{#}Dest*
 
----
-
 **Result:** The value from Dest (or immediate value) is stored in the K register.
 
 - Dest is a register or 9-bit immediate value (0-511) to push.
@@ -556,8 +526,6 @@ Push To hub stack A
 :::
 
 **PUSHA**  *{#}Dest*
-
----
 
 **Operation:** `hub[PTRA++] = D`
 
@@ -591,8 +559,6 @@ Push To hub stack B
 :::
 
 **PUSHB**  *{#}Dest*
-
----
 
 **Operation:** `hub[PTRB++] = D`
 

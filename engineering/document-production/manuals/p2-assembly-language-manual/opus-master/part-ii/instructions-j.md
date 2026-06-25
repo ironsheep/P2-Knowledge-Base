@@ -15,15 +15,15 @@ So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken (either c
 
 ::: instrheader
 ## JATN / JNATN {#jatn}
-Jump If Attention Set / Clear {#jnatn}
+Jump If Attention Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on ATN event flag state.
 :::
 
+\hypertarget{jnatn}{}
+
 **JATN**  *{#}S*\
 **JNATN**  *{#}S*
-
----
 
 **Result:** JATN jumps if the ATN event flag is set; JNATN jumps if the ATN event flag is clear.
 
@@ -69,8 +69,6 @@ Jump If Counter Event Set / Clear
 **JNCT2**  *{#}S*\
 **JNCT3**  *{#}S*
 
----
-
 **Result:** JCTn jumps if the CTn event flag is set; JNCTn jumps if the CTn event flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
@@ -104,15 +102,15 @@ The P2 provides three independent hardware counters for timing operations, allow
 
 ::: instrheader
 ## JFBW / JNFBW {#jfbw}
-Jump If FIFO Block Wrap Set / Clear {#jnfbw}
+Jump If FIFO Block Wrap Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on FIFO block wrap event flag state.
 :::
 
+\hypertarget{jnfbw}{}
+
 **JFBW**  *{#}S*\
 **JNFBW**  *{#}S*
-
----
 
 **Result:** JFBW jumps if the FIFO block wrap event flag is set; JNFBW jumps if the flag is clear.
 
@@ -143,15 +141,15 @@ These instructions are useful for implementing circular buffer operations and ma
 
 ::: instrheader
 ## JINT / JNINT {#jint}
-Jump If Interrupt Set / Clear {#jnint}
+Jump If Interrupt Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on INT event flag state.
 :::
 
+\hypertarget{jnint}{}
+
 **JINT**  *{#}S*\
 **JNINT**  *{#}S*
-
----
 
 **Result:** JINT jumps if the INT event flag is set; JNINT jumps if the flag is clear.
 
@@ -190,8 +188,6 @@ Jump
 **JMP**  *D*  **{WC/WZ/WCZ}**\
 **JMP**  *#A*\
 **JMP**  *#\A*
-
----
 
 **Operation:** `PC = D[19:0]`; `C = D[31]`, `Z = D[30]` (register-D form)
 
@@ -239,8 +235,6 @@ Jump Relative
 :::
 
 **JMPREL**  *{#}D*
-
----
 
 **Operation:** cogex: `PC += D[19:0]`; hubex: `PC += D[17:0] << 2`
 
@@ -299,8 +293,6 @@ Jump If Selectable Event Set / Clear
 **JNSE3**  *{#}S*\
 **JNSE4**  *{#}S*
 
----
-
 **Result:** JSEn jumps if the SEn event flag is set; JNSEn jumps if the SEn event flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
@@ -336,15 +328,15 @@ The P2 provides four independent selectable event sources, enabling multiple con
 
 ::: instrheader
 ## JPAT / JNPAT {#jpat}
-Jump If Pattern Match Event Set / Clear {#jnpat}
+Jump If Pattern Match Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on PAT event flag state.
 :::
 
+\hypertarget{jnpat}{}
+
 **JPAT**  *{#}S*\
 **JNPAT**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the PAT event flag is set (JPAT) or clear (JNPAT).
 
@@ -373,15 +365,15 @@ JPAT is useful for implementing hardware-triggered control flow where code execu
 
 ::: instrheader
 ## JQMT / JNQMT {#jqmt}
-Jump If CORDIC Empty Event Set / Clear {#jnqmt}
+Jump If CORDIC Empty Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on CORDIC-read-but-empty event flag state.
 :::
 
+\hypertarget{jnqmt}{}
+
 **JQMT**  *{#}S*\
 **JNQMT**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the CORDIC-read-but-empty event flag is set (JQMT) or clear (JNQMT).
 
@@ -411,15 +403,15 @@ JQMT is useful for error handling in CORDIC operations, allowing code to detect 
 
 ::: instrheader
 ## JXFI / JNXFI {#jxfi}
-Jump If Streamer Finished Event Set / Clear {#jnxfi}
+Jump If Streamer Finished Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on XFI event flag state.
 :::
 
+\hypertarget{jnxfi}{}
+
 **JXFI**  *{#}S*\
 **JNXFI**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the XFI event flag is set (JXFI) or clear (JNXFI).
 
@@ -448,15 +440,15 @@ JXFI is useful for chaining streamer operations or triggering code execution imm
 
 ::: instrheader
 ## JXMT / JNXMT {#jxmt}
-Jump If Streamer Empty Event Set / Clear {#jnxmt}
+Jump If Streamer Empty Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on XMT event flag state.
 :::
 
+\hypertarget{jnxmt}{}
+
 **JXMT**  *{#}S*\
 **JNXMT**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the XMT event flag is set (JXMT) or clear (JNXMT).
 
@@ -485,15 +477,15 @@ JXMT is useful for implementing continuous streaming operations where the code n
 
 ::: instrheader
 ## JXRL / JNXRL {#jxrl}
-Jump If streamer LUT Rollover Event Set / Clear {#jnxrl}
+Jump If Streamer LUT Rollover Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on XRL event flag state.
 :::
 
+\hypertarget{jnxrl}{}
+
 **JXRL**  *{#}S*\
 **JNXRL**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the XRL event flag is set (JXRL) or clear (JNXRL).
 
@@ -522,15 +514,15 @@ JXRL is useful for implementing circular buffer operations with the streamer usi
 
 ::: instrheader
 ## JXRO / JNXRO {#jxro}
-Jump If streamer NCO Rollover Event Set / Clear {#jnxro}
+Jump If Streamer NCO Rollover Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on XRO event flag state.
 :::
 
+\hypertarget{jnxro}{}
+
 **JXRO**  *{#}S*\
 **JNXRO**  *{#}S*
-
----
 
 **Result:** PC is set to the address specified by S if the XRO event flag is set (JXRO) or clear (JNXRO).
 

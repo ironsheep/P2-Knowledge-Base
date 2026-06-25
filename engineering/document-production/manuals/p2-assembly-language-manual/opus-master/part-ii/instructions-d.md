@@ -11,8 +11,6 @@ This section contains all PASM2 instructions beginning with the letter D.
 
 So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
 
-<!-- DEBUG instruction removed - will be covered in a dedicated narrative chapter with examples -->
-
 
 
 ::: instrheader
@@ -23,8 +21,6 @@ Decrement Modulus
 :::
 
 **DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** if D == 0 then `D = S`, `C = 1`, else `D = D - 1`, `C = 0`
 
@@ -64,8 +60,6 @@ Decode Bit Position
 **DECOD**  *Dest, {#}Src*\
 **DECOD**  *Dest*
 
----
-
 **Operation:** `D = 1 << S[4:0]`
 
 **Result:** A 32-bit value, with the bit position corresponding to Src or Dest value (0-31) set high, is stored in Dest.
@@ -100,15 +94,15 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 
 ::: instrheader
 ## DIRC / DIRNC {#dirc}
-Set Pin Direction by C flag {#dirnc}
+Set Pin Direction by C flag
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
+\hypertarget{dirnc}{}
+
 **DIRC**  *{#}Dest*  **{WCZ}**\
 **DIRNC**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `DIR[pin range] = src` (DIRC src=C, DIRNC src=!C); `C,Z = DIR bit`
 
@@ -154,8 +148,6 @@ Set Pin Direction High
 
 **DIRH**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `DIR[pin range] = 1`; `C,Z = DIR bit`
 
 **Result:** The I/O pins described by Dest are set to output direction; the rest are left as-is.
@@ -192,8 +184,6 @@ Set Pin Direction Low
 :::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `DIR[pin range] = 0`; `C,Z = DIR bit`
 
@@ -232,8 +222,6 @@ Direction Not
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** toggle `DIR[pin range]`; `C,Z = DIR bit`
 
 **Result:** The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.
@@ -268,15 +256,15 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 ::: instrheader
 ## DIRZ / DIRNZ {#dirz}
-Set Pin Direction by Z flag {#dirnz}
+Set Pin Direction by Z flag
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
+\hypertarget{dirnz}{}
+
 **DIRZ**  *{#}Dest*  **{WCZ}**\
 **DIRNZ**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `DIR[pin range] = src` (DIRZ src=Z, DIRNZ src=!Z); `C,Z = DIR bit`
 
@@ -322,8 +310,6 @@ Direction Random
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `DIR[pin range] = RND`; `C,Z = DIR bit`
 
 **Result:** The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.
@@ -365,9 +351,7 @@ Decrement and Jump If Full
 
 **DJF**  *Dest, {#}Src*
 
----
-
-**Operation:** `D = D - 1`; jump to S** if D == $FFFF_FFFF
+**Operation:** `D = D - 1`; jump to S if D == $FFFF_FFFF
 
 **Result:** Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -401,9 +385,7 @@ Decrement and Jump If Not Full
 
 **DJNF**  *Dest, {#}Src*
 
----
-
-**Operation:** `D = D - 1`; jump to S** if D != $FFFF_FFFF
+**Operation:** `D = D - 1`; jump to S if D != $FFFF_FFFF
 
 **Result:** Dest is decremented. If the result does NOT equal $FFFF_FFFF (not full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -432,15 +414,15 @@ The instruction executes in 2 clock cycles when the branch is not taken. When ta
 
 ::: instrheader
 ## DJZ / DJNZ {#djz}
-Decrement and Jump If Zero {#djnz}
+Decrement and Jump If Zero
 
 [Branching and Flow Control](#branching-and-flow-control) - Decrements and conditionally jumps based on zero result.
 :::
 
+\hypertarget{djnz}{}
+
 **DJZ**  *Dest, {#}Src*\
 **DJNZ**  *Dest, {#}Src*
-
----
 
 **Result:** Dest is decremented by 1, and conditionally jumps based on the result.
 
@@ -484,15 +466,15 @@ Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 
 
 ::: instrheader
 ## DRVC / DRVNC {#drvc}
-Drive Pins by C flag {#drvnc}
+Drive Pins by C flag
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
+\hypertarget{drvnc}{}
+
 **DRVC**  *{#}Dest*  **{WCZ}**\
 **DRVNC**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = src`, `DIR[pin range] = 1` (DRVC src=C, DRVNC src=!C); `C,Z = OUT bit`
 
@@ -536,8 +518,6 @@ Drive Pins High
 
 **DRVH**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `OUT[pin range] = 1`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of high; the rest are left as-is.
@@ -576,8 +556,6 @@ Drive Pins Low
 :::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = 0`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
@@ -620,8 +598,6 @@ Drive Not
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** toggle `OUT[pin range]`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.
@@ -658,15 +634,15 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 ::: instrheader
 ## DRVZ / DRVNZ {#drvz}
-Drive Pins by Z flag {#drvnz}
+Drive Pins by Z flag
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
+\hypertarget{drvnz}{}
+
 **DRVZ**  *{#}Dest*  **{WCZ}**\
 **DRVNZ**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = src`, `DIR[pin range] = 1` (DRVZ src=Z, DRVNZ src=!Z); `C,Z = OUT bit`
 
@@ -709,8 +685,6 @@ Drive Random
 :::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = RND`, `DIR[pin range] = 1`; `C,Z = OUT bit`
 

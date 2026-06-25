@@ -13,8 +13,6 @@ Execute Continue
 
 **XCONT**  *{#}Dest, {#}Src*
 
----
-
 **Result:** Buffers a new streamer command to execute when the current command completes its final NCO rollover, continuing from current phase.
 
 - Dest is the streamer mode configuration.
@@ -46,8 +44,6 @@ Execute Initialize
 :::
 
 **XINIT**  *{#}Dest, {#}Src*
-
----
 
 **Result:** Issues a streamer command immediately with the phase accumulator reset to zero.
 
@@ -94,8 +90,6 @@ Exclusive Or
 :::
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
-
----
 
 **Operation:** `D = D ^ S`; `C = parity of result`
 
@@ -148,8 +142,6 @@ Xoroshiro 32
 
 **XORO32**  *Dest*
 
----
-
 **Result:** Dest is updated with the next PRNG state. The generated random value is placed into the S field of the next instruction.
 
 - Dest is the register containing the 32-bit PRNG state.
@@ -196,8 +188,6 @@ Execute Stop
 
 **XSTOP**
 
----
-
 **Result:** The currently active streamer operation terminates immediately.
 
 - Takes no operands.
@@ -234,8 +224,6 @@ Execute Zero
 :::
 
 **XZERO**  *{#}Dest, {#}Src*
-
----
 
 **Result:** Buffers a new streamer command to execute when the current command completes, resetting phase to zero.
 

@@ -14,8 +14,6 @@ Encode Bit Position
 **ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ENCOD**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = position of top-most '1' in S (0..31)`; `C = (S != 0)`
 
 **Result:** The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
@@ -62,8 +60,6 @@ Execute with Skip Pattern
 :::
 
 **EXECF**  *{#}Dest*
-
----
 
 **Operation:** `PC = {10'b0, D[9:0]}`; SKIPF pattern = D[31:10]
 

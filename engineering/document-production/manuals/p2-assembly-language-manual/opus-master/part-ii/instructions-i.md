@@ -15,15 +15,15 @@ So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles
 
 ::: instrheader
 ## IJZ / IJNZ {#ijz}
-Increment and Jump If Zero {#ijnz}
+Increment and Jump If Zero
 
 [Branching and Flow Control](#branching-and-flow-control) - Increments and conditionally jumps based on the result.
 :::
 
+\hypertarget{ijnz}{}
+
 **IJZ**  *Dest, {#}Src*\
 **IJNZ**  *Dest, {#}Src*
-
----
 
 **Result:** Dest is incremented by 1, and conditionally jumps based on the result.
 
@@ -67,8 +67,6 @@ Increment Modulus
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** if D == S then `D = 0`, `C = 1`, else `D = D + 1`, `C = 0`
 
 **Result:** If Dest was not equal to Src, it is incremented by 1; otherwise Dest is reset to 0.
@@ -91,7 +89,7 @@ INCMOD compares Dest with Src. If they are not equal, INCMOD increments Dest by 
 
 If Dest begins in the range 0 to Src, repeated iterations of INCMOD will increment Dest cyclically from 0 to Src, then wrap back to 0, over and over. INCMOD increments Dest, wrapping to 0 after it reaches Src, which suits round-robin scheduling, circular buffer indexing, and other modulo-arithmetic operations. DECMOD provides the decrement-with-modulus equivalent for wrap-around counting downward.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if Dest was equal to Src and subsequently reset to 0 (the modulus was triggered), or is cleared (0) if Dest was simply incremented. This allows detecting when the cycle completes.
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest was equal to Src and subsequently reset to 0 (the modulus was triggered), or is cleared (0) if Dest was incremented. This allows detecting when the cycle completes.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 

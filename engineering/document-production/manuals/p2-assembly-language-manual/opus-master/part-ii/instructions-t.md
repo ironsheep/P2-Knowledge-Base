@@ -23,8 +23,6 @@ Test
 **TEST**  *Dest*  **{WC|WZ|WCZ}**\
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = parity of (D & S)`; `Z = ((D & S) == 0)`
 
 **Result:** The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags.
@@ -70,8 +68,6 @@ Test Bit
 **TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
 **TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
 **TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
-
----
 
 **Operation:** `C/Z = D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
 
@@ -120,8 +116,6 @@ Test Bit Negated
 **TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
 **TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
----
-
 **Operation:** `C/Z = !D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
 
 **Result:** The inverted state of bit Src[4:0] of Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
@@ -161,8 +155,6 @@ Test Not
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = parity of (D & !S)`; `Z = ((D & !S) == 0)`
 
 **Result:** The parity and zero-state of Dest bitwise ANDed with !Src is stored in the C and Z flags.
@@ -193,10 +185,12 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 
 ::: instrheader
 ## TESTP / TESTPN {#testp}
-Test Pin / Test Pin Negated {#testpn}
+Test Pin / Test Pin Negated
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
+
+\hypertarget{testpn}{}
 
 **TESTP**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
 **TESTP**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
@@ -207,8 +201,6 @@ Test Pin / Test Pin Negated {#testpn}
 **TESTPN**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
 **TESTPN**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
 **TESTPN**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
-
----
 
 **Operation:** `C/Z = IN[D[5:0]]` (TESTP) / `!IN[D[5:0]]` (TESTPN); AND/OR/XOR modes combine
 
@@ -253,17 +245,17 @@ Both instructions read the actual pin state from the IN register, not the output
 
 ::: instrheader
 ## TJF / TJNF {#tjf}
-Test And Jump If Full / Not Full {#tjnf}
+Test And Jump If Full / Not Full
 
 [Branching and Flow Control](#branching-and-flow-control) - Tests for all bits set and conditionally jumps.
 :::
 
+\hypertarget{tjnf}{}
+
 **TJF**  *Dest, {#}Src*\
 **TJNF**  *Dest, {#}Src*
 
----
-
-**Operation:** jump to S** if D == $FFFF_FFFF (TJF) / D != $FFFF_FFFF (TJNF)
+**Operation:** jump to S if D == $FFFF_FFFF (TJF) / D != $FFFF_FFFF (TJNF)
 
 **Result:** Dest is tested and conditionally jumps based on full state.
 
@@ -296,17 +288,17 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 ::: instrheader
 ## TJS / TJNS {#tjs}
-Test And Jump If Signed / Not Signed {#tjns}
+Test And Jump If Signed / Not Signed
 
 [Branching and Flow Control](#branching-and-flow-control) - Tests sign bit and conditionally jumps.
 :::
 
+\hypertarget{tjns}{}
+
 **TJS**  *Dest, {#}Src*\
 **TJNS**  *Dest, {#}Src*
 
----
-
-**Operation:** jump to S** if D[31] == 1 (TJS) / D[31] == 0 (TJNS)
+**Operation:** jump to S if D[31] == 1 (TJS) / D[31] == 0 (TJNS)
 
 **Result:** Dest is tested and conditionally jumps based on sign bit state.
 
@@ -339,15 +331,17 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 ::: instrheader
 ## TJZ / TJNZ {#tjz}
-Test And Jump If Zero / Not Zero {#tjnz}
+Test And Jump If Zero / Not Zero
 
 [Branching and Flow Control](#branching-and-flow-control) - Tests for zero and conditionally jumps.
 :::
 
+\hypertarget{tjnz}{}
+
 **TJZ**  *Dest, {#}Src*\
 **TJNZ**  *Dest, {#}Src*
 
----
+**Operation:** jump to S if D == 0 (TJZ) / D <> 0 (TJNZ)
 
 **Result:** Dest is tested (not modified), and conditionally jumps based on zero/non-zero result.
 
@@ -396,9 +390,7 @@ Test And Jump If Overflow
 
 **TJV**  *Dest, {#}Src*
 
----
-
-**Operation:** jump to S** if D[31] != C (overflow; C = 'correct sign' from last add/sub)
+**Operation:** jump to S if D[31] != C (overflow; C = 'true sign' from last add/sub)
 
 **Result:** Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a new relative (#Src) or absolute (Src) address.
 
@@ -415,7 +407,7 @@ Test And Jump If Overflow
 
 **Explanation:**
 
-TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the correct sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (Src) can be absolute or relative.
+TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the true sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (Src) can be absolute or relative.
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
@@ -431,7 +423,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 ::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
-Trigger interrupt (1, 2, Or 3)
+Trigger Interrupt (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
@@ -441,8 +433,6 @@ Trigger interrupt (1, 2, Or 3)
 **TRGINT1**
 **TRGINT2**
 **TRGINT3**
-
----
 
 **Result:** The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
@@ -460,6 +450,6 @@ Trigger interrupt (1, 2, Or 3)
 
 TRGINT1, TRGINT2, and TRGINT3 software-trigger their respective interrupt handlers, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
 
-The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions when you need to invoke an interrupt handler programmatically.
+The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions to invoke an interrupt handler programmatically.
 
 

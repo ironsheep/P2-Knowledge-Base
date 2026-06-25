@@ -246,7 +246,7 @@ The increment/decrement amount (SCALE) depends on the instruction:
 - `PTRA++[index]` — Post-update indexed: use PTRA, then PTRA += index × SCALE
 - `++PTRA[index]` — Pre-update indexed: PTRA += index × SCALE, then use PTRA
 
-Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
+Index ranges: -32 to +31 for non-updating indexed; -16 to +16 for updating forms.
 
 **Example**:
 ```pasm2
@@ -474,7 +474,7 @@ Several critical registers exist outside the cog RAM address space and are acces
 
 The program counter is a 20-bit register that holds the hub RAM address of the currently executing instruction.
 
-**Access**: Read via GETPC, modified implicitly by jumps and calls
+**Access**: No dedicated read instruction; the PC value is captured implicitly as the return address a call saves (`CALLD`/`CALL`/`CALLPA`/`CALLPB`), and is modified by jumps and calls
 
 **Range**: $00000-$FFFFF (full hub address space)
 
@@ -482,14 +482,15 @@ The program counter is a 20-bit register that holds the hub RAM address of the c
 
 **Example**:
 ```pasm2
-        getpc   current_addr            ' Read current PC value
+        calld   current_addr, #$+1      ' Capture return address (= next PC)
+        and     current_addr, ##$FFFFF  ' Isolate the 20-bit PC value
 
         ' PC modified by control flow
         jmp     #target                 ' Sets PC to target address
         call    #subroutine             ' Saves PC+4, jumps to subroutine
 ```
 
-**Related**: GETPC, JMP, CALL, CALLD
+**Related**: CALLD, CALL, JMP
 
 
 
@@ -560,13 +561,13 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
 
 ### Hardware Random Number Generator (RANDOM)
 
-The hardware random number generator produces true random numbers based on thermal noise, providing a new random value on each read.
+The random number generator is a high-quality pseudo-random generator (Xoroshiro128\*\*) implemented in hardware. It is true-random seeded at startup (the boot ROM seeds it from thermal noise) and iterates every clock, so a fresh value is available on each read.
 
 **Access**: Read via GETRND
 
-**Features**: True random number generation (not pseudo-random), continuously generates new values
+**Features**: High-quality pseudo-random generation (Xoroshiro128\*\*), true-random seeded at startup, iterates every clock
 
-**Usage**: Each execution of GETRND returns a new 32-bit random value. The generator runs continuously in hardware, so consecutive reads produce different values. The randomness quality is suitable for cryptographic applications.
+**Usage**: Each execution of GETRND returns a new 32-bit value. The generator iterates every clock in hardware, so consecutive reads produce different values.
 
 **Example**:
 ```pasm2

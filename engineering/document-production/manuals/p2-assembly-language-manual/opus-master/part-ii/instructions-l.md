@@ -14,8 +14,6 @@ Load Address
 **LOC**  *PA/PB/PTRA/PTRB, #A*\
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
 
----
-
 **Operation:** `{PA/PB/PTRA/PTRB} = {12'b0, address[19:0]}` (R=1: address = PC + A; R=0: address = A)
 
 **Result:** Address is loaded into the specified pointer register.
@@ -46,14 +44,12 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 
 ::: instrheader
 ## LOCKNEW {#locknew}
-Allocate New lock
+Allocate New Lock
 
 [Cog Control and Locks](#cog-control-and-locks) - Requests an available lock from the hardware pool.
 :::
 
 **LOCKNEW**  *D*  **{WC}**
-
----
 
 **Operation:** `D = LOCK number (0..15)`; `C = 1 if no LOCK available`
 
@@ -84,14 +80,12 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 
 ::: instrheader
 ## LOCKREL {#lockrel}
-Release lock
+Release Lock
 
 [Cog Control and Locks](#cog-control-and-locks) - Releases a lock for other cogs to acquire.
 :::
 
 **LOCKREL**  *{#}D*  **{WC}**
-
----
 
 **Operation:** release LOCK D[3:0]; if reg + WC: `D = owner cog id`, `C = LOCK status`
 
@@ -114,7 +108,7 @@ LOCKREL releases a lock that was previously acquired with LOCKTRY, making it ava
 
 When D is a register (not an immediate) and the WC effect is specified, LOCKREL performs an additional operation: it writes the cog ID of the previous lock owner into D and sets the C flag based on whether the lock was held. This diagnostic feature allows verification of lock ownership and debugging of synchronization issues.
 
-LOCKREL is safe to call even if the lock was not held by the current cog. Releasing an unheld lock simply has no effect. This property simplifies error recovery code, as locks can be released without checking ownership first.
+LOCKREL is safe to call even if the lock was not held by the current cog. Releasing an unheld lock has no effect. This property simplifies error recovery code, as locks can be released without checking ownership first.
 
 Proper lock management requires that every LOCKTRY that successfully acquires a lock is balanced with a corresponding LOCKREL. Failure to release locks leads to deadlocks and resource starvation. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if the result is written back to D.
 
@@ -128,8 +122,6 @@ Return Lock To Pool
 :::
 
 **LOCKRET**  *{#}D*
-
----
 
 **Result:** The lock specified by D[3:0] is returned to the pool and becomes available for LOCKNEW.
 
@@ -157,14 +149,12 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 
 ::: instrheader
 ## LOCKTRY {#locktry}
-Try To Acquire lock
+Try To Acquire Lock
 
 [Cog Control and Locks](#cog-control-and-locks) - Attempts to acquire a lock using atomic test-and-set.
 :::
 
 **LOCKTRY**  *{#}D*  **{WC}**
-
----
 
 **Operation:** try LOCK D[3:0]; `C = 1 if acquired`
 

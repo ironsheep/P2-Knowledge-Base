@@ -13,9 +13,7 @@ Merge Bits Of Bytes
 
 **MERGEB**  *D*
 
----
-
-**Operation:** `D = {D[31], D[23], D[15], D[7], … D[24], D[16], D[8], D[0]}`
+**Operation:** `D = {D[31], D[23], D[15], D[7], ... D[24], D[16], D[8], D[0]}`
 
 **Result:** Bits from each byte in D are rearranged into a specific merged pattern.
 
@@ -48,9 +46,7 @@ Merge Bits Of Words
 
 **MERGEW**  *D*
 
----
-
-**Operation:** `D = {D[31], D[15], D[30], D[14], … D[17], D[1], D[16], D[0]}`
+**Operation:** `D = {D[31], D[15], D[30], D[14], ... D[17], D[1], D[16], D[0]}`
 
 **Result:** Bits from each word in D are rearranged into a specific merged pattern.
 
@@ -83,8 +79,6 @@ Mix Pixels
 
 **MIXPIX**  *D,{#}S*
 
----
-
 **Result:** Bytes of S are blended into bytes of D according to the SETPIX and SETPIV configuration.
 
 - D is a register containing the destination pixel bytes to be modified.
@@ -112,14 +106,12 @@ MIXPIX blends two pixels per the configured mode in one operation.
 
 ::: instrheader
 ## MODC {#modc}
-Modify C flag
+Modify C Flag
 
 [Arithmetic Operations](#arithmetic-operations) - Sets or clears C flag based on a modifier and current flag states.
 :::
 
 **MODC**  *c*  **{WC}**
-
----
 
 **Operation:** `C = cccc[{C,Z}]`
 
@@ -158,8 +150,6 @@ Modify C And Z Flags
 :::
 
 **MODCZ**  *c,z*  **{WC/WZ/WCZ}**
-
----
 
 **Operation:** `C = cccc[{C,Z}]`; `Z = zzzz[{C,Z}]`
 
@@ -224,14 +214,12 @@ MODCZ updates both flags from the same initial flag state, which separate MODC/M
 
 ::: instrheader
 ## MODZ {#modz}
-Modify Z flag
+Modify Z Flag
 
 [Arithmetic Operations](#arithmetic-operations) - Sets or clears Z flag based on a modifier and current flag states.
 :::
 
 **MODZ**  *z*  **{WZ}**
-
----
 
 **Operation:** `Z = zzzz[{C,Z}]`
 
@@ -270,8 +258,6 @@ Move
 :::
 
 **MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Result:** The Src value is stored in Dest.
 
@@ -330,8 +316,6 @@ Move Bytes
 
 **MOVBYTS**  *D,{#}S*
 
----
-
 **Operation:** `D = {D.BYTE[S[7:6]], D.BYTE[S[5:4]], D.BYTE[S[3:2]], D.BYTE[S[1:0]]}`
 
 **Result:** Bytes within D are rearranged according to the byte selection pattern in S.
@@ -375,9 +359,7 @@ Multiply
 
 **MUL**  *Dest, {#}Src*  **{WZ}**
 
----
-
-**Operation:** `D = unsigned(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`
+**Operation:** `D = unsigned(D[15:0] * S[15:0])`; `Z = (S==0 OR D==0)`
 
 **Result:** The 32-bit unsigned product of the lower 16 bits of Dest and Src is stored in Dest.
 
@@ -418,7 +400,7 @@ For fixed-point math with 16-bit fractional parts:
         shr     temp, #16               ' Adjust for fixed-point scale
 ```
 
-For this multiply-then-shift-by-16 scaling pattern, SCA performs the same work in a single instruction: SCA computes `unsigned(D[15:0] × S[15:0]) >> 16` and substitutes the result directly as the next instruction's S operand.
+For this multiply-then-shift-by-16 scaling pattern, SCA performs the same work in a single instruction: SCA computes `unsigned(D[15:0] * S[15:0]) >> 16` and substitutes the result directly as the next instruction's S operand.
 
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
@@ -433,9 +415,7 @@ Multiply Pixels
 
 **MULPIX**  *D,{#}S*
 
----
-
-**Operation:** for each byte n: `D.BYTE[n] = (D.BYTE[n] × S.BYTE[n]) / 255` ($FF = 1.0, $00 = 0.0)
+**Operation:** for each byte n: `D.BYTE[n] = D.BYTE[n] * S.BYTE[n]` as fractions ($FF = 1.0, $00 = 0.0)
 
 **Result:** Each byte of S is multiplied with the corresponding byte of D, with results stored in D.
 
@@ -454,7 +434,7 @@ Multiply Pixels
 
 MULPIX performs parallel multiplication on four byte pairs, treating each byte as a fractional value where $FF represents 1.0 and $00 represents 0.0. Each of the four bytes in S is multiplied with the corresponding byte in D, and the results replace the bytes in D.
 
-The multiplication treats bytes as 8-bit fractional values in the range 0.0 to 1.0. For each byte position, the operation computes: D.BYTE[n] = (D.BYTE[n] * S.BYTE[n]) / 255. The division by 255 is implicit in the fractional representation, where $FF * $FF = $FF (1.0 * 1.0 = 1.0).
+The multiplication treats bytes as 8-bit fractional values in the range 0.0 to 1.0, where $FF represents 1.0 and $00 represents 0.0. For each byte position, the operation multiplies the two fractional bytes and stores the fractional product, so $FF * $FF = $FF (1.0 * 1.0 = 1.0).
 
 MULPIX multiplies each color component of D by the corresponding component of S. For example, multiplying an RGB color by a brightness value: if D contains $80_60_40_20 (RGBA values) and S contains $80_80_80_FF (50% brightness on RGB, full alpha), each color component is reduced to 50% of its original value.
 
@@ -480,9 +460,7 @@ Multiply Signed
 
 **MULS**  *Dest, {#}Src*  **{WZ}**
 
----
-
-**Operation:** `D = signed(D[15:0] × S[15:0])`; `Z = (S==0 OR D==0)`
+**Operation:** `D = signed(D[15:0] * S[15:0])`; `Z = (S==0 OR D==0)`
 
 **Result:** The 32-bit signed product of the signed lower 16 bits of Dest and Src is stored in Dest.
 
@@ -524,7 +502,7 @@ For signed fixed-point math with 16-bit fractional parts:
         sar     temp, #16               ' Arithmetic shift to preserve sign
 ```
 
-For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in one instruction: `signed(D[15:0] × S[15:0]) >> 14`, where `$4000` represents 1.0, substituting the result into the next instruction's S operand.
+For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in one instruction: `signed(D[15:0] * S[15:0]) >> 14`, where `$4000` represents 1.0, substituting the result into the next instruction's S operand.
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
@@ -545,8 +523,6 @@ Multiplex Flag To Bits
 **MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = (!S & D) | (S & {32{src}})` where src = C/!C/Z/!Z; `C = parity of result`
 
@@ -605,8 +581,6 @@ Multiplex Nibbles
 
 **MUXNIBS**  *Dest, {#}Src*
 
----
-
 **Operation:** for each nibble n (0..7): if `S.NIBBLE[n] != 0` then `D.NIBBLE[n] = S.NIBBLE[n]`
 
 **Result:** Each non-zero nibble in Src replaces the corresponding nibble in Dest.
@@ -651,8 +625,6 @@ Multiplex Nits
 
 **MUXNITS**  *Dest, {#}Src*
 
----
-
 **Operation:** for each 2-bit field n (0..15): if `S[2n+1:2n] != 0` then `D[2n+1:2n] = S[2n+1:2n]`
 
 **Result:** Each non-zero bit pair in Src replaces the corresponding bit pair in Dest.
@@ -696,8 +668,6 @@ Multiplex Q
 :::
 
 **MUXQ**  *Dest, {#}Src*
-
----
 
 **Operation:** `D = (D & !Q) | (S & Q)` (Q from prior SETQ)
 

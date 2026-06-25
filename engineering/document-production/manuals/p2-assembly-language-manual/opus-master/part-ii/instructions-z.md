@@ -13,8 +13,6 @@ Zero Extend
 
 **ZEROX**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
----
-
 **Operation:** zero-extend D above bit S[4:0]; `C = result[31]`
 
 **Result:** Dest is zero-extended above the bit indicated by Src[4:0]. Optionally sets C to MSB of result and Z if result equals zero.

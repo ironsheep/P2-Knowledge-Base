@@ -1,7 +1,5 @@
 # Chapter 1: The P2 Execution Model
 
-<!-- Chapter establishing the foundational mental model for the P2 architecture -->
-
 The Propeller 2 microcontroller implements a unique multi-processor architecture that differs fundamentally from conventional microcontrollers. Understanding this architecture is essential for effective PASM2 programming.
 
 
@@ -69,7 +67,7 @@ Registers $1D8-$1DF have predefined symbols PR0-PR7 for Spin2 interoperability. 
 
 The final 16 registers have dedicated hardware functions. Registers $1F0-$1F7 (IJMP3/IRET3, IJMP2/IRET2, IJMP1/IRET1, PA, PB) serve dual purposes: they function as interrupt vectors and call/return storage when those features are enabled, or as general-purpose RAM otherwise. Registers $1F8-$1FF (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) are fixed special registers that always provide their hardware I/O and pointer functions.
 
-For complete documentation of each register, see Part II: Special Registers and Appendix C: Special Registers Quick Reference.
+For complete documentation of each register, see Part II: Special Registers and Appendix D: Special Registers Quick Reference.
 
 ### 1.2.3 Register Addressing
 
@@ -193,7 +191,7 @@ The P2 supports three execution modes based on the program counter address, each
 
 ### 1.6.1 Cog Execution Mode
 
-Cog execution mode runs code from cog RAM (PC in range $000-$1FF). Instructions execute in the consistent two-clock pipeline with no additional delays. This mode provides the fastest possible execution and deterministic timing, making it ideal for time-critical code such as communication protocols, motor control loops, and signal generation.
+Cog execution mode runs code from cog RAM (PC in range $000-$1FF). Instructions execute in the consistent two-clock pipeline with no additional delays. This mode provides the fastest possible execution and deterministic timing, suiting it to time-critical code.
 
 Cog execution mode limits programs to the available cog RAM space. After accounting for special registers and data storage, typically 200-400 longs remain for code. Programs that fit in this space achieve maximum performance. Larger programs can overflow into LUT execution or use hub execution mode.
 
@@ -234,7 +232,4 @@ The hardware handles mode transitions transparently. The programmer specifies th
 \item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 1 -->
 

@@ -1,7 +1,5 @@
 # Chapter 4: Timing and Determinism
 
-<!-- Chapter covering clock cycles, hub windows, and deterministic timing -->
-
 The P2 provides deterministic instruction timing, enabling precise real-time control. Understanding timing characteristics is essential for time-critical applications and optimizing code performance.
 
 
@@ -177,7 +175,7 @@ The hub access latency directly impacts program performance when hub memory acce
 
 ### 4.3.3 Hub Burst Transfers
 
-SETQ enables burst transfers that read or write multiple consecutive longs in a single hub access sequence. This feature dramatically improves hub memory throughput by eliminating the window wait time for all but the first transfer.
+SETQ enables burst transfers that read or write multiple consecutive longs in a single hub access sequence. This feature improves hub memory throughput by eliminating the window wait time for all but the first transfer.
 
 The SETQ instruction takes one parameter specifying how many additional longs to transfer. The hub access instruction that follows SETQ performs a burst of that many consecutive transfers:
 
@@ -223,7 +221,7 @@ RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 | 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
 | 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
 
-The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
+The no-wait mode is useful when the FIFO must be reconfigured quickly and enough cycles can be guaranteed to pass before the first FIFO access.
 
 **Setting Up the Write FIFO:**
 
@@ -249,7 +247,7 @@ The FIFO supports circular buffer operation for continuous streaming. When confi
         rdfast  #16, audio_buffer       ' Read 16 blocks (1KB), then wrap
 ```
 
-For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count when you don't want wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
+For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count to disable wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
 
 **Dynamic Buffer Management with FBLOCK:**
 
@@ -294,7 +292,7 @@ The FIFO cannot be used while the cog is executing from hub RAM. During hub exec
 - WFBYTE / WFWORD / WFLONG
 - XINIT / XZERO / XCONT (when streamer mode engages the FIFO)
 
-To use FIFO operations, ensure your code executes from cog or LUT RAM.
+FIFO operations require execution from cog or LUT RAM.
 
 **FIFO and the streamer:**
 
@@ -630,7 +628,7 @@ Profiling can reveal unexpected timing variations. If a loop shows inconsistent 
 
 Cog execution mode—often called "cog mode"—executes instructions from the cog's local 512-long (2KB) RAM. This provides the fastest possible execution because instruction fetch occurs from the cog's private memory without any shared resource contention.
 
-In cog mode, most instructions complete in exactly 2 clock cycles. The processor fetches an instruction and executes it without waiting for memory access arbitration, cache lookups, or bus conflicts. This predictable timing makes cog mode ideal for timing-critical code like interrupt handlers, real-time control loops, and I/O bit-banging.
+In cog mode, most instructions complete in exactly 2 clock cycles. The processor fetches an instruction and executes it without waiting for memory access arbitration, cache lookups, or bus conflicts. This predictable timing suits cog mode to timing-critical code.
 
 Cog mode execution begins when a cog starts via COGINIT with a cog RAM address (0-$1FF). The program counter points to cog RAM locations, and instruction fetch proceeds at full speed. All 512 longs of cog RAM are available for code and data, though programs typically reserve some locations for data and use the remainder for code.
 
@@ -687,7 +685,4 @@ Because branch-heavy code pays the FIFO-refill penalty on every taken branch, co
 \item Hub execution mode adds instruction fetch latency
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 4 -->
 

@@ -1,5 +1,24 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.0 (2026-06-24)
+
+**Instruction-reference accuracy and readability pass** — a content re-audit against the Knowledge Base alongside a voicing and layout refresh.
+
+### Changed
+- Each instruction entry now reads as a single unit: the horizontal rule between an entry's syntax and its Operation/Result was removed (it had separated the heading from the entry's own body).
+- Voicing refresh across Part I and the instruction entries, in the manual's third-person reference register; 206 instruction entries gained a concise `Operation:` line.
+- Faster-instruction and related-instruction cross-references added (e.g. SCA/SCAS, FLE/FGE) so lower-cycle alternatives are discoverable from each entry.
+- Generic component nouns lowercased in prose for consistency.
+
+### Fixed
+- Signed add/subtract flag semantics: ADDS, ADDSX, SUBS, SUBSX, and the SUM family now state that C carries the correct sign of the result, not a "signed-overflow" indicator.
+- GETBRK: corrected the WC / WZ / WCZ return values (cog status; skip-and-execution state; the queued 32-bit skip pattern) and noted that a flag effect is required.
+- Program Counter: replaced a non-existent read instruction with the supported CALLD return-address idiom.
+- Random number generator described accurately as a hardware pseudo-random generator (Xoroshiro128\*\*), true-random seeded at startup.
+- PTRx updating-index range corrected to -16 to +16; RDFAST maximum-block-size wording corrected; CRCBIT bit order corrected; SCAS and RDLONG flag-effect cells corrected; the ANDZ effect example corrected to a bit-test instruction.
+- Appendix cross-references and inter-entry links corrected throughout.
+- Operation-line notation normalized to ASCII for reliable rendering.
+
 ## v3.0.1 (2026-06-18)
 
 **Smart-pin accuracy refresh** — aligned with the latest hardware-verified Knowledge Base.

@@ -8,12 +8,10 @@ This section contains all PASM2 instructions beginning with the letter H.
 ## HUBSET {#hubset}
 Set Hub Configuration
 
-[Hub Control](#hub-control) - Configures hub clock system, crystal, and PLL settings.
+[Cog Control and Locks](#cog-control-and-locks) - Configures hub clock system, crystal, and PLL settings.
 :::
 
 **HUBSET**  *{#}D*
-
----
 
 **Result:** Hub configuration is updated according to the value in D, controlling clock source, crystal settings, and PLL configuration.
 

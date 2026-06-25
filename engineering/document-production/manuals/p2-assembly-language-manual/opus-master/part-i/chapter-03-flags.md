@@ -1,7 +1,5 @@
 # Chapter 3: Flags and Conditional Execution
 
-<!-- Chapter covering C and Z flags, WC/WZ/WCZ effects, and IF_x conditions -->
-
 The P2 has two status flags that enable conditional execution and multi-precision arithmetic. Understanding flag behavior is essential for writing efficient, branching-free code.
 
 The P2's flag system differs from many processors in two important ways. First, flags persist until explicitly modified—an instruction without WC or WZ effects leaves flags unchanged, allowing flag values to be used by multiple subsequent instructions. Second, any instruction can be made conditional using IF_x prefixes, enabling deterministic branchless programming where instruction timing remains constant regardless of data values.
@@ -83,7 +81,7 @@ The extended arithmetic instructions—ADDX, SUBX, ADDSX, SUBSX, CMPX, CMPSX—u
 Z = Z AND (result == 0)
 ```
 
-Instead of simply replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
+Instead of replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
 
 ```pasm2
 ' 64-bit addition: [hi:lo] += [bhi:blo]
@@ -103,7 +101,7 @@ Without this AND behavior, the final Z flag would only reflect the last 32-bit o
         add     result, value   wcz     ' Update both flags
 ```
 
-When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. You can specify WC to update only C, WZ to update only Z, or WCZ to update both—these are the three valid effect options.
+When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. WC updates only C, WZ updates only Z, and WCZ updates both—these are the three valid effect options.
 
 WCZ is common after comparisons where both the ordering (C) and equality (Z) matter, or after arithmetic operations where both carry detection and zero detection are needed.
 
@@ -262,7 +260,7 @@ After a comparison instruction (CMP or CMPS), the C and Z flags can be tested wi
 | IF_NC_AND_NZ | IF_A | IF_GT | > | a is greater than b |
 | IF_C_OR_Z | IF_BE | IF_LE | <= | a is less or equal to b |
 
-**Both styles encode to identical condition codes**—the choice is purely stylistic. Use whichever terminology reads best for your code:
+**Both styles encode to identical condition codes**—the choice is purely stylistic. Either terminology reads equally well in the source:
 
 - **Magnitude terminology** (A = Above, B = Below) reads naturally with addresses, counts, and sizes
 - **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with temperatures, positions, and deltas
@@ -272,7 +270,7 @@ After a comparison instruction (CMP or CMPS), the C and Z flags can be tested wi
 - **CMP** performs unsigned subtraction—flags reflect unsigned ordering
 - **CMPS** performs signed subtraction—flags reflect signed ordering
 
-Either alias style works correctly with either compare instruction. The choice of CMP vs. CMPS determines whether $80000000 is treated as a large positive number or a negative number. The alias you use afterward is simply a matter of which terminology reads better in your code.
+Either alias style works correctly with either compare instruction. The choice of CMP vs. CMPS determines whether $80000000 is treated as a large positive number or a negative number. The alias used afterward is a matter of which terminology reads better in the source.
 
 
 ## 3.4 Flag Behavior by Instruction Category
@@ -286,9 +284,9 @@ Arithmetic instructions set C based on unsigned overflow (carry or borrow) and s
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
 | ADD | Unsigned carry out of bit 31 | Result = 0 |
-| ADDS | True sign of result (corrected sign of D+S) | Result = 0 |
+| ADDS | True sign of result (D+S at full precision) | Result = 0 |
 | SUB | Unsigned borrow (A < B) | Result = 0 |
-| SUBS | True sign of result (corrected sign of D−S) | Result = 0 |
+| SUBS | True sign of result (D−S at full precision) | Result = 0 |
 | CMP | Unsigned borrow (A < B) | A = B |
 | CMPS | Signed A < B (true sign of A−B) | A = B |
 
@@ -352,7 +350,7 @@ ABS sets C=1 if the source was negative, indicating that the absolute value oper
 
 ## 3.5 Common Flag Patterns
 
-Understanding common flag usage patterns accelerates learning and provides templates for solving typical programming problems. These patterns demonstrate how flags enable elegant, efficient solutions.
+These patterns are templates for common flag operations. They demonstrate how flags enable efficient solutions to typical programming problems.
 
 ### 3.5.1 Testing a Bit
 
@@ -365,7 +363,7 @@ Testing whether a specific bit is set uses TEST with WZ:
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
 
-The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pattern works for testing any single bit or combination of bits—just construct the appropriate mask. To test a single bit by its index rather than a mask constant, TESTB takes the bit number in S[4:0] and places that bit straight into C or Z, with no mask to build.
+The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pattern works for testing any single bit or combination of bits—construct the appropriate mask. To test a single bit by its index rather than a mask constant, TESTB takes the bit number in S[4:0] and places that bit straight into C or Z, with no mask to build.
 
 ### 3.5.2 Multi-Precision Addition
 
@@ -434,7 +432,7 @@ The issue is a quirk of two's complement: the most negative value (-2,147,483,64
 
 For all other negative values, ABS correctly computes the absolute value and clears C. For -2,147,483,648, ABS leaves it unchanged and sets C, and the conditional NEG negates it back to itself (since negating $8000_0000 produces $8000_0000).
 
-Most code doesn't care about this edge case and can simply use `ABS result, value` on its own. That is the faster path as well: the conditional NEG always occupies its 2-clock slot even when cancelled, so the edge-case-safe form costs 4 clocks, while the bare ABS costs 2:
+Most code doesn't care about this edge case and can use `ABS result, value` on its own. That is the faster path as well: the conditional NEG always occupies its 2-clock slot even when cancelled, so the edge-case-safe form costs 4 clocks, while the bare ABS costs 2:
 
 ```pasm2
                 abs     result, value   wc      ' edge-case safe   (4 clk)
@@ -517,7 +515,7 @@ This pattern extracts and repositions bits based on flag tests, enabling bit-fie
 
 ### 3.6.3 Flag Preservation Patterns
 
-Sometimes you need to preserve flag values across operations that might modify them. The P2 does not provide a dedicated flag save/restore mechanism, but you can use register operations:
+Flag values sometimes need to be preserved across operations that might modify them. The P2 does not provide a dedicated flag save/restore mechanism, but register operations serve the purpose:
 
 ```pasm2
         ' Save flags
@@ -554,7 +552,7 @@ This pattern tests state bits and branches to handlers. Each TEST sets Z if the 
 
 ## 3.7 Multi-Long Arithmetic Operations
 
-The P2's flag system enables arithmetic operations on values wider than 32 bits. By chaining instructions that propagate carry/borrow through the C flag and accumulate zero-detection through the Z flag, you can perform addition, subtraction, and comparison on 64-bit, 96-bit, 128-bit, or arbitrarily wide values.
+The P2's flag system enables arithmetic operations on values wider than 32 bits. By chaining instructions that propagate carry/borrow through the C flag and accumulate zero-detection through the Z flag, code can perform addition, subtraction, and comparison on 64-bit, 96-bit, 128-bit, or arbitrarily wide values.
 
 ### 3.7.1 Instruction Family Overview
 
@@ -686,7 +684,7 @@ For signed operations:
 - If the result is negative (would be negative with more bits), C = 1
 - If the result is non-negative, C = 0
 
-This differs from carry/borrow, which indicates overflow in unsigned arithmetic. For signed comparisons, the true sign tells you the sign of (A - B), directly indicating whether A < B.
+This differs from carry/borrow, which indicates overflow in unsigned arithmetic. For signed comparisons, the true sign gives the sign of (A - B), directly indicating whether A < B.
 
 ### 3.7.6 Practical Pattern Summary
 
@@ -702,7 +700,7 @@ After a multi-long comparison:
 - **Arithmetic terminology:** IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
 - **Equality (either style):** IF_Z (equal), IF_NZ (not equal)
 
-Both terminology styles encode to identical condition codes—choose whichever reads best for your code. The choice of CMP vs. CMPS (not the alias style) determines whether values are compared as unsigned or signed.
+Both terminology styles encode to identical condition codes—either reads equally well in the source. The choice of CMP vs. CMPS (not the alias style) determines whether values are compared as unsigned or signed.
 
 
 ```{=latex}
@@ -720,7 +718,4 @@ Both terminology styles encode to identical condition codes—choose whichever r
 \item Each cog maintains independent C and Z flags with no cross-cog interaction
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 3 -->
 

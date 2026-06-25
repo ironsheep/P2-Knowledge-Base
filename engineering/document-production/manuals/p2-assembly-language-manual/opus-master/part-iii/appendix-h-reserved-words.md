@@ -2,7 +2,7 @@
 
 This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
-**Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+**Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
 **Total Reserved Words: 852+** (456 PASM2 + 396 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
@@ -10,7 +10,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 Use this alphabetical index to quickly check if a name is reserved. For detailed descriptions and usage context, see the categorized sections that follow.
 
-**Note:** P_* constants (smart pin, ~116 words) are listed in Appendix E. X_* constants (streamer, ~78 words) are listed in Appendix F. Both prefixes are reserved.
+**Note:** P_* constants (smart pin, ~116 words) are listed in Appendix F. X_* constants (streamer, ~78 words) are listed in Appendix G. Both prefixes are reserved.
 
 ### A
 ```
@@ -542,14 +542,14 @@ Combine instruction result with existing flag using logic operation:
 ```pasm2
 ADD   x, y  WC      ' Update C flag with carry
 CMP   a, b  WCZ     ' Update both C and Z flags
-TEST  val, mask  ANDZ   ' AND test result with Z flag
+TESTB val, #0    ANDZ   ' AND bit-test result with Z flag
 ```
 
 
 
 ## Avoiding Reserved Words
 
-When naming labels, variables, and symbols in your PASM2 code:
+When naming labels, variables, and symbols in PASM2 code:
 
 1. **Check this reference** before choosing identifiers
 2. **Use descriptive names** that clearly differ from reserved words
@@ -631,15 +631,15 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 
 - **Part II** — Complete documentation of instructions, directives, constants, and special registers
 - **Chapter 3** — Detailed explanation of condition codes and effect modifiers
-- **Appendix E** — smart pin mode constants (P_* symbols, approximately 116 constants)
-- **Appendix F** — streamer mode constants (X_* symbols, approximately 78 constants)
+- **Appendix F** — smart pin mode constants (P_* symbols, approximately 116 constants)
+- **Appendix G** — streamer mode constants (X_* symbols, approximately 78 constants)
 
 **Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
 
 ## Spin2 Reserved Words
 
-Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. You cannot use any of these identifiers as labels, symbols, or variable names in your assembly code, even when writing pure PASM2.
+Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
 **Total Spin2-Only Reserved Words: 396**
 
@@ -947,7 +947,7 @@ SET         SIGNED      SIZE        SQRT        STEP
 
 ### Smart Pin Constants (P_*)
 
-The complete list of smart pin configuration constants (116 constants) is documented in **Appendix E: Smart Pin Constants**. These include:
+The complete list of smart pin configuration constants (116 constants) is documented in **Appendix F: Smart Pin Mode Constants**. These include:
 
 - Pin mode constants (P_ASYNC_TX, P_ASYNC_RX, P_SYNC_TX, etc.)
 - DAC configuration (P_DAC_*, P_BITDAC)
@@ -962,7 +962,7 @@ All P_* constants are reserved words and cannot be used as user-defined symbols.
 
 ### Streamer Constants (X_*)
 
-The complete list of streamer mode constants (78 constants) is documented in **Appendix F: Streamer Constants**. These include:
+The complete list of streamer mode constants (78 constants) is documented in **Appendix G: Streamer Mode Constants**. These include:
 
 - Immediate mode constants (X_IMM_*)
 - RF byte/word/long modes (X_RFBYTE_*, X_RFWORD_*, X_RFLONG_*)

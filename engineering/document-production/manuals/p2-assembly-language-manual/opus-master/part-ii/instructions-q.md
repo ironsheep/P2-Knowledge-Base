@@ -13,8 +13,6 @@ Queue Divide
 
 **QDIV**  *{#}Dest, {#}Src*
 
----
-
 **Operation:** CORDIC: `{SETQ-value or 0, D} / S` → GETQX = quotient, GETQY = remainder
 
 **Result:** Divides a 64-bit numerator by a 32-bit denominator, producing a 32-bit quotient (GETQX) and remainder (GETQY) 55 clocks later.
@@ -57,8 +55,6 @@ Queue Exponential
 
 **QEXP**  *{#}Dest*
 
----
-
 **Operation:** CORDIC: `2^D` (D as {5'whole, 27'frac}) → GETQX = number
 
 **Result:** Converts a 5:27-bit logarithm format into a 32-bit unsigned integer, retrieved via GETQX 55 clocks later.
@@ -97,8 +93,6 @@ Queue Fractional Divide
 :::
 
 **QFRAC**  *{#}Dest, {#}Src*
-
----
 
 **Operation:** CORDIC: `{D, SETQ-value or 0} / S` → GETQX = quotient, GETQY = remainder
 
@@ -141,8 +135,6 @@ Queue Logarithm
 
 **QLOG**  *{#}Dest*
 
----
-
 **Operation:** CORDIC: `log2(D)` → GETQX = {5'whole, 27'frac}
 
 **Result:** Converts a 32-bit unsigned integer into a 5:27-bit logarithm format, retrieved via GETQX 55 clocks later.
@@ -180,9 +172,7 @@ Queue Multiply
 
 **QMUL**  *{#}Dest, {#}Src*
 
----
-
-**Operation:** CORDIC: `D × S` (unsigned) → GETQX = low product, GETQY = high product
+**Operation:** CORDIC: `D * S` (unsigned) → GETQX = low product, GETQY = high product
 
 **Result:** Multiplies two 32-bit unsigned values, producing a 64-bit result with lower 32 bits via GETQX and upper 32 bits via GETQY, 55 clocks later.
 
@@ -222,8 +212,6 @@ Queue Rotate
 :::
 
 **QROTATE**  *{#}Dest, {#}Src*
-
----
 
 **Operation:** CORDIC: rotate point (D, SETQ-value or 0) by angle S → GETQX = X, GETQY = Y
 
@@ -268,8 +256,6 @@ Queue Square Root
 
 **QSQRT**  *{#}Dest, {#}Src*
 
----
-
 **Operation:** CORDIC: `sqrt({S, D})` → GETQX = root
 
 **Result:** Calculates the square root of a 64-bit value, producing a 32-bit result via GETQX 55 clocks later.
@@ -311,8 +297,6 @@ Queue Vector
 :::
 
 **QVECTOR**  *{#}Dest, {#}Src*
-
----
 
 **Operation:** CORDIC: vector of point (D, S) → GETQX = length, GETQY = angle
 

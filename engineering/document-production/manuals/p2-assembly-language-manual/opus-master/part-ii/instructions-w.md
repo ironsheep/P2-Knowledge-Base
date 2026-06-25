@@ -13,8 +13,6 @@ Wait For Attention
 
 **WAITATN**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** wait for ATN event then clear; (prior SETQ = CT timeout) `C/Z = timeout`
 
 **Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
@@ -45,7 +43,7 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
-Wait For Counter event
+Wait For Counter Event
 
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
@@ -55,8 +53,6 @@ Wait For Counter event
 **WAITCT1**  **{WC|WZ|WCZ}**\
 **WAITCT2**  **{WC|WZ|WCZ}**\
 **WAITCT3**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait for CTn event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
@@ -93,8 +89,6 @@ Wait For FIFO Block Wrap
 
 **WAITFBW**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** wait for FBW event then clear; `C/Z = timeout`
 
 **Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
@@ -119,14 +113,12 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 
 ::: instrheader
 ## WAITINT {#waitint}
-Wait For interrupt
+Wait For Interrupt
 
 [Events and Timing](#events-and-timing) - Waits for an interrupt event to occur.
 :::
 
 **WAITINT**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait for INT event then clear; `C/Z = timeout`
 
@@ -159,8 +151,6 @@ Wait For Pattern
 
 **WAITPAT**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** wait for PAT event then clear; `C/Z = timeout`
 
 **Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
@@ -190,7 +180,7 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 
 ::: instrheader
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
-Wait For Selectable event (1, 2, 3, Or 4)
+Wait For Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
@@ -201,8 +191,6 @@ Wait For Selectable event (1, 2, 3, Or 4)
 **WAITSE2**  **{WC|WZ|WCZ}**\
 **WAITSE3**  **{WC|WZ|WCZ}**\
 **WAITSE4**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait for SEn event then clear; `C/Z = timeout`
 
@@ -237,8 +225,6 @@ Wait Cycles
 :::
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait `2 + D` clocks; if WC/WZ/WCZ wait `2 + (D & RND)` clocks; `C/Z = 0`
 
@@ -276,8 +262,6 @@ Wait For Streamer Finished
 
 **WAITXFI**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** wait for XFI event then clear; `C/Z = timeout`
 
 **Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
@@ -309,8 +293,6 @@ Wait For Streamer Empty
 
 **WAITXMT**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** wait for XMT event then clear; `C/Z = timeout`
 
 **Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
@@ -335,14 +317,12 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 
 ::: instrheader
 ## WAITXRL {#waitxrl}
-Wait For streamer LUT Rollover
+Wait For Streamer LUT Rollover
 
 [Events and Timing](#events-and-timing) - Waits for the streamer LUT RAM rollover event.
 :::
 
 **WAITXRL**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait for XRL event then clear; `C/Z = timeout`
 
@@ -368,14 +348,12 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 
 ::: instrheader
 ## WAITXRO {#waitxro}
-Wait For streamer NCO Rollover
+Wait For Streamer NCO Rollover
 
 [Events and Timing](#events-and-timing) - Waits for the streamer NCO rollover event.
 :::
 
 **WAITXRO**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** wait for XRO event then clear; `C/Z = timeout`
 
@@ -408,8 +386,6 @@ Write FIFO Byte
 
 **WFBYTE**  *{#}Dest*
 
----
-
 **Result:** Writes the byte in Dest[7:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
 - Dest is the byte value to write (bits 7:0 used).
@@ -438,8 +414,6 @@ Write FIFO Long
 :::
 
 **WFLONG**  *{#}Dest*
-
----
 
 **Result:** Writes the long in Dest[31:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
@@ -470,8 +444,6 @@ Write FIFO Word
 
 **WFWORD**  *{#}Dest*
 
----
-
 **Result:** Writes the word in Dest[15:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
 - Dest is the word value to write (bits 15:0 used).
@@ -501,8 +473,6 @@ Write Masked Long
 
 **WMLONG**  *Dest, {#}Src/P*
 
----
-
 **Operation:** write only non-$00 bytes of D to hub[S/PTRx] (prior SETQ/SETQ2 → block transfer)
 
 **Result:** Writes only non-$00 bytes in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
@@ -513,7 +483,14 @@ Write Masked Long
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+| EEEE | 1010011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| Cog / LUT execution | 3...10 |
+| Hub execution | 3...20 |
 
 
 **Related:** [WRLONG](#wrlong), [WRBYTE](#wrbyte), [WRWORD](#wrword)
@@ -536,8 +513,6 @@ Write Byte
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
-
----
 
 **Result:** Writes the byte in Dest[7:0] to hub address Src/PTRx.
 
@@ -573,7 +548,7 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 
 ::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
-Write Flag To register
+Write Flag To Register
 
 [Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
@@ -584,8 +559,6 @@ Write Flag To register
 **WRNC**  *Dest*\
 **WRZ**  *Dest*\
 **WRNZ**  *Dest*
-
----
 
 **Operation:** `D = {31'b0, bit}` where bit = C (WRC) / !C (WRNC) / Z (WRZ) / !Z (WRNZ)
 
@@ -626,8 +599,6 @@ Write FIFO Setup
 
 **WRFAST**  *{#}Dest, {#}Src*
 
----
-
 **Result:** Initializes the hub FIFO for fast writes. Dest[31] = no wait, Dest[13:0] = block size in 64-byte units (0 = max), Src[19:0] = block start address.
 
 - Dest contains configuration: bit 31 = nowait, bits 13:0 = block size.
@@ -664,8 +635,6 @@ Write Long
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
-
----
 
 **Operation:** write D long to hub[S/PTRx] (prior SETQ/SETQ2 → block transfer)
 
@@ -715,8 +684,6 @@ Write LUT
 
 **WRLUT**  *{#}Dest, {#}Src/P*
 
----
-
 **Result:** Writes Dest to LUT address Src/PTRx.
 
 - Dest is the value to write.
@@ -755,8 +722,6 @@ Write Pin Mode
 
 **WRPIN**  *{#}Dest, {#}Src*
 
----
-
 **Result:** Sets the mode of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 
 - Dest is the smart pin mode configuration.
@@ -773,6 +738,8 @@ Write Pin Mode
 **Explanation:**
 
 WRPIN configures the operating mode of one or more smart pins. Each of the P2's 64 pins has a dedicated smart pin module capable of autonomous operation for PWM, serial I/O, pulse measurement, ADC, and many other functions.
+
+See Appendix F for the A/B input-selector (%AAAA/%BBBB) encodings.
 
 **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
@@ -804,8 +771,6 @@ Write Word
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
-
----
 
 **Result:** Writes the word in Dest[15:0] to hub address Src/PTRx.
 
@@ -844,8 +809,6 @@ Write Pin X Parameter
 
 **WXPIN**  *{#}Dest, {#}Src*
 
----
-
 **Result:** Sets the X register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 
 - Dest is the X parameter value.
@@ -880,8 +843,6 @@ Write Pin Y Parameter
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*
-
----
 
 **Result:** Sets the Y register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 

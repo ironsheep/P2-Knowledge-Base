@@ -635,7 +635,7 @@ Startup delay before any debug output occurs.
 
 #### Description
 
-DEBUG_DELAY specifies a delay in milliseconds before the debug system begins operation. This delay occurs before the application launches, providing time for serial terminals to connect and synchronize. The delay is calculated as `(CLKFREQ / 1000) * DEBUG_DELAY` and executed during debugger initialization.
+DEBUG_DELAY specifies a delay in milliseconds before the debug system begins operation. This delay occurs before the application launches, providing time for serial terminals to connect. The delay is calculated as `(CLKFREQ / 1000) * DEBUG_DELAY` and executed during debugger initialization.
 
 #### Usage
 
@@ -896,7 +896,7 @@ DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT 
 
 ```spin2
 CON
-  DEBUG_COGINIT               ' Break on every COG initialization
+  DEBUG_COGINIT               ' Break on every cog initialization
 
 PUB main()
   cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here

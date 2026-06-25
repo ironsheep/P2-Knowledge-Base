@@ -33,7 +33,7 @@ The P2 provides multiple aliases for the same condition codes, enabling programm
 
 ### B.2.1 Comparison Aliases
 
-After a comparison instruction (CMP or CMPS), condition aliases express relational comparisons. Two equivalent terminology styles are available—choose whichever reads best for your code:
+After a comparison instruction (CMP or CMPS), condition aliases express relational comparisons. Two equivalent terminology styles are available—choose whichever reads best in the source:
 
 | Relationship | Magnitude Style | Arithmetic Style | Primary | Flag State |
 |:-------------|:----------------|:-----------------|:--------|:-----------|
@@ -48,7 +48,7 @@ After a comparison instruction (CMP or CMPS), condition aliases express relation
 
 **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with signed values like temperatures, positions, and deltas.
 
-Both styles encode to the same condition codes—the choice is purely stylistic. Use whichever terminology makes your code's intent clearer.
+Both styles encode to the same condition codes—the choice is purely stylistic. Use whichever terminology makes the code's intent clearer.
 
 ### B.2.2 Flag State Aliases
 

@@ -13,8 +13,6 @@ Get Breakpoint Status
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Result:** Breakpoint or cog status information is retrieved into Dest based on the flag effect specified.
 
 - Dest is a register where the status information is written.
@@ -30,17 +28,15 @@ Get Breakpoint Status
 
 **Explanation:**
 
-GETBRK retrieves various breakpoint and cog status information into the Dest register. The specific information retrieved depends on which flag effect is specified.
+GETBRK retrieves cog status or debug information into the Dest register. A flag effect is required — WC, WZ, or WCZ selects which information is returned; GETBRK without a flag effect does not assemble.
 
-When the WCZ effect is specified, GETBRK retrieves the full 32-bit ISR call address into Dest. This is the address where the debug interrupt service routine will resume execution after handling the breakpoint.
+With the WCZ effect, GETBRK returns the cog's internal status: C indicates STALLI versus ALLOWI interrupt mode, Z indicates whether the cog started in hubexec or cogexec mode, and Dest reports the active subsystems and interrupt configuration — colorspace-converter and streamer activity, RDFAST/WRFAST mode, the three interrupt selectors (INT1/INT2/INT3) and their states, and the STALLI and hubexec bits. During a debug ISR, WCZ additionally returns the 8-bit break code from the most recent BRK in Dest[31:24] and indicates whether the debug interrupt came from a COGINIT.
 
-When the WC effect is specified, GETBRK retrieves the 8-bit cog ID into Dest[7:0]. This identifies which cog triggered the breakpoint, useful in multi-cog debugging scenarios where a debug ISR needs to determine the calling cog.
+With the WC effect, GETBRK reports skip and execution state: C is the LSB of the current SKIP/SKIPF/EXECF/XBYTE pattern, and Dest holds the CALL depth since that pattern began, the SKIP-versus-SKIPF/EXECF/XBYTE mode, the LUT-sharing and XBYTE state, and the 16 event-trap flags (CORDIC, attention, streamer, FIFO, pin-pattern, SE1-SE4, CT1-CT3, and interrupt events).
 
-When the WZ effect is specified, GETBRK retrieves the 8-bit breakpoint code into Dest[7:0]. This code was set by the BRK instruction and can be used for conditional breakpoint handling or to distinguish between different types of breakpoints.
+With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest = 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
 
-When no flag effects are specified, GETBRK retrieves the 16-bit skip pattern into Dest[15:0]. This pattern is used with the SKIPF instruction to selectively execute or skip subsequent instructions, typically within an ISR context.
-
-GETBRK is essential for implementing debug infrastructure and coordinating multi-cog debugging systems. It works in conjunction with BRK and SETBRK to provide comprehensive breakpoint support.
+GETBRK is essential for implementing debug infrastructure. It works in conjunction with BRK, and with COGBRK to break another cog, to provide breakpoint support.
 
 
 
@@ -53,8 +49,6 @@ Get Byte
 
 **GETBYTE**  *Dest, {#}Src, #Num*\
 **GETBYTE**  *Dest*
-
----
 
 **Operation:** `D = {24'b0, S.BYTE[N]}`
 
@@ -91,8 +85,6 @@ Get System Counter
 :::
 
 **GETCT**  *Dest*  **{WC}**
-
----
 
 **Operation:** `D = CT[31:0]` (or `CT[63:32]` if WC)
 
@@ -136,8 +128,6 @@ Get Nibble
 **GETNIB**  *Dest, {#}Src, #Num*\
 **GETNIB**  *Dest*
 
----
-
 **Operation:** `D = {28'b0, S.NIBBLE[N]}`
 
 **Result:** Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written to Dest.
@@ -174,8 +164,6 @@ Get FIFO Hub Pointer
 
 **GETPTR**  *Dest*
 
----
-
 **Result:** The current FIFO hub pointer is written to Dest.
 
 - Dest is a register where the FIFO hub pointer is written.
@@ -206,8 +194,6 @@ Get CORDIC X Result
 :::
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = CORDIC result X` (waits if not ready); `C = X[31]`
 
@@ -247,8 +233,6 @@ Get CORDIC Y Result
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = CORDIC result Y` (waits if not ready); `C = Y[31]`
 
 **Result:** The CORDIC Y result is written to Dest after waiting if necessary for the computation to complete.
@@ -287,8 +271,6 @@ Get Random Value
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**\
 **GETRND**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = RND[31:0]`; `C = RND[31]`; `Z = RND[30]`
 
@@ -331,8 +313,6 @@ Get Oscilloscope Samples
 
 **GETSCP**  *Dest*
 
----
-
 **Operation:** `D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}`
 
 **Result:** Four 8-bit oscilloscope samples are written to Dest as D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}.
@@ -369,8 +349,6 @@ Get Word
 **GETWORD**  *Dest, {#}Src, #Num*\
 **GETWORD**  *Dest*
 
----
-
 **Operation:** `D = {16'b0, S.WORD[N]}`
 
 **Result:** Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction, is written to Dest.
@@ -406,8 +384,6 @@ Get Goertzel Accumulators
 :::
 
 **GETXACC**  *Dest*
-
----
 
 **Operation:** `D = Goertzel X accumulator`; the next instruction's S = Y accumulator; both accumulators are cleared
 

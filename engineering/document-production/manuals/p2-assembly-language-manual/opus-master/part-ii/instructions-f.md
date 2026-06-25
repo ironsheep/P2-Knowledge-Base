@@ -13,8 +13,6 @@ Set Next FIFO Block
 
 **FBLOCK**  *{#}Dest, {#}Src*
 
----
-
 **Result:** The next block parameters are configured for FIFO wraparound operations.
 
 - Dest is a register or 9-bit literal whose value specifies the block size in 64-byte units (0 = maximum size).
@@ -48,8 +46,6 @@ Force Greater or Equal
 :::
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** if D < S then `D = S`, `C = 1`, else D unchanged, `C = 0`
 
@@ -89,8 +85,6 @@ Force Greater or Equal Signed
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** if D < S (signed) then `D = S`, `C = 1`, else D unchanged, `C = 0`
 
 **Result:** Signed Dest is set to signed Src if Dest was less than Src.
@@ -127,8 +121,6 @@ Force Less or Equal
 :::
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** if D > S then `D = S`, `C = 1`, else D unchanged, `C = 0`
 
@@ -168,8 +160,6 @@ Force Less or Equal Signed
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** if D > S (signed) then `D = S`, `C = 1`, else D unchanged, `C = 0`
 
 **Result:** Signed Dest is set to signed Src if Dest was greater than Src.
@@ -200,7 +190,7 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 ::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-Float with Output Preset by flag
+Float with Output Preset by Flag
 
 [Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
@@ -211,8 +201,6 @@ Float with Output Preset by flag
 **FLTNC**  *{#}Dest*  **{WCZ}**\
 **FLTZ**  *{#}Dest*  **{WCZ}**\
 **FLTNZ**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = src`, `DIR[pin range] = 0` (FLTC src=C, FLTNC src=!C, FLTZ src=Z, FLTNZ src=!Z); `C,Z = OUT bit`
 
@@ -261,8 +249,6 @@ Float High
 
 **FLTH**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `OUT[pin range] = 1`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of high.
@@ -304,8 +290,6 @@ Float Low
 
 **FLTL**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `OUT[pin range] = 0`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of low.
@@ -346,8 +330,6 @@ Float Not
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** toggle `OUT[pin range]`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 
@@ -391,8 +373,6 @@ Float Random
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = RND`, `DIR[pin range] = 0`; `C,Z = OUT bit`
 

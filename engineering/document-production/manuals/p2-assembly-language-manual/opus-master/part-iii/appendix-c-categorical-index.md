@@ -1,6 +1,6 @@
 # Appendix C: Categorical Instruction Index
 
-This appendix organizes P2 instructions by functional category, helping you find instructions based on what you want to accomplish rather than by alphabetical order. Each instruction name links to its detailed reference in Part II.
+This appendix organizes P2 instructions by functional category, so instructions can be located by task rather than by alphabetical order. Each instruction name links to its detailed reference in Part II.
 
 For a quick overview of each category with compact instruction lists, see [Instruction Categories](#instruction-categories) in Part II.
 

@@ -14,8 +14,6 @@ Ones
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = number of '1' bits in S (0..32)`; `C = result[0]`
 
 **Result:** The number of high bits (1s) in Src, or Dest, is stored in Dest.
@@ -55,8 +53,6 @@ Bitwise Or
 :::
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = D | S`; `C = parity of result`
 
@@ -109,8 +105,6 @@ Output By Flag State
 **OUTZ**  *{#}Dest*  **{WCZ}**\
 **OUTNZ**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `OUT[pin range] = src` (src = C/!C/Z/!Z); `C,Z = OUT bit`
 
 **Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets C and Z to the original output state.
@@ -156,8 +150,6 @@ Output High
 
 **OUTH**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** `OUT[pin range] = 1`; `C,Z = OUT bit`
 
 **Result:** The I/O pin output level bit(s) described by Dest are set high (1).
@@ -196,8 +188,6 @@ Output Low
 :::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = 0`; `C,Z = OUT bit`
 
@@ -238,8 +228,6 @@ Output Not (Toggle)
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
 
----
-
 **Operation:** toggle `OUT[pin range]`; `C,Z = OUT bit`
 
 **Result:** The I/O pin output level bit(s) described by Dest are toggled to their opposite state(s).
@@ -278,8 +266,6 @@ Output Random
 :::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**
-
----
 
 **Operation:** `OUT[pin range] = RND`; `C,Z = OUT bit`
 

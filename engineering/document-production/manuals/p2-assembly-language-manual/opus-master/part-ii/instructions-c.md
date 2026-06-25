@@ -15,8 +15,6 @@ Call Subroutine
 **CALL**  *#\Addr*\
 **CALL**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** push {C, Z, 10'b0, PC[19:0]}; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, PC is set to the new address, and optionally C and Z are updated to new states.
@@ -60,8 +58,6 @@ Call Subroutine via PTRA
 **CALLA**  *#Addr*\
 **CALLA**  *#\Addr*\
 **CALLA**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** write {C, Z, 10'b0, PC[19:0]} to hub[PTRA++]; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
 
@@ -107,8 +103,6 @@ Call Subroutine via PTRB
 **CALLB**  *#\Addr*\
 **CALLB**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** write {C, Z, 10'b0, PC[19:0]} to hub[PTRB++]; `C = D[31]`, `Z = D[30]`, `PC = D[19:0]`
 
 **Result:** Current C and Z flags and address of the next instruction are written to hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
@@ -153,9 +147,7 @@ Call with Destination register
 **CALLD**  *PA|PB|PTRA|PTRB, #\Addr*\
 **CALLD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** `D = {C, Z, 10'b0, PC[19:0]}`; `C = S[31]`, `Z = S[30]`; PC = S**
+**Operation:** `D = {C, Z, 10'b0, PC[19:0]}`; `C = S[31]`, `Z = S[30]`; `PC = S`
 
 **Result:** Current C and Z flags and address of the next instruction are written to the specified register (PA, PB, PTRA, PTRB, or Dest), PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -201,9 +193,7 @@ Call Subroutine with PA Parameter
 
 **CALLPA**  *{#}Dest, {#}Src*
 
----
-
-**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PA = D`; PC = S**
+**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PA = D`; `PC = S`
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PA, and PC is set to the address specified by Src.
 
@@ -239,9 +229,7 @@ Call Subroutine with PB Parameter
 
 **CALLPB**  *{#}Dest, {#}Src*
 
----
-
-**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PB = D`; PC = S**
+**Operation:** push {C, Z, 10'b0, PC[19:0]}; `PB = D`; `PC = S`
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PB, and PC is set to the address specified by Src.
 
@@ -276,8 +264,6 @@ Compare Unsigned
 :::
 
 **CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -322,8 +308,6 @@ Compare Most Significant Bit
 
 **CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = MSB of (D - S)`; `Z = (D == S)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
@@ -361,8 +345,6 @@ Compare Reverse
 
 **CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = borrow of (S - D)`; `Z = (D == S)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
@@ -387,7 +369,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than 
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, or is cleared (0) if they are not equal.
 
-CMPR is useful when the natural order of operands in your code is reversed from what CMP expects, avoiding the need to swap operands or reverse the logic. Note that for unsigned multi-long comparisons, use CMP (not CMPR) followed by CMPX.
+CMPR is useful when the natural order of operands in the source is reversed from what CMP expects, avoiding the need to swap operands or reverse the logic. Note that for unsigned multi-long comparisons, use CMP (not CMPR) followed by CMPX.
 
 
 
@@ -400,8 +382,6 @@ Compare Signed
 
 **CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = signed-sign of (D - S)`; `Z = (D == S)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
@@ -413,7 +393,7 @@ Compare Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | (D == S) | --- | 2 |
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D - S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
@@ -444,8 +424,6 @@ Compare and Subtract
 :::
 
 **CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** if D >= S then `D = D - S`, `C = 1`, else D unchanged, `C = 0`
 
@@ -487,8 +465,6 @@ Compare Signed Extended
 
 **CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `C = signed-sign of (D - (S + C))`; `Z = Z AND (D == S + C)`
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
@@ -500,7 +476,7 @@ Compare Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
+| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPS](#cmps)
@@ -531,8 +507,6 @@ Compare Unsigned Extended
 :::
 
 **CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `C = borrow of (D - (S + C))`; `Z = Z AND (D == S + C)`
 
@@ -576,8 +550,6 @@ Cog Attention
 :::
 
 **COGATN**  *{#}Dest*
-
----
 
 **Operation:** strobe ATN on every cog n (0..15) where `D[n] = 1`
 
@@ -624,8 +596,6 @@ Cog Breakpoint
 
 **COGBRK**  *{#}Dest*
 
----
-
 **Result:** If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.
 
 - Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
@@ -662,8 +632,6 @@ Cog Identification
 :::
 
 **COGID**  *{#}Dest*  **{WC}**
-
----
 
 **Operation:** if no WC: `D = cog ID (0..15)`; if WC: `C = 1 if cog D[3:0] is on`
 
@@ -711,8 +679,6 @@ Cog Initialize
 :::
 
 **COGINIT**  *{#}Dest, {#}Src*  **{WC}**
-
----
 
 **Result:** Target cog is started according to Dest to execute code from Src. The code pointer (Src) is written to the target cog's PTRB, and optionally a data pointer is written to its PTRA if SETQ preceded COGINIT.
 
@@ -794,8 +760,6 @@ Cog Stop
 
 **COGSTOP**  *{#}Dest*
 
----
-
 **Result:** Cog indicated by Dest is terminated (stopped).
 
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
@@ -840,8 +804,6 @@ CRC Iterate Bit
 
 **CRCBIT**  *Dest, {#}Src*
 
----
-
 **Operation:** `if (C ^ D[0]) then D = (D >> 1) ^ S, else D = (D >> 1)`
 
 **Result:** Dest is updated with the next CRC iteration using the C flag and polynomial in Src.
@@ -864,8 +826,8 @@ CRCBIT iterates the CRC value in Dest using the current C flag and the polynomia
 The operation performs a single bit iteration of a CRC calculation. The C flag represents the input bit, and Src contains the CRC polynomial. Dest contains the running CRC value and is updated with the result of this iteration.
 
 The exact algorithm follows the standard CRC bit-wise computation:
-1. Shift the CRC value in Dest left by one bit
-2. If the original MSB XOR the input bit (C) is 1, XOR with the polynomial in Src
+1. Shift the CRC value in Dest right by one bit
+2. If the original LSB (D[0]) XOR the input bit (C) is 1, XOR with the polynomial in Src
 
 CRCBIT is typically used in a loop to process data one bit at a time:
 
@@ -889,9 +851,7 @@ CRC Iterate Nibble
 
 **CRCNIB**  *Dest, {#}Src*
 
----
-
-**Operation:** CRCBIT × 4 using Q[31:28] and polynomial S; `Q = Q << 4`
+**Operation:** CRCBIT applied 4 times using Q[31:28] and polynomial S; `Q = Q << 4`
 
 **Result:** Dest is updated with CRC iterations for a nibble, and Q is shifted left by 4 bits.
 

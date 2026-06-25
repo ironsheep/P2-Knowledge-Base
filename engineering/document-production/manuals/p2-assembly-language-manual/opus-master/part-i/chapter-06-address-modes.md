@@ -1,7 +1,5 @@
 # Chapter 6: Address Modes
 
-<!-- Chapter covering all operand addressing modes in PASM2 -->
-
 PASM2 provides several addressing modes that determine how instruction operands are specified and how memory is accessed. Understanding these modes is essential for writing efficient code that accesses registers, immediate values, and hub memory correctly.
 
 This chapter covers all addressing modes from simple register access through the pointer expressions used for hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
@@ -606,6 +604,3 @@ For time-critical inner loops:
 \item SILICON BUG: AUGS affects immediate operands in intervening ALTx instructions
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 6 -->

@@ -18,8 +18,6 @@ Set Bit to Flag State
 **BITZ**  *Dest, {#}Src*  **{WCZ}**\
 **BITNZ**  *Dest, {#}Src*  **{WCZ}**
 
----
-
 **Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = src` where src = C (BITC) / !C (BITNC) / Z (BITZ) / !Z (BITNZ); `C,Z = original D[S[4:0]]`
 
 **Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates C and Z to the original bit state.
@@ -67,8 +65,6 @@ Bit High
 
 **BITH**  *Dest, {#}Src*  **{WCZ}**
 
----
-
 **Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = 1`; `C,Z = original D[S[4:0]]`
 
 **Result:** Dest bit(s) designated by Src are set to high (1).
@@ -105,8 +101,6 @@ Bit Low
 :::
 
 **BITL**  *Dest, {#}Src*  **{WCZ}**
-
----
 
 **Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = 0`; `C,Z = original D[S[4:0]]`
 
@@ -145,8 +139,6 @@ Bit Not
 
 **BITNOT**  *Dest, {#}Src*  **{WCZ}**
 
----
-
 **Operation:** toggle `D[S[9:5]+S[4:0] : S[4:0]]`; `C,Z = original D[S[4:0]]`
 
 **Result:** Dest bit(s) designated by Src are toggled to their opposite state(s).
@@ -183,8 +175,6 @@ Bit Random
 :::
 
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
-
----
 
 **Operation:** `D[S[9:5]+S[4:0] : S[4:0]] = RND`; `C,Z = original D[S[4:0]]`
 
@@ -225,8 +215,6 @@ Blend Pixels
 
 **BLNPIX**  *Dest, {#}Src*
 
----
-
 **Result:** Src color value bytes are alpha-blended into Dest color value bytes using the SETPIV blend factor.
 
 - Dest is a register containing the RGB color value to blend Src into, and is where the result is written.
@@ -259,8 +247,6 @@ Bit Mask
 
 **BMASK**  *Dest, {#}Src*\
 **BMASK**  *Dest*
-
----
 
 **Operation:** `D = (2 << S[4:0]) - 1`
 
@@ -303,8 +289,6 @@ Breakpoint
 :::
 
 **BRK**  *{#}Dest*
-
----
 
 **Result:** If debug interrupts are enabled, a debug interrupt is triggered in the current cog and Dest's value becomes the debug code or the next debug condition.
 

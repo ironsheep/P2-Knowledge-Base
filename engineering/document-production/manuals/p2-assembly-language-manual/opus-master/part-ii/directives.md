@@ -135,7 +135,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| address | Target Cog address to advance to (0-$1FF), filling intervening space with zeros |
+| address | Target cog address to advance to (0-$3FF: cog $000-$1FF, LUT $200-$3FF; cog mode only), filling intervening space with zeros |
 
 #### Usage
 Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF starts data structures at exact addresses while maintaining a complete memory image. Used for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
@@ -495,7 +495,7 @@ The compiler searches for the file in the following order:
 † *Include directory support varies by compiler. PNut_ts supports `-I` options; other P2 compilers may have different or no include directory mechanisms.*
 
 #### Usage
-Use FILE to embed binary resources directly into your program—font data, lookup tables, images, audio samples, or any pre-computed binary content. The file is read at assembly time and its raw bytes are inserted at the current address. A label preceding FILE becomes a byte pointer to the start of the included data.
+Use FILE to embed binary resources directly into the program—font data, lookup tables, images, audio samples, or any pre-computed binary content. The file is read at assembly time and its raw bytes are inserted at the current address. A label preceding FILE becomes a byte pointer to the start of the included data.
 
 FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI methods.
 
@@ -535,7 +535,7 @@ PUB ShowText() | ptr, len
 - A label before FILE provides a byte-addressable pointer to the data
 - Place a label after the FILE directive to calculate the included file's size
 - FILE is only allowed in DAT blocks (not in inline PASM code)
-- Maximum filename length: 253 characters <!-- NEEDS-VERIFICATION: trace to PNut_ts source -->
+- Maximum filename length: 253 characters
 - Filename case-matching follows the host OS filesystem (case-insensitive on Windows; case-sensitive on Linux and case-sensitive macOS volumes)
 - Common uses: fonts, lookup tables, images, audio samples, pre-computed data
 

@@ -110,7 +110,7 @@ When comparing values with CMP, CMPS, SUB, or similar instructions, the resultin
 | Equal | Z=1 | IF_E | IF_E |
 | Not equal | Z=0 | IF_NE | IF_NE |
 
-Both styles encode to identical condition codes—the choice is purely stylistic. Use whichever terminology reads best for your code.
+Both styles encode to identical condition codes—the choice is purely stylistic. Either terminology reads equally well in the source.
 
 **Magnitude terminology** (A = Above, B = Below) reads naturally with values like addresses, counts, and sizes:
 
@@ -264,7 +264,7 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 | `DIR bit` | A pin direction bit is written |
 | `OUT bit` | A pin output bit is written |
 | `DIRx, OUTx` | Pin direction and output state written |
-| `†` / `*` | Footnote markers flagging conditional or qualified write behavior |
+| † / * | Footnote markers flagging conditional or qualified write behavior |
 
 **Flag columns:**
 
@@ -495,7 +495,7 @@ Augmentation is needed when:
 2. **Read the syntax** to understand valid operand forms
 3. **Check the Result** line for what the instruction produces
 4. **Review Parameters** for operand requirements and constraints
-5. **Use the Encoding table** when you need machine code details
+5. **Use the Encoding table** when machine code details are needed
 6. **Read Related** instructions for alternatives and family members
 7. **Study Explanation** for complete behavioral description
 
@@ -517,7 +517,7 @@ The color bar spans the three-line identity block at the top of each entry:
 2. **Expansion** --- What the mnemonic stands for (e.g., "Add Signed, Extended")
 3. **Category** --- The functional category with a brief description
 
-When flipping through Part II, these color bars help you quickly identify entry boundaries and distinguish between instructions, directives, and constants.
+When flipping through Part II, these color bars make it easy to quickly identify entry boundaries and distinguish between instructions, directives, and constants.
 
 ### 2.8.3 Example: Understanding ADD
 
@@ -563,7 +563,7 @@ Instructions are grouped by category in Appendix C. When looking for "an instruc
 
 ### 2.8.5 Navigating with Links
 
-The PDF version of this manual includes extensive cross-reference links to help you navigate efficiently. Links appear in blue text and are clickable:
+The PDF version of this manual includes extensive cross-reference links for efficient navigation. Links appear in blue text and are clickable:
 
 **In the entry header block:**
 
@@ -580,7 +580,7 @@ Each instruction name in the Related section is a clickable link that jumps dire
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
 
-**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or `Cmd+[`) to return to where you were after following a link.
+**Navigation tip:** The PDF reader's "back" function (often Alt+Left Arrow or `Cmd+[`) returns to the previous location after following a link.
 
 
 ## 2.9 Constant Expressions and Operators
@@ -875,7 +875,4 @@ func_b          mov     y, #2                   ' Global: func_b,
 \item Global labels are visible throughout a DAT block; local labels (.name or :name) are scoped to the preceding global label
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 2 -->
 

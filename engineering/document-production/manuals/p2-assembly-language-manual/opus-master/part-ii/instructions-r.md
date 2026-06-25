@@ -13,8 +13,6 @@ Rotate Carry Left
 
 **RCL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = [63:32] of ({D, {32{C}}} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
 
 **Result:** The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
@@ -52,8 +50,6 @@ Rotate Carry Right
 :::
 
 **RCR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = [31:0] of ({{32{C}}, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
@@ -93,8 +89,6 @@ Rotate Carry And Zero Left
 
 **RCZL**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = {D[29:0], C, Z}`; `C = D[31]`, `Z = D[30]`
 
 **Result:** The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.
@@ -131,8 +125,6 @@ Rotate Carry And Zero Right
 
 **RCZR**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = {C, Z, D[31:2]}`; `C = D[1]`, `Z = D[0]`
 
 **Result:** The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.
@@ -168,8 +160,6 @@ Read Byte From hub
 :::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = zero-extend(hub byte)`; `C = byte[7]`
 
@@ -219,8 +209,6 @@ Read Fast Via FIFO
 
 **RDFAST**  *{#}Dest, {#}Src*
 
----
-
 **Result:** A fast read operation begins, filling the FIFO with data from hub memory starting at address Src.
 
 - Dest is a configuration value: Dest[31] = no-wait mode, Dest[13:0] = block size in 64-byte units (0 = maximum).
@@ -249,7 +237,7 @@ Read Fast Via FIFO
 
 RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from cog/LUT memory, not hub memory.
 
-Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
+Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
 
 After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
@@ -263,8 +251,6 @@ Read Long From hub
 :::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = hub long`; `C = long[31]` (prior SETQ/SETQ2 → block transfer)
 
@@ -303,7 +289,7 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations if you expect PTRx to point past the block.
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations when code expects PTRx to point past the block.
 
 
 
@@ -315,8 +301,6 @@ Read From LUT
 :::
 
 **RDLUT**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = LUT[S/PTRx]`; `C = data[31]`
 
@@ -357,8 +341,6 @@ Read smart pin
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
 
----
-
 **Operation:** `D = smart-pin S[5:0] result`, acknowledge pin; `C = modal result`
 
 **Result:** Smart Pin Src[5:0] result is loaded into Dest, and the pin is acknowledged.
@@ -383,6 +365,8 @@ If the WC effect is specified, the C flag is set to the modal result, which prov
 
 Smart pins are autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous cog intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
+Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart pin needs about 2 clock cycles to clear that flag before a TESTP poll of IN reads a valid result. Insert two NOP instructions (or other unrelated work) between RDPIN and the TESTP that polls the IN flag. RQPIN does not acknowledge the pin and so does not reset the IN flag, so no such delay is needed after RQPIN.
+
 
 
 ::: instrheader
@@ -393,8 +377,6 @@ Read Word From hub
 :::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = zero-extend(hub word)`; `C = word[15]`
 
@@ -444,8 +426,6 @@ Repeat Block
 
 **REP**  *@.label, {#}Src*
 
----
-
 **Operation:** repeat the next `D[8:0]` instructions `S` times (S = 0 → forever; D[8:0] = 0 → none)
 
 **Result:** The next Dest[8:0] instructions are executed Src times.
@@ -474,7 +454,7 @@ REP blocks cannot be nested. The P2 hardware uses a single internal counter for 
 
 - **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
 
-- **Hub memory overhead:** When REP executes from hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost (13+ clocks). For zero-overhead inner loops, execute REP from cog or LUT memory; for non-time-critical loops, hub-exec REP works correctly with the documented per-iteration penalty.
+- **Hub memory overhead:** When REP executes from hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost. For zero-overhead inner loops, execute REP from cog or LUT memory; for non-time-critical loops, hub-exec REP works correctly with this per-iteration penalty.
 
 **Forbidden instructions in REP blocks:**
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
@@ -625,7 +605,7 @@ Instructions within the REP block can also be conditional:
 
 ::: instrheader
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
-Resume From interrupt
+Resume From Interrupt
 
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
@@ -636,8 +616,6 @@ Resume From interrupt
 **RESI1**
 **RESI2**
 **RESI3**
-
----
 
 **Result:** Execution resumes from the interrupted location for the specified interrupt level.
 
@@ -668,8 +646,6 @@ Return From Subroutine
 :::
 
 **RET**  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** pop K from stack; `C = K[31]`, `Z = K[30]`, `PC = K[19:0]`
 
@@ -715,8 +691,6 @@ Return Via PTRA Stack
 
 **RETA**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `L = hub[--PTRA]`; `C = L[31]`, `Z = L[30]`, `PC = L[19:0]`
 
 **Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRA.
@@ -760,8 +734,6 @@ Return Via PTRB Stack
 
 **RETB**  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `L = hub[--PTRB]`; `C = L[31]`, `Z = L[30]`, `PC = L[19:0]`
 
 **Result:** The program counter, C flag, and Z flag are restored from hub memory at --PTRB.
@@ -798,7 +770,7 @@ RETB is paired with CALLB for implementing software stacks in hub memory, enabli
 
 ::: instrheader
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
-Return From interrupt
+Return From Interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
@@ -809,8 +781,6 @@ Return From interrupt
 **RETI1**
 **RETI2**
 **RETI3**
-
----
 
 **Result:** Execution returns from the specified interrupt level to the interrupted location.
 
@@ -842,8 +812,6 @@ Reverse Bits
 
 **REV**  *Dest*
 
----
-
 **Operation:** `D = D[0:31]` (bit-reverse)
 
 **Result:** The 32-bit pattern in Dest is reversed (bits 31:0 become bits 0:31).
@@ -874,8 +842,6 @@ Read Byte Via FIFO
 :::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = zero-extend(FIFO byte)`; `C = byte[7]`
 
@@ -913,8 +879,6 @@ Read Long Via FIFO
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = FIFO long`; `C = long[31]`
 
 **Result:** A long from the FIFO is loaded into Dest.
@@ -950,8 +914,6 @@ Read Variable Via FIFO
 :::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = zero-extend(FIFO 1..4-byte value)`; `C = 0`
 
@@ -989,8 +951,6 @@ Read Signed Variable Via FIFO
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = sign-extend(FIFO 1..4-byte value)`; `C = value MSB`
 
 **Result:** A sign-extended 1-4 byte value from the FIFO is loaded into Dest.
@@ -1024,8 +984,6 @@ Read Word Via FIFO
 :::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = zero-extend(FIFO word)`; `C = word[15]`
 
@@ -1063,8 +1021,6 @@ Expand RGB Color
 
 **RGBEXP**  *Dest*
 
----
-
 **Operation:** `D = {D[15:11,15:13], D[10:5,10:9], D[4:0,4:2], 8'b0}` (5:6:5 → 8:8:8)
 
 **Result:** The 5:6:5 RGB value in Dest[15:0] is expanded into 8:8:8 format in Dest[31:8].
@@ -1096,8 +1052,6 @@ Squeeze RGB Color
 
 **RGBSQZ**  *Dest*
 
----
-
 **Operation:** `D = {15'b0, D[31:27], D[23:18], D[15:11]}` (8:8:8 → 5:6:5)
 
 **Result:** The 8:8:8 RGB value in Dest[31:8] is compressed into 5:6:5 format in Dest[15:0].
@@ -1128,8 +1082,6 @@ Rotate Left
 :::
 
 **ROL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = [63:32] of ({D, D} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
 
@@ -1170,8 +1122,6 @@ Rotate Byte Left Into register
 **ROLBYTE**  *Dest, {#}Src, #N*\
 **ROLBYTE**  *Dest*
 
----
-
 **Operation:** `D = {D[23:0], S.BYTE[N]}`
 
 **Result:** Byte N (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left into Dest.
@@ -1206,8 +1156,6 @@ Rotate Nibble Left Into register
 
 **ROLNIB**  *Dest, {#}Src, #N*\
 **ROLNIB**  *Dest*
-
----
 
 **Operation:** `D = {D[27:0], S.NIBBLE[N]}`
 
@@ -1244,8 +1192,6 @@ Rotate Word Left Into register
 **ROLWORD**  *Dest, {#}Src, #N*\
 **ROLWORD**  *Dest*
 
----
-
 **Operation:** `D = {D[15:0], S.WORD[N]}`
 
 **Result:** Word N (0-1) of Src, or a word from a source described by prior ALTGW instruction, is rotated left into Dest.
@@ -1279,8 +1225,6 @@ Rotate Right
 :::
 
 **ROR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = [31:0] of ({D, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
@@ -1320,8 +1264,6 @@ Read Smart Pin Without Acknowledge
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**
 
----
-
 **Operation:** `D = smart-pin S[5:0] result` (no ack — "quiet"); `C = modal result`
 
 **Result:** Smart Pin Src[5:0] result is loaded into Dest without clearing the pin's ready flag.
@@ -1344,6 +1286,6 @@ RQPIN reads the result value from the specified smart pin without acknowledging 
 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
-This instruction is useful when you need to check a pin's result value without consuming it, such as polling for completion before actually processing the result.
+This instruction is useful for checking a pin's result value without consuming it, such as polling for completion before actually processing the result.
 
 

@@ -14,8 +14,6 @@ Negate
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = -S`; `C = result[31]`
 
 **Result:** The Src or Dest value is negated and stored into Dest.
@@ -66,8 +64,6 @@ Conditional Negate
 **NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** if cond then `D = -S`, else `D = S`; `C = result[31]` — cond: C (NEGC) / !C (NEGNC) / Z (NEGZ) / !Z (NEGNZ)
 
 **Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest. Optionally sets C to sign and Z if result is zero.
@@ -114,7 +110,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 ::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-Cancel interrupt
+Cancel Interrupt
 
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
@@ -124,8 +120,6 @@ Cancel interrupt
 **NIXINT1**
 **NIXINT2**
 **NIXINT3**
-
----
 
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
@@ -156,8 +150,6 @@ No Operation
 
 **NOP**
 
----
-
 **Result:** Two clock cycles are consumed.
 
 
@@ -170,7 +162,7 @@ No Operation
 
 **Explanation:**
 
-NOP simply consumes two clock cycles without performing any operation. No registers are modified, no flags are affected, and no memory is accessed.
+NOP consumes two clock cycles without performing any operation. No registers are modified, no flags are affected, and no memory is accessed.
 
 NOP is primarily used for timing adjustments, creating precise delays, or as a placeholder during development. It can also be used to align code for performance optimization or to fill instruction slots in pipelined operations.
 
@@ -185,8 +177,6 @@ Bitwise Not
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NOT**  *Dest*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = !S`; `C = !S[31]`
 

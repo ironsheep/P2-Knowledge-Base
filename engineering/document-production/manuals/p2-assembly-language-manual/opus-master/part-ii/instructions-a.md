@@ -14,8 +14,6 @@ Absolute Value
 **ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = abs(S)`; `C = S[31]`
 
 **Result:** Absolute Src (or Dest) value is stored in Dest.
@@ -53,8 +51,6 @@ Add Unsigned
 :::
 
 **ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Result:** Sum of unsigned Src and unsigned Dest is stored in Dest.
 
@@ -102,8 +98,6 @@ Add and Set Counter Event Trigger
 **ADDCT2**  *Dest, {#}Src*\
 **ADDCT3**  *Dest, {#}Src*
 
----
-
 **Operation:** `D = D + S`; arms the CTn event to fire when CT reaches the new D
 
 **Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
@@ -137,8 +131,6 @@ Add Pixels
 :::
 
 **ADDPIX**  *Dest, {#}Src*
-
----
 
 **Operation:** for each byte n: `D.BYTE[n] = min(D.BYTE[n] + S.BYTE[n], $FF)`
 
@@ -174,9 +166,7 @@ Add Signed
 
 **ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** `D = D + S`; `C = signed-overflow of (D + S)`
+**Operation:** `D = D + S`; `C = true sign of (D + S)`
 
 **Result:** Sum of signed Src and signed Dest is stored in Dest.
 
@@ -187,7 +177,7 @@ Add Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D + S) | result == 0 | D | 2 |
+| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D + S) | result == 0 | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
@@ -198,7 +188,7 @@ ADDS sums the two signed values of Dest and Src together and stores the result i
 
 If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended). Use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value, negative or positive.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a signed overflow (signed carry), or is cleared (0) if no overflow. Signed overflow occurs when the result cannot be represented in 32 bits using two's complement notation.
+If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative (the true sign of the signed sum, Result[31] = 1), or is cleared (0) if the result is non-negative. C carries the true sign of the result; it is not a signed-overflow indicator.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero.
 
@@ -215,9 +205,7 @@ Add Signed Extended
 
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** `D = D + S + C`; `C = signed-overflow`; `Z = Z AND (result==0)`
+**Operation:** `D = D + S + C`; `C = true sign of (D + S + C)`; `Z = Z AND (result==0)`
 
 **Result:** Sum of signed Src plus C and signed Dest is stored in Dest.
 
@@ -228,7 +216,7 @@ Add Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D + S + C) | Z AND (result == 0) | D | 2 |
+| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D + S + C) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
@@ -253,8 +241,6 @@ Add Unsigned Extended
 :::
 
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = D + S + C`; `Z = Z AND (result==0)`
 
@@ -293,8 +279,6 @@ Acknowledge smart pin
 
 **AKPIN**  *{#}Src*
 
----
-
 **Result:** One or more smart pins is acknowledged; lowering their corresponding IN signal(s).
 
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the smart pin(s) to acknowledge.
@@ -330,8 +314,6 @@ Allow Interrupts
 
 **ALLOWI**
 
----
-
 **Result:** Any stalled and future interrupts are allowed.
 
 
@@ -354,13 +336,11 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 ## ALTB {#altb}
 Alter Bit
 
-[Register Indirection](#register-indirection) - Alters next BITxxx instruction's target bit address.
+[Instruction Modification](#instruction-modification) - Alters next BITxxx instruction's target bit address.
 :::
 
 **ALTB**  *Dest, {#}Src*\
 **ALTB**  *Dest*
-
----
 
 **Operation:** next D field = (D[13:5] + S) & $1FF; then `D += signext(S[17:9])`
 
@@ -404,13 +384,11 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 ## ALTD {#altd}
 Alter Destination
 
-[Register Indirection](#register-indirection) - Alters next instruction's Dest field.
+[Instruction Modification](#instruction-modification) - Alters next instruction's Dest field.
 :::
 
 **ALTD**  *Dest, {#}Src*\
 **ALTD**  *Dest*
-
----
 
 **Operation:** next D field = (D + S) & $1FF; then `D += signext(S[17:9])`
 
@@ -451,13 +429,11 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 ## ALTGB {#altgb}
 Alter Get Byte
 
-[Register Indirection](#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
+[Instruction Modification](#instruction-modification) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
 **ALTGB**  *Dest, {#}Src*\
 **ALTGB**  *Dest*
-
----
 
 **Operation:** next GETBYTE/ROLBYTE: S field = (D[10:2] + S) & $1FF, N field = D[1:0]; then `D += signext(S[17:9])`
 
@@ -499,13 +475,11 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 ## ALTGN {#altgn}
 Alter Get Nibble
 
-[Register Indirection](#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
+[Instruction Modification](#instruction-modification) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
 **ALTGN**  *Dest, {#}Src*\
 **ALTGN**  *Dest*
-
----
 
 **Operation:** next GETNIB/ROLNIB: S field = (D[11:3] + S) & $1FF, N field = D[2:0]; then `D += signext(S[17:9])`
 
@@ -547,13 +521,11 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 ## ALTGW {#altgw}
 Alter Get Word
 
-[Register Indirection](#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
+[Instruction Modification](#instruction-modification) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
 **ALTGW**  *Dest, {#}Src*\
 **ALTGW**  *Dest*
-
----
 
 **Operation:** next GETWORD/ROLWORD: S field = (D[9:1] + S) & $1FF, N field = D[0]; then `D += signext(S[17:9])`
 
@@ -595,13 +567,11 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 ## ALTI {#alti}
 Alter Instruction
 
-[Register Indirection](#register-indirection) - Alters multiple fields of the next instruction.
+[Instruction Modification](#instruction-modification) - Alters multiple fields of the next instruction.
 :::
 
 **ALTI**  *Dest, {#}Src*\
 **ALTI**  *Dest*
-
----
 
 **Result:** The next instruction's pipelined field values are substituted from the Dest template, and Dest is modified per Src configuration.
 
@@ -635,13 +605,11 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 ## ALTR {#altr}
 Alter Result
 
-[Register Indirection](#register-indirection) - Alters next instruction's result write address.
+[Instruction Modification](#instruction-modification) - Alters next instruction's result write address.
 :::
 
 **ALTR**  *Dest, {#}Src*\
 **ALTR**  *Dest*
-
----
 
 **Operation:** next result-reg field = (D + S) & $1FF; then `D += signext(S[17:9])`
 
@@ -681,13 +649,11 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 ## ALTS {#alts}
 Alter Source
 
-[Register Indirection](#register-indirection) - Alters next instruction's Src field.
+[Instruction Modification](#instruction-modification) - Alters next instruction's Src field.
 :::
 
 **ALTS**  *Dest, {#}Src*\
 **ALTS**  *Dest*
-
----
 
 **Operation:** next S field = (D + S) & $1FF; then `D += signext(S[17:9])`
 
@@ -725,13 +691,11 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 ## ALTSB {#altsb}
 Alter Set Byte
 
-[Register Indirection](#register-indirection) - Alters next SETBYTE instruction's target byte.
+[Instruction Modification](#instruction-modification) - Alters next SETBYTE instruction's target byte.
 :::
 
 **ALTSB**  *Dest, {#}Src*\
 **ALTSB**  *Dest*
-
----
 
 **Operation:** next SETBYTE: D field = (D[10:2] + S) & $1FF, N field = D[1:0]; then `D += signext(S[17:9])`
 
@@ -771,13 +735,11 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 ## ALTSN {#altsn}
 Alter Set Nibble
 
-[Register Indirection](#register-indirection) - Alters next SETNIB instruction's target nibble.
+[Instruction Modification](#instruction-modification) - Alters next SETNIB instruction's target nibble.
 :::
 
 **ALTSN**  *Dest, {#}Src*\
 **ALTSN**  *Dest*
-
----
 
 **Operation:** next SETNIB: D field = (D[11:3] + S) & $1FF, N field = D[2:0]; then `D += signext(S[17:9])`
 
@@ -819,13 +781,11 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 ## ALTSW {#altsw}
 Alter Set Word
 
-[Register Indirection](#register-indirection) - Alters next SETWORD instruction's target word.
+[Instruction Modification](#instruction-modification) - Alters next SETWORD instruction's target word.
 :::
 
 **ALTSW**  *Dest, {#}Src*\
 **ALTSW**  *Dest*
-
----
 
 **Operation:** next SETWORD: D field = (D[9:1] + S) & $1FF, N field = D[0]; then `D += signext(S[17:9])`
 
@@ -872,8 +832,6 @@ Bitwise And
 
 **AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = D & S`; `C = parity of result`
 
 **Result:** Bitwise AND of Dest and Src is stored in Dest.
@@ -915,8 +873,6 @@ And Not
 :::
 
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = D & !S`; `C = parity of result`
 
@@ -962,8 +918,6 @@ Set Clock Mode
 
 **ASMCLK**
 
----
-
 **Result:** Configures the P2 system clock according to clock setup CON symbols.
 
 - No operands. Clock configuration is read from CON symbols (`_clkfreq`, `_xtlfreq`, `_xinfreq`, `_rcslow`, `_rcfast`).
@@ -1005,7 +959,7 @@ The clock configuration is determined by these CON symbols:
 
 **Modern Usage (v35v and later):**
 
-As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. The compiler automatically prepends a 16-long clock-setter program to PASM-only programs that use non-RCFAST clock modes. This clock-setter configures the clock, relocates your program down by 16 longs, then executes it via `COGINIT #0,#0`.
+As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. The compiler automatically prepends a 16-long clock-setter program to PASM-only programs that use non-RCFAST clock modes. This clock-setter configures the clock, relocates the program down by 16 longs, then executes it via `COGINIT #0,#0`.
 
 To disable the automatic clock-setter and use ASMCLK manually, define:
 
@@ -1037,8 +991,6 @@ Augment Destination
 :::
 
 **AUGD**  *#Dest*
-
----
 
 **Operation:** the next `#D` becomes the full 32-bit literal `{#n[22:0], #D[8:0]}`
 
@@ -1075,8 +1027,6 @@ Augment Source
 :::
 
 **AUGS**  *#Src*
-
----
 
 **Operation:** the next `#S` becomes the full 32-bit literal `{#n[22:0], #S[8:0]}`
 

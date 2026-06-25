@@ -13,8 +13,6 @@ Shift Arithmetic Left
 
 **SAL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = [63:32] of ({D, {32{D[0]}}} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
 
 **Result:** The bits of Dest are shifted left by Src bits, extending Dest[0] into new rightmost bits.
@@ -50,8 +48,6 @@ Shift Arithmetic Right
 :::
 
 **SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = [31:0] of ({{32{D[31]}}, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
@@ -89,9 +85,7 @@ Scale
 
 **SCA**  *Dest, {#}Src*  **{WZ}**
 
----
-
-**Operation:** next instruction's S = `unsigned(D[15:0] × S[15:0]) >> 16`
+**Operation:** next instruction's S = `unsigned(D[15:0] * S[15:0]) >> 16`
 
 **Result:** The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
 
@@ -129,9 +123,7 @@ Scale Signed
 
 **SCAS**  *Dest, {#}Src*  **{WZ}**
 
----
-
-**Operation:** next instruction's S = `signed(D[15:0] × S[15:0]) >> 14` ($4000 = 1.0, $C000 = -1.0)
+**Operation:** next instruction's S = `signed(D[15:0] * S[15:0]) >> 14` ($4000 = 1.0, $C000 = -1.0)
 
 **Result:** The upper 18 bits of the signed product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
 
@@ -142,7 +134,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | result == 0 | --- | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Product = 0 (before scaling) | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -164,8 +156,6 @@ Set Byte
 
 **SETBYTE**  *Dest, {#}Src, #N*\
 **SETBYTE**  *{#}Src*
-
----
 
 **Operation:** `D.BYTE[N] = S[7:0]` (other bytes unchanged)
 
@@ -205,8 +195,6 @@ Set Colorspace Converter Frequency
 
 **SETCFRQ**  *{#}Dest*
 
----
-
 **Result:** The colorspace converter CFRQ parameter is set to Dest[31:0].
 
 - Dest is a register or literal value (0-511) to set as CFRQ parameter.
@@ -233,8 +221,6 @@ Set Colorspace Converter CI
 :::
 
 **SETCI**  *{#}Dest*
-
----
 
 **Result:** The colorspace converter CI parameter is set to Dest[31:0].
 
@@ -263,8 +249,6 @@ Set Colorspace Converter Mode
 
 **SETCMOD**  *{#}Dest*
 
----
-
 **Result:** The colorspace converter CMOD parameter is set to Dest[8:0].
 
 - Dest is a register or literal value (0-511) to set as CMOD parameter.
@@ -291,8 +275,6 @@ Set Colorspace Converter CQ
 :::
 
 **SETCQ**  *{#}Dest*
-
----
 
 **Result:** The colorspace converter CQ parameter is set to Dest[31:0].
 
@@ -321,8 +303,6 @@ Set Colorspace Converter CY
 
 **SETCY**  *{#}Dest*
 
----
-
 **Result:** The colorspace converter CY parameter is set to Dest[31:0].
 
 - Dest is a register or literal value (0-511) to set as CY parameter.
@@ -345,12 +325,10 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 ## SETD {#setd}
 Set Destination Field
 
-[Register Indirection](#register-indirection) - Sets the D field of a template for use with ALTI instruction.
+[Instruction Modification](#instruction-modification) - Sets the D field of a template for use with ALTI instruction.
 :::
 
 **SETD**  *Dest, {#}Src*
-
----
 
 **Operation:** `D = {D[31:18], S[8:0], D[8:0]}`
 
@@ -384,8 +362,6 @@ Set DACs
 
 **SETDACS**  *{#}Dest*
 
----
-
 **Operation:** `DAC3 = D[31:24]`, `DAC2 = D[23:16]`, `DAC1 = D[15:8]`, `DAC0 = D[7:0]`
 
 **Result:** DAC3 = Dest[31:24], DAC2 = Dest[23:16], DAC1 = Dest[15:8], DAC0 = Dest[7:0].
@@ -416,8 +392,6 @@ Set Interrupt Source (1, 2, Or 3)
 **SETINT1**  *{#}Dest*\
 **SETINT2**  *{#}Dest*\
 **SETINT3**  *{#}Dest*
-
----
 
 **Result:** The specified interrupt source (INT1, INT2, or INT3) is set to Dest[3:0].
 
@@ -450,8 +424,6 @@ Set LUT Sharing
 
 **SETLUTS**  *{#}Dest*
 
----
-
 **Result:** If Dest[0] = 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
 
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
@@ -479,8 +451,6 @@ Set Nibble
 
 **SETNIB**  *Dest, {#}Src, #N*\
 **SETNIB**  *{#}Src*
-
----
 
 **Operation:** `D.NIBBLE[N] = S[3:0]` (rest unchanged)
 
@@ -520,8 +490,6 @@ Set Pin Pattern
 
 **SETPAT**  *{#}Dest, {#}Src*
 
----
-
 **Result:** Pin pattern for PAT event is configured. C selects INA/INB, Z selects =/!=, Dest provides mask value, Src provides match value.
 
 - Dest is a register or immediate containing mask value.
@@ -550,8 +518,6 @@ Set Pixel Blend Factor
 
 **SETPIV**  *{#}Dest*
 
----
-
 **Result:** BLNPIX/MIXPIX blend factor is set to Dest[7:0].
 
 - Dest is a register or literal value (0-511) containing 8-bit blend factor in bits [7:0].
@@ -579,8 +545,6 @@ Set Pixel Mixer Mode
 
 **SETPIX**  *{#}Dest*
 
----
-
 **Result:** MIXPIX mode is set to Dest[5:0].
 
 - Dest is a register or literal value (0-511) containing 6-bit mode in bits [5:0].
@@ -601,14 +565,12 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 
 ::: instrheader
 ## SETQ {#setq}
-Set Q register
+Set Q Register
 
 [hub memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
-
----
 
 **Result:** Q register is set to Dest.
 
@@ -643,8 +605,6 @@ Set Q For LUT Transfers
 
 **SETQ2**  *{#}Dest*
 
----
-
 **Result:** Q register is set to Dest for LUT block transfers.
 
 - Dest is a register or literal value (0-511) to load into Q.
@@ -673,12 +633,10 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 ## SETR {#setr}
 Set Result Field
 
-[Register Indirection](#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
+[Instruction Modification](#instruction-modification) - Sets the Result field of a template for use with ALTI instruction.
 :::
 
 **SETR**  *Dest, {#}Src*
-
----
 
 **Operation:** `D = {D[31:28], S[8:0], D[18:0]}`
 
@@ -707,12 +665,10 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 ## SETS {#sets}
 Set Source Field
 
-[Register Indirection](#register-indirection) - Sets the S field of a template for use with ALTI instruction.
+[Instruction Modification](#instruction-modification) - Sets the S field of a template for use with ALTI instruction.
 :::
 
 **SETS**  *Dest, {#}Src*
-
----
 
 **Operation:** `D = {D[31:9], S[8:0]}`
 
@@ -746,8 +702,6 @@ Set Oscilloscope
 
 **SETSCP**  *{#}Dest*
 
----
-
 **Result:** Four-channel oscilloscope enable is set to Dest[6] and input pin base is set to Dest[5:2].
 
 - Dest is a register or literal value (0-511) containing enable bit [6] and pin base [5:2].
@@ -766,7 +720,7 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 
 ::: instrheader
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
-Set Selectable event (1, 2, 3, Or 4)
+Set Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
@@ -777,8 +731,6 @@ Set Selectable event (1, 2, 3, Or 4)
 **SETSE2**  *{#}Dest*\
 **SETSE3**  *{#}Dest*\
 **SETSE4**  *{#}Dest*
-
----
 
 **Result:** The specified selectable event configuration (SE1-SE4) is set to Dest[8:0].
 
@@ -812,8 +764,6 @@ Set Word
 
 **SETWORD**  *Dest, {#}Src, #N*\
 **SETWORD**  *{#}Src*
-
----
 
 **Operation:** `D.WORD[N] = S[15:0]` (rest unchanged)
 
@@ -853,8 +803,6 @@ Set Streamer Frequency
 
 **SETXFRQ**  *{#}Dest*
 
----
-
 **Result:** Streamer NCO frequency is set to Dest.
 
 - Dest is a register or literal value (0-511) containing frequency value.
@@ -881,8 +829,6 @@ Seuss Forward
 :::
 
 **SEUSSF**  *Dest*
-
----
 
 **Result:** Dest is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
 
@@ -911,8 +857,6 @@ Seuss Reverse
 
 **SEUSSR**  *Dest*
 
----
-
 **Result:** Dest is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
 
 - Dest is a register to transform.
@@ -939,8 +883,6 @@ Shift Left
 :::
 
 **SHL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = [63:32] of ({D, 32'b0} << S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[31]`
 
@@ -978,8 +920,6 @@ Shift Right
 
 **SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = [31:0] of ({32'b0, D} >> S[4:0])`; `C = last bit shifted out (S[4:0]>0) else D[0]`
 
 **Result:** The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.
@@ -1016,8 +956,6 @@ Sign Extend
 
 **SIGNX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** sign-extend D from bit S[4:0]; `C = result[31]`
 
 **Result:** The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are updated to the resulting MSB and zero status.
@@ -1052,8 +990,6 @@ Skip Instructions
 :::
 
 **SKIP**  *{#}Dest*
-
----
 
 **Operation:** cancel each of next instructions 0..31 where D[n] = 1
 
@@ -1090,8 +1026,6 @@ Skip Instructions Fast
 :::
 
 **SKIPF**  *{#}Dest*
-
----
 
 **Operation:** like SKIP but PC leaps over skipped cog/LUT instructions (per D bits)
 
@@ -1133,9 +1067,7 @@ Split Bits To Bytes
 
 **SPLITB**  *Dest*
 
----
-
-**Operation:** `D = {D[31], D[27], D[23], D[19], … D[12], D[8], D[4], D[0]}`
+**Operation:** `D = {D[31], D[27], D[23], D[19], ... D[12], D[8], D[4], D[0]}`
 
 **Result:** Dest = {Dest[31], Dest[27], Dest[23], Dest[19], ...Dest[12], Dest[8], Dest[4], Dest[0]}.
 
@@ -1164,9 +1096,7 @@ Split Bits To Words
 
 **SPLITW**  *Dest*
 
----
-
-**Operation:** `D = {D[31], D[29], D[27], D[25], … D[6], D[4], D[2], D[0]}`
+**Operation:** `D = {D[31], D[29], D[27], D[25], ... D[6], D[4], D[2], D[0]}`
 
 **Result:** Dest = {Dest[31], Dest[29], Dest[27], Dest[25], ...Dest[6], Dest[4], Dest[2], Dest[0]}.
 
@@ -1194,8 +1124,6 @@ Disallow Interrupts
 :::
 
 **STALLI**
-
----
 
 **Result:** All future interrupts are disallowed.
 
@@ -1227,8 +1155,6 @@ Subtract
 :::
 
 **SUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Result:** Difference of unsigned Dest and unsigned Src is stored in Dest and optionally the C and Z flags are updated to the borrow and zero status.
 
@@ -1263,8 +1189,6 @@ Subtract Reverse
 
 **SUBR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
 **Operation:** `D = S - D`; `C = borrow of (S - D)`
 
 **Result:** Difference of unsigned Src and unsigned Dest is stored in Dest and optionally the C and Z flags are updated to the borrow and zero status.
@@ -1296,9 +1220,7 @@ Subtract Signed
 
 **SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** `D = D - S`; `C = signed-overflow of (D - S)`
+**Operation:** `D = D - S`; `C = true sign of (D - S)`
 
 **Result:** Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.
 
@@ -1309,7 +1231,7 @@ Subtract Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | result == 0 | D | 2 |
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D - S) | result == 0 | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
@@ -1329,9 +1251,7 @@ Subtract Signed Extended
 
 **SUBSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** `D = D - (S + C)`; `C = signed-overflow`; `Z = Z AND (result==0)`
+**Operation:** `D = D - (S + C)`; `C = true sign of (D - (S + C))`; `Z = Z AND (result==0)`
 
 **Result:** Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended sign and zero status.
 
@@ -1342,7 +1262,7 @@ Subtract Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (result == 0) | D | 2 |
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D - (S + C)) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
@@ -1361,8 +1281,6 @@ Subtract Extended
 :::
 
 **SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-
----
 
 **Operation:** `D = D - (S + C)`; `Z = Z AND (result==0)`
 
@@ -1400,9 +1318,7 @@ Conditional Sum
 **SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **SUMNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
----
-
-**Operation:** if cond then `D = D - S`, else `D = D + S`; `C = signed-overflow of (D ± S)` — cond: C/!C/Z/!Z
+**Operation:** if cond then `D = D - S`, else `D = D + S`; `C = true sign of (D +/- S)` — cond: C/!C/Z/!Z
 
 **Result:** Conditionally adds or subtracts Src from Dest based on flag state.
 
@@ -1413,10 +1329,10 @@ Conditional Sum
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
-| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
-| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
-| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D +/- S) | result == 0 | D | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D +/- S) | result == 0 | D | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D +/- S) | result == 0 | D | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | true sign of (D +/- S) | result == 0 | D | 2 |
 
 
 **Explanation:**
@@ -1430,7 +1346,7 @@ These instructions conditionally add or subtract Src from Dest based on the spec
 | SUMZ | Z = 1 | Z = 0 |
 | SUMNZ | Z = 0 | Z = 1 |
 
-The C flag (with WC) is updated to reflect the correct sign of the result.
+The C flag (with WC) is updated to reflect the true sign of the result.
 
 SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when their flag is clear (0), providing complementary behavior.
 

@@ -74,7 +74,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CMPR | `0010100` | CZI | 2 | borrow of (S - D) | (D == S) |
 | CMPS | `0010010` | CZI | 2 | Signed (D < S) | D=S |
 | CMPSUB | `0010111` | CZI | 2 | Unsigned(D => S) | Result = 0 |
-| CMPSX | `0010011` | CZI | 2 | correct sign of (D - (S + C)) | Z AND (D == S + C) |
+| CMPSX | `0010011` | CZI | 2 | true sign of (D - (S + C)) | Z AND (D == S + C) |
 | CMPX | `0010001` | CZI | 2 | borrow of (D - (S + C)) | Z AND (D == S + C) |
 | COGATN | `1101011` | — | 2 | — | — |
 | COGBRK | `1101011` | — | 2 | — | — |
@@ -249,7 +249,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | RCZR | `1101011` | CZ | 2 | D[1] | D[0] |
 | RDBYTE | `1010110` | CZI | 9...16 | MSB of byte | Result = 0 |
 | RDFAST | `1100011` | — | 2 or WRFAST finish + 10...17 | — | — |
-| RDLONG | `1011000` | CZI | 9...16 * | MSB of long | — |
+| RDLONG | `1011000` | CZI | 9...16 * | MSB of long | Result = 0 |
 | RDLUT | `1010101` | CZI | 3 | MSB of data | Result = 0 |
 | RDPIN | `1010100` | C | 2 | modal result | — |
 | RDWORD | `1010111` | CZI | 9...16 * | MSB of word | Result = 0 |
@@ -325,10 +325,10 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | SUBS | `0001110` | CZI | 2 | sign of (D - S) | Result = 0 |
 | SUBSX | `0001111` | CZI | 2 | sign of D-(S+C) | Z AND (Result = 0) |
 | SUBX | `0001101` | CZI | 2 | borrow of (D - (S + C)) | Z AND (result == 0) |
-| SUMC | `0011100` | CZI | 2 | 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S) | Result = 0 |
-| SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S) | Result = 0 |
-| SUMNZ | `0011111` | CZI | 2 | correct sign of (D +/- S) | 0 then D = D - S, else D = D + S |
-| SUMZ | `0011110` | CZI | 2 | correct sign of (D +/- S) | 1 then D = D - S, else D = D + S |
+| SUMC | `0011100` | CZI | 2 | 1 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result = 0 |
+| SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result = 0 |
+| SUMNZ | `0011111` | CZI | 2 | true sign of (D +/- S) | 0 then D = D - S, else D = D + S |
+| SUMZ | `0011110` | CZI | 2 | true sign of (D +/- S) | 1 then D = D - S, else D = D + S |
 | TEST | `0111110` | CZ | 2 | Parity of (D & S) | (D & S) = 0 |
 | TESTB | `0100000` | CZI | 2 | D[S[4:0]] | D[S[4:0]] |
 | TESTBN | `0100001` | CZI | 2 | !D[S[4:0]] | !D[S[4:0]] |

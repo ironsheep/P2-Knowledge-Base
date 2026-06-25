@@ -5,7 +5,7 @@ The P2 includes specialized hardware subsystems that extend beyond basic instruc
 
 ## 5.1 CORDIC Coprocessor {#cordic-overview}
 
-The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—your code initiates an operation, performs other useful work for 55 clock cycles while the CORDIC computes, then retrieves the results.
+The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—code initiates an operation, performs other useful work for 55 clock cycles while the CORDIC computes, then retrieves the results.
 
 ### 5.1.1 CORDIC Capabilities
 
@@ -45,7 +45,7 @@ The CORDIC is a fully pipelined, shared resource accessed through hub rotation�
 
 Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and drain.
 
-**Fill Phase:** Submit multiple operations before expecting any results. During this phase, you queue operations without retrieving results, filling the pipeline:
+**Fill Phase:** Submit multiple operations before expecting any results. During this phase, operations are queued without retrieving results, filling the pipeline:
 
 ```pasm2
         ' Fill phase - queue first 6 operations
@@ -80,7 +80,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 ### 5.1.5 Result Retrieval Timing
 
-The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the cog stalls until the result becomes available. This automatic stalling simplifies programming—you need not count cycles precisely—but can impact performance if you retrieve too early.
+The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the cog stalls until the result becomes available. This automatic stalling simplifies programming—precise cycle counting is unnecessary—but can impact performance if results are retrieved too early.
 
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
@@ -557,7 +557,7 @@ Smaller modes conserve LUT space. A compressed mode allows mixing individual and
 
 ## 5.7 Boot Process
 
-When the P2 powers on or receives a hardware reset, it begins a deterministic boot sequence that loads and executes user code. Understanding this sequence is essential for embedded applications—it explains why programs must configure the clock, how the chip finds your code, and what state the hardware is in when your program starts executing.
+When the P2 powers on or receives a hardware reset, it begins a deterministic boot sequence that loads and executes user code. Understanding this sequence is essential for embedded applications—it explains why programs must configure the clock, how the chip finds the user code, and what state the hardware is in when the program starts executing.
 
 ### 5.7.1 Initial Chip State
 
@@ -687,7 +687,7 @@ Loaded programs must include a validation header. The loader computes a 32-bit s
 
 ### 5.7.6 Clock Configuration After Boot
 
-User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-30 MHz (typically ~24 MHz). For applications requiring precise timing, configure an external crystal or the PLL early in your program:
+User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-30 MHz (typically ~24 MHz). For applications requiring precise timing, configure an external crystal or the PLL early in the program:
 
 ```pasm2
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
@@ -705,11 +705,11 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
                 hubset  ##%0000_0001_0000_1000_0000_0010_00_11
 ```
 
-The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
+The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in the program.
 
 **Why Clock Setup Is Required:**
 
-The boot ROM cannot know what clock source your hardware provides. Some boards use 20 MHz crystals, others use 25 MHz, and some applications run directly from the internal oscillator. By starting in RCFAST mode, the P2 boots reliably on any hardware. Your program then configures the actual clock source appropriate for your design.
+The boot ROM cannot know what clock source the hardware provides. Some boards use 20 MHz crystals, others use 25 MHz, and some applications run directly from the internal oscillator. By starting in RCFAST mode, the P2 boots reliably on any hardware. The program then configures the actual clock source appropriate for the design.
 
 ### 5.7.7 Rebooting from Software
 
@@ -833,6 +833,3 @@ For a debug statement to produce output, both conditions must be met: the statem
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
 ```
-
-
-<!-- End of Chapter 5 -->
