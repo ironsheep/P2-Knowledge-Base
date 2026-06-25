@@ -61,7 +61,7 @@ The 4-bit EEEE field encodes sixteen conditions:
 | 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
 | 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
-> **📖 Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.2 The _RET_ Condition
 
@@ -95,7 +95,7 @@ This is significantly faster than a separate instruction followed by RET.
 
 **Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
 
-> **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.3 Comparison Condition Aliases
 

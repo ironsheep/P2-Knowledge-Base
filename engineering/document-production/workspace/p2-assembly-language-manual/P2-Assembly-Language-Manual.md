@@ -97,12 +97,12 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-### Trademarks
+## Trademarks
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 
-## Acknowledgments
+# Acknowledgments
 
 This manual would not exist without the contributions of many individuals and organizations:
 
@@ -117,11 +117,11 @@ This manual would not exist without the contributions of many individuals and or
 This manual is a community-developed resource, created to make the P2's assembly language more accessible to developers at all skill levels.
 
 
-## How to Use This Manual
+# How to Use This Manual
 
 This manual serves multiple audiences and use cases. The organization is designed to support both learning and reference workflows.
 
-### For Different Reader Types
+## For Different Reader Types
 
 **New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
 
@@ -131,7 +131,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
 
-### For P1 Developers
+## For P1 Developers
 
 The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs sharing hub memory—while expanding capabilities.
 
@@ -152,6 +152,8 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 
 **Architecture That Transfers**
 
+These P1 fundamentals carry forward unchanged—Chapter 1 covers them in depth:
+
 - Eight independent cogs with true parallel execution
 - Shared hub memory with round-robin deterministic access
 - Private cog RAM for fast local operations
@@ -159,22 +161,9 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 - Hardware locks for inter-cog synchronization
 - Spin/PASM language structure
 
-Sequential hub access streams one long per clock; random hub access waits up to seven clocks to align—time-critical code runs from cog or LUT RAM (see Chapter 1).
-
 **New in P2**
 
-- **Smart pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
-- **Lookup RAM** — 512 additional longs per cog for tables and overflow code execution
-- **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
-- **Streamer** — Background DMA between hub, LUT, and pins
-- **Digital Video** — Hardware HDMI/DVI output via streamer
-- **FIFO** — Hardware FIFO for high-bandwidth hub streaming and hub execution
-- **Interrupts** — Three levels per cog (plus hidden debug interrupt) with 16 event sources
-- **Debug interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
-- **COGATN** — Hardware inter-cog attention signaling
-- **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
-- **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
-- **Hub Execution** — Run code directly from 512 KB hub RAM
+The P2 adds capabilities the P1 lacked: **Smart Pins** (64 autonomous I/O pins with ADC, DAC, PWM, serial protocols, and USB), the **CORDIC** math coprocessor (multiply, divide, square root, trigonometry, logarithms), the **Streamer** for background DMA and HDMI/DVI video, a hardware **FIFO** for high-bandwidth hub streaming, **LUT RAM** and **hub execution** for code beyond the 512-long cog limit, and three-level **interrupts** (plus a hidden debug interrupt) with 16 event sources. New instruction-level features include register indirection (ALTS/ALTD/ALTR), instruction skipping (SKIP/SKIPF/EXECF), and inter-cog signaling (COGATN). Part I introduces these; Chapter 5 covers the hardware subsystems in depth, and the Part II reference documents each instruction.
 
 **Changed from P1**
 
@@ -198,7 +187,7 @@ The R (result) bit from P1's ZCRI field was removed in P2. Result writing is now
 
 Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
 
-### Manual Structure
+## Manual Structure
 
 **Part I: Architectural Foundation** — Six chapters explaining how the P2 works:
 
@@ -229,7 +218,7 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 - Appendix I: Glossary
 - Appendix J: Known Bugs
 
-### Quick Navigation Guide
+## Quick Navigation Guide
 
 **"I need to find instruction X"** → Part II, Instructions section, alphabetically organized
 
@@ -248,9 +237,9 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 **"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 
 
-## Conventions Used in This Manual
+# Conventions Used in This Manual
 
-### Typography
+## Typography
 
 `Monospace font` is used for code examples, instruction names in syntax descriptions, register names, and literal values.
 
@@ -260,7 +249,7 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), and condition codes (IF_C, IF_Z).
 
-### Code Examples
+## Code Examples
 
 PASM2 code examples follow standard formatting conventions:
 
@@ -277,17 +266,19 @@ label           instruction     D,S             ' Comment
 - Comments start with a single quote (') and explain the operation
 - 8-character column alignment for readability
 
-### Special Markers
+## Special Markers
 
 Throughout this manual, special markers highlight important information:
 
-**Pitfall**: Common mistakes or non-obvious behavior that can cause errors. Pay careful attention to these to avoid debugging challenges.
+**Pitfall:** Common mistakes or non-obvious behavior that can cause errors. Pay careful attention to these to avoid debugging challenges.
 
-**Tip**: Useful techniques, optimization opportunities, or best practices that experienced P2 developers have discovered.
+**Tip:** Useful techniques, optimization opportunities, or best practices that experienced P2 developers have discovered.
 
-**Hardware**: Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
+**Hardware:** Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
 
-### Instruction Encoding Tables
+**Complete Reference:** A pointer to the appendix or section that holds the full table or detailed treatment of the topic at hand.
+
+## Instruction Encoding Tables
 
 Part II instruction entries include encoding tables with the following columns:
 
@@ -309,7 +300,7 @@ Part II instruction entries include encoding tables with the following columns:
 
 **Clks** — Execution time in system clock cycles.
 
-### Cross-References
+## Cross-References
 
 This manual uses consistent cross-reference formats:
 
@@ -322,7 +313,7 @@ This manual uses consistent cross-reference formats:
 **"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
 
 
-## About This Manual
+# About This Manual
 
 This manual documents the P2 Assembly Language (PASM2) in a format suited to both human reading and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and verification against P2 silicon behavior.
 
@@ -433,7 +424,7 @@ The LUT integrates with the P2's streamer and CORDIC subsystems. The streamer ca
 
 `RDLUT` reads a value from LUT memory to a cog register. `WRLUT` writes a value from a cog register to LUT memory. These instructions work similarly to regular cog memory operations but target the separate LUT address space.
 
-⚠️ **Pitfall:** A literal LUT address reaches only the lower half—`RDLUT d, #0` through `RDLUT d, #255`. `RDLUT d, #256` and above do not assemble (the compiler reports `Constant must be from 0 to 255`). To reach any of the 512 LUT longs, use a register holding the address, or a `PTRA`/`PTRB` pointer with an optional index: `RDLUT d, addr` or `RDLUT d, PTRB[4]`. The 9-bit address field's top bit selects the pointer form, so a plain literal spans only 8 bits; pointers carry the full range.
+**Pitfall:** A literal LUT address reaches only the lower half—`RDLUT d, #0` through `RDLUT d, #255`. `RDLUT d, #256` and above do not assemble (the compiler reports `Constant must be from 0 to 255`). To reach any of the 512 LUT longs, use a register holding the address, or a `PTRA`/`PTRB` pointer with an optional index: `RDLUT d, addr` or `RDLUT d, PTRB[4]`. The 9-bit address field's top bit selects the pointer form, so a plain literal spans only 8 bits; pointers carry the full range.
 
 Programs often load the LUT with data from hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in hub memory.
 
@@ -470,7 +461,7 @@ Programs use hub memory to share data between cogs, store large lookup tables, h
 
 Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
 
-⚠️ **Pitfall:** Hub addresses below $400 overlap with the region from which cogs load initial code during COGINIT. Writing to this area while cogs are being started can cause unpredictable behavior. Programs that dynamically start cogs should avoid using low hub addresses for shared data storage.
+**Pitfall:** Hub addresses below $400 overlap with the region from which cogs load initial code during COGINIT. Writing to this area while cogs are being started can cause unpredictable behavior. Programs that dynamically start cogs should avoid using low hub addresses for shared data storage.
 
 ### 1.4.2 Hub Access Timing
 
@@ -546,7 +537,7 @@ Hub execution mode provides access to the full 512KB hub address space, enabling
 
 `COGINIT` determines execution mode when starting a cog. The initialization parameter specifies either cog execution (code loaded from hub to cog RAM, then executed) or hub execution (code executed directly from hub RAM). The `ORGH` assembler directive marks code intended for hub execution, while `ORG` marks code for cog execution.
 
-⚠️ **Pitfall:** While executing from hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and the streamer FIFO instructions XINIT, XZERO, and XCONT when the streamer mode engages the FIFO. Code requiring these instructions must execute from cog RAM.
+**Pitfall:** While executing from hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and the streamer FIFO instructions XINIT, XZERO, and XCONT when the streamer mode engages the FIFO. Code requiring these instructions must execute from cog RAM.
 
 ### 1.6.4 Switching Between Modes
 
@@ -632,7 +623,7 @@ The 4-bit EEEE field encodes sixteen conditions:
 | 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
 | 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
-> **📖 Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.2 The _RET_ Condition
 
@@ -666,7 +657,7 @@ This is significantly faster than a separate instruction followed by RET.
 
 **Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
 
-> **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.3 Comparison Condition Aliases
 
@@ -1695,7 +1686,7 @@ The most commonly used conditions are:
 - **(no condition)** — When omitted, instructions execute unconditionally (encodes as EEEE=1111)
 - **_RET_** — Execute instruction, then return
 
-> **📖 Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
 
 ### 3.3.4 Comparison Condition Aliases
 
@@ -2325,13 +2316,9 @@ Variable range notation like "4...11" indicates that execution time varies withi
 Figure 4.1: Hub Access Rotation ("Egg Beater")
 :::
 
-Hub memory access uses round-robin arbitration that gives each cog fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each cog's access window spinning through the sequence in turn.
+Hub memory access uses the round-robin "egg beater" arbitration introduced in §1.4.2: each cog gets one hub-access window per eight-cycle rotation, and the pattern runs continuously and never changes. What matters for timing is the consequence—when a cog executes a hub instruction (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), it waits until its cog's window arrives, so the access cost depends on the program's phase relative to the rotation.
 
-The hub controller divides time into eight-cycle periods. Within each period, every cog gets exactly one cycle to access hub memory. The access windows rotate continuously through cogs 0, 1, 2, 3, 4, 5, 6, 7, then back to cog 0, repeating this pattern indefinitely. This rotation never stops and never changes—it runs continuously from the moment the chip powers on.
-
-When a cog executes an instruction that accesses hub memory (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), the instruction waits until that cog's window arrives, performs the memory access during the window, then completes. The wait time depends on when the instruction executes relative to the rotation pattern.
-
-This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the hub rotation can achieve minimum wait times by scheduling hub access to align with its windows.
+This rotation is deterministic: the wait varies from 0 to 7 cycles but follows a fixed pattern, so a program that knows its phase relationship to the rotation can schedule hub access to align with its windows and minimize the wait.
 
 ### 4.3.2 Hub Access Latency
 
@@ -2516,7 +2503,7 @@ While the P2 provides deterministic timing, four sources of variation exist. The
 
 ### 4.4.3 Eliminating Branches
 
-Conditional execution provides an alternative to branching that eliminates timing variation. Instead of using a compare instruction followed by a conditional jump, code can use a compare instruction followed by conditionally-executed instructions.
+Conditional execution (§3.3) doubles as a timing tool: replacing a branch with conditionally-executed instructions removes the 2-or-4-cycle branch variation and gives every path a fixed cost. The trade-off shows up directly in cycle counts.
 
 The branching approach introduces timing variation:
 
@@ -2798,23 +2785,13 @@ Profiling can reveal unexpected timing variations. If a loop shows inconsistent 
 
 ### 4.8.1 Cog Execution Mode
 
-Cog execution mode—often called "cog mode"—executes instructions from the cog's local 512-long (2KB) RAM. This provides the fastest possible execution because instruction fetch occurs from the cog's private memory without any shared resource contention.
-
-In cog mode, most instructions complete in exactly 2 clock cycles. The processor fetches an instruction and executes it without waiting for memory access arbitration, cache lookups, or bus conflicts. This predictable timing suits cog mode to timing-critical code.
-
-Cog mode execution begins when a cog starts via COGINIT with a cog RAM address (0-$1FF). The program counter points to cog RAM locations, and instruction fetch proceeds at full speed. All 512 longs of cog RAM are available for code and data, though programs typically reserve some locations for data and use the remainder for code.
-
-The limitation of cog mode is size—only 512 longs of code and data combined. Programs that need more code space must use hub execution mode or carefully manage code overlays.
+Cog mode (§1.6.1) executes from the cog's local RAM, so instruction fetch never contends for the hub. Most instructions complete in exactly 2 clock cycles with no arbitration, cache, or bus delays—the fastest and most predictable timing the P2 offers, which is why timing-critical code runs here. The trade-off is size: only 512 longs for code and data combined, so larger programs must use hub execution mode or manage code overlays.
 
 ### 4.8.2 Hub Execution Mode
 
-Hub execution mode—often called "HUBEXEC mode"—executes instructions from hub RAM. This allows programs to exceed the 512-long cog RAM size limit, supporting much larger code bases at the cost of a branch-refill penalty (sequential throughput is unchanged).
+Hub mode (§1.6.3) executes from hub RAM, lifting the 512-long cog limit at the cost of a branch-refill penalty—sequential throughput is unchanged. Straight-line code runs at 2 cycles per instruction, identical to cog mode: the (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The penalty falls entirely on branches—a taken branch forces a FIFO refill costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
 
-In hub execution mode, sequential straight-line code executes at 2 cycles per instruction—identical throughput to cog mode. The (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The only hubexec penalty occurs at branches: a taken branch forces a FIFO refill, costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
-
-Hub execution mode begins when a cog starts via COGINIT with a hub RAM address ($400 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can utilize the full 512 KB of hub RAM.
-
-Despite the branch-refill penalty, hub mode remains useful for several scenarios:
+Despite that penalty, hub mode remains the right choice in several cases:
 
 **Large programs:** When code exceeds 512 longs, hub mode is the only option short of implementing code overlays.
 
@@ -3631,7 +3608,7 @@ When multiple cogs execute DEBUG statements, the system automatically prefixes e
 
 ### 5.8.5 Performance Considerations
 
-⚠️ **Pitfall:** DEBUG transmits data serially—each statement can consume hundreds of microseconds. Never place DEBUG inside performance-critical loops. Use DEBUG before or after loops, or sample infrequently with conditional statements.
+**Pitfall:** DEBUG transmits data serially—each statement can consume hundreds of microseconds. Never place DEBUG inside performance-critical loops. Use DEBUG before or after loops, or sample infrequently with conditional statements.
 
 For production builds, disable DEBUG via compiler option. Statements compile to nothing—zero runtime impact.
 
@@ -11836,7 +11813,7 @@ Read From LUT
 
 RDLUT reads data from the Lookup Table at the address specified by Src (or pointer register) and loads it into Dest. The LUT is a 512-long (2KB) memory area in each cog that can be used for lookup tables, buffers, or general-purpose memory. The operation takes 3 clock cycles.
 
-⚠️ **Pitfall:** A literal address (`RDLUT Dest, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
+**Pitfall:** A literal address (`RDLUT Dest, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
 
 If the WC or WCZ effect is specified, C is set to the MSB of the data.
 
@@ -15317,7 +15294,7 @@ Write LUT
 
 WRLUT writes the value in Dest to the Lookup Table (LUT) at address Src/PTRx. The LUT is a 512-long (2KB) fast memory space.
 
-⚠️ **Pitfall:** A literal address (`WRLUT value, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
+**Pitfall:** A literal address (`WRLUT value, #addr`) reaches only LUT $000–$0FF (0–255); `#256` and above do not assemble (`Constant must be from 0 to 255`). Use a register, or a `PTRA`/`PTRB` pointer with an optional index, to reach any of the 512 LUT longs—the address field's top bit selects the pointer form, so a literal spans only 8 bits.
 
 When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511).
 
@@ -15906,7 +15883,7 @@ lut_code
 - ORG sets the address counter without generating any bytes
 - DAT blocks start in hub mode by default; use ORG to switch to cog mode
 
-⚠️ **Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
+**Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -15972,7 +15949,7 @@ block_end
 - Useful for creating fixed-layout binary structures
 - Used for interrupt vector tables and memory-mapped structures
 
-⚠️ **Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
+**Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
 
 #### Related Directives
 - [ORG](#org) — Set origin without fill
@@ -16088,7 +16065,7 @@ hub_data
 - After ORGH, use ORG to switch to cog RAM addresses
 - DAT blocks start in hub mode by default
 
-💡 **Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
+**Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
 
 #### Related Directives
 - [ORG](#org) — Set cog RAM origin
@@ -16919,7 +16896,7 @@ DAT
 - Use FIT $1F0 to ensure code does not overwrite special registers
 - FIT works in both cog mode and hub mode
 
-💡 **Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
+**Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
 
 #### Related Directives
 - [ORG](#org) — Set origin address
@@ -16988,7 +16965,7 @@ x       RES     1               ' x occupies 1 long
 ' Both ma and x refer to the same cog address
 ```
 
-💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
+**Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
 
 #### RES vs LONG for Data
 
@@ -17025,7 +17002,7 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 - Use LONG to declare initialized data in hub RAM
 - SIZEOF() enables correct sizing when working with Spin2 structures
 
-⚠️ **Pitfall:** RES cannot be used in hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
+**Pitfall:** RES cannot be used in hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data
@@ -17164,9 +17141,9 @@ When a cog uses Spin2 multitasking, the interpreter maintains a taskptr table in
 
 Programs using fewer than 32 software tasks leave the *lower* portion of `$100..$11F` free for inline code. Programs using all 32 tasks consume the full table. Plan inline-PASM size accordingly, or place large inline blocks in `ORGH` (hub-exec mode) to avoid this conflict entirely.
 
-⚠️ **Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
+**Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
 
-💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
+**Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
 
 #### Related Directives
 - [ORG](#org) — Set cog/LUT origin (begins inline block in methods)

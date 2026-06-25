@@ -49,31 +49,48 @@ This changelog documents critical issues discovered during document production (
 
 ## Directory Structure
 
+**Rendering-stack note (migrated 2026-06-10 onto the shared platform stack).** This
+manual no longer carries a bespoke `p2kb-pasm2-foundation/-content.sty` fork. It now
+loads the **shared platform** `.sty`/`.lua` from `../../platform/`, plus a thin
+per-manual fork (`p2kb-pasm2-local.sty`, `p2kb-pasm2-diagrams.sty`, and the
+`p2kb-pasm2-entry-*` filters). The shared platform files are staged to outbound by
+`prepare-manual` only when their content changes.
+
 ```
 workspace/p2-assembly-language-manual/     ← YOU ARE HERE (unescaped source)
 ├── README.md                              # This file
-├── P2-Assembly-Language-Manual.md         # Master document (UNESCAPED)
-├── templates/
+├── P2-Assembly-Language-Manual.md         # Master document (UNESCAPED, assembled)
+├── templates/                             # Per-manual fork files only
 │   ├── README.md                          # Template documentation
-│   ├── p2kb-pasm2-reference.latex         # Main LaTeX template
-│   ├── p2kb-pasm2-foundation.sty          # Pandoc compatibility layer
-│   ├── p2kb-pasm2-content.sty             # Reference manual environments
-│   └── p2kb-pasm2-diagrams.sty            # TikZ diagram macros (24 diagrams)
-├── filters/
-│   └── (Lua filters if needed)
+│   ├── p2kb-pasm2-reference.latex         # Main LaTeX template (loads platform + local + diagrams)
+│   ├── p2kb-pasm2-local.sty               # PASM2 reference apparatus (loaded AFTER platform)
+│   └── p2kb-pasm2-diagrams.sty            # TikZ diagram macros
+├── filters/                               # Per-manual fork Lua filters
+│   ├── p2kb-pasm2-entry-format.lua        # ACTIVE (in request.json)
+│   └── p2kb-pasm2-entry-headers.lua       # ACTIVE (in request.json)
+│   (other p2kb-pasm2-*.lua here are pre-migration leftovers — request.json
+│    uses the platform versions; safe to remove as a separate cleanup)
 ├── assets/
 │   └── (External images if needed)
 ├── request.json                           # PDF Forge configuration
-├── request-requirements.json              # Mandatory pandoc arguments
-└── VERSION-TRACKING.md                    # Document version history
+└── request-requirements.json              # Mandatory pandoc arguments
 
-outbound/p2-assembly-language-manual/      ← FLAT structure for PDF Forge
-├── P2-Assembly-Language-Manual.md         # ESCAPED copy (same name!)
-├── p2kb-pasm2-reference.latex             # Template (FLAT - no subfolder!)
-├── p2kb-pasm2-foundation.sty              # Style files at root level
-├── p2kb-pasm2-content.sty
+../../platform/                            ← SHARED rendering stack (consumed by many manuals)
+├── templates/p2kb-platform-foundation.sty # Geometry, fonts, headers, glyph fallbacks
+├── templates/p2kb-platform-content.sty    # Code-box family, callouts, part mechanism
+└── filters/p2kb-platform-{figures,tables,mnemonic-bold,code-coloring,pagination}.lua
+
+outbound/p2-assembly-language-manual/      ← FLAT structure for PDF Forge (stage ONLY changed files)
+├── P2-Assembly-Language-Manual.md         # ESCAPED copy (same name!) — always staged
+├── p2kb-pasm2-reference.latex             # Per-manual fork files (FLAT — no subfolders!)
+├── p2kb-pasm2-local.sty                   #   staged only when changed
 ├── p2kb-pasm2-diagrams.sty
-└── request.json
+├── p2kb-pasm2-entry-format.lua
+├── p2kb-pasm2-entry-headers.lua
+├── p2kb-platform-foundation.sty           # Shared platform files (from ../../platform/),
+├── p2kb-platform-content.sty              #   staged only when their content hash changes
+├── p2kb-platform-{figures,tables,mnemonic-bold,code-coloring,pagination}.lua
+└── request.json                           # staged on version bump or a document switch
 ```
 
 ---
@@ -115,15 +132,18 @@ cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-as
     P2-Assembly-Language-Manual.md \
     ../../outbound/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
 
-# Copy ONLY CHANGED templates FLAT (no subfolder!) to outbound
-# Example: If only p2kb-pasm2-content.sty changed:
-cp templates/p2kb-pasm2-content.sty ../../outbound/p2-assembly-language-manual/
+# Copy ONLY CHANGED per-manual fork templates FLAT (no subfolder!) to outbound
+# Example: If only p2kb-pasm2-local.sty changed:
+cp templates/p2kb-pasm2-local.sty ../../outbound/p2-assembly-language-manual/
 
-# Copy ONLY CHANGED filters to outbound
-# Example: If a new filter was added:
-cp filters/p2kb-pasm2-tables.lua ../../outbound/p2-assembly-language-manual/
+# Copy ONLY CHANGED per-manual fork filters to outbound
+# Example: If p2kb-pasm2-entry-format.lua changed:
+cp filters/p2kb-pasm2-entry-format.lua ../../outbound/p2-assembly-language-manual/
 
-# Copy request.json ONLY if it changed
+# Copy ONLY CHANGED shared platform files (from ../../platform/), e.g. a glyph fix:
+cp ../../platform/templates/p2kb-platform-foundation.sty ../../outbound/p2-assembly-language-manual/
+
+# Copy request.json ONLY if it changed (version bump) or on a document switch
 cp request.json ../../outbound/p2-assembly-language-manual/
 ```
 
@@ -217,8 +237,8 @@ Assembly Complete!
 ========================================
 
 Output file: P2-Assembly-Language-Manual.md
-Total lines: ~19,500
-Source files included: 38
+Total lines: ~21,900
+Source files included: 42
 ```
 
 ### Historical Note
@@ -235,34 +255,44 @@ The assembly script was created to prevent these issues.
 
 ## Template Stack
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `p2kb-pasm2-reference.latex` | Main document template | ~70 |
-| `p2kb-pasm2-foundation.sty` | Pandoc compatibility, fonts, headers | ~270 |
-| `p2kb-pasm2-content.sty` | Reference manual environments, callouts | ~320 |
-| `p2kb-pasm2-diagrams.sty` | TikZ diagram macros (24 diagrams) | ~1600 |
+The reference template loads, in order: the two shared **platform** `.sty` first, then
+the two per-manual **fork** `.sty` (so the fork's reference apparatus and overrides win).
 
-See `templates/README.md` for detailed template and diagram documentation.
+| File | Stack | Purpose |
+|------|-------|---------|
+| `p2kb-pasm2-reference.latex` | fork | Main document template (loads the stack below) |
+| `p2kb-platform-foundation.sty` | shared | Geometry, fonts, headers, penalties, glyph fallbacks |
+| `p2kb-platform-content.sty` | shared | Code-box family, callouts, continuation markers, part mechanism |
+| `p2kb-pasm2-local.sty` | fork | PASM2 reference apparatus (loaded AFTER platform) |
+| `p2kb-pasm2-diagrams.sty` | fork | TikZ diagram macros |
+
+Shared platform files live in `../../platform/templates/`; fork files live in this
+workspace's `templates/`. See `templates/README.md` for detailed diagram documentation.
 
 ---
 
 ## PASM2 Code Block Guidelines
 
-Code blocks use monospace Verbatim environment with line numbers. **No overflow is acceptable.**
+Code boxes use a monospace Verbatim environment and **do not wrap** — an over-long code
+line is an authorship defect, not a template concern. **No overflow is acceptable.**
 
 | Constraint | Value | Notes |
 |------------|-------|-------|
-| **Hard maximum** | 85 characters | Lines exceeding this MUST be fixed |
-| **Safe target** | 80 characters | Comfortable margin for all content |
+| **Max code columns (K)** | 76 characters | Calibrated for the platform code box; the hard gate |
+
+The authoritative budget is the `**Max code columns (K): 76**` line in
+`../../manuals/p2-assembly-language-manual/creation-guide.md`. `prepare-manual` enforces it
+before staging via `engineering/tools/validation/audit-code-line-length.py` (exit 1 = stop).
 
 **Comment length tips:**
 - Instruction + operands typically use 30-40 characters
-- Leaves 40-50 characters for comments
-- Use continuation comments for longer explanations
+- Leaves ~36-46 characters for comments within K=76
+- For longer explanations, move the comment to full line(s) above, or split it with a
+  continuation comment aligned to the inline `'` column — never a typeset wrap
 
-**Example well-formatted line (81 chars):**
+**Example well-formatted line (76 chars):**
 ```
-.loop           testp   tx_pin          wc      ' Local: .loop (scope: send)
+.loop           testp   tx_pin          wc      ' Local: .loop, send
 ```
 
 ---
@@ -285,17 +315,29 @@ The `request.json` file configures PDF Forge:
         "--toc",
         "--toc-depth=2"
       ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-pasm2-entry-format",
+        "p2kb-pasm2-entry-headers",
+        "p2kb-platform-pagination"
+      ],
       "metadata": {
         "title": "P2 Assembly Language Reference Manual",
         "subtitle": "Complete PASM2 Instruction Set Documentation",
         "author": "Iron Sheep Productions, LLC",
-        "version": "Version 1.0 - Technical Review",
-        "date": "December 2025"
+        "version": "v3.1.0",
+        "date": "June 2026"
       }
     }
   ]
 }
 ```
+
+The `lua_filters` run in order — the shared `p2kb-platform-*` filters plus the two
+per-manual `p2kb-pasm2-entry-*` filters that format instruction entries.
 
 Required arguments are documented in `request-requirements.json`.
 
@@ -315,7 +357,9 @@ When a PDF is ready for distribution:
 - Document all changes since last release
 
 **request.json** (in workspace):
-- Update `metadata.version` field to match (e.g., `"Version 1.1.0"`)
+- Update `metadata.version` field to match (e.g., `"v3.1.0"`) and `metadata.date`
+- Also update the cover-page version/date in `opus-master/front-matter.md` (the visible
+  cover renders from the markdown, not from `request.json` metadata)
 
 ### 2. Promote to Deliverables
 
@@ -360,4 +404,5 @@ git tag -a p2-assembly-language-manual-v1.1.0 -m "P2 Assembly Language Manual v1
 *Created: 2025-11-28*
 *Updated: 2025-12-01 - Added PDF Forge workflow, file naming conventions*
 *Updated: 2025-12-12 - Added Release Process section*
+*Updated: 2026-06-25 - Refreshed rendering-stack docs for the 2026-06-10 platform migration (platform .sty/.lua + thin pasm2 fork); corrected code budget to K=76*
 *Sprint: PASM2 Manual Generation*

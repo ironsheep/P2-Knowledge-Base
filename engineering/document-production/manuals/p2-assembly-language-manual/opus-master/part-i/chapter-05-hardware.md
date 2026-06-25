@@ -770,7 +770,7 @@ When multiple cogs execute DEBUG statements, the system automatically prefixes e
 
 ### 5.8.5 Performance Considerations
 
-⚠️ **Pitfall:** DEBUG transmits data serially—each statement can consume hundreds of microseconds. Never place DEBUG inside performance-critical loops. Use DEBUG before or after loops, or sample infrequently with conditional statements.
+**Pitfall:** DEBUG transmits data serially—each statement can consume hundreds of microseconds. Never place DEBUG inside performance-critical loops. Use DEBUG before or after loops, or sample infrequently with conditional statements.
 
 For production builds, disable DEBUG via compiler option. Statements compile to nothing—zero runtime impact.
 

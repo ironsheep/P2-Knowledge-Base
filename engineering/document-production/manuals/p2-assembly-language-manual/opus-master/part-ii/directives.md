@@ -109,7 +109,7 @@ lut_code
 - ORG sets the address counter without generating any bytes
 - DAT blocks start in hub mode by default; use ORG to switch to cog mode
 
-⚠️ **Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
+**Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -175,7 +175,7 @@ block_end
 - Useful for creating fixed-layout binary structures
 - Used for interrupt vector tables and memory-mapped structures
 
-⚠️ **Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
+**Pitfall:** ORGF only works in cog mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
 
 #### Related Directives
 - [ORG](#org) — Set origin without fill
@@ -291,7 +291,7 @@ hub_data
 - After ORGH, use ORG to switch to cog RAM addresses
 - DAT blocks start in hub mode by default
 
-💡 **Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
+**Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
 
 #### Related Directives
 - [ORG](#org) — Set cog RAM origin
@@ -1122,7 +1122,7 @@ DAT
 - Use FIT $1F0 to ensure code does not overwrite special registers
 - FIT works in both cog mode and hub mode
 
-💡 **Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
+**Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
 
 #### Related Directives
 - [ORG](#org) — Set origin address
@@ -1191,7 +1191,7 @@ x       RES     1               ' x occupies 1 long
 ' Both ma and x refer to the same cog address
 ```
 
-💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
+**Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
 
 #### RES vs LONG for Data
 
@@ -1228,7 +1228,7 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 - Use LONG to declare initialized data in hub RAM
 - SIZEOF() enables correct sizing when working with Spin2 structures
 
-⚠️ **Pitfall:** RES cannot be used in hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
+**Pitfall:** RES cannot be used in hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data
@@ -1367,9 +1367,9 @@ When a cog uses Spin2 multitasking, the interpreter maintains a taskptr table in
 
 Programs using fewer than 32 software tasks leave the *lower* portion of `$100..$11F` free for inline code. Programs using all 32 tasks consume the full table. Plan inline-PASM size accordingly, or place large inline blocks in `ORGH` (hub-exec mode) to avoid this conflict entirely.
 
-⚠️ **Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
+**Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
 
-💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
+**Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
 
 #### Related Directives
 - [ORG](#org) — Set cog/LUT origin (begins inline block in methods)

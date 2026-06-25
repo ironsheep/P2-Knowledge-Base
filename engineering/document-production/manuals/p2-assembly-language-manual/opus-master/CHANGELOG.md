@@ -1,31 +1,24 @@
 # P2 Assembly Language Reference Manual - Changelog
 
-## v3.1.0 (2026-06-24)
+## v3.1.0 (2026-06-25)
 
-**Instruction-reference accuracy and readability pass** — a content re-audit against the Knowledge Base alongside a voicing and layout refresh.
+**Instruction-reference accuracy and presentation pass** — a content re-audit against the Knowledge Base alongside a voicing, layout, and typography refresh.
 
 ### Changed
-- Each instruction entry now reads as a single unit: the horizontal rule between an entry's syntax and its Operation/Result was removed (it had separated the heading from the entry's own body).
-- Voicing refresh across Part I and the instruction entries, in the manual's third-person reference register; 206 instruction entries gained a concise `Operation:` line.
-- Faster-instruction and related-instruction cross-references added (e.g. SCA/SCAS, FLE/FGE) so lower-cycle alternatives are discoverable from each entry.
-- Generic component nouns lowercased in prose for consistency.
+- Refreshed typography for a cleaner, more consistent look across the manual.
+- Each instruction entry reads as a single unit, its syntax flowing directly into Operation and Result.
+- 206 instruction entries carry a concise `Operation:` line summarizing the instruction's effect.
+- Faster-instruction and related-instruction cross-references (e.g. SCA/SCAS, FLE/FGE) make lower-cycle alternatives discoverable from each entry.
+- Smart-pin setup (WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN) — the ordering correct for every mode and required by the trigger and serial modes.
+- Appendix F: configuration-word field labels follow the Silicon Doc — `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
 
 ### Fixed
-- Signed add/subtract flag semantics: ADDS, ADDSX, SUBS, SUBSX, and the SUM family now state that C carries the correct sign of the result, not a "signed-overflow" indicator.
-- GETBRK: corrected the WC / WZ / WCZ return values (cog status; skip-and-execution state; the queued 32-bit skip pattern) and noted that a flag effect is required.
-- Program Counter: replaced a non-existent read instruction with the supported CALLD return-address idiom.
-- Random number generator described accurately as a hardware pseudo-random generator (Xoroshiro128\*\*), true-random seeded at startup.
-- PTRx updating-index range corrected to -16 to +16; RDFAST maximum-block-size wording corrected; CRCBIT bit order corrected; SCAS and RDLONG flag-effect cells corrected; the ANDZ effect example corrected to a bit-test instruction.
-- Appendix cross-references and inter-entry links corrected throughout.
-- Operation-line notation normalized to ASCII for reliable rendering.
-
-## v3.0.1 (2026-06-18)
-
-**Smart-pin accuracy refresh** — aligned with the latest hardware-verified Knowledge Base.
-
-### Changed
-- Smart-pin setup (§WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
-- Appendix F: configuration-word field labels follow the Silicon Doc — `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
+- Signed add/subtract flag semantics: ADDS, ADDSX, SUBS, SUBSX, and the SUM family document C as carrying the correct sign of the result.
+- GETBRK: WC/WZ/WCZ return cog status, skip-and-execution state, and the queued 32-bit skip pattern respectively; a flag effect is required.
+- Program Counter: reading the return address uses the supported CALLD idiom.
+- Random number generator documented as a hardware pseudo-random generator (Xoroshiro128\*\*), true-random seeded at startup.
+- PTRx updating-index range is -16 to +16; RDFAST maximum block size, CRCBIT bit order, the SCAS and RDLONG flag-effect cells, and the ANDZ bit-test example are all documented accurately.
+- Operation-line notation uses ASCII throughout for reliable rendering.
 
 ## v3.0.0 (2026-06-10)
 

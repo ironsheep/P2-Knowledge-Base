@@ -245,7 +245,7 @@ The most commonly used conditions are:
 - **(no condition)** — When omitted, instructions execute unconditionally (encodes as EEEE=1111)
 - **_RET_** — Execute instruction, then return
 
-> **📖 Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
+> **Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
 
 ### 3.3.4 Comparison Condition Aliases
 

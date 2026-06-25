@@ -96,12 +96,15 @@ The Parallax draft tells you *what* instructions do. Our manual also tells you *
 
 | Enhancement | Purpose | Marker |
 |-------------|---------|--------|
-| Pitfall warnings | Prevent common mistakes | ⚠️ **Pitfall:** |
+| Pitfall warnings | Prevent common mistakes | **Pitfall:** |
 | Usage guidance | When to choose this instruction | (in Operation or Notes) |
 | Richer examples | Show *why*, not just *that* | EXAMPLE section |
 | Architecture links | Connect to Part I concepts | "See Chapter X" |
-| Pro tips | Non-obvious techniques | 💡 **Tip:** |
-| Hardware notes | Silicon-level details | 🔧 **Hardware:** |
+| Pro tips | Non-obvious techniques | **Tip:** |
+| Hardware notes | Silicon-level details | **Hardware:** |
+| Complete-reference pointers | Send reader to the full table or section | **Complete Reference:** |
+
+Markers are bold-text labels—not emoji. Emoji glyphs are absent from the manual's font set and render as missing-glyph boxes on the PDF Forge, so callouts use plain bold labels (**Pitfall:**, **Tip:**, **Hardware:**, **Complete Reference:**).
 
 ### 3.2 Enhancement Examples
 
@@ -125,29 +128,29 @@ To add unsigned, multi-long values, use ADD followed by ADDX as
 described in Adding Two Multi-Long Values. See Chapter 1 for the
 P2 execution model that makes this chaining possible.
 
-⚠️ **Pitfall:** For multi-long addition, forgetting WC on the leading
+**Pitfall:** For multi-long addition, forgetting WC on the leading
 ADD causes ADDX to receive incorrect carry-in. Always use WC or WCZ
 on ADD when chaining to ADDX.
 
-💡 **Tip:** ADD treats both operands as unsigned. For signed addition
+**Tip:** ADD treats both operands as unsigned. For signed addition
 where you need signed overflow detection, see ADDS.
 ```
 
 ### 3.3 When to Add Enhancements
 
-**Add ⚠️ Pitfall when:**
+**Add a Pitfall marker when:**
 - A common mistake has non-obvious consequences
 - Flag effects are critical and easily forgotten
 - Instruction behavior differs from intuitive expectation
 - Order of operations matters (e.g., SETQ before RDxxxx)
 
-**Add 💡 Tip when:**
+**Add a Tip marker when:**
 - A non-obvious technique improves code
 - An alternative approach exists for specific cases
 - Performance implications are significant
 - Instruction combinations create powerful patterns
 
-**Add 🔧 Hardware when:**
+**Add a Hardware marker when:**
 - Silicon behavior differs from software expectation
 - Timing has hardware implications
 - Pipeline effects matter
@@ -326,16 +329,16 @@ Code with comments that explain *why*:
 
 ### 6.6 Notes (Pitfalls, Tips, Hardware)
 
-Categorized with emoji markers, concise:
+Categorized with bold-text markers, concise:
 
 ```
-✅ ⚠️ **Pitfall:** Forgetting WC on the first ADD in a multi-long chain
+✅ **Pitfall:** Forgetting WC on the first ADD in a multi-long chain
    causes incorrect results. The carry MUST propagate to ADDX.
 
-✅ 💡 **Tip:** ADD treats both operands as unsigned. For signed addition
+✅ **Tip:** ADD treats both operands as unsigned. For signed addition
    where you need signed overflow detection, see ADDS.
 
-✅ 🔧 **Hardware:** The addition completes in a single clock cycle within
+✅ **Hardware:** The addition completes in a single clock cycle within
    the COG's ALU. No pipeline stalls occur.
 
 ❌ Note: Be careful with this instruction. (vague, no specific guidance)
@@ -365,9 +368,9 @@ Before finalizing any instruction entry, verify:
 - [ ] Canonical terms from Section 5.1
 
 ### Enhancement Completeness
-- [ ] Pitfalls marked with ⚠️ where applicable
-- [ ] Tips marked with 💡 where valuable
-- [ ] Hardware notes marked with 🔧 where relevant
+- [ ] Pitfalls marked with **Pitfall:** where applicable
+- [ ] Tips marked with **Tip:** where valuable
+- [ ] Hardware notes marked with **Hardware:** where relevant
 - [ ] Cross-references to Part I chapters where helpful
 - [ ] Related instructions listed
 
@@ -394,9 +397,9 @@ Our Voice = Parallax Precision + Actionable Enhancements
 - Cross-reference network
 
 **To Parallax, we add:**
-- ⚠️ Pitfall warnings for common mistakes
-- 💡 Tips for advanced techniques
-- 🔧 Hardware notes for silicon details
+- **Pitfall** markers for common mistakes
+- **Tip** markers for advanced techniques
+- **Hardware** markers for silicon details
 - Richer examples that show *why*
 - Connections to Part I architectural concepts
 - "When to use" guidance for instruction selection

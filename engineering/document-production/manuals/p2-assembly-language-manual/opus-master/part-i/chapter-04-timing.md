@@ -153,13 +153,9 @@ Variable range notation like "4...11" indicates that execution time varies withi
 Figure 4.1: Hub Access Rotation ("Egg Beater")
 :::
 
-Hub memory access uses round-robin arbitration that gives each cog fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each cog's access window spinning through the sequence in turn.
+Hub memory access uses the round-robin "egg beater" arbitration introduced in §1.4.2: each cog gets one hub-access window per eight-cycle rotation, and the pattern runs continuously and never changes. What matters for timing is the consequence—when a cog executes a hub instruction (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), it waits until its cog's window arrives, so the access cost depends on the program's phase relative to the rotation.
 
-The hub controller divides time into eight-cycle periods. Within each period, every cog gets exactly one cycle to access hub memory. The access windows rotate continuously through cogs 0, 1, 2, 3, 4, 5, 6, 7, then back to cog 0, repeating this pattern indefinitely. This rotation never stops and never changes—it runs continuously from the moment the chip powers on.
-
-When a cog executes an instruction that accesses hub memory (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), the instruction waits until that cog's window arrives, performs the memory access during the window, then completes. The wait time depends on when the instruction executes relative to the rotation pattern.
-
-This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the hub rotation can achieve minimum wait times by scheduling hub access to align with its windows.
+This rotation is deterministic: the wait varies from 0 to 7 cycles but follows a fixed pattern, so a program that knows its phase relationship to the rotation can schedule hub access to align with its windows and minimize the wait.
 
 ### 4.3.2 Hub Access Latency
 
@@ -344,7 +340,7 @@ While the P2 provides deterministic timing, four sources of variation exist. The
 
 ### 4.4.3 Eliminating Branches
 
-Conditional execution provides an alternative to branching that eliminates timing variation. Instead of using a compare instruction followed by a conditional jump, code can use a compare instruction followed by conditionally-executed instructions.
+Conditional execution (§3.3) doubles as a timing tool: replacing a branch with conditionally-executed instructions removes the 2-or-4-cycle branch variation and gives every path a fixed cost. The trade-off shows up directly in cycle counts.
 
 The branching approach introduces timing variation:
 
@@ -626,23 +622,13 @@ Profiling can reveal unexpected timing variations. If a loop shows inconsistent 
 
 ### 4.8.1 Cog Execution Mode
 
-Cog execution mode—often called "cog mode"—executes instructions from the cog's local 512-long (2KB) RAM. This provides the fastest possible execution because instruction fetch occurs from the cog's private memory without any shared resource contention.
-
-In cog mode, most instructions complete in exactly 2 clock cycles. The processor fetches an instruction and executes it without waiting for memory access arbitration, cache lookups, or bus conflicts. This predictable timing suits cog mode to timing-critical code.
-
-Cog mode execution begins when a cog starts via COGINIT with a cog RAM address (0-$1FF). The program counter points to cog RAM locations, and instruction fetch proceeds at full speed. All 512 longs of cog RAM are available for code and data, though programs typically reserve some locations for data and use the remainder for code.
-
-The limitation of cog mode is size—only 512 longs of code and data combined. Programs that need more code space must use hub execution mode or carefully manage code overlays.
+Cog mode (§1.6.1) executes from the cog's local RAM, so instruction fetch never contends for the hub. Most instructions complete in exactly 2 clock cycles with no arbitration, cache, or bus delays—the fastest and most predictable timing the P2 offers, which is why timing-critical code runs here. The trade-off is size: only 512 longs for code and data combined, so larger programs must use hub execution mode or manage code overlays.
 
 ### 4.8.2 Hub Execution Mode
 
-Hub execution mode—often called "HUBEXEC mode"—executes instructions from hub RAM. This allows programs to exceed the 512-long cog RAM size limit, supporting much larger code bases at the cost of a branch-refill penalty (sequential throughput is unchanged).
+Hub mode (§1.6.3) executes from hub RAM, lifting the 512-long cog limit at the cost of a branch-refill penalty—sequential throughput is unchanged. Straight-line code runs at 2 cycles per instruction, identical to cog mode: the (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The penalty falls entirely on branches—a taken branch forces a FIFO refill costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
 
-In hub execution mode, sequential straight-line code executes at 2 cycles per instruction—identical throughput to cog mode. The (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The only hubexec penalty occurs at branches: a taken branch forces a FIFO refill, costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
-
-Hub execution mode begins when a cog starts via COGINIT with a hub RAM address ($400 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can utilize the full 512 KB of hub RAM.
-
-Despite the branch-refill penalty, hub mode remains useful for several scenarios:
+Despite that penalty, hub mode remains the right choice in several cases:
 
 **Large programs:** When code exceeds 512 longs, hub mode is the only option short of implementing code overlays.
 

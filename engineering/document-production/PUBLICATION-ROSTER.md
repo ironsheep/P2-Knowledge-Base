@@ -42,7 +42,7 @@ that does not ride the shared stack.
 |-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
 | Getting Started with the Propeller 2 | `p2-getting-started-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding |
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF); production bundle prepared. Uses the shared common cover (`book-artwork.png`, identical across all manuals). Awaiting Stephen's technical + asset review; "Blue Book" reference |
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.0 (2026-06-10)** — migrated off the bespoke `p2kb-pasm2-*` fork onto the shared platform stack (`p2kb-pasm2-local` overlay + 5 platform lua filters + 2 local entry filters); content re-certified vs the current P2KB and rebuilt clean (492pp). chip review outstanding |
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.1.0 (2026-06-25)** — instruction-reference accuracy + voicing/typography pass on the shared platform stack; Ω/μ/µ missing-glyph fallback; front-matter leaned to navigation + the P1↔P2 comparison; callouts as bold-text labels; rebuilt clean (501pp), render-verified. chip review outstanding |
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay, 5 platform lua filters). **v3.0.0 (2026-06-10) release** — absorbs the content-accuracy re-audit (~33 latent errors fixed vs the current P2KB: two inverted LOCKTRY spin-locks, an inverted SKIP table, a fabricated SETSE edge mode, etc.) and the Ch2 egg-beater diagram fix; regenerated clean (172pp). Audit record: local `audit/content-reaudit-2026-06-10.md`. chip review outstanding. **DEFERRED to final wrap-up (both REQUIRED, not release-blocking):** (1) repair the "P1 COG" image `\CogAnatomyDiagram` (Ch2 "COG Anatomy 101", `opus-master` ~L557); (2) `pnut-ts` compile-cert re-audit of ALL built-in code examples (use `-d` for DEBUG blocks). |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.0 (2026-06-16)** — initial community-review release; all figures captured; 32-demo example library bundled (source ZIP) |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
@@ -158,6 +158,8 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-25 06:28  PUBLISH   p2-assembly-language-manual      (v3.1.0, 501pp — accuracy + voicing/typography pass; Ω/μ/µ glyph fallback; render-verified, clean compile log)
+2026-06-25 03:53  PLATFORM  templates/p2kb-platform-foundation.sty   (4d27dc5f — Ω/μ/µ missing-glyph fallback via newunicodechar + listings literate; low-urgency regen for manuals that use none of those glyphs)
 2026-06-24 22:36  PUBLISH   p2-getting-started-guide         (v1.0.0, 25pp — initial Community Review Edition; release-gate audited + finalized; clean compile log, 0 overfull)
 2026-06-24 21:01  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (AG-01: English-collision handling for call/push/ones/test — daemon-verified on Getting Started; other manuals low-urgency regen)
 2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
@@ -171,7 +173,6 @@ that PDF was generated. This ledger is the detector.
 2026-06-12 18:39  PLATFORM  filters/p2kb-platform-code-coloring.lua   (a149b8e — ::: tip/caution callouts)
 2026-06-10 23:35  PUBLISH   p2-pasm-desilva-style            (v3.0.0, 172pp — egg-beater Ch2 diagram fixed)
 2026-06-10 23:33  PUBLISH   p2-single-step-debugger-manual   (regression rebuild on the latest platform)
-2026-06-10 23:32  PUBLISH   p2-assembly-language-manual      (v3.0.0, 492pp — migrated off the bespoke fork onto the platform)
 2026-06-09 23:39  PUBLISH   p2-io-and-smart-pins-user-guide
 2026-06-09 22:50  PLATFORM  filters/p2kb-platform-figures.lua
 2026-06-08 08:32  PLATFORM  templates/p2kb-platform-foundation.sty
@@ -192,7 +193,7 @@ top of the 06-12 platform.
 | Manual | Status | Notes |
 |--------|--------|----------------------------------------------------|
 | `p2-debug-window-manual` | ✅ current | **v1.0.0 released 2026-06-16** for community review; all figures captured; built on the latest platform (incl. 06-16 `mnemonic-bold.lua`) |
-| `p2-assembly-language-manual` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (492pp); predates the 06-12 platform edit |
+| `p2-assembly-language-manual` | ✅ current | **v3.1.0 released 2026-06-25** (501pp); built on the latest platform (incl. the 06-25 Ω/μ/µ glyph fallback) |
 | `p2-pasm-desilva-style` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (172pp); predates the 06-12 platform edit |
 | `p2-streamer-programming-guide` | ✅ current | **v1.0.1 released 2026-06-19** (71pp); built on the latest platform (incl. 06-19 HardwareBlock + fit fix) |
 | `p2-single-step-debugger-manual` | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 platform edit |

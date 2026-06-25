@@ -152,6 +152,8 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 
 **Architecture That Transfers**
 
+These P1 fundamentals carry forward unchanged—Chapter 1 covers them in depth:
+
 - Eight independent cogs with true parallel execution
 - Shared hub memory with round-robin deterministic access
 - Private cog RAM for fast local operations
@@ -159,22 +161,9 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 - Hardware locks for inter-cog synchronization
 - Spin/PASM language structure
 
-Sequential hub access streams one long per clock; random hub access waits up to seven clocks to align—time-critical code runs from cog or LUT RAM (see Chapter 1).
-
 **New in P2**
 
-- **Smart pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
-- **Lookup RAM** — 512 additional longs per cog for tables and overflow code execution
-- **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
-- **Streamer** — Background DMA between hub, LUT, and pins
-- **Digital Video** — Hardware HDMI/DVI output via streamer
-- **FIFO** — Hardware FIFO for high-bandwidth hub streaming and hub execution
-- **Interrupts** — Three levels per cog (plus hidden debug interrupt) with 16 event sources
-- **Debug interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
-- **COGATN** — Hardware inter-cog attention signaling
-- **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
-- **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
-- **Hub Execution** — Run code directly from 512 KB hub RAM
+The P2 adds capabilities the P1 lacked: **Smart Pins** (64 autonomous I/O pins with ADC, DAC, PWM, serial protocols, and USB), the **CORDIC** math coprocessor (multiply, divide, square root, trigonometry, logarithms), the **Streamer** for background DMA and HDMI/DVI video, a hardware **FIFO** for high-bandwidth hub streaming, **LUT RAM** and **hub execution** for code beyond the 512-long cog limit, and three-level **interrupts** (plus a hidden debug interrupt) with 16 event sources. New instruction-level features include register indirection (ALTS/ALTD/ALTR), instruction skipping (SKIP/SKIPF/EXECF), and inter-cog signaling (COGATN). Part I introduces these; Chapter 5 covers the hardware subsystems in depth, and the Part II reference documents each instruction.
 
 **Changed from P1**
 
@@ -281,11 +270,13 @@ label           instruction     D,S             ' Comment
 
 Throughout this manual, special markers highlight important information:
 
-**Pitfall**: Common mistakes or non-obvious behavior that can cause errors. Pay careful attention to these to avoid debugging challenges.
+**Pitfall:** Common mistakes or non-obvious behavior that can cause errors. Pay careful attention to these to avoid debugging challenges.
 
-**Tip**: Useful techniques, optimization opportunities, or best practices that experienced P2 developers have discovered.
+**Tip:** Useful techniques, optimization opportunities, or best practices that experienced P2 developers have discovered.
 
-**Hardware**: Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
+**Hardware:** Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
+
+**Complete Reference:** A pointer to the appendix or section that holds the full table or detailed treatment of the topic at hand.
 
 ## Instruction Encoding Tables
 

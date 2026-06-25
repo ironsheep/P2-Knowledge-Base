@@ -1,5 +1,25 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.0 (2026-06-25)
+
+**Instruction-reference accuracy and presentation pass** — a content re-audit against the Knowledge Base alongside a voicing, layout, and typography refresh.
+
+### Changed
+- Refreshed typography for a cleaner, more consistent look across the manual.
+- Each instruction entry reads as a single unit, its syntax flowing directly into Operation and Result.
+- 206 instruction entries carry a concise `Operation:` line summarizing the instruction's effect.
+- Faster-instruction and related-instruction cross-references (e.g. SCA/SCAS, FLE/FGE) make lower-cycle alternatives discoverable from each entry.
+- Smart-pin setup (WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN) — the ordering correct for every mode and required by the trigger and serial modes.
+- Appendix F: configuration-word field labels follow the Silicon Doc — `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
+
+### Fixed
+- Signed add/subtract flag semantics: ADDS, ADDSX, SUBS, SUBSX, and the SUM family document C as carrying the correct sign of the result.
+- GETBRK: WC/WZ/WCZ return cog status, skip-and-execution state, and the queued 32-bit skip pattern respectively; a flag effect is required.
+- Program Counter: reading the return address uses the supported CALLD idiom.
+- Random number generator documented as a hardware pseudo-random generator (Xoroshiro128\*\*), true-random seeded at startup.
+- PTRx updating-index range is -16 to +16; RDFAST maximum block size, CRCBIT bit order, the SCAS and RDLONG flag-effect cells, and the ANDZ bit-test example are all documented accurately.
+- Operation-line notation uses ASCII throughout for reliable rendering.
+
 ## v3.0.0 (2026-06-10)
 
 **Full content re-audit on the shared presentation platform** — every checkable claim re-verified against the current P2 Knowledge Base, with figures, tables, and code rendered on the common manual platform.
