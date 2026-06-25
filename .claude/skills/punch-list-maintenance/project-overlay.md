@@ -25,7 +25,7 @@ completed items to a dated archive** (`PUNCH_LIST_ARCHIVE_PATTERN`) so the
 live copy carries only outstanding work. Finding states are
 `CONFIRMED` / `NEEDS-VERIFICATION` / `DONE` / `WONTFIX`; each finding keeps
 its ID, exact file location, what's wrong, evidence (cite `pnut_ts` →
-Spin2 v51 → Silicon Doc), and proposed correction. (See
+Spin2 v55 → Silicon Doc), and proposed correction. (See
 [[project_p2kb_corrections_register]],
 [[feedback_needs_verification_not_a_ship_license]].)
 

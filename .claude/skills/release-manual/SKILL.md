@@ -181,7 +181,9 @@ links). Use `mcp__filesystem__edit_file`; preserve surrounding prose exactly.
 
 In `engineering/document-production/PUBLICATION-ROSTER.md`:
 
-**3a — Platform Freshness Ledger** (the "## Platform Freshness Ledger" code block). Append/
+**3a — Platform Freshness Ledger** (the "## Platform Freshness Ledger" code block). This
+step is the **sole writer** of the `PUBLISH` line (`prepare-manual` deliberately does not
+write it — the PDF must be verified clean first). Append/
 update this manual's `PUBLISH` line at the **PDF's mtime** (the authoritative generation
 time), newest on top, collapsing any older `PUBLISH` for the same manual:
 ```

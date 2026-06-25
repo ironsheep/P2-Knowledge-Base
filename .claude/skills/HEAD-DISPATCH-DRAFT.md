@@ -1,16 +1,19 @@
 # Per-head sentinel dispatch — DRAFT (pre-brainstorm)
 
-> **STATUS: DRAFT capturing current understanding before the Work Type
-> Routing brainstorm (2026-06-05).** Cells marked `TBD` are exactly what
-> that brainstorm (and the recorded cleanup debt) will pin down. The
-> per-skill overlays that reference this file will be dialed in afterward.
-> Do not treat `TBD` rows as settled.
+> **STATUS: working dispatch table.** The 2026-06-05 Work Type Routing
+> brainstorm has happened (its outcomes are recorded below); most cells are
+> now resolved. The remaining `TBD` cells + the "Open items still to settle"
+> list at the foot are the genuine unfinished seams — do not treat those as
+> settled. (The filename keeps its `-DRAFT` suffix only because `whats-next`
+> and the per-head overlays reference it by that name; renaming would break
+> those refs.)
 
 ## Why this file exists
 
 `skill-conventions.md` stores several slots as **per-head routing
-sentinels** (`<per-head — …>`) because P2-Knowledge-Base is three heads
-under one repo (see the conventions file's preamble). A sentinel keeps a
+sentinels** (`<per-head — …>`) because P2-Knowledge-Base is **five heads**
+under one repo — manual, yaml, ingestion, obex, quickbytes (see `whats-next`
+and the conventions file's preamble). A sentinel keeps a
 central skill's Step 0a from hard-stopping (the slot is *present*), which
 lets Step 0b load that skill's `project-overlay.md`. The overlay's job is
 to **resolve the sentinel for the head currently being worked.** This file
@@ -28,7 +31,7 @@ skill sets a todo-mcp context key `active_element` = `head:element` (e.g.
 on pickup. Per-head overlays resolve their sentinels for *that* element:
 
 ```
-mcp__todo-mcp__context_get pattern:"active_element"
+mcp__todo-mcp__context_get key:"active_element"
 ```
 
 **Fallback (key unset):** infer the head from the work target (the
@@ -40,6 +43,15 @@ set `active_element` so downstream skills stay consistent.
 | **MANUAL** | target under `engineering/document-production/manuals/<m>/` or `…/workspace/<m>/` | that manual — **publication** (in `PUBLICATION-ROSTER.md`) or **instrument** (workspace folder only, e.g. P2 Layout Torture Test; no version; state wherever it records runs — forge interactive-testing is one example, not the rule; purpose traces to the effort/sprint it serves) |
 | **YAML (KB-for-agents)** | target under `deliverables/ai/P2/` (the P2KB YAML set) | the P2KB data set |
 | **INGESTION** | target under `engineering/ingestion/sources/<src>/` | that ingestion source |
+| **OBEX** | target under `engineering/obex-integration/` (the single catalog) | the OBEX catalog — one element (`obex:catalog`); state in `obex-integration/README.md` + last-release date |
+| **QUICKBYTES** | target under `engineering/quickbytes-integration/` (the single corpus) | the Quick Bytes corpus — one element (`quickbytes:quick-bytes`); **parked / not processed** (see `quickbytes-integration/README.md`) |
+
+**OBEX and QUICKBYTES are single-element heads** (one catalog / one corpus).
+Their state lives in their integration `README.md`, and `whats-next` is the
+authoritative spec for both. They do **not** resolve the Step-2 sentinel
+table below — that table is for the versioned / release-bearing heads
+(manual, yaml). The Step-2 columns are intentionally left at manual / yaml /
+ingestion.
 
 Cross-head work (e.g. a manual whose content is sourced from an ingestion
 pass) — resolution rule **TBD** (brainstorm).
@@ -48,12 +60,12 @@ pass) — resolution rule **TBD** (brainstorm).
 
 | Sentinel slot | MANUAL | YAML (KB) | INGESTION |
 |---|---|---|---|
-| `BUILD_VERSION_LOCATION` | the manual's `CHANGELOG.md` (+ `deliverables/documents/README.md` version line) | P2KB YAML set version — **TBD where it lives** | **N/A — version-less** |
-| `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | **TBD** | **N/A** |
-| `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | **TBD** | **N/A** |
+| `BUILD_VERSION_LOCATION` | the manual's `CHANGELOG.md` (+ `deliverables/documents/README.md` version line) | the YAML set's latest **git tag** (mirrored by the `deliverables/ai/P2` README badge + the YAML `CHANGELOG.md` top entry) — per `release-yamls` | **N/A — version-less** |
+| `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | the latest git tag (= CHANGELOG top heading) | **N/A** |
+| `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | e.g. `v1.9.1` | **N/A** |
 | `PLAN_DIR` | **RESOLVED — single unified dir `engineering/planning/` for all heads** (decided 2026-06-11; supersedes the former per-head sentinel; name the head/element in the filename) | ditto | ditto |
 | `PUNCH_LIST_DOC` | the manual's punch list — **location TBD per manual** | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | the source's `README.md` (ingestion dashboard) row + `sources/<src>/<src>-complete-extraction-audit.md` |
-| `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | P2KB YAML release notes — **TBD** | **N/A — uses completeness dashboard** |
+| `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | the YAML set's `CHANGELOG.md` (top entry mirrors the git tag) | **N/A — uses completeness dashboard** |
 | `SPEC_DOC` | the manual's `creation-guide.md` (candidate) | **TBD** | **N/A — gates + dashboard instead** |
 
 ## Head-specific notes
@@ -196,10 +208,18 @@ flight, not any single element.
 
 ## Open items still to settle
 
-1. YAML-head `TBD` cells (version home, plan home, spec) — the manual and
-   ingestion columns are resolved; YAML's are not.
-2. Plan-dir consolidation (`operations/sprints`, `operations/planning`,
-   `planning/`) — pick canonical per-head homes.
+1. YAML-head **spec** home (`SPEC_DOC`) — still TBD. (Resolved since: the
+   YAML **version** home = the git tag, per `release-yamls`; the **plan**
+   home = unified `engineering/planning/`; the **punch-list** =
+   `P2KB-CORRECTION-FINDINGS.md`. Only the spec slot remains open.)
+2. **Plan-dir model — internal contradiction to settle.** Step 2 (the
+   `PLAN_DIR` cell) records it RESOLVED to a single unified
+   `engineering/planning/` for all heads (2026-06-11), but the 2026-06-05
+   "Manual-head taxonomy + plan model" section below still says single-element
+   plans co-locate with the element and cross-element plans co-locate with the
+   effort. **Decide:** does unified `engineering/planning/` fully supersede
+   co-location, or do the two coexist? Then align both sections so the doc
+   states one model.
 3. Cross-head detection (a manual sourced from an ingestion pass).
 4. Recorded cleanup debt (in `skill-conventions.md`): relocate punch-list
    content per head; stand up the corrections-register dated-archive flow.

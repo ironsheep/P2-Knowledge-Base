@@ -269,6 +269,25 @@ Grep the returned body for a phrase unique to this release's edit:
 Once the index carries per-entry `sha256` (schema ≥ 3.5.0) and the server
 verifies it pre-filter, this probe becomes automatic; until then, do it by hand.
 
+## 8. Impact survey — flag consuming manuals for re-audit (YAML → Manual)
+
+A KB release can invalidate claims in already-published manuals that derive from the changed
+YAML. This is the YAML-head side of the manual↔YAML join `document-audit` describes: that skill
+owns the Manual→YAML drain gate; this step owns the YAML→Manual survey. Run it before closing out:
+
+1. Take the YAML delta shipped this release (the content files staged in 6a).
+2. For each **live** manual in `engineering/document-production/PUBLICATION-ROSTER.md`, intersect
+   that delta against the manual's `MANUAL-DESCRIPTOR.md` declared sources (`source_highlights` /
+   `authoritative_sources`). A non-empty intersection = that manual may now be behind HEAD.
+3. For every manual that intersects, record a **re-audit-against-HEAD** flag naming the release
+   (`vX.Y.Z`) and the changed area — in the manual's own punch list (or
+   `engineering/operations/P2KB-CORRECTION-FINDINGS.md` if the manual has none yet). That flag is
+   the drift signal `document-audit` drains on the manual's next pass; this step does **not**
+   re-render or re-audit here — it only emits the signal at the YAML's publish moment.
+
+If the delta touches no live manual's declared sources, record "no manual impact" so the survey
+is visibly done, not skipped.
+
 ## Hand back
 
 Report:

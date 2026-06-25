@@ -53,7 +53,7 @@ machine-readable dispatch detail):
 ## 1. Pull session state
 
 - Run `mcp__todo-mcp__context_resume` — tasks + recent context.
-- Read the pointer: `mcp__todo-mcp__context_get pattern:"active_element"`.
+- Read the pointer: `mcp__todo-mcp__context_get key:"active_element"`.
 
 ## 2. If `active_element` is set — report, then offer to resume
 
@@ -77,6 +77,11 @@ above:
 - **ingestion:`<src>`** — the `INGESTION-DASHBOARD` row (completeness %,
   gate status) + the source's extraction-audit; recent commits under
   `sources/<src>/`.
+  - **Wave form `ingestion:wave:<slug>`** (set by `ingest-conductor` for a
+    parallel multi-source wave) — resolve state from the wave manifest in
+    todo-mcp context (the conductor's per-source progress + gates), not a
+    single source's extraction-audit. "Where was I" = which sources in the
+    wave are done vs still outstanding.
 
 Also surface any `in_progress` / next task from `context_resume` scoped to
 the element's tag (`mcp__todo-mcp__todo_next tags:["<tag>"]`).
@@ -166,9 +171,11 @@ register-backed flow above. CLAUDE.md's Session Start points here.
 
 ## Known-open (working-draft seams)
 
-- YAML head's version/plan/spec homes are still `TBD` in
-  `HEAD-DISPATCH-DRAFT.md`.
-- Plan-dir consolidation and cross-head detection (a manual sourced from
-  an ingestion pass) are unsettled.
+- YAML head's **spec** home is still `TBD` in `HEAD-DISPATCH-DRAFT.md`
+  (version = the git tag per `release-yamls`; plan = unified
+  `engineering/planning/` — both now resolved there).
+- Plan-dir model (unified `engineering/planning/` vs co-location) and
+  cross-head detection (a manual sourced from an ingestion pass) are
+  unsettled — see the dispatch doc's "Open items still to settle."
 - Parked initiative tracked in the dispatch draft: **P1 stabilization**
   (complete P1 manual + deSilva P1 tutorial ingestion → basic P1 YAML set).

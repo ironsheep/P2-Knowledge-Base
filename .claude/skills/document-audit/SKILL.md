@@ -117,9 +117,9 @@ The manual↔YAML relationship runs both ways, off the **same join index** — e
   research → apply head change → publish — no manual in view). When that lands, survey *which*
   manuals derive from the changed YAML paths and flag them for re-audit. YAML-triggered, and
   **cross-manual** — so it does NOT live in this single-manual skill. Its home is **`release-yamls`**
-  (the YAML head's publish moment), computed by intersecting the YAML delta against every
-  `MANUAL-DESCRIPTOR`'s declared sources. (Wiring that step into `release-yamls` is a tracked
-  follow-on; the descriptors seeded by this skill are the data it needs.)
+  §8 (the YAML head's publish moment), computed by intersecting the YAML delta against every
+  `MANUAL-DESCRIPTOR`'s declared sources — the descriptors seeded by this skill are the data it
+  needs.
 
 ---
 
@@ -387,6 +387,10 @@ non-existent constants; `pnut_ts` has blind spots (operand-order, DIRH/DIRL-not-
 
 ## 9. Fix-side rules
 
+> **This skill does not execute these.** It FINDS and REPORTS (see the boundary at the top);
+> `document-finalize` resolves the findings and applies the rules below. They live here so the
+> audit report can name the standard each finding will be held to when it is fixed.
+
 - **Edit the opus-master, never the workspace render** — the render is generated and overwrites edits.
 - **Edit in place** — no `-fixed`/`-v2`/`-new` suffixes (sacred rule #5).
 - **Sweep wide** — fix every occurrence of a bad fact in one pass.
@@ -448,10 +452,13 @@ with the `./audit/` folder (findings/run history — KEEP; Dimension #12 reads i
 - `./audit/` — prior findings; check before re-finding.
 - `audit-changelog` skill — deep changelog readiness cross-reference (feeds #13).
 
-**Consolidation note (pending follow-on):** four manuals still carry a near-identical
-`AUDIT-PROCESS.md` (assembly, debug-window, IOSP, deSilva — debug-window's was the only one with
-the two-grounding-models improvement; the rest were stale). Those copies are **superseded by this
-skill**. Retiring them is a separate, deliberate consolidation pass — **never a side effect of an
+**Consolidation note (in progress):** **three** manuals still carry a near-identical
+`AUDIT-PROCESS.md` (debug-window, IOSP, deSilva — debug-window's is the only one with
+the two-grounding-models improvement, which MUST be carried across before it is retired; the
+rest are stale). Those copies are **superseded by this skill**. (Assembly retired 2026-06-25:
+carry-across verified — all 16 dimensions present here — archived to its git-ignored `./archive/`;
+done as we release each manual that still has one.) Retiring the rest is a separate, deliberate
+consolidation pass — **never a side effect of an
 audit or onboarding run** — and per manual it goes: (1) **carry-across check** — confirm this skill
 + the manual's descriptor capture everything in that copy (don't delete what wasn't migrated;
 surface any gap); (2) **archive, don't hard-delete** — move the file to a git-ignored `./archive/`

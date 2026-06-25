@@ -17,8 +17,8 @@ audit doctrine:
 
 - **Verify against primary sources, not memory.** Build a truth matrix
   from the golden sources before judging a claim. Authority order for P2
-  language facts: `pnut_ts` compiler → Spin2 v51 docs
-  (`engineering/ingestion/sources/spin2-v51/`) → Silicon Doc. The full
+  language facts: `pnut_ts` compiler → Spin2 v55 docs
+  (`engineering/ingestion/sources/spin2-v55/`) → Silicon Doc. The full
   framework is `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`;
   each manual's `creation-guide.md` names its own verification sources.
 - **Classify every extracted claim** as `VERIFIED` / `MODIFIED` /

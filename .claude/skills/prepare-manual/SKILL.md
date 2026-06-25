@@ -80,7 +80,7 @@ study: `methodology/presentation-platform-unification-STUDY.md`).
 The user may pass a slug as an argument. If not:
 - List subdirectories of `engineering/document-production/workspace/` (exclude `.DS_Store`).
 - If exactly one workspace has uncommitted changes per `git status`, suggest that one first.
-- Ask the user with `AskUserQuestion` which manual to prepare.
+- Ask the user directly in chat which manual to prepare (no `AskUserQuestion` in this repo — see project memory).
 
 ### Step 2 — Read the manual's conventions
 
@@ -140,7 +140,7 @@ md5sum platform/templates/p2kb-platform-foundation.sty platform/templates/p2kb-p
 
 Typical pattern is two LaTeX lines inside a `{=latex}` block: `{\large <Month> <Year>\par}` (date) and `{\large\color{blue}Version <N>\par}` (version). These MUST be updated alongside `request.json` or the PDF's cover will not match the metadata.
 
-Then use `AskUserQuestion` to present:
+Then ask the user directly in chat (no `AskUserQuestion` in this repo), covering:
 1. **Refresh source?** — show opus-master vs working-copy diff summary (newer/older/same).
 2. **Version bump?** — show CURRENT values in BOTH (a) `request.json` metadata and (b) markdown cover (front-matter file or single-file cover region). If recent commits to opus-master mention a version (e.g., "v2.3.0"), suggest that. Today's month/year as date. Offer: bump both to suggested / keep as-is / custom. Bumping ONE without the other creates a confusing mismatch — flag this risk explicitly if the user wants to do partial.
 3. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files whose **content hash changed** per the Step-4 Platform-stack check (often NONE). **Gate the manual's OWN files on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN content-diff gate (changed-hash only), **independent** of the per-manual seeded/first-build check — a first manual build does NOT drag the platform along if the platform is unchanged. Default: stage just the changed aux files + the markdown (+ only the platform files whose hash changed).
@@ -221,13 +221,13 @@ In order (each step depends on the previous):
 **If any platform files were staged this run, update their recorded hashes** so the next run's content-diff sees them as current and does NOT re-stage them:
 `mcp__todo-mcp__context_set key:"manual_store_platform_hashes" value:"<basename md5 per line for ALL platform files now in the store>"`. Write the full current map (every platform file's basename + live md5), not just the changed ones, so the map always reflects the store's full platform state. If no platform files were staged, leave the key unchanged.
 
-**Platform Freshness Ledger.** This build owes a `PUBLISH` line in the ledger in
-`engineering/document-production/PUBLICATION-ROSTER.md` (→ "## Platform Freshness Ledger") —
-but record it when the Forge generation is **confirmed clean** (compile log audited), NOT
-at stage time. On that confirmation: append/update this manual's `PUBLISH` line with the
-PDF's generation datetime (the Forge-side PDF mtime), then **prune** any `PLATFORM` line now
-sitting below the `PUBLISH` line of *every* consuming manual (fully absorbed — git keeps the
-permanent history). Platform `PLATFORM` lines are added when a `platform/` file is edited
+**Platform Freshness Ledger.** This build will owe a `PUBLISH` line in the ledger in
+`engineering/document-production/PUBLICATION-ROSTER.md` (→ "## Platform Freshness Ledger"),
+but **`prepare-manual` does not write it.** That line has a single owner: `release-manual`
+(Phase 3a), which appends/updates it at the verified PDF's mtime and prunes any absorbed
+`PLATFORM` lines — after the generation is confirmed clean. Writing it here (before the PDF
+even exists) would risk a premature or duplicate entry, so just note the obligation to the
+user if useful. Platform `PLATFORM` lines are added when a `platform/` file is edited
 (per `platform/README.md`), not here.
 
 End with a brief summary:
