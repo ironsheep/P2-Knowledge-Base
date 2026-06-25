@@ -4,6 +4,19 @@ This document catalogues narrative improvements to add more detail in future rev
 
 ---
 
+## Platform-migration doc drift (OPEN)
+
+**Status:** ⏳ Open — surfaced 2026-06-25 during the v3.1.0 dead-filter cleanup.
+
+Two of this manual's docs still describe the retired `p2kb-pasm2-*` fork pipeline as current (the manual migrated to the shared platform stack on 2026-06-10):
+
+- **`TEMPLATE-THEORY-OF-OPERATIONS.md`** — documents the old pasm2 filter/template pipeline as the active stack. Rewrite to the platform stack: `p2kb-platform-*` filters + the `p2kb-pasm2-local` / `p2kb-pasm2-diagrams` overlays + the 2 surviving `p2kb-pasm2-entry-*` filters. Substantial.
+- **`style-guide.md` §7.4.2** (~L552) — says the 15%-min table column width "is enforced in the `p2kb-pasm2-tables.lua` filter"; that filter was removed. Confirm whether the min-width logic now lives in `p2kb-platform-tables.lua` and update the name (or relocate the note).
+
+Cross-manual instances of this same migration drift are tracked in the Document Production punch list (`engineering/document-production/PUNCH-LIST.md`).
+
+---
+
 ## ~~Instruction Entry Header Format Audit~~ ✅ COMPLETED
 
 **Status:** ✅ Completed 2025-12-04
