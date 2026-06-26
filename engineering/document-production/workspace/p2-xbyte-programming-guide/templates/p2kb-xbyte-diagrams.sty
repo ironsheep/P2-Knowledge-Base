@@ -1,0 +1,121 @@
+% P2KB XBYTE Programming Guide Diagrams Package
+% TikZ diagrams for the XBYTE Guide. Shared styles (palette, iospbox/iospkey/iospflow
+% flow nodes, the fld bit-field pattern, the tbrace clock grid) come from the platform
+% diagrams base so figures match the manual family.
+%
+% Invocation (from the body): a bare raw-LaTeX block
+%   ```{=latex}
+%   \DiagXbyteLoop
+%   ```
+% Each macro is a self-contained, per-chapter-numbered figure (internal \caption).
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-xbyte-diagrams}[2026/06/26 P2KB XBYTE Diagrams Package v0.2]
+
+% Shared TikZ palette, node/edge styles, and the \diagramscale shrink-to-fit wrapper.
+\RequirePackage{p2kb-platform-diagrams}
+
+% ==================== Chapter 1 -- the dispatch loop ====================
+
+% Fig 1.1 -- the fetch/look-up/dispatch/run loop XBYTE runs in hardware
+\newcommand{\DiagXbyteLoop}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[node distance=9mm and 11mm]
+  \node[iospbox, text width=20mm] (fifo) {Hub FIFO};
+  \node[iospsub, below=0.5mm of fifo] {bytecode stream};
+  \node[iospbox, right=of fifo, text width=22mm] (pa) {RFBYTE\\$\to$ PA};
+  \node[iospsub, below=0.5mm of pa] {current bytecode};
+  \node[iospbox, right=of pa, text width=22mm] (lut) {LUT table};
+  \node[iospsub, below=0.5mm of lut] {index by bytecode};
+  \node[iospbox, right=of lut, text width=18mm] (execf) {EXECF};
+  \node[iospsub, below=0.5mm of execf] {jump + skip};
+  \node[iospkey, right=of execf, text width=20mm] (rout) {Bytecode\\routine};
+  \draw[iospflow] (fifo)--(pa);
+  \draw[iospflow] (pa)--(lut);
+  \draw[iospflow] (lut)--(execf);
+  \draw[iospflow] (execf)--(rout);
+  % return loop: routine -> back to the FIFO for the next bytecode
+  \draw[iospflow] (rout.south) -- ++(0,-13mm) -| (fifo.south);
+  \node[wlbl, text=diagram-accent, align=center] at ($(lut.south)+(0,-13mm)$)
+    {\texttt{\_RET\_} returns to \$1FF $\to$ next bytecode \quad(6-clock overhead)};
+\end{tikzpicture}}
+\caption{The XBYTE dispatch loop: fetch, look up, dispatch, run, repeat}
+\end{figure}}
+
+% ==================== Chapter 4 -- LUT table entry ====================
+
+% Fig 4.1 -- one dispatch-table entry is an EXECF operand (skip pattern | address)
+\newcommand{\DiagLutEntry}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
+              align=center, font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center},
+  flbl/.style={font=\tiny, text=diagram-text, align=center}]
+  \node[fld, minimum width=78mm] (skip) {SKIPF pattern};
+  \node[fld, minimum width=32mm, right=0pt of skip, fill=diagram-highlight] (addr) {address};
+  \node[lbl, above=1mm of skip] {31:10\quad(22 bits)};
+  \node[lbl, above=1mm of addr] {9:0\quad(10 bits)};
+  \node[flbl, below=1mm of skip, text width=78mm] {applied as a SKIPF pattern on entry to the handler};
+  \node[flbl, below=1mm of addr, text width=32mm] {handler address in cog/LUT};
+\end{tikzpicture}}
+\caption{LUT dispatch-table entry: one EXECF operand}
+\end{figure}}
+
+% ==================== Chapter 5 -- the 8-clock dispatch cycle ====================
+
+% Fig 5.1 -- the eight clocks of one dispatch, with the 6-clock overhead braced
+\newcommand{\DiagDispatchCycle}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[font=\scriptsize,
+  clk/.style={draw=diagram-border, fill=diagram-box, minimum width=19mm,
+              minimum height=15mm, align=center, inner sep=2pt, text=diagram-text,
+              font=\scriptsize\ttfamily},
+  num/.style={font=\scriptsize\bfseries, text=diagram-text}]
+  \node[clk] (c1) {RFBYTE\\bytecode\\SKIPF \#0};
+  \node[clk, right=0pt of c1] (c2) {MOV PA\\RDLUT};
+  \node[clk, right=0pt of c2] (c3) {RDLUT\\$\to$ D};
+  \node[clk, right=0pt of c3] (c4) {EXECF\\begin};
+  \node[clk, right=0pt of c4] (c5) {MOV PB\\MODCZ\\EXECF};
+  \node[clk, right=0pt of c5] (c6) {flush};
+  \node[clk, right=0pt of c6] (c7) {reload};
+  \node[clk, right=0pt of c7, fill=diagram-highlight] (c8) {handler\\instr 1};
+  \foreach \n/\c in {1/c1,2/c2,3/c3,4/c4,5/c5,6/c6,7/c7,8/c8}{
+    \node[num, above=1mm of \c] {clk \n};}
+  \draw[tbrace] (c1.south west) -- node[below=5pt, wlbl] {6-clock overhead} (c6.south east);
+  \draw[tbrace] (c8.south west) -- node[below=5pt, wlbl] {routine} (c8.south east);
+\end{tikzpicture}}
+\caption{The 8-clock XBYTE dispatch cycle (clock 1 overlaps the prior \texttt{\_RET\_})}
+\end{figure}}
+
+% ==================== Chapter 7 -- the mode operand ====================
+
+% Fig 7.1 -- the SETQ/SETQ2 mode operand %A000000xF (256-entry table form)
+\newcommand{\DiagModeOperand}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
+              align=center, font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center},
+  flbl/.style={font=\tiny, text=diagram-text, align=center}]
+  \node[fld, minimum width=16mm] (a) {A};
+  \node[fld, minimum width=46mm, right=0pt of a] (sz) {0 0 0 0 0 0};
+  \node[fld, minimum width=14mm, right=0pt of sz] (x) {x};
+  \node[fld, minimum width=14mm, right=0pt of x, fill=diagram-highlight] (f) {F};
+  \node[lbl, above=1mm of a] {8};
+  \node[lbl, above=1mm of sz] {7:2};
+  \node[lbl, above=1mm of x] {1};
+  \node[lbl, above=1mm of f] {0};
+  \node[flbl, below=1mm of a, text width=16mm] {LUT base};
+  \node[flbl, below=1mm of sz, text width=46mm] {table-size / compression select};
+  \node[flbl, below=1mm of x, text width=14mm] {don't care};
+  \node[flbl, below=1mm of f, text width=14mm] {flag write};
+\end{tikzpicture}}
+\caption{The mode operand \texttt{\%A000000xF} (256-entry table form)}
+\end{figure}}
+
+\endinput

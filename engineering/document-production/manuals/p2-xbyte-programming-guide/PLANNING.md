@@ -18,6 +18,37 @@
 
 ---
 
+## 0. SCOPE REVISION — v0.1.0 first-draft build (2026-06-26, decided with Stephen)
+
+The full stand-up began on 2026-06-26. Stephen narrowed the v0.1.0 scope from the
+original three-act design captured below. **This section governs; the later sections
+are the fuller design vision, retained for a future edition but partly DEFERRED.**
+
+- **Capstone micro = 6502 (RESOLVED).** Closes §5/§9 open decision #1. 6809 stays as a
+  one-chapter **SETQ2 vignette** (alternate-table prefix-page dispatch), per §5.
+- **External P2 projects → Appendix C, links only (CHANGED).** The Arc8de 8-console
+  arcade and the Yume emulator suite (§8) are NOT the cold-open and do NOT appear in the
+  narrative in this edition. They become **Appendix C "Further Implementations"**: each a
+  link + author + what-it-emulates + license. (All the §8 verification work still stands;
+  it just routes to the appendix.)
+- **Cold-open reframed → concept, not project (CHANGED).** Chapter 1 opens on the *idea*
+  (every interpreter runs the same fetch→dispatch→run loop; XBYTE does it in hardware for
+  ~6 clocks), with a forward-pointer to Appendix C for "see it in the wild."
+- **"Systems similar to the P2" → DEFERRED out of v0.1.0 (CHANGED).** The IBM Series/1
+  **EDL anchor (§6)** and the **kindred-architecture vignettes (§7)** — Transputer/Occam,
+  XMOS xCORE, GreenArrays, Cell SPE — and the S/360 channels-as-P2-I/O parallel (§4/§5)
+  are **cut from this edition**. They remain documented below as the design vision for a
+  later edition; do NOT reintroduce them without Stephen.
+- **§4 architectural-families contrast → KEPT but trimmed.** "How guest-CPU instruction
+  shapes map onto XBYTE" is core pedagogy (Ch. 10); it stays. The P2-kinship framing and
+  the mainframe-channel parallel are removed from it (those are the "similar to P2"
+  material above).
+
+Resulting v0.1.0 shape: 14 chapters in 4 parts + Appendices A–D + Index — see
+`creation-guide.md` §2 for the authored structure of record.
+
+---
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
@@ -343,14 +374,17 @@ spread covered.
 
 ---
 
-## 9. Open decisions (the only inputs blocking full stand-up)
+## 9. Open decisions — RESOLVED for v0.1.0 (see §0)
 
-1. **Capstone micro** — 8008 / 6502 / 8051 (default 6502 if unsure).
-2. **EDL depth** — featured vignette (current plan) vs. EDL-VM-as-capstone
-   (weigh after reading SC34-0314).
-3. **Real-world reference list** — Stephen supplies names → Claude verifies.
-4. Breadth-search for representative emulation targets (representative not
-   exhaustive) — run when building §4/§8.
+1. **Capstone micro** — ✅ **6502** (was 8008/6502/8051).
+2. **EDL depth** — ✅ **DEFERRED** out of v0.1.0 entirely (was: featured vignette vs.
+   EDL-VM-as-capstone). Held for a later edition.
+3. **Real-world reference list** — ✅ routes to **Appendix C** (links only); §8 names
+   verified. Pending: Chip Egues' answer on whether Arc8de uses XBYTE (record as a
+   personal-communication citation if/when it lands; otherwise the appendix states the
+   dispatch mechanism is unstated).
+4. Breadth-search for emulation targets — ✅ not needed for v0.1.0 (Appendix C is
+   representative, not exhaustive).
 
 ---
 

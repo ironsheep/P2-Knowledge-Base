@@ -1,0 +1,30 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-XBYTE-Programming-Guide.md",
+      "output": "P2-XBYTE-Programming-Guide.pdf",
+      "template": "p2kb-xbyte-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
+      ],
+      "metadata": {
+        "title": "P2 XBYTE Programming Guide",
+        "subtitle": "Building Interpreters and Emulators on the Propeller 2",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v0.1.0",
+        "date": "June 2026"
+      }
+    }
+  ]
+}
