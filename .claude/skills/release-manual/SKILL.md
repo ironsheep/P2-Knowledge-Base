@@ -31,9 +31,11 @@ Per manual being released:
    promoting. Then **promote**: copy the *post-audit* `opus-master/CHANGELOG.md` →
    `DOCs/<slug>-changelog.md`; update (or add) the manual's entry in
    `deliverables/documents/README.md` (version, date, force-download PDF link).
-3. **Record freshness**: append/update the manual's `PUBLISH` line in the Platform Freshness
-   Ledger (`PUBLICATION-ROSTER.md`) at the PDF's mtime; update its roster row/status; prune
-   absorbed `PLATFORM` lines.
+3. **Record freshness + sync dashboards**: append/update the manual's `PUBLISH` line in the
+   Platform Freshness Ledger (`PUBLICATION-ROSTER.md`) at the PDF's mtime; update its roster
+   row/status; prune absorbed `PLATFORM` lines; **and (3c, mandatory) sync the two roster-mirror
+   dashboards** — `engineering/document-production/README.md` ("Live publications") and the
+   `engineering/README.md` front-door Manual row.
 4. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
 5. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
    `raw.githubusercontent.com` download links). Do NOT execute.
@@ -221,12 +223,28 @@ columns (e.g., `Platform ⏳ → ✅` on a migration; `Released ✅`), and the N
 now-stale prose elsewhere in the roster that the release falsifies (e.g., "awaiting
 migration", "only X remains").
 
+**3c — sync the manual-status dashboards (MANDATORY — these MIRROR the roster).** Two
+engineering dashboards restate the roster's per-manual status and **drift on every release** if
+not updated in lockstep. They are deterministic roster mirrors — NOT the "broader docs" Phase 4
+deliberately leaves alone — so update them HERE, every release (this is the manual-release
+analogue of release-yamls' dashboard-ledger step):
+- **`engineering/document-production/README.md`** — the "Live publications (synced to roster)"
+  table. Set this manual's row to match the roster row you just wrote in 3b (version, pp, date,
+  one-line note). If the manual was previously *upcoming*, move it into the live table.
+- **`engineering/README.md`** — the front-door **Manual** row. Update its one-line manual-head
+  summary (e.g., the `<Manual> vX.Y.Z ✅ shipped` fragment) to the new version; while you're in
+  that cell, correct any *sibling* manual it still misstates (these front-door summaries lag).
+- **Verify:** `grep -rn "v<PRIOR_VERSION>" engineering/README.md engineering/document-production/README.md`
+  returns nothing for this manual.
+
 ---
 
 ## Phase 4 — Enclosing-doc audit (verification, not auto-edit)
 
-Sweep for stale references the Phase-2/3 edits don't catch. Surface candidates; do NOT
-auto-edit (broader docs need explicit user authorization per CLAUDE.md).
+Sweep for stale references the Phase-2/**3** edits don't catch — i.e. **everything except** the
+public index (Phase 2), the roster/ledger (3a/3b), and the two manual-status dashboards (3c,
+already updated). Surface candidates; do NOT auto-edit the rest (broader docs need explicit user
+authorization per CLAUDE.md).
 ```bash
 grep -rn "Version <PRIOR_VERSION>" --include="*.md" \
   | grep -vE "deliverables/documents/DOCs/|\.backup\.|opus-master/CHANGELOG.md"
@@ -246,7 +264,12 @@ covering everything the release touched (one commit per wave is fine):
 git add deliverables/documents/README.md \
         deliverables/documents/DOCs/<slug>-changelog.md \
         deliverables/documents/DOCs/<PDF> \
-        engineering/document-production/PUBLICATION-ROSTER.md
+        engineering/document-production/PUBLICATION-ROSTER.md \
+        engineering/document-production/README.md \
+        engineering/README.md
+# plus, if uncommitted from prior sessions: the manual's opus-master/CHANGELOG.md (post-audit) +
+# source, MANUAL-DESCRIPTOR.md, any shared platform edit, the workspace render, and a force-add
+# for a gitignored example ZIP:  git add -f deliverables/documents/DOCs/<slug>-src-YYMMDD.zip
 git commit -m "Release <slug> vX.Y.Z"
 git tag -a <slug>-vX.Y.Z -m "<Manual Name> vX.Y.Z"
 ```
