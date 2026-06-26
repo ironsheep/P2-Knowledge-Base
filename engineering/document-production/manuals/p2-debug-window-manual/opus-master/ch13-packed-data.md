@@ -176,7 +176,7 @@ the most of them.
    unless your data naturally arrives as words or bytes and repacking into longs
    would cost more than it saves.
 3. **Add `SIGNED` if the values are signed**, and `ALT` only if your sub-byte field
-   order is reversed relative to the display.
+   order is swapped relative to the display.
 
 So a single-bit logic capture at the highest rate uses `LONGS_1BIT` (32×). A scope
 sampling a signed 16-bit ADC-style value uses `LONGS_16BIT SIGNED` (2×). A
@@ -209,7 +209,8 @@ link, capture a finite burst and dump it rather than trying to stream live.
   first — is your code's responsibility.
 - **LSB-first ordering is fixed.** The first unpacked value always comes from the
   low end of the element. Shift your first sample into the low bits. Use `ALT` only
-  to flip sub-byte ordering within each byte, not to reverse whole elements.
+  to swap adjacent same-width fields throughout the element (bits 0↔1, 2↔3, …,
+  2-bit pairs, or nibbles by mode width), not to reverse whole elements.
 - **Packing is per window, set at creation.** All elements fed to that window are
   unpacked the same way for its lifetime; there is no per-element mode switch.
 - **Send whole multiples of the values-per-element count.** A `LONGS_1BIT` LOGIC

@@ -35,7 +35,7 @@ declarations follow on the same line:
 
 ```spin2
 PUB main() | ang
-  ' create the window, then declare one auto-ranging channel (separate message)
+  ' create the window, then declare one auto-ranging channel (separately)
   debug(`SCOPE Sig SIZE 400 200)
   debug(`Sig 'Wave' AUTO)
   ang := 0
@@ -87,8 +87,9 @@ The window reads the label, then reads the optional numeric arguments **in order
 
 The first label declares channel 0, the next channel 1, and so on, up to eight.
 Send the channel declarations as a **separate message after creating the window** —
-a channel declaration placed on the create line prevents the window from being
-created. So this declares three channels:
+a channel declaration placed on the create line is ignored, because the create
+message accepts only configuration keywords, so the window opens with no channels.
+So this declares three channels:
 
 ```spin2
 debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
@@ -440,8 +441,8 @@ channel, trigger, and capture code shows the live signal.
   (`tall`) smaller than the window and a stepped `base` offset to lay multiple traces
   out without overlap, as the worked example does.
 - **`SAMPLES` sets horizontal resolution and trigger depth.** It is also the default
-  holdoff and the default trigger offset, so raising `SAMPLES` widens the captured
-  frame and the pre-trigger window together.
+  holdoff, and **half of it** (`SAMPLES/2`) is the default trigger offset, so raising
+  `SAMPLES` widens the captured frame and the pre-trigger window together.
 - **For high sample rates, pack the data.** Bare per-channel values are simplest; the
   packing keywords ([Chapter 13](#ch-13)) move more samples per `DEBUG` packet over the link.
 
@@ -453,4 +454,4 @@ amplitude argument to `qsin`. Then add a trigger on the sine channel
 (`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
 `SAMPLES-1` to move the trigger point from the right edge to the center to the left
-edge, and see the pre-trigger region grow.
+edge, and see the post-trigger region grow.

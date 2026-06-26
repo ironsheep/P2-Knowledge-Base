@@ -110,7 +110,7 @@ every window are listed once at the end.
 | `OPACITY 0-255` | |
 | `LINESIZE` | |
 | `CARTESIAN {flipy {flipx}}` | |
-| `POLAR {twopi {theta}}` | |
+| `POLAR {twopi {offset}}` | |
 | `TEXTSIZE` | |
 
 **Primitives (cursor-relative):**

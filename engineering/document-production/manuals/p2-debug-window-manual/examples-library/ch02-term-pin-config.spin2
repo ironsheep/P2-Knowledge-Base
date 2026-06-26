@@ -7,5 +7,5 @@ CON
 
 PUB main()
   debug(`TERM Status SIZE 30 5)
-  debug(`Status "Ready." 13)
+  debug(`Status 'Ready.' 13)
   repeat                         ' keep the window open

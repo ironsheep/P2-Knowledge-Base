@@ -27,7 +27,8 @@ Maximum compression is **32×** (`LONGS_1BIT`). Fields are extracted LSB-first.
 
 - `SIGNED` — sign-extend each field instead of treating it as unsigned. Signed
   ranges: 1-bit −1…0, 2-bit −2…1, 4-bit −8…7, 8-bit −128…127, 16-bit −32768…32767.
-- `ALT` — reverse the sub-field order within each container.
+- `ALT` — swap adjacent same-width fields throughout the container (bits 0↔1, 2↔3,
+  …, 2-bit pairs, or nibbles by mode width), not a reversal.
 
 Syntax: `<packing-mode> {ALT} {SIGNED}`.
 

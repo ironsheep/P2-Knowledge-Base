@@ -48,6 +48,10 @@ The configuration keywords you can add to the creation line:
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 
+Sent at runtime in a feed (rather than on the creation line), `BACKCOLOR` instead
+sets the background drawn behind subsequent characters — the per-character text
+background.
+
 `SIZE` is the one you will set most often. The grid is measured in characters, not
 pixels — the window computes its pixel size from the font. A `SIZE 80 25` window
 gives you a classic 80-column console.

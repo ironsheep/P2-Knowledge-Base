@@ -245,7 +245,7 @@ PUB main() | i, phase, ainc, sample
          RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
-  ainc  := 30_000              ' shaft frequency at rest (a low tone)
+  ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
 
   repeat
     ' Feed one 512-sample FFT window at the current speed, then accelerate.
@@ -253,10 +253,10 @@ PUB main() | i, phase, ainc, sample
       sample := sine(2000, phase)
       phase += ainc            ' advance the synthesized vibration tone
       debug(`RunUp `(sample))
-    ainc += 20_000  ' the motor speeds up -> higher tone -> diagonal streak
-    if ainc > 1_000_000
+    ainc += 5_000_000  ' motor speeds up -> higher tone -> diagonal streak
+    if ainc > 400_000_000
       debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
-      ainc := 30_000
+      ainc := 8_000_000
 
 PRI sine(amp, angle) : y
   ' amp * sin(angle), via the CORDIC.

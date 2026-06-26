@@ -17,4 +17,4 @@ PUB main() | key, value
     waitms(20)
 
 PRI show(v)
-  debug(`Adjust 0 "Value: " `sdec_(v) 13 "Up/Down +/-1, Left/Right +/-10")
+  debug(`Adjust 0 'Value: `(v)' 13 'Up/Down +/-1, Left/Right +/-10')

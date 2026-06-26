@@ -69,7 +69,7 @@ PUB main() | ang, sine, count
     sine := qsin(1000, ang, 256)         ' CORDIC sine, software-generated
 
     debug(`Wave `(sine))                 ' feed the SCOPE by its name
-    debug(`Status 0 "Sample " `udec_(count) 13 "Value:  " `sdec_(sine) 13)
+    debug(`Status 0 'Sample `(count)' 13 'Value:  `(sine)' 13)
 
     ang += 4
     count += 1
@@ -112,7 +112,7 @@ iteration so they show the same moment:
 ```spin2
 debug(`Wave `(sine))                    ' the SCOPE gets the sample
 ' the TERM gets the same value, formatted
-debug(`Status "now: " `sdec_(sine) 13)
+debug(`Status 'now: `(sine)' 13)
 ```
 
 > **What does not exist.** There is no `TIMESTAMP`, `OVERLAY`, `ALL_WINDOWS`,
@@ -123,7 +123,7 @@ debug(`Status "now: " `sdec_(sine) 13)
 > lives in your code.
 
 > A separate, application-wide timestamp facility does exist: defining the
-> `DEBUG_TIMESTAMP` symbol stamps every plain `DEBUG` *message* with the 64-bit CT
+> `DEBUG_TIMESTAMP` symbol stamps every `DEBUG` *message* with the 64-bit CT
 > value. That is a property of the message stream, set once in a `CON` block — not a
 > command you send to a display window.
 
@@ -186,7 +186,7 @@ counter
               debug(`TERM Mon SIZE 30 8)
 .loop
               add       n, #1
-              debug(`Mon 0 "count = " `uhex_long_(n) 13)
+              debug(`Mon 0 'count = `$(n)' 13)
               waitx     ##50_000_000
               jmp       #.loop
 
@@ -206,7 +206,7 @@ PUB main() | x
   repeat
     org
                 add       x, #1
-                debug(`Inline 0 "x = " `udec_(x) 13)
+                debug(`Inline 0 'x = `(x)' 13)
     end
     waitms(500)
 ```
@@ -254,8 +254,8 @@ PUB main() | x
 
 - **Keep PASM `DEBUG` out of tight interrupt service routines.** A `DEBUG` taken
   inside an ISR can skew the cog's timing enough to disturb retriggering. Prefer
-  doing `DEBUG` from cogs that are not running background ISRs (see the Spin2 v5.1
-  documentation's "DEBUG and interrupts" note).
+  doing `DEBUG` from cogs that are not running background ISRs (see the Spin2
+  documentation on DEBUG and interrupts).
 
 ## Try it
 
@@ -287,9 +287,9 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
-    debug(`Panel 0 "Samples: " `udec_(count) 13 ...
-          "Current: " `sdec_(signal) 13 ...
-          "Peak:    " `udec_(peak) 13)  ' a fresh status block to the TERM
+    debug(`Panel 0 'Samples: `(count)' 13 ...
+          'Current: `(signal)' 13 ...
+          'Peak:    `(peak)' 13)  ' a fresh status block to the TERM
 
     ang   += 4
     count += 1

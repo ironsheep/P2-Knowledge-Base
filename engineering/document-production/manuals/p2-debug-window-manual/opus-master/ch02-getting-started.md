@@ -12,8 +12,8 @@ Two things, and nothing else:
 
 - **A P2 board** connected to your computer over USB. Any P2 board works; no
   shields, sensors, probes, or external wiring are required.
-- **A PC running `pnut_term_ts`**, the host application that compiles your program,
-  programs the P2, and opens the DEBUG display windows.
+- **A PC running `pnut_term_ts`**, the host application that programs the P2 and
+  opens the DEBUG display windows.
 
 The compiler is `pnut_ts`, and the host application that opens the display windows
 is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
@@ -61,7 +61,7 @@ CON _clkfreq = 200_000_000
 PUB main() | reading
   debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
   reading := 42
-  debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
+  debug(`Status 'Reading: `(reading)' 13)   ' feed it by name
   repeat                                          ' keep the window open
 ```
 
@@ -71,8 +71,10 @@ Two `DEBUG()` statements, two distinct jobs:
   type (`TERM`); the second is a name you choose (`Status`). `SIZE 30 5` makes it
   30 columns by 5 rows.
 - The second **feeds** that window, addressing it by the name you gave it. The
-  quoted string prints as-is; `` `udec_(reading) `` prints the decimal text of
-  `reading` — the characters `42`; the bare `13` is a newline.
+  single-quoted text prints as-is; the `` `(reading) `` substitution inside it
+  prints the decimal text of `reading` — the characters `42`; the bare `13` is a
+  newline. (In a TERM, display a value with `` `(value) `` substitution, not
+  `` `udec_ `` — the trailing-underscore formatters render as a glyph here.)
 
 This create-by-name, feed-by-name model is how every window in this manual works.
 You declare a window once with a type and a name, then drive it by that name for
@@ -80,11 +82,12 @@ the rest of the program. The window type determines what the window draws and wh
 commands it accepts — covered chapter by chapter — but the two-step pattern never
 changes.
 
-> Display values with formatters, issue commands with bare numbers.
-> `` `udec_(x) `` shows the digits of `x`; a bare `13` is the newline command, not
-> the text "13". The valid output formatters are `UDEC`, `SDEC`, `UHEX`, `SHEX`,
-> and `UBIN`, each with an optional trailing `_` that suppresses the auto label.
-> There is no bare `DEC`, `HEX`, or `BIN`.
+> Display values as text, issue commands with bare numbers.
+> In a TERM, `'`(x)'` shows the digits of `x`; a bare `13` is the newline command,
+> not the text "13". The value-only output formatters are `UDEC_`, `SDEC_`,
+> `UHEX_`, `SHEX_`, and `UBIN_` — these feed a numeric data element (consumed by the
+> graphing windows), so to display a value's text in a TERM use `` `(value) ``
+> substitution instead.
 
 Compile it with `pnut_ts -d`, run it from `pnut_term_ts`, and a small text window
 titled `Status` opens showing `Reading: 42`.
@@ -115,7 +118,7 @@ PUB main() | angle, wave, noise
   repeat
     wave  := qsin(1000, angle, $1000)              ' CORDIC: a sine value
     noise := getrnd() & $FF                        ' RNG: a noise value
-    debug(`Signals 1 "wave=" `sdec_(wave) "  noise=" `udec_(noise))
+    debug(`Signals 1 'wave=`(wave)  noise=`(noise)')
     angle += $0040
     waitms(50)
 ```
@@ -153,7 +156,7 @@ CON
 
 PUB main()
   debug(`TERM Status SIZE 30 5)
-  debug(`Status "Ready." 13)
+  debug(`Status 'Ready.' 13)
   repeat                         ' keep the window open
 ```
 

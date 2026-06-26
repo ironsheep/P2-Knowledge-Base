@@ -11,7 +11,7 @@ counter
               debug(`TERM Mon SIZE 30 8)
 .loop
               add       n, #1
-              debug(`Mon 0 "count = " `uhex_long_(n) 13)
+              debug(`Mon 0 'count = `$(n)' 13)
               waitx     ##50_000_000
               jmp       #.loop
 

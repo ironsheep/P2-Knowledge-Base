@@ -79,7 +79,7 @@ window.
 From then on you address that window **by its name**, not by its type:
 
 ```spin2
-DEBUG(`Status "Ready.")
+DEBUG(`Status 'Ready.')
 ```
 
 The name is the whole interface. The first statement said "make a TERM window and
@@ -92,7 +92,7 @@ CON _clkfreq = 200_000_000
 
 PUB main()
   debug(`TERM Status SIZE 40 20)   ' create a window named "Status"
-  debug(`Status "Ready.")          ' feed it by name
+  debug(`Status 'Ready.')          ' feed it by name
   repeat                           ' keep the program (and window) alive
 ```
 
@@ -113,8 +113,11 @@ The element types are:
 - **Keywords** — bare words like `SIZE`, `TITLE`, `POS`, `CLEAR`. These configure
   the window or issue a named command. Each window's chapter lists the keywords it
   understands.
-- **Strings** — text in single quotes, such as `'Sawtooth'`, or in the Spin2 source
-  written with double quotes, such as `"Ready."`. A string is shown literally.
+- **Strings** — display text in **single** quotes, such as `'Sawtooth'` or
+  `'Ready.'`. A single-quoted string is shown literally. Use single quotes for
+  display text: a **double**-quoted string in a backtick display feed compiles but
+  is silently dropped at runtime — the window shows nothing. (Double quotes remain
+  valid inside a `` `(expr) `` substitution, which is ordinary Spin2.)
 - **Numbers** — written in decimal, hex (`$FF`), or binary (`%1010`). What a number
   *means* depends on context, and that is the rule you must internalize.
 
@@ -122,27 +125,32 @@ The element types are:
 
 A number in the feed stream is interpreted one of two ways, and you control which:
 
-- A number sent through a **formatter** is *displayed as text*. The formatters
-  are the same `DEBUG()` output commands you use for serial output, in their
-  value-only form: `` `udec_(x) ``, `` `uhex_(x) ``, `` `sdec_(x) ``, and so on.
-  There are also shorthands: `` `(x) `` is short for `SDEC_` (signed decimal),
-  `` `$(x) `` for `UHEX_` (hex), `` `%(x) `` for `UBIN_` (binary), `` `.(x) `` for
-  `FDEC_` (floating point), and `` `#(x) `` to send the character whose code is `x`.
-  If `x` holds 25, then `` `udec_(x) `` puts the two characters `2` and `5` into the
-  stream.
-- A **bare number** — one not wrapped in a formatter — is *raw input* the window
-  interprets in its own way: in a TERM window it is a **command code** (cursor,
-  color, and control); in the graphing windows it is a **data value** (a sample to
-  plot). Either way it is not shown as the literal digits.
+- A number put into the stream as **display text** shows as its digits. In a TERM
+  you do this with a `` `(value) `` substitution inside single-quoted text:
+  `` `(x) `` is signed decimal, `` `$(x) `` hex, `` `%(x) `` binary, `` `.(x) ``
+  floating point, and `` `#(x) `` sends the character whose code is `x`. If `x`
+  holds 25, then `'`(x)'` shows the two characters `2` and `5`.
+
+  The value-only `DEBUG()` formatters you use for serial output — `` `udec_(x) ``,
+  `` `uhex_(x) ``, `` `sdec_(x) ``, and so on — also put a value in the stream, but
+  as a **numeric data element**: the form the graphing windows (SCOPE, LOGIC, FFT)
+  consume as a data point. Send one to a **TERM** and it renders as a single
+  **character glyph** (value 42 prints `*`, not `42`), not as digits. So in a TERM,
+  display a value's text with `` `(value) `` substitution — not `` `udec_ ``.
+- A **bare number** — one not wrapped in a formatter or substitution — is *raw
+  input* the window interprets in its own way: in a TERM window it is a **command
+  code** (cursor, color, and control); in the graphing windows it is a **data
+  value** (a sample to plot). Either way it is not shown as the literal digits.
 
 This is why a terminal treats a bare `13` as a newline rather than printing the
-digits "13": `13` is a command code. To show the number thirteen, you would send
-`` `udec_(13) `` or the literal string `"13"`. Carry this rule into every chapter:
+digits "13": `13` is the newline command code. To show the number thirteen as text,
+put it inside single-quoted text — `` debug(`Status '`(13)') `` — or write the
+literal string `'13'`. Carry this rule into every chapter:
 
 > **To display a number, format it. Send it bare and the window takes it as raw
 > input** — a command code in TERM, a plotted data value in the graphing windows.
-> `` `udec_(temp) `` shows the value of `temp`; a bare `13` in TERM is a command
-> code, not the text "13".
+> In a TERM, `'`(temp)'` shows the value of `temp`; a bare `13` is a command code,
+> not the text "13".
 
 Each window assigns its own meaning to its command codes and to its raw data
 values — what a number does in a TERM window (cursor and color control) is not what
@@ -187,7 +195,7 @@ after the window name, the same way you send data:
   dismiss a single window explicitly while the rest of the program keeps running.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
-  repaints only when you feed it the `UPDATE` command. This eliminates flicker when
+  repaints only when you feed it the `UPDATE` command. This prevents flicker when
   you redraw a whole display at once. Not every window supports buffered mode — its
   chapter says whether it does.
 - **`PC_KEY`** and **`PC_MOUSE`** — read the host keyboard and mouse back into your
@@ -219,9 +227,8 @@ you reach for these display windows.
 
 These windows are hosted by **`pnut_term_ts`**, the host application this manual
 uses throughout to open and draw them. The same DEBUG display windows are also
-hosted by **PNut** and by the **Spin Tools IDE** — all three environments open and
-draw them, so the examples work in any of them. You produce a program that drives
-them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+hosted by **PNut**, so the examples work there as well. You produce a program that
+drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
 [Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates

@@ -12,7 +12,7 @@ PUB main() | ang, sine, count
     sine := qsin(1000, ang, 256)         ' CORDIC sine, software-generated
 
     debug(`Wave `(sine))                 ' feed the SCOPE by its name
-    debug(`Status 0 "Sample " `udec_(count) 13 "Value:  " `sdec_(sine) 13)
+    debug(`Status 0 'Sample `(count)' 13 'Value:  `(sine)' 13)
 
     ang += 4
     count += 1

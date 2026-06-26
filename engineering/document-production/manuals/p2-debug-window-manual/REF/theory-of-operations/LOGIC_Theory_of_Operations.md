@@ -267,9 +267,9 @@ vTriggered      : boolean;       // Trigger event occurred
    - Example: `$00000001` = channel 0 high, channel 1 low
 
 3. **vTriggerOffset**: Position of trigger in display
-   - `0`: Trigger at left edge
+   - `0`: Trigger at right edge (tests the newest sample → pre-trigger lead-up)
    - `vSamples/2`: Trigger at center (default)
-   - `vSamples-1`: Trigger at right edge
+   - `vSamples-1`: Trigger at left edge (tests the oldest sample → post-trigger)
 
 4. **vHoldOff**: Minimum samples between triggers
    - Prevents continuous re-triggering on high-frequency signals
@@ -1262,9 +1262,9 @@ After a trigger, ignore the next 64 samples before allowing another trigger.
 **Purpose**: Control where the trigger event appears in the display.
 
 **Values**:
-- `0`: Trigger at left edge (show what happens after trigger)
+- `0`: Trigger at right edge — tests the newest sample (show the lead-up *to* the trigger, pre-trigger)
 - `vSamples/2`: Trigger at center (show before and after) - **default**
-- `vSamples-1`: Trigger at right edge (show what led up to trigger)
+- `vSamples-1`: Trigger at left edge — tests the oldest sample (show what happens *after* the trigger, post-trigger)
 
 **Sample Selection** (line 1083):
 ```pascal

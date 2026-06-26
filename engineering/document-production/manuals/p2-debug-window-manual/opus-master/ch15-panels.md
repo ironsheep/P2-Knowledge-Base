@@ -48,10 +48,10 @@ PUB main() | angle, rpm, temp, volts
   debug(`TERM Status SIZE 32 6 TITLE 'System Status')
 
   ' Draw the static labels once.
-  debug(`Status 0 4 "SYSTEM STATUS")       ' clear, pair 0, title at (0,0)
-  debug(`Status 3 2 2 0 "RPM  :")          ' row 2, col 0
-  debug(`Status 3 3 2 0 "Temp :")
-  debug(`Status 3 4 2 0 "Volts:")
+  debug(`Status 0 4 'SYSTEM STATUS')       ' clear, pair 0, title at (0,0)
+  debug(`Status 3 2 2 0 'RPM  :')          ' row 2, col 0
+  debug(`Status 3 3 2 0 'Temp :')
+  debug(`Status 3 4 2 0 'Volts:')
 
   angle := 0
   repeat
@@ -61,9 +61,9 @@ PUB main() | angle, rpm, temp, volts
 
     ' Overprint only the value fields, each at a fixed (row, col). Trailing
     ' spaces pad to a fixed width so a shorter value erases a longer one.
-    debug(`Status 3 2 2 8 `udec_(rpm) "   ")
-    debug(`Status 3 3 2 8 `udec_(temp) "   ")
-    debug(`Status 3 4 2 8 `udec_(volts) "   ")
+    debug(`Status 3 2 2 8 '`(rpm)   ')
+    debug(`Status 3 3 2 8 '`(temp)   ')
+    debug(`Status 3 4 2 8 '`(volts)   ')
 
     angle += 3
     waitms(100)
@@ -109,9 +109,10 @@ panels.
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
 > with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
 
-**The BMP format is specific.** `LAYER` accepts a **24-bit, uncompressed (BI_RGB),
-no-alpha** Windows BMP — one BMP pixel maps to one canvas pixel, with no scaling.
-Author each image at the exact device size you will display it. (A short Python +
+**The BMP format matters.** `LAYER` loads a Windows BMP file — the path must name an
+existing `.bmp`. Author it as a **24-bit, uncompressed (BI_RGB), no-alpha** image:
+that is the expected format, one BMP pixel mapping to one canvas pixel with no
+scaling. Author each image at the exact device size you will display it. (A short Python +
 Pillow generator can produce these images and is the practical way to author the
 artwork; that tooling is documented separately from this manual.)
 

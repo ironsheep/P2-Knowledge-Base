@@ -208,8 +208,10 @@ TRIGGER mask match {offset}
   0; `$3` watches channels 0 and 1; `0` disables the trigger (free-running).
 - **`match`** — the bit values expected on the masked channels.
 - **`offset`** — where the trigger event sits in the display, `0` to `SAMPLES-1`.
-  `0` is the left edge (show what follows the event), `SAMPLES-1` is the right edge
-  (show what led up to it), and the default is the center (`SAMPLES/2`).
+  `0` puts it at the **right** edge — it tests the newest sample, so you see the
+  lead-up *to* the event (pre-trigger history). `SAMPLES-1` puts it at the **left**
+  edge — it tests the oldest sample, so you see what happens *after* the event
+  (post-trigger). `SAMPLES/2` (the default) centers it.
 
 The match test is `((sample XOR match) AND mask) = 0` — true when every masked bit
 equals its expected value. The trigger is **edge-sensitive**: it first has to see a
@@ -338,7 +340,7 @@ because digital debugging rarely needs a continuous full-rate stream. Two
 logic-specific habits keep it that way.
 
 **Software-paced — one sample per event.** You do not have to sample a bus on
-every system-clock tick. The SPI example above sends one sample each time a line
+every `sysclk` tick. The SPI example above sends one sample each time a line
 *changes* — idle, CS low, each clock edge — not one per clock cycle. Driving the
 window from your protocol's own events, rather than a free-running sample clock,
 is what keeps a bring-up trace small enough to stream live: a few hundred samples

@@ -85,8 +85,10 @@ The modes fall into four families:
 mode without defining a palette, the palette is uninitialized and LUT-mode pixels
 render as garbage — you must supply one with `LUTCOLORS`.
 
-**Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
-color you pick with a color-tune keyword:
+**Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
+color. The LUMA modes map the value against a single tint color you pick with a
+color-tune keyword; the RGBI modes carry their own color in each pixel (upper 3
+bits) and take no tint keyword:
 
 | Mode | Meaning |
 |------|---------|
@@ -155,7 +157,7 @@ a value with `` `() `` — the parentheses send the *value* of the expression, n
 visible digits:
 
 ```spin2
-debug(`Img `(color))      ' write one pixel = the value of `color`
+debug(`Img `(color))      ' write one pixel = the value of color
 debug(`Img `($FF7F00))    ' write one orange pixel (RGB24)
 ```
 

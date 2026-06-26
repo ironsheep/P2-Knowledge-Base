@@ -7,6 +7,6 @@ PUB main() | x
   repeat
     org
                 add       x, #1
-                debug(`Inline 0 "x = " `udec_(x) 13)
+                debug(`Inline 0 'x = `(x)' 13)
     end
     waitms(500)

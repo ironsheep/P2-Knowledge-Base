@@ -105,7 +105,7 @@ PUB main() | key, value
     waitms(20)
 
 PRI show(v)
-  debug(`Adjust 0 "Value: " `sdec_(v) 13 "Up/Down +/-1, Left/Right +/-10")
+  debug(`Adjust 0 'Value: `(v)' 13 'Up/Down +/-1, Left/Right +/-10')
 ```
 
 Click the window to give it focus, then press the arrow keys. Each `case` arm acts
@@ -175,21 +175,21 @@ PUB main() | mouse[7]
     debug(`Pointer PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
-      debug(`Pointer "Pointer outside window" 13)
+      debug(`Pointer 'Pointer outside window' 13)
     else
-      debug(`Pointer "X: " `sdec_(mouse[0]) "  Y: " `sdec_(mouse[1]) 13)
-      debug(`Pointer "Wheel: " `sdec_(mouse[2]) 13)
-      debug(`Pointer "Buttons  L:" `sdec_(mouse[3]))
-      debug(`Pointer "  M:" `sdec_(mouse[4]) "  R:" `sdec_(mouse[5]) 13)
-      debug(`Pointer "Pixel: " `uhex_long_(mouse[6]))
+      debug(`Pointer 'X: `(mouse[0])  Y: `(mouse[1])' 13)
+      debug(`Pointer 'Wheel: `(mouse[2])' 13)
+      debug(`Pointer 'Buttons  L:`(mouse[3])')
+      debug(`Pointer '  M:`(mouse[4])  R:`(mouse[5])' 13)
+      debug(`Pointer 'Pixel: `$(mouse[6])')
     if mouse[3]                                        ' left button down?
-      debug(`Pointer 13 "LEFT DOWN")
+      debug(`Pointer 13 'LEFT DOWN')
     waitms(30)
 ```
 
 Move the mouse over the window and the position updates; move outside and the
 program reports it from the negative `xpos`. Press the left button and the buttons
-read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
+read `-1` (shown as `-1` by `` `() ``), and the `LEFT DOWN` line appears.
 
 ### Where you'd use this
 

@@ -17,9 +17,9 @@ PUB main() | p1, p2, p3, s
   p3 := 0
   repeat
     repeat N                           ' one full FFT buffer per pass
-      s :=  qsin(20000, p1, $1_0000)   ' tone 1
-      s += qsin(12000, p2, $1_0000)   ' tone 2
-      s += qsin( 6000, p3, $1_0000)   ' tone 3
+      s :=  qsin(20000, p1, 0)         ' tone 1 (twopi 0 = full 2^32 turn)
+      s += qsin(12000, p2, 0)          ' tone 2
+      s += qsin( 6000, p3, 0)          ' tone 3
       s += (getrnd() & $FFF) - $800    ' +/- noise
       debug(`Spectrum `(s))            ' feed one sample
 

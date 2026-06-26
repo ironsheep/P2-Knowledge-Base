@@ -310,7 +310,7 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 | 4–5 | Horizontal align | `0`/`1`=center, `2`=left, `3`=right |
 | 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
 
-So `$02` is bold, `$06` is bold + italic, `$0A` is normal-weight + underline, and
+So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` left-aligns. The defaults (style `$00`) are thin weight, centered both ways.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
@@ -640,7 +640,7 @@ PUB main() | ang, value, needle, i, tick
   ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
   debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
   debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
-  debug(`Gauge POLAR 360)  ' angles in degrees; theta 0 points up
+  debug(`Gauge POLAR 360)  ' degrees; theta 0 points right (+x), +90 up
 
   ang := 0
   repeat

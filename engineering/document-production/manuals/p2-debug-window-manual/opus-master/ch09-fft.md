@@ -58,13 +58,13 @@ covered in the next section — and then feed it samples by that name:
 
 ```spin2
 PUB main() | phase, s
-  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE) ' create the window
-  debug(`Spectrum 'Signal' 0 1000 256 0 1 $00FF00)        ' declare one channel
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE) ' create window
+  debug(`Spectrum 'Signal' 0 1000 256 0 1 $00FF00) ' declare one channel
   phase := 0
   repeat
     repeat 1024
       s := qsin(1000, phase, $1_0000)                     ' a sample
-      phase += 3072                                        ' steady tone -> a clear peak
+      phase += 3072                                        ' steady tone
       debug(`Spectrum `(s))                                ' feed it by name
 ```
 
@@ -74,7 +74,7 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `FFT` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | — | Plot area in pixels; each is **32–2048** |
+| `SIZE` | `width height` | `256 256` | Plot area in pixels; each is **32–2048** |
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
@@ -273,9 +273,9 @@ PUB main() | p1, p2, p3, s
   p3 := 0
   repeat
     repeat N                           ' one full FFT buffer per pass
-      s :=  qsin(20000, p1, $1_0000)   ' tone 1
-      s += qsin(12000, p2, $1_0000)   ' tone 2
-      s += qsin( 6000, p3, $1_0000)   ' tone 3
+      s :=  qsin(20000, p1, 0)         ' tone 1 (twopi 0 = full 2^32 turn)
+      s += qsin(12000, p2, 0)          ' tone 2
+      s += qsin( 6000, p3, 0)          ' tone 3
       s += (getrnd() & $FFF) - $800    ' +/- noise
       debug(`Spectrum `(s))            ' feed one sample
 
@@ -287,7 +287,8 @@ PUB main() | p1, p2, p3, s
 
 `qsin(length, angle, twopi)` returns a CORDIC sine: `length` is the amplitude,
 `angle` is the current phase, and `twopi` is the value that represents one full
-turn — here `$1_0000`, so the phase wraps every 65,536 counts. Summing three of
+turn — here `0`, which selects the full `$1_0000_0000` (2³²) circle, so the phase
+wraps every 4,294,967,296 counts. Summing three of
 them, scaling the noise down with a mask, and feeding the result one sample at a
 time produces a spectrum with three clear peaks at the three increment-determined
 bins.

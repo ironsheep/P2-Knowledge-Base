@@ -248,12 +248,13 @@ and digital event timing in LOGIC ([Chapter 6](#ch-6)).
   supported. If your software emits them, they will not move any key — and
   because their status bytes have the top bit set, each one simply resets the
   parser to wait for the next Note-On or Note-Off.
-- **A velocity-0 Note-On is not a Note-Off.** Many MIDI sources end a note with a
-  Note-On at velocity 0 instead of a real Note-Off. This window does not treat
-  that as a release: the key would store velocity 0 and read as off, but to turn a
-  lit key off reliably you must send a proper Note-Off (`$8n`) for it. When you
-  generate the bytes yourself, always pair each `$90` note-on with an `$80`
-  note-off.
+- **A velocity-0 Note-On clears the key.** Many MIDI sources end a note with a
+  Note-On at velocity 0 instead of a real Note-Off. The window stores that
+  velocity 0, and because a key lights only while its stored velocity is greater
+  than zero, the key reads as off — the same visual result as a Note-Off. Sending
+  an explicit Note-Off (`$8n`) is good MIDI practice, but it is not required to
+  extinguish the key here. When you generate the bytes yourself, pairing each
+  `$90` note-on with an `$80` note-off keeps your stream conventional.
 - **One channel at a time.** The window shows exactly the channel set by
   `CHANNEL`; notes on other channels are ignored. To watch several channels at
   once, open one MIDI window per channel, each with its own `CHANNEL` value.
