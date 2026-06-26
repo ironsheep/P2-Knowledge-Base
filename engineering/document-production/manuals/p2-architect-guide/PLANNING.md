@@ -269,6 +269,64 @@ how‑to. Candidates:
   (recoverable: v1.01 PDF archived at nagasm.org / archive.org). Value: a P1‑corpus source AND a pedagogy
   model. NB it teaches **Spin1/PASM1**, so it's a *model* for our P2 Ch2, never a content source.
 
+## 16. Shape refinement — the three-act book (Stephen, 2026-06-24, RECORD-ONLY SEED)
+
+> **Status:** dictated shape notes captured before building. This is the **seed** of the
+> reworked plan; we flesh it out into detail and generate initial content in a later working
+> session. It supersedes the loose "front-end pillar + AI-assist pillar" framing in the
+> NEXT-SESSION note and gives §15's parked "Using {toolchain}" candidate a concrete home.
+> Reconcile §5 (chapter architecture) into this three-act shape when we next flesh the plan.
+
+### 16.1 The book now has three acts
+The guide moves from a 4-chapter shape to a **three-act** shape:
+
+**ACT I — the universal engineering process (agent-AGNOSTIC front matter).**
+The front chapters describe *what we do on every project*, with no agent in the picture at all:
+- designing the system,
+- choosing the peripheral hardware,
+- choosing the communications,
+- wiring it all up (bus consolidation → pin budget → pin map).
+These chapters are **descriptive of HOW we go about each step**, and call out **the issues /
+concerns that matter to us as we work through each step**. The register is universal
+engineering practice — nothing here depends on having an AI agent. (This is the concrete
+shape of the earlier "front-end pillar.")
+
+**ACT II — functional decomposition (the existing capstone).**
+We work the system through functional decomposition — the Ch4 / decomposition-layer material
+already specified in §5–§7 (the forces, the first-contact procedure, the robot-dog worked
+derivation as a *demonstration not a template*). Still agent-agnostic.
+
+**ACT III — *now bring in agent support* (NEW closing set of chapters).**
+After the whole agent-agnostic process is worked through, the book **wraps up** by asking:
+*how does this entire system — this whole process — change if we choose to use an agent's
+support in development?* The closing chapters answer three questions:
+- **Which areas can agents support us in?** (where in Acts I–II an agent helps)
+- **How does it work?** (the build→load→run→observe round-trip with agent assistance)
+- **Which tools can we use?** (the toolchains an agent drives — §16.2)
+
+This placement keeps the front universal and approachable, and makes the AI-assist material an
+*additive lens* on a process the reader already understands — not a dependency. It also
+absorbs §15's parked "Using {toolchain}" candidate chapter (toolchain how-to now lives in Act III).
+
+### 16.2 The three tool sets Act III must speak to
+Stephen: speak to **all three tool sets**. Items he listed, grouped (⚠️ *grouping is my
+interpretation — confirm when we flesh the plan*):
+
+1. **FlexProp / flexspin** — the flexspin IDE + the flexspin environment and download (compile + load).
+2. **SPIN Tools IDE** — the SPIN Tools IDE (compile + load).
+3. **VS Code + spin2 + PNut-TS** — the spin2 VS Code extension + the PNut-TS compiler + PNut-TS download / execution.
+
+The tool set must stay a **slot**, not marry one IDE (consistent with §15's `{toolchain}` slot).
+
+### 16.3 How we'll build it (process, Stephen 2026-06-24)
+- This is the **seed**; next we **flesh out the plan in more detail**, then **generate initial content**.
+- Then iterate: **add content + pull more information from the repository** — especially where we
+  *actually used agents* to bolster the **latter (Act III) chapters** — and **add to the front (Act I)**
+  as we discuss the general engineering process **interactively** with Stephen.
+- DO NOT gut/build this session — recording only.
+
+---
+
 **Done already (the v1.01 cross‑check, option B, 2026-06-23):** read the v1.01 tutorial's arc (12 exercises
 building `Output.spin`/`Blinker2.spin`: Concept → languages → **Objects** → first object → Cogs → Block
 Designators → **Objects vs. Cogs** → many‑objects/many‑cogs → clock/timing → library objects → numbers).
