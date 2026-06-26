@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.1\par}
+{\large\color{blue}Version 1.0.2\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -141,14 +141,14 @@ This guide would not exist without the contributions of many individuals and org
 
 This guide draws on the following primary and community sources:
 
-- **P2 Silicon Documentation v35** (Chip Gracey, Parallax Inc.) — streamer architecture, mode encodings, NCO and DDS/Goertzel behavior
-- **Spin2 Documentation v51** (Parallax Inc.) — built-in streamer symbols and language integration
+- **Parallax Propeller 2 Documentation v35 - Rev B/C** (Chip Gracey, Parallax Inc.) — streamer architecture, mode encodings, NCO and DDS/Goertzel behavior
+- **Spin2 Reference Manual v51** (Parallax Inc.) — built-in streamer symbols and language integration
 - **P2 Flash Loader source** (official P2 ROM) — verified instruction usage
 - **Community video and Goertzel drivers** (Parallax OBEX) — application patterns
 
 ## How to Use This Guide
 
-This reference serves developers implementing high-speed I/O on the Propeller 2. It assumes familiarity with P2 COG/Hub architecture, basic PASM2 instructions, and RDFAST/WRFAST FIFO operations.
+This reference serves developers implementing high-speed I/O on the Propeller 2. It assumes familiarity with P2 cog/hub architecture, basic PASM2 instructions, and RDFAST/WRFAST FIFO operations.
 
 **Structure:**
 
@@ -191,19 +191,19 @@ Before the mode tables and bit fields, it helps to know what the streamer *is*, 
 
 ## 1.1 What the streamer is
 
-Every COG on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the COG's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
+Every cog on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the cog's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
 
-The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single COG produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
+The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single cog produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
 
-And because the streamer lives *inside* the COG, **each COG has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One COG can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
+And because the streamer lives *inside* the cog, **each cog has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One cog can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
 
 > **If you've used DMA before:** the streamer is a close cousin of a DMA channel, with two important additions. First, it has that built-in metronome, so it does *paced* transfers at an exact sample rate rather than "as fast as the bus allows." Second, it reshapes data as it moves — packing bits, expanding through a palette, converting color formats — instead of copying bytes verbatim. If you have never met DMA, don't worry: everything below stands on its own.
 
 ## 1.2 Why the streamer exists
 
-Generating precise, fast, repetitive signals in software is brutally expensive. Imagine driving a video display by hand: your code would have to write a new color to the pins every forty nanoseconds, forever, without ever slipping. A single loop like that would consume an entire COG and still stutter the moment anything interrupted it. The streamer exists so that this relentless, timed, repetitive work happens in hardware, leaving the COG free for the *interesting* part — drawing the next frame, decoding the next packet, running the game.
+Generating precise, fast, repetitive signals in software is brutally expensive. Imagine driving a video display by hand: your code would have to write a new color to the pins every forty nanoseconds, forever, without ever slipping. A single loop like that would consume an entire cog and still stutter the moment anything interrupted it. The streamer exists so that this relentless, timed, repetitive work happens in hardware, leaving the cog free for the *interesting* part — drawing the next frame, decoding the next packet, running the game.
 
-So why is it so complicated? Because one engine has to serve very different jobs: pushing video to a screen, playing audio through a DAC, capturing pins like a logic analyzer, sampling an analog input like an oscilloscope, generating tones, even detecting a specific frequency in an incoming signal. Rather than give each COG six narrow peripherals, the P2 gives it **one highly configurable engine**. The configurability is the complexity — and it is also the payoff. Learn the handful of knobs once, and the same engine does all of those jobs.
+So why is it so complicated? Because one engine has to serve very different jobs: pushing video to a screen, playing audio through a DAC, capturing pins like a logic analyzer, sampling an analog input like an oscilloscope, generating tones, even detecting a specific frequency in an incoming signal. Rather than give each cog six narrow peripherals, the P2 gives it **one highly configurable engine**. The configurability is the complexity — and it is also the payoff. Learn the handful of knobs once, and the same engine does all of those jobs.
 
 ## 1.3 A mental model: a paced, configurable pipe
 
@@ -259,15 +259,15 @@ You usually arrive at the streamer with an application already in mind. Find it 
 | Detecting a specific tone or frequency | Goertzel analysis | Ch. 10, Ch. 17 |
 | High-speed serial (fast SPI) | timed bit output, clocked by a smart pin | Ch. 16 |
 
-## 1.8 What each COG actually has
+## 1.8 What each Cog actually has
 
-For all that capability, the hardware budget is modest. Each COG contains exactly one streamer, with:
+For all that capability, the hardware budget is modest. Each cog contains exactly one streamer, with:
 
 - one 32-bit NCO (the metronome / phase accumulator);
 - one command buffer (it holds one queued command, so commands can hand off without a gap);
 - four 8-bit DAC channels (X0, X1, X2, X3);
 - one Goertzel analyzer;
-- access to the COG's LUT RAM (used as a palette or a waveform table).
+- access to the cog's LUT RAM (used as a palette or a waveform table).
 
 And it leans on a few neighboring P2 subsystems:
 
@@ -277,7 +277,7 @@ And it leans on a few neighboring P2 subsystems:
 | LUT RAM | palette lookups, sine/cosine tables |
 | DAC channels | analog output for video and audio |
 | Colorspace converter | HDMI encoding and composite video |
-| Smart pins | clock generation and timing synchronization |
+| Smart pins | clock generation and timing |
 
 With that picture in place, Chapter 2 opens up the engine itself — the data paths inside the streamer and how the pieces connect.
 
@@ -301,7 +301,7 @@ The streamer supports multiple data flow configurations:
 \DiagDataFlow
 ```
 
-**Output Paths (Hub → Pins/DACs):**
+**Output Paths (hub → Pins/DACs):**
 
 1. **Immediate → LUT → Pins/DACs**: S operand indexes LUT; LUT data drives output
 2. **Immediate → Pins/DACs**: S operand drives output directly
@@ -309,10 +309,10 @@ The streamer supports multiple data flow configurations:
 4. **RDFAST → Pins/DACs**: Hub data drives output directly
 5. **RDFAST → RGB → Pins/DACs**: Hub data passes through colorspace converter
 
-**Input Paths (Pins → Hub):**
+**Input Paths (Pins → hub):**
 
-1. **Pins → DACs/WRFAST**: Pin states written to Hub
-2. **ADC → DACs/WRFAST**: ADC readings written to Hub
+1. **Pins → DACs/WRFAST**: Pin states written to hub
+2. **ADC → DACs/WRFAST**: ADC readings written to hub
 
 **Special Path:**
 
@@ -330,7 +330,7 @@ Holds one pending command. Enables seamless transitions between streamer operati
 Handles data widths from 1-bit to 32-bit. Extracts and formats data according to mode.
 
 **LUT Interface:**
-Reads COG LUT RAM for palette expansion or waveform generation. 512 entries × 32 bits.
+Reads cog LUT RAM for palette expansion or waveform generation. 512 entries × 32 bits.
 
 **DAC Channels:**
 Four 8-bit channels (X0-X3) map to pins based on pin number LSBs. Configurable routing allows stereo, differential, or independent operation.
@@ -356,7 +356,7 @@ phase = (phase & $7FFF_FFFF) + frequency
 4. On rollover, the streamer advances to the next data element
 
 ::: hardware
-**The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2³¹`.
+**The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2^31`.
 :::
 
 ```{=latex}
@@ -382,10 +382,10 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 | 1:3 | `$2AAA_AAAB` | rounded (+1) |
 | 1:10 | `$0CCC_CCCD` | rounded (+1) |
 
-A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). This exactness is also what eliminates per-pixel jitter — see [§3.4](#sec-3-4) for choosing a rate around it. [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
+A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). A power-of-two ratio also makes the sysclk an exact integer multiple of the pixel rate, and that integer ratio — not the word's exactness — is what removes per-pixel jitter (see [§3.4](#sec-3-4) for choosing a rate around it). [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
 
 ::: caution
-**Round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+**Round up, and never let the value reach zero.** Truncating `$8000_0000 * rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 :::
 
 ## 3.3 Setting NCO Frequency {#sec-3-3}
@@ -412,8 +412,8 @@ The **SETQ** method allows changing frequency atomically with a new command.
 
 Two facts decide this, and the first is counter-intuitive:
 
-1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2³¹` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
-2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk ÷ pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
+1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2^31` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
+2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk / pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
 
 The jitter-free sysclks below are the integer multiples the P2 PLL can actually produce from a 20 MHz crystal. The last column is the penalty for ignoring the rule and just running 250 MHz.
 
@@ -427,7 +427,7 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 
 > **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
 
-The SETXFRQ word for any combination is `round($8000_0000 × pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+The SETXFRQ word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
 ```formula
 Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
@@ -443,12 +443,12 @@ Example 2 — non-integer ratio: VGA 640×480, 25.175 MHz @ 250 MHz
 ```
 
 ::: tip
-The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk ÷ pixel_clock` a whole number and every pixel is the same width.
+The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk / pixel_clock` a whole number and every pixel is the same width.
 :::
 
 ## 3.5 Clock Accuracy and Jitter {#sec-3-5}
 
-Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-to-pixel *ratio* and is the same no matter how precise your oscillator is. **Absolute accuracy** — how close the pixel clock sits to its exact nominal frequency, and how steadily it holds — is set entirely by the reference crystal: the PLL only multiplies it (`sysclk = crystal × M / (D×P)`) and the NCO adds under 0.01 ppm, so your pixel clock is **no more accurate than your crystal**.
+Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-to-pixel *ratio* and is the same no matter how precise your oscillator is. **Absolute accuracy** — how close the pixel clock sits to its exact nominal frequency, and how steadily it holds — is set entirely by the reference crystal: the PLL only multiplies it (`sysclk = crystal * M / (D*P)`) and the NCO adds under 0.01 ppm, so your pixel clock is **no more accurate than your crystal**.
 
 If you build on a Parallax **P2 Edge module**, this is already handled for you.
 
@@ -485,7 +485,7 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 | `%1111` | ADC | ADC | DACs/WRFAST |
 | `%1111_x111` | DDS/Goertzel | LUT | DACs + Analysis |
 
-> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Within that config field, bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
+> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Separately — outside that config field — bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
 
 ## 4.3 DAC Routing Field D[27:24]
 
@@ -618,6 +618,8 @@ RDFAST modes are the workhorse of the streamer. Where immediate modes carry a si
 
 Hub data serves as LUT index values.
 
+> **Reading the `%MMMM_CCCC` shorthand:** the two underscored nibbles are the **mode** field D[31:28] and the **config** field D[19:16] — *not* a single contiguous byte. D[27:20] sit between them in the command word (they carry DAC routing, enable, and pin-group fields; see [§4.2](#sec-4-2)). The shorthand pairs the two nibbles that pick the mode so a row reads at a glance; [Appendix A](#app-a) lists every field in its own column.
+
 | Mode | Symbol | Hub Read | Elements | Bits/Element |
 |------|--------|----------|----------|--------------|
 | `%0111_001a` | `X_RFLONG_32X1_LUT` | RFLONG | 32 | 1 |
@@ -680,7 +682,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 | `%1011_0101` | `X_RFWORD_RGB16` | RFWORD | RGB 5:6:5 | 2 |
 | `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB 8:8:8 | 4 |
 
-**Memory is usually the deciding factor.** A framebuffer is `width × height × bytes/px`, and it shares the P2's **512 KB hub RAM** with your code. A full 640×480 frame is **300 KB** at 1 byte/px (fits), **600 KB** at 2 bytes/px, and **1.2 MB** at 4 bytes/px (neither fits). So full-screen video on a 512 KB P2 generally uses a **1-byte format** (RGB8, RGBI8, or LUMA8); RGB16 and RGB24 suit smaller regions, sprites, or boards with external PSRAM.
+**Memory is usually the deciding factor.** A framebuffer is `width * height * bytes/px`, and it shares the P2's **512 KB hub RAM** with your code. A full 640×480 frame is **300 KB** at 1 byte/px (fits), **600 KB** at 2 bytes/px, and **1.2 MB** at 4 bytes/px (neither fits). So full-screen video on a 512 KB P2 generally uses a **1-byte format** (RGB8, RGBI8, or LUMA8); RGB16 and RGB24 suit smaller regions, sprites, or boards with external PSRAM.
 
 ## 7.2 Color Format Details
 
@@ -688,7 +690,14 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 \DiagRgbFormats
 ```
 
-**LUMA8:** 8-bit luminance. The `S[2:0]` field selects the output color; the byte sets its intensity.
+**LUMA8:** 8-bit luminance. The `S[2:0]` field selects one of eight output colors; the pixel byte sets that color's intensity. The color set is fixed:
+
+| `S[2:0]` | Color | | `S[2:0]` | Color |
+|----------|--------|---|----------|--------|
+| `%000` | Orange | | `%100` | Red |
+| `%001` | Blue | | `%101` | Magenta |
+| `%010` | Green | | `%110` | Yellow |
+| `%011` | Cyan | | `%111` | White |
 
 **RGBI8 (2:2:2:2):** Two bits each for red, green, and blue, plus a 2-bit intensity field.
 
@@ -716,7 +725,7 @@ RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory eff
 
 # Chapter 8: WRFAST Input Modes {#ch-8}
 
-Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a COG into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
+Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a cog into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
 ::: caution
 **Run WRFAST before any capture command.** It primes that same hub FIFO to *receive* data (streamer → hub); until it does, captured data has no valid destination. This is the exact mirror of RDFAST (Chapter 6) — one FIFO, opposite direction.
@@ -754,7 +763,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 
 # Chapter 9: ADC Sampling Modes {#ch-9}
 
-ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a COG into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
+ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a cog into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
 
 ## 9.1 ADC Capture Modes
 
@@ -853,7 +862,7 @@ repeat i from 0 to 511
 | Max amplitude | ±127 (full signed byte) | ±10 (prevents overflow) |
 
 ::: caution
-**SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
+**SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Goertzel example in the *Parallax Propeller 2 Documentation v35 - Rev B/C* uses for SINC2) to prevent accumulator overflow.
 :::
 
 ## 10.5 Reading Results {#sec-10-5}
@@ -876,7 +885,7 @@ frequency = $8000_0000 × F / CLK
 ```
 
 ::: hardware
-**The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode** — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2³¹`, about 0.12 Hz at 250 MHz.
+**The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode** — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2^31`, about 0.12 Hz at 250 MHz.
 :::
 
 # Part III: Configuration Reference
@@ -912,7 +921,7 @@ Many modes send data to the DAC channels, but none of them say *which* channels,
 
 - `--` = No override (SETDACS value used)
 - `!` = One's complement (inverted)
-- `X0`-`X3` = Streamer data channels
+- `X0`-`X3` = streamer data channels
 
 ## 11.2 DAC Pin Mapping {#sec-11-2}
 
@@ -932,22 +941,22 @@ DAC channels drive pins based on the pin's two LSBs:
 ## 11.3 Common DAC Configurations
 
 **Mono Audio (single channel):**
-```pasm2
+```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_0_0_0_0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Stereo Audio (two channels):**
-```pasm2
+```spin2
 mode := X_RFWORD_16P_2DAC8 | X_DACS_X_X_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Differential Output (noise rejection):**
-```pasm2
+```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_X_X_0N0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Four-Channel Video (RGB + sync):**
-```pasm2
+```spin2
 mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
@@ -957,7 +966,7 @@ A streamer command also has to say *which* pins it drives or samples, and that i
 
 ## 12.1 Pin Group Selection {#sec-12-1}
 
-The %ppp field in D[22:20] selects the 32-pin window the streamer drives or samples. The window's **base pin is `%ppp × 8`**, and it always spans **32 consecutive pins** from there — wrapping past pin 63 back to pin 0 once the base climbs high enough.
+The %ppp field in D[22:20] selects the 32-pin window the streamer drives or samples. The window's **base pin is `%ppp * 8`**, and it always spans **32 consecutive pins** from there — wrapping past pin 63 back to pin 0 once the base climbs high enough.
 
 | %ppp | Base | Pin Range (always 32 pins) | Window |
 |------|------|----------------------------|--------|
@@ -995,7 +1004,7 @@ For modes using fewer than 8 pins, D[19:17] refines selection within the group:
 
 **Output Modes:** D[23] must be 1 to drive pins
 
-```pasm2
+```spin2
 ' Pin output enabled
 mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
 
@@ -1003,9 +1012,9 @@ mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
 mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF + pin<<17 + count
 ```
 
-**Input Modes:** D[23] must be 1 to write to Hub
+**Input Modes:** D[23] must be 1 to write to hub
 
-```pasm2
+```spin2
 ' WRFAST enabled
 mode := X_32P_4DAC8_WFLONG | X_WRITE_ON + pin<<17 + count
 
@@ -1303,7 +1312,7 @@ vsync_pin       res     1
 y               res     1
 ```
 
-> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847), which drives sync and blanking through the streamer's DAC outputs.
+> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847).
 
 ## 15.2 HDMI/DVI Output {#sec-15-2}
 
@@ -1330,7 +1339,7 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 ```
 
 ::: hardware
-**HDMI requires the colorspace converter in DVI mode.** The converter generates TMDS encoding automatically from RGB data.
+**HDMI requires the colorspace converter in DVI mode.** In DVI mode, the converter generates TMDS encoding from RGB data.
 :::
 
 ## 15.3 Composite Video {#sec-15-3}
@@ -1499,7 +1508,7 @@ The LUT can contain any waveform shape—sine, square, triangle, or arbitrary sa
 
 # Chapter 18: Integration Patterns
 
-The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple COGs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
+The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple cogs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
 
 ## 18.1 Double Buffering {#sec-18-1}
 
@@ -1524,24 +1533,24 @@ frame_loop      ' Start displaying current buffer
                 jmp     #frame_loop
 ```
 
-## 18.2 Multi-COG Video {#sec-18-2}
+## 18.2 Multi-Cog Video {#sec-18-2}
 
-Complex video systems span multiple COGs:
+Complex video systems span multiple cogs:
 
-| COG | Function |
+| Cog | Function |
 |-----|----------|
 | 0 | Main application |
 | 1 | Horizontal timing, pixel streaming |
 | 2 | Vertical timing, frame sync |
 | 3 | Sprite rendering |
 
-**Synchronization via Hub flags:**
+**Synchronization via hub flags:**
 
 ```pasm2
-' COG 1: Signal line complete
+' Cog 1: Signal line complete
                 wrlong  #1, ##line_done_flag
 
-' COG 2: Wait for line complete, then clear the flag (handshake)
+' Cog 2: Wait for line complete, then clear the flag (handshake)
 wait_line       rdlong  temp, ##line_done_flag wz
         if_z    jmp     #wait_line
                 wrlong  #0, ##line_done_flag    ' clear for next line
@@ -1679,7 +1688,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 
 ## NCO Frequency Values
 
-**Formula:** `frequency = $8000_0000 × (rate / clock)`
+**Formula:** `frequency = $8000_0000 * (rate / clock)`
 
 | Rate Ratio | Value | Notes |
 |------------|-------|-------|
@@ -1702,7 +1711,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 | 1024×768 | 65.000 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
 | 1280×720 | 74.250 MHz | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
 
-Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
+Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 
 # Appendix D: Troubleshooting Guide {#app-d}
 
@@ -1845,7 +1854,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 - Mode encoding table: [Appendix A](#app-a)
 - Mode field: [4.2](#sec-4-2)
 - Mode symbols: [13.1](#sec-13-1)
-- Multi-COG: [18.2](#sec-18-2)
+- Multi-cog: [18.2](#sec-18-2)
 
 ```{=latex}
 \indexletter{N}

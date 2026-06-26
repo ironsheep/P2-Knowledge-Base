@@ -1,5 +1,16 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.2 (2026-06-26)
+
+Presentation refresh adopting the shared manual-family typography. No chapters added,
+no mode encodings changed.
+
+- **Typography** — the IBM Plex type family throughout, with code set in clean boxes and
+  no line-number gutter, matching the rest of the manual family.
+- **LUMA8 color reference** — §7.2 tabulates the eight `S[2:0]` output colors.
+- **Mode-field shorthand** — §6.1 explains the `%MMMM_CCCC` notation (mode field D[31:28]
+  plus config field D[19:16]) used across the mode tables.
+
 ## v1.0.1 (2026-06-19)
 
 Correctness, accuracy-guidance, and presentation update following a full grounding

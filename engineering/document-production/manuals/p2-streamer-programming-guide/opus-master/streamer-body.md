@@ -94,7 +94,7 @@ And it leans on a few neighboring P2 subsystems:
 | LUT RAM | palette lookups, sine/cosine tables |
 | DAC channels | analog output for video and audio |
 | Colorspace converter | HDMI encoding and composite video |
-| Smart pins | clock generation and timing synchronization |
+| Smart pins | clock generation and timing |
 
 With that picture in place, Chapter 2 opens up the engine itself — the data paths inside the streamer and how the pieces connect.
 
@@ -173,7 +173,7 @@ phase = (phase & $7FFF_FFFF) + frequency
 4. On rollover, the streamer advances to the next data element
 
 ::: hardware
-**The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2³¹`.
+**The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2^31`.
 :::
 
 ```{=latex}
@@ -199,10 +199,10 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 | 1:3 | `$2AAA_AAAB` | rounded (+1) |
 | 1:10 | `$0CCC_CCCD` | rounded (+1) |
 
-A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). This exactness is also what eliminates per-pixel jitter — see [§3.4](#sec-3-4) for choosing a rate around it. [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
+A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). A power-of-two ratio also makes the sysclk an exact integer multiple of the pixel rate, and that integer ratio — not the word's exactness — is what removes per-pixel jitter (see [§3.4](#sec-3-4) for choosing a rate around it). [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
 
 ::: caution
-**Round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+**Round up, and never let the value reach zero.** Truncating `$8000_0000 * rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 :::
 
 ## 3.3 Setting NCO Frequency {#sec-3-3}
@@ -229,8 +229,8 @@ The **SETQ** method allows changing frequency atomically with a new command.
 
 Two facts decide this, and the first is counter-intuitive:
 
-1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2³¹` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
-2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk ÷ pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
+1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2^31` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
+2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk / pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
 
 The jitter-free sysclks below are the integer multiples the P2 PLL can actually produce from a 20 MHz crystal. The last column is the penalty for ignoring the rule and just running 250 MHz.
 
@@ -244,7 +244,7 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 
 > **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
 
-The SETXFRQ word for any combination is `round($8000_0000 × pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+The SETXFRQ word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
 ```formula
 Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
@@ -260,12 +260,12 @@ Example 2 — non-integer ratio: VGA 640×480, 25.175 MHz @ 250 MHz
 ```
 
 ::: tip
-The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk ÷ pixel_clock` a whole number and every pixel is the same width.
+The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk / pixel_clock` a whole number and every pixel is the same width.
 :::
 
 ## 3.5 Clock Accuracy and Jitter {#sec-3-5}
 
-Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-to-pixel *ratio* and is the same no matter how precise your oscillator is. **Absolute accuracy** — how close the pixel clock sits to its exact nominal frequency, and how steadily it holds — is set entirely by the reference crystal: the PLL only multiplies it (`sysclk = crystal × M / (D×P)`) and the NCO adds under 0.01 ppm, so your pixel clock is **no more accurate than your crystal**.
+Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-to-pixel *ratio* and is the same no matter how precise your oscillator is. **Absolute accuracy** — how close the pixel clock sits to its exact nominal frequency, and how steadily it holds — is set entirely by the reference crystal: the PLL only multiplies it (`sysclk = crystal * M / (D*P)`) and the NCO adds under 0.01 ppm, so your pixel clock is **no more accurate than your crystal**.
 
 If you build on a Parallax **P2 Edge module**, this is already handled for you.
 
@@ -302,7 +302,7 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 | `%1111` | ADC | ADC | DACs/WRFAST |
 | `%1111_x111` | DDS/Goertzel | LUT | DACs + Analysis |
 
-> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Within that config field, bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
+> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Separately — outside that config field — bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
 
 ## 4.3 DAC Routing Field D[27:24]
 
@@ -435,6 +435,8 @@ RDFAST modes are the workhorse of the streamer. Where immediate modes carry a si
 
 Hub data serves as LUT index values.
 
+> **Reading the `%MMMM_CCCC` shorthand:** the two underscored nibbles are the **mode** field D[31:28] and the **config** field D[19:16] — *not* a single contiguous byte. D[27:20] sit between them in the command word (they carry DAC routing, enable, and pin-group fields; see [§4.2](#sec-4-2)). The shorthand pairs the two nibbles that pick the mode so a row reads at a glance; [Appendix A](#app-a) lists every field in its own column.
+
 | Mode | Symbol | Hub Read | Elements | Bits/Element |
 |------|--------|----------|----------|--------------|
 | `%0111_001a` | `X_RFLONG_32X1_LUT` | RFLONG | 32 | 1 |
@@ -497,7 +499,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 | `%1011_0101` | `X_RFWORD_RGB16` | RFWORD | RGB 5:6:5 | 2 |
 | `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB 8:8:8 | 4 |
 
-**Memory is usually the deciding factor.** A framebuffer is `width × height × bytes/px`, and it shares the P2's **512 KB hub RAM** with your code. A full 640×480 frame is **300 KB** at 1 byte/px (fits), **600 KB** at 2 bytes/px, and **1.2 MB** at 4 bytes/px (neither fits). So full-screen video on a 512 KB P2 generally uses a **1-byte format** (RGB8, RGBI8, or LUMA8); RGB16 and RGB24 suit smaller regions, sprites, or boards with external PSRAM.
+**Memory is usually the deciding factor.** A framebuffer is `width * height * bytes/px`, and it shares the P2's **512 KB hub RAM** with your code. A full 640×480 frame is **300 KB** at 1 byte/px (fits), **600 KB** at 2 bytes/px, and **1.2 MB** at 4 bytes/px (neither fits). So full-screen video on a 512 KB P2 generally uses a **1-byte format** (RGB8, RGBI8, or LUMA8); RGB16 and RGB24 suit smaller regions, sprites, or boards with external PSRAM.
 
 ## 7.2 Color Format Details
 
@@ -505,7 +507,14 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 \DiagRgbFormats
 ```
 
-**LUMA8:** 8-bit luminance. The `S[2:0]` field selects the output color; the byte sets its intensity.
+**LUMA8:** 8-bit luminance. The `S[2:0]` field selects one of eight output colors; the pixel byte sets that color's intensity. The color set is fixed:
+
+| `S[2:0]` | Color | | `S[2:0]` | Color |
+|----------|--------|---|----------|--------|
+| `%000` | Orange | | `%100` | Red |
+| `%001` | Blue | | `%101` | Magenta |
+| `%010` | Green | | `%110` | Yellow |
+| `%011` | Cyan | | `%111` | White |
 
 **RGBI8 (2:2:2:2):** Two bits each for red, green, and blue, plus a 2-bit intensity field.
 
@@ -693,7 +702,7 @@ frequency = $8000_0000 × F / CLK
 ```
 
 ::: hardware
-**The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode** — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2³¹`, about 0.12 Hz at 250 MHz.
+**The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode** — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2^31`, about 0.12 Hz at 250 MHz.
 :::
 
 # Part III: Configuration Reference
@@ -749,22 +758,22 @@ DAC channels drive pins based on the pin's two LSBs:
 ## 11.3 Common DAC Configurations
 
 **Mono Audio (single channel):**
-```pasm2
+```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_0_0_0_0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Stereo Audio (two channels):**
-```pasm2
+```spin2
 mode := X_RFWORD_16P_2DAC8 | X_DACS_X_X_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Differential Output (noise rejection):**
-```pasm2
+```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_X_X_0N0 | X_PINS_ON + pin<<17 + count
 ```
 
 **Four-Channel Video (RGB + sync):**
-```pasm2
+```spin2
 mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
@@ -774,7 +783,7 @@ A streamer command also has to say *which* pins it drives or samples, and that i
 
 ## 12.1 Pin Group Selection {#sec-12-1}
 
-The %ppp field in D[22:20] selects the 32-pin window the streamer drives or samples. The window's **base pin is `%ppp × 8`**, and it always spans **32 consecutive pins** from there — wrapping past pin 63 back to pin 0 once the base climbs high enough.
+The %ppp field in D[22:20] selects the 32-pin window the streamer drives or samples. The window's **base pin is `%ppp * 8`**, and it always spans **32 consecutive pins** from there — wrapping past pin 63 back to pin 0 once the base climbs high enough.
 
 | %ppp | Base | Pin Range (always 32 pins) | Window |
 |------|------|----------------------------|--------|
@@ -812,7 +821,7 @@ For modes using fewer than 8 pins, D[19:17] refines selection within the group:
 
 **Output Modes:** D[23] must be 1 to drive pins
 
-```pasm2
+```spin2
 ' Pin output enabled
 mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
 
@@ -822,7 +831,7 @@ mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF + pin<<17 + count
 
 **Input Modes:** D[23] must be 1 to write to hub
 
-```pasm2
+```spin2
 ' WRFAST enabled
 mode := X_32P_4DAC8_WFLONG | X_WRITE_ON + pin<<17 + count
 
@@ -1120,7 +1129,7 @@ vsync_pin       res     1
 y               res     1
 ```
 
-> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847), which drives sync and blanking through the streamer's DAC outputs.
+> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847).
 
 ## 15.2 HDMI/DVI Output {#sec-15-2}
 
@@ -1147,7 +1156,7 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 ```
 
 ::: hardware
-**HDMI requires the colorspace converter in DVI mode.** The converter generates TMDS encoding automatically from RGB data.
+**HDMI requires the colorspace converter in DVI mode.** In DVI mode, the converter generates TMDS encoding from RGB data.
 :::
 
 ## 15.3 Composite Video {#sec-15-3}
@@ -1355,10 +1364,10 @@ Complex video systems span multiple cogs:
 **Synchronization via hub flags:**
 
 ```pasm2
-' COG 1: Signal line complete
+' Cog 1: Signal line complete
                 wrlong  #1, ##line_done_flag
 
-' COG 2: Wait for line complete, then clear the flag (handshake)
+' Cog 2: Wait for line complete, then clear the flag (handshake)
 wait_line       rdlong  temp, ##line_done_flag wz
         if_z    jmp     #wait_line
                 wrlong  #0, ##line_done_flag    ' clear for next line
@@ -1496,7 +1505,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 
 ## NCO Frequency Values
 
-**Formula:** `frequency = $8000_0000 × (rate / clock)`
+**Formula:** `frequency = $8000_0000 * (rate / clock)`
 
 | Rate Ratio | Value | Notes |
 |------------|-------|-------|
@@ -1519,7 +1528,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 | 1024×768 | 65.000 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
 | 1280×720 | 74.250 MHz | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
 
-Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
+Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 
 # Appendix D: Troubleshooting Guide {#app-d}
 

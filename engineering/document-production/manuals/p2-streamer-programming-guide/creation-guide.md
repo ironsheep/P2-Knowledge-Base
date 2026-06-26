@@ -59,29 +59,29 @@ FRONT MATTER
 └── How to Use This Guide
 
 PART I: STREAMER FUNDAMENTALS (~15 pages)
-├── Chapter 1: Introduction and Overview
+├── Chapter 1: Understanding the Streamer
 ├── Chapter 2: Architecture
 ├── Chapter 3: NCO and Timing
 └── Chapter 4: Command Structure
 
 PART II: MODE REFERENCE (~40 pages)
-├── Chapter 5: Immediate Modes (IMM)
-├── Chapter 6: RDFAST Modes (RF)
-├── Chapter 7: WRFAST Modes (WF)
-├── Chapter 8: RGB Video Modes
+├── Chapter 5: Immediate Modes
+├── Chapter 6: RDFAST Modes
+├── Chapter 7: RGB Video Modes
+├── Chapter 8: WRFAST Input Modes
 ├── Chapter 9: ADC Sampling Modes
 └── Chapter 10: DDS/Goertzel Mode
 
 PART III: CONFIGURATION REFERENCE (~20 pages)
 ├── Chapter 11: DAC Channel Configuration
 ├── Chapter 12: Pin Selection and Control
-├── Chapter 13: Programming Constants (Symbols)
+├── Chapter 13: Programming Constants
 └── Chapter 14: Events and Synchronization
 
 PART IV: APPLICATIONS (~25 pages)
-├── Chapter 15: Video Output (VGA, HDMI)
+├── Chapter 15: Video Output
 ├── Chapter 16: High-Speed Serial (SPI)
-├── Chapter 17: Signal Processing (DDS, Goertzel)
+├── Chapter 17: Signal Processing
 └── Chapter 18: Integration Patterns
 
 APPENDICES

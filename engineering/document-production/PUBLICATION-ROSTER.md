@@ -46,7 +46,7 @@ that does not ride the shared stack.
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding. |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release. |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.1 (2026-06-19)** released as community-review edition — grounding-audit corrections + §3.5 clock-accuracy section + emoji→fenced callouts; platform-unification pilot. chip review outstanding |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.2 (2026-06-26)** released as community-review edition — IBM Plex typography refresh (platform-unification pilot) + LUMA8 color table + mode-field shorthand note; release-gate audited. chip review outstanding |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
 
 **Slug** is the one folder name each manual uses across all three trees —
@@ -159,6 +159,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-26 17:54  PUBLISH   p2-streamer-programming-guide    (v1.0.2, 68pp — IBM Plex typography refresh + LUMA8 color table + mode-field shorthand note; release-gate audited, 0 missing chars, outline verified complete)
 2026-06-26 05:09  PUBLISH   p2-debug-window-manual           (v1.0.1, 156pp — accuracy + typography refresh: DEBUG-quoting examples + FFT/run-up programs + per-window details; IBM Plex, 0 missing chars; outline verified complete)
 2026-06-25 23:31  PUBLISH   p2-pasm-desilva-style            (v3.0.1, 162pp — accuracy re-audit + Plex typography refresh; ✓/✗/θ glyph fallbacks clean, 0 missing chars; outline verified complete)
 2026-06-25 23:22  PLATFORM  templates/p2kb-platform-foundation.sty   (glyph fallbacks via newunicodechar + listings literate: ✅/✓/❌ → green \checkmark / red \times, and θ → \rmfamily Greek theta; collapses the 03:53 Ω/μ/µ line, file now carries all; daemon-verified clean on deSilva v3.0.1 — 0 missing chars)
@@ -166,7 +167,6 @@ that PDF was generated. This ledger is the detector.
 2026-06-24 22:36  PUBLISH   p2-getting-started-guide         (v1.0.0, 25pp — initial Community Review Edition; release-gate audited + finalized; clean compile log, 0 overfull)
 2026-06-24 21:01  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (AG-01: English-collision handling for call/push/ones/test — daemon-verified on Getting Started; other manuals low-urgency regen)
 2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
-2026-06-19 20:44  PUBLISH   p2-streamer-programming-guide    (v1.0.1, 71pp — grounding-audit fixes + §3.5 clock accuracy + fenced callouts)
 2026-06-19 20:41  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (do not bold the English verb "fit" — subject-pronoun + article-object contexts)
 2026-06-19 19:10  PLATFORM  templates/p2kb-platform-content.sty       (add HardwareBlock graphite callout)
 2026-06-19 19:10  PLATFORM  filters/p2kb-platform-code-coloring.lua   (map ::: hardware -> HardwareBlock)
@@ -196,7 +196,7 @@ top of the 06-12 platform.
 | `p2-debug-window-manual` | ✅ current | **v1.0.1 released 2026-06-26** (156pp); accuracy + typography refresh; built on the latest platform (06-25 glyph-fallback foundation + Plex) |
 | `p2-assembly-language-manual` | ✅ current | **v3.1.0 released 2026-06-25** (501pp); built on the latest platform (incl. the 06-25 Ω/μ/µ glyph fallback) |
 | `p2-pasm-desilva-style` | ✅ current | **v3.0.1 released 2026-06-25** (162pp); built on the latest platform (incl. the 06-25 ✓/✗/θ glyph fallback) |
-| `p2-streamer-programming-guide` | ✅ current | **v1.0.1 released 2026-06-19** (71pp); built on the latest platform (incl. 06-19 HardwareBlock + fit fix) |
+| `p2-streamer-programming-guide` | ✅ current | **v1.0.2 released 2026-06-26** (68pp); IBM Plex typography + glyph-fallback foundation; release-gate audited, 0 missing chars, outline verified complete |
 | `p2-single-step-debugger-manual` | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 platform edit |
 | `p2-io-and-smart-pins-user-guide` | ⏳ to regenerate | last built 2026-06-09; behind `figures.lua` + the 06-12 edit |
 | `p2-layout-torture-test` | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
