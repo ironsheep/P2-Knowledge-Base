@@ -164,10 +164,9 @@ PUB calc_frequency(hz) : y_val
 y_val := frequency FRAC _clkfreq
 ```
 
-The `FRAC` operator performs `(operand1 * 2^32) / operand2` using P2's 64-bit
-intermediate path, so it never overflows even when `frequency` × 2^32 would not
-fit in 32 bits. Avoid hand-rolled `frequency * $1_0000_0000 / _clkfreq` — the
-`$1_0000_0000` literal exceeds the 32-bit constant range.
+Use `FRAC`, not a hand-rolled `frequency * $1_0000_0000 / _clkfreq` (the
+`$1_0000_0000` literal exceeds the 32-bit constant range). See Chapter 8 for
+how `FRAC` derives the NCO Y value.
 
 **For NCO, remember X[15:0] affects frequency:**
 ```spin2
@@ -257,12 +256,12 @@ DEBUG("Bit period: ", UDEC_(bit_period))
 **Match TX and RX configuration:**
 ```spin2
 ' TRANSMIT
-tx_x := (_clkfreq / BAUD) << 16 | 8      ' 8 data bits
+tx_x := (_clkfreq / BAUD) << 16 | 7      ' 8 data bits
 WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
 WXPIN(TX_PIN, tx_x)
 
 ' RECEIVE - must match exactly
-rx_x := (_clkfreq / BAUD) << 16 | 8      ' Same baud and bits
+rx_x := (_clkfreq / BAUD) << 16 | 7      ' Same baud and bits
 WRPIN(RX_PIN, P_ASYNC_RX)
 WXPIN(RX_PIN, rx_x)
 ```

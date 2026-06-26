@@ -267,8 +267,7 @@ P_SYNC_TX transmits LSB first. For MSB-first protocols (like most SPI):
 **Spin2:**
 ```spin2
 PUB spi_tx_msb_first(value) | reversed
-  ' Reverse bits for MSB-first transmission
-  reversed := value << 24                   ' Shift to bits 31:24
+  ' reverse the data bits for MSB-first
   reversed := value REV 8                   ' Reverse 8 bits
 
   WYPIN(TX_PIN, reversed)
@@ -277,8 +276,7 @@ PUB spi_tx_msb_first(value) | reversed
 
 **PASM2:**
 ```pasm2
-              shl       data, #24             ' Position for 8 bits
-              rev       data                  ' Reverse bit order
+              rev       data            ' reverse the data bits, MSB-first
               wypin     data, #TX_PIN
               wypin     #16, #CLK_PIN
 ```
@@ -430,8 +428,7 @@ PUB spi_deselect()
 
 PUB spi_tx_byte(value) | reversed
   ' MSB first
-  reversed := value << 24
-  reversed := value REV 8
+  reversed := value REV 8              ' reverse the data bits for MSB-first
 
   WYPIN(MOSI_PIN, reversed)
   WYPIN(CLK_PIN, 16)                        ' 8 clock cycles

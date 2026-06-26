@@ -324,7 +324,7 @@ USB host mode requires:
 USB device mode requires:
 
 - Pull-up resistor on D+ (Full Speed) or D- (Low Speed)
-- May need level shifting if P2 runs at 3.3V
+- No level shifting needed on D+/D-: the P2's I/O is 3.3V, which matches USB low/full-speed signaling (only VBUS is 5V)
 
 ### Pin Selection
 

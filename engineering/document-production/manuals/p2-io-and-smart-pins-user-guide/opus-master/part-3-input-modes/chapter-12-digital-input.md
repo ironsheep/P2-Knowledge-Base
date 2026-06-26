@@ -81,13 +81,11 @@ bit := (INA >> pin) & 1                    ' Single bit extraction
 
 ### TESTP vs INA Timing
 
-TESTP reads pin state 2 clocks before the instruction starts, while INA reflects state 3 clocks before the read instruction.
+TESTP reaches the pin a clock sooner than the INA/INB register path (the latencies are tabulated in §12.1; see also Ch1, Input Timing). For time-critical input sampling, prefer TESTP.
 
 ```{=latex}
 \DiagTestpVsIna
 ```
-
-For time-critical input sampling, prefer TESTP.
 
 
 ## 12.3 Input Conditioning Options
@@ -103,17 +101,11 @@ WRPIN(pin, P_LOGIC_B_FB)               ' Same, different internal routing
 
 ### P_SCHMITT_A
 
-Schmitt trigger input with hysteresis for noise immunity:
+Schmitt trigger input — its hysteresis (separate rising and falling thresholds) adds noise immunity and produces clean edges on slow or noisy signals. For how a Schmitt trigger works, see Ch2 §2.3.
 
 ```spin2
 WRPIN(pin, P_SCHMITT_A)
 ```
-
-**Hysteresis behavior:**
-
-- Rising edge threshold: ~1.65V
-- Falling edge threshold: ~1.35V
-- Hysteresis: ~0.3V (300 mV)
 
 **Use when:**
 
@@ -168,6 +160,8 @@ threshold_voltage = (level / 256) × 3.3V
 
 
 ## 12.4 Pull-Up and Pull-Down Resistors
+
+Pull resistors and when to use them are covered in Ch2 §2.2; this section gives the smart-pin constants and how to apply them to inputs.
 
 ### Available Options
 
@@ -572,7 +566,7 @@ Theoretical maximum depends on sampling method:
 |----------|----------|
 | P_NORMAL | Default CMOS input |
 | P_LOGIC_A | Logic input, OUT feedback |
-| P_SCHMITT_A | Schmitt trigger (~0.4V hysteresis) |
+| P_SCHMITT_A | Schmitt trigger (adds input hysteresis) |
 | P_LEVEL_A | Programmable level comparator (use level=108 for ~1.4V TTL threshold) |
 
 ### Pull Resistors
@@ -586,11 +580,7 @@ Theoretical maximum depends on sampling method:
 
 ### Timing Summary
 
-| Operation | Clock Cycles |
-|-----------|--------------|
-| Output change to pin | 3 clocks |
-| Pin change to INA/INB | 3 clocks |
-| Pin change to TESTP | 2 clocks |
+For input/output path latencies (INA/INB vs TESTP), see §12.1 and Ch1, Input Timing.
 
 
 *This chapter covered basic digital input. For signal measurement modes (timing, counting), see Chapter 13. For serial reception, see Chapter 17.*

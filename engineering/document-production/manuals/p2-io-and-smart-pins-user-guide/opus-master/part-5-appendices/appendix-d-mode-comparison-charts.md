@@ -35,7 +35,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | Count Highs | P_COUNT_HIGHS | Gated edges | 32-bit | Configurable | Yes | Low | Freq counter |
 | Count Up/Down | P_REG_UP_DOWN | Up/down by B direction | 32-bit | Configurable | Yes | Low | Step/direction |
 | Count Edges | P_COUNT_RISES | Edge/rise count | 32-bit | Configurable | Yes | Low | Event counter |
-| High Clocks | P_HIGH_TICKS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
+| High Clocks | P_COUNT_HIGHS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
 | Periods Ticks | P_PERIODS_TICKS | N period time | 1 clock | N periods | Yes | Medium | Precision freq |
 | Periods Highs | P_PERIODS_HIGHS | N period high | 1 clock | N periods | Yes | Medium | Duty cycle |
 | Counter Ticks | P_COUNTER_TICKS | Time in window | 1 clock | Time window | Yes | Medium | Freq measurement |
@@ -102,9 +102,9 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | Mode | A-Input | B-Input | Direction | Gating | Signed |
 |------|---------|---------|-----------|--------|--------|
 | P_COUNT_RISES | Count | Down (Y=1) | Y[0] | No | Yes |
-| P_COUNT_HIGHS | Count | Gate | No | Yes | No |
-| P_COUNT_RISES | Count | Direction | B level | No | Yes |
-| P_HIGH_TICKS | Time | Time (Y=1) | Y[0] | Level | Yes |
+| P_REG_UP | Count | Gate | No | Yes | No |
+| P_REG_UP_DOWN | Count | Direction | B level | No | Yes |
+| P_COUNT_HIGHS | Time | Time (Y=1) | Y[0] | Level | Yes |
 | P_QUADRATURE | Phase A | Phase B | Automatic | No | Yes |
 
 ## Period/Frequency Measurement Comparison

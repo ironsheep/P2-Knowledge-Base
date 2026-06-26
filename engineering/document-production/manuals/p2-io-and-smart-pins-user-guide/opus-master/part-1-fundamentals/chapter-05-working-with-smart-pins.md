@@ -69,8 +69,7 @@ value := RQPIN(pin)                       ' Read quietly
 After acknowledging, wait 2 clocks before polling IN again:
 ```pasm2
               rdpin     result, #pin      ' Acknowledge
-              nop                         ' Clock 1
-              nop                         ' Clock 2  
+              nop                         ' Wait 2 clocks (NOP = 2 clocks)
               testp     #pin wc           ' Safe to poll
 ```
 
@@ -269,17 +268,7 @@ PINSTART(pin, P_NCO_FREQ | P_OE, 1, freq)
 
 ### PINCLEAR - Reset to Normal
 
-PINCLEAR disables smart pin mode and returns to Direct I/O:
-
-```spin2
-PINCLEAR(pin)                             ' Reset to P_NORMAL
-```
-
-Equivalent to:
-```spin2
-PINFLOAT(pin)
-WRPIN(pin, 0)
-```
+`PINCLEAR(pin)` disables smart pin mode and returns the pin to Direct I/O — equivalent to `PINFLOAT(pin)` followed by `WRPIN(pin, 0)`. See §4.14 for the complete reset-to-normal reference.
 
 
 ## 5.5 Debugging Smart Pins

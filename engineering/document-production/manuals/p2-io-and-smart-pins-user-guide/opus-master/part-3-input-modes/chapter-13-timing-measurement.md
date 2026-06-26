@@ -23,6 +23,10 @@ At 200 MHz sysclk:
 - Maximum measurement: $80000000 clocks = 10.74 seconds
 - Overflow behavior: Z saturates at $80000000
 
+### Divide-by-Zero-Safe Preload
+
+On reset (DIR=0), **all three timing modes preload Z to $0000_0001, not 0.** Software that reads Z before the first measurement completes therefore gets 1, never zero — which keeps a naive `period / Z` calculation from dividing by zero on the first window.
+
 ### Common Applications
 
 - PWM duty cycle analysis
@@ -54,7 +58,9 @@ P_STATE_TICKS continuously measures the duration of each logic state (both high 
 | C flag | Previous state (1=was high, 0=was low) |
 | IN flag | Raised on every transition |
 
-On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0**. Software that reads Z before the first transition therefore gets 1, never a zero — which keeps a naive `period / Z` calculation from dividing by zero on the first window.
+On reset (DIR=0), IN is low and Z preloads to 1 — see §13.1.
+
+**Bit 31 means different things across these modes.** In P_STATE_TICKS it is the captured C/state flag (1 = the timed state was high); in P_HIGH_TICKS and P_EVENTS_TICKS it is the saturation/overflow indicator. The same `& $7FFF_FFFF` mask clears it in every mode, but read bit 31 according to the mode you configured.
 
 ### Reading Measurements
 
@@ -82,6 +88,10 @@ PUB measure_states() | duration, was_high
     else
       DEBUG("Low time: ", UDEC_(duration), " clocks")
 ```
+
+**Enabling the smart pin.** The `PINLOW(INPUT_PIN) ' Enable` line just sets DIR = 1 — PINLOW, PINHIGH, and DIRH all do this, and the OUT level is irrelevant in input modes (see Ch3 §3.4).
+
+**PINREAD here means the IN flag.** In the wait loop, `PINREAD(INPUT_PIN)` returns the smart pin's IN flag (measurement-ready), *not* the pin's logic level as it did in Ch12 §12.2 — the same call carries two meanings depending on whether the pin is in smart-pin mode (see Ch3 §3.3 and Ch5 §5.1).
 
 **PASM2:**
 ```pasm2
@@ -149,7 +159,7 @@ P_HIGH_TICKS measures only the duration of high states. On each high-to-low tran
 | Z | Duration of previous high state (clocks) |
 | IN flag | Raised on high-to-low transition |
 
-On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** — the same divide-by-zero-safe initial value as the other timing modes. (Z also saturates at $8000_0000; bit 31 doubles as the overflow indicator, which is why the read examples mask with `$7FFF_FFFF`.)
+On reset (DIR=0), IN is low and Z preloads to 1 (see §13.1). Z saturates at $8000_0000; in this mode bit 31 is the overflow indicator, which is why the read examples mask with `$7FFF_FFFF`.
 
 ### Pulse Width Measurement
 
@@ -226,7 +236,7 @@ P_EVENTS_TICKS operates in two modes controlled by Y[2]:
 - **Event timing (Y[2]=0)**: Measures time for X events to occur
 - **Timeout detection (Y[2]=1)**: Detects when no event occurs within X clocks
 
-On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** in both sub-modes — the same divide-by-zero-safe initial value used by the other timing modes.
+On reset (DIR=0), IN is low and Z preloads to 1 in both sub-modes (see §13.1).
 
 ### Event Type Selection
 
@@ -338,7 +348,7 @@ In timeout mode:
 - Timeout raises IN and restarts timer
 - Z always contains clocks since last event
 
-In event-timing mode (Y[2]=0), reading the result with `RDPIN`/`RQPIN` acknowledges the measurement and **auto-restarts** it — the next read returns the interval to the following event. No explicit re-arm is needed for back-to-back measurements.
+In event-timing mode (Y[2]=0), reading the result with **RDPIN** acknowledges the measurement and **auto-restarts** it — the next RDPIN returns the interval to the following event, so no explicit re-arm is needed for back-to-back measurements. **RQPIN** is only a quiet peek: it returns the current value *without* acknowledging, so it does not clear IN and does not restart the measurement (see Ch15 §15.3).
 
 
 ## 13.5 Input Signal Routing

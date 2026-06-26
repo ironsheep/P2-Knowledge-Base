@@ -428,10 +428,9 @@ PUB measure_voltage() : millivolts | sample, last_acc, acc, ack
   WXPIN(SENSOR_PIN, %01_1101)                 ' SINC2 filter, 14-bit
   PINH(SENSOR_PIN)
 
-  ' Wait for filter to stabilize (2 periods)
-  REPEAT 2
-    REPEAT UNTIL PINREAD(SENSOR_PIN)
-    ack := RDPIN(SENSOR_PIN)               ' Discard stabilization sample
+  ' Discard the first reading (SINC2 is valid from the 2nd period)
+  REPEAT UNTIL PINREAD(SENSOR_PIN)
+  ack := RDPIN(SENSOR_PIN)                 ' discard warm-up sample
 
   ' Get actual measurement
   REPEAT UNTIL PINREAD(SENSOR_PIN)

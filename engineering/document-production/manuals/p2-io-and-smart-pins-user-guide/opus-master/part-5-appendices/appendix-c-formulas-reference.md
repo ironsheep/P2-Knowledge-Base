@@ -176,12 +176,12 @@ X[3:0] = 7  (128 clocks)
 sample_rate = 200,000,000 / 128 = 1,562,500 Hz
 ```
 
-| X[3:0] | Period | Sample Rate at 200 MHz |
-|--------|--------|------------------------|
-| %0111 | 128 clocks | 1.56 MHz |
-| %1001 | 512 clocks | 390 kHz |
-| %1011 | 2048 clocks | 97.6 kHz |
-| %1101 | 8192 clocks | 24.4 kHz |
+| Resolution | X[3:0] | Period | Sample Rate at 200 MHz |
+|------------|--------|--------|------------------------|
+| 8 bits | %0111 | 128 clocks | 1.56 MHz |
+| 10 bits | %1001 | 512 clocks | 390 kHz |
+| 12 bits | %1011 | 2048 clocks | 97.6 kHz |
+| 14 bits | %1101 | 8192 clocks | 24.4 kHz |
 
 
 ### ADC Voltage Conversion
@@ -198,7 +198,7 @@ voltage_mv = (sample × 3300) / full_scale
 - For 8-bit: full_scale = 255
 - For 14-bit: full_scale = 16383
 
-ADC resolution spans roughly **2 to 18 bits** depending on mode and sample period: SINC2 Sampling reaches 14-bit, while SINC3 Filtering with a long enough period (and the externally-clocked delta-sigma path) goes higher — up to ~18 ENOB. Use `full_scale = 2^bits - 1` for the resolution you actually configured.
+Use `full_scale = 2^bits - 1` for the resolution you actually configured. See Chapter 16 for how mode and sample period set the bit depth.
 
 **Worked Example (8-bit ADC reading 128):**
 ```formula
@@ -419,12 +419,8 @@ rpm = (500 × 60 × 10) / 4000 = 75 RPM
 
 ### ADC Resolution vs Speed at 200 MHz
 
-| Resolution | X[3:0] | Sample Rate |
-|------------|--------|-------------|
-| 8 bits | %0111 | 1.56 MHz |
-| 10 bits | %1001 | 390 kHz |
-| 12 bits | %1011 | 97.6 kHz |
-| 14 bits | %1101 | 24.4 kHz |
+See the **ADC Sample Rate** table above (resolution, X[3:0], period, and rate
+in one place).
 
 
 ### Pre-Calculated Values at 250 MHz

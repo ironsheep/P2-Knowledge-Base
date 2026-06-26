@@ -78,7 +78,7 @@ This appendix provides task-oriented navigation. Find what you want to accomplis
 | I want to… | Go to | Primary mode | Also consider |
 |---|---|---|---|
 | Synchronize multiple pin outputs | [Ch 7](#chapter-7-pulse-and-transition-generation) | `SETSE1` / `WAITSE1` events | shared X base period |
-| Share data between Cogs | [Ch 18](#chapter-18-repository-and-inter-cog-data-sharing) | `P_REPOSITORY` (%00001–%00011, non-DAC) | `RQPIN` for non-blocking reads |
+| Share data between Cogs | [Ch 18](#chapter-18-repository-and-inter-cog-data-sharing) | `P_REPOSITORY` (%00001, non-DAC) | `RQPIN` for non-blocking reads |
 | Precise timing control | [Ch 1](#chapter-1-direct-io---the-foundation) | 3-clock output/input latency (§1.2) | `TESTP` for 2-clock input path |
 | Generate synchronized waveforms | [Ch 8](#chapter-8-frequency-generation-nco) | multiple NCO pins, related freqs | common base period for phase |
 

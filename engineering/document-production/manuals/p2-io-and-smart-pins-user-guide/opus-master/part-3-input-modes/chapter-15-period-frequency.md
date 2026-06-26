@@ -5,6 +5,19 @@ This chapter covers smart pin modes for measuring signal periods and calculating
 
 ## 15.1 Measurement Philosophy
 
+### Which Chapter and Mode?
+
+Several smart-pin modes across Chapters 13–15 measure time-domain signal properties. Use this map to pick the right starting point:
+
+| You want to measure… | Recommended mode(s) | Where |
+|----------------------|---------------------|-------|
+| Pulse width / high or low duration | P_HIGH_TICKS, P_STATE_TICKS | Ch13 |
+| Time between events / timeout | P_EVENTS_TICKS | Ch13 |
+| Edge or event count | P_COUNT_RISES (and other counting modes) | Ch14 |
+| Period (precise, frequency range known) | P_PERIODS_TICKS | Ch15 §15.2 |
+| Frequency (unknown or variable) | P_COUNTER_PERIODS | Ch15 §15.3 |
+| Duty cycle | P_PERIODS_HIGHS + P_PERIODS_TICKS (or the time-window pair) | Ch15 §15.2/§15.4 |
+
 ### Two Approaches to Period Measurement
 
 | Approach | Modes | Method | Best For |
@@ -122,6 +135,8 @@ PUB measure_duty() | total_time, high_time, duty_percent
   duty_percent := (high_time * 100) / total_time
   DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
+
+The loop waits on only `SIG_PIN`, yet reads both pins. That is safe because both smart pins watch the same signal for the same number of periods, so they finish on the same edge — once SIG_PIN's IN flag rises, SIG_PIN+1's result is already latched and ready to read.
 
 
 ## 15.3 Time-Based Modes (Measure in X Clocks)

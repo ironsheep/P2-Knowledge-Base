@@ -199,13 +199,7 @@ X[4:0]: Number of bits minus 1
 
 ### Data Justification
 
-Received data is **left-justified** in the Z register. For less than 32 bits, right-shift to align:
-
-| Bits | Z Register | Right Shift |
-|------|------------|-------------|
-| 8 | Z[31:24] | SHR #24 |
-| 16 | Z[31:16] | SHR #16 |
-| 32 | Z[31:0] | None |
+Data justification is identical to async receive: the word arrives MSB-justified at Z[31], so right-shift by 32 − N to align an N-bit value. See §17.2 for the full table.
 
 ### Basic SPI Slave Receive
 
@@ -673,7 +667,7 @@ X[4:0]: Data bits - 1
 
 **Required modifier:** P_PLUS1_B (or similar) for clock routing
 
-**Data justification:** Left-justified, SHR #(32-bits) to right-justify
+**Data justification:** MSB-justified, SHR #(32-bits) to right-justify
 
 ### Related Modifiers
 

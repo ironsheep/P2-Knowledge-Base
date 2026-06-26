@@ -219,14 +219,14 @@ Both modes support these configuration options:
 | Constant | Purpose |
 |----------|---------|
 | `P_OE` | **Required** - Enable output |
-| `P_INVERT_OUT` | Invert output polarity |
+| `P_INVERT_OUTPUT` | Invert output polarity |
 | `P_HIGH_FAST` | Fast high drive (default) |
 | `P_LOW_FAST` | Fast low drive (default) |
 | `P_HIGH_1K5` / `P_LOW_1K5` | Current-limited drive |
 
 **Example - Inverted output:**
 ```spin2
-WRPIN(pin, P_PULSE | P_OE | P_INVERT_OUT)
+WRPIN(pin, P_PULSE | P_OE | P_INVERT_OUTPUT)
 ```
 
 
@@ -332,7 +332,7 @@ CON
 
 PUB setup_de()
   PINFLOAT(DE_PIN)
-  WRPIN(DE_PIN, P_TRANSITION | P_OE | P_INVERT_OUT)
+  WRPIN(DE_PIN, P_TRANSITION | P_OE | P_INVERT_OUTPUT)
   WXPIN(DE_PIN, DISABLE_DELAY)
   PINLOW(DE_PIN)                          ' DE starts low (disabled)
 

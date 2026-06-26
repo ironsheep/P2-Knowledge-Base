@@ -983,6 +983,8 @@ Reads the physical pin state inverted and affects C or Z flags.
 
 Spin2 provides high-level methods for common pin operations. These methods execute from hub RAM and have additional overhead compared to inline PASM2.
 
+Spin2 also accepts short-form aliases for the three most common of these: `PINH` for `PINHIGH`, `PINL` for `PINLOW`, and `PINF` for `PINFLOAT`. The two forms are interchangeable; this guide uses both.
+
 
 ### PINHIGH(PinField)
 

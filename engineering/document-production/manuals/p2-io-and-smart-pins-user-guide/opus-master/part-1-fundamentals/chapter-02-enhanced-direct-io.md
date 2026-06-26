@@ -30,17 +30,15 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 ### The P_ Constant Architecture
 
-P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior:
+P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The fields most relevant to Enhanced Direct I/O are:
 
 | Bits | Field | Function |
 |------|-------|----------|
-| 31:28 | AAAA | A input selection and polarity |
-| 27:24 | BBBB | B input selection and polarity |
-| 23:21 | FFF | A,B input logic / filter selection |
 | 20:8 | MMMMMMMMMMMMM | Low-level pin control (drive, input mode, DAC/ADC) |
 | 7:6 | TT | DIR/OUT control (P_OE, P_BITDAC) |
-| 5:1 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
-| 0 | — | Always 0 |
+| 5:1 | SSSSS | Smart Pin mode (%00000 = P_NORMAL) |
+
+(For the full 32-bit field map — including the A/B input-routing fields in bits [31:21] and the always-0 bit 0 — see §4.2.)
 
 When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
 
@@ -497,21 +495,7 @@ PUB set_voltage(level) | config
 
 ## 2.13 Resetting to Default
 
-To reset a pin to default configuration:
-
-**Spin2:**
-```spin2
-PINCLEAR(pin)                             ' Reset to P_NORMAL
-' or
-WRPIN(pin, 0)                             ' Same effect
-```
-
-**PASM2:**
-```pasm2
-              wrpin     #0, pin           ' Reset to P_NORMAL
-```
-
-This clears all enhanced configuration and smart pin modes, returning the pin to basic Direct I/O operation.
+`PINCLEAR(pin)` — or equivalently `WRPIN(pin, 0)` — clears all enhanced configuration and smart pin modes, returning the pin to basic Direct I/O operation. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
 
 ## 2.14 Quick Reference
 

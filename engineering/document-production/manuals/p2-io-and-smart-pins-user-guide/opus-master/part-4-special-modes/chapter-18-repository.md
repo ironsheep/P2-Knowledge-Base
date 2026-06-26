@@ -115,6 +115,8 @@ PUB logger_cog()
 
 When configured for DAC output, mode %00001 generates pseudo-random noise on the 8-bit DAC. Each pin produces a unique random pattern.
 
+`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode — the DAC_MODE bits (P[12:10]=%101) decide whether the pin acts as a long repository or a noise DAC.
+
 ### Configuration
 
 ```spin2
@@ -139,14 +141,7 @@ PUB setup_noise_dac()
 
 ### Voltage Range
 
-The noise output spans the full DAC voltage range based on the selected DAC mode:
-
-| DAC Mode | Output Range |
-|----------|--------------|
-| P_DAC_990R_3V | 0 to 3.3V |
-| P_DAC_600R_2V | 0 to 2.0V |
-| P_DAC_124R_3V | 0 to 3.3V |
-| P_DAC_75R_2V | 0 to 2.0V |
+The noise spans the full scale of the selected DAC range. See Chapter 10 §10.2 for the resistor-DAC voltage options.
 
 ### Example: White Noise Generator
 
@@ -179,7 +174,7 @@ Provides 16-bit DAC resolution using pseudo-random dithering of the 8-bit DAC. T
 - Hardware randomly dithers between adjacent 8-bit levels
 - Averaging over time yields 16-bit effective resolution
 
-> **The "16-bit" figure is nominal — a temporal-averaging resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution. The effective bits you actually realize depend on the low-pass filtering and settling of whatever the pin drives, so treat 16-bit as an averaged-over-time ceiling rather than a guaranteed sample-by-sample precision.
+> **The "16-bit" figure is nominal — a temporal-averaging ceiling, not sample-by-sample accuracy** (the hardware DAC is 8-bit). See Chapter 10 §10.4 for the full dithering-resolution treatment.
 
 ### Configuration
 
@@ -249,13 +244,7 @@ PRI get_next_sample() : sample
 
 ### ADC Readback
 
-When OUT is high, the pin's ADC is enabled. RDPIN returns the 16-bit ADC accumulation, useful for measuring DAC loading:
-
-```spin2
-PUB check_loading() : adc_value
-  REPEAT UNTIL PINREAD(DAC_PIN)
-  adc_value := RDPIN(DAC_PIN)                   ' Read ADC value
-```
+When OUT is high, the pin's ADC is enabled and RDPIN returns the 16-bit ADC accumulation (useful for measuring DAC loading). See Chapter 10 §10.6 for the ADC-feedback pattern.
 
 
 ## 18.5 Mode %00011: DAC PWM Dither
@@ -442,6 +431,8 @@ PUB test_flag(flag) : set
   set := (RQPIN(STATUS_PIN) & flag) <> 0
 ```
 
+> **Caution — set/clear-flag is a read-modify-write, not an atomic update.** `WXPIN(STATUS_PIN, RQPIN(STATUS_PIN) | flag)` reads, modifies, then writes back. The 32-bit *store* is atomic (§18.6), but the read-modify-write spanning those three steps is not: if two cogs each set a different flag at the same time, one update can be lost. This pattern is safe only when a **single cog owns all writes** to the repository. For multiple writers, guard the update with a lock or give each writer its own repository pin.
+
 ### Example 3: Stereo Audio with Dithered DAC
 
 ```spin2
@@ -537,7 +528,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 |----------|-------|------|
 | X via WXPIN | Store value | - |
 | Y | Not used | - |
-| Z via RDPIN | - | Retrieve value |
+| Z via RQPIN (or RDPIN to acknowledge) | - | Retrieve value |
 
 **DAC Dither Modes:**
 

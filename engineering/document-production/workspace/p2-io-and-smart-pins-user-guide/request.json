@@ -16,7 +16,8 @@
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
-        "p2kb-platform-pagination"
+        "p2kb-platform-pagination",
+        "p2kb-platform-crossref"
       ],
       "metadata": {
         "title": "P2 I/O & Smart Pins User Guide",

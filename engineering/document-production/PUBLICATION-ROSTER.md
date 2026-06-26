@@ -159,6 +159,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-26 18:15  PLATFORM  filters/p2kb-platform-crossref.lua        (NEW: auto-links "Chapter N"/"Appendix X"/"Section N.N"/"§N.N" prose refs to anchors; opt-in per request.json, IOSP piloting. OTHER MANUALS: adopt + visual-audit on NEXT release — NOT a forced release; tracker: CROSSREF-FILTER-ADOPTION.md)
 2026-06-26 17:54  PUBLISH   p2-streamer-programming-guide    (v1.0.2, 68pp — IBM Plex typography refresh + LUMA8 color table + mode-field shorthand note; release-gate audited, 0 missing chars, outline verified complete)
 2026-06-26 05:09  PUBLISH   p2-debug-window-manual           (v1.0.1, 156pp — accuracy + typography refresh: DEBUG-quoting examples + FFT/run-up programs + per-window details; IBM Plex, 0 missing chars; outline verified complete)
 2026-06-25 23:31  PUBLISH   p2-pasm-desilva-style            (v3.0.1, 162pp — accuracy re-audit + Plex typography refresh; ✓/✗/θ glyph fallbacks clean, 0 missing chars; outline verified complete)
@@ -183,6 +184,12 @@ that PDF was generated. This ledger is the detector.
 ```
 
 **Currently out of date (read off the list above):**
+
+**Cross-ref filter adoption (out-of-date flag, 2026-06-26).** The new
+`p2kb-platform-crossref.lua` (clickable Chapter/Appendix/§ references) is opt-in per manual.
+No manual is force-released for it; but every manual must **adopt + visually audit** it at its
+next release. Per-manual status lives in `CROSSREF-FILTER-ADOPTION.md` (IOSP is the pilot;
+all released manuals are PENDING AUDIT).
 
 **Regeneration status (updated 2026-06-15).** A previously-unrecorded 2026-06-12
 platform edit (`a149b8e` — `content.sty` + `code-coloring.lua`, advisory callouts) now

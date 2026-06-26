@@ -346,7 +346,7 @@ All smart pin modes follow a common configuration pattern:
 ```spin2
 PINFLOAT(pin)                            ' DIR=0, hold in reset
 ' or
-PINL(pin)                                ' Same effect
+PINF(pin)                            ' Same effect (short form of PINFLOAT)
 ```
 
 ```pasm2
@@ -422,6 +422,8 @@ PUB setup_nco() | y_value
   PINLOW(OUT_PIN)                         ' Step 5: Enable
 ```
 
+The `FRAC` operator computes `(operand1 * 2^32) / operand2` with a 64-bit intermediate (no overflow) — here it scales `TARGET_FREQ` into the NCO frequency word.
+
 **PASM2:**
 ```pasm2
               dirl      #OUT_PIN          ' Step 1: Reset
@@ -474,64 +476,7 @@ WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 
 ## 4.10 Input Routing
 
-Smart pins can receive input from the local pin or adjacent pins.
-
-### A Input Selection
-
-The A input is the primary input for most modes.
-
-| Constant | Source |
-|----------|--------|
-| `P_LOCAL_A` (default) | This pin's input |
-| `P_PLUS1_A` | Pin + 1 |
-| `P_PLUS2_A` | Pin + 2 |
-| `P_PLUS3_A` | Pin + 3 |
-| `P_OUTBIT_A` | This pin's OUT bit (internal) |
-| `P_MINUS3_A` | Pin - 3 |
-| `P_MINUS2_A` | Pin - 2 |
-| `P_MINUS1_A` | Pin - 1 |
-
-### A Input Polarity
-
-| Constant | Effect |
-|----------|--------|
-| `P_TRUE_A` (default) | Non-inverted |
-| `P_INVERT_A` | Inverted |
-
-### B Input Selection
-
-The B input is used for secondary signals (clock, quadrature channel B, etc.).
-
-| Constant | Source |
-|----------|--------|
-| `P_LOCAL_B` (default) | This pin's input |
-| `P_PLUS1_B` | Pin + 1 |
-| `P_PLUS2_B` | Pin + 2 |
-| `P_PLUS3_B` | Pin + 3 |
-| `P_OUTBIT_B` | This pin's OUT bit (internal) |
-| `P_MINUS3_B` | Pin - 3 |
-| `P_MINUS2_B` | Pin - 2 |
-| `P_MINUS1_B` | Pin - 1 |
-
-### B Input Polarity
-
-| Constant | Effect |
-|----------|--------|
-| `P_TRUE_B` (default) | Non-inverted |
-| `P_INVERT_B` | Inverted |
-
-### Input Logic Combinations
-
-| Constant | Result |
-|----------|--------|
-| `P_PASS_AB` (default) | A, B passed through |
-| `P_AND_AB` | A AND B, B |
-| `P_OR_AB` | A OR B, B |
-| `P_XOR_AB` | A XOR B, B |
-| `P_FILT0_AB` | A and B both filtered using global filt0 settings |
-| `P_FILT1_AB` | A and B both filtered using global filt1 settings |
-| `P_FILT2_AB` | A and B both filtered using global filt2 settings |
-| `P_FILT3_AB` | A and B both filtered using global filt3 settings |
+Smart pins draw their A and B inputs using the same input-routing constants introduced for Enhanced Direct I/O in §2.4: `P_LOCAL_A`/`P_PLUS1_A`…`P_MINUS1_A` (and the `_B` equivalents) select the source pin, `P_TRUE_A`/`P_INVERT_A` set the polarity, and `P_PASS_AB`/`P_AND_AB`/`P_OR_AB`/`P_XOR_AB`/`P_FILT0_AB`…`P_FILT3_AB` combine the A and B inputs before use. The A input is the primary input for most modes; the B input carries secondary signals (clock, quadrature channel B, etc.). See §2.4 for the full constant tables.
 
 When a pin is **not** in a smart pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a smart pin.
 
@@ -562,25 +507,7 @@ PINLOW(20)                                ' Enable
 
 ## 4.11 Span Operations
 
-All smart pin instructions support operating on multiple pins simultaneously.
-
-### Span Encoding
-
-The S operand (pin number) can include a span:
-
-- S[5:0]: Base pin (0-63)
-- S[10:6]: Additional pins (0-31)
-
-### Using SETQ for Span
-
-```pasm2
-              setq      #7                ' 8 pins total (base + 7)
-              wrpin     mode_value, #0    ' Configure pins 0-7
-```
-
-### Span Wrap Behavior
-
-Spans wrap within the same 32-pin port. Pins 0-31 and 32-63 are separate ports.
+Smart pin instructions operate on a span of pins exactly as the Direct I/O instructions do (§1.9), with one difference: the span travels in the **S** operand (the pin-number operand) rather than the D operand. `S[5:0]` is the base pin and `S[10:6]` the additional-pin count, set inline or via a preceding `SETQ`; as always, a span wraps within its 32-pin port. See §1.9 for the full span model.
 
 ### Spin2 Pin Ranges
 
@@ -621,8 +548,7 @@ After any instruction that acknowledges the smart pin (WRPIN, WXPIN, WYPIN, RDPI
 
 ```pasm2
               rdpin     result, #pin      ' Acknowledge Smart Pin
-              nop                         ' Clock 1
-              nop                         ' Clock 2
+              nop                         ' Wait 2 clocks (NOP = 2 clocks)
               testp     #pin wc           ' Now safe to poll IN
 ```
 

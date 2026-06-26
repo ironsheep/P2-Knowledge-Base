@@ -1147,7 +1147,7 @@ P_ASYNC_TX | P_OE | P_INVERT_OUTPUT      ' RS-232
 ```spin2
 bit_period := (_clkfreq / 115200) << 16
 WRPIN(pin, P_ASYNC_TX | P_OE)
-WXPIN(pin, bit_period | 8)               ' 8 data bits
+WXPIN(pin, bit_period | 7)               ' 8 data bits
 PINLOW(pin)
 REPEAT UNTIL PINREAD(pin)
 WYPIN(pin, byte_value)
@@ -1185,7 +1185,7 @@ P_ASYNC_RX | P_INVERT_IN                 ' RS-232
 ```spin2
 bit_period := (_clkfreq / 115200) << 16
 WRPIN(pin, P_ASYNC_RX)
-WXPIN(pin, bit_period | 8)
+WXPIN(pin, bit_period | 7)
 PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 data := RDPIN(pin) & $FF

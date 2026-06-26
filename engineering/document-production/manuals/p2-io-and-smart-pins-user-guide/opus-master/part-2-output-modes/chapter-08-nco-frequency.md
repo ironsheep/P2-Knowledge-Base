@@ -17,7 +17,7 @@ A Numerically Controlled Oscillator generates precise frequencies by accumulatin
 
 ### Key Properties
 
-- **Frequency resolution**: 32-bit phase accumulator provides ~0.05 Hz resolution at 200 MHz
+- **Frequency resolution**: the 32-bit phase accumulator gives a resolution of `sysclk / 2^32` — about 0.047 Hz at 200 MHz. Because it scales with the system clock, the resolution is finer at a lower sysclk and coarser at a higher one (e.g. ~0.023 Hz at 100 MHz, ~0.075 Hz at 320 MHz)
 - **Phase coherence**: Multiple NCOs can be phase-locked via initial phase setting
 - **Deterministic timing**: Hardware-based, independent of software execution
 
@@ -88,6 +88,8 @@ Y = 21,474,836
 ```
 
 ### Configuration Sequence
+
+`FRAC` computes `(operand1 * 2^32) / operand2` using a 64-bit intermediate (so it never overflows) — here it scales the desired frequency into the NCO's Y word.
 
 **Spin2:**
 ```spin2
@@ -171,7 +173,7 @@ CON
 PUB nco_duty(duty_percent) | y_value
   ' In NCO_DUTY, Y sets the duty cycle directly: duty = Y / 2^32.
   ' (Base period is 1 clock, so Z accumulates Y every clock.)
-  y_value := duty_percent frac 100        ' 50->$8000_0000, 25->$4000_0000
+  y_value := duty_percent FRAC 100        ' 50->$8000_0000, 25->$4000_0000
 
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_DUTY | P_OE)
@@ -261,14 +263,7 @@ When multiple NCOs use the same Y value and are enabled simultaneously:
 
 ### NCO + DAC for Sine Wave Approximation
 
-Combine NCO with DAC modes for analog output:
-
-```spin2
-' NCO output through DAC filter
-WRPIN(pin, P_NCO_FREQ | P_OE | P_DAC_990R_3V)
-```
-
-The square wave NCO output, when filtered by the resistor DAC and external RC filter, approximates a sine wave.
+An NCO can drive the resistor DAC directly (with an external RC filter) for filtered-sine output — see §10.5.
 
 ### Direct DAC Control
 

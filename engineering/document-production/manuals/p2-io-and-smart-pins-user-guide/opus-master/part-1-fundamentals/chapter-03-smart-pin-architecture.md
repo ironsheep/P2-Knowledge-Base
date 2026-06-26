@@ -36,7 +36,7 @@ Each smart pin operates as an independent state machine. The cog's role is:
 Between these interactions, the smart pin runs autonomously.
 
 
-## 3.2 The Three-Register Model
+## 3.2 The X / Y / Z Registers (plus the mode word)
 
 Every smart pin has four 32-bit registers: a mode-configuration register written by WRPIN (the mode-control word, see §3.5), plus the three parameter/result registers—X, Y, and Z—described here. The mode register establishes *what* the pin does; X, Y, and Z carry the data it works with:
 

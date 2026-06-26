@@ -163,7 +163,7 @@ Output logic is inverted from the OUT bit.
 
 **Configuration:**
 ```spin2
-WRPIN(pin, P_INVERT_OUT)
+WRPIN(pin, P_INVERT_OUTPUT)
 ```
 
 **Behavior:**
@@ -180,7 +180,7 @@ CON
   LED_PIN = 56                         ' LED connected to VCC, active low
 
 PUB setup()
-  WRPIN(LED_PIN, P_INVERT_OUT)
+  WRPIN(LED_PIN, P_INVERT_OUTPUT)
 
 PUB led_on()
   PINHIGH(LED_PIN)                        ' Drives LOW, LED on
@@ -432,7 +432,7 @@ PUB step_reverse(steps) | i
 | Open-drain | `P_HIGH_FLOAT` \| `P_LOW_FAST` |
 | Open-drain + internal pull-up | `P_HIGH_15K` \| `P_LOW_FAST` |
 | Open-source | `P_HIGH_FAST` \| `P_LOW_FLOAT` |
-| Inverted | `P_INVERT_OUT` |
+| Inverted | `P_INVERT_OUTPUT` |
 | LED current source | `P_HIGH_1MA` \| `P_LOW_FAST` |
 
 
