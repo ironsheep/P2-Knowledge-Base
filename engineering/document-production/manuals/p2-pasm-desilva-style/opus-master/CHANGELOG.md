@@ -1,11 +1,23 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
-## v3.0.1 (2026-06-18)
+## v3.0.1 (2026-06-25)
 
-**Smart-pin accuracy refresh** — aligned with the latest hardware-verified Knowledge Base.
+**Accuracy re-audit, typography refresh, and a companion example library** — every code example compile-checked against the current compiler, with a presentation pass on the shared manual platform.
 
 ### Changed
-- The Smart Pin recipe (Ch 14) enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
+- Refreshed typography for a cleaner, more consistent look across the manual.
+- A companion example library collects ready-to-run versions of the manual's early programs (first blink, multi-cog blink, hub counters).
+- The smart-pin recipe (Ch 14) enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
+- Every PASM2 and Spin2 example compiles against the current compiler, using P2 instructions and current Spin2 syntax: in-range immediates, absolute (`#\`) long jumps, DAT-label string addresses (`##@label`), the `{Spin2_v43}` directive for the `BYTE()`/`LONG()`/`LSTRING()` composers, long-aligned DAT data, and labels clear of instruction and keyword names.
+
+### Fixed
+- Quantitative values match silicon: smart pins offer 32 modes, CORDIC results (including QDIV) arrive 55 clocks later, the cog uses a 5-stage pipeline, and random hub access takes 9–16 clocks.
+- CORDIC sine/cosine results are full-scale-signed, with $7FFF_FFFF representing 1.0.
+- The cog reads one shared 64-bit system counter via GETCT, with its own CT1/CT2/CT3 compare targets for timed events.
+- The servo clamp uses FGE for the lower limit and FLE for the upper limit.
+- Reading a pin works regardless of its direction.
+- The cover's code-color legend reads: green = PASM2, blue = Spin2, teal = multi-cog, purple = CORDIC, red = antipattern.
+- Cross-references resolve to the right chapters: the smart-pin pointer to Chapter 14, and the Chapter 12 preview to the LUT memory, smart pins, and event-driven topics of Chapters 13–15.
 
 ## v3.0.0 (2026-06-10)
 

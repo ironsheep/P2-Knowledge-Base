@@ -54,6 +54,15 @@
 \newunicodechar{Ω}{{\rmfamily\char"03A9}}
 \newunicodechar{μ}{{\rmfamily\char"03BC}}
 \newunicodechar{µ}{{\rmfamily\char"00B5}}
+\newunicodechar{θ}{{\rmfamily\char"03B8}}
+% Emoji check / cross marks (e.g. deSilva "What We've Learned" + status lists). NO
+% font in this stack carries the U+2705/2713/274C glyphs, so XeLaTeX prints tofu
+% boxes. Substitute print-safe marks: a green check (amssymb \checkmark) and a red
+% cross (\times). Text-mode only -- these never appear inside code listings.
+% (\color/\checkmark resolve at typeset time; xcolor + amssymb load below.)
+\newunicodechar{✅}{{\color{green!55!black}\ensuremath{\checkmark}}}
+\newunicodechar{✓}{{\color{green!55!black}\ensuremath{\checkmark}}}
+\newunicodechar{❌}{{\color{red!70!black}\ensuremath{\times}}}
 
 \RequirePackage{microtype}
 \RequirePackage{graphicx}
@@ -295,7 +304,7 @@
   framesep=0pt,
   % Render Ω/μ/µ from the main font inside code (Plex Mono lacks them) — see
   % the missing-glyph fallback note in the font section above.
-  literate={Ω}{{\rmfamily\char"03A9}}1 {μ}{{\rmfamily\char"03BC}}1 {µ}{{\rmfamily\char"00B5}}1
+  literate={Ω}{{\rmfamily\char"03A9}}1 {μ}{{\rmfamily\char"03BC}}1 {µ}{{\rmfamily\char"00B5}}1 {θ}{{\rmfamily\char"03B8}}1
 }
 
 % ==================== CHAPTER FORMATTING ====================

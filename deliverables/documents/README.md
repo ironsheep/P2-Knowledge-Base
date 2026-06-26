@@ -53,11 +53,11 @@ The definitive reference for P2 assembly language programming. Documents all PAS
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-assembly-language-manual-changelog.md)
 
 ### [P2 Assembly Programming](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-PASM-deSilva-Style.pdf)
-**A Human-Centered Approach to Parallel Processing** — *Version 3.0.0*
+**A Human-Centered Approach to Parallel Processing** — *Version 3.0.1*
 
 This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
 
-*June 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md)
+*June 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-pasm-desilva-style-src-260624.zip)
 
 ### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
 **A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.1*

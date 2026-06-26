@@ -23,7 +23,7 @@ table still carry the older "shape" and await a separate refresh.)*
 | Publication | Slug | State |
 |-------------|------|-------|
 | P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ **Released v3.1.0** (501pp, 2026-06-25) — accuracy + voicing/typography pass; Ω/μ/µ glyph fallback; chip review outstanding (external) |
-| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ **Released v3.0.0** (172pp, 2026-06-10) — re-audit (~33 fixes); chip review outstanding; 2 deferred wrap-up items |
+| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ **Released v3.0.1** (162pp, 2026-06-25) — accuracy re-audit (all examples pnut-ts-certified) + Plex typography refresh + example-library ZIP; both prior deferrals resolved; chip review outstanding |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ **Released** — both reviews complete; presentation-class |
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | 🟢 draft (387pp), platform-migrated; **awaiting Stephen's technical + asset review** ("Blue Book") |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | 🟢 draft, platform stack; **cover repaired 2026-06-12**; in technical review (chip + community) |

@@ -26,9 +26,11 @@ Per manual being released:
 1. **Verify the PDF is complete** (Phase 1): right build (mtime), page count sane vs. prior
    release, outline complete (all chapters/instruction-letters/appendices present), key
    sections text-present, compile log clean. **Stop on any shortfall.**
-2. **Promote**: copy `opus-master/CHANGELOG.md` → `DOCs/<slug>-changelog.md`; update (or add)
-   the manual's entry in `deliverables/documents/README.md` (version, date, force-download
-   PDF link).
+2. **Audit the changelog** (Phase 2a — MANDATORY gate): run `/audit-changelog <slug>`; **stop
+   and fix `opus-master/CHANGELOG.md` until it clears** (NOT READY = any CRITICAL/HIGH) before
+   promoting. Then **promote**: copy the *post-audit* `opus-master/CHANGELOG.md` →
+   `DOCs/<slug>-changelog.md`; update (or add) the manual's entry in
+   `deliverables/documents/README.md` (version, date, force-download PDF link).
 3. **Record freshness**: append/update the manual's `PUBLISH` line in the Platform Freshness
    Ledger (`PUBLICATION-ROSTER.md`) at the PDF's mtime; update its roster row/status; prune
    absorbed `PLATFORM` lines.
@@ -131,9 +133,30 @@ a broken book doesn't ship.
 
 ## Phase 2 — Promote: CHANGELOG + README index
 
-**2a — recommend (don't enforce) a changelog audit.** If `audit-changelog` hasn't been run
-on this manual recently, mention: *"Recommend `/audit-changelog <slug>` first."* Don't
-auto-invoke; don't block.
+**2a — MANDATORY changelog audit gate (run EVERY release; block on failure).** Before
+promoting anything, audit the manual's top CHANGELOG entry by **running** the `audit-changelog`
+skill (`/audit-changelog <slug>`) — invoke it, do not merely recommend it. The audit applies
+`engineering/document-production/methodology/changelog-style-guide.md` (current-state voice, no
+prior-state phrasing, aggregate-not-itemize, the excluded-category list) and cross-checks the
+entry's claims against the commits/diff since the last published tag.
+
+**Uncommitted-release note:** much of a release's work is often still in the working tree (not
+yet committed at promote time). Audit the entry against the **baseline tag → working tree** diff
+(`git diff <slug>-v<prior> -- …/opus-master/`), not just `<baseline>..HEAD`, or the content
+audit misses the about-to-ship changes.
+
+**Gate:**
+- Verdict **READY** / **READY WITH NOTES** → proceed to 2b.
+- Verdict **NOT READY** (any CRITICAL or HIGH finding) → **STOP. Do not promote.** Fix the entry
+  in `opus-master/CHANGELOG.md` (never the workspace render — the CHANGELOG is authored, not
+  generated), then re-run the audit until it clears. A changelog fix needs **no PDF regen** (the
+  CHANGELOG is not part of the PDF), so this loop is cheap — there is no excuse to ship an
+  unaudited changelog. Surface the findings and your fixes to the user.
+
+This gate exists because the published changelog **is** the reader's release notes: shipping
+prior-state phrasing ("corrected from X to Y"), itemized confessionals, or excluded editorial
+churn is a visible quality defect. Recommending the audit was not enough — the release runs it.
+The CHANGELOG copy promoted in 2c must be the post-audit version.
 
 **2b — parse the version + date.** From `opus-master/CHANGELOG.md`, the topmost entry:
 `## v<X.Y.Z> (<YYYY-MM-DD>)`. Normalize to three-part semver (append `.0` if patch missing —
@@ -247,6 +270,9 @@ logical commit.
 - **PDF content incomplete / page-count drop / outline gap** (Phase 1) → STOP. Report what's
   missing + the likely stage (pandoc-swallow vs. xelatex error). This is the gate; never
   promote a book that failed verification.
+- **Changelog audit `NOT READY`** (Phase 2a) → STOP. Fix `opus-master/CHANGELOG.md`, re-run
+  `/audit-changelog <slug>` until READY / READY WITH NOTES, THEN copy the fixed source up to
+  `DOCs/`. Never promote (copy up) a changelog that hasn't passed the audit.
 - PDF missing → stop: generate via Forge and place it first.
 - CHANGELOG missing → nothing to release.
 - CHANGELOG topmost version == already-published version in README → stop, ask (re-release?).

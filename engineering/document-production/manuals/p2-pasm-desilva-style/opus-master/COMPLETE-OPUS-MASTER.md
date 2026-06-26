@@ -42,10 +42,10 @@
 \begin{minipage}[t]{0.38\textwidth}
 \textbf{Code Block Colors:}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item \textcolor{green!50!black}{\textbf{Green}} -- Spin2
-\item \textcolor{orange!70!black}{\textbf{Yellow}} -- PASM2
+\item \textcolor{green!50!black}{\textbf{Green}} -- PASM2
+\item \textcolor{blue!60!black}{\textbf{Blue}} -- Spin2
 \item \textcolor{purple!60!black}{\textbf{Purple}} -- CORDIC
-\item \textcolor{blue!60!black}{\textbf{Blue}} -- Multi-COG
+\item \textcolor{teal!70!black}{\textbf{Teal}} -- Multi-Cog
 \item \textcolor{red!60!black}{\textbf{Red}} -- Antipattern
 \end{itemize}
 \end{minipage}%
@@ -270,7 +270,7 @@ CON
 
 DAT
 ' LED Blinker - Your first PASM2 program!
-        org     0               ' Start at COG address 0
+        org     0               ' Start at cog address 0
 
         drvh    #56             ' Drive pin 56 high (LED on)
         waitx   ##50_000_000    ' Wait 0.25 seconds at 200MHz
@@ -308,8 +308,8 @@ CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 
 PUB main()
-    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in new COG
-    repeat  ' Keep the main COG alive
+    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in new cog
+    repeat  ' Keep the main cog alive
 
 DAT
         org     0
@@ -446,7 +446,7 @@ This one's a bit tricky - we'll use PWM to fade the LED:
 level   long    0
 ```
 
-Don't worry if the PWM example seems complex - we'll cover smart pins in detail in Chapter 8!
+Don't worry if the PWM example seems complex - we'll cover smart pins in detail in Chapter 14!
 
 ::: medicine-cabinet
 Feeling overwhelmed? Here's the simplified prescription:
@@ -484,7 +484,7 @@ Before we move on, let me save you some debugging time:
 
 1. **Forgetting the ##** - Using `waitx #25_000_000` will NOT wait for 0.25 seconds! Single # only allows values up to 511.
 
-2. **Wrong pin number** - The P2 Eval board's LEDs are on pins 56-63. The P2 Edge module might have different assignments.
+2. **Wrong pin number** - The P2 Eval board's eight LEDs are on pins 56-63. The P2 Edge Standard Module has two LEDs on pins 56-57; the 32MB Edge Module uses 56-57 for its PSRAM and places its two LEDs on pins 38-39 instead.
 
 3. **Clock setup required** - P2 boots at ~20MHz (internal RC oscillator). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust WAITX values if your clock differs.
 
@@ -562,7 +562,7 @@ But here's the beautiful part: Cogs are identical. There's no "master" cog or "s
 
 ### The 512-Long Limit
 
-Each cog has exactly 512 longs (2048 bytes) of memory. The first 496 longs are yours to use for code and data. The last 16 are special registers (but not like P1 - we'll get to that).
+Each cog has exactly 512 longs (2048 bytes) of memory. The first 496 longs ($000–$1EF) are yours to use for code and data. The last 16 ($1F0–$1FF) have special roles: $1F0–$1F7 can serve as ordinary registers or hold the interrupt vectors and the PA/PB parameters, and $1F8–$1FF are the special-purpose registers (PTRA/PTRB, the I/O registers, and friends) — but not like P1; we'll get to that.
 
 "Only 496 instructions?" you might cry. "That's tiny!"
 
@@ -600,11 +600,11 @@ The practical result? Hub access is MUCH faster and more predictable. Instead of
 Here's a simple demonstration of multiple cogs working together:
 
 ```{.spin2 caption="ch02-multicog-blink.spin2"}
-' Multi-COG LED Pattern Demo
+' Multi-cog LED Pattern Demo
 PUB main() | i
     repeat i from 0 to 3
-        coginit(COGEXEC_NEW, @cog_code, 56 + i)  ' Start 4 COGs
-    repeat  ' Main COG just watches
+        coginit(COGEXEC_NEW, @cog_code, 56 + i)  ' Start 4 cogs
+    repeat  ' Main cog just watches
 
 DAT
         org     0
@@ -614,7 +614,7 @@ cog_code
 .loop   drvnot  pin_num                ' Toggle our LED
         shl     pin_num, #24           ' Pin number to bits 24-31
         or      pin_num, ##10_000_000  ' Combine with delay
-        waitx   pin_num                ' Wait (varies per COG!)
+        waitx   pin_num                ' Wait (varies per cog!)
         shr     pin_num, #24           ' Restore pin number
         jmp     #.loop
 
@@ -635,11 +635,11 @@ Cogs are independent, but they're not isolated. They can communicate through hub
 ### Method 1: Simple Variables
 
 ```pasm2
-' COG 1: Writer
+' cog 1: Writer
         mov     value, #42
         wrlong  value, ##$1000  ' Write to hub address $1000
 
-' COG 2: Reader  
+' cog 2: Reader  
         rdlong  result, ##$1000 ' Read from hub address $1000
 ```
 
@@ -668,10 +668,10 @@ lock_id long    0              ' Lock 0-15
 A mailbox is just a hub location where cogs leave messages:
 
 ```pasm2
-' COG A: Leave a message
+' cog A: Leave a message
         wrlong  message, ##mailbox
         
-' COG B: Check for messages
+' cog B: Check for messages
 .check  rdlong  data, ##mailbox wz
    if_z jmp     #.check        ' Keep checking if empty
         wrlong  #0, ##mailbox  ' Clear mailbox
@@ -680,7 +680,7 @@ A mailbox is just a hub location where cogs leave messages:
 
 ## The Timer: Everyone Gets One
 
-Each cog has its own 64-bit timer, always counting system clocks. This is incredibly useful:
+Every cog reads the same free-running 64-bit system counter (with GETCT), and each cog has its own CT1/CT2/CT3 compare targets to schedule timed events against it. This is incredibly useful:
 
 ```pasm2
 ' Method 1: Simple delay
@@ -696,7 +696,7 @@ Each cog has its own 64-bit timer, always counting system clocks. This is incred
         jmp     #.loop        ' Perfectly periodic!
 ```
 
-The beauty? Each cog's timer is independent. No shared resource conflicts!
+The beauty? Each cog has its own CT1/CT2/CT3 compare targets, so your timed waits never collide with another cog's. No shared-resource conflicts!
 
 ## Why No Interrupts? (Usually)
 
@@ -709,15 +709,15 @@ Because with 8 cogs, you don't need interrupts! Instead of interrupting importan
 ' Main code runs, gets interrupted, handles event, returns
 
 ' Propeller way:
-' COG 1: Main code runs uninterrupted
-' COG 2: Watches for event continuously
+' cog 1: Main code runs uninterrupted
+' cog 2: Watches for event continuously
 pin_watcher
         testp   #BUTTON_PIN wc
    if_c jmp     #button_pressed
         jmp     #pin_watcher
         
 button_pressed
-        wrlong  ##1, ##button_flag  ' Signal other COGs
+        wrlong  ##1, ##button_flag  ' Signal other cogs
         jmp     #pin_watcher
 ```
 
@@ -728,7 +728,7 @@ No interrupt latency, no context switching, no priority inversion. Just dedicate
 Let's read four different sensors simultaneously:
 
 ```pasm2
-' Each COG runs this with different parameters
+' Each cog runs this with different parameters
 sensor_reader
         rdlong  sensor_pin, ptra[0]    ' Get pin assignment
         rdlong  hub_addr, ptra[1]       ' Where to store results
@@ -759,7 +759,7 @@ Feeling overwhelmed by all this parallel processing? Here's your prescription:
 **Start simple**: Use just one or two cogs at first
 
 ```spin2
-' Just two COGs - main program and one helper
+' Just two cogs - main program and one helper
 PUB main()
     coginit(COGEXEC_NEW, @helper, 0)
     ' Your main code here
@@ -768,7 +768,7 @@ PUB main()
 **Debug one cog at a time**: Get each cog working alone before combining
 
 ```pasm2
-' Test COG in isolation first
+' Test cog in isolation first
 debug_cog
         drvh    #MY_DEBUG_LED  ' Visual confirmation it's running
         ' Your actual code here
@@ -777,7 +777,7 @@ debug_cog
 **Use Spin2 for coordination**: Let the high-level language handle the complex stuff
 
 ```spin2
-' Spin2 manages COGs, PASM2 does the real-time work
+' Spin2 manages cogs, PASM2 does the real-time work
 PUB orchestrator()
     startSensorCog(0)
     startMotorCog(1)
@@ -816,8 +816,8 @@ Save yourself some debugging time:
 
 ```pasm2
    rdlong  value, ##$1000  ' Reads from hub byte address $1000
-   mov     value, $100     ' Moves from COG long address $100 (256)
-   ' Note: COG RAM is only 512 longs ($000-$1FF)!
+   mov     value, $100     ' Moves from cog long address $100 (256)
+   ' Note: cog RAM is only 512 longs ($000-$1FF)!
 ```
 
 4. **PTRA/PTRB are your friends** - These special registers make hub access much easier
@@ -864,10 +864,10 @@ value   long    0
 Make 8 LEDs display a moving pattern, with each cog controlling one LED:
 
 ```pasm2
-' Each COG gets LED pin in ptra
+' Each cog gets LED pin in ptra
         org     0
         rdlong  pin, ptra
-        rdlong  delay, ptrb      ' Different delay per COG
+        rdlong  delay, ptrb      ' Different delay per cog
         
 .flash  drvh    pin
         waitx   delay
@@ -945,7 +945,7 @@ The **MOV** family - your bread and butter:
         mov     x, ##70000     ' x = 70000 (32-bit immediate)
 
 ' But wait, there's more!
-        mvn     dest, source    ' dest = NOT source (inverted)
+        not     dest, source    ' dest = NOT source (inverted)
         abs     dest, source    ' dest = |source|
         neg     dest, source    ' dest = -source
 
@@ -1213,10 +1213,10 @@ Both `:` and `.` work identically. I prefer the dot - it's what modern conventio
 When you reference a label, you need to tell the assembler what you want:
 
 ```pasm2
-' In COG code (after ORG):
-        jmp     #my_routine     ' # = immediate COG address
+' In cog code (after ORG):
+        jmp     #my_routine     ' # = immediate cog address
         call    #.helper        ' # works for local labels too
-        mov     x, #data_table  ' Get COG address of data
+        mov     x, #data_table  ' Get cog address of data
 
 ' For hub addresses (used with Spin2):
         mov     ptr, @hub_data  ' @ = hub address of label
@@ -1372,13 +1372,14 @@ DAT             org
 
 ' Your code goes here
 entry           mov     ptra, ##buffer_addr
-                mov     count, #BUFFER_SIZE
+                mov     count, BUFFER_SIZE
 .fill           wrbyte  fill_value, ptra++
                 djnz    count, #.fill
                 jmp     #$
 
 ' Constants (read-only, effectively)
 fill_value      byte    $55
+                alignl
 BUFFER_SIZE     long    256
 
 ' Lookup tables
@@ -1458,40 +1459,46 @@ No conversion scripts, no copy-paste errors. Just reference the file and it's pa
 
 Beyond manually typing values, you have some helpers for creating data:
 
-**@"text" - Inline String Address**
+**String Addresses in PASM**
 
-Need a string address without declaring a separate label?
+Need a string's address? In PASM you point at a DAT label with `##@`:
 
 ```pasm2
-        mov     ptra, @"Hello!"     ' ptra points to "Hello!" in hub
+        mov     ptra, ##@hello      ' ptra points to "Hello!" in hub
         call    #print_string
 
-        mov     ptra, @"Error: "    ' Another string, inline
+        mov     ptra, ##@err_msg    ' Another string
         call    #print_string
+
+        alignl
+hello   byte    "Hello!", 0
+        alignl
+err_msg byte    "Error: ", 0
 ```
 
-The `@"text"` syntax creates the string in hub memory and gives you its address. It's like an anonymous label for a string constant. Each unique string gets stored once, even if you reference it multiple times.
+The string lives in your DAT block, and `@label` gives its hub address. Spin2 has an even shorter shortcut - `@"Hello!"` composes the string and hands back its address with no separate label - but that one is Spin2-only, not PASM.
 
 **STRING("text") and LSTRING("text")**
 
 These work similarly but in different contexts:
 
 ```spin2
+{Spin2_v43}                       ' enable LSTRING (a v43+ keyword)
 ' In Spin2 code (not PASM):
 debug(STRING("Temperature: "))    ' Zero-terminated string address
 debug(LSTRING("Status"))          ' Length byte first, then string
 ```
 
-`STRING()` returns the hub address of a zero-terminated string - same as what C programmers expect. `LSTRING()` puts a length byte at the front, which is handy when you need to know the string length without scanning for null.
+`STRING()` returns the hub address of a zero-terminated string - same as what C programmers expect. `LSTRING()` puts a length byte at the front, which is handy when you need to know the string length without scanning for null. `LSTRING()` is a newer keyword, so it needs a `{Spin2_v43}` (or later) directive at the top of your file before the compiler will recognize it.
 
 **BYTE[], WORD[], LONG[] - Data Arrays**
 
-In Spin2, you can create inline data arrays:
+In Spin2, you can compose inline data and get its address:
 
 ```spin2
-' Spin2 examples:
-lookup := BYTE[10, 20, 30, 40, 50]    ' Returns address of byte array
-config := LONG[$DEAD_BEEF, $CAFE_BABE]
+{Spin2_v43}                            ' BYTE/WORD/LONG composers (v43+)
+tbl := BYTE(10, 20, 30, 40, 50)        ' Returns address of byte array
+config := LONG($DEAD_BEEF, $CAFE_BABE)
 ```
 
 These are primarily Spin2 features, but they generate hub data that your PASM code can access if you know the addresses.
@@ -1501,9 +1508,10 @@ These are primarily Spin2 features, but they generate hub data that your PASM co
 | Method | Result | Use Case |
 |--------|--------|----------|
 | `file "name"` | Raw binary data | Images, audio, lookup tables |
-| `@"text"` | String address | Quick inline strings in PASM |
+| `##@label` | String address | Inline strings in PASM (DAT label) |
+| `@"text"` | String address | Quick inline strings (Spin2 shortcut) |
 | `STRING("text")` | Zero-terminated string address | Spin2 string constants |
-| `LSTRING("text")` | Length-prefixed string | When you need length upfront |
+| `LSTRING("text")` | Length-prefixed string | Spin2, needs `{Spin2_v43}` |
 
 ## The Flags: C and Z (and Q!)
 
@@ -1749,10 +1757,10 @@ You now speak basic PASM2. Time to learn how cogs communicate!
 ## The Hook: Instant Communication
 
 ```pasm2
-' COG 1: Leave a message
+' cog 1: Leave a message
         wrlong  ##$DEADBEEF, ##$1000
         
-' COG 2: Get the message
+' cog 2: Get the message
         rdlong  message, ##$1000
         ' message now contains $DEADBEEF!
 ```
@@ -1959,7 +1967,7 @@ fixed_mul
         ' Extract middle 32 bits for 16.16 result:
         shl     high, #16        ' Upper 16 bits of result
         shr     low, #16         ' Lower 16 bits of result
-        or      a, low           ' Combine for 16.16 format
+        mov     a, low           ' Combine for 16.16 format
         or      a, high
 ```
 
@@ -2169,8 +2177,8 @@ Let me show you something even more impressive:
 ```pasm2
 ' Calculate sine and cosine simultaneously
         qrotate ##$7FFF_FFFF, angle  ' D=radius (max), S=angle
-        getqx   cosine               ' cos(angle) in 2.30 fixed pt
-        getqy   sine                 ' sin(angle) in 2.30 fixed pt
+        getqx   cosine               ' cos(angle); $7FFF_FFFF = 1.0
+        getqy   sine                 ' sin(angle); $7FFF_FFFF = 1.0
         ' Both trig functions in 55 clocks total!
 ```
 
@@ -2505,7 +2513,7 @@ Before you pull your hair out debugging, know these:
 
 3. **Don't forget SETQ** - For two-operand operations (QROTATE with X,Y), you must load Y into Q first.
 
-4. **Results are scaled** - When rotating by unit circle ($7FFF_FFFF), results are in 2.30 fixed point format.
+4. **Results are scaled** - When rotating a vector of length $7FFF_FFFF, the X/Y results come back scaled so that $7FFF_FFFF represents 1.0 (full-scale signed).
 
 5. **Angles wrap naturally** - Adding $1_0000_0000 to an angle is the same as adding 0. Use this!
 
@@ -2595,9 +2603,9 @@ Let's unpack what makes those three lines so short. Every P2 pin is bidirectiona
 
 Here's the mental model:
 
-- **Output instructions** automatically make the pin an output
-- **Input instructions** automatically make the pin an input  
-- **Float instructions** make the pin high-impedance
+- **Output instructions** (DRVH/DRVL/DRVNOT) automatically drive the pin (direction becomes output)
+- **Float instructions** (FLTL/FLTH) make the pin high-impedance (direction becomes input)
+- **Reading a pin** (TESTP) works regardless of its direction
 - No setup required!
 
 ## Digital Output: Making Things Happen
@@ -2888,8 +2896,8 @@ servo_loop
 
         ' Adjust position as needed
         rdlong  position, ##position_addr
-        fle     position, ##200_000   ' Limit to 1ms min
-        fge     position, ##400_000   ' Limit to 2ms max
+        fge     position, ##200_000   ' Limit to 1ms min
+        fle     position, ##400_000   ' Limit to 2ms max
         
         jmp     #servo_loop
 ```
@@ -2921,7 +2929,7 @@ You might wonder - if basic I/O is this simple, why do we need smart pins?
 
 Well, while you CAN bit-bang serial at 115200 baud, or generate PWM, or measure frequencies using the techniques in this chapter, smart pins do all of this in hardware, freeing your cog for more important work.
 
-📚 **For smart pin details**: See the dedicated "P2 Smart Pins Manual" which covers all 64 modes, from simple PWM to complex protocol generation. Smart pins deserve their own complete treatment!
+**For smart pin details**: See the dedicated "P2 Smart Pins Manual" which covers all 32 modes, from simple PWM to complex protocol generation. Smart pins deserve their own complete treatment!
 
 ## Coming Up Next
 
@@ -3046,7 +3054,7 @@ Here's something amazing - you can execute code from hub through the FIFO:
         orgh    $1000           ' Code in hub memory
         
 hub_code
-        ' This code is in hub but executes like it's in COG
+        ' This code is in hub but executes like it's in cog
         add     x, y
         sub     a, b
         ' Can be megabytes of code!
@@ -3297,19 +3305,19 @@ The beauty? You can mix both in the same program! Sequential code in hub runs at
 Let's peek behind the curtain. When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
 
 ```pasm2
-        org     0               ' Start in COG
+        org     0               ' Start in cog
         
 cog_code
-        ' This runs from COG RAM
+        ' This runs from cog RAM
         call    #hub_function   ' Call into hub
-        ' Back in COG mode here
+        ' Back in cog mode here
         
         orgh    $1000          ' Switch to hub addresses
         
 hub_function
         ' This runs from hub RAM via FIFO
         ' Can be huge!
-        ret                    ' Returns to COG code
+        ret                    ' Returns to cog code
 ```
 
 The magic happens automatically. No mode switching instructions needed!
@@ -3374,7 +3382,7 @@ Here's the real power - combining both modes:
 ```pasm2
         org     0
         
-' Critical timing code in COG
+' Critical timing code in cog
 critical_loop
         testp   #TRIGGER_PIN wz       ' Test trigger pin
   if_nz jmp     #critical_loop        ' Loop until triggered
@@ -3459,7 +3467,7 @@ Hub addresses need 20 bits, so jumping far requires special handling:
 
 ```pasm2
 ' Jump to distant hub code
-        jmp     ##far_away     ' ## forces 32-bit immediate
+        jmp     #\far_away     ' \ forces a 32-bit absolute address
         
         orgh    $40000        ' Far away in hub
 far_away
@@ -3495,7 +3503,7 @@ loop_start
         djnz    count, #loop_start
         
 ' Keep critical loops small
-' Consider moving inner loops to COG RAM
+' Consider moving inner loops to cog RAM
 ```
 
 ## Common Hub Execution Gotchas
@@ -3542,7 +3550,7 @@ string_compare
         ret
         
 ' Thousands of instructions total
-' Would need multiple COGs without hub execution!
+' Would need multiple cogs without hub execution!
 ```
 
 ## When to Use Hub Execution
@@ -3602,13 +3610,13 @@ END_ISR
 And here's the P2 way:
 
 ```pasm2
-' Dedicated COG watching button
+' Dedicated cog watching button
 button_watcher
         testp   #BUTTON_PIN wc
    if_c wrlong  ##1, ##button_flag
         jmp     #button_watcher
         
-' Main COG doing important work
+' Main cog doing important work
 main_code
         ' Never interrupted!
         ' Checks button_flag when convenient
@@ -3635,7 +3643,7 @@ Traditional processors need interrupts because they only have one processor. Som
 Eight processors. No sharing required.
 
 ```pasm2
-' COG 0: Main application
+' cog 0: Main application
 main_app
         ' Complex calculations
         ' Never interrupted
@@ -3643,22 +3651,22 @@ main_app
    if_nz call   #process_command
         jmp     #main_app
 
-' COG 1: Serial port handler
+' cog 1: Serial port handler
 serial_handler
         ' Continuously monitors serial
         testp   #RX_PIN wc
    if_c call    #receive_byte
         jmp     #serial_handler
         
-' COG 2: Motor control
+' cog 2: Motor control
 motor_control
         ' Precise timing loops
         ' Never disrupted
-        waitcnt motor_time
+        waitx   motor_time
         drvnot  #STEP_PIN
         jmp     #motor_control
         
-' COG 3: Sensor monitor
+' cog 3: Sensor monitor
 sensor_monitor
         ' Watches multiple sensors
         ' Responds instantly
@@ -3672,7 +3680,7 @@ Each cog does one thing perfectly. No interruptions. No conflicts. Just pure, fo
 With interrupts, servo pulses jitter. With dedicated cogs, they're perfect:
 
 ```pasm2
-' COG dedicated to servo control
+' cog dedicated to servo control
 servo_cog
         getct   pulse_time
         
@@ -3733,7 +3741,7 @@ Still thinking you need interrupts? Here's your medicine:
 **Fast response?**
 
 ```pasm2
-' Dedicated COG responds in ~4 clocks
+' Dedicated cog responds in ~4 clocks
 watcher
         testp   #INPUT_PIN wz         ' Test pin state
   if_nz jmp     #watcher              ' Loop until pin high
@@ -3743,7 +3751,7 @@ watcher
 **Multiple events?**
 
 ```pasm2
-' One COG watches everything
+' One cog watches everything
 monitor
         test    sensors, #SENSOR1 wz
    if_nz call   #handle_sensor1
@@ -3772,7 +3780,7 @@ P2 has something better than interrupts - events:
 
 ```pasm2
 ' Configure event to watch pin
-        setse1  #%01_000000 | BUTTON_PIN  ' Rising edge event
+        setse1  #%001<<6 + BUTTON_PIN   ' Rising edge event
         
 ' Main code runs normally
 main_loop
@@ -3820,8 +3828,8 @@ Starting code:
 ```pasm2
         org     0
         
-' COG 0: Main game logic
-        setq    ##button_flag           ' PTRA for new COG
+' cog 0: Main game logic
+        setq    ##button_flag           ' PTRA for new cog
         coginit #1, @button_watcher
         
 game_loop
@@ -3842,7 +3850,7 @@ wait_press
         sub     end_time, start_time
         ' Display reaction time
         
-' COG 1: Button watcher
+' cog 1: Button watcher
         orgh    $400
 button_watcher
         ' Your code here
@@ -3941,12 +3949,9 @@ Almost twice as fast! The secret? Understanding how P2 really works.
 
 ## Understanding the Pipeline
 
-Before we hunt for clocks to save, let's understand where they go in the first place. P2 has a 2-stage pipeline:
+Before we hunt for clocks to save, let's understand where they go in the first place. P2 uses a **5-stage pipeline** - up to five instructions are in flight at once, each at a different stage. You don't need the stage-by-stage breakdown; what matters is the payoff: when the pipeline stays full, an instruction effectively completes every **2 clocks**.
 
-1. **Fetch** - Get next instruction
-2. **Execute** - Do the work
-
-This means while one instruction executes, the next is already being fetched:
+This is why, while one instruction executes, the next is already being fetched:
 
 ```pasm2
         add     x, y      ' Executing while next inst fetches
@@ -3975,7 +3980,7 @@ Not all instructions are created equal:
 ' Special cases
         mul     x, y            ' 2 clocks
         qdiv    x, y            ' 2 clocks to start
-        getqx   result          ' 2 clocks (but wait 30 for result)
+        getqx   result          ' 2 clocks (but wait 55 for result)
 ```
 
 ## REP: The Speed Loop
@@ -3996,7 +4001,7 @@ REP creates hardware-accelerated loops with zero overhead:
 
 That's 33% faster just by using REP!
 
-⚠️ **hub-Exec Note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in cog or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
+**Hub-exec note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in cog or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
 
 ## SKIP: Conditional Execution on Steroids
 
@@ -4248,7 +4253,7 @@ Always measure your optimizations:
         ' end_time now contains exact clock cycles
 ```
 
-⚠️ **Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
+**Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
 
 1. **Capture the full 64-bit count.** `GETCT D WC` returns the upper 32 bits (with `WC` set); a plain `GETCT D` returns the lower 32. Read upper-then-lower-then-upper-again and retry if the upper word changed, then build a 64-bit timestamp.
 2. **Work with deltas, not absolute time.** Compare `(now - start)` rather than `now > deadline`. The subtraction wraps correctly even when the counter does.
@@ -4268,7 +4273,7 @@ You're now an optimization expert:
 
 ## Coming Up Next
 
-Chapters 13-15 provide quick examples of Video Generation, Serial Protocols, and Signal Processing - with references to dedicated manuals for deep dives. Think of them as appetizers showing what's possible!
+Chapters 13-15 dig into LUT memory, smart pins, and event-driven programming - with references to dedicated manuals for deep dives. Think of them as appetizers showing what's possible!
 
 
 **Have Fun!** Remember, the best optimization is often a better algorithm. But when you need every last cycle, you now know how to get them!
@@ -4299,8 +4304,8 @@ You might be thinking, "Wait, I already have cog RAM and hub RAM - why do I need
 | Memory | Size per Cog | Access Time | Special Features |
 |--------|--------------|-------------|------------------|
 | Cog RAM | 512 longs | 2 clocks | Instructions live here |
-| Hub RAM | 512 KB shared | 2-9 clocks (hub slot wait) | Shared by all Cogs |
-| **LUT RAM** | 512 longs | **3 clocks** | **Private, deterministic, shareable with neighbor** |
+| Hub RAM | 512 KB shared | 9-16 clocks (hub slot wait) | Shared by all cogs |
+| **LUT RAM** | 512 longs | **3 clocks** | **Private, deterministic; shareable with a neighbor cog (see below)** |
 
 The LUT fills a sweet spot: faster than hub memory, doesn't compete with your instruction space, and has a trick up its sleeve - neighboring cogs can share LUTs!
 
@@ -4361,19 +4366,19 @@ The destination operand is the LUT offset, not the absolute address — so you w
 Here's something clever: adjacent cog pairs can share LUT data! When you enable LUT sharing with SETLUTS, writes your neighbor makes to their LUT are automatically *copied* to your LUT too.
 
 ```pasm2
-' --- COG 1 (consumer) - MUST enable sharing FIRST ---
-        setluts #1              ' Enable LUT write copying FROM COG 0
-        ' Now when COG 0 writes to its LUT, data is COPIED to our LUT
+' --- cog 1 (consumer) - MUST enable sharing FIRST ---
+        setluts #1              ' Enable LUT write copying FROM cog 0
+        ' Now when cog 0 writes to its LUT, data is COPIED to our LUT
 
-' --- COG 0 (producer) - writes AFTER consumer enables sharing ---
-        wrlut   message, #10    ' Write MY LUT[10] (copies to COG 1)
-        wrlut   #1, #0          ' Set ready flag (copies to COG 1)
+' --- cog 0 (producer) - writes AFTER consumer enables sharing ---
+        wrlut   message, #10    ' Write MY LUT[10] (copies to cog 1)
+        wrlut   #1, #0          ' Set ready flag (copies to cog 1)
 
-' --- COG 1 (consumer) - reads its OWN LUT (which contains copies) ---
-.wait   rdlut   flag, #0        ' Read MY LUT[0] (contains copy from COG 0)
+' --- cog 1 (consumer) - reads its OWN LUT (which contains copies) ---
+.wait   rdlut   flag, #0        ' Read MY LUT[0] (contains copy from cog 0)
         cmp     flag, #1 wz
   if_nz jmp     #.wait
-        rdlut   message, #10    ' Read MY LUT[10] (copied from COG 0)
+        rdlut   message, #10    ' Read MY LUT[10] (copied from cog 0)
 ```
 
 The key instruction is:
@@ -4446,12 +4451,12 @@ get_byte
 ' Grows downward from $1FF
 stack_ptr       long    $1FF
 
-push
+stack_push
         wrlut   value, stack_ptr
         sub     stack_ptr, #1
         ret
 
-pop
+stack_pop
         add     stack_ptr, #1
         rdlut   value, stack_ptr
         ret
@@ -4472,11 +4477,11 @@ load_waveform
         shl     value, #24       ' Scale for DAC
         wrlut   value, index
         add     index, #1
-        cmp     index, #512 wz
+        cmp     index, ##512 wz
   if_nz jmp     #.fill
 
 ' Now configure Streamer to read from LUT
-' Streamer handles the rest - no COG cycles needed!
+' Streamer handles the rest - no cog cycles needed!
 ```
 
 The streamer configuration for LUT reading is covered in detail in the Video and Audio manuals - but the key point is that your LUT becomes a 512-sample waveform buffer that plays automatically.
@@ -4486,8 +4491,8 @@ The streamer configuration for LUT reading is covered in detail in the Video and
 **❌ WRONG: Confusing LUT addresses**
 
 ```antipattern
-' WRONG - This reads COG RAM, not LUT!
-        mov     value, $200     ' $200 is COG RAM address
+' WRONG - This reads cog RAM, not LUT!
+        mov     value, $200     ' $200 is cog RAM address
 ```
 
 **✓ RIGHT: Use RDLUT for LUT access**
@@ -4663,14 +4668,14 @@ Think of it like power-cycling a misbehaving device. Always start fresh.
 | **WRPIN** mode, pin | Set the operating mode |
 | **WXPIN** value, pin | Set X parameter (mode-specific) |
 | **WYPIN** value, pin | Set Y parameter (mode-specific) |
-| **DIRH** pin | Enable the Smart Pin |
-| **DIRL** pin | Disable/reset the Smart Pin |
+| **DIRH** pin | Enable the smart pin |
+| **DIRL** pin | Disable/reset the smart pin |
 
 ### Data Instructions
 
 | Instruction | Purpose |
 |-------------|---------|
-| **WYPIN** data, pin | Write data to Smart Pin (same instruction!) |
+| **WYPIN** data, pin | Write data to smart pin (same instruction!) |
 | **RDPIN** data, pin | Read result, clear "ready" flag |
 | **RQPIN** data, pin | Read result, keep "ready" flag |
 | **AKPIN** pin | Acknowledge (clear "ready" flag only) |
@@ -4695,7 +4700,7 @@ Every smart pin has an IN flag that signals "something happened." What that some
 You check this flag with **TESTP** and clear it by reading with **RDPIN** (or explicitly with **AKPIN**).
 
 ```pasm2
-' Wait for Smart Pin to be ready
+' Wait for smart pin to be ready
 wait_ready
         testp   #PIN wc         ' Check IN flag
   if_nc jmp     #wait_ready     ' Loop if not ready
@@ -4726,7 +4731,7 @@ Here are the modes you'll use most often:
 ' Transmit mode
         dirl    #TX_PIN
         wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN
-        wxpin   ##(clkfreq/baud)<<16 | 7, #TX_PIN  ' Baud + 8 bits
+        wxpin   ##(CLK_FREQ/BAUD)<<16 | 7, #TX_PIN  ' Baud + 8 bits
         dirh    #TX_PIN
 
 ' Send a byte
@@ -4739,7 +4744,7 @@ send    testp   #TX_PIN wc      ' Wait for ready
 ' Receive mode
         dirl    #RX_PIN
         wrpin   ##P_ASYNC_RX, #RX_PIN
-        wxpin   ##(clkfreq/baud)<<16 | 7, #RX_PIN
+        wxpin   ##(CLK_FREQ/BAUD)<<16 | 7, #RX_PIN
         dirh    #RX_PIN
 
 ' Get a byte
@@ -4756,8 +4761,8 @@ recv    testp   #RX_PIN wc      ' Check for received byte
         dirl    #PWM_PIN
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
         wxpin   ##period, #PWM_PIN      ' Period in clocks
-        wypin   ##duty, #PWM_PIN        ' High time in clocks
         dirh    #PWM_PIN
+        wypin   ##duty, #PWM_PIN        ' High time; Y after enable
 
 ' Change duty cycle on the fly
         wypin   ##new_duty, #PWM_PIN    ' Just update Y parameter
@@ -4906,14 +4911,14 @@ Set up UART at 115200 baud:
 ```
 :::
 
-📚 **Going Deeper**: This chapter covered the smart pin essentials - the configuration pattern and common modes. For complete coverage of all 32 modes, timing diagrams, and advanced techniques, see the dedicated "P2 Smart Pins Manual."
+**Going Deeper:** This chapter covered the smart pin essentials - the configuration pattern and common modes. For complete coverage of all 32 modes, timing diagrams, and advanced techniques, see the dedicated "P2 Smart Pins Manual."
 
 ## What We've Learned
 
 Smart pin essentials:
 
 - ✅ Every pin contains its own state machine (32 modes available)
-- ✅ The universal recipe: **DIRL** → **WRPIN** → **WXPIN** → **WYPIN** → **DIRH**
+- ✅ The universal recipe: **DIRL** → **WRPIN** → **WXPIN** → **DIRH** → **WYPIN**
 - ✅ The IN flag signals "something happened" (mode-specific)
 - ✅ UART, PWM, ADC, quadrature — same configuration pattern
 - ✅ smart pins free the cog for other work
@@ -4989,7 +4994,7 @@ The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 | Mode | Meaning |
 |------|---------|
 | %000 | Never (disabled) |
-| %001 | IN rises (Smart Pin ready) |
+| %001 | IN rises (smart pin ready) |
 | %010 | IN falls |
 | %011 | IN changes |
 | %100 | Pin is low (level) |
@@ -5017,7 +5022,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
 | `EVENT_XFI` | %1011 | Streamer operation complete |
 | `EVENT_XRO` | %1100 | NCO frequency counter rolled |
 | `EVENT_XRL` | %1101 | Streamer read last LUT location ($1FF) |
-| `EVENT_ATN` | %1110 | Another Cog signaled attention |
+| `EVENT_ATN` | %1110 | Another cog signaled attention |
 | `EVENT_QMT` | %1111 | CORDIC/PIX math complete |
 
 **Using EVENT_* with SETINT:**
@@ -5031,7 +5036,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
         addct2  target, ##200_000       ' Set timer 2 target
         setint2 #EVENT_CT2              ' INT2 fires when CT = CT2
 
-' Enable INT3 when another COG signals
+' Enable INT3 when another cog signals
         setint3 #EVENT_ATN              ' INT3 fires on COGATN
 ```
 
@@ -5042,7 +5047,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
 The most common use is waiting for a smart pin to have data:
 
 ```pasm2
-' Wait for Smart Pin on pin 15 to be ready
+' Wait for smart pin on pin 15 to be ready
         setse1  #%001<<6 + 15   ' IN rise on pin 15
         waitse1                  ' Sleep until ready
         rdpin   data, #15        ' Get the data
@@ -5092,7 +5097,7 @@ Two ways to use events:
 ### WAIT - Sleep Until Event
 
 ```pasm2
-        waitse1                 ' COG sleeps here
+        waitse1                 ' cog sleeps here
         ' Wakes instantly when event occurs
 ```
 
@@ -5162,7 +5167,7 @@ wait_with_timeout
         ret
 
 .timed_out
-        mov     data, #-1       ' Return error
+        neg     data, #1        ' Return error (-1)
         ret
 ```
 
@@ -5203,12 +5208,12 @@ sample_loop
 The ATN (attention) system lets cogs signal each other:
 
 ```pasm2
-' COG 0: Signal another COG
-        cogatn  #%0000_0010     ' Send ATN to COG 1
+' cog 0: Signal another cog
+        cogatn  #%0000_0010     ' Send ATN to cog 1
 
-' COG 1: Wait for attention
+' cog 1: Wait for attention
         waitatn                  ' Sleep until ATN received
-        ' Another COG signaled us!
+        ' Another cog signaled us!
 ```
 
 The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a cog. Setting bit N sends attention to Cog N.
@@ -5268,7 +5273,7 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a c
 
 | %MMM | Trigger |
 |------|---------|
-| %001 | IN rises (Smart Pin ready) |
+| %001 | IN rises (smart pin ready) |
 | %010 | IN falls |
 | %011 | IN changes |
 | %10x | Pin is low (level) |
@@ -5299,7 +5304,7 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a c
 **Inter-cog:**
 
 ```pasm2
-        COGATN #mask    ' Signal COGs (bit per COG)
+        COGATN #mask    ' Signal cogs (bit per cog)
 ```
 :::
 
@@ -5356,7 +5361,7 @@ The event toolkit you now command:
 Chapter 16 brings the whole journey together — orchestrating eight cogs in parallel harmony to build complete systems. It's where the P2 philosophy really shines.
 
 
-**Have Fun!** And remember — every spin loop you replace with **WAITSE** is CPU cycles you've handed back to your design. Be generous with events!
+**Have Fun!** And remember — every spin loop you replace with **WAITSE** is cog cycles you've handed back to your design. Be generous with events!
 
 
 # Chapter 16: Multi-Cog Orchestration
@@ -5368,9 +5373,9 @@ Chapter 16 brings the whole journey together — orchestrating eight cogs in par
 Watch this system architecture come alive:
 
 ```pasm2
-' Main orchestrator (COG 0)
+' Main orchestrator (cog 0)
 main_orchestrator
-        ' Launch the orchestra (SETQ sets PTRA for new COG)
+        ' Launch the orchestra (SETQ sets PTRA for new cog)
         setq    @sensor_params
         coginit #1, @sensor_cog
         setq    @motor_params
@@ -5411,13 +5416,13 @@ Eight processors running in parallel sounds wonderful — until you realize they
 The simplest and most common — a single hub long that one cog writes and another reads:
 
 ```pasm2
-' Producer COG
+' Producer cog
 producer
         ' Generate data
         call    #calculate_result
         wrlong  result, ##MAILBOX_ADDR
         
-' Consumer COG
+' Consumer cog
 consumer
         rdlong  data, ##MAILBOX_ADDR wz
    if_z jmp     #consumer              ' Wait for data
@@ -5430,7 +5435,7 @@ consumer
 For streaming data between cogs:
 
 ```pasm2
-' Writer COG
+' Writer cog
 writer_cog
         rdlong  wr_ptr, ##WRITE_PTR
         wrlong  data, wr_ptr
@@ -5438,7 +5443,7 @@ writer_cog
         and     wr_ptr, ##BUFFER_MASK  ' Wrap around
         wrlong  wr_ptr, ##WRITE_PTR
         
-' Reader COG  
+' Reader cog  
 reader_cog
         rdlong  rd_ptr, ##READ_PTR
         rdlong  wr_ptr, ##WRITE_PTR
@@ -5462,7 +5467,7 @@ For sending commands between cogs:
 ' +8: Parameter 2
 ' +12: Result/Status
 
-' Commander COG
+' Commander cog
 send_command
         wrlong  cmd_id, ##CMD_BUFFER+0
         wrlong  param1, ##CMD_BUFFER+4
@@ -5474,7 +5479,7 @@ wait_complete
         cmp     status, ##$FFFF wz
    if_z jmp     #wait_complete
         
-' Worker COG
+' Worker cog
 process_commands
         rdlong  status, ##CMD_BUFFER+12
         cmp     status, ##$FFFF wz
@@ -5514,10 +5519,10 @@ atomic_increment
 Cogs waiting for specific events:
 
 ```pasm2
-' COG 1: Signal event
+' cog 1: Signal event
         wrlong  ##EVENT_FLAG, ##EVENT_ADDR
         
-' COG 2: Wait for event
+' cog 2: Wait for event
 wait_event
         rdlong  flag, ##EVENT_ADDR wz
    if_z jmp     #wait_event
@@ -5529,7 +5534,7 @@ wait_event
 Let's build a complete robot control system:
 
 ```pasm2
-' COG 0: Main Controller
+' cog 0: Main Controller
 main_controller
         call    #init_system
         
@@ -5549,7 +5554,7 @@ main_loop
         
         jmp     #main_loop
 
-' COG 1: Ultrasonic Sensor
+' cog 1: Ultrasonic Sensor
 sensor_cog
         ' Trigger ultrasonic pulse
         drvh    #TRIGGER_PIN
@@ -5574,7 +5579,7 @@ sensor_cog
         waitx   ##10_000_000         ' 50ms at 200MHz
         jmp     #sensor_cog
 
-' COG 2: Left Motor Driver
+' cog 2: Left Motor Driver
 left_motor_cog
         rdlong  speed, ##LEFT_MOTOR wz
    if_z jmp     #left_motor_cog      ' No speed set
@@ -5583,10 +5588,10 @@ left_motor_cog
         ' ... PWM generation code
         jmp     #left_motor_cog
 
-' COG 3: Right Motor Driver
+' cog 3: Right Motor Driver
 ' (Similar to left motor)
 
-' COG 4: Serial Communications
+' cog 4: Serial Communications
 serial_cog
         ' Check for incoming commands
         testp   #RX_PIN wc
@@ -5597,7 +5602,7 @@ serial_cog
         wrlong  command, ##SERIAL_COMMAND
         jmp     #serial_cog
 
-' COG 5: LED Status Display
+' cog 5: LED Status Display
 status_cog
         rdlong  system_state, ##STATE_MAILBOX
         
@@ -5613,7 +5618,7 @@ status_cog
         waitx   ##10_000_000
         jmp     #status_cog
 
-' COG 6: Safety Monitor
+' cog 6: Safety Monitor
 safety_cog
         ' Monitor critical systems
         rdlong  battery, ##BATTERY_VOLTAGE
@@ -5627,7 +5632,7 @@ safety_cog
         
         jmp     #safety_cog
 
-' COG 7: Debug Output
+' cog 7: Debug Output
 debug_cog
         ' Output system state for debugging
         ' ... debug code
@@ -5652,8 +5657,8 @@ Starting structure:
 
 ```pasm2
         org     0
-' COG 0: Main sequencer
-        ' Launch other COGs
+' cog 0: Main sequencer
+        ' Launch other cogs
         ' Coordinate light changes
         ' Handle pedestrian requests
         
@@ -5672,7 +5677,7 @@ Multi-cog systems overwhelming? Start simple:
 
 ```pasm2
 ' Main + Helper pattern
-main    setq    @params                 ' PTRA for new COG
+main    setq    @params                 ' PTRA for new cog
         coginit #1, @helper
         ' Main work
 
@@ -5882,10 +5887,10 @@ You're used to configuring HAL structures, writing interrupt handlers, and manag
 
 | Instead of... | On P2... | The Benefit |
 |---------------|----------|-------------|
-| `HAL_UART_Transmit()` | Configure Smart Pin once, then **WYPIN** bytes | Pin handles all timing autonomously |
-| `HAL_TIM_PWM_Start()` | Configure Smart Pin once, update with **WYPIN** | Pin runs independently—your Cog is free |
-| NVIC priority configuration | Nothing needed | All Cogs equal, no priority inversion ever |
-| `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Simpler API, integrated into each Cog |
+| `HAL_UART_Transmit()` | Configure smart pin once, then **WYPIN** bytes | Pin handles all timing autonomously |
+| `HAL_TIM_PWM_Start()` | Configure smart pin once, update with **WYPIN** | Pin runs independently—your cog is free |
+| NVIC priority configuration | Nothing needed | All cogs equal, no priority inversion ever |
+| `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Simpler API, integrated into each cog |
 | `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in exactly 55 clocks |
 | FreeRTOS `xTaskCreate()` | **COGINIT** | True parallel execution, not scheduled |
 
@@ -5899,7 +5904,7 @@ You're used to WiFi/Bluetooth convenience and FreeRTOS abstractions. P2 takes a 
 |-----------|--------|-------------|
 | Built-in WiFi/BT | Add WizNet or ESP module | You choose your connectivity—or skip it entirely |
 | `xTaskCreate()` | **COGINIT** | Not scheduled—truly parallel, guaranteed timing |
-| GPIO matrix routing | Smart Pins | 32 modes per pin, far more capability |
+| GPIO matrix routing | smart pins | 32 modes per pin, far more capability |
 | FreeRTOS timing | Deterministic hub | Cycle-accurate timing guaranteed |
 | Arduino framework | Spin2/PASM2 | Deeper control, deeper understanding |
 
@@ -5911,8 +5916,8 @@ You'll find P2 familiar but dramatically more powerful:
 
 | Arduino Way | P2 Way | The Upgrade |
 |-------------|--------|-------------|
-| `digitalWrite()` | **DRVH/DRVL** or Smart Pins | Similar syntax, vastly more capability |
-| `delay()` blocks everything | **WAITX** or dedicated Cog | Timing without blocking other tasks |
+| `digitalWrite()` | **DRVH/DRVL** or smart pins | Similar syntax, vastly more capability |
+| `delay()` blocks everything | **WAITX** or dedicated cog | Timing without blocking other tasks |
 | One thing at a time | 8 things truly parallel | Real concurrency, not fake multitasking |
 | 8-bit math limits | 32-bit + hardware CORDIC | No more overflow worries, hardware trig |
 | Libraries for everything | Growing ecosystem + OBEX | More control, deeper understanding |
