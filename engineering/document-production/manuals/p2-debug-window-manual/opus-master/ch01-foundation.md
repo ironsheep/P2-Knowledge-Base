@@ -129,7 +129,8 @@ A number in the feed stream is interpreted one of two ways, and you control whic
   you do this with a `` `(value) `` substitution inside single-quoted text:
   `` `(x) `` is signed decimal, `` `$(x) `` hex, `` `%(x) `` binary, `` `.(x) ``
   floating point, and `` `#(x) `` sends the character whose code is `x`. If `x`
-  holds 25, then `'`(x)'` shows the two characters `2` and `5`.
+  holds 25, then a `` `(x) `` substitution inside single-quoted text shows the two
+  characters `2` and `5`.
 
   The value-only `DEBUG()` formatters you use for serial output — `` `udec_(x) ``,
   `` `uhex_(x) ``, `` `sdec_(x) ``, and so on — also put a value in the stream, but
@@ -149,7 +150,8 @@ literal string `'13'`. Carry this rule into every chapter:
 
 > **To display a number, format it. Send it bare and the window takes it as raw
 > input** — a command code in TERM, a plotted data value in the graphing windows.
-> In a TERM, `'`(temp)'` shows the value of `temp`; a bare `13` is a command code,
+> In a TERM, a `` `(temp) `` substitution inside single-quoted text shows the value
+> of `temp`; a bare `13` is a command code,
 > not the text "13".
 
 Each window assigns its own meaning to its command codes and to its raw data
@@ -164,9 +166,9 @@ Within that element model, the keywords a window understands fall into three
 groups — the distinction the per-window chapters and the command reference
 ([Appendix A](#appendix-a)) are organized around:
 
-- **Creation-line configuration** sets the window up once, on the `` DEBUG(`TYPE
-  Name ...) `` line that creates it — `SIZE`, `TITLE`, `POS`, and the rest. Most
-  cannot be changed once the window exists.
+- **Creation-line configuration** sets the window up once, on the
+  `` DEBUG(`TYPE Name ...) `` line that creates it — `SIZE`, `TITLE`, `POS`, and
+  the rest. Most cannot be changed once the window exists.
 - **Runtime commands** are sent *after* creation, in later feeds, to change the
   window's state or act on it: `COLOR` and `SET` on PLOT, `TRIGGER` on SCOPE, and
   so on. A few keywords are runtime-only and must not appear on the creation line;

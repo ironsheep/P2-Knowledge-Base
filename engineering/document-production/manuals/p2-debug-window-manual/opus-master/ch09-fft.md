@@ -168,7 +168,7 @@ The FFT output is in arbitrary units — not decibels, and not an absolute scale
 You have two independent controls over how tall the spectrum is drawn.
 
 **`MAG` (per channel, 0–11)** is a bit-shift applied to the transform output: a
-`MAG` of `n` multiplies the magnitude by 2ⁿ. Use it to bring up a weak signal
+`MAG` of `n` multiplies the magnitude by 2 to the power n. Use it to bring up a weak signal
 (`MAG 3` multiplies by 8) or to pull down one that saturates the top of the plot
 (`MAG 0`). It is set in the channel declaration, in the `MAG` shift position
 shown above.

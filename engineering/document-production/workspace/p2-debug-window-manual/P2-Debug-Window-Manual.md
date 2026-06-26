@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0\par}
+{\large\color{blue}Version 1.0.1\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -223,7 +223,7 @@ window.
 From then on you address that window **by its name**, not by its type:
 
 ```spin2
-DEBUG(`Status "Ready.")
+DEBUG(`Status 'Ready.')
 ```
 
 The name is the whole interface. The first statement said "make a TERM window and
@@ -231,12 +231,12 @@ call it `Status`"; the second says "send this to `Status`." You can feed the sam
 window from many places in your program, and you can feed two windows the same data
 by naming both. A complete minimal program:
 
-```spin2
+```{.spin2 caption="ch01-getting-started-term.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main()
   debug(`TERM Status SIZE 40 20)   ' create a window named "Status"
-  debug(`Status "Ready.")          ' feed it by name
+  debug(`Status 'Ready.')          ' feed it by name
   repeat                           ' keep the program (and window) alive
 ```
 
@@ -257,8 +257,11 @@ The element types are:
 - **Keywords** — bare words like `SIZE`, `TITLE`, `POS`, `CLEAR`. These configure
   the window or issue a named command. Each window's chapter lists the keywords it
   understands.
-- **Strings** — text in single quotes, such as `'Sawtooth'`, or in the Spin2 source
-  written with double quotes, such as `"Ready."`. A string is shown literally.
+- **Strings** — display text in **single** quotes, such as `'Sawtooth'` or
+  `'Ready.'`. A single-quoted string is shown literally. Use single quotes for
+  display text: a **double**-quoted string in a backtick display feed compiles but
+  is silently dropped at runtime — the window shows nothing. (Double quotes remain
+  valid inside a `` `(expr) `` substitution, which is ordinary Spin2.)
 - **Numbers** — written in decimal, hex (`$FF`), or binary (`%1010`). What a number
   *means* depends on context, and that is the rule you must internalize.
 
@@ -266,27 +269,34 @@ The element types are:
 
 A number in the feed stream is interpreted one of two ways, and you control which:
 
-- A number sent through a **formatter** is *displayed as text*. The formatters
-  are the same `DEBUG()` output commands you use for serial output, in their
-  value-only form: `` `udec_(x) ``, `` `uhex_(x) ``, `` `sdec_(x) ``, and so on.
-  There are also shorthands: `` `(x) `` is short for `SDEC_` (signed decimal),
-  `` `$(x) `` for `UHEX_` (hex), `` `%(x) `` for `UBIN_` (binary), `` `.(x) `` for
-  `FDEC_` (floating point), and `` `#(x) `` to send the character whose code is `x`.
-  If `x` holds 25, then `` `udec_(x) `` puts the two characters `2` and `5` into the
-  stream.
-- A **bare number** — one not wrapped in a formatter — is *raw input* the window
-  interprets in its own way: in a TERM window it is a **command code** (cursor,
-  color, and control); in the graphing windows it is a **data value** (a sample to
-  plot). Either way it is not shown as the literal digits.
+- A number put into the stream as **display text** shows as its digits. In a TERM
+  you do this with a `` `(value) `` substitution inside single-quoted text:
+  `` `(x) `` is signed decimal, `` `$(x) `` hex, `` `%(x) `` binary, `` `.(x) ``
+  floating point, and `` `#(x) `` sends the character whose code is `x`. If `x`
+  holds 25, then a `` `(x) `` substitution inside single-quoted text shows the two
+  characters `2` and `5`.
+
+  The value-only `DEBUG()` formatters you use for serial output — `` `udec_(x) ``,
+  `` `uhex_(x) ``, `` `sdec_(x) ``, and so on — also put a value in the stream, but
+  as a **numeric data element**: the form the graphing windows (SCOPE, LOGIC, FFT)
+  consume as a data point. Send one to a **TERM** and it renders as a single
+  **character glyph** (value 42 prints `*`, not `42`), not as digits. So in a TERM,
+  display a value's text with `` `(value) `` substitution — not `` `udec_ ``.
+- A **bare number** — one not wrapped in a formatter or substitution — is *raw
+  input* the window interprets in its own way: in a TERM window it is a **command
+  code** (cursor, color, and control); in the graphing windows it is a **data
+  value** (a sample to plot). Either way it is not shown as the literal digits.
 
 This is why a terminal treats a bare `13` as a newline rather than printing the
-digits "13": `13` is a command code. To show the number thirteen, you would send
-`` `udec_(13) `` or the literal string `"13"`. Carry this rule into every chapter:
+digits "13": `13` is the newline command code. To show the number thirteen as text,
+put it inside single-quoted text — `` debug(`Status '`(13)') `` — or write the
+literal string `'13'`. Carry this rule into every chapter:
 
 > **To display a number, format it. Send it bare and the window takes it as raw
 > input** — a command code in TERM, a plotted data value in the graphing windows.
-> `` `udec_(temp) `` shows the value of `temp`; a bare `13` in TERM is a command
-> code, not the text "13".
+> In a TERM, a `` `(temp) `` substitution inside single-quoted text shows the value
+> of `temp`; a bare `13` is a command code,
+> not the text "13".
 
 Each window assigns its own meaning to its command codes and to its raw data
 values — what a number does in a TERM window (cursor and color control) is not what
@@ -300,9 +310,9 @@ Within that element model, the keywords a window understands fall into three
 groups — the distinction the per-window chapters and the command reference
 ([Appendix A](#appendix-a)) are organized around:
 
-- **Creation-line configuration** sets the window up once, on the `` DEBUG(`TYPE
-  Name ...) `` line that creates it — `SIZE`, `TITLE`, `POS`, and the rest. Most
-  cannot be changed once the window exists.
+- **Creation-line configuration** sets the window up once, on the
+  `` DEBUG(`TYPE Name ...) `` line that creates it — `SIZE`, `TITLE`, `POS`, and
+  the rest. Most cannot be changed once the window exists.
 - **Runtime commands** are sent *after* creation, in later feeds, to change the
   window's state or act on it: `COLOR` and `SET` on PLOT, `TRIGGER` on SCOPE, and
   so on. A few keywords are runtime-only and must not appear on the creation line;
@@ -331,7 +341,7 @@ after the window name, the same way you send data:
   dismiss a single window explicitly while the rest of the program keeps running.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
-  repaints only when you feed it the `UPDATE` command. This eliminates flicker when
+  repaints only when you feed it the `UPDATE` command. This prevents flicker when
   you redraw a whole display at once. Not every window supports buffered mode — its
   chapter says whether it does.
 - **`PC_KEY`** and **`PC_MOUSE`** — read the host keyboard and mouse back into your
@@ -363,9 +373,8 @@ you reach for these display windows.
 
 These windows are hosted by **`pnut_term_ts`**, the host application this manual
 uses throughout to open and draw them. The same DEBUG display windows are also
-hosted by **PNut** and by the **Spin Tools IDE** — all three environments open and
-draw them, so the examples work in any of them. You produce a program that drives
-them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+hosted by **PNut**, so the examples work there as well. You produce a program that
+drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
 [Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates
@@ -434,8 +443,8 @@ Two things, and nothing else:
 
 - **A P2 board** connected to your computer over USB. Any P2 board works; no
   shields, sensors, probes, or external wiring are required.
-- **A PC running `pnut_term_ts`**, the host application that compiles your program,
-  programs the P2, and opens the DEBUG display windows.
+- **A PC running `pnut_term_ts`**, the host application that programs the P2 and
+  opens the DEBUG display windows.
 
 The compiler is `pnut_ts`, and the host application that opens the display windows
 is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
@@ -477,13 +486,13 @@ ceiling on how fast a window can update.
 
 Here is a complete program that opens a text window and prints a value:
 
-```spin2
+```{.spin2 caption="ch02-term-print-value.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | reading
   debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
   reading := 42
-  debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
+  debug(`Status 'Reading: `(reading)' 13)   ' feed it by name
   repeat                                          ' keep the window open
 ```
 
@@ -493,8 +502,10 @@ Two `DEBUG()` statements, two distinct jobs:
   type (`TERM`); the second is a name you choose (`Status`). `SIZE 30 5` makes it
   30 columns by 5 rows.
 - The second **feeds** that window, addressing it by the name you gave it. The
-  quoted string prints as-is; `` `udec_(reading) `` prints the decimal text of
-  `reading` — the characters `42`; the bare `13` is a newline.
+  single-quoted text prints as-is; the `` `(reading) `` substitution inside it
+  prints the decimal text of `reading` — the characters `42`; the bare `13` is a
+  newline. (In a TERM, display a value with `` `(value) `` substitution, not
+  `` `udec_ `` — the trailing-underscore formatters render as a glyph here.)
 
 This create-by-name, feed-by-name model is how every window in this manual works.
 You declare a window once with a type and a name, then drive it by that name for
@@ -502,11 +513,13 @@ the rest of the program. The window type determines what the window draws and wh
 commands it accepts — covered chapter by chapter — but the two-step pattern never
 changes.
 
-> Display values with formatters, issue commands with bare numbers.
-> `` `udec_(x) `` shows the digits of `x`; a bare `13` is the newline command, not
-> the text "13". The valid output formatters are `UDEC`, `SDEC`, `UHEX`, `SHEX`,
-> and `UBIN`, each with an optional trailing `_` that suppresses the auto label.
-> There is no bare `DEC`, `HEX`, or `BIN`.
+> Display values as text, issue commands with bare numbers.
+> In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
+> `x`; a bare `13` is the newline command,
+> not the text "13". The value-only output formatters are `UDEC_`, `SDEC_`,
+> `UHEX_`, `SHEX_`, and `UBIN_` — these feed a numeric data element (consumed by the
+> graphing windows), so to display a value's text in a TERM use `` `(value) ``
+> substitution instead.
 
 Compile it with `pnut_ts -d`, run it from `pnut_term_ts`, and a small text window
 titled `Status` opens showing `Reading: 42`.
@@ -528,7 +541,7 @@ feeding a LOGIC trace — each exercises the full path from `DEBUG()` to a live
 window with no wiring at all. This program drives a text window from two software
 sources, a CORDIC sine and the RNG:
 
-```spin2
+```{.spin2 caption="ch02-term-signals.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | angle, wave, noise
@@ -537,7 +550,7 @@ PUB main() | angle, wave, noise
   repeat
     wave  := qsin(1000, angle, $1000)              ' CORDIC: a sine value
     noise := getrnd() & $FF                        ' RNG: a noise value
-    debug(`Signals 1 "wave=" `sdec_(wave) "  noise=" `udec_(noise))
+    debug(`Signals 1 'wave=`(wave)  noise=`(noise)')
     angle += $0040
     waitms(50)
 ```
@@ -565,7 +578,7 @@ For display windows to open at all, `DEBUG_PIN_TX` must be 62 — that is the pi
 `pnut_term_ts` listens on. The defaults already satisfy this; the symbols exist for
 the cases where you must move the link or limit which cogs participate.
 
-```spin2
+```{.spin2 caption="ch02-term-pin-config.spin2"}
 CON _clkfreq = 200_000_000
 
 CON
@@ -575,7 +588,7 @@ CON
 
 PUB main()
   debug(`TERM Status SIZE 30 5)
-  debug(`Status "Ready." 13)
+  debug(`Status 'Ready.' 13)
   repeat                         ' keep the window open
 ```
 
@@ -649,7 +662,7 @@ You feed the window afterward by that name:
 ```spin2
 PUB main()
   debug(`TERM Status SIZE 40 20)     ' create a 40x20 window named "Status"
-  debug(`Status "Ready.")            ' feed it by name
+  debug(`Status 'Ready.')            ' feed it by name
 ```
 
 The configuration keywords you can add to the creation line:
@@ -665,6 +678,10 @@ The configuration keywords you can add to the creation line:
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 
+Sent at runtime in a feed (rather than on the creation line), `BACKCOLOR` instead
+sets the background drawn behind subsequent characters — the per-character text
+background.
+
 `SIZE` is the one you will set most often. The grid is measured in characters, not
 pixels — the window computes its pixel size from the font. A `SIZE 80 25` window
 gives you a classic 80-column console.
@@ -672,11 +689,11 @@ gives you a classic 80-column console.
 ## Sending text
 
 Once the window exists, everything you send by its name is rendered at the cursor,
-left to right, top to bottom. You can send string literals and you can send the
-value of a variable:
+left to right, top to bottom. You can send a text string and you can substitute the
+value of a variable into the line:
 
 ```spin2
-debug(`Status "Temperature: " `udec_(temp) " C")
+debug(`Status 'Temperature: `(temp) C')
 ```
 
 ```{=latex}
@@ -689,14 +706,24 @@ debug(`Status "Temperature: " `udec_(temp) " C")
 
 Two things are happening here, and the difference matters:
 
-- A **quoted string** is printed as-is.
-- `` `udec_(temp) `` prints the *decimal text* of `temp` — if `temp` holds 25, the
-  window shows the characters `25`. Use the formatters (`` `udec_ ``, `` `uhex_ ``,
-  `` `sdec_ ``, and so on) whenever you want to display a number.
+- **Text is single-quoted.** Inside a backtick feed, a string literal must use
+  single quotes (`'...'`). This is the one rule that trips everyone up: a
+  *double*-quoted string compiles without error but is **silently dropped at
+  runtime** — the text simply never appears. Single quotes only.
+- `` `(temp) `` substitutes the *decimal text* of `temp` into the line — if `temp`
+  holds 25, the window shows the characters `25`. `` `(value) `` is how you display
+  a number's text in a TERM (it is shorthand for signed decimal).
+
+> **Don't reach for `` `udec_() `` here.** The trailing-underscore formatters
+> (`` `udec_ ``, `` `sdec_ ``, `` `uhex_ ``) feed a *numeric data element* — the form
+> the graphical windows (SCOPE, LOGIC, FFT) consume as a data point. Send one to a
+> TERM and the number is rendered as a single **character glyph** (value 42 prints
+> `*`, not `42`). In a TERM, display a value with `` `(value) `` substitution.
 
 There is a second, lower-level way numbers reach the window — as **command codes** —
-and that is the next section. The rule to carry with you: *to display a number,
-format it with a backtick formatter; to issue a command, send a bare number.*
+and that is the next section. The rule to carry with you: *to display a value, put
+`` `(value) `` inside your single-quoted text; to issue a command, send a bare
+number.*
 
 ## Command codes
 
@@ -719,18 +746,21 @@ So to clear the screen and print a heading at row 2, column 5:
 
 ```spin2
 debug(`Status 0)                 ' clear + home
-debug(`Status 3 2 2 5 "Heading") ' set row 2, set column 5, then print
+debug(`Status 3 2 2 5 'Heading') ' set row 2, set column 5, then print
 ```
 
 Read `3 2 2 5` as two commands: `3 2` (set row to 2) and `2 5` (set column to 5).
 To position with a variable instead of a literal, send the value with `` `() ``:
 
 ```spin2
-debug(`Status 3 `(line) 2 `(indent) "Positioned")
+debug(`Status 3 `(line) 2 `(indent) 'Positioned')
 ```
 
-`` `(line) `` sends the *value* of `line` as the command argument — distinct from
-`` `udec_(line) ``, which would print it as visible digits.
+Here `` `(line) `` supplies the *value* of `line` as the argument to the `3` (set
+row) command. It is the same `` `(value) `` substitution you use to display a
+number — the window interprets it as a command argument because a command code
+(`3`) precedes it. Position first, then print: the `'Positioned'` text lands at the
+cursor you just set.
 
 ## Color
 
@@ -745,8 +775,8 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 | 3 | `7` | Black | Lime |
 
 ```spin2
-debug(`Status 4 "normal" 13)     ' pair 0: orange on black
-debug(`Status 6 "ok" 13)         ' pair 2: lime on black
+debug(`Status 4 'normal' 13)     ' pair 0: orange on black
+debug(`Status 6 'ok' 13)         ' pair 2: lime on black
 ```
 
 To choose your own colors, set all eight values (four pairs, foreground then
@@ -781,7 +811,7 @@ PUB log_loop() | n
   debug(`TERM Events SIZE 80 25)
   n := 0
   repeat
-    debug(`Events `udec_(n) ": event" 13)   ' scrolls once it fills
+    debug(`Events '`(n): event' 13)         ' scrolls once it fills
     n += 1
     waitms(200)
 ```
@@ -813,8 +843,8 @@ PUB dashboard() | temp, press
     temp := read_temp()
     press := read_press()
     debug(`Panel 0)                       ' clear (off-screen)
-    debug(`Panel "Temp:  " `udec_(temp) " C" 13)
-    debug(`Panel "Press: " `udec_(press) " mb" 13)
+    debug(`Panel 'Temp:  `(temp) C' 13)
+    debug(`Panel 'Press: `(press) mb' 13)
     debug(`Panel UPDATE)                  ' repaint once, flicker-free
     waitms(250)
 
@@ -837,17 +867,17 @@ When a panel's *layout* is fixed — the labels never move, only the values chan
 draw the labels once, then overprint just the value fields in place with the `3`
 (set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
 
-```spin2
+```{.spin2 caption="ch03-term-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count
   debug(`TERM Panel SIZE 40 8)
 
   ' Draw the static layout once: a title and three fixed labels.
-  debug(`Panel 0 4 "SIGNAL MONITOR")     ' clear, pair 0, title at (0,0)
-  debug(`Panel 3 2 2 0 "Sample:")        ' row 2, col 0
-  debug(`Panel 3 3 2 0 "Value :")        ' row 3, col 0
-  debug(`Panel 3 4 2 0 "State :")        ' row 4, col 0
+  debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
+  debug(`Panel 3 2 2 0 'Sample:')        ' row 2, col 0
+  debug(`Panel 3 3 2 0 'Value :')        ' row 3, col 0
+  debug(`Panel 3 4 2 0 'State :')        ' row 4, col 0
 
   ang := 0
   count := 0
@@ -857,13 +887,13 @@ PUB main() | ang, signal, count
     ' Overprint only the value fields, each at a fixed (row, col). Trailing
     ' spaces pad to a fixed width so a shorter value erases a
     ' longer old one.
-    debug(`Panel 3 2 2 8 `udec_(count) "    ")
-    debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
+    debug(`Panel 3 2 2 8 '`(count)    ')
+    debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 "HIGH " 4)  ' pair 3 (red), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (red), then back to pair 0
     else
       ' pair 2 (lime), then back to pair 0
-      debug(`Panel 3 4 2 8 6 "ok   " 4)
+      debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4
     count += 1
@@ -903,9 +933,11 @@ or register read, and the same panel reports live values.
   it off — real-time drawing is simpler and the per-character cost is negligible.
 - **Tabs are fixed at every 8 columns.** For arbitrary alignment, position
   explicitly with the `2` (set column) command instead.
-- **Display values with formatters, issue commands with bare numbers.** This is the
-  single most common mistake: `` `udec_(x) `` shows the number; a bare `13` is a
-  newline, not the text "13".
+- **Use single quotes, and substitute values with `` `(value) ``.** The two most
+  common mistakes both fail silently: double-quoted text is dropped (use `'...'`),
+  and a value displayed with `` `udec_(x) `` arrives as a character glyph, not its
+  digits (use `` `(x) ``). And remember a bare `13` is a newline command, not the
+  text "13".
 
 ## Try it
 
@@ -1003,8 +1035,10 @@ The modes fall into four families:
 mode without defining a palette, the palette is uninitialized and LUT-mode pixels
 render as garbage — you must supply one with `LUTCOLORS`.
 
-**Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
-color you pick with a color-tune keyword:
+**Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
+color. The LUMA modes map the value against a single tint color you pick with a
+color-tune keyword; the RGBI modes carry their own color in each pixel (upper 3
+bits) and take no tint keyword:
 
 | Mode | Meaning |
 |------|---------|
@@ -1073,7 +1107,7 @@ a value with `` `() `` — the parentheses send the *value* of the expression, n
 visible digits:
 
 ```spin2
-debug(`Img `(color))      ' write one pixel = the value of `color`
+debug(`Img `(color))      ' write one pixel = the value of color
 debug(`Img `($FF7F00))    ' write one orange pixel (RGB24)
 ```
 
@@ -1210,7 +1244,7 @@ flicker-free updates — write an entire frame, then show it at once.
 pixels. A small count repaints often (smoother, slower); a large count repaints
 rarely (faster, choppier). The default is one scan line — `width` pixels for
 horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
-(`width × height`).
+(`width x height`).
 
 `SAVE` writes the current canvas to an image file on the host running
 `pnut_term_ts`.
@@ -1230,7 +1264,7 @@ with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
 built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
 bright (hot):
 
-```spin2
+```{.spin2 caption="ch04-bitmap-heatmap.spin2"}
 CON
   _clkfreq = 200_000_000
   COLS = 32                                ' a 32x24 thermopile array
@@ -1645,7 +1679,7 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 | 4–5 | Horizontal align | `0`/`1`=center, `2`=left, `3`=right |
 | 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
 
-So `$02` is bold, `$06` is bold + italic, `$0A` is normal-weight + underline, and
+So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` left-aligns. The defaults (style `$00`) are thin weight, centered both ways.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
@@ -1814,7 +1848,7 @@ the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command
 new position — you re-send one command, not the primitives. In buffered mode the motion
 is flicker-free:
 
-```spin2
+```{.spin2 caption="ch05-plot-field.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | x
@@ -1891,7 +1925,7 @@ moved to the left-center so the wave sits around a center line — y already
 increases upward in the default coordinate system. The two worked instruments that
 follow put these same primitives to work on real tasks.
 
-```spin2
+```{.spin2 caption="ch05-plot-wave-scatter.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | x, y, angle, i, sx, sy
@@ -1968,14 +2002,14 @@ marks and a ring — is drawn the same way, so a complete analog gauge needs onl
 `LINE` and `CIRCLE`. This program sweeps a software-generated reading across a 240°
 scale, redrawing in buffered mode so it never flickers:
 
-```spin2
+```{.spin2 caption="ch05-plot-gauge.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, value, needle, i, tick
   ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
   debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
   debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
-  debug(`Gauge POLAR 360)  ' angles in degrees; theta 0 points up
+  debug(`Gauge POLAR 360)  ' degrees; theta 0 points right (+x), +90 up
 
   ang := 0
   repeat
@@ -2035,7 +2069,7 @@ it for the integral term, forms the controller output (clamped, like a real
 actuator), and advances a first-order process model toward that output. The three
 histories are then drawn as three polylines across the canvas:
 
-```spin2
+```{.spin2 caption="ch05-plot-pid.spin2"}
 CON
   _clkfreq = 200_000_000
   STEPS = 256
@@ -2346,8 +2380,10 @@ TRIGGER mask match {offset}
   0; `$3` watches channels 0 and 1; `0` disables the trigger (free-running).
 - **`match`** — the bit values expected on the masked channels.
 - **`offset`** — where the trigger event sits in the display, `0` to `SAMPLES-1`.
-  `0` is the left edge (show what follows the event), `SAMPLES-1` is the right edge
-  (show what led up to it), and the default is the center (`SAMPLES/2`).
+  `0` puts it at the **right** edge — it tests the newest sample, so you see the
+  lead-up *to* the event (pre-trigger history). `SAMPLES-1` puts it at the **left**
+  edge — it tests the oldest sample, so you see what happens *after* the event
+  (post-trigger). `SAMPLES/2` (the default) centers it.
 
 The match test is `((sample XOR match) AND mask) = 0` — true when every masked bit
 equals its expected value. The trigger is **edge-sensitive**: it first has to see a
@@ -2411,7 +2447,7 @@ The decoding — knowing that this *is* SPI, that data is sampled on the rising 
 edge, that the byte is `$A5` — lives entirely in this Spin2 code. The window shows
 only the three waveforms; it does not know they are SPI.
 
-```spin2
+```{.spin2 caption="ch06-logic-spi-bus.spin2"}
 CON
   _clkfreq = 100_000_000
 
@@ -2476,7 +2512,7 @@ because digital debugging rarely needs a continuous full-rate stream. Two
 logic-specific habits keep it that way.
 
 **Software-paced — one sample per event.** You do not have to sample a bus on
-every system-clock tick. The SPI example above sends one sample each time a line
+every `sysclk` tick. The SPI example above sends one sample each time a line
 *changes* — idle, CS low, each clock edge — not one per clock cycle. Driving the
 window from your protocol's own events, rather than a free-running sample clock,
 is what keeps a bring-up trace small enough to stream live: a few hundred samples
@@ -2595,8 +2631,9 @@ declarations follow on the same line:
 
 ```spin2
 PUB main() | ang
-  ' create, one auto-ranging channel
-  debug(`SCOPE Sig SIZE 400 200 'Wave' AUTO)
+  ' create the window, then declare one auto-ranging channel (separately)
+  debug(`SCOPE Sig SIZE 400 200)
+  debug(`Sig 'Wave' AUTO)
   ang := 0
   repeat
     debug(`Sig `(qsin(1000, ang, 256)))         ' feed it by name
@@ -2644,12 +2681,15 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `grid` | Grid flags: 4-bit mask — bit0 baseline line, bit1 top line, bit2 min-value label, bit3 max-value label | `0` (off) |
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
-The first label after `SCOPE` becomes channel 0, the next becomes channel 1, and so
-on, up to eight. So this declares three channels:
+The first label declares channel 0, the next channel 1, and so on, up to eight.
+Send the channel declarations as a **separate message after creating the window** —
+a channel declaration placed on the create line is ignored, because the create
+message accepts only configuration keywords, so the window opens with no channels.
+So this declares three channels:
 
 ```spin2
-debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 ...
-  'Sine'  -1000 1000 100   0 0 $00FF00 ...
+debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
+debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
   'Tri'   -1000 1000 100 100 0 $FF0000 ...
   'Noise' -1000 1000 100 200 0 $00AAFF)
 ```
@@ -2800,15 +2840,15 @@ on three stacked SCOPE channels: a CORDIC sine (`QSIN`), a counter-driven triang
 and random noise from `GETRND`. It compiles with `pnut_ts` and runs on a bare P2
 board with `pnut_term_ts` open.
 
-```spin2
+```{.spin2 caption="ch07-scope-three-channel.spin2"}
 CON
   _clkfreq = 200_000_000
 
 PUB main() | ang, sine, tri, dir, noise
   ' Three stacked channels: fixed -1000..1000 range,
   ' 100px tall, offset by 'base'
-  debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2 ...
-    'Sine'  -1000 1000 100   0 0 $00FF00 ...
+  debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2)
+  debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
     'Tri'   -1000 1000 100 100 0 $FF0000 ...
     'Noise' -1000 1000 100 200 0 $00AAFF)
 
@@ -2859,7 +2899,7 @@ capture** is one line of setup. Here the window waits for the signal to rise pas
 500 (armed below at −500, fired at or above 500 — `fire` >= `arm`, so rising) and
 freezes a 512-sample frame with the trigger point centered:
 
-```spin2
+```{.spin2 caption="ch07-scope-triggered.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -2892,7 +2932,7 @@ clean signal's range arms on the quiet signal and fires the moment a spike
 crosses it, freezing a 512-sample frame with the glitch centered, its lead-up to
 the left and its aftermath to the right:
 
-```spin2
+```{.spin2 caption="ch07-scope-glitch.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -2997,8 +3037,8 @@ channel, trigger, and capture code shows the live signal.
   (`tall`) smaller than the window and a stepped `base` offset to lay multiple traces
   out without overlap, as the worked example does.
 - **`SAMPLES` sets horizontal resolution and trigger depth.** It is also the default
-  holdoff and the default trigger offset, so raising `SAMPLES` widens the captured
-  frame and the pre-trigger window together.
+  holdoff, and **half of it** (`SAMPLES/2`) is the default trigger offset, so raising
+  `SAMPLES` widens the captured frame and the pre-trigger window together.
 - **For high sample rates, pack the data.** Bare per-channel values are simplest; the
   packing keywords ([Chapter 13](#ch-13)) move more samples per `DEBUG` packet over the link.
 
@@ -3010,7 +3050,7 @@ amplitude argument to `qsin`. Then add a trigger on the sine channel
 (`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
 `SAMPLES-1` to move the trigger point from the right edge to the center to the left
-edge, and see the pre-trigger region grow.
+edge, and see the post-trigger region grow.
 
 
 # Chapter 8: The SCOPE_XY Window — XY, Lissajous, and Phase Plots {#ch-8}
@@ -3063,7 +3103,7 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
 | `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `radius` | `256×256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256×256 (the default is a 256-pixel width, not a radius) |
+| `SIZE` | `radius` | `256x256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256x256 (the default is a 256-pixel width, not a radius) |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
@@ -3194,7 +3234,7 @@ whose signature is `QSIN(length, step, stepsInCircle)` — it returns
 `length x sin(step / stepsInCircle x 2pi)`. Passing `360` for `stepsInCircle` lets
 you treat `step` as degrees.
 
-```spin2
+```{.spin2 caption="ch08-scope-xy-lissajous.spin2"}
 CON _clkfreq = 100_000_000
 
 PUB main() | ph, x, y
@@ -3339,15 +3379,19 @@ carries unique information. Bin 0 is the DC (zero-frequency) component and bin
 
 You create and configure the window in a single `DEBUG` statement. The first
 token after the backtick is the window type (`FFT`); the second is a name you
-choose. You feed it afterward by that name:
+choose. Before it will display anything you must declare at least one channel —
+covered in the next section — and then feed it samples by that name:
 
 ```spin2
-PUB main() | s
-  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024)   ' create the window
+PUB main() | phase, s
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE) ' create window
+  debug(`Spectrum 'Signal' 0 1000 256 0 1 $00FF00) ' declare one channel
+  phase := 0
   repeat
     repeat 1024
-      s := qsin(20000, getct(), $1_0000)           ' a sample
-      debug(`Spectrum `(s))                         ' feed it by name
+      s := qsin(1000, phase, $1_0000)                     ' a sample
+      phase += 3072                                        ' steady tone
+      debug(`Spectrum `(s))                                ' feed it by name
 ```
 
 The configuration keywords you can add to the creation line:
@@ -3356,7 +3400,7 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `FFT` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | — | Plot area in pixels; each is **32–2048** |
+| `SIZE` | `width height` | `256 256` | Plot area in pixels; each is **32–2048** |
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
@@ -3450,7 +3494,7 @@ The FFT output is in arbitrary units — not decibels, and not an absolute scale
 You have two independent controls over how tall the spectrum is drawn.
 
 **`MAG` (per channel, 0–11)** is a bit-shift applied to the transform output: a
-`MAG` of `n` multiplies the magnitude by 2ⁿ. Use it to bring up a weak signal
+`MAG` of `n` multiplies the magnitude by 2 to the power n. Use it to bring up a weak signal
 (`MAG 3` multiplies by 8) or to pull down one that saturates the top of the plot
 (`MAG 0`). It is set in the channel declaration, in the `MAG` shift position
 shown above.
@@ -3535,7 +3579,7 @@ accumulator; adding a fixed increment to a phase each sample sets that tone's
 frequency, and the size of the increment relative to a full `$1_0000_0000` turn
 fixes which bin the spike lands in.
 
-```spin2
+```{.spin2 caption="ch09-fft-spectrum.spin2"}
 CON
   _clkfreq = 180_000_000
 
@@ -3555,9 +3599,9 @@ PUB main() | p1, p2, p3, s
   p3 := 0
   repeat
     repeat N                           ' one full FFT buffer per pass
-      s :=  qsin(20000, p1, $1_0000)   ' tone 1
-      s += qsin(12000, p2, $1_0000)   ' tone 2
-      s += qsin( 6000, p3, $1_0000)   ' tone 3
+      s :=  qsin(20000, p1, 0)         ' tone 1 (twopi 0 = full 2^32 turn)
+      s += qsin(12000, p2, 0)          ' tone 2
+      s += qsin( 6000, p3, 0)          ' tone 3
       s += (getrnd() & $FFF) - $800    ' +/- noise
       debug(`Spectrum `(s))            ' feed one sample
 
@@ -3569,7 +3613,8 @@ PUB main() | p1, p2, p3, s
 
 `qsin(length, angle, twopi)` returns a CORDIC sine: `length` is the amplitude,
 `angle` is the current phase, and `twopi` is the value that represents one full
-turn — here `$1_0000`, so the phase wraps every 65,536 counts. Summing three of
+turn — here `0`, which selects the full `$1_0000_0000` (2³²) circle, so the phase
+wraps every 4,294,967,296 counts. Summing three of
 them, scaling the noise down with a mask, and feeding the result one sample at a
 time produces a spectrum with three clear peaks at the three increment-determined
 bins.
@@ -3892,7 +3937,7 @@ frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
 vibration draws a **diagonal streak** down the waterfall — the run-up captured as
 a picture.
 
-```spin2
+```{.spin2 caption="ch10-spectro-runup.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -3902,7 +3947,7 @@ PUB main() | i, phase, ainc, sample
          RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
-  ainc  := 30_000              ' shaft frequency at rest (a low tone)
+  ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
 
   repeat
     ' Feed one 512-sample FFT window at the current speed, then accelerate.
@@ -3910,10 +3955,10 @@ PUB main() | i, phase, ainc, sample
       sample := sine(2000, phase)
       phase += ainc            ' advance the synthesized vibration tone
       debug(`RunUp `(sample))
-    ainc += 20_000  ' the motor speeds up -> higher tone -> diagonal streak
-    if ainc > 1_000_000
+    ainc += 5_000_000  ' motor speeds up -> higher tone -> diagonal streak
+    if ainc > 400_000_000
       debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
-      ainc := 30_000
+      ainc := 8_000_000
 
 PRI sine(amp, angle) : y
   ' amp * sin(angle), via the CORDIC.
@@ -4169,7 +4214,7 @@ This program needs nothing but a P2 and the host running `pnut_term_ts`. It
 generates its own MIDI bytes: it plays a C-major scale one note at a time, then a
 C-major chord using running status, then clears the keyboard.
 
-```spin2
+```{.spin2 caption="ch11-midi-scale-chord.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4206,7 +4251,7 @@ chord keys light together for a second, then the keyboard goes dark.
 To see velocity at work, hold one note and raise the velocity each pass — the lit
 fill climbs higher each time:
 
-```spin2
+```{.spin2 caption="ch11-midi-velocity.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4254,12 +4299,13 @@ and digital event timing in LOGIC ([Chapter 6](#ch-6)).
   supported. If your software emits them, they will not move any key — and
   because their status bytes have the top bit set, each one simply resets the
   parser to wait for the next Note-On or Note-Off.
-- **A velocity-0 Note-On is not a Note-Off.** Many MIDI sources end a note with a
-  Note-On at velocity 0 instead of a real Note-Off. This window does not treat
-  that as a release: the key would store velocity 0 and read as off, but to turn a
-  lit key off reliably you must send a proper Note-Off (`$8n`) for it. When you
-  generate the bytes yourself, always pair each `$90` note-on with an `$80`
-  note-off.
+- **A velocity-0 Note-On clears the key.** Many MIDI sources end a note with a
+  Note-On at velocity 0 instead of a real Note-Off. The window stores that
+  velocity 0, and because a key lights only while its stored velocity is greater
+  than zero, the key reads as off — the same visual result as a Note-Off. Sending
+  an explicit Note-Off (`$8n`) is good MIDI practice, but it is not required to
+  extinguish the key here. When you generate the bytes yourself, pairing each
+  `$90` note-on with an `$80` note-off keeps your stream conventional.
 - **One channel at a time.** The window shows exactly the channel set by
   `CHANNEL`; notes on other channels are ignored. To watch several channels at
   once, open one MIDI window per channel, each with its own `CHANNEL` value.
@@ -4393,7 +4439,7 @@ This program opens a TERM window and lets the arrow keys nudge a number up and
 down. Up/Down change it by one; Left/Right by ten. The value is redrawn only when a
 key is actually pressed:
 
-```spin2
+```{.spin2 caption="ch12-keyboard-adjust.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | key, value
@@ -4413,7 +4459,7 @@ PUB main() | key, value
     waitms(20)
 
 PRI show(v)
-  debug(`Adjust 0 "Value: " `sdec_(v) 13 "Up/Down +/-1, Left/Right +/-10")
+  debug(`Adjust 0 'Value: `(v)' 13 'Up/Down +/-1, Left/Right +/-10')
 ```
 
 Click the window to give it focus, then press the arrow keys. Each `case` arm acts
@@ -4474,7 +4520,7 @@ too.
 This program continuously displays the mouse state in a TERM window, clearing and
 redrawing each pass:
 
-```spin2
+```{.spin2 caption="ch12-mouse-pointer.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | mouse[7]
@@ -4483,21 +4529,21 @@ PUB main() | mouse[7]
     debug(`Pointer PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
-      debug(`Pointer "Pointer outside window" 13)
+      debug(`Pointer 'Pointer outside window' 13)
     else
-      debug(`Pointer "X: " `sdec_(mouse[0]) "  Y: " `sdec_(mouse[1]) 13)
-      debug(`Pointer "Wheel: " `sdec_(mouse[2]) 13)
-      debug(`Pointer "Buttons  L:" `sdec_(mouse[3]))
-      debug(`Pointer "  M:" `sdec_(mouse[4]) "  R:" `sdec_(mouse[5]) 13)
-      debug(`Pointer "Pixel: " `uhex_long_(mouse[6]))
+      debug(`Pointer 'X: `(mouse[0])  Y: `(mouse[1])' 13)
+      debug(`Pointer 'Wheel: `(mouse[2])' 13)
+      debug(`Pointer 'Buttons  L:`(mouse[3])')
+      debug(`Pointer '  M:`(mouse[4])  R:`(mouse[5])' 13)
+      debug(`Pointer 'Pixel: `$(mouse[6])')
     if mouse[3]                                        ' left button down?
-      debug(`Pointer 13 "LEFT DOWN")
+      debug(`Pointer 13 'LEFT DOWN')
     waitms(30)
 ```
 
 Move the mouse over the window and the position updates; move outside and the
 program reports it from the negative `xpos`. Press the left button and the buttons
-read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
+read `-1` (shown as `-1` by `` `() ``), and the `LEFT DOWN` line appears.
 
 ### Where you'd use this
 
@@ -4655,7 +4701,7 @@ This example feeds a two-channel LOGIC window with `LONGS_1BIT`. Each long carri
 generated in software with the random-number generator, so it runs on a bare board
 with no wiring:
 
-```spin2
+```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i
@@ -4676,7 +4722,7 @@ as long as the bits you want unpacked first land in the low end of the element.
 A scope works the same way. Here four 8-bit samples ride in each long under
 `LONGS_8BIT`, packed low byte first:
 
-```spin2
+```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i, ch
@@ -4695,7 +4741,7 @@ A BITMAP window unpacks the same formats into pixels. With a `LUT2` (two-bit) co
 mode you would pack with `LONGS_2BIT`; with a one-bit source you can drive a
 two-color image using `LONGS_1BIT`, sending one long per 32-pixel row segment:
 
-```spin2
+```{.spin2 caption="ch13-packed-bitmap-frame.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
@@ -4724,7 +4770,7 @@ the most of them.
    unless your data naturally arrives as words or bytes and repacking into longs
    would cost more than it saves.
 3. **Add `SIGNED` if the values are signed**, and `ALT` only if your sub-byte field
-   order is reversed relative to the display.
+   order is swapped relative to the display.
 
 So a single-bit logic capture at the highest rate uses `LONGS_1BIT` (32×). A scope
 sampling a signed 16-bit ADC-style value uses `LONGS_16BIT SIGNED` (2×). A
@@ -4757,7 +4803,8 @@ link, capture a finite burst and dump it rather than trying to stream live.
   first — is your code's responsibility.
 - **LSB-first ordering is fixed.** The first unpacked value always comes from the
   low end of the element. Shift your first sample into the low bits. Use `ALT` only
-  to flip sub-byte ordering within each byte, not to reverse whole elements.
+  to swap adjacent same-width fields throughout the element (bits 0↔1, 2↔3, …,
+  2-bit pairs, or nibbles by mode width), not to reverse whole elements.
 - **Packing is per window, set at creation.** All elements fed to that window are
   unpacked the same way for its lifetime; there is no per-element mode switch.
 - **Send whole multiples of the values-per-element count.** A `LONGS_1BIT` LOGIC
@@ -4839,7 +4886,7 @@ and your chosen arrangement reappears on every run.
 Once the windows exist, you feed them by name, one statement at a time. A loop that
 drives both is just both feeds in sequence:
 
-```spin2
+```{.spin2 caption="ch14-multiwindow.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4854,7 +4901,7 @@ PUB main() | ang, sine, count
     sine := qsin(1000, ang, 256)         ' CORDIC sine, software-generated
 
     debug(`Wave `(sine))                 ' feed the SCOPE by its name
-    debug(`Status 0 "Sample " `udec_(count) 13 "Value:  " `sdec_(sine) 13)
+    debug(`Status 0 'Sample `(count)' 13 'Value:  `(sine)' 13)
 
     ang += 4
     count += 1
@@ -4897,7 +4944,7 @@ iteration so they show the same moment:
 ```spin2
 debug(`Wave `(sine))                    ' the SCOPE gets the sample
 ' the TERM gets the same value, formatted
-debug(`Status "now: " `sdec_(sine) 13)
+debug(`Status 'now: `(sine)' 13)
 ```
 
 > **What does not exist.** There is no `TIMESTAMP`, `OVERLAY`, `ALL_WINDOWS`,
@@ -4908,7 +4955,7 @@ debug(`Status "now: " `sdec_(sine) 13)
 > lives in your code.
 
 > A separate, application-wide timestamp facility does exist: defining the
-> `DEBUG_TIMESTAMP` symbol stamps every plain `DEBUG` *message* with the 64-bit CT
+> `DEBUG_TIMESTAMP` symbol stamps every `DEBUG` *message* with the 64-bit CT
 > value. That is a property of the message stream, set once in a `CON` block — not a
 > command you send to a display window.
 
@@ -4928,7 +4975,7 @@ on) work exactly as in Spin2.
 Here a PASM program running in its own cog drives a SCOPE window, feeding it the
 value of a cog register:
 
-```spin2
+```{.spin2 caption="ch14-pasm-scope.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4957,7 +5004,7 @@ per loop. The window opens and animates identically to a Spin2-driven one.
 Feeding a TERM from PASM works the same way. This cog reprints a register's value as
 hex on a text panel:
 
-```spin2
+```{.spin2 caption="ch14-pasm-terminal.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4971,7 +5018,7 @@ counter
               debug(`TERM Mon SIZE 30 8)
 .loop
               add       n, #1
-              debug(`Mon 0 "count = " `uhex_long_(n) 13)
+              debug(`Mon 0 'count = `$(n)' 13)
               waitx     ##50_000_000
               jmp       #.loop
 
@@ -4981,7 +5028,7 @@ n             long      0
 The same `DEBUG` also works in an **inline** `ORG`/`END` block inside a Spin2
 method, where the assembly shares the method's local variables:
 
-```spin2
+```{.spin2 caption="ch14-pasm-inline.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -4991,7 +5038,7 @@ PUB main() | x
   repeat
     org
                 add       x, #1
-                debug(`Inline 0 "x = " `udec_(x) 13)
+                debug(`Inline 0 'x = `(x)' 13)
     end
     waitms(500)
 ```
@@ -5039,8 +5086,8 @@ PUB main() | x
 
 - **Keep PASM `DEBUG` out of tight interrupt service routines.** A `DEBUG` taken
   inside an ISR can skew the cog's timing enough to disturb retriggering. Prefer
-  doing `DEBUG` from cogs that are not running background ISRs (see the Spin2 v5.1
-  documentation's "DEBUG and interrupts" note).
+  doing `DEBUG` from cogs that are not running background ISRs (see the Spin2
+  documentation on DEBUG and interrupts).
 
 ## Try it
 
@@ -5050,7 +5097,7 @@ so the SCOPE shows the waveform while the panel reports its numbers. The complet
 program below compiles with `pnut_ts` and runs on a bare P2 board with `pnut_term_ts`
 open — no wiring.
 
-```spin2
+```{.spin2 caption="ch14-scope-trace.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -5072,9 +5119,9 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
-    debug(`Panel 0 "Samples: " `udec_(count) 13 ...
-          "Current: " `sdec_(signal) 13 ...
-          "Peak:    " `udec_(peak) 13)  ' a fresh status block to the TERM
+    debug(`Panel 0 'Samples: `(count)' 13 ...
+          'Current: `(signal)' 13 ...
+          'Peak:    `(peak)' 13)  ' a fresh status block to the TERM
 
     ang   += 4
     count += 1
@@ -5130,17 +5177,17 @@ artwork at all. You draw the fixed labels once, then position the cursor with th
 it sits. [Chapter 3](#ch-3) develops this fully under "A positioned dashboard"; the
 technique in brief:
 
-```spin2
+```{.spin2 caption="ch15-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | angle, rpm, temp, volts
   debug(`TERM Status SIZE 32 6 TITLE 'System Status')
 
   ' Draw the static labels once.
-  debug(`Status 0 4 "SYSTEM STATUS")       ' clear, pair 0, title at (0,0)
-  debug(`Status 3 2 2 0 "RPM  :")          ' row 2, col 0
-  debug(`Status 3 3 2 0 "Temp :")
-  debug(`Status 3 4 2 0 "Volts:")
+  debug(`Status 0 4 'SYSTEM STATUS')       ' clear, pair 0, title at (0,0)
+  debug(`Status 3 2 2 0 'RPM  :')          ' row 2, col 0
+  debug(`Status 3 3 2 0 'Temp :')
+  debug(`Status 3 4 2 0 'Volts:')
 
   angle := 0
   repeat
@@ -5150,9 +5197,9 @@ PUB main() | angle, rpm, temp, volts
 
     ' Overprint only the value fields, each at a fixed (row, col). Trailing
     ' spaces pad to a fixed width so a shorter value erases a longer one.
-    debug(`Status 3 2 2 8 `udec_(rpm) "   ")
-    debug(`Status 3 3 2 8 `udec_(temp) "   ")
-    debug(`Status 3 4 2 8 `udec_(volts) "   ")
+    debug(`Status 3 2 2 8 '`(rpm)   ')
+    debug(`Status 3 3 2 8 '`(temp)   ')
+    debug(`Status 3 4 2 8 '`(volts)   ')
 
     angle += 3
     waitms(100)
@@ -5198,9 +5245,10 @@ panels.
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
 > with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
 
-**The BMP format is specific.** `LAYER` accepts a **24-bit, uncompressed (BI_RGB),
-no-alpha** Windows BMP — one BMP pixel maps to one canvas pixel, with no scaling.
-Author each image at the exact device size you will display it. (A short Python +
+**The BMP format matters.** `LAYER` loads a Windows BMP file — the path must name an
+existing `.bmp`. Author it as a **24-bit, uncompressed (BI_RGB), no-alpha** image:
+that is the expected format, one BMP pixel mapping to one canvas pixel with no
+scaling. Author each image at the exact device size you will display it. (A short Python +
 Pillow generator can produce these images and is the practical way to author the
 artwork; that tooling is documented separately from this manual.)
 
@@ -5247,7 +5295,7 @@ The example loads a background and a digit-font strip, then shows a live 3-digit
 reading by blitting one glyph per column (the font-strip pattern), erasing the box
 first by restoring background:
 
-```spin2
+```{.spin2 caption="ch15-panel-plot.spin2"}
 {Spin2_v50}
 CON _clkfreq = 200_000_000
 
@@ -5307,7 +5355,7 @@ Two patterns make a panel interactive:
 This panel draws two buttons and a value bar, and adjusts the value from either the
 arrow keys or a mouse click on a button. It recomposes only on a change:
 
-```spin2
+```{.spin2 caption="ch15-control-panel.spin2"}
 {Spin2_v50}
 CON _clkfreq = 200_000_000
 
@@ -5544,7 +5592,7 @@ every window are listed once at the end.
 | `OPACITY 0-255` | |
 | `LINESIZE` | |
 | `CARTESIAN {flipy {flipx}}` | |
-| `POLAR {twopi {theta}}` | |
+| `POLAR {twopi {offset}}` | |
 | `TEXTSIZE` | |
 
 **Primitives (cursor-relative):**
@@ -5802,7 +5850,8 @@ Maximum compression is **32×** (`LONGS_1BIT`). Fields are extracted LSB-first.
 
 - `SIGNED` — sign-extend each field instead of treating it as unsigned. Signed
   ranges: 1-bit −1…0, 2-bit −2…1, 4-bit −8…7, 8-bit −128…127, 16-bit −32768…32767.
-- `ALT` — reverse the sub-field order within each container.
+- `ALT` — swap adjacent same-width fields throughout the container (bits 0↔1, 2↔3,
+  …, 2-bit pairs, or nibbles by mode width), not a reversal.
 
 Syntax: `<packing-mode> {ALT} {SIGNED}`.
 

@@ -294,7 +294,7 @@ flicker-free updates — write an entire frame, then show it at once.
 pixels. A small count repaints often (smoother, slower); a large count repaints
 rarely (faster, choppier). The default is one scan line — `width` pixels for
 horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
-(`width × height`).
+(`width x height`).
 
 `SAVE` writes the current canvas to an image file on the host running
 `pnut_term_ts`.

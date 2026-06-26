@@ -83,7 +83,8 @@ commands it accepts — covered chapter by chapter — but the two-step pattern 
 changes.
 
 > Display values as text, issue commands with bare numbers.
-> In a TERM, `'`(x)'` shows the digits of `x`; a bare `13` is the newline command,
+> In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
+> `x`; a bare `13` is the newline command,
 > not the text "13". The value-only output formatters are `UDEC_`, `SDEC_`,
 > `UHEX_`, `SHEX_`, and `UBIN_` — these feed a numeric data element (consumed by the
 > graphing windows), so to display a value's text in a TERM use `` `(value) ``
