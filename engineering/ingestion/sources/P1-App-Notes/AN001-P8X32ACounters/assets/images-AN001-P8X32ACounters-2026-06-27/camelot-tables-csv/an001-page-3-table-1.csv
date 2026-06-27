@@ -1,0 +1,136 @@
+"CTRMODE","Description","Accumulate 
+FRQx to PHSx","APIN 
+Output*","BPIN 
+Output*"
+"%00000","Counter disabled (off)","0 (never)","0 (none)","0 (none)"
+"%00001 
+%00010 
+%00011","PLL internal (video mode) 
+PLL single-ended 
+PLL differential","1 (always) 
+1 
+1","0 
+PLLx 
+PLLx","0 
+0 
+!PLLx"
+"%00100 
+%00101","NCO single-ended 
+NCO differential","1 
+1","PHSx[31] 
+PHSx[31]","0 
+!PHSx[31]"
+"%00110 
+%00111","DUTY single-ended 
+DUTY differential","1 
+1","PHSx-Carry 
+PHSx-Carry","0 
+!PHSx-Carry"
+"%01000 
+%01001 
+%01010 
+%01011","POS detector 
+POS detector with feedback 
+POSEDGE detector 
+POSEDGE detector w/ feedback","A1 
+A1 
+A1 & !A2 
+A1 & !A2","0 
+0 
+0 
+0","0 
+!A1 
+0 
+!A1"
+"%01100 
+%01101 
+%01110 
+%01111","NEG detector 
+NEG detector with feedback 
+NEGEDGE detector 
+NEGEDGE detector w/ feedback","!A1 
+!A1 
+!A1 & A2 
+!A1 & A2","0 
+0 
+0 
+0","0 
+!A1 
+0 
+!A1"
+"%10000 
+%10001 
+%10010 
+%10011 
+%10100 
+%10101 
+%10110 
+%10111 
+%11000 
+%11001 
+%11010 
+%11011 
+%11100 
+%11101 
+%11110 
+%11111","LOGIC never 
+LOGIC !A & !B 
+LOGIC A & !B 
+LOGIC !B 
+LOGIC !A & B 
+LOGIC !A 
+LOGIC A <> B 
+LOGIC !A | !B 
+LOGIC A & B                  
+LOGIC A == B                 
+LOGIC A 
+LOGIC A | !B 
+LOGIC B 
+LOGIC !A | B 
+LOGIC A | B 
+LOGIC always","0 
+!A1 & !B1 
+A1 & !B1 
+!B1 
+!A1 & B1 
+!A1 
+A1 <> B1 
+!A1 | !B1 
+A1 & B1                  
+A1 == B1                
+A1 
+A1 | !B1 
+B1 
+!A1 | B1 
+A1 | B1 
+1","0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0","0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0"

@@ -1,0 +1,73 @@
+'' Listing 2 — AN008 Sigma-delta ADC (binary-search self-calibration)
+'' Source: Parallax Semiconductor Application Note AN008 v1.0 (2011), pages 7-8.
+'' Language: Spin1 + PASM1 for the Propeller 1 (P8X32A).
+'' STATUS: captured-not-compiled — no P1 compiler available in this environment
+''         (code_validated:false). Transcribed verbatim from the PDF text layer.
+''
+'' NOTE: As printed in AN008, this listing references CON symbols that are not
+''       re-declared here (ADC_INTERVAL0, ADC_RANGE, CALIB_PIN, INP_PIN, FB_PIN).
+''       They are assumed defined in a CON block as in Listing 1. Verbatim capture;
+''       not patched.
+
+adc_cog      mov             frqa,#1               'Initialize frqa to count up by one.
+             movi            ctra,#%0_01001_000    'Set ctra mode to positive w/feedback.
+             movd            ctra,#FB_PIN          'Write fback pin number to dst field.
+             movs            ctra,#INP_PIN         'Write input pin number to src field.
+             mov             dira,fb_mask          'Make the feedback pin an output.
+             mov             result_addr,par       'Save @value into result_addr.
+
+calibrate       or           dira,calib_mask       'Make calibration pin an output.
+                mov          interval,interval0    'Initialize acquisition interval.
+                mov          dinterval,interval0   'Initialize delta interval
+                shr          dinterval,#1          ' to interval/2.
+
+:searchlp      andn         outa,calib_mask        'Output 0V on calibration pin.
+               call         #soak                  'Delay to accommodate step change.
+               call         #adc                   'Get the result.
+               mov          loresult,acc           'Save as the low value.
+               or           outa,calib_mask        'Output Vdd on calibration pin.
+               call         #soak                  'Delay to accommodate step change.
+               call         #adc                   'Get the result.
+               sub          acc,loresult           'Subtract low value to get the range.
+               cmp          acc,range wc,wz        'Compare range with desired range.
+         if_z jmp          #:got_it                'Done if spot on.
+
+               sumnc         interval,dinterval    'Subtract if too high, add if too low.
+               shr           dinterval,#1 wz       'Cut delta interval in half.
+         if_nz jmp           #:searchlp            'Done if now zero, loop if not.
+
+:got_it         andn         dira,calib_mask       'Done: tristate calibration pin.
+main_loop       call         #adc                  'Get a new acquisition.
+                sub          acc,loresult          'Subtract the reading for 0V.
+                wrlong       acc,result_addr       'Write result to hub.
+                jmp          #main_loop                'Back for another.
+
+soak            mov          time,cnt                  'Give the caps a chance to charge
+                add          time,soak_time            ' by waiting for soak time...
+                waitcnt      time,#0
+soak_ret        ret
+
+adc             mov          time,cnt                  'Get the current counter value.
+                add          time,#16                  'Add a little to get ahead.
+                waitcnt      time,interval             'Sync to clock; add interval to time.
+                neg          acc,phsa                  'Negate phsa into result.
+                waitcnt      time,#0                   'Wait for interval to pass.
+                add          acc,phsa                  'Add phsa into result.
+adc_ret         ret
+
+interval0       long         ADC_INTERVAL0             'Initial acquisition interval.
+range           long         ADC_RANGE                 'Desired ADC range.
+fb_mask         long         1 << FB_PIN               'Mask for feedback pin.
+calib_mask      long         1 << CALIB_PIN            'Mask for calibration pin.
+soak_time       long         40_000                    'Sample (pre-soak) time for calib.
+result_addr     long         0-0                       'Result address gets plugged in here.
+
+interval        res          1                         'Acquisition time.
+dinterval       res          1                         'Delta interval for search.
+acc             res          1                         'General-purpose accumulator.
+time            res          1                         'Time variable use for waitcnt.
+loresult        res          1                         'ADC raw result for low end of range.
+
+'' Optional clamp of the corrected reading to [0, range] (from prose, page 7):
+''         maxs     acc,range
+''         mins     acc,#0
