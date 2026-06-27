@@ -69,6 +69,12 @@ failed-audit source stays in staging, reported not promoted). Single-writer and
 folder). But a *same-edition* `completion`/`re-extraction` **does** land in the
 existing folder, per the modes above — that is the point of the adaptation.
 
+**Audit-of-record filename (the map→reduce handoff).** The map emits the pass-5
+audit as `<src>-extraction-audit.md`. On promotion the reduce renames/promotes it
+to the canonical **audit of record `<src>-complete-extraction-audit.md`** (the name
+the dashboard's Tier-3 drill-down and every prior source folder use). One audit
+file of record per source — don't leave both names in canonical.
+
 ## 2. Dedup across the batch and against the corpus
 
 With all sources landed, reconcile duplicates the map could not see: a fact
@@ -117,6 +123,13 @@ writing the quad:
   and that the roll-up leaves the quad internally consistent — completeness % /
   gate cells match the landed reality, and **no dangling references** to staged
   or archived paths (Sacred Rule #7 — redirect, never strand).
+- **Reconcile each HANDBACK's claimed counts against the landed reality — verify
+  *completion*, not just findings.** Map agents over-report. Before promoting,
+  grep/`ls`-count the actual staged artifacts (images in `assets/images-*/`, tables
+  in the reference, code examples in `assets/code-*/`) and compare to the per-pass
+  numbers the HANDBACK asserts. A mismatch is a stop-and-investigate, not a
+  promote-on-trust — a source that claims "15 images" and staged 9 has a silent
+  failure. Record the reconciliation in the wrap report.
 
 ## 6. Roll up the ingestion quad (single-writer canonical write)
 
@@ -132,13 +145,29 @@ Update all four standing docs from the same batch, non-destructively
   open-question rollup) — a `new-edition delta` adds a logical source; a
   `completion`/`re-extraction` does not.
 - **`AUTHORITATIVE-SOURCES.md`** — assign/confirm each source's trust tier (a
-  new edition re-confirms; add aliases/part-numbers for hardware).
+  new edition re-confirms; add aliases/part-numbers for hardware). Register any
+  **cross-check companion** here as a 🟡 linked-not-standalone input of its owning
+  source (never its own logical-source row).
 - **`DOCUMENT-LINEAGE.md`** — record any supersession (delta editions in the
   wave) and source→output lineage; handle obsolete prior artifacts per
-  `ingest-source` §0.6 (mark-in-place + redirect before any archive move).
+  `ingest-source` §0.6 (mark-in-place + redirect before any archive move). Record
+  cross-source corroboration edges from §3, and for any **captured example-code
+  companion** add a source→ "driver/example code available + captured (not yet
+  processed)" lineage note so a future code pass can find it.
 - **`KNOWLEDGE-GAPS.md`** — move answered rows OPEN→ANSWERED (with the source @
   edition that filled them), add the new `G-`/`Q-` rows from §4, harvest
   reviewer notes.
+- **Central extraction matrices (image + code).** The map writes per-source
+  `assets/images-*/image-catalog.md` and `assets/code-*/`; the **cross-source
+  rollup is reduce work** (single-writer). Add this wave's sources to the central
+  image/code catalogs under `extraction-matrices/` (currently
+  `p2-edge-visual-assets-catalog.md` + `code-extraction-summary.md`). **If a named
+  central matrix does not exist** (e.g. the `INGESTION-IMAGE-EXTRACTION-MATRIX.md` /
+  `CODE-EXAMPLE-EXTRACTION-MATRIX.md` that `ingest-source` §1 cites aspirationally),
+  do **not** silently skip it: either stand up a minimal index row or record in the
+  wrap report that the per-source `image-catalog.md` is the system of record and the
+  central matrix is deprecated. Never leave the rollups silently stale — that reads
+  as "covered" when it isn't.
 
 ## 7. Exception-route conflicts → the corrections register
 

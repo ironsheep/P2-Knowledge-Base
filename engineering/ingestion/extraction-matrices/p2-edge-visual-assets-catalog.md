@@ -1,5 +1,11 @@
 # P2 Edge Visual Assets Catalog - Complete Image Inventory
 
+> ⚠️ **SCOPED to the 5 P2 Edge hardware guides — NOT a general image rollup.** The
+> **system of record** for extracted images per source is now each source's
+> `assets/images-<src>-<date>/image-catalog.md`. Do not add non-Edge sources (e.g.
+> add-on boards) here; their image catalogs live per-source and are surfaced via the
+> ingestion dashboard rows. Kept as the Edge-specific catalog.
+
 **Purpose**: Searchable catalog of all visual assets from P2 Edge hardware documentation  
 **Goal**: Enable quick asset discovery for document production  
 **Status**: INVENTORY COMPLETE - Extraction needed  

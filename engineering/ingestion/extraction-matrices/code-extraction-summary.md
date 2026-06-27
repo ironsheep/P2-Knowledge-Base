@@ -1,5 +1,13 @@
 # Code Example Extraction Summary
 
+> ⚠️ **HISTORICAL SNAPSHOT (Sprint 005, Aug 2025) — NOT a maintained live rollup.**
+> The **system of record** for code extracted per source is now each source's
+> `assets/code-<date>/` (with the per-source extraction audit). New ingestions /
+> waves do **not** back-fill this frozen summary. Off-document driver/example code
+> (board product-page archives) is **captured-not-processed** into the owning
+> source's `assets/code-*/` and cataloged there (see `ingest-source` §2). Kept for
+> provenance.
+
 **Sprint**: 005 - Documentation Accessibility & Discovery  
 **Task**: #930 - Extract and organize code examples  
 **Date**: August 20, 2025 (Updated: August 24, 2025)  

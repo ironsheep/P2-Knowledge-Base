@@ -1,5 +1,13 @@
 # Narrative Text Generation - Completion Report
 
+> ⚠️ **HISTORICAL RECORD (2025-09-02) — NOT a live requirement.** The
+> `<src>-narrative.txt` form this report tracks is **deprecated**: current
+> ingestion (`ingest-source`) produces a richer **curated markdown** summary
+> (`complete-*.md` / `*-reference.md`) plus the raw `<src>-text.txt` extract
+> instead. Re-extracted sources intentionally retire their `-narrative.txt`
+> (archived per §0.6). Do not regenerate narratives or treat "all sources have a
+> narrative" as a gate. Kept for provenance only.
+
 **Date**: 2025-09-02  
 **Status**: ✅ COMPLETE - All 24 sources now have narrative text files
 

@@ -40,8 +40,9 @@ does not restate.
    registered in step 2.
 2. **Record the wave manifest:** `mcp__todo-mcp__context_set
    key:"ingest_wave_<wave-slug>"` with the source list (each: folder slug +
-   input path + DOCX/PDF + whether it is a new source or a delta edition). This
-   is what `ingest-wrap-reduce` reads to find the batch.
+   input path + DOCX/PDF + whether it is a new source or a delta edition + any
+   **companion inputs**, see §2). This is what `ingest-wrap-reduce` reads to find
+   the batch.
 
 ## 1. The fan-out gate — decide whether to parallelize at all
 
@@ -86,6 +87,24 @@ Then, for each source:
   `sources/<src>/` baseline) in the wave manifest `ingest_wave_<wave-slug>` — the
   per-agent contract (§3) and the reduce both read it.
 
+**Companion inputs — a first-class manifest shape.** A single logical source may
+ship more than one input file: a **primary** document plus one or more
+**companions** that ride with it, each carrying its own *role* and *tier* (per the
+edition/role model). Two kinds seen so far:
+- **cross-check companion** — a 3rd-party datasheet that corroborates the primary
+  (e.g. the AKM **AK5704** datasheet beside the #64014 HD-Audio guide); tier 🟡
+  cross-check, **never** promoted as a P2-fact authority.
+- **example-code companion** — the product-page driver/example archive a board
+  guide defers its code to (the code itself lives off-document; see §3 capture rule).
+
+Record companions in the manifest as `companions: [{path, role: cross-check|example-code, tier}]`
+on the owning source. They do **not** get their own dashboard row (they are inputs
+to one logical source, not separate sources); the reduce reflects them in
+`AUTHORITATIVE-SOURCES` (cross-check companion) and `DOCUMENT-LINEAGE` (captured
+example code). If a referenced companion is **named but not staged on disk**, do
+not block the wave — record it as a candidate gap (the agent flags it; the reduce
+issues the `G-`).
+
 Use the filesystem MCP for these writes, not bash (Sacred Rule #2), and respect
 non-destructive editing on the shared dashboard (Sacred Rule #1: size-check +
 backup the dashboard before adding/modifying rows).
@@ -103,6 +122,19 @@ one source. Spell this out in the subagent's prompt:
 - **Touch nothing canonical:** not `sources/`, not the dashboard, not
   AUTHORITATIVE-SOURCES / DOCUMENT-LINEAGE / KNOWLEDGE-GAPS, not the corrections
   register. **Allocate no `F-`/`G-`/`Q-` IDs** — the reduce owns ID issuance.
+- **Keep canonical `sources/` byte-for-byte untouched — including tool intermediates.**
+  `pdf2md`/docling/`camelot`/`pdftotext` default to writing output *next to the
+  input file*, and the input lives in canonical `sources/<src>/` — so a naive run
+  drops a stray `.md`/`.csv` into canonical. Direct every tool's `--output` (or
+  `cwd`) at your staging dir (or a scratch dir under it), and if a tool still drops
+  an intermediate in `sources/`, move it into staging before you finish. The reduce
+  promotes from staging; anything you leak into `sources/` bypasses that gate.
+- **Carry the manifest's auth tier forward — do not re-litigate tier philosophy.**
+  The dashboard legend is fixed: 🏆 = *authoritative*, which **includes official
+  Parallax documentary guides** (it is NOT empirical-only). Propose the tier the
+  manifest already carries; only propose a *change* on hard evidence (a demonstrated
+  factual error), and even then the **reduce adjudicates**. Do not flag a Parallax
+  board guide's 🏆 as "mis-assigned because it's documentary" — that is wrong.
 - **Single-source post-processing only** in pass 4; any *cross-source* matrix is
   reduce work.
 - **Honor the source's mode** (from the manifest), reading the prior
@@ -116,6 +148,21 @@ one source. Spell this out in the subagent's prompt:
     scope the change set (`ingest-source` §0.5).
   In every mode the agent **still writes only into staging** and touches nothing
   canonical (the prior baseline is read-only input).
+- **Handle companion inputs per their role** (from the manifest):
+  - **cross-check companion** (datasheet) → extract only the *corroboration subset*
+    needed to confirm the primary's fact-bearing fields (register map index, pinout,
+    electrical/format specs); keep it clearly labelled as cross-check tier, in its own
+    staged file (`<companion>-crosscheck-*.md`), never blended into the primary; report
+    the corroboration verdict (match / conflict, with evidence) in the HANDBACK.
+  - **example-code companion** (product-page driver/example archive) → **capture it
+    into staging and catalog its availability — that is as far as the map goes.**
+    Stage the archive/sources under `assets/code-<date>/` (unpacked if small),
+    record in the HANDBACK *that* driver/example code exists and where it came from,
+    and note it is **captured-not-processed** (no `pnut_ts` deep-validate, no
+    extraction matrix — a later dedicated code pass owns that). The point now is that
+    the code is *in the source tree and findable*, not that it is analysed.
+  - **companion named but not on disk** → do not fetch from the web mid-wave; flag it
+    as a candidate gap (the reduce issues the `G-` and notes the product-page source).
 - **Emit a handback manifest** at `_staging/<wave-slug>/<src>/HANDBACK.md`:
   the source's **mode** (and, for `completion`, which prior gaps it filled);
   per-pass counts (paragraphs/tables; code extracted / `pnut_ts`-validated /

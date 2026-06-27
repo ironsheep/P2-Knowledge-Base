@@ -140,6 +140,26 @@ them are required for a new document.
 | 6 | **Cross-source Q&A + conflict audit** — answer prior questions, raise new, harvest reviewer notes, **flag conflicts**, score trust | Q&A audit; **gap ledger + questions-for-experts → `KNOWLEDGE-GAPS.md`**; **conflicts → `P2KB-CORRECTION-FINDINGS.md`** | corroboration matrix (§4) |
 | 7 | **Registration + update propagation** | `<src>-complete-extraction-audit.md`; **`README.md` (dashboard) + `AUTHORITATIVE-SOURCES.md` (tier) + `DOCUMENT-LINEAGE.md`** updated | `INGESTION-UPDATE-WORKFLOW.md` |
 
+**Pass-output conventions (read before you name files):**
+- **Two audit files, one of record.** Pass 5 emits `<src>-extraction-audit.md`
+  (the validation run); pass 7 promotes it to **`<src>-complete-extraction-audit.md`**
+  — the **audit of record** the dashboard's Tier-3 drill-down resolves. In a wave,
+  the map emits the pass-5 name and the reduce does the pass-7 promotion. Keep one
+  audit-of-record per source; don't ship both names in canonical.
+- **Curated output is markdown, not a `.txt` narrative.** The pass-1 *curated*
+  summary is `complete-*.md` / `*-reference.md` (tables, headings, structure). The
+  legacy `<src>-narrative.txt` (the 2025 narrative-generation form) is **deprecated**
+  — do not produce it and do not treat `NARRATIVE-GENERATION-COMPLETE.md` as a live
+  requirement. **Keep `<src>-text.txt`:** that is the *raw* layout-preserving extract
+  (pdftotext/`pdf-layout`), a different artifact from the curated markdown and still
+  required.
+- **The central extraction matrices are a cross-source rollup.** The per-source
+  outputs are `assets/images-*/image-catalog.md` + `assets/code-*/`. The central
+  `…-EXTRACTION-MATRIX.md` rows named above are an *aspirational* label — the active
+  central catalogs are `extraction-matrices/p2-edge-visual-assets-catalog.md` +
+  `extraction-matrices/code-extraction-summary.md`. Updating them is **pass-7 /
+  reduce** work (single-writer); never leave them silently stale.
+
 ## 2. Format strategy — validator-driven, not dogmatic
 
 **Pick the format per pass on evidence, gated by a validator — never by a
@@ -176,6 +196,16 @@ ladder below).
     that fails to compile *and* is pure prose (descriptive sentences, `✔`/emoji,
     table cells) is **not a code example** — drop it from the example set rather
     than counting it as a validation failure. Validate, then filter.
+  - **Off-document example/driver code → capture + catalog, do NOT process.** Many
+    guides (esp. board Product Guides) embed **no** code and defer it to a
+    product-page download (driver/example archive). When that archive is available
+    as a companion input, **stage it into `assets/code-<date>/`** (unpacked if small)
+    and record in the audit + HANDBACK *that the code exists and where it came from*
+    — it is **captured-not-processed**: do not `pnut_ts`-deep-validate it or build a
+    code matrix from it (a later dedicated code pass owns that). The goal is that the
+    code is **in the source tree and findable**, not analysed. If the archive is only
+    *referenced* (not on disk), don't fetch mid-run — log a gap noting its
+    availability + the product-page source.
 - **Images (pass 3) → DOCX media + `image-tools-mcp`.** Unzip `word/media/*`
   for the original embedded assets losslessly — this eliminates the v3.0
   "black image / full-page capture / false success" failure class at the
