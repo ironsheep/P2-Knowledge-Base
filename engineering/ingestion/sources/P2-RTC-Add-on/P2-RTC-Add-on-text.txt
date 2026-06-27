@@ -1,0 +1,98 @@
+P2 RTC Add-on (#64013) — P2 RTC Add-on Guide
+Source PDF: 64013-P2-RTC-Add-on-Guide-20221129.pdf
+Version: v1.0  11/29/2022  (3 pages)
+Extraction: pdftotext -layout (clean text layer; no OCR needed for body text)
+=================================================================================
+
+[Page 1 header banner — Parallax contact block]
+Web Store: www.parallax.com          Sales: (888) 512-1024
+Tutorials: learn.parallax.com        Educator Hotline: (916) 701-8625
+Sales: sales@parallax.com            Office: (916) 624-8333
+Tech Support: support@parallax.com   Fax: (916) 624-8003
+
+P2 RTC Add-on (#64013)
+
+The P2 RTC Add-On Board provides a real time clock with calendar and alarm functionality to the
+Propeller 2 (P2X8C4M64P) multicore microcontroller. The small RTC board includes a rechargeable lithium
+battery that is kept charged while the RTC is powered and will allow the RTC to keep time while power is
+disconnected.
+
+This add-on board is compatible with any standard single Parallax P2 accessory socket found on most P2
+development boards. The connector is a standard 2x6-way 0.1" pitch socket, and the board could be
+used with a wide range of microcontrollers employing 3.3 V signal levels.
+
+The P2 RTC Add-on extends the timekeeping capabilities of the Parallax P2 multicore microcontroller, and
+enables date and timestamp capabilities that are important in many projects, including data and file
+system management, user display, control and IoT integration.
+
+Features
+  - Based on the PCF8523 CMOS Real-Time Clock (RTC) with calendar
+  - Optimized for low power consumption
+  - Data is transferred serially via an I2C-bus with a data rate up to 1000 kbit/s
+  - Alarm and timer functions
+  - Events can generate a wake-up signal on an interrupt pin
+  - Offset register allows fine-tuning of the clock
+  - Backup battery switchover circuit detects power failures and automatically switches to the battery
+    supply when a power failure occurs
+  - 2x6-pin female socket with 0.1" spacing compatible with the standard Parallax P2 single Accessory sockets
+
+[Copyright (c) Parallax Inc.   P2 RTC Add-on Board (#64013)   v1.0 11/29/2022 Page 1 of 3]
+
+Key Specifications
+  - Supply voltage: +3.3 VDC
+  - Control interface: I2C bus (100, 400, 1000 kHz)
+  - Battery: built-in rechargeable lithium metal cell (Seiko MS421R)
+      - Nominal capacity: 1.5mAh
+      - Standard mass: 0.11g
+  - Low backup current: typical 150 nA
+  - Interface: Open-drain interrupt or clock output pins
+  - Form factor: dual 2x6-pin female passthrough headers with 0.1" spacing
+  - Mounting hole: 3.2 mm diameter
+  - Operating temperature: -4 to +140 °F (-20 to +60 °C)
+  - PCB dimensions: 0.8 x 1 in (20.32 x 25.4 mm)
+
+Pin Connections
+(Accessory header pin | RTC board function | Function)
+  VIO3V3 | 3V3            | Supply voltage; 3.3V voltage required to power the RTC board and trickle-charge the on-board battery
+  +7     | -              | Not connected
+  +6     | -              | Not connected
+  +5     | -              | Not connected
+  +4     | -              | Not connected
+  +3     | -              | Not connected
+  +2     | -              | Not connected
+  +1     | SDA            | I2C Serial Data Input/Output Pin
+  +0     | SCL/INT/CLKOUT | SCL = I2C Serial Data Clock Pin (Input);
+                            INT = Interrupt signal (Output);
+                            CLKOUT = CLKOUT signal (Output).
+                            Shared feature IO pin, refer to Code Tip below!
+  GND    | GND            | Common Ground reference connection
+
+Refer to the PCF8523 RTC datasheet for full details, available from www.nxp.com.
+
+Code Tip
+The SCL, INT and CLKOUT functions share a single IO pin.
+  - To use the I2C SCL function, set the I2C output mode to use 3.3 k-ohm pull-up.
+  - To use the INT or CLKOUT functions, first configure them with I2C instructions according to the
+    RTC datasheet API, then disable I2C and set the P2 Smartpin (or equivalent) input mode to 150
+    k-ohm pull-up.
+
+[Copyright (c) Parallax Inc.   P2 RTC Add-on Board (#64013)   v1.0 11/29/2022 Page 2 of 3]
+
+Board Dimensions
+[Mechanical drawing — see assets/images: p2-rtc-board-dimensions.png.
+ Silkscreen labels (OCR-confirmed): VIO3V3, "REAL TIME CLOCK AND CALENDAR", SCL+0, SDA+1, GND.]
+
+Resources and Downloads
+Check for the latest version of this document, schematics and example code from the P2 RTC Add-on
+product page. Go to www.parallax.com and search for 64013.
+
+Lithium Battery
+This product has a built-in (non-removable) lithium battery that corresponds to the category of lithium
+metal batteries with a lithium content of 1 g or less and meet the requirements of UN Manual of Tests
+and Criteria, Part III, sub-section 38.3, so they can be transported as Class 9 Dangerous Goods. Refer to
+the Seiko MS421R datasheet at https://www.sii.co.jp/en/ for more information.
+
+Revision History
+Version 1.0: Original release.
+
+[Copyright (c) Parallax Inc.   P2 RTC Add-on Board (#64013)   v1.0 11/29/2022 Page 3 of 3]

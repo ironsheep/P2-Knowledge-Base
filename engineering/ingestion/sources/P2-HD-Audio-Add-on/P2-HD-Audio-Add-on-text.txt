@@ -1,0 +1,192 @@
+                                     Web Store: www.parallax.com          Sales: (888) 512-1024
+                                     Tutorials: learn.parallax.com        Educator Hotline: (916) 701-8625
+                                     Sales: sales@parallax.com            Office: (916) 624-8333
+                                     Tech Support: support@parallax.com   Fax: (916) 624-8003
+
+
+
+
+P2 HD Audio Add-on Set (#64014)
+
+
+
+
+The P2 HD Audio Add-On Set comprises a 4-channel 32 bit 192 k Audio ADC (Analog to Digital
+Converter) and a 2-channel 16-bit 18-990 ohm Audio DAC (Digital to Analog Converter).
+
+This add-on set is supplied as a kit including both the ADC and DAC boards. Each board is
+compatible with any standard single Parallax P2 accessory socket found on most P2
+development boards, and are designed to fit side-by-side if installed at a dual port. The
+connector is a standard 2x6-way 0.1” pitch socket, and the boards could be used with a wide
+range of microcontrollers that use 3.3 V signal levels.
+
+The ADC has 4 input channels available via two stereo 3.5 mm jack sockets, or at two sets of
+unpopulated 0.1” pitch 3-way header pads.
+
+The DAC has 2 output channels available via one stereo 3.5 mm jack socket, or unpopulated
+0.1” pitch 3-way header pads.
+
+The jack sockets can be used in mono or stereo modes, to allow the left and right channels to
+carry independent signals, or to be part of a stereo pair.
+
+The P2 HD Audio Add-on Set extends the high quality audio capabilities of the Parallax P2
+multicore microcontroller Smart Pins into the real world, and enables advanced sound
+capabilities, processing and effects commonly used in robotics, interactive displays,
+conferencing, stadium, studio and industrial applications.
+
+
+
+
+Copyright © Parallax Inc.         P2 HD Audio Add-on Set (#64014)              v1.0 10/16/2022 Page 1 of 6
+P2 HD Audio ADC (Analog to Digital Converter)
+
+
+
+
+Features
+    ● Based on the AK5704EN 32-bit 4ch ADC with MIC pre-amplifier
+    ● High performance analog front-end A / D converter IC ideal for voice recognition, voice
+      control, and conferencing applications
+    ● Superior low-noise recording with low power consumption
+    ● VAD (voice activity detection) feature further reduces system power consumption
+    ● Supports ultrasonic recording
+    ● Sampling frequency from 8 k to 192 kHz
+    ● MIC input jack configurable for line level input signals, for up to 4 channels of line input
+    ● MIC input channels have configurable voltage pull-up for use with analog microphones
+    ● 2x6 female socket with 0.1” spacing compatible with the standard Parallax P2 Accessory
+      sockets
+
+
+
+Key Specifications
+    ●    Supply voltage: +3.3 VDC
+    ●    Control interface: I2C bus (400 kHz)
+    ●    Max bits: 32 bit
+    ●    Max fs: 192 kHz (typical 48 kHz)
+    ●    Max S/N: 105 dB
+    ●    MIC amplifier gain: +30 dB to 0 dB, 3 dB step
+    ●    Form factor: dual 2x6-pin female passthrough headers with 0.1" spacing
+    ●    Mounting hole: 3.2 mm diameter
+    ●    Operating temperature: -40 to +185 °F (-40 to +85 °C)
+    ●    PCB Dimensions: 1.6 x 1 in (40.64 x 25.4 mm)
+
+
+
+
+Copyright © Parallax Inc.         P2 HD Audio Add-on Set (#64014)        v1.0 10/26/2022 Page 2 of 6
+Pin Connections
+ Accessory      ADC board
+                          Function
+ header pin      function
+                            Supply voltage
+   VIO3V3           3V3
+                               - 3.3V voltage required to power the ADC board
+      +7            SDA     I2C Serial Data Input/Output Pin
+      +6            SCL     I2C Serial Data Clock Pin
+      +5          SDTO2     Audio Serial Data Output 2 Pin (Audio from Line input jack)
+      +4          SDTO1     Audio Serial Data Output 1 Pin (Audio from MIC input jack)
+      +3           LRCK     Frame Sync Clock Pin
+      +2           BCLK     Audio Serial Data Clock Pin
+      +1            MCKI    Master Clock Input Pin
+                            Power down Pin
+      +0            PDN
+                            “L”: Power-down, “H”: Power-Up
+    GND             GND     Common Ground reference connection
+     N/C           WINTN    Interrupt Output Pin (Customer option - unpopulated header)
+
+ Refer to the AK5704EN ADC datasheet for full details, available from www.akm.com                    .
+
+
+Board Dimensions
+
+
+
+
+Copyright © Parallax Inc.           P2 HD Audio Add-on Set (#64014)           v1.0 10/26/2022 Page 3 of 6
+P2 HD Audio DAC (Digital to Analog Converter)
+
+
+
+
+Features
+    ● Designed to leverage the Parallax P2 Microcontroller Smart Pin DAC modes
+    ● Configurable with a range of drive strengths, from 18 to 990 ohms
+    ● High performance output ideal for announcements, music and general sound monitoring
+      and reproduction
+    ● Superior low-noise output with low power consumption
+    ● 2x6 female socket with 0.1” spacing compatible with the standard Parallax P2 Accessory
+      sockets
+
+
+
+Key Specifications
+    ●    Supply voltage: +3.3 VDC
+    ●    Vpp output: 2 V or 3 V configurable
+    ●    Drive impedance: 18.75 ohms to 990 ohms, configurable in 16 steps
+    ●    Form factor: dual 2x6-pin female pass-through headers with 0.1" spacing
+    ●    Mounting hole: 3.2 mm diameter
+    ●    Operating temperature: -40 to +185 °F (-40 to +85 °C)
+    ●    PCB dimensions: 1.6 x 1 in (40.64 x 25.4 mm)
+
+
+
+
+Copyright © Parallax Inc.         P2 HD Audio Add-on Set (#64014)      v1.0 10/26/2022 Page 4 of 6
+Pin Connections
+ Accessory      DAC board
+                          Function
+ header pin      function
+
+   VIO3V3           N/C     Not Connected
+
+                            Common DAC Left Channel Inputs (wired in parallel)
+      +7           DAC_L
+                                -   Drive line level or headphone level devices by using 1,2,3
+                                    or 4 channels simultaneously to set the required output
+                                    drive impedance and max Vpp
+      +6           DAC_L
+                                    Each P2 SmartPin can output with these options:
+                                -   990 ohms,     3.3V peak
+                                -   600 ohms,     2.0V peak
+      +5           DAC_L        -   123.75 ohms, 3.3V peak
+                                -   75 ohms,      2.0V peak
+
+                            Example: For 31 ohms drive (which is common for many
+                            headphones), set the 123.75 ohms mode on 4 channels and
+                            calculate with ohm's law for the total output impedance as 123.75
+      +4           DAC_L
+                            / 4 = 30.9375 ohms. With this setting you could plug the
+                            headphones directly into the audio jack on the DAC board!
+
+      +3          DAC_R
+                            Common DAC Right Channel Inputs (wired in parallel)
+      +2          DAC_R
+      +1          DAC_R         -   Same rules apply as the DAC Left Channel function,
+                                    explained above.
+      +0          DAC_R
+
+
+    GND             GND     Common Ground reference connection
+
+
+
+
+Copyright © Parallax Inc.           P2 HD Audio Add-on Set (#64014)           v1.0 10/26/2022 Page 5 of 6
+Board Dimensions
+
+
+
+
+Resources and Downloads
+Check for the latest version of this document, schematics and example code from the P2 HD Audio
+Add-on Set product page. Go to www.parallax.com and search for 64014.
+
+
+Revision History
+Version 1.0: Original release.
+
+
+
+
+Copyright © Parallax Inc.        P2 HD Audio Add-on Set (#64014)       v1.0 10/26/2022 Page 6 of 6
+

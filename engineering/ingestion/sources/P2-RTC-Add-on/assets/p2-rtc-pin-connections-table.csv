@@ -1,0 +1,20 @@
+"Accessory
+header pin","RTC board
+function","Function"
+"VIO3V3","3V3","Supply voltage; 3.3V voltage required to power the RTC board
+and trickle-charge the on-board battery"
+"+7","-","Not connected"
+"+6","-","Not connected"
+"+5","-","Not connected"
+"+4","-","Not connected"
+"+3","-","Not connected"
+"+2","-","Not connected"
+"+1","SDA","I2C Serial Data Input/Output Pin"
+"+0","SCL
+INT
+CLKOUT","I2C Serial Data Clock Pin (Input)
+Interrupt signal (Output)
+Shared feature IO pin,
+CLKOUT signal (Output)
+refer to Code Tip below!"
+"GND","GND","Common Ground reference connection"

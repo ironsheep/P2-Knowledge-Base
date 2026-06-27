@@ -45,7 +45,9 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 | p2-hardware-manual | 🏆 | official Parallax — **P2X8C4M64P Hardware Manual** (release, not draft). Core hardware reference. Prior extraction 2025-08-15; newer `.docx` staged for refresh. **Aliases:** Hardware Manual, P2X8C4M64P, P2 hardware reference. | Nov-2022 |
 | Edge modules · eval board · add-on boards | 🏆 | official Parallax product guides | _(verify)_ |
 | HyperRAM/HyperFlash Add-on (#64004-ES) | 🏆 | official Parallax product guide (board Rev A, Open Source Hardware CC BY-SA 4.0). Ingested 2026-06-22 via forced OCR (corrupt PDF text layer); pin map triple-validated. **Aliases:** 64004-ES, HyperRAM, HyperFlash, HyperBUS, hyper memory add-on. | Guide v1.0 (2019) |
-| parallax-wx-wifi · p2-wx-adapter · propplug-rev-e · universal-motor-driver | 🏆 | official Parallax peripherals | _(verify)_ |
+| parallax-wx-wifi (#32420) · p2-wx-adapter (#64007) · propplug-rev-e · p2-universal-motor-driver (#64010) | 🏆 | official Parallax peripherals (WX/adapter/motor-driver **re-extracted 2026-06-27**, addon-wave-2026-06; prior captures archived §0.6). **Aliases:** WX ESP8266 Wi-Fi module, P2-WX adapter, Universal Motor Driver RevB. | guides v1.0 / RevB v2.0 |
+| p2-microSD-addon (#64009) · P2-RTC-Add-on (#64013) · P2-HD-Audio-Add-on (#64014) | 🏆 | official Parallax add-on board guides — **ingested 2026-06-27** (addon-wave-2026-06). **Aliases:** P2 microSD Add-on/Accessory; P2 RTC Add-on (NXP PCF8523); P2 HD Audio Add-on Set (AKM AK5704EN codec). | guides 2022 |
+| AK5704 datasheet (companion to #64014) | 🟡 | AKM component datasheet — **cross-check only**: corroborates the #64014 HD-Audio codec facts (11/11 confirmed, 0 conflicts); never promoted as a P2 fact authority. | AK5704EN (EN) |
 | p2-instructions-csv · p2-qa-spreadsheet | 🏆/🟢 | Parallax instruction data | _(verify)_ |
 | PASM2 Manual (Parallax) | ⚠️ Draft/Partial | official but preliminary / not fully vetted | Nov-2022 |
 | smart-pins | 🟢 | community-validated smart-pins documentation | _(verify)_ |
@@ -64,6 +66,12 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 | edge-module-breadboard | #64020 |
 | edge-breakout-board | #64029 |
 | edge-mini-breakout | #64019 |
+| p2-wx-adapter | #64007 |
+| p2-microSD-addon | #64009 |
+| p2-universal-motor-driver | #64010 |
+| P2-RTC-Add-on | #64013 |
+| P2-HD-Audio-Add-on | #64014 |
+| parallax-wx-wifi | #32420 |
 
 ## Admission & usage  ‹carried from old AUTHORITATIVE-SOURCES›
 **Authoritative-tier admission criteria** (all four required): (1) official Parallax documentation; (2) current/production version; (3) covers P2 (not P1) specs; (4) complete (not draft/partial). *A draft/partial official doc gets ⚠ Draft, not 🏆.*

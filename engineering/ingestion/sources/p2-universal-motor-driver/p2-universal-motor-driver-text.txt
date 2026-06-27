@@ -657,11 +657,11 @@ Offset
 Pin
 Label
 
-7
-
 Pin Function
 
 Pin Description
+
+7
 
 HALL_W
 
@@ -718,13 +718,14 @@ be 1500mV / 150 (mV/A) = 10 Amp.
 
 SENSE_X
 
+Output voltage feedback from The Sense signals are typically used to determine
+Channel X.
+motor position and provide over-voltage protection.
+
 2
 
 SENSE_W
 
-Output voltage feedback from The Sense signals are typically used to determine
-Channel X.
-motor position and provide over-voltage protection.
 Output voltage feedback
 from Channel W.
 

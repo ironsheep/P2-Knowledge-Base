@@ -15,6 +15,9 @@ must preserve fidelity; this doc is the map of those links.
 | Spin2 Language Reference | **v55** | v51a | **augment** — v55 is the full doc (v51a content **+** new language extensions); the document replaces, the material accumulates | yes — lineage/diff |
 | Smart Pins (Titus) | **rev 5** (`.docx`, canonical in `sources/smart-pins-titus/`) | PDF-scraped code (`smart-pins-catalog/`) | **re-extraction — DONE 2026-06-12** — prior was scraped from the *PDF* (code fragmented at page breaks, whitespace lost; needed a 5-script recovery); the rev-5 *DOCX* restores fidelity (28/30 examples pnut-ts-validated, 21 figures lossless). Prior `smart-pins-catalog/` **archived** with a pointer (§0.6); downstream re-validation below. | prior archived (not deleted) — git history is the record |
 | PASM2 Manual (Parallax) | preliminary | — | **superseded-by-deliverable** — fed our *P2 Assembly Language Reference Manual*; no longer the reference | source kept as input |
+| parallax-wx-wifi (#32420) | **2026-06-27 re-extraction** (`sources/parallax-wx-wifi/`) | 2025-08-29 PDF-era capture (narrative + audit) | **re-extraction** (addon-wave-2026-06) — prior had **0 images** (12+-image debt); new run triangulates the 12-row pin table + catalogs 15 images. Prior content was incomplete, not wrong (0 conflicts). Prior archived `archive/` + `SUPERSEDED-BY.md` (§0.6). | prior archived (not deleted) |
+| p2-wx-adapter (#64007) | **2026-06-27 re-extraction** (`sources/p2-wx-adapter/`) | 2025-08-29 PDF-era capture | **re-extraction** (addon-wave-2026-06) — cleared 8+-image debt (0→11 images); camelot-confirmed pin table. Prior archived (§0.6). | prior archived (not deleted) |
+| p2-universal-motor-driver (#64010) | **2026-06-27 re-extraction** (`sources/p2-universal-motor-driver/`, folder renamed from `universal-motor-driver`) | 2025-08-28 raw-txt capture (~85%, no images) | **re-extraction** (addon-wave-2026-06) — adds 8 images + 7 clean tables; confirms no code in guide. Prior archived (§0.6). _Carry-forward defect: docling mislabeled pins 9/8 → authoritative = PWM_UH(9)/PWM_UL(8)._ | prior archived (not deleted) |
 
 ## Source → output lineage  ‹which inputs feed which produced output›
 | Produced output (manual / KB) | Primary sources | Cross-check / support |
@@ -26,6 +29,7 @@ must preserve fidelity; this doc is the map of those links.
 | P2 Assembly Programming (deSilva-style) | authored · silicon-doc · pnut-ts | — |
 | `hardware/addon-hyperram-hyperflash.yaml` _(to author — F-122)_ | **hyperRam-n-hyperFlash** (#64004-ES Product Guide, ingested 2026-06-22) | board schematic (Rev A, title-block only) |
 | `hardware/addon-*.yaml` ×8 _(to rebuild — F-121)_ | **p2-eval-add-on-boards** per-board docs `boards/addon-*.md` (2025 `#64006`, ingested 2026-06-22) | 2020 `#64006-ES` set edition (cross-edition, forced-OCR) |
+| `hardware/addon-*.yaml` ×6 _(to author — F-116 findability)_ | **addon-wave-2026-06** (2026-06-27): microSD #64009 · RTC #64013 (PCF8523) · HD-Audio #64014 · WX-WiFi #32420 · WX-Adapter #64007 · Motor-Driver #64010 | AK5704 datasheet (🟡, for #64014 codec regs); datasheet-deferred fields → G-013/G-014 |
 | **YAML KB** (`deliverables/ai/P2`) | all qualified sources | _(re-ground)_ |
 | _(future)_ P1 outputs | p1-propeller-manual · p1-datasheet | desilva-p1-tutorial |
 
@@ -47,6 +51,8 @@ edges (corroboration / conflict) are populated by `ingest-source` **pass 6** —
 |----------|----------|----------|-----------|------------------------|
 | smart-pins-titus rev5 | **conflicts** | silicon-doc | WRPIN %AAAA/%BBBB input-selector: Titus `x101=−1, x111=−3` vs silicon-doc `x101=−3, x111=−1` | **silicon-doc wins** — Titus has the two swapped (reviewer #21 correct). Our YAML carries neither yet → gap G-001 |
 | smart-pins-titus rev5 | corroborates | silicon-doc · smart-pins | 32-mode taxonomy, mode bit-numbers, X/Y/Z register roles | agree (HIGH) — Titus adds technique/app-note color |
+| P2-HD-Audio-Add-on #64014 | corroborates | AK5704 datasheet (🟡 companion) | codec part (AK5704EN), fs 8k–192k, 105 dB S/N, I²C 400 kHz, full I²S/I²C signal set, PDN polarity | agree (11/11 HIGH) — datasheet confirms every board-guide codec claim; 0 conflicts |
+| parallax-wx-wifi #32420 | corroborates | p2-wx-adapter #64007 | shared RES/PGM/CTS/DI/DO control signals + Prop-Plug-#32201 programming compat | agree — note: "RES" names two nets (WiFi-module reset vs target-P2 reset via ESP IO13); naming collision, not a contradiction |
 
 ## Downstream re-validation after the Titus re-extraction (§0.6) — 2026-06-12
 The prior Titus capture was a **PDF code-scrape** (`smart-pins-catalog/`), not a prose source, and our

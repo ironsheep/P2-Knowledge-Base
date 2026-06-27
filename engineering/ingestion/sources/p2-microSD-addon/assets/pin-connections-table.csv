@@ -1,0 +1,23 @@
+"Accessory 
+header pin","SIP 
+breakout 
+pad","Function"
+"VIO3V3","3V3","Supply voltage to microSD card 
+-
+3.3V voltage required to power the microSD card 
+-
+Do not supply power to both the accessory header pin 
+and SIP breakout pad at the same time"
+"5V","N/C","Supply voltage from P2 accessory header  
+-
+Not Connected and Not Labelled"
+"+7, +6, +0","N/C","Not Connected"
+"+5","CLK","Connects to SD-CLK"
+"+4","CS","Connects to SD-CS (CD/DAT3/CS)"
+"+3","MOSI","Connects to SD-DI (CMD/MOSI)"
+"+2","MISO","Series 240R from SD-DO (MISO)  
+-
+Resistor provided for P2 boot compatibility"
+"+1","DET","Card detect 
+Internal 470K pull-up to 3V3, active low when card inserted"
+"GND","GND","Common Ground reference connection"

@@ -6,12 +6,12 @@
 > Per-source cells **scanned 2026-06-12**. Registry grounded in `sources/` on disk. _Went live 2026-06-12 (was the quad prototype); folds the former INGESTION-DASHBOARD + INGESTION-AUDIT-MATRIX._
 
 ## Tier 1 — At a glance
-- **Sources:** 38 folders on disk → **33 logical sources** · 30 P2 · **P1 now tracked separately** → `P1-INGESTION-DASHBOARD.md`  ‹+2 folders 2026-06-22: **p2-hardware-manual** (un-mis-filed from p2-eval-board → now a distinct logical source, +1) and **TAQOZ-Forth-Bitbashers-Guide** (the authoritative `.docx` for the existing `taqoz` logical source — folds in, not +1). v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
-- **By authority:** 🏆 23 · 🟢 6 · 🟡 4  ‹33 logical sources; p2-hardware-manual added 🏆; v51a lineage + 3 non-source folders excluded; hyperRam promoted 🟢→🏆 on ingestion›
-- **Ingest completeness:** mature ~19 (≥90% + audit, **incl. Titus rev5 ✅, HyperRAM #64004-ES ✅**) · partial ~8 (40–89%) · minimal/not-started ~5  ‹scanned 2026-06-12; HyperRAM ingested 2026-06-22›
-- **Open questions:** **9** in the gap ledger (G-001..008 Smart-Pins/Titus + **G-009** 64004-ES part-numbers) · **3** routed to an expert (Q-001..003)  ‹rolled up from KNOWLEDGE-GAPS›
-- **Latest ingested:** **P2 Eval Add-on Boards (#64006)** — cross-edition re-ingestion (2026-06-22, 🏆; **fabrication rescue** + 8 per-board source docs) · prior: HyperRAM/HyperFlash #64004-ES (2026-06-22, 🏆) ‹LIN›
-- **What's next:** **silicon-doc re-extraction from the `.docx`** — clean image catalog (Titus-style) + modern re-validation; `.docx` now staged in `sources/silicon-doc/` (v35 Rev B/C). _Then: **F-122** → YAML head authors the 64004-ES standalone board YAML from the new extraction (part-numbers G-009 to verify first)._  ‹HyperRAM #64004-ES ✅ 2026-06-22 · Titus rev5 ✅/DETUNED · YAML v1.10.1 ✅ 2026-06-20›
+- **Sources:** 41 folders on disk → **36 logical sources** · 33 P2 · **P1 now tracked separately** → `P1-INGESTION-DASHBOARD.md`  ‹**+3 logical sources 2026-06-27** (addon-wave-2026-06): **p2-microSD-addon** #64009, **P2-RTC-Add-on** #64013, **P2-HD-Audio-Add-on** #64014 (AK5704 datasheet = cross-check companion, not a separate logical source). +2 folders 2026-06-22: p2-hardware-manual + TAQOZ-Forth-Bitbashers-Guide. v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
+- **By authority:** 🏆 26 · 🟢 6 · 🟡 4  ‹36 logical sources; **+3 🏆 add-on board guides 2026-06-27**; AK5704 = 🟡 cross-check companion within #64014; p2-hardware-manual added 🏆; v51a lineage + 3 non-source folders excluded›
+- **Ingest completeness:** mature ~25 (≥90% + audit, **incl. the 6-board addon-wave-2026-06 ✅, Titus rev5 ✅, HyperRAM #64004-ES ✅**) · partial ~5 (40–89%) · minimal/not-started ~5  ‹addon wave ingested 2026-06-27 (3 new + 3 re-extracted)›
+- **Open questions:** **15** in the gap ledger (G-001..008 Smart-Pins/Titus · **G-009** 64004-ES part-numbers · **G-010..015** add-on-wave hardware) · **6** routed to an expert (Q-001..003 · **Q-004..006** add-on wave)  ‹rolled up from KNOWLEDGE-GAPS›
+- **Latest ingested:** **Add-on board wave (addon-wave-2026-06)** — 6 sources 2026-06-27 🏆 via ingest-conductor→ingest-wrap-reduce (3 NEW: #64009 microSD · #64013 RTC · #64014 HD-Audio+AK5704; 3 RE-EXTRACTED: #32420 WX-WiFi · #64007 WX-Adapter · #64010 Motor-Driver). **Cleared 34 images of debt** (3 re-extracted sources had 0 images); 0 cross-source conflicts. · prior: #64006 Eval Add-on Boards (2026-06-22) ‹LIN›
+- **What's next:** **silicon-doc re-extraction from the `.docx`** — clean image catalog (Titus-style) + modern re-validation; `.docx` now staged in `sources/silicon-doc/` (v35 Rev B/C). _Also queued for the YAML head: author `hardware/addon-*.yaml` for the 6 addon-wave boards (feeds hardware-findability **F-116**); **F-122** → 64004-ES board YAML (part-numbers G-009 first)._  ‹HyperRAM #64004-ES ✅ 2026-06-22 · Titus rev5 ✅/DETUNED · YAML v1.10.1 ✅ 2026-06-20›
 - **Why track this:** qualified inputs feed the YAML KB → **download-on-demand (MCP)** → agents writing P1/P2 code their models were never trained on. Input trust + completeness propagate straight to agent reliability.
 
 ## Tier 2 — Source registry (by category — categories preserved from existing trackers)
@@ -59,14 +59,17 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 | Source | Auth | C | K | I | A | X | Cmpl* |
 |--------|------|---|---|---|---|---|-------|
 | p2-eval-add-on-boards ‹#64006 series — 8 boards A–H + set SKU› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~98% _(**re-ingested cross-edition 2026-06-22** — prior extraction was **FABRICATED** (invented board lineup); now **8 per-board source docs** in `boards/` + overview + **17-image catalog** (photos corroborate pin maps; PCB-dimension drawings); 2025 clean + 2020 `#64006-ES` forced-OCR, pin maps cross-validated. **F-121** → YAML head rebuilds `addon-*.yaml`)_ |
-| p2-universal-motor-driver ‹folder renamed from `universal-motor-driver` 2026-06-27› | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~85% _(raw txt; no images/cross-source — **re-ingestion queued 2026-06-27**)_ |
+| p2-universal-motor-driver ‹#64010 RevB v2.0; folder renamed from `universal-motor-driver`, **re-extracted 2026-06-27** (prior raw-txt archived §0.6)› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~98% _(7 clean tables + 8 images cataloged (prior had 0); no code in guide; PWM/ADC sensing consistent w/ smart-pins. **Carry-forward:** docling mislabeled pins 9/8 — authoritative header = PWM_UH(9)/PWM_UL(8))_ |
+| p2-microSD-addon ‹#64009; **ingested 2026-06-27**› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~95% _(SD-SPI pin map + 240R-on-MISO boot-compat + 470K DET active-low; 4 images; no code in guide; SPI consistent w/ protocol layer)_ |
+| P2-RTC-Add-on ‹#64013; **ingested 2026-06-27**› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~95% _(RTC=NXP PCF8523; I2C pin map (+1 SDA / +0 shared SCL·INT·CLKOUT); Seiko MS421R backup; 4 images. I2C addr+regmap datasheet-deferred → G-013)_ |
+| P2-HD-Audio-Add-on ‹#64014 + AK5704 codec datasheet (🟡 cross-check); **ingested 2026-06-27**› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | ~100% _(codec=AK5704EN (ADC board); DAC board=pure Smart-Pin DACs; I²S/TDM + DAC-impedance scheme; 7 images. **11/11 codec claims corroborated by the AK5704 datasheet, 0 conflicts**)_ |
 | hyperRam-n-hyperFlash | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 95% _(**ingested 2026-06-22**, forced-OCR — PDF text layer corrupt; pin map **triple-validated** (text∩OCR∩drawing); no code in source; 7 images. Standalone YAML pending → **F-122** (yaml head); part-numbers OCR-unverified → **G-009**)_ |
 
 **Adapters & connectivity**
 | Source | Auth | C | K | I | A | X | Cmpl* |
 |--------|------|---|---|---|---|---|-------|
-| parallax-wx-wifi | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~90% _(stated; 12+ images flagged as debt)_ |
-| p2-wx-adapter | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~90% _(stated; 8+ images flagged as debt)_ |
+| parallax-wx-wifi ‹#32420; **re-extracted 2026-06-27** (prior PDF-era extraction archived §0.6)› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(12-row pin table triangulated; **15 images cataloged — cleared the 12+-image debt** (prior had 0); firmware = Remora/esp-link; no code in guide; pin map reconciled w/ #64007)_ |
+| p2-wx-adapter ‹#64007; **re-extracted 2026-06-27** (prior PDF-era extraction archived §0.6)› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(clean 8-row pin table (camelot-confirmed); **11 images cataloged — cleared the 8+-image debt** (prior had 0); no code (passive adapter); "RES" two-net naming noted vs #32420)_ |
 | propplug-rev-e | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~95% _(stated; no images)_ |
 
 ### P2 · Boot & loaders
