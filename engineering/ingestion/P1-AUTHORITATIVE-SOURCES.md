@@ -11,7 +11,7 @@
 | P1 Propeller Manual Errata | 🏆 | Parallax — **correction layer**; outranks the base Manual on points it corrects | v1.1 Supp |
 | P1 Datasheet | 🏆 | Parallax — hardware/electrical authority | v1.4.0 |
 | Parallax App Notes (AN001–019) | 🏆 | Parallax — applied, narrower scope. **5 ingested 2026-06-27** (wave p1-appnotes-2026-06): AN001 Counters · AN004 GUI-StartVGA · AN008 Σ∆-ADC · AN013 WMF-Menus · AN014 Coroutines; companion Spin1/PASM1 code captured into each note's `assets/code-*/` (`code_validated:false`, no P1 compiler). 12 remaining await PDFs. | per-note (2011) |
-| PE Labs Fundamentals · XBee Tutorial (+errata) | 🏆 | Parallax — official tutorials | v1.2 / v1.0.1 |
+| PE Labs Fundamentals · XBee Tutorial (+errata) | 🏆 | Parallax — official tutorials. **PE Labs Fundamentals ingested 2026-06-27** (#122-32305, Andy Lindsay; 233pp + 89 `.spin` captured `code_validated:false`); 🏆 for P1 pedagogy / PE-Kit hardware / Spin1 teaching idioms, but **tutorial-tier (secondary) for hard silicon facts** — defer to P1 Datasheet / Propeller Manual. | v1.2 / v1.0.1 |
 | deSilva P1 Tutorial | 🟢 | community (deSilva) — pedagogical cross-check / color | — |
 | Chip Gracey (designer) | 🏆 | P1 designer — tiebreaker for the unresolvable residue | — |
 | flexspin | community-tier | community compiler (Eric Smith) — **compile-check only**, NOT a semantic authority; below the golden docs | 7.6.11 (pending install) |

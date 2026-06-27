@@ -25,6 +25,7 @@ agents writing P1 code + P1→P2 migration guides.
 | `deliverables/ai/P1/hardware/` | P1 Datasheet v1.4 · Manual | — |
 | _(future)_ P1→P2 migration guide | this whole P1 corpus | `deliverables/ai/P2/` |
 | _(future)_ **P2 app-note recreations** + P2 app-note voice/style guide | ingested P1 app notes (AN001/004/008/013/014) — content, code, **voice/structure profiles** | `deliverables/ai/P2/` smart-pins / streamer / PASM2 |
+| _(future)_ **P2 labs book** ("Fundamentals"-style, reshaped experiments) | **PE Labs Fundamentals** (#122-32305) — its **whole-book Pattern Profile** is the structural/pedagogical donor; 89 lab `.spin` are the reshape inputs | `deliverables/ai/P2/` smart-pins (Lab 7→capstone) · P2 Edge platform · Spin2/`DEBUG` |
 
 ## P1 ↔ P2 cross-corpus edges  ‹the required pass-6 leg — how P1 facts relate to / differ from P2›
 Seeded 2026-06-22 from the P1 Propeller Manual v1.2 (Ch1). P1 side is source-cited (`complete-architecture-hardware.md`);
@@ -59,3 +60,10 @@ P2-side figures to confirm against `deliverables/ai/P2/` are flagged. The full f
 | **AN013** | WMF Menus & Messaging | video generator (VGA-text) + counter-PWM + counter audio | streamer text driver; smart-pin PWM; smart-pin NCO/DAC audio | **MED-HIGH** (data-driven menu/event/handler architecture is silicon-agnostic) / **LOW-MED** (driver layer needs full P2 rewrite) |
 
 **Shared P1 driver stack (lineage, NOT drift):** AN004 + AN013 both ship `WMF_Framework_010`, `VGA_HiRes_Text_010`, `Mouse_011`, `Keyboard_011` — the same stock objects, each note keeping its **own copy for self-containment** by design. They form one **GUI & Graphics Series** (AN004 foundation · AN005 intro-menus *not yet on disk* · AN013 advanced menus). The shared objects are uncharacterized in the KB → **G-P1-008**.
+
+## PE Labs Fundamentals → P2 labs book (pattern donor)  ‹single-source ingest 2026-06-27 — the required P1→P2 leg›
+> The book's value to us is its **reusable structure**, not its P1 content. The whole-book Pattern Profile (in `sources/p1-PE-Kit-Labs/complete-PE-Labs-Fundamentals-reference.md` → "## DOCUMENT PATTERN PROFILE") is the blueprint for the planned P2 labs book.
+- **Per-lab template to inherit wholesale:** `Introduction (app↔technique roadmap) → Prerequisite Labs → Parts List + Schematic → {concept → ► action step → code listing → "How X.spin Works" → figure}×N → Study Time (Questions/Exercises/Projects, answers in an appendix)`. Voice = ► second-person imperative for actions, declarative for concepts; difficulty by **progressive refinement** of a familiar example; **delta-word example naming** (`LedsOnOff`→`…Again`→`…50Percent`).
+- **Five-lab arc to re-target:** Setup → I/O&Timing → Methods&Cogs → Objects → **Smart Pins (replacing Counter Modules)**. **Lab 7 (counters) is the lab that reshapes most** — every CTRA/CTRB idiom (NCO tones, DUTY-mode D/A, edge counting, RC/pulse timing, PWM) maps to **per-pin P2 smart-pin modes** → the natural P2 capstone.
+- **Platform/language reshape:** 40-Pin DIP PE Platform → **P2 Edge** (on-board regulation; drop the Appendix-E regulator math + 5 MHz-xtal recipe); Spin1 → **Spin2** (`waitcnt/cnt`→`waitct/getct`; `dira/outa/ina`→`drvh/pinh/dirh` + smart-pin config); Parallax Serial Terminal → **Spin2 `DEBUG`**.
+- **Media reshape (per the TikZ direction):** original schematics are **catalog-only** (redraw in TikZ/circuitikz for the P2 book); the 5 extracted **breadboard/wiring photos are the reference pattern** for the new P2-environment photos that must be shot (cannot be regenerated). External library objects it leans on (`Parallax Serial Terminal.spin`, `Float`, `FloatString`) fold into **G-P1-008**.
