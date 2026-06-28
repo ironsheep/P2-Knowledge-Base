@@ -1,6 +1,7 @@
 # Sprint Plan — Smart-Pin ADC Foundation + P2AN000 Instrumentation-ADC App Note
 
-**Authored:** 2026-06-27 · **Status:** READY (research complete; scope pre-consented by Stephen)
+**Authored:** 2026-06-27 · **Status:** ✅ CLOSED 2026-06-28 — all tasks #121–#128 SHIPPED.
+Closeout audit: `engineering/history/sprints/smartpin-adc-foundation-p2an000/2026-06-28-smartpin-adc-foundation-p2an000-CLOSEOUT.md`.
 **Heads touched:** yaml (P2KB) · ingestion (donor hygiene) · manual (IOSP enrichment, app-note doc class) · operations (corrections register, validator, punch list)
 **Plan dir:** `engineering/planning/` · **This is a PLAN** (commits to ship), not a study.
 
@@ -18,9 +19,9 @@ revealed that (a) the P2 ADC's instrumentation *ceiling* is real and under-docum
 foundation (YAML + IOSP guide) and ships the application (the app note) so the two reinforce.
 
 **Cross-head dependency & sequencing.** The app note (Layer 3) rests on the enriched IOSP
-foundation (Layer 2) and the corrected YAML (Layer 1). **Execution order: §1–§4 (YAML/source
-hygiene) → §5 (IOSP foundation) → §6 (app note) → §7 (guide) → §8 (rig readiness).** §7 is
-process-only and may land anytime.
+foundation (Layer 2) and the corrected YAML (Layer 1). **Execution order: §1/§3/§4 (YAML/source
+hygiene) → §5 (IOSP foundation) → §6 (app note) → §7 (guide) → §8 (rig readiness).** §2 is
+DROPPED (see Entry checks). §7 is process-only and may land anytime.
 
 **Authority order** (per the corrections register): `pnut_ts` compiler → Spin2 v55 docs
 (`engineering/ingestion/sources/spin2-v55/`) → Silicon Doc v35
@@ -36,15 +37,37 @@ fabrication.**
 
 ---
 
+## Entry checks (sprint-start, 2026-06-28)
+
+- **Working tree:** committed in 3 commits (`75aeca21`, `571f5a40`, `e5692209`). Only the
+  pre-existing datasheet refactor remains — **outside the sprint blast radius, left untouched.**
+- **Entry baseline (YAML head): GREEN** — `verify-yaml-format.py` 1053/1053 parse clean;
+  `validate-crossref-keys.py` ALL cross-references resolved. This is the exit comparison point.
+- **Tracking:** nothing to archive. 4 leftover tasks (`#110` doc-style-change close; `#54/#46/#47`
+  IOSP Titus-expert/RECOMMEND_ADD/audit) — **all DEFERRED** (not this sprint). **Adjacency:**
+  `#54` Q2 (scope Tukey/Hann taps) + Q5 (DAC-ENOB) neighbor our Ch.16 work + the Goertzel
+  punch-list item — our edits must not contradict those pending Chip answers.
+- **Build numbers (per head): NO immediate releases.** IOSP — unreleased pilot, **no bump**
+  (rides first release, per task `#110` rule). P2KB YAML — **no bump** (verify-lock is
+  confirm-only; donor/F-170/guard are hygiene, not a release). Ingestion donor — versionless.
+  **P2AN000 — born v0.1.0** (drafted/staged, not released this sprint).
+- **§2 DROPPED (Green Book retired).** `P_ADC_CAL` exists only in the retired Green Book
+  tutorial + its test doc; IOSP (going-forward) + the YAML already use `P_ADC_SCOPE`. No
+  going-forward conflict; retired docs are not maintained. (Stephen, 2026-06-28: "Any Smart
+  Pins manual reference going forward is our IOSP.")
+
+---
+
 ## Design decisions (resolved by recommendation — redirect any before §1 starts)
 
 Per the sprint-plan overlay, the non-obvious calls, each with the answer this plan takes:
 
-- **D1 — Smart Pins Tutorial is a RELEASED manual; does the `P_ADC_CAL` fix force a re-release?**
-  **Recommendation (taken):** fix the opus-master now so the source is correct; let the
-  corrected text ride the tutorial's **next** release rather than forcing a standalone
-  re-release for one fabricated constant (a reader copying `P_ADC_CAL` gets a self-revealing
-  compile error). Record it in the tutorial CHANGELOG's unreleased section.
+- **D1 — `P_ADC_CAL` fix scope (RESOLVED 2026-06-28 → §2 DROPPED).** The fabricated
+  `P_ADC_CAL` exists ONLY in the retired **Green Book** Smart Pins Tutorial
+  (`p2-smart-pins-tutorial`, parked / superseded / not going forward) + its green-book test
+  doc. The going-forward smart-pins doc is **IOSP**, already correct (`P_ADC_SCOPE`); the YAML
+  is uniformly `P_ADC_SCOPE`. We do not maintain retired docs and no going-forward conflict
+  exists — so the fix is not performed.
 - **D2 — Where does the durable guard live (we must not modify central skills)?**
   **Recommendation (taken):** (a) `F-170` corrections-register entry as the permanent record +
   fix-trace; (b) a new in-repo validator `engineering/tools/validation/audit-adc-encoding.py`
@@ -79,8 +102,6 @@ No blocking open questions remain.
 | `deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` | verify-lock (already correct v1.9.0) | 1 |
 | `deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml` | verify-lock | 1 |
 | `deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml` | verify-lock (`P_ADC_SCOPE`) | 1 |
-| `engineering/document-production/manuals/p2-smart-pins-tutorial/opus-master/COMPLETE-OPUS-MASTER.md` | `P_ADC_CAL`→`P_ADC_SCOPE` (L1961 + occurrences) | 2 |
-| `engineering/pdf-forge/interactive-testing/test-documents/green-book-tutorial.md` | `P_ADC_CAL`→`P_ADC_SCOPE` (L2012) | 2 |
 | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | add **F-170** (canonical encoding + donor root cause) | 3 |
 | `engineering/tools/validation/audit-adc-encoding.py` | **new** guard validator | 3 |
 | `~/.claude/.../feedback_skill_evolution_candidates.md` (in-repo copy) | append release-checklist candidate | 3 |
@@ -123,27 +144,12 @@ that skill's remit.)
 
 ---
 
-## 2. Reconcile the `P_ADC_CAL` naming fabrication → `P_ADC_SCOPE`
+## 2. ~~Reconcile `P_ADC_CAL` → `P_ADC_SCOPE`~~ — REMOVED (2026-06-28)
 
-**Why.** `P_ADC_CAL` exists in no authoritative source; it's a v51-era misremembering (in
-v51 %11010 was `P_COUNT_RISES`; Spin2 renumbered all 32 modes by v55, where %11010 =
-`P_ADC_SCOPE`, "ADC scope with trigger"). It lives in two human docs and could mislead a
-reader/agent. The YAML is already uniformly `P_ADC_SCOPE` (no YAML conflict).
-
-**Current state.** `p2-smart-pins-tutorial/opus-master/COMPLETE-OPUS-MASTER.md:1961` (+ the
-`P_ADC_1X | P_ADC_CAL` table rows); `green-book-tutorial.md:2012`.
-
-**Target.** Both read `P_ADC_SCOPE` with the correct "ADC scope with trigger" gloss. Per **D1**,
-the tutorial opus-master is corrected now; corrected text rides the next tutorial release
-(note in its CHANGELOG unreleased section).
-
-**Integration.** Tutorial is on the live roster → coordinate with `release-manual` on next
-tutorial release; no immediate standalone re-release.
-
-**Verification.**
-- *Normal:* `grep -rn P_ADC_CAL` across the repo → zero hits.
-- *Edge:* the tutorial's surrounding mode table still reads correctly (no broken row).
-- *Error:* confirm `P_ADC_SCOPE` is the v55 name (re-cite `spin2-v55-text.txt:1556`).
+**Dropped per D1.** `P_ADC_CAL` lives only in the **retired** Green Book tutorial (parked /
+not going forward) + its test doc. IOSP (the going-forward smart-pins doc) and the YAML are
+already correct (`P_ADC_SCOPE`, Spin2 v55). No going-forward naming conflict exists, and we
+do not edit retired docs. (Tombstoned, not renumbered, so later sections keep their numbers.)
 
 ---
 
@@ -320,3 +326,25 @@ read, expected vs measured).
 Research complete; all decisions resolved by recommendation (none blocking); no procedure
 needed that a current skill doesn't cover **except** the central `release-yamls` checklist line,
 captured as a skill-evolution candidate (§3, D2). Plan ready for `plan-to-tasks`.
+
+---
+
+## Section ↔ task cross-reference (generated 2026-06-28)
+
+Sprint tag: `smartpin-adc`. Execute via `todo_next tags:["smartpin-adc"]`.
+
+| Plan § | Deliverable | Task | seq |
+|---|---|---|---|
+| §1 | Fix ADC encoding donor + verify-lock published YAMLs | «#121» | 12 |
+| §3 | Durable guard (F-170 + audit-adc-encoding.py) | «#122» | 13 |
+| §4 | Un-stale IOSP encoding audit note | «#123» | 14 |
+| §5 | IOSP Ch.16 foundation enrichment (4 additions) | «#124» | 15 |
+| §7 | Dual-archetype app-note guide update | «#125» | 16 |
+| §8 | Rig spec + measurement-table stub | «#126» | 17 |
+| §6a | P2AN000 app note — base build + harness + concept | «#127» | 18 |
+| §6b | P2AN000 app note — catalog + verify + close | «#128» | 19 |
+| §2 | ~~`P_ADC_CAL` reconcile~~ — DROPPED (Green Book retired) | — | — |
+
+> Order note: §7 (guide archetype) is sequenced **before** §6 per the rework-analysis
+> standards-before-application rule — the app note must conform to the updated guide. §1 is
+> foundational (guard, IOSP enrichment, and the app note all rest on the corrected encoding).
