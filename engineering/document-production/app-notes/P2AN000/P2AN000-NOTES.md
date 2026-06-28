@@ -33,12 +33,18 @@ for IS captured: `research/improved-adc-pin-techniques/code/EightPinADC.spin2`.
 | GIO/VIO/pin ratiometric µV math (`muldiv64`) | IOSP Ch.16 §16.3 + forum (cgracey) STUDY §B2 | compile ✓ (P2AN000 base build) — hardware pending |
 | 3-sample SINC2 flush on source switch | forum (cgracey/evanh) — STUDY §A4 | encoded in base-build `measure` routine; compile ✓ — hardware pending |
 | 15 mV absolute-error limit (resistor mismatch) | forum (cgracey, designer) — STUDY §A6 | designer-stated; not re-measured |
-| _(more as drafted)_ | | |
+| 3-pin constant-impedance ×3 (Recipe 2) | forum (cgracey/evanh) — STUDY §A5 | compile ✓ (recipe2-3pin) — hardware pending |
+| N-stage time-halving filter (Recipe 3) | forum (cgracey) — STUDY §B5 | compile ✓ (recipe3-filter, incl. CORDIC compute) — hardware pending |
+| Range extension series-R + tempco (Recipe 4) | forum (Rayman/evanh/jmg/cgracey) — STUDY §B7 | compile ✓ (recipe4-range); R_IN calibration honesty stated |
+| Mains-cycle averaging (Recipe 5) | forum (Christof/cgracey) — STUDY §B6 | compile ✓ (recipe5-mains); SUMS folded from _clkfreq |
+| 8-pin bytecode interpreter (capstone) | forum (cgracey) — EightPinADC.spin2 | described/linked only — NOT rebuilt (by design) |
 
 ## Open questions (for the note + for Stephen)
 
-- Confirm topic = instrumentation ADC, and confirm **scope**: single-pin only, or include the
-  3-pin / 8-pin progression? (See report.)
+- ~~Confirm topic = instrumentation ADC, and confirm **scope**: single-pin only, or include the
+  3-pin / 8-pin progression?~~ **RESOLVED:** techniques-catalog — base (single-pin) + 4 recipes
+  (3-pin, N-stage filter, range extension, mains averaging) + 8-pin capstone (described/linked).
+  Authored 2026-06-28 (tasks #127/#128).
 - Legal-clock target (note must use ≤300 MHz, not Chip's 320 MHz).
 - ENOB framing — what do we claim? Chip's numbers are bench/rig, not guaranteed (STUDY §6).
   **Resolved:** claim *mechanism* qualitatively; defer every ENOB number to the measurement-table
