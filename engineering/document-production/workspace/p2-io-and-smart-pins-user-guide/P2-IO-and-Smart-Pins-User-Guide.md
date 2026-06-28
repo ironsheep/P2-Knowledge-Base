@@ -9326,6 +9326,8 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 
 *ENOB = Effective Number of Bits*
 
+> **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. You can reach further by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — the absolute resolution you actually achieve depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Treat any specific ENOB figure as a bench result for *your* rig, not a datasheet value.
+
 ### Sample Rate Calculation
 
 ```formula
@@ -9410,6 +9412,8 @@ SINC3 provides better dynamic response than SINC2, doubling the effective bits f
 > - **Warm-up.** The difference math depends on a valid prior accumulator state, so the filter is only accurate **from the second period for SINC2, and from the third period for SINC3.** Discard the first reading (SINC2) or the first two (SINC3) after starting.
 > - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) - 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
 
+> **Startup warm-up and source-switch flush are two different discards.** The warm-up above is a *one-time* settling of the differencing filter when the smart pin first starts. A **separate** discard applies every time you **change the input source** (for example GIO → VIO → pin in the instrumentation method below): switching the ADC's reference contaminates the **first 3 samples** — two for the SINC filter to decimate the step through, plus one for the analog front end to settle — so the **4th sample after a source switch is the first clean one.** A steady single-source reading pays only the startup warm-up, once; a method that rotates among sources pays the 3-sample flush on every switch.
+
 ### Bitstream Capture Mode (%11)
 
 Captures raw ADC bitstream for custom processing algorithms.
@@ -9424,6 +9428,47 @@ PUB read_bitstream() : bits
   REPEAT UNTIL PINREAD(ADC_PIN)
   bits := RDPIN(ADC_PIN)                      ' 32 bits, LSB = oldest
 ```
+
+### Ratiometric Absolute-Voltage Instrumentation
+
+The gain and filter modes above turn the pin reading into a *number*, but that number is relative to the ADC's own internal references — which themselves drift with supply and temperature. To recover an **absolute** voltage in microvolts, measure the pin against the chip's two internal references and scale ratiometrically. This is the foundation of single-pin instrumentation measurement on the P2; the complete, runnable builds live in the P2AN000 application note, so the sketch here stays minimal.
+
+**Read all three sources.** The ADC input can be switched among the internal ground reference (`P_ADC_GIO`), the internal supply reference (`P_ADC_VIO`), and the external pin. Absolute voltage needs **all three** — the shortcut of reading only `P_ADC_FLOAT` and the pin is far noisier, because the float point only *approximately* sits mid-supply. Read each reference from the same pin in turn, then place the pin between them:
+
+```formula
+uV = (pin − GIO) / (VIO − GIO) × 3,300,000
+```
+
+```spin2
+PUB read_microvolts() : uv | gio, vio, pin
+  ' Read each reference from the same pin, in turn.
+  gio := read_source(P_ADC_GIO)                ' internal ground reference
+  vio := read_source(P_ADC_VIO)                ' internal supply reference
+  pin := read_source(P_ADC_1X)                 ' the external pin
+  ' Ratiometric: where does the pin sit between GIO and VIO?
+  ' muldiv64 keeps the (pin - gio) x 3_300_000 product at 64 bits.
+  uv := muldiv64(pin - gio, 3_300_000, vio - gio)
+
+PRI read_source(input_mode) : sample | acc, last
+  WRPIN(ADC_PIN, input_mode | P_ADC)
+  WXPIN(ADC_PIN, %01_0111)                     ' SINC2 filtering, 128 clocks
+  PINH(ADC_PIN)
+  ' Switching the source contaminates the first 3 samples; the 4th is
+  ' the first clean one (see the source-switch flush note above).
+  last := RDPIN(ADC_PIN)
+  REPEAT 4
+    REPEAT UNTIL PINREAD(ADC_PIN)
+    acc    := RDPIN(ADC_PIN)
+    sample := acc - last
+    last   := acc
+```
+
+**Handle the out-of-band cases.** Both edges of the formula are legitimate readings, not errors:
+
+- **Below ground** (`pin < GIO`): `pin - GIO` is negative, so `uv` is negative — the signal sits below the ground reference (below 0 V).
+- **Over-range** (`pin > VIO`): `pin - GIO` exceeds `VIO - GIO`, so `uv` exceeds 3,300,000 µV — the signal is above the supply reference. Clamp or flag these as your application requires.
+
+How close the absolute number lands depends on the front-end limits in §16.8 — most importantly the matched-resistor absolute-error floor, which no amount of averaging removes.
 
 
 ## 16.4 Mode %11001: P_ADC_EXT (External Clock)
@@ -9732,6 +9777,15 @@ threshold     long      128                   ' Mid-scale threshold
 | Digital crosstalk | Couples into analog | Separate analog from digital |
 | Input impedance | Source loading | Low-impedance source |
 | Temperature | Offset drift | Periodic calibration |
+
+### Hardware Limits
+
+Some bounds come from the analog front end itself and **cannot be averaged away** — know them before promising absolute accuracy:
+
+- **Input impedance ≈ 500 kΩ** (on the 1× range). A low-impedance source loads this lightly, but a high-impedance source — or a large external series resistor — forms a divider that shifts the reading. Buffer high-Z sources, or account for the divider.
+- **Absolute-error floor ≈ 15 mV.** The GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read up to about 15 mV apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
+- **Supply and temperature sensitivity.** The internal references track the VIO supply, so a noisy switch-mode VIO degrades precision — feed VIO from a clean LDO for instrumentation work. GIO and VIO also drift with temperature (VIO is the more stable of the two), giving each chip a per-pin fingerprint; periodic re-referencing handles the slow drift.
+- **Power-of-2 sample period.** In SINC2 sampling mode the period must be a power of two (`2^X[3:0]`) and cannot be freely dithered (§16.3, Resolution and Sample Rate).
 
 ### Improving Accuracy
 
