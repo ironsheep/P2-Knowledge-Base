@@ -31,3 +31,20 @@ own punch list (e.g. the assembly manual's `TEMPLATE-THEORY-OF-OPERATIONS.md` re
 `workspace/p2-assembly-language-manual/PUNCH-LIST.md`).
 
 ---
+
+## IOSP Ch. 16 — scope-mode / Goertzel completion (deferred enrichment) — OPEN
+
+**Status:** ⏳ Open — surfaced 2026-06-27 during the ADC-foundation enrichment audit
+(P2AN000 instrumentation-ADC work). Deliberately **carved out** of that enrichment because it
+belongs to the GETSCP scope-window mechanism, NOT the SINC-ADC spine being enriched now.
+
+IOSP Chapter 16 §16.5 (smart-pin mode %11010, ADC scope-with-trigger) is documented at a
+"simplified" level (Titus cross-audit). Complete later:
+- Scope-mode **filter-type selector** bits (Tukey 68-tap / 45-tap, Hann 28-tap).
+- Full **scope capture sequencing** (SETSCP / SETXFRQ / XINIT / XSTOP).
+- The **GETSCP window-overlap ENOB** technique (TonyB_ sub-thread) — see
+  `app-notes/P2AN000/research/improved-adc-pin-techniques/STUDY-improved-adc-pin-techniques.md` §B9.
+
+Not blocking the ADC-foundation enrichment or the P2AN000 app note.
+
+---
