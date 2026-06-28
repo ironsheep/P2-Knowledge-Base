@@ -13,7 +13,7 @@ An application note sits in the gap between the reference manuals and the DeSilv
 
 **An app note IS:**
 - **Application-driven.** It is organized around an outcome a developer wants ("generate PWM with no cog overhead," "read an analog voltage," "run two tasks in one cog"), not around the silicon taxonomy.
-- **Single-technique deep.** One note, one technique, thoroughly — concept through working, adaptable result.
+- **Focused and deep.** A note goes deep on *one thing* — either a single technique taught through one worked build, or a single capability-domain taught through a small set of runnable recipes the reader chooses among. It exhausts the *use*, not the silicon spec. (Two archetypes — see §1.1.)
 - **A complete worked example.** The centerpiece is one runnable, validated program the reader can build on.
 - **Empirically grounded.** It shows what success looks like and how to confirm it.
 - **Short.** Typically 5–20 pages. If it's growing past that, it's probably two notes, or it's becoming a manual chapter.
@@ -23,7 +23,21 @@ An application note sits in the gap between the reference manuals and the DeSilv
 - **A tutorial.** It does not teach the P2 from zero or walk a multi-lab progression. It assumes stated prerequisites and links to the tutorial/manuals for background.
 - **A datasheet.** Hardware/electrical specifications live in `engineering/document-production/datasheets/`.
 
-> **The test:** if you removed the worked example and the note still made sense, it's a manual chapter, not an app note. If the note teaches the whole subsystem rather than one use of it, it's a manual chapter. An app note earns its name by being built around *doing one thing*.
+> **The test:** if you removed the worked example(s) and the note still made sense, it's a manual chapter, not an app note. If the note teaches the whole subsystem rather than *using* it, it's a manual chapter. An app note earns its name by being built around *doing* — one technique, or one capability-domain's worth of runnable recipes.
+
+### 1.1 Two archetypes
+
+A note takes one of two shapes. Both obey everything above; they differ only in how many builds carry the note.
+
+- **Single-build** *(the default).* One technique, one centerpiece worked program, exhausted concept-through-adaptation. The canonical structure (§4) maps to it directly: one "Build It," one "Verify," one "Adapt It." Most notes are this. *(e.g. "generate PWM with no cog overhead.")*
+- **Techniques-catalog.** One capability-*domain* taught through a **shared conceptual base** plus a small set of complete, runnable recipes the reader **selects among** by need. The P1 AN001 (Counters) genre model is this shape, and so is P2AN000 (instrumentation ADC: single-pin → 3-pin → filtered → range-extended). It is *not* a license to tour a subsystem.
+
+Two guardrails keep a catalog an app note and not a manual chapter:
+
+1. **Shared conceptual base first.** All recipes build on **one** "The Idea / How It Works" foundation, taught once, never re-explained per recipe. The recipes vary the *application*, not the mechanism.
+2. **Every technique is a complete, verified, runnable recipe — plus a decision aid.** Each catalog entry is a build-it + verify (compiles under `pnut_ts`, shows expected output), not a described mode. A **decision table** (need → technique) gives the reader the "which one do I use" spine. If an entry is a mode description with no runnable recipe, it's manual-chapter content — cut it or move it to the manual.
+
+**Decomposition rule (both archetypes).** Foundation belongs in the **manual**; the note **applies** it. When a note needs a mechanism the manual under-documents, *enrich the manual* and have the note cite it — do not grow the note into the manual. (P2AN000 rests on the enriched I/O & Smart Pins User Guide Ch.16; the note teaches the *use*, the chapter owns the *mechanism*.)
 
 ---
 
@@ -115,6 +129,7 @@ FRONT MATTER
 - **§6 Build It** is the centerpiece. The program is complete and runnable on the stated board. Every code block compiles under `pnut_ts` (§5 verification). The walkthrough explains *why*, never restates the instruction.
 - **§7 Verify** is non-negotiable. A note without a verification step is not trustworthy. Show the expected DEBUG window / capture, the expected value, and at least one honest failure branch.
 - **§8 Adapt It** is what separates an app note from a recipe — it teaches the reader to *change* the result, which is the actual point of a note.
+- **Catalog mapping (§1.1).** This skeleton is written for the single-build archetype. A techniques-catalog keeps §1–§5 as the shared base, then **repeats §6–§7 (Build It + Verify) per recipe** after a decision table; §8 becomes "which recipe / going further." The fixed flow — orient → concept → mechanism → build → verify → adapt — is per-recipe once the shared base is set.
 
 ---
 
@@ -196,9 +211,11 @@ A recreation re-derives every number against P2 silicon and notes where a P1 idi
 ## 8. Quality checklist
 
 **Identity**
-- [ ] One application/outcome, in view from Abstract to Conclusion
-- [ ] Single technique, deep — not a subsystem tour
-- [ ] Removing the worked example would break the note (it's not a manual chapter in disguise)
+- [ ] One application/outcome (or one capability-domain), in view from Abstract to Conclusion
+- [ ] Archetype is clear (§1.1): single-build *or* techniques-catalog — not a subsystem tour
+- [ ] If a catalog: one shared conceptual base + every technique a runnable, verified recipe + a decision aid
+- [ ] Removing the worked example(s) would break the note (it's not a manual chapter in disguise)
+- [ ] Mechanism the manual under-documents was added to the manual and cited, not grown into the note
 
 **Structure**
 - [ ] Flow is orient → concept → mechanism → build → verify → adapt → consolidate
@@ -219,4 +236,4 @@ A recreation re-derives every number against P2 silicon and notes where a P1 idi
 
 ---
 
-*Version 1.0 — initial app-note creation guide. Genre model: Parallax P1 application notes (AN001/004/008/013/014, ingested 2026-06-27). Pedagogical layer added per §3. Companion: `APP-NOTE-VOICE-GUIDE.md`.*
+*Version 1.1 — adds the techniques-catalog archetype + its two guardrails and the decomposition rule (§1.1), surfaced by the P2AN000 instrumentation-ADC note. v1.0: initial app-note creation guide. Genre model: Parallax P1 application notes (AN001/004/008/013/014, ingested 2026-06-27). Pedagogical layer per §3. Companion: `APP-NOTE-VOICE-GUIDE.md`.*
