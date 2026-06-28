@@ -11,10 +11,30 @@
 Every official document has three parallel folders with the **same canonical name**:
 
 ```
-manuals/[doc-name]/          ← CONTENT AUTHORING (authoritative)
-workspace/[doc-name]/        ← PRODUCTION PREPARATION
-outbound/[doc-name]/         ← STAGING FOR PDF FORGE
+<authoring-tree>/[doc-name]/   ← CONTENT AUTHORING (authoritative)
+workspace/[doc-name]/          ← PRODUCTION PREPARATION
+outbound/[doc-name]/           ← STAGING FOR PDF FORGE
 ```
+
+**All three document classes use this same rule** — only the authoring tree differs:
+
+| Class | Authoring tree (`<authoring-tree>/`) | Example doc-name |
+|-------|--------------------------------------|------------------|
+| Manual | `manuals/` | `p2-streamer-programming-guide` |
+| Application note | `app-notes/` | `P2AN000` |
+| Datasheet | `datasheets/` | `P2-Eval-HUB75-Adapter-Datasheet` |
+
+`workspace/` and `outbound/` are **single flat trees keyed by doc-name**, shared
+across all three classes — which is what makes the production tooling
+(`prepare-manual` / `release-manual` / `forge-test`) document-class-agnostic: it
+resolves the three folders by canonical name regardless of class. An app note or
+datasheet enters production by gaining `workspace/<name>/` + `outbound/<name>/`
+entries, exactly as a manual does. A doc whose opus-master lives outside `manuals/`
+bridges to the shared workspace via its `assemble-manual.sh` (whose `OPUS_MASTER`
+path points into the right authoring tree). App notes additionally use the shared
+`p2kb-platform-*` stack with a thin `p2kb-appnote-*` class layer (cover keeps the
+family artwork; the manuals' Parts/Chapters cover box is repurposed to an app-note
+"What You'll Build" box). P2AN000 is the pilot (2026-06-28).
 
 **Canonical names** are established when a document is created and never change:
 - `p2-assembly-language-manual`

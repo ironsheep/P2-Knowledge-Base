@@ -186,7 +186,14 @@ The **opus-master is canonical** — the production workspace render is generate
 
 ### 6.3 Production
 
-App notes are short and use the **shared P2KB platform stack** (the same `p2kb-platform-*` templates/filters the twin manuals consume), via the standard `prepare-manual` → PDF Forge path. Specifics (template selection, cover, code-line budget K) are settled when the first note is rendered; the default expectation is **inherit the platform K = 76** and the platform code-box family unless a note diverges its code font (it should not). The cross-reference filter (clickable Chapter/§ refs) is adopted per the platform crossref-filter tracker.
+App notes are short and use the **shared P2KB platform stack** (the same `p2kb-platform-*` templates/filters the twin manuals consume), via the standard `prepare-manual` → PDF Forge path. They follow the **same Three-Folder Rule as the manuals** (see `../PDF-PRODUCTION-ARCHITECTURE.md`): authoring in `app-notes/<name>/opus-master/`, then `workspace/<name>/` + `outbound/<name>/` keyed by canonical name. The opus-master splits into `front-matter.md` (the cover) + the body file; an `assemble-manual.sh` in the workspace concatenates them (its `OPUS_MASTER` path is the bridge from the `app-notes/` tree to the shared workspace).
+
+Production specifics, **settled by the P2AN000 pilot (2026-06-28)**:
+- **Template** — a thin class template `p2kb-appnote-reference.latex` + `p2kb-appnote-local.sty` that loads the shared `p2kb-platform-foundation`/`-content` stack. Future notes clone these. The local layer carries app-note deltas only: unnumbered short-doc headings (`secnumdepth 0`), and `\newunicodechar` substitutes for the four marker emoji (⚠️/💡/🔧/🔍 — absent from IBM Plex; mapped to colored amssymb shapes, matching the platform's missing-glyph pattern).
+- **Cover** — the **same family artwork** (`book-artwork.png`) + title block as the manuals. The manuals' bottom-of-cover Parts/Chapters box is **repurposed** to an app-note **“What You'll Build”** box (the outcome + the technique list + an applies-to line) — a manual's chapter taxonomy does not fit a short, Part-less note.
+- **Code-line budget** — inherit the platform **K = 76** and the platform code-box family; do not diverge the code font.
+- **Marker authoring caveat** — the platform `mnemonic-bold` filter bolds bare PASM2/Spin2 mnemonics even in prose, and its English-word disambiguation is imperfect (it false-bolds e.g. “ones”). Avoid bare mnemonic-words as plain English in app-note prose (write “samples” not “ones”).
+- **Cross-reference filter** — clickable Chapter/§ refs (`p2kb-platform-crossref`) is the planned next adoption per the platform crossref-filter tracker (opt-in, with a visual audit).
 
 Code does **not** wrap; the `prepare-manual` line-length audit flags any source line wider than K. Over-long lines are an authorship defect, fixed in source.
 
