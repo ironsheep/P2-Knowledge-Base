@@ -131,5 +131,5 @@ notes:
   - "Y register sets trigger level for capture initiation"
   - "Useful for capturing signals around specific voltage thresholds"
   - "Can be combined with software buffering for waveform storage"
-  - "Requires P[12:10] = %100 for ADC pin configuration"
+  - "Requires M[12:10] = %100 for ADC pin configuration"
   - "Consult Parallax forums and application notes for detailed usage"

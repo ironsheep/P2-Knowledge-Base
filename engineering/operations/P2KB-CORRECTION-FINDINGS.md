@@ -392,4 +392,45 @@
 
 ---
 
+## Smart-pin ADC X[5:4] encoding root-cause guard (2026-06-28) — F-170
+
+> **Origin:** surfaced by the Smart-Pin ADC Foundation sprint
+> (`engineering/planning/SMART-PIN-ADC-FOUNDATION-AND-P2AN000-SPRINT-PLAN.md` §1/§3) while
+> studying Chip Gracey's "Improved ADC Pin Techniques" thread. Authority = Silicon Doc v35
+> (`engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:816,820-821`), confirmed
+> identical in Spin2 v55. No inference.
+
+### F-170 — ADC mode %11000 X[5:4] sub-mode encoding fixed at its ROOT (ingestion donor) + made un-regressable — `DONE`
+> **Canonical encoding (locked).** `WXPIN` sets the sample/filter mode to **X[5:4]** and the
+> sample period to **POWER(2, X[3:0])** (`part4-smart-pins.txt:816`). The four-row map
+> (`:820-821`): **%00 = SINC2 Sampling · %01 = SINC2 Filtering · %10 = SINC3 Filtering ·
+> %11 = Bitstream capturing.**
+>
+> **Root-cause narrative.** The X[5:4] map was inverted ("%00 = Raw bitstream capture",
+> "%11 = Reserved/unused") for ~6.5 months because the encoding was on **no** verification
+> checklist. Git forensics: the bug was **born** when a mis-authored donor was imported at
+> `e271cab0` (2025-11-29); it **survived** the v1.6.3 "aligned to silicon" pass (`b0f48a88`,
+> which only touched gain constants); it was **fixed in the published file only** at `35344af8`
+> (v1.9.0, 2026-06-13) — but the **upstream ingestion donor was never corrected**, so any
+> "regenerate from catalog" would have re-seeded the inversion downstream (the known donor
+> re-seed trap). A stale 2026-06-12 IOSP Titus cross-audit note (true that day, fixed the next)
+> is what made this sprint suspect the *published* YAML was still broken — it was not.
+>
+> **DONE 2026-06-28 (sprint §1+§3).**
+> (a) **Donor fixed** (`engineering/ingestion/smart-pins-catalog/ingestionSources/mode-11000-adc-internal-clock/smart-pin-11000-adc-internal-clock-concise.yaml`):
+> `bits_5_4`, `x_register_modes`, the `operation`/`timing`/`notes` prose, and the mislabeled
+> code-example comments all aligned to the silicon map (and `P[12:10]`→`M[12:10]` per silicon).
+> (b) **Published verify-locked:** `smart-pin-11000`/`11001` already silicon-correct (v1.9.0)
+> and now match the donor on all four rows; `smart-pin-11010` defers its X-config to the
+> siblings (uses `P_ADC_SCOPE`) and had one `P[12:10]`→`M[12:10]` note aligned.
+> (c) **Durable guard added:** `engineering/tools/validation/audit-adc-encoding.py` asserts the
+> four-row map is identical across the donor, the three published ADC YAMLs, and the Silicon
+> Doc ground-truth string; non-zero exit on any drift, clean error (no false pass) on malformed
+> YAML. Recurrence-tested: reverting the donor's %00 to the old "Raw bitstream" wording makes
+> the guard FAIL (proves it guards the real bug path). The central `release-yamls` pre-publish
+> hook for this guard is logged as a skill-evolution candidate (not a central-skill edit).
+> Verify: `verify-yaml-format.py` 1053/1053 clean, `validate-crossref-keys.py` all resolved.
+
+---
+
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
