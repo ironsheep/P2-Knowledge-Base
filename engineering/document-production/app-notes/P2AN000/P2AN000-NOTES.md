@@ -29,9 +29,9 @@ for IS captured: `research/improved-adc-pin-techniques/code/EightPinADC.spin2`.
 
 | Claim / number / code | Source (EF ledger / P2KB key / pnut_ts / silicon) | Verified |
 |---|---|---|
-| SINC2-manual mode + diff computation | `p2kbArchSmartPin11000AdcInternalClock` (KB) | KB ✓ / re-cert pending |
-| GIO/VIO/pin ratiometric µV math | forum (cgracey) — `research/.../STUDY` §B2 | NOT verified (compile-cert pending) |
-| 3-sample SINC2 flush on source switch | forum (cgracey/evanh) — STUDY §A4 | NOT verified |
+| SINC2-manual mode + diff computation | `p2kbArchSmartPin11000AdcInternalClock` (KB) | KB ✓ / compile ✓ (pnut_ts 1.55, 200 MHz, `-d`) — hardware pending |
+| GIO/VIO/pin ratiometric µV math (`muldiv64`) | IOSP Ch.16 §16.3 + forum (cgracey) STUDY §B2 | compile ✓ (P2AN000 base build) — hardware pending |
+| 3-sample SINC2 flush on source switch | forum (cgracey/evanh) — STUDY §A4 | encoded in base-build `measure` routine; compile ✓ — hardware pending |
 | 15 mV absolute-error limit (resistor mismatch) | forum (cgracey, designer) — STUDY §A6 | designer-stated; not re-measured |
 | _(more as drafted)_ | | |
 
