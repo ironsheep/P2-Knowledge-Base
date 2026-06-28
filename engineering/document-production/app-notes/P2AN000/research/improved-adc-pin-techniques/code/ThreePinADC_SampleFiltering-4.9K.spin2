@@ -1,0 +1,231 @@
+' This program demonstrates using three contiguous I/O pins tied together to form
+' a constant-impedance ADC that is capable of 17-bit conversions.
+'
+' In this example, pins 0,1,2 are ADC inputs and pin 8 is a DAC output for testing.
+' All these pins must be tied together.
+
+
+CON _clkfreq = 320_000_000
+    pinbase = 0
+    'debug_log_size = 10_000_000
+
+VAR ADCsetup[2], Samples[17]
+
+PUB go() | i, s
+
+  debug(`FFT f SIZE 512 400 SAMPLES 1024 RATE 16 COLOR YELLOW 4 YELLOW 5 linesize -2 pos 100 400)
+  debug(`f 'Sig' 0 100_000 380 10 15 yellow 12)
+
+  debug(`SCOPE s size 1024 440 rate 1 samples 1024 dotsize 2 linesize 0 pos 100 1000)
+  debug(`s 'ADC' 0 3_300_000 400 20 15 MAGENTA)		'0..3.3V full scale
+  debug(`s trigger 0 1_600_000 1_700_000)		'must set 'rate 1'
+' debug(`s 'ADC' AUTO 400 20 15 MAGENTA)		'top 10mV
+
+  ADCsetup[0] := pinbase
+  ADCsetup[1] := @Samples
+
+  coginit(newcog, @ADCprogram, @ADCsetup)
+  coginit(newcog, @DACprogram, 8)
+
+  i := 6
+  repeat
+    repeat until s := Samples[i]	'wait for sample
+    Samples[i]~				'clear it
+    debug(`s f `(s))			'show it
+
+
+DAT		org
+
+ADCprogram	rdlong	PinA,ptra[0]		'get pin variables
+		mov	PinB,PinA
+		add	PinB,#1
+		mov	PinC,PinA
+		add	PinC,#2
+		mov	PinABC,PinA
+		add	PinABC,#2<<6
+
+		mov	pa,PinA			'set se1 event to PinA rise
+		or	pa,#%001_000000
+		setse1	pa
+
+		fltl	PinABC			'set pins to SINC2 manual mode, 128 clocks/sample
+		wrpin	SetGio,PinABC
+		wxpin	#%01_0111,PinABC
+		wypin	##160,PinABC
+		drvl	PinABC
+
+		rdlong	SamplePtr,ptra[1]	'get sample ptr
+
+
+LoopADC		mov	Gio,#0			'perform sampling
+		mov	Vio,#0
+		mov	Sig,#0
+
+		mov	cycles,##1		'this controls the resolution and sampling time 1..~10_000
+
+.cycle		wrpin	SetGio,PinA
+		wrpin	SetVio,PinB
+		wrpin	SetSig,PinC
+		call	#Measure
+		add	Gio,MsrA
+		add	Vio,MsrB
+		add	Sig,MsrC
+
+		wrpin	SetVio,PinA
+		wrpin	SetSig,PinB
+		wrpin	SetGio,PinC
+		call	#Measure
+		add	Vio,MsrA
+		add	Sig,MsrB
+		add	Gio,MsrC
+
+		wrpin	SetSig,PinA
+		wrpin	SetGio,PinB
+		wrpin	SetVio,PinC
+		call	#Measure
+		add	Sig,MsrA
+		add	Gio,MsrB
+		add	Vio,MsrC
+
+		djnz	cycles,#.cycle
+
+		drvnot	#15
+
+'debug(udec(Sig, Vio, Gio))
+
+		call	#ComputeSample
+		call	#filter
+
+		jmp	#LoopADC
+
+
+
+Measure		mov	MsrA,#0			'reset measurement accumulators
+		mov	MsrB,#0
+		mov	MsrC,#0
+
+		mov	pa,#3+6-1		'ready for 3 SINC2 stabilizer cycles and 8 measurement cycles
+
+.loop		waitse1				'wait for ADC cycle done
+
+		cmp	iter,#3		wc	'skip first three measurements while SINC2's stabilize
+
+		rdpin	pb,PinA			'get PinA sample and update DiffA
+		sub	pb,DiffA
+		add	DiffA,pb
+		zerox	pb,#26
+	if_nc	add	MsrA,pb
+
+		rdpin	pb,PinB			'get PinB sample and update DiffB
+		sub	pb,DiffB
+		add	DiffB,pb
+		zerox	pb,#26
+	if_nc	add	MsrB,pb
+
+		rdpin	pb,PinC			'get PinC sample and update DiffC
+		sub	pb,DiffC
+		add	DiffC,pb
+		zerox	pb,#26
+	if_nc	add	MsrC,pb
+
+		incmod	iter,pa			'more iterations in this measurement?
+	_ret_	tjnz	iter,#.loop
+debug(uhex_long(MsrA, MsrB, MsrC))
+		ret
+
+ComputeSample	mov	pa,Sig			'compute ABS(Sig - Gio)       (ABS allows for Sig < Gio)
+		sub	pa,Gio
+		abs	pa		wc
+		mov	pb,Vio			'compute (Vio - Gio) << 1     (<< 1 allows Sig > Vio)
+		sub	pb,Gio
+		shl	pb,#1
+		qfrac	pa,pb			'compute r = (ABS(Sig - Gio) << 32) / ((Vio - Gio)  << 1)
+		getqx	pa
+		qmul	pa,##3_300_000<<1	'compute (r * (3_300_000 << 1)) >> 32
+		getqy	pa
+	if_c	neg	pa			'if Sig < Gio then negate result
+	_ret_	mov	sample,pa
+
+
+filter		mov	fb+0,fa+0		'shift sample into stage 0
+		mov	fa+0,sample
+
+		wrlong	sample,SamplePtr	'write stage 0 sample to hub (always)
+
+		add	fctr,#1			'determine filter stage to compute (time/2, time/4, time/8,...)
+		mov	fenc,fctr
+		rev	fenc
+		encod	fenc
+		subr	fenc,#31
+		cmp	fenc,#16	wc	'if N > highest stage, return
+	if_nc	ret
+
+		alts	fenc,#fa+1		'shift old sample within stage N
+		mov	pa,0-0
+		altd	fenc,#fb+1
+		mov	0-0,pa
+		alts	fenc,#fa+0		'add two samples from stage N-1
+		mov	pa,0-0
+		alts	fenc,#fb+0
+		add	pa,0-0
+		altd	fenc,#fa+1		'save new sample in stage N
+		mov	0-0,pa
+		sar	pa,fenc			'compute stage N sample by dividing it by power(2, N+1)
+		sar	pa,#1		wc
+		addx	pa,#0
+		add	fenc,#1			'write stage N sample to hub
+		shl	fenc,#2
+		add	fenc,SamplePtr
+	_ret_	wrlong	pa,fenc
+
+
+
+SetGio		long	%100_000_0000000_00_11000_0
+SetVio		long	%100_001_0000000_00_11000_0
+SetSig		long	%100_011_0000000_00_11000_0
+
+iter		long	0
+
+PinA		res	1
+PinB		res	1
+PinC		res	1
+PinABC		res	1
+
+SamplePtr	res	1
+
+MsrA		res	1
+MsrB		res	1
+MsrC		res	1
+
+DiffA		res	1
+DiffB		res	1
+DiffC		res	1
+
+Gio		res	1
+Vio		res	1
+Sig		res	1
+
+cycles		res	1
+
+fctr		res	1
+fenc		res	1
+fa		res	17
+fb		res	17
+sample		res	1
+
+
+		org
+
+DACprogram	fltl	ptra
+		wrpin	##%10100_00000000_01_00011_0,ptra
+		wxpin	#256,ptra
+		drvl	ptra
+
+.loop		add	daclevel,##1000
+		cmp	daclevel,##1_000_000 frac 3_300_000	wc
+'	if_nc	mov	daclevel,#0
+		getword	pa,daclevel,#1
+	_ret_	wypin	pa,ptra
+		jmp	#.loop
+
+daclevel	res	1

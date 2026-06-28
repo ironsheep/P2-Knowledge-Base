@@ -1,0 +1,215 @@
+'' =================================================================================================
+''
+''   File....... trapadc3.spin2
+''   Purpose.... 
+''               
+''     
+''               This can be done by sampling the output of a continuous
+''               sinc2 accumulator at select times. 
+''               
+''               The sinc modes in the P2 smartpin clear one of 
+''               the accumulators after the output is stored.
+''               This eliminates one differentiation in software. 
+''               
+''               To get a continuous accumulation, we can set the 
+''               sampling period to 1. This nullifies the first
+''               accumulator.  So for a continuous sinc2 accumulator
+''               we must set the smart pin to sinc3 mode. 
+''
+''
+''
+''
+''
+''   Author..... 
+''               Copyright (c) 2024
+''
+''   License.... MIT
+''               -- see below for terms of use
+'' 
+''   E-mail..... 
+''   Started....
+''   Updated.... 
+''
+'' =================================================================================================
+
+
+con { timing }
+ ' _xtlfreq = 24_000_000
+ ' _xtlfreq = 20_000_000
+  _clkfreq = 80_000_000
+
+
+con { terminal }
+
+  BR_TERM  = 230_400                                            ' terminal baud rate
+
+  #0, T_PST, T_ANSI                                             ' terminal types
+
+  T_TYPE = T_PST
+
+
+con { fixed io pins }
+
+  RX1    = 63  { I }                                            ' programming / debug
+  TX1    = 62  { O }
+
+
+  LED2   = 57  { O }                                            ' Eval and Edge LEDs
+  LED1   = 56  { O }
+
+  ADC_PIN = 0
+
+obj
+
+' main                                                          ' * master Spin cog
+  term : "jm_fullduplexserial"                                  ' * serial IO for terminal
+
+
+var
+
+  long  io_pin
+  long  top_width, skirt_width
+  long  fullscale
+
+pub main() | w, x, y, z, a, i, sig, vio, gio, cycles_settle, cycles_skirt, cycles_top 
+
+
+  setup()
+
+  a := 0  
+  term.str( string("Hello World") )
+  term.str( string(",") )
+  term.str( string( 13, 10)  )
+
+  io_pin := 16+4
+  pinstart( io_pin, p_adc | p_adc_1x, (2<<4) | 0 , 1 ) 
+  '_dirl( io_pin )
+  'wrpin( io_pin, p_adc   | p_adc_1x )
+  'wxpin( io_pin, (2<<4) | 0 ) ' SINC3, 1 clock per sample
+  '_dirh( io_pin )
+
+
+  if 0   ' digital pin override test, for full scale validation
+    wrpin( io_pin, p_adc  | p_oe )  ' Digital mode test
+    if 1
+      pinhigh( io_pin )
+    else
+      pinlow( io_pin )
+
+  ' Trapezoidal filter parameters
+  skirt_width:=250  ' each side
+  top_width:=  1500 -skirt_width*2
+  
+'area of trapezoid = height  *   (top + bottom)/2  
+  fullscale := skirt_width * ( (top_width + (top_width + 2*skirt_width))  )/2
+  term.str( string("Calculated full scale value is ") )
+  term.dec( fullscale )
+  term.str( string( 13, 10)  )
+
+  if fullscale>>27  ' If result does not fit in 27 bits
+    term.str( string("Warning! smartpin accumulators may overflow ") )
+    term.str( string( 13, 10)  )
+   
+  ' PASM can only use values in registers
+  cycles_skirt := skirt_width-6
+  cycles_top   := top_width-6
+  cycles_settle := 500
+ 
+  x:=-1_000_000_000
+  y:=1_000_000_000
+  repeat 100  
+    a:=0
+    i:=1_500_000 / (skirt_width*2 + top_width) 
+    'i:=1
+    repeat i  ' average measurements from i samples 
+
+      wrpin( io_pin, p_adc   | p_adc_gio )
+      'wrpin( io_pin, p_adc  | p_adc_1x | p_oe ) 
+      'pinlow( io_pin )
+      'waitx( cycles_settle )
+      waitct( cycles_settle + getct() )
+      gio := trapezoid_sample( io_pin, cycles_skirt, cycles_top )
+
+      wrpin( io_pin, p_adc   | p_adc_1x )
+      'waitx( cycles_settle )
+      waitct( cycles_settle + getct() )
+      sig := trapezoid_sample( io_pin, cycles_skirt, cycles_top )
+
+      wrpin( io_pin, p_adc   | p_adc_vio )
+      'wrpin( io_pin, p_adc  | p_adc_1x | p_oe ) 
+      'pinhigh( io_pin )
+      'waitx( cycles_settle )
+      waitct( cycles_settle + getct() )
+      vio := trapezoid_sample( io_pin, cycles_skirt, cycles_top )
+
+      a += compute_sample( sig, vio, gio, 3_300_000 )
+    z := a/i
+    org
+      fges x,z
+      fles y,z
+    end
+    term.dec(z)
+    term.str( string( 13, 10)  )
+  term.str( string("max,min,vpp,clocks,skirt,top,reps ") )
+  term.str( string( 13, 10)  )
+  term.dec(x)
+  term.str( string(",") )
+  term.dec(y)
+  term.str( string(",") )
+  term.dec(x-y)
+  term.str( string(",") )
+  term.dec( (skirt_width*2 + top_width) *i)
+  term.str( string(",") )
+  term.dec(skirt_width)
+  term.str( string(",") )
+  term.dec(top_width)
+  term.str( string(",") )
+  term.dec(i)
+  term.str( string( 13, 10)  )
+  repeat
+    a:=0
+
+    
+pub compute_sample( sig, vio, gio, vio_uv ) : uv
+
+  org
+                sub     sig,gio
+		sub	vio,gio
+		shl	vio_uv,#1
+
+		abs	sig		wc	'compute ABS(Sig - Gio)       (ABS allows for Sig < Gio)
+		shl	vio,#1			'compute (Vio - Gio) << 1     (<< 1 allows Sig > Vio)
+		qfrac	sig,vio			'compute r = (ABS(Sig - Gio) << 32) / ((Vio - Gio)  << 1)
+		getqx	pa
+		qmul	pa,vio_uv		'compute (r * (3_300_000 << 1)) >> 32
+		getqy	pa
+		negc	uv,pa		'if Sig < Gio then negate result
+   end
+
+pub trapezoid_sample( pin, cycles_skirt, cycles_top ) : sig | x
+    org
+   
+       rdpin   x,pin
+       mov     sig,x
+
+       waitx   cycles_skirt
+       rdpin   x,pin
+       sub     sig,x
+
+       waitx   cycles_top
+       rdpin   x,pin
+       sub     sig,x
+
+       waitx   cycles_skirt
+       rdpin   x,pin
+       add     sig,x
+
+       zerox   sig,#26        ' smart pin accumulators are only 27 bits
+
+    end 
+
+
+pub setup()
+  term.tstart(BR_TERM)                                          ' start terminal io
+
+

@@ -1,0 +1,620 @@
+CON  _clkfreq = 324_000_000/2
+
+PUB Go()
+
+  debug(`SCOPE s size 512 960 samples 512 dotsize 2 linesize 0 pos 400 500)
+  debug(`s 'ADC0' AUTO 100 860 15)
+  debug(`s 'ADC1' AUTO 100 740 15)
+  debug(`s 'ADC2' AUTO 100 620 15)
+  debug(`s 'ADC3' AUTO 100 500 15)
+  debug(`s 'ADC4' AUTO 100 380 15)
+  debug(`s 'ADC5' AUTO 100 260 15)
+  debug(`s 'ADC6' AUTO 100 140 15)
+  debug(`s 'ADC7' AUTO 100 20 15)
+  debug(`s TRIGGER 0 AUTO)
+
+  coginit(newcog, @DACprogram, 8)
+  coginit(newcog, @smartpgm, @bytecodes)
+
+  repeat
+    repeat until long[0]
+    debug(`s `udec_long_array_(0,8))
+    long[0]~
+
+
+DAT		org
+
+DACprogram	fltl	ptra
+		wrpin	##%10100_00000000_01_00011_0,ptra
+		wxpin	#256,ptra
+		drvl	ptra
+
+		mov	daclevel,##1_582_000 frac 3_300_000
+
+.loop		incmod	skipper,#7	wc
+	if_c	add	daclevel,##1
+		cmp	daclevel,##1_592_000 frac 3_300_000	wc
+	if_nc	mov	daclevel,##1_582_000 frac 3_300_000
+		getword	pa,daclevel,#1
+		wypin	pa,ptra
+		jmp	#.loop
+
+skipper		long	0
+daclevel	res	1
+
+
+DAT		orgh
+
+bytecodes	byte	_reset
+		byte	_addpin,0,4
+		byte	_addpin,1,4
+		byte	_addpin,2,4
+		byte	_addpin,3,4
+		byte	_addpin,4,4
+		byte	_addpin,5,4
+		byte	_addpin,6,4
+		byte	_addpin,7,4
+		byte	_start, word 120
+
+
+loop		byte	_gio_adc
+		byte	_add_vio
+		byte	_com_adc
+		byte	_get_dif
+		byte	_wait, word 360
+
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+
+
+		byte	_sig_adc
+		byte	_sub_gio
+		byte	_wait, word 240
+		byte	_get_dif
+		byte	_wait, word 120
+
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+
+
+		byte	_vio_adc
+		byte	_add_sig
+		byte	_avg_adc
+		byte	_wait, word 240
+		byte	_get_dif
+		byte	_wait, word 120
+
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+		byte	_msr_adc
+
+here		byte	_jmpr, word @loop - (@here + 1)
+
+
+
+
+		org
+
+smartpgm	mov	pa,#endcode
+		shl	pa,#2
+		add	pa,ptrb
+
+		setq2	#$100-1
+		rdlong	0,pa
+
+		rdfast	#0,ptra
+
+		push	#$1FF
+	_ret_	setq	#$000
+'
+'
+' Get ADC difs and clear msrs
+'
+get_dif		skip	adc_skip
+		rqpin	Dif7,ADC7
+		rqpin	Dif6,ADC6
+		rqpin	Dif5,ADC5
+		rqpin	Dif4,ADC4
+		rqpin	Dif3,ADC3
+		rqpin	Dif2,ADC2
+		rqpin	Dif1,ADC1
+		rqpin	Dif0,ADC0
+		skip	adc_skip
+		mov	Msr7,#0
+		mov	Msr6,#0
+		mov	Msr5,#0
+		mov	Msr4,#0
+		mov	Msr3,#0
+		mov	Msr2,#0
+		mov	Msr1,#0
+	_ret_	mov	Msr0,#0
+'
+'
+' Get ADC readings
+'
+msr_adc7	rqpin	pa,ADC7			'measure ADCs
+		sub	pa,Dif7
+		add	Dif7,pa
+		zerox	pa,#26
+		add	Msr7,pa
+
+msr_adc6	rqpin	pa,ADC6
+		sub	pa,Dif6
+		add	Dif6,pa
+		zerox	pa,#26
+		add	Msr6,pa
+
+msr_adc5	rqpin	pa,ADC5
+		sub	pa,Dif5
+		add	Dif5,pa
+		zerox	pa,#26
+		add	Msr5,pa
+
+msr_adc4	rqpin	pa,ADC4
+		sub	pa,Dif4
+		add	Dif4,pa
+		zerox	pa,#26
+		add	Msr4,pa
+
+msr_adc3	rqpin	pa,ADC3
+		sub	pa,Dif3
+		add	Dif3,pa
+		zerox	pa,#26
+		add	Msr3,pa
+
+msr_adc2	rqpin	pa,ADC2
+		sub	pa,Dif2
+		add	Dif2,pa
+		zerox	pa,#26
+		add	Msr2,pa
+
+msr_adc1	rqpin	pa,ADC1
+		sub	pa,Dif1
+		add	Dif1,pa
+		zerox	pa,#26
+		add	Msr1,pa
+
+msr_adc0	rqpin	pa,ADC0
+		sub	pa,Dif0
+		add	Dif0,pa
+		zerox	pa,#26
+		add	Msr0,pa
+
+msr_adc		addct1	cnt,adc_clks		'this timing is most critical, so do waitct here
+	_ret_	waitct1				'84+6+x clocks
+'
+'
+' Add Msr into Vio
+'
+add_vio		skip	adc_skip
+		add	Vio7,Msr7
+		add	Vio6,Msr6
+		add	Vio5,Msr5
+		add	Vio4,Msr4
+		add	Vio3,Msr3
+		add	Vio2,Msr2
+		add	Vio1,Msr1
+	_ret_	add	Vio0,Msr0
+'
+'
+' Add Msr into Sig
+'
+add_sig		skip	adc_skip
+		add	Sig7,Msr7
+		add	Sig6,Msr6
+		add	Sig5,Msr5
+		add	Sig4,Msr4
+		add	Sig3,Msr3
+		add	Sig2,Msr2
+		add	Sig1,Msr1
+	_ret_	add	Sig0,Msr0
+'
+'
+' Sub Msr from Vio and Sig
+'
+sub_gio		skip	adc_skip
+		sub	Vio7,Msr7
+		sub	Vio6,Msr6
+		sub	Vio5,Msr5
+		sub	Vio4,Msr4
+		sub	Vio3,Msr3
+		sub	Vio2,Msr2
+		sub	Vio1,Msr1
+		sub	Vio0,Msr0
+		skip	adc_skip
+		sub	Sig7,Msr7
+		sub	Sig6,Msr6
+		sub	Sig5,Msr5
+		sub	Sig4,Msr4
+		sub	Sig3,Msr3
+		sub	Sig2,Msr2
+		sub	Sig1,Msr1
+	_ret_	sub	Sig0,Msr0
+'
+'
+' Compute ADC samples for 8 channels
+'
+com_adc		abs	Sig0		wc	'compute ABS(Sig - Gio)       (ABS allows for Sig < Gio)
+		shl	Vio0,#1			'compute (Vio - Gio) << 1     (<< 1 allows Sig > Vio)
+		bitc	.sum0,#23		'turn ADD into SUB if negative
+		qfrac	Sig0,Vio0		'compute r = (ABS(Sig - Gio) << 32) / ((Vio - Gio)  << 1)
+
+		abs	Sig1		wc
+		shl	Vio1,#1
+		bitc	.sum1,#23
+		qfrac	Sig1,Vio1
+
+		abs	Sig2		wc
+		shl	Vio2,#1
+		bitc	.sum2,#23
+		qfrac	Sig2,Vio2
+
+		abs	Sig3		wc
+		shl	Vio3,#1
+		bitc	.sum3,#23
+		qfrac	Sig3,Vio3
+
+		abs	Sig4		wc
+		shl	Vio4,#1
+		bitc	.sum4,#23
+		qfrac	Sig4,Vio4
+
+		abs	Sig5		wc
+		shl	Vio5,#1
+		bitc	.sum5,#23
+		qfrac	Sig5,Vio5
+
+		abs	Sig6		wc
+		shl	Vio6,#1
+		bitc	.sum6,#23
+		qfrac	Sig6,Vio6
+
+		abs	Sig7		wc
+		shl	Vio7,#1
+		bitc	.sum7,#23
+		qfrac	Sig7,Vio7
+
+		mov	Sig0,#0			'clear old Sig and Vio values
+		mov	Vio0,#0
+		getqx	pa			'compute (r * (3_300_000 << 1)) >> 32
+		qmul	pa,scale2x
+
+		mov	Sig1,#0
+		mov	Vio1,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig2,#0
+		mov	Vio2,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig3,#0
+		mov	Vio3,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig4,#0
+		mov	Vio4,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig5,#0
+		mov	Vio5,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig6,#0
+		mov	Vio6,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		mov	Sig7,#0
+		mov	Vio7,#0
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqy	pa
+.sum0		add	Sam0,pa			'add/sub into/from sample
+
+		getqy	pa
+.sum1		add	Sam1,pa
+
+		getqy	pa
+.sum2		add	Sam2,pa
+
+		getqy	pa
+.sum3		add	Sam3,pa
+
+		getqy	pa
+.sum4		add	Sam4,pa
+
+		getqy	pa
+.sum5		add	Sam5,pa
+
+		getqy	pa
+.sum6		add	Sam6,pa
+
+		getqy	pa
+.sum7	_ret_	add	Sam7,pa			'192+6 clocks
+'
+'
+' Average samples
+'
+avg_adc7	incmod	Cnt7,Lim7	wc
+	if_c	sar	Sam7,Sar7
+	if_c	wrlong	Sam7,#28
+	if_c	mov	Sam7,#0
+
+avg_adc6	incmod	Cnt6,Lim6	wc
+	if_c	sar	Sam6,Sar6
+	if_c	wrlong	Sam6,#24
+	if_c	mov	Sam6,#0
+
+avg_adc5	incmod	Cnt5,Lim5	wc
+	if_c	sar	Sam5,Sar5
+	if_c	wrlong	Sam5,#20
+	if_c	mov	Sam5,#0
+
+avg_adc4	incmod	Cnt4,Lim4	wc
+	if_c	sar	Sam4,Sar4
+	if_c	wrlong	Sam4,#16
+	if_c	mov	Sam4,#0
+
+avg_adc3	incmod	Cnt3,Lim3	wc
+	if_c	sar	Sam3,Sar3
+	if_c	wrlong	Sam3,#12
+	if_c	mov	Sam3,#0
+
+avg_adc2	incmod	Cnt2,Lim2	wc
+	if_c	sar	Sam2,Sar2
+	if_c	wrlong	Sam2,#8
+	if_c	mov	Sam2,#0
+
+avg_adc1	incmod	Cnt1,Lim1	wc
+	if_c	sar	Sam1,Sar1
+	if_c	wrlong	Sam1,#4
+	if_c	mov	Sam1,#0
+
+avg_adc0	incmod	Cnt0,Lim0	wc
+	if_c	sar	Sam0,Sar0
+	if_c	wrlong	Sam0,#0
+	if_c	mov	Sam0,#0
+
+avg_adc		ret
+'
+'
+' Set ADC input to 
+'
+vio_adc		mov	pa,Vio_mode		'a
+sig_adc		mov	pa,Sig_mode		'| b
+gio_adc		mov	pa,Gio_mode		'| | c
+		skip	adc_skip		'a b c
+		wrpin	pa,ADC7
+		wrpin	pa,ADC6
+		wrpin	pa,ADC5
+		wrpin	pa,ADC4
+		wrpin	pa,ADC3
+		wrpin	pa,ADC2
+		wrpin	pa,ADC1
+	_ret_	wrpin	pa,ADC0
+'
+'
+' Wait for next count
+'
+wait		rfword	pa		'wait for next count
+		addct1	cnt,pa
+nop
+		waitct1
+_ret_ drvnot #13
+'
+'
+' Jump relative
+'
+jmpr		rfword	pa		'jump relative
+		signx	pa,#15
+		add	pb,pa
+drvnot #15
+	_ret_	rdfast	#0,pb
+'
+'
+' Reset ADC pin list
+'
+reset		mov	mask_a,#0	'reset pin list
+		mov	mask_b,#0
+	_ret_	mov	pins,#0
+'
+'
+' Add ADC pin to list
+'
+addpin		rfbyte	pa		'get pin
+
+		decod	pb,pa		'set mask bit
+		testb	pa,#5	wc
+	if_nc	or	mask_a,pb
+	if_c	or	mask_b,pb
+
+		altd	pins,#ADC0	'save pin
+		mov	0-0,pa
+
+		rfbyte	pa		'get sampling exponent
+
+		altd	pins,#Sar0	'set sar value
+		mov	0-0,pa
+
+		decod	pa		'set lim value
+		sub	pa,#1
+		altd	pins,#Lim0
+		mov	0-0,pa
+
+		altd	pins,#Cnt0	'clear cnt value
+		mov	0-0,#0
+
+	_ret_	add	pins,#1		'increment pin count
+'
+'
+' Start ADC pins
+'
+start		rfword	adc_clks	'get adc clocks
+
+		mov	pa,pins		'set bc_msr_adc
+		mul	pa,#5
+		subr	pa,#msr_adc
+		wrlut	pa,#_msr_adc
+
+		mov	pa,pins		'set bc_avg_adc
+		mul	pa,#4
+		subr	pa,#avg_adc
+		wrlut	pa,#_avg_adc
+
+		sets	.pin,#ADC0	'init pin pointer
+
+		mov	adc_skip,#$FF	'get skip pattern
+		shr	adc_skip,pins
+
+		andn	dira,mask_a	'reset adc pins
+		andn	dirb,mask_b
+
+		rep	@.r,pins	'configure smart pins for adc
+.pin		mov	pb,ADC0
+		add	.pin,#1
+		wrpin	Gio_mode,pb
+		wxpin	#%01_0000,pb
+		wypin	adc_clks,pb
+.r
+		or	dira,mask_a	'2!	start adc pins
+		or	dirb,mask_b	'2!	smart pin groups are only 2 clocks apart
+
+	_ret_	getct	cnt		'start tracking count
+'
+'
+' Data
+'
+scale2x		long	3_300_000 << 1
+
+Vio_mode	long	%100_001_0000000_00_11000_0
+Sig_mode	long	%100_011_0000000_00_11000_0
+Gio_mode	long	%100_000_0000000_00_11000_0
+
+endcode
+
+mask_a		res	1
+mask_b		res	1
+pins		res	1
+adc_skip	res	1
+adc_clks	res	1
+cnt		res	1
+
+ADC0		res	1
+ADC1		res	1
+ADC2		res	1
+ADC3		res	1
+ADC4		res	1
+ADC5		res	1
+ADC6		res	1
+ADC7		res	1
+
+Sar0		res	1
+Sar1		res	1
+Sar2		res	1
+Sar3		res	1
+Sar4		res	1
+Sar5		res	1
+Sar6		res	1
+Sar7		res	1
+
+Lim0		res	1
+Lim1		res	1
+Lim2		res	1
+Lim3		res	1
+Lim4		res	1
+Lim5		res	1
+Lim6		res	1
+Lim7		res	1
+
+Cnt0		res	1
+Cnt1		res	1
+Cnt2		res	1
+Cnt3		res	1
+Cnt4		res	1
+Cnt5		res	1
+Cnt6		res	1
+Cnt7		res	1
+
+Dif0		res	1
+Dif1		res	1
+Dif2		res	1
+Dif3		res	1
+Dif4		res	1
+Dif5		res	1
+Dif6		res	1
+Dif7		res	1
+
+Msr0		res	1
+Msr1		res	1
+Msr2		res	1
+Msr3		res	1
+Msr4		res	1
+Msr5		res	1
+Msr6		res	1
+Msr7		res	1
+
+Sig0		res	1
+Sig1		res	1
+Sig2		res	1
+Sig3		res	1
+Sig4		res	1
+Sig5		res	1
+Sig6		res	1
+Sig7		res	1
+
+Vio0		res	1
+Vio1		res	1
+Vio2		res	1
+Vio3		res	1
+Vio4		res	1
+Vio5		res	1
+Vio6		res	1
+Vio7		res	1
+
+Sam0		res	1
+Sam1		res	1
+Sam2		res	1
+Sam3		res	1
+Sam4		res	1
+Sam5		res	1
+Sam6		res	1
+Sam7		res	1
+
+
+		org	$000 {actually $200}		'	bytecodes, appear immediately after 'endcode' in memory
+
+_msr_adc	long	msr_adc				'	measure adc 7..0
+_avg_adc	long	avg_adc				'	average adc 7..0
+_vio_adc	long	vio_adc	  |        %0110 << 10	'	set Vio adc 7..0
+_sig_adc	long	sig_adc	  |         %010 << 10	'	set Sig adc 7..0
+_gio_adc	long	gio_adc	  |           %0 << 10	'	set Gio adc 7..0
+_get_dif	long	get_dif				'	get dif adc 7..0
+_add_vio	long	add_vio				'	add Msr into Vio 7..0
+_add_sig	long	add_sig				'	add Msr into Sig 7..0
+_sub_gio	long	sub_gio				'	sub Msr from Vio/Sig 7..0
+_com_adc	long	com_adc				'	compute ADC Sams for 7..0
+
+_wait		long	wait				'	wait for relative count (rfword)
+_jmpr		long	jmpr				'	jump relative (rfword)
+
+_reset		long	reset				'	reset ADC pin list
+_addpin		long	addpin				'	add ADC pin (rfbyte, rfbyte)
+_start		long	start				'	start ADCs (rfword)
+s

@@ -1,0 +1,434 @@
+' This program demonstrates using three contiguous I/O pins tied together to form
+' a constant-impedance ADC that is capable of 17-bit conversions.
+'
+' In this example, pins 0,1,2 are ADC inputs and pin 8 is a DAC output for testing.
+' All these pins must be tied together. This requires PNut_v43.
+
+
+CON _clkfreq = 320_000_000
+    pinbase = 0
+    'debug_log_size = 10_000_000
+
+VAR ADCsetup[2], Samples[16], SBuff[1024]
+
+PUB go() | i, s, p
+  i,s := "A","B"
+  debug(`FFT f SIZE 512 400 SAMPLES 1024 RATE 16 COLOR YELLOW 4 YELLOW 5 linesize -2 pos 100 400)
+  debug(`f 'Sig' 0 100_000 380 10 15 yellow 12)
+
+  debug(`SCOPE s size 1024 440 rate 4 samples 1024 dotsize 2 linesize 0 pos 100 1000)
+' debug(`s 'ADC' 0 3_300_000 400 20 15 MAGENTA)		'0..3.3V full scale
+' debug(`s trigger 0 1_600_000 1_700_000)		'must set 'rate 1'
+ debug(`s 'ADC' AUTO 400 20 15 MAGENTA)		'top 10mV
+
+  ADCsetup[0] := pinbase
+  ADCsetup[1] := @Samples
+
+  coginit(newcog, @ADCprogram, @ADCsetup)
+  coginit(newcog, @DACprogram, 8)
+
+  i := 12
+  repeat
+    repeat until s := Samples[i]	'wait for sample
+    Samples[i]~				'clear it
+    debug(`s f `$(s))			'show it
+
+{
+  repeat
+    p~
+    repeat 1024
+      repeat until s := Samples[i]	'wait for sample
+      Samples[i]~			'clear it
+      long[@SBuff][p++] := s
+    p~
+    repeat 1024
+      debug(`s f `$(long[@SBuff][p++]))	'show it
+}
+
+DAT		org
+
+ADCprogram	rdlong	PinA,ptra[0]		'get pin variables
+		mov	PinB,PinA
+		add	PinB,#1
+		mov	PinC,PinA
+		add	PinC,#2
+		mov	PinABC,PinA
+		add	PinABC,#2<<6
+
+		mov	pa,PinA			'set se1 event to PinA rise
+		or	pa,#%001_000000
+		setse1	pa
+
+		fltl	PinABC			'set pins to SINC2 manual mode, 128 clocks/sample
+		wrpin	SetGio,PinABC
+		wxpin	#%01_0111,PinABC
+		wypin	##160,PinABC
+		drvl	PinABC
+
+		rdlong	SamplePtr,ptra[1]	'get sample ptr
+
+
+LoopADC		mov	Vio,#0			'perform sampling
+		mov	Sig,#0
+
+		mov	cycles,##1		'this controls the resolution and sampling time 1..~10_000
+
+.cycle		wrpin	SetGio,PinA
+		wrpin	SetVio,PinB
+		wrpin	SetSig,PinC
+		call	#Measure
+		add	Vio,MsrB
+		sub	Vio,MsrA
+		add	Sig,MsrC
+		sub	Sig,MsrA
+
+		wrpin	SetVio,PinA
+		wrpin	SetSig,PinB
+		wrpin	SetGio,PinC
+		call	#Measure
+		add	Vio,MsrA
+		sub	Vio,MsrC
+		add	Sig,MsrB
+		sub	Sig,MsrC
+
+		wrpin	SetSig,PinA
+		wrpin	SetGio,PinB
+		wrpin	SetVio,PinC
+		call	#Measure
+		add	Vio,MsrC
+		sub	Vio,MsrB
+		add	Sig,MsrA
+		sub	Sig,MsrB
+
+		djnz	cycles,#.cycle
+
+		drvnot	#15
+
+'debug(udec(Sig, Vio, Gio))
+
+		call	#ComputeSample
+		call	#filter
+'debug(uhex(fa+12,fa+13,fa+14,fa+15,fa+16))
+
+		jmp	#LoopADC
+
+
+
+Measure		mov	MsrA,#0			'reset measurement accumulators
+		mov	MsrB,#0
+		mov	MsrC,#0
+
+		mov	pa,#3+9-1		'ready for 3 SINC2 stabilizer cycles and 8 measurement cycles
+
+.loop		waitse1				'wait for ADC cycle done
+
+		cmp	iter,#3		wc	'skip first three measurements while SINC2's stabilize
+
+		rdpin	pb,PinA			'get PinA sample and update DiffA
+		sub	pb,DiffA
+		add	DiffA,pb
+		zerox	pb,#26
+	if_nc	add	MsrA,pb
+
+		rdpin	pb,PinB			'get PinB sample and update DiffB
+		sub	pb,DiffB
+		add	DiffB,pb
+		zerox	pb,#26
+	if_nc	add	MsrB,pb
+
+		rdpin	pb,PinC			'get PinC sample and update DiffC
+		sub	pb,DiffC
+		add	DiffC,pb
+		zerox	pb,#26
+	if_nc	add	MsrC,pb
+
+		incmod	iter,pa			'more iterations in this measurement?
+	_ret_	tjnz	iter,#.loop
+debug(uhex_long(MsrA, MsrB, MsrC))
+		ret
+
+ComputeSample	abs	Sig		wc	'compute ABS(Sig - Gio)       (ABS allows for Sig < Gio)
+		shl	Vio,#1			'compute (Vio - Gio) << 1     (<< 1 allows Sig > Vio)
+		qfrac	Sig,Vio			'compute r = (ABS(Sig - Gio) << 32) / ((Vio - Gio)  << 1)
+		getqx	pa
+		qmul	pa,scale2x		'compute (r * (3_300_000 << 1)) >> 32
+		getqy	pa
+	_ret_	negc	sample,pa		'if Sig < Gio then negate result
+
+
+{
+filter2		incmod	scnt,slim	wc	'time to output a sample?
+	if_c	sar	samp,ssar
+	if_c	mov	sres,samp
+	if_c	mov	samp,#0
+}
+filter		wrlong	sample,SamplePtr	'write stage 0 sample to hub (always)
+
+		mov	fb,fa			'shift sample into stage 0
+		mov	fa,sample
+
+		add	fctr,#1			'determine filter stage to compute (time/2, time/4, time/8,...)
+		mov	pa,fctr
+		rev	pa
+		encod	pa
+		subr	pa,#32
+		cmp	pa,#16		wc	'if N > highest stage, return
+	if_nc	ret
+
+		alts	pa,#fa			'shift old sample within stage N
+		mov	pb,0-0
+		altd	pa,#fb
+		mov	0-0,pb
+		alts	pa,#fa-1		'add two samples from stage N-1
+		mov	pb,0-0
+		alts	pa,#fb-1
+		add	pb,0-0
+		altd	pa,#fa			'save new sample in stage N
+		mov	0-0,pb
+		sar	pb,pa		wc	'compute stage N sample by dividing it by power(2,N)
+		addx	pb,#0
+		shl	pa,#2			'write stage N sample to hub
+		add	pa,SamplePtr
+	_ret_	wrlong	pb,pa
+
+
+
+SetGio		long	%100_000_0000000_00_11000_0
+SetVio		long	%100_001_0000000_00_11000_0
+SetSig		long	%100_011_0000000_00_11000_0
+
+scale2x		long	3_300_000 << 1
+
+iter		long	0
+
+PinA		res	1
+PinB		res	1
+PinC		res	1
+PinABC		res	1
+
+SamplePtr	res	1
+
+MsrA		res	1
+MsrB		res	1
+MsrC		res	1
+
+DiffA		res	1
+DiffB		res	1
+DiffC		res	1
+
+Vio		res	1
+Sig		res	1
+
+cycles		res	1
+
+sample		res	1
+fctr		res	1
+fa		res	16
+fb		res	16
+
+
+		org
+
+DACprogram	fltl	ptra
+		wrpin	##%10100_00000000_01_00011_0,ptra
+		wxpin	#256,ptra
+		drvl	ptra
+
+.loop		add	daclevel,##3
+		cmp	daclevel,##805_664 frac 3_300_000	wc
+	if_nc	mov	daclevel,#0
+		getword	pa,daclevel,#1
+		wypin	pa,ptra
+		jmp	#.loop
+
+daclevel	res	1
+
+
+{
+
+
+
+ComputeSamples
+		abs	Sig0		wc	'compute ABS(Sig - Gio)       (ABS allows for Sig < Gio)
+		shl	Vio0,#1			'compute (Vio - Gio) << 1     (<< 1 allows Sig > Vio)
+		bitc	.sum0,#23		'turn ADD into SUB if negative
+		qfrac	Sig0,Vio0		'compute r = (ABS(Sig - Gio) << 32) / ((Vio - Gio)  << 1)
+
+		abs	Sig1		wc
+		shl	Vio1,#1
+		bitc	.sum1,#23
+		qfrac	Sig1,Vio1
+
+		abs	Sig2		wc
+		shl	Vio2,#1
+		bitc	.sum2,#23
+		qfrac	Sig2,Vio2
+
+		abs	Sig3		wc
+		shl	Vio3,#1
+		bitc	.sum3,#23
+		qfrac	Sig3,Vio3
+
+		abs	Sig4		wc
+		shl	Vio4,#1
+		bitc	.sum4,#23
+		qfrac	Sig4,Vio4
+
+		abs	Sig5		wc
+		shl	Vio5,#1
+		bitc	.sum5,#23
+		qfrac	Sig5,Vio5
+
+		abs	Sig6		wc
+		shl	Vio6,#1
+		bitc	.sum6,#23
+		qfrac	Sig6,Vio6
+
+		abs	Sig7		wc
+		shl	Vio7,#1
+		bitc	.sum7,#23
+		qfrac	Sig7,Vio7
+
+		getqx	pa			'compute (r * (3_300_000 << 1)) >> 32
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqx	pa
+		qmul	pa,scale2x
+
+		getqy	pa
+.sum0		add	Sample0,pa		'add/sub into/from sample
+
+		getqy	pa
+.sum1		add	Sample1,pa
+
+		getqy	pa
+.sum2		add	Sample2,pa
+
+		getqy	pa
+.sum3		add	Sample3,pa
+
+		getqy	pa
+.sum4		add	Sample4,pa
+
+		getqy	pa
+.sum5		add	Sample5,pa
+
+		getqy	pa
+.sum6		add	Sample6,pa
+
+		getqy	pa
+.sum7	_ret_	add	Sample7,pa		'192 clocks
+
+
+
+msr
+msr
+msr
+msr
+msr
+msr
+msr
+msr
+msr
+msr
+compute
+
+
+
+
+read_adcs	rdpin	pa,ADC0			'read ADCs, update Diffs, sum Msrs
+		sub	pa,Diff0
+		add	Diff0,pa
+		zerox	pa,#26
+		add	Msr0,pa
+
+		rdpin	pa,ADC1
+		sub	pa,Diff1
+		add	Diff1,pa
+		zerox	pa,#26
+		add	Msr1,pa
+
+		rdpin	pa,ADC2
+		sub	pa,Diff2
+		add	Diff2,pa
+		zerox	pa,#26
+		add	Msr2,pa
+
+		rdpin	pa,ADC3
+		sub	pa,Diff3
+		add	Diff3,pa
+		zerox	pa,#26
+		add	Msr3,pa
+
+		rdpin	pa,ADC4
+		sub	pa,Diff4
+		add	Diff4,pa
+		zerox	pa,#26
+		add	Msr4,pa
+
+		rdpin	pa,ADC5
+		sub	pa,Diff5
+		add	Diff5,pa
+		zerox	pa,#26
+		add	Msr5,pa
+
+		rdpin	pa,ADC6
+		sub	pa,Diff6
+		add	Diff6,pa
+		zerox	pa,#26
+		add	Msr6,pa
+
+		rdpin	pa,ADC7
+		sub	pa,Diff7
+		add	Diff7,pa
+		zerox	pa,#26
+	_ret_	add	Msr7,pa
+
+
+
+		org	$3C0
+
+
+
+Cycle	|	0	1	2	|	3	4	5	|
+P0 ADC	|	Vio	Gio	Pin	|	Vio	Gio	Pin	|
+P1 ADC	|	Gio	Pin	Vio	|	Gio	Pin	Vio	|
+P2 ADC	|	Pin	Vio	Gio	|	Pin	Vio	Gio	|
+		-------------------		-------------------	
+		sum (Pin-Gio)	/		sum (Pin-Gio)	/	
+		sum (Vio-Gio)	*		sum (Vio-Gio)	*	
+		3_300_000 = uV sample		3_300_000 = uV sample	
+
+
+	hex := lookupz(dig : "0123456789ABCDEF")
+	hex := lookupz(dig : "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F")
+
+	hex := lookupz(dig : "0".."9", "A".."F")
+  x := `ABCD`
+	case x
+	  `Zero`  :	"W+"
+	  %"One"  :
+	  %"Two"  :
+	  %"Thre" :
+	  %"Four" :
+	  %"Five" :
+
+}

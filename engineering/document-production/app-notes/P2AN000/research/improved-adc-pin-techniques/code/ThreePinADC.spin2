@@ -1,0 +1,199 @@
+' This program demonstrates using three contiguous I/O pins tied together to form
+' a constant-impedance instrumentation ADC that is capable of 17-bit conversions.
+
+
+con _clkfreq = 320_000_000
+    pinbase = 0
+    samples = 1200				'1200, 120, or 12
+
+pub go() | i
+
+  debug(`SCOPE s size 1200 1000 rate 12 samples `(samples) dotsize 2 linesize 0 pos 100 100)
+  debug(`s 'ADC' 0 3_300_000 960 20 15 MAGENTA)		'0..3.3V full scale
+' debug(`s 'ADC' 0 20_000 960 20 15 MAGENTA)		'bottom 20mV
+' debug(`s 'ADC' 3_280_000 3_300_000 960 20 15 MAGENTA)	'top 20mV
+
+  coginit(newcog, @ADCprogram, pinbase)
+
+  repeat until byte[$FFFF]
+  repeat samples with i
+    debug(`s `(long[$10000][i]))
+
+
+DAT		org
+
+ADCprogram	mov	PinA,ptra		'get pin variables
+		mov	PinB,ptra
+		add	PinB,#1
+		mov	PinC,ptra
+		add	PinC,#2
+		mov	PinABC,PinA
+		add	PinABC,#2<<6
+
+		mov	pa,PinA			'set se1 event to PinA rise
+		or	pa,#%001_000000
+		setse1	pa
+
+		fltl	PinABC			'set pins to SINC2 manual mode, 128 clocks/sample
+		wrpin	SetGio,PinABC
+		wxpin	#%01_0111,PinABC
+		drvl	PinABC
+
+		setq	##$2000-1		'clear filter taps
+		wrlong	#0,##$08000
+
+		wrfast	#0,##$10000		'ready to write samples
+
+
+LoopADC		mov	Gio,#0			'perform sampling
+		mov	Vio,#0
+		mov	Sig,#0
+
+		mov	cycles,##1		'this controls the resolution and sampling time 1..~10_000
+
+.cycle		wrpin	SetGio,PinA
+		wrpin	SetVio,PinB
+		wrpin	SetSig,PinC
+		call	#Measure
+		add	Gio,MsrA
+		add	Vio,MsrB
+		add	Sig,MsrC
+
+		wrpin	SetVio,PinA
+		wrpin	SetSig,PinB
+		wrpin	SetGio,PinC
+		call	#Measure
+		add	Vio,MsrA
+		add	Sig,MsrB
+		add	Gio,MsrC
+
+		wrpin	SetSig,PinA
+		wrpin	SetGio,PinB
+		wrpin	SetVio,PinC
+		call	#Measure
+		add	Sig,MsrA
+		add	Gio,MsrB
+		add	Vio,MsrC
+
+		djnz	cycles,#.cycle
+
+		call	#ComputeSample
+		call	#OutputSample
+
+		drvnot #15			'show sample rate for scope
+
+		djnz	many,#LoopADC
+		wrbyte	#1,##$0FFFF
+		jmp	#$
+
+many		long	samples
+
+
+
+Measure		mov	MsrA,#0			'reset measurement accumulators
+		mov	MsrB,#0
+		mov	MsrC,#0
+
+		mov	pa,#3+8-1		'ready for 3 SINC2 stabilizer cycles and 8 measurement cycles
+
+.loop		waitse1				'wait for ADC cycle done
+
+		cmp	iter,#3		wc	'skip first three measurements while SINC2's stabilize
+
+		rdpin	pb,PinA			'get PinA sample and update DiffA
+		sub	pb,DiffA
+		add	DiffA,pb
+		zerox	pb,#26
+	if_nc	add	MsrA,pb
+
+		rdpin	pb,PinB			'get PinB sample and update DiffB
+		sub	pb,DiffB
+		add	DiffB,pb
+		zerox	pb,#26
+	if_nc	add	MsrB,pb
+
+		rdpin	pb,PinC			'get PinC sample and update DiffC
+		sub	pb,DiffC
+		add	DiffC,pb
+		zerox	pb,#26
+	if_nc	add	MsrC,pb
+
+		incmod	iter,pa			'more iterations in this measurement?
+	_ret_	tjnz	iter,#.loop
+
+
+
+ComputeSample	mov	pa,Vio			'compute (Vio - Gio)
+		sub	pa,Gio
+		encod	shift,pa		'msb justify
+		subr	shift,#31
+		shl	pa,shift
+		qfrac	##3_300_000<<9,pa	'compute (3_300_000 / (Vio - GIO)) to 32-bit precision
+		getqx	pb
+		mov	pa,Sig			'compute (Sig - Gio)
+		sub	pa,Gio		wc
+	if_c	neg	pa			'if negative, make positive for QMUL
+		qmul	pa,pb			'compute (Sig - Gio) * (3_300_000 / (Vio - GIO))
+		getqx	pa
+		getqy	pb
+	if_c	not	pa			'negate product? NOT is sufficient
+	if_c	not	pb
+		subr	shift,#9	wcz	'determine shift needed, if any
+  if_nz_and_nc	sar	pb,shift		'shift right?
+  if_nz_and_c	shr	pa,shift		'shift left?
+  if_nz_and_c	subr	shift,#32
+  if_nz_and_c	shl	pb,shift
+  if_nz_and_c	or	pb,pa
+	_ret_	mov	sample,pb
+
+
+OutputSample	call	#filter			'output sample after running through filter
+	_ret_	wflong	sample
+
+
+filter	_ret_	tjnz	filtexp,#.go		'moving-boxcar averaging filter
+.go		mov	pa,tap
+		shl	pa,#2
+		add	pa,##$08000
+		rdlong	pb,pa
+		sub	tapsum,pb
+		add	tapsum,sample
+		wrlong	sample,pa
+		add	tap,#1
+		testb	tap,filtexp	wc
+	if_c	mov	tap,#0
+		mov	sample,tapsum
+		sar	sample,filtexp	wc
+	_ret_	addx	sample,#0
+
+
+SetGio		long	%100_000_0000000_00_11000_0
+SetVio		long	%100_001_0000000_00_11000_0
+SetSig		long	%100_011_0000000_00_11000_0
+
+filtexp		long	0			'filter setting 0..13, averages power(2,filtexp) samples
+tapsum		long	0
+tap		long	0
+
+iter		long	0
+
+PinA		res	1
+PinB		res	1
+PinC		res	1
+PinABC		res	1
+
+MsrA		res	1
+MsrB		res	1
+MsrC		res	1
+
+DiffA		res	1
+DiffB		res	1
+DiffC		res	1
+
+Gio		res	1
+Vio		res	1
+Sig		res	1
+
+cycles		res	1
+shift		res	1
+sample		res	1
