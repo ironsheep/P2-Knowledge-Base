@@ -550,6 +550,8 @@ From this entry:
 - **C flag:** Set if addition overflows (unsigned carry)
 - **Z flag:** Set if result is zero
 
+Some entries include one element this one does not: an **Operation:** line — exact pseudocode of the instruction's effect, shown only when the behavior is not obvious from the description. ADD needs none; "add two unsigned values" says everything. ADDX, which extends the add across multiple longs, carries **Operation:** `D = D + S + C; Z = Z AND (result==0)` to make the carry-in and the multi-long zero handling explicit. An Operation: line is a signal that the precise mechanics are worth a close read.
+
 ### 2.8.4 Using Categories for Discovery
 
 Instructions are grouped by category in Appendix C. When looking for "an instruction that does X," consult the categorical index:

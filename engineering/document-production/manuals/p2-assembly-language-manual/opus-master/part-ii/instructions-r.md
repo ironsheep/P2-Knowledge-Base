@@ -448,7 +448,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution to maintain timing precision. REP adds no per-iteration overhead, so it suits tight timing-critical loops.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution—including debug interrupts that ordinary masking cannot hold off—to maintain timing precision and keep the repeated block atomic. A REP block of RDLONG/WRLONG transfers is therefore an interrupt-atomic, cog-driven block move (the blocking counterpart to the streamer's autonomous transfer; see Chapter 1). REP adds no per-iteration overhead, so it suits tight timing-critical loops.
 
 **Critical Restrictions:**
 

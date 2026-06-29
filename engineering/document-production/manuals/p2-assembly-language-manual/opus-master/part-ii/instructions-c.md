@@ -265,6 +265,8 @@ Compare Unsigned
 
 **CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
+**Operation:** `C = borrow of (D - S)`; `Z = (D == S)`
+
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
 - Dest is the register containing the value to compare with that of Src.

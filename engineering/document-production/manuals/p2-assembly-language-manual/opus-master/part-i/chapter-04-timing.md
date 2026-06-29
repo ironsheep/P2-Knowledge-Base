@@ -626,7 +626,7 @@ Cog mode (§1.6.1) executes from the cog's local RAM, so instruction fetch never
 
 ### 4.8.2 Hub Execution Mode
 
-Hub mode (§1.6.3) executes from hub RAM, lifting the 512-long cog limit at the cost of a branch-refill penalty—sequential throughput is unchanged. Straight-line code runs at 2 cycles per instruction, identical to cog mode: the (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The penalty falls entirely on branches—a taken branch forces a FIFO refill costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
+Hub mode (§1.6.2) executes from hub RAM, lifting the 512-long cog limit at the cost of a branch-refill penalty—sequential throughput is unchanged. Straight-line code runs at 2 cycles per instruction, identical to cog mode: the (cogs+11) = 19-stage prefetch FIFO streams instructions ahead of execution, hiding hub latency so there is no per-instruction hub-window wait. The penalty falls entirely on branches—a taken branch forces a FIFO refill costing a minimum of 13 clocks (one more if the target is not long-aligned), versus 4 clocks for a cog-mode branch.
 
 Despite that penalty, hub mode remains the right choice in several cases:
 

@@ -42,6 +42,16 @@ audit doctrine:
   the `yaml-knowledge-base-maintenance` agent. (See
   [[project_p2kb_corrections_register]].) A manual-only finding stays in
   the document's own inventory / `audit/` folder.
+- **Pull in the manual's punch-list.** Updating a manual is the moment to
+  clear its deferred nits, not just the change that triggered the pass — a
+  render is happening anyway, so queued fixes should ride along. Read the
+  manual's `workspace/<slug>/PUNCH-LIST.md` (and scan the cross-manual
+  `engineering/document-production/PUNCH-LIST.md` for items scoped to this
+  manual). Fold every **OPEN** item that fits the current batch into this
+  pass's inventory; an item genuinely out of scope stays on the list with a
+  one-line why. This is the batching discipline
+  ([[feedback_batch_and_verify_workflow]]) applied to the standing backlog,
+  not just this cycle's findings.
 
 ## Augments the fix step — apply each fix in the correct tree
 

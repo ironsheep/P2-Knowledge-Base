@@ -161,6 +161,12 @@ Other hub-related instructions include lock instructions (`LOCKNEW`, `LOCKRET`, 
 
 The CORDIC coprocessor also interacts with hub memory. CORDIC operations can read operands from and write results to hub addresses, enabling efficient processing of large datasets stored in hub RAM.
 
+### 1.4.4 Moving Hub Data: the Cog and the Streamer
+
+The hub instructions above are *cog-driven*: the cog issues each RDLONG or WRLONG and waits for its hub window, so the transfer occupies—blocks—the cog while it runs. A SETQ burst (§1.4.3) is the fast cog-driven path, moving one long per clock after the initial window. Wrapping a transfer loop in a `REP` block (Chapter 4) makes it interrupt-atomic: REP shields its repeated instructions from interrupts—including debug interrupts that ordinary masking cannot hold off—so the whole block runs uninterrupted, at the cost of added interrupt latency for its duration.
+
+Alongside this cog-driven path, each cog has its own **streamer**: a small engine that moves data between hub memory and the pins, DACs, or ADC inputs on its own, at a rate the program sets, without the cog's further involvement. If you have used DMA before, the streamer is a close cousin of a DMA channel—with the additions that it paces transfers to an exact rate and can reshape data as it moves; if you have not, it is simply hardware that moves a stream of data while the cog does other work. The streamer shares the cog's FIFO with hub execution and the RDFAST/WRFAST instructions, so only one of those uses is active at a time. The streamer is covered in Chapter 4 and, in depth, in the *P2 Streamer Programming Guide*.
+
 
 ## 1.5 The Execution Pipeline
 
@@ -181,29 +187,25 @@ Register indirection instructions (ALTS, ALTD, ALTR, ALTB, ALTI) perform dynamic
 
 ## 1.6 Execution Modes
 
-The P2 supports three execution modes based on the program counter address, each offering different trade-offs between speed and capacity. Programs can use any mode exclusively or mix all three modes within a single application.
+The P2 names three execution modes by the program counter's address range. The first two—cog execution and LUT execution—are mechanically identical: both run from the cog's own RAM at a fixed two clocks per instruction with no FIFO involved, and the program counter rolls from cog RAM straight into LUT RAM (from $1FF to $200) with no branch and no penalty. Treat them as one contiguous 1024-long fast execution space. The real divide is the third mode—hub execution—where the cog fetches instructions through the FIFO and timing becomes variable. Most programs combine the fast cog/LUT space with hub execution—time-critical code in cog/LUT, bulk code in hub—moving between them by branching (§1.6.3).
 
 | Mode | PC Range | Characteristics |
 |------|----------|----------------|
-| Cog Execution | $00000-$001FF | Fastest, 2 clocks/instruction, 512 longs |
-| LUT Execution | $00200-$003FF | Fast, 2 clocks/instruction, 512 longs overflow |
+| Cog Execution | $00000-$001FF | Fast: 2 clocks/instruction, 512 longs |
+| LUT Execution | $00200-$003FF | Fast: 2 clocks/instruction, continuous with cog RAM |
 | Hub Execution | $00400-$7FFFF | Largest capacity, variable timing, uses FIFO |
 
-### 1.6.1 Cog Execution Mode
+Cog and LUT execution differ only in which half of the fast space holds the code; they carry no speed or behavioral distinction, and branching freely between them costs nothing. What changes performance is crossing into hub execution: a branch to a hub address takes at least 13 clocks while the FIFO refills and the pipeline reloads. The `REP` instruction sidesteps even ordinary branch overhead—it repeats a block of cog or LUT instructions with no per-iteration branch at all (Chapter 4).
 
-Cog execution mode runs code from cog RAM (PC in range $000-$1FF). Instructions execute in the consistent two-clock pipeline with no additional delays. This mode provides the fastest possible execution and deterministic timing, suiting it to time-critical code.
+### 1.6.1 Cog and LUT Execution
 
-Cog execution mode limits programs to the available cog RAM space. After accounting for special registers and data storage, typically 200-400 longs remain for code. Programs that fit in this space achieve maximum performance. Larger programs can overflow into LUT execution or use hub execution mode.
+Cog execution runs code from cog RAM (PC in $000-$1FF) in the consistent two-clock pipeline with no added delay—the fastest, most deterministic execution the P2 offers, and the home a cog boots into. After special registers and data storage, typically 200-400 of the 512 longs remain for code.
 
-### 1.6.2 LUT Execution Mode
+When a program outgrows that space, the LUT is its seamless extension. LUT execution runs code from LUT RAM (PC in $200-$3FF) at the identical two clocks per instruction, doubling the fast code space to 1024 longs per cog. The program counter rolls from $1FF straight into $200, and branching between cog and LUT addresses carries no special consideration—the two are one contiguous fast space. The hardware reflects this: a cog's boot-mode status records only whether it started in hub execution or in cog/LUT execution, with no separate state for the LUT. Use LUT execution for overflow code that must keep deterministic timing.
 
-LUT execution mode runs code from LUT RAM (PC in range $200-$3FF). Instructions execute at the same speed as cog execution—two clocks per instruction with deterministic timing. LUT execution effectively doubles the available fast code space from 512 to 1024 longs per cog.
+Time-critical inner loops often run in cog or LUT even when the main program lives in hub memory: the program loads the critical section into cog/LUT RAM, runs the loop at full speed, then returns to hub-based code—combining local-execution performance with hub capacity.
 
-LUT execution is ideal for overflow code that doesn't fit in cog RAM but requires deterministic timing. The cog fetches instructions from LUT memory with no additional delays beyond the standard pipeline. There are no special considerations when branching between cog and LUT addresses.
-
-Time-critical inner loops often execute in cog or LUT mode even when the main program runs from hub memory. The program loads critical code sections to cog/LUT RAM, executes the loop, then returns to hub-based code. This hybrid approach combines the performance of local execution with the capacity of hub storage.
-
-### 1.6.3 Hub Execution Mode
+### 1.6.2 Hub Execution Mode
 
 Hub execution mode runs code directly from hub RAM without loading it to cog memory first. The cog fetches instructions from hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the hub rotation used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to cog mode.
 
@@ -213,7 +215,7 @@ Hub execution mode provides access to the full 512KB hub address space, enabling
 
 **Pitfall:** While executing from hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and the streamer FIFO instructions XINIT, XZERO, and XCONT when the streamer mode engages the FIFO. Code requiring these instructions must execute from cog RAM.
 
-### 1.6.4 Switching Between Modes
+### 1.6.3 Switching Between Modes
 
 Programs switch between execution modes using `CALL` or `JMP` instructions. A cog executing from cog RAM can call or jump to hub addresses, and hub-executing code can call or jump to cog addresses. The program counter determines current mode: addresses $000-$3FF indicate cog/LUT execution, while higher addresses indicate hub execution.
 
@@ -226,7 +228,7 @@ The hardware handles mode transitions transparently. The programmer specifies th
 \item Each cog has 512 longs of private RAM plus 512 longs of private LUT
 \item Hub memory (512KB) is shared among all cogs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
-\item Cogs can execute from cog RAM (fast), LUT RAM (fast), or hub RAM (larger capacity)—three distinct execution modes
+\item Cog RAM and LUT RAM form one contiguous fast execution space (2 clocks/instruction); hub RAM adds capacity at variable, FIFO-paced timing
 \item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
 \item The pipeline provides two-clock execution for most instructions
 \item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided

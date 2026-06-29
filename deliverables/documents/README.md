@@ -46,7 +46,7 @@ The friendly on-ramp to the Propeller 2 — the orientation layer that sits belo
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-getting-started-guide-changelog.md)
 
 ### [P2 Assembly Language Reference Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf)
-**Complete PASM2 Instruction Set Documentation** — *Version 3.1.0*
+**Complete PASM2 Instruction Set Documentation** — *Version 3.1.1*
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 
@@ -75,7 +75,7 @@ The complete guide to the P2's nine DEBUG display windows — TERM, BITMAP, PLOT
 
 ## Also in the Pipeline
 
-Two further manuals are in production and will open for community review as they complete:
+Further manuals are in production and will open for community review as they complete:
 
 ### P2 Single-Step Debugger Manual
 **Observe and Control Your Running P2 Code** — *coming soon*
@@ -86,6 +86,16 @@ A practical guide to single-stepping P2 code — pausing and resuming a running 
 **Complete P2 Pin I/O and Smart Pin Reference** — *coming soon*
 
 The complete reference for P2 pin I/O and the Smart Pins — every smart pin mode, its configuration, and usage patterns.
+
+### The P2 Architect's Guide
+**Designing Real Systems on the Propeller 2** — *coming soon*
+
+The system-design companion to the reference manuals — taking a project from requirements to a working P2 architecture: budgeting pins, mapping peripherals onto buses, decomposing the work across cogs, and realizing the design into code.
+
+### P2 XBYTE Programming Guide
+**Building Interpreters and Emulators on the Propeller 2** — *coming soon*
+
+A deep dive into the P2's XBYTE hardware bytecode engine and the skip family (SKIP/SKIPF/EXECF) — using FIFO/LUT dispatch to build a custom virtual machine, then a compact illustrative 6502 emulator.
 
 
 ## Reporting Issues

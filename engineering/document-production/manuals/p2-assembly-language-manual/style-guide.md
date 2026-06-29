@@ -318,6 +318,47 @@ Each instruction entry follows strict visual hierarchy:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+#### 5.1.1 The `Operation:` line — include by exception
+
+The `Operation:` line gives exact pseudocode of an instruction's effect. It is
+**not a mandatory field.** Carry it only when an instruction's behavior is **not
+obvious from its one-line description.** The test —
+
+**Include an `Operation:` line when ANY of these holds:**
+- a **flag-effect subtlety** — C or Z is set from something a reader could get wrong (e.g. ADDS: `C = true sign of (D + S)`; ADDX: `Z = Z AND (result == 0)`);
+- an **encoding or operand quirk** — an operand is interpreted in a non-obvious way;
+- a **side effect or gotcha** — the instruction does something beyond the headline (e.g. REP shielding its block from interrupts);
+- **genuinely complex mechanics** — multi-step, conditional, or bitfield manipulation (the ALT\* family, MUXQ, bit-scan instructions).
+
+**Omit it** when the description plus the syntax already convey the full effect —
+the common case. ADD ("add two unsigned values") needs none even though the
+source spreadsheet lists `D = D + S`; the line would only restate the
+description. **An `Operation:` line on an obvious instruction is redundant noise
+and must be trimmed.**
+
+**Consistency within a family.** Presence must track *actual* complexity across
+related instructions, not land randomly: if ADDS carries one for its signed-C
+semantics, SUBS should too; if ADDX carries one, SUBX should.
+
+**Source — never inferred.** The pseudocode is taken **verbatim** from the
+Parallax *P2 Instructions v35 – Rev B/C Silicon* spreadsheet (the operation/
+effect column — the same authority used for encodings). Do **not** compose or
+reword the operation from reasoning. If the spreadsheet has no operation for a
+row, no line is added.
+
+**Format and placement.** `**Operation:**` (bold label) followed by the
+pseudocode in inline code, placed **between the syntax line and `**Result:**`.**
+The pseudocode must be ASCII (the inline-code path forbids non-ASCII — use `AND`,
+`OR`, `->`, `==`, etc.).
+
+**Non-instruction entries.** Assembler directives and special-register entries
+carry **no** `Operation:` line — they are not runtime operations.
+
+**Grouped multi-instruction entries** (event-jump / poll / wait families
+documented as one entry): if the family's behavior is non-obvious, give a compact
+**per-instruction mini-table** (instruction → operation) rather than one line, so
+every bundled instruction is covered.
+
 ### 5.2 At A Glance Box
 
 ```latex

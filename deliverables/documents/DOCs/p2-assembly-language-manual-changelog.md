@@ -1,5 +1,19 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.1 (2026-06-29)
+
+**Execution-model and instruction-reference refinements** — a clearer cog/LUT/hub model and the streamer's role in Chapter 1, better guidance on reading an instruction entry, and an uppercase style for mnemonics in prose.
+
+### Added
+- §1.4.4 "Moving Hub Data: the Cog and the Streamer" — cog-driven hub access (RDLONG/WRLONG, with SETQ for fast bursts) alongside each cog's own streamer, a close cousin of a DMA channel that moves data on its own at a set rate. A REP block of transfers is interrupt-atomic.
+- REP reference (Part II): a REP block is interrupt-atomic — uninterruptible for its duration, including debug interrupts — the blocking counterpart to the streamer's autonomous transfer.
+- §2.8.3 (reading an entry): explains the conditional `Operation:` line — exact pseudocode carried when an instruction's behavior is not obvious from its description — illustrated with ADDX.
+- CMP carries an `Operation:` line (`C = borrow of (D - S); Z = (D == S)`), matching its CMPS / CMPX / CMPSX / CMPR / CMPM compare-family siblings.
+
+### Changed
+- §1.6 Execution Modes presents cog and LUT execution as one contiguous 1024-long fast space — identical two-clock timing, the program counter rolling from cog RAM into LUT RAM ($1FF to $200) at no cost — in a single "Cog and LUT Execution" section, with hub execution as the performance boundary where instructions stream through the FIFO and a branch to hub costs at least 13 clocks. REP repeats a cog/LUT block with no per-iteration branch.
+- Instruction mnemonics in prose are set in uppercase, marking them as code tokens.
+
 ## v3.1.0 (2026-06-25)
 
 **Instruction-reference accuracy and presentation pass** — a content re-audit against the Knowledge Base alongside a voicing, layout, and typography refresh.

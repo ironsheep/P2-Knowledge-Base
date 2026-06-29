@@ -17,6 +17,14 @@ Cross-manual instances of this same migration drift are tracked in the Document 
 
 ---
 
+## Prose mnemonic style — backtick vs plain (OPEN)
+
+**Status:** ⏳ Open — surfaced 2026-06-29 during the v3.1.1 release review.
+
+Mnemonics in narrative prose render two ways: ~44 in Part I are backtick-wrapped (monospace, e.g. `` `RDLONG` ``) while others are plain (uppercased by `p2kb-platform-mnemonic-bold.lua`). The same mnemonic can appear both ways even within one paragraph — §1.4.4 shows `` `REP` `` (monospace) and plain REP. Decide one convention for prose mnemonics — plain uppercase (matching the filter) or backtick-monospace — and sweep Part I prose to it. Manual-wide; deliberately out of scope for the v3.1.1 patch that surfaced it.
+
+---
+
 ## ~~Instruction Entry Header Format Audit~~ ✅ COMPLETED
 
 **Status:** ✅ Completed 2025-12-04

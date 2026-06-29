@@ -1,12 +1,21 @@
--- P2KB IOSP Mnemonic Bold Filter
--- Converts IOSP mnemonics to BOLD UPPERCASE in prose and code
--- Version: 2.0 - Grammar-aware prose detection
+-- P2KB Mnemonic Uppercase Filter (filename kept as -bold for stability)
+-- Renders IOSP mnemonics as UPPERCASE in prose and code
+-- Version: 3.0 - Prose mnemonics are UPPERCASE, NOT bold
+--
+-- Rationale (policy decision 2026-06-29): uppercase carries the mnemonic's
+-- identity and matches its appearance in code, so a prose mention and a code
+-- occurrence read as the SAME token — one identity for the reader to learn.
+-- Bold is reserved for genuine emphasis; spending it on every mnemonic dilutes
+-- that signal and fragments narrative reading (the "ransom-note" effect). This
+-- also dissolves the old bold-path inconsistency where mnemonics adjacent to
+-- punctuation ("(ALTS", "RDFAST/WRFAST") bolded unevenly. See the Platform
+-- Freshness Ledger in PUBLICATION-ROSTER.md.
 --
 -- Behavior:
 -- - In code blocks: uppercase all mnemonics
 -- - In inline code: uppercase all mnemonics
--- - In narrative prose: bold+uppercase mnemonics with grammar-aware filtering
---   to avoid false positives on common English words (and, or, not, etc.)
+-- - In narrative prose: UPPERCASE mnemonics (grammar-aware, to avoid false
+--   positives on common English words: and, or, not, etc.) — NO bold
 
 -- Complete list of IOSP mnemonics
 local mnemonics = {
@@ -619,17 +628,16 @@ function Para(para)
         end
 
         -- Check if this is an ambiguous word needing grammar analysis
-        local should_bold = true
+        local should_mark = true
         if is_ambiguous(core_word) then
           if is_english_context(core_word, prev_word, next_word, suffix) then
-            should_bold = false
+            should_mark = false
           end
         end
 
-        if should_bold then
-          -- Bold and uppercase the mnemonic
-          local bold_elem = pandoc.Strong(pandoc.Str(core_word:upper()))
-          table.insert(new_content, bold_elem)
+        if should_mark then
+          -- Uppercase the mnemonic — NO bold (uppercase carries identity; v3.0 policy)
+          table.insert(new_content, pandoc.Str(core_word:upper()))
           if suffix ~= "" then
             table.insert(new_content, pandoc.Str(suffix))
           end
@@ -692,16 +700,16 @@ function Plain(plain)
           end
         end
 
-        local should_bold = true
+        local should_mark = true
         if is_ambiguous(core_word) then
           if is_english_context(core_word, prev_word, next_word, suffix) then
-            should_bold = false
+            should_mark = false
           end
         end
 
-        if should_bold then
-          local bold_elem = pandoc.Strong(pandoc.Str(core_word:upper()))
-          table.insert(new_content, bold_elem)
+        if should_mark then
+          -- Uppercase the mnemonic — NO bold (uppercase carries identity; v3.0 policy)
+          table.insert(new_content, pandoc.Str(core_word:upper()))
           if suffix ~= "" then
             table.insert(new_content, pandoc.Str(suffix))
           end

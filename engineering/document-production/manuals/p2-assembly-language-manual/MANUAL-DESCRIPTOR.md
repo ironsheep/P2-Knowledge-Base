@@ -2,7 +2,7 @@
 manual_slug: p2-assembly-language-manual
 doc_class: reference                              # YAML-backed (PASM2 instruction reference)
 code_line_budget_K: 76                            # platform-inherited; LM-Mono calibrated (creation-guide v1.2)
-last_published_tag: p2-assembly-language-manual-v3.0.0   # baseline for Dimension #15 (PDF dated 2026-06-10)
+last_published_tag: p2-assembly-language-manual-v3.1.1   # baseline for Dimension #15 (released 2026-06-29)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # v1.1 (user-suggestions sprint)
@@ -36,5 +36,4 @@ from the central `document-audit` skill body + the guides referenced above.
 index). Tutorial voice is NOT permitted here (Dimension #9).
 
 **Unreleased efforts since `last_published_tag`** (the changeset-integrity baseline, Dimension #15):
-v3.0.1 smart-pin/Appendix-F refresh; the doc-style-change sprint (lowercase nouns, Smart-Pins-Tutorial
-redirect); the user-suggestions sprint (Phases 1–3). The next publish must account for all three.
+none pending — v3.1.1 released 2026-06-29. Next release deltas against the v3.1.1 tag.
