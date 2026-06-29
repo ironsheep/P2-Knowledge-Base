@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-25T23:56:20.280470",
-    "total_entries": 1053,
-    "total_categories": 56,
-    "total_aliases": 1326,
+    "generated": "2026-06-29T21:23:20.153305",
+    "total_entries": 1060,
+    "total_categories": 58,
+    "total_aliases": 1440,
     "multi_target_aliases": 65,
     "source": "deliverables/ai/P2/"
   },
@@ -656,12 +656,23 @@
       "p2kbHwAddonControlBoardAddonControlBoard",
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
+      "p2kbHwAddonHdAudioAddonHdAudio",
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash",
       "p2kbHwAddonLedMatrixAddonLedMatrix",
+      "p2kbHwAddonMicrosdAddonMicrosd",
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
+      "p2kbHwAddonMotorDriverAddonMotorDriver",
+      "p2kbHwAddonRtcAddonRtc",
       "p2kbHwAddonSerialDeviceAddonSerialDevice",
       "p2kbHwAddonSerialHostAddonSerialHost",
+      "p2kbHwAddonWxAdapterAddonWxAdapter",
       "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "hardware_connectivity": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "hardware_programming_tools": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
     "hardware_reference": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix",
@@ -671,6 +682,15 @@
     ]
   },
   "aliases": {
+    "#32201": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "#32420 MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "#32420 module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
     "#64004 ADD-ON BOARD": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
@@ -696,6 +716,60 @@
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
       "p2kbHwAddonSerialDeviceAddonSerialDevice",
       "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "#64007 ADD-ON BOARD": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "#64007 add-on board": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "#64009 ADD-ON BOARD": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "#64009 add-on board": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "#64010 ADD-ON BOARD": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "#64010 add-on board": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "#64013 ADD-ON BOARD": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "#64013 add-on board": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "#64014 ADD-ON BOARD": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "#64014 add-on board": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "32201": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "32420": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "32420D": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "32420S": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "4-CHANNEL AUDIO ADC": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "4-PHASE MOTOR DRIVER": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "4-channel audio ADC": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "4-phase motor driver": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "64000": [
       "p2kbHwP2EvalBoardP2EvalBoard"
@@ -729,6 +803,21 @@
     ],
     "64006H": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
+    "64007": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "64009": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "64010": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "64013": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "64014": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "64019": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
@@ -785,6 +874,12 @@
     "ADDX": [
       "p2kbPasm2Addx"
     ],
+    "AK5704 ADD-ON": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "AK5704 add-on": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "AKPIN": [
       "p2kbPasm2Akpin",
       "p2kbSpin2Akpin"
@@ -837,6 +932,9 @@
     "ASMCLK": [
       "p2kbPasm2Asmclk"
     ],
+    "AUDIO ADC DAC BOARD": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "AUDIO VIDEO BREAKOUT": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
@@ -851,6 +949,9 @@
     ],
     "B input selector": [
       "p2kbPasm2Wrpin"
+    ],
+    "BATTERY-BACKED CLOCK ADD-ON": [
+      "p2kbHwAddonRtcAddonRtc"
     ],
     "BITC": [
       "p2kbPasm2Bitc"
@@ -879,6 +980,12 @@
     "BITZ": [
       "p2kbPasm2Bitz"
     ],
+    "BLDC MOTOR DRIVER BOARD": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "BLDC motor driver board": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
     "BLNPIX": [
       "p2kbPasm2Blnpix"
     ],
@@ -905,6 +1012,9 @@
     ],
     "BRK": [
       "p2kbPasm2Brk"
+    ],
+    "BRUSHLESS MOTOR DRIVER": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "BUTTONS AND LEDS BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
@@ -1262,6 +1372,18 @@
     "ENDIANW": [
       "p2kbSpin2Endianw"
     ],
+    "ESP8266 ADAPTER": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "ESP8266 WIFI MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "ESP8266 WiFi module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "ESP8266 adapter": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
     "EXECF": [
       "p2kbPasm2Execf"
     ],
@@ -1325,6 +1447,12 @@
     "FREQUENCY DISPLAY": [
       "p2kbSpin2Fft"
     ],
+    "FTDI FT231X PROGRAMMER": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "FTDI FT231X programmer": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
     "GETBRK": [
       "p2kbPasm2Getbrk"
     ],
@@ -1387,11 +1515,20 @@
     "HARDWARE SELECTION GUIDE": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
+    "HD AUDIO ADD-ON": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "HD audio add-on": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "HDMI ADD-ON BOARD": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
     ],
     "HDMI add-on board": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "HIGH-DEFINITION AUDIO BOARD": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "HUB75 ADAPTER": [
       "p2kbHwHub75AdapterHub75Adapter"
@@ -1659,6 +1796,15 @@
     "MERGEW": [
       "p2kbPasm2Mergew"
     ],
+    "MICRO SD CARD BOARD": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "MICROSD ADD-ON": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "MICROSD BREAKOUT": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
     "MIDI": [
       "p2kbSpin2Midi"
     ],
@@ -1685,6 +1831,9 @@
     ],
     "MOSI": [
       "p2kbArchSpiImplementationGuide"
+    ],
+    "MOTOR DRIVER ADD-ON": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "MOV": [
       "p2kbPasm2Mov"
@@ -1936,6 +2085,36 @@
     "P2 HARDWARE ECOSYSTEM": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "P2 HD AUDIO ADD-ON SET": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "P2 HD Audio Add-on Set": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "P2 MICROSD ADD-ON BOARD": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "P2 PROGRAMMER": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "P2 RTC ADD-ON BOARD": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "P2 RTC Add-on Board": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "P2 WX ADAPTER": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "P2 WX ADAPTER ADD-ON BOARD": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "P2 WX Adapter": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "P2 WX Adapter Add-on Board": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
     "P2 board features table": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
@@ -1954,6 +2133,12 @@
     "P2 hardware ecosystem": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "P2 microSD Add-on Board": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "P2 programmer": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
     "P2-EC": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
@@ -1971,6 +2156,15 @@
     ],
     "P8X32A font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "PARALLAX WX ESP8266 WI-FI MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "PCF8523 BOARD": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "PCF8523 board": [
+      "p2kbHwAddonRtcAddonRtc"
     ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
@@ -2103,6 +2297,18 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
+    "PROP PLUG": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "PROP PLUG REV E": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "PROPELLER PROGRAMMING ADAPTER": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "PROPPLUG": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
     "PROTO BOARD": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
@@ -2167,6 +2373,21 @@
     ],
     "P_TT_11": [
       "p2kbArchSmartPins"
+    ],
+    "Parallax WX ESP8266 Wi-Fi Module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "Prop Plug": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "Prop Plug Rev E": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "PropPlug": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "Propeller programming adapter": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
     "QCOS": [
       "p2kbSpin2Qcos"
@@ -2248,6 +2469,12 @@
     ],
     "RDWORD": [
       "p2kbPasm2Rdword"
+    ],
+    "REAL TIME CLOCK CALENDAR": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "REAL-TIME CLOCK BOARD": [
+      "p2kbHwAddonRtcAddonRtc"
     ],
     "RECV": [
       "p2kbSpin2Recv"
@@ -2361,6 +2588,12 @@
       "p2kbPasm2Rqpin",
       "p2kbSpin2Rqpin"
     ],
+    "RTC ADD-ON": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "RTC add-on": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
     "SAL": [
       "p2kbPasm2Sal"
     ],
@@ -2378,6 +2611,18 @@
     ],
     "SCOPE_XY": [
       "p2kbSpin2ScopeXy"
+    ],
+    "SD CARD ADAPTER": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "SD CARD ADD-ON": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "SD card adapter": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "SD card add-on": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
     ],
     "SEND": [
       "p2kbSpin2Send"
@@ -2505,6 +2750,9 @@
     "SKIPF": [
       "p2kbPasm2Skipf"
     ],
+    "SMART PIN DAC AUDIO BOARD": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "SMART PIN INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
     ],
@@ -2556,6 +2804,9 @@
     "STANDARD EDGE MODULE": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
+    "STEPPER MOTOR DRIVER ADD-ON": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
     "STRCOMP": [
       "p2kbSpin2Strcomp"
     ],
@@ -2594,6 +2845,9 @@
     ],
     "SUMZ": [
       "p2kbPasm2Sumz"
+    ],
+    "Smart Pin DAC audio board": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "TASK CONTINUE": [
       "p2kbSpin2Taskcont"
@@ -2698,17 +2952,41 @@
     "TT_BITS": [
       "p2kbArchSmartPins"
     ],
+    "UNIVERSAL MOTOR DRIVER": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "UNIVERSAL MOTOR DRIVER P2 ADD-ON BOARD": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
     "USB DEVICE BOARD": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
     ],
     "USB HOST ADD-ON": [
       "p2kbHwAddonSerialHostAddonSerialHost"
     ],
+    "USB SERIAL ADAPTER": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "USB TO SERIAL PROGRAMMER": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
     "USB device board": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
     ],
     "USB host add-on": [
       "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "USB serial adapter": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "USB to serial programmer": [
+      "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "Universal Motor Driver": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "Universal Motor Driver P2 Add-on Board": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "VECTOR GRAPHICS": [
       "p2kbSpin2Plot"
@@ -2811,6 +3089,15 @@
     "WHICH PINS": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "WIFI ADAPTER BOARD": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "WIRELESS PROGRAMMING ADAPTER": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "WIRELESS PROGRAMMING MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
     "WMLONG": [
       "p2kbPasm2Wmlong"
     ],
@@ -2875,6 +3162,30 @@
     "WRZ": [
       "p2kbPasm2Wrz"
     ],
+    "WX ADAPTER": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "WX WI-FI MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "WX WIFI MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "WX WIRELESS MODULE": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "WX Wi-Fi module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "WX WiFi module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
+    "WX adapter": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "WX wireless module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
+    ],
     "WXPIN": [
       "p2kbPasm2Wxpin",
       "p2kbSpin2Wxpin"
@@ -2882,6 +3193,9 @@
     "WYPIN": [
       "p2kbPasm2Wypin",
       "p2kbSpin2Wypin"
+    ],
+    "WiFi adapter board": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
     "XCONT": [
       "p2kbPasm2Xcont"
@@ -3056,6 +3370,9 @@
     "asmclk": [
       "p2kbPasm2Asmclk"
     ],
+    "audio ADC DAC board": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "audio video breakout": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
@@ -3067,6 +3384,9 @@
     ],
     "augs": [
       "p2kbPasm2Augs"
+    ],
+    "battery-backed clock add-on": [
+      "p2kbHwAddonRtcAddonRtc"
     ],
     "bitc": [
       "p2kbPasm2Bitc"
@@ -3121,6 +3441,9 @@
     ],
     "brk": [
       "p2kbPasm2Brk"
+    ],
+    "brushless motor driver": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "buffer_management": [
       "p2kbArchBufferManagementAnalysis",
@@ -3530,6 +3853,9 @@
     "hardware_specific_app": [
       "p2kbSpin2HardwareSpecificApp"
     ],
+    "high-definition audio board": [
+      "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
     "hubset": [
       "p2kbPasm2Hubset",
       "p2kbSpin2Hubset"
@@ -3742,6 +4068,15 @@
     "mergew": [
       "p2kbPasm2Mergew"
     ],
+    "micro SD card board": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "microSD add-on": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "microSD breakout": [
+      "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
     "mini breakout board": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
     ],
@@ -3762,6 +4097,9 @@
     ],
     "monitoring_device": [
       "p2kbSpin2MonitoringDevice"
+    ],
+    "motor driver add-on": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "motor_controller": [
       "p2kbSpin2MotorController"
@@ -4101,6 +4439,12 @@
     "rdword": [
       "p2kbPasm2Rdword"
     ],
+    "real time clock calendar": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
+    "real-time clock board": [
+      "p2kbHwAddonRtcAddonRtc"
+    ],
     "recv": [
       "p2kbSpin2Recv"
     ],
@@ -4415,6 +4759,9 @@
       "p2kbArchStateMachineAnalysis",
       "p2kbSpin2Spin2StateMachine"
     ],
+    "stepper motor driver add-on": [
+      "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
     "strcomp": [
       "p2kbSpin2Strcomp"
     ],
@@ -4645,6 +4992,12 @@
     ],
     "which pins": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "wireless programming adapter": [
+      "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "wireless programming module": [
+      "p2kbHwAddonWxWifiAddonWxWifi"
     ],
     "wmlong": [
       "p2kbPasm2Wmlong"
@@ -5076,8 +5429,8 @@
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1764449566,
-      "sha256": "0f23eb4adb867ed6c1dc5b59446c7383345960de717c8aa5de15ad7ed23f687b"
+      "mtime": 1782613829,
+      "sha256": "159155f1da91e44ea8f2d65c3e927a0e8e31d7b3d0d4c1a0bfcee8ade9141747"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
@@ -5799,6 +6152,11 @@
       "mtime": 1782328465,
       "sha256": "4e3990eadb1a4bec63fb9cfbcf59dd5e0e0249cbd3d5ba6ba9a86d6cd421bb69"
     },
+    "p2kbHwAddonHdAudioAddonHdAudio": {
+      "path": "deliverables/ai/P2/hardware/addon-hd-audio.yaml",
+      "mtime": 1782768130,
+      "sha256": "8437870552bdff2df379ee5b3ef2150be684c8ec8e7a68ef0fb9b79cc3f4088c"
+    },
     "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash": {
       "path": "deliverables/ai/P2/hardware/addon-hyperram-hyperflash.yaml",
       "mtime": 1782328465,
@@ -5809,10 +6167,25 @@
       "mtime": 1782328465,
       "sha256": "d80cfe4cde1afc9d8a7f8fa7ea90da95e88343cad9e2516559072f74e999d743"
     },
+    "p2kbHwAddonMicrosdAddonMicrosd": {
+      "path": "deliverables/ai/P2/hardware/addon-microsd.yaml",
+      "mtime": 1782768130,
+      "sha256": "5bc87e621611c9d8d01fbfc42eb4a9c031ef5b045bebba04b69e65fab8ac65d9"
+    },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
       "mtime": 1782328465,
       "sha256": "e8dcedb17c448856bf8db99b57e32368ac9979705053544ad491e192cb752026"
+    },
+    "p2kbHwAddonMotorDriverAddonMotorDriver": {
+      "path": "deliverables/ai/P2/hardware/addon-motor-driver.yaml",
+      "mtime": 1782768130,
+      "sha256": "1fe26ae664684f6b05f8dccdc8813c5f4a0d68c2d3be0c484d9be65f4c99818f"
+    },
+    "p2kbHwAddonRtcAddonRtc": {
+      "path": "deliverables/ai/P2/hardware/addon-rtc.yaml",
+      "mtime": 1782768130,
+      "sha256": "c8b94154624a7a18361f943c5920ed0c681c394cf1724d3f2d1be5d74488cd78"
     },
     "p2kbHwAddonSerialDeviceAddonSerialDevice": {
       "path": "deliverables/ai/P2/hardware/addon-serial-device.yaml",
@@ -5823,6 +6196,16 @@
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
       "mtime": 1782328465,
       "sha256": "449dec66520b48edc894c4080a0686d2ec31d2049f62c066f9cb5ec2a1a98868"
+    },
+    "p2kbHwAddonWxAdapterAddonWxAdapter": {
+      "path": "deliverables/ai/P2/hardware/addon-wx-adapter.yaml",
+      "mtime": 1782768130,
+      "sha256": "361efef0e58f12ccba485453884320bfe56db41f7fbb457196d89ee06ff2156a"
+    },
+    "p2kbHwAddonWxWifiAddonWxWifi": {
+      "path": "deliverables/ai/P2/hardware/addon-wx-wifi.yaml",
+      "mtime": 1782768130,
+      "sha256": "615fc4c6bfca4e7cfca9859745c8e3f56ee9e64d3257e07e3e6bd76b52556595"
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
@@ -5851,8 +6234,8 @@
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1782328465,
-      "sha256": "cc61c7b8c7ac9d5747fef54a7d065bd3212bd262e60a9423bb9e4c88c7e893e4"
+      "mtime": 1782768130,
+      "sha256": "c44e5b03bb2df119a18305ad240bb64d8a4ab9b4cd18aa5aa3d85a2ed0eb4d65"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
@@ -5878,6 +6261,11 @@
       "path": "deliverables/ai/P2/hardware/p2-hardware-selection-guide.yaml",
       "mtime": 1781981347,
       "sha256": "44f8988be8e0d9b09f1eb0866774a87e3a04cc7e40830e2c8dcf594f6762464e"
+    },
+    "p2kbHwProgrammingPropPlugProgrammingPropPlug": {
+      "path": "deliverables/ai/P2/hardware/programming-prop-plug.yaml",
+      "mtime": 1782768130,
+      "sha256": "798661b77262a1ddacce7d864b4e55b4dd1126388b9710bd015c84d2b36c826b"
     },
     "p2kbLanguageCaseSensitivity": {
       "path": "deliverables/ai/P2/language/fundamentals/case-sensitivity.yaml",
