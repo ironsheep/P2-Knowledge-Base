@@ -1,0 +1,157 @@
+component: P2 HD Audio Add-on Set
+part_number: "64014"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonHdAudio"
+category: addon
+aliases:
+  - "HD audio add-on"
+  - "P2 HD Audio Add-on Set"
+  - "audio ADC DAC board"
+  - "AK5704 add-on"
+  - "high-definition audio board"
+  - "4-channel audio ADC"
+  - "Smart Pin DAC audio board"
+  - "64014"
+  - "#64014 add-on board"
+
+description: >-
+  Two-board audio kit. The ADC board is a 4-channel, 32-bit, 192 kHz audio ADC
+  built on the AKM AK5704EN codec (I2C control + I2S/TDM audio). The DAC board is
+  a 2-channel audio DAC built directly on P2 Smart Pin DAC modes (no codec chip).
+  Both boards use a standard 2x6 0.1" accessory passthrough socket and are
+  designed to sit side-by-side at a dual port. Usable with any 3.3V-signal MCU.
+
+set_contents:
+  - "ADC board (AK5704EN codec) - 4ch, 32-bit, 192 kHz"
+  - "DAC board (P2 Smart Pin DAC) - 2ch"
+
+# === ADC BOARD (AK5704EN) ===
+adc_board:
+  codec: "AKM AK5704EN (28-pin QFN), 32-bit 4ch ADC with MIC pre-amplifier"
+  eval_header_occupant: true
+  pin_group:
+    size: 8
+    addressing: "actual_P2_pin = base_pin + offset; single 8-pin accessory-header group."
+  interface: "I2C control (400 kHz) + I2S/TDM audio"
+  signal_map:
+    - {offset: 0, signal: "PDN (power-down)", direction: out, notes: "L = power-down, H = power-up."}
+    - {offset: 1, signal: "MCKI (master clock in)", direction: out, notes: "Master clock input to the codec."}
+    - {offset: 2, signal: "BCLK (bit clock)", direction: out, notes: "Audio serial data clock."}
+    - {offset: 3, signal: "LRCK (frame sync)", direction: out, notes: "Frame/word-select clock."}
+    - {offset: 4, signal: "SDTO1 (serial data out 1)", direction: in, notes: "Audio from the MIC input jack."}
+    - {offset: 5, signal: "SDTO2 (serial data out 2)", direction: in, notes: "Audio from the Line input jack."}
+    - {offset: 6, signal: "SCL (I2C clock)", direction: out, notes: "I2C control clock."}
+    - {offset: 7, signal: "SDA (I2C data)", direction: bidir, notes: "I2C control data."}
+  unpopulated:
+    WINTN: "Interrupt output pin (customer option - unpopulated header, N/C on the 2x6)."
+  power_signals:
+    VIO3V3: "3.3V supply to the ADC board."
+    GND: "Common ground."
+  i2c_slave_address_7bit: "$10 (%0010000) - set by the CAD strap pin on the #64014 board"
+  i2c_address_bytes: "write = $20, read = $21 (AK5704_DEVICE_ID = $20)"
+  i2c_clock: "400 kHz; the ADC board carries its own pull-ups (the driver uses no external pull-ups)"
+  register_range: >-
+    Registers $00-$46: flow control, power management, clock-mode/PLL, audio I/F
+    format, mic amp gain + sensitivity, digital HPF/LPF filters, VAD, ALC. Full
+    bit-level detail lives in the AK5704 datasheet.
+  sdto2_default: >-
+    SDTO2 (offset +5) carries the Line-input audio serial data OUT of the codec
+    by default - the #64014 demo driver reads it as a P2 sync-serial input.
+  source_trace: >-
+    AK5704 I2C address + register usage resolved from the official Parallax
+    #64014 driver AK5704_Driver.spin2 (M. Mulholland, MIT; AK5704_DEVICE_ID=$20
+    @ 400 kHz) and the AKM AK5704 datasheet + the 64014-RevA schematic - staged
+    under sources/P2-HD-Audio-Add-on/ (datasheet + crosscheck) and NO-COMMIT/
+    (driver + schematic; NOT committed). (Gaps G-014 / Q-006 resolved.)
+  inputs: "4 input channels via two stereo 3.5 mm jacks, or two unpopulated 0.1\" 3-way header pad sets."
+  specs:
+    max_bits: "32 bit"
+    max_fs: "192 kHz (typical 48 kHz)"
+    min_fs: "8 kHz"
+    max_snr: "105 dB"
+    mic_gain: "+30 dB to 0 dB, 3 dB step"
+    features: "VAD (voice activity detection); ultrasonic recording; configurable MIC pull-up for analog mics"
+    pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
+
+# === DAC BOARD (P2 Smart Pin DAC) ===
+dac_board:
+  codec: "none - the P2 Smart Pin DACs ARE the converter"
+  eval_header_occupant: true
+  pin_group:
+    size: 8
+    addressing: "actual_P2_pin = base_pin + offset; single 8-pin accessory-header group."
+  channels: 2
+  signal_map:
+    - {offset: 0, signal: "DAC_R", direction: out, notes: "Right channel (4 pins +3..+0 wired in parallel)."}
+    - {offset: 1, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
+    - {offset: 2, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
+    - {offset: 3, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
+    - {offset: 4, signal: "DAC_L", direction: out, notes: "Left channel (4 pins +7..+4 wired in parallel)."}
+    - {offset: 5, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
+    - {offset: 6, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
+    - {offset: 7, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
+  power_signals:
+    VIO3V3: "Not Connected on the DAC board."
+    GND: "Common ground."
+  specs:
+    vpp_output: "2 V or 3 V configurable"
+    drive_impedance: "18.75 ohms to 990 ohms, configurable in 16 steps"
+    pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
+  drive_strength_design:
+    smartpin_dac_base_modes:
+      - "P_DAC_990R_3V  - 990 ohms, 3.3 V peak"
+      - "P_DAC_600R_2V  - 600 ohms, 2.0 V peak"
+      - "P_DAC_124R_3V  - 123.75 ohms, 3.3 V peak"
+      - "P_DAC_75R_2V   - 75 ohms, 2.0 V peak"
+    sixteen_steps: >-
+      The guide's '16 steps' = these 4 P2 Smart-Pin DAC base modes EACH divided
+      across 1-4 paralleled pins (4 modes x 4 divider values). Effective impedance
+      = base-mode impedance / number of paralleled pins. Confirmed by the official
+      #64014 4DAC_Analog_Driver.spin2 / AK5704_Driver.spin2 (the P_DAC_* constants
+      + an impedance_divider argument of 1..4). This resolves the board guide's
+      'only 4 of 16 stated' gap (G-014).
+    parallel_technique: >-
+      Each L/R channel parallels up to 4 Smart-Pin outputs to lower output
+      impedance. Total impedance = base-mode impedance / paralleled-pin count.
+      Example: P_DAC_124R_3V on 4 pins = 123.75 / 4 = ~30.9 ohms (drives 31-ohm
+      headphones directly) - the driver's start() default.
+
+specifications:
+  requires_host: true
+  supply_voltage: "+3.3 VDC (both boards)"
+  connector: "dual 2x6-pin female passthrough headers, 0.1\" spacing (each board)"
+  mounting_hole: "3.2 mm diameter"
+  operating_temp: "-40 to +85 C (-40 to +185 F)"
+
+use_cases:
+  primary:
+    - "Multi-channel audio capture (voice recognition, conferencing, recording)"
+    - "Line/headphone audio output via P2 Smart Pin DACs"
+    - "Ultrasonic capture (ADC up to 192 kHz)"
+  secondary:
+    - "Robotics / interactive-display / industrial audio I/O"
+
+limitations:
+  - "AK5704 register bit-level detail is in the AK5704 datasheet (the board guide is board-level)"
+  - "DAC is built on P2 Smart Pins (no codec) - audio quality bounded by the Smart-Pin DAC, not a dedicated DAC IC"
+  - "No code in the board guide itself; an official MIT Spin2 driver set is on the product page"
+
+documentation:
+  primary: "64014 P2 HD Audio Add-on Set Guide v1.0 (Parallax, 2022-10-26)"
+
+resources:
+  product_page: "www.parallax.com (search 64014) - latest guide, schematics, example code"
+  codec_datasheet: "AKM AK5704EN datasheet (www.akm.com) - authoritative for the codec register map"
+  example_drivers: "Parallax #64014 driver set (Spin2, MIT): AK5704_Driver.spin2 (ADC), 4DAC_Analog_Driver.spin2 (DAC), ADCtoDAC + AnalogDAC demos - on the 64014 product page"
+  schematic: "64014-RevA P2 HD Audio Add-on Set schematic (2022-08-22) - CAD strap / address"
+
+see_also:
+  - hardware/p2-hardware-feature-comparison.yaml
+  - language/spin2/methods/_index.yaml
+
+ecosystem_position: "audio_io"
+hardware_family: "p2_accessory_addons"
+size_class: "medium_addon"
+interface_type: "i2s_i2c_smartpin_dac"

@@ -1,0 +1,147 @@
+component: Universal Motor Driver P2 Add-on Board
+part_number: "64010"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+board_revision: "Rev B (Guide v2.0)"
+p2kb_key: "p2kbHwAddonMotorDriver"
+category: addon
+aliases:
+  - "motor driver add-on"
+  - "Universal Motor Driver"
+  - "Universal Motor Driver P2 Add-on Board"
+  - "BLDC motor driver board"
+  - "brushless motor driver"
+  - "stepper motor driver add-on"
+  - "4-phase motor driver"
+  - "64010"
+  - "#64010 add-on board"
+
+description: >-
+  4-phase motor driver add-on for the P2, using four TI UCC27211D half-bridge
+  MOSFET drivers (one per channel U/V/W/X) and N-channel MOSFETs. Supports brushed
+  and brushless motors: a single 3-phase BLDC (hub) motor, a 4-phase stepper, two
+  bidirectional brushed DC motors, or four uni-directional brushed DC motors.
+  3-phase sinusoidal 180-degree and classic 120-degree drive both supported. Adds
+  Hall-sensor feedback, per-phase voltage sense, and common current sense. Occupies
+  a P2 dual accessory header (16 pins).
+
+# --- Eval-header board model: 16-pin dual-header occupant ---
+eval_header_occupant: true
+pin_group:
+  size: 16
+  addressing: >-
+    actual_P2_pin = base_pin + offset (IO+0 .. IO+15). Spans two adjacent
+    accessory headers (16 consecutive pins): the upper header carries the PWM
+    drive signals (offsets 15..8), the lower header carries feedback (offsets
+    7..0). base_pin is the first pin of the 16-pin block.
+  base_pin_options: [0, 16, 32, 48]
+
+# Pin labels per the board-silk header table (Feature 1). Signal logic active high.
+# NOTE: offsets 9/8 are PWM_UH/PWM_UL per the board silk (the detailed
+# pin-definition table in the source guide mis-OCR'd them as a duplicate
+# "PWM_XH/XL" - corrected here to the consistent U/V/W/X 4-phase design;
+# recorded in DOCUMENT-LINEAGE).
+signal_map:
+  - {offset: 15, signal: "PWM_XH", direction: in, notes: "PWM input, X-channel high-side MOSFET driver."}
+  - {offset: 14, signal: "PWM_XL", direction: in, notes: "PWM input, X-channel low-side MOSFET driver."}
+  - {offset: 13, signal: "PWM_WH", direction: in, notes: "PWM input, W-channel high-side."}
+  - {offset: 12, signal: "PWM_WL", direction: in, notes: "PWM input, W-channel low-side."}
+  - {offset: 11, signal: "PWM_VH", direction: in, notes: "PWM input, V-channel high-side."}
+  - {offset: 10, signal: "PWM_VL", direction: in, notes: "PWM input, V-channel low-side."}
+  - {offset: 9,  signal: "PWM_UH", direction: in, notes: "PWM input, U-channel high-side (board silk; source pin-def table mis-OCR'd as PWM_XH)."}
+  - {offset: 8,  signal: "PWM_UL", direction: in, notes: "PWM input, U-channel low-side (board silk; source pin-def table mis-OCR'd as PWM_XL)."}
+  - {offset: 7,  signal: "HALL_W", direction: in, notes: "Hall sensor header channel W. Series 3.9k + 3.9k pull-up to 3.3V (5V-sensor safe)."}
+  - {offset: 6,  signal: "HALL_V", direction: in, notes: "Hall sensor header channel V. Series 3.9k + 3.9k pull-up to 3.3V."}
+  - {offset: 5,  signal: "HALL_U", direction: in, notes: "Hall sensor header channel U. Series 3.9k + 3.9k pull-up to 3.3V."}
+  - {offset: 4,  signal: "SENSE_COMMON", direction: in, notes: "Common current feedback (all 4 channels). Low-side 3mohm shunt + INA180B2 amp (gain 50 V/V)."}
+  - {offset: 3,  signal: "SENSE_X", direction: in, notes: "Output voltage feedback, channel X (13.1:1 +/-5% of motor output)."}
+  - {offset: 2,  signal: "SENSE_W", direction: in, notes: "Output voltage feedback, channel W (13.1:1)."}
+  - {offset: 1,  signal: "SENSE_V", direction: in, notes: "Output voltage feedback, channel V (13.1:1). e.g. 40V motor -> 3.05V."}
+  - {offset: 0,  signal: "SENSE_U", direction: in, notes: "Output voltage feedback, channel U (13.1:1)."}
+
+power_signals:
+  VIO3V3_upper: "Powers the on-board 12V boost regulator (up to 50 mA) feeding the MOSFET drivers."
+  VIO3V3_lower: "Powers the on-board 5V boost regulator (up to 100 mA) for the Hall/sensor header."
+  GND: "Common ground."
+  5V_external: "5V output on the Hall header for an external sensor, max 100 mA."
+
+pwm_control:
+  logic: "Active high. Both H and L have pull-down resistors (default low = MOSFETs off if floating)."
+  interlock: >-
+    Hardware logic buffer prevents simultaneous high+low on a channel: when both
+    PWM_xH and PWM_xL are driven high, PWM_xL has priority (high MOSFET only
+    operates when the low signal is off).
+  deadtime_min_ns: 250
+  deadtime_note: >-
+    Recommended minimum 250 ns deadtime after switching one MOSFET off and before
+    switching the other in the same channel (driver ~20 ns prop delay, but the
+    MOSFETs need settle time; standard half-bridge practice).
+  pwm_frequency: "20 kHz typical, 50 kHz max"
+
+current_sense:
+  technique: "low-side, 3 mohm shunt in common MOSFET GND path, INA180B2 amplifier gain 50 V/V"
+  formula: "Vsense = 3 mohm * 50 V/V = 150 mV per Amp -> Isense = Vsense / 150"
+  example: "Vsense = 1500 mV -> 10 A"
+
+specifications:
+  requires_host: true
+  io_pins_used: 16
+  input_voltage_range: "6-40 VDC (absolute max VIN 50 V)"
+  continuous_current_all_phases: "20 A"
+  surge_current_all_phases: "60 A"
+  continuous_current_per_phase: "20 A"
+  pulse_current_per_phase: "60 A"
+  continuous_power_all_phases: "240 W typical, 800 W max"
+  communication_interface: "3.3V TTL, PWM (low <= 0.8V, high >= 2.2V)"
+  mosfet_drivers: "4x Texas Instruments UCC27211D half-bridge"
+  mosfets: "Micro Commercial MCAC85N06Y-TP N-channel (large body diodes for back-EMF protection)"
+  terminals: "Push-in spring terminal blocks, 32A/400V, 0.2-4 mm^2 (24-12 AWG), 10 mm strip length"
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Mini-Breakout (64019)"
+    - "P2 Edge Module Breadboard (64020)"
+  physical:
+    connector: "dual 2x6 pass-through headers, 0.1\" spacing"
+    hall_header: "5-way 0.1\" male header (5V, U, V, W, GND)"
+    mounting_holes: "two 3.2 mm (0.125 in) holes, GND-connected"
+    pcb_dimensions: "2.75 x 2.75 in (70 x 70 mm)"
+    operating_temp: "-40 to +85 C (-40 to +185 F)"
+
+protection:
+  - "High/low-side interlock prevents shoot-through"
+  - "Reverse-biased diode each switching node to GND vs negative spikes (UCC27211D safe to -10V on HS)"
+  - "Under-voltage lockout in the MOSFET drivers"
+  - "Common current sense for overcurrent protection; per-phase voltage sense for over-voltage"
+
+use_cases:
+  primary:
+    - "Driving a 3-phase BLDC / hub motor (sinusoidal 180 or classic 120 commutation)"
+    - "4-phase stepper motor control"
+    - "One or two bidirectional brushed DC motors; up to four uni-directional"
+  secondary:
+    - "Robotics drive bases (e.g. with Motor Mount & Wheel Kit #28962 or 6.5\" Hub Motor #27860)"
+
+safety_notes:
+  - "Do not install on a conductive surface (high-current pins on the underside)."
+  - "Use an inline fuse near VIN when powered from an unprotected source (e.g. battery)."
+  - "Use a power source rated for the motor's startup/full-load surge current."
+
+limitations:
+  - "Uses 16 P2 pins (a full dual accessory header)"
+  - "No example/driver code in the guide (product-page download)"
+  - "High-current board - power-source and cable ratings are the user's responsibility"
+
+documentation:
+  primary: "64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax, Rev B)"
+
+resources:
+  product_page: "www.parallax.com (search 64010) - latest guide, free software, example programs, schematic"
+
+see_also:
+  - language/spin2/methods/_index.yaml
+
+ecosystem_position: "motor_control"
+hardware_family: "p2_accessory_addons"
+size_class: "large_addon"
+interface_type: "pwm"

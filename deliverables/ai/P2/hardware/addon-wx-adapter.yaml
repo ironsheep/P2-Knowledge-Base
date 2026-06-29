@@ -1,0 +1,111 @@
+component: P2 WX Adapter Add-on Board
+part_number: "64007"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonWxAdapter"
+category: addon
+aliases:
+  - "WX adapter"
+  - "P2 WX Adapter"
+  - "WiFi adapter board"
+  - "P2 WX Adapter Add-on Board"
+  - "wireless programming adapter"
+  - "ESP8266 adapter"
+  - "64007"
+  - "#64007 add-on board"
+
+description: >-
+  Passive adapter that hosts a Parallax WX Wi-Fi ESP8266 SIP module (#32420S) on
+  any P2 board's standard 2x6 accessory header. Adds serial-over-Wi-Fi from any
+  accessory header, and wireless P2 programming when plugged into the P56-P63
+  header marked with the "RES" logo (with the special P2 Wi-Fi firmware
+  P2_httpd_xxxx.ota, which hosts a drag/drop P2 binary loader on its web page).
+  The board has no programmable logic and ships with no code - it is a
+  signal-routing adapter between the 2x6 header and the 10-pin Wi-Fi-module socket.
+
+# --- Eval-header board model (uniform across accessory-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 8
+  addressing: >-
+    actual_P2_pin = base_pin + offset. Routes accessory-header pins to the WX
+    Wi-Fi module SIP socket. base_pin is the first pin of the 8-pin group.
+  base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
+  base_pin_note: >-
+    Wireless P2 PROGRAMMING requires the P56-P63 header marked with the "RES"
+    logo (base_pin 56); serial-over-Wi-Fi works on any accessory header.
+
+# "WiFi module pin" = the #32420 module signal each accessory pin routes to.
+signal_map:
+  - {offset: 0, signal: "RES (-> WiFi module reset)", direction: out, notes: "Wi-Fi module reset signal."}
+  - {offset: 1, signal: "PGM (-> WiFi module configure, ESP IO0)", direction: out, notes: "Wi-Fi module configure."}
+  - {offset: 2, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 3, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 4, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 5, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 6, signal: "DI (-> WiFi module RXD)", direction: out, notes: "P2 -> module serial (module RXD)."}
+  - {offset: 7, signal: "DO (-> WiFi module TXD)", direction: in, notes: "module -> P2 serial (module TXD)."}
+
+power_signals:
+  VIO3V3: "3.3V supply to the Wi-Fi module."
+  GND: "Common ground."
+
+special_header_pin:
+  RES_logo_pin: >-
+    The accessory header's "RES" label routes to the WiFi module CTS pin (ESP
+    IO13) and drives the TARGET P2 reset for wireless programming. NOTE the
+    name collision: header pin 0 -> module RES (module's own reset), while the
+    header's RES-logo position -> module CTS (the target-P2 reset). "RES" names
+    two different nets depending on side.
+
+specifications:
+  requires_host: true
+  io_pins_used: 8
+  requires_module: "Parallax WX Wi-Fi ESP8266 SIP Module (#32420S)"
+  physical:
+    module_socket: "10-pin SIP socket, 0.1\" spacing"
+    breakout: "Unpopulated 8-pin SIP pads exposing PGM, DBG, ASC, CTS, RTS, DO, DI, RES (for logic probes)"
+    connector: "2x6 female socket, 0.1\" spacing, standard P2 Accessory-compatible"
+    ap_enable: "Golden-Egg-shaped AP-enable pads (short 4x quickly to force AP-discovery mode)"
+    pcb_dimensions: "1.2 x 1.0 in (30.48 x 25.4 mm)"
+    operating_temp: "-40 to +85 C (-40 to +185 F)"
+
+wireless_programming_workflow:
+  - "Seat the WX SIP module on the adapter; plug the adapter into the RES-logo 2x6 header (wires P56-P63 + power + ground)."
+  - "Power up; module ASC LED blinks. Join its Wi-Fi network WX-123456 (touch AP golden-egg pads 4x if not visible)."
+  - "One-time: at http://192.168.4.1 upload P2_httpd_xxxx.ota (Firmware menu); under Settings set the reset dropdown to CTS (may default to DTR); SAVE + SAVE to FLASH. A 'P2 Loader' menu appears."
+  - "Use the P2 Drop Loader drag/drop area to upload P2 .binary files (any-language compiled). Success reports 'Done!'."
+
+required_companions:
+  - "P2 board with a 2x6 P56-P63 RES-logo header"
+  - "Parallax WX ESP8266 Wi-Fi Module - SIP, #32420S"
+  - "P2 programming software emitting binaries (e.g. Propeller Tool 2.3)"
+  - "Latest P2 Wi-Fi firmware + example binary from the 64007 product page"
+
+use_cases:
+  primary:
+    - "Wireless (Wi-Fi) programming of a P2 over the RES-logo header"
+    - "Serial-over-Wi-Fi from any accessory header"
+  secondary:
+    - "Untethered debug / data viewing over Wi-Fi"
+
+limitations:
+  - "Passive adapter - requires the #32420S Wi-Fi module (not included)"
+  - "Wireless programming needs the RES-logo P56-P63 header + special P2 Wi-Fi firmware"
+  - "No P2 code ships with the board"
+
+documentation:
+  primary: "64007 P2 WX Adapter Guide v1.0 (Parallax, 2020-11-12)"
+
+resources:
+  product_page: "www.parallax.com (search 64007) - latest guide, schematic, P2 firmware + example binary"
+
+see_also:
+  - hardware/addon-wx-wifi.yaml
+  - hardware/programming-prop-plug.yaml
+
+ecosystem_position: "wireless_connectivity"
+hardware_family: "p2_accessory_addons"
+size_class: "small_addon"
+interface_type: "serial_wifi_adapter"

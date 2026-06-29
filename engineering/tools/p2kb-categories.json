@@ -249,8 +249,16 @@
       "files": ["edge-breadboard-carrier", "edge-mini-breakout", "edge-standard-breakout"]
     },
     "eval_addon_boards": {
-      "description": "Boards that occupy a P2 Eval Board accessory header (base + offset model): the #64006 add-on set, the HUB75 adapter, and the HyperRAM/HyperFlash module. Ask 'what eval boards do we know about?' -> this is the full list.",
-      "files": ["addon-control-board", "addon-serial-host", "addon-led-matrix", "addon-digital-video-out", "addon-mini-prototyping", "addon-serial-device", "addon-goertzel-touch", "addon-av-breakout", "hub75_adapter", "addon-hyperram-hyperflash"]
+      "description": "Boards that occupy a P2 accessory header (base + offset model): the #64006 add-on set, the HUB75 adapter, the HyperRAM/HyperFlash module, and the addon-wave-2026-06 boards (microSD #64009, RTC #64013, HD Audio #64014, WX Adapter #64007, Universal Motor Driver #64010). Ask 'what eval/add-on boards do we know about?' -> this is the full list.",
+      "files": ["addon-control-board", "addon-serial-host", "addon-led-matrix", "addon-digital-video-out", "addon-mini-prototyping", "addon-serial-device", "addon-goertzel-touch", "addon-av-breakout", "hub75_adapter", "addon-hyperram-hyperflash", "addon-microsd", "addon-rtc", "addon-hd-audio", "addon-wx-adapter", "addon-motor-driver"]
+    },
+    "connectivity": {
+      "description": "Wireless / connectivity modules for P2 projects (Wi-Fi, etc.). The WX ESP8266 Wi-Fi module rides the WX Adapter (#64007) on a P2 accessory header.",
+      "files": ["addon-wx-wifi"]
+    },
+    "programming_tools": {
+      "description": "Tools for programming / communicating with a Propeller (P1/P2) - USB-to-serial adapters. Ask 'how do I program a P2?' / 'what do I need to load code?' -> this is where the Prop Plug lives.",
+      "files": ["programming-prop-plug"]
     },
     "reference": {
       "description": "Hardware selection, comparison, compatibility, and reference data",

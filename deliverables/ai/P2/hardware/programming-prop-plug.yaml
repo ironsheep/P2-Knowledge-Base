@@ -1,0 +1,101 @@
+component: Prop Plug Rev E
+part_number: "32201"
+hardware_revision: "Rev E"
+series: "Parallax Programming Tools"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwProgrammingPropPlug"
+category: programming_tool
+aliases:
+  - "Prop Plug"
+  - "PropPlug"
+  - "Prop Plug Rev E"
+  - "USB to serial programmer"
+  - "Propeller programming adapter"
+  - "FTDI FT231X programmer"
+  - "P2 programmer"
+  - "USB serial adapter"
+  - "32201"
+  - "#32201"
+
+description: >-
+  USB-to-serial programming and communication adapter for Propeller circuits
+  (P1 and P2). Slips onto a 4-pin, 0.1"-spaced male header to provide in-system
+  programming and serial communication. Asynchronous serial up to 3 Mbaud with
+  3.3 V and 5 V targets. Rev E uses the FTDI FT231X USB bridge (USB 2.0 Full
+  Speed) and adds 2-sided pin labelling, 2-sided activity LEDs, buffered I/O for
+  power-down isolation, and a selectable reset-control option pad.
+
+# NOTE: This is a USB-to-serial PROGRAMMING ADAPTER, not a P2 accessory-header
+# add-on board. It connects to a target's 4-pin programming header.
+eval_header_occupant: false
+
+# 4-pin female SIP socket (board silk, top->bottom) and the target connection
+# shown in the guide's Interface-to-Propeller figure.
+header_pinout:
+  - {pad: "RX", direction: "in (to Prop Plug)", connects_to: "Propeller TX = P30", notes: "PropPlug RX / Propeller TX."}
+  - {pad: "TX", direction: "out (from Prop Plug)", connects_to: "Propeller RX = P31", notes: "PropPlug TX / Propeller RX."}
+  - {pad: "RES", direction: "out (from Prop Plug)", connects_to: "Propeller RESn (reset)", notes: "DTR-controlled reset pulse by default (see reset_option)."}
+  - {pad: "VSS", direction: "-", connects_to: "GND", notes: "Common ground."}
+p2_note: >-
+  The guide's Interface figure illustrates a Propeller 1 (DIP-40) target; P2
+  programming uses the same four signals against the P2's serial programming pins.
+  Corroborated as the typical P2 Edge programmer by the #64010 and #64007 guides.
+
+reset_option:
+  default: "DTR-controlled reset (component to the left, connecting RES and DTR)"
+  alternatives:
+    - "RTS-controlled reset (move the component right, connecting RES and RTS)"
+    - "No reset pulse (remove the component)"
+  pulse: "~20 us typical (15-25 us; varies with target circuit), generated when USB DTR toggles low->high"
+  rev_e_note: "Selectable reset option pad + white silk marking area are new in Rev E."
+
+specifications:
+  power: "USB-powered (5 VDC), ~15 mA typical"
+  usb_interface: "USB 2.0 Full Speed; USB micro-B connector"
+  usb_bridge_ic: "FTDI FT231X"
+  uart: "True 3.3 V CMOS drive output, TTL input; buffered RX compatible with 3.3 V and 5 V, tolerant to 5.5 V"
+  baud_range: "300 baud to 3 Mbps, asynchronous serial"
+  activity_leds: "TX and RX, visible from either side of the board"
+  target_connector: "4-pin female SIP socket, 0.1\" spacing"
+  operating_temp: "-40 to +85 C (-40 to +185 F)"
+  pcb_dimensions: "0.93 x 0.48 in (23.5 x 12.1 mm)"
+  dimensions_with_connectors: "~1.3 x 0.48 in (~33 x 12.1 mm)"
+
+drivers:
+  requirement: "FTDI USB drivers required"
+  source: "https://www.parallax.com/usbdrivers (Windows + Mac)"
+  macos: "macOS 10.15 Catalina and later: drivers included in the OS, no install needed"
+  note: "Parallax software that relies on the FTDI drivers normally installs them automatically."
+
+required_parts:
+  - {part: "805-00016", role: "USB A to micro-B cable - required, NOT included"}
+related_parts:
+  - {part: "32200", role: "Prop Clip - predecessor / related product"}
+  - {part: "32420", role: "WX Wi-Fi Module - SIP first-4-pins (GND/RES/DI/DO) Prop-Plug-compatible for reflashing"}
+
+use_cases:
+  primary:
+    - "In-system programming of P1/P2 circuits via the 4-pin header"
+    - "Serial communication / debug between a PC and a Propeller target"
+  secondary:
+    - "Reflashing the WX Wi-Fi module (#32420) firmware via its breadboard header"
+
+limitations:
+  - "USB A->micro-B cable (#805-00016) not included"
+  - "Requires the target to expose a 4-pin programming header (RX/TX/RES/VSS)"
+  - "Requires FTDI drivers (auto-installed by most Parallax software; built in on macOS 10.15+)"
+
+documentation:
+  primary: "32201 Prop Plug Guide v3.0 (Parallax, Rev E, 2021-02-03)"
+
+resources:
+  product_page: "www.parallax.com (search 32201) - schematic, prior-version docs, resources"
+
+see_also:
+  - hardware/addon-wx-wifi.yaml
+
+ecosystem_position: "programming_adapter"
+hardware_family: "parallax_programming_tools"
+size_class: "tool"
+interface_type: "usb_serial"

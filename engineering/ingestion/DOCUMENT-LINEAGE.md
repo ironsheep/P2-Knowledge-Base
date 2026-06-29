@@ -18,6 +18,7 @@ must preserve fidelity; this doc is the map of those links.
 | parallax-wx-wifi (#32420) | **2026-06-27 re-extraction** (`sources/parallax-wx-wifi/`) | 2025-08-29 PDF-era capture (narrative + audit) | **re-extraction** (addon-wave-2026-06) — prior had **0 images** (12+-image debt); new run triangulates the 12-row pin table + catalogs 15 images. Prior content was incomplete, not wrong (0 conflicts). Prior archived `archive/` + `SUPERSEDED-BY.md` (§0.6). | prior archived (not deleted) |
 | p2-wx-adapter (#64007) | **2026-06-27 re-extraction** (`sources/p2-wx-adapter/`) | 2025-08-29 PDF-era capture | **re-extraction** (addon-wave-2026-06) — cleared 8+-image debt (0→11 images); camelot-confirmed pin table. Prior archived (§0.6). | prior archived (not deleted) |
 | p2-universal-motor-driver (#64010) | **2026-06-27 re-extraction** (`sources/p2-universal-motor-driver/`, folder renamed from `universal-motor-driver`) | 2025-08-28 raw-txt capture (~85%, no images) | **re-extraction** (addon-wave-2026-06) — adds 8 images + 7 clean tables; confirms no code in guide. Prior archived (§0.6). _Carry-forward defect: docling mislabeled pins 9/8 → authoritative = PWM_UH(9)/PWM_UL(8)._ | prior archived (not deleted) |
+| propplug-rev-e (#32201) | **2026-06-29 re-extraction** (`sources/propplug-rev-e/`) | 2025-08-29 PDF-era capture (`.txt` + audit, ~95%, no images) | **re-extraction** (addon-wave-2026-06 follow-on) — clean text layer; 4-pin header pinout (RX/TX/RES/VSS → P30/P31/RESn/GND) read from the page-3 figure (figure-only, no text layer); 2 figures cataloged; no code (adapter guide); 0 conflicts. Prior archived `archive/` + pointer README (§0.6). | prior archived (not deleted) |
 
 ## Source → output lineage  ‹which inputs feed which produced output›
 | Produced output (manual / KB) | Primary sources | Cross-check / support |
@@ -29,7 +30,7 @@ must preserve fidelity; this doc is the map of those links.
 | P2 Assembly Programming (deSilva-style) | authored · silicon-doc · pnut-ts | — |
 | `hardware/addon-hyperram-hyperflash.yaml` _(to author — F-122)_ | **hyperRam-n-hyperFlash** (#64004-ES Product Guide, ingested 2026-06-22) | board schematic (Rev A, title-block only) |
 | `hardware/addon-*.yaml` ×8 _(to rebuild — F-121)_ | **p2-eval-add-on-boards** per-board docs `boards/addon-*.md` (2025 `#64006`, ingested 2026-06-22) | 2020 `#64006-ES` set edition (cross-edition, forced-OCR) |
-| `hardware/addon-*.yaml` ×6 _(to author — F-116 findability)_ | **addon-wave-2026-06** (2026-06-27): microSD #64009 · RTC #64013 (PCF8523) · HD-Audio #64014 · WX-WiFi #32420 · WX-Adapter #64007 · Motor-Driver #64010 | AK5704 datasheet (🟡, for #64014 codec regs); datasheet-deferred fields → G-013/G-014 |
+| `hardware/addon-*.yaml` ×7 _(to author — F-116 findability)_ | **addon-wave-2026-06**: microSD #64009 · RTC #64013 (PCF8523) · HD-Audio #64014 · WX-WiFi #32420 · WX-Adapter #64007 · Motor-Driver #64010 (2026-06-27) · **Prop Plug #32201 (re-extracted 2026-06-29)** | AK5704 datasheet (🟡, for #64014 codec regs); datasheet-deferred fields → G-013/G-014 |
 | **YAML KB** (`deliverables/ai/P2`) | all qualified sources | _(re-ground)_ |
 | _(future)_ P1 outputs | p1-propeller-manual · p1-datasheet | desilva-p1-tutorial |
 

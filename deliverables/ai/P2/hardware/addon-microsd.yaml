@@ -1,0 +1,107 @@
+component: P2 microSD Add-on Board
+part_number: "64009"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonMicroSd"
+category: addon
+aliases:
+  - "microSD add-on"
+  - "micro SD card board"
+  - "SD card add-on"
+  - "P2 microSD Add-on Board"
+  - "SD card adapter"
+  - "microSD breakout"
+  - "64009"
+  - "#64009 add-on board"
+
+description: >-
+  Adapter board that connects a standard microSD card to the Propeller 2 over SPI
+  via a standard 2x6 accessory header. On a general accessory header it provides
+  data read/write (data logging, reading program data); on the special P2
+  programming header (IO pins 56-63) it also allows booting the P2 from a firmware
+  image stored on the microSD card. Seven 0.1" SIP breakout pads expose all card
+  signals for breadboard / other-MCU use.
+
+# --- Eval-header board model (uniform across accessory-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 8
+  addressing: >-
+    actual_P2_pin = base_pin + offset. The board defines its functions by OFFSET
+    within an 8-pin accessory-header group; the user chooses which header
+    (base_pin) it plugs into. base_pin is the first pin of that group.
+  base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
+  boot_note: >-
+    On the P2 programming header (base pin 56) the offsets map to absolute IOs
+    56-63 and the board supports booting from a binary firmware file on the card.
+
+# SD card SPI interface. "direction" is the P2-side role.
+signal_map:
+  - {offset: 0, signal: "Not Connected", direction: na,  notes: "N/C."}
+  - {offset: 1, signal: "DET (card detect)", direction: in, notes: "Internal 470K pull-up to 3V3; active low when a card is inserted."}
+  - {offset: 2, signal: "MISO (SD-DO, DAT0)", direction: in, notes: "Card->host data, via a 240R series resistor (provided for P2 boot compatibility)."}
+  - {offset: 3, signal: "MOSI (SD-DI, CMD)", direction: out, notes: "Host->card data."}
+  - {offset: 4, signal: "CS (SD-CS, CD/DAT3)", direction: out, notes: "SPI chip-select."}
+  - {offset: 5, signal: "CLK (SD-CLK)", direction: out, notes: "SPI clock (SCK)."}
+  - {offset: 6, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 7, signal: "Not Connected", direction: na, notes: "N/C."}
+
+power_signals:
+  VIO3V3: "3.3V supply to the microSD card (required to power the card). Do NOT supply power to both the accessory-header pin and the SIP breakout pad at once."
+  5V: "Not Connected (and not labelled) on this board."
+  GND: "Common ground."
+
+sip_breakout:
+  description: >-
+    Seven unpopulated 0.1" through-hole SIP pads expose all microSD signals for
+    logic probes, breadboard, or other-MCU use. Accepts a standard vertical or
+    right-angle pin header (not supplied).
+  pad_order_left_to_right: ["GND", "CLK", "CS", "MOSI", "MISO", "DET", "3V3"]
+
+interface: spi
+spi_notes: >-
+  Standard SD-over-SPI. The 240R series resistor on MISO is included specifically
+  for P2 boot compatibility. Card-detect (DET) is active-low with an on-board 470K
+  pull-up to 3V3.
+
+specifications:
+  requires_host: true
+  io_pins_used: 8
+  card_included: false
+  compatible_hosts:
+    - "Any P2 development board with a standard 2x6 accessory header"
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020) / Mini Breakout (64019)"
+  physical:
+    connector: "2x6 female socket, 0.1\" spacing, standard P2 Accessory-compatible"
+    breakout: "7-pin SIP through-hole pads, 0.1\" spacing"
+    pcb_dimensions: "0.8 x 1.05 in (20.32 x 26.67 mm)"
+    operating_temp: "-40 to +85 C (-40 to +185 F)"
+
+use_cases:
+  primary:
+    - "Data logging to / reading data from a microSD card"
+    - "Booting the P2 from a firmware image on the card (programming header, IO 56-63)"
+    - "Mass storage for P2 applications"
+  secondary:
+    - "Breadboard / other-MCU microSD access via the SIP breakout pads"
+
+limitations:
+  - "microSD card not included"
+  - "Boot-from-card requires seating on the P2 programming header (IO 56-63)"
+  - "Do not power the card from both the header pin and the SIP 3V3 pad simultaneously"
+
+documentation:
+  primary: "64009 P2 microSD Add-on Guide v1.0 (Parallax)"
+
+resources:
+  product_page: "www.parallax.com (search 64009) - latest guide, schematic, example code"
+
+see_also:
+  - language/spin2/methods/_index.yaml
+
+ecosystem_position: "mass_storage"
+hardware_family: "p2_accessory_addons"
+size_class: "small_addon"
+interface_type: "spi"

@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.12.0] - 2026-06-29
+
+**P2 add-on board hardware coverage**
+
+### Added
+- Seven P2 hardware boards now documented, each with part number, accessory-header pin map, and electrical specifications: microSD Add-on (#64009), RTC Add-on (#64013), HD Audio Add-on Set (#64014), WX Wi-Fi Module (#32420), WX Adapter (#64007), Universal Motor Driver (#64010), and the Prop Plug Rev E programmer (#32201).
+- RTC board (#64013) carries the NXP PCF8523 I2C address and complete register map covering timekeeping, alarm, CLKOUT, and clock-calibration work.
+- HD Audio board (#64014) carries the AK5704 codec I2C address plus the P2 Smart-Pin DAC drive-strength scheme (four base impedance/voltage modes across one to four paralleled pins).
+- WX Wi-Fi Module (#32420) carries its serial command protocol, baud-rate settings, and the P2 wireless-programming path through the WX Adapter.
+- Add-on boards are findable by name and grouped under hardware categories for connectivity modules and programming tools.
+
 ## [1.11.2] - 2026-06-25
 
 **CORDIC rotation, COGINIT, and LSTRING reference accuracy**

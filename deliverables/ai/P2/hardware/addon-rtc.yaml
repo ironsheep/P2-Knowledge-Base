@@ -1,0 +1,142 @@
+component: P2 RTC Add-on Board
+part_number: "64013"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonRtc"
+category: addon
+aliases:
+  - "RTC add-on"
+  - "real-time clock board"
+  - "P2 RTC Add-on Board"
+  - "PCF8523 board"
+  - "battery-backed clock add-on"
+  - "real time clock calendar"
+  - "64013"
+  - "#64013 add-on board"
+
+description: >-
+  Single-accessory add-on adding a battery-backed real-time clock + calendar +
+  alarm to a P2 system. Built around the NXP PCF8523 CMOS RTC, controlled over
+  I2C. An on-board rechargeable lithium cell (Seiko MS421R) keeps time across
+  power loss, trickle-charged from the 3.3V rail while the host is powered.
+
+# --- Eval-header board model (uniform across accessory-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 8
+  addressing: >-
+    actual_P2_pin = base_pin + offset. The board uses only offsets +0/+1 of an
+    8-pin accessory-header group; the user chooses which header (base_pin) it
+    plugs into. base_pin is the first pin of that group.
+  base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
+
+signal_map:
+  - offset: 0
+    signal: "SCL / INT / CLKOUT (shared)"
+    direction: bidir
+    notes: >-
+      One shared IO pin: I2C clock (SCL, input), OR interrupt output (INT), OR
+      clock output (CLKOUT). See pin_mode_tip.
+  - offset: 1
+    signal: "SDA (I2C serial data)"
+    direction: bidir
+    notes: "I2C serial data I/O (open-drain)."
+  - {offset: 2, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 3, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 4, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 5, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 6, signal: "Not Connected", direction: na, notes: "N/C."}
+  - {offset: 7, signal: "Not Connected", direction: na, notes: "N/C."}
+
+power_signals:
+  VIO3V3: "3.3V supply; powers the RTC and trickle-charges the backup battery."
+  GND: "Common ground."
+
+interface: i2c
+pin_mode_tip: >-
+  SCL, INT, and CLKOUT share the single +0 IO pin (board-author guidance):
+  to use I2C SCL, set I2C output mode with a 3.3 kohm pull-up; to use INT or
+  CLKOUT, first configure them over I2C per the RTC datasheet, then disable I2C
+  and set the P2 pin to input mode with a 150 kohm pull-up.
+
+rtc_chip:
+  part: "NXP PCF8523"
+  type: "CMOS real-time clock + calendar + alarm"
+  bus: "I2C (open-drain), up to 1000 kbit/s"
+  i2c_speeds_khz: [100, 400, 1000]
+  signal_levels: "3.3 V"
+  i2c_slave_address_7bit: "$68 (%1101000) - the single fixed address reserved for the PCF8523"
+  i2c_address_bytes: "write = $D0 (%1101_0000), read = $D1 (%1101_0001)"
+  register_format: "BCD for time/date counters (use bcd<->dec conversion)"
+  software_reset: "write $58 (%01011000) to Control_1 (00h)"
+  source_trace: >-
+    Address + register map are NOT in the board guide (it defers to the
+    datasheet); resolved from the NXP PCF8523 datasheet (Table 46 slave address;
+    register-overview Table 5, addresses 00h-13h) and CORROBORATED by the
+    official Parallax 64013 RTC driver (64013_RTC_Driver.spin2, M. Mulholland /
+    JonnyMac, MIT) which uses $68 at 400 kHz with a 3.3K pull-up. (Gap G-013
+    resolved.)
+  register_map:
+    "00h": "Control_1 (CAP_SEL, STOP, SR, 12_24, SIE, AIE, CIE)"
+    "01h": "Control_2 (alarm/timer interrupt flags + enables)"
+    "02h": "Control_3 (PM[2:0] battery-switchover mode, BSF/BLF battery flags)"
+    "03h": "Seconds (bit7 = OS oscillator-stop flag) + SECONDS 0-59"
+    "04h": "Minutes 0-59"
+    "05h": "Hours (AMPM + 12h, or 0-23 24h mode)"
+    "06h": "Days 1-31"
+    "07h": "Weekdays 0-6"
+    "08h": "Months 1-12"
+    "09h": "Years 0-99"
+    "0Ah-0Dh": "Minute/Hour/Day/Weekday alarm (each with its AEN enable bit)"
+    "0Eh": "Offset (MODE + OFFSET[6:0] clock fine-tuning)"
+    "0Fh": "Tmr_CLKOUT_ctrl (COF[2:0] CLKOUT freq, timer-A/B mode)"
+    "10h-13h": "Timer A freq/reg, Timer B freq/reg"
+  clkout_frequencies_hz: [32768, 16384, 8192, 4096, 1024, 32, 1, 0]
+
+specifications:
+  requires_host: true
+  io_pins_used: 2
+  supply_voltage: "+3.3 VDC"
+  battery:
+    cell: "Seiko MS421R rechargeable lithium-metal (built-in, non-removable)"
+    capacity: "1.5 mAh nominal, 0.11 g"
+    backup_current_typ: "150 nA"
+  physical:
+    connector: "dual 2x6-pin female passthrough headers, 0.1\" spacing (stackable)"
+    mounting_hole: "3.2 mm diameter"
+    pcb_dimensions: "0.8 x 1 in (20.32 x 25.4 mm)"
+    operating_temp: "-20 to +60 C (-4 to +140 F)"
+  transport_note: >-
+    Built-in lithium-metal cell (<=1 g lithium) meets UN Manual of Tests &
+    Criteria Part III sec 38.3; transportable as Class 9 Dangerous Goods.
+
+use_cases:
+  primary:
+    - "Battery-backed timekeeping / calendar across power loss"
+    - "Alarm and periodic-interrupt generation (PCF8523 INT)"
+    - "Timestamped data logging"
+  secondary:
+    - "Clock output (CLKOUT) source for a P2 application"
+
+limitations:
+  - "Uses a shared +0 pin for SCL/INT/CLKOUT - cannot use all three simultaneously"
+  - "Time/date stored in BCD; I2C address ($68) + register map come from the PCF8523 datasheet, not the board guide"
+  - "No code in the board guide itself; an official MIT Spin2 driver is on the product page"
+
+documentation:
+  primary: "64013 P2 RTC Add-on Guide v1.0 (Parallax, 2022-11-29)"
+
+resources:
+  product_page: "www.parallax.com (search 64013) - latest guide, schematic, example code"
+  rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
+  example_driver: "Parallax 64013 RTC Driver/Example (Spin2, MIT) - on the 64013 product page; uses jm_i2c at 400 kHz, 3.3K pull-up"
+  battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
+
+see_also:
+  - language/spin2/methods/_index.yaml
+
+ecosystem_position: "timekeeping"
+hardware_family: "p2_accessory_addons"
+size_class: "small_addon"
+interface_type: "i2c"

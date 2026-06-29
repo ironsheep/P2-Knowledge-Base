@@ -120,7 +120,35 @@ addon_board_host_compatibility:
         pins_used: "P0-P7"
         size: "large_module"
         conflicts: "check_physical_clearance"
-        
+
+      # --- addon-wave-2026-06 boards ---
+      - part: "64009"
+        name: "microSD Add-on"
+        pins_used: "8-pin group (base+0..base+7); SPI"
+        note: "Boot-from-card requires the P56-P63 programming header"
+        conflicts: "none_low_power"
+
+      - part: "64013"
+        name: "RTC Add-on (PCF8523)"
+        pins_used: "base+0/+1 (I2C) of an 8-pin group"
+        conflicts: "none_low_power"
+
+      - part: "64014"
+        name: "HD Audio Add-on Set (ADC + DAC)"
+        pins_used: "8-pin group per board (two boards, side-by-side at a dual port)"
+        conflicts: "none"
+
+      - part: "64007"
+        name: "WX Adapter (hosts #32420S Wi-Fi module)"
+        pins_used: "8-pin group; wireless programming needs the P56-P63 RES-logo header"
+        conflicts: "none"
+
+      - part: "64010"
+        name: "Universal Motor Driver"
+        pins_used: "16 pins (dual accessory header; PWM 15-8, feedback 7-0)"
+        size: "large_module (70x70 mm)"
+        conflicts: "uses a full dual header; high-current - check power budget"
+
   edge_carrier_compatibility:
     breadboard_carrier:
       host: "P2 Edge Module Breadboard (64020)"
