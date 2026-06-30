@@ -94,7 +94,8 @@ decomposition_forces:
       governs: |
         The contract chosen for each inter-cog (or object) seam — blocking call,
         latest-wins mailbox, ring buffer, request/response with ack, lock-free
-        published telemetry. The coupling the deadline tolerates determines where the
+        published telemetry, or fan-out publication (one producer -> a shared pool ->
+        multiple consumers). The coupling the deadline tolerates determines where the
         seam goes and who depends on whom.
       p2_mechanism: |
         Hub mailboxes / parameter blocks, locks, the hub FIFO and streamer for bulk

@@ -4,16 +4,19 @@ category: decomposition_reasoning
 
 summary: |
   The toolkit for JUDGING a cut, not merely proposing one — the part most absent from
-  the P2 knowledge base today and the highest-value thing this layer supplies. Three
+  the P2 knowledge base today and the highest-value thing this layer supplies. Four
   tools, in increasing sharpness: coupling stated as a countable integer; connascence
   (Page-Jones) as the sharpest measure, with a concrete P2 manifestation for each type;
-  and back-pressure stated precisely as a min-cut objective. Together they let an agent
+  back-pressure stated precisely as a min-cut objective; and observability of a cut —
+  whether each side's decisions can be watched at runtime. Together they let an agent
   EVALUATE any decomposition against a crisp objective rather than an aesthetic.
 
-  All three are PRINCIPLE-grade, grounded in the durable canon (Constantine & Yourdon
-  for coupling/cohesion; Page-Jones for connascence). The P2-specific danger they make
-  visible is dynamic connascence crossing a cog boundary, which the hardware expresses
-  as jitter and races.
+  The first three are PRINCIPLE-grade, grounded in the durable canon (Constantine &
+  Yourdon for coupling/cohesion; Page-Jones for connascence); the fourth (observability)
+  is a P2-practice principle grounded in field experience. The P2-specific danger the
+  first three make visible is dynamic connascence crossing a cog boundary, which the
+  hardware expresses as jitter and races; the fourth catches the cut that is correct but
+  cannot be watched.
 
 coupling_as_integer:
   authority_tier: PRINCIPLE
@@ -83,6 +86,32 @@ back_pressure_min_cut:
   grounding:
     - "Channel costs: hub mailbox traffic, lock contention, attention-signal latency — architecture/p2-architecture-mental-model.yaml (inter_cog_communication); architecture/locks.yaml; architecture/cog_attention.yaml"
 
+observability_of_a_cut:
+  authority_tier: PRINCIPLE
+  body: |
+    The first three tools all optimize CORRECTNESS and PERFORMANCE; none can express
+    "this cut is right but you cannot WATCH it work." Observability is a fourth axis:
+    after a boundary is drawn, can each side's decisions be made visible at runtime — in
+    debug() on live hardware, in production — WITHOUT violating a critical section? A cut
+    that is well-coupled and a clean min-cut can still fail here: folding a decision into
+    an atomic commit hides it; the same decision kept as its own visible stage can be
+    watched.
+  p2_specifics: |
+    On the P2 this is cheap: debug() and COGATN make runtime visibility nearly free, so
+    prefer cuts whose decisions surface there. Two disciplines cluster under this lens:
+      - test-side instrumentation: keep production libraries clean of test code; debug
+        never executes inside a critical section (instrumentation lives test-side, around
+        the seam, not within it).
+      - single exit point per method: a debug() after an early return silently never runs;
+        one exit guarantees end-of-method instrumentation is always reached.
+  distinct_from_c4: |
+    NOT the same as the C4 testability seam. C4 is BRING-UP ISOLATION (can I exercise a
+    layer standalone before assembly?); this is RUNTIME OBSERVABILITY (can I watch a
+    seam's live decisions in production?). A cut can pass C4 and still fail observability
+    — a folded decimator was perfectly testable yet had to be un-folded to be watchable.
+  grounding:
+    - "debug() runtime visibility + COGATN low-cost signalling make observability cheap — architecture/cog_attention.yaml"
+
 how_to_apply:
   authority_tier: PRINCIPLE
   body: |
@@ -90,9 +119,10 @@ how_to_apply:
     and list the connascence types that cross it; (2) flag every DYNAMIC connascence that
     crosses a cog boundary as a jitter/race risk and try to convert it to static at the
     seam (e.g. publish-last to tame execution-order; a single shared routine to tame
-    algorithm); (3) compute each boundary's back-pressure and confirm it is a min-cut. If
-    a cut is not a min-cut, re-draw it — that is the signal Force 1/Force 4 mis-placed a
-    boundary.
+    algorithm); (3) compute each boundary's back-pressure and confirm it is a min-cut; (4)
+    check OBSERVABILITY — can each side's decisions be watched at runtime without entering
+    a critical section? If a cut is not a min-cut, re-draw it — that is the signal Force
+    1/Force 4 mis-placed a boundary; if it cannot be watched, prefer the variant that can.
 
 related:
   - architecture/p2-architecture-mental-model.yaml
@@ -109,5 +139,8 @@ see_also:
   - "Force 1 — the cog boundaries this judges: p2kbArchResourceOwnership"
   - "The smells a high-back-pressure cut produces: p2kbArchSpatialComputing"
   - "The budget the min-cut is checked against: p2kbArchResourceBudget"
+  - "The decimation fold-vs-stage reversal the observability lens explains: p2kbArchRateAdaptation"
+  - "The streaming derivation that applies the observability lens (step 8): p2kbArchWorkedDerivationStreamingPipeline"
+  - "Bring-up isolation (c4) — the testability seam observability is distinct from: p2kbArchCrossCuttingForces"
 
-oneliner: "Judge a cut with three tools: coupling as a countable integer, connascence (maximize inside / minimize crossing / convert dynamic->static, each type with a P2 manifestation), and back-pressure as a min-cut objective."
+oneliner: "Judge a cut with four tools: coupling as a countable integer, connascence (maximize inside / minimize crossing / convert dynamic->static), back-pressure as a min-cut objective, and observability (can each side's decisions be watched at runtime without entering a critical section?)."

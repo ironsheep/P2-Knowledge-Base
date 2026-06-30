@@ -1,12 +1,43 @@
 keyword: "OBJ"
 type: keyword
 category: "Block Structure"
+aliases:
+  - OBJ block
+  - object instances
+  - child object declaration
+  - object instantiation
+  - CON override syntax
 description: |
-  Object section - declares object instances
+  Object section - declares instances of child objects by source filename. Each named
+  instance gives this object access to the child's public (PUB) methods and CON constants.
 syntax: |
   OBJ
     name : "filename"
+overrides: |
+  A child's overridable CON constants can be set per instance at declaration with
+  | CONST = value (compile-time configuration, no preprocessor):
+    OBJ
+      fast : "timer" | DEFAULT_PERIOD_MS = 100
+      slow : "timer" | DEFAULT_PERIOD_MS = 2000
+  An array of instances uses a count:  name[N] : "filename".
+  NOTE: an override forks a separate per-instance image+DAT only if it changes the
+  compiled bytes; an override that leaves the image byte-identical is silently merged to
+  one shared DAT (see p2kbSpin2ObjectImageDedup). The override-and-instance semantics are
+  documented in full under the configurable_object archetype.
 examples:
   - |
     OBJ
       serial : "FullDuplexSerial"
+  - |
+    OBJ
+      pca[2] : "pca9685" | I2C_TAG = 0   ' arrayed, per-instance override
+related:
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/concepts/object-image-dedup.yaml
+  - language/spin2/keywords/VAR.yaml
+  - language/spin2/keywords/CON.yaml
+see_also:
+  - "The override/instantiation semantics in full (configurable_object): p2kbSpin2ObjectArchetypes"
+  - "When a CON override forks vs silently merges the DAT: p2kbSpin2ObjectImageDedup"
+  - "Replicating an object tree onto N identical shared buses: p2kbArchSharedBusReplication"
+oneliner: "OBJ declares child-object instances by filename (name : \"file\"), optionally arrayed and with per-instance | CONST = value overrides."

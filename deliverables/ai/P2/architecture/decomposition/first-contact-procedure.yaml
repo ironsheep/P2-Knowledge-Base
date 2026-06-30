@@ -111,7 +111,21 @@ procedure:
   output_summary: |
     The output is the object-and-cog set plus the resource-budget allocation table.
     Judge it with the evaluation vocabulary (coupling, connascence across cog
-    boundaries, back-pressure) before committing.
+    boundaries, back-pressure, observability) before committing.
+  post_ship_audit:
+    authority_tier: PRINCIPLE
+    body: |
+      The forward routine (steps 1-9) produces the object-and-cog set; this closing,
+      POST-SHIP practice keeps the forces FALSIFIABLE. After the system ships, pair the
+      derivation with an AS-BUILT AUDIT: record which cuts survived to code and which
+      diverged, each tagged by the AUTHORITY TIER of the reasoning behind it
+      (PHYSICS/PRINCIPLE/HEURISTIC). The pattern is observed to hold — hardware-anchored
+      cuts survive, pattern-anchored cuts drift — so the audit is how the tiers stay
+      honest rather than asserted, and how a project notices when it has pushed past the
+      canon (the glossary's "name the new discipline and grow an entry"). It also surfaces
+      built-but-not-adopted gaps — a mechanism implemented but used by only some seams
+      (e.g. an event-wake path wired into a FIFO manager but adopted by one of three
+      consumers) — which a forward derivation alone cannot see.
 
 related:
   - architecture/p2-architecture-mental-model.yaml
@@ -129,6 +143,7 @@ see_also:
   - "Cross-cutting forces C1-C5: p2kbArchCrossCuttingForces"
   - "Judging the result: p2kbArchEvaluationVocabulary"
   - "The resource-budget artifact: p2kbArchResourceBudget"
-  - "The procedure exercised end-to-end: p2kbArchWorkedDerivationRobotDog"
+  - "The procedure exercised end-to-end (control plane): p2kbArchWorkedDerivationRobotDog"
+  - "The procedure exercised end-to-end (streaming / data plane): p2kbArchWorkedDerivationStreamingPipeline"
 
 oneliner: "The ordered observation-to-force routine for an unseen P2 hardware mix: enumerate wires -> smart-pin triage -> assign cog owners -> map cadences -> resolve same-bus rates in-cog -> draw seams -> layer -> place cross-cutting -> reconcile."

@@ -5,15 +5,16 @@ component: CORDIC
 category: math_engine
 description: |
   54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver shared by
-  all COGs via hub rotation. Each COG gets access every 8 clocks, enabling up to
-  7-8 operations in flight per COG simultaneously.
+  all COGs via hub rotation. Each COG gets access every 8 clocks, enabling several
+  operations in flight per COG simultaneously (derived: up to ~6-7 = 54-stage pipeline
+  divided by the 8-clock hub slot).
 
 architecture:
   pipeline_stages: 54
   pipeline_type: "Fully pipelined"
   access_model: "Hub rotation (like hub RAM)"
   cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; Silicon Doc verbatim: 'every 1/2/4/8/16 (#cogs) clocks')"
-  ops_in_flight_per_cog: "7-8 maximum"
+  ops_in_flight_per_cog: "up to ~6-7 (derived: 54-stage pipeline / 8-clock hub slot = 54/8; the Silicon Doc says 'several', stating no hard count)"
   system_throughput: "1 operation per clock (all COGs combined)"
   result_latency: "55 clocks (Silicon Doc v35 verbatim: 'Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
   pipeline_depth: "54 clocks (separate from result latency; this is the depth that enables overlapping ops)"
@@ -21,7 +22,7 @@ architecture:
   arbitration: "Round-robin via hub rotation"
 
 critical_usage_pattern:
-  fill_phase: "Submit 7-8 ops before expecting results"
+  fill_phase: "Submit ~6-7 ops before expecting results (derived: 54/8 = 6.75; the first result returns ~55 clocks after issue)"
   steady_state: "Each 8-clock slot: retrieve one result + submit one op"
   drain_phase: "Retrieve remaining results (may stall)"
   warning: "GETQX/GETQY stalls COG if result not ready - use POLLQMT to check"

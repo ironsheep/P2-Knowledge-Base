@@ -34,38 +34,36 @@ key_features:
 available_methods:
   trigonometric:
     qsin:
-      syntax: "result := QSIN(angle, length)"
-      description: "Calculate sine: result = length × sin(angle)"
-      example: "y := QSIN($4000_0000, 1000)  ' sin(90°) × 1000 = 1000"
+      syntax: "y := QSIN(length, step, stepsInCircle)"
+      description: "Calculate sine: y = length × sin( (step / stepsInCircle) × 2Pi ). stepsInCircle is the caller-chosen angle unit (360 for degrees, 0 selects a full circle of 2^32 steps)."
+      example: "y := QSIN(1000, 90, 360)  ' sin(90°) × 1000 -> ~1000"
 
     qcos:
-      syntax: "result := QCOS(angle, length)"
-      description: "Calculate cosine: result = length × cos(angle)"
-      example: "x := QCOS($4000_0000, 1000)  ' cos(90°) × 1000 = 0"
+      syntax: "x := QCOS(length, step, stepsInCircle)"
+      description: "Calculate cosine: x = length × cos( (step / stepsInCircle) × 2Pi ). stepsInCircle is the caller-chosen angle unit (360 for degrees, 0 selects a full circle of 2^32 steps)."
+      example: "x := QCOS(1000, 0, 360)  ' cos(0°) × 1000 -> ~1000"
 
   coordinate_transforms:
     rotxy:
-      syntax: "ROTXY(@x, @y, angle)"
-      description: "Rotate point (x,y) around origin by angle"
+      syntax: "x2, y2 := ROTXY(x, y, angle)"
+      description: "Rotate point (x,y) around origin by angle; returns the rotated coordinates"
       example: |
-        x := 100
-        y := 0
-        ROTXY(@x, @y, $2000_0000)  ' Rotate 45 degrees
-        ' x ≈ 71, y ≈ 71
+        x2, y2 := ROTXY(100, 0, $2000_0000)  ' Rotate 45 degrees
+        ' x2 ≈ 71, y2 ≈ 71
 
     polxy:
-      syntax: "POLXY(@x, @y, angle, length)"
-      description: "Polar to cartesian: convert (length, angle) to (x, y)"
+      syntax: "x, y := POLXY(rho, theta)"
+      description: "Polar to cartesian: convert (rho=length, theta=angle) to (x, y)"
       example: |
-        POLXY(@x, @y, $4000_0000, 100)  ' 90° at radius 100
-        ' x = 0, y = 100
+        x, y := POLXY(100, $4000_0000)  ' radius 100 at 90°
+        ' x ≈ 0, y ≈ 100
 
     xypol:
-      syntax: "XYPOL(@length, @angle, x, y)"
-      description: "Cartesian to polar: convert (x, y) to (length, angle)"
+      syntax: "rho, theta := XYPOL(x, y)"
+      description: "Cartesian to polar: convert (x, y) to (rho=length, theta=angle)"
       example: |
-        XYPOL(@len, @ang, 100, 100)  ' Point at (100, 100)
-        ' len ≈ 141, ang = $2000_0000 (45°)
+        rho, theta := XYPOL(100, 100)  ' Point at (100, 100)
+        ' rho ≈ 141, theta = $2000_0000 (45°)
 
   logarithmic:
     qlog:
@@ -87,32 +85,32 @@ available_methods:
 common_patterns:
   sine_wave_generation:
     code: |
-      repeat angle from 0 to $FFFF_FFFF step $0100_0000
-        amplitude := QSIN(angle, max_amplitude)
+      repeat ang from 0 to 359
+        amplitude := QSIN(max_amplitude, ang, 360)
         output(amplitude)
-    description: "Generate smooth sine wave output"
+    description: "Generate smooth sine wave output (one cycle over 360 steps)"
 
   circular_motion:
     code: |
       repeat
-        x := center_x + QCOS(angle, radius)
-        y := center_y + QSIN(angle, radius)
+        x := center_x + QCOS(radius, ang, 360)
+        y := center_y + QSIN(radius, ang, 360)
         draw_point(x, y)
-        angle += speed
+        ang += speed
     description: "Animate object in circular path"
 
   distance_calculation:
     code: |
       dx := x2 - x1
       dy := y2 - y1
-      XYPOL(@distance, @unused, dx, dy)
+      distance, unused := XYPOL(dx, dy)
     description: "Calculate distance between two points"
 
   angle_calculation:
     code: |
       dx := target_x - current_x
       dy := target_y - current_y
-      XYPOL(@unused, @heading, dx, dy)
+      unused, heading := XYPOL(dx, dy)
     description: "Calculate angle to target"
 
 performance_notes:

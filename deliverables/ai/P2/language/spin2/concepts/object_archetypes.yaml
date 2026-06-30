@@ -1,6 +1,13 @@
 concept: Object Archetypes
 type: concept
 category: Program Structure
+aliases:
+  - object archetypes
+  - configurable object
+  - CON override instantiation
+  - top-level application object
+  - driver object
+  - object composition patterns
 
 description: |
   Canonical object archetypes for Spin2 development. Each archetype has specific
@@ -150,7 +157,7 @@ archetypes:
     characteristics:
       - "CON values serve as defaults"
       - "Parent uses | CONST = value syntax to override"
-      - "Each override creates separate instance"
+      - "An override creates a separate image+DAT ONLY if it changes the compiled bytes; otherwise pnut-ts de-dupes the identical images and the instances silently share one DAT. To FORCE a fork, seed a DAT long from the override (see image_fork_note)."
       - "Compile-time configuration without preprocessor"
     child_template: |
       CON { defaults - can be overridden by parent }
@@ -168,8 +175,21 @@ archetypes:
         fast_timer : "timer" | DEFAULT_PERIOD_MS = 100
         slow_timer : "timer" | DEFAULT_PERIOD_MS = 2000
         custom_pin : "timer" | DEFAULT_PIN = 16
+    image_fork_note: |
+      pnut-ts de-duplicates object images by COMPILED-IMAGE CONTENT, not by override-set.
+      An override only forks a separate image+DAT if it CHANGES the compiled bytes; an
+      override that leaves the image byte-identical (e.g. declared but never referenced) is
+      silently merged back to one shared DAT — with NO compiler error. To force a per-
+      instance DAT, seed a DAT long from the override so the image genuinely differs:
+        CON  BUS_TAG = -1
+        DAT  tag  LONG  BUS_TAG    ' SEEDED -> image differs -> independent DAT
+      Cascade through tiers by having each tier seed its own DAT AND forward the constant
+      into the child's override under a DISTINCT name (| CHILD_TAG = THIS_TAG, never
+      | TAG = TAG — the same-token form fails to parse). Full mechanism, measurements, and
+      guardrails: p2kbSpin2ObjectImageDedup.
     related_patterns:
       - "language/spin2/constructs/blocks.yaml"
+      - "language/spin2/concepts/object-image-dedup.yaml"
 
   - archetype: "buffered_io_object"
     description: |
@@ -483,6 +503,8 @@ related:
   - language/spin2/patterns/implementation/spin2_buffer_management.yaml
   - language/spin2/patterns/implementation/spin2_state_machine.yaml
   - language/spin2/keywords/VAR.yaml
+  - language/spin2/keywords/OBJ.yaml
+  - language/spin2/concepts/object-image-dedup.yaml
 
 see_also:
   - "Object composition"
@@ -490,5 +512,7 @@ see_also:
   - "Multi-COG programming"
   - "Resource management"
   - "The grammar that DERIVES these archetypes (forces as generative rules): p2kbArchDecompositionMethod"
+  - "How CON overrides fork (or silently merge) the DAT singleton: p2kbSpin2ObjectImageDedup"
+  - "Replicating a configurable object tree onto N identical shared buses: p2kbArchSharedBusReplication"
 
 oneliner: "Canonical object archetypes for Spin2 development with patterns and anti-patterns"

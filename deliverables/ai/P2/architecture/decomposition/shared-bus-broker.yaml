@@ -1,0 +1,78 @@
+concept: shared_bus_broker
+title: "Shared-Bus Broker with Per-Cog Mailboxes (One Bus, Many Cogs)"
+category: decomposition_reasoning
+aliases:
+  - shared bus broker
+  - per-cog mailbox
+  - resident arbiter cog
+  - one bus many cogs
+  - PSRAM broker
+  - bus arbiter cog
+
+summary: |
+  Force 1's DAT singleton covers ONE cog with MANY register-level callers (the robot-dog I2C
+  singleton). This is the orthogonal case it does not: ONE serialized bus shared by MANY COGS,
+  arbitrated by a resident broker cog that gives each client cog a private mailbox slot. It is the
+  resolution when a Force-1-owned resource must serve multiple cogs rather than multiple in-cog
+  callers. (Contrast p2kbArchSharedBusReplication, which is the N-IDENTICAL-buses case; this is the
+  one-bus-many-cogs case.)
+
+authority_tier: PATTERN
+illustrative_not_normative: true
+
+why_a_broker_cog:
+  authority_tier: PHYSICS  # premise PHYSICS, conclusion PRINCIPLE (inline-tagged)
+  body: |
+    [PHYSICS] The P2 has no cog-independent DMA engine. Its DMA-class movers — the streamer and the
+    FIFO — are PER-COG resources (the FIFO is documented as "no sharing between COGs"; the streamer's
+    resources are enumerated per cog). There is no central controller a cog can hand a bus to and walk
+    away.
+    [PRINCIPLE] Therefore a hardware bus shared ACROSS cogs cannot be arbitrated by hardware alone —
+    it needs an always-resident arbiter COG that owns the bus and serializes every client's access.
+    The owning cog IS the mutex.
+
+the_pattern:
+  authority_tier: PATTERN
+  body: |
+    A resident broker cog owns the bus. Each client cog gets a private mailbox slot at a fixed offset
+    (e.g. base + cogid() * SLOT_LONGS), so there is exactly one writer per slot (no lock needed on the
+    slot itself). A client writes its request into its own slot; the broker round-robins the slots,
+    services each non-idle request on the bus, and acks. One direction bit (or the sign of a length
+    field) tells the broker read-vs-write. Force 1 holds: one owner (the broker) per bus.
+  skeleton: |
+    ' --- broker cog (resident): round-robin the per-cog mailbox slots ---
+    PUB broker() | cog, req
+      repeat
+        repeat cog from 0 to 7
+          req := mailbox[cog]                 ' client request word; 0 = idle
+          if req
+            serviceOnBus(cog, req)            ' perform the transfer for that cog
+            mailbox[cog] := 0                 ' ack (single writer per slot, no lock)
+    ' --- client side (any cog) ---
+    PUB request(args)
+      mailbox[cogid()] := encode(args)        ' sign of length encodes direction
+      repeat while mailbox[cogid()]           ' wait for ack
+
+when_to_use:
+  authority_tier: HEURISTIC
+  body: |
+    Reach for this whenever ONE serialized hardware bus must be reached from MORE THAN ONE cog and
+    the P2's lack of cog-independent DMA forces a cog to be the arbiter: PSRAM/HyperRAM framebuffers,
+    SD cards, multi-channel DACs, network controllers. If instead the bus is reached from many
+    callers in ONE cog, use the DAT singleton (Force 1). If you need N IDENTICAL independent buses,
+    see p2kbArchSharedBusReplication.
+
+related:
+  - architecture/decomposition/resource-ownership.yaml
+  - architecture/decomposition/shared-bus-replication.yaml
+  - architecture/cog_attention.yaml
+  - architecture/fifo.yaml
+  - architecture/hub.yaml
+
+see_also:
+  - "Force 1 — the one-owner-per-resource rule this resolves for the many-cogs case: p2kbArchResourceOwnership"
+  - "The orthogonal case — N identical buses, each one owner: p2kbArchSharedBusReplication"
+  - "The streaming derivation that uses a PSRAM broker (step 3): p2kbArchWorkedDerivationStreamingPipeline"
+  - "Per-cog attention signaling that can wake the broker or its clients: p2kbArchCogAttention"
+
+oneliner: "One serialized bus shared by many COGS is owned by a resident broker cog with a private per-cog mailbox slot (base + cogid()*N) — the owning cog is the mutex, because the P2 has no cog-independent DMA. The many-cogs counterpart to the DAT singleton and to shared-bus replication."

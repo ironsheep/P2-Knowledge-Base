@@ -6,8 +6,9 @@ summary: |
   The second primary decomposition force. Once Force 1 has scattered work across cogs,
   those cogs must exchange data — and the CONTRACT chosen for each exchange (blocking
   call, latest-wins mailbox, ring buffer, request/response with ack, lock-free published
-  telemetry) is itself a decomposition decision, because the coupling you can tolerate
-  determines where the seam goes and who depends on whom.
+  telemetry, or fan-out publication to multiple consumers) is itself a decomposition
+  decision, because the coupling you can tolerate determines where the seam goes and who
+  depends on whom.
 
   This entry carries the five force-fields and then crosses Force 2 with the THREE
   PLANES (data / control / event): every inter-cog link is three relationships
@@ -91,6 +92,37 @@ three_planes:
     mailbox words (a control mechanism) instead of the streaming path. Naming the planes
     lets the agent catch its own error.
 
+# ----- a sixth contract: one producer, many consumers -----
+fan_out_publication:
+  authority_tier: PRINCIPLE
+  body: |
+    A SIXTH contract, for one producer feeding MULTIPLE consumers from a shared buffer
+    pool: a refcounted frame pool with one typed FIFO per consumer, each consumer woken
+    (or polling) independently. This is the spine of any video / audio / sensor-fusion
+    pipeline on the P2 — the data-plane analogue of published telemetry, but for BULK
+    frames rather than single atomic longs. (Worked end to end in
+    p2kbArchWorkedDerivationStreamingPipeline.)
+  choice_rule: |
+    Refcount (one frame, N consumers share it via pointer + refcount) when frames are
+    large and the consumer count will grow. Copy-and-commit (duplicate the frame into one
+    slot per consumer) when frames are small or the pool can absorb N x depth and you
+    value commit/release simplicity. The cost is POOL SLOTS, not bandwidth.
+  irreversibility:
+    authority_tier: PRINCIPLE
+    note: |
+      Some Force-2 contracts are cheap to change after ship (latest-wins <-> buffered);
+      this one is NOT. Introducing a refcount after the fact rewrites every commit, every
+      release, and every error-path bounds-check — it touches every seam. Decide refcount
+      vs copy at DERIVATION time, before the first consumer ships. This is an
+      irreversibility the other contracts do not carry.
+  frame_pool_sizing:
+    authority_tier: HEURISTIC
+    note: |
+      Empirical anchor (field-observed, NOT a derived formula): pool depth >=
+      slowest-consumer-stall x producer-rate; and under copy-and-commit fan-out,
+      pool ~ consumers x FIFO_depth (e.g. ~32 slots for a 2-consumer design grows to
+      ~64 at 4 consumers). Refcount fan-out needs ~depth, independent of consumer count.
+
 example:
   authority_tier: EXAMPLE
   illustrative_not_normative: true
@@ -134,6 +166,7 @@ related:
   - language/spin2/patterns/implementation/spin2_buffer_management.yaml
   - language/spin2/patterns/implementation/spin2_shared_memory.yaml
   - language/spin2/patterns/implementation/spin2_event_dispatcher.yaml
+  - architecture/decomposition/worked-derivation-streaming-pipeline.yaml
 
 see_also:
   - "The shared vocabulary, tier legend, and three-plane definitions: p2kbArchDecompositionGlossary"
@@ -143,5 +176,6 @@ see_also:
   - "Force 3 — rate decoupling across a seam: p2kbArchRateAdaptation"
   - "Judging a seam (coupling, connascence, back-pressure): p2kbArchEvaluationVocabulary"
   - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+  - "The streaming worked derivation whose spine is the fan-out publication contract: p2kbArchWorkedDerivationStreamingPipeline"
 
-oneliner: "Force 2: the contract per inter-cog seam (blocking / latest-wins / buffered / request-ack / published telemetry) places the boundary; design each link's data, control, and event planes separately."
+oneliner: "Force 2: the contract per inter-cog seam (blocking / latest-wins / buffered / request-ack / published telemetry / fan-out publication) places the boundary; design each link's data, control, and event planes separately."

@@ -54,7 +54,7 @@ derivation_steps:
     - step: 3
       name: "Assign owners"
       force: "Force 1 (resource ownership)"
-      reasoning: "Bus 1 has three sharers behind one timing budget -> one owning cog plus a DAT-state SINGLETON transport (one bus configuration, three register-level chip drivers calling it). Bus 2 has a single device -> a different owning cog with a VAR-state INSTANCE transport (nothing to share). The discrete smart pins are owned by whichever cog already owns their timing domain. Same protocol (I2C), two state models, because the SHARING TOPOLOGY decided the shape."
+      reasoning: "Bus 1 has three sharers behind one timing budget -> one owning cog plus a DAT-state SINGLETON transport (one bus configuration, three register-level chip drivers calling it). Bus 2 has a single device -> a different owning cog with a VAR-state INSTANCE transport (nothing to share). The discrete smart pins are owned by whichever cog already owns their timing domain. Same protocol (I2C), two state models, because the SHARING TOPOLOGY decided the shape. NOTE: the DAT-singleton choice for bus 1 is valid here precisely BECAUSE bus 1 is unique in the program; for N identical shared buses the singleton encoding does not generalize (DAT is keyed per compiled image) and the transport must be re-encoded — see p2kbArchSharedBusReplication."
       output: "Cog map: bus-1 owner (DAT singleton), bus-2 owner (VAR instance), discrete pins folded onto existing owners."
     - step: 4
       name: "List the cadences"
@@ -109,6 +109,7 @@ see_also:
   - "The procedure this derivation walks: p2kbArchFirstContactProcedure"
   - "The generative theory behind it: p2kbArchDecompositionMethod"
   - "Force 1 — the ownership cuts in steps 1-3: p2kbArchResourceOwnership"
+  - "When bus 1's DAT-singleton stops generalizing (N identical shared buses): p2kbArchSharedBusReplication"
   - "Force 2 — the seams in step 6: p2kbArchDataFlowContracts"
   - "Force 3 — the rate adapters in steps 4-5: p2kbArchRateAdaptation"
   - "Force 4 — the layering in step 7: p2kbArchAltitudeLayering"

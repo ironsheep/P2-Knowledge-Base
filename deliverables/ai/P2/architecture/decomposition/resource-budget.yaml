@@ -74,6 +74,18 @@ re_cut_signal:
     Time-slicing low-rate, non-real-time concerns onto one orchestration cog is the one
     sanctioned way to fit more, and only for the non-real-time tier.
 
+one_forcing_sentence_per_cog:
+  authority_tier: HEURISTIC
+  rule: |
+    The POSITIVE complement to the re-cut signal: every cog you assign must have a
+    one-sentence forcing reason drawn from a closed set — {determinism, resource
+    ownership, blocking I/O, throughput/pipeline}. If you cannot state why a cog must
+    exist in one sentence from that set, the cog is misallocated — fold it into another
+    owner. This catches cog INFLATION before you run out of cogs, whereas re_cut_signal
+    catches over-COUPLING once you do. A design that ships with reserved cogs and a
+    forcing sentence for each used one is healthier than one that fills all 8 by reflex
+    (e.g. a shipped streaming pipeline ran on 6 cogs with 2 deliberately reserved).
+
 related:
   - architecture/cog.yaml
   - architecture/smart_pins.yaml
@@ -92,9 +104,10 @@ see_also:
   - "Where the budget is checked (step 9 — reconcile): p2kbArchFirstContactProcedure"
   - "The coupling integer that 'out of cogs' reflects: p2kbArchEvaluationVocabulary"
   - "Smart-pin absorption frees a cog: p2kbArchSpatialComputing"
+  - "A worked budget where every cog has a forcing reason (6 used, 2 reserved): p2kbArchWorkedDerivationStreamingPipeline"
   - "Force 1 — the ownership that consumes cogs: p2kbArchResourceOwnership"
   - "Force 4 — the layering bounded by cog RAM: p2kbArchAltitudeLayering"
   - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
   - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
 
-oneliner: "Emit the resource-allocation table as a design artifact (cogs, smart pins, locks, CORDIC, hub bandwidth, LUT pairs, cog RAM); 'out of cogs' means too coupled — re-cut, don't cram."
+oneliner: "Emit the resource-allocation table as a design artifact (cogs, smart pins, locks, CORDIC, hub bandwidth, LUT pairs, cog RAM); 'out of cogs' means too coupled — re-cut, don't cram; and every assigned cog needs a one-sentence forcing reason or it is misallocated."

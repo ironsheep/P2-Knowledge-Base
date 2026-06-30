@@ -82,6 +82,21 @@ how_it_cuts:
       task cannot meet its deadline while cooperatively yielding to the others — at which
       point the devices do not truly share one timing domain and Force 1 re-cuts them
       (e.g. move the nanosecond-timed device to its own smart pin or cog).
+  decimation_placement:
+    authority_tier: HEURISTIC
+    body: |
+      When a fast producer fans out to consumers at different REDUCED rates (multi-rate
+      decimation), where does the rate-reduction live? Two placements:
+      - FOLD into the producer's commit when the decimation state is bounded (a counter
+        per output) and the computation is cheap (a 1-in-N skip). Elegant, zero extra cog.
+      - PROMOTE to a visible stage or cog when the policy is non-trivial (averaging,
+        peak-hold, adaptive / jitter-rejecting rates) OR when the rate-domain decision
+        must be OBSERVABLE at runtime.
+    observability_note: |
+      The fold-into-commit form is elegant but makes the per-output decision INVISIBLE in
+      debug(); a visible Spin2 stage is uglier but lets you watch the counters directly. A
+      real design reversed a folded decimator back to a visible stage purely for this —
+      see the observability lens in p2kbArchEvaluationVocabulary.
 
 example:
   authority_tier: EXAMPLE
@@ -135,6 +150,8 @@ see_also:
   - "Force 2 — the contract that carries the decoupled data: p2kbArchDataFlowContracts"
   - "Force 4 — layering above the rate adapters: p2kbArchAltitudeLayering"
   - "Spatial-computing pipelines and the funnel/hub-saturation smells: p2kbArchSpatialComputing"
+  - "The observability lens behind the decimation fold-vs-stage reversal: p2kbArchEvaluationVocabulary"
+  - "The streaming derivation whose fan-out decimation exercises this force: p2kbArchWorkedDerivationStreamingPipeline"
   - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
 
-oneliner: "Force 3: rate mismatches demand their own objects — samplers/buffers at rate-domain crossings (3a), slew/easing ramps for discrete->continuous (3b), and cooperative tasks-in-a-cog when one bus serves many cadences."
+oneliner: "Force 3: rate mismatches demand their own objects — samplers/buffers at rate-domain crossings (3a), slew/easing ramps for discrete->continuous (3b), cooperative tasks-in-a-cog when one bus serves many cadences, and a fold-vs-visible-stage choice for multi-rate decimation."

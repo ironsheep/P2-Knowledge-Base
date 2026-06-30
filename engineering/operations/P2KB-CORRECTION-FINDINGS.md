@@ -443,7 +443,7 @@
 > sourced hard facts (54-stage pipeline, 8-clock hub slot) and mirrors the Silicon Doc's
 > "several" framing rather than any hard in-flight number.
 
-### F-171 — two published YAMLs disagree on per-cog CORDIC ops-in-flight (7-8 vs 6-7); the count is DERIVED, not spec'd, and "7-8" is unreachable — `CONFIRMED`
+### F-171 — two published YAMLs disagree on per-cog CORDIC ops-in-flight (7-8 vs 6-7); the count is DERIVED, not spec'd, and "7-8" is unreachable — `DONE`
 > **What's wrong.** `deliverables/ai/P2/architecture/cordic.yaml` asserts **"7-8" operations
 > in flight per cog** in three places — `description` ("enabling up to 7-8 operations in
 > flight per COG", line ~9), `architecture.ops_in_flight_per_cog: "7-8 maximum"` (line ~26),
@@ -470,7 +470,14 @@
 > ~6-7** (54-stage pipeline ÷ 8-clock hub slot)" — and present it explicitly as **derived**
 > from the two sourced hard facts, mirroring the Silicon Doc's "several." Do **not** assert
 > "8" (unreachable). No edit beyond the transparent `54 / 8` derivation already carried by the
-> sibling YAML; match the Silicon Doc's wording. Not yet applied (flagged per Stephen, 2026-06-30).
+> sibling YAML; match the Silicon Doc's wording.
+>
+> **APPLIED (yaml head) 2026-06-30:** aligned all three "7-8" occurrences in
+> `architecture/cordic.yaml` (`description`, `architecture.ops_in_flight_per_cog`,
+> `critical_usage_pattern.fill_phase`) to "up to ~6-7", each shown as DERIVED from the
+> transparent `54 / 8` (54-stage pipeline / 8-clock hub slot) and mirroring the Silicon
+> Doc's "several"; no "8" asserted. Sibling `language/pasm2/concepts/cordic_solver.yaml`
+> already carried `6-7 (54/8)` and is unchanged.
 
 ---
 
@@ -480,7 +487,7 @@
 > the Spin2 recipe code. Authority = **`pnut_ts` v1.55 compiler** (ground truth, top of this
 > register's authority order) + the **sibling per-method YAMLs** (which are already correct).
 
-### F-172 — `language/spin2/concepts/cordic_solver.yaml` documents `@pointer`-out and 2-arg CORDIC signatures that **do not compile**; per-method YAMLs are correct — `CONFIRMED`
+### F-172 — `language/spin2/concepts/cordic_solver.yaml` documents `@pointer`-out and 2-arg CORDIC signatures that **do not compile**; per-method YAMLs are correct — `DONE`
 > **What's wrong.** The concept overview YAML's `available_methods` (and the
 > `common_patterns` block) document the coordinate-transform built-ins in the **`@pointer`-out
 > statement form** — `ROTXY(@x, @y, angle)`, `POLXY(@x, @y, angle, length)`,
@@ -504,7 +511,14 @@
 > `common_patterns` (`distance_calculation`, `angle_calculation` use `XYPOL(@..)`) to the
 > multi-return forms the compiler accepts and the per-method YAMLs already carry. Re-derive
 > the worked example values against the corrected forms. Authority: `pnut_ts` compile + the
-> sibling method YAMLs. Not yet applied (flagged per Stephen, 2026-06-30).
+> sibling method YAMLs.
+>
+> **APPLIED (yaml head) 2026-06-30:** rewrote `available_methods` (QSIN/QCOS to
+> `(length, step, stepsInCircle)`; ROTXY/POLXY/XYPOL to multi-return) and the four
+> `common_patterns` (`sine_wave_generation`, `circular_motion`, `distance_calculation`,
+> `angle_calculation`) to the forms the per-method YAMLs carry, re-deriving the worked
+> example values. Every corrected form was compile-verified together under `pnut-ts -d`
+> v1.55.0 (clean).
 
 ---
 
@@ -515,7 +529,7 @@
 > Authority = **P2 Datasheet** (pin descriptions / "Power and Analog Considerations") +
 > **Silicon Doc v35** (pin table) + our ingestion walkthrough-audit.
 
-### F-173 — the 4-pin VIO/GIO power-domain grouping and per-group ADC reference were undocumented (IOSP Ch.16 + app note + YAML) — `CONFIRMED` (IOSP + app note applied; YAML pending)
+### F-173 — the 4-pin VIO/GIO power-domain grouping and per-group ADC reference were undocumented (IOSP Ch.16 + app note + YAML) — `DONE`
 > **The fact.** The P2 powers its I/O pins in **isolated groups of four** — pins 0–3, 4–7,
 > 8–11, …, 60–63 — each group sharing one **VIO/GIO** supply pair (an isolated supply
 > domain). A pin's ADC, when set to `P_ADC_GIO` / `P_ADC_VIO`, references **its own group's**
@@ -538,10 +552,14 @@
 > — a "references are local to the pin's power group" paragraph; §16.6 Multi-Channel — a
 > power-domain-layout note. (2) **P2AN001 app note** — a 🔧 Hardware note (Pitfalls) + a
 > How-It-Works mention + a Recipe 2 pin-selection line citing the mechanism.
-> **→ yaml-knowledge-base-maintenance head (PENDING):** add the 4-pin power-domain grouping +
-> per-group ADC reference to the ADC mode YAML(s) (`smart-pin-11000`/`11001`/`11010`) and/or a
-> hardware pin-grouping reference, with aliases/categories for findability. No inference — cite
-> the datasheet/silicon wording above.
+> **APPLIED (yaml head) 2026-06-30:** stood up a standalone reference
+> `architecture/pin-power-domains.yaml` (`p2kbArchPinPowerDomains`) — the isolated 4-pin
+> VIO/GIO grouping, the per-group `P_ADC_GIO`/`P_ADC_VIO` reference, and the shared-node
+> multi-pin constraint, sourced to durable P2 Datasheet + Silicon Doc v35 wording (no
+> internal paths), with aliases + `io_architecture` category registration. Added a
+> `power_domain` block + `related`/`see_also` pointing to it in all three ADC mode YAMLs
+> (`smart-pin-11000`/`11001`/`11010`); also fixed a pre-existing `adc_pin`->`adc_base`
+> compile bug in 11000's multi-channel example while in that file.
 
 ---
 

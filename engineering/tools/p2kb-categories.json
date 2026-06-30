@@ -105,7 +105,7 @@
     },
     "io": {
       "description": "I/O subsystems",
-      "files": ["smart_pins", "streamer", "serial_loader"]
+      "files": ["smart_pins", "streamer", "serial_loader", "pin-power-domains"]
     },
     "execution": {
       "description": "Execution engines",
@@ -125,7 +125,10 @@
         "spatial-computing",
         "evaluation-vocabulary",
         "resource-budget",
-        "worked-derivation-robot-dog"
+        "worked-derivation-robot-dog",
+        "shared-bus-replication",
+        "worked-derivation-streaming-pipeline",
+        "shared-bus-broker"
       ]
     }
   },
@@ -225,6 +228,10 @@
     "debug_displays": {
       "description": "DEBUG display-window types (the nine PNut DEBUG visualizers)",
       "files": ["term", "scope", "scope_xy", "fft", "spectro", "plot", "bitmap", "logic", "midi"]
+    },
+    "object_model": {
+      "description": "Spin2 object model: archetypes, OBJ instantiation, CON-override configuration, method pointers, typed pointers, and pnut-ts object-image deduplication (DAT-singleton fork mechanism)",
+      "files": ["object_archetypes", "OBJ", "method-pointers", "typed-pointers", "object-image-dedup"]
     }
   },
 

@@ -49,6 +49,17 @@ thesis:
     driver a sibling reachable from main(), shape chosen by analogy to a catalogue
     example rather than derived from the wiring. It compiles, then fails as flaky
     hardware the moment the derivation it skipped would have forbidden the cut.
+  field_corroboration: |
+    Observed in a shipped P2 streaming project (corroboration, illustrative): the team
+    pre-graded every decomposition decision by the authority tier of its reasoning, then
+    audited the running code against the plan. Cuts anchored in P2 HARDWARE reality (pin
+    ownership, the streamer-owning cog, shared-bus arbitration) survived to code 100%;
+    cuts anchored in distributed-systems PATTERN (refcount fan-out, multi-FIFO with
+    shared frames) diverged. That is this thesis observed in production — cuts DERIVED
+    from hardware are stable, cuts CHOSEN from pattern drift — the field evidence for the
+    PHYSICS > PRINCIPLE > HEURISTIC tiering. (The as-built audit practice that produces
+    such evidence is in p2kbArchFirstContactProcedure; the worked case is
+    p2kbArchWorkedDerivationStreamingPipeline.)
 
 # =============================================================================
 # 2. THE TWO AXES — logical cohesion/coupling AND physical allocation
@@ -180,7 +191,8 @@ see_also:
   - "Cross-cutting forces C1-C5: p2kbArchCrossCuttingForces"
   - "Judging a cut (coupling, connascence, back-pressure): p2kbArchEvaluationVocabulary"
   - "The resource-budget artifact: p2kbArchResourceBudget"
-  - "End-to-end worked derivation: p2kbArchWorkedDerivationRobotDog"
+  - "End-to-end worked derivation (control plane): p2kbArchWorkedDerivationRobotDog"
+  - "End-to-end worked derivation (streaming / data plane): p2kbArchWorkedDerivationStreamingPipeline"
   - "The object vocabulary this grammar derives: p2kbSpin2ObjectArchetypes"
   - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
 

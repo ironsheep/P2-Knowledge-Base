@@ -86,6 +86,12 @@ smells:
       what: "A cog software-times a protocol (PWM, serial, quadrature, pulse counting) that a smart pin could absorb in hardware."
       detectable_signature: "A cog's inner loop is dominated by precise wait/toggle sequences for an I/O protocol that maps to a documented smart-pin mode."
       grounding: "Smart-pin autonomous modes that absorb the protocol — architecture/smart_pins.yaml"
+      worked_escape:
+        note: "A smell is a signature to CHECK, not a verdict. A worked instance where the signature fired and bit-banging was the RIGHT call, with the escape recorded:"
+        situation: "[EXAMPLE, illustrative] An OLED/SPI panel with a ~17 ms blocking transfer per frame, streamed by a cog via inline PASM instead of a smart-pin sync-serial mode."
+        signature_fired: true
+        why_kept: "Bulk framebuffer streaming that a single smart pin cannot pace efficiently; a tight inline-PASM loop meets the per-frame budget. The signature fired, was evaluated against the blocking constraint, and inline-PASM was chosen deliberately."
+        escape_condition: "Re-evaluate if the SPI path moves to streamer/DMA — then smart-pin / hardware-streaming absorption becomes the better cut. The escape and its re-evaluation trigger are recorded, so the deviation is a decision, not an oversight."
     - smell: "Over-locking"
       what: "Serializing with locks what could be an elastic FIFO — re-coupling what the fabric let you parallelize."
       detectable_signature: "Locks guard a producer/consumer hand-off that has a single writer (where an atomic published long would do), or a high-rate stream (where a FIFO would decouple); cogs spend cycles spinning on lock acquisition."

@@ -20,6 +20,22 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.13.0] - 2026-06-30
+
+**Architecture decomposition layer gains a streaming domain, shared-bus patterns, and a sharper evaluation toolkit**
+
+### Added
+- A worked streaming/data-plane derivation (fast-ADC capture → buffered fan-out → dual display) — the data-plane counterpart to the robot-dog control-plane derivation
+- A "shared-bus broker" pattern (one bus reached from many cogs via a resident arbiter cog + per-cog mailboxes) and an "N identical shared buses" replication guide
+- A compiler object-image-deduplication reference (when a CON override forks an independent DAT region)
+- A pin power-domain reference: I/O pins are powered in isolated groups of four (VIO/GIO), governing per-group ADC references
+- An observability evaluation lens, a fan-out-publication data-flow contract, and heuristics for decimation placement, frame-pool sizing, and a forcing reason per cog; plus an as-built-audit practice
+
+### Changed
+- CORDIC Spin2 trig/coordinate methods document the compiler-verified multi-return call forms (QSIN/QCOS/ROTXY/POLXY/XYPOL)
+- CORDIC per-cog ops-in-flight stated as a sourced derivation (54-stage pipeline ÷ 8-clock hub slot)
+- Findability improvements (aliases + category registration) across the Spin2 object-model entries
+
 ## [1.12.0] - 2026-06-29
 
 **P2 add-on board hardware coverage**

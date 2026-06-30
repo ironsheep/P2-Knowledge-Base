@@ -73,6 +73,23 @@ how_it_cuts:
       cannot coexist) — then they are not truly sharing one timing domain and Force 1
       re-cuts them onto separate owners. Break the instance default when a "sole" device
       will foreseeably gain bus-mates; provision the singleton early to avoid a re-cut.
+    n_identical_buses: |
+      Both branches above assume each such bus is UNIQUE in the program. When N IDENTICAL
+      shared buses exist (e.g. two PCA9685 servo trees on two I2C buses), "one owner per
+      bus" still holds, but the DAT-singleton ENCODING does not generalize — DAT is keyed
+      per compiled image, so one driver file yields one shared region. Re-encode the
+      transport (see p2kbArchSharedBusReplication): (a) indexed broker — one image, state
+      arrays keyed by bus-id (recommended); (b) externalized ^struct context — re-entrant,
+      caller owns N state blocks; (c) compile-time image fork via image-changing CON
+      overrides (compiler-coupled). The rule is one OWNER per bus; the DAT singleton is
+      just the cheapest encoding when bus-count = 1.
+    many_cogs_one_bus: |
+      The singleton above assumes the many callers live in ONE cog. When a single
+      serialized bus must be reached from MULTIPLE COGS (e.g. a PSRAM framebuffer written
+      by a renderer cog and read by a signal-generator cog), neither a DAT singleton nor a
+      VAR instance fits: the P2 has no cog-independent DMA to arbitrate them, so the bus
+      needs an always-resident BROKER cog with a private per-cog mailbox slot (see
+      p2kbArchSharedBusBroker). One OWNER still holds — the broker is the one owner.
 
 example:
   authority_tier: EXAMPLE
@@ -115,6 +132,8 @@ related:
   - architecture/cog.yaml
   - language/spin2/concepts/object_archetypes.yaml
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
+  - architecture/decomposition/shared-bus-replication.yaml
+  - architecture/decomposition/shared-bus-broker.yaml
 
 see_also:
   - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
@@ -125,5 +144,7 @@ see_also:
   - "Judging the cut (connascence across a cog boundary): p2kbArchEvaluationVocabulary"
   - "Counting owned resources against the budget: p2kbArchResourceBudget"
   - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+  - "N identical shared buses — when the DAT-singleton encoding stops generalizing: p2kbArchSharedBusReplication"
+  - "One bus shared by many COGS — the resident broker + per-cog mailbox resolution: p2kbArchSharedBusBroker"
 
 oneliner: "Force 1 (correctness rule): one owning cog per serialized hardware resource because P2 pins are OR'd with no bus mutex; sharing topology decides DAT-singleton vs VAR-instance transport."

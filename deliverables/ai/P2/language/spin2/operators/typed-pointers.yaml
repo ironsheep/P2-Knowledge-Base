@@ -1,6 +1,13 @@
 name: Typed Pointers
 type: operator
 category: Pointer Types
+aliases:
+  - typed pointers
+  - struct pointer
+  - caret pointer
+  - externalized context
+  - re-entrant driver state
+  - pointer to struct
 
 requires_version: "Spin2_v45"
 version_directive: "{Spin2_v45}"
@@ -265,5 +272,8 @@ related:
   - language/spin2/concepts/addressing.yaml
   - language/spin2/concepts/method-pointers.yaml
   - language/spin2/idioms/memory-access.yaml
+
+see_also:
+  - "^struct context as Family C for N identical shared buses (caller owns N state blocks): p2kbArchSharedBusReplication"
 
 oneliner: "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"

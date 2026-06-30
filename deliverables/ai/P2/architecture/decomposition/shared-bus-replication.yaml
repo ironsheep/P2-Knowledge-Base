@@ -1,0 +1,120 @@
+concept: shared_bus_replication
+title: "Replicating One Object Tree onto N Identical Shared Buses"
+category: decomposition_reasoning
+
+summary: |
+  Force 1 says ONE OWNER per serialized resource; when a bus is unique in the program the
+  cheapest encoding of that ownership is a DAT-state SINGLETON. The moment a machine needs
+  TWO OR MORE identical, complex shared buses (e.g. two PCA9685 servo trees on two I2C
+  buses), the DAT-singleton encoding stops generalizing: DAT is keyed per compiled image,
+  so one driver file yields one shared region no matter how many buses you intend.
+
+  The durable lesson: Force 1's correctness rule is "one owner per bus." It does NOT say
+  the transport must be a file-scoped DAT singleton — that is merely the cheapest ENCODING
+  when the bus count is one. Keep the rule; change the encoding, and the wall dissolves.
+  This entry catalogues the four re-encodings and when to reach for each.
+
+  ILLUSTRATIVE, not normative — the bus counts and chips are an example; the decision axes
+  (where per-bus identity lives, how much the call surface changes) are the content.
+
+authority_tier: HEURISTIC
+illustrative_not_normative: true
+
+the_wall:
+  authority_tier: PRINCIPLE
+  body: |
+    "Singleton" on the P2 is not a language feature — it is the DAT-sharing trick: DAT is
+    shared across every instantiation of the same compiled image, so the many driver
+    instances scattered down a tree collapse onto one bus for free. A second, independent,
+    shared bus of the same shape needs a second DAT region — and the naive lever (a second
+    source file) forces re-cloning EVERY DAT-bearing tier under new names. That duplication
+    is the wall. (Mechanism: p2kbSpin2ObjectImageDedup.)
+
+the_reframe:
+  authority_tier: PRINCIPLE
+  body: |
+    One OWNER per bus is the correctness rule (each bus's state has a single writer). The
+    file-scoped DAT singleton is one encoding of that rule, optimal only at bus-count = 1.
+    For bus-count > 1, re-encode the transport so each bus has its own state while one owner
+    still writes it.
+
+solution_families:
+  authority_tier: HEURISTIC
+  ordered_by: "ascending method-surface cost"
+  families:
+    - id: A
+      name: "Indexed singleton (bus broker)"
+      recommended_default: true
+      how: |
+        Keep ONE image and ONE DAT, but make the state arrays indexed by busId
+        (pin_scl[NBUS], slaveAddress[NBUS], ...). Every op reads/takes a busId; each surface
+        object stores its busId once at init() and threads it down. Still exactly one writer
+        per bus slot, so Force 1 holds.
+      snippet: |
+        DAT { one image, N independent bus slots }
+          pin_scl       LONG  0[NBUS]
+          pin_sda       LONG  0[NBUS]
+          slaveAddress  LONG  0[NBUS]
+        PUB start(busId, pinSCL, pinSDA)
+          pin_scl[busId] := pinSCL
+      surface_cost: "One busId parameter, bound once at init and stored in the caller's VAR."
+      risk: "Low — deterministic, immune to the image-dedup subtlety. RAM is xN state in one DAT."
+      best_when: "Default choice; the honest generalization of the singleton for bus-count > 1."
+    - id: C
+      name: "Re-entrant driver + externalized ^struct context"
+      how: |
+        Transport becomes (near-)stateless; ALL bus+device state lives in a caller-owned
+        STRUCT busCtx(...) passed as ^busCtx to every method. N buses = N context structs in
+        the owner's VAR; the file compiles once. One pointer covers the whole surface.
+      surface_cost: "Every method gains a ^ctx param — largest change, but uniform."
+      risk: "Low behaviorally; most portable (no dedup dependency, no pointer indirection). Biggest rewrite."
+      best_when: "Textbook re-entrant driver / standardizing on STRUCT state. Requires {Spin2_v45}+ typed pointers."
+    - id: B
+      name: "VAR-instance + method-pointer injection"
+      how: |
+        Make the transport VAR-state; instantiate once per bus as an array at the owner
+        (pca[NBUS] : "drv_var"); inject @pca[i].primitive method pointers into the leaves at
+        init(). A method pointer encodes the VAR base, so each leaf calls its own bus.
+      surface_cost: "Leaf init() gains an injected pointer; no compile-time arg checking."
+      risk: "Medium — clean for a NARROW primitive seam; clunky for a wide (~12-method) surface. Pair with re-cutting the seam thinner."
+      best_when: "The bus/device coupling reduces to a small primitive surface. (Mechanism: p2kbSpin2MethodPointers.)"
+    - id: D
+      name: "Config-override image fork (compile-time)"
+      how: |
+        Give each DAT-bearing tier an overridable CON, SEED that tier's DAT from it, and
+        forward it into the child's override. One top-level override cascades down, producing
+        independent compiled images -> independent DAT singletons per tier.
+      surface_cost: "Zero at the method level — the fork is entirely in CON/DAT/OBJ."
+      risk: |
+        Compiler-coupled and fragile: the seed lines are load-bearing; a refactor that turns
+        an override into a no-op silently re-collapses the buses with NO error. Re-verify on
+        any pnut-ts version bump. (Mechanism + guardrails: p2kbSpin2ObjectImageDedup.)
+      best_when: "Existing call surfaces untouched and you accept a documented, compiler-coupled invariant. RAM is xN image."
+
+decision_guide:
+  authority_tier: HEURISTIC
+  table: |
+    Need                                                              -> Family
+    Default; safest; keep call surfaces, accept one busId             -> A (broker)
+    Full portable re-entrant driver, uniform signature change OK      -> C (^ctx struct)
+    Narrow injectable seam, logic above is pure                       -> B (method-ptr injection)
+    Zero method-surface change, accept a compiler-coupled invariant   -> D (override fork)
+  guidance: |
+    All four satisfy Force 1's actual rule (one owner per bus). A and C are dedup-immune;
+    B and D have specific failure modes to guard. LEAD WITH A; reach for D only when the
+    zero-surface property is worth the fragility.
+
+related:
+  - architecture/decomposition/resource-ownership.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/concepts/method-pointers.yaml
+  - language/spin2/operators/typed-pointers.yaml
+
+see_also:
+  - "Force 1 — the one-owner-per-bus rule this generalizes: p2kbArchResourceOwnership"
+  - "The compiler image-dedup mechanism families A/D rely on: p2kbSpin2ObjectImageDedup"
+  - "Method-pointer injection (Family B): p2kbSpin2MethodPointers"
+  - "Typed ^struct pointers (Family C, requires Spin2_v45): p2kbSpin2OpTypedPointers"
+  - "The worked derivation whose bus-1 singleton is the bus-count=1 case: p2kbArchWorkedDerivationRobotDog"
+
+oneliner: "Force 1's rule is one OWNER per bus; the DAT singleton is just its cheapest encoding at bus-count=1. For N identical shared buses, re-encode: A indexed broker (default), C externalized ^struct context, B method-pointer injection, or D compile-time image fork."

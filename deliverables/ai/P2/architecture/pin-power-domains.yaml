@@ -1,0 +1,48 @@
+component: pin_power_domains
+title: "I/O Pin Power Domains — Isolated Groups of Four"
+category: io_architecture
+aliases:
+  - pin power domains
+  - VIO GIO grouping
+  - power group of 4
+  - isolated supply domain
+  - ADC reference domain
+  - per-group ADC reference
+  - smart pin power grouping
+
+description: |
+  The P2 powers its I/O pins in ISOLATED GROUPS OF FOUR — pins 0-3, 4-7, 8-11, ...,
+  60-63 — each group sharing one VIO/GIO supply pair (an isolated supply domain). Pin
+  group boundaries align on multiples of four.
+
+power_grouping:
+  group_size: 4
+  groups: "0-3, 4-7, 8-11, ... , 60-63 (16 groups across 64 pins)"
+  supply_pair: "Each group shares one VIO (supply) / GIO (ground) pair — an isolated supply domain."
+  pin_table_symbols: "VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y}."
+
+adc_reference:
+  fact: |
+    A pin's ADC, when set to P_ADC_GIO or P_ADC_VIO, references ITS OWN GROUP's ground /
+    supply rails. This is why a single-pin ratiometric measurement is absolute.
+  multi_pin_constraint: |
+    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE GROUP to share
+    a reference domain. Straddling a group boundary (e.g. pins 3 and 4) mixes supply domains
+    and degrades the result. Independent single-ended channels on different pins are
+    unaffected — each reads against its own group's reference.
+
+evidence:
+  - "P2 Datasheet (Parallax): 'Power for smart pins in groups of 4'; 'Groups of 4 pins share supply for isolated domains'; 'ADC can sample own group's supply for calibration'."
+  - "P2 Silicon Doc v35, pin table: VIO_{x}_{y}/GIO_{x}_{y} = power/ground for smart pins {x} through {y}; group boundaries align on multiples of 4 (0-3, 4-7, ...)."
+
+related:
+  - architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml
+  - architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml
+  - architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml
+  - architecture/smart_pins.yaml
+
+see_also:
+  - "ADC sample/filter/capture, internal clock (mode %11000) — the per-group reference governs P_ADC_GIO/P_ADC_VIO"
+  - "Ratiometric and multi-channel ADC layout is covered in the I/O & Smart Pins User Guide (Ch.16)"
+
+oneliner: "P2 I/O pins are powered in isolated groups of 4 (0-3, 4-7, ..., 60-63) sharing one VIO/GIO pair; a pin's P_ADC_GIO/P_ADC_VIO ADC references its own group's rails, so multi-pin shared-node measurements must stay within one group."

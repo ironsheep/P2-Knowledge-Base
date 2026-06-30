@@ -1,0 +1,83 @@
+name: Object Image Deduplication
+type: concept
+category: Program Structure
+aliases:
+  - object image dedup
+  - DAT singleton fork
+  - CON override fork
+  - image deduplication
+  - shared DAT collapse
+  - multi-bus forking
+toolchain: "pnut-ts v1.55.0 (measured 2026-06-30) — compiler-coupled; re-verify on a compiler version bump"
+
+description: |
+  How pnut-ts decides whether two OBJ instantiations of the same source file share one
+  DAT region or get independent ones — the mechanism behind the "DAT singleton" idiom AND
+  behind a silent corruption trap when forking N identical shared buses from one driver file.
+
+  THE RULE (measured): pnut-ts de-duplicates object images by COMPILED-IMAGE CONTENT,
+  not by OBJ override-set identity.
+    - Same source, byte-identical image                  -> ONE shared image, ONE shared DAT (singleton).
+    - Same source, an override that CHANGES the bytes     -> distinct images, INDEPENDENT DAT.
+    - Same source, an override that does NOT change bytes -> silently merged back to one shared DAT.
+
+  DAT is shared per compiled image; VAR is per instance. So "one file -> one DAT region"
+  holds only while the image is unique. A CON override forks a per-instance DAT region IF
+  AND ONLY IF it changes the image bytes.
+
+forking_a_dat_region:
+  to_force_a_fork: |
+    Seed a DAT long from the overridable CON so the image genuinely differs per override:
+      CON  BUS_TAG = -1            ' parent overrides:  child : "drv" | BUS_TAG = n
+      DAT  tag  LONG  BUS_TAG      ' SEEDED -> image bytes differ -> independent DAT
+  the_silent_trap: |
+    An override declared but never referenced (or that otherwise leaves the bytes identical)
+    does NOT fork — the two "independent" buses silently collapse onto one shared DAT, a
+    corruption that mimics flaky hardware with NO compiler error. The seed line is
+    load-bearing; comment it with WHY it exists.
+
+cascade_through_tiers:
+  description: |
+    A single top-level override forks an entire DAT-bearing chain if each tier seeds its
+    own DAT from its own override AND forwards that value into the child's override.
+  pattern: |
+    ' mid tier — overridable, seeds itself, forwards to the leaf:
+    CON  MID_TAG = -1
+    OBJ  leaf : "casc_leaf" | LEAF_TAG = MID_TAG   ' distinct names: child <- this tier
+    DAT  mtag  LONG  MID_TAG                        ' seed so THIS tier forks too
+    ' top — one override cascades through every tier below:
+    OBJ  a : "casc_mid" | MID_TAG = 1
+         b : "casc_mid" | MID_TAG = 2
+  naming_gotcha: |
+    Each tier needs a DISTINCT constant name. The self-named forward
+    `leaf : "casc_leaf" | TAG = TAG` (same token both sides) fails to parse with
+    `error:Expected a symbol (m190)`. Use `| LEAF_TAG = MID_TAG` (child name <- this tier).
+
+verification:
+  measured: |
+    Reproduced with pnut-ts v1.55.0 (-m, reading the .map Objects: count + DAT addresses):
+      - identical overrides (100,100), seeded probe         -> Objects: 2, one shared DAT
+      - differing overrides (100,200), seeded probe         -> Objects: 3, two independent DAT
+      - differing overrides (100,200), override unreferenced -> Objects: 2, silently merged
+      - one top override through a 3-tier seeded+forwarding chain -> Objects: 5 (every DAT tier forked)
+  map_caveat: |
+    In the multi-instance .map, the instance-name / source-name columns can be internally
+    inconsistent — do NOT trust those labels. The reliable signals are the Objects: count
+    and the DAT symbol addresses.
+
+when_it_matters: |
+  Replicating one complex object tree onto N independent, identical shared buses (e.g. two
+  PCA9685 servo trees on two I2C buses). The DAT-singleton encoding does not generalize past
+  one bus; see the re-encoding options in p2kbArchSharedBusReplication.
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/keywords/OBJ.yaml
+  - language/spin2/concepts/method-pointers.yaml
+
+see_also:
+  - "Why N identical shared buses break the DAT-singleton and how to re-encode: p2kbArchSharedBusReplication"
+  - "Force 1 — one owner per bus (the rule the singleton serves): p2kbArchResourceOwnership"
+  - "The configurable_object archetype this fork mechanism underpins: p2kbSpin2ObjectArchetypes"
+
+oneliner: "pnut-ts dedups object images by compiled-image content, not override-set — a CON override forks an independent DAT region only if it changes the image bytes (seed a DAT long to force it); an override that doesn't change the bytes silently merges the buses."

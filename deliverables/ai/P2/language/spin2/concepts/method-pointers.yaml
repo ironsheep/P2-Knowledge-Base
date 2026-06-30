@@ -1,6 +1,13 @@
 name: Method Pointers
 type: concept
 category: Programming Patterns
+aliases:
+  - method pointers
+  - dependency injection
+  - shared instance injection
+  - callback pointer
+  - dispatch table
+  - pluggable method
 
 description: |
   Method pointers are 32-bit values that hold the address of a method, enabling 
@@ -138,6 +145,21 @@ examples:
         if onComplete
           onComplete(result)
     description: "Callback pattern for async completion"
+
+  - code: |
+      ' Inject a SPECIFIC shared-bus instance into each leaf.
+      ' One compiled image, N VAR instances (one per bus); a method pointer
+      ' encodes the target's VAR base, so each leaf addresses its OWN bus.
+      OBJ
+        pca[NBUS] : "pca9685_var"          ' one VAR instance per bus
+      VAR
+        LONG leafWrite[NBUS]
+      PUB Init()
+        repeat i from 0 to NBUS-1
+          leafWrite[i] := @pca[i].write     ' bind leaf i to bus i
+      PUB Drive(busId, channel, value)
+        leafWrite[busId](channel, value)    ' calls THAT bus's instance
+    description: "Dependency injection for N shared buses (Family B - see p2kbArchSharedBusReplication)"
     
   - code: |
       PUB TransformArray(pArray, count, transformFunc) | i, value
@@ -225,6 +247,7 @@ common_patterns:
   dispatch_tables: "State machines, command processors, menu systems"
   strategy_pattern: "Switch algorithms at runtime via object method pointers"
   higher_order: "Pass transform/filter/compare functions to generic algorithms"
+  shared_instance_injection: "Inject @obj[i].primitive so N callers over one image each address their own VAR instance (e.g. N independent buses from one driver) - Family B of p2kbArchSharedBusReplication"
 
 notes:
   - "Method pointers are 32-bit values encoding method index and VAR base"
@@ -238,5 +261,10 @@ related:
   - language/spin2/methods/recv.yaml
   - language/spin2/methods/send.yaml
   - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
+  - language/spin2/concepts/object-image-dedup.yaml
+
+see_also:
+  - "Method-pointer injection as Family B for N identical shared buses: p2kbArchSharedBusReplication"
+  - "Why one driver image yields one shared DAT (the constraint injection sidesteps): p2kbSpin2ObjectImageDedup"
 
 oneliner: "Method pointers enable indirect calls, callbacks, dispatch tables, and runtime method selection"

@@ -79,6 +79,7 @@ forces:
       what_it_is: "Shape objects so each can be exercised STANDALONE on real hardware before the whole is assembled. The seam you can test at is the seam you should cut at."
       why_on_p2: "[PRINCIPLE] On embedded specifically you cannot single-step a servo; you bring hardware up one layer at a time, so the observability requirement actively pushes back on the design and often reveals a seam you'd otherwise have fused."
       how_it_cuts: "Every layer gets a narrow, observable public surface and a minimal harness."
+      distinct_from_runtime_observability: "c4 is BRING-UP ISOLATION (exercise a layer standalone before assembly). Watching a seam's LIVE decisions in production is a SEPARATE concern — the observability evaluation lens (p2kbArchEvaluationVocabulary), not c4. A cut can pass c4 yet fail runtime observability (a folded decimator was perfectly testable but had to be un-folded to be watchable)."
       example: "[EXAMPLE, illustrative] A bring-up test per layer (bus scan -> chip -> servo-center -> leg IK -> gait), each runnable alone."
       failure_if_ignored: "A system that only works or fails as a whole, with no way to localize a fault to a layer."
     - id: c5
@@ -113,11 +114,12 @@ failure_if_ignored:
 breadth_gap_note:
   authority_tier: PRINCIPLE
   body: |
-    A known gap, flagged not invented: high-bandwidth streaming domains (video, audio,
-    fast-ADC capture via the streamer/DMA) are a distinct domain type with their own
-    decomposition (a streamer-owning cog with double-buffered hub hand-off). This layer
-    does not yet carry a worked streaming example; the spatial-computing entry covers the
-    relevant mechanisms and smells.
+    High-bandwidth streaming domains (video, audio, fast-ADC capture via the streamer)
+    are a distinct domain type with their own decomposition (a streamer-owning cog with a
+    buffered hub fan-out). This gap is now CLOSED: see the worked streaming derivation
+    (p2kbArchWorkedDerivationStreamingPipeline), which derives a fast-ADC -> fan-out ->
+    dual-display pipeline end to end — the data-plane counterpart to the robot dog. The
+    spatial-computing entry covers the relevant mechanisms and smells.
 
 related:
   - architecture/cog.yaml
@@ -130,6 +132,8 @@ see_also:
   - "Where these are placed in the routine (step 8): p2kbArchFirstContactProcedure"
   - "Force 4 — the layer boundaries C4 tests at: p2kbArchAltitudeLayering"
   - "C2 grounds in the same DDD canon as the control plane: p2kbArchDataFlowContracts"
+  - "Runtime observability of a live decision — distinct from c4 bring-up isolation: p2kbArchEvaluationVocabulary"
+  - "The worked streaming derivation that closes this entry's breadth_gap_note: p2kbArchWorkedDerivationStreamingPipeline"
   - "Streaming-domain mechanisms and smells: p2kbArchSpatialComputing"
   - "The object vocabulary (supervisor, orchestrator, driver): p2kbSpin2ObjectArchetypes"
 
