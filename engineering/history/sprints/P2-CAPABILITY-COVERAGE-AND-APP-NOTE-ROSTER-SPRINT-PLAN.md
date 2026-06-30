@@ -1,10 +1,9 @@
 # P2 Capability Coverage & App-Note Roster — Sprint Plan
 
-> **Status:** DRAFT for Stephen's confirmation (2026-06-29). Authored via the
-> `sprint-plan` skill. Research complete; a short **§ Open Questions** block
-> at the top carries the genuine decisions still needing your call (each with
-> a recommendation). This plan is **phase one — rich planning only**; nothing
-> ships until `sprint-start`.
+> **Status:** ✅ **CLOSED 2026-06-30** — all 9 commitments SHIPPED; plan certified.
+> Closeout audit: `engineering/history/sprints/2026-06-30-P2-CAPABILITY-COVERAGE-AND-APP-NOTE-ROSTER-CLOSEOUT.md`.
+> Committed in `fb7f8948`. (Authored 2026-06-29 via `sprint-plan`; §Open Questions all
+> confirmed; executed same day → 2026-06-30.)
 
 This sprint indexes the P2's *community-artifact landscape* (Quick Bytes,
 OBEX) onto a single capability axis, refreshes OBEX, makes our skills aware of

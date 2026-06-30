@@ -30,3 +30,16 @@ Skip this for single-file fixes, typo corrections, or mechanical steps
 [[feedback_plan_before_yaml_changes]]; this pairs with the data-set-wide
 correction discipline in [[feedback_no_unsourced_claims]] and the
 findability mandate in [[feedback_yaml_findability_continual]].
+
+## Augments §2 code-research — coverage/gap analysis factors IN-DEVELOPMENT scope
+
+When the sprint is a **coverage or gap analysis** (what's documented vs. missing
+— e.g. an app-note roster, a manual-coverage audit), the research pass MUST count
+not just **shipped** coverage but the **planned scope of in-development docs** —
+read their charters / `PLANNING.md` / creation-guides, not only their current
+render. An in-flight manual can already *own* a gap (its capstone or a planned
+chapter), so treating "not shipped yet" as "uncovered" over-states the gap and
+proposes work that duplicates an active effort. *(Certified 2026-06-30: the
+App-Note Roster's first cut over-stated the compute-model gap by counting only
+shipped manuals — the in-development P2 Architect's Guide Act II + decomposition
+YAML layer already owned it; Stephen caught it.)*
