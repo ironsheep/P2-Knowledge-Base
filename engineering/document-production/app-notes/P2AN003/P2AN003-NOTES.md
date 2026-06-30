@@ -4,7 +4,7 @@
 **Created:** 2026-06-30
 **Topic:** DAC & Analog Signal Generation (roster item **A1**, Smart-Pin Instrumentation family)
 **Owning manual (enrichment fork):** P2 I/O & Smart Pins User Guide (IOSP)
-**Campaign:** IOSP Release Campaign (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`)
+**Campaign:** IOSP Release Campaign (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`)
 
 ## Purpose
 

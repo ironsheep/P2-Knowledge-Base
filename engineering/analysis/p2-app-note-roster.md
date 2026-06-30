@@ -143,7 +143,7 @@ committed work.*
    companion); watch the guide-promotion trigger.
 2. **Family A (A1 DAC → P2AN003, A2 measurement → P2AN004)** — **committed +
    stood up 2026-06-30 as Inputs 2 & 3 of the IOSP Release Campaign**
-   (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`).
+   (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`).
    Each runs the §2 playbook, delineates against IOSP, **augments IOSP with its
    foundational fork**, and is taken to PDF. The campaign's **USB study** (Input 1)
    also mines the Standalone USB note's examples to enrich IOSP (the note itself stays
@@ -192,7 +192,7 @@ candidate for its own lightweight skill/process once it has run a few times
 (logged as a future-process candidate).
 
 > **Next actions:** (1) **B1 CORDIC** authoring in progress (#140, separate Math
-> track). (2) The **IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`)
+> track). (2) The **IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`)
 > drives **A1→P2AN003 (DAC)** and **A2→P2AN004 (Freq/Period/Pulse)** through the §2
 > playbook + IOSP enrichment + PDF, plus a USB study, then releases IOSP. Remaining
 > items are registered candidates above.
