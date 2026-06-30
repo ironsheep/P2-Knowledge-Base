@@ -1,6 +1,12 @@
 object_metadata:
   author: Wuerfel_21
   author_username: ''
+  capability:
+    domain: A
+    leaf: emulation
+    secondary:
+      - { domain: G, leaf: led-matrix }
+      - { domain: J, leaf: synthesis }
   compatibility:
     dependencies: []
     known_issues: []

@@ -1,0 +1,33 @@
+quick_byte:
+  title: Multiple Servo Control (up to 64) Object
+  slug: multiple-servo-control-up-to-64-object
+  url: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+  published_date: '2021-01-26'
+  author: Ken Gracey
+  code_author: Jon McPhalen
+  capability:
+    domain: H
+    leaf: servo
+  type: reusable-object
+  tags:
+  - motor-control
+  - robotics
+  - smart-pins
+  - utility
+  modalities:
+    article: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+    video: https://www.youtube.com/watch?v=v51GHsNfRQk
+    source_code:
+      has_code: false
+      download_count: 0
+      download_mechanism: ''
+      auth_gated: false
+      get_from: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards:
+    - 64006D
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

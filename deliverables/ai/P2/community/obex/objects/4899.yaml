@@ -1,0 +1,53 @@
+object_metadata:
+  author: Michael
+  author_username: ''
+  capability:
+    domain: K
+    leaf: hardware-design
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: Parallax 3D Models are typically available in both STEP and
+      VRML formats.
+    description_short: Parallax 3D Models are typically available in both STEP and
+      VRML formats.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - STEP
+    - VRML
+  metadata:
+    created_date: '2024-10-23 18:12:48'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '4899'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages: []
+    microcontroller:
+    - P2
+    version: ''
+  title: Propeller 2 Evaluation Board - 3D Model
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4899
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/propeller-2-evaluation-board-3d-model/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2024-10-23'
+    obex_version: ''

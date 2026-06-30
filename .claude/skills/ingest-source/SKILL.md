@@ -21,6 +21,17 @@ This is the **INGESTION head**'s working skill — the execution counterpart to
 manual head has `prepare-manual`/`release-manual`; the YAML head has
 `yaml-knowledge-base-maintenance`; **this is the ingestion head's.**
 
+> **Community artifacts are catalogued, not trust-ingested.** Per the
+> four-artifact model (`HEAD-DISPATCH-DRAFT.md` §"Artifact-type model"), an
+> **OBEX object** or **Quick Byte** is a *community* artifact: you build a
+> **catalog entry that points at it** (metadata + spine classification per
+> `engineering/standards/p2-capability-taxonomy.md` + a download/modality link),
+> and you **never copy its code into the trust-stamped `deliverables/` tree**.
+> This is distinct from this skill's full-trust *source ingestion* (documentary
+> sources that DO flow into the KB). The community-artifact catalog passes
+> (Quick Bytes build, OBEX re-scrape) reuse the corpus tooling, not the 7-pass
+> documentary ingestion.
+
 ## The methodology lives in `engineering/ingestion/`, not here
 
 This skill **orchestrates** the established methodology; it does not restate it.

@@ -1,6 +1,9 @@
 object_metadata:
   author: Chris Gadd
   author_username: ''
+  capability:
+    domain: G
+    leaf: lcd-eink
   compatibility:
     dependencies: []
     known_issues: []

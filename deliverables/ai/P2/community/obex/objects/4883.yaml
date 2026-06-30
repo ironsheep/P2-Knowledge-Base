@@ -1,6 +1,9 @@
 object_metadata:
   author: Jon McPhalen (jonnymac)
   author_username: ''
+  capability:
+    domain: B
+    leaf: pin-modes
   compatibility:
     dependencies: []
     known_issues: []

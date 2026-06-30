@@ -1,0 +1,57 @@
+object_metadata:
+  author: evanh
+  author_username: ''
+  capability:
+    domain: I
+    leaf: sd-fat
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: 4-bit SD mode SD card driver plug-in to Flexspin's FAT filesystem
+      layer.
+    description_short: 4-bit SD mode SD card driver plug-in to Flexspin's FAT filesystem
+      layer.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - FAT16
+    - FAT32
+    - Filesystem
+    - FlexProp
+    - SD card
+  metadata:
+    created_date: '2026-04-25 03:04:45'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5048'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: 4-bit SD driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5048
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/sdsd-cc/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2026-04-25'
+    obex_version: ''

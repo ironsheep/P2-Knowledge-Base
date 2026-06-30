@@ -1,6 +1,11 @@
 object_metadata:
   author: Jon McPhalen (jonnymac)
   author_username: ''
+  capability:
+    domain: F
+    leaf: temp-humidity
+    secondary:
+      - { domain: E, leaf: spi }
   compatibility:
     dependencies: []
     known_issues: []

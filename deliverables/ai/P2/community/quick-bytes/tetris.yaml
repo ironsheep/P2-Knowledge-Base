@@ -1,0 +1,34 @@
+quick_byte:
+  title: Tetris
+  slug: tetris
+  url: https://www.parallax.com/tetris/
+  published_date: '2021-02-14'
+  author: Ken Gracey
+  code_author: Rayman
+  capability:
+    domain: G
+    leaf: gui
+    secondary:
+    - domain: J
+      leaf: sound-engine
+  type: reusable-object
+  tags:
+  - audio
+  - gaming
+  - visual
+  modalities:
+    article: https://www.parallax.com/tetris/
+    video: https://www.youtube.com/watch?v=Ylk_Db_D9X0
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/tetris/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

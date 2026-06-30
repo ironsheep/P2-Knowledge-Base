@@ -1,6 +1,9 @@
 object_metadata:
   author: Jose Rullan
   author_username: ''
+  capability:
+    domain: A
+    leaf: timing
   compatibility:
     dependencies: []
     known_issues: []

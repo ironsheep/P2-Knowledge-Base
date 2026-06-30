@@ -1,0 +1,41 @@
+quick_byte:
+  title: 320x240 LCD Driver for ILI9341 Controller and XPT2046 Touch Screen
+  slug: 320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen
+  url: https://www.parallax.com/320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen/
+  published_date: '2021-03-03'
+  author: Ken Gracey
+  code_author: Greg LaPolla / Cluso99 / Mike Roberts
+  capability:
+    domain: G
+    leaf: lcd-eink
+    secondary:
+    - domain: F
+      leaf: touch-capacitive
+    - domain: E
+      leaf: spi
+  type: reusable-object
+  tags:
+  - gaming
+  - human-input
+  - lcd
+  - protocols
+  - smart-pins
+  - utility
+  - visual
+  modalities:
+    article: https://www.parallax.com/320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen/
+    video: https://www.youtube.com/watch?v=SGE8ksefZKs
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen/
+    reference_links:
+    - https://www.amazon.com/s?k=320x240+LCD+ILI9341+controller+and+XPT2046+touch+screen&ref=nb_sb_noss
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

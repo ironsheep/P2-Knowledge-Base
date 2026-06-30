@@ -1,6 +1,11 @@
 object_metadata:
   author: Jose Rullan
   author_username: ''
+  capability:
+    domain: G
+    leaf: gui-widgets
+    secondary:
+      - { domain: F, leaf: human-input }
   compatibility:
     dependencies: []
     known_issues: []

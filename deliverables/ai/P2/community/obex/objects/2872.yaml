@@ -1,6 +1,11 @@
 object_metadata:
   author: ManAtWork
   author_username: ''
+  capability:
+    domain: I
+    leaf: spi-flash
+    secondary:
+      - { domain: E, leaf: spi }
   compatibility:
     dependencies: []
     known_issues: []

@@ -1,0 +1,36 @@
+quick_byte:
+  title: Configuring Visual Studio Code for Programming the P2 on Mac, Windows, and Linux
+  slug: visual-studio
+  url: https://www.parallax.com/visual-studio/
+  published_date: '2021-03-14'
+  author: Ken Gracey
+  code_author: Eric Smith, Stephen Moraco, Cluso99
+  capability:
+    domain: K
+    leaf: toolchain-editor
+  type: procedural
+  tags:
+  - development-tools
+  - visual
+  modalities:
+    article: https://www.parallax.com/visual-studio/
+    video: https://www.youtube.com/watch?v=Ebgj-rOB9DQ
+    source_code:
+      has_code: false
+      download_count: 0
+      download_mechanism: ''
+      auth_gated: false
+      get_from: https://www.parallax.com/visual-studio/
+    reference_links:
+    - https://github.com/totalspectrum/flexprop
+    - https://code.visualstudio.com/
+    - https://github.com/parallaxinc/P2_PNut_Public/releases/
+    - https://drive.google.com/file/d/1fMpkdoxoNwIaPaJB_nEx3h2PTiJBMJFm/view?usp=sharing
+    - https://github.com/totalspectrum/flexprop/releases/tag/v5.2.0
+    - https://github.com/ironsheep/P2-vscode-extensions
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

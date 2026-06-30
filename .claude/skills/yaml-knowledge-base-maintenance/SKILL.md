@@ -28,6 +28,19 @@ deliverables/ai/P2/
 
 **Do not edit `engineering/knowledge-base/P2/`.** That tree is transient and stale. Its cleanup is a separate concern (see the `cleanup-backups` recommendation in the recommendations doc).
 
+> **App-note YAML companions are first-party and live here.** Per the
+> four-artifact model (`HEAD-DISPATCH-DRAFT.md` §"Artifact-type model"), an app
+> note ships as a human doc **+ a structured YAML companion** under
+> `deliverables/ai/P2/`. The companion is **first-party** (we author it,
+> `pnut_ts`-validated), so this skill governs it like any other canonical YAML —
+> with one rule: it is a **digest + links, never a prose clone**. It carries the
+> composition recipe as **links to the primitive YAMLs** it uses (not
+> re-descriptions), a reference to the runnable code, parameters/pin-maps,
+> prerequisites, and gotchas. The prose *why* stays in the human doc; no content
+> lives in two places. The doc↔companion **agreement gate** is owned by
+> `document-audit`. (Schema design lands in the app-note authoring sprint;
+> principle in `engineering/document-production/app-notes/APP-NOTE-DESIGN-DECISIONS.md`.)
+
 ## Findability is a continually-improving asset
 
 The KB is download-on-demand: remote agents request entries by name and follow `related:` chains to reach connected concepts. **Every time you touch a YAML, leave the remote agent better able to find what it needs than before.** This is continual, the same way process improvement is continual.

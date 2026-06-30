@@ -19,17 +19,29 @@ to the manuals for background). See the guides below for the full contract.
 
 | AN | Topic | Status | Notes |
 |---|---|---|---|
-| **P2AN000** | *(to be assigned)* | **experimental — in setup** | First note; `000` marks "not yet placed in the published sequence." See `P2AN000/P2AN000-NOTES.md`. |
+| **P2AN001** | Single-Pin ADC Instrumentation | drafted v0.1.0 — *renumber from legacy `P2AN000` PENDING* | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
+| **P2AN002** | CORDIC for Real Work | committed — **next up** | lead of the Math family; numbered at production start |
+
+> *Series starts at `001`, Parallax-style (no `AN000`); `P2AN000` was the experimental placeholder, now retired.*
+
+> **The authoritative candidate register + production plan is the roster:**
+> `engineering/analysis/p2-app-note-roster.md` (families, per-region IOSP/app-note
+> boundary, disposition ledger, two-pipeline tracking model). Numbers are assigned
+> at commit-to-production (per `APP-NOTE-CREATION-GUIDE.md` §6.1), so candidates
+> stay named in the roster until they enter production.
 
 ## Where notes come from
 
 The Parallax **P1 application notes** were ingested 2026-06-27 as pattern donors. Their
 **P2 recreation candidacy** is recorded in
 `engineering/ingestion/P1-DOCUMENT-LINEAGE.md` (§"App-note → P2 recreation candidacy").
-The STRONG candidates are the natural early P2 notes — AN001 Counters → **Smart Pin modes**,
-AN008 → **smart-pin ADC**, AN014 Coroutines → **PASM2 `CALLD`**. Recreations re-derive every
-number against P2 silicon; a recreation is a *new* P2AN number, not an inherited P1 one. New
-notes need not be recreations — any P2-specific application qualifies.
+P1 recreations re-derive every number against P2 silicon; a recreation is a *new* P2AN
+number, not an inherited P1 one, and new notes need not be recreations — any P2-specific
+application qualifies. **The current, authoritative candidate verdicts (which P1 topics
+become P2 app notes vs. route to the Architect's Guide / manuals / community) live in the
+roster** (`engineering/analysis/p2-app-note-roster.md`), which supersedes the initial
+lineage-stage guesses — e.g. inter-cog *communication* routes to the Architect's Guide,
+while ADC, CORDIC, multitasking, STRUCT/data-structures, and stack-sizing are app notes.
 
 ## Conventions in brief
 

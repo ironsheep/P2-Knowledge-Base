@@ -1,0 +1,62 @@
+object_metadata:
+  author: Stephen M Moraco
+  author_username: ''
+  capability:
+    domain: I
+    leaf: sd-fat
+    secondary:
+      - { domain: I, leaf: spi-flash }
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: A unified filesystem driver for the Parallax Propeller 2 (P2)
+      that provides simultaneous access to both the onboard 16MB FLASH chip and a
+      microSD card through a single cog and a single API.
+    description_short: A unified filesystem driver for the Parallax Propeller 2 (P2)
+      that provides simultaneous access to both the onboard 16MB FLASH chip and a
+      microSD card through a
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - FAT32
+    - Filesystem
+    - FLASH
+    - P2 EDGE
+    - SD card
+  metadata:
+    created_date: '2026-06-29 22:42:39'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5405'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: P2 Dual uSD FAT32 and FLASH FS
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5405
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/p2-dual-usd-fat32-and-flash-fs/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2026-06-29'
+    obex_version: ''

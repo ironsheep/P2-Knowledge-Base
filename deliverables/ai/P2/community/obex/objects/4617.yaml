@@ -1,6 +1,9 @@
 object_metadata:
   author: Stephen M Moraco
   author_username: ''
+  capability:
+    domain: H
+    leaf: servo
   compatibility:
     dependencies: []
     known_issues: []

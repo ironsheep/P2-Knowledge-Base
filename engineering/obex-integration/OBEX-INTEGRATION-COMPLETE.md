@@ -1,8 +1,109 @@
 # OBEX Community Integration Complete
 
-**Version**: v2.1 - OBEX Community Release  
-**Date**: September 12, 2025  
+**Version**: v2.2 - Re-Scrape Delta (history below is v2.1)  
+**Date**: June 29, 2026 (v2.2 delta) · September 12, 2025 (v2.1 base)  
 **Status**: ✅ Production Ready - Validated & Complete
+
+---
+
+## 📌 v2.2 Delta Re-Scrape — 2026-06-29
+
+Re-scraped the live OBEX Propeller-2 catalog (`https://obex.parallax.com/microcontroller/propeller-2/`)
+and diffed against the on-disk served YAMLs (the 113-object v2.1 baseline).
+
+**Diff result:** 130 live P2 objects · **17 NEW** added · **3 CHANGED** (genuine drift) · 0 removed · 110 unchanged.
+New served total: **130 objects**. Scraper (`scrape-obex-repos.py`) was an enrichment-only tool;
+the listing crawl + per-object structured extraction (the `<ul id="obexinformation">` block) was driven
+from `obex_discovery_fixed.py`'s `/microcontroller/propeller-2/page/N/` pattern, which still works against
+the live site (selectors current). All 17 new objects are P2-listed (no P1-only objects required filtering).
+
+### NEW objects (17)
+
+| ID | Title | Author | Live OBEX category | Notes |
+|----|-------|--------|--------------------|-------|
+| 2816 | DS1302_full | Dennis Gately | (none) | RTC driver; **github-archiver import → adoption candidate** |
+| 2822 | DS3231 | Jon McPhalen | (none) | RTC (P1+P2 versions attached) |
+| 4808 | mcp2517 CAN FD controller drivers | Chris Gadd | Protocol | CAN-FD driver (P1+P2) |
+| 4864 | P2 Edge KiCAD Symbols | Terry Trapp | PCB Design | hardware design asset |
+| 4898 | Propeller 2 Evaluation Board - PCB files | Michael | PCB Design | hardware design asset |
+| 4899 | Propeller 2 Evaluation Board - 3D Model | Michael | 3D Model | hardware design asset |
+| 4905 | Parallax P2 Library for Diptrace | Michael | (none) | hardware design asset |
+| 4933 | FloatToString.spin2 | Brian Estep | (none) | float→string utility |
+| 5048 | 4-bit SD driver | evanh | Data Storage | 4-bit SD-mode FAT driver |
+| 5071 | PropSPI | evanh | Protocol | autonomous SPI RAM-emulation cog |
+| 5096 | Autodesk Fusion model of P2 Arc8de 8in1 | Graham Cole | 3D Model | mechanical model |
+| 5285 | P2 ADC | Jon McPhalen | (none) | smart-pin ADC voltage measure |
+| 5348 | URLDecode | Terry Trapp | Snippet | URL-decode string snippet |
+| 5361 | FFT IFFT | James Smith | (none) | FFT/IFFT |
+| 5401 | HC-SR04 Ultrasonic Sensor for P2 | Jon McPhalen | Sensor | ultrasonic distance via smart pin |
+| 5404 | P2 microSD FAT32 Filesystem | Stephen M Moraco | Data Storage | **Stephen's new microSD driver** |
+| 5405 | P2 Dual uSD FAT32 and FLASH FS | Stephen M Moraco | Data Storage | **Stephen's new combined SD+FLASH driver** |
+
+> **Live OBEX taxonomy note:** OBEX has migrated to a new category vocabulary
+> (Data Storage / Protocol / PCB Design / 3D Model / Snippet / Sensor / …) that no
+> longer matches the v2.1 9-category `functionality.category` field. New objects keep
+> the legacy field (best-fit) for catalog consistency; the live category is recorded
+> above. Capability classification (below) is the authoritative cross-cutting axis.
+
+### Stephen M Moraco filesystem-driver trio — all confirmed present
+
+- **4261** — P2 FLASH Filesystem (flash-filesystem driver) — *existing, unchanged*
+- **5404** — P2 microSD FAT32 Filesystem (microSD/SD-card driver) — **NEW**
+- **5405** — P2 Dual uSD FAT32 and FLASH FS (combined dual SD+flash driver) — **NEW**
+
+### CHANGED objects (3 genuine drifts, updated in place)
+
+| ID | Title | Change |
+|----|-------|--------|
+| 4926 | PNut/Spin2 Latest Version | title **(v51) → (v55)**; OBEX date 2025-04-07 → 2026-05-08 |
+| 4800 | P2QR | OBEX date 2024-07-09 → 2026-05-06 (re-upload) |
+| 4889 | HostFS | author **Chip Gracey → ersmith** (live OBEX re-attribution — flagged for lead confirmation) |
+
+> **56 false-positive "author changes" were deliberately NOT applied.** The live scrape
+> returns raw, un-consolidated author strings (`Jon McPhalen (jonnymac)` → `Jon McPhalen`,
+> `ersmith` → `Eric R. Smith | added by Archiver`, `Greg LaPolla` → `glapolla`). The v2.1
+> catalog intentionally consolidated these to canonical names with separate archiver
+> metadata. Overwriting would regress the 2025-09 author-cleanup. Only the one genuine
+> person-level change (4889) was applied.
+
+### Adoption-request candidate (new)
+
+- **2816 — DS1302_full** — github-archiver import attributed to **Dennis Gately**
+  (`import_source: github_archiver`). Available for original-author adoption on OBEX,
+  same model as the v2.1 candidates (ersmith / Mike Calyer / Riley August). The other
+  16 new objects were uploaded by their real authors (no adoption action needed).
+
+### Capability spine classification (Task #135)
+
+All 130 served objects now carry a `capability:` block (domain A–K + leaf, optional
+secondary) per `engineering/standards/p2-capability-taxonomy.md`. Primary-domain roll-up:
+
+| Domain | | Count |
+|--------|--|------:|
+| A | Core compute model | 7 |
+| B | Smart Pins & I/O | 15 |
+| C | Math & DSP | 9 |
+| D | Streaming & video | 1 |
+| E | Comms & protocols | 25 |
+| F | Sensors & environment | 20 |
+| G | Displays & graphics | 21 |
+| H | Motors & motion | 9 |
+| I | Storage & memory | 8 |
+| J | Audio | 7 |
+| K | Dev tools & workflow | 8 |
+
+40 objects carry a secondary domain. Spine-gap leaves surfaced for lead review (the
+taxonomy enumerates representative leaves only): `ir-remote` (5 IR objects), `imu`,
+`compass`, `vision`, `rfid`, `can-bus`, `dmx`, `eeprom`, `mavlink`, `hmi-display`,
+`graphics-lib`, `image-codec`, `prng`, `emulation`, and `hardware-design` (5 PCB/3D/mechanical
+assets that arguably fall outside the software-capability spine entirely). Domain-boundary
+judgment calls flagged: 2811 (C-cordic vs H), 2819/2823 (B-adc vs F), 2828 (A-timing vs K),
+4570 (B-io vs E-i2c), 4889 (K-host vs I-storage).
+
+**Validation:** `verify-yaml-format.py` → 1119 clean / 0 failed (exit 0);
+`validate-crossref-keys.py` → all cross-references validated (exit 0).
+
+---
 
 ## 🎯 Integration Summary
 

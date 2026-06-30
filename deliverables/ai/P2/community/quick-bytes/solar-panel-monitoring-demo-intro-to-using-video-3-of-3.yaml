@@ -1,0 +1,38 @@
+quick_byte:
+  title: Solar Panel Monitoring Demo (Intro to Using Video 3 of 3)
+  slug: solar-panel-monitoring-demo-intro-to-using-video-3-of-3
+  url: https://www.parallax.com/solar-panel-monitoring-demo-intro-to-using-video-3-of-3/
+  published_date: '2022-08-22'
+  author: Ken Gracey
+  code_author: Michael Mulholland
+  capability:
+    domain: G
+    leaf: vga-dvi-hdmi-driver
+    secondary:
+    - domain: F
+      leaf: light-optical
+    - domain: E
+      leaf: iot-gateway
+  type: reusable-object
+  tags:
+  - environmental
+  - iot
+  - vga-hdmi
+  - visual
+  modalities:
+    article: https://www.parallax.com/solar-panel-monitoring-demo-intro-to-using-video-3-of-3/
+    video: https://www.youtube.com/watch?v=7N0Zu1zvwYk
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/solar-panel-monitoring-demo-intro-to-using-video-3-of-3/
+    reference_links:
+    - https://github.com/totalspectrum/flexprop/releases
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

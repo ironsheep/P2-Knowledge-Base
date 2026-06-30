@@ -1,6 +1,11 @@
 object_metadata:
   author: Greg LaPolla
   author_username: ''
+  capability:
+    domain: G
+    leaf: lcd-eink
+    secondary:
+      - { domain: F, leaf: touch }
   compatibility:
     dependencies: []
     known_issues: []

@@ -1,0 +1,29 @@
+quick_byte:
+  title: Breakout Board Options for P2 Edge Modules
+  slug: breakout-board-options-for-p2
+  url: https://www.parallax.com/breakout-board-options-for-p2/
+  published_date: '2023-03-15'
+  author: Michael Mulholland
+  code_author: ''
+  capability:
+    domain: K
+    leaf: project-template
+  type: procedural
+  tags:
+  - development-tools
+  modalities:
+    article: https://www.parallax.com/breakout-board-options-for-p2/
+    video: https://www.youtube.com/watch?v=YIxLPEVidzs
+    source_code:
+      has_code: false
+      download_count: 0
+      download_mechanism: ''
+      auth_gated: false
+      get_from: https://www.parallax.com/breakout-board-options-for-p2/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

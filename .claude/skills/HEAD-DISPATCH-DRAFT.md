@@ -41,6 +41,7 @@ set `active_element` so downstream skills stay consistent.
 | Head | Detection | "Element" the artifacts attach to |
 |------|-----------|-----------------------------------|
 | **MANUAL** | target under `engineering/document-production/manuals/<m>/` or `…/workspace/<m>/` | that manual — **publication** (in `PUBLICATION-ROSTER.md`) or **instrument** (workspace folder only, e.g. P2 Layout Torture Test; no version; state wherever it records runs — forge interactive-testing is one example, not the rule; purpose traces to the effort/sprint it serves) |
+| **APP NOTE** *(document-production)* | target under `engineering/document-production/app-notes/<n>/` | that app note — a **document-production element alongside manuals** (own doc class, own version/CHANGELOG, e.g. `P2AN000`); shares the prepare/release/audit machinery but ships as **doc + YAML companion** (see the artifact-type model below). Not a separate head. |
 | **YAML (KB-for-agents)** | target under `deliverables/ai/P2/` (the P2KB YAML set) | the P2KB data set |
 | **INGESTION** | target under `engineering/ingestion/sources/<src>/` | that ingestion source |
 | **OBEX** | target under `engineering/obex-integration/` (the single catalog) | the OBEX catalog — one element (`obex:catalog`); state in `obex-integration/README.md` + last-release date |
@@ -79,6 +80,43 @@ pass) — resolution rule **TBD** (brainstorm).
   sweep it to a dated archive (`PUNCH_LIST_ARCHIVE_PATTERN`); the live
   copy holds only outstanding work. `P2KB-CORRECTION-FINDINGS.md` (the
   YAML head's punch list) gets this same lifecycle.
+
+## Artifact-type model — the four-artifact shape (2026-06-29)
+
+P2 teaching/reuse content comes in **four artifact types** on one spectrum of
+increasing pedagogical depth and authorship/trust commitment. The authoritative
+definitions live in the standards docs — this is the dispatch-side summary so a
+skill knows *which type it's handling and how that changes its behavior:*
+
+| Artifact | It is a… | Head / owner | Trust | Skill behavior |
+|---|---|---|---|---|
+| **OBEX object** | reusable *part* | `obex` head | community (link, don't adopt) | **catalog entry** only — never trust-chain ingest the code |
+| **Quick Byte** | *worked demo* (multi-modal) | `quickbytes` head | community (route to it) | **catalog entry** + modality links; harvest as a *format donor* for app notes |
+| **App note** | *guided composition* (ours) | document-production element (above) | first-party, validated | author as **doc + YAML companion**; the companion is a digest+links, never a prose clone; emit both in one act, **agreement-gate** them |
+| **Manual** | *systematic reference* (ours) | `manual` head | first-party, KB core | already YAML-backed (the KB *is* the source) |
+
+**Authoritative specs (read these, don't restate them):**
+- `engineering/standards/p2-capability-taxonomy.md` — the capability **spine**
+  every artifact classifies onto (domain A–K + leaf), and the OBEX-category /
+  Quick-Bytes-tag → domain mapping.
+- `engineering/standards/documentation-standards/artifact-placement-rubric.md`
+  — which *form* a capability gap should take (the routing tree; the sharp test
+  *app note solves a problem by composing subsystems; a manual documents a
+  subsystem completely*).
+- `engineering/document-production/app-notes/APP-NOTE-DESIGN-DECISIONS.md` —
+  the format-donor principle and the doc+YAML-companion principle (+ the
+  agreement gate).
+
+**Consequences a skill must honor:**
+- A **community-artifact** task (OBEX/Quick Bytes) builds a *catalog entry that
+  points at* the artifact — it does **not** copy community code into
+  `deliverables/` (the trust-stamped tree). `ingest-source` treats these as
+  catalog-cataloging, not full-trust ingestion.
+- An **app-note element** is prepared/released/audited through the same
+  document-production skills as a manual, but additionally carries a **YAML
+  companion** under `deliverables/ai/P2/`; authoring it without the companion
+  trips the agreement gate. `yaml-knowledge-base-maintenance` governs that
+  first-party companion; `document-audit` owns the agreement gate.
 
 ## Brainstorm outcomes — session model (2026-06-05)
 

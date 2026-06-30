@@ -1,0 +1,35 @@
+quick_byte:
+  title: Simple Video Driver - Using Images (Intro to Using Video 2 of 3)
+  slug: p2-simple-video-driver-using-images-intro-to-using-video-2-of-3
+  url: https://www.parallax.com/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3/
+  published_date: '2022-08-22'
+  author: Ken Gracey
+  code_author: Michael Mulholland
+  capability:
+    domain: G
+    leaf: vga-dvi-hdmi-driver
+    secondary:
+    - domain: D
+      leaf: pixel-scanline
+  type: reusable-object
+  tags:
+  - vga-hdmi
+  - visual
+  modalities:
+    article: https://www.parallax.com/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3/
+    video: https://www.youtube.com/watch?v=_cQiBWek7HE
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3/
+    reference_links:
+    - https://github.com/totalspectrum/flexprop/releases
+  cross_links:
+    obex_object_ids: []
+    related_boards:
+    - 64006H
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

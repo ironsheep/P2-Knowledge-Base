@@ -1,6 +1,9 @@
 object_metadata:
   author: Michael
   author_username: ''
+  capability:
+    domain: A
+    leaf: inline-pasm
   compatibility:
     dependencies: []
     known_issues: []

@@ -1,6 +1,9 @@
 object_metadata:
   author: mike calyer
   author_username: ''
+  capability:
+    domain: E
+    leaf: wireless
   compatibility:
     dependencies: []
     known_issues: []

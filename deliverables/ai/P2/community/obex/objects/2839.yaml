@@ -1,6 +1,9 @@
 object_metadata:
   author: Jon McPhalen (jonnymac)
   author_username: ''
+  capability:
+    domain: E
+    leaf: dmx
   compatibility:
     dependencies: []
     known_issues: []

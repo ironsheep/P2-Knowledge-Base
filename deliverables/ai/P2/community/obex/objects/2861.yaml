@@ -1,6 +1,9 @@
 object_metadata:
   author: Johannes
   author_username: ''
+  capability:
+    domain: J
+    leaf: dac-playback
   compatibility:
     dependencies: []
     known_issues: []

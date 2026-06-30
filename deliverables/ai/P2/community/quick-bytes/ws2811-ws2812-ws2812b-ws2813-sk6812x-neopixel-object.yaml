@@ -1,0 +1,31 @@
+quick_byte:
+  title: WS2811, WS2812, WS2812b, WS2813, SK6812x NeoPixel Object
+  slug: ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object
+  url: https://www.parallax.com/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object/
+  published_date: '2021-01-20'
+  author: Ken Gracey
+  code_author: Jon McPhalen
+  capability:
+    domain: G
+    leaf: led-matrix-neopixel
+  type: reusable-object
+  tags:
+  - led
+  - protocols
+  - visual
+  modalities:
+    article: https://www.parallax.com/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object/
+    video: https://www.youtube.com/watch?v=jzrmCKgS8Dc
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

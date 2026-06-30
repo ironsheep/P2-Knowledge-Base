@@ -1,6 +1,9 @@
 object_metadata:
   author: Stephen M Moraco
   author_username: ''
+  capability:
+    domain: E
+    leaf: uart-serial
   compatibility:
     dependencies: []
     known_issues: []

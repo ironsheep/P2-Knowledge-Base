@@ -1,6 +1,11 @@
 object_metadata:
   author: glapolla
   author_username: ''
+  capability:
+    domain: B
+    leaf: adc
+    secondary:
+      - { domain: E, leaf: spi }
   compatibility:
     dependencies: []
     known_issues: []

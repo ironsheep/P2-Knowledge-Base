@@ -1,6 +1,9 @@
 object_metadata:
   author: MagIO2
   author_username: ''
+  capability:
+    domain: G
+    leaf: graphics-lib
   compatibility:
     dependencies: []
     known_issues: []

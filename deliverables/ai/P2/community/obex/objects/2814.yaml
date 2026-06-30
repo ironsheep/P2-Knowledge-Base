@@ -1,6 +1,9 @@
 object_metadata:
   author: ersmith
   author_username: ''
+  capability:
+    domain: G
+    leaf: terminal-ansi
   compatibility:
     dependencies: []
     known_issues: []

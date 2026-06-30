@@ -1,0 +1,34 @@
+quick_byte:
+  title: PCF8574 I2C LCD Demo
+  slug: pcf8574-i2c-lcd-demo
+  url: https://www.parallax.com/pcf8574-i2c-lcd-demo/
+  published_date: '2021-02-01'
+  author: Ken Gracey
+  code_author: Jon McPhalen
+  capability:
+    domain: G
+    leaf: lcd-eink
+    secondary:
+    - domain: E
+      leaf: i2c
+  type: reusable-object
+  tags:
+  - lcd
+  - protocols
+  - visual
+  modalities:
+    article: https://www.parallax.com/pcf8574-i2c-lcd-demo/
+    video: https://www.youtube.com/watch?v=-SWszMijKpw
+    source_code:
+      has_code: true
+      download_count: 3
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/pcf8574-i2c-lcd-demo/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

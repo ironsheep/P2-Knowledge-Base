@@ -1,6 +1,9 @@
 object_metadata:
   author: ManAtWork
   author_username: ''
+  capability:
+    domain: E
+    leaf: networking
   compatibility:
     dependencies: []
     known_issues: []

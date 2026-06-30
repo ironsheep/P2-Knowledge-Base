@@ -50,6 +50,17 @@ machine-readable dispatch detail):
 > **operations** is cross-cutting infrastructure (process + lessons-learned), not
 > a resumable work element — it has no `active_element` form.
 
+> **App notes + the four-artifact model.** App notes are a **document-production
+> element alongside manuals** (not a separate head): target
+> `engineering/document-production/app-notes/<n>/`, own doc class + version,
+> resolved like a manual (`PUBLICATION-ROSTER` / its folder) but additionally
+> shipping a **YAML companion** under a companion **agreement gate**. Together
+> with `obex`, `quickbytes`, and `manual` they are the four P2 artifact types
+> (part / worked-demo / guided-composition / systematic-reference). When a pickup
+> targets any of them, the **artifact-type model** in `HEAD-DISPATCH-DRAFT.md`
+> says how that type changes skill behavior; the **spine + placement rubric**
+> under `engineering/standards/` are the authoritative specs.
+
 ## 1. Pull session state
 
 - Run `mcp__todo-mcp__context_resume` — tasks + recent context.

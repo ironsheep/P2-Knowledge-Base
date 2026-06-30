@@ -1,0 +1,55 @@
+object_metadata:
+  author: James Smith
+  author_username: ''
+  capability:
+    domain: C
+    leaf: fft
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: 'Demo Files: real_fft_test.spin2  Spin2 speed and accuracy test,
+      tested with PNut-ts and flexspin fft_demo.spin2   Spin2 example program, tested
+      with Propeller Tool and PNut-ts comparefftbench.c   C example program, tested
+      with flexcc (spin2cpp)'
+    description_short: 'Demo Files: real_fft_test.spin2  Spin2 speed and accuracy
+      test, tested with PNut-ts and flexspin fft_demo.spin2   Spin2 example program,
+      tested with Propeller T'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    created_date: '2026-03-15 06:03:24'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5361'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: FFT IFFT
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5361
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/fft-ifft/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2026-03-15'
+    obex_version: ''

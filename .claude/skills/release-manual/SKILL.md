@@ -10,6 +10,15 @@ PDF(s) have already been produced by PDF Forge and placed in `deliverables/docum
 by the user. This skill is the single authoritative release process: **verify → promote →
 record → hand off git.**
 
+> **App-note elements release their YAML companion alongside the PDF.** An app
+> note is a document-production element (see `HEAD-DISPATCH-DRAFT.md`
+> §"Artifact-type model") that ships as **doc + first-party YAML companion**.
+> When releasing an app note: the companion under `deliverables/ai/P2/` is
+> published *with* the PDF, and the doc↔companion **agreement gate** (owned by
+> `document-audit`) must be green first — a divergence blocks release exactly as
+> the YAML-HEAD drain gate does. Everything else (PDF completeness verify,
+> CHANGELOG promotion, README index, freshness ledger) is identical to a manual.
+
 > **The cardinal rule: never trust the generation success flag.** PDF Forge runs xelatex in
 > batch mode and can emit a PDF + report "100% success" while silently dropping large spans
 > of content (a real incident: a PASM2 build dropped instruction sections A–F — 156 pages —

@@ -1,6 +1,9 @@
 object_metadata:
   author: Chip Gracey
   author_username: ''
+  capability:
+    domain: B
+    leaf: adc
   compatibility:
     dependencies: []
     known_issues: []

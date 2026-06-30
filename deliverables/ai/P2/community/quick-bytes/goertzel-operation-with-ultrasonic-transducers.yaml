@@ -1,0 +1,36 @@
+quick_byte:
+  title: Goertzel Operation with Ultrasonic Transducers
+  slug: goertzel-operation-with-ultrasonic-transducers
+  url: https://www.parallax.com/goertzel-operation-with-ultrasonic-transducers/
+  published_date: '2021-02-20'
+  author: Ken Gracey
+  code_author: Chip Gracey
+  capability:
+    domain: C
+    leaf: goertzel
+    secondary:
+    - domain: F
+      leaf: distance-ultrasonic
+  type: reusable-object
+  tags:
+  - adc-dac
+  - audio
+  - sensors
+  - smart-pins
+  modalities:
+    article: https://www.parallax.com/goertzel-operation-with-ultrasonic-transducers/
+    video: https://www.youtube.com/watch?v=P32IsWSbgjs
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/goertzel-operation-with-ultrasonic-transducers/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards:
+    - 64006G
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

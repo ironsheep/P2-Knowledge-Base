@@ -1,6 +1,9 @@
 object_metadata:
   author: ManAtWork
   author_username: ''
+  capability:
+    domain: H
+    leaf: stepper-dc
   compatibility:
     dependencies: []
     known_issues: []

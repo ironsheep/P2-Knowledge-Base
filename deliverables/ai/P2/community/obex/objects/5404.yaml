@@ -1,0 +1,61 @@
+object_metadata:
+  author: Stephen M Moraco
+  author_username: ''
+  capability:
+    domain: I
+    leaf: sd-fat
+    secondary:
+      - { domain: E, leaf: spi }
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This project provides a robust, high-performance SD card driver
+      for the P2 microcontroller with full FAT32 filesystem support. The driver uses
+      P2 smart pins for hardware-accelerated SPI communication and supports multiple
+      simultaneous file handles.
+    description_short: This project provides a robust, high-performance SD card driver
+      for the P2 microcontroller with full FAT32 filesystem support. The driver uses
+      P2 smart pins for
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - FAT32
+    - Filesystem
+    - SD card
+  metadata:
+    created_date: '2026-06-29 22:46:02'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5404'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: P2 microSD FAT32 Filesystem
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5404
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/p2-microsd-fat32-filesystem/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2026-06-29'
+    obex_version: ''

@@ -1,6 +1,9 @@
 object_metadata:
   author: phonoclese
   author_username: ''
+  capability:
+    domain: B
+    leaf: pulse-measurement
   compatibility:
     dependencies: []
     known_issues: []

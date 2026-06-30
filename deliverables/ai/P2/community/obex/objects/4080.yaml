@@ -1,6 +1,11 @@
 object_metadata:
   author: Wuerfel_21
   author_username: ''
+  capability:
+    domain: C
+    leaf: image-codec
+    secondary:
+      - { domain: G, leaf: graphics-lib }
   compatibility:
     dependencies: []
     known_issues: []

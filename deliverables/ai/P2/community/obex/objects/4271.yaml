@@ -1,6 +1,9 @@
 object_metadata:
   author: vonszarvas
   author_username: ''
+  capability:
+    domain: C
+    leaf: fixed-float
   compatibility:
     dependencies: []
     known_issues: []

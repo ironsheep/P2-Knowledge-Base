@@ -1,6 +1,11 @@
 object_metadata:
   author: ManAtWork
   author_username: ''
+  capability:
+    domain: C
+    leaf: cordic
+    secondary:
+      - { domain: H, leaf: bldc }
   compatibility:
     dependencies: []
     known_issues: []

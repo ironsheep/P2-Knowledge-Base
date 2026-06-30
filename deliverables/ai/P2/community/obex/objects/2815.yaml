@@ -1,6 +1,11 @@
 object_metadata:
   author: mike calyer
   author_username: ''
+  capability:
+    domain: F
+    leaf: temp-humidity
+    secondary:
+      - { domain: E, leaf: i2c }
   compatibility:
     dependencies: []
     known_issues: []

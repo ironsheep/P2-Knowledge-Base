@@ -1,0 +1,30 @@
+quick_byte:
+  title: P2 RTC Add-on Board Demo
+  slug: p2-rtc-add-on-board-demo
+  url: https://www.parallax.com/p2-rtc-add-on-board-demo/
+  published_date: '2023-01-26'
+  author: Michael Mulholland
+  code_author: Michael Mulholland
+  capability:
+    domain: F
+    leaf: rtc
+  type: reusable-object
+  tags:
+  - rtc
+  - utility
+  modalities:
+    article: https://www.parallax.com/p2-rtc-add-on-board-demo/
+    video: https://www.youtube.com/watch?v=mc14QBdn-Kg
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/p2-rtc-add-on-board-demo/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

@@ -1,6 +1,11 @@
 object_metadata:
   author: Chris Gadd
   author_username: ''
+  capability:
+    domain: B
+    leaf: usb-pins
+    secondary:
+      - { domain: F, leaf: human-input }
   compatibility:
     dependencies: []
     known_issues: []

@@ -1,0 +1,57 @@
+object_metadata:
+  author: evanh
+  author_username: ''
+  capability:
+    domain: E
+    leaf: spi
+    secondary:
+      - { domain: A, leaf: cogs }
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Uses a cog.  Runs autonomously.  Master can read and write at
+      will within the handler's specified hubRAM buffer space.
+    description_short: Uses a cog.  Runs autonomously.  Master can read and write
+      at will within the handler's specified hubRAM buffer space.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - SPI
+    - SPI RAM emulation
+  metadata:
+    created_date: '2025-02-15 00:20:00'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5071'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: PropSPI
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5071
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/propspi/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2025-02-15'
+    obex_version: ''

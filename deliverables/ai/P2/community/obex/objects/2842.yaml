@@ -1,6 +1,9 @@
 object_metadata:
   author: Jon McPhalen (jonnymac)
   author_username: ''
+  capability:
+    domain: E
+    leaf: uart-serial
   compatibility:
     dependencies: []
     known_issues: []

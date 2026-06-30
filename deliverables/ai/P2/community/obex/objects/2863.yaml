@@ -1,6 +1,9 @@
 object_metadata:
   author: Wuerfel_21
   author_username: ''
+  capability:
+    domain: J
+    leaf: synthesis
   compatibility:
     dependencies: []
     known_issues: []

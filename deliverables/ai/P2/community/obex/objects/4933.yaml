@@ -1,0 +1,57 @@
+object_metadata:
+  author: Brian Estep
+  author_username: ''
+  capability:
+    domain: C
+    leaf: fixed-float
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This Spin2 code provides functions for converting floats to
+      strings with precision specified. It was converted from existing FloatString.spin
+      functions.
+    description_short: This Spin2 code provides functions for converting floats to
+      strings with precision specified. It was converted from existing FloatString.spin
+      functions.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - Float
+    - Spin2
+    - String
+  metadata:
+    created_date: '2024-11-20 19:55:50'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '4933'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: FloatToString.spin2
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4933
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/floattostring-spin2/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2024-11-20'
+    obex_version: ''

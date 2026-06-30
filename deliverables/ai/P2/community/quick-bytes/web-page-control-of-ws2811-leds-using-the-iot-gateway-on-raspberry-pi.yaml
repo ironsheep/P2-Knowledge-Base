@@ -1,0 +1,37 @@
+quick_byte:
+  title: Web Page Control of WS2811 LEDs Using the IoT Gateway on Raspberry Pi
+  slug: web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi
+  url: https://www.parallax.com/web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi/
+  published_date: '2022-09-01'
+  author: Ken Gracey
+  code_author: Stephen M. Moraco
+  capability:
+    domain: E
+    leaf: iot-gateway
+    secondary:
+    - domain: G
+      leaf: led-matrix-neopixel
+    - domain: K
+      leaf: host-integration
+  type: reusable-object
+  tags:
+  - iot
+  - led
+  - raspberry-pi
+  modalities:
+    article: https://www.parallax.com/web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi/
+    video: https://www.youtube.com/watch?v=q_sy_4rSkOM
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi/
+    reference_links:
+    - https://github.com/ironsheep/P2-RPi-IoT-gateway
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

@@ -1,6 +1,9 @@
 object_metadata:
   author: Michael
   author_username: ''
+  capability:
+    domain: B
+    leaf: pin-modes
   compatibility:
     dependencies: []
     known_issues: []

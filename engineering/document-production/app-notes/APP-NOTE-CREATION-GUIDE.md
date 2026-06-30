@@ -163,9 +163,31 @@ Same family the manuals flag: "automatically," "also provides," "side effect," "
 
 ### 6.1 Naming & numbering
 
-- **Series prefix `P2AN`** + a **three-digit number**: `P2AN000`, `P2AN001`, …
-- **`P2AN000` is the experimental first note** — number `000` is deliberate: it marks "not yet placed in the published sequence." When the published numbering is settled, the note is renumbered (folder rename + front-matter), and `000` is retired or reserved for the template/exemplar.
-- **Recreations of P1 notes do *not* automatically inherit the P1 number.** A P2 recreation of P1's AN001 (Counters → Smart Pins) is a *new* note with its own P2AN number; the lineage is recorded in `P1-DOCUMENT-LINEAGE.md`, not encoded in the number. (P1 AN-numbers and P2 AN-numbers are independent sequences.)
+- **Series prefix `P2AN` + a three-digit, zero-padded number, no separator:**
+  `P2AN000`, `P2AN001`, … This is **our** P2 series.
+- **P1 notes keep their bare `ANxxx`** (`AN001`–`AN019`) — that is **Parallax's
+  authentic published designation**, preserved (we do not rename others'
+  published documents; same provenance discipline as the trust chain). The
+  `P2AN` / `AN` asymmetry is **deliberate** — it encodes *ours vs. theirs* and
+  prevents `AN001` collisions across the two corpora we both hold.
+- **Numbering is sequential and assigned at *commit-to-production*, not to
+  candidates.** The number is a **stable identifier + build-order provenance —
+  NOT a taxonomy.** Do **not** band numbers by family, and do **not** pre-number
+  speculative candidates (a cut candidate would strand a permalink). Family /
+  topic organization lives in the **roster / index** (`README.md` +
+  `engineering/analysis/p2-app-note-roster.md`), never in the number — identity
+  and organization are kept separate.
+- **The published series starts at `P2AN001`** (matching Parallax's P1
+  `AN001`–`AN019`, which had no `AN000`). `P2AN000` was the *experimental
+  placeholder* — now **retired**. The existing ADC-instrumentation draft (the
+  exemplar this guide cites) **renumbers `P2AN000` → `P2AN001`**; **CORDIC is
+  `P2AN002`**. The renumber is a tracked repo-wide rename (folder + ~15 refs
+  across app-notes, the `workspace/` render, the IOSP render, and the analysis
+  docs) — this guide's `P2AN000` citations become `P2AN001` in the same pass.
+- **Recreations of P1 notes do *not* automatically inherit the P1 number.** A P2
+  recreation of P1's `AN001` (Counters → Smart Pins) is a *new* note with its own
+  `P2AN` number; the lineage is recorded in `P1-DOCUMENT-LINEAGE.md`, not encoded
+  in the number. (P1 `AN`-numbers and P2 `P2AN`-numbers are independent sequences.)
 - Folder names may carry a topic slug once the topic is fixed: `P2AN007-smart-pin-pwm/`. Until then, the bare `P2ANxxx/` folder is fine.
 
 ### 6.2 Per-note folder layout

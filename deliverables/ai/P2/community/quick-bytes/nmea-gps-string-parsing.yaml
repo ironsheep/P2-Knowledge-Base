@@ -1,0 +1,31 @@
+quick_byte:
+  title: NMEA GPS String Parsing
+  slug: nmea-gps-string-parsing
+  url: https://www.parallax.com/nmea-gps-string-parsing/
+  published_date: '2023-01-19'
+  author: Michael Mulholland
+  code_author: Michael Mulholland
+  capability:
+    domain: F
+    leaf: gps-nmea
+  type: reusable-object
+  tags:
+  - gps
+  - protocols
+  - wireless
+  modalities:
+    article: https://www.parallax.com/nmea-gps-string-parsing/
+    video: https://www.youtube.com/watch?v=P4fUvNKssIo
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/nmea-gps-string-parsing/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

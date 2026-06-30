@@ -1,0 +1,35 @@
+quick_byte:
+  title: Send Email from the Propeller 2 Using the IoT Gateway on Raspberry Pi
+  slug: send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi
+  url: https://www.parallax.com/send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi/
+  published_date: '2022-02-24'
+  author: Ken Gracey
+  code_author: Stephen Moraco, Ken Gracey, Jon McPhalen
+  capability:
+    domain: E
+    leaf: iot-gateway
+    secondary:
+    - domain: K
+      leaf: host-integration
+  type: reusable-object
+  tags:
+  - iot
+  - raspberry-pi
+  - wireless
+  modalities:
+    article: https://www.parallax.com/send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi/
+    video: https://www.youtube.com/watch?v=Vnn5ezleq54
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi/
+    reference_links:
+    - https://github.com/ironsheep/P2-RPi-IoT-gateway
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

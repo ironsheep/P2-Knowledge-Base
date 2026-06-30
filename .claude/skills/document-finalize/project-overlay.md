@@ -81,6 +81,20 @@ on the next assemble. Before applying any finding, decide where it lands.
   index needs `\index{}` tags (content → opus-master) *and* `\makeindex`/`\printindex`
   (template → workspace) — split it and edit each part in its own tree.
 
+## Augments §1 — app-note elements carry a doc↔companion agreement check
+
+When the `active_element` is an **app note** (a document-production element
+alongside manuals — see `HEAD-DISPATCH-DRAFT.md` §"Artifact-type model"), the
+finalize batch includes one extra finding source: the **doc↔YAML-companion
+agreement**. An app note ships as the human doc **+ a first-party YAML companion**
+under `deliverables/ai/P2/` (a digest+links, never a prose clone). Before
+sign-off, confirm the companion's composition recipe, parameters/pin-maps, and
+code reference still match the finalized doc — a divergence is a release-blocking
+finding, gathered in this pass like any other. The gate itself is owned by
+`document-audit`; the companion is governed by `yaml-knowledge-base-maintenance`;
+the principle is in
+`engineering/document-production/app-notes/APP-NOTE-DESIGN-DECISIONS.md`.
+
 ## Augments §5–§6 — Render once, then verify / Hand back
 
 Because manuals render on PDF Forge (not a local `DOC_RENDER_COMMAND`),

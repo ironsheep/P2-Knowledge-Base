@@ -1,6 +1,9 @@
 object_metadata:
   author: glapolla
   author_username: ''
+  capability:
+    domain: E
+    leaf: rfid
   compatibility:
     dependencies: []
     known_issues: []

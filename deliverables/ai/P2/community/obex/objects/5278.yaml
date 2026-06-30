@@ -1,6 +1,11 @@
 object_metadata:
   author: m.k. borri
   author_username: ''
+  capability:
+    domain: F
+    leaf: compass
+    secondary:
+      - { domain: E, leaf: i2c }
   compatibility:
     dependencies: []
     known_issues: []

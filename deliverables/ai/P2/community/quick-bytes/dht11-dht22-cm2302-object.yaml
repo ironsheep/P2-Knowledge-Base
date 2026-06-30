@@ -1,0 +1,32 @@
+quick_byte:
+  title: DHT11, DHT22, CM2302 Humidity and Temperature Sensor Object
+  slug: dht11-dht22-cm2302-object
+  url: https://www.parallax.com/dht11-dht22-cm2302-object/
+  published_date: '2021-01-22'
+  author: Ken Gracey
+  code_author: Jon McPhalen
+  capability:
+    domain: F
+    leaf: temperature-humidity
+  type: reusable-object
+  tags:
+  - adc-dac
+  - environmental
+  - protocols
+  - sensors
+  modalities:
+    article: https://www.parallax.com/dht11-dht22-cm2302-object/
+    video: https://www.youtube.com/watch?v=wTeYnjcTfTI
+    source_code:
+      has_code: true
+      download_count: 2
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/dht11-dht22-cm2302-object/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

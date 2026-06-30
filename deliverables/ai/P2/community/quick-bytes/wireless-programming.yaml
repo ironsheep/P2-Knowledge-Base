@@ -1,0 +1,35 @@
+quick_byte:
+  title: Wireless Programming with the ESP8266 WX Module
+  slug: wireless-programming
+  url: https://www.parallax.com/wireless-programming/
+  published_date: '2021-01-17'
+  author: Ken Gracey
+  code_author: Michael Mulholland
+  capability:
+    domain: K
+    leaf: programming-loading
+    secondary:
+    - domain: E
+      leaf: wireless
+  type: procedural
+  tags:
+  - development-tools
+  - iot
+  - wireless
+  modalities:
+    article: https://www.parallax.com/wireless-programming/
+    video: ''
+    source_code:
+      has_code: true
+      download_count: 2
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/wireless-programming/
+    reference_links:
+    - https://drive.google.com/drive/folders/17Xh9A80skNweDfcSq5MR087GqHrKvtOK
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

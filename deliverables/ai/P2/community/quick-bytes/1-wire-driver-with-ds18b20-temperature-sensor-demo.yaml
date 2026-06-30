@@ -1,0 +1,34 @@
+quick_byte:
+  title: 1-Wire Driver with DS18B20 Temperature Sensor Demo
+  slug: 1-wire-driver-with-ds18b20-temperature-sensor-demo
+  url: https://www.parallax.com/1-wire-driver-with-ds18b20-temperature-sensor-demo/
+  published_date: '2023-01-18'
+  author: Michael Mulholland
+  code_author: Jon McPhalen
+  capability:
+    domain: E
+    leaf: 1-wire
+    secondary:
+    - domain: F
+      leaf: temperature-humidity
+  type: reusable-object
+  tags:
+  - environmental
+  - protocols
+  - sensors
+  modalities:
+    article: https://www.parallax.com/1-wire-driver-with-ds18b20-temperature-sensor-demo/
+    video: ''
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/1-wire-driver-with-ds18b20-temperature-sensor-demo/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

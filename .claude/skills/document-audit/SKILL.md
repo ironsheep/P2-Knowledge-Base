@@ -22,6 +22,18 @@ The procedure lives here once; everything that varies per manual lives in that m
 **`MANUAL-DESCRIPTOR.md`** overlay (§0, §10). Improve the method here and every manual
 inherits it — no copy drifts.
 
+> **App-note elements add a doc↔companion agreement gate.** When the
+> `active_element` is an **app note** (a document-production element alongside
+> manuals — see `HEAD-DISPATCH-DRAFT.md` §"Artifact-type model"), this audit
+> additionally enforces that the human doc and its **first-party YAML companion**
+> (under `deliverables/ai/P2/`) *agree* — same discipline as the YAML-HEAD drain
+> gate, applied to the doc↔companion pair: the companion's composition recipe,
+> parameters, and code reference must match the shipped doc, and the companion
+> must be a digest+links (never a prose clone). A divergence is a release-blocking
+> finding. (Principle:
+> `engineering/document-production/app-notes/APP-NOTE-DESIGN-DECISIONS.md`;
+> companion is governed by `yaml-knowledge-base-maintenance`.)
+
 **Companion methodology:** for deeper theory (truth-matrix construction, hallucination
 taxonomy, lessons learned), see `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`.
 This skill is the *operational* checklist; the methodology doc is the *why*. It is linked,

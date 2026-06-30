@@ -1,6 +1,9 @@
 object_metadata:
   author: Ray Allen
   author_username: ''
+  capability:
+    domain: I
+    leaf: sd-fat
   compatibility:
     dependencies: []
     known_issues: []

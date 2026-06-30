@@ -1,0 +1,33 @@
+quick_byte:
+  title: P2 RTC Add-on with GPS Module
+  slug: p2-rtc-add-on-with-gps-module
+  url: https://www.parallax.com/p2-rtc-add-on-with-gps-module/
+  published_date: '2023-01-26'
+  author: Michael Mulholland
+  code_author: Michael Mulholland
+  capability:
+    domain: F
+    leaf: rtc
+    secondary:
+    - domain: F
+      leaf: gps-nmea
+  type: reusable-object
+  tags:
+  - gps
+  - rtc
+  modalities:
+    article: https://www.parallax.com/p2-rtc-add-on-with-gps-module/
+    video: https://www.youtube.com/watch?v=jnSHeGuFUxQ
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/p2-rtc-add-on-with-gps-module/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'

@@ -1,6 +1,11 @@
 object_metadata:
   author: Jon McPhalen (jonnymac)
   author_username: ''
+  capability:
+    domain: B
+    leaf: quadrature-decode
+    secondary:
+      - { domain: H, leaf: encoder-feedback }
   compatibility:
     dependencies: []
     known_issues: []

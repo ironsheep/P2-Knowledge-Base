@@ -1,0 +1,57 @@
+object_metadata:
+  author: Graham Cole
+  author_username: ''
+  capability:
+    domain: K
+    leaf: hardware-design
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
+      I used 3mm Birch Plywood for it's construction. Link to the original thread
+      on the P2 forum is here .
+    description_short: This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
+      I used 3mm Birch Plywood for it's construction. Link to the original thread
+      on the P2 forum is h
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - 3D Model
+    - emulation
+    - Fusion
+    - P2 EDGE
+  metadata:
+    created_date: '2025-02-16 15:54:43'
+    discovery_date: '2026-06-29T00:00:00'
+    extraction_status: discovered
+    kb_integration: none
+    last_scraped: '2026-06-29T00:00:00'
+    last_verified: '2026-06-29T00:00:00'
+    quality_score: 5
+    rescrape_source: v2.2 re-scrape 2026-06-29
+  object_id: '5096'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages: []
+    microcontroller:
+    - P2
+    version: ''
+  title: Autodesk Fusion model of P2 Arc8de 8in1
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5096
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/autodesk-fusion-model-of-p2-arca8de-8in1/
+  version_tracking:
+    has_github_repo: false
+    last_scraped: '2026-06-29T00:00:00'
+    obex_upload_date: '2025-02-16'
+    obex_version: ''

@@ -1,0 +1,29 @@
+quick_byte:
+  title: Starting Your P2 Project with a Spin2 Template
+  slug: starting-your-p2-project-with-a-spin2-template
+  url: https://www.parallax.com/starting-your-p2-project-with-a-spin2-template/
+  published_date: '2021-02-05'
+  author: Ken Gracey
+  code_author: Jon McPhalen
+  capability:
+    domain: K
+    leaf: project-template
+  type: procedural
+  tags:
+  - development-tools
+  modalities:
+    article: https://www.parallax.com/starting-your-p2-project-with-a-spin2-template/
+    video: ''
+    source_code:
+      has_code: true
+      download_count: 1
+      download_mechanism: parallax-download-manager
+      auth_gated: false
+      get_from: https://www.parallax.com/starting-your-p2-project-with-a-spin2-template/
+    reference_links: []
+  cross_links:
+    obex_object_ids: []
+    related_boards: []
+  metadata:
+    source: parallax-quick-bytes
+    scraped: '2026-06-29'
