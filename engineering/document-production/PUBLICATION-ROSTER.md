@@ -12,9 +12,9 @@ Categories: **Live** (in front of the community) · **In development / parked**
 forward). The discriminator between *parked* and *orphaned* is **intent**, not
 state — a started-then-paused doc is parked if we still mean to ship it.
 
-**Invariant:** every `workspace|manuals|outbound/<name>` folder appears in
-exactly **one** section below. A folder with no entry is an **anomaly to
-reconcile** (classify it), not a silent guess.
+**Invariant:** every `workspace|manuals|outbound/<name>` manual folder — and every
+`app-notes/<P2ANxxx>/` note in production — appears in exactly **one** section below. A
+folder with no entry is an **anomaly to reconcile** (classify it), not a silent guess.
 
 *Established: 2026-05-28 — Updated: 2026-06-09 (Platform column corrected against
 on-disk reality: I/O & Smart Pins / Assembly / DeSilva are bespoke forks ⏳ — NOT
@@ -41,7 +41,7 @@ that does not ride the shared stack.
 | Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
 |-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
 | Getting Started with the Propeller 2 | `p2-getting-started-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding |
-| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF); production bundle prepared. Uses the shared common cover (`book-artwork.png`, identical across all manuals). Awaiting Stephen's technical + asset review; "Blue Book" reference |
+| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF); production bundle prepared. Uses the shared common cover (`book-artwork.png`, identical across all manuals). **About to release — terminal step of the IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`): releases LAST after folding in three inputs — USB study + P2AN003 (DAC) + P2AN004 (Freq/Period/Pulse) boundary-enrichment. Also awaiting Stephen's technical + asset review; "Blue Book" reference |
 | P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.1.1 (2026-06-29)** — Ch.1 execution-model refinements (cog/LUT as one space + §1.4.4 streamer/blocking-transfer), §2.8.3 Operation:-line guidance + CMP family-consistency fix; uppercase mnemonics in prose; 503pp, render-verified. chip review outstanding |
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding. |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release. |
@@ -88,6 +88,29 @@ Started, then retired by decision — superseded or abandoned. Kept for history;
 | Publication | Workspace | Why retired |
 |-------------|-----------|-------------|
 | Smart Pins Tutorial ("Green Book") | `workspace/p2-smart-pins-tutorial/` | superseded by the I/O & Smart Pins User Guide (newer generation) |
+
+## Application Notes (`P2ANxxx`)
+
+A distinct document class (see `app-notes/README.md`) — application-driven,
+single-technique, one runnable example, each shipping a **YAML companion** (the
+four-artifact model). Canonical source lives in `app-notes/<P2ANxxx>/opus-master/`; each
+note in production also has a `workspace/<P2ANxxx>/` render folder (covered by the folder
+invariant above). Notes ride the shared `p2kb-platform-*` stack (K = 76) and are therefore
+bound by the **shared conventions below**, but they are **not** part of the live-publication
+consistency set until released.
+
+**The candidate backlog + production plan is its own register** —
+[`engineering/analysis/p2-app-note-roster.md`](../analysis/p2-app-note-roster.md) (families
+A/B/C, the standalone USB note, the disposition ledger). The table here tracks only notes
+**in production** (folder stood up); candidates stay in that register until they enter
+production.
+
+| App note | Slug | State |
+|----------|------|-------|
+| **P2AN001 — Single-Pin ADC Instrumentation** | `P2AN001` | 🟢 **v0.1.0 draft** — the foundational first note + doc-class exemplar (Family A0); rests on the enriched IOSP Ch.16. NOT released — awaiting Stephen's Forge generate + review. |
+| **P2AN002 — CORDIC for Real Work** | `P2AN002` | 🟢 **v0.1.0 draft, authoring in progress** — lead of the Math family (B1). To be jointly shaped / reviewed / released with P2AN001 (the two notes together set the doc-class shape). |
+| **P2AN003 — DAC & Analog Signal Generation** | `P2AN003` | 🔴 **planned — stood up 2026-06-30** (Family A1; output sibling to ADC). Committed to production as Input 2 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP DAC content + authored to PDF. |
+| **P2AN004 — Frequency / Period / Pulse Measurement** | `P2AN004` | 🔴 **planned — stood up 2026-06-30** (Family A2; timing instrumentation). Committed to production as Input 3 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP measurement content + authored to PDF. |
 
 ---
 

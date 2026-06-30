@@ -91,7 +91,7 @@ This document tracks technical debt related to the P2 Knowledge Base content (YA
 
 - This debt document focuses on knowledge base content and tooling
 - Ingestion/extraction debt is tracked in `/engineering/ingestion/debt.md`
-- Document production debt is tracked in `/engineering/document-production/debt.md`
+- Document production debt is tracked in `/engineering/document-production/PUNCH-LIST.md` (the former `debt.md` is now a redirect to it)
 - Operations debt is tracked in `/engineering/operations/technical-debt/debt.md`
 
 ---

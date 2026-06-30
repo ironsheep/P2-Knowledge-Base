@@ -74,8 +74,8 @@ IOSP Ch.16. Every item below follows its shape.
 | # | App note | Belongs-here-because | Examples to mine | Status |
 |---|---|---|---|---|
 | A0 | **ADC Instrumentation** | *(done — P2AN001)* | 6 OBEX (SAR/ADS1118/hi-res/4-20mA) + 3 QB | ✅ v0.1.0 |
-| A1 | **DAC & Analog Signal Generation** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | candidate |
-| A2 | **Frequency / Period / Pulse Measurement** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | candidate |
+| A1 | **DAC & Analog Signal Generation** → **P2AN003** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | **stood up 2026-06-30** (IOSP Campaign Input 2; boundary pending) |
+| A2 | **Frequency / Period / Pulse Measurement** → **P2AN004** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | **stood up 2026-06-30** (IOSP Campaign Input 3; boundary pending) |
 
 ### Family B — Math (worked technique; reference already in PASM2/Spin2)
 *Owning manuals: PASM2 / Spin2 reference (building blocks already there). Author as a coordinated pair/trio.*
@@ -107,7 +107,9 @@ IOSP Ch.16. Every item below follows its shape.
 - **Belongs-here-because:** the smart-pin USB-mode mechanics → IOSP; the hard
   *composition* of a working device/host → app note.
 - **Examples to mine (in hand):** OBEX **USBnew**, **USB HID Driver**.
-- **Status:** candidate (high value, hard).
+- **Status:** candidate (high value, hard). **Its example-mining front-end runs early**
+  as the **IOSP Release Campaign's USB study (Input 1)** — those findings enrich IOSP's
+  USB smart-pin content now; the standalone note stays a candidate.
 
 ---
 
@@ -139,8 +141,13 @@ committed work.*
    layer follows cleanly.) Run the §2 playbook: mine CORDIC examples → delineate
    PASM2/`cordic.yaml` reference vs. applied → author the app note (+ YAML
    companion); watch the guide-promotion trigger.
-2. **Family A (A1 DAC, A2 measurement)** — examples in hand; each delineates
-   against IOSP. Natural after CORDIC; reuses the ADC playbook directly.
+2. **Family A (A1 DAC → P2AN003, A2 measurement → P2AN004)** — **committed +
+   stood up 2026-06-30 as Inputs 2 & 3 of the IOSP Release Campaign**
+   (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`).
+   Each runs the §2 playbook, delineates against IOSP, **augments IOSP with its
+   foundational fork**, and is taken to PDF. The campaign's **USB study** (Input 1)
+   also mines the Standalone USB note's examples to enrich IOSP (the note itself stays
+   a candidate). IOSP releases LAST, after all three forks land.
 3. **Family C (C1 multitasking, C2 STRUCT, C3 stacks)** — the new-feature notes;
    C1+C3 authored together.
 4. **B2/B3 (extended-precision, fixed-point)** — complete the Math family;
@@ -184,5 +191,8 @@ boundaries* — is a **new standing activity** distinct from KB-fact ingestion;
 candidate for its own lightweight skill/process once it has run a few times
 (logged as a future-process candidate).
 
-> **Next action:** author **B1 CORDIC** via the §2 playbook (carved-out app-note
-> authoring follow-on); everything else is a registered candidate above.
+> **Next actions:** (1) **B1 CORDIC** authoring in progress (#140, separate Math
+> track). (2) The **IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-PLAN.md`)
+> drives **A1→P2AN003 (DAC)** and **A2→P2AN004 (Freq/Period/Pulse)** through the §2
+> playbook + IOSP enrichment + PDF, plus a USB study, then releases IOSP. Remaining
+> items are registered candidates above.

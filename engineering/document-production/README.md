@@ -35,8 +35,23 @@ table still carry the older "shape" and await a separate refresh.)*
 | Publication | Slug | Category |
 |-------------|------|----------|
 | Spin2 Reference Manual | `spin2-reference-manual` | in development / parked |
+| P2 XBYTE Programming Guide | `p2-xbyte-programming-guide` | in development (v0.1.0 first draft) |
+| The P2 Architect's Guide | `p2-architect-guide` | in development (split in progress) |
 | P2 Layout Torture Test | `p2-layout-torture-test` | instrument (serves the layout-standards effort) |
 | Smart Pins Tutorial ("Green Book") | `p2-smart-pins-tutorial` | orphaned — superseded by the I/O & Smart Pins guide |
+
+## Application Notes (`P2ANxxx`) — synced to roster
+
+A distinct document class (see [`app-notes/README.md`](app-notes/README.md)). Candidate
+backlog + production plan: [`p2-app-note-roster.md`](../analysis/p2-app-note-roster.md).
+In production:
+
+| App note | Slug | State |
+|----------|------|-------|
+| P2AN001 — Single-Pin ADC Instrumentation | `P2AN001` | 🟢 v0.1.0 draft (exemplar, Family A0) — not released |
+| P2AN002 — CORDIC for Real Work | `P2AN002` | 🟢 v0.1.0 draft — authoring in progress (Family B1) |
+| P2AN003 — DAC & Analog Signal Generation | `P2AN003` | 🔴 planned (Family A1) — IOSP Release Campaign Input 2 |
+| P2AN004 — Frequency / Period / Pulse Measurement | `P2AN004` | 🔴 planned (Family A2) — IOSP Release Campaign Input 3 |
 
 ## Template Architecture
 
@@ -85,9 +100,9 @@ Document enters production when:
 ## Quick Links
 
 - [Working Documents](workspace/)
-- [Template Masters](../pdf-templates-master/)
-- [Visual Assets Matrix](../ingestion/visual-assets/INGESTION-IMAGE-EXTRACTION-MATRIX.md)
-- [Technical Debt](../technical-debt/VISUAL-ASSETS-DEBT.md)
+- [Platform Template Stack](platform/templates/) · [Template Catalog](TEMPLATE-CATALOG.md)
+- [Visual Assets Matrix](../ingestion/visual-assets-catalog/INGESTION-IMAGE-EXTRACTION-MATRIX.md)
+- [Technical Debt / Punch List](PUNCH-LIST.md)
 
 ---
 
