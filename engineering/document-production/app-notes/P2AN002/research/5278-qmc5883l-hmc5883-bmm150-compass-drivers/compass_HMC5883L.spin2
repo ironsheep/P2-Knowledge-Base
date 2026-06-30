@@ -1,0 +1,208 @@
+con { license }
+
+{{
+
+  Terms of Use: MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+}}
+
+obj i2c2 : "jm_i2c_tri"
+var ' floats
+
+long magx_cal ' floats
+long magy_cal
+long magz_cal
+
+long magx_scale
+long magy_scale
+long magz_scale
+
+long compass_avg_scale
+
+var ' ints
+
+long magx_raw
+long magy_raw
+long magz_raw
+long magx_ofs
+long magy_ofs
+long magz_ofs
+long magx_min
+long magy_min
+long magz_min
+long magz_max
+long magx_max
+long magy_max
+
+long delta_compass
+long delta
+
+var ' various
+byte r
+byte rawbytes[6]
+byte compass_cal_recalc
+
+pub null() ' not a top object file
+
+pub ready() : aa
+  return (i2c2.getb(hmc5883_ADDRESS,$09) & %0000_0001)
+
+pub get_cals() : sadf,sdf,asdf
+return magx_cal,magy_cal,magz_cal
+
+pub get_raws() : sadf,sdf,asdf
+return magx_raw,magy_raw,magz_raw
+
+pub dbl()   : l
+return delta_compass
+
+pub compass_cal() : x,y,z ' do this in inline asm?
+' https://github.com/mprograms/QMC5883LCompass/blob/master/src/QMC5883LCompass.cpp#L234
+
+    if ((magx_raw==0)||(magy_raw==0)||(magz_raw==0))
+       return
+    compass_cal_recalc~
+    if (magx_raw>magx_max)
+        magx_max:=magx_raw
+        compass_cal_recalc:=1
+    elseif (magx_raw<magx_min)
+        magx_min:=magx_raw
+        compass_cal_recalc:=1
+
+    if (magy_raw>magy_max)
+        magy_max:=magy_raw
+        compass_cal_recalc:=1
+    elseif (magy_raw<magy_min)
+        magy_min:=magy_raw
+        compass_cal_recalc:=1
+
+    if (magz_raw>magz_max)
+        magz_max:=magz_raw
+        compass_cal_recalc:=1
+    elseif (magz_raw<magz_min)
+        magz_min:=magz_raw
+        compass_cal_recalc:=1
+
+  if (compass_cal_recalc)
+    {
+    x:=magx_scale
+    y:=magy_scale
+    z:=magz_scale
+    }
+    magx_ofs := (magx_max+magx_min)/2
+    magy_ofs := (magy_max+magy_min)/2
+    magz_ofs := (magz_max+magz_min)/2
+
+    magx_scale := (float((magx_max-magx_min)/2)) & $7FFF_FFFF
+    magy_scale := (float((magy_max-magy_min)/2)) & $7FFF_FFFF
+    magz_scale := (float((magz_max-magz_min)/2)) & $7FFF_FFFF
+    compass_avg_scale:=3.0 /. (magx_scale +. magy_scale +. magz_scale)
+    magx_scale := magx_scale *. compass_avg_scale
+    magy_scale := magy_scale *. compass_avg_scale 'compass_avg_scale ends up being around 0.0002 scale ends up between 1.5 and 0.5 so ok
+    magz_scale := magz_scale *. compass_avg_scale
+
+  x:=float(magx_raw - magx_ofs) *. magx_scale
+  y:=float(magy_raw - magy_ofs) *. magy_scale
+  z:=float(magz_raw - magz_ofs) *. magz_scale
+  magx_cal := x
+  magy_cal := y
+  magz_cal := z
+
+CON
+' everything past this is hardware specific
+' the compass is very simple and only needs setup and raws
+con ' hmc5883 stuff
+HMC5883_ADDRESS = $1E
+HMC5883_ADDR2 = HMC5883_ADDRESS << 1
+HMC5883_CONFIG_A = $00
+HMC5883_CONFIG_B = $01
+HMC5883_MODE = $02
+HMC5883_BEGIN = $03
+HMC5883_READY = $09
+
+MEASUREMENT_CONTINUOUS  = $00
+MEASUREMENT_SINGLE_SHOT = $01
+MEASUREMENT_IDLE =        $03
+
+pub compass_resetcal()
+magx_min:=magy_min:=magz_min:=posx
+magx_max:=magy_max:=magz_max:=negx
+
+pub compass_setup(scl,sda)
+i2c2.setup(scl,sda,scl,sda,scl,sda,400,i2c2.PU_15K)
+
+repeat
+
+  repeat
+  until (i2c2.present(hmc5883_ADDR2)) ' this needs to be able to fail gracefully
+
+ if (i2c2.present(hmc5883_ADDR2))
+  i2c2.wait(hmc5883_ADDR2)
+  i2c2.putb(hmc5883_ADDRESS, HMC5883_CONFIG_A, %0_11_110_00) ' 7: must be zero. 65: averaging (1,2,4,8). 432: data out rate (110=75hz). 10: bias (do not use 11, 00 = no bias)
+  i2c2.wait(hmc5883_ADDR2)
+  i2c2.putb(hmc5883_ADDRESS, HMC5883_CONFIG_B, %001_00000) ' 765: gain (000=1370, 111=230, default=001=1070). others: must be zero
+  i2c2.wait(hmc5883_ADDR2)
+  i2c2.putb(hmc5883_ADDRESS, HMC5883_MODE, %000000_00) ' 10: mode: 00=continuous, 01=single, 10,11=idle
+  i2c2.wait(hmc5883_ADDR2)
+until (i2c2.present(hmc5883_ADDR2))
+
+ccc()
+
+' use internal calibration since we have it
+
+i2c2.putb(hmc5883_ADDRESS, HMC5883_CONFIG_A, %0_11_110_10) ' 7: must be zero. 65: averaging (1,2,4,8). 432: data out rate (110=75hz). 10: bias (do not use 11, 00 = no bias)
+
+ccc()
+
+i2c2.putb(hmc5883_ADDRESS, HMC5883_CONFIG_A, %0_11_110_01) ' 7: must be zero. 65: averaging (1,2,4,8). 432: data out rate (110=75hz). 10: bias (do not use 11, 00 = no bias)
+
+ccc()
+
+i2c2.putb(hmc5883_ADDRESS, HMC5883_CONFIG_A, %0_11_110_00) ' 7: must be zero. 65: averaging (1,2,4,8). 432: data out rate (110=75hz). 10: bias (do not use 11, 00 = no bias)
+
+                                                         ' 10 -1292   -1216   -1221
+                                                         ' 01 1326    1274    1216
+                                                         ' 00 -300    356     -354
+
+
+pub ccc()
+repeat 3
+   compass_read(true)
+   compass_cal()
+
+pub compass_read(wwait) : x, y, z
+
+if (wwait)
+  repeat
+
+  until (i2c2.getb(hmc5883_ADDRESS,HMC5883_READY) & %0000_0001) ' data ready. profile how long it takes
+
+r~
+    i2c2.readstart(hmc5883_ADDRESS,hmc5883_BEGIN) ' read the six bytes one shot, then do signs
+    repeat 5
+       rawbytes[r++],_,_:=i2c2.read(i2c2.ACK)
+    rawbytes[r],_,_:=i2c2.read(i2c2.NAK)
+    i2c2.stp()
+
+    x:=magx_raw:=((rawbytes[0]<<8)+rawbytes[1]) signx 15
+    y:=magy_raw:=((rawbytes[2]<<8)+rawbytes[3]) signx 15
+    z:=magz_raw:=((rawbytes[4]<<8)+rawbytes[5]) signx 15
+   delta_compass:=getct()-delta
+   delta:=getct()

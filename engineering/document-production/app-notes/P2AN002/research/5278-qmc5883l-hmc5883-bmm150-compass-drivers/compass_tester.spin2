@@ -1,0 +1,176 @@
+{Spin2_v51}
+' reminder the prop2 is little endian!
+
+'https://mwrona.com/posts/attitude-ekf/
+
+con { timing }
+
+' testing: 1 ms = 200160 cnt at 200Mhz, 1 ms = 300160 cnt at 300Mhz, etc.
+
+
+  CLK_FREQ = 200_000_000                                        ' system freq as a constant
+  MS_001   = CLK_FREQ / 1_000                                   ' ticks in 1ms
+  US_001   = CLK_FREQ / 1_000_000                               ' ticks in 1us
+
+  BR_TERM  = 115_200                                            ' terminal baud rate
+
+  _clkfreq = CLK_FREQ                                           ' set system clock
+
+
+con { fixed io pins }
+
+  RX0      = 63  { I }                                          ' programming / debg
+  TX0      = 62  { O }
+
+  SF_CS    = 61  { O }                                          ' serial flash
+  SF_SCK   = 60  { O }
+  SF_SDO   = 59  { O }
+  SF_SDI   = 58  { I }
+
+  SD_SCK   = 61  { O }                                          ' sd card
+  SD_CS    = 60  { O }
+  SD_SDI   = 59  { O }
+  SD_SDO   = 58  { I }
+
+  LED2     = 57  { O }                                          ' Eval and Edge LEDs
+  LED1     = 56  { O }
+
+
+con
+
+  #true, ON, OFF                                                ' digital control
+  #0, NO, YES
+
+
+
+obj
+
+' main                                                          ' * master Spin cog
+  com : "isp_8port_serial_strings_shared"                                  ' * serial IO for terminal
+  ftof: "FtoF" '' FtoF parses string into integer and vice versa
+'  compass:"compass_qMC5883L"
+'  compass:"compass_hMC5883L"
+  compass:"compass_BMM150"
+var
+long templong[32]             ' stuff
+word tempword[32]
+byte tempbyte [32]
+
+con '' Inclde board pinout at top of file.
+RX_PIN_0 = 63
+TX_PIN_0 = 62
+
+
+var
+long portaddr
+
+PUB main() : result '' Sets up the command parser. Put any code to start cogs on load in here.
+
+' we don't need the dynamic math library anymore so most cogs are going to have one job and that's it.
+
+' cog 0: main and slow sensors
+' cog 1: sbus in (can it do other stuff? maybe later...)
+' cog 2: serial ports
+' no cog: servos
+' no cog yet: i2c
+
+  ' comps are 0 to 7 in order of pins, are initialized at startup, and that's it. if we need more we add more.
+  com.AddPort(RX_PIN_0,TX_PIN_0,com.MODE_NONE,BR_TERM,true)           ' another object can start these as long as there are only a max of 8.
+
+  com.start()
+  com.str(0,string("boot",13))
+
+  compass.compass_setup(52,53) ' scl, sda
+  compass.compass_resetcal()
+
+  repeat
+        waitms(100)
+     if (compass.ready())
+        compass.compass_read(true)
+        compass.compass_cal()
+        templong[0],templong[1],templong[2]:=compass.get_raws()
+        templong[3],templong[4],templong[5]:=compass.get_cals()
+        com.dec(0,templong[0])
+        com.tx(0,9)
+        com.dec(0,templong[1])
+        com.tx(0,9)
+        com.dec(0,templong[2])
+        com.tx(0,9)
+        com.flt(0,templong[3])
+        com.tx(0,9)
+        com.flt(0,templong[4])
+        com.tx(0,9)
+        com.flt(0,templong[5])
+        com.tx(0,9)
+        com.tx(0,9)
+        com.flt(0,fastAtan2D(templong[3],templong[4]))
+        com.tx(0,9)
+        com.dec(0,compass.dbl())
+        com.tx(0,13)
+     else
+        com.str(0,string("Not ready",13))
+         compass.compass_setup(52,53)
+
+'' this is my fast atan2 approximation. much to my surprise it's still faster on the p2
+con
+const1a = 0.28088 ' magic number. i started at 0.25 and hunted around
+const2a = -180.0/pi
+const3a = -const2a
+const4a = -90.0
+const5a = 90.0
+
+PUB fastATan2D(x, y) : angle | z, sign, r', xx, yy, temp ', const2 ' this is good to 0.27 degrees and know what? plenty enough for steering (but not for orientation vector).
+
+   if not (x & $7FFF_FFFF)   ' if x = 0
+     if (y & $7FFF_FFFF <> y)     ' and y < 0
+        return -180.0
+     else
+        return 0.0           ' if x = 0 and y >= 0
+
+   case derpcmp((x & $7FFF_FFFF), (y & $7FFF_FFFF))
+
+    1:
+       z := y *. x
+
+     if (x & $7FFF_FFFF == x)  ' x > 0
+       sign := 90.0
+     else
+       sign := -90.0
+
+     angle := (((const2a *. z) /. (x *. x +. const1a *. y *. y))) +. sign
+
+    -1:
+       z := y *. x
+
+     if (x & $7FFF_FFFF == x)  ' x > 0, z < 0
+          sign:= 180.0'~' := 0.0
+        if ((z & $7FFF_FFFF) == z)   ' x > 0, z > 0
+          sign~' := 0.0 'const3
+     else
+          sign~             ' x < 0, z < 0
+        if ((z & $7FFF_FFFF) == z)
+          sign := -180.0' := 0.0              ' x < 0, z > 0
+
+     angle := (((const3a *. z) /. (y *. y +. const1a *. x *. x))) +. sign
+
+    0:' horrible hack to return proper values for 45-degree outs, which happens fairly often. There's a discontinuity in the graph here, so it's justified
+
+      if (x & $7FFF_FFFF == x)  ' x > 0, y < 0
+        if ((y & $7FFF_FFFF) == y)  ' x > 0, y > 0
+          angle := 45.0
+        else
+          angle := 135.0
+      else
+        if ((y & $7FFF_FFFF) == y)
+          angle := -45.0           ' x < 0, y > 0
+        else
+          angle := -135.0            ' x < 0, y < 0
+
+pri derpcmp(a, b) : r
+  if a < b
+    return -1
+  elseif a == b
+    return 0
+  else
+    return 1
+

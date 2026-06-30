@@ -1,0 +1,15 @@
+CON
+  _clkfreq = 200_000_000
+
+  AMPL  = 1000
+  ASTEP = $0200_0000            ' angle increment per sample
+
+PUB main() | ang, s
+  debug(`SCOPE sine size 400 200 samples 256 rate 1 pos 100 100)
+  debug(`sine 'sin' -1100 1100 180 20 15 CYAN)
+  ang := 0
+  repeat
+    s := QSIN(AMPL, ang, 0)     ' AMPL * sin(ang); 0 -> full 2^32 circle
+    debug(`sine `(s))
+    ang += ASTEP
+    waitms(2)

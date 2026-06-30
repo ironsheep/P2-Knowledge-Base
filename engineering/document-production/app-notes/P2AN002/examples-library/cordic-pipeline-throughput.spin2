@@ -1,0 +1,68 @@
+CON
+  _clkfreq = 200_000_000
+  N    = 8                      ' elements to transform
+  FILL = 6                      ' in flight (~6-7: 54-stage/8)
+
+VAR
+  long inbuf[N]                 ' source values
+  long outbuf[N]                ' results (follow inbuf in hub)
+  long done                     ' handshake flag
+
+PUB main() | i
+  repeat i from 0 to N-1
+    inbuf[i] := 10 + i          ' 10,11,...,17
+  done := 0
+  coginit(NEWCOG, @square_engine, @inbuf)
+  repeat until done
+  repeat i from 0 to N-1
+    debug(udec(inbuf[i]), " squared = ", udec(outbuf[i]))
+
+
+DAT             org
+
+square_engine
+                mov     inp, ptra            ' @inbuf
+                mov     outp, ptra
+                add     outp, ##N*4          ' @outbuf
+                mov     donep, ptra
+                add     donep, ##N*8         ' @done
+                mov     ii, #0               ' issue index
+                mov     jj, #0               ' retire index
+
+' Fill phase: queue FILL operations before reading any result.
+.fill           cmp     ii, #FILL       wcz
+        if_ae   jmp     #.steady
+                cmp     ii, #N          wcz
+        if_ae   jmp     #.steady             ' N < FILL: queue only N
+                rdlong  t, inp
+                add     inp, #4
+                qmul    t, t                 ' queue: t*t
+                add     ii, #1
+                jmp     #.fill
+
+' Steady state: retire one result, queue one more.
+.steady         cmp     jj, #N          wcz
+        if_ae   jmp     #.done
+                getqx   r                    ' next result, FIFO order
+                wrlong  r, outp
+                add     outp, #4
+                add     jj, #1
+                cmp     ii, #N          wcz
+        if_ae   jmp     #.steady             ' none left -> drain
+                rdlong  t, inp
+                add     inp, #4
+                qmul    t, t
+                add     ii, #1
+                jmp     #.steady
+
+.done           wrlong  #1, donep
+                cogid   t
+                cogstop t
+
+inp             res     1
+outp            res     1
+donep           res     1
+ii              res     1
+jj              res     1
+t               res     1
+r               res     1

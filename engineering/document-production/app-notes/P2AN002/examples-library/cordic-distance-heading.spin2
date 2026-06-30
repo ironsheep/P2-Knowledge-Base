@@ -1,0 +1,8 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | dist, heading, dx, dy
+  dx := 3
+  dy := 4
+  dist, heading := XYPOL(dx, dy)        ' (x,y) -> (length, angle)
+  debug("distance=", sdec(dist), "  heading=", uhex_long(heading))

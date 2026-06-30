@@ -1,0 +1,25 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | a, b, c, scaled, mag, ang, lg, back
+  a := 123_456
+  b := 789_012
+  c := 1000
+  scaled := muldiv64(a, b, c)        ' (a*b)/c, 64-bit intermediate
+  mag, ang := XYPOL(a, b)            ' sqrt(a*a + b*b), 64-bit-safe
+  lg  := qlog_of(a)                  ' base-2 log, 5.27 fixed-point
+  back := qexp_of(lg)                ' antilog round-trips back to ~a
+  debug("scaled=", udec(scaled), "  mag=", udec(mag))
+  debug("log2=", uhex_long(lg), "  back=", udec(back))
+
+PRI qlog_of(v) : r
+  org
+    qlog v
+    getqx r
+  end
+
+PRI qexp_of(v) : r
+  org
+    qexp v
+    getqx r
+  end

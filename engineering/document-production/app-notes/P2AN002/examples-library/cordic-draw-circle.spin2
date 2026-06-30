@@ -1,0 +1,15 @@
+CON
+  _clkfreq = 200_000_000
+
+  R       = 100                 ' circle radius
+  STEPS   = 64                  ' points around the circle (even)
+  ASTEP   = $8000_0000 / (STEPS / 2)   ' one full 2^32 circle / STEPS
+
+PUB main() | i, ang, x, y
+  debug(`PLOT myplot size 240 240 origin 120 120 dotsize 4)
+  repeat
+    repeat i from 0 to STEPS-1
+      ang := i * ASTEP                    ' fraction of a full 2^32 circle
+      x, y := POLXY(R, ang)               ' (length,angle) -> (x,y)
+      debug(`myplot `(x, y))
+    waitms(500)

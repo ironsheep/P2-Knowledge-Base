@@ -1,0 +1,27 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2AN002.md",
+      "output": "P2AN002.pdf",
+      "template": "p2kb-appnote-reference",
+      "pandoc_args": [
+        "--pdf-engine=xelatex"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
+      ],
+      "metadata": {
+        "title": "CORDIC for Real Work",
+        "subtitle": "Application Note P2AN002 — Hardware Math on the P2",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v0.1.0",
+        "date": "June 2026"
+      }
+    }
+  ]
+}

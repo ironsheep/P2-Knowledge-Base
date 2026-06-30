@@ -1,0 +1,207 @@
+con { license }
+
+{{
+
+  Terms of Use: MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+}}
+
+obj i2c2 : "jm_i2c_tri"
+var ' floats
+
+long magx_cal ' floats
+long magy_cal
+long magz_cal
+
+long magx_scale
+long magy_scale
+long magz_scale
+
+long compass_avg_scale
+
+var ' ints
+
+long magx_raw
+long magy_raw
+long magz_raw
+long magx_ofs
+long magy_ofs
+long magz_ofs
+long magx_min
+long magy_min
+long magz_min
+long magz_max
+long magx_max
+long magy_max
+
+long delta_compass
+long delta
+
+var ' various
+byte r
+byte rawbytes[6]
+byte compass_cal_recalc
+
+pub null() ' not a top object file
+
+pub ready() : aa
+  return (i2c2.getb(qmc5883_ADDRESS,$06) & %0000_0001)
+
+pub get_cals() : sadf,sdf,asdf
+return magx_cal,magy_cal,magz_cal
+
+pub get_raws() : sadf,sdf,asdf
+return magx_raw,magy_raw,magz_raw
+
+pub dbl()   : l
+return delta_compass
+
+pub compass_cal() : x,y,z ' do this in inline asm?
+' https://github.com/mprograms/QMC5883LCompass/blob/master/src/QMC5883LCompass.cpp#L234
+
+    if ((magx_raw==0)||(magy_raw==0)||(magz_raw==0))
+       return
+    compass_cal_recalc~
+    if (magx_raw>magx_max)
+        magx_max:=magx_raw
+        compass_cal_recalc:=1
+    elseif (magx_raw<magx_min)
+        magx_min:=magx_raw
+        compass_cal_recalc:=1
+
+    if (magy_raw>magy_max)
+        magy_max:=magy_raw
+        compass_cal_recalc:=1
+    elseif (magy_raw<magy_min)
+        magy_min:=magy_raw
+        compass_cal_recalc:=1
+
+    if (magz_raw>magz_max)
+        magz_max:=magz_raw
+        compass_cal_recalc:=1
+    elseif (magz_raw<magz_min)
+        magz_min:=magz_raw
+        compass_cal_recalc:=1
+
+  if (compass_cal_recalc)
+    {
+    x:=magx_scale
+    y:=magy_scale
+    z:=magz_scale
+    }
+    magx_ofs := (magx_max+magx_min)/2
+    magy_ofs := (magy_max+magy_min)/2
+    magz_ofs := (magz_max+magz_min)/2
+
+    magx_scale := (float((magx_max-magx_min)/2)) & $7FFF_FFFF
+    magy_scale := (float((magy_max-magy_min)/2)) & $7FFF_FFFF
+    magz_scale := (float((magz_max-magz_min)/2)) & $7FFF_FFFF
+    compass_avg_scale:=3.0 /. (magx_scale +. magy_scale +. magz_scale)
+    magx_scale := magx_scale *. compass_avg_scale
+    magy_scale := magy_scale *. compass_avg_scale 'compass_avg_scale ends up being around 0.0002 scale ends up between 1.5 and 0.5 so ok
+    magz_scale := magz_scale *. compass_avg_scale
+
+  x:=float(magx_raw - magx_ofs) *. magx_scale
+  y:=float(magy_raw - magy_ofs) *. magy_scale
+  z:=float(magz_raw - magz_ofs) *. magz_scale
+  magx_cal := x
+  magy_cal := y
+  magz_cal := z
+
+
+
+
+
+CON
+' everything past this is hardware specific
+' the compass is very simple and only needs setup and raws
+con ' qmc5883 stuff
+qmc5883_ADDRESS= $0D ' HMC5883 is $0C and we may need to write a driver for that too, and i hate it
+qmc5883_ADDR2 = qmc5883_ADDRESS << 1
+
+QMC5883L_X_LSB = 0
+QMC5883L_X_MSB = 1
+QMC5883L_Y_LSB = 2
+QMC5883L_Y_MSB = 3
+QMC5883L_Z_LSB = 4
+QMC5883L_Z_MSB = 5
+QMC5883L_STATUS = 6
+QMC5883L_TEMP_LSB = 7    ' do we need this for anything
+QMC5883L_TEMP_MSB = 8
+QMC5883L_CONFIG = 9
+QMC5883L_CONFIG2 = 10
+QMC5883L_RESET = 11
+QMC5883L_RESERVED = 12
+QMC5883L_CHIP_ID = 13    ' why is this $FF? what does that even do for us? blargh.
+
+
+pub compass_resetcal()
+magx_min:=magy_min:=magz_min:=posx
+magx_max:=magy_max:=magz_max:=negx
+
+pub compass_setup(scl,sda)
+i2c2.setup(scl,sda,scl,sda,scl,sda,400,i2c2.PU_15K)
+
+repeat
+ i2c2.putb(qmc5883_ADDRESS, $0A, %10_00_00_00) ' 7 soft reset, 6 roll pointer (auto increment for reading)
+  repeat
+  until (i2c2.present(qmc5883_ADDRESS << 1))
+
+ if (i2c2.present(qmc5883_ADDRESS << 1))
+  i2c2.wait(qmc5883_ADDR2)
+  i2c2.putb(qmc5883_ADDRESS, QMC5883L_CONFIG, %00_00_10_01) ' 76: oversample (512,256,128,64); 54: scale (00 200uT,800uT,no,no 11); 32: ouput data rate (00 10,50,100,200Hz 11); 10: mode (standby, continuous, no, no)
+  i2c2.wait(qmc5883_ADDR2)
+  i2c2.putb(qmc5883_ADDRESS, QMC5883L_CONFIG2, %01_00_00_00) ' 7 soft reset, 6 roll pointer (auto increment for reading)
+  i2c2.wait(qmc5883_ADDR2)
+  i2c2.putb(qmc5883_ADDRESS, QMC5883L_RESET, %00_00_00_01) ' datasheet says set it to 01
+  i2c2.wait(qmc5883_ADDR2)
+until (i2c2.present(qmc5883_ADDRESS << 1))
+
+ccc()
+
+pub ccc()
+repeat 3
+   compass_read(true)
+   compass_cal()
+
+pub compass_read(wwait) : x, y, z
+
+if (wwait)
+  repeat
+
+  until (i2c2.getb(qmc5883_ADDRESS,$06) & %0000_0001) ' data ready. profile how long it takes
+
+    'x:=magx :=i2c2.getw(qmc5883_ADDRESS,$00) signx 15 ' converts a signed word into a signed long quickly
+    'y:=magy :=i2c2.getw(qmc5883_ADDRESS,$02) signx 15 ' converts a signed word into a signed long quickly
+    'z:=magz :=i2c2.getw(qmc5883_ADDRESS,$04) signx 15 ' converts a signed word into a signed long quickly
+r~
+    i2c2.readstart(qmc5883_ADDRESS,QMC5883L_X_LSB) ' read the six bytes one shot, then do signs
+    repeat 5
+       rawbytes[r++],_,_:=i2c2.read(i2c2.ACK)
+    rawbytes[r],_,_:=i2c2.read(i2c2.NAK)
+    i2c2.stp()
+
+    x:=magx_raw:=((rawbytes[1]<<8)+rawbytes[0]) signx 15
+    y:=magy_raw:=((rawbytes[3]<<8)+rawbytes[2]) signx 15
+    z:=magz_raw:=((rawbytes[5]<<8)+rawbytes[4]) signx 15
+    delta_compass:=getct()-delta
+    delta:=getct()
+
+

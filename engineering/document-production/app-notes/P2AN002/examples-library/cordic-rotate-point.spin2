@@ -1,0 +1,9 @@
+CON
+  _clkfreq = 200_000_000
+
+  QTR = $4000_0000              ' 90 degrees as a 32-bit binary angle
+
+PUB main() | x, y
+  ' Rotate the point (100, 0) by 90 degrees about the origin.
+  x, y := ROTXY(100, 0, QTR)
+  debug("x=", sdec(x), "  y=", sdec(y))
