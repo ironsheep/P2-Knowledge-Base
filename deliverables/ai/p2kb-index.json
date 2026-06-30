@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-29T21:23:20.153305",
-    "total_entries": 1060,
-    "total_categories": 58,
-    "total_aliases": 1440,
+    "generated": "2026-06-30T19:58:11.600970",
+    "total_entries": 1124,
+    "total_categories": 59,
+    "total_aliases": 1524,
     "multi_target_aliases": 65,
     "source": "deliverables/ai/P2/"
   },
@@ -447,6 +447,7 @@
       "p2kbArchMultiResourceManagement"
     ],
     "architecture_io": [
+      "p2kbArchPinPowerDomains",
       "p2kbArchSerialLoader",
       "p2kbArchSmartPins"
     ],
@@ -464,8 +465,11 @@
       "p2kbArchRateAdaptation",
       "p2kbArchResourceBudget",
       "p2kbArchResourceOwnership",
+      "p2kbArchSharedBusBroker",
+      "p2kbArchSharedBusReplication",
       "p2kbArchSpatialComputing",
-      "p2kbArchWorkedDerivationRobotDog"
+      "p2kbArchWorkedDerivationRobotDog",
+      "p2kbArchWorkedDerivationStreamingPipeline"
     ],
     "smart_pins_configuration": [
       "p2kbArchSmartPinPatterns",
@@ -633,6 +637,13 @@
       "p2kbSpin2ScopeXy",
       "p2kbSpin2Spectro",
       "p2kbSpin2Term"
+    ],
+    "spin2_object_model": [
+      "p2kbSpin2KwOBJ",
+      "p2kbSpin2MethodPointers",
+      "p2kbSpin2ObjectArchetypes",
+      "p2kbSpin2ObjectImageDedup",
+      "p2kbSpin2OpTypedPointers"
     ],
     "guides_getting_started": [
       "p2kbGuidePasm2GettingStarted",
@@ -847,6 +858,12 @@
       "p2kbPasm2Abs",
       "p2kbSpin2Abs"
     ],
+    "ADC REFERENCE DOMAIN": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "ADC reference domain": [
+      "p2kbArchPinPowerDomains"
+    ],
     "ADD": [
       "p2kbPasm2Add"
     ],
@@ -1016,6 +1033,9 @@
     "BRUSHLESS MOTOR DRIVER": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
+    "BUS ARBITER COG": [
+      "p2kbArchSharedBusBroker"
+    ],
     "BUTTONS AND LEDS BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
@@ -1044,6 +1064,9 @@
     "CALLB": [
       "p2kbPasm2Callb"
     ],
+    "CALLBACK POINTER": [
+      "p2kbSpin2MethodPointers"
+    ],
     "CALLD": [
       "p2kbPasm2Calld"
     ],
@@ -1059,6 +1082,9 @@
     "CAPACITIVE TOUCH BOARD": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
+    "CARET POINTER": [
+      "p2kbSpin2OpTypedPointers"
+    ],
     "CARRIER COMPATIBILITY": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -1067,6 +1093,9 @@
     ],
     "CHARLIEPLEX LED BOARD": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "CHILD OBJECT DECLARATION": [
+      "p2kbSpin2KwOBJ"
     ],
     "CHOOSE P2 BOARD": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
@@ -1135,6 +1164,27 @@
     "COMPARE P2 BOARDS": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
+    "CON OVERRIDE FORK": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "CON OVERRIDE INSTANTIATION": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "CON OVERRIDE SYNTAX": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "CON override fork": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "CON override instantiation": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "CON override syntax": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "CONFIGURABLE OBJECT": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
     "CONTINUE TASK": [
       "p2kbSpin2Taskcont"
     ],
@@ -1152,6 +1202,12 @@
     ],
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "DAT SINGLETON FORK": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "DAT singleton fork": [
+      "p2kbSpin2ObjectImageDedup"
     ],
     "DEBUG": [
       "p2kbPasm2Debug"
@@ -1258,6 +1314,9 @@
     "DECOD": [
       "p2kbPasm2Decod"
     ],
+    "DEPENDENCY INJECTION": [
+      "p2kbSpin2MethodPointers"
+    ],
     "DIGITAL SIGNALS": [
       "p2kbSpin2Logic"
     ],
@@ -1288,6 +1347,9 @@
     "DIRZ": [
       "p2kbPasm2Dirz"
     ],
+    "DISPATCH TABLE": [
+      "p2kbSpin2MethodPointers"
+    ],
     "DJF": [
       "p2kbPasm2Djf"
     ],
@@ -1302,6 +1364,9 @@
     ],
     "DOWNLOAD_BAUD": [
       "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DRIVER OBJECT": [
+      "p2kbSpin2ObjectArchetypes"
     ],
     "DRVC": [
       "p2kbPasm2Drvc"
@@ -1395,6 +1460,9 @@
     ],
     "EXP2": [
       "p2kbSpin2Exp2"
+    ],
+    "EXTERNALIZED CONTEXT": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "FBLOCK": [
       "p2kbPasm2Fblock"
@@ -1574,11 +1642,17 @@
     "IJZ": [
       "p2kbPasm2Ijz"
     ],
+    "IMAGE DEDUPLICATION": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "IMAGE DISPLAY": [
       "p2kbSpin2Bitmap"
     ],
     "INCMOD": [
       "p2kbPasm2Incmod"
+    ],
+    "ISOLATED SUPPLY DOMAIN": [
+      "p2kbArchPinPowerDomains"
     ],
     "JATN": [
       "p2kbPasm2Jatn"
@@ -1796,6 +1870,9 @@
     "MERGEW": [
       "p2kbPasm2Mergew"
     ],
+    "METHOD POINTERS": [
+      "p2kbSpin2MethodPointers"
+    ],
     "MICRO SD CARD BOARD": [
       "p2kbHwAddonMicrosdAddonMicrosd"
     ],
@@ -1853,6 +1930,9 @@
     ],
     "MULS": [
       "p2kbPasm2Muls"
+    ],
+    "MULTI-BUS FORKING": [
+      "p2kbSpin2ObjectImageDedup"
     ],
     "MUSIC KEYBOARD": [
       "p2kbSpin2Midi"
@@ -1920,8 +2000,32 @@
     "NOTE VELOCITY": [
       "p2kbSpin2Midi"
     ],
+    "OBJ BLOCK": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "OBJ block": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "OBJECT ARCHETYPES": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "OBJECT COMPOSITION PATTERNS": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "OBJECT IMAGE DEDUP": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "OBJECT INSTANCES": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "OBJECT INSTANTIATION": [
+      "p2kbSpin2KwOBJ"
+    ],
     "OFFSETOF": [
       "p2kbSpin2Offsetof"
+    ],
+    "ONE BUS MANY COGS": [
+      "p2kbArchSharedBusBroker"
     ],
     "ONES": [
       "p2kbPasm2Ones"
@@ -2166,6 +2270,12 @@
     "PCF8523 board": [
       "p2kbHwAddonRtcAddonRtc"
     ],
+    "PER-COG MAILBOX": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "PER-GROUP ADC REFERENCE": [
+      "p2kbArchPinPowerDomains"
+    ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
     ],
@@ -2174,6 +2284,9 @@
     ],
     "PIN ACCESS": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "PIN POWER DOMAINS": [
+      "p2kbArchPinPowerDomains"
     ],
     "PINCLEAR": [
       "p2kbSpin2Pinclear"
@@ -2228,6 +2341,12 @@
     ],
     "PLOT": [
       "p2kbSpin2Plot"
+    ],
+    "PLUGGABLE METHOD": [
+      "p2kbSpin2MethodPointers"
+    ],
+    "POINTER TO STRUCT": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "POLAR PLOT": [
       "p2kbSpin2Plot",
@@ -2297,6 +2416,9 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
+    "POWER GROUP OF 4": [
+      "p2kbArchPinPowerDomains"
+    ],
     "PROP PLUG": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -2315,6 +2437,9 @@
     "PROTOTYPING ADD-ON": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
+    "PSRAM BROKER": [
+      "p2kbArchSharedBusBroker"
+    ],
     "PSRAM EDGE MODULE": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
@@ -2323,6 +2448,9 @@
     ],
     "PSRAM NOR flash add-on": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "PSRAM broker": [
+      "p2kbArchSharedBusBroker"
     ],
     "PSRAM edge module": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
@@ -2470,6 +2598,9 @@
     "RDWORD": [
       "p2kbPasm2Rdword"
     ],
+    "RE-ENTRANT DRIVER STATE": [
+      "p2kbSpin2OpTypedPointers"
+    ],
     "REAL TIME CLOCK CALENDAR": [
       "p2kbHwAddonRtcAddonRtc"
     ],
@@ -2502,6 +2633,9 @@
     ],
     "RESI3": [
       "p2kbPasm2Resi3"
+    ],
+    "RESIDENT ARBITER COG": [
+      "p2kbArchSharedBusBroker"
     ],
     "RESUME TASK": [
       "p2kbSpin2Taskcont"
@@ -2732,6 +2866,15 @@
     "SEUSSR": [
       "p2kbPasm2Seussr"
     ],
+    "SHARED BUS BROKER": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "SHARED DAT COLLAPSE": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "SHARED INSTANCE INJECTION": [
+      "p2kbSpin2MethodPointers"
+    ],
     "SHL": [
       "p2kbPasm2Shl"
     ],
@@ -2755,6 +2898,9 @@
     ],
     "SMART PIN INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
+    ],
+    "SMART PIN POWER GROUPING": [
+      "p2kbArchPinPowerDomains"
     ],
     "SMART_PIN_CONFIGURATION": [
       "p2kbArchSmartPins"
@@ -2818,6 +2964,9 @@
     ],
     "STRSIZE": [
       "p2kbSpin2Strsize"
+    ],
+    "STRUCT POINTER": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "SUB": [
       "p2kbPasm2Sub"
@@ -2931,6 +3080,9 @@
     "TJZ": [
       "p2kbPasm2Tjz"
     ],
+    "TOP-LEVEL APPLICATION OBJECT": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
     "TOUCH SENSING ADD-ON": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
@@ -2951,6 +3103,9 @@
     ],
     "TT_BITS": [
       "p2kbArchSmartPins"
+    ],
+    "TYPED POINTERS": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "UNIVERSAL MOTOR DRIVER": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
@@ -3002,6 +3157,12 @@
     ],
     "VGA text font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "VIO GIO GROUPING": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "VIO GIO grouping": [
+      "p2kbArchPinPowerDomains"
     ],
     "VSCODE_SPIN2_COMMENTS": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -3449,6 +3610,9 @@
       "p2kbArchBufferManagementAnalysis",
       "p2kbSpin2Spin2BufferManagement"
     ],
+    "bus arbiter cog": [
+      "p2kbArchSharedBusBroker"
+    ],
     "buttons and LEDs board": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
@@ -3477,6 +3641,9 @@
     "callb": [
       "p2kbPasm2Callb"
     ],
+    "callback pointer": [
+      "p2kbSpin2MethodPointers"
+    ],
     "calld": [
       "p2kbPasm2Calld"
     ],
@@ -3492,11 +3659,17 @@
     "capacitive touch board": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
+    "caret pointer": [
+      "p2kbSpin2OpTypedPointers"
+    ],
     "carrier compatibility": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "cartesian": [
       "p2kbSpin2Plot"
+    ],
+    "child object declaration": [
+      "p2kbSpin2KwOBJ"
     ],
     "choose P2 board": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
@@ -3563,6 +3736,9 @@
     "compare P2 boards": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
+    "configurable object": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
     "configuration_manager": [
       "p2kbSpin2ConfigurationManager"
     ],
@@ -3608,6 +3784,9 @@
     "decod": [
       "p2kbPasm2Decod"
     ],
+    "dependency injection": [
+      "p2kbSpin2MethodPointers"
+    ],
     "diagnostic_output": [
       "p2kbSpin2Spin2DiagnosticOutput"
     ],
@@ -3641,6 +3820,9 @@
     "dirz": [
       "p2kbPasm2Dirz"
     ],
+    "dispatch table": [
+      "p2kbSpin2MethodPointers"
+    ],
     "display_driver": [
       "p2kbSpin2DisplayDriver"
     ],
@@ -3655,6 +3837,9 @@
     ],
     "djz": [
       "p2kbPasm2Djz"
+    ],
+    "driver object": [
+      "p2kbSpin2ObjectArchetypes"
     ],
     "drvc": [
       "p2kbPasm2Drvc"
@@ -3739,6 +3924,9 @@
     ],
     "exp2": [
       "p2kbSpin2Exp2"
+    ],
+    "externalized context": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "fblock": [
       "p2kbPasm2Fblock"
@@ -3869,6 +4057,9 @@
     "ijz": [
       "p2kbPasm2Ijz"
     ],
+    "image deduplication": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "image display": [
       "p2kbSpin2Bitmap"
     ],
@@ -3877,6 +4068,9 @@
     ],
     "iot_device": [
       "p2kbSpin2IotDevice"
+    ],
+    "isolated supply domain": [
+      "p2kbArchPinPowerDomains"
     ],
     "jatn": [
       "p2kbPasm2Jatn"
@@ -4068,6 +4262,9 @@
     "mergew": [
       "p2kbPasm2Mergew"
     ],
+    "method pointers": [
+      "p2kbSpin2MethodPointers"
+    ],
     "micro SD card board": [
       "p2kbHwAddonMicrosdAddonMicrosd"
     ],
@@ -4122,6 +4319,9 @@
     ],
     "muls": [
       "p2kbPasm2Muls"
+    ],
+    "multi-bus forking": [
+      "p2kbSpin2ObjectImageDedup"
     ],
     "multi_display_system": [
       "p2kbSpin2MultiDisplaySystem"
@@ -4202,8 +4402,26 @@
     "note velocity": [
       "p2kbSpin2Midi"
     ],
+    "object archetypes": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "object composition patterns": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "object image dedup": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "object instances": [
+      "p2kbSpin2KwOBJ"
+    ],
+    "object instantiation": [
+      "p2kbSpin2KwOBJ"
+    ],
     "offsetof": [
       "p2kbSpin2Offsetof"
+    ],
+    "one bus many cogs": [
+      "p2kbArchSharedBusBroker"
     ],
     "ones": [
       "p2kbPasm2Ones"
@@ -4244,6 +4462,12 @@
     "pasm2_initialization": [
       "p2kbPasm2Pasm2Initialization"
     ],
+    "per-cog mailbox": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "per-group ADC reference": [
+      "p2kbArchPinPowerDomains"
+    ],
     "phase plot": [
       "p2kbSpin2ScopeXy"
     ],
@@ -4252,6 +4476,9 @@
     ],
     "pin access": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "pin power domains": [
+      "p2kbArchPinPowerDomains"
     ],
     "pin_control": [
       "p2kbSpin2Spin2PinControl"
@@ -4283,8 +4510,14 @@
     "plot": [
       "p2kbSpin2Plot"
     ],
+    "pluggable method": [
+      "p2kbSpin2MethodPointers"
+    ],
     "plugin_system": [
       "p2kbSpin2Spin2PluginSystem"
+    ],
+    "pointer to struct": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "polar plot": [
       "p2kbSpin2Plot",
@@ -4353,6 +4586,9 @@
     ],
     "popb": [
       "p2kbPasm2Popb"
+    ],
+    "power group of 4": [
+      "p2kbArchPinPowerDomains"
     ],
     "proto board": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
@@ -4439,6 +4675,9 @@
     "rdword": [
       "p2kbPasm2Rdword"
     ],
+    "re-entrant driver state": [
+      "p2kbSpin2OpTypedPointers"
+    ],
     "real time clock calendar": [
       "p2kbHwAddonRtcAddonRtc"
     ],
@@ -4471,6 +4710,9 @@
     ],
     "resi3": [
       "p2kbPasm2Resi3"
+    ],
+    "resident arbiter cog": [
+      "p2kbArchSharedBusBroker"
     ],
     "resource_pool": [
       "p2kbSpin2Spin2ResourcePool"
@@ -4683,6 +4925,15 @@
     "several_objects": [
       "p2kbSpin2SeveralObjects"
     ],
+    "shared DAT collapse": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
+    "shared bus broker": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "shared instance injection": [
+      "p2kbSpin2MethodPointers"
+    ],
     "shared_memory": [
       "p2kbSpin2Spin2SharedMemory"
     ],
@@ -4715,6 +4966,9 @@
     ],
     "smart pin input selector": [
       "p2kbPasm2Wrpin"
+    ],
+    "smart pin power grouping": [
+      "p2kbArchPinPowerDomains"
     ],
     "smart_pin_usage": [
       "p2kbArchSmartPinUsageAnalysis"
@@ -4773,6 +5027,9 @@
     ],
     "strsize": [
       "p2kbSpin2Strsize"
+    ],
+    "struct pointer": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "sub": [
       "p2kbPasm2Sub"
@@ -4883,6 +5140,9 @@
     "tjz": [
       "p2kbPasm2Tjz"
     ],
+    "top-level application object": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
     "touch sensing add-on": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
@@ -4900,6 +5160,9 @@
     ],
     "trunc": [
       "p2kbSpin2Trunc"
+    ],
+    "typed pointers": [
+      "p2kbSpin2OpTypedPointers"
     ],
     "utility_library": [
       "p2kbSpin2UtilityLibrary"
@@ -5139,8 +5402,8 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1782431727,
-      "sha256": "050a11efbdb9c3dbffdd6352cf58c680d524c6cd2b7b7cb0f8a1317e8fbef5e6"
+      "mtime": 1782849425,
+      "sha256": "9062f63f574dd7b357423575d0d3ab9f37fd6a16d96f0150c61aed4acab5ce79"
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
@@ -5154,58 +5417,73 @@
     },
     "p2kbArchCrossCuttingForces": {
       "path": "deliverables/ai/P2/architecture/decomposition/cross-cutting-forces.yaml",
-      "mtime": 1781211862,
-      "sha256": "d09919c3d4f7e54b86ce84b80f910a01a4f2a142277ccb75f2f4c860a95116ac"
+      "mtime": 1782849425,
+      "sha256": "d367fde36ef4274e31b6f859731742ad04450280ed612330736d1ccc1e092947"
     },
     "p2kbArchDataFlowContracts": {
       "path": "deliverables/ai/P2/architecture/decomposition/data-flow-contracts.yaml",
-      "mtime": 1781211862,
-      "sha256": "4be8a557aea21e53618dfa20ee8a3c81dffa782c505574a9bf3b9132c375154c"
+      "mtime": 1782849425,
+      "sha256": "1c621fea8b259294f0ce64d06ef182948f9915327f481136ec8b8476ad14b47e"
     },
     "p2kbArchDecompositionGlossary": {
       "path": "deliverables/ai/P2/architecture/decomposition/decomposition-glossary.yaml",
-      "mtime": 1781211862,
-      "sha256": "ad8ac887eb8c22df08d1025c9e53cda7b795601bf44b6775854e82f8dad1fcc6"
+      "mtime": 1782849425,
+      "sha256": "cc0348d6f82aeacda22caa0cb00cdd079228fddf9d7ee73501f7731fc8f7c56b"
     },
     "p2kbArchDecompositionMethod": {
       "path": "deliverables/ai/P2/architecture/decomposition/decomposition-method.yaml",
-      "mtime": 1781211862,
-      "sha256": "ba6378a0dc0b62a41d0e79a32e0c0b663f5a164f3b2fea65a832c7d3121c0114"
+      "mtime": 1782849425,
+      "sha256": "3084801b1373f40ba2e28eda148cd49127cd33b2fddc2e313f5422c18bea45fd"
     },
     "p2kbArchEvaluationVocabulary": {
       "path": "deliverables/ai/P2/architecture/decomposition/evaluation-vocabulary.yaml",
-      "mtime": 1781211862,
-      "sha256": "edf1c36729d29b836facce3d88fed94357c639ebade36adbc0e5fe52071f7d58"
+      "mtime": 1782849425,
+      "sha256": "db0193251d1bc5f9a4a5805b145ea975a90b07b28e201f4ea8973c20dfef4d78"
     },
     "p2kbArchFirstContactProcedure": {
       "path": "deliverables/ai/P2/architecture/decomposition/first-contact-procedure.yaml",
-      "mtime": 1781211862,
-      "sha256": "4e60b4345342196f9380ef20b795544429eb1bd753c08955a74ce4a718de7eca"
+      "mtime": 1782849425,
+      "sha256": "2f3934707c889c9eff31568f7a3bd95006eb3b05c888ae4b5ac56d55f211dcc3"
     },
     "p2kbArchRateAdaptation": {
       "path": "deliverables/ai/P2/architecture/decomposition/rate-adaptation.yaml",
-      "mtime": 1781211862,
-      "sha256": "31257da59a62102715e699f889584f25a3577de7c0e7cd71eba1a1533dfd5043"
+      "mtime": 1782849425,
+      "sha256": "9ae94f113da606d0fea1ead1f6390977d61579e1279d6271da9147c7929df74d"
     },
     "p2kbArchResourceBudget": {
       "path": "deliverables/ai/P2/architecture/decomposition/resource-budget.yaml",
-      "mtime": 1781211862,
-      "sha256": "74561be8f6574c1ec357c21fa18412a3b5172fda90fbeeaa589a4e5e5726cc21"
+      "mtime": 1782849425,
+      "sha256": "fca9f840422ac18c06dffb11de0f184cc9646a4bce389899a12e1f8c8769b863"
     },
     "p2kbArchResourceOwnership": {
       "path": "deliverables/ai/P2/architecture/decomposition/resource-ownership.yaml",
-      "mtime": 1781211862,
-      "sha256": "cc3502ae174d90e82f88389e39be542da213e28cd22488c9f3c6ea499c8c5540"
+      "mtime": 1782849425,
+      "sha256": "77592ee844a01cd8832c553749590a7590f17c5fd6b83676032ed8ef6e7cef9b"
+    },
+    "p2kbArchSharedBusBroker": {
+      "path": "deliverables/ai/P2/architecture/decomposition/shared-bus-broker.yaml",
+      "mtime": 1782849425,
+      "sha256": "ddf95e682b6b9e8c8e14b8e38cbcc674b2fed6bd75e4be2ad72f5f0ee8e93274"
+    },
+    "p2kbArchSharedBusReplication": {
+      "path": "deliverables/ai/P2/architecture/decomposition/shared-bus-replication.yaml",
+      "mtime": 1782849425,
+      "sha256": "afe4914dc0024b214e3b16866069ec652e46e697b358e02793458b1c5bd4fc5b"
     },
     "p2kbArchSpatialComputing": {
       "path": "deliverables/ai/P2/architecture/decomposition/spatial-computing.yaml",
-      "mtime": 1781211862,
-      "sha256": "5b4b93859251a40ee1793d371d5c24bed94f0c7ef65f2b933d11334c37b4494f"
+      "mtime": 1782849425,
+      "sha256": "550a5310a74cb521e0c9fd574fce27af24a9a76c4cdd6a764e3715a5dc8c2514"
     },
     "p2kbArchWorkedDerivationRobotDog": {
       "path": "deliverables/ai/P2/architecture/decomposition/worked-derivation-robot-dog.yaml",
-      "mtime": 1781211862,
-      "sha256": "f17ac85e10c9ae0dba3b5678b2ed6bc5dca7658ff1c4d7aa1ca7770cc268e508"
+      "mtime": 1782849425,
+      "sha256": "0bf702e766ca3c31e31280e1609f072cf7c4843578889f281d81bc672c076214"
+    },
+    "p2kbArchWorkedDerivationStreamingPipeline": {
+      "path": "deliverables/ai/P2/architecture/decomposition/worked-derivation-streaming-pipeline.yaml",
+      "mtime": 1782849425,
+      "sha256": "99f4ebc277111fe8dea681270d38149f4ec1d39c8000a8847b8f21c4d7a14ff7"
     },
     "p2kbArchEventSystem": {
       "path": "deliverables/ai/P2/architecture/event_system.yaml",
@@ -5291,6 +5569,11 @@
       "path": "deliverables/ai/P2/architecture/patterns-analysis/timing_control_analysis.yaml",
       "mtime": 1781211862,
       "sha256": "6f6db00aa5980cde4cb75407d4fdf6828f2512e1b07e61355eb1dc2910e5f209"
+    },
+    "p2kbArchPinPowerDomains": {
+      "path": "deliverables/ai/P2/architecture/pin-power-domains.yaml",
+      "mtime": 1782849425,
+      "sha256": "f8977d58976caf66f72d5c936aaafa6bfeb25f09aab2180556cdaa0c54a79098"
     },
     "p2kbArchSerialLoader": {
       "path": "deliverables/ai/P2/architecture/serial_loader.yaml",
@@ -5419,18 +5702,18 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1781325191,
-      "sha256": "f9d1ecc9e1526e5cdc55cff2cf87b89bc52ffe09845434b037b9c53cec72a5f8"
+      "mtime": 1782849425,
+      "sha256": "ce194acb63f4cdbab079b3a50e3550b63ea132cc644bfc44ebcdda0c364cf3fb"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
-      "mtime": 1764449566,
-      "sha256": "75c89311d21dd4a00862f46a4fcb2560535e47de3310da5912095ebe6706dd3f"
+      "mtime": 1782849425,
+      "sha256": "0dfe41b0073e45abffd45eb3161bb114ba9db5176770ecee171d1eba619511de"
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1782613829,
-      "sha256": "159155f1da91e44ea8f2d65c3e927a0e8e31d7b3d0d4c1a0bfcee8ade9141747"
+      "mtime": 1782849425,
+      "sha256": "426ba07e52c12be0855573effa4e4c304eab24658939f7999ef6c7e3fdb3c058"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
@@ -5549,573 +5832,868 @@
     },
     "p2kbCommunity2811": {
       "path": "deliverables/ai/P2/community/obex/objects/2811.yaml",
-      "mtime": 1764449566,
-      "sha256": "176720d86a7fde9a0c480d2ae7a94bb7406d2b62e89dbeba974eead3eb461436"
+      "mtime": 1782780274,
+      "sha256": "55c20e585bd27e891268f10ecad3c69288a07f54ede2e1cb3df87644997856db"
     },
     "p2kbCommunity2812": {
       "path": "deliverables/ai/P2/community/obex/objects/2812.yaml",
-      "mtime": 1764449566,
-      "sha256": "5b2bf6eca3ac9a3f491466a4ee19ff28656864e492c73a78102daf0bc2e4d6d4"
+      "mtime": 1782780274,
+      "sha256": "1df03c598242752fdae823a69ebf259e79aabcb1fb0c105189851954dde4a0ca"
     },
     "p2kbCommunity2813": {
       "path": "deliverables/ai/P2/community/obex/objects/2813.yaml",
-      "mtime": 1764449566,
-      "sha256": "5002ee2135a8ce11818f89e6c51a822638ee455ad6444cc0b9754ec4016e76cb"
+      "mtime": 1782780274,
+      "sha256": "5b02e46302cb2718724e3393af32f60fc1565978535ba84fc585656fb8e68dc3"
     },
     "p2kbCommunity2814": {
       "path": "deliverables/ai/P2/community/obex/objects/2814.yaml",
-      "mtime": 1764449566,
-      "sha256": "4f3bdb22a385978dac96e798cfebfb3c5df2923d6a612965dabf9c2964de5428"
+      "mtime": 1782780274,
+      "sha256": "26f92dcc61e9b1d096d71b4e52147ae77fa6b1b1ff60380bfbbc390a6070c30e"
     },
     "p2kbCommunity2815": {
       "path": "deliverables/ai/P2/community/obex/objects/2815.yaml",
-      "mtime": 1764449566,
-      "sha256": "3f22de7ca18aa12bd606e2b4634f1a88fb8dd161ccf5ccb3dcd9b20c7f7d394c"
+      "mtime": 1782780274,
+      "sha256": "7d45059f560ad38d76d9b6b6f1b0e1fe08dfad65cfa254f46d6b90f20143ca62"
+    },
+    "p2kbCommunity2816": {
+      "path": "deliverables/ai/P2/community/obex/objects/2816.yaml",
+      "mtime": 1782780274,
+      "sha256": "8547e4e1bd798966da055572369e6cdc0f3f9f4146ee9614aa36b2de8e0c5eb3"
     },
     "p2kbCommunity2817": {
       "path": "deliverables/ai/P2/community/obex/objects/2817.yaml",
-      "mtime": 1764449566,
-      "sha256": "7fa221bb5fee3e130eae0b0c6c25a04b5d7cdfd87df9cb4f487b6046b4cc5bd2"
+      "mtime": 1782780274,
+      "sha256": "ea8dfd23f1aa36535cfe2c8ded3c8c6146f090d05126b376292341077f9a6732"
     },
     "p2kbCommunity2818": {
       "path": "deliverables/ai/P2/community/obex/objects/2818.yaml",
-      "mtime": 1764449566,
-      "sha256": "543f21cbc50aac23478f42f8aa0d530f70d3b6a88a0287b37ef0d3fc7afcd0fe"
+      "mtime": 1782780274,
+      "sha256": "861299f2f585b74dbbf927b9ca14d6d057582d66117da56175514a762a244e4e"
     },
     "p2kbCommunity2819": {
       "path": "deliverables/ai/P2/community/obex/objects/2819.yaml",
-      "mtime": 1764449566,
-      "sha256": "baf40f0f45a59ae782858962caee80c10cd83cb98b170078d19272584aafe7fe"
+      "mtime": 1782780274,
+      "sha256": "147788f5f704fc745db97563421014048dd2f723eca6a2c60b87705f78ada9a8"
     },
     "p2kbCommunity2820": {
       "path": "deliverables/ai/P2/community/obex/objects/2820.yaml",
-      "mtime": 1764449566,
-      "sha256": "eaf3ec6418a2ba44c7481fd102fe3a6f2c043f457608f1163135d1842fec2c79"
+      "mtime": 1782780274,
+      "sha256": "633554f8568dffd017be836345aefba01df40c98ed852eb3f09b284773f95578"
     },
     "p2kbCommunity2821": {
       "path": "deliverables/ai/P2/community/obex/objects/2821.yaml",
-      "mtime": 1764449566,
-      "sha256": "da6ef2f3e8180324cf165656ebc1e2ced30f28193eeedd146a8e3d7b1911bf0b"
+      "mtime": 1782780274,
+      "sha256": "891dd9c2a9f8dfd7958e46c83d996ccbccae0c85d8fac34d9cfba8f72a608da3"
+    },
+    "p2kbCommunity2822": {
+      "path": "deliverables/ai/P2/community/obex/objects/2822.yaml",
+      "mtime": 1782780274,
+      "sha256": "f9331a012c06dfe649ce3865b0b45644c78995cc135bb462397a7704b528b9e7"
     },
     "p2kbCommunity2823": {
       "path": "deliverables/ai/P2/community/obex/objects/2823.yaml",
-      "mtime": 1764449566,
-      "sha256": "8b23d320abdafd5dcc07bbc9917b2c18e0340df7cc13d06019710b2d8bd6ea4c"
+      "mtime": 1782780274,
+      "sha256": "e52e737b85cb8cf185a623f15cf338015aabd1ee6e8a55cfcc995d3f0c316121"
     },
     "p2kbCommunity2824": {
       "path": "deliverables/ai/P2/community/obex/objects/2824.yaml",
-      "mtime": 1764449566,
-      "sha256": "6f1995bf101a03589dee89a66bdf928cc6e2002b87fa0a8affe8f8f7a2b37c67"
+      "mtime": 1782780274,
+      "sha256": "6dfe528866c81d4b1e84b1bec7bf3e196670c1516c35ccf240b74961297b95dc"
     },
     "p2kbCommunity2825": {
       "path": "deliverables/ai/P2/community/obex/objects/2825.yaml",
-      "mtime": 1764449566,
-      "sha256": "dcd8dded900a6c5723477d7b562759bed09ba7992ae339d0dfaae3c5307ee462"
+      "mtime": 1782780274,
+      "sha256": "2d6cd08c6844fbcb060436458bb6d8d125525c15034a803c8ef5bb3450b08d4d"
     },
     "p2kbCommunity2826": {
       "path": "deliverables/ai/P2/community/obex/objects/2826.yaml",
-      "mtime": 1764449566,
-      "sha256": "a2745cd36b6b43e10daf60c0a9f628f391986a5a5e38aad5f62f1e5960f8687f"
+      "mtime": 1782780274,
+      "sha256": "d8c0475691914dc43a695bed42fffd97dc586340d1806c8fbb52faa4918f9b0e"
     },
     "p2kbCommunity2827": {
       "path": "deliverables/ai/P2/community/obex/objects/2827.yaml",
-      "mtime": 1764449566,
-      "sha256": "000ce4894d3f887ea1033b0a6a71fa35de3e1984000d664c7f7c669c627256d6"
+      "mtime": 1782780274,
+      "sha256": "5325f5a8de438aa23d5fd506e6bcce1e7a64f9207f60555acdb24a7e1c48c36f"
     },
     "p2kbCommunity2828": {
       "path": "deliverables/ai/P2/community/obex/objects/2828.yaml",
-      "mtime": 1764449566,
-      "sha256": "f1b95a8121a2e2c7e7e9ac1672ad97284fe190bdb190d0b8814430517295bea2"
+      "mtime": 1782780274,
+      "sha256": "8b0d4112d611be7a0adbc91b769d18b43710696ae4d22c5e39311950cee4a327"
     },
     "p2kbCommunity2829": {
       "path": "deliverables/ai/P2/community/obex/objects/2829.yaml",
-      "mtime": 1764449566,
-      "sha256": "0e5f513be3435de1ac9cd2bd838e8677efde901b6409b2c04081250fad701dc1"
+      "mtime": 1782780274,
+      "sha256": "fd289ad023b6ed259eab944bcc3f3288f71311e3c77cfcc35980d2785fcddf91"
     },
     "p2kbCommunity2830": {
       "path": "deliverables/ai/P2/community/obex/objects/2830.yaml",
-      "mtime": 1764449566,
-      "sha256": "8f1b7d1ccce1f41d54a4a97f4deca4f485049c926cf144206e4959ece8a29053"
+      "mtime": 1782780274,
+      "sha256": "e3729cb8c86fd5a22c4bcfc341903d1993337a82fb5cdb39106844cca69d0686"
     },
     "p2kbCommunity2831": {
       "path": "deliverables/ai/P2/community/obex/objects/2831.yaml",
-      "mtime": 1764449566,
-      "sha256": "92cdbc69dce66bbe2ecc79a7026b2379c9f67c0a9fa55d214fa2c33ffd06d407"
+      "mtime": 1782780274,
+      "sha256": "04ad6ceb50be260da7bd0763e0fc6e06cf02e211884cb8002a4f2606eab5edc0"
     },
     "p2kbCommunity2832": {
       "path": "deliverables/ai/P2/community/obex/objects/2832.yaml",
-      "mtime": 1764449566,
-      "sha256": "e04157d4d860f558e847c2a1704b2b700dc23d358775ccaaa50f60a0991306e9"
+      "mtime": 1782780274,
+      "sha256": "dd6bf211ad8dcbbbe5bc24ac1cae3752d078b0f34b8ec37a9aecbe552ab6d795"
     },
     "p2kbCommunity2833": {
       "path": "deliverables/ai/P2/community/obex/objects/2833.yaml",
-      "mtime": 1764449566,
-      "sha256": "e5634100055ab906a8cf66ad8f4abc8e16c5f579e539740d8f9d6078d9f5e104"
+      "mtime": 1782780274,
+      "sha256": "48cabaa729ca385537d677f5b1565538f761e47f942162d170d44f72e916a2dc"
     },
     "p2kbCommunity2834": {
       "path": "deliverables/ai/P2/community/obex/objects/2834.yaml",
-      "mtime": 1764449566,
-      "sha256": "930c5405aea1246cfa1b052bd502d9147d1f9c5c0d03c4699fad2f94d04666a1"
+      "mtime": 1782780274,
+      "sha256": "8c7b983c3f37c555760c8a9b9936630ba5c8c01f7eb6e5c497a4cf23b509440f"
     },
     "p2kbCommunity2835": {
       "path": "deliverables/ai/P2/community/obex/objects/2835.yaml",
-      "mtime": 1764449566,
-      "sha256": "c8cbc993a47097e8ea0c196ee643311c4c3817480e3530c1f7c3ee7c63afb8a1"
+      "mtime": 1782780274,
+      "sha256": "22b07f6bf6781346222d2d2f551b9feb11df9929e32ec8a6ed795903917d22ca"
     },
     "p2kbCommunity2836": {
       "path": "deliverables/ai/P2/community/obex/objects/2836.yaml",
-      "mtime": 1764449566,
-      "sha256": "0b935326bd8d30543dfffc2105f49461f91a51e29c2b6278c1965e6ffb1beba9"
+      "mtime": 1782780274,
+      "sha256": "bad26639b9d91e02a9e4c55c9798253fee908030abb1d7dc65076c7cb5698c82"
     },
     "p2kbCommunity2837": {
       "path": "deliverables/ai/P2/community/obex/objects/2837.yaml",
-      "mtime": 1764449566,
-      "sha256": "93b10e13404ca62678faf2bdd5a6031a67d10e6c562ce4384341631cc7ab4def"
+      "mtime": 1782780274,
+      "sha256": "09a7593f09d20453e987a016f9514a0b68f3c09ba7689f963c835676f730711b"
     },
     "p2kbCommunity2838": {
       "path": "deliverables/ai/P2/community/obex/objects/2838.yaml",
-      "mtime": 1764449566,
-      "sha256": "10b6de0967b74827b46a34e15b354e812ab5816f9d75344f34aa18f05e41da97"
+      "mtime": 1782780274,
+      "sha256": "5180433c349692941e6c0714a3532a9ec06ed296713bf593dc671a1ef033efdb"
     },
     "p2kbCommunity2839": {
       "path": "deliverables/ai/P2/community/obex/objects/2839.yaml",
-      "mtime": 1764449566,
-      "sha256": "8eac22ac08a5e986d59da1e540533e2024cdc248cf8d2f7fcdb6cc0db27baa7b"
+      "mtime": 1782780274,
+      "sha256": "ca929d75988c4b042639572a2e094ece21a12e86a85caf11a3d9f233aedbf51c"
     },
     "p2kbCommunity2840": {
       "path": "deliverables/ai/P2/community/obex/objects/2840.yaml",
-      "mtime": 1764449566,
-      "sha256": "24d8467a77898b14fca548f8216170bf79f3ae913197351d13a60a207c26562a"
+      "mtime": 1782780274,
+      "sha256": "e72458223855eeb022acdae9e9b4f82f6add849fb9e094ded83eff902aede601"
     },
     "p2kbCommunity2841": {
       "path": "deliverables/ai/P2/community/obex/objects/2841.yaml",
-      "mtime": 1764449566,
-      "sha256": "a06cb480db4b924002a968c77a0328a5c671c4f1da6c9959a2f0bb3539f42a60"
+      "mtime": 1782780274,
+      "sha256": "eb940dd3d4b323de9537f1438c8e88cf097f7c84d438b173301739a066a3e2c3"
     },
     "p2kbCommunity2842": {
       "path": "deliverables/ai/P2/community/obex/objects/2842.yaml",
-      "mtime": 1764449566,
-      "sha256": "13d9f7da3afa8d2abdf7c14dda788bb5ac343fc47847010731923947b5fd84f0"
+      "mtime": 1782780274,
+      "sha256": "336c7485eb800894c19b8d6002fe73df8951cb9cd1f5a68eb3ffe6d91a859e13"
     },
     "p2kbCommunity2843": {
       "path": "deliverables/ai/P2/community/obex/objects/2843.yaml",
-      "mtime": 1764449566,
-      "sha256": "370ab650e67d4842442985c67d6ab569a9b3aad01d02a1b9918cf03643313b8f"
+      "mtime": 1782780274,
+      "sha256": "b6d6c90fca2de39902aeab088bd49c4830f4bcec812a250cd966ae0ab1ac87f9"
     },
     "p2kbCommunity2844": {
       "path": "deliverables/ai/P2/community/obex/objects/2844.yaml",
-      "mtime": 1764449566,
-      "sha256": "df0364cf05c5aa1f806fc3904f2cf9573434d4a615f01d088beba7a2bb2697f6"
+      "mtime": 1782780274,
+      "sha256": "b1129ec6f8adec0858f971df291b2b9045260543e3b0d07c94d69e4288ccc6af"
     },
     "p2kbCommunity2845": {
       "path": "deliverables/ai/P2/community/obex/objects/2845.yaml",
-      "mtime": 1764449566,
-      "sha256": "dc558c3969031ef786e85ea4c852df2b9a6a2dad92b4a1c91169397ab5a2ca34"
+      "mtime": 1782780274,
+      "sha256": "b6fd0ae8981f9229f437aafbd4363ef31ec6c2db3e66ccb99ba98dc7768a5627"
     },
     "p2kbCommunity2846": {
       "path": "deliverables/ai/P2/community/obex/objects/2846.yaml",
-      "mtime": 1764449566,
-      "sha256": "f746e207b333737545db27a04dedb7376ebc02a6088704d3868a761cc6ef0392"
+      "mtime": 1782780274,
+      "sha256": "92758fcc550630ba2eeb0f31e1861d341a0cd6831dd756dbdb60af5d7bf6b794"
     },
     "p2kbCommunity2847": {
       "path": "deliverables/ai/P2/community/obex/objects/2847.yaml",
-      "mtime": 1764449566,
-      "sha256": "341a0b22f60165b027e2485ee5ddb066297767c2885ff4c378b7d48ecf86729c"
+      "mtime": 1782780274,
+      "sha256": "7a84b351dc25c15584f2c46c792fddf855ede614987a9a3f25043fe5c1db24d6"
     },
     "p2kbCommunity2848": {
       "path": "deliverables/ai/P2/community/obex/objects/2848.yaml",
-      "mtime": 1764449566,
-      "sha256": "266bdce29cc9321fe24a6fb02440f9697003e9bddafd86827c3372e541c74a3d"
+      "mtime": 1782780274,
+      "sha256": "32148eeed68ab31d972c7d21cf837dc2228dd5aa954023e5336252e1d35fe8a7"
     },
     "p2kbCommunity2849": {
       "path": "deliverables/ai/P2/community/obex/objects/2849.yaml",
-      "mtime": 1764449566,
-      "sha256": "1f873d044591c6c66d0118cf651e0fbc60a54bb12feb3a70fac75d9f4eefd8fe"
+      "mtime": 1782780274,
+      "sha256": "62c132e208a75590b77facd7916d4e737e2aee924d2afcf539064d70274d6eec"
     },
     "p2kbCommunity2850": {
       "path": "deliverables/ai/P2/community/obex/objects/2850.yaml",
-      "mtime": 1764449566,
-      "sha256": "f16b972a61b6add3b4e42912cefd19ddf51ec5f806ccf45b2c77b050cf42d031"
+      "mtime": 1782780274,
+      "sha256": "2bfad45b40ddc947d395990812e5403f819f7877f1ddcaf3860b8c4dde188460"
     },
     "p2kbCommunity2851": {
       "path": "deliverables/ai/P2/community/obex/objects/2851.yaml",
-      "mtime": 1764449566,
-      "sha256": "8e4c19ed4eefeae83f3378048622b75cd2e33e1fc1dc67869c5760b737bac61a"
+      "mtime": 1782780274,
+      "sha256": "4e341a7d166b8567f934bd009f6184d407abcaed6c912e65e22727e639c82728"
     },
     "p2kbCommunity2852": {
       "path": "deliverables/ai/P2/community/obex/objects/2852.yaml",
-      "mtime": 1764449566,
-      "sha256": "49a0c5f33b4470ce7ac4925946838cabb8b8f6648a0812934d17dfdb3bd8bf01"
+      "mtime": 1782780274,
+      "sha256": "922d44817da75166342c722b33363bb0dc0e39dd720ab7e8056a1d608865cdce"
     },
     "p2kbCommunity2853": {
       "path": "deliverables/ai/P2/community/obex/objects/2853.yaml",
-      "mtime": 1764449566,
-      "sha256": "5bad99727cd9d31ce6b3c20809d114ce2cf2a0f02ef8761462d71136b775ff1d"
+      "mtime": 1782780274,
+      "sha256": "6c7adfa343ee4e62e44408504601a8c8a1e88215956b5b8f9dd830388b91e0c7"
     },
     "p2kbCommunity2854": {
       "path": "deliverables/ai/P2/community/obex/objects/2854.yaml",
-      "mtime": 1764449566,
-      "sha256": "652755d00117ca070cdc934c682d54df063cf0d77b34234fdeb923c8812daea5"
+      "mtime": 1782780274,
+      "sha256": "3150bbc113bfb1507773eb9c6beae0f892f5363a9ae98ab5f19fdccaeed50074"
     },
     "p2kbCommunity2855": {
       "path": "deliverables/ai/P2/community/obex/objects/2855.yaml",
-      "mtime": 1764449566,
-      "sha256": "18f1c33e4a8f58bee0408d4faa772217abb1c73e6504b462f481094ab81dfe90"
+      "mtime": 1782780274,
+      "sha256": "ba4da2a25fbc9ab6df006e65cdc509774fb2d0b2dc93eca549c0ea2c0b7d4d25"
     },
     "p2kbCommunity2856": {
       "path": "deliverables/ai/P2/community/obex/objects/2856.yaml",
-      "mtime": 1764449566,
-      "sha256": "1dae2e9da86c3d65f4a421bbe618d40fcfe98d926ed0779f7ccde30b4ce879a6"
+      "mtime": 1782780274,
+      "sha256": "1169aa405a4c37f31fdb54848b0604e0d5c0a816c0cd8dd80c1cc3c292824f4e"
     },
     "p2kbCommunity2857": {
       "path": "deliverables/ai/P2/community/obex/objects/2857.yaml",
-      "mtime": 1764449566,
-      "sha256": "b36958b16e1e9306aa88a08e2d61597ede78b4732909e3b7c976fd13a8eb45ec"
+      "mtime": 1782780274,
+      "sha256": "f0463fadcc63fb0d5905c5c5fd6463f092bee3426596ff64490d323c5b51ba77"
     },
     "p2kbCommunity2858": {
       "path": "deliverables/ai/P2/community/obex/objects/2858.yaml",
-      "mtime": 1764449566,
-      "sha256": "f976dd7f6e8cff8d6800757f0a8b2f318343a5454c258d9baa72356ce26745da"
+      "mtime": 1782780274,
+      "sha256": "f85d61684e50471d0531a232a770352ad8d8daa03773ccc968a90f3fadc6bd47"
     },
     "p2kbCommunity2859": {
       "path": "deliverables/ai/P2/community/obex/objects/2859.yaml",
-      "mtime": 1764449566,
-      "sha256": "123ef6c9379c11e2815e2312d28ca19eb44bcfc3979ab08a2a85ab457c54dafa"
+      "mtime": 1782780274,
+      "sha256": "0b1f565193c00a8b3f72a09ef06a8b297b28a5fce174723e32be333ee4ea64da"
     },
     "p2kbCommunity2860": {
       "path": "deliverables/ai/P2/community/obex/objects/2860.yaml",
-      "mtime": 1764449566,
-      "sha256": "f7d8a67e97941f7f6d7ff93631601c440048de1aff4dd9a278b84b0b8b2528c8"
+      "mtime": 1782780274,
+      "sha256": "b2b8c5257ebd3a8a61c725822f4041bf9b1865c2b7d220a3aab5253f14aa6027"
     },
     "p2kbCommunity2861": {
       "path": "deliverables/ai/P2/community/obex/objects/2861.yaml",
-      "mtime": 1764449566,
-      "sha256": "d04e119a1cebf4e572fdc213b7a318f5af4ab2efbcd26ec36d5211e22e154f72"
+      "mtime": 1782780274,
+      "sha256": "f3a681b47ac9546a5246c9996b1858ba24141e6a5370e9379730e8d144a5f6d3"
     },
     "p2kbCommunity2862": {
       "path": "deliverables/ai/P2/community/obex/objects/2862.yaml",
-      "mtime": 1764449566,
-      "sha256": "f8233f51ea34edd5fdc563408065dc7e9dbc882a1f6528b1f11c8899dad2e278"
+      "mtime": 1782780274,
+      "sha256": "8e7092d572ea5c585a27c1790d89d011699263ddec60d3644989cce4cc726975"
     },
     "p2kbCommunity2863": {
       "path": "deliverables/ai/P2/community/obex/objects/2863.yaml",
-      "mtime": 1764449566,
-      "sha256": "d0381c760f9f0728148db434eb285d71df22387cb97189b7dd7f6492e815dd13"
+      "mtime": 1782780274,
+      "sha256": "0cb35be80e1483239c4fcfa8be3857905c0d21e61f537eac37553707fb210637"
     },
     "p2kbCommunity2864": {
       "path": "deliverables/ai/P2/community/obex/objects/2864.yaml",
-      "mtime": 1764449566,
-      "sha256": "9c08f745ed8b2da94e9e5d7c45c8645530f95d4c1a29c884fad987b6e0eed4cb"
+      "mtime": 1782780274,
+      "sha256": "f2da74fe9a214278657f13d75e403c4a246cb652119acce1fe1491b5417574c5"
     },
     "p2kbCommunity2865": {
       "path": "deliverables/ai/P2/community/obex/objects/2865.yaml",
-      "mtime": 1764449566,
-      "sha256": "732d100d41685395b8198977c9b838294c30c2145599ea173a3edf27c90fc552"
+      "mtime": 1782780274,
+      "sha256": "b0296ed365fb7fdb6791b5054dd89abc33466d769dcd280d2d6f817244694f55"
     },
     "p2kbCommunity2866": {
       "path": "deliverables/ai/P2/community/obex/objects/2866.yaml",
-      "mtime": 1764449566,
-      "sha256": "260116cbc59dfe8e58d831e0fd0a3df424d92391d9239ea4bc3cc896dfae7182"
+      "mtime": 1782780274,
+      "sha256": "d0ad6cfdbaa8b4d06216937ca74739cbdef5b0b2e4a24a84c55f46a967ecdd10"
     },
     "p2kbCommunity2867": {
       "path": "deliverables/ai/P2/community/obex/objects/2867.yaml",
-      "mtime": 1764449566,
-      "sha256": "51404c8d32b3f722fb2d3a34135edc8b94b274ef9b3ec2de402d8380b7e2983f"
+      "mtime": 1782780274,
+      "sha256": "51a4975af121de192c9d100522dbc424f6600d7bf6c110bc3167352322fd858f"
     },
     "p2kbCommunity2868": {
       "path": "deliverables/ai/P2/community/obex/objects/2868.yaml",
-      "mtime": 1764449566,
-      "sha256": "643e86330b43015570c7ea6ba9b5542425ba4aa11fea08798822581bc1319d1e"
+      "mtime": 1782780274,
+      "sha256": "6caa55a1d6d369677adaf92cb47ca67f8e7c90f3e15cbb375a004aa1b71c0ccc"
     },
     "p2kbCommunity2869": {
       "path": "deliverables/ai/P2/community/obex/objects/2869.yaml",
-      "mtime": 1764449566,
-      "sha256": "251125622762f10f560d513ee3f12d4967393342cf3886aee32de674050b3f8d"
+      "mtime": 1782780274,
+      "sha256": "271e7c20986f103624a454e875327a3d56e1d50710f2014bdfddbbafdce23cd6"
     },
     "p2kbCommunity2870": {
       "path": "deliverables/ai/P2/community/obex/objects/2870.yaml",
-      "mtime": 1764449566,
-      "sha256": "67070d573fa0b5a54e9c546cbeb10a7be1d1c319aa34699e7f5a2b30c85d0d8a"
+      "mtime": 1782780274,
+      "sha256": "42592511bd0076499fa5e1c3e247492abb1306d1978892c03da9c8ad49ffb0a7"
     },
     "p2kbCommunity2871": {
       "path": "deliverables/ai/P2/community/obex/objects/2871.yaml",
-      "mtime": 1764449566,
-      "sha256": "8ec80bd8a54af0d7787e9ff6c0a83ca1624d5e7ae3727568fd60d9465959706d"
+      "mtime": 1782780274,
+      "sha256": "f0b2ec04d679711473b36be3230ea757134b991549528ca6bc1c15c8fd57b11b"
     },
     "p2kbCommunity2872": {
       "path": "deliverables/ai/P2/community/obex/objects/2872.yaml",
-      "mtime": 1764449566,
-      "sha256": "0d6b990e7c70a60a7b48f80421fbfbac8b0525db6b7c8477f6e6fccf2dcd77ce"
+      "mtime": 1782780274,
+      "sha256": "47d5ff32b19dc58b7890b63329280004fb0e73d7330fb7c64a18681d20ad2ea4"
     },
     "p2kbCommunity2873": {
       "path": "deliverables/ai/P2/community/obex/objects/2873.yaml",
-      "mtime": 1764449566,
-      "sha256": "721cea79c2d4104834cc9e07e4b6557df0805770082e9a99b252248545dcca56"
+      "mtime": 1782780274,
+      "sha256": "8be0ebae61f504686f39c572fbcbb6e75148834bf41c4b0f131028438c490027"
     },
     "p2kbCommunity2874": {
       "path": "deliverables/ai/P2/community/obex/objects/2874.yaml",
-      "mtime": 1764449566,
-      "sha256": "9533108e543d4c097b02ced357991807490ca8ab3aa51cabe143b72041a27430"
+      "mtime": 1782780274,
+      "sha256": "ebe11de33ba594c64716935d9a66ff661af8c4fae803ae23996da390039bfac6"
     },
     "p2kbCommunity2875": {
       "path": "deliverables/ai/P2/community/obex/objects/2875.yaml",
-      "mtime": 1764449566,
-      "sha256": "ccb2fd603566be48830023f49838cc6b8a3f129e0ef8820e8cc00dcc3d092642"
+      "mtime": 1782780274,
+      "sha256": "12e743e1d214eae26705d8b97ca55296398807a92fc37ff429edc3146a588539"
     },
     "p2kbCommunity2876": {
       "path": "deliverables/ai/P2/community/obex/objects/2876.yaml",
-      "mtime": 1764449566,
-      "sha256": "7ff43b21f698e747039db8128531870c1abfba5eac6f8d9489dfcf969034ed9a"
+      "mtime": 1782780274,
+      "sha256": "8f58d4e40393f141d9478168b6ab27ecc7615d4ee9450a7f2ea2aa6d9756d5a6"
     },
     "p2kbCommunity2877": {
       "path": "deliverables/ai/P2/community/obex/objects/2877.yaml",
-      "mtime": 1764449566,
-      "sha256": "13919556c60e3970e89539c60612b46088fabd18f2b0c4018bf03cc88fa1d38b"
+      "mtime": 1782780274,
+      "sha256": "deedbc4995f1505efb620226458f18dc43e7c60f51ef269ef318a1d3715a3560"
     },
     "p2kbCommunity3804": {
       "path": "deliverables/ai/P2/community/obex/objects/3804.yaml",
-      "mtime": 1764449566,
-      "sha256": "3a8a9d9afd1e66fd2396e4b9170bd1fbaf3c9c367f50f65426527bc13b324d96"
+      "mtime": 1782780274,
+      "sha256": "363fdfc48ea43f15c48d69a4d4cc0038176d7b31dffe630329280e0154e988d6"
     },
     "p2kbCommunity4012": {
       "path": "deliverables/ai/P2/community/obex/objects/4012.yaml",
-      "mtime": 1764449566,
-      "sha256": "46c454d847f7b54261a08e1ea709692e910320fa35533cc91faaec5883a1efb0"
+      "mtime": 1782780274,
+      "sha256": "d937b450028921576ffc83d9fdf00812b861d28997badb60c5044105245b48b5"
     },
     "p2kbCommunity4047": {
       "path": "deliverables/ai/P2/community/obex/objects/4047.yaml",
-      "mtime": 1764449566,
-      "sha256": "9fc292bef5912e74f475eeaab119369f14558be7042908837cc2dca6bceaf28f"
+      "mtime": 1782780274,
+      "sha256": "ad2bf46f327cf2b11e6fee0844f08e8c2bf64d686d2dc32fa99793d1d62876b5"
     },
     "p2kbCommunity4060": {
       "path": "deliverables/ai/P2/community/obex/objects/4060.yaml",
-      "mtime": 1764449566,
-      "sha256": "5853beae68093ab36679da42f2947cb73d6d9c9490e423c012ad16d7fbd6bb18"
+      "mtime": 1782780274,
+      "sha256": "c1a392abcd4d0cb4fcb9948937f0783f67d188d8cbad85e8d4354aca97633afc"
     },
     "p2kbCommunity4064": {
       "path": "deliverables/ai/P2/community/obex/objects/4064.yaml",
-      "mtime": 1764449566,
-      "sha256": "31114a3fa0a34739430ea4cf33d79ac7143c64aec9f8c94941dcb77790e0ad6f"
+      "mtime": 1782780274,
+      "sha256": "ee0bb47c13dcd1ae954c90dd1193c47c0f771a236ee6ca4cde852cafa366f20f"
     },
     "p2kbCommunity4068": {
       "path": "deliverables/ai/P2/community/obex/objects/4068.yaml",
-      "mtime": 1764449566,
-      "sha256": "f3a867fe615b6665d54f6977a9bba6ca09657c0d5e33b348d8b24d18c04a0cc1"
+      "mtime": 1782780274,
+      "sha256": "9defb80888f0292105fcbac6e6a4c81ed45fa21bb77794f96efaff97f94ce72e"
     },
     "p2kbCommunity4070": {
       "path": "deliverables/ai/P2/community/obex/objects/4070.yaml",
-      "mtime": 1764449566,
-      "sha256": "cd9aef615506889e89f87bcd424b0876352665a25f43a2fb351823002726546d"
+      "mtime": 1782780274,
+      "sha256": "29c5480339207939128b210f5186ebb9acf2ed6564835f9cd561e3b750108568"
     },
     "p2kbCommunity4080": {
       "path": "deliverables/ai/P2/community/obex/objects/4080.yaml",
-      "mtime": 1764449566,
-      "sha256": "bc4cd47dfa3083963b6dfb7d626a75f59ffc55ce34c1289dd0df351f556c02a4"
+      "mtime": 1782780274,
+      "sha256": "509c395ec2586fd064be0db413876856c2de4270dde98a9d7120234cc6e8ac11"
     },
     "p2kbCommunity4087": {
       "path": "deliverables/ai/P2/community/obex/objects/4087.yaml",
-      "mtime": 1764449566,
-      "sha256": "d3f859e694351b6bf29122ce89d49b1d80205395e5af59b5249829add2389b82"
+      "mtime": 1782780274,
+      "sha256": "03b999bb5718f29edebd3172e4acccede7453776b1ef42900023df215739b278"
     },
     "p2kbCommunity4162": {
       "path": "deliverables/ai/P2/community/obex/objects/4162.yaml",
-      "mtime": 1764449566,
-      "sha256": "90dc06ade42d45c76d1b31ec0b0a7ed6a6667da93bc14524d4d89f77184e5b44"
+      "mtime": 1782780274,
+      "sha256": "2074dec05e31260720fe00d4a9373392e32d2cda884b1777056a4df8a46c98b4"
     },
     "p2kbCommunity4198": {
       "path": "deliverables/ai/P2/community/obex/objects/4198.yaml",
-      "mtime": 1764449566,
-      "sha256": "9afd0d79be4df2a41ac65d0d76f47adbb3a9f49973528023ed9e76215cf878ea"
+      "mtime": 1782780274,
+      "sha256": "8ba73f5561aa499ab1b982e285321b080d626e480c5da7e13c8e1b392e0bad6c"
     },
     "p2kbCommunity4254": {
       "path": "deliverables/ai/P2/community/obex/objects/4254.yaml",
-      "mtime": 1764449566,
-      "sha256": "bb94f7dfc5d10c802a3cf40914c2f3d5d3120c40b91d345560386ce51dd87097"
+      "mtime": 1782780274,
+      "sha256": "eaf3685b914b70a082a61471ad1f0c864572dc6cd3f887992b177b45b1f02851"
     },
     "p2kbCommunity4257": {
       "path": "deliverables/ai/P2/community/obex/objects/4257.yaml",
-      "mtime": 1764449566,
-      "sha256": "7f66f44e05357e67cdbb0a1d28fcbc9819f17cc96bab992be00ccb682216433a"
+      "mtime": 1782780274,
+      "sha256": "93eded1d1d25319f7dee21cbc9a8ffc4815b62e63be1002a30881cc52bb12a74"
     },
     "p2kbCommunity4261": {
       "path": "deliverables/ai/P2/community/obex/objects/4261.yaml",
-      "mtime": 1764449566,
-      "sha256": "50f42e0ccb8c851a63221c7bc52cc8cbe3c26c0f2b5c05d7824995a0b672a272"
+      "mtime": 1782780274,
+      "sha256": "f5311cd76ef49f556a1f604515a36cb84101cbee403c6c8cd7ef32d2f678cfe1"
     },
     "p2kbCommunity4266": {
       "path": "deliverables/ai/P2/community/obex/objects/4266.yaml",
-      "mtime": 1764449566,
-      "sha256": "9758ccb450c00f6bb9353184dc949d6a62255e96fbc4e9092e01a8cc65a9687b"
+      "mtime": 1782780274,
+      "sha256": "50c98088256e68633ddac9fddeb08cb2c646cf6619661b080564683d1f94ad68"
     },
     "p2kbCommunity4267": {
       "path": "deliverables/ai/P2/community/obex/objects/4267.yaml",
-      "mtime": 1764449566,
-      "sha256": "15cb1f894f5bbdec487912ba2620fab37ca9d654cb0a70da0c89679166319a4b"
+      "mtime": 1782780274,
+      "sha256": "52fa21b7cd6d7ab406c45aaa24a57bce9f49c3468ba10dd9af63da72926b83a5"
     },
     "p2kbCommunity4269": {
       "path": "deliverables/ai/P2/community/obex/objects/4269.yaml",
-      "mtime": 1764449566,
-      "sha256": "506e07acf62767fd610a4d4bcf57ffdd057ce0ec69a5cb45261123099b7ca4e2"
+      "mtime": 1782780274,
+      "sha256": "c417d3f3bb5d0d1bf4106a3c7ed1c2099949900a9e2e80dc761ad5f9eb3d6667"
     },
     "p2kbCommunity4271": {
       "path": "deliverables/ai/P2/community/obex/objects/4271.yaml",
-      "mtime": 1764449566,
-      "sha256": "a793648da1d2adacbe3929f8c5e3b6bc52113d0521e392059979a9814eb9f271"
+      "mtime": 1782780274,
+      "sha256": "d6e47959c55d4027ff460953f15421459560c00e48e4b87291a287fdfa74d318"
     },
     "p2kbCommunity4442": {
       "path": "deliverables/ai/P2/community/obex/objects/4442.yaml",
-      "mtime": 1764449566,
-      "sha256": "8e8452517f399eca3e0b8b5bf3482c82a262345e556c73311cab9fda0089fe69"
+      "mtime": 1782780274,
+      "sha256": "3d1a288b3ad33e8dace13fb920c569aecc35e95955b2cb4d483babd357c00ad8"
     },
     "p2kbCommunity4564": {
       "path": "deliverables/ai/P2/community/obex/objects/4564.yaml",
-      "mtime": 1764449566,
-      "sha256": "200fc0280112c62afb8bf065480bffd38b41a159e41e05ed9ef255989734a775"
+      "mtime": 1782780274,
+      "sha256": "1732c86aa23ce3c9be5134fe805312f7c6c2ed0b5f8b76a4a0ed21fab541702e"
     },
     "p2kbCommunity4570": {
       "path": "deliverables/ai/P2/community/obex/objects/4570.yaml",
-      "mtime": 1764449566,
-      "sha256": "c443d19db598a5c176f6139b84ec5a123318308752b73b91c51a7e53f6c7d2ca"
+      "mtime": 1782780274,
+      "sha256": "e9852b2debf18da9c5e02a8eea06d94766ba0e74313c013635c253ba492e37e1"
     },
     "p2kbCommunity4571": {
       "path": "deliverables/ai/P2/community/obex/objects/4571.yaml",
-      "mtime": 1764449566,
-      "sha256": "51605823fb7895f34106cf23a8cda6ba2fd4a3bbdf0be9e1d66abef52d7c0820"
+      "mtime": 1782780274,
+      "sha256": "677dea81648d517e31dd0cb4edd58ce8348c8cf658787a5b18860c3c24ad751b"
     },
     "p2kbCommunity4581": {
       "path": "deliverables/ai/P2/community/obex/objects/4581.yaml",
-      "mtime": 1764449566,
-      "sha256": "a0d19f62c9d56dc335fff313578db15198f508d7bbaa40813a5fd5f7688abe6c"
+      "mtime": 1782780274,
+      "sha256": "a8db84691ac7b0a8f0626ee5081dfa514a084d1bd835e258cdd2f5459a23ac82"
     },
     "p2kbCommunity4597": {
       "path": "deliverables/ai/P2/community/obex/objects/4597.yaml",
-      "mtime": 1764449566,
-      "sha256": "9f94ceeb643aa2bed3cb860c938c5ad3a429cc265207ff8ac70669aafc51e2a6"
+      "mtime": 1782780274,
+      "sha256": "b842c47f93d8cf499cc8e51b071c70e3e2a586c394e8c5bbe97b7bd0c5e8ca35"
     },
     "p2kbCommunity4616": {
       "path": "deliverables/ai/P2/community/obex/objects/4616.yaml",
-      "mtime": 1764449566,
-      "sha256": "b04258d3f00593c996596e63a91a6b333bb1a956dcce03c7478cc1a78baf17f9"
+      "mtime": 1782780274,
+      "sha256": "a9b7667c4541f0c95a0ad63d11fd48903ff06bf822d4303e68badafbd1f9251e"
     },
     "p2kbCommunity4617": {
       "path": "deliverables/ai/P2/community/obex/objects/4617.yaml",
-      "mtime": 1764449566,
-      "sha256": "bab75837265235a8b678743ae9f6b3773898a76fc6afe40fbd71737125bc52a5"
+      "mtime": 1782780274,
+      "sha256": "4e95118aa6944369ea8fc98f8e177502724722928564aacc79e0f005f0359b4d"
     },
     "p2kbCommunity4701": {
       "path": "deliverables/ai/P2/community/obex/objects/4701.yaml",
-      "mtime": 1764449566,
-      "sha256": "3982a8711eae22be5d05c2f834d85a676de65aa00c9cab68668965764160ecf6"
+      "mtime": 1782780274,
+      "sha256": "ac5e9a47221698dac0985d994cb1d78c93158c27f39e3374f6f2e33ed50ad3d4"
     },
     "p2kbCommunity4718": {
       "path": "deliverables/ai/P2/community/obex/objects/4718.yaml",
-      "mtime": 1764449566,
-      "sha256": "1d32910318ab13724f5d5bd37f3461e980f532d1b49f8090884cc0e10f3bd136"
+      "mtime": 1782780274,
+      "sha256": "b53b7473f403d7ebf41bc4ed10c074ed4cdef23d46a0a5f4a7672c5ea4c7a6ce"
     },
     "p2kbCommunity4720": {
       "path": "deliverables/ai/P2/community/obex/objects/4720.yaml",
-      "mtime": 1764449566,
-      "sha256": "22e91301c56229c1ee907ffba8f3bbb14615caab5e0b091e56329a60d0184d19"
+      "mtime": 1782780274,
+      "sha256": "6e9128c2cdb701919d12775a0147ec63439ef58aea30fbd3e34ab1a1d2670565"
     },
     "p2kbCommunity4727": {
       "path": "deliverables/ai/P2/community/obex/objects/4727.yaml",
-      "mtime": 1764449566,
-      "sha256": "3ef62dbc35a0f1c9832cb0dfae8059e9e91a49d9acf465917e4ef48dc3b3b48f"
+      "mtime": 1782780274,
+      "sha256": "58303a460373585abe0e621d720fd2b6a2ec0ef05e1259b038ad5ac5bd5ac2da"
     },
     "p2kbCommunity4746": {
       "path": "deliverables/ai/P2/community/obex/objects/4746.yaml",
-      "mtime": 1764449566,
-      "sha256": "a0411f43f0e6967642b79aa4a9542d2b29e10d5db6a5d413f036a49925c77e09"
+      "mtime": 1782780274,
+      "sha256": "3bd73bab407197aa9123370eff568ed227541bba94135296f4a130c2c484ea46"
     },
     "p2kbCommunity4758": {
       "path": "deliverables/ai/P2/community/obex/objects/4758.yaml",
-      "mtime": 1764449566,
-      "sha256": "c53f33619fb8c2b71371ebf50b2bf3f598b72203ffa191af94534da7b7690b3b"
+      "mtime": 1782780274,
+      "sha256": "73002d677f81d189e4688879d2aedb8c3411f07ff564d62ed38335a9e611294d"
     },
     "p2kbCommunity4800": {
       "path": "deliverables/ai/P2/community/obex/objects/4800.yaml",
-      "mtime": 1764449566,
-      "sha256": "6c13003fe8f2fee02c0361e384fa91abbba65629bd66732a54faad73bcaa4974"
+      "mtime": 1782780274,
+      "sha256": "64a81302e5372b65c54289aa75bcc8e41e9e7387478a73a0157e05e8c889ba03"
+    },
+    "p2kbCommunity4808": {
+      "path": "deliverables/ai/P2/community/obex/objects/4808.yaml",
+      "mtime": 1782780274,
+      "sha256": "865409472c6acb3bca8c5dfe950505c0f9af8a9152ca93d1863b47cd42a3bf5b"
     },
     "p2kbCommunity4858": {
       "path": "deliverables/ai/P2/community/obex/objects/4858.yaml",
-      "mtime": 1764449566,
-      "sha256": "a1c62c14661979106e2a541cc72b394f6069978f3198abe92b055bfa03c48954"
+      "mtime": 1782780274,
+      "sha256": "02801ee6fb61e4c194029da77fd52135954a1009f43259a8d02f1a969c25a84f"
+    },
+    "p2kbCommunity4864": {
+      "path": "deliverables/ai/P2/community/obex/objects/4864.yaml",
+      "mtime": 1782780274,
+      "sha256": "bd8d1e9fdf81710306d909a589ca7af4078fc4c5c167530a142e422bc1f4bf2b"
     },
     "p2kbCommunity4883": {
       "path": "deliverables/ai/P2/community/obex/objects/4883.yaml",
-      "mtime": 1764449566,
-      "sha256": "dd221a94e822d8127ddb9ff95d16ac2ad2ef1a1cac34ccaf4c7c31fc56e34b01"
+      "mtime": 1782780274,
+      "sha256": "8d9ff3a1bcf9c546aa332f4cf02049279d3a303ce6c89a23fd020d398739e291"
     },
     "p2kbCommunity4889": {
       "path": "deliverables/ai/P2/community/obex/objects/4889.yaml",
-      "mtime": 1764449566,
-      "sha256": "f757e25f649abacc7eaf0337a0d99d15eb46c9b84c89e5f4dfc2efd9d2357b3c"
+      "mtime": 1782780274,
+      "sha256": "54cd8bcd243c88902d159a4bc7fcde5ccf057c749868e4e926cffd91d85faf8c"
     },
     "p2kbCommunity4894": {
       "path": "deliverables/ai/P2/community/obex/objects/4894.yaml",
-      "mtime": 1764449566,
-      "sha256": "453e4c41ffff3c18a74e5be439798655273505984d58f78eba15084fe09500a8"
+      "mtime": 1782780274,
+      "sha256": "129e8833edbdbbece10a583255c89c9703aa953523c2847e1a560b4b937bea66"
+    },
+    "p2kbCommunity4898": {
+      "path": "deliverables/ai/P2/community/obex/objects/4898.yaml",
+      "mtime": 1782780274,
+      "sha256": "1f880ef7023754a0dc81deb90e016a06c44d46078dadeee595a3370e2362cfab"
+    },
+    "p2kbCommunity4899": {
+      "path": "deliverables/ai/P2/community/obex/objects/4899.yaml",
+      "mtime": 1782780274,
+      "sha256": "61a91102a002d1414d1e96ef276968efa34a2e283fb1f97845139d7c3d72a235"
+    },
+    "p2kbCommunity4905": {
+      "path": "deliverables/ai/P2/community/obex/objects/4905.yaml",
+      "mtime": 1782780274,
+      "sha256": "2786444e97ec5d8d27275ecf4730f4af6d0f946972f17b4425bf76c0f441179e"
     },
     "p2kbCommunity4911": {
       "path": "deliverables/ai/P2/community/obex/objects/4911.yaml",
-      "mtime": 1764449566,
-      "sha256": "f12c3a766b858e26615f9791d7fca4645bd719542c1b527cccb1434f4490576f"
+      "mtime": 1782780274,
+      "sha256": "bb7f4be8d26b02f588fc2d9b4af8276327eded99902ef4c39ec8b42386f629bb"
     },
     "p2kbCommunity4917": {
       "path": "deliverables/ai/P2/community/obex/objects/4917.yaml",
-      "mtime": 1764449566,
-      "sha256": "6d929b7e48407b792982746c72ad88d716792995b4f42d4944bcc1452bc1e774"
+      "mtime": 1782780274,
+      "sha256": "5fbdcc6f63be88f5482047415f75b4e04048294af5dacf826c124bda57a62099"
     },
     "p2kbCommunity4918": {
       "path": "deliverables/ai/P2/community/obex/objects/4918.yaml",
-      "mtime": 1764449566,
-      "sha256": "ed81fe97d3d361eb79b0dc8d7f8b2322c4c01eb6a19ed701f9b90d073a02c305"
+      "mtime": 1782780274,
+      "sha256": "d59578b268acac8498eb0062a898489110323a0c15810db7bb709100302bdb8b"
     },
     "p2kbCommunity4926": {
       "path": "deliverables/ai/P2/community/obex/objects/4926.yaml",
-      "mtime": 1764449566,
-      "sha256": "11564fc9360d827460fd9207715c27692090508a3cb71822bfa8109b381c9d0f"
+      "mtime": 1782780274,
+      "sha256": "41643fca37afa26e1965018918cf3df6aed749e90235d5e6141d924db544ccd7"
+    },
+    "p2kbCommunity4933": {
+      "path": "deliverables/ai/P2/community/obex/objects/4933.yaml",
+      "mtime": 1782780274,
+      "sha256": "fab6d5f967bf5c95703235caaa549ffb6dd17c5f0d1f27d5aa9dc1a5ddab9be2"
+    },
+    "p2kbCommunity5048": {
+      "path": "deliverables/ai/P2/community/obex/objects/5048.yaml",
+      "mtime": 1782780274,
+      "sha256": "724d59c828d5b0452392a6b1278432865077241dde53d7444e248e09bc1d73a8"
+    },
+    "p2kbCommunity5071": {
+      "path": "deliverables/ai/P2/community/obex/objects/5071.yaml",
+      "mtime": 1782780274,
+      "sha256": "2d4e27dbe9950106519d8517caed6fe8513a09769634abd9269e2d5e3cb63bae"
+    },
+    "p2kbCommunity5096": {
+      "path": "deliverables/ai/P2/community/obex/objects/5096.yaml",
+      "mtime": 1782780274,
+      "sha256": "f7f19902c52b7c28a5c272c1c32002509b2e58e14845bf58a3af0f97987a8b59"
     },
     "p2kbCommunity5189": {
       "path": "deliverables/ai/P2/community/obex/objects/5189.yaml",
-      "mtime": 1764449566,
-      "sha256": "25561e3235ffb8cedf4b5cda8d94f3bb641ea34325c88bbed3d707c9fbae0433"
+      "mtime": 1782780274,
+      "sha256": "6f25ef17357c48cc940498a36f9b63ae8eaaae727fa343b41707ea8752a98745"
     },
     "p2kbCommunity5246": {
       "path": "deliverables/ai/P2/community/obex/objects/5246.yaml",
-      "mtime": 1764449566,
-      "sha256": "73c0759325a17c8e2082f4a3811d219a2f5775c367322edbaf2b57a859c62f36"
+      "mtime": 1782780274,
+      "sha256": "699616d605a4766fe84287f3c8d4511b640d5c04f6b4203c194d11b230585791"
     },
     "p2kbCommunity5252": {
       "path": "deliverables/ai/P2/community/obex/objects/5252.yaml",
-      "mtime": 1764449566,
-      "sha256": "a4c45b603120edfd557345796c255fcab459fb3f979d8e7f9a8f1113dcb7e4c4"
+      "mtime": 1782780274,
+      "sha256": "b446c7f5c1e11a327e7deebebd2f197e75c1b8895c93534acb80fc09a3276165"
     },
     "p2kbCommunity5259": {
       "path": "deliverables/ai/P2/community/obex/objects/5259.yaml",
-      "mtime": 1764449566,
-      "sha256": "7a60103a6a6d64db52fc06e19735b6e6a561ecd14017970d9477c634149c62d8"
+      "mtime": 1782780274,
+      "sha256": "204fd56ada9a2f6c47f096882503f20010138c3a51a61878fa6b686f420f3707"
     },
     "p2kbCommunity5274": {
       "path": "deliverables/ai/P2/community/obex/objects/5274.yaml",
-      "mtime": 1764449566,
-      "sha256": "e5c2eb15721eb8de0d97a4d966f95c2a07ae1327648f305e22f3bf7f9ed25339"
+      "mtime": 1782780274,
+      "sha256": "404a70e01015e71a4c2dddc80e298216f8ef11557989729d6a70fd849b981a6d"
     },
     "p2kbCommunity5278": {
       "path": "deliverables/ai/P2/community/obex/objects/5278.yaml",
-      "mtime": 1764449566,
-      "sha256": "d960f0a60ff0af077ab44f0c4d9eeb4d43af512f6af35aaffc0981d9851b74d9"
+      "mtime": 1782780274,
+      "sha256": "0db492256c622d9ebd7afbb307667b4f3d090a2220ee24d97857c06902a782e7"
     },
     "p2kbCommunity5281": {
       "path": "deliverables/ai/P2/community/obex/objects/5281.yaml",
-      "mtime": 1764449566,
-      "sha256": "322264ff77f942232aa765f65ff17420d481b23a0e70e13834128446b019ebe2"
+      "mtime": 1782780274,
+      "sha256": "ed33641f92d68db9085b9cec971c62e00362128582f752ff499323c8e10e3afa"
+    },
+    "p2kbCommunity5285": {
+      "path": "deliverables/ai/P2/community/obex/objects/5285.yaml",
+      "mtime": 1782780274,
+      "sha256": "88a73a430ffc2f34c9ae9098f0ee56bd6dd5689adaf8673d627af50b35eeac4d"
+    },
+    "p2kbCommunity5348": {
+      "path": "deliverables/ai/P2/community/obex/objects/5348.yaml",
+      "mtime": 1782780274,
+      "sha256": "c51204e01dab2507063cf34a988c5c227615c13af151bbf4b2490506a926d1dc"
+    },
+    "p2kbCommunity5361": {
+      "path": "deliverables/ai/P2/community/obex/objects/5361.yaml",
+      "mtime": 1782780274,
+      "sha256": "265cfa76694de009e312019417d78b85e85c7e3d3cd668c3e181900d62a65961"
+    },
+    "p2kbCommunity5401": {
+      "path": "deliverables/ai/P2/community/obex/objects/5401.yaml",
+      "mtime": 1782780274,
+      "sha256": "9b61d985d171326384fb98a5558bf2da1ab57e41fe03c61a51a4aaa6957b8ee7"
+    },
+    "p2kbCommunity5404": {
+      "path": "deliverables/ai/P2/community/obex/objects/5404.yaml",
+      "mtime": 1782780274,
+      "sha256": "224faee128223681a2336031f0c0696f93af250dbd668f47362558a1771231a0"
+    },
+    "p2kbCommunity5405": {
+      "path": "deliverables/ai/P2/community/obex/objects/5405.yaml",
+      "mtime": 1782780274,
+      "sha256": "14b76d2cbe22d6009286b59933029f2d6f4a5f8be822cb753064f9e1d681b485"
     },
     "p2kbCommunityTemplate": {
       "path": "deliverables/ai/P2/community/obex/objects/_template.yaml",
       "mtime": 1764449566,
       "sha256": "fb76c44306c98bf89f9e6497497438ad32e99b11cef32d4e367f2cc9df712887"
+    },
+    "p2kbCommunity1WireDriverWithDs18b20TemperatureSensorDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/1-wire-driver-with-ds18b20-temperature-sensor-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "52a981a79e4261b9048af59d539da9c6817644255611b9a08529d3e12dab1aa0"
+    },
+    "p2kbCommunity32ChannelAdcObject": {
+      "path": "deliverables/ai/P2/community/quick-bytes/32-channel-adc-object.yaml",
+      "mtime": 1782780274,
+      "sha256": "1ad9fcb3df53d497cd45a119b0b5487c5b377e5e26d184da10243942bbb1fc57"
+    },
+    "p2kbCommunity320x240LcdDriverForIli9341ControllerAndXpt2046TouchScreen": {
+      "path": "deliverables/ai/P2/community/quick-bytes/320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen.yaml",
+      "mtime": 1782780274,
+      "sha256": "1ac18dae02a7c4e71004e6760d55b536a3e7c468279429754b2ef5f0c5f93cb6"
+    },
+    "p2kbCommunityArloConversionToP2WithTheUniversalMotorController": {
+      "path": "deliverables/ai/P2/community/quick-bytes/arlo-conversion-to-p2-with-the-universal-motor-controller.yaml",
+      "mtime": 1782780274,
+      "sha256": "f2e9f3d29ee014cd40441d70e71bea3bdd62da38ea14a4ecc5747a139f304618"
+    },
+    "p2kbCommunityBreakoutBoardOptionsForP2": {
+      "path": "deliverables/ai/P2/community/quick-bytes/breakout-board-options-for-p2.yaml",
+      "mtime": 1782780274,
+      "sha256": "d76c413c1626cc81d3bc3208d6d0b24b8e117d27c2f17b520323f349b68cfc3e"
+    },
+    "p2kbCommunityBrushlessDcMotorControlDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/brushless-dc-motor-control-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "d852b3b463997347acc92d3e3e13f8fd866ef46387f0e7a4d3d3fb961d68be6d"
+    },
+    "p2kbCommunityColorfulTerminalOutputWithAnsiEscapeSequences": {
+      "path": "deliverables/ai/P2/community/quick-bytes/colorful-terminal-output-with-ansi-escape-sequences.yaml",
+      "mtime": 1782780274,
+      "sha256": "3248a9e7cf06af372433e1e37dbb8b013d9003f0e5cbe35248f699979a9867ee"
+    },
+    "p2kbCommunityDht11Dht22Cm2302Object": {
+      "path": "deliverables/ai/P2/community/quick-bytes/dht11-dht22-cm2302-object.yaml",
+      "mtime": 1782780274,
+      "sha256": "f2b16e84198c26647df6494f5ad6a31a6034307fd1e0e8749d186136b387df37"
+    },
+    "p2kbCommunityDigitalSampleAdcToDacAnalogFrequencyToDac": {
+      "path": "deliverables/ai/P2/community/quick-bytes/digital-sample-adc-to-dac-analog-frequency-to-dac.yaml",
+      "mtime": 1782780274,
+      "sha256": "9c9fbb3090e19ad4cb78585f77ab6c12a045a48a49cfda24ee837ad39a858411"
+    },
+    "p2kbCommunityDs3231RealTimeClockI2cDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/ds3231-real-time-clock-i2c-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "2a65c7afca8fabbb52c0ff96a3be72bb32914a59f01ee030b1df5487925f1057"
+    },
+    "p2kbCommunityDviVgaTextDriverDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/dvi-vga-text-driver-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "09c4b29f3a7ecdf53b29d2e5373bb344a09fecc68514c9c53a547dd86a4950fc"
+    },
+    "p2kbCommunityEInkDisplayDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/e-ink-display-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "969d812c8d761c8d4db4af1b66fd20f6eeb086380a25854b5744919dbf1db7e6"
+    },
+    "p2kbCommunityFiveButtonsOnOnePin": {
+      "path": "deliverables/ai/P2/community/quick-bytes/five-buttons-on-one-pin.yaml",
+      "mtime": 1782780274,
+      "sha256": "4555e7cdb5f60125dd1cc9fd5f32422bc8ae9d208a0716900df285ef44780445"
+    },
+    "p2kbCommunityFloatingPointMath": {
+      "path": "deliverables/ai/P2/community/quick-bytes/floating-point-math.yaml",
+      "mtime": 1782780274,
+      "sha256": "4df3dfa883884f3e862ff84fcd7989c301efbfb07e6f74f05a285c8f29b99f81"
+    },
+    "p2kbCommunityGoertzelOperationWithUltrasonicTransducers": {
+      "path": "deliverables/ai/P2/community/quick-bytes/goertzel-operation-with-ultrasonic-transducers.yaml",
+      "mtime": 1782780274,
+      "sha256": "70cf7250333f40709c555ac15bbc42fb983279ac9312c23865bba7ecd6bd08fd"
+    },
+    "p2kbCommunityIOTestUtilityWithLedMatrix": {
+      "path": "deliverables/ai/P2/community/quick-bytes/i-o-test-utility-with-led-matrix.yaml",
+      "mtime": 1782780274,
+      "sha256": "fe2dbca4f9efcf928b2a8bf7256208fab7ac12780179e67a35045cdd81a13e6e"
+    },
+    "p2kbCommunityI2cDeviceBusScanner": {
+      "path": "deliverables/ai/P2/community/quick-bytes/i2c-device-bus-scanner.yaml",
+      "mtime": 1782780274,
+      "sha256": "f92a50d10d2f7e7e8c55e614494475acf931f1665f2df70d8350fface798fa55"
+    },
+    "p2kbCommunityLedsBeyondTheBasics": {
+      "path": "deliverables/ai/P2/community/quick-bytes/leds-beyond-the-basics.yaml",
+      "mtime": 1782780274,
+      "sha256": "6d8c0f424c7b3636a9b981da0a50845d1da3e151b5406480207e156d377ec522"
+    },
+    "p2kbCommunityMax7219LedDisplaySpiDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/max7219-led-display-spi-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "11cdaf762024ae065712a130af3d56a972b04e194c54b6f52cbca03859a941ca"
+    },
+    "p2kbCommunityMultipleSerialPort16Object": {
+      "path": "deliverables/ai/P2/community/quick-bytes/multiple-serial-port-16-object.yaml",
+      "mtime": 1782780274,
+      "sha256": "5512cd85f2e0845556074716b163f90c6a28bf7daa5a4117d74d35f2dc830565"
+    },
+    "p2kbCommunityMultipleServoControlUpTo64Object": {
+      "path": "deliverables/ai/P2/community/quick-bytes/multiple-servo-control-up-to-64-object.yaml",
+      "mtime": 1782780274,
+      "sha256": "b7ebc9146b92fa6136f64da9b0ad405aa5ce9f87ef408a04e71a36cc2708c0bd"
+    },
+    "p2kbCommunityNmeaGpsStringParsing": {
+      "path": "deliverables/ai/P2/community/quick-bytes/nmea-gps-string-parsing.yaml",
+      "mtime": 1782780274,
+      "sha256": "d47f548e965d4169549276cec4884086596769ba6fe9277384b7de4d97043181"
+    },
+    "p2kbCommunityP2Edge16MbFlashReaderAndExplorerUtility": {
+      "path": "deliverables/ai/P2/community/quick-bytes/p2-edge-16-mb-flash-reader-and-explorer-utility.yaml",
+      "mtime": 1782780274,
+      "sha256": "f0b1a648743c8822a87300c1e69396d781e3209a2635370f489b1127ea133cf6"
+    },
+    "p2kbCommunityP2RtcAddOnBoardDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/p2-rtc-add-on-board-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "9aea23111e20768fccbc878022d21dcf765fa8db0fbed4315f92cde0bd31ce42"
+    },
+    "p2kbCommunityP2RtcAddOnWithGpsModule": {
+      "path": "deliverables/ai/P2/community/quick-bytes/p2-rtc-add-on-with-gps-module.yaml",
+      "mtime": 1782780274,
+      "sha256": "61598f0b5e571d82423a7c773f4169613ab1a643905d81e1d0b4f6ecf6b7b885"
+    },
+    "p2kbCommunityP2SimpleVideoDriverUsingImagesIntroToUsingVideo2Of3": {
+      "path": "deliverables/ai/P2/community/quick-bytes/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3.yaml",
+      "mtime": 1782780274,
+      "sha256": "adacfc2a60b61cf39a95bc2a86b766d12a6fffd9cb2dc7ff5b585b40df9ec108"
+    },
+    "p2kbCommunityPcf8574I2cLcdDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/pcf8574-i2c-lcd-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "3d379c183718f1de82bbb4bd0725ded6b2a9171358a82093df6c1d71a8a82ff2"
+    },
+    "p2kbCommunityPingUltrasonicDistanceSensorWithGraphicalDebugDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/ping-ultrasonic-distance-sensor-with-graphical-debug-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "c9c53c0baf0fc5d8c2758ab2893238b5b298880a54f4175861eac1e4b17f14dd"
+    },
+    "p2kbCommunityRotaryEncoder": {
+      "path": "deliverables/ai/P2/community/quick-bytes/rotary-encoder.yaml",
+      "mtime": 1782780274,
+      "sha256": "99dbe4652cdee5d397d50d037ff4ca6d3249a0a9c4391cf9164d9cfc812cbdd6"
+    },
+    "p2kbCommunitySendEmailFromThePropeller2UsingTheIotGatewayOnRaspberryPi": {
+      "path": "deliverables/ai/P2/community/quick-bytes/send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi.yaml",
+      "mtime": 1782780274,
+      "sha256": "a3ec5cbbe932f4f93093d07c931bdafbb2116f8b12a332c930998686cdea3b49"
+    },
+    "p2kbCommunitySimpleAnalogInput": {
+      "path": "deliverables/ai/P2/community/quick-bytes/simple-analog-input.yaml",
+      "mtime": 1782780274,
+      "sha256": "9c0f809187f8cadd34e40b7a0babb35fd9da224c14e7c74e7a3edd15788e0b34"
+    },
+    "p2kbCommunitySimpleSoundEngineDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/simple-sound-engine-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "c4ae61a7ccaab3913b3f79ea2a91ebd99cb2553d619adce4e524bb3539a55d96"
+    },
+    "p2kbCommunitySmartPinsTsl235r": {
+      "path": "deliverables/ai/P2/community/quick-bytes/smart-pins-tsl235r.yaml",
+      "mtime": 1782780274,
+      "sha256": "797a3e011c7eb1fe02a0025df93317e85e3528e8bf0440fad896e9fd374d1c25"
+    },
+    "p2kbCommunitySolarPanelMonitoringDemoIntroToUsingVideo3Of3": {
+      "path": "deliverables/ai/P2/community/quick-bytes/solar-panel-monitoring-demo-intro-to-using-video-3-of-3.yaml",
+      "mtime": 1782780274,
+      "sha256": "285be8b865c911b6667979511895015f11119ca0edef0abeda429d37af21058a"
+    },
+    "p2kbCommunityStartingYourP2ProjectWithASpin2Template": {
+      "path": "deliverables/ai/P2/community/quick-bytes/starting-your-p2-project-with-a-spin2-template.yaml",
+      "mtime": 1782780274,
+      "sha256": "8f941e3406ba1febde4d4d0e05454ef022ea2239e3628d0863a496ee272134cd"
+    },
+    "p2kbCommunityTetris": {
+      "path": "deliverables/ai/P2/community/quick-bytes/tetris.yaml",
+      "mtime": 1782780274,
+      "sha256": "b0a8405f58c80014d77a13788a4456f42a56abf4c205b6ac410ef7fa9eb95266"
+    },
+    "p2kbCommunityVideoHardwareCharacterMap": {
+      "path": "deliverables/ai/P2/community/quick-bytes/video-hardware-character-map.yaml",
+      "mtime": 1782780274,
+      "sha256": "26a36aeab2b3844bfe75b004176c6f56a3fa8b15528abe7177f7c8c42a64cfb1"
+    },
+    "p2kbCommunityVisualStudio": {
+      "path": "deliverables/ai/P2/community/quick-bytes/visual-studio.yaml",
+      "mtime": 1782780274,
+      "sha256": "bc273b427c634d020d17ac11f7fafabe52212cb5705c8c05e79418b16e2055c9"
+    },
+    "p2kbCommunityWebPageControlOfWs2811LedsUsingTheIotGatewayOnRaspberryPi": {
+      "path": "deliverables/ai/P2/community/quick-bytes/web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi.yaml",
+      "mtime": 1782780274,
+      "sha256": "44ca34007165f7e433b9019e7460a3e6511b55b021faf60cf1cc93b0ee69d22a"
+    },
+    "p2kbCommunityWirelessProgramming": {
+      "path": "deliverables/ai/P2/community/quick-bytes/wireless-programming.yaml",
+      "mtime": 1782780274,
+      "sha256": "849acfd28e727b76090d28e4526d760d8440bbfd11c16fd11b343fa145107c20"
+    },
+    "p2kbCommunityWs2811Ws2812Ws2812bWs2813Sk6812xNeopixelObject": {
+      "path": "deliverables/ai/P2/community/quick-bytes/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object.yaml",
+      "mtime": 1782780274,
+      "sha256": "cfe8f01ddf118e581c39927a8d79e91218d4750667427a02be8b13c192ee7033"
+    },
+    "p2kbCommunityXbeeRfTransparentAndApiModeDemo": {
+      "path": "deliverables/ai/P2/community/quick-bytes/xbee-rf-transparent-and-api-mode-demo.yaml",
+      "mtime": 1782780274,
+      "sha256": "b0c1e218d2b749073aa4cf5622994bfa3326b62a9f9cccfc23f40aa0e84623aa"
     },
     "p2kbGuidePasm2GettingStarted": {
       "path": "deliverables/ai/P2/guides/pasm2-getting-started.yaml",
@@ -8464,8 +9042,8 @@
     },
     "p2kbSpin2CordicSolver": {
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
-      "mtime": 1777496128,
-      "sha256": "9c12cc7e445c65e7e2139014ac4e2b2f4f895fdec56adba732f006bb0da2ea24"
+      "mtime": 1782849425,
+      "sha256": "5793cae4b46ca0d2dc455fdc74e9901f85a8a393beb439fb05762cb1862ec634"
     },
     "p2kbSpin2FloatingPoint": {
       "path": "deliverables/ai/P2/language/spin2/concepts/floating_point.yaml",
@@ -8479,13 +9057,18 @@
     },
     "p2kbSpin2MethodPointers": {
       "path": "deliverables/ai/P2/language/spin2/concepts/method-pointers.yaml",
-      "mtime": 1769203447,
-      "sha256": "608c02da87ac08721bbb9aa801a10f3630f466de4bc5f765e68525504a186834"
+      "mtime": 1782849425,
+      "sha256": "98b66d8ad8f85ad0e528891453280b15b1e23e86e3e0b7ec46cc3460a66e413c"
+    },
+    "p2kbSpin2ObjectImageDedup": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/object-image-dedup.yaml",
+      "mtime": 1782849425,
+      "sha256": "c391349e54264adc75d42c9ac6f35de9d3700d57279015912e090ddfcdfec7f4"
     },
     "p2kbSpin2ObjectArchetypes": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
-      "mtime": 1781211862,
-      "sha256": "6531a1c3debcba326cd7cd21f4d204da91c7fcd63b30f0db1ce83b5322211fb4"
+      "mtime": 1782849425,
+      "sha256": "e107550e2e0ec42f2e0d3f2ca82cb48617666b65efa6964c6fea8ac7636b3f77"
     },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
@@ -8879,8 +9462,8 @@
     },
     "p2kbSpin2KwOBJ": {
       "path": "deliverables/ai/P2/language/spin2/keywords/OBJ.yaml",
-      "mtime": 1764449566,
-      "sha256": "859d6160d47512618759d2ba037e242d86041fc50a02ed43609713fe3d4a479c"
+      "mtime": 1782849425,
+      "sha256": "1514c630a7939b2b5b3c5e81422f963fa23498ff65557d4da11777cfb47e2c82"
     },
     "p2kbSpin2KwOTHER": {
       "path": "deliverables/ai/P2/language/spin2/keywords/OTHER.yaml",
@@ -9864,8 +10447,8 @@
     },
     "p2kbSpin2OpTypedPointers": {
       "path": "deliverables/ai/P2/language/spin2/operators/typed-pointers.yaml",
-      "mtime": 1772669399,
-      "sha256": "da6edf71a299acf870b8eb39d42927df40f15e2e73094fe433016e791fcd583e"
+      "mtime": 1782849425,
+      "sha256": "bee3d8df95f7512aaf317edf5350e8e7ea1ce837dc9df5d4c10154b5013bac94"
     },
     "p2kbSpin2AnimationEngine": {
       "path": "deliverables/ai/P2/language/spin2/patterns/applications/animation_engine.yaml",

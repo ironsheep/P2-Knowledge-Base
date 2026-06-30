@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-29",
-    "last_updated": "2026-06-29T21:23:20.198811",
+    "release_date": "2026-06-30",
+    "last_updated": "2026-06-30T19:58:11.647076",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-29T21:23:20.198811",
+    "extraction_date": "2026-06-30T19:58:11.647076",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-29T21:23:20.198811",
+    "extraction_date": "2026-06-30T19:58:11.647076",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18777,11 +18777,32 @@
             "keyword": "OBJ",
             "type": "keyword",
             "category": "Block Structure",
-            "description": "Object section - declares object instances\n",
+            "aliases": [
+              "OBJ block",
+              "object instances",
+              "child object declaration",
+              "object instantiation",
+              "CON override syntax"
+            ],
+            "description": "Object section - declares instances of child objects by source filename. Each named\ninstance gives this object access to the child's public (PUB) methods and CON constants.\n",
             "syntax": "OBJ\n  name : \"filename\"\n",
+            "overrides": "A child's overridable CON constants can be set per instance at declaration with\n| CONST = value (compile-time configuration, no preprocessor):\n  OBJ\n    fast : \"timer\" | DEFAULT_PERIOD_MS = 100\n    slow : \"timer\" | DEFAULT_PERIOD_MS = 2000\nAn array of instances uses a count:  name[N] : \"filename\".\nNOTE: an override forks a separate per-instance image+DAT only if it changes the\ncompiled bytes; an override that leaves the image byte-identical is silently merged to\none shared DAT (see p2kbSpin2ObjectImageDedup). The override-and-instance semantics are\ndocumented in full under the configurable_object archetype.\n",
             "examples": [
-              "OBJ\n  serial : \"FullDuplexSerial\""
-            ]
+              "OBJ\n  serial : \"FullDuplexSerial\"\n",
+              "OBJ\n  pca[2] : \"pca9685\" | I2C_TAG = 0   ' arrayed, per-instance override\n"
+            ],
+            "related": [
+              "language/spin2/concepts/object_archetypes.yaml",
+              "language/spin2/concepts/object-image-dedup.yaml",
+              "language/spin2/keywords/VAR.yaml",
+              "language/spin2/keywords/CON.yaml"
+            ],
+            "see_also": [
+              "The override/instantiation semantics in full (configurable_object): p2kbSpin2ObjectArchetypes",
+              "When a CON override forks vs silently merges the DAT: p2kbSpin2ObjectImageDedup",
+              "Replicating an object tree onto N identical shared buses: p2kbArchSharedBusReplication"
+            ],
+            "oneliner": "OBJ declares child-object instances by filename (name : \"file\"), optionally arrayed and with per-instance | CONST = value overrides."
           },
           "CON": {
             "keyword": "CON",
@@ -19592,6 +19613,14 @@
             "name": "Typed Pointers",
             "type": "operator",
             "category": "Pointer Types",
+            "aliases": [
+              "typed pointers",
+              "struct pointer",
+              "caret pointer",
+              "externalized context",
+              "re-entrant driver state",
+              "pointer to struct"
+            ],
             "requires_version": "Spin2_v45",
             "version_directive": "{Spin2_v45}",
             "description": "Typed pointer declarations using ^BYTE, ^WORD, ^LONG, and ^structName syntax.\nPointers are 32-bit values holding memory addresses with type information\nthat enables proper pointer arithmetic and type-safe dereferencing.\nREQUIRES: {Spin2_v45} or later version directive at the start of the source file.\n\nNote: Basic pointer operations using @ (address-of) and BYTE[]/WORD[]/LONG[] \nmemory access are part of base Spin2 and do NOT require a version directive.\n",
@@ -19781,6 +19810,9 @@
               "language/spin2/concepts/addressing.yaml",
               "language/spin2/concepts/method-pointers.yaml",
               "language/spin2/idioms/memory-access.yaml"
+            ],
+            "see_also": [
+              "^struct context as Family C for N identical shared buses (caller owns N state blocks): p2kbArchSharedBusReplication"
             ],
             "oneliner": "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"
           },
