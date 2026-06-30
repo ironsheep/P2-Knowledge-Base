@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-171`**
+**Next finding ID: `F-174`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -430,6 +430,118 @@
 > the guard FAIL (proves it guards the real bug path). The central `release-yamls` pre-publish
 > hook for this guard is logged as a skill-evolution candidate (not a central-skill edit).
 > Verify: `verify-yaml-format.py` 1053/1053 clean, `validate-crossref-keys.py` all resolved.
+
+---
+
+## CORDIC ops-in-flight count — `architecture/cordic.yaml` overstates "7-8"; Silicon Doc says "several" (2026-06-30) — F-171
+
+> **Origin:** surfaced while authoring **P2AN002 "CORDIC for Real Work"** (app note),
+> sourcing the pipeline/throughput facts. Authority = **Silicon Doc v35**
+> (`engineering/ingestion/sources/silicon-doc/part3-end.txt:346-352`) + the **P2 Datasheet**
+> (`engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt:1424`). The note
+> itself is trust-chain-clean regardless of how this resolves — it cites only the two
+> sourced hard facts (54-stage pipeline, 8-clock hub slot) and mirrors the Silicon Doc's
+> "several" framing rather than any hard in-flight number.
+
+### F-171 — two published YAMLs disagree on per-cog CORDIC ops-in-flight (7-8 vs 6-7); the count is DERIVED, not spec'd, and "7-8" is unreachable — `CONFIRMED`
+> **What's wrong.** `deliverables/ai/P2/architecture/cordic.yaml` asserts **"7-8" operations
+> in flight per cog** in three places — `description` ("enabling up to 7-8 operations in
+> flight per COG", line ~9), `architecture.ops_in_flight_per_cog: "7-8 maximum"` (line ~26),
+> and `critical_usage_pattern.fill_phase: "Submit 7-8 ops before expecting results"` (line
+> ~24). The sibling `deliverables/ai/P2/language/pasm2/concepts/cordic_solver.yaml` says
+> **`max_in_flight: 6-7 operations per COG (54 / 8)`** (line ~19). They disagree, and **"7-8"
+> is not reachable**: 54 ÷ 8 = 6.75 and 55 ÷ 8 = 6.875 — at most ~7 commands can be issued
+> before the first result returns.
+>
+> **Evidence (sourced, verbatim).** Silicon Doc v35: *"Fifty-five clocks later, results will
+> be available via the GETQX and GETQY instructions… Because each cog's hub slot comes around
+> every 1/2/4/8/16 clocks (8 clocks for the current P2X8C4M64P…) and the pipeline is 54 clocks
+> long, it is possible to overlap CORDIC commands, where **several** commands are initially
+> given to the CORDIC solver, and then results are read and another command is given,
+> indefinitely…"* (`part3-end.txt:346-352`). P2 Datasheet: *"achieving up to one CORDIC result
+> every eight clocks"* (`p2-datasheet-narrative.txt:1424`). **Neither source states a hard
+> in-flight count** — the Silicon Doc says "several." Per this register's "No inference or
+> derivation" rule, both "7-8" and "6-7" are *derived*; the sibling at least shows its
+> derivation (`54 / 8`) and rounds correctly, while "7-8" rounds **up past what the math
+> allows**.
+>
+> **Proposed correction (→ yaml-knowledge-base-maintenance head).** Align
+> `architecture/cordic.yaml`'s three "7-8" occurrences to the sibling's framing — "**up to
+> ~6-7** (54-stage pipeline ÷ 8-clock hub slot)" — and present it explicitly as **derived**
+> from the two sourced hard facts, mirroring the Silicon Doc's "several." Do **not** assert
+> "8" (unreachable). No edit beyond the transparent `54 / 8` derivation already carried by the
+> sibling YAML; match the Silicon Doc's wording. Not yet applied (flagged per Stephen, 2026-06-30).
+
+---
+
+## Spin2 CORDIC concept YAML documents non-compiling built-in signatures (2026-06-30) — F-172
+
+> **Origin:** surfaced while authoring **P2AN002 "CORDIC for Real Work"**, compile-verifying
+> the Spin2 recipe code. Authority = **`pnut_ts` v1.55 compiler** (ground truth, top of this
+> register's authority order) + the **sibling per-method YAMLs** (which are already correct).
+
+### F-172 — `language/spin2/concepts/cordic_solver.yaml` documents `@pointer`-out and 2-arg CORDIC signatures that **do not compile**; per-method YAMLs are correct — `CONFIRMED`
+> **What's wrong.** The concept overview YAML's `available_methods` (and the
+> `common_patterns` block) document the coordinate-transform built-ins in the **`@pointer`-out
+> statement form** — `ROTXY(@x, @y, angle)`, `POLXY(@x, @y, angle, length)`,
+> `XYPOL(@length, @angle, x, y)` — and `QSIN`/`QCOS` in a **2-argument form**
+> `QSIN(angle, length)`. **None of these compile** under `pnut_ts` v1.55:
+> - `ROTXY(@x, @y, angle)` → `error: This instruction can only be used as an expression term,
+>   since it returns results`
+> - `QSIN($4000_0000, 1000)` → `error: Expected ","`
+>
+> The CORDIC built-ins are **multi-return functions**, not in-place `@pointer` mutators.
+>
+> **Evidence (sourced).** `pnut_ts` v1.55 compiles the multi-return forms cleanly; the
+> **sibling per-method YAMLs already document them correctly**:
+> `rotxy.yaml` → `X2, Y2 := ROTXY(X, Y, Angle)`; `polxy.yaml` → `X, Y := POLXY(Rho, Theta)`;
+> `xypol.yaml` → `Rho, Theta := XYPOL(X, Y)`; `qsin.yaml` → `y := QSIN(length, step,
+> stepsInCircle)`; `qcos.yaml` → `x := QCOS(length, step, stepsInCircle)`. So the defect is
+> **isolated to the concept overview file** — the method files are the correct authority.
+>
+> **Proposed correction (→ yaml-knowledge-base-maintenance head).** Rewrite
+> `spin2/concepts/cordic_solver.yaml`'s `available_methods` syntax + examples and the
+> `common_patterns` (`distance_calculation`, `angle_calculation` use `XYPOL(@..)`) to the
+> multi-return forms the compiler accepts and the per-method YAMLs already carry. Re-derive
+> the worked example values against the corrected forms. Authority: `pnut_ts` compile + the
+> sibling method YAMLs. Not yet applied (flagged per Stephen, 2026-06-30).
+
+---
+
+## ADC reference is local to the pin's 4-pin power domain — undocumented (2026-06-30) — F-173
+
+> **Origin:** surfaced by Stephen while reviewing the P2AN001 ADC app note — the isolated
+> 4-pin power grouping that governs which pins a multi-pin ADC measurement may share.
+> Authority = **P2 Datasheet** (pin descriptions / "Power and Analog Considerations") +
+> **Silicon Doc v35** (pin table) + our ingestion walkthrough-audit.
+
+### F-173 — the 4-pin VIO/GIO power-domain grouping and per-group ADC reference were undocumented (IOSP Ch.16 + app note + YAML) — `CONFIRMED` (IOSP + app note applied; YAML pending)
+> **The fact.** The P2 powers its I/O pins in **isolated groups of four** — pins 0–3, 4–7,
+> 8–11, …, 60–63 — each group sharing one **VIO/GIO** supply pair (an isolated supply
+> domain). A pin's ADC, when set to `P_ADC_GIO` / `P_ADC_VIO`, references **its own group's**
+> ground/supply rails. This is *why* the single-pin ratiometric measurement is absolute, and
+> it constrains multi-pin layouts: pins tied to a shared node for one measurement must sit
+> **within a single group** to share a reference domain (straddling a boundary mixes domains
+> and degrades the result).
+>
+> **Evidence (sourced).** P2 Datasheet: *"Power for smart pins in groups of 4: Pxx through
+> Pyy"*, *"Groups of 4 pins share supply for isolated domains"*, *"ADC can sample own group's
+> supply for calibration"* (`engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt:528`
+> + `…/p2-datasheet-diagram-narratives.md:94-96`). Silicon Doc v35 pin table:
+> `VIO_{x}_{y}`/`GIO_{x}_{y}` = power/ground for smart pins {x} through {y}. Boundary alignment
+> (0–3, 4–7, …) per `engineering/ingestion/sources/silicon-doc/silicon-doc-v35-walkthrough-audit.md:34-39`.
+>
+> **Where it was missing.** Not in **IOSP Ch.16** (only the `P_ADC_GIO`/`P_ADC_VIO` constants,
+> never the domain mechanism); not in **P2AN001**; not in the **published YAML**.
+>
+> **Applied 2026-06-30.** (1) **IOSP Ch.16 enriched** (owns the mechanism): §16.3 Ratiometric
+> — a "references are local to the pin's power group" paragraph; §16.6 Multi-Channel — a
+> power-domain-layout note. (2) **P2AN001 app note** — a 🔧 Hardware note (Pitfalls) + a
+> How-It-Works mention + a Recipe 2 pin-selection line citing the mechanism.
+> **→ yaml-knowledge-base-maintenance head (PENDING):** add the 4-pin power-domain grouping +
+> per-group ADC reference to the ADC mode YAML(s) (`smart-pin-11000`/`11001`/`11010`) and/or a
+> hardware pin-grouping reference, with aliases/categories for findability. No inference — cite
+> the datasheet/silicon wording above.
 
 ---
 

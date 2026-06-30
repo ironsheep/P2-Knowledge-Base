@@ -106,7 +106,7 @@ App notes use the same marker family as the manuals, so a reader moving between 
 
 App notes inherit the house formatting so code, symbols, and bit fields look identical across the documentation set.
 
-- **Instructions / directives** in prose: **bold uppercase** — "the **WXPIN** instruction."
+- **Instructions / directives** in prose: **UPPERCASE, not bold** — "the WXPIN instruction." Write the bare mnemonic in uppercase; the shared `p2kb-platform-mnemonic-bold` filter (v3.0 policy, 2026-06-29) renders mnemonics uppercase in prose and code so a prose mention and a code occurrence read as the **same** token. **Do not wrap mnemonics in `**…**`** — bold is reserved for genuine emphasis, and spending it on every mnemonic dilutes that signal ("ransom-note" effect). This matches the P2 Assembly Language Reference Manual.
 - **Symbols / constants** in monospace: `P_PWM_TRIANGLE`, `P_OE`.
 - **Bit fields**: bracket notation — `D[31:28]`, `X[15:0]`.
 - **Binary** with underscores: `%0001_0000`. **Hex** with `$`: `$8000_0000`.
@@ -151,7 +151,7 @@ App notes inherit the house formatting so code, symbols, and bit fields look ide
 - [ ] No capability claim that isn't sourced (creation guide §5)
 
 **House consistency**
-- [ ] Instructions bold-uppercase; symbols monospace; bit fields bracketed
+- [ ] Instructions UPPERCASE (not bold); symbols monospace; bit fields bracketed
 - [ ] Symbolic constants taught, not raw numbers
 - [ ] "cog" lowercase in prose
 - [ ] Every code block compiles under `pnut_ts`

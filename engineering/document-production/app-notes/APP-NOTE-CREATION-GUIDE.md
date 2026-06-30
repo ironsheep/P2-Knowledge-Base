@@ -199,7 +199,9 @@ app-notes/
 ├── README.md                       ← series index + pipeline from P1 lineage
 └── P2ANxxx/
     ├── opus-master/                ← THE canonical source (edit here, never the workspace render)
+    │   ├── front-matter.md         ← the cover (no ToC — see §6.3)
     │   └── P2ANxxx.md
+    ├── examples-library/           ← every recipe's runnable .spin2 + a README (→ source ZIP, §6.3)
     ├── P2ANxxx-NOTES.md            ← working notes: topic, source traceability, open questions
     └── audit/                      ← (added at audit time) findings + verification log
 ```
@@ -216,8 +218,13 @@ Production specifics, **settled by the P2AN001 pilot (2026-06-28)**:
 - **Code-line budget** — inherit the platform **K = 76** and the platform code-box family; do not diverge the code font.
 - **Marker authoring caveat** — the platform `mnemonic-bold` filter bolds bare PASM2/Spin2 mnemonics even in prose, and its English-word disambiguation is imperfect (it false-bolds e.g. “ones”). Avoid bare mnemonic-words as plain English in app-note prose (write “samples” not “ones”).
 - **Cross-reference filter** — clickable Chapter/§ refs (`p2kb-platform-crossref`) is the planned next adoption per the platform crossref-filter tracker (opt-in, with a visual audit).
+- **No table of contents.** App notes carry **no** `\tableofcontents` and pass **no** `--toc`/`--toc-depth` (drop both from the cloned `front-matter.md` and `request.json`). The shared platform is chapter-centric (`book` class, `tocdepth 1`); a note has only `##` sections and no `#` chapters, so a ToC renders an **empty "Contents" page**. A note is 5–20 pp and the cover's **"What You'll Build"** box already lists every recipe — that *is* the contents. (Established 2026-06-30 across P2AN001/P2AN002.)
+- **Example-library source ZIP.** Every runnable recipe is also a standalone file under the note's **`examples-library/`** (one `.spin2` per recipe + a `README.md` table), extracted verbatim from the opus-master so the download never drifts from the document. `release-manual` publishes them as **`P2ANxxx-src-<YYMMDD>.zip`** beside the PDF in `deliverables/documents/DOCs/`, with a `raw.githubusercontent.com` download link in the publication roster (the same mechanism the manuals use). The note's **Resources** section names the ZIP (no in-PDF link). Every file in `examples-library/` must compile clean under `pnut_ts` (`-d` if it uses `debug()`), same gate as the embedded blocks.
+- **Cite OBEX objects by their permanent number.** When a note references an OBEX object, give its **`OBEX #NNNN`** (the permanent object id) at every mention and in Resources — the number is the stable, searchable identifier; the slug-based URL is secondary. (Do not invent a URL; if unsure of the slug, cite the number and point the reader to `obex.parallax.com`.)
+- **Attribute sources by who actually authored them — never default everything to "Parallax Inc."** Three tiers: (1) **Parallax primary sources** (the *Propeller 2 Documentation / Silicon* v35, the *Datasheet*, the *Spin2 Language Documentation*) — cite as *(Chip Gracey, Parallax Inc.)*; these genuinely are Parallax's and the provenance must not be stripped. (2) **Companion P2 Knowledge Base manuals** (the *P2 I/O & Smart Pins User Guide*, *P2 Assembly Language Reference Manual*, *P2 Streamer Programming Guide*, *P2 Architect's Guide*, …) — name them by their canonical title as **"a companion P2 Knowledge Base publication"**; they are **not** "Parallax Inc." documents (they are joint Iron Sheep / Parallax works — see the copyright rule below). Put these in **Resources** (companion reading), and keep formal **References** to the primary sources the facts trace to. (3) **Community** (OBEX, forums) — author/handle + OBEX #.
+- **Close with the joint copyright/license back-matter** (creation-guide §4 item 14), mirroring the manual family: a **`## Copyright & License`** section — *"Copyright © <year> Iron Sheep Productions, LLC and Parallax Inc."*, CC BY-NC-ND 4.0, the Parallax trademark line — followed by **`## Acknowledgments`** (Parallax Inc., Chip Gracey, the specific community authors whose code grounded the note). The work is **jointly** Iron Sheep + Parallax; the cover already carries the *"P2 Knowledge Base Project"* branding.
 
-Code does **not** wrap; the `prepare-manual` line-length audit flags any source line wider than K. Over-long lines are an authorship defect, fixed in source.
+Code does **not** wrap; the `prepare-manual` line-length audit flags any source line wider than K. Over-long lines are an authorship defect, fixed in source. Inline code spans must be **ASCII only** (the `audit-inline-code-ascii.py` gate) — xelatex's `\lstinline` aborts on a stray `×`/`−`/`²`/`°`; use `*`, `-`, `^2`, `deg` inside `` `code` `` and keep the unicode in prose/blocks.
 
 ---
 
