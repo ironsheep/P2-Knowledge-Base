@@ -30,14 +30,14 @@ An application note sits in the gap between the reference manuals and the DeSilv
 A note takes one of two shapes. Both obey everything above; they differ only in how many builds carry the note.
 
 - **Single-build** *(the default).* One technique, one centerpiece worked program, exhausted concept-through-adaptation. The canonical structure (§4) maps to it directly: one "Build It," one "Verify," one "Adapt It." Most notes are this. *(e.g. "generate PWM with no cog overhead.")*
-- **Techniques-catalog.** One capability-*domain* taught through a **shared conceptual base** plus a small set of complete, runnable recipes the reader **selects among** by need. The P1 AN001 (Counters) genre model is this shape, and so is P2AN000 (instrumentation ADC: single-pin → 3-pin → filtered → range-extended). It is *not* a license to tour a subsystem.
+- **Techniques-catalog.** One capability-*domain* taught through a **shared conceptual base** plus a small set of complete, runnable recipes the reader **selects among** by need. The P1 AN001 (Counters) genre model is this shape, and so is P2AN001 (instrumentation ADC: single-pin → 3-pin → filtered → range-extended). It is *not* a license to tour a subsystem.
 
 Two guardrails keep a catalog an app note and not a manual chapter:
 
 1. **Shared conceptual base first.** All recipes build on **one** "The Idea / How It Works" foundation, taught once, never re-explained per recipe. The recipes vary the *application*, not the mechanism.
 2. **Every technique is a complete, verified, runnable recipe — plus a decision aid.** Each catalog entry is a build-it + verify (compiles under `pnut_ts`, shows expected output), not a described mode. A **decision table** (need → technique) gives the reader the "which one do I use" spine. If an entry is a mode description with no runnable recipe, it's manual-chapter content — cut it or move it to the manual.
 
-**Decomposition rule (both archetypes).** Foundation belongs in the **manual**; the note **applies** it. When a note needs a mechanism the manual under-documents, *enrich the manual* and have the note cite it — do not grow the note into the manual. (P2AN000 rests on the enriched I/O & Smart Pins User Guide Ch.16; the note teaches the *use*, the chapter owns the *mechanism*.)
+**Decomposition rule (both archetypes).** Foundation belongs in the **manual**; the note **applies** it. When a note needs a mechanism the manual under-documents, *enrich the manual* and have the note cite it — do not grow the note into the manual. (P2AN001 rests on the enriched I/O & Smart Pins User Guide Ch.16; the note teaches the *use*, the chapter owns the *mechanism*.)
 
 ---
 
@@ -164,7 +164,7 @@ Same family the manuals flag: "automatically," "also provides," "side effect," "
 ### 6.1 Naming & numbering
 
 - **Series prefix `P2AN` + a three-digit, zero-padded number, no separator:**
-  `P2AN000`, `P2AN001`, … This is **our** P2 series.
+  `P2AN001`, `P2AN002`, … This is **our** P2 series.
 - **P1 notes keep their bare `ANxxx`** (`AN001`–`AN019`) — that is **Parallax's
   authentic published designation**, preserved (we do not rename others'
   published documents; same provenance discipline as the trust chain). The
@@ -179,11 +179,11 @@ Same family the manuals flag: "automatically," "also provides," "side effect," "
   and organization are kept separate.
 - **The published series starts at `P2AN001`** (matching Parallax's P1
   `AN001`–`AN019`, which had no `AN000`). `P2AN000` was the *experimental
-  placeholder* — now **retired**. The existing ADC-instrumentation draft (the
-  exemplar this guide cites) **renumbers `P2AN000` → `P2AN001`**; **CORDIC is
-  `P2AN002`**. The renumber is a tracked repo-wide rename (folder + ~15 refs
+  placeholder* — now **retired**. The ADC-instrumentation draft (the
+  exemplar this guide cites) was **renumbered `P2AN000` → `P2AN001`**; **CORDIC is
+  `P2AN002`**. That renumber was a tracked repo-wide rename (folder + refs
   across app-notes, the `workspace/` render, the IOSP render, and the analysis
-  docs) — this guide's `P2AN000` citations become `P2AN001` in the same pass.
+  docs); this guide's citations are `P2AN001` accordingly.
 - **Recreations of P1 notes do *not* automatically inherit the P1 number.** A P2
   recreation of P1's `AN001` (Counters → Smart Pins) is a *new* note with its own
   `P2AN` number; the lineage is recorded in `P1-DOCUMENT-LINEAGE.md`, not encoded
@@ -210,7 +210,7 @@ The **opus-master is canonical** — the production workspace render is generate
 
 App notes are short and use the **shared P2KB platform stack** (the same `p2kb-platform-*` templates/filters the twin manuals consume), via the standard `prepare-manual` → PDF Forge path. They follow the **same Three-Folder Rule as the manuals** (see `../PDF-PRODUCTION-ARCHITECTURE.md`): authoring in `app-notes/<name>/opus-master/`, then `workspace/<name>/` + `outbound/<name>/` keyed by canonical name. The opus-master splits into `front-matter.md` (the cover) + the body file; an `assemble-manual.sh` in the workspace concatenates them (its `OPUS_MASTER` path is the bridge from the `app-notes/` tree to the shared workspace).
 
-Production specifics, **settled by the P2AN000 pilot (2026-06-28)**:
+Production specifics, **settled by the P2AN001 pilot (2026-06-28)**:
 - **Template** — a thin class template `p2kb-appnote-reference.latex` + `p2kb-appnote-local.sty` that loads the shared `p2kb-platform-foundation`/`-content` stack. Future notes clone these. The local layer carries app-note deltas only: unnumbered short-doc headings (`secnumdepth 0`), and `\newunicodechar` substitutes for the four marker emoji (⚠️/💡/🔧/🔍 — absent from IBM Plex; mapped to colored amssymb shapes, matching the platform's missing-glyph pattern).
 - **Cover** — the **same family artwork** (`book-artwork.png`) + title block as the manuals. The manuals' bottom-of-cover Parts/Chapters box is **repurposed** to an app-note **“What You'll Build”** box (the outcome + the technique list + an applies-to line) — a manual's chapter taxonomy does not fit a short, Part-less note.
 - **Code-line budget** — inherit the platform **K = 76** and the platform code-box family; do not diverge the code font.
@@ -265,4 +265,4 @@ A recreation re-derives every number against P2 silicon and notes where a P1 idi
 
 ---
 
-*Version 1.1 — adds the techniques-catalog archetype + its two guardrails and the decomposition rule (§1.1), surfaced by the P2AN000 instrumentation-ADC note. v1.0: initial app-note creation guide. Genre model: Parallax P1 application notes (AN001/004/008/013/014, ingested 2026-06-27). Pedagogical layer per §3. Companion: `APP-NOTE-VOICE-GUIDE.md`.*
+*Version 1.1 — adds the techniques-catalog archetype + its two guardrails and the decomposition rule (§1.1), surfaced by the P2AN001 instrumentation-ADC note. v1.0: initial app-note creation guide. Genre model: Parallax P1 application notes (AN001/004/008/013/014, ingested 2026-06-27). Pedagogical layer per §3. Companion: `APP-NOTE-VOICE-GUIDE.md`.*

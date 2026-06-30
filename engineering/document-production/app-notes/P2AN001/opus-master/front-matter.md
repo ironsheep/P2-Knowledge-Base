@@ -18,7 +18,7 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\large\scshape Propeller 2 \textbullet{} Application Note P2AN000\par}
+{\large\scshape Propeller 2 \textbullet{} Application Note P2AN001\par}
 \vspace{0.30cm}
 {\fontsize{30}{36}\selectfont\bfseries Measure an Absolute Voltage in Microvolts on a P2 Pin\par}
 \vspace{0.25cm}

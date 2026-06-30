@@ -19,7 +19,7 @@ to the manuals for background). See the guides below for the full contract.
 
 | AN | Topic | Status | Notes |
 |---|---|---|---|
-| **P2AN001** | Single-Pin ADC Instrumentation | drafted v0.1.0 — *renumber from legacy `P2AN000` PENDING* | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
+| **P2AN001** | Single-Pin ADC Instrumentation | drafted v0.1.0 | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
 | **P2AN002** | CORDIC for Real Work | committed — **next up** | lead of the Math family; numbered at production start |
 
 > *Series starts at `001`, Parallax-style (no `AN000`); `P2AN000` was the experimental placeholder, now retired.*

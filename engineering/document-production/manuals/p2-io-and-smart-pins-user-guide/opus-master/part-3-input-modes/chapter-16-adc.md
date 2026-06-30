@@ -208,7 +208,7 @@ PUB read_bitstream() : bits
 
 ### Ratiometric Absolute-Voltage Instrumentation
 
-The gain and filter modes above turn the pin reading into a *number*, but that number is relative to the ADC's own internal references — which themselves drift with supply and temperature. To recover an **absolute** voltage in microvolts, measure the pin against the chip's two internal references and scale ratiometrically. This is the foundation of single-pin instrumentation measurement on the P2; the complete, runnable builds live in the P2AN000 application note, so the sketch here stays minimal.
+The gain and filter modes above turn the pin reading into a *number*, but that number is relative to the ADC's own internal references — which themselves drift with supply and temperature. To recover an **absolute** voltage in microvolts, measure the pin against the chip's two internal references and scale ratiometrically. This is the foundation of single-pin instrumentation measurement on the P2; the complete, runnable builds live in the P2AN001 application note, so the sketch here stays minimal.
 
 **Read all three sources.** The ADC input can be switched among the internal ground reference (`P_ADC_GIO`), the internal supply reference (`P_ADC_VIO`), and the external pin. Absolute voltage needs **all three** — the shortcut of reading only `P_ADC_FLOAT` and the pin is far noisier, because the float point only *approximately* sits mid-supply. Read each reference from the same pin in turn, then place the pin between them:
 

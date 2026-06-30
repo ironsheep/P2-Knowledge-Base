@@ -1,6 +1,6 @@
 # Research capture — "Improved ADC Pin Techniques" (Parallax forum)
 
-Local study material for **P2AN000** (P2 instrumentation-ADC app note). Gathered 2026-06-27
+Local study material for **P2AN001** (P2 instrumentation-ADC app note). Gathered 2026-06-27
 from https://forums.parallax.com/discussion/175609/improved-adc-pin-techniques (4 pages).
 
 ## Read this first

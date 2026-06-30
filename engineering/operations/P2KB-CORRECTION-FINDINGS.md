@@ -395,7 +395,7 @@
 ## Smart-pin ADC X[5:4] encoding root-cause guard (2026-06-28) — F-170
 
 > **Origin:** surfaced by the Smart-Pin ADC Foundation sprint
-> (`engineering/planning/SMART-PIN-ADC-FOUNDATION-AND-P2AN000-SPRINT-PLAN.md` §1/§3) while
+> (`engineering/planning/SMART-PIN-ADC-FOUNDATION-AND-P2AN001-SPRINT-PLAN.md` §1/§3) while
 > studying Chip Gracey's "Improved ADC Pin Techniques" thread. Authority = Silicon Doc v35
 > (`engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:816,820-821`), confirmed
 > identical in Spin2 v55. No inference.

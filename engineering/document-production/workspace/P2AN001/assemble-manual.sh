@@ -1,5 +1,5 @@
 #!/bin/bash
-# P2AN000 Application Note Assembly Script
+# P2AN001 Application Note Assembly Script
 # Combines opus-master content (front matter + body) into a single markdown file
 # that PDF Forge consumes. Front matter (the cover) is PREPENDED to the body, the
 # same house standard the manuals use, so it flows through Pandoc + the template.
@@ -10,11 +10,11 @@
 
 set -e
 
-OPUS_MASTER="../../app-notes/P2AN000/opus-master"
-OUTPUT="P2AN000.md"
+OPUS_MASTER="../../app-notes/P2AN001/opus-master"
+OUTPUT="P2AN001.md"
 
 echo "========================================"
-echo "P2AN000 Application Note Assembly"
+echo "P2AN001 Application Note Assembly"
 echo "========================================"
 echo ""
 
@@ -26,7 +26,7 @@ fi
 # Source files, in assembly order (front matter / cover first, then the body)
 declare -a REQUIRED_FILES=(
     "front-matter.md"
-    "P2AN000.md"
+    "P2AN001.md"
 )
 
 echo "Verifying source files..."

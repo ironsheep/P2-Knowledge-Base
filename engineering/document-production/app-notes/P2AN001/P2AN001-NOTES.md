@@ -1,11 +1,11 @@
-# P2AN000 — Working Notes
+# P2AN001 — Working Notes
 
 **Status:** topic-pending (experimental first note)
 **Created:** 2026-06-27
 
 ## Purpose
 
-P2AN000 is the **first experiment** in the P2 application-note series — the note that
+P2AN001 is the **first experiment** in the P2 application-note series — the note that
 shakes out the structure (`../APP-NOTE-CREATION-GUIDE.md`) and voice
 (`../APP-NOTE-VOICE-GUIDE.md`) before the series numbering is settled. The `000` number
 is deliberate: it marks "not yet placed in the published sequence." When the topic and
@@ -30,7 +30,7 @@ for IS captured: `research/improved-adc-pin-techniques/code/EightPinADC.spin2`.
 | Claim / number / code | Source (EF ledger / P2KB key / pnut_ts / silicon) | Verified |
 |---|---|---|
 | SINC2-manual mode + diff computation | `p2kbArchSmartPin11000AdcInternalClock` (KB) | KB ✓ / compile ✓ (pnut_ts 1.55, 200 MHz, `-d`) — hardware pending |
-| GIO/VIO/pin ratiometric µV math (`muldiv64`) | IOSP Ch.16 §16.3 + forum (cgracey) STUDY §B2 | compile ✓ (P2AN000 base build) — hardware pending |
+| GIO/VIO/pin ratiometric µV math (`muldiv64`) | IOSP Ch.16 §16.3 + forum (cgracey) STUDY §B2 | compile ✓ (P2AN001 base build) — hardware pending |
 | 3-sample SINC2 flush on source switch | forum (cgracey/evanh) — STUDY §A4 | encoded in base-build `measure` routine; compile ✓ — hardware pending |
 | 15 mV absolute-error limit (resistor mismatch) | forum (cgracey, designer) — STUDY §A6 | designer-stated; not re-measured |
 | 3-pin constant-impedance ×3 (Recipe 2) | forum (cgracey/evanh) — STUDY §A5 | compile ✓ (recipe2-3pin) — hardware pending |
@@ -96,5 +96,5 @@ collapses toward 0 µV — the cheap, no-instrument sanity test the note's Verif
 
 ## Canonical source
 
-The note's markdown will live in `opus-master/P2AN000.md`. Edit there; the production
+The note's markdown will live in `opus-master/P2AN001.md`. Edit there; the production
 workspace render is generated and overwrites edits.

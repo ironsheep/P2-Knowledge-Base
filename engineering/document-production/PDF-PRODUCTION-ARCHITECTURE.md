@@ -21,7 +21,7 @@ outbound/[doc-name]/           ← STAGING FOR PDF FORGE
 | Class | Authoring tree (`<authoring-tree>/`) | Example doc-name |
 |-------|--------------------------------------|------------------|
 | Manual | `manuals/` | `p2-streamer-programming-guide` |
-| Application note | `app-notes/` | `P2AN000` |
+| Application note | `app-notes/` | `P2AN001` |
 | Datasheet | `datasheets/` | `P2-Eval-HUB75-Adapter-Datasheet` |
 
 `workspace/` and `outbound/` are **single flat trees keyed by doc-name**, shared
@@ -34,7 +34,7 @@ bridges to the shared workspace via its `assemble-manual.sh` (whose `OPUS_MASTER
 path points into the right authoring tree). App notes additionally use the shared
 `p2kb-platform-*` stack with a thin `p2kb-appnote-*` class layer (cover keeps the
 family artwork; the manuals' Parts/Chapters cover box is repurposed to an app-note
-"What You'll Build" box). P2AN000 is the pilot (2026-06-28).
+"What You'll Build" box). P2AN001 is the pilot (2026-06-28).
 
 **Canonical names** are established when a document is created and never change:
 - `p2-assembly-language-manual`

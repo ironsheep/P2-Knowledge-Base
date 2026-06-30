@@ -2,7 +2,7 @@
 
 **Source thread:** https://forums.parallax.com/discussion/175609/improved-adc-pin-techniques (4 pages, 2023-11-27 → 2024-04-07)
 **Local capture:** `thread-p1.md … thread-p4.md` (verbatim posts) + `code/` (7 attachments, verbatim) + `P2_ADC_Schematic.pdf`
-**Studied:** 2026-06-27 for P2AN000 (P2 instrumentation-ADC app note)
+**Studied:** 2026-06-27 for P2AN001 (P2 instrumentation-ADC app note)
 **Authority note:** **cgracey = Chip Gracey, the P2 silicon designer.** His statements about *why the ADC behaves as it does* and *its design limits* are near-authoritative (he designed the analog front end). Empirical performance numbers he quotes are bench results from his own rig — strong, but rig-specific, not datasheet guarantees. Everything here must still be re-derived/verified against P2 silicon + `pnut_ts` before it enters the note (trust chain).
 
 ---
@@ -148,7 +148,7 @@ All captured verbatim under `code/`. Progression of Chip's investigation:
 
 ---
 
-## 7. Implications for P2AN000 (the app note)
+## 7. Implications for P2AN001 (the app note)
 
 This thread strongly supports a **P2 instrumentation-ADC app note**: *"Read an absolute voltage in microvolts on a single P2 pin — no external ADC."* Proposed mapping onto the app-note structure (`../../APP-NOTE-CREATION-GUIDE.md`):
 

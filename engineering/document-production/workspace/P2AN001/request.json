@@ -2,8 +2,8 @@
   "format_type": "document_generation",
   "documents": [
     {
-      "input": "P2AN000.md",
-      "output": "P2AN000.pdf",
+      "input": "P2AN001.md",
+      "output": "P2AN001.pdf",
       "template": "p2kb-appnote-reference",
       "pandoc_args": [
         "--pdf-engine=xelatex",
@@ -19,7 +19,7 @@
       ],
       "metadata": {
         "title": "Measure an Absolute Voltage in Microvolts on a P2 Pin",
-        "subtitle": "Application Note P2AN000 — No External ADC",
+        "subtitle": "Application Note P2AN001 — No External ADC",
         "author": "Iron Sheep Productions, LLC",
         "version": "v0.1.0",
         "date": "June 2026"

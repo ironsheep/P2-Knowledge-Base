@@ -97,4 +97,4 @@ discipline as the manual↔YAML drain gate.
 
 **Scope.** This sprint records the *principle* (it frames the roster). The
 **schema + emit-mechanism is designed in the app-note authoring follow-on
-sprint**, piloting on the existing **P2AN000** draft.
+sprint**, piloting on the existing **P2AN001** draft.

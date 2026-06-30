@@ -41,7 +41,7 @@ set `active_element` so downstream skills stay consistent.
 | Head | Detection | "Element" the artifacts attach to |
 |------|-----------|-----------------------------------|
 | **MANUAL** | target under `engineering/document-production/manuals/<m>/` or `…/workspace/<m>/` | that manual — **publication** (in `PUBLICATION-ROSTER.md`) or **instrument** (workspace folder only, e.g. P2 Layout Torture Test; no version; state wherever it records runs — forge interactive-testing is one example, not the rule; purpose traces to the effort/sprint it serves) |
-| **APP NOTE** *(document-production)* | target under `engineering/document-production/app-notes/<n>/` | that app note — a **document-production element alongside manuals** (own doc class, own version/CHANGELOG, e.g. `P2AN000`); shares the prepare/release/audit machinery but ships as **doc + YAML companion** (see the artifact-type model below). Not a separate head. |
+| **APP NOTE** *(document-production)* | target under `engineering/document-production/app-notes/<n>/` | that app note — a **document-production element alongside manuals** (own doc class, own version/CHANGELOG, e.g. `P2AN001`); shares the prepare/release/audit machinery but ships as **doc + YAML companion** (see the artifact-type model below). Not a separate head. |
 | **YAML (KB-for-agents)** | target under `deliverables/ai/P2/` (the P2KB YAML set) | the P2KB data set |
 | **INGESTION** | target under `engineering/ingestion/sources/<src>/` | that ingestion source |
 | **OBEX** | target under `engineering/obex-integration/` (the single catalog) | the OBEX catalog — one element (`obex:catalog`); state in `obex-integration/README.md` + last-release date |

@@ -25,7 +25,7 @@
 | **AN005** GUI Graphics — Simple VGA Menus *(series 2/3)* | **G** · gui-menus | **transform** | UI/menu layer atop P2 video generation. |
 | **AN006** FAT16/FAT32 Full File System Driver | **I** · sd-fat | map | P2 **already covered in OBEX** — Chris Gadd "FAT32 SD card driver" (4269), Ray Allen "FRSW and FAT32" (4894). *Not a P2 gap.* |
 | **AN007** Soft-loading an App Image via XBee | **K** · programming-loading *(2° E·wireless)* | map | Wireless code-load; P2 Quick Bytes "Wireless Programming ESP8266 WX", "XBee RF". |
-| **AN008** Sigma-delta Analog-to-Digital Conversion | **B** · adc | **transform** | P1 sigma-delta ADC built from counters + R/C → **P2 smart-pin native ADC** (SINC/sigma-delta modes built in). *P2AN000 (ADC) in flight.* |
+| **AN008** Sigma-delta Analog-to-Digital Conversion | **B** · adc | **transform** | P1 sigma-delta ADC built from counters + R/C → **P2 smart-pin native ADC** (SINC/sigma-delta modes built in). *P2AN001 (ADC) in flight.* |
 | **AN009** Execution Time | **A** · execution-timing | evolve | Cycle-accurate timing; P2 `GETCT`/`CNT`, deterministic egg-beater hub. |
 | **AN010** Mixed Voltage Interface | **B** · pin-modes *(electrical)* | transform | Level/voltage interfacing; P2 different I/O scheme + smart-pin electricals. *(Judgment: electrical-design topic, nearest spine home is B; flag for review.)* |
 | **AN011** Simple Multicore Template | **A** · cogs-multicore | evolve | 8 cogs (P2 adds LUT RAM); structural template for parallel work. **Strong app-note candidate** (core P2 topic, no QB demo). |

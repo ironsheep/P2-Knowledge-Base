@@ -1,27 +1,27 @@
-# Workspace — P2AN000 (Application Note)
+# Workspace — P2AN001 (Application Note)
 
-Production-preparation workspace for the **P2AN000** application note. This is the
+Production-preparation workspace for the **P2AN001** application note. This is the
 first app note to go through PDF production; it establishes the app-note production
 path, which is the **same Three-Folder Rule the manuals use** (see
 `../../PDF-PRODUCTION-ARCHITECTURE.md`):
 
 ```
-app-notes/P2AN000/opus-master/   ← CONTENT AUTHORING (front-matter.md + P2AN000.md)   authoritative
-workspace/P2AN000/               ← PRODUCTION PREPARATION (this folder)
-outbound/P2AN000/                ← STAGING FOR PDF FORGE
+app-notes/P2AN001/opus-master/   ← CONTENT AUTHORING (front-matter.md + P2AN001.md)   authoritative
+workspace/P2AN001/               ← PRODUCTION PREPARATION (this folder)
+outbound/P2AN001/                ← STAGING FOR PDF FORGE
 ```
 
 ## Canonical name
 
-`P2AN000` — used identically for the workspace folder, the outbound folder, the
+`P2AN001` — used identically for the workspace folder, the outbound folder, the
 assembled `.md`, and the output PDF.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `assemble-manual.sh` | Concatenates `front-matter.md` (cover) + `P2AN000.md` (body) from the app-note opus-master into `P2AN000.md` here. |
-| `P2AN000.md` | The assembled working copy (generated — do not edit; edit opus-master). |
+| `assemble-manual.sh` | Concatenates `front-matter.md` (cover) + `P2AN001.md` (body) from the app-note opus-master into `P2AN001.md` here. |
+| `P2AN001.md` | The assembled working copy (generated — do not edit; edit opus-master). |
 | `templates/p2kb-appnote-reference.latex` | Class template — loads the shared platform stack + the app-note override. |
 | `templates/p2kb-appnote-local.sty` | App-note class override (thin: unnumbered short-doc headings). |
 | `assets/book-artwork.png` | Shared cover artwork (identical md5 across the document family). |
@@ -42,8 +42,8 @@ assembled `.md`, and the output PDF.
 
 ```
 ./assemble-manual.sh
-../../../tools/conversion/latex-escape-all.sh P2AN000.md      # or via prepare-manual
-# stage changed files to ../../outbound/P2AN000/ ; user moves outbound -> Forge
+../../../tools/conversion/latex-escape-all.sh P2AN001.md      # or via prepare-manual
+# stage changed files to ../../outbound/P2AN001/ ; user moves outbound -> Forge
 ```
 
 Prefer the `prepare-manual` skill, which runs assemble → escape → stage-only-changed.

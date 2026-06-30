@@ -34,14 +34,14 @@ Two discriminators decide placement; together they explain the whole roster.
   manual + `cordic.yaml` + Spin2 operators) and only the *applied* layer is
   missing, an **app note** is the right form. Guides are *earned*, not presumed.
 
-App notes are the **narrow, worked, task-specific** layer (the P2AN000 shape) —
+App notes are the **narrow, worked, task-specific** layer (the P2AN001 shape) —
 deliberately what the Architect's Guide refuses to give (its load-bearing
 anti-prescription rule: teach the method, never the recipe). They **complement**
 the manuals and the Guide; they never compete.
 
 ## 2. The production methodology — boundary-determination by example-mining
 
-Every roster item is produced by the **P2AN000 playbook** (proven on the ADC
+Every roster item is produced by the **P2AN001 playbook** (proven on the ADC
 foundation sprint): **locate + download source examples (OBEX / Quick Bytes /
 external) → study them → delineate** what is *foundational* (belongs in the
 owning manual) from what is *advanced technique* (becomes the app note). The
@@ -64,7 +64,7 @@ exists, so there's no app note, only enrichment).
 Each item: rank, the *belongs-here-because*, the example sources to mine, the
 owning-manual boundary, and status.
 
-### Exemplar (shipped) — **P2AN000: Single-Pin ADC Instrumentation** · v0.1.0
+### Exemplar (shipped) — **P2AN001: Single-Pin ADC Instrumentation** · v0.1.0
 The proof of the model: advanced ADC technique → app note; foundational ADC →
 IOSP Ch.16. Every item below follows its shape.
 
@@ -73,7 +73,7 @@ IOSP Ch.16. Every item below follows its shape.
 
 | # | App note | Belongs-here-because | Examples to mine | Status |
 |---|---|---|---|---|
-| A0 | **ADC Instrumentation** | *(done — P2AN000)* | 6 OBEX (SAR/ADS1118/hi-res/4-20mA) + 3 QB | ✅ v0.1.0 |
+| A0 | **ADC Instrumentation** | *(done — P2AN001)* | 6 OBEX (SAR/ADS1118/hi-res/4-20mA) + 3 QB | ✅ v0.1.0 |
 | A1 | **DAC & Analog Signal Generation** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | candidate |
 | A2 | **Frequency / Period / Pulse Measurement** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | candidate |
 
@@ -150,7 +150,7 @@ committed work.*
 Each item also emits **document-enrichment** work on its owning manual (the
 foundational fork) — tracked alongside the app note (§6). Schema for the
 app-note **YAML companion** is designed in the first authoring pass (pilot:
-P2AN000), per `APP-NOTE-DESIGN-DECISIONS.md`.
+P2AN001), per `APP-NOTE-DESIGN-DECISIONS.md`.
 
 ---
 
