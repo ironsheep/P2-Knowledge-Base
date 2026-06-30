@@ -1,0 +1,138 @@
+CON
+  _clkfreq = 200_000_000
+
+  PINA = 32                  ' three ADC pins, tied together to the node
+  PINB = 33
+  PINC = 34
+  ADC_GRP = PINA | %10_000000   ' pin group: base + 2 (three pins)
+  DAC_PIN = 35               ' loopback test-signal source (also tied)
+
+  FULLSCALE_UV = 3_300_000
+  TEST_UV      = 1_650_000
+  SUMS = 64
+
+VAR
+  long mbox[4]
+
+PUB main() | gioRef, vioRef, pinRef, uv
+  start_test_signal()
+  open_scope()
+  coginit(NEWCOG, @adc_engine, @mbox)
+
+  repeat
+    repeat until mbox[3]
+    gioRef := mbox[0]
+    vioRef := mbox[1]
+    pinRef := mbox[2]
+    mbox[3] := 0
+    uv := muldiv64(pinRef - gioRef, FULLSCALE_UV, vioRef - gioRef)
+    debug(`uV `(uv))
+
+PRI start_test_signal() | dac16
+  dac16 := muldiv64(TEST_UV, $FFFF, FULLSCALE_UV)
+  WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE)
+  WXPIN(DAC_PIN, $100)
+  PINH(DAC_PIN)
+  WYPIN(DAC_PIN, dac16)
+
+PRI open_scope()
+  debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
+  debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
+
+
+DAT             org
+
+adc_engine
+                mov     pa, #PINA
+                or      pa, #%001_000000  ' SE1 = PINA's IN rising
+                setse1  pa
+
+                fltl    #ADC_GRP          ' reset all three pins
+                wrpin   SetGio, #ADC_GRP  ' ADC mode on all three
+                wxpin   #%01_0111, #ADC_GRP   ' SINC2 filter, 128 clocks
+                dirh    #ADC_GRP          ' enable all three
+
+loop            mov     Gio, #0
+                mov     Vio, #0
+                mov     Sig, #0
+                mov     cycles, ##SUMS
+
+                ' Each sub-cycle assigns the three sources to the three pins
+                ' in a different rotation, so exactly one pin always reads
+                ' the node -> the source sees a constant impedance.
+.rotate         wrpin   SetGio, #PINA     ' A=GIO  B=VIO  C=pin
+                wrpin   SetVio, #PINB
+                wrpin   SetSig, #PINC
+                call    #measure
+                add     Gio, MsrA
+                add     Vio, MsrB
+                add     Sig, MsrC
+
+                wrpin   SetVio, #PINA     ' A=VIO  B=pin  C=GIO
+                wrpin   SetSig, #PINB
+                wrpin   SetGio, #PINC
+                call    #measure
+                add     Vio, MsrA
+                add     Sig, MsrB
+                add     Gio, MsrC
+
+                wrpin   SetSig, #PINA     ' A=pin  B=GIO  C=VIO
+                wrpin   SetGio, #PINB
+                wrpin   SetVio, #PINC
+                call    #measure
+                add     Sig, MsrA
+                add     Gio, MsrB
+                add     Vio, MsrC
+                djnz    cycles, #.rotate
+
+.publish        rdlong  pa, ptra[3]  wz
+        if_nz   jmp     #.publish
+                wrlong  Gio, ptra[0]
+                wrlong  Vio, ptra[1]
+                wrlong  Sig, ptra[2]
+                wrlong  #1, ptra[3]
+                jmp     #loop
+
+
+' Sum eight clean SINC2 differentials from all three pins at once.
+measure         mov     MsrA, #0
+                mov     MsrB, #0
+                mov     MsrC, #0
+                mov     pa, #3+8-1
+.s              waitse1
+                cmp     iter, #3  wc
+                rdpin   pb, #PINA
+                sub     pb, DiffA
+                add     DiffA, pb
+                zerox   pb, #26
+        if_nc   add     MsrA, pb
+                rdpin   pb, #PINB
+                sub     pb, DiffB
+                add     DiffB, pb
+                zerox   pb, #26
+        if_nc   add     MsrB, pb
+                rdpin   pb, #PINC
+                sub     pb, DiffC
+                add     DiffC, pb
+                zerox   pb, #26
+        if_nc   add     MsrC, pb
+                incmod  iter, pa
+        _ret_   tjnz    iter, #.s
+
+
+SetGio          long    P_ADC_GIO | P_ADC
+SetVio          long    P_ADC_VIO | P_ADC
+SetSig          long    P_ADC_1X  | P_ADC
+
+iter            long    0
+DiffA           long    0
+DiffB           long    0
+DiffC           long    0
+
+MsrA            res     1
+MsrB            res     1
+MsrC            res     1
+Gio             res     1
+Vio             res     1
+Sig             res     1
+cycles          res     1

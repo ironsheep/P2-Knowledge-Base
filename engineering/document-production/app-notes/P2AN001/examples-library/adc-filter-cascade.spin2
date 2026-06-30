@@ -1,0 +1,150 @@
+CON
+  _clkfreq = 200_000_000
+
+  ADC_PIN = 32
+  DAC_PIN = 33
+
+  FULLSCALE_UV = 3_300_000
+  TEST_UV      = 1_650_000
+
+  SUMS  = 1                   ' run the ADC flat-out; the filter averages
+  STAGE = 6                   ' which averaging stage to display (0..16)
+
+VAR
+  long Samples[17]            ' 17 averaging depths, filled by the cascade
+
+PUB main()
+  start_test_signal()
+  open_scope()
+  coginit(NEWCOG, @adc_engine, @Samples)
+  repeat
+    debug(`uV `(Samples[STAGE]))      ' deeper stage = smoother, slower
+    waitms(20)
+
+PRI start_test_signal() | dac16
+  dac16 := muldiv64(TEST_UV, $FFFF, FULLSCALE_UV)
+  WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE)
+  WXPIN(DAC_PIN, $100)
+  PINH(DAC_PIN)
+  WYPIN(DAC_PIN, dac16)
+
+PRI open_scope()
+  debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
+  debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
+
+
+DAT             org
+
+adc_engine
+                mov     SamplePtr, ptra   ' hub base of the 17-stage array
+                mov     pa, #ADC_PIN
+                or      pa, #%001_000000
+                setse1  pa
+                fltl    #ADC_PIN
+                wrpin   SetSig, #ADC_PIN
+                wxpin   #%01_0111, #ADC_PIN
+                dirh    #ADC_PIN
+
+loop            mov     Gio, #0
+                mov     Vio, #0
+                mov     Sig, #0
+                mov     cycles, ##SUMS
+
+.rotate         wrpin   SetGio, #ADC_PIN
+                call    #measure
+                add     Gio, MsrA
+                wrpin   SetVio, #ADC_PIN
+                call    #measure
+                add     Vio, MsrA
+                wrpin   SetSig, #ADC_PIN
+                call    #measure
+                add     Sig, MsrA
+                djnz    cycles, #.rotate
+
+                call    #compute          ' Gio/Vio/Sig -> one uV sample
+                call    #filter           ' fan it out across the 17 stages
+                jmp     #loop
+
+
+measure         mov     MsrA, #0
+                mov     pa, #3+8-1
+.s              waitse1
+                cmp     iter, #3  wc
+                rdpin   pb, #ADC_PIN
+                sub     pb, DiffA
+                add     DiffA, pb
+                zerox   pb, #26
+        if_nc   add     MsrA, pb
+                incmod  iter, pa
+        _ret_   tjnz    iter, #.s
+
+
+' Ratiometric uV via CORDIC: r = ABS(Sig-Gio)<<32 / ((Vio-Gio)<<1),
+' then sample = r * (3_300_000<<1) >> 32. ABS+<<1 admit Sig<Gio and Sig>Vio.
+compute         mov     pa, Sig
+                sub     pa, Gio
+                abs     pa  wc
+                mov     pb, Vio
+                sub     pb, Gio
+                shl     pb, #1
+                qfrac   pa, pb
+                getqx   pa
+                qmul    pa, ##3_300_000<<1
+                getqy   pa
+        if_c    neg     pa
+        _ret_   mov     sample, pa
+
+
+' N-stage time-halving filter. Stage 0 is the raw sample; stage N is the
+' average of two stage-(N-1) samples, emitted every 2^N periods. A bit-
+' reversed counter picks which one stage to update this period, so the whole
+' cascade costs near-constant time and the ADC never slows down.
+filter          mov     fb+0, fa+0        ' shift sample into stage 0
+                mov     fa+0, sample
+                wrlong  sample, SamplePtr ' stage 0 written every period
+
+                add     fctr, #1          ' choose the stage to update
+                mov     fenc, fctr
+                rev     fenc
+                encod   fenc
+                subr    fenc, #31
+                cmp     fenc, #16  wc
+        if_nc   ret                       ' nothing due this period
+
+                alts    fenc, #fa+1       ' shift old sample within stage N
+                mov     pa, 0-0
+                altd    fenc, #fb+1
+                mov     0-0, pa
+                alts    fenc, #fa+0       ' add the two stage-(N-1) samples
+                mov     pa, 0-0
+                alts    fenc, #fb+0
+                add     pa, 0-0
+                altd    fenc, #fa+1       ' save the new stage-N sample
+                mov     0-0, pa
+                sar     pa, fenc          ' divide by 2^(N+1)
+                sar     pa, #1  wc
+                addx    pa, #0
+                add     fenc, #1          ' write stage N to hub
+                shl     fenc, #2
+                add     fenc, SamplePtr
+        _ret_   wrlong  pa, fenc
+
+
+SetGio          long    P_ADC_GIO | P_ADC
+SetVio          long    P_ADC_VIO | P_ADC
+SetSig          long    P_ADC_1X  | P_ADC
+
+iter            long    0
+DiffA           long    0
+fctr            long    0
+
+SamplePtr       res     1
+MsrA            res     1
+Gio             res     1
+Vio             res     1
+Sig             res     1
+cycles          res     1
+sample          res     1
+fenc            res     1
+fa              res     17
+fb              res     17

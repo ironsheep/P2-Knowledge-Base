@@ -1,0 +1,113 @@
+CON
+  _clkfreq = 200_000_000
+
+  ADC_PIN  = 32              ' pin under measurement (jumper from DAC_PIN)
+  DAC_PIN  = 33              ' loopback test-signal source
+
+  FULLSCALE_UV = 3_300_000   ' VIO full scale, in microvolts
+  TEST_UV      = 1_650_000   ' loopback target: ~half scale (~1.65 V)
+
+  SUMS = 64                  ' source rotations summed per reading
+                             '   raise for resolution, lower for rate
+
+VAR
+  long mbox[4]               ' cog<->Spin2: [0]Gio [1]Vio [2]Sig [3]flag
+
+PUB main() | gioRef, vioRef, pinRef, uv
+  start_test_signal()        ' harness: drive a known voltage onto the pin
+  open_scope()               ' harness: DEBUG SCOPE, scaled in microvolts
+  coginit(NEWCOG, @adc_engine, @mbox)        ' start the ADC cog
+
+  repeat
+    repeat until mbox[3]     ' wait for a fresh reading
+    gioRef := mbox[0]
+    vioRef := mbox[1]
+    pinRef := mbox[2]
+    mbox[3] := 0             ' acknowledge; release the cog
+
+    ' Ratiometric: where does the pin sit between GIO and VIO?
+    ' (mechanism: I/O & Smart Pins User Guide, Ch. 16)
+    uv := muldiv64(pinRef - gioRef, FULLSCALE_UV, vioRef - gioRef)
+
+    debug(`uV `(uv))         ' stream the reading to the scope
+
+PRI start_test_signal() | dac16
+  ' Drive DAC_PIN to a steady, known voltage so a jumper to ADC_PIN
+  ' gives the ADC something real to read with no external gear. This
+  ' is a functional (loopback) check: it proves the code, not accuracy.
+  dac16 := muldiv64(TEST_UV, $FFFF, FULLSCALE_UV)    ' uV -> 16-bit DAC
+  WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE)
+  WXPIN(DAC_PIN, $100)       ' 256-clock DAC period (minimum)
+  PINH(DAC_PIN)              ' enable the smart pin first
+  WYPIN(DAC_PIN, dac16)      ' then set the output level
+
+PRI open_scope()
+  debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
+  debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
+
+
+DAT             org
+
+adc_engine
+                mov     pa, #ADC_PIN
+                or      pa, #%001_000000  ' SE1 = this pin's IN rising
+                setse1  pa
+
+                fltl    #ADC_PIN          ' reset the smart pin
+                wrpin   SetSig, #ADC_PIN  ' ADC mode, pin selected
+                wxpin   #%01_0111, #ADC_PIN   ' SINC2 filter, 128 clocks
+                dirh    #ADC_PIN          ' enable the smart pin
+
+loop            mov     Gio, #0           ' clear the three accumulators
+                mov     Vio, #0
+                mov     Sig, #0
+                mov     cycles, ##SUMS
+
+.rotate         wrpin   SetGio, #ADC_PIN  ' internal ground reference
+                call    #measure
+                add     Gio, MsrA
+                wrpin   SetVio, #ADC_PIN  ' internal supply reference
+                call    #measure
+                add     Vio, MsrA
+                wrpin   SetSig, #ADC_PIN  ' the external pin
+                call    #measure
+                add     Sig, MsrA
+                djnz    cycles, #.rotate
+
+.publish        rdlong  pa, ptra[3]  wz   ' wait until Spin2 took it
+        if_nz   jmp     #.publish
+                wrlong  Gio, ptra[0]
+                wrlong  Vio, ptra[1]
+                wrlong  Sig, ptra[2]
+                wrlong  #1, ptra[3]       ' fresh reading is ready
+                jmp     #loop
+
+
+' Sum eight clean SINC2 differentials from the selected source. The
+' first 3 samples after a source switch are contaminated (2 for the
+' SINC2 filter, 1 for the front end to settle); the 4th is clean.
+measure         mov     MsrA, #0
+                mov     pa, #3+8-1        ' 3 settling + 8 summed
+.s              waitse1                   ' wait for the next sample
+                cmp     iter, #3  wc      ' iter < 3 -> still settling
+                rdpin   pb, #ADC_PIN      ' read the SINC2 accumulator
+                sub     pb, DiffA         ' differential vs last read
+                add     DiffA, pb         ' update running accumulator
+                zerox   pb, #26           ' keep the 27-bit result
+        if_nc   add     MsrA, pb          ' sum only clean samples
+                incmod  iter, pa
+        _ret_   tjnz    iter, #.s
+
+
+SetGio          long    P_ADC_GIO | P_ADC ' internal ground reference
+SetVio          long    P_ADC_VIO | P_ADC ' internal supply reference
+SetSig          long    P_ADC_1X  | P_ADC ' external pin, 1x gain
+
+iter            long    0
+DiffA           long    0
+
+MsrA            res     1
+Gio             res     1
+Vio             res     1
+Sig             res     1
+cycles          res     1

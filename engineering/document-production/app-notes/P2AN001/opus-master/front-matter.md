@@ -72,8 +72,4 @@ techniques you choose among by what your project needs:
 
 \clearpage
 \pagestyle{fancy}
-
-\tableofcontents
-
-\clearpage
 ```

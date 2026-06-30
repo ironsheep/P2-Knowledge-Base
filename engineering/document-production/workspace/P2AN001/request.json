@@ -6,9 +6,7 @@
       "output": "P2AN001.pdf",
       "template": "p2kb-appnote-reference",
       "pandoc_args": [
-        "--pdf-engine=xelatex",
-        "--toc",
-        "--toc-depth=2"
+        "--pdf-engine=xelatex"
       ],
       "lua_filters": [
         "p2kb-platform-figures",
