@@ -51,6 +51,8 @@ against these, per policy §5). 🏆 = Chip Gracey authoritative; 🟢 = credibl
 | A5 | Crystal `%CC` cap modes shift ppm → duty aperture-walk; `%10/%11` pF value **contested** (Chip 7.5/15 vs jmg 15/30) | accuracy caveat | 🏆 ⚠️ (verify vs Silicon Doc) |
 | A6 | TSL235R light-to-frequency Quick-Byte drivers as a related measure source | related-links | 🟢 |
 
+**Status (2026-07-01) — RECONCILED into P2AN002/P2AN004 opus-masters.** A1 already present (reciprocal + `muldiv64` core; MULDIV64 prose ripple in commit 9f5473e7). A2/A3/A5 folded as method-selection & accuracy notes (range below ½ sysclk; averages so does not measure jitter; reading only as accurate as clkfreq — no contested pF/ceiling figures cited). A6 already in Resources. **A4 `ticks-1` NOT adopted** — the correction's rationale is unverified in-thread; our formula `MULDIV64(periods, clkfreq, ticks)` is the correct reciprocal form and stays. C1/C2/C3 folded into the "Going Further" FFT paragraph (butterfly = one QROTATE; pipelined; 79-long ~3 ms / hand-tuned ~700 µs @250 MHz). C4 folded as a library pointer (**OBEX #5361** SaucySoliton FFT/IFFT — real-input, windowing, radix-4 digit reversal) rather than a full DSP appendix, matching the note's pointer-altitude scope. Both notes remain v0.1.0 drafts (uncommitted at time of writing).
+
 ### → P2AN002 (CORDIC for Real Work)
 | # | Finding | Action | Trust |
 |---|---------|--------|-------|
