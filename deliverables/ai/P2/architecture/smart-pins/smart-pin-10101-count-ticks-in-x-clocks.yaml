@@ -16,7 +16,7 @@ detailed_description:
     (P_COUNTER_PERIODS) on the same signal, with the same X window. Because all concurrent
     measurements span the same period-aligned window, downstream math is exact:
       duty cycle = highs / ticks       (pair with %10110)
-      frequency  = periods * clkfreq / ticks   (pair with %10111)
+      frequency  = MULDIV64(periods, clkfreq, ticks)   (pair with %10111; 64-bit, no overflow)
   
   timing: |
     Window length is AT LEAST X clock cycles, extending to complete the in-progress A-period

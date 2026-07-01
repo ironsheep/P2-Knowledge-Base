@@ -47,21 +47,22 @@ code_examples:
     code: |
       CON
         _clkfreq = 200_000_000
-        base_pin = 20                            ' Both pins observe the same signal
+        base_pin = 20                            ' Signal on base_pin+0; cell +1 routes to it
         window_ms = 50
       
       PUB main() | ticks, highs, duty_pct, window_clks
         window_clks := (_clkfreq / 1000) * window_ms
       
-        ' Start both pins on the same window; matched timing is essential
+        ' Start both cells on the same window; matched timing is essential.
+        ' Signal is on base_pin+0; cell +1 watches it via P_MINUS1_A (no extra wiring).
         pinstart(base_pin+0, P_COUNTER_HIGHS, window_clks, %00)
-        pinstart(base_pin+1, P_COUNTER_TICKS, window_clks, %00)
+        pinstart(base_pin+1, P_COUNTER_TICKS | P_MINUS1_A, window_clks, %00)
       
         repeat
           repeat until pinread(base_pin+0) and pinread(base_pin+1)
           highs    := rdpin(base_pin+0)          ' Clocks A was high during window
           ticks    := rdpin(base_pin+1)          ' Actual elapsed clocks (>= window_clks)
-          duty_pct := (highs * 100) / ticks      ' Exact duty cycle
+          duty_pct := MULDIV64(highs, 100, ticks)  ' Exact duty cycle (64-bit)
           debug("Duty: ", udec(duty_pct), "%")
       
       DAT

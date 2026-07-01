@@ -90,13 +90,15 @@ code_examples:
       PUB main() | periods, ticks, highs, freq, duty, window_clks
         window_clks := (_clkfreq / 1000) * window_ms
         
-        ' Three pins, same period-aligned window, started together for matched timing
+        ' Three cells, same period-aligned window, started together for matched timing.
+        ' The signal is on pin_base+0 only; the other two cells watch it via A-input
+        ' routing (P_MINUS1_A / P_MINUS2_A), so no extra wiring and the pins stay free.
         ' Pin 20: count complete A-periods within the window
         pinstart(pin_base+0, P_COUNTER_PERIODS, window_clks, %00)
         ' Pin 21: measure actual elapsed ticks (>= window_clks, period-extended)
-        pinstart(pin_base+1, P_COUNTER_TICKS, window_clks, %00)
+        pinstart(pin_base+1, P_COUNTER_TICKS | P_MINUS1_A, window_clks, %00)
         ' Pin 22: measure total clocks A was high during the same window
-        pinstart(pin_base+2, P_COUNTER_HIGHS, window_clks, %00)
+        pinstart(pin_base+2, P_COUNTER_HIGHS | P_MINUS2_A, window_clks, %00)
         
         repeat
           ' Wait for all three measurements to complete
@@ -107,8 +109,8 @@ code_examples:
           highs   := rdpin(pin_base+2)           ' Clocks A was high during window
           
           ' Exact results - all three measurements span the SAME period-aligned window
-          freq := (periods * _clkfreq) / ticks   ' freq = periods / (ticks/clkfreq)
-          duty := (highs * 100) / ticks          ' duty = high-time / elapsed-time
+          freq := MULDIV64(periods, _clkfreq, ticks)  ' 64-bit product avoids overflow
+          duty := MULDIV64(highs, 100, ticks)         ' high-time / elapsed-time (percent)
           
           debug("Freq: ", udec(freq), "Hz, Duty: ", udec(duty), "%")
 

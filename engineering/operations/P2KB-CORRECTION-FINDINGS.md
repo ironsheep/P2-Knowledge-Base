@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-186`**
+**Next finding ID: `F-189`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -731,6 +731,47 @@
 > The 32 missing legal P_* constants were added to `spin2-builtin-symbols-complete.yaml`,
 > v55-sourced + compiler-certified, and ship in the same release as the fictitious-name fixes.
 > See the F-182 entry above for detail.
+
+## Chip Gracey forum-thread reconciliation (2026-07-01) — F-186…F-188
+
+> **Origin.** Reconciliation of the "Reciprocal Counter Demo" forum thread (170882) —
+> authored by Chip Gracey (`cgracey`, P2 designer, 🏆) — against the I/O & Smart Pins User
+> Guide and the served smart-pin YAMLs. Full ingestion + queue:
+> `engineering/ingestion/external-inputs/forum-threads/`. Both audiences fixed in one pass
+> (manual reader + YAML-consuming agent). Also applied this pass (reader enrichment, not a
+> defect): the ADC self-bias / no-mic-bias-divider note in IOSP Ch.16 Example 2.
+
+### F-186 — 32-bit overflow in smart-pin frequency/duty math (manual + YAML) — `DONE (2026-07-01)`
+> **CONFIRMED (Chip Gracey 🏆 + MULDIV64 KB semantics + arithmetic).** Frequency/duty were
+> computed as 32-bit `(periods * clkfreq) / ticks` (and `(highs * 100) / ticks`), which
+> overflows for any real signal (100 periods times 200 MHz = 2e10, past 2^32). Chip's thread
+> flags the 64-bit-intermediate requirement. **Fixed to `MULDIV64(...)`** (a real Spin2
+> built-in, already used in IOSP Ch.16:227) at every site:
+> - manual `chapter-15-period-frequency.md` — 12 sites (§15.2/§15.4/§15.6 code + §15.9
+>   formulas) + a teach-once "compute with MULDIV64" note in §15.1; plus
+>   `examples-library/ch15-oscillator-calibration.spin2` (pnut-ts clean).
+> - YAML `smart-pin-10101/10110/10111-*.yaml` — freq + duty compute lines.
+> Code-line (K=76) + inline-ASCII gates pass; crossrefs validate. Ships: manual in the IOSP
+> release; YAML in the next KB release-yamls pass.
+
+### F-187 — concurrent-measurement example silently needs the signal on every pin — `DONE (2026-07-01)`
+> **CONFIRMED (Chip Gracey 🏆; routing constants compiler-verified).** The 3-cell (and 2-cell)
+> concurrent frequency/duty examples configured each cell with `%00` on separate pins, which
+> only works if the signal is physically wired to all of them — otherwise the extra cells' IN
+> flags never rise and the `REPEAT UNTIL` hangs. Chip's thread notes the cells can watch one
+> signal pin via A-input routing without consuming pins. **Added the single-pin routing
+> technique** (`P_MINUS1_A` / `P_MINUS2_A`) to IOSP §15.4 and to the `smart-pin-10110/10111`
+> YAML examples, with signal placement clarified.
+
+### F-188 — same 32-bit overflow class in OUTPUT-mode unit conversions — `NEEDS-VERIFICATION`
+> **OBSERVED while sweeping for F-186 (different domain — NOT yet fixed).** The
+> `(a * clkfreq) / 1_000_000` microseconds-to-clocks idiom overflows the same way for
+> realistic inputs:
+> - `architecture/smart-pins/smart-pin-00111-nco-duty.yaml:76` — `(us_width * _clkfreq / 1_000_000) * (...)` (us_width >= 22 overflows before the divide)
+> - `language/spin2/patterns/applications/motor_controller.yaml:11` — `wypin(angle * clkfreq / 1_000_000, pin)`
+> These belong to the NCO/PWM output-mode reconciliation (Ch.8/9), not the frequency wave.
+> Verify the intended value ranges, then fix (MULDIV64, or `clkfreq / 1_000_000` first) in that
+> wave. Do not ship the overflow idiom.
 
 ---
 
