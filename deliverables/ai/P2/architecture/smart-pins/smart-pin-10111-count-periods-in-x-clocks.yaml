@@ -52,7 +52,7 @@ code_examples:
         window_clks := (_clkfreq / 1000) * window_ms
         
         ' Count periods in ~100ms windows
-        pinstart(signal_pin, P_COUNTER_PERIODS | P_B_A_INPUT, window_clks, %00)
+        pinstart(signal_pin, P_COUNTER_PERIODS, window_clks, %00)
         
         repeat
           repeat until pinread(signal_pin)       ' Wait for measurement complete
@@ -68,7 +68,7 @@ code_examples:
       ' PASM2 example - precise frequency measurement
         org
         dirl    #signal_pin                      ' Reset smart pin
-        wrpin   ##P_COUNTER_PERIODS | P_B_A_INPUT, #signal_pin
+        wrpin   ##P_COUNTER_PERIODS, #signal_pin
         wxpin   ##clkfreq, #signal_pin           ' 1-second minimum window
         wypin   #%00, #signal_pin                ' Rise to rise
         dirh    #signal_pin                      ' Start measurement
@@ -92,11 +92,11 @@ code_examples:
         
         ' Three pins, same period-aligned window, started together for matched timing
         ' Pin 20: count complete A-periods within the window
-        pinstart(pin_base+0, P_COUNTER_PERIODS | P_B_A_INPUT, window_clks, %00)
+        pinstart(pin_base+0, P_COUNTER_PERIODS, window_clks, %00)
         ' Pin 21: measure actual elapsed ticks (>= window_clks, period-extended)
-        pinstart(pin_base+1, P_COUNTER_TICKS   | P_B_A_INPUT, window_clks, %00)
+        pinstart(pin_base+1, P_COUNTER_TICKS, window_clks, %00)
         ' Pin 22: measure total clocks A was high during the same window
-        pinstart(pin_base+2, P_COUNTER_HIGHS   | P_B_A_INPUT, window_clks, %00)
+        pinstart(pin_base+2, P_COUNTER_HIGHS, window_clks, %00)
         
         repeat
           ' Wait for all three measurements to complete
@@ -128,7 +128,7 @@ configuration_constants:
   mode_constant: "P_COUNTER_PERIODS"
   binary_value: "%10111"
   common_modifiers:
-    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
     - "P_FILT1_AB - Add filtering for noise immunity"

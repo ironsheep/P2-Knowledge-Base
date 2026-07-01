@@ -337,24 +337,24 @@ protocol_timing_examples:
 
 timing_measurement_techniques:
   using_counters: |
-    ' Measure pin-to-pin delay
-    WRPIN   ##P_TRANSITION_OUTPUT, #0  ' Setup pin 0
-    WRPIN   ##P_TRANSITION_INPUT, #1   ' Setup pin 1
-    DIRH    #0                          ' Enable output
-    DIRH    #1                          ' Enable input
+    ' Measure pin-to-pin propagation delay (plain GPIO + system counter)
+    FLTL    #0                          ' Pin 0: output driver, start low
+    DIRL    #1                          ' Pin 1: plain input
+    DIRH    #0                          ' Enable pin 0 output
     
-    GETCT   start_time
-    OUTH    #0                          ' Drive high
-    WAITPEQ #1, #1                      ' Wait for input high
-    GETCT   end_time
-    SUB     end_time, start_time       ' Delay in clocks
+    GETCT   start_time                  ' Timestamp before the edge
+    DRVH    #0                          ' Drive pin 0 high
+    wait_hi TESTP   #1          WC       ' Sample pin 1 input
+      if_nc JMP     #wait_hi             ' Loop until pin 1 sees the high
+    GETCT   end_time                    ' Timestamp after
+    SUB     end_time, start_time        ' Delay in clocks
   
   using_smart_pins: |
-    ' Use smart pin to measure pulse width
-    WRPIN   ##P_PULSE_MEASURE, #0
-    WXPIN   #0, #0                      ' Continuous mode
+    ' Measure pulse width with a smart pin (counts clocks while input is high)
+    WRPIN   ##P_HIGH_TICKS, #0          ' Pin 0: time-A-highs mode
+    WXPIN   #0, #0                      ' Continuous measurement
     DIRH    #0                          ' Start measuring
-    ' Pulse width appears in Z register
+    RDPIN   width, #0                   ' Read high-time (pulse width in clocks)
 
 compensation_techniques:
   trace_delay_compensation:

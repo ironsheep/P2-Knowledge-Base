@@ -20,6 +20,16 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.13.1] - 2026-07-01
+
+**Complete, compiler-verified constant coverage across the smart-pin, streamer, and pin-configuration examples**
+
+### Added
+- Pin-configuration constants: the full set of WRPIN input/output configuration symbols — A/B input selection and combining, logic/Schmitt/level input modes, synchronous I/O, IN and output inversion, and drive-strength control — documented with values and bit patterns.
+
+### Changed
+- Every `P_*` and `X_*` constant across the smart-pin, streamer, and timing-measurement examples is a symbol the P2 compiler defines, so the examples compile exactly as shown.
+
 ## [1.13.0] - 2026-06-30
 
 **Architecture decomposition layer gains a streaming domain, shared-bus patterns, and a sharper evaluation toolkit**

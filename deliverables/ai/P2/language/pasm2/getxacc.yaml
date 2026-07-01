@@ -47,7 +47,7 @@ examples:
       cmp     x_val, threshold  wc  ' Compare to threshold
     notes: For simple detection, magnitude approximation may suffice
 goertzel_usage:
-  setup: "Configure streamer in DDS/Goertzel mode (X_DDS_GOERTZEL)"
+  setup: "Configure streamer in DDS/Goertzel mode (X_DDS_GOERTZEL_SINC1 / X_DDS_GOERTZEL_SINC2)"
   target_frequency: "Set via SETXFRQ to match tone being detected"
   sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"
   output: "X,Y are complex Goertzel output (real/imaginary)"

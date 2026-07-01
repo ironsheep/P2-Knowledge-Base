@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-174`**
+**Next finding ID: `F-186`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -560,6 +560,177 @@
 > `power_domain` block + `related`/`see_also` pointing to it in all three ADC mode YAMLs
 > (`smart-pin-11000`/`11001`/`11010`); also fixed a pre-existing `adc_pin`->`adc_base`
 > compile bug in 11000's multi-channel example while in that file.
+
+---
+
+## USB mode %11011 code examples omit P_OE — won't drive the bus (2026-06-30) — F-174
+
+> **Origin:** surfaced by the IOSP Release Campaign §1a USB boundary-mining pass
+> (`mine-and-delineate` fan-out). Hand-verified against two independent OBEX USB drivers
+> (host #4198 USBnew / Wuerfel_21, device #4727 / Chris Gadd), IOSP Ch.19, and the WRPIN
+> encoding. Distinct from **G-004** (which enriched the X/Y/Z register *documentation* in
+> the same file); this is a defect in the file's *code examples*.
+
+### F-174 — `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` code examples set the USB mode **without `P_OE`**, so as written they never drive the bus — `DONE (2026-07-01)`
+> **APPLIED 2026-07-01.** Both active-port examples now use `P_USB_PAIR | P_OE` — Spin2 `pinstart(usb_dm…, P_USB_PAIR | P_OE, …)` (2 sites) + PASM `usb_mode long P_USB_PAIR | P_OE` (symbolic, per the show-code-constants convention). Verified vs `wrpin.yaml` (`P_OE`=$40=bit 6), OBEX #4198 `USB_V2_DRVOUT`/#4727, IOSP Ch.19 output-control table, and `pnut-ts` compile. **Donor fixed too** (`…/mode-11011-usb-host-device/smart-pin-11011-usb-host-device-concise.yaml`, 3 sites) so a regenerate stays reseed-safe. Evidence-scoped: defect isolated to this one file — every other `%..._00_11011_0` is the correct bare `P_USB_PAIR` constant definition, left untouched.
+> **The defect.** Every code example in the file configures the USB pair with the bare mode
+> and no output-enable bit:
+> - PASM `code_examples[0]`: `usb_mode long %0000_0000_000_000000_0000000_00_11011_0` —
+>   bits[7:6]=`00`, so **bit 6 (`P_OE`=$40) is clear**. The pin pair is configured but the
+>   driver is disabled, so it cannot drive D+/D− (this is the *sniffer/monitor* configuration,
+>   `%0_11011_0`, not an active port).
+> - Spin2 `code_examples[0]` and `[1]`: `pinstart(usb_dm…, P_USB_PAIR, …)` — `P_OE` is not
+>   OR'd into the mode argument either.
+>
+> **Why it's wrong.** An active USB host or device must drive the bus. Both real-world drivers
+> and IOSP Ch.19 (§19.2/§19.7/§19.10) configure an active port as **`P_USB_PAIR | P_OE`**
+> (`%1_11011_0`); output drive is disabled only for a passive sniffer. As written, none of the
+> examples would communicate.
+>
+> **Evidence (sourced, no inference).** WRPIN D-field `…_TT_MMMMM_0`: mode `M=%11011` at
+> bits[5:1]; `P_OE` is bit 6 (`$40`) — clear in the example. IOSP Ch.19 "Output Control" table:
+> `%1_11011_0` = output enabled, `%0_11011_0` = sniffer. OBEX #4198 `USB_V2_DRVOUT` and #4727
+> `mode` both set `P_USB_PAIR | P_OE` for the active port. `pinstart` passes its mode argument
+> straight to WRPIN, so the Spin2 calls inherit the same omission.
+>
+> **Proposed correction (for `yaml-knowledge-base-maintenance`).** In the active-port examples,
+> set output enable: PASM `usb_mode long P_USB_PAIR | P_OE` (or the explicit
+> `%0000_0000_000_000000_0000000_01_11011_0`), and Spin2 `pinstart(usb_dm…, P_USB_PAIR | P_OE,
+> …)`. If an example is genuinely intended as a passive bus sniffer, **label it as such** and
+> keep `P_OE` clear deliberately (with a comment) — but `code_examples[0]` "USB Pin Pair
+> Configuration" is plainly an active port and must enable output.
+>
+> **⚠️ Donor-reseed caveat (`reference_p2kb_yaml_donor_reseed`).** This is a *published*
+> deliverable YAML; per the known donor-reseed trap it was likely seeded from an ingestion
+> "concise donor". Fixing only the published copy will be re-overwritten on regenerate — locate
+> and fix the **donor** too, then verify donor == published == any sibling == source.
+>
+> **Drain-gate note.** This is an actionable YAML correction. The IOSP Release Campaign §4
+> release-depth re-audit requires the corrections-register drain gate to be GREEN, so **F-174
+> must be resolved before IOSP releases.**
+
+---
+
+## Smart-pin example defects surfaced during app-note authoring (2026-06-30) — F-175…F-176
+
+> **Origin:** surfaced while authoring P2AN003 (DAC) and P2AN004 (measurement) app notes
+> against the KB — the drafting agents hit two published smart-pin `code_examples` that do not
+> compile / cannot work as written, and used the KB-validated idiom instead (no note shipped the
+> broken code). Both are **set-wide** (span multiple mode YAMLs). Verified against `pnut-ts` v1.55
+> and the `pinread.yaml` authority. Both carry the **donor-reseed caveat** (published deliverable
+> YAMLs — fix any ingestion donor too, per `reference_p2kb_yaml_donor_reseed`).
+
+### F-175 — smart-pin examples wait on the IN flag with a broken mask `PINREAD(pin) & $8000_0000` (single-pin PINREAD returns 0/1, so bit 31 is never set → infinite loop) — `DONE (2026-07-01)`
+> **APPLIED 2026-07-01.** Dropped the mask across **6 sites in 5 files** (one more than first reported — the deep audit found `spi-implementation-guide.yaml:105` with the `< 0` variant): sync-serial-rx (2), sync-serial-tx, pulse-cycle-output, dac-16bit-pwm-dither, spi-implementation-guide. Fix = bare `REPEAT UNTIL PINREAD(pin)` / `IF PINREAD(pin)` — the corpus-consistent idiom (PINREAD yields the IN bit as 0/1; matches ~8 other bare-PINREAD sites + `pinread.yaml`). `pnut-ts`-verified. **Donors fixed** (the 4 concise donors: 11101/11100/00100/00011); the SPI guide has no donor (authored standalone). Cross-domain spread into IOSP opus-master (`chapter-10-dac-output.md` ×2, `chapter-11-serial-transmit.md`, `examples-library/ch10-audio-dac.spin2`) is tracked for the IOSP campaign §2 finalize (pre-first-release, not this YAML set).
+> **The defect.** Five published smart-pin YAMLs poll the IN flag with `REPEAT UNTIL PINREAD(pin)
+> & $8000_0000` (or `IF PINREAD(pin) & $8000_0000`). `PINREAD` on a **single** pin returns **0 or
+> 1** (`language/spin2/methods/pinread.yaml`: *"For single pin: returns 0 or 1"*), so masking with
+> bit 31 (`$8000_0000`) is **always false** — the loop never exits. The mask looks copied from a
+> raw-register / RDPIN-status mental model that does not apply to Spin2 `PINREAD`.
+>
+> **Occurrences (LIVE):**
+> - `architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml:86, :99`
+> - `architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml:82`
+> - `architecture/smart-pins/smart-pin-00100-pulse-cycle-output.yaml:70`
+> - `architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml:94`
+>
+> **Evidence.** `pinread.yaml` (single pin → 0/1). The Parallax 4DAC driver + reSound (OBEX #2861)
+> wait on the IN event with `SETSE1`/`WAITSE1`; P2AN003's authoring replaced the mask with that
+> idiom and compiles clean under `pnut-ts` v1.55.
+>
+> **Proposed correction.** Replace the broken mask with a working IN-wait: either drop the mask
+> (`REPEAT UNTIL PINREAD(pin)` — PINREAD already yields the IN bit as 0/1) or use the
+> `SETSE1(pin IN-rising)` + `WAITSE1` event idiom (preferred; matches the drivers). Apply set-wide
+> across all five files, KB-validated, `pnut-ts`-compiled.
+
+### F-176 — count-mode examples use the constant `P_B_A_INPUT`, which is UNDEFINED in `pnut-ts` v1.55 (examples do not compile) — `DONE (2026-07-01)`
+> **APPLIED 2026-07-01.** `P_B_A_INPUT` is **invented** — the config it names (A-input feeds both A and B on one pin) is the **WRPIN default** (both selector nibbles default to this pin, per `wrpin.yaml`/Silicon Doc), so the fix is to **delete `| P_B_A_INPUT`** (the bare mode constant is the correct single-pin config). Removed all **21 occurrences across the 4 files** (10100/10101/10110/10111): code lines, `known_constants` bullets (replaced with a correct "no routing constant needed" note), and mis-teaching prose. `pnut-ts`-verified.
+> **VINDICATION (the manual already caught this).** The IOSP manual team discovered `P_B_A_INPUT` was undefined back in **2026-05/06** and removed it from the manual (`audit/domain-judgments-2026-05-25.md:97` "(removed) — default A-input from local pin is correct"; `audit/titus-cross-audit-2026-06-12.md:2636` "B defaults to A's pin; NO constant (P_B_A_INPUT is undefined in pnut_ts)") — but the **YAML KB was never updated to match**. Manual↔YAML drift, manual-more-correct direction; the drain gate now closes it.
+> **DONOR CARVE → see F-183.** The 4 count-mode *concise donors* are broadly divergent from published (undefined *mode-name* constants `P_PERIODS_STATES`/`P_PERIODS_CLOCKS_*` + a different mode taxonomy, on top of `P_B_A_INPUT`); published was hand-corrected away from them long ago. Partial-fixing them = false safety. Full donor resync tracked separately as **F-183**.
+> **The defect.** Four published counting-mode YAMLs configure "use the A-input for both A and B
+> (single-pin measurement)" with `P_COUNTER_* | P_B_A_INPUT`. `pnut-ts` v1.55 reports
+> **`Undefined symbol`** for `P_B_A_INPUT` (and `P_A_B_INPUT`); the control constant `P_MINUS1_A`
+> is defined, so this is a genuinely missing symbol, not a compiler gap. The examples cannot
+> compile as written.
+>
+> **Occurrences (LIVE):**
+> - `architecture/smart-pins/smart-pin-10100-count-highs-x-periods.yaml`
+> - `architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml`
+> - `architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml`
+> - `architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml`
+> (used in `code_examples` PUB + DAT blocks, `known_constants` lists, and prose notes).
+>
+> **Evidence.** `pnut-ts` v1.55 `Undefined symbol` on `P_B_A_INPUT`. The validated single-pin
+> routing (per the F. Bauer `fb_measfreq2P` donor used in P2AN004) is: signal pin in
+> `P_COUNTER_TICKS` (default-local A/B), plus the periods pin in `P_COUNTER_PERIODS | P_MINUS1_A |
+> P_MINUS1_B` routed back one pin — this compiles.
+>
+> **Proposed correction (needs KB-first care — NOT a rename).** Determine the correct P2 routing
+> for "A-input feeds both A and B on one pin" and rewrite the examples to a `pnut-ts`-compiling
+> idiom (the Bauer routing above is the proven pattern). Do **not** merely substitute a symbol
+> name — verify the actual routing against the KB + a `pnut-ts` compile. Fix the `known_constants`
+> lists + prose references in the same pass.
+
+> **Drain-note (both).** These are actionable smart-pin YAML corrections; fold them into the same
+> `yaml-knowledge-base-maintenance` drain pass as **F-174**. The IOSP release-depth re-audit (§2)
+> should assess whether any block the IOSP drain gate (IOSP documents these modes in Ch.10/§15/§17).
+
+---
+
+## Systematic `P_*` constant-name audit (2026-07-01) — F-177…F-183
+
+> **Origin & method (Stephen's call).** After F-174/175/176 kept surfacing fictitious `P_*`
+> constants ad-hoc, we ran a **corpus-wide audit** to make it the last time. Method: the
+> **legality arbiter is `pnut-ts` v1.55** (our authority order: compiler → v55 doc → Silicon);
+> the **v55 Spin2 manual is the enumeration**. Extracted every unique `P_[A-Z0-9_]+` token in
+> `deliverables/ai/P2/` (115) and compile-tested each. **Result: after the fixes below, the
+> YAMLs contain ONLY legal v55 constant names** — `Y-legal \ L` is empty (no legal-but-nonstandard
+> names), and all 8 fictitious names are gone corpus-wide. Also ran the **Opus-Master propagation**:
+> the manuals are clean in body (they'd already removed these — see F-176 vindication). Two
+> non-blocking findings remain: **F-182** (coverage gap) and **F-183** (donor staleness).
+
+### F-177 — `language/spin2/methods/pinstart.yaml` uses `P_QUADRATURE_A` (undefined) — `DONE (2026-07-01)`
+> **APPLIED.** Quadrature mode %01011 is `P_QUADRATURE`; `P_QUADRATURE_A` is undefined (`pnut-ts`). Renamed at `pinstart.yaml:47`. Single occurrence.
+
+### F-178 — `P_TRANSITION_OUTPUT` (undefined) used in 4 files — `DONE (2026-07-01)`
+> **APPLIED.** Transition-output mode %00101 is `P_TRANSITION`; `P_TRANSITION_OUTPUT` is undefined. Renamed at the **4 legit sites**: `pinstart.yaml:96`, `wypin.yaml` (×2 — code + prose), `concepts/streamer_smartpin_control.yaml` (×2). `pnut-ts`-verified. (The 5th occurrence, `io_pin_timing.yaml:341`, was part of a broken fragment → fixed under F-179.)
+
+### F-179 — `architecture/io_pin_timing.yaml` `timing_measurement_techniques` fragments are unsound P1-era pseudo-code — `DONE (2026-07-01)`
+> **The defect.** Both fragments used undefined constants (`P_TRANSITION_OUTPUT`/`P_TRANSITION_INPUT`/`P_PULSE_MEASURE`) plus **`WAITPEQ`, a P1 instruction invalid on P2**; the "pin-to-pin delay" technique doesn't even need smart pins.
+> **APPLIED.** Rewrote `using_counters` to correct plain-GPIO timing (`FLTL`/`DIRL`/`DIRH` + `GETCT` + a `TESTP`/`JMP` sense loop, no smart pins, no `WAITPEQ`), and `using_smart_pins` to the real pulse-width mode `P_HIGH_TICKS` + `RDPIN`. Full rewrite **compile-verified** under `pnut-ts` (exit 0).
+
+### F-180 — Spin2-method mode tables name `P_DAC_DITHER` (undefined; real: `P_DAC_DITHER_PWM`/`_RND`) — `DONE (2026-07-01)`
+> **APPLIED.** `P_DAC_DITHER` (bare) is undefined; %00011 dither is `P_DAC_DITHER_PWM`. Renamed in the `common_smart_modes` / WYPIN-value tables: `spin2/methods/wrpin.yaml:86`, `spin2/methods/wypin.yaml:92`. `pnut-ts`-verified.
+
+### F-181 — jonnymac style-docs reference `P_HIGH_1M5` — a fabricated constant AND a fabricated 1.5 MΩ pullup — `DONE (2026-07-01)`
+> **The defect.** `P_HIGH_1M5` is undefined, and v55's pull-resistor family **tops out at `P_HIGH_150K` (150 kΩ)** — there is **no 1.5 MΩ pullup** on the P2 at all (v55 has no `1.5M`/`1M5`/`pullup` match). So both the constant and the hardware value were fictitious, in 2 documentation-style files.
+> **APPLIED.** Changed the illustrative example to the real largest pullup `P_HIGH_150K` with an honest "150K pullup" comment: `conventions/spin2-docs-jonnymac.yaml:196`, `conventions/johnny-mac-documentation-style.yaml:303`. (Also tidied two prose SPI comments — `P_MINUS`/`P_PLUS` → `P_MINUSx_A`/`P_PLUSx_A` — so no prose ambiguously names a bare constant.)
+
+### F-182 — coverage gap: 32 legal v55 `P_*` constants were unmentioned in any YAML — `DONE (2026-07-01)`
+> **The gap.** Of 116 legal-in-v55 `P_*` constants, **32 appeared in no YAML** — the A/B input-logic family (`P_AND_AB`/`P_OR_AB`/`P_XOR_AB`/`P_PASS_AB`), filter/level selectors (`P_FILT0/2/3_AB`, `P_LEVEL_*_FB*`, `P_SCHMITT_*_FB`, `P_LOGIC_*`), `P_INVERT_IN/OUT`, `P_TRUE_*`, `P_MINUS2_A`/`P_MINUS3_A`, `P_SYNC_IO`/`P_ASYNC_IO`, and drive/float constants (`P_HIGH_100UA`/`P_HIGH_10UA`/`P_HIGH_FLOAT`/`P_LOW_*`). A findability hole — a remote agent asking about these got nothing.
+> **APPLIED 2026-07-01.** Added all **32** as full entries to `language/spin2/symbols/spin2-builtin-symbols-complete.yaml` (where their siblings `P_TRUE_A`/`P_LOCAL_A` live). Every `value` + `bit_pattern` + `description` sourced verbatim from the v55 WRPIN config table (lines 1422–1519); the hex values were **compiler-certified** (bit-pattern→hex cross-checked against `pnut-ts`-produced binary on a representative sample spanning the AB-select, IN-invert, drive, and relative-pin families). All 32 compile; crossref clean. The KB now covers the complete legal `P_*` set.
+
+### F-183 — count-mode *concise donors* (10100/10101/10110/10111) are broadly stale/divergent from published — `TRACKED → ingestion`
+> Carved from F-176. The 4 donors carry undefined **mode-name** constants (`P_PERIODS_STATES`, `P_PERIODS_CLOCKS_TIME/STATES/PERIODS`) **and** a different mode taxonomy than the (hand-corrected) published files, on top of the now-removed `P_B_A_INPUT`. Published diverged from them long ago (proving the concise-YAML pipeline isn't re-run for these), so reseed-risk is currently latent. A **full donor↔published resync** (mode names + taxonomy) belongs to the ingestion/smart-pins-catalog head, not a published-YAML edit. Tracked, not release-blocking.
+
+## Systematic `X_*` (streamer) constant-name audit (2026-07-01) — F-184…F-185
+
+> **Origin & method.** Extended the P_* audit to the streamer `X_*` constants (the Streamer
+> Programming Guide is released, so accuracy matters). Same method: `pnut-ts` v1.55 = legality
+> arbiter, v55 = enumeration. **Coverage is 100%** — every legal v55 `X_*` is already in a YAML
+> (no gap, better than P_*). Two fictitious names found + fixed; `X_RFBYTE_*`/`X_RFLONG_*` are
+> legit prose family refs and `X_VALUE` is an example variable name (both left).
+
+### F-184 — `X_DACS_ON` (undefined) in a `related_symbols` link — `DONE (2026-07-01)`
+> **APPLIED.** There is no `X_DACS_ON` — v55 has `X_DACS_OFF` + specific channel configs (`X_DACS_0_0_0_0` … `X_DACS_3_2_1_0`). Fixed the `related_symbols` of the `X_PINS_ON` entry in `language/spin2/symbols/spin2-builtin-symbols-complete.yaml:257` → `X_DACS_OFF` (the real DAC control constant, already used in the sibling `X_PINS_OFF` entry). `pnut-ts`-verified.
+
+### F-185 — `X_DDS_GOERTZEL` (truncated/undefined) in prose — `DONE (2026-07-01)`
+> **APPLIED.** The real Goertzel streamer modes are `X_DDS_GOERTZEL_SINC1` / `X_DDS_GOERTZEL_SINC2` (v55 table); bare `X_DDS_GOERTZEL` is undefined. Corrected the prose in `language/pasm2/getxacc.yaml:50` to name both real constants. `pnut-ts`-verified.
+
+### F-182 (coverage enrichment) — DONE this release
+> The 32 missing legal P_* constants were added to `spin2-builtin-symbols-complete.yaml`,
+> v55-sourced + compiler-certified, and ship in the same release as the fictitious-name fixes.
+> See the F-182 entry above for detail.
 
 ---
 

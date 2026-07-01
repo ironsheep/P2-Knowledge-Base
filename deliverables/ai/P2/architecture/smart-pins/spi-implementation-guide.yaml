@@ -63,14 +63,14 @@ recommended_pin_layout:
       MISO: "N+1 (use P_MINUS1_B)"
 
   layout_2:
-    comment: "Clock first - all data pins use P_MINUS offsets"
+    comment: "Clock first - all data pins use P_MINUSx_A relative-pin offsets"
     pins:
       CLK:  "N"
       MOSI: "N+1 (use P_MINUS1_B)"
       MISO: "N+2 (use P_MINUS2_B)"
 
   layout_3:
-    comment: "Clock last - all data pins use P_PLUS offsets"
+    comment: "Clock last - all data pins use P_PLUSx_A relative-pin offsets"
     pins:
       MOSI: "N (use P_PLUS2_B)"
       MISO: "N+1 (use P_PLUS1_B)"
@@ -102,7 +102,7 @@ complete_spi_master_example:
       PINLOW(SPI_CS)                          ' Assert CS
       WYPIN(SPI_MOSI, tx_byte)                ' Load TX data
       WYPIN(SPI_CLK, 16)                      ' Generate 16 transitions (8 clocks)
-      REPEAT UNTIL PINREAD(SPI_MISO) < 0      ' Wait for RX complete
+      REPEAT UNTIL PINREAD(SPI_MISO)          ' Wait for RX complete
       rx_byte := RDPIN(SPI_MISO) >> 24        ' Read and right-justify
       PINHIGH(SPI_CS)                         ' Deassert CS
 

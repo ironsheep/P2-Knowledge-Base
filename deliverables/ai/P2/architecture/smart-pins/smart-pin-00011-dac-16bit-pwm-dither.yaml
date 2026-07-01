@@ -91,7 +91,7 @@ spin2_complete: |
     value16 := $8000 + (SIN(angle, $7FFF) >> 16)
     
     ' Wait for sample period complete
-    REPEAT UNTIL PINREAD(DAC_PIN) & $8000_0000
+    REPEAT UNTIL PINREAD(DAC_PIN)
     WYPIN(DAC_PIN, value16)
     
   PUB setup_audio_dac() | mode

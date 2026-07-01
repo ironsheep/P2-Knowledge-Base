@@ -89,7 +89,7 @@ mode_specific_y_values:
   P_NCO_DUTY: "High time value"
   P_PWM_TRIANGLE: "Duty cycle (0 to X)"
   P_PWM_SAWTOOTH: "Duty cycle (0 to X)"
-  P_DAC_DITHER: "16-bit DAC value"
+  P_DAC_DITHER_PWM: "16-bit DAC value"
   P_REPOSITORY: "32-bit value to store"
 
 data_transmission:

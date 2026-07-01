@@ -40,8 +40,8 @@ documentation_level: comprehensive
 examples:
 - name: SPI Clock Generation
   description: Generate continuous SPI clock using transition mode
-  code: "' Configure pin for transition output mode (P_TRANSITION_OUTPUT)\nwrpin \
-    \  ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN\nwxpin   #1, #SPI_CLK_PIN      \
+  code: "' Configure pin for transition output mode (P_TRANSITION)\nwrpin \
+    \  ##P_TRANSITION | P_OE, #SPI_CLK_PIN\nwxpin   #1, #SPI_CLK_PIN      \
     \  ' Set timebase to sysclk/2  \nwypin   #0, #SPI_CLK_PIN        ' Start continuous\
     \ transitions\ndirh    #SPI_CLK_PIN             ' Enable smart pin\n"
   source: flash_loader.spin2

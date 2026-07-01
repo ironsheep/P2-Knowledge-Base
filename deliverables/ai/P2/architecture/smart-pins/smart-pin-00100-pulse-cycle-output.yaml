@@ -67,7 +67,7 @@ spin2_complete: |
     WYPIN(PULSE_PIN, count)         ' THEN trigger: number of pulses
     
     ' Wait for completion
-    REPEAT UNTIL PINREAD(PULSE_PIN) & $8000_0000
+    REPEAT UNTIL PINREAD(PULSE_PIN)
     
   PUB square_wave_burst(cycles) | mode, period
     mode := P_PULSE | P_OE

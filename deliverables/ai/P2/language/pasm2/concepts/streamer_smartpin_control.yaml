@@ -183,10 +183,10 @@ smart_pin_modes:
     
     spi_modes:
       transition_clock:
-        mode: "P_TRANSITION_OUTPUT"
+        mode: "P_TRANSITION"
         description: "Generate continuous SPI clock"
         code: |
-          wrpin   ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN
+          wrpin   ##P_TRANSITION | P_OE, #SPI_CLK_PIN
           wxpin   #1, #SPI_CLK_PIN        ' sysclk/2
           wypin   #0, #SPI_CLK_PIN        ' Start transitions
           dirh    #SPI_CLK_PIN

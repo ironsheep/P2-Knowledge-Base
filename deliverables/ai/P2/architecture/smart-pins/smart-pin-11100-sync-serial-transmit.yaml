@@ -79,7 +79,7 @@ spin2_complete: |
     WYPIN(TX_PIN, second_data)               ' Load buffer (double-buffered, gapless)
     
     REPEAT
-      IF PINREAD(TX_PIN) & $8000_0000        ' Check IN flag
+      IF PINREAD(TX_PIN)                     ' Check IN flag
         WYPIN(TX_PIN, get_next_data())       ' Load next
 
 # Complete PASM2 Example

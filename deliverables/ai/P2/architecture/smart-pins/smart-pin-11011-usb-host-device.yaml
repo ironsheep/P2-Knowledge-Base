@@ -75,7 +75,7 @@ code_examples:
       PUB main()
         ' Configure USB pin pair
         ' Even pin must be configured first
-        pinstart(usb_dm_pin, P_USB_PAIR, x_config, y_config)
+        pinstart(usb_dm_pin, P_USB_PAIR | P_OE, x_config, y_config)
         
         ' USB communication implemented in software driver
         ' Smart pins handle low-level differential signaling
@@ -103,7 +103,7 @@ code_examples:
         dirh    #usb_dp_pin
       
       usb_mode
-        long    %0000_0000_000_000000_0000000_00_11011_0
+        long    P_USB_PAIR | P_OE               ' USB pair, output enabled (active port)
       usb_config
         long    0
       usb_ctrl
@@ -118,7 +118,7 @@ code_examples:
         usb_dp = 57
       
       PUB main() | usb_status
-        pinstart(usb_dm, P_USB_PAIR, 0, 0)
+        pinstart(usb_dm, P_USB_PAIR | P_OE, 0, 0)
         
         repeat
           ' Check for USB events

@@ -48,7 +48,7 @@ code_examples:
       PUB main() | total_high, periods, duty_percent
         ' Measure duty cycle over 100 periods
         ' Use A-rise to A-rise (single pin, %00 mode)
-        pinstart(pwm_pin, P_PERIODS_HIGHS | P_B_A_INPUT, 100, %00)
+        pinstart(pwm_pin, P_PERIODS_HIGHS, 100, %00)
         
         repeat
           ' Wait for measurement complete
@@ -64,7 +64,7 @@ code_examples:
       ' PASM2 example - measure duty over 10 cycles
         org
         dirl    #pwm_pin                         ' Reset smart pin
-        wrpin   ##P_PERIODS_HIGHS | P_B_A_INPUT, #pwm_pin
+        wrpin   ##P_PERIODS_HIGHS, #pwm_pin
         wxpin   #10, #pwm_pin                    ' 10 periods
         wypin   #%00, #pwm_pin                   ' A-rise to A-rise (B=A)
         dirh    #pwm_pin                         ' Start measurement
@@ -110,7 +110,7 @@ configuration_constants:
   mode_constant: "P_PERIODS_HIGHS"
   binary_value: "%10100"
   common_modifiers:
-    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
     - "P_FILT1_AB - Add filtering for noise immunity"

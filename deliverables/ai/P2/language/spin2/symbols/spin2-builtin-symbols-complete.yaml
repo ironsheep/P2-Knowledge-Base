@@ -254,8 +254,425 @@ spin2_builtin_symbols:
       usage_context:
         - "Streamer pin output control"
         - "Enable pin driving for data output"
-      related_symbols: ["X_PINS_OFF", "X_DACS_ON"]
+      related_symbols: ["X_PINS_OFF", "X_DACS_OFF"]
       hardware_relationship: "Streamer pin output enable control"
+
+    # SmartPin Pin-Configuration Symbols (WRPIN)
+    - symbol_id: "p_minus3_a"
+      symbol_name: "P_MINUS3_A"
+      category: "smartpin"
+      subcategory: "a_input_selection"
+      value: "$5000_0000"
+      bit_pattern: "%0101_0000_000_0000000000000_00_00000_0"
+      description: "Select pin-3 for A input"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A input source selection (pin offset)"
+      related_symbols: ["P_MINUS1_A", "P_PLUS1_A", "P_LOCAL_A"]
+      hardware_relationship: "SmartPin A input source multiplexer"
+
+    - symbol_id: "p_minus2_a"
+      symbol_name: "P_MINUS2_A"
+      category: "smartpin"
+      subcategory: "a_input_selection"
+      value: "$6000_0000"
+      bit_pattern: "%0110_0000_000_0000000000000_00_00000_0"
+      description: "Select pin-2 for A input"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A input source selection (pin offset)"
+      related_symbols: ["P_MINUS1_A", "P_PLUS1_A", "P_LOCAL_A"]
+      hardware_relationship: "SmartPin A input source multiplexer"
+
+    - symbol_id: "p_true_b"
+      symbol_name: "P_TRUE_B"
+      category: "smartpin"
+      subcategory: "b_input_config"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "True B input"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "B input polarity configuration"
+      related_symbols: ["P_INVERT_B", "P_TRUE_A"]
+      hardware_relationship: "SmartPin B input polarity control"
+
+    - symbol_id: "p_pass_ab"
+      symbol_name: "P_PASS_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Select A, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input combining"
+      related_symbols: ["P_AND_AB", "P_OR_AB", "P_XOR_AB"]
+      hardware_relationship: "SmartPin A/B input logic selector"
+
+    - symbol_id: "p_and_ab"
+      symbol_name: "P_AND_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$0020_0000"
+      bit_pattern: "%0000_0000_001_0000000000000_00_00000_0"
+      description: "Select A & B, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input combining"
+      related_symbols: ["P_PASS_AB", "P_OR_AB", "P_XOR_AB"]
+      hardware_relationship: "SmartPin A/B input logic selector"
+
+    - symbol_id: "p_or_ab"
+      symbol_name: "P_OR_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$0040_0000"
+      bit_pattern: "%0000_0000_010_0000000000000_00_00000_0"
+      description: "Select A | B, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input combining"
+      related_symbols: ["P_PASS_AB", "P_AND_AB", "P_XOR_AB"]
+      hardware_relationship: "SmartPin A/B input logic selector"
+
+    - symbol_id: "p_xor_ab"
+      symbol_name: "P_XOR_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$0060_0000"
+      bit_pattern: "%0000_0000_011_0000000000000_00_00000_0"
+      description: "Select A ^ B, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input combining"
+      related_symbols: ["P_PASS_AB", "P_AND_AB", "P_OR_AB"]
+      hardware_relationship: "SmartPin A/B input logic selector"
+
+    - symbol_id: "p_filt0_ab"
+      symbol_name: "P_FILT0_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$0080_0000"
+      bit_pattern: "%0000_0000_100_0000000000000_00_00000_0"
+      description: "Select FILT0 settings for A, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input filter selection"
+      related_symbols: ["P_FILT1_AB", "P_FILT2_AB", "P_FILT3_AB"]
+      hardware_relationship: "SmartPin A/B input filter selector"
+
+    - symbol_id: "p_filt2_ab"
+      symbol_name: "P_FILT2_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$00C0_0000"
+      bit_pattern: "%0000_0000_110_0000000000000_00_00000_0"
+      description: "Select FILT2 settings for A, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input filter selection"
+      related_symbols: ["P_FILT1_AB", "P_FILT0_AB", "P_FILT3_AB"]
+      hardware_relationship: "SmartPin A/B input filter selector"
+
+    - symbol_id: "p_filt3_ab"
+      symbol_name: "P_FILT3_AB"
+      category: "smartpin"
+      subcategory: "ab_input_combining"
+      value: "$00E0_0000"
+      bit_pattern: "%0000_0000_111_0000000000000_00_00000_0"
+      description: "Select FILT3 settings for A, B"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "A/B input filter selection"
+      related_symbols: ["P_FILT1_AB", "P_FILT0_AB", "P_FILT2_AB"]
+      hardware_relationship: "SmartPin A/B input filter selector"
+
+    - symbol_id: "p_logic_a"
+      symbol_name: "P_LOGIC_A"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Logic level A → IN, output OUT"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LOGIC_A_FB", "P_SCHMITT_A", "P_LEVEL_A"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_logic_a_fb"
+      symbol_name: "P_LOGIC_A_FB"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$0002_0000"
+      bit_pattern: "%0000_0000_000_0001000000000_00_00000_0"
+      description: "Logic level A → IN, output feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LOGIC_A", "P_LOGIC_B_FB", "P_SCHMITT_A"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_logic_b_fb"
+      symbol_name: "P_LOGIC_B_FB"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$0004_0000"
+      bit_pattern: "%0000_0000_000_0010000000000_00_00000_0"
+      description: "Logic level B → IN, output feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LOGIC_A_FB", "P_SCHMITT_B_FB", "P_LEVEL_B"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_schmitt_a_fb"
+      symbol_name: "P_SCHMITT_A_FB"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$0008_0000"
+      bit_pattern: "%0000_0000_000_0100000000000_00_00000_0"
+      description: "Schmitt trigger A → IN, output feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_SCHMITT_A", "P_SCHMITT_B_FB", "P_LOGIC_A_FB"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_schmitt_b_fb"
+      symbol_name: "P_SCHMITT_B_FB"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$000A_0000"
+      bit_pattern: "%0000_0000_000_0101000000000_00_00000_0"
+      description: "Schmitt trigger B → IN, output feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_SCHMITT_B", "P_SCHMITT_A_FB", "P_LOGIC_B_FB"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_level_a_fbn"
+      symbol_name: "P_LEVEL_A_FBN"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$001A_0000"
+      bit_pattern: "%0000_0000_000_1101000000000_00_00000_0"
+      description: "A > Level → IN, output negative feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LEVEL_A", "P_LEVEL_B_FBP", "P_LEVEL_B_FBN"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_level_b_fbp"
+      symbol_name: "P_LEVEL_B_FBP"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$001C_0000"
+      bit_pattern: "%0000_0000_000_1110000000000_00_00000_0"
+      description: "B > Level → IN, output positive feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LEVEL_B", "P_LEVEL_A_FBN", "P_LEVEL_B_FBN"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_level_b_fbn"
+      symbol_name: "P_LEVEL_B_FBN"
+      category: "smartpin"
+      subcategory: "input_logic_mode"
+      value: "$001E_0000"
+      bit_pattern: "%0000_0000_000_1111000000000_00_00000_0"
+      description: "B > Level → IN, output negative feedback"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Input sensing and output feedback mode"
+      related_symbols: ["P_LEVEL_B", "P_LEVEL_A_FBN", "P_LEVEL_B_FBP"]
+      hardware_relationship: "SmartPin input logic/feedback mode control"
+
+    - symbol_id: "p_async_io"
+      symbol_name: "P_ASYNC_IO"
+      category: "smartpin"
+      subcategory: "io_sync"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Select asynchronous I/O"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Synchronous vs asynchronous I/O selection"
+      related_symbols: ["P_SYNC_IO"]
+      hardware_relationship: "SmartPin I/O clocking mode control"
+
+    - symbol_id: "p_sync_io"
+      symbol_name: "P_SYNC_IO"
+      category: "smartpin"
+      subcategory: "io_sync"
+      value: "$0001_0000"
+      bit_pattern: "%0000_0000_000_0000100000000_00_00000_0"
+      description: "Select synchronous I/O"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Synchronous vs asynchronous I/O selection"
+      related_symbols: ["P_ASYNC_IO"]
+      hardware_relationship: "SmartPin I/O clocking mode control"
+
+    - symbol_id: "p_true_in"
+      symbol_name: "P_TRUE_IN"
+      category: "smartpin"
+      subcategory: "in_config"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "True IN bit"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "IN bit polarity configuration"
+      related_symbols: ["P_INVERT_IN"]
+      hardware_relationship: "SmartPin IN bit polarity control"
+
+    - symbol_id: "p_invert_in"
+      symbol_name: "P_INVERT_IN"
+      category: "smartpin"
+      subcategory: "in_config"
+      value: "$0000_8000"
+      bit_pattern: "%0000_0000_000_0000010000000_00_00000_0"
+      description: "Invert IN bit"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "IN bit polarity configuration"
+      related_symbols: ["P_TRUE_IN"]
+      hardware_relationship: "SmartPin IN bit polarity control"
+
+    - symbol_id: "p_true_output"
+      symbol_name: "P_TRUE_OUTPUT"
+      category: "smartpin"
+      subcategory: "out_config"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Select true output"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Output polarity configuration"
+      related_symbols: ["P_TRUE_OUT", "P_INVERT_OUT"]
+      hardware_relationship: "SmartPin output polarity control"
+
+    - symbol_id: "p_true_out"
+      symbol_name: "P_TRUE_OUT"
+      category: "smartpin"
+      subcategory: "out_config"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Select true output"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Brevity alias of P_TRUE_OUTPUT"
+      related_symbols: ["P_TRUE_OUTPUT", "P_INVERT_OUT"]
+      hardware_relationship: "SmartPin output polarity control"
+
+    - symbol_id: "p_invert_out"
+      symbol_name: "P_INVERT_OUT"
+      category: "smartpin"
+      subcategory: "out_config"
+      value: "$0000_4000"
+      bit_pattern: "%0000_0000_000_0000001000000_00_00000_0"
+      description: "Select inverted output"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Output polarity configuration"
+      related_symbols: ["P_TRUE_OUTPUT", "P_TRUE_OUT"]
+      hardware_relationship: "SmartPin output polarity control"
+
+    - symbol_id: "p_high_100ua"
+      symbol_name: "P_HIGH_100UA"
+      category: "smartpin"
+      subcategory: "high_drive_config"
+      value: "$0000_2800"
+      bit_pattern: "%0000_0000_000_0000000101000_00_00000_0"
+      description: "Drive high 100μA"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "High-side drive strength selection"
+      related_symbols: ["P_HIGH_1K5", "P_HIGH_15K", "P_HIGH_FAST", "P_HIGH_10UA"]
+      hardware_relationship: "SmartPin high-side output drive control"
+
+    - symbol_id: "p_high_10ua"
+      symbol_name: "P_HIGH_10UA"
+      category: "smartpin"
+      subcategory: "high_drive_config"
+      value: "$0000_3000"
+      bit_pattern: "%0000_0000_000_0000000110000_00_00000_0"
+      description: "Drive high 10μA"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "High-side drive strength selection"
+      related_symbols: ["P_HIGH_1K5", "P_HIGH_15K", "P_HIGH_FAST", "P_HIGH_100UA"]
+      hardware_relationship: "SmartPin high-side output drive control"
+
+    - symbol_id: "p_high_float"
+      symbol_name: "P_HIGH_FLOAT"
+      category: "smartpin"
+      subcategory: "high_drive_config"
+      value: "$0000_3800"
+      bit_pattern: "%0000_0000_000_0000000111000_00_00000_0"
+      description: "Float high"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "High-side drive strength selection"
+      related_symbols: ["P_HIGH_1K5", "P_HIGH_15K", "P_HIGH_FAST", "P_HIGH_100UA"]
+      hardware_relationship: "SmartPin high-side output drive control"
+
+    - symbol_id: "p_low_fast"
+      symbol_name: "P_LOW_FAST"
+      category: "smartpin"
+      subcategory: "low_drive_config"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Drive low fast (30mA)"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Low-side drive strength selection"
+      related_symbols: ["P_LOW_1K5", "P_LOW_15K", "P_LOW_100UA"]
+      hardware_relationship: "SmartPin low-side output drive control"
+
+    - symbol_id: "p_low_100ua"
+      symbol_name: "P_LOW_100UA"
+      category: "smartpin"
+      subcategory: "low_drive_config"
+      value: "$0000_0500"
+      bit_pattern: "%0000_0000_000_0000000000101_00_00000_0"
+      description: "Drive low 100μA"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Low-side drive strength selection"
+      related_symbols: ["P_LOW_1K5", "P_LOW_15K", "P_LOW_FAST"]
+      hardware_relationship: "SmartPin low-side output drive control"
+
+    - symbol_id: "p_low_10ua"
+      symbol_name: "P_LOW_10UA"
+      category: "smartpin"
+      subcategory: "low_drive_config"
+      value: "$0000_0600"
+      bit_pattern: "%0000_0000_000_0000000000110_00_00000_0"
+      description: "Drive low 10μA"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Low-side drive strength selection"
+      related_symbols: ["P_LOW_1K5", "P_LOW_15K", "P_LOW_FAST"]
+      hardware_relationship: "SmartPin low-side output drive control"
+
+    - symbol_id: "p_low_float"
+      symbol_name: "P_LOW_FLOAT"
+      category: "smartpin"
+      subcategory: "low_drive_config"
+      value: "$0000_0700"
+      bit_pattern: "%0000_0000_000_0000000000111_00_00000_0"
+      description: "Float low"
+      usage_context:
+        - "SmartPin input/output configuration (WRPIN)"
+        - "Low-side drive strength selection"
+      related_symbols: ["P_LOW_1K5", "P_LOW_15K", "P_LOW_FAST"]
+      hardware_relationship: "SmartPin low-side output drive control"
 
     # Event and Interrupt Symbols
     - symbol_id: "event_int"

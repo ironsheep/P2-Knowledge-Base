@@ -300,7 +300,7 @@ pasm2_documentation:
     
       org
         ' Configure sensor pin for input with pullup
-        mov     pin_config, ##P_HIGH_1M5       ' 1.5M pullup resistor  
+        mov     pin_config, ##P_HIGH_150K      ' 150K pullup resistor  
         wrpin   pin_config, sensor_pin         ' apply to sensor pin
         
         ' Timing loop for sensor reading

@@ -83,7 +83,7 @@ spin2_complete: |
     
   PUB receive_byte() : result
     ' Wait for and read one byte
-    REPEAT UNTIL PINREAD(RX_PIN) & $8000_0000  ' Wait for IN
+    REPEAT UNTIL PINREAD(RX_PIN)               ' Wait for IN
     result := RDPIN(RX_PIN) >> 24              ' Read & right-justify
     
   PUB setup_fast_p2() | mode
@@ -96,7 +96,7 @@ spin2_complete: |
     
   PUB receive_msb_first() : result | data
     ' Handle MSB-first protocol
-    REPEAT UNTIL PINREAD(RX_PIN) & $8000_0000
+    REPEAT UNTIL PINREAD(RX_PIN)
     data := RDPIN(RX_PIN)
     data := REV data                          ' Reverse bit order
     result := data & $FF                     ' Mask to 8 bits

@@ -83,7 +83,7 @@ common_smart_modes:
   P_NORMAL: "%00000 - Normal I/O"
   P_REPOSITORY: "%00001 - Long repository"
   P_DAC_NOISE: "%00010 - DAC noise"
-  P_DAC_DITHER: "%00011 - DAC with dither"
+  P_DAC_DITHER_PWM: "%00011 - DAC with dither"
   P_PULSE: "%00100 - Pulse/cycle output"
   P_TRANSITION: "%00101 - Transition output"
   P_NCO_FREQ: "%00110 - NCO frequency"

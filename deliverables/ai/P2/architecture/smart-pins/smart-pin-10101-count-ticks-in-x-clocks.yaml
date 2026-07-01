@@ -41,7 +41,7 @@ registers:
 flags:
   in_flag: "Raised when measurement completes (>= X clocks AND current A-period completed)"
   a_input: "Signal whose period boundaries define when the window can close"
-  b_input: "Period boundary marker (can be same as A-input via P_B_A_INPUT)"
+  b_input: "Period boundary marker (same as A-input by default on a single pin - no routing constant needed)"
 
 code_examples:
   - title: "Exact Duty Cycle (paired with %10110 P_COUNTER_HIGHS)"
@@ -56,8 +56,8 @@ code_examples:
         window_clks := (_clkfreq / 1000) * window_ms
       
         ' Start both pins on the same window; matched timing is essential
-        pinstart(base_pin+0, P_COUNTER_TICKS | P_B_A_INPUT, window_clks, %00)
-        pinstart(base_pin+1, P_COUNTER_HIGHS | P_B_A_INPUT, window_clks, %00)
+        pinstart(base_pin+0, P_COUNTER_TICKS, window_clks, %00)
+        pinstart(base_pin+1, P_COUNTER_HIGHS, window_clks, %00)
       
         repeat
           repeat until pinread(base_pin+0) and pinread(base_pin+1)
@@ -70,7 +70,7 @@ code_examples:
       ' PASM2 example - start a single P_COUNTER_TICKS pin
         org
         dirl    #signal_pin                      ' Reset smart pin
-        wrpin   ##P_COUNTER_TICKS | P_B_A_INPUT, #signal_pin
+        wrpin   ##P_COUNTER_TICKS, #signal_pin
         wxpin   ##clkfreq/10, #signal_pin        ' 100ms minimum window
         wypin   #%00, #signal_pin                ' A-rise to A-rise
         dirh    #signal_pin                      ' Start measurement
@@ -97,7 +97,7 @@ configuration_constants:
   mode_constant: "P_COUNTER_TICKS"
   binary_value: "%10101"
   common_modifiers:
-    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
     - "P_FILT1_AB - Add filtering for noise immunity"
@@ -113,5 +113,5 @@ notes:
   - "Window length is at least X ticks AND extends to complete the in-progress A-period (Z always >= X)"
   - "Designed for concurrent use with %10110 (high-time) and/or %10111 (period count) on the same signal"
   - "All concurrent measurements must be started together with the same X window for matched timing"
-  - "B-input can be same as A-input (P_B_A_INPUT) for single-pin period detection"
+  - "B-input defaults to the same pin as A-input for single-pin period detection - no routing constant needed"
   - "Measurement restarts automatically after each window completes"
