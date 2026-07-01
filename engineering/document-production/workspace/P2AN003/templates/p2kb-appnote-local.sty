@@ -1,0 +1,28 @@
+% p2kb-appnote-local.sty — Application Note class override layer
+% Loaded AFTER p2kb-platform-content.sty so anything here overrides platform defaults.
+%
+% App notes are short, single-topic documents with no Parts and no Chapters: the
+% body's top headings are sections (## in the markdown). This layer carries the few
+% deltas a short note needs on top of the shared platform stack. Genuinely-new block
+% types are NOT added here — app notes reuse the platform code/reference box family.
+
+\ProvidesPackage{p2kb-appnote-local}[2026/06/28 P2KB Application Note class override layer v1.0]
+
+% Short doc: do not number headings (no "0.1 Abstract"). Sections/subsections stay
+% unnumbered; they still appear in the table of contents. References in the prose are
+% by name ("Recipe 2", "the Verify section"), so no section numbers are needed.
+\setcounter{secnumdepth}{0}
+
+% ---- App-note marker glyphs (missing-glyph fallback) ----
+% App notes use four inline enhancement markers — Pitfall / Tip / Hardware / Verify.
+% Their emoji (U+26A0, U+1F4A1, U+1F527, U+1F50D) have NO glyph in the IBM Plex
+% stack, so xelatex would print tofu. Following the platform's own newunicodechar
+% pattern (foundation: the ✅/✓/❌ substitutes), map each marker to a distinct
+% colored amssymb shape (amssymb + xcolor are loaded by the foundation). The bold
+% "Pitfall:/Tip:/Hardware:/Verify:" label follows the symbol and carries the word.
+\newunicodechar{⚠}{{\color{orange!90!black}\ensuremath{\blacktriangle}}}   % Pitfall
+\newunicodechar{💡}{{\color{blue!70!black}\ensuremath{\bigstar}}}          % Tip
+\newunicodechar{🔧}{{\color{teal!75!black}\ensuremath{\blacksquare}}}      % Hardware
+\newunicodechar{🔍}{{\color{green!55!black}\ensuremath{\blacklozenge}}}    % Verify
+
+\endinput

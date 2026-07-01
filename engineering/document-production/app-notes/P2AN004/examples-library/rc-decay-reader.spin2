@@ -1,0 +1,32 @@
+CON
+  _clkfreq = 200_000_000
+
+  RC_PIN  = 8                  ' R-C sensor node (220 ohm series + cap)
+  CHG_MS  = 5                  ' capacitor charge time, milliseconds
+
+  ' Time the high duration of the decaying node: %10001 P_HIGH_TICKS.
+  ' P_SCHMITT_A gives a clean threshold crossing on the RC ramp.
+  ' P_OE | P_LOW_FLOAT lets the pin DRIVE high to charge the cap, then
+  ' FLOAT (high output drives, low output floats) so it discharges
+  ' through the sensor resistance while the smart pin times the high.
+  RC_MODE = P_HIGH_TICKS | P_SCHMITT_A | P_OE | P_LOW_FLOAT
+
+PUB main() | clocks, us
+  wrpin(RC_PIN, RC_MODE)             ' configure the timing smart pin once
+  repeat
+    clocks := read_rc()              ' one charge-float-time cycle
+    us     := clocks / (clkfreq / 1_000_000)
+    debug(udec(clocks), " clocks  (", udec(us), " us)")
+    waitms(200)
+
+PRI read_rc() : clocks
+  ' 1) charge: drive the node high through the series resistor
+  pinh(RC_PIN)                       ' OUT=1 -> P_LOW_FLOAT drives high
+  waitms(CHG_MS)
+  ' 2) release: reset the smart pin, then float and start timing
+  pinf(RC_PIN)                       ' DIR low resets the accumulator
+  pinl(RC_PIN)                       ' OUT=0 -> P_LOW_FLOAT floats; DIR
+  '                                    high re-enables, timing starts now
+  ' 3) wait for the high->low crossing, read the latched high-tick count
+  repeat until pinread(RC_PIN)       ' IN raised when the node falls
+  clocks := rdpin(RC_PIN)

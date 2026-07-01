@@ -1,0 +1,95 @@
+CON
+  _clkfreq = 200_000_000
+
+  ENC_A  = 32                  ' encoder A input (smart pin)
+  ENC_B  = 33                  ' encoder B input (B = A+1, P_PLUS1_B)
+  BTN    = 34                  ' pushbutton input (active low; -1 if none)
+
+  STIM_A = 40                  ' Tier-0 self-test: drive A (jumper 40->32)
+  STIM_B = 41                  '                   drive B (jumper 41->33)
+
+  DET4X  = TRUE                ' detented encoder: 4 raw counts per detent
+  PRESET = 0                   ' initial detent value
+  LOLIM  = 0                   ' clamp range, low
+  HILIM  = 20                  ' clamp range, high
+
+VAR
+  long mod4x                   ' 0 or 2: the 4x-per-detent normalize shift
+  long offset                  ' preset/zero bookkeeping
+
+PUB main() | pos
+  enc_start(DET4X, PRESET)
+  ' --- Tier-0 self-test (jumper 40->32 and 41->33; no encoder) ---
+  stim_setup()
+  stim_turn(5, TRUE)                   ' 5 detents forward
+  debug("Tier-0: 5 detents fwd  -> reads ", sdec_(enc_value()))
+  stim_turn(2, FALSE)                  ' 2 detents back
+  debug("Tier-0: 2 detents back -> reads ", sdec_(enc_value()))
+  ' --- live read loop (turn a real encoder knob) ---
+  repeat
+    pos := enc_value()
+    debug("position = ", sdec_(pos), "   button = ", udec_(enc_button(25)))
+    waitms(200)
+
+PUB enc_start(d4x, pval)
+  ' One smart pin in %01011 P_QUADRATURE; B is the next pin up.
+  ' Continuous totalizer (X=0): Z always holds the signed 4x count.
+  pinstart(ENC_A, P_QUADRATURE | P_PLUS1_B, 0, 0)
+  mod4x := (d4x) ? 2 : 0               ' 4 counts/detent -> sar 2
+  enc_set(pval)
+
+PUB enc_set(pval) : result
+  ' Zero/preset without dropping the smart pin: pulse DIR, set offset.
+  pinf(ENC_A)                          ' DIR low resets the count
+  pinl(ENC_A)                          ' DIR high re-enables at zero
+  offset := pval
+  return pval
+
+PUB enc_raw() : result
+  ' Un-offset detent count: raw signed 4x count normalized by mod4x.
+  return rdpin(ENC_A) sar mod4x
+
+PUB enc_value() : result
+  ' Detent value with preset applied, clamped to LOLIM..HILIM.
+  result := enc_raw() + offset
+  if result < LOLIM
+    result := enc_set(LOLIM)
+  elseif result > HILIM
+    result := enc_set(HILIM)
+
+PUB enc_button(ms) : pressed
+  ' Debounced active-low button: 1 only if held low for ms milliseconds.
+  if BTN < 0
+    return 0
+  if pinread(BTN) == 0
+    pressed := 1
+    repeat (ms #> 0)
+      waitms(1)
+      pressed &= pinread(BTN) ^ 1
+
+PUB stim_setup()
+  ' Tier-0 stimulus pins idle low, then re-zero the encoder.
+  pinl(STIM_A)
+  pinl(STIM_B)
+  waitms(1)
+  enc_set(PRESET)
+
+PUB stim_turn(detents, fwd)
+  ' Walk the A/B gray-code sequence: 4 transitions = 1 detent.
+  ' fwd uses one phase order; reverse swaps it (sign flips).
+  repeat detents
+    if fwd
+      stim_ab(0, 1)
+      stim_ab(1, 1)
+      stim_ab(1, 0)
+      stim_ab(0, 0)
+    else
+      stim_ab(1, 0)
+      stim_ab(1, 1)
+      stim_ab(0, 1)
+      stim_ab(0, 0)
+
+PRI stim_ab(a, b)
+  pinw(STIM_A, a)
+  pinw(STIM_B, b)
+  waitus(50)                           ' let the decoder register the edge

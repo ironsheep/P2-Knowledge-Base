@@ -1,0 +1,68 @@
+CON
+  _clkfreq = 200_000_000
+
+  DAC_PIN   = 48                 ' DAC output pin (any free pin)
+  PERIOD    = 256                ' DAC sample period in clocks
+                                 '   (multiple of 256 for PWM dither)
+  SAMPLE_HZ = _clkfreq / PERIOD  ' resulting sample rate: 781_250 Hz
+
+  TABLE_LEN = 256                ' stored sample buffer length (power of 2)
+  PLAY_HZ   = 220                ' how often the buffer repeats, in Hz
+
+VAR
+  long buffer[TABLE_LEN]         ' stored sample data, filled at startup
+  long inc                       ' DDS phase increment (the cog reads it)
+
+PUB main() | i, ang
+  ' Fill the buffer with one cycle of a two-harmonic wave. In a real
+  ' program this is recorded or loaded audio; here we synthesize it so
+  ' the example is self-contained. The cog resamples whatever is in the
+  ' buffer to the requested pitch.
+  ang := 0
+  repeat i from 0 to TABLE_LEN-1
+    buffer[i] := qsin($6000, ang, TABLE_LEN) + qsin($1800, ang*3, TABLE_LEN)
+    ang++
+
+  ' DDS phase step = PLAY_HZ * 2^32 / SAMPLE_HZ, so the whole buffer
+  ' repeats PLAY_HZ times per second at our DAC sample rate.
+  inc := PLAY_HZ frac SAMPLE_HZ
+
+  coginit(NEWCOG, @player, @buffer)        ' load+run the player below
+
+DAT             org
+
+player          mov     bufp, ptra            ' @buffer (sample base)
+                mov     incp, ptra
+                add     incp, ##(TABLE_LEN*4) ' @inc follows the buffer
+                rdlong  pinc, incp
+
+                ' configure the DAC output stage (foundation: IOSP Ch.10)
+                wrpin   dacmode, #DAC_PIN
+                wxpin   #PERIOD, #DAC_PIN
+                dirh    #DAC_PIN              ' enable the smart pin
+                wypin   ##$8000, #DAC_PIN     ' park at mid-scale
+
+                ' event 1 = DAC pin's IN rising, once per sample period
+                mov     pa, #DAC_PIN
+                or      pa, #%001_000000
+                setse1  pa
+
+.loop           mov     idx, phase            ' top 8 bits = buffer index
+                shr     idx, #24              ' TABLE_LEN=256 -> >> (32-8)
+                shl     idx, #2               ' long index -> byte offset
+                add     idx, bufp             ' hub address of buffer[idx]
+                rdlong  smp, idx              ' fetch the stored sample
+                add     smp, ##$8000          ' signed -> offset binary
+                waitse1                        ' wait for next sample period
+                wypin   smp, #DAC_PIN         ' hand the DAC its sample
+                add     phase, pinc           ' advance the DDS phase
+                jmp     #.loop
+
+dacmode         long    P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+phase           long    0
+
+bufp            res     1
+incp            res     1
+pinc            res     1
+idx             res     1
+smp             res     1

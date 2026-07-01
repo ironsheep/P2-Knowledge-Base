@@ -1,0 +1,35 @@
+'' probe-dds-dac.spin2 — advanced-fork PRIMITIVE buildability probe (STAGE-ONLY)
+'' Demonstrates: phase-accumulator DDS pitch -> 16-bit PWM-dither DAC, IN-flag synced.
+'' This is the foundational mechanism the reSound (OBEX 2861) engine generalizes to
+'' 32 channels. We compile ONLY this primitive to prove the P2AN003 recipe layer is
+'' buildable; the full mixing engine is described-not-rebuilt.
+
+CON
+  _clkfreq = 200_000_000
+  DAC_PIN  = 48
+  SAMPLE_PERIOD = 256              ' multiple of 256 for HQ PWM dither
+
+VAR
+  long phase
+  long phase_inc
+
+PUB main() | sample
+  ' 16-bit PWM-dither DAC, audio-grade output stage (foundational, IOSP Ch.10)
+  PINFLOAT(DAC_PIN)
+  WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
+  WXPIN(DAC_PIN, SAMPLE_PERIOD)
+  PINLOW(DAC_PIN)
+  WYPIN(DAC_PIN, $8000)           ' mid-scale
+
+  set_pitch(440)                  ' A4
+
+  ' ADVANCED: software DDS sample loop the app note teaches
+  repeat
+    phase += phase_inc            ' phase accumulator (DDS pitch)
+    sample := QSIN($7FFF, phase, 0) + $8000          ' table-free sine via CORDIC
+    repeat until PINREAD(DAC_PIN) & $8000_0000        ' wait sample-period IN flag
+    WYPIN(DAC_PIN, sample)
+
+PUB set_pitch(hz)
+  ' map output frequency to phase increment at the DAC sample rate
+  phase_inc := hz frac (_clkfreq / SAMPLE_PERIOD)

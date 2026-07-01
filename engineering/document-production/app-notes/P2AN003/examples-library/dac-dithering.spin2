@@ -1,0 +1,29 @@
+CON
+  _clkfreq = 200_000_000
+
+  DAC_PIN = 48
+
+  ' Choose the 16-bit dither mode for the output stage:
+  '   PWM dither  (P_DAC_DITHER_PWM, mode %00011): cleanest spectrum,
+  '     lowest switching noise -- but adds a small tone at clock/256;
+  '     its X period MUST be a multiple of 256. Best for audio.
+  '   PRNG dither (P_DAC_DITHER_RND, mode %00010): no periodic tone,
+  '     slightly more broadband noise; X = 1 updates every clock. Best
+  '     for control DC.
+  DITHER  = P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+  PERIOD  = $100                ' 256 for PWM dither; use 1 for PRNG
+
+PUB main() | code
+  PINCLEAR(DAC_PIN)
+  WRPIN(DAC_PIN, DITHER)
+  WXPIN(DAC_PIN, PERIOD)
+  PINHIGH(DAC_PIN)             ' enable the smart pin first
+  WYPIN(DAC_PIN, $8000)        ' then park at mid-scale
+
+  ' Walk the full 16-bit code range in small steps. Codes that fall
+  ' between the 8-bit DAC's native levels are produced purely by
+  ' dithering, so a filtered scope trace climbs in smooth fine steps.
+  repeat
+    repeat code from 0 to $FFFF step $0400
+      WYPIN(DAC_PIN, code)
+      waitms(2)

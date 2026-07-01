@@ -1,0 +1,64 @@
+CON
+  _clkfreq = 200_000_000
+
+  DAC_PIN   = 48
+  PERIOD    = 256                ' DAC sample period (multiple of 256)
+  SAMPLE_HZ = _clkfreq / PERIOD  ' 781_250 Hz sample rate
+
+  TONE_HZ   = 440                ' output frequency (A4)
+  WAVE      = 0                  ' 0 = sine, 1 = sawtooth, 2 = triangle
+
+VAR
+  long inc
+
+PUB main()
+  inc := TONE_HZ frac SAMPLE_HZ  ' DDS step = TONE_HZ * 2^32 / SAMPLE_HZ
+  coginit(NEWCOG, @synth, @inc)
+
+DAT             org
+
+synth           rdlong  pinc, ptra            ' DDS phase increment
+
+                ' configure the DAC output stage (foundation: IOSP Ch.10)
+                wrpin   dacmode, #DAC_PIN
+                wxpin   #PERIOD, #DAC_PIN
+                dirh    #DAC_PIN
+                wypin   ##$8000, #DAC_PIN
+
+                mov     pa, #DAC_PIN
+                or      pa, #%001_000000      ' SE1 = DAC pin IN rising
+                setse1  pa
+
+.loop           add     phase, pinc           ' advance the DDS phase
+                cmp     wsel, #1        wz
+        if_e    jmp     #.saw
+                cmp     wsel, #2        wz
+        if_e    jmp     #.tri
+
+.sine           qrotate ampl, phase           ' (AMPL, phase) -> (X, Y)
+                getqy   smp                   ' Y = AMPL * sin(phase)
+                add     smp, ##$8000          ' signed -> offset binary
+                jmp     #.emit
+
+.saw            mov     smp, phase            ' rising ramp from the phase
+                shr     smp, #16              ' top 16 bits: 0..$FFFF
+                jmp     #.emit
+
+.tri            mov     smp, phase            ' fold the ramp to a triangle
+                shl     smp, #1
+                test    phase, hibit    wc    ' second half of the cycle?
+        if_c    not     smp                   '   -> count back down
+                shr     smp, #16
+
+.emit           waitse1                        ' wait for next sample period
+                wypin   smp, #DAC_PIN
+                jmp     #.loop
+
+dacmode         long    P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+ampl            long    $7FFF
+wsel            long    WAVE
+hibit           long    $8000_0000
+phase           long    0
+
+pinc            res     1
+smp             res     1

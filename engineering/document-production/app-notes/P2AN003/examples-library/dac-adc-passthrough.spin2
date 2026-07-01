@@ -1,0 +1,47 @@
+CON
+  _clkfreq = 200_000_000
+
+  ADC_PIN = 32                  ' analog input pin (feed a signal here)
+  DAC_PIN = 48                  ' analog output pin (the reconstruction)
+  PERIOD  = 256                 ' shared sample period in clocks
+
+PUB main()
+  coginit(NEWCOG, @pump, 0)
+
+DAT             org
+
+pump            ' ADC input pin: SINC2 filtering, 256-clock period
+                fltl    #ADC_PIN
+                wrpin   adcmode, #ADC_PIN
+                wxpin   #%01_1000, #ADC_PIN   ' SINC2, 2^8 = 256 clocks
+                dirh    #ADC_PIN
+
+                ' DAC output pin: 16-bit PWM dither, matched period
+                wrpin   dacmode, #DAC_PIN
+                wxpin   #PERIOD, #DAC_PIN
+                dirh    #DAC_PIN
+                wypin   ##$8000, #DAC_PIN     ' park at mid-scale
+
+                ' SE1 = ADC pin IN rising: fresh accumulator each period
+                mov     pa, #ADC_PIN
+                or      pa, #%001_000000
+                setse1  pa
+
+.loop           waitse1                        ' wait for ADC sample period
+                rdpin   acc, #ADC_PIN         ' running SINC2 accumulator
+                mov     smp, acc
+                sub     smp, last             ' delta over this period
+                mov     last, acc             ' remember for next time
+                zerox   smp, #26              ' keep the meaningful bits
+                shl     smp, #8               ' scale the count toward 16b
+                cmp     smp, ##$FFFF    wcz
+        if_a    mov     smp, ##$FFFF          ' clamp to full scale
+                wypin   smp, #DAC_PIN         ' re-emit on the DAC
+                jmp     #.loop
+
+adcmode         long    P_ADC_1X | P_ADC
+dacmode         long    P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+last            long    0
+
+acc             res     1
+smp             res     1

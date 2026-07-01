@@ -1,0 +1,108 @@
+CON
+  _clkfreq = 200_000_000
+
+  LEFT_PIN  = 48                ' left-channel DAC pin
+  RIGHT_PIN = 49                ' right-channel DAC pin
+  PERIOD    = 256               ' DAC sample period (multiple of 256)
+  SAMPLE_HZ = _clkfreq / PERIOD ' 781_250 Hz
+
+VAR
+  long inc[3]                   ' the voices' DDS phase increments
+
+PUB main()
+  inc[0] := 262 frac SAMPLE_HZ  ' C4
+  inc[1] := 330 frac SAMPLE_HZ  ' E4
+  inc[2] := 392 frac SAMPLE_HZ  ' G4
+  coginit(NEWCOG, @mixer, @inc)
+
+DAT             org
+
+mixer           rdlong  inc0, ptra[0]         ' per-voice phase steps
+                rdlong  inc1, ptra[1]
+                rdlong  inc2, ptra[2]
+
+                ' two DAC pins: left and right, 16-bit PWM dither
+                wrpin   dacmode, #LEFT_PIN
+                wxpin   #PERIOD, #LEFT_PIN
+                dirh    #LEFT_PIN
+                wypin   ##$8000, #LEFT_PIN
+                wrpin   dacmode, #RIGHT_PIN
+                wxpin   #PERIOD, #RIGHT_PIN
+                dirh    #RIGHT_PIN
+                wypin   ##$8000, #RIGHT_PIN
+
+                ' pace the mix on the left pin's IN, once per period
+                mov     pa, #LEFT_PIN
+                or      pa, #%001_000000
+                setse1  pa
+
+.loop           mov     lsum, #0              ' start an empty mix
+                mov     rsum, #0
+
+                add     pha0, inc0            ' voice 0 (center)
+                qrotate amp, pha0
+                getqy   smp
+                mov     pl, v0panL
+                mov     pr, v0panR
+                call    #addvoice
+
+                add     pha1, inc1            ' voice 1 (panned left)
+                qrotate amp, pha1
+                getqy   smp
+                mov     pl, v1panL
+                mov     pr, v1panR
+                call    #addvoice
+
+                add     pha2, inc2            ' voice 2 (panned right)
+                qrotate amp, pha2
+                getqy   smp
+                mov     pl, v2panL
+                mov     pr, v2panR
+                call    #addvoice
+
+                fges    lsum, neg7fff         ' clamp mix to 16-bit signed
+                fles    lsum, pos7fff
+                fges    rsum, neg7fff
+                fles    rsum, pos7fff
+                add     lsum, ##$8000         ' signed -> offset binary
+                add     rsum, ##$8000
+
+                waitse1                        ' wait for sample period
+                wypin   lsum, #LEFT_PIN
+                wypin   rsum, #RIGHT_PIN
+                jmp     #.loop
+
+' Scale one voice's sample by its left/right pan weights (0..256) and
+' add it into the running stereo mix.
+addvoice        mov     t, smp
+                muls    t, pl
+                sar     t, #8
+                add     lsum, t
+                mov     t, smp
+                muls    t, pr
+                sar     t, #8
+        _ret_   add     rsum, t
+
+dacmode         long    P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+amp             long    $2AAA                 ' per-voice amplitude
+v0panL          long    192
+v0panR          long    192
+v1panL          long    256
+v1panR          long     64
+v2panL          long     64
+v2panR          long    256
+pos7fff         long    $7FFF
+neg7fff         long    -$7FFF
+pha0            long    0
+pha1            long    0
+pha2            long    0
+
+inc0            res     1
+inc1            res     1
+inc2            res     1
+lsum            res     1
+rsum            res     1
+smp             res     1
+pl              res     1
+pr              res     1
+t               res     1

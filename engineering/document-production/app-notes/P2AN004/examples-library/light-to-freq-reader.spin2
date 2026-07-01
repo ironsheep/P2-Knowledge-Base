@@ -1,0 +1,44 @@
+CON
+  _clkfreq = 200_000_000
+
+  SIG_PIN  = 16                ' TSL235R OUT -> this pin (the signal)
+  '          17               ' periods counter, routed from SIG_PIN
+  GATE_MS  = 100               ' minimum gate window, milliseconds
+
+  ' Reciprocal frequency counter, two consecutive smart pins, one window:
+  '   SIG_PIN   : %10101 P_COUNTER_TICKS   -> elapsed clocks (A/B local)
+  '   SIG_PIN+1 : %10111 P_COUNTER_PERIODS -> complete periods, with its
+  '               A/B routed back one pin (P_MINUS1_A|P_MINUS1_B) so it
+  '               watches the SAME signal physically present on SIG_PIN.
+  '   freq = periods * clkfreq / ticks
+  ' P_LOW_150K adds a soft pull that rejects noise on an open input.
+  TIK_MODE = P_COUNTER_TICKS   | P_LOW_150K
+  PER_MODE = P_COUNTER_PERIODS | P_MINUS1_A | P_MINUS1_B
+
+  ' TSL235R datasheet typical: fO = 250 kHz at Ee = 430 uW/cm^2
+  ' (lambda_p = 635 nm, VDD = 5 V). Irradiance scales with frequency:
+  '   Ee[uW/cm^2] = freq[Hz] * 430 / 250_000
+  CAL_UW   = 430
+  CAL_HZ   = 250_000
+
+PUB main() | gate, freq, ee_x100, ee_int, ee_frac
+  gate := (clkfreq / 1000) * GATE_MS
+  pinstart(SIG_PIN+0, TIK_MODE, gate, %00)    ' elapsed-ticks pin
+  pinstart(SIG_PIN+1, PER_MODE, gate, %00)    ' periods pin
+  repeat
+    freq    := read_freq()
+    ' irradiance in hundredths of a uW/cm^2 (integer fixed point)
+    ee_x100 := muldiv64(freq * 100, CAL_UW, CAL_HZ)
+    ee_int  := ee_x100 / 100
+    ee_frac := ee_x100 // 100
+    debug("TSL235R  freq = ", udec_(freq), " Hz", 13)
+    debug("  Ee = ", udec_(ee_int), ".", udec_(ee_frac), " uW/cm2")
+    waitms(300)
+
+PRI read_freq() : freq | periods, ticks
+  ' block until both pins have closed their period-aligned window
+  repeat until pinread(SIG_PIN+0) and pinread(SIG_PIN+1)
+  ticks   := rdpin(SIG_PIN+0)
+  periods := rdpin(SIG_PIN+1)
+  if ticks                            ' no signal -> guard divide-by-zero
+    freq := muldiv64(periods, clkfreq, ticks)
