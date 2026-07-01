@@ -352,7 +352,7 @@ PUB measure_duty_cycle() : duty_percent | high_clocks, period_clocks
   repeat until PINREAD(PWM_PIN)
   high_clocks := RDPIN(PWM_PIN)
 
-  duty_percent := (high_clocks * 100) / period_clocks
+  duty_percent := MULDIV64(high_clocks, 100, period_clocks)
 ```
 
 ### Differential High-Time

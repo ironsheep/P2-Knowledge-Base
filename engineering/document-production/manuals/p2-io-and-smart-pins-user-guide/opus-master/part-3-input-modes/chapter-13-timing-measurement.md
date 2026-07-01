@@ -134,7 +134,7 @@ PUB analyze_pwm() : frequency, duty_percent
 
   ' Calculate results
   frequency := _clkfreq / (high_time + low_time)
-  duty_percent := (high_time * 100) / (high_time + low_time)
+  duty_percent := MULDIV64(high_time, 100, high_time + low_time)
 ```
 
 
@@ -287,7 +287,7 @@ PUB measure_frequency() : freq_hz | clocks, events
               rdpin     period, #FREQ_PIN
               and       period, ##$7FFFFFFF
 
-              ' frequency = (sysclk * 100) / period
+              ' frequency = MULDIV64(sysclk, 100, period)
 ```
 
 ### Timeout Detection Mode (Y[2]=1)
@@ -463,7 +463,7 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
 
   ' Calculate results
   frequency := _clkfreq / (h_clocks + l_clocks)
-  duty_percent := (h_clocks * 100) / (h_clocks + l_clocks)
+  duty_percent := MULDIV64(h_clocks, 100, h_clocks + l_clocks)
   high_us := h_clocks / (_clkfreq / 1_000_000)
   low_us := l_clocks / (_clkfreq / 1_000_000)
 
@@ -524,7 +524,7 @@ freq_loop
               rdpin     period, #FREQ_PIN
               and       period, ##$7FFFFFFF
 
-              ' Calculate frequency = (sysclk * 1000) / period
+              ' Calculate frequency = MULDIV64(sysclk, 1000, period)
               ' Store for main cog to read
               wrlong    period, #period_hub
 

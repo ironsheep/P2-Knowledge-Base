@@ -169,7 +169,7 @@ Use `FRAC`, not a hand-rolled `frequency * $1_0000_0000 / _clkfreq` (the
 how `FRAC` derives the NCO Y value.
 
 **For NCO, remember X[15:0] affects frequency:**
-```spin2
+```formula
 ' With X[15:0] = 1 (default)
 frequency = Y * sysclk / 2^32
 

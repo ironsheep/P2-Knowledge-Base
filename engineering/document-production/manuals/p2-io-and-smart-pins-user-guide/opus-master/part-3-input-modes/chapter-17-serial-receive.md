@@ -56,7 +56,7 @@ X_value = (bit_period << 16) | (data_bits - 1)
 
 **With fractional precision:**
 ```spin2
-bit_period_frac := (_clkfreq * 65536) / baud
+bit_period_frac := MULDIV64(_clkfreq, 65536, baud)
 X_value := (bit_period_frac & $FFFFFC00) | (data_bits - 1)
 ```
 
