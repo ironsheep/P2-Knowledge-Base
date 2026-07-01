@@ -180,6 +180,10 @@ TX and RX have separate state machines; only the baud generator is shared. Note 
 **FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
 :::
 
+::: caution
+**Transmit pacing tightens as the system clock rises.** Beyond the basic IN-flag handshake above, community USB drivers report that at higher `clkfreq` the transmit buffer must not be re-fed too soon, or bit-stuffed bits can be dropped — the safe inter-byte spacing scales with the system clock. Both the host driver (OBEX #4198) and the device driver (OBEX #4727) insert sysclk-proportional delays between output bytes to stay reliable. This is a community-observed behaviour; the exact mechanism is not described in the current silicon documentation, so tune the per-clock delay against your own clock rather than treating any single value as a published figure.
+:::
+
 
 ## 19.5 Host vs Device Mode
 
@@ -216,11 +220,12 @@ As a USB host, the P2:
 
 Rather than implementing USB from scratch, use existing libraries:
 
-**Parallax OBEX (Object Exchange):**
+**Parallax OBEX (Object Exchange)** — two community drivers are the natural starting points, one for each role:
 
-- Search for USB objects
-- CDC (serial port) implementations
-- HID implementations
+- **USBnew** (OBEX #4198, by Wuerfel_21) — a USB **host** / HID-input driver: with the P2 acting as host, it reads keyboards, mice, and gamepads.
+- **USB Human-Interface-Device Driver** (OBEX #4727, by Chris Gadd) — a USB **device** driver: the P2 presents itself as a HID peripheral to a host.
+
+These are the community implementations to study and build from; review each against your own requirements and test it for your use before you rely on it.
 
 **P2 Forums:**
 
