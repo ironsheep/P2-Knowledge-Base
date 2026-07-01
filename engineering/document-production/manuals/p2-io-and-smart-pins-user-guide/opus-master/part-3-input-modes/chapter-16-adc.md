@@ -464,6 +464,8 @@ PRI process_audio()
   ' Application-specific audio processing of audio_buffer[]
 ```
 
+> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_GIO` (ground-referenced). For an AC source such as an electret microphone, switch to `P_ADC_FLOAT`: the floating input **self-biases to roughly mid-supply**, so the mic couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what you want.
+
 ### Example 3: High-Resolution DC Measurement
 
 ```spin2

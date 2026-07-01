@@ -41,6 +41,8 @@ duty_cycle = high_time / total_time
 
 A single measurement provides either a count or a time, but calculating frequency or duty requires both.
 
+> **Compute these ratios with `MULDIV64`, not `*` and `/`.** Frequency and duty combine large values: `periods * sysclk` overflows a 32-bit long for any real signal — 100 periods times 200 MHz is already 20 billion, past the 4.29-billion limit — so a plain `(periods * sysclk) / time` silently returns a wrong number. Spin2's `MULDIV64(a, b, divisor)` forms the `a * b` product in a 64-bit intermediate, then divides, so the result stays exact. Every frequency and duty calculation in this chapter uses it; so should yours.
+
 ### Trigger Sensitivity
 
 All period measurement modes use Y[1:0] to select A/B input trigger combinations:
@@ -132,7 +134,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
   total_time := RDPIN(SIG_PIN)                ' Total period time
   high_time := RDPIN(SIG_PIN+1)               ' Total high time
 
-  duty_percent := (high_time * 100) / total_time
+  duty_percent := MULDIV64(high_time, 100, total_time)
   DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
 
@@ -274,10 +276,10 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     periods := RDPIN(PIN_PERIODS)             ' Period count
 
     ' Calculate frequency: periods / time
-    freq := (periods * _clkfreq) / time_clks
+    freq := MULDIV64(periods, _clkfreq, time_clks)
 
     ' Calculate duty: high_time / total_time
-    duty := (high_clks * 100) / time_clks
+    duty := MULDIV64(high_clks, 100, time_clks)
 
     DEBUG("Frequency: ", UDEC_(freq), " Hz")
     DEBUG("Duty cycle: ", UDEC_(duty), "%")
@@ -285,13 +287,15 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     DEBUG("---")
 ```
 
+> **All three cells must watch the same signal.** Each `PINSTART` above measures the pin you name, so the signal has to reach `PIN_TIME`, `PIN_HIGH`, and `PIN_PERIODS`. Rather than wiring it to three pins, leave it on one and aim the other two cells at that pin with A-input routing: `P_MINUS1_A` and `P_MINUS2_A` make a cell read the pin one or two below it — so with the signal on `PIN_TIME`, start `PIN_HIGH` with `P_COUNTER_HIGHS | P_MINUS1_A` and `PIN_PERIODS` with `P_COUNTER_PERIODS | P_MINUS2_A`. A cell watching a neighbor does not consume that pin; the observed pin stays free for its own use. (Without this, a signal on only one pin leaves the other two cells' IN flags low and the `REPEAT UNTIL` never exits.)
+
 ### Why Three Measurements?
 
 The actual measurement time extends beyond X clocks to complete the final period. Using P_COUNTER_TICKS provides the **actual** measurement duration, enabling precise calculations:
 
 ```formula
-actual_frequency = periods / (time_clks / sysclk)
-actual_duty = high_clks / time_clks
+actual_frequency = MULDIV64(periods, sysclk, time_clks)
+actual_duty = MULDIV64(high_clks, 100, time_clks)   ' percent
 ```
 
 Without knowing the actual elapsed time, calculations would have error due to the period completion extension.
@@ -439,14 +443,14 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
     high_time := RDPIN(PWM_PIN+1)
 
     ' Calculate frequency
-    freq := (NUM_PERIODS * _clkfreq) / total_time
+    freq := MULDIV64(NUM_PERIODS, _clkfreq, total_time)
 
     ' Calculate duty cycle
-    duty := (high_time * 1000) / total_time   ' 0.1% resolution
+    duty := MULDIV64(high_time, 1000, total_time) ' 0.1% resolution
 
     ' Calculate period in nanoseconds
-    period_ns := (total_time * 1000) / ...
-                 (NUM_PERIODS * (_clkfreq / 1_000_000))
+    period_ns := MULDIV64(total_time, 1000, ...
+                 NUM_PERIODS * (_clkfreq / 1_000_000))
 
     DEBUG("Frequency: ", UDEC_(freq), " Hz")
     DEBUG("Duty cycle: ", UDEC_(duty/10), ".", UDEC_(duty//10), "%")
@@ -480,7 +484,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' error_ppm = ((measured - expected) * 1_000_000) / expected
 
     ' Simplified: calculate measured frequency
-    measured := (periods * _clkfreq) / measured
+    measured := MULDIV64(periods, _clkfreq, measured)
 
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
@@ -596,12 +600,12 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 
 **From period measurement (P_PERIODS_TICKS):**
 ```formula
-frequency = (num_periods × sysclk) / rdpin_value
+frequency = MULDIV64(num_periods, sysclk, rdpin_value)
 ```
 
 **From period count (P_COUNTER_PERIODS):**
 ```formula
-frequency = (rdpin_value × sysclk) / window_clocks
+frequency = MULDIV64(rdpin_value, sysclk, window_clocks)
 ' Or for 1-second window:
 frequency = rdpin_value  ' Direct Hz reading
 ```
@@ -610,7 +614,7 @@ frequency = rdpin_value  ' Direct Hz reading
 
 **From period-based modes:**
 ```formula
-duty_percent = (high_time × 100) / total_time
+duty_percent = MULDIV64(high_time, 100, total_time)
 ```
 Where:
 

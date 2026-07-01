@@ -21,7 +21,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' error_ppm = ((measured - expected) * 1_000_000) / expected
 
     ' Simplified: calculate measured frequency
-    measured := (periods * _clkfreq) / measured
+    measured := MULDIV64(periods, _clkfreq, measured)
 
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
