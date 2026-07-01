@@ -1,5 +1,23 @@
 # P2 Streamer Programming Guide - Changelog
 
+## Unreleased
+
+Content additions from a P2 forum-thread reconciliation pass — designer-authoritative
+findings folded in. No mode encodings changed.
+
+- **§10.4 — SINC2 Goertzel silicon limitation.** Documented that SINC2's double integration
+  requires a constant iteration count per Goertzel cycle: a non-power-of-two NCO rate makes
+  GETXACC read an off-by-one integration, corrupting the current and next samples (periodic
+  ~30–60 ms glitches). Three workarounds given (power-of-two clock, SINC1, or XZERO + sub-20 ms
+  period). From the *Parallax Propeller 2 Documentation* Goertzel note dated 2024.12.16; also
+  cross-referenced in the Appendix D "Goertzel Results Invalid" checklist.
+- **§15.2 — HDMI/DVI blanking guidance.** Blanking is display-limited, not analog-mandated:
+  observed horizontal floors ~16–68 px (multiple of 8) and minimal ~8-line vertical blanking;
+  audio-carrying HDMI needs ~34 horizontal blank pixel-periods (community-measured — verify
+  against the data-island spec).
+- **§9.2 — capture-to-spectrum pointer** linking high-rate ADC capture to the CORDIC FFT
+  technique worked in the *CORDIC for Real Work* application note (P2AN002).
+
 ## v1.0.2 (2026-06-26)
 
 Presentation refresh adopting the shared manual-family typography. No chapters added,
