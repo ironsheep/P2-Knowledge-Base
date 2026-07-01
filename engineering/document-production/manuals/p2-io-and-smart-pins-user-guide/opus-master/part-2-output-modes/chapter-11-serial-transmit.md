@@ -298,7 +298,7 @@ PUB continuous_stream()
 
   ' Continuous transmission loop
   repeat
-    if PINREAD(TX_PIN) & $8000_0000         ' Buffer empty?
+    if PINREAD(TX_PIN)                      ' IN raised = buffer ready
       WYPIN(TX_PIN, get_next_byte())        ' Load next
 ```
 

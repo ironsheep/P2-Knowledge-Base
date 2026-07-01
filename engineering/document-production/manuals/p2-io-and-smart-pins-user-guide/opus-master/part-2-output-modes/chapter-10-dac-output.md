@@ -279,7 +279,7 @@ PUB dithered_dac_pwm(value16) | mode
 
 PUB update_value_sync(value16)
   ' Wait for sample complete before update
-  repeat until PINREAD(DAC_PIN) & $8000_0000
+  repeat until PINREAD(DAC_PIN)
   WYPIN(DAC_PIN, value16)
 ```
 
@@ -475,7 +475,7 @@ PUB audio_sample() : sample | sine_val
 
 PUB audio_output()
   ' Output audio sample
-  repeat until PINREAD(AUDIO_PIN) & $8000_0000
+  repeat until PINREAD(AUDIO_PIN)
   WYPIN(AUDIO_PIN, audio_sample())
 ```
 

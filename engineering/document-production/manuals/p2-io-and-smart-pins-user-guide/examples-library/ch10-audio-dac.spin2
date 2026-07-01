@@ -33,5 +33,5 @@ PUB audio_sample() : sample | sine_val
 
 PUB audio_output()
   ' Output audio sample
-  repeat until PINREAD(AUDIO_PIN) & $8000_0000
+  repeat until PINREAD(AUDIO_PIN)
   WYPIN(AUDIO_PIN, audio_sample())
