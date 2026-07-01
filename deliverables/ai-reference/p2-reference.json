@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-30",
-    "last_updated": "2026-06-30T19:58:11.647076",
+    "release_date": "2026-07-01",
+    "last_updated": "2026-07-01T19:44:42.758604",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-30T19:58:11.647076",
+    "extraction_date": "2026-07-01T19:44:42.758604",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-30T19:58:11.647076",
+    "extraction_date": "2026-07-01T19:44:42.758604",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22509,7 +22509,7 @@
                 "description": "Configure asynchronous serial transmit"
               },
               {
-                "code": "' Start quadrature encoder on pins 32-33\nPINSTART(32 ADDPINS 1, P_QUADRATURE_A, 0, 0)\n",
+                "code": "' Start quadrature encoder on pins 32-33\nPINSTART(32 ADDPINS 1, P_QUADRATURE, 0, 0)\n",
                 "description": "Configure quadrature encoder input"
               },
               {
@@ -22523,7 +22523,7 @@
                 "source": "sensor_array"
               },
               {
-                "code": "' Flash FS SPI pin configuration\nCON\n  SPI_CLK = 56\n  SPI_MOSI = 57\n  SPI_MISO = 58\n  SPI_CS = 59\n  \nPUB setup_spi()\n  ' Configure SPI pins as group\n  PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)\n  \n  ' Then set specific modes\n  PINSTART(SPI_CLK, P_TRANSITION_OUTPUT, 1, 0)\n  PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)\n  PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)\n",
+                "code": "' Flash FS SPI pin configuration\nCON\n  SPI_CLK = 56\n  SPI_MOSI = 57\n  SPI_MISO = 58\n  SPI_CS = 59\n  \nPUB setup_spi()\n  ' Configure SPI pins as group\n  PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)\n  \n  ' Then set specific modes\n  PINSTART(SPI_CLK, P_TRANSITION, 1, 0)\n  PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)\n  PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)\n",
                 "description": "Configure SPI pins for flash filesystem",
                 "source": "P2-FLASH-FS"
               }
@@ -25374,7 +25374,7 @@
               "P_NCO_DUTY": "High time value",
               "P_PWM_TRIANGLE": "Duty cycle (0 to X)",
               "P_PWM_SAWTOOTH": "Duty cycle (0 to X)",
-              "P_DAC_DITHER": "16-bit DAC value",
+              "P_DAC_DITHER_PWM": "16-bit DAC value",
               "P_REPOSITORY": "32-bit value to store"
             },
             "data_transmission": {
@@ -26892,7 +26892,7 @@
               "P_NORMAL": "%00000 - Normal I/O",
               "P_REPOSITORY": "%00001 - Long repository",
               "P_DAC_NOISE": "%00010 - DAC noise",
-              "P_DAC_DITHER": "%00011 - DAC with dither",
+              "P_DAC_DITHER_PWM": "%00011 - DAC with dither",
               "P_PULSE": "%00100 - Pulse/cycle output",
               "P_TRANSITION": "%00101 - Transition output",
               "P_NCO_FREQ": "%00110 - NCO frequency",
