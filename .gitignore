@@ -252,3 +252,7 @@ NO-COMMIT/
 engineering/document-production/manuals/p2-debug-window-manual/opus-master/ch09-fft.md.backup-20260617-235045
 engineering/document-production/manuals/p2-debug-window-manual/opus-master/ch07-scope.md.backup-20260618-041608
 /engineering/document-production/manuals/p2-xbyte-programming-guide/REF-NO-COMMIT
+
+# regenerable analysis/extraction reports (script outputs, not KB content)
+engineering/ingestion/extracted-documentation/extraction_update_report.yaml
+engineering/planning/yaml-audit-report.yaml
