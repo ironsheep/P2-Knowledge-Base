@@ -65,6 +65,16 @@ So: emit the foundational fork **only** when the owning manual genuinely lacks t
 coverage; emit the advanced fork **only** when there is a committed app note. A
 region can be enrichment-only (USB), app-note-only (CORDIC), or both (ADC).
 
+**Scope-collision check (a load-bearing third question).** Before committing the
+*advanced* fork, verify the owning manual does not **already work the very
+instrument** the app note is meant to deliver. If the manual already ships the
+worked example (e.g. IOSP Ch.13/14/15 already contain a frequency counter,
+tachometer, and time-of-flight instrument that the roster had pencilled in for the
+app note), the advanced fork **collapses to whatever is genuinely not yet worked**
+— a campaign-scope decision, surfaced as an open-question, **never** a silent
+duplication of the manual. The boundary test is bidirectional: the owning manual
+can pre-empt the *advanced* fork just as it can satisfy the *foundational* one.
+
 ---
 
 ## The mergeable output contract (the linchpin)
@@ -121,6 +131,17 @@ Capture everything **verbatim** under the region's `research/<source>/` (for an
 app-note region: `app-notes/<P2ANxxx>/research/`). Do not paraphrase the source
 into the capture — paraphrase loses the evidence.
 
+**Located-but-uncapturable source (degradation path).** Some sources you can
+*locate* but not *capture* — notably **Quick Bytes code bodies**, which are
+distributed through Parallax's `parallax-download-manager` and are **not
+retrievable in-container**. When this happens: study the source from its **catalog
+metadata + the KB-grounded mechanism only**, mark every recipe that depends on its
+code **BLOCKED / code-pending**, and record it as an **open-question** — its code
+must be fetched and `pnut_ts`-compiled at authoring time before any claim rests on
+it. A located source you could not capture is a **finding, not an omission** — list
+it in `sources_mined` with its uncapturable status; never silently drop it, and
+never assert behaviour you could not read.
+
 ## §2. Study the examples
 
 Read the captured code + prose. Produce a `STUDY-*.md` per source cluster
@@ -141,6 +162,12 @@ test above, and which fork(s) apply for this region:
   note is committed this cycle.
 - **described-not-rebuilt** → a ceiling example linked but not rebuilt (P2AN001's
   8-pin interpreter, P2AN002's Park/FOC capstone).
+- **out-of-region** → a source you mined that turns out to exercise a *different*
+  capability than the region (e.g. an OBEX "sound" object that drives NCO/FREQ
+  square-wave tones, **not** the DAC). Do not force it into the fork; **route it**
+  to where it belongs (a one-line contrast in the relevant manual chapter, or
+  another region's pile) and record the re-route in the artifact. Mining the wrong-
+  fit source and naming the correct home is itself a useful boundary signal.
 
 Record *why* each call was made — the boundary decision is the durable output.
 
@@ -213,6 +240,14 @@ single region shows.
    `engineering/operations/P2KB-CORRECTION-FINDINGS.md`.
 4. **Promote each region's staged artifact** to its canonical home (the app note's
    `P2ANxxx-NOTES.md` boundary sections / the enrichment boundary doc).
+5. **Preserve the captures that downstream authoring needs, THEN tear down staging.**
+   For any region with an **app-note fork**, the verbatim source captures
+   (`research/<source>/` — OBEX/forum/external code the recipes are built from) are
+   **input to §3 doc-generation**; move them to the app note's `app-notes/<P2ANxxx>/research/`
+   before removing the staging mirror, or the authors must re-download. Enrichment-only
+   regions (no app note) have no downstream consumer — their captures go with the
+   teardown (the promoted boundary doc + the corrections register hold the durable
+   record). Only after this does `_mine-staging/<wave-slug>/` get removed.
 
 The reduce is the **barrier**. **Document generation — authoring the app notes
 from their advanced forks — is downstream of the reduce**, a separate tail of

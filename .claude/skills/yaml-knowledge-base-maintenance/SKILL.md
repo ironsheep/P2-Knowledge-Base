@@ -26,7 +26,7 @@ deliverables/ai/P2/
 └── guides/
 ```
 
-**Do not edit `engineering/knowledge-base/P2/`.** That tree is transient and stale. Its cleanup is a separate concern (see the `cleanup-backups` recommendation in the recommendations doc).
+**KB-YAML work searches and edits `deliverables/ai/P2/` ONLY.** That is the single served source of truth. **Everything under `engineering/` is NON-KB** — process docs, ingestion **reports/extractions**, **backups**, and former ingestion **"concise donors"** (all git-ignored local artifacts; most are not even in the repo). Never grep the `engineering/` tree for a KB fix, never edit a "donor"/backup copy, and never "fix the donor too" — those files don't ship and don't regenerate anything (the old donor-reseed pipeline is retired; see [[reference_p2kb_yaml_donor_reseed]]). Scope every search to `deliverables/ai/P2/`. In particular **do not edit `engineering/knowledge-base/P2/`** (transient/stale) — its cleanup is a separate concern.
 
 > **App-note YAML companions are first-party and live here.** Per the
 > four-artifact model (`HEAD-DISPATCH-DRAFT.md` §"Artifact-type model"), an app
