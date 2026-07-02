@@ -230,6 +230,18 @@ Execution status).
 
 ---
 
+### F11 — Fig 9.5 (Typical SMPS Circuit): feedback label overlays the ground arrows — DONE 2026-07-02
+
+**Location:** Chapter 9 §9.4, Figure 9.5 (`\DiagSmpsCircuit` in
+`workspace/p2-io-and-smart-pins-user-guide/templates/p2kb-iosp-diagrams.sty`).
+The italic "feedback: voltage divider → A-input, shunt → B-input" label was placed at a
+fixed `(1.3,-3.1)`, level with the diode/capacitor ground symbols, so the text ran through
+the descending ground arrows. **Fix:** anchor the label BELOW the capacitor ground (the
+lower of the two) by capturing its coordinate (`cgnd`) and hanging the label `7mm` under it
+(`anchor=north, yshift=-7mm at (1.3,0 |- cgnd)`) — robust to the transistor's rendered
+height, unlike a guessed absolute y. Daemon-verified (single-figure round-trip): label sits
+clear below both grounds, compile clean.
+
 ## Carried corrections folded into this batch
 
 - **RA-10 (F-135) — DONE 2026-07-02.** The IOSP-side reversal of the false

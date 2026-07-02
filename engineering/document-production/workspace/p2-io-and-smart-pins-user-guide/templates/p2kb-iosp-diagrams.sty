@@ -608,10 +608,14 @@
   % freewheel diode (cathode to switch node) + inductor + output cap
   \draw (swn) to[D, invert, l_=$D$] ++(0,-1.7) node[ground]{};
   \draw (swn) to[L, l=$L$] ++(2.7,0) coordinate (vo);
-  \draw (vo) to[C, l=$C$] ++(0,-2.2) node[ground]{};
+  \draw (vo) to[C, l=$C$] ++(0,-2.2) coordinate (cgnd) node[ground]{};
   \draw (vo) -- ++(1.1,0) node[right, text=diagram-text]{Vout};
-  \node[font=\scriptsize\itshape, text=diagram-text, text width=72mm, align=center]
-        at (1.3,-3.1) {feedback: voltage divider $\to$ A-input, shunt $\to$ B-input};
+  % Caption label hangs BELOW the lowest ground symbol (the capacitor ground, cgnd),
+  % anchored to its actual position so the text never overlays the descending ground
+  % arrows regardless of the transistor's rendered height.
+  \node[font=\scriptsize\itshape, text=diagram-text, text width=72mm, align=center,
+        anchor=north, yshift=-7mm]
+        at (1.3,0 |- cgnd) {feedback: voltage divider $\to$ A-input, shunt $\to$ B-input};
 \end{circuitikz}
 \caption{Typical SMPS (buck) circuit}
 \end{figure}}
