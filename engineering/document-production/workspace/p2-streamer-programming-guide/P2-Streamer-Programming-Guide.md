@@ -796,6 +796,10 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 **ADC readings are 8-bit values.** For higher resolution, use smart pin ADC modes with post-processing.
 :::
 
+::: tip
+**Capture-to-spectrum.** Streaming ADC samples to hub at up to megasamples per second is the front end of on-chip spectral analysis: capture a block here, then hand it to a CORDIC FFT to turn the samples into a spectrum. The FFT side is worked in the *CORDIC for Real Work* application note (P2AN002); this chapter is how you feed it.
+:::
+
 # Chapter 10: DDS/Goertzel Mode {#ch-10}
 
 This is the streamer's cleverest mode, and it does two things at once (Chapter 1 introduced both in plain terms). **DDS** *generates* a signal — it steps through a waveform table to synthesize a precise tone or arbitrary shape. **Goertzel** *measures* one — it reports how much of a single chosen frequency is present in an incoming signal, the trick behind touch-tone decoding and ultrasonic ranging. Uniquely, this mode advances on **every clock cycle**, not just on NCO rollovers, which is what gives it the resolution to do real signal processing.
@@ -863,6 +867,16 @@ repeat i from 0 to 511
 
 ::: caution
 **SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Goertzel example in the *Parallax Propeller 2 Documentation v35 - Rev B/C* uses for SINC2) to prevent accumulator overflow.
+:::
+
+::: caution
+**SINC2 requires a *constant* iteration count per Goertzel cycle — a documented silicon limitation.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise — roughly one glitch every 30–60 ms. (Recorded in the *Parallax Propeller 2 Documentation* Goertzel note dated 2024.12.16.)
+
+Three ways to avoid it, most robust first:
+
+1. **Run at a system clock that makes the iteration count a power of two.** To listen at 1 MHz, run the sysclock at 256 MHz rather than 250 MHz, so every Goertzel cycle is exactly 256 clocks — constant by construction. (A *constant* count is the true requirement; a power of two is simply the practical way to guarantee it.)
+2. **Use SINC1 instead.** Single integration is not sensitive to a varying iteration count.
+3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT) and keep the measurement period under about 20 ms.**
 :::
 
 ## 10.5 Reading Results {#sec-10-5}
@@ -1342,6 +1356,14 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 **HDMI requires the colorspace converter in DVI mode.** In DVI mode, the converter generates TMDS encoding from RGB data.
 :::
 
+::: hardware
+**Blanking intervals are display-limited, not analog-mandated.** DVI/HDMI has no analog front/back-porch requirement, so the large blanking intervals inherited from VGA can be trimmed hard — the practical floor is whatever the attached display tolerates. Observed horizontal-blanking floors range from about **16 pixels** on permissive TVs to roughly **68** on older DVI monitors, and horizontal blanking must be a **multiple of 8** pixels; minimal vertical blanking of about **8 lines** (one sync line plus seven blank) has been driven successfully. Treat these as *observed display limits* to test against your own monitor, not as P2 limits.
+:::
+
+::: caution
+**Carrying HDMI audio needs more horizontal blanking than video alone.** The data-island packets that carry sound require additional room in each horizontal blanking interval — community testing reports roughly **34 pixel-periods**, versus the ~16 that video-only timing can reach — so an audio-carrying design cannot use the tightest blanking. This figure is community-measured rather than quoted from the HDMI data-island specification; verify it for your exact mode before committing a timing.
+:::
+
 ## 15.3 Composite Video {#sec-15-3}
 
 Composite video uses the colorspace converter to generate NTSC or PAL signals.
@@ -1765,6 +1787,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 2. ADC pin configured for ADC mode
 3. Sample count adequate for frequency resolution
 4. SINC2 amplitude reduced to ±10 to prevent overflow
+5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches (~every 30–60 ms) mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.4)
 
 # Index
 
