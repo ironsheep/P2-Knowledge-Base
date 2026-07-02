@@ -147,6 +147,12 @@ Mechanical/independent (no decision): F3, F6, F8, F10. Platform filter/template:
 (+F2), F7. Decision-gated: F5, F9. Apply the whole batch, then a single re-prepare →
 regenerate → verify.
 
+**Correction (2026-07-02):** F1 was initially left OUT of this sequencing as
+"content, not a visual fix." That carve-out was wrong — it conflicts with the
+standing guidance that anything identified as useful to readers/agents ships in the
+same pass (no disguised deferral). F1 was folded in and authored the same day (see
+Execution status).
+
 ## Execution status (2026-07-02)
 - **F10 — DONE.** `content.sty` `ModeBlock` top rule `borderline north` 4pt → 1.5pt
   (vertical `west` stays 4pt). Shared-platform file → re-stages on the final prepare.
@@ -176,6 +182,14 @@ regenerate → verify.
   Constant text table + reconcile Appendix B (quick-ref keeps compact colored-table role).
 - **F9 — READY (heavy).** New "FPGA Board Differences" appendix; relocate scattered FPGA
   notes there, leave one-line pointers where load-bearing; never delete.
+- **F1 — DONE (2026-07-02, folded in after the carve-out correction above).** Added a
+  "Waiting Strategies" subsection to §5.1: the true event **stall** (`SETSE`/`WAITSE` —
+  cog halts vs. the poll-spin), the **wait-with-timeout race** (`POLLSE1`/`POLLCT1`,
+  never hangs) with a `SETINT1` background-servicing pointer, and the hardware
+  self-timeout modes (`P_EVENTS_TICKS` Y[2]=1, windowed `%10101`–`%10111`). All idioms
+  KB-verified (`p2kbArchEventSystem` protocol-timeout pattern; SETSE `%001` = IN-rising);
+  both PASM2 blocks `pnut-ts`-certified; K=76 + inline-ASCII gates pass; daemon-verified
+  render (§5.1 pp. 93–94). Awaiting Stephen's read/approval before commit.
 
 ---
 

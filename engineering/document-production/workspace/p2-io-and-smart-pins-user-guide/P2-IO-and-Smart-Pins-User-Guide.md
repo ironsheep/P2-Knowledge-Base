@@ -3162,6 +3162,44 @@ else
   ' Handle timeout
 ```
 
+### Waiting Strategies
+
+Every pattern above keeps the cog **executing** — the poll-spin loops on `TESTP`/`PINREAD`, and the time-limited wait re-reads `GETCT()` on each pass. That burns instruction cycles (and power) for the whole wait. When a cog has nothing to do until the smart pin is ready, the P2's event system offers a true **stall**: the cog halts and resumes the instant the pin acts. These are PASM2 patterns; Spin2 code reaches them through inline PASM.
+
+**Blocking wait via the event system (the true stall).** A selectable event (SE1–SE4, four per cog) can watch a pin's IN flag. `SETSE1` arms it for the rising edge of IN; `WAITSE1` then halts the cog — no instructions execute — until that edge occurs:
+
+```pasm2
+              setse1    #%001<<6 + pin    ' Arm SE1 on IN rising edge
+.wait
+              waitse1                     ' Cog halts until IN rises
+              rdpin     result, #pin      ' Read + ack (lowers IN)
+              jmp       #.wait
+```
+
+`WAITSE1` auto-clears the SE1 flag as it releases, so the next `WAITSE1` waits for the next edge. You still issue an acknowledging read (`RDPIN`) to retrieve the result and lower IN. The four slots are independent, letting one cog track up to four sources — but each `WAITSE` waits on exactly one.
+
+**Wait with a timeout (never hang).** `WAITSE1` stalls *indefinitely* — if the smart pin never completes, the cog never wakes. To bound the wait, race the pin event against the system counter. No single instruction waits on an event *and* a timer at once, so poll both and branch on whichever fires first:
+
+```pasm2
+              getct     deadline          ' Read current time
+              addct1    deadline, ##timeout   ' Deadline = now + wait
+              setse1    #%001<<6 + pin    ' Arm SE1 on IN rising edge
+.race
+              pollse1   wc                ' Pin ready?
+        if_c  jmp       #.ready           ' Yes - go read it
+              pollct1   wc                ' Timeout reached?
+        if_nc jmp       #.race            ' Neither yet - keep polling
+              jmp       #.timedout        ' Timed out
+.ready
+              rdpin     result, #pin      ' Pin won the race
+.timedout
+              ' Handle the timeout
+```
+
+`ADDCT1` sets counter-comparator 1 to a deadline; `POLLCT1 WC` reports (and clears) whether that deadline has passed, exactly as `POLLSE1 WC` does for the pin event. This costs a few instructions per pass — more than a pure stall — but it can never hang. For background servicing, that same SE1 event can instead drive an interrupt (via `SETINT1`), freeing the cog to run other code between events.
+
+**Let the smart pin time itself out.** Several input modes carry the timeout in hardware, removing the software race entirely. `P_EVENTS_TICKS` (mode `%10010`) with Y[2] = 1 raises IN either when the event arrives *or* after X clocks with no event (Chapter 13), so a single `WAITSE1` covers both outcomes — read the result, then decide whether it was a real event or a timeout. The windowed measurement modes (`%10101`–`%10111`, Chapter 15) instead raise IN after a fixed number of clocks, giving a "wait exactly this long, then read" cadence. When one of these fits, prefer it: the blend is done in silicon at zero cog cost.
+
 ### Checking Without Clearing
 
 To inspect the IN state without affecting it:
