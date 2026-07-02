@@ -22,11 +22,38 @@ So adoption is deliberately **gated per manual**:
 `release-manual` Phase 1/Phase 4 should consult this tracker; flip a row to ADOPTED ✅
 only after the per-manual visual audit passes.
 
+## ⚠️ REQUIRED: crossref must be listed BEFORE the tables filter
+
+**Ordering is not optional.** `p2kb-platform-tables.lua` rewrites every markdown table
+into a `RawBlock` of LaTeX — flattening each cell's inlines to a plain string. Any filter
+that runs **after** tables can no longer see (or link) references inside table cells. So in
+each manual's `request.json` `lua_filters`, **`p2kb-platform-crossref` MUST come before
+`p2kb-platform-tables`**, or table-borne refs (e.g. a "Quick Mode Selection" matrix's
+"Ch N" cells) render as dead text while only body-prose refs link.
+
+```jsonc
+"lua_filters": [
+  "p2kb-platform-figures",
+  "p2kb-platform-crossref",   // ← BEFORE tables
+  "p2kb-platform-tables",
+  "p2kb-platform-mnemonic-bold",
+  "p2kb-platform-code-coloring",
+  "p2kb-platform-pagination"
+]
+```
+
+The filter's header carries a matching FILTER-ORDER note, and it has an explicit `Table`
+cell-walker that only fires while the Table AST still exists (i.e. when crossref runs first);
+if a manual mistakenly lists crossref after tables, that handler is a harmless no-op and the
+table refs silently stay dead — so the visual audit MUST include at least one table-borne
+ref. (Discovered 2026-07-02 on the IOSP pilot: matrix cells were dead while 78 body-prose
+`\hyperlink`s worked; root cause was tables-before-crossref ordering.)
+
 ## Status
 
 | Manual | Cross-ref filter | Notes |
 |--------|------------------|-------|
-| `p2-io-and-smart-pins-user-guide` | 🔧 **ADOPTING (pilot)** | First adopter; wired into request.json 2026-06-26; daemon-verify in progress (this is where the filter is being proven) |
+| `p2-io-and-smart-pins-user-guide` | 🔧 **ADOPTING (pilot)** | First adopter; wired into request.json 2026-06-26. 2026-07-02: fixed the filter-ordering bug (crossref now BEFORE tables) so table-cell refs link; awaiting Stephen's regen + visual audit of the Quick Mode Matrix links |
 | `p2-assembly-language-manual` | ⏳ PENDING AUDIT | released v3.1.0; adopt + audit on next release |
 | `p2-pasm-desilva-style` | ⏳ PENDING AUDIT | released v3.0.1; adopt + audit on next release |
 | `p2-debug-window-manual` | ⏳ PENDING AUDIT | released v1.0.1; adopt + audit on next release |

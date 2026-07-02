@@ -10,8 +10,19 @@
   Two passes over the document:
     Pass 1  harvests every header's auto-generated identifier, keyed by chapter
             number / appendix letter / leading section number.
-    Pass 2  rewrites matching inline runs inside Para/Plain blocks into Links
-            whose target is the harvested anchor.
+    Pass 2  rewrites matching inline runs inside Para/Plain blocks — AND inside
+            table cells (Table handler) — into Links whose target is the
+            harvested anchor.
+
+  FILTER ORDER MATTERS (table cells).  A platform table filter that rewrites a
+  Table into a RawBlock of LaTeX (p2kb-platform-tables) FLATTENS every cell's
+  inlines to a string, after which this filter can no longer see or link them.
+  So for table-borne refs to become clickable, crossref MUST run BEFORE the
+  tables filter in request.json `lua_filters`. When it does, the explicit Table
+  handler below (and pandoc's normal descent into cell Para/Plain) links the
+  cells while the Table AST still exists. If a manual instead lists crossref
+  AFTER tables, the Table nodes are already gone → the Table handler simply
+  never matches (a harmless no-op) and only prose refs link.
 
   SAFE BY DESIGN:
     * Only links a reference whose target header actually EXISTS in this document;
@@ -21,6 +32,9 @@
       (Emph/Strong/Span/Quoted/...), so refs inside *italic* "see also" lines link
       too. It does NOT recurse into a Link (no double-wrapping an existing markdown
       link) or into Code/Math.
+    * Table-cell rewriting is idempotent with pandoc's own descent: a cell
+      already carrying a Link is left untouched (rewrite skips Link inlines), so
+      the explicit Table handler never double-wraps.
     * Pandoc strips leading numbers from section identifiers, so we map the section
       NUMBER -> the real identifier pandoc assigned (never guess the anchor text).
 
@@ -123,7 +137,37 @@ local function do_block(el)
   return el
 end
 
+-- Rewrite references inside every cell of a Table. A cell's `contents` is a list
+-- of Blocks (usually a single Plain); we relink the inlines of each Para/Plain.
+-- This makes table-borne refs (e.g. a "Quick Mode Selection" matrix's "Ch 8"
+-- cells) clickable — but ONLY when crossref runs before the tables filter, so
+-- the Table AST still exists (see FILTER ORDER note in the header). Idempotent:
+-- rewrite() passes existing Link inlines through untouched.
+local function relink_cell(cell)
+  for _, blk in ipairs(cell.contents) do
+    if blk.t == "Para" or blk.t == "Plain" then
+      blk.content = rewrite(blk.content)
+    end
+  end
+end
+
+local function do_table(tbl)
+  local function do_rows(rows)
+    if not rows then return end
+    for _, row in ipairs(rows) do
+      for _, cell in ipairs(row.cells) do relink_cell(cell) end
+    end
+  end
+  if tbl.head then do_rows(tbl.head.rows) end
+  for _, body in ipairs(tbl.bodies) do
+    do_rows(body.head)   -- intermediate (row-group) head rows, if any
+    do_rows(body.body)
+  end
+  if tbl.foot then do_rows(tbl.foot.rows) end
+  return tbl
+end
+
 return {
-  { Header = harvest },                    -- pass 1: build the anchor maps
-  { Para = do_block, Plain = do_block },   -- pass 2: link prose references
+  { Header = harvest },                                   -- pass 1: build the anchor maps
+  { Para = do_block, Plain = do_block, Table = do_table },-- pass 2: link prose + table-cell references
 }

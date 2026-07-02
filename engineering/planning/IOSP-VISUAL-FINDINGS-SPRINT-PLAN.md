@@ -170,18 +170,55 @@ Execution status).
   splits only on ` — ` (em-dash) → they never split and wrapped. Converted to em-dash:
   Ch.1/2/3 (were hyphenated) + Ch.7/15/18 (long, no separator). Now render as short title
   + `\chaptersubtitle`, consistent with Debug Window Manual. No filter/template change.
-- **F4/F2 — DONE.** Added "Ch" to the crossref filter's Form-A keywords + resolve; rewrote
-  all 45 Quick Mode Matrix Chapter/Chapters cells from bare numbers to "Ch N" (filter links
-  them → clickable). Escaper-safe (filter builds the link at AST stage, after escaping, so
-  no `#` in source). Shared-platform filter + front-matter.
-- **F7 — DONE.** Prepended `\needspace` to the section/subsection/subsubsection star-form
-  formats (no shape change) so a heading can't widow at page bottom (fixes §9.3).
-  Shared-platform (`foundation.sty`).
+- **F4/F2 — DONE (fixed 2026-07-02, ordering bug).** Added "Ch" to the crossref filter's
+  Form-A keywords + resolve; rewrote all 45 Quick Mode Matrix Chapter/Chapters cells from
+  bare numbers to "Ch N". Escaper-safe (filter builds the link at AST stage, after escaping,
+  so no `#` in source). Shared-platform filter + front-matter.
+  - **Regression found in Stephen's PDF:** the matrix "Ch N" cells rendered as **dead text**
+    (not clickable), while body-prose refs worked (78 `\hyperlink{chN}` in the generated
+    `.tex`; matrix cells were bare `& Ch 7 &`). **Root cause:** `p2kb-platform-tables.lua`
+    rewrites every Table into a `RawBlock` of LaTeX (flattening each cell's inlines to a
+    string) and ran BEFORE `crossref` in `request.json` — so crossref's Para/Plain/cell
+    handlers never saw the cells. **Fix (2 parts):** (1) reordered IOSP `request.json`
+    `lua_filters` so `p2kb-platform-crossref` runs **before** `p2kb-platform-tables`;
+    (2) added an explicit `Table` cell-walker to the shared `crossref.lua` (+ a FILTER-ORDER
+    note in its header) — robust insurance, a harmless no-op for any manual that still lists
+    crossref after tables. Validated against the pre-fix generated `.tex` (dead cells + working
+    `\hypertarget{ch7}` anchors confirm the reorder will link them). Staged `request.json` +
+    `p2kb-platform-crossref.lua` to outbound; md unchanged (cells already "Ch N").
+    **Adoption impact:** every manual adopting the cross-ref filter must place crossref BEFORE
+    tables in its `lua_filters` (see CROSSREF-FILTER-ADOPTION.md).
+- **F7 — DONE (root-caused + daemon-verified 2026-07-02; 11→0 heading widows).**
+  The first attempt (prepend `\needspace` to every heading format) did NOT hold — Stephen
+  still saw §9.4 / §13.2 headings orphaned at page bottom. Daemon round-trips (4 iterations)
+  found TWO distinct mechanisms:
+  1. **Filter-injected reserve landing between a heading and its content (the real cause of
+     the code-box widows).** `p2kb-platform-figures.lua` reserves `\needspace{n\baselineskip}`
+     before a `**lead-in:**` + code-box (or table) pair to weld them — but when that pair sits
+     directly under a heading, the reserve was emitted BETWEEN the heading and the lead-in, so
+     a short page remnant forced a break right after the heading, stranding it. **Fix:** new
+     `emit_reserve()` helper places the reserve BEFORE a preceding heading, so the heading
+     migrates WITH its lead-in + box/table. (`platform/filters/p2kb-platform-figures.lua`.)
+  2. **Section→subsection strand.** A `\needspace` on the SUBSECTION forced a break that
+     stranded an immediately-preceding SECTION head. **Fix:** keep a solid `\needspace`
+     (7 baselineskip) on `\section` only; REMOVE it from subsection/subsubsection (rely on
+     titlesec's afterheading + the box binding). Plus the Shaded code-box now binds to its
+     preceding line with `\nobreak` before AND after the pre-box `\vspace` (a bare vspace glue
+     is a legal breakpoint). (`platform/templates/p2kb-platform-foundation.sty`.)
+  Verified on the daemon (v4, 396pp): a strict scan (any heading as the last block below
+  mid-page) reports **0** widows; §9.4 and "Reading Measurements" render with their content.
+  Shared-platform (`foundation.sty` + `figures.lua`) — benefits every manual on the stack.
 - **F5 — READY (heavy).** Author one colored bit-field "ruler" macro (positions/colored
   spans above, color-matched meaning-table below; PASM2 palette); convert the Ch.2 P_
   Constant text table + reconcile Appendix B (quick-ref keeps compact colored-table role).
-- **F9 — READY (heavy).** New "FPGA Board Differences" appendix; relocate scattered FPGA
-  notes there, leave one-line pointers where load-bearing; never delete.
+- **F9 — DONE (+ Ch19 straggler fixed 2026-07-02).** New "FPGA Board Differences" appendix
+  (Appendix G); scattered FPGA notes relocated, one-line pointers left where load-bearing.
+  Stephen's PDF review caught one straggler: the Ch19 USB `::: caution` still carried the full
+  resistor detail (1.5 kΩ/15 kΩ, DP/DM) that already lives in Appendix G §"USB — No Built-In
+  Resistors". Trimmed to a short load-bearing pointer ("fit the USB signaling resistors
+  yourself … see Appendix G"). Whole-body re-sweep confirms no other FPGA content outside
+  Appendix G (front-matter's appendix list entry excepted). Daemon-verified: pointer present
+  (p297), full detail gone.
 - **F1 — DONE (2026-07-02, folded in after the carve-out correction above).** Added a
   "Waiting Strategies" subsection to §5.1: the true event **stall** (`SETSE`/`WAITSE` —
   cog halts vs. the poll-spin), the **wait-with-timeout race** (`POLLSE1`/`POLLCT1`,
@@ -192,6 +229,21 @@ Execution status).
   render (§5.1 pp. 93–94). Awaiting Stephen's read/approval before commit.
 
 ---
+
+## Carried corrections folded into this batch
+
+- **RA-10 (F-135) — DONE 2026-07-02.** The IOSP-side reversal of the false
+  "P_TRANSITION Y=0 = continuous transitions" claim (YAML corrected 2026-06-18;
+  hardware-confirmed via `test3-smartpin-00101-y0-continuous.spin2`). Swept the
+  whole opus-master; the claim lived in exactly one place —
+  `part-5-appendices/appendix-f-mode-reference.md` %00101 Register-Usage table.
+  Fixed the cell `Y[15:0] | Transition count (0 = continuous)` →
+  `Y[31:0] | Transition count (0 = idle; use NCO %00110/%00111 for continuous)`
+  and removed a fabricated `X[31:16] | Initial output state time` row (no such
+  field for %00101 in Silicon Doc / Titus / the YAML; the manual's own Ch.7 §7.3
+  and Quick Reference list only X[15:0]+Y[31:0]). Ch.7 and appendix-d were already
+  correct. Traces to Silicon Doc `part4-smart-pins.txt` L351-366 + Titus L487-491 +
+  `smart-pin-00101-transition-output.yaml`. See `P2KB-CORRECTION-FINDINGS.md` F-135.
 
 ## Resolved investigations (recorded so they are not re-chased)
 

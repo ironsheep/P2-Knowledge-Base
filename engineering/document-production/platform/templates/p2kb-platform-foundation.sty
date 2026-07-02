@@ -190,12 +190,22 @@
 % Stepped heading scale (distinct levels) — sans, bold. At the 11pt base these
 % relative sizes land at section 17.3pt / subsection 14.4pt / sub-subsection 12.0pt
 % (the sans-v5 demo scale; chapter stays \Huge = 24.8pt above).
-% Keep-with-next: \needspace reserves room so a heading never lands alone at the
-% bottom of a page (its content would otherwise start on the next). Prepended to
-% the star-form format (no shape change) — fixes heading widows like §9.3.
-\titleformat*{\section}{\needspace{4\baselineskip}\sffamily\bfseries\LARGE}
-\titleformat*{\subsection}{\needspace{4\baselineskip}\sffamily\bfseries\Large}
-\titleformat*{\subsubsection}{\needspace{3\baselineskip}\sffamily\bfseries\large}
+% Keep-with-next. Two mechanisms, deliberately split by level:
+%   * SECTION: a \needspace reserve large enough to cover the section head + an
+%     immediately-following SUBSECTION head + a few content lines. If that much
+%     room isn't left, the whole section migrates to the next page. The reserve is
+%     bigger than the raw "lines wanted" because the \LARGE font + beforeskip eat
+%     ~2.5 baselineskips before any content.
+%   * SUBSECTION / SUBSUBSECTION: NO \needspace. titlesec's native \@afterheading
+%     already forbids a page break between a heading and the block right after it,
+%     which keeps a section glued to a following subsection and a subsection glued
+%     to its first paragraph. A \needspace HERE would instead FORCE a break (when
+%     its reserve doesn't fit) and STRAND the section heading above it — exactly the
+%     §9.4 widow. Code boxes (which issue their own \par and would otherwise break
+%     away) are held by the \nobreak in the Shaded environment below.
+\titleformat*{\section}{\needspace{7\baselineskip}\sffamily\bfseries\LARGE}
+\titleformat*{\subsection}{\sffamily\bfseries\Large}
+\titleformat*{\subsubsection}{\sffamily\bfseries\large}
 
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
@@ -265,9 +275,17 @@
 % ==================== CODE ENVIRONMENTS ====================
 
 % Basic Shaded environment for code blocks
+% The tcolorbox is NOT breakable, so a tall box near the page bottom jumps whole to
+% the next page. If it merely reserved space (\needspace) it would break AWAY from a
+% heading/lead-in just above it, orphaning that heading. Instead bind the box to the
+% preceding line with \nobreak (penalty 10000 = break prohibited): a heading -> lead-in
+% -> box trio then has no internal breakpoint, so TeX moves the WHOLE unit to the next
+% page rather than stranding the heading. A \vskip glue is a legal breakpoint when
+% preceded by a box (the lead-in line), so a \nobreak must sit BEFORE the \vspace (not
+% only after it) — otherwise the break lands AT the vspace, before the guard. Guard
+% both the 0.5\baselineskip vspace and the tcolorbox's own before-skip.
 \newenvironment{Shaded}{%
-  \par\needspace{4\baselineskip}%
-  \vspace{0.5\baselineskip}%
+  \par\nobreak\vspace{0.5\baselineskip}\nobreak%
   \begin{tcolorbox}[
     boxrule=0.5pt,
     colback=gray!8,

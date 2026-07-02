@@ -92,6 +92,23 @@ local function code_box_lines(blk)
   return n
 end
 
+-- Emit a \needspace reserve that keeps the following lead-in + box/table unit on one
+-- page. CRITICAL: if that unit sits directly under a heading (the heading is the last
+-- block already emitted), the reserve must go BEFORE the heading — otherwise it lands
+-- between the heading and the lead-in and, when the remaining page space is short,
+-- forces a page break right after the heading, STRANDING it at the page foot (the
+-- §9.3/§13.2 "heading then break" widows). Placing it before the heading makes the
+-- heading migrate together with its lead-in + box/table.
+local function emit_reserve(result, n)
+  local hdr = nil
+  if #result > 0 and result[#result].t == "Header" then
+    hdr = table.remove(result)
+  end
+  table.insert(result, pandoc.RawBlock("latex",
+    string.format("\\needspace{%d\\baselineskip}", n)))
+  if hdr then table.insert(result, hdr) end
+end
+
 -- Process blocks to find RawBlock + figurecaption Div pairs, AND bold-lead-in +
 -- table pairs (keep the label welded to its table). Runs before the table filter,
 -- so the table is still a pandoc Table element here (row count is available).
@@ -147,8 +164,7 @@ function Blocks(blocks)
       -- never over-reserves and forces a needless early break.
       local n = table_data_rows(next_block) + 4
       if n > 28 then n = 28 end
-      table.insert(result, pandoc.RawBlock("latex",
-        string.format("\\needspace{%d\\baselineskip}", n)))
+      emit_reserve(result, n)
       table.insert(result, current)
       i = i + 1
     elseif is_bold_leadin(current) and next_block and is_code_box(next_block) then
@@ -161,8 +177,7 @@ function Blocks(blocks)
       -- anyway -- never over-reserves and forces a needless early break.
       local n = code_box_lines(next_block) + 3
       if n > 14 then n = 14 end
-      table.insert(result, pandoc.RawBlock("latex",
-        string.format("\\needspace{%d\\baselineskip}", n)))
+      emit_reserve(result, n)
       table.insert(result, current)
       i = i + 1
     else

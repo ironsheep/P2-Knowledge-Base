@@ -11357,7 +11357,7 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines. See Appendix G for this and other FPGA board differences.
+**On an FPGA-emulated P2 you must fit the USB signaling resistors yourself** — the built-in resistors this mode relies on exist only on the ASIC. See Appendix G (FPGA Board Differences) for the specifics.
 :::
 
 ::: caution
@@ -13606,9 +13606,8 @@ Generates a specified number of output transitions with precise timing. Creates 
 
 | Register | Function |
 |----------|----------|
-| X[15:0] | Period (clocks per transition) |
-| X[31:16] | Initial output state time |
-| Y[15:0] | Transition count (0 = continuous) |
+| X[15:0] | Base period (clocks per transition) |
+| Y[31:0] | Transition count (0 = idle; use NCO %00110/%00111 for continuous) |
 | IN | Transitions complete |
 
 ### Key Constants

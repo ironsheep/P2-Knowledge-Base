@@ -226,9 +226,8 @@ Generates a specified number of output transitions with precise timing. Creates 
 
 | Register | Function |
 |----------|----------|
-| X[15:0] | Period (clocks per transition) |
-| X[31:16] | Initial output state time |
-| Y[15:0] | Transition count (0 = continuous) |
+| X[15:0] | Base period (clocks per transition) |
+| Y[31:0] | Transition count (0 = idle; use NCO %00110/%00111 for continuous) |
 | IN | Transitions complete |
 
 ### Key Constants
