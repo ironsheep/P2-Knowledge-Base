@@ -56,7 +56,7 @@ end
 
 -- keyword + following token text -> (id, core, trailing) or nil
 local function resolve(keyword, tok)
-  if keyword == "Chapter" then
+  if keyword == "Chapter" or keyword == "Ch" then
     local num, rest = tok:match("^(%d+)(.*)$")
     if num and chapters[num] then return chapters[num], num, rest end
   elseif keyword == "Appendix" then
@@ -87,7 +87,7 @@ local function rewrite(inlines)
       -- Form A: keyword + Space + token  (Chapter 8 / Appendix C / Section 8.2)
       -- allow a leading-punct prefix on the keyword token, e.g. "(Chapter"
       local pfx, kw = el.text:match("^(.-)(%a+)$")
-      if kw and (kw == "Chapter" or kw == "Appendix" or kw == "Section")
+      if kw and (kw == "Chapter" or kw == "Ch" or kw == "Appendix" or kw == "Section")
          and inlines[i+1] and inlines[i+1].t == "Space"
          and inlines[i+2] and inlines[i+2].t == "Str" then
         local id, core, rest = resolve(kw, inlines[i+2].text)

@@ -70,6 +70,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 
 - **Filtering, input** - P_FILT0_AB through P_FILT3_AB, Ch. 12
 - **Float** - see PINFLOAT
+- **FPGA board differences** - USB resistors, clock, hub RAM, App. G
 - **Fractional baud** - X[15:10] precision, Ch. 11
 - **Frame period** - X[31:16] in PWM, Ch. 9
 - **Frequency counter** - P_COUNTER_PERIODS, Ch. 15

@@ -32,7 +32,7 @@ Y = (1000 × 4,294,967,296) / 200,000,000
 Y = 21,475
 ```
 
-**Note:** Frequency resolution is sysclk / 2^32 (~0.047 Hz at 200 MHz).
+**Note:** Frequency resolution is sysclk / 2^32^ (~0.047 Hz at 200 MHz).
 
 
 ### Y Value from Desired Frequency
@@ -501,7 +501,7 @@ in one place).
 
 ### NCO Frequency
 
-- Resolution: sysclk / 2^32
+- Resolution: sysclk / 2^32^
 - At 200 MHz: ~0.047 Hz resolution
 - Maximum frequency: sysclk / 2 (Nyquist limit)
 

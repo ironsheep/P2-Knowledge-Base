@@ -20,6 +20,18 @@
 \definecolor{diagram-text}{HTML}{333333}
 \definecolor{diagram-accent}{HTML}{CC6600}
 
+% ---- P_ constant bit-field colors (colored-ruler standard; PASM2-family pastels) ----
+% One color per WRPIN configuration field, reused across the teaching rulers
+% (\DiagPConstRuler, \DiagPConstRulerEDIO) and the Appendix B quick-ref strip
+% (\DiagPConstFields) so the same field always reads as the same color.
+\definecolor{pcfield-a}{HTML}{FFE0E0}   % A input select/polarity (31:28) -- light red
+\definecolor{pcfield-b}{HTML}{FFEAD0}   % B input select/polarity (27:24) -- light orange
+\definecolor{pcfield-f}{HTML}{FFFAD0}   % A,B logic/filter (23:21)        -- light yellow
+\definecolor{pcfield-m}{HTML}{E0F0D8}   % Low-level pin config (20:8)     -- light green
+\definecolor{pcfield-t}{HTML}{D8ECF6}   % TT DIR/OUT (7:6)                -- light blue
+\definecolor{pcfield-s}{HTML}{E6DCF2}   % Smart pin mode (5:1)            -- light purple
+\definecolor{pcfield-z}{HTML}{E8E8E8}   % Reserved bit 0                  -- grey
+
 % ---- Shared node/edge styles for flow & block diagrams ----
 \tikzset{
   iospbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
@@ -383,22 +395,29 @@
 
 % --- Register bit-field diagrams (replace ASCII bit-layout art) ---
 
-% Appendix B -- structure of a P_ constant value (32-bit WRPIN config field map)
+% ==================== P_ constant field rulers (F5 colored-ruler standard) ====================
+% Three renderings of the same 32-bit WRPIN configuration value, sharing one
+% color-per-field palette (pcfield-*):
+%   \DiagPConstFields     -- Appendix B quick-ref: compact colored strip (labels under cells)
+%   \DiagPConstRuler      -- Ch.4 teaching: colored strip + color-matched meaning table
+%   \DiagPConstRulerEDIO  -- Ch.2 teaching: same strip, only the Enhanced-Direct-I/O fields lit
+
+% Appendix B -- structure of a P_ constant value (compact colored quick-ref strip)
 \newcommand{\DiagPConstFields}{%
 \begin{figure}[H]\centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[font=\footnotesize,
-  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
+  fld/.style={draw=diagram-border, minimum height=9mm,
               align=center, font=\ttfamily\small, inner sep=2pt},
   lbl/.style={font=\scriptsize, text=diagram-text, align=center},
   flbl/.style={font=\tiny, text=diagram-text, align=center}]
-  \node[fld, minimum width=14mm] (a) {AAAA};
-  \node[fld, minimum width=14mm, right=0pt of a] (b) {BBBB};
-  \node[fld, minimum width=11mm, right=0pt of b] (c) {CCC};
-  \node[fld, minimum width=34mm, right=0pt of c, fill=diagram-highlight] (d) {DDDDDDDDDDDDD};
-  \node[fld, minimum width=9mm,  right=0pt of d] (e) {EE};
-  \node[fld, minimum width=16mm, right=0pt of e] (f) {FFFFF};
-  \node[fld, minimum width=6mm,  right=0pt of f] (z) {0};
+  \node[fld, minimum width=14mm, fill=pcfield-a] (a) {AAAA};
+  \node[fld, minimum width=14mm, right=0pt of a, fill=pcfield-b] (b) {BBBB};
+  \node[fld, minimum width=11mm, right=0pt of b, fill=pcfield-f] (c) {FFF};
+  \node[fld, minimum width=34mm, right=0pt of c, fill=pcfield-m] (d) {MMMMMMMMMMMMM};
+  \node[fld, minimum width=9mm,  right=0pt of d, fill=pcfield-t] (e) {TT};
+  \node[fld, minimum width=16mm, right=0pt of e, fill=pcfield-s] (f) {SSSSS};
+  \node[fld, minimum width=6mm,  right=0pt of f, fill=pcfield-z] (z) {0};
   \node[lbl, above=1mm of a] {31:28}; \node[lbl, above=1mm of b] {27:24};
   \node[lbl, above=1mm of c] {23:21}; \node[lbl, above=1mm of d] {20:8};
   \node[lbl, above=1mm of e] {7:6};   \node[lbl, above=1mm of f] {5:1};
@@ -411,6 +430,71 @@
   \node[flbl, below=1mm of f, text width=16mm] {Smart pin mode};
 \end{tikzpicture}}
 \caption{Structure of a P\_ constant value}
+\end{figure}}
+
+% Chapter 4 -- full 32-bit WRPIN config value: colored teaching ruler + meaning table
+\newcommand{\DiagPConstRuler}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, minimum height=9mm, align=center,
+              font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center}]
+  \node[fld, minimum width=14mm, fill=pcfield-a] (a) {AAAA};
+  \node[fld, minimum width=14mm, right=0pt of a, fill=pcfield-b] (b) {BBBB};
+  \node[fld, minimum width=11mm, right=0pt of b, fill=pcfield-f] (c) {FFF};
+  \node[fld, minimum width=42mm, right=0pt of c, fill=pcfield-m] (d) {MMMMMMMMMMMMM};
+  \node[fld, minimum width=9mm,  right=0pt of d, fill=pcfield-t] (e) {TT};
+  \node[fld, minimum width=16mm, right=0pt of e, fill=pcfield-s] (f) {SSSSS};
+  \node[fld, minimum width=6mm,  right=0pt of f, fill=pcfield-z] (z) {0};
+  \node[lbl, above=1mm of a] {31:28}; \node[lbl, above=1mm of b] {27:24};
+  \node[lbl, above=1mm of c] {23:21}; \node[lbl, above=1mm of d] {20:8};
+  \node[lbl, above=1mm of e] {7:6};   \node[lbl, above=1mm of f] {5:1};
+  \node[lbl, above=1mm of z] {0};
+\end{tikzpicture}
+
+\vspace{3mm}
+{\footnotesize
+\begin{tabular}{@{}>{\ttfamily}c l l@{}}
+\cellcolor{pcfield-a}AAAA          & \ttfamily 31:28 & A input selection and polarity \\
+\cellcolor{pcfield-b}BBBB          & \ttfamily 27:24 & B input selection and polarity \\
+\cellcolor{pcfield-f}FFF           & \ttfamily 23:21 & A, B input logic and filtering \\
+\cellcolor{pcfield-m}MMMMMMMMMMMMM & \ttfamily 20:8  & Low-level pin mode (drive, input, DAC, ADC) \\
+\cellcolor{pcfield-t}TT            & \ttfamily 7:6   & DIR/OUT control \\
+\cellcolor{pcfield-s}SSSSS         & \ttfamily 5:1   & Smart pin mode (0--31) \\
+\cellcolor{pcfield-z}0             & \ttfamily 0     & Reserved (always 0) \\
+\end{tabular}}
+\caption{WRPIN configuration value --- 32-bit field map}
+\end{figure}}
+
+% Chapter 2 -- same value, only the Enhanced-Direct-I/O fields lit (others muted)
+\newcommand{\DiagPConstRulerEDIO}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, minimum height=9mm, align=center,
+              font=\ttfamily\small, inner sep=2pt},
+  mut/.style={fld, fill=diagram-box, text=gray},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center}]
+  \node[mut, minimum width=14mm] (a) {AAAA};
+  \node[mut, minimum width=14mm, right=0pt of a] (b) {BBBB};
+  \node[mut, minimum width=11mm, right=0pt of b] (c) {FFF};
+  \node[fld, minimum width=42mm, right=0pt of c, fill=pcfield-m] (d) {MMMMMMMMMMMMM};
+  \node[fld, minimum width=9mm,  right=0pt of d, fill=pcfield-t] (e) {TT};
+  \node[fld, minimum width=16mm, right=0pt of e, fill=pcfield-s] (f) {SSSSS};
+  \node[mut, minimum width=6mm,  right=0pt of f] (z) {0};
+  \node[lbl, above=1mm of a] {31:28}; \node[lbl, above=1mm of b] {27:24};
+  \node[lbl, above=1mm of c] {23:21}; \node[lbl, above=1mm of d] {20:8};
+  \node[lbl, above=1mm of e] {7:6};   \node[lbl, above=1mm of f] {5:1};
+  \node[lbl, above=1mm of z] {0};
+\end{tikzpicture}
+
+\vspace{3mm}
+{\footnotesize
+\begin{tabular}{@{}>{\ttfamily}c l l@{}}
+\cellcolor{pcfield-m}MMMMMMMMMMMMM & \ttfamily 20:8 & Low-level pin control (drive, input mode, DAC, ADC) \\
+\cellcolor{pcfield-t}TT            & \ttfamily 7:6  & DIR/OUT control (P\_OE, P\_BITDAC) \\
+\cellcolor{pcfield-s}SSSSS         & \ttfamily 5:1  & Smart pin mode (\%00000 = P\_NORMAL) \\
+\end{tabular}}
+\caption{Enhanced Direct I/O --- the active WRPIN fields (full 32-bit map in \S4.2)}
 \end{figure}}
 
 % Chapter 16 -- ADC pin-configuration fields (P[12:10]=\%100 + mode \%11000)

@@ -190,9 +190,12 @@
 % Stepped heading scale (distinct levels) — sans, bold. At the 11pt base these
 % relative sizes land at section 17.3pt / subsection 14.4pt / sub-subsection 12.0pt
 % (the sans-v5 demo scale; chapter stays \Huge = 24.8pt above).
-\titleformat*{\section}{\sffamily\bfseries\LARGE}
-\titleformat*{\subsection}{\sffamily\bfseries\Large}
-\titleformat*{\subsubsection}{\sffamily\bfseries\large}
+% Keep-with-next: \needspace reserves room so a heading never lands alone at the
+% bottom of a page (its content would otherwise start on the next). Prepended to
+% the star-form format (no shape change) — fixes heading widows like §9.3.
+\titleformat*{\section}{\needspace{4\baselineskip}\sffamily\bfseries\LARGE}
+\titleformat*{\subsection}{\needspace{4\baselineskip}\sffamily\bfseries\Large}
+\titleformat*{\subsubsection}{\needspace{3\baselineskip}\sffamily\bfseries\large}
 
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}

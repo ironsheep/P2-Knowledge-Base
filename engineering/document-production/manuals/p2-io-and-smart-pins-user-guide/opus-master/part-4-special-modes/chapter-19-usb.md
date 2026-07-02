@@ -177,7 +177,7 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines. See Appendix G for this and other FPGA board differences.
 :::
 
 ::: caution

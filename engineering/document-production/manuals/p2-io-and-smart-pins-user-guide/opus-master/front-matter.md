@@ -79,6 +79,7 @@
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Formulas \& Reference Tables
 \item Troubleshooting Guide
+\item FPGA Board Differences
 \end{itemize}
 \end{minipage}
 \end{tcolorbox}
@@ -117,12 +118,12 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-### Trademarks
+## Trademarks
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 
-## Acknowledgments
+# Acknowledgments
 
 This guide would not exist without the contributions of many individuals and organizations:
 
@@ -137,11 +138,11 @@ This guide would not exist without the contributions of many individuals and org
 This guide is a community-developed resource, created to make the P2's smart pin system more accessible to developers at all skill levels.
 
 
-## How to Use This Guide
+# How to Use This Guide
 
 The P2 I/O & Smart Pins User Guide supports three distinct reading paths, each designed for different needs:
 
-### Path 1: Learning Path (New to P2 I/O)
+## Path 1: Learning Path (New to P2 I/O)
 
 Readers unfamiliar with the P2 pin system should progress through Part I sequentially:
 
@@ -153,7 +154,7 @@ Readers unfamiliar with the P2 pin system should progress through Part I sequent
 
 After completing Part I, proceed to specific mode chapters in Parts II-IV as needed, using the appendices for reference.
 
-### Path 2: Task-Oriented Path (Know What to Accomplish)
+## Path 2: Task-Oriented Path (Know What to Accomplish)
 
 Readers who know what they want to accomplish but not which mode to use should start with **Appendix A: Intent Index**. The Intent Index provides entries in the form:
 
@@ -170,7 +171,7 @@ The Intent Index covers common tasks including:
 - Reading inputs (digital, ADC)
 - Communication protocols (SPI, I²C, UART, USB)
 
-### Path 3: Reference Path (Know the Mode)
+## Path 3: Reference Path (Know the Mode)
 
 Readers who know which mode or feature they need can navigate directly:
 
@@ -181,9 +182,9 @@ Readers who know which mode or feature they need can navigate directly:
 Each mode chapter stands alone with complete configuration details, all applicable P_ constants, working examples in both Spin2 and PASM2, and decision guidance.
 
 
-## Document Conventions
+# Document Conventions
 
-### Typography
+## Typography
 
 | Element | Convention | Example |
 |---------|------------|---------|
@@ -194,7 +195,7 @@ Each mode chapter stands alone with complete configuration details, all applicab
 | Mode values | Binary with percent prefix | %00110, %11110 |
 | Numeric values | Underscores for readability | 200_000_000, 4_294_967_296 |
 
-### Register Notation
+## Register Notation
 
 The P2 smart pin system uses three internal registers:
 
@@ -206,7 +207,7 @@ The P2 smart pin system uses three internal registers:
 
 Bit ranges use the notation X[high:low], where X[31:0] indicates all 32 bits and X[15:0] indicates the lower 16 bits.
 
-### Code Examples
+## Code Examples
 
 All code examples appear in both Spin2 and PASM2:
 
@@ -226,7 +227,7 @@ PINL(PIN)                 ' Enable Smart Pin
               drvl      pin                 ' Enable Smart Pin
 ```
 
-### Terminology
+## Terminology
 
 | Term | Definition |
 |------|------------|
@@ -238,7 +239,7 @@ PINL(PIN)                 ' Enable Smart Pin
 | sysclk | System clock frequency (typically 200 MHz) |
 | mode bits | Bits [4:0] in WRPIN value selecting Smart Pin mode |
 
-### Cross-References
+## Cross-References
 
 Cross-references use the format:
 
@@ -247,74 +248,74 @@ Cross-references use the format:
 - "See MODE_NAME (%XXXXX)" for mode references
 
 
-## Quick Mode Selection Matrix
+# Quick Mode Selection Matrix
 
 The following matrix provides a one-page overview of all 32 smart pin modes organized by function. Use this for quick navigation to the appropriate chapter.
 
-### Output Modes
+## Output Modes
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| Normal | `P_NORMAL` | %00000 | 2 | Direct I/O, no Smart Pin (Enhanced Direct I/O) |
-| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | 18, 10 | Long repository or DAC noise output |
-| DAC Dither RND | `P_DAC_DITHER_RND` | %00010 | 10 | DAC 16-bit random dither |
-| DAC Dither PWM | `P_DAC_DITHER_PWM` | %00011 | 10 | DAC 16-bit PWM dither |
-| Pulse/Cycle | `P_PULSE` | %00100 | 7 | Pulse or cycle output |
-| Transition | `P_TRANSITION` | %00101 | 7 | Timed transition output |
-| NCO Frequency | `P_NCO_FREQ` | %00110 | 8 | NCO frequency output (square wave) |
-| NCO Duty | `P_NCO_DUTY` | %00111 | 8 | NCO duty cycle output |
-| PWM Triangle | `P_PWM_TRIANGLE` | %01000 | 9 | PWM triangle wave output |
-| PWM Sawtooth | `P_PWM_SAWTOOTH` | %01001 | 9 | PWM sawtooth wave output |
-| PWM SMPS | `P_PWM_SMPS` | %01010 | 9 | Switch-mode power supply PWM |
-| Sync Serial TX | `P_SYNC_TX` | %11100 | 11 | Synchronous serial transmit |
-| Async Serial TX | `P_ASYNC_TX` | %11110 | 11 | Asynchronous serial transmit |
+| Normal | `P_NORMAL` | %00000 | Ch 2 | Direct I/O, no Smart Pin (Enhanced Direct I/O) |
+| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | Ch 18, Ch 10 | Long repository or DAC noise output |
+| DAC Dither RND | `P_DAC_DITHER_RND` | %00010 | Ch 10 | DAC 16-bit random dither |
+| DAC Dither PWM | `P_DAC_DITHER_PWM` | %00011 | Ch 10 | DAC 16-bit PWM dither |
+| Pulse/Cycle | `P_PULSE` | %00100 | Ch 7 | Pulse or cycle output |
+| Transition | `P_TRANSITION` | %00101 | Ch 7 | Timed transition output |
+| NCO Frequency | `P_NCO_FREQ` | %00110 | Ch 8 | NCO frequency output (square wave) |
+| NCO Duty | `P_NCO_DUTY` | %00111 | Ch 8 | NCO duty cycle output |
+| PWM Triangle | `P_PWM_TRIANGLE` | %01000 | Ch 9 | PWM triangle wave output |
+| PWM Sawtooth | `P_PWM_SAWTOOTH` | %01001 | Ch 9 | PWM sawtooth wave output |
+| PWM SMPS | `P_PWM_SMPS` | %01010 | Ch 9 | Switch-mode power supply PWM |
+| Sync Serial TX | `P_SYNC_TX` | %11100 | Ch 11 | Synchronous serial transmit |
+| Async Serial TX | `P_ASYNC_TX` | %11110 | Ch 11 | Asynchronous serial transmit |
 
-### Input Modes
-
-| Mode | P_ Constant | Mode Bits | Chapter | Description |
-|------|-------------|-----------|---------|-------------|
-| Quadrature | `P_QUADRATURE` | %01011 | 14 | A-B quadrature encoder input (within Counting chapter) |
-| Reg Up | `P_REG_UP` | %01100 | 14 | Increment on A-rise when B-high |
-| Reg Up/Down | `P_REG_UP_DOWN` | %01101 | 14 | Increment/decrement accumulator |
-| Count Rises | `P_COUNT_RISES` | %01110 | 14 | Count A-rises, optionally subtract B-rises |
-| Count Highs | `P_COUNT_HIGHS` | %01111 | 14 | Count A-high ticks, optionally subtract B-high |
-| State Ticks | `P_STATE_TICKS` | %10000 | 13 | Measure A-low and A-high durations |
-| High Ticks | `P_HIGH_TICKS` | %10001 | 13 | Measure A-high duration |
-| Events/Timeout | `P_EVENTS_TICKS` | %10010 | 13 | Count events or timeout detection |
-| Periods Ticks | `P_PERIODS_TICKS` | %10011 | 15 | For X periods, count ticks |
-| Periods Highs | `P_PERIODS_HIGHS` | %10100 | 15 | For X periods, count highs |
-| Counter Ticks | `P_COUNTER_TICKS` | %10101 | 15 | For periods in X+ ticks, count ticks |
-| Counter Highs | `P_COUNTER_HIGHS` | %10110 | 15 | For periods in X+ ticks, count highs |
-| Counter Periods | `P_COUNTER_PERIODS` | %10111 | 15 | For periods in X+ ticks, count periods |
-| ADC Internal | `P_ADC` | %11000 | 16 | ADC sample/filter, internal clock |
-| ADC External | `P_ADC_EXT` | %11001 | 16 | ADC sample/filter, external clock |
-| ADC Scope | `P_ADC_SCOPE` | %11010 | 16 | ADC oscilloscope with trigger |
-| Sync Serial RX | `P_SYNC_RX` | %11101 | 17 | Synchronous serial receive |
-| Async Serial RX | `P_ASYNC_RX` | %11111 | 17 | Asynchronous serial receive |
-
-### Special Modes
+## Input Modes
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| USB Pair | `P_USB_PAIR` | %11011 | 19 | USB host/device pin pair |
+| Quadrature | `P_QUADRATURE` | %01011 | Ch 14 | A-B quadrature encoder input (within Counting chapter) |
+| Reg Up | `P_REG_UP` | %01100 | Ch 14 | Increment on A-rise when B-high |
+| Reg Up/Down | `P_REG_UP_DOWN` | %01101 | Ch 14 | Increment/decrement accumulator |
+| Count Rises | `P_COUNT_RISES` | %01110 | Ch 14 | Count A-rises, optionally subtract B-rises |
+| Count Highs | `P_COUNT_HIGHS` | %01111 | Ch 14 | Count A-high ticks, optionally subtract B-high |
+| State Ticks | `P_STATE_TICKS` | %10000 | Ch 13 | Measure A-low and A-high durations |
+| High Ticks | `P_HIGH_TICKS` | %10001 | Ch 13 | Measure A-high duration |
+| Events/Timeout | `P_EVENTS_TICKS` | %10010 | Ch 13 | Count events or timeout detection |
+| Periods Ticks | `P_PERIODS_TICKS` | %10011 | Ch 15 | For X periods, count ticks |
+| Periods Highs | `P_PERIODS_HIGHS` | %10100 | Ch 15 | For X periods, count highs |
+| Counter Ticks | `P_COUNTER_TICKS` | %10101 | Ch 15 | For periods in X+ ticks, count ticks |
+| Counter Highs | `P_COUNTER_HIGHS` | %10110 | Ch 15 | For periods in X+ ticks, count highs |
+| Counter Periods | `P_COUNTER_PERIODS` | %10111 | Ch 15 | For periods in X+ ticks, count periods |
+| ADC Internal | `P_ADC` | %11000 | Ch 16 | ADC sample/filter, internal clock |
+| ADC External | `P_ADC_EXT` | %11001 | Ch 16 | ADC sample/filter, external clock |
+| ADC Scope | `P_ADC_SCOPE` | %11010 | Ch 16 | ADC oscilloscope with trigger |
+| Sync Serial RX | `P_SYNC_RX` | %11101 | Ch 17 | Synchronous serial receive |
+| Async Serial RX | `P_ASYNC_RX` | %11111 | Ch 17 | Asynchronous serial receive |
 
-### Mode Categories Quick Reference
+## Special Modes
+
+| Mode | P_ Constant | Mode Bits | Chapter | Description |
+|------|-------------|-----------|---------|-------------|
+| USB Pair | `P_USB_PAIR` | %11011 | Ch 19 | USB host/device pin pair |
+
+## Mode Categories Quick Reference
 
 | Category | Modes | Chapters |
 |----------|-------|----------|
-| **Digital Output** | Pulse, Transition | 7 |
-| **Frequency Generation** | NCO Freq, NCO Duty | 8 |
-| **PWM Output** | Triangle, Sawtooth, SMPS | 9 |
-| **DAC Output** | Repository/Noise, Dither RND, Dither PWM | 10 |
-| **Serial Transmit** | Sync TX, Async TX | 11 |
-| **Timing Measurement** | State Ticks, High Ticks, Events/Timeout | 13 |
-| **Counting** | Reg Up, Reg Up/Down, Count Rises, Count Highs | 14 |
-| **Quadrature Encoder** | Quadrature | 14 |
-| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 15 |
-| **ADC Input** | ADC, ADC Ext, ADC Scope | 16 |
-| **Serial Receive** | Sync RX, Async RX | 17 |
-| **Inter-Cog Sharing** | Repository | 18 |
-| **USB** | USB Pair | 19 |
+| **Digital Output** | Pulse, Transition | Ch 7 |
+| **Frequency Generation** | NCO Freq, NCO Duty | Ch 8 |
+| **PWM Output** | Triangle, Sawtooth, SMPS | Ch 9 |
+| **DAC Output** | Repository/Noise, Dither RND, Dither PWM | Ch 10 |
+| **Serial Transmit** | Sync TX, Async TX | Ch 11 |
+| **Timing Measurement** | State Ticks, High Ticks, Events/Timeout | Ch 13 |
+| **Counting** | Reg Up, Reg Up/Down, Count Rises, Count Highs | Ch 14 |
+| **Quadrature Encoder** | Quadrature | Ch 14 |
+| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | Ch 15 |
+| **ADC Input** | ADC, ADC Ext, ADC Scope | Ch 16 |
+| **Serial Receive** | Sync RX, Async RX | Ch 17 |
+| **Inter-Cog Sharing** | Repository | Ch 18 |
+| **USB** | USB Pair | Ch 19 |
 
 
 *This front matter provides navigation tools for all readers. Proceed to Part I for foundational knowledge, or use the Intent Index (Appendix A) for task-oriented guidance.*

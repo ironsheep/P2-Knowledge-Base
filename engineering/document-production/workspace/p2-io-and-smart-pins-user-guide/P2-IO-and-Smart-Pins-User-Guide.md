@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape Complete P2 Pin I/O and Smart Pin Reference\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large July 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
@@ -79,6 +79,7 @@
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Formulas \& Reference Tables
 \item Troubleshooting Guide
+\item FPGA Board Differences
 \end{itemize}
 \end{minipage}
 \end{tcolorbox}
@@ -117,12 +118,12 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-### Trademarks
+## Trademarks
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 
-## Acknowledgments
+# Acknowledgments
 
 This guide would not exist without the contributions of many individuals and organizations:
 
@@ -137,11 +138,11 @@ This guide would not exist without the contributions of many individuals and org
 This guide is a community-developed resource, created to make the P2's smart pin system more accessible to developers at all skill levels.
 
 
-## How to Use This Guide
+# How to Use This Guide
 
 The P2 I/O & Smart Pins User Guide supports three distinct reading paths, each designed for different needs:
 
-### Path 1: Learning Path (New to P2 I/O)
+## Path 1: Learning Path (New to P2 I/O)
 
 Readers unfamiliar with the P2 pin system should progress through Part I sequentially:
 
@@ -153,7 +154,7 @@ Readers unfamiliar with the P2 pin system should progress through Part I sequent
 
 After completing Part I, proceed to specific mode chapters in Parts II-IV as needed, using the appendices for reference.
 
-### Path 2: Task-Oriented Path (Know What to Accomplish)
+## Path 2: Task-Oriented Path (Know What to Accomplish)
 
 Readers who know what they want to accomplish but not which mode to use should start with **Appendix A: Intent Index**. The Intent Index provides entries in the form:
 
@@ -170,7 +171,7 @@ The Intent Index covers common tasks including:
 - Reading inputs (digital, ADC)
 - Communication protocols (SPI, I²C, UART, USB)
 
-### Path 3: Reference Path (Know the Mode)
+## Path 3: Reference Path (Know the Mode)
 
 Readers who know which mode or feature they need can navigate directly:
 
@@ -181,9 +182,9 @@ Readers who know which mode or feature they need can navigate directly:
 Each mode chapter stands alone with complete configuration details, all applicable P_ constants, working examples in both Spin2 and PASM2, and decision guidance.
 
 
-## Document Conventions
+# Document Conventions
 
-### Typography
+## Typography
 
 | Element | Convention | Example |
 |---------|------------|---------|
@@ -194,7 +195,7 @@ Each mode chapter stands alone with complete configuration details, all applicab
 | Mode values | Binary with percent prefix | %00110, %11110 |
 | Numeric values | Underscores for readability | 200_000_000, 4_294_967_296 |
 
-### Register Notation
+## Register Notation
 
 The P2 smart pin system uses three internal registers:
 
@@ -206,7 +207,7 @@ The P2 smart pin system uses three internal registers:
 
 Bit ranges use the notation X[high:low], where X[31:0] indicates all 32 bits and X[15:0] indicates the lower 16 bits.
 
-### Code Examples
+## Code Examples
 
 All code examples appear in both Spin2 and PASM2:
 
@@ -226,7 +227,7 @@ PINL(PIN)                 ' Enable Smart Pin
               drvl      pin                 ' Enable Smart Pin
 ```
 
-### Terminology
+## Terminology
 
 | Term | Definition |
 |------|------------|
@@ -238,7 +239,7 @@ PINL(PIN)                 ' Enable Smart Pin
 | sysclk | System clock frequency (typically 200 MHz) |
 | mode bits | Bits [4:0] in WRPIN value selecting Smart Pin mode |
 
-### Cross-References
+## Cross-References
 
 Cross-references use the format:
 
@@ -247,74 +248,74 @@ Cross-references use the format:
 - "See MODE_NAME (%XXXXX)" for mode references
 
 
-## Quick Mode Selection Matrix
+# Quick Mode Selection Matrix
 
 The following matrix provides a one-page overview of all 32 smart pin modes organized by function. Use this for quick navigation to the appropriate chapter.
 
-### Output Modes
+## Output Modes
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| Normal | `P_NORMAL` | %00000 | 2 | Direct I/O, no Smart Pin (Enhanced Direct I/O) |
-| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | 18, 10 | Long repository or DAC noise output |
-| DAC Dither RND | `P_DAC_DITHER_RND` | %00010 | 10 | DAC 16-bit random dither |
-| DAC Dither PWM | `P_DAC_DITHER_PWM` | %00011 | 10 | DAC 16-bit PWM dither |
-| Pulse/Cycle | `P_PULSE` | %00100 | 7 | Pulse or cycle output |
-| Transition | `P_TRANSITION` | %00101 | 7 | Timed transition output |
-| NCO Frequency | `P_NCO_FREQ` | %00110 | 8 | NCO frequency output (square wave) |
-| NCO Duty | `P_NCO_DUTY` | %00111 | 8 | NCO duty cycle output |
-| PWM Triangle | `P_PWM_TRIANGLE` | %01000 | 9 | PWM triangle wave output |
-| PWM Sawtooth | `P_PWM_SAWTOOTH` | %01001 | 9 | PWM sawtooth wave output |
-| PWM SMPS | `P_PWM_SMPS` | %01010 | 9 | Switch-mode power supply PWM |
-| Sync Serial TX | `P_SYNC_TX` | %11100 | 11 | Synchronous serial transmit |
-| Async Serial TX | `P_ASYNC_TX` | %11110 | 11 | Asynchronous serial transmit |
+| Normal | `P_NORMAL` | %00000 | Ch 2 | Direct I/O, no Smart Pin (Enhanced Direct I/O) |
+| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | Ch 18, Ch 10 | Long repository or DAC noise output |
+| DAC Dither RND | `P_DAC_DITHER_RND` | %00010 | Ch 10 | DAC 16-bit random dither |
+| DAC Dither PWM | `P_DAC_DITHER_PWM` | %00011 | Ch 10 | DAC 16-bit PWM dither |
+| Pulse/Cycle | `P_PULSE` | %00100 | Ch 7 | Pulse or cycle output |
+| Transition | `P_TRANSITION` | %00101 | Ch 7 | Timed transition output |
+| NCO Frequency | `P_NCO_FREQ` | %00110 | Ch 8 | NCO frequency output (square wave) |
+| NCO Duty | `P_NCO_DUTY` | %00111 | Ch 8 | NCO duty cycle output |
+| PWM Triangle | `P_PWM_TRIANGLE` | %01000 | Ch 9 | PWM triangle wave output |
+| PWM Sawtooth | `P_PWM_SAWTOOTH` | %01001 | Ch 9 | PWM sawtooth wave output |
+| PWM SMPS | `P_PWM_SMPS` | %01010 | Ch 9 | Switch-mode power supply PWM |
+| Sync Serial TX | `P_SYNC_TX` | %11100 | Ch 11 | Synchronous serial transmit |
+| Async Serial TX | `P_ASYNC_TX` | %11110 | Ch 11 | Asynchronous serial transmit |
 
-### Input Modes
-
-| Mode | P_ Constant | Mode Bits | Chapter | Description |
-|------|-------------|-----------|---------|-------------|
-| Quadrature | `P_QUADRATURE` | %01011 | 14 | A-B quadrature encoder input (within Counting chapter) |
-| Reg Up | `P_REG_UP` | %01100 | 14 | Increment on A-rise when B-high |
-| Reg Up/Down | `P_REG_UP_DOWN` | %01101 | 14 | Increment/decrement accumulator |
-| Count Rises | `P_COUNT_RISES` | %01110 | 14 | Count A-rises, optionally subtract B-rises |
-| Count Highs | `P_COUNT_HIGHS` | %01111 | 14 | Count A-high ticks, optionally subtract B-high |
-| State Ticks | `P_STATE_TICKS` | %10000 | 13 | Measure A-low and A-high durations |
-| High Ticks | `P_HIGH_TICKS` | %10001 | 13 | Measure A-high duration |
-| Events/Timeout | `P_EVENTS_TICKS` | %10010 | 13 | Count events or timeout detection |
-| Periods Ticks | `P_PERIODS_TICKS` | %10011 | 15 | For X periods, count ticks |
-| Periods Highs | `P_PERIODS_HIGHS` | %10100 | 15 | For X periods, count highs |
-| Counter Ticks | `P_COUNTER_TICKS` | %10101 | 15 | For periods in X+ ticks, count ticks |
-| Counter Highs | `P_COUNTER_HIGHS` | %10110 | 15 | For periods in X+ ticks, count highs |
-| Counter Periods | `P_COUNTER_PERIODS` | %10111 | 15 | For periods in X+ ticks, count periods |
-| ADC Internal | `P_ADC` | %11000 | 16 | ADC sample/filter, internal clock |
-| ADC External | `P_ADC_EXT` | %11001 | 16 | ADC sample/filter, external clock |
-| ADC Scope | `P_ADC_SCOPE` | %11010 | 16 | ADC oscilloscope with trigger |
-| Sync Serial RX | `P_SYNC_RX` | %11101 | 17 | Synchronous serial receive |
-| Async Serial RX | `P_ASYNC_RX` | %11111 | 17 | Asynchronous serial receive |
-
-### Special Modes
+## Input Modes
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| USB Pair | `P_USB_PAIR` | %11011 | 19 | USB host/device pin pair |
+| Quadrature | `P_QUADRATURE` | %01011 | Ch 14 | A-B quadrature encoder input (within Counting chapter) |
+| Reg Up | `P_REG_UP` | %01100 | Ch 14 | Increment on A-rise when B-high |
+| Reg Up/Down | `P_REG_UP_DOWN` | %01101 | Ch 14 | Increment/decrement accumulator |
+| Count Rises | `P_COUNT_RISES` | %01110 | Ch 14 | Count A-rises, optionally subtract B-rises |
+| Count Highs | `P_COUNT_HIGHS` | %01111 | Ch 14 | Count A-high ticks, optionally subtract B-high |
+| State Ticks | `P_STATE_TICKS` | %10000 | Ch 13 | Measure A-low and A-high durations |
+| High Ticks | `P_HIGH_TICKS` | %10001 | Ch 13 | Measure A-high duration |
+| Events/Timeout | `P_EVENTS_TICKS` | %10010 | Ch 13 | Count events or timeout detection |
+| Periods Ticks | `P_PERIODS_TICKS` | %10011 | Ch 15 | For X periods, count ticks |
+| Periods Highs | `P_PERIODS_HIGHS` | %10100 | Ch 15 | For X periods, count highs |
+| Counter Ticks | `P_COUNTER_TICKS` | %10101 | Ch 15 | For periods in X+ ticks, count ticks |
+| Counter Highs | `P_COUNTER_HIGHS` | %10110 | Ch 15 | For periods in X+ ticks, count highs |
+| Counter Periods | `P_COUNTER_PERIODS` | %10111 | Ch 15 | For periods in X+ ticks, count periods |
+| ADC Internal | `P_ADC` | %11000 | Ch 16 | ADC sample/filter, internal clock |
+| ADC External | `P_ADC_EXT` | %11001 | Ch 16 | ADC sample/filter, external clock |
+| ADC Scope | `P_ADC_SCOPE` | %11010 | Ch 16 | ADC oscilloscope with trigger |
+| Sync Serial RX | `P_SYNC_RX` | %11101 | Ch 17 | Synchronous serial receive |
+| Async Serial RX | `P_ASYNC_RX` | %11111 | Ch 17 | Asynchronous serial receive |
 
-### Mode Categories Quick Reference
+## Special Modes
+
+| Mode | P_ Constant | Mode Bits | Chapter | Description |
+|------|-------------|-----------|---------|-------------|
+| USB Pair | `P_USB_PAIR` | %11011 | Ch 19 | USB host/device pin pair |
+
+## Mode Categories Quick Reference
 
 | Category | Modes | Chapters |
 |----------|-------|----------|
-| **Digital Output** | Pulse, Transition | 7 |
-| **Frequency Generation** | NCO Freq, NCO Duty | 8 |
-| **PWM Output** | Triangle, Sawtooth, SMPS | 9 |
-| **DAC Output** | Repository/Noise, Dither RND, Dither PWM | 10 |
-| **Serial Transmit** | Sync TX, Async TX | 11 |
-| **Timing Measurement** | State Ticks, High Ticks, Events/Timeout | 13 |
-| **Counting** | Reg Up, Reg Up/Down, Count Rises, Count Highs | 14 |
-| **Quadrature Encoder** | Quadrature | 14 |
-| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 15 |
-| **ADC Input** | ADC, ADC Ext, ADC Scope | 16 |
-| **Serial Receive** | Sync RX, Async RX | 17 |
-| **Inter-Cog Sharing** | Repository | 18 |
-| **USB** | USB Pair | 19 |
+| **Digital Output** | Pulse, Transition | Ch 7 |
+| **Frequency Generation** | NCO Freq, NCO Duty | Ch 8 |
+| **PWM Output** | Triangle, Sawtooth, SMPS | Ch 9 |
+| **DAC Output** | Repository/Noise, Dither RND, Dither PWM | Ch 10 |
+| **Serial Transmit** | Sync TX, Async TX | Ch 11 |
+| **Timing Measurement** | State Ticks, High Ticks, Events/Timeout | Ch 13 |
+| **Counting** | Reg Up, Reg Up/Down, Count Rises, Count Highs | Ch 14 |
+| **Quadrature Encoder** | Quadrature | Ch 14 |
+| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | Ch 15 |
+| **ADC Input** | ADC, ADC Ext, ADC Scope | Ch 16 |
+| **Serial Receive** | Sync RX, Async RX | Ch 17 |
+| **Inter-Cog Sharing** | Repository | Ch 18 |
+| **USB** | USB Pair | Ch 19 |
 
 
 *This front matter provides navigation tools for all readers. Proceed to Part I for foundational knowledge, or use the Intent Index (Appendix A) for task-oriented guidance.*
@@ -322,7 +323,7 @@ The following matrix provides a one-page overview of all 32 smart pin modes orga
 
 # Part I: P2 Pin System Fundamentals
 
-# Chapter 1: Direct I/O - The Foundation {#ch1}
+# Chapter 1: Direct I/O — The Foundation {#ch1}
 
 Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex smart pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
@@ -1578,7 +1579,7 @@ DAT           org
 
 *This chapter establishes the foundational concepts of P2 pin control. All smart pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
 
-# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
+# Chapter 2: Enhanced Direct I/O — Low-Level Pin Modes {#ch2}
 
 Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering smart pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
@@ -1610,15 +1611,11 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 ### The P_ Constant Architecture
 
-P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The fields most relevant to Enhanced Direct I/O are:
+P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The three fields most relevant to Enhanced Direct I/O are lit below; the muted fields (A/B input routing in bits [31:21] and the always-0 bit 0) belong to smart pin modes and are covered by the full field map in §4.2.
 
-| Bits | Field | Function |
-|------|-------|----------|
-| 20:8 | MMMMMMMMMMMMM | Low-level pin control (drive, input mode, DAC/ADC) |
-| 7:6 | TT | DIR/OUT control (P_OE, P_BITDAC) |
-| 5:1 | SSSSS | Smart Pin mode (%00000 = P_NORMAL) |
-
-(For the full 32-bit field map — including the A/B input-routing fields in bits [31:21] and the always-0 bit 0 — see §4.2.)
+```{=latex}
+\DiagPConstRulerEDIO
+```
 
 When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
 
@@ -2104,7 +2101,7 @@ PUB set_voltage(level) | config
 
 *This chapter covers pin configuration without smart pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the smart pin configuration process, see Chapter 4.*
 
-# Chapter 3: Smart Pin Architecture - Autonomous I/O {#ch3}
+# Chapter 3: Smart Pin Architecture — Autonomous I/O {#ch3}
 
 Smart pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a smart pin operates independently of the cog—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming cog cycles. This chapter establishes the mental model for understanding all smart pin modes documented in Parts II through IV.
 
@@ -2554,21 +2551,11 @@ WRPIN(PinField, Mode)
 
 ### Configuration Value Format
 
-The D operand is a 32-bit value with the following fields:
+The D operand is a 32-bit value divided into the fields below. Each field selects one aspect of pin behavior; you build a configuration by OR-ing the P_ constants for the fields you need.
 
-```layout
-D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+```{=latex}
+\DiagPConstRuler
 ```
-
-| Field | Bits | Purpose |
-|-------|------|---------|
-| AAAA | 31:28 | A input selection and polarity |
-| BBBB | 27:24 | B input selection and polarity |
-| FFF | 23:21 | A,B input logic/filtering |
-| MMMMMMMMMMMMM | 20:8 | Low-level pin mode (13 bits) |
-| TT | 7:6 | DIR/OUT control |
-| SSSSS | 5:1 | Smart Pin mode (0-31) |
-| 0 | 0 | Reserved (always 0) |
 
 ### Timing
 
@@ -4047,7 +4034,7 @@ PUB step_reverse(steps) | i
 
 *This chapter covered software-controlled digital output. For hardware-automated pulse and transition output, see Chapter 7. For continuous waveform generation, see Chapters 8 (NCO) and 9 (PWM).*
 
-# Chapter 7: Pulse and Transition Generation {#ch7}
+# Chapter 7: Pulse & Transition — Signal Generation {#ch7}
 
 This chapter covers hardware-generated pulses and transitions using two smart pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
 
@@ -5810,7 +5797,7 @@ PUB dithered_dac_pwm(value16) | mode
 
 PUB update_value_sync(value16)
   ' Wait for sample complete before update
-  repeat until PINREAD(DAC_PIN) & $8000_0000
+  repeat until PINREAD(DAC_PIN)
   WYPIN(DAC_PIN, value16)
 ```
 
@@ -6006,7 +5993,7 @@ PUB audio_sample() : sample | sine_val
 
 PUB audio_output()
   ' Output audio sample
-  repeat until PINREAD(AUDIO_PIN) & $8000_0000
+  repeat until PINREAD(AUDIO_PIN)
   WYPIN(AUDIO_PIN, audio_sample())
 ```
 
@@ -6461,7 +6448,7 @@ PUB continuous_stream()
 
   ' Continuous transmission loop
   repeat
-    if PINREAD(TX_PIN) & $8000_0000         ' Buffer empty?
+    if PINREAD(TX_PIN)                      ' IN raised = buffer ready
       WYPIN(TX_PIN, get_next_byte())        ' Load next
 ```
 
@@ -7466,7 +7453,7 @@ PUB analyze_pwm() : frequency, duty_percent
 
   ' Calculate results
   frequency := _clkfreq / (high_time + low_time)
-  duty_percent := (high_time * 100) / (high_time + low_time)
+  duty_percent := MULDIV64(high_time, 100, high_time + low_time)
 ```
 
 
@@ -7619,7 +7606,7 @@ PUB measure_frequency() : freq_hz | clocks, events
               rdpin     period, #FREQ_PIN
               and       period, ##$7FFFFFFF
 
-              ' frequency = (sysclk * 100) / period
+              ' frequency = MULDIV64(sysclk, 100, period)
 ```
 
 ### Timeout Detection Mode (Y[2]=1)
@@ -7795,7 +7782,7 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
 
   ' Calculate results
   frequency := _clkfreq / (h_clocks + l_clocks)
-  duty_percent := (h_clocks * 100) / (h_clocks + l_clocks)
+  duty_percent := MULDIV64(h_clocks, 100, h_clocks + l_clocks)
   high_us := h_clocks / (_clkfreq / 1_000_000)
   low_us := l_clocks / (_clkfreq / 1_000_000)
 
@@ -7856,7 +7843,7 @@ freq_loop
               rdpin     period, #FREQ_PIN
               and       period, ##$7FFFFFFF
 
-              ' Calculate frequency = (sysclk * 1000) / period
+              ' Calculate frequency = MULDIV64(sysclk, 1000, period)
               ' Store for main cog to read
               wrlong    period, #period_hub
 
@@ -8306,7 +8293,7 @@ PUB measure_duty_cycle() : duty_percent | high_clocks, period_clocks
   repeat until PINREAD(PWM_PIN)
   high_clocks := RDPIN(PWM_PIN)
 
-  duty_percent := (high_clocks * 100) / period_clocks
+  duty_percent := MULDIV64(high_clocks, 100, period_clocks)
 ```
 
 ### Differential High-Time
@@ -8599,7 +8586,7 @@ All counting modes when DIR=0:
 
 *This chapter covered counting modes. For period measurement modes, see Chapter 15. For quadrature encoder details, see the P_QUADRATURE section above.*
 
-# Chapter 15: Period and Frequency Measurement {#ch15}
+# Chapter 15: Frequency Measurement — Periods, Duty & Reciprocal Counting {#ch15}
 
 This chapter covers smart pin modes for measuring signal periods and calculating frequency. Two approaches are available: measuring over a fixed number of periods, or measuring over a fixed time window. Used together, these modes enable precise frequency and duty cycle determination.
 
@@ -8641,6 +8628,8 @@ duty_cycle = high_time / total_time
 ```
 
 A single measurement provides either a count or a time, but calculating frequency or duty requires both.
+
+> **Compute these ratios with `MULDIV64`, not `*` and `/`.** Frequency and duty combine large values: `periods * sysclk` overflows a 32-bit long for any real signal — 100 periods times 200 MHz is already 20 billion, past the 4.29-billion limit — so a plain `(periods * sysclk) / time` silently returns a wrong number. Spin2's `MULDIV64(a, b, divisor)` forms the `a * b` product in a 64-bit intermediate, then divides, so the result stays exact. Every frequency and duty calculation in this chapter uses it; so should yours.
 
 ### Trigger Sensitivity
 
@@ -8733,7 +8722,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
   total_time := RDPIN(SIG_PIN)                ' Total period time
   high_time := RDPIN(SIG_PIN+1)               ' Total high time
 
-  duty_percent := (high_time * 100) / total_time
+  duty_percent := MULDIV64(high_time, 100, total_time)
   DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
 
@@ -8875,10 +8864,10 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     periods := RDPIN(PIN_PERIODS)             ' Period count
 
     ' Calculate frequency: periods / time
-    freq := (periods * _clkfreq) / time_clks
+    freq := MULDIV64(periods, _clkfreq, time_clks)
 
     ' Calculate duty: high_time / total_time
-    duty := (high_clks * 100) / time_clks
+    duty := MULDIV64(high_clks, 100, time_clks)
 
     DEBUG("Frequency: ", UDEC_(freq), " Hz")
     DEBUG("Duty cycle: ", UDEC_(duty), "%")
@@ -8886,13 +8875,15 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     DEBUG("---")
 ```
 
+> **All three cells must watch the same signal.** Each `PINSTART` above measures the pin you name, so the signal has to reach `PIN_TIME`, `PIN_HIGH`, and `PIN_PERIODS`. Rather than wiring it to three pins, leave it on one and aim the other two cells at that pin with A-input routing: `P_MINUS1_A` and `P_MINUS2_A` make a cell read the pin one or two below it — so with the signal on `PIN_TIME`, start `PIN_HIGH` with `P_COUNTER_HIGHS | P_MINUS1_A` and `PIN_PERIODS` with `P_COUNTER_PERIODS | P_MINUS2_A`. A cell watching a neighbor does not consume that pin; the observed pin stays free for its own use. (Without this, a signal on only one pin leaves the other two cells' IN flags low and the `REPEAT UNTIL` never exits.)
+
 ### Why Three Measurements?
 
 The actual measurement time extends beyond X clocks to complete the final period. Using P_COUNTER_TICKS provides the **actual** measurement duration, enabling precise calculations:
 
 ```formula
-actual_frequency = periods / (time_clks / sysclk)
-actual_duty = high_clks / time_clks
+actual_frequency = MULDIV64(periods, sysclk, time_clks)
+actual_duty = MULDIV64(high_clks, 100, time_clks)   ' percent
 ```
 
 Without knowing the actual elapsed time, calculations would have error due to the period completion extension.
@@ -9040,14 +9031,14 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
     high_time := RDPIN(PWM_PIN+1)
 
     ' Calculate frequency
-    freq := (NUM_PERIODS * _clkfreq) / total_time
+    freq := MULDIV64(NUM_PERIODS, _clkfreq, total_time)
 
     ' Calculate duty cycle
-    duty := (high_time * 1000) / total_time   ' 0.1% resolution
+    duty := MULDIV64(high_time, 1000, total_time) ' 0.1% resolution
 
     ' Calculate period in nanoseconds
-    period_ns := (total_time * 1000) / ...
-                 (NUM_PERIODS * (_clkfreq / 1_000_000))
+    period_ns := MULDIV64(total_time, 1000, ...
+                 NUM_PERIODS * (_clkfreq / 1_000_000))
 
     DEBUG("Frequency: ", UDEC_(freq), " Hz")
     DEBUG("Duty cycle: ", UDEC_(duty/10), ".", UDEC_(duty//10), "%")
@@ -9081,7 +9072,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' error_ppm = ((measured - expected) * 1_000_000) / expected
 
     ' Simplified: calculate measured frequency
-    measured := (periods * _clkfreq) / measured
+    measured := MULDIV64(periods, _clkfreq, measured)
 
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
@@ -9197,12 +9188,12 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 
 **From period measurement (P_PERIODS_TICKS):**
 ```formula
-frequency = (num_periods × sysclk) / rdpin_value
+frequency = MULDIV64(num_periods, sysclk, rdpin_value)
 ```
 
 **From period count (P_COUNTER_PERIODS):**
 ```formula
-frequency = (rdpin_value × sysclk) / window_clocks
+frequency = MULDIV64(rdpin_value, sysclk, window_clocks)
 ' Or for 1-second window:
 frequency = rdpin_value  ' Direct Hz reading
 ```
@@ -9211,7 +9202,7 @@ frequency = rdpin_value  ' Direct Hz reading
 
 **From period-based modes:**
 ```formula
-duty_percent = (high_time × 100) / total_time
+duty_percent = MULDIV64(high_time, 100, total_time)
 ```
 Where:
 
@@ -9463,6 +9454,8 @@ PRI read_source(input_mode) : sample | acc, last
     last   := acc
 ```
 
+**The references are local to the pin's power group.** The P2 powers its I/O pins in **isolated groups of four** — pins 0–3, 4–7, 8–11, …, 60–63 — and each group shares a single VIO/GIO supply pair (P2 datasheet, pin descriptions). When a pin's ADC selects `P_ADC_GIO` or `P_ADC_VIO`, it measures *its own group's* ground and supply rails. This is what makes the single-pin ratiometric reading absolute: pin, GIO, and VIO are all referenced to the same local domain, so the supply and temperature drift common to all three divides out. It also carries a layout rule for multi-pin work (§16.6): pins you tie together for one measurement should sit **within a single group**, so they share one reference domain — straddling a group boundary mixes supply domains and degrades the result.
+
 **Handle the out-of-band cases.** Both edges of the formula are legitimate readings, not errors:
 
 - **Below ground** (`pin < GIO`): `pin - GIO` is negative, so `uv` is negative — the signal sits below the ground reference (below 0 V).
@@ -9509,8 +9502,8 @@ PINH(ADC_PIN)
 
 | Filter | Max Period | Why |
 |--------|------------|-----|
-| SINC2 | 11,585 clocks | 27-bit accumulator: 2^(27/2) |
-| SINC3 | 512 clocks | 27-bit accumulator: 2^(27/3) |
+| SINC2 | 11,585 clocks | 27-bit accumulator: 2^(27/2)^ |
+| SINC3 | 512 clocks | 27-bit accumulator: 2^(27/3)^ |
 
 
 ## 16.5 Mode %11010: P_ADC_SCOPE (Triggered Capture)
@@ -9573,6 +9566,8 @@ The hysteretic trigger works as follows:
 
 
 ## 16.6 Multi-Channel ADC
+
+> **Power-domain layout.** The P2 powers its pins in isolated groups of four (§16.3) — pins 0–3, 4–7, …, 60–63, each group on its own VIO/GIO pair. This shapes multi-channel layout two ways: each pin's `P_ADC_GIO`/`P_ADC_VIO` references *its own* group, so an independent channel is self-consistent wherever it sits; but any pins you tie to a *shared* node (as in a constant-impedance multi-pin instrument) must sit within one group to share a reference domain. The example below spans pins 40–47 — two full groups (40–43, 44–47) — which is fine because the channels are independent.
 
 ### Configuring Multiple Pins
 
@@ -9682,6 +9677,8 @@ PRI capture_buffer() | i, last_acc, acc
 PRI process_audio()
   ' Application-specific audio processing of audio_buffer[]
 ```
+
+> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_GIO` (ground-referenced). For an AC source such as an electret microphone, switch to `P_ADC_FLOAT`: the floating input **self-biases to roughly mid-supply**, so the mic couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what you want.
 
 ### Example 3: High-Resolution DC Measurement
 
@@ -9944,7 +9941,7 @@ X_value = (bit_period << 16) | (data_bits - 1)
 
 **With fractional precision:**
 ```spin2
-bit_period_frac := (_clkfreq * 65536) / baud
+bit_period_frac := MULDIV64(_clkfreq, 65536, baud)
 X_value := (bit_period_frac & $FFFFFC00) | (data_bits - 1)
 ```
 
@@ -10592,7 +10589,7 @@ REPEAT UNTIL PINREAD(pin) OR (GETMS() >= deadline)
 
 # Part IV: Special Modes
 
-# Chapter 18: Repository and Inter-Cog Data Sharing {#ch18}
+# Chapter 18: Repository — Inter-Cog Data Sharing {#ch18}
 
 This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-cog data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 
@@ -11322,7 +11319,11 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB smart pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines. See Appendix G for this and other FPGA board differences.
+:::
+
+::: caution
+**Transmit pacing tightens as the system clock rises.** Beyond the basic IN-flag handshake above, community USB drivers report that at higher `clkfreq` the transmit buffer must not be re-fed too soon, or bit-stuffed bits can be dropped — the safe inter-byte spacing scales with the system clock. Both the host driver (OBEX #4198) and the device driver (OBEX #4727) insert sysclk-proportional delays between output bytes to stay reliable. This is a community-observed behaviour; the exact mechanism is not described in the current silicon documentation, so tune the per-clock delay against your own clock rather than treating any single value as a published figure.
 :::
 
 
@@ -11361,11 +11362,12 @@ As a USB host, the P2:
 
 Rather than implementing USB from scratch, use existing libraries:
 
-**Parallax OBEX (Object Exchange):**
+**Parallax OBEX (Object Exchange)** — two community drivers are the natural starting points, one for each role:
 
-- Search for USB objects
-- CDC (serial port) implementations
-- HID implementations
+- **USBnew** (OBEX #4198, by Wuerfel_21) — a USB **host** / HID-input driver: with the P2 acting as host, it reads keyboards, mice, and gamepads.
+- **USB Human-Interface-Device Driver** (OBEX #4727, by Chris Gadd) — a USB **device** driver: the P2 presents itself as a HID peripheral to a host.
+
+These are the community implementations to study and build from; review each against your own requirements and test it for your use before you rely on it.
 
 **P2 Forums:**
 
@@ -11978,7 +11980,7 @@ Y = (1000 × 4,294,967,296) / 200,000,000
 Y = 21,475
 ```
 
-**Note:** Frequency resolution is sysclk / 2^32 (~0.047 Hz at 200 MHz).
+**Note:** Frequency resolution is sysclk / 2^32^ (~0.047 Hz at 200 MHz).
 
 
 ### Y Value from Desired Frequency
@@ -12447,7 +12449,7 @@ in one place).
 
 ### NCO Frequency
 
-- Resolution: sysclk / 2^32
+- Resolution: sysclk / 2^32^
 - At 200 MHz: ~0.047 Hz resolution
 - Maximum frequency: sysclk / 2 (Nyquist limit)
 
@@ -12885,7 +12887,7 @@ Use `FRAC`, not a hand-rolled `frequency * $1_0000_0000 / _clkfreq` (the
 how `FRAC` derives the NCO Y value.
 
 **For NCO, remember X[15:0] affects frequency:**
-```spin2
+```formula
 ' With X[15:0] = 1 (default)
 frequency = Y * sysclk / 2^32
 
@@ -14256,7 +14258,7 @@ Sigma-delta ADC with SINC filtering. 8-14 bit resolution depending on sample per
 | Register | Function |
 |----------|----------|
 | X[5:4] | Filter mode |
-| X[3:0] | Sample period = 2^X clocks |
+| X[3:0] | Sample period = 2^X^ clocks |
 | Y | Period override (optional) |
 | Z | ADC sample/accumulator |
 | IN | Sample complete |
@@ -14537,6 +14539,26 @@ data := RDPIN(pin) & $FF
 
 *For full mode details, see the referenced chapters. For P_ constant values, see Appendix B.*
 
+# Appendix G: FPGA Board Differences
+
+The target for this guide is the **Propeller 2 ASIC** — the production silicon. Before the ASIC existed, the P2 design was emulated on FPGA development boards, and those boards remain in limited use. An FPGA emulation reproduces the P2's digital logic faithfully, but it cannot reproduce the analog and mixed-signal hardware built into the ASIC's pins, and it runs from a fixed development clock rather than the ASIC's configurable clock generator.
+
+Everywhere else in this guide, behavior is described for the ASIC. Where a smart pin or I/O behavior depends on hardware the FPGA does not have, this appendix records the difference. If you are running on an FPGA board, read this appendix first.
+
+## USB — No Built-In Resistors
+
+The ASIC's USB smart pins (mode `%11011`, Chapter 19) include the 1.5 kΩ and 15 kΩ resistors that USB signaling requires, built directly into the pin hardware. An FPGA emulation has no such resistors — you must fit them yourself on the DP and DM lines.
+
+## Clock — Fixed 20 MHz or 80 MHz
+
+The ASIC derives its system clock from an on-chip oscillator and PLL, configurable across a wide frequency range. On an FPGA, the clock generator is not emulated: the only supported system-clock settings are **20 MHz** and **80 MHz**.
+
+The timing relationships throughout this guide still hold — baud rates, NCO frequencies, and measurement windows are all expressed relative to the system clock. Simply substitute the FPGA's actual clock frequency (20 MHz or 80 MHz) wherever a calculation uses the system clock.
+
+## Other Board-Level Differences
+
+FPGA boards also differ from the ASIC in ways that are not specific to the pins — most notably the amount of hub RAM (an FPGA image provides only a portion of the ASIC's 512 KB, as little as 32 KB on small boards) and, on the smallest boards, the number of emulated cogs. These vary from board to board and from image to image; consult your board's documentation for its exact configuration before sizing buffers or assuming eight cogs are available.
+
 # Index
 
 Alphabetical index of terms, constants, and concepts in this guide.
@@ -14609,6 +14631,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 
 - **Filtering, input** - P_FILT0_AB through P_FILT3_AB, Ch. 12
 - **Float** - see PINFLOAT
+- **FPGA board differences** - USB resistors, clock, hub RAM, App. G
 - **Fractional baud** - X[15:10] precision, Ch. 11
 - **Frame period** - X[31:16] in PWM, Ch. 9
 - **Frequency counter** - P_COUNTER_PERIODS, Ch. 15

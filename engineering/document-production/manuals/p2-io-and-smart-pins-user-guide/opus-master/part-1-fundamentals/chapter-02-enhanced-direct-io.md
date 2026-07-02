@@ -1,4 +1,4 @@
-# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
+# Chapter 2: Enhanced Direct I/O — Low-Level Pin Modes {#ch2}
 
 Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering smart pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
@@ -30,15 +30,11 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 ### The P_ Constant Architecture
 
-P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The fields most relevant to Enhanced Direct I/O are:
+P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The three fields most relevant to Enhanced Direct I/O are lit below; the muted fields (A/B input routing in bits [31:21] and the always-0 bit 0) belong to smart pin modes and are covered by the full field map in §4.2.
 
-| Bits | Field | Function |
-|------|-------|----------|
-| 20:8 | MMMMMMMMMMMMM | Low-level pin control (drive, input mode, DAC/ADC) |
-| 7:6 | TT | DIR/OUT control (P_OE, P_BITDAC) |
-| 5:1 | SSSSS | Smart Pin mode (%00000 = P_NORMAL) |
-
-(For the full 32-bit field map — including the A/B input-routing fields in bits [31:21] and the always-0 bit 0 — see §4.2.)
+```{=latex}
+\DiagPConstRulerEDIO
+```
 
 When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
 

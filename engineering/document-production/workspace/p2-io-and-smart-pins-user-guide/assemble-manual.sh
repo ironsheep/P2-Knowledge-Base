@@ -45,6 +45,7 @@ declare -a REQUIRED_FILES=(
     "part-5-appendices/appendix-d-mode-comparison-charts.md"
     "part-5-appendices/appendix-e-troubleshooting.md"
     "part-5-appendices/appendix-f-mode-reference.md"
+    "part-5-appendices/appendix-g-fpga-differences.md"
     "part-5-appendices/index.md"
 )
 
@@ -149,6 +150,7 @@ assemble_section "part-5-appendices/appendix-c-formulas-reference.md" "Appendix 
 assemble_section "part-5-appendices/appendix-d-mode-comparison-charts.md" "Appendix D: Mode Comparison Charts"
 assemble_section "part-5-appendices/appendix-e-troubleshooting.md" "Appendix E: Troubleshooting"
 assemble_section "part-5-appendices/appendix-f-mode-reference.md" "Appendix F: Complete Mode Reference"
+assemble_section "part-5-appendices/appendix-g-fpga-differences.md" "Appendix G: FPGA Board Differences"
 assemble_section "part-5-appendices/index.md" "Index"
 
 echo ""
@@ -170,5 +172,5 @@ echo "  - Part I (Fundamentals):    5 chapters"
 echo "  - Part II (Output Modes):   6 chapters"
 echo "  - Part III (Input Modes):   6 chapters"
 echo "  - Part IV (Special Modes):  2 chapters"
-echo "  - Part V (Appendices):      7 files (A-F + Index)"
+echo "  - Part V (Appendices):      8 files (A-G + Index)"
 echo ""

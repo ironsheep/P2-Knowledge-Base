@@ -916,7 +916,7 @@ Sigma-delta ADC with SINC filtering. 8-14 bit resolution depending on sample per
 | Register | Function |
 |----------|----------|
 | X[5:4] | Filter mode |
-| X[3:0] | Sample period = 2^X clocks |
+| X[3:0] | Sample period = 2^X^ clocks |
 | Y | Period override (optional) |
 | Z | ADC sample/accumulator |
 | IN | Sample complete |

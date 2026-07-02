@@ -1,4 +1,4 @@
-# Chapter 15: Period and Frequency Measurement {#ch15}
+# Chapter 15: Frequency Measurement — Periods, Duty & Reciprocal Counting {#ch15}
 
 This chapter covers smart pin modes for measuring signal periods and calculating frequency. Two approaches are available: measuring over a fixed number of periods, or measuring over a fixed time window. Used together, these modes enable precise frequency and duty cycle determination.
 

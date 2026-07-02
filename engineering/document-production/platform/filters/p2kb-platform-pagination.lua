@@ -17,6 +17,16 @@ local first_chapter = true
 -- Track if we just emitted a Part (next chapter stays on same page)
 local just_emitted_part = false
 
+-- Helper: escape LaTeX specials in a plain-text string.
+-- The chapter subtitle is emitted as a raw \chaptersubtitle{...} argument,
+-- which bypasses pandoc's normal escaping — so an unescaped &, %, $, #, or _
+-- in a subtitle (e.g. "Periods, Duty & Reciprocal Counting") reaches xelatex
+-- raw and aborts the build ("Misplaced alignment tab character &"). Escape the
+-- prose specials here so subtitles behave like the pandoc-escaped title part.
+local function latex_escape(s)
+  return (s:gsub('([&%%$#_])', '\\%1'))
+end
+
 -- Helper: Check if title represents a chapter-level heading
 local function is_chapter_heading(title)
   return title:match("^Chapter") or
@@ -91,7 +101,7 @@ function Header(header)
 
       table.insert(blocks, header)
       if subtitle then
-        table.insert(blocks, pandoc.RawBlock('latex', '\\chaptersubtitle{' .. subtitle .. '}'))
+        table.insert(blocks, pandoc.RawBlock('latex', '\\chaptersubtitle{' .. latex_escape(subtitle) .. '}'))
       end
       return blocks
     end

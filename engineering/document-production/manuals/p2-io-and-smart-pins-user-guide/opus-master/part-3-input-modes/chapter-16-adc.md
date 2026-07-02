@@ -288,8 +288,8 @@ PINH(ADC_PIN)
 
 | Filter | Max Period | Why |
 |--------|------------|-----|
-| SINC2 | 11,585 clocks | 27-bit accumulator: 2^(27/2) |
-| SINC3 | 512 clocks | 27-bit accumulator: 2^(27/3) |
+| SINC2 | 11,585 clocks | 27-bit accumulator: 2^(27/2)^ |
+| SINC3 | 512 clocks | 27-bit accumulator: 2^(27/3)^ |
 
 
 ## 16.5 Mode %11010: P_ADC_SCOPE (Triggered Capture)

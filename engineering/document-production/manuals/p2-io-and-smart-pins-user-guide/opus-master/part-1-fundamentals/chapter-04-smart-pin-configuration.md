@@ -44,21 +44,11 @@ WRPIN(PinField, Mode)
 
 ### Configuration Value Format
 
-The D operand is a 32-bit value with the following fields:
+The D operand is a 32-bit value divided into the fields below. Each field selects one aspect of pin behavior; you build a configuration by OR-ing the P_ constants for the fields you need.
 
-```layout
-D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+```{=latex}
+\DiagPConstRuler
 ```
-
-| Field | Bits | Purpose |
-|-------|------|---------|
-| AAAA | 31:28 | A input selection and polarity |
-| BBBB | 27:24 | B input selection and polarity |
-| FFF | 23:21 | A,B input logic/filtering |
-| MMMMMMMMMMMMM | 20:8 | Low-level pin mode (13 bits) |
-| TT | 7:6 | DIR/OUT control |
-| SSSSS | 5:1 | Smart Pin mode (0-31) |
-| 0 | 0 | Reserved (always 0) |
 
 ### Timing
 

@@ -1,4 +1,4 @@
-# Chapter 1: Direct I/O - The Foundation {#ch1}
+# Chapter 1: Direct I/O — The Foundation {#ch1}
 
 Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex smart pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
