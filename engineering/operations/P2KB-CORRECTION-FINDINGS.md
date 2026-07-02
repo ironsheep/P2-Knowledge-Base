@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-191`**
+**Next finding ID: `F-192`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -79,6 +79,14 @@
 > v55 / hardware ledger) is correct** and the overview/concept/pattern is the drift. Statuses are
 > `CONFIRMED` (cited authority); ★ = I personally re-verified against the Silicon Doc this pass.
 > Re-confirm each at fix time per §4.5.
+
+### F-191 — `architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml` places the trigger level in the Y register; it is actually the X register (WXPIN) — `CONFIRMED`
+> **Logged 2026-07-02** (surfaced by the IOSP release-gate audit, appendix agent — an inverted finding: the manual is right, the YAML is wrong).
+- **Where:** `deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml` (~L24-27) — currently claims the scope trigger level is written to the **Y** register.
+- **What's wrong:** for %11010 P_ADC_SCOPE the trigger level and arm level are set via **WXPIN** (the X register): X[15:8] = trigger level, X[7:0] = arm level. The YAML's Y-register claim is incorrect.
+- **Evidence:** IOSP Appendix F %11010 card (X[15:8] trigger / X[7:0] arm) — independently verified this audit; the Titus extract `ingestionSources/mode-11010-adc-scope-trigger/john-titus-extract.md:152-158` ("trigger+arm set via WXPIN / SCP_X"); Silicon Doc part4 SCOPE-trigger section. All three agree it is X, not Y.
+- **Fix:** correct the `y_register`/`x_register` roles in `smart-pin-11010-*.yaml` so the trigger/arm levels live in X (WXPIN), matching the appendix + Titus + Silicon. Then re-validate parse + crossref. **This is the actionable item that keeps the IOSP drain gate RED until landed** (see IOSP `audit/release-gate-2026-07-02.md`).
+- **Origin:** IOSP release-gate audit, 2026-07-02.
 
 ### F-141 — `architecture/smart_pin_patterns.yaml` carries 3 wrong smart-pin register-roles (stale; skipped by the F-135–F-140 sweep) — `DONE`
 > **APPLIED 2026-06-20:** `architecture/smart_pin_patterns.yaml` — repository value now stored via **WXPIN** (X holds the long, not WYPIN; `smart-pin-00001-*.yaml` authority); dropped **both** ADC WYPIN "trigger" lines (ADC samples continuously once enabled; `smart-pin-11000-*.yaml` + Silicon part4 L66/73); quadrature "clear" now **pulses DIR low** (DIRL→DIRH; `smart-pin-01011-*.yaml` "pulse DIR low to zero count"); adopted the **universal init order** (WXPIN→DIRH→WYPIN) in the PWM, DAC-dither, and frequency-count patterns. Verified: parse + crossref clean.
