@@ -142,7 +142,8 @@ time_conversions:
     - from: "microseconds"
       to: "cycles"
       formula: "cycles := clkfreq / 1_000_000 * us"
-      better: "cycles := clkfreq * us / 1_000_000"
+      better: "cycles := MULDIV64(clkfreq, us, 1_000_000)"
+      better_note: "MULDIV64 uses a 64-bit intermediate: full precision (no divide-first truncation) AND no 32-bit overflow. Plain clkfreq * us / 1_000_000 overflows once us exceeds ~21 at 200 MHz."
     - from: "cycles"
       to: "milliseconds"
       formula: "ms := cycles / (clkfreq / 1000)"
@@ -403,7 +404,7 @@ anti_patterns:
         cycles := clkfreq / 1_000_000 * us  ' May truncate significantly
     correct: |
       PUB better_us_delay(us) | cycles
-        cycles := clkfreq * us / 1_000_000  ' Less truncation for small us
+        cycles := MULDIV64(clkfreq, us, 1_000_000)  ' full precision, no overflow
 
       ' Or use library functions
       PUB best_us_delay(us)

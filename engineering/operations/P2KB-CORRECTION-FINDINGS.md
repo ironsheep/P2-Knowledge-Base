@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-189`**
+**Next finding ID: `F-190`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -763,15 +763,39 @@
 > technique** (`P_MINUS1_A` / `P_MINUS2_A`) to IOSP §15.4 and to the `smart-pin-10110/10111`
 > YAML examples, with signal placement clarified.
 
-### F-188 — same 32-bit overflow class in OUTPUT-mode unit conversions — `NEEDS-VERIFICATION`
-> **OBSERVED while sweeping for F-186 (different domain — NOT yet fixed).** The
-> `(a * clkfreq) / 1_000_000` microseconds-to-clocks idiom overflows the same way for
-> realistic inputs:
-> - `architecture/smart-pins/smart-pin-00111-nco-duty.yaml:76` — `(us_width * _clkfreq / 1_000_000) * (...)` (us_width >= 22 overflows before the divide)
-> - `language/spin2/patterns/applications/motor_controller.yaml:11` — `wypin(angle * clkfreq / 1_000_000, pin)`
-> These belong to the NCO/PWM output-mode reconciliation (Ch.8/9), not the frequency wave.
-> Verify the intended value ranges, then fix (MULDIV64, or `clkfreq / 1_000_000` first) in that
-> wave. Do not ship the overflow idiom.
+### F-188 — same 32-bit overflow class in OUTPUT-mode unit conversions — `DONE (2026-07-02)`
+> **CONFIRMED (range analysis + arithmetic; same MULDIV64 class as F-186).** The
+> `(a * clkfreq) / 1_000_000` microseconds-to-clocks idiom overflows for realistic inputs.
+> Verified ranges: both sites carry **servo pulse widths in microseconds (~1000–2000 µs)** ×
+> `clkfreq` (200 MHz) = ~2e11–4e11, far past 2³². **Fixed to `MULDIV64(...)`** (64-bit
+> intermediate, the F-186 pattern) at both named sites:
+> - `architecture/smart-pins/smart-pin-00111-nco-duty.yaml:76` — `MULDIV64(us_width, _clkfreq, 1_000_000) * ($FFFFFFFF / period)` (second factor stays ≤2³²: verified ~4.3e8 for a 2 ms pulse).
+> - `language/spin2/patterns/applications/motor_controller.yaml:11` — `wypin(MULDIV64(angle, clkfreq, 1_000_000), pin)`.
+> **Evidence-scoping:** the tree-wide sweep for this idiom surfaced a THIRD site not named in the
+> original finding → logged + fixed as **F-189**. YAML-format + crossref validate clean. Ships in
+> this release-yamls patch.
+
+### F-189 — µs→cycles conversion taught as "better" while overflowing (`timing_operations.yaml`) — `DONE (2026-07-02)`
+> **CONFIRMED (surfaced by the F-188 sweep; same overflow class).** `language/spin2/concepts/timing_operations.yaml`
+> recommended `cycles := clkfreq * us / 1_000_000` as the **"better"** form (:145) and as the
+> anti-pattern's **"correct"** example (:406) — but that product overflows 32-bit once `us` exceeds
+> ~21 at 200 MHz. The file is otherwise overflow-aware (it warns extensively about the ms→cycles
+> path), so this was an inconsistent gap teaching an overflow-prone idiom as best practice.
+> **Fixed to `MULDIV64(clkfreq, us, 1_000_000)`** at both sites (full precision AND no overflow — the
+> both-worlds answer the file's own lessons point toward), plus a `better_note` explaining why.
+> Validate clean. Ships in this release-yamls patch.
+
+### F-190 — SINC2 Goertzel constant-iteration silicon limitation absent from `getxacc.yaml` — `DONE (2026-07-02)`
+> **CONFIRMED (Chip Gracey 🏆, P2 designer, forum thread 176065, 2024-12-16).** The Goertzel SINC2
+> (double-integration) mode requires a **constant** iteration count per cycle; a non-power-of-two
+> `SETXFRQ` D makes GETXACC capture an off-by-one integration that corrupts the current + next
+> samples (~30–60 ms periodic glitches). `getxacc.yaml` documented the SINC1/SINC2 setup but not
+> this constraint. **Added a `sinc2_constraint` field** under `goertzel_usage:` with the mechanism +
+> three workarounds (power-of-two clock / SINC1 / XZERO+<20 ms). **Source note:** Chip states he
+> added this to the Silicon Doc, but the released Silicon Doc we hold has NOT been updated — so the
+> authority is Chip's designer report, attributed as such in the YAML (not cited to a Silicon-Doc
+> note our copy lacks). The manual-side twin shipped in the Streamer Guide (§10.4, CHANGELOG
+> "Unreleased"). Validate clean. Ships in this release-yamls patch.
 
 ---
 

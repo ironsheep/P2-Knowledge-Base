@@ -8,7 +8,7 @@ implementation: |
     
   PUB set_servo_angle(pin, angle)
     angle := 1000 + (angle * 1000 / 180)
-    wypin(angle * clkfreq / 1_000_000, pin)
+    wypin(MULDIV64(angle, clkfreq, 1_000_000), pin)
     
   PUB step_motor(steps, delay)
     repeat steps

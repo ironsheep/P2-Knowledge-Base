@@ -81,6 +81,8 @@ against these, per policy §5). 🏆 = Chip Gracey authoritative; 🟢 = credibl
 | Y4 | QMUL/QDIV signed-word limitation | qmul/qdiv YAML | cross-check | 🟢 |
 | Y5 | `SETPIV`(alpha=low 8 bits)+`BLNPIX` pixel-blend; `RGBSQZ`/`RGBEXP` for 16bpp; 32bpp/LUMA only | setpiv/blnpix/rgbsqz/rgbexp YAML | verify semantics | ⚠️ community-reverse-engineered |
 
+**Status (2026-07-02) — RECONCILED into the served YAML (ships in a release-yamls patch).** **Y1** applied: added a `sinc2_constraint` field to `language/pasm2/getxacc.yaml` (register F-190) — attributed to Chip's designer report, since the released Silicon Doc still lacks the 2024.12.16 note (confirmed by Stephen). **Y2** verified already present — `pasm2/rep.yaml` states "Interrupts stalled during execution." **Y3** no change — `qrotate`/`qvector`/`cordic` already document the 8-clock hub-window spacing; the "no manual NOPs needed" corollary is derivable from that and only a 🟢 community claim (not shipped as new authoritative fact). **Y4** no change — `qmul`/`qdiv` already documented unsigned throughout (the "signed-word" note = the unsigned nature; digest itself flags it as possibly interpretation, not a hardware limit). **Y5** no change — `setpiv` ("blend factor to D[7:0]"), `blnpix`, `rgbsqz`, `rgbexp` already carry the correct semantics; the ⚠️ community reverse-engineering merely confirms them. (The F-188 overflow sweep also surfaced F-189 in `timing_operations.yaml` — fixed same pass.)
+
 ### → DEBUG display docs
 | # | Finding | Action | Trust |
 |---|---------|--------|-------|

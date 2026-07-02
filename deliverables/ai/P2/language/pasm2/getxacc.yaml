@@ -51,6 +51,7 @@ goertzel_usage:
   target_frequency: "Set via SETXFRQ to match tone being detected"
   sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"
   output: "X,Y are complex Goertzel output (real/imaginary)"
+  sinc2_constraint: "SINC2 (double-integration) requires a CONSTANT iteration count per Goertzel cycle. A non-power-of-two SETXFRQ D makes the NCO cycle span a varying number of system clocks, so GETXACC captures an off-by-one integration that corrupts the current sample AND the next before self-correcting (periodic noise ~every 30-60 ms). Avoid it by running at a clock that makes the iteration count a power of two (e.g. 256 MHz, not 250, for a 1 MHz target), or use SINC1 (single integration is immune), or start each measurement with XZERO (not XCONT) and keep the window under ~20 ms. Reported by Chip Gracey (P2 designer), 2024-12-16; not yet in the released Silicon Doc."
 related_instructions:
   - QVECTOR: Compute magnitude/phase from X,Y pair
   - GETQX: Get magnitude result after QVECTOR

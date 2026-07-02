@@ -20,6 +20,16 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.13.2] - 2026-07-02
+
+**Goertzel SINC2 usage constraint and overflow-safe unit conversions**
+
+### Added
+- GETXACC: the Goertzel SINC2 mode's constant-iteration requirement is documented — running at a power-of-two-relationship clock (or using SINC1) keeps the double-integration accumulators consistent, with the practical alternatives spelled out.
+
+### Changed
+- Microsecond-to-clocks conversions in the servo/PWM and timing examples use `MULDIV64`, so full-range inputs compute exactly through a 64-bit intermediate.
+
 ## [1.13.1] - 2026-07-01
 
 **Complete, compiler-verified constant coverage across the smart-pin, streamer, and pin-configuration examples**

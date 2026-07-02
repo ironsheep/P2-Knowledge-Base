@@ -73,7 +73,7 @@ spin2_complete: |
     period := _clkfreq / 50     ' 20ms @ 50Hz
     
     ' Calculate Y for desired pulse width
-    y_value := (us_width * _clkfreq / 1_000_000) * ($FFFFFFFF / period)
+    y_value := MULDIV64(us_width, _clkfreq, 1_000_000) * ($FFFFFFFF / period)
     
     PINCLEAR(PWM_PIN)
     WRPIN(PWM_PIN, mode)
