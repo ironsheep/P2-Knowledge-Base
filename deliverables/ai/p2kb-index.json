@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-02T01:18:54.098653",
+    "generated": "2026-07-03T03:04:15.312343",
     "total_entries": 1124,
     "total_categories": 59,
     "total_aliases": 1524,
@@ -5712,8 +5712,8 @@
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1782849425,
-      "sha256": "426ba07e52c12be0855573effa4e4c304eab24658939f7999ef6c7e3fdb3c058"
+      "mtime": 1783047774,
+      "sha256": "674cb0e7fc5703fa5976213b8be84528c89c75308f6b23e521cf46dff8f83a69"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
