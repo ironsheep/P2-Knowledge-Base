@@ -1,0 +1,123 @@
+# P2AN001 — YAML companion to the "Single-Pin Instrumentation ADC" application note.
+# Four-artifact model: this is the first-party, trust-stampable digest an agent consumes
+# WITHOUT opening the PDF. It is a DIGEST + LINKS, never a prose clone — the "why" lives in
+# the human document; this file carries the novel composition + pointers to the KB primitives
+# the note assembles. Schema pilot for the P2ANxxx series (see APP-NOTE-DESIGN-DECISIONS.md).
+
+title: "Single-Pin Instrumentation ADC"
+subtitle: "Absolute microvolt measurement on one P2 pin, no external ADC"
+doc_id: P2AN001
+version: "1.0.0"
+kind: application-note
+
+# ---- DISCOVERY TIER (same shape as the OBEX / Quick Byte catalog entries) ----
+aliases:
+  - instrumentation ADC
+  - absolute voltage measurement
+  - microvolt measurement
+  - ratiometric ADC
+  - sigma-delta pin ADC
+  - single-pin ADC
+  - GIO VIO ratiometric measurement
+  - SINC2 filtering ADC
+  - read analog voltage no external ADC
+categories:
+  - analog-io
+  - smart-pins
+  - measurement
+capability_domain: "Analog I/O / Instrumentation"
+summary: |
+  Read an ABSOLUTE voltage in microvolts on any P2 pin using only the pin's built-in
+  sigma-delta ADC — no external converter. The pin ADC compares against the chip's own
+  drifting GIO/VIO references, so the note measures all three sources (ground reference,
+  supply reference, and the pin) through the same path and takes a ratio; supply and
+  temperature drift divide out, making the result absolute rather than relative. A
+  techniques-catalog: one shared base build plus recipes that trade resolution, channel
+  count, and sample rate.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves
+# (durable link integrity, Sacred Rule #7). The `composes` label carries the semantics:
+# these are the KB primitives this note ASSEMBLES — pointers, never re-descriptions.
+cross_references:
+  composes:                        # full-path, validator-resolvable
+    - architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml   # P_ADC mode + SINC2 filtering (X[5:4]=%01)
+    - language/spin2/methods/muldiv64.yaml                              # the ratiometric divide, 64-bit intermediate
+    - language/pasm2/wrpin.yaml                                          # live source switching (GIO/VIO/pin)
+    - language/pasm2/wxpin.yaml                                          # SINC2 period configuration
+    - language/pasm2/wypin.yaml                                          # DAC output level (test harness)
+    - language/pasm2/rdpin.yaml                                          # read the SINC2 accumulator
+    - language/pasm2/setse1.yaml                                         # arm the sample-ready event
+    - language/pasm2/waitse1.yaml                                        # wait per-sample
+    - architecture/cordic.yaml                                           # Recipe 3 in-cog ratiometric compute (QFRAC/QMUL)
+
+mechanism_reference:               # the human mechanism OWNER (a companion manual, not a primitive to re-teach)
+  - "P2 I/O & Smart Pins User Guide, Chapter 16 — §16.3 (mode P_ADC, ratiometric absolute-voltage method), §16.8 (accuracy limits)"
+
+runnable_code:                     # reference to the validated artifact — NOT inlined
+  examples_zip: "P2AN001-src-<YYMMDD>.zip"   # published beside the PDF at release (release-manual stamps the date)
+  recipes:
+    - id: single-pin-base
+      file: adc-single-pin-base.spin2
+      note: "Recipe 1 — the centerpiece; one pin, absolute uV; SUMS trades rate vs resolution"
+    - id: three-pin
+      file: adc-three-pin.spin2
+      note: "Recipe 2 — three pins on one node, constant impedance, ~3x data/time (lower noise)"
+    - id: filter-cascade
+      file: adc-filter-cascade.spin2
+      note: "Recipe 3 — 17-stage time-halving filter; every averaging depth at once; CORDIC in-cog divide"
+    - id: range-extension
+      note: "Recipe 4 — external series R + calibrated scale factor to read above 3.3 V (CON-delta on base)"
+    - id: mains-averaging
+      note: "Recipe 5 — integrate exactly one mains cycle so 50/60 Hz pickup nulls (CON-delta on base)"
+  ceiling_reference:
+    note: "8-pin bytecode-interpreter ADC (Chip Gracey, EightPinADC.spin2) — DESCRIBED/LINKED only, not rebuilt in-note"
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000, compiled with -d (uses debug())"
+
+key_parameters:
+  clock_hz: 200_000_000
+  adc_mode: "P_ADC with X = %01_0111 (SINC2 filtering, 128-clock sample period)"
+  raw_sample_rate_sps: 1_562_500        # 200_000_000 / 128
+  sources: [P_ADC_GIO, P_ADC_VIO, P_ADC_1X]
+  ratiometric_formula: "microvolts = (pin - GIO) / (VIO - GIO) * 3_300_000"
+  full_scale_uv: 3_300_000
+  source_switch_flush: "discard 3 samples after each source switch (2 SINC2 + 1 front-end), then sum 8 clean"
+  test_harness: "on-chip 16-bit DAC (P_DAC_DITHER_PWM|P_DAC_124R_3V|P_OE) jumpered pin-to-pin; functional loopback, NOT an accuracy benchmark"
+
+prerequisites:
+  - "Smart-pin configuration (WRPIN/WXPIN/WYPIN, raise DIR to enable)"
+  - "Starting code in another cog with COGINIT"
+  - "P2 ADC modes at the mechanism level (this note APPLIES them; the mechanism is owned by IOSP Ch.16)"
+
+gotchas:                           # the note's consolidated pitfalls/hardware notes, as structured flags
+  - flag: pitfall
+    text: "Matched-resistor error floor: GIO/VIO/pin are each measured through a separate on-chip resistor; different pins can read up to ~15 mV apart in absolute terms. A hardware limit — averaging does NOT remove it. Calibrate per pin for absolute work."
+  - flag: pitfall
+    text: "High-impedance sources load the pin (input resistance ~500 kOhm) and read low — buffer, or account for the divider (Recipe 4)."
+  - flag: hardware
+    text: "Keep a multi-pin measurement inside ONE 4-pin power domain (pins 0-3, 4-7, ... 60-63): each group shares one VIO/GIO pair, which is what makes the measurement absolute. Straddling a group boundary mixes supply domains."
+  - flag: hardware
+    text: "Feed VIO from a clean LDO — the internal references track the VIO rail, so a noisy switch-mode VIO degrades every reading."
+  - flag: pitfall
+    text: "Stay at a legal clock: builds run at 200 MHz; P2 spec max is 300 MHz. The original research code's 320 MHz is over-spec. The ADC works from ~10 MHz up — do not overclock for resolution (use integration time)."
+  - flag: tip
+    text: "Keep the SINC2 sample period a power of two (period = 2^X[3:0]); the builds use 128 (%0111)."
+  - flag: tip
+    text: "The DAC loopback is a FUNCTIONAL check, not an accuracy benchmark — DAC and ADC share the same die and imperfections."
+
+hardware_status: |
+  ENOB / resolution claims in the note are QUALITATIVE (mechanism, not measured) — hardware
+  characterization is pending. Do NOT treat any resolution ceiling as a measured/guaranteed
+  figure. When bench measurement lands and is accepted it becomes empirical (top of the trust
+  chain) and this field updates with the measured numbers.
+
+provenance:
+  primary_sources:
+    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — Smart Pins, ADC modes"
+    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — MULDIV64, smart-pin config"
+  technique_source:
+    - "Chip Gracey et al., 'Improved ADC Pin Techniques,' Parallax Forums, 2023-2024 (designer-authoritative)"
+  companion_publication:
+    - "P2 I/O & Smart Pins User Guide, Chapter 16 (a companion P2 Knowledge Base publication)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

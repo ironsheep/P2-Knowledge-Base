@@ -107,7 +107,7 @@ production.
 
 | App note | Slug | State |
 |----------|------|-------|
-| **P2AN001 — Single-Pin ADC Instrumentation** | `P2AN001` | 🟢 **v0.1.0 draft** — the foundational first note + doc-class exemplar (Family A0); rests on the enriched IOSP Ch.16. NOT released — awaiting Stephen's Forge generate + review. |
+| **P2AN001 — Single-Pin ADC Instrumentation** | `P2AN001` | ✅ **v1.0.0 released 2026-07-03** (20pp) — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16; ships a YAML companion (`application-notes/p2an001-single-pin-instrumentation-adc.yaml`) + example ZIP. First app-note release. |
 | **P2AN002 — CORDIC for Real Work** | `P2AN002` | 🟢 **v0.1.0 draft, authoring in progress** — lead of the Math family (B1). To be jointly shaped / reviewed / released with P2AN001 (the two notes together set the doc-class shape). |
 | **P2AN003 — DAC & Analog Signal Generation** | `P2AN003` | 🔴 **planned — stood up 2026-06-30** (Family A1; output sibling to ADC). Committed to production as Input 2 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP DAC content + authored to PDF. |
 | **P2AN004 — Frequency / Period / Pulse Measurement** | `P2AN004` | 🔴 **planned — stood up 2026-06-30** (Family A2; timing instrumentation). Committed to production as Input 3 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP measurement content + authored to PDF. |
@@ -182,6 +182,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-03 18:21  PUBLISH   P2AN001                          (v1.0.0, 20pp — FIRST app-note release: single-pin instrumentation-ADC techniques-catalog; app-note-class templates over the shared platform stack; render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 17:45  PUBLISH   p2-streamer-programming-guide    (v1.0.3, 75pp — Wave-3 designer-authoritative additions: SINC2 constant-iteration constraint §10.4, HDMI/DVI blanking guidance §15.2, capture-to-spectrum pointer §9.2; cross-ref filter adopted, 82 links/0 dead; render-verified, 0 missing chars, outline complete)
 2026-07-03 05:06  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.0, 396pp — MAIDEN release: 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP; document-finalize resolved 5 HIGH + ~12 MED + ~14 LOW release-gate findings; cross-ref filter adopted (pilot); render-verified: compile-clean, 0 heading widows, Appendix A links 42->0, full outline; drain gate GREEN — F-191 shipped in KB v1.13.3)
 2026-07-02 22:51  PLATFORM  filters/p2kb-platform-figures.lua         (emit_reserve(): a keep-together \needspace reserved before a lead-in+box/table pair now goes BEFORE a preceding heading, so the heading migrates with its unit instead of widowing — the real fix for the heading-at-page-bottom class. Benefits every manual; IOSP proved 11->0 widows.)

@@ -80,6 +80,17 @@ The complete reference for the Propeller 2's pin I/O and Smart Pins — working 
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-io-and-smart-pins-user-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-io-and-smart-pins-user-guide-src-260703.zip)
 
+### Application Notes
+
+Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean, runnable code.
+
+#### [Measure an Absolute Voltage in Microvolts on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001.pdf)
+**Application Note P2AN001 — Single-Pin Instrumentation ADC** — *Version 1.0.0*
+
+Read an absolute voltage in microvolts on a single P2 pin using only the built-in smart-pin sigma-delta ADC — no external converter. It measures the chip's own internal references alongside the pin and takes a ratio, so supply and temperature drift divide out and the reading is absolute. One clean base measurement comes first, then a small catalog of techniques to choose among — three pins for lower noise, a filter cascade that hands you every rate at once, a series resistor to read above 3.3 V, and mains-cycle averaging to erase 50/60 Hz hum — plus a reference eight-channel design. Every worked program compiles clean and runs on a bare P2 board with a single jumper wire.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an001-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001-src-260703.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
@@ -92,7 +103,6 @@ Releasing next for community review:
 
 Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean code:
 
-- **Single-Pin ADC Instrumentation** — no external ADC: a single-pin instrumentation ADC and a catalog of techniques
 - **CORDIC for Real Work** — rotations, distances, headings, and transcendentals from the P2's hardware math solver
 - **DAC & Analog Signal Generation** — no external DAC: sample playback, synthesis, dithering, and mixing, straight from the smart pin
 - **Frequency, Period & Pulse Measurement** — three smart-pin instruments that turn a transducer into a number, no external counter or ADC
