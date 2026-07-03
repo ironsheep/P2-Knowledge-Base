@@ -49,7 +49,7 @@ In production:
 | App note | Slug | State |
 |----------|------|-------|
 | P2AN001 — Single-Pin ADC Instrumentation | `P2AN001` | ✅ **v1.0.0 released 2026-07-03** (20pp) — exemplar + companion-schema pilot (Family A0); ships YAML companion + example ZIP |
-| P2AN002 — CORDIC for Real Work | `P2AN002` | 🟢 v0.1.0 draft — authoring in progress (Family B1) |
+| P2AN002 — CORDIC for Real Work | `P2AN002` | ✅ **v1.0.0 released 2026-07-03** (14pp) — Math family lead (B1); 6 recipes + FOC ceiling; ships YAML companion + example ZIP |
 | P2AN003 — DAC & Analog Signal Generation | `P2AN003` | 🔴 planned (Family A1) — IOSP Release Campaign Input 2 |
 | P2AN004 — Frequency / Period / Pulse Measurement | `P2AN004` | 🔴 planned (Family A2) — IOSP Release Campaign Input 3 |
 

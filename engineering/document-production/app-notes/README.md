@@ -20,7 +20,7 @@ to the manuals for background). See the guides below for the full contract.
 | AN | Topic | Status | Notes |
 |---|---|---|---|
 | **P2AN001** | Single-Pin ADC Instrumentation | released v1.0.0 (2026-07-03) | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
-| **P2AN002** | CORDIC for Real Work | drafted v0.1.0 — authoring in progress | lead of the Math family (B1) |
+| **P2AN002** | CORDIC for Real Work | released v1.0.0 (2026-07-03) | lead of the Math family (B1) |
 | **P2AN003** | DAC & Analog Signal Generation | planned — stood up 2026-06-30 | Family A1 (output sibling to ADC); IOSP Release Campaign Input 2 — boundary-determination pending |
 | **P2AN004** | Frequency / Period / Pulse Measurement | planned — stood up 2026-06-30 | Family A2 (timing instrumentation); IOSP Release Campaign Input 3 — boundary-determination pending |
 

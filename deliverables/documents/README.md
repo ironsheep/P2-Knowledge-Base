@@ -91,6 +91,13 @@ Read an absolute voltage in microvolts on a single P2 pin using only the built-i
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2an001-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001-src-260703.zip)
 
+#### [CORDIC for Real Work](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002.pdf)
+**Application Note P2AN002 — Hardware Math on the P2** — *Version 1.0.0*
+
+Put the Propeller 2's shared hardware CORDIC solver to real work — the engine that turns a rotation, a sine, a square root, or a full 64-bit multiply into a single queued operation with a fixed latency. Six runnable recipes to choose among — distance and heading, point rotation, circle layout, sine and cosine waves, 64-bit-safe fixed-point scaling, and pipelining to retire one result every eight clocks — plus a field-oriented motor-control reference design. Because the CORDIC computes exact, deterministic math, every recipe checks against a closed-form answer you can derive by hand, with no bench instruments.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an002-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002-src-260703.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
@@ -103,7 +110,6 @@ Releasing next for community review:
 
 Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean code:
 
-- **CORDIC for Real Work** — rotations, distances, headings, and transcendentals from the P2's hardware math solver
 - **DAC & Analog Signal Generation** — no external DAC: sample playback, synthesis, dithering, and mixing, straight from the smart pin
 - **Frequency, Period & Pulse Measurement** — three smart-pin instruments that turn a transducer into a number, no external counter or ADC
 

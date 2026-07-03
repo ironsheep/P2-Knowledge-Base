@@ -82,7 +82,7 @@ IOSP Ch.16. Every item below follows its shape.
 
 | # | App note | Belongs-here-because | Examples to mine | Status |
 |---|---|---|---|---|
-| B1 | **CORDIC for Real Work** ⭐ **LEAD** | P2-unique solver; reference assembled but *applied* guidance (rotation, distance+heading, scale, transcendentals) taught nowhere | `cordic.yaml`; QB Goertzel; OBEX CORDIC/FFT libs | **next up** |
+| B1 | **CORDIC for Real Work** ⭐ **LEAD** | P2-unique solver; reference assembled but *applied* guidance (rotation, distance+heading, scale, transcendentals) taught nowhere | `cordic.yaml`; QB Goertzel; OBEX CORDIC/FFT libs | ✅ **released v1.0.0 (P2AN002, 2026-07-03)** |
 | B2 | **Extended-Precision Integer Math** | building blocks (carry-chain ADDX/SUBX, `muldiv64`) in the manual; composed 64/96/128-bit technique only in community | **OBEX 5189** (64/96/128-bit); float objects 2812/4047 | candidate |
 | B3 | **Fixed-Point Math on the P2** | fractional math with no FPU — recurring, P2-specific technique, no guided home | DSP/filter examples; CORDIC fixed-point formats | candidate |
 
@@ -191,7 +191,7 @@ boundaries* — is a **new standing activity** distinct from KB-fact ingestion;
 candidate for its own lightweight skill/process once it has run a few times
 (logged as a future-process candidate).
 
-> **Next actions:** (1) **B1 CORDIC** authoring in progress (#140, separate Math
+> **Next actions:** (1) **B1 CORDIC** ✅ released v1.0.0 (P2AN002, 2026-07-03) (#140, separate Math
 > track). (2) The **IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`)
 > drives **A1→P2AN003 (DAC)** and **A2→P2AN004 (Freq/Period/Pulse)** through the §2
 > playbook + IOSP enrichment + PDF, plus a USB study, then releases IOSP. Remaining

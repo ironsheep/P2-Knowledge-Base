@@ -1,0 +1,131 @@
+# P2AN002 — YAML companion to the "CORDIC for Real Work" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001.
+
+title: "CORDIC for Real Work"
+subtitle: "Distance, rotation, waveforms and fixed-point math from the P2's hardware solver"
+doc_id: P2AN002
+version: "1.0.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - CORDIC
+  - hardware math solver
+  - rotate a point
+  - distance and heading
+  - cartesian to polar
+  - sine and cosine
+  - fixed-point math
+  - 64-bit multiply divide
+  - CORDIC pipelining
+  - binary angle
+  - Park transform
+  - field-oriented motor control
+categories:
+  - cordic
+  - math
+  - dsp
+capability_domain: "Math / CORDIC solver"
+summary: |
+  Use the P2's shared hardware CORDIC solver for real work: distance and heading (QVECTOR/XYPOL),
+  point rotation (QROTATE/ROTXY), circle/arc layout (POLXY), sine/cosine waves (QSIN/QCOS),
+  64-bit-safe fixed-point scale/magnitude/log (MULDIV64, QVECTOR, QLOG/QEXP), and pipelining to
+  retire one result every eight clocks. One shape underlies all of it: queue an operation, do
+  other work, retrieve the result 55 clocks later. Angles are a full 2^32 binary circle, so
+  rotation arithmetic is modular addition.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - architecture/cordic.yaml                    # the solver: 54-stage pipeline, 55-clock latency, ~6-7 in flight
+    - language/pasm2/qrotate.yaml                  # rotate (X,Y) by angle
+    - language/pasm2/qvector.yaml                  # cartesian -> polar (length, angle)
+    - language/pasm2/qmul.yaml                     # 32x32 -> 64 unsigned product
+    - language/pasm2/qdiv.yaml                     # 64/32 -> quotient + remainder
+    - language/pasm2/qfrac.yaml                    # 64/32 fractional DIVIDE (not a multiply)
+    - language/pasm2/qsqrt.yaml                    # 64-bit sqrt -> 32-bit root
+    - language/pasm2/qlog.yaml                     # integer -> 5.27 fixed-point log2
+    - language/pasm2/qexp.yaml                     # 5.27 fixed-point -> integer (antilog)
+    - language/pasm2/getqx.yaml                    # read X / length / quotient
+    - language/pasm2/getqy.yaml                    # read Y / angle / remainder
+    - language/pasm2/rep.yaml                      # protect a pipelined sequence from interrupts
+    - language/spin2/methods/rotxy.yaml            # Spin2 rotate
+    - language/spin2/methods/polxy.yaml            # Spin2 polar -> cartesian
+    - language/spin2/methods/xypol.yaml            # Spin2 cartesian -> polar
+    - language/spin2/methods/qsin.yaml             # Spin2 length*sin(angle)
+    - language/spin2/methods/qcos.yaml             # Spin2 length*cos(angle)
+    - language/spin2/methods/muldiv64.yaml         # (a*b)/c with 64-bit intermediate
+
+mechanism_reference:
+  - "P2 Assembly Language Reference Manual (a companion P2 Knowledge Base publication) — full encoding of every CORDIC instruction + REP"
+  - "P2 Streamer Programming Guide (a companion P2 Knowledge Base publication) — streaming CORDIC-computed samples to pins/DACs (DDS)"
+
+runnable_code:
+  examples_zip: "P2AN002-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: distance-heading, file: cordic-distance-heading.spin2, note: "Recipe 1 — QVECTOR/XYPOL: distance + heading from one call"}
+    - {id: rotate-point,     file: cordic-rotate-point.spin2,     note: "Recipe 2 — QROTATE/ROTXY: rotate a point about the origin"}
+    - {id: draw-circle,      file: cordic-draw-circle.spin2,      note: "Recipe 3 — POLXY: step angle to lay points around a circle"}
+    - {id: sine-cosine,      file: cordic-sine-cosine.spin2,      note: "Recipe 4 — QSIN/QCOS: waveform / oscillator"}
+    - {id: fixed-point,      file: cordic-fixed-point.spin2,      note: "Recipe 5 — MULDIV64 + QVECTOR + QLOG/QEXP: 64-bit-safe scale/magnitude/log"}
+    - {id: pipeline-throughput, file: cordic-pipeline-throughput.spin2, note: "Recipe 6 — fill/steady/drain: one result ~every 8 clocks"}
+  ceiling_reference:
+    note: "Three-phase field-oriented motor control (Park transform = QROTATE ops) — DESCRIBED/LINKED only; complete impl is OBEX #2811 (ManAtWork)"
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000, compiled with -d (uses debug())"
+
+key_parameters:
+  pipeline_stages: 54
+  result_latency_clocks: 55
+  issue_interval_clocks: 8            # a cog's hub-access window
+  ops_in_flight_per_cog: "several (~6-7, derived 54/8) — Silicon Doc states no hard count"
+  binary_angle: "full circle = 2^32; $4000_0000=90deg, $8000_0000=180deg, $C000_0000=270deg, $5555_5555=120deg, $AAAA_AAAA=240deg"
+  operations:
+    - "QMUL 32x32->64 (unsigned)"
+    - "QDIV 64/32 -> quotient+remainder (unsigned)"
+    - "QFRAC 64/32 fractional divide (unsigned)"
+    - "QSQRT 64-bit -> 32-bit root (unsigned)"
+    - "QROTATE rotate (X,Y) by angle (signed)"
+    - "QVECTOR (X,Y) -> (length, angle) (signed)"
+    - "QLOG integer -> 5.27 fixed-point log2"
+    - "QEXP 5.27 fixed-point -> integer"
+  precision: "trig (rotate/vector/sin/log/exp) ~28 bits; integer ops (mul/div/sqrt) exact"
+
+prerequisites:
+  - "Spin2 read/write, PASM2 read (throughput recipe + capstone are assembly)"
+  - "Starting code in another cog with COGINIT (pipelining recipe)"
+  - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
+
+gotchas:
+  - flag: pitfall
+    text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED — a negative operand becomes a huge positive one. For signed data, take magnitude + sign separately. QVECTOR/QROTATE ARE signed (built for coordinates)."
+  - flag: pitfall
+    text: "Read each result before the next overwrites it. When pipelining, keep issued-minus-retired within what the pipeline holds, and never let an interrupt stall a pipelined sequence (wrap in REP)."
+  - flag: tip
+    text: "The angle is the whole 32-bit range, so there is no wrap to manage — add/subtract angles freely; overflow IS the wrap you want."
+  - flag: hardware
+    text: "The CORDIC is shared fairly across all cogs via the hub rotation (a turn every 8 clocks); no locking, but the 55-clock latency is fixed and does not shrink with fewer cogs."
+  - flag: verify
+    text: "Precision ~28 bits for trig, exact for integer ops — expect the low few bits of rotate/vector/sin/log/exp to be approximate; a predicted (0,100) may read (0,99)."
+
+hardware_status: |
+  The CORDIC computes deterministic, closed-form math, so every recipe's expected output is
+  derivable by hand and verified against known answers in a DEBUG window (no bench instruments).
+  Values are arithmetic-derived, not measured. This note carries no accuracy-unknown caveat.
+
+provenance:
+  primary_sources:
+    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — CORDIC Solver section"
+    - "Propeller 2 Datasheet (Parallax Inc.) — CORDIC functions and throughput"
+    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — built-in CORDIC methods"
+  community_examples:
+    - "OBEX #2811 Park Transformation (ManAtWork) — the FOC capstone reference"
+    - "OBEX #2812 Binary Floating-Point (Total Spectrum Software)"
+    - "OBEX #5278 compass drivers (polynomial atan2 contrast); OBEX #5361 FFT/IFFT (SaucySoliton)"
+  companion_publication:
+    - "P2 Assembly Language Reference Manual; P2 Streamer Programming Guide (companion P2 Knowledge Base publications)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

@@ -24,9 +24,9 @@
 \vspace{0.25cm}
 {\Large\itshape Rotations, distances, headings, and transcendentals from the P2's hardware math solver\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 0.1.0 (draft)\par}
+{\large\color{blue}Version 1.0.0\par}
 
 \vspace{0.25cm}
 % App-note cover box: repurposes the manuals' bottom-of-cover content table.
