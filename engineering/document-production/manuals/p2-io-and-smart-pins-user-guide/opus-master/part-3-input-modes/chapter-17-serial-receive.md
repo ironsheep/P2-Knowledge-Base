@@ -164,7 +164,7 @@ Receives serial data synchronized to an external clock signal. Data is sampled o
 
 ### Critical: Clock Routing
 
-**The B-input defaults to the local pin, which is useless for SPI.** You MUST add a pin-selection constant:
+**The B-input defaults to the local pin, which is useless for SPI.** A pin-selection constant MUST be added:
 
 ```spin2
 ' WRONG - no clock routing:

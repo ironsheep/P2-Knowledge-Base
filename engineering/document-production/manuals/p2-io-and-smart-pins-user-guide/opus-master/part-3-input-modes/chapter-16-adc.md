@@ -34,7 +34,7 @@ ADC operation requires specific pin mode bits. Set P[12:10] = %100 in the WRPIN 
 
 ### Input Configuration Options
 
-| Constant | P[16:14] | Description | Input Range |
+| Constant | P[9:7] | Description | Input Range |
 |----------|----------|-------------|-------------|
 | P_ADC_GIO | %000 | Ground-referenced | 0V to 3.3V |
 | P_ADC_VIO | %001 | VIO-referenced | VIO-relative |
@@ -103,7 +103,7 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 
 *ENOB = Effective Number of Bits*
 
-> **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. You can reach further by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — the absolute resolution you actually achieve depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Treat any specific ENOB figure as a bench result for *your* rig, not a datasheet value.
+> **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. Reaching further is possible by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — the absolute resolution actually achieved depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Treat any specific ENOB figure as a bench result for a *particular* rig, not a datasheet value.
 
 ### Sample Rate Calculation
 
@@ -187,9 +187,9 @@ SINC3 provides better dynamic response than SINC2, doubling the effective bits f
 > **Two things the post-processing must get right.**
 >
 > - **Warm-up.** The difference math depends on a valid prior accumulator state, so the filter is only accurate **from the second period for SINC2, and from the third period for SINC3.** Discard the first reading (SINC2) or the first two (SINC3) after starting.
-> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) - 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
+> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) - 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever X changes.
 
-> **Startup warm-up and source-switch flush are two different discards.** The warm-up above is a *one-time* settling of the differencing filter when the smart pin first starts. A **separate** discard applies every time you **change the input source** (for example GIO → VIO → pin in the instrumentation method below): switching the ADC's reference contaminates the **first 3 samples** — two for the SINC filter to decimate the step through, plus one for the analog front end to settle — so the **4th sample after a source switch is the first clean one.** A steady single-source reading pays only the startup warm-up, once; a method that rotates among sources pays the 3-sample flush on every switch.
+> **Startup warm-up and source-switch flush are two different discards.** The warm-up above is a *one-time* settling of the differencing filter when the smart pin first starts. A **separate** discard applies every time the input source **changes** (for example GIO → VIO → pin in the instrumentation method below): switching the ADC's reference contaminates the **first 3 samples** — two for the SINC filter to decimate the step through, plus one for the analog front end to settle — so the **4th sample after a source switch is the first clean one.** A steady single-source reading pays only the startup warm-up, once; a method that rotates among sources pays the 3-sample flush on every switch.
 
 ### Bitstream Capture Mode (%11)
 
@@ -240,12 +240,12 @@ PRI read_source(input_mode) : sample | acc, last
     last   := acc
 ```
 
-**The references are local to the pin's power group.** The P2 powers its I/O pins in **isolated groups of four** — pins 0–3, 4–7, 8–11, …, 60–63 — and each group shares a single VIO/GIO supply pair (P2 datasheet, pin descriptions). When a pin's ADC selects `P_ADC_GIO` or `P_ADC_VIO`, it measures *its own group's* ground and supply rails. This is what makes the single-pin ratiometric reading absolute: pin, GIO, and VIO are all referenced to the same local domain, so the supply and temperature drift common to all three divides out. It also carries a layout rule for multi-pin work (§16.6): pins you tie together for one measurement should sit **within a single group**, so they share one reference domain — straddling a group boundary mixes supply domains and degrades the result.
+**The references are local to the pin's power group.** The P2 powers its I/O pins in **isolated groups of four** — pins 0–3, 4–7, 8–11, …, 60–63 — and each group shares a single VIO/GIO supply pair (P2 datasheet, pin descriptions). When a pin's ADC selects `P_ADC_GIO` or `P_ADC_VIO`, it measures *its own group's* ground and supply rails. This is what makes the single-pin ratiometric reading absolute: pin, GIO, and VIO are all referenced to the same local domain, so the supply and temperature drift common to all three divides out. It also carries a layout rule for multi-pin work (§16.6): pins tied together for one measurement should sit **within a single group**, so they share one reference domain — straddling a group boundary mixes supply domains and degrades the result.
 
 **Handle the out-of-band cases.** Both edges of the formula are legitimate readings, not errors:
 
 - **Below ground** (`pin < GIO`): `pin - GIO` is negative, so `uv` is negative — the signal sits below the ground reference (below 0 V).
-- **Over-range** (`pin > VIO`): `pin - GIO` exceeds `VIO - GIO`, so `uv` exceeds 3,300,000 µV — the signal is above the supply reference. Clamp or flag these as your application requires.
+- **Over-range** (`pin > VIO`): `pin - GIO` exceeds `VIO - GIO`, so `uv` exceeds 3,300,000 µV — the signal is above the supply reference. Clamp or flag these as the application requires.
 
 How close the absolute number lands depends on the front-end limits in §16.8 — most importantly the matched-resistor absolute-error floor, which no amount of averaging removes.
 
@@ -300,7 +300,7 @@ Oscilloscope-style triggered acquisition for capturing signal events. Supports f
 
 ### Four-Channel Architecture
 
-The scope mode captures from four consecutive pins simultaneously. Pin numbers must be multiples of 4 (0, 4, 8, 12, ..., 52).
+The scope mode captures from four consecutive pins simultaneously. Pin numbers must be multiples of 4 (0, 4, 8, ..., 60).
 
 ```layout
 Pin group starting at 52:
@@ -353,7 +353,7 @@ The hysteretic trigger works as follows:
 
 ## 16.6 Multi-Channel ADC
 
-> **Power-domain layout.** The P2 powers its pins in isolated groups of four (§16.3) — pins 0–3, 4–7, …, 60–63, each group on its own VIO/GIO pair. This shapes multi-channel layout two ways: each pin's `P_ADC_GIO`/`P_ADC_VIO` references *its own* group, so an independent channel is self-consistent wherever it sits; but any pins you tie to a *shared* node (as in a constant-impedance multi-pin instrument) must sit within one group to share a reference domain. The example below spans pins 40–47 — two full groups (40–43, 44–47) — which is fine because the channels are independent.
+> **Power-domain layout.** The P2 powers its pins in isolated groups of four (§16.3) — pins 0–3, 4–7, …, 60–63, each group on its own VIO/GIO pair. This shapes multi-channel layout two ways: each pin's `P_ADC_GIO`/`P_ADC_VIO` references *its own* group, so an independent channel is self-consistent wherever it sits; but any pins tied to a *shared* node (as in a constant-impedance multi-pin instrument) must sit within one group to share a reference domain. The example below spans pins 40–47 — two full groups (40–43, 44–47) — which is fine because the channels are independent.
 
 ### Configuring Multiple Pins
 
@@ -464,7 +464,7 @@ PRI process_audio()
   ' Application-specific audio processing of audio_buffer[]
 ```
 
-> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_GIO` (ground-referenced). For an AC source such as an electret microphone, switch to `P_ADC_FLOAT`: the floating input **self-biases to roughly mid-supply**, so the mic couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what you want.
+> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_GIO` (ground-referenced). For an AC source such as an electret microphone, switch to `P_ADC_FLOAT`: the floating input **self-biases to roughly mid-supply**, so the mic couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what audio needs.
 
 ### Example 3: High-Resolution DC Measurement
 

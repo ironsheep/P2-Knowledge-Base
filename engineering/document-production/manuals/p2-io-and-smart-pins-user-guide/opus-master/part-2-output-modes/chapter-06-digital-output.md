@@ -132,7 +132,7 @@ PUB sda_read() : state
               testp     #SDA_PIN wc       ' C = SDA state
 ```
 
-`TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where you drive a line and immediately sample it (see §1.2).
+`TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where a line is driven and immediately sampled (see §1.2).
 
 **With Internal Pull-Up:**
 
@@ -310,7 +310,7 @@ The 3-clock output latency is a fixed pipeline delay — it sets *when* each edg
               drvnot    #pin              ' 2 cycles
               jmp       #$-1              ' 4 cycles (taken branch)
 ```
-Period: 6 cycles = 30 ns → ~33 MHz maximum at 200 MHz sysclk.
+Period: 6 cycles = 30 ns → ~33 MHz toggle (edge) rate at 200 MHz sysclk — i.e. a ~16.5 MHz square wave.
 
 The 3-clock output latency shifts *when* edges reach the pad but does not reduce the edge rate; the actual rate is set by the loop's instruction count (the per-transition cost), not by the latency.
 

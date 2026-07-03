@@ -93,7 +93,7 @@ Drive instructions set both the DIR bit (set to 1) and the OUT bit in a single a
 - **Execution time:** 2 clock cycles
 - **Output latency:** 3 additional clock cycles after instruction
 - **Flags:** With the optional WCZ effect, C and Z are **both** set to the pin's prior OUT-bit state (its output level before the instruction executes); without WCZ, neither flag changes
-- **Pin range:** D[5:0] specifies base pin (0-63); D[10:6] specifies span (0-31 additional pins when preceded by SETQ)
+- **Pin range:** D[5:0] specifies base pin (0-63); D[10:6] specifies span (0-31 additional pins)
 
 
 ### DRVH - Drive High

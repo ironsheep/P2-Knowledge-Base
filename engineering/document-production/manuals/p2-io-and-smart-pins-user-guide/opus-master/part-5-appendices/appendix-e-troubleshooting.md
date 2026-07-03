@@ -35,7 +35,7 @@ DEBUG("Mode applied")
 
 **Enable the pin:**
 ```spin2
-' After WRPIN, you MUST set DIR
+' After WRPIN, MUST set DIR
 WRPIN(pin, P_NCO_FREQ | P_OE)
 PINH(pin)                                ' THIS IS REQUIRED
 ```
@@ -462,7 +462,7 @@ Configuring one pin affects behavior of another.
 
 **Verify no accidental routing:**
 ```spin2
-' Check you're not routing A or B from affected pin
+' Check A or B is not routed from affected pin
 ' P_PLUS1_A, P_MINUS1_A, etc. share inputs
 
 ' If pin 20 has issues when pin 21 is used:
@@ -561,7 +561,7 @@ For serial protocols:
 ```spin2
 ' Simplest test - does the pin toggle?
 REPEAT
-  PINNOT(pin)
+  PINTOGGLE(pin)
   WAITMS(500)
 ```
 

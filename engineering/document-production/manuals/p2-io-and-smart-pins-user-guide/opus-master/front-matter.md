@@ -51,6 +51,7 @@
 \vspace{0.3cm}
 \textbf{Part II: Output Modes}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Digital Output
 \item Pulse \& Transition
 \item NCO Frequency/Duty
 \item PWM Triangle/Sawtooth/SMPS
@@ -62,6 +63,7 @@
 \begin{minipage}[t]{0.50\textwidth}
 \textbf{Part III: Input Modes}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Digital Input
 \item Timing Measurement
 \item Counting Modes
 \item Period/Frequency
@@ -77,8 +79,12 @@
 \vspace{0.3cm}
 \textbf{Part V: Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Intent Index
+\item P\_ Constants Reference
 \item Formulas \& Reference Tables
+\item Mode Comparison Charts
 \item Troubleshooting Guide
+\item Complete Mode Reference
 \item FPGA Board Differences
 \end{itemize}
 \end{minipage}

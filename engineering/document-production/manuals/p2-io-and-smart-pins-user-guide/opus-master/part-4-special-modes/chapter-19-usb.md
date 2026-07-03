@@ -89,7 +89,7 @@ USB uses differential signaling with specific line states:
 | SE0 | Low | Low | End of Packet, Reset, Disconnect |
 | SE1 | High | High | Invalid (error condition) |
 
-**Note:** J and K meanings swap for Low Speed vs Full Speed. Because USB uses complementary (mirrored) line signaling, the **DP/DM electrical designations can themselves be swapped by exchanging the low-speed and full-speed mode bit** — handy when PCB routing would otherwise force you to cross the differential pair.
+**Note:** J and K meanings swap for Low Speed vs Full Speed, because USB uses complementary (mirrored) line signaling. (This is a signaling-polarity difference tied to the speed setting, not a way to reassign the physical DP/DM pins.)
 
 ### USB Speeds
 
@@ -162,7 +162,7 @@ The two pins carry **different** IN meanings:
 - **Upper (odd / DP) pin** — IN rises whenever the **output buffer empties**, signalling that the next output byte may be written (via WYPIN to the lower pin). Read it with TESTP.
 - **Lower (even / DM) pin** — IN rises on any **change in receiver status**; read the 16-bit status word with RDPIN/RQPIN.
 
-After a lower-pin status change, IN will not rise again until you acknowledge with one of WRPIN/WXPIN/WYPIN/RDPIN/AKPIN — so always acknowledge before waiting for the next event, or you will miss it.
+After a lower-pin status change, IN will not rise again until acknowledged with one of WRPIN/WXPIN/WYPIN/RDPIN/AKPIN — so always acknowledge before waiting for the next event, or the event is missed.
 
 ### Sending a Packet
 
@@ -174,14 +174,14 @@ Always confirm the upper pin's IN rose after each WYPIN before issuing the next 
 
 ### Transmitter and Receiver Are Independent
 
-TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
+TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — the pin's own transmitted bytes appear in the RX status stream, so software must account for that loopback.
 
 ::: caution
-**On an FPGA-emulated P2 you must fit the USB signaling resistors yourself** — the built-in resistors this mode relies on exist only on the ASIC. See Appendix G (FPGA Board Differences) for the specifics.
+**On an FPGA-emulated P2 the USB signaling resistors must be fitted externally** — the built-in resistors this mode relies on exist only on the ASIC. See Appendix G (FPGA Board Differences) for the specifics.
 :::
 
 ::: caution
-**Transmit pacing tightens as the system clock rises.** Beyond the basic IN-flag handshake above, community USB drivers report that at higher `clkfreq` the transmit buffer must not be re-fed too soon, or bit-stuffed bits can be dropped — the safe inter-byte spacing scales with the system clock. Both the host driver (OBEX #4198) and the device driver (OBEX #4727) insert sysclk-proportional delays between output bytes to stay reliable. This is a community-observed behaviour; the exact mechanism is not described in the current silicon documentation, so tune the per-clock delay against your own clock rather than treating any single value as a published figure.
+**Transmit pacing tightens as the system clock rises.** Beyond the basic IN-flag handshake above, community USB drivers report that at higher `clkfreq` the transmit buffer must not be re-fed too soon, or bit-stuffed bits can be dropped — the safe inter-byte spacing scales with the system clock. Both the host driver (OBEX #4198) and the device driver (OBEX #4727) insert sysclk-proportional delays between output bytes to stay reliable. This is a community-observed behaviour; the exact mechanism is not described in the current silicon documentation, so tune the per-clock delay against the actual clock rather than treating any single value as a published figure.
 :::
 
 
@@ -225,7 +225,7 @@ Rather than implementing USB from scratch, use existing libraries:
 - **USBnew** (OBEX #4198, by Wuerfel_21) — a USB **host** / HID-input driver: with the P2 acting as host, it reads keyboards, mice, and gamepads.
 - **USB Human-Interface-Device Driver** (OBEX #4727, by Chris Gadd) — a USB **device** driver: the P2 presents itself as a HID peripheral to a host.
 
-These are the community implementations to study and build from; review each against your own requirements and test it for your use before you rely on it.
+These are the community implementations to study and build from; review each against the application's requirements and test it before relying on it.
 
 **P2 Forums:**
 
@@ -401,4 +401,4 @@ PINHIGH(even_pin+1)                             ' Enable DP
 - P2 USB implementation examples from community members
 
 
-*This chapter covered the USB smart pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*
+*This chapter covered the USB smart pin mode. For a complete mode reference, see Appendix F.*

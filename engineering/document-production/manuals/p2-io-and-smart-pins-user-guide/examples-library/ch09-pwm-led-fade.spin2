@@ -2,23 +2,24 @@ CON
   _clkfreq = 200_000_000
   LED_PIN = 56
   PWM_FREQ = 500                            ' 500 Hz (no flicker)
+  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds the
+  ' 16-bit frame field, so split it across base and frame: base x frame = period.
+  BASE_PERIOD = 8
+  FRAME_PERIOD = 50000                      ' 8 x 50,000 = 400,000 -> 500 Hz
 
-PUB led_control() | frame, brightness
-  frame := _clkfreq / PWM_FREQ              ' 400,000
-  frame := frame <# 65535                   ' Limit to 16-bit
-
+PUB led_control() | brightness
   PINFLOAT(LED_PIN)
   WRPIN(LED_PIN, P_PWM_SAWTOOTH | P_OE)
-  WXPIN(LED_PIN, 1 | (frame << 16))
+  WXPIN(LED_PIN, BASE_PERIOD | (FRAME_PERIOD << 16))
   WYPIN(LED_PIN, 0)                         ' Start at 0%
   PINLOW(LED_PIN)
 
   ' Fade up
-  repeat brightness from 0 to frame step frame/100
+  repeat brightness from 0 to FRAME_PERIOD step FRAME_PERIOD/100
     WYPIN(LED_PIN, brightness)
     WAITMS(20)
 
   ' Fade down
-  repeat brightness from frame to 0 step frame/100
+  repeat brightness from FRAME_PERIOD to 0 step FRAME_PERIOD/100
     WYPIN(LED_PIN, brightness)
     WAITMS(20)

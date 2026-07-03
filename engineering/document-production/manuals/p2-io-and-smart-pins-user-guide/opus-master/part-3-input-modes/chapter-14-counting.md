@@ -97,7 +97,7 @@ PUB zero_position()
 .read         rdpin     position, #ENC_A    ' Get position
 ```
 
-> **The raw count is 4× the detent count.** A quadrature encoder produces four transitions per detent (two on A, two on B), and this mode counts all of them — so the signed Z value advances by ±4 per click. Reading Z directly (as `read_position()` does) gives the full 4×-resolution count, which is what you want for fine positioning. When you need *detents*, divide by four while preserving the sign with an arithmetic shift right by 2 — `RDPIN(ENC_A) ~> 2` in Spin2, or `sar position, #2` in PASM2 — not a plain unsigned shift, which would corrupt negative (reverse) counts.
+> **The raw count is 4× the detent count.** A quadrature encoder produces four transitions per detent (two on A, two on B), and this mode counts all of them — so the signed Z value advances by ±4 per click. Reading Z directly (as `read_position()` does) gives the full 4×-resolution count, which is what fine positioning requires. When *detents* are needed, divide by four while preserving the sign with an arithmetic shift right by 2 — `RDPIN(ENC_A) ~> 2` in Spin2, or `sar position, #2` in PASM2 — not a plain unsigned shift, which would corrupt negative (reverse) counts.
 
 ### Velocity Measurement (Periodic Mode)
 

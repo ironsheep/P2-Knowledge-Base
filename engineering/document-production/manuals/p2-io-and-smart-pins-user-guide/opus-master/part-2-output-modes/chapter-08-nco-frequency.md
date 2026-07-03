@@ -125,7 +125,7 @@ Using X[15:0] > 1 reduces update rate but can smooth jitter:
 |---------|------------------------|--------|
 | 1 | 200,000,000 | Maximum resolution |
 | 10 | 20,000,000 | Reduced jitter |
-| 100 | 2,000,000 | Lower CPU access rate |
+| 100 | 2,000,000 | Lower cog access rate |
 
 For most applications, X[15:0] = 1 provides best frequency resolution.
 
@@ -186,7 +186,7 @@ PUB nco_duty(duty_percent) | y_value
 
 Because the output is high for exactly one base period on each overflow, P_NCO_DUTY is also a clean way to produce a **fixed-width pulse at an adjustable period** — X sets the pulse width, Y sets the period.
 
-Suppose Fclk = 25 MHz and you want a 1 µs pulse repeating every 18 µs:
+Suppose Fclk = 25 MHz and the goal is a 1 µs pulse repeating every 18 µs:
 
 - Base period X = 25 clocks (= 1 µs at 25 MHz) — the high time is one base period, so 1 µs.
 - The pin overflows (emits a pulse) once every 18 base periods (18 µs), so Y = 2³² / 18.

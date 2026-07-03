@@ -191,10 +191,9 @@ Generates precise timed pulses. Output a specified number of transitions with co
 
 | Register | Function |
 |----------|----------|
-| X[15:0] | Base period (clocks per unit) |
-| X[31:16] | Initial OUT state duration |
-| Y[15:0] | Pulse count |
-| Y[31:16] | Pulse duration |
+| X[15:0] | Base period (clocks per pulse) |
+| X[31:16] | Compare value (output high while the base-period counter > this) |
+| Y[31:0] | Pulse/cycle count (decrements to 0) |
 | IN | Pulses complete |
 
 ### Key Constants
@@ -205,8 +204,8 @@ P_PULSE | P_OE
 ### Quick Example
 ```spin2
 WRPIN(pin, P_PULSE | P_OE)
-WXPIN(pin, 1 | (100 << 16))              ' Base=1, pre-delay=100
-WYPIN(pin, 5 | (50 << 16))               ' 5 pulses, 50 clocks each
+WXPIN(pin, 16 | (8 << 16))               ' period 16, high above 8 (50%)
+WYPIN(pin, 5)                            ' 5 pulses
 PINH(pin)
 ```
 
@@ -1132,7 +1131,7 @@ UART-style transmission with automatic start/stop bit generation.
 |----------|----------|
 | X[31:16] | Bit period (clocks) |
 | X[15:10] | Fractional (1/64 clock) |
-| X[4:0] | Data bits |
+| X[4:0] | Data bits minus 1 |
 | Y | Transmit data (LSB first) |
 | IN | Ready for next byte |
 
@@ -1170,8 +1169,8 @@ UART-style reception with automatic start bit detection and framing.
 |----------|----------|
 | X[31:16] | Bit period (clocks) |
 | X[15:10] | Fractional (1/64 clock) |
-| X[4:0] | Data bits |
-| Z | Received data (right-justified) |
+| X[4:0] | Data bits minus 1 |
+| Z | Received data (MSB-justified, MSB at Z[31]) |
 | IN | Byte received |
 
 ### Key Constants
@@ -1187,7 +1186,7 @@ WRPIN(pin, P_ASYNC_RX)
 WXPIN(pin, bit_period | 7)
 PINH(pin)
 REPEAT UNTIL PINREAD(pin)
-data := RDPIN(pin) & $FF
+data := RDPIN(pin) >> 24                  ' MSB-justified: shift right 32-8
 ```
 
 ### Reference

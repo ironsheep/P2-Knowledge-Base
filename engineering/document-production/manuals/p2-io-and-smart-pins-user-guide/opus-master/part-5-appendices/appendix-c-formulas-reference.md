@@ -198,11 +198,11 @@ voltage_mv = (sample × 3300) / full_scale
 - For 8-bit: full_scale = 255
 - For 14-bit: full_scale = 16383
 
-Use `full_scale = 2^bits - 1` for the resolution you actually configured. See Chapter 16 for how mode and sample period set the bit depth.
+Use `full_scale = 2^bits - 1` for the resolution actually configured. See Chapter 16 for how mode and sample period set the bit depth.
 
 **Worked Example (8-bit ADC reading 128):**
 ```formula
-voltage_mv = (128 × 3300) / 255 = 1655 mV
+voltage_mv = (128 × 3300) / 255 = 1656 mV
 ```
 
 

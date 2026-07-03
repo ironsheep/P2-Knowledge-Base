@@ -252,7 +252,7 @@ P_PWM_SMPS generates PWM output for switch-mode power supply control with voltag
 3. When A goes low, start new cycle, capture Y, raise IN
 4. During cycle, if B-input goes high, force output low for remainder
 
-The **IN flag rising marks the cycle boundary** — the instant a fresh Y is captured for the new cycle. That makes IN the synchronization cue for software: wait on (or poll) IN before writing the next duty value with WYPIN, and your update lands cleanly on the upcoming cycle instead of mid-pulse.
+The **IN flag rising marks the cycle boundary** — the instant a fresh Y is captured for the new cycle. That makes IN the synchronization cue for software: wait on (or poll) IN before writing the next duty value with WYPIN, and the update lands cleanly on the upcoming cycle instead of mid-pulse.
 
 ### Block Diagram
 
@@ -383,13 +383,15 @@ For smooth transitions, update rate should be much slower than PWM frequency:
 
 PWM resolution depends on frame period (X[31:16]):
 
-| Frame Period | Resolution | Max Frequency (200 MHz) |
+| Frame Period | Resolution | Max Frequency, triangle (200 MHz) |
 |--------------|------------|------------------------|
-| 256 | 8-bit | 390.6 kHz (sawtooth) |
+| 256 | 8-bit | 390.6 kHz |
 | 512 | 9-bit | 195.3 kHz |
 | 1024 | 10-bit | 97.7 kHz |
 | 4096 | 12-bit | 24.4 kHz |
 | 65535 | 16-bit | 1.5 kHz |
+
+These are triangle-mode maxima (`sysclk / (2 * frame)`). Sawtooth uses the full frame as one period, so its maximum frequency is double each value.
 
 ### Choosing Parameters
 
@@ -418,24 +420,25 @@ CON
   _clkfreq = 200_000_000
   LED_PIN = 56
   PWM_FREQ = 500                            ' 500 Hz (no flicker)
+  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds the
+  ' 16-bit frame field, so split it across base and frame: base x frame = period.
+  BASE_PERIOD = 8
+  FRAME_PERIOD = 50000                      ' 8 x 50,000 = 400,000 -> 500 Hz
 
-PUB led_control() | frame, brightness
-  frame := _clkfreq / PWM_FREQ              ' 400,000
-  frame := frame <# 65535                   ' Limit to 16-bit
-
+PUB led_control() | brightness
   PINFLOAT(LED_PIN)
   WRPIN(LED_PIN, P_PWM_SAWTOOTH | P_OE)
-  WXPIN(LED_PIN, 1 | (frame << 16))
+  WXPIN(LED_PIN, BASE_PERIOD | (FRAME_PERIOD << 16))
   WYPIN(LED_PIN, 0)                         ' Start at 0%
   PINLOW(LED_PIN)
 
   ' Fade up
-  repeat brightness from 0 to frame step frame/100
+  repeat brightness from 0 to FRAME_PERIOD step FRAME_PERIOD/100
     WYPIN(LED_PIN, brightness)
     WAITMS(20)
 
   ' Fade down
-  repeat brightness from frame to 0 step frame/100
+  repeat brightness from FRAME_PERIOD to 0 step FRAME_PERIOD/100
     WYPIN(LED_PIN, brightness)
     WAITMS(20)
 ```
@@ -486,7 +489,7 @@ VAR
   long frame_period
 
 PUB motor_init()
-  frame_period := _clkfreq / PWM_FREQ
+  frame_period := _clkfreq / (2 * PWM_FREQ) ' triangle period = 2 x frame
 
   PINFLOAT(MOTOR_PIN)
   WRPIN(MOTOR_PIN, P_PWM_TRIANGLE | P_OE)   ' Triangle for smooth drive
@@ -525,7 +528,7 @@ DAT           org
               wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
               wxpin     ##$07D0_0001, #PWM_PIN      ' Frame=2000, Base=1
               dirh      #PWM_PIN
-              wypin     ##1000, #PWM_PIN  ' 50% duty (imm32, 9-bit)
+              wypin     ##1000, #PWM_PIN  ' 50% duty (1000 of 2000)
 
 ' Update duty in real-time
 pwm_loop

@@ -1,6 +1,6 @@
 # Appendix D: Mode Comparison Charts
 
-This appendix provides comparison matrices to help select the appropriate smart pin mode for your application.
+This appendix provides comparison matrices to help select the appropriate smart pin mode for the application.
 
 ## Output Mode Comparison
 
@@ -201,10 +201,10 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 | Mode | Resistance | Voltage | Current | Best For |
 |------|------------|---------|---------|----------|
-| P_DAC_990R_3V | 990 ohm | 0-3.3V | ~3 mA | Op-amp input |
-| P_DAC_600R_2V | 600 ohm | 0-2.0V | ~3 mA | Medium load |
-| P_DAC_124R_3V | 124 ohm | 0-3.3V | ~27 mA | LED, speaker |
-| P_DAC_75R_2V | 75 ohm | 0-2.0V | ~27 mA | Coax cable |
+| P_DAC_990R_3V | 990 Ω | 0-3.3V | ~3.3 mA | Op-amp input |
+| P_DAC_600R_2V | 600 Ω | 0-2.0V | ~3.3 mA | Medium load |
+| P_DAC_124R_3V | 124 Ω | 0-3.3V | ~27 mA | LED, speaker |
+| P_DAC_75R_2V | 75 Ω | 0-2.0V | ~27 mA | Coax cable |
 
 ### Dithering Comparison
 

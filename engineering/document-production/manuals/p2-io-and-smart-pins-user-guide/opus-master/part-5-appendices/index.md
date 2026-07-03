@@ -61,7 +61,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 
 ### E
 
-- **Edge counting** - P_COUNT_RISES, P_COUNT_RISES, Ch. 14
+- **Edge counting** - P_COUNT_RISES, P_COUNT_HIGHS, Ch. 14
 - **Encoder** - see Quadrature encoder
 - **ENOB** - Effective number of bits (ADC), Ch. 16
 - **Event timing** - P_EVENTS_TICKS, Ch. 13
@@ -153,10 +153,10 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **P_COUNTER_HIGHS** - High time in window (%10110), Ch. 15, App. F
 - **P_COUNTER_PERIODS** - Period count in window (%10111), Ch. 15, App. F
 - **P_COUNTER_TICKS** - Period time in window (%10101), Ch. 15, App. F
-- **P_DAC_124R_3V** - 124 ohm, 3.3V DAC, Ch. 10
-- **P_DAC_600R_2V** - 600 ohm, 2.0V DAC, Ch. 10
-- **P_DAC_75R_2V** - 75 ohm, 2.0V DAC, Ch. 10
-- **P_DAC_990R_3V** - 990 ohm, 3.3V DAC, Ch. 10
+- **P_DAC_124R_3V** - 124 Ω, 3.3V DAC, Ch. 10
+- **P_DAC_600R_2V** - 600 Ω, 2.0V DAC, Ch. 10
+- **P_DAC_75R_2V** - 75 Ω, 2.0V DAC, Ch. 10
+- **P_DAC_990R_3V** - 990 Ω, 3.3V DAC, Ch. 10
 - **P_DAC_DITHER_PWM** - PWM dithered DAC (%00011), Ch. 18, App. F
 - **P_DAC_DITHER_RND** - PRNG dithered DAC (%00010), Ch. 18, App. F
 - **P_DAC_NOISE** - DAC noise output (%00001), Ch. 18, App. F
@@ -213,7 +213,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **PINFLOAT** - Float pin (Spin2), Ch. 4, 6
 - **PINHIGH** - Drive pin high (Spin2), Ch. 4, 6
 - **PINLOW** - Drive pin low (Spin2), Ch. 4, 6
-- **PINNOT** - Toggle pin (Spin2), Ch. 4, 6
+- **PINTOGGLE** - Toggle pin (Spin2), Ch. 1
 - **PINREAD** - Read IN flag (Spin2), Ch. 4
 - **PINSTART** - Configure and start (Spin2), Ch. 4
 - **PINWRITE** - Write pin value (Spin2), Ch. 4, 6

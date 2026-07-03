@@ -90,7 +90,7 @@ PUB sensor_cog() | reading
 
   REPEAT
     reading := read_sensor()
-    WXPIN(REPO_PIN, reading)                    ' Share with other COGs
+    WXPIN(REPO_PIN, reading)                    ' Share with other Cogs
     WAITMS(10)
 ```
 
@@ -380,10 +380,10 @@ VAR
   long sensor_stack[64]
 
 PUB main()
-  ' Start sensor reading COG
+  ' Start sensor reading Cog
   COGSPIN(NEWCOG, sensor_cog(), @sensor_stack)
 
-  ' This COG reads the shared value
+  ' This Cog reads the shared value
   setup_repository_reader()
 
   REPEAT
@@ -518,7 +518,7 @@ PRI build_sine_table() | i
 Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
 - P[12:10] = %101 for DAC output
-- P[11] = output enable
+- `P_OE` sets the output-enable flag (drives the pin)
 
 ### Register Usage
 
@@ -547,4 +547,4 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 - **All modes**: IN raised when sample period completes
 
 
-*This chapter covered repository and dithered DAC modes. For USB host/device, see Chapter 19. For a complete mode reference, see Appendix A.*
+*This chapter covered repository and dithered DAC modes. For USB host/device, see Chapter 19. For a complete mode reference, see Appendix F.*

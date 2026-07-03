@@ -60,7 +60,7 @@ P_STATE_TICKS continuously measures the duration of each logic state (both high 
 
 On reset (DIR=0), IN is low and Z preloads to 1 — see §13.1.
 
-**Bit 31 means different things across these modes.** In P_STATE_TICKS it is the captured C/state flag (1 = the timed state was high); in P_HIGH_TICKS and P_EVENTS_TICKS it is the saturation/overflow indicator. The same `& $7FFF_FFFF` mask clears it in every mode, but read bit 31 according to the mode you configured.
+**Bit 31 means different things across these modes.** In P_STATE_TICKS it is the captured C/state flag (1 = the timed state was high); in P_HIGH_TICKS and P_EVENTS_TICKS it is the saturation/overflow indicator. The same `& $7FFF_FFFF` mask clears it in every mode, but read bit 31 according to the mode configured.
 
 ### Reading Measurements
 

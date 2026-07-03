@@ -44,7 +44,7 @@ WRPIN(PinField, Mode)
 
 ### Configuration Value Format
 
-The D operand is a 32-bit value divided into the fields below. Each field selects one aspect of pin behavior; you build a configuration by OR-ing the P_ constants for the fields you need.
+The D operand is a 32-bit value divided into the fields below. Each field selects one aspect of pin behavior; a configuration is built by OR-ing the P_ constants for the needed fields.
 
 ```{=latex}
 \DiagPConstRuler
@@ -285,10 +285,10 @@ result := RQPIN(Pin)
 ### Example - Multi-Cog Access
 
 ```pasm2
-' COG 0 (primary) uses RDPIN
+' Cog 0 (primary) uses RDPIN
               rdpin     result, #sensor  ' Read and acknowledge
 
-' COG 1 (observer) uses RQPIN
+' Cog 1 (observer) uses RQPIN
               rqpin     result, #sensor  ' Read without acknowledge
 ```
 
@@ -451,7 +451,7 @@ The `P_OE` constant (TT bits = %01) enables smart pin output regardless of the D
 **Input-only modes:** Modes that only measure input don't need P_OE:
 
 - All timing measurement modes (%10000-%10010)
-- Counter modes (%01011-%01111) unless driving output
+- Quadrature and counter modes (%01011-%01111) unless driving output
 - Period/frequency modes (%10011-%10111)
 - ADC modes (%11000-%11010)
 - Serial RX (%11101, %11111)

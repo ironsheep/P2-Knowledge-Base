@@ -248,7 +248,7 @@ Basic ADC modes provide analog-to-digital conversion without smart pin modes. Th
 | `P_ADC_30X` | 31.6× | Higher gain |
 | `P_ADC_100X` | 100× | Maximum gain |
 
-**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use smart pin ADC modes (Chapter 17).
+**Note:** These modes provide single-bit output (comparator-style). For multi-bit ADC conversion, use smart pin ADC modes (Chapter 16).
 
 **Example - Simple threshold detection:**
 ```spin2

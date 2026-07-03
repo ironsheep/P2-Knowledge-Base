@@ -9,7 +9,7 @@ This chapter covers smart pin modes for measuring signal periods and calculating
 
 Several smart-pin modes across Chapters 13–15 measure time-domain signal properties. Use this map to pick the right starting point:
 
-| You want to measure… | Recommended mode(s) | Where |
+| To measure… | Recommended mode(s) | Where |
 |----------------------|---------------------|-------|
 | Pulse width / high or low duration | P_HIGH_TICKS, P_STATE_TICKS | Ch13 |
 | Time between events / timeout | P_EVENTS_TICKS | Ch13 |
@@ -167,7 +167,7 @@ The loop waits on only `SIG_PIN`, yet reads both pins. That is safe because both
 - %10011: "Measure time for exactly X periods"
 - %10101: "Measure time for all periods within X clocks"
 
-Because the window stretches to the end of the period already in progress, **Z reports the *actual* elapsed clocks — always ≥ X, never exactly X.** Use Z, not the nominal X, as the time term in your math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
+Because the window stretches to the end of the period already in progress, **Z reports the *actual* elapsed clocks — always ≥ X, never exactly X.** Use Z, not the nominal X, as the time term in the math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
 
 **Configuration:**
 ```spin2
@@ -236,12 +236,12 @@ frequency := period_count
 
 ### Restart and Acknowledge
 
-These modes restart automatically: a new measurement begins on the next trigger after the window completes, so you do not re-arm them by hand. How you *read* the result decides whether the IN flag is cleared:
+These modes restart automatically: a new measurement begins on the next trigger after the window completes, so they are not re-armed by hand. How the result is *read* decides whether the IN flag is cleared:
 
-- **RDPIN** reads Z **and acknowledges** — it clears IN, so the next completed window can raise it again. Use RDPIN as your once-per-window read.
+- **RDPIN** reads Z **and acknowledges** — it clears IN, so the next completed window can raise it again. Use RDPIN as the once-per-window read.
 - **RQPIN** reads Z **quietly** — it does *not* clear IN. Use it to peek mid-stream without disturbing the IN-driven cadence; the matching RDPIN still does the acknowledge.
 
-Reading with RDPIN each time IN rises gives you exactly one fresh result per window, in lock-step with the hardware.
+Reading with RDPIN each time IN rises gives exactly one fresh result per window, in lock-step with the hardware.
 
 
 ## 15.4 Combined Measurements
@@ -287,7 +287,7 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     DEBUG("---")
 ```
 
-> **All three cells must watch the same signal.** Each `PINSTART` above measures the pin you name, so the signal has to reach `PIN_TIME`, `PIN_HIGH`, and `PIN_PERIODS`. Rather than wiring it to three pins, leave it on one and aim the other two cells at that pin with A-input routing: `P_MINUS1_A` and `P_MINUS2_A` make a cell read the pin one or two below it — so with the signal on `PIN_TIME`, start `PIN_HIGH` with `P_COUNTER_HIGHS | P_MINUS1_A` and `PIN_PERIODS` with `P_COUNTER_PERIODS | P_MINUS2_A`. A cell watching a neighbor does not consume that pin; the observed pin stays free for its own use. (Without this, a signal on only one pin leaves the other two cells' IN flags low and the `REPEAT UNTIL` never exits.)
+> **All three cells must watch the same signal.** Each `PINSTART` above measures the pin named, so the signal has to reach `PIN_TIME`, `PIN_HIGH`, and `PIN_PERIODS`. Rather than wiring it to three pins, leave it on one and aim the other two cells at that pin with A-input routing: `P_MINUS1_A` and `P_MINUS2_A` make a cell read the pin one or two below it — so with the signal on `PIN_TIME`, start `PIN_HIGH` with `P_COUNTER_HIGHS | P_MINUS1_A` and `PIN_PERIODS` with `P_COUNTER_PERIODS | P_MINUS2_A`. A cell watching a neighbor does not consume that pin; the observed pin stays free for its own use. (Without this, a signal on only one pin leaves the other two cells' IN flags low and the `REPEAT UNTIL` never exits.)
 
 ### Why Three Measurements?
 

@@ -62,7 +62,7 @@ Every pattern above keeps the cog **executing** — the poll-spin loops on `TEST
               jmp       #.wait
 ```
 
-`WAITSE1` auto-clears the SE1 flag as it releases, so the next `WAITSE1` waits for the next edge. You still issue an acknowledging read (`RDPIN`) to retrieve the result and lower IN. The four slots are independent, letting one cog track up to four sources — but each `WAITSE` waits on exactly one.
+`WAITSE1` auto-clears the SE1 flag as it releases, so the next `WAITSE1` waits for the next edge. An acknowledging read (`RDPIN`) is still required to retrieve the result and lower IN. The four slots are independent, letting one cog track up to four sources — but each `WAITSE` waits on exactly one.
 
 **Wait with a timeout (never hang).** `WAITSE1` stalls *indefinitely* — if the smart pin never completes, the cog never wakes. To bound the wait, race the pin event against the system counter. No single instruction waits on an event *and* a timer at once, so poll both and branch on whichever fires first:
 
@@ -257,11 +257,11 @@ When multiple cogs need the same smart pin data:
 
 **Pattern: One owner, multiple observers**
 ```pasm2
-' COG 0 - Owner (uses RDPIN)
+' Cog 0 - Owner (uses RDPIN)
               testp     #sensor wc
         if_c  rdpin     result, #sensor   ' Read and acknowledge
 
-' COG 1..N - Observers (use RQPIN)
+' Cog 1..N - Observers (use RQPIN)
               rqpin     result, #sensor   ' Read without acknowledge
 ```
 

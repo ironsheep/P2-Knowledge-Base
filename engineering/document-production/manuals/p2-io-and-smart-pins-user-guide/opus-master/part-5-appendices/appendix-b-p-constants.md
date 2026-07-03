@@ -147,10 +147,10 @@ WRPIN(pin, mode)
 
 | Constant | Resistance | Voltage | Description |
 |----------|------------|---------|-------------|
-| P_DAC_990R_3V | 990 ohm | 3.3V peak | Standard DAC |
-| P_DAC_600R_2V | 600 ohm | 2.0V peak | Lower impedance |
-| P_DAC_124R_3V | 124 ohm | 3.3V peak | Low impedance |
-| P_DAC_75R_2V | 75 ohm | 2.0V peak | Lowest impedance |
+| P_DAC_990R_3V | 990 Ω | 3.3V peak | Standard DAC |
+| P_DAC_600R_2V | 600 Ω | 2.0V peak | Lower impedance |
+| P_DAC_124R_3V | 124 Ω | 3.3V peak | Low impedance |
+| P_DAC_75R_2V | 75 Ω | 2.0V peak | Lowest impedance |
 
 
 ## Sync/Async I/O (pick one)
@@ -185,9 +185,9 @@ WRPIN(pin, mode)
 | Constant | Drive | Description |
 |----------|-------|-------------|
 | P_HIGH_FAST | 30mA | Fast drive high (default) |
-| P_HIGH_1K5 | 1.5k ohm | Resistive pull-up |
-| P_HIGH_15K | 15k ohm | Weak pull-up |
-| P_HIGH_150K | 150k ohm | Very weak pull-up |
+| P_HIGH_1K5 | 1.5k Ω | Resistive pull-up |
+| P_HIGH_15K | 15k Ω | Weak pull-up |
+| P_HIGH_150K | 150k Ω | Very weak pull-up |
 | P_HIGH_1MA | 1mA | Current source |
 | P_HIGH_100UA | 100uA | Weak current source |
 | P_HIGH_10UA | 10uA | Very weak current source |
@@ -199,9 +199,9 @@ WRPIN(pin, mode)
 | Constant | Drive | Description |
 |----------|-------|-------------|
 | P_LOW_FAST | 30mA | Fast drive low (default) |
-| P_LOW_1K5 | 1.5k ohm | Resistive pull-down |
-| P_LOW_15K | 15k ohm | Weak pull-down |
-| P_LOW_150K | 150k ohm | Very weak pull-down |
+| P_LOW_1K5 | 1.5k Ω | Resistive pull-down |
+| P_LOW_15K | 15k Ω | Weak pull-down |
+| P_LOW_150K | 150k Ω | Very weak pull-down |
 | P_LOW_1MA | 1mA | Current sink |
 | P_LOW_100UA | 100uA | Weak current sink |
 | P_LOW_10UA | 10uA | Very weak current sink |
