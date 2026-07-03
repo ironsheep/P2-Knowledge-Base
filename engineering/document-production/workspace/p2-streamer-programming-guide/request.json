@@ -13,6 +13,7 @@
       ],
       "lua_filters": [
         "p2kb-platform-figures",
+        "p2kb-platform-crossref",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
@@ -22,8 +23,8 @@
         "title": "P2 Streamer Programming Guide",
         "subtitle": "Comprehensive Reference for the Propeller 2 Streamer",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v1.0.2",
-        "date": "June 2026"
+        "version": "v1.0.3",
+        "date": "July 2026"
       }
     }
   ]

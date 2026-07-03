@@ -1,5 +1,19 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.3 (2026-07-03)
+
+Designer-authoritative guidance additions to the DDS/Goertzel and video chapters.
+No mode encodings changed.
+
+- **SINC2 constant-iteration constraint** — §10.4 documents the silicon requirement that
+  every Goertzel cycle integrate a constant iteration count, with three workarounds; the
+  Appendix D troubleshooting checklist points to it.
+- **HDMI/DVI blanking guidance** — §15.2 adds practical DVI/HDMI blanking limits
+  (display-limited, not analog-mandated) and the extra horizontal blanking that
+  audio-carrying HDMI needs.
+- **Capture-to-spectrum pointer** — §9.2 links high-rate ADC capture to the CORDIC FFT
+  technique for on-chip spectral analysis.
+
 ## v1.0.2 (2026-06-26)
 
 Presentation refresh adopting the shared manual-family typography. No chapters added,

@@ -57,7 +57,7 @@ ref. (Discovered 2026-07-02 on the IOSP pilot: matrix cells were dead while 78 b
 | `p2-assembly-language-manual` | ⏳ PENDING AUDIT | released v3.1.0; adopt + audit on next release |
 | `p2-pasm-desilva-style` | ⏳ PENDING AUDIT | released v3.0.1; adopt + audit on next release |
 | `p2-debug-window-manual` | ⏳ PENDING AUDIT | released v1.0.1; adopt + audit on next release |
-| `p2-streamer-programming-guide` | ⏳ PENDING AUDIT | released v1.0.2; adopt + audit on next release |
+| `p2-streamer-programming-guide` | ✅ ADOPTED | v1.0.3 (2026-07-03): crossref wired before tables; visual audit passed — 82 links, 0 dead (all 49 targets resolve). Manual has no table-cell chapter/§ refs → table-borne case N/A |
 | `p2-single-step-debugger-manual` | ⏳ PENDING AUDIT | in tech review; adopt + audit when first released |
 | `p2-getting-started-guide` | ⏳ PENDING AUDIT | released v1.0.0; adopt + audit on next release |
 | `p2-architect-guide` | ⏳ PENDING AUDIT | in development; adopt + audit when first released |

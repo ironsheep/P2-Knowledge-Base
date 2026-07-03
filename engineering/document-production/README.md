@@ -27,7 +27,7 @@ table still carry the older "shape" and await a separate refresh.)*
 | AI Privacy Guide | `ai-privacy-guide` | ✅ **Released** — both reviews complete; presentation-class |
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ **v1.0.0** (396pp) released 2026-07-03 — maiden Community Review Edition; cross-ref filter pilot; 15-program example ZIP ("Blue Book") |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | 🟢 draft, platform stack; **cover repaired 2026-06-12**; in technical review (chip + community) |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ **v1.0.2 released 2026-06-26** (68pp); IBM Plex typography refresh + LUMA8 color table + mode-field shorthand; chip review outstanding |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ **v1.0.3 released 2026-07-03** (75pp); Wave-3 designer-authoritative additions (SINC2 constant-iteration constraint, HDMI/DVI blanking guidance, capture-to-spectrum pointer) + cross-ref filter adopted; chip review outstanding |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ **v1.0.1 released 2026-06-26** (community review, 156pp); accuracy + typography refresh; 32-demo example library bundled |
 
 ## In development / parked · Instruments · Orphaned (see roster for detail)
