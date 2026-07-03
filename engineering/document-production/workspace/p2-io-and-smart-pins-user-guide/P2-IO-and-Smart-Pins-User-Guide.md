@@ -14374,9 +14374,10 @@ Four-channel oscilloscope-style ADC with hysteretic triggering.
 
 | Register | Function |
 |----------|----------|
-| X[15:8] | Trigger level |
-| X[7:0] | Arm level |
-| Z | 4 × 8-bit samples |
+| X[15:10] | B trigger value (6-bit) |
+| X[7:2] | A trigger value (6-bit) |
+| X[1:0] | Filter select (%00/%01 Tukey, %1x Hann) |
+| Z | 8-bit sample (RDPIN; C = armed) |
 | IN | Trigger fired |
 
 ### Key Constants
@@ -14386,9 +14387,8 @@ P_ADC_GIO | P_ADC_SCOPE
 
 ### Quick Example
 ```spin2
-' Pin must be multiple of 4
-WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)
-WXPIN(52, (128 << 8) | 64)               ' Trigger=128, Arm=64
+WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)       ' pin must be a multiple of 4
+WXPIN(52, (48 << 10) | (16 << 2))        ' B=48, A=16, 68-tap filter
 PINH(52)
 ```
 
