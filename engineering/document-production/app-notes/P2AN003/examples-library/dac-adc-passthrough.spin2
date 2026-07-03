@@ -27,13 +27,17 @@ pump            ' ADC input pin: SINC2 filtering, 256-clock period
                 or      pa, #%001_000000
                 setse1  pa
 
-.loop           waitse1                        ' wait for ADC sample period
+                waitse1                        ' first SINC2 period settles
+                rdpin   last, #ADC_PIN        ' prime the differencer
+
+.loop           waitse1                        ' wait for next ADC period
                 rdpin   acc, #ADC_PIN         ' running SINC2 accumulator
                 mov     smp, acc
                 sub     smp, last             ' delta over this period
                 mov     last, acc             ' remember for next time
-                zerox   smp, #26              ' keep the meaningful bits
-                shl     smp, #8               ' scale the count toward 16b
+                zerox   smp, #26              ' true 27-bit modular delta
+                ' a 256-clock SINC2 delta is already ~16-bit full scale
+                ' (raw width = 2*log2(256)), so it drives the DAC directly
                 cmp     smp, ##$FFFF    wcz
         if_a    mov     smp, ##$FFFF          ' clamp to full scale
                 wypin   smp, #DAC_PIN         ' re-emit on the DAC

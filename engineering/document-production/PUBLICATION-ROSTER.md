@@ -109,7 +109,7 @@ production.
 |----------|------|-------|
 | **P2AN001 — Single-Pin ADC Instrumentation** | `P2AN001` | ✅ **v1.0.1 released 2026-07-03** (20pp) — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16; ships a YAML companion (`application-notes/p2an001-single-pin-instrumentation-adc.yaml`) + example ZIP. First app-note release; v1.0.1 = editorial compile-status wording patch. |
 | **P2AN002 — CORDIC for Real Work** | `P2AN002` | ✅ **v1.0.0 released 2026-07-03** (14pp) — lead of the Math family (B1); techniques-catalog (6 recipes + FOC/Park ceiling, OBEX #2811); ships a YAML companion + example ZIP. |
-| **P2AN003 — DAC & Analog Signal Generation** | `P2AN003` | 🔴 **planned — stood up 2026-06-30** (Family A1; output sibling to ADC). Committed to production as Input 2 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP DAC content + authored to PDF. |
+| **P2AN003 — DAC & Analog Signal Generation** | `P2AN003` | ✅ **v1.0.0 released 2026-07-03** (19pp) — Family A1 (output sibling to ADC); techniques-catalog: shared dithered-DAC output stage + 5 recipes (sample playback, waveform synthesis, dithering, ADC→DAC passthrough, mixing & panning) + reSound 32-stream ceiling (OBEX #2861); ships a YAML companion + example ZIP. Deep audit (4-agent fan-out + hand-verify) caught + fixed a HIGH Recipe-4 scaling bug pre-release. Cites IOSP Ch.10/§18.3 (basic DAC surface). |
 | **P2AN004 — Frequency / Period / Pulse Measurement** | `P2AN004` | 🔴 **planned — stood up 2026-06-30** (Family A2; timing instrumentation). Committed to production as Input 3 of the **IOSP Release Campaign**; boundary-determination pending → enriches IOSP measurement content + authored to PDF. |
 
 ---
@@ -182,6 +182,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-03 20:08  PUBLISH   P2AN003                          (v1.0.0, 19pp — app-note #3: DAC & analog signal generation techniques-catalog (5 recipes + reSound ceiling); deep audit caught+fixed a HIGH Recipe-4 scaling bug (SINC2 differential already 16-bit); render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 19:30  PUBLISH   P2AN001                          (v1.0.1, 20pp — editorial patch: compile-status wording corrected to be clock-independent; content otherwise identical to v1.0.0; render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 18:53  PUBLISH   P2AN002                          (v1.0.0, 14pp — app-note #2: CORDIC techniques-catalog (6 recipes + FOC ceiling); app-note-class templates over the shared platform; render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 17:45  PUBLISH   p2-streamer-programming-guide    (v1.0.3, 75pp — Wave-3 designer-authoritative additions: SINC2 constant-iteration constraint §10.4, HDMI/DVI blanking guidance §15.2, capture-to-spectrum pointer §9.2; cross-ref filter adopted, 82 links/0 dead; render-verified, 0 missing chars, outline complete)

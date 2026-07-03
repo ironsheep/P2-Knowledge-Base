@@ -1,0 +1,145 @@
+# P2AN003 — YAML companion to the "DAC & Analog Signal Generation" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002.
+
+title: "DAC & Analog Signal Generation"
+subtitle: "Sample playback, waveform synthesis, dithering, and mixing from a single P2 pin's DAC"
+doc_id: P2AN003
+version: "1.0.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - DAC output
+  - analog output
+  - audio DAC
+  - single-pin DAC
+  - dithered DAC
+  - 16-bit DAC
+  - sample playback
+  - waveform synthesis
+  - direct digital synthesis
+  - DDS
+  - sine oscillator
+  - ADC to DAC passthrough
+  - audio mixing
+  - stereo panning
+  - PWM dither
+  - pseudo-random dither
+categories:
+  - dac
+  - audio
+  - dsp
+  - smart-pins
+capability_domain: "Analog output / DAC / audio"
+summary: |
+  Turn one P2 pin into a 16-bit audio-quality analog output with no external converter: the
+  smart pin's dithered DAC takes a 16-bit number once per sample period, and a continuous signal
+  is just the right sequence of numbers delivered on time. One shared output stage (dither mode +
+  output config + P_OE, paced by the pin's IN flag) underlies five recipes chosen among by task:
+  sample playback and waveform synthesis via a DDS phase accumulator, deliberate dither-mode +
+  RC-filter choice for effective resolution, a real-time ADC->DAC passthrough, and software mixing
+  with stereo panning. The DDS phase increment inc = f * 2^32 / sample_rate (Spin2 `frac`)
+  decouples pitch from the sample rate; CORDIC QROTATE turns the phase into a sine in one op.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml       # PWM dither %00011 (period x256, Fclock/256 @ -48dB)
+    - architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml # PRNG dither %00010 (X=1 updates every clock)
+    - architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml    # plain 8-bit DAC noise %00001
+    - architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml          # ADC SINC2 filtering (Recipe 4 passthrough source)
+    - architecture/cordic.yaml                        # the solver: QROTATE phase -> sine (R2/R5)
+    - language/pasm2/wrpin.yaml                        # configure the DAC/ADC smart pin mode
+    - language/pasm2/wxpin.yaml                        # set the sample period
+    - language/pasm2/wypin.yaml                        # write the 16-bit DAC value / ADC period override
+    - language/pasm2/rdpin.yaml                        # read the SINC2 accumulator (R4)
+    - language/pasm2/setse1.yaml                       # select the DAC pin's IN-rising edge (sample clock)
+    - language/pasm2/waitse1.yaml                      # wait one sample period
+    - language/pasm2/qrotate.yaml                      # rotate (ampl,0) by phase -> sine/cosine
+    - language/pasm2/getqy.yaml                        # read Y = ampl*sin(phase)
+    - language/pasm2/getqx.yaml                        # read X = ampl*cos(phase)
+    - language/pasm2/zerox.yaml                        # keep the 27-bit modular ADC differential (R4)
+    - language/pasm2/muls.yaml                         # signed voice*weight in the mixer (R5)
+    - language/pasm2/sar.yaml                          # fixed-point >>8 pan-weight divide (R5)
+    - language/pasm2/fges.yaml                         # integer signed limit-minimum clamp (R5)
+    - language/pasm2/fles.yaml                         # integer signed limit-maximum clamp (R5)
+    - language/spin2/methods/qsin.yaml                 # fill a wavetable: length*sin(angle) (R1)
+    - language/spin2/methods/muldiv64.yaml             # (code*Vfs)/65536 known-answer DC (Tier-0)
+    - language/spin2/operators/op_FRAC.yaml            # DDS phase increment (x<<32)/y
+
+mechanism_reference:
+  - "P2 I/O & Smart Pins User Guide, Chapter 10 (DAC Output) + Sec 18.3 (DAC noise) (a companion P2 Knowledge Base publication) — the DAC mechanism this note applies: 8-bit DAC, dither modes, four output configs, voltage math, IN-flag sample sync, ADC feedback during DAC output"
+  - "P2 I/O & Smart Pins User Guide, Chapter 16 (ADC) (a companion P2 Knowledge Base publication) — the ADC source end of the Recipe 4 passthrough; also application note P2AN001"
+  - "P2 Streamer Programming Guide (a companion P2 Knowledge Base publication) — feeding the DAC from hub memory at high, hardware-paced rates (the Going Further path)"
+
+runnable_code:
+  examples_zip: "P2AN003-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: sample-playback,     file: dac-sample-playback.spin2,     note: "Recipe 1 — DDS phase-accumulator playback of a stored buffer at any pitch"}
+    - {id: waveform-synthesis,  file: dac-waveform-synthesis.spin2,  note: "Recipe 2 — computed sine (CORDIC QROTATE), sawtooth, triangle from the DDS phase"}
+    - {id: dithering,           file: dac-dithering.spin2,           note: "Recipe 3 — PRNG-vs-PWM dither choice swept across the full 16-bit code range"}
+    - {id: adc-dac-passthrough, file: dac-adc-passthrough.spin2,     note: "Recipe 4 — real-time sample pump: SINC2-filtering ADC read -> DAC write, period-matched"}
+    - {id: mixing-panning,      file: dac-mixing-panning.spin2,      note: "Recipe 5 — three voices summed and panned to a stereo pair of DAC pins"}
+  ceiling_reference:
+    note: "32-stream software audio mixer to 1-8 output pins (volume/pan/pitch/format) + MOD player — DESCRIBED/LINKED only; complete impl is OBEX #2861 reSound (Johannes Ahlebrand, ~955 lines)"
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
+
+key_parameters:
+  dac_native_bits: 8
+  dac_output_bits: "16-bit nominal, dithered and time-averaged (no ENOB/SNR/THD figure printed — defers to a hardware run)"
+  dither_modes:
+    - "P_DAC_DITHER_PWM (%00011): cleanest spectrum, lowest switching noise; adds a Fclock/256 line at -48 dB; X period MUST be a multiple of 256 (256 min). Best for audio."
+    - "P_DAC_DITHER_RND (%00010): no periodic tone, slightly more broadband noise; X=1 updates every clock. Best for control DC."
+    - "plain 8-bit DAC noise mode %00001 (Sec 18.3)"
+  output_configs: "P_DAC_990R_3V / P_DAC_600R_2V / P_DAC_124R_3V / P_DAC_75R_2V (990/600/124/75 ohm; 3.3 V or 2.0 V peak) — trade drive impedance vs peak voltage"
+  voltage_math: "V = (code / 65536) * Vfs; $8000 -> 1.65 V, $4000 -> 0.825 V at Vfs = 3.3 V"
+  sample_clock: "period set by WXPIN; the pin raises IN once per period; 200 MHz / 256 clocks = 781_250 samples/s"
+  dds_phase_increment: "inc = f * 2^32 / sample_rate, computed with Spin2 `frac` (unsigned (x<<32)/y); top bits of a 32-bit phase index a table or feed the CORDIC"
+  adc_passthrough_config: "SINC2 filtering, X[5:4]=%01, period X[3:0]=8 -> 2^8=256 clocks (matched to the DAC's 256); the raw per-period differential is already ~16-bit full scale (raw width = 2*log2(N)), so it drives the DAC directly"
+
+prerequisites:
+  - "Configuring a smart pin (WRPIN/WXPIN/WYPIN, raise DIR to enable) and starting a cog with COGINIT"
+  - "The P2 DAC modes at the mechanism level — this note USES the DAC; IOSP Ch.10/Sec 18.3 teach it"
+  - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
+
+gotchas:
+  - flag: pitfall
+    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER — the universal smart-pin init order. Reversing it leaves the first output cycle undefined."
+  - flag: pitfall
+    text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). A non-multiple produces incorrect dithering; if you need a different period, use PRNG dither instead."
+  - flag: pitfall
+    text: "FGES/FLES are INTEGER signed-limit instructions (Force >=/<= Signed), NOT floating-point — the R5 mix clamp to +/-$7FFF is correct integer saturation. Do not 're-fix' it into a bug."
+  - flag: pitfall
+    text: "Recipe 4: a 256-clock SINC2 FILTERING differential is already ~16-bit full scale, so it feeds the DAC directly — do NOT up-scale it (a left shift overflows and rails the DAC). SINC2 differences are valid only from the 2nd period, so prime/discard the first read."
+  - flag: hardware
+    text: "Always filter the output: the DAC's analog value only emerges after the dither is averaged. Put an RC low-pass corner above your highest signal frequency and below the dither frequency (Fclock/256 for PWM dither)."
+  - flag: tip
+    text: "Signed sample -> DAC offset-binary is a single `add $8000`; the sawtooth/triangle are already unipolar 0..$FFFF so they skip it. Volume and pan are the same op — a multiply by a weight."
+  - flag: verify
+    text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — proves the whole path with no bench gear. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
+
+hardware_status: |
+  The Tier-0 DAC->ADC loopback known-answer (fixed code -> computable DC, read back by a P2AN001
+  ADC on a jumpered pin) proves the code and arithmetic with no bench instruments. Numeric
+  audio-quality figures — SNR, THD, true effective bit depth after filtering — depend on the
+  analog filter and the measurement bench and are NOT asserted here; they defer to a
+  characterization run on real silicon (-> EF ledger when accepted), exactly as P2AN001 defers
+  its ENOB figure. Every embedded and example-library program compiles clean under pnut_ts.
+
+provenance:
+  primary_sources:
+    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — Smart Pins, DAC modes %00001/%00010/%00011: the 8-bit DAC and its dithering, the four output configs, the sample-period and IN-flag behavior (incl. the Fclock/256 @ -48 dB PWM-dither line)"
+    - "Propeller 2 Datasheet (Parallax Inc.) — DAC electrical characteristics and output configurations"
+    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — WRPIN/WXPIN/WYPIN, QSIN/QROTATE, MULDIV64, and the `frac` operator"
+  community_examples:
+    - "OBEX #2861 reSound (Johannes Ahlebrand) — the 32-stream, up-to-8-pin software audio mixer + MOD player behind The Ceiling"
+    - "OBEX #2860 EZ Sound (Jon McPhalen / jonnymac) — NCO-frequency square-wave tone player (a non-DAC contrast, not a recipe)"
+    - "Parallax 'Analog Frequency to DAC' and 'Digital Sample ADC to DAC' example code (Michael Mulholland, Chip Gracey) — grounded the synthesis and passthrough recipes"
+  companion_publication:
+    - "P2 I/O & Smart Pins User Guide (Ch.10 DAC, Ch.16 ADC); P2 Streamer Programming Guide; application note P2AN001 (companion P2 Knowledge Base publications)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

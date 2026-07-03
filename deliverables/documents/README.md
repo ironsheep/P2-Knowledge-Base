@@ -98,6 +98,13 @@ Put the Propeller 2's shared hardware CORDIC solver to real work — the engine 
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2an002-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002-src-260703.zip)
 
+#### [Generate Analog Waveforms and Audio on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003.pdf)
+**Application Note P2AN003 — DAC & Analog Signal Generation** — *Version 1.0.0*
+
+Turn a single P2 pin into a 16-bit audio-quality analog output using only the built-in smart-pin DAC — no external converter. It dithers the pin's 8-bit DAC to an effective 16 bits and paces it from the smart pin's own sample clock, so a continuous signal is just the right sequence of numbers delivered on time. One shared output stage comes first, then five recipes to choose among — sample playback and waveform synthesis from a DDS phase accumulator, deliberate dither-mode and RC-filter choice for effective resolution, a real-time ADC-to-DAC passthrough, and multi-voice mixing with stereo panning — plus a 32-stream reference ceiling. Every worked program compiles clean and runs on a bare P2 board, with a one-jumper known-answer check that proves the whole signal path with no bench gear.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an003-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003-src-260703.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
@@ -110,7 +117,6 @@ Releasing next for community review:
 
 Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean code:
 
-- **DAC & Analog Signal Generation** — no external DAC: sample playback, synthesis, dithering, and mixing, straight from the smart pin
 - **Frequency, Period & Pulse Measurement** — three smart-pin instruments that turn a transducer into a number, no external counter or ADC
 
 ### In Development & Planned

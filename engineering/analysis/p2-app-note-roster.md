@@ -74,7 +74,7 @@ IOSP Ch.16. Every item below follows its shape.
 | # | App note | Belongs-here-because | Examples to mine | Status |
 |---|---|---|---|---|
 | A0 | **ADC Instrumentation** | *(done — P2AN001)* | 6 OBEX (SAR/ADS1118/hi-res/4-20mA) + 3 QB | ✅ v1.0.1 |
-| A1 | **DAC & Analog Signal Generation** → **P2AN003** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | **stood up 2026-06-30** (IOSP Campaign Input 2; boundary pending) |
+| A1 | **DAC & Analog Signal Generation** → **P2AN003** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | ✅ **released v1.0.0 2026-07-03** (5 recipes + reSound ceiling) |
 | A2 | **Frequency / Period / Pulse Measurement** → **P2AN004** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | **stood up 2026-06-30** (IOSP Campaign Input 3; boundary pending) |
 
 ### Family B — Math (worked technique; reference already in PASM2/Spin2)
