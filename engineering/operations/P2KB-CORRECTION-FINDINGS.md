@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-192`**
+**Next finding ID: `F-193`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -806,6 +806,25 @@
 > authority is Chip's designer report, attributed as such in the YAML (not cited to a Silicon-Doc
 > note our copy lacks). The manual-side twin shipped in the Streamer Guide (§10.4, CHANGELOG
 > "Unreleased"). Validate clean. Ships in this release-yamls patch.
+
+### F-192 — concurrent frequency/period cells routed A-only (F-187) may also need B routed — `NEEDS-VERIFICATION`
+> **NEEDS-VERIFICATION (Silicon Doc + working donor vs. the F-187 resolution — needs a hardware spot-check).**
+> Surfaced by the P2AN004 (measurement app-note) release-gate audit. **F-187** added the single-pin
+> concurrent-measurement routing `P_MINUS1_A` / `P_MINUS2_A` (A-input only) to IOSP §15.4 and the
+> `smart-pin-10110` / `smart-pin-10111` YAML examples, so extra counter cells can watch one signal
+> pin without consuming pins. But the Silicon Doc (`part4-smart-pins.txt`) defines a period as
+> **"A-input rise/edge to B-input rise/edge"** (Y=%00 = A-rise to B-rise) and explicitly notes
+> **"The B-input can be set to the same pin as the A-input for single-pin cycle measurement."** On a
+> *neighbour* cell with only A routed, the B-input stays on the cell's idle own-pin, which never
+> rises — so by that definition the in-progress period never completes and `REPEAT UNTIL` would hang,
+> the very failure F-187 set out to fix. The empirically-working **F. Bauer `fb_measfreq2P`** donor
+> (the routing P2AN004 R2 adopts) routes **both** A and B (`P_COUNTER_PERIODS | P_MINUS1_A |
+> P_MINUS1_B`), matching the Silicon Doc note.
+> **Likely fix:** add the matching `| P_MINUS1_B` / `| P_MINUS2_B` to the F-187 YAML + IOSP §15.4
+> examples. **Do NOT apply blind** — F-187 is Chip-Gracey-attributed (🏆); confirm on silicon whether
+> A-only routing actually hangs (vs. some period-detection path that tolerates an idle B) before
+> editing. **P2AN004 is unaffected** — R2 already routes both A and B (correct either way), so this is
+> non-blocking for that release. Cross-ref **F-187**.
 
 ---
 

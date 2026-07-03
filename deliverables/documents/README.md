@@ -105,19 +105,16 @@ Turn a single P2 pin into a 16-bit audio-quality analog output using only the bu
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2an003-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003-src-260703.zip)
 
+#### [Read Real-World Sensors by Frequency, Period, and RC Timing on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004.pdf)
+**Application Note P2AN004 — Frequency / Period / Pulse Measurement** — *Version 1.0.0*
+
+Read a resistive, capacitive, light, or rotary sensor directly on a single P2 pin — the smart pin times, counts, or decodes the signal in hardware and the cog just reads the answer, with no external counter or ADC. One shared idea comes first, then three runnable instruments to choose among by what you're reading: an RC-decay reader that times a capacitor's discharge through a photocell, thermistor, or pot; a light-to-frequency reader that turns a TSL235R's output frequency into an irradiance with a reciprocal frequency counter; and a drop-in quadrature-knob instrument with detent normalization, preset, a range clamp, and a debounced button. Every worked program compiles clean and runs on a bare P2 board — the encoder self-verifies with two jumper wires and a known-answer detent count, while the analog recipes carry no invented readings and defer their absolute calibration to a hardware pass.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an004-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004-src-260703.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
-
-### Coming Soon
-
-Releasing next for community review:
-
-#### Application Notes
-
-Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean code:
-
-- **Frequency, Period & Pulse Measurement** — three smart-pin instruments that turn a transducer into a number, no external counter or ADC
 
 ### In Development & Planned
 

@@ -22,7 +22,7 @@ to the manuals for background). See the guides below for the full contract.
 | **P2AN001** | Single-Pin ADC Instrumentation | released v1.0.1 (2026-07-03) | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
 | **P2AN002** | CORDIC for Real Work | released v1.0.0 (2026-07-03) | lead of the Math family (B1) |
 | **P2AN003** | DAC & Analog Signal Generation | released v1.0.0 (2026-07-03) | Family A1 (output sibling to ADC); techniques-catalog (5 recipes + reSound ceiling); cites IOSP Ch.10/§18.3 |
-| **P2AN004** | Frequency / Period / Pulse Measurement | planned — stood up 2026-06-30 | Family A2 (timing instrumentation); IOSP Release Campaign Input 3 — boundary-determination pending |
+| **P2AN004** | Frequency / Period / Pulse Measurement | ✅ v1.0.0 released 2026-07-03 | Family A2 (timing instrumentation); 3 recipes (RC-decay, light-to-frequency reciprocal counter, quadrature-knob) + rendered circuit/timing diagrams; ships YAML companion + example ZIP |
 
 > *Series starts at `001`, Parallax-style (no `AN000`); `P2AN000` was the experimental placeholder, now retired.*
 

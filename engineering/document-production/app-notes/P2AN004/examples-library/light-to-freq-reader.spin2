@@ -10,7 +10,7 @@ CON
   '   SIG_PIN+1 : %10111 P_COUNTER_PERIODS -> complete periods, with its
   '               A/B routed back one pin (P_MINUS1_A|P_MINUS1_B) so it
   '               watches the SAME signal physically present on SIG_PIN.
-  '   freq = periods * clkfreq / ticks
+  '   freq = MULDIV64(periods, clkfreq, ticks)
   ' P_LOW_150K adds a soft pull that rejects noise on an open input.
   TIK_MODE = P_COUNTER_TICKS   | P_LOW_150K
   PER_MODE = P_COUNTER_PERIODS | P_MINUS1_A | P_MINUS1_B
@@ -28,7 +28,7 @@ PUB main() | gate, freq, ee_x100, ee_int, ee_frac
   repeat
     freq    := read_freq()
     ' irradiance in hundredths of a uW/cm^2 (integer fixed point)
-    ee_x100 := muldiv64(freq * 100, CAL_UW, CAL_HZ)
+    ee_x100 := muldiv64(freq, CAL_UW * 100, CAL_HZ)
     ee_int  := ee_x100 / 100
     ee_frac := ee_x100 // 100
     debug("TSL235R  freq = ", udec_(freq), " Hz", 13)

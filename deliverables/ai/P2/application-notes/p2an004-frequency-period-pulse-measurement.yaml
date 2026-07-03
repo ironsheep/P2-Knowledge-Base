@@ -1,0 +1,135 @@
+# P2AN004 — YAML companion to the "Frequency / Period / Pulse Measurement" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002 / P2AN003.
+
+title: "Frequency / Period / Pulse Measurement"
+subtitle: "Read a resistive, capacitive, light, or rotary sensor directly on a P2 pin — the smart pin does the measuring"
+doc_id: P2AN004
+version: "1.0.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - frequency measurement
+  - period measurement
+  - pulse measurement
+  - reciprocal frequency counter
+  - RC decay reader
+  - rctime
+  - light to frequency
+  - TSL235R
+  - quadrature encoder
+  - quadrature knob
+  - rotary encoder
+  - detent normalization
+  - sensor reading
+  - photocell reader
+  - thermistor reader
+  - high-time measurement
+  - pulse width measurement
+categories:
+  - measurement
+  - sensors
+  - smart-pins
+  - timing
+capability_domain: "Sensor measurement / frequency, period, and RC timing"
+summary: |
+  Read a real-world sensor directly on one P2 pin by letting a smart pin time, count, or decode the
+  signal so the cog never watches an edge. One shared idea (configure the measurement mode, let the
+  smart pin run, read a number) applied through three instruments chosen among by transducer:
+  R1 an RC-decay reader that times a capacitor's discharge through a resistive/capacitive sensor
+  (P_HIGH_TICKS, %10001); R2 a light-to-frequency reader that turns a TSL235R's output frequency
+  into an irradiance with a reciprocal frequency counter (P_COUNTER_TICKS %10101 + P_COUNTER_PERIODS
+  %10111 over one window, frequency = periods * clkfreq / ticks via MULDIV64); and R3 a drop-in
+  quadrature-knob instrument (P_QUADRATURE %01011, continuous totalizer X=0) with detent
+  normalization, preset, range clamp, and a debounced button. The encoder self-verifies with two
+  jumper wires and a known-answer detent count; the analog recipes' absolute calibration defers to
+  hardware and carries no invented readings.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - architecture/smart-pins/smart-pin-10001-time-a-highs.yaml                # P_HIGH_TICKS %10001 (R1 RC-decay high-time)
+    - architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml     # P_COUNTER_TICKS %10101 (R2 elapsed clocks of the window)
+    - architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml   # P_COUNTER_PERIODS %10111 (R2 whole periods in the window)
+    - architecture/smart-pins/smart-pin-01011-quadrature-encoder.yaml          # P_QUADRATURE %01011 (R3 signed A/B decode)
+    - language/spin2/methods/pinstart.yaml            # configure a smart pin (mode, X window, Y) — R2/R3
+    - language/pasm2/wrpin.yaml                        # configure the timing smart pin mode — R1
+    - language/pasm2/wxpin.yaml                        # set the X measurement window / period
+    - language/pasm2/rdpin.yaml                        # read the latched result (Z) — high-ticks, ticks/periods, signed count
+    - language/spin2/methods/pinread.yaml             # poll the smart pin's IN flag (window closed)
+    - language/spin2/methods/pinhigh.yaml             # R1 charge: drive the node high (pinh)
+    - language/spin2/methods/pinlow.yaml              # R1/R3 pinl: OUT=0 + DIR high (float via P_LOW_FLOAT / re-enable)
+    - language/spin2/methods/pinfloat.yaml            # R1/R3 pinf: DIR low resets the accumulator
+    - language/spin2/methods/pinwrite.yaml            # R3 self-test stimulus: drive the A/B gray-code pins (pinw)
+    - language/spin2/methods/muldiv64.yaml            # reciprocal frequency + irradiance without 32-bit overflow
+
+mechanism_reference:
+  - "P2 I/O & Smart Pins User Guide, Chapter 13 (time measurement) (a companion P2 Knowledge Base publication) — the P_HIGH_TICKS high-duration mode R1 applies"
+  - "P2 I/O & Smart Pins User Guide, Chapter 14 (counting and quadrature) (a companion P2 Knowledge Base publication) — the P_QUADRATURE mode R3 applies, incl. the velocity (X>0) path"
+  - "P2 I/O & Smart Pins User Guide, Chapter 15 (frequency and period) (a companion P2 Knowledge Base publication) — the reciprocal frequency counter R2 applies, and the worked frequency-counter/tachometer/time-of-flight instruments this note points to"
+
+runnable_code:
+  examples_zip: "P2AN004-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: rc-decay-reader,     file: rc-decay-reader.spin2,     note: "R1 — time a capacitor's discharge through a resistive/capacitive sensor (P_HIGH_TICKS)"}
+    - {id: light-to-freq-reader, file: light-to-freq-reader.spin2, note: "R2 — reciprocal frequency counter turns a TSL235R's output frequency into an irradiance"}
+    - {id: quadrature-knob,     file: quadrature-knob.spin2,     note: "R3 — drop-in encoder knob (detent normalize, preset, clamp, debounced button) with a two-jumper self-test"}
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
+
+key_parameters:
+  r1_mode: "P_HIGH_TICKS (%10001) — Z = duration of the high state in clocks; IN raised on the high->low crossing only; RC_MODE = P_HIGH_TICKS | P_SCHMITT_A | P_OE | P_LOW_FLOAT"
+  r1_mechanism: "pinh charges the node through a 220 ohm series resistor; pinf (DIR low) resets the accumulator; pinl (OUT=0, DIR high) floats the pin via P_LOW_FLOAT and starts timing; RDPIN reads the latched high-tick count. us = clocks / (clkfreq / 1_000_000)"
+  r2_reciprocal: "frequency = MULDIV64(periods, clkfreq, ticks); P_COUNTER_TICKS on SIG_PIN (default-local A/B) + P_COUNTER_PERIODS on SIG_PIN+1 routed back one pin (P_MINUS1_A | P_MINUS1_B) over the same X window; both raise IN when the period-aligned window closes"
+  r2_tsl235r: "datasheet (ams/TAOS, cross-check tier): fO = 250 kHz typ at Ee = 430 uW/cm^2, lambda_p = 635 nm, VDD = 5 V; 2.7-5.5 V operating (works at 3.3 V); dark 0.4-10 Hz. Ee[uW/cm^2] = freq * 430 / 250_000, folded as muldiv64(freq, CAL_UW*100, CAL_HZ) for two-decimal fixed point without 32-bit overflow"
+  r3_quadrature: "P_QUADRATURE (%01011) | P_PLUS1_B (B from the next pin up); continuous totalizer X=0 -> Z always holds the live signed count; 4 counts per detent -> `rdpin sar 2` normalizes to one-per-detent; zero by pulsing DIR low (pinf/pinl); optional P_FILT1_AB for contact bounce"
+  gate_window: "R2 window: gate = (clkfreq / 1000) * GATE_MS clocks; longer window resolves low frequency finer, shorter updates faster"
+  measurement_ceiling: "keep the measured frequency well below clkfreq (many system-clock ticks per input period); every reading inherits the P2 clock's ppm accuracy; runs at a legal 200 MHz (300 MHz max)"
+
+prerequisites:
+  - "Configuring a smart pin (WRPIN/WXPIN/WYPIN, or the Spin2 pinstart that wraps them) and reading it back with RDPIN"
+  - "The P2 smart-pin measurement modes at the mechanism level — this note USES them; IOSP Ch.13-15 teach them"
+  - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
+
+gotchas:
+  - flag: pitfall
+    text: "P_B_A_INPUT does not exist (undefined in pnut_ts). Single-pin routing is the BARE mode constant (A and B default to the local pin) plus P_MINUS1_A|P_MINUS1_B for the reciprocal periods cell, or P_PLUS1_B for quadrature. Never add P_B_A_INPUT."
+  - flag: pitfall
+    text: "R1 depends on P_LOW_FLOAT: when OUT goes low the pin must FLOAT so the capacitor discharges through the sensor. Drop it and a low output drives the node to ground — you time the pin's driver, not the sensor, and the count collapses to near zero."
+  - flag: pitfall
+    text: "An open sensor (or too-short charge) HANGS R1's poll loop — P_HIGH_TICKS raises IN only on a high->low crossing, so if the node never falls, RDPIN is never reached. The symptom is a hang, not a max ($8000_0000) reading."
+  - flag: pitfall
+    text: "R3 P_PLUS1_B reads B from ENC_A+1, so the encoder's B line must sit on the pin just above A (or pick the routing modifier that matches your wiring). A detented encoder is 4 counts/detent; `sar 2` normalizes it — an un-detented encoder wants no shift."
+  - flag: hardware
+    text: "TSL235R runs at 2.7-5.5 V (fine at 3.3 V); a 0.1 uF cap close to the sensor keeps its output clean. Its dark output is a few hertz (0.4-10 Hz), not zero — treat a very low reading as near-dark, not a fault."
+  - flag: tip
+    text: "R2's reciprocal method beats a fixed gate at low frequency (it counts whole periods and the exact time they took), but it reports a mean over the window and hides cycle-to-cycle jitter. Choose GATE_MS for your range."
+  - flag: verify
+    text: "R3 Tier-0: jumper 40->32 and 41->33 and run; the stimulus drives 5 detents forward then 2 back and the reads are the known answers 5 then 3. A wrong sign means the A/B pair is reversed; 4x the magnitude means detent normalization (sar) is off; erratic means add P_FILT1_AB. R1/R2 absolute calibration defers to hardware."
+
+hardware_status: |
+  R3 (quadrature) is Tier-0 self-verified: a two-jumper stimulus drives a known detent count (5 fwd,
+  2 back -> reads 5 then 3) on a bare Edge board with no encoder, exercising the mode config, the
+  4x-per-detent normalization, the preset/offset, and the clamp. R1 and R2 show correct BEHAVIOR now
+  (R1's count moves with sensor resistance; R2's frequency moves with light), but turning those into
+  a calibrated lux, temperature, or absolute irradiance needs a known reference and DEFERS to a
+  characterization run on real silicon (-> EF ledger when accepted). No invented sensor numbers are
+  printed. Every embedded and example-library program compiles clean under pnut_ts (-d).
+
+provenance:
+  primary_sources:
+    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — Smart Pins measurement modes %10001 (P_HIGH_TICKS), %10101 (P_COUNTER_TICKS), %10111 (P_COUNTER_PERIODS), %01011 (P_QUADRATURE), and the A/B input routing modifiers (period = A-input rise to B-input rise)"
+    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — PINSTART, WRPIN, RDPIN, MULDIV64, and the pin-control methods (pinh/pinl/pinf/pinw/pinread)"
+  cross_check_sources:
+    - "TSL235R-LF Light-to-Frequency Converter Datasheet (ams/TAOS, TAOS038E) — a 3rd-party datasheet (cross-check tier, NOT Parallax-primary): output frequency 250 kHz typ at Ee = 430 uW/cm^2 (lambda_p = 635 nm, VDD = 5 V), 2.7-5.5 V operating range, dark output frequency 0.4-10 Hz"
+  community_examples:
+    - "OBEX #2831 P2_rctime (phonoclese) — the RC-decay donor, incl. the REGEXEC background-ISR pattern (org $1B0, RETI1) referenced in Going Further"
+    - "OBEX #2829 Quadrature Encoder (Jon McPhalen / jonnymac) — the production-encoder donor behind R3 (range limiting, preset, det4x, debounced button)"
+    - "Parallax Quick Bytes 'Using Smart Pins to Measure Frequency Output of TSL235R' (Ken Gracey; code by Francis Bauer, Jon McPhalen, Chip Gracey) — grounded R2, incl. the F. Bauer fb_measfreq2P single-pin reciprocal routing"
+  companion_publication:
+    - "P2 I/O & Smart Pins User Guide (Ch.13 time, Ch.14 counting/quadrature, Ch.15 frequency/period); application note P2AN001 (companion P2 Knowledge Base publications)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"
