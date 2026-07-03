@@ -20,6 +20,13 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.13.3] - 2026-07-03
+
+**ADC scope trigger register accuracy**
+
+### Changed
+- ADC Scope with Trigger (%11010): the trigger A/B values and filter select are documented in the X register (WXPIN), and RDPIN returns the 8-bit sample with the armed state in C.
+
 ## [1.13.2] - 2026-07-02
 
 **Goertzel SINC2 usage constraint and overflow-safe unit conversions**

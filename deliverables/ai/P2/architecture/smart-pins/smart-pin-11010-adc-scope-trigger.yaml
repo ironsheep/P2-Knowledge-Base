@@ -13,21 +13,29 @@ detailed_description:
     and analyzing signal behavior around specific trigger points.
   
   timing: |
-    Trigger condition defined by Y register settings
-    Captures samples when trigger condition met
-    IN flag raised when capture completes
-    Supports pre-trigger and post-trigger capture
+    Trigger is configured entirely via WXPIN (the A and B trigger values and the
+    filter select all live in the X register). On every clock the mode computes an
+    8-bit ADC sample and checks hysteretic triggering. Triggering is a two-step
+    arm-then-trigger: IN is raised on the trigger, then the mode waits for a new
+    arming event. RDPIN/RQPIN returns the 8-bit sample with the 'armed' state in C.
 
 registers:
   x_register:
-    function: "ADC configuration (similar to modes %11000/%11001)"
+    function: "Trigger and filter configuration (set via WXPIN)"
+    X[15:10]: "B trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
+    X[7:2]: "A trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
+    X[1:0]: "Filter select: %00=68-tap Tukey, %01=45-tap Tukey, %1x=28-tap Hann"
+    trigger_pattern: |
+      The A/B relationship sets the arm-then-trigger pattern:
+        A>B:  arm when sample[7:2] >= A, then trigger when sample[7:2] < B
+        A<=B: arm when sample[7:2] < A,  then trigger when sample[7:2] >= B
   y_register:
-    function: "Trigger level and configuration"
+    function: "Not used in this mode"
   z_register:
-    function: "Captured ADC sample data"
+    function: "8-bit ADC sample (read via RDPIN/RQPIN; C flag returns the 'armed' state)"
 
 flags:
-  in_flag: "Raised when triggered capture completes"
+  in_flag: "Raised on trigger (after arming); the 'armed' state is then cancelled"
   a_input: "Analog signal to monitor and capture"
   b_input: "Optional external trigger or clock"
 
@@ -40,38 +48,35 @@ code_examples:
         adc_pin = 46                             ' Analog input
       
       PUB main() | captured_value
-        ' Configure ADC scope mode
-        ' Mode configuration requires trigger level in Y register
-        pinstart(adc_pin, P_ADC_SCOPE, x_config, trigger_level)
-        
+        ' Trigger A/B values + filter select go in X (WXPIN); Y is unused.
+        ' B=48, A=16 (A<=B): arm when sample < 16, trigger when sample >= 48.
+        pinstart(adc_pin, P_ADC_SCOPE, (48 << 10) | (16 << 2), 0)
+
         repeat
           ' Wait for trigger event
           repeat until pinread(adc_pin)
-          
-          captured_value := rdpin(adc_pin)       ' Read captured sample
+
+          captured_value := rdpin(adc_pin)       ' Read 8-bit sample (C = armed)
           debug("Triggered: ", udec(captured_value))
-      
+
       DAT
       ' PASM2 example - triggered acquisition
         org
         dirl    #adc_pin                         ' Reset smart pin
         wrpin   scope_mode, #adc_pin             ' Configure scope mode
-        wxpin   adc_config, #adc_pin             ' ADC settings
-        wypin   trigger_level, #adc_pin          ' Set trigger level
+        wxpin   scope_trig, #adc_pin             ' A/B trigger values + filter (X)
         dirh    #adc_pin                         ' Enable smart pin
       .loop
-        testp   #adc_pin wc                      ' Check for trigger
+        testp   #adc_pin wc                      ' Check for trigger (C = armed)
         if_nc   jmp #.loop                       ' Wait for event
-        rdpin   sample, #adc_pin                 ' Read captured data
+        rdpin   sample, #adc_pin                 ' Read 8-bit sample
         ' Process triggered sample...
         jmp     #.loop
-      
+
       scope_mode
         long    %0000_0000_000_100011_0000000_00_11010_0
-      adc_config
-        long    %00_0111                         ' 8-bit resolution
-      trigger_level
-        long    $8000                            ' Mid-range trigger
+      scope_trig
+        long    (48 << 10) | (16 << 2) | %00     ' B=48, A=16, 68-tap Tukey
       sample
         long    0
 
@@ -88,8 +93,8 @@ code_examples:
         long capture_index
       
       PUB main() | i
-        ' Setup triggered capture
-        pinstart(adc_pin, P_ADC_SCOPE, %00_0111, $8000)
+        ' Setup triggered capture (trigger A/B + filter in X; Y unused)
+        pinstart(adc_pin, P_ADC_SCOPE, (48 << 10) | (16 << 2), 0)
         
         repeat
           capture_index := 0
@@ -126,13 +131,13 @@ configuration_constants:
   required_pin_config: "%100011 in bits 17:12 for ADC functionality"
 
 notes:
-  - "⚠️ Limited documentation available for this mode"
-  - "Trigger functionality extends basic ADC capture"
-  - "Y register sets trigger level for capture initiation"
+  - "Trigger A/B values and the filter select are all in the X register (WXPIN); Y is not used"
+  - "A and B are 6-bit; they MSB-justify to sample[7:2] for comparison. Their relationship (A>B vs A<=B) sets the arm-then-trigger pattern"
+  - "RDPIN/RQPIN returns the 8-bit sample; the C flag returns the 'armed' state"
   - "Useful for capturing signals around specific voltage thresholds"
   - "Can be combined with software buffering for waveform storage"
   - "Requires M[12:10] = %100 for ADC pin configuration"
-  - "Consult Parallax forums and application notes for detailed usage"
+  - "The cog's SCOPE data pipe (SETSCP/GETSCP) can aggregate four 4-pin-block samples per clock for the streamer — see the SETSCP/GETSCP instructions"
 
 power_domain:
   fact: |
@@ -148,6 +153,8 @@ power_domain:
 related:
   - architecture/pin-power-domains.yaml
   - architecture/smart_pins.yaml
+  - language/pasm2/setscp.yaml
+  - language/pasm2/getscp.yaml
 
 see_also:
   - "I/O pin power domains — isolated groups of 4 sharing VIO/GIO; governs the P_ADC_GIO/P_ADC_VIO reference: p2kbArchPinPowerDomains"
