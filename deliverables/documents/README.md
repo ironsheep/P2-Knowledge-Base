@@ -36,7 +36,7 @@ Two short companion reads go deeper on the questions every reviewer asks:
 
 ## Documents in Community Review
 
-Five documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
+Six documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
 ### [Getting Started with the Propeller 2](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Getting-Started-Guide.pdf)
 **Meet the Chip, Read Its Code, Put It to Work** — *Version 1.0.0*
@@ -73,29 +73,59 @@ The complete guide to the P2's nine DEBUG display windows — TERM, BITMAP, PLOT
 
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-debug-window-manual-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-debug-window-manual-src-260626.zip)
 
-## Also in the Pipeline
+### [P2 I/O & Smart Pins User Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-IO-and-Smart-Pins-User-Guide.pdf)
+**Complete P2 Pin I/O and Smart Pin Reference** — *Version 1.0.0*
 
-Further manuals are in production and will open for community review as they complete:
+The complete reference for the Propeller 2's pin I/O and Smart Pins — working up from direct pin control through the smart pin architecture to all 32 smart pin modes. Chapters organized by function (digital, pulse/transition, NCO, PWM, DAC, serial, timing, counting, period/frequency, ADC, repository, USB) give register-level configuration, worked Spin2 and PASM2 examples, and a "where you'd use this" framing — with hardware-grounded coverage of the details that bite: init ordering, IN-flag handshakes, data justification, and measurement math. Reference appendices provide a task-oriented intent index, the full P\_ constant tables, a formulas reference, mode-comparison charts, a troubleshooting guide, a complete 32-mode register reference, and FPGA board differences. Includes a downloadable library of 15 compile-clean Spin2 example programs that run on a bare P2 board.
 
-### P2 Single-Step Debugger Manual
-**Observe and Control Your Running P2 Code** — *coming soon*
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2-io-and-smart-pins-user-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-io-and-smart-pins-user-guide-src-260703.zip)
+
+## The Full Documentation Set
+
+Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
+
+### Coming Soon
+
+Releasing next for community review:
+
+#### Application Notes
+
+Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean code:
+
+- **Single-Pin ADC Instrumentation** — no external ADC: a single-pin instrumentation ADC and a catalog of techniques
+- **CORDIC for Real Work** — rotations, distances, headings, and transcendentals from the P2's hardware math solver
+- **DAC & Analog Signal Generation** — no external DAC: sample playback, synthesis, dithering, and mixing, straight from the smart pin
+- **Frequency, Period & Pulse Measurement** — three smart-pin instruments that turn a transducer into a number, no external counter or ADC
+
+### In Development & Planned
+
+The rest of the set — in production or on the drawing board:
+
+#### P2 Single-Step Debugger Manual
+**Observe and Control Your Running P2 Code**
 
 A practical guide to single-stepping P2 code — pausing and resuming a running program, inspecting values and timing, and driving the debugger from the host.
 
-### P2 I/O & Smart Pins User Guide
-**Complete P2 Pin I/O and Smart Pin Reference** — *coming soon*
-
-The complete reference for P2 pin I/O and the Smart Pins — every smart pin mode, its configuration, and usage patterns.
-
-### The P2 Architect's Guide
-**Designing Real Systems on the Propeller 2** — *coming soon*
+#### The P2 Architect's Guide
+**Designing Real Systems on the Propeller 2**
 
 The system-design companion to the reference manuals — taking a project from requirements to a working P2 architecture: budgeting pins, mapping peripherals onto buses, decomposing the work across cogs, and realizing the design into code.
 
-### P2 XBYTE Programming Guide
-**Building Interpreters and Emulators on the Propeller 2** — *coming soon*
+#### P2 XBYTE Programming Guide
+**Building Interpreters and Emulators on the Propeller 2**
 
 A deep dive into the P2's XBYTE hardware bytecode engine and the skip family (SKIP/SKIPF/EXECF) — using FIFO/LUT dispatch to build a custom virtual machine, then a compact illustrative 6502 emulator.
+
+#### Application Notes in Planning
+
+Further worked companions under consideration:
+
+- **Extended-Precision Integer Math** — 64/96/128-bit integer math built from the carry-chain instructions
+- **Fixed-Point Math on the P2** — fractional math without a floating-point unit
+- **Cooperative Multitasking with Spin2 TASK Methods** — intra-cog cooperative tasks with the new TASK family
+- **Data Structures with the New Language Facilities** — in-cog and cross-cog queues, lists, and FIFOs
+- **Sizing Cog & Task Stacks** — sizing stacks correctly for cogs and tasks
+- **USB Device/Host with Smart Pins** — building a working USB device or host on the smart pins
 
 
 ## Reporting Issues
