@@ -40,7 +40,7 @@ machine-readable dispatch detail):
 | **manual** | `engineering/document-production/PUBLICATION-ROSTER.md` (publications); workspace folder existence (in-dev / **instruments**) | the manual's folder — `CHANGELOG.md`, `audit/`, working notes; **instruments**: their own run artifacts (e.g. forge interactive-testing) | version (instruments: none) |
 | **yaml** (P2KB) | the YAML tree / index | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (**empty ⇒ nothing outstanding**; non-empty ⇒ the to-do list) | version |
 | **ingestion** | `engineering/ingestion/README.md` | dashboard row (completeness %, gates) + `sources/<src>/<src>-complete-extraction-audit.md` | completeness % + gates (no version) |
-| **obex** | `engineering/obex-integration/README.md` | the integration record (`OBEX-INTEGRATION-COMPLETE.md`) + last-release date; outstanding = **delta vs the last-scan baseline** (2025-09-12) | release version + delta-since-baseline (re-scan) |
+| **obex** | `engineering/obex-integration/README.md` | the integration record (`OBEX-INTEGRATION-COMPLETE.md`) + last-release date; outstanding = **delta vs the last-scan baseline** (2026-06-29, v2.2 · shipped in KB v1.13.3) | release version + delta-since-baseline (re-scan) |
 | **quickbytes** | `engineering/quickbytes-integration/README.md` | the dashboard's state line (currently **NOT processed** — plans/scraper staged, ~15% discovered); single-element, parked | not-started → in-progress → integrated (parked at bottom) |
 
 > **Single-element heads.** `yaml`, `obex`, and `quickbytes` are single-element
@@ -131,7 +131,7 @@ then act:
 - **ingestion** → row in `README.md` (the dashboard)? (refresh per
   `INGESTION-UPDATE-WORKFLOW.md` when turning to ingestion).
 - **obex** → single catalog; state via `obex-integration/README.md` (last
-  release + whether a delta re-scan is due vs the 2025-09-12 baseline).
+  release + whether a delta re-scan is due vs the 2026-06-29 baseline, v2.2).
 - **quickbytes** → single corpus; state via `quickbytes-integration/README.md`
   (currently **NOT processed** — confirm intent before reviving; it's
   deliberately parked at the bottom of the queue).
