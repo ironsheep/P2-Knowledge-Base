@@ -18,6 +18,7 @@ Wait For Attention
 **Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -59,6 +60,7 @@ Wait For Counter Event
 **Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -89,11 +91,12 @@ Wait For FIFO Block Wrap
 
 **WAITFBW**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for FBW event then clear; `C/Z = timeout`
+**Operation:** wait for FBW event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -120,11 +123,12 @@ Wait For Interrupt
 
 **WAITINT**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for INT event then clear; `C/Z = timeout`
+**Operation:** wait for INT event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -151,11 +155,12 @@ Wait For Pattern
 
 **WAITPAT**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for PAT event then clear; `C/Z = timeout`
+**Operation:** wait for PAT event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -192,11 +197,12 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 **WAITSE3**  **{WC|WZ|WCZ}**\
 **WAITSE4**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for SEn event then clear; `C/Z = timeout`
+**Operation:** wait for SEn event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for the specified selectable event flag (SE1-SE4) to be set, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -262,11 +268,12 @@ Wait For Streamer Finished
 
 **WAITXFI**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for XFI event then clear; `C/Z = timeout`
+**Operation:** wait for XFI event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -293,11 +300,12 @@ Wait For Streamer Empty
 
 **WAITXMT**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for XMT event then clear; `C/Z = timeout`
+**Operation:** wait for XMT event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -324,11 +332,12 @@ Wait For Streamer LUT Rollover
 
 **WAITXRL**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for XRL event then clear; `C/Z = timeout`
+**Operation:** wait for XRL event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -355,11 +364,12 @@ Wait For Streamer NCO Rollover
 
 **WAITXRO**  **{WC|WZ|WCZ}**
 
-**Operation:** wait for XRO event then clear; `C/Z = timeout`
+**Operation:** wait for XRO event then clear; `C/Z = timeout` (prior SETQ = CT timeout)
 
 **Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
