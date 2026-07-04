@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-03T03:04:15.312343",
-    "total_entries": 1124,
+    "generated": "2026-07-04T20:58:17.950625",
+    "total_entries": 1128,
     "total_categories": 59,
-    "total_aliases": 1524,
+    "total_aliases": 1629,
     "multi_target_aliases": 65,
     "source": "deliverables/ai/P2/"
   },
@@ -758,6 +758,12 @@
     "#64014 add-on board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
+    "16-BIT DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "16-bit DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "32201": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -781,6 +787,12 @@
     ],
     "4-phase motor driver": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "64-BIT MULTIPLY DIVIDE": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "64-bit multiply divide": [
+      "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "64000": [
       "p2kbHwP2EvalBoardP2EvalBoard"
@@ -858,11 +870,20 @@
       "p2kbPasm2Abs",
       "p2kbSpin2Abs"
     ],
+    "ABSOLUTE VOLTAGE MEASUREMENT": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "ADC REFERENCE DOMAIN": [
       "p2kbArchPinPowerDomains"
     ],
+    "ADC TO DAC PASSTHROUGH": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "ADC reference domain": [
       "p2kbArchPinPowerDomains"
+    ],
+    "ADC to DAC passthrough": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "ADD": [
       "p2kbPasm2Add"
@@ -940,6 +961,9 @@
     "ANALOG DISPLAY": [
       "p2kbSpin2Scope"
     ],
+    "ANALOG OUTPUT": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "AND": [
       "p2kbPasm2And"
     ],
@@ -951,6 +975,12 @@
     ],
     "AUDIO ADC DAC BOARD": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "AUDIO DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "AUDIO MIXING": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "AUDIO VIDEO BREAKOUT": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
@@ -969,6 +999,9 @@
     ],
     "BATTERY-BACKED CLOCK ADD-ON": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "BINARY ANGLE": [
+      "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "BITC": [
       "p2kbPasm2Bitc"
@@ -1091,6 +1124,9 @@
     "CARTESIAN": [
       "p2kbSpin2Plot"
     ],
+    "CARTESIAN TO POLAR": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "CHARLIEPLEX LED BOARD": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
@@ -1191,6 +1227,15 @@
     "CONTROL BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
+    "CORDIC": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "CORDIC PIPELINING": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "CORDIC pipelining": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "CRCBIT": [
       "p2kbPasm2Crcbit"
     ],
@@ -1203,11 +1248,20 @@
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
+    "DAC OUTPUT": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "DAC output": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "DAT SINGLETON FORK": [
       "p2kbSpin2ObjectImageDedup"
     ],
     "DAT singleton fork": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "DDS": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "DEBUG": [
       "p2kbPasm2Debug"
@@ -1317,6 +1371,9 @@
     "DEPENDENCY INJECTION": [
       "p2kbSpin2MethodPointers"
     ],
+    "DETENT NORMALIZATION": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "DIGITAL SIGNALS": [
       "p2kbSpin2Logic"
     ],
@@ -1325,6 +1382,9 @@
     ],
     "DIRC": [
       "p2kbPasm2Dirc"
+    ],
+    "DIRECT DIGITAL SYNTHESIS": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "DIRH": [
       "p2kbPasm2Dirh"
@@ -1349,6 +1409,12 @@
     ],
     "DISPATCH TABLE": [
       "p2kbSpin2MethodPointers"
+    ],
+    "DISTANCE AND HEADING": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "DITHERED DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "DJF": [
       "p2kbPasm2Djf"
@@ -1476,6 +1542,12 @@
     "FGES": [
       "p2kbPasm2Fges"
     ],
+    "FIELD-ORIENTED MOTOR CONTROL": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "FIXED-POINT MATH": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "FLE": [
       "p2kbPasm2Fle"
     ],
@@ -1514,6 +1586,9 @@
     ],
     "FREQUENCY DISPLAY": [
       "p2kbSpin2Fft"
+    ],
+    "FREQUENCY MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "FTDI FT231X PROGRAMMER": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
@@ -1568,6 +1643,12 @@
     "GETXACC": [
       "p2kbPasm2Getxacc"
     ],
+    "GIO VIO RATIOMETRIC MEASUREMENT": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "GIO VIO ratiometric measurement": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "GOERTZEL TOUCH BOARD": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
@@ -1579,6 +1660,9 @@
     ],
     "HARDWARE FEATURE COMPARISON": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "HARDWARE MATH SOLVER": [
+      "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "HARDWARE SELECTION GUIDE": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
@@ -1597,6 +1681,9 @@
     ],
     "HIGH-DEFINITION AUDIO BOARD": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "HIGH-TIME MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "HUB75 ADAPTER": [
       "p2kbHwHub75AdapterHub75Adapter"
@@ -1650,6 +1737,9 @@
     ],
     "INCMOD": [
       "p2kbPasm2Incmod"
+    ],
+    "INSTRUMENTATION ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "ISOLATED SUPPLY DOMAIN": [
       "p2kbArchPinPowerDomains"
@@ -1783,6 +1873,9 @@
     "LED panel interface": [
       "p2kbHwHub75AdapterHub75Adapter"
     ],
+    "LIGHT TO FREQUENCY": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "LISSAJOUS": [
       "p2kbSpin2ScopeXy"
     ],
@@ -1881,6 +1974,9 @@
     ],
     "MICROSD BREAKOUT": [
       "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "MICROVOLT MEASUREMENT": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "MIDI": [
       "p2kbSpin2Midi"
@@ -2264,6 +2360,9 @@
     "PARALLAX WX ESP8266 WI-FI MODULE": [
       "p2kbHwAddonWxWifiAddonWxWifi"
     ],
+    "PARK TRANSFORM": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "PCF8523 BOARD": [
       "p2kbHwAddonRtcAddonRtc"
     ],
@@ -2276,8 +2375,14 @@
     "PER-GROUP ADC REFERENCE": [
       "p2kbArchPinPowerDomains"
     ],
+    "PERIOD MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
+    ],
+    "PHOTOCELL READER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "PIANO KEYBOARD": [
       "p2kbSpin2Midi"
@@ -2437,6 +2542,9 @@
     "PROTOTYPING ADD-ON": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
+    "PSEUDO-RANDOM DITHER": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "PSRAM BROKER": [
       "p2kbArchSharedBusBroker"
     ],
@@ -2455,6 +2563,12 @@
     "PSRAM edge module": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
+    "PULSE MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "PULSE WIDTH MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "PUSH": [
       "p2kbPasm2Push"
     ],
@@ -2463,6 +2577,12 @@
     ],
     "PUSHB": [
       "p2kbPasm2Pushb"
+    ],
+    "PWM DITHER": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "PWM dither": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "P_BITDAC": [
       "p2kbArchSmartPins"
@@ -2505,6 +2625,9 @@
     "Parallax WX ESP8266 Wi-Fi Module": [
       "p2kbHwAddonWxWifiAddonWxWifi"
     ],
+    "Park transform": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "Prop Plug": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -2546,8 +2669,23 @@
     "QSQRT": [
       "p2kbPasm2Qsqrt"
     ],
+    "QUADRATURE ENCODER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "QUADRATURE KNOB": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "QVECTOR": [
       "p2kbPasm2Qvector"
+    ],
+    "RATIOMETRIC ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "RC DECAY READER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "RC decay reader": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "RCFAST": [
       "p2kbArchClockSystem"
@@ -2560,6 +2698,9 @@
     ],
     "RCSLOW": [
       "p2kbArchClockSystem"
+    ],
+    "RCTIME": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "RCZL": [
       "p2kbPasm2Rczl"
@@ -2601,11 +2742,17 @@
     "RE-ENTRANT DRIVER STATE": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "READ ANALOG VOLTAGE NO EXTERNAL ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "REAL TIME CLOCK CALENDAR": [
       "p2kbHwAddonRtcAddonRtc"
     ],
     "REAL-TIME CLOCK BOARD": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "RECIPROCAL FREQUENCY COUNTER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "RECV": [
       "p2kbSpin2Recv"
@@ -2712,6 +2859,12 @@
     "ROR": [
       "p2kbPasm2Ror"
     ],
+    "ROTARY ENCODER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "ROTATE A POINT": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "ROTXY": [
       "p2kbSpin2Rotxy"
     ],
@@ -2730,6 +2883,9 @@
     ],
     "SAL": [
       "p2kbPasm2Sal"
+    ],
+    "SAMPLE PLAYBACK": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "SAR": [
       "p2kbPasm2Sar"
@@ -2760,6 +2916,9 @@
     ],
     "SEND": [
       "p2kbSpin2Send"
+    ],
+    "SENSOR READING": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "SERIAL DEVICE ADD-ON": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
@@ -2881,8 +3040,29 @@
     "SHR": [
       "p2kbPasm2Shr"
     ],
+    "SIGMA-DELTA PIN ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "SIGNX": [
       "p2kbPasm2Signx"
+    ],
+    "SINC2 FILTERING ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "SINC2 filtering ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "SINE AND COSINE": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "SINE OSCILLATOR": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "SINGLE-PIN ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "SINGLE-PIN DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "SIZEOF": [
       "p2kbSpin2Sizeof"
@@ -2952,6 +3132,9 @@
     ],
     "STEPPER MOTOR DRIVER ADD-ON": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "STEREO PANNING": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "STRCOMP": [
       "p2kbSpin2Strcomp"
@@ -3056,6 +3239,9 @@
     "TEXT WINDOW": [
       "p2kbSpin2Term"
     ],
+    "THERMISTOR READER": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "THISTASK": [
       "p2kbSpin2Thistask"
     ],
@@ -3100,6 +3286,9 @@
     ],
     "TRUNC": [
       "p2kbSpin2Trunc"
+    ],
+    "TSL235R": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "TT_BITS": [
       "p2kbArchSmartPins"
@@ -3231,6 +3420,9 @@
     "WAVEFORM": [
       "p2kbSpin2Logic",
       "p2kbSpin2Scope"
+    ],
+    "WAVEFORM SYNTHESIS": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "WFBYTE": [
       "p2kbPasm2Wfbyte"
@@ -3443,6 +3635,9 @@
       "p2kbPasm2Abs",
       "p2kbSpin2Abs"
     ],
+    "absolute voltage measurement": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "add": [
       "p2kbPasm2Add"
     ],
@@ -3513,6 +3708,9 @@
     "analog display": [
       "p2kbSpin2Scope"
     ],
+    "analog output": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "and": [
       "p2kbPasm2And"
     ],
@@ -3534,6 +3732,12 @@
     "audio ADC DAC board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
+    "audio DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "audio mixing": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "audio video breakout": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
@@ -3548,6 +3752,9 @@
     ],
     "battery-backed clock add-on": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "binary angle": [
+      "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "bitc": [
       "p2kbPasm2Bitc"
@@ -3668,6 +3875,9 @@
     "cartesian": [
       "p2kbSpin2Plot"
     ],
+    "cartesian to polar": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "child object declaration": [
       "p2kbSpin2KwOBJ"
     ],
@@ -3787,6 +3997,9 @@
     "dependency injection": [
       "p2kbSpin2MethodPointers"
     ],
+    "detent normalization": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "diagnostic_output": [
       "p2kbSpin2Spin2DiagnosticOutput"
     ],
@@ -3798,6 +4011,9 @@
     ],
     "dirc": [
       "p2kbPasm2Dirc"
+    ],
+    "direct digital synthesis": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "dirh": [
       "p2kbPasm2Dirh"
@@ -3825,6 +4041,12 @@
     ],
     "display_driver": [
       "p2kbSpin2DisplayDriver"
+    ],
+    "distance and heading": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "dithered DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "djf": [
       "p2kbPasm2Djf"
@@ -3940,6 +4162,12 @@
     "fges": [
       "p2kbPasm2Fges"
     ],
+    "field-oriented motor control": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "fixed-point math": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "fle": [
       "p2kbPasm2Fle"
     ],
@@ -3981,6 +4209,9 @@
     ],
     "frequency display": [
       "p2kbSpin2Fft"
+    ],
+    "frequency measurement": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "getbrk": [
       "p2kbPasm2Getbrk"
@@ -4035,6 +4266,9 @@
     "hardware feature comparison": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
+    "hardware math solver": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "hardware selection guide": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
@@ -4043,6 +4277,9 @@
     ],
     "high-definition audio board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "high-time measurement": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "hubset": [
       "p2kbPasm2Hubset",
@@ -4065,6 +4302,9 @@
     ],
     "incmod": [
       "p2kbPasm2Incmod"
+    ],
+    "instrumentation ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "iot_device": [
       "p2kbSpin2IotDevice"
@@ -4183,6 +4423,9 @@
     "layered_architecture": [
       "p2kbSpin2Spin2LayeredArchitecture"
     ],
+    "light to frequency": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "loc": [
       "p2kbPasm2Loc"
     ],
@@ -4273,6 +4516,9 @@
     ],
     "microSD breakout": [
       "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "microvolt measurement": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "mini breakout board": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
@@ -4468,8 +4714,14 @@
     "per-group ADC reference": [
       "p2kbArchPinPowerDomains"
     ],
+    "period measurement": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "phase plot": [
       "p2kbSpin2ScopeXy"
+    ],
+    "photocell reader": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "piano keyboard": [
       "p2kbSpin2Midi"
@@ -4600,6 +4852,15 @@
     "prototyping add-on": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
+    "pseudo-random dither": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "pulse measurement": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "pulse width measurement": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "push": [
       "p2kbPasm2Push"
     ],
@@ -4638,17 +4899,29 @@
     "qsqrt": [
       "p2kbPasm2Qsqrt"
     ],
+    "quadrature encoder": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "quadrature knob": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
     "qvector": [
       "p2kbPasm2Qvector"
     ],
     "rate_domain_decoupler": [
       "p2kbSpin2Spin2RateDomainDecoupler"
     ],
+    "ratiometric ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "rcl": [
       "p2kbPasm2Rcl"
     ],
     "rcr": [
       "p2kbPasm2Rcr"
+    ],
+    "rctime": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "rczl": [
       "p2kbPasm2Rczl"
@@ -4678,11 +4951,17 @@
     "re-entrant driver state": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "read analog voltage no external ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "real time clock calendar": [
       "p2kbHwAddonRtcAddonRtc"
     ],
     "real-time clock board": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "reciprocal frequency counter": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "recv": [
       "p2kbSpin2Recv"
@@ -4783,6 +5062,12 @@
     "ror": [
       "p2kbPasm2Ror"
     ],
+    "rotary encoder": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "rotate a point": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "rotxy": [
       "p2kbSpin2Rotxy"
     ],
@@ -4795,6 +5080,9 @@
     ],
     "sal": [
       "p2kbPasm2Sal"
+    ],
+    "sample playback": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "sar": [
       "p2kbPasm2Sar"
@@ -4810,6 +5098,9 @@
     ],
     "send": [
       "p2kbSpin2Send"
+    ],
+    "sensor reading": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "sensor_fusion": [
       "p2kbSpin2SensorFusion"
@@ -4943,8 +5234,23 @@
     "shr": [
       "p2kbPasm2Shr"
     ],
+    "sigma-delta pin ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "signx": [
       "p2kbPasm2Signx"
+    ],
+    "sine and cosine": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "sine oscillator": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "single-pin ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "single-pin DAC": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "single_communication": [
       "p2kbSpin2SingleCommunication"
@@ -5015,6 +5321,9 @@
     ],
     "stepper motor driver add-on": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "stereo panning": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "strcomp": [
       "p2kbSpin2Strcomp"
@@ -5114,6 +5423,9 @@
     ],
     "text window": [
       "p2kbSpin2Term"
+    ],
+    "thermistor reader": [
+      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "timing_control": [
       "p2kbArchTimingControlAnalysis",
@@ -5238,6 +5550,9 @@
       "p2kbSpin2Logic",
       "p2kbSpin2Scope"
     ],
+    "waveform synthesis": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
     "wfbyte": [
       "p2kbPasm2Wfbyte"
     ],
@@ -5345,6 +5660,26 @@
     ]
   },
   "files": {
+    "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
+      "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
+      "mtime": 1783103488,
+      "sha256": "15f60243652c5b82c9a2677ee114a52ae2cc379f71b113fddb73b012e9012cc9"
+    },
+    "p2kbAppNoteP2an002CordicForRealWork": {
+      "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
+      "mtime": 1783106424,
+      "sha256": "70e91a7adf7c3ca4e1c073ec3e3e7a7ac41b345b793fd91ff30ddf9f8abb0516"
+    },
+    "p2kbAppNoteP2an003DacAnalogSignalGeneration": {
+      "path": "deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml",
+      "mtime": 1783109814,
+      "sha256": "b37896c3fa557f65f0d5ca5589b962f4f8fa56396a93b24d89a9f9ffd8c579dd"
+    },
+    "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement": {
+      "path": "deliverables/ai/P2/application-notes/p2an004-frequency-period-pulse-measurement.yaml",
+      "mtime": 1783123138,
+      "sha256": "904a67b1f172ea14ff5f69131afce440c8d8a74cbcd5014787d117bbf7872c18"
+    },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
       "mtime": 1781325191,
@@ -5687,18 +6022,18 @@
     },
     "p2kbArchSmartPin10101CountTicksInXClocks": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml",
-      "mtime": 1782943074,
-      "sha256": "029f724ef1cf342366a057acc220b256c6542504d422f28ed572a0dac4237d58"
+      "mtime": 1783195231,
+      "sha256": "a5db85a87a31a84dd5d019751378e4fa60e6f07a6c80a0c068235f5aaca93447"
     },
     "p2kbArchSmartPin10110CountHighsInXClocks": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml",
-      "mtime": 1782943074,
-      "sha256": "a4200f734c7476889d9cfd5550c0f648c5d5dccb96155dacb3ad71358860a726"
+      "mtime": 1783195231,
+      "sha256": "ec04d287f7f5ede4dfbadb8a9c254dfa68111f8ee4f8de41d1b7d7263b31e78e"
     },
     "p2kbArchSmartPin10111CountPeriodsInXClocks": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml",
-      "mtime": 1782943074,
-      "sha256": "0985f7daa317b0e60795ee51479f039a61f7be128ecf8bbfdf3bfca059c37f13"
+      "mtime": 1783195231,
+      "sha256": "a9e89082c5ce786c5d2ffab34af0708e14cb86c6b73230adff6d7745af330857"
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
@@ -5732,8 +6067,8 @@
     },
     "p2kbArchSmartPin11110AsyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
-      "mtime": 1781981347,
-      "sha256": "b3c577f7b4ff8cc5d417e23c14a07aca30175a49819066d7969dc8720b4a264a"
+      "mtime": 1783195231,
+      "sha256": "0d7806848216df7e6026f16ed1ccd76d05cf9cc970f4a9b98eac39eda04b097d"
     },
     "p2kbArchSmartPin11111AsyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml",
@@ -8767,58 +9102,58 @@
     },
     "p2kbPasm2Waitatn": {
       "path": "deliverables/ai/P2/language/pasm2/waitatn.yaml",
-      "mtime": 1764449566,
-      "sha256": "376d35f7c946c99ef0f0bfdea77fcd7f56e54d668cc6a6d442c561713e0712b5"
+      "mtime": 1783198595,
+      "sha256": "efefa0efbec962194b7a0e8fd09e2e7fc10df521faa69e5209d114a37146fd3b"
     },
     "p2kbPasm2Waitct1": {
       "path": "deliverables/ai/P2/language/pasm2/waitct1.yaml",
-      "mtime": 1764449566,
-      "sha256": "9c1d9627f90d1d69dd67cc29bae1a0045ca0ab0c884c8c27a3047974b08fd4e9"
+      "mtime": 1783198595,
+      "sha256": "83df7c1cf93980d08270cb6075f38b78d12c38b63b1e0e57895b3f06d49eed04"
     },
     "p2kbPasm2Waitct2": {
       "path": "deliverables/ai/P2/language/pasm2/waitct2.yaml",
-      "mtime": 1764449566,
-      "sha256": "0ef6d0c0ea6307b5db8923ed7ce1709a825c4a47cc4cd8d6578784a9a303647f"
+      "mtime": 1783198595,
+      "sha256": "ca9c541ef7ae3bd9e39758a7f9990b0d4c51fa5458a32c31b06674c71aeaf674"
     },
     "p2kbPasm2Waitct3": {
       "path": "deliverables/ai/P2/language/pasm2/waitct3.yaml",
-      "mtime": 1764449566,
-      "sha256": "aa9f0d311a6b0c5f40b952c5cafbd1f4ad441def02811f7fab3012278be875be"
+      "mtime": 1783198595,
+      "sha256": "9498a233ef042fcbcbced4803db84384c1ed8d1e9132973e65b2170af95dfb59"
     },
     "p2kbPasm2Waitfbw": {
       "path": "deliverables/ai/P2/language/pasm2/waitfbw.yaml",
-      "mtime": 1764449566,
-      "sha256": "eb711555264268341abc551ea48bd8cbc38d7d4f025740b6b8e0885f4abee1e2"
+      "mtime": 1783198595,
+      "sha256": "b1af36b7368cc62c22a31ec794aeeaa2d130d23b7fc1adb6e74ee16a5695c034"
     },
     "p2kbPasm2Waitint": {
       "path": "deliverables/ai/P2/language/pasm2/waitint.yaml",
-      "mtime": 1764449566,
-      "sha256": "44fceba4f18ee42b962811bfc3136b0b6ad06730f61c09ba8ac0ccf59ed2ae2e"
+      "mtime": 1783198595,
+      "sha256": "bc95d6bedd7acfff5326da00a68d08a3892da0371c3b2007f2a2aaf60e8da12f"
     },
     "p2kbPasm2Waitpat": {
       "path": "deliverables/ai/P2/language/pasm2/waitpat.yaml",
-      "mtime": 1764449566,
-      "sha256": "a43bee280bd847a2934b66574bc0fa0c522778319adab16170608f33e8aa1f1f"
+      "mtime": 1783198595,
+      "sha256": "1b2213846b15359cc5a473df75780e565951626427441279994c91ed1f2cce98"
     },
     "p2kbPasm2Waitse1": {
       "path": "deliverables/ai/P2/language/pasm2/waitse1.yaml",
-      "mtime": 1764449566,
-      "sha256": "31ca7edcfa67d902a88322c259ab62ccb93ee51971d3ba9da0540a79acd5cc33"
+      "mtime": 1783198595,
+      "sha256": "d6288542dcbc8dc80bb17ed4797c48e43e38da0509343203f7f3a870f6b1c984"
     },
     "p2kbPasm2Waitse2": {
       "path": "deliverables/ai/P2/language/pasm2/waitse2.yaml",
-      "mtime": 1764449566,
-      "sha256": "942289f07b526cb787a7c701f73ff58eea9083a63c8de9fa00b9686b549e2b7b"
+      "mtime": 1783198595,
+      "sha256": "aca0d852e176148185fbb6980fd99ae58886c2ed00ef9bd7a68bbeb73622ff17"
     },
     "p2kbPasm2Waitse3": {
       "path": "deliverables/ai/P2/language/pasm2/waitse3.yaml",
-      "mtime": 1764449566,
-      "sha256": "546cda384b597620631b11d0ab7e2a36d56b62843bd70fb484c83453c4dd8f68"
+      "mtime": 1783198595,
+      "sha256": "53210096fd0d70ad601c590abe1ae67e60fc6d4c9ada1b1d7a54ea1eba2d4a0d"
     },
     "p2kbPasm2Waitse4": {
       "path": "deliverables/ai/P2/language/pasm2/waitse4.yaml",
-      "mtime": 1764449566,
-      "sha256": "63889cc876dbe76f84887285dc6cf1a17d6d544f23855a8387706b72fe720174"
+      "mtime": 1783198595,
+      "sha256": "e32e194d48060563edb5c47a74b629fc109d0eb27137eb1f6b1bc4f5830ee28a"
     },
     "p2kbPasm2Waitx": {
       "path": "deliverables/ai/P2/language/pasm2/waitx.yaml",
@@ -8827,23 +9162,23 @@
     },
     "p2kbPasm2Waitxfi": {
       "path": "deliverables/ai/P2/language/pasm2/waitxfi.yaml",
-      "mtime": 1764449566,
-      "sha256": "e40ca9038e5d0a2fe33569d35f805eb85a87f74e1d932e65cd5d23861dd84709"
+      "mtime": 1783198595,
+      "sha256": "1a9325a907460253d5f59aced998cdaabc54f23334f5c45ec8b9a9902a066db7"
     },
     "p2kbPasm2Waitxmt": {
       "path": "deliverables/ai/P2/language/pasm2/waitxmt.yaml",
-      "mtime": 1764449566,
-      "sha256": "5781928addedff17735fcc7c35c6561db974af50315a61c3e6090567f8bc996b"
+      "mtime": 1783198595,
+      "sha256": "3ba218365b991882233ad9e72b179eb573e40d5959f2ad08927a5757e84e6265"
     },
     "p2kbPasm2Waitxrl": {
       "path": "deliverables/ai/P2/language/pasm2/waitxrl.yaml",
-      "mtime": 1764449566,
-      "sha256": "4bf91b09b569c9d3e404745f54e465f7dc1bcf999216931fb1162d2c1ad38ef8"
+      "mtime": 1783198595,
+      "sha256": "d50aa8217dd3b613f1994ae74843708ae2336d198993d1b1cd6fb4317f5482be"
     },
     "p2kbPasm2Waitxro": {
       "path": "deliverables/ai/P2/language/pasm2/waitxro.yaml",
-      "mtime": 1781076792,
-      "sha256": "d2ca943c578f973f387f1122cae5aa643873d8c17b1c62e535a2095d55a7e6c4"
+      "mtime": 1783198595,
+      "sha256": "d5448c6e6c5dc190c52b91b8d4126f43d9ba8633c1996299fdf7488e90fa0726"
     },
     "p2kbPasm2Wfbyte": {
       "path": "deliverables/ai/P2/language/pasm2/wfbyte.yaml",
