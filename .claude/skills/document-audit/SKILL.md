@@ -210,6 +210,7 @@ bit positions / field widths, addresses, asserted counts ("491 instructions", "8
 Pins", "512KB hub"). grep digits/ranges; cross-check each. **Forbidden (memory):** no
 bytecode-interpreter clock timings for Spin2 methods (cite underlying PASM or remove; never "varies
 with release"); no compiler bytecode values / `bc_`-prefixed symbols (describe behavior, not symbol).
+Any number carrying weak-sourcing framing routes to **Dimension #4b** for the provenance-match test.
 
 ### Theme B — Coverage
 
@@ -235,6 +236,48 @@ occurrence.
 | "automatically" / "mechanism for" | MEDIUM — hand-waving |
 | "additionally" / "furthermore" | MEDIUM — often precedes invented extras |
 | "enables" / "allows" / "can be used to" (vague) | MEDIUM |
+
+**Dimension #4b — Source-tier & provenance-match (forum-figure quarantine).** A claim that
+*has* a source can still be wrong if the manual states it **above the source's confidence**.
+Dimension #4 catches unsourced fabrication; this catches **confidence-source mismatch** — the
+failure that let a *retracted* forum figure ("~34 hblank px" for HDMI audio, Ada via cgracey)
+ship dressed as "community-measured" (no measurement ever happened; the number was later
+retracted as ~40% low). Two steps:
+
+1. **Weak-sourcing sweep.** grep the admission-of-weak-sourcing vocabulary + adjacent numbers:
+   `community[- ](measured|tested|report)`, `reportedly`, `observed`, `seems to`, `roughly N`,
+   `~N (px|pixel|lines|clocks|ms)`, `verify (it|before|against)`, `not (independently )?spec`.
+   Yields a small triage list, not noise. (Benign `~N clocks` code-timing idioms trace to
+   documentary timing — clear them and move on.)
+2. **Provenance-*match*, not provenance-*exists*.** For each hit, trace to its ingestion record
+   (`engineering/ingestion/external-inputs/**/INGEST.md`) or the empirical ledger. Then confirm
+   the manual's **characterization** matches the source's *true* epistemic status — "measured /
+   tested / spec" is legal ONLY if the source actually measured / tested / specifies it. A forum
+   ballpark framed as "measured" is a finding **even though a source exists**.
+
+**Governing invariant (the disposition rule):** *never state a number above its source's
+confidence; remove any number that is known-wrong or cannot be honestly framed at any confidence;
+let the prose framing carry the trust tier; when a solid number is lacking, point at the primary
+authority (HDMI/TMDS spec, Silicon Doc) — never at a forum thread.*
+
+- **Forum threads are Titus-tier** (see `feedback_forum_material_is_titus_tier` /
+  `feedback_titus_trust_tier_representation`): a legitimate **upstream** lead-source for
+  ingestion, **never** a downstream citation handed to the reader. Per-number test: *"at the
+  confidence we're framing this, would we defend it if challenged?"* — Retracted/refuted → **out**
+  (no framing rescues a wrong number). Genuine observation (someone actually tested displays) →
+  **keep, framed as observation** with a verify-on-your-hardware instruction. First-party-but-
+  non-spec (a designer's forum rule-of-thumb) → **keep, framed as approximate / not part of the
+  documented specification** — but **never presuppose the spec will change** ("not *yet* in the
+  Silicon Doc" is an undocumented-future/roadmap claim — banned per
+  `feedback_no_undocumented_roadmap_claims`).
+- **Relay ≠ endorsement.** A number a Parallax person merely *relays* (and disclaims) is not
+  promoted to 🏆 — the tier tracks the epistemic status of the *claim*, not who typed it.
+- **Durable identified community artifacts** (OBEX objects with an ID) are citable to a reader;
+  ephemeral discussion threads are not.
+- A prose hedge ("community-measured, verify yourself") does **NOT** discharge an ingestion
+  "verify-before-publishing" caveat. Such a caveat becomes a release-blocking item (logged to the
+  manual's `./audit/`), cleared only by verification against a primary/empirical source or by
+  removal — not by wording.
 
 ### Theme D — Linkage & Examples
 
@@ -365,6 +408,7 @@ Single consolidated file `./audit/periodic-audit-YYYY-MM-DD.md` (or `release-gat
 ## Recommended Actions (ranked by severity)
 ## Sign-off
 - [ ] All CRITICAL have a tracked fix
+- [ ] No forum-tier figure stated above its source's confidence (#4b); ingestion verify-before-publish caveats resolved or removed
 - [ ] YAML-HEAD drain gate GREEN (release-gate)
 - [ ] Changeset integrity clean (release-gate)
 - [ ] Prior-audit follow-up complete (#12)

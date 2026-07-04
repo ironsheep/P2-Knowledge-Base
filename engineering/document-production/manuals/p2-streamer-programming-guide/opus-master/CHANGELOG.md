@@ -1,5 +1,17 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.4 (2026-07-04)
+
+Guidance refinements in the video and DDS/Goertzel chapters. No chapters added, no mode
+encodings changed.
+
+- **HDMI audio blanking (§15.2)** — audio-carrying HDMI needs more horizontal blanking than
+  video-only timing; size that budget from the HDMI data-island specification for your exact mode.
+- **DVI/HDMI blanking floors (§15.2)** — the observed per-display floors are framed as
+  display-specific values to test against your own monitor, not as fixed limits.
+- **SINC2 measurement period (§10.4)** — the non-power-of-two-rate workaround gives an
+  approximate measurement-period bound (on the order of 20 ms) to verify for your rate.
+
 ## v1.0.3 (2026-07-03)
 
 Designer-authoritative guidance additions to the DDS/Goertzel and video chapters.

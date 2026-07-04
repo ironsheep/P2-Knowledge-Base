@@ -687,13 +687,13 @@ repeat i from 0 to 511
 :::
 
 ::: caution
-**SINC2 requires a *constant* iteration count per Goertzel cycle — a documented silicon limitation.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise — roughly one glitch every 30–60 ms. (Recorded in the *Parallax Propeller 2 Documentation* Goertzel note dated 2024.12.16.)
+**SINC2 requires a *constant* iteration count per Goertzel cycle — a documented silicon limitation.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (The constant-iteration constraint is recorded in the *Parallax Propeller 2 Documentation* Goertzel note dated 2024.12.16.)
 
 Three ways to avoid it, most robust first:
 
 1. **Run at a system clock that makes the iteration count a power of two.** To listen at 1 MHz, run the sysclock at 256 MHz rather than 250 MHz, so every Goertzel cycle is exactly 256 clocks — constant by construction. (A *constant* count is the true requirement; a power of two is simply the practical way to guarantee it.)
 2. **Use SINC1 instead.** Single integration is not sensitive to a varying iteration count.
-3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT) and keep the measurement period under about 20 ms.**
+3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT) and keep the measurement period short — on the order of 20 ms or less** — so the per-cycle error cannot accumulate far. This bound is approximate and not part of the documented specification; verify it for your rate.
 :::
 
 ## 10.5 Reading Results {#sec-10-5}
@@ -1174,11 +1174,11 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 :::
 
 ::: hardware
-**Blanking intervals are display-limited, not analog-mandated.** DVI/HDMI has no analog front/back-porch requirement, so the large blanking intervals inherited from VGA can be trimmed hard — the practical floor is whatever the attached display tolerates. Observed horizontal-blanking floors range from about **16 pixels** on permissive TVs to roughly **68** on older DVI monitors, and horizontal blanking must be a **multiple of 8** pixels; minimal vertical blanking of about **8 lines** (one sync line plus seven blank) has been driven successfully. Treat these as *observed display limits* to test against your own monitor, not as P2 limits.
+**Blanking intervals are display-limited, not analog-mandated.** DVI/HDMI has no analog front/back-porch requirement, so the large blanking intervals inherited from VGA can be trimmed hard — the practical floor is whatever the attached display tolerates. Observed horizontal-blanking floors range from about **16 pixels** on permissive TVs to roughly **68** on older DVI monitors; minimal vertical blanking of about **8 lines** (one sync line plus seven blank) has been driven successfully. Treat these as *observed display limits* to test against your own monitor, not as P2 limits.
 :::
 
 ::: caution
-**Carrying HDMI audio needs more horizontal blanking than video alone.** The data-island packets that carry sound require additional room in each horizontal blanking interval — community testing reports roughly **34 pixel-periods**, versus the ~16 that video-only timing can reach — so an audio-carrying design cannot use the tightest blanking. This figure is community-measured rather than quoted from the HDMI data-island specification; verify it for your exact mode before committing a timing.
+**Carrying HDMI audio needs more horizontal blanking than video alone.** The data-island packets that carry sound need room in each horizontal blanking interval that the tightest video-only timing does not leave — so an audio-carrying design cannot use the tightest blanking. Size the blanking budget from the HDMI data-island specification for your exact mode before committing a timing.
 :::
 
 ## 15.3 Composite Video {#sec-15-3}
@@ -1604,7 +1604,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 2. ADC pin configured for ADC mode
 3. Sample count adequate for frequency resolution
 4. SINC2 amplitude reduced to ±10 to prevent overflow
-5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches (~every 30–60 ms) mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.4)
+5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.4)
 
 # Index
 

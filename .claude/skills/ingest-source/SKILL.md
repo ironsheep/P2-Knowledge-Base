@@ -332,6 +332,29 @@ zero answered/new questions is the exception to justify, not the default.
 5. **Unresolved / expert-only:** where a fact is unresolved across all eligible sources, ask the user rather than guess (plain chat — no AskUserQuestion here); if only the designer can settle it, record it in `KNOWLEDGE-GAPS.md` **Part B** (questions-for-experts + who-to-ask).
 6. **Update trust scoring** (HIGH multi-source-confirmed / MEDIUM single-source / LOW conflict-or-gap).
 
+> **Forum/community-thread figures are Titus-tier — quarantine, never let one graduate
+> silently.** A discussion thread (Parallax forums, etc.) is a legitimate **upstream lead
+> source** — mine it for facts and questions — but a *quantitative figure* whose only
+> provenance is a thread is **not** promoted to a publishable number by this ingestion. This is
+> the **upstream** half of the invariant `document-audit` Dimension #4b enforces downstream:
+> *never let a number reach reader prose above its source's confidence.* Handle each such figure:
+> - **Record it as a lead** in the INGEST record with its *true* provenance — who said it,
+>   **relayed vs. asserted**, and any disclaimer or later retraction. Open a **`KNOWLEDGE-GAPS.md`
+>   Part A** row: "authoritative value for <X> unconfirmed — forum figure ~N; verify against
+>   <primary authority / hardware> before any manual states it."
+> - **Tag it `verify-before-publishing` and treat that as a BLOCKING item, not an advisory
+>   note.** It is cleared ONLY by (a) confirming the figure against a primary/empirical source —
+>   then cite THAT, not the thread — or (b) demoting it to a labeled observation framed at its
+>   true (low) confidence. **A downstream prose hedge does NOT discharge it.** That leak is
+>   exactly how a *retracted* "~34 px HDMI-audio blanking" figure (Ada via cgracey, later
+>   retracted as ~40% low) reached a released manual dressed as "community-measured."
+> - **Relay ≠ endorsement.** A number a Parallax authority merely *relays* (or disclaims —
+>   "would be good to know exact numbers") is NOT promoted to that authority's tier. Tier tracks
+>   the epistemic status of the *claim*, not who typed it — do not stamp such a figure 🏆.
+> - **When routing the figure to a manual** (an `Affects: <manual>` line), the
+>   `verify-before-publishing` tag travels with it into that manual's `audit/` open items, so the
+>   manual head cannot publish the number unverified. (See `feedback_forum_material_is_titus_tier`.)
+
 ## 6. Output layout (mirror the canonical source folder)
 
 ```
@@ -385,3 +408,6 @@ that improvement here, and in the source docs, is part of finishing the work.
 - **Don't skip `pnut_ts` validation of extracted code** (use `-d` for DEBUG code), or ship a code example that did not compile clean.
 - **Don't mark a source complete with open gates** — completeness % and gate status on the dashboard are load-bearing for `whats-next` resume.
 - **Don't bury a conflict** — inter-source disagreement is an outcome to surface, not smooth over.
+- **Don't let a forum-thread figure graduate to a publishable number** — quarantine it (§5),
+  verify against a primary/empirical source or demote to a labeled observation; relay ≠
+  endorsement; a `verify-before-publishing` tag is blocking, not advisory.
