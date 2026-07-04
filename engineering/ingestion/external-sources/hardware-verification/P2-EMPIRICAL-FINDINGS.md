@@ -111,6 +111,41 @@ recorded in the IOSP disproven-findings staging doc. **Supersedes** the earlier 
 internal-loopback `test51` (which had also accidentally applied the fix via the universal
 init order).
 
+### EF-017 · Concurrent single-signal counter cells (%10101/%10110/%10111) need BOTH A and B routed — `CONFIRMED`
+The period-aligned X-clocks counter modes measure A-rise → B-rise (Y=%00). When several cells
+watch one signal pin via relative-input routing, routing the **A-input only** (`P_MINUS*_A`)
+**hangs**: each neighbour's B-input stays on its own idle pin, which never rises, so the window
+never closes and IN never asserts. Routing **both** inputs (`P_MINUS*_A | P_MINUS*_B`) works.
+*Proof:* `test70-f187-f192-concurrent-routing` — ~1 MHz NCO on P0 → P2 (jumper); rig phase
+(mode %10010, A-only) proved all four cells' A-inputs LIVE (ticks≈199_850 for 1000 rises); then
+**PASS A (A-only) → P3 TICKS / P4 HIGHS / P5 PERIODS all TIMEOUT**, **PASS B (A|B) → all READY**
+(ticks=2_000_000, highs=1_000_000, periods=10_000, freq=1_000_000 Hz). A-routing byte-identical
+across passes + proven A-liveness ⇒ the missing B-input is the sole cause. *Date:* 2026-07-04.
+*Log:* `logs/debug_260704-125420.log`. *Grounds:* corrects F-187 (A-only); closes F-192. Agrees
+with the Silicon Doc ("B can be tied to the A pin for single-pin measurement"), the working
+`fb_measfreq2P` donor, and the released P2AN004 companion (`P_MINUS1_A | P_MINUS1_B`). *Applied:*
+`smart-pin-10110/10111` YAML + IOSP ch15 §15 prose patched to route both inputs.
+
+### EF-018 · Signed ADDS/SUBS/CMPS C-flag = TRUE SIGN (overflow-corrected), not bit-31 — `CONFIRMED`
+On signed overflow the stored 32-bit result's bit 31 disagrees with the full-precision sign; silicon
+sets C to the TRUE overflow-corrected sign — NOT bit 31, and NOT a signed-overflow flag. *Proof:*
+`test71-signed-cflag-truesign` — six deliberately-overflowing cases, measured C = `0,1,0,1,1,0`, each
+matching the true sign and OPPOSITE the bit-31 value: e.g. ADDS $7FFFFFFF+$1 → C=0 (result $80000000,
+bit31=1); ADDS $80000000+$FFFFFFFF → C=1 (result $7FFFFFFF, bit31=0); SUBS/CMPS likewise. *Date:*
+2026-07-04. *Grounds:* upgrades F-165 (adds/subs/cmps "true sign" wording) from documentary to empirical.
+
+### EF-019 · Reordered smart-pin init preserves NCO phase-lock and sync-serial gapless streaming — `CONFIRMED`
+The universal-order reorder (enable BEFORE WYPIN) does not disturb (a) a phase-locked NCO pair or
+(b) sync-serial continuous double-buffering. *Proof (a):* `test72-nco-phaselock` — two NCOs set up with
+the reordered init, 90° loaded via WXPIN, measured with mode %10011 through input routing (test70/F-192
+machinery): period T=2000 clks exact, A→B offset **dead-stable at 1580 clks (0.79 T) across 4 repeats,
+spread 0** ⇒ the pair starts and stays locked. *Proof (b):* `test73-syncserial-gapless` — %11100
+continuous TX, reordered prime-after-enable: steady inter-word cadence 1584/1584/1592/1600 clks
+(spread 16 ≈ one 8-bit word-time) ⇒ gapless double-buffer. *Date:* 2026-07-04. *Grounds:* closes the
+F-139 residual hardware checks (the reorder was ratified order-insensitive by test61/EF-011; these two
+special cases were flagged for a hardware look). *Note:* the phase read 0.79 T vs the ideal 0.75 T — a
+fixed ~4% measurement/edge-definition offset, NOT drift (the zero spread is the phase-lock evidence).
+
 ---
 
 ## Open / pending empirical questions

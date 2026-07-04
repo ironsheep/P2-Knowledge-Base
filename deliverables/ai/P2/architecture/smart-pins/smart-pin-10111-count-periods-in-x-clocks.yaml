@@ -91,14 +91,17 @@ code_examples:
         window_clks := (_clkfreq / 1000) * window_ms
         
         ' Three cells, same period-aligned window, started together for matched timing.
-        ' The signal is on pin_base+0 only; the other two cells watch it via A-input
-        ' routing (P_MINUS1_A / P_MINUS2_A), so no extra wiring and the pins stay free.
+        ' The signal is on pin_base+0 only; the other two cells watch it via A+B input
+        ' routing (P_MINUS1_A | P_MINUS1_B / P_MINUS2_A | P_MINUS2_B), so no extra wiring
+        ' and the pins stay free. Route BOTH inputs: the period-aligned window closes on a
+        ' B-rise (Y=%00 = A-rise to B-rise), so routing A alone leaves B on the cell's idle
+        ' own-pin -- IN never rises and the REPEAT UNTIL below hangs.
         ' Pin 20: count complete A-periods within the window
         pinstart(pin_base+0, P_COUNTER_PERIODS, window_clks, %00)
         ' Pin 21: measure actual elapsed ticks (>= window_clks, period-extended)
-        pinstart(pin_base+1, P_COUNTER_TICKS | P_MINUS1_A, window_clks, %00)
+        pinstart(pin_base+1, P_COUNTER_TICKS | P_MINUS1_A | P_MINUS1_B, window_clks, %00)
         ' Pin 22: measure total clocks A was high during the same window
-        pinstart(pin_base+2, P_COUNTER_HIGHS | P_MINUS2_A, window_clks, %00)
+        pinstart(pin_base+2, P_COUNTER_HIGHS | P_MINUS2_A | P_MINUS2_B, window_clks, %00)
         
         repeat
           ' Wait for all three measurements to complete

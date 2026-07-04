@@ -63,7 +63,7 @@ code_examples:
           repeat until pinread(base_pin+0) and pinread(base_pin+1)
           ticks    := rdpin(base_pin+0)          ' Actual elapsed clocks (>= window_clks)
           highs    := rdpin(base_pin+1)          ' Clocks A was high during window
-          duty_pct := (highs * 100) / ticks      ' Exact duty cycle
+          duty_pct := MULDIV64(highs, 100, ticks) ' Exact duty cycle (64-bit; avoids overflow)
           debug("Duty: ", udec(duty_pct), "%")
       
       DAT

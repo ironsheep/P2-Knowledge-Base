@@ -224,7 +224,15 @@
 > **APPLIED 2026-06-20 (provable part):** replaced the one-line X/Y/Z stubs with the full Silicon-confirmable register layer — WXPIN config word (D[15] host/device, D[14] FS/LS, D[13:0] baud = 16-bit sysclk fraction, two MSBs 0), WYPIN line-state D-values (0=IDLE, 1=SE0, 2=K, 3=J, 4=EOP, $80=SOP) + packet-send protocol, the 16-bit RX status word (all 10 documented bit-fields), and per-pin IN semantics (odd/DP = TX-buffer-empty; even/DM = RX-status-change; C = RX error). All WXPIN/WYPIN/RDPIN issued on the lower/even pin. Authority: Silicon `p2-documentation.txt:8886-9006` (verbatim). **STILL OPEN (Chip-gated):** logged an in-file `open_questions:` block — RX analog front-end / line-state detector thresholds / any scope-style filter taps are NOT in Silicon and remain in the expert queue. This finding stays PARTIAL.
 - The USB-host/device mode carries no register detail. **Add the Silicon-Doc-confirmable layer now:** WXPIN config word (D[15]=host/device, D[14]=FS/LS, D[13:0]=baud), WYPIN line-state D-values (0=IDLE…$80=SOP), RX 16-bit status word, per-pin IN semantics (odd/DP = TX-buffer-empty, even/DM = RX-status-change). **Authority:** Silicon `p2-documentation.txt:8886–8960`. **Gated remainder:** any figure not in Silicon (e.g. scope-style filter taps) stays in the expert queue (Chip). (IOSP RA-38/40/42/43/46/47.)
 
-### G-005 — `architecture/smart-pins/smart-pin-11110.yaml` (async TX) omits the first-byte low-glitch gotcha — `NEEDS-HW-CONFIRM — gotcha RECORDED 2026-06-20 (OPEN pending hardware)`
+### G-005 — `architecture/smart-pins/smart-pin-11110.yaml` (async TX) omits the first-byte low-glitch gotcha — `DONE (2026-07-04) — HW-CONFIRMED NOT-OBSERVED (EF-016)`
+> **CLOSED 2026-07-04 from existing hardware evidence.** The "Batch 2" hardware confirmation this finding was
+> waiting on **already ran** — `test51b-asynctx-firstbyte-glitch-wired` (RA-19, 2026-06-17, ledger **EF-016**):
+> over a real wired loopback (TX P0 → RX P2) the cold first byte arrived **clean** with no settle frame and no
+> preclear, for both `$A5` and `$01`. The gotcha did **not** reproduce. The register entry was stale (still
+> "OPEN pending hardware") while the empirical answer was on the ledger. **Applied:** reframed the
+> `gotchas.first_byte_low_glitch` block in `smart-pin-11110-async-serial-transmit.yaml` from an asserted
+> symptom + `NEEDS-HW-CONFIRM` to **HW-CONFIRMED NOT-OBSERVED** (community lore, not reproduced; the `$FF`
+> pre-clear is optional belt-and-suspenders, not a rule). No new test needed.
 > **APPLIED 2026-06-20 (recorded as attributed gotcha):** added a `gotchas.first_byte_low_glitch` block to `smart-pin-11110-async-serial-transmit.yaml` — symptom (first byte after enable may glitch the line low), the harmless `WYPIN $FF` pre-clear workaround, attribution (community-credited to Ray Rodrick), and explicit `status: NEEDS-HW-CONFIRM` pointing at IOSP verification Batch 2 (todo #53 / RA-19). **STAYS OPEN** — not in any primary source and not compile-verifiable; the register entry remains NEEDS-HW-CONFIRM until the Batch 2 hardware run confirms it.
 - Async-serial TX drops the line low for the first byte after enable; the harmless `$FF` pre-clear workaround is well-attested (community-credited to Ray Rodrick). Not compile-verifiable (runtime/pin behavior). **Add as an attributed gotcha**, flagged for hardware confirmation in IOSP verification **Batch 2** (todo #53 / RA-19). **Authority:** community + pending-hardware.
 
@@ -254,6 +262,7 @@
 - **DAC %00011:** simple init sites (low risk) — bundle with %00010 for one verified pass.
 - **sync-serial %11100 + spi-implementation-guide:** `stream_continuous` *primes the shifter* before enable then *loads the buffer* after — the documented double-buffered gapless-TX technique; NOT ratified by test60-63 (which covered async TX %11110, a different mode).
 > **Note:** these are ORDER-INSENSITIVE for correctness (Y is a value, not a trigger; test61 NCO / test63 DAC = PASS-SAFE both orders) — reordering is purely pedagogical consistency. Verify each special-case (ideally a quick hardware/compile check that the reordered quadrature still phase-syncs and the double-buffer still streams gaplessly) before applying. async-TX %11110 needs no change (no WYPIN-before-enable).
+> **HARDWARE-VERIFIED 2026-07-04 (🏆, ledger EF-019):** the two flagged special cases confirmed on silicon under the reordered init. `test72-nco-phaselock` — a phase-locked NCO pair (90° via WXPIN): period T=2000 clks exact, A→B offset dead-stable at 1580 clks across 4 repeats (spread 0) ⇒ still phase-locked. `test73-syncserial-gapless` — %11100 continuous TX, prime-after-enable: steady inter-word cadence ≈ one word-time (spread 16) ⇒ still gapless double-buffering. Residual hardware checks CLOSED.
 - **Where:** `deliverables/ai/P2/architecture/smart-pins/{smart-pin-00110-nco-frequency,smart-pin-00111-nco-duty,smart-pin-00010-dac-16bit-pseudo-random-dither,smart-pin-00011-dac-16bit-pwm-dither,smart-pin-11100-sync-serial-transmit,spi-implementation-guide}.yaml`.
 - **Origin:** F-135 set-wide sweep, 2026-06-18 — scoped down on reading the actual examples (special-cases that don't fit a blind universal-order swap).
 
@@ -377,6 +386,7 @@
 
 ### F-165 — signed-flag family C-flag wording: "correct sign" standardized to "true sign" + `adds.yaml`/`subs.yaml` "bit 31" gloss tightened — `DONE`
 > **APPLIED 2026-06-25 (Assembly-manual release-gate follow-on).** Standardized the signed add/subtract/compare/sum family C-flag wording from "correct sign" to **"true sign"** (the manual's Chapter-3 lead term; also more arresting to readers) across `adds.yaml subs.yaml cmps.yaml cmpsx.yaml sumc.yaml sumnc.yaml sumz.yaml sumnz.yaml tjv.yaml`. Additionally tightened `adds.yaml`/`subs.yaml`, whose C field glossed the value as "i.e. bit 31 of the result" — imprecise for a single overflowing op (the truncated bit 31 is the wrong sign on overflow) — to **"the sign of (D ± S) at full precision (overflow-corrected)"**, matching the manual's audit-verified Chapter-3 definition and the family convention (CMPS = "true sign of A−B"). The core fact (C is the result's SIGN, **not** a signed-overflow indicator) was already correct; this is a terminology + precision alignment. **Note:** the exact single-instruction-overflow behavior (bit 31 vs overflow-corrected) rests on the documentary Chapter-3/Silicon framing; a hardware confirmation could make it empirical if desired. Verified: `validate-yaml-syntax` + `validate-crossref-keys` clean.
+> **HARDWARE-VERIFIED 2026-07-04 (🏆, ledger EF-018):** `test71-signed-cflag-truesign` ran six deliberately-overflowing ADDS/SUBS/CMPS cases (where the stored result's bit 31 disagrees with the true sign). Measured C = `0,1,0,1,1,0` — every case the **overflow-corrected true sign**, opposite the bit-31 value. The documentary wording is now empirical; C is confirmed NOT bit-31 and NOT a signed-overflow flag.
 
 ---
 
@@ -763,6 +773,9 @@
 > - YAML `smart-pin-10101/10110/10111-*.yaml` — freq + duty compute lines.
 > Code-line (K=76) + inline-ASCII gates pass; crossrefs validate. Ships: manual in the IOSP
 > release; YAML in the next KB release-yamls pass.
+> **STRAGGLER FIXED (2026-07-04):** the F-192 pass surfaced one duty line this sweep had missed —
+> `smart-pin-10101-count-ticks-in-x-clocks.yaml:66` still read `(highs * 100) / ticks`. Converted to
+> `MULDIV64(highs, 100, ticks)` to match the rest of the sweep (same authority, same overflow class).
 
 ### F-187 — concurrent-measurement example silently needs the signal on every pin — `DONE (2026-07-01)`
 > **CONFIRMED (Chip Gracey 🏆; routing constants compiler-verified).** The 3-cell (and 2-cell)
@@ -772,6 +785,10 @@
 > signal pin via A-input routing without consuming pins. **Added the single-pin routing
 > technique** (`P_MINUS1_A` / `P_MINUS2_A`) to IOSP §15.4 and to the `smart-pin-10110/10111`
 > YAML examples, with signal placement clarified.
+> **CORRECTION (2026-07-04, F-192):** this A-only routing was **incomplete** — the period-aligned modes also
+> need the **B-input** routed to the observed pin (`| P_MINUS*_B`), or the window never closes and the cell
+> hangs. Proven on P2 silicon (see **F-192**). All sites patched to `P_MINUS*_A | P_MINUS*_B`. Chip's guidance
+> ("watch one pin via input routing") was right; the mistake was routing only A, not both A and B.
 
 ### F-188 — same 32-bit overflow class in OUTPUT-mode unit conversions — `DONE (2026-07-02)`
 > **CONFIRMED (range analysis + arithmetic; same MULDIV64 class as F-186).** The
@@ -807,7 +824,25 @@
 > note our copy lacks). The manual-side twin shipped in the Streamer Guide (§10.4, CHANGELOG
 > "Unreleased"). Validate clean. Ships in this release-yamls patch.
 
-### F-192 — concurrent frequency/period cells routed A-only (F-187) may also need B routed — `NEEDS-VERIFICATION`
+### F-192 — concurrent frequency/period cells routed A-only (F-187) also need B routed — `DONE (2026-07-04, hardware-verified 🏆)`
+> **CONFIRMED — HARDWARE-VERIFIED on P2 silicon (2026-07-04).** The F-187 A-only routing hangs;
+> the neighbour cells need `| P_MINUS*_B` too. Empirical proof: `test70-f187-f192-concurrent-routing.spin2`
+> (IOSP `audit/verification-tests/`) drove a ~1 MHz NCO signal on P0 → P2 (jumper) and configured three
+> neighbour cells (P3 TICKS, P4 HIGHS, P5 PERIODS) tapping P2 via `P_MINUS*_A`. A rig-integrity phase
+> (mode `%10010`, A-input only) proved **all** cells' A-inputs LIVE (ticks≈199_850 for 1000 rises).
+> Then: **PASS A (A-only) → all three neighbours TIMEOUT (0)**; **PASS B (A|B) → all three READY with exact
+> values** (ticks=2_000_000, highs=1_000_000, periods=10_000, freq=1_000_000 Hz). Since the A-routing is
+> byte-identical between passes and A-liveness is proven, the sole cause of the hang is the missing B-input:
+> these X-clocks modes (`%10101/%10110/%10111`, Y=%00) are period-aligned and close their window on a
+> **B-rise**, which never comes if B stays on the cell's idle own-pin. Matches the Silicon Doc, the working
+> `fb_measfreq2P` donor, and the already-released **P2AN004** companion (which correctly ships
+> `P_MINUS1_A | P_MINUS1_B`). Log: `logs/debug_260704-125420.log`.
+> **APPLIED (yaml + manual) 2026-07-04:** added `| P_MINUS*_B` at every A-only concurrent-measurement site —
+> `smart-pin-10111-count-periods-in-x-clocks.yaml` (:99 TICKS, :101 HIGHS + comment), `smart-pin-10110-count-highs-in-x-clocks.yaml`
+> (:59 TICKS + comment), and IOSP `chapter-15-period-frequency.md` §15 prose (the routing alternative + its
+> parenthetical, now noting the hardware verification). Evidence replicated to the empirical ledger
+> (`engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`). Manual fix ships
+> in the next IOSP release. **Original (superseded) NEEDS-VERIFICATION note follows.**
 > **NEEDS-VERIFICATION (Silicon Doc + working donor vs. the F-187 resolution — needs a hardware spot-check).**
 > Surfaced by the P2AN004 (measurement app-note) release-gate audit. **F-187** added the single-pin
 > concurrent-measurement routing `P_MINUS1_A` / `P_MINUS2_A` (A-input only) to IOSP §15.4 and the

@@ -54,9 +54,11 @@ code_examples:
         window_clks := (_clkfreq / 1000) * window_ms
       
         ' Start both cells on the same window; matched timing is essential.
-        ' Signal is on base_pin+0; cell +1 watches it via P_MINUS1_A (no extra wiring).
+        ' Signal is on base_pin+0; cell +1 watches it via P_MINUS1_A | P_MINUS1_B
+        ' (route BOTH inputs -- the period-aligned window closes on a B-rise, so
+        ' routing A alone leaves B on the cell's idle own-pin and IN never rises).
         pinstart(base_pin+0, P_COUNTER_HIGHS, window_clks, %00)
-        pinstart(base_pin+1, P_COUNTER_TICKS | P_MINUS1_A, window_clks, %00)
+        pinstart(base_pin+1, P_COUNTER_TICKS | P_MINUS1_A | P_MINUS1_B, window_clks, %00)
       
         repeat
           repeat until pinread(base_pin+0) and pinread(base_pin+1)
