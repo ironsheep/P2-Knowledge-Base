@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-193`**
+**Next finding ID: `F-194`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -860,6 +860,36 @@
 > A-only routing actually hangs (vs. some period-detection path that tolerates an idle B) before
 > editing. **P2AN004 is unaffected** — R2 already routes both A and B (correct either way), so this is
 > non-blocking for that release. Cross-ref **F-187**.
+
+### F-193 — IOSP ch05 falsely claims no single instruction waits on event+timeout; teaches a busy-poll — `APPLIED across KB + IOSP + PASM2 (🏆 HW-PROVEN EF-020); releases pending (phase-1 YAML, phase-2 doc patches)`
+> **CONFIRMED (documentary + hardware-in-progress).** IOSP `chapter-05-working-with-smart-pins.md` §"Wait with a
+> timeout" stated **"No single instruction waits on an event *and* a timer at once, so poll both…"** and taught a
+> busy-poll `.race` loop — contradicting the section's own preceding "true stall" pitch (poll-spin burns cycles/power).
+> The claim is **false**: a **`SETQ` (future CT target) immediately before `WAITSEx`** makes that one stalling
+> instruction release on whichever comes first (event or deadline), reporting which via `WC` (C=1 timeout, C=0 event).
+> This is already documented in our KB (`waitse1-4.yaml` + the 14-instruction wait family) and partly in the PASM2
+> manual. Origin: forum thread (evanh + TonyB silicon testing) surfaced the related no-SETQ corner case.
+> **APPLIED (IOSP) 2026-07-04:** rewrote §"Wait with a timeout" — deleted the false sentence, led with the
+> `SETQ`+`WAITSE1 WC` atomic stall-with-timeout (noting C≡Z, so one flag suffices; and that the idiom generalizes to
+> the whole `WAIT*` family), and **kept** the double-poll `.race` loop as a labeled "when you must do work while
+> waiting" alternative. Ships next IOSP release.
+> **Hardware proof:** `test74-waitse-setq-timeout.spin2` (P0, edge-based, single cog) — event-wins → C=0,
+> timeout-wins → C=1, no-SETQ `WCZ` → C=Z=0. **PROVEN 2026-07-04 (🏆 EF-020)** — all three cases pass. (First run had
+> a rig bug: pin P16 has external hardware and held the level high; moved to P0 + a discrete rising-edge event.)
+> **NOW QUEUED (proof landed):**
+> - **(a) No-SETQ free-clear corner case — APPLIED (KB) 2026-07-04.** Added a `no_setq_behavior:` field (cited to
+>   EF-020, not the forum) to **all 15** timeout-family wait YAMLs: `waitatn, waitct1-3, waitfbw, waitint, waitpat,
+>   waitse1-4, waitxfi, waitxmt, waitxrl, waitxro`. **Scope catch:** `waitxmt` was initially missed because a grep
+>   for "SETQ…timeout" failed on its folded block-scalar (the two words landed on separate lines) — re-derived the
+>   family from the manual's bullet-map + a folding-safe scan (15, not 14). `waitx` (fixed-delay) correctly excluded.
+>   Crossref validates clean. Ships in the phase-1 YAML release.
+> - **(b) PASM2-reference — APPLIED (manual) 2026-07-04.** In `instructions-w.md`, added a uniform bullet to all
+>   10 event-wait entry headers (15 instructions incl. `WAITXMT`) giving the full SETQ-arming how-to **and** the
+>   no-SETQ free-clear behavior, and added "(prior SETQ = CT timeout)" to the 8 Operation lines that lacked it
+>   (`WAITFBW/INT/PAT/SE/XFI/XMT/XRL/XRO`; `WAITATN`/`WAITCTn` already had it — not doubled). Ships in the phase-2
+>   PASM2 patch.
+> - **NOT for IOSP:** the no-SETQ free-clear detail is too low-level for the user guide; it lives in the PASM2 ref + KB.
+> **Reject** a "WC-without-SETQ" lint — the free-clear idiom is intentional; a lint would false-positive.
 
 ---
 

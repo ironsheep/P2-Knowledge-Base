@@ -223,6 +223,10 @@ def get_category_prefix(rel_path: Path) -> str:
     if 'tools' in parts:
         return 'Tools'
 
+    # Handle application notes (companion YAMLs for the app-note documents)
+    if 'application-notes' in parts:
+        return 'AppNote'
+
     # Default: use first significant directory
     for part in parts:
         if part not in ['P2', '.']:

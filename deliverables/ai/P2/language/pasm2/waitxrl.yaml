@@ -1,5 +1,6 @@
 instruction: WAITXRL
 syntax: WAITXRL {WC|WZ|WCZ}
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon (empirical finding EF-020)."
 brief_description: Wait streamer rollover LUT
 category: Event
 description: >-

@@ -146,6 +146,17 @@ F-139 residual hardware checks (the reorder was ratified order-insensitive by te
 special cases were flagged for a hardware look). *Note:* the phase read 0.79 T vs the ideal 0.75 T — a
 fixed ~4% measurement/edge-definition offset, NOT drift (the zero spread is the phase-lock evidence).
 
+### EF-020 · SETQ+WAITSEx = single-instruction event-OR-timeout; no-SETQ WCZ is a free flag-clear — `CONFIRMED`
+A `SETQ` (future CT target) immediately before an event-wait makes that ONE stalling instruction release on whichever
+comes first, reporting which via `WC`: event first → C=0, timeout first → C=1. With **no** preceding SETQ, no timer is
+armed, so the event is always "first" and `WAITSEx WCZ` clears **both** C and Z (a legitimate free-flag-clear idiom).
+*Proof:* `test74-waitse-setq-timeout` (P0, single cog, rising-edge event) — event-wins (edge before wait, far SETQ)
+**C=0**; timeout-wins (P0 held low, near SETQ) **C=1**; no-SETQ `WCZ` (edge) **C=Z=0**. *Date:* 2026-07-04. *Grounds:*
+refutes IOSP ch05's "no single instruction waits on an event and a timer at once" (F-193); confirms the forum
+(evanh/TonyB) no-SETQ corner case. Mechanism is shared by the 14-instruction wait family (WAITSE1-4, WAITCT1-3,
+WAITATN, WAITFBW, WAITINT, WAITPAT, WAITXFI, WAITXRL, WAITXRO). *Rig note:* first run used P16, which has external
+hardware that held the level high (no-event case failed); moved to P0 + a discrete rising edge for determinism.
+
 ---
 
 ## Open / pending empirical questions

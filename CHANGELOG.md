@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.0] - 2026-07-04
+
+**Application-note companion data now discoverable, plus hardware-verified smart-pin and event-wait accuracy.**
+
+### Added
+- Application-note companion data (P2AN001–004) discoverable in the knowledge base.
+- Event-wait instructions (WAITSE, WAITCT, WAITPAT, WAITATN, and the rest): flag behavior documented for both the SETQ-armed timeout and the no-timeout free-clear.
+
+### Changed
+- Concurrent single-signal smart-pin measurement (frequency, period, duty) routes both A and B inputs.
+
 ## [1.13.3] - 2026-07-03
 
 **ADC scope trigger register accuracy**

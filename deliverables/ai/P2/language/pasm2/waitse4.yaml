@@ -1,5 +1,6 @@
 instruction: WAITSE4
 syntax: WAITSE4 {WC|WZ|WCZ}
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon (empirical finding EF-020)."
 brief_description: Wait for SE4 event flag
 category: Event
 description: Wait for SE4 event flag, then clear it. WAITSE4 waits for selectable event 4 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE4 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE4. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE4 event flag is set whenever the configured selectable event 4 occurs. The flag is cleared by SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 execution.
