@@ -1,5 +1,13 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.2 (2026-07-04)
+
+**Event-wait timeout documentation** — the event-waiting instructions document how a preceding SETQ arms a hardware timeout, hardware-verified on P2 silicon.
+
+### Changed
+- The event-wait instructions (WAITSE1–WAITSE4, WAITCT1–WAITCT3, WAITPAT, WAITATN, and the WAITxxx event family) document the SETQ-armed timeout: a System-Counter target loaded into SETQ immediately before the wait bounds it, so a single instruction stalls on its event or the deadline — whichever comes first — with C/Z reporting which. With no preceding SETQ the wait carries no timeout, and its WC/WZ/WCZ form clears both flags as a one-instruction flag-clear.
+- The affected `Operation:` lines carry the timeout condition (`C/Z = timeout`, with the prior SETQ supplying the System-Counter deadline).
+
 ## v3.1.1 (2026-06-29)
 
 **Execution-model and instruction-reference refinements** — a clearer cog/LUT/hub model and the streamer's role in Chapter 1, better guidance on reading an instruction entry, and an uppercase style for mnemonics in prose.

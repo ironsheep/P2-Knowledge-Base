@@ -22,7 +22,7 @@ table still carry the older "shape" and await a separate refresh.)*
 
 | Publication | Slug | State |
 |-------------|------|-------|
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ **Released v3.1.1** (503pp, 2026-06-29) — Ch.1 execution-model refinements + §1.4.4 streamer + CMP Operation: line; uppercase mnemonics in prose; chip review outstanding (external) |
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ **Released v3.1.2** (505pp, 2026-07-04) — F-193 patch: event-wait instructions document the SETQ-armed timeout (EF-020, HW-verified); prior v3.1.1 Ch.1 execution-model refinements; chip review outstanding (external) |
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ **Released v3.0.1** (162pp, 2026-06-25) — accuracy re-audit (all examples pnut-ts-certified) + Plex typography refresh + example-library ZIP; both prior deferrals resolved; chip review outstanding |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ **Released** — both reviews complete; presentation-class |
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ **v1.0.1** (396pp) released 2026-07-04 — hardware-verified patch (Ch.5 event-wait timeout F-193 + Ch.15 A+B routing F-192); maiden v1.0.0 2026-07-03; cross-ref filter pilot; 15-program example ZIP ("Blue Book") |
