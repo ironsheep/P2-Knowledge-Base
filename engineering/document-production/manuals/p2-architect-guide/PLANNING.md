@@ -90,6 +90,17 @@ orientation ends. The pure newcomer is *Getting Started*'s audience, not this bo
 > now the live architecture, fleshed out below. **Chapter numbering / titles in Acts I & III are PROPOSED —
 > Stephen shapes them interactively (§16.3); the Act boundaries and the Act II content are settled.**
 
+> **UPDATE 2026-07-05 — content seeded, structure emerging.** Stephen dictated **12 real P2 projects**
+> (`act1-seed-transcription.md`); they were consolidated into a **four-phase Act I spine** (decide → learn the
+> hardware → build → ship). From that: **Act I Chapter 1 "Getting a Project Off the Ground" is drafted**
+> (first draft, in the opus-master), and **Act III Chapter 3 "The Same Work, with an Agent" is forecast** as a
+> skeleton mirroring that spine item-for-item, with 7 `[Stephen to add]` slots. **Emergent structure is
+> currently ONE chapter per act** — Ch1 (Act I) / Ch2 = the existing "Thinking in P2" (Act II) / Ch3 (Act III)
+> — deliberately left to split later if content grows (Act I candidate splits: identify / bring-up / build-ship;
+> Act III mirrors). Both KB worked derivations map to real projects on the list: #5 imaging-tile =
+> streaming-pipeline (data-plane), #9 robot-dog = robot-dog (control-plane). The tables below remain the
+> reference for the *fuller* multi-chapter option if a split is chosen.
+
 **The altitude gradient survives the split, at a higher entry point.** Orientation used to carry the reader
 from "picture the chip" up to "think like an architect." Now *Getting Started* owns the comfort-building base,
 and this book begins already at the design desk. The gradient within the book runs **concrete → rigorous →
@@ -337,19 +348,14 @@ by the link-out discipline (§2).
 - **Platform:** ride the shared `p2kb-platform-*` stack + thin local overlay (consistent with the unification
   effort); shared common cover.
 
-## 14. Next steps (post-split re-cut, 2026-07-04)
-1. ✅ D1–D6 resolved (§11); title LOCKED (D1); three-act architecture fleshed out (§5); AG-10–13 scope
-   decisions reconciled (§17).
-2. **Re-scope the derivative docs** to the design/realization book: `creation-guide.md` (chapter specs → the
-   three acts + source map §6 + the capstone-fidelity/anti-prescription gates), `voice-guide.md` (the altitude
-   gradient re-expressed concrete→rigorous→practical across the acts; drop the orientation-comfort register that
-   left with Getting Started), `CHANGELOG.md` (open a v0.2.0 "design-book re-cut" entry).
-3. **Trim the opus-master** — remove the migrated orientation Chs 1–3 (safely shipped in *Getting Started*
-   v1.0.0); retain Ch4 as Act II.
-4. **Augment Act II** against the current 15-entry decomposition layer (§6a) — capstone-fidelity re-audit.
-5. **Author Act I** interactively with Stephen (§16.3) — the front-end engineering process. Then **Act III**,
-   pulling repo evidence of where we actually used agents.
-6. Apply the remaining ARCH walkthrough fixes (AG-05/06/07/08 — §17) as their chapters are authored/refreshed.
+## 14. Next steps (updated 2026-07-05)
+1. ✅ D1–D6 resolved (§11); title LOCKED (D1); three-act architecture fleshed out (§5); AG-10–13 reconciled (§17).
+2. ✅ **Trimmed** the migrated orientation Chs 1–3; **augmented Act II** against the 15-entry layer (§6a); ✅ CHANGELOG v0.2.0 opened.
+3. ✅ **Captured 12 projects** + consolidated the **Act I spine**; ✅ **drafted Act I Ch1**; ✅ **forecast Act III Ch3** (skeleton, 7 slots).
+4. **← STEPHEN, next:** **enrich Act I Ch1** (confirm the `[?]` facts — motor rpm/"dokko", "Click", ~30-channel; add detail/voice) and **fill the 7 Act III `[Stephen to add]` slots** (the lived AI usage per phase, and any of the 12 projects' AI story not yet inferred).
+5. **Re-scope the derivative docs** to the design/realization book (this was deferred pending chapter shape, now unblocked once §4 firms up): `creation-guide.md` (chapter specs → three acts + source map §6 + capstone-fidelity/anti-prescription gates), `voice-guide.md` (altitude gradient re-expressed concrete→rigorous→practical; drop the orientation-comfort register that left with Getting Started), **front-matter.md** (still says "four chapters / short orientation" — false; update to the three acts + Getting-Started prerequisite).
+6. **Decide chapter splits** (Act I: one chapter vs identify / bring-up / build-ship; Act III mirror) — *after* the content firms, per Stephen's content-first method.
+7. Apply the remaining ARCH walkthrough fixes (AG-05 connascence term / AG-06 "machine" word / AG-07 done / AG-08 Fig 5 — §17) as chapters are refreshed.
 
 ## 15. Future / candidate additions (PARKED — not up next, don't forget)
 

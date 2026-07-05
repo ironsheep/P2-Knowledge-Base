@@ -1,9 +1,12 @@
 # Act I Seed — The Project Process (transcription capture)
 
-**Status:** ACTIVE CAPTURE — started 2026-07-04. Raw dictation from Stephen + light structuring.
-This is the seed for **Act I** (the universal engineering process, agent-agnostic) and — mirrored
-item-for-item — the spine for **Act III** (how an AI helps with each of the same things).
-Not chapter prose yet; content first, chapter breakdown falls out later (Stephen's method).
+**Status:** CAPTURE COMPLETE (12/12) + spine consolidated + chapters seeded — 2026-07-05.
+Raw dictation from Stephen + light structuring. Seed for **Act I** (the pre-decomposition project
+process) and — mirrored item-for-item — the spine for **Act III** (how an AI helps with each).
+**Downstream (done):** the CONSOLIDATED SPINE below drove **Act I Ch1 "Getting a Project Off the
+Ground"** (drafted, opus-master) and the **Act III Ch3 "The Same Work, with an Agent"** forecast
+skeleton. This doc stays the source of truth for the project evidence + the spine; enrich here or
+in the chapters. Content-first — chapter breakdown still emergent (currently one chapter per act).
 
 > **Framing (Stephen, 2026-07-04).** Act I is framed *for the reader* as a **real project you're building
 > to ship** — a commercial product, a contracted job, or a formal project you'll sell; any given reader's
