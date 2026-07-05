@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Thinking in Cogs, Pins, and Forces\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.1.0 — First Draft\par}
+{\large\color{blue}Version 0.2.0 — Design-Book Draft (for review)\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -36,17 +36,16 @@
   colbacktitle=gray!15,
   coltitle=black
 ]
-\textbf{A short orientation to the Propeller 2 — and how to think in its parallel grain.}
+\textbf{From a project idea to a realized build — designing the system, decomposing it onto the P2, and doing it with an AI agent's help.}
 
 \vspace{0.1cm}
 {\footnotesize
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{The Four Chapters}
+\textbf{The Three Acts}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Ch 1 — Meet the Propeller 2
-\item Ch 2 — Reading P2 Code
-\item Ch 3 — Putting It to Work
-\item Ch 4 — Thinking in P2 (Functional Decomposition)
+\item Act I — Getting a Project Off the Ground
+\item Act II — Thinking in P2 (Functional Decomposition)
+\item Act III — The Same Work, with an Agent
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -110,20 +109,23 @@ This guide stands on work done by others:
 
 ## Sources
 
-This guide is a distillation, not a primary source. It draws on, and points you back to, these trusted P2 reference documents:
+This guide is a distillation, not a primary source. It draws on, and points you back to, these trusted P2 documents:
 
-- **The Parallax Propeller 2 Documentation v35 - Rev B/C** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind Chapter 1.
-- **The Spin2 Reference Manual and the P2 Assembly Language Reference** — the language facts behind Chapter 2 ("Reading P2 Code").
-- **The P2 reference manuals** (Assembly Language, I/O & Smart Pins, Streamer, Debug) — the depth this orientation deliberately leaves to them (see *Where to Next*).
+- **Getting Started with the Propeller 2** — this guide's companion and **prerequisite**; it teaches the orientation (the chip, and how to read its code) that this guide assumes.
+- **The Parallax Propeller 2 Documentation (v35, Rev B/C)** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind the hardware design of Act I and the decomposition of Act II.
+- **The P2 reference manuals** (Assembly Language, I/O & Smart Pins, Streamer, Debug) — the depth this guide deliberately leaves to them (see *Where to Next*).
 
 ## How to Use This Guide
 
-This is a short, narrative guide, not a reference manual — it is meant to be *read*, and it is built so different readers can enter at different doors. Four paths:
+This is a short, narrative guide, not a reference manual — it is meant to be *read*. It assumes you have already met the Propeller 2; if you haven't, its companion **Getting Started with the Propeller 2** is the place to begin. This guide moves in **three acts**, and different readers can enter at different doors:
 
-- **New to the Propeller 2?** Read straight through: Chapter 1 builds the mental picture, Chapter 2 teaches you to *read* P2 code (so the examples ahead aren't a mystery), Chapter 3 puts it to work in real (compiling) code, and Chapter 4 — the decomposition method — is there when you're ready for it. Take the chapters in order; each earns the next.
-- **Coming from the Propeller 1?** You already own the model — and Spin2 will look familiar. Skim Chapter 1 following the bronze **"P1 note"** sidebars — they call out exactly what's *the same*, *changed*, or *new* on the P2 — skim Chapter 2 for what's new in the language, then jump to Chapter 4 for the decomposition method, using Chapter 3 as a hands-on refresher.
-- **Already writing P2 code?** Go straight to Chapter 4. It's the reason this guide exists: how to look at a whole machine and derive the right set of cooperating cogs and objects, rather than build an accidental sequential program on parallel silicon. Keep Chapters 1–3 as reference.
-- **An AI agent or tool?** Read this guide for the narrative and the mental model — the way an experienced P2 developer thinks. The P2 reference manuals carry the exhaustive, authoritative facts the design decisions rest on.
+- **Building a real system?** Read straight through. **Act I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Act II** derives the software architecture — which cog owns what, how the pieces talk. **Act III** walks the whole process again with an AI agent at your side.
+- **Already have a hardware design and need the software architecture?** Go straight to **Act II** (Chapter 2) — the functional-decomposition method — and use Act I as reference.
+- **Curious how an AI agent changes the work?** **Act III** (Chapter 3) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
+- **Coming from the Propeller 1?** Follow the bronze **"P1 note"** sidebars wherever a design decision differs from the P1.
+- **An AI agent or tool?** Read this guide for the reasoning — the way an experienced P2 developer thinks. The P2 reference manuals carry the exhaustive, authoritative facts the design decisions rest on.
+
+> *This is a **v0.2.0 design-book draft for review**: Act I Chapter 1 is a first draft, and Act III Chapter 3 is a forecast outline with authoring notes still visible in the text.*
 
 ## Conventions
 
