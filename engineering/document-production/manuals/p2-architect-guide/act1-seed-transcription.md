@@ -27,25 +27,86 @@ Not chapter prose yet; content first, chapter breakdown falls out later (Stephen
 
 ---
 
-## The emerging spine — things done *before* decomposition
-*(The concern list. Each becomes an Act I topic and an Act III "how AI helps" counterpart.
-**Process (Stephen 2026-07-04): capture ALL 12 projects first, then do the common-element analysis.**
-Rows A–K below are a head-start seeded from Project 1 only; the real consolidation across all 12 —
-merging duplicates, settling granularity, ordering — happens AFTER capture is complete.)*
+## CONSOLIDATED SPINE — the pattern (analysis across all 12) — 2026-07-05
 
-| # | Concern (the thing I had to do) | Surfaced by (project) | Act II? | Notes |
-|---|---------------------------------|-----------------------|---------|-------|
-| A | Adopt & understand technology you didn't write (someone else's driver / IP) | BLDC | — | inherited Chip Gracey's BLDC control tech |
-| B | Research the problem domain & its user communities (who uses it, how they think about it) | BLDC | — | how motor/servo communities control motors |
-| C | Design a unifying, background-agnostic **interface** before implementing | BLDC | — | "first effort"; approachable from any motor/servo style |
-| D | Layer higher-level **convenience abstractions** over the primitives | BLDC | — | 2WD + steering hides "two separate motors" |
-| E | Adapt the new interface onto the **existing driver** + implement control | BLDC | partial | the bridge/impl work |
-| F | Support **multiple instances of one driver** (sharing / replication) | BLDC | ⚠ Act II | two instances of the same motor driver — ties to shared-bus-replication |
-| G | Absorb a **requirements change / new hardware variant** mid-project | BLDC | — | request to support a different motor type |
-| H | **Characterize hardware empirically** → turn findings into features & limits | BLDC | — | wheels vs motor rpm vs battery sizes → became features |
-| I | Build **development-time observability** (a live status display) | BLDC | — | HDMI live per-wheel motor status while developing |
-| J | Select a **display** + rendering / font techniques | BLDC | — | find usable HDMI display + font/draw techniques (may merge with I; recurs on display projects) |
-| K | Produce **documentation** as a deliverable | BLDC | — | lots of writing, tool-assisted → strong Act III mirror |
+*The deduplicated concern list, clustered into the four phases every project moved through — all **before**
+the functional decomposition of Act II. This IS the pattern for **Chapter 1 (Act I)**, and — item for item —
+the spine of **Chapter 3 (Act III, "how AI helps")**. "Evidence" = projects that surfaced it (by #).
+"→II" flags a concern that *hands off into* Act II decomposition (the Act I→II boundary).*
+
+### PHASE A — Deciding what to build *(identify & frame the project)*
+- **A1 · Where the project comes from** — an interest, a contract/request, a community demo you saw, a chip
+  you couldn't stop thinking about. *(Evidence: all; explicit #2,#3,#4-YouTube,#5,#11,#12; the interest-vs-
+  contract blend.)*
+- **A2 · Feasibility up front** — what's *practical* vs. *possible* before committing (achievable frame
+  rate/speed; "60 fps is more than enough"). *(#5 the sharpest; #7 speed ceiling.)*
+- **A3 · Choosing peripherals & communications** — narrow (I²C/SPI) vs. broad; self-contained/no-code vs.
+  write-the-driver; by price point; for embedded-friendliness. *(#9 narrow-vs-broad, #12 price point +
+  self-contained, #6/#8 offload to a driver chip.)*
+- **A4 · The partitioning decision** — does the P2 do it, or pair it with a more capable **companion
+  device**? What runs where. *(#10 the whole project; #9 Pi-camera→embedded sensor.)*
+- **A5 · Scoping the features** — what will it actually do, and how far (text? graphics? rotation?). *(#2,#3,
+  #4; #6 how-far.)*
+
+### PHASE B — Learning the hardware *(bring-up)*
+- **B1 · Find the truth about the parts** — datasheets (hard to find; sometimes **in Chinese → translate**;
+  sometimes none → adapt example code); vendor code (partial, multi-language). *(#2,#3,#5,#8,#11; a
+  near-universal grind.)*
+- **B2 · Reverse-engineer** when there's no schematic/docs — study example code, reverse-engineer the comms.
+  *(#9 no schematics; #11 on-device firmware.)*
+- **B3 · Electrical realities** — level-shifting **at speed**, power. *(#3 the marquee case.)*
+- **B4 · Pin budget & pin map** — count the pins; when it won't fit / won't hand-wire → **design an adapter
+  board** (which sometimes *becomes a product*); decide the **pin layout**. *(#3 custom HUB adapter→Parallax
+  product; #6 pin reduction; #9 pin-layout decision.)* → the "Pins" of the subtitle.
+- **B5 · Mechanical / fabrication** — 3D-printed fixtures, mounting platforms, interface boards. *(#11 sensor
+  fixture + I²C board; #9 two rounds bolting P2 + voice sensor.)*
+- **B6 · Firmware-loaded devices** — build a **loader**, then talk to the on-device code. *(#11 the ToF.)*
+- **B7 · Bring-up instrumentation & hook-up** — the **logic analyzer** ("am I talking to it correctly? am I
+  getting output?"); eval/adapter rigs; **paired-device loopback rigs**; wiring / where-to-plug-in;
+  prototype the communication. *(logic analyzer: #2,#3,#7,#11; paired-P2 rig: #7; wiring: all.)*
+
+### PHASE C — Building the capability
+- **C1 · Design the interface (API)** — unify into one approachable interface reachable from any background;
+  and the insight that **layering new capability on your own driver *enriches* the API**. *(#1 unify motor
+  styles; #4 morphing-digits-atop-driver enriches API.)*
+- **C2 · Layer convenience abstractions** — hide the primitives (2WD hides two motors; servos behind a chip;
+  "it's just another font"). *(#1,#4,#6,#8.)* → partly **→II** (object modeling).
+- **C3 · Translate & digest reference code** — C→Python→Spin2 in your head; multi-source archaeology
+  (Arduino, NodeMCU); **code-generate data tables**. *(#3,#4 codegen,#9,#11 heavy transcription.)*
+- **C4 · Chase performance** — do what the reference drivers do, **but fast enough for the P2**; error-free
+  at speed. *(#3,#7; a signature Stephen theme.)*
+- **C5 · Characterize the hardware** — motors/wheels/batteries/servo-repeatability — and characterization
+  **becomes features & limits**. *(#1 batteries→features; #6 servo repeatability.)*
+- **C6 · Verify & certify** — checksums, round-trip verification, **logic-analyzer proof**. *(#7 round-trip;
+  #11 certified traces.)*
+- **C7 · Your own ceiling (honest)** — the math/expertise limit you hit alone (or the deep expertise that
+  makes one easy). *(#6 IK/math ceiling; #10 expertise-rich, research-light — the opposite pole.)*
+
+### PHASE D — Finishing & shipping
+- **D1 · The closing ritual (every project)** — document so it's **usable** → **post to the repo** →
+  **announce**. *(explicit #2; stated as done on all.)*
+- **D2 · Documentation assets** — pictures of the devices, **videos**, **logic-analyzer traces as proof**.
+  *(#1,#2,#3 photos; #4 video; #7,#11 traces.)*
+- **D3 · Make it reusable & configurable** — per-device config, channel maps; **productize a one-off**. *(#2
+  configurable-by-device; #8 arm→reusable driver; #1 reusable parts.)*
+- **D4 · The long tail** — maintenance when vendors ship **new code** (the diff/audit burden); knowing when a
+  project is **"incomplete but shippable."** *(#11 both, sharply.)*
+
+### The Act I → Act II boundary (concerns that hand off into decomposition)
+*These surfaced in the projects but belong to Act II; Act I ends where they begin. Listed so Chapter 1 can
+*point* at them without doing them:* multi-instance / **shared-bus replication** (#1,#11) · **shared-bus
+broker**, one-bus-many-cogs (#5 PSRAM) · **remote-object modeling** behind a chip/bus (#6,#8) · **FIFO +
+decimation / rate mismatch** (#5) · **cooperative-tasking cog allocation** of low-work sensors (#9,#12) ·
+**motion coordination / overlap** (#6). *(All already taught in Act II; the two headline worked derivations
+ARE #5 and #9.)*
+
+### Act III mirror — where AI already showed up (from the post-AI projects)
+*Each Phase A–D item gets an Act III counterpart; the post-AI projects give real evidence to forecast from:*
+**feasibility & datasheet study, driver comprehension** (#5 MCP) · **device/market research** (#12 Perplexity
+by price point) · **reverse-engineering + decomposition + code**, weeks→days/weeks (#9) · **datasheet reading
++ test authoring** (#12 Claude Code) · **diff-and-surgically-port vendor updates**, weeks→days (#11) · **raise
+the expertise ceiling** — IK + vision that were out of reach (#6). *Gaps Stephen will fill: the pre-AI-only
+projects' AI counterparts, and anything not yet inferable.*
 
 ---
 
