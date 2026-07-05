@@ -28,6 +28,219 @@ CONVENTIONS (front matter documents them):
 ================================================================================
 -->
 
+<!--
+================================================================================
+ACT I — DESIGNING THE SYSTEM  (Chapter below)
+FIRST DRAFT, seeded 2026-07-05 from Stephen's 12-project experience
+(`act1-seed-transcription.md`, consolidated spine). Framed for the reader as a
+project you're building to ship; grounded in real projects woven as evidence,
+not a catalogue. Chapter count is deliberately left to emerge — this single
+chapter carries the whole Act I arc (identify -> bring-up -> build -> ship) and
+may later split. Stephen to enrich; `[?]` marks an item to confirm.
+================================================================================
+-->
+
+# Getting a Project Off the Ground
+
+Picture a real project — not a toy. Something you're going to build and then put in front of
+people: a product you'll sell, a job you were contracted to do, a design you'll stand behind. In
+practice it's usually a blend of those, and the stakes are the same either way — it has to
+actually work, for someone who isn't you.
+
+Before you can ask the question the *next* chapter answers — *which cog owns what?* — there's a
+whole body of work every such project makes you do first. None of it is decomposition yet. All of
+it shapes the decomposition that follows: by the time you're ready to carve the machine into
+cooperating cogs, this is the work that has handed you the parts, the pin map, the rates, and the
+deadlines you'll carve *around*. This chapter is a map of that front end — the things you *do*,
+and the things you have to *deal with*, to get a project from an idea to a wired-up, understood
+machine.
+
+A word on where this comes from. The projects behind this chapter were built by an engineer who
+works mostly by curiosity and request rather than a sales mandate — picking up a thing because
+it's interesting and seeing how the P2 applies to it. But the work is the same work any shipping
+project demands, which is why the "you're shipping this" framing holds throughout. And no two
+projects hit these steps in the same order or the same weight; read for the *shape* of the front
+end, not for a checklist.
+
+## Deciding what to build
+
+Projects start in more ways than a plan admits. One begins as a standing interest — you've always
+wondered what you'd do with a grid of Hall-effect sensors, and one day a board shows up that has
+them. One begins as a request — someone hands you a piece of advanced motor-control technology and
+asks you to make it usable by a whole community. One begins with a thirty-second video of digits
+morphing into each other on an LED panel, and the thought *I have a driver that could do that.*
+The trigger doesn't much matter; what matters is that the very next decisions set the project's
+character, and you make them before you write a line.
+
+The first real one is rarely *how* — it's *is this even practical, and what will it cost me in
+parts and pins?* Feasibility comes before design. The sharpest version of the question is to ask
+what the hardware can even do before you build around it. On one imaging project the useful
+question wasn't "how do I display this data" but "how fast can I even *read* the sensor?" — and the
+answer, on the order of thirteen hundred frames a second, reshaped everything downstream. Paired
+with it is the honest question of what's *practical*: sixty frames a second is already more than an
+eye needs, so the real design lives in the gap between what's possible and what's worth doing.
+
+Then you choose the peripherals and how you'll talk to them, and a lot of the project's character
+is decided right here. A device that speaks a narrow, embedded-friendly bus — I²C or SPI — folds
+into a P2 design cleanly; a device that wants a wide, host-style interface, like a camera ribbon,
+pulls you toward a different and heavier kind of system. Choose narrow when you can: on the robot
+dog, trading a Raspberry-Pi camera for a small time-of-flight sensor on I²C kept the whole design
+embedded and simple. And some parts do the hard work *for* you — a self-contained module you
+merely *configure* instead of *program*. A trainable voice sensor that needs no driver code, where
+your only job is to read which word it recognized, can delete an entire subsystem before you start.
+Picking one of those is a design decision worth making on purpose.
+
+Sometimes the largest early choice is what the P2 *shouldn't* do at all. The P2 has no operating
+system and no network stack; when a project needs the web, a filesystem, or the time of day, you
+reach a fork: port all of that onto the P2, or pair it with a device that already does it well and
+just talk to it. On one gateway project a Raspberry Pi carried the web server, a mail path, and
+network time while the P2 did the real-time work, the two lashed together over a couple of megabits
+of serial — and suddenly the P2 "knew what time it was" without owning a clock. That partition —
+what runs where — is among the most consequential decisions you'll make, and you make it here,
+before any cog exists.
+
+Last, scope the features honestly: what will this actually do, and how far will you take it? Text?
+Graphics? Rotation — portrait, landscape, upside-down? Four digits composed into a clock? The
+answer bounds everything that follows.
+
+## Learning the hardware
+
+Now the part nobody advertises: on a real project, most of the early effort goes into simply
+finding out *how the parts work.*
+
+Datasheets come first, and they fight you. Some are hard to find; some arrive in a language you
+don't read and must be translated before they're any use; some don't exist at all, and the nearest
+thing to documentation is a folder of half-working example code in three different languages. The
+controller chips behind LED-matrix panels were a running example — new panel, new controller,
+datasheet nearly impossible to locate and often in Chinese — while an HDMI path had no datasheet at
+all, only example code close enough to adapt. When there's no schematic *and* no datasheet, you
+reverse-engineer: read the vendor's example code, watch what it does on the wire, and reconstruct
+the protocol yourself. Bringing the robot dog over from its original Arduino meant exactly that —
+no schematics, only example code, every sensor and actuator's communication rebuilt by study.
+
+Then the physical realities the software never mentions. Voltage: the P2's pins run at 3.3 V and
+plenty of devices want 5 V, so you need level shifters — and if you mean to run the part *fast*,
+the shifters have to keep up, which quietly narrows your options before you've chosen anything.
+
+Pins. This is the "Pins" the book's title promises, and it's where a design first meets the wall
+of a finite resource. You count what the part needs, and sometimes it just doesn't fit — too many
+signals to hand-wire, more than a single adapter's worth of lines. When that happens the answer
+isn't to drop a feature; it's to build the interface hardware: a small board carrying the level
+shifters, the connectors, and — if you're wise — a spare row of pins for a logic analyzer. A HUB75
+matrix needed more than eight and fewer than sixteen pins per adapter, impossible to hand-wire, so
+a custom adapter board got designed — and eventually Parallax sold it as a product. Deciding the
+pin *layout* is a real design act too, and the P2's any-pin-any-function flexibility means you get
+to make it well rather than accept whatever the package forces.
+
+Some projects need more than a board; they need a part you *fabricate*. A fixture to hold sensors
+at a fixed geometry, a platform to bolt the controller to the thing it controls. Four
+time-of-flight sensors aimed to sweep 180° only mean something if a 3D-printed frame holds them at
+their exact angles; putting the P2 and a voice sensor onto the dog took two rounds of 3D printing.
+The mechanical build is part of the project whether you planned for it or not.
+
+A special case worth naming: some devices don't run *your* code at all — they run *their own*,
+which you upload first. What you "download" for such a part is a binary image you load *into* the
+device; only once it's running its own firmware can you open communications with it. That means
+building a loader before you can even say hello, as the time-of-flight sensor demanded.
+
+Through all of it, one instrument does the heavy lifting: the logic analyzer. The first question on
+any new part is blunt — *am I talking to it correctly, and am I getting anything back?* — and the
+logic analyzer is how you answer it, which is why it pays to design every rig so you can always
+attach one. Sometimes the rig itself is the test: two of the same chip wired together so each
+checks the other, as when an eight-channel serial driver was certified by lashing two P2s together
+with sixteen wires and verifying every round trip. And beneath all of it sits the unglamorous
+constant of every project ever built: *where do I plug this in, and what's the wiring?*
+
+> **[Figure — the front of a project, as four phases: Decide → Learn the hardware → Build the
+> capability → Finish & ship; with the hand-off arrow into Act II's decomposition. Log to
+> PUNCH-LIST.md]**
+
+## Building the capability
+
+With the part talking, the work turns to making it *usable* — and here design taste starts to
+matter.
+
+The interface comes first, and it's more than exposing what the chip does; it's deciding how
+someone will *think* about the thing. The strongest move is to unify. Study how different
+communities already reason about the problem, then design one interface a person from any of those
+backgrounds can pick up and use. The motor-control work reached servos, brushless motors, and
+wheeled drive through a single interface, so you come to it however you learned motors and still
+know how to drive it. And a lesson that repays attention: every time you layer a new capability
+*on top of* your own driver, it tends to *improve the driver itself*, because the new thing needs
+something you didn't anticipate — adding a morphing-digit display on top of a matrix driver made
+the driver's own interface richer.
+
+Above the raw interface you add convenience layers that hide the primitives, so the application can
+say "steer" instead of setting two motor speeds, or treat an animated digit as "just another font."
+Much of the building, too, is *translation and digestion*: the reference implementation you're
+learning from is almost always in another language — C, an Arduino sketch, NodeMCU — and you carry
+it across into Spin2 one idea at a time, often in your head. Sometimes you don't transcribe at all;
+you write a small program that *generates* what you need, the way a short Python script produced the
+digit-to-digit transition tables that were then baked into the object.
+
+Then there's the thing that keeps a P2 developer up at night in the best way: *performance.* The
+reference drivers rarely run as fast as the P2 can, and matching what they do while going faster —
+and staying error-free at speed — is often the entire point. Octal serial pushed past two megabits
+per second on every channel at once, error-free; the matrix driver is a standing chase after the
+best frame rate the panels will give.
+
+You also *characterize* the hardware — measure how it truly behaves, not how the datasheet claims
+it should. How wheels behave against a motor's top speed under different batteries; how repeatably
+a servo returns to a commanded position. And here's the quiet payoff: those measurements don't stay
+in a lab notebook — they *become the features and the limits of the product.* Characterizing which
+batteries could drive the motor platform turned directly into its supported-battery spec. Then you
+verify: checksums, round-trip confirmation, and again the logic analyzer as the court of final
+appeal, proving the protocol is tight before you call it done.
+
+One honest note before we move on. Sometimes a project meets *your own* limits, not the chip's. A
+six-axis arm stalled at the edge of one engineer's comfort with the mathematics of inverse
+kinematics — the code was reachable, the math wasn't, so the demo could pick a thing up and move it
+but not much more. The opposite happens too: a project you bring deep prior expertise to almost
+builds itself, the way years of Linux and web experience made the hard parts of a gateway routine.
+Where your own ceiling sits is part of the real shape of a project — and it's exactly the place the
+third chapter will have the most to say.
+
+## Finishing and shipping
+
+A project isn't done when it runs. On every one of these the same closing ritual runs: *document it
+so the driver is genuinely usable, post it to the repository in a form people can pick up, and
+announce that it exists.* Skip any of the three and you've wasted the work.
+
+Documentation here means more than prose. It's photographs of the actual devices you drove, short
+videos so people can watch the thing move, and — a signature of real hardware work — the
+logic-analyzer traces themselves, published as proof of how the communication behaves. If you want
+the work to outlive the project, you make it *reusable and configurable*: pull the general part out
+of the specific one, let it be configured per device instead of hard-coded, record which channel
+each thing lives on. The servo work became a standalone, reusable driver extracted from the arm
+that first needed it.
+
+And then the long tail the first release never shows you. Vendors ship new firmware and new code;
+keeping up means diffing their changes against what you built and deciding what to fold back in — a
+chore heavy enough to stall a project for a year. The time-of-flight driver still carries a known
+gap, a coordinate table and some angle math left undone, with a pile of newer vendor code waiting
+to be reconciled. Knowing that a project can be *shipped while honestly incomplete* — clear about
+what isn't finished — is part of the craft too.
+
+## Where this leaves you
+
+That's the front of a project. You decided what to build and what the P2 should and shouldn't do;
+you learned the parts, wired them, and proved they talk; you designed an interface, made it fast,
+characterized it, and shipped it with its documentation. Not one cog has been assigned yet — and
+that is the point. All of this is the raw material the *next* chapter works on.
+
+The next chapter takes exactly this — a wired-up, understood machine with a pin map, a set of parts
+that talk, and a feel for their rates and deadlines — and derives the software architecture from it:
+which cog owns what, how the pieces talk across the gaps, what adapts between cadences. You may have
+noticed a few of the hardest questions raised here went deliberately unanswered: two of the same
+sensor sharing one bus, a fast producer feeding slow displays, a clutch of tiny sensors that don't
+each deserve a cog of their own. Those aren't front-of-project questions; they're *decomposition*
+questions, and they belong to the next chapter.
+
+And a promise to close on. The *third* chapter comes back to this very list — every phase you just
+read — and asks it again with an AI agent at your side. Because every one of these things, from
+hunting down a datasheet in a language you don't read, to reconciling a vendor's new code, to
+reaching past your own math, changes when you have one.
+
 # Thinking in P2 (Functional Decomposition)
 
 You can already write a P2 program. You can launch a cog, drive a pin, share data
