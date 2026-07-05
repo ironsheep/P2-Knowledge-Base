@@ -10,6 +10,40 @@ to commits). Newest entry first.
 
 ---
 
+## v0.2.0 — Design-book re-cut (in progress)
+
+**Status:** re-cut sprint, started 2026-07-04. Plan: `PLANNING.md` (v2, §5 + §16 + §17).
+
+The first draft was split after a walkthrough review: the orientation Chapters 1–3 became the
+separate *Getting Started with the Propeller 2* manual (released v1.0.0), and **this book was
+re-cut into the design + realization book** — the same title, *Thinking in Cogs, Pins, and
+Forces*, now spanning three acts (design the system → decompose onto the P2 → realize with agent
+support). This entry covers the re-cut's first pass.
+
+- **Re-scoped to a design/realization book.** *Getting Started* is now a stated prerequisite; this
+  book opens at the design desk and no longer teaches orientation. Title locked; the three-act
+  architecture replaces the four-chapter plan (`PLANNING.md` §5).
+- **Trimmed the migrated orientation chapters** (Meet the Propeller 2 / Reading P2 Code / Putting
+  It to Work) from the master — they ship in *Getting Started*. The functional-decomposition
+  chapter becomes **Act II**, bracketed by Act I (design) and Act III (agent-assisted realization),
+  both still to be authored.
+- **Augmented Act II against the current knowledge base.** The chapter, first drafted against an
+  earlier decomposition reference, was brought back into lockstep with it: a **shared-resource
+  family** under Force 1 (one owner as a shared transport, a broker cog for one-bus-many-cogs, and
+  the rule-vs-encoding distinction for replicated buses); a **fan-out publication** contract under
+  Force 2 with its can't-walk-it-back caution; a **decimation-placement** choice under Force 3; a
+  **one-forcing-sentence-per-cog** check in the budget; a **fourth judging lens — observability**;
+  a post-ship **as-built audit**; and a compact **second worked machine** (a data-plane streaming
+  pipeline) that reaches a deliberately different answer from the robot dog — the clearest proof the
+  method is a grammar, not a template. Also grounded the robot's servos (13: three per leg ×4 + head).
+
+_(In development — not a public release. Front matter, creation-guide, and voice-guide re-scoping,
+and the authoring of Acts I and III, are the remaining re-cut work. Two walkthrough term questions
+stay open pending an author decision: the "connascence" wording and the word for the embedded
+application itself.)_
+
+---
+
 ## v0.1.0 — First Draft (in progress)
 
 **Status:** first-draft build sprint (`arch-guide-v0.1`), started 2026-06-22.
