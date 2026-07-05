@@ -996,6 +996,132 @@ into the reference manuals for every part you'll actually program.
 Start from the wires, run the forces, judge the cut — and let the hardware, not habit, hand you the
 shape. That's what it means to think in P2. The rest is yours to build.
 
+<!--
+================================================================================
+ACT III — REALIZING WITH AGENT SUPPORT  (Chapter below)
+FORECAST SKELETON, seeded 2026-07-05. Mirrors Chapter 1's four-phase spine
+item-for-item + a decomposition section, and forecasts "how an AI agent changes
+each step." Prose where it can be inferred from the POST-AI projects (#5 imaging
+tile / MCP, #9 robot-dog port, #11 ToF maintenance, #12 voice sensor / Perplexity
++ Claude Code); `> **[Stephen to add: ...]**` marks where he supplies his lived
+AI usage. Chapter count still emergent. This is a forecast to enrich, not final.
+================================================================================
+-->
+
+# The Same Work, with an Agent
+
+You now know the front of a project (Chapter 1) and how to derive its architecture (Chapter 2).
+This chapter puts an AI agent in the loop and walks the *same* work again — every phase of Chapter
+1, and the decomposition of Chapter 2 — asking one question of each step: *what changes when you
+have an agent at your side?*
+
+Be clear about what does **not** change. The agent removes none of the judgment. You still decide
+what to build, you still own the pin map and hold the logic-analyzer probe, and you still judge the
+cut against the hardest deadline. What the agent changes is the *cost* and the *reach* of each
+step — and, on the real projects behind this book, that change was large enough to measure in
+weeks saved and ceilings lifted. This chapter is an additive lens on a process you already
+understand, not a new process.
+
+## Deciding what to build — with an agent
+
+The agent is strongest exactly where the front of a project is slowest: research. Asked what parts
+exist for a job, at what price, an agent surveys the field in minutes — a voice sensor in the
+fifty-to-a-hundred-dollar range was found this way, by a research agent, rather than by days of
+manual searching. And feasibility, the *what's-even-possible* question that should precede design,
+becomes something you can simply ask: hand an agent the datasheets and a schematic and it will
+reason out the practical limit before you commit a dollar — the imaging tile's ceiling of roughly
+thirteen hundred frames a second came back from exactly that kind of question, put to an agent
+backed by the P2 Knowledge Base.
+
+> **[Stephen to add: how the agent helped weigh the narrow-vs-broad comms choice and the
+> offload-vs-port partition — or whether those stayed a human call informed by AI research.]**
+
+The choice stays yours; what the agent widens is the set of options you choose *among*, and how
+quickly you can price and rule them out.
+
+## Learning the hardware — with an agent
+
+This is where the agent attacks the single biggest time-sink of Chapter 1. Datasheets it will read
+and summarize; a datasheet in a language you don't read it will translate; a folder of half-working
+example code in three languages it will digest and explain. Where there was no schematic at all,
+the agent will study a vendor's codebase and help reconstruct the protocol — the robot-dog port off
+its original Arduino was done this way, reverse-engineering each sensor and actuator with the agent
+reading the example code alongside you. And an unfamiliar driver you must adapt — a PSRAM part you
+have never touched — the agent will explain well enough that you can bend it to your use. Even
+bring-up tests are fair game: on the voice sensor, the agent wrote the tests that got the part
+talking across a couple of quick rounds.
+
+> **[Stephen to add: agent help (or not) in building the firmware loader for a device that runs its
+> own uploaded code, e.g. the ToF sensor.]**
+
+What stays stubbornly yours: the logic analyzer, the wiring, the fabricated fixture. The agent can
+read every datasheet in the world and still can't hold the probe or bolt the sensor to the frame.
+
+## Building the capability — with an agent
+
+The in-head transcription of Chapter 1 — carrying C or an Arduino sketch across into Spin2 one idea
+at a time — is work an agent does with you at a different speed; weeks of hand-translation compress
+toward hours. The tables and boilerplate you used to hand-generate, it generates.
+
+And then the story that matters most. Chapter 1 admitted that a project can stall at *your own*
+ceiling, not the chip's — a six-axis arm halted at the edge of one engineer's comfort with the
+mathematics of inverse kinematics. With an agent, that ceiling lifts: the same arm can now carry a
+full inverse-kinematics solution and a vision system that finds an object, reaches for it, and
+places it — the design that was out of personal reach becomes reachable. That is the clearest single
+thing an agent changes: not the work you could already do faster, but the work you *couldn't do at
+all* now within reach.
+
+> **[Stephen to add: how (and whether) the agent helped chase P2 *performance* — the "match the
+> reference driver but faster" problem — since that's a place human craft may still lead.]**
+
+Taste still leads: what an interface should *feel* like, how a thing should behave, remains a human
+call the agent serves rather than makes.
+
+## Finishing and shipping — with an agent
+
+Documentation — the usable driver docs, the write-ups, the examples — the agent drafts, turning the
+closing ritual from a chore into a review. But the sharpest win is in the *long tail*. Chapter 1's
+most demoralizing moment was the vendor shipping new code and the year-long stall of reconciling it.
+With an agent the move becomes surgical: take your original source, diff the vendor's new release,
+apply just the meaningful changes, pull the new binaries, and run — days instead of weeks. The
+stalled time-of-flight project is revivable now for exactly this reason; the maintenance that felt
+like starting over becomes an afternoon of directed edits.
+
+> **[Stephen to add: any shipping/announcement steps where the agent helped — or where it
+> deliberately stayed out.]**
+
+## Through the decomposition itself — with an agent
+
+The middle chapter's work changes too. An agent can help you *postulate* a decomposition and build
+the layers — the robot dog was reverse-engineered, decomposed onto the P2, and coded with agent
+help in a week or two rather than a month or two. It can run the first-contact procedure alongside
+you, sanity-check a proposed cut against the four forces, and catch a plane conflation before it
+ships.
+
+> **[Stephen to add: concretely how you used an agent during decomposition — where it proposed,
+> where it caught something, where you overrode it.]**
+
+What the agent does not do is *own* the reconciliation. The forces still argue, the hardest deadline
+still wins, and the call is still yours — the agent is a fast, well-read partner in that judgment,
+not a substitute for it.
+
+## Where this leaves you
+
+Walk back over the two chapters and notice the pattern: every phase got cheaper or reached farther,
+and not one got removed. You still choose what to build, still own the pin map and the probe, still
+judge the cut. What changed is real all the same — the datasheet in a language you don't read is no
+longer a wall, the vendor's new code is no longer a year's stall, and the math you don't carry is no
+longer a ceiling. Measured across these real projects, that change reads as weeks turned to days and
+months turned to weeks, and a few designs that simply weren't reachable before.
+
+There's a closing symmetry worth naming. The knowledge an agent draws on to help you think in P2 —
+the architecture, the instructions, the decomposition reasoning of the last chapter — is the same
+body of curated knowledge this guide is drawn from. The better that knowledge, the better the
+partner. You are, in a sense, holding one end of it.
+
+> **[Stephen to add: a final pass over any of the twelve projects whose AI story isn't yet captured
+> above, so every phase has at least one lived example.]**
+
 # Appendix A — Computing in Space and Time (Why We Borrow FPGA Language)
 
 Throughout this guide — and especially in Chapter 4 — we describe the P2 with words borrowed from
