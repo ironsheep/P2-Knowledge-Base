@@ -119,7 +119,7 @@ CON
 VAR
   long high_time, low_time
 
-PUB analyze_pwm() : frequency, duty_percent
+PUB analyze_pwm() : frequency, duty_percent | duration
   PINFLOAT(PWM_PIN)
   WRPIN(PWM_PIN, P_STATE_TICKS | P_SCHMITT_A)
   PINLOW(PWM_PIN)
@@ -127,10 +127,12 @@ PUB analyze_pwm() : frequency, duty_percent
   ' Get one complete cycle
   repeat 2
     repeat until PINREAD(PWM_PIN)
-    if RDPIN(PWM_PIN) & $8000_0000         ' C flag = was high
-      high_time := RDPIN(PWM_PIN) & $7FFF_FFFF
+    ' Read once: bit 31 = C (state), bits[30:0] = ticks
+    duration := RDPIN(PWM_PIN)
+    if duration & $8000_0000               ' C flag = was high
+      high_time := duration & $7FFF_FFFF
     else
-      low_time := RDPIN(PWM_PIN) & $7FFF_FFFF
+      low_time := duration & $7FFF_FFFF
 
   ' Calculate results
   frequency := _clkfreq / (high_time + low_time)
@@ -442,7 +444,7 @@ VAR
   long high_us
   long low_us
 
-PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
+PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low, duration
   PINFLOAT(PWM_PIN)
   WRPIN(PWM_PIN, P_STATE_TICKS | P_SCHMITT_A)
   PINLOW(PWM_PIN)
@@ -454,11 +456,13 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
   repeat until got_high AND got_low
     repeat until PINREAD(PWM_PIN)
 
-    if RDPIN(PWM_PIN) & $8000_0000
-      h_clocks := RDPIN(PWM_PIN) & $7FFF_FFFF
+    ' Read once: bit 31 = C (state), bits[30:0] = ticks
+    duration := RDPIN(PWM_PIN)
+    if duration & $8000_0000
+      h_clocks := duration & $7FFF_FFFF
       got_high := true
     else
-      l_clocks := RDPIN(PWM_PIN) & $7FFF_FFFF
+      l_clocks := duration & $7FFF_FFFF
       got_low := true
 
   ' Calculate results

@@ -1,5 +1,11 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.2 (2026-07-05)
+
+Sharper worked examples for reading smart-pin state timing.
+
+- **State-timing examples (Chapter 13)** — the P_STATE_TICKS PWM-analysis examples read each transition with a single `RDPIN`, taking the state from bit 31 and the tick count from the low bits of that one result.
+
 ## v1.0.1 (2026-07-04)
 
 Hardware-verified updates to the event-wait and concurrent-measurement guidance, proven on P2 silicon:
