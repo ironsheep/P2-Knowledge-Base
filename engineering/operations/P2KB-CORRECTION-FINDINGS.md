@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-194`**
+**Next finding ID: `F-196`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -861,7 +861,12 @@
 > editing. **P2AN004 is unaffected** — R2 already routes both A and B (correct either way), so this is
 > non-blocking for that release. Cross-ref **F-187**.
 
-### F-193 — IOSP ch05 falsely claims no single instruction waits on event+timeout; teaches a busy-poll — `APPLIED across KB + IOSP + PASM2 (🏆 HW-PROVEN EF-020); releases pending (phase-1 YAML, phase-2 doc patches)`
+### F-193 — IOSP ch05 falsely claims no single instruction waits on event+timeout; teaches a busy-poll — `DONE (🏆 HW-PROVEN EF-020) — all phases RELEASED`
+> **STATUS CORRECTED 2026-07-05:** the "releases pending" note below is stale — all phases shipped.
+> **Phase-1 YAML** (`no_setq_behavior:` on all 15 wait YAMLs) shipped in **KB v1.14.0** (verified: the
+> field is present in the `v1.14.0` tag). **Phase-2 doc patches** shipped in **IOSP v1.0.1** and
+> **PASM2 v3.1.2** (commit `b76a9fed` phase-2 source → releases `a6fcbc5c` / `0dd7159a`). Nothing
+> outstanding.
 > **CONFIRMED (documentary + hardware-in-progress).** IOSP `chapter-05-working-with-smart-pins.md` §"Wait with a
 > timeout" stated **"No single instruction waits on an event *and* a timer at once, so poll both…"** and taught a
 > busy-poll `.race` loop — contradicting the section's own preceding "true stall" pitch (poll-spin burns cycles/power).
@@ -890,6 +895,66 @@
 >   PASM2 patch.
 > - **NOT for IOSP:** the no-SETQ free-clear detail is too low-level for the user guide; it lives in the PASM2 ref + KB.
 > **Reject** a "WC-without-SETQ" lint — the free-clear idiom is intentional; a lint would false-positive.
+
+## IOSP reader question — P_STATE_TICKS "bit 31 = state" (2026-07-05) — F-194 `RESOLVED-INVALID`
+
+### F-194 — `p2kbArchSmartPin10000TimeAStates` RDPIN-bit-31 example — `RESOLVED-INVALID` (not a defect)
+**The reported defect does not exist.** An IOSP reader (on FlexSpin) asked whether bit 31 of
+`RDPIN()` really carries the P_STATE_TICKS previous state. My first pass wrongly concluded the
+manual + this YAML example were broken (that Spin2 `RDPIN()` drops C and bit 31 is only the
+saturation MSB) and filed a "class defect" with an IOSP Ch04 "taproot." **Stephen sent me to the
+Spin2 v55 reference, which overturns it:**
+> Spin2 v55 lines 543–544: *"`RDPIN (Pin) : Zval` — … **`Zval[31] = C flag from RDPIN`, other
+> bits are RDPIN data.**"* (same for `RQPIN()`.)
+So the Spin2 built-in **does** fold the modal C flag into bit 31 of its return value — the
+exact opposite of what I claimed. `if rdpin(pwm_pin) & $80000000  ' Check C flag in bit 31` is
+**correct**, and `& $7FFF_FFFF` correctly strips that bit to leave the count. **No YAML edit.**
+**Root cause of my error:** I checked the PASM2 `RDPIN` *instruction* (C via `WC` only) and
+assumed the Spin2 `RDPIN()` *method* matched; it doesn't — the method marshals C into the MSB.
+Lesson for Spin2-built-in findings: check the **Spin2 method table**, not just the PASM2
+instruction. **Whole chain withdrawn** — no "class," no Ch04 taproot, no IOSP v1.0.1 needed; the
+manual (Ch04 §4.12 + Ch13) is correct against v55. **The reader's real issue is a FlexSpin/PNut
+compiler discrepancy** (FlexSpin's `RDPIN()` apparently returns raw Z without C in bit 31) — a
+third-party compiler behavior, not a P2KB defect; portable inline-PASM (`rdpin…wc`+`wrc`)
+workaround given. Full trail in
+`manuals/p2-io-and-smart-pins-user-guide/audit/reader-question-p_state_ticks-bit31-2026-07-05.md`.
+(Note F-175 stays valid on its own terms — that was a real `PINREAD` single-pin mask bug, a
+different construct from `RDPIN()`.)
+
+### F-195 — `p2kbArchSmartPin10000TimeAStates` "PWM Signal Analysis" example reads `rdpin()` multiple times per loop — `DONE (2026-07-05)`
+> **APPLIED (yaml head) 2026-07-05 (ships v1.14.1):** in
+> `architecture/smart-pins/smart-pin-10000-time-a-states.yaml` (Spin2 example, ~line 50) replaced the
+> three-`rdpin()`-per-iteration pattern with a single `duration := rdpin(pwm_pin)` read, then
+> `if duration & $80000000` / `& $7FFFFFFF` on that one capture. Bit-31=C and the count now come from
+> one atomic read. Compile-verified `pnut-ts -d` v1.55.0 (standalone Spin2 PUB). YAML-format + crossref
+> validators clean (no cross-ref change — code-example-only edit). The file's PASM2 block already read
+> once (`rdpin duration,#pwm_pin wc`) — left untouched. **Manual twin** (IOSP Ch13 `analyze_pwm` +
+> `pwm_analyzer`) fixed separately for IOSP v1.0.2.
+**Distinct from F-194 (which was invalid); this one is real.** The example tests the C flag with
+one `rdpin(pwm_pin)` call, then reads `rdpin(pwm_pin)` **again** to store the duration:
+```
+if rdpin(pwm_pin) & $80000000          ' read #1 — acknowledges the pin
+  high_time := rdpin(pwm_pin) & $7FFFFFFF   ' read #2 — a SEPARATE capture
+```
+Each `rdpin()` acknowledges the smart pin. Bit 31 (C) and the count belong to a *single* capture,
+but the code tests one read and stores another. **Latent bug:** if a transition lands between the
+two reads (fast signals / glitches), read #2 is the next state's data while the C test was on the
+previous one → wrong duration, or a high/low mix-up. Invisible on slow PWM (Z unchanged between
+back-to-back reads), which is why it wasn't caught. **Independently flagged 2026-07-05 by the
+pnut_ts-side agent** during the same investigation. **Fix:** read once into a variable, then
+test/mask that variable (the `%10000` state example one section up in the same YAML already does
+this correctly):
+```
+x := rdpin(pwm_pin)
+if x & $80000000
+  high_time := x & $7FFFFFFF
+else
+  low_time  := x & $7FFFFFFF
+```
+**Manual twin (IOSP, live):** the *same* double-read appears in Ch13 `analyze_pwm()` (lines
+130–133) and `pwm_analyzer()` (lines 457–461). The reader's `measure_states()` example (line 80)
+reads once and is **correct**. This is a narrow, genuine IOSP fix (candidate for a bundled
+v1.0.1) — separate from the withdrawn bit-31 claim. Verify each site before editing.
 
 ---
 

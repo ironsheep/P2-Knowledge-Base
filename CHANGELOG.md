@@ -20,6 +20,13 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.1] - 2026-07-05
+
+**P_STATE_TICKS example demonstrates single-read state capture.**
+
+### Changed
+- P_STATE_TICKS (%10000): the high/low state-timing example reads each transition with one `RDPIN` call — bit 31 carries the state, bits [30:0] the tick count.
+
 ## [1.14.0] - 2026-07-04
 
 **Application-note companion data now discoverable, plus hardware-verified smart-pin and event-wait accuracy.**

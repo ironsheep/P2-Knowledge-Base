@@ -40,17 +40,18 @@ code_examples:
         _clkfreq = 200_000_000
         pwm_pin = 53                             ' PWM input signal
       
-      PUB main() | high_time, low_time, duty
+      PUB main() | high_time, low_time, duty, duration
         pinstart(pwm_pin, P_STATE_TICKS, 0, 0)
-        
+
         repeat
           ' Wait for state change and get duration
           repeat until pinr(pwm_pin)             ' Wait for transition
-          
-          if rdpin(pwm_pin) & $80000000          ' Check C flag in bit 31
-            high_time := rdpin(pwm_pin) & $7FFFFFFF
+
+          duration := rdpin(pwm_pin)             ' Read ONCE: bit 31 = C (state), bits[30:0] = ticks
+          if duration & $80000000                ' C flag in bit 31 = was high
+            high_time := duration & $7FFFFFFF
           else
-            low_time := rdpin(pwm_pin) & $7FFFFFFF
+            low_time := duration & $7FFFFFFF
             
             ' Calculate duty cycle when we have both
             if high_time and low_time
