@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-07-05",
-    "last_updated": "2026-07-05T19:44:04.791650",
+    "release_date": "2026-07-06",
+    "last_updated": "2026-07-06T23:15:26.876488",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-07-05T19:44:04.791650",
+    "extraction_date": "2026-07-06T23:15:26.876488",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-07-05T19:44:04.791650",
+    "extraction_date": "2026-07-06T23:15:26.876488",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20853,7 +20853,7 @@
         }
       },
       "methods": {
-        "count": 103,
+        "count": 101,
         "elements": {
           "GETCRC": {
             "method": "GETCRC",
@@ -21188,8 +21188,7 @@
               "TASKCONT",
               "task continue",
               "resume task",
-              "continue task",
-              "TASKRESUME"
+              "continue task"
             ],
             "requires_version": "Spin2_v47",
             "version_directive": "{Spin2_v47}",
@@ -21226,17 +21225,16 @@
               "Task continues from where it was halted",
               "All state preserved during halt",
               "No effect if task not halted",
-              "Part of cooperative multitasking",
-              "The name TASKRESUME (seen in some older notes) does not compile \u2014 the keyword is TASKCONT"
+              "Part of cooperative multitasking"
             ],
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "TASKHALT",
-              "TASKSPIN",
-              "TASKSTOP",
-              "TASKCHK"
+              "language/spin2/methods/taskhalt.yaml",
+              "language/spin2/methods/taskspin.yaml",
+              "language/spin2/methods/taskstop.yaml",
+              "language/spin2/methods/taskchk.yaml"
             ],
             "see_also": [
               "Task synchronization",
@@ -22637,15 +22635,16 @@
               "Current task pauses, next task runs",
               "Returns when task gets control again",
               "Essential for task cooperation",
-              "Prevents task starvation"
+              "Prevents task starvation",
+              "To wait for a condition while other tasks keep running, poll in a loop that yields: repeat until <cond> ... TASKNEXT(). There is no dedicated wait method."
             ],
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "TASKWAIT",
-              "TASKSPIN",
-              "TASKHALT"
+              "language/spin2/methods/taskspin.yaml",
+              "language/spin2/methods/taskhalt.yaml",
+              "language/spin2/methods/taskchk.yaml"
             ],
             "see_also": [
               "Cooperative multitasking",
@@ -23577,60 +23576,6 @@
               "language/pasm2/waitx.yaml"
             ]
           },
-          "TASKWAIT": {
-            "method": "TASKWAIT",
-            "type": "method",
-            "description": "Wait for specific condition with task yielding\n",
-            "category": "Task Operations",
-            "syntax": "TASKWAIT(Condition)",
-            "parameters": [
-              {
-                "name": "Condition",
-                "type": "expression",
-                "description": "Boolean condition to wait for"
-              }
-            ],
-            "returns": {
-              "type": "void",
-              "description": "No return value"
-            },
-            "examples": [
-              {
-                "code": "' Wait for flag\nTASKWAIT(ready_flag == TRUE)\n' Flag is now true\n",
-                "description": "Wait for flag to be set"
-              },
-              {
-                "code": "' Wait for buffer space\nTASKWAIT(buffer_count < MAX_SIZE)\n' Can now add to buffer\n",
-                "description": "Wait for buffer availability"
-              },
-              {
-                "code": "' Wait for multiple conditions\nTASKWAIT(data_ready AND not busy_flag)\n' Both conditions met\n",
-                "description": "Wait for complex condition"
-              }
-            ],
-            "notes": [
-              "Yields to other tasks while waiting",
-              "More efficient than busy waiting",
-              "Condition checked between yields",
-              "Returns when condition becomes true",
-              "Prevents CPU hogging during waits",
-              "Part of cooperative multitasking"
-            ],
-            "timing": {
-              "description": "Depends on condition",
-              "cycles": "Variable - yields while waiting"
-            },
-            "related": [
-              "TASKNEXT",
-              "WAITCT",
-              "POLLCT"
-            ],
-            "see_also": [
-              "Conditional waiting",
-              "Task synchronization",
-              "Efficient polling"
-            ]
-          },
           "QLOG": {
             "method": "QLOG",
             "type": "method",
@@ -23983,7 +23928,7 @@
             "category": "Task Operations",
             "requires_version": "Spin2_v47",
             "version_directive": "{Spin2_v47}",
-            "description": "Get the ID of the currently executing task. Returns an integer from 0-31 \nrepresenting this task's slot in the cog's task table. The main task is \ntypically ID 0.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
+            "description": "Get the ID of the currently executing task. Returns an integer from 0-31\nrepresenting this task's slot in the cog's task table. In each cog the\ntop-level (initial) code runs as that cog's task 0; TASKSPIN(NEWTASK) then\nallocates upward (1, 2, ...). Task IDs are cog-local (each cog has its own\n0-31 task space). Hardware-verified (EF-023).\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "id := TASKID()",
             "parameters": [],
             "returns": {
@@ -24007,7 +23952,8 @@
             "notes": [
               "REQUIRES {Spin2_v47} or later at start of source file",
               "Returns ID of currently executing task (0-31)",
-              "Main task is typically ID 0",
+              "In each cog the top-level code runs as that cog's task 0; TASKSPIN(NEWTASK) fills upward from 1 (hardware-verified, EF-023)",
+              "Task IDs are cog-local \u2014 every cog has its own 0-31 task space",
               "Useful for task-specific storage/behavior",
               "Each task has unique ID 0-31",
               "ID remains constant for task lifetime"
@@ -24016,9 +23962,9 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "TASKCHK",
-              "TASKSPIN",
-              "COGID"
+              "language/spin2/methods/taskchk.yaml",
+              "language/spin2/methods/taskspin.yaml",
+              "language/spin2/methods/cogid.yaml"
             ],
             "see_also": [
               "Task identification",
@@ -25042,24 +24988,6 @@
               "language/spin2/methods/wypin.yaml",
               "language/spin2/methods/rdpin.yaml",
               "architecture/smart-pins/*.yaml"
-            ]
-          },
-          "TASKRESUME": {
-            "method": "TASKRESUME",
-            "type": "method",
-            "category": "Task Operations",
-            "status": "invalid_keyword",
-            "aliases": [
-              "TASKRESUME"
-            ],
-            "description": "TASKRESUME is NOT a valid Spin2 keyword. It does not compile\n(pnut_ts: \"Expected an instruction or variable\").\n\nThe real keyword for continuing a halted task is TASKCONT (introduced in\n{Spin2_v47}). This stub exists only to redirect lookups of the invalid name\nto the correct method.\n",
-            "redirect_to": "language/spin2/methods/taskcont.yaml",
-            "see_also": [
-              "TASKCONT \u2014 the correct keyword (language/spin2/methods/taskcont.yaml)"
-            ],
-            "related": [
-              "TASKCONT",
-              "TASKHALT"
             ]
           },
           "PINWRITE": {
@@ -26118,8 +26046,8 @@
               }
             ],
             "returns": {
-              "type": "void",
-              "description": "No return value"
+              "type": "integer (as expression) / void (as statement)",
+              "description": "As a statement, TASKSPIN returns nothing. Used as an expression term, it\nreturns the assigned task number (0-31), or -1 if no task slot was free.\nSource: Spin2 v55 keyword reference (v47 change note).\n"
             },
             "examples": [
               {
@@ -26149,10 +26077,11 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "TASKSTOP",
-              "TASKHALT",
-              "TASKCONT",
-              "TASKCHK"
+              "language/spin2/methods/taskstop.yaml",
+              "language/spin2/methods/taskhalt.yaml",
+              "language/spin2/methods/taskcont.yaml",
+              "language/spin2/methods/taskchk.yaml",
+              "language/spin2/methods/tasknext.yaml"
             ],
             "see_also": [
               "Cooperative multitasking",
@@ -28229,7 +28158,7 @@
               {
                 "bit": "31",
                 "task": "0",
-                "description": "Task 0 halt status (main task)"
+                "description": "Task 0 halt status (the cog's top-level task)"
               }
             ],
             "syntax": {
@@ -28259,7 +28188,7 @@
               "Bits are stored in REVERSE order (bit 0 = task 31, bit 31 = task 0)",
               "A set bit (1) indicates the task is halted",
               "A clear bit (0) indicates the task is running or stopped",
-              "Task 0 is typically the main program task",
+              "Task 0 is the cog's top-level task; task IDs are cog-local (hardware-verified, EF-023)",
               "Use TASKCHK() for simpler status checking of individual tasks",
               "Direct TASKHLT access useful for bulk task monitoring",
               "Writing to TASKHLT can force-halt or force-resume tasks"
@@ -29969,11 +29898,11 @@
       }
     },
     "statistics": {
-      "total_elements": 277,
+      "total_elements": 275,
       "by_category": {
         "keywords": 37,
         "operators": 78,
-        "methods": 103,
+        "methods": 101,
         "registers": 18,
         "assembly_directives": 12,
         "debug_commands": 13,

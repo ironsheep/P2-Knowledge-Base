@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-05T19:44:04.748401",
-    "total_entries": 1128,
+    "generated": "2026-07-06T23:15:26.832362",
+    "total_entries": 1129,
     "total_categories": 59,
-    "total_aliases": 1629,
-    "multi_target_aliases": 65,
+    "total_aliases": 1712,
+    "multi_target_aliases": 74,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -973,6 +973,9 @@
     "ASMCLK": [
       "p2kbPasm2Asmclk"
     ],
+    "ATOMIC PUBLISH": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "AUDIO ADC DAC BOARD": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
@@ -1172,6 +1175,9 @@
     "CMPX": [
       "p2kbPasm2Cmpx"
     ],
+    "COG STACK SIZE": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "COGATN": [
       "p2kbPasm2Cogatn",
       "p2kbSpin2Cogatn"
@@ -1192,6 +1198,9 @@
     ],
     "COGSPIN": [
       "p2kbSpin2Cogspin"
+    ],
+    "COGSPIN STACK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "COGSTOP": [
       "p2kbPasm2Cogstop",
@@ -1227,6 +1236,12 @@
     "CONTROL BOARD": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
+    "COOPERATIVE MULTITASKING": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "COOPERATIVE YIELD": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "CORDIC": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
@@ -1236,6 +1251,9 @@
     "CORDIC pipelining": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "COROUTINES": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "CRCBIT": [
       "p2kbPasm2Crcbit"
     ],
@@ -1244,6 +1262,9 @@
     ],
     "CROP": [
       "p2kbSpin2Plot"
+    ],
+    "CROSS-COG DATA": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
@@ -1259,6 +1280,9 @@
     ],
     "DAT singleton fork": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "DATA STRUCTURES": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "DDS": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
@@ -1370,6 +1394,9 @@
     ],
     "DEPENDENCY INJECTION": [
       "p2kbSpin2MethodPointers"
+    ],
+    "DEQUE": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "DETENT NORMALIZATION": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
@@ -1545,6 +1572,9 @@
     "FIELD-ORIENTED MOTOR CONTROL": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "FIFO": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "FIXED-POINT MATH": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
@@ -1655,11 +1685,17 @@
     "Goertzel touch board": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
+    "HALT AND RESUME TASKS": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "HARDWARE COMPATIBILITY MATRIX": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "HARDWARE FEATURE COMPARISON": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "HARDWARE LOCKS": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "HARDWARE MATH SOLVER": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -1684,6 +1720,12 @@
     ],
     "HIGH-TIME MEASUREMENT": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "HOW BIG A STACK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "HUB SHARED DATA": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "HUB75 ADAPTER": [
       "p2kbHwHub75AdapterHub75Adapter"
@@ -1743,6 +1785,9 @@
     ],
     "ISOLATED SUPPLY DOMAIN": [
       "p2kbArchPinPowerDomains"
+    ],
+    "ISP_STACK_CHECK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "JATN": [
       "p2kbPasm2Jatn"
@@ -1846,6 +1891,9 @@
     "JXRO": [
       "p2kbPasm2Jxro"
     ],
+    "LATEST-WINS MAILBOX": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "LAYER": [
       "p2kbSpin2Plot"
     ],
@@ -1882,14 +1930,19 @@
     "LOC": [
       "p2kbPasm2Loc"
     ],
+    "LOCK-FREE QUEUE": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "LOCKCHK": [
       "p2kbSpin2Lockchk"
     ],
     "LOCKNEW": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbPasm2Locknew",
       "p2kbSpin2Locknew"
     ],
     "LOCKREL": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbPasm2Lockrel",
       "p2kbSpin2Lockrel"
     ],
@@ -1898,6 +1951,7 @@
       "p2kbSpin2Lockret"
     ],
     "LOCKTRY": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbPasm2Locktry",
       "p2kbSpin2Locktry"
     ],
@@ -1956,6 +2010,12 @@
     ],
     "Lissajous": [
       "p2kbSpin2ScopeXy"
+    ],
+    "MAILBOX": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "MEASURING STACK SPACE": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "MERGEB": [
       "p2kbPasm2Mergeb"
@@ -2030,6 +2090,12 @@
     "MULTI-BUS FORKING": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "MULTI-WRITER QUEUE": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "MULTIPLE TASKS ONE COG": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "MUSIC KEYBOARD": [
       "p2kbSpin2Midi"
     ],
@@ -2073,6 +2139,7 @@
       "p2kbPasm2Negz"
     ],
     "NEWTASK": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Newtask"
     ],
     "NIXINT1": [
@@ -2356,6 +2423,9 @@
     ],
     "P8X32A font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "PACKED RECORD": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "PARALLAX WX ESP8266 WI-FI MODULE": [
       "p2kbHwAddonWxWifiAddonWxWifi"
@@ -2675,6 +2745,9 @@
     "QUADRATURE KNOB": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
+    "QUEUE": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "QVECTOR": [
       "p2kbPasm2Qvector"
     ],
@@ -2753,6 +2826,9 @@
     ],
     "RECIPROCAL FREQUENCY COUNTER": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "RECORDS": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "RECV": [
       "p2kbSpin2Recv"
@@ -2838,6 +2914,12 @@
     "RGBSQZ": [
       "p2kbPasm2Rgbsqz"
     ],
+    "RIGHT-SIZE A STACK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "RING BUFFER": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "ROL": [
       "p2kbPasm2Rol"
     ],
@@ -2870,6 +2952,9 @@
     ],
     "ROUND": [
       "p2kbSpin2Round"
+    ],
+    "ROUND ROBIN SCHEDULING": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "RQPIN": [
       "p2kbPasm2Rqpin",
@@ -2919,6 +3004,12 @@
     ],
     "SENSOR READING": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "SENTINEL FILL TECHNIQUE": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "SEQUENCE COUNTER": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "SERIAL DEVICE ADD-ON": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
@@ -3058,6 +3149,9 @@
     "SINE OSCILLATOR": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "SINGLE PRODUCER SINGLE CONSUMER": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "SINGLE-PIN ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
@@ -3065,6 +3159,7 @@
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "SIZEOF": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbSpin2Sizeof"
     ],
     "SKIP": [
@@ -3097,6 +3192,12 @@
     "SPI": [
       "p2kbArchSpiImplementationGuide"
     ],
+    "SPIN2 STRUCTURES": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "SPIN2 TASKS": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "SPIN2_DOCS_VSCODE": [
       "p2kbSpin2VscodePnutDocumentationStyle"
     ],
@@ -3118,8 +3219,26 @@
     "SPRITEDEF": [
       "p2kbSpin2Plot"
     ],
+    "SPSC": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "SQRT": [
       "p2kbSpin2Sqrt"
+    ],
+    "STACK BUFFER": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "STACK CORRUPTION": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "STACK HIGH-WATER MARK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "STACK OVERFLOW DETECTION": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "STACK SIZING": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "STALLI": [
       "p2kbPasm2Stalli"
@@ -3147,6 +3266,9 @@
     ],
     "STRSIZE": [
       "p2kbSpin2Strsize"
+    ],
+    "STRUCT": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "STRUCT POINTER": [
       "p2kbSpin2OpTypedPointers"
@@ -3178,39 +3300,66 @@
     "SUMZ": [
       "p2kbPasm2Sumz"
     ],
+    "SYNCHRONIZED TASK START": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "Smart Pin DAC audio board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "Spin2 structures": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "Spin2 tasks": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "TASK CONTINUE": [
       "p2kbSpin2Taskcont"
     ],
+    "TASK METHODS": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "TASK SCHEDULING": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "TASK STACK SIZE": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "TASK STATUS CENSUS": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "TASK methods": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "TASKCHK": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskchk"
     ],
     "TASKCONT": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskcont"
     ],
     "TASKHALT": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskhalt"
     ],
     "TASKID": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskid"
     ],
     "TASKNEXT": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Tasknext"
     ],
-    "TASKRESUME": [
-      "p2kbSpin2Taskcont",
-      "p2kbSpin2Taskresume"
-    ],
     "TASKSPIN": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskspin"
     ],
-    "TASKSTOP": [
-      "p2kbSpin2Taskstop"
+    "TASKSPIN STACK": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
-    "TASKWAIT": [
-      "p2kbSpin2Taskwait"
+    "TASKSTOP": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
+      "p2kbSpin2Taskstop"
     ],
     "TERM": [
       "p2kbSpin2Term"
@@ -3243,6 +3392,7 @@
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
     "THISTASK": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Thistask"
     ],
     "TJF": [
@@ -3729,6 +3879,9 @@
     "asmclk": [
       "p2kbPasm2Asmclk"
     ],
+    "atomic publish": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "audio ADC DAC board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
@@ -3911,6 +4064,9 @@
     "cmpx": [
       "p2kbPasm2Cmpx"
     ],
+    "cog stack size": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "cog_management": [
       "p2kbArchCogManagementAnalysis",
       "p2kbSpin2Spin2CogManagement"
@@ -3936,6 +4092,9 @@
     "cogspin": [
       "p2kbSpin2Cogspin"
     ],
+    "cogspin stack": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "cogstop": [
       "p2kbPasm2Cogstop",
       "p2kbSpin2Cogstop"
@@ -3958,8 +4117,17 @@
     "control board": [
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
+    "cooperative multitasking": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "cooperative yield": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "cooperative_tasking": [
       "p2kbSpin2Spin2CooperativeTasking"
+    ],
+    "coroutines": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "crcbit": [
       "p2kbPasm2Crcbit"
@@ -3969,6 +4137,12 @@
     ],
     "crop": [
       "p2kbSpin2Plot"
+    ],
+    "cross-cog data": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "data structures": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "data_logger": [
       "p2kbSpin2DataLogger"
@@ -3996,6 +4170,9 @@
     ],
     "dependency injection": [
       "p2kbSpin2MethodPointers"
+    ],
+    "deque": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "detent normalization": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
@@ -4260,11 +4437,17 @@
     "getxacc": [
       "p2kbPasm2Getxacc"
     ],
+    "halt and resume tasks": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "hardware compatibility matrix": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "hardware feature comparison": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "hardware locks": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "hardware math solver": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -4280,6 +4463,12 @@
     ],
     "high-time measurement": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "how big a stack": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "hub shared data": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "hubset": [
       "p2kbPasm2Hubset",
@@ -4311,6 +4500,9 @@
     ],
     "isolated supply domain": [
       "p2kbArchPinPowerDomains"
+    ],
+    "isp_stack_check": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "jatn": [
       "p2kbPasm2Jatn"
@@ -4414,6 +4606,9 @@
     "jxro": [
       "p2kbPasm2Jxro"
     ],
+    "latest-wins mailbox": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "latest_wins_mailbox": [
       "p2kbSpin2Spin2LatestWinsMailbox"
     ],
@@ -4428,6 +4623,9 @@
     ],
     "loc": [
       "p2kbPasm2Loc"
+    ],
+    "lock-free queue": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "lockchk": [
       "p2kbSpin2Lockchk"
@@ -4490,8 +4688,14 @@
     "lstring": [
       "p2kbSpin2Lstring"
     ],
+    "mailbox": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "mailbox_communication": [
       "p2kbSpin2Spin2MailboxCommunication"
+    ],
+    "measuring stack space": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "memory_allocation": [
       "p2kbSpin2Spin2MemoryAllocation"
@@ -4569,6 +4773,9 @@
     "multi-bus forking": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "multi-writer queue": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "multi_display_system": [
       "p2kbSpin2MultiDisplaySystem"
     ],
@@ -4580,6 +4787,9 @@
     ],
     "multimedia_device": [
       "p2kbSpin2MultimediaDevice"
+    ],
+    "multiple tasks one cog": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "music keyboard": [
       "p2kbSpin2Midi"
@@ -4701,6 +4911,9 @@
     ],
     "outz": [
       "p2kbPasm2Outz"
+    ],
+    "packed record": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "pasm2_hub_synchronization": [
       "p2kbPasm2Pasm2HubSynchronization"
@@ -4905,6 +5118,9 @@
     "quadrature knob": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
     ],
+    "queue": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "qvector": [
       "p2kbPasm2Qvector"
     ],
@@ -4962,6 +5178,9 @@
     ],
     "reciprocal frequency counter": [
       "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+    ],
+    "records": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "recv": [
       "p2kbSpin2Recv"
@@ -5044,6 +5263,12 @@
     "rgbsqz": [
       "p2kbPasm2Rgbsqz"
     ],
+    "right-size a stack": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "ring buffer": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "robotics": [
       "p2kbSpin2Robotics"
     ],
@@ -5073,6 +5298,9 @@
     ],
     "round": [
       "p2kbSpin2Round"
+    ],
+    "round robin scheduling": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "rqpin": [
       "p2kbPasm2Rqpin",
@@ -5107,6 +5335,12 @@
     ],
     "sensor_reader": [
       "p2kbSpin2SensorReader"
+    ],
+    "sentinel fill technique": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "sequence counter": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "serial device add-on": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
@@ -5246,6 +5480,9 @@
     "sine oscillator": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "single producer single consumer": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "single-pin ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
@@ -5305,6 +5542,21 @@
     ],
     "sqrt": [
       "p2kbSpin2Sqrt"
+    ],
+    "stack buffer": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "stack corruption": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "stack high-water mark": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "stack overflow detection": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "stack sizing": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "stalli": [
       "p2kbPasm2Stalli"
@@ -5367,8 +5619,20 @@
     "sumz": [
       "p2kbPasm2Sumz"
     ],
+    "synchronized task start": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "task continue": [
       "p2kbSpin2Taskcont"
+    ],
+    "task scheduling": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "task stack size": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "task status census": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "taskchk": [
       "p2kbSpin2Taskchk"
@@ -5385,17 +5649,14 @@
     "tasknext": [
       "p2kbSpin2Tasknext"
     ],
-    "taskresume": [
-      "p2kbSpin2Taskresume"
-    ],
     "taskspin": [
       "p2kbSpin2Taskspin"
     ],
+    "taskspin stack": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "taskstop": [
       "p2kbSpin2Taskstop"
-    ],
-    "taskwait": [
-      "p2kbSpin2Taskwait"
     ],
     "terminal": [
       "p2kbSpin2Term"
@@ -5679,6 +5940,21 @@
       "path": "deliverables/ai/P2/application-notes/p2an004-frequency-period-pulse-measurement.yaml",
       "mtime": 1783123138,
       "sha256": "904a67b1f172ea14ff5f69131afce440c8d8a74cbcd5014787d117bbf7872c18"
+    },
+    "p2kbAppNoteP2an005CooperativeMultitaskingTasks": {
+      "path": "deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml",
+      "mtime": 1783374481,
+      "sha256": "8ef46b61c31c7678225a9f3564035797f469d9ca5e2bbeba3eb68561adedf564"
+    },
+    "p2kbAppNoteP2an006SizingCogTaskStacks": {
+      "path": "deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-stacks.yaml",
+      "mtime": 1783374481,
+      "sha256": "96950206bc2396ebd309158b6529e586fc06419dcf560a7d6fb1b6b34d3455a6"
+    },
+    "p2kbAppNoteP2an007DataStructuresNewFacilities": {
+      "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
+      "mtime": 1783374481,
+      "sha256": "b2dc8db17f1b706fd3952ca2490212f7659b262abca7dd686a15baed99108ffc"
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
@@ -6042,8 +6318,8 @@
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
-      "mtime": 1782849425,
-      "sha256": "0dfe41b0073e45abffd45eb3161bb114ba9db5176770ecee171d1eba619511de"
+      "mtime": 1783374514,
+      "sha256": "b4021bf6e5351d34cf9b8b2d75e9ff893375f513001ad44fbcd89dbfbb07e21e"
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
@@ -10287,8 +10563,8 @@
     },
     "p2kbSpin2Taskcont": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskcont.yaml",
-      "mtime": 1781981347,
-      "sha256": "5f81b2569a152c2cfc31f9155871977bc283348018bf55e6784889367309d0de"
+      "mtime": 1783379620,
+      "sha256": "18fde3f23fc1a45e88e0b146344435fb848713a476dc259ff80925216ccbe579"
     },
     "p2kbSpin2Taskhalt": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskhalt.yaml",
@@ -10297,33 +10573,23 @@
     },
     "p2kbSpin2Taskid": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskid.yaml",
-      "mtime": 1777496128,
-      "sha256": "83a56eeedcbaa79fc6eacae3b354aed3402d45b9cdecc70612bb1ab4115c82cb"
+      "mtime": 1783379620,
+      "sha256": "e0dfae6aae3b180a092241f5c5f2c9b4ff61ef37e3ec43a04a82249cdc509813"
     },
     "p2kbSpin2Tasknext": {
       "path": "deliverables/ai/P2/language/spin2/methods/tasknext.yaml",
-      "mtime": 1777496128,
-      "sha256": "83a99f0a8debb9ecec04c04219f0d32125b845b5f0b319cd91907b21c394697a"
-    },
-    "p2kbSpin2Taskresume": {
-      "path": "deliverables/ai/P2/language/spin2/methods/taskresume.yaml",
-      "mtime": 1781981347,
-      "sha256": "e1314fa1467719a632d9d099a45ebb0ae43596f3e6d306dabb50df8eb93d7053"
+      "mtime": 1783379620,
+      "sha256": "a2f5c8e2228ef3d49d793bfa10295c6dac1f04475285afefc5b53fa7754b5e4a"
     },
     "p2kbSpin2Taskspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskspin.yaml",
-      "mtime": 1781981347,
-      "sha256": "41d8770603944544cd2598a8426dd6da3a7d0cb10b817471740d69cca0057063"
+      "mtime": 1783379620,
+      "sha256": "72d2801f66e24271a6863ad67173cc8722429325f1e21ea08a4c7a44a58af46f"
     },
     "p2kbSpin2Taskstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskstop.yaml",
       "mtime": 1781981347,
       "sha256": "ea5da88fee57afbe1d67d1f7ba54720b5e401bdee565329e382b5e259c751c51"
-    },
-    "p2kbSpin2Taskwait": {
-      "path": "deliverables/ai/P2/language/spin2/methods/taskwait.yaml",
-      "mtime": 1764449566,
-      "sha256": "ebb959d4ad78bfac7826a3e9cdd60c5fa05e167dff55653213e0ef4e580d6ec5"
     },
     "p2kbSpin2Trunc": {
       "path": "deliverables/ai/P2/language/spin2/methods/trunc.yaml",
@@ -10927,8 +11193,8 @@
     },
     "p2kbSpin2Spin2EventDispatcher": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_event_dispatcher.yaml",
-      "mtime": 1764449566,
-      "sha256": "c177bb023c6dc9d8c2687789d04dcc0d65d34df157168aa0b89b0bd0f34e357e"
+      "mtime": 1783379620,
+      "sha256": "4310da13755456c9e4dbbb991fd314ac60fe069606e4b97e25312f3764ecd2b7"
     },
     "p2kbSpin2Spin2LatestWinsMailbox": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml",
@@ -10977,8 +11243,8 @@
     },
     "p2kbSpin2Spin2SharedMemory": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_shared_memory.yaml",
-      "mtime": 1764449566,
-      "sha256": "8cc485386da3cd0e97d2d13ff1cea944325fd9c397fea0af685ec0911b2675ea"
+      "mtime": 1783379620,
+      "sha256": "ce287f773c6848121eca7eb46653006c8e02d7a908c1cb5e84ea626965a86214"
     },
     "p2kbSpin2Spin2SlewEasingEngine": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_slew_easing_engine.yaml",
@@ -11187,8 +11453,8 @@
     },
     "p2kbSpin2RegTaskhlt": {
       "path": "deliverables/ai/P2/language/spin2/registers/taskhlt.yaml",
-      "mtime": 1781981347,
-      "sha256": "9480f249dadd59556c7c6186aeaf3c1249370763bddf98d1ce87b51143b4df7f"
+      "mtime": 1783379620,
+      "sha256": "70970d32df1ba3b4c64fe2175fe09190c17d688b455f94bfcb94855844a943c7"
     },
     "p2kbSpin2Sym": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/..yaml",
