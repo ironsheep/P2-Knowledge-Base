@@ -181,9 +181,11 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | X[5:4] | Mode | Post-Processing | Resolution | Speed |
 |--------|------|-----------------|------------|-------|
 | %00 | SINC2 Sampling | None | 8-14 bits | Fast |
-| %01 | SINC2 Filtering | Software diff | 8-14 ENOB | Medium |
-| %10 | SINC3 Filtering | Software 3x diff | 10-18 ENOB | Slow |
+| %01 | SINC2 Filtering | Software diff | 8-14 bits* | Medium |
+| %10 | SINC3 Filtering | Software 3x diff | 10-18 bits*† | Slow |
 | %11 | Bitstream | Custom | 1 bit/clock | Fastest |
+
+*Nominal resolution (the decimation word width), **not** measured ENOB — the effective resolution is lower and must be characterized on hardware (see Chapter 16). † The SINC3 figures assume an idealized doubling over SINC2 that the P2's ADC does not actually deliver.
 
 ### Gain Selection Guide
 

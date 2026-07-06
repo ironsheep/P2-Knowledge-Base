@@ -161,10 +161,10 @@ configuration_constants:
       - "8 clocks = 4 bits"
       - "128 clocks = 8 bits"
       - "8,192 clocks = 14 bits (practical max)"
-    sinc3_filtering:
-      - "16 clocks = 8 ENOB"
-      - "128 clocks = 14 ENOB"
-      - "512 clocks = 18 ENOB (max, limited by accumulator)"
+    sinc3_filtering:  # NOMINAL decimation word-width (bits), NOT measured ENOB
+      - "16 clocks = 8 bits (nominal)"
+      - "128 clocks = 14 bits (nominal)"
+      - "512 clocks = 18 bits (nominal max, limited by 27-bit accumulator)"
     bitstream:
       - "32 clocks = 32 new bits (max before overflow)"
 
@@ -178,6 +178,8 @@ notes:
   - "SINC2 supports up to 11,585 clocks/period"
   - "Prescale 27-bit to 32-bit (SHL #5) or post-trim (ZEROX #26) for overflow handling"
   - "Multiple pins can be configured simultaneously using pin group bits"
+  - "Resolution figures are NOMINAL decimation word-widths (theoretical bits), NOT ENOB. ENOB (Effective Number of Bits) is the MEASURED effective resolution after noise and distortion; true effective resolution on P2 is lower than the nominal figures and depends on the reference supply, source impedance, and temperature — it must be characterized on hardware."
+  - "The SINC3 column's apparent doubling of resolution over SINC2 is an idealized figure the P2 ADC does not actually deliver; treat SINC3 nominal figures as optimistic upper bounds, not attainable resolution."
 
 power_domain:
   fact: |

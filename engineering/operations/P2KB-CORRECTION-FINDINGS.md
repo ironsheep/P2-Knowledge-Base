@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-196`**
+**Next finding ID: `F-201`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -955,6 +955,76 @@ else
 130–133) and `pwm_analyzer()` (lines 457–461). The reader's `measure_states()` example (line 80)
 reads once and is **correct**. This is a narrow, genuine IOSP fix (candidate for a bundled
 v1.0.1) — separate from the withdrawn bit-31 claim. Verify each site before editing.
+
+---
+
+## Family C app-note authoring sweep (2026-07-06) — F-196…F-200
+
+> Surfaced while source-mining for the Family C app notes (P2AN005 Multitasking /
+> P2AN006 Stack Sizing / P2AN007 Data Structures). **YAML fixes are DEFERRED to a
+> yaml-head pass after the three drafts are staged for PDF review** (Stephen's
+> sequencing call 2026-07-06); logged here now per the always-log discipline. The
+> notes are authored *correctly against P2* regardless — they exclude/route around
+> every defect below. Authority: `pnut_ts` v1.55.0 + the Spin2 v55 keyword table
+> (`engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149`).
+
+### F-196 — `methods/taskwait.yaml` documents `TASKWAIT`, which does not exist in Spin2 — `CONFIRMED` (DEFERRED)
+`TASKWAIT` is **absent from the v55 keyword table** (`spin2-v55-text.txt:149` lists exactly
+TASKSPIN/TASKNEXT/TASKSTOP/TASKHALT/TASKCONT/TASKCHK/TASKID/NEWTASK/THISTASK/TASKHLT — no
+TASKWAIT). **Compile-probe (pnut_ts v1.55.0, `-d`):** `TASKWAIT(ready == 1)` →
+`error: Expected an instruction or variable` — **does not compile**. The YAML also (a) gives a
+signature `TASKWAIT(Condition)` matching neither the v51 mentions (which describe a `TASKWAIT(ticks)`
+tick-count wait), (b) **lacks the `{Spin2_v47}` version gate** every sibling carries, and (c) carries a
+forbidden interpreter `cycles:` timing field. **Proposed correction (deferred):** convert `taskwait.yaml`
+to an invalid-keyword stub in the shape of `taskresume.yaml` (which already does this for the invalid
+`TASKRESUME`), and remove the `TASKWAIT` back-references in `tasknext.yaml related:`. **Authoring:**
+`TASKWAIT` is excluded from P2AN005.
+
+### F-197 — `methods/taskspin.yaml` `returns: void` omits the expression-return form — `CONFIRMED` (DEFERRED)
+v55 (`spin2-v55-text.txt:39`) and a compile-probe confirm `TASKSPIN(...)` used as an expression
+**returns the assigned task number, or −1 if no slot was free**. The YAML declares `returns: type: void`,
+which is incomplete. **Proposed correction (deferred):** document the integer expression-return (task # /
+−1) alongside the statement form.
+
+### F-198 — `methods/taskid.yaml` + `registers/taskhlt.yaml` assert "main task is typically ID 0" unsourced — `NEEDS-VERIFICATION` (DEFERRED)
+Both files state the main/host task is (typically) ID 0; the v55 keyword table does not state this. Reads
+as inference. **Proposed correction (deferred):** verify on hardware (Stephen) or soften/remove the claim.
+P2AN005 does not rely on any fixed main-task ID.
+
+### F-199 — `patterns/implementation/spin2_shared_memory.yaml` uses P1 `lockset()`/`lockclr()` — `CONFIRMED` (DEFERRED)
+Lines ~12/14/17 use `lockset()`/`lockclr()`, which are **Propeller 1** methods and **do not exist in P2
+Spin2** (P2 uses `LOCKTRY`/`LOCKREL` with `LOCKNEW`/`LOCKRET`/`LOCKCHK`) — the pattern would fail to compile
+under `pnut_ts`. **Proposed correction (deferred):** rewrite to the P2 `LOCKTRY`/`LOCKREL` idiom (spin-acquire
+`repeat until locktry(id)`, release on all paths). **Authoring:** P2AN007 codes the real P2 locks and never
+cites the P1 form.
+
+### F-200 — `patterns/implementation/spin2_event_dispatcher.yaml` is SPSC-only but unscoped — `CONFIRMED` (DEFERRED)
+The `post_event` queue is correct only single-producer/single-consumer; used multi-producer it races (no lock
+on the head advance), and the file does not state the constraint. **Proposed correction (deferred):** add the
+SPSC scope note (and point multi-writer use at a lock-guarded queue). **Authoring:** P2AN007's R4 shows the
+lock-guarded multi-writer form explicitly.
+
+---
+
+## ADC "ENOB" misuse — nominal decimation width printed as measured effective resolution (2026-07-06) — F-201
+
+### F-201 — Silicon-Doc-inherited ENOB misuse in the SINC ADC resolution tables — `DONE (2026-07-06)`
+> **CONFIRMED (definitional + primary-authority).** The P2 Silicon Doc labels the SINC filter columns
+> "Post-diff ENOB" and its footnote defines *"ENOB = Effective Number of Bits, **or the sample
+> resolution**"* — conflating the two. By definition (IEEE Std 1241) ENOB is the **measured** effective
+> resolution derived from SINAD; the table values are **nominal decimation word-widths**, not ENOB. The
+> P2 designer **Chip Gracey** has conceded this on record (P2AN001 research thread): *"I never did find
+> out how you computed the ENOB in the Silicon Doc"* and *"optimistic doubling of ENOB would only be if
+> we had a second-order analog modulator. Need to change the docs."* Community feedback (Christof Eb.,
+> 2026-07-06) independently flagged *"ENOB=18 is total nonsense."*
+> **APPLIED 2026-07-06** — relabeled the ENOB cells → nominal "bits" and added the nominal-vs-measured
+> caveat plus the "SINC3 doubling is not achieved on P2" caveat in:
+> - `deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml` (`sinc3_filtering` values + two `notes`) — YAML parse + crossref 100% clean.
+> - IOSP User Guide opus-master: §16.3 Resolution/Sample-Rate table + footnote + the "Beyond 14 bits" caveat, and Appendix D mode-comparison chart. (Ships in **IOSP v1.0.3**.)
+> **No effective-resolution number is printed** (none is characterized — consistent with the
+> P2AN001/P2AN003 defer-ENOB stance and **G-003**). The appendix glossary line ("ENOB — Effective number
+> of bits") is a correct definition and was kept. Full analysis: the ADC/ENOB community-feedback capture
+> (`engineering/operations/questions/adc-enob-community-feedback-2026-07-06.md`). Green Book (retired) intentionally not touched.
 
 ---
 

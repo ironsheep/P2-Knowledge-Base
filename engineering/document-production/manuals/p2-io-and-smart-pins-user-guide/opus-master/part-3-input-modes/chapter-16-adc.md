@@ -91,19 +91,21 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 
 ### Resolution and Sample Rate
 
-| X[3:0] | Sample Period | SINC2 Sample | SINC2 Filter | SINC3 Filter | Bitstream |
-|--------|---------------|--------------|--------------|--------------|-----------|
+| X[3:0] | Sample Period | SINC2 Sample | SINC2 Filter | SINC3 Filter† | Bitstream |
+|--------|---------------|--------------|--------------|---------------|-----------|
 | %0001 | 2 clocks | 2 bits | - | - | 2 new bits |
-| %0011 | 8 clocks | 4 bits | 4 ENOB | - | 8 new bits |
-| %0101 | 32 clocks | 6 bits | 6 ENOB | 10 ENOB | 32 new bits |
-| %0111 | 128 clocks | 8 bits | 8 ENOB | 14 ENOB | overflow |
-| %1001 | 512 clocks | 10 bits | 10 ENOB | 18 ENOB | overflow |
-| %1011 | 2048 clocks | 12 bits | 12 ENOB | overflow | overflow |
-| %1101 | 8192 clocks | 14 bits | 14 ENOB | overflow | overflow |
+| %0011 | 8 clocks | 4 bits | 4 bits | - | 8 new bits |
+| %0101 | 32 clocks | 6 bits | 6 bits | 10 bits | 32 new bits |
+| %0111 | 128 clocks | 8 bits | 8 bits | 14 bits | overflow |
+| %1001 | 512 clocks | 10 bits | 10 bits | 18 bits | overflow |
+| %1011 | 2048 clocks | 12 bits | 12 bits | overflow | overflow |
+| %1101 | 8192 clocks | 14 bits | 14 bits | overflow | overflow |
 
-*ENOB = Effective Number of Bits*
+*The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on your own hardware (see §16.8 Accuracy Considerations).*
 
-> **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. Reaching further is possible by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — the absolute resolution actually achieved depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Treat any specific ENOB figure as a bench result for a *particular* rig, not a datasheet value.
+† **SINC3 Filter:** the higher SINC3 figures assume an idealized doubling over SINC2 that the P2's ADC does not actually deliver — treat them as optimistic upper bounds, not attainable resolution.
+
+> **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. Reaching further is possible by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — and these are *nominal* resolutions, the bit-width the accumulation produces. The *effective* number of bits (ENOB) actually measured is lower still, because it accounts for noise and distortion; it depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Any specific ENOB figure is a bench result for a *particular* rig, never a datasheet value.
 
 ### Sample Rate Calculation
 
