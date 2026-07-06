@@ -43,8 +43,8 @@ Per manual being released:
 3. **Record freshness + sync dashboards**: append/update the manual's `PUBLISH` line in the
    Platform Freshness Ledger (`PUBLICATION-ROSTER.md`) at the PDF's mtime; update its roster
    row/status; prune absorbed `PLATFORM` lines; **and (3c, mandatory) sync the two roster-mirror
-   dashboards** — `engineering/document-production/README.md` ("Live publications") and the
-   `engineering/README.md` front-door Manual row.
+   dashboards** — `engineering/document-production/README.md` (the status matrices — a release
+   moves the doc into **Done**) and the `engineering/README.md` front-door Manual row.
 4. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
 5. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
    `raw.githubusercontent.com` download links). Do NOT execute.
@@ -227,19 +227,21 @@ Then **prune**: drop any `PLATFORM` line that now sits below a `PUBLISH` line fo
 consuming manual (fully absorbed — git keeps the history). Update the freshness status table
 so this manual reads `✅ current`.
 
-**3b — roster row + status.** Update the manual's row in the Live table: version, the status
-columns (e.g., `Platform ⏳ → ✅` on a migration; `Released ✅`), and the Notes. Fix any
-now-stale prose elsewhere in the roster that the release falsifies (e.g., "awaiting
-migration", "only X remains").
+**3b — roster row + status.** The roster is organized **by lifecycle status** (Done · In progress
+· Upcoming · Abandoned) with a Type column. On a release, **move the document's checkbox row into
+the `## Done` matrix** (from `## In progress`/`## Upcoming` if it was there), set its version + gate
+columns (e.g., `Platform ⏳ → ✅`; `Released ✅`), and update its entry in the Done `### Detail`
+list. Fix any now-stale prose the release falsifies (e.g., "awaiting migration", "only X remains").
 
 **3c — sync the manual-status dashboards (MANDATORY — these MIRROR the roster).** Two
 engineering dashboards restate the roster's per-manual status and **drift on every release** if
 not updated in lockstep. They are deterministic roster mirrors — NOT the "broader docs" Phase 4
 deliberately leaves alone — so update them HERE, every release (this is the manual-release
 analogue of release-yamls' dashboard-ledger step):
-- **`engineering/document-production/README.md`** — the "Live publications (synced to roster)"
-  table. Set this manual's row to match the roster row you just wrote in 3b (version, pp, date,
-  one-line note). If the manual was previously *upcoming*, move it into the live table.
+- **`engineering/document-production/README.md`** — the status-mirror tables (**Done** / In
+  progress / Upcoming / Abandoned). Move this manual's row into **Done** and set version/pp to
+  match the roster row you wrote in 3b. If it was previously in In progress/Upcoming, remove it
+  from there.
 - **`engineering/README.md`** — the front-door **Manual** row. Update its one-line manual-head
   summary (e.g., the `<Manual> vX.Y.Z ✅ shipped` fragment) to the new version; while you're in
   that cell, correct any *sibling* manual it still misstates (these front-door summaries lag).

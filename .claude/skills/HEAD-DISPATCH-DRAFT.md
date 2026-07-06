@@ -207,21 +207,26 @@ comparable to the just-produced streamer manual.
 
 The **manual head is not flat** — it has a *type*, and the work on it has a *scope*.
 
-**Type — recorded in `PUBLICATION-ROSTER.md`, now the complete + authoritative registry:**
-- **Live** — manual (6) or presentation (AI Privacy) — consistency-bound.
-- **In development / parked** — intended; may be a pre-production walk-away
-  (Spin2 Ref). *Not* orphaned (intent, not state, is the discriminator).
-- **Instrument** — test/standards harness (P2 Layout Torture Test);
-  manual-shaped, generates PDFs, never released; serves an effort. **Its
-  analysis (`audit/`) is versioned with it** — an instrument's analysis is
-  durable product, not transient release-audit, so its `audit/` gets a
-  `.gitignore` exception (the general `manuals/*/audit/` ignore stays for
+**Status + Type — recorded in `PUBLICATION-ROSTER.md` (status-first since 2026-07-05), now the
+complete + authoritative registry.** The roster groups documents by **lifecycle status**
+(`## Done` · `## In progress` · `## Upcoming` · `## Abandoned`) and tags each with a **Type**
+(manual · app-note · guide · instrument). Dispatch reads both:
+- **Done** — shipped; released manuals + the presentation guide (AI Privacy) — the technical
+  manuals here are **consistency-bound**. → resume.
+- **In progress** — actively built (Architect's Guide, XBYTE, Single-Step) **plus the
+  `instrument`** (P2 Layout Torture Test; manual-shaped, generates PDFs, never released, serves an
+  effort). → resume; an instrument resumes into the **effort it serves**, never the live set.
+  **Its analysis (`audit/`) is versioned with it** — durable product, not transient release-audit,
+  so its `audit/` gets a `.gitignore` exception (the general `manuals/*/audit/` ignore stays for
   publications).
-- **Orphaned** — not carrying forward (Green Book, superseded by IO&SP).
+- **Upcoming** — planned, not started (Spin2 Ref; app-note candidates B2/B3/C1–C3 + standalone
+  USB). → resume to begin, or add-new if no folder exists yet.
+- **Abandoned** — not carrying forward (Green Book, superseded by IO&SP). → confirm-revive; never
+  silently resume.
 
 Physical signals (the `workspace|manuals|outbound` folder triad, a generated
-PDF) prove *existence/progress*, never *category* — instruments have both.
-Category = intent, read from the roster. A folder with **no** roster entry =
+PDF) prove *existence/progress*, never *status* — instruments have both.
+Status = intent, read from the roster. A folder with **no** roster entry =
 **anomaly to reconcile**, not a guess.
 
 **Scope of the work — plan location (resolves the `PLAN_DIR` sentinel + the

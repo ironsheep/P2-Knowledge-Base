@@ -1,116 +1,163 @@
 # Publication Roster
 
 Tracks every **manual-shaped** publication and document instrument in
-`engineering/document-production/`, by category. The categories drive both
-**consistency scope** (only the live set must stay mutually consistent) and
-**how skills resume work** (e.g. `whats-next` reads this roster to decide
-resume-vs-revive-vs-new).
+`engineering/document-production/`, **by lifecycle status** — shipped work reads at
+the top, abandoned work last:
 
-Categories: **Live** (in front of the community) · **In development / parked**
-(intended; may be a pre-production walk-away — *not* orphaned) · **Instruments**
-(test/standards harnesses, not publications) · **Orphaned** (not carrying
-forward). The discriminator between *parked* and *orphaned* is **intent**, not
-state — a started-then-paused doc is parked if we still mean to ship it.
+**Done** (shipped) → **In progress** (actively being built) → **Upcoming** (planned,
+not started) → **Abandoned** (retired, last).
+
+Within each status, the **Type** column groups the three kinds of document —
+**manual · app-note · guide · instrument**. Every tracked document keeps its
+**checkbox gate row** (Draft · Assets · Platform · Chip · Comm · Released), so you can
+still scan any gate down a column.
+
+Two properties the layout preserves: **consistency scope** — the released + in-progress
+technical manuals on the shared platform stack (see **Shared conventions** below) must
+stay mutually consistent — and **how skills resume work** (`whats-next` reads a
+document's status + type to decide resume-vs-revive-vs-new: Done/In-progress → resume,
+Upcoming → resume-or-add-new, Abandoned → confirm-revive, instrument → resume into its
+effort).
 
 **Invariant:** every `workspace|manuals|outbound/<name>` manual folder — and every
-`app-notes/<P2ANxxx>/` note in production — appears in exactly **one** section below. A
-folder with no entry is an **anomaly to reconcile** (classify it), not a silent guess.
+`app-notes/<P2ANxxx>/` note in production — appears in exactly **one** status section
+below. A folder with no entry is an **anomaly to reconcile** (classify it), not a silent guess.
 
-*Established: 2026-05-28 — Updated: 2026-06-09 (Platform column corrected against
-on-disk reality: I/O & Smart Pins / Assembly / DeSilva are bespoke forks ⏳ — NOT
-yet migrated; Single-Step / Streamer confirmed ✅ on the shared platform stack).
-2026-06-05: categorized into live / parked / instruments / orphaned; Green Book
-retired in favor of the I/O & Smart Pins guide.*
+*Established 2026-05-28. **Restructured 2026-07-05** from category-first
+(live/parked/instrument/orphaned) to **status-first** (done/in-progress/upcoming/abandoned)
+with a Type column, so shipped work is on top and every tracked document keeps its checkbox
+gate row.*
 
 ---
 
-## Live publications
+## Done — shipped (and the state each is in)
 
-These are the live working set. Any shared visual or editorial convention MUST be
-kept consistent across the live set — a change to one that affects a shared
-convention is a change to all of them.
+The released set. The technical manuals here (all on the shared `p2kb-platform` stack) are the
+**consistency-bound live set** — a change to a shared convention in one is a change to all (see
+**Shared conventions** below). Every document is one checkbox row; per-document detail follows.
 
-**Status pipeline** — each manual migrates left → right through these gates. `Chip`
-and `Community` review are **independent** (a manual can be released and
-community-reviewed while chip review is still outstanding — see Assembly / DeSilva).
-Markers: ✅ done · 🔄 in review / in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached.
-`Platform` = migrated onto the shared **`p2kb-platform`** display stack and its
-cross-publication conventions (the **Rule** at the bottom); `—` = a different class
-that does not ride the shared stack.
+| Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
+|----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
+| Getting Started | manual | 1.0.0 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| I/O & Smart Pins | manual | 1.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Assembly Reference | manual | 3.1.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| DeSilva Tutorial | manual | 3.0.1 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Debug Window | manual | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| Streamer Guide | manual | 1.0.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| P2AN001 — ADC Instrumentation | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| AI Privacy Guide | guide | — | ✅ | ✅ | — | ✅ | ✅ | ✅ |
 
-| Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
-|-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
-| Getting Started with the Propeller 2 | `p2-getting-started-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding |
-| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.2 released 2026-07-05** (396pp, Community Review Edition) — Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference |
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.1.2 (2026-07-04)** — F-193 patch: event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx family) document the SETQ-armed timeout (EF-020, HW-verified); 505pp, render-verified. Prior v3.1.1 (2026-06-29): Ch.1 execution-model refinements + §2.8.3 Operation:-line guidance. chip review outstanding |
-| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding. |
-| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release. |
-| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.4 (2026-07-04)** community-review edition — forum-provenance patch (HDMI-audio blanking budget sourced to the HDMI data-island spec §15.2 · DVI/HDMI blanking floors framed as display-specific observations · SINC2 measurement-period bound reframed §10.4); render-verified 75pp = prior, 0 glyph drops; `audit/forum-provenance-audit-2026-07-04.md`. Prior v1.0.3 (2026-07-03) Wave-3 designer-authoritative additions + cross-ref filter (82 links/0 dead). chip review outstanding |
-| AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
+Legend: ✅ done · 🔄 in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached. `Chip`/`Comm`
+review are **independent** gates (a manual can be released with chip review still outstanding — see
+Assembly/DeSilva). `Platform` ✅ = on the shared `p2kb-platform` stack (`—` = a class that doesn't
+ride it, e.g. the presentation-class AI Privacy Guide). App notes carry no separate chip-review gate
+(`—`) and ship a YAML companion + example ZIP (the four-artifact model — see `app-notes/README.md`).
 
-**Slug** is the one folder name each manual uses across all three trees —
-`manuals/<slug>/`, `workspace/<slug>/`, and `outbound/<slug>/`. When a manual needs
-more detail than fits in **Notes**, add a slim `↳` continuation row (markers blank,
-detail in Notes).
+### Detail
 
-## In development / parked (NOT live)
+Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<slug>/`,
+`outbound/<slug>/` (app notes: `app-notes/<P2ANxxx>/`, companion YAML under `deliverables/ai/P2/`).
 
-Intended for production but not released — actively progressing or a
-pre-production walk-away we still mean to ship. Free to evolve independently;
-they do **not** constrain the live set and are **not** constrained by it until
-promoted. Reconcile conventions against this roster at promotion.
+**Getting Started with the Propeller 2** · `p2-getting-started-guide` · manual
+**v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding.
 
-| Publication | Workspace | State |
-|-------------|-----------|-------|
-| Spin2 Reference Manual | `workspace/spin2-reference-manual/` | parked; may go forward |
-| **P2 XBYTE Programming Guide** | `manuals/p2-xbyte-programming-guide/` + `workspace/p2-xbyte-programming-guide/` | **in development — STOOD UP 2026-06-26, v0.1.0 first-draft authored.** New manual modeled on the Streamer guide (layout/richness/two-register voice), twin on the shared `p2kb-platform-*` stack. Teaches the XBYTE hardware bytecode engine + the skip family (SKIP/SKIPF/EXECF) + FIFO/LUT dispatch, then builds a minimal custom VM and a tiny illustrative **6502** emulator (+ a 6809 SETQ2 vignette). **Scope narrowed with Stephen (PLANNING.md §0):** external P2 projects (Arc8de, Yume suite) → **Appendix C links only**, not narrative; "systems similar to the P2" (IBM Series/1 EDL anchor, Transputer/Occam, XMOS, GreenArrays, Cell SPE) **DEFERRED** out of this edition. Full triad stood up (creation-/voice-guide, MANUAL-DESCRIPTOR, CHANGELOG, opus-master, grounding digest) + workspace wiring. NEXT: prepare-manual → Stephen generates the v0.1.0 review PDF on the Forge. Subtitle "Building Interpreters and Emulators on the Propeller 2". |
-| **The P2 Architect's Guide** (design book) | `manuals/p2-architect-guide/` + `workspace/p2-architect-guide/` | **in development — SPLIT in progress (2026-06-24).** The v0.1.0 first draft (4 ch, 48pp, born on the unified `p2kb-platform-*` stack) is being divided into two books after a walkthrough review (`manuals/p2-architect-guide/audit/walkthrough-feedback-2026-06-24.md`). **This folder retains the design / realization book** — *The P2 Architect's Guide — Designing Real Systems on the Propeller 2* — keeping Ch4 (functional decomposition) + a new front-end (peripherals → buses → pin budget) + a realization / AI-assist pillar. Orientation Chs 1–3 split out to **Getting Started**, now released v1.0.0 (see the Live table). Charter / voice / changelog to be re-cut to the design scope. |
+**P2 I/O & Smart Pins User Guide** · `p2-io-and-smart-pins-user-guide` · manual
+**v1.0.2 released 2026-07-05** (396pp, Community Review Edition) — Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference.
 
-## Instruments (not publications)
+**P2 Assembly Language Reference** · `p2-assembly-language-manual` · manual
+**v3.1.2 (2026-07-04)** — F-193 patch: event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx family) document the SETQ-armed timeout (EF-020, HW-verified); 505pp, render-verified. Prior v3.1.1 (2026-06-29): Ch.1 execution-model refinements + §2.8.3 Operation:-line guidance. chip review outstanding.
 
-Test / standards harnesses. Manual-shaped (full folder triad, generate PDFs) but
-never released; each serves an **effort**, not the community. Not
-consistency-bound. Resume into the effort it serves. **An instrument's analysis
-IS its product** — unlike a publication's transient release-audit, its `audit/`
-is **git-tracked** alongside its cases (see the `.gitignore` exception), so the
-instrument, its analysis, and the fixes it drives version together.
+**DeSilva PASM2 Tutorial** · `p2-pasm-desilva-style` · manual
+**v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding.
 
-| Instrument | Workspace | Serves |
-|------------|-----------|--------|
-| P2 Layout Torture Test | `workspace/p2-layout-torture-test/` | the manual layout-standards effort (`methodology/manual-layout-standards-*`) |
+**P2 Debug Window Manual** · `p2-debug-window-manual` · manual
+**v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release.
 
-## Orphaned (not carrying forward)
+**P2 Streamer Programming Guide** · `p2-streamer-programming-guide` · manual
+**v1.0.4 (2026-07-04)** community-review edition — forum-provenance patch (HDMI-audio blanking budget sourced to the HDMI data-island spec §15.2 · DVI/HDMI blanking floors framed as display-specific observations · SINC2 measurement-period bound reframed §10.4); render-verified 75pp = prior, 0 glyph drops; `audit/forum-provenance-audit-2026-07-04.md`. Prior v1.0.3 (2026-07-03) Wave-3 designer-authoritative additions + cross-ref filter (82 links/0 dead). chip review outstanding.
 
-Started, then retired by decision — superseded or abandoned. Kept for history;
-**not** resumed without an explicit revive decision; never consistency-bound.
+**P2AN001 — Single-Pin ADC Instrumentation** · `P2AN001` · app-note
+**v1.0.1 (2026-07-03, 20pp)** — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16. v1.0.1 = editorial compile-status wording patch.
 
-| Publication | Workspace | Why retired |
-|-------------|-----------|-------------|
-| Smart Pins Tutorial ("Green Book") | `workspace/p2-smart-pins-tutorial/` | superseded by the I/O & Smart Pins User Guide (newer generation) |
+**P2AN002 — CORDIC for Real Work** · `P2AN002` · app-note
+**v1.0.0 (2026-07-03, 14pp)** — lead of the Math family (B1); techniques-catalog (6 recipes + FOC/Park ceiling, OBEX #2811).
 
-## Application Notes (`P2ANxxx`)
+**P2AN003 — DAC & Analog Signal Generation** · `P2AN003` · app-note
+**v1.0.0 (2026-07-03, 19pp)** — Family A1 (output sibling to ADC); shared dithered-DAC output stage + 5 recipes (sample playback, waveform synthesis, dithering, ADC→DAC passthrough, mixing & panning) + reSound 32-stream ceiling (OBEX #2861). Deep audit (4-agent fan-out + hand-verify) caught + fixed a HIGH Recipe-4 scaling bug pre-release. Cites IOSP Ch.10/§18.3.
 
-A distinct document class (see `app-notes/README.md`) — application-driven,
-single-technique, one runnable example, each shipping a **YAML companion** (the
-four-artifact model). Canonical source lives in `app-notes/<P2ANxxx>/opus-master/`; each
-note in production also has a `workspace/<P2ANxxx>/` render folder (covered by the folder
-invariant above). Notes ride the shared `p2kb-platform-*` stack (K = 76) and are therefore
-bound by the **shared conventions below**, but they are **not** part of the live-publication
-consistency set until released.
+**P2AN004 — Frequency / Period / Pulse Measurement** · `P2AN004` · app-note
+**v1.0.0 (2026-07-03, 14pp)** — Family A2 (timing instrumentation); 3 recipes (RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob). First app note with rendered circuit/timing diagrams (new shared `p2kb-appnote-diagrams` library — circuitikz). Cites IOSP Ch.13-15.
 
-**The candidate backlog + production plan is its own register** —
-[`engineering/analysis/p2-app-note-roster.md`](../analysis/p2-app-note-roster.md) (families
-A/B/C, the standalone USB note, the disposition ledger). The table here tracks only notes
-**in production** (folder stood up); candidates stay in that register until they enter
-production.
+**AI Privacy Guide** · `ai-privacy-guide` · guide
+Released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`).
 
-| App note | Slug | State |
-|----------|------|-------|
-| **P2AN001 — Single-Pin ADC Instrumentation** | `P2AN001` | ✅ **v1.0.1 released 2026-07-03** (20pp) — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16; ships a YAML companion (`application-notes/p2an001-single-pin-instrumentation-adc.yaml`) + example ZIP. First app-note release; v1.0.1 = editorial compile-status wording patch. |
-| **P2AN002 — CORDIC for Real Work** | `P2AN002` | ✅ **v1.0.0 released 2026-07-03** (14pp) — lead of the Math family (B1); techniques-catalog (6 recipes + FOC/Park ceiling, OBEX #2811); ships a YAML companion + example ZIP. |
-| **P2AN003 — DAC & Analog Signal Generation** | `P2AN003` | ✅ **v1.0.0 released 2026-07-03** (19pp) — Family A1 (output sibling to ADC); techniques-catalog: shared dithered-DAC output stage + 5 recipes (sample playback, waveform synthesis, dithering, ADC→DAC passthrough, mixing & panning) + reSound 32-stream ceiling (OBEX #2861); ships a YAML companion + example ZIP. Deep audit (4-agent fan-out + hand-verify) caught + fixed a HIGH Recipe-4 scaling bug pre-release. Cites IOSP Ch.10/§18.3 (basic DAC surface). |
-| **P2AN004 — Frequency / Period / Pulse Measurement** | `P2AN004` | ✅ **v1.0.0 released 2026-07-03** (14pp) — Family A2 (timing instrumentation); techniques-catalog: 3 recipes (RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob instrument); deep audit (4-agent fan-out + hand-verify, 0 code defects). First app note with rendered circuit/timing diagrams (new shared `p2kb-appnote-diagrams` library — circuitikz). Ships a YAML companion + example ZIP. Cites IOSP Ch.13-15. |
+## In progress — actively being built
+
+Not part of the live consistency set until released; free to evolve independently, reconciled
+against the shared conventions at promotion. (`P2 Layout Torture Test` is an **instrument** — a
+tool serving an effort, never released — carried here while it's actively used.)
+
+| Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
+|----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
+| Architect's Guide | manual | v0.2.0 draft | ✅ | ⏳ | ✅ | | | |
+| XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
+| Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
+| P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
+
+### Detail
+
+**The P2 Architect's Guide** (design book) · `p2-architect-guide` · manual
+**in development — v0.2.0 draft; SPLIT completed (2026-06-24).** The v0.1.0 first draft (4 ch, 48pp, born on the unified `p2kb-platform-*` stack) was divided into two books after a walkthrough review (`manuals/p2-architect-guide/audit/walkthrough-feedback-2026-06-24.md`). **This folder retains the design / realization book** — *The P2 Architect's Guide — Designing Real Systems on the Propeller 2* — keeping Ch4 (functional decomposition) + a new front-end (peripherals → buses → pin budget) + a realization / AI-assist pillar. Orientation Chs 1–3 split out to **Getting Started** (now released v1.0.0, in Done). v0.2.0 draft PDF staged for review.
+
+**P2 XBYTE Programming Guide** · `p2-xbyte-programming-guide` · manual
+**in development — STOOD UP 2026-06-26, v0.1.0 first-draft authored.** New manual modeled on the Streamer guide (layout/richness/two-register voice), twin on the shared `p2kb-platform-*` stack. Teaches the XBYTE hardware bytecode engine + the skip family (SKIP/SKIPF/EXECF) + FIFO/LUT dispatch, then builds a minimal custom VM and a tiny illustrative **6502** emulator (+ a 6809 SETQ2 vignette). **Scope narrowed with Stephen (PLANNING.md §0):** external P2 projects (Arc8de, Yume suite) → **Appendix C links only**, not narrative; "systems similar to the P2" (IBM Series/1 EDL anchor, Transputer/Occam, XMOS, GreenArrays, Cell SPE) **DEFERRED** out of this edition. Full triad stood up (creation-/voice-guide, MANUAL-DESCRIPTOR, CHANGELOG, opus-master, grounding digest) + workspace wiring. NEXT: prepare-manual → Stephen generates the v0.1.0 review PDF on the Forge. Subtitle "Building Interpreters and Emulators on the Propeller 2".
+
+**P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
+On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
+
+**P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
+Test / standards harness — manual-shaped (full folder triad, generates PDFs) but **never released**; serves the manual layout-standards effort (`methodology/manual-layout-standards-*`), not the community. Not consistency-bound. **Its analysis IS its product** — its `audit/` is git-tracked alongside its cases (the `.gitignore` exception), so the instrument, its analysis, and the fixes it drives version together. Resume into the effort it serves.
+
+## Upcoming — planned, not yet started
+
+Manuals and app notes we intend to build. **App-note candidates — full rationale, examples-to-mine,
+and production sequence — live in the planning register**
+[`analysis/p2-app-note-roster.md`](../analysis/p2-app-note-roster.md); the rows here are that
+pipeline at a glance (blank gates = not started).
+
+| Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
+|----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
+| Spin2 Reference Manual | manual | — | | | | | | |
+| Extended-Precision Integer Math (B2) | app-note | — | | | | | | |
+| Fixed-Point Math (B3) | app-note | — | | | | | | |
+| Cooperative Multitasking / TASK (C1) | app-note | — | | | | | | |
+| Data Structures, in-cog + cross-cog (C2) | app-note | — | | | | | | |
+| Sizing Cog & Task Stacks (C3) | app-note | — | | | | | | |
+| USB Device/Host, standalone | app-note | — | | | | | | |
+
+### Detail
+
+**Spin2 Reference Manual** · `spin2-reference-manual` · manual — parked; may go forward.
+
+**App-note candidates** (full detail + production sequence → the [planning register](../analysis/p2-app-note-roster.md)):
+- **B2 · Extended-Precision Integer Math** — 64/96/128-bit composed from carry-chain ADDX/SUBX + `muldiv64` (OBEX #5189).
+- **B3 · Fixed-Point Math on the P2** — fractional math with no FPU; recurring P2-specific technique.
+- **C1 · Cooperative Multitasking with Spin2 TASK Methods** — the `{Spin2_v47}` TASK\* family; P1 AN014 successor.
+- **C2 · Data Structures with the New Language Facilities** — STRUCT (in-cog) + worked cross-cog FIFOs/queues; P1 AN003 successor. (The *contract decision* — which structure, why — stays with the Architect's Guide.)
+- **C3 · Sizing Cog & Task Stacks** — `TASKSPIN` stack sizing as a worked recipe; companion to C1; P1 AN019 successor.
+- **USB Device/Host (standalone)** — high value, hard; its example-mining ran early as the IOSP Release Campaign's USB study.
+
+## Abandoned — retired, not carrying forward (last)
+
+Started, then retired by decision — superseded or abandoned. Kept for history; **not** resumed
+without an explicit revive decision; never consistency-bound.
+
+| Document | Type | Why retired |
+|----------|------|-------------|
+| Smart Pins Tutorial ("Green Book") · `p2-smart-pins-tutorial` | manual | superseded by the I/O & Smart Pins User Guide (newer generation) |
 
 ---
 
@@ -233,15 +280,18 @@ callout change is cosmetic for manuals that use no `::: tip` / `::: caution` blo
 regen wave is due but low-urgency for them). Only `p2-debug-window-manual` was built on
 top of the 06-12 platform.
 
-| Manual | Status | Notes |
-|--------|--------|----------------------------------------------------|
-| `p2-debug-window-manual` | ✅ current | **v1.0.1 released 2026-06-26** (156pp); accuracy + typography refresh; built on the latest platform (06-25 glyph-fallback foundation + Plex) |
-| `p2-assembly-language-manual` | ✅ current | **v3.1.2 released 2026-07-04** (505pp); F-193 event-wait SETQ-timeout doc patch; first to render the uppercase-mnemonic platform filter |
-| `p2-pasm-desilva-style` | ✅ current | **v3.0.1 released 2026-06-25** (162pp); built on the latest platform (incl. the 06-25 ✓/✗/θ glyph fallback) |
-| `p2-streamer-programming-guide` | ✅ current | **v1.0.4 released 2026-07-04** (75pp); forum-provenance patch (§15.2 HDMI-audio/blanking, §10.4 SINC2 bound); built on the latest platform; render-verified, 0 missing chars, outline complete. Prior v1.0.3 Wave-3 additions + cross-ref filter |
-| `p2-single-step-debugger-manual` | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 platform edit |
-| `p2-io-and-smart-pins-user-guide` | ✅ current | **v1.0.2 released 2026-07-05** (396pp); Ch.13 P_STATE_TICKS single-read example patch (F-195, matches KB v1.14.1); prior v1.0.1 hardware-verified patch (F-193 Ch.5 + F-192 Ch.15); latest platform (cross-ref filter pilot) |
-| `p2-layout-torture-test` | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
+Freshness = is the manual's PDF built on the current `platform/` stack? (Release history
+lives in the Live-section detail above — not repeated here.)
+
+| Manual | Ver | Freshness | Why |
+|--------|-----|:--:|-----|
+| `p2-debug-window-manual` | 1.0.1 | ✅ current | built on latest platform (06-25 glyph-fallback + Plex) |
+| `p2-assembly-language-manual` | 3.1.2 | ✅ current | first to render the uppercase-mnemonic filter |
+| `p2-pasm-desilva-style` | 3.0.1 | ✅ current | incl. the 06-25 ✓/✗/θ glyph fallback |
+| `p2-streamer-programming-guide` | 1.0.4 | ✅ current | on latest platform |
+| `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit |
+| `p2-io-and-smart-pins-user-guide` | 1.0.2 | ✅ current | on latest platform (cross-ref filter pilot) |
+| `p2-layout-torture-test` | — | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`
 appends/updates a `PUBLISH` line when a generation is confirmed clean; any edit to a

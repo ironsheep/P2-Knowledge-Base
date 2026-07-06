@@ -10,18 +10,20 @@
 > resumes your thread, and routes you into the right head. This README is what you
 > read to see the *whole board* and decide where to push next.
 >
-> _Last refreshed: 2026-06-24._
+> _Last refreshed: 2026-07-05._
 
 ## The heads — status & next action
 
+Glance only — one line per head; each head's own dashboard (Dashboard column) holds the detail.
+
 | Head | Dashboard | Status at a glance | Next actionable |
 |------|-----------|--------------------|-----------------|
-| **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | 32 logical sources · 8 open gaps + 3 expert-Qs · **Smart Pins (Titus) rev5 ✅ today** | **Smart Pins manual cert audit** (uses Titus); then **5B verification fill** (~20 sources missing cross-source, image debt) |
-| **YAML (P2KB)** | [`operations/YAML-HEAD-DASHBOARD.md`](operations/YAML-HEAD-DASHBOARD.md) · register → [`P2KB-CORRECTION-FINDINGS.md`](operations/P2KB-CORRECTION-FINDINGS.md) · data → `deliverables/ai/P2/` | **v1.11.0 in prep** — eval-header board model (10 boards standardized + HyperRAM authored + orphans removed) + F-161/F-160/F-162 · drains the Assembly-manual YAML gate · **open:** G-004/G-005 (Chip/HW-gated) | **Regenerate index + validate + release v1.11.0** |
-| **Manual** | [`document-production/README.md`](document-production/README.md) · roster → [`PUBLICATION-ROSTER.md`](document-production/PUBLICATION-ROSTER.md) | Getting-Started **v1.0.0** ✅ + Assembly **v3.1.2** ✅ + DeSilva **v3.0.1** ✅ + Debug-Window **v1.0.1** ✅ + Streamer **v1.0.4** ✅ + **I/O & Smart Pins v1.0.2 ✅ shipped 2026-07-05** · Single-Step in **tech review** | **I/O & Smart Pins User Guide v1.0.2** — Ch.13 P_STATE_TICKS single-read example patch (F-195, matches KB v1.14.1); prior v1.0.1 event-wait/A+B routing (F-193/F-192); cross-ref filter pilot. Next owned work: Architect's Guide + XBYTE guide; P2AN app-note series — **P2AN001 v1.0.1 + P2AN002 v1.0.0 + P2AN003 v1.0.0 + P2AN004 v1.0.0 ✅ released 2026-07-03** (ADC + CORDIC + DAC + freq/period/pulse; companion-schema pilot; P2AN004 adds rendered circuit/timing diagrams) |
-| **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ Integrated v2.1 (2025-09-12) · 113 P2 objects · served via p2kb MCP | **Delta re-scan** vs the 2025-09-12 baseline |
-| **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process + dashboard home; owns the corrections register & lessons-learned | (infrastructure — supports the content heads) |
-| **Quick Bytes** | [`quickbytes-integration/README.md`](quickbytes-integration/README.md) | 🔴 **NOT processed** — plans + scraper staged, ~15% discovered, never executed | **Parked at the bottom** — not moving soon (tracked so it isn't lost) |
+| **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | 32 sources · 8 open gaps + 3 expert-Qs | Smart Pins manual cert audit → 5B verification fill |
+| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.14.1** shipped · no open corrections (F-183 ingestion-tracked) | Next correction/enrichment as findings land |
+| **Manual** | [`document-production/README.md`](document-production/README.md) · [roster](document-production/PUBLICATION-ROSTER.md) | 7 live manuals + 4 app-notes · **I/O & Smart Pins v1.0.2** latest · Single-Step in review | Architect's Guide draft review; then XBYTE guide |
+| **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ v2.1 (2025-09-12) · 113 P2 objects · MCP-served | Delta re-scan vs the 2025-09-12 baseline |
+| **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process · owns register + lessons-learned | (infrastructure — supports the content heads) |
+| **Quick Bytes** | [`quickbytes-integration/README.md`](quickbytes-integration/README.md) | 🔴 NOT processed · ~15% discovered | Parked — not moving soon (tracked so it isn't lost) |
 
 ## How the heads work (the model)
 - **~70% of work is single-head run-to-completion; ~30% interleaved** — progress a head, set it aside,

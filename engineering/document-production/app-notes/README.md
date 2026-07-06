@@ -17,12 +17,14 @@ to the manuals for background). See the guides below for the full contract.
 
 ## The series
 
-| AN | Topic | Status | Notes |
-|---|---|---|---|
-| **P2AN001** | Single-Pin ADC Instrumentation | released v1.0.1 (2026-07-03) | the foundational first note + exemplar; rests on the enriched I/O & Smart Pins User Guide Ch.16 |
-| **P2AN002** | CORDIC for Real Work | released v1.0.0 (2026-07-03) | lead of the Math family (B1) |
-| **P2AN003** | DAC & Analog Signal Generation | released v1.0.0 (2026-07-03) | Family A1 (output sibling to ADC); techniques-catalog (5 recipes + reSound ceiling); cites IOSP Ch.10/§18.3 |
-| **P2AN004** | Frequency / Period / Pulse Measurement | ✅ v1.0.0 released 2026-07-03 | Family A2 (timing instrumentation); 3 recipes (RC-decay, light-to-frequency reciprocal counter, quadrature-knob) + rendered circuit/timing diagrams; ships YAML companion + example ZIP |
+| AN | Topic | Ver | Released |
+|---|---|---|:--:|
+| **P2AN001** | Single-Pin ADC Instrumentation | 1.0.1 | ✅ |
+| **P2AN002** | CORDIC for Real Work | 1.0.0 | ✅ |
+| **P2AN003** | DAC & Analog Signal Generation | 1.0.0 | ✅ |
+| **P2AN004** | Frequency / Period / Pulse Measurement | 1.0.0 | ✅ |
+
+Family, rationale, recipes-to-mine, and ceilings per note → the candidate/production register [`p2-app-note-roster.md`](../../analysis/p2-app-note-roster.md).
 
 > *Series starts at `001`, Parallax-style (no `AN000`); `P2AN000` was the experimental placeholder, now retired.*
 

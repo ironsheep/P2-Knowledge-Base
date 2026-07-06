@@ -1,12 +1,13 @@
 # Document Production Pipeline
 
-*Status synced to PUBLICATION-ROSTER 2026-06-12. The roster is the **source of truth** for
-publication state; this README mirrors its current snapshot. (The sections below the publications
-table still carry the older "shape" and await a separate refresh.)*
+*Status synced to PUBLICATION-ROSTER 2026-07-05. The roster is the **source of truth** for
+publication state; the tables here are a **glance-only mirror** (compact status matrices — no
+prose), with all per-publication detail in the roster.*
 
 > **Authoritative roster → [`PUBLICATION-ROSTER.md`](PUBLICATION-ROSTER.md)** — every manual-shaped
-> folder is categorized there exactly once (live / in-dev / instrument / orphaned), with the full
-> per-gate pipeline. The table below is a glance; the roster is the detail.
+> folder + app note appears there exactly once, organized **by lifecycle status**
+> (Done · In progress · Upcoming · Abandoned) with the full per-gate checkbox matrix + per-document
+> detail. The tables below are a glance; the roster is the detail.
 
 ## Production States
 
@@ -18,40 +19,45 @@ table still carry the older "shape" and await a separate refresh.)*
 | Released | ✅ | Published and available |
 | Deferred | ⏸️ | Valid but not current priority |
 
-## Live publications (synced to roster)
+## Done — shipped
 
-| Publication | Slug | State |
-|-------------|------|-------|
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ **Released v3.1.2** (505pp, 2026-07-04) — F-193 patch: event-wait instructions document the SETQ-armed timeout (EF-020, HW-verified); prior v3.1.1 Ch.1 execution-model refinements; chip review outstanding (external) |
-| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ **Released v3.0.1** (162pp, 2026-06-25) — accuracy re-audit (all examples pnut-ts-certified) + Plex typography refresh + example-library ZIP; both prior deferrals resolved; chip review outstanding |
-| AI Privacy Guide | `ai-privacy-guide` | ✅ **Released** — both reviews complete; presentation-class |
-| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ **v1.0.2** (396pp) released 2026-07-05 — Ch.13 P_STATE_TICKS single-read example patch (F-195, matches KB v1.14.1); prior v1.0.1 event-wait/A+B routing (F-193/F-192); maiden v1.0.0 2026-07-03; cross-ref filter pilot; 15-program example ZIP ("Blue Book") |
-| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | 🟢 draft, platform stack; **cover repaired 2026-06-12**; in technical review (chip + community) |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ **v1.0.4 released 2026-07-04** (75pp); forum-provenance patch (§15.2 HDMI-audio/blanking sourced to spec, §10.4 SINC2 bound reframed); prior v1.0.3 Wave-3 additions + cross-ref filter; chip review outstanding |
-| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ **v1.0.1 released 2026-06-26** (community review, 156pp); accuracy + typography refresh; 32-demo example library bundled |
+| Document | Type | Ver | pp | Released |
+|----------|------|-----|:--:|:--:|
+| Getting Started | manual | 1.0.0 | 25 | ✅ |
+| I/O & Smart Pins | manual | 1.0.2 | 396 | ✅ |
+| Assembly Reference | manual | 3.1.2 | 505 | ✅ |
+| DeSilva Tutorial | manual | 3.0.1 | 162 | ✅ |
+| Debug Window | manual | 1.0.1 | 156 | ✅ |
+| Streamer Guide | manual | 1.0.4 | 75 | ✅ |
+| P2AN001 — ADC Instrumentation | app-note | 1.0.1 | 20 | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | 14 | ✅ |
+| P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | 19 | ✅ |
+| P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | 14 | ✅ |
+| AI Privacy Guide | guide | — | — | ✅ |
 
-## In development / parked · Instruments · Orphaned (see roster for detail)
+## In progress
 
-| Publication | Slug | Category |
-|-------------|------|----------|
-| Spin2 Reference Manual | `spin2-reference-manual` | in development / parked |
-| P2 XBYTE Programming Guide | `p2-xbyte-programming-guide` | in development (v0.1.0 first draft) |
-| The P2 Architect's Guide | `p2-architect-guide` | in development (split in progress) |
-| P2 Layout Torture Test | `p2-layout-torture-test` | instrument (serves the layout-standards effort) |
-| Smart Pins Tutorial ("Green Book") | `p2-smart-pins-tutorial` | orphaned — superseded by the I/O & Smart Pins guide |
-
-## Application Notes (`P2ANxxx`) — synced to roster
-
-A distinct document class (see [`app-notes/README.md`](app-notes/README.md)). Candidate
-backlog + production plan: [`p2-app-note-roster.md`](../analysis/p2-app-note-roster.md).
-In production:
-
-| App note | Slug | State |
+| Document | Type | State |
 |----------|------|-------|
-| P2AN001 — Single-Pin ADC Instrumentation | `P2AN001` | ✅ **v1.0.1 released 2026-07-03** (20pp) — exemplar + companion-schema pilot (Family A0); ships YAML companion + example ZIP |
-| P2AN002 — CORDIC for Real Work | `P2AN002` | ✅ **v1.0.0 released 2026-07-03** (14pp) — Math family lead (B1); 6 recipes + FOC ceiling; ships YAML companion + example ZIP |
-| P2AN003 — DAC & Analog Signal Generation | `P2AN003` | ✅ **v1.0.0 released 2026-07-03** (19pp) — Family A1 (output sibling to ADC); techniques-catalog (5 recipes + reSound ceiling); ships YAML companion + example ZIP |
-| P2AN004 — Frequency / Period / Pulse Measurement | `P2AN004` | ✅ **v1.0.0 released 2026-07-03** (14pp) — Family A2 (timing); techniques-catalog (3 recipes) + rendered circuit/timing diagrams; ships YAML companion + example ZIP |
+| Architect's Guide | manual | v0.2.0 draft (design book) |
+| XBYTE Guide | manual | v0.1.0 first draft |
+| Single-Step Debugger | manual | draft; in technical review |
+| P2 Layout Torture Test | instrument | serves the layout-standards effort |
+
+## Upcoming — planned
+
+App-note candidates + rationale + sequence: [`p2-app-note-roster.md`](../analysis/p2-app-note-roster.md).
+
+| Document | Type |
+|----------|------|
+| Spin2 Reference Manual | manual |
+| B2 Extended-Precision Math · B3 Fixed-Point · C1 TASK Multitasking · C2 Data Structures · C3 Cog/Task Stacks · Standalone USB | app-note |
+
+## Abandoned
+
+| Document | Type | Why retired |
+|----------|------|-------------|
+| Smart Pins Tutorial ("Green Book") | manual | superseded by the I/O & Smart Pins guide |
 
 ## Template Architecture
 

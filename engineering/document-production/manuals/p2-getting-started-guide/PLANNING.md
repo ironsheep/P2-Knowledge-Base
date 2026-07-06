@@ -188,8 +188,7 @@ by the link-out discipline (§2).
 ## 12. Production logistics
 - **Home:** `engineering/document-production/manuals/p2-getting-started-guide/` (this charter) → opus-master,
   audit, creation-guide, voice-guide once locked.
-- **Roster:** added to PUBLICATION-ROSTER.md **In development** — keeps the every-folder-in-roster invariant;
-  promote to Live on release.
+- **Roster:** in PUBLICATION-ROSTER.md — keeps the every-folder-in-roster invariant; now in `## Done` (released v1.0.0).
 - **Platform:** ride the shared `p2kb-platform-*` stack + thin local overlay (consistent with the unification
   effort); shared common cover.
 

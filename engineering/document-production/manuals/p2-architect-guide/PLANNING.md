@@ -344,7 +344,7 @@ by the link-out discipline (§2).
 - **Home:** `engineering/document-production/manuals/p2-architect-guide/` (this charter) → opus-master, audit,
   creation-guide, voice-guide once locked.
 - **Roster:** added to PUBLICATION-ROSTER.md **In development** (provisional name) — keeps the every-folder-in-
-  roster invariant; promote to Live on release.
+  roster invariant; move to `## Done` on release.
 - **Platform:** ride the shared `p2kb-platform-*` stack + thin local overlay (consistent with the unification
   effort); shared common cover.
 

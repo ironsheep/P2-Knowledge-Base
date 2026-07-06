@@ -110,21 +110,25 @@ we working on today?" prompt.
 ## 4. Verify the target against the registry
 
 `PUBLICATION-ROSTER.md` is **complete and authoritative** — every
-manual-shaped folder is categorized in it. Resolve the target's category,
-then act:
+manual-shaped folder appears in it exactly once. The roster is organized
+**by lifecycle status** (`## Done` · `## In progress` · `## Upcoming` ·
+`## Abandoned`), with a **Type** column (manual · app-note · guide ·
+instrument). Resolve the target's **status section** (and its Type), then act:
 
-- **manual** → find it in `PUBLICATION-ROSTER.md`:
-  - **Live** (manual or presentation) or **In development / parked** →
-    resume (§5).
-  - **Instrument** → resume into the **effort it serves** (§5); never treat
-    it as a publication, never add it to the live set.
-  - **Orphaned (not carrying forward)** → do **not** silently resume.
+- **manual / app-note / guide** → find it in `PUBLICATION-ROSTER.md`:
+  - **Done** (shipped) or **In progress** → resume (§5).
+  - **Upcoming** (planned, not started) → resume to *begin* it; if it's genuinely
+    new (no folder yet), fall through to the add-new-element process (§6).
+  - **Type = instrument** (lives in `## In progress`) → resume into the
+    **effort it serves** (§5); never treat it as a publication, never add it to
+    the live consistency set.
+  - **Abandoned (retired, not carrying forward)** → do **not** silently resume.
     Confirm with {{USER_NAME}}: "this is retired (superseded/abandoned) — are
     we reviving it?" Proceed only on a yes.
   - **A `workspace|manuals|outbound/<name>` folder exists but has no roster
     entry** → **anomaly**, not a guess: surface it, have {{USER_NAME}}
-    classify it, add it to the roster (preserving the "every folder appears
-    once" invariant), then resume per its new category.
+    classify it, add it to the roster under the right status section
+    (preserving the "every folder appears once" invariant), then resume.
   - **No entry and no folder** → genuinely new → §6.
 - **yaml** → one P2KB set; always exists. State via
   `P2KB-CORRECTION-FINDINGS.md`.

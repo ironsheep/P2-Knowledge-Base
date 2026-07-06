@@ -18,9 +18,9 @@
 ## Tier 2 — Outstanding work
 | Item | State | Note |
 |------|-------|------|
-| **Re-scan for delta** | ✅ **done 2026-06-29 (v2.2)** | 130 objects served (17 new / 3 changed), YAML + index regenerated, released in KB v1.13.3. Next re-scan baseline = **2026-06-29**. |
-| OBEX adoption outreach | ⏳ community-side | `OBEX-ADOPTION-REQUESTS.md` — 6 GitHub-archiver imports await adoption by their original authors (ersmith, mike calyer, Riley August, …). Outreach, not KB work. |
-| Forum announcement follow-through | ◐ | `FORUM-POST-1/2` drafted (KB announcement + integration). |
+| **Re-scan for delta** | ✅ done 2026-06-29 (v2.2) | 130 objects (17 new / 3 changed) in KB v1.13.3; next baseline **2026-06-29** |
+| OBEX adoption outreach | ⏳ community-side | 6 archiver imports await author adoption → `OBEX-ADOPTION-REQUESTS.md` |
+| Forum announcement follow-through | ◐ | drafts `FORUM-POST-1/2` (KB announcement + integration) |
 
 ## Tier 3 — Drill-down
 - **Integration record** → `OBEX-INTEGRATION-COMPLETE.md` (the 2025-09-12 completion report + metrics)
