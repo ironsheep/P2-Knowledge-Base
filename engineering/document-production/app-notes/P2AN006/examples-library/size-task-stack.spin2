@@ -1,0 +1,35 @@
+{Spin2_v47}
+CON
+  _clkfreq = 200_000_000
+  TASK_STACK_LONGS = 64  ' the cooperative task's stack (longs)
+
+OBJ
+  stk : "isp_stack_check"
+
+DAT
+  taskStack     LONG 0[TASK_STACK_LONGS]
+  endStackMark  LONG stk.DO_NOT_WRITE_MARK
+
+PUB main() | reports
+  stk.prepStackForCheck(@taskStack, TASK_STACK_LONGS)
+  taskspin(NEWTASK, worker(), @taskStack)  ' cooperative task, not a new cog
+
+  reports := 0
+  repeat
+    stk.checkStack(@taskStack, TASK_STACK_LONGS)  ' guard: halts on overflow
+    if reports++ // 20 == 0
+      ' periodic high-water read
+      stk.reportStackUse(@taskStack, TASK_STACK_LONGS)
+    waitms(50)
+    tasknext()
+
+PRI worker() | r
+  repeat
+    r := taskWork(4)
+    tasknext()
+
+PRI taskWork(n) : r | localWork
+  localWork := n + 1
+  if n <= 0
+    return localWork
+  r := taskWork(n - 1) + localWork

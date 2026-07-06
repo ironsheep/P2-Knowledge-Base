@@ -1,0 +1,38 @@
+CON
+  _clkfreq = 200_000_000
+  ' START GENEROUS; shrink after you read the high-water mark
+  STACK_LONGS = 128
+
+OBJ
+  stk : "isp_stack_check"
+
+DAT
+  workerStack   LONG 0[STACK_LONGS]
+  endStackMark  LONG stk.DO_NOT_WRITE_MARK
+
+PUB main()
+  stk.prepStackForCheck(@workerStack, STACK_LONGS)
+  cogspin(NEWCOG, worker(), @workerStack)
+
+  ' Give the worker time to run its worst-case path once, THEN measure.
+  waitms(1000)
+  ' prints: "^^^ STACK used N of 128"
+  stk.reportStackUse(@workerStack, STACK_LONGS)
+
+  ' From here: set STACK_LONGS to ~1.5 x N; re-run, keep the guard.
+  repeat
+    stk.checkStack(@workerStack, STACK_LONGS)
+    waitms(500)
+
+PRI worker() | r
+  ' High-water mark reflects only paths that ran; exercise the deepest.
+  r := deepChain(6)
+  repeat
+    waitms(10)
+
+PRI deepChain(n) : r | localWork
+  ' Recursion drives stack depth (each call frames its parameter + local).
+  localWork := n * 3
+  if n <= 0
+    return localWork
+  r := deepChain(n - 1) + localWork

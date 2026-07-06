@@ -1,0 +1,36 @@
+CON
+  _clkfreq = 200_000_000
+  STACK_LONGS = 64
+
+OBJ
+  stk : "isp_stack_check"
+
+DAT
+  workerStack   LONG 0[STACK_LONGS]
+  endStackMark  LONG stk.DO_NOT_WRITE_MARK
+
+PUB main()
+  stk.prepStackForCheck(@workerStack, STACK_LONGS)
+  cogspin(NEWCOG, worker(), @workerStack)
+  repeat
+    waitms(1000)
+
+PRI worker()
+  ' Granular checks: whichever halts names the routine that overran it.
+  initSensors()
+  stk.checkStack(@workerStack, STACK_LONGS)     ' clean after sensors?
+  initComms()
+  stk.checkStack(@workerStack, STACK_LONGS)     ' HERE: initComms overran
+  initControl()
+  stk.checkStack(@workerStack, STACK_LONGS)     ' clean after control?
+  repeat
+    waitms(10)
+
+PRI initSensors() | a
+  a := getct()
+
+PRI initComms() | b
+  b := getct()
+
+PRI initControl() | c
+  c := getct()

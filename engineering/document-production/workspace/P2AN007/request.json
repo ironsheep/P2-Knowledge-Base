@@ -1,0 +1,27 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2AN007.md",
+      "output": "P2AN007.pdf",
+      "template": "p2kb-appnote-reference",
+      "pandoc_args": [
+        "--pdf-engine=xelatex"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
+      ],
+      "metadata": {
+        "title": "Data Structures with the New Language Facilities",
+        "subtitle": "Application Note P2AN007 — STRUCT Records, Shared Safely Across Cogs",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v0.1.0",
+        "date": "July 2026"
+      }
+    }
+  ]
+}

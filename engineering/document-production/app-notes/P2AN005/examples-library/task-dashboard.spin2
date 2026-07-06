@@ -1,0 +1,53 @@
+{Spin2_v47}
+CON
+  _clkfreq = 200_000_000
+
+  STACK_LONGS = 64
+  N_WORKERS   = 3
+
+DAT
+  workerStacks  LONG 0[STACK_LONGS * N_WORKERS]
+
+VAR
+  LONG shutdown
+
+PUB main() | i, running, halted, id
+  shutdown := 0
+  repeat i from 0 to N_WORKERS - 1
+    taskspin(NEWTASK, worker(), @workerStacks[i * STACK_LONGS])
+
+  ' --- supervisor: census the slots a few times, then order shutdown ---
+  repeat 5
+    running := 0
+    halted  := 0
+    repeat id from 0 to 31
+      case taskchk(id)  ' 0=free, 1=running, 2=halted
+        1: running++
+        2: halted++
+    debug("census: running=", udec(running), ...
+          " halted=", udec(halted), " TASKHLT=", ubin_long(TASKHLT))
+    yield_a_while()
+
+  shutdown := 1  ' workers see this and self-terminate
+  yield_a_while()
+  debug("after shutdown: workers still running = ", udec(worker_census()))
+
+PRI worker() | announced
+  announced := 0
+  repeat
+    if not announced
+      debug("worker up as task ", udec(taskid()))  ' self-identify once
+      announced := 1
+    if shutdown
+      taskstop(thistask)  ' free my slot; never returns
+    tasknext()
+
+PRI worker_census() : running | id
+  ' count only the worker slots (ids above the main task) still running
+  repeat id from 1 to 31
+    if taskchk(id) == 1
+      running++
+
+PRI yield_a_while() | k
+  repeat k from 0 to 199
+    tasknext()

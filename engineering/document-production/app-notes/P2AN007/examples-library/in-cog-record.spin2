@@ -1,0 +1,28 @@
+{Spin2_v45}
+CON
+  _clkfreq = 200_000_000
+  LOG_SIZE = 8
+
+  ' A record type: three named members, packed (9 bytes, no padding).
+  STRUCT reading_t(LONG timestamp, LONG value, BYTE status)
+
+VAR
+  reading_t log[LOG_SIZE]  ' an array of records, in this cog's memory
+  LONG head
+
+PUB main() | i, reading_t r
+  head := 0
+  ' fill a rolling log of records
+  repeat i from 0 to LOG_SIZE - 1
+    r.timestamp := getct()                ' set members by name
+    r.value     := i * i
+    r.status    := i & 1
+    log[head] := r  ' whole-struct copy into the array slot
+    head := (head + 1) // LOG_SIZE
+
+  ' read them back by member
+  repeat i from 0 to LOG_SIZE - 1
+    debug("log[", udec(i), "] t=", uhex_long(log[i].timestamp), ...
+          " v=", sdec(log[i].value), " s=", uhex(log[i].status))
+
+  debug("sizeof(reading_t) = ", udec(SIZEOF(reading_t)), " bytes")

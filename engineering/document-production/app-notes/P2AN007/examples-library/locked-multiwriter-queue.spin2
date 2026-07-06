@@ -1,0 +1,50 @@
+{Spin2_v45}
+CON
+  _clkfreq = 200_000_000
+  QSIZE = 16
+  QMASK = QSIZE - 1
+
+  STRUCT job_t(LONG writerId, LONG payload)
+
+VAR
+  job_t jobs[QSIZE]                       ' shared hub queue of records
+  LONG jhead, jtail
+  LONG qlock  ' a hardware lock guards the multi-writer head advance
+
+DAT
+  writerStackA LONG 0[64]
+  writerStackB LONG 0[64]
+
+PUB main() | job_t j
+  jhead := 0
+  jtail := 0
+  qlock := LOCKNEW()  ' allocate one of the 16 hardware locks
+  if qlock < 0
+    debug("no lock available")
+    return
+
+  ' TWO writers contend for the head -> lock needed
+  cogspin(NEWCOG, writer(1), @writerStackA)
+  cogspin(NEWCOG, writer(2), @writerStackB)
+
+  ' Single consumer (this cog) drains; owns jtail, no lock to read.
+  repeat
+    if jtail <> jhead
+      j := jobs[jtail]
+      jtail := (jtail + 1) & QMASK
+      debug("job from writer ", udec(j.writerId), ...
+            " payload ", udec(j.payload))
+
+PRI writer(id) | n
+  n := 0
+  repeat
+    ' Enqueue is a read-modify-write on jhead shared by both
+    ' writers -> bracket it with the lock.
+    repeat until LOCKTRY(qlock)           ' spin-acquire
+    if ((jhead + 1) & QMASK) <> jtail     ' not full
+      jobs[jhead].writerId := id
+      jobs[jhead].payload  := n
+      jhead := (jhead + 1) & QMASK
+    LOCKREL(qlock)  ' release on the single path out of the section
+    n++
+    waitms(5)

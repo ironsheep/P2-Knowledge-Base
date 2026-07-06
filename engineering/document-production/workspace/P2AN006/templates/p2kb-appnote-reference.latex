@@ -1,0 +1,56 @@
+% P2KB Application Note LaTeX Template (class template — shared by all P2ANxxx notes)
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% LAYOUT: One-sided for PDF screen viewing.
+%
+% Template Stack (PLATFORM-UNIFIED — same stack the manuals use; see
+% methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty - shared: geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty     - shared: code/reference box family, contmarkers, keep-together
+%   3. p2kb-appnote-local.sty        - app-note class override (thin: unnumbered short-doc headings)
+%   4. p2kb-appnote-diagrams.sty     - shared app-note diagram library (platform base + circuitikz + \Diag* macros)
+%
+% App notes are SHORT and have no Parts/Chapters, so this template differs from a
+% manual template only in the per-class override layer plus the shared diagram
+% library (circuitikz schematics + timing figures, invoked as \Diag* macros).
+
+\documentclass[11pt,letterpaper,oneside]{book}
+
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
+
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
+
+% ==================== LOAD APP-NOTE CLASS OVERRIDE ====================
+\usepackage{p2kb-appnote-local}
+
+% ==================== LOAD SHARED APP-NOTE DIAGRAM LIBRARY ====================
+% Common mechanism for all app notes: pulls in the platform diagram base +
+% circuitikz and the \Diag* schematic/timing macros. Inert for notes that invoke
+% none of them (P2AN001-003 render unchanged).
+\usepackage{p2kb-appnote-diagrams}
+
+% ==================== DOCUMENT METADATA ====================
+% These can be overridden by pandoc metadata
+\title{P2 Application Note}
+\author{Iron Sheep Productions, LLC}
+\date{June 2026}
+
+% ==================== APP-NOTE SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page - no headers/footers
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (includes the cover front matter at the beginning)
+$body$
+
+\end{document}

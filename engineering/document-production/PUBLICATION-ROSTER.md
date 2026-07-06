@@ -105,6 +105,9 @@ tool serving an effort, never released — carried here while it's actively used
 | Architect's Guide | manual | v0.2.0 draft | ✅ | ⏳ | ✅ | | | |
 | XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
+| P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
+| P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
+| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
@@ -117,6 +120,15 @@ tool serving an effort, never released — carried here while it's actively used
 
 **P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
+
+**P2AN005 — Cooperative Multitasking with Spin2 TASK Methods** · `P2AN005` · app-note
+**stood up + drafted 2026-07-06, v0.1.0.** Family **C1** (Concurrency & New Language Features). Techniques-catalog: the `{Spin2_v47}` TASK\* family (cooperative multitasking in one cog) through 4 recipes — two-task round-robin, cooperative yield in a long computation, halt/resume flow control, task-status dashboard. All four `pnut_ts -d`-clean. `TASKWAIT` compile-probed, found not to exist, excluded (F-196). Companion to P2AN006. NEXT: prepare-manual → Forge v0.1.0 review PDF.
+
+**P2AN006 — Sizing Cog & Task Stacks** · `P2AN006` · app-note
+**stood up + drafted 2026-07-06, v0.1.0.** Family **C3** (companion to C1). Techniques-catalog: sizing the stack buffers `cogspin`/`TASKSPIN` require (silent overflow → corruption) through 4 recipes built around the MIT-licensed `isp_stack_check` sentinel-fill utility (Stephen M. Moraco, shipped in the example library) — instrument a cog stack, high-water mark, pinpoint the culprit, size a task stack. All `pnut_ts -d`-clean. NEXT: prepare-manual → Forge v0.1.0 review PDF.
+
+**P2AN007 — Data Structures with the New Language Facilities** · `P2AN007` · app-note
+**stood up + drafted 2026-07-06, v0.1.0.** Family **C2**. Techniques-catalog: the Spin2 `{Spin2_v45}` STRUCT facility + worked cross-cog sharing through 4 recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW/LOCKTRY/LOCKREL`, never P1 `lockset/lockclr`). Implementation-only; the *contract decision* (which structure, why) is cited to the Architect's Guide. All `pnut_ts -d`-clean. NEXT: prepare-manual → Forge v0.1.0 review PDF.
 
 **P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
 Test / standards harness — manual-shaped (full folder triad, generates PDFs) but **never released**; serves the manual layout-standards effort (`methodology/manual-layout-standards-*`), not the community. Not consistency-bound. **Its analysis IS its product** — its `audit/` is git-tracked alongside its cases (the `.gitignore` exception), so the instrument, its analysis, and the fixes it drives version together. Resume into the effort it serves.
@@ -133,9 +145,6 @@ pipeline at a glance (blank gates = not started).
 | Spin2 Reference Manual | manual | — | | | | | | |
 | Extended-Precision Integer Math (B2) | app-note | — | | | | | | |
 | Fixed-Point Math (B3) | app-note | — | | | | | | |
-| Cooperative Multitasking / TASK (C1) | app-note | — | | | | | | |
-| Data Structures, in-cog + cross-cog (C2) | app-note | — | | | | | | |
-| Sizing Cog & Task Stacks (C3) | app-note | — | | | | | | |
 | USB Device/Host, standalone | app-note | — | | | | | | |
 
 ### Detail
@@ -145,10 +154,9 @@ pipeline at a glance (blank gates = not started).
 **App-note candidates** (full detail + production sequence → the [planning register](../analysis/p2-app-note-roster.md)):
 - **B2 · Extended-Precision Integer Math** — 64/96/128-bit composed from carry-chain ADDX/SUBX + `muldiv64` (OBEX #5189).
 - **B3 · Fixed-Point Math on the P2** — fractional math with no FPU; recurring P2-specific technique.
-- **C1 · Cooperative Multitasking with Spin2 TASK Methods** — the `{Spin2_v47}` TASK\* family; P1 AN014 successor.
-- **C2 · Data Structures with the New Language Facilities** — STRUCT (in-cog) + worked cross-cog FIFOs/queues; P1 AN003 successor. (The *contract decision* — which structure, why — stays with the Architect's Guide.)
-- **C3 · Sizing Cog & Task Stacks** — `TASKSPIN` stack sizing as a worked recipe; companion to C1; P1 AN019 successor.
 - **USB Device/Host (standalone)** — high value, hard; its example-mining ran early as the IOSP Release Campaign's USB study.
+
+*(Family C — C1/C2/C3 — moved to **In progress** 2026-07-06 as P2AN005/P2AN006/P2AN007.)*
 
 ## Abandoned — retired, not carrying forward (last)
 

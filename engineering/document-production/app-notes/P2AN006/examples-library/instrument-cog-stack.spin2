@@ -1,0 +1,29 @@
+CON
+  _clkfreq = 200_000_000
+  STACK_LONGS = 64                          ' the worker cog's stack (longs)
+
+OBJ
+  stk : "isp_stack_check"
+
+DAT
+  workerStack   LONG 0[STACK_LONGS]
+  endStackMark  LONG stk.DO_NOT_WRITE_MARK  ' sentinel MUST abut buffer
+
+PUB main()
+  ' Phase 1+2: fill buffer with pattern, drop sentinel, THEN launch.
+  stk.prepStackForCheck(@workerStack, STACK_LONGS)
+  cogspin(NEWCOG, worker(), @workerStack)
+
+  ' Phase 3: watch the sentinel. checkStack halts the program
+  ' if the worker overran STACK_LONGS.
+  repeat
+    stk.checkStack(@workerStack, STACK_LONGS)
+    waitms(500)
+
+PRI worker() | scratch
+  repeat
+    scratch := doUnitOfWork()               ' the cog's real work goes here
+    waitms(10)
+
+PRI doUnitOfWork() : result
+  result := getct()

@@ -1,0 +1,38 @@
+{Spin2_v45}
+CON
+  _clkfreq = 200_000_000
+  QSIZE = 16  ' power of two -> the & mask below is fast modulo
+  QMASK = QSIZE - 1
+
+  STRUCT sample_t(LONG seq, LONG value)  ' element type carried by the ring
+
+VAR
+  sample_t queue[QSIZE]                   ' shared hub ring of records
+  LONG qhead, qtail  ' producer OWNS head, consumer OWNS tail
+
+DAT
+  prodStack   LONG 0[64]
+
+PUB main() | sample_t s
+  qhead := 0
+  qtail := 0
+  cogspin(NEWCOG, producer(), @prodStack) ' producer runs in its own cog
+
+  ' Consumer (this cog): lock-free because only it writes qtail
+  ' and only the producer writes qhead.
+  repeat
+    if qtail <> qhead                     ' something to take?
+      s := queue[qtail]                   ' copy the record OUT first
+      ' THEN publish the advance (single atomic long)
+      qtail := (qtail + 1) & QMASK
+      debug("consumed seq=", udec(s.seq), " value=", sdec(s.value))
+
+PRI producer() | n
+  n := 0
+  repeat
+    if ((qhead + 1) & QMASK) <> qtail     ' not full?
+      queue[qhead].seq   := n             ' fill the record FIRST
+      queue[qhead].value := n * 10
+      ' THEN publish head (single atomic long) -> element visible
+      qhead := (qhead + 1) & QMASK
+      n++

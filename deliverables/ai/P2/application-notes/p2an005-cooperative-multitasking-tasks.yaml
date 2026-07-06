@@ -1,0 +1,139 @@
+# P2AN005 — YAML companion to the "Cooperative Multitasking with Spin2 TASK Methods" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002 / P2AN003 / P2AN004.
+
+title: "Cooperative Multitasking with Spin2 TASK Methods"
+subtitle: "Run several cooperative jobs in one cog — launch, yield, halt, resume, and stop them through Spin2's TASK methods"
+doc_id: P2AN005
+version: "0.1.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - cooperative multitasking
+  - Spin2 tasks
+  - TASK methods
+  - TASKSPIN
+  - TASKNEXT
+  - TASKHALT
+  - TASKCONT
+  - TASKCHK
+  - TASKID
+  - TASKSTOP
+  - NEWTASK
+  - THISTASK
+  - coroutines
+  - round robin scheduling
+  - cooperative yield
+  - multiple tasks one cog
+  - task scheduling
+  - halt and resume tasks
+  - synchronized task start
+  - task status census
+categories:
+  - concurrency
+  - spin2-language
+  - multitasking
+capability_domain: "Concurrency / cooperative multitasking within a single cog"
+summary: |
+  Run several jobs in one cog by letting each run until it voluntarily yields, so they take turns
+  cooperatively. One shared idea (a task runs until it calls TASKNEXT; up to 32 tasks share a cog,
+  each with its own stack) applied through four runnable recipes chosen among by need: R1 a two-task
+  round-robin (two independent blinkers from one cog via TASKSPIN(NEWTASK)+TASKNEXT, with the
+  last job run inline); R2 a cooperative yield inside a long computation (TASKNEXT on a YIELD_EVERY
+  cadence keeps a second task responsive; the result is published as one atomic long); R3 halt/resume
+  flow control (a consumer pauses its producer with TASKHALT and wakes it with TASKCONT, gated on
+  TASKCHK==halted, plus a synchronized start using TASKSPIN's expression-return id); and R4 a task
+  dashboard (a live TASKCHK/TASKHLT census, TASKID self-identification, and a clean TASKSTOP(THISTASK)
+  shutdown). The modern replacement for the hand-coded PASM coroutine. TASKWAIT — documented in some
+  older material — was compile-probed, found not to exist in Spin2, and excluded. Every recipe
+  compiles clean under pnut_ts -d; live scheduling behavior defers to a hardware pass.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - language/spin2/methods/taskspin.yaml            # start a task (id/NEWTASK, method, @stack); expression form returns the id
+    - language/spin2/methods/tasknext.yaml            # yield to the next runnable task (the cooperative hand-off)
+    - language/spin2/methods/taskhalt.yaml            # pause a task (or THISTASK); state preserved
+    - language/spin2/methods/taskcont.yaml            # resume a halted task
+    - language/spin2/methods/taskchk.yaml             # slot status: 0 free / 1 running / 2 halted
+    - language/spin2/methods/taskid.yaml              # the caller's own task id
+    - language/spin2/methods/taskstop.yaml            # stop a task (or THISTASK) and free its slot
+    - language/spin2/constants/newtask.yaml           # -1: next free slot, for TASKSPIN
+    - language/spin2/constants/thistask.yaml          # -1: the caller, for TASKHALT/TASKSTOP
+    - language/spin2/registers/taskhlt.yaml           # 32 halt bits (REVERSED: bit 0 = task 31); R4 bulk bitmap
+    - language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml  # the finish-before-you-yield discipline + many-cadences-on-one-bus
+
+mechanism_reference:
+  - "P2AN006 Sizing Cog & Task Stacks (a companion P2 Knowledge Base publication) — how big to make each task's stack; the companion note this one points to"
+  - "P2AN007 Data Structures with the New Language Facilities (a companion P2 Knowledge Base publication) — the worked cross-cog form of sharing a value safely across tasks/cogs"
+
+runnable_code:
+  examples_zip: "P2AN005-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: two-task-round-robin, file: two-task-round-robin.spin2, note: "R1 — two independent blinkers from one cog (TASKSPIN(NEWTASK)+TASKNEXT; last job runs inline)"}
+    - {id: cooperative-yield,    file: cooperative-yield.spin2,    note: "R2 — a long computation yields on a YIELD_EVERY cadence so a second task stays responsive"}
+    - {id: halt-resume-flow,     file: halt-resume-flow.spin2,     note: "R3 — consumer halts/wakes its producer (TASKHALT/TASKCONT/TASKCHK/THISTASK) + synchronized start"}
+    - {id: task-dashboard,       file: task-dashboard.spin2,       note: "R4 — live TASKCHK/TASKHLT census, TASKID self-ID, clean TASKSTOP(THISTASK) shutdown"}
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; all four recipes use debug() so compile with -d"
+
+key_parameters:
+  version_gate: "{Spin2_v47} MUST be the first source line — the TASK methods are a Spin2 v47 language feature; without it the keywords are unrecognized"
+  taskspin: "TASKSPIN(id, Method(args), @stack): id = 0..31 or NEWTASK (next free slot); as an EXPRESSION returns the assigned task id, or -1 if all 32 slots are full"
+  tasknext: "TASKNEXT() yields to the next runnable task; control returns to this line when the task's turn comes round. Every loop path must reach a yield or it starves siblings"
+  taskchk: "TASKCHK(id) -> 0 free / 1 running / 2 halted (non-destructive)"
+  taskhalt_cont: "TASKHALT(id) pauses (state+stack preserved); TASKHALT(THISTASK) halts the caller and AUTO-YIELDS; TASKCONT(id) resumes where it left off"
+  taskstop: "TASKSTOP(id)/TASKSTOP(THISTASK) frees the slot; a top-level return from a task method is an implicit TASKSTOP(THISTASK); the last task's return stops the cog"
+  taskhlt_register: "TASKHLT @ $200, 32 halt bits in REVERSE order (bit 0 = task 31, bit 31 = task 0); read for a bulk bitmap, write to force halt/resume"
+  yield_cadence: "R2 YIELD_EVERY: yield too rarely -> the responsive task stutters; too often -> the computation slows. Tune to the needed responsiveness"
+  stacks: "each task gets its own stack (per-task @stack); size it for the deepest call chain — see P2AN006. Tasks share the cog's hub/register state; only stack + PC are per-task"
+
+prerequisites:
+  - "Reading/writing Spin2 (methods, DAT/VAR, debug())"
+  - "Launching a method in its own cog with cogspin (the cog-level parallel TASKSPIN mirrors inside a cog)"
+  - "The idea that a task needs a stack (sizing it is P2AN006)"
+
+gotchas:
+  - flag: pitfall
+    text: "TASKWAIT does NOT exist in Spin2 — compile-probed (pnut_ts v1.55.0) to 'Expected an instruction or variable'. Some older material documents it; never use it. The wait-with-yield idiom is a TASKCHK/TASKNEXT poll loop."
+  - flag: pitfall
+    text: "The {Spin2_v47} directive must be the FIRST line of the file. Without it the compiler doesn't know TASKSPIN/TASKNEXT/etc. and reports 'expected an instruction' on correct-looking lines."
+  - flag: pitfall
+    text: "Cooperative means voluntary: a loop path with no TASKNEXT() holds the cog forever the moment it is taken, starving every other task. Ensure every loop in every task reaches a yield."
+  - flag: pitfall
+    text: "Do not yield mid-transaction. Finish a shared bus / multi-field update before TASKNEXT() or a sibling can interleave and corrupt it. This discipline is what keeps cooperative tasks lock-free."
+  - flag: pitfall
+    text: "TASKHLT register bits are REVERSED (bit 0 = task 31, bit 31 = task 0). Use it only for bulk bitmaps; use TASKCHK(id) for a specific task's state."
+  - flag: tip
+    text: "The last job runs inline for free: launch N-1 tasks with TASKSPIN, then just CALL the final method — the calling task becomes it, using the cog's existing stack (no allocation)."
+  - flag: tip
+    text: "Self-halt and self-stop are clean idioms: TASKHALT(THISTASK) pauses the caller and yields in one step; TASKSTOP(THISTASK) (or returning from the task's top method) frees the slot."
+  - flag: hardware
+    text: "The taskptr table occupies cog registers $100..$11F (filling downward), overlapping the inline-PASM ORG..END area — heavy multitasking and heavy inline PASM in the same cog compete for those registers. Ordinary Spin2 tasks never hit this. (Chip Gracey clarification, recorded in the KB.)"
+  - flag: verify
+    text: "R1: two LEDs blink at independent rates (interleaving proof); only one blinking means a task never yields. R2: the heartbeat line advances between crunch-pass lines (responsiveness). R3: the producer flips TASKCHK state 1<->2 as the ring fills/drains. R4: census shows running=workers+1 (the supervisor counts itself), then worker-census=0 after shutdown."
+
+hardware_status: |
+  Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
+  _clkfreq = 200_000_000), and the whole TASK* family (TASKSPIN expression + statement forms,
+  TASKNEXT, TASKHALT/TASKCONT, TASKCHK, TASKID, TASKSTOP, NEWTASK, THISTASK, TASKHLT read/write) was
+  compile-verified. LIVE scheduling behavior — true interleaving, the halt/resume timing, the
+  "all tasks halted -> wait for interrupt" edge, and "the last task's return stops the cog" — is a
+  runtime property described from the Spin2 v47+ documentation and DEFERS to a bench pass on real
+  silicon (-> EF ledger when accepted). No invented DEBUG captures. TASKWAIT was probed and excluded.
+
+provenance:
+  primary_sources:
+    - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $200)"
+    - "Spin2 v55 keyword table (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149) — the authoritative TASK keyword list (TASKWAIT is absent)"
+  tool_ground_truth:
+    - "pnut_ts v1.55.0 — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword (F-196)"
+  cross_check_sources:
+    - "P2 Knowledge Base cooperative-tasking pattern (patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
+  companion_publication:
+    - "P2AN006 Sizing Cog & Task Stacks; P2AN007 Data Structures with the New Language Facilities (companion P2 Knowledge Base publications)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

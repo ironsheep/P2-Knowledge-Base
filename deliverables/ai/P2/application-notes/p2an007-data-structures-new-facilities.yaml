@@ -1,0 +1,141 @@
+# P2AN007 — YAML companion to the "Data Structures with the New Language Facilities" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002 / P2AN003 / P2AN004.
+
+title: "Data Structures with the New Language Facilities"
+subtitle: "Spin2 STRUCT for in-cog records — and the worked code for sharing them safely across cogs"
+doc_id: P2AN007
+version: "0.1.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - STRUCT
+  - Spin2 structures
+  - data structures
+  - records
+  - packed record
+  - ring buffer
+  - FIFO
+  - queue
+  - deque
+  - mailbox
+  - latest-wins mailbox
+  - lock-free queue
+  - single producer single consumer
+  - SPSC
+  - multi-writer queue
+  - hub shared data
+  - cross-cog data
+  - hardware locks
+  - LOCKNEW
+  - LOCKTRY
+  - LOCKREL
+  - SIZEOF
+  - atomic publish
+  - sequence counter
+categories:
+  - data-structures
+  - spin2-language
+  - concurrency
+capability_domain: "Data structures / STRUCT records and safe cross-cog data sharing"
+summary: |
+  Use the Spin2 STRUCT facility for packed, named, typed records, and share those records safely
+  across cogs. One shared idea (a STRUCT is a packed record; a single hub long is atomic but a
+  multi-field record is not, so publish a record by writing its fields FIRST then flipping one long
+  LAST) applied through four runnable recipes chosen among by how the data flows: R1 an in-cog record
+  and array (declare/fill/whole-struct-copy/SIZEOF); R2 a lock-free single-producer/single-consumer
+  ring buffer (single-owner head/tail indices, power-of-2 & mask, publish-index-last, no lock);
+  R3 a latest-wins command mailbox (a STRUCT arg block published with a sequence counter bumped last,
+  seq/ack handshake, no lock); and R4 a locked multi-writer queue (several writers, one P2 hardware
+  lock guarding the head advance, release-on-all-paths, ascending-lock-order). Uses the REAL P2 lock
+  methods LOCKNEW/LOCKTRY/LOCKREL -- never the P1 lockset/lockclr. Implementation-only by design:
+  which structure to use and why (copy vs reference, refcount-vs-copy fan-out) is a contract decision
+  the P2 Architect's Guide owns and this note CITES. Every recipe compiles clean under pnut_ts -d;
+  cross-cog race-freedom is described from the atomic-single-long model, a hardware pass deferred.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - language/spin2/keywords/STRUCT.yaml             # the record facility (decl, typed members, arrays, SIZEOF, pointers, cross-object export/import)
+    - language/spin2/methods/sizeof.yaml              # SIZEOF(structName) -> packed byte size (R1)
+    - language/spin2/methods/locknew.yaml             # allocate one of 16 hardware locks (R4); returns -1 if none free
+    - language/spin2/methods/locktry.yaml             # non-blocking test-and-set; REPEAT UNTIL LOCKTRY = spin-acquire (R4)
+    - language/spin2/methods/lockrel.yaml             # release the captured lock (R4)
+    - language/spin2/methods/lockret.yaml             # return a lock to the pool when done
+    - architecture/locks.yaml                         # the 16-lock model: atomic test-and-set, deadlock ordering, release discipline
+    - architecture/decomposition/data-flow-contracts.yaml  # the named cog-to-cog contracts this note IMPLEMENTS (the CHOICE is an Architect's Guide topic)
+    - language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml  # R3 basis: seq bumped last, seq/ack
+    - language/spin2/patterns/implementation/spin2_buffer_management.yaml     # R2 basis: power-of-2 ring, head/tail, & mask
+
+mechanism_reference:
+  - "P2 Architect's Guide (a companion P2 Knowledge Base publication) — the CONTRACT DECISION layer: which data-flow structure to use and why (copy vs reference, latest-wins vs queue, refcount-vs-copy fan-out). This note implements a choice; the Guide helps make it."
+  - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication) — when the cogs sharing these structures are cooperative tasks in one cog"
+
+runnable_code:
+  examples_zip: "P2AN007-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: in-cog-record,           file: in-cog-record.spin2,           note: "R1 — declare/fill/whole-struct-copy an array of STRUCT records + SIZEOF (in-cog, no lock)"}
+    - {id: spsc-ring-buffer,        file: spsc-ring-buffer.spin2,        note: "R2 — lock-free single-producer/single-consumer ring of records; single-owner indices, publish-index-last"}
+    - {id: latest-wins-mailbox,     file: latest-wins-mailbox.spin2,     note: "R3 — STRUCT command block published with a sequence counter (seq bumped last, seq/ack), no lock"}
+    - {id: locked-multiwriter-queue, file: locked-multiwriter-queue.spin2, note: "R4 — many writers -> one queue guarded by a P2 hardware lock (LOCKNEW/LOCKTRY/LOCKREL)"}
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; every file opens with {Spin2_v45} (STRUCT); all use debug() so compile with -d"
+
+key_parameters:
+  version_gate: "STRUCT requires {Spin2_v45} as the first source line (OFFSETOF is v53, member bitfields v54 — this note stays within v45)"
+  struct_decl: "STRUCT name(members) in a CON block; members default LONG, or typed BYTE/WORD/LONG; arrays and nesting allowed; packed (no padding). reading_t(LONG,LONG,BYTE) = 9 bytes"
+  struct_ops: "member access var.member; whole-struct copy a := b; SIZEOF(name) -> byte size; pass-by-value <=15 longs (larger uses BYTEMOVE)"
+  atomicity_model: "a single hub LONG is read/written atomically; a multi-field record is NOT. Publish a record: write its fields FIRST, then flip ONE long (an index or a sequence counter) LAST"
+  lock_rule: "single writer of the publish long -> NO lock (R2 ring: producer owns head, consumer owns tail; R3 mailbox: one writer bumps seq). Several writers of the same index -> ONE hardware lock (R4)"
+  locks: "P2 has 16 hardware locks. LOCKNEW() -> 0..15 or -1 (check it); REPEAT UNTIL LOCKTRY(id) spin-acquires; LOCKREL(id) releases; LOCKRET(id) frees. Release on EVERY exit path; two locks -> acquire in the SAME (ascending) order"
+  ring_indexing: "power-of-2 QSIZE -> `& QMASK` is one-instruction modulo; full test ((head+1)&MASK) == tail (or <> for not-full)"
+
+prerequisites:
+  - "Reading/writing Spin2 (methods, VAR/DAT, debug())"
+  - "Launching a method in another cog with cogspin (the cross-cog recipes run a second cog)"
+  - "Hub RAM as shared memory; a single long is atomic, a multi-long update is not"
+
+gotchas:
+  - flag: pitfall
+    text: "A multi-field record is NOT atomic. Always write the record's fields first, then flip a single long (index or sequence counter) that publishes it — that one long is the atomic hand-off. The reader must not touch the record until it sees that long change."
+  - flag: pitfall
+    text: "Publish the index/sequence LAST. Every lock-free recipe's correctness depends on the order: fields first, publish long last. Reversed, readers see partial/stale data."
+  - flag: pitfall
+    text: "One writer per index -> no lock; several writers -> a lock. A single owner of an index long advances it safely lock-free (R2/R3). Two cogs advancing the same index is a read-modify-write race — guard it (R4)."
+  - flag: pitfall
+    text: "Use the REAL P2 locks LOCKNEW/LOCKTRY/LOCKREL. The P1 methods lockset()/lockclr() do NOT exist on P2 and will not compile (KB finding F-199)."
+  - flag: pitfall
+    text: "Release the lock on EVERY exit path from a critical section — an early RETURN/ABORT inside a locked section must LOCKREL first, or the lock leaks and other cogs hang. Free the lock with LOCKRET when done."
+  - flag: pitfall
+    text: "Receiving a struct POINTER from a CHILD object needs bracket notation: `[pRec] := child.method()`. Without it a record larger than 15 longs is treated as a full-struct return and fails to compile. (Only across OBJ boundaries.)"
+  - flag: hardware
+    text: "The P2 has 16 hardware locks; LOCKNEW returns -1 when they're exhausted — always check. Keep the locked section tiny (never hold a lock across debug()/waitms)."
+  - flag: tip
+    text: "A STRUCT array replaces parallel arrays kept in lockstep — one records[] copies and indexes as a unit, fewer indices to keep aligned. A deque is a ring with both ends live (no new primitive)."
+  - flag: verify
+    text: "R1: SIZEOF(reading_t)=9, value=i*i. R2: consumed value = seq*10, seq monotonic (a mismatch = publish order wrong). R3: 5 exec lines op 1..5, a0=op*100, a1=op*1000. R4: writer-1/writer-2 jobs interleaved, no duplicated/skipped slot (a collision = enqueue ran without the lock)."
+
+hardware_status: |
+  Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
+  _clkfreq = 200_000_000), covering the STRUCT declarations/arrays/SIZEOF/whole-struct-copy and the
+  LOCKNEW/LOCKTRY/LOCKREL usage. Compilation proves LEGALITY only: true cross-cog atomicity and
+  race-freedom (torn-read absence under the ring/mailbox ordering, mutual exclusion under contention
+  for the locked queue) are RUNTIME multi-cog properties described here from the atomic-single-long
+  model, and a two-cog confirmation on real silicon is a later step (Stephen runs hardware externally;
+  -> EF ledger when accepted). No invented DEBUG captures. Implementation-only: the contract-choice
+  reasoning is deferred to the P2 Architect's Guide.
+
+provenance:
+  primary_sources:
+    - "Spin2 Language Documentation, v45 and later (Chip Gracey, Parallax Inc.) — the STRUCT facility (declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET"
+  tool_ground_truth:
+    - "pnut_ts v1.55.0 — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods (F-199)"
+  cross_check_sources:
+    - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
+  companion_publication:
+    - "P2 Architect's Guide (contract decisions); P2AN005 Cooperative Multitasking (companion P2 Knowledge Base publications)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

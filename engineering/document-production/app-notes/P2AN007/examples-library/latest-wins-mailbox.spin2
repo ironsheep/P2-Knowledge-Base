@@ -1,0 +1,36 @@
+{Spin2_v45}
+CON
+  _clkfreq = 200_000_000
+
+  STRUCT cmd_t(LONG opcode, LONG arg0, LONG arg1)  ' command's arg block
+
+VAR
+  cmd_t cmd  ' shared command block (one writer, one reader)
+  LONG cmdSeq, cmdAck  ' writer bumps seq LAST; reader writes ack
+
+DAT
+  workerStack LONG 0[64]
+
+PUB main() | i
+  cmdSeq := 0
+  cmdAck := 0
+  cogspin(NEWCOG, worker(), @workerStack)
+
+  repeat i from 1 to 5
+    cmd.opcode := i                       ' fill the arg block FIRST...
+    cmd.arg0   := i * 100
+    cmd.arg1   := i * 1000
+    ' ...then publish LAST (single atomic long) -> command visible
+    cmdSeq++
+    repeat until cmdAck == cmdSeq  ' wait for the worker to ack this one
+    waitms(10)
+  debug("all commands acknowledged")
+
+PRI worker()
+  repeat
+    if cmdSeq <> cmdAck                   ' a new command is published?
+      execute(cmd.opcode, cmd.arg0, cmd.arg1)
+      cmdAck := cmdSeq                    ' acknowledge (single atomic long)
+
+PRI execute(op, a0, a1)
+  debug("worker exec op=", udec(op), " a0=", udec(a0), " a1=", udec(a1))

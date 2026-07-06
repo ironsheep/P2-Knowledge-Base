@@ -1,0 +1,124 @@
+# P2AN006 — YAML companion to the "Sizing Cog & Task Stacks" application note.
+# Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
+# PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
+# carries the novel composition + pointers to the KB primitives the note assembles.
+# Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002 / P2AN003 / P2AN004.
+
+title: "Sizing Cog & Task Stacks"
+subtitle: "Give every cog and task exactly the stack it needs — and catch an overflow before it corrupts memory"
+doc_id: P2AN006
+version: "0.1.0"
+kind: application-note
+
+# ---- DISCOVERY TIER ----
+aliases:
+  - stack sizing
+  - cog stack size
+  - task stack size
+  - stack overflow detection
+  - stack high-water mark
+  - cogspin stack
+  - taskspin stack
+  - sentinel fill technique
+  - measuring stack space
+  - stack buffer
+  - stack corruption
+  - isp_stack_check
+  - right-size a stack
+  - how big a stack
+categories:
+  - concurrency
+  - spin2-language
+  - debugging
+capability_domain: "Concurrency / stack sizing and overflow detection for cogs and tasks"
+summary: |
+  Size the hub stack buffer every cog (cogspin) and cooperative task (TASKSPIN) needs, and catch an
+  undersized one before it silently overwrites memory. One shared idea (fill the stack with a known
+  pattern and watch a sentinel long just past its end: if the sentinel changed, the stack overflowed;
+  the count of still-untouched pattern longs is the high-water mark) applied through four runnable
+  recipes: R1 instrument a new-cog stack (prepStackForCheck before launch + checkStack as a running
+  guard); R2 find the high-water mark and right-size (start 128, exercise the deepest path,
+  reportStackUse reads N, set the buffer to ~1.5xN, keep the guard); R3 pinpoint the overflowing
+  routine (granular checkStack between init calls; the one that halts names the culprit); and R4 size
+  a TASKSPIN task stack (the identical technique on an intra-cog task buffer -- the instrument only
+  watches a hub buffer, so it does not care whether the buffer feeds a cog or a task). Built around
+  the MIT-licensed isp_stack_check utility (Stephen M. Moraco), shipped in the example library. The
+  hub method stack sized here is NOT the P2 8-level hardware call stack. Every recipe compiles clean
+  under pnut_ts -d; observing the overflow halt fire is a bench step.
+audience: [human, agent]
+
+# ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
+# Nested under cross_references so the crossref validator enforces every path resolves.
+cross_references:
+  composes:
+    - language/spin2/methods/cogspin.yaml             # start a method in a NEW cog with a stack (R1-R3); "overflow is not detected"
+    - language/spin2/methods/taskspin.yaml            # start an intra-cog TASK with a stack (R4)
+    - language/spin2/methods/tasknext.yaml            # R4 cooperative yield between the supervisor and the task
+    - language/spin2/methods/longfill.yaml            # the fill primitive the instrument uses to lay the sentinel pattern
+    - language/pasm2/concepts/stack_operations.yaml   # the P2 HARDWARE call stack (PTRA/PTRB, 8-level) — cited to keep it DISTINCT from the hub method stack this note sizes
+
+mechanism_reference:
+  - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication) — how the tasks whose stacks R4 sizes are launched and run; the companion note this one answers"
+
+runnable_code:
+  examples_zip: "P2AN006-src-<YYMMDD>.zip"        # published beside the PDF at release
+  recipes:
+    - {id: isp_stack_check,      file: isp_stack_check.spin2,      note: "the instrument — sentinel-fill stack-overflow utility (Stephen M. Moraco, MIT); shipped verbatim"}
+    - {id: instrument-cog-stack, file: instrument-cog-stack.spin2, note: "R1 — guard a cogspin worker: prepStackForCheck (before launch) + checkStack (running guard)"}
+    - {id: high-water-mark,      file: high-water-mark.spin2,      note: "R2 — reportStackUse reads the high-water mark; right-size to ~1.5x N"}
+    - {id: pinpoint-overflow,    file: pinpoint-overflow.spin2,    note: "R3 — granular checkStack between init calls localizes the overrunning routine"}
+    - {id: size-task-stack,      file: size-task-stack.spin2,      note: "R4 — the same technique on a TASKSPIN task stack ({Spin2_v47})"}
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; each recipe OBJ-includes isp_stack_check.spin2 (uses debug()) so compile with -d. R1-R3 need no directive; R4 needs {Spin2_v47}"
+
+key_parameters:
+  constants: "isp_stack_check: NOT_WRITTEN_MARK = $a5a50df0 (fill every stack long before launch); DO_NOT_WRITE_MARK = $addee5e5 (sentinel in the long JUST PAST the buffer)"
+  api: "all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); getStackDepth(high-water count, bottom-up to first untouched long); reportStackUse(prints 'STACK used N of M')"
+  placement_rule: "the sentinel long (endStackMark) MUST abut the stack buffer with no gap — declare it immediately after the stack in the SAME DAT block; prepStackForCheck writes it"
+  sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
+  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code (cogspin.yaml); a task usually needs less than a full cog (one focused job)"
+  stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth (Spin2 v55 text:284)"
+  two_contexts: "new-cog stack (cogspin, one call stack per cog) and intra-cog task stack (TASKSPIN, one per task) — same sizing job; the instrument only watches a hub buffer"
+
+prerequisites:
+  - "Reading/writing Spin2 (methods, DAT/VAR, debug())"
+  - "Launching a method in a new cog with cogspin (and, for R4, a task with TASKSPIN — see P2AN005)"
+  - "That a call stack holds a method's parameters, results, locals, and its nested-call chain"
+
+gotchas:
+  - flag: pitfall
+    text: "The sentinel long (endStackMark) MUST abut the stack buffer in the same DAT block. A gap puts the sentinel where the overflow won't reach it first (or the check reads the wrong long), and the technique quietly stops working."
+  - flag: pitfall
+    text: "getStackDepth's high-water mark only counts paths that ACTUALLY RAN. If your test never exercises the deepest branch/handler, you undercount and size the stack too small. Drive the worst case before trusting the number."
+  - flag: pitfall
+    text: "checkStack proves the BOUNDARY was crossed (the one long past the buffer), not that all memory is intact. Detection is sound because the stack grows contiguously and clobbers the sentinel first — but read it as 'boundary held/crossed'."
+  - flag: hardware
+    text: "isp_stack_check keeps its working values in shared object variables, so two cogs calling checkStack on different stacks at once can interfere. Every recipe here has a single thread do the checking; for concurrent self-checks, give each cog its own copy of the object."
+  - flag: hardware
+    text: "The buffer sized here is the HUB Spin2 method call stack — unrelated to the P2's 8-level HARDWARE call stack (PASM CALL/RET). Sizing one has no bearing on the other."
+  - flag: tip
+    text: "Ship the guard, not just the measurement. A checkStack in a slow supervisory loop costs one long-compare and turns any future overflow (a new deep branch, a bigger input) into a clear halt instead of silent corruption."
+  - flag: tip
+    text: "P2 operator is `<=` not `=<` (pnut_ts rejects `=<`). Caught while authoring the recursion in R2/R4."
+  - flag: verify
+    text: "R1/R3/R4: silent guard = pass; shrink the stack below what the code needs and checkStack prints '^^^ STACK Overflow! Depth greater than N longs' and halts. R2: reportStackUse prints '^^^ STACK used N of M'; deepen the call chain and N rises."
+
+hardware_status: |
+  Every recipe and the isp_stack_check instrument compile clean under pnut_ts -d (v1.55.0, _clkfreq =
+  200_000_000); each recipe OBJ-includes the utility from the example library. The overflow DETECTION,
+  the '^^^ STACK Overflow!' message, the high-water 'STACK used N of M' output, and the lockup-for-
+  analysis halt are runtime behaviors described from the utility's design; observing them fire (shrink
+  a stack below what its code needs) is a bench step on real silicon (Stephen runs hardware externally;
+  -> EF ledger when accepted). No invented DEBUG captures.
+
+provenance:
+  primary_sources:
+    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — cogspin/coginit stack requirements, TASKSPIN task stacks, and the parameters-then-results-then-locals stack layout"
+  tool_ground_truth:
+    - "pnut_ts v1.55.0 — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
+  cross_check_sources:
+    - "P2 Knowledge Base cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
+  community_examples:
+    - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC, MIT License) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
+  companion_publication:
+    - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication)"
+  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0. Bundled isp_stack_check.spin2 (c) 2024 Iron Sheep Productions, LLC under MIT."

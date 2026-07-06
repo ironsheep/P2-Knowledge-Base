@@ -1,0 +1,25 @@
+{Spin2_v47}
+CON
+  _clkfreq = 200_000_000
+
+  LED_A       = 56                 ' first blinker's LED (Edge LEDs 56-63)
+  LED_B       = 57                 ' second blinker's LED
+  STACK_LONGS = 64                 ' per-task stack (deepest call chain)
+
+DAT
+  blinkBStack   LONG 0[STACK_LONGS]
+
+PUB main()
+  ' Launch the second blinker as a cooperative sibling task, then
+  ' let THIS method become the first blinker. Both share the one cog,
+  ' taking turns at tasknext().
+  taskspin(NEWTASK, blink(LED_B, 250), @blinkBStack)
+  blink(LED_A, 100)  ' never returns -> becomes steady-state task
+
+PRI blink(pin, period_ms) | nextEdge
+  nextEdge := getct()
+  repeat
+    if getct() - nextEdge >= 0     ' time for this LED's next edge?
+      nextEdge += period_ms * (clkfreq / 1000)
+      pint(pin)  ' toggle the LED (complete the "transaction")
+    tasknext()  ' ...THEN yield, so the sibling blinker runs

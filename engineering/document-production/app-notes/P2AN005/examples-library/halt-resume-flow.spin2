@@ -1,0 +1,50 @@
+{Spin2_v47}
+CON
+  _clkfreq = 200_000_000
+
+  STACK_LONGS = 64
+  BUF_LONGS   = 8  ' power of two -> & mask below is fast modulo
+  BUF_MASK    = BUF_LONGS - 1
+
+DAT
+  prodStack   LONG 0[STACK_LONGS]
+
+VAR
+  LONG buffer[BUF_LONGS]
+  LONG head, tail                  ' producer owns head, consumer owns tail
+  LONG prodId
+
+PUB main() | item, seen
+  head := 0
+  tail := 0
+  seen := 0
+
+  ' --- synchronized start: launch producer HALTED, prep, then release ---
+  ' expression form -> task id
+  prodId := taskspin(NEWTASK, producer(), @prodStack)
+  taskhalt(prodId)  ' hold it before it runs a step
+  ' (prepare shared state here; producer cannot touch it yet)
+  taskcont(prodId)                                       ' now both run
+
+  repeat
+    if head <> tail  ' something to consume?
+      item := buffer[tail]
+      tail := (tail + 1) & BUF_MASK
+      seen++
+      if seen // 8 == 0
+        debug("consumed ", udec(item), ...
+              "   (producer state ", udec(taskchk(prodId)), ")")
+      if taskchk(prodId) == 2  ' 2 = halted: space now, wake it
+        taskcont(prodId)
+    tasknext()
+
+PRI producer() | n
+  n := 0
+  repeat
+    if ((head + 1) & BUF_MASK) == tail                  ' ring full?
+      ' halt SELF (auto-yields); consumer resumes me
+      taskhalt(thistask)
+    else
+      buffer[head] := n++
+      head := (head + 1) & BUF_MASK
+    tasknext()

@@ -1,0 +1,36 @@
+{Spin2_v47}
+CON
+  _clkfreq = 200_000_000
+
+  STACK_LONGS = 96                 ' the cruncher's stack
+  YIELD_EVERY = 256                ' responsive task runs every N iters
+
+DAT
+  crunchStack   LONG 0[STACK_LONGS]
+
+VAR
+  LONG checksum  ' cruncher publishes its latest result here
+
+PUB main() | heartbeat
+  taskspin(NEWTASK, crunch(), @crunchStack)   ' the compute-heavy sibling
+  heartbeat := 0
+  repeat                                       ' THIS task stays responsive
+    heartbeat++
+    if heartbeat // 5000 == 0
+      debug("responsive: heartbeat ", udec(heartbeat), ...
+            "   latest checksum ", uhex_long(checksum))
+    tasknext()
+
+PRI crunch() | pass, i, acc
+  pass := 0
+  repeat
+    acc := 0
+    repeat i from 1 to 100_000  ' a deliberately long inner loop
+      acc += i
+      if i // YIELD_EVERY == 0
+        tasknext()  ' yield mid-computation -> responsive task runs
+    checksum := acc                            ' publish the result
+    pass++
+    debug("crunch pass ", udec(pass), ...
+          " done, checksum ", uhex_long(checksum))
+    tasknext()
