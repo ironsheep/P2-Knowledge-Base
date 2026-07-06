@@ -39,7 +39,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | Getting Started | manual | 1.0.0 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| I/O & Smart Pins | manual | 1.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| I/O & Smart Pins | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Assembly Reference | manual | 3.1.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | DeSilva Tutorial | manual | 3.0.1 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Debug Window | manual | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
@@ -65,7 +65,7 @@ Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<sl
 **v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding.
 
 **P2 I/O & Smart Pins User Guide** · `p2-io-and-smart-pins-user-guide` · manual
-**v1.0.2 released 2026-07-05** (396pp, Community Review Edition) — Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference.
+**v1.0.3 released 2026-07-06** (396pp, Community Review Edition) — ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits; ENOB presented as the measured, hardware-characterized figure (F-201, matches KB v1.14.2). Prior v1.0.2 (2026-07-05): Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference.
 
 **P2 Assembly Language Reference** · `p2-assembly-language-manual` · manual
 **v3.1.2 (2026-07-04)** — F-193 patch: event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx family) document the SETQ-armed timeout (EF-020, HW-verified); 505pp, render-verified. Prior v3.1.1 (2026-06-29): Ch.1 execution-model refinements + §2.8.3 Operation:-line guidance. chip review outstanding.
@@ -237,7 +237,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
-2026-07-05 21:39  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.2, 396pp — patch: Ch.13 P_STATE_TICKS state-timing examples now read each transition with a single RDPIN (state in bit 31, tick count in the low bits) (F-195, matches KB v1.14.1); render-verified: 396pp = prior, outline complete (19 ch + App A-G), Ch.13 examples text-present (p200/p207), compile-clean)
+2026-07-06 21:43  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.3, 396pp — patch: ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits, ENOB presented as the measured figure (F-201, matches KB v1.14.2); render-verified: 396pp = prior, outline complete (19 ch + App A-G), §16.3 nominal-resolution footnote text-present (p246), compile-clean)
 2026-07-04 21:42  PUBLISH   p2-assembly-language-manual      (v3.1.2, 505pp — F-193 doc patch: the event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx event family) document the SETQ-armed timeout — a preceding SETQ bounds a single wait on the event OR a CT deadline, C/Z reports which; no-SETQ form clears the flags as a free flag-clear (EF-020, HW-verified). Render-verified: 505pp vs 503 prior (+2, additive), outline complete (Ch.1-6 + Instr A-Z + App A-J), changed sections text-present (p336), compile-clean)
 2026-07-04 04:18  PUBLISH   p2-streamer-programming-guide    (v1.0.4, 75pp — forum-provenance patch: HDMI-audio blanking now sourced to the HDMI data-island spec §15.2, DVI/HDMI blanking floors framed as display-specific observations, SINC2 measurement-period bound reframed §10.4; render-verified 75pp = prior, 0 missing chars, outline complete)
 2026-07-03 23:39  PUBLISH   P2AN004                          (v1.0.0, 14pp — app-note #4: frequency/period/pulse measurement techniques-catalog (3 recipes: RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob); deep audit 4-agent fan-out + hand-verify (0 code defects); first app note with 3 rendered circuit/timing diagrams via a NEW shared app-note diagram library (circuitikz); render-verified, 0 missing chars, no empty ToC, all recipes present)
@@ -298,7 +298,7 @@ lives in the Live-section detail above — not repeated here.)
 | `p2-pasm-desilva-style` | 3.0.1 | ✅ current | incl. the 06-25 ✓/✗/θ glyph fallback |
 | `p2-streamer-programming-guide` | 1.0.4 | ✅ current | on latest platform |
 | `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit |
-| `p2-io-and-smart-pins-user-guide` | 1.0.2 | ✅ current | on latest platform (cross-ref filter pilot) |
+| `p2-io-and-smart-pins-user-guide` | 1.0.3 | ✅ current | on latest platform (cross-ref filter pilot) |
 | `p2-layout-torture-test` | — | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`

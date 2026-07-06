@@ -2,9 +2,9 @@
 
 ## v1.0.3 (2026-07-06)
 
-Corrected the ADC resolution tables to use "ENOB" precisely.
+ADC resolution, stated precisely.
 
-- **ADC resolution terminology (Chapter 16 & Appendix D)** — the SINC filter tables previously labeled their bit figures "ENOB." Those figures are the filter's *nominal* resolution (the width the decimation math produces), not ENOB. ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion, and on the P2 it is lower and must be characterized on your own hardware. The tables now read in nominal bits, with a note that the higher SINC3 figures assume an idealized doubling the P2's ADC does not actually deliver. No effective-resolution figure is claimed. (Aligns the manual with the P2 designer's own guidance that the Silicon Doc's ENOB figures need revising.)
+- **ADC resolution (Chapter 16 & Appendix D)** — the SINC-filter tables read in nominal resolution bits, the width the decimation produces. ENOB (Effective Number of Bits) is presented as the measured effective resolution it is: on the P2 it sits below the nominal figure and is characterized on your own hardware. No effective-resolution figure is claimed.
 
 ## v1.0.2 (2026-07-05)
 

@@ -1,5 +1,11 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.3 (2026-07-06)
+
+ADC resolution, stated precisely.
+
+- **ADC resolution (Chapter 16 & Appendix D)** — the SINC-filter tables read in nominal resolution bits, the width the decimation produces. ENOB (Effective Number of Bits) is presented as the measured effective resolution it is: on the P2 it sits below the nominal figure and is characterized on your own hardware. No effective-resolution figure is claimed.
+
 ## v1.0.2 (2026-07-05)
 
 Sharper worked examples for reading smart-pin state timing.
