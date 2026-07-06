@@ -961,14 +961,21 @@ v1.0.1) — separate from the withdrawn bit-31 claim. Verify each site before ed
 ## Family C app-note authoring sweep (2026-07-06) — F-196…F-200
 
 > Surfaced while source-mining for the Family C app notes (P2AN005 Multitasking /
-> P2AN006 Stack Sizing / P2AN007 Data Structures). **YAML fixes are DEFERRED to a
-> yaml-head pass after the three drafts are staged for PDF review** (Stephen's
-> sequencing call 2026-07-06); logged here now per the always-log discipline. The
+> P2AN006 Stack Sizing / P2AN007 Data Structures). **ALL RESOLVED — `DONE` 2026-07-06**
+> in the yaml-head pass after the drafts were staged for PDF review (was deferred per
+> Stephen's sequencing call; F-198 hardware-verified → EF-023). The
 > notes are authored *correctly against P2* regardless — they exclude/route around
 > every defect below. Authority: `pnut_ts` v1.55.0 + the Spin2 v55 keyword table
 > (`engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149`).
 
-### F-196 — `methods/taskwait.yaml` documents `TASKWAIT`, which does not exist in Spin2 — `CONFIRMED` (DEFERRED)
+### F-196 — `methods/taskwait.yaml` documents `TASKWAIT`, which does not exist in Spin2 — `DONE (2026-07-06)`
+> **APPLIED 2026-07-06 (policy: no fabricated names in the tree — Stephen's call).** Deleted
+> `methods/taskwait.yaml` AND `methods/taskresume.yaml` outright (no invalid-keyword stubs, no
+> aliases) — fake names now resolve to nothing; agents recover via `p2kb_find` on `task*`. Redirected
+> the inbound refs: `tasknext.yaml related:` dropped `TASKWAIT` and upgraded to full-path valid
+> siblings; `taskcont.yaml` dropped its `TASKRESUME` alias + note. Added a POSITIVE wait-idiom note to
+> `tasknext.yaml` (`repeat until <cond>` + `TASKNEXT()`) so the use-case is answered via a real method.
+> Source: v55 keyword table (TASKWAIT/TASKRESUME absent, `spin2-v55-text.txt:149`) + pnut_ts v1.55.0 probe.
 `TASKWAIT` is **absent from the v55 keyword table** (`spin2-v55-text.txt:149` lists exactly
 TASKSPIN/TASKNEXT/TASKSTOP/TASKHALT/TASKCONT/TASKCHK/TASKID/NEWTASK/THISTASK/TASKHLT — no
 TASKWAIT). **Compile-probe (pnut_ts v1.55.0, `-d`):** `TASKWAIT(ready == 1)` →
@@ -980,25 +987,43 @@ to an invalid-keyword stub in the shape of `taskresume.yaml` (which already does
 `TASKRESUME`), and remove the `TASKWAIT` back-references in `tasknext.yaml related:`. **Authoring:**
 `TASKWAIT` is excluded from P2AN005.
 
-### F-197 — `methods/taskspin.yaml` `returns: void` omits the expression-return form — `CONFIRMED` (DEFERRED)
+### F-197 — `methods/taskspin.yaml` `returns: void` omits the expression-return form — `DONE (2026-07-06)`
+> **APPLIED 2026-07-06.** `taskspin.yaml` `returns:` now documents both forms: as a statement it
+> returns nothing; as an expression term it returns the assigned task number (0-31) or -1 if no slot
+> was free. `related:` upgraded to full paths. Source: v55 v47 change note (`spin2-v55-text.txt:39`).
 v55 (`spin2-v55-text.txt:39`) and a compile-probe confirm `TASKSPIN(...)` used as an expression
 **returns the assigned task number, or −1 if no slot was free**. The YAML declares `returns: type: void`,
 which is incomplete. **Proposed correction (deferred):** document the integer expression-return (task # /
 −1) alongside the statement form.
 
-### F-198 — `methods/taskid.yaml` + `registers/taskhlt.yaml` assert "main task is typically ID 0" unsourced — `NEEDS-VERIFICATION` (DEFERRED)
+### F-198 — `methods/taskid.yaml` + `registers/taskhlt.yaml` assert "main task is typically ID 0" unsourced — `DONE (2026-07-06, hardware-verified 🏆 EF-023)`
+> **HARDWARE-VERIFIED 2026-07-06 (🏆 EF-023).** Stephen ran `f198-tasks-per-cog-probe.spin2` on real P2
+> silicon: two cogs, each spinning two tasks, all reporting `COGID()`/`TASKID()`. **Both cogs** showed
+> top-level = TASKID 0, spawned tasks = 1 and 2 (each task's id matched `TASKSPIN`'s return). So the
+> claim is CONFIRMED but **sharpened**: not a single global "main = 0" — rather, *in each cog the
+> top-level code runs as that cog's task 0, and task IDs are cog-local*. Kept + reworded (dropped the
+> vague "typically") in `taskid.yaml` + `taskhlt.yaml`, both citing EF-023. Verification turned a
+> remove-the-unsourced-claim into a keep-and-strengthen (empirical outranks documentary silence).
 Both files state the main/host task is (typically) ID 0; the v55 keyword table does not state this. Reads
 as inference. **Proposed correction (deferred):** verify on hardware (Stephen) or soften/remove the claim.
 P2AN005 does not rely on any fixed main-task ID.
 
-### F-199 — `patterns/implementation/spin2_shared_memory.yaml` uses P1 `lockset()`/`lockclr()` — `CONFIRMED` (DEFERRED)
+### F-199 — `patterns/implementation/spin2_shared_memory.yaml` uses P1 `lockset()`/`lockclr()` — `DONE (2026-07-06)`
+> **APPLIED 2026-07-06.** Rewrote the pattern to the real P2 lock idiom: `LOCKNEW()` to allocate,
+> `repeat until LOCKTRY(id)` to acquire, `LOCKREL(id)` to release (added the missing `start()`/`LOCKNEW`
+> allocation the P1 original lacked). Compile-verified under pnut_ts v1.55.0. Source: v55 (P2 has
+> LOCKNEW/LOCKTRY/LOCKREL/LOCKRET/LOCKCHK; `lockset`/`lockclr` absent). Evidence-scoping: the only other
+> lockset/lockclr hit, `p2an007` companion, is a *correct warning* ("do NOT use the P1 form") — left as-is.
 Lines ~12/14/17 use `lockset()`/`lockclr()`, which are **Propeller 1** methods and **do not exist in P2
 Spin2** (P2 uses `LOCKTRY`/`LOCKREL` with `LOCKNEW`/`LOCKRET`/`LOCKCHK`) — the pattern would fail to compile
 under `pnut_ts`. **Proposed correction (deferred):** rewrite to the P2 `LOCKTRY`/`LOCKREL` idiom (spin-acquire
 `repeat until locktry(id)`, release on all paths). **Authoring:** P2AN007 codes the real P2 locks and never
 cites the P1 form.
 
-### F-200 — `patterns/implementation/spin2_event_dispatcher.yaml` is SPSC-only but unscoped — `CONFIRMED` (DEFERRED)
+### F-200 — `patterns/implementation/spin2_event_dispatcher.yaml` is SPSC-only but unscoped — `DONE (2026-07-06)`
+> **APPLIED 2026-07-06.** Added a `constraints:` note stating the queue is correct only single-producer/
+> single-consumer (the `queue_head` advance is unguarded and races under multiple producers), and pointing
+> multi-writer use at a lock-guarded queue (`spin2_shared_memory.yaml`, full path). Source: code analysis.
 The `post_event` queue is correct only single-producer/single-consumer; used multi-producer it races (no lock
 on the head advance), and the file does not state the constraint. **Proposed correction (deferred):** add the
 SPSC scope note (and point multi-writer use at a lock-guarded queue). **Authoring:** P2AN007's R4 shows the

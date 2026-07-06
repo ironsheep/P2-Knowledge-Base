@@ -16,6 +16,12 @@ implementation: |
       event := event_queue[queue_tail]
       queue_tail := (queue_tail + 1) & 31
       handle_event(event>>16, event&$FFFF)
+constraints: |
+  SPSC only: this queue is correct for exactly ONE producer (post_event) and
+  ONE consumer (process_events). With multiple producers the queue_head advance
+  races (it is unguarded), which corrupts the queue. For multi-writer use, guard
+  the head advance with a lock (see language/spin2/patterns/implementation/spin2_shared_memory.yaml)
+  or use a lock-guarded queue.
 resources:
   memory: "128+ bytes queue"
   overhead: "polling loop"

@@ -1,0 +1,48 @@
+{Spin2_v47}
+' ============================================================================
+' F-198 verification probe — what TASKID() does the main/initial task run as?
+'
+' Claim under test (currently UNSOURCED in taskid.yaml + taskhlt.yaml):
+'   "the main task is typically ID 0"
+' The Spin2 v55 keyword table does not state this. This probe reports the
+' actual runtime IDs so the claim can be confirmed or removed.
+'
+' HOW TO RUN (DEBUG must be enabled or you will see nothing):
+'   pnut_ts f198-main-task-id-probe.spin2 -d      ' compile with DEBUG
+'   pnut_ts f198-main-task-id-probe.spin2 -bd     ' download + run with DEBUG
+' Capture the DEBUG terminal output and hand back the log.
+'
+' HOW TO READ THE RESULT:
+'   - "main TASKID() before any TASKSPIN" : the id the initial code runs as.
+'       If this prints 0, the main task is ID 0 (claim CONFIRMED).
+'   - "TASKSPIN(NEWTASK) returned id"     : the slot the first spawned task got.
+'   - "worker TASKID()"                   : the worker confirming its own id.
+'       Together these show the allocation order (e.g. main=0 -> first NEWTASK=1).
+' ============================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+VAR
+  long workerStack[64]
+
+PUB main() | assigned
+  debug("=== F-198 main-task-ID probe ===")
+  debug("main TASKID() before any TASKSPIN = ", sdec(TASKID()))
+
+  assigned := TASKSPIN(NEWTASK, worker(), @workerStack)
+  debug("TASKSPIN(NEWTASK) returned id     = ", sdec(assigned))
+  debug("main TASKID() after TASKSPIN      = ", sdec(TASKID()))
+
+  ' Give the worker a few switches so it can report its own id.
+  repeat 3
+    TASKNEXT()
+
+  debug("=== probe complete ===")
+  repeat                                       ' idle, keep the cog alive
+    TASKNEXT()
+
+PRI worker()
+  debug("worker TASKID()                   = ", sdec(TASKID()))
+  repeat
+    TASKNEXT()

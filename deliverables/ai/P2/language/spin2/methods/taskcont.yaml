@@ -7,7 +7,6 @@ aliases:
   - "task continue"
   - "resume task"
   - "continue task"
-  - "TASKRESUME"          # common-but-invalid name; see taskresume.yaml stub
 
 requires_version: "Spin2_v47"
 version_directive: "{Spin2_v47}"
@@ -52,7 +51,6 @@ notes:
   - "All state preserved during halt"
   - "No effect if task not halted"
   - "Part of cooperative multitasking"
-  - "The name TASKRESUME (seen in some older notes) does not compile — the keyword is TASKCONT"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is
@@ -61,10 +59,10 @@ timing:
     single-PASM-instruction backing to cite).
 
 related:
-  - TASKHALT
-  - TASKSPIN
-  - TASKSTOP
-  - TASKCHK
+  - language/spin2/methods/taskhalt.yaml
+  - language/spin2/methods/taskspin.yaml
+  - language/spin2/methods/taskstop.yaml
+  - language/spin2/methods/taskchk.yaml
 see_also:
   - "Task synchronization"
   - "Task continuation"

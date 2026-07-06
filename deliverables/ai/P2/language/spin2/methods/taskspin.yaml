@@ -22,8 +22,11 @@ parameters:
     type: "address"
     description: "Address of stack space for the task"
 returns:
-  type: "void"
-  description: "No return value"
+  type: "integer (as expression) / void (as statement)"
+  description: |
+    As a statement, TASKSPIN returns nothing. Used as an expression term, it
+    returns the assigned task number (0-31), or -1 if no task slot was free.
+    Source: Spin2 v55 keyword reference (v47 change note).
 examples:
   - code: |
       {Spin2_v47}                              ' REQUIRED directive
@@ -79,10 +82,11 @@ timing:
     single-PASM-instruction backing to cite).
 
 related:
-  - TASKSTOP
-  - TASKHALT
-  - TASKCONT
-  - TASKCHK
+  - language/spin2/methods/taskstop.yaml
+  - language/spin2/methods/taskhalt.yaml
+  - language/spin2/methods/taskcont.yaml
+  - language/spin2/methods/taskchk.yaml
+  - language/spin2/methods/tasknext.yaml
 see_also:
   - "Cooperative multitasking"
   - "Task management"

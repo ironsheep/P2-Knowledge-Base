@@ -1,0 +1,32 @@
+{Spin2_v47}
+' ============================================================================
+' F-198 — who lands as TASKID 0, per cog?
+' Two cogs; EACH cog's top-level code spins two tasks. Top-level + both tasks
+' report COGID and TASKID. Expected: per cog, top-level=0, spawned tasks=1,2.
+' RUN:  pnut_ts f198-tasks-per-cog-probe.spin2 -bd   (hand back the DEBUG log)
+' ============================================================================
+CON
+  _clkfreq = 200_000_000
+VAR
+  long extraStack[64]
+  long tStk[256]                               ' 4 task stacks x 64 longs
+
+PUB main()
+  debug("=== F-198 tasks-per-cog probe ===")
+  cogspin(NEWCOG, runCog(@tStk[128], @tStk[192]), @extraStack)   ' 2nd cog
+  runCog(@tStk[0], @tStk[64])                  ' this (launcher) cog
+
+PRI runCog(stkA, stkB) | idA, idB
+  debug("COGID=", udec(COGID()), " TOP-LEVEL TASKID=", sdec(TASKID()))
+  idA := TASKSPIN(NEWTASK, taskWork(), stkA)
+  idB := TASKSPIN(NEWTASK, taskWork(), stkB)
+  debug("COGID=", udec(COGID()), " spawned ids=", sdec(idA), ",", sdec(idB))
+  repeat 6
+    TASKNEXT()
+  repeat
+    TASKNEXT()
+
+PRI taskWork()
+  debug("COGID=", udec(COGID()), " task TASKID=", sdec(TASKID()))
+  repeat
+    TASKNEXT()

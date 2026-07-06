@@ -6,16 +6,19 @@ implementation: |
   VAR
     long shared_data[16]
     long lock_id
-    
+
+  PUB start()
+    lock_id := LOCKNEW()                  ' allocate one lock (0-15), or -1 if none free
+
   PUB write_shared(index, value)
-    repeat while lockset(lock_id)
+    repeat until LOCKTRY(lock_id)         ' acquire — spins until this cog owns the lock
     shared_data[index] := value
-    lockclr(lock_id)
-    
+    LOCKREL(lock_id)                      ' release on the single exit path
+
   PUB read_shared(index) : value
-    repeat while lockset(lock_id)
+    repeat until LOCKTRY(lock_id)
     value := shared_data[index]
-    lockclr(lock_id)
+    LOCKREL(lock_id)
 resources:
   locks: "1 per resource"
   memory: "shared hub RAM"

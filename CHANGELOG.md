@@ -20,6 +20,15 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.2] - 2026-07-06
+
+**Cooperative multitasking and ADC resolution, documented precisely**
+
+### Changed
+- Cooperative tasking: `TASKSPIN`'s expression return (the assigned task number, or -1 when no slot is free) and cog-local task IDs (each cog's top-level code runs as that cog's task 0, hardware-verified) are documented; the wait-with-yield idiom lives on `TASKNEXT`.
+- Multitasking patterns use the real P2 idioms: the shared-memory pattern's `LOCKNEW`/`LOCKTRY`/`LOCKREL` locks, and the event-dispatcher's single-producer/single-consumer scope.
+- ADC SINC-filter tables state resolution in nominal bits; ENOB is presented as the measured, hardware-characterized figure it is.
+
 ## [1.14.1] - 2026-07-05
 
 **P_STATE_TICKS example demonstrates single-read state capture.**

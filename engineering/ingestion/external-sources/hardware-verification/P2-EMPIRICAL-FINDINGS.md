@@ -202,3 +202,16 @@ see EF-003) → **looping data updates**. LOGIC and SCOPE_XY accept their channe
 create line (config-phase); SCOPE/FFT do not (update-phase). *Evidence:* the EF-003 run +
 prior-session window work. *Grounds:* the create/config/update split across the
 debug-display YAMLs + `statements/debug.yaml`.
+
+### EF-023 · Top-level Spin2 code runs as its cog's task 0; task IDs are cog-local — `CONFIRMED`
+In each cog, the **top-level (initial) code runs as that cog's `TASKID` 0**; `TASKSPIN(NEWTASK)`
+then allocates upward (1, 2, …). Task IDs are **cog-local** — every cog has its own 0–31 task
+space. *How proven:* `f198-tasks-per-cog-probe.spin2` (pnut_ts v1.55.0, `-d`, real P2 silicon,
+RAM download) launched a second cog via `COGSPIN`; each cog's top-level code plus its two
+`TASKSPIN(NEWTASK)` tasks reported `COGID()`/`TASKID()`. *Result (verbatim, both cogs identical):*
+`TOP-LEVEL TASKID=0` · `task TASKID=1` · `task TASKID=2` · `spawned ids=1,2` — for `COGID 0` **and**
+`COGID 1`. Each task's self-reported id matched `TASKSPIN`'s return (triangulated); the quantity is
+discrete/deterministic, so one run is dispositive. *Verdict:* CONFIRMED 2026-07-06. *Grounds:*
+`methods/taskid.yaml` + `registers/taskhlt.yaml` (F-198) — replaces the prior **unsourced** "main
+task is typically ID 0" with the cog-local fact. Test replicated under
+`campaigns/2026-07-cooperative-tasking/tests/`.

@@ -47,6 +47,7 @@ notes:
   - "Returns when task gets control again"
   - "Essential for task cooperation"
   - "Prevents task starvation"
+  - "To wait for a condition while other tasks keep running, poll in a loop that yields: repeat until <cond> ... TASKNEXT(). There is no dedicated wait method."
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is
@@ -55,9 +56,9 @@ timing:
     single-PASM-instruction backing to cite).
 
 related:
-  - TASKWAIT
-  - TASKSPIN
-  - TASKHALT
+  - language/spin2/methods/taskspin.yaml
+  - language/spin2/methods/taskhalt.yaml
+  - language/spin2/methods/taskchk.yaml
 see_also:
   - "Cooperative multitasking"
   - "Task scheduling"
