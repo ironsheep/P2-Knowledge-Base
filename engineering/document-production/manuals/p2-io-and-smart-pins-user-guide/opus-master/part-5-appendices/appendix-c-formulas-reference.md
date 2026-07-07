@@ -208,18 +208,15 @@ voltage_mv = (128 × 3300) / 255 = 1656 mV
 
 ### ADC with Gain
 
-**Effective Input Range:**
-```formula
-input_max = 3300mV / gain_factor
-```
+Gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16x per gain step — NOT a ground-referenced 0-to-max range. The windows below were **measured on a real P2** (representative single sample; vary part-to-part and with VIO/temperature — calibrate for absolute work). See Chapter 16, §16.2.
 
-| Gain Mode | Gain Factor | Input Range |
-|-----------|-------------|-------------|
-| P_ADC_1X | 1 | 0-3.3V |
-| P_ADC_3X | 3.16 | 0-1.04V |
-| P_ADC_10X | 10 | 0-330mV |
-| P_ADC_30X | 31.6 | 0-104mV |
-| P_ADC_100X | 100 | 0-33mV |
+| Gain Mode | Gain Factor | Input window (measured, VIO ~3.3 V) |
+|-----------|-------------|-------------------------------------|
+| P_ADC_1X | 1 | 0-3.3 V (full rail) |
+| P_ADC_3X | 3.16 | ~0.9-2.4 V |
+| P_ADC_10X | 10 | ~1.4-1.9 V |
+| P_ADC_30X | 31.6 | ~1.57-1.71 V |
+| P_ADC_100X | 100 | ~1.61-1.66 V |
 
 
 ## DAC (Analog Output)

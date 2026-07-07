@@ -221,15 +221,16 @@ PUB main() | x
 
 - **The debug link is shared by every window and every cog.** All `DEBUG` output —
   from all eight cogs, to all your windows — travels over one serial link, and the
-  cogs time-share it through a hardware lock (`LOCK[15]`) during their debug
+  cogs time-share it through a hardware lock during their debug
   interrupts. There is no separate channel per window or per cog; everything is
   serialized onto the same wire and demultiplexed on the host by window name.
 
 - **One shared link means you must pace your output.** Because every feed competes
   for that one link, the total rate across all windows and cogs is what matters, not
-  the rate of any single window. Messages can stream at up to roughly 10,000 per
-  second before the link saturates. With several windows updating in one loop, keep
-  the loop's `waitms`/`waitx` generous enough that the combined traffic fits.
+  the rate of any single window. Past some combined rate the link saturates and
+  messages back up. With several windows updating in one loop, keep the loop's
+  `waitms`/`waitx` generous enough that the combined traffic fits — tune it against
+  your own serial baud rate and message sizes.
 
 - **Slow a busy cog with `DLY`.** Adding `` `DLY `` (in Spin2) or `DLY(#ms)` (in
   PASM, where the millisecond count is an immediate) as the *last* item in a `DEBUG`

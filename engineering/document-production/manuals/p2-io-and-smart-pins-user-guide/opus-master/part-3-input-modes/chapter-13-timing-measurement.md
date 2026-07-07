@@ -429,9 +429,9 @@ PUB measure_frequency_averaged(events, samples) : freq | total, i
 ```
 
 
-## 13.7 Complete Examples
+## 13.7 Worked Examples
 
-### Example 1: Complete PWM Analyzer
+### Example 1: PWM Signal Analyzer
 
 ```spin2
 CON

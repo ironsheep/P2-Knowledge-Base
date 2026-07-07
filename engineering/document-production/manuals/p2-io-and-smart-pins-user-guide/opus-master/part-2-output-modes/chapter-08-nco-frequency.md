@@ -319,7 +319,7 @@ Error = 0.00076%
 | 350 MHz | 0.0815 Hz |
 
 
-## 8.7 Complete Examples
+## 8.7 Worked Examples
 
 ### Example 1: Audio Tone Generator
 

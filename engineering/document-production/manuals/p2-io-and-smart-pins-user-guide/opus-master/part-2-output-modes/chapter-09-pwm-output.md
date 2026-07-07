@@ -411,7 +411,7 @@ Y range: 0 to 57,143
 ```
 
 
-## 9.7 Complete Examples
+## 9.7 Worked Examples
 
 ### Example 1: LED Brightness Control
 

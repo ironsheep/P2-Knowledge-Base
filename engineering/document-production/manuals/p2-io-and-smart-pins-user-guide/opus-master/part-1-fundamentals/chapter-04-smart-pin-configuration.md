@@ -389,7 +389,7 @@ PINHIGH(pin)                             ' DIR=1, start Smart Pin
 
 **Note:** For output modes, DRVL vs DRVH doesn't affect the smart pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
 
-### Complete Example - NCO Frequency
+### Worked Example - NCO Frequency
 
 **Spin2:**
 ```spin2

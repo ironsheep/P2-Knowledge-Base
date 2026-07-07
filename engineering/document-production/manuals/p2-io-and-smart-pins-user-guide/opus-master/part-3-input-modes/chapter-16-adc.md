@@ -34,36 +34,54 @@ ADC operation requires specific pin mode bits. Set P[12:10] = %100 in the WRPIN 
 
 ### Input Configuration Options
 
-| Constant | P[9:7] | Description | Input Range |
-|----------|----------|-------------|-------------|
-| P_ADC_GIO | %000 | Ground-referenced | 0V to 3.3V |
-| P_ADC_VIO | %001 | VIO-referenced | VIO-relative |
-| P_ADC_FLOAT | %010 | Floating input | Self-biased |
-| P_ADC_1X | %011 | 1x gain | 0V to 3.3V |
-| P_ADC_3X | %100 | 3.16x gain | 0V to ~1.04V |
-| P_ADC_10X | %101 | 10x gain | 0V to 330mV |
-| P_ADC_30X | %110 | 31.6x gain | 0V to ~104mV |
-| P_ADC_100X | %111 | 100x gain | 0V to 33mV |
+| Constant | P[9:7] | Role / Behavior |
+|----------|----------|-------------|
+| P_ADC_GIO | %000 | Internal **ground reference** — a calibration source, not a signal input |
+| P_ADC_VIO | %001 | Internal **supply reference** — a calibration source, not a signal input |
+| P_ADC_FLOAT | %010 | Floating input — self-biases to ~mid-supply (good for AC / capacitive coupling) |
+| P_ADC_1X | %011 | Pin, unity gain — full-scale spans the supply rail (≈0V to 3.3V at 3.3V VIO) |
+| P_ADC_3X | %100 | Pin, 3.16x gain (window below) |
+| P_ADC_10X | %101 | Pin, 10x gain (window below) |
+| P_ADC_30X | %110 | Pin, 31.6x gain (window below) |
+| P_ADC_100X | %111 | Pin, 100x gain (window below) |
+
+> **Gain modes measure *around* the ADC's mid-supply bias point (~VIO/2) — not up from ground.** A higher gain narrows the measurable window *symmetrically about mid-supply*; it does not rescale a 0 V-referenced range. A ground-referenced small signal (a 0-100 mV sensor sitting near 0 V) cannot be read directly by a gain mode — bias it to mid-supply first, or use the ratiometric reference method in §16.3.
+
+The per-gain input windows below were **measured on a real P2** (one sample; the on-chip DAC driven through a pin-to-pin loopback into the ADC). Every gain centers on ~VIO/2, and the windows narrow ~3.16x per gain step. Treat them as **representative** — the exact endpoints vary part-to-part and with VIO and temperature, so calibrate for absolute work.
+
+| Mode | Gain | Input window (measured, VIO ~3.3 V) |
+|------|------|-------------------------------------|
+| P_ADC_1X | 1x | 0-3.3 V (full rail) |
+| P_ADC_3X | 3.16x | ~0.9-2.4 V |
+| P_ADC_10X | 10x | ~1.4-1.9 V |
+| P_ADC_30X | 31.6x | ~1.57-1.71 V |
+| P_ADC_100X | 100x | ~1.61-1.66 V |
 
 ### Choosing an Input Mode
 
-**P_ADC_GIO (Ground-referenced):**
+**P_ADC_1X (unity-gain pin read):**
 
-- Most common mode for general-purpose ADC
-- Full 0V to 3.3V range
-- Best for sensors and potentiometers
+- The general-purpose mode for reading a voltage on a pin
+- Full-scale spans the supply rail (≈0V to 3.3V at 3.3V VIO)
+- Best for pots and sensors that swing across the rail
 
-**P_ADC_1X through P_ADC_100X (Gain modes):**
+**P_ADC_GIO / P_ADC_VIO (calibration references):**
 
-- Amplify small signals before conversion
-- Reduce noise by using more of the ADC range
-- Higher gain = smaller input range
+- Not signal inputs — they read the chip's own internal ground and supply references
+- Used to calibrate a pin reading against known endpoints (ratiometric method, §16.3)
+
+**P_ADC_3X through P_ADC_100X (gain modes):**
+
+- Increase sensitivity to small signals *centered on the ADC's mid-supply bias point*
+- Higher gain = a narrower measurable window about mid-supply (not a smaller 0-referenced range)
+- A ground-referenced small signal must be biased to mid-supply first (or read ratiometrically, §16.3)
 
 **Example: Gain Selection**
 ```spin2
-' For a 0-100mV sensor, use 30x gain
-' 100mV × 31.6 = 3.16V (uses most of ADC range)
-WRPIN(pin, P_ADC_30X | P_ADC)
+' Gain modes measure about mid-supply (~VIO/2), not up from 0V.
+' A ground-referenced 0-100mV sensor must be biased to mid-supply first,
+' or read ratiometrically (Section 16.3).
+WRPIN(pin, P_ADC_30X | P_ADC)   ' 31.6x sensitivity about mid-supply
 ```
 
 
@@ -499,23 +517,27 @@ PUB measure_voltage() : millivolts | sample, last_acc, acc, ack
 
 ### Example 4: Small Signal with Gain
 
+Gain modes raise sensitivity *around the ADC's mid-supply bias point* (~VIO/2), so
+the small signal must sit near mid-supply — not at ground. A raw thermocouple (tens
+of millivolts referenced to ground) needs a bias network to lift it to mid-supply,
+or the ratiometric reference method (§16.3); it cannot be read directly by a gain
+mode. This example configures a gain mode for a signal already biased to mid-supply
+and reads the filtered result. Converting that reading to volts needs the per-gain
+input window, which is being characterized on hardware (see §16.2).
+
 ```spin2
 CON
   _clkfreq = 200_000_000
-  THERMOCOUPLE_PIN = 46                 ' Range ~0-50mV depending on type
+  SIGNAL_PIN = 46                 ' small signal, biased to mid-supply
 
-PUB read_thermocouple() : microvolts | sample
-  ' Use 100x gain: 33mV max input → full ADC range
-  WRPIN(THERMOCOUPLE_PIN, P_ADC_100X | P_ADC)
-  WXPIN(THERMOCOUPLE_PIN, %00_1001)           ' SINC2 sampling, 10-bit
-  PINH(THERMOCOUPLE_PIN)
+PUB read_small_signal() : sample
+  WRPIN(SIGNAL_PIN, P_ADC_100X | P_ADC)       ' 100x about mid-supply
+  WXPIN(SIGNAL_PIN, %00_1001)                 ' SINC2 sampling, 10-bit
+  PINH(SIGNAL_PIN)
 
-  WAITMS(1)                                   ' Let filter stabilize
+  WAITMS(1)                                   ' let filter stabilize
 
-  sample := RDPIN(THERMOCOUPLE_PIN)
-
-  ' Convert: 0-1023 → 0-33000 µV (0-33mV at 100x gain)
-  microvolts := (sample * 33000) / 1023
+  sample := RDPIN(SIGNAL_PIN)                 ' filtered result
 ```
 
 ### Example 5: PASM2 ADC with Event Detection
@@ -567,8 +589,8 @@ threshold     long      128                   ' Mid-scale threshold
 
 Some bounds come from the analog front end itself and **cannot be averaged away** — know them before promising absolute accuracy:
 
-- **Input impedance ≈ 500 kΩ** (on the 1× range). A low-impedance source loads this lightly, but a high-impedance source — or a large external series resistor — forms a divider that shifts the reading. Buffer high-Z sources, or account for the divider.
-- **Absolute-error floor ≈ 15 mV.** The GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read up to about 15 mV apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
+- **High input impedance.** The 1× range presents a high input impedance, so a low-impedance source loads it lightly. A high-impedance source — or a large external series resistor — forms a divider with it that shifts the reading. Buffer high-Z sources, or account for the divider.
+- **Absolute-error floor.** A single pin's absolute error is small — a few millivolts (≤ ~9 mV measured on real P2 silicon; representative, not a guaranteed spec). The larger concern is **pin-to-pin spread**: the GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read a bit apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
 - **Supply and temperature sensitivity.** The internal references track the VIO supply, so a noisy switch-mode VIO degrades precision — feed VIO from a clean LDO for instrumentation work. GIO and VIO also drift with temperature (VIO is the more stable of the two), giving each chip a per-pin fingerprint; periodic re-referencing handles the slow drift.
 - **Power-of-2 sample period.** In SINC2 sampling mode the period must be a power of two (`2^X[3:0]`) and cannot be freely dithered (§16.3, Resolution and Sample Rate).
 
@@ -630,14 +652,14 @@ PUB calibrated_read() : value
 
 | Constant | Function |
 |----------|----------|
-| P_ADC_GIO | Ground-referenced input |
-| P_ADC_VIO | VIO-referenced input |
-| P_ADC_FLOAT | Floating input |
-| P_ADC_1X | 1x gain (0-3.3V) |
-| P_ADC_3X | 3.16x gain (0-1.04V) |
-| P_ADC_10X | 10x gain (0-330mV) |
-| P_ADC_30X | 31.6x gain (0-104mV) |
-| P_ADC_100X | 100x gain (0-33mV) |
+| P_ADC_GIO | Internal ground reference (calibration) |
+| P_ADC_VIO | Internal supply reference (calibration) |
+| P_ADC_FLOAT | Floating input (self-biases to ~mid-supply) |
+| P_ADC_1X | Pin, unity gain — 0-3.3 V (full rail) |
+| P_ADC_3X | Pin, 3.16x gain — window ~0.9-2.4 V (measured, about mid-supply) |
+| P_ADC_10X | Pin, 10x gain — window ~1.4-1.9 V |
+| P_ADC_30X | Pin, 31.6x gain — window ~1.57-1.71 V |
+| P_ADC_100X | Pin, 100x gain — window ~1.61-1.66 V |
 
 ### Filter Mode Summary
 

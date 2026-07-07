@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.4\par}
+{\large\color{blue}Version 1.0.5\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -1001,18 +1001,40 @@ The **wrap-around groups (%101–%111)** place a 32-pin window that straddles th
 
 ## 12.2 Sub-Pin Selection {#sec-12-2}
 
-For modes using fewer than 8 pins, D[19:17] refines selection within the group:
+Within the 32-pin window chosen by the group field (§12.1), the D[19:17] region refines *which* pins a fewer-than-8-pin transfer uses. It is **not** a uniform 3-bit selector across all pin counts: as the pin count rises, fewer of these bits are pin-select bits and the freed low bits become **DAC-configuration** bits (which DACs the block feeds). The pin offset is relative to the window base.
 
-| D[19:17] | 1-Pin | 2-Pin | 4-Pin |
-|----------|-------|-------|-------|
-| `%000` | Pin 0 | Pins 1..0 | Pins 3..0 |
-| `%001` | Pin 1 | Pins 3..2 | Pins 7..4 |
-| `%010` | Pin 2 | Pins 5..4 | Pins 11..8 |
-| `%011` | Pin 3 | Pins 7..6 | Pins 15..12 |
-| `%100` | Pin 4 | Pins 9..8 | Pins 19..16 |
-| `%101` | Pin 5 | Pins 11..10 | Pins 23..20 |
-| `%110` | Pin 6 | Pins 13..12 | Pins 27..24 |
-| `%111` | Pin 7 | Pins 15..14 | Pins 31..28 |
+**1-Pin modes** — all three bits (D[19:17]) select the pin offset (0–7):
+
+| D[19:17] | Pin offset |
+|----------|-----------|
+| `%000` | Pin 0 |
+| `%001` | Pin 1 |
+| `%010` | Pin 2 |
+| `%011` | Pin 3 |
+| `%100` | Pin 4 |
+| `%101` | Pin 5 |
+| `%110` | Pin 6 |
+| `%111` | Pin 7 |
+
+**2-Pin modes** — only D[19:18] select the pin pair; **D[17] is a DAC-config bit** (2DAC1 vs 1DAC2), not a pin bit:
+
+| D[19:18] | Pin pair |
+|----------|----------|
+| `%00` | Pins 1..0 |
+| `%01` | Pins 3..2 |
+| `%10` | Pins 5..4 |
+| `%11` | Pins 7..6 |
+
+**4-Pin modes** — only D[19] selects the pin group; **D[18:17] are DAC-config bits** (4DAC1 / 2DAC2 / 1DAC4), not pin bits:
+
+| D[19] | Pin group |
+|-------|-----------|
+| `%0` | Pins 3..0 |
+| `%1` | Pins 7..4 |
+
+::: hardware
+**Reach higher pins with the group field, not the sub-pin field.** Sub-pin selection only refines within the low pins of the window — it does not scan across all 32. To place a transfer on higher pins, move the 32-pin window with the group field `%ppp` in D[22:20] (§12.1).
+:::
 
 ## 12.3 Enable Control {#sec-12-3}
 

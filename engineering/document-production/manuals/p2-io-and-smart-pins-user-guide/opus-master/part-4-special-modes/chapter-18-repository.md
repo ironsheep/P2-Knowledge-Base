@@ -338,7 +338,7 @@ PRI get_next_sample() : sample
 |--------|---------|------------|
 | Capacity | 512 KB | 32 bits per pin |
 | Access | May need LOCK | Atomic |
-| Speed | 8-15 clocks/access | 1 instruction |
+| Speed | 9-16 clocks/access | 1 instruction |
 | Flexibility | High | Limited |
 | Best for | Large data | Flags, status |
 

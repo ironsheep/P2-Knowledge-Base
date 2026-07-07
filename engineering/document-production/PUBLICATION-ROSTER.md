@@ -39,11 +39,11 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | Getting Started | manual | 1.0.0 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| I/O & Smart Pins | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| I/O & Smart Pins | manual | 1.0.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Assembly Reference | manual | 3.1.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| DeSilva Tutorial | manual | 3.0.1 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| Debug Window | manual | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| Streamer Guide | manual | 1.0.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| DeSilva Tutorial | manual | 3.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Debug Window | manual | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| Streamer Guide | manual | 1.0.5 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
@@ -67,19 +67,19 @@ Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<sl
 **v1.0.0 (2026-06-24)** — initial community-review release. The orientation on-ramp, split 2026-06-24 from the P2 Architect's Guide first draft (orientation Chs 1–3 "Meet the Propeller 2" / "Reading P2 Code" / "Putting It to Work" + Where-to-Next); born on the shared platform stack with `p2kb-getting-started-*` locals; release-gate audited (drain GREEN) + finalized; 25pp. Links out to the reference manuals + the Architect's Guide. chip review outstanding.
 
 **P2 I/O & Smart Pins User Guide** · `p2-io-and-smart-pins-user-guide` · manual
-**v1.0.3 released 2026-07-06** (396pp, Community Review Edition) — ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits; ENOB presented as the measured, hardware-characterized figure (F-201, matches KB v1.14.2). Prior v1.0.2 (2026-07-05): Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference.
+**v1.0.4 released 2026-07-07** (396pp, Community Review Edition) — correction wave: ADC input-mode windows measured on real P2 (F-202/EF-024, gain modes center on ~VIO/2), ch02 ~17Ω fast-drive + ch18 9-16 hub-access datasheet fixes, five unsourced specifics softened to qualitative guidance (§7.5 clock, §10.9 DAC min-load, §12.10 input buffer, §16.8 impedance/abs-error), example-heading de-inflation. Prior **v1.0.3 (2026-07-06)** — ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits; ENOB presented as the measured, hardware-characterized figure (F-201, matches KB v1.14.2). Prior v1.0.2 (2026-07-05): Ch.13 P_STATE_TICKS state-timing examples single-read (state in bit 31, count in low bits; F-195, matches KB v1.14.1). Prior v1.0.1 (2026-07-04): Ch.5 SETQ-armed event-wait timeout (F-193/EF-020) + Ch.15 concurrent A+B input routing (F-192/EF-017). Maiden release v1.0.0 (2026-07-03): 19 chapters covering all 32 smart-pin modes + Appendices A-G + 15-program example ZIP. Terminal step of the IOSP Release Campaign (folded in the USB study + P2AN003 DAC + P2AN004 Freq/Period/Pulse boundary-enrichment). Release-gate audited: 5 HIGH + ~12 MED + ~14 LOW resolved via document-finalize; drain gate GREEN (F-191 shipped in KB v1.13.3); cross-ref filter PILOT (adopted + visually audited); render-verified (compile-clean, 0 heading widows, Appendix A links 42->0, full outline). Chip-review expert-queue items parked (external). "Blue Book" reference.
 
 **P2 Assembly Language Reference** · `p2-assembly-language-manual` · manual
 **v3.1.2 (2026-07-04)** — F-193 patch: event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx family) document the SETQ-armed timeout (EF-020, HW-verified); 505pp, render-verified. Prior v3.1.1 (2026-06-29): Ch.1 execution-model refinements + §2.8.3 Operation:-line guidance. chip review outstanding.
 
 **DeSilva PASM2 Tutorial** · `p2-pasm-desilva-style` · manual
-**v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding.
+**v3.0.2 released 2026-07-07** (163pp) — correction wave: three event-table encodings match silicon (SETSE %000 = LUT read/write & hub-lock event, EVENT_INT %0000, EVENT_QMT %1111) + dedicated-cog servo example rename. Prior **v3.0.1 (2026-06-25)** — accuracy re-audit (every PASM2/Spin2 example compile-checked with `pnut-ts` against the current compiler), typography refresh on the shared platform stack (Plex, no line-number gutter, 8.5pt code boxes; ✓/✗/θ glyph fallbacks), lowercase house-style sweep, and a companion example-library ZIP (first-blink, multicog-blink, hub-counters). **Resolves both prior DEFERRALS:** the Cog-Anatomy diagram is repaired ("Each Cog Contains:") and the full pnut-ts compile-cert is done. Regenerated clean (162pp; 172→162 from the denser typography, outline verified complete). Release-gate audit: local `audit/release-gate-2026-06-25.md`. Prior **v3.0.0 (2026-06-10)** absorbed the ~33-error content re-audit + Ch2 egg-beater fix. chip review outstanding.
 
 **P2 Debug Window Manual** · `p2-debug-window-manual` · manual
-**v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release.
+**v1.0.2 released 2026-07-07** (160pp) — correction wave: TEXTSTYLE align/weight + TERM TEXTSIZE default aligned to Spin2 v55, ch14 shared-lock number + throughput figure softened (156→160pp = benign platform reflow, first rebuild absorbing the 07-02 heading-widow fix + 07-07 mnemonic-"ones" fix; word-count unchanged confirms no content change). Prior **v1.0.1 (2026-06-26)** — accuracy + typography refresh: DEBUG-output quoting examples corrected data-set-wide, FFT/run-up worked programs fixed, per-window details tightened (trigger offsets, defaults/ranges, PLOT polar, ALT, MIDI), IBM Plex typography (156pp); 32-demo example library refreshed (source ZIP). Prior **v1.0.0 (2026-06-16)** initial community-review release.
 
 **P2 Streamer Programming Guide** · `p2-streamer-programming-guide` · manual
-**v1.0.4 (2026-07-04)** community-review edition — forum-provenance patch (HDMI-audio blanking budget sourced to the HDMI data-island spec §15.2 · DVI/HDMI blanking floors framed as display-specific observations · SINC2 measurement-period bound reframed §10.4); render-verified 75pp = prior, 0 glyph drops; `audit/forum-provenance-audit-2026-07-04.md`. Prior v1.0.3 (2026-07-03) Wave-3 designer-authoritative additions + cross-ref filter (82 links/0 dead). chip review outstanding.
+**v1.0.5 released 2026-07-07** (75pp) — correction wave: §12.2 sub-pin selection documents the silicon's per-pin-count field widths (1-pin uses D[19:17], 2-pin D[19:18]+DAC-config bit, 4-pin D[19]+DAC-config bits; higher pins via the group field D[22:20]). Prior **v1.0.4 (2026-07-04)** community-review edition — forum-provenance patch (HDMI-audio blanking budget sourced to the HDMI data-island spec §15.2 · DVI/HDMI blanking floors framed as display-specific observations · SINC2 measurement-period bound reframed §10.4); render-verified 75pp = prior, 0 glyph drops; `audit/forum-provenance-audit-2026-07-04.md`. Prior v1.0.3 (2026-07-03) Wave-3 designer-authoritative additions + cross-ref filter (82 links/0 dead). chip review outstanding.
 
 **P2AN001 — Single-Pin ADC Instrumentation** · `P2AN001` · app-note
 **v1.0.1 (2026-07-03, 20pp)** — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16. v1.0.1 = editorial compile-status wording patch.
@@ -237,12 +237,14 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-07 20:39  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.4, 396pp — correction wave: ADC input-mode windows measured on real P2 (F-202/EF-024), ch02 ~17Ω + ch18 9-16 datasheet fixes, 5 unsourced specifics softened to qualitative guidance (§7.5/§10.9/§12.10/§16.8), example-heading de-inflation; render-verified 396pp = prior, outline complete (5 parts + appendices), edits text-present, compile-clean)
+2026-07-07 20:34  PUBLISH   p2-pasm-desilva-style            (v3.0.2, 163pp — correction wave: 3 event-table encodings match silicon (SETSE %000, EVENT_INT %0000, EVENT_QMT %1111) + dedicated-cog servo example rename; render-verified 163pp, Ch1-16 + App A + Index complete, edits text-present, compile-clean)
+2026-07-07 20:33  PUBLISH   p2-debug-window-manual           (v1.0.2, 160pp — correction wave: TEXTSTYLE align/weight + TERM TEXTSIZE default aligned to Spin2 v55, ch14 shared-lock/throughput softened; render-verified 156->160pp (+4 = benign platform reflow, first rebuild absorbing the 07-02 heading-widow fix + 07-07 mnemonic-"ones" fix; word-count 47057->47109 confirms no content change), outline complete, compile-clean)
+2026-07-07 20:30  PUBLISH   p2-streamer-programming-guide    (v1.0.5, 75pp — correction wave: §12.2 sub-pin selection documents the silicon's per-pin-count field widths (1/2/4-pin DAC-config bits, group-field D[22:20] for higher pins); render-verified 75pp = prior, outline complete, §12.2 text-present, compile-clean)
 2026-07-07 00:48  PUBLISH   P2AN006                          (v1.0.0, 12pp — app-note: sizing cog & task stacks techniques-catalog (4 recipes: instrument new-cog stack, high-water mark, pinpoint overflow, size task stack) built around the MIT isp_stack_check utility; render-verified 12pp, all recipes present, compile-clean; first render carrying the mnemonic-"ones" platform fix)
 2026-07-07 00:47  PUBLISH   P2AN005                          (v1.0.0, 12pp — app-note: cooperative multitasking with Spin2 TASK methods techniques-catalog (4 recipes: two-task round-robin, cooperative yield, halt/resume flow, task dashboard); TASKWAIT excluded (F-196); render-verified 12pp, all recipes present, compile-clean)
 2026-07-07 00:11  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua  (the ambiguous-word "ones" now defaults to English prose, only rendering as the ONES popcount instruction on an explicit "ones instruction/count" signal — replaces a fragile adjective allowlist that leaked "ONES" into prose like "the short ones". Consistent with the and/or/not rules. Benefits every manual; first consumed by P2AN005/P2AN006 v1.0.0.)
-2026-07-06 21:43  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.3, 396pp — patch: ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits, ENOB presented as the measured figure (F-201, matches KB v1.14.2); render-verified: 396pp = prior, outline complete (19 ch + App A-G), §16.3 nominal-resolution footnote text-present (p246), compile-clean)
 2026-07-04 21:42  PUBLISH   p2-assembly-language-manual      (v3.1.2, 505pp — F-193 doc patch: the event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx event family) document the SETQ-armed timeout — a preceding SETQ bounds a single wait on the event OR a CT deadline, C/Z reports which; no-SETQ form clears the flags as a free flag-clear (EF-020, HW-verified). Render-verified: 505pp vs 503 prior (+2, additive), outline complete (Ch.1-6 + Instr A-Z + App A-J), changed sections text-present (p336), compile-clean)
-2026-07-04 04:18  PUBLISH   p2-streamer-programming-guide    (v1.0.4, 75pp — forum-provenance patch: HDMI-audio blanking now sourced to the HDMI data-island spec §15.2, DVI/HDMI blanking floors framed as display-specific observations, SINC2 measurement-period bound reframed §10.4; render-verified 75pp = prior, 0 missing chars, outline complete)
 2026-07-03 23:39  PUBLISH   P2AN004                          (v1.0.0, 14pp — app-note #4: frequency/period/pulse measurement techniques-catalog (3 recipes: RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob); deep audit 4-agent fan-out + hand-verify (0 code defects); first app note with 3 rendered circuit/timing diagrams via a NEW shared app-note diagram library (circuitikz); render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 20:08  PUBLISH   P2AN003                          (v1.0.0, 19pp — app-note #3: DAC & analog signal generation techniques-catalog (5 recipes + reSound ceiling); deep audit caught+fixed a HIGH Recipe-4 scaling bug (SINC2 differential already 16-bit); render-verified, 0 missing chars, no empty ToC, all recipes present)
 2026-07-03 19:30  PUBLISH   P2AN001                          (v1.0.1, 20pp — editorial patch: compile-status wording corrected to be clock-independent; content otherwise identical to v1.0.0; render-verified, 0 missing chars, no empty ToC, all recipes present)
@@ -256,8 +258,6 @@ that PDF was generated. This ledger is the detector.
 2026-07-02 06:07  PLATFORM  templates/p2kb-platform-content.sty       (F10: ModeBlock top rule "borderline north" 4pt->1.5pt — thins the Appendix-F mode-card corner marker's horizontal stroke; vertical west stays 4pt.)
 2026-06-29 19:00  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (v3.0 STYLE POLICY: prose mnemonics now render UPPERCASE, NOT bold — uppercase carries the token's identity and matches its code appearance; bold is reserved for genuine emphasis. Also ends the uneven-bold bug where punctuation-adjacent mnemonics ("(ALTS", "RDFAST/WRFAST") bolded only partially. AUTOMATIC for EVERY manual on its NEXT render — a visible prose-style change, but NOT a forced re-release. First absorbed by Assembly Language Reference v3.1.1.)
 2026-06-26 18:15  PLATFORM  filters/p2kb-platform-crossref.lua        (NEW: auto-links "Chapter N"/"Appendix X"/"Section N.N"/"§N.N" prose refs to anchors; opt-in per request.json, IOSP piloting. OTHER MANUALS: adopt + visual-audit on NEXT release — NOT a forced release; tracker: CROSSREF-FILTER-ADOPTION.md)
-2026-06-26 05:09  PUBLISH   p2-debug-window-manual           (v1.0.1, 156pp — accuracy + typography refresh: DEBUG-quoting examples + FFT/run-up programs + per-window details; IBM Plex, 0 missing chars; outline verified complete)
-2026-06-25 23:31  PUBLISH   p2-pasm-desilva-style            (v3.0.1, 162pp — accuracy re-audit + Plex typography refresh; ✓/✗/θ glyph fallbacks clean, 0 missing chars; outline verified complete)
 2026-06-25 23:22  PLATFORM  templates/p2kb-platform-foundation.sty   (glyph fallbacks via newunicodechar + listings literate: ✅/✓/❌ → green \checkmark / red \times, and θ → \rmfamily Greek theta; collapses the 03:53 Ω/μ/µ line, file now carries all; daemon-verified clean on deSilva v3.0.1 — 0 missing chars)
 2026-06-24 22:36  PUBLISH   p2-getting-started-guide         (v1.0.0, 25pp — initial Community Review Edition; release-gate audited + finalized; clean compile log, 0 overfull)
 2026-06-24 21:01  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (AG-01: English-collision handling for call/push/ones/test — daemon-verified on Getting Started; other manuals low-urgency regen)
@@ -296,12 +296,12 @@ lives in the Live-section detail above — not repeated here.)
 
 | Manual | Ver | Freshness | Why |
 |--------|-----|:--:|-----|
-| `p2-debug-window-manual` | 1.0.1 | ✅ current | built on latest platform (06-25 glyph-fallback + Plex) |
+| `p2-debug-window-manual` | 1.0.2 | ✅ current | rebuilt 07-07 on latest platform (absorbed 07-02 widow fix + 07-07 mnemonic-"ones") |
 | `p2-assembly-language-manual` | 3.1.2 | ✅ current | first to render the uppercase-mnemonic filter |
-| `p2-pasm-desilva-style` | 3.0.1 | ✅ current | incl. the 06-25 ✓/✗/θ glyph fallback |
-| `p2-streamer-programming-guide` | 1.0.4 | ✅ current | on latest platform |
+| `p2-pasm-desilva-style` | 3.0.2 | ✅ current | rebuilt 07-07 on latest platform |
+| `p2-streamer-programming-guide` | 1.0.5 | ✅ current | rebuilt 07-07 on latest platform (carried the mnemonic-"ones" seed) |
 | `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit |
-| `p2-io-and-smart-pins-user-guide` | 1.0.3 | ✅ current | on latest platform (cross-ref filter pilot) |
+| `p2-io-and-smart-pins-user-guide` | 1.0.4 | ✅ current | rebuilt 07-07 on latest platform (cross-ref filter pilot) |
 | `p2-layout-torture-test` | — | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
 
 **Pending platform change — 2026-07-07 (`mnemonic-bold.lua` "ones" fix):** every live
@@ -310,9 +310,12 @@ Smart Pins Tutorial, on its own `p2kb-sp-` fork), so by the detector's rule each
 below this `PLATFORM` line until its next render. The fix is **cosmetic** — it only
 changes how a bare "<adjective> ones" reads in prose (e.g. "the short ones") — so **no
 forced re-render is scheduled**; each manual **picks it up automatically on its next
-natural release**, and is marked current then. **P2AN005 / P2AN006 v1.0.0 are the first
-renders to carry it.** The rows above stay ✅ for the substantive platform stack; this is
-the one pending cosmetic delta, tracked here so it isn't lost.
+natural release**, and is marked current then. **P2AN005 / P2AN006 v1.0.0 carried it
+first; the 2026-07-07 correction wave (Streamer v1.0.5, Debug v1.0.2, deSilva v3.0.2,
+IOSP v1.0.4) has since absorbed it.** Still pending on the manuals that haven't rebuilt
+since (Getting Started, Assembly, the P2AN001-004 notes, single-step, torture-test). The
+rows above stay ✅ for the substantive platform stack; this is the one pending cosmetic
+delta, tracked here so it isn't lost.
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`
 appends/updates a `PUBLISH` line when a generation is confirmed clean; any edit to a

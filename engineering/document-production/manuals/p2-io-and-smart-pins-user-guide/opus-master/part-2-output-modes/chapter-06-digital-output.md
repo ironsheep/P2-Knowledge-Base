@@ -332,7 +332,7 @@ Smart pins are faster when:
 
 Smart pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, smart pin overhead is negligible.
 
-## 6.5 Complete Examples
+## 6.5 Worked Examples
 
 ### Example 1: Status LED with Blink
 

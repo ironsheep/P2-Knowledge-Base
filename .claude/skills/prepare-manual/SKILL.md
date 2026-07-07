@@ -73,6 +73,13 @@ study: `methodology/presentation-platform-unification-STUDY.md`).
 - **Sacred Rule #5** — Never rename files. The working-copy filename in `request.json` is sacred and identical in workspace and outbound.
 - Outbound is **FLAT** — no subdirectories for templates/filters. (Assets, if used, do go in `outbound/<slug>/assets/`.)
 
+## Multi-manual wave staging (ordering + shared-file-once)
+
+When you prepare **several manuals in one wave** (e.g. a correction sweep touching 4 manuals), two rules govern the wave as a whole — above the per-manual staging logic below:
+
+- **A shared common-named file is staged in exactly ONE manual of the wave — never repeated.** Forge's manual store keys every file by filename, so any file that carries the **same name across manuals** — the platform `.sty`/`.lua`, a shared `.latex`, the shared cover image (`book-artwork.png`, one identical copy for all manuals) — is a **single slot** in the store. The first manual to stage it seeds it for every manual that follows; re-sending a byte-identical copy in a later manual just overwrites the seed with itself (first-in == last-in) and wastes the user's deploy time. So: if such a shared file **changed** and the wave needs it, stage it with the **first** manual only; every other manual in the wave stages just its own manual-specific files (body `.md`, front-matter, its own `request.json`, manual-only override `.sty`). The per-file content-hash gate (Platform-stack rule) already enforces this *mechanically* when you prepare the manuals in sequence and let Step 7 update `manual_store_platform_hashes` between them — but hold the rule explicitly in mind so you never hand-stage a shared file into a second bundle "to be safe." (Corollary: if NO shared file changed this wave — the common case for a markdown-only correction sweep — **no** manual stages any shared file.)
+- **Stage the wave shortest-manual-first.** Order the manuals by length (PDF page count is the quickest proxy) and prepare/hand off the **shortest first**, longest last. The short manual compiles fastest on the Forge, so the user gets a fast turnaround — and because the shortest bundle is the one carrying any changed shared file (previous rule), the shared file is proven on the quickest build before the long manuals run. State the wave order explicitly to the user when you present the staging plan.
+
 ## Execution plan
 
 ### Step 1 — Identify the manual
@@ -146,6 +153,8 @@ Then ask the user directly in chat (no `AskUserQuestion` in this repo), covering
 3. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files whose **content hash changed** per the Step-4 Platform-stack check (often NONE). **Gate the manual's OWN files on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN content-diff gate (changed-hash only), **independent** of the per-manual seeded/first-build check — a first manual build does NOT drag the platform along if the platform is unchanged. Default: stage just the changed aux files + the markdown (+ only the platform files whose hash changed).
 
 If the user has clearly signaled "just do it" in this session, you may skip confirmation for unambiguous cases — but always show what you're about to do at minimum.
+
+**Wave context.** If this manual is part of a multi-manual wave, honor the two wave rules (see "Multi-manual wave staging"): you should be preparing manuals **shortest-first**, and any changed shared common-named file rides with the **first** (shortest) manual only — later manuals in the wave must not re-stage it. State where this manual sits in the wave order.
 
 ### Step 6 — Execute
 

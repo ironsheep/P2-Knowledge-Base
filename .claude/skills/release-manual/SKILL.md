@@ -46,7 +46,7 @@ Per manual being released:
    dashboards** — `engineering/document-production/README.md` (the status matrices — a release
    moves the doc into **Done**) and the `engineering/README.md` front-door Manual row.
 4. **Update the community-review announcement draft** (Phase 3d): add the doc's row + warm blurb
-   (or bump its version) in the gitignored `COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, and spot-check the
+   (or bump its version) in the gitignored `DRAFTS/COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, and spot-check the
    other rows' versions against the roster. Not committed — the user publishes it.
 5. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
 6. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
@@ -252,8 +252,8 @@ analogue of release-yamls' dashboard-ledger step):
   returns nothing for this manual.
 
 **3d — Update the community-review announcement draft (MANDATORY every manual/app-note release).**
-The review-announcement post is a **living draft** at the repo root
-(`COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, **gitignored** — the user publishes it by hand). It carries
+The review-announcement post is a **living draft** in `DRAFTS/`
+(`DRAFTS/COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, **gitignored** — the user publishes it by hand). It carries
 a summary table (Manuals / App Notes, each with Download · View Changes · Examples links + version)
 and a warm "why you'd reach for each one" blurb per document. A release that updates the README index
 (Phase 2) but not this draft leaves the announcement lying about the current set — and because the

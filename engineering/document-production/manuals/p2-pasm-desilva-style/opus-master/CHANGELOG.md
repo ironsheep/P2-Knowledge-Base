@@ -1,5 +1,15 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.2 (2026-07-07)
+
+**A naming refinement and three event-encoding corrections** — an example titled for what it teaches, and event-table entries that match the silicon.
+
+### Changed
+- The dedicated-cog servo example is titled "Real-World Example: Dedicated-Cog Servo Control," and its lead-in describes the timing as rock-steady. Accurate framing for a focused teaching example; no code changed.
+
+### Fixed
+- Event-table encodings match the silicon: `SETSE` selector `%000` is the LUT read/write & hub-lock event, `EVENT_INT %0000` reads "an interrupt occurred," and `EVENT_QMT %1111` reads "read with no CORDIC result available."
+
 ## v3.0.1 (2026-06-25)
 
 **Accuracy re-audit, typography refresh, and a companion example library** — every code example compile-checked against the current compiler, with a presentation pass on the shared manual platform.

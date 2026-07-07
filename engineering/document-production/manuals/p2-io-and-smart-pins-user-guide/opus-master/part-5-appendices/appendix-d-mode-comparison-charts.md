@@ -189,13 +189,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 ### Gain Selection Guide
 
-| Signal Level | Best Gain | Input Range | Use Case |
-|--------------|-----------|-------------|----------|
-| 0-3.3V | P_ADC_1X | Full | Pot, sensor |
-| 0-1V | P_ADC_3X | 0-1.04V | Low-voltage sensor |
-| 0-300mV | P_ADC_10X | 0-330mV | Thermocouple |
-| 0-100mV | P_ADC_30X | 0-104mV | Strain gauge |
-| 0-30mV | P_ADC_100X | 0-33mV | Microphone |
+Gain modes increase ADC sensitivity *around the mid-supply bias point (~VIO/2)*, not up from ground — so they suit small signals already centered near mid-supply (an AC signal coupled in via `P_ADC_FLOAT`, or a signal biased there). A ground-referenced small signal (a thermocouple or strain gauge sitting near 0 V) must be level-shifted to mid-supply first, or measured with the ratiometric reference method (Chapter 16, §16.3). Higher gain narrows the measurable window about mid-supply; the exact per-gain input window is being characterized on hardware (see Chapter 16, §16.2). For a full-rail signal (a pot or a sensor that swings across the supply), use `P_ADC_1X`.
 
 ## DAC Mode Comparison
 

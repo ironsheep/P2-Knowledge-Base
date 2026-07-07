@@ -304,14 +304,14 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 
 | Bits | Field | Values |
 |------|-------|--------|
-| 0–1 | Weight | `0`=100 (thin), `1`=400 (normal), `2`=700 (bold), `3`=900 (heavy) |
+| 0–1 | Weight | `0`=light, `1`=normal, `2`=bold, `3`=heavy |
 | 2 | Italic | `0`=normal, `1`=italic |
 | 3 | Underline | `0`=none, `1`=underline |
-| 4–5 | Horizontal align | `0`/`1`=center, `2`=left, `3`=right |
-| 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
+| 4–5 | Horizontal align | `0`/`1`=center, `2`=right, `3`=left |
+| 6–7 | Vertical align | `0`/`1`=center, `2`=bottom, `3`=top |
 
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
-`$20` left-aligns. The defaults (style `$00`) are thin weight, centered both ways.
+`$20` right-aligns. The defaults (style `$00`) are light weight, centered both ways.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the

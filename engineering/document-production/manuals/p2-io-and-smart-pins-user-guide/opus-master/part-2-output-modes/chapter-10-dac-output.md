@@ -411,7 +411,7 @@ PUB set_voltage_mv(pin, mv)
   wypin(pin, millivolts_to_dac16(mv, 3300))
 ```
 
-## 10.8 Complete Examples
+## 10.8 Worked Examples
 
 ### Example 1: Simple Voltage Reference
 
@@ -560,12 +560,14 @@ delay         long      2000               ' Sample interval
 
 The DAC output impedance determines load driving capability:
 
-| DAC Type | Output Z | Max Load | Voltage Drop at 1mA |
+| DAC Type | Output Z | Min Load (guideline) | Voltage Drop at 1mA |
 |----------|----------|----------|-------------------|
 | P_DAC_990R_3V | 990Ω | >10kΩ | 0.99V |
 | P_DAC_600R_2V | 600Ω | >6kΩ | 0.60V |
 | P_DAC_124R_3V | 124Ω | >1.2kΩ | 0.12V |
 | P_DAC_75R_2V | 75Ω | >750Ω | 0.08V |
+
+The "Min Load" column is a **rule-of-thumb guideline** (roughly 10× the output impedance), not a hard specification — keeping the load well above the output impedance holds the voltage drop small. Size the actual load to the voltage-drop budget your application can tolerate.
 
 ### External Buffering
 

@@ -1,5 +1,15 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.5 (2026-07-07)
+
+A sub-pin selection correction. No chapters added.
+
+- **Sub-pin selection (§12.2)** — the sub-pin field is documented per the silicon's actual field
+  widths, which vary with pin count: **1-pin** modes use all of D[19:17] as the pin offset; **2-pin**
+  modes use D[19:18] (four pin pairs), with D[17] selecting DAC configuration; **4-pin** modes use
+  D[19] (two groups), with D[18:17] selecting DAC configuration. Higher pins are reached by moving
+  the 32-pin window with the group field D[22:20] (§12.1).
+
 ## v1.0.4 (2026-07-04)
 
 Guidance refinements in the video and DDS/Goertzel chapters. No chapters added, no mode

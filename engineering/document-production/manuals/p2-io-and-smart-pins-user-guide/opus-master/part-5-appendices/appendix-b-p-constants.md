@@ -133,14 +133,16 @@ WRPIN(pin, mode)
 
 | Constant | Gain | Input Range | Description |
 |----------|------|-------------|-------------|
-| P_ADC_GIO | - | - | Ground-referenced input |
-| P_ADC_VIO | - | - | VIO-referenced input |
-| P_ADC_FLOAT | - | - | Floating input |
-| P_ADC_1X | 1x | 0-3.3V | Unity gain |
-| P_ADC_3X | 3.16x | 0-1.04V | 3.16x gain |
-| P_ADC_10X | 10x | 0-330mV | 10x gain |
-| P_ADC_30X | 31.6x | 0-104mV | 31.6x gain |
-| P_ADC_100X | 100x | 0-33mV | 100x gain |
+| P_ADC_GIO | - | - | Internal ground reference (calibration source) |
+| P_ADC_VIO | - | - | Internal supply reference (calibration source) |
+| P_ADC_FLOAT | - | - | Floating input (self-biases to ~mid-supply) |
+| P_ADC_1X | 1x | 0-3.3V | Unity gain, full rail |
+| P_ADC_3X | 3.16x | ~0.9-2.4V | Gain, centered on ~VIO/2 (measured) |
+| P_ADC_10X | 10x | ~1.4-1.9V | Gain, centered on ~VIO/2 (measured) |
+| P_ADC_30X | 31.6x | ~1.57-1.71V | Gain, centered on ~VIO/2 (measured) |
+| P_ADC_100X | 100x | ~1.61-1.66V | Gain, centered on ~VIO/2 (measured) |
+
+> Gain-mode windows are **centered on ~VIO/2 (mid-supply)** — measured on a real P2 (representative single sample; vary part-to-part and with VIO/temperature). GIO/VIO are calibration references, not signal inputs. See Chapter 16, §16.2.
 
 
 ## DAC Output Modes (pick one)

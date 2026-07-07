@@ -50,8 +50,36 @@ build + run + accept (manual workspace)  ──replicate accepted──▶  here
 - The workspace copy may keep evolving; only an **accepted** result is replicated here. A
   divergence between the two is expected — the workspace is live, this is the accepted record.
 
+## How to CITE a result (single-part = real, but representative)
+
+Our tests run on **one physical P2**, so a result is **empirical (real silicon —
+stronger than any documentary/derived claim) yet still N=1**: one part is a
+representative point on the spectrum of correct behavior (part-to-part spread, VIO
+±tolerance, temperature). When you use a finding downstream, label it accordingly —
+and separate the two kinds of finding a single part yields:
+
+- **Structural / qualitative facts** — a yes/no architectural truth one part proves
+  outright (e.g. "the ADC gain modes are centered on mid-supply (VIO/2), not
+  ground-referenced"). Cite as **confirmed on real P2 silicon**; definitive.
+- **Quantitative magnitudes** — measured numbers (e.g. a specific window width).
+  Cite as **measured on real P2 silicon — a representative single-sample value;
+  exact figures vary part-to-part and with VIO/temperature, so calibrate for
+  absolute work.** NOT a guaranteed min/max spec (that is the many-parts /
+  characterized tier — the external-hardware VO-X catalog or the manufacturer's
+  datasheet).
+
+Never launder a single-sample magnitude into a hard spec, and never state real-
+silicon provenance for a value we only derived. See the two-kinds-of-nominal
+taxonomy in [`VERIFICATION-OPPORTUNITIES.md`](VERIFICATION-OPPORTUNITIES.md).
+
 ## How to use it
 
+- **A finding wants empirical confirmation?** Classify the test by its rig —
+  **jumper-only** (on-chip DAC/pin loopback, internal references: we run it) vs
+  **external-hardware** (added reference/sensor/bias/scope: we catalog it with its
+  benefit, not committed short-term). The rule + the register live in
+  [`VERIFICATION-OPPORTUNITIES.md`](VERIFICATION-OPPORTUNITIES.md). A could-verify is
+  never lost: it is either done (→ ledger) or cataloged-with-benefit (there).
 - **Grounding a YAML or manual edit?** Cite the relevant entry in
   [`P2-EMPIRICAL-FINDINGS.md`](P2-EMPIRICAL-FINDINGS.md) (e.g. "universal smart-pin
   init order — verified, campaign 2026-06"). The corrections register
@@ -69,7 +97,8 @@ build + run + accept (manual workspace)  ──replicate accepted──▶  here
 ```
 engineering/ingestion/external-sources/hardware-verification/
   README.md                  # this file
-  P2-EMPIRICAL-FINDINGS.md   # THE running golden-source ledger (cross-campaign)
+  P2-EMPIRICAL-FINDINGS.md   # THE running golden-source ledger (cross-campaign) — proofs we HAVE
+  VERIFICATION-OPPORTUNITIES.md  # the "could-verify" register — proofs we COULD get (jumper-only queue + external-hw catalog)
   campaigns/
     <YYYY-MM-topic>/
       README.md              # campaign scope, rig, tooling, test roster + verdicts
@@ -96,6 +125,7 @@ engineering/ingestion/external-sources/hardware-verification/
 | Location | Holds |
 |----------|-------|
 | **here** (`hardware-verification/`) | the empirical PROOF: tests, results, analysis |
+| [`VERIFICATION-OPPORTUNITIES.md`](VERIFICATION-OPPORTUNITIES.md) | the "could-verify" register: **jumper-only** tests we run, and **external-hardware** verifications we catalog-but-don't-commit (with the benefit each would provide) |
 | `operations/P2KB-CORRECTION-FINDINGS.md` | the TO-FIX register; cites evidence here |
 | `manuals/*/audit/disproven-findings-*.md` | per-manual changelog staging for disproven claims |
 | `engineering/ingestion/` | DOCUMENTARY trusted sources (Silicon Doc, Titus, …) |

@@ -215,3 +215,33 @@ discrete/deterministic, so one run is dispositive. *Verdict:* CONFIRMED 2026-07-
 `methods/taskid.yaml` + `registers/taskhlt.yaml` (F-198) — replaces the prior **unsourced** "main
 task is typically ID 0" with the cog-local fact. Test replicated under
 `campaigns/2026-07-cooperative-tasking/tests/`.
+
+### EF-024 · ADC gain modes measure a window CENTERED on mid-supply (~VIO/2), not ground-referenced — `CONFIRMED` (F-202)
+**Structural fact (definitive):** the pin-ADC gain modes (`P_ADC_1X/3X/10X/30X/100X`) measure an input
+window **centered on mid-supply (~VIO/2)**, NOT a ground-referenced `0..V` range. Every gain's transfer
+curve crosses its 50% point at **~1.64 V**. This refutes the fabricated `0..V/gain` framing (F-202) and
+also **supersedes the derived nominal `1.65 ± 1.65/gain` (= 3.3 V/gain width) — that formula was WRONG**
+(under-estimated the width ~1.4×).
+**Representative magnitudes (MEASURED ON REAL P2 SILICON, N=1 — one part; vary part-to-part / VIO /
+temperature; not a guaranteed spec):** 2 mV fine sweep, gain-mode raw 0..131072, 5%/50%/95% crossings:
+
+| Gain | low | center | high | width |
+|------|-----|--------|------|-------|
+| 3.16× | 0.93 V | 1.648 V | 2.36 V | 1.44 V |
+| 10×   | 1.41 V | 1.642 V | 1.87 V | 0.46 V |
+| 31.6× | 1.57 V | 1.640 V | 1.71 V | 0.15 V |
+| 100×  | 1.61 V | 1.640 V | 1.66 V | 0.05 V |
+
+(1× = full rail 0..3.3 V.) **Widths scale ~√10 per gain step** (ratios 3.15 / 3.12 / 2.9 — confirms the
+documented gain ladder); measured width ≈ **4.55 V/gain**, not 3.3 V/gain.
+**How proven:** `adc-gain-window-fine.spin2` (pnut_ts v1.55.0, `-d`, real P2, RAM download) — on-chip DAC
+`P0` → jumper → ADC `P1` loopback. **Bracketed:** simple digital P0→P1 loopback confirmed the jumper
+(low→0, high→1); GIO/VIO internal references bracketed the scale (GIO≈20.5k, VIO≈108k); `center_raw`
+≈65.5k confirmed each 50% crossing is a real transition, not noise. Reproducible across coarse (100 mV)
+and fine (2 mV) sweeps. Tests + logs: `engineering/operations/correction-sweeps/f202-adc-jumper-verification/`.
+**Companion (F-203 note):** the ratiometric single-pin absolute error was **≤9 mV** (reproducible; small
+positive offset at low V, ~0 at mid/high) — does NOT support a **~15 mV single-pin absolute** floor; the
+"~15 mV *pin-to-pin* spread" claim needs the move-jumper multi-pin extension (still open).
+**Grounds:** F-202 corrections to IOSP §16.2 + Appendix B + Appendix C (print the measured centered
+windows, labelled representative single-sample; DELETE the ground-referenced `0..V` ranges and DO NOT use
+the derived 3.3 V/gain formula). *Verdict:* CONFIRMED 2026-07-07.

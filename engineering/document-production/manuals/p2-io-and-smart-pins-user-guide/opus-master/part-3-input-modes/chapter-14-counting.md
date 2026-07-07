@@ -464,7 +464,7 @@ PUB update_extended_count() | current, delta
 | Differential time | P_COUNT_HIGHS | X=period, Y=1 |
 
 
-## 14.10 Complete Examples
+## 14.10 Worked Examples
 
 ### Example 1: Frequency Counter
 

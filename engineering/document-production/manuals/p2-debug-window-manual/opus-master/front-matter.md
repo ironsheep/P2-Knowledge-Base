@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape See What Your Program Is Doing\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.1\par}
+{\large\color{blue}Version 1.0.2\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[

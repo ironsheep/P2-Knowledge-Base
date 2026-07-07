@@ -24,11 +24,11 @@ prose), with all per-publication detail in the roster.*
 | Document | Type | Ver | pp | Released |
 |----------|------|-----|:--:|:--:|
 | Getting Started | manual | 1.0.0 | 25 | ✅ |
-| I/O & Smart Pins | manual | 1.0.3 | 396 | ✅ |
+| I/O & Smart Pins | manual | 1.0.4 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.2 | 505 | ✅ |
-| DeSilva Tutorial | manual | 3.0.1 | 162 | ✅ |
-| Debug Window | manual | 1.0.1 | 156 | ✅ |
-| Streamer Guide | manual | 1.0.4 | 75 | ✅ |
+| DeSilva Tutorial | manual | 3.0.2 | 163 | ✅ |
+| Debug Window | manual | 1.0.2 | 160 | ✅ |
+| Streamer Guide | manual | 1.0.5 | 75 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.1 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | 14 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | 19 | ✅ |

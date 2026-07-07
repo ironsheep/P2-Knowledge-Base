@@ -340,7 +340,7 @@ PUB send_clocks(count)
 For CPHA=1, use P_INVERT_A on the data pin.
 
 
-## 11.5 Complete Examples
+## 11.5 Worked Examples
 
 ### Example 1: UART Debug Console
 

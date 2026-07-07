@@ -391,7 +391,7 @@ PASM2 TESTPN provides inverted read:
 ```
 
 
-## 12.9 Complete Examples
+## 12.9 Worked Examples
 
 ### Example 1: Button with LED
 
@@ -525,7 +525,7 @@ PUB detect_voltage_ranges() : range | level, threshold
 
 From external signal to INA/INB register:
 
-- Input buffer: ~2ns
+- Input buffer: small (analog settling ahead of the synchronizer)
 - Synchronizer: ~1-2 clock cycles
 - Register: 1 clock cycle
 - Total: 3 clock cycles typical

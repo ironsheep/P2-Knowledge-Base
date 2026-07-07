@@ -1,5 +1,14 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.4 (2026-07-07)
+
+ADC input modes documented as measured on real silicon, a quantitative-table accuracy pass, and example titles that describe the code plainly.
+
+- **ADC input modes (Chapter 16 §16.2 & §16.7, Appendices B, C & D)** — the ADC input modes are documented as measured on a real P2. `P_ADC_GIO`/`P_ADC_VIO` are the ADC's internal **calibration references** (ground and supply); the gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16× per gain step. The per-gain windows are the values measured on P2 silicon (representative single-sample — exact endpoints vary part-to-part and with VIO/temperature, so calibrate for absolute work). Reported by a community reviewer; confirmed on P2 silicon.
+- **Quantitative-table accuracy (Chapters 2 & 18)** — the fast push-pull driver's effective on-resistance reads **~17 Ω** at ~30 mA drive, and hub-RAM access time reads **9-16 clocks**, both per the P2 datasheet.
+- **Example headings (throughout)** — the per-chapter example sections read "Worked Examples," and the Chapter 13 PWM example is titled "PWM Signal Analyzer." These names describe the teaching examples and building blocks plainly. No code changed.
+- **Engineering guidance stated qualitatively (Chapters 7, 10, 12, 16)** — several figures without a primary source are given as qualitative guidance rather than spec: the ADC input impedance is high (§16.8); a single pin's ADC absolute error is a few millivolts (≤ ~9 mV measured on silicon), with pin-to-pin spread the larger effect; the DAC loading table's "Min Load" column is a ~10× output-Z guideline (§10.9); the digital-input propagation delay is stated as the grounded 3-clock total (§12.10); and the pulse-mode clock-frequency note attributes 180 MHz to the datasheet and 350 MHz to the Silicon Doc (§7.5). Grounded totals and behaviors are unchanged.
+
 ## v1.0.3 (2026-07-06)
 
 ADC resolution, stated precisely.

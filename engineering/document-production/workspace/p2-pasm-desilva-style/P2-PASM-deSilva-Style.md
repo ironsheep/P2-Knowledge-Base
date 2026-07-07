@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0.1\par}
+{\large\color{blue}Version 3.0.2\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -3675,9 +3675,9 @@ sensor_monitor
 
 Each cog does one thing perfectly. No interruptions. No conflicts. Just pure, focused execution.
 
-## Real-World Example: Perfect Servo Control
+## Real-World Example: Dedicated-Cog Servo Control
 
-With interrupts, servo pulses jitter. With dedicated cogs, they're perfect:
+With interrupts, servo pulses jitter. With dedicated cogs, they're rock-steady:
 
 ```pasm2
 ' cog dedicated to servo control
@@ -4993,7 +4993,7 @@ The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 
 | Mode | Meaning |
 |------|---------|
-| %000 | Never (disabled) |
+| %000 | LUT read/write & hub-lock events (not a pin event) |
 | %001 | IN rises (smart pin ready) |
 | %010 | IN falls |
 | %011 | IN changes |
@@ -5008,7 +5008,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `EVENT_INT` | %0000 | Pin matches interrupt configuration |
+| `EVENT_INT` | %0000 | An interrupt occurred (INT1/2/3 fired) |
 | `EVENT_CT1` | %0001 | CT equals CT1 (timer 1 target) |
 | `EVENT_CT2` | %0010 | CT equals CT2 (timer 2 target) |
 | `EVENT_CT3` | %0011 | CT equals CT3 (timer 3 target) |
@@ -5023,7 +5023,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
 | `EVENT_XRO` | %1100 | NCO frequency counter rolled |
 | `EVENT_XRL` | %1101 | Streamer read last LUT location ($1FF) |
 | `EVENT_ATN` | %1110 | Another cog signaled attention |
-| `EVENT_QMT` | %1111 | CORDIC/PIX math complete |
+| `EVENT_QMT` | %1111 | GETQX/GETQY read with no CORDIC result available |
 
 **Using EVENT_* with SETINT:**
 

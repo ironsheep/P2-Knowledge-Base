@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape See What Your Program Is Doing\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.1\par}
+{\large\color{blue}Version 1.0.2\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -672,7 +672,7 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `TERM` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
-| `TEXTSIZE` | `points` | `10` | Font size; the window sizes itself to fit |
+| `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
 | `BACKCOLOR` | `rgb` | black | The canvas background — the fill used for clear and scroll (not the per-character background) |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
@@ -1673,14 +1673,14 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 
 | Bits | Field | Values |
 |------|-------|--------|
-| 0–1 | Weight | `0`=100 (thin), `1`=400 (normal), `2`=700 (bold), `3`=900 (heavy) |
+| 0–1 | Weight | `0`=light, `1`=normal, `2`=bold, `3`=heavy |
 | 2 | Italic | `0`=normal, `1`=italic |
 | 3 | Underline | `0`=none, `1`=underline |
-| 4–5 | Horizontal align | `0`/`1`=center, `2`=left, `3`=right |
-| 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
+| 4–5 | Horizontal align | `0`/`1`=center, `2`=right, `3`=left |
+| 6–7 | Vertical align | `0`/`1`=center, `2`=bottom, `3`=top |
 
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
-`$20` left-aligns. The defaults (style `$00`) are thin weight, centered both ways.
+`$20` right-aligns. The defaults (style `$00`) are light weight, centered both ways.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the
@@ -5053,15 +5053,16 @@ PUB main() | x
 
 - **The debug link is shared by every window and every cog.** All `DEBUG` output —
   from all eight cogs, to all your windows — travels over one serial link, and the
-  cogs time-share it through a hardware lock (`LOCK[15]`) during their debug
+  cogs time-share it through a hardware lock during their debug
   interrupts. There is no separate channel per window or per cog; everything is
   serialized onto the same wire and demultiplexed on the host by window name.
 
 - **One shared link means you must pace your output.** Because every feed competes
   for that one link, the total rate across all windows and cogs is what matters, not
-  the rate of any single window. Messages can stream at up to roughly 10,000 per
-  second before the link saturates. With several windows updating in one loop, keep
-  the loop's `waitms`/`waitx` generous enough that the combined traffic fits.
+  the rate of any single window. Past some combined rate the link saturates and
+  messages back up. With several windows updating in one loop, keep the loop's
+  `waitms`/`waitx` generous enough that the combined traffic fits — tune it against
+  your own serial baud rate and message sizes.
 
 - **Slow a busy cog with `DLY`.** Adding `` `DLY `` (in Spin2) or `DLY(#ms)` (in
   PASM, where the millisecond count is an immediate) as the *last* item in a `DEBUG`

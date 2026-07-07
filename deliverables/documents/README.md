@@ -53,28 +53,28 @@ The definitive reference for P2 assembly language programming. Documents all PAS
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-assembly-language-manual-changelog.md)
 
 ### [P2 Assembly Programming](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-PASM-deSilva-Style.pdf)
-**A Human-Centered Approach to Parallel Processing** — *Version 3.0.1*
+**A Human-Centered Approach to Parallel Processing** — *Version 3.0.2*
 
 This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
 
-*June 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-pasm-desilva-style-src-260624.zip)
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-pasm-desilva-style-src-260624.zip)
 
 ### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
-**A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.4*
+**A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.5*
 
 An introduction to the P2 streamer — the DMA-like engine that moves data between hub RAM, pins, and DACs — built to make a genuinely tricky part of the chip make sense. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-streamer-programming-guide-changelog.md)
 
 ### [P2 Debug Window Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Debug-Window-Manual.pdf)
-**See What Your Program Is Doing — Nine Display Windows for the Propeller 2** — *Version 1.0.1*
+**See What Your Program Is Doing — Nine Display Windows for the Propeller 2** — *Version 1.0.2*
 
 The complete guide to the P2's nine DEBUG display windows — TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, and MIDI. Documents every window's directives, parameters, ranges, and defaults, with a worked, software-only example in each chapter — thermal heatmap, PID strip-chart, glitch capture, motor run-up, and more — that runs on a bare P2 board with no wiring. Integration chapters cover packed-data high-rate transfer, multiple windows and PASM debugging, host keyboard and mouse input, and live control and status panels. Includes a downloadable example library of 32 compile-clean Spin2 programs.
 
-*June 2026 - Community Review Edition* | [Changelog](DOCs/p2-debug-window-manual-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-debug-window-manual-src-260626.zip)
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2-debug-window-manual-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-debug-window-manual-src-260626.zip)
 
 ### [P2 I/O & Smart Pins User Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-IO-and-Smart-Pins-User-Guide.pdf)
-**Complete P2 Pin I/O and Smart Pin Reference** — *Version 1.0.3*
+**Complete P2 Pin I/O and Smart Pin Reference** — *Version 1.0.4*
 
 The complete reference for the Propeller 2's pin I/O and Smart Pins — working up from direct pin control through the smart pin architecture to all 32 smart pin modes. Chapters organized by function (digital, pulse/transition, NCO, PWM, DAC, serial, timing, counting, period/frequency, ADC, repository, USB) give register-level configuration, worked Spin2 and PASM2 examples, and a "where you'd use this" framing — with hardware-grounded coverage of the details that bite: init ordering, IN-flag handshakes, data justification, and measurement math. Reference appendices provide a task-oriented intent index, the full P\_ constant tables, a formulas reference, mode-comparison charts, a troubleshooting guide, a complete 32-mode register reference, and FPGA board differences. Includes a downloadable library of 15 compile-clean Spin2 example programs that run on a bare P2 board.
 

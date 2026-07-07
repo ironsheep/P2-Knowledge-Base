@@ -1053,4 +1053,94 @@ lock-guarded multi-writer form explicitly.
 
 ---
 
+## ADC gain-mode input ranges framed ground-referenced, not centered on VIO/2 (2026-07-07) — F-202
+
+### F-202 — IOSP §16.2 ADC input-mode table (and 5 propagated sites) frame the gain ranges as ground-referenced `0V–ceiling` — `PARTIALLY CONFIRMED: GIO/VIO-as-calibration + mid-supply bias grounded in Silicon Doc; exact centered endpoints UNVERIFIED (no trusted numeric source) → hardware campaign required`
+> **Source of report:** community reviewer (2026-07-07, relayed by Stephen): *"the ranges are totally
+> wrong… they are centred around 1.65V."* Community-tier input (Titus-tier): challenges our work, is not
+> itself a citable source.
+> **TRUST-CHAIN DISCIPLINE (Stephen, 2026-07-07):** the **P2AN\*** app notes are derived from the SAME
+> ingested sources as the manuals — a **peer derivation, NOT an authority**. Do not justify manual content
+> against P2AN001/§16.3; ground only against trusted **ingested** sources (Silicon Doc) or **empirical**
+> hardware (EF ledger). This finding was re-grounded on that basis.
+> **What the Silicon Doc (trusted ingested) DOES ground:**
+> - **GIO/VIO are calibration sources, not input-range modes** — *"Delta-sigma ADC with 5 ranges, 2
+>   **sources**, and **VIO/GIO calibration**."* The §16.2 table mislabels them as ranges (`GIO = 0V–3.3V`,
+>   `VIO = VIO-relative`). WRONG per a trusted source.
+> - **The ADC has a ~mid-supply bias point** — Rev C note: FLOAT mode "useful for determining the
+>   **floating bias point of the ADC**." So the gain window sits around mid-supply, **not up from 0 V** —
+>   the table's ground-referenced framing is wrong.
+> - Tell-tale of how it happened: the table's ceilings (`1.04V / 330mV / 104mV / 33mV`) equal `3.3V ÷ gain`
+>   — correct range **widths** placed at `[0, width]` (generic unipolar-PGA assumption) instead of around
+>   the mid-supply bias. (§16.7 L469 and §16.3 already describe the bias/references correctly — but those
+>   are peer manual sections, cited here only as internal-inconsistency evidence, not as authority.)
+> **RESOLUTION — nominal transfer characteristic (releasable-correct without hardware):**
+> The exact endpoints are a **nominal / definitional** quantity, not a measured one: the mid-supply
+> reference is grounded (Silicon Doc float-bias-point) and the gain factors are grounded (Silicon Doc
+> "5 ranges" + image catalog), so the window `= 1.65 V ± (1.65 V / gain)` about mid-supply is **DERIVED**
+> (like the Ohm's-law drive currents and `clkfreq/2³²` NCO resolution we already print), NOT AT_RISK —
+> **provided it is labelled *nominal* and carries the calibration caveat** (exact endpoints vary with device
+> tolerance + VIO; for absolute work calibrate against GIO/VIO, §16.3). This mirrors the manual's already-correct
+> nominal-vs-measured handling of resolution ([[F-201]]). This is the distinction I initially over-collapsed:
+> a *measured precision spec* needs silicon; the *nominal transfer characteristic* does not. So §16.2 prints the
+> nominal windows (labelled) — correct, complete, hardware-independent.
+> **Verification split (per VERIFICATION-OPPORTUNITIES.md):**
+> - **VO-J-001 (jumper-only — we do it):** on-chip DAC → jumper → ADC pin sweep confirms the centering + √10
+>   window scaling on silicon (upgrades nominal → silicon-confirmed). Task #172. NOT a release blocker.
+> - **VO-X-001 (external-hardware — cataloged, not committed):** calibrated external reference + precision meter
+>   for tolerance-bounded absolute endpoints. Benefit: nominal → datasheet-grade. Deferred.
+> **Propagated sites (all same root), IOSP opus-master `part-3-input-modes/chapter-16-adc.md` unless noted:**
+> §16.2 table (L39–46) · §16.2 prose (L50–60) · §16.2 example "0-100mV sensor → 30x" (L64–66) ·
+> §16.7 Example 4 thermocouple "0-50mV → 100x" (L505–517) · §16.7 quick-ref table (L636–640) ·
+> `part-5-appendices/appendix-d-mode-comparison-charts.md` (L195–198). The **examples are the worst**:
+> they feed a ground-referenced small-signal sensor (0-100 mV, 0-50 mV thermocouple, mic, strain gauge)
+> into a 1.65 V-centered gain mode with **no mid-rail bias network** — they would not work as written.
+> **NOT affected (checked, don't over-correct):** §16.3 ratiometric (correct) · §16.7 float note L469
+> (correct) · **DAC ranges ch10** `0–3.3V`/`0–2.0V` (correct — DAC is genuinely unipolar 0-to-Vfs,
+> matches Silicon Doc drive-level table). Defect is **specific to ADC gain modes**.
+> **Secondary check:** `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` L144–145 calls
+> GIO/VIO "Ground-referenced input / VIO-referenced input" — loose (they're calibration references);
+> tighten wording, and confirm no range claim depends on the ground-referenced framing.
+> **SILICON-CONFIRMED 2026-07-07 (EF-024) — supersedes the nominal formula.** VO-J-001 ran on real P2:
+> gain modes ARE centered on mid-supply (~1.64 V measured) [structural, definitive], but the **derived
+> `1.65 ± 1.65/gain` (3.3 V/gain width) was WRONG** — measured widths are ~1.4× wider (≈4.55 V/gain), √10-laddered.
+> Measured representative windows (N=1): 3.16× 0.93–2.36 V · 10× 1.41–1.87 V · 31.6× 1.57–1.71 V · 100× 1.61–1.66 V.
+> **Fold into IOSP v1.0.4** (staged): (a) GIO/VIO reclassified [APPLIED]; (b) mid-supply framing + examples
+> fixed [APPLIED]; (c) **print the MEASURED windows** (table above) across §16.2 + Appendix B + Appendix C,
+> labelled *measured on real P2 silicon, representative single-sample* (per the citation convention), NOT the
+> derived formula; rebuild the two examples on the measured centering [PENDING apply]. With (c), F-202 is
+> **CLOSED for release** and now hardware-grounded (not merely derived). VO-X-001 (absolute tolerance across
+> parts) remains the optional datasheet-grade upgrade.
+
+---
+
+## Quantitative hardware-table audit batch (2026-07-07) — F-203
+
+### F-203 — 4-manual fan-out audit of quantitative hardware tables vs trusted ingested sources — `14 CONFIRMED_WRONG (hand-verified) + 8 AT_RISK; fixes in progress`
+> **Method:** 9-unit fan-out (IOSP ×5 parts, Streamer, Debug ×2, deSilva) enumerating every quantitative/encoding
+> table cell, each classified GROUNDED/DERIVED/AT_RISK/WRONG against **ingested sources only** (Silicon Doc,
+> Spin2 v55, P2 datasheet), then adversarially verified. Full verdicts: workflow `wx8vrj00a` output. 1 false
+> alarm rejected on hand-verify (ch06 "30mA" — actually GROUNDED, spin2-v55:1502).
+>
+> **CONFIRMED_WRONG — IOSP (fold into v1.0.4):**
+> - `ch02` `P_HIGH_FAST`/`P_LOW_FAST` drive impedance **`~100Ω` → `~17Ω`** (datasheet Vol 510mV@30mA ⇒ ~17Ω; 30mA is correct). **FIXED.**
+> - `ch18` §18.6 Hub RAM **`8-15 clocks` → `9-16 clocks`** (datasheet RDLONG `9...16`). **FIXED.**
+> - `appendix-b` + `appendix-c` (table **and** the `input_max = 3300mV/gain` formula) — **F-202 ADC-range recurrence** (2 more sites; ground-referenced `0-Xmv`). PENDING (rides the F-202 nominal-table fix across §16.2 + both appendices).
+>
+> **CONFIRMED_WRONG — deSilva (fold into v3.0.2):**
+> - SETSE Event-Modes `%000` **"Never (disabled)" → "LUT read/write & hub-lock events"** (silicon-doc part3-interrupts:48-53). **FIXED.**
+> - `EVENT_INT %0000` **"Pin matches interrupt configuration" → "An interrupt occurred"** (part2-video-output:360; pin-match is `EVENT_PAT %1000`). **FIXED.**
+> - `EVENT_QMT %1111` **"CORDIC/PIX math complete" → "read with no CORDIC result available"** (part2-video-output:375 — the inverse meaning). **FIXED.**
+>
+> **CONFIRMED_WRONG — Streamer (needs own patch, NOT in current wave):**
+> - §12.2 Sub-Pin Selection table treats `D[19:17]` as a uniform 3-bit selector for 1/2/4-pin; silicon encodes `pppa/pp?a/p??a` (pin-bits shrink 3/2/1; freed low bits = DAC sub-mode). 1-pin col correct; 2/4-pin cols wrong. (p2-documentation:3004-3009).
+>
+> **CONFIRMED_WRONG — Debug (needs own patch, NOT in current wave):**
+> - `ch05` PLOT TEXTSTYLE **horizontal align 2/3 swapped** (source %10=right, %11=left) and **vertical align 2/3 swapped** (%10=bottom, %11=top) — spin2-v55:1282; plus downstream prose **"`$20` left-aligns" → right-aligns**.
+> - `ch03` TERM **`TEXTSIZE` default `10` → "editor text size"** (spin2-v55:1305; the 10 is the PLOT default).
+>
+> **AT_RISK (unsourced specifics — disposition per finding):** IOSP `ch16` §16.8 ADC "input impedance ~500kΩ" + "absolute-error floor ~15mV" (from P2AN001, not in EF ledger — **jumper-only verifiable, VO-J candidate**); `ch10` DAC "Max Load >10kΩ…" (10× rule-of-thumb heuristic); `ch12` "input buffer ~2ns" (sub-component; 3-clk total IS grounded); `ch07` "180MHz rated / 250 overclock" (only 350 grounded; 180 cites external datasheet); Debug `ch05` weight "100/400/700/900" (OpenType nums unsourced; "thin"→"light"); Debug `ch14` "LOCK[15]" + "~10,000 msg/s" (tool/throughput, ungrounded). Disposition: remove the unsourced number or soften to qualitative; the ~15mV/~500kΩ ADC pair → VO-J jumper test.
+
+---
+
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*

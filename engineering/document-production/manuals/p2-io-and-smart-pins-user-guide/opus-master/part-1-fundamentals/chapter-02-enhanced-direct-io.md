@@ -48,7 +48,7 @@ Select one drive-high constant. These control the high-side output driver.
 
 | Constant | Bits[13:11] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
-| `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
+| `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_HIGH_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting, protection |
 | `P_HIGH_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-up resistor |
 | `P_HIGH_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-up |
@@ -63,7 +63,7 @@ Select one drive-low constant. These control the low-side output driver.
 
 | Constant | Bits[10:8] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
-| `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
+| `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_LOW_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting |
 | `P_LOW_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-down resistor |
 | `P_LOW_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-down |
@@ -409,7 +409,7 @@ WRPIN(pin, P_HIGH_1K5 | P_LOW_1K5 | P_INVERT_OUT)
 WRPIN(pin, P_COMPARE_AB | P_PLUS1_B)
 ```
 
-## 2.12 Complete Configuration Examples
+## 2.12 Worked Configuration Examples
 
 ### I²C Open-Drain Configuration
 
