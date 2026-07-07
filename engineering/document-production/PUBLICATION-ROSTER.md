@@ -48,6 +48,8 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | AI Privacy Guide | guide | — | ✅ | ✅ | — | ✅ | ✅ | ✅ |
 
 Legend: ✅ done · 🔄 in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached. `Chip`/`Comm`
@@ -91,6 +93,12 @@ Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<sl
 **P2AN004 — Frequency / Period / Pulse Measurement** · `P2AN004` · app-note
 **v1.0.0 (2026-07-03, 14pp)** — Family A2 (timing instrumentation); 3 recipes (RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob). First app note with rendered circuit/timing diagrams (new shared `p2kb-appnote-diagrams` library — circuitikz). Cites IOSP Ch.13-15.
 
+**P2AN005 — Cooperative Multitasking with Spin2 TASK Methods** · `P2AN005` · app-note
+**v1.0.0 (2026-07-07, 12pp)** — Family C1 (Concurrency & New Language Features); techniques-catalog: the `{Spin2_v47}` TASK\* family through 4 recipes (two-task round-robin, cooperative yield, halt/resume flow, task dashboard). `TASKWAIT` compile-probed + excluded (F-196); cog-local task IDs hardware-verified (EF-023, KB v1.14.2). Companion to P2AN006. First render on the mnemonic-"ones" platform fix.
+
+**P2AN006 — Sizing Cog & Task Stacks** · `P2AN006` · app-note
+**v1.0.0 (2026-07-07, 12pp)** — Family C3 (companion to C1); techniques-catalog: sizing `cogspin`/`TASKSPIN` stack buffers (silent overflow → corruption) through 4 recipes built around the MIT-licensed `isp_stack_check` sentinel-fill utility (Stephen M. Moraco, in the example library). All `pnut_ts -d`-clean.
+
 **AI Privacy Guide** · `ai-privacy-guide` · guide
 Released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`).
 
@@ -105,8 +113,6 @@ tool serving an effort, never released — carried here while it's actively used
 | Architect's Guide | manual | v0.2.0 draft | ✅ | ⏳ | ✅ | | | |
 | XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
-| P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
-| P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
 | P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
@@ -120,12 +126,6 @@ tool serving an effort, never released — carried here while it's actively used
 
 **P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
-
-**P2AN005 — Cooperative Multitasking with Spin2 TASK Methods** · `P2AN005` · app-note
-**stood up + drafted 2026-07-06, v0.1.0.** Family **C1** (Concurrency & New Language Features). Techniques-catalog: the `{Spin2_v47}` TASK\* family (cooperative multitasking in one cog) through 4 recipes — two-task round-robin, cooperative yield in a long computation, halt/resume flow control, task-status dashboard. All four `pnut_ts -d`-clean. `TASKWAIT` compile-probed, found not to exist, excluded (F-196). Companion to P2AN006. NEXT: prepare-manual → Forge v0.1.0 review PDF.
-
-**P2AN006 — Sizing Cog & Task Stacks** · `P2AN006` · app-note
-**stood up + drafted 2026-07-06, v0.1.0.** Family **C3** (companion to C1). Techniques-catalog: sizing the stack buffers `cogspin`/`TASKSPIN` require (silent overflow → corruption) through 4 recipes built around the MIT-licensed `isp_stack_check` sentinel-fill utility (Stephen M. Moraco, shipped in the example library) — instrument a cog stack, high-water mark, pinpoint the culprit, size a task stack. All `pnut_ts -d`-clean. NEXT: prepare-manual → Forge v0.1.0 review PDF.
 
 **P2AN007 — Data Structures with the New Language Facilities** · `P2AN007` · app-note
 **stood up + drafted 2026-07-06, v0.1.0.** Family **C2**. Techniques-catalog: the Spin2 `{Spin2_v45}` STRUCT facility + worked cross-cog sharing through 4 recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW/LOCKTRY/LOCKREL`, never P1 `lockset/lockclr`). Implementation-only; the *contract decision* (which structure, why) is cited to the Architect's Guide. All `pnut_ts -d`-clean. NEXT: prepare-manual → Forge v0.1.0 review PDF.
@@ -156,7 +156,7 @@ pipeline at a glance (blank gates = not started).
 - **B3 · Fixed-Point Math on the P2** — fractional math with no FPU; recurring P2-specific technique.
 - **USB Device/Host (standalone)** — high value, hard; its example-mining ran early as the IOSP Release Campaign's USB study.
 
-*(Family C — C1/C2/C3 — moved to **In progress** 2026-07-06 as P2AN005/P2AN006/P2AN007.)*
+*(Family C: C1/C3 — **P2AN005/P2AN006 — released v1.0.0 2026-07-07** (now in Done); C2 — P2AN007 remains In progress.)*
 
 ## Abandoned — retired, not carrying forward (last)
 
@@ -237,6 +237,9 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-07 00:48  PUBLISH   P2AN006                          (v1.0.0, 12pp — app-note: sizing cog & task stacks techniques-catalog (4 recipes: instrument new-cog stack, high-water mark, pinpoint overflow, size task stack) built around the MIT isp_stack_check utility; render-verified 12pp, all recipes present, compile-clean; first render carrying the mnemonic-"ones" platform fix)
+2026-07-07 00:47  PUBLISH   P2AN005                          (v1.0.0, 12pp — app-note: cooperative multitasking with Spin2 TASK methods techniques-catalog (4 recipes: two-task round-robin, cooperative yield, halt/resume flow, task dashboard); TASKWAIT excluded (F-196); render-verified 12pp, all recipes present, compile-clean)
+2026-07-07 00:11  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua  (the ambiguous-word "ones" now defaults to English prose, only rendering as the ONES popcount instruction on an explicit "ones instruction/count" signal — replaces a fragile adjective allowlist that leaked "ONES" into prose like "the short ones". Consistent with the and/or/not rules. Benefits every manual; first consumed by P2AN005/P2AN006 v1.0.0.)
 2026-07-06 21:43  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.3, 396pp — patch: ADC resolution tables (Ch.16 §16.3 + App D) read in nominal bits, ENOB presented as the measured figure (F-201, matches KB v1.14.2); render-verified: 396pp = prior, outline complete (19 ch + App A-G), §16.3 nominal-resolution footnote text-present (p246), compile-clean)
 2026-07-04 21:42  PUBLISH   p2-assembly-language-manual      (v3.1.2, 505pp — F-193 doc patch: the event-wait instructions (WAITSE1-4, WAITCT1-3, WAITPAT, WAITATN, WAITxxx event family) document the SETQ-armed timeout — a preceding SETQ bounds a single wait on the event OR a CT deadline, C/Z reports which; no-SETQ form clears the flags as a free flag-clear (EF-020, HW-verified). Render-verified: 505pp vs 503 prior (+2, additive), outline complete (Ch.1-6 + Instr A-Z + App A-J), changed sections text-present (p336), compile-clean)
 2026-07-04 04:18  PUBLISH   p2-streamer-programming-guide    (v1.0.4, 75pp — forum-provenance patch: HDMI-audio blanking now sourced to the HDMI data-island spec §15.2, DVI/HDMI blanking floors framed as display-specific observations, SINC2 measurement-period bound reframed §10.4; render-verified 75pp = prior, 0 missing chars, outline complete)
@@ -300,6 +303,16 @@ lives in the Live-section detail above — not repeated here.)
 | `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit |
 | `p2-io-and-smart-pins-user-guide` | 1.0.3 | ✅ current | on latest platform (cross-ref filter pilot) |
 | `p2-layout-torture-test` | — | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
+
+**Pending platform change — 2026-07-07 (`mnemonic-bold.lua` "ones" fix):** every live
+manual consumes `p2kb-platform-mnemonic-bold.lua` (the lone exception is the retired
+Smart Pins Tutorial, on its own `p2kb-sp-` fork), so by the detector's rule each sits
+below this `PLATFORM` line until its next render. The fix is **cosmetic** — it only
+changes how a bare "<adjective> ones" reads in prose (e.g. "the short ones") — so **no
+forced re-render is scheduled**; each manual **picks it up automatically on its next
+natural release**, and is marked current then. **P2AN005 / P2AN006 v1.0.0 are the first
+renders to carry it.** The rows above stay ✅ for the substantive platform stack; this is
+the one pending cosmetic delta, tracked here so it isn't lost.
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`
 appends/updates a `PUBLISH` line when a generation is confirmed clean; any edit to a

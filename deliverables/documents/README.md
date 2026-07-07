@@ -112,6 +112,20 @@ Read a resistive, capacitive, light, or rotary sensor directly on a single P2 pi
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2an004-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004-src-260703.zip)
 
+#### [Run Several Cooperative Jobs in One P2 Cog](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN005.pdf)
+**Application Note P2AN005 — Cooperative Multitasking with Spin2 TASK Methods** — *Version 1.0.0*
+
+Run several cooperative jobs in one cog with Spin2's TASK methods — each job runs until it voluntarily yields, so they take turns with no preemption and no locks. One shared idea comes first, then four runnable recipes to choose among by need: a two-task round-robin that blinks two LEDs at independent rates from a single cog, a cooperative yield that keeps a second job responsive inside a long computation, halt/resume flow control where a consumer pauses and wakes its producer, and a live task dashboard with a clean shutdown. Every worked program compiles clean under the P2 toolchain and runs on a bare board; live scheduling behavior is described from the language documentation and defers its bench confirmation to a hardware pass. The modern replacement for the hand-coded PASM coroutine.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an005-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN005-src-260706.zip)
+
+#### [Size Cog and Task Stacks — and Catch Overflow Before It Corrupts Memory](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006.pdf)
+**Application Note P2AN006 — Sizing Cog & Task Stacks** — *Version 1.0.0*
+
+Size the stack buffers that new cogs and cooperative tasks need — where an undersized stack silently overwrites hub memory with no hardware trap. One shared idea comes first (fill the stack with a known pattern and watch a sentinel just past its end), then four runnable recipes: instrument a new-cog stack against overflow, find the high-water mark and right-size, pinpoint which routine overran the stack, and size a cooperative task's stack. Built around a small MIT-licensed stack-check utility that ships in the example library; every recipe compiles clean under the P2 toolchain. The companion to the cooperative-multitasking note.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an006-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006-src-260706.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
@@ -141,9 +155,7 @@ Further worked companions under consideration:
 
 - **Extended-Precision Integer Math** — 64/96/128-bit integer math built from the carry-chain instructions
 - **Fixed-Point Math on the P2** — fractional math without a floating-point unit
-- **Cooperative Multitasking with Spin2 TASK Methods** — intra-cog cooperative tasks with the new TASK family
 - **Data Structures with the New Language Facilities** — in-cog and cross-cog queues, lists, and FIFOs
-- **Sizing Cog & Task Stacks** — sizing stacks correctly for cogs and tasks
 - **USB Device/Host with Smart Pins** — building a working USB device or host on the smart pins
 
 

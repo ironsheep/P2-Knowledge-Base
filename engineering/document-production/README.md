@@ -33,6 +33,8 @@ prose), with all per-publication detail in the roster.*
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | 14 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | 19 | ✅ |
 | P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | 14 | ✅ |
+| P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.0 | 12 | ✅ |
+| P2AN006 — Sizing Cog & Task Stacks | app-note | 1.0.0 | 12 | ✅ |
 | AI Privacy Guide | guide | — | — | ✅ |
 
 ## In progress
@@ -51,7 +53,7 @@ App-note candidates + rationale + sequence: [`p2-app-note-roster.md`](../analysi
 | Document | Type |
 |----------|------|
 | Spin2 Reference Manual | manual |
-| B2 Extended-Precision Math · B3 Fixed-Point · C1 TASK Multitasking · C2 Data Structures · C3 Cog/Task Stacks · Standalone USB | app-note |
+| B2 Extended-Precision Math · B3 Fixed-Point · C2 Data Structures · Standalone USB | app-note |
 
 ## Abandoned
 

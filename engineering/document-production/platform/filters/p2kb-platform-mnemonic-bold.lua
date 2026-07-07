@@ -380,19 +380,17 @@ local function is_english_context(word, prev_word, next_word, suffix)
     return false
   end
 
-  -- "ones" as noun: "the ones", "which ones"
+  -- "ones" as English plural noun (the common prose case). Like and/or/not above,
+  -- default to English and only treat it as the ONES popcount instruction on an
+  -- explicit signal ("ones instruction" / "ones count"). A bare "<adj> ones"
+  -- (short ones, few ones, ...) is English — an adjective allowlist can never be
+  -- complete, so the prior allowlist leaked "ONES" into prose. An author who means
+  -- the instruction writes it all-caps or in inline code, both handled elsewhere.
   if w == "ones" then
     if next == "instruction" or next == "count" then
       return false
     end
-    if prev == "the" or prev == "which" or prev == "these" or prev == "those" or
-       prev == "static" or prev == "dynamic" or prev == "weak" or prev == "strong" or
-       prev == "new" or prev == "old" or prev == "real" or prev == "good" or
-       prev == "bad" or prev == "right" or prev == "wrong" or prev == "small" or
-       prev == "big" or prev == "such" or prev == "other" or prev == "same" then
-      return true
-    end
-    return false
+    return true
   end
 
   -- "skip" as verb: "skip the", "to skip"
