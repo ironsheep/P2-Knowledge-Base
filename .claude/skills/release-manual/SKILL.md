@@ -45,8 +45,11 @@ Per manual being released:
    row/status; prune absorbed `PLATFORM` lines; **and (3c, mandatory) sync the two roster-mirror
    dashboards** — `engineering/document-production/README.md` (the status matrices — a release
    moves the doc into **Done**) and the `engineering/README.md` front-door Manual row.
-4. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
-5. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
+4. **Update the community-review announcement draft** (Phase 3d): add the doc's row + warm blurb
+   (or bump its version) in the gitignored `COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, and spot-check the
+   other rows' versions against the roster. Not committed — the user publishes it.
+5. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
+6. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
    `raw.githubusercontent.com` download links). Do NOT execute.
 
 The phases below are the full form of each of these steps.
@@ -248,6 +251,25 @@ analogue of release-yamls' dashboard-ledger step):
 - **Verify:** `grep -rn "v<PRIOR_VERSION>" engineering/README.md engineering/document-production/README.md`
   returns nothing for this manual.
 
+**3d — Update the community-review announcement draft (MANDATORY every manual/app-note release).**
+The review-announcement post is a **living draft** at the repo root
+(`COMMUNITY-REVIEW-ANNOUNCEMENT-v*.md`, **gitignored** — the user publishes it by hand). It carries
+a summary table (Manuals / App Notes, each with Download · View Changes · Examples links + version)
+and a warm "why you'd reach for each one" blurb per document. A release that updates the README index
+(Phase 2) but not this draft leaves the announcement lying about the current set — and because the
+draft isn't committed, the drift is **silent** (it has lagged multiple releases before this step
+existed). So, in the same pass:
+- **New document** → add a table row (`**NEW:** <Title> | [Download] <br>[vX.Y.Z] | [View Changes] |
+  [Examples] (.zip)`) in the Manuals or App Notes block, AND a warm reach-for-this blurb in the
+  matching "why you'd reach for each one" section. Match the post's voice and its **`COG` all-caps**
+  convention.
+- **Existing document** → bump its row's version (the transition endpoint, e.g. `[v1.0.0 -> v1.0.3]`);
+  the evergreen blurb usually needs no change.
+- **Spot-check every other row's version against the roster** while you're in the file — this draft
+  drifts across releases that forgot it; fix any stale version you find.
+This is the community-facing twin of the README index (Phase 2d): the README is committed and pushed;
+this draft is **NOT** part of the git hand-off (Phase 5) — it stays a local draft for the user to post.
+
 ---
 
 ## Phase 4 — Enclosing-doc audit (verification, not auto-edit)
@@ -296,8 +318,11 @@ logical commit.
 - Does not generate the PDF (PDF Forge does) or place it in `DOCs/` (the user does).
 - Does not edit `opus-master/CHANGELOG.md` content (audit-changelog audits; the user authors).
 - Does not run `git add` / `commit` / `tag` / `push` (suggests only).
-- Does not auto-edit docs outside `deliverables/documents/README.md` + `PUBLICATION-ROSTER.md`
-  (Phase 4 surfaces candidates in top-level/other READMEs but does not modify them).
+- Does not auto-edit **broader** docs beyond the release artifacts it owns: the deliverables README
+  index (Phase 2), `PUBLICATION-ROSTER.md` (Phase 3a/3b), the two roster-mirror dashboards
+  (`engineering/README.md` + `engineering/document-production/README.md`, Phase 3c), and the
+  gitignored community-review announcement draft (Phase 3d). Phase 4 *surfaces* stale refs in other
+  top-level/deliverables READMEs but does not modify them.
 
 ## Error handling
 
