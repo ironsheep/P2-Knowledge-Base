@@ -248,13 +248,12 @@ engineering/document-production/manuals/p2-assembly-language-manual/opus-master/
 
 # Local-only reference material (licensed OBEX sources, etc.) — never committed
 NO-COMMIT/
+DRAFTS/
 /engineering/ingestion/external-inputs/p2kb-update-requests
-engineering/document-production/manuals/p2-debug-window-manual/opus-master/ch09-fft.md.backup-20260617-235045
-engineering/document-production/manuals/p2-debug-window-manual/opus-master/ch07-scope.md.backup-20260618-041608
-/engineering/document-production/manuals/p2-xbyte-programming-guide/REF-NO-COMMIT
+REF-NO-COMMIT/
 
 # regenerable analysis/extraction reports (script outputs, not KB content)
 engineering/ingestion/extracted-documentation/extraction_update_report.yaml
 engineering/planning/yaml-audit-report.yaml
 /engineering/ingestion/external-inputs/appNote-fodder-NO-COMMIT
-COMMUNITY-POST-IOSP-RELEASE.md
+/engineering/operations/correction-sweeps
