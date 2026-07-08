@@ -80,6 +80,13 @@ The complete reference for the Propeller 2's pin I/O and Smart Pins — working 
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-io-and-smart-pins-user-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-io-and-smart-pins-user-guide-src-260703.zip)
 
+### [The P2 Architect's Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Architect-Guide.pdf)
+**Thinking in Cogs, Pins, and Forces** — *Version 1.0.0*
+
+The design-and-realization companion to the reference manuals, picking up where *Getting Started with the Propeller 2* leaves off. It moves in three acts: getting a real project off the ground (choosing hardware and buses, spending the pin budget, getting the parts to talk), then **deriving** the software architecture from physical forces rather than guessing it (which cog owns what, how the pieces talk across the gaps, how mismatched rates are matched), and finally walking the whole process again with an AI agent at your side. It teaches a method, not a catalogue — its two worked derivations are demonstrations on deliberately different hardware, never templates — and it's grounded throughout in the P2 Knowledge Base and in real, hardware-verified projects.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2-architect-guide-changelog.md)
+
 ### Application Notes
 
 Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean, runnable code.
@@ -138,11 +145,6 @@ The rest of the set — in production or on the drawing board:
 **Observe and Control Your Running P2 Code**
 
 A practical guide to single-stepping P2 code — pausing and resuming a running program, inspecting values and timing, and driving the debugger from the host.
-
-#### The P2 Architect's Guide
-**Designing Real Systems on the Propeller 2**
-
-The system-design companion to the reference manuals — taking a project from requirements to a working P2 architecture: budgeting pins, mapping peripherals onto buses, decomposing the work across cogs, and realizing the design into code.
 
 #### P2 XBYTE Programming Guide
 **Building Interpreters and Emulators on the Propeller 2**

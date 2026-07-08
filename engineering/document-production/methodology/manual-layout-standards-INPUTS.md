@@ -567,6 +567,27 @@ For a P2/P1-style hardware manual, I would normally define 3–4 table templates
 
 ---
 
+## Field-found defect — tall non-encoding tables silently clip (2026-07-08)
+
+A concrete rendering defect surfaced while producing *The P2 Architect's Guide* v1.0.0 — a real
+input for the table-layout analysis, and a platform bug to fix:
+
+- **`p2kb-platform-tables.lua` routes a tall, non-encoding, multi-column table to a non-breaking
+  `tblr`** (tabularray), which **silently clips** any rows past the page bottom — **no compile
+  error, no warning**. It reads as "the table rendered fine" when rows are actually missing.
+- **Seen on:** the Architect's Guide Appendix A 12-row terminology table (worked around by splitting
+  it into two 6-row tables); the 5-row budget table was fine.
+- **Fix:** in the filter's breakable-vs-non-breaking heuristic, route tall / non-encoding
+  multi-column tables to **`longtblr`** (breakable) instead of `tblr`.
+- **How to prove the fix:** add a fixture to the **layout torture test**
+  (`workspace/p2-layout-torture-test/`) — a non-encoding multi-column table long enough to overflow
+  one page (~20+ rows) — generate on the Forge, and confirm **every row appears** (overflow flows to
+  the next page, not dropped).
+- **Blast radius:** any manual with a long explanatory (non-register) table; silent, so it can ship
+  missing content undetected.
+
+---
+
 ## Collection complete — analysis pending
 
 All four parts collected. **None of this is adopted guidance.** Next step is to study

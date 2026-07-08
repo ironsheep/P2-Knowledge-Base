@@ -29,6 +29,7 @@ prose), with all per-publication detail in the roster.*
 | DeSilva Tutorial | manual | 3.0.2 | 163 | ✅ |
 | Debug Window | manual | 1.0.2 | 160 | ✅ |
 | Streamer Guide | manual | 1.0.5 | 75 | ✅ |
+| Architect's Guide | manual | 1.0.0 | 53 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.1 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | 14 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | 19 | ✅ |
@@ -41,7 +42,6 @@ prose), with all per-publication detail in the roster.*
 
 | Document | Type | State |
 |----------|------|-------|
-| Architect's Guide | manual | v0.2.0 draft (design book) |
 | XBYTE Guide | manual | v0.1.0 first draft |
 | Single-Step Debugger | manual | draft; in technical review |
 | P2 Layout Torture Test | instrument | serves the layout-standards effort |

@@ -458,7 +458,26 @@ platform/orientation items (AG-01/02/03/04/09) were resolved **in *Getting Start
 
 | ID | Item | Disposition |
 |----|------|-------------|
-| **AG-05** | "connascence" unfamiliar (load-bearing, ~9× in Act II) | **needs-term** — lead with an approachable word, keep the rigorous anchor ("the design literature calls this *connascence*"). Term TBD; resolve during the Act II augment. |
-| **AG-06** | "machine" as the name for the embedded application | **needs-term** — Stephen: "a firmware application I allocate to assets on the board." Replace "machine" as the app-noun; term TBD (application / system / design?). Recurs in Act II — resolve during the augment, pick once. |
+| **AG-05** | "connascence" unfamiliar (load-bearing, ~9× in Act II) | **RESOLVED 2026-07-08 → renamed the 2nd judging tool to "change-coupling."** Could NOT swap to plain "coupling" (that's already the 1st tool, the countable one). Fix: 2nd tool is now **"Change-coupling — the sharpest tool"** (framed as sharpening the 1st: count what crosses → ask what must *change together*); **"connascence" kept once** as the formal anchor ("the design literature calls this connascence") + in Appendix B (Page-Jones cite) + glossary title "Change-coupling (connascence)". Everyday-usage jargon reduced from ~9 to 3 formal mentions. Also added a concrete **duplication** paragraph under change-coupling (two copies of an algorithm = worst change-coupling; fix = single owner + accessor hiding composition) and a P2-specific **observability** paragraph (observer cog reads lock-free published state → observe without perturbing; N observers). |
+| **AG-06** | "machine" as the name for the embedded application | **RESOLVED 2026-07-07 → "embedded application"** (Stephen: "very different in nature from a general application"). Replace "machine" as the app-noun with **"embedded application"** (shorten to "application" only where the embedded context is already clear). Sweep across all three acts + front-matter in the next draft. Keep "machine" only where it means literal hardware, not the app. |
 | **AG-07** | walking-robot — servo attachment unclear | **fix** — 13 servos (3/leg × 4 + 1 head), driven by the multi-channel servo controller. Apply in the Act II worked-example section. |
 | **AG-08** | Figure 5 broken | **deferred — LAST**, inspect with the rendered image in front of Stephen (per the walkthrough doc). |
+| **AG-14** | WATCH OUT / TIP callouts render as a **square box (tofu)** in the PDF | **fix — template.** The inline emoji ⚠️ (U+26A0 U+FE0F) and 💡 (U+1F4A1) have no glyph in the body font (IBM Plex). Options: swap to a symbol the font carries, or load an emoji/symbol font in the template. ~3 call-sites, all Ch2 body (Watch out ×2, Tip ×1). Validate at visual review. Reported 2026-07-07. |
+| **AG-15** | Long single-chapter acts + long chapter headings | **structure.** Adopt the **debug-window-manual** pattern: **Parts = the three Acts**; split each Act's long chapter into several shorter chapters titled *"Chapter N: Main — Subtitle."* Apply during the Act III synthesis draft. Split granularity TBD with Stephen. Reported 2026-07-07. |
+
+**Audience decision (2026-07-07):** target audience is **human, not agent** (Stephen). Flow is **KB → document**
+(Act II was generated *from* the decomposition YAML); an agent gets its P2 facts from the **MCP/KB**, not by
+reading this narrative PDF. → **Drop the two-audience framing** from front-matter ("How to Use": remove the
+"*An AI agent or tool?*" door; make the guide cleanly human-facing). The Act III **closing symmetry** (guide +
+agent draw on the *same* KB) stays — it's a human-meaningful point, not a claim that agents read this PDF.
+
+**KB-harvest proposals (from Act I / Act III → the YAML) — SEPARATE follow-up `yaml-knowledge-base-maintenance`
+task, Stephen go/no-go; NOT part of the reader draft, NO KB-plumbing language in the prose:**
+
+| Candidate | Source | Rationale |
+|-----------|--------|-----------|
+| **Project front-end / design-process node set** | Act I (the 4-phase spine) | Real KB gap: the decomposition-reasoning layer begins *at* "which cog owns what." Nothing captures the **pre-decomposition** front-end — feasibility-before-design, narrow-vs-broad comms selection, offload-vs-port partitioning, pin-budget→adapter-board, "characterization becomes the spec," firmware-loaded-device→loader. Reusable P2 design-process patterns an agent scoping a project would reason better with; sits *above* the decomposition layer. |
+| **narrow-vs-broad comms selection** pattern | Act I A3 | Peripheral/bus selection guidance (I²C/SPI vs host-style ribbon) for embedded-friendliness. |
+| **offload-vs-port / companion-device partitioning** pattern | Act I A4 (#10 gateway) | System-partitioning pattern — what the P2 does vs. a companion device; complements decomposition. |
+| **performance → P2-resource mapping** | Act III P-7 | Which performance need maps to which P2 architecture (LUT RAM / PSRAM / CORDIC / streamer). Architectural-selection guidance the KB could carry. |
+| ~~Act III agentic principles (P-1…P-24)~~ | Act III | **Do NOT harvest** — about *using agents*, not about the P2; low KB value; stay human-guide only. |

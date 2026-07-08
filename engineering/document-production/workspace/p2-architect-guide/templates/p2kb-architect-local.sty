@@ -33,9 +33,27 @@
 }
 
 % ==================== FIGURE NUMBERING ====================
-% The guide uses NAMED, unnumbered chapters (Ch1/Ch2/Ch3 by title), so \thechapter
-% is 0 and the default \thefigure would render as "Figure 0.1, 0.2, ...". Number
-% figures continuously across the document instead: "Figure 1, 2, 3, ...".
-\renewcommand{\thefigure}{\arabic{figure}}
+% Chapters now carry visible numbers ("Chapter N:" — the p2kb-platform-pagination
+% filter sets the chapter counter from the heading and resets the figure counter at
+% each chapter), so number figures PER CHAPTER as "Figure N.M" (chapter . figure).
+% This is what disambiguates the several figures that would otherwise all read
+% "Figure 1" under flat numbering.
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
+
+% ==================== INLINE CALLOUT ICONS (AG-14) ====================
+% The prose uses two inline markers -- "Watch out" and "Tip". Their source
+% emoji (U+26A0 warning, U+1F4A1 bulb) have no glyph in IBM Plex and render as
+% tofu boxes. Provide vector icons via fontawesome5 when the package is present,
+% with a plain-text fallback so a missing package never breaks the build.
+% Invoked from the body/front-matter as inline raw LaTeX:
+%   `\WatchoutIcon`{=latex}   and   `\TipIcon`{=latex}
+\IfFileExists{fontawesome5.sty}{%
+  \usepackage{fontawesome5}%
+  \newcommand{\WatchoutIcon}{\textcolor{orange}{\faExclamationTriangle}}%
+  \newcommand{\TipIcon}{\textcolor{iosp-p1note-border}{\faLightbulb}}%
+}{%
+  \newcommand{\WatchoutIcon}{\textbf{[!]}}%
+  \newcommand{\TipIcon}{\textbf{[*]}}%
+}
 
 \endinput

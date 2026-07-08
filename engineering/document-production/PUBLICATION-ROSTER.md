@@ -44,6 +44,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | DeSilva Tutorial | manual | 3.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Debug Window | manual | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | Streamer Guide | manual | 1.0.5 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Architect's Guide | manual | 1.0.0 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
@@ -81,6 +82,9 @@ Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<sl
 **P2 Streamer Programming Guide** · `p2-streamer-programming-guide` · manual
 **v1.0.5 released 2026-07-07** (75pp) — correction wave: §12.2 sub-pin selection documents the silicon's per-pin-count field widths (1-pin uses D[19:17], 2-pin D[19:18]+DAC-config bit, 4-pin D[19]+DAC-config bits; higher pins via the group field D[22:20]). Prior **v1.0.4 (2026-07-04)** community-review edition — forum-provenance patch (HDMI-audio blanking budget sourced to the HDMI data-island spec §15.2 · DVI/HDMI blanking floors framed as display-specific observations · SINC2 measurement-period bound reframed §10.4); render-verified 75pp = prior, 0 glyph drops; `audit/forum-provenance-audit-2026-07-04.md`. Prior v1.0.3 (2026-07-03) Wave-3 designer-authoritative additions + cross-ref filter (82 links/0 dead). chip review outstanding.
 
+**The P2 Architect's Guide** · `p2-architect-guide` · manual
+**v1.0.0 released 2026-07-08** (53pp) — MAIDEN release. The design/realization companion to the reference manuals (*Getting Started* is the prerequisite): a three-act narrative — get a real project off the ground (Part I, distilled from 12 real projects), *derive* its architecture from physical forces (Part II, the functional-decomposition method + two worked derivations, robot dog + streaming pipeline), then walk the whole process again with an AI agent (Part III, synthesized from the same 12 projects). Teaches a method, not a catalogue. 4 TikZ figures; ships **no example ZIP** (0 embedded code — orphaned examples-library archived). Render-verified 53pp, full TOC (Parts I-III + In Closing + appendices), 0 LaTeX errors, compile-clean. chip review outstanding.
+
 **P2AN001 — Single-Pin ADC Instrumentation** · `P2AN001` · app-note
 **v1.0.1 (2026-07-03, 20pp)** — foundational first note + doc-class & companion-schema exemplar (Family A0); techniques-catalog on the enriched IOSP Ch.16. v1.0.1 = editorial compile-status wording patch.
 
@@ -110,16 +114,12 @@ tool serving an effort, never released — carried here while it's actively used
 
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
-| Architect's Guide | manual | v0.2.0 draft | ✅ | ⏳ | ✅ | | | |
 | XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
 | P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
-
-**The P2 Architect's Guide** (design book) · `p2-architect-guide` · manual
-**in development — v0.2.0 draft; SPLIT completed (2026-06-24).** The v0.1.0 first draft (4 ch, 48pp, born on the unified `p2kb-platform-*` stack) was divided into two books after a walkthrough review (`manuals/p2-architect-guide/audit/walkthrough-feedback-2026-06-24.md`). **This folder retains the design / realization book** — *The P2 Architect's Guide — Designing Real Systems on the Propeller 2* — keeping Ch4 (functional decomposition) + a new front-end (peripherals → buses → pin budget) + a realization / AI-assist pillar. Orientation Chs 1–3 split out to **Getting Started** (now released v1.0.0, in Done). v0.2.0 draft PDF staged for review.
 
 **P2 XBYTE Programming Guide** · `p2-xbyte-programming-guide` · manual
 **in development — STOOD UP 2026-06-26, v0.1.0 first-draft authored.** New manual modeled on the Streamer guide (layout/richness/two-register voice), twin on the shared `p2kb-platform-*` stack. Teaches the XBYTE hardware bytecode engine + the skip family (SKIP/SKIPF/EXECF) + FIFO/LUT dispatch, then builds a minimal custom VM and a tiny illustrative **6502** emulator (+ a 6809 SETQ2 vignette). **Scope narrowed with Stephen (PLANNING.md §0):** external P2 projects (Arc8de, Yume suite) → **Appendix C links only**, not narrative; "systems similar to the P2" (IBM Series/1 EDL anchor, Transputer/Occam, XMOS, GreenArrays, Cell SPE) **DEFERRED** out of this edition. Full triad stood up (creation-/voice-guide, MANUAL-DESCRIPTOR, CHANGELOG, opus-master, grounding digest) + workspace wiring. NEXT: prepare-manual → Stephen generates the v0.1.0 review PDF on the Forge. Subtitle "Building Interpreters and Emulators on the Propeller 2".
@@ -237,6 +237,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-08 03:26  PUBLISH   p2-architect-guide               (v1.0.0, 53pp — MAIDEN release: three-act design/realization book (Ch1-14 + In Closing + Appendix A/B + Glossary + Where-to-Next), 4 TikZ figures, fontawesome callout icons; render-verified 53pp, full TOC (Parts I-III, chapter titles render in full), 0 LaTeX errors, 0 missing glyphs, compile-clean)
 2026-07-07 20:39  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.4, 396pp — correction wave: ADC input-mode windows measured on real P2 (F-202/EF-024), ch02 ~17Ω + ch18 9-16 datasheet fixes, 5 unsourced specifics softened to qualitative guidance (§7.5/§10.9/§12.10/§16.8), example-heading de-inflation; render-verified 396pp = prior, outline complete (5 parts + appendices), edits text-present, compile-clean)
 2026-07-07 20:34  PUBLISH   p2-pasm-desilva-style            (v3.0.2, 163pp — correction wave: 3 event-table encodings match silicon (SETSE %000, EVENT_INT %0000, EVENT_QMT %1111) + dedicated-cog servo example rename; render-verified 163pp, Ch1-16 + App A + Index complete, edits text-present, compile-clean)
 2026-07-07 20:33  PUBLISH   p2-debug-window-manual           (v1.0.2, 160pp — correction wave: TEXTSTYLE align/weight + TERM TEXTSIZE default aligned to Spin2 v55, ch14 shared-lock/throughput softened; render-verified 156->160pp (+4 = benign platform reflow, first rebuild absorbing the 07-02 heading-widow fix + 07-07 mnemonic-"ones" fix; word-count 47057->47109 confirms no content change), outline complete, compile-clean)
@@ -261,7 +262,6 @@ that PDF was generated. This ledger is the detector.
 2026-06-25 23:22  PLATFORM  templates/p2kb-platform-foundation.sty   (glyph fallbacks via newunicodechar + listings literate: ✅/✓/❌ → green \checkmark / red \times, and θ → \rmfamily Greek theta; collapses the 03:53 Ω/μ/µ line, file now carries all; daemon-verified clean on deSilva v3.0.1 — 0 missing chars)
 2026-06-24 22:36  PUBLISH   p2-getting-started-guide         (v1.0.0, 25pp — initial Community Review Edition; release-gate audited + finalized; clean compile log, 0 overfull)
 2026-06-24 21:01  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (AG-01: English-collision handling for call/push/ones/test — daemon-verified on Getting Started; other manuals low-urgency regen)
-2026-06-23 05:30  PUBLISH   p2-architect-guide               (v0.1.0 first draft, 48pp — FOUR chapters + back matter + 5 figures; IN DEVELOPMENT, not a public release)
 2026-06-19 20:41  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (do not bold the English verb "fit" — subject-pronoun + article-object contexts)
 2026-06-19 19:10  PLATFORM  templates/p2kb-platform-content.sty       (add HardwareBlock graphite callout)
 2026-06-19 19:10  PLATFORM  filters/p2kb-platform-code-coloring.lua   (map ::: hardware -> HardwareBlock)

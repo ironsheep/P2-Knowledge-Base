@@ -37,6 +37,23 @@
 
 ---
 
+## Open — enhancement proposals (new content, not corrections)
+
+- **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
+  2026-07-08 (deferred from the Architect's Guide v1.0.0 release); Stephen go/no-go before authoring.*
+  Source: *The P2 Architect's Guide* v1.0.0, **Part I (Act I)**. The decomposition-reasoning layer
+  (`architecture/decomposition/`) begins *at* "which cog owns what"; nothing in the KB captures the
+  **pre-decomposition** front-of-project work Part I lays out. Candidate new node set — reusable P2
+  **design-process** patterns that sit *above* the decomposition layer: feasibility-before-design ·
+  **narrow-vs-broad comms selection** (I²C/SPI vs host-style ribbon) · **offload-vs-port /
+  companion-device partitioning** · pin-budget → adapter-board · "characterization becomes the spec" ·
+  firmware-loaded-device → loader. Also a small KB touch worth doing: **performance → P2-resource
+  mapping** (which performance need → LUT RAM / PSRAM / CORDIC / streamer — Architect's Guide Act III
+  P-7). **Do NOT harvest the Act III agentic principles** (about *using agents*, not the P2 — low KB
+  value). Fuller rationale table lives in the manual's `PLANNING.md` (KB-harvest proposals).
+
+---
+
 ## Open — TRACKED in the ingestion head (resolution lives there, not in a YAML edit)
 
 - **F-121 — #64006 P2 Eval Add-on Board roster: the prior extraction was FABRICATED; cross-edition re-ingestion DONE 2026-06-22.** **Root cause found:** the Aug-2025 extraction invented the *entire* 8-board lineup (LED Array / Switch / Potentiometer / Servo / Sensor / Prototyping / Digital-IO / Analog-IO) — none in the actual guide. Re-ingested cross-edition (2025 `#64006` clean + 2020 `#64006-ES` forced-OCR); both editions agree on lineup + **every pin map**. Real map: **A=Control · B=Serial Host · C=LED Matrix · D=Digital Video Out · E=Mini Prototyping · F=Serial Device · G=Goertzel · H=A/V Breakout** (`#64006-ES` = the set SKU). **Per-board verified sources:** `engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-*.md`. **→ YAML head:** rebuild `hardware/addon-*.yaml` to the 8 real boards from those docs; the 4 part-number-less orphans (`7_segment_display`, `buttons_board`, `switches_and_leds`, `switches_board`) are **not** #64006 boards — remove/re-home. (The 2 fabricated entries removed in v1.9.0 were the tip of this.)

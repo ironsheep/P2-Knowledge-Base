@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.2.0 — Design-Book Draft (for review)\par}
+{\large Version 1.0.0\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -120,12 +120,9 @@ This guide is a distillation, not a primary source. It draws on, and points you 
 This is a short, narrative guide, not a reference manual — it is meant to be *read*. It assumes you have already met the Propeller 2; if you haven't, its companion **Getting Started with the Propeller 2** is the place to begin. This guide moves in **three acts**, and different readers can enter at different doors:
 
 - **Building a real system?** Read straight through. **Act I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Act II** derives the software architecture — which cog owns what, how the pieces talk. **Act III** walks the whole process again with an AI agent at your side.
-- **Already have a hardware design and need the software architecture?** Go straight to **Act II** (Chapter 2) — the functional-decomposition method — and use Act I as reference.
-- **Curious how an AI agent changes the work?** **Act III** (Chapter 3) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
+- **Already have a hardware design and need the software architecture?** Go straight to **Part II** (Chapter 5) — the functional-decomposition method — and use Part I as reference.
+- **Curious how an AI agent changes the work?** **Part III** (Chapters 10–14) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
 - **Coming from the Propeller 1?** Follow the bronze **"P1 note"** sidebars wherever a design decision differs from the P1.
-- **An AI agent or tool?** Read this guide for the reasoning — the way an experienced P2 developer thinks. The P2 reference manuals carry the exhaustive, authoritative facts the design decisions rest on.
-
-> *This is a **v0.2.0 design-book draft for review**: Act I Chapter 1 is a first draft, and Act III Chapter 3 is a forecast outline with authoring notes still visible in the text.*
 
 ## Conventions
 

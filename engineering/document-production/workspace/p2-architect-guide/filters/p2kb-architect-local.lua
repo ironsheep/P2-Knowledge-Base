@@ -27,3 +27,25 @@ function Div(div)
   -- not ours — leave every other div unchanged
   return nil
 end
+
+-- ============================================================================
+-- Inline callout icons (AG-14). The prose uses two emoji markers that IBM Plex
+-- cannot render (they come out as tofu boxes). Convert them to the fontawesome
+-- macros defined in templates/p2kb-architect-local.sty (\WatchoutIcon / \TipIcon,
+-- each with a plain-text fallback if fontawesome5 is absent).
+--
+-- WHY here and not an inline `\Macro`{=latex} span in the markdown: the
+-- latex-escape pre-pass mangles inline raw-LaTeX attributes (`...`{=latex} ->
+-- `...`\{=latex\}), which breaks them. Emoji, by contrast, pass the escape pass
+-- untouched, and this filter runs after parsing — so we emit clean RawInline
+-- LaTeX from the emoji here. (Handles the U+FE0F variation selector too.)
+-- ============================================================================
+function Str(elem)
+  local t = elem.text
+  if t == "⚠️" or t == "⚠" then
+    return pandoc.RawInline('latex', '\\WatchoutIcon{}')
+  elseif t == "💡" then
+    return pandoc.RawInline('latex', '\\TipIcon{}')
+  end
+  return nil
+end

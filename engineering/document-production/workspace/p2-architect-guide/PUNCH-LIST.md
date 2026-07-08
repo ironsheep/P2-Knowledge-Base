@@ -12,10 +12,13 @@ each closeout; the list above carries only **outstanding** work.
       fonts (emoji only — no other glyph missing). They degrade **gracefully**: the bold
       `**Tip:**` / `**Watch out:**` label still renders, no tofu box. Guide-wide (every
       chapter + front matter use the same markers), so it's a style decision, not a local
-      patch. **Resolve in the visual/style pass:** (a) adopt an emoji-capable fallback font
-      on the platform, or (b) drop the emoji guide-wide and keep the bold text label
-      (matches the "rare inline markers" intent), or (c) follow the Streamer precedent
-      (emoji → fenced callout). Decide once, apply everywhere.
+      patch. **ADDRESSED (AG-14, 2026-07-08):** the guide now maps the warning + bulb markers to
+      **fontawesome** icons (`\WatchoutIcon` / `\TipIcon` in `p2kb-architect-local.sty`) via an
+      `\IfFileExists{fontawesome5.sty}` guard that falls back to bold `[!]` / `[*]` text if the
+      package is absent — either way, **no tofu**. The emoji stay in the markdown; a Str handler in
+      `p2kb-architect-local.lua` converts them (survives the latex-escape pass). **Confirm the icons
+      render in the v1.0.0 PDF, then close.** (Guide-local for now; promoting the fallback-font
+      approach platform-wide for the other manuals stays a style-pass call.)
 
 - [ ] **Platform: tall non-encoding tables silently drop overflow rows** (flagged for
       `project_manual_layout_standards`). `p2kb-platform-tables.lua` routes a tall, non-encoding
@@ -24,9 +27,18 @@ each closeout; the list above carries only **outstanding** work.
       (worked around by splitting it into two 6-row tables); the 5-row budget table was fine.
       The filter's breakable-vs-non-breaking heuristic should route tall tables to `longtblr` —
       it can bite any manual with a long explanatory table.
+      **Fix:** in `p2kb-platform-tables.lua`, route a tall / non-encoding multi-column table to
+      **`longtblr`** (breakable) instead of `tblr`. **How to prove it's fixed — use the layout
+      torture test** (`engineering/document-production/workspace/p2-layout-torture-test/`): add a
+      fixture case with a **non-encoding multi-column table long enough to overflow one page**
+      (~20+ rows), generate it on the PDF Forge, and confirm **every row appears** — the overflow
+      rows flow onto the next page rather than being silently clipped, with no compile error.
+      Proven fixed when that fixture's full row count is present in the rendered PDF. *(Also logged
+      to the platform layout-standards effort — `methodology/manual-layout-standards-INPUTS.md`.)*
 
-- [ ] **Fig 5 density — minor polish (not blocking).** The per-unit-calibration box sits a
-      little tight against COG B; tighten on the next visual pass.
+- [x] **Calibration-box density — RESOLVED 2026-07-08.** The robot-decomposition diagram (now
+      Figure 9.1) was redrawn to the real **three-cog** structure; per-unit **servo** calibration
+      now sits on the **COG A** side, clear of the I/O cog. No longer tight. (Sweep at closeout.)
 
 ---
 
