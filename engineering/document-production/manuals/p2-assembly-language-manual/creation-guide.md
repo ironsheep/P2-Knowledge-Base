@@ -345,6 +345,7 @@ For PASM2 instruction documentation, every claim falls into these categories:
 | **Syntax forms** | YAML `syntax:` field | "ADD Dest, {#}Src {WC}" |
 | **Hardware capability** | Silicon Doc ONLY | "CORDIC computes sin/cos" |
 | **Synchronization claims** | Silicon Doc ONLY | "Hub access every 8 clocks" |
+| **Worked example / idiom** | Same source as the behavior it demonstrates | "abs + if_c neg = edge-case-safe abs" — an example IS a claim; verify it end-to-end (see 4A.8) |
 
 ### 4A.2 Red-Flag Phrases for PASM2
 
@@ -359,6 +360,10 @@ For PASM2 instruction documentation, every claim falls into these categories:
 | "automatically" | MEDIUM | Automatic behavior must be documented | Check source for automatic behavior |
 | "can be used to" | MEDIUM | Use case attribution | Verify the use case is valid |
 | "mechanism for" | MEDIUM | Implementation claim | Must trace to hardware doc |
+| "in parallel" / "overlaps" / "while … proceeds" | **CRITICAL** | 2026-07-09 §4.6.2 fabricated RDLONG parallelism | A plain hub/mem op BLOCKS — verify vs Silicon Doc/CSV or DON'T WRITE |
+| "pipelined" (of a hub read / any single op) | HIGH | Only FIFO/streamer + SETQ-burst hide hub latency | Name the actual mechanism or DON'T WRITE |
+| "C/Z indicates <edge/special case>" | **CRITICAL** | 2026-07-09 §3.5.4 ABS invented a C-edge-case (C is the original sign) | Verify the flag's ACTUAL meaning (CSV C/Z column) |
+| "takes N clock cycles" (for M instructions) | HIGH | Cycle-count vs instruction-count confusion (§3.3) | Each instr ≥2 clocks; sum per-instruction clocks from the CSV |
 
 ### 4A.3 The Verification Protocol
 
@@ -441,8 +446,24 @@ Claim to write: "WRPIN timing varies based on Smart Pin mode"
 ### 4A.7 Full Audit Methodology Reference
 
 For comprehensive post-write audit procedures, see:
-- `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md` (generic methodology)
+- `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md` (generic methodology, v2.0.0)
 - `./audit/` (this manual's specific audit documentation)
+
+### 4A.8 Prose, examples, and idioms ARE claims (added 2026-07-09)
+
+The 2026-07-09 forum report + root-cause analysis established that Part I's **narrative
+prose, worked examples, and idiom explanations** were never claim-audited — and that is
+exactly where the fabrications hid. Write-time rules:
+
+1. **A worked example is a claim.** "This sequence takes 3 clocks" / "C flags the edge
+   case" must be verified end-to-end (each instruction's clocks from the CSV; each flag's
+   real meaning) BEFORE writing — like any instruction-entry claim.
+2. **Trust-chain proof applies to conceptual prose too:** silicon → YAML → doc. The YAML
+   is not authority until itself proven against the CSV / Silicon Doc.
+3. **Operator notation** (see §6.2): in behavior descriptions `=` = receives, `==` =
+   comparison — a comparison written `=` is a defect; in fenced Spin2 code use `:=` / `==`.
+4. Full method: methodology §5.4 (exhaustive prose coverage), §6.4 (operator rule), §8.6
+   (fan-out). Root cause: `./audit/root-cause-2026-07-09-part-i-prose-never-claim-audited.md`.
 
 ---
 
@@ -688,6 +709,21 @@ Use these terms consistently throughout:
 | `$` | Hexadecimal prefix or current address |
 | `%` | Binary prefix |
 | `##` | 32-bit augmented immediate |
+
+**Operator notation in behavior descriptions and code (added 2026-07-09).** Behavior
+descriptions (flag-effect prose, the `c:`/`z:` meaning of a flag) are math/pseudocode,
+not source — follow the trusted source's convention, consistently:
+
+| Symbol | Means | Use |
+|--------|-------|-----|
+| `=` | receives / is | A flag or register takes a value: `C = D[31]`, `then D = D − S`. **Correct — leave.** |
+| `==` | comparison (predicate) | `Z = (D == 0)`, `Result == 0`. Any "when X equals Y" condition. |
+| `:=` | Spin2 assignment | **Only** in fenced Spin2 code examples (`x := 5`). Never in prose. |
+
+The defect is the **mismatch**: a comparison written with a single `=` (write `== 0`,
+not `= 0`). A bare `=` inside a fenced **Spin2** code example is a real bug (use `:=`
+assign / `==` compare). PASM2 CON-block `=` is legitimate assembler syntax and stays.
+See methodology §6.4 + `feedback_behavior_notation_vs_code_operators`.
 
 ---
 

@@ -1,8 +1,8 @@
 # Technical Document Audit Methodology
 
-**Version:** 1.0.0
-**Created:** 2026-01-23
-**Derived From:** P2 Assembly Language Manual audit experience (2025-12 to 2026-01)
+**Version:** 2.0.0
+**Created:** 2026-01-23 · **Upgraded:** 2026-07-09 (fabrication-audit sprint §2)
+**Derived From:** P2 Assembly Language Manual audit experience (2025-12 to 2026-01); upgraded after the 2026-07-09 forum-defect report exposed a coverage gap (Part I prose never claim-audited)
 **Purpose:** Generic, document-independent framework for auditing technical documentation for accuracy, completeness, and hallucination
 
 ---
@@ -92,8 +92,12 @@ These patterns frequently accompany hallucinated content:
 | "automatically" | MEDIUM | Automatic behavior must be documented |
 | "additionally" / "furthermore" | MEDIUM | Often precedes fabricated extras |
 | "synchroniz*" (domain-specific) | HIGH | Complex mechanism often misunderstood |
+| "in parallel" / "overlap*" / "while … proceeds" | HIGH | Claims concurrent execution the hardware may not do (2026-07-09: §4.6.2 "pipelined hub access" fabrication — a blocking RDLONG asserted to run in parallel) |
+| "pipelined" (of a blocking op) | HIGH | Attributes latency-hiding to an operation that actually stalls the core |
+| "issue … and immediately begin" / "fire-and-continue" | HIGH | Asserts non-blocking issue; most ops block until complete |
+| "sets C/Z to indicate <special/edge case>" | HIGH | Invents a flag semantic — verify the flag's ACTUAL meaning vs the primary source (2026-07-09: §3.5.4 ABS "C indicates the edge case" fabrication; C is the original sign bit) |
 
-**Audit action**: Search for these patterns; each instance requires source verification.
+**Audit action**: Search for these patterns; each instance requires source verification. Worked examples and idiom explanations are the highest-yield hiding place — an example asserting "this takes N clocks" or "C flags the edge case" is a claim, audit it like any other (§5.4).
 
 ### 2.2 Content Red Flags
 
@@ -235,6 +239,31 @@ For each claim:
 | Warning/limitation | Primary specification |
 | Cross-component interaction | Primary + implementation |
 
+### 5.4 Coverage completeness — every claim, all prose (not a feature checklist)
+
+**Root-cause rule (added 2026-07-09).** The audit's unit is **every claim**, extracted
+**exhaustively from ALL prose** — narrative sentences, worked examples, and idiom
+explanations — **not** a curated list of features/mechanisms. A prior Part I audit of
+the PASM2 manual verified 8 chosen architectural features rigorously, declared
+"examined ALL / Confidence HIGH," and shipped — while two fabrications sat in the
+branchless-idiom and hub-timing **prose it never read claim-by-claim.** Feature-checklist
+coverage is not claim coverage.
+
+1. **Exhaustive extraction.** Enumerate every capability/behavior claim in the audited
+   region. A worked example is a claim ("this code does X in Y clocks"); an idiom
+   explanation is a claim. Sampling (§8.2's 10%) is a smoke test, **never** the
+   systematic pass.
+2. **Trust-chain proof for prose.** Every claim carries **silicon → YAML → doc**.
+   Conceptual/narrative prose gets the **same** rigor as instruction entries — it is
+   higher-risk, not exempt (Appendix A.3).
+3. **YAML is not authority until proven.** The derived YAML (Level 3) can be wrong too;
+   cite it only after confirming it against the primary source (Level 1). A doc-matches-
+   YAML result is **not** a pass if the YAML itself is unverified.
+4. **Honest scope attestation — silence ≠ audited.** Never report "examined ALL / HIGH
+   confidence" unless coverage is provably exhaustive. A scoped audit **states its
+   scope** and does not imply the remainder is clean; every region emits an explicit
+   clean-or-finding record, and any unaudited region is **named as unaudited.**
+
 ---
 
 ## Part VI: Semantic vs Formatting Distinction
@@ -247,11 +276,16 @@ Many audit "hits" are formatting differences, not errors. Distinguishing them sa
 
 | Example | Type | Real Issue? |
 |---------|------|-------------|
-| "Result = 0" vs "result == 0" | Formatting | NO - same meaning |
+| "Result = 0" (a comparison) vs "Result == 0" | Semantic, agent-facing | **YES** — a comparison written with a single `=` is a defect; see §6.4 |
 | "sign of result" vs "MSB of result" | Semantic equivalent | NO - same concept |
 | "2 cycles" vs "2 clocks" | Terminology | NO - same meaning |
 | "1 cycle" vs "2 cycles" | Semantic error | YES - different values |
 | "carries if overflow" vs "no carry" | Semantic error | YES - opposite behavior |
+
+> **Corrected 2026-07-09.** The prior edition of this table listed `=` vs `==` as
+> "Formatting — NO, same meaning." That was wrong and contradicted this doc's own
+> §14.2/§14.3. For the agent audience, `=` vs `==` is a **correctness** issue — see
+> the operator rule in §6.4.
 
 ### 6.3 Decision Framework
 
@@ -264,6 +298,23 @@ Would a reader understand correctly?
 ├── YES → Not critical
 └── NO → Must fix
 ```
+
+### 6.4 Operator notation — `=` receives, `==` compares, `:=` only in code
+
+Behavior descriptions (flag tables, YAML `c:`/`z:` fields) are math/pseudocode, **not**
+source code. Follow the trusted source's own convention, applied consistently:
+
+- **`=` means "receives / is"** — a flag or register takes this value: `C = D[31]`,
+  `then D = D − S`. **Correct — leave alone.**
+- **`==` means comparison** — a predicate yielding true/false: `Z = (D == 0)`,
+  `Result == 0`.
+
+The defect is **only the mismatch**: a comparison written with a single `=`. Fixing
+just those makes the notation self-consistent (afterward `=` *always* means receives,
+`==` *always* means compare), which is what stops an agent copying the wrong operator
+into generated code. The strict Spin2 rule (`:=` assign / `==` compare, no bare `=`)
+applies **only to actual Spin2 code examples** (fenced source); PASM2 CON-block `=` is
+legitimate assembler syntax and stays. (`feedback_behavior_notation_vs_code_operators`.)
 
 ---
 
@@ -279,12 +330,18 @@ Users find errors that systematic audits miss because they:
 
 ### 7.2 User Feedback Triage Protocol
 
-| Severity | Criteria | Response Time |
-|----------|----------|---------------|
-| CRITICAL | Fundamentally wrong (opposite behavior) | Immediate |
-| HIGH | Incorrect data affecting usage | Same session |
-| MEDIUM | Misleading but not fatal | Within 1-2 days |
-| LOW | Stylistic or minor | Backlog |
+No severity ranking (Part IX). Every user-reported item is verified against the
+trusted source; if it is wrong it is repaired, and its **class** is swept across all
+documents + YAMLs. User feedback is especially valuable because it finds what
+systematic audits missed — treat each report as the seed of a class-wide sweep, not a
+single-spot fix.
+
+| Step | Action |
+|------|--------|
+| 1 | Verify the report against the primary source (silicon → YAML → doc) |
+| 2 | If wrong: identify the **class** the defect belongs to |
+| 3 | Sweep + fix every occurrence in every document AND every YAML |
+| 4 | Full-audit any region the report shows was never claim-level audited, before re-release |
 
 ### 7.3 User Feedback Analysis Template
 
@@ -344,29 +401,48 @@ Ongoing maintenance:
 3. Re-audit after document changes
 4. Maintain audit trail
 
+### 8.6 Fan-out mode — parallel finders + MANDATORY adversarial verification
+
+For a whole-corpus pass (many documents), fan out per-document finders (per
+Part/chapter-range for large docs) each running the exhaustive claim-level protocol
+(§5.4). Fan-out is the only way to reach exhaustive coverage across a large corpus in
+one pass.
+
+**Non-negotiable safeguard: fan-out audit findings INVERT.** Parallel finders flag
+correct content as wrong and miss real defects. Every finding MUST pass an independent
+**adversarial-verify** stage (a separate agent prompted to *refute* it against the
+trusted source) **and** a human hand-check of the confirmed set, **before** any finding
+drives a fix. A raw fan-out finding list is a hypothesis set, never a fix list.
+(`feedback_handverify_audit_findings_and_compile_blindspots`.)
+
+**No silent coverage caps.** Every in-scope document emits a register — findings OR an
+explicit "audited, clean" attestation. Anything not fully covered is logged, never
+omitted (silence ≠ audited).
+
 ---
 
-## Part IX: Issue Severity Classification
+## Part IX: No Severity — Right vs. Wrong, and the Class-Wide Sweep
 
-### 9.1 Severity Levels
+**Superseded 2026-07-09 (Stephen's directive).** We do **not** rank findings
+CRITICAL/HIGH/MEDIUM/LOW. Severity invites deferral and understates systemic
+problems. The only judgment is binary: **is the information correct or not?** If it is
+wrong — for the human reader OR for the agents that consume the YAMLs — it is
+**repaired.** No exceptions, no ranking, no "we'll fix the low-priority ones later."
 
-| Level | Definition | Examples |
-|-------|------------|----------|
-| **CRITICAL** | Fundamentally wrong behavior; would cause failure | Opposite flag behavior, wrong instruction |
-| **HIGH** | Significant error affecting correct usage | Missing critical parameter, wrong value |
-| **MEDIUM** | Error with workaround or limited impact | Terminology inconsistency, unclear wording |
-| **LOW** | Minor issue, cosmetic | Formatting, style preferences |
-| **INFO** | Not wrong, but could be improved | Missing cross-reference, verbose |
+### 9.1 Every finding triggers a class-wide sweep
 
-### 9.2 Priority Matrix
+A defect is an instance of a **class**. On finding one, identify the class and fix
+**every occurrence in every document AND every YAML** — not just the reported spot.
+Reject "lightweight" / triage-only responses; they guarantee more defect reports, not
+fewer, and the exhaustive sweep is explicitly worth the time.
+(`feedback_classwide_sweep_on_every_finding`.)
 
-| Severity | User Impact | Priority |
-|----------|-------------|----------|
-| CRITICAL | Any | IMMEDIATE |
-| HIGH | Frequent use case | HIGH |
-| HIGH | Rare use case | MEDIUM |
-| MEDIUM | Any | LOW |
-| LOW | Any | BACKLOG |
+### 9.2 Systemic ⇒ content bump; full audit gates re-release
+
+A systemic finding (a fabrication, a whole-class notation error) is a **content
+version bump, not a patch** — a patch understates the scope and misleads readers. If a
+region cannot be shown to have been fully, claim-level audited, it is **fully audited
+before its document re-releases.** The full audit is a hard release gate.
 
 ---
 
@@ -402,19 +478,18 @@ Ongoing maintenance:
 | UNVERIFIED | |
 | FABRICATED | |
 
-## Critical Findings
+## Findings (grouped by class — no severity, per Part IX)
 
-| ID | Location | Claim | Issue | Source | Recommendation |
-|----|----------|-------|-------|--------|----------------|
-
-## High Priority Findings
-
-...
+| ID | Location | Claim | Issue | Source (silicon→YAML→doc) | Repair | Class-sweep scope |
+|----|----------|-------|-------|---------------------------|--------|-------------------|
 
 ## Audit Coverage
 
-| Section | Claims | Verified | Issues |
-|---------|--------|----------|--------|
+Every audited region emits a row — findings OR an explicit "audited, clean"
+attestation. Name any region NOT claim-level audited (silence ≠ audited).
+
+| Section | Claims extracted | Verified | Findings | Coverage |
+|---------|------------------|----------|----------|----------|
 ```
 
 ---
@@ -646,6 +721,7 @@ search_patterns.py        - Find hallucination red flags
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0.0 | 2026-01-23 | Initial version derived from PASM2 manual audit |
+| 2.0.0 | 2026-07-09 | Fabrication-audit sprint §2. Root cause: Part I prose was never claim-audited (a curated 8-feature checklist over-attested as "examined ALL"). Added: §5.4 exhaustive claim extraction of ALL prose + trust-chain-proof-for-prose + YAML-not-authority-until-proven + honest-scope-attestation; §6.4 operator rule (= receives / == compares / := code-only) — corrected the prior "= vs == is formatting" guidance; §8.6 fan-out mode with mandatory adversarial-verify + hand-check; Part IX replaced severity with binary right/wrong + class-wide sweep + full-audit-gates-release; §2.1 new fabrication red-flags (parallel/overlap/pipelined-blocking-op/flag-indicates-edge-case); §7.2 feedback triage de-severitized. |
 
 ---
 
