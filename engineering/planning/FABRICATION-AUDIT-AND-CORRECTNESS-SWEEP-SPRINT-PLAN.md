@@ -256,3 +256,27 @@ DoD validation (`validate-dod-release.py`) blocks on any unsourced/broken ref.
 Deliverables 1–9 constitute Group 1. Groups 2–3, the DEBUG-window ZIP pass, and the
 coordinated release sweep are tracked as program context above and are **not** closed
 by this plan. The re-rendered-but-unreleased manuals wait for that coordinated sweep.
+
+---
+
+## § Section ↔ task cross-reference (tag `fabrication-audit`)
+
+| Plan § | Deliverable | Task | seq |
+| ------ | ----------- | ---- | --- |
+| §1 | Root-cause analysis (why fabrications slipped) | «#173» | 1 |
+| §2 | Audit-methodology upgrade + skill proposals | «#174» | 2 |
+| §3 | Author the fan-out audit spec | «#175» | 3 |
+| §4 | Pilot on PASM2 Part I (Stephen checkpoint) | «#176» | 4 |
+| §5 | Fan-out fabrication audit — all 13 P2 docs | «#177» | 5 |
+| §6 | Class-wide sweep A — fabrications/factual | «#178» | 6 |
+| §7 | Class-wide sweep B — operator notation (plan-gated) | «#179» | 7 |
+| §8 | Re-render affected manuals (no release) | «#180» | 8 |
+| §9 | YAML correctness release-prep (KB track) | «#181» | 9 |
+
+**Rework-analysis (§3a) — order verified:** root-cause → methodology → spec are
+standards-before-application; pilot (§4) validates the spec before the fan-out (§5)
+spends it (discovery-before-utilization); sweeps (§6/§7) consume §5's findings;
+re-render (§8) regenerates from opus-master only after content edits; index regen
+(§7) / KB prep (§9) follow the YAML edits. No interleave conflicts; sequential 1→9.
+The four unrelated leftover tasks (#110, #54, #46, #160) were resequenced after the
+sprint set (handled separately per the sprint-start decision).
