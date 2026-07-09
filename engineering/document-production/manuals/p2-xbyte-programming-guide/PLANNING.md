@@ -10,7 +10,7 @@
 - **Slug:** `p2-xbyte-programming-guide` (matches the Streamer guide pattern)
 - **Provisional title:** *P2 XBYTE Programming Guide* — subtitle TBD, around
   *Building Interpreters and Emulators on the Propeller 2*
-- **Category:** In development / parked (roster row added on creation)
+- **Status:** In progress (roster: `## In progress`, type=manual)
 - **Originated:** 2026-06-26
 - **Modeled on:** the **P2 Streamer Programming Guide** — its *layout,
   richness, and voice* are the target. Same `concepts → practical use →
@@ -43,8 +43,16 @@ are the fuller design vision, retained for a future edition but partly DEFERRED.
   shapes map onto XBYTE" is core pedagogy (Ch. 10); it stays. The P2-kinship framing and
   the mainframe-channel parallel are removed from it (those are the "similar to P2"
   material above).
+- **NEW Ch. 13 "XBYTE Beyond Interpreters" → ADDED (2026-07-04, Stephen approved).**
+  Widens the manual off interpreters/CPUs: a graded application map (the "whistle-wetting"
+  breadth table) + three tiny illustrative sketches (terminal/ANSI escape · MIDI status
+  dispatch · graphics display list) + a §13.6 promotion of one-shot `SETQ2` from
+  emulator-trick to general mode-switch (grounded in the Spin2 interpreter's own
+  variable-operator use). Does NOT reintroduce the deferred "similar systems" material —
+  this is XBYTE *applications*, not architecture contrast. Instruction Reference + Config
+  chapters renumbered 13/14 → 14/15. Code sketches compile-clean (pnut-ts) and within K=76.
 
-Resulting v0.1.0 shape: 14 chapters in 4 parts + Appendices A–D + Index — see
+Resulting v0.1.0 shape: **15** chapters in 4 parts + Appendices A–D + Index — see
 `creation-guide.md` §2 for the authored structure of record.
 
 ---
