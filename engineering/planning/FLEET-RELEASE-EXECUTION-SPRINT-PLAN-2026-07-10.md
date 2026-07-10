@@ -354,23 +354,60 @@ Debug); it is **not** separate release waves — all ship in the one coordinated
    fix the "Same, different routing" comment — teach the A/B-input and OUT/feedback axes so the
    misconception is dissolved. Grounded in Silicon Doc smart-pin input-routing + the manual's own
    constant tables (see §2b); no unsourced claims.
-4. **Interactive example grounding.** ch12 PC_KEY/PC_MOUSE + ch15-control-panel can't be
-   screenshotted. *Recommend:* Stephen runs them, confirms behavior as a pass/fail observation,
-   logged as "interactively verified" in the run-list (best grounding available). **Need:** accept
-   that as sufficient conformance evidence for the corpus?
-5. **Sweep B boundary cases.** Confirm D1 (10 non-uniform compare rows → `==`), D2 (6 excluded
-   receives/`=>` lines → leave), D3 (legend/`OUT=` prose → out of scope). *Recommend:* as stated in
-   §3b. **Need:** per-decision sign-off (batched in §6).
+4. **Interactive example grounding — RESOLVED (Stephen): certify against proven reference code +
+   event-log.** ch12 PC_KEY/PC_MOUSE + ch15-control-panel can't be screenshotted, so grounding is a
+   **combination**, evidence-typed per item:
+   - **structural-vs-reference** — contrast each example against the hardware-proven, freshly-certified
+     `REF/robot-dog/test_dog_panel.spin2` (production 3-cog interactive panel; bench-confirmed
+     2026-06-06). It pins the idioms: `pc_key(@one_long)` LAST-in-windowed-DEBUG + edge-detect;
+     `pc_mouse(@mx)` filling **7 consecutive longs** LAST-in-stmt; PLOT mouse **bottom-left/Y-up →
+     flip `py`** vs top-left artwork; PLOT+layers+`crop`-blit+`hitSlot`+telemetry for the panel. The
+     robot-dog panel is richer than the PNut-ts regression control-panel, so it alone suffices (no
+     second anchor needed). Reference is cited (external material), NOT committed into our tree.
+   - **event-log** — flip the `DEBUG[DBG_INPUT]` channel on (channel-gated `DEBUG_MASK`; a clear bit
+     compiles to zero code) so Stephen's run emits a re-readable keystroke/click log I read back.
+   - **visual position cross-check** (mouse) — confirm the drawn pointer lands where the reported
+     coordinate says, in the window's frame.
+   Two hard checks this enables on our examples (not a rubber-stamp): does ch12-mouse-pointer declare
+   **7 consecutive longs**, and does it **flip Y**? A miss is a real bug. *Accepted:* structural-vs-
+   reference + event-log (+ visual cross-check) is sufficient conformance evidence for the interactive
+   corpus, each ✓ tagged with its evidence type in the run-list.
+5. **Sweep B boundary cases — RESOLVED (Stephen): sign off all three as written in §3b.**
+   D1 (10 non-uniform compare rows → `==`) — genuine comparisons (`D=S`, `(D=0)|(S=0)`, masked
+   `(D & S)=0`, `Z AND (Result=0)`), Z receives a comparison result → make inner `==` explicit.
+   D2 (6 excluded lines: `sumz`/`sumnz`/`sumc`/`sumnc`/`incmod` receives-assignment + `cmpsub` `=>`
+   the ≥ operator) → **LEAVE** (editing would inject a false compare — correctness guardrail).
+   D3 (appendix-A legend + §18.8-class `OUT=` pin-state prose) → **out of scope** (not predicates).
+   Hand-checked each against the receives-vs-compare rule; no per-line diff requested. Rides the §6
+   batched session, then YAML edits proceed with validate-yaml-syntax + validate-crossref-keys +
+   Path-B index regen.
 
-6. **ch03–ch11 divergence disposition.** Several shipped examples diverged from their hardware-tested
-   fig-generators (ch10 RANGE, ch06 TRIGGER+colors, plus the ch03/ch15-dashboard "colors unverified"
-   flags). *Recommend:* **default to reverting to the tested fig behavior** (guarantees the corpus is
-   hardware-proven), and only KEEP a divergence if it's a pedagogical improvement worth a hardware
-   re-run — which then joins the §6 run-list. **Need:** blanket "revert to tested" as the default, and
-   I bring you the short list of divergences that look worth keeping for a keep/re-test call?
+6. **ch03–ch11 divergence disposition — RESOLVED (Stephen): revert-to-tested is the default; KEEP
+   ch06.** Blanket rule = reconcile every divergence to the hardware-tested fig behavior. Dispositions:
+   - **ch10-spectro-runup** → REVERT `RANGE $40000` → **`RANGE 500`** (the $40000 blanks the display —
+     straight bug, no upside).
+   - **ch03-term-dashboard** → REVERT to fig-03 (define the `BACKCOLOR/COLOR` scheme on the create line;
+     the divergence leaned on figure-defined pairs it never set — incomplete form).
+   - **ch15-dashboard** → REVERT (same color-pair class as ch03).
+   - **ch06-logic-spi-bus** → **KEEP** the `TRIGGER` + per-channel colors (genuinely better pedagogy:
+     a triggered, color-coded SPI bus trace) → **joins the §6 hardware run-list** for a fresh capture
+     (cost is one extra screenshot in an already-scheduled session). The RC-1 `...` create-line fix
+     applies regardless. **Figure refresh (Stephen): since we're re-running anyway, ALSO grab the new
+     image and update the manual's ch06 LOGIC figure to the pedagogically-better trace** — cheap, and
+     the reader then sees the improved version. (Fully compatible with the invariant below: the figure
+     swap is optional polish; the binding rule is still file↔code-block parity.)
 
-**Q1–Q3 RESOLVED (above). Q4–Q6 remain open** — the only items where Stephen's call changes what I do.
-Iterating one at a time (Stephen's technique: Claire gives pros/cons + recommendation, Stephen answers).
-Next up: **Q4** (interactive-example grounding).
+   **SCOPE CLARIFICATION (Stephen) — the example-corpus conformance invariant:** the binding
+   requirement is **external example file ≡ the manual's code block for that example (byte-identical)**,
+   NOT rendered-image ≡ published-manual-figure. An example whose produced image differs slightly from
+   the figure shown in the manual is fine — examples convey information and are useful in their own
+   right. What must hold: when the manual *speaks of* an example, the file the reader downloads matches
+   the code the manual shows. Consequence for KEEP-ch06 (and any kept divergence): we need a **passing
+   hardware capture** proving it runs; we do NOT also have to replace the manual's figure or force the
+   code back to match the old figure. Stage 4 byte-identity = file↔code-block, not render↔figure.
+
+**Q1–Q6 ALL RESOLVED.** No open questions remain — the plan is decision-complete.
+Next step: **plan-to-tasks → execute.** (See §6 hardware run-list, now including KEEP-ch06's
+`TRIGGER`+colors re-capture; §3b YAML sign-off done; interactive certification method fixed per Q4.)
 *(F-204 is NOT among them — grounded by IOSP §4.13 + CSV + EF-015; needs only the one-NOP YAML edit
 on the §9 track, no verification.)*
