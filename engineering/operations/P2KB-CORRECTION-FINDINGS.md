@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-201`**
+**Next finding ID: `F-205`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -1157,6 +1157,15 @@ lock-guarded multi-writer form explicitly.
 > - `ch03` TERM **`TEXTSIZE` default `10` → "editor text size"** (spin2-v55:1305; the 10 is the PLOT default).
 >
 > **AT_RISK (unsourced specifics — disposition per finding):** IOSP `ch16` §16.8 ADC "input impedance ~500kΩ" + "absolute-error floor ~15mV" (from P2AN001, not in EF ledger — **jumper-only verifiable, VO-J candidate**); `ch10` DAC "Max Load >10kΩ…" (10× rule-of-thumb heuristic); `ch12` "input buffer ~2ns" (sub-component; 3-clk total IS grounded); `ch07` "180MHz rated / 250 overclock" (only 350 grounded; 180 cites external datasheet); Debug `ch05` weight "100/400/700/900" (OpenType nums unsourced; "thin"→"light"); Debug `ch14` "LOCK[15]" + "~10,000 msg/s" (tool/throughput, ungrounded). Disposition: remove the unsourced number or soften to qualitative; the ~15mV/~500kΩ ADC pair → VO-J jumper test.
+
+## Fabrication-audit fan-out — YAML-wrong finding (2026-07-10, task #177) — F-204
+
+### F-204 — `rdpin.yaml` RDPIN IN-flag-reset snippet shows **two** NOPs for a **2-clock** delay (one NOP = 2 clocks, so it over-waits) — `NEEDS-VERIFICATION`
+- **Location:** `deliverables/ai/P2/language/pasm2/rdpin.yaml` — `p2kbPasm2Rdpin.in_flag_reset_latency` (snippet: `RDPIN result,#pin / NOP  Clock 1 for IN flag reset / NOP  Clock 2 for IN flag reset / TESTP #pin WC`).
+- **What's wrong:** the snippet labels **each NOP as one clock** ("Clock 1", "Clock 2") and uses **two** NOPs to cover the 2-clock IN-flag reset. A `NOP` is **2 clocks** (v35 CSV NOP row), so a single NOP already elapses the full 2-clock acknowledge/reset delay; two NOPs wait **4 clocks** and the per-NOP "Clock N" labels are wrong.
+- **Evidence:** v35 Instructions CSV — `NOP` = 2 clocks. IOSP User Guide §4.13 (line 542) states this correctly: *"One NOP waits 2 clocks (NOP = 2 clocks) to satisfy the 2-clock acknowledge delay"* — doc is right, YAML is wrong. Surfaced by the fabrication-audit fan-out (IOSP batch); adversarial-verifier confirmed doc-correct / YAML-wrong. Detail: `manuals/p2-io-and-smart-pins-user-guide/audit/fanout-findings-2026-07-10.md`.
+- **Why NEEDS-VERIFICATION (not CONFIRMED):** NOP=2-clocks is CSV ground truth, but the *actual RDPIN IN-flag reset latency* (is it exactly 2 clocks?) should be confirmed against the Silicon Doc / `pnut_ts` before editing, since the fix depends on it. If the reset latency is 2 clocks, the snippet should show a **single** NOP (or state "2 clocks = one NOP"), not two NOPs each mislabeled as one clock.
+- **Proposed correction:** replace the two-NOP snippet with one NOP (`RDPIN result,#pin / NOP  '2 clocks: IN-flag reset delay / TESTP #pin WC`), or annotate that the single NOP covers the full 2-clock reset — matching the IOSP guide's wording. Verify RDPIN IN-flag reset latency first.
 
 ---
 
