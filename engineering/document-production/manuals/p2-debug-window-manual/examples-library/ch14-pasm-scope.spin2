@@ -8,7 +8,8 @@ PUB main()
 DAT
               org
 blink
-              debug(`SCOPE Wave SIZE 400 200 'Ramp' 0 255)
+              debug(`SCOPE Wave SIZE 400 200)  ' create with config only
+              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF

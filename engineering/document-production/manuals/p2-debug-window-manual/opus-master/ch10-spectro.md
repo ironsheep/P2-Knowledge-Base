@@ -137,8 +137,7 @@ horizontally — use a direction in the 4–7 group with bit 3 set, for example
 `TRACE 12`:
 
 ```spin2
-debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
-       RANGE $20000 HSV16X LOGSCALE)
+debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 RANGE $20000 HSV16X LOGSCALE)
 ```
 
 > **Set scrolling on (`TRACE` 8–15) for a waterfall.** Values 0–7 wrap in place,
@@ -158,8 +157,7 @@ effective scroll rate in lines per second is your sample feed rate divided by
 represents.
 
 ```spin2
-debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 ...
-       RANGE $80000 LUMA8X)
+debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 RANGE $80000 LUMA8X)
 ```
 
 `RATE` accepts **1–2048**.
@@ -243,8 +241,7 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 ...
-         RATE 512 TRACE 8 LUMA8X)
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 8_000_000           ' shaft frequency at rest (a low tone)

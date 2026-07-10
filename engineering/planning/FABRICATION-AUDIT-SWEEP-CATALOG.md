@@ -129,6 +129,8 @@
 - **Correct (true fact):** 'If an instruction stalls for additional clock cycles, all following instructions in the pipeline are also stalled.' A scalar RDLONG blocks the cog for its full 9...16 clocks; subsequent instructions do NOT execute during the hub access. There is no non-blocking scalar hub read.
 - **Source proof:** Silicon Doc v35 lines 629-630 (pipeline stall); CSV RDLONG cog clocks 9...16
 
+TODO: can we source a narrative description of this our p2 eggbeater paradigm? Don't we expect a delay in the first access but not on subsequent accesses?  I'm not sure, i'm asking to make sure we carefully understand this.
+
 | Document | Location | before → after |
 |----------|----------|----------------|
 | Assembly (Part I) | chapter-04-timing.md §4.6.2 Pipelined Hub Ac | a program can issue a hub access and immediately begin computing with data alrea → A plain RDLONG blocks the cog until the read completes; the following instructio |
@@ -245,6 +247,8 @@
 - **Correct (true fact):** The default color combos #2 and #3 use GREEN, not 'Lime'. The P2 debug palette keywords are BLACK/WHITE/ORANGE/BLUE/GREEN/CYAN/RED/MAGENTA/YELLOW/GRAY — there is no 'Lime'.
 - **Source proof:** Spin2 v55 TERM Instantiation, COLOR default: '2 = GREEN/BLACK 3 = BLACK/GREEN' (spin2-v55-text.txt line ~1306)
 
+TODO: need to audit against detail document from pnut-ts (in pnut-ts-facts/ folder maybe)
+
 | Document | Location | before → after |
 |----------|----------|----------------|
 | Debug Window | ch03-term.md §Color / default color table, l | Default TERM color pairs 2 and 3 use foreground/background color 'Lime'. → Pair 2 = Green/Black, Pair 3 = Black/Green (the default keyword is GREEN, not Li |
@@ -288,6 +292,8 @@
 - **The defect:** SINC3 ... doubling the effective bits for fast-changing signals
 - **Correct (true fact):** 'SINC3 doubles the ENOB (effective number of bits) over simple bit-summing for fast signals, but it is only slightly better at DC measurements than SINC2.' Doubling is vs simple bit-summing, NOT vs SINC2.
 - **Source proof:** Silicon Doc v35, part4-smart-pins.txt line 886
+
+TODO We have to be VERY careful here, "ENOB" is a specific term and likely doens't apply... we have to choose our terminology extremely carefully  - we just make a sweeping ENOB correctness page prior to this.  We can't re-introduce".
 
 | Document | Location | before → after |
 |----------|----------|----------------|
@@ -635,6 +641,8 @@
 - **Correct (true fact):** Silicon Doc: intervening instructions between AUGS and its intended target do NOT cancel the augment ('will use the AUGS value, but not cancel it'); the augment is consumed by the next instruction that has the matching immediate #S (AUGS) / #D (AUGD). CSV AUGS: 'Queue #n ... for next #S occurrence.'
 - **Source proof:** Silicon Doc p2-documentation.txt lines 211-227; CSV row 408 AUGS ('for next #S occurrence')
 
+TODO: this sounds suspicious/incorrect... any more proof sources?
+
 | Document | Location | before → after |
 |----------|----------|----------------|
 | Assembly (Part I) | chapter-02-instruction-format.md §2.7.3 Augm | The AUG instruction must immediately precede the instruction it augments; if any → AUGS/AUGD attach to the NEXT instruction that has a matching immediate operand ( |
@@ -724,6 +732,8 @@
 - **The defect:** For Serial RX modes, the RDPIN/RQPIN C flag means 'Parity or error'.
 - **Correct (true fact):** The async serial receive mode (%11111) 'Words from 1 to 32 bits are serially received... Capture the shifter into the Z register and raise IN' — there is NO parity feature and no error/parity flag anywhere in the mode description. General rule: C receives a mode-related flag or the MSB of the Z result. P2 smart-pin serial has no hardware parity.
 - **Source proof:** Silicon Doc p2-documentation.txt L9156-9194 (%11111 async serial receive) and part4-smart-pins.txt L1-3 (C = mode-related flag or MSB of Z)
+
+TODO: do we have to be careful here with rdpin() (spin2) vs. rdpin (pasm2)?  rdpin() spin2 C bit encoding is special
 
 | Document | Location | before → after |
 |----------|----------|----------------|
@@ -2545,6 +2555,8 @@
 - **Correct (true fact):** The literal '...' is not Spin2 line-continuation; it is compiled into the LOGIC creation command as literal content, altering the emitted display command.
 - **Source proof:** pnut-ts v1.55.0 compile: with '...' the binary is 9438 bytes; with '...' removed it is 9435 bytes (3-byte diff = the three dots embedded into the DEBUG display command stream).
 
+TODO: it is spin2 line continuation, just not within debug() statements, possibly?
+
 | Document | Location | before → after |
 |----------|----------|----------------|
 | Debug Window | ch06-logic.md §A complete software-only exam | the named runnable example ch06-logic-spi-bus.spin2 creates the window with `SAM → Remove the stray '...'; the debug() call already spans two lines legally inside  |
@@ -2564,6 +2576,8 @@
 - **The defect:** The POS keyword defaults to 'auto' screen positioning.
 - **Correct (true fact):** The documented default position is 0, 0 (top-left), not 'auto'.
 - **Source proof:** Spin2 v55 TERM Instantiation: 'POS left top \| Set the window position. \| 0, 0' (spin2-v55-text.txt line 1123)
+
+TODO there is a pnut-term-ts behavior that when a window is created without POS directive the window is auto-placed (maybe this led to this confusion and needs to be stated clearly?)
 
 | Document | Location | before → after |
 |----------|----------|----------------|

@@ -3,7 +3,8 @@ CON
 
 PUB main() | ang, sine, count
   ' Two independent windows, each created by name and placed with POS.
-  debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+  debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
+  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
   debug(`TERM Status POS 420 0 SIZE 40 10)
 
   ang := 0

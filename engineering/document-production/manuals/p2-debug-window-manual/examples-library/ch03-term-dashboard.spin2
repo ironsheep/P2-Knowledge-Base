@@ -20,9 +20,9 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (red), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (black on green), then back to pair 0
     else
-      ' pair 2 (lime), then back to pair 0
+      ' pair 2 (green), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4

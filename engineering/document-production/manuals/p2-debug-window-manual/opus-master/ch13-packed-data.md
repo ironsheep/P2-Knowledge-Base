@@ -90,7 +90,8 @@ A mode keyword may be followed by either or both of two optional keywords:
 
 ```spin2
 ' two signed 16-bit values per long
-debug(`SCOPE Sig SIZE 256 128 'val' LONGS_16BIT SIGNED)
+debug(`SCOPE Sig SIZE 256 128 LONGS_16BIT SIGNED)
+debug(`Sig 'val')
 ```
 
 ## How to send packed data
@@ -130,7 +131,8 @@ A scope works the same way. Here four 8-bit samples ride in each long under
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i, ch
-  debug(`SCOPE Sig SIZE 256 128 'A' 'B' LONGS_8BIT)
+  debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
+  debug(`Sig 'A' 'B')                          ' channel-defs as a separate feed
   ch := 0
   repeat
     packed := 0
@@ -150,7 +152,8 @@ row segment:
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
   repeat
     repeat row from 0 to 15
       packed := 0

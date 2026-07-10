@@ -4,7 +4,7 @@ PUB main() | ang, value, needle, i, tick
   ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
   debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
   debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
-  debug(`Gauge POLAR 360)  ' angles in degrees; theta 0 points up
+  debug(`Gauge POLAR 360)  ' degrees; theta 0 points right (+x), +90 up
 
   ang := 0
   repeat

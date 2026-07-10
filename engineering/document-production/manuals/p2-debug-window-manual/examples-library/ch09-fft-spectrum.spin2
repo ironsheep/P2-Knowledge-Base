@@ -9,7 +9,7 @@ PUB main() | p1, p2, p3, s
   debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE)
 
   ' One channel: label, MAG=0, full scale, 256 tall, baseline 0,
-  ' baseline grid line, drawn green.
+  ' baseline legend line, drawn green.
   debug(`Spectrum 'Signal' 0 $7FFF_FFFF 256 0 1 $00FF00)
 
   p1 := 0                              ' phase accumulators

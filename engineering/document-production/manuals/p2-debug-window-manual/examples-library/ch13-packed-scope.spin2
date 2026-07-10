@@ -1,7 +1,8 @@
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i, ch
-  debug(`SCOPE Sig SIZE 256 128 'A' 'B' LONGS_8BIT)
+  debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
+  debug(`Sig 'A' 'B')                          ' channel-defs as a separate feed
   ch := 0
   repeat
     packed := 0

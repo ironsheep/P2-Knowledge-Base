@@ -4,7 +4,8 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256 'Signal' -1000 1000)
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
+  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0
@@ -19,9 +20,7 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
-    debug(`Panel 0 'Samples: `(count)' 13 ...
-          'Current: `(signal)' 13 ...
-          'Peak:    `(peak)' 13)  ' a fresh status block to the TERM
+    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)  ' fresh status block
 
     ang   += 4
     count += 1

@@ -153,11 +153,8 @@ To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-debug(`TERM Log SIZE 60 20 COLOR ...
-      $FF7F00 $000000 ...                ' pair0 fg/bg
-      $000000 $FF7F00 ...                ' pair1 fg/bg
-      $00FF00 $000000 ...                ' pair2 fg/bg
-      $FF0000 $000000)                   ' pair3 fg/bg
+' COLOR pairs: pair0 orange/black, pair1 black/orange, pair2 green/black, pair3 red/black
+debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =

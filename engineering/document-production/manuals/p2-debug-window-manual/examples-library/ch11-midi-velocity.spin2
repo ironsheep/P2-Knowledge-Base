@@ -2,7 +2,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | vel
-  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR GREEN ORANGE)
 
   vel := 24
   repeat 5

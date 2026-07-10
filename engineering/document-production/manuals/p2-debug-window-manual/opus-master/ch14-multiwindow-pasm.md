@@ -20,7 +20,8 @@ the window type, then a **unique name** you choose. From then on you address eac
 window by its name, independently of every other window.
 
 ```spin2
-debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+debug(`SCOPE Wave POS 0 0 SIZE 400 200)
+debug(`Wave 'Sine' -1000 1000)
 debug(`TERM Status POS 420 0 SIZE 40 10)
 ```
 
@@ -60,7 +61,8 @@ CON
 
 PUB main() | ang, sine, count
   ' Two independent windows, each created by name and placed with POS.
-  debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+  debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
+  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
   debug(`TERM Status POS 420 0 SIZE 40 10)
 
   ang := 0
@@ -154,7 +156,8 @@ PUB main()
 DAT
               org
 blink
-              debug(`SCOPE Wave SIZE 400 200 'Ramp' 0 255)
+              debug(`SCOPE Wave SIZE 400 200)  ' create with config only
+              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF
@@ -273,7 +276,8 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256 'Signal' -1000 1000)
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
+  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0
@@ -288,9 +292,7 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
-    debug(`Panel 0 'Samples: `(count)' 13 ...
-          'Current: `(signal)' 13 ...
-          'Peak:    `(peak)' 13)  ' a fresh status block to the TERM
+    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)  ' fresh status block
 
     ang   += 4
     count += 1

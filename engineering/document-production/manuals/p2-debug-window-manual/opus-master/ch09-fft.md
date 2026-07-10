@@ -148,8 +148,7 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 ...
-         'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
+  debug(`Dual 'Left' 0 $7FFF_FFFF 128 0 1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)
