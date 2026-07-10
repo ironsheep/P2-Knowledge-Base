@@ -267,14 +267,14 @@ Controls the analog characteristics of the pin:
 
 These are the same settings documented in Chapter 2 (Enhanced Direct I/O).
 
-### Layer 3: Input Routing (bits [31:24])
+### Layer 3: Input Routing (bits [31:21])
 
 Selects input sources:
 
-- A input source: local pin, adjacent pins (-3 to +3), or OUT bit
-- B input source: local pin, adjacent pins (-3 to +3), or OUT bit
-- Input polarity: true or inverted
-- Input logic: pass, AND, OR, XOR, or filter
+- A input source: local pin, adjacent pins (-3 to +3), or OUT bit (bits [31:28])
+- B input source: local pin, adjacent pins (-3 to +3), or OUT bit (bits [27:24])
+- Input polarity: true or inverted (high bit of each source selector)
+- Input logic: pass, AND, OR, XOR, or filter (bits [23:21])
 
 ### Layer 4: DIR/OUT Control (bits [7:6])
 

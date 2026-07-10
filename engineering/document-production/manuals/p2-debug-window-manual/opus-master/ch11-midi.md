@@ -41,12 +41,12 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `MIDI` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | none (window name) | The window's title-bar text |
+| `POS` | `left top` | `0 0` | Screen position of the window, in pixels |
 | `SIZE` | `multiplier` | `4` | Key-size multiplier, **1–50** |
 | `RANGE` | `first last` | `21 108` | First and last MIDI note to display, each **0–127** |
 | `CHANNEL` | `channel` | `0` | The single MIDI channel to display, **0–15** |
-| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each `$RRGGBB` |
+| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each a named color with an optional 0–15 brightness |
 
 A few things to know about these:
 
@@ -67,7 +67,7 @@ A few things to know about these:
 
 ```spin2
 ' One octave, large keys, green/orange lit colors, channel 0
-debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF7F00)
+debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR GREEN ORANGE)
 ```
 
 Each key is labelled with its MIDI **note number** (0–127), drawn rotated along
@@ -150,7 +150,9 @@ Three runtime keyword commands round out the set:
 - `` `CLEAR `` — resets every key to off (clears all stored velocities) and
   redraws an empty keyboard. Use it between takes, or to recover if a Note-Off
   was missed and a key is stuck lit.
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE {WINDOW} 'filename' `` — writes a `.bmp` of the display area (or of the
+  whole window if you add the `WINDOW` keyword) to `'filename'` on the host; a
+  filename is required.
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
@@ -205,7 +207,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | vel
-  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR GREEN ORANGE)
 
   vel := 24
   repeat 5

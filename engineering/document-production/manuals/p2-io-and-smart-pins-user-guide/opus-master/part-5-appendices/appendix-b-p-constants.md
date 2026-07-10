@@ -58,36 +58,54 @@ WRPIN(pin, mode)
 | P_ASYNC_RX | %11111 | - | Asynchronous serial RX | 17 |
 
 
-## A Input Selection (pick one)
+## A Input Polarity & Selection (pick one each)
 
-| Constant | Bits [31:28] | Description |
+Two independent fields in bits [31:28]: the polarity bit (bit 31) combines with any selection (bits [30:28]) — e.g. `P_INVERT_A | P_PLUS1_A`.
+
+### A Input Polarity (pick one)
+
+| Constant | Bit 31 | Description |
+|----------|--------|-------------|
+| P_TRUE_A | %0 | True A input (default) |
+| P_INVERT_A | %1 | Invert A input |
+
+### A Input Selection (pick one)
+
+| Constant | Bits [30:28] | Description |
 |----------|--------------|-------------|
-| P_TRUE_A | %0000 | True A input (default) |
-| P_INVERT_A | %1000 | Invert A input |
-| P_LOCAL_A | %0000 | Select local pin for A (default) |
-| P_PLUS1_A | %0001 | Select pin+1 for A |
-| P_PLUS2_A | %0010 | Select pin+2 for A |
-| P_PLUS3_A | %0011 | Select pin+3 for A |
-| P_OUTBIT_A | %0100 | Select OUT bit for A |
-| P_MINUS3_A | %0101 | Select pin-3 for A |
-| P_MINUS2_A | %0110 | Select pin-2 for A |
-| P_MINUS1_A | %0111 | Select pin-1 for A |
+| P_LOCAL_A | %000 | Select local pin for A (default) |
+| P_PLUS1_A | %001 | Select pin+1 for A |
+| P_PLUS2_A | %010 | Select pin+2 for A |
+| P_PLUS3_A | %011 | Select pin+3 for A |
+| P_OUTBIT_A | %100 | Select OUT bit for A |
+| P_MINUS3_A | %101 | Select pin-3 for A |
+| P_MINUS2_A | %110 | Select pin-2 for A |
+| P_MINUS1_A | %111 | Select pin-1 for A |
 
 
-## B Input Selection (pick one)
+## B Input Polarity & Selection (pick one each)
 
-| Constant | Bits [27:24] | Description |
+Two independent fields in bits [27:24]: the polarity bit (bit 27) combines with any selection (bits [26:24]) — e.g. `P_INVERT_B | P_PLUS1_B`.
+
+### B Input Polarity (pick one)
+
+| Constant | Bit 27 | Description |
+|----------|--------|-------------|
+| P_TRUE_B | %0 | True B input (default) |
+| P_INVERT_B | %1 | Invert B input |
+
+### B Input Selection (pick one)
+
+| Constant | Bits [26:24] | Description |
 |----------|--------------|-------------|
-| P_TRUE_B | %0000 | True B input (default) |
-| P_INVERT_B | %1000 | Invert B input |
-| P_LOCAL_B | %0000 | Select local pin for B (default) |
-| P_PLUS1_B | %0001 | Select pin+1 for B |
-| P_PLUS2_B | %0010 | Select pin+2 for B |
-| P_PLUS3_B | %0011 | Select pin+3 for B |
-| P_OUTBIT_B | %0100 | Select OUT bit for B |
-| P_MINUS3_B | %0101 | Select pin-3 for B |
-| P_MINUS2_B | %0110 | Select pin-2 for B |
-| P_MINUS1_B | %0111 | Select pin-1 for B |
+| P_LOCAL_B | %000 | Select local pin for B (default) |
+| P_PLUS1_B | %001 | Select pin+1 for B |
+| P_PLUS2_B | %010 | Select pin+2 for B |
+| P_PLUS3_B | %011 | Select pin+3 for B |
+| P_OUTBIT_B | %100 | Select OUT bit for B |
+| P_MINUS3_B | %101 | Select pin-3 for B |
+| P_MINUS2_B | %110 | Select pin-2 for B |
+| P_MINUS1_B | %111 | Select pin-1 for B |
 
 
 ## A/B Input Logic (pick one)

@@ -83,9 +83,8 @@ Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing betwee
 
 | Register | Repository | DAC Noise |
 |----------|-----------|-----------|
-| X[15:0] | Not used | Sample period |
-| Y via WXPIN | Value to store | Not used |
-| Z via RDPIN | Stored value | Not used |
+| X via WXPIN | 32-bit value stored | Sample period (X[15:0]) |
+| Z via RDPIN | Stored value | 16-bit ADC accumulation |
 | IN | New data written | Period complete |
 
 ### Key Constants
@@ -184,7 +183,7 @@ PINH(pin)
 
 **Pulse/cycle output**
 
-Generates precise timed pulses. Output a specified number of transitions with configurable timing.
+Generates precise timed pulses. Output a specified number of pulses (or cycles), counted down in Y, with configurable timing.
 :::
 
 ### Register Usage
@@ -297,7 +296,7 @@ NCO frequency generator with duty cycle control. Output reflects Z overflow stat
 |----------|----------|
 | X[15:0] | Base period (1 for maximum resolution) |
 | X[31:16] | Initial phase |
-| Y[31:0] | Frequency × duty control |
+| Y[31:0] | Value added to Z each base period (sets both frequency and duty) |
 | Z[31:0] | Phase accumulator |
 | IN | Z overflow |
 
@@ -503,7 +502,7 @@ count := RDPIN(pin)
 
 **Up/down gated counter**
 
-Counts A-input edges. B-input controls direction: high=increment, low=decrement.
+Counts A-input positive (rising) edges. B-input controls direction: high=increment, low=decrement.
 :::
 
 ### Register Usage
@@ -942,7 +941,7 @@ sample := RDPIN(pin)
 
 **ADC with external clock**
 
-Samples A-input data on B-input clock edges. For external delta-sigma ADCs.
+Samples A-input data on each B-input rising edge. For external delta-sigma ADCs.
 :::
 
 ### Register Usage
@@ -978,7 +977,7 @@ PINH(pin)
 
 **ADC triggered scope capture**
 
-Four-channel oscilloscope-style ADC with hysteretic triggering.
+Single-channel oscilloscope-style ADC with hysteretic triggering. Up to four such pins can be aggregated into a cog's SCOPE data pipe (SETSCP/GETSCP).
 :::
 
 ### Register Usage
@@ -998,7 +997,7 @@ P_ADC_GIO | P_ADC_SCOPE
 
 ### Quick Example
 ```spin2
-WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)       ' pin must be a multiple of 4
+WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)       ' any pin; 4-pin alignment only for the SCOPE data pipe
 WXPIN(52, (48 << 10) | (16 << 2))        ' B=48, A=16, 68-tap filter
 PINH(52)
 ```
@@ -1092,7 +1091,7 @@ Clocked serial reception for SPI slave and similar protocols.
 
 | Register | Function |
 |----------|----------|
-| X[5] | Mode: 0=continuous, 1=start-stop |
+| X[5] | Sample position: 0 = just before B-input edge, 1 = coincident with B-input edge |
 | X[4:0] | Bits minus 1 |
 | Y | Not used |
 | Z | Received data (left-justified) |
@@ -1107,7 +1106,7 @@ P_SYNC_RX | P_PLUS1_B                    ' Clock from next pin
 ### Quick Example
 ```spin2
 WRPIN(pin, P_SYNC_RX | P_PLUS1_B)
-WXPIN(pin, %1_00111)                     ' Start-stop, 8 bits
+WXPIN(pin, %1_00111)                     ' Sample coincident with clock edge, 8 bits
 PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 data := RDPIN(pin) >> 24                 ' Left-justified, shift down
@@ -1147,8 +1146,8 @@ bit_period := (_clkfreq / 115200) << 16
 WRPIN(pin, P_ASYNC_TX | P_OE)
 WXPIN(pin, bit_period | 7)               ' 8 data bits
 PINLOW(pin)
-REPEAT UNTIL PINREAD(pin)
-WYPIN(pin, byte_value)
+WYPIN(pin, byte_value)                   ' Load first byte (begins transmission)
+REPEAT UNTIL PINREAD(pin)                ' IN rises when ready for the next byte
 ```
 
 ### Reference

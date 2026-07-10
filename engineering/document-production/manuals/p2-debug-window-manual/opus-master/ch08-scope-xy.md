@@ -47,13 +47,13 @@ The configuration keywords you can add to the creation line:
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
+| `POS` | `left top` | `0, 0` | Screen position of the window, in pixels |
 | `SIZE` | `radius` | `256x256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256x256 (the default is a 256-pixel width, not a radius) |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
-| `DOTSIZE` | `pixels` | `6` | Dot diameter, `2`–`20` |
-| `TEXTSIZE` | `points` | `10` | Legend text size, `6`–`200` |
+| `DOTSIZE` | `half-pixels` | `6` | Sample-dot size in half-pixels, `2`–`20` (so `6` draws a 3-pixel dot) |
+| `TEXTSIZE` | `points` | editor size | Legend text size, `6`–`200` |
 | `COLOR` | `back {grid}` | black, gray | Background color and, optionally, grid color |
 | `POLAR` | `{twopi {offset}}` | — | Interpret pairs as `(radius, angle)` instead of `(x, y)` — see below |
 | `LOGSCALE` | — | linear | Logarithmic radial scale, to magnify points near the center |

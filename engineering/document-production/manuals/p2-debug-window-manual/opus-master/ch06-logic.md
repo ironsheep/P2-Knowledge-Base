@@ -53,14 +53,13 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | Range | What it sets |
 |---------|-----------|---------|-------|--------------|
-| `TITLE` | `'text'` | `Logic` | — | The window's title-bar text |
-| `POS` | `left top` | cascaded | screen px | Window position, in pixels |
-| `SAMPLES` | `count` | `32` | 4–2047 | Horizontal resolution — samples shown across the width |
-| `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
+| `TITLE` | `'text'` | (none) | — | The window's title-bar text |
+| `POS` | `left top` | `0, 0` | screen px | Window position, in pixels |
+| `SAMPLES` | `count` | `32` | 4–2048 | Horizontal resolution — samples shown across the width |
+| `SPACING` | `pixels` | `8` | 2–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
-| `DOTSIZE` | `pixels` | `0` | 0–32 | Dot diameter at each sample (`0` = no dots) |
-| `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
-| `TEXTSIZE` | `points` | `10` | 6–200 | Channel-label font size |
+| `LINESIZE` | `pixels` | `1` | 1–7 | Waveform line thickness |
+| `TEXTSIZE` | `points` | editor size | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
@@ -74,7 +73,7 @@ sample wider.
 > circular buffer. The buffer is shared across all channels — every sample you send
 > is one 32-bit value whose bits are distributed to the channels — not 2048 samples
 > per channel. `SAMPLES` controls how many of those buffered samples are drawn, up to
-> 2047.
+> 2048.
 
 ### Channel declaration syntax
 
@@ -136,8 +135,8 @@ debug(`Bus `(sample))              ' one sample; its bits feed the channels
 ```
 
 For the four-channel `Bus` above (`CLK DATA CS WR`, all single-bit), a sample value
-of `%1011` lights channel 0 (`CLK`) high, channel 1 (`DATA`) low, channel 2 (`CS`)
-high, channel 3 (`WR`) high. You build that value in your own code — from a counter,
+of `%1011` lights channel 0 (`CLK`) high, channel 1 (`DATA`) high, channel 2 (`CS`)
+low, channel 3 (`WR`) high. You build that value in your own code — from a counter,
 from `GETRND`, from port reads, or from a software-simulated signal — and the window
 draws whatever bits you send.
 
@@ -255,12 +254,14 @@ Three runtime commands manage the display:
 - `` `CLEAR `` — clears the trace, empties the sample buffer (`SamplePop` returns to
   zero), resets the trigger indicator, and resets the rate counter. The window starts
   collecting fresh samples from empty.
-- `` `SAVE `` — saves the current window image to a `.bmp` file on the host.
+- `` `SAVE 'file.bmp' `` — saves the current display area to the named `.bmp` file on
+  the host. Add `WINDOW` before the filename (`` `SAVE WINDOW 'file.bmp' ``) to capture
+  the entire window instead of just the display area. The filename is required.
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Bus CLEAR)                  ' empty the buffer and blank the trace
-debug(`Bus SAVE)  ' write the current image to a bitmap file
+debug(`Bus SAVE 'trace.bmp')       ' write current image to a bitmap file
 ```
 
 ## A complete software-only example
@@ -280,8 +281,7 @@ CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 ...
-         'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
+  debug(`LOGIC SPIbus SAMPLES 200 'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
   ' align display to CS going low (frame start)
   debug(`SPIbus TRIGGER $1 $0 32)
 
@@ -391,7 +391,7 @@ trigger, and decode-in-code approach shows a live bus.
   each channel's bit (or field) lands at the right offset: channel 0 at bit 0, the
   next channel at the bits above it. A range channel consumes a contiguous field.
 - **The buffer is 2048 samples, shared, circular.** `SAMPLES` chooses how many are
-  drawn (4–2047) — and only that many are ever marked valid, so the trigger
+  drawn (4–2048) — and only that many are ever marked valid, so the trigger
   evaluates and displays within the `SAMPLES` window, not the full 2048-deep buffer.
 - **Trigger fires on an edge, not a level.** It must first see a non-matching sample,
   then a matching one. A signal already sitting at the match value will not trigger

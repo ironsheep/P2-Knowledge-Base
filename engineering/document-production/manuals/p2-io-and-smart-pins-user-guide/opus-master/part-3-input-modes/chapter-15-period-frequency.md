@@ -41,7 +41,7 @@ duty_cycle = high_time / total_time
 
 A single measurement provides either a count or a time, but calculating frequency or duty requires both.
 
-> **Compute these ratios with `MULDIV64`, not `*` and `/`.** Frequency and duty combine large values: `periods * sysclk` overflows a 32-bit long for any real signal — 100 periods times 200 MHz is already 20 billion, past the 4.29-billion limit — so a plain `(periods * sysclk) / time` silently returns a wrong number. Spin2's `MULDIV64(a, b, divisor)` forms the `a * b` product in a 64-bit intermediate, then divides, so the result stays exact. Every frequency and duty calculation in this chapter uses it; so should yours.
+> **Compute these ratios with `MULDIV64`, not `*` and `/`.** Frequency and duty combine large values: `periods * sysclk` overflows a 32-bit long for any real signal — 100 periods times 200 MHz is already 20 billion, past the 4.29-billion limit — so a plain `(periods * sysclk) / time` silently returns a wrong number. Spin2's `MULDIV64(a, b, divisor)` forms the `a * b` product in a 64-bit intermediate, then divides, so the result stays exact. Reach for it wherever an `a * b` product could exceed 32 bits; the small-value calculations in this chapter that stay within range (an average period, an RPM scale factor) correctly use plain `/`.
 
 ### Trigger Sensitivity
 
@@ -76,7 +76,7 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 |----------|----------|
 | X | Number of periods to measure |
 | Y[1:0] | Trigger sensitivity |
-| Z | Total clock cycles for X periods |
+| Z | Total clock cycles for X periods (max $80000000) |
 
 **Configuration:**
 ```spin2
@@ -124,12 +124,13 @@ CON
   PERIODS = 100
 
 PUB measure_duty() | total_time, high_time, duty_percent
-  ' Start both measurements
+  ' Start both measurements — SIG_PIN reads its own pin;
+  ' SIG_PIN+1 is aimed at SIG_PIN with both-input routing.
   PINSTART(SIG_PIN, P_PERIODS_TICKS, PERIODS, %00)
-  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS, PERIODS, %00)
+  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, PERIODS, %00)
 
-  ' Wait for completion
-  REPEAT UNTIL PINREAD(SIG_PIN)
+  ' Wait for BOTH cells to complete
+  REPEAT UNTIL PINREAD(SIG_PIN) AND PINREAD(SIG_PIN+1)
 
   total_time := RDPIN(SIG_PIN)                ' Total period time
   high_time := RDPIN(SIG_PIN+1)               ' Total high time
@@ -138,7 +139,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
   DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
 
-The loop waits on only `SIG_PIN`, yet reads both pins. That is safe because both smart pins watch the same signal for the same number of periods, so they finish on the same edge — once SIG_PIN's IN flag rises, SIG_PIN+1's result is already latched and ready to read.
+Both smart pins have to watch the *same* signal for the duty math to line up. `SIG_PIN` reads its own pin, and `SIG_PIN+1` is aimed one pin below it with `P_MINUS1_A | P_MINUS1_B` — the both-input routing pattern §15.4 describes — so the signal only needs to reach `SIG_PIN`. The loop waits on *both* IN flags: the two cells are started by sequential `PINSTART` calls, so if a signal edge arrives between them the cells begin one period apart and finish one edge apart. Waiting on only one pin could read the other's result before it has latched.
 
 
 ## 15.3 Time-Based Modes (Measure in X Clocks)
@@ -160,14 +161,14 @@ The loop waits on only `SIG_PIN`, yet reads both pins. That is safe because both
 |----------|----------|
 | X | Minimum measurement window (clock cycles) |
 | Y[1:0] | Trigger sensitivity |
-| Z | Total clock cycles for all periods within window |
+| Z | Total clock cycles for all periods within window (max $80000000) |
 
 **Key Difference from %10011:**
 
 - %10011: "Measure time for exactly X periods"
 - %10101: "Measure time for all periods within X clocks"
 
-Because the window stretches to the end of the period already in progress, **Z reports the *actual* elapsed clocks — always ≥ X, never exactly X.** Use Z, not the nominal X, as the time term in the math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
+Because the window stretches to the end of the period already in progress, **Z reports the accumulated period time — always ≥ X, and usually greater than X because the window runs on to finish the period in progress.** Use Z, not the nominal X, as the time term in the math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
 
 **Configuration:**
 ```spin2
@@ -193,7 +194,7 @@ PINSTART(pin, P_COUNTER_TICKS, window_clocks, %00)
 |----------|----------|
 | X | Minimum measurement window (clock cycles) |
 | Y[1:0] | Trigger sensitivity |
-| Z | Total clock cycles A was HIGH within window |
+| Z | Total clock cycles A was HIGH within window (max $80000000) |
 
 **Configuration:**
 ```spin2
@@ -230,7 +231,8 @@ PINSTART(pin, P_COUNTER_PERIODS, _clkfreq, %00)
 ```spin2
 REPEAT UNTIL PINREAD(pin)
 period_count := RDPIN(pin)
-' For 1-second window, period_count = frequency in Hz
+' For a ~1-second window, period_count ≈ frequency in Hz
+'   (window runs slightly past 1 s to finish the last period; ±1 period)
 frequency := period_count
 ```
 
@@ -430,14 +432,16 @@ CON
   NUM_PERIODS = 50                            ' Average over 50 periods
 
 PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
-  ' Use period-based measurement for PWM analysis
+  ' Use period-based measurement for PWM analysis.
+  ' PWM_PIN reads its own pin; PWM_PIN+1 is aimed at PWM_PIN
+  ' with both-input routing so both watch the same signal.
   PINSTART(PWM_PIN, P_PERIODS_TICKS, NUM_PERIODS, %00)
-  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS, NUM_PERIODS, %00)
+  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, NUM_PERIODS, %00)
 
   DEBUG("PWM Analyzer - averaging ", UDEC_(NUM_PERIODS), " periods")
 
   REPEAT
-    REPEAT UNTIL PINREAD(PWM_PIN)
+    REPEAT UNTIL PINREAD(PWM_PIN) AND PINREAD(PWM_PIN+1)
 
     total_time := RDPIN(PWM_PIN)
     high_time := RDPIN(PWM_PIN+1)
@@ -524,11 +528,13 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 
 ### Gate Time vs Resolution
 
-| Gate Time | Resolution at 1 kHz | Resolution at 1 MHz |
-|-----------|---------------------|---------------------|
-| 10 ms | 10 Hz (1%) | 10 kHz (1%) |
-| 100 ms | 1 Hz (0.1%) | 1 kHz (0.1%) |
-| 1 second | 0.1 Hz (0.01%) | 100 Hz (0.01%) |
+A period-counting frequency measurement (P_COUNTER_PERIODS) resolves to ±1 period per gate, so its *absolute* resolution is `1 / gate_time` — the same number of hertz at every input frequency. The *relative* resolution then scales with frequency: the same 100 Hz step is 10 % of a 1 kHz reading but only 0.01 % of a 1 MHz reading.
+
+| Gate Time | Absolute resolution | Relative at 1 kHz | Relative at 1 MHz |
+|-----------|---------------------|-------------------|-------------------|
+| 10 ms | 100 Hz | 10% | 0.01% |
+| 100 ms | 10 Hz | 1% | 0.001% |
+| 1 second | 1 Hz | 0.1% | 0.0001% |
 
 
 ## 15.8 Mode Selection Guide
@@ -606,8 +612,8 @@ frequency = MULDIV64(num_periods, sysclk, rdpin_value)
 **From period count (P_COUNTER_PERIODS):**
 ```formula
 frequency = MULDIV64(rdpin_value, sysclk, window_clocks)
-' Or for 1-second window:
-frequency = rdpin_value  ' Direct Hz reading
+' Or for a ~1-second window (window runs slightly long; ±1 period):
+frequency ≈ rdpin_value  ' Approximate Hz reading
 ```
 
 ### Duty Cycle Formulas

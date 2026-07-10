@@ -168,7 +168,7 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 ```pasm2
         mov     x, #100                 ' 2 cycles
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##data, ##addr          ' 6+ cycles (2+2+2: AUGD+AUGS+instr)
+        wrlong  ##data, ##addr          ' 7+ cycles (2+2+3..10: AUGD+AUGS+WRLONG, variable)
 ```
 
 **Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.
@@ -580,9 +580,9 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub operations (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode)
+**Variable:** Hub reads (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode); hub writes are faster (3-10 clocks in cog/LUT mode, 3-20 clocks in HUB mode)
 
-> **Timing Note:** Hub operations require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs). In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the maximum to 26 clocks.
+> **Timing Note:** Hub reads require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs); hub writes require only ~3 base clocks plus the same 0-7 window wait. In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the read maximum to 26 clocks.
 
 For time-critical inner loops:
 - Frequently-used values should reside in cog registers

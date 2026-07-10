@@ -55,7 +55,7 @@ When a DIR or OUT bit is changed by any instruction, **three additional clock cy
 \DiagOutputTiming
 ```
 
-**Total latency from instruction start to pin transition:** 5 clock cycles (2 for instruction execution + 3 pipeline delay).
+**Total latency from instruction start to pin transition:** 5 clock cycles (2 for instruction execution + 3 clocks of pin-output registration/propagation delay).
 
 ### Input Timing via INx Registers: 3 Clocks Old
 
@@ -983,7 +983,7 @@ Reads the physical pin state inverted and affects C or Z flags.
 
 Spin2 provides high-level methods for common pin operations. These methods execute from hub RAM and have additional overhead compared to inline PASM2.
 
-Spin2 also accepts short-form aliases for the three most common of these: `PINH` for `PINHIGH`, `PINL` for `PINLOW`, and `PINF` for `PINFLOAT`. The two forms are interchangeable; this guide uses both.
+Spin2 also accepts short-form aliases for six of these methods: `PINW` for `PINWRITE`, `PINL` for `PINLOW`, `PINH` for `PINHIGH`, `PINT` for `PINTOGGLE`, `PINF` for `PINFLOAT`, and `PINR` for `PINREAD`. The two forms are interchangeable; this guide uses both.
 
 
 ### PINHIGH(PinField)
@@ -1096,7 +1096,7 @@ Clears smart pin configuration.
 
 **Function:** Resets pin to normal mode (P_NORMAL)
 
-**Equivalent PASM2:** `WRPIN #0, pin`
+**Equivalent PASM2:** `DIRL pin` followed by `WRPIN #0, pin` (PINCLEAR sets DIR=0, then clears the smart-pin mode register)
 
 **Example:**
 ```spin2
@@ -1178,7 +1178,7 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: *P2 Assembly Language Reference*.)
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN write the pin's input state to C (with WC) or Z (with WZ) — one flag per instruction (WC/WZ are mutually exclusive; there is no WCZ form). Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to whichever flag(s) that instruction writes. (Source: *P2 Assembly Language Reference*.)
 
 
 ## 1.11 Common Patterns

@@ -280,7 +280,7 @@ result := RQPIN(Pin)
 
 **Non-destructive peek:** When checking results without signaling consumption.
 
-**Continuous modes:** Some modes (like totalizer counters) benefit from RQPIN for intermediate reads while RDPIN resets for the next period.
+**Continuous modes:** RDPIN and RQPIN return the same Z value; they differ only in that RDPIN acknowledges (lowers IN) while RQPIN does not. Neither resets the accumulator. A totalizer (period X=0) is continuous — its count can be read repeatedly via RDPIN/RQPIN with no "next period." Periodic modes re-arm automatically at period end (or are zeroed by pulsing DIR low), not because RDPIN was used. Use RQPIN for observation reads that must not clear IN.
 
 ### Example - Multi-Cog Access
 
@@ -307,12 +307,15 @@ AKPIN acknowledges the smart pin without reading the Z register.
 
 ### Spin2 Equivalent
 
-There is no direct Spin2 equivalent. Use RDPIN with a discard variable:
+Spin2 provides `AKPIN(PinField)`, the direct equivalent of the PASM2 AKPIN instruction — it acknowledges the smart pin without reading Z:
+```spin2
+AKPIN(pin)                         ' Acknowledge without reading
+```
+
+A discarded `RDPIN` also acknowledges, if you already have the value in hand:
 ```spin2
 ack := RDPIN(pin)                  ' Read (discard result) to acknowledge
 ```
-
-Or configure in PASM2 if needed.
 
 ### When to Use AKPIN
 
@@ -497,7 +500,7 @@ PINLOW(20)                                ' Enable
 
 ## 4.11 Span Operations
 
-Smart pin instructions operate on a span of pins exactly as the Direct I/O instructions do (§1.9), with one difference: the span travels in the **S** operand (the pin-number operand) rather than the D operand. `S[5:0]` is the base pin and `S[10:6]` the additional-pin count, set inline or via a preceding `SETQ`; as always, a span wraps within its 32-pin port. See §1.9 for the full span model.
+The write/acknowledge smart pin instructions — WRPIN, WXPIN, WYPIN, and AKPIN — operate on a span of pins much as the Direct I/O instructions do (§1.9), with one difference: the span travels in the **S** operand (the pin-number operand) rather than the D operand. (The read instructions RDPIN and RQPIN act on a single pin only, since each returns one pin's Z result into one D register.) `S[5:0]` is the base pin and `S[10:6]` the additional-pin count, set inline or via a preceding `SETQ`; as always, a span wraps within its 32-pin port. See §1.9 for the full span model.
 
 ### Spin2 Pin Ranges
 
@@ -516,7 +519,7 @@ RDPIN and RQPIN set the C flag based on mode-specific information:
 | NCO modes | Z[31] (phase MSB) |
 | Measurement modes | State indicator |
 | Counter modes | Overflow indicator |
-| Serial RX | Parity or error |
+| Serial RX | MSB of received Z value |
 
 ### Checking C After Read
 

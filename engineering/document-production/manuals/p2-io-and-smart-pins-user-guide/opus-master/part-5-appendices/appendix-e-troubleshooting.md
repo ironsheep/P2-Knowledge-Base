@@ -18,8 +18,8 @@ Pin appears completely inactive. No output changes, no IN flag, no measurements.
 
 1. Read pin state:
 ```spin2
-DEBUG("DIR: ", UDEC_(PINREAD(pin) >> 31))
-DEBUG("OUT: ", UDEC_((INA >> pin) & 1))
+DEBUG("DIR: ", UDEC_((DIRA >> pin) & 1))
+DEBUG("OUT: ", UDEC_((OUTA >> pin) & 1))
 ```
 
 2. Verify mode was written:
@@ -317,10 +317,13 @@ mode := P_ADC_1X | P_ADC
 mode := P_ADC_30X | P_ADC
 ```
 
-**Use ground reference for single-ended:**
+**Read the internal ground reference for calibration:**
 ```spin2
-mode := P_ADC_GIO | P_ADC                ' Ground-referenced input
+mode := P_ADC_GIO | P_ADC                ' Internal GIO ground node (~0), for calibration
 ```
+P_ADC_GIO routes the internal GIO ground node to the ADC, not the pin's
+signal — it reads ~0 for calibration. To read an external single-ended
+signal, select a gain range (P_ADC_1X | P_ADC, etc.) as shown above.
 
 **For SINC2 filtering, compute difference:**
 ```spin2
@@ -401,7 +404,7 @@ Smart pin works initially then stops. No more IN flags or output changes.
 
 ### Likely Causes
 
-1. **IN flag not acknowledged** - Accumulator overflow
+1. **IN flag not acknowledged** - IN stays high until RDPIN/AKPIN lowers it
 2. **Measurement complete, not restarted** - One-shot mode
 3. **Counter overflow** - 32-bit limit reached
 
@@ -428,12 +431,15 @@ REPEAT
 
 **For continuous measurement, verify X value:**
 ```spin2
-' X=0 means continuous, no IN flag
+' For counter/measurement modes: X=0 means continuous, no periodic IN flag
 WXPIN(pin, 0)                            ' Continuous - read anytime
 
 ' X>0 means periodic, IN raised each period
 WXPIN(pin, period)                      ' Periodic - must read to restart
 ```
+The meaning of X=0 is mode-specific. For ADC and DAC modes X sets the sample
+period, so X=0 is a finite period (a 1-clock ADC sample; 65,536 clocks for
+DAC), not continuous.
 
 **Pulse DIR to reset if stuck:**
 ```spin2
@@ -492,12 +498,12 @@ PINH(pin2)
 ### Using RDPIN to Inspect State
 
 ```spin2
-' Read Z register contents
-z_value := RDPIN(pin)
+' Read Z result (bits 30:0); bit 31 is the RDPIN C flag
+z_value := RDPIN(pin) & $7FFF_FFFF
 DEBUG("Z: ", UHEX_(z_value))
 
-' Read without clearing IN
-z_value := RQPIN(pin)
+' Read without clearing IN (bit 31 is the RQPIN C flag)
+z_value := RQPIN(pin) & $7FFF_FFFF
 DEBUG("Z (no clear): ", UHEX_(z_value))
 
 ' Check IN flag

@@ -55,7 +55,7 @@ The configuration keywords you can place on the creation line:
 | `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
 | `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
-| `LINESIZE` | `pixels` | `3` | Line thickness; **0–32** (`0` = no lines) |
+| `LINESIZE` | `half-pixels` | `3` | Line thickness, in half-pixels (default `3` = 1.5 px); **0–32** (`0` = no lines) |
 | `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
@@ -143,9 +143,11 @@ The sample timing is entirely yours: the window plots a set whenever one arrives
 the spacing of your `DEBUG` calls in the loop is what determines the time scale. A
 `waitms` or `waitx` in the loop sets how fast samples are produced.
 
-> Send sample values with the `` `() `` form, which transmits the *value*. This is
-> the same distinction as in the TERM chapter: `` `udec_(x) `` would send the visible
-> *digits* of `x`, which is not what a sample stream wants.
+> Send sample values with the `` `() `` form. It is shorthand for `SDEC_`, so it
+> renders each value as a **signed** decimal the SCOPE reads directly — including
+> negative samples (a value of −5 arrives as −5). Avoid the unsigned `` `udec_ ``
+> form for signed traces: it emits the unsigned 32-bit interpretation, so a small
+> negative sample like −5 is transmitted as `4294967291` and plots far off-scale.
 
 ## Triggering
 

@@ -123,10 +123,7 @@ PUB generate_pulses() | ack
 
 ### Retriggering
 
-Writing a new Y value while pulses are in progress:
-
-- If Y > 0: New value is loaded at next base period boundary
-- If Y = 0: New value triggers a new pulse sequence immediately
+Writing a non-zero Y value — whether the pin is idle (Y already 0) or a sequence is still running (Y > 0) — begins pulse output at the next base period boundary. There is no immediate-start fast path; every non-zero Y write is honored at the next base period.
 
 This allows continuous pulse generation or mid-stream adjustment.
 
@@ -305,12 +302,13 @@ CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
   STEP_PERIOD = 400                       ' 2 µs period
-  STEP_HIGH = 200                         ' 1 µs high time
+  STEP_LOW = 200                          ' X[31:16] compare = 1 µs low time
+                                          ' (high time = 400-200 = 200 = 1 µs, 50% duty)
 
 PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)
   WRPIN(STEP_PIN, P_PULSE | P_OE)
-  WXPIN(STEP_PIN, STEP_PERIOD | (STEP_HIGH << 16))
+  WXPIN(STEP_PIN, STEP_PERIOD | (STEP_LOW << 16))
   PINLOW(STEP_PIN)
   
   WYPIN(STEP_PIN, steps)                  ' Generate step pulses
@@ -334,7 +332,7 @@ PUB setup_de()
   PINFLOAT(DE_PIN)
   WRPIN(DE_PIN, P_TRANSITION | P_OE | P_INVERT_OUTPUT)
   WXPIN(DE_PIN, DISABLE_DELAY)
-  PINLOW(DE_PIN)                          ' DE starts low (disabled)
+  PINLOW(DE_PIN)                          ' DE is high (enabled) after setup due to output inversion
 
 PUB tx_complete()
   ' After transmission, trigger delayed disable
@@ -368,13 +366,16 @@ PUB trigger_burst() | ack
 ```pasm2
 CON
   _clkfreq = 200_000_000
+  STEP_PIN = 10
+  STEP_PERIOD = 400
+  STEP_LOW = 200                          ' X[31:16] compare = low-time clocks
 
 DAT           org
 
 ' Setup
               dirl      #STEP_PIN
               wrpin     ##(P_PULSE | P_OE), #STEP_PIN
-              wxpin     ##(STEP_PERIOD | (STEP_HIGH << 16)), #STEP_PIN
+              wxpin     ##(STEP_PERIOD | (STEP_LOW << 16)), #STEP_PIN
               drvl      #STEP_PIN
 
 ' Generate steps as needed
@@ -391,9 +392,6 @@ step_loop
               
               jmp       #$                ' Done
 
-STEP_PIN      long      10
-STEP_PERIOD   long      400
-STEP_HIGH     long      200
 steps_needed  long      100
 more_steps    long      0
 result        long      0
@@ -408,14 +406,14 @@ result        long      0
 |-----------|----------|-------|-------|
 | Base period | X[15:0] | 1-65535 | Clocks per cycle |
 | Compare value | X[31:16] | 0-65535 | Output HIGH when counter > this (low-time clocks) |
-| Cycle count | Y[31:0] | 1-2³² | Pulses to generate |
+| Cycle count | Y[31:0] | 1 to 2³²-1 | Pulses to generate (0 = idle) |
 
 ### P_TRANSITION Configuration
 
 | Parameter | Register | Range | Notes |
 |-----------|----------|-------|-------|
 | Edge period | X[15:0] | 1-65535 | Clocks between edges |
-| Edge count | Y[31:0] | 1-2³² | Transitions to make |
+| Edge count | Y[31:0] | 1 to 2³²-1 | Transitions to make (0 = idle) |
 
 ### Reset State
 

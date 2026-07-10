@@ -319,8 +319,9 @@ CON
   WAVE_PIN = 20
 
 PUB nco_dac_wave(freq_hz) | mode, y_val
-  ' NCO square wave through DAC for filtered sine output
-  mode := P_NCO_FREQ | P_DAC_990R_3V | P_OE
+  ' NCO toggles BIT_DAC between two 4-bit DAC levels
+  ' M[7:4]=$F sets the 'high' level, M[3:0]=$0 sets the 'low' level
+  mode := P_NCO_FREQ | P_DAC_990R_3V | P_OE | ($F0 << 8)
   y_val := freq_hz FRAC _clkfreq
 
   PINFLOAT(WAVE_PIN)
@@ -330,15 +331,16 @@ PUB nco_dac_wave(freq_hz) | mode, y_val
   PINLOW(WAVE_PIN)
 ```
 
-The NCO generates a square wave, and with external RC filtering, approximates a sine wave.
+In DAC_MODE a non-DAC smart mode like NCO does not feed the 8-bit DAC directly; its 1-bit output drives BIT_DAC, toggling the pin between the two 4-bit levels held in M[7:4] and M[3:0]. Setting M[7:4]=$F and M[3:0]=$0 produces a full-swing square wave; with external RC filtering it approximates a sine wave. (Leaving M[7:0]=0 makes both levels 0V, so the pin never swings.)
 
 ### PWM + DAC Integration
 
-PWM modes can combine with DAC for analog PWM output:
+PWM modes can combine with DAC. Like NCO, a PWM smart mode in DAC_MODE drives BIT_DAC with its 1-bit output, toggling between the two 4-bit levels in M[7:4] and M[3:0] — you must populate those nibbles or the pin stays at 0V. RC-filter the pin to recover the analog average:
 
 ```spin2
-' PWM triangle through DAC for smooth analog output
-mode := P_PWM_TRIANGLE | P_DAC_600R_2V | P_OE
+' PWM triangle toggles BIT_DAC between two 4-bit levels;
+' M[7:4]=$F 'high', M[3:0]=$0 'low' — RC-filter the pin for analog output
+mode := P_PWM_TRIANGLE | P_DAC_600R_2V | P_OE | ($F0 << 8)
 ```
 
 ## 10.6 ADC Feedback
@@ -450,10 +452,12 @@ VAR
   long phase_inc
 
 PUB audio_init()
-  ' Initialize audio DAC at 44.1 kHz
+  ' Initialize audio DAC. The PWM-dither sample period must be a multiple of
+  ' 256 clocks, so 44.1 kHz is not exactly achievable: truncating the period to
+  ' 4352 clocks yields ~46 kHz (200 MHz / 4352).
   PINFLOAT(AUDIO_PIN)
   WRPIN(AUDIO_PIN, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
-  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Round to 256
+  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Period, rounded down to a 256-clock multiple
   WYPIN(AUDIO_PIN, $8000)                 ' Start at mid-scale
   PINLOW(AUDIO_PIN)
 
@@ -467,7 +471,8 @@ PUB audio_sample() : sample | sine_val
   ' Generate next audio sample
   phase += phase_inc
 
-  ' Get sine value (-32767 to +32767) using CORDIC (length, angle, twist)
+  ' Get sine value (-32767 to +32767) using CORDIC (length, step, stepsInCircle)
+  ' stepsInCircle=0 selects a full $1_0000_0000-step circle, so phase is a step count
   sine_val := QSIN(32767, phase, 0)
 
   ' Convert to 16-bit unsigned (0 to 65535)
@@ -540,7 +545,7 @@ saw_loop
 tri_loop
               wypin     value16, #DAC_PIN
               add       value16, direction
-              cmp       value16, ##$FFFF wz
+              cmp       value16, ##$FF00 wz     ' top: a 256-step multiple the ramp lands on
         if_z  neg       direction
               cmp       value16, #0 wz
         if_z  neg       direction
@@ -623,11 +628,12 @@ DAC_value = (V_target / V_full_scale) × resolution
 
 ### Reset State (DIR=0)
 
-All DAC modes:
+Dithered DAC modes (%00010, %00011):
 
 - IN = low
 - Y[15:0] = captured (ready for DIR=1)
-- Output = low (0V)
+
+(The pin driver is disabled while DIR=0, so the DAC output is not actively driven.)
 
 
 *This chapter covered DAC analog output. For serial transmission modes, see Chapter 11. For input modes, see Part III.*

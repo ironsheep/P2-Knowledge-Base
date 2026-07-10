@@ -1,6 +1,6 @@
 # Chapter 18: Repository — Inter-Cog Data Sharing {#ch18}
 
-This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-cog data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
+This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-cog data sharing via the long repository function, and DAC output — pseudo-random noise (%00001) or 16-bit dithered output (%00010/%00011). Reads from the repository are conflict-free — any number of cogs may RQPIN concurrently without bus conflict — while writes are last-writer-wins with no hardware arbitration, so a single writer is assumed.
 
 
 ## 18.1 Repository Concept
@@ -12,7 +12,7 @@ Modes %00001-%00011 behave differently based on pin configuration:
 | Condition | Function |
 |-----------|----------|
 | NOT DAC_MODE | 32-bit long repository |
-| DAC_MODE (P[12:10]=%101) | DAC with dithering |
+| DAC_MODE (M[12:10]=%101) | DAC output: noise (%00001) or 16-bit dithered (%00010/%00011) |
 
 ### Repository Function
 
@@ -37,7 +37,7 @@ This enables lock-free data sharing between cogs through dedicated pin hardware.
 
 ### Purpose
 
-The repository provides a hardware-arbitrated communication channel between cogs. Unlike hub RAM which may require locks for atomic access, the repository guarantees atomic 32-bit reads and writes.
+The repository provides a shared 32-bit communication register between cogs. Unlike hub RAM which may require locks for atomic access, each repository read and write is an atomic 32-bit operation. Concurrent reads never conflict — any number of cogs may RQPIN at once — but writes are not arbitrated: a later WXPIN simply overwrites the long (last-writer-wins), so a single writer is assumed.
 
 ### Operation
 
@@ -98,8 +98,11 @@ PUB sensor_cog() | reading
 ```spin2
 PUB display_cog()
   REPEAT
-    IF PINREAD(REPO_PIN)                        ' New data available?
-      display_value(RQPIN(REPO_PIN))
+    ' RQPIN never acknowledges, so it never clears IN — PINREAD would
+    ' stay high after the first write and cannot flag "new" data here.
+    ' Just read the latest value each pass (RDPIN would edge-detect but
+    ' clears IN for every reader, defeating multi-cog reads).
+    display_value(RQPIN(REPO_PIN))
     WAITMS(100)
 
 PUB logger_cog()
@@ -115,7 +118,7 @@ PUB logger_cog()
 
 When configured for DAC output, mode %00001 generates pseudo-random noise on the 8-bit DAC. Each pin produces a unique random pattern.
 
-`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode — the DAC_MODE bits (P[12:10]=%101) decide whether the pin acts as a long repository or a noise DAC.
+`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode — the DAC_MODE bits (M[12:10]=%101) decide whether the pin acts as a long repository or a noise DAC.
 
 ### Configuration
 
@@ -124,9 +127,9 @@ CON
   NOISE_PIN = 20
 
 PUB setup_noise_dac()
-  ' P[12:10] = %101 enables DAC output
+  ' M[12:10] = %101 enables DAC output
   WRPIN(NOISE_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
-  WXPIN(NOISE_PIN, 0)                           ' No sample period
+  WXPIN(NOISE_PIN, 0)                           ' Max sample period (65,536 clocks; low power)
   PINH(NOISE_PIN)
 ```
 
@@ -353,7 +356,7 @@ PRI get_next_sample() : sample
 
 ### Repository Advantages
 
-1. **No contention**: Hardware arbitration, no lock waits
+1. **Conflict-free reads**: Any number of cogs may RQPIN concurrently, no lock waits
 2. **Atomic updates**: Guaranteed 32-bit coherence
 3. **Flag included**: IN indicates new data
 4. **Non-blocking reads**: RQPIN doesn't clear IN
@@ -517,7 +520,7 @@ PRI build_sine_table() | i
 
 Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
-- P[12:10] = %101 for DAC output
+- M[12:10] = %101 for DAC output
 - `P_OE` sets the output-enable flag (drives the pin)
 
 ### Register Usage
@@ -544,7 +547,8 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 - **DAC Noise**: Random 8-bit values every clock
 - **PRNG Dither**: Random toggle between adjacent levels
 - **PWM Dither**: Deterministic dither, period must be ×256
-- **All modes**: IN raised when sample period completes
+- **DAC modes**: IN raised when sample period completes
+- **Repository**: IN raised on each WXPIN write (no sample period)
 
 
 *This chapter covered repository and dithered DAC modes. For USB host/device, see Chapter 19. For a complete mode reference, see Appendix F.*

@@ -37,7 +37,7 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Plot` | The window's title-bar text |
+| `TITLE` | `'text'` | none | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
 | `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
@@ -54,11 +54,12 @@ picture rather than revealing more canvas.
 a 2×2 block, which is useful when you want a small drawing shown large. The two
 axes can differ.
 
-`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **runtime commands, not creation-line
-keywords** — issue them after the window exists, not in the `DEBUG(\`PLOT …)`
-creation call. `CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE`
-sets the default font size for `TEXT` (default `10`, range 6–200). They are
-described in the sections that follow.
+`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **feeding commands, not
+window-instantiation keywords** — they belong to the drawing you feed the window,
+not to how the window is created, which is why they are not in the table above.
+`CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE` sets the default
+font size for `TEXT` (default `10`, range 6–200). They are described in the
+sections that follow.
 
 ## The coordinate system
 
@@ -142,8 +143,8 @@ With the origin at the canvas center, polar mode draws radial figures directly:
 
 ```spin2
 PUB main() | theta
-  debug(`PLOT Rose SIZE 512 512 POLAR $1_0000 BACKCOLOR $000000)
-  debug(`Rose ORIGIN 256 256)
+  debug(`PLOT Rose SIZE 512 512 BACKCOLOR $000000)
+  debug(`Rose ORIGIN 256 256 POLAR $1_0000)
   debug(`Rose COLOR $00FFFF)
   debug(`Rose SET 0 0)
   repeat theta from 0 to $1_0000
@@ -154,17 +155,20 @@ Send `CARTESIAN` to leave polar mode.
 
 ### PRECISE — sub-pixel positioning
 
-Coordinates are stored internally in a fixed-point format, and by default the
-window keeps **sub-pixel precision** (1/256 of a pixel), so anti-aliased
-primitives land on exact positions. `PRECISE` toggles this:
+Coordinates are stored internally in a fixed-point format. By default `PRECISE`
+mode is **off** and coordinates are taken in whole pixels; issuing `PRECISE`
+turns it **on**, so that line size and (x, y) for `DOT` and `LINE` are expressed
+in **256ths of a pixel** — letting anti-aliased primitives land on sub-pixel
+positions. `PRECISE` toggles this:
 
 ```debug-update
 PRECISE
 ```
 
-Each `PRECISE` flips between sub-pixel mode (the default) and whole-pixel mode.
+Each `PRECISE` flips between whole-pixel mode (the default) and sub-pixel mode.
 Whole-pixel mode aligns coordinates to integer pixels. Sub-pixel mode is the
-right choice for smooth curves and animation; you rarely need to change it.
+right choice for smooth curves and animation; a single `PRECISE` enters it, and
+every following coordinate is then taken in 256ths of a pixel.
 
 > **Read coordinates through the active system.** A primitive's position is
 > always the cursor, transformed by polar conversion (if active), then the
@@ -292,8 +296,8 @@ style, and angle:
 
 ```spin2
 PUB main()
-  debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF TEXTSIZE 14)
-  debug(`Labels COLOR $000000 SET 300 200)
+  debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF)
+  debug(`Labels TEXTSIZE 14 COLOR $000000 SET 300 200)
   debug(`Labels TEXT 'Default')           ' size 14 (the window default)
   debug(`Labels TEXT 20 'Bigger')         ' size 20
   ' size 16, bold, rotated 90 degrees
@@ -311,7 +315,8 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 | 6–7 | Vertical align | `0`/`1`=center, `2`=bottom, `3`=top |
 
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
-`$20` right-aligns. The defaults (style `$00`) are light weight, centered both ways.
+`$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
+centered both ways.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the
@@ -329,8 +334,9 @@ COLOR rgb
 The argument is a `$RRGGBB` value — for example `COLOR $FF0000` is red,
 `COLOR $00FF00` is green, `COLOR $0000FF` is blue. Named colors (`RED`, `GREEN`,
 `BLUE`, `WHITE`, `BLACK`, `CYAN`, `MAGENTA`, `YELLOW`, `ORANGE`, `GRAY`) are also
-accepted in the command stream. Until you set `COLOR`, the default draw color is
-cyan (`$00FFFF`) and the default text color is white (`$FFFFFF`).
+accepted in the command stream. Until you set `COLOR`, the default drawing color
+is cyan (`$00FFFF`); the same `COLOR` also colors `TEXT`, so set it just before a
+`TEXT` command to change the text color.
 
 `BACKCOLOR rgb` sets the background fill — the color `CLEAR` paints the canvas
 with. It is most often set on the creation line.
@@ -366,9 +372,11 @@ Beyond live primitives, the PLOT window holds **eight bitmap layers** and a
 rather than redrawing primitives every frame: you composite a layer or stamp a
 sprite with a single command, which avoids re-issuing the geometry that built it.
 
-> **`{Spin2_v50}` required.** `LAYER`, `CROP`, `SPRITEDEF`, and `SPRITE` are V50
-> additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
-> with a Spin2 v50+ `pnut_ts`; without it these commands are not recognized.
+> **`LAYER`/`CROP` need `{Spin2_v50}`.** The hidden-bitmap `LAYER` and `CROP`
+> commands are V50 additions; `SPRITEDEF` and `SPRITE` were added earlier (V35n).
+> Because this section uses `LAYER` and `CROP`, build it with a Spin2 v50+
+> `pnut_ts` and put `{Spin2_v50}` (or later) on the source file's first line;
+> without that, those two commands are not recognized.
 
 ### LAYER — load a bitmap into a layer
 

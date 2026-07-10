@@ -52,8 +52,8 @@ bit := (INA >> pin) & 1                    ' Single bit extraction
 ```pasm2
               testp     #pin wc             ' Pin state → C flag
               testp     #pin wz             ' Pin state → Z flag
-        if_c  jmp       #pin_high           ' Branch if high
-        if_z  jmp       #pin_low            ' Branch if zero (low)
+        if_c  jmp       #pin_high           ' Branch if high (C = IN[pin])
+        if_nz jmp       #pin_low            ' Branch if Z clear (Z=0 → pin low)
 ```
 
 **TESTPN** - Read inverted pin state:
@@ -176,23 +176,23 @@ Pull resistors and when to use them are covered in Ch2 §2.2; this section gives
 
 **Pull-up (for active-low buttons):**
 ```spin2
-' 15kΩ pull-up to VDD
+' 15kΩ weak drive-high acts as a pull-up
 WRPIN(pin, P_HIGH_15K)
-PINFLOAT(pin)                              ' Input mode
+PINHIGH(pin)                               ' DIR=1, OUT=1 → 15kΩ drive high
 ```
 
 **Pull-down (for active-high buttons):**
 ```spin2
-' 15kΩ pull-down to GND
+' 15kΩ weak drive-low acts as a pull-down
 WRPIN(pin, P_LOW_15K)
-PINFLOAT(pin)
+PINLOW(pin)                                ' DIR=1, OUT=0 → 15kΩ drive low
 ```
 
 **Combined with input conditioning:**
 ```spin2
-' Schmitt trigger input with pull-up
+' Schmitt trigger input with 15kΩ drive-high pull-up
 WRPIN(pin, P_SCHMITT_A | P_HIGH_15K)
-PINFLOAT(pin)
+PINHIGH(pin)                               ' DIR=1, OUT=1 → 15kΩ drive high
 ```
 
 ### Choosing Resistance
@@ -248,13 +248,13 @@ PUB detect_float(pin) : is_floating | count, i
 ' Option 1: Drive low
 PINLOW(unused_pin)
 
-' Option 2: Pull-down
+' Option 2: Weak drive-low (holds pin low)
 WRPIN(unused_pin, P_LOW_150K)
-PINFLOAT(unused_pin)
+PINLOW(unused_pin)                         ' DIR=1, OUT=0 → 150kΩ drive low
 
-' Option 3: Pull-up
+' Option 3: Weak drive-high (holds pin high)
 WRPIN(unused_pin, P_HIGH_150K)
-PINFLOAT(unused_pin)
+PINHIGH(unused_pin)                        ' DIR=1, OUT=1 → 150kΩ drive high
 ```
 
 
@@ -374,8 +374,8 @@ CON
   BUTTON_PIN = 20
 
 PUB button_init()
-  WRPIN(BUTTON_PIN, P_HIGH_15K)            ' Internal pull-up
-  PINFLOAT(BUTTON_PIN)                     ' Input mode
+  WRPIN(BUTTON_PIN, P_HIGH_15K)            ' 15kΩ drive-high pull-up
+  PINHIGH(BUTTON_PIN)                      ' DIR=1, OUT=1 → pull-up active
 
 PUB is_pressed() : pressed
   pressed := NOT PINREAD(BUTTON_PIN)       ' Invert for natural sense
@@ -407,7 +407,7 @@ PUB main()
 
   ' Configure button with pull-up and Schmitt trigger
   WRPIN(BUTTON_PIN, P_SCHMITT_A | P_HIGH_15K)
-  PINFLOAT(BUTTON_PIN)
+  PINHIGH(BUTTON_PIN)                    ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
 
   ' Main loop
   repeat
@@ -428,7 +428,7 @@ PUB main() | buttons, last_buttons, i
   ' Configure 4 buttons with pull-ups
   repeat i from 0 to 3
     WRPIN(BUTTON_BASE + i, P_SCHMITT_A | P_HIGH_15K)
-    PINFLOAT(BUTTON_BASE + i)
+    PINHIGH(BUTTON_BASE + i)              ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
 
   last_buttons := 0
 
@@ -462,9 +462,9 @@ CON
 DAT           org
 
 ' Configure input pin
-              mov       pin, #BUTTON_PIN
+              mov       pin, BUTTON_PIN     ' Load pin number 20 (DAT long value)
               wrpin     ##P_SCHMITT_A | P_HIGH_15K, pin
-              dirl      pin                 ' Input mode
+              drvh      pin                 ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
 
 ' Wait for button press
 wait_press
@@ -565,7 +565,7 @@ Theoretical maximum depends on sampling method:
 | Constant | Function |
 |----------|----------|
 | P_NORMAL | Default CMOS input |
-| P_LOGIC_A | Logic input, OUT feedback |
+| P_LOGIC_A | Logic input, output driven by OUT |
 | P_SCHMITT_A | Schmitt trigger (adds input hysteresis) |
 | P_LEVEL_A | Programmable level comparator (use level=108 for ~1.4V TTL threshold) |
 

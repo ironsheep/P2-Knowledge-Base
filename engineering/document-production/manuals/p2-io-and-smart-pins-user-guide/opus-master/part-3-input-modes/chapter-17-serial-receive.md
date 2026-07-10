@@ -31,7 +31,7 @@ This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%1110
 
 ### Operation
 
-Receives serial data asynchronously with automatic start bit detection. The smart pin monitors for a high-to-low transition (start bit), samples data bits at mid-bit timing, and validates the stop bit.
+Receives serial data asynchronously with automatic start bit detection. The smart pin monitors for a high-to-low transition (start bit), samples each data bit at mid-bit timing, then captures the word into Z and raises IN. The smart pin does **not** validate the stop bit; framing (stop-bit) errors must be detected in software (see §17.6).
 
 ```{=latex}
 \DiagUartRxFrame
@@ -41,7 +41,7 @@ Receives serial data asynchronously with automatic start bit detection. The smar
 
 ```layout
 X[31:16]: System clock periods per bit (integer part)
-X[15:10]: Fractional clock periods (1/64th increments)
+X[15:10]: Fractional clock periods (1/64th increments) — honored only when X[31:26]==0
 X[9:5]:   Reserved
 X[4:0]:   Number of data bits minus 1 (0-31 for 1-32 bits)
 ```
@@ -60,12 +60,14 @@ bit_period_frac := MULDIV64(_clkfreq, 65536, baud)
 X_value := (bit_period_frac & $FFFFFC00) | (data_bits - 1)
 ```
 
+The smart pin applies the X[15:10] fractional field **only when X[31:26]==0** — that is, when the integer bit period is under 1024 sysclk cycles. For slower baud rates on a fast clock (where the integer bit period exceeds 1023 cycles), the fractional bits are ignored and the integer clock count alone sets the baud rate.
+
 **Common baud rates at 200 MHz:**
 
 | Baud | Clocks/bit | X[31:16] Value |
 |------|------------|----------------|
 | 9600 | 20833 | $5161 |
-| 19200 | 10417 | $28B1 |
+| 19200 | 10416 | $28B0 |
 | 38400 | 5208 | $1458 |
 | 57600 | 3472 | $0D90 |
 | 115200 | 1736 | $06C8 |
@@ -226,7 +228,7 @@ Standard sync receive is LSB-first. For MSB-first protocols, reverse the bits:
 PUB receive_msb_first() : value
   REPEAT UNTIL PINREAD(MISO_PIN)
   value := RDPIN(MISO_PIN)
-  value := value REV 32                         ' Reverse all 32 bits
+  value := value REV 31                         ' Reverse all 32 bits
   value := value & $FF                          ' Mask to 8 bits
 ```
 
@@ -478,11 +480,13 @@ PUB detect_break(pin) : is_break | start_time
 
 RS-232 uses inverted logic (mark=-3V to -15V, space=+3V to +15V). After level conversion to 3.3V logic, the signal is still inverted.
 
-### Using P_INVERT_IN
+### Using P_INVERT_A
+
+The async receiver samples the **A input**, so inverting the received serial data requires `P_INVERT_A`. (`P_INVERT_IN` inverts the IN bit — the data-ready flag in this mode — and does not affect the sampled data polarity.)
 
 ```spin2
 ' For RS-232 with external level shifter
-PINSTART(RX_PIN, P_ASYNC_RX | P_INVERT_IN, (bit_period << 16) | 7, 0)
+PINSTART(RX_PIN, P_ASYNC_RX | P_INVERT_A, (bit_period << 16) | 7, 0)
 ```
 
 
@@ -648,7 +652,7 @@ PRI send_string(ptr)
 
 ```layout
 X[31:16]: Clocks per bit (sysclk / baud)
-X[15:10]: Fractional clocks (precision)
+X[15:10]: Fractional clocks (precision) — honored only when X[31:26]==0
 X[4:0]:   Data bits - 1 (7 for 8-bit)
 ```
 
@@ -673,7 +677,7 @@ X[4:0]: Data bits - 1
 
 | Modifier | Function |
 |----------|----------|
-| P_INVERT_IN | Invert input (RS-232) |
+| P_INVERT_A | Invert received serial data (A input) — e.g. RS-232 |
 | P_INVERT_B | Invert B-input clock |
 | P_PLUS1_B | Clock on pin+1 |
 | P_MINUS1_B | Clock on pin-1 |

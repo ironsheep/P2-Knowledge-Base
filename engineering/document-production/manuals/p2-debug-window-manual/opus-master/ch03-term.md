@@ -39,8 +39,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `TERM` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | none | The window's title-bar text |
+| `POS` | `left top` | `0, 0` | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
@@ -141,12 +141,12 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 |------|------|-----------|------------|
 | 0 | `4` | Orange | Black |
 | 1 | `5` | Black | Orange |
-| 2 | `6` | Lime | Black |
-| 3 | `7` | Black | Lime |
+| 2 | `6` | Green | Black |
+| 3 | `7` | Black | Green |
 
 ```spin2
 debug(`Status 4 'normal' 13)     ' pair 0: orange on black
-debug(`Status 6 'ok' 13)         ' pair 2: lime on black
+debug(`Status 6 'ok' 13)         ' pair 2: green on black
 ```
 
 To choose your own colors, set all eight values (four pairs, foreground then
@@ -161,7 +161,7 @@ debug(`TERM Log SIZE 60 20 COLOR ...
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
-lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
+green-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
 
 ## Cursor, tabs, and scrolling
@@ -260,9 +260,9 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (red), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (black on green), then back to pair 0
     else
-      ' pair 2 (lime), then back to pair 0
+      ' pair 2 (green), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4
@@ -312,7 +312,7 @@ or register read, and the same panel reports live values.
 ## Try it
 
 Start with the dashboard example above. Then: switch it to color — print the label
-in pair 0 and the value in pair 2, and turn the value red (pair 3) when it crosses a
-threshold. You will have a live, color-coded status panel in a dozen lines, and
+in pair 0 and the value in pair 2, and set a custom `COLOR` combo so pair 3 is red,
+switching the value to pair 3 when it crosses a threshold. You will have a live, color-coded status panel in a dozen lines, and
 you will have used creation config, command codes, color pairs, and buffered
 updates together.

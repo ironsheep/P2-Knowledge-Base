@@ -96,18 +96,20 @@ transform and draw.
 You can send several samples in one `DEBUG` call by listing them, and you can pack
 multiple samples per long for higher throughput. SPECTRO uses the same 12-mode
 packing scheme as the other sampling windows: a packing keyword on the feed selects
-how many samples each long carries and whether they are sign-extended.
+how many samples each long carries; an optional `SIGNED` keyword sign-extends them.
 
 ```spin2
-debug(`SPECTRO Pk SAMPLES 512 RANGE $4000 LONGS_8BIT LUMA8X)
-' four signed bytes -> four samples
+debug(`SPECTRO Pk SAMPLES 512 RANGE $4000 LONGS_8BIT SIGNED LUMA8X)
+' four signed bytes -> four samples ($C0 = -64)
 debug(`Pk `($7F | $40 << 8 | $C0 << 16 | $10 << 24))
 ```
 
 The packing keywords are `LONGS_1BIT`, `LONGS_2BIT`, `LONGS_4BIT`, `LONGS_8BIT`,
-`LONGS_16BIT` (sign-extended), and `WORDS_1BIT`/`2BIT`/`4BIT`/`8BIT` and
-`BYTES_1BIT`/`2BIT`/`4BIT` (zero-extended). `LONGS_8BIT` carries four 8-bit signed
-samples per long, a 4× bandwidth gain over sending one sample per long.
+`LONGS_16BIT`, and `WORDS_1BIT`/`2BIT`/`4BIT`/`8BIT` and
+`BYTES_1BIT`/`2BIT`/`4BIT`. Every mode delivers unsigned (zero-extended) values by
+default; append the optional `SIGNED` keyword to sign-extend them. `LONGS_8BIT`
+carries four 8-bit samples per long, a 4× bandwidth gain over sending one sample
+per long.
 
 ## Scroll direction — TRACE
 

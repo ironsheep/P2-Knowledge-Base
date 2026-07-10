@@ -243,7 +243,7 @@ PINL(PIN)                 ' Enable Smart Pin
 | OUT bit | Output state when DIR = 1 |
 | IN bit | Input state or Smart Pin status flag |
 | sysclk | System clock frequency (typically 200 MHz) |
-| mode bits | Bits [4:0] in WRPIN value selecting Smart Pin mode |
+| mode bits | The %SSSSS field, bits [5:1] of the WRPIN D value, selecting Smart Pin mode (bit [0] is a separate trailing bit) |
 
 ## Cross-References
 

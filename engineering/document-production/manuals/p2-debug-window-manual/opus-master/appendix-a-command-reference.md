@@ -153,11 +153,11 @@ every window are listed once at the end.
 |-----------|-------|
 | `TITLE` | |
 | `POS` | |
-| `SAMPLES` | 4–2047 |
-| `SPACING` | 1–32 |
+| `SAMPLES` | 4–2048 |
+| `SPACING` | 2–32 |
 | `RATE` | 1–2048 |
 | `DOTSIZE` | 0–32 |
-| `LINESIZE` | 1–32 |
+| `LINESIZE` | 1–7 |
 | `TEXTSIZE` | |
 | `COLOR back grid` | |
 | `HIDEXY` | |

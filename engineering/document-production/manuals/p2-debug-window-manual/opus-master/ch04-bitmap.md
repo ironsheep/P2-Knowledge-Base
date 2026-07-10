@@ -45,8 +45,8 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
-| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
-| `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
+| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification (square blocks, or round dots under `SPARSE`); each is **1–256** |
+| `SPARSE` | `color` | off | Round-dot mode (needs `DOTSIZE`≥4); sets the background color |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
@@ -82,8 +82,9 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without defining a palette, the palette is uninitialized and LUT-mode pixels
-render as garbage — you must supply one with `LUTCOLORS`.
+mode without defining a palette, entries 0–7 hold default colors — so `LUT1` and
+`LUT2` render entirely in those defaults, while `LUT4` and `LUT8` leave their
+higher entries (above 7) undefined. Supply `LUTCOLORS` to control the palette.
 
 **Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
 color. The LUMA modes map the value against a single tint color you pick with a
@@ -92,12 +93,13 @@ bits) and take no tint keyword:
 
 | Mode | Meaning |
 |------|---------|
-| `LUMA8` / `LUMA8W` / `LUMA8X` | Brightness in one color: black-base, white-base, expanded-range |
+| `LUMA8` / `LUMA8W` / `LUMA8X` | Brightness in one color: black-to-color, white-to-color, black-to-color-to-white |
 | `RGBI8` / `RGBI8W` / `RGBI8X` | Upper 3 bits select a color, lower 5 bits are intensity |
 
 For the LUMA modes you name the tint color after the keyword (for example,
 `LUMA8 GREEN`); the 8-bit value then runs that color from dark to bright. The `W`
-variants run from white toward the color; the `X` variants expand the value range.
+variants run from white toward the color; the `X` variants ramp black → color →
+white, peaking in white.
 
 **HSV (hue/value) modes** — pack a hue and a brightness into each pixel:
 
@@ -108,7 +110,7 @@ variants run from white toward the color; the `X` variants expand the value rang
 
 Hue maps around a color wheel (red → yellow → green → cyan → blue → magenta → red);
 value sets brightness. As with the luminance modes, `W` runs from white and `X`
-expands the range.
+ramps black → color → white, peaking in white.
 
 **Direct RGB modes** — the value *is* the color:
 
@@ -309,8 +311,8 @@ spot over a cool background. No hardware is involved — the temperatures are
 computed in software — but the data has exactly the shape a real array would
 produce.
 
-The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel block
-with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel round
+dot with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
 built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
 bright (hot):
 
@@ -322,7 +324,7 @@ CON
 
 PUB main() | x, y, ang, cx, cy
 
-  ' 32x24 grid: each cell a 12px block with grid border; temperature -> tint
+  ' 32x24 grid: each cell a 12px round dot on the GRAY background; temperature -> tint
   debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
   ang := 0
@@ -397,10 +399,12 @@ and the heatmap shows live infrared.
   pass, `UPDATE` mode prevents the partial-frame flicker you would see with automatic
   refresh. For a steadily growing image, automatic refresh with a suitable `RATE` is
   simpler.
-- **Sparse mode is for magnified, low-resolution displays.** `DOTSIZE` with `SPARSE`
-  draws each logical pixel as a `DOTSIZE`-square block with a grid border — useful for
-  LED-matrix and pixel-art views — but it renders far more slowly than the 1:1 path,
-  so keep the logical canvas small.
+- **Sparse mode is for magnified, low-resolution displays.** `SPARSE` draws each
+  magnified pixel as a large round dot against its background color (and requires a
+  `DOTSIZE` of at least 4); plain `DOTSIZE` without `SPARSE` fills the full
+  `DOTSIZE`×`DOTSIZE` square block instead. Either is useful for LED-matrix and
+  pixel-art views — but sparse mode renders far more slowly than the 1:1 path, so
+  keep the logical canvas small.
 - **There are no drawing primitives here.** BITMAP plots pixels only. For lines,
   shapes, text, and sprites, use the PLOT window ([Chapter 5](#ch-5)), which shares BITMAP's
   color modes but adds a coordinate system and drawing commands.

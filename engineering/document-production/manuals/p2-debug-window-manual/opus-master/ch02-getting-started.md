@@ -85,8 +85,9 @@ changes.
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
 > `x`; a bare `13` is the newline command,
-> not the text "13". The value-only output formatters are `UDEC_`, `SDEC_`,
-> `UHEX_`, `SHEX_`, and `UBIN_` — these feed a numeric data element (consumed by the
+> not the text "13". Value-only output formatters such as `UDEC_`, `SDEC_`,
+> `UHEX_`, `SHEX_`, and `UBIN_` — every DEBUG output command has a trailing-underscore
+> value-only form — feed a numeric data element (consumed by the
 > graphing windows), so to display a value's text in a TERM use `` `(value) ``
 > substitution instead.
 
@@ -101,8 +102,8 @@ signal drives a display window exactly the way a real sensor would. Throughout
 this manual, examples produce their own data using:
 
 - **counters** — a variable you increment in a loop,
-- **the CORDIC solver** — `QSIN` / `QROTATE` for smooth waveforms and rotations,
-- **the random-number generator** — `GETRND` (or the `?` operator) for noise,
+- **the CORDIC solver** — `QSIN` / `ROTXY` for smooth waveforms and rotations,
+- **the random-number generator** — `GETRND` (or the `??` operator) for noise,
 - **`GETCT`** — the system counter, for timing and elapsed-time measurements.
 
 A counter feeding a text window, a CORDIC sine wave feeding a SCOPE, RNG noise

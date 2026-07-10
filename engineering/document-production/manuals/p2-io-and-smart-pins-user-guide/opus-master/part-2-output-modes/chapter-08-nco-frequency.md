@@ -119,15 +119,15 @@ PUB nco_frequency(freq_hz) | y_value
 
 ### Resolution vs Update Rate Tradeoff
 
-Using X[15:0] > 1 reduces update rate but can smooth jitter:
+The output edge can only move on a base-period boundary, and the frequency step is `sysclk / (X[15:0] × 2³²)`. So raising X[15:0] above 1 lowers the update rate and the maximum output frequency, and increases output-edge jitter (edges snap to a coarser grid) — but it makes the frequency step finer:
 
 | X[15:0] | Updates/sec at 200 MHz | Effect |
 |---------|------------------------|--------|
-| 1 | 200,000,000 | Maximum resolution |
-| 10 | 20,000,000 | Reduced jitter |
-| 100 | 2,000,000 | Lower cog access rate |
+| 1 | 200,000,000 | Widest range & highest update rate; least jitter |
+| 10 | 20,000,000 | Finer frequency step; more edge jitter |
+| 100 | 2,000,000 | Finest frequency step; lowest max frequency |
 
-For most applications, X[15:0] = 1 provides best frequency resolution.
+For most applications, X[15:0] = 1 is the right choice — it gives the widest output-frequency range, the highest update rate, and the least edge jitter. Use X[15:0] > 1 only when you need a finer frequency step at low output frequencies.
 
 
 ## 8.3 P_NCO_DUTY Mode (%00111)
@@ -226,7 +226,7 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   
   ' Phase offsets: 0°, 120°, 240°
   phase_120 := 65536 / 3                  ' 21845
-  phase_240 := 65536 * 2 / 3              ' 43691
+  phase_240 := 65536 * 2 / 3              ' 43690
   
   ' Configure all three
   PINFLOAT(PHASE_A)
@@ -247,7 +247,7 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   WYPIN(PHASE_C, y_val)
   
   ' Enable all simultaneously
-  PINLOW(PHASE_A..PHASE_C)
+  PINLOW(PHASE_C..PHASE_A)
 ```
 
 ### Phase Coherence
@@ -392,6 +392,7 @@ DAT           org
               drvl      #NCO_PIN
 
 ' Sweep frequency upward
+              mov       y_current, y_start       ' Begin sweep at 1 kHz
 sweep_loop
               add       y_current, y_step
               wypin     y_current, #NCO_PIN
@@ -416,7 +417,7 @@ sweep_delay   long      2_000_000         ' 10 ms between steps
 
 | Parameter | Register | Formula |
 |-----------|----------|---------|
-| Base period | X[15:0] | 1 for maximum resolution |
+| Base period | X[15:0] | 1 for widest range & update rate |
 | Initial phase | X[31:16] | 0-65535 (0°-360°) |
 | Frequency | Y | (freq × 2³²) / sysclk |
 
@@ -424,7 +425,7 @@ sweep_delay   long      2_000_000         ' 10 ms between steps
 
 | Parameter | Register | Formula |
 |-----------|----------|---------|
-| Base period | X[15:0] | 1 for maximum resolution |
+| Base period | X[15:0] | 1 for widest range & update rate |
 | Initial phase | X[31:16] | 0-65535 (0°-360°) |
 | Freq × duty | Y | Varies by desired duty |
 

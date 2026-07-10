@@ -32,7 +32,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | High Ticks | P_HIGH_TICKS | Pulse width | 1 clock | Per pulse | Yes | Low | Servo, pulse |
 | Events Ticks | P_EVENTS_TICKS | N events / timeout | 1 clock | Configurable | Yes | Medium | Frequency, watchdog |
 | Quadrature | P_QUADRATURE | Position/velocity | 4x encoder | Every edge | Yes | Low | Encoder |
-| Count Highs | P_COUNT_HIGHS | Gated edges | 32-bit | Configurable | Yes | Low | Freq counter |
+| Count Gated | P_REG_UP | Gated A-rise edges | 32-bit | Configurable | Yes | Low | Freq counter |
 | Count Up/Down | P_REG_UP_DOWN | Up/down by B direction | 32-bit | Configurable | Yes | Low | Step/direction |
 | Count Edges | P_COUNT_RISES | Edge/rise count | 32-bit | Configurable | Yes | Low | Event counter |
 | High Clocks | P_COUNT_HIGHS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
@@ -89,13 +89,13 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | Scenario | Best Mode | Configuration |
 |----------|-----------|---------------|
 | Simple event count | P_COUNT_RISES | X=0, Y=0 |
-| Gated frequency counter | P_COUNT_HIGHS | X=gate_period |
-| Step/direction motor | P_COUNT_RISES | X=0 |
+| Gated frequency counter | P_REG_UP | X=gate_period |
+| Step/direction motor | P_REG_UP_DOWN | X=0 |
 | Up/down buttons | P_COUNT_RISES | X=0, Y=1 |
 | Rotary encoder | P_QUADRATURE | X=0 (position) |
 | Encoder velocity | P_QUADRATURE | X=period |
-| PWM duty integration | P_HIGH_TICKS | X=period |
-| Differential timing | P_HIGH_TICKS | X=period, Y=1 |
+| PWM duty integration | P_PERIODS_HIGHS | X=periods |
+| Differential timing | P_HIGH_TICKS | None |
 
 ### Counter Features Matrix
 
@@ -180,7 +180,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 | X[5:4] | Mode | Post-Processing | Resolution | Speed |
 |--------|------|-----------------|------------|-------|
-| %00 | SINC2 Sampling | None | 8-14 bits | Fast |
+| %00 | SINC2 Sampling | None | 2-14 bits | Fast |
 | %01 | SINC2 Filtering | Software diff | 8-14 bits* | Medium |
 | %10 | SINC3 Filtering | Software 3x diff | 10-18 bits*† | Slow |
 | %11 | Bitstream | Custom | 1 bit/clock | Fastest |

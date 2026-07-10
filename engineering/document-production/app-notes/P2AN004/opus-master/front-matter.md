@@ -20,7 +20,7 @@
 \vspace{0.35cm}
 {\large\scshape Propeller 2 \textbullet{} Application Note P2AN004\par}
 \vspace{0.30cm}
-{\fontsize{30}{36}\selectfont\bfseries Read Real-World Sensors by Frequency, Period, and RC Timing on a P2 Pin\par}
+{\fontsize{30}{36}\selectfont\bfseries Read Real-World Sensors by Frequency, Rotation, and RC Timing on a P2 Pin\par}
 \vspace{0.25cm}
 {\Large\itshape Three smart-pin instruments that turn a transducer into a number — no external counter or ADC\par}
 \vspace{0.35cm}

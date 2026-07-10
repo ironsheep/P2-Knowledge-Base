@@ -297,8 +297,8 @@ When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction ge
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | DIRx | DIR bit | 2 |
 
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
@@ -339,7 +339,7 @@ The 9-bit D field (bits 17-9) addresses a cog register from $000 to $1FF:
 
 The D field can also specify:
 
-- Hub addresses (for ALTD-modified instructions)
+- Indirect Cog/LUT register addresses (for ALTD-modified instructions, which rewrite the next instruction's 9-bit D field to a value masked to $1FF — a register address, not a 20-bit Hub address)
 - LUT addresses (for LUT instructions)
 - Pin numbers (for certain I/O instructions)
 
@@ -444,14 +444,14 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
 
 ### 2.7.3 Augmentation Behavior
 
-The AUG instruction must immediately precede the instruction it augments:
+The assembler emits the AUG instruction immediately before the instruction it augments. In hardware, AUGS attaches to the next instruction that supplies an immediate source (`#S`), and AUGD to the next instruction that supplies an immediate destination (`#D`):
 
-1. The AUG executes, storing the 23-bit value internally
-2. The next instruction combines this with its 9-bit field
-3. The combined 32-bit value is used for that instruction only
-4. The augmentation is consumed (one-shot)
+1. The AUG executes, queuing the 23-bit value internally
+2. The next instruction with a matching immediate operand combines this with its 9-bit field
+3. The combined 32-bit value is used for that one instruction only
+4. That instruction consumes (cancels) the augmentation (one-shot)
 
-If any instruction intervenes (including a conditional NOP), the augmentation is lost.
+An intervening instruction that has no matching immediate operand does not consume the queued value — the augmentation survives to the next instruction that does supply the matching immediate. (Caution: an intervening ALTx instruction that itself carries a matching immediate operand *will* pick up the augmented value early — corrupting the ALTx — even though it does not cancel the augment for the true target. Give such an ALTx a register operand, not an immediate, to avoid this.)
 
 **Timing Overhead:**
 
@@ -466,7 +466,7 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 ```pasm2
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##dest, ##addr          ' 6 cycles (AUGD+AUGS+instr)
+        wrlong  ##dest, ##addr          ' 7...14 cycles (AUGD+AUGS = +4; WRLONG itself 3...10)
 ```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
@@ -618,20 +618,20 @@ Operators are listed from highest to lowest precedence within each category.
 | `>>` | Shift right | `$80 >> 4` → `$08` |
 | `<<` | Shift left | `1 << 8` → `$100` |
 | `&` | Bitwise AND | `$FF & $0F` → `$0F` |
-| `|` | Bitwise OR | `$F0 | $0F` → `$FF` |
 | `^` | Bitwise XOR | `$FF ^ $0F` → `$F0` |
+| `|` | Bitwise OR | `$F0 | $0F` → `$FF` |
 
 **Arithmetic Operators**
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `+` | Addition | `100 + 50` → `150` |
-| `-` | Subtraction | `100 - 50` → `50` |
 | `*` | Multiplication (lower 32 bits, signed) | `1000 * 1000` → `1000000` |
 | `/` | Division quotient (signed) | `-100 / 3` → `-33` |
 | `+/` | Division quotient (unsigned) | `$FFFFFFFF +/ 2` → `$7FFFFFFF` |
 | `//` | Division remainder/modulo (signed) | `-100 // 3` → `-1` |
 | `+//` | Division remainder (unsigned) | `$FFFFFFFF +// 16` → `15` |
+| `+` | Addition | `100 + 50` → `150` |
+| `-` | Subtraction | `100 - 50` → `50` |
 
 **Limit Operators**
 
@@ -642,10 +642,11 @@ Operators are listed from highest to lowest precedence within each category.
 
 **Comparison Operators**
 
-Comparison operators return -1 (true, all bits set) or 0 (false).
+Comparison operators return -1 (true, all bits set) or 0 (false). The three-way comparison `<=>` is the exception, returning -1, 0, or +1.
 
 | Operator | Description | Signed/Unsigned |
 |----------|-------------|-----------------|
+| `<=>` | Three-way compare (returns -1, 0, or +1) | Signed |
 | `<` | Less than | Signed |
 | `+<` | Less than | Unsigned |
 | `>` | Greater than | Signed |
@@ -663,9 +664,8 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 |----------|-------------|---------|
 | `!!` | Boolean NOT (0→-1, non-zero→0) | `!!5` → `0` |
 | `&&` | Boolean AND | `(a > 0) && (b > 0)` |
-| `||` | Boolean OR | `(a == 0) || (b == 0)` |
 | `^^` | Boolean XOR | `(a > 0) ^^ (b > 0)` |
-| `<=>` | Three-way compare (returns -1, 0, or 1) | `5 <=> 3` → `1` |
+| `||` | Boolean OR | `(a == 0) || (b == 0)` |
 
 **Ternary Operator** (lowest precedence)
 
@@ -800,11 +800,10 @@ PASM2 provides several operators for referencing labels in different contexts:
 |----------|---------|---------|
 | `#label` | Immediate value (Cog address) | PASM instructions |
 | `#.local` | Immediate reference to local label | PASM instructions |
-| `#\label` | Absolute Cog-relative address | Forces 9-bit Cog address |
+| `#\label` | Absolute address (non-PC-relative) | Forces 9-bit Cog address |
 | `@label` | Hub address of label | Spin2 or PASM |
 | `@@label` | Object-relative address | Spin2 or PASM |
-| `$` | Current Cog address | PASM (ORG mode) |
-| `$$` | Current Hub address | PASM (ORGH mode) |
+| `$` | Current assembly address | PASM (ORG → Cog address, ORGH → Hub address) |
 
 **Example:**
 ```pasm2

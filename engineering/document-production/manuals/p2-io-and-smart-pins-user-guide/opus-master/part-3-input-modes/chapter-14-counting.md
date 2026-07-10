@@ -137,7 +137,8 @@ PUB dual_encoder_init()
   PINLOW(POS_PIN)
 
   ' Velocity on pin 22 (periodic, same encoder signals)
-  WRPIN(VEL_PIN, P_QUADRATURE | P_MINUS1_B)
+  ' A routed from pin 20 (P_MINUS2_A), B from pin 21 (P_MINUS1_B)
+  WRPIN(VEL_PIN, P_QUADRATURE | P_MINUS2_A | P_MINUS1_B)
   WXPIN(VEL_PIN, _clkfreq / 10)            ' 100ms period
   PINLOW(VEL_PIN)
 ```
@@ -456,7 +457,7 @@ PUB update_extended_count() | current, delta
 | Application | Mode | Configuration |
 |-------------|------|---------------|
 | Rotary encoder | P_QUADRATURE | X=0 for position |
-| Frequency counter | P_REG_UP | X=gate_period |
+| Frequency counter | P_COUNT_RISES | X=period |
 | Event counter | P_COUNT_RISES | X=0, Y=0 |
 | Up/down buttons | P_COUNT_RISES | X=0, Y=1 |
 | Step/direction motor | P_REG_UP_DOWN | X=0 |
@@ -547,6 +548,7 @@ PRI motor_stop()
 ```pasm2
 CON
   _clkfreq = 200_000_000
+  EVENT_PIN = 20
 
 DAT           org
 
@@ -565,7 +567,6 @@ count_loop
               waitx     ##200_000           ' 1ms update rate
               jmp       #count_loop
 
-EVENT_PIN     long      20
 count         long      0
 count_hub     long      0
 ```
@@ -639,7 +640,7 @@ WXPIN(pin, 200_000_000)                    ' X = sysclk
 All counting modes when DIR=0:
 
 - IN = low
-- Z = initial adder value: 0 or +1 for unidirectional counters; bidirectional modes (quadrature, up/down) can also load -1, accounting for any edge coincident with reset
+- Z = initial adder value: 0 or +1 for gated P_REG_UP; the other counting modes — quadrature, up/down, P_COUNT_RISES, and P_COUNT_HIGHS — can also load -1, accounting for any edge coincident with reset
 - Counter ready to start on DIR=1
 
 

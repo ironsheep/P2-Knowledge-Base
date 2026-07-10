@@ -93,7 +93,7 @@ Instead of replacing Z with the zero test, these instructions AND the new zero s
 
 Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
 
-**Source Verification:** CSV v35 documents this as "Z = Z AND (Result = 0)" for all extended instructions.
+**Source Verification:** CSV v35 documents this as "Z = Z AND (result == 0)" for the extended add and subtract instructions (ADDX, ADDSX, SUBX, SUBSX); the extended compares CMPX and CMPSX apply the same AND rule with their equality test, "Z = Z AND (D == S + C)".
 
 ### 3.2.3 The WCZ Effect
 
@@ -177,7 +177,7 @@ Not all instructions support all effect modifiers. Each instruction defines whic
 
 - **WC only or WZ only:** Some instructions produce meaningful output for only one flag. For example, LOCKTRY sets C to indicate lock acquisition but has no meaningful Z output.
 
-- **Extended effects (no WCZ):** The TEST* instructions (TESTP, TESTPN, TESTB, TESTBN) support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ.
+- **Extended effects (no WCZ):** The bit- and pin-test instructions TESTB, TESTBN, TESTP, and TESTPN support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ. (TEST and TESTN are not in this group—they carry the full WC, WZ, and WCZ.)
 
 ```pasm2
 ' Examples of effect restrictions
@@ -204,7 +204,7 @@ Any instruction can be made conditional by prefixing with an IF_x condition. Whe
         if_nz   mov     result, #0              ' Only if Z=0 (not equal)
 ```
 
-This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly three clock cycles regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes.
+This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly six clock cycles (three instructions × 2 clocks each) regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes—but the cancelled MOV still occupies its 2-clock slot.
 
 The timing predictability is crucial. Traditional branch-based code has variable timing depending on which path is taken. Conditional execution eliminates this variation—the instruction stream is fixed, and timing is constant.
 
@@ -216,21 +216,21 @@ Consider this example:
 
 ```pasm2
                 test    flags, #BIT_READY  wz   ' Check ready bit
-        if_nz   rdlong  data, ptr               ' Read if ready
-        if_nz   add     ptr, #4                 ' Advance if read occurred
+        if_nz   mov     result, source          ' Capture if ready
+        if_nz   add     count, #1               ' Count if captured
 ```
 
-This sequence takes exactly three clock cycles whether the ready bit is set or clear. If implementing the same logic with branches:
+This sequence takes exactly six clock cycles (three instructions × 2 clocks each) whether the ready bit is set or clear—each conditional instruction occupies its 2-clock slot even when its condition is false. If implementing the same logic with branches:
 
 ```pasm2
                 test    flags, #BIT_READY  wz
         if_z    jmp     #skip
-                rdlong  data, ptr
-                add     ptr, #4
+                mov     result, source
+                add     count, #1
 skip
 ```
 
-The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when ready (test + not-jump + rdlong + add). The timing varies by 100%. The conditional version maintains constant 3-cycle timing.
+The branch version takes 6 clocks when not ready (test, then a taken jump—whose pipeline flush costs 4 clocks) or 8 clocks when ready (test, cancelled jump, mov, add). The timing varies with the data. The conditional version maintains constant 6-clock timing.
 
 For real-time code, deterministic timing often matters more than average speed.
 
@@ -292,11 +292,11 @@ Arithmetic instructions set C based on unsigned overflow (carry or borrow) and s
 
 For ADD, C=1 indicates that adding the operands produced a value larger than 32 bits can represent—a carry occurred. For SUB and CMP, C=1 indicates the first operand is less than the second (a borrow would be required). The result is always written to the destination (for ADD/SUB) or the flags are set (for CMP/CMPS).
 
-ADDS and SUBS set C to the true sign of the result (result bit 31), not a signed-overflow flag — it is the sign the value would have at full precision after overflow correction. For signed multi-long arithmetic, use ADD/ADDX (SUB/SUBX) for the lower longs and ADDSX (SUBSX) for the final long so C reflects the overall result's sign.
+ADDS and SUBS set C to the true sign of the result, not a signed-overflow flag — it is the sign the value would have at full precision after overflow correction, which equals the stored result's bit 31 only when no signed overflow occurs. For signed multi-long arithmetic, use ADD/ADDX (SUB/SUBX) for the lower longs and ADDSX (SUBSX) for the final long so C reflects the overall result's sign.
 
 ### 3.4.2 Logic Instructions
 
-Logical instructions set C based on parity and set Z based on whether the result is zero:
+Most logical instructions (AND, OR, XOR) set C based on parity and set Z based on whether the result is zero. NOT is the exception—it sets C to the inverse of the operand's bit 31, not parity:
 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
@@ -419,27 +419,29 @@ When the value to be clamped is already in `result`, a single `fle result, b` or
 
 ### 3.5.4 Branchless Absolute Value
 
-Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
+Computing the absolute value of a signed number is a single instruction:
 
 ```pasm2
-                abs     result, value   wc      ' Abs value, C = negative
-        if_c    neg     result                  ' Correct if was negative
+                abs     result, value           ' result = |value|   (2 clk)
 ```
 
-Wait—this looks wrong. If ABS already computes the absolute value, why negate it afterward?
+ABS computes the absolute value for every input. The one unavoidable edge case is a property of two's complement, not of the instruction: the most negative value (-2,147,483,648 or $8000_0000) has no positive counterpart in 32 bits, so ABS leaves it unchanged. No conditional code can repair this—the true magnitude is simply unrepresentable.
 
-The issue is a quirk of two's complement: the most negative value (-2,147,483,648 or $8000_0000) has no positive representation in 32 bits. Its absolute value cannot be represented. The ABS instruction handles this by leaving the value unchanged and setting C to indicate the exceptional case.
-
-For all other negative values, ABS correctly computes the absolute value and clears C. For -2,147,483,648, ABS leaves it unchanged and sets C, and the conditional NEG negates it back to itself (since negating $8000_0000 produces $8000_0000).
-
-Most code doesn't care about this edge case and can use `ABS result, value` on its own. That is the faster path as well: the conditional NEG always occupies its 2-clock slot even when cancelled, so the edge-case-safe form costs 4 clocks, while the bare ABS costs 2:
+Add WC when you need to remember the original sign. ABS sets C to the source's sign bit—C=1 whenever the source was negative, for every negative input:
 
 ```pasm2
-                abs     result, value   wc      ' edge-case safe   (4 clk)
-        if_c    neg     result                  '   ABS + cancelled NEG
-
-                abs     result, value           ' common case      (2 clk)
+                abs     result, value   wc      ' result = |value|, C = source was negative
 ```
+
+That captured sign supports the common "operate on the magnitude, then restore the sign" idiom—for example taking the absolute value before an unsigned divide, then re-applying the sign afterward with a conditional negate:
+
+```pasm2
+                abs     result, value   wc      ' result = |value|, C = source was negative
+                '   ... unsigned work on result ...
+        if_c    neg     result                  ' restore original sign if source was negative
+```
+
+Note the subtlety: `abs ... wc` immediately followed by `if_c neg`, with no work in between, negates a negative input's magnitude straight back to its original value—it returns `value`, not `|value|`. The absolute value is the bare `abs` above; the conditional NEG is only for restoring the sign after intervening work, and it always occupies its 2-clock slot even when cancelled.
 
 ### 3.5.5 Conditional Increment/Decrement
 
@@ -450,7 +452,7 @@ Updating a counter only when a condition is met uses conditional arithmetic:
         if_nz   add     count, #1               ' Increment if ready
 ```
 
-This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—two clock cycles regardless of flag state.
+This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—four clock cycles (two instructions × 2 clocks each) regardless of flag state, since the conditional ADD occupies its 2-clock slot even when cancelled.
 
 ### 3.5.6 Bounds Checking
 
@@ -540,14 +542,14 @@ Flags can encode state transitions in compact state machines. Instead of compari
 ```pasm2
                 ' Current state determines which flags are set
                 test    state, #STATE_IDLE      wz
-        if_z    jmp     #handle_idle
+        if_nz   jmp     #handle_idle
                 test    state, #STATE_ACTIVE    wz
-        if_z    jmp     #handle_active
+        if_nz   jmp     #handle_active
                 test    state, #STATE_DONE      wz
-        if_z    jmp     #handle_done
+        if_nz   jmp     #handle_done
 ```
 
-This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
+This pattern tests state bits and branches to handlers. Each TEST sets Z=1 when the tested state bit is *clear* (the AND is zero) and Z=0 when it is *set*, so IF_NZ takes the branch for the state whose bit is set. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
 
 ## 3.7 Multi-Long Arithmetic Operations

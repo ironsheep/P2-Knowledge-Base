@@ -254,7 +254,7 @@ Here's the P2 philosophy in a nutshell:
 
 **Instead of timing that depends on cache luck**, the hub memory has deterministic access. Your timing loops work the same way every time.
 
-**Instead of calling math libraries**, there's a hardware CORDIC that gives you sine, cosine, and arctangent (via vector rotate and convert) with results ready in exactly 55 clocks. Every time.
+**Instead of calling math libraries**, there's a hardware CORDIC that gives you sine, cosine, and arctangent (via vector rotate and convert) with results ready about 55 clocks after the solver takes your command.
 
 Does this mean P2 is perfect for everything? Of course not. But if your projects involve multiple real-time tasks, precise timing, video or audio generation, or just running out of peripheral pins - you're in the right place.
 
@@ -333,7 +333,7 @@ CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 ```
 
-This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs at a sluggish ~20 MHz on its internal RC oscillator—and timing-dependent code (including DEBUG output) won't behave as expected.
+This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs on its internal RCFAST oscillator—nominally ~24 MHz (spec'd at 20 MHz minimum)—and timing-dependent code (including DEBUG output) won't behave as expected.
 
 At 200 MHz with most instructions taking 2 clocks, each cog executes approximately 100 million instructions per second (100 MIPS). With 8 cogs running in parallel, that's 800 MIPS of total processing power—and that's before smart pins start handling I/O autonomously.
 
@@ -486,7 +486,7 @@ Before we move on, let me save you some debugging time:
 
 2. **Wrong pin number** - The P2 Eval board's eight LEDs are on pins 56-63. The P2 Edge Standard Module has two LEDs on pins 56-57; the 32MB Edge Module uses 56-57 for its PSRAM and places its two LEDs on pins 38-39 instead.
 
-3. **Clock setup required** - P2 boots at ~20MHz (internal RC oscillator). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust WAITX values if your clock differs.
+3. **Clock setup required** - P2 boots on its internal RCFAST oscillator (nominally ~24MHz, spec'd 20MHz minimum). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust WAITX values if your clock differs.
 
 4. **Cog already running** - If you `coginit` to a specific cog that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free cog.
 
@@ -593,7 +593,7 @@ P2 uses what we call the "egg beater" model. Imagine eight beaters (cogs) all wh
 \EggBeaterDiagram
 ```
 
-The practical result? Hub access is MUCH faster and more predictable. Instead of waiting up to 16 clocks (P1), you wait at most 8 clocks (P2), and often less if you align your accesses properly.
+The practical result? Hub access is MUCH faster and more predictable. Instead of waiting up to 16 clocks (P1), you wait at most 7 clocks (#cogs-1) to reach your hub slice on the P2, and often less if you align your accesses properly.
 
 ## Let's See Cogs in Action
 
@@ -810,7 +810,7 @@ Save yourself some debugging time:
 
 1. **Cog RAM is copied, not shared** - Changes in cog RAM don't affect hub RAM unless you explicitly write them back
 
-2. **Cogs start at 0** - Always! Your code better be there.
+2. **Cog-exec cogs start at cog address 0** - Always! Your code better be there. (A hub-exec cog instead starts at the hub address you pass to COGINIT.)
 
 3. **Hub addresses are byte addresses** - cog addresses are long addresses. Don't mix them up!
 
@@ -864,10 +864,11 @@ value   long    0
 Make 8 LEDs display a moving pattern, with each cog controlling one LED:
 
 ```pasm2
-' Each cog gets LED pin in ptra
+' Each cog gets a 2-long parameter block (pin, delay) in ptra
+' (COGINIT passes just ONE value—the PTRA pointer—so pack both into hub)
         org     0
-        rdlong  pin, ptra
-        rdlong  delay, ptrb      ' Different delay per cog
+        rdlong  pin, ptra[0]
+        rdlong  delay, ptra[1]   ' Different delay per cog
         
 .flash  drvh    pin
         waitx   delay
@@ -968,8 +969,8 @@ P2 has hardware multiply and divide. Let that sink in. Hardware. Multiply. And. 
         subs    x, y           ' Signed subtract
 
 ' The revolution: hardware multiply!
-        mul     x, y           ' x = x * y (low 32 bits)
-        muls    x, y           ' Signed multiply
+        mul     x, y           ' x = x[15:0] * y[15:0] (unsigned 16x16->32)
+        muls    x, y           ' Signed 16x16->32 multiply
         
 ' And hardware divide!
         qdiv    x, y           ' Start division x/y
@@ -1040,8 +1041,8 @@ Moving bits around:
         jmp     target         ' Jump to address in target register
         
 ' Relative jumps
-        jmp     #$-4          ' Jump back 4 longs (addresses)
-        jmp     #$+8          ' Jump forward 8 instructions
+        jmp     #$-4          ' Jump back 4 longs (= 4 instructions)
+        jmp     #$+8          ' Jump forward 8 longs (= 8 instructions)
 ```
 
 ### Conditional Execution (The Magic)
@@ -1219,7 +1220,7 @@ When you reference a label, you need to tell the assembler what you want:
         mov     x, #data_table  ' Get cog address of data
 
 ' For hub addresses (used with Spin2):
-        mov     ptr, @hub_data  ' @ = hub address of label
+        mov     ptr, ##@hub_data ' ##@ = full hub address of label
 ```
 
 The `#` means "immediate value" - use this for jumps and calls within cog code. The `@` means "hub address" - use this when passing addresses to Spin2 or for hub memory operations.
@@ -1248,7 +1249,7 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 | Global label | `name` | `my_routine` |
 | Local label | `.name` or `:name` | `.loop`, `:done` |
 | Jump to label | `#label` | `jmp #.loop` |
-| Hub address | `@label` | `mov ptr, @data` |
+| Hub address | `##@label` | `mov ptr, ##@data` |
 
 ### Common Gotchas
 
@@ -1256,7 +1257,7 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 
 2. **Scope surprise**: Data definitions (`LONG`, `WORD`, `BYTE`) also start new scopes. If you put data between two parts of a routine, your local labels won't work!
 
-3. **The 30-character limit**: For compatibility with all tools, keep label names under 30 characters. `this_is_a_really_long_label_name` might cause trouble.
+3. **The 30-character limit**: Keep label names to 30 characters or fewer—the compiler rejects any name longer than 30. `this_is_a_really_long_label_name` (32 characters) will be rejected.
 
 ## Data in DAT Blocks: Your Program's Pantry
 
@@ -1371,7 +1372,7 @@ Let's put it all together:
 DAT             org
 
 ' Your code goes here
-entry           mov     ptra, ##buffer_addr
+entry           mov     ptra, buffer_addr   ' Read the hub pointer Spin2 stored
                 mov     count, BUFFER_SIZE
 .fill           wrbyte  fill_value, ptra++
                 djnz    count, #.fill
@@ -1513,7 +1514,7 @@ These are primarily Spin2 features, but they generate hub data that your PASM co
 | `STRING("text")` | Zero-terminated string address | Spin2 string constants |
 | `LSTRING("text")` | Length-prefixed string | Spin2, needs `{Spin2_v43}` |
 
-## The Flags: C and Z (and Q!)
+## The Flags: C and Z (plus the Q register)
 
 Flags are your friends. They remember things:
 
@@ -1531,7 +1532,7 @@ if_c    jmp     #overflow      ' Handle overflow
 if_a    jmp     #x_greater     ' Jump if x > y (unsigned)
 ```
 
-The Q flag is special - it's used by CORDIC operations (Chapter 7).
+Q isn't a flag at all—it's a 32-bit register you load with SETQ/SETQ2. It supplies an extra operand to block hub transfers (SETQ + RDLONG/WRLONG), CORDIC operations (Chapter 7), and the streamer. The only true condition flags are C and Z.
 
 ## Special Instructions That Will Blow Your Mind
 
@@ -1715,7 +1716,7 @@ Compare multiply methods:
 
 Most assembly languages are thin wrappers over hardware. PASM2 is different - it's designed for humans:
 
-1. **Symmetry**: Every instruction can use every addressing mode
+1. **Regularity**: Nearly every instruction shares the same D, S/# operand pattern (hub, branch, and no-operand instructions have their own restricted forms)
 2. **Orthogonality**: Features combine predictably
 3. **Conditional everything**: Not just jumps, ANY instruction
 4. **No special cases**: General-purpose registers, no accumulator
@@ -1857,9 +1858,9 @@ Now you know the moves. Try these to make them stick:
 
 Before you pull your hair out debugging hub access:
 
-1. **Forgetting the `##`** — hub addresses are 20-bit. A bare `#address` only encodes 9 bits, so you'll hit the wrong memory. Always use `##` for hub addresses outside the 0–511 range.
+1. **Forgetting the `##`** — hub addresses are 20-bit. On **RDxxx**/**WRxxx** a bare `#address` only encodes 8 bits (0–255)—the 9th S-field bit selects PTR-expression mode, not address 256+—so you'll hit the wrong memory. Always use `##` for any hub address above 255.
 
-2. **Long-aligned access** — **RDLONG** and **WRLONG** work on long boundaries. If your address isn't a multiple of 4, the P2 silently masks the low bits. For byte-precise access, use **RDBYTE** / **WRBYTE**.
+2. **Unaligned long access costs a clock** — **RDLONG** and **WRLONG** can read or write a long starting at *any* byte address (no low-bit masking, unlike P1). When the long straddles two hub-RAM slices you simply pay one extra clock. Only the FIFO/wrapping mode actually requires long alignment.
 
 3. **SETQ block size** — **SETQ** `#N-1` transfers `N` longs (not `N-1`). The `-1` is because the encoded field is "count minus one." Off-by-one bugs love this one.
 
@@ -2002,11 +2003,11 @@ The math instructions hide a few traps:
 
 1. **MUL is unsigned, MULS is signed** — Using the wrong one on negative values gives spectacular nonsense. When in doubt, **MULS**.
 
-2. **MUL gives only low 32 bits** — For the full 64-bit result, you must use **QMUL** + **GETQX**/**GETQY**. The high word is silently discarded by **MUL**.
+2. **MUL is a 16×16 multiply** — It multiplies the low 16 bits of each operand into a complete 32-bit product (nothing is discarded). To multiply full 32-bit operands into a 64-bit result, use **QMUL** + **GETQX**/**GETQY**.
 
 3. **GETQX/GETQY block until ready** — They wait for the CORDIC. If you call them too early, your cog stalls. If you call them later than necessary, you've wasted cycles. The sweet spot is starting the CORDIC, doing exactly 55 clocks of other work, then reading.
 
-4. **Don't queue a new CORDIC op while one is pending** — A second **QMUL**/**QDIV**/**QFRAC** before reading results overwrites the queue. Use **GETQX**/**GETQY** first.
+4. **Don't outrun the CORDIC pipeline** — The CORDIC is a 54-stage pipeline, so you *may* issue several operations before reading; **GETQX**/**GETQY** return their results in issue order. Results are only lost if you let too many accumulate before reading, or if an enabled interrupt steals clocks during the overlap—so keep interrupts disabled while juggling.
 
 ## What We've Learned
 
@@ -2096,7 +2097,7 @@ if_lt   jmp     #less           ' x < y (signed)
 - **IF_GT**, **IF_LT**, **IF_GE**, **IF_LE** — signed comparisons after **CMPS**
 - **IF_E**, **IF_NE** — equal / not equal (same as **IF_Z**/**IF_NZ** after compare)
 
-Any instruction can carry a condition prefix and still take exactly 2 clocks. No branches, no pipeline flush, no surprise.
+A condition prefix adds no clocks and causes no pipeline flush—a simple ALU instruction still takes 2 clocks whether it runs or is skipped. (Multi-cycle instructions like **RDLONG** at 9–16 clocks or **GETQX** at up to 58 keep their own larger counts, conditional or not.) No branches, no surprise.
 :::
 
 ## Your Turn: Experiments
@@ -2158,7 +2159,7 @@ If you thought hardware multiply was nice, wait until you see what the CORDIC do
 
 *Trigonometry at the speed of logic gates*
 
-## The Hook: Rotate a Point in 3 Lines
+## The Hook: Rotate a Point in 4 Lines
 
 Let me show you something that, on most processors, would take a coffee break of instructions, a math library, and probably a tear or two:
 
@@ -2170,7 +2171,7 @@ Let me show you something that, on most processors, would take a coffee break of
         getqy   new_y          ' Get rotated Y
 ```
 
-Read that again. *Four lines*, and a 2D rotation is done. No floating-point library. No lookup tables. No iterative approximation. The P2 has a dedicated trigonometric coprocessor sitting next to every cog, just waiting for you to wake it up. You're about to learn how.
+Read that again. *Four lines*, and a 2D rotation is done. No floating-point library. No lookup tables. No iterative approximation. The P2 has a hardware trigonometric coprocessor—a single CORDIC solver in the hub that every cog can call on—just waiting for you to wake it up. You're about to learn how.
 
 Let me show you something even more impressive:
 
@@ -2184,18 +2185,18 @@ Let me show you something even more impressive:
 
 ## What Just Happened?
 
-CORDIC stands for COordinate Rotation DIgital Computer. It's a method invented in 1959 for calculating trigonometric functions using only shifts and adds - no multiplies needed! Each P2 cog has its own dedicated CORDIC unit built into the hardware.
+CORDIC stands for COordinate Rotation DIgital Computer. It's a method invented in 1959 for calculating trigonometric functions using only shifts and adds - no multiplies needed! The P2 has a single CORDIC solver built into the hub, shared by all cogs—each cog gets a hub slot in which to hand off a command.
 
 Think of CORDIC as your mathematical co-processor that can:
 
 - Rotate points around the origin
 - Convert between rectangular and polar coordinates  
-- Calculate sine, cosine, tangent
+- Calculate sine and cosine (tangent by dividing sine by cosine)
 - Compute square roots and magnitudes
 - Find arctangent (angle between points)
 - Even do logarithms and exponentials!
 
-All of this in exactly 55 clock cycles. Every time. No variation.
+The pipeline itself is a fixed 55 clocks from command hand-off to result. Add the 0–7 clock wait for your cog's hub slot (plus the GETQX/GETQY read), and the end-to-end time varies only slightly around that.
 
 ## The CORDIC Pipeline - Your Mathematical Assembly Line
 
@@ -2218,10 +2219,10 @@ generate
         wrlong  sample, sample_ptr   ' Store it
         
         tjnz    count, #generate     ' Test-jump-not-zero
-        ' Generated 256 samples with perfect overlap!
+        ' Generated 256 samples, overlapping a few instructions per pass
 ```
 
-The pipeline means you're not really waiting 55 clocks - you're getting useful work done while CORDIC churns away in the background. Uff! That's free math!
+This loop overlaps only the three instructions between `qrotate` and `getqy` with the 55-clock latency, so `getqy` still stalls for most of it each pass. To *truly* hide the latency you software-pipeline across iterations: issue the next sample's `qrotate` before reading the previous sample's `getqy`, keeping a command in flight while you harvest the last result. Uff! That's how you get free math!
 
 ## Core CORDIC Operations
 
@@ -2507,9 +2508,9 @@ sample_loop
 
 Before you pull your hair out debugging, know these:
 
-1. **One result at a time** - Each cog has its own CORDIC, but starting a new operation before retrieving your result overwrites it!
+1. **Mind the pipeline depth** - The P2 has one shared CORDIC solver in the hub (not one per cog). You may have several operations in flight at once—results queue and are read in issue order via **GETQX**/**GETQY**. They're only lost if you outrun the 54-stage pipeline before reading, or an enabled interrupt steals enough clocks during the overlap.
 
-2. **55 clocks is exact** - Not 54, not 56. Always exactly 55 clocks from operation start to result ready.
+2. **55 clocks after hand-off** - Results are ready exactly 55 clocks after the solver *receives* your command—but your cog first waits 0 to 7 clocks (on an 8-cog P2) for its hub slot, so time it from hand-off, not from the instruction issue.
 
 3. **Don't forget SETQ** - For two-operand operations (QROTATE with X,Y), you must load Y into Q first.
 
@@ -2661,8 +2662,8 @@ Or read into Z flag for zero/non-zero testing:
 
 ```pasm2
         testp   #SENSOR_PIN wz ' Read pin into Z flag  
-   if_z jmp     #sensor_low    ' Jump if pin low (Z=1 when pin=0)
-  if_nz jmp     #sensor_high   ' Jump if pin is high
+   if_z jmp     #sensor_high   ' Jump if pin high (Z=1 when pin=1)
+  if_nz jmp     #sensor_low    ' Jump if pin is low
 ```
 
 ### Reading Multiple Pins
@@ -2877,7 +2878,7 @@ Now here's something we'll keep coming back to: P2 I/O is deterministic. When yo
         drvl    #57
 ```
 
-Pin 56 goes high and pin 57 goes low at EXACTLY the same clock cycle. No skew, no uncertainty. Uff! Try doing that on an interrupt-driven MCU. This determinism is what makes P2 perfect for precise timing applications.
+Pin 56 goes high, then pin 57 goes low exactly two clocks later—each instruction is deterministic, so that spacing is fixed and repeatable every single time, with no jitter. (If you need two pins to change on the *very same* clock, set them in one instruction—a single `OUTA` write, or `DRVH` with `ADDPINS` over a contiguous group.) Uff! Try getting timing that predictable on an interrupt-driven MCU. This determinism is what makes P2 perfect for precise timing applications.
 
 ## Real-World Example: Servo Control
 
@@ -2892,7 +2893,9 @@ servo_loop
         drvh    #SERVO_PIN
         waitx   position              ' 1-2ms high pulse
         drvl    #SERVO_PIN
-        waitx   ##4_000_000          ' Rest of 20ms at 200MHz
+        mov     rest, ##4_000_000     ' 20ms frame at 200MHz
+        sub     rest, position        ' Low time fills out the 20ms frame
+        waitx   rest
 
         ' Adjust position as needed
         rdlong  position, ##position_addr
@@ -2943,20 +2946,20 @@ Chapter 9 takes us into "Streaming Data" - the P2's incredible FIFO system that 
 
 *Moving mountains of data without breaking a sweat*
 
-## The Hook: 4KB in 4 Instructions
+## The Hook: 2KB in 4 Instructions
 
 Watch this data transfer magic:
 
 ```pasm2
-' Copy 1000 longs (4KB) at maximum speed
-        setq    ##1000-1        ' Setup for 1000 longs
+' Copy 512 longs (2KB) at maximum speed — the most a cog block move can hold
+        setq    ##512-1         ' Setup for 512 longs (cog RAM limit)
         rdlong  buffer, source  ' Read them all!
-        setq    ##1000-1        ' Setup for 1000 longs  
+        setq    ##512-1         ' Setup for 512 longs
         wrlong  buffer, dest    ' Write them all!
-        ' 4KB moved in microseconds!
+        ' 2KB moved in microseconds!
 ```
 
-Four instructions. Four kilobytes. Faster than DMA on most processors. And we're just getting started...
+Four instructions. Two kilobytes. Faster than DMA on most processors. (A cog holds only 512 registers, so that's the ceiling for a single SETQ block through cog RAM—move more with the FIFO/streamer.) And we're just getting started...
 
 ## Block Transfers: The Power Move
 
@@ -3111,7 +3114,7 @@ circular_loop
 ### Processing Pipeline with FIFO
 
 ```pasm2
-' Read data with FIFO, process, write via PTRA
+' Read data with FIFO, process, write via manual pointer dest_ptr
         rdfast  #0, ##source    ' Set up FIFO for reading
         mov     dest_ptr, ##dest
 
@@ -3121,7 +3124,7 @@ pipeline
         ' Scale using 16x16 multiply (result in input)
         mul     input, #SCALE_FACTOR
 
-        wrlong  input, dest_ptr ' Write result via PTRA
+        wrlong  input, dest_ptr ' Write result via dest_ptr
         add     dest_ptr, #4
         djnz    count, #pipeline
 ```
@@ -3286,7 +3289,7 @@ Let's be honest about the differences:
 
 **Cog Execution** (traditional):
 
-- ✅ Fast: exactly 2 clocks per instruction
+- ✅ Fast: most simple instructions run in 2 clocks (hub accesses are 9–16, taken branches 5+)
 - ✅ Deterministic: perfect for real-time
 - ❌ Limited: only 496 instructions
 - ✅ Self-contained: runs independently
@@ -3467,7 +3470,7 @@ Hub addresses need 20 bits, so jumping far requires special handling:
 
 ```pasm2
 ' Jump to distant hub code
-        jmp     #\far_away     ' \ forces a 32-bit absolute address
+        jmp     #\far_away     ' \ forces a 20-bit absolute (non-relative) address
         
         orgh    $40000        ' Far away in hub
 far_away
@@ -3496,7 +3499,7 @@ hub_data
 To maximize hub execution speed:
 
 ```pasm2
-' Align branch targets to 8-byte boundaries
+' Align branch targets to long (4-byte) boundaries
         alignl                 ' Align to long boundary
 loop_start
         ' Loop code here
@@ -3691,7 +3694,10 @@ servo_loop
         
         mov     index, #0
 check_servos
-        rdlong  width, ptra[index]     ' Get pulse width
+        mov     addr, index            ' PTR index is compile-time only,
+        shl     addr, #2               '   so build the address by hand:
+        add     addr, ptra             '   ptra (table base) + index*4
+        rdlong  width, addr            ' Get pulse width
         addct1  pulse_time, width      ' Set compare time
         
         waitct1                        ' Wait for exact time
@@ -3741,7 +3747,7 @@ Still thinking you need interrupts? Here's your medicine:
 **Fast response?**
 
 ```pasm2
-' Dedicated cog responds in ~4 clocks
+' Dedicated cog responds in ~6 clocks
 watcher
         testp   #INPUT_PIN wz         ' Test pin state
   if_nz jmp     #watcher              ' Loop until pin high
@@ -3926,12 +3932,12 @@ Chapter 12 shows you "Optimization Mastery" - how to make your PASM2 code blazin
 
 *Making the fast faster*
 
-## The Hook: Double Your Speed with One Change
+## The Hook: Cut Loop Overhead with One Change
 
 Let me show you a loop that looks fine — until you realize you're paying for the same thing twice. Watch:
 
 ```pasm2
-' Before optimization: 13 clocks
+' Before optimization: ~18+ clocks (sum of the per-line minimums below)
 .loop   rdlong  value, ptra      ' 9-16 (cog-exec) / 9-26 (hub-exec)
         add     value, #1        ' 2 clocks
         wrlong  value, ptra      ' 3-10 (cog-exec) / 3-20 (hub-exec)
@@ -3945,7 +3951,7 @@ Let me show you a loop that looks fine — until you realize you're paying for t
         djnz    count, #.loop    ' Saved the ADD instruction
 ```
 
-Almost twice as fast! The secret? Understanding how P2 really works.
+That trims one instruction (2 clocks) per iteration—a modest ~10% off this hub-bound loop, and it's free. The secret? Understanding how P2 really works.
 
 ## Understanding the Pipeline
 
@@ -3999,7 +4005,7 @@ REP creates hardware-accelerated loops with zero overhead:
         add     ptr, #4         ' 2 clocks = 4 total!
 ```
 
-That's 33% faster just by using REP!
+That's about 50% faster: the traditional loop pays 2 + 2 + 4 clocks (the taken **DJNZ** costs 4), while the REP body is just 4 clocks.
 
 **Hub-exec note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in cog or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
 
@@ -4028,16 +4034,17 @@ if_b    jmp     #less
 Hub timing is critical for performance:
 
 ```pasm2
-' Unaligned hub access: variable timing
-        rdlong  v1, ##$1001     ' Not long-aligned, slower
+' Hub RAM allows any byte address (no masking, unlike P1). An unaligned
+' long may cost at most one extra clock if it straddles a slice — still
+' within RDLONG's normal 9-16 range, so it's nothing to optimize around
+        rdlong  v1, ##$1001     ' Unaligned: essentially the same cost
+        rdlong  v1, ##$1000     ' Aligned: no meaningful speedup
         
-' Aligned hub access: predictable timing  
-        rdlong  v1, ##$1000     ' Long-aligned, faster
-        
-' Sequential access: maximum speed
-        rdlong  v1, ptra++      ' Hardware manages sequence
-        rdlong  v2, ptra++      ' Optimal hub slot usage
-        rdlong  v3, ptra++      ' Maximum throughput
+' Sequential ptra++ is convenient, but each read is still 9-16 clocks;
+' for real throughput use the FIFO (RFLONG) or a SETQ burst
+        rdlong  v1, ptra++      ' Hardware manages the pointer
+        rdlong  v2, ptra++
+        rdlong  v3, ptra++
 ```
 
 ## The FIFO Fast Path
@@ -4045,17 +4052,17 @@ Hub timing is critical for performance:
 For ultimate speed, use the FIFO:
 
 ```pasm2
-' Traditional hub reading: ~6 clocks average per long
+' Traditional hub reading: ~13+ clocks per long (RDLONG alone is 9-16)
 .loop   rdlong  value, ptra++
         add     sum, value
         djnz    count, #.loop
 
-' FIFO reading: 2 clocks per long!
+' FIFO reading: RFLONG is always 2 clocks
         rdfast  #0, ptra        ' Start FIFO
 .loop   rflong  value           ' 2 clocks, always!
         add     sum, value      ' 2 clocks
-        djnz    count, #.loop   ' 2 clocks
-        ' 3x faster for sequential reads!
+        djnz    count, #.loop   ' 4 clocks when it branches back
+        ' ~2x faster for sequential reads!
 ```
 
 ## Parallel Operations
@@ -4095,14 +4102,14 @@ copy_basic
         add     source, #4
         add     dest, #4
         djnz    count, #copy_basic
-        ' ~13 clocks per long
+        ' ~18+ clocks per long
 
 ' Version 2: Better pointers
 copy_better
         rdlong  temp, ptra++
         wrlong  temp, ptrb++
         djnz    count, #copy_better
-        ' ~8 clocks per long
+        ' ~14+ clocks per long
         
 ' Version 3: Block transfer (ultimate)
 copy_ultimate
@@ -4137,7 +4144,7 @@ Optimization overwhelming you? Start with these simple improvements:
 data    long    $12345678
 ```
 
-3. **Use REP** for tight loops (note: hub-address expressions like `ptra++` only work with hub-access instructions, so we read first, then add)
+3. **Use REP** for tight loops (note: `ptra++` works with the hub RD/WR instructions and with RDLUT/WRLUT—not with ordinary ALU ops—so we read first, then add)
 
 ```pasm2
         rep     @.end, count
@@ -4146,7 +4153,7 @@ data    long    $12345678
 .end
 ```
 
-Just these three changes often double performance!
+Just these three changes trim the overhead instructions off a hub-bound loop—a modest but free speedup.
 :::
 
 ## Your Turn: Optimization Challenges
@@ -4192,22 +4199,18 @@ Some instruction pairs execute specially:
 
 ### Pipeline-Aware Coding
 
-Avoid pipeline stalls:
+Good news: unlike many pipelined CPUs, the P2 has **no data-dependency stalls**. A register result is ready for the very next instruction, so these back-to-back ops each take just 2 clocks:
 
 ```pasm2
-' Bad: result needed immediately
         add     x, y
-        cmp     x, #10 wcz      ' Stall waiting for x
-        
-' Good: interleave operations
-        add     x, y
-        mov     a, b            ' Do something else
-        cmp     x, #10 wcz      ' Now x is ready
+        cmp     x, #10 wcz      ' x is ready — no stall
 ```
+
+The stalls worth planning around are the multi-cycle ones: hub accesses (9–16 clocks) and taken branches (pipeline flush). Interleave *those* with useful work, not ordinary ALU ops.
 
 ### Unrolling Loops
 
-Sometimes removing the loop is faster. (Remember: `ptra++` only works with hub-access instructions like **RDLONG**, so each iteration reads then adds.)
+Sometimes removing the loop is faster. (Remember: `ptra++` works with the hub RD/WR instructions and with **RDLUT**/**WRLUT**—not with ordinary ALU ops—so each iteration reads then adds.)
 
 ```pasm2
 ' Looped version
@@ -4255,7 +4258,7 @@ Always measure your optimizations:
 
 **Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
 
-1. **Capture the full 64-bit count.** `GETCT D WC` returns the upper 32 bits (with `WC` set); a plain `GETCT D` returns the lower 32. Read upper-then-lower-then-upper-again and retry if the upper word changed, then build a 64-bit timestamp.
+1. **Capture the full 64-bit count.** `GETCT D WC` latches the full 64-bit counter and returns its upper 32 bits (with `WC` set); the very next `GETCT D` (no `WC`) returns the matching lower 32 bits of that same instant. Keep the two instructions back-to-back and uninterrupted—no re-read-and-retry loop is needed.
 2. **Work with deltas, not absolute time.** Compare `(now - start)` rather than `now > deadline`. The subtraction wraps correctly even when the counter does.
 
 The 21.5-second wrap is *fast* — long enough that you won't see it in a basic example, short enough that real applications hit it constantly.
@@ -4491,8 +4494,8 @@ The streamer configuration for LUT reading is covered in detail in the Video and
 **❌ WRONG: Confusing LUT addresses**
 
 ```antipattern
-' WRONG - This reads cog RAM, not LUT!
-        mov     value, $200     ' $200 is cog RAM address
+' WRONG - $200 isn't a cog register at all (cog RAM is $000..$1FF)
+        mov     value, $200     ' Won't reach the LUT; the 9-bit register field can't hold $200
 ```
 
 **✓ RIGHT: Use RDLUT for LUT access**
@@ -4578,7 +4581,7 @@ Use LUT sharing to create a message passing system between cog 2 and cog 3:
 The LUT in your toolbox:
 
 - ✅ 512 longs of fast, private memory in every cog
-- ✅ 3-clock deterministic access via **RDLUT** / **WRLUT**
+- ✅ Deterministic access via **RDLUT** (3 clocks) / **WRLUT** (2 clocks)
 - ✅ Bulk loading via **SETQ2** + **RDLONG**
 - ✅ cog-pair LUT sharing for high-bandwidth data passing
 - ✅ streamer source for waveform generation
@@ -4602,7 +4605,7 @@ Remember that tedious bit-bang serial from Chapter 8? Watch this:
 ```pasm2
 ' Configure pin as UART transmitter - done!
         dirl    #TX_PIN                 ' Reset pin first!
-        wrpin   ##P_ASYNC_TX, #TX_PIN   ' Configure as async TX
+        wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN  ' Async TX; P_OE drives the output
         wxpin   ##BAUD_115200, #TX_PIN  ' Set baud rate
         dirh    #TX_PIN                 ' Enable - runs on its own
 ```
@@ -4645,11 +4648,13 @@ Every smart pin follows the same configuration pattern. This is **the most impor
         wypin   y_value, pin    ' Mode-specific parameter Y
 ```
 
-Why is `wypin` last, *after* `dirh`? For the trigger and serial modes the Y
-value is held at zero during reset, so a `wypin` written before `dirh` is simply
-lost. Writing Y after enabling is the one ordering that works for *every* mode --
-so make it your habit. (For pure value modes the order doesn't matter, but one
-rule is easier to remember than two.)
+Why is `wypin` shown last, *after* `dirh`? For the serial and trigger modes,
+**WYPIN** is how you *feed data* to a running pin -- each byte you transmit is a
+fresh `wypin` issued after the pin is enabled, so that's where it naturally
+lives. (The silicon documentation's configuration procedure actually writes
+WRPIN/WXPIN/WYPIN while DIR is low and *then* raises DIR; for pure value modes
+that order is fine too. Once the pin is live, feeding it with WYPIN is just the
+normal operating pattern.)
 
 ::: sidetrack
 **Why DIRL First?**
@@ -4695,7 +4700,7 @@ Every smart pin has an IN flag that signals "something happened." What that some
 - **UART RX**: IN high = byte received
 - **ADC**: IN high = new sample ready
 - **PWM**: IN high = period complete
-- **Counter**: IN high = threshold reached
+- **Counter**: IN high = measurement period complete (result ready to read)
 
 You check this flag with **TESTP** and clear it by reading with **RDPIN** (or explicitly with **AKPIN**).
 
@@ -4734,10 +4739,13 @@ Here are the modes you'll use most often:
         wxpin   ##(CLK_FREQ/BAUD)<<16 | 7, #TX_PIN  ' Baud + 8 bits
         dirh    #TX_PIN
 
-' Send a byte
-send    testp   #TX_PIN wc      ' Wait for ready
+' Send the first byte immediately -- the buffer is empty right after enable
+        wypin   byte, #TX_PIN
+
+' Before each *subsequent* byte, wait until the pin is ready for more
+send    testp   #TX_PIN wc      ' IN rises once a word moves to the shifter
   if_nc jmp     #send
-        wypin   byte, #TX_PIN   ' Send it
+        wypin   byte, #TX_PIN   ' Send the next byte
 ```
 
 ```pasm2
@@ -4760,7 +4768,7 @@ recv    testp   #RX_PIN wc      ' Check for received byte
 ' PWM mode - period + duty cycle
         dirl    #PWM_PIN
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
-        wxpin   ##period, #PWM_PIN      ' Period in clocks
+        wxpin   ##frame_period<<16 | base_period, #PWM_PIN  ' X[31:16]=frame, X[15:0]=base period
         dirh    #PWM_PIN
         wypin   ##duty, #PWM_PIN        ' High time; Y after enable
 
@@ -4773,7 +4781,7 @@ recv    testp   #RX_PIN wc      ' Check for received byte
 ```pasm2
 ' ADC mode - continuous sampling
         dirl    #ADC_PIN
-        wrpin   ##P_ADC | P_ADC_GIO, #ADC_PIN
+        wrpin   ##P_ADC | P_ADC_1X, #ADC_PIN
         wxpin   ##13, #ADC_PIN          ' 14-bit mode (period = 2^13 clocks)
         dirh    #ADC_PIN
 
@@ -4833,7 +4841,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 ' WRONG - Pin enabled with partial config!
         dirl    #PIN
         dirh    #PIN                    ' Enabled too early!
-        wrpin   ##P_ASYNC_TX, #PIN
+        wrpin   ##P_ASYNC_TX | P_OE, #PIN
 ```
 
 **✓ RIGHT: DIRH comes last**
@@ -4841,7 +4849,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 ```pasm2
 ' RIGHT - Configure completely, then enable
         dirl    #PIN
-        wrpin   ##P_ASYNC_TX, #PIN
+        wrpin   ##P_ASYNC_TX | P_OE, #PIN
         wxpin   ##BAUD, #PIN
         dirh    #PIN                    ' Enable last!
 ```
@@ -4886,7 +4894,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 Create a PWM output that dims an LED:
 
 1. Configure a pin for PWM sawtooth mode
-2. Set a 1 kHz period (at 160 MHz: period = 160,000)
+2. Set a 1 kHz period (at 160 MHz that's 160,000 clocks—too big for the 16-bit base-period field, so split it: base period = 1000, frame = 160)
 3. Vary duty cycle from 0% to 100%
 
 ```pasm2
@@ -5008,10 +5016,10 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `EVENT_INT` | %0000 | An interrupt occurred (INT1/2/3 fired) |
-| `EVENT_CT1` | %0001 | CT equals CT1 (timer 1 target) |
-| `EVENT_CT2` | %0010 | CT equals CT2 (timer 2 target) |
-| `EVENT_CT3` | %0011 | CT equals CT3 (timer 3 target) |
+| `EVENT_INT` | %0000 | In SETINT this value turns the interrupt *off*; as a POLL/WAIT event it means an interrupt occurred |
+| `EVENT_CT1` | %0001 | CT reaches/passes CT1 (timer 1 target) |
+| `EVENT_CT2` | %0010 | CT reaches/passes CT2 (timer 2 target) |
+| `EVENT_CT3` | %0011 | CT reaches/passes CT3 (timer 3 target) |
 | `EVENT_SE1` | %0100 | Selectable event 1 triggered |
 | `EVENT_SE2` | %0101 | Selectable event 2 triggered |
 | `EVENT_SE3` | %0110 | Selectable event 3 triggered |
@@ -5040,7 +5048,7 @@ While dedicated cogs are usually better than interrupts (see Chapter 11), someti
         setint3 #EVENT_ATN              ' INT3 fires on COGATN
 ```
 
-**Pro tip**: You can also use these constants with WAITSE/POLLSE by first triggering them with the appropriate hardware condition, then waiting. But for most purposes, the SETSE mode bits (the table above this one) are what you'll configure directly.
+**Pro tip**: These `EVENT_*` constants are only for **SETINT1/2/3**. The **WAITSE1..4**/**POLLSE1..4** instructions are dedicated per-channel opcodes that take no event-number operand—you configure their trigger with the SETSE mode bits (the table above this one) and then just wait or poll the matching channel.
 
 ### Smart Pin Events
 
@@ -5216,27 +5224,27 @@ The ATN (attention) system lets cogs signal each other:
         ' Another cog signaled us!
 ```
 
-The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a cog. Setting bit N sends attention to Cog N.
+The **COGATN** instruction takes a 16-bit mask in D[15:0] where each bit corresponds to a cog (cogs 0..15). Setting bit N sends attention to Cog N.
 
 ## Common Gotchas
 
 **❌ WRONG: Forgetting to clear event flag**
 
 ```antipattern
-' WRONG - Event may fire before you're ready
+' WRONG - an event that fires during 'other stuff' makes the wait return at once
         setse1  #%001<<6 + PIN
         ' ... do other stuff ...
         waitse1                 ' May return immediately!
 ```
 
-**✓ RIGHT: Poll first to clear any pending event**
+**✓ RIGHT: Clear right before you wait**
 
 ```pasm2
-' RIGHT - Clear any stale event
+' RIGHT - SETSE1 already clears SE1, so re-clear just BEFORE the wait
         setse1  #%001<<6 + PIN
-        pollse1                 ' Clear if already set
-        ' ... do other stuff ...
-        waitse1                 ' Now wait cleanly
+        ' ... do other stuff (an event may arrive during this) ...
+        pollse1                 ' Discard any event caught during the work
+        waitse1                 ' Now wait cleanly for the next one
 ```
 
 **❌ WRONG: Using WAIT when you need to handle multiple sources**
@@ -5879,7 +5887,7 @@ On P2, every pin contains a programmable state machine. Any pin can become a UAR
 
 ARM MCUs with cache have unpredictable timing. A memory read might take 1 cycle (cache hit) or 50+ cycles (cache miss). Even instruction timing varies—ARM instructions take 1-3+ cycles depending on the operation. This makes cycle-accurate timing extremely difficult.
 
-P2 takes a different approach: nearly all instructions execute in exactly **2 clock cycles**. Want to know how long a code sequence takes? Count the instructions and multiply by 2. Hub memory uses round-robin access that gives every cog predictable, guaranteed access slots. Your timing loops work identically every time—no cache luck required.
+P2 takes a different approach: most cog-register ALU and logic instructions execute in exactly **2 clock cycles**. For straight-line register code you can estimate the time by counting instructions and multiplying by 2. The multi-cycle instructions—hub reads/writes (9+ clocks, variable), taken branches (a pipeline flush), CORDIC result reads, and WAITx—cost more, so "instructions × 2" is a lower bound for real sequences, not an exact figure. Hub memory still uses round-robin access that gives every cog predictable, guaranteed access slots, so your timing loops behave identically every time—no cache luck required.
 
 ## Coming From ARM/STM32
 
@@ -5891,7 +5899,7 @@ You're used to configuring HAL structures, writing interrupt handlers, and manag
 | `HAL_TIM_PWM_Start()` | Configure smart pin once, update with **WYPIN** | Pin runs independently—your cog is free |
 | NVIC priority configuration | Nothing needed | All cogs equal, no priority inversion ever |
 | `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Simpler API, integrated into each cog |
-| `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in exactly 55 clocks |
+| `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in ~55 clocks |
 | FreeRTOS `xTaskCreate()` | **COGINIT** | True parallel execution, not scheduled |
 
 **The result**: Deterministic timing, zero interrupt conflicts, and I/O configuration that just works.
@@ -6087,7 +6095,7 @@ Engineers who've fought interrupt priority inversions, missed timing deadlines, 
 - PWM: Ch8, Ch14
 
 ### Q
-- Q flag: Ch7
+- Q register: Ch7
 - QDIV: Ch5
 - QROTATE: Ch7
 

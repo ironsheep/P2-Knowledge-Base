@@ -510,6 +510,7 @@ PUB measure_distance_cm() : distance | echo_us
 ```pasm2
 CON
   _clkfreq = 200_000_000
+  FREQ_PIN = 20
 
 DAT           org
 
@@ -528,16 +529,15 @@ freq_loop
               rdpin     period, #FREQ_PIN
               and       period, ##$7FFFFFFF
 
-              ' Calculate frequency = MULDIV64(sysclk, 1000, period)
-              ' Store for main cog to read
-              wrlong    period, #period_hub
+              ' 1000 any-edges span 500 signal periods:
+              ' frequency = MULDIV64(sysclk, 500, period)
+              ' Store to hub buffer (address passed in PTRA at coginit)
+              wrlong    period, ptra
 
               ' Auto-restarts on read
               jmp       #freq_loop
 
-FREQ_PIN      long      20
 period        long      0
-period_hub    long      0
 ```
 
 ### Example 4: Communication Watchdog
@@ -565,6 +565,7 @@ PUB comm_monitor() | timeout_clocks
 
   repeat
     if PINREAD(RX_PIN)                     ' Timeout occurred
+      AKPIN(RX_PIN)                         ' Acknowledge: lowers IN so recovery is visible
       comm_ok := false
       last_timeout := GETMS()
       DEBUG("Communication lost!")

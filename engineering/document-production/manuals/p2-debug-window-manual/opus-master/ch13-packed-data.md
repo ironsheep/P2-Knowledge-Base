@@ -82,12 +82,11 @@ A mode keyword may be followed by either or both of two optional keywords:
 - **`SIGNED`** — the host sign-extends each unpacked value. Without it, values are
   unsigned (the left column above); with it, they take the right column's signed
   range. Use it when your packed fields represent signed quantities.
-- **`ALT`** — the host swaps **adjacent same-width fields** throughout the element:
-  neighbouring bits (0↔1, 2↔3, …), or 2-bit pairs, or nibbles, depending on the
-  mode's field width — a butterfly swap of neighbours across the whole long, not a
-  within-byte or end-to-end reversal. This helps when your source data has its
-  sub-field order swapped from what the display expects — most often bitmap data
-  composed in a standard pixel format.
+- **`ALT`** — **within each byte sent**, the host reorders the sub-units (the bits,
+  double-bits, or nibbles set by the mode's field width) **end-to-end** — a per-byte
+  reversal of sub-unit order, applied independently to each byte of the element. This
+  helps when your source data has its sub-field order swapped from what the display
+  expects — most often bitmap data composed in a standard pixel format.
 
 ```spin2
 ' two signed 16-bit values per long
@@ -101,17 +100,16 @@ Packing is set on the window's creation line — you add the mode keyword to the
 that window is treated as a packed container and unpacked according to the mode.
 You do the packing on the P2 side; the host does the unpacking.
 
-This example feeds a two-channel LOGIC window with `LONGS_1BIT`. Each long carries
-32 one-bit samples; with two channels declared, the host unpacks the first long as
-32 samples of channel 0 and the next long as 32 samples of channel 1. The data is
-generated in software with the random-number generator, so it runs on a bare board
-with no wiring:
+This example feeds a single-channel LOGIC window with `LONGS_1BIT`. Each long carries
+32 one-bit samples; the host unpacks them LSB-first and applies them to the channel
+in turn, so one long becomes 32 successive samples of `D0`. The data is generated in
+software with the random-number generator, so it runs on a bare board with no wiring:
 
 ```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | packed, i
-  debug(`LOGIC Stream SAMPLES 256 'D0' 'D1' LONGS_1BIT)
+  debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
     packed := 0
     repeat i from 0 to 31
@@ -145,13 +143,14 @@ PUB main() | packed, i, ch
 
 A BITMAP window unpacks the same formats into pixels. With a `LUT2` (two-bit) color
 mode you would pack with `LONGS_2BIT`; with a one-bit source you can drive a
-two-color image using `LONGS_1BIT`, sending one long per 32-pixel row segment:
+two-color image using `LUT1` with `LONGS_1BIT`, sending one long per 32-pixel
+row segment:
 
 ```{.spin2 caption="ch13-packed-bitmap-frame.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT2 LONGS_1BIT)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)
   repeat
     repeat row from 0 to 15
       packed := 0
@@ -209,8 +208,9 @@ link, capture a finite burst and dump it rather than trying to stream live.
   first — is your code's responsibility.
 - **LSB-first ordering is fixed.** The first unpacked value always comes from the
   low end of the element. Shift your first sample into the low bits. Use `ALT` only
-  to swap adjacent same-width fields throughout the element (bits 0↔1, 2↔3, …,
-  2-bit pairs, or nibbles by mode width), not to reverse whole elements.
+  to reverse the order of the sub-units (bits, 2-bit pairs, or nibbles by mode width)
+  end-to-end within each byte of the element — a per-byte sub-unit reversal, not a
+  whole-element reversal.
 - **Packing is per window, set at creation.** All elements fed to that window are
   unpacked the same way for its lifetime; there is no per-element mode switch.
 - **Send whole multiples of the values-per-element count.** A `LONGS_1BIT` LOGIC

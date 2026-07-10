@@ -20,13 +20,13 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 | Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
 | Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
 | Logarithm | [QLOG](#qlog) | Base-2 logarithm (5:27 fixed-point) in X |
-| Exponential | [QEXP](#qexp) | e^x approximation in X |
+| Exponential | [QEXP](#qexp) | Base-2 exponential 2^x (inverse of QLOG) in X |
 
 Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. QMUL returns the full 64-bit product, which fixed-point arithmetic uses directly.
 
 ### 5.1.2 CORDIC Operation Flow
 
-CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 55-clock computation period—attempting to retrieve results before this period completes produces undefined values.
+CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 55-clock computation period—if GETQX or GETQY executes before the queued result is ready, the cog stalls until it becomes available (see §5.1.5). An empty/undefined return occurs only when no operation is in progress at all.
 
 ```pasm2
         qmul    multiplicand, multiplier    ' Start 32x32 multiply
@@ -82,13 +82,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the cog stalls until the result becomes available. This automatic stalling simplifies programming—precise cycle counting is unnecessary—but can impact performance if results are retrieved too early.
 
-For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
-
-```pasm2
-        pollqmt             wc              ' C=1 if pipeline empty,
-                                            '  C=0 if results pending
-        if_nc   getqx   result              ' Retrieve if available
-```
+POLLQMT reads and clears the QMT event flag. QMT is set only *after* a GETQX or GETQY has already executed with no result available and none in progress—it records an erroneous early read rather than forecasting whether a pending result is ready, so it cannot be polled before a read to avoid stalling. To keep the cog from stalling, structure the pipeline explicitly using the fill/steady/drain pattern shown above.
 
 The CORDIC generates event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
 
@@ -140,7 +134,7 @@ queue_rotation
         ret
 ```
 
-This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 55 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
+This pattern achieves one rotation result about every dozen instructions (the loop body plus the queue helper), rather than waiting 55 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
 
 ### 5.1.7 CORDIC Instructions Reference
 
@@ -341,17 +335,17 @@ The P2 defines numerous event sources, each representing a distinct hardware con
 
 | Event | Source | Typical Use |
 |-------|--------|-------------|
-| INT1, INT2, INT3 | Software-triggered interrupts | Inter-Cog signaling, priority events |
+| INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
 | CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
 | SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
 | PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
 | FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
 | XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
 | XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
-| XRO | Streamer rollover | Circular buffer management |
+| XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
 | XRL | Streamer read LUT $1FF | LUT-wrap timing event |
 | ATN | Attention from another Cog | Inter-Cog communication |
-| QMT | CORDIC operation complete | Math coprocessor completion |
+| QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
 
 Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation).
 
@@ -375,7 +369,7 @@ Interrupt setup involves two steps: configuring the interrupt source and enablin
 - **STALLI** - Stall (disable) interrupt processing
 - **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
 
-Each interrupt level (1, 2, 3) has independent configuration. Level 3 can interrupt level 2; level 2 can interrupt level 1; level 1 can interrupt normal execution. This provides priority-based interrupt handling when multiple urgent events require service.
+Each interrupt level (1, 2, 3) has independent configuration. Level 1 (INT1) has the highest priority and can interrupt levels 2 and 3; level 2 can interrupt level 3; level 3 (INT3), the lowest priority, can only interrupt normal (non-interrupt) execution. This provides priority-based interrupt handling when multiple urgent events require service.
 
 ### 5.4.3 Event Waiting
 
@@ -511,7 +505,7 @@ XBYTE executes as a phantom instruction triggered by returning to $1FF. The retu
 
 | Clock | Phase | Activity |
 |-------|-------|----------|
-| 1 | go | RFBYTE bytecode, SKIPF #0 |
+| 1 | go | RFBYTE bytecode, SKIPF #0 (last clock of the triggering RET/_RET_, not counted in overhead) |
 | 2 | get | MOV PA,bytecode, RDLUT |
 | 3 | go | RDLUT complete |
 | 4 | get | EXECF begin |
@@ -565,7 +559,7 @@ At reset, the P2 initializes to a known state before any user code executes:
 
 | Resource | Initial State |
 |----------|---------------|
-| Clock source | RCFAST (~20-30 MHz (typically ~24 MHz) internal RC oscillator) |
+| Clock source | RCFAST (~20 MHz+ (nominally ~24 MHz) internal RC oscillator) |
 | All Cogs | Stopped (except Cog 0) |
 | Hub RAM | Undefined contents |
 | I/O pins | High-impedance (floating) |
@@ -583,7 +577,7 @@ The P2 determines its boot source by sensing external pull-up resistors on pins 
 | P61 | P60 | P59 | Boot Behavior |
 |-----|-----|-----|---------------|
 | none | none | none | Serial only (60s window) |
-| pull-up | none | none | Serial 100 ms window, then SPI flash; serial 60s on flash failure |
+| pull-up | any | none | Serial 100 ms window, then SPI flash; serial 60s on flash failure |
 | pull-up | any | pull-down | SPI flash only (fast boot), no serial; shutdown on failure |
 | none | pull-up | none | SD card, then serial (60s) on failure |
 | none | pull-up | pull-down | SD card only, shutdown on failure |
@@ -615,8 +609,8 @@ The boot process uses pins P58-P63 for communication with external boot sources:
 
 | Pin | Function | Direction |
 |-----|----------|-----------|
-| P61 | Chip Select (directly active low) | Output |
-| P60 | Clock | Output |
+| P61 | Clock | Output |
+| P60 | Chip Select (active low) | Output |
 | P59 | Data Out (MOSI) | Output |
 | P58 | Data In (MISO) | Input |
 
@@ -687,22 +681,19 @@ Loaded programs must include a validation header. The loader computes a 32-bit s
 
 ### 5.7.6 Clock Configuration After Boot
 
-User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-30 MHz (typically ~24 MHz). For applications requiring precise timing, configure an external crystal or the PLL early in the program:
+User code starts executing with the RCFAST clock source—an internal RC oscillator running at 20 MHz or more (nominally ~24 MHz). For applications requiring precise timing, configure an external crystal or the PLL early in the program:
 
 ```pasm2
-' Configure 20 MHz crystal with PLL for 160 MHz operation
-                ' Enable crystal oscillator with 15pF caps
-                hubset  ##%0000_0001_0000_0000_0000_0000_00_10
-                ' Wait 10ms for crystal stabilization
+' Configure 20 MHz crystal + PLL for 160 MHz operation
+' Config word %1_DDDDDD_MMMMMMMMMM_PPPP_XX_CC:
+'   enable=1, DDDDDD=div-1 (÷1), MMMMMMMMMM=mult-1 (×8),
+'   PPPP=%1111 (VCO/1), XX=%10 (15pF caps), CC=source (%00 stay RCFAST / %11 PLL)
+                ' Enable crystal + PLL, stay in RCFAST while they stabilize
+                hubset  ##%1_000000_0000000111_1111_10_00
+                ' Wait ~10ms for crystal + PLL to stabilize
                 waitx   ##20_000_000/100
-                ' Switch to crystal clock source
-                hubset  ##%0000_0001_0000_0000_0000_0000_10_10
-                ' Configure PLL: /1 * 8 / 1 = 160MHz
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_10
-                ' Wait 100µs for PLL lock
-                waitx   ##20_000_000/10000
-                ' Switch to PLL output
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_11
+                ' Switch clock source to PLL output (now 160 MHz)
+                hubset  ##%1_000000_0000000111_1111_10_11
 ```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in the program.
@@ -766,7 +757,7 @@ Visual displays use a two-phase pattern: creation statement (with display type) 
 
 ### 5.8.4 Multi-Cog Programs
 
-When multiple cogs execute DEBUG statements, the system automatically prefixes each message with the cog number (Cog0: through Cog7:). This applies to text output only; visual displays are typically dedicated to specific cogs.
+When multiple cogs execute DEBUG statements, the system automatically prefixes each message with the cog number—the word `Cog`, the cog number, then spaces (`Cog0 ` through `Cog7 `), with no colon. This applies to text output only; visual displays are typically dedicated to specific cogs.
 
 ### 5.8.5 Performance Considerations
 

@@ -105,7 +105,7 @@ a little arithmetic; all the pixels were drawn in an image editor. This is the
 sprite-sheet (blitting) model — the technique behind the richest DEBUG instrument
 panels.
 
-> **Requires `{Spin2_v50}`.** The `LAYER`, `CROP`, and sprite commands are V50
+> **Requires `{Spin2_v50}`.** The `LAYER` and `CROP` commands are V50
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
 > with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
 
@@ -130,8 +130,8 @@ completely. Three consequences follow, and they are the rules of the technique:
   background; the pixels inside come from the sprite. For an invisible seam, author the
   cell's border to match the background exactly — same colors, same box.
 
-`CROP` has three forms ([Chapter 5](#ch-5) documents them in full), and each is one
-idiom of this technique:
+`CROP` has several forms ([Chapter 5](#ch-5) documents them in full); three of them
+are the idioms of this technique:
 
 ```debug-update
 CROP layer                           ' whole layer: paint/reset the scene

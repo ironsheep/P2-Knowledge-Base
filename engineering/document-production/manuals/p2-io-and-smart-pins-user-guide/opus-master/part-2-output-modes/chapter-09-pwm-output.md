@@ -86,11 +86,14 @@ Duty cycle = Y[15:0] / X[31:16] × 100%
 Target: 1 kHz PWM, 50% duty
 PWM period = 1/1000 = 1 ms = 200,000 clocks
 
-Choose: Base period = 1, Frame period = 100,000
-  → PWM period = 2 × 100,000 × 1 = 200,000 clocks ✓
+Frame must fit the 16-bit X[31:16] field (max 65,535). The
+period needs frame × base = 100,000, so split it across the two:
 
-Duty = 50% = 50,000 / 100,000
-  → Y = 50,000
+Choose: Base period = 2, Frame period = 50,000
+  → PWM period = 2 × 50,000 × 2 = 200,000 clocks ✓
+
+Duty = 50% = 25,000 / 50,000
+  → Y = 25,000
 ```
 
 ### Configuration Sequence
@@ -101,14 +104,18 @@ CON
   _clkfreq = 200_000_000
   PWM_PIN = 20
 
-PUB triangle_pwm(freq_hz, duty_percent) | frame, y_val
-  ' Calculate frame period for desired frequency
-  frame := _clkfreq / (2 * freq_hz)
+PUB triangle_pwm(freq_hz, duty_percent) | base, frame, y_val
+  ' PWM period (clocks) = 2 * frame * base; frame must fit the 16-bit field
+  frame := _clkfreq / (2 * freq_hz)          ' = frame * base (base starts at 1)
+  base  := 1
+  repeat while frame > $FFFF                 ' grow base until frame fits 16 bits
+    base += 1
+    frame := _clkfreq / (2 * freq_hz * base)
   y_val := frame * duty_percent / 100
 
   PINFLOAT(PWM_PIN)
   WRPIN(PWM_PIN, P_PWM_TRIANGLE | P_OE)
-  WXPIN(PWM_PIN, 1 | (frame << 16))       ' Base=1, frame period
+  WXPIN(PWM_PIN, base | (frame << 16))       ' Base period, frame period
   WYPIN(PWM_PIN, y_val)
   PINLOW(PWM_PIN)
 ```
@@ -200,14 +207,18 @@ CON
   _clkfreq = 200_000_000
   PWM_PIN = 20
 
-PUB sawtooth_pwm(freq_hz, duty_percent) | frame, y_val
-  ' Calculate frame period for desired frequency
-  frame := _clkfreq / freq_hz
+PUB sawtooth_pwm(freq_hz, duty_percent) | base, frame, y_val
+  ' PWM period (clocks) = frame * base; frame must fit the 16-bit field
+  frame := _clkfreq / freq_hz                ' = frame * base (base starts at 1)
+  base  := 1
+  repeat while frame > $FFFF                 ' grow base until frame fits 16 bits
+    base += 1
+    frame := _clkfreq / (freq_hz * base)
   y_val := frame * duty_percent / 100
 
   PINFLOAT(PWM_PIN)
   WRPIN(PWM_PIN, P_PWM_SAWTOOTH | P_OE)
-  WXPIN(PWM_PIN, 1 | (frame << 16))
+  WXPIN(PWM_PIN, base | (frame << 16))
   WYPIN(PWM_PIN, y_val)
   PINLOW(PWM_PIN)
 ```
@@ -229,7 +240,7 @@ For frame period = 8, duty value = 3:
 \DiagPwmSawtooth
 ```
 
-The sawtooth pattern creates a fast rising edge and slow falling edge in the output.
+The pin output is a rectangular PWM pulse with sharp digital edges in both directions. The "sawtooth" name refers to the internal counter, which ramps slowly from 1 up to the frame period and then resets quickly to 1.
 
 
 ## 9.4 P_PWM_SMPS Mode (%01010)
@@ -395,11 +406,11 @@ These are triangle-mode maxima (`sysclk / (2 * frame)`). Sawtooth uses the full 
 
 ### Choosing Parameters
 
-**For motor control (20 kHz, 10-bit resolution):**
+**For motor control (20 kHz, triangle mode):**
 ```formula
-Frame period = 200_000_000 / 20_000 = 10,000
-Actual resolution = log2(10,000) ≈ 13.3 bits
-Y range: 0 to 10,000
+Frame period = 200_000_000 / (2 × 20_000) = 5,000   (triangle: period = 2 × frame × base)
+Actual resolution = log2(5,000) ≈ 12.3 bits
+Y range: 0 to 5,000
 ```
 
 **For LED dimming (500 Hz, 12-bit resolution):**
@@ -520,10 +531,11 @@ PUB motor_update() | delta
 ```pasm2
 CON
   _clkfreq = 200_000_000
+  PWM_PIN  = 20                              ' CON symbol → #PWM_PIN is the value 20
 
 DAT           org
 
-' 100 kHz PWM with 10-bit resolution
+' 100 kHz PWM with ~11-bit resolution (log2(2000) ≈ 11)
               dirl      #PWM_PIN
               wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
               wxpin     ##$07D0_0001, #PWM_PIN      ' Frame=2000, Base=1
@@ -537,7 +549,6 @@ pwm_loop
               waitx     delay
               jmp       #pwm_loop
 
-PWM_PIN       long      20
 duty_ptr      long      0                          ' Hub address for duty
 new_duty      long      0
 delay         long      20_000                      ' Update rate

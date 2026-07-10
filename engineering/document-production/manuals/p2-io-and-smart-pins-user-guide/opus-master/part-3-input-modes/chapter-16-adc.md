@@ -121,7 +121,7 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 
 *The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on your own hardware (see §16.8 Accuracy Considerations).*
 
-† **SINC3 Filter:** the higher SINC3 figures assume an idealized doubling over SINC2 that the P2's ADC does not actually deliver — treat them as optimistic upper bounds, not attainable resolution.
+† **SINC3 Filter:** the higher SINC3 figures assume an idealized doubling over simple bit-summing that the P2's ADC does not actually deliver — treat them as optimistic upper bounds, not attainable resolution.
 
 > **Beyond 14 bits — the instrumentation ceiling.** The table stops at 14 bits because that is the single-conversion SINC2 limit. Reaching further is possible by running SINC2 *filtering* mode fast and **summing many per-period differentials** over a long integration window (optionally with input gain ahead of it): each doubling of the accumulated sample count buys roughly another half-bit, and long integrations push into **16–17-bit / microvolt territory**. This is a *mechanism*, not a guaranteed specification — and these are *nominal* resolutions, the bit-width the accumulation produces. The *effective* number of bits (ENOB) actually measured is lower still, because it accounts for noise and distortion; it depends on the board, the source impedance, the VIO supply, and temperature (see §16.8 Accuracy Considerations, and the ratiometric method later in this section). Any specific ENOB figure is a bench result for a *particular* rig, never a datasheet value.
 
@@ -152,7 +152,7 @@ CON
 
 PUB adc_init()
   ' Configure ADC with 8-bit SINC2 sampling
-  WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
+  WRPIN(ADC_PIN, P_ADC_1X | P_ADC)
   WXPIN(ADC_PIN, %00_0111)                   ' SINC2 sampling, 128 clocks
   PINH(ADC_PIN)                               ' Enable smart pin
 
@@ -167,7 +167,7 @@ Requires software post-processing to compute the difference between consecutive 
 **Configuration:**
 ```spin2
 PUB sinc2_init()
-  WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
+  WRPIN(ADC_PIN, P_ADC_1X | P_ADC)
   WXPIN(ADC_PIN, %01_0111)                  ' SINC2 filtering, 128 clocks
   PINH(ADC_PIN)
 
@@ -189,7 +189,7 @@ PUB sinc2_read() : sample | acc
 
 ### SINC3 Filtering Mode (%10)
 
-SINC3 provides better dynamic response than SINC2, doubling the effective bits for fast-changing signals. Limited to 512 samples per period due to 27-bit accumulator.
+SINC3 provides better dynamic response than SINC2, roughly doubling the nominal bit-count over simple bit-summing for fast-changing signals (at DC it is only marginally better than SINC2). Limited to 512 samples per period due to 27-bit accumulator.
 
 **Post-processing:**
 ```pasm2
@@ -217,7 +217,7 @@ Captures raw ADC bitstream for custom processing algorithms.
 
 ```spin2
 PUB bitstream_init()
-  WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
+  WRPIN(ADC_PIN, P_ADC_1X | P_ADC)
   WXPIN(ADC_PIN, %11_0101)                    ' Bitstream, 32 bits
   PINH(ADC_PIN)
 
@@ -324,10 +324,11 @@ The scope mode captures from four consecutive pins simultaneously. Pin numbers m
 
 ```layout
 Pin group starting at 52:
-  Pin 52: Channel 0 (and trigger source)
+  Pin 52: Channel 0
   Pin 53: Channel 1
   Pin 54: Channel 2
   Pin 55: Channel 3
+  (each channel has its own independent hysteretic trigger)
 ```
 
 ### Configuration
@@ -338,7 +339,7 @@ CON
 
 PUB scope_init(trigger_config)
   ' Configure 4 consecutive pins for scope mode
-  WRPIN(SCOPE_BASE, P_ADC_GIO | P_ADC_SCOPE)
+  WRPIN(SCOPE_BASE, P_ADC_1X | P_ADC_SCOPE)
   WXPIN(SCOPE_BASE, trigger_config)
   PINH(SCOPE_BASE)
 ```
@@ -360,6 +361,9 @@ The hysteretic trigger works as follows:
 ### Reading Scope Data
 
 ```pasm2
+              ' Enable the SCOPE data pipe (D[6]=1) and point it at the
+              ' 4-pin block (D[5:2] = base pin) before reading it:
+              setscp    #%0100_0000 | SCOPE_BASE
               getscp    combined           ' Read all 4 channels (32-bit)
               ' combined = [ch3][ch2][ch1][ch0], 8 bits each
 
@@ -386,7 +390,7 @@ CON
 
 PUB multi_adc_init() | ch
   REPEAT ch FROM 0 TO NUM_CHANNELS-1
-    WRPIN(ADC_BASE + ch, P_ADC_GIO | P_ADC)
+    WRPIN(ADC_BASE + ch, P_ADC_1X | P_ADC)
     WXPIN(ADC_BASE + ch, %00_0111)            ' 8-bit SINC2
     PINH(ADC_BASE + ch)
 
@@ -422,7 +426,7 @@ CON
 
 PUB main() | adc_value, led_bits, i
   ' Initialize ADC - 8-bit, ~1.5 MHz sample rate
-  WRPIN(POT_PIN, P_ADC_GIO | P_ADC)
+  WRPIN(POT_PIN, P_ADC_1X | P_ADC)
   WXPIN(POT_PIN, %00_0111)
   PINH(POT_PIN)
 
@@ -462,7 +466,7 @@ PUB main() | sample_period
 
   ' Configure ADC with SINC2 sampling
   ' Use period override for exact rate
-  WRPIN(AUDIO_PIN, P_ADC_GIO | P_ADC)
+  WRPIN(AUDIO_PIN, P_ADC_FLOAT | P_ADC)
   WXPIN(AUDIO_PIN, %01_1100)                  ' SINC2 filter, base period
   WYPIN(AUDIO_PIN, sample_period)             ' Override period
   PINH(AUDIO_PIN)
@@ -484,7 +488,7 @@ PRI process_audio()
   ' Application-specific audio processing of audio_buffer[]
 ```
 
-> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_GIO` (ground-referenced). For an AC source such as an electret microphone, switch to `P_ADC_FLOAT`: the floating input **self-biases to roughly mid-supply**, so the mic couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what audio needs.
+> **Feeding a microphone: no bias network needed.** This example uses `P_ADC_FLOAT`, the floating pin input that **self-biases to roughly mid-supply**, so an AC source such as an electret microphone couples straight in through a single series capacitor — no external bias-divider resistors. That self-bias point is only *approximately* VIO/2, so for absolute-voltage work use the ratiometric three-reference method in §16.3; for audio (AC, where only the changes matter) the approximate midpoint is exactly what audio needs.
 
 ### Example 3: High-Resolution DC Measurement
 
@@ -551,12 +555,12 @@ DAT           org
 
               ' Initialize ADC
               dirl      #ADC_PIN
-              wrpin     ##P_ADC_GIO | P_ADC, #ADC_PIN
+              wrpin     ##P_ADC_1X | P_ADC, #ADC_PIN
               wxpin     #%00_0111, #ADC_PIN   ' 8-bit SINC2
               dirh      #ADC_PIN
 
               ' Set up event detection for IN flag
-              setse1    #%001<<6 + ADC_PIN    ' Event on IN high
+              setse1    #%001<<6 + ADC_PIN    ' Event on IN rising edge
 
 .loop
               waitse1                         ' Wait for sample ready

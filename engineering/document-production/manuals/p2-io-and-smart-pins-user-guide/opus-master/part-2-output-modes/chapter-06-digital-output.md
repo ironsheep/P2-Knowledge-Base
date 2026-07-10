@@ -276,7 +276,7 @@ pulse         drvh      pin
 
 ### Fast Toggle
 
-Maximum software toggle rate:
+A fast software toggle loop:
 
 ```pasm2
 .fast_toggle
@@ -305,12 +305,20 @@ The 3-clock output latency is a fixed pipeline delay — it sets *when* each edg
 
 ### Maximum Toggle Rate
 
-**Tight loop toggle:**
+The fastest software toggle uses `REP` to remove branch overhead. `REP` repeats an instruction block without any per-iteration branch, so each `DRVNOT` costs only its own 2 clocks:
+
+```pasm2
+              rep       #1,#0             ' Repeat next instruction indefinitely
+              drvnot    #pin              ' 2 cycles per toggle
+```
+Period: 2 cycles per toggle = 10 ns → 100M toggles/s at 200 MHz sysclk — i.e. a 50 MHz square wave.
+
+**Branch-based tight loop** (pays the 4-clock taken branch on every edge):
 ```pasm2
               drvnot    #pin              ' 2 cycles
               jmp       #$-1              ' 4 cycles (taken branch)
 ```
-Period: 6 cycles = 30 ns → ~33 MHz toggle (edge) rate at 200 MHz sysclk — i.e. a ~16.5 MHz square wave.
+Period: 6 cycles = 30 ns → ~33 MHz toggle (edge) rate at 200 MHz sysclk — i.e. a ~16.5 MHz square wave — 3× slower than the `REP` form because of the branch overhead.
 
 The 3-clock output latency shifts *when* edges reach the pad but does not reduce the edge rate; the actual rate is set by the loop's instruction count (the per-transition cost), not by the latency.
 

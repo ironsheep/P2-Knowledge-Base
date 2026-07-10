@@ -41,7 +41,7 @@ P_ASYNC_TX transmits asynchronous serial data with automatic start and stop bit 
 | Register | Field | Purpose |
 |----------|-------|---------|
 | X[31:16] | Bit period | System clocks per bit (integer part) |
-| X[15:10] | Fractional | Base-2 fractional clocks (1/64 increments) |
+| X[15:10] | Fractional | Base-2 fractional clocks (1/64 increments), honored only when X[31:26]=0 (integer bit period < 1024 clocks) |
 | X[4:0] | Bit count | Word size minus 1 (write 7 for 8-bit; supports 1-32 bits) |
 | Y[31:0] | Data | Transmit data (LSB first) |
 
@@ -70,7 +70,7 @@ X[31:10] = 113,777,778 & $FFFFFC00 = $06C8_1C00
 | Baud Rate | X[31:16] (integer) | X (with fractional) | Error |
 |-----------|-------------------|---------------------|-------|
 | 9600 | 20833 | $5161_5400 | 0.00% |
-| 19200 | 10417 | $28B0_A800 | 0.00% |
+| 19200 | 10416 | $28B0_A800 | 0.00% |
 | 38400 | 5208 | $1458_5400 | 0.01% |
 | 57600 | 3472 | $0D90_3800 | 0.01% |
 | 115200 | 1736 | $06C8_1C00 | 0.01% |
@@ -89,7 +89,7 @@ CON
   BAUD = 115200
 
 PUB uart_tx_init() | bit_period
-  ' Calculate bit period with fractional precision
+  ' Calculate integer bit period (X[31:16] = clocks per bit)
   bit_period := (_clkfreq / BAUD) << 16
 
   PINFLOAT(TX_PIN)
@@ -209,7 +209,7 @@ mode := P_SYNC_TX | P_OE | P_PLUS1_B        ' Clock from pin+1
 | Clock Edge | Configuration |
 |------------|---------------|
 | Positive (rising) | Default (no modifier) |
-| Negative (falling) | Add P_INVERT_A |
+| Negative (falling) | Add P_INVERT_B (inverts the B/clock input) |
 
 ### Configuration Sequence
 
@@ -233,7 +233,7 @@ PUB spi_master_init() | tx_mode, clk_mode
 
   PINFLOAT(CLK_PIN)
   WRPIN(CLK_PIN, clk_mode)
-  WXPIN(CLK_PIN, $1000)                     ' Clock period
+  WXPIN(CLK_PIN, $1000)                     ' Clock half-period (clocks per transition)
   PINLOW(CLK_PIN)
 
 PUB spi_tx_byte(value)
@@ -252,7 +252,7 @@ PUB spi_tx_byte(value)
               ' Setup clock generator
               dirl      #CLK_PIN
               wrpin     ##(P_TRANSITION | P_OE), #CLK_PIN
-              wxpin     ##$1000, #CLK_PIN     ' Clock period
+              wxpin     ##$1000, #CLK_PIN     ' Clock half-period (clocks per transition)
               dirh      #CLK_PIN
 
               ' Transmit byte
@@ -268,7 +268,7 @@ P_SYNC_TX transmits LSB first. For MSB-first protocols (like most SPI):
 ```spin2
 PUB spi_tx_msb_first(value) | reversed
   ' reverse the data bits for MSB-first
-  reversed := value REV 8                   ' Reverse 8 bits
+  reversed := value REV 7                   ' Reverse the low 8 bits (REV n covers bits 0..n)
 
   WYPIN(TX_PIN, reversed)
   WYPIN(CLK_PIN, 16)
@@ -276,7 +276,8 @@ PUB spi_tx_msb_first(value) | reversed
 
 **PASM2:**
 ```pasm2
-              rev       data            ' reverse the data bits, MSB-first
+              shl       data, #32-8     ' left-justify the byte into the high bits
+              rev       data            ' then reverse into the low 8 bits, MSB-first
               wypin     data, #TX_PIN
               wypin     #16, #CLK_PIN
 ```
@@ -337,7 +338,7 @@ PUB send_clocks(count)
 | 0 | Leading (first) | Trailing (second) |
 | 1 | Trailing (second) | Leading (first) |
 
-For CPHA=1, use P_INVERT_A on the data pin.
+For CPHA=1, add P_INVERT_B to the data pin, which inverts its B (clock) input and moves the shift edge.
 
 
 ## 11.5 Worked Examples
@@ -428,13 +429,14 @@ PUB spi_deselect()
 
 PUB spi_tx_byte(value) | reversed
   ' MSB first
-  reversed := value REV 8              ' reverse the data bits for MSB-first
+  reversed := value REV 7              ' reverse the 8 data bits for MSB-first (REV n covers bits 0..n)
 
   WYPIN(MOSI_PIN, reversed)
   WYPIN(CLK_PIN, 16)                        ' 8 clock cycles
 
-  ' Wait for completion
-  repeat until PINREAD(MOSI_PIN)
+  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock pin
+  ' rises when its transition count reaches zero; MOSI's IN only signals buffer-ready)
+  repeat until PINREAD(CLK_PIN)
 
 PUB spi_write_register(addr, value)
   spi_select()
@@ -471,12 +473,13 @@ PUB tx_buffer(ptr, count) | i
 ```pasm2
 CON
   _clkfreq = 200_000_000
+  TX_PIN   = 20
 
 DAT           org
 
 ' Initialize async TX
               mov       x_val, ##(200_000_000 / 115200) << 16
-              or        x_val, #8
+              or        x_val, #7            ' 8 data bits (X[4:0] = N - 1)
 
               dirl      #TX_PIN
               wrpin     ##(P_ASYNC_TX | P_OE), #TX_PIN
@@ -498,7 +501,6 @@ tx_loop
 
 done          jmp       #$
 
-TX_PIN        long      20
 x_val         long      0
 data          long      0
 message       byte      "Hello, PASM2!", 13, 10, 0
@@ -521,10 +523,12 @@ UART receivers typically tolerate ±2-3% baud rate error. At 10 bits per frame (
 
 ### Fractional Timing Benefits
 
-| Method | Precision | Error at 115200 baud |
+The X[15:10] fractional field is honored by the hardware only when X[31:26]=0 — that is, when the integer bit period is below 1024 clocks. At 200 MHz that condition is met only above ~195 kHz baud (230400 and up); for 9600-115200 baud the fractional bits are ignored and the integer-only error applies.
+
+| Method | Precision | Error at 115200 baud (200 MHz) |
 |--------|-----------|---------------------|
-| Integer only | 1 clock | 0.02% |
-| With X[15:10] | 1/64 clock | <0.001% |
+| Integer only | 1 clock | ~0.01% |
+| With X[15:10] | 1/64 clock | ignored at this baud (period = 1736 clocks > 1024) |
 
 
 ## 11.7 Quick Reference
@@ -534,7 +538,7 @@ UART receivers typically tolerate ±2-3% baud rate error. At 10 bits per frame (
 | Parameter | Register | Notes |
 |-----------|----------|-------|
 | Bit period | X[31:16] | sysclk / baud |
-| Fractional | X[15:10] | 1/64 clock precision |
+| Fractional | X[15:10] | 1/64 clock precision (honored only when X[31:26]=0, i.e. bit period < 1024 clocks) |
 | Data bits | X[4:0] | Word size minus 1 (write 7 for 8-bit; supports 1-32 bits) |
 | Data | Y | LSB first |
 | Ready flag | IN | High when ready |

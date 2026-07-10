@@ -30,7 +30,7 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 ### The P_ Constant Architecture
 
-P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The three fields most relevant to Enhanced Direct I/O are lit below; the muted fields (A/B input routing in bits [31:21] and the always-0 bit 0) belong to smart pin modes and are covered by the full field map in §4.2.
+P_ constants are 32-bit values where specific bit fields control different aspects of pin behavior. The three fields most relevant to this section are lit below; the A/B input-routing fields in bits [31:21] and the always-0 bit 0 are shown muted only to keep the focus here. The A/B input-routing fields are themselves low-level Enhanced Direct I/O settings—they select the input source and A/B logic used by the input, comparator, and level modes (§2.3–2.4, §2.7), and the resultant A drives the IN signal in non-smart-pin modes. The full field map appears in §4.2.
 
 ```{=latex}
 \DiagPConstRulerEDIO
@@ -491,7 +491,7 @@ PUB set_voltage(level) | config
 
 ## 2.13 Resetting to Default
 
-`PINCLEAR(pin)` — or equivalently `WRPIN(pin, 0)` — clears all enhanced configuration and smart pin modes, returning the pin to basic Direct I/O operation. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
+`PINCLEAR(pin)` sets `DIR=0` and then writes `WRPIN=0`, clearing all enhanced configuration and smart pin modes *and* lowering the pin's direction bit, returning the pin to basic Direct I/O operation. `WRPIN(pin, 0)` clears only the mode word and leaves `DIR` unchanged—so the two are not fully equivalent: a pin left with `DIR=1` keeps driving after `WRPIN(pin, 0)`, whereas `PINCLEAR` also releases it. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
 
 ## 2.14 Quick Reference
 

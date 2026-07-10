@@ -55,8 +55,9 @@ CON
   USB_DP = 57                                   ' D+ on odd pin (DM+1)
 
 PUB configure_usb_pins() | baud
-  ' Configure as USB pair with output enabled
+  ' Configure BOTH pins of the pair with identical WRPIN D data
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
+  WRPIN(USB_DP, P_USB_PAIR | P_OE)
   ' WXPIN on the LOWER pin sets USB mode + baud:
   '   D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed
   '   D[13:0]=baud fraction
@@ -269,8 +270,9 @@ PUB configure_usb() | baud
   PINFLOAT(USB_DM)
   PINFLOAT(USB_DP)
 
-  ' Configure USB mode with output enabled
+  ' Configure both pins of the pair with identical WRPIN D data
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
+  WRPIN(USB_DP, P_USB_PAIR | P_OE)
 
   ' Set USB mode + baud on lower pin (D[15]=0 device, D[14]=1 full-speed)
   baud := 12_000_000 / (clkfreq / $10000)
@@ -290,8 +292,10 @@ DAT           org
               dirl      #USB_DM
               dirl      #USB_DP
 
-              ' Configure USB mode + baud (lower pin)
+              ' Configure USB mode on both pins (identical D data)
               wrpin     usb_mode, #USB_DM
+              wrpin     usb_mode, #USB_DP
+              ' Set USB mode + baud on lower pin only
               wxpin     usb_cfg, #USB_DM
 
               ' Enable USB pair
@@ -378,8 +382,9 @@ Implementing USB requires:
 ### Configuration Pattern
 
 ```spin2
-WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' full-speed
+WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure DM (identical D data)
+WRPIN(even_pin+1, P_USB_PAIR | P_OE)            ' Configure DP (identical D data)
+WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' full-speed, lower pin only
 PINHIGH(even_pin)                               ' Enable DM
 PINHIGH(even_pin+1)                             ' Enable DP
 ```

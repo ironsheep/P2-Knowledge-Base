@@ -229,7 +229,7 @@ The **SETQ** method allows changing frequency atomically with a new command.
 
 Two facts decide this, and the first is counter-intuitive:
 
-1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2^31` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
+1. **The average pixel clock is essentially exact at any sysclk.** The frequency word is 32-bit, but because the phase accumulator masks its MSB each clock, only 31 bits accumulate — so the resolution is `sysclk / 2^31` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
 2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk / pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
 
 The jitter-free sysclks below are the integer multiples the P2 PLL can actually produce from a 20 MHz crystal. The last column is the penalty for ignoring the rule and just running 250 MHz.
@@ -533,7 +533,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 
         mov     cmd, ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0
         add     cmd, ##base<<17 + 640
-        xcont   cmd, #0
+        xinit   cmd, #0                          ' XINIT starts from a zeroed phase
 ```
 
 ::: tip
@@ -1119,8 +1119,8 @@ DAT             org
                 drvc    vsync_pin                 ' establish initial
                                                   ' VSYNC level
 
-vfield          mov     y, #10                    ' vertical front porch
-                                                  ' (lines)
+vfield          mov     y, #33                    ' vertical back porch
+                                                  ' (lines, follows vsync)
                 call    #blank
                 rdfast  #0, ##framebuffer         ' visible pixels stream
                                                   ' from the FIFO
@@ -1129,8 +1129,8 @@ line            call    #hsync
                 xcont   m_visible, #0             ' 640 RGB pixels
                                                   ' (pipeline: Chapter 7)
                 djnz    y, #line
-                mov     y, #33                    ' vertical back porch
-                                                  ' (lines)
+                mov     y, #10                    ' vertical front porch
+                                                  ' (lines, precedes vsync)
                 call    #blank
                 drvnot  vsync_pin                 ' VSYNC active
                 mov     y, #2                     ' vertical sync (lines)
@@ -1157,8 +1157,8 @@ m_sync          long    $7F01_0000 + 96
 m_back          long    $7F01_0000 + 48
 ' whole line, no visible pixels
 m_blank         long    $7F01_0000 + 800
-' X_RFWORD_RGB16 | X_PINS_ON
-m_visible       long    $B085_0000 + 640
+' X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 (route RGB to the DACs)
+m_visible       long    $BF85_0000 + 640
 
 pixfreq         long    $0CE3_BCD3                ' 25.175 MHz @ 250 MHz
 vsync_pin       res     1
@@ -1236,7 +1236,9 @@ The streamer outputs SPI data while a smart pin generates the clock.
 ```pasm2
                 ' Configure clock pin as transition counter
                 wrpin   ##P_TRANSITION + P_OE, #spi_clk
-                wxpin   ##2, #spi_clk           ' base period in clocks
+                wxpin   ##1, #spi_clk           ' base period in clocks
+                                                ' (2 sysclks/clock cycle =
+                                                ' one NCO-÷2 data bit)
                 drvl    #spi_clk
 
                 ' NCO at half clock rate
@@ -1466,7 +1468,7 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%0111` | `%010a` | RFLONG 16×2 → LUT | `X_RFLONG_16X2_LUT` |
 | `%0111` | `%011a` | RFLONG 8×4 → LUT | `X_RFLONG_8X4_LUT` |
 | `%0111` | `%1000` | RFLONG 4×8 → LUT | `X_RFLONG_4X8_LUT` |
-| `%1000` | `%pppp` | RFBYTE → 1-pin + 1-DAC1 | `X_RFBYTE_1P_1DAC1` |
+| `%1000` | `%pppa` | RFBYTE → 1-pin + 1-DAC1 | `X_RFBYTE_1P_1DAC1` |
 | `%1001` | `%ppp0` | RFBYTE → 2-pin + 2-DAC1 | `X_RFBYTE_2P_2DAC1` |
 | `%1001` | `%ppp0`+2 | RFBYTE → 2-pin + 1-DAC2 | `X_RFBYTE_2P_1DAC2` |
 | `%1010` | `%pp00` | RFBYTE → 4-pin + 4-DAC1 | `X_RFBYTE_4P_4DAC1` |
@@ -1483,7 +1485,7 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%1011` | `%0100` | RFBYTE RGB8 | `X_RFBYTE_RGB8` |
 | `%1011` | `%0101` | RFWORD RGB16 | `X_RFWORD_RGB16` |
 | `%1011` | `%0110` | RFLONG RGB24 | `X_RFLONG_RGB24` |
-| `%1100` | `%pppp` | 1-pin + 1-DAC1 → WFBYTE | `X_1P_1DAC1_WFBYTE` |
+| `%1100` | `%pppa` | 1-pin + 1-DAC1 → WFBYTE | `X_1P_1DAC1_WFBYTE` |
 | `%1101` | `%ppp0` | 2-pin + 2-DAC1 → WFBYTE | `X_2P_2DAC1_WFBYTE` |
 | `%1101` | `%ppp0`+2 | 2-pin + 1-DAC2 → WFBYTE | `X_2P_1DAC2_WFBYTE` |
 | `%1110` | `%pp00` | 4-pin + 4-DAC1 → WFBYTE | `X_4P_4DAC1_WFBYTE` |
@@ -1590,7 +1592,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 **Check:**
 
 1. **RDFAST** executed before streamer command
-2. Buffer address aligned to 64-byte boundary for wrap mode
+2. Buffer start address long-aligned (4-byte, ends in `%00`) for wrap mode
 3. Buffer size matches FIFO configuration
 4. No other code reading from FIFO simultaneously
 

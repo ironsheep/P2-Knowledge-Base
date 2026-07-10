@@ -666,7 +666,7 @@ watches `count` and lights the LED on odd values. Neither cog calls the other; t
 just agree on a spot in hub memory. Single hub reads and writes are *atomic* — a cog
 always sees a whole value, never half-written — so this simple mailbox is safe. When a
 hand-off is more than one value, or several cogs might write at once, the P2 gives you
-**locks** (the 16 hardware locks from Chapter 1) to guard the exchange. The
+**locks** (16 hardware locks) to guard the exchange. The
 *P2 Assembly Language Reference* covers the coordination patterns in depth.
 
 ::: p1note
@@ -686,8 +686,9 @@ three options, not a binary.
   and to read. It runs as interpreted bytecode, so it's slower than assembly, but your
   program can be large because the bytecodes live in the roomy hub. Reach for Spin2 for
   application logic, coordination, setup, and anything not on a tight timing budget.
-- **PASM2** is native assembly: it runs at the deterministic two-clocks-per-instruction
-  speed from Chapter 1, with cycle-exact timing. Reach for a dedicated PASM2 cog when a
+- **PASM2** is native assembly: it runs with the deterministic, cycle-exact timing from
+  Chapter 1 — most register-to-register instructions execute in just two clocks, while
+  branches and hub accesses take more. Reach for a dedicated PASM2 cog when a
   job must be fast and precise — a video driver, a bit-banged protocol, a tight control
   loop.
 - **Inline PASM2** sits between them: a short burst of assembly dropped right inside a

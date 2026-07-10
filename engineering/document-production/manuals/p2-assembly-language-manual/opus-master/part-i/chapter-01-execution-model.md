@@ -38,7 +38,7 @@ Cogs can communicate with each other through shared hub memory, hardware locks, 
 
 ### 1.1.3 Starting and Stopping Cogs
 
-The `COGINIT` instruction starts a new cog or restarts an existing one. COGINIT specifies which cog to start (0-7), where the code resides in hub memory, and optionally passes a parameter to the new cog. The parameter value appears in the new cog's PTRB register, providing a simple mechanism for initialization data.
+The `COGINIT` instruction starts a new cog or restarts an existing one. COGINIT specifies which cog to start (0-7), where the code resides in hub memory, and optionally passes a parameter to the new cog. The start address is written to the new cog's PTRB register; the optional parameter—supplied via a `SETQ` executed immediately before COGINIT—is written to the new cog's PTRA register, providing a simple mechanism for initialization data.
 
 The `COGSTOP` instruction halts a running cog. A cog can stop itself or another cog by specifying the target cog number. Stopped cogs consume no power and can be restarted later with different code.
 
@@ -88,7 +88,7 @@ Each cog has a dedicated 512-long Lookup Table (LUT) providing additional fast m
 
 ### 1.3.1 LUT Characteristics
 
-LUT memory occupies a separate address space from cog RAM, addressed at $200-$3FF relative to cog addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions. RDLUT takes 3 clock cycles and WRLUT takes 2 cycles—both faster than hub access but slower than direct cog register operations. This separation doubles the available fast memory per cog from 512 longs to 1024 longs total.
+LUT memory occupies a separate address space from cog RAM, addressed at $200-$3FF relative to cog addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions. RDLUT takes 3 clock cycles and WRLUT takes 2 cycles—both faster than hub access. WRLUT matches the speed of a direct cog-register operation (2 clocks), while RDLUT is one clock slower. This separation doubles the available fast memory per cog from 512 longs to 1024 longs total.
 
 LUT RAM can also execute code at the same speed as cog RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed cog RAM capacity. When the program counter is in the range $200-$3FF, the cog fetches instructions from LUT memory with the same deterministic timing as cog execution.
 
@@ -145,7 +145,7 @@ When a cog accesses a specific hub address, it must wait up to 7 clocks to reach
 
 The hardware FIFO smooths out data flow for non-sequential or variable-rate access. The FIFO can be configured for hub-RAM-read or hub-RAM-write operation, allowing sequential transfers in any combination of bytes, words, or longs at rates up to one long per clock. The FIFO maintains proper hub slice alignment without programmer intervention.
 
-Hub read instructions (RDBYTE/RDWORD/RDLONG) take 9-16 clocks in cog/LUT execution mode (9-26 in hub execution mode). Hub write instructions (WRBYTE/WRWORD/WRLONG) take 3-10 clocks in cog/LUT mode (3-20 in hub execution mode). All ranges are egg-beater hub-window dependent. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
+Hub read instructions (RDBYTE/RDWORD/RDLONG) take 9-16 clocks in cog/LUT execution mode (9-26 in hub execution mode). Hub write instructions (WRBYTE/WRWORD/WRLONG) take 3-10 clocks in cog/LUT mode (3-20 in hub execution mode). All ranges are egg-beater hub-window dependent. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks (LOCKNEW takes 4-11).
 
 Despite the variable initial wait, hub timing remains deterministic. The maximum wait is always seven clocks, and once aligned, sequential access proceeds at one long per clock. Programs requiring precise timing use cog execution mode for critical sections and hub memory for data storage and inter-cog communication.
 
