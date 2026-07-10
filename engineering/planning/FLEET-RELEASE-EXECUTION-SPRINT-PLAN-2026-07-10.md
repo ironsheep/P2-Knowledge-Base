@@ -52,14 +52,15 @@ had zero survivors). Most of them need **no further edits** — they are render-
 | **Assembly** | C-56 AUG, C-09 eggbeater | 2 files (~83 occ) | — | ⚠ after §2+§3 |
 | **Debug Window** | C-19, C-247, C-249, skip ch05-POS, F-205a | — | **HEAVY** (§4+§5) | ⛔ after §4+§5 |
 
-**Consequence for sequencing (revised per Stephen, 2026-07-10):** the render wave is gated on a
-**single content-review gate** — *all* edits land across *all* manuals, then **Stephen reviews the
-accumulated diffs (content + code) per manual**, and only then does any manual go to PDF. So the
-order is: **§0 commit pending → apply all Layer-3 edits (the 3 manuals) → Stephen content+diff
-review (§7.5, the render gate) → render wave → release.** The 9 content-final manuals carry only the
-already-committed §6 diff; Stephen may **pre-review those 9 early** (they're stable) to shorten the
-gate, but no PDF is generated until the gate clears. The YAML/KB track (Sweep B YAMLs + F-204) runs
-on its own §9 rail.
+**Master sequence (Stephen, Q2 = one focused campaign, NOT rolling releases):** interim per-manual
+releases would divert focus from the core goal — clean, complete correction of *all* sources — so run
+this as a single campaign in three steps:
+1. **Push through ALL manual fixes** — every front, every manual; get all ducks in a row (Layer-3
+   edits §2–§5 + the hardware-gated ones §6). **No PDF yet.**
+2. **Cooperative audit** (§7.5) — visual inspection + cooperative discovery across all fixed manuals;
+   nothing renders until this clears.
+3. **Render the WHOLE fleet to PDF** at the end (§8), all known clean+correct, and **release together**
+   (§9). The YAML/KB track (Sweep B YAMLs + F-204) lands in the same coordinated release.
 
 Sweep B **doc** impact is confined to **Assembly only** (every other manual's `=` hits are
 config/state prose, out of scope) — so no other manual's render is gated by Sweep B.
@@ -85,7 +86,12 @@ Only three manuals carry un-applied Sweep-A work. Base §6 text is already commi
 - **C-23** ENOB terminology re-check — **must not re-introduce "ENOB"** removed in IOSP v1.0.3
   (`project_adc_enob_correction_thread`). Confirm the committed wording is clean; no edit if so.
 - **C-65** rdpin() Spin2-vs-PASM2 C-bit caution — verify the committed note reads correctly.
-- **Genuine skip** §12.3 `P_LOGIC_B_FB` comment — **needs Stephen's call** (Open Q).
+- §12.3 `P_LOGIC_B_FB` — **(C, Stephen Q3): rework the subsection to teach it correctly.** The
+  current comment "Same, different internal routing" is false (it's the **B input**, not A, and
+  **feedback** output). Rework to teach the two axes — **input source A vs B** and **output OUT vs
+  feedback** — clearing the misconception. **Must be grounded:** pull the exact A/B input-selector
+  semantics from the **Silicon Doc smart-pin input-routing** (not only the constant table), so we
+  don't trade a vague comment for a confident-but-wrong teaching (`feedback_no_unsourced_claims`).
 
 **2c. Debug Window** (non-example corrections — see also §5):
 - **C-19** green/lime — now **empirically settled** (test A: default = clLime $00FF00 exact;
@@ -210,7 +216,8 @@ Separate from the examples: the prose/behavior backlog that gates Debug release.
   C-R7 SCOPE 256, B26 MIDI rgb24 accepted. Re-triage the 34 against these results: the four
   **inversions** (filled-bars→lines, Lime→Green, 256→255, MIDI named-only) become **DROP**; the
   range/default items become **confirm-manual-correct** (no edit).
-- **F-205a** apply (weight); **F-205b** hold pending Open Q 1.
+- **F-205 (both halves in one pass)** — apply weight + justification together **after Test I**
+  confirms the justification mapping (Q1: test-first, one-pass fix).
 - Keep zip↔manual identity for any example touched incidentally.
 
 ---
@@ -271,16 +278,37 @@ re-zip (§4 Stage 5) and as a Debug release gate. Prevents silent corpus drift f
 
 ---
 
-## 7.5. Stephen content + diff review gate (HARD gate before any PDF)
+## 7.5. Cooperative audit (HARD gate before any PDF — fleet-wide)
 
-After **all** Layer-3 edits land (§2–§5) and pending work is committed (§0), Stephen reviews the
-**accumulated diff since last public release, per manual** — manual prose/content AND example code —
-before a single PDF is generated. Nothing renders until this clears.
-- Present per manual: the full diff (git range), with the correction rationale/source for each hunk.
-- The 9 content-final manuals (§6-only diff) may be pre-reviewed early to shorten the gate.
-- Any change Stephen rejects loops back to §2–§5 (fix), re-commit, re-present — never carried into render.
-- Rationale: Stephen re-syncs on exactly what ships and catches anything before Forge time is spent
-  (`document-finalize` gather-then-resolve, and "every commit raises quality").
+After **all** manual fixes land (§2–§6) and are committed, Stephen and Claire do **one cooperative
+audit pass across all fixed manuals** — visual inspection + cooperative discovery of the accumulated
+diff since last public release (manual prose/content AND example code). **No PDF is generated until
+this clears for the whole fleet** (Q2: single campaign, not per-wave).
+- Present per manual: the full diff (git range) with the correction rationale/source for each hunk,
+  for visual inspection; surface anything ambiguous for cooperative discovery.
+- Anything rejected loops back to §2–§6 (fix), re-commit, re-present — never carried into render.
+- Rationale: one focused sign-off that every source was corrected cleanly, so the fleet renders
+  known-clean (`document-finalize` gather-then-resolve; "complete over partial").
+
+## 7.6. Master hardware-test catalog — promote A–J into the versioned ledger
+
+**Gap found (Stephen, 2026-07-10):** every hardware/render test that yields grounding must stay
+**versioned** as one master catalog, so any future challenge to a claim answers with "here's the
+test, here's the result — and if it's not complete enough, here's how we extend it." Today the
+**silicon/smart-pin tests are versioned** (`hardware-verification/P2-EMPIRICAL-FINDINGS.md`, EF-NNN +
+`VERIFICATION-OPPORTUNITIES.md`), but the **DEBUG-window render tests (A–H, and I/J when run) + the
+reconciliation live only in the gitignored `audit/` workspace** — not durable. That's the risk:
+these A–H results ground the whole sprint, yet aren't in the versioned ledger.
+
+Deliverable:
+- **Make `P2-EMPIRICAL-FINDINGS.md` the single master hardware-test catalog** — DEBUG-window render
+  tests are first-class alongside silicon/log tests (both are hardware tests). Add a glanceable index
+  row per test: ID · what · why · result · status.
+- **Promote A–H (and I/J after §6) to EF-NNN entries** — each carrying what/why/result/grounding + a
+  pointer to the regenerable `.spin2` (the test source is the versioned artifact; BMP/log regenerable).
+  Cite these EFs wherever a manual/YAML change grounds on them.
+- **Standing discipline (memory):** no grounding result stays only in a gitignored workspace — every
+  test that changes what we know graduates to the ledger.
 
 ## 8. Render wave (Phase 3 — NO release yet)
 
@@ -290,10 +318,10 @@ outline, key sections, compile log; guard silent content-drop, `reference_forge_
 Wave-staging: shortest first; a changed shared common-named file rides **one** manual only
 (`feedback_wave_staging_order_and_shared_once`).
 
-All rendering is **after** the §7.5 review gate. Within the wave, order lightest-first:
-- **Wave 1:** the 9 content-final manuals (Getting Started, DeSilva, Streamer, Architect,
-  P2AN001–005) — §6-only diff, fastest to verify.
-- **Wave 2:** IOSP → Assembly → Debug (the 3 that took Layer-3 edits), lightest-first.
+All rendering happens **after** the §7.5 cooperative audit clears for the whole fleet — then the
+**entire fleet renders and releases together** (Q2 = one fleet moment). Render order is only an
+internal efficiency choice (lightest-first: the 9 content-final manuals, then IOSP → Assembly →
+Debug); it is **not** separate release waves — all ship in the one coordinated release (§9).
 
 ## 9. Release wave (Phase 4) + YAML/KB track
 
@@ -313,17 +341,19 @@ All rendering is **after** the §7.5 review gate. Within the wave, order lightes
 
 ## Open Questions (each carries a recommendation)
 
-1. **F-205 split — now generated.** Test D settled the **weight** aspect ("$00=light" refuted →
-   $00==$01). The **justification 2/3-swap** aspect is now covered by **Test I** (authored + compiles,
-   in the §6 batch). *Recommend:* apply **F-205a (weight)** now; hold the **F-205b (justification)**
-   manual/YAML edit until Test I's BMPs come back, then apply per the observed mapping. **Need:**
-   confirm the split (apply weight now, justification after Test I).
-2. **Re-release scope / cadence.** §6 fixes are committed-but-unreleased across 12 manuals.
-   *Recommend:* re-render+release all 12; **P2AN006 left as-is** (no content change, no bump).
-   And ship **Wave 1 (9 ready manuals) early**, Debug/Assembly/IOSP as Wave 2 — don't hold done work
-   for Debug's long pole. **Need:** one coordinated "fleet moment" for optics, or rolling Wave 1/2?
-3. **IOSP genuine skip §12.3 `P_LOGIC_B_FB` comment** — your call (catalog left it a genuine skip).
-   *Recommend:* review the one comment together during IOSP finalize; likely leave.
+1. **F-205 — RESOLVED (Stephen): do NOT split.** Run **Test I** in today's §6 batch for the
+   justification answer, then apply **both** halves (weight + justification) in **one** documentation
+   pass over the TEXTSTYLE section (`ch05-plot.md` + `plot.yaml`). Test first; both fixes together.
+   Rationale: the hardware runs today anyway, so waiting on Test I is no real delay, and one clean
+   pass beats a double-touch.
+2. **Release cadence — RESOLVED (Stephen): A, one fleet moment.** Run as a single focused campaign:
+   (1) push all manual fixes, (2) cooperative audit, (3) render the whole fleet to PDF at the end and
+   release together — no interim per-manual releases (they'd divert focus from clean-correct-all-
+   sources). Re-render+release all 12; **P2AN006 left as-is** (no §6 change, no bump).
+3. **IOSP §12.3 `P_LOGIC_B_FB` — RESOLVED (Stephen): C, rework to teach it correctly.** Not just
+   fix the "Same, different routing" comment — teach the A/B-input and OUT/feedback axes so the
+   misconception is dissolved. Grounded in Silicon Doc smart-pin input-routing + the manual's own
+   constant tables (see §2b); no unsourced claims.
 4. **Interactive example grounding.** ch12 PC_KEY/PC_MOUSE + ch15-control-panel can't be
    screenshotted. *Recommend:* Stephen runs them, confirms behavior as a pass/fail observation,
    logged as "interactively verified" in the run-list (best grounding available). **Need:** accept
@@ -339,6 +369,8 @@ All rendering is **after** the §7.5 review gate. Within the wave, order lightes
    re-run — which then joins the §6 run-list. **Need:** blanket "revert to tested" as the default, and
    I bring you the short list of divergences that look worth keeping for a keep/re-test call?
 
-*All other research is closed; these six are the only items where your call changes what I do.*
-*(F-204 is NOT among them — it's grounded by IOSP §4.13 + CSV + EF-015; it needs only the one-NOP
-YAML edit on the §9 track, no verification.)*
+**Q1–Q3 RESOLVED (above). Q4–Q6 remain open** — the only items where Stephen's call changes what I do.
+Iterating one at a time (Stephen's technique: Claire gives pros/cons + recommendation, Stephen answers).
+Next up: **Q4** (interactive-example grounding).
+*(F-204 is NOT among them — grounded by IOSP §4.13 + CSV + EF-015; needs only the one-NOP YAML edit
+on the §9 track, no verification.)*
