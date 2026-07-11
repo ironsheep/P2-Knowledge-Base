@@ -4,6 +4,16 @@
 **Prepared by:** Claire (task #193 PREP).
 **Sprint:** fleet-release · plan `engineering/planning/FLEET-RELEASE-EXECUTION-SPRINT-PLAN-2026-07-10.md`.
 
+> **UPDATE 2026-07-11 evening (Claire) — batch essentially DONE:** two hardware passes today
+> captured everything on this list. Morning run (03:55–04:42) captured **A1–A4, A8–A14, B2**;
+> evening run (18:28–19:00) captured **A5, A6, A7, B1**. **C1–C3** are certified by
+> structural-vs-reference (no hardware run needed, per the directive in Part C). **One generator
+> was added AFTER this list was written and is the ONLY figure still to run: A15
+> `fig-13-packed-logic-multi`** (row in Part A; no input-asset .bmp needed). The two conflict
+> tests **D1/D2 (I/J)** in `audit/verification-tests/` are also still to run (self-contained).
+> **Net remaining = A15 + D1 + D2.** All prior figures are captured-current unless their example
+> changes again (e.g. a ch05-post edit would re-open its figure).
+
 ## Why this run exists
 
 The chapters ch01, ch02, ch12, ch13, ch14, ch15 have **no figure-generators** — their
@@ -66,6 +76,7 @@ generator bounds its loop, `SAVE`s the display area (`fig-NN-*.bmp`) **and** the
 | A12 | `fig-14-scope-trace` | SCOPE + TERM | ch14-scope-trace | left SCOPE sine + right TERM `Samples/Current/Peak` | — |
 | A13 | `fig-15-dashboard` | TERM | ch15-dashboard | fixed-field `RPM/Temp/Volts` block, values updating | — |
 | A14 | `fig-15-panel-plot` | PLOT + 2 BMP LAYERs | ch15-panel-plot | frame bg + **3-digit reading blitted from the font strip** | **LAYER/external-BMP** |
+| A15 | `fig-13-packed-logic-multi` | LOGIC | ch13-packed-logic-multi | **two** 1-bit traces `D0` **and** `D1`, both random hi/lo (pre-fix bug drew everything on D0) | **mode↔channel, F-207 B** |
 
 **Assets required in the run directory** for A14: `panel_bg.bmp` + `digits.bmp`
 (both live in `examples-library/` — copy them alongside the generator before running).
