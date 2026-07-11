@@ -277,18 +277,20 @@ Either alias style works correctly with either compare instruction. The choice o
 
 Flag meanings vary by instruction category. Understanding these patterns helps predict flag behavior without consulting the instruction reference for each operation.
 
+In the tables below, a flag entry such as `Result == 0` or `A == B` is a **comparison** — the flag is set when that test is true. A single `=` (as in the surrounding prose and code comments, e.g. `Z=1`, `C = C AND bit`) denotes a resulting **state or assignment**, not a test for equality.
+
 ### 3.4.1 Arithmetic Instructions
 
 Arithmetic instructions set C based on unsigned overflow (carry or borrow) and set Z when the result equals zero:
 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
-| ADD | Unsigned carry out of bit 31 | Result = 0 |
-| ADDS | True sign of result (D+S at full precision) | Result = 0 |
-| SUB | Unsigned borrow (A < B) | Result = 0 |
-| SUBS | True sign of result (D−S at full precision) | Result = 0 |
-| CMP | Unsigned borrow (A < B) | A = B |
-| CMPS | Signed A < B (true sign of A−B) | A = B |
+| ADD | Unsigned carry out of bit 31 | Result == 0 |
+| ADDS | True sign of result (D+S at full precision) | Result == 0 |
+| SUB | Unsigned borrow (A < B) | Result == 0 |
+| SUBS | True sign of result (D−S at full precision) | Result == 0 |
+| CMP | Unsigned borrow (A < B) | A == B |
+| CMPS | Signed A < B (true sign of A−B) | A == B |
 
 For ADD, C=1 indicates that adding the operands produced a value larger than 32 bits can represent—a carry occurred. For SUB and CMP, C=1 indicates the first operand is less than the second (a borrow would be required). The result is always written to the destination (for ADD/SUB) or the flags are set (for CMP/CMPS).
 
@@ -300,10 +302,10 @@ Most logical instructions (AND, OR, XOR) set C based on parity and set Z based o
 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
-| AND | Parity (odd # of 1 bits) | Result = 0 |
-| OR | Parity (odd # of 1 bits) | Result = 0 |
-| XOR | Parity (odd # of 1 bits) | Result = 0 |
-| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result = 0 |
+| AND | Parity (odd # of 1 bits) | Result == 0 |
+| OR | Parity (odd # of 1 bits) | Result == 0 |
+| XOR | Parity (odd # of 1 bits) | Result == 0 |
+| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result == 0 |
 
 Parity means C=1 when the result contains an odd number of 1 bits, and C=0 when the result contains an even number of 1 bits. This enables parity checking for error detection—XOR all data bits together, and C indicates odd parity.
 
@@ -315,10 +317,10 @@ Shift and rotate instructions capture the bit shifted or rotated out in the C fl
 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
-| SHL | Bit 31 (MSB shifted out) | Result = 0 |
-| SHR | Bit 0 (LSB shifted out) | Result = 0 |
-| ROL | Bit 31 (MSB rotated out) | Result = 0 |
-| ROR | Bit 0 (LSB rotated out) | Result = 0 |
+| SHL | Bit 31 (MSB shifted out) | Result == 0 |
+| SHR | Bit 0 (LSB shifted out) | Result == 0 |
+| ROL | Bit 31 (MSB rotated out) | Result == 0 |
+| ROR | Bit 0 (LSB rotated out) | Result == 0 |
 
 For left operations (SHL, ROL), the most significant bit (bit 31) moves into C. For right operations (SHR, ROR), the least significant bit (bit 0) moves into C. This enables multi-precision shifts where the bit shifted out of one word becomes the bit shifted into the next word.
 
@@ -330,11 +332,11 @@ Move and data manipulation instructions set flags based on the source or result 
 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
-| MOV | MSB of source (S[31]) | Source = 0 |
-| NEG | Result is negative (result bit 31) | Result = 0 |
-| ABS | Source was negative | Result = 0 |
-| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result = 0 |
-| ENCOD | Source was non-zero | Result = 0 |
+| MOV | MSB of source (S[31]) | Source == 0 |
+| NEG | Result is negative (result bit 31) | Result == 0 |
+| ABS | Source was negative | Result == 0 |
+| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result == 0 |
+| ENCOD | Source was non-zero | Result == 0 |
 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 

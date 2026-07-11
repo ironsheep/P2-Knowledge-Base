@@ -16,7 +16,8 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 **Flag Effect Notation:**
 
 - `---` indicates the flag is not affected by the instruction
-- `Result = 0` means the flag is set if the result equals zero
+- `Result == 0` means the flag is set if the result equals zero
+- Notation: `==` is a **comparison** — the flag is set when the two sides are equal (e.g. `D == S`). A single `=` denotes **assignment or resulting state** — a register receives a value (e.g. `D = D + 1`, `C = 0`), not a test for equality.
 - Specific conditions are described where applicable
 
 
@@ -25,14 +26,14 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 
 | Instruction | Opcode | CZI | Cycles | C Effect | Z Effect |
 |-------------|--------|-----|--------|----------|----------|
-| ABS | `0110010` | CZI | 2 | S[31] | Result = 0 |
-| ADD | `0001000` | CZI | 2 | carry of (D + S) | Result = 0 |
+| ABS | `0110010` | CZI | 2 | S[31] | Result == 0 |
+| ADD | `0001000` | CZI | 2 | carry of (D + S) | Result == 0 |
 | ADDCT1 | `1010011` | — | 2 | — | — |
 | ADDCT2 | `1010011` | — | 2 | — | — |
 | ADDCT3 | `1010011` | — | 2 | — | — |
 | ADDPIX | `1010010` | — | 7 | — | — |
-| ADDS | `0001010` | CZI | 2 | sign of (D + S) | Result = 0 |
-| ADDSX | `0001011` | CZI | 2 | sign of (D+S+C) | Z AND (Result = 0) |
+| ADDS | `0001010` | CZI | 2 | sign of (D + S) | Result == 0 |
+| ADDSX | `0001011` | CZI | 2 | sign of (D+S+C) | Z AND (Result == 0) |
 | ADDX | `0001001` | CZI | 2 | carry of (D + S + C) | Z AND (result == 0) |
 | AKPIN | `1100000` | — | 2 | — | — |
 | ALLOWI | `1101011` | — | 2 | — | — |
@@ -47,8 +48,8 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | ALTSB | `1001011` | — | 2 | — | — |
 | ALTSN | `1001010` | — | 2 | — | — |
 | ALTSW | `1001011` | — | 2 | — | — |
-| AND | `0101000` | CZI | 2 | parity of result | Result = 0 |
-| ANDN | `0101001` | CZI | 2 | parity of result | Result = 0 |
+| AND | `0101000` | CZI | 2 | parity of result | Result == 0 |
+| ANDN | `0101001` | CZI | 2 | parity of result | Result == 0 |
 | ASMCLK | `---` | — | — | — | — |
 | AUGD | `1111100` | — | 2 | — | — |
 | AUGS | `1111000` | — | 2 | — | — |
@@ -69,11 +70,11 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CALLD | `1011001` | CZI | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
-| CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D=S |
-| CMPM | `0010101` | CZI | 2 | Result[31] | D=S |
+| CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D == S |
+| CMPM | `0010101` | CZI | 2 | Result[31] | D == S |
 | CMPR | `0010100` | CZI | 2 | borrow of (S - D) | (D == S) |
-| CMPS | `0010010` | CZI | 2 | Signed (D < S) | D=S |
-| CMPSUB | `0010111` | CZI | 2 | Unsigned(D => S) | Result = 0 |
+| CMPS | `0010010` | CZI | 2 | Signed (D < S) | D == S |
+| CMPSUB | `0010111` | CZI | 2 | Unsigned(D => S) | Result == 0 |
 | CMPSX | `0010011` | CZI | 2 | true sign of (D - (S + C)) | Z AND (D == S + C) |
 | CMPX | `0010001` | CZI | 2 | borrow of (D - (S + C)) | Z AND (D == S + C) |
 | COGATN | `1101011` | — | 2 | — | — |
@@ -84,7 +85,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CRCBIT | `1001110` | — | 2 | — | — |
 | CRCNIB | `1001110` | — | 2 | — | — |
 | DEBUG | `---` | — | — | — | — |
-| DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result = 0 |
+| DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result == 0 |
 | DECOD | `1001110` | — | 2 | — | — |
 | DIRC | `1101011` | CZ | 2 | — | DIR bit |
 | DIRH | `1101011` | CZ | 2 | — | DIR bit |
@@ -106,13 +107,13 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | DRVNZ | `1101011` | CZ | 2 | — | OUT bit |
 | DRVRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | DRVZ | `1101011` | CZ | 2 | — | OUT bit |
-| ENCOD | `0111100` | CZI | 2 | S != 0 | Result = 0 |
+| ENCOD | `0111100` | CZI | 2 | S != 0 | Result == 0 |
 | EXECF | `1101011` | — | 4 | — | — |
 | FBLOCK | `1100100` | — | 2 | — | — |
-| FGE | `0011000` | CZI | 2 | limit enforced | Result = 0 |
-| FGES | `0011010` | CZI | 2 | limit enforced | Result = 0 |
-| FLE | `0011001` | CZI | 2 | limit enforced | Result = 0 |
-| FLES | `0011011` | CZI | 2 | limit enforced | Result = 0 |
+| FGE | `0011000` | CZI | 2 | limit enforced | Result == 0 |
+| FGES | `0011010` | CZI | 2 | limit enforced | Result == 0 |
+| FLE | `0011001` | CZI | 2 | limit enforced | Result == 0 |
+| FLES | `0011011` | CZI | 2 | limit enforced | Result == 0 |
 | FLTC | `1101011` | CZ | 2 | — | OUT bit |
 | FLTH | `1101011` | CZ | 2 | — | OUT bit |
 | FLTL | `1101011` | CZ | 2 | — | OUT bit |
@@ -126,8 +127,8 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | GETCT | `1101011` | C | 2 | same | — |
 | GETNIB | `1000010` | — | 2 | — | — |
 | GETPTR | `1101011` | — | 2 | — | — |
-| GETQX | `1101011` | CZ | 2...58 | X[31] | Result = 0 |
-| GETQY | `1101011` | CZ | 2...58 | Y[31] | Result = 0 |
+| GETQX | `1101011` | CZ | 2...58 | X[31] | Result == 0 |
+| GETQY | `1101011` | CZ | 2...58 | Y[31] | Result == 0 |
 | GETRND | `1101011` | CZ | 2 | RND[31] | RND[30], unique per cog |
 | GETSCP | `1101011` | — | 2 | — | — |
 | GETWORD | `1001001` | — | 2 | — | — |
@@ -135,7 +136,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | HUBSET | `1101011` | — | 2...9 | — | — |
 | IJNZ | `1011100` | — | 2 or 4 | — | — |
 | IJZ | `1011100` | — | 2 or 4 | — | — |
-| INCMOD | `0111000` | CZI | 2 | 1, else D = D + 1 and C = 0 | Result = 0 |
+| INCMOD | `0111000` | CZI | 2 | 1, else D = D + 1 and C = 0 | Result == 0 |
 | JATN | `1011110` | — | 2 or 4 | — | — |
 | JCT1 | `1011110` | — | 2 or 4 | — | — |
 | JCT2 | `1011110` | — | 2 or 4 | — | — |
@@ -181,30 +182,30 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | MODC | `1101011` | — | 2 | cccc[{C,Z}] | — |
 | MODCZ | `1101011` | — | 2 | cccc[{C,Z}] | zzzz[{C,Z}] |
 | MODZ | `1101011` | — | 2 | — | zzzz[{C,Z}] |
-| MOV | `0110000` | CZI | 2 | S[31] | Result = 0 |
+| MOV | `0110000` | CZI | 2 | S[31] | Result == 0 |
 | MOVBYTS | `1001111` | — | 2 | — | — |
-| MUL | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
+| MUL | `1010000` | I | 2 | — | (D == 0) OR (S == 0) |
 | MULPIX | `1010010` | — | 7 | — | — |
-| MULS | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
-| MUXC | `0101100` | CZI | 2 | parity of result | Result = 0 |
-| MUXNC | `0101101` | CZI | 2 | parity of result | Result = 0 |
+| MULS | `1010000` | I | 2 | — | (D == 0) OR (S == 0) |
+| MUXC | `0101100` | CZI | 2 | parity of result | Result == 0 |
+| MUXNC | `0101101` | CZI | 2 | parity of result | Result == 0 |
 | MUXNIBS | `1001111` | — | 2 | — | — |
 | MUXNITS | `1001111` | — | 2 | — | — |
-| MUXNZ | `0101111` | CZI | 2 | parity of result | Result = 0 |
+| MUXNZ | `0101111` | CZI | 2 | parity of result | Result == 0 |
 | MUXQ | `1001111` | — | 2 | — | — |
-| MUXZ | `0101110` | CZI | 2 | parity of result | Result = 0 |
-| NEG | `0110011` | CZI | 2 | Sign of result | Result = 0 |
-| NEGC | `0110100` | CZI | 2 | Sign of result | Result = 0 |
-| NEGNC | `0110101` | CZI | 2 | Sign of result | Result = 0 |
-| NEGNZ | `0110111` | CZI | 2 | Sign of result | Result = 0 |
-| NEGZ | `0110110` | CZI | 2 | Sign of result | Result = 0 |
+| MUXZ | `0101110` | CZI | 2 | parity of result | Result == 0 |
+| NEG | `0110011` | CZI | 2 | Sign of result | Result == 0 |
+| NEGC | `0110100` | CZI | 2 | Sign of result | Result == 0 |
+| NEGNC | `0110101` | CZI | 2 | Sign of result | Result == 0 |
+| NEGNZ | `0110111` | CZI | 2 | Sign of result | Result == 0 |
+| NEGZ | `0110110` | CZI | 2 | Sign of result | Result == 0 |
 | NIXINT1 | `1101011` | — | 2 | — | — |
 | NIXINT2 | `1101011` | — | 2 | — | — |
 | NIXINT3 | `1101011` | — | 2 | — | — |
 | NOP | `0000000` | — | 2 | — | — |
-| NOT | `0110001` | CZI | 2 | !S[31] | Result = 0 |
-| ONES | `0111101` | CZI | 2 | Result is odd | Result = 0 |
-| OR | `0101010` | CZI | 2 | Parity of Result | Result = 0 |
+| NOT | `0110001` | CZI | 2 | !S[31] | Result == 0 |
+| ONES | `0111101` | CZI | 2 | Result is odd | Result == 0 |
+| OR | `0101010` | CZI | 2 | Parity of Result | Result == 0 |
 | OUTC | `1101011` | CZ | 2 | — | OUT bit |
 | OUTH | `1101011` | CZ | 2 | — | OUT bit |
 | OUTL | `1101011` | CZ | 2 | — | OUT bit |
@@ -229,9 +230,9 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | POLLXMT | `1101011` | — | 2 | XMT Event | XMT Event |
 | POLLXRL | `1101011` | — | 2 | XRL Event | XRLEvent |
 | POLLXRO | `1101011` | — | 2 | XRO Event | XRO Event |
-| POP | `1101011` | CZ | 2 | K[31] | Result = 0 |
-| POPA | `1011000` | CZ | 9...16 * | MSB of long | Result = 0 |
-| POPB | `1011000` | CZ | 9...16 * | MSB of long | Result = 0 |
+| POP | `1101011` | CZ | 2 | K[31] | Result == 0 |
+| POPA | `1011000` | CZ | 9...16 * | MSB of long | Result == 0 |
+| POPB | `1011000` | CZ | 9...16 * | MSB of long | Result == 0 |
 | PUSH | `1101011` | — | 2 | — | — |
 | PUSHA | `1100011` | — | 3...10* | — | — |
 | PUSHB | `1100011` | — | 3...10* | — | — |
@@ -243,16 +244,16 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | QROTATE | `1101010` | — | 2...9 | — | — |
 | QSQRT | `1101001` | — | 2...9 | — | — |
 | QVECTOR | `1101010` | — | 2...9 | — | — |
-| RCL | `0000101` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 |
-| RCR | `0000100` | CZI | 2 | Last bit out1 | Result = 0 |
+| RCL | `0000101` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result == 0 |
+| RCR | `0000100` | CZI | 2 | Last bit out1 | Result == 0 |
 | RCZL | `1101011` | CZ | 2 | D[31] | D[30] |
 | RCZR | `1101011` | CZ | 2 | D[1] | D[0] |
-| RDBYTE | `1010110` | CZI | 9...16 | MSB of byte | Result = 0 |
+| RDBYTE | `1010110` | CZI | 9...16 | MSB of byte | Result == 0 |
 | RDFAST | `1100011` | — | 2 or WRFAST finish + 10...17 | — | — |
-| RDLONG | `1011000` | CZI | 9...16 * | MSB of long | Result = 0 |
-| RDLUT | `1010101` | CZI | 3 | MSB of data | Result = 0 |
+| RDLONG | `1011000` | CZI | 9...16 * | MSB of long | Result == 0 |
+| RDLUT | `1010101` | CZI | 3 | MSB of data | Result == 0 |
 | RDPIN | `1010100` | C | 2 | modal result | — |
-| RDWORD | `1010111` | CZI | 9...16 * | MSB of word | Result = 0 |
+| RDWORD | `1010111` | CZI | 9...16 * | MSB of word | Result == 0 |
 | REP | `1100110` | — | 2 | — | — |
 | RESI0 | `1011001` | — | 4 | — | — |
 | RESI1 | `1011001` | — | 4 | — | — |
@@ -266,23 +267,23 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | RETI2 | `1011001` | — | 4 | — | — |
 | RETI3 | `1011001` | — | 4 | — | — |
 | REV | `1101011` | — | 2 | — | — |
-| RFBYTE | `1101011` | CZ | 2 | MSB of byte | Result = 0 |
-| RFLONG | `1101011` | CZ | 2 | MSB of long | Result = 0 |
-| RFVAR | `1101011` | CZ | 2 | 0 | Result = 0 |
-| RFVARS | `1101011` | CZ | 2 | MSB of value | Result = 0 |
-| RFWORD | `1101011` | CZ | 2 | MSB of word | Result = 0 |
+| RFBYTE | `1101011` | CZ | 2 | MSB of byte | Result == 0 |
+| RFLONG | `1101011` | CZ | 2 | MSB of long | Result == 0 |
+| RFVAR | `1101011` | CZ | 2 | 0 | Result == 0 |
+| RFVARS | `1101011` | CZ | 2 | MSB of value | Result == 0 |
+| RFWORD | `1101011` | CZ | 2 | MSB of word | Result == 0 |
 | RGBEXP | `1101011` | — | 2 | — | — |
 | RGBSQZ | `1101011` | — | 2 | — | — |
-| ROL | `0000001` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 |
+| ROL | `0000001` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result == 0 |
 | ROLBYTE | `1001000` | — | 2 | — | — |
 | ROLNIB | `1000100` | — | 2 | — | — |
 | ROLWORD | `1001010` | — | 2 | — | — |
-| ROR | `0000000` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result = 0 |
+| ROR | `0000000` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result == 0 |
 | RQPIN | `1010100` | C | 2 | modal result | — |
-| SAL | `0000111` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 |
-| SAR | `0000110` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result = 0 |
-| SCA | `1010001` | I | 2 | — | Product = 0 |
-| SCAS | `1010001` | I | 2 | — | Result = 0 |
+| SAL | `0000111` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result == 0 |
+| SAR | `0000110` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result == 0 |
+| SCA | `1010001` | I | 2 | — | Product == 0 |
+| SCAS | `1010001` | I | 2 | — | Result == 0 |
 | SETBYTE | `1000110` | — | 2 | — | — |
 | SETCFRQ | `1101011` | — | 2 | — | — |
 | SETCI | `1101011` | — | 2 | — | — |
@@ -312,27 +313,27 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | SETXFRQ | `1101011` | — | 2 | — | — |
 | SEUSSF | `1101011` | — | 2 | — | — |
 | SEUSSR | `1101011` | — | 2 | — | — |
-| SHL | `0000011` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 |
-| SHR | `0000010` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result = 0 |
-| SIGNX | `0111011` | CZI | 2 | MSB of result | Result = 0 |
+| SHL | `0000011` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[31] | Result == 0 |
+| SHR | `0000010` | CZI | 2 | last bit shifted out if S[4:0] > 0, else D[0] | Result == 0 |
+| SIGNX | `0111011` | CZI | 2 | MSB of result | Result == 0 |
 | SKIP | `1101011` | — | 2 | — | — |
 | SKIPF | `1101011` | — | 2 | — | — |
 | SPLITB | `1101011` | — | 2 | — | — |
 | SPLITW | `1101011` | — | 2 | — | — |
 | STALLI | `1101011` | — | 2 | — | — |
-| SUB | `0001100` | CZI | 2 | borrow of (D - S) | Result = 0 |
-| SUBR | `0010110` | CZI | 2 | borrow of (S - D) | Result = 0 |
-| SUBS | `0001110` | CZI | 2 | sign of (D - S) | Result = 0 |
-| SUBSX | `0001111` | CZI | 2 | sign of D-(S+C) | Z AND (Result = 0) |
+| SUB | `0001100` | CZI | 2 | borrow of (D - S) | Result == 0 |
+| SUBR | `0010110` | CZI | 2 | borrow of (S - D) | Result == 0 |
+| SUBS | `0001110` | CZI | 2 | sign of (D - S) | Result == 0 |
+| SUBSX | `0001111` | CZI | 2 | sign of D-(S+C) | Z AND (Result == 0) |
 | SUBX | `0001101` | CZI | 2 | borrow of (D - (S + C)) | Z AND (result == 0) |
-| SUMC | `0011100` | CZI | 2 | 1 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result = 0 |
-| SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result = 0 |
+| SUMC | `0011100` | CZI | 2 | 1 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result == 0 |
+| SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = true sign of (D +/- S) | Result == 0 |
 | SUMNZ | `0011111` | CZI | 2 | true sign of (D +/- S) | 0 then D = D - S, else D = D + S |
 | SUMZ | `0011110` | CZI | 2 | true sign of (D +/- S) | 1 then D = D - S, else D = D + S |
-| TEST | `0111110` | CZ | 2 | Parity of (D & S) | (D & S) = 0 |
+| TEST | `0111110` | CZ | 2 | Parity of (D & S) | (D & S) == 0 |
 | TESTB | `0100000` | CZI | 2 | D[S[4:0]] | D[S[4:0]] |
 | TESTBN | `0100001` | CZI | 2 | !D[S[4:0]] | !D[S[4:0]] |
-| TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) = 0 |
+| TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) == 0 |
 | TESTP | `1101011` | CZ | 2 | IN[D[5:0]] | IN[D[5:0]] |
 | TESTPN | `1101011` | CZ | 2 | !IN[D[5:0]] | !IN[D[5:0]] |
 | TJF | `1011101` | — | 2 or 4 | — | — |
@@ -379,11 +380,11 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | WYPIN | `1100001` | — | 2 | — | — |
 | XCONT | `1100110` | — | 2+ | — | — |
 | XINIT | `1100101` | — | 2 | — | — |
-| XOR | `0101011` | CZI | 2 | Parity of Result | Result = 0 |
+| XOR | `0101011` | CZI | 2 | Parity of Result | Result == 0 |
 | XORO32 | `1101011` | — | 2 | — | — |
 | XSTOP | `1100101` | — | 2 | — | — |
 | XZERO | `1100101` | — | 2+ | — | — |
-| ZEROX | `0111010` | CZI | 2 | MSB of result | Result = 0 |
+| ZEROX | `0111010` | CZI | 2 | MSB of result | Result == 0 |
 
 **Total Instructions:** 359 (357 with a fixed encoding + 2 without: ASMCLK and DEBUG)
 
