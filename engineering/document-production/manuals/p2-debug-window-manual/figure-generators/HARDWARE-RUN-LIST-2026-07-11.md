@@ -8,11 +8,13 @@
 > captured everything on this list. Morning run (03:55–04:42) captured **A1–A4, A8–A14, B2**;
 > evening run (18:28–19:00) captured **A5, A6, A7, B1**. **C1–C3** are certified by
 > structural-vs-reference (no hardware run needed, per the directive in Part C). **One generator
-> was added AFTER this list was written and is the ONLY figure still to run: A15
-> `fig-13-packed-logic-multi`** (row in Part A; no input-asset .bmp needed). The two conflict
-> tests **D1/D2 (I/J)** in `audit/verification-tests/` are also still to run (self-contained).
-> **Net remaining = A15 + D1 + D2.** All prior figures are captured-current unless their example
-> changes again (e.g. a ch05-post edit would re-open its figure).
+> was added AFTER this list was written and is the ONLY item still to run: A15
+> `fig-13-packed-logic-multi`** (row in Part A; no input-asset .bmp needed). **Conflict tests
+> D1/D2 (I/J) are DONE** — run 2026-07-11 00:58–00:59 on both platforms (`img-macOS/`,
+> `img-Windows/`), read back, and RESOLVED in `audit/v55-vs-REF-reconciliation-2026-07-10.md`
+> (F-205b TEXTSTYLE = per-axis hybrid; POLAR θ0 = East/CCW, no flip). **Net remaining = A15
+> only.** All prior figures are captured-current unless their example changes again (e.g. a
+> ch05-post edit would re-open its figure).
 
 ## Why this run exists
 
