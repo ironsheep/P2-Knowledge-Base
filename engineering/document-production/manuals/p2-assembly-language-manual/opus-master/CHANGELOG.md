@@ -1,5 +1,13 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.3 (2026-07-11)
+
+**A silicon- and hardware-grounded accuracy pass** — instruction semantics, flag effects, and timing across the reference verified against the P2 documentation and real-hardware measurement.
+
+### Changed
+- Instruction behavior and flag effects read as the silicon defines them — including the AUGS/AUGD augment surviving intervening instructions before its `#` immediate, and the TEST, interrupt-priority, COGINIT, and QEXP semantics.
+- Timing reflects measured behavior: bracketing code with two GETCT reads carries a fixed 2-clock overhead, hardware-confirmed on real P2 silicon.
+
 ## v3.1.2 (2026-07-04)
 
 **Event-wait timeout documentation** — the event-waiting instructions document how a preceding SETQ arms a hardware timeout, hardware-verified on P2 silicon.

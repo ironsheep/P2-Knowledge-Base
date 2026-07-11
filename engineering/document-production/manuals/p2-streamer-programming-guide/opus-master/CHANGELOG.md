@@ -1,5 +1,14 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.6 (2026-07-11)
+
+A Silicon-Doc accuracy pass across the streamer's timing, worked examples, and mode-encoding reference. No chapters added.
+
+- **NCO frequency resolution (Ch 3)** — the phase accumulator masks its MSB each clock, so the average output rate resolves to `sysclk / 2^31` and is essentially exact at any sysclk.
+- **Worked examples (video & SPI)** — the 640×480 VGA driver's field timing and DAC-routed RGB mode word, and the SPI clock setup, are stated as the silicon requires, so the examples drive correct signals.
+- **FIFO wrap mode (Appendix D)** — the wrap-mode buffer start address requirement is long-alignment (address ends in `%00`).
+- **Mode-encoding reference (Appendix A)** — the RFBYTE single-pin + single-DAC mode encodings read per the Silicon Doc.
+
 ## v1.0.5 (2026-07-07)
 
 A sub-pin selection correction. No chapters added.
