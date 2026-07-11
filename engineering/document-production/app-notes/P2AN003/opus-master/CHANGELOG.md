@@ -1,5 +1,11 @@
 # P2AN003 — DAC & Analog Signal Generation — Changelog
 
+## v1.0.1 (2026-07-11)
+
+A DAC precision refinement. No recipes added.
+
+- **PWM dither tone** — the PWM-dither spectral component sits at a fixed sysclock/256, independent of the sample period, so raising the period lowers the sample rate without moving the dither tone.
+
 ## v1.0.0 (2026-07-03)
 
 Initial release for community review. A techniques-catalog application note for generating analog

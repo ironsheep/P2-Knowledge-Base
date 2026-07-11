@@ -151,6 +151,13 @@ architect (`v1.0.1`), getting-started (`v1.0.1`), P2AN001 (`v1.0.2`), P2AN002 (`
 P2AN003 (`v1.0.1`), P2AN004 (`v1.0.1`), P2AN005 (`v1.0.1`). *(The 4 big manuals done; Debug deferred
 on reconciliation.)* Author per `methodology/changelog-style-guide.md` AFTER their audit clears.
 
+> **✅ GAP B CLOSED 2026-07-11.** All seven CHANGELOG entries authored (current-state voice, theme +
+> bullets per the house accuracy-pass model; excluded non-user-discoverable housekeeping such as
+> getting-started's "from Chapter 1" cross-ref dedup). Following the pre-staged big-manual pattern, only
+> the `opus-master/CHANGELOG.md` entry is written now — the title-page version string in
+> `front-matter.md` is promoted at release (§9, `release-manual`), not here. Debug's own changelog stays
+> deferred on the REF↔v55 reconciliation.
+
 ## Flow
 1. YAML template pass (running) → Stephen reviews report + approves the format.
 2. Fan out the 7 manual passes + P2AN004 (+ pre-clear the 3 template-only app-notes).
