@@ -244,8 +244,8 @@ an existing test (A–H), a newly generated test (I/J), or a reasoned dispositio
 | #644 | AUG survives intervening instr | Test G | ✅ survives |
 | #132 | egg-beater scalar-vs-stream | Test H | ✅ scalar blocks |
 | F-205a | TEXTSTYLE weight ("$00=light") | Test D | ✅ $00==$01 (refuted) |
-| **F-205b** | **TEXTSTYLE justification (2/3 swap, both axes)** | **Test I — NEW, compiles clean** | ⏳ run in §6 |
-| **POLAR-θ0** | **POLAR 0-direction + rotation sense (ch05 flip risk)** | **Test J — NEW, compiles clean** (+ fig-05 gauge cross-check) | ⏳ run in §6 |
+| **F-205b** | **TEXTSTYLE justification (2/3 swap, both axes)** | **Test I — RAN 2026-07-11** | ✅ HYBRID: horiz=v55 (%10=right/%11=left), vert=REF (%10=top/%11=bottom); render=truth |
+| **POLAR-θ0** | **POLAR 0-direction + rotation sense (ch05 flip risk)** | **Test J — RAN 2026-07-11** | ✅ θ=0 East, +θ CCW, no flip |
 | C-R4 | TEXTSIZE default "editor size" vs 10 | reasoned: 10 IS the editor default (matrix §7.0a); keep 10, note "(editor default)" | ✅ no test |
 | idiom | SCOPE/FFT channel-def on create-line drops window | already observed via tested fig-07 (empty plot) + scope.yaml | ✅ existing fig |
 | idiom | TERM text quoting `"…"` / `'…'` / `` `(expr) `` | existing `test1-term-string-quoting.spin2` (run if not yet) | ◑ test exists |

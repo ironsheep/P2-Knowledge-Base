@@ -158,7 +158,7 @@ PUB main() | row, x, packed, bit
     repeat row from 0 to 15
       packed := 0
       repeat x from 0 to 31
-        bit := ((x + row) & 3) == 0  ' a diagonal stripe pattern
+        bit := (((x + row) & 3) == 0) & 1  ' a diagonal stripe pattern
         packed := packed | (bit << x)
       debug(`Frame `(packed))  ' one long = 32 pixels of one row
     waitms(200)

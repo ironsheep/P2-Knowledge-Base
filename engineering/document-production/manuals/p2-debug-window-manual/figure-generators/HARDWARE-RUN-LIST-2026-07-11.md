@@ -99,6 +99,35 @@ log text.
 > mouse-vs-draw inversion — **stop and fix**, don't certify. (Structural analysis says it is
 > consistent; this run confirms it.)
 
+### Structural-vs-reference certification — COMPLETE (2026-07-11, Claire, task #194)
+
+**Stephen's directive (2026-07-11):** the interactive examples do **NOT** need a hardware
+run — the bench-certified `REF/robot-dog/test_dog_panel.spin2` certifies the PC_KEY/PC_MOUSE
+idioms; certification = **structural contrast** against it (recode only where they diverge).
+
+Contrast performed against the reference's four pinned idioms — (1) pc_mouse = 7 consecutive
+longs, (2) poll LAST-in-statement, (3) press-edge detect, (4) flip py **only** when mapping a
+bottom-left/Y-up mouse coord onto **top-left BMP artwork**. Result **PASS on all three; no
+divergence found → no recode**:
+
+| Example | 7 longs / last-in-stmt | edge-detect | Y handling | Verdict |
+|---------|------------------------|-------------|------------|---------|
+| `ch12-keyboard-adjust` | `PC_KEY(@key)` last-in-stmt (key-only) | fresh-key (`key:=0` per poll) | n/a (TERM, no draw) | ✅ conforms |
+| `ch12-mouse-pointer` | `mouse[7]`, `PC_MOUSE(@mouse)` last-in-stmt | n/a (state read-out) | TERM prints RAW coords — no artwork to map → correctly NO flip | ✅ conforms |
+| `ch15-control-panel` | `m[7]`, both `PC_KEY`/`PC_MOUSE` last-in-stmt | `if m[3] and not lastL` + `lastL := m[3]` | draws + hit-tests in ONE native PLOT frame; **no CARTESIAN flip** → correctly NO py-flip | ✅ conforms |
+
+**Grounding for the "no flip" verdict (the Q4 bug-risk):** `plot.yaml:84` —
+`cursor_coordinate: "pixel / DOTSIZE, honoring CARTESIAN flip flags (vDirX/vDirY)"`. PC_MOUSE
+reports in the **same** coordinate frame the drawing primitives use, so a PLOT example that
+draws its own buttons (no external top-left BMP) hit-tests coord-consistently **without** a
+flip. The reference needs `py := (PANEL_H-1) - py` only because its layout is a **top-left
+BMP blitted via `crop`** — a frame the PLOT-native mouse coord does not share. ch15 has no
+such external artwork, so the flip would be a *bug to introduce*, not one to fix.
+
+**Evidence type: structural-vs-reference (COMPLETE).** The event-log + visual-cross-check
+paths (C1–C3 above) remain available as optional belt-and-suspenders if Stephen later elects
+a confirming bench run, but are **not required** for certification per the directive.
+
 ## Part D — Conflict tests I + J (last two dangling source conflicts)
 
 Already authored + compiled (`audit/verification-tests/`). Bracketed/self-checking.

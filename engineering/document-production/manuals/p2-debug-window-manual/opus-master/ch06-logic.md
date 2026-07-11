@@ -281,7 +281,7 @@ CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
+  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00)
   ' align display to CS going low (frame start)
   debug(`SPIbus TRIGGER $1 $0 32)
 
