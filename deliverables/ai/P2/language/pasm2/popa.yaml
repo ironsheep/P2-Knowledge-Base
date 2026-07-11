@@ -4,7 +4,7 @@ encoding:
 - bits: EEEE 1011000 CZ1 DDDDDDDDD 101011111
   write: D
   c: MSB of long
-  z: Result = 0
+  z: Result == 0
   clocks: '9...16 *'
 timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"

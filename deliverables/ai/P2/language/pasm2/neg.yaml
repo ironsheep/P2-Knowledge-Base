@@ -34,13 +34,13 @@ encoding:
 - bits: EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: Sign of result
-  z: Result = 0
+  z: Result == 0
   clocks: '2'
   notes: Syntax 1 - negate Src
 - bits: EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD
   write: D
   c: Sign of result
-  z: Result = 0
+  z: Result == 0
   clocks: '2'
   notes: Syntax 2 - negate Dest (S=D)
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

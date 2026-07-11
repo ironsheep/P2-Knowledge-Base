@@ -29,7 +29,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS
   write: D1
   c: Unsigned(D => S)
-  z: Result = 0
+  z: Result == 0
   clocks: '2'
 encoding_notes:
 - Dest is only written if a subtraction was performed on it.

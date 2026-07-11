@@ -34,13 +34,13 @@ encoding:
 - bits: EEEE 0111110 CZ0 DDDDDDDDD DDDDDDDDD
   write: —
   c: Parity of D
-  z: D = 0
+  z: D == 0
   clocks: '2'
   notes: Syntax 1 - test Dest only (S=D)
 - bits: EEEE 0111110 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: Parity of (D & S)
-  z: (D & S) = 0
+  z: (D & S) == 0
   clocks: '2'
   notes: Syntax 2 - test (Dest AND Src)
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

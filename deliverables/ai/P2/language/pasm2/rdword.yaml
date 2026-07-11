@@ -4,7 +4,7 @@ encoding:
 - bits: EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: MSB of word
-  z: Result = 0
+  z: Result == 0
   clocks: '9...16 *'
 timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"

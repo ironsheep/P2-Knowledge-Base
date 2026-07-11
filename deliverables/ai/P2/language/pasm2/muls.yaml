@@ -34,7 +34,7 @@ encoding:
 - bits: EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS
   write: D
   c: —
-  z: (D = 0) | (S = 0)
+  z: (D == 0) | (S == 0)
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive

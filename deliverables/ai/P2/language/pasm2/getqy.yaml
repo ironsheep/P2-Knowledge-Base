@@ -4,7 +4,7 @@ encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000011001
   write: D
   c: Y[31]
-  z: Result = 0
+  z: Result == 0
   clocks: '2...58'
 timing:
   cycles: 2

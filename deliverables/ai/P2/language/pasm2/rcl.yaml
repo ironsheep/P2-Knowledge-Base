@@ -41,7 +41,7 @@ encoding:
 - bits: EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: last bit shifted out if S[4:0] > 0, else D[31]
-  z: Result = 0
+  z: Result == 0
   clocks: '2'
 encoding_notes:
 - C = last bit shifted out if Src[4:0] > 0, else C = Dest[31].

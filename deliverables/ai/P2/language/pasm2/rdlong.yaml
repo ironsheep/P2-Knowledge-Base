@@ -5,7 +5,7 @@ encoding:
 - bits: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: MSB of long
-  z: Result = 0
+  z: Result == 0
   clocks: '9...16 *'
 compiler_encoding:
   bits: 32

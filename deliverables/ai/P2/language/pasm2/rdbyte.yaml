@@ -4,7 +4,7 @@ encoding:
 - bits: EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: MSB of byte
-  z: Result = 0
+  z: Result == 0
   clocks: '9...16'
 timing:
   cycles: 9
