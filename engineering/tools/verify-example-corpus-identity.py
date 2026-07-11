@@ -100,10 +100,12 @@ def main():
         print(f"GREEN: no examples-library/ under {manual.name} — nothing to check.")
         return 0
 
-    # Collect captioned blocks across all chapter/appendix masters.
+    # Collect captioned blocks across all chapter/appendix masters. Scan
+    # RECURSIVELY: some manuals nest chapters (opus-master/part-N/chapter-*.md,
+    # e.g. p2-io-and-smart-pins-user-guide) rather than keeping them flat.
     blocks = {}          # caption -> (bytes, source_md, line)
     duplicates = []      # (caption, first_src, dup_src)
-    for md in sorted(opus.glob("*.md")):
+    for md in sorted(opus.rglob("*.md")):
         for caption, block, src, line in extract_captioned_blocks(md):
             if caption in blocks:
                 duplicates.append((caption, blocks[caption][1], src))
