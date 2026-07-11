@@ -183,7 +183,25 @@
 
 **Grounding:** P2 Silicon Doc HUBSET clock-config field layout (`%PPPP_CC_SS`: CC=caps bits 3:2, SS=source bits 1:0); matches Ch4.
 
-### F-211 — I/O pin power-domain group size is wrong across the KB: "isolated groups of **four**" (16 groups) — actual = **8 groups of 8** (P0-7 … P56-63) — `CONFIRMED`
+### F-211 — I/O pin power-domain group size is wrong across the KB: "isolated groups of **four**" (16 groups) — actual = **8 groups of 8** (P0-7 … P56-63) — `DONE 2026-07-11 (YAML applied; pending KB publish at §9)`
+
+> **APPLIED 2026-07-11 (yaml head).** Corrected 4→8 across all 5 files: `pin-power-domains.yaml`
+> (title, description, `power_grouping.group_size` 4→8, `groups:` "16 groups"→"8 groups", boundaries
+> 0-3,4-7→0-7,8-15, `multi_pin_constraint` straddle example pins 3/4→7/8, oneliner, `power group of 4`
+> alias→`of 8`); `smart-pin-11000/11010/11001-adc-*.yaml` (`power_domain.fact` + `multi_pin_layout` +
+> `see_also`, and 11000's multi-channel code comment); `application-notes/p2an001-*.yaml` (the pitfall
+> line). **Removed the fabricated `evidence` citation** ("P2 Datasheet: 'Power for smart pins in groups
+> of 4'" — unverifiable; the Silicon Doc uses `{x}_{y}` placeholders, no "4") and replaced it with honest
+> durable sources: Silicon Doc per-group VIO/GIO pin table + the P2 Edge/eval breakout electrical spec
+> ("300 mA per 8-pin group; one VIO3V3/GND pair per 8-pin header"). **Left untouched (correctly NOT the
+> power-domain error):** 11010's "four 4-pin-block samples" (that's the SCOPE/streamer channel-nibble
+> aggregation, not power grouping); p2an001 companion's "8-pin bytecode-interpreter ADC" (an OBEX object
+> name, EightPinADC); the 11000 multi-channel example's "4 consecutive INDEPENDENT channels" (a legit
+> 4-channel demo, not a power-group claim). **Source trace:** VIO/GIO are per-group, 8 groups of 8
+> (`engineering/ingestion/external-sources/hardware-verification/VERIFICATION-OPPORTUNITIES.md:57`;
+> edge-mini-breakout extraction "300 mA per 8-pin group"; Silicon Doc VIO_{x}_{y}/GIO_{x}_{y} per-group;
+> memory `reference_p2_adc_per_group_vio_gio`). YAML format + crossref validated clean. Index regen +
+> KB publish ride §9 (`release-yamls`), per Stephen's "make the changes, don't release yet."
 
 **Surfaced:** 2026-07-11 by the changeset-integrity audit of the P2AN001 content delta (Gap A;
 report `engineering/planning/CHANGESET-AUDIT-app-notes-content-2026-07-11.md`). The P2AN001 **manual**
