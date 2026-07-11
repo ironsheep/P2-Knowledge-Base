@@ -159,6 +159,20 @@ clocks. *Result:* `scalar1`=**15 clk**, `scalar8`=**16 clk/read**; `setq8`=**2 c
 RDLONG blocks ~9–16 clk) stands; egg-beater rotor confirmed. Full write-up: catalog #132.
 *Source:* `.../conflict-testH-eggbeater-timing.spin2`.
 
+### EF-035 · Two GETCTs bracketing a sequence add a fixed 2-clock measurement overhead (not 4) — `CONFIRMED`
+The cost of measuring elapsed cycles with a GETCT pair is **2 clocks** (one GETCT's worth), not
+4. *How proven:* `getct-overhead-char` — cog-resident (2-clk-exact) PASM: a back-to-back GETCT
+pair (`d_ctrl`) plus 10-NOP (20-clk) and 20-NOP (40-clk) bracketed sequences (`d_10`/`d_20`).
+*Result:* `d_ctrl`=**2**, `d_10`=**22**, `d_20`=**42** — overhead = 2 three independent ways
+(`d_ctrl`; `d_10`−20; `d_20`−40), slope exactly 1 clk/clk (linearity confirms the reading tracks
+inserted cycles, ruling out a fixed-value artifact — the two-tailed control). *Date/rig:*
+2026-07-11, real P2 (Stephen), debug-log readback. *Grounds:* A-F2 — the Assembly manual's
+"2-cycle measurement overhead" (chapter-04-timing) is CONFIRMED; the pre-sweep "4-cycle" figure
+is REFUTED. **Scope note:** proves the overhead RESULT (2), NOT the intra-instruction latch
+mechanism — a 2-clk overhead falls out for any consistent GETCT latch point (start *or* end), so
+the manual states the result, not a "samples-at-start" rationale. *Source:*
+`.../campaigns/2026-07-pasm2-timing/getct-overhead-char.spin2`.
+
 ---
 
 ## Smart pins

@@ -549,9 +549,9 @@ Measuring code execution time involves reading the counter before and after the 
         sub     end_time, start_time    ' Elapsed cycles
 ```
 
-The difference between the two readings gives the exact number of cycles elapsed. This measurement includes the execution time of the first GETCT (2 cycles), which falls inside the interval; the second GETCT samples the counter at the start of its own execution, so its 2 cycles fall outside the interval and do not count. Precise measurements should therefore subtract a single 2-cycle overhead.
+The difference between the two readings gives the number of cycles elapsed, plus a fixed **2-cycle measurement overhead** — the cost of the GETCT pair itself, confirmed on real P2 silicon. Subtract 2 cycles for a precise figure.
 
-For short code sequences, the measurement overhead matters. Measuring a 10-cycle sequence with two GETCT instructions reports 12 cycles (2 for the first GETCT + 10). For longer sequences, the 2-cycle overhead becomes negligible.
+For short code sequences, the measurement overhead matters. Measuring a 10-cycle sequence with two GETCT instructions reports 12 cycles (2-cycle overhead + 10). For longer sequences, the 2-cycle overhead becomes negligible.
 
 The cycle counter is global across all cogs—all cogs read the same counter value. This enables synchronization and coordination between cogs. One cog can mark a time value and pass it to another cog via hub memory, allowing the second cog to measure time relative to events in the first cog.
 

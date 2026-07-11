@@ -1,0 +1,79 @@
+CON
+  _clkfreq = 200_000_000
+
+' ============================================================================
+' GETCT measurement-overhead characterization  (A-F2, feeds F-210-adjacent)
+' ----------------------------------------------------------------------------
+' QUESTION: when you bracket a known N-clock sequence with two GETCT reads,
+'   the reported delta = N + <overhead>. Is <overhead> 2 clocks (the 2nd GETCT
+'   samples the counter at the START of its own execution, so its 2 clocks fall
+'   OUTSIDE the interval) or 4 clocks (both GETCTs' 2 clocks count)?
+'   The Assembly manual (part-ii/instructions-g.md) currently asserts 2 by
+'   reasoning; no ingested source (v55 / datasheet / Silicon Doc) states the
+'   intra-instruction latch point. This test settles it on real silicon.
+'
+' METHOD: cog-resident (2-clock-exact) PASM. Explicit NOPs (each exactly 2
+'   clocks) as the known sequence; measure GETCT-to-GETCT deltas.
+'     d_ctrl = back-to-back GETCT delta   -> the single-GETCT spacing == overhead
+'     d_10   = GETCT, 10 NOPs (20 clk), GETCT
+'     d_20   = GETCT, 20 NOPs (40 clk), GETCT
+'
+' EXPECT / READ-BACK:
+'     linearity: (d_20 - d_10) == 20  AND  (d_10 - d_ctrl) == 20   [rig sane]
+'     overhead == d_ctrl :  d_ctrl == 2  => manual "2-cycle overhead" CONFIRMED
+'                           d_ctrl == 4  => old "4-cycle" was right; revert
+' ============================================================================
+
+PUB main() | d_ctrl, d_10, d_20
+  org
+                ' --- control: two GETCTs back-to-back (nothing between) ---
+                getct   pr0
+                getct   pr1
+                sub     pr1, pr0
+                mov     d_ctrl, pr1
+
+                ' --- 10 NOPs = 20 clocks between the two GETCTs ---
+                getct   pr0
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                getct   pr1
+                sub     pr1, pr0
+                mov     d_10, pr1
+
+                ' --- 20 NOPs = 40 clocks between the two GETCTs ---
+                getct   pr0
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                getct   pr1
+                sub     pr1, pr0
+                mov     d_20, pr1
+  end
+
+  debug(udec(d_ctrl), udec(d_10), udec(d_20))
+  repeat

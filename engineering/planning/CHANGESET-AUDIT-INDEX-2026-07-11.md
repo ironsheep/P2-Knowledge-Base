@@ -52,10 +52,18 @@ but **BITMAP was never conflict-tested** and POS/TITLE/FFT-legend were in no EF 
 - **F-5 (TITLE default)** TERM/PLOT/LOGIC say `none`; REF = "(window name)".
 - **S-6 (CONFLICTED)** "half-pixels" relabel of SCOPE/FFT LINESIZE + SCOPE_XY DOTSIZE: radius-arithmetic supports it, but **EF-027 measured LINESIZE 3→3px (1:1)** and LOGIC chapter says "pixels" for the same primitive → likely error; settle by reverting to "pixels" OR one targeted hardware test.
 - **N-1** PLOT dropped accurate "default text color white ($FFFFFF)" — restore.
-**✅ ALL APPLIED 2026-07-11** (F-209 class): hand-verified against REF/EF-027, then fixed in opus-master
-(commit `91eacf4b`); Debug identity GREEN 33/33. S-6 resolved to revert-to-"pixels" per EF-027.
-**One residual note:** F-2/F-3 (BITMAP) were never hardware-tested — they rest on Pascal/REF; a quick
-BITMAP SPARSE visual (round-vs-square) would seal F-2 empirically. Debug now ready for re-audit.
+**APPLIED 2026-07-11 (commit `91eacf4b`), but STATUS SPLIT after Stephen's authority-model correction
+(the agent-derived REF does NOT auto-outrank v55 — reconcile + prove, don't rank):**
+- **SOLID — empirical:** S-6 (EF-027). *(D-F2 Lime = EF-025, solid, applied earlier.)*
+- **SOLID — fabrication (no source supports the removed claim):** F-1 FFT legend-text bits 2–3 (pending a
+  one-line confirm that v55 is also silent on legend text — if so, invented regardless of ranking).
+- **⚠️ PROVISIONAL / UNRECONCILED — rest on the agent-derived REF alone:** D-F1 PRECISE, D-F3 DOTSIZE,
+  F-2 BITMAP, F-3 LUT, F-4 POS, F-5 TITLE, N-1 text-color. **These must NOT ship as authoritative.**
+  **Gate:** Debug re-audit/render is BLOCKED until reconciled — REF agent re-audits each against the
+  **raw `DebugDisplayUnit.pas`** (non-circular; the raw `.pas` is NOT in-repo) reporting supports-v55 /
+  supports-REF / silent; silent-or-render-dependent → hardware render test (PRECISE, BITMAP SPARSE,
+  POS cascade, TITLE are directly visual on Stephen's rig). Awaiting Stephen to point the REF agent at
+  the raw source.
 
 ## FLAGS — Debug manual (all hand-verified CONFIRMED) — ✅ ADJUDICATED + FIXED 2026-07-11 (F-209)
 **Stephen agreed with recommendations; all three reverted in opus-master.** Class-wide v55-over-Pascal
