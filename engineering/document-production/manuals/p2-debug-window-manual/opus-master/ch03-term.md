@@ -238,7 +238,9 @@ draw the labels once, then overprint just the value fields in place with the `3`
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count
-  debug(`TERM Panel SIZE 40 8)
+  ' pairs: 0 = labels (black/white), 1 = header (white/blue),
+  '        2 = ok (white/green), 3 = alert (white/red)
+  debug(`TERM Panel SIZE 40 8 BACKCOLOR WHITE COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' Draw the static layout once: a title and three fixed labels.
   debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
@@ -257,9 +259,9 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (black on green), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (white on red = alert), then back to pair 0
     else
-      ' pair 2 (green), then back to pair 0
+      ' pair 2 (white on green = ok), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4

@@ -241,7 +241,7 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 RATE 512 TRACE 8 LUMA8X)
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
