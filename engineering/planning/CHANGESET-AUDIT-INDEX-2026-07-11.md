@@ -14,7 +14,7 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 | Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (67 pasm2 z-flag `=`→`==` + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | ✅ CLEAN — 0 flags (3 sub-threshold watch items); scope-creep claim independently re-verified (77 `z:` lines, 0 other fields) |
 | 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | `CHANGESET-AUDIT-p2-debug-window-manual-…md` | 🔄 independent pass running |
 | 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | `CHANGESET-AUDIT-p2-io-and-smart-pins-…md` | ✅ CLEAN — ~120 hunks all traced (FABRICATION-AUDIT-SWEEP-CATALOG 148-row proofs + F-173/F-202/C-65); 8 examples compile+byte-identical; real bug-fixes confirmed (REV, PINLOW wrap) |
-| 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | `CHANGESET-AUDIT-p2-assembly-…md` | 🔄 independent pass running |
+| 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | `CHANGESET-AUDIT-p2-assembly-…md` | ⚠️ 2 FLAGS (mostly clean — 7 fabrications removed, AUG↔EF-033 confirmed): (1) Ch5 §5.7.6 vs Ch4 §4.1.4 clock-field naming contradiction introduced here — needs relabel; (2) GETCT 4→2 reasoning-derived, optional annotate. Neither is a fabrication. |
 | 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | `CHANGESET-AUDIT-p2-pasm-desilva-…md` | ✅ CLEAN — ~46 hunks faithful (sweep-catalog proofs); 8 high-risk claims independently re-verified (TESTP polarity flip, per-cog→shared CORDIC fab, async-TX P_OE); examples byte-identical |
 | 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 (dense technical) | `CHANGESET-AUDIT-p2-streamer-…md` | ✅ CLEAN — 7/7 faithful, each verbatim-Silicon-Doc-sourced (NCO 32-bit-mask L2747, xinit L3512, VESA porch, $BF85 from X_DACS, long-align L6673); fixes a materially wrong FIFO-alignment claim |
 | 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | (inline) | ✅ inline-cleared — faithful† |
@@ -40,6 +40,17 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 **Excluded (no delta since release):** p2an005, p2an006.
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
+
+## FLAGS awaiting Stephen adjudication (Assembly manual)
+- **FLAG 1 — CONFIRMED (hand-verified), fix ready.** Ch5 §5.7.6 (`chapter-05-hardware.md:690`)
+  labels the clock-config low fields `PPPP_XX_CC` with **XX=caps, CC=source**; Ch4 §4.1.4
+  (`chapter-04-timing.md:71`, changed in this set) uses **CC=caps, SS=source** — the P2/Silicon-Doc
+  standard. `CC` therefore means *source* in Ch5 and *caps* in Ch4. Bit values correct in both (code
+  assembles); reader-decoding contradiction only. **Fix:** relabel Ch5 to the standard `PPPP_CC_SS`
+  (`XX`→`CC`=caps, `CC`→`SS`=source) in the config-word line + comment. Recommend: apply.
+- **FLAG 2 — optional.** GETCT overhead `4→2` cycles is reasoning-derived, not EF-grounded (the old
+  `4` was equally unsourced; `2` is the more defensible figure). Recommend: annotate as an estimate
+  (or leave — it raises correctness either way). Not a release blocker.
 
 ## Non-blocking follow-ups surfaced by the audit (not release gates)
 - **Fleet-wide release-prep (IOSP audit):** the correction sweeps intentionally left CHANGELOGs
