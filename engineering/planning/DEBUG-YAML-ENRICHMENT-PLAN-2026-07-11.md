@@ -36,17 +36,20 @@ BITMAP is **exempt** from F-207 (frame-buffer window tolerates a per-long packed
 
 ## Flagged decisions
 
-- **D1 — F-206 bare-`SAVE` lenient form.** `pnut-ts -d` **accepts** a bare `SAVE` (no filename) as
-  *syntactically legal* (verified 2026-07-11: `debug(\`MyPlot SAVE)` compiles clean). Whether Term-TS
-  *auto-generates* a filename at runtime is unverified (would need hardware/Term-TS). **Proposal:**
-  standardize all six YAMLs to the **required-filename** teaching form (`SAVE {WINDOW} 'filename'`),
-  and do **not** document a bare-SAVE alternate (unverified runtime behavior; not the form to teach).
-  *Decision needed: OK to omit the lenient-alternate note?*
-- **D2 — F-207 example size in the YAML.** The v55 authority example (L1144) is a full smart-pin +
-  streamer capture demo. **Proposal:** put a **minimal** array-feed snippet in the YAML example
-  (`VAR buff[N]` → pack loop → `` `uhex_long_array_(@buff, N) ``) rather than transcribe the whole
-  streamer example — the YAML documents the *feed shape*, not a streamer tutorial. *Decision needed:
-  minimal snippet vs verbatim v55 example?*
+- **D1 — F-206 bare-`SAVE` lenient form. → RESOLVED (Stephen, 2026-07-11): standardize on the
+  required-filename form; omit the bare-SAVE lenient note.** `pnut-ts -d` accepts a bare `SAVE` as
+  *syntactically legal* (verified: `debug(\`MyPlot SAVE)` compiles clean), but its runtime auto-name
+  behavior is unverified, so we do **not** document it — all six YAMLs standardize to
+  `SAVE {WINDOW} 'filename'`.
+- **D2 — F-207 example size in the YAML. → RESOLVED (Stephen, 2026-07-11): essential feed-shape
+  snippet, NOT the verbatim v55 streamer example.** Rationale (YAML = Download-on-Demand, essential
+  content): the v55 authority example (L1144) wraps the feed in a 333 Mbaud smart-pin + streamer
+  high-speed-capture demo — incidental to the feed-shape lesson AND *misleading* (an agent could infer
+  the streamer is required for a packed feed, which is false). So the example carries only the
+  essential feed shape (`VAR buff[N]` → pack loop → `` `uhex_long_array_(@buff, N) `` in one message).
+  **Split rule:** the *unpack-semantics fact* is quoted **verbatim** from v55 (L1143 "16 sets per
+  long"; L1406 LONGS_1BIT "32 separate 1-bit values, starting from the LSB") — paraphrase there risks
+  a bit-order/off-by-one error; the *code illustration* is the essential minimal snippet.
 - **D3 — new finding ID.** These consume **F-209** for the bundle registration (F-205b/206/207/208
   already have IDs). No new IDs needed for the edits themselves.
 
