@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-205`**
+**Next finding ID: `F-207`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -86,6 +86,21 @@
 > a smaller set were genuine defects (→ `DONE`); and three NEW writing-debug-statement defects
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
+
+### F-206 — `debug-displays/{term,fft,logic,midi,scope,scope_xy}.yaml` under-specify the `SAVE` command's required filename (inconsistent across the set) — `CONFIRMED`
+
+**Surfaced:** 2026-07-11, while correcting the Debug Window Manual's `SAVE` prose (ch05/ch10) in the fleet-release sweep (commit 828e62ae).
+
+**What's wrong:** the `SAVE` runtime command takes a **required** filename per the v55 spec `SAVE {WINDOW} 'filename'` (only `{WINDOW}` is optional) and the REF matrix (`KeySave`, 2839-2866: `SAVE 'name'` → `name.bmp`), but the shipped YAMLs describe it three different ways:
+- `plot.yaml:77` — `SAVE 'name' -- ...` ✅ correct (filename shown, required; also has the `l t w h 'name'` region form)
+- `term.yaml:45`, `fft.yaml:56` — bare `SAVE -- write the window bitmap to <name>.bmp` (no filename arg shown → implies `SAVE`-alone works)
+- `logic.yaml:46`, `midi.yaml:38`, `scope.yaml:58`, `scope_xy.yaml:50` — `SAVE {filename} -- ...` (braces imply the filename is optional)
+
+**Evidence:** v55 text lines 1139/1169/1194/1222/1246/1294 all show `SAVE {WINDOW} 'filename'` (filename un-braced = required); REF `DEBUG-WINDOW-DIRECTIVE-MATRIX.md` L337/L504 shows `SAVE 'name'`.
+
+**Proposed correction:** standardize all six to the v55/REF form — `SAVE {WINDOW} 'filename' -- write the window (or display-area) bitmap to <filename>.bmp` (filename required; `WINDOW` optional). Keep PLOT's extra region form.
+
+**Verify first:** confirm whether PNut-Term-TS also accepts a bare `SAVE` (auto-generated name). If it does, document that as a lenient alternate — the required-filename form is still the one to teach (the manual was corrected to it in this sweep).
 
 ## Internal-consistency audit batch (2026-06-18) — F-141…F-153
 
