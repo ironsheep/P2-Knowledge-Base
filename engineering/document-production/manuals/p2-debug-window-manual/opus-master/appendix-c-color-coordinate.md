@@ -14,8 +14,11 @@ TERM holds four foreground/background pairs, selected at runtime with command co
 |------|------|-----------|------------|
 | 0 | `4` | Orange | Black |
 | 1 | `5` | Black | Orange |
-| 2 | `6` | Green | Black |
-| 3 | `7` | Black | Green |
+| 2 | `6` | Lime | Black |
+| 3 | `7` | Black | Lime |
+
+The default green is `clLime` (`$00FF00`) — pure green, brighter than the `GREEN`
+keyword (`$09FF09`). There is no `LIME` keyword; reproduce it with `$00FF00`.
 
 Set your own with `COLOR` on the creation line (eight values: fg0 bg0 fg1 bg1 fg2 bg2 fg3 bg3).
 

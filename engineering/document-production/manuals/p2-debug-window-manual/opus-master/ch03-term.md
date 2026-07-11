@@ -141,24 +141,30 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 |------|------|-----------|------------|
 | 0 | `4` | Orange | Black |
 | 1 | `5` | Black | Orange |
-| 2 | `6` | Green | Black |
-| 3 | `7` | Black | Green |
+| 2 | `6` | Lime | Black |
+| 3 | `7` | Black | Lime |
+
+> **The default green is `clLime` (`$00FF00`), not the `GREEN` keyword.** Parallax's
+> default palette uses **Lime** — pure `$00FF00` — which renders measurably brighter
+> than the `GREEN` color keyword (`$09FF09`). There is no `LIME` keyword: to reproduce
+> the default with `COLOR`, use `$00FF00` directly (the `GREEN` keyword gives the
+> slightly darker keyword shade).
 
 ```spin2
 debug(`Status 4 'normal' 13)     ' pair 0: orange on black
-debug(`Status 6 'ok' 13)         ' pair 2: green on black
+debug(`Status 6 'ok' 13)         ' pair 2: lime on black
 ```
 
 To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-' COLOR pairs: pair0 orange/black, pair1 black/orange, pair2 green/black, pair3 red/black
+' COLOR pairs: pair0 orange/black, pair1 black/orange, pair2 lime/black, pair3 red/black
 debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
-green-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
+lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
 
 ## Cursor, tabs, and scrolling

@@ -685,9 +685,9 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
 
 ```pasm2
 ' Configure 20 MHz crystal + PLL for 160 MHz operation
-' Config word %1_DDDDDD_MMMMMMMMMM_PPPP_XX_CC:
+' Config word %1_DDDDDD_MMMMMMMMMM_PPPP_CC_SS:
 '   enable=1, DDDDDD=div-1 (÷1), MMMMMMMMMM=mult-1 (×8),
-'   PPPP=%1111 (VCO/1), XX=%10 (15pF caps), CC=source (%00 stay RCFAST / %11 PLL)
+'   PPPP=%1111 (VCO/1), CC=%10 (15pF caps), SS=source (%00 stay RCFAST / %11 PLL)
                 ' Enable crystal + PLL, stay in RCFAST while they stabilize
                 hubset  ##%1_000000_0000000111_1111_10_00
                 ' Wait ~10ms for crystal + PLL to stabilize

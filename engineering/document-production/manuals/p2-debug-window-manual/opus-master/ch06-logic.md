@@ -59,6 +59,7 @@ The configuration keywords you can add to the creation line:
 | `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
 | `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
+| `DOTSIZE` | `diameter` | `0` | 0–32 | Sample-dot diameter (`0` = no dots) |
 | `TEXTSIZE` | `points` | editor size | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |

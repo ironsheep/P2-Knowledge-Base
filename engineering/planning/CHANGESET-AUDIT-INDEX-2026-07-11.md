@@ -41,9 +41,10 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
 
-## FLAGS awaiting Stephen adjudication (Debug manual — all hand-verified CONFIRMED)
-**One class:** the pre-empirical sweep `f3e702ed` trusted **v55 text over the higher-authority
-Pascal/REF** for the DEBUG windows; the later empirical work fixed around them but never re-caught.
+## FLAGS — Debug manual (all hand-verified CONFIRMED) — ✅ ADJUDICATED + FIXED 2026-07-11 (F-209)
+**Stephen agreed with recommendations; all three reverted in opus-master.** Class-wide v55-over-Pascal
+sweep RUNNING to catch any others before Debug re-audit. **One class:** the pre-empirical sweep
+`f3e702ed` trusted **v55 text over the higher-authority Pascal/REF** for the DEBUG windows.
 - **F1 — HIGH — PRECISE default inverted (ch05-plot.md).** Manual now says sub-pixel is OFF by
   default / one `PRECISE` turns it ON. REF (Pascal-derived) is unambiguous: `vPrecise := 8` at
   `PLOT_Configure` = sub-pixel **ON at creation**, `PRECISE` XORs 8↔0. So one `PRECISE` turns it
@@ -61,8 +62,9 @@ Pascal/REF** for the DEBUG windows; the later empirical work fixed around them b
   behavioral claim against the Pascal/REF theory-of-ops + directive matrix, to catch any other
   reversals — then fix the whole class + re-audit (feedback_classwide_sweep_on_every_finding).
 
-## FLAGS awaiting Stephen adjudication (Assembly manual)
-- **FLAG 1 — CONFIRMED (hand-verified), fix ready.** Ch5 §5.7.6 (`chapter-05-hardware.md:690`)
+## FLAGS — Assembly manual
+- **FLAG 1 — ✅ FIXED 2026-07-11 (F-210).** Ch5 relabeled to standard `PPPP_CC_SS`. (Was:)
+  **CONFIRMED (hand-verified), fix ready.** Ch5 §5.7.6 (`chapter-05-hardware.md:690`)
   labels the clock-config low fields `PPPP_XX_CC` with **XX=caps, CC=source**; Ch4 §4.1.4
   (`chapter-04-timing.md:71`, changed in this set) uses **CC=caps, SS=source** — the P2/Silicon-Doc
   standard. `CC` therefore means *source* in Ch5 and *caps* in Ch4. Bit values correct in both (code

@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-209`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented)
+**Next finding ID: `F-211`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -156,6 +156,25 @@
 **Manual side (→ ch05-post #195-C):** add the same orientation fact to the ch05-plot.md POLAR section — re-scoped from "optional enhancement" to **required gap-fill**.
 
 **Grounding:** Test J (empirical > documentary). Cite the EF once promoted.
+
+### F-209 — Debug manual: the `f3e702ed` correctness sweep INVERTED higher-authority Pascal/REF for three DEBUG-window facts (trusted v55 text over ground truth) — `DONE 2026-07-11 (reverted)`
+
+**Surfaced:** 2026-07-11 by the fleet **changeset-integrity audit** (independent adversarial pass). Three hunks from the *pre-empirical* sweep `f3e702ed` followed **v55 text** where the Pascal-derived REF/matrix — higher authority in the DEBUG-window chain **Pascal → REF → v55** — says the opposite. The later empirical work fixed *around* them but never re-caught them. Class: v55-text-over-Pascal reversal (`feedback_handverify_audit_findings` — the underlying fanout findings inverted).
+
+**Instances (all reverted in opus-master 2026-07-11):**
+- **D-F1 (HIGH) — PLOT PRECISE default.** `ch05-plot.md` claimed sub-pixel is OFF by default (one `PRECISE` turns it on). REF `PLOT_Theory_of_Operations.md` L215/L244/L383: `vPrecise := 8` at `PLOT_Configure` = **sub-pixel ON at creation**, `PRECISE` XORs 8↔0. As shipped, a reader issuing one `PRECISE` for smooth curves would turn sub-pixel **OFF** — the opposite of intent. **Reverted** to sub-pixel-default. (v55 L1271 "disabled" is the sole opposing source.)
+- **D-F2 (MED) — TERM default color.** `ch03-term.md` + `appendix-c` relabeled the default pair-2/3 green "Green"; **EF-025** confirmed the default renders `clLime $00FF00`, distinct from the `GREEN` keyword `$09FF09`, disposition "keep Lime + reader-note." **Restored "Lime"** + added the reader-note; `term.yaml` already correct. (Explicit `GREEN`-keyword usages left unchanged.)
+- **D-F3 (LOW-MED) — LOGIC DOTSIZE.** `ch06-logic.md` dropped the LOGIC `DOTSIZE` config row (v55 LOGIC table omits it); REF matrix L90 `DOTSIZE ✅` + L260 lists it, and `logic.yaml:32` documents it. **Restored** the row (default 0, range 0–32).
+
+**Class-wide sweep:** an independent pass over `f3e702ed`'s remaining DEBUG-window edits vs Pascal/REF is running to catch any other reversals of this class before Debug re-audit (`feedback_classwide_sweep_on_every_finding`).
+
+**Grounding:** REF `PLOT_Theory_of_Operations.md` + `DEBUG-WINDOW-DIRECTIVE-MATRIX.md` (both Pascal-derived) + `EF-025`. Empirical/Pascal outranks v55 text.
+
+### F-210 — Assembly manual Ch5 §5.7.6 clock-config field names contradict Ch4 §4.1.4 — `DONE 2026-07-11`
+
+**Surfaced:** 2026-07-11 by the changeset-integrity audit. Ch5 labeled the HUBSET clock-config low fields `PPPP_XX_CC` (XX=caps, CC=source); Ch4 §4.1.4 (changed in the same `f3e702ed` set) uses `PPPP_CC_SS` (CC=caps, SS=source) — the P2/Silicon-Doc standard. So `CC` denoted *source* in Ch5 and *caps* in Ch4. Bit **values** correct in both (code assembles); a reader decoding via field names would read `CC` two ways. **Fix (applied):** relabeled Ch5 to the standard `PPPP_CC_SS` (values unchanged). An internal cross-chapter naming inconsistency introduced by the sweep — **not** a v55-over-Pascal issue.
+
+**Grounding:** P2 Silicon Doc HUBSET clock-config field layout (`%PPPP_CC_SS`: CC=caps bits 3:2, SS=source bits 1:0); matches Ch4.
 
 ## Internal-consistency audit batch (2026-06-18) — F-141…F-153
 

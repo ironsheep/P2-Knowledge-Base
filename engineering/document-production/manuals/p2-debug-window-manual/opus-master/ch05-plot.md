@@ -161,8 +161,7 @@ Send `CARTESIAN` to leave polar mode.
 ### PRECISE — sub-pixel positioning
 
 Coordinates are stored internally in a fixed-point format. By default `PRECISE`
-mode is **off** and coordinates are taken in whole pixels; issuing `PRECISE`
-turns it **on**, so that line size and (x, y) for `DOT` and `LINE` are expressed
+mode is **on**, so that line size and (x, y) for `DOT` and `LINE` are expressed
 in **256ths of a pixel** — letting anti-aliased primitives land on sub-pixel
 positions. `PRECISE` toggles this:
 
@@ -170,10 +169,11 @@ positions. `PRECISE` toggles this:
 PRECISE
 ```
 
-Each `PRECISE` flips between whole-pixel mode (the default) and sub-pixel mode.
-Whole-pixel mode aligns coordinates to integer pixels. Sub-pixel mode is the
-right choice for smooth curves and animation; a single `PRECISE` enters it, and
-every following coordinate is then taken in 256ths of a pixel.
+Each `PRECISE` flips between sub-pixel mode (the default) and whole-pixel mode.
+Sub-pixel mode is the right choice for smooth curves and animation, so most
+drawing leaves it on; whole-pixel mode aligns coordinates to integer pixels.
+Because sub-pixel is the default, a single `PRECISE` switches **to** whole-pixel
+mode — issue `PRECISE` again to return to sub-pixel.
 
 > **Read coordinates through the active system.** A primitive's position is
 > always the cursor, transformed by polar conversion (if active), then the
