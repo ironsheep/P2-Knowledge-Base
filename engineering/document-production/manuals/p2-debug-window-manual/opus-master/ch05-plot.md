@@ -543,9 +543,9 @@ Three more commands round out display control:
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
   becomes visible at the next `UPDATE`.
-- `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
-  `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
-  extension is added for you — do not include it).
+- `` `SAVE 'name' `` — save the current canvas image to a BMP file on the host.
+  A filename is required: `SAVE 'name'` writes `name.bmp` (the `.bmp` extension is
+  added for you — do not include it).
 - `` `CLOSE `` — close this window and free its resources.
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns

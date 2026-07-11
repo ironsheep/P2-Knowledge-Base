@@ -55,10 +55,10 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|-------|--------------|
 | `TITLE` | `'text'` | (none) | — | The window's title-bar text |
 | `POS` | `left top` | `0, 0` | screen px | Window position, in pixels |
-| `SAMPLES` | `count` | `32` | 4–2048 | Horizontal resolution — samples shown across the width |
-| `SPACING` | `pixels` | `8` | 2–32 | Horizontal pixels between samples |
+| `SAMPLES` | `count` | `32` | 4–2047 | Horizontal resolution — samples shown across the width |
+| `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
-| `LINESIZE` | `pixels` | `1` | 1–7 | Waveform line thickness |
+| `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
 | `TEXTSIZE` | `points` | editor size | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
@@ -73,7 +73,7 @@ sample wider.
 > circular buffer. The buffer is shared across all channels — every sample you send
 > is one 32-bit value whose bits are distributed to the channels — not 2048 samples
 > per channel. `SAMPLES` controls how many of those buffered samples are drawn, up to
-> 2048.
+> 2047.
 
 ### Channel declaration syntax
 
@@ -391,7 +391,7 @@ trigger, and decode-in-code approach shows a live bus.
   each channel's bit (or field) lands at the right offset: channel 0 at bit 0, the
   next channel at the bits above it. A range channel consumes a contiguous field.
 - **The buffer is 2048 samples, shared, circular.** `SAMPLES` chooses how many are
-  drawn (4–2048) — and only that many are ever marked valid, so the trigger
+  drawn (4–2047) — and only that many are ever marked valid, so the trigger
   evaluates and displays within the `SAMPLES` window, not the full 2048-deep buffer.
 - **Trigger fires on an edge, not a level.** It must first see a non-matching sample,
   then a matching one. A signal already sitting at the match value will not trigger

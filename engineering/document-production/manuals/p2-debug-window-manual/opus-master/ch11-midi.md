@@ -46,7 +46,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `multiplier` | `4` | Key-size multiplier, **1–50** |
 | `RANGE` | `first last` | `21 108` | First and last MIDI note to display, each **0–127** |
 | `CHANNEL` | `channel` | `0` | The single MIDI channel to display, **0–15** |
-| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each a named color with an optional 0–15 brightness |
+| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each a named color (optional 0–15 brightness) or an `$RRGGBB` value |
 
 A few things to know about these:
 
@@ -62,8 +62,10 @@ A few things to know about these:
   MIDI channels are numbered 1–16 on instruments, so channel 1 is `0` here and
   channel 16 is `15`.
 - **`COLOR`** takes exactly two color values: the first is the lit color for
-  white keys, the second for black keys. Unlit white keys are always white and
-  unlit black keys are always black; only the *active* fill color is configurable.
+  white keys, the second for black keys. Each value may be a named color
+  (optionally with a `0`–`15` brightness) or a full `$RRGGBB` value. Unlit white
+  keys are always white and unlit black keys are always black; only the *active*
+  fill color is configurable.
 
 ```spin2
 ' One octave, large keys, green/orange lit colors, channel 0

@@ -7,9 +7,9 @@ like a sine wave on SCOPE shows up on FFT as a single tall spike at that tone's
 frequency. Mix three tones together and you see three spikes; add noise and you
 see a low carpet under them.
 
-The window runs a Cooley-Tukey FFT on the samples you feed it and displays the
+The window runs an FFT on the samples you feed it and displays the
 resulting **magnitude spectrum** — one point per frequency bin, drawn as a line,
-dot, or isolated-vertical-line (stem) trace. It supports up to **8 channels**, each transformed and
+dot, or filled-bar trace. It supports up to **8 channels**, each transformed and
 drawn independently.
 
 You create one FFT window per `` DEBUG(`FFT ...) `` declaration, name it, and feed
@@ -78,10 +78,10 @@ The configuration keywords you can add to the creation line:
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
-| `LINESIZE` | `width` | `3` | Line width in half-pixels (**−32–32**; negative draws isolated vertical lines) |
+| `LINESIZE` | `width` | `3` | Line width in half-pixels (**−32–32**; negative draws filled bars, wider for larger negative values) |
 | `TEXTSIZE` | `points` | editor text size | Label font size; defaults to the editor's text size (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
-| `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
+| `LOGSCALE` | — | off | Logarithmic amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 | packing | — | off | Sample packing format (see "Packing samples") |
 
@@ -172,15 +172,13 @@ You have two independent controls over how tall the spectrum is drawn.
 (`MAG 0`). It is set in the channel declaration, in the `MAG` shift position
 shown above.
 
-**`LOGSCALE`** is a bare flag on the creation line. It applies a **log2-based**
+**`LOGSCALE`** is a bare flag on the creation line. It applies a **logarithmic**
 compression to the amplitude before drawing, expanding small values and
-compressing large ones so a wide dynamic range fits in one window. When
-`LOGSCALE` is active, the window also draws power-of-2 markers (1, 2, 4, 8, …)
-along the amplitude axis.
+compressing large ones so a wide dynamic range fits in one window.
 
-`LOGSCALE` is **not a decibel mode**. There is no dB scale, no dB markers, and no
-keyword that produces one — the markers are powers of 2, and the underlying math
-is log2 of the magnitude.
+`LOGSCALE` is **not a decibel mode**. There is no calibrated dB scale, no dB
+markers, and no keyword that produces one — the scaling is a logarithm of the
+(uncalibrated) magnitude, in arbitrary power units.
 
 ```spin2
 debug(`FFT Spectrum SIZE 512 256 SAMPLES 512 LOGSCALE)

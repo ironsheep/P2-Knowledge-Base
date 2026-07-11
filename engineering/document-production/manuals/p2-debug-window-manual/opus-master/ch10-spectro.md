@@ -214,12 +214,12 @@ Three keyword commands work at runtime, sent by the window's name:
 - `` `CLEAR `` — clears the display, resets the sample buffer (so the window waits
   for a fresh full window before drawing again), and resets the trace position to
   its starting edge.
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host (a filename is required).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Wfall CLEAR)
-debug(`Wfall SAVE)
+debug(`Wfall SAVE 'waterfall')
 ```
 
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`

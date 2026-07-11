@@ -238,8 +238,9 @@ drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
 The `DEBUG()` link carries every element you send — every sample, pixel, and
 value — over a single serial connection, so **the link is the budget.** At the
 2 Mbaud the tool uses, 8N1 framing costs about 10 bits per byte, so the wire
-moves roughly **200 KB/s of raw bytes**, and after the `DEBUG()` command and
-formatting overhead you can count on **~100–150 KB/s of actual payload**.
+moves roughly **200 KB/s of raw bytes**. After the `DEBUG()` command and
+formatting overhead the usable payload is lower — as a rough working estimate,
+on the order of **100–150 KB/s**.
 Everything a window shows has to fit through that.
 
 Most debugging fits comfortably: text, status panels, sensors read at a few Hz

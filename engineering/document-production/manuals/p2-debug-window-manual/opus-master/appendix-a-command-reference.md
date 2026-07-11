@@ -153,11 +153,11 @@ every window are listed once at the end.
 |-----------|-------|
 | `TITLE` | |
 | `POS` | |
-| `SAMPLES` | 4–2048 |
-| `SPACING` | 2–32 |
+| `SAMPLES` | 4–2047 |
+| `SPACING` | 1–32 |
 | `RATE` | 1–2048 |
 | `DOTSIZE` | 0–32 |
-| `LINESIZE` | 1–7 |
+| `LINESIZE` | 1–32 |
 | `TEXTSIZE` | |
 | `COLOR back grid` | |
 | `HIDEXY` | |
@@ -261,7 +261,7 @@ every window are listed once at the end.
 | `LINESIZE` | −32…32; negative = filled bars |
 | `TEXTSIZE` | |
 | `COLOR back grid` | |
-| `LOGSCALE` | log2 amplitude |
+| `LOGSCALE` | logarithmic amplitude |
 | `HIDEXY` | |
 
 **Channels:** `'label' MAG-shift(0-11) high tall base grid color`. A Hanning window is always applied; it is not selectable.
