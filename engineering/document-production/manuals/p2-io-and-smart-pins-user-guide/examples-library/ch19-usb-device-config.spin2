@@ -8,8 +8,9 @@ PUB configure_usb() | baud
   PINFLOAT(USB_DM)
   PINFLOAT(USB_DP)
 
-  ' Configure USB mode with output enabled
+  ' Configure both pins of the pair with identical WRPIN D data
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
+  WRPIN(USB_DP, P_USB_PAIR | P_OE)
 
   ' Set USB mode + baud on lower pin (D[15]=0 device, D[14]=1 full-speed)
   baud := 12_000_000 / (clkfreq / $10000)

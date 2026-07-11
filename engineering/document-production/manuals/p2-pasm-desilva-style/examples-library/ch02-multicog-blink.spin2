@@ -1,8 +1,8 @@
-' Multi-COG LED Pattern Demo
+' Multi-cog LED Pattern Demo
 PUB main() | i
     repeat i from 0 to 3
-        coginit(COGEXEC_NEW, @cog_code, 56 + i)  ' Start 4 COGs
-    repeat  ' Main COG just watches
+        coginit(COGEXEC_NEW, @cog_code, 56 + i)  ' Start 4 cogs
+    repeat  ' Main cog just watches
 
 DAT
         org     0
@@ -12,7 +12,7 @@ cog_code
 .loop   drvnot  pin_num                ' Toggle our LED
         shl     pin_num, #24           ' Pin number to bits 24-31
         or      pin_num, ##10_000_000  ' Combine with delay
-        waitx   pin_num                ' Wait (varies per COG!)
+        waitx   pin_num                ' Wait (varies per cog!)
         shr     pin_num, #24           ' Restore pin number
         jmp     #.loop
 

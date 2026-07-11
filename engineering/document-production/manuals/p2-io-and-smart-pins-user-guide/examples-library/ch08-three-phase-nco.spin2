@@ -10,7 +10,7 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   
   ' Phase offsets: 0°, 120°, 240°
   phase_120 := 65536 / 3                  ' 21845
-  phase_240 := 65536 * 2 / 3              ' 43691
+  phase_240 := 65536 * 2 / 3              ' 43690
   
   ' Configure all three
   PINFLOAT(PHASE_A)
@@ -31,4 +31,4 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   WYPIN(PHASE_C, y_val)
   
   ' Enable all simultaneously
-  PINLOW(PHASE_A..PHASE_C)
+  PINLOW(PHASE_C..PHASE_A)

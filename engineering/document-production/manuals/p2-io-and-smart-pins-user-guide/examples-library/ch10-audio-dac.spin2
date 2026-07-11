@@ -8,10 +8,12 @@ VAR
   long phase_inc
 
 PUB audio_init()
-  ' Initialize audio DAC at 44.1 kHz
+  ' Initialize audio DAC. The PWM-dither sample period must be a multiple of
+  ' 256 clocks, so 44.1 kHz is not exactly achievable: truncating the period to
+  ' 4352 clocks yields ~46 kHz (200 MHz / 4352).
   PINFLOAT(AUDIO_PIN)
   WRPIN(AUDIO_PIN, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
-  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Round to 256
+  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Period, rounded down to a 256-clock multiple
   WYPIN(AUDIO_PIN, $8000)                 ' Start at mid-scale
   PINLOW(AUDIO_PIN)
 
@@ -25,7 +27,8 @@ PUB audio_sample() : sample | sine_val
   ' Generate next audio sample
   phase += phase_inc
 
-  ' Get sine value (-32767 to +32767) using CORDIC (length, angle, twist)
+  ' Get sine value (-32767 to +32767) using CORDIC (length, step, stepsInCircle)
+  ' stepsInCircle=0 selects a full $1_0000_0000-step circle, so phase is a step count
   sine_val := QSIN(32767, phase, 0)
 
   ' Convert to 16-bit unsigned (0 to 65535)

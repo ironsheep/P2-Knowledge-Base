@@ -7,10 +7,10 @@ VAR
   long sensor_stack[64]
 
 PUB main()
-  ' Start sensor reading COG
+  ' Start sensor reading Cog
   COGSPIN(NEWCOG, sensor_cog(), @sensor_stack)
 
-  ' This COG reads the shared value
+  ' This Cog reads the shared value
   setup_repository_reader()
 
   REPEAT

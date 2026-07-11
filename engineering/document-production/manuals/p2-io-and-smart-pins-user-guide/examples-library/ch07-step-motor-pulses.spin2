@@ -2,12 +2,13 @@ CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
   STEP_PERIOD = 400                       ' 2 µs period
-  STEP_HIGH = 200                         ' 1 µs high time
+  STEP_LOW = 200                          ' X[31:16] compare = 1 µs low time
+                                          ' (high time = 400-200 = 200 = 1 µs, 50% duty)
 
 PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)
   WRPIN(STEP_PIN, P_PULSE | P_OE)
-  WXPIN(STEP_PIN, STEP_PERIOD | (STEP_HIGH << 16))
+  WXPIN(STEP_PIN, STEP_PERIOD | (STEP_LOW << 16))
   PINLOW(STEP_PIN)
   
   WYPIN(STEP_PIN, steps)                  ' Generate step pulses

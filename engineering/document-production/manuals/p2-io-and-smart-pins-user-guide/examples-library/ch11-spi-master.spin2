@@ -29,14 +29,14 @@ PUB spi_deselect()
 
 PUB spi_tx_byte(value) | reversed
   ' MSB first
-  reversed := value << 24
-  reversed := value REV 8
+  reversed := value REV 7              ' reverse the 8 data bits for MSB-first (REV n covers bits 0..n)
 
   WYPIN(MOSI_PIN, reversed)
   WYPIN(CLK_PIN, 16)                        ' 8 clock cycles
 
-  ' Wait for completion
-  repeat until PINREAD(MOSI_PIN)
+  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock pin
+  ' rises when its transition count reaches zero; MOSI's IN only signals buffer-ready)
+  repeat until PINREAD(CLK_PIN)
 
 PUB spi_write_register(addr, value)
   spi_select()

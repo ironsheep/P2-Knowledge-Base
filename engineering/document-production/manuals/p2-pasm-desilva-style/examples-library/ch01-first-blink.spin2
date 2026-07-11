@@ -2,8 +2,8 @@ CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 
 PUB main()
-    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in new COG
-    repeat  ' Keep the main COG alive
+    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in new cog
+    repeat  ' Keep the main cog alive
 
 DAT
         org     0
