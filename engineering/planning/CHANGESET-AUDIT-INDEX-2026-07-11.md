@@ -52,7 +52,10 @@ but **BITMAP was never conflict-tested** and POS/TITLE/FFT-legend were in no EF 
 - **F-5 (TITLE default)** TERM/PLOT/LOGIC say `none`; REF = "(window name)".
 - **S-6 (CONFLICTED)** "half-pixels" relabel of SCOPE/FFT LINESIZE + SCOPE_XY DOTSIZE: radius-arithmetic supports it, but **EF-027 measured LINESIZE 3→3px (1:1)** and LOGIC chapter says "pixels" for the same primitive → likely error; settle by reverting to "pixels" OR one targeted hardware test.
 - **N-1** PLOT dropped accurate "default text color white ($FFFFFF)" — restore.
-**Next:** hand-verify F-1..F-5 (findings can invert) before applying; S-6 needs adjudication (revert vs test). These join F-209's class before the Debug re-audit.
+**✅ ALL APPLIED 2026-07-11** (F-209 class): hand-verified against REF/EF-027, then fixed in opus-master
+(commit `91eacf4b`); Debug identity GREEN 33/33. S-6 resolved to revert-to-"pixels" per EF-027.
+**One residual note:** F-2/F-3 (BITMAP) were never hardware-tested — they rest on Pascal/REF; a quick
+BITMAP SPARSE visual (round-vs-square) would seal F-2 empirically. Debug now ready for re-audit.
 
 ## FLAGS — Debug manual (all hand-verified CONFIRMED) — ✅ ADJUDICATED + FIXED 2026-07-11 (F-209)
 **Stephen agreed with recommendations; all three reverted in opus-master.** Class-wide v55-over-Pascal
