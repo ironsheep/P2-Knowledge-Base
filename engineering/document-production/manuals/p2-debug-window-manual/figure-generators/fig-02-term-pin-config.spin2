@@ -1,0 +1,20 @@
+'' fig-02-term-pin-config.spin2  ->  fig-02-term-pin-config.bmp
+'' TERM window — Chapter 2 debug-link/pin-config example, instrumented for capture.
+'' Create + feed (and the DEBUG_PIN_*/DEBUG_BAUD link CONs) byte-preserved from
+'' examples-library/ch02-term-pin-config.spin2; window-alive `repeat` -> SAVE + END.
+
+CON _clkfreq = 200_000_000
+
+CON
+  DEBUG_PIN_TX = 62
+  DEBUG_PIN_RX = 63
+  DEBUG_BAUD   = 2_000_000
+
+PUB main()
+  debug(`TERM Status SIZE 30 5)
+  debug(`Status 'Ready.' 13)
+  waitms(200)
+  debug(`Status save 'fig-02-term-pin-config')
+  debug(`Status save window 'fig-02-term-pin-config_WDW')
+  debug(`Status close)
+  debug("DEBUG_END_SESSION")

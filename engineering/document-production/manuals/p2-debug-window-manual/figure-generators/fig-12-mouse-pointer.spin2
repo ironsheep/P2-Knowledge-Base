@@ -1,0 +1,46 @@
+'' fig-12-mouse-pointer.spin2  ->  DBG_INPUT event log (INTERACTIVE, no screenshot)
+'' PC_MOUSE certification harness for Chapter 12's mouse-pointer example.
+'' HARD CHECKS (structural, vs REF/robot-dog/test_dog_panel.spin2) — both PASS:
+''   (1) 7 CONSECUTIVE longs: `mouse[7]` local array == 7 longs (mx,my,mwheel,
+''       mlb,mmb,mrb,mpix); PC_MOUSE(@mouse) is LAST in its statement.
+''   (2) Y-flip: this example is a TERM text read-out (it prints the reported
+''       coords, it does NOT draw a pointer onto a PLOT), so no bottom-left/top-left
+''       mapping exists to flip — correct as-is. (The flip idiom lives in the PLOT
+''       panel example, ch15-control-panel.)
+'' TERM create + PC_MOUSE read-out byte-preserved from
+'' examples-library/ch12-mouse-pointer.spin2. ADDS: DEBUG[DBG_INPUT] logging of the
+'' left-click press-edge (coord + pixel) for read-back + a visual position
+'' cross-check (drawn X/Y text must match the logged x/y). Ends on right-click.
+
+{Spin2_v50}
+CON
+  _clkfreq   = 200_000_000
+  DBG_INPUT  = 1
+  DEBUG_MASK = (1 << DBG_INPUT)
+
+PUB main() | mouse[7], polls, lastL
+  debug(`TERM Pointer SIZE 40 8 TITLE 'Mouse State')
+  polls := 0
+  lastL := 0
+  repeat
+    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer 0)                                 ' clear + home
+    if mouse[0] < 0
+      debug(`Pointer 'Pointer outside window' 13)
+    else
+      debug(`Pointer 'X: `(mouse[0])  Y: `(mouse[1])' 13)
+      debug(`Pointer 'Wheel: `(mouse[2])' 13)
+      debug(`Pointer 'Buttons  L:`(mouse[3])')
+      debug(`Pointer '  M:`(mouse[4])  R:`(mouse[5])' 13)
+      debug(`Pointer 'Pixel: `$(mouse[6])')
+    if mouse[3]                                        ' left button down?
+      debug(`Pointer 13 'LEFT DOWN')
+    if mouse[3] and not lastL                          ' left-button press edge -> log
+      DEBUG[DBG_INPUT]("CLICK x=", sdec_(mouse[0]), " y=", sdec_(mouse[1]), " pix=", uhex_(mouse[6]))
+    lastL := mouse[3]
+    if mouse[5]                                        ' right button ends the session
+      quit
+    if ++polls > 3000                                  ' safety bound if unattended (~90 s)
+      quit
+    waitms(30)
+  debug("DEBUG_END_SESSION")

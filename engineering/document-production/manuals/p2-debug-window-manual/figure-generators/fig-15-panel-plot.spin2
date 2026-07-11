@@ -1,0 +1,41 @@
+'' fig-15-panel-plot.spin2  ->  fig-15-panel-plot.bmp
+'' PLOT window with two external-BMP LAYERs — Chapter 15 example (PRIORITY:
+'' LAYER/external-BMP surface). Requires panel_bg.bmp + digits.bmp in the run
+'' directory (both live in examples-library/). Create + LAYER load + CROP-blit
+'' byte-preserved from examples-library/ch15-panel-plot.spin2; infinite `repeat`
+'' bounded to 30 frames, then SAVE + DEBUG_END_SESSION.
+
+{Spin2_v50}
+CON _clkfreq = 200_000_000
+
+PUB main() | angle, reading, n
+  ' Two BMP layers, loaded once and reused every frame.
+  debug(`PLOT Panel SIZE 200 96 POS 200 200 HIDEXY UPDATE)
+  debug(`Panel LAYER 1 'panel_bg.bmp')      ' background: frame + empty box
+  debug(`Panel LAYER 2 'digits.bmp')        ' font strip: 0-9, each 30x48
+  debug(`Panel CROP 1)                      ' paint the background once
+  debug(`Panel UPDATE)
+
+  angle := 0
+  repeat n from 1 to 30                     ' bounded (example loops forever)
+    reading := 50 + qsin(50, angle, 360)    ' software reading 0..100
+    show3(reading)
+    debug(`Panel UPDATE)                    ' one flip per frame
+    angle += 4
+    waitms(50)
+  waitms(200)
+  debug(`Panel save 'fig-15-panel-plot')
+  debug(`Panel save window 'fig-15-panel-plot_WDW')
+  debug(`Panel close)
+  debug("DEBUG_END_SESSION")
+
+' Blit a fixed-width 3-digit reading using the font strip (form c), after
+' erasing the readout box by restoring its background (form b).
+PRI show3(value) | d, col, x, div
+  debug(`Panel CROP 1 45 24 110 48)         ' erase box: restore bg patch
+  div := 100
+  repeat col from 0 to 2
+    d := (value / div) // 10                 ' this column's digit, 0..9
+    x := 50 + col * 36                        ' on-screen slot
+    debug(`Panel CROP 2 `(d * 30, 0, 30, 48, x, 28))
+    div /= 10

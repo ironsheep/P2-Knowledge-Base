@@ -1,0 +1,16 @@
+'' fig-02-term-print-value.spin2  ->  fig-02-term-print-value.bmp
+'' TERM window — Chapter 2 "print a value" example, instrumented for capture.
+'' Create + feed byte-preserved from examples-library/ch02-term-print-value.spin2;
+'' window-alive `repeat` -> SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | reading
+  debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
+  reading := 42
+  debug(`Status 'Reading: `(reading)' 13)   ' feed it by name
+  waitms(200)
+  debug(`Status save 'fig-02-term-print-value')
+  debug(`Status save window 'fig-02-term-print-value_WDW')
+  debug(`Status close)
+  debug("DEBUG_END_SESSION")

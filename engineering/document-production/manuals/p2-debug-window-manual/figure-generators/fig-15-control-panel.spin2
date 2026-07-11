@@ -1,0 +1,75 @@
+'' fig-15-control-panel.spin2  ->  DBG_INPUT event log (INTERACTIVE, no screenshot)
+'' PC_KEY + PC_MOUSE + PLOT certification harness for Chapter 15's control-panel.
+'' This is the Y-consistency cross-check: the minus button is DRAWN at x in [25,75]
+'' (left) and the plus button at x in [225,275] (right); the in_box() hit-tests use
+'' the SAME PLOT coordinate space as the draws (both bottom-left/Y-up, no external
+'' artwork), so NO flip is needed and the panel is internally consistent. The
+'' event-log proves it on hardware: clicking the LEFT (minus) region must DECREASE
+'' value and the RIGHT (plus) region must INCREASE it — a mismatch would be a real
+'' bottom-left/top-left mouse-vs-draw inversion.
+'' Create + poll + hit-test + draw byte-preserved from
+'' examples-library/ch15-control-panel.spin2. ADDS: DEBUG[DBG_INPUT] logging of each
+'' key + button-press-edge (region + coord). Ends on Esc (or a safety poll bound).
+
+{Spin2_v50}
+CON
+  _clkfreq   = 200_000_000
+  DBG_INPUT  = 1
+  DEBUG_MASK = (1 << DBG_INPUT)
+
+PUB main() | m[7], key, value, dirty, lastL, polls
+  debug(`PLOT Ctrl SIZE 300 140 POS 200 200 BACKCOLOR $202020 HIDEXY UPDATE)
+  value := 50
+  dirty := true                              ' force the first draw
+  lastL := 0
+  polls := 0
+
+  repeat
+    ' Poll both inputs; each is the LAST command in its statement.
+    key := 0
+    debug(`Ctrl PC_KEY(@key))
+    debug(`Ctrl PC_MOUSE(@m))
+
+    case key                                 ' keyboard: arrows nudge
+      1: value -= 5                           ' Left  arrow
+         dirty := true
+         DEBUG[DBG_INPUT]("KEY Left")
+      2: value += 5                           ' Right arrow
+         dirty := true
+         DEBUG[DBG_INPUT]("KEY Right")
+
+    if m[3] and not lastL                     ' left-button press edge
+      if in_box(m[0], m[1], 25, 45, 75, 95)
+        value -= 5
+        dirty := true
+        DEBUG[DBG_INPUT]("CLICK MINUS x=", sdec_(m[0]), " y=", sdec_(m[1]))
+      if in_box(m[0], m[1], 225, 45, 275, 95)
+        value += 5
+        dirty := true
+        DEBUG[DBG_INPUT]("CLICK PLUS  x=", sdec_(m[0]), " y=", sdec_(m[1]))
+    lastL := m[3]
+
+    value := 0 #> value <# 100                ' clamp to range
+
+    if dirty
+      draw(value)
+      debug(`Ctrl UPDATE)
+      dirty := false
+    if key == 27                              ' Esc ends the session
+      quit
+    if ++polls > 5000                         ' safety bound if unattended (~100 s)
+      quit
+    waitms(20)
+  debug("DEBUG_END_SESSION")
+
+' Bounding-box hit test: true when (x,y) is inside the rectangle.
+PRI in_box(x, y, x1, y1, x2, y2) : hit
+  hit := (x >= x1) and (x <= x2) and (y >= y1) and (y <= y2)
+
+PRI draw(v) | len
+  debug(`Ctrl CLEAR)
+  debug(`Ctrl COLOR $C04040 SET 50 70 BOX 50 50 0 255)   ' minus button
+  debug(`Ctrl COLOR $40C040 SET 250 70 BOX 50 50 0 255)  ' plus button
+  len := 1 + v * 150 / 100                    ' value 0..100 -> bar length
+  debug(`Ctrl COLOR $4080FF)
+  debug(`Ctrl SET `(75 + len / 2, 70) BOX `(len, 24, 0, 255))

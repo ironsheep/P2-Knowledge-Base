@@ -1,0 +1,21 @@
+'' fig-02-term-signals.spin2  ->  fig-02-term-signals.bmp
+'' TERM window — Chapter 2 "live signals" example, instrumented for capture.
+'' Create + per-frame feed byte-preserved from examples-library/ch02-term-signals.spin2;
+'' the reader's infinite `repeat` is bounded to 40 frames, then SAVE + END.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | angle, wave, noise, n
+  debug(`TERM Signals SIZE 40 5)
+  angle := 0
+  repeat n from 1 to 40                            ' bounded (example loops forever)
+    wave  := qsin(1000, angle, $1000)              ' CORDIC: a sine value
+    noise := getrnd() & $FF                        ' RNG: a noise value
+    debug(`Signals 1 'wave=`(wave)  noise=`(noise)')
+    angle += $0040
+    waitms(50)
+  waitms(200)
+  debug(`Signals save 'fig-02-term-signals')
+  debug(`Signals save window 'fig-02-term-signals_WDW')
+  debug(`Signals close)
+  debug("DEBUG_END_SESSION")

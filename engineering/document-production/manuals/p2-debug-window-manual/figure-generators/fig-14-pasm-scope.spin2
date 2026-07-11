@@ -1,0 +1,32 @@
+'' fig-14-pasm-scope.spin2  ->  fig-14-pasm-scope.bmp
+'' SCOPE window fed from a PASM cog (coginit) — Chapter 14 example. The DAT PASM
+'' cog (create with config only + channel-def on a SEPARATE feed, RC-2; then feed
+'' a ramp) is byte-preserved from examples-library/ch14-pasm-scope.spin2. The Spin
+'' cog's keep-alive `repeat` is replaced by a bounded wait, then it stops the feed
+'' cog for a stable capture and SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | cog
+  cog := coginit(COGEXEC_NEW, @blink, 0)  ' launch the PASM program in its own cog
+  waitms(3000)                            ' let it create + fill the SCOPE (bounded capture)
+  cogstop(cog)                            ' stop the feed so the frame is stable
+  debug(`Wave save 'fig-14-pasm-scope')
+  debug(`Wave save window 'fig-14-pasm-scope_WDW')
+  debug(`Wave close)
+  debug("DEBUG_END_SESSION")
+
+DAT
+              org
+blink
+              debug(`SCOPE Wave SIZE 400 200)  ' create with config only
+              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
+.loop
+              add       value, #4        ' advance a software ramp
+              and       value, #$FF
+              ' feed the window with the register's value
+              debug(`Wave `(value))
+              waitx     ##2_000_000
+              jmp       #.loop
+
+value         long      0

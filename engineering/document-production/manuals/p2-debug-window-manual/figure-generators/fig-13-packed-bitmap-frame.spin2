@@ -1,0 +1,24 @@
+'' fig-13-packed-bitmap-frame.spin2  ->  fig-13-packed-bitmap-frame.bmp
+'' BITMAP window — Chapter 13 LUT1 + LUTCOLORS packed-pixel example (PRIORITY:
+'' LUT/LUTCOLORS surface). Create + LUTCOLORS + per-row packing byte-preserved from
+'' examples-library/ch13-packed-bitmap-frame.spin2; infinite `repeat` bounded to 2
+'' frames, then SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | row, x, packed, bit, n
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
+  repeat n from 1 to 2                        ' bounded (example loops forever)
+    repeat row from 0 to 15
+      packed := 0
+      repeat x from 0 to 31
+        bit := ((x + row) & 3) == 0  ' a diagonal stripe pattern
+        packed := packed | (bit << x)
+      debug(`Frame `(packed))  ' one long = 32 pixels of one row
+    waitms(200)
+  waitms(200)
+  debug(`Frame save 'fig-13-packed-bitmap-frame')
+  debug(`Frame save window 'fig-13-packed-bitmap-frame_WDW')
+  debug(`Frame close)
+  debug("DEBUG_END_SESSION")

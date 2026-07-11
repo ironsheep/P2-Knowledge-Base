@@ -1,0 +1,29 @@
+'' fig-14-pasm-terminal.spin2  ->  fig-14-pasm-terminal.bmp
+'' TERM window fed from a PASM cog (coginit) — Chapter 14 example. The DAT PASM cog
+'' (create TERM, then count) is byte-preserved from
+'' examples-library/ch14-pasm-terminal.spin2. The Spin cog's keep-alive `repeat` is
+'' replaced by a bounded wait, then it stops the feed cog for a stable capture and
+'' SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | cog
+  cog := coginit(COGEXEC_NEW, @counter, 0)
+  waitms(3000)                            ' let it create + count (bounded capture)
+  cogstop(cog)                            ' stop the feed so the frame is stable
+  debug(`Mon save 'fig-14-pasm-terminal')
+  debug(`Mon save window 'fig-14-pasm-terminal_WDW')
+  debug(`Mon close)
+  debug("DEBUG_END_SESSION")
+
+DAT
+              org
+counter
+              debug(`TERM Mon SIZE 30 8)
+.loop
+              add       n, #1
+              debug(`Mon 0 'count = `$(n)' 13)
+              waitx     ##50_000_000
+              jmp       #.loop
+
+n             long      0

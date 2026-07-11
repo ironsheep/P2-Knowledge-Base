@@ -45,6 +45,36 @@ name **without** an extension; the directive appends `.bmp` automatically
 | `fig-10-spectro.png`        | SPECTRO  | `fig-10-spectro.spin2` |
 | `fig-11-midi.png`           | MIDI     | `fig-11-midi.spin2` |
 
+### No-fig chapter generators (ch01/02/12/13/14/15) + KEEP re-runs — added 2026-07-11 (§6 prep)
+
+These wrap the previously never-run `examples-library/` demos for ch01, ch02, ch12–ch15 (RC-2:
+authored outside the tested fig pipeline). Window-create + feed commands are **byte-preserved
+from the matching `examples-library/*.spin2`**; the harness only bounds the reader's infinite
+`repeat` and adds `SAVE` + `DEBUG_END_SESSION`. All compile clean with `pnut-ts -d`. See
+`HARDWARE-RUN-LIST-2026-07-11.md` for the bracketed batched-session run-list.
+
+| Generator | Window | Certifies example | Evidence |
+|---|---|---|---|
+| `fig-01-getting-started-term.spin2` | TERM | ch01-getting-started-term | BMP |
+| `fig-02-term-pin-config.spin2` | TERM | ch02-term-pin-config | BMP |
+| `fig-02-term-print-value.spin2` | TERM | ch02-term-print-value | BMP |
+| `fig-02-term-signals.spin2` | TERM | ch02-term-signals | BMP |
+| `fig-06-logic-spi-bus.spin2` | LOGIC | ch06-logic-spi-bus (KEEP: TRIGGER + colours) | BMP (may refresh ch06 fig) |
+| `fig-10-spectro-runup.spin2` | SPECTRO | ch10-spectro-runup (KEEP: LUMA8X+TRACE8) | BMP |
+| `fig-12-keyboard-adjust.spin2` | TERM | ch12-keyboard-adjust | event-log (DBG_INPUT) |
+| `fig-12-mouse-pointer.spin2` | TERM | ch12-mouse-pointer | event-log + visual cross-check |
+| `fig-13-packed-bitmap-frame.spin2` | BITMAP | ch13-packed-bitmap-frame (LUT/LUTCOLORS) | BMP |
+| `fig-13-packed-logic-stream.spin2` | LOGIC | ch13-packed-logic-stream | BMP |
+| `fig-13-packed-scope.spin2` | SCOPE | ch13-packed-scope | BMP |
+| `fig-14-multiwindow.spin2` | SCOPE+TERM | ch14-multiwindow | BMP |
+| `fig-14-pasm-inline.spin2` | TERM | ch14-pasm-inline | BMP |
+| `fig-14-pasm-scope.spin2` | SCOPE | ch14-pasm-scope | BMP |
+| `fig-14-pasm-terminal.spin2` | TERM | ch14-pasm-terminal | BMP |
+| `fig-14-scope-trace.spin2` | SCOPE+TERM | ch14-scope-trace | BMP |
+| `fig-15-control-panel.spin2` | PLOT | ch15-control-panel | event-log + visual (Y-consistency) |
+| `fig-15-dashboard.spin2` | TERM | ch15-dashboard | BMP |
+| `fig-15-panel-plot.spin2` | PLOT+2 BMP LAYERs | ch15-panel-plot (LAYER/external-BMP) | BMP (needs panel_bg.bmp + digits.bmp) |
+
 ## Provenance
 
 Command sequences are taken from the **audited** opus-master chapters (ch03–ch11),

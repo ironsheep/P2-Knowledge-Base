@@ -1,0 +1,39 @@
+'' fig-12-keyboard-adjust.spin2  ->  DBG_INPUT event log (INTERACTIVE, no screenshot)
+'' PC_KEY certification harness for Chapter 12's keyboard-adjust example.
+'' Create + PC_KEY poll + arrow-code case byte-preserved from
+'' examples-library/ch12-keyboard-adjust.spin2 (arrow codes 1/2/3/4 = L/R/U/D per
+'' pc_key.yaml). ADDS: a channel-gated DEBUG[DBG_INPUT] log so Stephen's run emits
+'' a re-readable keystroke record I read back. Ends on Esc (or a safety poll bound).
+'' Cert = event-log confirms each keypress maps to the intended value change.
+
+{Spin2_v50}
+CON
+  _clkfreq   = 200_000_000
+  DBG_INPUT  = 1                             ' event-log channel
+  DEBUG_MASK = (1 << DBG_INPUT)              ' enable it (a clear bit compiles to zero code)
+
+PUB main() | key, value, polls
+  debug(`TERM Adjust SIZE 32 6 TITLE 'Arrow Keys Adjust')
+  value := 50
+  show(value)
+  polls := 0
+  repeat
+    key := 0
+    debug(`Adjust PC_KEY(@key))
+    case key
+      3: value += 1                       ' Up arrow
+      4: value -= 1                       ' Down arrow
+      1: value -= 10                      ' Left arrow
+      2: value += 10                      ' Right arrow
+    if key
+      show(value)
+      DEBUG[DBG_INPUT]("KEY code=", sdec_(key), "  value=", sdec_(value))
+    if key == 27                          ' Esc ends the session
+      quit
+    if ++polls > 3000                     ' safety bound if unattended (~60 s)
+      quit
+    waitms(20)
+  debug("DEBUG_END_SESSION")
+
+PRI show(v)
+  debug(`Adjust 0 'Value: `(v)' 13 'Up/Down +/-1, Left/Right +/-10')

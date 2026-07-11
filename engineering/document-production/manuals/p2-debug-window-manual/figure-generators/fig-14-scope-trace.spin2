@@ -1,0 +1,37 @@
+'' fig-14-scope-trace.spin2  ->  fig-14-scope-trace-scope.bmp + ...-term.bmp
+'' SCOPE + TERM — Chapter 14 coordinated scope/status-panel example (RC-2: SCOPE
+'' channel-def on a SEPARATE feed). Byte-preserved from
+'' examples-library/ch14-scope-trace.spin2; infinite `repeat` bounded to 256 frames
+'' (fills the 256-sample window), both windows saved, then DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, signal, peak, count, n
+  ' A SCOPE on the left, a TERM status panel on the right.
+  ' Both are created up front, each by its own name, each placed with POS.
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
+  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
+  debug(`TERM Panel POS 420 0 SIZE 32 8)
+
+  ang   := 0
+  peak  := 0
+  count := 0
+
+  repeat n from 1 to 256                 ' bounded (example loops forever)
+    signal := qsin(1000, ang, 256)         ' software-generated waveform
+    if abs signal > peak
+      peak := abs signal                   ' track the running peak
+
+    debug(`Trace `(signal))                ' one sample to the SCOPE
+    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)
+
+    ang   += 4
+    count += 1
+    waitms(10)
+  waitms(200)
+  debug(`Trace save 'fig-14-scope-trace-scope')
+  debug(`Trace save window 'fig-14-scope-trace-scope_WDW')
+  debug(`Panel save window 'fig-14-scope-trace-term_WDW')
+  debug(`Trace close)
+  debug(`Panel close)
+  debug("DEBUG_END_SESSION")

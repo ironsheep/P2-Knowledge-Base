@@ -1,0 +1,22 @@
+'' fig-14-pasm-inline.spin2  ->  fig-14-pasm-inline.bmp
+'' TERM window fed from an inline-PASM org/end block — Chapter 14 example.
+'' Create + inline org/end DEBUG byte-preserved from
+'' examples-library/ch14-pasm-inline.spin2; the reader's infinite `repeat` around
+'' the org/end block is bounded to 12 iterations, then SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | x, n
+  debug(`TERM Inline SIZE 30 6)
+  x := 0
+  repeat n from 1 to 12                  ' bounded (example loops forever)
+    org
+                add       x, #1
+                debug(`Inline 0 'x = `(x)' 13)
+    end
+    waitms(500)
+  waitms(200)
+  debug(`Inline save 'fig-14-pasm-inline')
+  debug(`Inline save window 'fig-14-pasm-inline_WDW')
+  debug(`Inline close)
+  debug("DEBUG_END_SESSION")

@@ -1,0 +1,22 @@
+'' fig-13-packed-logic-stream.spin2  ->  fig-13-packed-logic-stream.bmp
+'' LOGIC window — Chapter 13 packed 1-bit stream example, instrumented for capture.
+'' Create + 32-samples-per-long packing byte-preserved from
+'' examples-library/ch13-packed-logic-stream.spin2; infinite `repeat` bounded to 10
+'' longs (320 samples > 256-deep window), then SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | packed, i, n
+  debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
+  repeat n from 1 to 10                       ' bounded (example loops forever)
+    packed := 0
+    repeat i from 0 to 31
+      ' pack 32 one-bit samples into a long
+      packed := (packed << 1) | (getrnd() & 1)
+    debug(`Stream `(packed))  ' send one long = 32 samples
+    waitms(50)
+  waitms(200)
+  debug(`Stream save 'fig-13-packed-logic-stream')
+  debug(`Stream save window 'fig-13-packed-logic-stream_WDW')
+  debug(`Stream close)
+  debug("DEBUG_END_SESSION")

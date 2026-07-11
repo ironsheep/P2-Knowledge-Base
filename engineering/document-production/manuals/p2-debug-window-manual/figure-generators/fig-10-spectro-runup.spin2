@@ -1,0 +1,40 @@
+'' fig-10-spectro-runup.spin2  ->  fig-10-spectro-runup.bmp
+'' SPECTRO window — Chapter 10 motor run-up example, the KEPT divergence variant:
+'' RANGE 500 + TRACE 8 + LUMA8X (differs from fig-10-spectro.spin2's LUMA8W BLUE;
+'' Stephen elected 2026-07-11 to KEEP it → must be hardware-re-tested before ship).
+'' Create + FFT-window feed + inline-PASM sine() byte-preserved from
+'' examples-library/ch10-spectro-runup.spin2; infinite `repeat` bounded to 78
+'' feed-windows (one full run-up just before CLEAR), then SAVE + DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | i, phase, ainc, sample, n
+  ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
+
+  phase := 0
+  ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
+
+  repeat n from 1 to 78        ' bounded: one full run-up (example loops forever)
+    ' Feed one 512-sample FFT window at the current speed, then accelerate.
+    repeat i from 1 to 512
+      sample := sine(2000, phase)
+      phase += ainc            ' advance the synthesized vibration tone
+      debug(`RunUp `(sample))
+    ainc += 5_000_000  ' motor speeds up -> higher tone -> diagonal streak
+    if ainc > 400_000_000
+      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
+      ainc := 8_000_000
+  waitms(200)
+  debug(`RunUp save 'fig-10-spectro-runup')
+  debug(`RunUp save window 'fig-10-spectro-runup_WDW')
+  debug(`RunUp close)
+  debug("DEBUG_END_SESSION")
+
+PRI sine(amp, angle) : y
+  ' amp * sin(angle), via the CORDIC.
+  ' angle $0000_0000..$FFFF_FFFF spans one full circle.
+  org
+    qrotate amp, angle         ' X = amp, Y = 0 (no SETQ)
+    getqy   y                  ' Y result = amp * sin(angle)
+  end

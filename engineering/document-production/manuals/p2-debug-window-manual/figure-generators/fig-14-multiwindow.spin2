@@ -1,0 +1,32 @@
+'' fig-14-multiwindow.spin2  ->  fig-14-multiwindow-scope.bmp + ...-term.bmp
+'' SCOPE + TERM — Chapter 14 two-independent-windows example. Both create lines
+'' (SCOPE channel-def on a SEPARATE feed, RC-2) + per-frame feed byte-preserved from
+'' examples-library/ch14-multiwindow.spin2; infinite `repeat` bounded to 120 frames,
+'' both windows saved, then DEBUG_END_SESSION.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, sine, count, n
+  ' Two independent windows, each created by name and placed with POS.
+  debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
+  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
+  debug(`TERM Status POS 420 0 SIZE 40 10)
+
+  ang := 0
+  count := 0
+  repeat n from 1 to 120                 ' bounded (example loops forever)
+    sine := qsin(1000, ang, 256)         ' CORDIC sine, software-generated
+
+    debug(`Wave `(sine))                 ' feed the SCOPE by its name
+    debug(`Status 0 'Sample `(count)' 13 'Value:  `(sine)' 13)
+
+    ang += 4
+    count += 1
+    waitms(10)
+  waitms(200)
+  debug(`Wave save 'fig-14-multiwindow-scope')
+  debug(`Wave save window 'fig-14-multiwindow-scope_WDW')
+  debug(`Status save window 'fig-14-multiwindow-term_WDW')
+  debug(`Wave close)
+  debug(`Status close)
+  debug("DEBUG_END_SESSION")
