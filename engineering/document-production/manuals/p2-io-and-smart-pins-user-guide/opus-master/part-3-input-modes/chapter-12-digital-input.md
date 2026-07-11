@@ -90,14 +90,26 @@ TESTP reaches the pin a clock sooner than the INA/INB register path (the latenci
 
 ## 12.3 Input Conditioning Options
 
-### P_LOGIC_A and P_LOGIC_B_FB
+### P_LOGIC_A, P_LOGIC_A_FB, and P_LOGIC_B_FB
 
-Standard CMOS logic input with ~1.65V threshold:
+All three present the pin as a standard CMOS logic input (~1.65V threshold). They are not interchangeable spellings of one mode — they differ along **two independent routing axes**:
+
+- **Which input reaches IN.** Every smart pin has two independently-selectable input taps, **A** and **B**; each tap can read this pin, a ±1/±2/±3 neighbor, or the pin's own OUT bit (Appendix B, *A/B Input Selection*). `P_LOGIC_A` sends the **A** tap to IN; `P_LOGIC_B_FB` sends the **B** tap instead.
+- **What drives the pin's output.** Either the cog's **OUT** bit (the normal path) or the pin's own logic level **fed back** to the output. The `_FB` suffix selects that feedback path.
+
+| Constant | Input → IN | Output driven by |
+|----------|:----------:|:----------------:|
+| `P_LOGIC_A` (default) | A | OUT |
+| `P_LOGIC_A_FB` | A | feedback |
+| `P_LOGIC_B_FB` | B | feedback |
 
 ```spin2
-WRPIN(pin, P_LOGIC_A)                      ' Default logic input
-WRPIN(pin, P_LOGIC_B_FB)               ' Same, different internal routing
+WRPIN(pin, P_LOGIC_A)         ' A → IN; pin output = cog OUT bit (default)
+WRPIN(pin, P_LOGIC_A_FB)      ' A → IN; pin output = its own logic level (feedback)
+WRPIN(pin, P_LOGIC_B_FB)      ' B → IN; feedback output — a different tap AND a different output path
 ```
+
+`P_LOGIC_B_FB` therefore differs from the `P_LOGIC_A` default on *both* axes — it is not "the same input, routed differently."
 
 ### P_SCHMITT_A
 
