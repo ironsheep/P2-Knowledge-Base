@@ -52,6 +52,7 @@ Tools for validating code syntax and document structure.
 | Tool | Language | Purpose |
 |------|----------|---------|
 | `validate-pasm-code.sh` | Shell | Validate PASM2 code using pnut_ts compiler |
+| `verify-example-corpus-identity.py` | Python | Assert every manual `examples-library/*.spin2` is byte-identical to its `opus-master` `caption="…"` code block (anti-drift gate for the reader example ZIP). `--manual DIR` for any manual; exit 0 = GREEN. Wired into `document-finalize` (pre-re-zip) + `release-manual` (release gate) overlays. |
 
 ### 🤖 Automation Tools (`automation/`)
 

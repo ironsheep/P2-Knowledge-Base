@@ -95,6 +95,31 @@ finding, gathered in this pass like any other. The gate itself is owned by
 the principle is in
 `engineering/document-production/app-notes/APP-NOTE-DESIGN-DECISIONS.md`.
 
+## Augments the fix step — example edits keep loose-file ↔ code-block identity
+
+When a manual ships an **example corpus** (a `manuals/<slug>/examples-library/`
+of loose `*.spin2` files, bundled as `examples-library.zip` for the reader), the
+loose file a reader opens in an external tool **must be byte-identical to the
+printed code block** in `opus-master/` that carries `caption="<name>.spin2"`
+([[feedback_example_file_matches_code_block_not_figure]]). Identity — not the
+rendered figure matching the published screenshot, and not compile/run success
+(those are `pnut-ts -d` and the hardware run-list, separate gates).
+
+- **Edit both halves in lockstep.** When a finding touches an example, change the
+  loose `examples-library/<name>.spin2` **and** its `opus-master` code block in the
+  same pass. Never one without the other.
+- **Gate before the re-zip.** Before rebuilding `examples-library.zip` (and before
+  calling the corpus done for this cycle), run the identity checker — it must be
+  **GREEN**:
+
+  ```bash
+  python3 engineering/tools/verify-example-corpus-identity.py            # default: Debug Window
+  python3 engineering/tools/verify-example-corpus-identity.py --manual <manual-dir>   # any other
+  ```
+
+  A RED result (mismatch / orphan loose-file / orphan block / duplicate caption)
+  is a corpus-drift defect — resolve it, do not re-zip over it. Exit 0 = GREEN.
+
 ## Augments §5–§6 — Render once, then verify / Hand back
 
 Because manuals render on PDF Forge (not a local `DOC_RENDER_COMMAND`),
