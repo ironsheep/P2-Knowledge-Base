@@ -12,9 +12,10 @@
 > `fig-13-packed-logic-multi`** (row in Part A; no input-asset .bmp needed). **Conflict tests
 > D1/D2 (I/J) are DONE** — run 2026-07-11 00:58–00:59 on both platforms (`img-macOS/`,
 > `img-Windows/`), read back, and RESOLVED in `audit/v55-vs-REF-reconciliation-2026-07-10.md`
-> (F-205b TEXTSTYLE = per-axis hybrid; POLAR θ0 = East/CCW, no flip). **Net remaining = A15
-> only.** All prior figures are captured-current unless their example changes again (e.g. a
-> ch05-post edit would re-open its figure).
+> (F-205b TEXTSTYLE = per-axis hybrid; POLAR θ0 = East/CCW, no flip). **A15 `fig-13-packed-logic-multi`
+> was run 2026-07-11 and CONFIRMED** (both D0 + D1 populated → F-207 Facet B closed). **BATCH
+> COMPLETE — nothing left to run.** All figures are captured-current unless an example changes
+> again (e.g. a ch05-post edit would re-open its figure).
 
 ## Why this run exists
 

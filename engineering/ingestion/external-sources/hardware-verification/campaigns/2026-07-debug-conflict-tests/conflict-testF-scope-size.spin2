@@ -1,0 +1,51 @@
+'' =====================================================================
+'' conflict-testF-scope-size.spin2  --  settles C-R7 (SCOPE default width)
+''
+'' QUESTION: SCOPE default SIZE width -- v55 text 255, REF+scope.yaml 256.
+''
+'' NOTE (F-137 / scope.yaml): SCOPE (like FFT) needs its channel declared
+''   as a SEPARATE message AFTER the create line -- a channel-def on the
+''   create line is dropped and the window shows nothing.  So: create with
+''   config keys only, THEN send 'label' lo hi, THEN stream.
+''
+'' TWO-RAIL DESIGN (guards the 1px false positive):
+''   S_255 (explicit 255) and S_256 (explicit 256) are the RAILS -- must
+''   measure 1px apart (proves the ruler resolves 1px, else inconclusive).
+''   S_512 -- coarse instrument check (~2x wide).
+''   S_def -- default under test (created with NO SIZE); matched to 255/256.
+''
+'' READ (image-tools): measure inner plot-area width of S_255, S_256, S_512
+''   first (confirm the ruler), then place S_def against 255/256.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | cnt, v
+  ' create (config keys only), then channel-def as a SEPARATE message
+  DEBUG(`SCOPE S_def SAMPLES 256)
+  DEBUG(`S_def 'ch' -1000 1000)
+  DEBUG(`SCOPE S_255 SIZE 255 256 SAMPLES 256)
+  DEBUG(`S_255 'ch' -1000 1000)
+  DEBUG(`SCOPE S_256 SIZE 256 256 SAMPLES 256)
+  DEBUG(`S_256 'ch' -1000 1000)
+  DEBUG(`SCOPE S_512 SIZE 512 256 SAMPLES 256)
+  DEBUG(`S_512 'ch' -1000 1000)
+
+  ' plot-area width is set at CREATE; feed just enough to draw a visible trace.
+  cnt := 0
+  repeat 300
+    v := (cnt // 120) * 16 - 1000
+    DEBUG(`S_def `(v))
+    DEBUG(`S_255 `(v))
+    DEBUG(`S_256 `(v))
+    DEBUG(`S_512 `(v))
+    cnt++
+
+  waitms(300)
+  DEBUG(`S_def SAVE 'scopeF_default')
+  DEBUG(`S_255 SAVE 'scopeF_255')
+  DEBUG(`S_256 SAVE 'scopeF_256')
+  DEBUG(`S_512 SAVE 'scopeF_512')
+  waitms(500)
+  repeat

@@ -1,0 +1,53 @@
+'' =====================================================================
+'' conflict-testI-textstyle-justify.spin2  --  settles F-205 (TEXTSTYLE
+''   horizontal/vertical justification value->direction mapping)
+''
+'' QUESTION: PLOT TEXTSTYLE byte %YYXXUIWW -- the %XX (horizontal, bits4-5)
+''   and %YY (vertical, bits6-7) value->direction mapping is INVERTED between
+''   the two primary sources:
+''     Spin2 v55 text L1282 : %10=right / %10=bottom , %11=left / %11=top
+''     REF PLOT_Theory §4.3  : 2=left  / 2=top       , 3=right / 3=bottom
+''   The bit LAYOUT agrees; only value->direction is inverted on BOTH axes.
+''   (Test D settled the WEIGHT bits %WW; it did NOT exercise justification.)
+''
+'' TWO-RAIL DESIGN (guards false positives): draw the SAME label three ways
+''   against a reference guide-line through the ANCHOR:
+''   HORIZONTAL window (guide = vertical white line at the anchor column):
+''     row C  style $00 (align 0 = center)  -- MUST straddle the line (control:
+''            proves the align field is honored + the sampler resolves L/R).
+''     row 2  style $20 (horiz value %10)   -- read: glyphs LEFT or RIGHT of line.
+''     row 3  style $30 (horiz value %11)   -- MUST fall the OPPOSITE side of 2.
+''   VERTICAL window (guide = horizontal white line at the anchor row): same,
+''     style $00 straddles; $80 (vert %10) vs $C0 (vert %11) above/below.
+''
+''   Decide: whichever side value 2 lands maps to REF (2=left/top) or v55
+''   (2=right/bottom).  If $00 does NOT straddle, or 2 and 3 land the same
+''   side -> INCONCLUSIVE (we know it), never a false positive.
+''
+'' READ (image-tools): in each window find the guide-line x/y, then measure
+''   which side each style's glyph ink sits.  Bright distinct colors per row.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+  ' ---- HORIZONTAL justification: guide = vertical line at anchor x=160 ----
+  debug(`PLOT TXJ_h SIZE 320 210 BACKCOLOR BLACK)
+  debug(`TXJ_h WHITE SET 160 5 LINE 160 205 1 255)       ' vertical guide @ x=160
+  debug(`TXJ_h GREEN  SET 160 30  TEXT 28 $00 0 'HHHH')   ' align0 center: straddles (control)
+  debug(`TXJ_h CYAN   SET 160 95  TEXT 28 $20 0 'HHHH')   ' horiz %10: LEFT(REF) or RIGHT(v55)?
+  debug(`TXJ_h YELLOW SET 160 160 TEXT 28 $30 0 'HHHH')   ' horiz %11: opposite of the above
+
+  ' ---- VERTICAL justification: guide = horizontal line at anchor y=105 ----
+  debug(`PLOT TXJ_v SIZE 320 210 BACKCOLOR BLACK)
+  debug(`TXJ_v WHITE SET 5 105 LINE 315 105 1 255)        ' horizontal guide @ y=105
+  debug(`TXJ_v GREEN  SET 55  105 TEXT 28 $00 0 'VV')     ' align0 center: straddles (control)
+  debug(`TXJ_v CYAN   SET 160 105 TEXT 28 $80 0 'VV')     ' vert %10: TOP(REF) or BOTTOM(v55)?
+  debug(`TXJ_v YELLOW SET 260 105 TEXT 28 $C0 0 'VV')     ' vert %11: opposite of the above
+
+  waitms(300)
+  debug(`TXJ_h save 'textI_horiz')
+  debug(`TXJ_v save 'textI_vert')
+  waitms(500)
+  repeat

@@ -1,0 +1,83 @@
+'' =====================================================================
+'' conflict-testG-aug-intervening.spin2  --  settles #644 / C-56 on SILICON
+''
+'' QUESTION: does an intervening instruction (no #S operand) between AUGS
+''   and its intended #S target CANCEL the augment?  Old manual: yes
+''   ("must immediately precede").  Silicon Doc L211-227: no -- the augment
+''   is queued for the NEXT #S user and survives.
+''
+'' ENCODING: AUGS#$55E6 + (#S=$1EF) => $00ABCDEF (21990<<9 | 495).
+''
+'' TWO RAILS (bracket) + FOUR INDEPENDENT METHODS (so one quirk can't fool us):
+''   RAIL noaug  : MOV #$1EF with NO AUGS            -> $000001EF (augment ABSENT)
+''   RAIL direct : AUGS, MOV #$1EF (immediate)       -> $00ABCDEF (augment PRESENT)
+''   M1 nop      : AUGS, NOP, MOV #$1EF              (intervening no-op)
+''   M2 alu      : AUGS, ROR reg,reg, MOV #$1EF      (intervening register ALU op, no #S)
+''   M3 twonop   : AUGS, NOP, NOP, MOV #$1EF         (two intervening)
+''   M4 add      : AUGS, NOP, ADD #$1EF into 0       (a DIFFERENT #S consumer, not MOV)
+''
+''   Each Mn == direct  => augment survived that path.  Each Mn == noaug
+''   => it was cancelled.  The two rails MUST read $000001EF and $00ABCDEF
+''   or the rig/encoding is wrong (warned) -- so a "survived" reading can't
+''   be a false positive.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | noaug, direct, m1_nop, m2_alu, m3_twonop, m4_add
+  noaug := 0
+  direct := 0
+  m1_nop := 0
+  m2_alu := 0
+  m3_twonop := 0
+  m4_add := 0                            ' M4 needs its target pre-zeroed (ADD accumulates)
+
+  org
+        ' RAIL (negative): no AUGS at all
+        mov     noaug, #$1EF                 ' -> $000001EF
+        ' RAIL (positive): AUGS immediately before target
+        augs    #$55E6
+        mov     direct, #$1EF                ' -> $00ABCDEF
+        ' M1: intervening NOP
+        augs    #$55E6
+        nop
+        mov     m1_nop, #$1EF
+        ' M2: intervening register-only ALU op (ROR, no #S immediate)
+        augs    #$55E6
+        ror     pr0, pr1
+        mov     m2_alu, #$1EF
+        ' M3: two intervening NOPs
+        augs    #$55E6
+        nop
+        nop
+        mov     m3_twonop, #$1EF
+        ' M4: intervening NOP, and a DIFFERENT #S consumer (ADD into 0)
+        augs    #$55E6
+        nop
+        add     m4_add, #$1EF                ' 0 + $00ABCDEF
+  end
+
+  DEBUG("=== AUG intervening-instruction test  (#644 / C-56) ===")
+  DEBUG("RAIL noaug  (want $000001EF) = ", UHEX_LONG(noaug))
+  DEBUG("RAIL direct (want $00ABCDEF) = ", UHEX_LONG(direct))
+  DEBUG("M1 NOP        = ", UHEX_LONG(m1_nop))
+  DEBUG("M2 ALU(ROR)   = ", UHEX_LONG(m2_alu))
+  DEBUG("M3 two-NOP    = ", UHEX_LONG(m3_twonop))
+  DEBUG("M4 ADD #S     = ", UHEX_LONG(m4_add))
+
+  ' NOTE: the ABSOLUTE augmented value depends on how the toolchain maps the
+  ' AUGS operand into the 23-bit field, so the rails are checked RELATIVELY:
+  ' noaug = bare #S (no augment), direct = augment applied (must differ).
+  if noaug <> $000001EF
+    DEBUG("RIG WARNING: noaug != $000001EF -- bare #S wrong; cannot trust the methods")
+  elseif direct == noaug
+    DEBUG("RIG WARNING: direct == noaug -- AUGS had NO effect even with no intervening instr; rig broken")
+  elseif (m1_nop == direct) and (m2_alu == direct) and (m3_twonop == direct) and (m4_add == direct)
+    DEBUG("VERDICT: augment (direct != noaug) SURVIVES all four intervening paths -> C-56 correct; 'must immediately precede' is WRONG")
+  elseif (m1_nop == noaug) or (m2_alu == noaug) or (m3_twonop == noaug) or (m4_add == noaug)
+    DEBUG("VERDICT: at least one intervening path CANCELS the augment -> inspect which; old manual partly right")
+  else
+    DEBUG("VERDICT: MIXED/unexpected -- inspect the per-method values above")
+
+  repeat

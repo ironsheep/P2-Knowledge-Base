@@ -1,0 +1,96 @@
+'' =====================================================================
+'' conflict-testH-eggbeater-timing.spin2  --  confirms #132 / C-09 on SILICON
+''
+'' QUESTION: the "egg beater" hub interface -- a delay on the FIRST/
+''   independent hub access (align to the target slice, up to #cogs-1
+''   clocks) but ~1 long/clock for SEQUENTIAL access.  Silicon Doc
+''   L6634-6649 states it; this measures it MULTIPLE INDEPENDENT WAYS.
+''
+'' INSTRUMENT RAILS (prove the clock counter resolves single clocks):
+''   base  = getct;getct                 (bracket overhead, subtracted out)
+''   nop8  = 8 NOPs                       (known ~8-clock reference)
+''
+'' SCALAR (independent-access) -- TWO ways, should agree HIGH:
+''   scalar1 = one RDLONG
+''   scalar8 = REP 8x RDLONG (same addr; each waits for that slice again)
+''
+'' STREAMING (sequential) -- TWO independent mechanisms, should agree LOW (~1/long):
+''   setq8  = SETQ #7 + RDLONG (block move of 8 longs to cog regs)
+''   fifo16 = RDFAST + REP 16x RFLONG (the FIFO / egg-beater stream)
+''
+''   Timing is kept in locals t0/t1 (NOT pr0..pr7) because the SETQ block
+''   move overwrites pr0..pr7 with hub data.  Cross-check: scalar1 ~=
+''   scalar8/8 (high) AND setq8/8 ~= fifo16/16 (low), with base < nop8
+''   proving the ruler -- two scalar + two streaming methods rule out a
+''   single-mechanism false positive.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+DAT
+              orgh
+hubbuf        long      $A5A5_0000[64]
+
+PUB main() | base, nop8, scalar1, scalar8, setq8, fifo16, addr, t0, t1
+  addr := @hubbuf
+
+  org
+        ' --- rail: bracket baseline (timing in locals t0/t1) ---
+        getct   t0
+        getct   t1
+        sub     t1, t0
+        mov     base, t1
+        ' --- rail: 8 NOPs (known ~8 clocks) ---
+        getct   t0
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        getct   t1
+        sub     t1, t0
+        mov     nop8, t1
+        ' --- scalar way 1: single RDLONG ---
+        getct   t0
+        rdlong  pr2, addr
+        getct   t1
+        sub     t1, t0
+        mov     scalar1, t1
+        ' --- scalar way 2: 8 independent RDLONGs (same addr, each re-aligns) ---
+        getct   t0
+        rep     #1, #8
+        rdlong  pr2, addr
+        getct   t1
+        sub     t1, t0
+        mov     scalar8, t1
+        ' --- streaming way 1: SETQ block move of 8 longs into pr0..pr7 ---
+        getct   t0
+        setq    #8-1
+        rdlong  pr0, addr
+        getct   t1
+        sub     t1, t0
+        mov     setq8, t1
+        ' --- streaming way 2: RDFAST + 16 sequential RFLONG (FIFO) ---
+        rdfast  #0, addr
+        getct   t0
+        rep     #1, #16
+        rflong  pr2
+        getct   t1
+        sub     t1, t0
+        mov     fifo16, t1
+  end
+
+  DEBUG("=== Egg-beater hub timing  (#132 / C-09) ===")
+  DEBUG("RAIL base (getct-getct)        = ", UDEC(base), " clocks")
+  DEBUG("RAIL nop8 net (want ~16 = 8x2) = ", SDEC(nop8 - base), " clocks")
+  DEBUG("SCALAR1  net                   = ", SDEC(scalar1 - base), " clocks")
+  DEBUG("SCALAR8  net (per-read /8)      = ", SDEC((scalar8 - base) / 8), " clocks")
+  DEBUG("STREAM setq8 net (per-long /8)  = ", SDEC((setq8 - base) / 8), " clocks")
+  DEBUG("STREAM fifo16 net (per-long /16) = ", SDEC((fifo16 - base) / 16), " clocks")
+  DEBUG("EXPECT: scalar per-access >> streaming per-long (alignment vs stream)")
+
+  repeat

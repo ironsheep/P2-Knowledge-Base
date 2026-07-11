@@ -1,0 +1,47 @@
+'' =====================================================================
+'' conflict-testJ-polar-theta0.spin2  --  settles PLOT POLAR orientation
+''   (where theta=0 points, and which way increasing theta rotates)
+''
+'' QUESTION: ch05 POLAR section carries an UNANCHORED claim about where the
+''   zero angle sits and the rotation sense (flip risk).  POLAR maps the two
+''   cursor coords to (rho, theta).  We need ground truth for:
+''     (a) theta = 0   -> which screen direction? (East/right?  North/up?)
+''     (b) increasing theta -> counter-clockwise (math) or clockwise (screen)?
+''   (`POLAR 360` sets a full turn = 360 units, so theta is in degrees; the
+''    default twopi sense is under test here -- yaml notes twopi -1/0 flip it.)
+''
+'' TWO-RAIL / SELF-BRACKET: draw four spokes from the center origin at
+''   theta = 0, 90, 180, 270, each a distinct color, all rho=180:
+''     RED=0  GREEN=90  BLUE=180  YELLOW=270.
+''   The rig is self-checking: RED and BLUE MUST be COLLINEAR-OPPOSITE (0 vs
+''   180) and GREEN/YELLOW MUST be the OPPOSITE pair, orthogonal to RED/BLUE.
+''   If the four are not two orthogonal opposed pairs -> INCONCLUSIVE (we
+''   know it), never a false positive.  A short RED stub at rho=90 double-marks
+''   the 0 direction so it can't be confused with its 180 opposite.
+''
+''   Decide from RED: theta=0 points to the screen direction RED occupies;
+''   then GREEN (90) tells the sense -- 90 deg CCW from RED = math (0=East,
+''   CCW); 90 deg CW = screen convention.  Compare to whatever ch05 asserts.
+''
+'' READ (image-tools): find center (200,200); for each spoke color compute
+''   its bearing from center (atan2 of a bright pixel) -> the 0-direction and
+''   the 0->90 turn direction fall straight out.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+  debug(`PLOT PJ SIZE 400 400 BACKCOLOR BLACK)
+  debug(`PJ ORIGIN 200 200 POLAR 360)                ' center origin; theta in degrees
+
+  debug(`PJ RED    SET 0 0 LINE 180 0   3 255)        ' spoke theta=0    (RED)   <- the anchor
+  debug(`PJ GREEN  SET 0 0 LINE 180 90  3 255)        ' spoke theta=90   (GREEN) <- sense probe
+  debug(`PJ BLUE   SET 0 0 LINE 180 180 3 255)        ' spoke theta=180  (BLUE)  = opposite RED
+  debug(`PJ YELLOW SET 0 0 LINE 180 270 3 255)        ' spoke theta=270  (YELLOW)= opposite GREEN
+  debug(`PJ WHITE  SET 0 0 LINE 90  0   6 255)        ' short fat stub at theta=0 (double-mark 0)
+
+  waitms(300)
+  debug(`PJ save 'polarJ_wheel')
+  waitms(500)
+  repeat

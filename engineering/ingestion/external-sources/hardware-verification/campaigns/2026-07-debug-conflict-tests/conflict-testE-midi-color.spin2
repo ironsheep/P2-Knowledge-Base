@@ -1,0 +1,49 @@
+'' =====================================================================
+'' conflict-testE-midi-color.spin2  --  settles B26 (MIDI COLOR rgb24)
+''
+'' QUESTION: does MIDI COLOR accept a 24-bit $RRGGBB value (manual's
+''   example), or only named colors?  REF: color param = named OR
+''   numeric-through-color-mode; MIDI default mode = RGB24, so $00FF00
+''   SHOULD render green.
+''
+'' TWO-RAIL DESIGN (guards a "green-by-coincidence" false positive):
+''   M_def  -- no COLOR -> DEFAULT cyan/magenta (the FALLBACK rail: what
+''             a REJECTED numeric would look like).
+''   M_rgbB -- COLOR $0000FF ... -> if the key renders BLUE, rgb24 is
+''             DEFINITELY parsed (blue can't be a default or a green fluke).
+''   M_rgb  -- COLOR $00FF00 ... -> the actual manual-example case (green?).
+''   M_kw   -- COLOR GREEN ...   -> named-keyword control (known green).
+''
+''   Decision: M_rgbB blue AND M_rgb green (matching M_kw) => rgb24 accepted
+''   (finding to force named-only INVERTS).  M_rgb/M_rgbB == M_def cyan =>
+''   rgb24 rejected.  Two rgb24 hues + the fallback rail remove coincidence.
+''
+'' READ (image-tools): sample the lit white-key (note 60) color in each.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+  DEBUG(`MIDI M_def  SIZE 20)                          ' default cyan/magenta (fallback rail)
+  DEBUG(`MIDI M_rgbB SIZE 20 COLOR $0000FF $FF7F00)     ' rgb24 BLUE (proves rgb24 parsed)
+  DEBUG(`MIDI M_rgb  SIZE 20 COLOR $00FF00 $FF7F00)     ' rgb24 GREEN (the manual example)
+  DEBUG(`MIDI M_kw   SIZE 20 COLOR GREEN ORANGE)        ' named keyword control
+
+  ' light middle-C (white key) + C# (black key) full velocity in each
+  DEBUG(`M_def  $90 `(60, 127))
+  DEBUG(`M_def  $90 `(61, 127))
+  DEBUG(`M_rgbB $90 `(60, 127))
+  DEBUG(`M_rgbB $90 `(61, 127))
+  DEBUG(`M_rgb  $90 `(60, 127))
+  DEBUG(`M_rgb  $90 `(61, 127))
+  DEBUG(`M_kw   $90 `(60, 127))
+  DEBUG(`M_kw   $90 `(61, 127))
+
+  waitms(300)
+  DEBUG(`M_def  SAVE 'midiE_default')
+  DEBUG(`M_rgbB SAVE 'midiE_rgbBLUE')
+  DEBUG(`M_rgb  SAVE 'midiE_rgbGREEN')
+  DEBUG(`M_kw   SAVE 'midiE_keyword')
+  waitms(500)
+  repeat

@@ -1,0 +1,37 @@
+'' =====================================================================
+'' conflict-testD-textstyle.spin2  --  informs F-205 (TEXTSTYLE)
+''
+'' QUESTION: what do PLOT TEXTSTYLE weight bits look like?  REF §7.0 says
+''   default textStyle = 1; F-205 disputes what the weight bits MEAN
+''   (manual: $00 = "light"; REF distillation implies %01 = normal).
+''
+'' TWO-RAIL DESIGN: draw the SAME string at styles $00,$01,$02,$03 down
+''   the canvas.  The progression is the rail: if $00..$03 all render
+''   IDENTICALLY the style byte is ignored (test inconclusive -> we know).
+''   If they differ, we can read whether $00 is LIGHTER than $01 (default)
+''   or heavier, and where the weight steps.  A big control string sample
+''   ('WWWjjj000') maximizes stroke area to measure ink coverage.
+''
+'' READ (image-tools): per row, measure glyph ink coverage / stroke width;
+''   confirm rows differ (rail), then order them by weight.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+  DEBUG(`PLOT P SIZE 320 240)
+
+  DEBUG(`P SET 20 30)
+  DEBUG(`P TEXT 30 $00 0 'WWWjjj000 s00')
+  DEBUG(`P SET 20 85)
+  DEBUG(`P TEXT 30 $01 0 'WWWjjj000 s01')
+  DEBUG(`P SET 20 140)
+  DEBUG(`P TEXT 30 $02 0 'WWWjjj000 s02')
+  DEBUG(`P SET 20 195)
+  DEBUG(`P TEXT 30 $03 0 'WWWjjj000 s03')
+
+  waitms(300)
+  DEBUG(`P SAVE 'textD_styles')
+  waitms(500)
+  repeat

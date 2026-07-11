@@ -1,0 +1,62 @@
+'' =====================================================================
+'' conflict-testB-fft-linesize.spin2  --  settles C-R5 (+ C-R8 half-pixel)
+''
+'' QUESTION: NEGATIVE FFT LINESIZE draws "filled bars of width |n|"
+''   (REF + fft.yaml) or "isolated vertical lines" (v55 text)?
+''
+'' NOTE (fft.yaml:22/42): FFT needs its channel declared as a SEPARATE
+''   message AFTER the create line, or the window displays NOTHING. Create
+''   = config keys only; then send the channel-def; then stream samples.
+''   Signal = a clean qsin tone (proven test2d recipe) -> one crisp peak,
+''   so each window has an unmistakable vertical element to inspect.
+''
+'' TWO-RAIL / MULTI-MAGNITUDE DESIGN (guards false positives):
+''   F_pos   LINESIZE  4  -- CONNECTED polyline (the "neither" reference).
+''   F_neg   LINESIZE -4  -- negative case, small magnitude.
+''   F_neg2  LINESIZE -16 -- negative case, large magnitude.
+''     -> vertical-element WIDTH scales with |n| (4 vs 16) => "filled bars
+''        of width |n|" (REF/yaml); both stay ~1px thin => "isolated lines"
+''        (v55).  Two magnitudes force the call from the DIFFERENCE.
+''   F_ls2 / F_ls8  LINESIZE 2 vs 8 -- half-pixel rail (8 ~4x the 2).
+'' =====================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | phase, s
+  ' create (config keys ONLY -- LINESIZE variants; LOGSCALE for visible peaks)
+  DEBUG(`FFT F_pos  SIZE 256 130 SAMPLES 256 LOGSCALE LINESIZE 4)
+  DEBUG(`FFT F_neg  SIZE 256 130 SAMPLES 256 LOGSCALE LINESIZE -4)
+  DEBUG(`FFT F_neg2 SIZE 256 130 SAMPLES 256 LOGSCALE LINESIZE -16)
+  DEBUG(`FFT F_ls2  SIZE 256 130 SAMPLES 256 LOGSCALE LINESIZE 2)
+  DEBUG(`FFT F_ls8  SIZE 256 130 SAMPLES 256 LOGSCALE LINESIZE 8)
+
+  ' declare ONE channel per window -- SEPARATE message (required or blank)
+  ' grammar: 'label' {mag {high {tall {base {grid {color}}}}}}
+  DEBUG(`F_pos  'sig' 0 1000 120 0 1 $00FF00)
+  DEBUG(`F_neg  'sig' 0 1000 120 0 1 $00FF00)
+  DEBUG(`F_neg2 'sig' 0 1000 120 0 1 $00FF00)
+  DEBUG(`F_ls2  'sig' 0 1000 120 0 1 $00FF00)
+  DEBUG(`F_ls8  'sig' 0 1000 120 0 1 $00FF00)
+
+  ' feed a clean tone -> one crisp peak (bin ~12). 3 buffers (768) is plenty
+  ' to fill SAMPLES=256 and get a stable spectrum -- no need for a long feed.
+  phase := 0
+  repeat 3
+    repeat 256
+      s := qsin(1000, phase, $1_0000)
+      phase += 3072
+      DEBUG(`F_pos  `(s))
+      DEBUG(`F_neg  `(s))
+      DEBUG(`F_neg2 `(s))
+      DEBUG(`F_ls2  `(s))
+      DEBUG(`F_ls8  `(s))
+
+  waitms(300)
+  DEBUG(`F_pos  SAVE 'fftB_pos')
+  DEBUG(`F_neg  SAVE 'fftB_neg')
+  DEBUG(`F_neg2 SAVE 'fftB_neg16')
+  DEBUG(`F_ls2  SAVE 'fftB_ls2')
+  DEBUG(`F_ls8  SAVE 'fftB_ls8')
+  waitms(500)
+  repeat

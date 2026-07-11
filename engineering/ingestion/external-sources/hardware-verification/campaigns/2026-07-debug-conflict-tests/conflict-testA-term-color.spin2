@@ -1,0 +1,45 @@
+'' =====================================================================
+'' conflict-testA-term-color.spin2  --  settles C-R6 (green vs lime)
+''
+'' QUESTION: is a default TERM color pair rendered as clLime ($00_FF_00,
+''   PNut source constant) or as the GREEN keyword ($09_FF_09)?
+''
+'' TWO-RAIL DESIGN (guards false positives):
+''   T_ref -- LITERAL reference swatches: pair0 bg = $00FF00 (clLime rail),
+''            pair1 bg = $09FF09 (GREEN-value rail).  These two rows MUST be
+''            distinguishable by the pixel sampler; if they are not, the
+''            test is INCONCLUSIVE (the two colors differ by only 9/255 in
+''            R+B) -- not a false positive.  This proves the instrument.
+''   T_def -- the DEFAULT under test.
+''   T_kw  -- pairs set with the GREEN keyword (control).
+''
+''   Decide by matching T_def to a RAIL:  T_def == $00FF00 row => clLime
+''   (REF, manual "Lime" stands);  T_def == $09FF09 row (== T_kw) => GREEN
+''   keyword (v55).  Never conclude from T_def alone.
+''
+'' READ (image-tools): sample pair-bg pixels in all three BMPs; first
+''   confirm T_ref row0 != row1, THEN place T_def against them.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+  ' ---- REFERENCE RAILS: both literal colors, sampler-discrimination proof ----
+  DEBUG(`TERM T_ref SIZE 24 4 COLOR $000000 $00FF00 $000000 $09FF09 $000000 $000000 $000000 $000000)
+  DEBUG(`T_ref 4 '                    ' 13 5 '                    ' 13)   ' row0=$00FF00(clLime)  row1=$09FF09(GREENval)
+
+  ' ---- DEFAULT under test ----
+  DEBUG(`TERM T_def SIZE 24 4)
+  DEBUG(`T_def 7 '                    ' 13 6 'GGGGGGGGGGGGGGGGGGGG' 13)   ' row0=pair3 bg  row1=pair2 fg
+
+  ' ---- GREEN keyword control ----
+  DEBUG(`TERM T_kw  SIZE 24 4 COLOR ORANGE BLACK BLACK ORANGE GREEN BLACK BLACK GREEN)
+  DEBUG(`T_kw 7 '                    ' 13 6 'GGGGGGGGGGGGGGGGGGGG' 13)
+
+  waitms(300)
+  DEBUG(`T_ref SAVE 'termA_ref')
+  DEBUG(`T_def SAVE 'termA_default')
+  DEBUG(`T_kw  SAVE 'termA_greenkw')
+  waitms(500)
+  repeat

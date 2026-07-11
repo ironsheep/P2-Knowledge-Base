@@ -60,6 +60,105 @@ Two windows created in the same millisecond could collide on a `<type>-<ms>` id.
 earlier; a clean `test2` run confirms it is fixed in PNut-Term-TS. *Note:* the FFT
 "render gap" was NOT a host bug — it was the missing channel decl (EF-004).
 
+<!-- 2026-07 conflict-test suite (A–J): v55-text-vs-REF-Pascal conflicts + undocumented
+     behaviors, settled on real P2. Sources versioned under
+     campaigns/2026-07-debug-conflict-tests/. Read-back via image-tools-mcp + PIL
+     (centroid / color / geometry) by Claire; run on real P2 by Stephen (I/J on both
+     macOS + Windows). Full analysis: the manual's audit/v55-vs-REF-reconciliation-2026-07-10.md. -->
+
+### EF-025 · TERM default color pair is `clLime` ($00FF00), NOT the `GREEN` keyword — `CONFIRMED`
+The TERM default foreground is `clLime` = `$00FF00`, distinct from what the `GREEN` keyword
+renders. *How proven:* `conflict-testA-term-color` — render the default TERM vs a
+`GREEN`-keyword TERM; sample glyph-core RGB. *Result:* default glyph cores = **$00FF00**;
+`greenkw` cores = **$09FF09** (exact, distinct). *Date/rig:* 2026-07-10, real P2 (Stephen),
+read-back Claire. *Grounds:* C-R6 — v55 text "Green" INVERTS; `term.yaml` "Lime" + the manual
+stand (add reader-note: no LIME keyword, reproduce with `GREEN`). *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testA-term-color.spin2`.
+
+### EF-026 · FFT negative `LINESIZE` draws vertical FILLED BARS (width grows with |n|), not isolated lines — `CONFIRMED`
+A negative FFT `LINESIZE` renders filled vertical bars whose width scales with `|n|`. *How
+proven:* `conflict-testB-fft-linesize` — render at `+4`, `−4`, `−16`; measure bar geometry.
+*Result:* `pos(+4)` = thin connected polyline; `neg(−4)` = filled bar ~6px; `neg16(−16)` =
+rectangular filled bar ~12px. *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:* C-R5 —
+v55 text "isolated vertical lines" INVERTS; `fft.yaml` "filled bars of width |n|" + manual
+stand. *Source:* `.../conflict-testB-fft-linesize.spin2`.
+
+### EF-027 · LOGIC keyword ranges: `LINESIZE` default 3 (→32), `SAMPLES` max 2047, `SPACING` min 1 default 8 — `CONFIRMED`
+*How proven:* `conflict-testC-logic-ranges` — render LOGIC at `LINESIZE` 1/3/7/20/32,
+`SAMPLES` 1024/2047/2048, `SPACING` 1/2/8; use window-width as a pixel ruler + measure trace
+thickness. *Result:* default `LINESIZE` = **3px** (= `ls3`), monotone 1→3→5→11→**17px** at 32,
+no clamp; `SAMPLES` `s2047`=2097px vs `s2048`=2097px **identical** → **2048 clamps, max 2047**;
+`SPACING 1` accepted (`sp1`114 ≠ `sp2`178), default `SPACING` = **8** (`def` width 562 =
+64·8+50). *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:* C-R1/C-R2/C-R3 — v55 text
+(`1_to_7`/`4_to_2048`/`2_to_32`) INVERTS; `logic.yaml` + manual stand. *Source:* `.../conflict-testC-logic-ranges.spin2`.
+
+### EF-028 · PLOT TEXTSTYLE weight bits are honored but the DEBUG font does NOT visibly distinguish the four weights ($00 renders == $01) — `CONFIRMED`
+The style byte's weight field (bits 0–1) selects nominal font weights — Pascal
+`weight[0..3] = (100,400,700,900)` = thin/normal/bold/heavy (PLOT theory-of-ops) — but the
+DEBUG display font does not render them distinctly: `$00` renders identically to `$01`, and
+the source's own style-example notes `$02` = "same as 0". *How proven:*
+`conflict-testD-textstyle` — render TEXT rows `$00`–`$03`; measure prefix ink %. *Result:*
+`$00`=**18.66%** ≈ `$01`=**18.71%** (identical); `$02`=11.6%, `$03`=12.3%. *Date/rig:*
+2026-07-10, real P2 (Stephen), PIL ink-% (Claire). *Grounds:* F-205a — the manual's "`$00` =
+light (lighter than the `$01` default)" is REFUTED (no visible difference); the nominal
+weight mapping (per Pascal) is correct as a *selector* but does not render distinctly. Fix
+the manual to state the nominal mapping + this render caveat. *Source:* `.../conflict-testD-textstyle.spin2`.
+
+### EF-029 · MIDI accepts a 24-bit `$RRGGBB` color (rgb24), not named-only — `CONFIRMED`
+*How proven:* `conflict-testE-midi-color` — render MIDI keys colored via rgb24 (`$0000FF`,
+`$00FF00`) vs the `GREEN` keyword; sample key colors. *Result:* `rgbBLUE($0000FF)`=blue,
+`rgbGREEN($00FF00)`=green **== `keyword`(GREEN)**; a blue key cannot be a default/green-fluke →
+rgb24 definitively parsed. *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:* B26 — the
+"force named-only" finding INVERTS; the manual's `$RRGGBB` example stands. *Source:* `.../conflict-testE-midi-color.spin2`.
+
+### EF-030 · SCOPE default `SIZE` width is 256 (not 255) — `CONFIRMED`
+*How proven:* `conflict-testF-scope-size` — render SCOPE at `SIZE` 255/256/512 + default;
+measure window width. *Result:* `s255`=269px vs `s256`=270px (**exactly 1px apart**),
+`s512`=526px (+256); `s_default`=**270 = the s256 rail**. *Date/rig:* 2026-07-10, real P2
+(Stephen). *Grounds:* C-R7 — v55 text "255" INVERTS; `scope.yaml` "256×256" + manual stand.
+*Source:* `.../conflict-testF-scope-size.spin2`.
+
+### EF-031 · PLOT TEXTSTYLE justification is a per-axis HYBRID — horiz %10=right/%11=left, vert %10=top/%11=bottom — `CONFIRMED`
+The value→direction mapping differs by axis. *How proven:* `conflict-testI-textstyle-justify`
+— render a `$00` center-align control plus `$20`/`$30` (horiz) and `$80`/`$C0` (vert) against a
+guide line; centroid analysis of ink vs the guide. *Result:* `$00` control straddles the guide
+both axes (centroid ≈ anchor). **Horiz:** `$20`(%10) ink LEFT of anchor → right-justified;
+`$30`(%11) RIGHT → left. **Vert:** `$80`(%10) ink below guide (top-edge pinned) → top; `$C0`(%11)
+above → bottom. *Date/rig:* 2026-07-11 (00:58–00:59, both macOS + Windows), real P2 (Stephen),
+centroid PIL (Claire). *Grounds:* F-205b — horiz **v55 text correct** (REF §4.3 inverts); vert
+**REF correct** (v55 text inverts). Note vertical also confirms the Pascal source
+(`2:ty:=h //top; 3:ty:=0 //bottom`); the manual's `2=bottom,3=top` is inverted → fix to
+`2=top,3=bottom`. *Source:* `.../conflict-testI-textstyle-justify.spin2`.
+
+### EF-032 · PLOT POLAR: θ=0 points EAST (+x); increasing θ is counter-clockwise; no flip — `CONFIRMED`
+*How proven:* `conflict-testJ-polar-theta0` — render a POLAR wheel with four colored spokes at
+0°/90°/180°/270°; sample color at ρ≈150 around the origin (200,200). *Result:* **East=RED(0°)**
+(#BF0707), **North/up=GREEN(90°)** (#07BF07), West=BLUE(180°), South=YELLOW(270°) → θ=0 East,
+increasing θ CCW (math convention), no flip. *Date/rig:* 2026-07-11 (both platforms), real P2
+(Stephen). *Grounds:* F-208 — closes the ch05 POLAR flip-risk; fills a doc gap (θ=0 direction
+was undocumented in manual + `plot.yaml`). *Source:* `.../conflict-testJ-polar-theta0.spin2`.
+
+---
+
+## PASM2 core & hub (silicon — 2026-07 conflict-test suite)
+
+### EF-033 · AUGS/AUGD augment SURVIVES intervening instructions — "must immediately precede" is FALSE — `CONFIRMED-FALSE` (of the "immediately precede" claim)
+The 23-bit augment prefix is consumed by the next instruction with a `#` immediate regardless
+of intervening non-augmenting instructions. *How proven:* `conflict-testG-aug-intervening` —
+compare a register's value after an augmented immediate reached via four intervening paths (M1
+a NOP, M2 an ALU op (ROR), M3 two NOPs, M4 an ADD #S) vs an "absent-augment" rail. *Result:*
+`noaug`=**$000001EF** (absent) vs `direct`=**$000055EF** (applied); M1/M2/M3/M4 **all =
+$000055EF = direct**. *Date/rig:* 2026-07-10, real P2 (Stephen). *(Rig note: a run-1 `direct`
+mismatch was rig-caught; relative rails unambiguous on re-run.)* *Grounds:* C-56 correct;
+"augment must immediately precede" WRONG. Full write-up: catalog #644. *Source:* `.../conflict-testG-aug-intervening.spin2`.
+
+### EF-034 · Hub egg-beater: scalar hub access ~15–16 clk each vs streaming ~2 clk/long (~7–8×) — `CONFIRMED`
+*How proven:* `conflict-testH-eggbeater-timing` — cycle-count scalar `RDLONG` (×1, ×8) vs a
+`SETQ`-block burst and a 16-long FIFO stream, using a base-2-clk NOP loop to resolve single
+clocks. *Result:* `scalar1`=**15 clk**, `scalar8`=**16 clk/read**; `setq8`=**2 clk/long**,
+`fifo16`=**2 clk/long**. *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:* C-09 (scalar
+RDLONG blocks ~9–16 clk) stands; egg-beater rotor confirmed. Full write-up: catalog #132.
+*Source:* `.../conflict-testH-eggbeater-timing.spin2`.
+
 ---
 
 ## Smart pins
