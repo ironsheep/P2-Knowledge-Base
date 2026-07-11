@@ -19,7 +19,7 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 | 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 (dense technical) | `CHANGESET-AUDIT-p2-streamer-…md` | 🔄 independent pass running |
 | 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | (inline) | ✅ inline-cleared — faithful† |
 | 7 | manual | p2-architect-guide | `…-v1.0.0` | 1 file, 1 line | (inline) | ✅ inline-cleared — faithful† |
-| 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 (clock-spec + filter claims) | `CHANGESET-AUDIT-P2AN004-…md` | 🔄 independent pass running |
+| 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 (clock-spec + filter claims) | `CHANGESET-AUDIT-P2AN004-…md` | ✅ CLEAN — 3/3 faithful (each deletes a real defect; ≈600 ns FILT1 + 100–200 MHz VCO both verbatim-sourced; the removed "300 MHz max" was the actual fabrication) |
 | 9 | app-note | P2AN001 | `…-v1.0.1` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
 | 10 | app-note | P2AN002 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
 | 11 | app-note | P2AN003 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
@@ -40,6 +40,13 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 **Excluded (no delta since release):** p2an005, p2an006.
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
+
+## Non-blocking follow-ups surfaced by the audit (not release gates)
+- **P2AN004** — "sit comfortably within spec" is rhetorically loose (200 MHz is the *top edge* of the
+  100–200 MHz VCO range, not mid-band); optional wording tweak. NOT a sourced-number error.
+- **P2AN004 companion YAML** — the KB filename still reads `…frequency-period-pulse-measurement.yaml`
+  while the note retitled Period→Rotation; findability/consistency drift → candidate ENH for the
+  corrections register (out of scope for this release gate).
 
 ## Flow
 1. YAML template pass (running) → Stephen reviews report + approves the format.
