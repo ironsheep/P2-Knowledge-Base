@@ -12,29 +12,23 @@ For AI to generate correct P2 code, we need to understand what instructions DO, 
 is FROZEN in our docs/KB until Chip resolves it (empirical outranks documentary,
 but a primary-source overturn is held pending Chip/isolation before we apply it).*
 
-### DEBUG_PIN_TX / DEBUG_PIN_RX bench behavior contradicts the v55 language reference
-*Surfaced 2026-07-11 (Debug-Window manual fleet-release sprint). STATUS: UNEXPLAINED, frozen.*
+### ✅ RESOLVED 2026-07-11 — DEBUG_PIN_TX / DEBUG_PIN_RX "reversal" was a `pnut-ts` BUG, not a doc/silicon conflict — REMOVED from the ask-Chip queue
+*Surfaced and resolved the same day (Debug-Window fleet-release sprint). No Chip adjudication needed.*
 
-- **DOCUMENTARY (all agree):** Spin2 v55 lang ref
-  (`engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` lines 1015–1016) states
-  `DEBUG_PIN_TX = 62` ("DEBUG serial OUTPUT pin; for DEBUG windows to open, DEBUG_PIN
-  must be 62") and `DEBUG_PIN_RX = 63` ("serial INPUT pin"). Our KB
-  (`deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml:289-296`),
-  the Assembly Manual App E, the single-step-debugger REF, and Debug-Window ch02 all copy
-  these values faithfully. Silicon Doc is silent (these are Spin2/PNut compiler symbols,
-  not silicon).
-- **EMPIRICAL (Stephen's bench, pnut-term-ts host, 2026-07-11):** the DOCUMENTED values
-  TX=62 / RX=63 produce NO debug output ("code loaded, nothing ran, no debug output");
-  the REVERSED values TX=63 / RX=62 produce output. Reproduced via the no-fig example
-  `ch02-term-pin-config` (identical TERM code to fig-01, which works with no pin CONs).
-- **QUESTION FOR CHIP:** Why does the bench appear to require TX/RX reversed vs the v55
-  table? Is the v55 doc's TX/RX assignment wrong, or is this a pnut-term-ts vs official-PNut
-  convention difference (term-ts mirrors PNut but is a separate impl)? Does official PNut
-  also need 63, or does it work at 62 per the doc?
-- **STATUS:** UNEXPLAINED. Decision 2026-07-11 (Stephen): make NO changes to any manual,
-  KB YAML, or example based on this — note-only, pending Chip. Do NOT flip the pins in
-  ch02 / fig-02 or anywhere. Carried in the fleet-release sprint as an explicit
-  known-blocked carve-out (ch02-term-pin-config cannot be certified until resolved).
+- **Resolution:** the reversal is a **`pnut-ts` bug in the SET-path** — it manifests **only when a
+  program explicitly *sets* `DEBUG_PIN_TX` / `DEBUG_PIN_RX`**. With the defaults (TX=62 / RX=63) DEBUG
+  works correctly, as proven by the entire fleet-release hardware campaign (which read DEBUG output on
+  Stephen's bench throughout). Confirmed by Stephen + the pnut-ts agent 2026-07-11; `pnut-ts` is being
+  patched.
+- **The docs were RIGHT:** v55 (`DEBUG_PIN_TX=62` output / `DEBUG_PIN_RX=63` input) and our KB
+  (`special-configuration-symbols.yaml:289-296`), Assembly App E, single-step-debugger REF, and
+  Debug-Window ch02 all correctly copy the documented values. The triangulation that closed it: every
+  documentary source agreed, the rig is hardwired-standard (Edge → adapter → PropPlug → USB, nothing
+  to miswire), and DEBUG worked all project on the defaults → the tool's set-path was the only variable.
+- **Doc/KB impact: NONE.** No manual, YAML, or example changes — the documented values stand. Tool bug
+  → tool fix ("PNut is ground truth; a tool bug is a code fix").
+- **Carve-out CLEARED:** `ch02-term-pin-config` is no longer blocked by this and can be certified — its
+  documented pins are correct; the defect was in the tool's set-path (now being fixed), not the example.
 
 ## 🔴 PRIORITY 1: Instruction Semantics (The Real Gaps)
 
