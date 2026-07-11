@@ -87,6 +87,13 @@ sweep RUNNING to catch any others before Debug re-audit. **One class:** the pre-
   `4` was equally unsourced; `2` is the more defensible figure). Recommend: annotate as an estimate
   (or leave — it raises correctness either way). Not a release blocker.
 
+## Resolved threads
+- **DEBUG TX/RX "reversal" (Stephen's rig) — RESOLVED 2026-07-11: it's a `pnut-ts` BUG (being patched),
+  not a doc/silicon issue.** Triangulation closed it: v55 (`DEBUG_PIN_TX=62`/`RX=63`), both Edge boards
+  (`P62=P2-TX`/`P63=P2-RX`), and our YAMLs all agree AND the rig is hardwired-standard AND DEBUG output
+  worked all project → the tool was the only variable left. **No deliverable change** — the docs are
+  validated correct; tool fix per "PNut is ground truth, tool bug = code fix." Not a corrections-register item.
+
 ## Non-blocking follow-ups surfaced by the audit (not release gates)
 - **Fleet-wide release-prep (IOSP audit):** the correction sweeps intentionally left CHANGELOGs
   un-bumped and un-rendered ("No version bumps, no re-render"). Each releasing manual needs its
