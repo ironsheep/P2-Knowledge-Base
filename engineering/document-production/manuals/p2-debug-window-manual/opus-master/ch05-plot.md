@@ -139,6 +139,11 @@ POLAR {twopi {theta}}
 - `theta` — an angular offset added to every angle, which rotates the entire
   coordinate system.
 
+By default the angle is measured the mathematical way: `theta` = 0 points **East**
+(along +x), and increasing `theta` sweeps **counter-clockwise** (a negative `twopi`,
+above, flips that sweep to clockwise). The `theta` offset then rotates this whole
+system to a new zero direction.
+
 With the origin at the canvas center, polar mode draws radial figures directly:
 
 ```spin2
@@ -308,15 +313,20 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 
 | Bits | Field | Values |
 |------|-------|--------|
-| 0–1 | Weight | `0`=light, `1`=normal, `2`=bold, `3`=heavy |
+| 0–1 | Weight | `0`=thin, `1`=normal, `2`=bold, `3`=heavy |
 | 2 | Italic | `0`=normal, `1`=italic |
 | 3 | Underline | `0`=none, `1`=underline |
 | 4–5 | Horizontal align | `0`/`1`=center, `2`=right, `3`=left |
-| 6–7 | Vertical align | `0`/`1`=center, `2`=bottom, `3`=top |
+| 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
 
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
 centered both ways.
+
+The weight field selects a *nominal* font weight, but the DEBUG display font
+renders all four weights the same on screen: `$00` looks identical to the `$01`
+default, and `$02`/`$03` are not visibly heavier. Treat weight as a nominal
+setting rather than a visible change in stroke thickness.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the

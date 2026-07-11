@@ -1220,7 +1220,28 @@ lock-guarded multi-writer form explicitly.
 
 ## SOURCE CONFLICT — v55 text vs REF (PNut source distillation) on PLOT TEXTSTYLE justification (2026-07-10) — F-205
 
-### F-205 — PLOT `TEXTSTYLE` horizontal/vertical justification value mapping is **inverted** between the Spin2 v55 text and the debug-window REF theory-of-operations — `NEEDS-VERIFICATION (raw DebugDisplayUnit.pas or hardware) — BLOCKS the pending "TEXTSTYLE align swap" manual/YAML correction`
+### F-205 — PLOT `TEXTSTYLE` horizontal/vertical justification value mapping is **inverted** between the Spin2 v55 text and the debug-window REF theory-of-operations — `RESOLVED 2026-07-11 by hardware Test I (EF-031) + Test D (EF-028); manual corrected (#195)`
+
+> **RESOLVED 2026-07-11 (hardware).** The v55-vs-REF standoff was settled on real
+> P2 silicon, and the answer is a **per-axis HYBRID** — neither source was wholly
+> right:
+> - **Horizontal:** `%10`=right, `%11`=left — **v55 text correct**, REF §4.3 inverts.
+> - **Vertical:** `%10`=top, `%11`=bottom — **REF correct** (matches Pascal
+>   `2:ty:=h //top; 3:ty:=0 //bottom`), v55 text inverts.
+>
+> Grounded in **EF-031** (`conflict-testI-textstyle-justify`, centroid analysis,
+> both macOS + Windows). The companion weight question is **EF-028** (Test D):
+> the weight field (bits 0–1) is a correct *nominal* selector but the DEBUG font
+> does **not** render the four weights distinctly (`$00`==`$01`) — so **F-205a**
+> (the manual's "`$00` = light, lighter than `$01`" claim) is **REFUTED**.
+>
+> **Applied to the manual (#195, 2026-07-11):** `ch05-plot.md` TEXTSTYLE table now
+> reads horizontal `2=right/3=left` (unchanged — was already correct), **vertical
+> `2=top/3=bottom` (corrected from `2=bottom/3=top`)**, weight `0=thin` + a render
+> caveat that the font does not visibly distinguish the four weights.
+> **YAML side pending** (rides KB rail): `plot.yaml` TEXTSTYLE is silent on the
+> value→direction mapping — enrich it with this per-axis hybrid rather than leave
+> it bit-positions-only.
 - **Location:** PLOT `TEXTSTYLE` byte `%YYXXUIWW` — the `%XX` (horizontal) and `%YY` (vertical) value→direction mapping. Affects `manuals/p2-debug-window-manual/opus-master/ch05-plot.md` (TEXTSTYLE table), `deliverables/ai/P2/language/spin2/debug-displays/plot.yaml` (currently states only the **bit positions**, silent on the value mapping), and any doc asserting which of `%10`/`%11` is left/right/top/bottom.
 - **The conflict (verbatim, both primary sources):**
   - **Spin2 v55 text L1282:** *"%YY vertical: %00=middle, **%10=bottom, %11=top**. %XX horizontal: %00=middle, **%10=right, %11=left**."* → 2=right/bottom, 3=left/top.
