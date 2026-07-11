@@ -11,7 +11,7 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 
 | # | Rail | Target | Baseline | Delta | Report | Status |
 |---|------|--------|----------|-------|--------|--------|
-| Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (≈38 pasm2 z-flag notation + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | 🔄 running (template pass) |
+| Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (67 pasm2 z-flag `=`→`==` + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | ✅ CLEAN — 0 flags (3 sub-threshold watch items); scope-creep claim independently re-verified (77 `z:` lines, 0 other fields) |
 | 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | — | ⏳ queued |
 | 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | — | ⏳ queued |
 | 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | — | ⏳ queued |
