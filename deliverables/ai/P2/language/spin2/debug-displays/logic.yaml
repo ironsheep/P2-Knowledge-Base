@@ -34,7 +34,7 @@ configuration_directives:
   TEXTSIZE: "TEXTSIZE n -- label font point size, 6..200 (default 10)."
   COLOR: "COLOR back grid -- background then grid color (named or RGB24; defaults black $000000 / gray $404040)."
   HIDEXY: "HIDEXY -- suppress on-screen cursor readout (PC_MOUSE still reports)"
-  packed: "Packing mode (12 modes) with optional ALT and/or SIGNED -- how many sub-samples are packed per transmitted long/word/byte. Modes: LONGS_1BIT (32x1), LONGS_2BIT (16x2), LONGS_4BIT (8x4), LONGS_8BIT (4x8), LONGS_16BIT (2x16); WORDS_1BIT (16x1), WORDS_2BIT (8x2), WORDS_4BIT (4x4), WORDS_8BIT (2x8); BYTES_1BIT (8x1), BYTES_2BIT (4x2), BYTES_4BIT (2x4). ALT bit-reverses each sub-unit; SIGNED sign-extends on unpack."
+  packed: "Packing mode (12 modes) with optional ALT and/or SIGNED -- how many sub-samples are packed per transmitted long/word/byte. Modes: LONGS_1BIT (32x1), LONGS_2BIT (16x2), LONGS_4BIT (8x4), LONGS_8BIT (4x8), LONGS_16BIT (2x16); WORDS_1BIT (16x1), WORDS_2BIT (8x2), WORDS_4BIT (4x4), WORDS_8BIT (2x8); BYTES_1BIT (8x1), BYTES_2BIT (4x2), BYTES_4BIT (2x4). ALT bit-reverses each sub-unit; SIGNED sign-extends on unpack. For LOGIC the sub-sample WIDTH sets the channel count: each sub-sample carries one bit per channel per time-step, so a 1-bit mode feeds 1 channel, a 2-bit mode 2 channels, a 4-bit mode 4, an 8-bit mode 8. Declare exactly that many channels -- a 2-channel window needs LONGS_2BIT; with LONGS_1BIT both channels' data lands on the first channel only."
   channel_definition_string: "A quoted string defines a channel: 'name' {count} {RANGE} {color}. A 'count' >= 2 groups consecutive bits (single-bit channels get auto-suffixed labels 'name 0'..'name N'; with RANGE they form one multi-bit bus value). 'color' sets the trace."
 
 display_directives:
@@ -43,7 +43,7 @@ display_directives:
   TRIGGER: "TRIGGER mask match {offset} -- an EDGE-armed mask/match trigger. The window arms on a non-matching sample ((sample AND mask) != match), then FIRES on the next sample where (sample AND mask) == match. It is a transition INTO the match state, NOT a static level match. offset 0..SAMPLES-1 (default SAMPLES/2) positions the trigger within the capture. Re-issuing TRIGGER resets the armed state. This is a single mask/match edge compare -- NOT an I2C/SPI/UART decoder or an edge-sequence/glitch engine."
   HOLDOFF: "HOLDOFF n -- minimum samples between triggers, 2..2048 (initial value = SAMPLES, set at configure). Supplying a count sets the holdoff and resets the holdoff counter to 0; a bare HOLDOFF with no count is a no-op (it leaves both the holdoff and its counter unchanged)."
   CLEAR: "CLEAR -- clear the display and reset the sample population and rate counters"
-  SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp (also a WINDOW / 'l t w h' region variant)"
+  SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional. (A 'l t w h' region variant selects a sub-rectangle.)"
   CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
@@ -74,6 +74,20 @@ examples:
       REPEAT
         DEBUG(`Trig `(bus_value))
     description: "Mask/match edge trigger with holdoff"
+  - code: |
+      ' Packed full-window array feed. Two channels -> LONGS_2BIT (sub-sample
+      ' width == channel count). Build one full window of packed longs, then feed
+      ' the whole array in ONE message (not one packed long per DEBUG call).
+      VAR long buff[16]                         ' 16 longs x 16 pairs = 256 samples
+      DEBUG(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+      REPEAT
+        REPEAT j FROM 0 TO 15
+          packed := 0
+          REPEAT i FROM 0 TO 15
+            packed := (packed << 2) | (getrnd() & %11)   ' bit0 -> D0, bit1 -> D1
+          buff[j] := packed
+        DEBUG(`Pair `uhex_long_array_(@buff, 16))         ' whole window, one message
+    description: "Packed full-window array feed (LONGS_2BIT, two channels) -- the feed shape that fills a scrolling LOGIC window"
 
 not_supported:
   - "No protocol decoding -- no I2C/SPI/UART/CAN decoders; multi-bit buses are shown as raw bus values only."
@@ -86,6 +100,7 @@ notes:
   - "TRIGGER is EDGE-armed: it requires a transition into the match state (disarm on non-match, fire on the next match), not a static level match."
   - "SPACING is the HORIZONTAL (time-axis) pixel gap between samples; the per-channel vertical pitch is fixed."
   - "Packed-data modes let you pack multiple sub-samples per transmitted long/word/byte; ALT/SIGNED adjust interleave/sign."
+  - "To FILL a scrolling LOGIC window with packed data, feed the whole window as an array in one message -- `uhex_long_array_(@buff, N)`; a single packed long advances the window by one column only. On unpack: invoking LONGS_2BIT has the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long; LONGS_1BIT translates each value into 32 separate 1-bit values, starting from the LSB."
 
 related:
   - language/spin2/statements/debug.yaml

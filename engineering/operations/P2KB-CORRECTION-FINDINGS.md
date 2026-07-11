@@ -87,7 +87,13 @@
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
 
-### F-206 — `debug-displays/{term,fft,logic,midi,scope,scope_xy}.yaml` under-specify the `SAVE` command's required filename (inconsistent across the set) — `CONFIRMED`
+### F-206 — `debug-displays/{term,fft,logic,midi,scope,scope_xy}.yaml` under-specify the `SAVE` command's required filename (inconsistent across the set) — `CONFIRMED · YAML APPLIED 2026-07-11 (pending KB publish)`
+
+> **APPLIED 2026-07-11:** all six `SAVE` lines standardized to `SAVE {WINDOW} 'filename' -- ...
+> filename is REQUIRED; WINDOW optional`, matching v55 L1139 (WINDOW = entire window; absence =
+> display area). `plot.yaml:77` was already correct (unchanged). D1 (Stephen): bare-`SAVE` compiles
+> legal on `pnut-ts` but runtime auto-name is unverified → not documented; the required-filename form
+> is the one taught.
 
 **Surfaced:** 2026-07-11, while correcting the Debug Window Manual's `SAVE` prose (ch05/ch10) in the fleet-release sweep (commit 828e62ae).
 
@@ -119,6 +125,15 @@
 
 **Proposed KB action:** (1) add a **packed full-window array-feed example** to `debug-displays/logic.yaml` and `debug-displays/scope.yaml` (and the packed-mode note in `statements/debug.yaml`) — `` `uhex_long_array_(@buff, N) `` matching v55's only packed example — plus the caveat: *a single packed-long feed advances the scrolling window by one column only; the full window requires the array feed* (BITMAP is exempt). (2) Document the **mode↔channel-count** rule in `logic.yaml` (LONGS_NBIT ⇒ N one-bit channels) and the SCOPE value-interleave form in `scope.yaml`.
 
+> **KB APPLIED 2026-07-11 (pending KB publish):** both facets landed. `logic.yaml` — `packed:` gains the
+> sub-sample-width = channel-count rule (Facet B) + a new LONGS_2BIT full-window array-feed example
+> and an array-feed/unpack note (Facet A, unpack semantics quoted from v55 L1143/L1406). `scope.yaml`
+> — `packed:` gains the per-channel-value interleave form (Facet B) + a LONGS_8BIT array-feed example
+> and left-edge-fragment caveat (Facet A). `statements/debug.yaml` — a packed scrolling-window
+> array-feed example cross-referencing both. D2 (Stephen): essential feed-shape snippet, NOT the
+> verbatim v55 streamer example (incidental + misleading re streamer-required); unpack semantics
+> quoted verbatim.
+
 **Verify first (at fix time, §4.5):** open v55 text line ~1144 (and the REF Pascal-derived matrix / `DebugDisplayUnit.pas SetPack`) and match wording exactly — do not paraphrase. Facet A's feed-shape claim is grounded in the 2026-07-11 hardware renders + v55 showing only the array form. **Facet B is a peer report (Stephen), not yet our own hardware run — confirm on silicon before enriching the KB** (empirical > documentary); the LONGS_2BIT 2-channel render, if we adopt that example, IS that confirmation.
 
 ### F-208 — PLOT POLAR orientation (θ=0 baseline direction) is undocumented; the rotation-sense wording is murky/likely-wrong — `CONFIRMED` (Test J)
@@ -132,6 +147,11 @@
 **Evidence:** Test J (`conflict-testJ-polar-theta0`, both platforms 2026-07-11): sampling ρ≈150 from origin — **East=RED (0°)**, North/up=GREEN (90°), West=BLUE (180°), South=YELLOW (270°) → θ=0 East, CCW. Recorded in `audit/v55-vs-REF-reconciliation-2026-07-10.md`; EF entry pending (§7.6 / #196).
 
 **Proposed correction (KB → yaml head):** in `plot.yaml` POLAR directive, state that **θ=0 points East (+x)**; the default (positive `twopi`) sense is **counter-clockwise**; a **negative `twopi` reverses to clockwise**. Replace the `"twopi -1/0"` shorthand with that sign-based rule.
+
+> **YAML APPLIED 2026-07-11 (pending KB publish):** `plot.yaml:62` POLAR now reads "*Orientation:
+> theta=0 points East (+x); with the default (positive) twopi the angle increases counter-clockwise;
+> a NEGATIVE twopi reverses the sweep to clockwise*" — the murky `"twopi -1/0"` shorthand is gone.
+> Manual side already applied (#195). Grounded EF-032/Test J.
 
 **Manual side (→ ch05-post #195-C):** add the same orientation fact to the ch05-plot.md POLAR section — re-scoped from "optional enhancement" to **required gap-fill**.
 
@@ -1239,9 +1259,9 @@ lock-guarded multi-writer form explicitly.
 > reads horizontal `2=right/3=left` (unchanged — was already correct), **vertical
 > `2=top/3=bottom` (corrected from `2=bottom/3=top`)**, weight `0=thin` + a render
 > caveat that the font does not visibly distinguish the four weights.
-> **YAML side pending** (rides KB rail): `plot.yaml` TEXTSTYLE is silent on the
-> value→direction mapping — enrich it with this per-axis hybrid rather than leave
-> it bit-positions-only.
+> **YAML side APPLIED 2026-07-11** (pending KB publish): `plot.yaml:67` TEXTSTYLE now
+> carries the per-axis mapping (horiz `%10`=right/`%11`=left; vert `%10`=top/`%11`=bottom)
+> + the weight render caveat (`$00`==`$01`; `$02`/`$03` not visibly heavier).
 - **Location:** PLOT `TEXTSTYLE` byte `%YYXXUIWW` — the `%XX` (horizontal) and `%YY` (vertical) value→direction mapping. Affects `manuals/p2-debug-window-manual/opus-master/ch05-plot.md` (TEXTSTYLE table), `deliverables/ai/P2/language/spin2/debug-displays/plot.yaml` (currently states only the **bit positions**, silent on the value mapping), and any doc asserting which of `%10`/`%11` is left/right/top/bottom.
 - **The conflict (verbatim, both primary sources):**
   - **Spin2 v55 text L1282:** *"%YY vertical: %00=middle, **%10=bottom, %11=top**. %XX horizontal: %00=middle, **%10=right, %11=left**."* → 2=right/bottom, 3=left/top.

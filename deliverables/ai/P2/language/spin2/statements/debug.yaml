@@ -132,6 +132,14 @@ examples:
       DEBUG(`LOGIC Signals 'clk' 'data' 'enable' 'ready')
       DEBUG(`Signals `(sample))
     description: "Display digital signals"
+
+  - code: |
+      ' Packed-mode scrolling window (LOGIC/SCOPE): a scrolling window is FILLED by
+      ' feeding a whole window of packed longs as an ARRAY in one message -- not one
+      ' packed long per call (a single packed long advances the window one column).
+      DEBUG(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+      DEBUG(`Pair `uhex_long_array_(@buff, 16))   ' whole window: 16 longs = 256 pairs
+    description: "Packed scrolling-window array feed (details in debug-displays/logic.yaml, scope.yaml)"
     
   - code: |
       ' Hexadecimal display with formatting

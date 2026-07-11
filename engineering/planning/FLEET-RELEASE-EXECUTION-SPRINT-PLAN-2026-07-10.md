@@ -284,17 +284,35 @@ re-zip (§4 Stage 5) and as a Debug release gate. Prevents silent corpus drift f
 
 ---
 
-## 7.5. Cooperative audit (HARD gate before any PDF — fleet-wide)
+## 7.5. Changeset-integrity audit (HARD gate before any PDF/KB publish — fleet-wide)
 
-After **all** manual fixes land (§2–§6) and are committed, Stephen and Claire do **one cooperative
-audit pass across all fixed manuals** — visual inspection + cooperative discovery of the accumulated
-diff since last public release (manual prose/content AND example code). **No PDF is generated until
-this clears for the whole fleet** (Q2: single campaign, not per-wave).
-- Present per manual: the full diff (git range) with the correction rationale/source for each hunk,
-  for visual inspection; surface anything ambiguous for cooperative discovery.
-- Anything rejected loops back to §2–§6 (fix), re-commit, re-present — never carried into render.
-- Rationale: one focused sign-off that every source was corrected cleanly, so the fleet renders
-  known-clean (`document-finalize` gather-then-resolve; "complete over partial").
+**STAKE IN THE GROUND (Stephen, 2026-07-11): this gate IS a changeset-integrity audit, not a live
+cooperative diff-walk.** Stephen's marginal value in a raw diff-walk is low; the value is a rigorous,
+per-target audit of the accumulated diff since last public release, where **every hunk maps back to a
+fix we intended, at the right magnitude, introducing nothing false.** This applies to **both rails**:
+each touched **manual** (prose + example code) AND the entire **YAML delta** since the last KB release
+(the §3b/F-204 changes already applied + the F-205b/206/207/208 enrichment batch). It is the central
+`document-audit` "changeset-integrity (delta-since-last-published)" gate + `audit-changelog --deep`
+traceability, applied fleet-wide. **No PDF renders and no KB publishes until this clears fleet-wide.**
+
+**Method (per target — manual or YAML file/set):**
+1. **Scope** = the git diff from that target's last public release to HEAD (manual: since its released
+   tag; YAML: since the last KB/YAML release tag).
+2. **Independent adversarial pass** — run as a fresh-context audit (NOT a re-read from the authoring
+   context), stance = *"disprove that this hunk is justified and proportionate,"* anchored to sources
+   (findings register `P2KB-CORRECTION-FINDINGS`, EF ledger, commit rationale), not to memory of
+   intent. (`feedback_handverify_audit_findings` — fan-out findings invert under independent check.)
+3. **Per-hunk verdict:** `traces-to-nothing` (scope-creep red flag) · `faithful` · `overstates
+   source` · `understates source` · `introduces-new-claim` (fabrication). The last two + the red flag
+   are the ones we act on.
+4. **Artifact** = a per-target traceability report (short table: hunk → source → verdict) + any flags.
+   Falls out as the verified CHANGELOG entry each manual needs anyway.
+5. **Stephen reviews the REPORT, not the raw diffs** — adjudicates flags with Claire. Anything
+   rejected loops back to its fix task, re-commit, re-audit — never carried into render/publish.
+
+Rationale: a systematic, source-anchored, independently-verified sign-off (not sampling) that every
+change is a clean, proportionate fix — so the fleet renders and the KB publishes known-clean
+(`document-finalize` gather-then-resolve; "complete over partial").
 
 ## 7.6. Master hardware-test catalog — promote A–J into the versioned ledger
 

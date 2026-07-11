@@ -53,7 +53,7 @@ display_directives:
   note: "Accepted in FFT_Update (streaming to the named window)."
   numeric_data: "Sample longs, channel-interleaved. The FFT is drawn every RATE sets once the SAMPLES buffer is full."
   CLEAR: "CLEAR -- erase and reset the sample/rate counters"
-  SAVE: "SAVE -- write the window bitmap to <name>.bmp"
+  SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional."
   CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2; FFT transmits RAW client-pixel x,y (see pc_mouse.yaml)"

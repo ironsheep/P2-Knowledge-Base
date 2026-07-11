@@ -36,7 +36,7 @@ configuration_directives:
   TEXTSIZE: "TEXTSIZE n -- label font point size, 6..200 (default 10)"
   COLOR: "COLOR back grid -- window background and grid colors (named or RGB24; default black, $404040). NOT per-channel color (that is set per channel-def)."
   HIDEXY: "HIDEXY -- suppress the on-screen XY readout (PC_MOUSE still reports)"
-  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes; default LONGS_1BIT) -- how many sub-samples are packed per transmitted long/word/byte"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes; default LONGS_1BIT) -- how many sub-samples are packed per transmitted long/word/byte. Unlike LOGIC, each SCOPE sub-sample is a full per-channel VALUE (not one bit per channel): with multiple channels the sub-samples are applied to the channels in turn -- e.g. two channels A/B via LONGS_8BIT pack four 8-bit values per long (low byte first), applied A,B,A,B."
 
 channel_definition:
   note: "Up to 8 channels, each defined by a quoted string. The channel-def(s) MUST be sent as a SEPARATE message AFTER the create line (handled by SCOPE_Update, before streaming). A channel-def placed ON the create line prevents the window from being created -- create with config keys only, then send the channel-def(s)."
@@ -55,7 +55,7 @@ display_directives:
   TRIGGER: "TRIGGER channel (AUTO | arm fire) {offset} -- level-based trigger. channel -1..7 (-1 = free-run); AUTO auto-computes levels, or arm/fire are explicit level thresholds; offset 0..SAMPLES-1 (default SAMPLES/2). The offset is read back from the NEWEST sample at the RIGHT edge (the trace runs oldest-left -> newest-right), so the edge mapping is counter-intuitive: offset 0 = trigger at the RIGHT edge, showing the lead-up TO the trigger (pre-trigger view); offset SAMPLES-1 = trigger at the LEFT edge, showing what happens AFTER the trigger (post-trigger view); offset SAMPLES/2 = trigger centered. This is a level arm/fire trigger only -- not edge/window/external modes."
   HOLDOFF: "HOLDOFF n -- minimum samples between triggers, 2..2048 (default SAMPLES)"
   CLEAR: "CLEAR -- clear the bitmap and reset sample/rate counters"
-  SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
+  SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional."
   CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
@@ -88,6 +88,18 @@ examples:
       REPEAT
         DEBUG(`Trg `(adc))
     description: "Auto level trigger with holdoff (channel + trigger declared after create)"
+  - code: |
+      ' Packed full-window array feed. Each sub-sample is a full per-channel VALUE;
+      ' two channels A/B interleave via LONGS_8BIT (four 8-bit values per long, low
+      ' byte first). Build a full window, then feed the whole array in ONE message.
+      VAR long buff[128]                          ' 128 longs x 4 values = 256 A,B sample-sets
+      DEBUG(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create (config only)
+      DEBUG(`Sig 'A' 0 255 'B' 0 255)             ' declare both channels (each needs a range)
+      REPEAT
+        REPEAT i FROM 0 TO 127
+          buff[i] := pack_next_four_samples()     ' A,B,A,B as four low-first 8-bit values
+        DEBUG(`Sig `uhex_long_array_(@buff, 128)) ' whole window, one message
+    description: "Packed full-window array feed (LONGS_8BIT, two channels interleaved) -- fills a scrolling SCOPE window"
 
 not_supported:
   - "No automatic measurements -- no peak-to-peak, RMS, frequency, period, duty cycle, or rise/fall time (these do not exist in the P2 SCOPE)."
@@ -102,6 +114,7 @@ notes:
   - "SCOPE is always time-domain (Y vs sample index); there is no mode selector."
   - "Channel color is set per channel-def, not by the COLOR directive (which sets window back + grid)."
   - "Samples are packed int32 per the packing mode; there is no float sample type."
+  - "To FILL a scrolling SCOPE window with packed data, feed the whole window as an array in one message -- `uhex_long_array_(@buff, N)`; a single packed long fills only the first few sample columns (left edge)."
 
 related:
   - language/spin2/statements/debug.yaml
