@@ -42,7 +42,8 @@ attached — no external wiring is required.
 | `ch12-keyboard-adjust.spin2` | TERM (PC_KEY) | Adjust a value with the arrow keys |
 | `ch12-mouse-pointer.spin2` | TERM (PC_MOUSE) | Read mouse pointer state |
 | `ch13-packed-bitmap-frame.spin2` | BITMAP | Packed frame — `LONGS_1BIT` |
-| `ch13-packed-logic-stream.spin2` | LOGIC | Packed stream — `LONGS_1BIT` |
+| `ch13-packed-logic-multi.spin2` | LOGIC | Packed 2-channel stream — `LONGS_2BIT` |
+| `ch13-packed-logic-stream.spin2` | LOGIC | Packed stream — single channel `LONGS_1BIT` |
 | `ch13-packed-scope.spin2` | SCOPE | Packed samples — `LONGS_8BIT` |
 | `ch14-multiwindow.spin2` | SCOPE + TERM | Feed two windows in one loop |
 | `ch14-pasm-inline.spin2` | TERM | Inline PASM (`ORG`/`END`) feeding a window |
