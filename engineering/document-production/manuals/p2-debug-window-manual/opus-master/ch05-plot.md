@@ -323,10 +323,10 @@ So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
 centered both ways.
 
-The weight field selects a *nominal* font weight, but the DEBUG display font
-renders all four weights the same on screen: `$00` looks identical to the `$01`
-default, and `$02`/`$03` are not visibly heavier. Treat weight as a nominal
-setting rather than a visible change in stroke thickness.
+The weight field selects a *nominal* font weight, but the DEBUG display font does
+not render it as a weight progression: `$00` looks identical to the `$01` default,
+and `$02`/`$03` are *not* heavier — if anything they render with slightly less ink,
+not more. Don't rely on the weight field to make text bolder.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the

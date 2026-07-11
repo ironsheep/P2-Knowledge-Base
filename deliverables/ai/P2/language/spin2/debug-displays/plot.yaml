@@ -59,12 +59,12 @@ display_directives:
     OVAL: "OVAL width height {linesize {opacity}} -- ellipse centered on the current position; linesize 0 = filled"
     BOX: "BOX width height {linesize {opacity}} -- rectangle centered on the current position; linesize 0 = filled"
     OBOX: "OBOX width height xradius yradius {linesize {opacity}} -- ROUNDED rectangle (corner radii xradius/yradius) centered on the current position; linesize 0 = filled"
-    POLAR: "POLAR {twopi {theta}} -- interpret subsequent coordinates as polar (rho, theta). twopi sets the units-per-revolution (default $100000000); theta sets the angular offset (default 0). Orientation: theta=0 points East (+x); with the default (positive) twopi the angle increases counter-clockwise; a NEGATIVE twopi reverses the sweep to clockwise."
+    POLAR: "POLAR {twopi {theta}} -- interpret subsequent coordinates as polar (rho, theta). twopi = full-circle units (default $100000000): 0 => +$100000000 (default, counter-clockwise winding), -1 => -$100000000 (reversed, clockwise winding) -- 0 and -1 are NOT equivalent; any other value is taken literally (e.g. 360 = degrees). Orientation: theta=0 points East (+x); positive twopi increases theta counter-clockwise, negative twopi clockwise. theta = angular offset (default 0)."
     CARTESIAN: "CARTESIAN {flipy {flipx}} -- interpret coordinates as Cartesian; optional flipy/flipx (0 or 1) set the vDirY/vDirX axis-flip flags"
   text:
     TEXT: "TEXT {size {style {angle}}} 'string' -- draw text at the current position; the optional inline size/style/angle override the current TEXTSIZE/TEXTSTYLE/TEXTANGLE for this string"
     TEXTSIZE: "TEXTSIZE n -- label font point size (clamped 6..200)"
-    TEXTSTYLE: "TEXTSTYLE n -- style byte 0..255: weight bits0-1, italic bit2, underline bit3, horizontal-align bits4-5, vertical-align bits6-7. Align value->direction is per-axis: horizontal %10=right, %11=left; vertical %10=top, %11=bottom (%00/%01=center on both). Weight bits select a NOMINAL weight (0=thin, 1=normal, 2=bold, 3=heavy) that the DEBUG font does not render distinctly on screen ($00 renders identically to the $01 default; $02/$03 are not visibly heavier)."
+    TEXTSTYLE: "TEXTSTYLE n -- style byte 0..255: weight bits0-1, italic bit2, underline bit3, horizontal-align bits4-5, vertical-align bits6-7. Align value->direction is per-axis: horizontal %10=right, %11=left; vertical %10=top, %11=bottom (%00/%01=center on both). Weight bits select a NOMINAL weight (0=thin, 1=normal, 2=bold, 3=heavy) that the DEBUG font does NOT render as a weight progression: $00 renders identically to the $01 default, and $02/$03 are not heavier (they render with slightly LESS ink, not more). Do not rely on the weight field to bolden text."
     TEXTANGLE: "TEXTANGLE n -- text rotation (degrees 0..359 in Cartesian, or 0..twopi in polar)"
   bitmap_layers:
     LAYER: "LAYER n 'file.bmp' -- load a BMP into layer buffer n (n 1..8; the .bmp file must exist)"
