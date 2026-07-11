@@ -1,21 +1,26 @@
 '' fig-13-packed-scope.spin2  ->  fig-13-packed-scope.bmp
 '' SCOPE window — Chapter 13 packed-samples example (RC-2: channel-defs on a
-'' SEPARATE feed, NOT the create line). Byte-preserved from
-'' examples-library/ch13-packed-scope.spin2; infinite `repeat` bounded to 70 longs
-'' (280 samples > 256-wide window), then SAVE + DEBUG_END_SESSION.
+'' SEPARATE feed, NOT the create line; each channel-def carries a range per EF-003
+'' + the working ch07 SCOPE examples). Create + full-window array feed
+'' byte-preserved from examples-library/ch13-packed-scope.spin2; infinite `repeat`
+'' bounded to 2 frames, then SAVE + DEBUG_END_SESSION.
+''
+'' Packed data must be streamed as an ARRAY (uhex_long_array_) — one full window
+'' per message. Feeding one packed long at a time via `(x) does NOT accumulate.
 
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i, ch, n
+VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+
+PUB main() | i, ch, n
   debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
-  debug(`Sig 'A' 'B')                          ' channel-defs as a separate feed
+  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
   ch := 0
-  repeat n from 1 to 70                        ' bounded (example loops forever)
-    packed := 0
-    repeat i from 0 to 3
-      ' four 8-bit values, low byte first
-      packed := packed | ((ch++ & $FF) << (i * 8))
-    debug(`Sig `(packed))  ' one long = 4 samples
+  repeat n from 1 to 2                         ' bounded (example loops forever)
+    repeat i from 0 to 127
+      ' four 8-bit values per long, low byte first
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+    debug(`Sig `uhex_long_array_(@buff, 128))  ' feed the whole window in one message
     waitms(20)
   waitms(200)
   debug(`Sig save 'fig-13-packed-scope')

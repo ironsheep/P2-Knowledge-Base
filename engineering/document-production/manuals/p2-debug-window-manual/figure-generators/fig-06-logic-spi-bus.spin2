@@ -4,7 +4,8 @@
 '' as the pedagogically-better ch06 figure → re-capture on hardware, then refresh
 '' the manual's ch06 LOGIC figure to this image). Create-line + TRIGGER + emit()
 '' byte-preserved from examples-library/ch06-logic-spi-bus.spin2; infinite `repeat`
-'' bounded to 10 bytes, then SAVE + DEBUG_END_SESSION.
+'' bounded to 40 bytes (enough for several complete TRIGGER-aligned frames to
+'' scroll through the 200-deep window), then SAVE + DEBUG_END_SESSION.
 ''
 '' Supersedes the free-run fig-06-logic.spin2 for the ch06 figure IF Stephen
 '' accepts the triggered capture (kept side-by-side until then).
@@ -18,7 +19,12 @@ PUB main() | tx_byte, i, cs, clk, mosi, b
   debug(`SPIbus TRIGGER $1 $0 32)
 
   tx_byte := $A5
-  repeat b from 0 to 9                       ' bounded (example loops forever)
+  ' bounded (example loops forever). 40 bytes = 800 samples = 4x the 200-deep
+  ' window, so several complete TRIGGER-aligned frames scroll through before
+  ' SAVE. At exactly 200 samples (10 bytes) the trigger — which only evaluates
+  ' once the window is full and needs 32 post-trigger samples (offset) — can
+  ' never complete a frame, and the trace renders blank.
+  repeat b from 0 to 39
     ' idle: CS high, CLK low
     cs := 1
     clk := 0

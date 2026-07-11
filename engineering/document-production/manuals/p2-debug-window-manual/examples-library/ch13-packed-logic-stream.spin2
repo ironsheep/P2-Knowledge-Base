@@ -1,11 +1,18 @@
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i
+VAR long buff[8]                              ' 8 longs x 32 samples = 256 = one full window
+
+PUB main() | i, j, packed
   debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
-    packed := 0
-    repeat i from 0 to 31
-      ' pack 32 one-bit samples into a long
-      packed := (packed << 1) | (getrnd() & 1)
-    debug(`Stream `(packed))  ' send one long = 32 samples
+    repeat j from 0 to 7                       ' build one window of packed samples
+      packed := 0
+      repeat i from 0 to 31
+        ' pack 32 one-bit samples into a long
+        packed := (packed << 1) | (getrnd() & 1)
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 32 samples LSB-first (packed data is streamed as an array, not one long
+    ' per DEBUG call)
+    debug(`Stream `uhex_long_array_(@buff, 8))
     waitms(50)

@@ -109,14 +109,21 @@ software with the random-number generator, so it runs on a bare board with no wi
 ```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i
+VAR long buff[8]                              ' 8 longs x 32 samples = 256 = one full window
+
+PUB main() | i, j, packed
   debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
-    packed := 0
-    repeat i from 0 to 31
-      ' pack 32 one-bit samples into a long
-      packed := (packed << 1) | (getrnd() & 1)
-    debug(`Stream `(packed))  ' send one long = 32 samples
+    repeat j from 0 to 7                       ' build one window of packed samples
+      packed := 0
+      repeat i from 0 to 31
+        ' pack 32 one-bit samples into a long
+        packed := (packed << 1) | (getrnd() & 1)
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 32 samples LSB-first (packed data is streamed as an array, not one long
+    ' per DEBUG call)
+    debug(`Stream `uhex_long_array_(@buff, 8))
     waitms(50)
 ```
 
@@ -124,22 +131,65 @@ The packing loop builds the long bit by bit. You can build it any way you like �
 from a streamer capture in hub RAM, from CORDIC results, from a shift register —
 as long as the bits you want unpacked first land in the low end of the element.
 
+Stream the packed longs as an **array** — one full window's worth per message,
+using `` `uhex_long_array_(@buff, count) `` — rather than one long per `DEBUG`
+call. Packed data is delivered as a batch the host unpacks in one pass; a full
+window per frame is the pattern the Spin2 documentation uses for packed capture.
+
+Packing is not tied to one channel — it is a **fixed bit budget** you choose how to
+spend. Every `LONGS_` mode delivers the same 32 bits per element: `LONGS_1BIT` as
+32 one-bit values, `LONGS_2BIT` as 16 two-bit values, `LONGS_4BIT` as 8 four-bit
+values. You spend that budget on **time** — one channel, the most samples per long,
+as above — or across **channels**, several signals carried at once. Declaring two
+channels and packing with `LONGS_2BIT` sends a *pair* of one-bit logic channels
+(`D0` in bit 0, `D1` in bit 1), sixteen sample-pairs to a long — the same 32-bit
+budget split two ways instead of one:
+
+```{.spin2 caption="ch13-packed-logic-multi.spin2"}
+CON _clkfreq = 200_000_000
+
+VAR long buff[16]                            ' 16 longs x 16 sample-pairs = 256 = one full window
+
+PUB main() | i, j, packed
+  debug(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+  repeat
+    repeat j from 0 to 15                      ' build one window of packed sample-pairs
+      packed := 0
+      repeat i from 0 to 15
+        ' pack 16 two-bit samples into a long: bit 0 -> D0, bit 1 -> D1
+        packed := (packed << 2) | (getrnd() & %11)
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 16 two-bit samples (one bit per channel), streamed as an array -- not one
+    ' long per DEBUG call
+    debug(`Pair `uhex_long_array_(@buff, 16))
+    waitms(50)
+```
+
+Same packing mechanism, same array feed — only the channel count and the mode's
+bit width changed. That is the whole point: high-density capture serves a single
+channel and many channels equally.
+
 A scope works the same way. Here four 8-bit samples ride in each long under
 `LONGS_8BIT`, packed low byte first:
 
 ```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i, ch
+VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+
+PUB main() | i, ch
   debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
-  debug(`Sig 'A' 'B')                          ' channel-defs as a separate feed
+  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
   ch := 0
   repeat
-    packed := 0
-    repeat i from 0 to 3
-      ' four 8-bit values, low byte first
-      packed := packed | ((ch++ & $FF) << (i * 8))
-    debug(`Sig `(packed))  ' one long = 4 samples
+    repeat i from 0 to 127
+      ' four 8-bit values per long, low byte first
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+    ' feed the whole window in one message; the host unpacks each long into
+    ' four 8-bit values (packed data is streamed as an array, not one long
+    ' per DEBUG call)
+    debug(`Sig `uhex_long_array_(@buff, 128))
     waitms(20)
 ```
 
@@ -230,10 +280,12 @@ chapter is the shared reference for what those keywords mean.
 
 ## Try it
 
-Start with the LOGIC example above. Change `LONGS_1BIT` to `LONGS_2BIT` and pack two
-bits per value instead of one — now each long carries 16 two-bit samples (16×), and
-the unpacked values range 0..3. Then declare the window with `SIGNED` and watch the
-same bit patterns reinterpret as −2..1. Finally, switch the container from `LONGS_`
-to `WORDS_` and `BYTES_` for the same bit width and observe how the values-per-element
-count — and therefore the number of elements you send per screen — changes with the
-container size.
+You have now seen the same two-bit element spent two ways — as one channel at maximum
+time-resolution (`LONGS_1BIT`), and as two 1-bit channels (`LONGS_2BIT`). Spend it a
+third way: keep `LONGS_2BIT`, but declare a **single** channel with a `0 3` range, so
+each two-bit sample is one *value* (0..3) instead of two channel bits — now the same
+mode draws a stepped 0..3 waveform on one channel. Then declare the window with
+`SIGNED` and watch the same bit patterns reinterpret as −2..1. Finally, switch the
+container from `LONGS_` to `WORDS_` and `BYTES_` for the same bit width and observe how
+the values-per-element count — and therefore the number of elements you send per
+screen — changes with the container size.

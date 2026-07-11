@@ -1,0 +1,18 @@
+CON _clkfreq = 200_000_000
+
+VAR long buff[16]                            ' 16 longs x 16 sample-pairs = 256 = one full window
+
+PUB main() | i, j, packed
+  debug(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+  repeat
+    repeat j from 0 to 15                      ' build one window of packed sample-pairs
+      packed := 0
+      repeat i from 0 to 15
+        ' pack 16 two-bit samples into a long: bit 0 -> D0, bit 1 -> D1
+        packed := (packed << 2) | (getrnd() & %11)
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 16 two-bit samples (one bit per channel), streamed as an array -- not one
+    ' long per DEBUG call
+    debug(`Pair `uhex_long_array_(@buff, 16))
+    waitms(50)
