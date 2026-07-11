@@ -39,8 +39,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | none | The window's title-bar text |
-| `POS` | `left top` | `0, 0` | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | (window name) | The window's title-bar text |
+| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |

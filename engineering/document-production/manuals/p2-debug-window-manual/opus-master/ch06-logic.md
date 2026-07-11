@@ -53,8 +53,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | Range | What it sets |
 |---------|-----------|---------|-------|--------------|
-| `TITLE` | `'text'` | (none) | — | The window's title-bar text |
-| `POS` | `left top` | `0, 0` | screen px | Window position, in pixels |
+| `TITLE` | `'text'` | (window name) | — | The window's title-bar text |
+| `POS` | `left top` | cascaded | screen px | Window position, in pixels |
 | `SAMPLES` | `count` | `32` | 4–2047 | Horizontal resolution — samples shown across the width |
 | `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |

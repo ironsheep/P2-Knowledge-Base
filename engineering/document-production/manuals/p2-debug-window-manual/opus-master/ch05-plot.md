@@ -37,7 +37,7 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | none | The window's title-bar text |
+| `TITLE` | `'text'` | (window name) | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
 | `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
@@ -290,9 +290,9 @@ debug(`Canvas OBOX 120 100 15 15 4 200)   ' outline, thickness 4
 TEXT {size {style {angle}}} 'string'
 ```
 
-`TEXT` renders the string at the cursor, in the current text color. All three
-numeric arguments are optional and default to the window's current text size,
-style, and angle:
+`TEXT` renders the string at the cursor, in the current text color (white,
+`$FFFFFF`, until you set `COLOR`). All three numeric arguments are optional and
+default to the window's current text size, style, and angle:
 
 - `size` — font size in points.
 - `style` — a style byte (below).

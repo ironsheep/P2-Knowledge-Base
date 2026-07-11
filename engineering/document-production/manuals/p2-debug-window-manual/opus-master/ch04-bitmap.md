@@ -45,8 +45,8 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
-| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification (square blocks, or round dots under `SPARSE`); each is **1–256** |
-| `SPARSE` | `color` | off | Round-dot mode (needs `DOTSIZE`≥4); sets the background color |
+| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification — each logical pixel becomes an x×y block; each is **1–256** |
+| `SPARSE` | `color` | off | Sparse mode: outline each magnified pixel; `color` sets the outline (grid) color |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
@@ -82,9 +82,9 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without defining a palette, entries 0–7 hold default colors — so `LUT1` and
-`LUT2` render entirely in those defaults, while `LUT4` and `LUT8` leave their
-higher entries (above 7) undefined. Supply `LUTCOLORS` to control the palette.
+mode without first defining a palette, the lookup table is **uninitialized** — its
+entries hold arbitrary values, so pixels translate to garbage colors. Always send
+`LUTCOLORS` to load the palette before feeding LUT-mode pixel data.
 
 **Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
 color. The LUMA modes map the value against a single tint color you pick with a
@@ -307,8 +307,8 @@ spot over a cool background. No hardware is involved — the temperatures are
 computed in software — but the data has exactly the shape a real array would
 produce.
 
-The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel round
-dot with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel outlined
+block with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
 built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
 bright (hot):
 

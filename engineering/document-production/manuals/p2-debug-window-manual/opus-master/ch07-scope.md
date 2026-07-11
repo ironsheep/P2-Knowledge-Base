@@ -55,7 +55,7 @@ The configuration keywords you can place on the creation line:
 | `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
 | `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
-| `LINESIZE` | `half-pixels` | `3` | Line thickness, in half-pixels (default `3` = 1.5 px); **0–32** (`0` = no lines) |
+| `LINESIZE` | `pixels` | `3` | Line thickness in pixels; **0–32** (`0` = no lines) |
 | `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |

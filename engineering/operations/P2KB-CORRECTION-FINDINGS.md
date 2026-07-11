@@ -166,7 +166,14 @@
 - **D-F2 (MED) — TERM default color.** `ch03-term.md` + `appendix-c` relabeled the default pair-2/3 green "Green"; **EF-025** confirmed the default renders `clLime $00FF00`, distinct from the `GREEN` keyword `$09FF09`, disposition "keep Lime + reader-note." **Restored "Lime"** + added the reader-note; `term.yaml` already correct. (Explicit `GREEN`-keyword usages left unchanged.)
 - **D-F3 (LOW-MED) — LOGIC DOTSIZE.** `ch06-logic.md` dropped the LOGIC `DOTSIZE` config row (v55 LOGIC table omits it); REF matrix L90 `DOTSIZE ✅` + L260 lists it, and `logic.yaml:32` documents it. **Restored** the row (default 0, range 0–32).
 
-**Class-wide sweep:** an independent pass over `f3e702ed`'s remaining DEBUG-window edits vs Pascal/REF is running to catch any other reversals of this class before Debug re-audit (`feedback_classwide_sweep_on_every_finding`).
+**Class-wide sweep — DONE 2026-07-11 (found + fixed 5 more + 1 conflicted + 1 restore):** the independent pass over `f3e702ed`'s DEBUG-window edits vs Pascal/REF confirmed the class was NOT clear beyond the first three (`feedback_classwide_sweep_on_every_finding`). All hand-verified against the REF theory-of-ops + matrix and applied in opus-master:
+- **F-1 (FFT)** `ch09` channel-def `legend`→**`grid`**, removing fabricated bits 2–3 (legend-text). REF `FFT_Theory` L110/L203: grid is 2-bit (bit0=baseline, bit1=top), default 0. Twin `ch09-fft-spectrum.spin2` comment updated in lockstep (identity GREEN).
+- **F-2 (BITMAP)** `ch04` SPARSE: "round-dot / needs DOTSIZE≥4 / sets background color" → **outline each magnified pixel; `color` sets the outline (grid) color** (no ≥4 gate). REF `BITMAP_Theory` L91/L156/L272: `vSparse` = pixel BORDER color. *(NOTE: BITMAP was never hardware-tested; round-vs-square shape rests on Pascal/REF — a quick SPARSE visual would confirm.)*
+- **F-3 (BITMAP)** `ch04` LUT-without-palette "entries 0–7 hold default colors" → **uninitialized → garbage until `LUTCOLORS`**. REF `BITMAP_Theory` L605 (`SetDefaults` does not init `vLut[]`).
+- **F-4 (POS default)** `0,0`→**cascaded** in TERM/LOGIC/SCOPE_XY/MIDI. REF `LOGIC_Theory` L362/L506.
+- **F-5 (TITLE default)** `none`→**(window name)** in TERM/PLOT/LOGIC. REF `LOGIC_Theory` L361.
+- **S-6 (half-pixels)** SCOPE/FFT LINESIZE + SCOPE_XY DOTSIZE reverted to **pixels** — per **EF-027** (LINESIZE 3→3px, 1:1) + LOGIC-says-pixels consistency (the radius-arithmetic basis is refuted empirically).
+- **N-1 (PLOT)** restored the dropped "default text color is **white (`$FFFFFF`)**" fact (PLOT theory L242).
 
 **Grounding:** REF `PLOT_Theory_of_Operations.md` + `DEBUG-WINDOW-DIRECTIVE-MATRIX.md` (both Pascal-derived) + `EF-025`. Empirical/Pascal outranks v55 text.
 

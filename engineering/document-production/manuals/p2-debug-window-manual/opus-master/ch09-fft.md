@@ -78,7 +78,7 @@ The configuration keywords you can add to the creation line:
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
-| `LINESIZE` | `width` | `3` | Line width in half-pixels (**−32–32**; negative draws filled bars, wider for larger negative values) |
+| `LINESIZE` | `width` | `3` | Line width in pixels (**−32–32**; negative draws filled bars, wider for larger negative values) |
 | `TEXTSIZE` | `points` | editor text size | Label font size; defaults to the editor's text size (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic amplitude scaling |
@@ -129,17 +129,17 @@ label:
 | high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
-| legend | Legend flags (`%abcd`): bit 0 = min (baseline) line, bit 1 = max (top) line, bit 2 = min-value legend text, bit 3 = max-value legend text | — |
+| grid | Grid-line flags: bit 0 = baseline line, bit 1 = top line | default `0` |
 | color | Trace color (`$RRGGBB`) | — |
 
-A single green channel, full height, with a baseline legend line:
+A single green channel, full height, with a baseline grid line:
 
 ```spin2
 debug(`Spectrum 'Signal' 0 $7FFF_FFFF 256 0 1 $00FF00)
 ```
 
 Read that as: label `Signal`, magnitude shift 0, full scale `$7FFF_FFFF`, 256
-pixels tall, baseline at the bottom (`base` 0), legend flag 1 (min/baseline line),
+pixels tall, baseline at the bottom (`base` 0), grid flag 1 (baseline line),
 color green.
 
 To stack two channels in one window — say a left and right pair, one in the lower
@@ -262,7 +262,7 @@ PUB main() | p1, p2, p3, s
   debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE)
 
   ' One channel: label, MAG=0, full scale, 256 tall, baseline 0,
-  ' baseline legend line, drawn green.
+  ' baseline grid line, drawn green.
   debug(`Spectrum 'Signal' 0 $7FFF_FFFF 256 0 1 $00FF00)
 
   p1 := 0                              ' phase accumulators
@@ -367,5 +367,5 @@ Start with the multi-tone example above. Then:
    scaling, then raise `MAG` on the channel to lift weak content further.
 
 You will have used creation config, the `SAMPLES` size and bin range, a channel
-declaration with color and legend flags, and both amplitude controls together — a
+declaration with color and grid flags, and both amplitude controls together — a
 complete software-only spectrum analyzer in a few dozen lines.

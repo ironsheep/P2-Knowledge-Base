@@ -42,7 +42,7 @@ The configuration keywords you can add to the creation line:
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | none (window name) | The window's title-bar text |
-| `POS` | `left top` | `0 0` | Screen position of the window, in pixels |
+| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
 | `SIZE` | `multiplier` | `4` | Key-size multiplier, **1–50** |
 | `RANGE` | `first last` | `21 108` | First and last MIDI note to display, each **0–127** |
 | `CHANNEL` | `channel` | `0` | The single MIDI channel to display, **0–15** |
