@@ -12,7 +12,7 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 | # | Rail | Target | Baseline | Delta | Report | Status |
 |---|------|--------|----------|-------|--------|--------|
 | Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (67 pasm2 z-flag `=`→`==` + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | ✅ CLEAN — 0 flags (3 sub-threshold watch items); scope-creep claim independently re-verified (77 `z:` lines, 0 other fields) |
-| 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | `CHANGESET-AUDIT-p2-debug-window-manual-…md` | 🔄 independent pass running |
+| 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | `CHANGESET-AUDIT-p2-debug-window-manual-…md` | ⚠️ 3 FLAGS (all hand-verified CONFIRMED) — rest clean (15/15 examples compile+byte-identical, ~30 correction-groups faithful). All 3 = same class: f3e702ed trusted v55 over Pascal/REF. F1 HIGH PRECISE-default inverted, F2 MED Lime→Green (vs EF-025), F3 LOW-MED LOGIC DOTSIZE row dropped. |
 | 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | `CHANGESET-AUDIT-p2-io-and-smart-pins-…md` | ✅ CLEAN — ~120 hunks all traced (FABRICATION-AUDIT-SWEEP-CATALOG 148-row proofs + F-173/F-202/C-65); 8 examples compile+byte-identical; real bug-fixes confirmed (REV, PINLOW wrap) |
 | 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | `CHANGESET-AUDIT-p2-assembly-…md` | ⚠️ 2 FLAGS (mostly clean — 7 fabrications removed, AUG↔EF-033 confirmed): (1) Ch5 §5.7.6 vs Ch4 §4.1.4 clock-field naming contradiction introduced here — needs relabel; (2) GETCT 4→2 reasoning-derived, optional annotate. Neither is a fabrication. |
 | 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | `CHANGESET-AUDIT-p2-pasm-desilva-…md` | ✅ CLEAN — ~46 hunks faithful (sweep-catalog proofs); 8 high-risk claims independently re-verified (TESTP polarity flip, per-cog→shared CORDIC fab, async-TX P_OE); examples byte-identical |
@@ -40,6 +40,26 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 **Excluded (no delta since release):** p2an005, p2an006.
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
+
+## FLAGS awaiting Stephen adjudication (Debug manual — all hand-verified CONFIRMED)
+**One class:** the pre-empirical sweep `f3e702ed` trusted **v55 text over the higher-authority
+Pascal/REF** for the DEBUG windows; the later empirical work fixed around them but never re-caught.
+- **F1 — HIGH — PRECISE default inverted (ch05-plot.md).** Manual now says sub-pixel is OFF by
+  default / one `PRECISE` turns it ON. REF (Pascal-derived) is unambiguous: `vPrecise := 8` at
+  `PLOT_Configure` = sub-pixel **ON at creation**, `PRECISE` XORs 8↔0. So one `PRECISE` turns it
+  **OFF** — reader who wants smooth curves gets aliased output, the opposite of intent. Only source
+  for "off" is v55 L1271. **Fix:** revert to sub-pixel-default (Pascal/REF). *Adjudicate: revert now,
+  or hardware-verify (a "Test K") first? — mirrors the F-205 source-conflict pattern.*
+- **F2 — MED — TERM default "Lime"→"Green" (ch03 + appendix-c + 2 example comments).** EF-025
+  CONFIRMED default = `clLime $00FF00`, distinct from `GREEN` kw `$09FF09`; its disposition is
+  explicitly "keep Lime, add reader-note (no LIME kw; reproduce with GREEN)." Sweep applied the
+  inverted v55 reading; contradicts EF-025 + `term.yaml`. **Fix:** restore Lime + reader-note.
+- **F3 — LOW-MED — LOGIC DOTSIZE config row removed (ch06-logic.md).** REF matrix L90 `DOTSIZE ✅`
+  + L260 lists it in LOGIC config; sweep deleted it on v55's omission. **Fix:** restore the row.
+- **Systemic (class-wide sweep):** since all 3 are the same v55-over-Pascal class, before fixing do a
+  systematic pass over `f3e702ed`'s remaining **Debug** edits, cross-checking every DEBUG-window
+  behavioral claim against the Pascal/REF theory-of-ops + directive matrix, to catch any other
+  reversals — then fix the whole class + re-audit (feedback_classwide_sweep_on_every_finding).
 
 ## FLAGS awaiting Stephen adjudication (Assembly manual)
 - **FLAG 1 — CONFIRMED (hand-verified), fix ready.** Ch5 §5.7.6 (`chapter-05-hardware.md:690`)
