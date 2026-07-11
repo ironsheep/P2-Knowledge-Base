@@ -1,0 +1,101 @@
+% P2KB Application Note Diagrams Package — shared across ALL P2ANxxx app notes.
+%
+% MECHANISM (common to every app note): this layer RequirePackages the shared
+% platform diagram base (palette, waveform/brace styles, \diagramscale) and
+% circuitikz (real schematic symbols), then defines the app-note \Diag* macros
+% against them. It is pulled in by ONE line in the shared app-note class template
+% (p2kb-appnote-reference.latex), so every app note inherits both the mechanism
+% and the whole diagram library — any note may invoke any \Diag* macro.
+%
+% DIAGRAMS (note-specific, but shared-by-location): each schematic/timing figure
+% is a named command wrapped in a [H] figure with a caption, invoked from the
+% opus-master inside a raw-LaTeX (=latex) block, e.g.  \DiagRcDecay.
+% Approach + palette mirror p2kb-iosp-diagrams.sty for cross-publication
+% consistency (the app notes are companions to the IOSP manual).
+%
+% Author: Iron Sheep Productions, LLC
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-appnote-diagrams}[2026/07/03 P2KB Application Note Diagrams Package v1.0]
+
+% Shared base: tikz + float + graphicx, the diagram palette (diagram-text,
+% diagram-border, diagram-box, ...), the waveform/brace styles (wsig/wcell/wlbl/
+% tbrace), and \diagramscale (shrink-to-fit, never upscale).
+\RequirePackage{p2kb-platform-diagrams}
+
+% Real schematic symbols (R/L/C/D/FET/op-amp); same options IOSP uses.
+\RequirePackage[siunitx, RPvoltages]{circuitikz}
+
+% ==================== R1 — RC-decay sensor network ====================
+% The pin charges the node through a series resistor, then floats so the cap
+% discharges through the sensor resistance. Mirrors IOSP's \DiagDacFilter, with
+% the sensor branch added as a second path to ground.
+\newcommand{\DiagRcDecay}{%
+\begin{figure}[H]\centering
+\begin{circuitikz}[scale=0.9, transform shape, line width=0.8pt,
+   every node/.append style={font=\scriptsize, text=diagram-text}]
+  \ctikzset{color=diagram-border}
+  \draw (0,0) node[left, text=diagram-text]{P2 pin}
+        to[R, l=$220\,\Omega$] (3,0) coordinate (n);
+  \fill[diagram-border] (n) circle (1.6pt);
+  \node[above=1mm, text=diagram-text] at (n) {node};
+  \draw (n) to[C, l_=$C$] (3,-2) node[ground]{};
+  \draw (n) -- (5,0) coordinate (s);
+  \draw (s) to[R, l=$R_{sensor}$] (5,-2) node[ground]{};
+\end{circuitikz}
+\caption{R1 --- RC-decay network: the pin charges the node through the series
+resistor, then floats so the capacitor discharges through the sensor resistance.}
+\end{figure}}
+
+% ==================== R2 — TSL235R light-to-frequency hookup ====================
+% Three pins: VDD -> 3.3 V, GND -> ground, OUT -> one P2 pin. A 0.1 uF decoupling
+% cap sits across the supply, close to the device.
+\newcommand{\DiagTslHookup}{%
+\begin{figure}[H]\centering
+\begin{circuitikz}[line width=0.8pt,
+   every node/.append style={font=\scriptsize, text=diagram-text}]
+  \ctikzset{color=diagram-border}
+  \node[draw=diagram-border, fill=diagram-box, minimum width=20mm,
+        minimum height=12mm, align=center] (u) at (0,0) {TSL235R};
+  % VDD up
+  \draw (u.north) node[above right=0pt, font=\tiny]{VDD} -- (0,1.6) coordinate (vdd);
+  \node[above, text=diagram-text] at (vdd) {$+3.3\,$V};
+  % GND down
+  \draw (u.south) node[below right=0pt, font=\tiny]{GND} -- (0,-1.6) node[ground]{};
+  % OUT right
+  \draw (u.east) node[above left=0pt, font=\tiny]{OUT}
+        -- ++(2.4,0) node[right]{to P2 pin (signal)};
+  % decoupling cap across the supply, on the left; label on the far (west)
+  % side with l_ so it never overlaps the device box or the supply rails.
+  \draw (vdd) -- (-2.6,1.6) to[C, l_=$0.1\,\mu$F] (-2.6,-1.6) -- (0,-1.6);
+\end{circuitikz}
+\caption{R2 --- TSL235R hookup: VDD to 3.3\,V, GND to ground, OUT to one P2 pin,
+with a 0.1\,$\mu$F decoupling capacitor close to the device.}
+\end{figure}}
+
+% ==================== R3 — quadrature A/B timing ====================
+% Two square waves a quarter-cycle apart; each detent = four counted edges; which
+% channel leads sets the sign. Uses the platform waveform/brace styles.
+\newcommand{\DiagQuadratureTiming}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=0.7cm, y=0.7cm,
+   every node/.append style={font=\scriptsize, text=diagram-text}]
+  % Channel A (top): high in [1,3] and [5,7]
+  \node[wlbl, left] at (0,2) {A};
+  \draw[wsig] (0,1.5) -- (1,1.5) -- (1,2.5) -- (3,2.5) -- (3,1.5)
+              -- (5,1.5) -- (5,2.5) -- (7,2.5) -- (7,1.5) -- (8,1.5);
+  % Channel B (bottom): quarter-cycle later, high in [2,4] and [6,8]
+  \node[wlbl, left] at (0,0) {B};
+  \draw[wsig] (0,-0.5) -- (2,-0.5) -- (2,0.5) -- (4,0.5) -- (4,-0.5)
+              -- (6,-0.5) -- (6,0.5) -- (8,0.5) -- (8,-0.5);
+  % transition grid (every unit = one counted edge)
+  \foreach \x in {1,2,3,4,5,6,7}{\draw[wcell] (\x,-1) -- (\x,3);}
+  % one-detent brace over [0,4]
+  \draw[tbrace] (0,-1.3) -- (4,-1.3);
+  \node[wlbl] at (2,-2) {one detent = 4 edges (\texttimes4 decode)};
+  \node[wlbl, right] at (8,2.4) {A leads B: forward ($+$)};
+\end{tikzpicture}
+\caption{R3 --- quadrature A/B timing: the two channels are a quarter-cycle apart,
+so each detent produces four counted edges; which channel leads sets the sign.}
+\end{figure}}
+
+\endinput

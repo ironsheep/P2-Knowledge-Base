@@ -13,6 +13,10 @@
 % by name ("Recipe 2", "the Verify section"), so no section numbers are needed.
 \setcounter{secnumdepth}{0}
 
+% Short doc has no chapters, so figures would otherwise number "0.1, 0.2, ..."
+% (book-class \thechapter.\arabic{figure}). Drop the chapter prefix -> 1, 2, 3.
+\renewcommand{\thefigure}{\arabic{figure}}
+
 % ---- App-note marker glyphs (missing-glyph fallback) ----
 % App notes use four inline enhancement markers — Pitfall / Tip / Hardware / Verify.
 % Their emoji (U+26A0, U+1F4A1, U+1F527, U+1F50D) have NO glyph in the IBM Plex
