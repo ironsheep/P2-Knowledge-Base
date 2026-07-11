@@ -13,10 +13,10 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 |---|------|--------|----------|-------|--------|--------|
 | Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (67 pasm2 z-flag `=`→`==` + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | ✅ CLEAN — 0 flags (3 sub-threshold watch items); scope-creep claim independently re-verified (77 `z:` lines, 0 other fields) |
 | 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | `CHANGESET-AUDIT-p2-debug-window-manual-…md` | 🔄 independent pass running |
-| 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | `CHANGESET-AUDIT-p2-io-and-smart-pins-…md` | 🔄 independent pass running |
+| 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | `CHANGESET-AUDIT-p2-io-and-smart-pins-…md` | ✅ CLEAN — ~120 hunks all traced (FABRICATION-AUDIT-SWEEP-CATALOG 148-row proofs + F-173/F-202/C-65); 8 examples compile+byte-identical; real bug-fixes confirmed (REV, PINLOW wrap) |
 | 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | `CHANGESET-AUDIT-p2-assembly-…md` | 🔄 independent pass running |
-| 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | `CHANGESET-AUDIT-p2-pasm-desilva-…md` | 🔄 independent pass running |
-| 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 (dense technical) | `CHANGESET-AUDIT-p2-streamer-…md` | 🔄 independent pass running |
+| 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | `CHANGESET-AUDIT-p2-pasm-desilva-…md` | ✅ CLEAN — ~46 hunks faithful (sweep-catalog proofs); 8 high-risk claims independently re-verified (TESTP polarity flip, per-cog→shared CORDIC fab, async-TX P_OE); examples byte-identical |
+| 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 (dense technical) | `CHANGESET-AUDIT-p2-streamer-…md` | ✅ CLEAN — 7/7 faithful, each verbatim-Silicon-Doc-sourced (NCO 32-bit-mask L2747, xinit L3512, VESA porch, $BF85 from X_DACS, long-align L6673); fixes a materially wrong FIFO-alignment claim |
 | 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | (inline) | ✅ inline-cleared — faithful† |
 | 7 | manual | p2-architect-guide | `…-v1.0.0` | 1 file, 1 line | (inline) | ✅ inline-cleared — faithful† |
 | 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 (clock-spec + filter claims) | `CHANGESET-AUDIT-P2AN004-…md` | ✅ CLEAN — 3/3 faithful (each deletes a real defect; ≈600 ns FILT1 + 100–200 MHz VCO both verbatim-sourced; the removed "300 MHz max" was the actual fabrication) |
@@ -42,6 +42,13 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
 
 ## Non-blocking follow-ups surfaced by the audit (not release gates)
+- **Fleet-wide release-prep (IOSP audit):** the correction sweeps intentionally left CHANGELOGs
+  un-bumped and un-rendered ("No version bumps, no re-render"). Each releasing manual needs its
+  CHANGELOG entry authored (the audit reports are the input) + a re-render before ship — that IS the
+  #180 render-wave / #181 release-wave prep, not an audit gap.
+- **Streamer (out-of-scope):** the App-A mode table's adjacent 2-pin/4-pin RFBYTE rows still show
+  `%ppp0`/`%pp00` where the Silicon Doc shows the `a` alt-bit (`pp0a`/`p00a`); this commit correctly
+  fixed only the two 1-pin rows. Candidate for the next fabrication-audit pass (not this changeset).
 - **P2AN004** — "sit comfortably within spec" is rhetorically loose (200 MHz is the *top edge* of the
   100–200 MHz VCO range, not mid-band); optional wording tweak. NOT a sourced-number error.
 - **P2AN004 companion YAML** — the KB filename still reads `…frequency-period-pulse-measurement.yaml`
