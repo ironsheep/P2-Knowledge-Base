@@ -41,6 +41,19 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
 
+## Class-wide v55-over-Pascal sweep RESULT (2026-07-11) — class NOT clear; 5 more + 1 conflicted
+The sweep paid off (report: `CHANGESET-AUDIT-debug-v55-over-pascal-sweep-2026-07-11.md`). The empirical
+batch EF-025..032 had already reverted several (LOGIC ranges, FFT filled-bars, MIDI color, SCOPE size),
+but **BITMAP was never conflict-tested** and POS/TITLE/FFT-legend were in no EF — so these slipped:
+- **F-1 (FFT)** `grid`→"legend" fabricates bits 2–3 (Pascal FFT tests only bits 0/1 = baseline/top lines). *Fabrication.*
+- **F-2 (BITMAP)** SPARSE reworded to round-dot/background/≥4; Pascal = bordered square blocks (vSparse=grid color), no ≥4 gate. Pre-sweep was correct.
+- **F-3 (BITMAP)** LUT-without-palette "entries 0–7 default"; Pascal = uninitialized/garbage until LUTCOLORS. Pre-sweep was correct.
+- **F-4 (POS default)** TERM/LOGIC/SCOPE_XY/MIDI say `0,0`; REF = cascaded/auto (windows cascade, not screen origin).
+- **F-5 (TITLE default)** TERM/PLOT/LOGIC say `none`; REF = "(window name)".
+- **S-6 (CONFLICTED)** "half-pixels" relabel of SCOPE/FFT LINESIZE + SCOPE_XY DOTSIZE: radius-arithmetic supports it, but **EF-027 measured LINESIZE 3→3px (1:1)** and LOGIC chapter says "pixels" for the same primitive → likely error; settle by reverting to "pixels" OR one targeted hardware test.
+- **N-1** PLOT dropped accurate "default text color white ($FFFFFF)" — restore.
+**Next:** hand-verify F-1..F-5 (findings can invert) before applying; S-6 needs adjudication (revert vs test). These join F-209's class before the Debug re-audit.
+
 ## FLAGS — Debug manual (all hand-verified CONFIRMED) — ✅ ADJUDICATED + FIXED 2026-07-11 (F-209)
 **Stephen agreed with recommendations; all three reverted in opus-master.** Class-wide v55-over-Pascal
 sweep RUNNING to catch any others before Debug re-audit. **One class:** the pre-empirical sweep
