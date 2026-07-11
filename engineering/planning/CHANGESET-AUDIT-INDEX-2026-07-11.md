@@ -119,6 +119,28 @@ sweep RUNNING to catch any others before Debug re-audit. **One class:** the pre-
   while the note retitled Period→Rotation; findability/consistency drift → candidate ENH for the
   corrections register (out of scope for this release gate).
 
+## ⚠️ OPEN GAPS discovered 2026-07-11 (late) — MUST close before the release wave
+The `f3e702ed` sweep ("342 fixes across 13 docs") touched more than the big manuals. Two gaps:
+
+**A. Audit gap — app-note CONTENT deltas were NOT changeset-audited.** I mis-"pre-cleared"
+P2AN001/002/003 as *template-only* (the #160 propagation) and marked P2AN005 as *no-change* — but each
+has an `f3e702ed` **content** delta in `app-notes/<AN>/opus-master/` that no independent pass covered:
+- **P2AN001** (5 hunks): I/O power groups **8-pin** (P0–7…P56–63) not 4-pin; SINC2 *filtering* period is
+  adjustable (not power-of-two-locked); below-ground reading is unsigned-wrap in the muldiv64 builds,
+  signed only in the CORDIC build. *(All look correct vs KB `reference_p2_adc_per_group_vio_gio` — but
+  UNVERIFIED by a pass.)*
+- **P2AN002** (4 hunks): 2^32 literal-overflow explanation refined; OBEX author names corrected
+  (#2812 → ersmith, #5361 → James Smith). *(Author-name accuracy needs a check.)*
+- **P2AN003** (1 hunk): PWM dither tone fixed at sysclock/256 regardless of period.
+- **P2AN005** (1 hunk): cross-cog bus coordination wording.
+→ **Action:** run the changeset-integrity pass on these 4 app-note content deltas (tiny) before they
+release. P2AN004 already audited (clean). architect + getting-started were inline-cleared (OK).
+
+**B. CHANGELOG gap — these re-releasing docs still need entries + version bumps:**
+architect (`v1.0.1`), getting-started (`v1.0.1`), P2AN001 (`v1.0.2`), P2AN002 (`v1.0.1`),
+P2AN003 (`v1.0.1`), P2AN004 (`v1.0.1`), P2AN005 (`v1.0.1`). *(The 4 big manuals done; Debug deferred
+on reconciliation.)* Author per `methodology/changelog-style-guide.md` AFTER their audit clears.
+
 ## Flow
 1. YAML template pass (running) → Stephen reviews report + approves the format.
 2. Fan out the 7 manual passes + P2AN004 (+ pre-clear the 3 template-only app-notes).
