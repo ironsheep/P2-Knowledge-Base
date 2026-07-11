@@ -12,21 +12,30 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 | # | Rail | Target | Baseline | Delta | Report | Status |
 |---|------|--------|----------|-------|--------|--------|
 | Y | yaml | full P2KB YAML delta | `v1.14.2` | 76 files (67 pasm2 z-flag `=`→`==` + rdpin F-204 + 8 debug-display enrichments) | `CHANGESET-AUDIT-yaml-delta-2026-07-11.md` | ✅ CLEAN — 0 flags (3 sub-threshold watch items); scope-creep claim independently re-verified (77 `z:` lines, 0 other fields) |
-| 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | — | ⏳ queued |
-| 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | — | ⏳ queued |
-| 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | — | ⏳ queued |
-| 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | — | ⏳ queued |
-| 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 | — | ⏳ queued |
-| 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | — | ⏳ queued (trivial) |
-| 7 | manual | p2-architect-guide | `…-v1.0.0` | 1 file, 1 line | — | ⏳ queued (trivial) |
-| 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 | — | ⏳ queued (trivial) |
-| 9 | app-note | P2AN001 | `…-v1.0.1` | 4 files (template-only, #160) | — | ⏳ pre-cleared candidate* |
-| 10 | app-note | P2AN002 | `…-v1.0.0` | 4 files (template-only, #160) | — | ⏳ pre-cleared candidate* |
-| 11 | app-note | P2AN003 | `…-v1.0.0` | 4 files (template-only, #160) | — | ⏳ pre-cleared candidate* |
+| 1 | manual | p2-debug-window-manual | `…-v1.0.2` | 58 files, ~1339+ | `CHANGESET-AUDIT-p2-debug-window-manual-…md` | 🔄 independent pass running |
+| 2 | manual | p2-io-and-smart-pins-user-guide | `…-v1.0.4` | 34 files, ~350 | `CHANGESET-AUDIT-p2-io-and-smart-pins-…md` | 🔄 independent pass running |
+| 3 | manual | p2-assembly-language-manual | `…-v3.1.2` | 9 files, ~235 | `CHANGESET-AUDIT-p2-assembly-…md` | 🔄 independent pass running |
+| 4 | manual | p2-pasm-desilva-style | `…-v3.0.2` | 3 files, ~128 | `CHANGESET-AUDIT-p2-pasm-desilva-…md` | 🔄 independent pass running |
+| 5 | manual | p2-streamer-programming-guide | `…-v1.0.5` | 1 file, ~14 (dense technical) | `CHANGESET-AUDIT-p2-streamer-…md` | 🔄 independent pass running |
+| 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | (inline) | ✅ inline-cleared — faithful† |
+| 7 | manual | p2-architect-guide | `…-v1.0.0` | 1 file, 1 line | (inline) | ✅ inline-cleared — faithful† |
+| 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 (clock-spec + filter claims) | `CHANGESET-AUDIT-P2AN004-…md` | 🔄 independent pass running |
+| 9 | app-note | P2AN001 | `…-v1.0.1` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
+| 10 | app-note | P2AN002 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
+| 11 | app-note | P2AN003 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
 
 \* P2AN001/002/003 deltas are the #160 diagram-mechanism template propagation — verified at copy time
 to be byte-identical mechanism files from P2AN004 with **no per-note content changed** (inert, no
-re-render). These trace cleanly to #160; candidate for a one-line pre-clear rather than a full pass.
+re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass).
+
+† **Inline-cleared by Claude** (not an independent pass — say the word if you want full independence):
+- **p2-architect-guide** — one line: PSRAM regrouped from the on-chip resource list to "external
+  PSRAM" (geography correctness; PSRAM is off-chip). Traces to f3e702ed. `faithful`.
+- **p2-getting-started-guide** — (a) PLANNING.md roster status In-dev→Done (bookkeeping, non-reader);
+  (b) "the 16 hardware locks from Chapter 1"→"16 hardware locks" (P2 has exactly 16 — fact, dedup);
+  (c) the "two-clocks-per-instruction" overclaim softened to "most register-to-register instructions
+  execute in two clocks, while branches and hub accesses take more" (correct nuance, safe direction).
+  Traces to f3e702ed. All `faithful`.
 
 **Excluded (no delta since release):** p2an005, p2an006.
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
