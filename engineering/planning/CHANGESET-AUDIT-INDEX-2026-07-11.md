@@ -20,9 +20,10 @@ rationale). Per-hunk verdict: `traces-to-nothing` (scope-creep red flag) · `fai
 | 6 | manual | p2-getting-started-guide | `…-v1.0.0` | 2 files, ~5 | (inline) | ✅ inline-cleared — faithful† |
 | 7 | manual | p2-architect-guide | `…-v1.0.0` | 1 file, 1 line | (inline) | ✅ inline-cleared — faithful† |
 | 8 | app-note | P2AN004 | `…-v1.0.0` | 2 files, ~3 (clock-spec + filter claims) | `CHANGESET-AUDIT-P2AN004-…md` | ✅ CLEAN — 3/3 faithful (each deletes a real defect; ≈600 ns FILT1 + 100–200 MHz VCO both verbatim-sourced; the removed "300 MHz max" was the actual fabrication) |
-| 9 | app-note | P2AN001 | `…-v1.0.1` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
-| 10 | app-note | P2AN002 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
-| 11 | app-note | P2AN003 | `…-v1.0.0` | 4 files (template-only, #160) | (pre-clear) | ✅ pre-cleared* |
+| 9 | app-note | P2AN001 | `…-v1.0.1` | template (#160) + **5-hunk content delta** | `CHANGESET-AUDIT-app-notes-content-…md` | ✅ CLEAN — 5/5 faithful (power-groups 4→8, SINC2 filtering, below-ground unsigned-wrap); each fixes a real defect. → F-211 (companion YAML drift). |
+| 10 | app-note | P2AN002 | `…-v1.0.0` | template (#160) + **3-hunk content delta** | `CHANGESET-AUDIT-app-notes-content-…md` | ✅ CLEAN — 3/3 faithful (2³² overflow; OBEX #2812→ersmith, #5361→James Smith, both catalog-verified) |
+| 11 | app-note | P2AN003 | `…-v1.0.0` | template (#160) + **1-hunk content delta** | `CHANGESET-AUDIT-app-notes-content-…md` | ✅ CLEAN — PWM dither fixed at Fclock/256 (Silicon L7936); fixes a real defect |
+| 12 | app-note | P2AN005 | `…-v1.0.0` | **1-hunk content delta** | `CHANGESET-AUDIT-app-notes-content-…md` | ✅ CLEAN — "P2 has no hardware mutex" was false (P2 has 16 locks); fix removes it |
 
 \* P2AN001/002/003 deltas are the #160 diagram-mechanism template propagation — verified at copy time
 to be byte-identical mechanism files from P2AN004 with **no per-note content changed** (inert, no
@@ -37,7 +38,7 @@ re-render). These trace cleanly to #160; pre-cleared (one-line, not a full pass)
   execute in two clocks, while branches and hub accesses take more" (correct nuance, safe direction).
   Traces to f3e702ed. All `faithful`.
 
-**Excluded (no delta since release):** p2an005, p2an006.
+**Excluded (no delta since release):** p2an006. *(p2an005 was wrongly excluded — it has a 1-hunk content delta, now audited clean as row 12.)*
 **Not in a release-delta audit (never released / in-dev / instruments):** p2-layout-torture-test,
 p2-single-step-debugger-manual, p2-smart-pins-tutorial, p2-xbyte-programming-guide.
 
@@ -135,6 +136,15 @@ has an `f3e702ed` **content** delta in `app-notes/<AN>/opus-master/` that no ind
 - **P2AN005** (1 hunk): cross-cog bus coordination wording.
 → **Action:** run the changeset-integrity pass on these 4 app-note content deltas (tiny) before they
 release. P2AN004 already audited (clean). architect + getting-started were inline-cleared (OK).
+
+> **✅ GAP A CLOSED 2026-07-11.** Independent adversarial pass run on all four content deltas —
+> report `CHANGESET-AUDIT-app-notes-content-2026-07-11.md`. **CLEAN — 0 flags; all 10 hunks `faithful`,
+> each corrects a real pre-existing defect.** Verified against primary sources: P2AN001 power-groups
+> (8-groups-of-8: VERIFICATION-OPPORTUNITIES + edge-breakout 300mA/8-pin) + SINC2 filtering/11,585 (IOSP
+> Ch16 L297/L311) + below-ground unsigned-wrap (note's own Recipe-3 code `abs…wc`/`if_c neg`); P2AN002
+> OBEX authors (catalog: #2812=ersmith, #5361=James Smith) + 2³² dividend-overflow; P2AN003 PWM dither
+> fixed at Fclock/256 (Silicon L7936); P2AN005 P2-has-16-locks. **Side-finding → F-211** (KB YAML still
+> teaches 4-pin power groups; the app-note *manuals* are correct — `yaml`-head fix on the KB rail).
 
 **B. CHANGELOG gap — these re-releasing docs still need entries + version bumps:**
 architect (`v1.0.1`), getting-started (`v1.0.1`), P2AN001 (`v1.0.2`), P2AN002 (`v1.0.1`),

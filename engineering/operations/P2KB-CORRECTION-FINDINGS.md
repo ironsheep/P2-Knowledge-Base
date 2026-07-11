@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-211`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming)
+**Next finding ID: `F-212`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -182,6 +182,42 @@
 **Surfaced:** 2026-07-11 by the changeset-integrity audit. Ch5 labeled the HUBSET clock-config low fields `PPPP_XX_CC` (XX=caps, CC=source); Ch4 §4.1.4 (changed in the same `f3e702ed` set) uses `PPPP_CC_SS` (CC=caps, SS=source) — the P2/Silicon-Doc standard. So `CC` denoted *source* in Ch5 and *caps* in Ch4. Bit **values** correct in both (code assembles); a reader decoding via field names would read `CC` two ways. **Fix (applied):** relabeled Ch5 to the standard `PPPP_CC_SS` (values unchanged). An internal cross-chapter naming inconsistency introduced by the sweep — **not** a v55-over-Pascal issue.
 
 **Grounding:** P2 Silicon Doc HUBSET clock-config field layout (`%PPPP_CC_SS`: CC=caps bits 3:2, SS=source bits 1:0); matches Ch4.
+
+### F-211 — I/O pin power-domain group size is wrong across the KB: "isolated groups of **four**" (16 groups) — actual = **8 groups of 8** (P0-7 … P56-63) — `CONFIRMED`
+
+**Surfaced:** 2026-07-11 by the changeset-integrity audit of the P2AN001 content delta (Gap A;
+report `engineering/planning/CHANGESET-AUDIT-app-notes-content-2026-07-11.md`). The P2AN001 **manual**
+was corrected 4→8 in `f3e702ed` (audited faithful), but the shipped **KB YAML** still teaches the old
+4-pin grouping — a manual↔YAML drift, plus a class-wide error in the canonical power-domain file.
+
+- **What's wrong:** the KB says P2 I/O pins are powered in **isolated groups of four** (pins 0-3, 4-7, …,
+  60-63 = "16 groups"). The P2 actually powers I/O in **8 groups of 8** — P0-7, P8-15, …, P56-63 — each
+  group with its own VIO/GIO pair.
+- **Evidence (three independent, hardware-grounded):**
+  - `engineering/ingestion/external-sources/hardware-verification/VERIFICATION-OPPORTUNITIES.md:57` —
+    "**VIO/GIO are PER-GROUP, not global.** The 64 pins are 8 groups of 8 (P0-7, P8-15, …)".
+  - `engineering/ingestion/sources/edge-mini-breakout/…-complete-extraction-audit.md:104` +
+    `extraction-matrices/edge-module-breakout-compatibility-matrix.md:70` — "300 mA per **8-pin group**"
+    (a hard electrical spec from the Parallax breakout doc; one VIO3V3/GND per 8-pin header).
+  - Silicon Doc VIO_{x}_{y}/GIO_{x}_{y} = "power/ground for smart pins {x} through {y}" — placeholder
+    span, i.e. it does **not** state "4"; consistent with 8.
+  - Corroborated by memory `reference_p2_adc_per_group_vio_gio` (written during the F-203 pin-to-pin
+    spread test design).
+- **Fix (class-wide — `yaml-knowledge-base-maintenance`; rides the KB rail):**
+  - `architecture/pin-power-domains.yaml` — canonical file: title (L2 "Groups of Four"), body (L14),
+    `groups:` (L20 "16 groups"), `oneliner` (L48), and **the `sources:` datasheet citation (L35-36)
+    quoting "Power for smart pins in groups of 4" / "group boundaries align on multiples of 4" — this
+    quote appears fabricated (the Silicon Doc uses `{x}_{y}` placeholders, not "4"); verify against the
+    primary P2 datasheet pin table and replace/remove it.** Change 4→8, "16 groups"→"8 groups".
+  - `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` (power_domain L172-176, see_also
+    L186, code comment L117), `…-11010-adc-scope-trigger.yaml` (L144-148, L160),
+    `…-11001-adc-external-clock.yaml` (L186-190, L200).
+  - `application-notes/p2an001-single-pin-instrumentation-adc.yaml:99` (companion YAML — the manual is
+    already at 8-pin; align the companion).
+  - (Stale `.backup.*` copies carry it too — cleanup only, not served.)
+- **Note:** the *mechanism* the KB teaches (per-group VIO/GIO reference; multi-pin shared-node
+  measurements must stay within one group; single-pin ratiometric reads are absolute) is **correct** —
+  only the group **size/count** (4/16 → 8/8) and the group boundaries (…0-3,4-7… → …0-7,8-15…) are wrong.
 
 ## Internal-consistency audit batch (2026-06-18) — F-141…F-153
 
