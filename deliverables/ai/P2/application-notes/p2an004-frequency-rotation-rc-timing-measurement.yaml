@@ -1,10 +1,10 @@
-# P2AN004 — YAML companion to the "Frequency / Period / Pulse Measurement" application note.
+# P2AN004 — YAML companion to the "Frequency / Rotation / RC-Timing Measurement" application note.
 # Four-artifact model: first-party, trust-stampable digest an agent consumes WITHOUT opening the
 # PDF. DIGEST + LINKS, never a prose clone — the "why" lives in the human document; this file
 # carries the novel composition + pointers to the KB primitives the note assembles.
 # Schema: the P2ANxxx companion schema piloted on P2AN001 / P2AN002 / P2AN003.
 
-title: "Frequency / Period / Pulse Measurement"
+title: "Frequency / Rotation / RC-Timing Measurement"
 subtitle: "Read a resistive, capacitive, light, or rotary sensor directly on a P2 pin — the smart pin does the measuring"
 doc_id: P2AN004
 version: "1.0.0"

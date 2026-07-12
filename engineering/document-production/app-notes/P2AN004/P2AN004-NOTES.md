@@ -2,7 +2,7 @@
 
 **Status:** boundary DECIDED 2026-06-30 (mine-and-delineate fan-out, IOSP campaign §1c); ready for authoring (§3b)
 **Created:** 2026-06-30
-**Topic:** Frequency / Period / Pulse Measurement (roster item **A2**, Smart-Pin Instrumentation family)
+**Topic:** Frequency / Rotation / RC-Timing Measurement (roster item **A2**, Smart-Pin Instrumentation family)
 **Owning manual (enrichment fork):** P2 I/O & Smart Pins User Guide (IOSP)
 **Campaign:** IOSP Release Campaign (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`)
 
@@ -18,7 +18,7 @@ It is authored **as part of the IOSP Release Campaign**: its boundary-determinat
 pass decides the IOSP-vs-note split for the measurement region, and the **foundational
 fork augments IOSP** before IOSP releases. Taken all the way through PDF.
 
-## Topic — Frequency / Period / Pulse Measurement
+## Topic — Frequency / Rotation / RC-Timing Measurement
 
 Smart-pin measurement modes through worked recipes: frequency counting, period /
 high-time / duty measurement, RC decay timing (rctime), pulse/edge counting, and

@@ -48,7 +48,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | P2AN001 — ADC Instrumentation | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | AI Privacy Guide | guide | — | ✅ | ✅ | — | ✅ | ✅ | ✅ |
@@ -94,7 +94,7 @@ Each document's slug is its folder name across `manuals/<slug>/`, `workspace/<sl
 **P2AN003 — DAC & Analog Signal Generation** · `P2AN003` · app-note
 **v1.0.0 (2026-07-03, 19pp)** — Family A1 (output sibling to ADC); shared dithered-DAC output stage + 5 recipes (sample playback, waveform synthesis, dithering, ADC→DAC passthrough, mixing & panning) + reSound 32-stream ceiling (OBEX #2861). Deep audit (4-agent fan-out + hand-verify) caught + fixed a HIGH Recipe-4 scaling bug pre-release. Cites IOSP Ch.10/§18.3.
 
-**P2AN004 — Frequency / Period / Pulse Measurement** · `P2AN004` · app-note
+**P2AN004 — Frequency / Rotation / RC-Timing Measurement** · `P2AN004` · app-note
 **v1.0.0 (2026-07-03, 14pp)** — Family A2 (timing instrumentation); 3 recipes (RC-decay reader, TSL235R light-to-frequency reciprocal counter, quadrature-knob). First app note with rendered circuit/timing diagrams (new shared `p2kb-appnote-diagrams` library — circuitikz). Cites IOSP Ch.13-15.
 
 **P2AN005 — Cooperative Multitasking with Spin2 TASK Methods** · `P2AN005` · app-note

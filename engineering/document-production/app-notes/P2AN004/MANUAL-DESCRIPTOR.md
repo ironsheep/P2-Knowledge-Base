@@ -8,7 +8,7 @@ guide_paths:
   creation_guide: ../APP-NOTE-CREATION-GUIDE.md
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
   style_guide: ../APP-NOTE-VOICE-GUIDE.md
-companion_yaml: deliverables/ai/P2/application-notes/p2an004-frequency-period-pulse-measurement.yaml
+companion_yaml: deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml
 authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Silicon Doc v35 (Smart Pins: measurement modes %10001 P_HIGH_TICKS / %10101 P_COUNTER_TICKS / %10111 P_COUNTER_PERIODS / %01011 P_QUADRATURE + A/B input routing) + TSL235R datasheet (ams/TAOS, 3rd-party = cross-check tier) + Spin2 docs (pinstart/wrpin/wxpin/rdpin/pinread/pinh/pinl/pinf/pinw/muldiv64) + IOSP Ch.13-15 (companion manual) + OBEX (#2831 P2_rctime, #2829 Quadrature Encoder) + pnut_ts
 high_risk_quant:
   - "Reciprocal frequency counter (R2): frequency = periods x clkfreq / ticks via MULDIV64; %10101 (ticks) + %10111 (periods) run over the SAME X window; worked check 50 kHz/100 ms/200 MHz -> 5000 periods, 20e6 ticks -> 50_000 Hz"
@@ -25,7 +25,7 @@ fragile_areas:
   - "TSL235R figures are a 3rd-party datasheet (cross-check tier), not Parallax-primary; the built-in irradiance conversion is a starting point pending calibration, stated as such"
 ---
 
-# P2AN004 — Frequency / Period / Pulse Measurement — Descriptor
+# P2AN004 — Frequency / Rotation / RC-Timing Measurement — Descriptor
 
 Thin per-note overlay read by document-audit (and prepare-/release-/finalize-manual).
 Fourth app-note release; reuses the companion schema piloted on [[P2AN001]] and [[P2AN002]]

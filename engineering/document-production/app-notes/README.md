@@ -22,7 +22,7 @@ to the manuals for background). See the guides below for the full contract.
 | **P2AN001** | Single-Pin ADC Instrumentation | 1.0.1 | ✅ |
 | **P2AN002** | CORDIC for Real Work | 1.0.0 | ✅ |
 | **P2AN003** | DAC & Analog Signal Generation | 1.0.0 | ✅ |
-| **P2AN004** | Frequency / Period / Pulse Measurement | 1.0.0 | ✅ |
+| **P2AN004** | Frequency / Rotation / RC-Timing Measurement | 1.0.0 | ✅ |
 
 Family, rationale, recipes-to-mine, and ceilings per note → the candidate/production register [`p2-app-note-roster.md`](../../analysis/p2-app-note-roster.md).
 

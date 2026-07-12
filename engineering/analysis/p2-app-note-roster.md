@@ -75,7 +75,7 @@ IOSP Ch.16. Every item below follows its shape.
 |---|---|---|---|---|
 | A0 | **ADC Instrumentation** | *(done — P2AN001)* | 6 OBEX (SAR/ADS1118/hi-res/4-20mA) + 3 QB | ✅ v1.0.1 |
 | A1 | **DAC & Analog Signal Generation** → **P2AN003** | the *output* sibling to ADC; advanced DAC (dithering, audio streaming, waveform synth) is worked technique, not reference | QB "ADC→DAC + Analog Frequency to DAC"; sound-engine | ✅ **released v1.0.0 2026-07-03** (5 recipes + reSound ceiling) |
-| A2 | **Frequency / Period / Pulse Measurement** → **P2AN004** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | ✅ **v1.0.0 released 2026-07-03** (3 recipes; rendered circuit/timing diagrams) |
+| A2 | **Frequency / Rotation / RC-Timing Measurement** → **P2AN004** | the timing-instrumentation region (freq, period, duty, rctime, count) — many modes, non-obvious, recurring (tachometer, freq counter, ToF) | QB TSL235R (freq); OBEX P2_rctime (pulse); quadrature | ✅ **v1.0.0 released 2026-07-03** (3 recipes; rendered circuit/timing diagrams) |
 
 ### Family B — Math (worked technique; reference already in PASM2/Spin2)
 *Owning manuals: PASM2 / Spin2 reference (building blocks already there). Author as a coordinated pair/trio.*
@@ -193,6 +193,6 @@ candidate for its own lightweight skill/process once it has run a few times
 
 > **Next actions:** (1) **B1 CORDIC** ✅ released v1.0.0 (P2AN002, 2026-07-03) (#140, separate Math
 > track). (2) The **IOSP Release Campaign** (`engineering/planning/IOSP-RELEASE-CAMPAIGN-SPRINT-PLAN.md`)
-> drives **A1→P2AN003 (DAC)** and **A2→P2AN004 (Freq/Period/Pulse)** through the §2
+> drives **A1→P2AN003 (DAC)** and **A2→P2AN004 (Freq/Rotation/RC-Timing)** through the §2
 > playbook + IOSP enrichment + PDF, plus a USB study, then releases IOSP. Remaining
 > items are registered candidates above.

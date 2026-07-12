@@ -116,9 +116,14 @@ sweep RUNNING to catch any others before Debug re-audit. **One class:** the pre-
   fixed only the two 1-pin rows. Candidate for the next fabrication-audit pass (not this changeset).
 - **P2AN004** — "sit comfortably within spec" is rhetorically loose (200 MHz is the *top edge* of the
   100–200 MHz VCO range, not mid-band); optional wording tweak. NOT a sourced-number error.
-- **P2AN004 companion YAML** — the KB filename still reads `…frequency-period-pulse-measurement.yaml`
-  while the note retitled Period→Rotation; findability/consistency drift → candidate ENH for the
-  corrections register (out of scope for this release gate).
+- **P2AN004 companion YAML** — ~~the KB filename still reads `…frequency-period-pulse-measurement.yaml`
+  while the note retitled Period→Rotation~~ **✅ RESOLVED 2026-07-11 (Stephen: retitle).** The note is
+  now formally *Frequency / Rotation / RC-Timing Measurement* (its three instruments have no period/pulse
+  recipe). Aligned in one coherent move: companion YAML renamed
+  `…-frequency-rotation-rc-timing-measurement.yaml` + `title:`; manual-head source-of-truth updated
+  (CHANGELOG, MANUAL-DESCRIPTOR, NOTES, PUBLICATION-ROSTER, app-notes/README, analysis roster). Published
+  `deliverables/documents/` area + index key regen ride release-manual/release-yamls at §9 (they lag
+  until publish); historical records (dated audit, PUBLISH ledger, ingestion source-map) left as-is.
 
 ## ⚠️ OPEN GAPS discovered 2026-07-11 (late) — MUST close before the release wave
 The `f3e702ed` sweep ("342 fixes across 13 docs") touched more than the big manuals. Two gaps:
