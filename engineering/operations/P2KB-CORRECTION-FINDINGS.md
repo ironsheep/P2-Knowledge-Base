@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-212`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB)
+**Next finding ID: `F-213`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -236,6 +236,48 @@ was corrected 4→8 in `f3e702ed` (audited faithful), but the shipped **KB YAML*
 - **Note:** the *mechanism* the KB teaches (per-group VIO/GIO reference; multi-pin shared-node
   measurements must stay within one group; single-pin ratiometric reads are absolute) is **correct** —
   only the group **size/count** (4/16 → 8/8) and the group boundaries (…0-3,4-7… → …0-7,8-15…) are wrong.
+
+### F-212 — Debug-displays YAML corrections surfaced by the 2026-07-12 coverage re-audit (per-file batch) — `CONFIRMED` (held for the debug-displays YAML pass, bundled with F-207/F-208)
+
+**Surfaced:** 2026-07-12, the coverage-tracked exhaustive re-audit of the Debug Window Manual against the latest ratified
+REF (matrix + 9 Theory-of-Operations docs re-grounded on raw `DebugDisplayUnit.pas`, commit `360a9c15`). Full per-item
+evidence + line numbers in the manual audit report `…/p2-debug-window-manual/audit/release-gate-2026-07-12-COVERAGE.md` §2.
+Every item below is a place a shipped **debug-displays YAML contradicts the authority** (ToO/matrix/`.pas`/EF ledger) — the
+manual is correct in each case unless noted. **Gate:** drain with F-207/F-208 in the single debug-displays YAML pass; do
+not publish the Debug manual until landed (`yaml-knowledge-base-maintenance` → `release-yamls`).
+
+- **`fft.yaml` (HIGH ×2):** (a) `grid` documented as 2-bit → it is **4-bit `%abcd`** (bit2/bit3 = min/max legend TEXT; FFT
+  never sets `vLow` so bit-2 shows `+0`). (b) **`MAG` inverted** — recorded as "right-shift **divisor**"; it is a **gain
+  ×2^mag** (power formula `Hypot/($800 shl FFTexp shr FFTmag)`; ToO §11.4). This tells a KB agent MAG *attenuates* when it
+  *amplifies* — an AI-trust inversion. Manual (ch09) correct on both.
+- **`spectro.yaml` (HIGH):** axis assignment inverted (L52/L53/L82). Default `$F` = **time-X / freq-Y** (swap fires only when
+  `vTrace and $4 = 0`, i.e. traces 0-3 → freq-X). ToO §4.1/§22.1 (`SPECTRO_Configure` 1751-1787) + validated fig-10 run-up.
+  Manual (ch10:124-126) correct.
+- **`midi.yaml` (HIGH + MEDIUM):** (a) velocity-0 note-on claim wrong — a velocity-0 note-on stores 0 and the fill test is
+  `MidiVelocity > 0`, so the key reads **OFF** (no explicit `$80` required); ToO §5.1/§18.1/§19.3. (b) "velocity sets the key
+  **color**" → velocity sets fill **HEIGHT** (no color gradient; hue fixed per key type; ToO §19.3). Manual (ch11) correct.
+- **`pc_mouse.yaml` (HIGH):** `coordinate_basis_per_window` reproduces the §4.4a on-screen **readout**, not the §4.4b
+  **wire** value the P2 receives — wrong for LOGIC/SCOPE/SCOPE_XY/FFT/MIDI. Correct wire: raw client pixels for those five;
+  `÷DOTSIZE` (+CARTESIAN flip) for PLOT/SPECTRO/BITMAP; char col/row for TERM (`SendMousePos` 3537-3577).
+- **`logic.yaml` (MEDIUM ×2):** (a) `'DATA' 4` mislabeled "multi-bit bus" — a `count` without `RANGE` = 4 **single-bit**
+  channels (ToO §7.2). (b) TRIGGER formula `(sample AND mask)==match` → `((sample XOR match) AND mask)==0` (only equivalent
+  when `match ⊆ mask`).
+- **`bitmap.yaml` (MEDIUM + LOW):** SPARSE "grid-border color" → background-**block** model + add the `DOTSIZE ≥ 4` sparse
+  gate (manual carries it at ch04:400; yaml lacks it); add "LUT entries are black `$000000` (zero-init) until `LUTCOLORS`."
+  *(The exact SPARSE user-facing word is a hardware-hold — see COVERAGE report §4.)*
+- **`term.yaml` (MEDIUM):** control-code note "12 is in the 14..31 range" is arithmetically false (12 < 14); the *behavior*
+  it asserts is right. Reword: "codes 0-10 and 13 act; 11, 12, and 14-31 do nothing." (Manual ch03 is clean.)
+- **TITLE default (systemic, LOW-MEDIUM):** `scope.yaml`, `scope_xy.yaml` (`'Scope_XY'`), `term.yaml`, `midi.yaml` (`'MIDI'`)
+  record the TITLE default as a bare type/name; the real default caption is `"<name> - <TYPE>"` (`FormCreate:626`).
+- **DO NOT TOUCH (verified correct — prior-pass would have regressed these):** `scope.yaml` "prevents the window from being
+  created" (EF-003 confirms it — the *manual* ch07:88-91 is the one to fix); `logic.yaml`/`term.yaml` POS "don't overlap"
+  (hardware-hold vs the REF's "overlap" — needs a multi-window capture, do not mechanically flip); `bitmap.yaml`/`ch10`
+  packing "unsigned by default" (correct — the **SPECTRO ToO** carries the stale sign mislabel, not the YAML).
+
+> **REF-doc defects are NOT in this finding.** The re-audit also found ~15 places the ratified **matrix/ToO** contradict the
+> correct manual/YAML (TEXTSTYLE/EF-031, trigger-offset inversions, MAG-divisor, color-mode enum order, SPECTRO sign-label,
+> CLOSE §6 dropped clause, etc.). Those are REF corrections (Stephen-adjudicated), catalogued in the COVERAGE report §3 — not
+> KB YAML edits, so they stay out of this register.
 
 ## Internal-consistency audit batch (2026-06-18) — F-141…F-153
 
