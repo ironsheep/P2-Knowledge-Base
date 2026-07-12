@@ -10,6 +10,14 @@ to commits). Newest entry first.
 
 ---
 
+## v1.0.1 (2026-07-11)
+
+An accuracy refinement. No chapters added.
+
+- **External memory** — PSRAM is named as an external resource, distinct from the P2's on-chip LUT RAM, CORDIC, and streamer.
+
+---
+
 ## v1.0.0 — Maiden release (2026-07-08)
 
 **Initial release for community review.** *The P2 Architect's Guide — Thinking in Cogs, Pins, and

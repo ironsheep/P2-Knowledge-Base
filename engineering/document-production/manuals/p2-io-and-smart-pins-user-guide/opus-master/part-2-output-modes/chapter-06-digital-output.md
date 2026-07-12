@@ -308,8 +308,8 @@ The 3-clock output latency is a fixed pipeline delay — it sets *when* each edg
 The fastest software toggle uses `REP` to remove branch overhead. `REP` repeats an instruction block without any per-iteration branch, so each `DRVNOT` costs only its own 2 clocks:
 
 ```pasm2
-              rep       #1,#0             ' Repeat next instruction indefinitely
-              drvnot    #pin              ' 2 cycles per toggle
+              rep       #1,#0       ' Repeat next instruction indefinitely
+              drvnot    #pin        ' 2 cycles per toggle
 ```
 Period: 2 cycles per toggle = 10 ns → 100M toggles/s at 200 MHz sysclk — i.e. a 50 MHz square wave.
 

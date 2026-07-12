@@ -106,16 +106,16 @@ CON
 
 PUB triangle_pwm(freq_hz, duty_percent) | base, frame, y_val
   ' PWM period (clocks) = 2 * frame * base; frame must fit the 16-bit field
-  frame := _clkfreq / (2 * freq_hz)          ' = frame * base (base starts at 1)
+  frame := _clkfreq / (2 * freq_hz)    ' = frame * base (base starts at 1)
   base  := 1
-  repeat while frame > $FFFF                 ' grow base until frame fits 16 bits
+  repeat while frame > $FFFF           ' grow base until frame fits 16 bits
     base += 1
     frame := _clkfreq / (2 * freq_hz * base)
   y_val := frame * duty_percent / 100
 
   PINFLOAT(PWM_PIN)
   WRPIN(PWM_PIN, P_PWM_TRIANGLE | P_OE)
-  WXPIN(PWM_PIN, base | (frame << 16))       ' Base period, frame period
+  WXPIN(PWM_PIN, base | (frame << 16)) ' Base period, frame period
   WYPIN(PWM_PIN, y_val)
   PINLOW(PWM_PIN)
 ```
@@ -209,9 +209,9 @@ CON
 
 PUB sawtooth_pwm(freq_hz, duty_percent) | base, frame, y_val
   ' PWM period (clocks) = frame * base; frame must fit the 16-bit field
-  frame := _clkfreq / freq_hz                ' = frame * base (base starts at 1)
+  frame := _clkfreq / freq_hz          ' = frame * base (base starts at 1)
   base  := 1
-  repeat while frame > $FFFF                 ' grow base until frame fits 16 bits
+  repeat while frame > $FFFF           ' grow base until frame fits 16 bits
     base += 1
     frame := _clkfreq / (freq_hz * base)
   y_val := frame * duty_percent / 100
@@ -408,7 +408,8 @@ These are triangle-mode maxima (`sysclk / (2 * frame)`). Sawtooth uses the full 
 
 **For motor control (20 kHz, triangle mode):**
 ```formula
-Frame period = 200_000_000 / (2 × 20_000) = 5,000   (triangle: period = 2 × frame × base)
+Frame period = 200_000_000 / (2 × 20_000) = 5,000
+  (triangle: period = 2 × frame × base)
 Actual resolution = log2(5,000) ≈ 12.3 bits
 Y range: 0 to 5,000
 ```
@@ -531,7 +532,7 @@ PUB motor_update() | delta
 ```pasm2
 CON
   _clkfreq = 200_000_000
-  PWM_PIN  = 20                              ' CON symbol → #PWM_PIN is the value 20
+  PWM_PIN  = 20                    ' CON symbol → #PWM_PIN is the value 20
 
 DAT           org
 

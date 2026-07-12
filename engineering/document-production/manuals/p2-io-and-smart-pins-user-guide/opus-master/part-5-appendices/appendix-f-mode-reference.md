@@ -997,7 +997,8 @@ P_ADC_GIO | P_ADC_SCOPE
 
 ### Quick Example
 ```spin2
-WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)       ' any pin; 4-pin alignment only for the SCOPE data pipe
+' any pin; 4-pin alignment only for the SCOPE data pipe
+WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)
 WXPIN(52, (48 << 10) | (16 << 2))        ' B=48, A=16, 68-tap filter
 PINH(52)
 ```
@@ -1106,7 +1107,7 @@ P_SYNC_RX | P_PLUS1_B                    ' Clock from next pin
 ### Quick Example
 ```spin2
 WRPIN(pin, P_SYNC_RX | P_PLUS1_B)
-WXPIN(pin, %1_00111)                     ' Sample coincident with clock edge, 8 bits
+WXPIN(pin, %1_00111)                     ' Sample on clock edge, 8 bits
 PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 data := RDPIN(pin) >> 24                 ' Left-justified, shift down
@@ -1146,8 +1147,8 @@ bit_period := (_clkfreq / 115200) << 16
 WRPIN(pin, P_ASYNC_TX | P_OE)
 WXPIN(pin, bit_period | 7)               ' 8 data bits
 PINLOW(pin)
-WYPIN(pin, byte_value)                   ' Load first byte (begins transmission)
-REPEAT UNTIL PINREAD(pin)                ' IN rises when ready for the next byte
+WYPIN(pin, byte_value)                   ' Load first byte (begins TX)
+REPEAT UNTIL PINREAD(pin)                ' IN rises when ready for next byte
 ```
 
 ### Reference

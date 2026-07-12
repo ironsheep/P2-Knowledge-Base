@@ -10,6 +10,14 @@ commits). Newest entry first.
 
 ---
 
+## v1.0.1 (2026-07-11)
+
+An accuracy refinement. No chapters added.
+
+- **Instruction timing** — most register-to-register PASM2 instructions execute in two clocks, while branches and hub accesses take more.
+
+---
+
 ## v1.0.0 (2026-06-24)
 
 **Initial release for community review.** A warm orientation on-ramp to the Propeller 2 —

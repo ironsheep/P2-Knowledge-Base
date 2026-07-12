@@ -41,7 +41,7 @@ Receives serial data asynchronously with automatic start bit detection. The smar
 
 ```layout
 X[31:16]: System clock periods per bit (integer part)
-X[15:10]: Fractional clock periods (1/64th increments) — honored only when X[31:26]==0
+X[15:10]: Fractional clock periods (1/64th) — honored only when X[31:26]==0
 X[9:5]:   Reserved
 X[4:0]:   Number of data bits minus 1 (0-31 for 1-32 bits)
 ```

@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Meet the Chip, Read Its Code, Put It to Work\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.0 — Community Review Edition\par}
+{\large\color{blue}Version 1.0.1 — Community Review Edition\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[

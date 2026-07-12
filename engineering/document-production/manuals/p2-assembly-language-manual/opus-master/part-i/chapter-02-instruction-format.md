@@ -466,7 +466,7 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 ```pasm2
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##dest, ##addr          ' 7...14 cycles (AUGD+AUGS = +4; WRLONG itself 3...10)
+        wrlong  ##dest, ##addr  ' 7...14 cyc (AUGD+AUGS = +4; WRLONG 3...10)
 ```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.

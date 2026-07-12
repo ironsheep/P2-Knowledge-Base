@@ -23,18 +23,18 @@ prose), with all per-publication detail in the roster.*
 
 | Document | Type | Ver | pp | Released |
 |----------|------|-----|:--:|:--:|
-| Getting Started | manual | 1.0.0 | 25 | ✅ |
-| I/O & Smart Pins | manual | 1.0.4 | 396 | ✅ |
-| Assembly Reference | manual | 3.1.2 | 505 | ✅ |
-| DeSilva Tutorial | manual | 3.0.2 | 163 | ✅ |
+| Getting Started | manual | 1.0.1 | 25 | ✅ |
+| I/O & Smart Pins | manual | 1.0.5 | 398 | ✅ |
+| Assembly Reference | manual | 3.1.3 | 505 | ✅ |
+| DeSilva Tutorial | manual | 3.0.3 | 164 | ✅ |
 | Debug Window | manual | 1.0.2 | 160 | ✅ |
-| Streamer Guide | manual | 1.0.5 | 75 | ✅ |
-| Architect's Guide | manual | 1.0.0 | 53 | ✅ |
-| P2AN001 — ADC Instrumentation | app-note | 1.0.1 | 20 | ✅ |
-| P2AN002 — CORDIC for Real Work | app-note | 1.0.0 | 14 | ✅ |
-| P2AN003 — DAC & Signal Generation | app-note | 1.0.0 | 19 | ✅ |
-| P2AN004 — Freq / Period / Pulse | app-note | 1.0.0 | 14 | ✅ |
-| P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.0 | 12 | ✅ |
+| Streamer Guide | manual | 1.0.6 | 75 | ✅ |
+| Architect's Guide | manual | 1.0.1 | 53 | ✅ |
+| P2AN001 — ADC Instrumentation | app-note | 1.0.2 | 20 | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.1 | 14 | ✅ |
+| P2AN003 — DAC & Signal Generation | app-note | 1.0.1 | 19 | ✅ |
+| P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.1 | 14 | ✅ |
+| P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.1 | 12 | ✅ |
 | P2AN006 — Sizing Cog & Task Stacks | app-note | 1.0.0 | 12 | ✅ |
 | AI Privacy Guide | guide | — | — | ✅ |
 

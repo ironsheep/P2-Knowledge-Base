@@ -1,5 +1,11 @@
 # P2AN005 — Cooperative Multitasking with Spin2 TASK Methods — Changelog
 
+## v1.0.1 (2026-07-11)
+
+A wording refinement in Adapt It / Going Further. No recipes added.
+
+- **One bus, many cadences** — keeping a shared bus inside its single owning cog lets cooperative tasks service devices at different rates while the bus stays coherent, sidestepping cross-cog lock coordination.
+
 ## v1.0.0 (2026-07-07)
 
 Initial release for community review. A techniques-catalog application note for running several

@@ -319,7 +319,7 @@ mode := P_ADC_30X | P_ADC
 
 **Read the internal ground reference for calibration:**
 ```spin2
-mode := P_ADC_GIO | P_ADC                ' Internal GIO ground node (~0), for calibration
+mode := P_ADC_GIO | P_ADC  ' Internal GIO ground node (~0), for calibration
 ```
 P_ADC_GIO routes the internal GIO ground node to the ADC, not the pin's
 signal — it reads ~0 for calibration. To read an external single-ended

@@ -565,7 +565,8 @@ PUB comm_monitor() | timeout_clocks
 
   repeat
     if PINREAD(RX_PIN)                     ' Timeout occurred
-      AKPIN(RX_PIN)                         ' Acknowledge: lowers IN so recovery is visible
+      ' Acknowledge: lowers IN so recovery is visible
+      AKPIN(RX_PIN)
       comm_ok := false
       last_timeout := GETMS()
       DEBUG("Communication lost!")

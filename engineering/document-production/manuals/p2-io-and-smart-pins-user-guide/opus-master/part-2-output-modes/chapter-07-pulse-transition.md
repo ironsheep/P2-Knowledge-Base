@@ -332,7 +332,8 @@ PUB setup_de()
   PINFLOAT(DE_PIN)
   WRPIN(DE_PIN, P_TRANSITION | P_OE | P_INVERT_OUTPUT)
   WXPIN(DE_PIN, DISABLE_DELAY)
-  PINLOW(DE_PIN)                          ' DE is high (enabled) after setup due to output inversion
+  ' DE is high (enabled) after setup due to output inversion
+  PINLOW(DE_PIN)
 
 PUB tx_complete()
   ' After transmission, trigger delayed disable
@@ -368,7 +369,7 @@ CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
   STEP_PERIOD = 400
-  STEP_LOW = 200                          ' X[31:16] compare = low-time clocks
+  STEP_LOW = 200                       ' X[31:16] compare = low-time clocks
 
 DAT           org
 

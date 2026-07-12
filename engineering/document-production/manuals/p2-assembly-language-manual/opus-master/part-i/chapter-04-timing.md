@@ -68,9 +68,11 @@ Switching clock sources requires a careful sequence to ensure glitch-free transi
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 
 ```pasm2
-        hubset  ##%0000_0000_0000_0000_0000_0000_0000_1000  ' Enable xtal (CC=%10), stay on RCFAST (SS=%00)
+        ' Enable xtal (CC=%10), stay on RCFAST (SS=%00)
+        hubset  ##%0000_0000_0000_0000_0000_0000_0000_1000
         waitx   ##20_000_000/100                            ' Wait ~10ms
-        hubset  ##%0000_0000_0000_0000_0000_0000_0000_1010  ' Switch source to crystal (SS=%10=XI)
+        ' Switch source to crystal (SS=%10=XI)
+        hubset  ##%0000_0000_0000_0000_0000_0000_0000_1010
 ```
 
 The P2 has no runtime clock-failure monitor and no automatic fallback. RCFAST is only the power-on/reset default source, not a runtime failsafe. An unsafe clock switch can produce a glitch that hangs the P2 until a reset occurs, so when switching away from the PLL always switch to an internal RC oscillator (%SS = %00 or %01) first, then to the new source.
@@ -376,7 +378,7 @@ Conditional execution works for simple cases where both branches are short. For 
 WAITX provides precise, cycle-accurate delays by pausing execution for a specified number of clock cycles:
 
 ```pasm2
-        waitx   ##100                   ' Pause 100 clocks (102 total with WAITX's own 2)
+        waitx   ##100  ' Pause 100 clocks (102 total with WAITX's own 2)
 ```
 
 The instruction accepts a value D specifying the delay duration. WAITX consumes 2 + D clocks—the D-clock pause plus the instruction's own 2-clock cost—so `waitx ##100` occupies 102 clocks, not 100. For an exact N-clock delay, load N − 2 (for example, `waitx ##98` for 100 clocks). This precision makes WAITX suited to timing-critical operations such as bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.

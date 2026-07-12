@@ -382,11 +382,12 @@ Implementing USB requires:
 ### Configuration Pattern
 
 ```spin2
-WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure DM (identical D data)
-WRPIN(even_pin+1, P_USB_PAIR | P_OE)            ' Configure DP (identical D data)
-WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' full-speed, lower pin only
-PINHIGH(even_pin)                               ' Enable DM
-PINHIGH(even_pin+1)                             ' Enable DP
+WRPIN(even_pin, P_USB_PAIR | P_OE)        ' Configure DM (identical D data)
+WRPIN(even_pin+1, P_USB_PAIR | P_OE)      ' Configure DP (identical D data)
+' full-speed, lower pin only
+WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))
+PINHIGH(even_pin)                         ' Enable DM
+PINHIGH(even_pin+1)                       ' Enable DP
 ```
 
 ### Key Points

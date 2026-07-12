@@ -1,5 +1,12 @@
 # P2AN002 — CORDIC for Real Work — Changelog
 
+## v1.0.1 (2026-07-11)
+
+A derivation and attribution refinement. No recipes added.
+
+- **Step-size derivation** — the circle-layout recipe explains why the direct `$1_0000_0000 / STEPS` form won't compile (a 33-bit dividend literal) and how the halved `$8000_0000 / (STEPS / 2)` form reaches the same quotient within 32 bits.
+- **OBEX attributions** — the Resources list matches the catalog: #2812 Binary Floating-Point (ersmith) and #5361 FFT/IFFT (James Smith).
+
 ## v1.0.0 (2026-07-03)
 
 Initial release for community review. An application note for putting the Propeller 2's shared

@@ -1,4 +1,12 @@
-# P2AN004 — Frequency / Period / Pulse Measurement — Changelog
+# P2AN004 — Frequency / Rotation / RC-Timing Measurement — Changelog
+
+## v1.0.1 (2026-07-11)
+
+A specification-accuracy and titling refinement. No instruments added.
+
+- **Clock headroom** — the programs run at 200 MHz, the top of the P2 PLL VCO's designed 100–200 MHz range.
+- **Encoder input filtering** — `P_FILT1_AB` routes the A/B inputs through the global FILT1 digital filter (reset default ≈600 ns low-pass).
+- **Title** — the note is *Frequency / Rotation / RC-Timing Measurement*, naming its three instruments (light-to-frequency, quadrature-rotation, RC-decay); the cover reads "Frequency, Rotation, and RC Timing."
 
 ## v1.0.0 (2026-07-03)
 

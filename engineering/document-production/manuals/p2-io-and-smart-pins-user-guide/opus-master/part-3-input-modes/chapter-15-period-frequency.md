@@ -127,7 +127,8 @@ PUB measure_duty() | total_time, high_time, duty_percent
   ' Start both measurements — SIG_PIN reads its own pin;
   ' SIG_PIN+1 is aimed at SIG_PIN with both-input routing.
   PINSTART(SIG_PIN, P_PERIODS_TICKS, PERIODS, %00)
-  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, PERIODS, %00)
+  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, ...
+           PERIODS, %00)
 
   ' Wait for BOTH cells to complete
   REPEAT UNTIL PINREAD(SIG_PIN) AND PINREAD(SIG_PIN+1)
@@ -436,7 +437,8 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
   ' PWM_PIN reads its own pin; PWM_PIN+1 is aimed at PWM_PIN
   ' with both-input routing so both watch the same signal.
   PINSTART(PWM_PIN, P_PERIODS_TICKS, NUM_PERIODS, %00)
-  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, NUM_PERIODS, %00)
+  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS | P_MINUS1_A | P_MINUS1_B, ...
+           NUM_PERIODS, %00)
 
   DEBUG("PWM Analyzer - averaging ", UDEC_(NUM_PERIODS), " periods")
 

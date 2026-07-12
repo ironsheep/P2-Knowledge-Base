@@ -1,5 +1,15 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.3 (2026-07-11)
+
+**A technical-accuracy pass** — instruction semantics, timing, and the worked examples verified against the P2 silicon documentation and the current compiler.
+
+### Changed
+- PASM2 behavior and timing read as the silicon defines them — the CORDIC is one solver the cogs share through hub slots, `MUL` is a 16×16→32 multiply, and the RCFAST oscillator runs at a nominal ~24 MHz.
+
+### Fixed
+- The `TESTP` WZ result reflects the pin state as the silicon reports it, and the async-serial transmit recipe drives its output pin (`P_OE`) — so these worked examples behave as the text describes.
+
 ## v3.0.2 (2026-07-07)
 
 **A naming refinement and three event-encoding corrections** — an example titled for what it teaches, and event-table entries that match the silicon.

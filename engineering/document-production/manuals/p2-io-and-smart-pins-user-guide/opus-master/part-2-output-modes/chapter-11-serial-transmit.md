@@ -233,7 +233,7 @@ PUB spi_master_init() | tx_mode, clk_mode
 
   PINFLOAT(CLK_PIN)
   WRPIN(CLK_PIN, clk_mode)
-  WXPIN(CLK_PIN, $1000)                     ' Clock half-period (clocks per transition)
+  WXPIN(CLK_PIN, $1000)                     ' clocks between transitions
   PINLOW(CLK_PIN)
 
 PUB spi_tx_byte(value)
@@ -252,7 +252,7 @@ PUB spi_tx_byte(value)
               ' Setup clock generator
               dirl      #CLK_PIN
               wrpin     ##(P_TRANSITION | P_OE), #CLK_PIN
-              wxpin     ##$1000, #CLK_PIN     ' Clock half-period (clocks per transition)
+              wxpin     ##$1000, #CLK_PIN     ' clocks between transitions
               dirh      #CLK_PIN
 
               ' Transmit byte
@@ -268,7 +268,8 @@ P_SYNC_TX transmits LSB first. For MSB-first protocols (like most SPI):
 ```spin2
 PUB spi_tx_msb_first(value) | reversed
   ' reverse the data bits for MSB-first
-  reversed := value REV 7                   ' Reverse the low 8 bits (REV n covers bits 0..n)
+  ' REV 7 reverses the low 8 bits (REV n covers bits 0..n)
+  reversed := value REV 7
 
   WYPIN(TX_PIN, reversed)
   WYPIN(CLK_PIN, 16)
@@ -276,8 +277,8 @@ PUB spi_tx_msb_first(value) | reversed
 
 **PASM2:**
 ```pasm2
-              shl       data, #32-8     ' left-justify the byte into the high bits
-              rev       data            ' then reverse into the low 8 bits, MSB-first
+              shl       data, #32-8     ' left-justify byte into high bits
+              rev       data            ' reverse to low 8 bits, MSB-first
               wypin     data, #TX_PIN
               wypin     #16, #CLK_PIN
 ```

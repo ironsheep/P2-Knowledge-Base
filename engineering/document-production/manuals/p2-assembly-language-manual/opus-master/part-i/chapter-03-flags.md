@@ -432,15 +432,18 @@ ABS computes the absolute value for every input. The one unavoidable edge case i
 Add WC when you need to remember the original sign. ABS sets C to the source's sign bit—C=1 whenever the source was negative, for every negative input:
 
 ```pasm2
-                abs     result, value   wc      ' result = |value|, C = source was negative
+                ' result = |value|, C = source was negative
+                abs     result, value   wc
 ```
 
 That captured sign supports the common "operate on the magnitude, then restore the sign" idiom—for example taking the absolute value before an unsigned divide, then re-applying the sign afterward with a conditional negate:
 
 ```pasm2
-                abs     result, value   wc      ' result = |value|, C = source was negative
+                ' result = |value|, C = source was negative
+                abs     result, value   wc
                 '   ... unsigned work on result ...
-        if_c    neg     result                  ' restore original sign if source was negative
+        ' restore original sign if source was negative
+        if_c    neg     result
 ```
 
 Note the subtlety: `abs ... wc` immediately followed by `if_c neg`, with no work in between, negates a negative input's magnitude straight back to its original value—it returns `value`, not `|value|`. The absolute value is the bare `abs` above; the conditional NEG is only for restoring the sign after intervening work, and it always occupies its 2-clock slot even when cancelled.

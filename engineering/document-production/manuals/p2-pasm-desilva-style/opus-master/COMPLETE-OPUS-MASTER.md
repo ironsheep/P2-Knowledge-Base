@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0.2\par}
+{\large\color{blue}Version 3.0.3\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -1372,7 +1372,7 @@ Let's put it all together:
 DAT             org
 
 ' Your code goes here
-entry           mov     ptra, buffer_addr   ' Read the hub pointer Spin2 stored
+entry           mov     ptra, buffer_addr   ' Read hub pointer Spin2 stored
                 mov     count, BUFFER_SIZE
 .fill           wrbyte  fill_value, ptra++
                 djnz    count, #.fill
@@ -3470,7 +3470,7 @@ Hub addresses need 20 bits, so jumping far requires special handling:
 
 ```pasm2
 ' Jump to distant hub code
-        jmp     #\far_away     ' \ forces a 20-bit absolute (non-relative) address
+        jmp     #\far_away  ' \ forces 20-bit absolute (non-relative) addr
         
         orgh    $40000        ' Far away in hub
 far_away
@@ -4495,7 +4495,7 @@ The streamer configuration for LUT reading is covered in detail in the Video and
 
 ```antipattern
 ' WRONG - $200 isn't a cog register at all (cog RAM is $000..$1FF)
-        mov     value, $200     ' Won't reach the LUT; the 9-bit register field can't hold $200
+        mov     value, $200  ' Won't reach LUT; 9-bit reg can't hold $200
 ```
 
 **✓ RIGHT: Use RDLUT for LUT access**
@@ -4605,7 +4605,7 @@ Remember that tedious bit-bang serial from Chapter 8? Watch this:
 ```pasm2
 ' Configure pin as UART transmitter - done!
         dirl    #TX_PIN                 ' Reset pin first!
-        wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN  ' Async TX; P_OE drives the output
+        wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN  ' Async TX; P_OE drives output
         wxpin   ##BAUD_115200, #TX_PIN  ' Set baud rate
         dirh    #TX_PIN                 ' Enable - runs on its own
 ```
@@ -4768,7 +4768,8 @@ recv    testp   #RX_PIN wc      ' Check for received byte
 ' PWM mode - period + duty cycle
         dirl    #PWM_PIN
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
-        wxpin   ##frame_period<<16 | base_period, #PWM_PIN  ' X[31:16]=frame, X[15:0]=base period
+        ' X[31:16]=frame, X[15:0]=base period
+        wxpin   ##frame_period<<16 | base_period, #PWM_PIN
         dirh    #PWM_PIN
         wypin   ##duty, #PWM_PIN        ' High time; Y after enable
 
@@ -5231,7 +5232,7 @@ The **COGATN** instruction takes a 16-bit mask in D[15:0] where each bit corresp
 **❌ WRONG: Forgetting to clear event flag**
 
 ```antipattern
-' WRONG - an event that fires during 'other stuff' makes the wait return at once
+' WRONG - event firing during 'other stuff' makes wait return at once
         setse1  #%001<<6 + PIN
         ' ... do other stuff ...
         waitse1                 ' May return immediately!

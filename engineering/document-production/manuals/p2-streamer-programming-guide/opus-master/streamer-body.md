@@ -533,7 +533,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 
         mov     cmd, ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0
         add     cmd, ##base<<17 + 640
-        xinit   cmd, #0                          ' XINIT starts from a zeroed phase
+        xinit   cmd, #0  ' XINIT starts from a zeroed phase
 ```
 
 ::: tip

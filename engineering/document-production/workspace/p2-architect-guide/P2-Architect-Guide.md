@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large Version 1.0.0\par}
+{\large Version 1.0.1\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -1345,7 +1345,7 @@ now speaks to the chip that drives the servo — you describe the new indirectio
 **reshapes the code**; what used to be a re-engineering slog becomes a change you recover from in
 an afternoon, back on the air where you left off. When performance is the goal, the division of
 labor is clean: *you* decide where speed matters and why; the agent helps decide *how* to reach it
-with the P2's own resources — LUT RAM, PSRAM, the CORDIC, the streamer. And when you build a piece
+with the P2's own resources — LUT RAM, the CORDIC, the streamer — and external PSRAM. And when you build a piece
 in the middle — a FIFO, say — you build it as a **standalone object with an agent-written
 regression test**, proven before it's wired in, so that by the time it's inside the whole
 application it's a *tested component* and no longer a suspect when something breaks.

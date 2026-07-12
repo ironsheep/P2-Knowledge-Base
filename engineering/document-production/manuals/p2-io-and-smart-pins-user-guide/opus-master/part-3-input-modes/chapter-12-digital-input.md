@@ -53,7 +53,7 @@ bit := (INA >> pin) & 1                    ' Single bit extraction
               testp     #pin wc             ' Pin state → C flag
               testp     #pin wz             ' Pin state → Z flag
         if_c  jmp       #pin_high           ' Branch if high (C = IN[pin])
-        if_nz jmp       #pin_low            ' Branch if Z clear (Z=0 → pin low)
+        if_nz jmp       #pin_low            ' Branch if Z=0 → pin low
 ```
 
 **TESTPN** - Read inverted pin state:
@@ -105,8 +105,8 @@ All three present the pin as a standard CMOS logic input (~1.65V threshold). The
 
 ```spin2
 WRPIN(pin, P_LOGIC_A)         ' A → IN; pin output = cog OUT bit (default)
-WRPIN(pin, P_LOGIC_A_FB)      ' A → IN; pin output = its own logic level (feedback)
-WRPIN(pin, P_LOGIC_B_FB)      ' B → IN; feedback output — a different tap AND a different output path
+WRPIN(pin, P_LOGIC_A_FB)      ' A → IN; output = own logic level (feedback)
+WRPIN(pin, P_LOGIC_B_FB)      ' B → IN; feedback out (tap AND path differ)
 ```
 
 `P_LOGIC_B_FB` therefore differs from the `P_LOGIC_A` default on *both* axes — it is not "the same input, routed differently."
@@ -440,7 +440,7 @@ PUB main() | buttons, last_buttons, i
   ' Configure 4 buttons with pull-ups
   repeat i from 0 to 3
     WRPIN(BUTTON_BASE + i, P_SCHMITT_A | P_HIGH_15K)
-    PINHIGH(BUTTON_BASE + i)              ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+    PINHIGH(BUTTON_BASE + i)      ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
 
   last_buttons := 0
 
@@ -474,9 +474,9 @@ CON
 DAT           org
 
 ' Configure input pin
-              mov       pin, BUTTON_PIN     ' Load pin number 20 (DAT long value)
+              mov       pin, BUTTON_PIN     ' Load pin 20 (DAT long value)
               wrpin     ##P_SCHMITT_A | P_HIGH_15K, pin
-              drvh      pin                 ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+              drvh      pin                 ' DIR=1, OUT=1 → 15kΩ pull-up
 
 ' Wait for button press
 wait_press

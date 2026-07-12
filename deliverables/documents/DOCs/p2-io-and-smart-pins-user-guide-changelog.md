@@ -1,5 +1,13 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.5 (2026-07-11)
+
+A hardware-grounded accuracy pass across smart-pin behavior, pin configuration, and the worked examples.
+
+- **Smart-pin & pin behavior verified against silicon (throughout)** — pin configuration, smart-pin modes, and I/O behavior are documented as measured on real P2 hardware.
+- **Worked examples run as written (example library)** — every companion program compiles clean under the current compiler and matches its in-text listing line-for-line.
+- **Quantitative values aligned to source** — instruction and pin timings, bit-field encodings, and value ranges read per the P2 datasheet and Silicon Doc.
+
 ## v1.0.4 (2026-07-07)
 
 ADC input modes documented as measured on real silicon, a quantitative-table accuracy pass, and example titles that describe the code plainly.

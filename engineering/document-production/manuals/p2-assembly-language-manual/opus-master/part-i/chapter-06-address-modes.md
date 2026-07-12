@@ -168,7 +168,7 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 ```pasm2
         mov     x, #100                 ' 2 cycles
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##data, ##addr          ' 7+ cycles (2+2+3..10: AUGD+AUGS+WRLONG, variable)
+        wrlong  ##data, ##addr  ' 7+ cyc (2+2+3..10: AUGD+AUGS+WRLONG, var)
 ```
 
 **Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.

@@ -545,7 +545,8 @@ saw_loop
 tri_loop
               wypin     value16, #DAC_PIN
               add       value16, direction
-              cmp       value16, ##$FF00 wz     ' top: a 256-step multiple the ramp lands on
+              ' top: a 256-step multiple the ramp lands on
+              cmp       value16, ##$FF00 wz
         if_z  neg       direction
               cmp       value16, #0 wz
         if_z  neg       direction

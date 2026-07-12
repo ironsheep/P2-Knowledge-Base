@@ -129,7 +129,7 @@ CON
 PUB setup_noise_dac()
   ' M[12:10] = %101 enables DAC output
   WRPIN(NOISE_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
-  WXPIN(NOISE_PIN, 0)                           ' Max sample period (65,536 clocks; low power)
+  WXPIN(NOISE_PIN, 0)        ' Max sample period (65,536 clocks; low power)
   PINH(NOISE_PIN)
 ```
 

@@ -119,7 +119,7 @@ PUB nco_frequency(freq_hz) | y_value
 
 ### Resolution vs Update Rate Tradeoff
 
-The output edge can only move on a base-period boundary, and the frequency step is `sysclk / (X[15:0] × 2³²)`. So raising X[15:0] above 1 lowers the update rate and the maximum output frequency, and increases output-edge jitter (edges snap to a coarser grid) — but it makes the frequency step finer:
+The output edge can only move on a base-period boundary, and the frequency step is `sysclk / (X[15:0] * 2^32)`. So raising X[15:0] above 1 lowers the update rate and the maximum output frequency, and increases output-edge jitter (edges snap to a coarser grid) — but it makes the frequency step finer:
 
 | X[15:0] | Updates/sec at 200 MHz | Effect |
 |---------|------------------------|--------|

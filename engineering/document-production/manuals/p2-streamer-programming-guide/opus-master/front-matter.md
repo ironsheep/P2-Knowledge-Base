@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.5\par}
+{\large\color{blue}Version 1.0.6\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
