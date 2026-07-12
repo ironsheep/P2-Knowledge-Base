@@ -107,61 +107,11 @@ vLow[0..7]    : integer    // Minimum value (unused in FFT)
 vMag[0..7]    : integer    // Magnitude multiplier (0-11, right-shift divisor)
 vTall[0..7]   : integer    // Vertical display height in pixels
 vBase[0..7]   : integer    // Vertical baseline offset in pixels
-vGrid[0..7]   : integer    // Grid display flags (bitwise: 1=baseline, 2=top)
+vGrid[0..7]   : integer    // Grid/legend flags (4-bit %abcd: 1=baseline line, 2=top line, 4=min-value legend TEXT, 8=max-value legend TEXT)
 vColor[0..7]  : integer    // Channel color (RGB format: $00RRGGBB)
 ```
 
 **Location**: DebugDisplayUnit.pas:303-311
-
-### 2.4 Receiving Types & Numeric Parity (TS-port Contract)
-
-This subsection captures the exact numeric semantics a TypeScript port must reproduce for
-byte-for-byte parity. Every claim is anchored to a `DebugDisplayUnit.pas` line.
-
-**Receiving field types** — every FFT receiving field is a **signed 32-bit `integer`**
-(Delphi `integer`, two's-complement, *wraps* on overflow), not an unsigned long:
-- `vHigh[0..7]: integer`, `vMag/vTall/vBase/vGrid/vColor: integer` (303–311); `val: integer`
-  (358, the global into which `NextNum` deposits every parsed numeric element).
-- ⚠️ The per-channel scale maximum `vHigh[]` default and clamp ceiling `$7FFFFFFF` is
-  **signed `INT_MAX`** (1610, 1633), *not* unsigned `0x7FFFFFFF`. A port must store and
-  compare it as a signed 32-bit value; treating it as an unsigned `0x7FFFFFFF` would diverge
-  on any arithmetic that can carry into bit 31.
-
-**Internal widening** — FFT working math is **64-bit**, deliberately widened from the
-32-bit receiving fields:
-- `FFTsin/cos/win/real/imag: array of int64` (388–392); `PerformFFT` butterfly locals
-  `ax,ay,bx,by,rx,ry: int64` (4196).
-- `FFT_Draw`'s per-bin accumulator is `v: int64` (1684), and the log-scale step explicitly
-  widens with `Int64(v)` / `Int64(vHigh[j])` before the `Log2` (1699). A port must perform
-  these in 64-bit (e.g. `BigInt`) — a 32-bit intermediate would overflow on large
-  `vHigh`/power values.
-
-**Packing drives unpacking** — the `Pack` fields set by `SetPack` (`vPackCount`,
-`vPackShift`, `vPackMask`, `vPackSignx`, 4146–4156) are exactly the inputs `UnPack`
-consumes (4166–4171); the configure-time `Pack` declaration is what later governs every
-`UnPack` extraction in `FFT_Update`.
-
-**Parity notes (rounding / shift / sign semantics — the headline hazards):**
-- **`Trunc` = toward zero.** SAMPLES power-of-2 snap is
-  `FFTexp := Trunc(Log2(Within(val, 4, 2048)))` (1576; default-path mirror at 1558).
-  This is *truncation toward zero* of the log2 — equivalently `floor(log2(n))` for the
-  in-range positive `n`, i.e. the **largest power of 2 ≤ n**, *not* "nearest power of 2".
-  A port uses `Math.trunc`/`Math.floor` of `log2`, never `Math.round`.
-- **Delphi `Round` is banker's rounding (round-half-to-even).** This is the headline FFT
-  parity hazard. It governs:
-  - the FFT power scale `FFTpower[i1] := Round(Hypot(rx, ry) / ($800 shl FFTexp shr FFTmag))`
-    (4248),
-  - the Y-pixel amplitude `Round(v * fScale)` (1701), and
-  - the log-scale remap `Round(Log2(Int64(v)+1) / Log2(Int64(vHigh)+1) * vHigh)` (1699).
-
-  A naïve TypeScript `Math.round` rounds halves *up* (toward +∞) and **diverges** from
-  Delphi on exact-half cases; a round-half-to-even helper is required.
-- **`shr` is a *logical* (unsigned) shift.** In `$800 shl FFTexp shr FFTmag` (4248) the
-  right shift is logical. `UnPack` (4169–4170) likewise uses logical `shr vPackShift`, then
-  applies **signed** sign-extension (`Result or ($FFFFFFFF xor vPackMask)`) only when the
-  sign bit is set and `vPackSignx` is true. `NewPack`'s ALT mode (4158–4163) is a pure
-  logical-shift swizzle (`shr`/`shl` masked nibble/bit swaps). A port must use unsigned
-  (`>>>`) shifts here, with explicit two's-complement sign-extension where noted.
 
 ---
 
@@ -177,14 +127,14 @@ Accepted by `FFT_Configure` (lines 1552–1618) — run once at window creation.
 | Directive | Parameters / range · default | Notes |
 |---|---|---|
 | `TITLE 'str'` | string | Window title (`KeyTitle`) |
-| `POS left top` | integers | Window screen position (`KeyPos`, 2712–2716). The **2nd arg (`top`) is read only if the 1st (`left`) is present** — `KeyPos` does `if NextNum then Left:=… else Exit` (2714), so a lone `POS` with no operands leaves both unchanged. |
+| `POS left top` | integers | Window screen position (`KeyPos`) |
 | `SIZE w h` | int **32..2048** · 256, int **32..2048** · 256 | Plot area in pixels (`KeySize`, clamped to `scope_w/hmin..max`) |
 | `SAMPLES n {first last}` | n: int **4..2048** (snapped to power-of-2) · 512; first: int **0..n/2−2** · 0; last: int **first+1..n/2−1** · n/2−1 | Sets `vSamples` AND the displayed bin range `FFTfirst`/`FFTlast`. Without `first last`, full spectrum (0 .. n/2−1) is shown. Lines 1573–1582. |
-| `RATE n` | int **1..2048** · *effective* `vSamples` | Update every *n* new samples (`KeyValWithin(vRate,1,FFTmax)`, 1583–1584). **Default mechanism**: `vRate` inherits `0` from `SetDefaults` (2902); because the clamp floor is 1, `0` is *unsettable* via the directive, so a literal 0 never reaches `vRate`. The post-loop fixup `if vRate=0 then vRate:=vSamples` (1603) then substitutes the effective default `vSamples`. |
+| `RATE n` | int **1..2048** · `vSamples` | Update every *n* new samples (line 1583–1584) |
 | `DOTSIZE n` | int **0..32** · 0 | Dot radius (0 = none). If both DOTSIZE and LINESIZE are 0 after configure, DOTSIZE is forced to 1 (line 1606). |
 | `LINESIZE n` | int **−32..32** · 3 | Line width. **Positive**: connected polyline mode. **Zero**: no lines. **Negative**: vertical filled-bar mode (absolute value = bar width). Lines 1587–1588. |
 | `TEXTSIZE n` | int **6..200** · FontSize | Label text size (`KeyTextSize`, line 1589) |
-| `COLOR back grid` | named-color or numeric · black, gray | Background then grid color (1591–1593). The **grid color is read only if the back color parses**: `if KeyColor(vBackColor) then KeyColor(vGridColor)` (1591–1593) — a `COLOR` with an unparseable/absent first operand sets neither, and a `COLOR back` with only one operand leaves `vGridColor` at its default. |
+| `COLOR back grid` | named-color or numeric · black, gray | Background then grid color (lines 1591–1593) |
 | `LOGSCALE` | *(flag)* | Logarithmic amplitude scaling (line 1594) |
 | `HIDEXY` | *(flag)* | Suppress on-screen measurement cursor readout (line 1596) |
 | `LONGS_1BIT` … `BYTES_4BIT` | *(packed-data declaration)* | Sample packing format (`KeyPack`, lines 1598–1599) |
@@ -200,7 +150,7 @@ Accepted by `FFT_Update` (lines 1620–1679) — run on every subsequent message
 | Directive / element | Parameters | Notes |
 |---|---|---|
 | **Numeric sample stream** | integers | The primary data stream. Samples are interleaved by channel: Ch0, Ch1, …, Ch(N−1), Ch0, … One FFT drawn per `vRate` complete sample sets after the circular buffer is full (`vSamples` samples). Lines 1657–1678. |
-| **Channel-def string** | `'label' {mag {high {tall {base {grid {color}}}}}}` | A string element defines (or redefines) the next channel in order. All parameters are optional and positional: *mag* int **0..11** (right-shift divisor for FFT magnitude, default 0); *high* int **1..$7FFFFFFF** (Y-axis full-scale, default $7FFFFFFF); *tall* int (height in px, default vHeight); *base* int (baseline offset in px, default 0); *grid* int (bitfield: bit 0=baseline line, bit 1=top line, default 0); *color* named-color or $00RRGGBB. Lines 1628–1638. **Beyond 8 channels: the 9th and later channel-def strings overwrite slot 8** — `vIndex` saturates via `if vIndex <> Channels then Inc(vIndex)` (1630), so once `vIndex = Channels(8)` it stops advancing and every subsequent definition lands in `[vIndex-1] = [7]`. |
+| **Channel-def string** | `'label' {mag {high {tall {base {grid {color}}}}}}` | A string element defines (or redefines) the next channel in order. All parameters are optional and positional: *mag* int **0..11** (right-shift divisor for FFT magnitude, default 0); *high* int **1..$7FFFFFFF** (Y-axis full-scale, default $7FFFFFFF); *tall* int (height in px, default vHeight); *base* int (baseline offset in px, default 0); *grid* int (**4-bit `%abcd` field**, default 0: bit 0=baseline line, bit 1=top line, **bit 2=min-value legend TEXT at the baseline, bit 3=max-value legend TEXT at the top line** — bits 2–3 `TextOut` the lower/upper of `vLow`/`vHigh`); *color* named-color or $00RRGGBB. Lines 1628–1638. |
 | `CLEAR` | — | Erase display, reset `SamplePop` and rate counter (lines 1642–1648) |
 | `SAVE` | — | Save bitmap to file (`KeySave`, line 1649) |
 | `PC_KEY` | — | Poll latched keypress and transmit to P2 (`SendKeyPress`, line 1651) |
@@ -580,10 +530,7 @@ end;
 - First string defines channel 0
 - Second string defines channel 1
 - etc.
-- `vIndex` tracks total channel count, **saturating at `Channels` (8)**: the guard
-  `if vIndex <> Channels then Inc(vIndex)` (line 1630) stops advancing once 8 channels are
-  defined, so a 9th+ channel-def string redefines slot 8 (`[vIndex-1] = [7]`) rather than
-  allocating a new channel.
+- `vIndex` tracks total channel count
 
 ### 5.4 Command Processing (lines 1640-1655)
 
@@ -673,10 +620,7 @@ end;
 5. **Rate Limiting**:
    - `RateCycle()`: Returns true every `vRate` calls
    - Prevents excessive CPU usage
-   - **Default mechanism**: `vRate` starts at 0 (from `SetDefaults`, line 2902); the
-     RATE clamp floor is 1, so 0 is unsettable from the directive. The post-configure fixup
-     `if vRate=0 then vRate:=vSamples` (line 1603) yields the *effective* default
-     `vRate = vSamples` (one FFT per buffer fill)
+   - Default: `vRate = vSamples` (one FFT per buffer fill)
    - User-configurable: `vRate = 1` (every sample), `vRate = 100` (every 100 samples)
 
 **Data Layout in Y_SampleBuff**:
@@ -752,7 +696,24 @@ begin
   Bitmap[0].Canvas.MoveTo(vMarginLeft, y);
   Bitmap[0].Canvas.LineTo(vMarginLeft + vWidth, y);
 end;
+
+if (vGrid[i] and 4) <> 0 then                      // Min-value legend TEXT (at baseline)
+begin
+  y := vMarginTop + vHeight - vBase[i] - 1;
+  if vLow[i] < vHigh[i] then x := vLow[i] else x := vHigh[i];
+  if x >= 0 then s := '+' + IntToStr(x) else s := IntToStr(x);
+  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s);
+end;
+
+if (vGrid[i] and 8) <> 0 then                      // Max-value legend TEXT (at top line)
+begin
+  y := vMarginTop + vHeight - vBase[i] - vTall[i];
+  if vLow[i] < vHigh[i] then x := vHigh[i] else x := vLow[i];
+  if x >= 0 then s := '+' + IntToStr(x) else s := IntToStr(x);
+  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s);
+end;
 ```
+> **Note (v55 ratification, 2026-07-11):** `vGrid` is a **4-bit** field. Bits 0–1 draw the baseline/top **lines**; **bits 2–3 render min/max-value legend TEXT** (`ClearBitmap` lines 3310–3333, actual `TextOut`). Earlier revisions of this doc described it as 2-bit with no legend text — corrected. (FFT never sets `vLow[]`, so a bit-2 legend shows `+0`.)
 
 **Log Scale Markers** (lines 3350-3393):
 ```pascal
@@ -1153,8 +1114,8 @@ end;
 
 **State Variables**:
 - `vPixelX, vPixelY`: Last drawn position (used for line continuity)
-- `vLineSize`: Line width (0=no line, 1-32=width in pixels, negative=filled bars)
-- `vDotSize`: Dot radius (0=no dot, 1-32=radius in pixels)
+- `vLineSize`: Line width (0=no line, 1-32=nominal width in px, negative=filled bars). Passed as `vLineSize shl 6` → geometric disc radius = N/4 in the 8.8 space; the visible ~1:1 width is an anti-aliasing effect, not the raw disc geometry.
+- `vDotSize`: Dot **diameter** (0=no dot, 1-32 px). Passed as `vDotSize shl 7` → geometric radius = N/2 px, i.e. face value = diameter (matches LOGIC ToO §10.5 "diameter"; SCOPE_XY dots use `shl 6`).
 
 **Line Continuity**:
 - Each call stores current position
@@ -1185,7 +1146,7 @@ end;
 procedure SmoothLine(x1, y1, x2, y2, radius, color: integer; opacity: byte);
 ```
 - `x1, y1, x2, y2`: Endpoints in fixed-point
-- `radius`: Line width in fixed-point (64× for historical reasons)
+- `radius`: true geometric disc radius in the 8.8 fixed-point space (256 = 1 px), clamped to `maxr shl 8` (`SmoothLine`:3872). Callers pass `size shl 6` (line) or `size shl 7` (dot); the `shl 6` is the caller's input scale, not the internal format.
 - `color`: RGB color
 - `opacity`: Alpha value (0=transparent, 255=opaque)
 
@@ -1552,8 +1513,8 @@ vRate parameter:
 ```pascal
 function TDebugDisplayForm.RateCycle: boolean;
 begin
-  Inc(vRateCount);
-  if vRateCount = vRate then
+  vRateCount := vRateCount + 1;
+  if vRateCount >= vRate then
   begin
     vRateCount := 0;
     Result := True;
@@ -1930,17 +1891,16 @@ PackDef[key_longs_2bit]  = 0 shl 16 +  2 shl 8 + 16    // sign=0, shift=2, count
 **Encoding** (decoded by `SetPack`, lines 4146–4156):
 - Bits 0-7: `vPackCount` — sample count per packed value
 - Bits 8-15: `vPackShift` — bits per sample (right-shift amount)
-- Bit 16: unused placeholder, hard-coded `0` for every `PackDef` entry (lines 140–152) and never read for sign. Sign-extension is conveyed instead via the `signx` boolean parameter to `SetPack` (lines 4146–4156), which `KeyPack` (lines 2825–2831) sets from the `SIGNED` keyword. See §19.1.
+- Bit 16: sign-extend flag (0 = unsigned; set to 1 by the `SIGNED` modifier keyword)
 
 **NewPack Function**:
 ```pascal
 function TDebugDisplayForm.NewPack: integer;
 begin
+  if vPackAlt and not (NextNum and NextNum) then Exit;    // Alt mode: 2 nums per pack
+  if not NextNum then Exit;
   Result := val;
-  // ALT mode: reverse nibble/byte/word ordering
-  if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
-  if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
-  if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
+  if vPackSignx then Result := SignExtend(Result);         // Sign-extend if needed
 end;
 ```
 
@@ -1948,10 +1908,9 @@ end;
 ```pascal
 function TDebugDisplayForm.UnPack(var v: integer): integer;
 begin
-  Result := v and vPackMask;                                        // Extract low bits
-  v := v shr vPackShift;                                            // Shift for next sample
-  if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then
-    Result := Result or ($FFFFFFFF xor vPackMask);                  // Sign-extend
+  Result := v and vPackMask;                   // Extract bits
+  if vPackSignx then Result := SignExtend(Result);
+  v := v shr vPackShift;                       // Shift for next sample
 end;
 ```
 
@@ -2105,8 +2064,7 @@ end;
 FFTexp := Trunc(Log2(Within(val, 4, FFTmax)));
 vSamples := 1 shl FFTexp;
 ```
-- User input snapped to the **largest power of 2 ≤ n** via `Trunc(Log2(...))` (truncation
-  toward zero / floor of log2 — *not* "nearest"; see §2.4 parity notes)
+- User input rounded to nearest power of 2
 - Minimum: 4 (2²)
 - Maximum: 2048 (2¹¹)
 
@@ -2779,13 +2737,6 @@ begin
   vPackCount := i and $FF;          // Samples per packed integer
 end;
 ```
-
-**Default packing = unpacked, NOT `LONGS_1BIT`.** `SetDefaults` calls `SetPack(0, …)`
-(line 2915). With `val = 0`, `SetPack` takes the special branch `i := 32 shl 8 + 1`
-(line 4152) → `vPackShift = 32`, `vPackCount = 1`, `vPackMask = $FFFFFFFF`. The default is
-therefore **one 32-bit sample per numeric element** (a single full-width pass-through),
-*not* 32 × 1-bit. A packing directive (`LONGS_1BIT … BYTES_4BIT`) is required to enable any
-sub-word unpacking.
 
 **NewPack Method** (DebugDisplayUnit.pas:4158-4164):
 ```pascal

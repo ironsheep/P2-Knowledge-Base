@@ -7,6 +7,13 @@
 **Author**: Analysis of P2 PNut Debug Display System
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window directive reference; directive coverage re-verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01
 
+> **TS parity (2026-06-06):** The `DebugBitmapWindow` implementation was brought to full parity
+> with this spec by the 9-window parity sprint **§15** (build 0.9.27): default color mode RGB24
+> with one sample per long, tune consumed only by LUMA8/HSV modes (RGBI8/LUT/RGB consume none),
+> `LUTCOLORS` overwriting the palette from index 0, the mode-dependent clear background
+> (`GetBackground`: white for W modes, palette[0] for LUT, else black), sparse disabled below dot
+> size 4, and named colors for SPARSE/LUTCOLORS. See matrix §8 and `bitmapResidualsParity.test.ts`.
+
 ---
 
 ## Executive Summary
@@ -154,7 +161,7 @@ Parsed in `BITMAP_Configure` (lines 2372–2414) during window creation.
 | `SIZE` | `w h` | int **1..2048** each; default 256 × 256 (`bitmap_wmin/wmax`, `bitmap_hmin/hmax`) | `2386` |
 | `DOTSIZE` | `x {y}` | int **1..256** each; default 1 × 1; if `y` omitted it copies `x` | `2388–2392` |
 | `SPARSE` | `color` | named color or RGB24; enables sparse mode (default −1 = off / normal) | `2393–2394` |
-| color-mode | `LUT1` `LUT2` `LUT4` `LUT8` `LUMA8` `LUMA8W` `LUMA8X` `HSV8` `HSV8W` `HSV8X` `RGBI8` `RGBI8W` `RGBI8X` `RGB8` `HSV16` `HSV16W` `HSV16X` `RGB16` `RGB24` | 19 modes; default `RGB24`. `KeyColorMode` consumes a tint token **only** for `LUMA8/8W/8X` (a `key_orange..key_gray` color keyword **or** a number) and for `HSV8/8W/8X`, `HSV16/16W/16X` (a **number only**). **`RGBI8/8W/8X`, `LUT1/2/4/8`, `RGB8/16/24` consume NO tint token** — RGBI derives its color selector from the pixel's own upper 3 bits (`p shr 5 and 7`), not a tint. For LUMA, a non-color keyword is pushed back (`Dec(ptr)`, 2794) and re-parsed as the next directive | `KeyColorMode`; `2785–2804`; `2395–2396` |
+| color-mode | `LUT1` `LUT2` `LUT4` `LUT8` `LUMA8` `LUMA8W` `LUMA8X` `RGBI8` `RGBI8W` `RGBI8X` `RGB8` `HSV8` `HSV8W` `HSV8X` `HSV16` `HSV16W` `HSV16X` `RGB16` `RGB24` | 19 modes; default `RGB24`. Tune-parameter parsing differs by family (`KeyColorMode` 2788-2803): **LUMA8/8W/8X** take an optional tint — a color keyword (`ORANGE`..`GRAY`) **or** a numeric value; **HSV8/16 families** take a numeric tune value only; **RGBI8/8W/8X take no tune** (RGBI derives its shade from the pixel bits, `TranslateColor` 3118-3119). | `KeyColorMode`; `2395–2396` |
 | `LUTCOLORS` | `rgb24…` | Up to 256 RGB24 palette entries; only meaningful with LUT1/2/4/8 mode | `2397–2398` |
 | `TRACE` | `n` | int **0..15** (bits 0–2 = scan pattern 0–7, bit 3 = scroll enable); default 0 | `2399–2400`; see §3.2 |
 | `RATE` | `n` | int; pixels per screen update; −1 ⇒ auto-set to `vWidth × vHeight` after configure; 0 ⇒ `SetTrace` sets it to `vWidth` (h-scan) or `vHeight` (v-scan); default 0 | `2401–2402`, `2412–2413` |
@@ -182,7 +189,7 @@ Parsed in `BITMAP_Update` (lines 2416–2485) on every subsequent debug message.
 | *numeric pixel stream* | integer values | Each number → one pixel (or multiple if packed); color-translated via `vColorMode` and plotted at current trace position; `BitmapToCanvas` called every `vRate` pixels (via `RateCycle`) | `2459–2483` |
 | color-mode | (same 19 modes as config) | Change active color mode mid-stream; affects all subsequent pixels | `2425–2426` |
 | `LUTCOLORS` | `rgb24…` | Replace LUT palette entries at runtime | `2427–2428` |
-| `TRACE` | `n` | int **0..15**; **only acts `if NextNum`** (no-op if no number follows); change scan pattern mid-stream; resets pixel position; `SetTrace(val,True)` — `ModifyRate=True` here, so it also recomputes `vRate` | `2429–2430` |
+| `TRACE` | `n` | int **0..15**; change scan pattern mid-stream; resets pixel position; `SetTrace(val,True)` also adjusts `vRate` | `2429–2430` |
 | `RATE` | `n` | int; change pixels-per-update rate at runtime | `2431–2432` |
 | `SET` | `x y` | x: int **0..w−1**; y: int **0..h−1**; jump cursor and **cancel scroll** (clears bit 3 of `vTrace`) | `2433–2438` |
 | `SCROLL` | `x y` | x: int **−w..w**; y: int **−h..h**; positive x = right, positive y = down; fills vacated area with background | `2439–2442` |
@@ -278,7 +285,7 @@ while NextKey do
 | `update` | - | Enable manual update mode |
 | `hidexy` | - | Hide mouse coordinate display |
 
-**Trace Mode Encoding** (DebugDisplayUnit.pas:2362-2370):
+**Trace Mode Encoding** (decoded in `SetTrace` 2973-2980 [start corner] + `StepTrace` 2982-3061 [step direction + scroll]):
 ```
 Bits 0-2: Scan pattern (0-7)
 Bit 3:    Scroll enable (0=wrap, 1=scroll)
@@ -603,7 +610,7 @@ key_lut8:  p := vLut[p and $FF];        // 8 bits → 256 colors
 ```
 - Simple lookup table indexing
 - `vLut[]` contains 256 RGB24 values
-- **Default contents are undefined**: `SetDefaults` (2880–2917) does **not** initialize `vLut[]`, so until a `LUTCOLORS` directive populates it, LUT-mode pixels translate to garbage (see §17.4)
+- Default palette: grayscale (0=black, 255=white)
 
 #### LUMA8/RGBI8 Modes (lines 3105-3142)
 
@@ -1503,7 +1510,7 @@ key_lut1..key_rgb24:
 BITMAP `0 rgb24 $FF0000,$00FF00,$0000FF lut4 0,1,2,3
 ```
 - First 3 pixels: RGB24 (red, green, blue)
-- Next 4 pixels: LUT4 (indices 0,1,2,3 → undefined colors!)
+- Next 4 pixels: LUT4 (indices 0,1,2,3 → **black `$000000`** — `vLut[]` is never default-populated; it is Delphi zero-initialized until `LUTCOLORS`, so it reads black, not the v55-text's claimed "0–7 default colors")
 
 ### 14.2 Trace Mode Switching
 
@@ -1745,7 +1752,7 @@ SpriteMaxY  = 32      // 32 pixels tall
 
 **LUT Modes**: Require palette definition
 ```
-BITMAP `0 lut4        // LUT undefined! Colors = garbage
+BITMAP `0 lut4        // LUT unset → all entries black $000000 (zero-init, not "0-7 default colors")
 BITMAP `0 lut4 lutcolors $000000,$111111,...,$FFFFFF    // Correct
 ```
 
@@ -2074,14 +2081,12 @@ end;
 
 **TranslateColor Function**: Converts 19 color modes to RGB24.
 
-**BITMAP-Specific Modes** (grouped by whether `KeyColorMode` consumes a tint token, 2785–2804):
-- **Consume a tint token:**
-  - **LUMA8/8W/8X**: Luminance with color tint — tint is a `key_orange..key_gray` color keyword **or** a number (a non-color keyword is pushed back via `Dec(ptr)` and re-parsed as the next directive).
-  - **HSV8/8W/8X, HSV16/16W/16X**: Hue-saturation-value — tint is a **number only** (`vColorTune` hue shift).
-- **Consume NO tint token:**
-  - **RGBI8/8W/8X**: RGB + intensity — the color selector comes from the pixel's own upper 3 bits (`p shr 5 and 7`), not a tint.
-  - **LUT1/2/4/8**: Palette lookup (2–256 colors).
-  - **RGB8/16/24**: Direct RGB.
+**BITMAP-Specific Modes**:
+- **LUT1/2/4/8**: Palette lookup (2-256 colors)
+- **LUMA8/8W/8X**: Luminance with color tint
+- **HSV8/8W/8X, HSV16/16W/16X**: Hue-saturation-value
+- **RGBI8/8W/8X**: RGB + intensity
+- **RGB8/16/24**: Direct RGB
 
 **Example** (LUT8):
 ```pascal
@@ -2181,11 +2186,8 @@ while NextKey do
 Bitmap[0].Width := vWidth;
 Bitmap[0].Height := vHeight;
 SetSize(0, 0, 0, 0);
-SetTrace(vTrace, vRate = 0);    // ModifyRate = (no RATE given); see §3.2
-if vRate = -1 then vRate := vWidth * vHeight;
+SetTrace(vTrace, True);
 ```
-
-> **Note:** in the configure path `ModifyRate` is the boolean `vRate = 0` (line 2412) — true only when no `RATE` directive was supplied — **not** the literal `True`. (The mid-stream `TRACE` handler does pass `True`, line 2430.)
 
 **6. Ready**: Window displayed, trace at initial position, waiting for pixels.
 
@@ -2201,36 +2203,6 @@ if vRate = -1 then vRate := vWidth * vHeight;
 ```
 
 **Termination**: User closes window, bitmaps auto-freed by Delphi.
-
----
-
-## 24. Receiving types & numeric parity (TS-port contract)
-
-This section pins the exact numeric semantics a TypeScript port must reproduce. All deviations from "obvious" JS arithmetic are called out.
-
-### 24.1 Receiving field types and bounding
-
-- Every receiving field is a **signed 32-bit Delphi `integer`** (`val`, all `v*` state — see field declarations, e.g. `val` at line 358). Arithmetic **wraps** modulo 2³² with two's-complement sign; a port must mask/sign-extend to 32 bits, not use JS doubles.
-- **`vTrace` / `vRate` are stored raw via `KeyVal` (unclamped)** — `KeyVal` (2694–2698) just copies `val`, with no `Within` clamp (contrast `KeyValWithin`, 2706–2710, which applies `Within`). The raw value is bounded only later:
-  - `vTrace` is masked at use: `SetTrace` does `vTrace := Path and $F` (2979), so only the low 4 bits matter.
-  - `vRate` is special-cased: `−1 ⇒ vWidth × vHeight` after configure (2413); otherwise used as-is by `RateCycle`.
-- **`SCROLL` bounds are signed**: `KeyValWithin(x, −vWidth, vWidth)` and `(y, −vHeight, vHeight)` (2440–2441) — negative values are legal and meaningful (scroll left/up).
-- **`SET` bounds** are `0..vWidth−1` / `0..vHeight−1` (2436–2437), unsigned.
-
-### 24.2 Parity notes (exact arithmetic to mirror)
-
-- **`shr` is a *logical* shift** in the sparse-center math: `vDotSize shr 1`, `vDotSizeY shr 1` (center), `vDotSize shr 2`, `vDotSizeY shr 2` (inner-fill inset), lines 2470–2476. Port with `>>>`, not `>>`.
-- **`UnPack` (4166–4171)**: `v shr vPackShift` is **logical** (`>>>`), but sign-extension is **signed** — when `vPackSignx` and the top extracted bit (bit `vPackShift−1`) is set, it does `Result := Result or ($FFFFFFFF xor vPackMask)` (4170). A port must reproduce the sign-extend-from-`vPackShift−1` behavior, then keep the result as a signed 32-bit value.
-- **`NewPack` ALT swizzle (4158–4164)**: the bit-pair/nibble swap uses **logical** shifts (`shr`/`shl` with `$55555555`/`$AAAAAAAA`, etc.). Logical-shift in the port.
-- **`PolarColors` table build (3215–3227)** uses Delphi **`Round` (banker's rounding — round-half-to-even)**, not `Math.round` (round-half-up). The two differ on exact `.5` cases; use a banker's-round implementation to match the generated hue→RGB table.
-- **`RateCycle` (3079–3088)** uses an exact equality test `vRateCount = vRate`. If `vRate` is negative or zero, the counter (incremented by 1 each pixel) never equals it until the counter **wraps** through 2³¹/2³² — i.e. the auto-refresh effectively never fires for a non-positive rate until 32-bit wrap. Port the comparison as exact `===` on wrapped 32-bit values, not `>=`.
-
-### 24.3 Control-flow / edge facts (silent drops)
-
-- **Stray `STRING` aborts the whole update message.** `BITMAP_Update`'s loop begins `if NextStr then Break;` (2422). `Break` exits the entire `while not NextEnd` loop, so a string mid-stream **silently drops all remaining commands and pixels** in that message — not just the string.
-- **`KeyPack` loses a trailing non-modifier key.** `KeyPack` (2817–2832) peeks the next element with `NextKey`; if it is **not** `key_alt`/`key_signed`, that key is **consumed and lost** — there is **no `Dec(ptr)` push-back** (unlike `KeyColorMode`'s LUMA path at 2794 and the `KeyIs`-style handlers). A keyword directly following a pack keyword is silently swallowed.
-- **Mid-stream `TRACE` only acts `if NextNum`** (2430): `key_trace: if NextNum then SetTrace(val, True);`. With no following number the directive is a no-op (and `SetTrace` here passes `ModifyRate = True`, so it *does* recompute `vRate`).
-- **`SET` cancels scroll via `and 7`** (2435): `vTrace := vTrace and 7` clears **bit 3** (scroll-enable) while keeping the scan pattern — distinct from the configure path's `SetTrace`, which preserves the scroll bit via `vTrace := Path and $F` (2979).
 
 ---
 

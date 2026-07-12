@@ -258,18 +258,18 @@ vArmed          : boolean;       // Trigger armed state
 vTriggered      : boolean;       // Trigger event occurred
 ```
 
-**Trigger Logic**:
-1. **vTriggerMask**: Defines which channels participate in trigger
-   - Bit N set = channel N is part of trigger condition
-   - Example: `$00000003` = channels 0 and 1
+**Trigger Logic** — the mask/match operate on the **raw 32-bit sample word** (`t := LogicSampleBuff[…]`, one bit per input line/pin), compared as `((t xor vTriggerMatch) and vTriggerMask) = 0` (`LOGIC_Update` 1083-1094), *before* the display groups bits into named/bus channels. So the bit index is a **raw input bit/pin**, which only coincides with the displayed "channel" number when every channel is 1 bit wide; a multi-bit bus channel (via `RANGE`) spans several of these trigger bits.
+1. **vTriggerMask**: Defines which **raw input bits** participate in the trigger
+   - Bit N set = input bit/pin N is part of the trigger condition
+   - Example: `$00000003` = input bits 0 and 1
 
-2. **vTriggerMatch**: Expected value on masked channels
-   - Example: `$00000001` = channel 0 high, channel 1 low
+2. **vTriggerMatch**: Expected level on the masked bits
+   - Example: `$00000001` = bit 0 high, bit 1 low
 
 3. **vTriggerOffset**: Position of trigger in display
-   - `0`: Trigger at right edge (tests the newest sample → pre-trigger lead-up)
+   - `0`: Trigger at left edge
    - `vSamples/2`: Trigger at center (default)
-   - `vSamples-1`: Trigger at left edge (tests the oldest sample → post-trigger)
+   - `vSamples-1`: Trigger at right edge
 
 4. **vHoldOff**: Minimum samples between triggers
    - Prevents continuous re-triggering on high-frequency signals
@@ -307,44 +307,6 @@ vTextSize       : integer;       // Label font size
 vLogicIndex     : integer;       // Number of active channels
 ```
 
-### 4.6 Receiving types & numeric parity (TS-port contract)
-
-**Field widths.** Every receiving field above is a **signed 32-bit Pascal
-`integer`** — it wraps on overflow and its bounds surface as `$7FFFFFFF` /
-`−$80000000` (see e.g. `vLow`/`vHigh` at lines 1192–1193). The element value `val`
-the parser hands these directives is likewise a signed 32-bit `integer` (line 358).
-The **one exception** is `vLogicBits[]`, declared as **`byte`** (unsigned, `& $FF`)
-— so a TS port must mask channel bit-widths to 8 bits and never sign-extend them.
-`LOGIC_Draw`'s working locals `mask, v, y` are **`int64`** (line 1111), not 32-bit.
-
-**Parity notes for the TS port of LOGIC's math:**
-
-- **Range value mapping** — `y := v * (top - bot) div mask + bot` (line 1137) is
-  computed in **`int64`** (its operands are the `int64` locals). Pascal `div` is
-  **truncation toward zero**, so the TS port must truncate toward zero (e.g.
-  `Math.trunc(a / b)`), not floor.
-- **Channel mask** — `mask := Int64(1) shl vLogicBits[j] - 1` (line 1123). Pascal
-  precedence binds `shl` above `-`, so this is `(1 shl bits) - 1`. For a 32-bit
-  `vLogicBits[j]` the intermediate `1 shl bits` overflows 32 bits, so the shift
-  **must be done in 64-bit** (the `Int64(1)` is load-bearing).
-- **Color dim** — `colordim := color shr 2 and $3F3F3F` (line 1120). Pascal `shr`
-  on an `integer` is a **logical** shift; the TS port must use **`>>>`**, not `>>`,
-  so a high (sign) bit does not propagate.
-- **UnPack** (lines 4169–4170) — `v shr vPackShift` is a **logical** shift
-  (`>>>`); sign-extension is then applied **explicitly** only when `SIGNED`
-  (`Result := Result or ($FFFFFFFF xor vPackMask)` when the sub-sample's MSB is
-  set). Do not rely on an arithmetic shift to sign-extend.
-- **NewPack ALT swizzle** (lines 4161–4163) — the `Result shr n and …` /
-  `Result shl n and …` bit-swap also relies on **logical** shifts (`>>>`); use the
-  unsigned-shift form in TS.
-- **Negative circular index** — `(SamplePtr - n) and LogicPtrMask` (e.g. lines 1083,
-  1136) relies on **two's-complement** wraparound of the negative subtraction before
-  the mask. In TS use `& 2047` (which operates on the two's-complement 32-bit value),
-  **not** the `%` remainder operator (which would yield a negative result).
-- **RateCycle** (line 3082) fires on `vRateCount = vRate` — **exact equality**, not
-  `>=`. A TS port must compare with `===`, or a missed-equality (e.g. if the counter
-  were ever set past `vRate`) would never fire.
-
 ---
 
 ## Directive Reference (v55-verified)
@@ -358,25 +320,22 @@ Accepted in `LOGIC_Configure` (lines 926–1032). All are optional; defaults sho
 
 | Directive | Parameter shape | Default | Range | Pascal lines |
 |---|---|---|---|---|
-| `TITLE` | `'string'` | (window name) | — | 946–947 (`KeyTitle`) |
-| `POS` | `left top` | cascaded | screen coords | 948–949 (`KeyPos` 2712–2716) |
+| `TITLE` | `'string'` | `"<name> - LOGIC"` (instance name + type) | — | 946–947 (`KeyTitle`); default caption set in `FormCreate:626` |
+| `POS` | `left top` | host origin ≈ `(0, 210)` (**not** `0,0`; **no cascade** — windows overlap) | offset from `DebugDisplayLeft/Top` | 948–949 (`KeyPos`); default in `FormCreate:628-629` |
 | `SAMPLES` | `n` | 32 | 4 .. 2047 (LogicSets−1) | 950–951 |
 | `SPACING` | `n` | 8 | 1 .. 32 | 952–953 |
 | `RATE` | `n` | 1 | 1 .. 2048 (LogicSets) | 954–955 |
 | `DOTSIZE` | `n` | 0 | 0 .. 32 | 956–957 |
 | `LINESIZE` | `n` | 3 | 1 .. 32 | 958–959 |
 | `TEXTSIZE` | `n` | FontSize (10) | 6 .. 200 (`KeyTextSize` clamp) | 960–961 (`KeyTextSize` body 2834–2837) |
-| `COLOR` | `back grid` | black `$000000` / gray `$404040` | named color (optional trailing brightness nibble `val and 15`, default 8 — 2773) or numeric-through-mode | 962–964 |
+| `COLOR` | `back grid` | black `$000000` / gray `$404040` | named color or numeric-through-mode | 962–964 |
 | `HIDEXY` | *(flag)* | show | *(flag, no value)* | 965–966 |
-| `LONGS_1BIT` .. `BYTES_4BIT` | *(pack mode, optional `ALT`/`SIGNED`)* | none — unpacked `SetPack(0,…)`: 1 sample/long, 32-bit, mask $FFFFFFFF, shift 32, count 1 (SetDefaults 2915) | 12 modes (`PackDef` 140–152) + `ALT`/`SIGNED` | 967–968 (`KeyPack`) |
+| `LONGS_1BIT` .. `BYTES_4BIT` | *(pack mode, optional `ALT`/`SIGNED`)* | LONGS_1BIT | 12 modes (`PackDef` 140–152) + `ALT`/`SIGNED` | 967–968 (`KeyPack`) |
 | *channel string* | `'name' {count} {RANGE} {color}` | 32 auto-numbered "0".."31" | count int 1 .. 32 (then clamped to channels remaining); color = named/numeric | 971–1005 |
 
 **Notes:** `SPACING` lower bound is `2-1 = 1` (source line 953: `KeyValWithin(vSpacing, 2-1, 32)`).
 `DOTSIZE` 0 means no dots. `LINESIZE` default 3 (not 0).
 If no channel strings are given, 32 channels labeled "0"–"31" are created (lines 1008–1016).
-`POS` reads its second operand (`top`) **only if the first (`left`) was supplied** —
-`KeyPos` (2712–2716) does `if NextNum then Left := … else Exit` before attempting
-`top`, so a bare `POS` with no numbers leaves both coordinates unchanged.
 
 ### Display / data directives
 
@@ -386,9 +345,9 @@ Accepted in `LOGIC_Update` (lines 1034–1106). These arrive on every subsequent
 |---|---|---|---|
 | *(numeric stream)* | packed long(s) | Unpack samples into circular buffer; trigger or rate-cycle triggers draw | 1068–1103 |
 | `TRIGGER` | `mask match {offset}` — mask int32, match int32, offset int **0..vSamples−1** (default vSamples/2) | (Re)configure trigger: resets `vArmed`; offset clamped 0..vSamples−1 | 1043–1049 |
-| `HOLDOFF` | `n` — int **2..2048** (LogicSets) | If a number is supplied, set holdoff count and reset `vHoldOffCount` to 0; with no arg, `vHoldOff`/`vHoldOffCount` are unchanged (1051) | 1050–1051 |
+| `HOLDOFF` | `n` — int **2..2048** (LogicSets) | Set holdoff count; resets `vHoldOffCount` to 0 | 1050–1051 |
 | `CLEAR` | — | Reset `vTriggered`, clear bitmap, reset `SamplePop` and `vRateCount` | 1052–1059 |
-| `SAVE` | *{filename}* · or `WINDOW {filename}` · or `l t w h {filename}` | Save current bitmap, or a desktop region given the `WINDOW` keyword (window's own rect) or explicit `l t w h` coords (`KeySave`, 2839–2866) | 1060–1061 |
+| `SAVE` | *{filename}* | Save current bitmap (`KeySave`) | 1060–1061 |
 | `PC_KEY` | — | Transmit latched keypress LONG to P2 (`SendKeyPress`) | 1062–1063 |
 | `PC_MOUSE` | — | Transmit position+buttons+wheel + pixel color to P2 (`SendMousePos`) | 1064–1065 |
 
@@ -502,8 +461,8 @@ end;
 
 | Parameter | Command | Default | Range | Purpose |
 |-----------|---------|---------|-------|---------|
-| Title | `TITLE 'string'` | "Logic" | - | Window title |
-| Position | `POS x y` | Cascaded | Screen coords | Window position |
+| Title | `TITLE 'string'` | `"<name> - LOGIC"` | - | Window title (default = instance name + type) |
+| Position | `POS x y` | host origin ≈ `(0, 210)`, no cascade | offset from `DebugDisplayLeft/Top` | Window position (**not** `0,0`; windows overlap without `POS`) |
 | Samples | `SAMPLES count` | 32 | 4-2047 | Horizontal resolution |
 | Spacing | `SPACING pixels` | 8 | 1-32 | Pixel spacing between samples |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
@@ -512,7 +471,7 @@ end;
 | Text Size | `TEXTSIZE size` | 10 (`FontSize`) | 6-200 | Label font size |
 | Colors | `COLOR back grid` | Black/Gray | RGB24 | Background and grid colors |
 | Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
-| Packing | `LONGS_1BIT` etc. | unpacked (`SetPack(0,…)`) | 12 modes | Data packing format |
+| Packing | `LONGS_1BIT` etc. | LONGS_1BIT | 12 modes | Data packing format |
 
 ### 5.3 Display Metrics Calculation
 
@@ -600,23 +559,29 @@ key_bytes_4bit  = 40;    // BYTES_4BIT
 
 ```pascal
 PackDef: array [key_longs_1bit..key_bytes_4bit] of integer = (
-  0 shl 16 +  1 shl 8 + 32,   // LONGS_1BIT:  signx=0, shift=1,  count=32
-  0 shl 16 +  2 shl 8 + 16,   // LONGS_2BIT:  signx=0, shift=2,  count=16
-  0 shl 16 +  4 shl 8 + 8,    // LONGS_4BIT:  signx=0, shift=4,  count=8
-  0 shl 16 +  8 shl 8 + 4,    // LONGS_8BIT:  signx=0, shift=8,  count=4
-  0 shl 16 + 16 shl 8 + 2,    // LONGS_16BIT: signx=0, shift=16, count=2
-  0 shl 16 +  1 shl 8 + 16,   // WORDS_1BIT:  signx=0, shift=1,  count=16
-  0 shl 16 +  2 shl 8 + 8,    // WORDS_2BIT:  signx=0, shift=2,  count=8
-  0 shl 16 +  4 shl 8 + 4,    // WORDS_4BIT:  signx=0, shift=4,  count=4
-  0 shl 16 +  8 shl 8 + 2,    // WORDS_8BIT:  signx=0, shift=8,  count=2
-  0 shl 16 +  1 shl 8 + 8,    // BYTES_1BIT:  signx=0, shift=1,  count=8
-  0 shl 16 +  2 shl 8 + 4,    // BYTES_2BIT:  signx=0, shift=2,  count=4
-  0 shl 16 +  4 shl 8 + 2);   // BYTES_4BIT:  signx=0, shift=4,  count=2
+  0 shl 16 +  1 shl 8 + 32,   // LONGS_1BIT:  shift=1,  count=32
+  0 shl 16 +  2 shl 8 + 16,   // LONGS_2BIT:  shift=2,  count=16
+  0 shl 16 +  4 shl 8 + 8,    // LONGS_4BIT:  shift=4,  count=8
+  0 shl 16 +  8 shl 8 + 4,    // LONGS_8BIT:  shift=8,  count=4
+  0 shl 16 + 16 shl 8 + 2,    // LONGS_16BIT: shift=16, count=2
+  0 shl 16 +  1 shl 8 + 16,   // WORDS_1BIT:  shift=1,  count=16
+  0 shl 16 +  2 shl 8 + 8,    // WORDS_2BIT:  shift=2,  count=8
+  0 shl 16 +  4 shl 8 + 4,    // WORDS_4BIT:  shift=4,  count=4
+  0 shl 16 +  8 shl 8 + 2,    // WORDS_8BIT:  shift=8,  count=2
+  0 shl 16 +  1 shl 8 + 8,    // BYTES_1BIT:  shift=1,  count=8
+  0 shl 16 +  2 shl 8 + 4,    // BYTES_2BIT:  shift=2,  count=4
+  0 shl 16 +  4 shl 8 + 2);   // BYTES_4BIT:  shift=4,  count=2
 ```
 
-**Encoding Format**: `signx shl 16 + shift shl 8 + count`
+**Encoding Format**: `shift shl 8 + count` — only **two** fields are packed and consumed:
+- bits **8-15** = `shift` = sub-sample **bit width** (1/2/4/8/16)
+- bits **0-7** = `count` = number of sub-samples per transmitted container
 
-**Source Location**: Lines 140-152 in DebugDisplayUnit.pas
+`SetPack` (4152-4155) reads exactly these: `vPackShift := i shr 8 and $FF; vPackCount := i and $FF;` and derives `vPackMask := 1 shl vPackShift - 1`. The leading `0 shl 16` is **inert padding** — the top 16 bits are never read.
+
+> **Sign-extension is NOT encoded in this table.** `vPackSignx` is a separate run-time flag set by the `SIGNED` keyword modifier (`KeyPack` 2817-2831 → `SetPack(val, alt, signx)`, `vPackSignx := signx`), independent of `PackDef`. Likewise the `ALT` modifier sets `vPackAlt`. Earlier drafts mislabeled the padding as a `signx` field.
+
+**Source Location**: Lines 140-152 (`PackDef`); `SetPack` 4146-4156; `KeyPack` 2817-2832 in DebugDisplayUnit.pas
 
 ### 6.3 Packing Parameters
 
@@ -808,9 +773,6 @@ begin
     isRange := KeyIs(key_range);
     if not KeyColor(color) then color := DefaultScopeColors[vLogicIndex mod 8];
 
-    // NOTE: the whole block is gated by `if vLogicIndex < LogicChannels` (line 975).
-    // A channel string that arrives once all 32 channels are already allocated is
-    // **silently dropped** — its label/count/color are parsed but no channel is made.
     for i := 0 to v - 1 do
     begin
       vLogicColor[vLogicIndex + i] := color;
@@ -1231,11 +1193,6 @@ key_holdoff:
   if KeyValWithin(vHoldOff, 2, LogicSets) then vHoldOffCount := 0;
 ```
 
-The `vHoldOffCount := 0` reset is **conditional**: it runs only when a number is
-supplied (the `if KeyValWithin(...)` guard, line 1051). A bare `HOLDOFF` with no
-argument leaves both `vHoldOff` and `vHoldOffCount` unchanged — it is **not** an
-unconditional reset.
-
 **Processing** (lines 1096-1098):
 ```pascal
 if vHoldOffCount > 0 then Dec(vHoldOffCount);
@@ -1262,9 +1219,9 @@ After a trigger, ignore the next 64 samples before allowing another trigger.
 **Purpose**: Control where the trigger event appears in the display.
 
 **Values**:
-- `0`: Trigger at right edge — tests the newest sample (show the lead-up *to* the trigger, pre-trigger)
+- `0`: Trigger at left edge (show what happens after trigger)
 - `vSamples/2`: Trigger at center (show before and after) - **default**
-- `vSamples-1`: Trigger at left edge — tests the oldest sample (show what happens *after* the trigger, post-trigger)
+- `vSamples-1`: Trigger at right edge (show what led up to trigger)
 
 **Sample Selection** (line 1083):
 ```pascal
@@ -1453,14 +1410,10 @@ end;
    - Dot diameter: `vDotSize << 7` (convert to fixed-point with scaling)
 3. **Update State**: Store current point as previous for next iteration
 
-**Line/Dot Modes**:
-- `vDotSize = 0, vLineSize > 0`: Connected lines only
-- `vDotSize > 0, vLineSize = 0`: Dots only (no connections)
-- Both > 0: Lines with dots at sample points
-- Both = 0: No rendering. **In LOGIC this is unreachable**: `LINESIZE`'s clamp floor
-  is 1 (line 959), so `vLineSize` can never be 0. The "force a dot when both are 0"
-  guard (`if (vDotSize = 0) and (vLineSize = 0) then vDotSize := 1`) is **SCOPE-only**
-  (`SCOPE_Configure`, line 1188); `LOGIC_Configure` does not apply it.
+**Line/Dot Modes** — LOGIC clamps `LINESIZE` to **1..32** in `LOGIC_Configure:958-959` (`KeyValWithin(vLineSize, 1, 32)`), so `vLineSize` is **never 0** (default 3, :938):
+- `vDotSize = 0` (default), `vLineSize ≥ 1`: Connected lines only
+- `vDotSize > 0`, `vLineSize ≥ 1`: Lines with dots at sample points
+- The `vLineSize = 0` and "both = 0" states are **structurally unreachable** for LOGIC; it has **no** `(vDotSize=0) and (vLineSize=0) → vDotSize:=1` auto-force (that safety net exists only in `SCOPE_Configure:1188` / `FFT_Configure:1606`, where `LINESIZE` can reach 0).
 
 ### 10.6 Waveform Rendering Loop
 
@@ -1703,17 +1656,11 @@ Total: ~800 bytes
 
 **Display Bitmaps**:
 ```
-Bitmap size = vWidth × vHeight × 4 bytes (RGBA), per bitmap × 2 bitmaps
-  vWidth  = vSamples × vSpacing
-  vHeight = vLogicIndex × ChrHeight
+Typical size: 256×256 pixels × 4 bytes (RGBA) = 256 KB
+Bitmap[0] + Bitmap[1] = 512 KB
 ```
-Bitmap memory is size-dependent: the window dimensions are computed at runtime
-from the sample count, spacing, channel count, and text metrics, so there is no
-single fixed byte figure. (`SetDefaults` seeds `vWidth`/`vHeight` to 256, but
-`LOGIC_Configure` overwrites them per the formulas above.)
 
-**Fixed cost**: the only fixed allocation is the 8 KB `LogicSampleBuff`
-(2048 × 4 bytes); the display bitmaps scale with the window size.
+**Total**: ~520 KB (typical configuration)
 
 ### 13.2 Rendering Performance
 
@@ -1738,8 +1685,7 @@ Channels × Samples × 2 DrawLineDot calls
 - Use RATE limiting to reduce update frequency
 - Reduce vSamples for fewer samples per frame
 - Increase vSpacing to fit more samples in less width
-- vLineSize cannot be set to 0 in LOGIC (LINESIZE clamp floor is 1, line 959); the
-  minimum is vLineSize=1 with vDotSize=0
+- Use `vDotSize=0` (dots off — the default) with a small `vLineSize` for fastest line-only rendering (`vLineSize` cannot be 0 — it is clamped to 1..32)
 
 ### 13.3 Serial Bandwidth
 
@@ -2441,7 +2387,8 @@ reading `LogicSampleBuff[(SamplePtr-k-1) and 2047]` and shifting/masking out tha
 channel's bits. The outer loop repeats per channel (line 1116 `while j < vLogicIndex`),
 so the buffer is re-scanned once per channel.
 
-**Footprint:** the buffer is 8 KB (2048 × 4 bytes), trivially cache-resident.
+**Footprint:** the buffer is 8 KB (2048 × 4 bytes), trivially cache-resident — far
+smaller than the fabricated 256 KB figure.
 
 ---
 
@@ -2627,7 +2574,7 @@ it leaves no on-screen marker. (Channel labels and the frame are drawn by
 **Rendering Cost Factors**:
 - Number of channels (vIndex)
 - Number of samples displayed (vSamples)
-- Line thickness (vLineSize) and dot size (vDotSize)
+- Line thickness (vDotSize)
 - Anti-aliasing overhead
 
 **Typical Performance** (32 channels, 512 samples, thickness=4):
@@ -2639,7 +2586,7 @@ Frame rate: 20-100 Hz
 **Optimization Strategies**:
 1. Reduce vSamples (horizontal resolution)
 2. Reduce vSpacing (vertical spacing)
-3. Use smaller vLineSize (line thickness) / vDotSize (dot size)
+3. Use smaller vDotSize (line thickness)
 4. Apply rate limiting (reduce update frequency)
 5. Disable unused channels
 
@@ -2673,13 +2620,6 @@ DefaultScopeColors: array[0..7] of integer = (
 The `clXxx` constants are defined as literal RGB24 values at `DebugDisplayUnit.pas`
 179–191 — they are **not** VCL palette `TColor`s and do not depend on the Windows
 palette. `WinRGB` only swaps R↔B at GDI draw time.
-
-**Named-color brightness nibble** (`KeyColor`, lines 2752–2783): when a color is
-given as a named hue (`key_orange`..), an **optional** trailing number sets a
-brightness nibble — `if NextNum then p := val and 15` with default `p := 8`
-(line 2773); the hue and brightness are combined as `h shl 5 or p shl 1` and run
-through `TranslateColor(…, key_rgbi8x)`. A numeric color (no name) is taken
-literally through the active color mode instead (line 2780).
 
 **LOGIC Color Usage** (see also §7.4):
 - Background color: `vBackColor` (global default black `$000000`).
@@ -2788,9 +2728,8 @@ the `WINDOW` keyword or explicit `l t w h` coordinates.
 **LOGIC Creation** (display_type = `dis_logic` = 0). The sequence below reflects the
 real v55 flow; note the corrections vs. earlier revisions: the buffer is the 1-D
 `LogicSampleBuff` (no `FillChar` of a 65 536-int array), there is no `BitmapPtr`
-swap, and the default pack state is the **unpacked** `SetPack(0,…)` set by
-`SetDefaults` (line 2915) — *not* `LONGS_1BIT`. A literal `LONGS_*..BYTES_*`
-directive is required to change it (via `KeyPack`).
+swap, and the default pack mode is set by `SetDefaults`/`KeyPack`, not a literal
+`SetPack(key_longs_1bit)` call here.
 
 ```pascal
 // 1. Display type chosen in FormCreate (633-643) → dispatch to *_Configure
@@ -2800,9 +2739,7 @@ DisplayType := dis_logic;
 //    (walked by NextKey/NextNum/NextStr/NextEnd, 4109-4129)
 
 // 3. Global SetDefaults (2880-2917) runs first: width/height 256, samples 256,
-//    backColor black, gridColor gray, lineSize 1, textSize 10, rate 0, holdOff 0,
-//    SetPack(0,False,False) ⇒ unpacked: 1 sample/long, 32-bit, mask $FFFFFFFF,
-//    shift 32, count 1 (line 2915), ...
+//    backColor black, gridColor gray, lineSize 1, textSize 10, rate 0, holdOff 0, ...
 
 // 4. LOGIC_Configure (926-1032) sets LOGIC's unique defaults (932-939):
 vSamples := 32;  vSpacing := 8;  vRate := 1;
@@ -2820,10 +2757,11 @@ vLogicIndex := 0;
 // 6. Sample-buffer state: SamplePtr := 0; SamplePop := 0; (LogicSampleBuff is a
 //    static global array[0..2047]; not per-window FillChar'd here)
 
-// 7. Window sized via SetSize / positioned from POS or cascade.
+// 7. Window sized via SetSize / positioned from POS, else host origin
+//    DebugDisplayLeft/Top (~0,210). Display windows do NOT cascade (unlike the
+//    single-step debugger windows, which offset by cog id) — no-POS windows overlap.
 
-// 8. Packing: default is the unpacked SetPack(0,…) state from the global default
-//    (1 sample/long, 32-bit, mask $FFFFFFFF, shift 32, count 1); an explicit
+// 8. Packing: default LONGS_1BIT comes from the global default; an explicit
 //    LONGS_*..BYTES_* directive calls KeyPack → SetPack (4146-4156).
 
 // 9. Initial clear + present: ClearBitmap; BitmapToCanvas(0).
@@ -2868,7 +2806,7 @@ end;
 - RATE not specified → vRate = 1
 - DOTSIZE not specified → vDotSize = 0
 - LINESIZE not specified → vLineSize = 3
-- Packing not specified → unpacked `SetPack(0,…)` (1 sample/long, 32-bit, mask $FFFFFFFF, shift 32, count 1)
+- Packing not specified → LONGS_1BIT
 
 **Validation**:
 - SAMPLES clamped to 4-2047
@@ -2980,7 +2918,7 @@ Window: Created and visible
 Display: Black (cleared), no waveforms
 Buffer: Empty (SamplePop = 0)
 Trigger: Disabled or armed (depending on configuration)
-Packing: unpacked SetPack(0,…) default, or configured mode
+Packing: LONGS_1BIT or configured mode
 Channels: vIndex channels configured with labels/colors
 ```
 
@@ -3074,7 +3012,7 @@ The **LOGIC** display window is a comprehensive digital logic analyzer for the P
 
 **Strengths**:
 - Efficient for digital signal visualization
-- Low memory usage (8 KB sample buffer + display bitmaps scale with window size)
+- Low memory usage (8 KB sample buffer + ~520 KB display)
 - Flexible data packing (32× bandwidth reduction)
 - Edge-sensitive trigger reduces false triggers
 

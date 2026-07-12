@@ -4,6 +4,12 @@
 **Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
+> **TS parity (2026-06-06):** The `DebugMidiWindow` implementation was brought to full parity with
+> this spec by the 9-window parity sprint **§16** (build 0.9.27): the per-note key tweak table
+> (`MidiKey…` geometry) corrected to the Pascal values (F♯..B were off), note-off velocity stored
+> as `-val`, keys drawn with the flat-top clip (rect top at `-r`), and `UPDATE` treated as a no-op
+> (MIDI has no deferred-update mode). See matrix §8 and `midiResidualsParity.test.ts`.
+
 ## Table of Contents
 
 1. [Overview](#1-overview)
@@ -208,7 +214,7 @@ Each row: directive → parameter(s) with **type · legal range · default** (ma
 
 | Directive | Parameter(s) — type · range · default | Pascal lines |
 |---|---|---|
-| `TITLE 'str'` | `'text'` · free string · "MIDI" | 2508–2509 |
+| `TITLE 'str'` | `'text'` · free string · default `"<name> - MIDI"` (FormCreate:626) | 2508–2509 |
 | `POS left top` | left, top · int (offset from base window pos) | 2510–2511 |
 | `SIZE n` | n · int **1..50** · **4** — key-size scalar (NOT pixels); `MidiKeySize = 8 + n×4` | 2512–2513 |
 | `RANGE firstKey lastKey` | firstKey · int **0..127** · **21**; lastKey · int **firstKey..127** · **108** (lastKey clamped ≥ firstKey, 2517–2518) | 2514–2519 |
@@ -365,10 +371,10 @@ end;
 
 | Parameter | Key | Type | Range | Default | Description |
 |-----------|-----|------|-------|---------|-------------|
-| **title** | key_title | string | - | "MIDI" | Window title text |
-| **pos** | key_pos | left, top | - | auto | Window position only. `KeyPos` (2712-2716) reads exactly two operands — left and top — as offsets from `DebugDisplayLeft`/`DebugDisplayTop`. Window SIZE is NOT from POS; it derives from `MidiKeySize × whitekeys` (2584-2586). |
+| **title** | key_title | string | - | `"<name> - MIDI"` | Window title text |
+| **pos** | key_pos | left, top | - | host origin ≈(0,210), no cascade | Window position (offset only; `KeyPos:2712-2716` reads 2 values — no width/height) |
 | **size** | key_size | integer | 1-50 | 4 | Key size multiplier |
-| **range** | key_range | first, last | first 0-127; last firstKey..127 | 21-108 | Note range to display. `lastKey` is read only if `firstKey` was supplied, and is clamped to a dynamic lower bound `firstKey..127` (default 108) — see 2515-2519. |
+| **range** | key_range | first, last | 0-127 | 21-108 | Note range to display |
 | **channel** | key_channel | integer | 0-15 | 0 | MIDI channel to monitor |
 | **color** | key_color | 2 integers | RGB24 | cyan, magenta | Active key colors (white, black) |
 
@@ -588,6 +594,16 @@ if val and $80 <> 0 then MidiState := 0;  // Reset on status byte
 
 **Automatic Reset**: Any status byte ($80-$FF) resets state machine to state 0.
 
+**Status-byte field decode** — the status byte is a packed value; `MIDI_Update` (2610-2616) tests each field separately:
+
+| Bits | Mask | Field | Meaning | Pascal test |
+|------|------|-------|---------|-------------|
+| 7 | $80 | Status flag | 1 = status/command byte (forces `MidiState:=0` — the running-status resync); 0 = data byte | `if val and $80 <> 0 then MidiState := 0` (2611) |
+| 4-6 | $F0 | Command | high nibble: `$90` = note-on, `$80` = note-off (only these two are handled) | `val and $F0 = $90` / `= $80` (2615-2616) |
+| 0-3 | $0F | Channel | low nibble: target MIDI channel 0-15; the message is accepted only when it equals `MidiChannel` | `val and $0F = MidiChannel` (2615-2616) |
+
+So a byte like `$93` = status(bit7=1), command `$90` (note-on), channel `3`. A note-on to a non-matching channel still resets the state machine (via bit 7) but is not tracked (the `$0F = MidiChannel` guard fails), which is how per-channel filtering works.
+
 ### 5.5 Channel Filtering
 
 **DebugDisplayUnit.pas:2615-2616**
@@ -620,40 +636,6 @@ MidiVelocity[MidiNote] := -val;  // Negative velocity (release)
 **Interpretation**:
 - **Velocity > 0**: Note active, display proportional to velocity
 - **Velocity ≤ 0**: Note inactive (off or release)
-
-### 5.7 Receiving Types & Numeric Parity (TS-Port Contract)
-
-This subsection pins the receiving-side numeric semantics a TypeScript port must
-reproduce byte-for-byte.
-
-**Receiving field types** — every MIDI state/geometry field is a **signed 32-bit
-`integer`** (`MidiSize`, `MidiKeyFirst`, `MidiKeyLast`, `MidiChannel`, `MidiState`,
-`MidiNote`, and the geometry arrays). In particular:
-- `MidiVelocity[0..127]` is a **signed** `integer` array (369-376). Note-off stores
-  `-velocity` (2636), so a port MUST use a signed cell, not an unsigned byte.
-- The MIDI byte-stream value is `val and $FF` (2610) — the low 8 bits of the incoming
-  number. `val` itself is the shared signed-32 receive register (`val : integer`, 358).
-- `vOpacity` / `vPrecise` are `byte`-typed, but the MIDI path does **not** read them.
-
-**Integer-truncation parity** — all `div` in the MIDI path are Pascal `div`, which
-**truncates toward zero** (not floor, not round):
-- `vTextSize := MidiKeySize div 3` (2528).
-- Key geometry: `(MidiKeySize * (10 - tweak) + 16) div 32`, `MidiKeySize * 20 div 32`,
-  `(left + right + 1) div 2`, `(MidiKeySize * tweak + 16) div 32`, `MidiKeySize div 4`,
-  and the border `MidiKeySize div ((MidiSizeBase + MidiSizeFactor) div 2)` — all `div`.
-- Velocity fill height: `(MidiBottom[i] - r) * MidiVelocity[i] div 127` (2677) — also
-  `div`, truncating toward zero. (Inputs here are ≥ 0, so floor and truncate coincide,
-  but the port should still use truncation for fidelity.)
-
-There is **no** `Round` and **no** `shr` anywhere in the MIDI path of concern — do not
-substitute either for `div`.
-
-**Clamp & bit-filter parity**:
-- `Within(val, bottom, top)` clamps are **inclusive** on both ends (used by `KeyValWithin`
-  for `MidiSize`, `MidiKeyFirst`, `MidiKeyLast`, `MidiChannel`).
-- Channel/status filtering is purely bitwise: status reset is `val and $80 <> 0` (2611),
-  message-type test is `val and $F0` (2615-2616), and the channel filter is the exact
-  match `val and $0F = MidiChannel` (2615-2616). No range arithmetic, no masking shortcuts.
 
 ---
 
@@ -1062,14 +1044,15 @@ note_in_octave = note % 12
 
 **Example**:
 ```
-Note 60: 60/12 = 5, 60%12 = 0 → C4 (Middle C)
-Note 69: 69/12 = 5, 69%12 = 9 → A4 (440 Hz)
-Note 21: 21/12 = 1, 21%12 = 9 → A0
+Note 60: 60/12 = 5, 60%12 = 0 → C5 (Middle C)
+Note 69: 69/12 = 5, 69%12 = 9 → A5 (440 Hz)
+Note 21: 21/12 = 1, 21%12 = 9 → A1 (A0 in piano naming)
 ```
 
 **Note Naming Convention**:
-- **Scientific pitch (C4 = middle C, note 60)**: this document's convention; consistent with A0 = note 21 and A4 = 440 Hz (note 69)
-- **This implementation**: The source labels keys with the raw MIDI note number only (`IntToStr(i)`); pitch names are documentation convention
+- **MIDI**: C5 = middle C (note 60)
+- **Piano**: C4 = middle C (note 60)
+- **This implementation**: Uses MIDI numbering
 
 ### 11.2 Octave Pattern
 
@@ -1086,14 +1069,12 @@ note := i mod 12;
 black := note in [1, 3, 6, 8, 10];
 ```
 
-**Layout** (octave label = note/12 - 1, so note 0 = C-1 and note 60 = C4):
+**Layout**:
 ```
-Octave -1: C-1, C#-1, D-1, D#-1, E-1, F-1, F#-1, G-1, G#-1, A-1, A#-1, B-1   (notes 0-11)
-Octave  0: C0,  C#0,  D0,  D#0,  E0,  F0,  F#0,  G0,  G#0,  A0,  A#0,  B0     (notes 12-23, A0 = note 21)
+Octave 0: C0, C#0, D0, D#0, E0, F0, F#0, G0, G#0, A0, A#0, B0
+Octave 1: C1, C#1, D1, D#1, E1, F1, F#1, G1, G#1, A1, A#1, B1
 ...
-Octave  4: C4,  C#4,  D4,  D#4,  E4,  F4,  F#4,  G4,  G#4,  A4,  A#4,  B4     (notes 60-71, C4 = note 60)
-...
-Octave  9: C9,  C#9,  D9,  D#9,  E9,  F9,  F#9,  G9                            (notes 120-127)
+Octave 10: C10, C#10, D10, D#10, E10, F10, F#10, G10
 ```
 
 ### 11.3 Standard Piano Range
@@ -1134,7 +1115,7 @@ Note 108: C8   (highest note)
 ```
 ele_key, dis_midi,
 ele_key, key_title, ele_str, "MIDI", ele_end,
-ele_key, key_pos, ele_num, left, ele_num, top,  // position only (two operands)
+ele_key, key_pos, ele_num, x, ele_num, y, ele_num, w, ele_num, h,
 ele_key, key_size, ele_num, size,
 ele_key, key_range, ele_num, first, ele_num, last,
 ele_key, key_channel, ele_num, channel,
@@ -1507,7 +1488,7 @@ AngleTextOut(x, y, text, style, angle);
 
 **Text Direction**: Vertical, reading upward from bottom
 
-**Font Size**: `vTextSize := MidiKeySize div 3` (2528 — Pascal `div`, truncating toward zero)
+**Font Size**: `vTextSize = MidiKeySize / 3`
 
 **Example** (MidiKeySize = 24):
 - Font size = 8 points

@@ -311,16 +311,10 @@ vTriggered      : boolean;       // Trigger event occurred
   - Arm when signal rises above TriggerArm
   - Fire when signal falls below TriggerFire
 
-**vTriggerOffset**: Pre/post-trigger position. The trigger sample is read `vTriggerOffset`
-slots back from newest (`t := Y_SampleBuff[(SamplePtr - vTriggerOffset - 1) and Y_PtrMask …]`,
-line 1296) and so renders at horizontal position `k = vTriggerOffset`. Because the trace runs
-**oldest-at-left → newest-at-right** (`SCOPE_Draw`, lines 1355-1359), the offset maps to the
-edge **opposite** to the naive reading:
-- `0`: Trigger at **right** edge — tests the newest sample; the display shows the samples
-  leading **up to** the trigger (pre-trigger history)
+**vTriggerOffset**: Pre/post-trigger position
+- `0`: Trigger at left edge (show what happens after trigger)
 - `vSamples/2`: Trigger at center (default)
-- `vSamples-1`: Trigger at **left** edge — tests the oldest sample; the display shows what
-  happens **after** the trigger (post-trigger)
+- `vSamples-1`: Trigger at right edge (show what led up to trigger)
 
 **Default Initialization** (lines 1198-1203):
 ```pascal
@@ -346,24 +340,6 @@ vTextSize       : integer;       // Label font size
 vIndex          : integer;       // Number of active channels
 ```
 
-### 4.5 Receiving types & numeric parity (TS-port contract)
-
-Every value the window receives off the element stream arrives through `val: integer` (line 358) — a **signed 32-bit** quantity that wraps on overflow. A faithful TypeScript port must store these fields full-width and signed; it must not clamp or mask them to a narrower type.
-
-**Receiving fields are signed 32-bit and stored verbatim:**
-
-- **`vGrid[]` is `int32`, NOT a byte.** It is written through `KeyVal` (`vGrid[vIndex-1]`, line 1230), which copies `val` **unclamped**. Only bits 0–3 are ever tested — and only at render time in `ClearBitmap` (`vGrid[i] and 1/2/4/8`, 3298–3322). A port must store the full 32-bit value, not `& 0xF`; the masking lives at the render test, not at storage.
-- Channel **`vLow`/`vHigh`** default to the signed extremes **−$80000000 / $7FFFFFFF** (1192–1193).
-- **`vTall`/`vBase`/`vGrid`** and the **TRIGGER `arm`/`fire`** levels are all set via `KeyVal` (1228–1230, 1245–1246), i.e. **unclamped signed-32** (`KeyVal` just does `v := val`, 2694–2698).
-- The interleaved sample `val` itself is signed-32 (declared line 358; `Y_SampleBuff` is `array of integer`).
-
-**Numeric parity hazards a port must replicate exactly:**
-
-- **Banker's rounding.** `SCOPE_Draw`'s `Round(...)` for the fixed-point `x`/`y` (lines 1358–1359) is Delphi `Round`, which is **round-half-to-even**. A TS port must **not** use `Math.round` (round-half-up); use a banker's-rounding helper.
-- **`div` truncates toward zero.** `vSamples div 2` (1202) and the auto-trigger `(high-low) div 3` / `div 2` (1292–1293) are integer division toward zero, not floor — these differ for negatives.
-- **int64 widening to avoid 32-bit overflow.** The scale denominator `Abs(Int64(vHigh[j]) - Int64(vLow[j]))` (1352) widens both operands to **int64** before subtracting, so the span across the signed extremes (≈ $FFFFFFFF) does not overflow a 32-bit subtract. A port must perform this widening (e.g. `BigInt` or a 64-bit intermediate), not a wrapping 32-bit difference.
-- **UnPack: logical shift + signed sign-extension.** `UnPack` (4169–4170) advances the working value with a **logical** `shr vPackShift`, then, only when the SIGNED modifier is set (`vPackSignx`), sign-extends the extracted field by OR-ing in `$FFFFFFFF xor vPackMask` when its top bit is 1.
-
 ---
 
 ## Directive Reference (v55-verified)
@@ -376,8 +352,8 @@ Accepted by `SCOPE_Configure` (lines 1151–1207). All directives are optional; 
 
 | Directive | Parameters | Range / default | Pascal lines |
 |---|---|---|---|
-| `TITLE` | `'string'` | — | 1163–1164 |
-| `POS` | `left top` | screen coords / cascaded | 1165–1166 |
+| `TITLE` | `'string'` | `"<name> - SCOPE"` (FormCreate:626) | 1163–1164 |
+| `POS` | `left top` | offset from host origin ≈(0,210); no cascade (FormCreate:628-629, KeyPos:2712-2716) | 1165–1166 |
 | `SIZE` | `width height` (pixels) | each int 32–2048 / 256×256 | 1167–1168 |
 | `SAMPLES` | `n` | int 16–2048 / 256 | 1169–1170 |
 | `RATE` | `n` | int 1–2048 / 1 | 1171–1172 |
@@ -396,9 +372,9 @@ Accepted by `SCOPE_Update` (lines 1209–1337) on every subsequent message.
 
 | Directive | Parameters | Range / value-set / default | Pascal lines |
 |---|---|---|---|
-| *string* (channel def) | `'label' (AUTO \| lo hi) {tall} {base} {grid} {color}` | `label`: free string. `AUTO`: keyword flag → vAuto:=True. `lo`/`hi`: int32 (defaults −$80000000 / $7FFFFFFF). `tall`: int / vHeight. `base`: int / 0. `grid`: int / 0 (4-bit flag mask, **rendered** in `ClearBitmap` — see §4.2/§19.3). `color`: named or RGB24 / `DefaultScopeColors[i]`. `vIndex` saturates at 8 (`Channels`); a **9th** def does **not** advance the index, so it overwrites channel 8's slot [7] (label/range/color clobbered) rather than being ignored (1219–1220) | 1217–1231 |
+| *string* (channel def) | `'label' (AUTO \| lo hi) {tall} {base} {grid} {color}` | `label`: free string. `AUTO`: keyword flag → vAuto:=True. `lo`/`hi`: int32 (defaults −$80000000 / $7FFFFFFF). `tall`: int / vHeight. `base`: int / 0. `grid`: int / 0 — **4-bit `%abcd` mask, rendered** (bit0=baseline line, bit1=top line, bit2=min-value TEXT, bit3=max-value TEXT) in `ClearBitmap` 3298-3333; see §19.3. `color`: named or RGB24 / `DefaultScopeColors[i]`. Up to 8 channels (`Channels`=8); further defs ignored | 1217–1231 |
 | `TRIGGER` | `channel (AUTO \| arm fire) {offset}` | `channel`: int **−1..7** (−1=disabled/free-run). `AUTO`: keyword flag → vTriggerAuto:=True (else `arm`,`fire`: int32). `offset`: int **0…vSamples−1** / vSamples div 2 | 1236–1249 |
-| `HOLDOFF` | `n` | int **2..2048** / vSamples (set in Configure); resets vHoldOffCount:=0 **only when a number is supplied** (`if KeyValWithin(...) then`, 1251) | 1250–1251 |
+| `HOLDOFF` | `n` | int **2..2048** / vSamples (set in Configure); resets vHoldOffCount:=0 | 1250–1251 |
 | `CLEAR` | *(none)* | Clears bitmap + resets SamplePop and RateCount | 1252–1259 |
 | `SAVE` | *{filename}* | Saves window bitmap to BMP | 1260–1261 |
 | `PC_KEY` | *(none)* | Transmits latched key byte → P2 | 1262–1263 |
@@ -512,14 +488,12 @@ end;
 
 **Source Location**: Lines 1151-1207
 
-The `KeyValWithin` calls above route through `Within(value, min, max)` (GlobalUnit.pas 222–227), whose clamp is **inclusive at both ends** (`< Minimum` → min, `> Maximum` → max). So the documented ranges (e.g. SAMPLES 16…2048, DOTSIZE 0…32) admit both endpoints.
-
 ### 5.2 Configuration Parameters
 
 | Parameter | Command | Default | Range | Purpose |
 |-----------|---------|---------|-------|---------|
-| Title | `TITLE 'string'` | "Scope" | - | Window title |
-| Position | `POS x y` | Cascaded | Screen coords | Window position |
+| Title | `TITLE 'string'` | `"<name> - SCOPE"` | - | Window title (caption set in FormCreate) |
+| Position | `POS x y` | host origin ≈(0,210), no cascade | offset from host origin | Window position |
 | Size | `SIZE width height` | 256 × 256 | 32-2048 | Display dimensions |
 | Samples | `SAMPLES count` | 256 | 16-2048 | Horizontal resolution |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
@@ -1686,8 +1660,6 @@ DefaultScopeColors: array[0..7] of integer = (
 
 **Source Location**: Line 241 in DebugDisplayUnit.pas
 
-`KeyColor` (2752–2783) accepts either a named-color key or a raw numeric color. For a named color other than `BLACK`/`WHITE`, it consumes an **optional following brightness nibble** (`if NextNum then p := val and 15`, 2773) and folds it into the translated RGBI8x value; if no number follows, brightness defaults to `8`.
-
 ### 20.2 Data Packing System
 
 SCOPE typically uses:
@@ -1706,8 +1678,6 @@ end;
 ```
 
 The unpack state uses `vPackMask`, `vPackShift`, and `vPackSignx` (set by `KeyPack`); there is no `vPackSize`/`vPackIndex` counter. `SCOPE_Update` iterates `vPackCount` sub-samples per transmitted value (line 1272), each obtained from a fresh `v := NewPack` (line 1271). `NewPack` (lines 4158-4164) optionally re-orders nibble/word lanes when the `ALT` modifier is active.
-
-`KeyPack` (2817–2832) reads the packing-mode key, then consumes **up to two** optional modifier keys from `{ALT, SIGNED}` (2825–2829) before calling `SetPack(v, alt, signx)`. Both may be present (`LONGS_8BIT ALT SIGNED`); `ALT` selects the nibble/word-lane reordering in `NewPack`, `SIGNED` enables the sign-extension in `UnPack`.
 
 ### 20.3 Fixed-Point Arithmetic
 
