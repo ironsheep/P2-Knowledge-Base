@@ -121,7 +121,7 @@ machine.
 
 ## Where we go past what a printed book can do
 
-Two things in this pipeline a traditional print house structurally *can't* offer, no
+Three things in this pipeline a traditional print house structurally *can't* offer, no
 matter how good its editors are:
 
 - **We check against the silicon, not just against experts.** A printed reference can be
@@ -135,6 +135,15 @@ matter how good its editors are:
   answers an AI coding assistant's questions directly — curated, version-tracked, far
   better than letting a model guess from scraps it found on the open web. One source,
   two audiences. A printed book serves one.
+- **The review doesn't end when the book ships - it's when the biggest review starts.**
+  A printed reference freezes the moment it goes to press. The best a paper book can do
+  about a mistake a reader finds afterward is a separate errata sheet, which reaches only
+  the people who go looking for it and corrects the error in exactly one spot. Ours work
+  the other way around: a find after publication is folded straight back into the one live
+  source, and because the same fact often appears across several manuals and in the
+  machine-readable source too, correcting it once corrects it everywhere. So putting a
+  manual in front of the whole community isn't the last tidy step after review - it's the
+  point where the largest and most varied review pass we could ever run finally begins.
 
 And because that source faces both ways, it gets better from both directions. When an AI
 assistant can't find something in the knowledge base — sometimes a user reports it, and

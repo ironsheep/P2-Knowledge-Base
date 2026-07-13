@@ -180,6 +180,28 @@ delivery — if the community tells us per-mode examples would help, we can add 
 push the guide back out again without rebuilding anything. Your feedback isn't a
 suggestion box; it's the next edition.
 
+And "one place" undersells what that propagation does for you. The same knowledge
+base feeds every manual and the machine-readable source our AI coding assistants read
+from, so a single thing you flag against one page can correct that fact everywhere it
+lived, all at once - in books you weren't even reading, and in the source an assistant
+answers from. That is not hypothetical: on a recent read, a reviewer went through one
+of our references casually and turned up a handful of errors in an afternoon, including
+two spots where the prose described behavior the chip simply doesn't have. One of the
+notes was a small notation fix, and it turned out to be live in more than sixty of the
+underlying data files, not the single table it pointed at - so it was corrected across
+the whole set in one pass. The findings did more than get fixed, too: they showed us the
+narrative chapters hadn't been held to the same silicon-backed proof as the look-up
+entries, so we extended that proof to the narrative as well. One reader, one afternoon,
+and the whole system came out sharper.
+
+There's a second kind of leverage that only shows up when many people read at once. A
+few reviewers, each arriving from their own angle - the assembly programmer reading for
+timing, the driver author reading for edge cases, the newcomer reading for what went
+unexplained - will between them catch what no single exhaustive pass can, because each
+one sees what their own vantage makes visible. We can't staff all of those perspectives
+ourselves. You are them, and a handful of sharp, honest reads does more for a manual
+than one more careful pass on our end ever could.
+
 ## The short of it
 
 These are **review editions** on purpose. They're grounded deeply and checked hard,
