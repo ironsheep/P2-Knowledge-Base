@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-215`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs)
+**Next finding ID: `F-216`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -1420,6 +1420,23 @@ lock-guarded multi-writer form explicitly.
 - **Fix applied 2026-07-13:** the guard now also treats a hyphen as an identifier connector **when it joins two alphanumeric runs** (a compound token). It requires the character *beyond* the hyphen to be alphanumeric, so genuine subtraction (`x - long`), a leading unary minus (`-long`), the standalone type keyword (`long[@ptr]`), and the pointer size-override (`ptrvar[++].long[5]` → `.LONG[5]`, which MUST still uppercase) are all untouched. Verified against an 11-case unit test of the guard logic (no Lua interpreter and no local pandoc in the container — Sacred Rule #4 — so the algorithm was mirrored and tested directly); ships with P2AN007's v1.0.0 bundle, which is the render that proves it end-to-end.
 - **Outstanding — affected published docs need a re-render to pick up the fix (Stephen's release-timing call):** **P2 Assembly Language Manual** (7 corrupted renders, incl. the cross-manual reference) — a content-identical re-render + patch release. The XByte guide is in-dev (absorbs at its next build; no release owed). All other manuals: scan clean. **A doc is only fixed once it is RE-RENDERED — the filter fix does not retroactively touch a shipped PDF.**
 - **Origin:** surfaced 2026-07-13 in the P2AN007 v1.0.0 render verification — the published PDF listed an example filename that does not exist. Class-wide sweep then found it pre-existing in a released manual.
+
+---
+
+## Shipped app-note PDFs contradict their own cover — Revision History still says "v0.1.0 initial draft" (2026-07-13) — F-215
+
+### F-215 — Released app notes carry a never-shipped draft version in their in-document Revision History — `CONFIRMED` (P2AN007 fixed pre-release; P2AN005/P2AN006 shipped wrong)
+
+- **Location:** the `## Revision History` section of each app note's `opus-master/<ID>.md`. **Verified in the SHIPPED PDFs** (text-extracted, not inferred):
+  - `P2AN005.pdf` — cover reads **Version 1.0.1**; Revision History reads **"v0.1.0 (July 2026) — initial draft for review."**
+  - `P2AN006.pdf` — cover reads **Version 1.0.0**; Revision History reads **"v0.1.0 (July 2026) — initial draft for review."**
+  A reader sees a released version on the cover and a *draft* in the history of the same document.
+- **The rule it breaks:** `methodology/changelog-style-guide.md` — **"Never-shipped versions are never mentioned … For users, they never existed. If a version number was never released, delete any artifact referencing it."** v0.1.0 was a review draft: never in `deliverables/documents/README.md`, never tagged. It must not appear in reader-facing history. The same guide's **"Initial releases describe the document, not a delta"** means the v1.0.0 entry must holistically describe the document, not delta against the unpublished draft.
+- **Why it slipped:** the release process promotes `opus-master/CHANGELOG.md` (which P2AN005/6 got *right* — a single holistic initial entry) but the **doc's own in-PDF Revision History is a separate artifact** that nothing gated. `audit-changelog` audits `CHANGELOG.md`; no check compared it to the rendered Revision History. The two drifted silently.
+- **P2AN007 (fixed pre-release, 2026-07-13):** the changelog audit gate caught it before promotion. `CHANGELOG.md` rewritten as a conforming initial entry (holistic, no delta headings, no draft reference) and the doc's Revision History reduced to the single v1.0.0 entry. Re-rendered.
+- **Outstanding — P2AN005 + P2AN006 need the same edit and a re-render** (content-identical otherwise; bundle with the F-214 Assembly re-render). **A shipped PDF is only fixed by re-rendering it.**
+- **Process gap to close:** `release-manual` Phase 2a audits `CHANGELOG.md` only. It should also assert that the doc's rendered Revision History top entry **matches the cover version** and mentions **no unreleased version** — this defect is invisible to the current gate. (Skill change is central-owned; propose, do not edit.)
+- **Origin:** surfaced 2026-07-13 running the mandatory changelog audit gate for P2AN007's release; the sibling comparison against P2AN005/P2AN006 exposed it as pre-existing and shipped.
 
 ---
 
