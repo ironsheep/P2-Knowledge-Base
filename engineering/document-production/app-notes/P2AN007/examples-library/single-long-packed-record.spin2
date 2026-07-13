@@ -17,10 +17,10 @@ PUB main() | i, cmd_t staged
   cogspin(NEWCOG, worker(), @workerStack)
 
   repeat i from 1 to 5
-    staged.opcode := i                    ' build it PRIVATELY, field by field
+    staged.opcode := i                  ' build it PRIVATELY, field by field
     staged.arg    := i * 100
-    staged.seq    := i                    ' the sequence rides INSIDE the long
-    cmd := staged                         ' publish: ONE whole-struct store
+    staged.seq    := i                  ' the sequence rides INSIDE the long
+    cmd := staged                       ' publish: ONE whole-struct store
     waitms(50)
 
   debug("all commands published")
@@ -31,5 +31,5 @@ PRI worker() | cmd_t snap, lastSeq
     snap := cmd                           ' snapshot: ONE whole-struct load
     if snap.seq <> lastSeq                ' new command? ask the SNAPSHOT
       lastSeq := snap.seq
-      debug("worker exec op=", udec(snap.opcode), " arg=", udec(snap.arg), ...
-            " seq=", udec(snap.seq))
+      debug("worker exec op=", udec(snap.opcode), ...
+            " arg=", udec(snap.arg), " seq=", udec(snap.seq))

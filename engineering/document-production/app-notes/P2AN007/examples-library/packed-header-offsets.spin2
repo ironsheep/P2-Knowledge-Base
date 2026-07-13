@@ -13,7 +13,7 @@ PUB main() | payload
   [ph] := @packet  ' aim the view at the buffer - brackets write the POINTER
 
   ' Fill the header through RAW addressing - the way low-level code must -
-  ' but with OFFSETOF supplying every offset instead of hand-counted numbers.
+  ' but with OFFSETOF supplying each offset instead of hand-counted numbers.
   LONG[@packet + OFFSETOF(hdr_t.magic)]  := $5032_5041
   WORD[@packet + OFFSETOF(hdr_t.length)] := 40
   BYTE[@packet + OFFSETOF(hdr_t.kind)]   := 7
