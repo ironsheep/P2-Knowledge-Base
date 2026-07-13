@@ -221,6 +221,10 @@ engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-
 engineering/tools/.dod-validation-history.json
 *.backup-encoding-conversion
 
+# Timestamped edit backups (Sacred Rule #1 workspace artifacts) - never versioned;
+# generalizes the ad-hoc *.backup-YYYYMMDD entries scattered below
+*.backup-*
+
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/
 engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md.pre-merge-backup.20251209_052816
@@ -258,3 +262,4 @@ engineering/planning/yaml-audit-report.yaml
 /engineering/document-production/manuals/p2-debug-window-manual/figure-generators/screenshots-OLD
 /engineering/document-production/manuals/p2-debug-window-manual/REF/robot-dog
 /OBEX
+/engineering/planning/REF audit v55 vs. theops
