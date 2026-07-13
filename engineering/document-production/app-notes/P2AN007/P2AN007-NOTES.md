@@ -56,11 +56,11 @@ that long → no lock (R2/R3); several writers → one hardware lock (R4).
 P1-Spin, has no STRUCT). AN003 PDF un-ingested (`external-inputs/P1/AppNotes/AN003-...pdf`) — not
 needed.
 
-## P2KB findings (logged; YAML fixes DEFERRED to after PDF review)
+## P2KB findings (logged; both RESOLVED — register shows F-199/F-200 `DONE (2026-07-06)`)
 
 - **F-199 (CONFIRMED)** — `patterns/implementation/spin2_shared_memory.yaml` uses P1 `lockset()`/
   `lockclr()` (do NOT exist in P2; would not compile). This note deliberately uses the real P2
-  `LOCKTRY`/`LOCKREL` and never cites the P1 form. Deferred fix: rewrite the pattern to P2 locks.
+  `LOCKTRY`/`LOCKREL` and never cites the P1 form. Fix applied same day (register: DONE 2026-07-06).
 - **F-200 (CONFIRMED)** — `spin2_event_dispatcher.yaml` is SPSC-only but unscoped; R4 shows the
   lock-guarded multi-writer form explicitly.
 
