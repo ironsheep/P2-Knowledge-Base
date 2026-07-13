@@ -1,0 +1,151 @@
+{Spin2_v45}
+'' VT3 - P2AN007 R4 (locked multi-writer queue) - does the lock actually serialize?
+''
+'' CLAIM UNDER TEST: when two cogs enqueue to the same queue, "advance jhead" is a
+'' read-modify-write they can interleave. A hardware lock around it makes the
+'' enqueue exclusive; without the lock, two writers collide on the same slot.
+''
+'' DUAL-TAIL DESIGN.
+''   ARM A (LOCKED)   - LOCKTRY/LOCKREL bracket the enqueue.   expect 0 anomalies
+''   ARM B (UNLOCKED) - the same enqueue with no lock at all.  expect >0 anomalies
+'' Both arms carry an IDENTICAL waitus(WINDOW_US) INSIDE the critical section,
+'' between reading jhead and writing it back. The arms differ in ONE thing only:
+'' whether the lock brackets that section.
+''
+'' DETECTOR: each writer stamps its id and a strictly incrementing payload. The
+'' consumer tracks the last payload seen per writer; a correctly serialized queue
+'' delivers each writer's payloads in order with no gaps and no repeats. Any gap
+'' or repeat means two writers took the same slot = a lost or duplicated record.
+''
+'' READING THE RESULT: arm B MUST report anomalies. If both arms report zero, the
+'' rig failed to stress the race and the run is INCONCLUSIVE - it is NOT a pass.
+''
+'' PHASE SENSITIVITY (rig revision 2, 2026-07-13 - the lesson of run 2).
+'' Rev 1 used WINDOW_US = 1 and reported 14_976 unlocked anomalies on run 1 and
+'' ZERO on run 2 - from a binary whose only change was debug text. Two cogs running
+'' deterministic loops of equal length hold a nearly fixed relative phase: whether
+'' the two writers ever sit in the critical section at the same time was decided at
+'' cogspin time and then never changed. A single added debug line re-rolled it.
+'' A race the rig only SOMETIMES exercises is not a test. Rev 2 makes the overlap
+'' structural by holding the section open (WINDOW_US = 10) for longer than a
+'' writer's entire remaining loop, so the other writer cannot help but walk into
+'' it. The lock still has to do exactly the same job; only the observability of its
+'' absence changed, and it changed identically in both arms.
+
+CON
+  _clkfreq = 200_000_000
+
+  QSIZE   = 16
+  QMASK   = QSIZE - 1
+  DRAIN   = 20_000  ' records the consumer drains per arm
+
+  ' The window a writer spends INSIDE the critical section, holding jhead read but
+  ' not yet written back. Identical in both arms - the arms differ only in whether
+  ' the lock brackets it. It is set LONGER than a writer's whole remaining loop
+  ' (~2-3us of bytecode) so that while writer A sits in the section, writer B is
+  ' near-certain to enter it too. See PHASE SENSITIVITY in the header: with a 1us
+  ' window the collision was incidental (it depended on the two cogs' startup
+  ' phase) and the rig reported 14_976 anomalies on one run and 0 on the next from
+  ' a logic-identical binary. At 10us the overlap is structural.
+  WINDOW_US = 10
+
+  LOCKED   = 0
+  UNLOCKED = 1
+
+  STRUCT job_t(LONG writerId, LONG payload)
+
+VAR
+  job_t jobs[QSIZE]
+  LONG jhead, jtail
+  LONG qlock
+  LONG runMode, running
+
+DAT
+  writerStackA LONG 0[64]
+  writerStackB LONG 0[64]
+
+PUB main() | anomA, anomB
+  debug("VT3 lock serializes writers - P2AN007 R4")
+  debug("  2 arms, ~1s each. Ends with a VT3 RESULT line then VT3 DONE.")
+  debug("  window=", udec_(WINDOW_US), "us (inside the critical section)  drain/arm=", udec_(DRAIN))
+
+  qlock := LOCKNEW()
+  if qlock < 0
+    debug("VT3 FATAL: no hardware lock available")
+    return
+
+  anomA := runArm(LOCKED)
+  debug("VT3 ARM-A LOCKED   (LOCKTRY/LOCKREL bracket the enqueue)  anomalies=", udec_(anomA))
+
+  anomB := runArm(UNLOCKED)
+  debug("VT3 ARM-B UNLOCKED (same enqueue, no lock)                anomalies=", udec_(anomB))
+
+  LOCKRET(qlock)
+  verdict(anomA, anomB)
+  debug("VT3 DONE - both arms complete. Safe to stop the capture.")
+
+PRI runArm(mode) : anomalies | cogA, cogB, drained, job_t j, last1, last2
+  jhead := 0
+  jtail := 0
+  runMode := mode
+  running := 1
+  anomalies := 0
+  drained := 0
+  last1 := 0
+  last2 := 0
+
+  cogA := cogspin(NEWCOG, writer(1), @writerStackA)
+  cogB := cogspin(NEWCOG, writer(2), @writerStackB)
+  if cogA < 0 or cogB < 0
+    debug("  FATAL: no free cog")
+    return -1
+
+  repeat while drained < DRAIN
+    if jtail <> jhead
+      j := jobs[jtail]
+      jtail := (jtail + 1) & QMASK
+      drained++
+      if j.writerId == 1                  ' THE DETECTOR: per-writer payloads must
+        if j.payload <> last1 + 1         ' arrive in order, no gaps, no repeats
+          anomalies++
+        last1 := j.payload
+      elseif j.writerId == 2
+        if j.payload <> last2 + 1
+          anomalies++
+        last2 := j.payload
+      else
+        anomalies++                       ' a slot that is neither writer = corrupt
+
+  running := 0
+  waitms(5)
+  cogstop(cogA)
+  cogstop(cogB)
+
+PRI writer(id) | n, slot, nxt
+  n := 1
+  repeat while running
+    if runMode == LOCKED
+      repeat until LOCKTRY(qlock)
+    ' ---- critical section (guarded only in arm A) ----
+    slot := jhead                         ' read jhead...
+    nxt  := (slot + 1) & QMASK
+    waitus(WINDOW_US)                     ' identical window in BOTH arms
+    if nxt <> jtail                       ' not full
+      jobs[slot].writerId := id
+      jobs[slot].payload  := n
+      jhead := nxt                        ' ...write jhead back = the RMW
+      n++
+    ' ---- end critical section ----
+    if runMode == LOCKED
+      LOCKREL(qlock)
+
+PRI verdict(anomA, anomB)
+  if anomB == 0
+    debug("VT3 RESULT: INCONCLUSIVE - the unlocked arm produced no anomalies, so the")
+    debug("            detector was never exercised. This is NOT a pass.")
+  elseif anomA == 0
+    debug("VT3 RESULT: PASS - locked arm delivered every writer's payloads in order;")
+    debug("            the unlocked arm lost/duplicated slots. The lock is what")
+    debug("            serializes the head advance.")
+  else
+    debug("VT3 RESULT: FAIL - the LOCKED arm showed anomalies. Serialization failed.")

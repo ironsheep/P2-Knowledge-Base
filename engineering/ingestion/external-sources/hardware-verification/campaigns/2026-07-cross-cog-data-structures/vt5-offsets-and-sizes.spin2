@@ -1,0 +1,69 @@
+{Spin2_v53}
+'' VT5 - P2AN007 R6 (OFFSETOF) + R1 (SIZEOF) - do the computed layouts match?
+''
+'' CLAIM UNDER TEST: STRUCT members pack with no padding or alignment, so OFFSETOF
+'' and SIZEOF return the exact byte layout the note's Verify sections promise. This
+'' is a compile-time claim - no cogs, no race - but the note PRINTS these numbers to
+'' the reader, so they get asserted rather than assumed.
+''
+'' It also checks the layout claims R1 and R5 make:
+''   reading_t(LONG timestamp, LONG value, BYTE status) -> 9 bytes  (R1's Verify)
+''   cmd_t nameless single LONG                         -> 4 bytes  (R5)
+''
+'' Self-auditing: every check prints PASS or FAIL against its expected value, and
+'' the rig ends with a single VT5 RESULT line.
+
+CON
+  _clkfreq = 200_000_000
+
+  STRUCT hdr_t(LONG magic, WORD length, BYTE kind, BYTE flags)   ' R6's wire header
+  STRUCT reading_t(LONG timestamp, LONG value, BYTE status)      ' R1's record
+
+VAR
+  BYTE packet[64]
+  ^hdr_t ph
+
+PUB main() | fails, payload
+  debug("VT5 offsets and sizes - P2AN007 R6/R1")
+  debug("  compile-time checks only - instant. Ends with VT5 RESULT then VT5 DONE.")
+  fails := 0
+
+  ' --- R6: the header offsets the note prints in its Verify -----------------
+  fails += check(@"OFFSETOF(hdr_t.magic)",  OFFSETOF(hdr_t.magic),  0)
+  fails += check(@"OFFSETOF(hdr_t.length)", OFFSETOF(hdr_t.length), 4)
+  fails += check(@"OFFSETOF(hdr_t.kind)",   OFFSETOF(hdr_t.kind),   6)
+  fails += check(@"OFFSETOF(hdr_t.flags)",  OFFSETOF(hdr_t.flags),  7)
+  fails += check(@"SIZEOF(hdr_t)",          SIZEOF(hdr_t),          8)
+
+  ' --- R1: the packed size the note prints in its Verify --------------------
+  fails += check(@"SIZEOF(reading_t)",      SIZEOF(reading_t),      9)
+
+  ' --- the offsets must actually address the right bytes --------------------
+  [ph] := @packet
+  LONG[@packet + OFFSETOF(hdr_t.magic)]  := $5032_5041
+  WORD[@packet + OFFSETOF(hdr_t.length)] := 40
+  BYTE[@packet + OFFSETOF(hdr_t.kind)]   := 7
+  BYTE[@packet + OFFSETOF(hdr_t.flags)]  := %0000_0011
+
+  fails += check(@"raw write -> ph.magic",  ph.magic,  $5032_5041)
+  fails += check(@"raw write -> ph.length", ph.length, 40)
+  fails += check(@"raw write -> ph.kind",   ph.kind,   7)
+  fails += check(@"raw write -> ph.flags",  ph.flags,  %0000_0011)
+
+  payload := @packet + SIZEOF(hdr_t)
+  fails += check(@"payload offset", payload - @packet, 8)
+
+  if fails == 0
+    debug("VT5 RESULT: PASS - every computed offset and size matches what the note prints.")
+  else
+    debug("VT5 RESULT: FAIL - ", udec_(fails), " mismatch(es). The note's Verify text is wrong.")
+
+  debug("VT5 DONE - all checks complete. Safe to stop the capture.")
+
+PRI check(pName, got, want) : failed
+  if got == want
+    debug("  PASS  ", zstr_(pName), " = ", udec_(got))
+    failed := 0
+  else
+    debug("  FAIL  ", zstr_(pName), " = ", udec_(got), "  expected ", udec_(want))
+    failed := 1

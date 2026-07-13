@@ -1,8 +1,8 @@
 # P2AN007 — Working Notes
 
-**Status:** drafted 2026-07-06 (Family C app-notes sprint); **extended + bumped to v1.0.0 pre-release 2026-07-13** —
-adds R5 (member bitfields, v54) + R6 (OFFSETOF, v53). Hardware-verification rigs built and compile-clean;
-awaiting Stephen's silicon run before the PDF renders.
+**Status:** drafted 2026-07-06 (Family C app-notes sprint); **extended + bumped to v1.0.0, hardware-verified 2026-07-13** —
+adds R5 (member bitfields, v54) + R6 (OFFSETOF, v53). All five verification rigs GREEN on real silicon
+(EF-036…EF-040). **NEXT: prepare-manual → Forge PDF → release-gate audit → release.**
 **Created:** 2026-07-06
 **Topic:** Data Structures with the New Language Facilities (roster item **C2**, Concurrency & New Language Features family)
 **Owning manual (enrichment fork):** Spin2 Reference Manual — **PARKED**, so this note is the guided home (no foundational fork)
@@ -110,7 +110,12 @@ back behind a HOLD comment until the logs exist) → prepare-manual → Forge PD
 | VT4 | 0 / **109,642** | 0 / **116,452** | — | **BANKED** — reproduced |
 | VT5 | 11/11 PASS | 11/11 PASS | — | **BANKED** — deterministic |
 | VT3 | 0 / **14,976** | 0 / 0 ⚠ | 0 / **3,331** | **BANKED** — structural overlap (10µs section) |
-| VT2 | A0 / B20,000 / **C0** | A0 / B5,001 / **C0** | A0 / **B0** ⚠ / **C20,000** | rev 4 (2 experiments), re-run |
+| VT2 | A0 / B20,000 / **C0** | A0 / B5,001 / **C0** | A0 / **B0** ⚠ / **C20,000** | **BANKED** (run 4, rev 4): A1=0 · B=**20,000** · A2=0 · C=**20,000** |
+
+**ALL FIVE RIGS GREEN (2026-07-13).** Promoted to the empirical ledger as **EF-036…EF-040**; rigs +
+golden analysis replicated to `external-sources/hardware-verification/campaigns/2026-07-cross-cog-data-structures/`.
+F-213 closed `DONE` (hardware-confirmed, EF-038). The v1.0.0 Revision History's held-back
+race-freedom sentence is now released.
 
 **VT2 rev 4 — one worker cannot serve both claims.** Run 3's 25µs worker gap finally fired arm C at
 20,000/20,000 (decisive for F-213) but dropped arm B to zero: the bad-publish-order bug is only visible

@@ -149,13 +149,20 @@ gotchas:
 
 hardware_status: |
   Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
-  _clkfreq = 200_000_000), covering the STRUCT declarations/arrays/SIZEOF/whole-struct-copy and the
-  LOCKNEW/LOCKTRY/LOCKREL usage. Compilation proves LEGALITY only: true cross-cog atomicity and
-  race-freedom (torn-read absence under the ring/mailbox ordering, mutual exclusion under contention
-  for the locked queue) are RUNTIME multi-cog properties described here from the atomic-single-long
-  model, and a two-cog confirmation on real silicon is a later step (Stephen runs hardware externally;
-  -> EF ledger when accepted). No invented DEBUG captures. Implementation-only: the contract-choice
-  reasoning is deferred to the P2 Architect's Guide.
+  _clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
+  SILICON with two cogs actually contending (2026-07-13; empirical ledger EF-036..EF-040; rigs +
+  golden analysis under external-sources/hardware-verification/campaigns/2026-07-cross-cog-data-structures/).
+  Each discipline was measured against a deliberately-broken control, and the control was REQUIRED to
+  fail before the result was accepted (a rig reporting zero in both arms is INCONCLUSIVE, never a pass).
+  Measured: R2 publish-index-last 0 torn / index-first 200_000 of 200_000 torn (EF-036). R5 staged
+  one-store publish 0 torn / same fields written in-place into the shared packed long 116_452 of 200_000
+  torn (EF-037) -- fitting in ONE long does NOT make a record atomic; each bitfield write is a
+  read-modify-write of the backing long. R3 seq/ack handshake present 0 bad / handshake removed 20_000 of
+  20_000 bad for a worker that dispatches between reads (EF-038, grounds F-213); a TIGHT-POLLING worker
+  reports zero, which is why the missing ack looks fine under the obvious test. R4 locked 0 anomalies /
+  unlocked 3_331 (EF-039). R6/R1 OFFSETOF+SIZEOF 11/11 layout checks match the numbers the note prints
+  (EF-040). No invented DEBUG captures. Implementation-only: the contract-choice reasoning is deferred to
+  the P2 Architect's Guide.
 
 provenance:
   primary_sources:

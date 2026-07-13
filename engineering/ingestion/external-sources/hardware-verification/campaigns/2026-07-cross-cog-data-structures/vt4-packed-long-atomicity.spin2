@@ -1,0 +1,112 @@
+{Spin2_v54}
+'' VT4 - P2AN007 R5 (whole record in one long) - is the packed publish atomic?
+''
+'' CLAIM UNDER TEST - and it is the counter-intuitive one:
+''   Packing a record's named fields into ONE long does NOT by itself make it
+''   atomic. Each bitfield write is a read-modify-write of the backing long, so
+''   filling the shared record field-by-field is several separate stores and a
+''   reader CAN land between them. Atomicity comes from staging the record in a
+''   private local and publishing it with ONE whole-struct store (and snapshotting
+''   it with ONE load on the way back in).
+''
+'' DUAL-TAIL DESIGN.
+''   ARM A (STAGED)  - build in a local, publish with one store.  expect 0 tears
+''   ARM B (IN-PLACE)- write the fields straight into the shared record. expect >0
+'' Both arms carry an IDENTICAL waitus(WINDOW_US) between two field writes, so they
+'' differ in ONE thing only: whether the fields are assembled privately first.
+''
+'' DETECTOR: the packed record carries the invariant  arg == opcode * 100  and
+'' seq == opcode. The reader snapshots the long ONCE and checks the invariant on
+'' the snapshot. A snapshot that fails it caught the record half-written = a TEAR.
+''
+'' READING THE RESULT: arm B MUST report tears. If both arms report zero, the rig
+'' failed to stress the race and the run is INCONCLUSIVE - it is NOT a pass.
+'' (If arm B reports zero across several runs, that is itself a finding worth
+'' recording: it would mean the field-by-field window is too narrow to observe.)
+
+CON
+  _clkfreq = 200_000_000
+
+  SAMPLES   = 200_000  ' snapshots the reader takes per arm
+  WINDOW_US = 1
+
+  STAGED  = 0
+  INPLACE = 1
+
+  ' opcode 4 bits (1..9 used), arg 16 bits (<= 900), seq 12 bits (1..9 used)
+  STRUCT cmd_t(LONG.opcode[3..0].arg[19..4].seq[31..20])
+
+VAR
+  cmd_t cmd  ' the shared record - exactly one long
+  LONG runMode, running
+
+DAT
+  writerStack LONG 0[64]
+
+PUB main() | tearsA, tearsB
+  debug("VT4 packed-long atomicity - P2AN007 R5")
+  debug("  2 arms, ~1s each. Ends with a VT4 RESULT line then VT4 DONE.")
+  debug("  window=", udec_(WINDOW_US), "us  snapshots/arm=", udec_(SAMPLES))
+  debug("  sizeof(cmd_t)=", udec_(SIZEOF(cmd_t)), " bytes (expect 4)")
+
+  tearsA := runArm(STAGED)
+  debug("VT4 ARM-A STAGED   (build in a local, ONE whole-struct store)  tears=", udec_(tearsA))
+
+  tearsB := runArm(INPLACE)
+  debug("VT4 ARM-B IN-PLACE (fields written straight into the shared long)  tears=", udec_(tearsB))
+
+  verdict(tearsA, tearsB)
+  debug("VT4 DONE - both arms complete. Safe to stop the capture.")
+
+PRI runArm(mode) : tears | cog, taken, cmd_t snap
+  cmd := 0
+  runMode := mode
+  running := 1
+  tears := 0
+  taken := 0
+
+  cog := cogspin(NEWCOG, writer(), @writerStack)
+  if cog < 0
+    debug("  FATAL: no free cog")
+    return -1
+
+  repeat while taken < SAMPLES
+    snap := cmd                           ' ONE whole-struct load
+    taken++
+    if snap.opcode <> 0                   ' skip the initial zero state
+      if snap.arg <> snap.opcode * 100 or snap.seq <> snap.opcode   ' THE DETECTOR
+        tears++
+
+  running := 0
+  waitms(5)
+  cogstop(cog)
+
+PRI writer() | n, cmd_t pending
+  n := 1
+  repeat while running
+    if runMode == INPLACE
+      cmd.opcode := n                     ' three separate read-modify-writes
+      cmd.arg    := n * 100               ' of the SAME backing long
+      waitus(WINDOW_US)                   ' identical window in both arms
+      cmd.seq    := n
+    else
+      pending.opcode := n                 ' assembled privately - no reader can see
+      pending.arg    := n * 100
+      waitus(WINDOW_US)                   ' identical window in both arms
+      pending.seq    := n
+      cmd := pending                      ' ONE whole-struct store = the publish
+    n++
+    if n > 9                              ' stay inside the bit budget
+      n := 1
+
+PRI verdict(tearsA, tearsB)
+  if tearsB == 0
+    debug("VT4 RESULT: INCONCLUSIVE - the in-place arm produced no tears, so the")
+    debug("            detector was never exercised. This is NOT a pass. Re-run;")
+    debug("            if it stays zero, record WHY (window too narrow to observe).")
+  elseif tearsA == 0
+    debug("VT4 RESULT: PASS - the staged one-store publish never tore; writing the")
+    debug("            same fields in place DID. Fitting in one long is not enough;")
+    debug("            publishing in one store is what makes it atomic.")
+  else
+    debug("VT4 RESULT: FAIL - the STAGED arm tore. The one-store publish is not atomic.")

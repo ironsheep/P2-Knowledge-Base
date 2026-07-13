@@ -1,0 +1,173 @@
+{Spin2_v45}
+'' VT2 - P2AN007 R3 (latest-wins mailbox) - publish-order + ack-handshake rig
+''
+'' TWO SEPARATE CLAIMS, TWO SEPARATE EXPERIMENTS, EACH WITH ITS OWN CONTROL.
+'' They need DIFFERENT workers, which is the lesson of run 3 (see RIG HISTORY).
+''
+''   EXPERIMENT 1 - "the publish ORDER matters"      -> needs a FAST worker
+''     ARM A1 (control) correct order + ack, fast worker     expect 0
+''     ARM B  (test)    seq bumped FIRST + ack, fast worker  expect > 0
+''   The bad-order bug is only exposed to a worker that reads the record IMMEDIATELY:
+''   its window is the ~2us between the seq bump and the fields landing. A slow
+''   worker reads the args long after that window shuts and sees nothing wrong.
+''
+''   EXPERIMENT 2 - "the ACK is load-bearing"        -> needs a SLOW worker
+''     ARM A2 (control) correct order + ack, slow worker      expect 0
+''     ARM C  (test)    correct order, NO ack, slow worker    expect > 0
+''   The no-ack bug is only exposed to a worker that takes real time BETWEEN reading
+''   the opcode and reading its arguments - which is what every real worker does
+''   (CASE cmd.opcode, THEN use the args). A tight polling worker wins the sprint
+''   against the writer and sees nothing wrong. That is exactly what makes the bug
+''   dangerous: it LOOKS fine.
+''
+'' Within each experiment the two arms differ in EXACTLY ONE thing - the protocol.
+'' The worker is identical across the pair. A2 is the arm that proves the 25us gap
+'' is not itself the cause of C's tearing: same slow worker, ack present, zero tears.
+''
+'' DETECTOR: the command carries the invariant  arg0 == opcode * 100  and
+'' arg1 == opcode * 1000. The worker checks both on every command it observes.
+''
+'' READING THE RESULT: B and C MUST report violations and A1/A2 MUST report zero.
+'' A zero in B or C means that experiment did not exercise its race - INCONCLUSIVE,
+'' NOT a pass.
+''
+'' RIG HISTORY (why it looks like this):
+''   Rev 1 - one worker, no gap. Arm C reported 0: the tight-loop worker won the
+''           sprint against the writer's next write every time. INCONCLUSIVE.
+''   Rev 2 - one worker, 1us gap. Arm C still 0. Two cogs running deterministic
+''           loops hold a near-fixed relative phase, so the straddle was decided at
+''           cogspin time, not sampled. INCONCLUSIVE. (See lessons-learned:
+''           two-cog-race-rigs-must-be-structural.md)
+''   Rev 3 - one worker, 25us gap. Arm C fired 20_000/20_000 - but arm B fell to 0,
+''           because the same slow worker that exposes C HIDES B. One worker cannot
+''           serve both claims.
+''   Rev 4 - THIS: two experiments, each with its own worker and its own control.
+
+CON
+  _clkfreq = 200_000_000
+
+  OBSERVATIONS = 20_000  ' commands the worker observes per arm
+  WINDOW_US    = 1       ' writer-side window between two field writes (all arms)
+
+  ' The worker's gap between reading the opcode and reading its arguments - the
+  ' CASE-dispatch a real worker performs. Set LONGER than the writer's whole command
+  ' cycle so that in arm C the writer is GUARANTEED to move on mid-read: the straddle
+  ' is structural, not a coin-flip on cog phase. Arm A2 carries the SAME gap with the
+  ' ack present and must still report zero - that is what isolates the ack as the
+  ' cause, rather than the gap.
+  FAST_GAP_US  = 0       ' experiment 1: read the record immediately
+  SLOW_GAP_US  = 25      ' experiment 2: dispatch on the opcode, then use the args
+
+  CORRECT  = 0
+  BADORDER = 1
+  NOACK    = 2
+
+  STRUCT cmd_t(LONG opcode, LONG arg0, LONG arg1)
+
+VAR
+  cmd_t cmd
+  LONG cmdSeq, cmdAck
+  LONG runMode, running, workerGap
+  LONG seen, bad
+
+DAT
+  writerStack LONG 0[64]
+
+PUB main() | badA1, badB, badA2, badC
+  debug("VT2 mailbox publish-order + ack - P2AN007 R3")
+  debug("  4 arms = 2 experiments x (control, test). Ends with VT2 RESULT then VT2 DONE.")
+  debug("  observations/arm=", udec_(OBSERVATIONS), "  writer window=", udec_(WINDOW_US), "us")
+
+  debug("EXPERIMENT 1 - does the publish ORDER matter?  (fast worker, gap=0us)")
+  badA1 := runArm(CORRECT,  FAST_GAP_US)
+  debug("  ARM-A1 control  correct order + ack     bad=", udec_(badA1), "  (expect 0)")
+  badB  := runArm(BADORDER, FAST_GAP_US)
+  debug("  ARM-B  test     seq bumped FIRST + ack  bad=", udec_(badB), "  (expect > 0)")
+
+  debug("EXPERIMENT 2 - is the ACK load-bearing?  (slow worker, gap=", udec_(SLOW_GAP_US), "us)")
+  badA2 := runArm(CORRECT, SLOW_GAP_US)
+  debug("  ARM-A2 control  correct order + ack     bad=", udec_(badA2), "  (expect 0)")
+  badC  := runArm(NOACK,   SLOW_GAP_US)
+  debug("  ARM-C  test     ack handshake REMOVED   bad=", udec_(badC), "  (expect > 0)")
+
+  verdict(badA1, badB, badA2, badC)
+  debug("VT2 DONE - all four arms complete. Safe to stop the capture.")
+
+PRI runArm(mode, gap) : violations | cog
+  cmdSeq := 0
+  cmdAck := 0
+  cmd.opcode := 0
+  cmd.arg0 := 0
+  cmd.arg1 := 0
+  runMode := mode
+  workerGap := gap
+  running := 1
+  seen := 0
+  bad := 0
+
+  cog := cogspin(NEWCOG, writer(), @writerStack)
+  if cog < 0
+    debug("  FATAL: no free cog")
+    return -1
+
+  worker()  ' this cog is the worker; returns once it has seen OBSERVATIONS commands
+
+  running := 0
+  waitms(5)
+  cogstop(cog)
+  violations := bad
+
+PRI writer() | n
+  n := 1
+  repeat while running
+    if runMode == BADORDER
+      cmdSeq++                            ' BUG: published before it is written
+      cmd.opcode := n
+      cmd.arg0   := n * 100
+      waitus(WINDOW_US)                   ' identical window in every arm
+      cmd.arg1   := n * 1000
+    else
+      cmd.opcode := n
+      cmd.arg0   := n * 100
+      waitus(WINDOW_US)                   ' identical window in every arm
+      cmd.arg1   := n * 1000
+      cmdSeq++                            ' CORRECT: published only when complete
+
+    if runMode <> NOACK
+      repeat until cmdAck == cmdSeq or running == 0   ' the handshake
+    n++
+    if n > 1_000_000
+      n := 1
+
+PRI worker() | op, a0, a1
+  repeat while seen < OBSERVATIONS
+    if cmdSeq <> cmdAck
+      ' Three SEPARATE reads of shared memory. The gap between reading the opcode
+      ' and reading its arguments is the worker's dispatch - identical within each
+      ' experiment's arm pair, so only the protocol differs.
+      op := cmd.opcode
+      if workerGap > 0
+        waitus(workerGap)                 ' CASE cmd.opcode ... then use the args
+      a0 := cmd.arg0
+      a1 := cmd.arg1
+      if a0 <> op * 100 or a1 <> op * 1000       ' THE DETECTOR
+        bad++
+      seen++
+      cmdAck := cmdSeq                    ' acknowledge (arm C's writer ignores this)
+
+PRI verdict(badA1, badB, badA2, badC)
+  if badB == 0
+    debug("VT2 RESULT: INCONCLUSIVE - experiment 1's test arm (B) did not fail, so the")
+    debug("            bad-publish-order race was never exercised. NOT a pass.")
+  elseif badC == 0
+    debug("VT2 RESULT: INCONCLUSIVE - experiment 2's test arm (C) did not fail, so the")
+    debug("            no-ack race was never exercised. NOT a pass.")
+  elseif badA1 <> 0 or badA2 <> 0
+    debug("VT2 RESULT: FAIL - a CONTROL arm tore. R3 as written does not hold.")
+  else
+    debug("VT2 RESULT: PASS - both controls clean, both tests torn.")
+    debug("            EXP-1: publishing the sequence BEFORE the fields tears.")
+    debug("            EXP-2: with the ack, a slow worker is safe (A2 = 0); without")
+    debug("            it, the SAME slow worker tears (C > 0). The ack is what buys")
+    debug("            that safety - the v0.1.0 R3 Tip was wrong to invite dropping")
+    debug("            it. Pack into one long (R5) or re-check the sequence instead.")

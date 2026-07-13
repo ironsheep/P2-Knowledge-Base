@@ -272,6 +272,80 @@ hardware that held the level high (no-event case failed); moved to P0 + a discre
 
 ---
 
+## Cross-cog data structures (silicon — 2026-07 P2AN007 rig suite)
+
+*Campaign: `campaigns/2026-07-cross-cog-data-structures/` (5 rigs + GOLDEN analysis). All dual-tail:
+each rig runs the correct discipline AND a deliberately-broken control with any injected delay applied
+identically to both arms, and refuses to report PASS unless the broken arm actually fails. `pnut_ts`
+v1.55.0 `-d`, real P2 silicon, RAM download, `_clkfreq = 200_000_000`, 2026-07-13.*
+
+### EF-036 · Ring buffer: publishing the index BEFORE the record's fields tears every time — `CONFIRMED`
+In a single-producer/single-consumer hub ring of multi-field records, advancing the publish index
+**after** writing a slot's fields is what prevents a torn read; advancing it **first** exposes the slot
+while it is still being written. *How proven:* `vt1-ring-buffer-integrity.spin2` — two arms, identical
+1µs window between the two field writes, differing only in where the index advance happens; the
+consumer checks the invariant `value == seq * 10` on every record it drains. *Result:* fields-then-index
+= **0 torn records in 200,000**; index-then-fields = **200,000 torn in 200,000** (every record).
+Reproduced identically on two runs. *Verdict:* CONFIRMED 2026-07-13. *Grounds:* P2AN007 R2 + the
+`data-flow-contracts` ring/buffer-management patterns; the "publish the index LAST" rule is not a
+stylistic preference but the entire safety property.
+
+### EF-037 · A record packed into ONE long is NOT atomic unless it is published in ONE store — `CONFIRMED`
+**The counter-intuitive one.** Spin2 v54 member bitfields let a whole record (opcode + argument +
+sequence) occupy a single LONG. Fitting in one long does **not** make the record atomic: each bitfield
+write is a **read-modify-write of the backing long**, so filling the *shared* record field-by-field is
+several separate stores and a reader lands between them. Atomicity comes from staging the record in a
+private local and publishing it with **one** whole-struct store (and snapshotting it with one
+whole-struct load). *How proven:* `vt4-packed-long-atomicity.spin2` — two arms, identical 1µs window
+between field writes, differing only in whether the fields are assembled privately first; the reader
+takes a one-load snapshot and checks `arg == opcode * 100 and seq == opcode`. *Result:* staged +
+one-store publish = **0 torn snapshots in 200,000**; the same fields written straight into the shared
+long = **116,452 torn in 200,000** (109,642 on a prior run — reproduced). `SIZEOF(cmd_t)` = 4 bytes as
+expected. *Verdict:* CONFIRMED 2026-07-13. *Grounds:* P2AN007 R5 + `concepts/struct-bitfields.yaml`;
+this is the fact the recipe is built around, and it inverts the natural assumption that a
+one-long record is inherently safe to publish.
+
+### EF-038 · Latest-wins mailbox: the seq/ack handshake is LOAD-BEARING — removing it tears 100% for any worker that dispatches between reads — `CONFIRMED` (F-213)
+A latest-wins mailbox whose worker reads `opcode`, `arg0`, `arg1` as three separate reads of shared
+memory is protected **only** by the seq/ack handshake, which is what stops the writer overwriting the
+command mid-read. *How proven:* `vt2-mailbox-publish-order.spin2` exp-2 — a **slow worker** (25µs
+between reading the opcode and reading its arguments, modelling the near-universal `CASE cmd.opcode`
+dispatch), with a matched control carrying the same slow worker and the ack present. *Result:* ack
+present = **0 bad in 20,000**; ack removed = **20,000 bad in 20,000** (every single command torn). The
+matched control is what isolates the ack as the cause rather than the injected delay. *Also measured
+(the trap):* a **tight polling worker** with no work between its reads wins the race against the writer
+and reports **zero** — so the missing ack *looks fine* under exactly the test most people would write.
+Safety without the ack is contingent on worker timing. *Verdict:* CONFIRMED 2026-07-13. *Grounds:*
+grounds **F-213** — P2AN007 v0.1.0's R3 invited the reader to drop the handshake ("drop that wait and
+the newest command always wins"); v1.0.0 replaces it with a pitfall plus the two safe non-blocking
+alternatives (pack the payload into one long per EF-037, or re-check the sequence after copying and
+discard a straddling copy).
+
+### EF-039 · One hardware lock serializes a concurrent enqueue read-modify-write; without it two writers collide — `CONFIRMED`
+When two cogs enqueue to one queue, "advance the head index" is a read-modify-write they can interleave:
+both read the same head, both write the same slot, and one record is lost while the head advances only
+once. Bracketing the enqueue with a single P2 hardware lock (`LOCKTRY`/`LOCKREL`) makes it exclusive.
+*How proven:* `vt3-lock-serializes-writers.spin2` — two writer cogs, identical 10µs window **inside**
+the critical section in both arms, differing only in whether the lock brackets it; the consumer tracks
+each writer's payload sequence and counts any gap or repeat as a lost/duplicated slot. *Result:* locked
+= **0 anomalies in 20,000 drained**; unlocked = **3,331 anomalies**. *Verdict:* CONFIRMED 2026-07-13.
+*Grounds:* P2AN007 R4 + `architecture/locks.yaml`. **Rig caveat worth carrying forward:** at a 1µs
+window this rig reported 14,976 anomalies on one run and **0** on the next from a logic-identical
+binary — two cogs running deterministic loops hold a near-fixed relative phase, so the collision was
+decided at `cogspin` time rather than sampled. The 10µs window makes the overlap structural. See
+`engineering/operations/lessons-learned/two-cog-race-rigs-must-be-structural.md`.
+
+### EF-040 · STRUCT members pack with no padding — OFFSETOF/SIZEOF confirmed against the published layout numbers — `CONFIRMED`
+Spin2 packs STRUCT members with no padding or alignment, and `OFFSETOF` (v53) / `SIZEOF` return exactly
+that layout. *How proven:* `vt5-offsets-and-sizes.spin2` asserts every layout number P2AN007 prints to a
+reader, then writes the header through raw addressing (`WORD[@buf + OFFSETOF(hdr_t.length)] := …`) and
+reads it back by name through a `^struct` pointer view of the same bytes. *Result (11/11 PASS):* for
+`hdr_t(LONG magic, WORD length, BYTE kind, BYTE flags)` — `OFFSETOF` magic=**0**, length=**4**,
+kind=**6**, flags=**7**; `SIZEOF(hdr_t)`=**8**; payload starts at **+8**; every raw-addressed write read
+back correctly by name. For `reading_t(LONG timestamp, LONG value, BYTE status)` — `SIZEOF`=**9**.
+*Verdict:* CONFIRMED 2026-07-13. *Grounds:* P2AN007 R6/R1 + `methods/offsetof.yaml`; confirms the
+Verify text the note prints is correct as published.
+
 ## Open / pending empirical questions
 
 - *(none currently)*

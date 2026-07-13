@@ -1,0 +1,112 @@
+{Spin2_v45}
+'' VT1 - P2AN007 R2 (lock-free SPSC ring buffer) - cross-cog integrity rig
+''
+'' CLAIM UNDER TEST: with a single owner of each index, writing a record's fields
+'' and THEN advancing the publish index makes a torn read impossible; advancing the
+'' index FIRST makes torn reads possible.
+''
+'' DUAL-TAIL DESIGN. Two arms run back to back:
+''   ARM A (CORRECT) - fields written, then qhead advanced.
+''   ARM B (BROKEN)  - qhead advanced, then fields written.
+'' Both arms carry an IDENTICAL waitus(WINDOW_US) between the two field writes, so
+'' the arms differ in ONE thing only: where the publish happens. The delay is a
+'' constant of the experiment, not a thumb on the scale - it widens the window in
+'' both arms so the race is observable in seconds instead of statistically rare.
+''
+'' DETECTOR: every record carries the invariant  value == seq * 10.  The consumer
+'' checks it on each record it drains. A record whose value does not match its seq
+'' was observed half-written = a TEAR.
+''
+'' READING THE RESULT: arm B MUST report tears. If both arms report zero, the rig
+'' failed to stress the race and the run is INCONCLUSIVE - it is NOT a pass.
+
+CON
+  _clkfreq = 200_000_000
+
+  QSIZE   = 16
+  QMASK   = QSIZE - 1
+  SAMPLES = 200_000  ' records the consumer drains per arm
+  WINDOW_US = 1      ' identical in BOTH arms - see header
+
+  CORRECT = 0
+  BROKEN  = 1
+
+  STRUCT sample_t(LONG seq, LONG value)
+
+VAR
+  sample_t queue[QSIZE]
+  LONG qhead, qtail
+  LONG runMode, running
+
+DAT
+  prodStack LONG 0[64]
+
+PUB main() | tearsA, tearsB
+  debug("VT1 ring-buffer integrity - P2AN007 R2")
+  debug("  2 arms, ~2s each. Ends with a VT1 RESULT line then VT1 DONE.")
+  debug("  window=", udec_(WINDOW_US), "us  samples/arm=", udec_(SAMPLES))
+
+  tearsA := runArm(CORRECT)
+  debug("VT1 ARM-A CORRECT (fields, then publish index)  tears=", udec_(tearsA))
+
+  tearsB := runArm(BROKEN)
+  debug("VT1 ARM-B BROKEN  (publish index, then fields)  tears=", udec_(tearsB))
+
+  verdict(tearsA, tearsB)
+  debug("VT1 DONE - both arms complete. Safe to stop the capture.")
+
+PRI runArm(mode) : tears | cog, drained, sample_t r
+  ' fresh ring for each arm
+  qhead := 0
+  qtail := 0
+  runMode := mode
+  running := 1
+  tears := 0
+  drained := 0
+
+  cog := cogspin(NEWCOG, producer(), @prodStack)
+  if cog < 0
+    debug("  FATAL: no free cog")
+    return -1
+
+  repeat while drained < SAMPLES
+    if qtail <> qhead                     ' a record is published
+      r := queue[qtail]                   ' drain it (whole-struct copy)
+      qtail := (qtail + 1) & QMASK
+      drained++
+      if r.value <> r.seq * 10            ' THE DETECTOR
+        tears++
+
+  running := 0
+  waitms(5)  ' let the producer notice and fall out of its loop
+  cogstop(cog)
+
+PRI producer() | n, slot, nxt
+  n := 1
+  repeat while running
+    nxt := (qhead + 1) & QMASK
+    if nxt == qtail                       ' ring full - let the consumer catch up
+      waitus(1)
+    else
+      slot := qhead
+      if runMode == BROKEN
+        qhead := nxt                      ' BUG: published before it is written
+        queue[slot].seq := n
+        waitus(WINDOW_US)                 ' identical window in both arms
+        queue[slot].value := n * 10
+      else
+        queue[slot].seq := n
+        waitus(WINDOW_US)                 ' identical window in both arms
+        queue[slot].value := n * 10
+        qhead := nxt                      ' CORRECT: published only when complete
+      n++
+
+PRI verdict(tearsA, tearsB)
+  if tearsB == 0
+    debug("VT1 RESULT: INCONCLUSIVE - the broken arm produced no tears, so the ")
+    debug("            detector was never exercised. This is NOT a pass.")
+  elseif tearsA == 0
+    debug("VT1 RESULT: PASS - correct arm 0 tears; broken arm tore, proving the ")
+    debug("            detector works and the publish-last ordering is what prevents it.")
+  else
+    debug("VT1 RESULT: FAIL - the CORRECT arm tore. Publish-last did not hold.")
