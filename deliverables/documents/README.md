@@ -133,6 +133,13 @@ Size the stack buffers that new cogs and cooperative tasks need — where an und
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2an006-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006-src-260706.zip)
 
+#### [Share Data Between Cogs Without Ever Reading It Half-Written](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN007.pdf)
+**Application Note P2AN007 — Data Structures with the New Language Facilities** — *Version 1.0.0*
+
+Spin2's STRUCT facility gives the P2 real records — named, typed, packed fields you reach by name instead of juggling parallel arrays. Within one cog that's a convenience; across cogs it's a design question, because a single hub long is written atomically but a multi-field record is not. One shared idea comes first (write the record's fields, then flip one long that publishes them), then six runnable recipes: an in-cog record and array, a lock-free ring buffer, a latest-wins mailbox, a lock-guarded multi-writer queue, a whole record packed into one atomically-published long using the newer member bitfields, and computed member offsets with OFFSETOF for the places raw addressing is unavoidable. Every cross-cog claim is confirmed on real P2 silicon with two cogs actually contending — each discipline measured against a deliberately-broken version of itself. The first document to cover the STRUCT facilities Spin2 has added since records arrived.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2an007-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN007-src-260713.zip)
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set — so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.

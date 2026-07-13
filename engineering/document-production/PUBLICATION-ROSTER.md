@@ -51,6 +51,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | AI Privacy Guide | guide | — | ✅ | ✅ | — | ✅ | ✅ | ✅ |
 
 Legend: ✅ done · 🔄 in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached. `Chip`/`Comm`
@@ -114,6 +115,9 @@ Prior **v1.0.0 (2026-07-07, 12pp)** — Family C1 (Concurrency & New Language Fe
 **P2AN006 — Sizing Cog & Task Stacks** · `P2AN006` · app-note
 **v1.0.0 (2026-07-07, 12pp)** — Family C3 (companion to C1); techniques-catalog: sizing `cogspin`/`TASKSPIN` stack buffers (silent overflow → corruption) through 4 recipes built around the MIT-licensed `isp_stack_check` sentinel-fill utility (Stephen M. Moraco, in the example library). All `pnut_ts -d`-clean.
 
+**P2AN007 — Data Structures with the New Language Facilities** · `P2AN007` · app-note
+**v1.0.0 (2026-07-13, 16pp) — INITIAL release.** Family **C2**. Techniques-catalog: the Spin2 `STRUCT` facility + the worked code for sharing records safely across cogs, through 6 recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW`/`LOCKTRY`/`LOCKREL`), plus the two STRUCT facilities added since v45: **R5** member bitfields (`{Spin2_v54}`) packing a whole record into one atomically-published long, and **R6** `OFFSETOF` (`{Spin2_v53}`) for computed offsets under raw addressing. R1–R4 stay `{Spin2_v45}`. **The only reader-facing P2 doc covering `OFFSETOF` or struct bitfields.** Every cross-cog claim **hardware-confirmed on real P2 silicon** (two cogs contending; each discipline measured against a deliberately-broken control that was REQUIRED to fail — EF-036…EF-040). Headline empirical result: a record packed into one long is **not** atomic unless published in one store (in-place field writes tore 116,452 / 200,000; staged one-store publish tore 0). First render carrying the F-214 mnemonic-bold hyphen fix. Implementation-only; the contract decision is cited to the Architect's Guide.
+
 **AI Privacy Guide** · `ai-privacy-guide` · guide
 Released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`).
 
@@ -127,7 +131,6 @@ tool serving an effort, never released — carried here while it's actively used
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
-| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v1.0.0 pre-release | ✅ | ✅ | ⏳ | | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
@@ -137,9 +140,6 @@ tool serving an effort, never released — carried here while it's actively used
 
 **P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
-
-**P2AN007 — Data Structures with the New Language Facilities** · `P2AN007` · app-note
-**drafted 2026-07-06; extended + bumped to v1.0.0 pre-release 2026-07-13.** Family **C2**. Techniques-catalog: the Spin2 `{Spin2_v45}` STRUCT facility + worked cross-cog sharing through **6** recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW/LOCKTRY/LOCKREL`, never P1 `lockset/lockclr`), plus the two STRUCT facilities added since v45: **R5** member bitfields (`{Spin2_v54}`) packing a whole record into one atomically-published long, and **R6** `OFFSETOF` (`{Spin2_v53}`) for computed offsets under raw addressing. R1–R4 stay `{Spin2_v45}`; the newer floors apply only to the files that use them. **This is the only reader-facing P2 doc covering `OFFSETOF` or struct bitfields** (the Spin2 Reference Manual is parked). Implementation-only; the *contract decision* (which structure, why) is cited to the Architect's Guide. All 6 `pnut_ts -d`-clean. **F-213 fixed here:** v0.1.0's R3 invited dropping the seq/ack handshake, which reintroduces a torn read — replaced with a pitfall + the two safe non-blocking alternatives. NEXT: Stephen runs the 5 hardware-verification rigs (`audit/verification-tests/`) → Claude certifies logs → EF ledger → prepare-manual → Forge v1.0.0 PDF → release.
 
 **P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
 Test / standards harness — manual-shaped (full folder triad, generates PDFs) but **never released**; serves the manual layout-standards effort (`methodology/manual-layout-standards-*`), not the community. Not consistency-bound. **Its analysis IS its product** — its `audit/` is git-tracked alongside its cases (the `.gitignore` exception), so the instrument, its analysis, and the fixes it drives version together. Resume into the effort it serves.
@@ -167,7 +167,7 @@ pipeline at a glance (blank gates = not started).
 - **B3 · Fixed-Point Math on the P2** — fractional math with no FPU; recurring P2-specific technique.
 - **USB Device/Host (standalone)** — high value, hard; its example-mining ran early as the IOSP Release Campaign's USB study.
 
-*(Family C: C1/C3 — **P2AN005/P2AN006 — released v1.0.0 2026-07-07** (now in Done); C2 — P2AN007 remains In progress.)*
+*(Family C complete: C1/C3 — **P2AN005/P2AN006 released v1.0.0 2026-07-07**; C2 — **P2AN007 released v1.0.0 2026-07-13**. All three in Done.)*
 
 ## Abandoned — retired, not carrying forward (last)
 
@@ -248,6 +248,8 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-07-13 20:13  PUBLISH   P2AN007                          (v1.0.0, 16pp — app-note, INITIAL release: STRUCT records + safe cross-cog sharing, 6 recipes (in-cog record, lock-free SPSC ring, latest-wins mailbox, locked multi-writer queue, whole record packed into one atomically-published long via {Spin2_v54} member bitfields, {Spin2_v53} OFFSETOF computed offsets). First reader-facing doc covering OFFSETOF or struct bitfields. Every cross-cog claim hardware-confirmed on real P2 silicon, two cogs contending, each discipline measured against a deliberately-broken control that was REQUIRED to fail (EF-036..EF-040). Carries the F-214 mnemonic-bold fix (hyphenated compound tokens no longer uppercased — filenames/slugs render correctly); render-verified 16pp, all sections present, compile-clean, no content-drop)
+2026-07-13 20:00  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua  (F-214: a mnemonic inside a HYPHENATED compound token is no longer uppercased — the guard now treats a hyphen joining two alphanumeric runs as an identifier connector. Fixes corrupted filenames/slugs in rendered inline code (single-long-packed-record.spin2 -> single-LONG-..., not-taken -> NOT-taken, p2-io-and-smart-pins-user-guide -> p2-io-AND-...). Real Spin2 code is untouched: subtraction, unary minus, standalone LONG[@ptr], and the .long[5] pointer size-override all still uppercase. Benefits every manual; first consumed by P2AN007 v1.0.0. RELEASED PDFs still carrying the defect need a re-render — Assembly Language Manual foremost.)
 2026-07-12 04:36  PUBLISH   p2-assembly-language-manual      (v3.1.3, 505pp — silicon/hardware-grounded accuracy pass: instruction semantics + flag effects read as the silicon defines (AUGS/AUGD augment surviving intervening instructions, TEST/interrupt-priority/COGINIT/QEXP), GETCT-pair bracketing carries a fixed 2-clock overhead HW-confirmed on real P2; render-verified 505pp, outline complete, compile-clean, no content-drop)
 2026-07-12 04:22  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.5, 398pp — hardware-grounded accuracy pass: smart-pin & pin behavior documented as measured on real P2, every worked example runs as written and matches its in-text listing line-for-line, quantitative timings/bit-field encodings/ranges aligned to the datasheet + Silicon Doc; example ZIP rebuilt (-src-260712); render-verified 398pp, outline complete, compile-clean, no content-drop)
 2026-07-12 04:06  PUBLISH   p2-pasm-desilva-style            (v3.0.3, 164pp — technical-accuracy pass: the CORDIC is one solver the cogs share through hub slots, MUL is a 16×16→32 multiply, RCFAST runs ~24 MHz, TESTP WZ reflects pin state, async-serial transmit drives its P_OE output; example ZIP rebuilt (-src-260712); render-verified 164pp, outline complete, compile-clean, no content-drop)
