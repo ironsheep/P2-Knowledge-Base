@@ -1,0 +1,36 @@
+{Spin2_v53}
+CON
+  _clkfreq = 200_000_000
+
+  ' A packed 8-byte header, laid out exactly as it arrives on the wire.
+  STRUCT hdr_t(LONG magic, WORD length, BYTE kind, BYTE flags)
+
+VAR
+  BYTE packet[64]  ' raw bytes, as if just received
+  ^hdr_t ph  ' a typed view over those same bytes
+
+PUB main() | payload
+  [ph] := @packet  ' aim the view at the buffer - brackets write the POINTER
+
+  ' Fill the header through RAW addressing - the way low-level code must -
+  ' but with OFFSETOF supplying every offset instead of hand-counted numbers.
+  LONG[@packet + OFFSETOF(hdr_t.magic)]  := $5032_5041
+  WORD[@packet + OFFSETOF(hdr_t.length)] := 40
+  BYTE[@packet + OFFSETOF(hdr_t.kind)]   := 7
+  BYTE[@packet + OFFSETOF(hdr_t.flags)]  := %0000_0011
+
+  ' Read the SAME bytes back by name, through the struct view.
+  debug("magic=", uhex_long(ph.magic), " length=", udec(ph.length), ...
+        " kind=", udec(ph.kind), " flags=", uhex(ph.flags))
+
+  ' The offsets the compiler computed - so you never hand-count them.
+  debug("offsets  magic=", udec(OFFSETOF(hdr_t.magic)), ...
+        " length=", udec(OFFSETOF(hdr_t.length)), ...
+        " kind=", udec(OFFSETOF(hdr_t.kind)), ...
+        " flags=", udec(OFFSETOF(hdr_t.flags)), ...
+        "  sizeof=", udec(SIZEOF(hdr_t)))
+
+  ' The payload begins right after the header - SIZEOF says where.
+  payload := @packet + SIZEOF(hdr_t)
+  BYTE[payload] := $FF
+  debug("payload starts at +", udec(payload - @packet))

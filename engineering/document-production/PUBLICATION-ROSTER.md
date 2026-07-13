@@ -127,7 +127,7 @@ tool serving an effort, never released — carried here while it's actively used
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | XBYTE Guide | manual | v0.1.0 draft | ✅ | ⏳ | ✅ | | | |
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
-| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v0.1.0 draft | ✅ | ✅ | ⏳ | | | |
+| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | v1.0.0 pre-release | ✅ | ✅ | ⏳ | | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
@@ -139,7 +139,7 @@ tool serving an effort, never released — carried here while it's actively used
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
 
 **P2AN007 — Data Structures with the New Language Facilities** · `P2AN007` · app-note
-**stood up + drafted 2026-07-06, v0.1.0.** Family **C2**. Techniques-catalog: the Spin2 `{Spin2_v45}` STRUCT facility + worked cross-cog sharing through 4 recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW/LOCKTRY/LOCKREL`, never P1 `lockset/lockclr`). Implementation-only; the *contract decision* (which structure, why) is cited to the Architect's Guide. All `pnut_ts -d`-clean. NEXT: prepare-manual → Forge v0.1.0 review PDF.
+**drafted 2026-07-06; extended + bumped to v1.0.0 pre-release 2026-07-13.** Family **C2**. Techniques-catalog: the Spin2 `{Spin2_v45}` STRUCT facility + worked cross-cog sharing through **6** recipes — in-cog record/array, lock-free SPSC ring buffer, latest-wins mailbox, locked multi-writer queue (real P2 `LOCKNEW/LOCKTRY/LOCKREL`, never P1 `lockset/lockclr`), plus the two STRUCT facilities added since v45: **R5** member bitfields (`{Spin2_v54}`) packing a whole record into one atomically-published long, and **R6** `OFFSETOF` (`{Spin2_v53}`) for computed offsets under raw addressing. R1–R4 stay `{Spin2_v45}`; the newer floors apply only to the files that use them. **This is the only reader-facing P2 doc covering `OFFSETOF` or struct bitfields** (the Spin2 Reference Manual is parked). Implementation-only; the *contract decision* (which structure, why) is cited to the Architect's Guide. All 6 `pnut_ts -d`-clean. **F-213 fixed here:** v0.1.0's R3 invited dropping the seq/ack handshake, which reintroduces a torn read — replaced with a pitfall + the two safe non-blocking alternatives. NEXT: Stephen runs the 5 hardware-verification rigs (`audit/verification-tests/`) → Claude certifies logs → EF ledger → prepare-manual → Forge v1.0.0 PDF → release.
 
 **P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
 Test / standards harness — manual-shaped (full folder triad, generates PDFs) but **never released**; serves the manual layout-standards effort (`methodology/manual-layout-standards-*`), not the community. Not consistency-bound. **Its analysis IS its product** — its `audit/` is git-tracked alongside its cases (the `.gitignore` exception), so the instrument, its analysis, and the fixes it drives version together. Resume into the effort it serves.

@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-213`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit)
+**Next finding ID: `F-214`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -1393,6 +1393,19 @@ lock-guarded multi-writer form explicitly.
 - **Blocks:** the previously-noted "ch05 PLOT TEXTSTYLE horiz+vert align 2/3 SWAPPED" manual correction (which would have aligned the manual to v55 text) is **ON HOLD** — applying it now risks contradicting PNut source and flip-flopping on the next PNut-grounded audit.
 - **Related open candidate (same v55-vs-REF axis, softer):** PLOT `TEXTSIZE` default — REF §4.3 says `DefaultTextSize = 10` (a PNut constant); v55 instantiation tables say default = "editor text size." May be layering (hardcoded fallback vs tool-supplied runtime default) rather than a hard contradiction — reconcile against REF/raw Pascal too.
 - **Origin:** surfaced 2026-07-10 while checking whether the debug REF folder addresses the example-ZIP customer feedback + broader fabrication audit; REF is upstream of the debug YAMLs (they cite `DEBUG-WINDOW-DIRECTIVE-MATRIX.md` as `documentation_source`). Recommend a **systematic v55-text-vs-REF reconciliation pass** for the debug windows before applying any broader debug fabrication-audit finding.
+
+---
+
+## P2AN007 R3 — dropping the seq/ack handshake invites the torn read the note exists to prevent (2026-07-13) — F-213
+
+### F-213 — P2AN007 v0.1.0 R3 tells the reader the ack can be dropped; it cannot — `CONFIRMED` (doc-side; FIXED in v1.0.0, hardware arm pending)
+
+- **Location:** `engineering/document-production/app-notes/P2AN007/opus-master/P2AN007.md` — Recipe R3 (Latest-Wins Mailbox), the "How this works" closing sentence and the following Tip. Doc-side only; **no YAML is wrong** (`patterns/implementation/spin2_latest_wins_mailbox.yaml` does not make this claim).
+- **What v0.1.0 said:** *"Here the writer waits for the ack before sending the next, which paces the two cogs; **drop that wait and the newest command always wins**."* The companion Tip further claimed the sequence-counter form *"never blocks the writer waiting for the reader"* — which is not true of the recipe as printed, since it does exactly that.
+- **Why it is wrong:** R3's worker reads `cmd.opcode`, `cmd.arg0`, and `cmd.arg1` as **three separate reads of shared hub memory**. The seq/ack handshake is the only thing preventing the writer from overwriting `cmd` *while the worker is part-way through reading it*. Remove the wait and a torn read is reintroduced — the precise failure the note's entire thesis is organized around avoiding. R3 **as printed** is correct; the guidance to modify it is what is unsafe. This is a guidance defect, not a code defect.
+- **Fix applied (v1.0.0, 2026-07-13):** the invitation is replaced by a ⚠ Pitfall stating the ack is load-bearing, plus the two honest non-blocking alternatives — pack the payload into a single long so the whole record publishes in one store (new recipe **R5**, member bitfields {Spin2_v54}), or have the reader re-check the sequence (read seq, copy, re-read seq, retry if it moved) so a straddling copy is discarded rather than used. The inaccurate "never blocks" Tip is corrected.
+- **Empirical arm (pending):** `audit/verification-tests/vt2-mailbox-publish-order.spin2` arm **C (`NOACK`)** measures this directly — correct publish order, ack removed — against arm A (R3 as printed, expect zero) and arm B (bad publish order, expect tears). Promote to the EF ledger once the two-cog run certifies. Until then the fix stands on the correctness argument above, not on a measurement.
+- **Origin:** surfaced 2026-07-13 while building the hardware-verification rigs for the P2AN007 v1.0.0 release — designing a rig for R3 required stating precisely what R3 guarantees, which exposed the guidance that contradicts it. A worked argument for *why* a rig is needed is itself an audit.
 
 ---
 

@@ -11,14 +11,22 @@ drift.
 | `spsc-ring-buffer.spin2` | R2 (lock-free ring) | one-producer/one-consumer ring of records; single-owner indices, no lock |
 | `latest-wins-mailbox.spin2` | R3 (latest-wins mailbox) | a command record published with a sequence counter; seq/ack, no lock |
 | `locked-multiwriter-queue.spin2` | R4 (locked queue) | many writers → one queue, guarded by a P2 hardware lock (`LOCKNEW`/`LOCKTRY`/`LOCKREL`) |
+| `single-long-packed-record.spin2` | R5 (record in one long) | member bitfields ({Spin2_v54}); a whole command record in one long, staged privately and published in one atomic store |
+| `packed-header-offsets.spin2` | R6 (raw addressing) | `OFFSETOF` ({Spin2_v53}); compiler-computed member offsets over a packed wire header, plus a struct-pointer view of the same bytes |
 
-**Version gate.** Every file opens with `{Spin2_v45}` as its first line — STRUCT is
-a Spin2 v45 language feature.
+**Version gate.** R1–R4 open with `{Spin2_v45}` — STRUCT is a Spin2 v45 language
+feature. The two newer facilities raise the floor only for the files that use them:
+`packed-header-offsets.spin2` needs **v53** (`OFFSETOF`), and
+`single-long-packed-record.spin2` needs **v54** (member bitfields). A compiler that
+predates them still builds R1–R4.
 
 **The one discipline.** Every cross-cog recipe writes a record's fields **first**,
 then flips a single long (an index or a sequence counter) that publishes it — the
 atomic hand-off. A single writer of that long needs no lock (R2, R3); several
-writers need one hardware lock (R4).
+writers need one hardware lock (R4). When the payload itself fits in 32 bits, the
+record *becomes* that long (R5) — but only if you stage it privately and publish it
+in one whole-struct store, because filling a packed long a field at a time is still
+several separate read-modify-writes.
 
 **Verification.** Every file compiles clean under `pnut-ts -d` (v1.55, `_clkfreq =
 200_000_000`). Build with DEBUG enabled (`-d`). Compilation proves the STRUCT and

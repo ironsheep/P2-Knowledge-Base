@@ -26,7 +26,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 0.1.0 (draft)\par}
+{\large\color{blue}Version 1.0.0\par}
 
 \vspace{0.25cm}
 % App-note cover box: repurposes the manuals' bottom-of-cover content table.
@@ -53,11 +53,13 @@ by how the data flows:
 \item \textbf{R2 — lock-free ring buffer} — one producer, one consumer, no lock
 \item \textbf{R3 — latest-wins mailbox} — a command block published with a sequence counter
 \item \textbf{R4 — locked multi-writer queue} — many writers, one hardware lock
+\item \textbf{R5 — a whole record in one long} — member bitfields; the publish IS the payload
+\item \textbf{R6 — raw addressing with OFFSETOF} — computed offsets, never hand-counted
 \end{itemize}
 
 \vspace{0.05cm}
-\textbf{Applies to:} P2 (Propeller 2) silicon \textbullet{} Spin2 / PNut v45 or later (STRUCT)
-\textbullet{} P2 Edge or P2 Eval board; every recipe reports over DEBUG.
+\textbf{Applies to:} P2 (Propeller 2) silicon \textbullet{} Spin2 / PNut v45 or later (STRUCT;
+R6 needs v53, R5 needs v54) \textbullet{} P2 Edge or P2 Eval board; every recipe reports over DEBUG.
 }
 \end{tcolorbox}
 \vspace{0.10cm}

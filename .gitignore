@@ -173,6 +173,11 @@ archive-old/
 
 # Audit working files (internal QA, not versioned - changelog captures results)
 engineering/document-production/manuals/*/audit/
+# App notes follow the same rule (P2AN007 2026-07-13 is the first with an audit/
+# workspace): the verification-test rigs and their hardware logs are transient
+# history. Accepted results replicate to engineering/ingestion/external-sources/
+# hardware-verification/ (the EF ledger), which IS the source of truth.
+engineering/document-production/app-notes/*/audit/
 # EXCEPTION: an instrument's analysis IS its product (not transient release scratch),
 # so the layout torture-test's audit/ is versioned alongside its cases.
 !engineering/document-production/manuals/p2-layout-torture-test/audit/

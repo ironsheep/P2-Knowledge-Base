@@ -1,0 +1,35 @@
+{Spin2_v54}
+CON
+  _clkfreq = 200_000_000
+
+  ' The WHOLE command, packed into one long. The nameless form means the
+  ' struct IS the backing long - no intermediate member name to write.
+  STRUCT cmd_t(LONG.opcode[3..0].arg[19..4].seq[31..20])
+
+VAR
+  cmd_t cmd  ' the entire shared command block - exactly one long
+
+DAT
+  workerStack LONG 0[64]
+
+PUB main() | i, cmd_t staged
+  cmd := 0  ' whole-struct zero
+  cogspin(NEWCOG, worker(), @workerStack)
+
+  repeat i from 1 to 5
+    staged.opcode := i                    ' build it PRIVATELY, field by field
+    staged.arg    := i * 100
+    staged.seq    := i                    ' the sequence rides INSIDE the long
+    cmd := staged                         ' publish: ONE whole-struct store
+    waitms(50)
+
+  debug("all commands published")
+
+PRI worker() | cmd_t snap, lastSeq
+  lastSeq := 0
+  repeat
+    snap := cmd                           ' snapshot: ONE whole-struct load
+    if snap.seq <> lastSeq                ' new command? ask the SNAPSHOT
+      lastSeq := snap.seq
+      debug("worker exec op=", udec(snap.opcode), " arg=", udec(snap.arg), ...
+            " seq=", udec(snap.seq))

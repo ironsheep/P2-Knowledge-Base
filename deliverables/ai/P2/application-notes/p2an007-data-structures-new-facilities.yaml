@@ -7,12 +7,20 @@
 title: "Data Structures with the New Language Facilities"
 subtitle: "Spin2 STRUCT for in-cog records — and the worked code for sharing them safely across cogs"
 doc_id: P2AN007
-version: "0.1.0"
+version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
 aliases:
   - STRUCT
+  - OFFSETOF
+  - struct bitfields
+  - member bitfields
+  - nameless struct member
+  - packed status word
+  - atomic publish
+  - torn read
+  - seqlock
   - Spin2 structures
   - data structures
   - records
@@ -50,11 +58,18 @@ summary: |
   ring buffer (single-owner head/tail indices, power-of-2 & mask, publish-index-last, no lock);
   R3 a latest-wins command mailbox (a STRUCT arg block published with a sequence counter bumped last,
   seq/ack handshake, no lock); and R4 a locked multi-writer queue (several writers, one P2 hardware
-  lock guarding the head advance, release-on-all-paths, ascending-lock-order). Uses the REAL P2 lock
-  methods LOCKNEW/LOCKTRY/LOCKREL -- never the P1 lockset/lockclr. Implementation-only by design:
-  which structure to use and why (copy vs reference, refcount-vs-copy fan-out) is a contract decision
-  the P2 Architect's Guide owns and this note CITES. Every recipe compiles clean under pnut_ts -d;
-  cross-cog race-freedom is described from the atomic-single-long model, a hardware pass deferred.
+  lock guarding the head advance, release-on-all-paths, ascending-lock-order). Two further recipes
+  cover the STRUCT facilities added after v45: R5 packs a WHOLE record into one long using member
+  bitfields ({Spin2_v54}, nameless form) so the payload and its sequence number publish in a single
+  atomic store -- but ONLY if the record is staged in a private local and stored once, because each
+  bitfield write is a read-modify-write of the backing long and filling the shared record field-by-
+  field is several separate stores a reader can land between; and R6 uses OFFSETOF ({Spin2_v53}) for
+  compiler-computed member offsets where raw addressing is unavoidable (a packed wire header, a buffer
+  handed to inline PASM), so a widened member never silently invalidates a hand-counted offset.
+  Uses the REAL P2 lock methods LOCKNEW/LOCKTRY/LOCKREL -- never the P1 lockset/lockclr.
+  Implementation-only by design: which structure to use and why (copy vs reference, refcount-vs-copy
+  fan-out) is a contract decision the P2 Architect's Guide owns and this note CITES. Every recipe
+  compiles clean under pnut_ts -d.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -83,10 +98,15 @@ runnable_code:
     - {id: spsc-ring-buffer,        file: spsc-ring-buffer.spin2,        note: "R2 — lock-free single-producer/single-consumer ring of records; single-owner indices, publish-index-last"}
     - {id: latest-wins-mailbox,     file: latest-wins-mailbox.spin2,     note: "R3 — STRUCT command block published with a sequence counter (seq bumped last, seq/ack), no lock"}
     - {id: locked-multiwriter-queue, file: locked-multiwriter-queue.spin2, note: "R4 — many writers -> one queue guarded by a P2 hardware lock (LOCKNEW/LOCKTRY/LOCKREL)"}
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; every file opens with {Spin2_v45} (STRUCT); all use debug() so compile with -d"
+    - {id: single-long-packed-record, file: single-long-packed-record.spin2, note: "R5 — {Spin2_v54} member bitfields; a WHOLE command record (opcode/arg/seq) packed into one long, staged privately and published in ONE whole-struct store; reader snapshots in ONE load"}
+    - {id: packed-header-offsets,    file: packed-header-offsets.spin2,    note: "R6 — {Spin2_v53} OFFSETOF; compiler-computed member offsets over a packed wire header, plus a ^struct pointer view of the same bytes (SIZEOF locates the payload)"}
+  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; R1-R4 open with {Spin2_v45} (STRUCT), R6 needs {Spin2_v53} (OFFSETOF), R5 needs {Spin2_v54} (member bitfields); all use debug() so compile with -d"
 
 key_parameters:
-  version_gate: "STRUCT requires {Spin2_v45} as the first source line (OFFSETOF is v53, member bitfields v54 — this note stays within v45)"
+  version_gate: "STRUCT requires {Spin2_v45} as the first source line. Two later additions are covered and raise the floor ONLY for the file that uses them: OFFSETOF = v53 (R6); member bitfields = v54 (R5). R1-R4 remain v45. NOTE: the v54 bitfield syntax parses UNCONDITIONALLY (there is no level54_symbols table), so {Spin2_v54} is a declaration of intent, NOT an enforced gate — a clean compile does not prove the toolchain is new enough."
+  struct_bitfields: "{Spin2_v54}. Named bit ranges on a BYTE/WORD/LONG member: STRUCT s(LONG flags.ready[0].mode[3..2]) -> s.flags.ready. NAMELESS form STRUCT s(LONG.ready[0].mode[3..2]) makes the struct ITSELF the backing long -> s.ready (single member only, no [N] count). [N]=one bit, [hi..lo]=inclusive range. Bit must fit the member type (BYTE 0..7 / WORD 0..15 / LONG 0..31) — the compiler CHECKS that, but does NOT check that fields fail to overlap. Whole-member and whole-struct assignment/zero/set-all are preserved. SIZEOF(nameless)=size of the backing type (4 for LONG); OFFSETOF(nameless.field)=0"
+  packed_long_atomicity: "CRITICAL and counter-intuitive: packing a record into ONE long does NOT make it atomic. Each bitfield write is a read-modify-write of the backing long, so writing the SHARED record field-by-field is several separate stores and a reader CAN observe an intermediate state. Atomicity requires staging the record in a PRIVATE local, publishing with ONE whole-struct store (shared := staged), and snapshotting with ONE whole-struct load (snap := shared) before reading any field"
+  offsetof: "{Spin2_v53}. OFFSETOF(struct.member) -> byte offset of the member within the record (records pack with NO padding). Nests and indexes: OFFSETOF(s.sub.member), OFFSETOF(s.arr[2].member). Restricted to DAT/VAR/PUB/PRI blocks — using it in CON or OBJ is a compile error (same restriction as SIZEOF). Use it wherever raw addressing is unavoidable so a widened/inserted member cannot silently invalidate a hand-counted offset"
   struct_decl: "STRUCT name(members) in a CON block; members default LONG, or typed BYTE/WORD/LONG; arrays and nesting allowed; packed (no padding). reading_t(LONG,LONG,BYTE) = 9 bytes"
   struct_ops: "member access var.member; whole-struct copy a := b; SIZEOF(name) -> byte size; pass-by-value <=15 longs (larger uses BYTEMOVE)"
   atomicity_model: "a single hub LONG is read/written atomically; a multi-field record is NOT. Publish a record: write its fields FIRST, then flip ONE long (an index or a sequence counter) LAST"
@@ -107,6 +127,14 @@ gotchas:
   - flag: pitfall
     text: "One writer per index -> no lock; several writers -> a lock. A single owner of an index long advances it safely lock-free (R2/R3). Two cogs advancing the same index is a read-modify-write race — guard it (R4)."
   - flag: pitfall
+    text: "A record that FITS in one long still needs a ONE-STORE publish (R5). Each bitfield write is a read-modify-write of the backing long, so filling the shared record field-by-field is several stores a reader can land between. Stage it in a private local, publish with one whole-struct store, snapshot with one whole-struct load. Fitting in one long makes an atomic publish POSSIBLE; storing it once is what makes it HAPPEN."
+  - flag: pitfall
+    text: "R3's seq/ack handshake is LOAD-BEARING — do NOT drop it (KB finding F-213). The worker reads opcode/arg0/arg1 as THREE separate reads of shared memory; the ack is what stops the writer overwriting the command mid-read. For a non-blocking writer: pack the payload into one long (R5), or have the reader re-check the sequence (read seq, copy, re-read seq, retry if it moved) and discard a straddling copy."
+  - flag: pitfall
+    text: "Member bitfields may OVERLAP silently. The compiler rejects a bit range that overruns its member type, but performs NO disjointness check — two fields sharing bits compile clean and corrupt each other. Add the bit budget up by hand, once."
+  - flag: pitfall
+    text: "Brackets write the POINTER, the bare name writes the RECORD: `[ph] := @packet` aims a ^struct pointer; plain `ph := ...` means the record it points at and will not compile as an address assignment."
+  - flag: pitfall
     text: "Use the REAL P2 locks LOCKNEW/LOCKTRY/LOCKREL. The P1 methods lockset()/lockclr() do NOT exist on P2 and will not compile (KB finding F-199)."
   - flag: pitfall
     text: "Release the lock on EVERY exit path from a critical section — an early RETURN/ABORT inside a locked section must LOCKREL first, or the lock leaks and other cogs hang. Free the lock with LOCKRET when done."
@@ -117,7 +145,7 @@ gotchas:
   - flag: tip
     text: "A STRUCT array replaces parallel arrays kept in lockstep — one records[] copies and indexes as a unit, fewer indices to keep aligned. A deque is a ring with both ends live (no new primitive)."
   - flag: verify
-    text: "R1: SIZEOF(reading_t)=9, value=i*i. R2: consumed value = seq*10, seq monotonic (a mismatch = publish order wrong). R3: 5 exec lines op 1..5, a0=op*100, a1=op*1000. R4: writer-1/writer-2 jobs interleaved, no duplicated/skipped slot (a collision = enqueue ran without the lock)."
+    text: "R1: SIZEOF(reading_t)=9, value=i*i. R2: consumed value = seq*10, seq monotonic (a mismatch = publish order wrong). R3: 5 exec lines op 1..5, a0=op*100, a1=op*1000. R4: writer-1/writer-2 jobs interleaved, no duplicated/skipped slot (a collision = enqueue ran without the lock). R5: 5 exec lines op 1..5 with arg=op*100 (an arg belonging to a different op = the record reached the shared long field-by-field instead of staged+stored once). R6: OFFSETOF magic=0 length=4 kind=6 flags=7, SIZEOF(hdr_t)=8, payload at +8."
 
 hardware_status: |
   Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
