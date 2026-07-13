@@ -23,6 +23,8 @@ When you encounter a rule and wonder why it exists:
 | Use surgical editing (Edit tool), never wholesale replacement | [file-operations-regression-lesson.md](file-operations-regression-lesson.md) | Destructive file replacement without backup |
 | Never use `head -n`, `>` redirection, or `mv` on important files | [file-operations-regression-lesson.md](file-operations-regression-lesson.md) | Truncation and overwrite incidents |
 | Check file size before modifying | [file-operations-regression-lesson.md](file-operations-regression-lesson.md) | Large file damage prevention |
+| Make a two-cog race **structural**, never incidental | [two-cog-race-rigs-must-be-structural.md](two-cog-race-rigs-must-be-structural.md) | Same rig, logic unchanged: 14,976 anomalies one run, 0 the next — cogs phase-lock at launch |
+| A dual-tail rig must FAIL LOUDLY when its negative control doesn't fail | [two-cog-race-rigs-must-be-structural.md](two-cog-race-rigs-must-be-structural.md) | Zero-in-both-arms was one guard away from being banked as a clean PASS |
 
 ### PDF Generation Rules
 

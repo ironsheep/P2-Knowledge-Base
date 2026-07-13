@@ -102,6 +102,33 @@ After the run: certify each log → EF-NNN entries in the empirical ledger → f
 opus-master BEFORE the render → append the race-freedom sentence to the v1.0.0 Revision History (held
 back behind a HOLD comment until the logs exist) → prepare-manual → Forge PDF → release.
 
+### Run status
+
+| Rig | Run 1 (07-13) | Run 2 (07-13) | State |
+|---|---|---|---|
+| VT1 | 0 / **200,000** | 0 / **200,000** | **BANKED** — reproduced exactly |
+| VT4 | 0 / **109,642** | 0 / **116,452** | **BANKED** — reproduced |
+| VT5 | 11/11 PASS | 11/11 PASS | **BANKED** — deterministic |
+| VT2 | A0 / B20,000 / **C0** | A0 / B5,001 / **C0** | INCONCLUSIVE → rev 3, re-run |
+| VT3 | 0 / **14,976** | 0 / **0** | INCONCLUSIVE → rev 2, re-run |
+
+**VT4 is the empirical centerpiece.** In-place field writes to the shared packed long tore ~110k times
+per 200k snapshots; the staged one-store publish tore zero, twice. R5's counter-intuitive claim is
+measured, not argued.
+
+### The phase-lock trap (methodology, cost us two runs)
+
+VT3's unlocked arm gave 14,976 anomalies on run 1 and **0** on run 2 from a binary whose only change
+was debug text. Two cogs running deterministic loops of equal length hold a near-fixed relative phase,
+so "do the writers ever collide" was decided at `cogspin` time and never re-sampled; one added debug
+line rerolled it. Same disease in VT2 arm C (zero twice). **Fix: make the race structural** — hold the
+contended window open longer than the other cog's entire loop (VT3: 1µs → 10µs section; VT2: 1µs → 25µs
+worker gap), applied identically in every arm so only the protocol still differs. Promoted to
+`engineering/operations/lessons-learned/two-cog-race-rigs-must-be-structural.md`.
+
+The INCONCLUSIVE guard is what caught this. Without it, run 2's VT3 would have banked "locked arm: 0
+anomalies" as a clean PASS from a run where the detector never fired.
+
 ## Sources (all P2-native — no P1 content read or cited)
 
 - `deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml` (syntax, members, arrays, SIZEOF, pointers, cross-object export/import, the >15-long struct-pointer bracket gotcha)
