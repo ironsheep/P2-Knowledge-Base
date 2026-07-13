@@ -225,6 +225,11 @@ engineering/tools/.dod-validation-history.json
 # generalizes the ad-hoc *.backup-YYYYMMDD entries scattered below
 *.backup-*
 
+# Compiled example binaries (Stephen 2026-07-13): example .bin are NEVER committed
+# nor shipped in example ZIPs - always recreatable from the versioned .spin2 via
+# pnut_ts. (Ingestion assets/ .bin are source-document artifacts - NOT covered.)
+engineering/document-production/**/*.bin
+
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/
 engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md.pre-merge-backup.20251209_052816
