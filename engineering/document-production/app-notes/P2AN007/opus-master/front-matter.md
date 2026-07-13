@@ -40,7 +40,7 @@
   colbacktitle=gray!15,
   coltitle=black
 ]
-\textbf{Real data structures on the P2 — a typed record with the Spin2 STRUCT facility, and three worked ways to move those records safely between cogs.}
+\textbf{Real data structures on the P2 — a typed record with the Spin2 STRUCT facility, and four worked ways to move those records safely between cogs.}
 
 \vspace{0.10cm}
 {\footnotesize
