@@ -104,13 +104,22 @@ back behind a HOLD comment until the logs exist) → prepare-manual → Forge PD
 
 ### Run status
 
-| Rig | Run 1 (07-13) | Run 2 (07-13) | State |
-|---|---|---|---|
-| VT1 | 0 / **200,000** | 0 / **200,000** | **BANKED** — reproduced exactly |
-| VT4 | 0 / **109,642** | 0 / **116,452** | **BANKED** — reproduced |
-| VT5 | 11/11 PASS | 11/11 PASS | **BANKED** — deterministic |
-| VT2 | A0 / B20,000 / **C0** | A0 / B5,001 / **C0** | INCONCLUSIVE → rev 3, re-run |
-| VT3 | 0 / **14,976** | 0 / **0** | INCONCLUSIVE → rev 2, re-run |
+| Rig | Run 1 | Run 2 | Run 3 | State |
+|---|---|---|---|---|
+| VT1 | 0 / **200,000** | 0 / **200,000** | — | **BANKED** — reproduced exactly |
+| VT4 | 0 / **109,642** | 0 / **116,452** | — | **BANKED** — reproduced |
+| VT5 | 11/11 PASS | 11/11 PASS | — | **BANKED** — deterministic |
+| VT3 | 0 / **14,976** | 0 / 0 ⚠ | 0 / **3,331** | **BANKED** — structural overlap (10µs section) |
+| VT2 | A0 / B20,000 / **C0** | A0 / B5,001 / **C0** | A0 / **B0** ⚠ / **C20,000** | rev 4 (2 experiments), re-run |
+
+**VT2 rev 4 — one worker cannot serve both claims.** Run 3's 25µs worker gap finally fired arm C at
+20,000/20,000 (decisive for F-213) but dropped arm B to zero: the bad-publish-order bug is only visible
+to a worker that reads the record IMMEDIATELY (its window is the ~2µs between the seq bump and the
+fields landing), while the no-ack bug is only visible to a worker that takes real time BETWEEN reading
+the opcode and reading the args. Rev 4 splits them into two experiments, each with its own worker and
+its own matched control: EXP-1 (fast worker) A1-control vs B-test; EXP-2 (slow worker) A2-control vs
+C-test. A2 is what isolates the ack as the cause rather than the gap — same slow worker, ack present,
+must be zero.
 
 **VT4 is the empirical centerpiece.** In-place field writes to the shared packed long tore ~110k times
 per 200k snapshots; the staged one-store publish tore zero, twice. R5's counter-intuitive claim is
