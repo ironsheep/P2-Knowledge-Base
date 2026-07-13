@@ -529,7 +529,20 @@ local function uppercase_mnemonics_in_line(line)
       local char_before = word_start > 1 and code_part:sub(word_start - 1, word_start - 1) or ""
       local char_after = i <= len and code_part:sub(i, i) or ""
 
+      -- A hyphen that JOINS two alphanumeric runs makes a compound token -- a
+      -- filename or a hyphenated term (single-long-packed-record.spin2,
+      -- not-taken, p2-io-and-smart-pins-user-guide, 1..4-byte). Those are not
+      -- Spin2 code and must not be uppercased: doing so corrupts the name and,
+      -- for a filename, points the reader at a file that does not exist.
+      -- Require the char BEYOND the hyphen to be alphanumeric, so a genuine
+      -- subtraction ("x - long", "#-1") and a leading unary minus are untouched.
+      local prev2 = word_start > 2 and code_part:sub(word_start - 2, word_start - 2) or ""
+      local next2 = (i + 1) <= len and code_part:sub(i + 1, i + 1) or ""
+      local joined_left  = char_before == "-" and prev2:match("[%w_]") ~= nil
+      local joined_right = char_after  == "-" and next2:match("[%w_]") ~= nil
+
       local is_part_of_identifier = char_before:match("[%w_]") or char_after:match("[%w_]")
+                                    or joined_left or joined_right
 
       if is_mnemonic(word) and not is_part_of_identifier then
         table.insert(result, word:upper())
