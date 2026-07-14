@@ -457,10 +457,23 @@ is indistinguishable from "the window never opened". The **TERM heartbeat** is w
 and dropped the keyword. No error, no diagnostic: the tool simply locks up. **SCOPE and FFT are NOT exposed** (their
 configure loops are `while NextKey do`, which merely truncates the parse).
 
-*Consequences:* (1) **ch08 must now carry the warning** — it is a real hazard, and the earlier "write nothing until
-confirmed" hold is lifted. (2) **This is a PNut BUG worth reporting upstream** to Parallax/Chip. (3) **Class-wide
-sweep owed:** ask the REF side to check **all nine** `_Configure` loops for the same `while not NextEnd do` pattern —
-if SCOPE_XY has it, others may.
+**CLASS-WIDE SWEEP DONE (2026-07-14) — blast radius is exactly ONE window:**
+| configure loop | windows | exposed? |
+|---|---|---|
+| `while NextKey do` | SCOPE, FFT, SPECTRO, PLOT, TERM, BITMAP, MIDI | **No** — a non-key element ends the loop |
+| `while not NextEnd do` **+ `if NextNum then Break;`** | **LOGIC** | **No** — explicitly guarded |
+| `while not NextEnd do`, **no number guard** | **SCOPE_XY** | 🔴 **YES — hangs** |
+
+LOGIC and SCOPE_XY are the **only** two windows that accept **channel-label strings on the create line**, so they are
+the only two that cannot use `while NextKey do` — they must run to end-of-message and dispatch on *key or string*.
+`LOGIC_Configure` guards the third case (`if NextNum then Break;   // number not allowed`); **`SCOPE_XY_Configure` is
+missing exactly that line.** The fix is one line, and LOGIC already contains it.
+*(This also cross-checks **EF-003**: SCOPE uses `while NextKey do`, so a channel-def **string** on its create line ends
+the config loop — which is precisely why the SCOPE window is never created.)*
+
+*Consequences:* (1) **ch08 must now carry the warning** — it is a real hazard, and the "write nothing until confirmed"
+hold is lifted. (2) **PNut v55 bug report drafted:** `DRAFTS/PNUT-BUG-scope-xy-parser-hang.md` (minimal repro,
+mechanism, blast radius, one-line fix) — for Stephen to route to Parallax/Chip.
 *Source:* `.../conflict-testO-scopexy-parser-hang.spin2`.
 
 ## Open / pending empirical questions
