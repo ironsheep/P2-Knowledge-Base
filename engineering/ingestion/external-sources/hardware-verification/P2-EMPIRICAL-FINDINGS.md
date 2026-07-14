@@ -390,8 +390,13 @@ captured BMPs, halved for the 2x Retina device-pixel scale (the window's own dec
 **v55 is correct on every one.** `shl 7` face value = a whole-pixel **diameter**; `shl 6` face value = **half-pixels**
 (i.e. rendered width = n/2). At small n a ~1px anti-aliasing envelope inflates the measurement — which is exactly
 what made EF-027 misread its own data. FFT `DOTSIZE` is the same `shl 7` path as SCOPE (inferred, not measured).
-*Date/rig:* 2026-07-14, real P2 (Stephen), **pnut-term-ts** render; corroborated 3 ways (v55 text + the Pascal's
-shift geometry + this render). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
+**CONFIRMED ON PNut (ground truth) 2026-07-14** — captures re-run on real PNut (1×, no Retina) give the *same law*:
+SCOPE `DOTSIZE` 2→2, 4→4, 8→8, 16→16, **32→32** (slope **1**); SCOPE_XY `DOTSIZE` 2→1, 6→3, 12→7, **20→11**;
+SCOPE `LINESIZE` 3→2, 7→4, 20→10, **32→16** (slope **½** across the large-n points, where the ~1px AA floor stops
+mattering). **PNut and pnut-term-ts agree, and both agree with v55** — so term-ts is at parity here, and the
+correction rests on ground truth, not on the port.
+*Date/rig:* 2026-07-14, real P2 (Stephen), **both PNut and pnut-term-ts**; corroborated 4 ways (v55 text + the
+Pascal's shift geometry + both renders). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
 *Source:* `.../conflict-testK-dotsize-render.spin2`, `.../conflict-testL-scope-linesize.spin2`.
 
 ### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED`
@@ -404,9 +409,24 @@ window renders as a **solid red field carrying a grid of round green dots** — 
 *Grounds:* v55 L1331 ("large **round** pixels against a **coloured background**") and the REF ToO ("a solid fill of the
 whole cell") are **CORRECT**; the manual's `ch04:49` ("outline each magnified pixel … the outline (grid) colour") and
 `bitmap.yaml:32` ("grid-border colour") are **WRONG** — figure and ground inverted. `ch04:398-400` was already right.
-*Still open:* the **`DOTSIZE >= 4` gate** — INCONCLUSIVE, see the note in H-4 (the `DOTSIZE 3` window's canvas is
-smaller than its own title bar, so the capture contained only window chrome).
-*Source:* `.../conflict-testM-bitmap-sparse.spin2`.
+**THE `DOTSIZE >= 4` GATE IS REAL — CONFIRMED 2026-07-14** (`conflict-testP-sparse-gate`, 20×15 canvas so even
+`DOTSIZE 3` yields a real window; read reduced to a binary "is there any RED?"):
+| capture | red | verdict |
+|---|---|---|
+| RAIL-OFF (DS12, no `SPARSE`) | **0.0 %** | rail holds — red can only come from `SPARSE` |
+| RAIL-SHAPE (DS12, `SPARSE`) | **42.3 %** | rail holds — the instrument discriminates |
+| **`DOTSIZE 3`** | **0.0 %** | **`SPARSE` self-disables** |
+| **`DOTSIZE 4`** | **20.8 %** | **`SPARSE` active** |
+Bracketed exactly at **3 → off / 4 → on**. *Rig:* pnut-term-ts (the PNut leg of this run was invalidated by *our*
+test design, not by disagreement — see below).
+> ⚠️ **Test-design lesson (recorded because the failure is instructive).** The first `conflict-testP` gave its four
+> windows **no `POS`**. That is fine on pnut-term-ts, which **auto-arranges** them — but PNut has **no auto-layout**
+> and **stacks** every no-POS window at the host origin. Since `SAVE WINDOW` is a **desktop scrape of a screen
+> rectangle**, all four PNut windows occluded one another and both DS12 scrapes returned the **byte-identical**
+> image (md5 `4856803a…`). Rails that cannot discriminate ⇒ INCONCLUSIVE, never a verdict.
+> **That failure is itself independent confirmation of EF-043** — PNut windows *do* overlap. `conflict-testP` now
+> carries an **explicit `POS` on every window** and is re-runnable on both tools.
+*Source:* `.../conflict-testM-bitmap-sparse.spin2`, `.../conflict-testP-sparse-gate.spin2`.
 
 ### EF-043 · No-POS window placement is TOOL-DEPENDENT — pnut-term-ts AUTO-ARRANGES (no overlap); PNut has no such feature — `CONFIRMED (pnut-term-ts)`
 *How proven:* `conflict-testN-pos-origin-overlap` — three PLOT windows created with **no `POS`**, in decreasing size.
@@ -415,6 +435,9 @@ auto-placed window. *Result:* `Pa` (400×300) → `POS 1076,60`; `Pb` (300×220)
 `POS 1680,60` — **distinct x, common y, tiled, NOT overlapping, NOT cascaded.** The 4th window, created with an
 **explicit** `POS 500 0`, got **no** `WINDOW_PLACED` line — the layout engine only engages when `POS` is absent.
 *Date/rig:* 2026-07-14, real P2 (Stephen), **pnut-term-ts**.
+**PNut half now has DIRECT EVIDENCE (2026-07-14):** the `conflict-testP` PNut run gave four no-POS BITMAP windows,
+and two same-sized `SAVE WINDOW` desktop scrapes came back **byte-identical** — which is only possible if the windows
+were **stacked on top of one another at a common origin**. PNut overlaps; it does not tile and does not cascade.
 **⚠️ THIS IS A TOOL BEHAVIOUR, NOT A P2/PNut FACT.** Stephen: *"pnut-term-ts has special auto-layout ability when no
 POS directive is specified… PNut on Windows has no such capability."* PNut places every window at its host display
 origin and display windows do **not** cascade, so successive no-POS windows there **overlap**. **Both are true, of
