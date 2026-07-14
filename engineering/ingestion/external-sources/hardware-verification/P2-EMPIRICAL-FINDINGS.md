@@ -431,7 +431,7 @@ behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert
 "SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
 2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `.../conflict-testO-scopexy-parser-hang.spin2` (log).
 
-### EF-045 · A bare number in a SCOPE_XY create message does NOT hang pnut-term-ts — `REFUTED (pnut-term-ts); UNTESTED on PNut`
+### EF-045 · A bare number in a SCOPE_XY create message HANGS PNut — and pnut-term-ts does NOT share the defect — `CONFIRMED (PNut) / REFUTED (pnut-term-ts)` — a TOOL DIVERGENCE
 The suspected infinite loop (`SCOPE_XY_Configure`'s `while not NextEnd do` matching neither `NextKey` nor `NextStr`,
 so `ptr` never advances) **does not occur in pnut-term-ts**. *How proven:* `conflict-testO-scopexy-parser-hang` — a TERM
 **heartbeat** is the instrument, distinguishing "the tool hung" from "the window just didn't open". *Result:* the
@@ -439,9 +439,28 @@ heartbeat printed `pre 1…5`, the suspect line `` `SCOPE_XY Bad 128 'A' `` exec
 `post 1…20` → **"NO HANG - parser recovered"**. Moreover the `Bad` window **was created**, at the **default** 256×256
 canvas — so the stray number ended (or was skipped in) the config parse rather than hanging it, and the `'A'` label
 after it was not applied. *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
-**⚠️ SCOPE LIMIT:** the hang was derived from **PNut's Pascal**, and PNut is ground truth. term-ts is a *port* and may
-simply not share the defect. **This refutes the hang for term-ts; it does NOT clear PNut.** Until a Windows-PNut run
-says otherwise, write **nothing** about this in the manual — an unconfirmed hang claim is worse than silence.
+**🔴 PNut RESULT (2026-07-14, Stephen, visual): PNut HANGS — frozen at `` `Beat 13 'pre  ' 5 ``.** That is the last
+output before the suspect line, i.e. the exact predicted signature. The source-derived hypothesis is **CORRECT for
+PNut**: `SCOPE_XY_Configure`'s loop is `while not NextEnd do begin if NextKey then … else if NextStr then … end;` — an
+`ele_num` element matches **neither** branch, so `ptr` is never advanced and `NextEnd` never fires. **Infinite loop.**
+
+**This is a genuine TOOL DIVERGENCE, and the poster child for `PNut is ground truth; term-ts mirrors`:**
+| tool | result |
+|---|---|
+| **PNut** | **HANGS** (heartbeat frozen at `pre 5`; the `Bad` window never opens) |
+| **pnut-term-ts** | **No hang** — heartbeat ran `post 1…20`; the `Bad` window was even created, at its default 256×256 canvas (the stray number ended the parse rather than hanging it) |
+
+**Why the instrument mattered:** a screenshot could not have answered this — a hung tool writes no file, and "no file"
+is indistinguishable from "the window never opened". The **TERM heartbeat** is what separates *hung* from *absent*.
+
+**Trigger is a PLAUSIBLE TYPO, not a contrived input:** `` debug(`SCOPE_XY W 128 'A') `` — a user who meant `SIZE 128`
+and dropped the keyword. No error, no diagnostic: the tool simply locks up. **SCOPE and FFT are NOT exposed** (their
+configure loops are `while NextKey do`, which merely truncates the parse).
+
+*Consequences:* (1) **ch08 must now carry the warning** — it is a real hazard, and the earlier "write nothing until
+confirmed" hold is lifted. (2) **This is a PNut BUG worth reporting upstream** to Parallax/Chip. (3) **Class-wide
+sweep owed:** ask the REF side to check **all nine** `_Configure` loops for the same `while not NextEnd do` pattern —
+if SCOPE_XY has it, others may.
 *Source:* `.../conflict-testO-scopexy-parser-hang.spin2`.
 
 ## Open / pending empirical questions
