@@ -706,7 +706,7 @@ Everything in this part is **tiny and illustrative** — sized to show a techniq
 
 The smallest useful XBYTE program is a stack machine with a handful of bytecodes. Building it touches every part of the engine once: load a dispatch table into LUT, point the FIFO at a bytecode program, arm the engine, and write a few handlers. This chapter is that build, complete.
 
-## 9.1 The instruction set {#sec-10-1}
+## 10.1 The instruction set {#sec-10-1}
 
 Four bytecodes are enough to be a real VM:
 
@@ -719,7 +719,7 @@ Four bytecodes are enough to be a real VM:
 
 The VM stack is a few longs of cog memory with a pointer. `PUSHC` uses an inline operand (§3.3); `ADD` and `SUB` are a shared body candidate (§2.4), but are written separately here for clarity.
 
-## 9.2 The complete program {#sec-10-2}
+## 10.2 The complete program {#sec-10-2}
 
 ```spin2
 CON
@@ -795,7 +795,7 @@ That is a working XBYTE VM. The dispatch table is four longs in hub, loaded into
 **Why the table entries are just handler addresses.** With no skipping, an entry's SKIPF pattern (bits [31:10]) is zero, so the long is simply the handler's cog address in bits [9:0]. The moment you adopt the shared-handler idiom (§2.4), those high bits fill with per-bytecode skip patterns — see §10.3.
 :::
 
-## 9.3 Folding ADD and SUB into a shared body {#sec-10-3}
+## 10.3 Folding ADD and SUB into a shared body {#sec-10-3}
 
 `ADD` and `SUB` differ by one instruction. Per §2.4 they can share a body, with each bytecode's table entry carrying the skip pattern that selects its operation:
 
@@ -821,7 +821,7 @@ The obvious way is to ask: *does my guest's instruction shape fit the engine?* B
 
 Instruction shape is not the axis. **Three decisions are**, and this chapter is about them.
 
-## 10.1 Two assets, three decisions {#sec-11-1}
+## 11.1 Two assets, three decisions {#sec-11-1}
 
 XBYTE gives you two separable things — this much of the classic story is exactly right:
 
@@ -840,7 +840,7 @@ The dispatch is **independent of the other two**. That is not a claim from theor
 
 Hold that result. Everything else in this chapter follows from it.
 
-## 10.2 The dispatch ladder {#sec-11-2}
+## 11.2 The dispatch ladder {#sec-11-2}
 
 Dispatch is not a yes-or-no question about XBYTE. It is a **ladder with three rungs**, and you may stop on any of them.
 
@@ -874,7 +874,7 @@ Look at what is the same and what changed. Both hand-roll the **fetch**. Both pu
 This is the most useful thing to know about XBYTE: **you can take the dispatch asset without taking the engine.** `EXECF` plus a LUT table is available to any program, any time, with no arming, no `$1FF`, and no constraint on where the guest's code lives. Most working P2 emulators live exactly here, on rung 2 — and they get there deliberately, not because they failed to reach rung 3.
 :::
 
-## 10.3 The coupling decision {#sec-11-3}
+## 11.3 The coupling decision {#sec-11-3}
 
 So why do they stop at rung 2? Because of the fetch — and the fetch is not a feature choice. **It is a coupling decision, and you make it on the first day.**
 
@@ -898,7 +898,7 @@ If there is any chance your guest will outgrow hub, do not take the auto-fetch. 
 
 And there is a second, quieter cost. XBYTE reads its dispatch table from **LUT**, and LUT is a cog resource that the rest of your system also wants — for a prefetch queue, a palette, a line buffer, a sine table. At least one emulator in the field moved its dispatch table *out* of LUT for exactly this reason, and XBYTE went with it. The FIFO is contended the same way: in one emulator the FIFO is busy streaming the video framebuffer, and could not have fetched instructions even if the guest's code had been in hub. Chapter 1's resource budget (§1.6) is not a formality — it is the second half of this decision.
 
-## 10.4 There is no loop body {#sec-11-4}
+## 11.4 There is no loop body {#sec-11-4}
 
 The third decision is the one nobody warns you about, and it is the reason the largest emulators decline XBYTE even when memory would allow it.
 
@@ -927,7 +927,7 @@ A software loop costs you roughly three extra clocks per instruction and gives y
 
 You can see the consequence most clearly in debugging. An emulator that *does* use XBYTE, when its author needed to trace guest execution, had no choice: **comment the engine out** and substitute the software dispatch loop of §4.4, with a `debug()` in the middle. There was nowhere else to put it. An emulator that never armed XBYTE simply leaves a `NOP` in its loop and patches it when needed. Same problem; one of them pays nothing. Chapter 9 makes this practical.
 
-## 10.5 Choosing, in order {#sec-11-5}
+## 11.5 Choosing, in order {#sec-11-5}
 
 The three decisions have a natural order, because each one constrains the next.
 
@@ -941,7 +941,7 @@ That is not a discouraging result. It is a precise one, and it maps exactly onto
 
 Chapter 12 turns these three decisions into a per-processor survey: what each classic guest will actually cost you.
 
-## 10.6 Why the 6502 {#sec-11-6}
+## 11.6 Why the 6502 {#sec-11-6}
 
 The capstone in Chapter 13 is the **6502**, and this chapter's framework makes the choice concrete:
 
@@ -1103,7 +1103,7 @@ Then, whichever rung you land on, the columns of §12.3 are your work list — f
 
 This chapter builds an illustrative slice of a 6502 on XBYTE — enough opcodes to show how a real CPU's instructions become bytecode handlers, and how the engine's pieces (PA, the FIFO, the shared body, the skip pattern) carry the emulation. It is **not** a complete or cycle-accurate 6502, by charter; it is the technique, shown end to end on a representative handful of instructions.
 
-## 11.1 The mapping {#sec-13-1}
+## 13.1 The mapping {#sec-13-1}
 
 In a 6502 emulator the correspondence is direct:
 
@@ -1117,7 +1117,7 @@ In a 6502 emulator the correspondence is direct:
 
 The guest's program counter *is* the FIFO position, which is the single most elegant part of the fit: incrementing the PC is free (the FIFO advances as it reads), and a branch is a `RDFAST` to the new address.
 
-## 11.2 Register file and dispatch {#sec-13-2}
+## 13.2 Register file and dispatch {#sec-13-2}
 
 The 6502 register set is a few cog longs, and arming is the same sequence as Chapter 10 — a 256-entry table for the full opcode space:
 
@@ -1133,7 +1133,7 @@ The 6502 register set is a few cog longs, and arming is the same sequence as Cha
 
 Each opcode that the slice implements gets a table entry pointing at its handler; unimplemented opcodes point at a shared `op_undef` that flags the gap. (A real build fills all 256; this slice fills the few below and routes the rest to `op_undef`.)
 
-## 11.3 Representative handlers {#sec-13-3}
+## 13.3 Representative handlers {#sec-13-3}
 
 **`LDA #imm` ($A9)** — load the accumulator with an immediate. The operand byte follows the opcode in the stream; N and Z flags are set from the result.
 
@@ -1162,7 +1162,7 @@ op_jmp_abs                                  ' $4C: JMP $hhll
 
 The shared-body idiom collapses the 6502's many ALU and load/store opcodes the way §10.3 collapsed ADD/SUB: one body per family (loads, ALU ops, branches), with each opcode's table entry supplying the SKIPF pattern and, where four-way behavior is needed, the F bit (§7.4) carrying two opcode bits into the flags.
 
-## 11.4 What this slice shows, and what it omits {#sec-13-4}
+## 13.4 What this slice shows, and what it omits {#sec-13-4}
 
 The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode, correct flag semantics on every operation, and accurate timing — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
 
@@ -1274,15 +1274,37 @@ Nothing here is expensive in clocks. `JATN` is two, the injection is one `EXECF`
 
 What it costs is **a decision you would not have had to make** on a software loop: *where are my interrupt boundaries?* The engine bought you three clocks per bytecode and handed you that question in exchange. For a language interpreter — which has no interrupts to service — it is a pure gift. For a CPU emulator it is a real, if modest, tax, and one more entry on the ledger of Chapter 11.
 
-# Chapter 15: The 6809 SETQ2 Vignette {#ch-15}
+# Chapter 15: Prefixes and Alternate Tables {#ch-15}
 
-One XBYTE feature has not yet earned its keep in an example: the one-shot **SETQ2** mode (§6.3). The 6809 is the cleanest small demonstration of why it exists, so it appears here as a short vignette — not a second emulator, just the one trick.
+Almost every guest processor eventually runs out of opcodes and solves it with a **prefix byte** — a byte that changes the meaning of the byte after it. XBYTE has an instruction that looks made for exactly this: the one-shot **SETQ2** (§6.3), which borrows an alternate dispatch table for precisely one bytecode and then reverts on its own.
 
-## 12.1 The problem: prefix pages {#sec-15-1}
+The temptation is to conclude that `SETQ2` is *the* answer to prefixes. **It is the answer to half of them**, and knowing which half is the difference between an elegant emulator and a tangle.
 
-The Motorola 6809 extends its opcode space with two **prefix bytes**, `$10` and `$11`. An opcode introduced by `$10` belongs to "page 2"; one introduced by `$11` belongs to "page 3". The same second byte means different things depending on which prefix — if any — preceded it. A flat 256-entry table cannot express that: byte `$83` is one instruction on page 1 and another on page 2.
+## 15.1 Prefixes are two different things {#sec-15-1}
 
-## 12.2 The solution: a one-shot alternate table {#sec-15-2}
+Look at what a prefix actually *does* to the byte that follows it, and they fall into two groups that want opposite treatment:
+
+| | **Map prefix** (escape) | **Modifier prefix** |
+|---|---|---|
+| Examples | 6809 `$10`/`$11` · Z80 `CB`/`ED` · x86 `$0F` | x86 segment override, `REP`, `LOCK` · Z80 `DD`/`FD` |
+| What it changes | **which handler runs** — a *different opcode map* | **how the handler behaves** — same instruction, different memory or register |
+| The tool | **one-shot `SETQ2`** — an alternate table | **a state register**, then re-fetch |
+
+A **map** prefix genuinely redirects dispatch. After the 6809's `$10`, the byte `$83` names a different instruction than `$83` alone does. You want a different table, and one-shot `SETQ2` hands you one for free.
+
+A **modifier** prefix does *not* want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment register, which is absurd. The right answer is a register (§15.3).
+
+::: caution
+**The Z80 carries both kinds, which makes it the best teacher and a genuine trap.** Its `CB` and `ED` prefixes are **map** prefixes — different opcode tables. Its `DD` and `FD` prefixes are **modifier** prefixes — they retarget `HL` to `IX` or `IY` and leave the opcode map alone.
+
+Treat `DD` like `CB` and you will build a duplicate table you never needed. Treat `CB` like `DD` and you will decode the wrong instruction entirely.
+:::
+
+## 15.2 Map prefixes — the 6809's pages {#sec-15-2}
+
+The Motorola 6809 is the cleanest small demonstration, so it earns the worked example.
+
+It extends its opcode space with two **prefix bytes**, `$10` and `$11`. An opcode introduced by `$10` belongs to "page 2"; one introduced by `$11` belongs to "page 3". The same second byte means different things depending on which prefix — if any — preceded it. A flat 256-entry table cannot express that: byte `$83` is one instruction on page 1 and another on page 2.
 
 This is exactly what one-shot SETQ2 is for. Keep the page-1 table as the persistent mode (armed once with SETQ). Make `$10` and `$11` *prefix bytecodes* whose handlers do nothing but select the matching alternate table **for the next bytecode only**:
 
@@ -1298,15 +1320,60 @@ op_page3                                    ' $11: select page-3 table
 
 When the 6809 stream contains `$10 $83`, the `$10` handler arms the page-2 table one-shot; the `$83` that follows dispatches through page 2; and the engine then reverts to page 1 on its own — *"without having to restore the original XBYTE mode afterwards."* No flag to clear, no mode to put back. The prefix byte costs one dispatch, and the alternate page is in effect for exactly the one opcode that needs it.
 
+The elegance is in what is **absent**. Written by hand, a prefix means keeping an "am I in a prefix?" flag and testing it before every single opcode. Here there is no flag and no test: the prefix shifts the machine for exactly one dispatch, and normal decoding resumes with no code to put it back.
+
 ::: tip
-This is the general pattern for **any** guest with escape/prefix opcodes — the 6809's pages, the Z80's `$CB`/`$ED` prefixes, the x86 `$0F` escape. Each prefix becomes a one-shot-SETQ2 handler that points at the alternate table for that page. SETQ2's automatic revert is what makes it free.
+This is the general pattern for **any map prefix** — the 6809's pages, the Z80's `CB`/`ED`, the x86 `$0F` escape. Each becomes a one-shot-`SETQ2` handler pointing at the alternate table for that page, and `SETQ2`'s automatic revert is what makes it free.
 :::
+
+## 15.3 Modifier prefixes — state, not dispatch {#sec-15-3}
+
+Now the other half, which `SETQ2` cannot help with.
+
+An x86 segment-override prefix says *"the next instruction's memory access goes through this segment."* It does not change which handler runs. So its handler simply records the fact and goes back for the real opcode:
+
+```pasm2
+' A modifier prefix: remember it, then fetch the instruction it modifies.
+op_seg_es       mov     override, seg_es    ' remember which segment...
+                jmp     #next_op            ' ...and go fetch the real opcode
+```
+
+Every memory-touching handler then consults `override`, and clears it once the instruction retires. That is the whole mechanism, and it is the shape every working implementation uses. The Z80's `DD`/`FD` are the same idea wearing a different hat: they do not select a table, they change which register `HL` means for one instruction.
+
+::: hardware
+Be honest about what this costs under XBYTE.
+
+Setting state and returning is fine — the engine dispatches the next bytecode, and the modified handler consults the register. No problem.
+
+The awkward case is a modifier that must **re-execute** the following instruction rather than merely colour it. x86's `REP` is the notorious example: it runs the *next* instruction over and over until a counter expires. XBYTE fetches a **new** bytecode on every `_RET_`, so a `REP` handler cannot express *"run that one again"* as a plain return. It must fetch and dispatch the repeated instruction **itself**, in a loop — which is to say it hand-rolls exactly the loop the engine was supposed to save it (§4.4).
+
+The engine still dispatches everything else beautifully. It simply has nothing to offer this one pattern, and it is better to know that before you design around it.
+:::
+
+## 15.4 `SETQ2` is bigger than prefixes {#sec-15-4}
+
+It would be easy to file one-shot `SETQ2` away as "the prefix trick." That undersells it badly, and the reference implementation shows why.
+
+The P2's own Spin2 interpreter runs **two dispatch tables at once** — its main bytecode table, and a second table of *variable operators* at a different LUT base. Handlers that need the second one end like this:
+
+```pasm2
+        _ret_   setq2   #var_op_mode        ' the next bytecode is a
+                                            ' variable operator
+```
+
+Read that comment again. It does not say *"the next byte is on an extended page."* It says **"the next byte is a different kind of thing."** The bytecode stream has a small *grammar* — some bytecodes are operations, others are operands-with-behaviour that must be decoded through their own table — and one-shot `SETQ2` is what expresses it.
+
+Prefixes are merely the most obvious instance of a much larger idea:
+
+> **The table *is* state.** Change the table and you change what the machine *is* — for one bytecode with `SETQ2`, or for good with `SETQ`.
+
+Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, a parser whose states *are* tables, a decoder that switches interpretation mid-stream. Chapter 16 takes that idea well outside emulation, and it turns out to be where some of XBYTE's best non-obvious uses live.
 
 # Chapter 16: XBYTE Beyond Interpreters {#ch-16}
 
 Parts I–III taught XBYTE as the engine under a language or a CPU, because that is what it was built for and where it shines. But strip the word "bytecode" away and the machine is more general: **XBYTE is hardware table-driven dispatch over a byte stream.** It reads the next byte, indexes a table, jumps to a handler, and loops — and nothing in that sentence requires the stream to be a *program*. Any problem shaped like *walk a stream of bytes, and for each one do one of a small set of things* can ride the same six-clock loop. This chapter widens the lens: the engine that runs a VM will also parse a protocol, decode a format, drive a display, or sequence a show.
 
-## 13.1 Two assets, three widening features {#sec-16-1}
+## 16.1 Two assets, three widening features {#sec-16-1}
 
 Chapter 11 named XBYTE's **two separable assets** for a CPU emulator; they are just as useful outside emulation:
 
@@ -1323,7 +1390,7 @@ An application draws on whatever mix of the two its data calls for. Three featur
 
 The rest of the chapter applies these to problems that are not interpreters — with the same honest fit-grading Chapter 11 used for CPUs, because the engine helps some of them far more than others.
 
-## 13.2 The application map {#sec-16-2}
+## 16.2 The application map {#sec-16-2}
 
 A survey of where XBYTE earns its keep beyond languages and CPUs. Fit is graded **★** (strong — both assets plus a feature), **◑** (partial — leans on one asset), **○** (marginal — the dispatch is really just a lookup).
 
@@ -1342,7 +1409,7 @@ A survey of where XBYTE earns its keep beyond languages and CPUs. Fit is graded 
 
 The three sketches that follow take one ★ case for each widening feature. Each is **tiny and illustrative** — a handful of handlers to show the shape, not a finished driver — the same charter as the rest of Part III.
 
-## 13.3 A terminal reader — the table as state {#sec-16-3}
+## 16.3 A terminal reader — the table as state {#sec-16-3}
 
 A serial terminal receives a stream of output bytes. Most are printable characters to place on screen; a few are controls, and one — `$1B`, `ESC` — announces that *the next byte begins an escape sequence* that must be read from a different set of rules. That is exactly one-shot `SETQ2` (§6.3): the `ESC` handler borrows an escape table for the single byte that follows, and the engine reverts to the text table on its own.
 
@@ -1361,7 +1428,7 @@ The elegance is what is *absent*. A hand-written terminal keeps an "am I in an e
 The reverting one-shot is the whole reason this stays clean. If a sequence needs to hold an alternate table across several bytes, arm it with persistent `SETQ` on the way in and re-arm the base table on the way out — `SETQ2` for a one-byte shift, `SETQ` for a mode you stay in.
 :::
 
-## 13.4 A MIDI dispatcher — the byte as data {#sec-16-4}
+## 16.4 A MIDI dispatcher — the byte as data {#sec-16-4}
 
 MIDI is a byte stream whose **status byte** packs two fields: the high nibble is the command (`$9`_n_ = Note On, `$8`_n_ = Note Off, `$B`_n_ = Control Change, …) and the low nibble is the channel. XBYTE hands the whole status byte to the handler in `PA`, so the command *selects* the handler while the channel *rides along* as data in the same byte:
 
@@ -1376,7 +1443,7 @@ h_note_on                                   ' $9n: Note On, channel n
 
 This is "the byte is both the selector and an operand" in its cleanest form. Because the eight commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§7.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") is a natural extension: a data-valued byte re-enters the current command's handler, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.
 
-## 13.5 A display list — the stream as a movable cursor {#sec-16-5}
+## 16.5 A display list — the stream as a movable cursor {#sec-16-5}
 
 A **display list** is a stream of drawing commands — set a color, move the pen, draw a run — that a renderer walks once per frame. Each command byte selects a primitive; its parameters follow inline in the stream, pulled with the FIFO reads of Chapter 3. And because the FIFO position *is* the list cursor (§8.3), a "repeat" or "jump" command is nothing but an `RDFAST` to a new address — the very mechanism a guest CPU's branch used in Chapter 13, here doing ordinary graphics:
 
@@ -1398,33 +1465,53 @@ The command stream is *data you emit*, not a program you compile — a scene, a 
 The FIFO reads (`RFWORD`, `RFVAR`) that pull a command's parameters advance the same read cursor the next dispatch fetches from, so operations and their operands interleave in one stream and the read position takes care of itself — exactly as it did for inline VM operands (§3.3) and guest-CPU operand bytes (§13.1). One mechanism, three very different uses.
 :::
 
-## 13.6 SETQ2 is a general mode switch {#sec-16-6}
+## 16.6 SETQ2 is a general mode switch {#sec-16-6}
 
 Chapter 15 introduced one-shot `SETQ2` through the 6809's prefix pages, where it can read as a CPU-emulation trick. It is neither a trick nor about CPUs. `SETQ2` is the general operation *"dispatch the next byte through a different table, then restore mine"* — and every escape or mode shift in a byte stream is an instance of it:
 
 - the **6809** `$10` / `$11` prefix pages (Chapter 15),
 - an **ANSI terminal**'s `ESC` (§16.3),
 - **MIDI** System Exclusive, where `$F0` opens a manufacturer data block a different table consumes,
-- the **Z80** `$CB` / `$ED` and **x86** `$0F` escape prefixes (§11.2).
+- the **Z80** `CB` / `ED` and **x86** `$0F` escape prefixes (§15.1).
 
 It is also how Parallax's own **Spin2 interpreter** works internally: the interpreter uses one-shot `SETQ2` to reach a whole family of *variable-operator* bytecodes through an alternate table, then reverts — the persistent table never has to hold room for them. When you meet a stream where "the next thing means something different," `SETQ2` is the answer, and its automatic revert (§6.3) is what makes the shift free.
 
-## 13.7 When XBYTE is the wrong tool {#sec-16-7}
+## 16.7 When XBYTE is the wrong tool {#sec-16-7}
 
-The engine is not free, and some stream-shaped problems still do not want it. Reach for something else when:
+The engine is not free. Some problems are stream-shaped and still do not want it, and this section is the honest list.
 
-| The situation | Why XBYTE does not help | Use instead |
-|---------------|-------------------------|-------------|
-| There is no ordered byte stream to walk | auto-fetch has nothing to fetch | a plain loop over the data |
-| The stream has one fixed record format | the many-way table sits idle — you only use auto-fetch | the FIFO reads (`RDFAST` + `RFxxxx`) directly, no engine |
-| Each symbol maps straight to output, no logic | dispatch is just a lookup | a `RDLUT` per byte is cheaper than arming the engine |
-| The state changes on nearly every symbol | constant `SETQ`/`SETQ2` re-arming outweighs the saved dispatch | a conventional `RDLUT`-plus-branch state loop |
-| The unit is a fixed-width word, not a byte | the byte-stream auto-fetch does not apply (the RISC case, §11.2) | read the word with `RFLONG`, dispatch on an extracted field |
+**Three of them are disqualifying** — they are not a matter of degree. If any one holds, the engine is simply unavailable to you, and no amount of wanting it will help:
 
-The through-line is Chapter 11's two-asset test, generalized: XBYTE pays when you use *both* auto-fetch and many-way dispatch, and at least one of the three widening features. Use fewer of them and a simpler loop will match it without spending LUT RAM on a table.
+| The disqualifier | Why | What you do instead |
+|------------------|-----|---------------------|
+| **The stream is not in hub RAM** | The FIFO reads **hub, and only hub**. If your data lives in external PSRAM or HyperRAM, or arrives live from a pin, **auto-fetch cannot reach it** (§11.3) | write the fetch yourself, keep `EXECF` dispatch — rung 2 |
+| **LUT is not free** | XBYTE reads its table from **LUT**. If a palette, a line buffer, or a prefetch queue has already claimed it, the table must live in hub — and the engine cannot read a table in hub | keep the table in hub, dispatch with `RDLONG` + `EXECF` |
+| **You need cross-cutting work per symbol** | XBYTE's loop is **hardware**; there is no loop body (§11.4). Cycle pacing, progress counters, timeout checks, tracing — none of it has anywhere to live | use the software loop (§4.4). Three clocks, and you get a place to stand |
+
+**The rest are a matter of degree** — the engine will work, it just will not earn its keep:
+
+| The situation | Why XBYTE does not pay | Use instead |
+|---------------|------------------------|-------------|
+| There is no ordered stream to walk | auto-fetch has nothing to fetch | a plain loop over the data |
+| The stream has one fixed record format | the many-way table sits idle; you are using auto-fetch only | `RDFAST` + the `RF` reads directly, no engine |
+| Each symbol maps straight to output, no logic | dispatch is just a lookup | one `RDLUT` per byte is cheaper than arming the engine |
+| The state changes on nearly every symbol | constant re-arming outweighs the saved dispatch | a conventional `RDLUT`-plus-branch state loop |
+| The unit is a fixed-width **word**, not a byte | byte auto-fetch does not apply — the RISC case (§12.2) | read the word, dispatch on an extracted **field** — or see below |
+
+::: hardware
+**And one option this book has not yet named: do not interpret at all.**
+
+For a fixed-width RISC guest — ARM, MIPS, RISC-V — there is a strategy that beats every rung of the ladder: **translate the guest's instructions into native PASM2 once, and then just run them.** A just-in-time translator does the decode a single time per instruction *ever*, instead of once per *execution*, and a hot loop then runs at native P2 speed with no dispatch at all.
+
+This is not hypothetical; it is what the P2's RISC-V implementation does. It is a substantially bigger undertaking than an interpreter, and it is the right answer when the guest's instructions are regular enough to translate and hot enough to be worth translating.
+
+XBYTE is a superb interpreter engine. Interpretation is not always the goal.
+:::
+
+The through-line is Chapter 11's three decisions, generalised beyond CPUs: **XBYTE pays when your data is in hub, your LUT is free, you have no per-symbol cross-cutting work, and the byte genuinely selects one of many behaviours.** Weaken any of those and a simpler loop will match it — without spending 256 longs of LUT on a table.
 
 ::: tip
-A quick decision rule: if you can describe the job as *"read a byte, pick one of many things to do, repeat"* — and the pick is not a trivial lookup — XBYTE fits. The more the byte doubles as data, the table doubles as state, or the cursor moves, the better the fit.
+A quick decision rule: if you can describe the job as *"read a byte from hub, pick one of many things to do, repeat"* — and the pick is not a trivial lookup, and you have nothing to do *between* the picks — XBYTE fits. The more the byte doubles as data, the table doubles as state, or the read cursor moves, the better it fits.
 :::
 
 # Part IV: Reference
@@ -1435,7 +1522,7 @@ This part is for lookup. Chapter 17 is the per-instruction reference for everyth
 
 The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `EEEE` form (the leading `EEEE` is the condition field). All are 2-clock instructions except **EXECF** (4 clocks).
 
-## 14.1 The skip family {#sec-17-1}
+## 17.1 The skip family {#sec-17-1}
 
 | Instruction | Syntax | Encoding | Effect |
 |-------------|--------|----------|--------|
@@ -1443,14 +1530,14 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 | **SKIPF** | `SKIPF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110010` | Fast skip: the PC leaps over each of the next up-to-22 instructions whose bit in D is set; skipped instructions cost nothing. Cog/LUT only. No flag effect. |
 | **EXECF** | `EXECF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110011` | Jump to D[9:0] in cog/LUT, then apply D[31:10] as a SKIPF pattern. PC = {10'b0, D[9:0]}. The dispatch vehicle. No flag effect. 4 clocks. |
 
-## 14.2 Arming {#sec-17-2}
+## 17.2 Arming {#sec-17-2}
 
 | Instruction | Syntax | Encoding | Effect |
 |-------------|--------|----------|--------|
 | **SETQ** | `SETQ {#}D` | `EEEE 1101011 00L DDDDDDDDD 000101000` | Load D as the **persistent** XBYTE mode operand (with `_RET_` and `$1FF` on the stack, starts/continues the engine). Outside XBYTE, sets Q for block transfers. |
 | **SETQ2** | `SETQ2 {#}D` | `EEEE 1101011 00L DDDDDDDDD 000101001` | Load D as a **one-shot** XBYTE mode operand — applies to the next bytecode only, then reverts to the last SETQ mode. Outside XBYTE, sets Q for LUT block transfers. |
 
-## 14.3 The FIFO bytecode stream {#sec-17-3}
+## 17.3 The FIFO bytecode stream {#sec-17-3}
 
 | Instruction | Syntax | Encoding | Effect |
 |-------------|--------|----------|--------|
@@ -1464,7 +1551,7 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 
 # Chapter 18: Configuration Constants & Patterns {#ch-18}
 
-## 15.1 The mode operand {#sec-18-1}
+## 18.1 The mode operand {#sec-18-1}
 
 The value handed to SETQ/SETQ2, written `%A...F`:
 
@@ -1480,7 +1567,7 @@ The value handed to SETQ/SETQ2, written `%A...F`:
 | 256 with 16-primary compression, threshold B | `%ABBBB00xF` (§7.3) |
 | smaller tables | per the §7.2 patterns |
 
-## 15.2 Registers and ranges {#sec-18-2}
+## 18.2 Registers and ranges {#sec-18-2}
 
 | Item | Value |
 |------|-------|
@@ -1492,7 +1579,7 @@ The value handed to SETQ/SETQ2, written `%A...F`:
 | Hardware stack depth | 8 levels |
 | Dispatch overhead | 6 clocks/bytecode; minimum loop 8 clocks |
 
-## 15.3 The arming pattern {#sec-18-3}
+## 18.3 The arming pattern {#sec-18-3}
 
 ```pasm2
                 setq2   #N-1                ' load N-long table into LUT
