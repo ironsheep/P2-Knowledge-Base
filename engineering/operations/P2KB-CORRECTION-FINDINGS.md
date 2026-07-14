@@ -1599,9 +1599,10 @@ together. YAML side rides F-212 + its addendum.
 > **Origin.** Stephen asked for a per-processor "what will hurt when you emulate this" table in the XBYTE
 > Guide, and proposed we ground it by studying **live, working emulators** rather than reasoning from ISA
 > facts. The study immediately surfaced two defects. Full evidence ledger:
-> `engineering/document-production/manuals/p2-xbyte-programming-guide/audit/technique-mining-2026-07-14.md`
+> `engineering/document-production/manuals/p2-xbyte-programming-guide/TECHNIQUE-MINING.md`
 > (per-source, because the techniques enter the manual body *anonymously* — the ledger is the only place
-> the lineage lives).
+> the lineage lives). **Note the path:** it lives at the manual **root**, not in `audit/`, because
+> `.gitignore:175` ignores `manuals/*/audit/` — a durable source-of-record cannot live there.
 
 ### F-217 — XBYTE Guide §5.3 presents interruptibility as a pure benefit and omits that handlers doing atomic work must shield with `REP` — `CONFIRMED`
 
