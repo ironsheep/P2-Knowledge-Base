@@ -20,6 +20,32 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.3] - 2026-07-14
+
+**The DEBUG display windows, verified on silicon**
+
+### Changed
+- FFT `MAG`: a magnitude **gain** — it multiplies the plotted magnitude by 2^n, so a higher `MAG` draws a taller trace.
+- FFT channel `grid`: a 4-bit field — bits 2 and 3 print the minimum and maximum as legend text.
+- SPECTRO axes: at the default `TRACE $F`, time runs along X and frequency along Y; traces 0–3 are the ones that swap them.
+- MIDI velocity: sets each key's fill **height**, with `COLOR` setting the hue. A velocity-0 Note-On releases the key.
+- `PC_MOUSE`: LOGIC, SCOPE, SCOPE_XY, FFT and MIDI deliver **raw client pixels** to the P2 — the coordinate drawn beside the pointer is a display-side readout. Convert from pixels using the geometry you configured.
+- SCOPE and SCOPE_XY packing: unpacked by default — each long you feed is one full 32-bit sample.
+- PLOT `CARTESIAN`: the default origin is bottom-left, with y increasing **upward**.
+- PLOT `OPACITY`: stored as a byte, so it wraps — `255` is the most opaque value.
+- PLOT sprite orientation: three independent bits — flip-X, flip-Y, and transpose — so code 4 is a diagonal mirror and 5 and 6 are the 90° rotations.
+- BITMAP `SPARSE`: draws each pixel as a round dot on a solid background fill, at `DOTSIZE` 4 or greater.
+- BITMAP `RATE`: `-1` and `0` are creation-line shorthands (full frame / one scan line); at runtime, give `RATE` a positive count.
+- BITMAP LUT: entries are black until `LUTCOLORS` loads the palette.
+- TERM colors: the `GREEN` keyword resolves to `$09FF09`; the palette green is `$00FF00`. Control codes 0–10 and 13 act; 11, 12 and 14–31 do nothing.
+- LOGIC `TRIGGER`: fires on `((sample XOR match) AND mask) == 0` — bits outside the mask are don't-cares.
+- LOGIC channel definitions: the first number after a label is the channel **count**, so give a count before a color (`'CLK' 1 $00FF00`).
+- `CLOSE`: a command in its own right — it takes several window names, runs after the rest of its message, and returns one of the 32 display slots.
+- `SAVE`: the filename is required and comes last. In buffered mode, send `UPDATE` first so the frame you save is the frame you drew.
+- `POS`: with no `POS`, the host places the window — supply it whenever the layout matters.
+- `DLY`: comes last in a `DEBUG()` statement, and releases LOCK[15] while it waits.
+- `DEBUG_MASK` and `debug[N]()`: available without a version directive.
+
 ## [1.14.2] - 2026-07-06
 
 **Cooperative multitasking and ADC resolution, documented precisely**
