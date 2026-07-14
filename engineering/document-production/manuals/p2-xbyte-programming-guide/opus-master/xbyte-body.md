@@ -1049,26 +1049,26 @@ A guest processor is not hard or easy in the abstract. It is hard or easy **rela
 
 One honesty marker, which matters:
 
-> **◆** — a working P2 implementation of this guest exists, and the row reports **what it actually does**. Appendix C will point you at it.
+> A **•** in the **Real?** column means a working P2 implementation of this guest exists, and the row reports **what it actually does**. Appendix C will point you at it.
 >
-> An unmarked row applies Chapter 11's model to the guest's *documented* behaviour. That model has been checked against every ◆ row in this table — but a row without a diamond is **reasoning, not observation**, and you should hold it a little more loosely than one with a diamond. So should we.
+> An unmarked row applies Chapter 11's model to the guest's *documented* behaviour. That model has been checked against every marked row in this table — but a row **without** the mark is **reasoning, not observation**, and you should hold it a little more loosely than a marked one. So should we.
 
 ## 12.2 Can you take the engine? {#sec-12-2}
 
 The first decision dominates: **where does the guest's code live?** The FIFO reads hub, so a guest whose program fits in hub can be auto-fetched, and one whose program cannot, cannot.
 
-| Guest | ◆ | Guest address space | Instruction shape | Realistic rung |
+| Guest | Real? | Guest address space | Instruction shape | Realistic rung |
 |-------|---|---------------------|-------------------|----------------|
 | **6502 / 65C02** | | 64 KB — **fits hub** | byte, opcode-first | **3 — XBYTE** |
-| **8080** | ◆ | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
-| **Z80** | ◆ | 64 KB — fits hub | byte, opcode-first | 3 — *if* you can forgo cycle pacing |
+| **8080** | • | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
+| **Z80** | • | 64 KB — fits hub | byte, opcode-first | 3 — *if* you can forgo cycle pacing |
 | **6809** | | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
 | **8051** | | 64 KB code — fits hub | byte, opcode-first | **3 — XBYTE** |
 | **CHIP-8** | | 4 KB — fits hub | 2-byte, nibble-decoded | 3 — via compression (§7.3) |
-| **65816** | ◆ | 16 MB — **off-chip** | byte, opcode-first | **2** — the ROM cannot be streamed |
-| **68000** | ◆ | 16 MB — off-chip | 16-bit word opcodes | **2** |
-| **x86 (8086)** | ◆ | 1 MB, **segmented** | byte, but `CS:IP` | **2** |
-| **ARM / MIPS** | ◆ | — | 32-bit fixed words | **2**, or **JIT** |
+| **65816** | • | 16 MB — **off-chip** | byte, opcode-first | **2** — the ROM cannot be streamed |
+| **68000** | • | 16 MB — off-chip | 16-bit word opcodes | **2** |
+| **x86 (8086)** | • | 1 MB, **segmented** | byte, but `CS:IP` | **2** |
+| **ARM / MIPS** | • | — | 32-bit fixed words | **2**, or **JIT** |
 
 ::: caution
 **Read the 65816 row twice.** It is byte-stream and opcode-first — by instruction shape it is *identical* to the 6502, which sits comfortably at rung 3. And the working P2 implementation of it uses **neither** XBYTE nor auto-fetch, because a 65816 machine's ROM is megabytes and lives off-chip.
@@ -1487,22 +1487,22 @@ The rest of the chapter applies these to problems that are not interpreters — 
 
 ## 16.2 The application map {#sec-16-2}
 
-A survey of where XBYTE earns its keep beyond languages and CPUs. Fit is graded **★** (strong — both assets plus a feature), **◑** (partial — leans on one asset), **○** (marginal — the dispatch is really just a lookup).
+A survey of where XBYTE earns its keep beyond languages and CPUs. Fit is graded **strong** (both assets plus a widening feature), **partial** (leans on one asset), or **marginal** (the dispatch is really just a lookup).
 
 | Application | The stream is… | Main lever | Fit |
 |-------------|----------------|------------|-----|
-| **Terminal / ANSI (VT100) reader** | characters + escape sequences | table-as-state (`ESC` → one-shot table) | ★ |
-| **MIDI stream engine** | status + data bytes | byte-as-data (channel in `PA`) | ★ |
-| **Graphics display list** | draw commands + inline coordinates | seek + auto-fetch | ★ |
-| **Binary format / TLV decoder** (MessagePack, CBOR) | type-tagged records | byte-as-data (the type tag) | ★ |
-| **Event / timeline sequencer** (LED art, tracker, animatronics) | time-ordered events | seek (loop / branch) | ★ |
-| **Stream decompression** (multi-code RLE, packed sprites) | control tokens + payload | auto-fetch — dispatch pays only with *many* codes | ◑ |
-| **Inter-cog command coprocessor** | a live command ring | dispatch — the stream is live, not stored | ◑ |
-| **Lexer / protocol state machine** | input symbols | table-as-state, one table per DFA state (advanced) | ◑ |
-| **Forth inner interpreter** | a threaded word stream | both — but interpreter-adjacent | ◑ |
-| **Charset map / Morse / template expand** | symbols → output | ○ — a plain `RDLUT` wins unless there is real per-symbol work |
+| **Terminal / ANSI (VT100) reader** | characters + escape sequences | table-as-state (`ESC` → one-shot table) | strong |
+| **MIDI stream engine** | status + data bytes | byte-as-data (channel in `PA`) | strong |
+| **Graphics display list** | draw commands + inline coordinates | seek + auto-fetch | strong |
+| **Binary format / TLV decoder** (MessagePack, CBOR) | type-tagged records | byte-as-data (the type tag) | strong |
+| **Event / timeline sequencer** (LED art, tracker, animatronics) | time-ordered events | seek (loop / branch) | strong |
+| **Stream decompression** (multi-code RLE, packed sprites) | control tokens + payload | auto-fetch — dispatch pays only with *many* codes | partial |
+| **Inter-cog command coprocessor** | a live command ring | dispatch — the stream is live, not stored | partial |
+| **Lexer / protocol state machine** | input symbols | table-as-state, one table per DFA state (advanced) | partial |
+| **Forth inner interpreter** | a threaded word stream | both — but interpreter-adjacent | partial |
+| **Charset map / Morse / template expand** | symbols → output | marginal — a plain `RDLUT` wins unless there is real per-symbol work |
 
-The three sketches that follow take one ★ case for each widening feature. Each is **tiny and illustrative** — a handful of handlers to show the shape, not a finished driver — the same charter as the rest of Part III.
+The three sketches that follow take one **strong** case for each widening feature. Each is **tiny and illustrative** — a handful of handlers to show the shape, not a finished driver — the same charter as the rest of Part III.
 
 ## 16.3 A terminal reader — the table as state {#sec-16-3}
 

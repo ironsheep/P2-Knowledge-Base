@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape Building Interpreters and Emulators on the Propeller 2\par}
 \vspace{0.35cm}
-{\large June 2026\par}
+{\large July 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 0.2.0\par}
 
@@ -55,14 +55,18 @@
 \item Arming XBYTE
 \item Table-Size \& Compression Modes
 \item Bytecode Routines
+\item Debugging XBYTE
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part III: Building a VM}
+\textbf{Part III: Building Interpreters \& Emulators}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A Minimal Custom VM
-\item Mapping CPU Families onto XBYTE
+\item The Three Decisions
+\item What Will Hurt — A Guest-CPU Survey
 \item A Tiny CPU Emulator (6502)
-\item The 6809 SETQ2 Vignette
+\item Servicing Guest Interrupts
+\item Prefixes \& Alternate Tables
+\item XBYTE Beyond Interpreters
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -147,12 +151,12 @@ This guide serves developers building interpreters, virtual machines, and CPU em
 **Structure:**
 
 - **Part I (Fundamentals)** builds the mental model — read this first. It teaches the skip family (SKIP/SKIPF/EXECF) before XBYTE, because the engine is built out of them.
-- **Part II (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, and the rules bytecode routines follow.
-- **Part III (Building a VM)** proves the engine by building — a minimal custom VM, then a tiny illustrative 6502 emulator.
+- **Part II (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, the rules bytecode routines follow, and how to debug a hardware dispatch loop.
+- **Part III (Building Interpreters & Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
 - **Part IV (Reference)** is quick lookup for the instructions and the configuration bits.
 - **Appendices** contain quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 
-The capstone 6502 emulator and the 6809 vignette in Part III are deliberately **tiny and illustrative** — enough to show the technique end to end, not faithful or complete emulators.
+The 6502 emulator in Part III is deliberately **tiny and illustrative** — enough to show the technique end to end, not a faithful or complete emulator. Its two worked programs (the minimal VM and the display-list engine) are complete and compile.
 
 ## Document Conventions
 
