@@ -179,7 +179,9 @@ every window are listed once at the end.
 
 ## SCOPE — time-domain oscilloscope (Chapter 7)
 
-**Create:** `` DEBUG(`SCOPE Name <config> <channels>) ``
+**Create:** `` DEBUG(`SCOPE Name <config>) `` — configuration keywords only.
+**Then declare channels in a second message:** `` DEBUG(`Name <channels>) ``.
+A channel label on the create line **prevents the window from being created at all**.
 
 **Configuration directives:**
 
@@ -246,7 +248,9 @@ every window are listed once at the end.
 
 ## FFT — frequency spectrum (Chapter 9)
 
-**Create:** `` DEBUG(`FFT Name <config> <channels>) ``
+**Create:** `` DEBUG(`FFT Name <config>) `` — configuration keywords only.
+**Then declare channels in a second message:** `` DEBUG(`Name <channels>) ``.
+A channel label placed on the create line is rejected by the parser.
 
 **Configuration directives:**
 
@@ -334,6 +338,15 @@ every window are listed once at the end.
 - `` DEBUG(`Name PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. See [Chapter 12](#ch-12) for the key-code table.
 - `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
-- `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save the window image to a host file.
-- `` DEBUG(`Name CLOSE) `` — close and free this one window. A different action from
-  ending the whole debug session; works on all nine window types.
+- `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save to `file.bmp` on the host (no
+  extension in the name). **The filename is required and must be last**: a bare
+  `SAVE` writes nothing, and a keyword placed after `SAVE` is consumed and discarded.
+  In buffered mode `SAVE` captures the *front* buffer — send `` `UPDATE `` first. See
+  [Chapter 1](#ch-1).
+- `` DEBUG(`Name CLOSE) `` — close and free this one window; reclaims one of the 32
+  display slots. Runs *after* the rest of its message, and accepts several window
+  names. A different action from ending the whole debug session; works on all nine
+  window types.
+- `` DEBUG(DEBUG_END_SESSION) `` — `{Spin2_v52}`. Ends the whole session: closes every
+  window and the `DEBUG.LOG` file. The P2 program keeps running. Note this is a
+  `DEBUG()` statement in its own right, not a `` `Name `` window command.

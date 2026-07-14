@@ -72,13 +72,13 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `FFT` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - FFT` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Plot area in pixels; each is **32–2048** |
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
-| `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
-| `LINESIZE` | `width` | `3` | Line width in pixels (**−32–32**; negative draws filled bars, wider for larger negative values) |
+| `DOTSIZE` | `diameter` | `0` | Dot diameter in pixels (**0–32**) |
+| `LINESIZE` | `half-pixels` | `3` | Line width in **half-pixels** (**−32–32**; negative draws filled bars, wider for larger negative values) |
 | `TEXTSIZE` | `points` | editor text size | Label font size; defaults to the editor's text size (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic amplitude scaling |
@@ -125,12 +125,16 @@ label:
 | Position | Meaning | Range |
 |----------|---------|-------|
 | label | Channel name (string) | — |
-| `MAG` shift | Magnitude bit-shift | **0–11** |
+| `MAG` gain | Magnitude **gain**: multiplies by 2ⁿ (a higher `MAG` makes the trace *taller*) | **0–11** |
 | high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
-| grid | Grid-line flags: bit 0 = baseline line, bit 1 = top line | default `0` |
+| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | default `0` |
 | color | Trace color (`$RRGGBB`) | — |
+
+The two upper `grid` bits add printed **legend text**, not lines: bit 3 labels the
+channel's maximum, and bit 2 its minimum — which for FFT always reads `+0`, because
+the window never sets a low value.
 
 A single green channel, full height, with a baseline grid line:
 
@@ -178,7 +182,9 @@ compressing large ones so a wide dynamic range fits in one window.
 
 `LOGSCALE` is **not a decibel mode**. There is no calibrated dB scale, no dB
 markers, and no keyword that produces one — the scaling is a logarithm of the
-(uncalibrated) magnitude, in arbitrary power units.
+(uncalibrated) magnitude, in arbitrary power units. The window's only visible
+acknowledgement of the flag is the word `logscale` printed on the display; it draws
+no scale markings of any kind.
 
 ```spin2
 debug(`FFT Spectrum SIZE 512 256 SAMPLES 512 LOGSCALE)
@@ -214,7 +220,9 @@ Three runtime commands work in the feed stream:
 - `` `CLEAR `` — erases the display and resets the sample buffer, so the next
   spectrum is built from fresh samples rather than blending with what was already
   collected.
-- `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host.
+- `` `SAVE 'name' `` — saves the **display area** to `name.bmp` on the host; write
+  `` `SAVE WINDOW 'name' `` to capture the whole window instead. The filename is
+  required ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
@@ -326,8 +334,9 @@ stay the same.
 - **The window is fixed; there is no choice of window function.** Every transform
   is Hanning-windowed internally. Do not look for a `WINDOW` keyword or alternate
   window types — there are none.
-- **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log2 compression with
-  power-of-2 markers, and `MAG` is a power-of-2 gain. Neither produces decibels.
+- **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log compression and `MAG`
+  is a power-of-2 gain. Neither produces decibels, and neither draws a calibrated
+  scale — the only thing `LOGSCALE` adds to the display is the word `logscale`.
 - **The frequency axis is yours to compute.** The window plots bins, not Hertz.
   Bin `k` is at `k x sample_rate / N`; if you want Hz labels, you add them.
 - **One FFT per channel per redraw.** Each channel runs its own transform, so
@@ -344,7 +353,7 @@ stay the same.
 
 - **FFT** — you care about *which frequencies* are present: tones, harmonics,
   resonances, noise floor.
-- **SCOPE** ([Chapter 8](#ch-8)) — you care about the *waveform over time*: shape, timing,
+- **SCOPE** ([Chapter 7](#ch-7)) — you care about the *waveform over time*: shape, timing,
   transients.
 - **SPECTRO** ([Chapter 10](#ch-10)) — you care about *how the spectrum changes over time*:
   a scrolling waterfall built from the same FFT, one column per transform.

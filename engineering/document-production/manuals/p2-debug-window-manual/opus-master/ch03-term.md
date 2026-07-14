@@ -39,8 +39,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | (window name) | The window's title-bar text |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - TERM` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
@@ -144,11 +144,13 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 | 2 | `6` | Lime | Black |
 | 3 | `7` | Black | Lime |
 
-> **The default green is `clLime` (`$00FF00`), not the `GREEN` keyword.** Parallax's
-> default palette uses **Lime** — pure `$00FF00` — which renders measurably brighter
-> than the `GREEN` color keyword (`$09FF09`). There is no `LIME` keyword: to reproduce
-> the default with `COLOR`, use `$00FF00` directly (the `GREEN` keyword gives the
-> slightly darker keyword shade).
+> **The default green is the palette value `$00FF00`, not the `GREEN` keyword.** The
+> default palette uses a pure, fully saturated green — `$00FF00`, with no red and no
+> blue in it at all. The `GREEN` *keyword* is a computed color and resolves to
+> `$09FF09` at its default brightness: a trace of red and blue rides along with it, so
+> it reads as very slightly washed out beside the palette green rather than as a
+> cleaner one. **There is no `LIME` keyword.** To reproduce the default exactly, write
+> `$00FF00` ([Appendix C](#appendix-c) explains why keywords and palette values differ).
 
 ```spin2
 debug(`Status 4 'normal' 13)     ' pair 0: orange on black
@@ -166,6 +168,26 @@ debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
 lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
+
+### Setting a color directly, without a pair
+
+The four pairs are not your only option. From **Spin2 v52** onward you can name a
+color *in the feed itself* and skip the pair system entirely — send a color keyword
+and, optionally, a second one for the background:
+
+```spin2
+debug(`Log RED 'fault: overtemp' 13)          ' red text
+debug(`Log YELLOW BLACK 'warning' 13)         ' yellow on black
+debug(`Log GREEN 12 'all systems nominal' 13) ' green at brightness 12
+```
+
+Each keyword takes the optional `0`–`15` brightness described in
+[Appendix C](#appendix-c). A runtime `BACKCOLOR` sets just the text background. The
+color stays in force until you change it or select a pair with a `4`–`7` code.
+
+> This is a **v52 addition**. Build with a `pnut_ts` of v52 or later and put
+> `{Spin2_v52}` (or later) on the source file's first line; an older compiler does not
+> recognize the directive.
 
 ## Cursor, tabs, and scrolling
 
@@ -230,7 +252,9 @@ PRI read_press() : v
 Three more runtime keyword commands round out the set:
 
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE 'name' `` — saves the window image to `name.bmp` on the host. The filename
+  is **required** and must come last — a bare `` `SAVE `` writes nothing at all, and
+  says nothing about it ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ## A positioned dashboard

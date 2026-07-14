@@ -46,19 +46,38 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `radius` | `256x256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256x256 (the default is a 256-pixel width, not a radius) |
+| `TITLE` | `'text'` | `<name> - SCOPE_XY` | The window's title-bar caption |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
+| `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` square. The default radius of `128` gives a 256×256 plot |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
-| `DOTSIZE` | `pixels` | `6` | Sample-dot diameter in pixels, `2`–`20` |
+| `DOTSIZE` | `half-pixels` | `6` | Sample-dot diameter in **half-pixels**, `2`–`20` (the default `6` draws a 3-pixel dot) |
 | `TEXTSIZE` | `points` | editor size | Legend text size, `6`–`200` |
 | `COLOR` | `back {grid}` | black, gray | Background color and, optionally, grid color |
 | `POLAR` | `{twopi {offset}}` | — | Interpret pairs as `(radius, angle)` instead of `(x, y)` — see below |
 | `LOGSCALE` | — | linear | Logarithmic radial scale, to magnify points near the center |
 | `HIDEXY` | — | shown | Hide the X,Y coordinate readout at the mouse pointer |
+| Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 | `'name' {color}` | — | next default color | Declare a channel (trace), optionally with a color |
+
+> ### ⚠️ A stray number in the create message will hang your tool
+>
+> Every value on a SCOPE_XY create line must belong to a keyword. A number that
+> follows no keyword sends **PNut's** configuration parser into an **infinite loop**:
+> no error, no diagnostic, no window — the tool simply locks up and has to be killed.
+>
+> ```spin2
+> debug(`SCOPE_XY W 128 'A')      ' HANGS PNut -- 128 follows no keyword
+> debug(`SCOPE_XY W SIZE 128 'A') ' what was meant
+> ```
+>
+> The trigger is an ordinary typo: a dropped `SIZE`, `RANGE`, or `SAMPLES` keyword
+> leaves its number stranded. SCOPE_XY is the only window with this exposure — the
+> others reject or truncate the stray value instead of spinning on it — and
+> `pnut_term_ts` does not share the defect. It is a PNut bug, reported upstream;
+> until it is fixed, a SCOPE_XY window that never opens and a tool that stops
+> responding are the same symptom. (Hardware-verified.)
 
 Three of these behave differently from what their names might suggest, and getting
 them wrong is the most common SCOPE_XY mistake:
@@ -113,8 +132,13 @@ debug(`Phase `(x1, y1, x2, y2))   ' (x1,y1) -> A, (x2,y2) -> B
 ```
 
 SCOPE_XY collects values until it has a complete set — two per declared channel —
-then plots all channels at once and starts the next set. You can also split a set
-across several feeds; the window assembles them in arrival order.
+then plots all channels at once and starts the next set.
+
+> **Send a complete set in one message.** The window assembles a set *within* a
+> single `DEBUG` message; it does not carry a half-finished set across to the next
+> one. Split a set across two feeds and the leftover values are **silently
+> discarded** — nothing is plotted, and nothing tells you why. With two channels
+> declared, send all four numbers together.
 
 ## Polar mode
 
@@ -134,8 +158,11 @@ debug(`SCOPE_XY Rose SIZE 256 RANGE 1000 POLAR 360 'Rose')
   default explicitly, or `-1` to run angles the other direction.
 - **`offset`** — an angular offset added to every angle, rotating the whole plot.
 
-Angle `0` points up; increasing angle sweeps around the circle. Feed
-`(radius, angle)` pairs exactly as you feed `(x, y)` pairs in Cartesian mode:
+Angle `0` points **east** — along the +x axis, to the right — and increasing angle
+sweeps **counter-clockwise**, the mathematical convention (the same one PLOT uses,
+[Chapter 5](#ch-5)). A negative `twopi` reverses the sweep to clockwise, and `offset`
+rotates the zero direction wherever you want it. Feed `(radius, angle)` pairs exactly
+as you feed `(x, y)` pairs in Cartesian mode:
 
 ```spin2
 debug(`Rose `(radius, angle))

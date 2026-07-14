@@ -49,17 +49,24 @@ The configuration keywords you can place on the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Scope` | The window's title-bar text |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - SCOPE` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Display size in pixels; each is **32–2048** |
 | `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
-| `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
-| `LINESIZE` | `pixels` | `3` | Line thickness in pixels; **0–32** (`0` = no lines) |
+| `DOTSIZE` | `diameter` | `0` | Dot diameter in pixels; **0–32** (`0` = no dots) |
+| `LINESIZE` | `half-pixels` | `3` | Line thickness in **half-pixels**; **0–32** (`0` = no lines) |
 | `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
-| Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see [Chapter 13](#ch-13)) |
+| Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
+
+> **`LINESIZE` is in half-pixels; `DOTSIZE` is in whole pixels.** The default
+> `LINESIZE 3` draws a trace about 1.5 pixels wide, and the maximum `32` draws 16
+> pixels — whereas `DOTSIZE 8` is a plain 8-pixel diameter.
+>
+> **There is no default packing format.** Unless you name one, the window is
+> *unpacked*: each long you feed it is one complete sample value.
 
 If you set both `DOTSIZE` and `LINESIZE` to `0`, the window forces a dot size of 1
 so traces remain visible.
@@ -86,9 +93,15 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
 The first label declares channel 0, the next channel 1, and so on, up to eight.
-Send the channel declarations as a **separate message after creating the window** —
-a channel declaration placed on the create line is ignored, because the create
-message accepts only configuration keywords, so the window opens with no channels.
+Send the channel declarations as a **separate message after creating the window**.
+
+> **A channel definition on the create line is not ignored — it stops the window from
+> being created at all.** The create message accepts only configuration keywords; a
+> quoted channel label among them aborts the creation, and you get **no window**, no
+> error, and no trace. If a SCOPE never appears, look for a label on the create line
+> first. (Hardware-verified.) Create the window, *then* declare its channels in a
+> second message.
+
 So this declares three channels:
 
 ```spin2
@@ -228,13 +241,14 @@ Three more runtime commands round out the set:
 
 - `` `CLEAR `` — clears the display and resets the sample buffer, so the next samples
   start a fresh trace from the right edge.
-- `` `SAVE `` — saves the current display image to a `.bmp` file on the host. An
-  optional filename may follow; without one, the host names the file.
+- `` `SAVE 'name' `` — saves the current display image to `name.bmp` on the host. The
+  filename is **required**: a bare `` `SAVE `` writes nothing, silently
+  ([Chapter 1](#ch-1)). Do not put the `.bmp` in the name — it is appended for you.
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
-debug(`Sig SAVE)    ' write the current trace to a bitmap on the PC
-debug(`Sig CLEAR)   ' wipe the buffer and start over
+debug(`Sig SAVE 'trace')   ' writes trace.bmp on the PC -- the name is required
+debug(`Sig CLEAR)          ' wipe the buffer and start over
 ```
 
 ## A complete worked example
@@ -429,6 +443,9 @@ channel, trigger, and capture code shows the live signal.
   (the default) the window redraws on every sample set. With `RATE 16` it accepts and
   buffers every set but redraws only on every sixteenth — which lowers the host's
   drawing load for fast streams. It does not change how often *you* send samples.
+  **When a `TRIGGER` is armed, `RATE` divides *triggers*, not samples**: the rate
+  counter only advances on sample sets that fire the trigger, so `RATE 10` with a
+  trigger means "redraw every tenth trigger."
 - **You set the time scale, not the window.** The horizontal axis is one column per
   sample set. How fast time appears to move is set by the spacing of your `DEBUG`
   calls — the `waitms`/`waitx` in your loop — not by any window parameter.

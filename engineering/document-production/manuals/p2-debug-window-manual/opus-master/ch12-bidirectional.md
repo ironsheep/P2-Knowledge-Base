@@ -8,9 +8,12 @@ becomes a control surface as well.
 
 The mechanism is shared. `PC_KEY` and `PC_MOUSE` work on any display window — TERM,
 PLOT, SCOPE, BITMAP, all of them — because you address the input to a window by
-name and the host reports the state of that window. The window must have focus for
-input to be noticed: keypresses and wheel events go to whichever window the host
-user has clicked into.
+name and the host reports the state of that window.
+
+**Focus governs keys and the wheel, not the pointer.** Keypresses go to whichever
+window the host user has clicked into, and the scroll-wheel delta likewise. Mouse
+**position, buttons, and the pixel color under the pointer** are reported on hover —
+you do not have to click the window first to read where the pointer is.
 
 Both commands follow the same shape: you pass a **pointer to a buffer in hub RAM**,
 and the host writes the current input state into that buffer. They do not return a
@@ -135,9 +138,26 @@ The seven longs, in order, are:
 | `mouse[5]` | right button | `0` released, `-1` pressed. |
 | `mouse[6]` | pixel | Color at the mouse position, `$00_RR_GG_BB`, or `-1` if the mouse is outside the window. |
 
-The position units depend on the window type — for a TERM window they are character
-column and row; for pixel-based windows like BITMAP they are pixels. (See the per-
-window hover-coordinate behavior in each window's chapter.)
+### The value you receive is not the number on the screen
+
+Most windows print a coordinate readout next to the mouse pointer. **That readout is
+drawn by the host, and for five of the nine windows it is not what your P2 receives.**
+The window computes a friendly, chapter-native number for the display — a sample
+index, a signal value, an inverted Y, a polar angle — and sends your program the
+**raw pixel position inside the window's client area** instead.
+
+| Window | What `mouse[0]` / `mouse[1]` actually carry |
+|--------|---------------------------------------------|
+| TERM | character **column and row** |
+| PLOT, BITMAP, SPECTRO | canvas pixels — divided by `DOTSIZE`, and flipped if `CARTESIAN` flipped them |
+| **LOGIC, SCOPE, SCOPE_XY, FFT, MIDI** | **raw client pixels** — *not* the sample index, value, or angle shown on screen |
+
+For the five windows in the last row, the transform you see on screen is
+**display-only**. If you read `mouse[0]` from a SCOPE expecting the sample index under
+the pointer, or from a SCOPE_XY expecting a polar angle, you will get a pixel offset
+that happens to look plausible — and every hit-test you build on it will be quietly
+wrong. Do the conversion yourself, from pixels, using the window geometry you
+configured.
 
 **Buttons are a full-long state, not a bitmask.** Each button long is either `0`
 (released) or `-1` (pressed). Test it directly — `if mouse[3]` is true when the left

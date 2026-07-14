@@ -47,9 +47,9 @@ The configuration keywords for the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `SPECTRO` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SAMPLES` | `count` | `512` | FFT size; a power of two, **4–2048** |
+| `TITLE` | `'text'` | `<name> - SPECTRO` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
+| `SAMPLES` | `count {first last}` | `512` | FFT size (a power of two, **4–2048**), and an optional displayed bin range |
 | `DEPTH` | `pixels` | `256` | Time-history depth (the scrolling dimension), **1–2048** |
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
@@ -66,6 +66,11 @@ effective sample rate). A `SAMPLES 512` window analyzes 512 points into 256 bins
 `SAMPLES 2048` gives 1024 bins. `SAMPLES` is rounded to a power of two — values that
 are not powers of two are reduced to the next lower power, and the range is clamped
 to 4–2048.
+
+`SAMPLES` also accepts an optional **bin range** — two more numbers giving the first
+and last bin to display. `SAMPLES 2048 0 236` runs a full 2048-point transform but
+plots only bins 0 through 236, which is how you zoom the waterfall onto the band you
+care about without shrinking the transform that produced it.
 
 `SAMPLES` and `DEPTH` set the two axes. The frequency axis is `SAMPLES`/2 bins long.
 The time axis is `DEPTH` pixels long — that is how many past spectra stay on screen
@@ -195,6 +200,16 @@ on its creation line are the luminance and 16-bit HSV families:
 | `HSV16W` | 16-bit HSV | White variant |
 | `HSV16X` | 16-bit HSV | Extended range |
 
+Each mode takes an optional **tune** argument that follows the keyword. For the
+`LUMA8` family it is the tint the ramp runs toward — one of the named colors
+(`ORANGE`, `BLUE`, `GREEN`, `CYAN`, `RED`, `MAGENTA`, `YELLOW`, `GRAY`), so
+`LUMA8X GREEN` gives a green waterfall instead of the default orange. For the
+`HSV16` family it is a numeric `0`–`255` phase offset that rotates the hue wheel:
+
+```spin2
+debug(`SPECTRO Wfall SAMPLES 512 DEPTH 256 RANGE $40000 LUMA8X GREEN)
+```
+
 `LUMA8X` is the default if you name no mode. The luminance modes render a brightness
 ramp — the natural "heat map" look for a single magnitude. The HSV16 modes encode
 phase as well: the FFT's per-bin phase angle is folded into the hue while magnitude
@@ -214,7 +229,9 @@ Three keyword commands work at runtime, sent by the window's name:
 - `` `CLEAR `` — clears the display, resets the sample buffer (so the window waits
   for a fresh full window before drawing again), and resets the trace position to
   its starting edge.
-- `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host (a filename is required).
+- `` `SAVE 'name' `` — saves the **display area** to `name.bmp` on the host; write
+  `` `SAVE WINDOW 'name' `` to capture the whole window instead. The filename is
+  required, and nothing may follow it ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2

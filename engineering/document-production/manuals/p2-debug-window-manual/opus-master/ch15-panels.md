@@ -203,9 +203,13 @@ A status panel becomes a control panel when the window reads input. The same
 `PC_KEY` / `PC_MOUSE` commands from [Chapter 12](#ch-12) turn any window into a
 surface you operate: the user clicks a drawn button or presses a key, and your program
 acts. Three rules carry over from that chapter — each input command must be the **last**
-command in its `DEBUG()` statement, the window must have **focus**, and `PC_MOUSE`
-fills **seven consecutive longs** (`xpos, ypos, wheel, left, middle, right, pixel`,
-buttons `0`/`-1`, coordinates negative when the pointer is outside).
+command in its `DEBUG()` statement; **focus** is required for keypresses and the
+scroll wheel, though pointer position, buttons, and the pixel color report on hover
+without it; and `PC_MOUSE` fills **seven consecutive longs** (`xpos, ypos, wheel,
+left, middle, right, pixel`, buttons `0`/`-1`, coordinates negative when the pointer
+is outside). The panel here is a PLOT window, so its coordinates arrive as canvas
+pixels — but in a LOGIC, SCOPE, SCOPE_XY, FFT, or MIDI window they would be **raw
+client pixels**, not the values shown on screen ([Chapter 12](#ch-12)).
 
 Two patterns make a panel interactive:
 

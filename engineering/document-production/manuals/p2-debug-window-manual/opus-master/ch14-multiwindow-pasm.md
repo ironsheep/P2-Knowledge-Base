@@ -32,23 +32,27 @@ the name is how every later feed is routed to the right window.
 ### Placing windows with POS
 
 Every display type takes a `POS left top` keyword on its creation line, giving the
-window's position on the host screen in pixels (default `0, 0`). With more than one
-window open, set `POS` on each so they do not stack on top of each other. In the
-example above, `Wave` sits at the top-left corner and `Status` sits 420 pixels to
-its right — clear of a 400-pixel-wide SCOPE.
+window's position on the host screen in pixels. With more than one window open, set
+`POS` on each so they do not stack on top of each other. In the example above, `Wave`
+sits at the top-left corner and `Status` sits 420 pixels to its right — clear of a
+400-pixel-wide SCOPE.
 
 > Two host-wide offsets shift *all* displays together: the `DEBUG_DISPLAY_LEFT` and
 > `DEBUG_DISPLAY_TOP` symbols add to every window's `POS` coordinates. Set them in a
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 
-If you declare several windows **without** `POS`, `pnut_term_ts` places them for
-you — it offsets each new window from the base display position rather than opening
-them all on top of each other. That is enough to get started, but the arrangement is
-automatic, not one you chose. To capture a layout you *do* like, **drag a window**:
-while you move it, its title bar shows the window's current `left,top` in pixels.
-Read those numbers off and encode them into `POS` on that window's creation line,
-and your chosen arrangement reappears on every run.
+If you declare several windows **without** `POS`, **your tool places them** — and what
+it does is up to that tool, not to the P2. Some hosts arrange the windows so they do
+not overlap; others simply stack every window at the same origin, leaving you with
+one visible window and the rest hidden underneath it. Neither is a property of the
+debug system, and neither is guaranteed.
+
+**So give `POS` explicitly whenever the layout matters** — which, with more than one
+window, is essentially always. To capture a layout you like, **drag a window**: while
+you move it, its title bar shows the window's current `left,top` in pixels. Read those
+numbers off and encode them into `POS` on that window's creation line, and your chosen
+arrangement reappears on every run, on every tool.
 
 ### Feeding each window in your loop
 

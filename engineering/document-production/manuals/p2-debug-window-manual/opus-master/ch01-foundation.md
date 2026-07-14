@@ -128,9 +128,13 @@ A number in the feed stream is interpreted one of two ways, and you control whic
 - A number put into the stream as **display text** shows as its digits. In a TERM
   you do this with a `` `(value) `` substitution inside single-quoted text:
   `` `(x) `` is signed decimal, `` `$(x) `` hex, `` `%(x) `` binary, `` `.(x) ``
-  floating point, and `` `#(x) `` sends the character whose code is `x`. If `x`
-  holds 25, then a `` `(x) `` substitution inside single-quoted text shows the two
-  characters `2` and `5`.
+  floating point, `` `?(x) `` boolean (printing `TRUE` or `FALSE`), and `` `#(x) ``
+  sends the character whose code is `x`. If `x` holds 25, then a `` `(x) ``
+  substitution inside single-quoted text shows the two characters `2` and `5`.
+
+  These punctuation forms are shorthands for the long-named formatters:
+  `` `(x) `` is `SDEC_`, `` `.(x) `` is `FDEC_`, and `` `?(x) `` is `BOOL_`. Use
+  whichever reads better — they compile to the same thing.
 
   The value-only `DEBUG()` formatters you use for serial output — `` `udec_(x) ``,
   `` `uhex_(x) ``, `` `sdec_(x) ``, and so on — also put a value in the stream, but
@@ -191,10 +195,14 @@ after the window name, the same way you send data:
   accept `SAVE 'filename'`, and optionally `SAVE WINDOW 'filename'` to capture the
   whole window rather than just the display area. The file is a `.bmp`; the
   extension is appended automatically, so give the name *without* it (`'scope'`,
-  not `'scope.bmp'`).
+  not `'scope.bmp'`). **`SAVE` has four traps — read the box below before you use it.**
 - **`CLOSE`** — close one window and free it. Most programs never need this — a
   window also stops when the program stops feeding it — but `` `CLOSE `` lets you
   dismiss a single window explicitly while the rest of the program keeps running.
+  `CLOSE` is a command only (it takes no arguments), it accepts more than one window
+  name in a message, and it runs **after** the rest of that message — so
+  `` `Win SAVE 'shot' CLOSE `` saves *and then* closes, in that order. Closing a
+  window gives back one of the **32 display slots** the debug system has to hand out.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This prevents flicker when
@@ -207,6 +215,51 @@ after the window name, the same way you send data:
 Each window also has commands of its own — `TRIGGER` and `HOLDOFF` on SCOPE and
 LOGIC, the drawing commands on PLOT, and so on. Those belong to the window and are
 documented in its chapter.
+
+### The four `SAVE` traps
+
+`SAVE` writes a file and tells you nothing about how it went. All four of these
+failures are silent, and all four have been confirmed on hardware:
+
+1. **No filename, no file.** The filename is *required*. A bare `` `Win SAVE ``
+   writes nothing at all — no file, no error, no warning. It simply does not happen.
+2. **A keyword after `SAVE` is eaten.** The filename must be the **last** thing in the
+   message. Anything you put after `SAVE` other than a filename is consumed and
+   discarded — `` `Win SAVE CLEAR `` writes no file **and** does not clear the window.
+   You lose both commands.
+3. **In buffered mode you save the *previous* frame.** `SAVE` captures the front
+   buffer — what is on screen — not the drawing you have accumulated off-screen.
+   Under `UPDATE` mode, send `` `UPDATE `` *before* `SAVE`, or you will file the frame
+   before the one you meant.
+4. **`SAVE WINDOW` scrapes the desktop.** The plain form renders the display area from
+   the window's own bitmap, but `SAVE WINDOW` copies the region of the *screen* the
+   window occupies — so anything overlapping it gets captured too. Keep the window
+   unobscured, or prefer the plain form.
+
+Trap 1 and trap 3 are the ones that waste an afternoon: in both cases the program
+runs, the file appears (or doesn't) without complaint, and the picture you get is a
+plausible one — just not the picture you asked for.
+
+> **`SAVE WINDOW` is currently unreliable on PNut.** It can capture a truncated or
+> offset rectangle, a neighboring window, or bare desktop. This is a tool bug, reported
+> upstream — the plain `SAVE 'name'` form is correct in every case and is what you
+> should build on.
+
+### Ending a debug session
+
+`` `CLOSE `` dismisses one window. `DEBUG_END_SESSION` ends the **whole session** —
+it is the global counterpart, and it is not a window command but a `DEBUG()`
+statement of its own:
+
+```spin2
+debug(DEBUG_END_SESSION)   ' {Spin2_v52} -- closes every window and the log file
+```
+
+Executing it closes any open DEBUG windows *and* the `DEBUG.LOG` file, and **your P2
+program keeps running**. It exists chiefly so that a run can signal "the output is
+complete": the log file is closed and flushed, which is what lets a script — or an AI
+coding assistant — know the results are ready to read rather than still being written.
+It needs `{Spin2_v52}` or later.
 
 ## How these differ from the single-step debugger
 

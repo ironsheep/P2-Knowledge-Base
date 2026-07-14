@@ -41,8 +41,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | none (window name) | The window's title-bar text |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - MIDI` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `multiplier` | `4` | Key-size multiplier, **1–50** |
 | `RANGE` | `first last` | `21 108` | First and last MIDI note to display, each **0–127** |
 | `CHANNEL` | `channel` | `0` | The single MIDI channel to display, **0–15** |
@@ -142,8 +142,15 @@ debug(`Piano $90 `(note) `(vel))   ' note-on with variable note and velocity
 
 This is the same distinction as in the other windows: `` `(note) `` sends the
 *value* of `note` as a byte the parser consumes, whereas a formatter such as
-`` `udec_(note) `` would render the digits as text — which the MIDI window does
-not accept and would ignore as a string.
+`` `udec_(note) `` would render the digits as **text**.
+
+> **A string does not get ignored — it ends the feed.** When the MIDI window meets a
+> string element, it **stops processing that message**: every byte after the string is
+> discarded, not just the string itself. So a stray `` `udec_() `` in the middle of a
+> feed silently swallows the rest of your MIDI bytes.
+>
+> Note that `` `uhex_byte_() `` is **not** a string in this sense — it is a
+> value-carrying formatter, and it is the normal way to feed MIDI bytes from PASM.
 
 ## Clearing and saving
 
