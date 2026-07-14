@@ -1594,4 +1594,79 @@ together. YAML side rides F-212 + its addendum.
 
 ---
 
+## XBYTE technique-mining sweep — reference implementations expose two doc defects (2026-07-14) — F-217, F-218
+
+> **Origin.** Stephen asked for a per-processor "what will hurt when you emulate this" table in the XBYTE
+> Guide, and proposed we ground it by studying **live, working emulators** rather than reasoning from ISA
+> facts. The study immediately surfaced two defects. Full evidence ledger:
+> `engineering/document-production/manuals/p2-xbyte-programming-guide/audit/technique-mining-2026-07-14.md`
+> (per-source, because the techniques enter the manual body *anonymously* — the ledger is the only place
+> the lineage lives).
+
+### F-217 — XBYTE Guide §5.3 presents interruptibility as a pure benefit and omits that handlers doing atomic work must shield with `REP` — `CONFIRMED`
+
+**What §5.3 says today**, in full:
+
+> *"XBYTE is also **interruptible**: an interrupt can occur during dispatch, and the engine resumes the
+> bytecode stream afterward. Bytecode interpretation does not lock out a cog's interrupts."*
+
+Every word is true. But it is framed **entirely as a benefit**, and the manual never states the
+consequence: **if a bytecode handler performs a multi-instruction sequence that must be atomic — a CORDIC
+operation, a read-modify-write of a shared variable — an interrupt can land in the middle of it.** The
+reader is told interrupts are free and is never told to fence.
+
+**Evidence — Chip Gracey's Spin2 interpreter shields exactly this, eight times, in his own words:**
+
+| Site | Code | Chip's comment |
+|---|---|---|
+| `op_quna` | `rep #99,#1` | *"use REP to protect cordic operation until ret/_ret_"* |
+| (SCAS) | `rep #99,#1` | *"use REP to protect cordic operation until call/ret/_ret_"* |
+| `wrf` | `rep @stall,#1` | *"use REP to protect variable from interrupts"* |
+| `clkset_init` | `rep #99,#1` | *"use REP to stall interrupts until _ret_"* |
+| ×4 more | `rep @.stall,#1` | *"use REP to stall interrupts to protect cordic operation"* |
+
+**`REP` appears zero times in the XBYTE Guide.** This is a correctness hazard, not a style note: a reader
+who follows our text will write a handler that is silently corrupted by an interrupt, intermittently.
+
+- **Passes the promotion filter three ways** — it is the reference implementation (Chip's), it converges
+  across eight independent sites within it, and the mechanism explains why it is right.
+- **Fix:** §5.3 gains the consequence and the `REP` shield; a safety section makes it explicit.
+- **Class-wide sweep owed:** does any *other* manual tell a reader that P2 interrupts are free during a
+  hardware-driven sequence without naming the fence? Check the Assembly Language Manual's interrupt and
+  CORDIC chapters before this closes.
+
+### F-218 — `SingleStep-Debugger-Theory-of-Operations.md` §6.4 mislabels `GETBRK` D[25] as "C,Z affected by XBYTE" — `NEEDS-VERIFICATION`
+
+**Our own ingested doc says:**
+
+> *"Displayed as 3 hex digits. A checkmark glyph appears if **bit 25** of `mBRKC` is set (**C,Z affected by
+> XBYTE**)."*
+
+**The Silicon Doc says otherwise.** Per P2KB `p2kbPasm2Getbrk`, `GETBRK D WC` returns:
+
+| Field | Meaning (Silicon Doc) |
+|---|---|
+| D[27] | 1 = SKIP · 0 = SKIPF/EXECF/XBYTE |
+| D[26] | LUT sharing enabled |
+| **D[25]** | **XBYTE pending on next `_RET_`/`RET`** |
+| D[24:16] | the 9-bit XBYTE mode |
+
+"C,Z affected by XBYTE" is the **F bit**, which is the *low bit of the mode operand* — i.e. **D[16]**, not
+D[25]. The two are different facts about different bits, and our doc appears to have conflated them.
+
+- **NOT SETTLED, and deliberately not fixed.** The checkmark's meaning is decided by the **host-side**
+  display code (PNut / term-ts), not by Chip's P2-side debug stub — `Spin2_debugger.spin2` only calls
+  `getbrk` and ships the word to the host. So the P2-side source **cannot** adjudicate this. Settling it
+  needs the host display source or Chip.
+- **Two possible truths:** (i) our gloss is simply wrong and D[25] means "XBYTE pending"; or (ii) the
+  debugger's checkmark genuinely reflects the F bit and our doc attributed it to the wrong bit index. Either
+  way **the doc as written is wrong**; only the repair differs.
+- **Consumer risk:** the XBYTE Guide is about to gain a "Debugging XBYTE" section citing `GETBRK` fields.
+  It will cite **the Silicon Doc layout**, not this doc, until this is resolved.
+- **Wider lesson (already a standing rule, freshly demonstrated):** our own ingested derivations are **peer
+  tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
+  instead of being trusted.
+
+---
+
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
