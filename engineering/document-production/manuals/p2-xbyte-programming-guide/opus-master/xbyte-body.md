@@ -719,6 +719,149 @@ The **8080**, **Z80**, and **8051** fit equally well and would make fine alterna
 Be clear about what the capstone is *not*. Our 6502 is a **teaching artifact** — it takes rung 3 because rung 3 is what this book is about. A 6502 emulator that had to be **cycle-accurate**, or whose ROM lived in external memory, would land on rung 2 like everything else in Appendix C. The technique is what transfers; the rung is a decision you make for *your* guest, not one this book makes for you.
 :::
 
+# Chapter 12: What Will Hurt — A Guest-CPU Survey {#ch-12}
+
+Chapter 11 gave you three decisions. This chapter answers them for the processors people actually emulate, so you can see at a glance what you are signing up for.
+
+Two tables, because a reader arrives with two different questions. The first is *"can I use the engine at all?"* The second is *"what is going to hurt me regardless?"* They are not the same question, and mixing them into one grid would help nobody.
+
+## 12.1 How to read this survey {#sec-12-1}
+
+A guest processor is not hard or easy in the abstract. It is hard or easy **relative to the three decisions**, and the survey is organised that way.
+
+One honesty marker, which matters:
+
+> **◆** — a working P2 implementation of this guest exists, and the row reports **what it actually does**. Appendix C will point you at it.
+>
+> An unmarked row applies Chapter 11's model to the guest's *documented* behaviour. That model has been checked against every ◆ row in this table — but a row without a diamond is **reasoning, not observation**, and you should hold it a little more loosely than one with a diamond. So should we.
+
+## 12.2 Can you take the engine? {#sec-12-2}
+
+The first decision dominates: **where does the guest's code live?** The FIFO reads hub, so a guest whose program fits in hub can be auto-fetched, and one whose program cannot, cannot.
+
+| Guest | ◆ | Guest address space | Instruction shape | Realistic rung |
+|-------|---|---------------------|-------------------|----------------|
+| **6502 / 65C02** | | 64 KB — **fits hub** | byte, opcode-first | **3 — XBYTE** |
+| **8080** | ◆ | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
+| **Z80** | ◆ | 64 KB — fits hub | byte, opcode-first | 3 — *if* you can forgo cycle pacing |
+| **6809** | | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
+| **8051** | | 64 KB code — fits hub | byte, opcode-first | **3 — XBYTE** |
+| **CHIP-8** | | 4 KB — fits hub | 2-byte, nibble-decoded | 3 — via compression (§7.3) |
+| **65816** | ◆ | 16 MB — **off-chip** | byte, opcode-first | **2** — the ROM cannot be streamed |
+| **68000** | ◆ | 16 MB — off-chip | 16-bit word opcodes | **2** |
+| **x86 (8086)** | ◆ | 1 MB, **segmented** | byte, but `CS:IP` | **2** |
+| **ARM / MIPS** | ◆ | — | 32-bit fixed words | **2**, or **JIT** |
+
+::: caution
+**Read the 65816 row twice.** It is byte-stream and opcode-first — by instruction shape it is *identical* to the 6502, which sits comfortably at rung 3. And the working P2 implementation of it uses **neither** XBYTE nor auto-fetch, because a 65816 machine's ROM is megabytes and lives off-chip.
+
+The instruction shape did not decide it. **The address space did.** That is the whole lesson of Chapter 11, and this one row contains it.
+:::
+
+## 12.3 What will hurt anyway? {#sec-12-3}
+
+The rung you land on says nothing about how hard the *guest* is. These costs are yours no matter which rung you stand on.
+
+| Guest | Prefixes | Flags | Decimal | Guest interrupts | Cycle accuracy |
+|-------|----------|-------|---------|------------------|----------------|
+| **6502 / 65C02** | none | N,V,Z,C — cheap | **`D` flag** on `ADC`/`SBC` | IRQ + NMI vectors | needed for games |
+| **65816** | none | + `M`/`X` width bits | `D` flag | IRQ, NMI, ABORT | **required** |
+| **8080** | none | + auxiliary carry | **`DAA`** | `RST` vectors | modest |
+| **Z80** | **`CB`/`ED` map · `DD`/`FD` modifier** | full `F`, incl. `H` and `N` | **`DAA`** | modes 0/1/2 + NMI | **required** |
+| **6809** | **`$10`/`$11` — map** | `CC` register | `DAA` | IRQ, FIRQ, NMI | modest |
+| **8051** | none | `PSW` | `DA A` | 5 sources, 2 levels | modest |
+| **68000** | none | `CCR` + the `X` bit | `ABCD`/`SBCD` | 7 levels, vectored | **required** |
+| **x86 (8086)** | **`$0F` map · segment/`REP`/`LOCK` modifier** | the lazy-flags problem | `AAA`/`DAA` family | `INT` + the `IF` flag | modest |
+| **ARM / MIPS** | — | `NZCV` (ARM) | none | exception vectors | rarely |
+| **CHIP-8** | none | `VF` only | none | none — timers only | timers only |
+
+The rest of this chapter takes each column in turn, because *what the column costs you on the P2* is the part a survey table cannot say.
+
+## 12.4 Prefixes are two different things {#sec-12-4}
+
+This is the distinction that most often gets an emulator wrong, and it is worth stating carefully, because the two kinds look identical in a hex dump and want opposite treatment.
+
+| Kind | Examples | What it changes | The tool |
+|------|----------|-----------------|----------|
+| **Map prefix** (escape) | 6809 `$10`/`$11` · Z80 `CB`/`ED` · x86 `$0F` | **which handler runs** — it selects a *different opcode map* | **one-shot `SETQ2`** (Chapter 15) |
+| **Modifier prefix** | x86 segment override, `REP`, `LOCK` · Z80 `DD`/`FD` | **not** which handler runs — *how that handler behaves* | **a state register**, then re-fetch |
+
+A map prefix genuinely redirects dispatch: after `$10`, byte `$83` means something else entirely, so you want a different table. That is exactly what one-shot `SETQ2` is for, and Chapter 15 builds it.
+
+A modifier prefix does **not** want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment, which is absurd. The working implementations set a **state register** and jump back to the fetch:
+
+```pasm2
+' a modifier prefix: set state, then go fetch the real opcode
+seg_override    mov     override, seg_reg   ' remember it...
+                jmp     #next_op            ' ...and fetch again
+```
+
+::: caution
+The Z80 carries **both kinds at once**, which makes it the perfect teacher and a genuine trap. Its `CB` and `ED` prefixes are **map** prefixes — different opcode tables. Its `DD` and `FD` prefixes are **modifier** prefixes — they retarget `HL` to `IX` or `IY`, leaving the opcode map alone. Treat `DD` like `CB` and you will duplicate a table you did not need to; treat `CB` like `DD` and you will decode the wrong instruction.
+:::
+
+## 12.5 Flags — the cost nobody budgets for {#sec-12-5}
+
+The P2 has two flags: `C` and `Z`. Your guest almost certainly has more, and every one of them must be *computed*, *stored*, and *read back* — on every instruction that touches them.
+
+This is the single largest hidden cost in most emulators, and it scales with how faithful you must be.
+
+- **6502** is kind: `N` and `Z` fall out of the result almost free, and `C`/`V` are cheap. A single shared `set_nz` helper serves most of the instruction set.
+- **Z80 and 8080** are not kind. The Z80's `F` register carries **`H` (half-carry)** and **`N` (subtract)** bits that exist for one reason: to make `DAA` work afterwards. They are pure bookkeeping — no program reads them directly — and you must maintain them anyway, on every arithmetic instruction, or `DAA` produces the wrong answer.
+- **x86** is where emulators traditionally cheat, and the cheat has a name: **lazy flags.** Rather than compute all six status flags on every ALU operation, you store the operands and the operation, and only *derive* the flags if something actually reads them. Most instructions never have their flags read. It is a large win and a large complication.
+
+::: tip
+The F bit (§7.4) can help here, but not the way people first assume. It does not carry your *guest's* flags — it writes the **bytecode's own low bits** into `C` and `Z` at dispatch. That is a way to let one handler body branch four ways on which opcode selected it; it is not a guest flag register. Your guest's flags live in a cog register you maintain yourself.
+:::
+
+## 12.6 Decimal mode {#sec-12-6}
+
+Almost every 8-bit guest has one, almost every emulator gets it wrong first, and almost no test program exercises it until something breaks.
+
+The 6502's `D` flag silently changes what `ADC` and `SBC` *mean*. The 8080, Z80 and 6809 instead provide `DAA`, which corrects a binary result to a packed-BCD one **after the fact** — and to do that, `DAA` must know the half-carry and (on the Z80) whether the last operation was an add or a subtract. That is why those bookkeeping flags in §12.5 exist, and why you cannot skip them.
+
+The honest advice: **decimal mode is small, fiddly, well-specified, and testable.** Write it early, test it against a known-good table, and never think about it again. Emulators that defer it spend a long time chasing a bug that turns out to be a scoring routine in a game.
+
+## 12.7 Guest interrupts {#sec-12-7}
+
+Every guest but CHIP-8 has them, and servicing them under a *hardware* dispatch loop is the problem Chapter 14 exists to solve. Two things are worth knowing here, at survey level:
+
+- **The guest's interrupt-enable flag is just a cog register you own.** `DI` and `EI` become one instruction each.
+- **Where you poll matters more than how.** With a software loop you poll once, in the loop. Under XBYTE **there is no loop** (§11.4) — so the poll must live inside handlers, at points where interrupting is safe. That is a design decision, not a detail, and it is the clearest practical consequence of taking rung 3.
+
+The Z80's three interrupt modes and the 68000's seven vectored levels are more *bookkeeping* than the 6502's single IRQ line, but the mechanism is the same in all of them.
+
+## 12.8 Cycle accuracy {#sec-12-8}
+
+Ask this question early, because the answer changes your architecture.
+
+**If the guest drives real hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
+
+And now the sting: **that per-instruction pacing has nowhere to live under XBYTE** (§11.4). This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §12.2 carries the caveat it does.
+
+If your guest is a language runtime, a scripting VM, or a self-contained program with no externally visible timing, you need none of this — and rung 3 is yours.
+
+## 12.9 The long tail {#sec-12-9}
+
+The survey tables stop where the honest advice becomes *"it depends on your guest."* Three things routinely bite, and none of them are P2-specific:
+
+**Undocumented opcodes.** The 6502's illegal opcodes and the Z80's `IX`/`IY` half-register instructions are used by real software — demos and copy-protection especially. They cost you table entries, not architecture. Decide up front whether you are emulating the *specification* or the *silicon*; they are different machines.
+
+**Self-modifying guest code.** Harmless when your handlers read the guest's memory on every fetch — which, if you hand-rolled the fetch, they do. But if you have taken **auto-fetch**, the FIFO may have already read ahead past code the guest just rewrote. Another quiet consequence of rung 3, and one more reason a self-modifying guest wants rung 2.
+
+**Memory-mapped I/O and banking.** The guest's address space is rarely flat. A clean way through, seen in the field: make the memory-access routine a **register holding an address**, so the routine itself can be swapped per region — ROM, RAM, I/O, banked window. `CALL` through it, and the map becomes data instead of a chain of comparisons.
+
+## 12.10 Reading the survey for your own guest {#sec-12-10}
+
+Nothing in these tables is magic, and the method transfers to a guest that is not listed. Ask, in this order:
+
+1. **Does the guest's code fit in hub?** No → rung 2. Stop.
+2. **Does anything about it need cycle-accurate pacing?** Yes → rung 2, most likely. Stop.
+3. **Is LUT free?** No → rung 2. Stop.
+4. **Is the first byte an opcode that can index a table?** Yes → rung 3 is genuinely available to you.
+
+Then, whichever rung you land on, the columns of §12.3 are your work list — flags, decimal, prefixes, interrupts — and those you owe your guest regardless of what the P2 does for you.
+
 # Chapter 13: A Tiny CPU Emulator (6502) {#ch-13}
 
 This chapter builds an illustrative slice of a 6502 on XBYTE — enough opcodes to show how a real CPU's instructions become bytecode handlers, and how the engine's pieces (PA, the FIFO, the shared body, the skip pattern) carry the emulation. It is **not** a complete or cycle-accurate 6502, by charter; it is the technique, shown end to end on a representative handful of instructions.
