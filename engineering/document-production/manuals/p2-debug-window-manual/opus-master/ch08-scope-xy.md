@@ -61,25 +61,22 @@ The configuration keywords you can add to the creation line:
 | Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 | `'name' {color}` | — | next default color | Declare a channel (trace), optionally with a color |
 
-> ### ⚠️ A stray number in the create message will hang your tool
+> ### ⚠️ Every value on the create line must belong to a keyword
 >
-> **Every value on a SCOPE_XY create line must belong to a keyword.** A bare number —
-> one that follows no keyword — is not valid there in the first place, exactly as it is
-> not valid on a LOGIC create line. But where other windows discard it, **PNut's**
-> SCOPE_XY configuration parser goes into an **infinite loop** on it: no error, no
-> diagnostic, no window — the tool simply locks up and has to be killed.
+> A **bare number** — one that follows no keyword — is not valid in a SCOPE_XY create
+> message, exactly as it is not valid on a LOGIC create line. The usual way to write one
+> by accident is to drop a keyword and leave its number stranded:
 >
 > ```spin2
-> debug(`SCOPE_XY W 128 'A')      ' HANGS PNut -- 128 follows no keyword
+> debug(`SCOPE_XY W 128 'A')      ' WRONG -- 128 follows no keyword
 > debug(`SCOPE_XY W SIZE 128 'A') ' what was meant
 > ```
 >
-> The trigger is an ordinary typo: a dropped `SIZE`, `RANGE`, or `SAMPLES` keyword
-> leaves its number stranded. SCOPE_XY is the only window with this exposure — the
-> others reject or truncate the stray value instead of spinning on it — and
-> `pnut_term_ts` does not share the defect. It is a PNut bug, reported upstream;
-> until it is fixed, a SCOPE_XY window that never opens and a tool that stops
-> responding are the same symptom. (Hardware-verified.)
+> This is worth being careful about, because a debug tool has no good way to tell you
+> about it: there is no window to put an error message in. **If a SCOPE_XY window never
+> appears — or your debug tool stops responding when it should be opening one — look for
+> a stray number on the create line first.** It is the single most likely cause, and
+> nothing else on screen will point you at it.
 
 Three of these behave differently from what their names might suggest, and getting
 them wrong is the most common SCOPE_XY mistake:

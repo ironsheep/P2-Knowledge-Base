@@ -55,9 +55,9 @@ example library, replace it: the ZIP has been rebuilt.
 - **The four `SAVE` traps** (Chapter 1), all silent: no filename means no file; a keyword after `SAVE`
   is swallowed; in buffered mode `SAVE` captures the *previous* frame unless you `UPDATE` first; and
   `SAVE WINDOW` scrapes the desktop.
-- **A stray number in a `SCOPE_XY` create message hangs the tool** — an infinite loop in PNut's parser,
-  triggered by an ordinary typo such as a dropped `SIZE` keyword. Chapter 8 carries a warning; the bug is
-  reported to Parallax.
+- **Every value on a `SCOPE_XY` create line must belong to a keyword** — a bare number, typically left
+  stranded by a dropped `SIZE` keyword, is invalid there, and a debug tool has no window in which to report
+  it. Chapter 8 now says what to check when a SCOPE_XY window never appears.
 - **`OPACITY 256` makes everything vanish** — the value wraps to 0, fully transparent.
 - **A runtime `` `RATE -1 `` freezes a BITMAP** (it is a create-line-only shorthand).
 - **The named-color keyword system** (Appendix C) — ten keywords with a brightness nibble — and the

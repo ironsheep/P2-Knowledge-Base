@@ -240,13 +240,13 @@ Trap 1 and trap 3 are the ones that waste an afternoon: in both cases the progra
 runs, the file appears (or doesn't) without complaint, and the picture you get is a
 plausible one — just not the picture you asked for.
 
-> **Prefer the plain `SAVE 'name'` form.** It renders from the window's own buffer, so
-> it captures exactly your window's contents and nothing else. The two forms that
-> capture the *screen* instead — `SAVE WINDOW`, and the `SAVE left top width height`
-> region form — go through the host's screen-capture path, which brings in whatever is
-> on screen at the time. On PNut that path is **currently unreliable**: it can return a
-> truncated or offset rectangle, a neighboring window, or bare desktop. That is a tool
-> bug, reported upstream. The plain form was correct in every case we exercised.
+> **Prefer the plain `SAVE 'name'` form.** It renders from the window's **own buffer**,
+> so it captures exactly your window's contents — no chrome, and nothing that happens to
+> be sitting on top of it. The other two forms — `SAVE WINDOW`, and the
+> `SAVE left top width height` region form — capture the **screen**, so what lands in
+> the file is whatever was actually on screen at that moment. Reach for those only when
+> you specifically want the window frame or a screen region, and keep the window
+> unobscured when you do.
 
 ### Ending a debug session
 
