@@ -459,9 +459,115 @@ Re-pointing the FIFO with RDFAST is how a guest "branch" works under XBYTE: chan
 
 XBYTE runs until a handler chooses **not** to return to `$1FF`. A "halt" bytecode's handler simply does not end in the dispatch-continuing return — it branches to ordinary code instead, leaving the engine. That is the clean way to exit: one bytecode whose handler jumps out of the loop rather than back into it.
 
+# Chapter 9: Debugging XBYTE {#ch-9}
+
+You have now written handlers, built a table, and armed the engine. Sooner or later it will not do what you meant, and you will want to look inside it — which is where XBYTE presents its one genuinely awkward property.
+
+**The engine's loop is hardware. There is no loop body.** In a software interpreter you would drop a `debug()` into the dispatch loop and watch every instruction go by. XBYTE has no such place: it goes from your handler's `_RET_` to the next handler's first instruction in six clocks, with nothing of yours in between. (Chapter 11 shows how far the consequences of that reach; this chapter is about living with it.)
+
+Fortunately, the silicon anticipated this.
+
+## 9.1 What the hardware will tell you {#sec-9-1}
+
+**`GETBRK`** reads the engine's live state. It requires a flag effect, and the flag you choose selects *which* information you get.
+
+**`GETBRK D WC`** — the engine's configuration:
+
+| Field | Meaning |
+|-------|---------|
+| `C` | the LSB of the active skip pattern |
+| `D[31:28]` | **`CALL` depth** since the pattern began — **skipping is *suspended* when this is not zero** |
+| `D[27]` | 1 = plain `SKIP` · 0 = `SKIPF` / `EXECF` / XBYTE |
+| `D[26]` | LUT sharing enabled |
+| `D[25]` | XBYTE **pending** on the next `_RET_`/`RET` |
+| `D[24:16]` | the **9-bit XBYTE mode operand** — the very value you armed with |
+| `D[15:0]` | event-trap flags |
+
+**`GETBRK D WZ`** — the pattern itself:
+
+| Field | Meaning |
+|-------|---------|
+| `Z` | set when **no** skip pattern is queued (and `D` = 0) |
+| `D` | the full **32-bit** `SKIP`/`SKIPF`/`EXECF`/XBYTE pattern, used LSB-first |
+
+That is a remarkable amount of insight for two instructions. You can ask the engine, at any moment: *am I armed? what mode? what pattern is running? how many instructions of it are left?*
+
+::: hardware
+Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 13's `_RET_ CALL #set_nz` idiom depends entirely on this.
+:::
+
+## 9.2 The debugger already shows you all of it {#sec-9-2}
+
+You rarely need to call `GETBRK` yourself, because the P2's single-step debugger does it for you. Its display carries **the live 32-bit skip pattern** and **the 9-bit XBYTE mode**, side by side with the registers and the program counter.
+
+Better still: in the disassembly view, **an instruction that the current skip pattern will cancel is drawn struck through.** You can *see* the pattern working — which instructions of a shared body are live for this bytecode and which have been skipped away. For debugging a SKIPF pattern that is off by one bit, nothing else comes close.
+
+And XBYTE survives being debugged, for a reason worth knowing: the debug interrupt service routine **saves and restores the full eight-level hardware stack**. The `$1FF` that the engine depends on (§6.1) is preserved across every breakpoint. You can stop the world, look around, and let it run on.
+
+## 9.3 The technique the engine cannot give you {#sec-9-3}
+
+The debugger steps **P2 instructions**. That is exactly right when your handler is misbehaving — and exactly wrong when your question is *"which bytecode ran, and where in the stream was it?"* No amount of stepping through hardware dispatch will show you a **guest-level** trace, because the dispatch is not made of instructions you can stop on.
+
+The answer is the one the field arrived at independently: **take the engine out and put the loop back.**
+
+Recall §4.4, where you dispatched by hand before meeting XBYTE. That was not merely a teaching device. It is the **debug mode** — a software loop that does exactly what the engine does, with one crucial difference: **it has a body you can write in.**
+
+Comment out the two arming instructions, and substitute this:
+
+```pasm2
+' Debug mode: the software equivalent of the engine, with a place to stand.
+' Trades ~3 clocks per bytecode for a guest-level trace.
+landing         nop                         ' see the caution below - this pad
+                nop                         '   absorbs any leftover skip
+                nop                         '   pattern from the last handler
+                nop
+                nop
+                nop
+                nop
+                nop
+dispatch        rfbyte  pa                  ' fetch the bytecode  (clock 1)
+                getptr  pb                  ' stream position     (clock 5)
+                debug(uhex_byte(pa), uhex_long(pb))
+                rdlut   entry, pa           ' the table entry     (clock 2-3)
+                push    #landing            ' handlers _RET_ back to here
+                execf   entry               ' jump + skip         (clock 4-5)
+```
+
+Every line maps onto a clock of the hardware cycle (Chapter 5) — that is the point. The engine's behaviour is reproduced exactly, and now `PA` and `PB` pass through code you own, so a `debug()` can print **which bytecode** and **where in the stream** on every single dispatch. That is a guest-level trace, and the hardware cannot give it to you.
+
+::: caution
+**The landing pad is not decoration, and here is the trap.**
+
+A skip pattern is consumed as instructions execute. If a handler's pattern is *longer than the handler* — more bits than there are instructions to cancel — the leftover bits do not evaporate. They fall on **whatever executes next**.
+
+Under XBYTE this is harmless: the engine issues a `SKIPF #0` at clock 1 of every dispatch (Appendix A), cancelling any leftover pattern before the next bytecode runs. **Your software loop does no such thing.** The leftovers land on the first instructions of *your loop*.
+
+And you cannot simply cancel it at the top of the loop, because **a leftover pattern would cancel your cancel** — a skipped `SKIPF #0` never executes, and so never clears anything. Hence the pad: enough `NOP`s to absorb the longest pattern you emit, harmlessly, before the real loop begins.
+
+The root cause is worth fixing at the source: **do not emit a pattern longer than the handler it belongs to.** Size each pattern to its body and the problem never arises — in which case the pad costs you nothing and insures you anyway.
+:::
+
+## 9.4 Leaving the switch in {#sec-9-4}
+
+Both modes are only a couple of instructions, so build your program to hold them both from the start:
+
+```pasm2
+' Arm the engine - the fast path.
+                push    #$1FF               ' XBYTE triggers on RET to $1F8..$1FF
+        _ret_   setq    #mode               ' ...and away it goes
+
+' Debug path: comment the two lines above, jump to the software loop instead.
+```
+
+The cost of keeping the software loop in your source is a few longs of cog space. The cost of *not* keeping it is rediscovering, at the worst possible moment, that your hardware dispatch loop has no window in it.
+
+::: tip
+Two failure modes, two tools. If a **handler** is wrong — the wrong variant ran, the flags came out strange — use the debugger and read the skip pattern; the strikethrough will usually show you the bug directly. If the **stream** is wrong — the wrong bytecode ran, or you branched somewhere unintended — take the engine out and trace the loop. Reaching for the wrong tool is the most common way to spend an afternoon.
+:::
+
 # Part III: Building a VM
 
-Parts I and II explained the engine. This part proves it by building. Chapter 10 builds a complete, working bytecode VM from nothing — the smallest thing that exercises the whole engine. Chapter 11 steps back to ask which *guest CPUs* map well onto XBYTE and which fight it. Chapters 11 and 12 then build a tiny illustrative 6502 emulator and a 6809 vignette that shows the one-shot SETQ2 trick. Chapter 16 closes the part by widening the frame off of interpreters entirely — the same engine parsing protocols, decoding formats, and driving displays.
+Parts I and II explained the engine — and Chapter 9 showed you how to see it running. This part proves it by building. Chapter 10 builds a complete, working bytecode VM from nothing: the smallest thing that exercises the whole engine. Chapter 11 then steps back and asks the question that comes *before* any emulator — which of the engine's assets you can actually take, and what each one costs — and Chapter 12 answers it for the classic guest processors, one by one. Chapters 13 through 15 build a tiny 6502, service its interrupts, and handle prefix bytes with alternate tables. Chapter 16 closes the part by widening the frame off interpreters entirely: the same engine parsing protocols, decoding formats, and driving displays.
 
 Everything in this part is **tiny and illustrative** — sized to show a technique end to end and to compile, not to be a faithful or complete implementation. That is a deliberate charter, restated where it matters.
 
@@ -928,6 +1034,114 @@ The shared-body idiom collapses the 6502's many ALU and load/store opcodes the w
 ## 11.4 What this slice shows, and what it omits {#sec-13-4}
 
 The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode, correct flag semantics on every operation, and accurate timing — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
+
+# Chapter 14: Servicing Guest Interrupts {#ch-14}
+
+Your guest has an interrupt line. Almost all of them do — and Chapter 13's 6502 is no exception, with its `IRQ` and `NMI` vectors sitting at the top of memory waiting to be honoured.
+
+In a software interpreter this is a solved problem so ordinary that nobody writes it down: you check the interrupt line once per pass, at the top of the dispatch loop, and if one is pending you push the guest's program counter and vector to its handler. One check, one place.
+
+**XBYTE has no dispatch loop.** The engine goes from `_RET_` to the next handler in hardware, and there is nowhere to put the check. This chapter is how real emulators solve that — and the answer turns out to be more interesting than the problem.
+
+## 14.1 The guest's interrupt state is just cog registers {#sec-14-1}
+
+Start with the easy half. Everything the guest knows about its own interrupts — the enable flag, the pending state, the mode — is **yours to keep in cog registers**. There is no P2 mechanism involved and no cleverness required.
+
+The guest's interrupt-enable flag is one bit that you own, so the guest's `DI` and `EI` instructions become one instruction each:
+
+```pasm2
+op_di   _ret_   bitl    inte, #0            ' guest DI - disable interrupts
+op_ei   _ret_   bith    inte, #0            ' guest EI - enable them
+```
+
+That is the whole of it. A guest instruction that manipulates the guest's interrupt state is just a handler that manipulates your register.
+
+## 14.2 Getting the signal in {#sec-14-2}
+
+The interrupt itself comes from *outside* your emulation cog — a timer cog, a video cog reaching a raster line, an I/O cog with a byte to deliver. So you need a way for another cog to say *"something happened"* that costs you nothing while nothing is happening.
+
+The P2 has exactly that, in the **attention** mechanism. Another cog raises it; your cog tests it with **`JATN`**, a jump-if-attention that costs two clocks and never blocks:
+
+```pasm2
+                jatn    #int_pending        ' anything waiting? (2 clocks if not)
+```
+
+That is the cheapest interrupt poll the P2 offers, and it is what the field uses.
+
+## 14.3 Where to poll — the real question {#sec-14-3}
+
+Now the hard half, and it is a **design decision**, not a technique.
+
+Under a software loop, you poll once, at the top, and every guest instruction is an interrupt boundary. Simple, uniform, correct.
+
+Under XBYTE there is no top. The poll has to live **inside handlers** — and you must choose *which* handlers, because putting it in all of them costs two clocks on every guest instruction and puts you back where a software loop would have left you.
+
+The choice has a real consequence:
+
+| Poll in… | Interrupt latency | Cost |
+|----------|-------------------|------|
+| every handler | one guest instruction — ideal | 2 clocks × every instruction |
+| a shared body that many opcodes route through | bounded by that body's reach | 2 clocks, paid once per family |
+| only control-flow handlers (branches, calls, returns) | until the guest next branches | nearly free |
+
+A shipped 8080 emulator takes the third road: it polls in the shared body that ends its **control-flow** instructions, on the reasoning that a guest's program counter is unambiguous at a branch and that real 8080 code branches constantly. That is a defensible engineering trade, not a universal answer — a guest running a long unrolled loop would see its interrupts arrive late.
+
+::: caution
+**Choose the safe points deliberately.** An interrupt must only be taken where the guest's state is *consistent* — the previous instruction fully retired, no half-computed address in a scratch register. Handlers that have already finished their work and are about to return are safe; the middle of a multi-step addressing-mode computation is not.
+
+This is the sharpest practical consequence of taking rung 3 (§11.4). The engine gave you a free dispatch and took away the place where the check naturally belonged, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
+:::
+
+## 14.4 Injecting the interrupt {#sec-14-4}
+
+Here is the idea that makes the whole thing elegant.
+
+A dispatch-table entry is **just a long** — a handler address in the low ten bits, a skip pattern above (§4.1). The engine reads one from LUT and hands it to `EXECF`. But nothing says an `EXECF` operand has to *come* from the table. **You can build one yourself and execute it.**
+
+So servicing a guest interrupt is not a special mechanism at all. It is a **bytecode that never came from the stream**:
+
+```pasm2
+int_pending
+                testb   inte, #0        wc  ' are guest interrupts enabled?
+        if_nc   jmp     #int_ignore         ' no - resume the stream untouched
+                bitl    inte, #0            ' yes - guest disables IE on entry
+                mov     pb, guest_pc        ' remember where the guest was
+        _ret_   execf   int_vector_entry    ' ...and "dispatch" the interrupt
+```
+
+`int_vector_entry` is a table entry you constructed — the address of your interrupt-sequence handler, OR'd with whatever skip pattern that handler needs:
+
+```pasm2
+int_vector_entry  long  int_go | (%0 << 10)  ' a hand-built dispatch entry
+```
+
+The engine does not know, and does not care, that this bytecode was not in the stream. It jumps and skips exactly as it would for a real one.
+
+::: tip
+This is worth sitting with, because it generalises. **`EXECF` is the dispatch primitive; the table is merely the usual place to keep its operands.** Once you see that, a whole class of problems opens up — synthesising a dispatch, chaining one handler into another, or building an entry from parts at run time. The interrupt is simply the first place you need it.
+:::
+
+## 14.5 Halt, and waiting for an interrupt {#sec-14-5}
+
+Most guests have an instruction that stops the processor until an interrupt arrives — the 8080's `HLT`, the 6502's various idle idioms. It looks like it needs special support. It does not, and the solution shows off the FIFO one last time.
+
+`JNATN` is the mirror of `JATN`: jump if there is **no** attention. So a halt handler spins on it. And when no interrupt has arrived, the handler must arrange for the guest to **execute the same instruction again** — which, because the guest's program counter *is* the FIFO position (§8.3), means backing the stream up by one byte:
+
+```pasm2
+op_halt         jnatn   #.still_halted      ' no interrupt yet?
+                jmp     #int_pending        ' one arrived - go service it
+
+.still_halted   sub     pb, #1              ' back the stream up one byte...
+        _ret_   rdfast  #0, pb              ' ...and re-run this same HLT
+```
+
+Four instructions, and the guest's halt semantics are exactly right: it sits there re-executing `HLT` until something wakes it, and if interrupts are disabled it sits there **forever** — which is precisely what the real silicon does.
+
+## 14.6 What this costs you {#sec-14-6}
+
+Nothing here is expensive in clocks. `JATN` is two, the injection is one `EXECF`, and the guest's interrupt-enable flag is a single bit you were keeping anyway.
+
+What it costs is **a decision you would not have had to make** on a software loop: *where are my interrupt boundaries?* The engine bought you three clocks per bytecode and handed you that question in exchange. For a language interpreter — which has no interrupts to service — it is a pure gift. For a CPU emulator it is a real, if modest, tax, and one more entry on the ledger of Chapter 11.
 
 # Chapter 15: The 6809 SETQ2 Vignette {#ch-15}
 
