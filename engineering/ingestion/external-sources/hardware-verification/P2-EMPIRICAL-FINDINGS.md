@@ -426,6 +426,11 @@ test design, not by disagreement — see below).
 > image (md5 `4856803a…`). Rails that cannot discriminate ⇒ INCONCLUSIVE, never a verdict.
 > **That failure is itself independent confirmation of EF-043** — PNut windows *do* overlap. `conflict-testP` now
 > carries an **explicit `POS` on every window** and is re-runnable on both tools.
+**BONUS — BITMAP window size = canvas × `DOTSIZE`, exactly 1:1** (read free from the pnut-term-ts placement log,
+no measurement needed): `BITMAP 'SpGate' **18x12**` (canvas 6×4 at `DOTSIZE 3`) and `BITMAP 'SpOff'/'SpOn' **72x48**`
+(same canvas at `DOTSIZE 12`). 6×3=18, 4×3=12; 6×12=72, 4×12=48. This also states plainly why the `DOTSIZE 3` capture
+was unreadable — an 18×12 window is **smaller than its own title bar.** The log said so before a single pixel was
+counted.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testM-bitmap-sparse.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testP-sparse-gate.spin2`.
 
 ### EF-043 · No-POS window placement is TOOL-DEPENDENT — pnut-term-ts AUTO-ARRANGES (no overlap); PNut has no such feature — `CONFIRMED (pnut-term-ts)`
