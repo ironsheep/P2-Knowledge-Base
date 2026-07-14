@@ -90,17 +90,21 @@ PUB main() | i
 
   waitms(500)
 
-  ' --- the gate bracket: SAVE WINDOW (magnified, what the reader sees) ---
+  ' PLAIN SAVE ON ALL FOUR -- the AUTHORITATIVE read (revised 2026-07-14 after the PNut run).
+  ' plain SAVE writes the window's OWN buffer: magnified (NOT "1x un-dotsized" -- v55 L1347
+  ' and REF ToO:229 are both WRONG), occlusion-immune, and chrome-free.
+  ' SAVE WINDOW proved UNTRUSTWORTHY on PNut: the desktop scrapes came back SOLID GREEN (no
+  ' sparse) for the very windows whose plain SAVEs show red-background-plus-green-dots.
+  debug(`GpOff save 'gateP_plain_off12')
+  debug(`GpRef save 'gateP_plain_ref12')
+  debug(`Gp03  save 'gateP_plain_ds03')     ' <-- THE GATE.  missing from the first run.
+  debug(`Gp04  save 'gateP_plain_ds04')
+
+  ' kept only as the screen-vs-buffer probe:
   debug(`GpOff save window 'gateP_off12')
   debug(`GpRef save window 'gateP_ref12')
   debug(`Gp03  save window 'gateP_ds03')
   debug(`Gp04  save window 'gateP_ds04')
-
-  ' --- the SAME windows saved the OTHER way: plain SAVE (window's own buffer) ---
-  ' Compare gateP_plain_ref12 against gateP_ref12.  See the banner: this settles whether
-  ' a plain BITMAP SAVE is really "1x un-dotsized" (a claim we are about to ship).
-  debug(`GpRef save 'gateP_plain_ref12')
-  debug(`Gp04  save 'gateP_plain_ds04')
 
   waitms(500)
   repeat

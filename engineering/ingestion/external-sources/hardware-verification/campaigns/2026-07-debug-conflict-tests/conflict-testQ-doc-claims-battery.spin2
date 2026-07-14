@@ -17,6 +17,18 @@
 '' EVIDENCE IS FILE-EXISTENCE + IMAGE CONTENT.  No log is required, so this runs
 '' identically on PNut (which emits no debug log) and on pnut-term-ts.
 ''
+'' *** USE PLAIN `SAVE ONLY -- NEVER `SAVE WINDOW.  (revised 2026-07-14) ***
+''   `SAVE WINDOW is a DESKTOP SCRAPE and it is UNRELIABLE on PNut.  In the first run of
+''   this battery, every SAVE WINDOW capture (q2/q4/q5/q6) came back as DESKTOP WALLPAPER
+''   -- not a stale frame, not the wrong window: wallpaper.  The same form also returned
+''   solid green instead of the SPARSE pattern in conflict-testP, for windows whose plain
+''   SAVE showed sparse correctly.
+''   A plain `SAVE reads the window's OWN buffer: occlusion-immune, chrome-free, and it
+''   worked on every single test that used it.  Note it writes the bitmap at 1x
+''   UN-DOTSIZED (v55 L1347 is correct) -- which is FINE here: we are reading COLOURS and
+''   PIXEL POSITIONS, not magnified geometry.  (A SPARSE window is the exception: it
+''   allocates at physical size, which is why testP's plain saves came out magnified.)
+''
 '' ---------------------------------------------------------------------
 '' Q1  Does a BARE `SAVE` (no filename) write anything?
 ''       doc says: NO -- silently writes nothing.
@@ -100,8 +112,8 @@ PUB main() | i
   debug(`q2 save clear)                ' TEST: expect NO file AND the CLEAR is eaten
   debug(`q2b clear)                    ' RAIL: a plain CLEAR -- q2b MUST go black
   waitms(200)
-  debug(`q2  save window 'q2_after')   ' expect STILL GREEN (clear was eaten)
-  debug(`q2b save window 'q2b_rail')   ' expect BLACK
+  debug(`q2  save 'q2_after')   ' expect STILL GREEN (clear was eaten)
+  debug(`q2b save 'q2b_rail')   ' expect BLACK
 
   '' ---------- Q3 : does SAVE write the stale front buffer? ----------
   debug(`BITMAP q3 POS 0 200 SIZE 8 8 DOTSIZE 8 RGB24 UPDATE)
@@ -121,8 +133,8 @@ PUB main() | i
     debug(`q4 `($00FF00))
     debug(`q5 `($00FF00))
   waitms(200)
-  debug(`q4 save window 'q4_before')   ' GREEN
-  debug(`q5 save window 'q5_before')   ' GREEN
+  debug(`q4 save 'q4_before')   ' GREEN
+  debug(`q5 save 'q5_before')   ' GREEN
 
   debug(`q4 rate -1)                   ' TEST : doc says this FREEZES auto-refresh
   debug(`q5 rate 6)                    ' RAIL : a legal positive rate -- must keep working
@@ -130,8 +142,8 @@ PUB main() | i
     debug(`q4 `($FF0000))              ' feed RED
     debug(`q5 `($FF0000))              ' feed RED
   waitms(300)
-  debug(`q4 save window 'q4_after')    ' still GREEN => FROZE (doc right).  RED => not frozen.
-  debug(`q5 save window 'q5_after')    ' MUST be RED, or Q4 is inconclusive
+  debug(`q4 save 'q4_after')    ' still GREEN => FROZE (doc right).  RED => not frozen.
+  debug(`q5 save 'q5_after')    ' MUST be RED, or Q4 is inconclusive
 
   '' ---------- Q6 : is an out-of-range SET clamped, or ignored? ----------
   '' *** reverses ch04:241 if CLAMPED ***
@@ -142,7 +154,7 @@ PUB main() | i
   debug(`q6 set 999 999)               ' far out of range on a 8x8 canvas
   debug(`q6 `($FFFFFF))                ' plot ONE white pixel
   waitms(200)
-  debug(`q6 save window 'q6_clamp')    ' white at BOTTOM-RIGHT => CLAMPED.  none => IGNORED.
+  debug(`q6 save 'q6_clamp')    ' white at BOTTOM-RIGHT => CLAMPED.  none => IGNORED.
 
   '' ---------- Q7 : does PLOT OPACITY 256 wrap to 0 (transparent)? ----------
   debug(`PLOT q7 POS 600 0 SIZE 200 100 BACKCOLOR BLACK)
