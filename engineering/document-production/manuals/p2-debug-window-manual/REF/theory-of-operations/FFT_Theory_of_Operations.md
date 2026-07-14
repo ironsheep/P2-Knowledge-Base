@@ -1,8 +1,8 @@
 # FFT Window - Complete Theory of Operations
 
 **Current as of**: PNut v55 for Propeller 2
-**Document Version**: 1.1
-**Date**: 2026-06-01
+**Document Version**: 1.2
+**Date**: 2026-07-14 (v55 conflict-audit re-ratification — see change note below)
 **Source Files**: DebugDisplayUnit.pas, DebugUnit.pas, SerialUnit.pas, GlobalUnit.pas
 **Author**: Analysis of P2 PNut Debug Display System
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window directive reference; directive coverage re-verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01
@@ -12,6 +12,28 @@
 ## Executive Summary
 
 The FFT (Fast Fourier Transform) window in DebugDisplayUnit.pas is a real-time frequency spectrum analyzer that receives time-domain sample data over a serial connection from a Propeller 2 microcontroller and displays the frequency-domain representation. The window supports multiple channels (up to 8), configurable sample sizes, logarithmic/linear scaling, and sophisticated anti-aliased rendering.
+
+> ### ⚠️ v1.2 change note — v55 re-ratification (2026-07-14)
+>
+> This revision conforms the document's **prose, tables and examples** to the **raw
+> `DebugDisplayUnit.pas` (v55)**. The behavioral reversals below are load-bearing — anything derived
+> from v1.1 or earlier should be re-checked against them:
+>
+> | # | v1.1 said | v55 says |
+> |---|---|---|
+> | 1 | `MAG` is a "right-shift divisor" — *divides* the output | **`MAG` is a GAIN: it MULTIPLIES the output by 2ⁿ** (`PerformFFT`:4248 — it right-shifts the *divisor*) |
+> | 2 | `FFTpower[]` is a power spectrum (\|X\|²) | It is a **magnitude** (`Hypot` = √(re²+im²)) |
+> | 3 | `LOGSCALE` draws power-of-2 axis markers | It draws **one string, `'logscale'`** — **no markers of any kind** (3358-3365) |
+> | 4 | `SmoothDot` is a distance-field AA rasterizer | It is a **one-line wrapper**: `SmoothLine(x,y,x,y,…)` (3839-3842) |
+> | 5 | `PackDef` bit 16 = sign flag; `NewPack` calls `NextNum` and sign-extends | **All fabricated.** `SIGNED`/`ALT` are trailing keywords; `NewPack` consumes nothing (4158-4164) |
+> | 6 | `RateCycle` uses `>=` | It uses **`=`** (3079-3088) |
+> | 7 | `SAMPLES n` rounds to the nearest power of 2 | It **truncates DOWN** (`SAMPLES 1000` → **512**) |
+> | 8 | Twiddle `W = cos θ − i·sin θ` | v55 uses the **conjugate**, `e^{+iθ}` (4224-4225) |
+> | 9 | Debug strings are prefixed `0xFF 0x00` | They open with a **backtick `` ` `` = `$60`** (`DebugUnit.pas:203`); no `$FF` test exists |
+> | 10 | An "update with configuration" message can set `SAMPLES`/`RATE` | **It cannot.** `FFT_Update` accepts only `CLEAR`/`SAVE`/`PC_KEY`/`PC_MOUSE` + channel-defs + samples |
+> | 11 | `DOTSIZE` is a "radius" | **Unknown in rendered pixels — NEEDS-HARDWARE.** Only the `shl 7` is a code fact |
+>
+> Also added: `CLOSE`, the full six-form `SAVE` grammar, and `TITLE`/`POS` defaults.
 
 ---
 
@@ -70,7 +92,7 @@ FFTwin      : array[0..FFTmax-1] of int64    // Hanning window coefficients
 FFTreal     : array[0..FFTmax-1] of int64    // Real component (working)
 FFTimag     : array[0..FFTmax-1] of int64    // Imaginary component (working)
 FFTsamp     : array[0..FFTmax-1] of integer  // Sample buffer (input)
-FFTpower    : array[0..FFTmax div 2-1] of integer  // Output power spectrum
+FFTpower    : array[0..FFTmax div 2-1] of integer  // Output MAGNITUDE spectrum (despite the name)
 FFTangle    : array[0..FFTmax div 2-1] of integer  // Output phase spectrum
 ```
 
@@ -79,8 +101,10 @@ FFTangle    : array[0..FFTmax div 2-1] of integer  // Output phase spectrum
 - `FFTwin`: Hanning window coefficients to reduce spectral leakage
 - `FFTreal/FFTimag`: Working arrays for complex FFT computation
 - `FFTsamp`: Input time-domain samples
-- `FFTpower`: Output magnitude spectrum (what gets displayed)
-- `FFTangle`: Output phase spectrum (available but not displayed by default)
+- `FFTpower`: Output **magnitude** spectrum — `Hypot(re, im)` = √(re²+im²), i.e. **|X[k]|, not |X[k]|²**
+  (`PerformFFT`:4248). The array is merely *named* `FFTpower`; it never holds a squared quantity.
+  This is what gets displayed.
+- `FFTangle`: Output phase spectrum (available but not displayed by the FFT window)
 
 ### 2.2 Sample Buffer (Circular Buffer)
 ```pascal
@@ -104,7 +128,7 @@ vLabel[0..7]  : string     // Channel labels (user-defined)
 vAuto[0..7]   : boolean    // Auto-ranging enable (not used in FFT)
 vHigh[0..7]   : integer    // Maximum value for scaling (default: $7FFFFFFF)
 vLow[0..7]    : integer    // Minimum value (unused in FFT)
-vMag[0..7]    : integer    // Magnitude multiplier (0-11, right-shift divisor)
+vMag[0..7]    : integer    // Magnitude GAIN exponent (0-11) → output × 2^mag (see §11.4)
 vTall[0..7]   : integer    // Vertical display height in pixels
 vBase[0..7]   : integer    // Vertical baseline offset in pixels
 vGrid[0..7]   : integer    // Grid/legend flags (4-bit %abcd: 1=baseline line, 2=top line, 4=min-value legend TEXT, 8=max-value legend TEXT)
@@ -126,18 +150,18 @@ Accepted by `FFT_Configure` (lines 1552–1618) — run once at window creation.
 
 | Directive | Parameters / range · default | Notes |
 |---|---|---|
-| `TITLE 'str'` | string | Window title (`KeyTitle`) |
-| `POS left top` | integers | Window screen position (`KeyPos`) |
+| `TITLE 'str'` | string · **default `<name> - FFT`** | Replaces the window caption (`KeyTitle`:2689-2692 → `SetCaption`). Absent `TITLE`, the caption is built at `FormCreate`:626 as `SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType])` — i.e. the **instance name**, a space-hyphen-space, and `'FFT'` (`TypeName[3]`, line 133). |
+| `POS left top` | **exactly two** integers · **default = host origin** (`P2.DebugDisplayLeft`, `P2.DebugDisplayTop`) | Window screen position (`KeyPos`:2712-2716). The two values are **offsets added to the host origin**: `Left := val + P2.DebugDisplayLeft; Top := val + P2.DebugDisplayTop;`. `KeyPos` reads **two** numbers, never four; if the first is missing it `Exit`s without touching either. Display windows do **not** cascade. |
 | `SIZE w h` | int **32..2048** · 256, int **32..2048** · 256 | Plot area in pixels (`KeySize`, clamped to `scope_w/hmin..max`) |
-| `SAMPLES n {first last}` | n: int **4..2048** (snapped to power-of-2) · 512; first: int **0..n/2−2** · 0; last: int **first+1..n/2−1** · n/2−1 | Sets `vSamples` AND the displayed bin range `FFTfirst`/`FFTlast`. Without `first last`, full spectrum (0 .. n/2−1) is shown. Lines 1573–1582. |
+| `SAMPLES n {first last}` | n: int **4..2048**, then **truncated DOWN to a power of 2** · 512; first: int **0..n/2−2** · 0; last: int **first+1..n/2−1** · n/2−1 | Sets `vSamples` AND the displayed bin range `FFTfirst`/`FFTlast`. `FFTexp := Trunc(Log2(Within(val, 4, FFTmax)))` (1576) — `Trunc` **floors** the exponent, so **`SAMPLES 1000` yields 512, not 1024**. Without `first last`, the full spectrum (0 .. n/2−1) is shown. Lines 1573–1582. |
 | `RATE n` | int **1..2048** · `vSamples` | Update every *n* new samples (line 1583–1584) |
-| `DOTSIZE n` | int **0..32** · 0 | Dot radius (0 = none). If both DOTSIZE and LINESIZE are 0 after configure, DOTSIZE is forced to 1 (line 1606). |
+| `DOTSIZE n` | int **0..32** · 0 | Dot size, 0 = no dots. **Code fact:** the value is passed as `vDotSize shl 7` into `SmoothDot` (`DrawLineDot`:3427, `FFT_Draw`:1707), i.e. `n × 128` in a space where 256 = 1 px. ⚠️ **The rendered pixel width has never been measured — NEEDS-HARDWARE.** Do not read the shift constant as a user-facing "radius" or "diameter": for `LINESIZE` the equivalent derivation is known to mispredict the rendered width (anti-aliasing widens small radii; hardware measured `LINESIZE 3` → 3 px, 1:1). If both DOTSIZE and LINESIZE are 0 after configure, DOTSIZE is forced to 1 (line 1606). |
 | `LINESIZE n` | int **−32..32** · 3 | Line width. **Positive**: connected polyline mode. **Zero**: no lines. **Negative**: vertical filled-bar mode (absolute value = bar width). Lines 1587–1588. |
 | `TEXTSIZE n` | int **6..200** · FontSize | Label text size (`KeyTextSize`, line 1589) |
 | `COLOR back grid` | named-color or numeric · black, gray | Background then grid color (lines 1591–1593) |
 | `LOGSCALE` | *(flag)* | Logarithmic amplitude scaling (line 1594) |
 | `HIDEXY` | *(flag)* | Suppress on-screen measurement cursor readout (line 1596) |
-| `LONGS_1BIT` … `BYTES_4BIT` | *(packed-data declaration)* | Sample packing format (`KeyPack`, lines 1598–1599) |
+| `LONGS_1BIT` … `BYTES_4BIT` {`ALT`} {`SIGNED`} | 12 opt-in modes · **default = UNPACKED** | Sample packing format (`KeyPack`:2817-2832, dispatched at 1598–1599). **The default is NOT `LONGS_1BIT`**: `SetDefaults`:2915 calls `SetPack(0, False, False)`, and `SetPack` special-cases `val = 0` (bypassing `PackDef`) ⇒ `vPackCount`=1, `vPackShift`=32, `vPackMask`=`$FFFFFFFF` — **one full 32-bit sample per long**. `ALT` and `SIGNED` are optional **trailing modifier keywords** (up to two, either order). `ALT` on a 1-bit mode is a **full within-byte bit reversal** (`$01 → $80`), because the three `vPackShift` guards in `NewPack` are cumulative. **Configure-only** — packing cannot be changed on a live window. |
 
 Default values set at configure time: `vSamples`=512, `FFTexp`=9, `FFTfirst`=0, `FFTlast`=255,
 `vDotSize`=0, `vLineSize`=3, `vTextSize`=FontSize.  
@@ -150,11 +174,48 @@ Accepted by `FFT_Update` (lines 1620–1679) — run on every subsequent message
 | Directive / element | Parameters | Notes |
 |---|---|---|
 | **Numeric sample stream** | integers | The primary data stream. Samples are interleaved by channel: Ch0, Ch1, …, Ch(N−1), Ch0, … One FFT drawn per `vRate` complete sample sets after the circular buffer is full (`vSamples` samples). Lines 1657–1678. |
-| **Channel-def string** | `'label' {mag {high {tall {base {grid {color}}}}}}` | A string element defines (or redefines) the next channel in order. All parameters are optional and positional: *mag* int **0..11** (right-shift divisor for FFT magnitude, default 0); *high* int **1..$7FFFFFFF** (Y-axis full-scale, default $7FFFFFFF); *tall* int (height in px, default vHeight); *base* int (baseline offset in px, default 0); *grid* int (**4-bit `%abcd` field**, default 0: bit 0=baseline line, bit 1=top line, **bit 2=min-value legend TEXT at the baseline, bit 3=max-value legend TEXT at the top line** — bits 2–3 `TextOut` the lower/upper of `vLow`/`vHigh`); *color* named-color or $00RRGGBB. Lines 1628–1638. |
+| **Channel-def string** | `'label' {mag {high {tall {base {grid {color}}}}}}` | A string element defines (or redefines) the next channel in order. All parameters are optional and positional: *mag* int **0..11** — a **GAIN**: the plotted magnitude is **multiplied by 2^mag** (default 0 = ×1). `mag` right-shifts the *divisor* (`PerformFFT`:4248), so raising it **shrinks the divisor** and **amplifies** the output; *high* int **1..$7FFFFFFF** (Y-axis full-scale, default $7FFFFFFF); *tall* int (height in px, default vHeight); *base* int (baseline offset in px, default 0); *grid* int (**4-bit `%abcd` field**, default 0: bit 0=baseline line, bit 1=top line, **bit 2=min-value legend TEXT at the baseline, bit 3=max-value legend TEXT at the top line** — bits 2–3 `TextOut` the lower/upper of `vLow`/`vHigh`); *color* named-color or $00RRGGBB. Lines 1628–1638. |
 | `CLEAR` | — | Erase display, reset `SamplePop` and rate counter (lines 1642–1648) |
-| `SAVE` | — | Save bitmap to file (`KeySave`, line 1649) |
+| `SAVE …` | see grammar below | Save a bitmap (`KeySave`:2839-2866, dispatched at line 1650) |
 | `PC_KEY` | — | Poll latched keypress and transmit to P2 (`SendKeyPress`, line 1651) |
 | `PC_MOUSE` | — | Poll mouse position/buttons/wheel and transmit to P2 (`SendMousePos`, line 1653) |
+| `CLOSE` | — | **Closes the window.** Dispatched at the **parser** layer, not in `FFT_Update` — see below. |
+
+#### `SAVE` grammar (`KeySave`, 2839-2866)
+
+Six forms. **Three of them silently write nothing.** The filename always comes **last**; `.bmp` is appended.
+
+| Form | Writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` — the **front / display** buffer — to `name.bmp` |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect (`Left/Top/Width/Height`) — **includes the title bar and borders**, and is vulnerable to occlusion by other windows |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region |
+| `SAVE WINDOW` *(no name)* | captures to `DesktopBitmap` in memory — **no file written** |
+| `SAVE l t w h` *(no name)* | captures to memory — **no file written** |
+| `SAVE` *(bare)* | `Exit` — **nothing at all** |
+
+⚠️ **Sharp edge (2848):** a keyword other than `WINDOW` following `SAVE` is **consumed and then
+discarded** by `if val <> key_window then Exit;`. So `` `MyFFT SAVE CLEAR `` does nothing **and eats
+the `CLEAR`**.
+
+#### `CLOSE` (`key_close` = 49, line 84)
+
+`CLOSE` appears in **no** `XXX_Update` case statement — deliberately. Its handler lives one layer up,
+in the **parser** (`p2com.asm`), which is why a `DebugDisplayUnit.pas`-only read cannot see it:
+
+1. `parse_debug_string` (p2com.asm:19565-19572) detects `CLOSE` on an **existing-display command** and sets a flag.
+2. p2com.asm:19613-19624 reverts the name symbol (`dd_nam` → `dd_unk`) and **clears that display's bit in `debug_display_ena`** (= Pascal `P2.DebugDisplayEna`, `GlobalUnit.pas:123`).
+3. `TDebugForm.ChrIn` (`DebugUnit.pas:236-237`) runs the **full** `UpdateDisplay(...)` and only afterwards:
+   `if P2.DebugDisplayEna shr j and 1 = 0 then DisplayForm[j].Close;`
+
+Semantics:
+- **Command-only** — ignored in a *new-display declaration* (p2com.asm:19569-19570).
+- **Multi-target** — `` `Fft1 Fft2 CLOSE `` closes **all** named targets.
+- **Update-first, close-second** — the rest of the message **executes**, then the window closes.
+  `` `MyFFT SAVE 'shot' CLOSE `` **saves, then closes.**
+- **Purpose:** reclaims one of the 32 display slots; the id and the name become reusable.
+- It is the per-window counterpart of the global `DEBUG_END_SESSION` teardown
+  (`TDebugForm.CloseDisplays`, `DebugUnit.pas:125-134`).
 
 ### Keyboard & mouse
 
@@ -254,9 +315,13 @@ Execution sequence:
      // ... other display types
    end;
    ```
-   - Calls `SetDefaults()` to initialize all variables
-   - Sets `ptr := 2` (skips display type and title in parameter array)
-   - Calls type-specific configuration routine
+   - Calls `SetDefaults()` to initialize all variables — including `SetPack(0, False, False)` (2915),
+     which makes the **default packing UNPACKED** (one 32-bit sample per long)
+   - Sets `ptr := 2` — skipping `Value[0]` (the **display type**) and `Value[1]` (the **window name**,
+     already consumed at line 626 by `SetCaption(PChar(Value[1]) + ' - ' + TypeName[DisplayType])`)
+   - Calls the type-specific configuration routine
+   - **The configure loop is `while NextKey do` — key-only.** A non-key element (a bare number, a
+     channel-def string) terminates the parse, and the rest of the create message is silently dropped.
 
 8. **Display** (line 644)
    ```pascal
@@ -369,28 +434,43 @@ Margins:
 
 **Location**: SerialUnit.pas:1-100
 
-### 4.2 Debug Command Parsing (DebugUnit.pas:200-236)
+### 4.2 Debug Command Parsing (DebugUnit.pas:203-239)
 
-**Command Detection**:
+**Command Detection** (`DebugUnit.pas:203`) — the opener is a **backtick**, `` ` `` = **`$60`**:
 ```pascal
-if x = $FF then DisplayStrFlag := True;      // Start of DEBUG command
+// start of display string?
+if (x = $60) and not DisplayStrFlag then
+begin
+  DisplayStrLen := 0;
+  DisplayStrFlag := True;
+end
 ```
 
-**String Accumulation** (lines 202-215):
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions cited `if x = $FF then
+> DisplayStrFlag := True;` at `DebugUnit.pas:200`. **No `$FF` byte test exists anywhere in
+> `DebugUnit.pas`** (grep-verified), and line 200 is an `Exit;` inside the end-of-session branch
+> (`if x = 27 then …`). The debug-display string is introduced by the backtick and terminated by CR.
+
+**String Accumulation** (lines **209-222**):
 ```pascal
 else if DisplayStrFlag then
 begin
-  if x <> 13 then
+  if DisplayStrLen < DebugStringLimit then
   begin
-    P2.DebugDisplayStr[DisplayStrLen] := x;   // Accumulate character
-    Inc(DisplayStrLen);
+    if x <> 13 then
+    begin
+      P2.DebugDisplayStr[DisplayStrLen] := x;   // Accumulate character
+      Inc(DisplayStrLen);
+    end
+    else
+    begin
+      P2.DebugDisplayStr[DisplayStrLen] := 0;   // Null-terminate on CR
+      P2ParseDebugString;                       // Parse into element arrays
+      DisplayStrFlag := False;
+      ...                                       // then create (224-228) or update (231-239)
+    end;
   end
-  else
-  begin
-    P2.DebugDisplayStr[DisplayStrLen] := 0;   // Null-terminate
-    P2ParseDebugString;                       // Parse into element arrays
-    DisplayStrFlag := False;
-  end;
+  else if x = 13 then DisplayStrFlag := False;  // overlong string: drop it
 end;
 ```
 
@@ -401,9 +481,11 @@ end;
   - `P2.DebugDisplayType[]` - Element types (ele_key=3, ele_num=4, ele_str=5, ele_end=0)
   - `P2.DebugDisplayValue[]` - Corresponding values
 
-### 4.3 Display Update Trigger (DebugUnit.pas:224-232)
+### 4.3 Display Update Trigger (DebugUnit.pas:231-239)
 
-**Update Command** (when `P2.DebugDisplayType[0] = 2`):
+**Update Command** (when `P2.DebugDisplayType[0] = 2`) — note the `Close` at the tail: this is where a
+parser-level `CLOSE` (which cleared the display's `DebugDisplayEna` bit) actually takes effect,
+**after** `UpdateDisplay` has run the rest of the message:
 ```pascal
 if P2.DebugDisplayType[0] = 2 then
 begin
@@ -417,7 +499,7 @@ begin
 end;
 ```
 
-**Create Command** (when `P2.DebugDisplayType[0] = 1`):
+**Create Command** (when `P2.DebugDisplayType[0] = 1` — `DebugUnit.pas:224-228`):
 ```pascal
 if P2.DebugDisplayType[0] = 1 then
 begin
@@ -508,7 +590,7 @@ begin
   vLabel[vIndex - 1] := PChar(val);           // Store channel label
 
   // Optional parameters (order-dependent):
-  if not KeyValWithin(vMag[vIndex - 1], 0, 11) then Continue;             // Magnitude shift (0-11)
+  if not KeyValWithin(vMag[vIndex - 1], 0, 11) then Continue;             // Magnitude GAIN exponent (0-11) → ×2^mag
   if not KeyValWithin(vHigh[vIndex - 1], 1, $7FFFFFFF) then Continue;     // Scale maximum
   if not KeyVal(vTall[vIndex - 1]) then Continue;                         // Display height
   if not KeyVal(vBase[vIndex - 1]) then Continue;                         // Baseline offset
@@ -519,7 +601,7 @@ end;
 
 **Example**: `"Channel A" 3 1000000 256 0 3 $00FF00`
 - Label: "Channel A"
-- Magnitude shift: 3 (divide FFT output by 8)
+- Magnitude gain: 3 → **multiplies FFT output by 8** (`mag` right-shifts the *divisor*, `PerformFFT`:4248)
 - Scale max: 1000000
 - Height: 256 pixels
 - Baseline: 0 (bottom)
@@ -642,7 +724,7 @@ Chan:   0  1  x  x  0  1  x  x  0  1  x  x  ...
 
 ## 6. FFT_Draw Method - Rendering Pipeline
 
-### 6.1 Method Overview (DebugDisplayUnit.pas:1681-1712)
+### 6.1 Method Overview (DebugDisplayUnit.pas:1681-1717)
 ```pascal
 procedure TDebugDisplayForm.FFT_Draw;
 var
@@ -659,18 +741,22 @@ var
 
 **Step 1: Clear Canvas** (line 1687)
 ```pascal
-ClearBitmap;        // DebugDisplayUnit.pas:3227
+ClearBitmap;        // DebugDisplayUnit.pas:3235
 ```
 
-**ClearBitmap Implementation** (lines 3227-3404):
-1. Fill background with `vBackColor`
-2. Draw frame rectangle (for FFT: lines 3276-3281)
-3. Draw grid lines if `vGrid[channel]` is set (lines 3283-3319)
-4. Draw log scale markers if `vLogScale = True` (lines 3350-3393)
-5. Draw channel labels (lines 3394-3401)
-6. Copy Bitmap[0] → Bitmap[1] (line 3403)
+**ClearBitmap Implementation** (**3235-3412**; the `dis_scope, dis_fft` branch opens at **3284**):
+1. Fill background with `GetBackground` (3240-3241)
+2. Draw frame rectangle — `FrameRect`, **3286-3289**
+3. Draw dotted grid lines + optional min/max legends where `vGrid[i] <> 0` — **3291-3335**
+4. *(SCOPE only — the trigger indicator, 3336-3357; FFT skips it)*
+5. Draw the `'logscale'` label if `vLogScale` — **3358-3365**
+6. Draw channel name labels — **3366-3382**
+7. Copy Bitmap[0] → Bitmap[1] — **line 3411**
 
-**Frame Drawing** (lines 3278-3281):
+> Lines 3394-3401, cited in earlier revisions as "channel labels", are actually the **SCOPE_XY** label
+> code — a different branch of the same `case`.
+
+**Frame Drawing** (lines **3286-3289**):
 ```pascal
 Bitmap[0].Canvas.Brush.Color := WinRGB(vGridColor);
 Bitmap[0].Canvas.FrameRect(Rect(vMarginLeft - 1, vMarginTop - 1,
@@ -678,10 +764,16 @@ Bitmap[0].Canvas.FrameRect(Rect(vMarginLeft - 1, vMarginTop - 1,
                                  vMarginTop + vHeight + 1));
 ```
 
-**Grid Line Drawing** (lines 3283-3319):
+**Grid Line Drawing** (lines **3291-3335**; the legend `TextOut`s at 3310-3333):
 For each channel where `vGrid[i] <> 0`:
 ```pascal
 color := AlphaBlend(vColor[i], vBackColor, $40);   // 25% channel color + 75% background
+
+// GRID LINES ARE DOTTED (3294-3295); pen restored to psSolid at 3334
+Bitmap[0].Canvas.Pen.Width := 1;
+Bitmap[0].Canvas.Pen.Style := psDot;
+Bitmap[0].Canvas.Pen.Color := WinRGB(color);
+Bitmap[0].Canvas.Brush.Color := WinRGB(vBackColor);
 
 if (vGrid[i] and 1) <> 0 then                      // Baseline
 begin
@@ -700,33 +792,63 @@ end;
 if (vGrid[i] and 4) <> 0 then                      // Min-value legend TEXT (at baseline)
 begin
   y := vMarginTop + vHeight - vBase[i] - 1;
+  Bitmap[0].Canvas.Brush.Color := WinRGB(vBackColor);
+  Bitmap[0].Canvas.Font.Color := WinRGB(color);    // the SAME 25%-blended color
+  Bitmap[0].Canvas.Font.Style := [];
   if vLow[i] < vHigh[i] then x := vLow[i] else x := vHigh[i];
   if x >= 0 then s := '+' + IntToStr(x) else s := IntToStr(x);
-  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s);
+  w := Bitmap[0].Canvas.TextWidth(s);
+  // BACKDROP: punch a vBackColor hole in the dotted grid line before the text
+  Bitmap[0].Canvas.FillRect(Rect(vMarginLeft, y - 1, vMarginLeft + w + ChrWidth, y + 1));
+  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s)
 end;
 
 if (vGrid[i] and 8) <> 0 then                      // Max-value legend TEXT (at top line)
 begin
   y := vMarginTop + vHeight - vBase[i] - vTall[i];
+  Bitmap[0].Canvas.Brush.Color := WinRGB(vBackColor);
+  Bitmap[0].Canvas.Font.Color := WinRGB(color);
+  Bitmap[0].Canvas.Font.Style := [];
   if vLow[i] < vHigh[i] then x := vHigh[i] else x := vLow[i];
   if x >= 0 then s := '+' + IntToStr(x) else s := IntToStr(x);
-  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s);
+  w := Bitmap[0].Canvas.TextWidth(s);
+  Bitmap[0].Canvas.FillRect(Rect(vMarginLeft, y - 1, vMarginLeft + w + ChrWidth, y + 1));
+  Bitmap[0].Canvas.TextOut(vMarginLeft + ChrWidth div 2, y - ChrHeight div 2, s)
 end;
-```
-> **Note (v55 ratification, 2026-07-11):** `vGrid` is a **4-bit** field. Bits 0–1 draw the baseline/top **lines**; **bits 2–3 render min/max-value legend TEXT** (`ClearBitmap` lines 3310–3333, actual `TextOut`). Earlier revisions of this doc described it as 2-bit with no legend text — corrected. (FFT never sets `vLow[]`, so a bit-2 legend shows `+0`.)
 
-**Log Scale Markers** (lines 3350-3393):
+Bitmap[0].Canvas.Pen.Style := psSolid;             // 3334 — restore
+```
+> **Note (v55 ratification, 2026-07-11; grid rendering detail added 2026-07-14):** `vGrid` is a
+> **4-bit** field. Bits 0–1 draw the baseline/top **lines**; **bits 2–3 render min/max-value legend
+> TEXT** (`ClearBitmap` 3310–3333, actual `TextOut`). Three rendering details that earlier revisions
+> omitted:
+> 1. **The grid lines are DOTTED** — `Pen.Style := psDot`, width 1 (3294-3295), in the 25 %-blended
+>    channel color; restored to `psSolid` at 3334.
+> 2. **Each legend is drawn in the blended color, not the raw channel color** (`Font.Color := WinRGB(color)`).
+> 3. **Each legend punches a backdrop first**: a `vBackColor` `FillRect` of
+>    `TextWidth(s) + ChrWidth` wide × 2 px tall, centred on the line — so the text is not overprinted
+>    by the dotted grid line beneath it.
+>
+> (FFT never sets `vLow[]`, so a bit-2 legend shows `+0`.)
+
+**Logscale annotation** (`ClearBitmap`, lines 3358-3365) — the **only** thing `vLogScale` draws:
 ```pascal
+// Draw logscale for FFT
 if (DisplayType = dis_fft) and vLogScale then
 begin
-  // Draw power-of-2 markers (1, 2, 4, 8, 16, ...)
-  for i := 0 to 31 do
-  begin
-    y := Log2(1 shl i) / Log2(vHigh[0]) * vTall[0];
-    // ... draw text and line
-  end;
+  Bitmap[0].Canvas.Font.Style := [];
+  Bitmap[0].Canvas.Font.Color := WinRGB(vGridColor);
+  s := 'logscale';
+  Bitmap[0].Canvas.TextOut(vBitmapWidth - 1 - vMarginRight - Length(s) * ChrWidth, ChrHeight div 2, s);
 end;
 ```
+When `LOGSCALE` is set, FFT draws the literal string `'logscale'` in `vGridColor` at the **top-right of
+the plot area** (`x = vBitmapWidth - 1 - vMarginRight - Length('logscale') * ChrWidth`,
+`y = ChrHeight div 2`). **No axis markers, tick marks, or per-decade labels of any kind are drawn.**
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions of this document described a
+> "power-of-2 axis marker" loop here. **That code does not exist in v55** — no marker lines, no marker
+> labels. `ClearBitmap` 3358-3365 is the complete logscale rendering.
 
 **Step 2: Process Each Channel** (lines 1688-1709)
 
@@ -813,10 +935,10 @@ y := (vMarginTop + vHeight - 1 - vBase[j]) shl 8 - Round(v * fScale);
 
 **Step 3: Update Display** (line 1711)
 ```pascal
-BitmapToCanvas(0);     // DebugDisplayUnit.pas:3514
+BitmapToCanvas(0);     // DebugDisplayUnit.pas:3522
 ```
 
-**BitmapToCanvas Implementation** (lines 3514-3522):
+**BitmapToCanvas Implementation** (lines **3522-3530**):
 ```pascal
 procedure TDebugDisplayForm.BitmapToCanvas(Level: integer);
 begin
@@ -868,9 +990,12 @@ end;
 ```
 
 **Twiddle Factor Calculation**:
-- Standard FFT: `W_N^k = e^(-2πik/N) = cos(2πk/N) - i*sin(2πk/N)`
-- This implementation: Uses bit-reversed index for decimation-in-time algorithm
-- `Tf = π * bitreverse(i) / 2^32`: Normalized to [0, π)
+- Textbook FFT convention: `W_N^k = e^(-2πik/N) = cos(2πk/N) − i*sin(2πk/N)`
+- **v55 does NOT use that convention.** `PerformFFT` (4224-4225) applies the **conjugate**,
+  `W = cos θ + i*sin θ = e^{+iθ}` — see §7.2. The magnitude spectrum is unaffected (|X| is identical
+  under conjugation); the **sign of `FFTangle[]` is**.
+- The angle index is **bit-reversed**, for the decimation-in-time ordering:
+  `Tf := Rev32(i) / $100000000 * Pi` (4185) — normalized to [0, π).
 
 **Hanning Window**:
 - Formula: `w[n] = 0.5 * (1 - cos(2πn/N))`
@@ -904,7 +1029,7 @@ end;
 
 **Complexity**: O(N log₂ N)
 
-**Phase 1: Windowing** (lines 4191-4195)
+**Phase 1: Windowing** (lines **4198-4203**)
 ```pascal
 for i1 := 0 to (1 shl FFTexp) - 1 do
 begin
@@ -918,7 +1043,7 @@ end;
 - Reduces spectral leakage caused by finite observation window
 - Initializes imaginary components to zero (input is real-valued)
 
-**Phase 2: Decimation-in-Time FFT** (lines 4197-4233)
+**Phase 2: Decimation-in-Time FFT** (lines **4204-4241**)
 
 **Overview**:
 - Iterative algorithm (not recursive)
@@ -950,7 +1075,7 @@ begin
       ax := FFTreal[ptra];  ay := FFTimag[ptra];
       bx := FFTreal[ptrb];  by := FFTimag[ptrb];
 
-      // Twiddle factor multiplication (complex): (bx + i*by) * (cos - i*sin)
+      // Twiddle factor multiplication (complex): (bx + i*by) * (cos θ + i*sin θ) = B · e^{+iθ}
       rx := (bx * FFTcos[th] - by * FFTsin[th]) div $1000;
       ry := (bx * FFTsin[th] + by * FFTcos[th]) div $1000;
 
@@ -976,16 +1101,22 @@ begin
 end;
 ```
 
-**Butterfly Operation**:
+**Butterfly Operation** (conformed to `PerformFFT`:4224-4225):
 ```
 Input:  A = ax + i*ay, B = bx + i*by
-Twiddle: W = cos(θ) - i*sin(θ)
-Compute: r = B * W = (bx + i*by) * (cos(θ) - i*sin(θ))
-         rx = bx*cos(θ) - by*sin(θ)
-         ry = bx*sin(θ) + by*cos(θ)
+Twiddle: W = cos(θ) + i*sin(θ) = e^{+iθ}       ← v55 uses the CONJUGATE of the textbook e^{-iθ}
+Compute: r = B * W = (bx + i*by) * (cos θ + i*sin θ)
+         rx = bx*cos θ − by*sin θ
+         ry = bx*sin θ + by*cos θ
 Output: A' = A + r
-        B' = A - r
+        B' = A − r
 ```
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions stated `W = cos θ − i·sin θ`.
+> That is **backwards** and is inconsistent with the `rx`/`ry` lines printed directly beneath it: a
+> `cos − i·sin` twiddle would yield `rx = bx·cos + by·sin`, `ry = by·cos − bx·sin`, which is **not**
+> what 4224-4225 computes. The consequence is confined to the sign of `FFTangle[]`; `FFTpower[]`
+> (a `Hypot` magnitude) is invariant under conjugation.
 
 **Stage Progression** (for N=8, FFTexp=3):
 ```
@@ -994,7 +1125,7 @@ Stage 2: i1=2, i2=2, blocks=2×2, butterflies=2×2
 Stage 3: i1=1, i2=4, blocks=4×4, butterflies=1×1
 ```
 
-**Phase 3: Magnitude/Phase Extraction** (lines 4235-4242)
+**Phase 3: Magnitude/Phase Extraction** (lines **4242-4250**; the `FFTpower` line is **4248**)
 ```pascal
 for i1 := 0 to (1 shl (FFTexp - 1)) - 1 do      // N/2 bins (Nyquist theorem)
 begin
@@ -1002,7 +1133,7 @@ begin
   rx := FFTreal[i2];
   ry := FFTimag[i2];
 
-  // Power spectrum: |X[k]|² = real² + imag², scaled by FFTmag
+  // Magnitude spectrum: |X[k]| = Hypot(real, imag), normalized by ($800 shl FFTexp shr FFTmag)
   FFTpower[i1] := Round(Hypot(rx, ry) / ($800 shl FFTexp shr FFTmag));
 
   // Phase spectrum: atan2(real, imag), normalized to 32-bit unsigned
@@ -1010,13 +1141,15 @@ begin
 end;
 ```
 
-**Power Calculation**:
-- `Hypot(rx, ry)` = √(rx² + ry²) = magnitude
-- Division: Normalization factor
+**Magnitude Calculation** (the array is named `FFTpower`, but it holds a **magnitude**):
+- `Hypot(rx, ry)` = √(rx² + ry²) = **|X[k]|**, the magnitude — **not** the squared magnitude |X[k]|².
+  There is no squaring anywhere in `PerformFFT`.
+- Divisor `($800 shl FFTexp shr FFTmag)`:
   - `$800` = 2048 (base scale)
-  - `shl FFTexp` = multiply by N (FFT gain)
-  - `shr FFTmag` = divide by 2^FFTmag (user magnitude adjustment)
-- Result: Power in arbitrary units (not dB or absolute scale)
+  - `shl FFTexp` — scales the divisor by N (undoes the FFT's N-fold gain)
+  - `shr FFTmag` — **shrinks the divisor** by 2^FFTmag ⇒ **multiplies the result by 2^FFTmag**
+    (the user gain; see §11.4)
+- Result: magnitude in arbitrary units (not dB, not an absolute scale)
 
 **Phase Calculation**:
 - `ArcTan2(rx, ry)` = angle in radians [-π, π]
@@ -1061,8 +1194,13 @@ end;
 
 ### 8.1 Coordinate System
 
-**Fixed-Point Format**: 8.8 (8 integer bits, 8 fractional bits)
-- Range: 0 to 65535 (representing 0.0 to 255.99609375 pixels)
+**Fixed-Point Format**: a plain 32-bit Delphi `integer` carrying **8 fractional bits**
+(value = pixels × 256; 1 px = `$100`). The comment above `SmoothDot` (3837) states it directly:
+*"x/y/radius in 256th's"*.
+- **Range is the bitmap, not 16 bits.** With `scope_wmax = scope_hmax = SmoothFillMax = 2048`
+  (208-213), a coordinate reaches `2048 shl 8 = 524288` — far past 65535. `SmoothLine`'s parameters
+  are `integer`, and `SmoothClip` (4015) clips against the **bitmap bounds**, not a 16-bit range.
+  (Earlier revisions called this "8.8, range 0..65535" — that upper bound is wrong.)
 - Conversion: `pixel_value shl 8` (multiply by 256)
 - Example:
   - 100 pixels = 25600 (100 shl 8)
@@ -1080,7 +1218,7 @@ end;
 - `vWidth`, `vHeight`: Plot area dimensions
 - Total form size: `vClientWidth`, `vClientHeight` (includes margins)
 
-### 8.2 DrawLineDot Method (DebugDisplayUnit.pas:3415-3423)
+### 8.2 DrawLineDot Method (DebugDisplayUnit.pas:3423-3431)
 
 **Purpose**: Draw line segment and/or dot at specified position
 
@@ -1114,8 +1252,15 @@ end;
 
 **State Variables**:
 - `vPixelX, vPixelY`: Last drawn position (used for line continuity)
-- `vLineSize`: Line width (0=no line, 1-32=nominal width in px, negative=filled bars). Passed as `vLineSize shl 6` → geometric disc radius = N/4 in the 8.8 space; the visible ~1:1 width is an anti-aliasing effect, not the raw disc geometry.
-- `vDotSize`: Dot **diameter** (0=no dot, 1-32 px). Passed as `vDotSize shl 7` → geometric radius = N/2 px, i.e. face value = diameter (matches LOGIC ToO §10.5 "diameter"; SCOPE_XY dots use `shl 6`).
+- `vLineSize`: Line width (0 = no line, 1..32, negative = filled bars). **Code fact:** passed as
+  `vLineSize shl 6` (`DrawLineDot`:3425). ⚠️ Do **not** derive a rendered pixel width from that shift —
+  hardware measured `LINESIZE 3` as **3 px, 1:1 whole pixels**; the anti-aliasing envelope widens
+  small radii, so the shift constant does not predict what the user sees.
+- `vDotSize`: Dot size (0 = no dot, 1..32). **Code fact:** passed as `vDotSize shl 7`
+  (`DrawLineDot`:3427). ⚠️ **The rendered pixel width of a dot has NEVER been measured —
+  NEEDS-HARDWARE.** Since the shift-constant derivation demonstrably fails for `LINESIZE`, it cannot
+  be trusted for `DOTSIZE` either. State the shift; do not assert "radius" or "diameter" in
+  user-facing terms.
 
 **Line Continuity**:
 - Each call stores current position
@@ -1123,14 +1268,17 @@ end;
 - Creates connected polyline
 - `first=True` starts new polyline
 
-**Radius Scaling**:
-- Line: `vLineSize shl 6` (multiply by 64)
-- Dot: `vDotSize shl 7` (multiply by 128)
-- Different scaling factors compensate for rendering algorithm differences
+**Radius Scaling** (code fact — see the ⚠️ notes above before converting either to pixels):
+- Line: `vLineSize shl 6` (× 64)
+- Dot: `vDotSize shl 7` (× 128)
+- Both feed `SmoothLine`'s `radius` parameter, which is in the same 256-per-pixel space and is clamped
+  to `maxr shl 8` (`maxr = 128`, `SmoothLine`:3872). The **rendered** widths do not follow from these
+  constants alone — anti-aliasing intervenes (`LINESIZE 3` measures 3 px on hardware, and `DOTSIZE`
+  has never been measured).
 
 ### 8.3 Anti-Aliased Rendering
 
-#### SmoothLine (DebugDisplayUnit.pas:3754-3864)
+#### SmoothLine (DebugDisplayUnit.pas:3844-3984)
 
 **Algorithm**: Modified Bresenham's line drawing with sub-pixel positioning
 
@@ -1150,36 +1298,37 @@ procedure SmoothLine(x1, y1, x2, y2, radius, color: integer; opacity: byte);
 - `color`: RGB color
 - `opacity`: Alpha value (0=transparent, 255=opaque)
 
-#### SmoothDot (DebugDisplayUnit.pas:3867-3934)
+#### SmoothDot (DebugDisplayUnit.pas:3839-3842)
 
-**Algorithm**: Circular brush with anti-aliased edges
+**`SmoothDot` is a one-line wrapper around `SmoothLine` — a zero-length line.** It contains no
+rasterizer of its own:
 
-**Features**:
-- True circular shape (not square)
-- Sub-pixel positioning
-- Distance-based alpha for smooth edges
-- Opacity control
+```pascal
+procedure TDebugDisplayForm.SmoothDot(x, y, radius, color: integer; opacity: byte);
+begin
+  SmoothLine(x, y, x, y, radius, color, opacity);
+end;
+```
 
 **Parameters**:
 ```pascal
 procedure SmoothDot(x, y, radius, color: integer; opacity: byte);
 ```
-- `x, y`: Center in fixed-point
-- `radius`: Dot radius in fixed-point (128× scaling)
+- `x, y`: Center, in the 8-fractional-bit fixed-point space (256 = 1 px)
+- `radius`: passed straight through to `SmoothLine`, where it is clamped to `maxr shl 8`
+  (`maxr = 128`; clamp at `SmoothLine`:3872)
 - `color`: RGB color
 - `opacity`: Alpha value
 
-**Edge Anti-Aliasing**:
-```pascal
-for dx := -r to r do
-  for dy := -r to r do
-    d := sqrt(dx² + dy²);                    // Distance from center
-    if d <= r then
-      alpha := opacity * (1 - (d - floor(d)));  // Fractional distance
-      blend_pixel(x+dx, y+dy, color, alpha);
-```
+**Consequence**: every property of a dot — the round cap, the sub-pixel placement, the anti-aliased
+edge, the radius clamp — is produced by `SmoothLine` (3844-3984) with identical endpoints. There is
+**no dot-specific algorithm** to describe.
 
-#### AlphaBlend (DebugDisplayUnit.pas:3406-3413)
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions of this document carried a
+> nested `for dx / for dy` distance-field anti-aliasing loop here, attributed to `SmoothDot`.
+> **That code does not exist** — see 3839-3842 above.
+
+#### AlphaBlend (DebugDisplayUnit.pas:3414-3421)
 
 **Purpose**: Gamma-corrected alpha blending
 
@@ -1220,7 +1369,7 @@ end;
 4. **Clipping**: Early exit for off-screen pixels
 5. **Double-Buffering**: Eliminates flicker without disabling screen updates
 
-**Pixel Access** (DebugDisplayUnit.pas:3425-3436):
+**Pixel Access** (`PlotPixel`, DebugDisplayUnit.pas:3433-3444):
 ```pascal
 procedure TDebugDisplayForm.PlotPixel(p: integer);
 var
@@ -1236,13 +1385,17 @@ begin
 end;
 ```
 
-**Bitmap Line Pointers** (Setup in FormCreate):
+**Bitmap Line Pointers** (populated in **`SetSize`**, line **2967** — *not* in `FormCreate`):
 ```pascal
-for i := 0 to vBitmapHeight - 1 do
-  BitmapLine[i] := Bitmap[0].ScanLine[i];
+for i := 0 to vBitmapHeight - 1 do BitmapLine[i] := Bitmap[0].ScanLine[i];
 ```
-- `ScanLine[]` returns pointer to raw pixel data
-- Avoids overhead of canvas pixel access
+- Lives at the tail of `SetSize` (2926-2971), **after** the bitmaps have been resized — the scanline
+  pointers are only valid once the bitmap has its final dimensions.
+- For FFT this runs at the end of `FFT_Configure` via
+  `SetSize(ChrWidth, ChrHeight * 2, ChrWidth, ChrWidth)` (line 1617).
+- `FormCreate` (591-645) never touches `BitmapLine`.
+- `ScanLine[]` returns a pointer to raw pixel data
+- Avoids the overhead of canvas pixel access
 - Direct memory writes (significant speedup)
 
 ---
@@ -1252,9 +1405,13 @@ for i := 0 to vBitmapHeight - 1 do
 ### 9.1 Command Structure
 
 **Protocol**:
-- Prefix: `0xFF 0x00` (marks DEBUG command)
+- Prefix: a **backtick** `` ` `` = **`$60`** (opens a debug-display string; `DebugUnit.pas:203`)
 - Body: ASCII string
-- Terminator: `0x0D` (carriage return)
+- Terminator: `0x0D` (carriage return) — null-terminates the buffer and invokes `P2ParseDebugString`
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions claimed a `0xFF 0x00` prefix.
+> **There is no `$FF` byte test anywhere in `DebugUnit.pas`** (grep-verified). The opener is the
+> backtick.
 
 **Parsed Representation**:
 ```pascal
@@ -1274,71 +1431,83 @@ ele_str = 5    // String
 
 ### 9.2 Command Examples
 
+> **How the array is laid out** (`FormCreate`:625-632). The create/update discriminator is
+> `P2.DebugDisplayType[0]` (`DebugUnit.pas:224` / `:231`) — it is **not** an element occupying a slot
+> ahead of the payload. In the value array:
+> `Value[0]` = the **display type** (`dis_fft` = **3**), `Value[1]` = the **window name** (used to
+> build the caption), and **directive parsing starts at `ptr := 2`**:
+> ```pascal
+> DisplayType := P2.DebugDisplayValue[0];
+> SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType]);
+> …
+> SetDefaults;
+> ptr := 2;
+> ```
+
 #### Create FFT Window
 ```
-Serial: 0xFF 0x00 "FFT `My Spectrum samples 1024 logscale" 0x0D
+Serial: ` "FFT MySpectrum SAMPLES 1024 LOGSCALE" CR
 
 Parsed:
-[0] type=ele_dis, value=1                (1 = create new)
-[1] type=ele_num, value=0                (display type: dis_fft)
-[2] type=ele_str, value="My Spectrum"    (title)
-[3] type=ele_key, value=key_samples
-[4] type=ele_num, value=1024
-[5] type=ele_key, value=key_logscale
-[6] type=ele_end
+DebugDisplayType[0] = 1                  → create  (DebugUnit.pas:224)
+[0] value = 3                            (display type: dis_fft)
+[1] value = ptr to "MySpectrum"          (window name → caption "MySpectrum - FFT")
+[2] type=ele_key, value=key_samples      ← FFT_Configure starts here (ptr := 2)
+[3] type=ele_num, value=1024
+[4] type=ele_key, value=key_logscale
+[5] type=ele_end
 ```
 
-#### Update with Configuration
-```
-Serial: 0xFF 0x00 "FFT `0 samples 512 100 200 rate 10 clear" 0x0D
-
-Parsed:
-[0] type=ele_dis, value=2                (2 = update existing)
-[1] type=ele_num, value=0                (display index)
-[2] type=ele_key, value=key_samples
-[3] type=ele_num, value=512
-[4] type=ele_num, value=100              (FFTfirst)
-[5] type=ele_num, value=200              (FFTlast)
-[6] type=ele_key, value=key_rate
-[7] type=ele_num, value=10
-[8] type=ele_key, value=key_clear
-[9] type=ele_end
-```
+> **Configure phase is KEY-ONLY** (`while NextKey do`, 1565). A non-key element — a bare number, or a
+> channel-def string — **terminates the configure parse**, and the remainder of the create message is
+> silently dropped.
 
 #### Update with Samples
 ```
-Serial: 0xFF 0x00 "FFT `0 100,200,300,400,500" 0x0D
+Serial: ` "MySpectrum 100 200 300 400 500" CR
 
 Parsed:
-[0] type=ele_dis, value=2
-[1] type=ele_num, value=0
-[2] type=ele_num, value=100              (sample data)
-[3] type=ele_num, value=200
-[4] type=ele_num, value=300
-[5] type=ele_num, value=400
-[6] type=ele_num, value=500
-[7] type=ele_end
+DebugDisplayType[0] = 2                  → update  (DebugUnit.pas:231)
+[0] value = display index                (resolved from the instance name)
+[1] type=ele_num, value=100              (sample data)
+[2] type=ele_num, value=200
+[3] type=ele_num, value=300
+[4] type=ele_num, value=400
+[5] type=ele_num, value=500
+[6] type=ele_end
 ```
 
 #### Update with Channel Definition
 ```
-Serial: 0xFF 0x00 "FFT `0 "Audio Left" 2 5000000 256 0 1 $00FF00 100,200,300" 0x0D
+Serial: ` "MySpectrum 'Audio Left' 2 5000000 256 0 1 $00FF00 100 200 300" CR
 
 Parsed:
-[0] type=ele_dis, value=2
-[1] type=ele_num, value=0
-[2] type=ele_str, value="Audio Left"     (channel label)
-[3] type=ele_num, value=2                (vMag = 2, divide by 4)
-[4] type=ele_num, value=5000000          (vHigh = 5000000)
-[5] type=ele_num, value=256              (vTall = 256 pixels)
-[6] type=ele_num, value=0                (vBase = 0)
-[7] type=ele_num, value=1                (vGrid = 1, show baseline)
-[8] type=ele_num, value=$00FF00          (vColor = green)
-[9] type=ele_num, value=100              (sample data follows)
-[10] type=ele_num, value=200
-[11] type=ele_num, value=300
-[12] type=ele_end
+DebugDisplayType[0] = 2                  → update
+[0] value = display index
+[1] type=ele_str, value="Audio Left"     (channel label)
+[2] type=ele_num, value=2                (vMag = 2 → MULTIPLIES FFT output by 4; see §11.4)
+[3] type=ele_num, value=5000000          (vHigh = 5000000)
+[4] type=ele_num, value=256              (vTall = 256 pixels)
+[5] type=ele_num, value=0                (vBase = 0)
+[6] type=ele_num, value=1                (vGrid = 1, show baseline)
+[7] type=ele_num, value=$00FF00          (vColor = green)
+[8] type=ele_num, value=100              (sample data follows)
+[9] type=ele_num, value=200
+[10] type=ele_num, value=300
+[11] type=ele_end
 ```
+
+#### ⚠️ There is no "update with configuration"
+
+`FFT_Update` (1620-1679) accepts **only four keywords**: `CLEAR`, `SAVE`, `PC_KEY`, `PC_MOUSE` — plus
+channel-def strings and numeric sample data. **`SAMPLES`, `RATE`, `SIZE`, `DOTSIZE`, `LINESIZE`,
+`COLOR`, `LOGSCALE`, `HIDEXY` and the packing keywords are configure-only** and are **not** reachable
+in an update message; a `SAMPLES`/`RATE` keyword sent to a live FFT window hits no case arm and is
+silently discarded. To change them, the window must be re-created.
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions carried an "Update with
+> Configuration" example that fed `samples 512 100 200 rate 10 clear` to an existing window. **That
+> message does not work** — it was fabricated. It has been removed.
 
 ### 9.3 Configuration Keywords
 
@@ -1360,7 +1529,7 @@ key_logscale     // Enable logarithmic amplitude scaling
 
 #### Rendering
 ```pascal
-key_dotsize      // Set dot radius (0-32, 0=none)
+key_dotsize      // Set dot size (0-32, 0=none) — passed as vDotSize shl 7; rendered px width NEEDS-HARDWARE
 key_linesize     // Set line width (-32..32; positive=polyline, 0=none, negative=vertical filled-bar mode)
 key_textsize     // Set text size (points)
 ```
@@ -1402,7 +1571,7 @@ OperateDebug() (main thread)
     ↓
 ChrIn() (DebugUnit)
     ↓
-0xFF 0x00 detected → DisplayStrFlag := True
+backtick `$60` detected → DisplayStrFlag := True   (DebugUnit.pas:203)
     ↓
 Accumulate characters until 0x0D
     ↓
@@ -1509,20 +1678,23 @@ vRate parameter:
   vRate = vSamples → FFT every buffer fill (low CPU, may lag)
 ```
 
-**RateCycle Function**:
+**RateCycle Function** (`DebugDisplayUnit.pas:3079-3088`):
 ```pascal
 function TDebugDisplayForm.RateCycle: boolean;
 begin
-  vRateCount := vRateCount + 1;
-  if vRateCount >= vRate then
+  Inc(vRateCount);
+  if vRateCount = vRate then
   begin
     vRateCount := 0;
     Result := True;
   end
-  else
-    Result := False;
+  else Result := False;
 end;
 ```
+The comparison is **exact equality (`=`), not `>=`.** That is precisely why `FFT_Configure` seeds
+`vRateCount := vRate - 1` (line 1604) and `CLEAR` re-seeds it (line 1647) — the counter must land on
+`vRate` exactly. A consequence: a **non-positive `vRate` can never fire**, because `vRateCount` is
+reset to 0 and only ever increments upward.
 
 **Tuning Recommendations**:
 - Real-time audio: vRate = vSamples / 4 (25% overlap)
@@ -1562,7 +1734,11 @@ if SamplePop <> vSamples then Continue;         // Exit if not full
 - `SamplePop` never exceeds `vSamples`
 
 **Overflow Protection**:
-- Buffer size (2048) > max samples (2048) → No overflow possible
+- Buffer capacity (`Y_Sets` = **2048** sets, line 167) **equals** the maximum FFT length
+  (`FFTmax` = `DataSets` = **2048**, line 165) — they are equal, not "greater than".
+- Because the read window is the trailing `vSamples` sets
+  (`((SamplePtr - vSamples + x) and Y_PtrMask)`), it can **never** overrun: at `vSamples = 2048` it
+  spans the entire buffer exactly once.
 - Circular wrapping handles continuous streaming
 - Old data automatically overwritten
 
@@ -1612,15 +1788,21 @@ v_scaled = log₂(v + 1) / log₂(vHigh + 1) × vHigh
 - Dynamic range: 0..vHigh → 0..vHigh (scaled)
 - Useful for signals with wide dynamic range (e.g., audio)
 
-**Visual Markers** (lines 3350-3393):
-Powers of 2 marked on Y-axis:
+**Visual Marker** (`ClearBitmap`, lines 3358-3365):
+`LOGSCALE` draws **exactly one thing** — the literal string `'logscale'` in `vGridColor` at the
+top-right of the plot area:
 ```pascal
-for i := 0 to 31 do
+// Draw logscale for FFT
+if (DisplayType = dis_fft) and vLogScale then
 begin
-  y := Log2(1 shl i) / Log2(vHigh[0]) * vTall[0];
-  // Draw line and label: "1", "2", "4", "8", ...
+  Bitmap[0].Canvas.Font.Style := [];
+  Bitmap[0].Canvas.Font.Color := WinRGB(vGridColor);
+  s := 'logscale';
+  Bitmap[0].Canvas.TextOut(vBitmapWidth - 1 - vMarginRight - Length(s) * ChrWidth, ChrHeight div 2, s);
 end;
 ```
+**There are no power-of-2 markers, no Y-axis tick marks, and no numeric axis labels.** The amplitude
+axis carries no annotation beyond the optional per-channel `vGrid` bit-2/bit-3 legends (§6.2).
 
 **Why +1 in Formula**:
 - Prevents `log₂(0)` = -∞
@@ -1629,27 +1811,38 @@ end;
 
 ### 11.4 Magnitude Adjustment
 
-**Parameter**: `FFTmag` (0-11), stored per channel in `vMag[j]`
+**Parameter**: `FFTmag` (0-11), stored per channel in `vMag[j]`, loaded into `FFTmag` at
+`FFT_Draw`:1692 before each channel's `PerformFFT`.
 
-**Application** (line 4240):
+**`MAG` IS A GAIN — IT MULTIPLIES. IT DOES NOT DIVIDE.**
+
+**Application** (`PerformFFT`, line **4248**):
 ```pascal
 FFTpower[i1] := Round(Hypot(rx, ry) / ($800 shl FFTexp shr FFTmag));
 ```
+Read the divisor carefully: `FFTmag` appears as `shr FFTmag` **inside the divisor**. Raising `mag`
+therefore **shrinks the divisor**, which **amplifies** the plotted value by `2^mag`:
 
-**Effect**:
-- `FFTmag = 0`: No adjustment (standard output)
-- `FFTmag = 1`: Multiply by 2 (double sensitivity)
-- `FFTmag = 11`: Multiply by 2048 (maximum sensitivity)
+| `mag` | divisor | plotted magnitude |
+|---|---|---|
+| 0 | `$800 shl FFTexp` | ×1 (baseline) |
+| 1 | `$800 shl FFTexp shr 1` (half) | **×2** |
+| 3 | `$800 shl FFTexp shr 3` (⅛) | **×8** |
+| 11 | `$800 shl FFTexp shr 11` | **×2048** (maximum sensitivity) |
 
 **Use Cases**:
-- Low-amplitude signals: Increase FFTmag
-- Saturated signals: Decrease FFTmag (set to 0)
-- Per-channel gain control
+- Low-amplitude signals: **increase** `mag` (more gain)
+- Saturated / clipped display: **decrease** `mag` toward 0
+- Per-channel gain control (each channel carries its own `vMag[j]`)
 
 **Relation to Scaling**:
-- `FFTmag` adjusts FFT output magnitude
-- `vHigh[j]` sets Y-axis scale
-- Both affect final display amplitude
+- `MAG` is a **pre-scale gain** on the FFT output
+- `vHigh[j]` sets the Y-axis full-scale
+- Both affect the final on-screen amplitude
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions described `MAG` in two places as
+> a "right-shift divisor" that would "divide the FFT output by 8". **That is inverted** — and it
+> contradicted this very section, which had it right. `MAG` is a magnification factor of 2ⁿ.
 
 ### 11.5 Bin Windowing
 
@@ -1747,20 +1940,27 @@ key_bytes_4bit   : 2 samples × 4 bits = 8 bits
 ### 12.1 Serial Protocol
 
 **Command Structure**:
-- Prefix: `0xFF 0x00` (2 bytes)
-- Body: ASCII string (variable length)
+- Prefix: a single **backtick** `` ` `` = **`$60`** (1 byte)
+- Body: ASCII string (variable length, up to `DebugStringLimit`)
 - Terminator: `0x0D` (carriage return)
 
 **Example**:
 ```
-Hex:  FF 00 46 46 54 20 60 30 20 31 30 30 2C 32 30 30 0D
-ASCII:      F  F  T     `  0     1  0  0  ,  2  0  0  CR
+Hex:   60 4D 79 46 46 54 20 31 30 30 20 32 30 30 0D
+ASCII:  `  M  y  F  F  T     1  0  0     2  0  0  CR
 ```
 
-**Detection** (DebugUnit.pas:200):
+**Detection** (`DebugUnit.pas:203`):
 ```pascal
-if x = $FF then DisplayStrFlag := True;
+if (x = $60) and not DisplayStrFlag then
+begin
+  DisplayStrLen := 0;
+  DisplayStrFlag := True;
+end
 ```
+Bytes then accumulate into `P2.DebugDisplayStr[]` until CR (`13`), which null-terminates the buffer
+and calls `P2ParseDebugString`. **There is no `0xFF 0x00` prefix** — that claim, carried by earlier
+revisions of this document, is fabricated; no `$FF` test exists in `DebugUnit.pas`.
 
 **Parsing** (GlobalUnit.pas):
 - Tokenizes string into keywords, numbers, strings
@@ -1775,7 +1975,8 @@ P2.DebugDisplayType[]   : array[0..DebugDisplayLimit-1] of byte
 P2.DebugDisplayValue[]  : array[0..DebugDisplayLimit-1] of integer
 ```
 - Location: GlobalUnit.pas:126-127
-- Size: DebugDisplayLimit (typically 256)
+- Size: `DebugDisplayLimit` = **1100** (`GlobalUnit.pas:35` — *"allows 1k data elements + some
+  commands"*). Not 256.
 
 **Display Enable Flags**:
 ```pascal
@@ -1801,9 +2002,9 @@ P2.DebugDisplayTargs    : integer    // Number of target displays
 
 **1. Creation** (User sends command):
 ```
-Serial: "FFT `My FFT samples 1024"
+Serial: ` "FFT MyFFT SAMPLES 1024"
 ```
-→ DebugUnit.pas:217-221:
+→ `DebugUnit.pas:224-228`:
 ```pascal
 if P2.DebugDisplayType[0] = 1 then
 begin
@@ -1890,29 +2091,67 @@ PackDef[key_longs_2bit]  = 0 shl 16 +  2 shl 8 + 16    // sign=0, shift=2, count
 
 **Encoding** (decoded by `SetPack`, lines 4146–4156):
 - Bits 0-7: `vPackCount` — sample count per packed value
-- Bits 8-15: `vPackShift` — bits per sample (right-shift amount)
-- Bit 16: sign-extend flag (0 = unsigned; set to 1 by the `SIGNED` modifier keyword)
+- Bits 8-15: `vPackShift` — bits per sample; also builds `vPackMask = 1 shl shift - 1`
+- The `shl 16` field in every `PackDef` entry is **always `0`** and is **never read** — `SetPack`
+  reads only bits 0-15 (`vPackShift := i shr 8 and $FF; vPackCount := i and $FF;`).
 
-**NewPack Function**:
+**There is no per-mode sign flag.** `ALT` and `SIGNED` are **trailing modifier keywords**, parsed at
+runtime by `KeyPack` (2817-2832), which accepts up to two of them in either order after the packing
+keyword and passes them into `SetPack(v, alt, signx)` → `vPackAlt` / `vPackSignx`:
+```pascal
+procedure TDebugDisplayForm.KeyPack;
+begin
+  v := val;
+  alt := False;
+  signx := False;
+  if NextKey and (val in [key_alt, key_signed]) then
+  begin
+    if val = key_alt then alt := True else signx := True;
+    if NextKey and (val in [key_alt, key_signed]) then
+      if val = key_alt then alt := True else signx := True;
+  end;
+  SetPack(v, alt, signx);
+end;
+```
+
+> **Default packing is UNPACKED.** `SetDefaults` (2915) calls `SetPack(0, False, False)`, and
+> `SetPack` special-cases `val = 0` **bypassing `PackDef` entirely**: `vPackCount = 1`,
+> `vPackShift = 32`, `vPackMask = $FFFFFFFF` ⇒ **one full 32-bit sample per transmitted long**.
+> `LONGS_1BIT` is not a default anywhere — it is one of twelve opt-in keywords.
+
+**NewPack Function** (`DebugDisplayUnit.pas:4158-4164`):
 ```pascal
 function TDebugDisplayForm.NewPack: integer;
 begin
-  if vPackAlt and not (NextNum and NextNum) then Exit;    // Alt mode: 2 nums per pack
-  if not NextNum then Exit;
   Result := val;
-  if vPackSignx then Result := SignExtend(Result);         // Sign-extend if needed
+  if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
+  if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
+  if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
 end;
 ```
+`NewPack` **does not read the element stream** — it begins `Result := val`, reusing the value the
+caller's `while NextNum do` already latched. It consumes nothing, advances nothing, and performs **no
+sign-extension**. Its only action is the optional `ALT` reordering. The three `vPackShift` guards are
+**cumulative**: at shift 1 **all three fire**, which is a full **within-byte bit reversal**
+(`$01 → $80`) — not a stage-1 adjacent-bit swap.
 
-**UnPack Function**:
+**UnPack Function** (`DebugDisplayUnit.pas:4166-4171`):
 ```pascal
 function TDebugDisplayForm.UnPack(var v: integer): integer;
 begin
-  Result := v and vPackMask;                   // Extract bits
-  if vPackSignx then Result := SignExtend(Result);
-  v := v shr vPackShift;                       // Shift for next sample
+  Result := v and vPackMask;                                        // Extract low sub-field FIRST
+  v := v shr vPackShift;                                            // THEN shift for next sample
+  if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then
+    Result := Result or ($FFFFFFFF xor vPackMask);                  // Conditional sign-extend
 end;
 ```
+Order matters: the low sub-field is masked out, `v` is shifted, and sign-extension happens **last** —
+gated on *both* `vPackSignx` **and** the sub-sample's own top bit being set.
+
+> **Correction (v55 re-ratification, 2026-07-14):** earlier revisions of this section listed a
+> `NewPack` that called `NextNum` and a `SignExtend()` helper, an unconditional sign-extend in
+> `UnPack`, and a "bit 16 = sign-extend flag" in `PackDef`. **All three were fabricated.** No
+> `SignExtend` function exists in `DebugDisplayUnit.pas`. The listings above are the v55 bodies.
 
 **Example** (8-bit packed in longs):
 ```
@@ -1945,13 +2184,34 @@ end;
 - Format: "X,Y" (origin at bottom-left of plot)
 - Rendered as custom cursor bitmap
 
-**Custom Cursor** (FormMouseMove, lines 737-775):
+**Custom Cursor** (`FormMouseMove`, lines 771-808):
 ```pascal
-CursorMask.Canvas.FillRect(Rect(0, 0, W, H));           // Black background
-CursorColor.Canvas.FillRect(Rect(0, 0, W, H));          // Transparent
-CursorColor.Canvas.TextOut(8, 8, Str);                   // Draw text
-// ... create cursor from bitmaps
+// Clear color bitmap
+CursorColor.Canvas.Brush.Color := clBlack;                   // COLOR bitmap → BLACK
+CursorColor.Canvas.FillRect(Rect(0, 0, CursorWidth, CursorHeight));
+// Clear mask bitmap
+CursorMask.Canvas.Brush.Color := clWhite;                    // MASK bitmap → WHITE
+CursorMask.Canvas.FillRect(Rect(0, 0, CursorWidth, CursorHeight));
+// If text present, add to bitmaps
+if Str <> '' then
+begin
+  // Draw text on color bitmap
+  CursorColor.Canvas.Brush.Color := WinRGB(vBackColor);
+  CursorColor.Canvas.Font.Color := WinRGB(vGridColor);
+  CursorColor.Canvas.TextRect(Rect(TextX, TextY, TextX + StrW, TextY + StrH), TextX, TextY, Str);
+  // Draw text rectangle on mask bitmap
+  CursorMask.Canvas.Brush.Color := clBlack;
+  CursorMask.Canvas.FillRect(Rect(TextX, TextY, TextX + StrW, TextY + StrH));
+end;
+// ... crosshair on both bitmaps (788-798), then CreateIconIndirect (799-808)
 ```
+Points to note:
+- The **color** bitmap is cleared to **black** and the **mask** bitmap to **white** (a white mask =
+  fully transparent; the mask is punched to black only where ink is drawn).
+- The readout text is drawn with **`TextRect`**, not `TextOut`, at the quadrant-dependent
+  `TextX, TextY` computed at 745-769 — not a fixed `(8, 8)`.
+- The text is painted in **`vGridColor` on a `vBackColor` box**.
+- Cursor construction spans **771-808**, ending at `Screen.Cursors[DebugCursor] := CreateIconIndirect(CursorInfo)`.
 
 **Send to P2** (key_pc_mouse command, lines 3537–3577):
 Transmits two LONGs. If the cursor is outside the client area, LONG 1 = `$03FFFFFF` and LONG 2 = `$FFFFFFFF`. Otherwise:
@@ -1997,48 +2257,66 @@ Note: transmits a **LONG** (4 bytes), not a byte.
 
 **Trigger**: `key_save` command
 
-**KeySave Method** (lines 2839–2866):
+**KeySave Method** (`DebugDisplayUnit.pas:2839-2866`) — verbatim:
 ```pascal
 procedure TDebugDisplayForm.KeySave;
+var
+  l, t, w, h: integer;
 begin
   if NextStr then Bitmap[1].SaveToFile(PChar(val) + '.bmp')
   else
   begin
-    // WINDOW or l/t/w/h variant: capture desktop region to DesktopBitmap
     if NextKey then
     begin
-      if val <> key_window then Exit;
-      // uses window Left/Top/Width/Height
-    end else
+      if val <> key_window then Exit;      // ← any OTHER keyword is EATEN, then Exit
+      l := Left;
+      t := Top;
+      w := Width;
+      h := Height;
+    end
+    else
     begin
-      // reads l, t, w, h parameters
+      if not KeyVal(l) then Exit;
+      if not KeyVal(t) then Exit;
+      if not KeyVal(w) then Exit;
+      if not KeyVal(h) then Exit;
     end;
+    DesktopBitmap.Width := w;
+    DesktopBitmap.Height := h;
+    BitBlt(DesktopBitmap.Canvas.Handle, 0, 0, w, h, DesktopDC, l, t, SRCCOPY);
     if NextStr then DesktopBitmap.SaveToFile(PChar(val) + '.bmp');
   end;
 end;
 ```
 
-**Format**: Windows BMP (24-bit)
+**Format**: Windows BMP (24-bit — `Bitmap[*].PixelFormat = pf24bit`, `FormCreate`:596-599)
 
-**Content**: `Bitmap[1]` (the display/front buffer) for the simple `SAVE 'name'` form. For the `SAVE WINDOW 'name'` or `SAVE l t w h 'name'` forms, saves a captured desktop region via `DesktopBitmap` (BitBlt from `DesktopDC`).
+**Content**: for the simple `SAVE 'name'` form, **`Bitmap[1]` — the FRONT buffer**. For the
+`SAVE WINDOW 'name'` / `SAVE l t w h 'name'` forms, a captured desktop region via `DesktopBitmap`
+(`BitBlt` from `DesktopDC`) — which **includes the title bar and borders** and can be **occluded** by
+other windows. See the full six-form grammar in the Directive Reference above; note that `SAVE`
+without a trailing filename captures to memory and writes **no file**, and a bare `SAVE` does nothing.
 
 **Example**:
 ```
-Command: "FFT `0 save "spectrum_capture""
-Result:  spectrum_capture.bmp created in current directory
+Command: ` "MyFFT SAVE 'spectrum_capture'"
+Result:  spectrum_capture.bmp written to the current directory (contents of Bitmap[1])
 ```
 
 ### 13.5 Window Position Feedback
 
-**Mouse Move** (FormMove):
+**Window Move** (`FormMove`, DebugDisplayUnit.pas:864-869):
 ```pascal
 procedure TDebugDisplayForm.FormMove(var Msg: TWMMove);
 begin
-  if CaptionPos then Exit;
-  Caption := IntToStr(Left) + ',' + IntToStr(Top);    // Show position
+  inherited;
+  Caption := CaptionStr + ' (' + IntToStr(Left) + ', ' + IntToStr(Top) + ')';
   CaptionPos := True;
 end;
 ```
+There is **no** `if CaptionPos then Exit;` guard — the caption is rewritten on **every** move message.
+The caption is the *original* caption (`CaptionStr`, latched by `SetCaption`:2873-2878) with
+` (left, top)` **appended** — not a bare `left,top`.
 
 **Restoration** (UpdateDisplay, lines 914-918):
 ```pascal
@@ -2059,12 +2337,17 @@ end;
 
 **Requirement**: Must be power of 2
 
-**Enforcement** (line 1576):
+**Enforcement** (`FFT_Configure`, lines 1576-1577):
 ```pascal
 FFTexp := Trunc(Log2(Within(val, 4, FFTmax)));
 vSamples := 1 shl FFTexp;
 ```
-- User input rounded to nearest power of 2
+- User input is first **clamped** to 4..2048 (`Within`), then the exponent is **truncated DOWN**
+  (`Trunc`) — the value is **not rounded to the nearest** power of two.
+- Worked consequences:
+  - `SAMPLES 1000` → `FFTexp = 9` → **512 samples** (not 1024)
+  - `SAMPLES 2047` → `FFTexp = 10` → **1024 samples**
+  - `SAMPLES 1024` → 1024 samples, bins 0..511 (`FFTlast := vSamples div 2 - 1`)
 - Minimum: 4 (2²)
 - Maximum: 2048 (2¹¹)
 
@@ -2077,8 +2360,8 @@ vSamples := 1 shl FFTexp;
 
 ### 14.2 Display Resolution
 
-**Default window size**: `vWidth × vHeight = 256 × 256` (from global `SetDefaults`,
-2880–2884 — `FFT_Configure` does not override them). Overridable by `SIZE w h`. The
+**Default window size**: `vWidth × vHeight = 256 × 256` (from global `SetDefaults`, **2880-2917** —
+`vWidth` at **2884**, `vHeight` at **2885**; `FFT_Configure` does not override them). Overridable by `SIZE w h`. The
 plot bitmap is `256 × 256`; the client window adds margins (`ChrWidth` left/right/bottom,
 `ChrHeight × 2` top — `SetSize` at 1617).
 
@@ -2223,14 +2506,17 @@ Frequency of bin k = k × (sampling_rate / vSamples)
 - Same configuration keywords (size, color, etc.)
 
 **Code Reuse**:
-- SCOPE_Configure (lines 1161-1213) similar to FFT_Configure
-- SCOPE_Update (lines 1215-1269) similar to FFT_Update
-- SCOPE_Draw (lines 1271-1363) different algorithm (no FFT)
+- `SCOPE_Configure` (**1151-1207**) similar to `FFT_Configure`
+- `SCOPE_Update` (**1209-1337**) similar to `FFT_Update`
+- `SCOPE_Draw` (**1339-1364**) different algorithm (no FFT)
+- SCOPE additionally has `SCOPE_Range` (**1366-1384**); FFT has no auto-ranging.
 
 ### 15.2 vs. SPECTRO (dis_spectro = 4)
 
 **SPECTRO**:
-- Waterfall display (time on Y-axis, frequency on X-axis)
+- Waterfall display. **At the default `vTrace = $F` (bit 2 set) there is no W/H swap ⇒ time on the
+  X-axis, frequency on the Y-axis** (the swap at `SPECTRO_Configure`:1782-1787 applies to traces 0-3
+  only). Do not state the mapping without naming the trace.
 - Continuous scrolling (shows FFT history)
 - Color-coded magnitude (luma or HSV)
 - Optional phase display (HSV hue = phase)
@@ -2245,7 +2531,7 @@ Frequency of bin k = k × (sampling_rate / vSamples)
 - Same FFT configuration (samples, mag, range)
 - Pre-computed lookup tables
 
-**SPECTRO Implementation** (lines 1719-1857):
+**SPECTRO Implementation** (`SPECTRO_Configure` 1719, `SPECTRO_Update` 1792, `SPECTRO_Draw` 1836-1862):
 ```pascal
 procedure TDebugDisplayForm.SPECTRO_Update;
 // ... similar to FFT_Update
@@ -2396,44 +2682,65 @@ end;
 
 **ASCII Debug Command** (from Propeller 2):
 ```spin2
-debug(`FFT SIZE 256 128 RATE 128 DOTSIZE 2 LOGSCALE TITLE "Audio Spectrum")
+debug(`FFT MyFFT SIZE 256 128 RATE 128 DOTSIZE 2 LOGSCALE TITLE 'Audio Spectrum')
 ```
-Note: `LUMA8X` is **not** a valid FFT directive — it belongs to SPECTRO only. FFT does not accept color-mode keywords.
+Notes:
+- The **instance name** (`MyFFT`) is mandatory on a create — it lands in `Value[1]` and is what later
+  messages address the window by. Strings are **single-quoted**.
+- `LUMA8X` is **not** a valid FFT directive — it belongs to SPECTRO only. FFT accepts no colour-mode keywords.
 
-**Resulting Element Array** (conceptual representation):
+**Resulting Element Array** — `Value[0]` is the display type and `Value[1]` the window name;
+`FFT_Configure` begins at **`ptr := 2`** (`FormCreate`:632):
 ```
-Type:  [ele_key]  [ele_num] [ele_num] [ele_key]  [ele_num] [ele_key]    [ele_num] [ele_key]    [ele_key]   [ele_str]        [ele_end]
-Value: [key_size] [256]     [128]     [key_rate]  [128]    [key_dotsize] [2]      [key_logscale] [key_title] ["Audio Spectrum"] [0]
-Index: [0]        [1]       [2]       [3]         [4]      [5]           [6]      [7]            [8]         [9]               [10]
+DebugDisplayType[0] = 1                  → create  (DebugUnit.pas:224)
+
+[0]  value = 3                           (display type: dis_fft)
+[1]  value = ptr to "MyFFT"              (window name → caption "MyFFT - FFT")
+[2]  type=ele_key, value=key_size        ← FFT_Configure starts here (ptr := 2)
+[3]  type=ele_num, value=256
+[4]  type=ele_num, value=128
+[5]  type=ele_key, value=key_rate
+[6]  type=ele_num, value=128
+[7]  type=ele_key, value=key_dotsize
+[8]  type=ele_num, value=2
+[9]  type=ele_key, value=key_logscale
+[10] type=ele_key, value=key_title
+[11] type=ele_str, value="Audio Spectrum"
+[12] type=ele_end
 ```
 
 **Parsing Sequence**:
 ```pascal
-// ptr=0: FFT_Configure starts
-while NextKey do                    // ptr=0: ele_key → val=key_size, ptr→1
+// FormCreate: DisplayType := Value[0];  SetCaption(PChar(Value[1]) + ' - FFT');  SetDefaults;  ptr := 2;
+while NextKey do                    // ptr=2: ele_key → val=key_size, ptr→3
   case val of
     key_size:
-      KeySize(vWidth, vHeight, ...); // consumes two ele_num values (256, 128)
-    key_rate:                        // ptr=3: ele_key → val=key_rate, ptr→4
-      KeyValWithin(vRate, 1, FFTmax); // ptr=4: ele_num → val=128, ptr→5
-    key_dotsize:                     // ptr=5: ele_key → val=key_dotsize, ptr→6
-      KeyValWithin(vDotSize, 0, 32); // ptr=6: ele_num → val=2, ptr→7
-    key_logscale:                    // ptr=7: ele_key, ptr→8
+      KeySize(vWidth, vHeight, ...); // consumes two ele_num values (256, 128) → ptr→5
+    key_rate:                        // ptr=5: ele_key → val=key_rate, ptr→6
+      KeyValWithin(vRate, 1, FFTmax); // ptr=6: ele_num → val=128, ptr→7
+    key_dotsize:                     // ptr=7: ele_key → val=key_dotsize, ptr→8
+      KeyValWithin(vDotSize, 0, 32); // ptr=8: ele_num → val=2, ptr→9
+    key_logscale:                    // ptr=9: ele_key, ptr→10
       vLogScale := True;
-    key_title:                       // ptr=8: ele_key, ptr→9
-      KeyTitle;                      // ptr=9: ele_str consumed, ptr→10
+    key_title:                       // ptr=10: ele_key, ptr→11
+      KeyTitle;                      // ptr=11: ele_str consumed → SetCaption, ptr→12
   end;
-// ptr=10: NextKey returns False (ele_end found)
+// NextKey returns False at ele_end → loop exits, PrepareFFT runs
 ```
 
 ### 16.5 Data Update Example
 
 **Propeller 2 Code** (sending 4 samples):
 ```spin2
-' Pack 4 samples using LONGS_8BIT mode
+' Window was created with LONGS_8BIT declared:  debug(`FFT MyFFT LONGS_8BIT ...)
+' Pack 4 samples into one long
 packed := sample1 | (sample2 << 8) | (sample3 << 16) | (sample4 << 24)
-debug(`FFT `UDEC_(packed))
+debug(`MyFFT `UDEC_(packed))       ' feed by INSTANCE NAME, not by display type
 ```
+(Packing is **configure-only** — `KeyPack` is reachable only from `FFT_Configure`'s
+`key_longs_1bit..key_bytes_4bit` arm (1598-1599). It cannot be changed on a live window. If no packing
+keyword was declared, the default is **unpacked**: `SetPack(0, …)` ⇒ `vPackCount = 1`,
+`vPackShift = 32`, `vPackMask = $FFFFFFFF` — one full 32-bit sample per long.)
 
 **Element Array**:
 ```
@@ -2648,7 +2955,7 @@ Example (512×256):
 
 ### 18.2 BitmapToCanvas Method
 
-**DebugDisplayUnit.pas:3514-3522**:
+**DebugDisplayUnit.pas:3522-3530**:
 ```pascal
 procedure BitmapToCanvas(Level: integer);
 begin
@@ -2695,7 +3002,7 @@ end;
 
 ### 18.4 Scanline Access for Direct Pixel Manipulation
 
-**Fast Pixel Writing** (PlotPixel, DebugDisplayUnit.pas:3425-3436):
+**Fast Pixel Writing** (PlotPixel, DebugDisplayUnit.pas:3433-3444):
 ```pascal
 procedure PlotPixel(p: integer);
 var
@@ -2779,9 +3086,20 @@ Unpack 4: $12 (extract bits 0-7,  shift right 8)  → result=$12
 
 **Shared By**: FFT, SPECTRO, BITMAP, PLOT (color-based displays).
 
-FFT itself does **not** call `TranslateColor` for its channel curves — trace colors are
-stored pre-resolved as RGB24 in `vColor[]` (set by `KeyColor` at configure, or from the
-default palette below).
+**`TranslateColor` IS on FFT's path** — via `KeyColor` (2752-2784), which every `COLOR` / channel-def
+colour goes through:
+- a **named** colour (`BLACK`..`GRAY`) resolves through `TranslateColor(h shl 5 or p shl 1, key_rgbi8x)` (2775);
+- a **numeric** colour resolves through `TranslateColor(val, vColorMode)` (**2780**) — i.e. it is
+  interpreted through the **current colour mode**, not blindly as literal RGB24.
+
+For FFT the *effect* is a pass-through, but only because FFT accepts **no colour-mode keyword**, so
+`vColorMode` keeps its global default `key_rgb24` (`SetDefaults`:2889) and `TranslateColor`'s
+`key_rgb24` arm is `p := p and $00FFFFFF` (3169-3170). The values land in `vColor[]` already resolved
+to RGB24; what is *not* true is that FFT bypasses `TranslateColor`.
+
+Note also (`KeyColor`:2764-2768): **`BLACK` and `WHITE` take no brightness nibble** — they are fixed
+literals. The optional 0-15 nibble (default 8) applies only to `ORANGE`..`GRAY`. Trap: writing
+`BLACK 8` leaves the `8` in the element stream for the *next* `KeyColor` to consume as a numeric colour.
 
 #### 19.2.1 Default Channel Colors
 
@@ -2809,7 +3127,8 @@ they are not VCL palette `TColor`s. `WinRGB` swaps R↔B to BGR only at GDI draw
 
 ### 19.3 Fixed-Point Arithmetic
 
-**8.8 Format** (8 integer bits, 8 fractional bits):
+**32-bit integer with 8 fractional bits** (value = pixels × 256; 1 px = `$100`). The source comment at
+3837 reads *"x/y/radius in 256th's"*.
 ```pascal
 fixed_value := integer_value shl 8;    // Convert to fixed-point
 pixel := fixed_value shr 8;            // Convert back to integer
@@ -2818,6 +3137,9 @@ pixel := fixed_value shr 8;            // Convert back to integer
 **Used For**: Sub-pixel positioning in rendering (SmoothLine, SmoothDot).
 
 **Precision**: 1/256 pixel ≈ 0.004 pixels.
+
+**Range**: bounded by the bitmap, not by 16 bits — up to `2048 shl 8 = 524288` (`SmoothFillMax` = 2048).
+Do not describe this as "8.8 with a 0..65535 range."
 
 ### 19.4 FFT Functions (Shared by FFT and SPECTRO)
 
@@ -2862,8 +3184,10 @@ ptr := 0;  // Element array pointer
 
 **4. FFT_Configure Called** (from DebugUnit):
 ```pascal
-DisplayType := DebugDisplayValue[0];    // Extract display type (dis_fft=3)
-ptr := 2;                               // Skip past type and title
+DisplayType := P2.DebugDisplayValue[0];                                    // display type (dis_fft = 3)
+SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType]); // "<name> - FFT"
+SetDefaults;                            // global defaults, incl. SetPack(0,False,False) = UNPACKED
+ptr := 2;                               // Skip past Value[0] (type) and Value[1] (window NAME)
 case DisplayType of
   dis_fft: FFT_Configure;
 end;

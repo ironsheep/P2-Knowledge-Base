@@ -2,6 +2,9 @@
 
 **Current as of**: PNut v55 for Propeller 2
 **Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Re-grounded against raw v55 Pascal**: 2026-07-14 — polar/log-scale orientation math, defaults
+(`SIZE`/`SAMPLES`/packing), the `ClearBitmap` graticule, buffer ownership, `SAVE`/`CLOSE` grammar,
+and all line citations. See `DOCs/investigations/conflict-audit/CANONICAL-FACTS.md`.
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
@@ -39,10 +42,11 @@ The **SCOPE_XY** display window is a specialized XY plotter for the Propeller 2 
 **Key Features**:
 - **Dual coordinate systems**: Cartesian (X/Y) and polar (rho/theta)
 - **Logarithmic scaling**: Optional log-scale for wide dynamic range
-- **Persistent mode**: Accumulating display (vSamples = 0)
-- **Fading mode**: Trails with opacity decay (vSamples > 0)
+- **Persistent mode**: Accumulating display (`SAMPLES 0` — must be requested explicitly)
+- **Fading mode**: Trails with opacity decay (vSamples > 0) — **the default, 256 samples**
+- **Polar orientation**: θ = 0 points **East**; increasing θ rotates **counter-clockwise**
 - **Up to 8 independent traces**
-- **Circular sample buffer** (2048 sample pairs per trace)
+- **Circular sample buffer** (2048 sample pairs per trace, per window)
 - **Rate limiting** for display update control
 - **Anti-aliased dot rendering**
 
@@ -166,7 +170,8 @@ XY_SampleBuff: 2048 sets × 16 integers × 4 bytes/int = 131,072 bytes = 128 KB
 ```
 (Each integer is 32-bit regardless of bitmap pixel format.)
 
-**Source Locations**: Lines 171-174 in DebugDisplayUnit.pas
+**Source Locations**: `Channels` = line **157**; `XY_Elements`/`XY_SetSize`/`XY_Sets`/`XY_PtrMask` =
+lines **171-174** in DebugDisplayUnit.pas. (`DataSets = 1 shl 11 = 2048`, lines 154-155.)
 
 ### 3.3 Size Constraints
 
@@ -185,10 +190,13 @@ scope_xy_wmax = SmoothFillMax;           // Maximum size (2048)
 // From SCOPE_XY_Configure (lines 1388-1392) — SCOPE_XY-specific overrides only
 vRange       := $7FFFFFFF;       // Default range (max 32-bit signed)
 vRate        := 1;               // Default rate divisor
-vDotSize     := 6;               // Default dot diameter (larger than SCOPE)
+vDotSize     := 6;               // Default dot-size scalar (passed to SmoothDot as vDotSize shl 6)
 vTextSize    := FontSize;        // Default label font size (global FontSize, default 10)
-// NOTE: vSamples is NOT reset here; it inherits 256 from SetDefaults (line 2886).
-// Effective default: 256-sample fading trail (NOT persistent/0).
+// NOT reset here — inherited from SetDefaults (2880-2917):
+//   vSamples := 256    (2886)  ⇒ effective default is a 256-sample FADING trail, NOT persistent
+//   vWidth   := 256    (2884)  ⇒ 256 × 256 px display ⇒ equivalent to `SIZE 128`
+//   vHeight  := 256    (2885)
+//   SetPack(0, False, False) (2915) ⇒ UNPACKED (one full 32-bit sample per long)
 ```
 
 ---
@@ -231,7 +239,8 @@ x := XY_SampleBuff[ptr + 0];
 y := XY_SampleBuff[ptr + 1];
 ```
 
-**Source Location**: Line 362
+**Source Location**: Line 362 — declared inside `TDebugDisplayForm`'s `private` section, so it is a
+**per-window instance field**, not a shared static global (see §20.4).
 
 ### 4.2 Configuration Variables
 
@@ -240,9 +249,9 @@ vRange          : integer;       // Value range for scaling (1 to $7FFFFFFF)
 vScale          : extended;      // Scale factor: vScale = (width/2) / vRange
 vPolar          : boolean;       // True = polar coords, False = Cartesian
 vLogScale       : boolean;       // True = logarithmic scale, False = linear
-vSamples        : integer;       // Fade buffer depth (0 = persistent, >0 = fading)
-vTwoPi          : integer;       // Full circle value for polar mode
-vTheta          : integer;       // Angular offset for polar mode
+vSamples        : integer;       // Fade buffer depth (0 = persistent, >0 = fading); default 256
+vTwoPi          : int64;         // Full circle value for polar mode (line 315 — must hold ±$100000000)
+vTheta          : integer;       // Angular offset for polar mode (line 316)
 vLabel          : array[0..Channels - 1] of string;
 vColor          : array[0..Channels - 1] of integer;
 ```
@@ -267,21 +276,32 @@ vScale := vWidth / 2 / vRange;
 - `True`: Logarithmic scale (useful for wide dynamic range)
 
 **vSamples**: Display persistence mode
-- `0`: Persistent (accumulating) display
-- `>0`: Fading display with opacity decay
+- `0`: Persistent (accumulating) display — **must be requested explicitly**
+- `>0`: Fading display with opacity decay — **this is the default (256)**
+
+**vTwoPi**: `int64` (line 315), *not* `integer` — `KeyTwoPi` assigns `±$100000000` (2739/2744/2745),
+which does not fit a 32-bit signed integer. `POLAR -1` stores the **negative** constant, reversing
+the sense of rotation.
 
 ### 4.3 Display State Variables
 
 ```pascal
-vWidth          : integer;       // Display width (= height for square display)
-vHeight         : integer;       // Display height (= width)
-vBitmapWidth    : integer;       // Bitmap width (same as vWidth)
-vBitmapHeight   : integer;       // Bitmap height (same as vHeight)
+vWidth          : integer;       // Display (plot-area) width  — = height, square
+vHeight         : integer;       // Display (plot-area) height — = width
+vBitmapWidth    : integer;       // = ClientWidth  = vMarginLeft + vWidth  + vMarginRight  = vWidth  + 4*ChrHeight
+vBitmapHeight   : integer;       // = ClientHeight = vMarginTop  + vHeight + vMarginBottom = vHeight + 4*ChrHeight
 vRate           : integer;       // Rate divisor
 vRateCount      : integer;       // Current rate counter
-vDotSize        : integer;       // Dot diameter in pixels
+vDotSize        : integer;       // Dot-size scalar; passed to SmoothDot as `vDotSize shl 6` (256ths)
 vIndex          : integer;       // Number of active traces
 ```
+
+> ⚠️ **`vBitmapWidth`/`vBitmapHeight` are NOT `vWidth`/`vHeight`.** `SCOPE_XY_Configure` (1440) calls
+> `SetSize(ChrHeight*2, ChrHeight*2, ChrHeight*2, ChrHeight*2)`; SCOPE_XY takes `SetSize`'s
+> non-`[dis_spectro, dis_plot, dis_bitmap]` branch (2954-2964), so the bitmaps are allocated at
+> `ClientWidth × ClientHeight` — the plot area **plus all four margins**. The centering at 1542-1543
+> centers on the *bitmap*, which coincides with the plot-area centre only because the four margins
+> are equal.
 
 ---
 
@@ -298,20 +318,28 @@ Accepted during `SCOPE_XY_Configure` (lines 1386–1441).
 |---|---|---|---|---|---|
 | `TITLE` | `TITLE 'str'` | `"<name> - SCOPE_XY"` (FormCreate:626) | — | `1398-1399` | Window caption |
 | `POS` | `POS left top` | host origin ≈(0,210), no cascade | offset from host origin (KeyPos:2712-2716) | `1400-1401` | |
-| `SIZE` | `SIZE val` | 256 (→ 512 px) | 16..1024 (→ 32..2048 px) | `1402-1406` | **One value only (square).** `vWidth = val*2; vHeight = vWidth`. |
+| `SIZE` | `SIZE radius` | **128** — i.e. `vWidth = vHeight = 256 px` from `SetDefaults`:2884-2885 (SCOPE_XY_Configure sets **no** size default) | argument 16..1024 ⇒ display 32..2048 px | `1402-1406` | **One value only (square).** `vWidth = Within(val*2, 32, 2048); vHeight = vWidth`. The clamp is applied to `val*2`. |
 | `RANGE` | `RANGE n` | `$7FFFFFFF` | 1..`$7FFFFFFF` | `1407-1408` | Coordinate extent; both axes |
-| `SAMPLES` | `SAMPLES n` | `256` (from `SetDefaults` line 2886) | 0..2048 | `1409-1410` | `0` = persistent (no buffer); `>0` = fading trail depth; SCOPE_XY_Configure does NOT reset this |
-| `RATE` | `RATE n` | `1` | 1..2048 | `1411-1412` | Display update divisor |
-| `DOTSIZE` | `DOTSIZE n` | `6` | 2..20 | `1413-1414` | Dot diameter in pixels |
+| `SAMPLES` | `SAMPLES n` | `256` (from `SetDefaults` line 2886) | 0..2048 (`XY_Sets`) | `1409-1410` | `0` = persistent (no buffer); `>0` = fading trail depth. **The default is 256 = FADING, not persistent** — SCOPE_XY_Configure does NOT reset this |
+| `RATE` | `RATE n` | `1` | 1..2048 (`XY_Sets`) | `1411-1412` | Display update divisor |
+| `DOTSIZE` | `DOTSIZE n` | `6` | 2..20 | `1413-1414` | Dot-size scalar. Passed as `vDotSize shl 6` (i.e. `n × 64` in 256ths) to `SmoothDot`'s `radius` argument (1544). **Rendered pixel width: NEEDS-HARDWARE** — see §9.3. |
 | `TEXTSIZE` | `TEXTSIZE n` | `FontSize` (default 10) | 6..200 | `1415-1416` | Label font size |
 | `COLOR` | `COLOR back grid` | Black / Gray | RGB24 | `1417-1419` | Background then grid color |
-| `POLAR` | `POLAR {twopi {theta}}` | Off | — | `1420-1421` | Enables polar (rho, theta) mode; see §6.2 |
+| `POLAR` | `POLAR {twopi {theta}}` | Off | — | `1420-1421` | Enables polar (rho, theta) mode; **θ = 0 → East, increasing θ → CCW**; see §6.2 |
 | `LOGSCALE` | `LOGSCALE` | Off (linear) | — | `1422-1423` | Logarithmic scale on both axes |
 | `HIDEXY` | `HIDEXY` | Off | — | `1424-1425` | Suppresses on-screen measurement cursor; does **not** block `PC_MOUSE` |
-| Packing | `LONGS_1BIT`…`BYTES_4BIT` | `LONGS_1BIT` | 12 modes | `1426-1427` | Sub-sample packing density |
-| *label string* | `'label' {color}` | — | up to 8 traces | `1429-1434` | One string per trace; optional RGB24 color follows |
+| Packing | `LONGS_1BIT`…`BYTES_4BIT` `{ALT} {SIGNED}` | **UNPACKED** — `SetPack(0, False, False)` (`SetDefaults`:2915) ⇒ `vPackCount=1`, `vPackShift=32`, `vPackMask=$FFFFFFFF` = one full 32-bit sample per long | 12 opt-in modes | `1426-1427` | Sub-sample packing density. **`LONGS_1BIT` is NOT the default** — it is one of the twelve opt-in keys. |
+| *label string* | `'label' {color}` | — | up to 8 traces | `1429-1434` | One string per trace; optional RGB24 color follows. Labels are drawn in the four corners by `ClearBitmap` (§9.4). |
 
-**SIZE specifics**: `SIZE` takes **one** numeric value (the half-width / radius). The window width and height are both set to `val * 2`, enforcing a square display. Minimum stored width = 32 px, maximum = `SmoothFillMax` (2048 px). Pascal: `vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax); vHeight := vWidth` (lines 1404–1405).
+**SIZE specifics**: `SIZE` takes **one** numeric value, a **radius** (half-width). The window width and
+height are both set to `val * 2`, enforcing a square display. Pascal:
+`vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax); vHeight := vWidth` (lines 1404-1405).
+The `Within` clamp is applied to the **doubled** value, with `scope_xy_wmin = 32` (215) and
+`scope_xy_wmax = SmoothFillMax = DataSets = 2048` (216, 208, 154-155) — so the **display** is clamped to
+**32..2048 px**, and the usable radius argument is **16..1024**. There is no `scope_xy_hmin`/`_hmax`
+constant; the height is simply copied from the width (1405). *A 4096-px display is not reachable.*
+With no `SIZE` directive at all, `vWidth`/`vHeight` remain **256** from `SetDefaults` (2884-2885) —
+equivalent to `SIZE 128`.
 
 **POLAR specifics**: Calling `POLAR` invokes `KeyTwoPi` which sets `vPolar := True`, `vTwoPi := $100000000` (2³²), `vTheta := 0`. An optional first numeric argument overrides `vTwoPi` (pass `0` or `-1` for ±2³² default; any other value sets degrees/custom units). An optional second argument sets `vTheta` (angular offset). Examples:
 ```
@@ -321,7 +349,12 @@ POLAR 360 90       → vTwoPi=360, vTheta=90
 POLAR -1           → vTwoPi=-$100000000 (clockwise)
 ```
 
-**SAMPLES 0 = persistent display**: Points are never cleared; they accumulate on the bitmap until a `CLEAR` command. No circular buffer is used in persistent mode.
+**SAMPLES 0 = persistent display**: Points are never cleared; they accumulate on the bitmap until a `CLEAR` command. No circular buffer is used in persistent mode. **This is not the default** — `vSamples` is 256 (fading) unless you write `SAMPLES 0`.
+
+> ⚠️ **Footgun — a bare number in the create message hangs the parse.** SCOPE_XY_Configure's loop is
+> `while not NextEnd do begin if NextKey then … else if NextStr then … end;` (1394-1435). An `ele_num`
+> that is not consumed by a preceding key or label matches **neither** branch, so `ptr` never advances
+> and `NextEnd` never becomes true. Numbers must always follow the directive (or label) that consumes them.
 
 ### Display / data directives
 
@@ -330,12 +363,18 @@ Accepted during `SCOPE_XY_Update` (lines 1443–1509).
 | Directive | Pascal lines | Notes |
 |---|---|---|
 | *numeric data stream* | 1469–1507 | Packed XY (or rho/theta) pairs; one pair per active trace per sample set |
-| `CLEAR` | 1454–1460 | Clears bitmap, resets `SamplePop` and `vRateCount` |
-| `SAVE {filename}` | 1461–1462 | Saves current bitmap to `.bmp` |
+| `CLEAR` | 1454–1460 | Clears bitmap (redrawing the graticule, §9.4), resets `SamplePop` and `vRateCount` |
+| `SAVE 'name'` | 1461–1462 → `KeySave` 2843 | Saves `Bitmap[1]` (the **display buffer**) to `name.bmp` |
+| `SAVE WINDOW 'name'` | `KeySave` 2846-2864 | Desktop **scrape** of the window's *outer* rect (includes title bar/borders; vulnerable to occlusion) → `name.bmp` |
+| `SAVE left top width height 'name'` | `KeySave` 2854-2864 | Desktop scrape of an arbitrary screen region → `name.bmp` |
+| `SAVE WINDOW` / `SAVE l t w h` *(no name)* | `KeySave` 2861-2864 | Captures to memory only — **writes no file** |
+| `SAVE` *(bare)* | `KeySave` 2846-2848 | `Exit` — **does nothing**. A non-`WINDOW` keyword after `SAVE` is consumed and then discarded (2848), so `` SAVE CLEAR `` does nothing **and eats the CLEAR**. |
+| `CLOSE` | *(no `_Update` case arm — dispatched at the PARSER layer)* | Closes the window. Handled in `p2com.asm` (19565-19572 detect; 19613-19624 revert the name symbol and clear the display's bit in `debug_display_ena`), then `TDebugForm.ChrIn` (`DebugUnit.pas`:236-237) runs the **full** `UpdateDisplay` and only afterwards closes the form. ⇒ **update-first, close-second**: `` `MyXY SAVE 'shot' CLOSE `` saves, *then* closes. Command-only (ignored in a new-display declaration); multi-target; reclaims one of the 32 display slots. |
 | `PC_KEY` | 1463–1464 | Returns latched key byte to P2 (`SendKeyPress`, 3579–3583) |
 | `PC_MOUSE` | 1465–1466 | Returns cursor position + buttons + color to P2 (`SendMousePos`, 3537–3577) |
 
-*Strings in the update phase break the sample loop (`NextStr` → `Break`, line 1451).*
+*Strings in the update phase break the sample loop (`NextStr` → `Break`, line 1451). The `SAVE` filename
+is therefore consumed by `KeySave` itself, not by the update loop.*
 
 ### Keyboard & mouse
 
@@ -427,21 +466,21 @@ end;
 |-----------|---------|---------|-------|---------|
 | Title | `TITLE 'string'` | `"<name> - SCOPE_XY"` | - | Window title (caption set in FormCreate) |
 | Position | `POS x y` | host origin ≈(0,210), no cascade | offset from host origin | Window position |
-| Size | `SIZE radius` | 256 | 16-1024 | Display radius (width = height = radius × 2) |
+| Size | `SIZE radius` | **128** (⇒ 256×256 px display, from `SetDefaults` 2884-2885) | argument 16-1024 ⇒ display 32-2048 px | Display radius (width = height = radius × 2) |
 | Range | `RANGE value` | $7FFFFFFF | 1-$7FFFFFFF | Coordinate system extent |
-| Samples | `SAMPLES count` | 256 (from `SetDefaults`) | 0-2048 | Fade buffer depth (0=persistent, >0=fading); SCOPE_XY_Configure does not reset this |
+| Samples | `SAMPLES count` | 256 (from `SetDefaults`) — **fading, not persistent** | 0-2048 | Fade buffer depth (0=persistent, >0=fading); SCOPE_XY_Configure does not reset this |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
-| Dot Size | `DOTSIZE pixels` | 6 | 2-20 | Dot diameter |
+| Dot Size | `DOTSIZE n` | 6 | 2-20 | Dot-size scalar → `SmoothDot(…, vDotSize shl 6, …)`. Rendered width **NEEDS-HARDWARE** |
 | Text Size | `TEXTSIZE size` | 10 (`FontSize`) | 6-200 | Label font size |
 | Colors | `COLOR back grid` | Black/Gray | RGB24 | Background and grid colors |
-| Polar | `POLAR {twopi {theta}}` | - | - | Enable polar coordinates |
+| Polar | `POLAR {twopi {theta}}` | - | - | Enable polar coordinates (θ=0 East, CCW) |
 | Log Scale | `LOGSCALE` | Linear | - | Enable logarithmic scaling |
-| Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
-| Packing | `LONGS_1BIT` etc. | LONGS_1BIT | 12 modes | Data packing format |
+| Hide XY | `HIDEXY` | Show | - | Hide on-screen measurement cursor |
+| Packing | `LONGS_1BIT` etc. | **UNPACKED** (`SetPack(0,…)`, 2915) | 12 opt-in modes | Data packing format |
 
 ### 5.3 Size Parameter Special Handling
 
-**Code** (lines 1403-1406):
+**Code** (lines 1402-1406):
 ```pascal
 key_size:
 begin
@@ -453,11 +492,15 @@ end;
 **Behavior**:
 - User specifies **radius** (half of display size)
 - System calculates **width = height = radius × 2**
-- Enforces square display
+- The clamp is applied to `val * 2` ⇒ **display 32..2048 px**, usable radius argument **16..1024**
+- Enforces square display (`vHeight := vWidth`; there is no separate height constant)
 
 **Example**:
 ```
-SIZE 256  →  vWidth = 512, vHeight = 512 (512×512 display)
+SIZE 256   →  vWidth = 512, vHeight = 512     (512×512 display)
+SIZE 5     →  vWidth = Within(10, 32, 2048) = 32   (clamped up to the 32 px minimum)
+SIZE 4000  →  vWidth = Within(8000, 32, 2048) = 2048 (clamped down to the 2048 px maximum)
+(no SIZE)  →  vWidth = vHeight = 256          (SetDefaults; == SIZE 128)
 ```
 
 ### 5.4 Scale Factor Calculation
@@ -531,15 +574,22 @@ Y := Round(y * vScale * $100);
 
 **Log Scale**:
 ```pascal
-Rf := (Log2(Hypot(x, y) + 1) / Log2(vRange + 1)) * (width / 2);
-Tf := ArcTan2(x, y);
-X := Round(Rf * cos(Tf) * $100);
-Y := Round(Rf * sin(Tf) * $100);
+Rf := (Log2(Hypot(x, y) + 1) / Log2(Int64(vRange) + 1)) * (vWidth div 2);
+Tf := ArcTan2(x, y);          // NOTE: Delphi's ArcTan2(Y, X) — the args are DELIBERATELY swapped,
+                              //       so Tf is measured from the +Y axis: sin(Tf) = x/hypot, cos(Tf) = y/hypot
+SinCos(Tf, Xf, Yf);           // Delphi SinCos is SINE-FIRST: Xf = sin(Tf), Yf = cos(Tf)
+X := Round(Rf * Xf * $100);   // = Rf × sin(Tf) = Rf × x/hypot
+Y := Round(Rf * Yf * $100);   // = Rf × cos(Tf) = Rf × y/hypot
 ```
 
 - Converts (x, y) to polar
 - Applies log scale to radius
 - Converts back to Cartesian for plotting
+
+> ⚠️ **The two swaps cancel.** `ArcTan2` is called with its arguments swapped **and** `SinCos`
+> returns sine in the first out-param. The net effect is that the plotted point keeps the
+> **original direction** of `(x, y)` — only the radius is log-compressed. This is not a bug and
+> it is *not* equivalent to the naive `x = R·cos(atan2(y,x))` form. (SCOPE_XY_Plot, 1519-1523.)
 
 ### 6.2 Polar Coordinates
 
@@ -549,7 +599,7 @@ Y := Round(Rf * sin(Tf) * $100);
 - First value: rho (radius, 0 to vRange)
 - Second value: theta (angle in vTwoPi units)
 
-**Configuration** (KeyTwoPi, lines 2728-2742):
+**Configuration** (KeyTwoPi, lines 2736-2750):
 ```pascal
 vPolar := True;
 vTwoPi := $100000000;         // Default full circle value (2^32)
@@ -584,47 +634,65 @@ end;
 ```pascal
 Rf := rho * vScale;
 Tf := Pi / 2 - (theta + vTheta) / vTwoPi * Pi * 2;
-x := Round(Rf * cos(Tf) * $100);
-y := Round(Rf * sin(Tf) * $100);
+SinCos(Tf, Xf, Yf);          // SINE-FIRST: Xf = sin(Tf), Yf = cos(Tf)
+x := Round(Rf * Xf * $100);  // = Rf × sin(Tf)
+y := Round(Rf * Yf * $100);  // = Rf × cos(Tf)
 ```
 
 **Log Scale**:
 ```pascal
-Rf := (Log2(rho) / Log2(vRange)) * (width / 2);
+if rho <> 0 then Rf := (Log2(rho) / Log2(vRange)) * (vWidth div 2) else Rf := 0;
 Tf := Pi / 2 - (theta + vTheta) / vTwoPi * Pi * 2;
-x := Round(Rf * cos(Tf) * $100);
-y := Round(Rf * sin(Tf) * $100);
+SinCos(Tf, Xf, Yf);
+x := Round(Rf * Xf * $100);  // = Rf × sin(Tf)
+y := Round(Rf * Yf * $100);  // = Rf × cos(Tf)
 ```
 
 **Angle Conversion**:
 ```
-theta_radians = π/2 - (theta + vTheta) / vTwoPi × 2π
+Tf = π/2 - φ,   where φ = (theta + vTheta) / vTwoPi × 2π
+x  = Rf × sin(Tf) = Rf × cos(φ)     ← horizontal offset from centre, +x = right
+y  = Rf × cos(Tf) = Rf × sin(φ)     ← vertical  offset from centre, +y = UP (y is subtracted at 1543)
 ```
 
 - `vTheta`: Angular offset (rotation)
 - `vTwoPi`: Full circle value
-- `π/2 -`: Converts from mathematical angle (0° = right) to display angle (0° = up)
+- **`SinCos` is sine-first.** Delphi's `Math.SinCos(Theta; var Sin, Cos)` returns the **sine** in the
+  first out-param, so `Xf = sin(Tf)` and `Yf = cos(Tf)` (1538-1540) — **not** cos/sin.
+- Combined with the `π/2 −` term this collapses to the plain math orientation:
+  **θ = 0 plots EAST (right)**, and increasing θ rotates **counter-clockwise**
+  (θ = ¼ circle → up, ½ → left, ¾ → down). The `π/2 −` does **not** put θ = 0 "straight up";
+  it exists precisely to cancel the sine-first output back into standard orientation.
+- Corroboration: the inverse (readout) mapping in `FormMouseMove` (line 708) uses the standard
+  `Tf := ArcTan2(ScaledY, ScaledX) / (Pi * 2)` — 0 = East, CCW positive. SCOPE_XY and PLOT agree;
+  they do **not** use different polar conventions.
+- `POLAR -1` (`vTwoPi := -$100000000`, KeyTwoPi:2744) negates the divisor and therefore **reverses**
+  the sense of rotation to clockwise.
 
 ### 6.3 Logarithmic Scaling
 
 **Purpose**: Visualize wide dynamic range (e.g., 1 to 1,000,000).
 
-**Cartesian Log Scale**:
+**Cartesian Log Scale** (1519-1523):
 ```
-radius = log2(sqrt(x² + y²) + 1) / log2(range + 1) × (width / 2)
-angle = atan2(x, y)
-plot_x = radius × cos(angle)
-plot_y = radius × sin(angle)
+radius = log2(sqrt(x² + y²) + 1) / log2(range + 1) × (vWidth div 2)
+Tf     = ArcTan2(x, y)                 // args swapped vs. Delphi's ArcTan2(Y, X)
+plot_x = radius × sin(Tf)   = radius × x / hypot(x, y)
+plot_y = radius × cos(Tf)   = radius × y / hypot(x, y)
 ```
+The swapped `ArcTan2` args and the sine-first `SinCos` cancel: **the point's direction is preserved,
+only its radius is log-compressed.**
 
 **Effect**: Values near origin are spread out, distant values compressed.
 
-**Polar Log Scale**:
+**Polar Log Scale** (1533-1540):
 ```
-radius = log2(rho) / log2(range) × (width / 2)
-plot_x = radius × cos(theta)
-plot_y = radius × sin(theta)
+radius = log2(rho) / log2(range) × (vWidth div 2)      (radius = 0 when rho = 0)
+Tf     = π/2 − (theta + vTheta) / vTwoPi × 2π
+plot_x = radius × sin(Tf) = radius × cos(φ)
+plot_y = radius × cos(Tf) = radius × sin(φ)            (φ = the normalized angle)
 ```
+Same orientation as polar linear: **θ = 0 → East, increasing θ → counter-clockwise.**
 
 **Effect**: Exponential radius → linear display.
 
@@ -639,13 +707,15 @@ SmoothDot(x, y, vDotSize shl 6, color, opacity);
 
 **Translation to Screen Coordinates**:
 ```
-screen_x = (bitmap_width / 2) × 256 + x
-screen_y = (bitmap_height / 2) × 256 - y
+screen_x = (vBitmapWidth  / 2) × 256 + x        // vBitmapWidth shl 7 == vBitmapWidth × 128
+screen_y = (vBitmapHeight / 2) × 256 - y
 ```
 
-- Centers coordinate system at display center
+- Centers the coordinate system on the **bitmap** centre. That coincides with the plot-area centre
+  only because SCOPE_XY sets all four margins equal (`SetSize(ChrHeight*2, ×4)`, line 1440).
 - Y-axis inverted (positive Y = up)
-- Fixed-point format (8.8, shift by 7 = multiply by 128, then shift by 1 for centering)
+- All values are in **256ths of a pixel** — the units `SmoothDot`/`SmoothLine` expect
+  (see the section header at 3834-3837, *"x/y/radius in 256th's"*). `shl 7` = ×128 = (n/2) × 256.
 
 ---
 
@@ -655,14 +725,17 @@ SCOPE_XY supports two display modes: **Persistent** and **Fading**.
 
 ### 7.1 Persistent Mode
 
-**Activation**: `SAMPLES 0` (default)
+**Activation**: `SAMPLES 0` — ⚠️ **NOT the default.** `vSamples` defaults to **256**
+(`SetDefaults`:2886) and `SCOPE_XY_Configure` never resets it, so with no `SAMPLES` directive the
+window runs in **fading** mode with a 256-sample trail (the `else` branch at 1486). Persistent mode
+must be requested explicitly.
 
 **Behavior**:
 - Points accumulate on display
 - No clearing between updates
 - Display persists until CLEAR command
 
-**Code** (SCOPE_XY_Update, lines 1480-1484):
+**Code** (SCOPE_XY_Update, lines 1480-1485):
 ```pascal
 if vSamples = 0 then
 begin
@@ -908,12 +981,80 @@ SmoothDot(x, y, vDotSize shl 6, color, opacity);
 ```
 
 **Parameters**:
-- `x, y`: Fixed-point coordinates (8.8 format)
-- `vDotSize shl 6`: Radius in fixed-point (6-bit shift = multiply by 64)
+- `x, y`: coordinates in **256ths of a pixel** (the units declared at 3834-3837)
+- `vDotSize shl 6`: the value handed to `SmoothLine`'s `radius` argument = `vDotSize × 64`, i.e. a
+  **geometric** radius of `vDotSize / 4` px. (SCOPE_XY uses `shl 6`; LOGIC/SCOPE/FFT use `shl 7`.)
+  `SmoothLine` clamps it: `radius1 := Min(radius, maxr shl 8)` with `maxr = 128` px (3872).
 - `color`: RGB24 color
 - `opacity`: Alpha value (0-255)
 
-**Rendering**: Anti-aliased circular dot with gamma-corrected alpha blending.
+> ⚠️ **NEEDS-HARDWARE — do not translate `DOTSIZE` into a rendered pixel width.** The `shl 6` above is
+> a **code fact about the geometric parameter**, not a prediction of what appears on screen. The
+> analogous shift-constant derivation demonstrably *fails* for LOGIC `LINESIZE` — hardware measured
+> `LINESIZE 3` rendering **3 px** (1:1), not the 1.5 px the arithmetic predicts, because the
+> anti-aliasing envelope widens small radii. `DOTSIZE`'s **rendered** width has never been measured.
+> This document therefore states the geometry and declines to assert "radius" or "diameter" in
+> user-facing pixel terms.
+
+**Rendering**: Anti-aliased circular dot with gamma-corrected alpha blending (all of it inside
+`SmoothLine`, 3844-3984 — see §18.4).
+
+### 9.4 Graticule Rendering — `ClearBitmap`'s `dis_scope_xy` branch (3384-3409)
+
+The SCOPE_XY window is **never blank**. `ClearBitmap` has a dedicated `dis_scope_xy` case that, after
+the background fill (3240-3243), draws a full graticule on `Bitmap[0]`:
+
+```pascal
+dis_scope_xy:
+begin
+  // Draw grid — inscribed circle, 1 px, in vGridColor
+  SmoothShape(vMarginLeft + vWidth shr 1, vMarginTop + vHeight shr 1,
+    vWidth + 1, vHeight + 1, vWidth, vHeight, 1, vGridColor, 255);       // 3387-3388
+  // Full-height vertical crosshair through the plot centre
+  Bitmap[0].Canvas.MoveTo(vMarginLeft + vWidth div 2, 0);                // 3389
+  Bitmap[0].Canvas.LineTo(vMarginLeft + vWidth div 2, vBitmapHeight);    // 3390
+  // Full-width horizontal crosshair through the plot centre
+  Bitmap[0].Canvas.MoveTo(0, vMarginTop + vHeight div 2);                // 3391
+  Bitmap[0].Canvas.LineTo(vBitmapWidth, vMarginTop + vHeight div 2);     // 3392
+  // Draw type and range — plain style, grid color, in the TOP margin
+  Bitmap[0].Canvas.Font.Style := [];                                     // 3394
+  Bitmap[0].Canvas.Font.Color := WinRGB(vGridColor);                     // 3395
+  s := 'r=' + IntToStr(vRange);                                          // 3396
+  if vLogScale then s := s + ' logscale';                                // 3397
+  Bitmap[0].Canvas.TextOut(vBitmapWidth div 2 + ChrWidth * 2, ChrHeight div 2, s);  // 3398
+  // Draw channel names — BOLD + ITALIC, in each trace's own vColor[i]
+  Bitmap[0].Canvas.Font.Style := [fsBold, fsItalic];                     // 3400
+  for i := 0 to Channels - 1 do if vLabel[i] <> '' then
+  begin
+    if (i and 2) = 0 then x := ChrWidth
+                     else x := vBitmapWidth - ChrWidth - Bitmap[0].Canvas.TextWidth(vLabel[i]);  // 3403
+    if i < 4 then y := ChrWidth
+             else y := vBitmapHeight - ChrWidth - ChrHeight * 2;         // 3404
+    if (i and 1) <> 0 then y := y + ChrHeight;                           // 3405
+    Bitmap[0].Canvas.Font.Color := WinRGB(vColor[i]);                    // 3406
+    Bitmap[0].Canvas.TextOut(x, y, vLabel[i]);                           // 3407
+  end;
+end;
+```
+
+**What is drawn**
+
+| Element | Geometry | Color |
+|---|---|---|
+| Inscribed circle | `SmoothShape` centred on the plot area, `xs/ys = vWidth+1 / vHeight+1`, corner radii `= vWidth/vHeight` (⇒ a full ellipse = circle, since `vWidth = vHeight`), `thick = 1` | `vGridColor` |
+| Vertical crosshair | `x = vMarginLeft + vWidth div 2`, spanning **the whole bitmap height** (0 → `vBitmapHeight`) — it runs through the margins, not just the plot area | `vGridColor` (Pen set at 3242) |
+| Horizontal crosshair | `y = vMarginTop + vHeight div 2`, spanning **the whole bitmap width** | `vGridColor` |
+| Range text | `'r=' + vRange`, plus `' logscale'` when `LOGSCALE` is active. Drawn in the **top margin**, starting two characters right of bitmap-centre | `vGridColor` |
+| Trace labels (≤ 8) | Only for non-empty `vLabel[i]`. Corner is chosen by bits of `i`: **bit 1 clear ⇒ left, set ⇒ right** (labels 0,1,4,5 left; 2,3,6,7 right); **`i < 4` ⇒ top, else bottom**; **bit 0 set ⇒ shifted down one text row**. So 0/1 → top-left, 2/3 → top-right, 4/5 → bottom-left, 6/7 → bottom-right. **Bold + italic.** (Note the top inset uses `ChrWidth`, not `ChrHeight` — as written at 3404.) | each trace's `vColor[i]` |
+
+**When it runs**
+1. **Window creation** — `SCOPE_XY_Configure` (1440) → `SetSize` → `ClearBitmap` (2970).
+2. **`CLEAR` directive** — `SCOPE_XY_Update` (1456).
+3. **Every fading-mode redraw** — `SCOPE_XY_Update` (1494), i.e. on each `RateCycle`. The graticule is
+   therefore re-laid under the trail on every refresh; the dots are composited on top of it.
+
+Persistent mode (`SAMPLES 0`) only clears on an explicit `CLEAR`, so the graticule is drawn once and the
+trace accumulates over it.
 
 ---
 
@@ -937,28 +1078,33 @@ x_value = -100:  X_pixels = -100 × 2.56 × 256 = -65,536
 x_value = 0:     X_pixels = 0
 x_value = +100:  X_pixels = +100 × 2.56 × 256 = +65,536
 
-After centering (vBitmapWidth shl 7 = 32,768):
-  -100 → -32,768 (left edge)
-  0    → 0 (center)
-  +100 → +32,768 (right edge)
+After centering (x := vBitmapWidth shl 7 + x, line 1542; shl 7 = ×128):
+  centre = vBitmapWidth × 128 = (vBitmapWidth / 2) × 256      (an absolute 256ths coordinate)
+
+  -100 → centre − 65,536   (left edge of the plot area)
+   0   → centre            (display centre)
+  +100 → centre + 65,536   (right edge of the plot area)
 ```
+Note `vBitmapWidth = vWidth + 4·ChrHeight` (all four margins) — see §4.3. The centered result is an
+absolute screen coordinate ≥ 0; negative values are impossible (`SmoothClip`, 3870, would clip them).
 
 ### 10.2 Cartesian Log Transformation
 
 **Purpose**: Spread out values near origin, compress distant values.
 
-**Algorithm**:
+**Algorithm** (SCOPE_XY_Plot, 1519-1523):
 ```pascal
-radius := sqrt(x² + y²)
-log_radius := log2(radius + 1) / log2(range + 1) × (width / 2)
-angle := atan2(x, y)
-X_pixels := log_radius × cos(angle) × 256
-Y_pixels := log_radius × sin(angle) × 256
+radius     := hypot(x, y)
+log_radius := log2(radius + 1) / log2(vRange + 1) × (vWidth div 2)
+Tf         := ArcTan2(x, y)                  // args swapped vs. Delphi's ArcTan2(Y, X)
+X_pixels   := log_radius × sin(Tf) × 256     // SinCos is sine-first ⇒ = log_radius × x / radius
+Y_pixels   := log_radius × cos(Tf) × 256     //                        = log_radius × y / radius
 ```
+The direction of `(x, y)` is preserved exactly; only the radius is log-compressed.
 
 **Example**:
 ```
-vRange = 1000, vWidth = 512
+vRange = 1000, vWidth = 512  ⇒  vWidth div 2 = 256, vScale = 256/1000 = 0.256
 
 Linear mapping:
   r = 1:    pixels = 1 / 1000 × 256 = 0.26
@@ -966,10 +1112,10 @@ Linear mapping:
   r = 100:  pixels = 100 / 1000 × 256 = 25.6
   r = 1000: pixels = 1000 / 1000 × 256 = 256
 
-Log mapping:
-  r = 1:    log_r = log2(2) / log2(1001) × 256 ≈ 25.6
-  r = 10:   log_r = log2(11) / log2(1001) × 256 ≈ 87.6
-  r = 100:  log_r = log2(101) / log2(1001) × 256 ≈ 168.3
+Log mapping   (log2(1001) = 9.9672):
+  r = 1:    log_r = log2(2)    / log2(1001) × 256 = 1.0000 / 9.9672 × 256 ≈ 25.7
+  r = 10:   log_r = log2(11)   / log2(1001) × 256 = 3.4594 / 9.9672 × 256 ≈ 88.9
+  r = 100:  log_r = log2(101)  / log2(1001) × 256 = 6.6582 / 9.9672 × 256 ≈ 171.0
   r = 1000: log_r = log2(1001) / log2(1001) × 256 = 256
 ```
 
@@ -979,42 +1125,48 @@ Log mapping:
 - rho: 0 to vRange
 - theta: 0 to vTwoPi (full circle)
 
-**Transformation**:
+**Transformation** (SCOPE_XY_Plot, 1536-1540):
 ```pascal
-radius := rho × vScale
-angle := π/2 - (theta + vTheta) / vTwoPi × 2π
-X_pixels := radius × cos(angle) × 256
-Y_pixels := radius × sin(angle) × 256
+Rf := rho × vScale
+Tf := π/2 - (theta + vTheta) / vTwoPi × 2π
+SinCos(Tf, Xf, Yf)                  // SINE-FIRST: Xf = sin(Tf), Yf = cos(Tf)
+X_pixels := Rf × sin(Tf) × 256      // = Rf × cos(φ)
+Y_pixels := Rf × cos(Tf) × 256      // = Rf × sin(φ)   (+Y = up, subtracted at 1543)
 ```
 
 **Angle Conversion**:
 ```
-theta_radians = π/2 - (theta + vTheta) / vTwoPi × 2π
+φ  = (theta + vTheta) / vTwoPi × 2π      // normalize to radians
+Tf = π/2 − φ
 ```
 
-- `π/2 -`: Rotate 90° (0° = up instead of right)
-- `vTheta`: Additional angular offset
 - `/ vTwoPi × 2π`: Normalize to radians
+- `vTheta`: Additional angular offset
+- **`π/2 −` does NOT rotate the display 90°.** It cancels the sine-first `SinCos` output, restoring the
+  standard math orientation. The net mapping is `x = Rf·cos(φ)`, `y = Rf·sin(φ)`.
 
-**Example** (vTwoPi = 360, vTheta = 0):
+**Example** (vTwoPi = 360, vTheta = 0) — **θ = 0 is EAST; increasing θ is counter-clockwise**:
 ```
-theta = 0:   angle = π/2 - 0 = π/2 = 90° (up)
-theta = 90:  angle = π/2 - π/2 = 0 (right)
-theta = 180: angle = π/2 - π = -π/2 = 270° (down)
-theta = 270: angle = π/2 - 3π/2 = -π = 180° (left)
+theta = 0:    x = +Rf, y =   0   →  RIGHT (East)
+theta = 90:   x =   0, y = +Rf   →  UP    (North)
+theta = 180:  x = -Rf, y =   0   →  LEFT  (West)
+theta = 270:  x =   0, y = -Rf   →  DOWN  (South)
 ```
+(`POLAR -1` makes `vTwoPi` negative, which reverses this to clockwise.)
 
 ### 10.4 Polar Log Transformation
 
 **Purpose**: Exponential radius → linear display.
 
-**Transformation**:
+**Transformation** (SCOPE_XY_Plot, 1533-1540):
 ```pascal
-log_radius := log2(rho) / log2(range) × (width / 2)
-angle := π/2 - (theta + vTheta) / vTwoPi × 2π
-X_pixels := log_radius × cos(angle) × 256
-Y_pixels := log_radius × sin(angle) × 256
+log_radius := log2(rho) / log2(vRange) × (vWidth div 2)   // 0 when rho = 0 (guard at 1534)
+Tf         := π/2 - (theta + vTheta) / vTwoPi × 2π
+X_pixels   := log_radius × sin(Tf) × 256                  // = log_radius × cos(φ)
+Y_pixels   := log_radius × cos(Tf) × 256                  // = log_radius × sin(φ)
 ```
+
+Orientation is identical to polar linear: **θ = 0 → East, increasing θ → counter-clockwise.**
 
 **Use Case**: Spirals, exponential growth, frequency domain.
 
@@ -1028,26 +1180,30 @@ Y_pixels := log_radius × sin(angle) × 256
 |---------|------------|---------|
 | `TITLE` | 'string' | Set window title |
 | `POS` | x y | Set window position |
-| `SIZE` | radius | Set display size (width = height = radius × 2) |
+| `SIZE` | radius | Set display size (width = height = radius × 2; display clamped 32-2048 px). Default: no SIZE ⇒ 256×256 (== `SIZE 128`) |
 | `RANGE` | value | Set coordinate system extent (1-$7FFFFFFF) |
-| `SAMPLES` | count | Set fade buffer depth (0=persistent, >0=fading) |
+| `SAMPLES` | count | Set fade buffer depth (0=persistent, >0=fading). **Default 256 = fading** |
 | `RATE` | divisor | Set display update rate (1-2048) |
-| `DOTSIZE` | pixels | Set dot diameter (2-20) |
+| `DOTSIZE` | n | Set dot-size scalar (2-20) → `SmoothDot(…, n shl 6, …)`. Rendered width **NEEDS-HARDWARE** |
 | `TEXTSIZE` | size | Set label font size (6-200) |
 | `COLOR` | back grid | Set background and grid colors |
-| `POLAR` | {twopi {theta}} | Enable polar coordinates |
+| `POLAR` | {twopi {theta}} | Enable polar coordinates (θ=0 East, CCW; `POLAR -1` reverses to CW) |
 | `LOGSCALE` | - | Enable logarithmic scaling |
-| `HIDEXY` | - | Hide mouse coordinates |
-| Packing modes | - | Set data packing format (12 modes) |
+| `HIDEXY` | - | Hide the on-screen measurement cursor |
+| Packing modes | `{ALT} {SIGNED}` | Set data packing format (12 opt-in modes). **Default: UNPACKED** |
 
 ### 11.2 Runtime Commands
 
 | Command | Parameters | Purpose |
 |---------|------------|---------|
-| `CLEAR` | - | Clear display and reset buffer |
-| `SAVE` | {filename} | Save display to BMP file |
+| `CLEAR` | - | Clear display (graticule is redrawn, §9.4) and reset buffer |
+| `SAVE` | `'name'` | Save `Bitmap[1]` (display buffer) to `name.bmp` |
+| `SAVE WINDOW` | `{'name'}` | Desktop scrape of the window's outer rect (title bar + borders). Without a name: captured to memory, **no file** |
+| `SAVE` | `l t w h {'name'}` | Desktop scrape of an arbitrary screen rect. Without a name: **no file** |
+| `SAVE` | *(bare)* | **Nothing** — `KeySave` `Exit`s (2848), and a non-`WINDOW` keyword after it is eaten |
+| `CLOSE` | - | Close the window. **Update-first, close-second** — the rest of the message runs first. Dispatched at the parser layer (p2com.asm 19613-19624 → `DebugUnit.pas`:236-237), not in `SCOPE_XY_Update` |
 | `PC_KEY` | - | Request keyboard state |
-| `PC_MOUSE` | - | Request mouse position/color |
+| `PC_MOUSE` | - | Request mouse position/color (raw client pixels — see §4a) |
 
 ### 11.3 Trace Configuration Format
 
@@ -1066,21 +1222,24 @@ Y_pixels := log_radius × sin(angle) × 256
 
 ### 12.1 Memory Usage
 
-**Sample Buffer** (fading mode only):
+**Sample Buffer** (per window — a private instance field, line 362):
 ```
-XY_SampleBuff: 2048 pairs × 8 traces × 2 values × 4 bytes = 128 KB
-```
-
-**Persistent mode**: No buffer (0 bytes)
-
-**Display Bitmaps** (pf24bit = 3 bytes/pixel):
-```
-Typical: 512×512 × 3 bytes × 2 = 1.5 MB
+XY_SampleBuff: 2048 sets × 8 traces × 2 values × 4 bytes = 128 KB
 ```
 
-**Total**:
-- Persistent mode: ~1.5 MB
-- Fading mode: ~1.63 MB (+ 128 KB sample buffer)
+**Persistent mode**: the buffer is still **allocated** (it is a fixed-size form field), it is simply
+never written or read. The saving is in CPU, not memory.
+
+**Display Bitmaps** (pf24bit = 3 bytes/pixel, no alpha):
+```
+vBitmapWidth × vBitmapHeight × 3 bytes × 2 bitmaps
+  — remember vBitmap* = display size + 4×ChrHeight on each axis (§4.3)
+
+Default (256×256 display, ChrHeight≈13 ⇒ 308×308):  308 × 308 × 3 × 2 ≈  569 KB
+`SIZE 256`  (512×512 display        ⇒ 564×564):     564 × 564 × 3 × 2 ≈  1.9 MB
+```
+
+**Total**: bitmaps + a flat 128 KB for `XY_SampleBuff` in **either** mode.
 
 ### 12.2 Rendering Performance
 
@@ -1154,8 +1313,10 @@ Example: 4 traces × 100 samples = 400 SmoothDot calls (moderate)
 
 **Configuration**:
 ```
-SCOPE_XY SIZE 256 RANGE 100 'XY'
+SCOPE_XY SIZE 256 RANGE 100 SAMPLES 0 'XY'
 ```
+`SAMPLES 0` is **required** for a persistent (accumulating) figure — without it `vSamples` is 256
+(`SetDefaults`:2886) and the window renders a 256-sample *fading trail* instead of the full curve.
 
 **P2 Code**:
 ```spin2
@@ -1259,25 +1420,36 @@ y := vBitmapHeight shl 7 - y;
 ```
 
 **Breakdown**:
-- `vBitmapWidth shl 7`: (width / 2) × 128 = center in 7.8 fixed-point
-- `+ x`: Add transformed x (already in 8.8 fixed-point)
-- Result: 8.8 fixed-point screen coordinate
+- `vBitmapWidth shl 7`: = `vBitmapWidth × 128` = `(vBitmapWidth / 2) × 256` — the **bitmap centre**
+  expressed in the same 256ths space `SmoothDot` expects. (There is no "7.8" format anywhere; the
+  shared header at 3834-3837 declares *"x/y/radius in 256th's"*.)
+- `+ x`: Add transformed x (already in 256ths)
+- `- y`: **Subtract** transformed y — this is the y-inversion that makes +y point up
+- Result: an absolute 8.8 (256ths) screen coordinate, always ≥ 0
 
 ### 15.2 Trigonometric Functions
 
-**SinCos** (Pascal runtime function):
+**SinCos** (Delphi `Math` unit):
 ```pascal
-SinCos(angle, sine, cosine);
+SinCos(Theta: Extended; var Sin, Cos: Extended);
 ```
 
 Computes sine and cosine simultaneously (more efficient than separate calls).
+⚠️ **The SINE comes back in the FIRST out-param.** In `SCOPE_XY_Plot` the call is
+`SinCos(Tf, Xf, Yf)` (1521, 1538) — so **`Xf = sin(Tf)` and `Yf = cos(Tf)`**, and
+`X := Round(Rf * Xf * $100)` is therefore `Rf × sin(Tf)`, *not* `Rf × cos(Tf)`.
+Every orientation claim in this document follows from that fact.
 
-**ArcTan2** (Pascal runtime function):
+**ArcTan2** (Delphi `Math` unit):
 ```pascal
-angle := ArcTan2(y, x);
+function ArcTan2(const Y, X: Extended): Extended;   // standard atan2: 0 = +X axis (East), CCW positive
 ```
 
 Computes angle from (x, y) with correct quadrant.
+⚠️ SCOPE_XY's Cartesian-log path calls it as **`ArcTan2(x, y)`** (line 1520) — arguments **swapped**,
+so `Tf` is measured from the **+Y** axis. Together with the sine-first `SinCos` the two swaps cancel
+(§6.3). The measurement-cursor readout (`FormMouseMove`, line 708) uses the *standard* order,
+`ArcTan2(ScaledY, ScaledX)`.
 
 ### 15.3 Logarithmic Functions
 
@@ -1395,13 +1567,19 @@ SCOPE_XY_Configure:
 
 ### 16.5 SCOPE_XY Sample Data Message Example
 
-**Persistent Mode** (2 traces, LONGS_16BIT packing):
+**Persistent Mode** (`SAMPLES 0`; 2 traces, `LONGS_16BIT SIGNED` packing):
+
+> ⚠️ **`UnPack` yields the LOW sub-field first** (4166-4171: `Result := v and vPackMask;` *then*
+> `v := v shr vPackShift;`). For `LONGS_16BIT` the **low** half-word is the **first** value unpacked.
+> Sign-extension additionally requires the `SIGNED` modifier (`vPackSignx`, 4170; `KeyPack`, 2825-2829)
+> — without it `$FF38` unpacks to **65,336**, not −200.
+
 ```
 Element Array:
-[0] type=ele_num   value=$00640032       → packed: x0=50, y0=100
-[1] type=ele_num   value=$FF9CFF38       → packed: x1=-100, y1=-200
-[2] type=ele_num   value=$003200C8       → packed: x0=200, y0=50
-[3] type=ele_num   value=$FFD6FF9C       → packed: x1=-100, y1=-42
+[0] type=ele_num   value=$00640032       → packed (low field first): x0 = $0032 = 50,   y0 = $0064 = 100
+[1] type=ele_num   value=$FF9CFF38       → packed (low field first): x1 = $FF38 = -200, y1 = $FF9C = -100
+[2] type=ele_num   value=$003200C8       → packed (low field first): x0 = $00C8 = 200,  y0 = $0032 = 50
+[3] type=ele_num   value=$FFD6FF9C       → packed (low field first): x1 = $FF9C = -100, y1 = $FFD6 = -42
 [4] type=ele_end   value=0
 ```
 
@@ -1409,11 +1587,11 @@ Element Array:
 ```pascal
 SCOPE_XY_Update:
   NextNum → $00640032
-    UnPack → samp[0] = 50 (x0)
+    UnPack → samp[0] = 50 (x0)      // low half-word first
     UnPack → samp[1] = 100 (y0)
   NextNum → $FF9CFF38
-    UnPack → samp[2] = -100 (x1)
-    UnPack → samp[3] = -200 (y1)
+    UnPack → samp[2] = -200 (x1)    // low half-word $FF38
+    UnPack → samp[3] = -100 (y1)    // then $FF9C
   → All pairs received, plot immediately (persistent mode)
 
   NextNum → $003200C8
@@ -1470,21 +1648,22 @@ Element Array:
 
 SCOPE_XY uses **two different buffer strategies** depending on display mode:
 
-**Persistent Mode** (vSamples = 0):
-- **No sample buffering**
+**Persistent Mode** (vSamples = 0 — **must be requested explicitly**):
+- **No sample buffering** (`XY_SampleBuff` is allocated but untouched)
 - Sample pairs plotted directly to Bitmap[0]
 - Points accumulate until CLEAR command
-- Minimal memory usage
+- Minimal CPU cost
 
-**Fading Mode** (vSamples > 0):
+**Fading Mode** (vSamples > 0 — **the default, 256**):
 - **Circular buffer**: XY_SampleBuff
 - Stores last N sample pairs (N = vSamples, max 2048)
-- Redraw all samples each update with opacity decay
-- Higher memory usage, animated trails
+- Redraw all samples each update with opacity decay (over a freshly re-drawn graticule, §9.4)
+- Higher CPU cost, animated trails
 
 ### 17.2 XY_SampleBuff Circular Buffer
 
-**Declaration** (DebugDisplayUnit.pas:362):
+**Declaration** (DebugDisplayUnit.pas:362 — a **private instance field** of `TDebugDisplayForm`,
+not a shared global; `SamplePtr` is line 402, `SamplePop` line 403):
 ```pascal
 XY_SampleBuff: array[0..XY_Sets * XY_SetSize - 1] of integer;
 ```
@@ -1513,7 +1692,7 @@ XY_PtrMask: integer = $7FF;       // 2047 (for wraparound)
 
 ### 17.3 Write Operations
 
-**Persistent Mode** (SCOPE_XY_Update, lines 1480-1484):
+**Persistent Mode** (SCOPE_XY_Update, lines 1480-1485):
 ```pascal
 if vSamples = 0 then
 begin
@@ -1566,7 +1745,7 @@ end;
 
 **Read Timing**: Only occurs in fading mode, during RateCycle.
 
-**Read Loop** (lines 1494-1500):
+**Read Loop** (lines 1495-1501; the preceding `ClearBitmap` is line 1494):
 ```pascal
 for j := vIndex - 1 downto 0 do           // For each trace
   for k := SamplePop - 1 downto 0 do      // For each buffered sample (newest to oldest)
@@ -1610,7 +1789,7 @@ Oldest sample (k=49):
 
 ### 17.5 Opacity Decay Formula
 
-**Calculation** (line 1498):
+**Calculation** (line 1499; line 1498 is the `ptr :=` index calculation):
 ```pascal
 opa := 255 - (k * 255 div vSamples);
 ```
@@ -1633,7 +1812,7 @@ k = 99 (oldest):  opa = 255 - (99 * 255 / 100) = 2 (nearly transparent)
 
 ### 17.6 Rate Control
 
-**RateCycle Function** (shared with other displays):
+**RateCycle Function** (shared with other displays; `RateCycle`, lines 3079-3088):
 ```pascal
 function RateCycle: boolean;
 begin
@@ -1756,7 +1935,7 @@ SmoothDot(x, y, vDotSize shl 6, color, opacity);
 
 **Parameters**:
 - `x, y`: Center position in 8.8 fixed-point (256 = 1 pixel)
-- `vDotSize shl 6`: `vDotSize` scaled ×64 as input into the fixed-point draw space, which is always **8.8** (256 = 1 pixel) — *not* a "6.6" format; geometric disc radius = `vDotSize/4` px (`SmoothDot`/`SmoothLine` clamp `radius` to `maxr shl 8`, 3872). Note SCOPE_XY dots use `shl 6`, half of LOGIC/SCOPE/FFT's `shl 7`.
+- `vDotSize shl 6`: `vDotSize` scaled ×64 as input into the fixed-point draw space, which is always **8.8** (256 = 1 pixel) — *not* a "6.6" format. The **geometric** disc radius handed to `SmoothLine` is therefore `vDotSize/4` px (clamped to `maxr shl 8`, `maxr = 128` px, at 3872). Note SCOPE_XY dots use `shl 6`, half of LOGIC/SCOPE/FFT's `shl 7`. ⚠️ **The rendered dot width is NOT simply 2× that geometric radius and has never been measured — NEEDS-HARDWARE.** The same derivation is known to fail for LOGIC `LINESIZE` (measured 1:1: `LINESIZE 3` → 3 px), because the anti-aliasing envelope widens small radii.
 - `color`: RGB24 color value
 - `opacity`: Alpha value (0-255)
 
@@ -1813,21 +1992,29 @@ Center: x += (width/2) * 256, y += (height/2) * 256
 Render: SmoothDot(x, y, ...) → Bitmap[0]
 ```
 
-**Example** (Cartesian linear, vRange=100, vScale=2.56, width=512):
+**Example** (Cartesian linear, `SIZE 256` ⇒ vWidth = vHeight = 512, vRange = 100, vScale = 2.56):
+
+⚠️ The centering uses **`vBitmapWidth`, not `vWidth`** — the bitmap includes all four margins
+(`= vWidth + 4·ChrHeight`, §4.3). Taking `ChrHeight = 13 px` (a 10-pt font; the exact value is
+font-metric dependent, `SetTextMetrics`:2919-2924):
+
 ```
+vBitmapWidth = vBitmapHeight = 512 + 4×13 = 564   ⇒ centre pixel = 282
+
 Input: x=50, y=50
 
-Transform (line 1529):
-  X = Round(50 * 2.56 * 256) = 32,768 (fixed-point)
-  Y = Round(50 * 2.56 * 256) = 32,768
+Transform (line 1527-1528):
+  X = Round(50 * 2.56 * 256) = 32,768 (256ths)   → 128 px right of centre
+  Y = Round(50 * 2.56 * 256) = 32,768            → 128 px above centre
 
-Center (line 1542-1543):
-  x = (512 shl 7) + 32,768 = 65,536 + 32,768 = 98,304
-  y = (512 shl 7) - 32,768 = 65,536 - 32,768 = 32,768
+Center (lines 1542-1543):
+  x = (564 shl 7) + 32,768 = 72,192 + 32,768 = 104,960
+  y = (564 shl 7) - 32,768 = 72,192 - 32,768 =  39,424
 
 SmoothDot (line 1544):
-  SmoothDot(98,304, 32,768, 384, color, opacity)
-  → Plots at pixel (384, 128) with anti-aliasing
+  SmoothDot(104,960, 39,424, 6 shl 6 = 384, color, opacity)
+  → Plots at pixel (104,960/256, 39,424/256) = (410, 154) with anti-aliasing
+    — i.e. centre(282,282) + 128 px right, 128 px up. ✓
 ```
 
 ---
@@ -1892,15 +2079,23 @@ begin
 end;
 ```
 
-Each call to `UnPack` extracts the next sub-value from `v` using a right-shift of `vPackShift` bits. Sign-extension (when `vPackSignx` is true) tests the MSB of the extracted field and fills the upper bits with `1`s if set.
+**`UnPack` yields the LOW sub-field first.** `Result := v and vPackMask` is evaluated **before** the
+right-shift, so the least-significant sub-field is the **first** value returned; successive calls walk
+up toward the MSB. Sign-extension (only when `vPackSignx` is true — set by the trailing `SIGNED`
+modifier, `KeyPack` 2825-2829) tests the extracted field's own top bit and fills the upper bits with 1s.
+
+**Default packing is UNPACKED**, not `LONGS_1BIT`: `SetDefaults`:2915 calls `SetPack(0, False, False)`,
+and `SetPack` special-cases `val = 0` (4152-4153), **bypassing `PackDef`** ⇒ `vPackShift = 32`,
+`vPackCount = 1`, `vPackMask = $FFFFFFFF` = **one full 32-bit sample per transmitted long**. A packing
+mode is only in force if the create message names one of the twelve keys.
 
 **SCOPE_XY Typical Usage**: LONGS_16BIT (2 values per long)
 
-**Example** (2 traces, Cartesian coordinates):
+**Example** (2 traces, Cartesian coordinates, `LONGS_16BIT SIGNED`):
 ```
-LONGS_16BIT mode:
-  Packed value 1: $00640032 → x0=50, y0=100
-  Packed value 2: $FF9CFFD8 → x1=-100, y1=-40
+LONGS_16BIT mode — low half-word unpacks FIRST:
+  Packed value 1: $00640032 → x0 = $0032 = 50,  y0 = $0064 = 100
+  Packed value 2: $FF9CFFD8 → x1 = $FFD8 = -40, y1 = $FF9C = -100
 ```
 
 ### 19.2 Color System
@@ -1964,31 +2159,34 @@ Y := Round(y * vScale * $100);
 
 **SinCos** (used in coordinate transformations):
 ```pascal
-SinCos(angle, sine_result, cosine_result);
+SinCos(Theta: Extended; var Sin, Cos: Extended);   // ⚠️ SINE-FIRST
 ```
 
 **Purpose**: Computes sine and cosine simultaneously (more efficient than separate calls).
+The **first** output is the **sine**.
 
-**SCOPE_XY Usage** (lines 1526, 1540):
+**SCOPE_XY Usage** (lines 1521, 1538):
 ```pascal
-// Cartesian log scale
-SinCos(Tf, Xf, Yf);
-X := Round(Rf * Xf * $100);
+// Cartesian log scale (1520-1523)
+Tf := ArcTan2(x, y);          // args swapped ⇒ angle measured from +Y
+SinCos(Tf, Xf, Yf);           // Xf = sin(Tf) = x/hypot ; Yf = cos(Tf) = y/hypot
+X := Round(Rf * Xf * $100);   // direction preserved, radius log-compressed
 Y := Round(Rf * Yf * $100);
 
-// Polar mode
+// Polar mode (1537-1540)
 Tf := Pi / 2 - (y + vTheta) / vTwoPi * Pi * 2;
-SinCos(Tf, Xf, Yf);
-x := Round(Rf * Xf * $100);
-y := Round(Rf * Yf * $100);
+SinCos(Tf, Xf, Yf);           // Xf = sin(Tf), Yf = cos(Tf)
+x := Round(Rf * Xf * $100);   // = Rf·cos(φ)  ⇒ θ = 0 points EAST
+y := Round(Rf * Yf * $100);   // = Rf·sin(φ)  ⇒ increasing θ is COUNTER-CLOCKWISE
 ```
 
 **ArcTan2** (used in Cartesian log scale):
 ```pascal
-angle := ArcTan2(y, x);
+function ArcTan2(const Y, X: Extended): Extended;   // standard atan2 — 0 = East, CCW positive
 ```
 
 **Purpose**: Computes angle from (x, y) with correct quadrant.
+⚠️ SCOPE_XY calls it **`ArcTan2(x, y)`** (1520) with the arguments deliberately swapped.
 
 **Hypot** (used in Cartesian log scale):
 ```pascal
@@ -2048,18 +2246,50 @@ end;
 
 ### 19.7 File Operations
 
-**Save to BMP** (`KeySave`, lines 2839-2870):
+**Save to BMP** (`KeySave`, lines 2839-2866):
 ```pascal
 procedure TDebugDisplayForm.KeySave;
+var
+  l, t, w, h: integer;
 begin
-  if NextStr then Bitmap[1].SaveToFile(PChar(val) + '.bmp')
-  else ...  // optional WINDOW / coordinate-rect form
+  if NextStr then Bitmap[1].SaveToFile(PChar(val) + '.bmp')     // 2843
+  else
+  begin
+    if NextKey then
+    begin
+      if val <> key_window then Exit;                            // 2848 — any other key: consumed, then bail
+      l := Left;  t := Top;  w := Width;  h := Height;           // 2849-2852 — OUTER window rect
+    end
+    else
+    begin
+      if not KeyVal(l) then Exit;                                // 2856-2859 — explicit screen rect
+      if not KeyVal(t) then Exit;
+      if not KeyVal(w) then Exit;
+      if not KeyVal(h) then Exit;
+    end;
+    DesktopBitmap.Width := w;  DesktopBitmap.Height := h;
+    BitBlt(DesktopBitmap.Canvas.Handle, 0, 0, w, h, DesktopDC, l, t, SRCCOPY);   // 2863 — desktop scrape
+    if NextStr then DesktopBitmap.SaveToFile(PChar(val) + '.bmp');               // 2864 — name OPTIONAL
+  end;
 end;
 ```
 
-When `SAVE` is followed by a string element, it appends `.bmp` to the supplied name and saves `Bitmap[1]` (the display buffer). No auto-counter or format string is used; the filename must be supplied explicitly, or the optional `WINDOW` / rect form captures a screen region instead.
+**Six forms — three of them silently write nothing:**
 
-**SCOPE_XY Command**: `SAVE {filename}`
+| Form | Writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` (the **display/front buffer**) → `name.bmp` |
+| `SAVE WINDOW 'name'` | Desktop **scrape** of the window's *outer* rect — **includes the title bar and borders**, and is vulnerable to occlusion by other windows |
+| `SAVE left top width height 'name'` | Desktop scrape of an arbitrary screen region |
+| `SAVE WINDOW` *(no name)* | Captured to memory — **no file** |
+| `SAVE l t w h` *(no name)* | Captured to memory — **no file** |
+| `SAVE` *(bare)* | `Exit` — **nothing at all** |
+
+The filename always comes **last**, and `.bmp` is appended automatically. ⚠️ **Sharp edge:** a
+non-`WINDOW` keyword after `SAVE` is consumed by `NextKey` and then discarded by the `Exit` at 2848 —
+`` `MyXY SAVE CLEAR `` does nothing **and eats the CLEAR**.
+
+**SCOPE_XY Command**: `SAVE 'name'` | `SAVE WINDOW {'name'}` | `SAVE l t w h {'name'}`
 
 ---
 
@@ -2076,8 +2306,9 @@ When `SAVE` is followed by a string element, it appends `.bmp` to the supplied n
 DebugDisplayForm := TDebugDisplayForm.Create(Application);
 DebugDisplayForm.DisplayType := dis_scope_xy;
 
-// 2. Initialize element parser (ptr field, P2.DebugDisplayType/Value arrays)
-ptr := 0;  // form-local position; element array is in P2.DebugDisplayType/Value
+// 2. Element 0 = display type; element 1 = window name (consumed by FormCreate itself)
+DisplayType := P2.DebugDisplayValue[0];                                   // 625
+SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType]); // 626
 
 // 3. SetDefaults is called first (line 631), establishing cross-window defaults
 //    including vSamples := 256, SetPack(0, False, False), vPolar := False, etc.
@@ -2091,30 +2322,36 @@ vLogScale    := False;
 vPolar       := False;
 vTwoPi       := $100000000;
 vTheta       := 0;
-SetPack(0, False, False); // 32-bit, count=1 (unpacked), no alt/sign
+SetPack(0, False, False); // 32-bit, count=1 (UNPACKED), no alt/sign — NOT LONGS_1BIT
 
-// 4. Call SCOPE_XY_Configure — sets SCOPE_XY-specific overrides only:
+// 4. Element parser positioned past the two consumed elements
+ptr := 2;  // FormCreate:632 — configure parses from element index 2 onward
+           // (update messages instead set ptr := Index in UpdateDisplay, 901)
+
+// 5. Call SCOPE_XY_Configure (dispatched at FormCreate:636) — SCOPE_XY-specific overrides only:
 //    vRange := $7FFFFFFF; vRate := 1; vDotSize := 6; vTextSize := FontSize;
 //    (vSamples is NOT reset here; it retains 256 from SetDefaults)
 SCOPE_XY_Configure;
 
-// 5. Scale factor calculated at end of SCOPE_XY_Configure (line 1437)
+// 6. Scale factor calculated at end of SCOPE_XY_Configure (line 1437)
 vScale := vWidth / 2 / vRange;
 
-// 6. Bitmaps already created at form-create time (lines 596-599), pf24bit
-//    SetSize called via SetSize() at end of SCOPE_XY_Configure (line 1440)
+// 7. Bitmaps already created at form-create time (lines 596-599), pf24bit
+//    SetSize(ChrHeight*2 ×4) called at end of SCOPE_XY_Configure (line 1440)
 
-// 7. Set form size and position
-ClientWidth := vWidth + margins;
-ClientHeight := vHeight + margins;
-SetFormPosition;  // From POS command or cascade
+// 8. Set form size (SetSize, 2956-2964) — bitmaps include ALL FOUR margins
+ClientWidth  := vMarginLeft + vWidth  + vMarginRight;    // 2956
+ClientHeight := vMarginTop  + vHeight + vMarginBottom;   // 2957
+vBitmapWidth := Bitmap[0].Width;  vBitmapHeight := Bitmap[0].Height;   // 2963-2964
+// Position comes from the POS directive, else the host origin (FormCreate:628-629).
+// Display windows do NOT cascade.
 
-// 8. Clear display
-ClearBitmap;
+// 9. Clear display — this DRAWS THE GRATICULE (see §9.4), it does not leave the window blank
+ClearBitmap;      // SetSize:2970
 BitmapToCanvas(0);
 
-// 9. Show window
-Show;
+// 10. Show window
+Show;             // FormCreate:644
 ```
 
 **Source Locations**:
@@ -2157,21 +2394,24 @@ end;
 ```
 
 **Default Overrides**:
-- SIZE not specified → vWidth = 256 (from `SetDefaults` line 2884), vHeight = 256
+- SIZE not specified → vWidth = 256 (from `SetDefaults` line 2884), vHeight = 256 (2885) — i.e. `SIZE 128`
 - RANGE not specified → vRange = $7FFFFFFF (set by SCOPE_XY_Configure, line 1389)
-- SAMPLES not specified → vSamples = 256 (from `SetDefaults` line 2886; SCOPE_XY_Configure does NOT reset this)
-- Packing not specified → `SetPack(0, False, False)` (val=0: 32-bit, count=1, no alt/sign, line 2915)
+- SAMPLES not specified → vSamples = 256 (from `SetDefaults` line 2886; SCOPE_XY_Configure does NOT reset this) ⇒ **fading**, not persistent
+- Packing not specified → `SetPack(0, False, False)` (val=0: 32-bit, count=1, **unpacked**, no alt/sign, line 2915)
 
-**Validation**:
-- SIZE clamped to 32-2048 (radius), resulting in 64-4096 display
-- RANGE clamped to 1-$7FFFFFFF
-- SAMPLES clamped to 0-2048
-- RATE clamped to 1-2048
-- DOTSIZE clamped to 2-20
+**Validation** — every `KeyValWithin` is **assign-and-clamp** (`Within`, `GlobalUnit.pas`:222-227): an
+out-of-range value is *saturated*, never ignored.
+- **SIZE**: `Within(val * 2, scope_xy_wmin = 32, scope_xy_wmax = 2048)` (line 1404) — the clamp is applied
+  to the **doubled** value ⇒ **display 32..2048 px**, usable radius argument **16..1024**.
+  `vHeight := vWidth` (1405); there is no `scope_xy_hmin`/`_hmax`. **A 4096-px display is unreachable.**
+- RANGE clamped to 1-$7FFFFFFF (1408)
+- SAMPLES clamped to 0-2048 (`XY_Sets`, 1410)
+- RATE clamped to 1-2048 (`XY_Sets`, 1412)
+- DOTSIZE clamped to 2-20 (1414)
 
 ### 20.3 Polar Mode Initialization
 
-**KeyTwoPi Processing** (lines 2728-2742):
+**KeyTwoPi Processing** (lines 2736-2750):
 ```pascal
 procedure KeyTwoPi;
 begin
@@ -2194,39 +2434,53 @@ end;
 
 **Polar Configuration Examples**:
 ```
-POLAR              → vTwoPi = $100000000 (2^32), vTheta = 0
+POLAR              → vTwoPi = +$100000000 (2^32), vTheta = 0   (θ=0 East, CCW)
 POLAR 360          → vTwoPi = 360 (degrees), vTheta = 0
 POLAR 360 90       → vTwoPi = 360, vTheta = 90 (90° offset)
-POLAR -1           → vTwoPi = -$100000000 (clockwise)
+POLAR 0            → vTwoPi = +$100000000 (explicit default)
+POLAR -1           → vTwoPi = **-**$100000000 — the NEGATIVE constant; the negative divisor in
+                     `Tf := Pi/2 - (y + vTheta)/vTwoPi * Pi*2` (1537) reverses the rotation to clockwise
 ```
+Only `0` yields the **positive** full-circle constant; `-1` yields the **negative** one. `vTwoPi` is
+`int64` (line 315) precisely so it can hold `±$100000000`.
 
 ### 20.4 Buffer Allocation
 
-**Circular Buffer** (allocated statically):
+**Circular Buffer** — a **per-window private instance field** of `TDebugDisplayForm` (line 362, inside
+the class's `private` section):
 ```pascal
-XY_SampleBuff: array[0..32767] of integer;  // 128 KB, shared among all SCOPE_XY windows
+XY_SampleBuff : array [0..XY_Sets * XY_SetSize - 1] of integer;   // 2048 × 16 × 4 B = 128 KB
 ```
 
-**Per-Window State** (reset by `SetDefaults`, lines 2906-2907, 2886):
+**Per-Window State** (`SamplePtr` line 402, `SamplePop` line 403 — also private instance fields; reset by
+`SetDefaults`, lines 2906-2907, 2886):
 ```pascal
 SamplePtr := 0;    // Write position
 SamplePop := 0;    // Number of valid samples
 vSamples := 256;   // Default fading trail depth (from SetDefaults line 2886)
 ```
 
-**Memory Ownership**: Each SCOPE_XY window has independent state variables but shares the global buffer array. In practice, only one SCOPE_XY window is typically active at a time.
+**Memory Ownership**: **There is no shared/global sample buffer.** Each debug-display form carries its
+own 128 KB `XY_SampleBuff`, allocated with the form and released with it — and it does so *regardless of
+display type*, since the field is declared on the common `TDebugDisplayForm` class. Multiple SCOPE_XY
+windows therefore never share or clobber each other's samples.
 
 ### 20.5 Initial Display State
 
 **After Initialization**:
 ```
 Window: Created and visible
-Display: Black (cleared)
+Display: background (vBackColor, default black) + the SCOPE_XY GRATICULE — NOT blank:
+         • inscribed circle (1 px, vGridColor)
+         • full-bitmap-width/height crosshair (vGridColor)
+         • the text "r=<vRange>" (+ " logscale" when LOGSCALE) in the top margin
+         • up to 8 bold-italic trace labels in the four corners, each in its own vColor[i]
+         (ClearBitmap, dis_scope_xy branch, 3384-3409 — see §9.4)
 Buffer: SamplePtr = 0, SamplePop = 0
 Mode: Fading (vSamples = 256 unless overridden by SAMPLES directive)
 Scale: vScale = (width / 2) / vRange
-Coordinates: Cartesian or polar (determined by vPolar)
-Packing: val=0 / 32-bit unpacked (SetPack(0,False,False)) unless packing directive given
+Coordinates: Cartesian or polar (determined by vPolar); polar θ=0 = East, CCW
+Packing: val=0 / 32-bit UNPACKED (SetPack(0,False,False)) unless a packing directive is given
 ```
 
 **Ready for Data**: Window now waits for SCOPE_XY_Update calls with sample data.
@@ -2268,7 +2522,15 @@ Bitmap[1].Free;
 Form.Free;
 ```
 
-**Buffer Cleanup**: XY_SampleBuff is a static global array, not freed per-window.
+**Buffer Cleanup**: `XY_SampleBuff` is a **private instance field** of the form (line 362), so it is
+allocated with the form and released with it — there is nothing to free separately, and nothing is
+shared with any other window.
+
+**`CLOSE`**: the per-window `CLOSE` directive is dispatched one layer up, not in `SCOPE_XY_Update` —
+`p2com.asm` (19613-19624) clears the display's bit in `debug_display_ena`, and `TDebugForm.ChrIn`
+(`DebugUnit.pas`:236-237) closes the form **after** running the rest of the message. It reclaims one of
+the 32 display slots; it is the per-window counterpart of the global `DEBUG_END_SESSION` teardown
+(`TDebugForm.CloseDisplays`, `DebugUnit.pas`:125-134).
 
 ---
 
@@ -2286,9 +2548,11 @@ The **SCOPE_XY** display window is a versatile XY plotter for the Propeller 2 de
 - Flexible data packing (12 modes)
 
 **Performance Profile**:
-- Persistent mode: Minimal CPU usage (plot on arrival)
-- Fading mode: Moderate CPU usage (redraw all samples per update)
-- Memory: ~1.5 MB bitmaps (persistent), ~1.63 MB (fading with full buffer)
+- Persistent mode (`SAMPLES 0`): Minimal CPU usage (plot on arrival)
+- Fading mode (**the default**, 256 samples): Moderate CPU usage (clear + redraw the graticule and all
+  buffered samples on every rate cycle)
+- Memory: bitmaps sized `(display + 4·ChrHeight)² × 3 B × 2`, plus a flat per-window 128 KB
+  `XY_SampleBuff` in **either** mode
 
 **Common Use Cases**:
 - Lissajous figures (frequency/phase analysis)

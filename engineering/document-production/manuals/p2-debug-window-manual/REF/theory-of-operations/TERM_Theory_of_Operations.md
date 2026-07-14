@@ -2,12 +2,19 @@
 
 **Current as of**: PNut v55 for Propeller 2
 **Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Re-ratified against raw v55**: 2026-07-14 — conflict-audit conformance pass (control-code
+model, lazy column wrap, color-pair naming, `SAVE`/`CLOSE` grammar, worked examples, citations)
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 > **TS parity (2026-06-06):** `DebugTermWindow` was brought to parity by the 9-window parity
-> sprint **§14** (build 0.9.27): runtime named colors + `BACKCOLOR`, `SET` column/row consuming
-> their parameter (no double-dispatch), `CR`+`LF` collapsing to a single newline, default 10pt
-> font, and `SIZE`/`TEXTSIZE` clamping. See matrix §8 and `termResidualsParity.test.ts`.
+> sprint **§14** (build 0.9.27): runtime named colors + `BACKCOLOR`, the numeric control codes
+> **2** / **3** (set column / set row) consuming their following numeric parameter (no
+> double-dispatch), `CR`+`LF` collapsing to a single newline, default 10pt font, and
+> `SIZE`/`TEXTSIZE` clamping. See matrix §8 and `termResidualsParity.test.ts`.
+>
+> ⚠️ **TERM has no `SET` directive.** `key_set` (= 77, line 112) is a PLOT/BITMAP keyword and
+> is accepted by neither `TERM_Configure` (2193-2211) nor `TERM_Update` (2230-2255). Cursor
+> placement in TERM is done with the numeric control codes **2** and **3** (2272-2275).
 
 ## Table of Contents
 
@@ -54,8 +61,9 @@ The **TERM** (Terminal) display window provides a text-based terminal emulator f
 
 - **Configurable size**: 1-256 columns, 1-256 rows (default: 40×20)
 - **Proportional font support**: Uses Windows TrueType fonts with dynamic sizing
-- **Color pairs**: 4 predefined text/background color combinations
-- **Control characters**: Tab (9), newline (10, 13), backspace (8)
+- **Color pairs**: 4 predefined text/background color combinations (two colors × inverse video)
+- **Control codes**: clear+home (0), home (1), set column (2 *n*), set row (3 *n*), select color
+  pair 0-3 (4-7), backspace (8), tab (9), newline (10, 13) — codes **11, 12 and 14-31 are inert**
 - **String output**: Efficient multi-character string rendering
 - **Position commands**: Explicit cursor positioning (row, column)
 - **Update modes**: Real-time character-by-character or buffered batch updates
@@ -118,23 +126,38 @@ const
     (clOrange, clBlack, clBlack, clOrange, clLime, clBlack, clBlack, clLime);
 ```
 
-**Color Pairs**:
-- **Pair 0**: Orange text on black background (indices 0-1)
-- **Pair 1**: Black text on orange background (indices 2-3)
-- **Pair 2**: Lime text on black background (indices 4-5)
-- **Pair 3**: Black text on lime background (indices 6-7)
+**Color Pairs** — the four defaults are **two colors × two inverse-video variants**:
+- **Pair 0**: ORANGE text on BLACK background (indices 0-1)
+- **Pair 1**: BLACK text on ORANGE background (indices 2-3) — *inverse of pair 0*
+- **Pair 2**: GREEN text on BLACK background (indices 4-5)
+- **Pair 3**: BLACK text on GREEN background (indices 6-7) — *inverse of pair 2*
 
 **Interpretation**:
 ```
 vColor[0] = clOrange   // Pair 0 foreground
 vColor[1] = clBlack    // Pair 0 background
-vColor[2] = clBlack    // Pair 1 foreground
+vColor[2] = clBlack    // Pair 1 foreground  (inverse video)
 vColor[3] = clOrange   // Pair 1 background
-vColor[4] = clLime     // Pair 2 foreground
+vColor[4] = clLime     // Pair 2 foreground  ($00FF00 — pure green)
 vColor[5] = clBlack    // Pair 2 background
-vColor[6] = clBlack    // Pair 3 foreground
+vColor[6] = clBlack    // Pair 3 foreground  (inverse video)
 vColor[7] = clLime     // Pair 3 background
 ```
+
+> ⚠️ **`clLime` is a Delphi palette constant, not a DEBUG color keyword.** The two color
+> systems are **distinct**:
+> - **`clXxx` constants** (`DebugDisplayUnit.pas` 179-191) are literal RGB24 values used
+>   *inside* the Pascal — `clLime = $00FF00`, `clOrange = $FF7F00`, `clBlack = $000000`.
+>   `DefaultTermColors` (242) is written in this vocabulary.
+> - **DEBUG color keywords** are what a user writes in a `debug()` directive:
+>   `BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY` (`key_black = 0` …
+>   `key_gray = 9`, lines 32-41). **There is no `LIME` keyword** — the green keyword is
+>   **`GREEN`** (`key_green = 4`, line 36).
+>
+> So pair 2's default *value* is `$00FF00`, and the *keyword* that names green is `GREEN`.
+> The keyword path is not a literal lookup: `KeyColor` (2770-2775) routes the eight hues
+> `ORANGE..GRAY` through `TranslateColor(h shl 5 or p shl 1, key_rgbi8x)`, so `GREEN` at a
+> given brightness need not equal `$00FF00` exactly.
 
 ---
 
@@ -154,7 +177,8 @@ var
 **Characteristics**:
 - **vCols, vRows**: Terminal grid dimensions
 - **vCol, vRow**: Current cursor position (0-based indexing)
-- **Valid ranges**: vCol ∈ [0, vCols-1], vRow ∈ [0, vRows-1]
+- **Valid ranges**: `vCol ∈ [0, vCols]`, `vRow ∈ [0, vRows-1]` — `vCol` may legitimately
+  rest **at `vCols`** (a "pending wrap"; the wrap is lazy, `TERM_Chr:2340`/`2347` — see §7.3)
 
 ### 3.2 Color Array
 
@@ -214,9 +238,9 @@ opens.
 |-----------|-----------|------------|---------------|
 | `TITLE 'str'` | `key_title` | string | Free string · window title bar text |
 | `POS left top` | `key_pos` | 2 integers | left, top · offset from base window position |
-| `SIZE cols rows` | `key_size` | 2 integers | **Columns × rows** (not pixels); cols int **1..256** · default 40; rows int **1..256** · default 20. Clamped by `KeySize(…, term_colmin, term_colmax, term_rowmin, term_rowmax)` (`2199-2200`; constants `term_colmin/_rowmin`=1, `term_colmax/_rowmax`=256, lines 224-227) |
+| `SIZE cols rows` | `key_size` | 2 integers | **Columns × rows** (not pixels); cols int **1..256** · default 40; rows int **1..256** · default 20. **Assign-and-clamp** by `KeySize(…, term_colmin, term_colmax, term_rowmin, term_rowmax)` (`2199-2200`; constants `term_colmin/_rowmin`=1, `term_colmax/_rowmax`=**256**, lines 224-227) — out-of-range is *saturated*, never ignored: `SIZE 300 200` ⇒ **256 × 200** |
 | `TEXTSIZE n` | `key_textsize` | integer | Font point size · int **6..200** · default 10 (global `FontSize` user preference); applied via `KeyTextSize` |
-| `COLOR c0 c1 … c7` | `key_color` | up to 8 RGB24 values | Fills `vColor[0..7]` — 4 text/background pairs; reads up to 8, stops early if a value is absent (`2203-2204`). Each value is a named color (§7.1, optional 0–15 brightness nibble) or numeric. Default: `ORANGE/BLACK, BLACK/ORANGE, LIME/BLACK, BLACK/LIME` |
+| `COLOR c0 c1 … c7` | `key_color` | up to 8 color values | Fills `vColor[0..7]` — 4 text/background pairs; reads up to 8, stops early if a value is absent (`2203-2204`). Each value is a named color keyword ([Directive Matrix §7.1](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — optional 0–15 brightness nibble, but **not** for `BLACK`/`WHITE`; see the named-color notes below) **or** numeric (interpreted through `vColorMode`, which for TERM is always the `SetDefaults` value **RGB24**, 2889). **`COLOR` is config-only for TERM** — `TERM_Update` has no `key_color` arm (see below). Default: pair0 `ORANGE/BLACK`, pair1 `BLACK/ORANGE`, pair2 `GREEN/BLACK`, pair3 `BLACK/GREEN` (`DefaultTermColors`, 242 — pairs 1 & 3 are inverse video) |
 | `BACKCOLOR color` | `key_backcolor` | 1 RGB24 value | Window canvas background (used for clear/scroll fill), not character background (`2205-2206`) |
 | `UPDATE` | `key_update` | *(flag)* | Enables buffered mode — screen only updates on explicit `UPDATE` directive (`2207-2208`) |
 | `HIDEXY` | `key_hidexy` | *(flag)* | Hides the live measurement-cursor coordinate readout; does **not** disable `PC_MOUSE` (`2209-2210`) |
@@ -225,12 +249,21 @@ opens.
 
 Processed on every subsequent message by `TERM_Update` (lines 2223-2315).
 
+> **TERM does NOT accept `COLOR` in the update phase.** `TERM_Update`'s key `case`
+> (2231-2255) contains only `key_black..key_gray` (2232), `key_backcolor` (2238),
+> `key_clear`, `key_update`, `key_save`, `key_pc_key`, `key_pc_mouse` — **there is no
+> `key_color` arm**. `COLOR` is accepted only by `TERM_Configure` (2203-2204). (PLOT
+> accepts `COLOR` in *both* phases — `PLOT_Update:1934` reads
+> `key_color, key_black..key_gray:` — which is why the shared Matrix row is misleading
+> for TERM.)
+
 **Named-color key directives** (`key_black`..`key_gray`, lines 2232-2237):
 
 | Directive | Action |
 |-----------|--------|
-| `BLACK` `WHITE` `ORANGE` `BLUE` `GREEN` `CYAN` `RED` `MAGENTA` `YELLOW` `GRAY` `{brightness}` | Sets `vTextColor` (text foreground) to the named color, then reads an optional second color into `vTextBackColor` (text background). Both use `KeyColor` which accepts an optional 0–15 brightness nibble after the color name. |
-| `BACKCOLOR color` | Sets `vTextBackColor` only (`key_backcolor`, line 2238-2239) |
+| `ORANGE` `BLUE` `GREEN` `CYAN` `RED` `MAGENTA` `YELLOW` `GRAY` `{brightness 0..15}` | Sets `vTextColor` (text foreground), then `KeyColor` is called a **second time** (2236) and sets `vTextBackColor` **if** another color element follows. The optional brightness nibble (default **8**) applies **only** to these eight hues; they are computed through RGBI8X: `c := TranslateColor(h shl 5 or p shl 1, key_rgbi8x)` (`KeyColor:2770-2775`). |
+| `BLACK` `WHITE` | Same two-slot behavior, but these take **NO brightness nibble** — `KeyColor:2764-2768` returns the fixed literals `$000000` / `$FFFFFF` and never calls `NextNum`. ⚠️ **Trap:** `TERM BLACK 8` does *not* mean "black, brightness 8" — the `8` is left in the element stream, where the **second** `KeyColor` (2236) eats it as a **numeric background color**. |
+| `BACKCOLOR color` | Sets `vTextBackColor` only (`key_backcolor`, lines 2238-2239) |
 
 **Keyword directives**:
 
@@ -238,13 +271,33 @@ Processed on every subsequent message by `TERM_Update` (lines 2223-2315).
 |-----------|--------|
 | `CLEAR` | `key_clear` — clear entire bitmap, home cursor to (0,0), set update flag (lines 2240-2246) |
 | `UPDATE` | `key_update` — immediately copy `Bitmap[0]` to canvas (`BitmapToCanvas(0)`), line 2247-2248 |
-| `SAVE` | `key_save` — save bitmap to file (`KeySave`, line 2249-2250) |
+| `SAVE …` | `key_save` — six forms, see the **SAVE grammar** below (`KeySave`, 2839-2866; dispatched at 2249-2250) |
+| `CLOSE` | `key_close` (= 49, line 84) — closes this window and **reclaims its display slot**. It has **no arm in any `_Update` case statement** — it is dispatched a layer up, in the **parser** (`p2com.asm:19565-19572` flags it; 19613-19624 reverts the name symbol and clears the display's bit in `debug_display_ena`), after which `TDebugForm.ChrIn` (`DebugUnit.pas:236-237`) runs the full `UpdateDisplay(...)` and *then* closes the form. **Command-only** (ignored in a new-display declaration), **multi-target** (`` `Term1 Term2 CLOSE `` closes both), and **update-first, close-second** (`` `MyTerm SAVE 'shot' CLOSE `` saves, *then* closes). |
 | `PC_KEY` | `key_pc_key` — transmit latched keypress LONG to P2 (`SendKeyPress`, line 2251-2252) |
 | `PC_MOUSE` | `key_pc_mouse` — transmit mouse position + buttons LONG pair to P2 (`SendMousePos`, line 2253-2254) |
 
+**`SAVE` grammar** (`KeySave`, 2839-2866) — **six forms; three of them silently write nothing**:
+
+| Form | Writes |
+|------|--------|
+| `SAVE 'name'` | `Bitmap[1]` (the **front/display** buffer) → `name.bmp` (2843) |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect — **includes title bar and borders**, and is vulnerable to occlusion (2846-2864) |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region (2856-2864) |
+| `SAVE WINDOW` | captures to memory, **no file** (the trailing `if NextStr` at 2864 fails) |
+| `SAVE l t w h` | captures to memory, **no file** |
+| `SAVE` (bare) | `Exit` — **nothing at all** |
+
+The filename always comes **last**; the `.bmp` extension is appended. ⚠️ **Sharp edge:** a
+non-`WINDOW` keyword after `SAVE` is **consumed and then discarded** by the `Exit` at 2848 —
+`` `MyTerm SAVE CLEAR `` does nothing **and eats the `CLEAR`**. ⚠️ Because `SAVE 'name'` writes
+`Bitmap[1]`, a `SAVE` issued in buffered (`UPDATE`) mode *before* the explicit `UPDATE` writes
+the **stale previous frame**.
+
 **Numeric control codes** (lines 2258-2305, `ele_num` values). Each is a numeric
-element in the **0..13** control range or **32..255** printable range; numbers
-14–31 fall through the `case` with no action:
+element in the **0..13** control range or **32..255** printable range. Codes **0-7
+are acting codes**, not "unsupported" — they are the cursor/screen/color command set.
+Numbers **11, 12 and 14–31** have no `case` arm and fall through with **no action**
+(silently ignored — never printed):
 
 | Value | Parameter range | Action |
 |-------|-----------------|--------|
@@ -281,7 +334,7 @@ model. TERM-specific notes:
 | `FormMouseMove` | 725-732 | Displays character **col,row** as live measurement cursor; empty string (no readout) if cursor is outside the text area |
 | `FormMouseWheel` | 811-817 | Latches wheel direction (+1/−1) into `vMouseWheel` for 100 ms |
 | `PC_KEY` → `SendKeyPress` | 3579-3583 | Sends one LONG = `vKeyPress` byte (0 if none), then clears it |
-| `PC_MOUSE` → `SendMousePos` | 3563-3567 | LONG 1: `x` = char column, `y` = char row, wheel bits 26-27, L/M/R buttons bits 28-30; if cursor is **outside the text area** (margin-bounded character grid), LONG 1 = `$03FFFFFF`, LONG 2 = `$FFFFFFFF` (off-window sentinel). LONG 2: RGB color under cursor |
+| `PC_MOUSE` → `SendMousePos` | **3537-3577** (TERM char-cell mapping at 3563-3567) | LONG 1: `x` = char column, `y` = char row (the TERM `div ChrWidth`/`div ChrHeight` transform, 3563-3567), wheel bits 26-27 (3569), L/M/R buttons bits 28-30 (3570-3572); if cursor is **outside the text area** (margin-bounded character grid), LONG 1 = `$03FFFFFF`, LONG 2 = `$FFFFFFFF` (off-window sentinel, 3543-3549). LONG 2: RGB color under cursor (3553-3554) |
 
 `HIDEXY` suppresses the on-screen readout from `FormMouseMove` but does **not**
 prevent `PC_MOUSE` from reporting coordinates back to the P2.
@@ -486,10 +539,10 @@ end;
 | **1** | Home | Move cursor to (0, 0) |
 | **2** | Set Column | Next value = column (0-based) |
 | **3** | Set Row | Next value = row (0-based) |
-| **4** | Color Pair 0 | Set to pair 0 colors (orange/black) |
-| **5** | Color Pair 1 | Set to pair 1 colors (black/orange) |
-| **6** | Color Pair 2 | Set to pair 2 colors (lime/black) |
-| **7** | Color Pair 3 | Set to pair 3 colors (black/lime) |
+| **4** | Color Pair 0 | Set to pair 0 colors (ORANGE on BLACK) |
+| **5** | Color Pair 1 | Set to pair 1 colors (BLACK on ORANGE — inverse video) |
+| **6** | Color Pair 2 | Set to pair 2 colors (GREEN on BLACK) |
+| **7** | Color Pair 3 | Set to pair 3 colors (BLACK on GREEN — inverse video) |
 | **8** | Backspace | Move cursor back one position |
 | **9** | Tab | Space to next 8-column boundary |
 | **10** | Line Feed | New line (same as CR) |
@@ -500,11 +553,11 @@ end;
 
 | Key | Action |
 |-----|--------|
-| **key_black..key_gray** | Set text foreground color (named color + optional brightness); optionally set text background color from next element (lines 2232-2237) |
+| **key_black..key_gray** | Set text foreground color; optionally set text background color from next element (lines 2232-2237). Brightness nibble applies to `ORANGE..GRAY` only — **`BLACK`/`WHITE` take none** (`KeyColor:2764-2768`) |
 | **key_backcolor** | Set text background color only (line 2238-2239) |
 | **key_clear** | Clear screen and home cursor |
 | **key_update** | Force display update (buffered mode) |
-| **key_save** | Save display to image file |
+| **key_save** | Save to `.bmp` — six forms, incl. `SAVE WINDOW` (`KeySave`, 2839-2866); see the Directive Reference |
 | **key_pc_key** | Send keyboard input to host |
 | **key_pc_mouse** | Send mouse position to host |
 
@@ -653,9 +706,15 @@ vRow: integer;  // Row (0-based)
 
 **Valid Ranges**:
 ```
-vCol ∈ [0, vCols - 1]
+vCol ∈ [0, vCols]        // vCols == "pending wrap" — see §7.3
 vRow ∈ [0, vRows - 1]
 ```
+
+`vCol` legitimately **rests at `vCols`** (one past the last column) after a glyph is
+written into the last column: `TERM_Chr:2347` does an unconditional `Inc(vCol)` with
+no wrap test after it. The wrap is deferred to the *next* character (`TERM_Chr:2340`).
+The explicit set-column directive is still clamped to `0..vCols-1`
+(`KeyValWithin(vCol, 0, vCols - 1)`, 2273).
 
 ### 7.2 Position Commands
 
@@ -679,15 +738,24 @@ KeyValWithin(vRow, 0, vRows - 1);
 
 ### 7.3 Cursor Movement
 
-**Forward Movement** (printing character):
+**Forward Movement** (printing character) — the wrap is **LAZY, not eager**:
 ```pascal
-Inc(vCol);
-if vCol = vCols then  // Wrap to next line
-begin
-  vCol := 0;
-  Inc(vRow) or Scroll;
-end;
+// TERM_Chr, else-branch (2338-2352):
+if vCol = vCols then TERM_Chr(Chr(13));   // 2340 — deferred wrap, tested ON ENTRY
+… draw the glyph at (vCol, vRow) …        // 2341-2346
+Inc(vCol);                                // 2347 — UNCONDITIONAL, no wrap test after
 ```
+
+`TERM_Chr` tests the wrap **on entry of the next character** (2340), not after
+advancing. So printing into the last column leaves `vCol = vCols` — a *pending-wrap*
+state — and the CR that opens the new row is performed only when another **printable**
+character actually arrives.
+
+> **Behavioral consequence (this is a real difference, not a formality).** An explicit
+> `CR` (13) sent immediately after a last-column glyph produces **one** newline. Under
+> an eager-wrap model (`Inc(vCol); if vCol = vCols then wrap`) the row would already
+> have advanced, and the explicit CR would advance it *again* — emitting an **extra
+> blank row**. v55 does not do that.
 
 **Backward Movement** (backspace, command 8):
 ```pascal
@@ -924,17 +992,21 @@ Pair 2: vColor[4] (foreground), vColor[5] (background)
 Pair 3: vColor[6] (foreground), vColor[7] (background)
 ```
 
-**Default Colors** (DebugDisplayUnit.pas:242):
+**Default Colors** (DebugDisplayUnit.pas:242) — **four inverse-video pairs**:
 ```pascal
 DefaultTermColors: array[0..7] of integer =
-  (clOrange, clBlack,    // Pair 0: Orange ($FF7F00) on black ($000000)
-   clBlack, clOrange,    // Pair 1: Black ($000000) on orange ($FF7F00)
-   clLime, clBlack,      // Pair 2: Lime ($00FF00) on black ($000000)
-   clBlack, clLime);     // Pair 3: Black ($000000) on lime ($00FF00)
+  (clOrange, clBlack,    // Pair 0: ORANGE ($FF7F00) on BLACK ($000000)
+   clBlack, clOrange,    // Pair 1: BLACK on ORANGE          (inverse of pair 0)
+   clLime, clBlack,      // Pair 2: GREEN ($00FF00) on BLACK
+   clBlack, clLime);     // Pair 3: BLACK on GREEN           (inverse of pair 2)
 ```
 The `clXxx` constants are literal RGB24 values (`DebugDisplayUnit.pas` 179–191):
 `clOrange = $FF7F00` (note: **NOT** web `$FF8000`/`$FFA500`), `clLime = $00FF00`,
 `clBlack = $000000`. `WinRGB` swaps R↔B to BGR only at GDI draw time.
+
+**Naming**: `clLime` is a **Delphi palette constant**, not a DEBUG color keyword — the
+DEBUG keyword for that hue is **`GREEN`** (`key_green = 4`, line 36); no `LIME` keyword
+exists. See §2.3 for the two-color-systems note.
 
 ### 10.3 Color Selection
 
@@ -1007,11 +1079,16 @@ ChrWidth: integer;   // Pixels per character (horizontal)
 ChrHeight: integer;  // Pixels per character (vertical)
 ```
 
-**Font**: `SetTextMetrics` sets only `Bitmap[0].Canvas.Font.Size := vTextSize` and
-does **not** assign a font name — the canvas's inherited font face is used. The cell
-size is the measured width/height of the glyph `'X'` at the requested point size
-(`2921-2924`); `'X'` is a representative wide glyph, so proportional fonts are
-accommodated by sizing every cell to that width.
+**Font**: `SetTextMetrics` (2919-2925) sets only the **size**
+(`Bitmap[0].Canvas.Font.Size := vTextSize`). The **face** is assigned once, earlier, in
+`FormCreate:600` — `Bitmap[0].Canvas.Font.Name := FontName` — i.e. the **global font-name
+preference** (the same one applied to `CursorColor.Canvas.Font.Name` at 608). So the cell
+size is the measured width/height of the glyph `'X'` **in `FontName` at `vTextSize` points**
+(`2921-2924`), not in an arbitrary VCL default face. `'X'` is a representative wide glyph, so
+proportional fonts are accommodated by sizing every cell to that width.
+
+> **TS-parity note:** cell width/height must be measured with the **configured font face**,
+> not the browser/host default — otherwise the whole grid geometry drifts.
 
 **Example Measurements** (approximate):
 
@@ -1054,12 +1131,19 @@ ClientHeight := vMarginTop + vHeight + vMarginBottom;
 
 ### 12.1 Configuration Command
 
-**Format** (element array):
+**Format** (element array). Slot `[0]` is the **display-type** element `ele_dis` — *not*
+`ele_key` — and slot `[1]` is the window-**name** element `ele_nam`; `FormCreate` reads
+`DisplayType := P2.DebugDisplayValue[0]` and the name from `[1]`, then begins the directive
+scan at `ptr := 2` (`FormCreate:625-632`). There is exactly **one** `ele_end`, at the very end
+— `NextEnd` (4124-4127) tests `DebugDisplayType[ptr] = ele_end`, so a mid-array `ele_end`
+would **terminate the whole directive scan**.
+
 ```
-ele_key, dis_term,
-ele_key, key_title, ele_str, "Terminal", ele_end,
-ele_key, key_pos, ele_num, x, ele_num, y, ele_num, w, ele_num, h,
-ele_key, key_size, ele_num, cols, ele_num, rows,
+ele_dis, dis_term,
+ele_nam, <name ptr>,
+ele_key, key_title,    ele_str, 'Terminal',
+ele_key, key_pos,      ele_num, left, ele_num, top,      // KeyPos reads exactly 2 numbers
+ele_key, key_size,     ele_num, cols, ele_num, rows,
 ele_key, key_textsize, ele_num, font_size,
 ele_key, key_color,
   ele_num, fg0, ele_num, bg0,
@@ -1069,6 +1153,10 @@ ele_key, key_color,
 ele_key, key_update,
 ele_end
 ```
+
+`KeyPos` (2712-2716) reads **exactly two** numbers — `if NextNum then Left := val +
+P2.DebugDisplayLeft else Exit; if NextNum then Top := val + P2.DebugDisplayTop;` — there is
+**no width/height**. (Window size comes from `SIZE cols rows` × the measured cell.)
 
 ### 12.2 Update Commands
 
@@ -1105,20 +1193,28 @@ ele_key, key_update, ele_end
 
 ## 13. Usage Examples
 
+> **Two rules govern every example below — get either wrong and nothing appears.**
+>
+> 1. **Instantiate, then feed by INSTANCE NAME.** The *first* `debug()` names the display
+>    **type** followed by the **instance name** you are creating (`` `TERM MyTerm … ``); every
+>    subsequent message addresses the **instance**, never the type (`` `MyTerm … ``). Feeding
+>    the display *type* — `` debug(`TERM 'Hello') `` — does not reach a window.
+>    (`FormCreate:625-626` reads `[0]` = display type, `[1]` = the window's name; the name is
+>    what the parser resolves on later messages.)
+> 2. **Strings are SINGLE-quoted.** `'Hello'` — not `"Hello"`. Double quotes are **silently
+>    ignored** by the debug-string parser.
+
 ### 13.1 Basic Text Output
 
 **Goal**: Display simple text messages.
 
-**Configuration**:
-```
-TERM SIZE 40 20
-```
-
 **Propeller 2 Code**:
 ```spin2
-debug(`TERM "Hello, World!")
-debug(`TERM 13)  ' Newline
-debug(`TERM "Line 2")
+debug(`TERM MyTerm SIZE 40 20)    ' create the instance "MyTerm"
+
+debug(`MyTerm 'Hello, World!')
+debug(`MyTerm 13)                 ' newline
+debug(`MyTerm 'Line 2')
 ```
 
 **Output**:
@@ -1134,11 +1230,15 @@ _
 
 **Propeller 2 Code**:
 ```spin2
-debug(`TERM 1)           ' Home cursor
-debug(`TERM 3 `UDEC_(5))  ' Set row to 5
-debug(`TERM 2 `UDEC_(10)) ' Set column to 10
-debug(`TERM "Positioned text")
+debug(`TERM MyTerm SIZE 40 20)
+
+debug(`MyTerm 1)                  ' control code 1 — home cursor
+debug(`MyTerm 3 5)                ' control code 3 + parameter — set row to 5
+debug(`MyTerm 2 10)               ' control code 2 + parameter — set column to 10
+debug(`MyTerm 'Positioned text')
 ```
+
+(Use `` `(expr) `` to supply the parameter from a variable: `` debug(`MyTerm 3 `(row)) ``.)
 
 **Output**:
 ```
@@ -1152,17 +1252,16 @@ debug(`TERM "Positioned text")
 
 **Goal**: Use different colors for status messages.
 
-**Configuration**:
-```
-TERM SIZE 40 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000
-```
-Pairs: Orange/Black, Black/Orange, Green/Black, Red/Black (here Orange = `clOrange` `$FF7F00`)
-
 **Propeller 2 Code**:
 ```spin2
-debug(`TERM 4 "Normal message" 13)    ' Pair 0 (orange)
-debug(`TERM 6 "Success!" 13)          ' Pair 2 (green)
-debug(`TERM 7 "Error!" 13)            ' Pair 3 (red)
+' 8 values = 4 text/background pairs. COLOR is CONFIG-ONLY for TERM (2203-2204).
+debug(`TERM MyTerm SIZE 40 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
+' pair0 Orange/Black · pair1 Black/Orange · pair2 Green/Black · pair3 Red/Black
+' (Orange here = clOrange $FF7F00)
+
+debug(`MyTerm 4 'Normal message' 13)   ' control code 4 → pair 0 (orange)
+debug(`MyTerm 6 'Success!' 13)         ' control code 6 → pair 2 (green)
+debug(`MyTerm 7 'Error!' 13)           ' control code 7 → pair 3 (red)
 ```
 
 **Output** (in color):
@@ -1172,16 +1271,23 @@ Success!        (green text)
 Error!          (red text)
 ```
 
+An **arbitrary** foreground/background can also be set at runtime with the named-color
+directives, which TERM *does* accept in the update phase (2232-2239) — e.g.
+`` debug(`MyTerm YELLOW 12 'Warning' 13) `` (yellow at brightness 12), or
+`` debug(`MyTerm BACKCOLOR $202020) ``. Only the **`COLOR`** keyword itself is config-only.
+
 ### 13.4 Formatted Data Table
 
 **Goal**: Display aligned data columns.
 
 **Propeller 2 Code**:
 ```spin2
-debug(`TERM 0)            ' Clear screen
-debug(`TERM "Sensor" 9 "Value" 9 "Status" 13)
-debug(`TERM "Temp" 9 `UDEC_(temp) 9 "OK" 13)
-debug(`TERM "Press" 9 `UDEC_(press) 9 "OK" 13)
+debug(`TERM MyTerm SIZE 40 20)
+
+debug(`MyTerm 0)                  ' control code 0 — clear screen + home
+debug(`MyTerm 'Sensor' 9 'Value' 9 'Status' 13)
+debug(`MyTerm 'Temp' 9 `UDEC_(temp) 9 'OK' 13)
+debug(`MyTerm 'Press' 9 `UDEC_(press) 9 'OK' 13)
 ```
 
 **Output**:
@@ -1195,15 +1301,12 @@ Press   1013    OK
 
 **Goal**: Continuous logging with auto-scroll.
 
-**Configuration**:
-```
-TERM SIZE 80 25
-```
-
 **Propeller 2 Code**:
 ```spin2
+debug(`TERM MyTerm SIZE 80 25)
+
 repeat
-  debug(`TERM `UDEC_(milliseconds()) " Event occurred" 13)
+  debug(`MyTerm `UDEC_(getms()) ' Event occurred' 13)
   waitms(100)
 ```
 
@@ -1221,22 +1324,21 @@ _
 
 **Goal**: Reduce flicker during complex updates.
 
-**Configuration**:
-```
-TERM SIZE 40 20 UPDATE
-```
-
 **Propeller 2 Code**:
 ```spin2
+debug(`TERM MyTerm SIZE 40 20 UPDATE)   ' UPDATE at config = buffered mode
+
 ' Clear and redraw entire screen
-debug(`TERM 0)            ' Clear
-debug(`TERM "Header")
-debug(`TERM 13)
+debug(`MyTerm 0)                        ' clear
+debug(`MyTerm 'Header')
+debug(`MyTerm 13)
 ' ... more text ...
-debug(`TERM `UPDATE)      ' Force single update
+debug(`MyTerm UPDATE)                   ' force the single flush (BitmapToCanvas(0), 2247-2248)
 ```
 
-**Behavior**: All text buffered, then displayed once with UPDATE command.
+**Behavior**: All text buffered in `Bitmap[0]`, then displayed once by the `UPDATE`
+directive. ⚠️ A `SAVE 'name'` issued *before* that `UPDATE` writes `Bitmap[1]` — i.e. the
+**stale previous frame** (`KeySave:2843`).
 
 ---
 
@@ -1312,32 +1414,54 @@ debug(`TERM `UPDATE)      ' Force single update
 
 **Supported Features**:
 - Character output
-- Cursor positioning (row/column)
+- Cursor positioning (row/column) — control codes 1, 2, 3
 - Scrolling
-- Color selection (limited)
+- Color selection — 4 selectable pairs (codes 4-7) **plus** arbitrary fg/bg via the
+  named-color directives `BLACK..GRAY {brightness}` / `BACKCOLOR` (2232-2239)
 - Tab expansion
 - Newline handling
+- **Mouse position readback** — the P2 polls it with `PC_MOUSE` (`SendMousePos`, 3537-3577),
+  which returns the character **column, row** (TERM's char-cell transform, 3563-3567)
 
 **Not Supported**:
 - ANSI escape sequences
 - Cursor movement sequences (e.g., ESC[A for up)
 - Attributes (bold, underline, blink)
 - Alternate screen buffer
-- Mouse tracking
+- **ANSI/xterm mouse-*reporting* escape sequences** — note this is *not* the same as "no
+  mouse": the mouse **position is available**, just not via terminal escape codes. It is
+  polled with `PC_MOUSE` (see the Keyboard & mouse table in the Directive Reference).
 - Line drawing characters
 
 ### 15.2 Control Code Handling
 
-**Supported Control Codes**:
+Codes **0-7 are the core acting codes** — they are the entire cursor/screen/color
+command set. They are *not* "unsupported": every one of them has an explicit arm in
+the `case val of` at `TERM_Update:2259-2305`.
 
-| Code | ASCII | Name | Action |
-|------|-------|------|--------|
-| 8 | BS | Backspace | Move cursor back |
-| 9 | HT | Horizontal Tab | Space to tab stop |
-| 10 | LF | Line Feed | New line |
-| 13 | CR | Carriage Return | New line |
+**Supported control codes** (all handled in `TERM_Update`):
 
-**Unsupported Control Codes**: 0-7, 11-12, 14-31 (ignored or treated as printable)
+| Code | ASCII | Name | Action | Pascal |
+|------|-------|------|--------|--------|
+| 0 | NUL | Clear + Home | `ClearBitmap`; `vUpdateFlag := True`; `vCol := 0`; `vRow := 0` | 2260-2266 |
+| 1 | SOH | Home | `vCol := 0`; `vRow := 0` (no clear) | 2267-2271 |
+| 2 *n* | STX | Set column | `KeyValWithin(vCol, 0, vCols - 1)` — consumes the **next numeric element** | 2272-2273 |
+| 3 *n* | ETX | Set row | `KeyValWithin(vRow, 0, vRows - 1)` — consumes the **next numeric element** | 2274-2275 |
+| 4 | EOT | Select color pair 0 | `vTextColor := vColor[0]`; `vTextBackColor := vColor[1]` | 2276-2280 |
+| 5 | ENQ | Select color pair 1 | `vColor[2]` / `vColor[3]` | 2276-2280 |
+| 6 | ACK | Select color pair 2 | `vColor[4]` / `vColor[5]` | 2276-2280 |
+| 7 | BEL | Select color pair 3 | `vColor[6]` / `vColor[7]` | 2276-2280 |
+| 8 | BS | Backspace | Move cursor back (cursor only — no erase) | 2281-2290 |
+| 9 | HT | Horizontal Tab | Space to next 8-column boundary | 2291-2295 |
+| 10 | LF | Line Feed | New line (`TERM_Chr(Chr(13))`) | 2296-2297 |
+| 13 | CR | Carriage Return | New line; swallows a following `10` | 2298-2302 |
+| 32-255 | — | Printable | Render glyph via `TERM_Chr` | 2303-2304 |
+
+**Unhandled numeric values**: **11, 12 and 14-31**. The `case` at `TERM_Update:2259-2305`
+has **no arm** for them, so they fall through with **no action** — they are silently
+ignored, and they are **never "treated as printable"** (only `32..255` reaches
+`TERM_Chr`). Note that 11 and 12 *are* legal *input* values — `FormKeyDown` (846-847)
+sends them for PageUp/PageDown — they are simply no-ops on *output*.
 
 ### 15.3 Newline Behavior
 
@@ -1364,7 +1488,7 @@ CRLF (13, 10): Processed as single newline
 | **Character output** | ✓ | ✓ | ✓ |
 | **Scrolling** | ✓ | ✓ | ✓ |
 | **Cursor positioning** | ✓ (commands) | ✓ (ESC sequences) | ✗ |
-| **Colors** | ✓ (4 pairs) | ✓ (8/16 colors) | ✗ |
+| **Colors** | ✓ (4 selectable pairs *plus* arbitrary fg/bg via `BLACK..GRAY {brightness}` / `BACKCOLOR`) | ✓ (8/16 colors) | ✗ |
 | **ANSI escapes** | ✗ | ✓ | ✗ |
 | **Attributes** | ✗ | ✓ | ✗ |
 | **Tab stops** | ✓ (fixed 8) | ✓ (programmable) | ✓ |
@@ -1417,7 +1541,7 @@ clipping rectangle.
 **Logical Coordinates** (row/column):
 ```
 vRow ∈ [0, vRows - 1]
-vCol ∈ [0, vCols - 1]
+vCol ∈ [0, vCols]        // vCols = pending-wrap state (lazy wrap, §7.3)
 ```
 
 **Pixel Coordinates**:
@@ -1478,25 +1602,37 @@ DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;
 
 ### 17.2 TERM Configuration Example
 
+A **create** message always begins with the display-type element and the window-name
+element; `FormCreate` reads `DisplayType` from `[0]` and the name from `[1]`, then sets
+`ptr := 2` before dispatching `TERM_Configure` (`FormCreate:625-632`). Directives therefore
+start at index **2**, and a single `ele_end` terminates the array.
+
 ```
 Element Array:
-[0] type=ele_key   value=key_size        → SIZE
-[1] type=ele_num   value=40              → columns
-[2] type=ele_num   value=25              → rows
-[3] type=ele_key   value=key_textsize    → TEXTSIZE
-[4] type=ele_num   value=12              → font size
-[5] type=ele_end   value=0
+[0] type=ele_dis   value=dis_term        → display type (6)
+[1] type=ele_nam   value=<name ptr>      → window instance name
+[2] type=ele_key   value=key_size        → SIZE
+[3] type=ele_num   value=40              → columns
+[4] type=ele_num   value=25              → rows
+[5] type=ele_key   value=key_textsize    → TEXTSIZE
+[6] type=ele_num   value=12              → font size
+[7] type=ele_end   value=0
 ```
 
 ### 17.3 TERM Character Output Example
 
+For an **update** message the payload is reached via `UpdateDisplay(Index)`, which does
+`ptr := Index` (`899-901`) with `Index = P2.DebugDisplayTargs` — i.e. `ptr` starts *past* the
+list of targeted display names. The indices below are relative to that `ptr`, not absolute
+array slots:
+
 ```
-Element Array:
-[0] type=ele_str   value=<ptr>           → "Hello World\n"
-[1] type=ele_end   value=0
+Element Array (from ptr):
+[+0] type=ele_str   value=<ptr>           → 'Hello World'
+[+1] type=ele_end   value=0
 ```
 
-Each character processed sequentially through TERM_Chr.
+Each character processed sequentially through `TERM_Chr` (2307-2311).
 
 ---
 
@@ -1540,7 +1676,8 @@ pixels are block-copied. See §8 for the exact source rectangles.
 
 In real-time mode (`vUpdate = False`, default) each `TERM_Chr` immediately mirrors
 the just-drawn cell rectangle from `Bitmap[0]` to `Bitmap[1]` and to the on-screen
-`Canvas` (lines 2349-2353), so output appears character-by-character. In buffered
+`Canvas` (guard `if not vUpdate` at **2348**; the two `CopyRect`s at **2350-2351**), so output
+appears character-by-character. In buffered
 mode (`vUpdate = True`, set by the `UPDATE` config directive) those per-character
 copies are skipped; `Bitmap[0]` accumulates silently until an explicit `UPDATE`
 directive runs `BitmapToCanvas(0)` (line 2248). Independently, `vUpdateFlag` is set
@@ -1573,7 +1710,8 @@ Character rendering in v55 is performed entirely inside `TERM_Chr` (lines
 The procedure sets `Bitmap[0].Canvas.Font.Color := WinRGB(vTextColor)` and
 `Bitmap[0].Canvas.Brush.Color := WinRGB(vTextBackColor)`, then calls
 `Bitmap[0].Canvas.TextRect(r, x, y, c)` where `r` is the cell rectangle derived
-from `vCol`/`vRow` × `ChrWidth`/`ChrHeight` plus the margins (lines 2344-2348). The
+from `vCol`/`vRow` × `ChrWidth`/`ChrHeight` plus the margins (rect derived **2341-2343**;
+colors + `TextRect` **2344-2346**; `Inc(vCol)` **2347**). The
 `Brush.Color` fills the cell background as part of the `TextRect` call, so each
 glyph is opaque over its background pair color. See §6.1 for the full procedure.
 
@@ -1613,8 +1751,10 @@ vBackColor: integer;                 // window canvas background (clear/scroll f
 
 ### 20.2 Text Metrics
 
-The v55 `SetTextMetrics` measures `'X'` and does not assign a font name (see §11.1,
-lines 2919-2925):
+The v55 `SetTextMetrics` measures `'X'` at the current size (see §11.1, lines 2919-2925). It
+assigns **no font name** — because it does not need to: the face was already set once in
+`FormCreate:600` (`Bitmap[0].Canvas.Font.Name := FontName`), so the measurement is of `'X'`
+**in the global `FontName`**:
 
 ```pascal
 procedure TDebugDisplayForm.SetTextMetrics;
@@ -1650,21 +1790,32 @@ Reference above for the authoritative code table.
 The TERM window is created by the shared form infrastructure and configured by
 `TERM_Configure` (lines 2181-2221). The lifecycle at creation:
 
-1. Shared `FormCreate` (`591-643`) runs — selects the display type and creates the
-   double-buffer `Bitmap[0]`/`Bitmap[1]` and the form-level timers/handlers common
-   to all nine windows.
-2. `TERM_Configure` is called — applies TERM's unique defaults: `vTextSize := FontSize`,
+1. The form **constructor** — `constructor TDebugDisplayForm.Create` (**551-576**) — installs
+   the shared event handlers (`OnCreate`/`OnMouseMove`/`OnMouseWheel`/`OnKeyPress`/
+   `OnKeyDown`/`OnPaint`/`OnDestroy`, 563-569) and creates the two `TTimer`s
+   `MouseWheelTimer` / `KeyTimer` (570-575). **`FormCreate` does none of this.**
+2. Shared `FormCreate` (**591-645**) runs — creates the double-buffer `Bitmap[0]`/`Bitmap[1]`
+   as `pf24bit` (596-599); assigns the **global font face** `Bitmap[0].Canvas.Font.Name :=
+   FontName` (600) and the global `vTextSize := FontSize` + `SetTextMetrics` (601-602); builds
+   the measurement-cursor bitmaps (604-616) and the desktop-capture bitmap/DC (618-619);
+   `SetPolarColors` (621); reads `DisplayType := P2.DebugDisplayValue[0]` (625) and sets the
+   default caption `'<name> - TERM'` (626); sets `Left`/`Top` (628-629); runs the **global
+   `SetDefaults`** (631 — `vBackColor = clBlack`, `vColorMode = key_rgb24`, `vUpdate = False`,
+   `vHideXY = False`, `vTextSize = 10`); sets `ptr := 2` (632); dispatches `TERM_Configure`
+   (640) and finally `Show` (644).
+3. `TERM_Configure` applies TERM's unique defaults: `vTextSize := FontSize`,
    `vCols := DefaultCols` (40), `vRows := DefaultRows` (20), `vCol := 0`, `vRow := 0`,
-   and `vColor[0..7] := DefaultTermColors` (lines 2185-2190). It then walks the
+   and `vColor[0..7] := DefaultTermColors` (lines 2186-2191). It then walks the
    element stream with `NextKey`, applying any `TITLE/POS/SIZE/TEXTSIZE/COLOR/
-   BACKCOLOR/UPDATE/HIDEXY` directives (lines 2192-2210).
-3. Active colors are seeded from pair 0: `vTextColor := vColor[0]`,
+   BACKCOLOR/UPDATE/HIDEXY` directives (lines 2193-2211).
+4. Active colors are seeded from pair 0: `vTextColor := vColor[0]`,
    `vTextBackColor := vColor[1]` (lines 2212-2213).
-4. `SetTextMetrics` (2919-2925) runs inside `TERM_Configure` — sets the font size
-   and measures `'X'` to get `ChrWidth`/`ChrHeight`; then `vWidth := vCols*ChrWidth`,
-   `vHeight := vRows*ChrHeight` (lines 2215-2218).
-5. `SetSize(i, i, i, i)` is called with `i := ChrWidth div 2` margin on all sides
-   (lines 2219-2220); `SetSize` (2926-2972) sizes both bitmaps to the margined
+5. `SetTextMetrics` (2919-2925) runs inside `TERM_Configure` — sets the font **size** and
+   measures `'X'` to get `ChrWidth`/`ChrHeight` (the **face** was already fixed at
+   `FormCreate:600`); then `vWidth := vCols*ChrWidth`, `vHeight := vRows*ChrHeight`
+   (lines 2216-2218).
+6. `SetSize(i, i, i, i)` is called with `i := ChrWidth div 2` margin on all sides
+   (lines 2219-2220); `SetSize` (2926-2971) sizes both bitmaps to the margined
    client area and calls `ClearBitmap`.
 
 There is no `vCursorVisible`, no `vColorIndex`, and no `TermBuff` — none of these

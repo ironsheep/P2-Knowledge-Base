@@ -1,8 +1,13 @@
 # BITMAP Window - Complete Theory of Operations
 
 **Current as of**: PNut v55 for Propeller 2
-**Document Version**: 1.1
-**Date**: 2026-06-01
+**Document Version**: 1.2
+**Date**: 2026-07-14 (v1.2 — conflict-audit conformance pass: re-grounded against raw
+`DebugDisplayUnit.pas` v55. Corrected the `SetSize` sparse gate + client/bitmap sizing, the
+`StretchDraw` scaling story, sparse cell geometry (solid fill + **round** dot), the LUT
+"default palette" claim, the colour-mode id order, `CLEAR`/`TRACE` discarding `RATE`, the
+`RATE -1` and un-dotsized-`SAVE` footguns, the horizontal scroll fill strips, and the borrowed
+PLOT `CIRCLE`/`TEXTSTYLE` encodings — which are re-scoped as **PLOT's, not BITMAP's**.)
 **Source Files**: DebugDisplayUnit.pas, DebugUnit.pas, SerialUnit.pas, GlobalUnit.pas
 **Author**: Analysis of P2 PNut Debug Display System
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window directive reference; directive coverage re-verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01
@@ -18,7 +23,15 @@
 
 ## Executive Summary
 
-The BITMAP window in DebugDisplayUnit.pas is a versatile pixel-based display system that receives pixel data over a serial connection from a Propeller 2 microcontroller and renders it to a scalable bitmap canvas. The window supports 19 different color modes, 8 trace/scan patterns with optional scrolling, packed data formats, sparse pixel rendering, and extensive drawing primitives inherited from the PLOT display. It serves as both a simple bitmap receiver and a sophisticated 2D graphics canvas.
+The BITMAP window in DebugDisplayUnit.pas is a pixel-based display system that receives pixel data over a serial connection from a Propeller 2 microcontroller and renders it to a scalable bitmap canvas. The window supports 19 different color modes, 8 trace/scan patterns with optional scrolling, packed data formats, and sparse (magnified, LED-matrix-style) pixel rendering. It is a **bitmap receiver**, not a graphics canvas.
+
+> **⚠️ BITMAP has NO drawing primitives.** `BITMAP_Update` (2416–2485) accepts **only** pixel
+> numbers plus the commands `LUT1..RGB24`, `LUTCOLORS`, `TRACE`, `RATE`, `SET`, `SCROLL`,
+> `CLEAR`, `UPDATE`, `SAVE`, `PC_KEY`, `PC_MOUSE` (and `CLOSE`, dispatched in the parser).
+> There is **no `LINE`, no `CIRCLE`, no `OVAL`, no `BOX`, no `TEXT`, no `SPRITE`** — those are
+> `PLOT_Update` directives and BITMAP does **not** inherit them (see §11, §17.5). BITMAP shares
+> only the *internal* renderers (`SmoothShape`, `TranslateColor`, `StepTrace`, `ScrollBitmap`)
+> with PLOT/SPECTRO; sharing a renderer is not sharing a directive.
 
 ---
 
@@ -160,11 +173,11 @@ Parsed in `BITMAP_Configure` (lines 2372–2414) during window creation.
 | `POS` | `left top` | int, int; window screen position | `KeyPos` |
 | `SIZE` | `w h` | int **1..2048** each; default 256 × 256 (`bitmap_wmin/wmax`, `bitmap_hmin/hmax`) | `2386` |
 | `DOTSIZE` | `x {y}` | int **1..256** each; default 1 × 1; if `y` omitted it copies `x` | `2388–2392` |
-| `SPARSE` | `color` | named color or RGB24; enables sparse mode (default −1 = off / normal) | `2393–2394` |
-| color-mode | `LUT1` `LUT2` `LUT4` `LUT8` `LUMA8` `LUMA8W` `LUMA8X` `RGBI8` `RGBI8W` `RGBI8X` `RGB8` `HSV8` `HSV8W` `HSV8X` `HSV16` `HSV16W` `HSV16X` `RGB16` `RGB24` | 19 modes; default `RGB24`. Tune-parameter parsing differs by family (`KeyColorMode` 2788-2803): **LUMA8/8W/8X** take an optional tint — a color keyword (`ORANGE`..`GRAY`) **or** a numeric value; **HSV8/16 families** take a numeric tune value only; **RGBI8/8W/8X take no tune** (RGBI derives its shade from the pixel bits, `TranslateColor` 3118-3119). | `KeyColorMode`; `2395–2396` |
-| `LUTCOLORS` | `rgb24…` | Up to 256 RGB24 palette entries; only meaningful with LUT1/2/4/8 mode | `2397–2398` |
+| `SPARSE` | `color` | Named color (`BLACK`..`GRAY` + optional 0–15 brightness) **or a number interpreted through the *currently-active* color mode** (`KeyColor` 2780: `c := TranslateColor(val, vColorMode)`) — RGB24 only if the mode is still the default RGB24. Sets `vSparse` (default −1 = off). ⚠️ **`SPARSE` alone does NOT enable sparse rendering: it additionally requires `DOTSIZE` ≥ 4 on BOTH axes.** `SetSize` (2938) keeps `vSparse` only if `(vSparse <> -1) and (vDotSize >= 4) and (vDotSizeY >= 4)`; otherwise it silently forces `vSparse := -1` (2947). | `2393–2394`; `KeyColor 2752–2783`; gate `2938`/`2947` |
+| color-mode | `LUT1` `LUT2` `LUT4` `LUT8` `LUMA8` `LUMA8W` `LUMA8X` `HSV8` `HSV8W` `HSV8X` `RGBI8` `RGBI8W` `RGBI8X` `RGB8` `HSV16` `HSV16W` `HSV16X` `RGB16` `RGB24` (ids **10–28**, in that order — see §6.1) | 19 modes; default `RGB24`. Tune-parameter parsing differs by family (`KeyColorMode` 2788-2803): **LUMA8/8W/8X** take an optional tint — a color keyword (`ORANGE`..`GRAY`) **or** a numeric value; **HSV8/16 families** take a numeric tune value only; **RGBI8/8W/8X take no tune** (RGBI derives its shade from the pixel bits, `TranslateColor` 3118-3119). | `KeyColorMode`; `2395–2396` (range `key_lut1..key_rgb24`) |
+| `LUTCOLORS` | `rgb24…` | Up to 256 RGB24 palette entries; only meaningful with LUT1/2/4/8 mode. ⚠️ **There is no default palette** — `vLut[]` is written *only* here (2806–2815) and is otherwise zero-initialised, so a LUT mode without `LUTCOLORS` renders entirely black (§6.2, §17.4) | `2397–2398` |
 | `TRACE` | `n` | int **0..15** (bits 0–2 = scan pattern 0–7, bit 3 = scroll enable); default 0 | `2399–2400`; see §3.2 |
-| `RATE` | `n` | int; pixels per screen update; −1 ⇒ auto-set to `vWidth × vHeight` after configure; 0 ⇒ `SetTrace` sets it to `vWidth` (h-scan) or `vHeight` (v-scan); default 0 | `2401–2402`, `2412–2413` |
+| `RATE` | `n` | int; pixels per screen update; **−1 ⇒ auto-set to `vWidth × vHeight`** (whole-frame refresh) — this substitution exists **only** at the tail of `BITMAP_Configure` (2413), i.e. **only in the CREATE message**; 0 ⇒ `SetTrace(vTrace, vRate = 0)` derives it as `vWidth` (scan patterns 0–3) or `vHeight` (4–7); default 0 | `2401–2402`, `2412–2413` |
 | packed | `LONGS_1BIT` … `BYTES_4BIT` | 12 keywords; optional `ALT` and/or `SIGNED` modifiers | `KeyPack`; `2403–2404` |
 | `UPDATE` | — | Flag; enables manual-refresh mode; display only updates on explicit `UPDATE` command | `2405–2406` |
 | `HIDEXY` | — | Flag; suppresses on-screen measurement-cursor readout; does **not** disable `PC_MOUSE` | `2407–2408` |
@@ -189,13 +202,47 @@ Parsed in `BITMAP_Update` (lines 2416–2485) on every subsequent debug message.
 | *numeric pixel stream* | integer values | Each number → one pixel (or multiple if packed); color-translated via `vColorMode` and plotted at current trace position; `BitmapToCanvas` called every `vRate` pixels (via `RateCycle`) | `2459–2483` |
 | color-mode | (same 19 modes as config) | Change active color mode mid-stream; affects all subsequent pixels | `2425–2426` |
 | `LUTCOLORS` | `rgb24…` | Replace LUT palette entries at runtime | `2427–2428` |
-| `TRACE` | `n` | int **0..15**; change scan pattern mid-stream; resets pixel position; `SetTrace(val,True)` also adjusts `vRate` | `2429–2430` |
-| `RATE` | `n` | int; change pixels-per-update rate at runtime | `2431–2432` |
+| `TRACE` | `n` | int **0..15**; change scan pattern mid-stream; resets pixel position; `SetTrace(val, True)` — `ModifyRate` is **hard-coded True**, so this also **re-derives `vRate`** (to `vWidth` for patterns 0–3, `vHeight` for 4–7), discarding a user-set `RATE` | `2429–2430` |
+| `RATE` | `n` | int; change pixels-per-update rate at runtime. ⚠️ **Bare `KeyVal(vRate)` — there is NO `-1` substitution here** (unlike configure, 2413). See the `RATE -1` footgun below. | `2431–2432` |
 | `SET` | `x y` | x: int **0..w−1**; y: int **0..h−1**; jump cursor and **cancel scroll** (clears bit 3 of `vTrace`) | `2433–2438` |
-| `SCROLL` | `x y` | x: int **−w..w**; y: int **−h..h**; positive x = right, positive y = down; fills vacated area with background | `2439–2442` |
-| `CLEAR` | — | Fill bitmap with background, reset pixel position to trace start, refresh display (unless `UPDATE` mode) | `2443–2448` |
+| `SCROLL` | `x y` | x: int **−w..w**; y: int **−h..h**; positive x = right, positive y = down; fills the **vacated** strip with `GetBackground` (§9.1) | `2439–2442` |
+| `CLEAR` | — | `ClearBitmap` → refresh display unless `UPDATE` mode → **`SetTrace(vTrace, True)`**: resets the pixel position to the trace start **and re-derives `vRate`** to `vWidth` (patterns 0–3) or `vHeight` (4–7). ⚠️ **A user-set `RATE` is silently DISCARDED by any `CLEAR`.** | `2443–2448` |
 | `UPDATE` | — | Force screen refresh (`BitmapToCanvas(0)`); required when manual-refresh mode active | `2449–2450` |
-| `SAVE` | `{filename}` | Write window bitmap to `.bmp` file; `SAVE WINDOW` or `SAVE l t w h` for desktop region | `KeySave`; `2451–2452` |
+| `SAVE` | see grammar below | `KeySave` (2839–2866) — six forms, three of which write no file. `SAVE 'name'` writes **`Bitmap[1]`** (the front buffer) at **1× LOGICAL scale, un-dotsized** (see below). | `KeySave`; `2451–2452` |
+| `CLOSE` | — | Closes the window and frees its display slot. **Dispatched in the parser, not here** — it appears in no `_Update` case statement; `p2com.asm` (19565–19624) clears the display's bit in `debug_display_ena` and `TDebugForm.ChrIn` (`DebugUnit.pas:236–237`) runs the **full update first, then closes**. So `` `MyBmp SAVE 'shot' CLOSE `` saves *and then* closes. Command-only (ignored on a create line); multi-target (`` `B1 B2 CLOSE `` closes both). | `p2com.asm 19565–19624`; `DebugUnit.pas 236–237` |
+
+#### `SAVE` grammar (`KeySave`, 2839–2866)
+
+| Form | What it writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` (the **front/display** buffer) → `name.bmp` |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect — **includes title bar and borders**; vulnerable to occlusion by other windows |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region |
+| `SAVE WINDOW` (no name) | captures to memory, **writes no file** |
+| `SAVE l t w h` (no name) | captures to memory, **writes no file** |
+| `SAVE` (bare) | `Exit` — **does nothing at all** |
+
+The filename always comes **last**; `.bmp` is appended automatically.
+**Sharp edge (2846–2848):** a non-`WINDOW` keyword after `SAVE` is consumed and then discarded by
+the `Exit` — `` `MyBmp SAVE CLEAR `` does nothing **and eats the `CLEAR`**.
+
+> **🔴 `SAVE 'name'` is UN-DOTSIZED.** It writes `Bitmap[1]`, and `DOTSIZE` magnification is a
+> **display-time `StretchDraw`** (`BitmapToCanvas` 3526–3527) that **never touches the bitmap**.
+> So on a normal (non-sparse) window, `SAVE 'shot'` yields a `vWidth × vHeight` file — a
+> `SIZE 64 64 DOTSIZE 8` window that fills 512×512 px on screen saves a **64×64** .bmp.
+> **Sole exception:** a genuinely *sparse* window (`SPARSE` colour **and** `DOTSIZE` ≥ 4 on both
+> axes), where `SetSize` allocates the bitmaps at physical size (2938–2943) — that one saves at
+> `vWidth·vDotSize × vHeight·vDotSizeY`.
+> **To capture the magnified on-screen appearance, use `SAVE WINDOW 'name'`.**
+
+> **🔴 `RATE -1` footgun — it works in the CREATE message ONLY.**
+> The `-1 → vWidth * vHeight` substitution lives at the tail of `BITMAP_Configure` (**2413**:
+> `if vRate = -1 then vRate := vWidth * vHeight;`). `BITMAP_Update`'s handler is a bare
+> `KeyVal(vRate)` (**2431–2432**) with **no** substitution. And `RateCycle` (3079–3088) tests
+> **equality** — `if vRateCount = vRate` — not `>=`. So a *runtime* `RATE -1` (or `RATE 0`)
+> leaves the rate non-positive, the counter can never match it, and **auto-refresh freezes
+> permanently** until a subsequent `TRACE`, `CLEAR` (both re-derive `vRate`) or an explicit
+> `UPDATE` intervenes. Real v55 behaviour.
 
 ### Keyboard & mouse
 
@@ -328,34 +375,51 @@ begin
 end;
 ```
 
-**Window Sizing** (SetSize method, lines 2926-2963):
+**Window Sizing** (SetSize method, lines 2926-2971):
 
-For BITMAP (and SPECTRO/PLOT):
+For BITMAP (and SPECTRO/PLOT) — verbatim structure of `SetSize` 2934–2970:
 ```pascal
-if vDotSize > 1 or vDotSizeY > 1 then
+if DisplayType in [dis_spectro, dis_plot, dis_bitmap] then
 begin
-  // Sparse mode: client size = logical size × dot scale
-  ClientWidth  := vWidth * vDotSize;
-  ClientHeight := vHeight * vDotSizeY;
-  vSparse := (sparse color specified);
-end
-else
-begin
-  // Normal mode: 1:1 pixel mapping
-  vSparse := -1;
-  ClientWidth := vWidth;
-  ClientHeight := vHeight;
-end
-
-Bitmap[0].Width := vWidth;
-Bitmap[0].Height := vHeight;
-Bitmap[1].Width := vWidth;
-Bitmap[1].Height := vHeight;
-
-// Setup scanline pointers for fast pixel access
-for i := 0 to vBitmapHeight - 1 do
-  BitmapLine[i] := Bitmap[0].ScanLine[i];
+  ClientWidth  := vWidth  * vDotSize;      // 2936 — UNCONDITIONAL (sparse or not)
+  ClientHeight := vHeight * vDotSizeY;     // 2937 — UNCONDITIONAL
+  if (vSparse <> -1) and (vDotSize >= 4) and (vDotSizeY >= 4) then
+  begin                                    // 2938 — the real SPARSE gate
+    Bitmap[1].Width := ClientWidth;   Bitmap[1].Height := ClientHeight;   // 2940-2941
+    Bitmap[0].Width := ClientWidth;   Bitmap[0].Height := ClientHeight;   // 2942-2943
+  end                                      //        ⇒ bitmaps are PHYSICAL size
+  else
+  begin
+    vSparse := -1;                         // 2947 — sparse SILENTLY SELF-DISABLES
+    Bitmap[1].Width := vWidth;   Bitmap[1].Height := vHeight;             // 2948-2949
+    Bitmap[0].Width := vWidth;   Bitmap[0].Height := vHeight;             // 2950-2951
+  end                                      //        ⇒ bitmaps are LOGICAL size
+end;
+vBitmapWidth  := Bitmap[0].Width;   vBitmapHeight := Bitmap[0].Height;    // 2963-2964
+vClientWidth  := ClientWidth;       vClientHeight := ClientHeight;        // 2965-2966
+for i := 0 to vBitmapHeight - 1 do BitmapLine[i] := Bitmap[0].ScanLine[i];// 2967
+vTriggered := False;                                                      // 2969
+ClearBitmap;                                                              // 2970 — SetSize always clears
 ```
+
+**🔴 The sparse gate (2938) — three conditions, all required:**
+
+> Sparse rendering needs a `SPARSE` **colour** *and* `DOTSIZE` **≥ 4 on BOTH axes**.
+> If any of the three fails, `SetSize` forces `vSparse := -1` (2947) and the window renders in
+> **normal** mode — **sparse silently self-disables, with no error.** `SPARSE $404040 DOTSIZE 3`
+> is therefore *not* a sparse window.
+
+Consequences that the rest of this document depends on:
+
+| | `vSparse` after `SetSize` | `Bitmap[0]/[1]` size | Client size | `BitmapToCanvas` StretchDraw |
+|---|---|---|---|---|
+| **Sparse active** (colour set, both dot sizes ≥ 4) | the colour | **physical** `vWidth·vDotSize × vHeight·vDotSizeY` (2940-2943) | same | **1:1 — no scaling** |
+| **Sparse off, `DOTSIZE` > 1** | −1 (2947) | **logical** `vWidth × vHeight` (2948-2951) | `vWidth·vDotSize × vHeight·vDotSizeY` (2936-2937) | **upscales** (nearest-neighbour) |
+| **Sparse off, `DOTSIZE` = 1** (default) | −1 | logical = client | `vWidth × vHeight` | 1:1 |
+
+Note that `ClientWidth`/`ClientHeight` are set **unconditionally** at 2936–2937: `DOTSIZE 4` with
+**no** `SPARSE` still produces a 4×-sized window — it just fills it by stretching a logical-size
+bitmap rather than by drawing physical-size cells.
 
 **Note**: Unlike SCOPE/FFT, BITMAP has zero margins. The entire bitmap is the drawable area.
 
@@ -372,7 +436,10 @@ for i := 0 to vBitmapHeight - 1 do
 ### 4.3 Display Update Trigger (DebugUnit.pas:224-232)
 [Identical to FFT - see FFT documentation]
 
-### 4.4 Element Parsing Helpers (DebugDisplayUnit.pas:4101-4131)
+### 4.4 Element Parsing Helpers (DebugDisplayUnit.pas:4109-4139)
+
+`NextKey` **4109–4112**, `NextNum` **4114–4117**, `NextStr` **4119–4122**, `NextEnd` **4124–4127**,
+`NextElement` **4129–4139** (the `// Get Elements //` block runs 4105–4139).
 [Identical to FFT - see FFT documentation]
 
 ---
@@ -474,14 +541,20 @@ key_scroll:
 ```pascal
 key_clear:
 begin
-  ClearBitmap;
-  if not vUpdate then BitmapToCanvas(0);
-  SetTrace(vTrace, True);
+  ClearBitmap;                              // 2445
+  if not vUpdate then BitmapToCanvas(0);    // 2446
+  SetTrace(vTrace, True);                   // 2447 — ModifyRate = TRUE, unconditionally
 end;
 ```
-- Fills bitmap with background color
-- Resets pixel position to starting corner
+- Fills bitmap with the mode-dependent background color (`GetBackground`)
+- Resets pixel position to the trace's starting corner
 - Updates display (unless manual update mode)
+- ⚠️ **Silently discards any user-set `RATE`.** `ModifyRate` is passed as a hard-coded `True`, so
+  `SetTrace` (2977–2978: `if ModifyRate then if Path and 7 in [0,1,2,3] then vRate := vWidth else
+  vRate := vHeight;`) **overwrites `vRate`** with `vWidth` (scan patterns 0–3) or `vHeight`
+  (patterns 4–7). A `RATE n` sent earlier does not survive a `CLEAR`. (Same for a runtime
+  `TRACE n`, which also passes `True` — 2430.) This is a real parity trap: re-send `RATE` after
+  every `CLEAR` if you depend on it.
 
 **key_update** (lines 2449-2450):
 ```pascal
@@ -528,23 +601,27 @@ begin
 end;
 ```
 
-**Path 2: Sparse Pixels** (vSparse ≠ -1):
+**Path 2: Sparse Pixels** (vSparse ≠ -1 — i.e. a `SPARSE` colour **and** `DOTSIZE` ≥ 4 on both axes, §3.2):
 ```pascal
 while NextNum do
 begin
   v := NewPack;
   for i := 1 to vPackCount do
   begin
-    // Calculate center of sparse pixel
+    // Center of the cell, in PHYSICAL bitmap coordinates (2470-2471)
     x := vPixelX * vDotSize + vDotSize shr 1;
     y := vPixelY * vDotSizeY + vDotSizeY shr 1;
 
-    // Draw border (sparse color)
+    // Call 1 (2472-2474): SOLID FILLED RECTANGLE over the WHOLE cell, in the sparse colour.
+    //   xro=yro=0 ⇒ rectangle := True (SmoothShape 3617); thick=0 ⇒ solid := True (3616).
     SmoothShape(x, y,
                 vDotSize, vDotSizeY,
                 0, 0, 0, vSparse, 255);
 
-    // Draw inner pixel (data color, 75% size)
+    // Call 2 (2475-2478): the DATA pixel — a ROUND DOT / ELLIPSE at 3/4 cell size.
+    //   size = 3/4 cell; the radii passed (vDotSize, vDotSizeY) exceed half the size, so
+    //   SmoothShape's clamp (3638-3639: if xro shl 1 > xs then xro := xs shr 1) forces
+    //   MAXIMUM rounding ⇒ a fully-rounded ellipse, not a square.
     SmoothShape(x, y,
                 vDotSize - vDotSize shr 2, vDotSizeY - vDotSizeY shr 2,
                 vDotSize, vDotSizeY,
@@ -557,10 +634,15 @@ end;
 ```
 
 **Sparse Mode Effect**:
-- Each logical pixel rendered as `vDotSize × vDotSizeY` physical pixels
-- Outer border in `vSparse` color (grid effect)
-- Inner fill in data color at 75% size (prevents grid from covering data)
-- Creates magnified pixel display with visible grid
+- Each logical pixel becomes a `vDotSize × vDotSizeY` **cell** drawn at physical coordinates
+  (in sparse mode the bitmap *is* physical-size — see §3.2, §21.2).
+- **Call 1 is not a border/frame.** It is a solid fill of the entire cell in the `SPARSE` colour.
+- **Call 2 lays a round dot** (data colour, ~3/4 of the cell) on top of that fill. v55 calls these
+  "large **round** pixels" (v55 §BITMAP, L1329).
+- The grid / LED-matrix appearance is simply the **residual sparse colour left visible around the
+  dot** (most of all in the cell corners) — nothing draws a grid line.
+- **Every pixel is drawn.** Both `SmoothShape` calls run unconditionally for every unpacked
+  sample; there is **no** "skip the pixel if its value equals the sparse colour" rule.
 
 ---
 
@@ -568,27 +650,33 @@ end;
 
 ### 6.1 Supported Color Modes (19 modes)
 
-| Mode | Keyword | Bits/Pixel | Description |
-|------|---------|------------|-------------|
-| LUT1 | `key_lut1` | 1 | 2-color palette (bit 0 → vLut[0..1]) |
-| LUT2 | `key_lut2` | 2 | 4-color palette (bits 0-1 → vLut[0..3]) |
-| LUT4 | `key_lut4` | 4 | 16-color palette (bits 0-3 → vLut[0..15]) |
-| LUT8 | `key_lut8` | 8 | 256-color palette (byte → vLut[0..255]) |
-| LUMA8 | `key_luma8` | 8 | Grayscale to color (black → color) |
-| LUMA8W | `key_luma8w` | 8 | Grayscale to color (white → color) |
-| LUMA8X | `key_luma8x` | 8 | Grayscale to color (expanded range) |
-| RGBI8 | `key_rgbi8` | 8 | 3-bit RGB + intensity (black → color) |
-| RGBI8W | `key_rgbi8w` | 8 | 3-bit RGB + intensity (white → color) |
-| RGBI8X | `key_rgbi8x` | 8 | 3-bit RGB + intensity (expanded range) |
-| RGB8 | `key_rgb8` | 8 | 3:3:2 RGB (R3 G3 B2) |
-| HSV8 | `key_hsv8` | 8 | 4-bit hue + 4-bit value (black → hue) |
-| HSV8W | `key_hsv8w` | 8 | 4-bit hue + 4-bit value (white → hue) |
-| HSV8X | `key_hsv8x` | 8 | 4-bit hue + 4-bit value (expanded range) |
-| HSV16 | `key_hsv16` | 16 | 8-bit hue + 8-bit value (black → hue) |
-| HSV16W | `key_hsv16w` | 16 | 8-bit hue + 8-bit value (white → hue) |
-| HSV16X | `key_hsv16x` | 16 | 8-bit hue + 8-bit value (expanded range) |
-| RGB16 | `key_rgb16` | 16 | 5:6:5 RGB (R5 G6 B5) |
-| RGB24 | `key_rgb24` | 24 | 8:8:8 RGB (full color) |
+Listed **in keyword-id order** (`DebugDisplayUnit.pas:43–61`). ⚠️ **The order is load-bearing** —
+the ids are consumed as *ranges*: `BITMAP_Configure` (2395) and `BITMAP_Update` (2425) both
+dispatch on `key_lut1..key_rgb24`, and `KeyColorMode` tests `val in [key_luma8..key_luma8x]`
+(2788) and `val in [key_hsv8..key_hsv8x, key_hsv16..key_hsv16x]` (2802). Note that the **HSV8
+family precedes the RGBI8 family**, and `RGB8` follows `RGBI8X`.
+
+| id | Mode | Keyword | Bits/Pixel | Description |
+|---:|------|---------|------------|-------------|
+| 10 | LUT1 | `key_lut1` | 1 | 2-color palette (bit 0 → vLut[0..1]) |
+| 11 | LUT2 | `key_lut2` | 2 | 4-color palette (bits 0-1 → vLut[0..3]) |
+| 12 | LUT4 | `key_lut4` | 4 | 16-color palette (bits 0-3 → vLut[0..15]) |
+| 13 | LUT8 | `key_lut8` | 8 | 256-color palette (byte → vLut[0..255]) |
+| 14 | LUMA8 | `key_luma8` | 8 | Grayscale to color (black → color) |
+| 15 | LUMA8W | `key_luma8w` | 8 | Grayscale to color (white → color) |
+| 16 | LUMA8X | `key_luma8x` | 8 | Grayscale to color (expanded range) |
+| 17 | HSV8 | `key_hsv8` | 8 | 4-bit hue + 4-bit value (black → hue) |
+| 18 | HSV8W | `key_hsv8w` | 8 | 4-bit hue + 4-bit value (white → hue) |
+| 19 | HSV8X | `key_hsv8x` | 8 | 4-bit hue + 4-bit value (expanded range) |
+| 20 | RGBI8 | `key_rgbi8` | 8 | 3-bit RGB + intensity (black → color) |
+| 21 | RGBI8W | `key_rgbi8w` | 8 | 3-bit RGB + intensity (white → color) |
+| 22 | RGBI8X | `key_rgbi8x` | 8 | 3-bit RGB + intensity (expanded range) |
+| 23 | RGB8 | `key_rgb8` | 8 | 3:3:2 RGB (R3 G3 B2) |
+| 24 | HSV16 | `key_hsv16` | 16 | 8-bit hue + 8-bit value (black → hue) |
+| 25 | HSV16W | `key_hsv16w` | 16 | 8-bit hue + 8-bit value (white → hue) |
+| 26 | HSV16X | `key_hsv16x` | 16 | 8-bit hue + 8-bit value (expanded range) |
+| 27 | RGB16 | `key_rgb16` | 16 | 5:6:5 RGB (R5 G6 B5) |
+| 28 | RGB24 | `key_rgb24` | 24 | 8:8:8 RGB (full color) — **the default** (`SetDefaults` 2889) |
 
 ### 6.2 TranslateColor Function (DebugDisplayUnit.pas:3090-3173)
 
@@ -610,7 +698,14 @@ key_lut8:  p := vLut[p and $FF];        // 8 bits → 256 colors
 ```
 - Simple lookup table indexing
 - `vLut[]` contains 256 RGB24 values
-- Default palette: grayscale (0=black, 255=white)
+- 🔴 **There is NO default palette.** `vLut[]` (declared 312) is written **only** by
+  `KeyLutColors` (2806–2815: `for i := 0 to $FF do if not KeyColor(vLut[i]) then Break;`).
+  Nothing in `SetDefaults` (2880–2917), `FormCreate` (591–645) or `BITMAP_Configure`
+  (2372–2414) populates it. As a Delphi class field it is **zero-initialised**, so every entry
+  reads `$000000`.
+  ⇒ **A LUT mode used without `LUTCOLORS` renders entirely black** — and `GetBackground` for
+  LUT modes returns `vLut[0]` (3184–3185), so the background is black too. (v55's prose claim
+  of "default colors 0..7" is wrong; see §14.1, §17.4.)
 
 #### LUMA8/RGBI8 Modes (lines 3105-3142)
 
@@ -766,8 +861,14 @@ Bit 3:    Scroll enable (0=wrap, 1=scroll)
 
 **8 Scan Patterns**:
 
-| Mode | Description | Start | X-Advance | Y-Advance | End-of-Line |
-|------|-------------|-------|-----------|-----------|-------------|
+The two advance columns are the **primary** (every pixel) and **secondary** (at the end of a
+line/column) motions, exactly as Chip's comment block prints them (2363–2370). For the vertical
+patterns 4–7 the primary motion is on **Y** and the secondary on **X** — so these columns are
+*not* "the X motion" and "the Y motion". Confirmed in `StepTrace`: mode 4 (3024–3031) advances
+`Inc(vPixelY)` per pixel and `Inc(vPixelX)` at the end of the column.
+
+| Mode | Description | Start | Per-pixel advance | End-of-line/column advance | At the far edge |
+|------|-------------|-------|-------------------|----------------------------|-----------------|
 | 0 | Top line, L→R | (0,0) | X++ | Y++ | Wrap/Scroll down |
 | 1 | Top line, R→L | (W-1,0) | X-- | Y++ | Wrap/Scroll down |
 | 2 | Bottom line, L→R | (0,H-1) | X++ | Y-- | Wrap/Scroll up |
@@ -872,30 +973,38 @@ end;
 
 ### 8.2 Sparse Mode (vSparse ≠ -1)
 
+**Activation** — all three required (`SetSize` 2938; see §3.2):
+1. a `SPARSE` colour, **and**
+2. `DOTSIZE` x ≥ 4, **and**
+3. `DOTSIZE` y ≥ 4.
+
+Otherwise `vSparse := -1` (2947) and the window is a **normal** window. There is no warning.
+
 **Characteristics**:
-- Magnified pixel display (logical pixel = vDotSize × vDotSizeY physical pixels)
-- Grid borders between pixels
-- Client window size = bitmap size × scale
+- Magnified pixel display (logical pixel = `vDotSize × vDotSizeY` **physical** pixels)
+- The bitmap itself is allocated at physical size (2940–2943), so the cells are drawn at real
+  device resolution and `StretchDraw` is a 1:1 blit (§21.2)
+- Client window size = `vWidth·vDotSize × vHeight·vDotSizeY`
 
 **Configuration**:
 ```
 size 64 64 dotsize 8 8 sparse $404040
 ```
 - Creates 64×64 logical bitmap
-- Each pixel rendered as 8×8 physical pixels
-- Client window: 512×512 pixels
-- Grid color: dark gray ($404040)
+- Each pixel rendered as an 8×8 physical cell
+- Client window (and bitmap): 512×512 pixels
+- Sparse/field color: dark gray ($404040)
 
-**Rendering** (BITMAP_Update, lines 2469-2479):
+**Rendering** (BITMAP_Update, lines 2470-2478):
 ```pascal
-// Calculate center of sparse pixel
+// Center of the cell (physical coords)
 x := vPixelX * vDotSize + vDotSize shr 1;
 y := vPixelY * vDotSizeY + vDotSizeY shr 1;
 
-// Draw border (full size, sparse color)
+// Call 1 — SOLID FILL of the whole cell in the sparse color (xro=yro=0 ⇒ rectangle; thick=0 ⇒ solid)
 SmoothShape(x, y, vDotSize, vDotSizeY, 0, 0, 0, vSparse, 255);
 
-// Draw inner fill (75% size, data color)
+// Call 2 — the data pixel: a ROUND DOT at 3/4 cell size (radii clamped to max ⇒ fully rounded)
 SmoothShape(x, y,
             vDotSize - vDotSize shr 2,
             vDotSizeY - vDotSizeY shr 2,
@@ -903,21 +1012,25 @@ SmoothShape(x, y,
             0, TranslateColor(UnPack(v), vColorMode), 255);
 ```
 
-**Visual Effect**:
+**Visual Effect** — round dots on a solid sparse-coloured field (v55: "large **round** pixels"):
 ```
-┌─────┬─────┬─────┐
-│█████│     │█████│
-│█████│     │█████│
-├─────┼─────┼─────┤
-│     │█████│     │
-│     │█████│     │
-├─────┼─────┼─────┤
-│█████│     │█████│
-│█████│     │█████│
-└─────┴─────┴─────┘
+░░●●●░░░░░░░░░░░●●●░░      ░ = vSparse color  (the solid cell fill, showing
+░●●●●●░░░░░░░░░●●●●●░           through around and between the dots)
+░░●●●░░░░░░░░░░░●●●░░      ● = data color     (round dot, ~3/4 of the cell)
+░░░░░░░░●●●░░░░░░░░░░
+░░░░░░░●●●●●░░░░░░░░░      NOT a drawn grid: there are no grid lines in the
+░░░░░░░░●●●░░░░░░░░░░      code. The "grid" is the residual sparse fill left
+░░●●●░░░░░░░░░░░●●●░░      visible where the round dot does not cover the
+░●●●●●░░░░░░░░░●●●●●░      square cell — chiefly the four corners.
+░░●●●░░░░░░░░░░░●●●░░
 ```
-- Outer box: `vSparse` color (grid)
-- Inner fill: data color (75% of cell)
+- **Cell fill**: `vSparse` colour, **solid, whole cell** (call 1 — *not* a hollow border)
+- **Dot**: data colour, **round**, ~75 % of the cell (call 2)
+- **No skip rule**: every pixel is plotted, including ones whose value equals the sparse colour
+
+> **NEEDS-HARDWARE:** the exact rendered footprint of a `DOTSIZE` cell (and of the anti-aliased
+> dot inside it) has never been measured on real output. The geometry above is *code fact*; the
+> resulting pixel coverage — where the AA envelope lands — is not asserted here.
 
 **Use Cases**:
 - Retro pixel art (magnified view)
@@ -1011,21 +1124,25 @@ Bitmap[0].Canvas.Brush.Color := WinRGB(GetBackground);
 if x <> 0 then
 begin
   if x < 0 then
-    dst := Rect((vWidth + x) * xm, 0, vWidth * xm, vHeight * ym)     // Left strip
+    dst := Rect((vWidth + x) * xm, 0, vWidth * xm, vHeight * ym)     // 3468 RIGHT strip (vacated by a LEFTWARD scroll)
   else
-    dst := Rect(0, 0, x * xm, vHeight * ym);                         // Right strip
+    dst := Rect(0, 0, x * xm, vHeight * ym);                         // 3470 LEFT strip  (vacated by a RIGHTWARD scroll)
   Bitmap[0].Canvas.FillRect(dst);
 end;
 
 if y <> 0 then
 begin
   if y < 0 then
-    dst := Rect(0, (vHeight + y) * ym, vWidth * xm, vHeight * ym)    // Bottom strip
+    dst := Rect(0, (vHeight + y) * ym, vWidth * xm, vHeight * ym)    // 3476 BOTTOM strip (vacated by an UPWARD scroll)
   else
-    dst := Rect(0, 0, vWidth * xm, y * ym);                          // Top strip
+    dst := Rect(0, 0, vWidth * xm, y * ym);                          // 3478 TOP strip    (vacated by a DOWNWARD scroll)
   Bitmap[0].Canvas.FillRect(dst);
 end;
 ```
+
+**The fill strip is always on the side the content moved *away from*.** `x < 0` moves the content
+left, so the vacated band — the one filled with `GetBackground` — is at the **right** edge
+(`(vWidth+x)*xm … vWidth*xm`, 3468), and `x > 0` vacates the **left** edge (`0 … x*xm`, 3470).
 
 **Automatic Scrolling** (from StepTrace):
 ```pascal
@@ -1120,18 +1237,25 @@ Processing:
 
 ---
 
-## 11. Drawing Primitives (PLOT Integration)
+## 11. Drawing Primitives — **PLOT's, NOT BITMAP's** (reference only)
 
 ### 11.1 Overview
 
-**Note**: BITMAP display shares most rendering infrastructure with PLOT display, but does **not** directly support PLOT drawing commands in BITMAP_Update. The primitives listed here are available in PLOT display and demonstrate the underlying rendering capabilities.
+> **🔴 These are PLOT directives. BITMAP does not accept any of them.**
+> Every keyword in this section (`LINE`, `DOT`, `CIRCLE`, `OVAL`, `BOX`, `OBOX`, `TEXT`,
+> `TEXTSTYLE`, `LAYER`, `CROP`, `SPRITEDEF`, `SPRITE`) appears **only** in the `PLOT_Update`
+> case statement (1930–2155). None of them appears in `BITMAP_Update`'s case statement
+> (2424–2457), so sending one to a BITMAP window is a no-op that falls through the `case` —
+> and, being a key rather than a number, it does not even plot a pixel.
 
-BITMAP can use these primitives indirectly via:
-1. Sparse pixel mode (uses SmoothShape)
-2. Shared sprite system
-3. Future extensions
+BITMAP shares with PLOT the **internal renderers only**: `SmoothShape` (3590–3743) — which BITMAP
+calls **solely** from its sparse-pixel path (2472–2478) — plus `TranslateColor`, `SmoothFillSetup`
+and the bitmap/scanline machinery. Sharing a renderer is not sharing a directive.
 
-### 11.2 Available Primitives (from PLOT_Update)
+This section is retained purely as a cross-reference for readers comparing the two windows. It
+is **not** a BITMAP feature list.
+
+### 11.2 PLOT's primitives (for reference — unavailable in BITMAP)
 
 #### Geometric Shapes (DebugDisplayUnit.pas:1980-2035)
 
@@ -1147,11 +1271,17 @@ key_dot:   // DOT {linesize {opacity}}
   SmoothDot(x, y, radius, color, opacity);
 ```
 
-**CIRCLE** (lines 2012-2035):
+**CIRCLE** (lines 2012-2035) — the parameter is a **WIDTH (diameter)**, *not* a radius:
 ```pascal
-key_circle:  // CIRCLE radius {linesize {opacity}}
-  SmoothShape(x, y, radius*2, radius*2, radius, radius, linesize, color, opacity);
+key_circle,                                   // CIRCLE width {linesize {opacity}}   (Chip's own comment, 2012)
+  ...
+  key_circle: SmoothShape(t1, t2, t3, t3, t3 shr 1, t3 shr 1, t7, vPlotColor, t8);   // 2031
+  //                              ^^^^^^  ^^^^^^^^^^^^^^^^^^
+  //                              size = width, width      radii = width shr 1
 ```
+`t3` is passed as the **size** on both axes and halved (`t3 shr 1`) to obtain the corner radii —
+so `CIRCLE 20` draws a circle **20 px across**, not 40. (Treating the argument as a radius would
+double the circle. The [Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) §7.3 has this right.)
 
 **OVAL** (lines 2012-2035):
 ```pascal
@@ -1179,25 +1309,28 @@ key_text:  // TEXT {size {style {angle}}} 'string'
   AngleTextOut(x, y, string, style, angle);
 ```
 
-**Styles** (bitwise encoding):
+**Styles** (bitwise encoding — `AngleTextOut`, 3483–3520):
 ```
-Bits 0-3: Font style
-  0: Normal
-  1: Bold
-  2: Italic
-  4: Underline
-  8: Strikeout
-
-Bits 4-5: Horizontal alignment
-  0/1: Center
-  2:   Left
-  3:   Right
-
-Bits 6-7: Vertical alignment
-  0/1: Center
-  2:   Top
-  3:   Bottom
+Bits 0-1: Font WEIGHT (4 levels, not a "bold" flag)                          (3485, 3494)
+  0: 100 (thin)   1: 400 (normal)   2: 700 (bold)   3: 900 (black)
+  ⇒ $01 = normal (DefaultTextStyle); $02 = BOLD
+Bit  2:   Italic         (lfItalic := style and $04 shr 2)                    (3495)
+Bit  3:   Underline      (lfUnderline := style and $08 shr 3)                 (3496)
+          — there is NO strikeout bit anywhere in the source
+Bits 4-5: Horizontal justify                                                 (3502-3506)
+  0/1: centred on the anchor        (tx := -w/2)
+  2:   text sits to the RIGHT of the anchor (anchor = text's LEFT edge)   (tx := 0)
+  3:   text sits to the LEFT of the anchor  (anchor = text's RIGHT edge)  (tx := -w)
+Bits 6-7: Vertical justify                                                   (3507-3511)
+  0/1: centred on the anchor        (ty := h/2)
+  2:   text sits ABOVE the anchor (anchor = text's BOTTOM edge)           (ty := h)
+  3:   text sits BELOW the anchor (anchor = text's TOP edge)              (ty := 0)
 ```
+Geometry: output is `TextOut(x + rx, y - ry)` (3516) and screen Y grows **down**, so `ty := h`
+(case 2) lifts the whole cell above the anchor and `ty := 0` (case 3) drops it below.
+The Pascal `case` arms are **bare** — Chip attached no names to these values; any justify
+*name* is a downstream convention, so both halves are always stated here (where the ink lands
+**and** which edge the anchor is).
 
 #### Bitmap Layers (DebugDisplayUnit.pas:2056-2089)
 
@@ -1218,7 +1351,10 @@ key_crop:   // CROP layer {left top width height {x y}}
 - Copies rectangular region from layer to main bitmap
 - AUTO mode: copies entire layer
 
-### 11.3 SmoothShape Method (DebugDisplayUnit.pas:3582-3735)
+### 11.3 SmoothShape Method (DebugDisplayUnit.pas:3590-3743)
+
+> Unlike the rest of §11, `SmoothShape` **is** on BITMAP's path — it is what draws the sparse
+> cells (2472–2478). It is documented here because PLOT's primitives all funnel into it too.
 
 **Purpose**: Draw anti-aliased rectangle/oval with optional frame
 
@@ -1242,39 +1378,47 @@ procedure TDebugDisplayForm.SmoothShape(xc, yc,           // Center position
 
 **Rendering Algorithm**:
 
-1. **Setup** (lines 3597-3606):
-   - Validate parameters
-   - Call `SmoothFillSetup(xs, color)` to prepare color buffer
-   - Determine if solid or frame, rectangle or oval
+1. **Setup** (lines 3605-3618):
+   - Ignore bad input (3606–3612): any `xs`/`ys` outside 1..`SmoothFillMax`, negative `thick`, or
+     a centre far off-bitmap causes a silent `Exit`
+   - Call `SmoothFillSetup(xs, color)` (3614) to prepare the color buffer
+   - `solid := (thick = 0) or (thick shl 1 >= xs) or (thick shl 1 >= ys);`  (3616)
+   - `rectangle := (xro = 0) or (yro = 0);`                                  (3617)
+   ⇒ **`thick = 0` means SOLID FILL, not "no frame"**, and **either radius = 0 means RECTANGLE**.
+   Both are what BITMAP's sparse call 1 (`xro=yro=0, thick=0`) relies on.
 
-2. **Rectangle Fast Path** (lines 3611-3628):
+2. **Rectangle Fast Path** (lines 3618-3636):
    ```pascal
    if rectangle then
    begin
      if solid then
-       SmoothRect(x, y, width, height, opacity)    // Single filled rectangle
+       SmoothRect(xl, yt, xs, ys, opacity)         // 3626 — single filled rectangle
      else
-     begin
-       SmoothRect(top);     // Draw 4 frame edges
-       SmoothRect(bottom);
-       SmoothRect(left);
-       SmoothRect(right);
+     begin                                         // 3628-3634 — inward frame, 4 edges
+       SmoothRect(xl,         yt,         xs,    thick, opacity);    // top
+       SmoothRect(xl,         yb - thick, xs,    thick, opacity);    // bottom
+       SmoothRect(xl,         yt + thick, thick, yf,    opacity);    // left
+       SmoothRect(xr - thick, yt + thick, thick, yf,    opacity);    // right
      end;
+     Exit;                                         // 3635
    end;
    ```
+   The stroke is drawn **inward** from the outer box — it does not straddle the boundary by ±t/2.
 
-3. **Oval Rendering** (lines 3629-3735):
-   - Compute lookup tables for rounded corners (using sin/arccos)
-   - Draw flat sections (top/bottom/left/right strips)
-   - Draw 4 rounded corners with anti-aliasing
-   - Blend pixels based on distance from edge
+3. **Rounded / Oval Rendering** (lines 3637-3743):
+   - **Clamp the corner radii first** (3638–3639):
+     `if (xro shl 1 > xs) then xro := xs shr 1;  if (yro shl 1 > ys) then yro := ys shr 1;`
+     — this is what turns BITMAP's sparse call 2 (radii `vDotSize`/`vDotSizeY`, larger than half
+     the 3/4-size shape) into a **fully rounded dot**.
+   - Compute quarter-ellipse lookup tables for the corners
+   - Draw the flat sections (top/bottom/left/right strips)
+   - Draw the 4 rounded corners with 4-way symmetric plotting + gamma blending
+   (There is **no signed-distance field** here — it is LUTs plus symmetry.)
 
-**Anti-Aliasing**:
-```pascal
-// For each pixel near edge:
-xopa := 255 - Abs(distance_to_edge) * 255;    // Alpha based on distance
-SmoothPixel(x, y, color, xopa * opacity / 255);
-```
+**Anti-Aliasing**: edge coverage comes from the **quarter-ellipse lookup tables** (`xo_lut`/`yo_lut`
+/`xi_lut`/`yi_lut`, declared 3595–3598) combined with the `xo_above`/`xo_below`… boundary flags and
+gamma blending — plotted 4-way symmetrically. It is **not** a signed-distance field and there is no
+`Abs(distance_to_edge)` term anywhere in the procedure; do not model it as one.
 
 ---
 
@@ -1431,9 +1575,9 @@ color = $00RRGGBB    // Alpha = 0x00 (invisible)
 
 ### 13.2 Memory Usage
 
-**Bitmap Storage**:
+**Bitmap Storage** — `pf24bit`, **3 bytes/pixel** (BGR, no alpha):
 ```pascal
-Bitmap[0]: vWidth × vHeight × 3 bytes
+Bitmap[0]: vWidth × vHeight × 3 bytes      // normal mode (SetSize 2948-2951)
 Bitmap[1]: vWidth × vHeight × 3 bytes
 
 Example (640×480):
@@ -1441,6 +1585,10 @@ Example (640×480):
   Bitmap[1]: 921,600 bytes (900 KB)
   Total:     1,843,200 bytes (1.8 MB)
 ```
+⚠️ **In sparse mode the bitmaps are allocated at PHYSICAL size** (`SetSize` 2940–2943):
+`vWidth·vDotSize × vHeight·vDotSizeY × 3` bytes each — memory grows with the *square* of the dot
+size. `SIZE 64 64 DOTSIZE 8 SPARSE $404040` ⇒ 512×512×3 = 786,432 bytes **per** bitmap (1.5 MB
+for the pair), not the 12 KB the logical size would suggest.
 
 **Sprite Storage**:
 ```pascal
@@ -1574,23 +1722,36 @@ size 100 100 longs_1bit
 
 ### 14.5 Sparse Mode Scaling
 
-**Integer Scaling Only**:
+**Integer Scaling Only** (`BITMAP_Configure` 2387–2392):
 ```pascal
 key_dotsize:
-  if KeyValWithin(vDotSize, 1, 256) then ...
+  if KeyValWithin(vDotSize, 1, 256) then
+  begin
+    vDotSizeY := vDotSize;               // y defaults to x
+    KeyValWithin(vDotSizeY, 1, 256);     // optional explicit y
+  end;
 ```
-- Only integer scales supported (1, 2, 3, ..., 256)
+- Only integer scales supported (1, 2, 3, ..., 256); `KeyValWithin` **assigns and clamps** —
+  `DOTSIZE 999` yields **256**, it is not rejected
 - Fractional scales not available
 
-**Client Window Size**:
+**⚠️ `DOTSIZE` alone does NOT give you sparse mode** — and `DOTSIZE 1..3` *cannot*, even with a
+`SPARSE` colour, because `SetSize`'s gate (2938) requires **≥ 4 on both axes** and otherwise sets
+`vSparse := -1` (2947). With `DOTSIZE` > 1 and sparse off you still get a magnified window — but
+by `StretchDraw` of a logical-size bitmap (hard blocks), not by drawn cells (§21.2).
+
+**Client Window Size** — set **unconditionally** for BITMAP/SPECTRO/PLOT (2936–2937):
 ```pascal
 ClientWidth  := vWidth * vDotSize;
 ClientHeight := vHeight * vDotSizeY;
 ```
-- Can create very large windows (256×256 × 256 = 65,536 pixels wide!)
+- Can create very large windows (2048 × 256 = 524,288 px wide!)
 - May exceed screen dimensions
+- In **sparse** mode the *bitmaps* are this size too (2940–2943), so memory scales with the
+  square of the dot size: `vWidth·vDotSize × vHeight·vDotSizeY × 3 bytes`, ×2 buffers
 
-**Recommendation**: Keep `vDotSize × max(vWidth, vHeight) < 2048`
+**Recommendation**: Keep `vDotSize × max(vWidth, vHeight) < 2048` — `SmoothShape` also silently
+ignores any cell whose size exceeds `SmoothFillMax` = 2048 (3608–3609).
 
 ---
 
@@ -1607,15 +1768,25 @@ ClientHeight := vHeight * vDotSizeY;
 
 ### 15.4 Shared Infrastructure
 
-**With SPECTRO** (dis_spectro = 4):
-- Same scaling system (`vDotSize`, `vDotSizeY`)
-- Same color modes
+**With SPECTRO** (dis_spectro = 4) — shares the *mechanisms*, **not** the accepted ranges:
+- Shares `TranslateColor` / `GetBackground`, the `vDotSize`/`vDotSizeY` scaling mechanism, and
+  `SetTrace` / `StepTrace` / `ScrollBitmap` / `BitmapToCanvas`.
+- ❌ **NOT "the same color modes."** SPECTRO's config parser accepts only **six** of the nineteen
+  — `key_luma8..key_luma8x, key_hsv16..key_hsv16x: KeyColorMode;` (**1767**), i.e.
+  `LUMA8 / LUMA8W / LUMA8X / HSV16 / HSV16W / HSV16X` — whereas BITMAP accepts the whole
+  `key_lut1..key_rgb24` range (**2395**). No LUT, no RGB, no HSV8, no RGBI on SPECTRO.
+- ❌ **NOT the same `DOTSIZE` range.** SPECTRO clamps to **1..16** (1762–1765); BITMAP to
+  **1..256** (2388–2391).
 - Different trace behavior (SPECTRO always scrolls)
 
 **With PLOT** (dis_plot = 5):
-- Shared sprite system
-- Shared drawing primitives (SmoothShape, SmoothLine, etc.)
-- PLOT has coordinate system, BITMAP does not
+- Shares the **internal renderers** (`SmoothShape`, `SmoothLine`, `SmoothDot`, `AngleTextOut`)
+  and the bitmap/scanline machinery — but BITMAP calls `SmoothShape` **only** from its
+  sparse-pixel path (2472–2478).
+- Shares the sprite **arrays** (they are per-window instance fields), but **not** the sprite
+  directives — `SPRITEDEF`/`SPRITE` exist only in `PLOT_Update`.
+- ❌ **BITMAP accepts NONE of PLOT's drawing directives** (`LINE`, `CIRCLE`, `TEXT`, …). See §11.
+- PLOT has a coordinate system (origin/offset/polar), BITMAP does not.
 
 **With TERM** (dis_term = 6):
 - Different rendering (text-based vs. pixel-based)
@@ -1728,8 +1899,12 @@ bitmap_hmax = SmoothFillMax = 2048
 **Constraint**:
 ```pascal
 key_dotsize:
-  if KeyValWithin(vDotSize, 1, 256) then ...
+  if KeyValWithin(vDotSize, 1, 256) then ...      // 2388, clamped (not rejected)
 ```
+
+**Minimum for sparse to work at all**: `DOTSIZE` **≥ 4 on both axes** *and* a `SPARSE` colour
+(`SetSize` 2938). Below that, `vSparse := -1` (2947) — sparse **silently self-disables** and the
+window renders normally.
 
 **Maximum Client Size**: 2048 × 256 = 524,288 pixels (exceeds screen!)
 
@@ -1809,9 +1984,11 @@ BITMAP `0 lut4 0,1,2,3 rgb24 $FF0000,$00FF00,$0000FF
 - Direct pixel data
 
 **Shared**:
-- Same color modes
+- Same color-translation *code* (`TranslateColor`) — but SPECTRO's parser admits only 6 of the 19
+  modes (1767) vs BITMAP's 19 (2395); see §15.4
 - Same sparse pixel system
-- Same scaling (vDotSize, vDotSizeY)
+- Same scaling mechanism (vDotSize, vDotSizeY) — but SPECTRO clamps `DOTSIZE` 1..16 (1762–1765)
+  vs BITMAP 1..256 (2388–2391)
 
 **Code Overlap**: ~60% (color translation, scaling, trace)
 
@@ -1842,7 +2019,10 @@ BITMAP `0 lut4 0,1,2,3 rgb24 $FF0000,$00FF00,$0000FF
 - Text-only display
 - Character grid
 - ASCII rendering
-- ANSI color codes
+- **No ANSI escape sequences.** TERM's colour comes from control codes 4–7, which select one of
+  four pre-configured colour *pairs* (`TERM_Chr`); there is no ANSI/xterm escape parser anywhere
+  in the source. (An earlier revision of this section claimed "ANSI color codes" — that was a
+  cross-window contradiction with the TERM ToO, and TERM is right.)
 
 **BITMAP**:
 - Pixel-based display
@@ -1867,8 +2047,10 @@ BITMAP `0 lut4 0,1,2,3 rgb24 $FF0000,$00FF00,$0000FF
 - Trace patterns instead of channels
 
 **Shared**:
-- Sample buffer structure (Y_SampleBuff)
-- Packed data support
+- **Packed data support only** (`SetPack`/`NewPack`/`UnPack`, 4146–4171) — **nothing else.**
+- ❌ **NOT the sample buffer.** BITMAP has **no sample buffer at all**: `BITMAP_Update`
+  (2416–2485) never touches `Y_SampleBuff` / `SamplePtr` / `SamplePop`. Pixels go straight to the
+  bitmap via `PlotPixel` (3433–3444) or `SmoothShape` (2472–2478). See §20.1.
 
 ---
 
@@ -2025,21 +2207,38 @@ Total: 450 KB for both bitmaps
 
 ### 21.2 Canvas Display Scaling
 
-`BitmapToCanvas` always uses `StretchDraw` for BITMAP (and also for SPECTRO and PLOT), regardless of sparse mode. Normal mode: `vClientWidth = vWidth`, `vClientHeight = vHeight`, so the stretch is 1:1. Sparse mode: `vClientWidth = vWidth * vDotSize`, `vClientHeight = vHeight * vDotSizeY`, so the bitmap is scaled up (lines 3522–3530):
+`BitmapToCanvas` always *calls* `StretchDraw` for BITMAP (and SPECTRO and PLOT), regardless of sparse mode (lines 3522–3530):
 
 ```pascal
 procedure TDebugDisplayForm.BitmapToCanvas(Level: integer);
 begin
   if Level = 0 then
-    Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);   // copy back→front
+    Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);   // 3524-3525 copy back→front
   if DisplayType in [dis_spectro, dis_plot, dis_bitmap] then
-    Canvas.StretchDraw(Rect(0, 0, vClientWidth, vClientHeight), Bitmap[1])
+    Canvas.StretchDraw(Rect(0, 0, vClientWidth, vClientHeight), Bitmap[1])   // 3527
   else
-    Canvas.Draw(0, 0, Bitmap[1]);
+    Canvas.Draw(0, 0, Bitmap[1]);             // 3529
 end;
 ```
 
-**Effect in sparse mode**: 64×64 logical bitmap stretched to `64*vDotSize × 64*vDotSizeY` physical pixels. The `SmoothShape` grid is drawn directly into `Bitmap[0]` at physical coordinates before the copy, so the grid lines are part of the bitmap data, not overlaid by the stretch.
+**Whether it actually scales is decided in `SetSize`, not here** (2936–2951, §3.2). `StretchDraw`
+stretches `Bitmap[1]` (whatever size `SetSize` gave it) to `vClientWidth × vClientHeight`
+(always `vWidth·vDotSize × vHeight·vDotSizeY`, 2936–2937). So:
+
+| Case | `Bitmap[1]` size | Client rect | Result of `StretchDraw` |
+|---|---|---|---|
+| **Sparse active** (colour + `DOTSIZE` ≥ 4 both axes) | **physical** `vWidth·vDotSize × vHeight·vDotSizeY` (2940-2943) | identical | **1:1 blit — nothing is stretched** |
+| **Sparse off, `DOTSIZE` > 1** (no colour, or a dot size < 4) | **logical** `vWidth × vHeight` (2948-2951) | `vWidth·vDotSize × …` | **upscale** by `vDotSize`/`vDotSizeY` (nearest-neighbour block pixels) |
+| **Sparse off, `DOTSIZE` = 1** (default) | `vWidth × vHeight` | `vWidth × vHeight` | 1:1 |
+
+**Effect in sparse mode**: the magnification is *already in the bitmap*. `SmoothShape` draws each
+cell (solid sparse fill + round data dot) directly into `Bitmap[0]` at **physical** coordinates —
+so the anti-aliased dots survive to the screen unmangled, and the StretchDraw is a pass-through.
+
+**Effect when sparse is off but `DOTSIZE` > 1**: `PlotPixel` writes one logical pixel per sample
+into a logical-size bitmap, and `StretchDraw` blows it up — you get hard square blocks, no dots,
+no sparse-coloured field. This is the case that a `DOTSIZE 2`/`DOTSIZE 3` window silently lands
+in, even with a `SPARSE` colour set.
 
 ### 21.3 BitmapToCanvas Operation
 
@@ -2181,13 +2380,17 @@ while NextKey do
   end;
 ```
 
-**5. Bitmap Sizing**:
+**5. Bitmap Sizing** — the tail of `BITMAP_Configure`, verbatim (2411–2413):
 ```pascal
-Bitmap[0].Width := vWidth;
-Bitmap[0].Height := vHeight;
-SetSize(0, 0, 0, 0);
-SetTrace(vTrace, True);
+SetSize(0, 0, 0, 0);                             // 2411 — zero margins; sizes BOTH bitmaps
+                                                 //        and applies the SPARSE gate (§3.2)
+SetTrace(vTrace, vRate = 0);                     // 2412 — ModifyRate is the EXPRESSION `vRate = 0`
+if vRate = -1 then vRate := vWidth * vHeight;    // 2413 — only here, never at runtime
 ```
+⚠️ `ModifyRate` is **`vRate = 0`**, *not* `True`. The rate is auto-derived (to `vWidth` for scan
+patterns 0–3, `vHeight` for 4–7, per 2977–2978) **only when the user supplied no `RATE`**.
+Passing `True` here would clobber a user-specified `RATE` — which is exactly what the *runtime*
+`CLEAR` and `TRACE` handlers do (2447, 2430), and why they discard it.
 
 **6. Ready**: Window displayed, trace at initial position, waiting for pixels.
 
@@ -2259,9 +2462,12 @@ The implementation demonstrates careful attention to both performance (direct sc
 - **ScrollBitmap**: Efficient bitmap shifting
 
 ### Related Displays:
-- **SPECTRO**: Scrolling waterfall (shares color modes, scaling)
-- **PLOT**: Vector graphics (shares sprites, rendering primitives)
-- **SCOPE**: Analog waveforms (shares sample buffer structure)
+- **SPECTRO**: Scrolling waterfall (shares the color-translation and scaling *code*; accepts only
+  6 of the 19 modes and clamps `DOTSIZE` 1..16 — §15.4)
+- **PLOT**: Vector graphics (shares the *internal* renderers and the sprite arrays — **but none of
+  PLOT's drawing directives**; §11)
+- **SCOPE**: Analog waveforms (shares **only** the packed-data support — BITMAP has **no** sample
+  buffer; §18.4, §20.1)
 - **TERM**: Text display (no overlap)
 
 ---

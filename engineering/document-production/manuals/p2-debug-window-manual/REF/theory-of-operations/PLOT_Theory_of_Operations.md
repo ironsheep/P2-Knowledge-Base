@@ -2,7 +2,37 @@
 
 **Current as of**: PNut v55 for Propeller 2
 **Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Conflict-audit ratification**: 2026-07-14 — all prose/table/example claims re-grounded against raw
+`DebugDisplayUnit.pas` v55 (+ `p2com.asm`, `DebugUnit.pas`, `GlobalUnit.pas` for `CLOSE` dispatch).
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
+
+> **What changed in the 2026-07-14 pass.** The **normative core survived** — the directive tables, parse
+> order, parameter shapes, clamps and defaults were substantially correct. The defects were in the
+> *narrative* layer: claims **about** the code that the code never said. Corrected here, each marked
+> inline with a **⚠️ Corrected** callout:
+> - **Coordinates are BOTTOM-LEFT / Y-UP by default** (§6.1, §17.4) — the prose said top-left/Y-down,
+>   contradicting the `PLOT_GetXY` listing printed alongside it.
+> - **Default `SIZE` is 256 × 256** (§5.2), not 512 × 512.
+> - **`SmoothShape` uses no signed-distance field** (§7.7, §12.4) — that algorithm was fabricated. It is
+>   span fills + quarter-ellipse LUTs, 4-way symmetric, with an **inward** stroke frame.
+> - **The coordinate pipeline had two alternative paths composed into one** (§12.3), double-counting the
+>   pixel. `PLOT_GetXY` (integer) and the inline 8.8 path (DOT/LINE) are **alternatives**.
+> - **`TranslateColor` *is* on PLOT's colour path** (§21.1) — a numeric `COLOR` is read through the
+>   current `vColorMode`, not as literal RGB24.
+> - **TEXTSTYLE justify** (§4.3, §8.2, §8.4) — the Pascal `case` arms are **bare**; every justify *name*
+>   was invented downstream, and §8.4's vertical labels were inverted. Now stated with both halves
+>   (which side the ink lands on **and** which edge the anchor is).
+> - **Sprite orientation codes 4 and 5 were swapped** (§10.4); code 4 is a diagonal **transpose**.
+> - **`OPACITY` is not clamped** — it truncates mod 256, so `OPACITY 256` ⇒ **0, fully transparent**.
+> - **Bitmaps are `pf24bit`** (3 B/px, no alpha), created in `FormCreate` — every 4-byte/RGBA memory
+>   figure was wrong. Sprite arrays are **per-window private fields**, not shared globals.
+> - **Added: `CLOSE`** (dispatched in `p2com.asm`, invisible to a `DebugDisplayUnit.pas`-only read) and
+>   the **full six-form `SAVE` grammar**.
+>
+> **NEEDS-HARDWARE:** the *rendered pixel width* of `DOT`/`LINESIZE` output is **unmeasured**. The shift
+> arithmetic is documented as code fact about the geometric parameter only; no user-facing
+> "radius"/"diameter" pixel unit is asserted. (The same derivation predicted half-pixels for LOGIC's
+> `LINESIZE` and was falsified on silicon — EF-027.)
 
 > **TS parity (2026-06-06):** `DebugPlotWindow` was brought to parity by the 9-window parity
 > sprint **§13a–c** (build 0.9.27): the coordinate model (polar/Cartesian, origin, mirror/Y-invert),
@@ -144,36 +174,44 @@ dis_plot = 5;
 
 The PLOT display is identified by type code `5` in the debug display system.
 
-**Source Location**: Line 38 in DebugDisplayUnit.pas
+**Source Location**: Line **27** in DebugDisplayUnit.pas. (Line 38 is `key_red = 6;`.)
 
 ### 3.2 Size Constraints
 
 ```pascal
-plot_wmin    = 32;      // Minimum width in pixels
-plot_wmax    = 2048;    // Maximum width in pixels
-plot_hmin    = 32;      // Minimum height in pixels
-plot_hmax    = 2048;    // Maximum height in pixels
+plot_wmin             = 32;              // (218) Minimum width in pixels
+plot_wmax             = SmoothFillMax;   // (219) = DataSets = 1 shl 11 = 2048
+plot_hmin             = 32;              // (220) Minimum height in pixels
+plot_hmax             = SmoothFillMax;   // (221) = 2048
 ```
 
 **Purpose**:
 - `plot_wmin/plot_hmin`: Minimum display dimensions ensure sufficient space for meaningful visualization
 - `plot_wmax/plot_hmax`: Maximum dimensions prevent excessive memory usage and maintain performance
 
-**Memory Calculation**:
-- Maximum bitmap size: 2048 × 2048 × 4 bytes (RGBA) = 16 MB per bitmap
-- With 8 layer bitmaps: up to 128 MB additional memory
+**Memory Calculation** (the render bitmaps are **`pf24bit`** — 3 bytes/pixel, BGR, **no alpha plane** —
+set in `FormCreate` 597/599):
+- Maximum bitmap size: 2048 × 2048 × **3** bytes = **12 MB** per bitmap
+- With 8 layer bitmaps: up to **96 MB** additional memory
 
-**Source Location**: Lines 60-63 in DebugDisplayUnit.pas
+> Every "32-bit / 4 bytes / RGBA / BGRA" claim about `Bitmap[0]`/`Bitmap[1]` is wrong, and so is any
+> memory figure derived from it. Corroborated by every rasterizer: `PlotPixel` 3440 (`v := vPixelX * 3`),
+> `SmoothFill` 3795 (`[x * 3]`), and `SmoothFillBuff : array [0..SmoothFillMax * 3 - 1] of byte` (412).
+> Opacity is applied by **blending at write time**, not by an alpha channel in the bitmap.
+
+**Source Location**: Lines **218-221** in DebugDisplayUnit.pas — the maxima resolve through
+`plot_wmax = plot_hmax = SmoothFillMax`, and `SmoothFillMax = DataSets = 1 shl 11 = 2048`
+(lines 154-155, 208).
 
 ### 3.3 Layer System
 
 ```pascal
-plot_layermax = 8;      // Maximum number of layer bitmaps
+plot_layermax         = 8;      // Maximum number of layer bitmaps
 ```
 
 The PLOT window supports up to 8 independent bitmap layers that can be loaded from external BMP files and composited onto the main display canvas.
 
-**Source Location**: Line 64 in DebugDisplayUnit.pas
+**Source Location**: Line **222** in DebugDisplayUnit.pas. (Line 64 is `key_longs_2bit = 30;`.)
 
 ### 3.4 Command Key Constants
 
@@ -197,8 +235,13 @@ The PLOT window responds to the following command keys:
 | `key_origin` | 65 | `ORIGIN` | Set coordinate origin |
 | `key_set` | 77 | `SET` | Set current position |
 | `key_precise` | 71 | `PRECISE` | Toggle precision mode |
+| `key_close` | 49 | `CLOSE` | Close the window (dispatched in `p2com.asm`, **not** in `PLOT_Update` — see the Directive Reference) |
 
-**Source Locations**: Lines 44-122 in DebugDisplayUnit.pas
+**Source Locations**: Lines **76-127** in DebugDisplayUnit.pas — the functional-keyword group
+`key_alt` = 41 (line 76) … `key_window` = 92 (line 127). The specific keys tabulated above
+(`key_box` = 44 … `key_text` = 84) occupy lines **79-119**. (The old citation "44-122" started inside the
+*colour-mode* group — line 44 is `key_lut2 = 11`. All 16 key **values** in the table were and remain
+correct; only the line citation was stale.)
 
 ---
 
@@ -219,12 +262,18 @@ vPixelX      : integer;     // Current X position (relative to origin)
 vPixelY      : integer;     // Current Y position (relative to origin)
 
 // Precision control
-vPrecise     : integer;     // Coordinate-INPUT shift: 8 = whole-pixel input (default, PRECISE off); 0 = sub-pixel 8.8 input (PRECISE on)
+vPrecise     : byte;        // (342) Coordinate-INPUT shift: 8 = whole-pixel input (default, PRECISE off); 0 = sub-pixel 8.8 input (PRECISE on)
 
 // Polar coordinate parameters
-vTwoPi       : integer;     // Full circle value (default: $100000000)
+vTwoPi       : int64;       // (315) Full circle value (default: $100000000) — MUST be 64-bit: an
+                            //       `integer` cannot hold $100000000, and POLAR -1 stores -$100000000
 vTheta       : integer;     // Theta offset for polar coordinates
 ```
+
+> **Declared types matter here** (315, 342): `vTwoPi` is an **`int64`**, not an `integer` — it has to
+> hold `±$100000000`, and `POLAR -1` genuinely stores the **negative** value (reversing the rotation
+> sense); only `POLAR 0` yields `+$100000000`. `vPrecise` is a **`byte`** holding 8 or 0 — not a
+> boolean and not an integer.
 
 **Purpose**:
 - **vPolar**: Determines whether coordinates are interpreted as (rho, theta) or (x, y)
@@ -259,16 +308,20 @@ vPrecise := 8;            // whole-pixel input (default; PRECISE toggles to 0 = 
 vPlotColor   : integer;     // Current drawing color (RGB24)
 vTextColor   : integer;     // Text color (RGB24)
 vBackColor   : integer;     // Background color (RGB24)
-vOpacity     : integer;     // Transparency (0-255, 255 = opaque)
-vLineSize    : integer;     // Line/dot size in pixels
+vOpacity     : byte;        // (341) Blend opacity; NOT clamped by OPACITY — truncates mod 256
+vLineSize    : integer;     // Default line/dot size argument for DOT/LINE
 ```
 
 **Purpose**:
-- **vPlotColor**: Color used for drawing primitives (dots, lines, shapes)
+- **vPlotColor**: Color used for drawing primitives (dots, lines, shapes). Resolved through
+  `KeyColor` → `TranslateColor` **in the current `vColorMode`** — see §21.1.
 - **vTextColor**: Color used for text rendering
 - **vBackColor**: Background fill color
-- **vOpacity**: Alpha channel value for transparency effects
-- **vLineSize**: Thickness of lines and diameter of dots
+- **vOpacity**: Blend opacity applied at pixel-write time (there is no alpha plane in the 24-bit
+  bitmaps). Declared a **`byte`** (341), and `OPACITY` assigns it **without a clamp** (1944-1945) ⇒
+  the value **truncates mod 256**: `OPACITY 256` ⇒ **0, fully transparent**.
+- **vLineSize**: The default `linesize` argument for DOT/LINE (see §7.1 on how it reaches
+  `SmoothDot`/`SmoothLine`, and the NEEDS-HARDWARE note on rendered width)
 
 ### 4.3 Text Rendering Variables
 
@@ -290,17 +343,33 @@ vTextAngle   : integer;     // PERSISTENT text rotation (tenths of degrees: 0-36
 | 0-1 | $03 | 0-3 | Font weight: 0=100 (thin), 1=400 (normal), 2=700 (bold), 3=900 (heavy) |
 | 2 | $04 | 0-1 | Italic: 0=upright, 1=italic |
 | 3 | $08 | 0-1 | Underline: 0=none, 1=underline |
-| 4-5 | $30 | 0-3 | Horizontal justify: 0/1=center, 2=left, 3=right |
-| 6-7 | $C0 | 0-3 | Vertical justify: 0/1=center, **2=bottom, 3=top** |
+| 4-5 | $30 | 0-3 | Horizontal justify — see §8.2 (0/1: centred; **%10**: ink **right** of the anchor / anchor = text's **left** edge; **%11**: ink **left** of the anchor / anchor = text's **right** edge) |
+| 6-7 | $C0 | 0-3 | Vertical justify — see §8.2 (0/1: centred; **%10**: ink **above** the anchor / anchor = text's **bottom** edge; **%11**: ink **below** the anchor / anchor = text's **top** edge) |
 
-> **Justify semantics** (verified against `AngleTextOut` 3502-3516): the two justify
-> fields position the anchor point relative to the text box, then the offset is rotated
-> by `angle` before drawing (`TextOut(x+rx, y-ry)`). Horizontal value 2 → `tx=0` (anchor
-> at the text's left edge → left-justified), 3 → `tx=-w` (right edge → right). Vertical
-> value 2 → `ty=h` → text drawn at `y-h`, i.e. it occupies screen rows `[y-h, y]` so the
-> anchor sits at the text's **bottom** edge (**bottom**-justified); value 3 → `ty=0` →
-> rows `[y, y+h]`, anchor at the **top** edge (**top**-justified). Weight = 700 is the
-> only "bold" — there is no separate bold flag; bit 2 is italic, bit 3 underline.
+> **Justify semantics** (from `AngleTextOut` 3502-3511 + `TextOut(x + rx, y - ry, s)` at 3516; screen
+> Y grows **down**). The two justify fields offset the text box relative to the anchor point, then the
+> offset is rotated by `angle` before drawing. **State both halves — which side the ink lands on AND
+> which edge the anchor is**, because "left/right/top/bottom" alone is ambiguous (it can name either):
+>
+> - H `%10` → `tx := 0`: the text sits **right** of the anchor point (the anchor is the text's **left**
+>   edge).
+> - H `%11` → `tx := -w`: the text sits **left** of the anchor point (the anchor is the text's **right**
+>   edge).
+> - V `%10` → `ty := h`: drawn at `y - h`, occupying rows `[y-h, y]` ⇒ the text sits **above** the
+>   anchor point (the anchor is the text's **bottom** edge).
+> - V `%11` → `ty := 0`: drawn at `y`, occupying rows `[y, y+h]` ⇒ the text sits **below** the anchor
+>   point (the anchor is the text's **top** edge).
+>
+> There is **no bold flag** — 700 is a *weight* (bits 0-1). Bit 2 is italic, bit 3 underline. There is
+> **no strikeout bit.**
+>
+> **Note on naming:** the Pascal `case` arms carry **no comments** — Chip never named these four
+> values (verified byte-exact against 3502-3511). Every `//Left-aligned`-style label in earlier
+> revisions of this document was invented downstream, and that invention is the whole origin of the
+> long-running "is %10 left or right?" dispute. Hardware measurement (EF-031) names them from the
+> **ink** side ("%10 = right / top"); this document previously named them from the **anchor-edge**
+> side ("%10 = left / bottom"). **Both describe the same pixels.** The wording above states both
+> halves so it cannot be misread under either convention.
 
 **Text Angle Units**:
 - Stored in tenths of degrees (0-3600 = 0-360°)
@@ -337,9 +406,9 @@ begin
 end;
 ```
 
-### 4.5 Sprite System (Shared)
+### 4.5 Sprite System (same layout as BITMAP — but **not** shared data)
 
-The PLOT window shares the sprite system with the BITMAP display:
+PLOT uses the **same sprite storage layout** as the BITMAP display (constants 237-239, fields 397-400):
 
 ```pascal
 const
@@ -347,19 +416,26 @@ const
   SpriteMaxX   = 32;      // Maximum sprite width in pixels
   SpriteMaxY   = 32;      // Maximum sprite height in pixels
 
-var
-  SpriteSizeX  : array[0..SpriteMax - 1] of integer;          // Sprite widths
-  SpriteSizeY  : array[0..SpriteMax - 1] of integer;          // Sprite heights
-  SpritePixels : array[0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;    // Pixel indices
-  SpriteColors : array[0..SpriteMax * 256 - 1] of integer;    // Color palettes (RGBA)
+// ...declared inside TDebugDisplayForm's `private` section (the `private` keyword is at line 250):
+  SpritePixels : array [0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;    // (397) Pixel indices
+  SpriteColors : array [0..SpriteMax * 256 - 1] of integer;                     // (398) Palettes, $AARRGGBB
+  SpriteSizeX  : array [0..SpriteMax - 1] of byte;                              // (399) Sprite widths  — BYTE
+  SpriteSizeY  : array [0..SpriteMax - 1] of byte;                              // (400) Sprite heights — BYTE
 ```
 
-**Total Memory**:
-- SpriteSizeX: 256 × 4 bytes = 1 KB
-- SpriteSizeY: 256 × 4 bytes = 1 KB
-- SpritePixels: 256 × 32 × 32 = 256 KB
-- SpriteColors: 256 × 256 × 4 bytes = 256 KB
-- **Total: ~514 KB**
+> **⚠️ Two corrections.**
+> 1. **`SpriteSizeX`/`SpriteSizeY` are `of byte`** (399-400), not `of integer` — 256 bytes each, not 1 KB.
+> 2. **These are PER-WINDOW PRIVATE INSTANCE FIELDS, not unit-level globals.** They are declared inside
+>    `TDebugDisplayForm`'s `private` section, so **each debug-display window owns its own copy**, zeroed
+>    by its own `_Configure` (`FillChar`, 1910-1913). PLOT and BITMAP share the *code and the layout* —
+>    **not the data.** A sprite defined in one window is **invisible** to another. (This is also why
+>    `PLOT_Close` has nothing to free for them: they are not heap-allocated.)
+
+**Total Memory** (per window):
+- SpritePixels: 256 × 32 × 32 × 1 B = 256 KB
+- SpriteColors: 256 × 256 × 4 B = 256 KB
+- SpriteSizeX + SpriteSizeY: 256 B + 256 B = 512 B
+- **Total: ≈ 512.5 KB**
 
 ---
 
@@ -376,7 +452,7 @@ Accepted by `PLOT_Configure` only (window-creation phase). Line refs: 1882–190
 |---|---|---|---|
 | `TITLE` | `'string'` | — | Window title |
 | `POS` | `left top` | Screen coords | Window screen position |
-| `SIZE` | `width height` | 32–2048 each; **default 256 × 256** (from global `SetDefaults` 2880–2884; `PLOT_Configure` does not override) | Canvas dimensions (client = `vWidth·vDotSize × vHeight·vDotSizeY`; with default dotsize 1×1 → 256 × 256 px, zero margins) |
+| `SIZE` | `width height` | 32–2048 each; **default 256 × 256** (shared `SetDefaults` **2884-2885**: `vWidth := 256; vHeight := 256;` — `PLOT_Configure` never overrides them) | Canvas dimensions (client = `vWidth·vDotSize × vHeight·vDotSizeY`; with default dotsize 1×1 → 256 × 256 px, zero margins) |
 | `DOTSIZE` | `x {y}` | **1–256** each; default **1×1** | Pixel-scaling factor; if only x given, y copies x (`1891-1894`) |
 | color-mode | `LUT1`…`RGB24` | Keyword token | Initial color mode (`KeyColorMode`; `1896-1897`) |
 | `LUTCOLORS` | `rgb24…` | 256 color longs | 256-entry LUT palette (`1898-1899`) |
@@ -397,7 +473,7 @@ Accepted by `PLOT_Update` (1918–2155). PLOT is the only window whose update ph
 | `BACKCOLOR` | `color` | Any color | 1932–1933 | Set background color |
 | `COLOR` | `color` | Any color | 1934–1943 | Set `vPlotColor`; if next key is `TEXT`, also sets `vTextColor` |
 | `BLACK`…`GRAY` | `{brightness}` | Brightness 0–15 | 1934–1943 | Named-color shorthand; optional brightness nibble |
-| `OPACITY` | `byte` | **0–255**; default `$FF` | 1944–1945 | Set `vOpacity` |
+| `OPACITY` | `byte` | **NO CLAMP** — value truncated to 8 bits (mod 256); default `$FF` | 1944–1945 | Set `vOpacity` (see the footgun note below) |
 | `PRECISE` | _(toggle)_ | Starts at 8 (whole-pixel / sub-pixel OFF) | 1946–1947 | XOR `vPrecise` 8↔0; **8→0 enables** sub-pixel 8.8-fixed-point input (v55: PRECISE turns sub-pixel on) |
 | `LINESIZE` | `size` | — | 1948–1949 | Set `vLineSize` default for DOT/LINE |
 | `ORIGIN` | `{x y}` | — | 1950–1956 | Set coordinate origin; no args = use current `vPixelX,vPixelY` |
@@ -420,9 +496,65 @@ Accepted by `PLOT_Update` (1918–2155). PLOT is the only window whose update ph
 | `CARTESIAN` | `{flipy {flipx}}` | flipy/flipx 0 or 1 | 2137–2142 | Disable polar mode; optionally set `vDirY`, `vDirX` flip flags |
 | `CLEAR` | _(none)_ | — | 2143–2144 | Clear canvas to `vBackColor` (`ClearBitmap`) |
 | `UPDATE` | _(none)_ | — | 2145–2146 | Flush `Bitmap[0]` to screen (`BitmapToCanvas(0)`) |
-| `SAVE` | _(see KeySave)_ | — | 2147–2148 | Write canvas to `<name>.bmp` or desktop region |
+| `SAVE` | _(six forms — see below)_ | — | 2147–2148 (`KeySave` 2839–2866) | Write `Bitmap[1]` (the **front** buffer) to `<name>.bmp`, or scrape a desktop region |
 | `PC_KEY` | _(none)_ | — | 2149–2150 | Poll keyboard latch → transmit 1 LONG to P2 (`SendKeyPress`) |
 | `PC_MOUSE` | _(none)_ | — | 2151–2152 | Transmit 2 LONGs to P2: packed x/y/buttons/wheel + pixel color (`SendMousePos`) |
+| `CLOSE` | _(none)_ | — | **not in `PLOT_Update`** — dispatched in `p2com.asm` (see below) | Close this window and release its display slot |
+
+> **⚠️ `OPACITY` is NOT clamped.** `PLOT_Update` 1944-1945 is `if NextNum then vOpacity := val;` —
+> a bare assignment, **not** `KeyValWithin`. `vOpacity` is a `byte` (declared 341) and the unit
+> compiles with range/overflow checks **off** (`{$Q-,R-}`, line 1), so the value **truncates mod 256**
+> rather than saturating. **`OPACITY 256` ⇒ 0 = fully transparent** (everything you draw next
+> vanishes); `OPACITY -1` ⇒ 255. Contrast `SPRITE`'s opacity argument, which *is* genuinely clamped
+> (`KeyValWithin(t6, 0, 255)`, 2109).
+
+#### `SAVE` — the full grammar (`KeySave`, 2839–2866)
+
+The filename always comes **last**, and `.bmp` is appended automatically. Six forms, **three of which
+silently write nothing**:
+
+| Form | What it writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` — the **front / display** buffer — to `name.bmp` (2843) |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect — **includes the title bar and borders**, and is vulnerable to occlusion by other windows (2846-2851, 2861-2864) |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region (2853-2858) |
+| `SAVE WINDOW` | captures to memory — **no file** (the trailing `NextStr` fails, 2864) |
+| `SAVE l t w h` | captures to memory — **no file** |
+| `SAVE` (bare) | **nothing at all** |
+
+- **Sharp edge (2848):** a non-`WINDOW` keyword after `SAVE` is **consumed and then discarded** by the
+  `if val <> key_window then Exit`. So `` `MyPlot SAVE CLEAR `` writes no file **and eats the CLEAR**.
+- **Manual-update trap:** `SAVE 'name'` writes `Bitmap[1]`, the **front** buffer. In `UPDATE` (manual)
+  mode drawing accumulates in `Bitmap[0]` and only reaches `Bitmap[1]` on an explicit `UPDATE`
+  (2145-2146) — so **a `SAVE` issued before that `UPDATE` writes the STALE previous frame.**
+- **`DOTSIZE` magnification is not in the file.** `DOTSIZE` is a display-time `StretchDraw`
+  (`BitmapToCanvas` 3526-3527) that never touches `Bitmap[1]`; PLOT can never set `vSparse`, so
+  `SetSize` always takes the logical-size branch (2946-2951). `SAVE 'name'` therefore writes the
+  canvas at **1× logical scale, un-dotsized**. To capture the magnified on-screen appearance, use
+  `SAVE WINDOW 'name'`.
+
+#### `CLOSE` — a real directive, dispatched one layer up
+
+`CLOSE` (`key_close` = 49, line 84) appears in **no** `XXX_Update` case statement — including
+`PLOT_Update`. That absence is **not** evidence that it is dead: the handler lives **outside**
+`DebugDisplayUnit.pas`, in the parser.
+
+1. `parse_debug_string` (`p2com.asm` 19565-19572) detects `CLOSE` on an **existing-display command**
+   and sets a flag.
+2. `p2com.asm` 19613-19624 reverts the display's name symbol (`dd_nam` → `dd_unk`) and **clears that
+   display's bit in `debug_display_ena`** (= Pascal `P2.DebugDisplayEna`, `GlobalUnit.pas:123`).
+3. `TDebugForm.ChrIn` (`DebugUnit.pas` 236-237) runs the **full** `UpdateDisplay(...)` and only
+   *afterwards*: `if P2.DebugDisplayEna shr j and 1 = 0 then DisplayForm[j].Close;`
+
+**Semantics:**
+- **Command-only.** `CLOSE` is ignored in a *new-display declaration* (p2com.asm 19569-19570).
+- **Multi-target.** `` `Plot1 Plot2 CLOSE `` closes **all** named targets (`loop @@close`, 19624).
+- **Update-first, close-second.** The rest of the message executes, *then* the window closes — so
+  `` `MyPlot SAVE 'shot' CLOSE `` **saves, then closes.**
+- **It reclaims one of the 32 display slots**: the id and the name become reusable. It is the
+  per-window counterpart of the global `DEBUG_END_SESSION` teardown (`TDebugForm.CloseDisplays`,
+  `DebugUnit.pas` 125-134).
+- On the Pascal side, closing the form is what invokes `PLOT_Close` (887) to free the layer bitmaps.
 
 ### Keyboard & mouse
 
@@ -518,13 +650,19 @@ end;
 |-----------|---------|---------|-------|---------|
 | Title | `TITLE 'string'` | `"<name> - PLOT"` | - | Window title (caption set in FormCreate) |
 | Position | `POS x y` | host origin ≈(0,210), no cascade | offset from host origin | Window position |
-| Size | `SIZE width height` | 512 × 512 | 32–2048 | Canvas dimensions |
+| Size | `SIZE width height` | **256 × 256** | 32–2048 | Canvas dimensions |
 | Dot Size | `DOTSIZE x {y}` | 1 × 1 | **1–256** | Pixel scaling (v55: `1891-1894`) |
-| Color mode | `LUT1`…`RGB24` | - | - | Initial color mode |
-| LUT Colors | `LUTCOLORS rgb24...` | - | 256 colors | Palette for LUT modes |
+| Color mode | `LUT1`…`RGB24` | `RGB24` (`SetDefaults` 2889) | 19 modes | Initial color mode |
+| LUT Colors | `LUTCOLORS rgb24...` | all `$000000` (zero-init) | 256 colors | Palette for LUT modes |
 | Back Color | `BACKCOLOR color` | Black | RGB24 | Background color |
 | Update Mode | `UPDATE` | Auto | - | Manual update mode |
-| Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
+| Hide XY | `HIDEXY` | Show | - | Suppress the on-screen measurement-cursor readout (does **not** affect `PC_MOUSE`) |
+
+> **Default SIZE is 256 × 256, not 512 × 512.** `PLOT_Configure` never assigns `vWidth`/`vHeight`
+> itself — the values come from the global `SetDefaults` (2884-2885: `vWidth := 256; vHeight := 256;`),
+> which runs before the `_Configure` dispatch. An earlier revision of this table said 512 × 512,
+> contradicting this document's own Directive Reference. **Examples throughout this document that
+> open with `SIZE 512 512` are simply explicit — they are not showing the default.**
 
 ### 5.3 Initialization Sequence
 
@@ -573,14 +711,23 @@ The PLOT window features a sophisticated dual-mode coordinate system with origin
 
 ### 6.1 Cartesian Mode
 
-**Default Mode**: Cartesian coordinates with origin at (0, 0) in top-left corner.
+**Default Mode**: Cartesian coordinates with the origin at (0, 0) in the **BOTTOM-LEFT** corner —
+**Y increases UPWARD**, the mathematical convention.
+
+> **⚠️ Corrected.** Earlier revisions of this section (and §17.4) said "origin top-left, Y increases
+> downward". That contradicts `PLOT_GetXY` — the very routine quoted immediately below. The default
+> `vDirY = False` takes the **`else`** branch, `y := vHeight - 1 - vOffsetY - vPixelY`, which **inverts
+> Y** against the screen. So at the defaults, user `(0, 0)` lands on screen row `vHeight-1` — the
+> bottom-left pixel — and increasing user Y moves **up** the screen. (Confirmed on hardware, EF-020;
+> the v55 language reference agrees: *"if ydir is 0, the Y axis points up"*.) `vDirY = True`
+> (`CARTESIAN 1`) is what selects the *screen-native* top-left / Y-down orientation.
 
 **Standard Configuration**:
 ```pascal
 vPolar := False;
-vDirX := False;               // X increases rightward
-vDirY := False;               // Y increases downward
-vOffsetX := 0;                // Origin at top-left
+vDirX := False;               // X increases rightward (screen-native)
+vDirY := False;               // Y increases UPWARD (Y inverted vs. the screen) — the default
+vOffsetX := 0;                // Origin at BOTTOM-left
 vOffsetY := 0;
 ```
 
@@ -619,14 +766,21 @@ Both flip:  screen_x = (vWidth - 1 - vOffsetX) - vPixelX
 CARTESIAN {flipy {flipx}}
 ```
 
-- `flipy`: 0 = Y increases downward (default), 1 = Y increases upward
-- `flipx`: 0 = X increases rightward (default), 1 = X increases leftward
+The two arguments set the `vDirY` / `vDirX` **flip flags** (`KeyBool`, 2140-2141) — they flip the
+axis *away from its default sense*, they do not name an absolute direction:
+
+- `flipy` → `vDirY`: **0 (default) = Y increases UPWARD** (origin at the bottom); **1 = Y increases
+  downward** (origin at the top, screen-native).
+- `flipx` → `vDirX`: **0 (default) = X increases rightward**; 1 = X increases leftward.
+
+So the *default* (no `CARTESIAN` at all) is already the mathematical convention on Y. `CARTESIAN 1`
+is what gives you a screen-native top-left/Y-down canvas.
 
 **Example**:
 ```
-CARTESIAN 1 0         // Mathematical convention: Y up, X right
-ORIGIN 256 256        // Center origin
-SET 100 100           // Point at (100, 100) relative to center
+CARTESIAN 0 0         // explicit default: Y up, X right (same as issuing nothing)
+ORIGIN 128 128        // Center origin on the default 256×256 canvas
+SET 100 100           // Point 100 right and 100 UP from the center
 ```
 
 ### 6.2 Polar Mode
@@ -864,12 +1018,21 @@ end;
 4. Shift to 8.8 fixed-point format (multiply by 256)
 5. Apply precision mode (shift by vPrecise)
 
-**Radius Calculation**:
+**Size argument → `SmoothDot` radius parameter** (code fact, 1978):
 ```pascal
-radius = (linesize shl vPrecise) shr 1
+SmoothDot(t3, t4, t1 shl vPrecise shr 1, vPlotColor, t2);
+//                ^^^^^^^^^^^^^^^^^^^^^ radius, in the same 8.8 units as t3/t4
 ```
-- Converts diameter to radius
-- Applies precision scaling
+- The `linesize` argument is shifted into the draw space by `vPrecise` (8 by default) and **halved**,
+  so the value handed to `SmoothDot` as its `radius` parameter is **half the argument**, expressed in
+  8.8 fixed-point. That much is settled by the code.
+- **NEEDS-HARDWARE — the *rendered* width of a dot has never been measured.** Do **not** infer the
+  on-screen pixel span from this shift arithmetic. `SmoothDot` is a one-line wrapper around
+  `SmoothLine` (3839-3842), which anti-aliases; the AA envelope sits between the geometric radius and
+  the lit pixels, and it demonstrably widens small radii. (The same shift-constant reasoning applied
+  to LOGIC's `LINESIZE` predicted half-pixels and was **falsified on silicon** — `LINESIZE 3` renders
+  3 px, 1:1, EF-027.) Until `DOT n` is measured against a rule, this document states the geometric
+  parameter only and asserts **no** user-facing "diameter"/"radius" pixel unit.
 
 **Current Position**:
 - DOT does **not** modify vPixelX or vPixelY
@@ -1139,31 +1302,54 @@ procedure SmoothShape(x, y, w, h, rx, ry, t: integer; c: integer; opa: integer);
 
 **Rendering Algorithm** (lines 3590–3743):
 
-The SmoothShape method implements a sophisticated anti-aliased rendering algorithm:
+> **There is no signed-distance field.** `SmoothShape` is built from span fills (`SmoothRect`)
+> plus **precomputed quarter-ellipse lookup tables** for the corners, plotted with 4-way symmetry.
+> Earlier revisions of this document described a per-pixel distance-field rasterizer with a
+> `±thick/2` stroke straddling the boundary — that algorithm does not exist in v55.
 
-1. **Bounding Box Calculation**:
-   - Determine pixel bounds based on shape dimensions
-   - Expand bounds for anti-aliasing coverage
+1. **Input validation** (3606-3612) — the call is **silently dropped** (`Exit`) if the center is more
+   than `SmoothFillMax` (2048) px outside the bitmap, `xs`/`ys` are outside **1..2048**, `xro`/`yro`
+   are outside **0..1024** (`SmoothFillMax shr 1`), or `thick < 0`.
 
-2. **Distance Field Calculation**:
-   - For each pixel, compute distance to shape boundary
-   - Handle corner rounding using distance from corner centers
+2. **Fill-buffer setup** (3614): `SmoothFillSetup(xs, color)` builds a row of `xs` RGB24 pixels in
+   the shape color, reused by every span fill.
 
-3. **Outline vs. Fill**:
-   - If `t = 0`: Filled shape (distance < 0 = inside)
-   - If `t > 0`: Outline (abs(distance) < t/2 = on stroke)
+3. **Solid decision** (3616):
+   ```pascal
+   solid := (thick = 0) or (thick shl 1 >= xs) or (thick shl 1 >= ys);
+   ```
+   The shape is filled solid when `thick = 0` **or** when `2·thick` reaches the width **or** the
+   height — a too-thick outline degenerates to a fill (it does not overdraw).
 
-4. **Anti-Aliasing**:
-   - Sub-pixel coverage calculation using distance
-   - Gamma-corrected alpha blending
+4. **Sharp-corner fast path** (3617-3636): `rectangle := (xro = 0) or (yro = 0)` — a zero radius on
+   *either* axis makes the whole shape a plain rectangle. It is drawn purely with `SmoothRect` spans
+   (one span for solid; four — top/bottom/left/right — for the frame) and then `Exit`s. **No
+   anti-aliasing math runs on this path** (BOX takes it; so does every sprite pixel).
 
-5. **Pixel Compositing**:
-   - Blend shape color with existing pixel color based on coverage
+5. **Rounded path** (3638-3742):
+   - corner radii clamped to half-size (`if xro shl 1 > xs then xro := xs shr 1`, 3638-3639);
+   - **inner radii** `xri := xro - thick`, `yri := yro - thick` (3641-3642) ⇒ **the stroke frame grows
+     INWARD.** The outer edge stays on the shape's bounding box; the outline does *not* straddle the
+     boundary by ±t/2. A non-positive inner radius forces `solid` (3643-3648);
+   - the straight flats are filled with `SmoothRect` (solid: 3660-3662; frame: 3666-3669);
+   - the corners are anti-aliased from **precomputed quarter-ellipse LUTs** —
+     `yo_lut[x] := Trunc(Sin(ArcCos((x + yo_bias) / xro)) * yro * 256)` and the matching
+     `yi_lut/xo_lut/xi_lut` (3677-3689), i.e. 8.8-fixed edge positions with a small
+     `1/(r+1)` bias for good shading at tiny radii;
+   - per-pixel coverage is the product of the x- and y-edge coverages
+     (`opa := (xopa * yopa + $FF) shr 8`, 3726), and each computed corner pixel is plotted **4-way
+     symmetrically** — upper/lower × left/right (3737-3740). Where a solid shape's coverage saturates,
+     the remainder of the scan line is span-filled instead (3728-3735).
+
+6. **Blending** — `SmoothFill` (3777-3808) for spans, `SmoothPlot` (3810-3831) for single pixels. A
+   fully-opaque write is a straight 3-byte store (3820-3822); anything less is **gamma-corrected alpha
+   blending** against the existing 24-bit pixel — `Round(Power((Power(dst, 2.0)·($FF - opacity) +
+   Power(src, 2.0)·opacity) / $100, 0.5))`, per channel (3803; 3827-3829).
 
 **Performance**:
-- Per-pixel distance calculations
-- More expensive than simple filled rectangles
-- Optimized with bounding box culling
+- Straight edges cost one span fill each — cheap.
+- Only the corner quadrants run the per-pixel LUT/blend loop, and only out to `xro`/`yro`.
+- Sharp-cornered shapes (BOX, and every sprite pixel block) never enter the AA loop at all.
 
 ---
 
@@ -1234,8 +1420,16 @@ The `vTextStyle` variable encodes multiple style attributes in a single byte:
 | 0-1 | $03 | Weight | 0-3 | Font weight |
 | 2 | $04 | Italic | 0-1 | Italic style |
 | 3 | $08 | Underline | 0-1 | Underline |
-| 4-5 | $30 | H-Justify | 0-3 | Horizontal justify (anchor edge) |
-| 6-7 | $C0 | V-Justify | 0-3 | Vertical justify (anchor edge) |
+| 4-5 | $30 | H-Justify | 0-3 | Horizontal justify |
+| 6-7 | $C0 | V-Justify | 0-3 | Vertical justify |
+
+> **Read the justify tables below carefully.** The Pascal `case` arms are **bare** — Chip assigned
+> **no names** to these four values (3502-3511, verified byte-exact; the comments in earlier revisions
+> of this document were invented downstream). A bare axis name like "%10 = left" is ambiguous: it can
+> mean *the ink is left of the anchor* or *the anchor is at the text's left edge* — and those are
+> **opposite** placements. The tables therefore state **both halves**. Hardware measurement (EF-031)
+> names these from the ink side; this document historically named them from the anchor-edge side.
+> Same pixels, two vocabularies.
 
 **Weight Values** (bits 0-1):
 ```pascal
@@ -1257,37 +1451,50 @@ const weight: array [0..3] of integer = (100, 400, 700, 900);
 - 0 = No underline
 - 1 = Underlined
 
-**Horizontal Alignment** (bits 4-5):
+**Horizontal Justify** (bits 4-5) — verbatim from `AngleTextOut` 3502-3506 (**no comments in the
+source**; the annotations here are this document's):
 ```pascal
 case style and $30 shr 4 of
-  0, 1: tx := -w / 2;        // Center (default)
-  2:    tx := 0;             // Left-aligned
-  3:    tx := -w;            // Right-aligned
+  0, 1: tx := -w / 2;
+  2:    tx := 0;
+  3:    tx := -w;
 end;
 ```
+The offset is rotated and applied as `TextOut(x + rx, …)` (3516), and the GDI device context keeps its
+default `TA_LEFT | TA_TOP` (there are **zero** `SetTextAlign`/`TA_*` calls in the whole unit), so
+`TextOut(X, Y)` places the text cell's **left/top corner** at `(X, Y)`.
 
-| Value | Alignment | Offset |
-|-------|-----------|--------|
-| 0, 1 | Center | -width/2 |
-| 2 | Left | 0 |
-| 3 | Right | -width |
+| Value | Offset `tx` | The text sits… | The anchor is the text's… |
+|-------|-------------|----------------|---------------------------|
+| 0, 1 (`%00`/`%01`) | `-w/2` | centred on the anchor | horizontal centre |
+| **2 (`%10`)** | `0` | **RIGHT of the anchor point** | **LEFT edge** |
+| **3 (`%11`)** | `-w` | **LEFT of the anchor point** | **RIGHT edge** |
 
-**Vertical Justify** (bits 6-7). The offset `ty` is applied as `TextOut(…, y - ty)`, so a larger `ty` moves the text *up* and places the anchor lower on the text box:
+For `%10` the cell's left corner is placed exactly at the anchor (`tx` is literally `0`) — no
+implementation could put the ink to the *left* of the anchor for this value.
+
+**Vertical Justify** (bits 6-7) — verbatim from `AngleTextOut` 3507-3511 (again, **no comments in the
+source**). The offset is applied as `TextOut(…, y - ry)` (3516) and screen Y grows **downward**, so a
+larger `ty` moves the text **up**:
 ```pascal
 case style and $C0 shr 6 of
-  0, 1: ty := h / 2;         // Center (anchor at text's vertical middle)
-  2:    ty := h;             // Bottom  (text drawn at y-h → occupies [y-h, y] → anchor at bottom edge)
-  3:    ty := 0;             // Top     (text drawn at y   → occupies [y, y+h] → anchor at top edge)
+  0, 1: ty := h / 2;
+  2:    ty := h;
+  3:    ty := 0;
 end;
 ```
 
-| Value | Justify | Offset | Anchor sits at the text's… |
-|-------|---------|--------|-----------------------------|
-| 0, 1 | Center | +height/2 | vertical middle |
-| 2 | **Bottom** | +height | bottom edge |
-| 3 | **Top** | 0 | top edge |
+| Value | Offset `ty` | The text sits… | The anchor is the text's… |
+|-------|-------------|----------------|---------------------------|
+| 0, 1 (`%00`/`%01`) | `h/2` | centred on the anchor | vertical middle |
+| **2 (`%10`)** | `h` | **ABOVE the anchor point** (drawn at `y-h`, occupying rows `[y-h, y]`) | **BOTTOM edge** |
+| **3 (`%11`)** | `0` | **BELOW the anchor point** (drawn at `y`, occupying rows `[y, y+h]`) | **TOP edge** |
 
-> Vertical value **2 = bottom, 3 = top** (mirror of horizontal: value 2 keeps the near/origin edge at the anchor, value 3 the far edge). Earlier drafts had these two labels reversed.
+> **Do not shorten these to a bare axis name.** "%10 = bottom" and "%10 = top" have both been written
+> about this same value, by people who were both looking at the same pixels — one naming the anchor
+> edge, the other naming where the ink went. Always say both halves, as the tables above do. This is
+> consistent with the hardware measurement (EF-031), which reports `%10` as "top" because the ink
+> appeared **above** the guide line.
 
 **Style Examples** (decode the bit fields — do not read the hex digits as flags):
 ```
@@ -1413,21 +1620,28 @@ h := Bitmap[0].Canvas.TextHeight(s);
 - Measure text width and height (unrotated)
 
 **Step 3: Calculate Alignment Offset**
+
+The source (3502-3511) carries **no comments** on these arms. Annotated here — each arm named by
+**both** halves, per §8.2:
 ```pascal
 case style and $30 shr 4 of
-  0, 1: tx := -w / 2;       // Center
-  2:    tx := 0;            // Left
-  3:    tx := -w;           // Right
+  0, 1: tx := -w / 2;       // centred on the anchor
+  2:    tx := 0;            // ink RIGHT of the anchor  (anchor = text's LEFT edge)
+  3:    tx := -w;           // ink LEFT of the anchor   (anchor = text's RIGHT edge)
 end;
 case style and $C0 shr 6 of
-  0, 1: ty := h / 2;        // Center
-  2:    ty := h;            // Top
-  3:    ty := 0;            // Bottom
+  0, 1: ty := h / 2;        // centred on the anchor
+  2:    ty := h;            // ink ABOVE the anchor     (anchor = text's BOTTOM edge)
+  3:    ty := 0;            // ink BELOW the anchor     (anchor = text's TOP edge)
 end;
 ```
 
-- Calculate offset for horizontal and vertical alignment
-- Offset is relative to text bounding box
+> **⚠️ Corrected.** An earlier revision of this block annotated the vertical arms `2: // Top` and
+> `3: // Bottom` — **inverted**, and self-contradictory with §8.2 in the same document. Value 2 sets
+> `ty := h`, and since the text is emitted at `y - ry` (3516) with screen Y growing downward, that
+> draws the text **above** `y`, putting the anchor at the text's **bottom** edge.
+
+- Offset is relative to the text bounding box, and is rotated (Step 4) before being applied
 
 **Step 4: Rotate Alignment Offset**
 ```pascal
@@ -1709,9 +1923,10 @@ CROP 1 200 200 100 100 50 50    // Copy 100×100 region from (200,200) to (50,50
 
 **Multi-Layer Composition**:
 ```
-// Initialize canvas
-SIZE 512 512
-BACKCOLOR BLACK
+// --- config phase (the window-creation message) ---
+PLOT SIZE 512 512 BACKCOLOR BLACK    // 512×512 is EXPLICIT; the default is 256×256
+
+// --- update phase (subsequent messages) ---
 CLEAR
 
 // Load three layers
@@ -1734,22 +1949,23 @@ CIRCLE 40 0 255                 // Draw sun
 
 ## 10. Sprite Rendering
 
-The PLOT window shares the sprite system with the BITMAP display, supporting up to 256 sprite definitions with 8 orientations, scaling, and opacity control.
+PLOT uses the same sprite system as the BITMAP display — up to 256 sprite definitions with 8
+orientations, scaling and opacity control. The **storage layout is shared; the storage is not** (each
+window owns a private copy — see §4.5).
 
 ### 10.1 Sprite System Architecture
 
-**Data Structures**:
+**Data Structures** (private instance fields of `TDebugDisplayForm`, 397-400):
 ```pascal
 const
-  SpriteMax    = 256;     // Maximum sprite definitions
-  SpriteMaxX   = 32;      // Maximum sprite width
-  SpriteMaxY   = 32;      // Maximum sprite height
+  SpriteMax    = 256;     // Maximum sprite definitions   (237)
+  SpriteMaxX   = 32;      // Maximum sprite width         (238)
+  SpriteMaxY   = 32;      // Maximum sprite height        (239)
 
-var
-  SpriteSizeX  : array[0..SpriteMax - 1] of integer;
-  SpriteSizeY  : array[0..SpriteMax - 1] of integer;
-  SpritePixels : array[0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;
-  SpriteColors : array[0..SpriteMax * 256 - 1] of integer;
+  SpritePixels : array [0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;    // (397)
+  SpriteColors : array [0..SpriteMax * 256 - 1] of integer;                     // (398)
+  SpriteSizeX  : array [0..SpriteMax - 1] of byte;                              // (399) byte, not integer
+  SpriteSizeY  : array [0..SpriteMax - 1] of byte;                              // (400) byte, not integer
 ```
 
 **Storage Layout**:
@@ -1934,26 +2150,40 @@ The sprite system supports 8 orientations combining flips and rotations:
 | 1 | Flip X | `(width - x)` | `y - 1` |
 | 2 | Flip Y | `x - 1` | `(height - y)` |
 | 3 | Flip X+Y (180°) | `(width - x)` | `(height - y)` |
-| 4 | Rotate 90° CCW | `y - 1` | `x - 1` |
-| 5 | Rotate 90° CCW + Flip X | `y - 1` | `(width - x)` |
+| 4 | **Transpose** (reflect about the main diagonal) | `y - 1` | `x - 1` |
+| 5 | **Rotate 90° CCW** | `y - 1` | `(width - x)` |
 | 6 | Rotate 90° CW | `(height - y)` | `x - 1` |
-| 7 | Rotate 90° CW + Flip X | `(height - y)` | `(width - x)` |
+| 7 | Reflect about the anti-diagonal | `(height - y)` | `(width - x)` |
 
 **Visualization** (4×4 sprite):
 
 ```
-Original (0):     Flip X (1):      Flip Y (2):      Flip X+Y (3):
+Original (0):     Flip X (1):       Flip Y (2):       Flip X+Y (3):
 A B C D           D C B A           M N O P           P O N M
 E F G H           H G F E           I J K L           L K J I
 I J K L           L K J I           E F G H           H G F E
 M N O P           P O N M           A B C D           D C B A
 
-Rot 90° CCW (4):  90CCW+FlipX (5): Rot 90° CW (6):   90CW+FlipX (7):
-D H L P           A E I M           M I E A           P L H D
-C G K O           B F J N           N J F B           O K G C
-B F J N           C G K O           O K G C           N J F B
-A E I M           D H L P           P L H D           M I E A
+Transpose (4):    Rot 90° CCW (5):  Rot 90° CW (6):   Anti-diagonal (7):
+A E I M           D H L P           M I E A           P L H D
+B F J N           C G K O           N J F B           O K G C
+C G K O           B F J N           O K G C           N J F B
+D H L P           A E I M           P L H D           M I E A
 ```
+
+> **⚠️ Corrected — codes 4 and 5 were swapped in an earlier revision** (the formula columns were
+> always right; only the names and the ASCII grids were wrong, and they disagreed with §10.3, which
+> was right). Read them straight off `PLOT_Update` 2128-2129:
+> ```pascal
+> 4: SmoothShape(t1 +  (y - 1) * t5, t2 +  (x - 1) * t5, ...);   // dest(col,row) = src(row,col)
+> 5: SmoothShape(t1 +  (y - 1) * t5, t2 + (t7 - x) * t5, ...);
+> ```
+> Code **4** maps destination `(col, row)` to source `(row, col)` — a **pure transpose** (reflection
+> about the main diagonal), *not* a rotation. Code **5** is transpose + flip-Y, which composes to the
+> **90° CCW rotation**. Likewise **7** (2131) is the reflection about the anti-diagonal, not a
+> "90° CW + flip X" rotation-plus-mirror by any other decomposition. The three orientation bits
+> (flip-X, flip-Y, transpose — see §10.3) are what compose; the rotation names are just the
+> conventional labels for four of the eight results.
 
 **Rendering Code**:
 ```pascal
@@ -1971,14 +2201,21 @@ end;
 - Each sprite pixel is rendered as a `scale × scale` block
 - Example: scale=4 means 4×4 pixels per sprite pixel
 
-**Centering Adjustment**:
+**Block-center adjustment** (2115-2116):
 ```pascal
-Inc(t1, t5 shr 1);        // Offset by scale/2
+Inc(t1, t5 shr 1);        // Offset by HALF OF ONE SCALE BLOCK — not half the sprite
 Inc(t2, t5 shr 1);
 ```
 
-- Centers the sprite on the specified position
-- Without adjustment, top-left corner would be at position
+> **⚠️ This is not sprite centering.** `SmoothShape` addresses shapes by their **center**
+> (`xl := xc - xs shr 1`, 3621), and each sprite pixel is drawn as one `t5 × t5` `SmoothShape` block
+> (2124-2131). The `+scale/2` therefore converts the *first block's* top-left corner into that block's
+> *center*, so that sprite pixel (1,1) lands with its top-left corner exactly on the current position.
+>
+> **The sprite as a whole is NOT centered on the position — it grows right and down from it.** A 32×32
+> sprite at scale 1 still extends 32 px right and 32 px down from the anchor. (Earlier revisions said
+> "centers the sprite on the specified position"; that would require an offset of `w·scale/2`, which
+> the code never computes.)
 
 **Example**:
 ```
@@ -2139,13 +2376,16 @@ if not vUpdate then BitmapToCanvas(0);
 
 **Manual Update Mode**:
 ```
-PLOT SIZE 512 512 UPDATE
+PLOT SIZE 512 512 UPDATE      // SIZE is explicit here; the DEFAULT canvas is 256 × 256
 ```
 
-- `vUpdate := True` (set during configuration)
+- `vUpdate := True` (set during configuration, 1902-1903)
 - Commands render to Bitmap[0] but don't display
 - Must send `UPDATE` command to make changes visible
 - Allows batch rendering without flicker
+- ⚠️ `CLEAR` is **not** exempt: it repaints `Bitmap[0]` only (`ClearBitmap`, 3235) and stays invisible
+  until the next `UPDATE` (§20.5). Nor is `SAVE`, which writes the **front** buffer `Bitmap[1]` and will
+  therefore capture the **stale previous frame** if issued before the `UPDATE` (§21.8).
 
 ### 11.4 Command Processing Example
 
@@ -2204,9 +2444,15 @@ TEXT 14 'Hello'
      a[0] := vTextSize;           // Default size
      KeyVal(a[0]);                // a[0] := 14
      NextStr;                     // s := 'Hello'
-     PLOT_GetXY(t1, t2);          // Get screen position (200, 100)
+     PLOT_GetXY(t1, t2);          // → SCREEN (200, vHeight-1-100) — Y is INVERTED
      AngleTextOut(t1, t2, 'Hello', vTextStyle, vTextAngle);
    ```
+   > The current position is user `(200, 100)` (LINE moved it there in step 4). `PLOT_GetXY`
+   > (2159-2166) with the defaults (`vOffsetX/Y = 0`, `vDirX/vDirY = False`) returns
+   > `x = 200`, `y = vHeight - 1 - 100` — e.g. **411** on a 512-tall canvas, **not** 100. Inverting Y
+   > is the entire reason the routine exists (§6.1). An earlier revision commented this line
+   > "// Get screen position (200, 100)", presenting the *user* coordinates as if they were screen
+   > coordinates.
 
 6. **Auto Update**:
    ```pascal
@@ -2256,57 +2502,63 @@ end;
 
 ### 12.3 Rendering Coordinate System
 
-**User Coordinates** → **Fixed-Point** → **Screen Pixels**
+**User Coordinates** → (polar conversion) → **one of two alternative screen-coordinate paths**
 
-**Transformation Steps**:
+> **⚠️ The two paths are ALTERNATIVES — they are never composed.** An earlier revision of this
+> section chained them (origin-offset → flip → *then* `shl 8` + `pixel shl vPrecise`), which
+> **counts the pixel coordinate twice**. There is no such composition anywhere in `PLOT_Update`.
 
-1. **User Input**: Cartesian (x, y) or Polar (rho, theta)
+**Step 1 — User Input**: Cartesian (x, y) or Polar (rho, theta).
 
-2. **Polar Conversion** (if enabled):
-   ```pascal
-   PolarToCartesian(rho, theta);
-   // Output: (x, y) in Cartesian
-   ```
+**Step 2 — Polar Conversion** (only in `SET` 1961 and `LINE` 1987, when `vPolar`):
+```pascal
+PolarToCartesian(rho, theta);   // → (x, y) in Cartesian, stored into vPixelX/vPixelY
+```
+By the time either path below runs, `vPixelX`/`vPixelY` already hold Cartesian values.
 
-3. **Origin Offset**:
-   ```pascal
-   x_relative = x + vOffsetX
-   y_relative = y + vOffsetY
-   ```
+**Step 3a — INTEGER screen coordinates** (`PLOT_GetXY`, 2159-2166) — used by **CIRCLE / OVAL / BOX /
+OBOX** (2018), **TEXT** (2053) and **SPRITE** (2104). No shifting of any kind:
+```pascal
+if vDirX then x := vWidth  - 1 - vOffsetX - vPixelX  else  x := vOffsetX + vPixelX;
+if vDirY then y := vOffsetY + vPixelY                else  y := vHeight - 1 - vOffsetY - vPixelY;
+```
 
-4. **Direction Flipping**:
-   ```pascal
-   if vDirX then x_screen = (vWidth - 1) - x_relative
-   else          x_screen = x_relative
+**Step 3b — 8.8 FIXED-POINT coordinates** — used **only** by **DOT** (1970-1977) and **LINE**
+(1988-2006), computed **inline from the variables**, not from `PLOT_GetXY`'s output. The *origin*
+is shifted by 8 and the *pixel* by `vPrecise`:
+```pascal
+// X (DOT, 1971-1973):
+if vDirX then t3 := (vWidth - 1 - vOffsetX) shl 8 - vPixelX shl vPrecise
+         else t3 :=            vOffsetX     shl 8 + vPixelX shl vPrecise;
+// Y (DOT, 1974-1977):
+if vDirY then t4 :=            vOffsetY     shl 8 + vPixelY shl vPrecise
+         else t4 := (vHeight - 1 - vOffsetY) shl 8 - vPixelY shl vPrecise;
+```
 
-   if vDirY then y_screen = y_relative
-   else          y_screen = (vHeight - 1) - y_relative
-   ```
-
-5. **Fixed-Point Conversion**:
-   ```pascal
-   x_fixed = x_screen shl 8 + x_pixel shl vPrecise
-   y_fixed = y_screen shl 8 + y_pixel shl vPrecise
-   ```
-
-6. **Rendering**: SmoothDot, SmoothLine, SmoothShape use fixed-point coordinates
+**Step 4 — Rendering**: `SmoothDot`/`SmoothLine` consume the 8.8 values from step 3b; `SmoothShape`
+consumes the plain integer pixel values from step 3a.
 
 ### 12.4 Anti-Aliased Rendering
 
 All primitives use anti-aliased rendering for smooth edges.
 
-**SmoothDot** (circular dots):
-- Distance-based coverage calculation
-- Gamma-corrected alpha blending
+**SmoothDot** (3839-3842) — a **one-line wrapper**, not a rasterizer:
+```pascal
+procedure TDebugDisplayForm.SmoothDot(x, y, radius, color: integer; opacity: byte);
+begin
+  SmoothLine(x, y, x, y, radius, color, opacity);
+end;
+```
+A dot is a zero-length thick line. There is no distance-field loop inside `SmoothDot`.
 
-**SmoothLine** (thick lines):
-- Perpendicular distance to line segment
-- Rounded end caps
+**SmoothLine** (3844-3984) — the single rasterizer behind both DOT and LINE:
+- 8.8-fixed endpoints, thickness as a fixed-point half-width
+- clipped by `SmoothClip` (4015+), then blended by `SmoothFill`/`SmoothPlot`
 
-**SmoothShape** (shapes with rounded corners):
-- Distance field for rounded rectangles
-- Outline vs. fill modes
-- Per-pixel coverage sampling
+**SmoothShape** (3590-3743) — span fills + quarter-ellipse corner LUTs, 4-way symmetric (see §7.7):
+- **no** distance field
+- solid vs. **inward** frame; sharp-cornered shapes skip the AA loop entirely
+- gamma-corrected blending at the pixel-write layer
 
 **Performance Impact**:
 - Higher quality than simple pixel filling
@@ -2376,6 +2628,11 @@ key_pc_mouse:
 
 **SendMousePos Method** (lines 3537–3577):
 
+> **Off-window guard (3543-3546):** the condition is **four lines**, not one. Earlier revisions quoted
+> only the client-bounds test. The second clause is **TERM-only** (`DisplayType = dis_term` — it excludes
+> TERM's text margins), so **for PLOT the off-window test is exactly the client-bounds check** and the
+> behavior is unchanged; the quote below is now the actual cited source.
+
 ```pascal
 procedure TDebugDisplayForm.SendMousePos;
 var
@@ -2383,7 +2640,10 @@ var
   v, c: cardinal;
 begin
   p := ScreenToClient(Mouse.CursorPos);
-  if (p.x < 0) or (p.x >= ClientWidth) or (p.y < 0) or (p.y >= ClientHeight) then
+  if (p.x < 0) or (p.x >= ClientWidth) or (p.y < 0) or (p.y >= ClientHeight) or
+     (DisplayType = dis_term) and
+     ((p.x < vMarginLeft) or (p.x >= ClientWidth - vMarginLeft) or
+     (p.y < vMarginTop) or (p.y >= ClientHeight - vMarginTop)) then
   begin
     v := $03FFFFFF;
     c := $FFFFFFFF;
@@ -2442,29 +2702,34 @@ end;
 
 ### 14.1 Memory Usage
 
-**Base Display**:
-- Bitmap[0]: vWidth × vHeight × 4 bytes (render target)
-- Bitmap[1]: vWidth × vHeight × 4 bytes (display buffer)
+**Base Display** — both bitmaps are **`pf24bit`: 3 bytes/pixel, no alpha plane** (`FormCreate` 597, 599):
+- Bitmap[0]: vWidth × vHeight × **3** bytes (render target)
+- Bitmap[1]: vWidth × vHeight × **3** bytes (display buffer)
 
-**Example (512×512)**:
-- Bitmap[0]: 512 × 512 × 4 = 1 MB
-- Bitmap[1]: 512 × 512 × 4 = 1 MB
-- **Total: 2 MB**
+**Example — the 256 × 256 default**:
+- Bitmap[0]: 256 × 256 × 3 = 192 KB
+- Bitmap[1]: 256 × 256 × 3 = 192 KB
+- **Total: 384 KB**
+
+**Example — a 512 × 512 canvas**:
+- Bitmap[0]: 512 × 512 × 3 = 768 KB
+- Bitmap[1]: 512 × 512 × 3 = 768 KB
+- **Total: 1.5 MB**
 
 **Layer System**:
 - PlotBitmap[0..7]: 8 independent bitmaps
-- Each layer can be different size
-- Maximum per layer: 2048 × 2048 × 4 = 16 MB
-- **Maximum all layers: 128 MB**
+- Each layer can be a different size; the depth is whatever the loaded `.bmp` file carries
+- Maximum per layer at the canvas maximum: 2048 × 2048 × 3 = **12 MB**
+- **Maximum all layers: ≈ 96 MB**
 
-**Sprite System**:
-- SpriteSizeX/Y: 256 × 4 × 2 = 2 KB
+**Sprite System** (per window — these are private instance fields, §4.5):
+- SpriteSizeX/Y: 256 × 1 × 2 = **512 bytes**
 - SpritePixels: 256 × 32 × 32 = 256 KB
 - SpriteColors: 256 × 256 × 4 = 256 KB
-- **Total: ~514 KB**
+- **Total: ≈ 512.5 KB**
 
 **Typical Memory**:
-- 512×512 canvas + 4 moderate-size layers + sprites: ~10-20 MB
+- 512×512 canvas + 4 moderate-size layers + sprites: ~5-15 MB
 
 ### 14.2 Rendering Performance
 
@@ -2563,15 +2828,26 @@ CIRCLE 20
 - Easier for programmatic drawing
 
 **BITMAP Advantages**:
-- Pixel-by-pixel control
-- 19 color modes (vs. PLOT's RGB24)
+- Pixel-by-pixel control (a per-pixel data stream — PLOT has no equivalent)
+- **Packed-data formats** (`LONGS_1BIT`…`BYTES_4BIT`), which PLOT does **not** accept
 - Trace/scan patterns for oscilloscope-style displays
+- `SPARSE` mode
 - More efficient for pixel-exact rendering
 
+> **Colour modes are NOT a BITMAP advantage.** PLOT accepts the **same 19 colour modes**
+> (`key_lut1` = 10 … `key_rgb24` = 28) that BITMAP does, in **both** phases: `key_lut1..key_rgb24:
+> KeyColorMode;` at 1896-1897 (configure) *and* 1928-1929 (update). `RGB24` is merely PLOT's
+> **default** (`SetDefaults` 2889). An earlier revision listed "19 color modes (vs. PLOT's RGB24)" here,
+> contradicting this document's own directive tables.
+
 **Common Features**:
-- Sprite rendering system (shared)
-- Layer compositing (PLOT has layers, BITMAP doesn't)
+- The same sprite system — same layout and same code, but **per-window private data** (§4.5): a sprite
+  defined in a PLOT window is **not** visible to a BITMAP window
 - User input feedback (PC_KEY, PC_MOUSE)
+- All 19 colour modes, `LUTCOLORS`, `BACKCOLOR`, `DOTSIZE`, `UPDATE`, `HIDEXY`, `SAVE`, `CLOSE`
+
+**PLOT-only**: layer compositing (`LAYER`/`CROP`), and the entire drawing-primitive command set.
+**BITMAP has no drawing primitives at all** — no `LINE`, no `CIRCLE`, no `TEXT`.
 
 **Use Cases**:
 - **PLOT**: Graphs, charts, UI elements, geometric drawings
@@ -2654,9 +2930,19 @@ LINE 50 50
 
 ### 16.2 Polar Plotting
 
+> **⚠️ `POLAR` and `CARTESIAN` must NOT appear on the window-creation line.** `PLOT_Configure`'s `case`
+> (1882-1906) accepts only `TITLE, POS, SIZE, DOTSIZE, LUT1..RGB24, LUTCOLORS, BACKCOLOR, UPDATE,
+> HIDEXY`. `key_polar` / `key_cartesian` are **update-phase only** (2135-2142). Worse, the configure
+> loop is `while NextKey do` — **key-only** — so a non-key element (or an unrecognised key) *terminates
+> the configure parse* and the remainder of the create message is silently dropped. Earlier revisions of
+> these two examples put `POLAR $100` on the create line; they would not work on hardware. The mode
+> directive belongs in the **first update message**.
+
 **Circular Pattern**:
 ```
-PLOT SIZE 512 512 POLAR $100
+PLOT SIZE 512 512               // create the window (config phase)
+                                // --- subsequent message(s): update phase ---
+POLAR $100                      // full circle = 256 units
 BACKCOLOR BLACK
 CLEAR
 ORIGIN 256 256
@@ -2669,7 +2955,9 @@ for theta := 0 to 255 do
 
 **Spiral**:
 ```
-PLOT SIZE 512 512 POLAR $100
+PLOT SIZE 512 512               // create the window (config phase)
+                                // --- subsequent message(s): update phase ---
+POLAR $100
 BACKCOLOR BLACK
 CLEAR
 ORIGIN 256 256
@@ -2680,6 +2968,11 @@ for theta := 0 to 255 do
   rho := theta
   LINE rho theta 2 255
 ```
+
+> **Polar orientation:** θ = 0 points **EAST**, and increasing θ sweeps **counter-clockwise**.
+> `PolarToCartesian` (3063-3071) calls Delphi's `SinCos(Tf, Yf, Xf)`, which is **sine-first**, so
+> `x = rho·cos(θ)`, `y = rho·sin(θ)` — and because the default Y axis points **up** (§6.1), positive θ
+> rises. (Confirmed on hardware, EF-032.)
 
 ### 16.3 Text Annotations
 
@@ -2710,14 +3003,20 @@ CLEAR
 
 COLOR BLUE
 SET 256 100
-TEXT 18 $02 'Normal'
+TEXT 18 $01 'Normal'          // $01: bits0-1 = %01 → weight 400 = NORMAL
 
 SET 256 200
-TEXT 18 $06 'Bold Italic'
+TEXT 18 $06 'Bold Italic'     // $06: %0110 → weight 700 (bold) + bit2 italic
 
 SET 256 300
-TEXT 18 $0A 'Bold Underline'
+TEXT 18 $0A 'Bold Underline'  // $0A: %1010 → weight 700 (bold) + bit3 underline
 ```
+
+> **⚠️ `$02` is BOLD, not "Normal".** An earlier revision of this example used `TEXT 18 $02 'Normal'`.
+> `AngleTextOut` 3494 does `NewLogFont.lfWeight := weight[style and 3]` with
+> `weight: array[0..3] = (100, 400, 700, 900)` (3485), so `$02 and 3 = 2` → **weight 700 = bold**.
+> Normal weight (400) is **`$01`** — which is also `DefaultTextStyle` (201). Decode the bits; never read
+> the hex digits as flags (see §8.2).
 
 ### 16.4 Layer Composition
 
@@ -2795,21 +3094,28 @@ loop:
   pos := receive_long()
   color := receive_long()
   if pos <> $03FFFFFF then
-    x := pos & $FFF
-    y := pos >> 12 & $FFF
+    x := pos & $1FFF                 // 13 bits, mask $1FFF
+    y := (pos >> 13) & $1FFF         // 13 bits, shift 13
     SET x y
     DOT 10 255
   goto loop
 ```
 
+> **⚠️ The X/Y fields are 13 bits, not 12.** `SendMousePos` 3569 packs them as
+> `v := vMouseWheel and 3 shl 26 or p.y and $1FFF shl 13 or p.x and $1FFF;` — x = bits 0-12
+> (mask `$1FFF`), y = bits 13-25 (shift **13**). An earlier revision of this example used `$FFF` / `>> 12`,
+> contradicting this document's own §13.2 and Directive Reference, which both state the 13-bit layout
+> correctly. With a 12-bit decode, every y is halved and the low bit of y bleeds into x above x = 4095.
+
 ### 16.7 Mathematical Function Plotting
 
 **Sine Wave**:
 ```
-PLOT SIZE 512 256 CARTESIAN 1
+PLOT SIZE 512 256               // create the window (config phase)
+                                // --- subsequent message(s): update phase ---
 BACKCOLOR WHITE
 CLEAR
-ORIGIN 0 128
+ORIGIN 0 128                    // Y already points UP by default (§6.1) — no CARTESIAN needed
 
 COLOR RED
 SET 0 0
@@ -2817,6 +3123,13 @@ for x := 1 to 511 do
   y := round(sin(x / 512 * 2 * pi) * 100)
   LINE x y 2 255
 ```
+
+> **Two fixes vs. an earlier revision of this example.** (1) `CARTESIAN 1` was on the **creation line**,
+> where it is not accepted (`PLOT_Configure` 1882-1906) and where, being a non-config key, it would
+> **terminate the configure parse** and drop the rest of the message. (2) It was there to "get Y
+> pointing up" — but **Y already points up by default** (`vDirY = False` ⇒ `PLOT_GetXY` 2166 inverts Y).
+> `CARTESIAN 1` would have flipped the wave **upside-down**. If you do want to issue it explicitly, put
+> `CARTESIAN 0 0` in the update phase.
 
 **Parametric Curve**:
 ```
@@ -2871,10 +3184,13 @@ Element Array:
 
 ### 17.2 Fixed-Point Arithmetic
 
-**8.8 Format**:
-- 8 integer bits, 8 fractional bits
-- Range: 0 to 255.996 (for positive values)
-- Resolution: 1/256 pixel
+**8.8 fixed-point** — a plain **32-bit signed `integer` whose low 8 bits are the fraction**:
+- Resolution: **1/256 pixel**
+- The **integer part is NOT limited to 8 bits.** The coordinates must span the whole canvas (up to
+  `vWidth - 1 = 2047` px ⇒ ≈ `$7FF00` in 8.8) and may legitimately be **negative** — `SmoothLine` takes
+  `x1, y1, x2, y2: integer` (3844) and `SmoothClip` (4015+) clips out-of-canvas values.
+- ⚠️ An earlier revision gave the range as "0 to 255.996". That is the range of an 8-*bit*-integer-part
+  fixed-point number; it is **not** what PLOT uses, and it is narrower than a single canvas.
 
 **Conversion**:
 ```pascal
@@ -2923,26 +3239,33 @@ end;
 
 ### 17.4 Canvas Coordinate System
 
-**Screen Coordinates**:
-- Origin: Top-left corner (0, 0)
+**Screen / bitmap coordinates** (what Windows and `Bitmap[0]` use):
+- Origin: **Top-left** corner (0, 0)
 - X-axis: Increases rightward
-- Y-axis: Increases downward
+- Y-axis: Increases **downward**
 
-**User Coordinates** (default Cartesian, no flipping):
-- Origin: Top-left corner (0, 0)
+**User coordinates** (default Cartesian, no flipping — `vDirX = vDirY = False`):
+- Origin: **BOTTOM-left** corner (0, 0)
 - X-axis: Increases rightward
-- Y-axis: Increases downward (mathematical convention requires CARTESIAN 1 to flip Y)
+- Y-axis: Increases **UPWARD** — the mathematical convention, **on by default**
 
-**Mathematical Convention**:
+`PLOT_GetXY` (2159-2166) is the routine that bridges the two, and its `vDirY = False` branch is
+exactly the Y inversion:
+```pascal
+if vDirY then y := vOffsetY + vPixelY                // vDirY=True  → screen-native, Y down
+         else y := vHeight - 1 - vOffsetY - vPixelY; // vDirY=False → DEFAULT: Y up
 ```
-CARTESIAN 1 0         // Y increases upward
-ORIGIN 256 256        // Center origin
-```
 
-Now coordinates match mathematical convention:
-- Origin: Center (256, 256)
-- X-axis: Increases rightward
-- Y-axis: Increases upward
+> **⚠️ Corrected.** An earlier revision stated the user Y axis "increases downward (mathematical
+> convention requires `CARTESIAN 1` to flip Y)". That is backwards: the default **is** the
+> mathematical convention, and `CARTESIAN 1` flips *to* the screen-native downward Y.
+> (Confirmed on hardware, EF-020.)
+
+**Screen-native convention** (if you want user Y to match bitmap rows):
+```
+CARTESIAN 1 0         // vDirY := True  → Y increases downward, origin top-left
+ORIGIN 128 128        // Center origin on the default 256×256 canvas
+```
 
 ---
 
@@ -3072,7 +3395,7 @@ Layers are stored as `PlotBitmap: array[0..plot_layermax - 1] of TBitmap` (8 ele
 
 ### 19.5 Sprite System Timing
 
-- `SPRITEDEF` stores pixel indices and palette colors into the global flat arrays (`SpritePixels`, `SpriteColors`). No display update occurs.
+- `SPRITEDEF` stores pixel indices and palette colors into **this window's own** flat arrays (`SpritePixels`, `SpriteColors` — private instance fields, 397-398; see §4.5). No display update occurs, and no other window can see the result. Palette entries are read **raw** with a bare `KeyVal` (2100) — they are the only PLOT colours that do **not** pass through `TranslateColor` (§21.1) — as literal `$AARRGGBB`.
 - `SPRITE` iterates over all sprite pixels, calls `SmoothShape` per non-transparent pixel, and the result sits in `Bitmap[0]`; the update model controls when it becomes visible.
 - There is no pre-rendering of orientations — all 8 orientation transforms are computed at render time via the coordinate arithmetic in the `case t4 of` block (lines 2123–2132).
 
@@ -3093,7 +3416,21 @@ Bitmap: array[0..1] of TBitmap;
 - **Bitmap[0]**: Render target — all drawing operations go here.
 - **Bitmap[1]**: Display buffer — copied to the form `Canvas` for display.
 
-> **v55 note:** `PixelFormat := pf32bit` is **not** explicitly set in `PLOT_Configure`. The bitmaps are created inside `SetSize` (called at line 1915). The exact pixel format depends on the shared `SetSize` implementation, not on PLOT-specific code.
+> **v55 note — where the bitmaps come from, and what format they are.** `Bitmap[0]` and `Bitmap[1]`
+> are **created in `FormCreate` (596-599)**, not in `SetSize` and not in `PLOT_Configure`, and their
+> pixel format is set there **explicitly**:
+> ```pascal
+> Bitmap[0] := TBitmap.Create;
+> Bitmap[0].PixelFormat := pf24bit;     // 597
+> Bitmap[1] := TBitmap.Create;
+> Bitmap[1].PixelFormat := pf24bit;     // 599
+> ```
+> **`pf24bit` = 3 bytes/pixel, BGR, no alpha plane.** `SetSize` (2926-2971, called from
+> `PLOT_Configure` at 1915) only **resizes** them to `vWidth × vHeight` (PLOT/SPECTRO/BITMAP take the
+> no-margin branch, 2934-2952 — PLOT can never set `vSparse`, so it always lands on the logical-size
+> sub-branch at **2947-2951**), re-caches the `BitmapLine[]` scanline pointers (2967), and clears the
+> bitmap (2970). Earlier revisions said the bitmaps are "created inside `SetSize`" and that "the exact
+> pixel format depends on the shared `SetSize` implementation" — both are wrong.
 
 ### 20.2 BitmapToCanvas Transfer (lines 3522–3530)
 
@@ -3138,12 +3475,13 @@ The `t3/t4` (DOT) and `t5–t8` (LINE) coordinates are 8.8 fixed-point values co
 PlotBitmap: array[0..plot_layermax - 1] of TBitmap;  // plot_layermax = 8
 ```
 
-**Sprites** (flat global arrays, shared with BITMAP display):
+**Sprites** — flat arrays with the same layout BITMAP uses, but declared as **private instance fields
+of `TDebugDisplayForm`** (397-400), so each window has its **own copy** (see §4.5):
 ```pascal
-SpritePixels : array[0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;
-SpriteColors : array[0..SpriteMax * 256 - 1] of integer;
-SpriteSizeX  : array[0..SpriteMax - 1] of integer;
-SpriteSizeY  : array[0..SpriteMax - 1] of integer;
+SpritePixels : array [0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;    // 397
+SpriteColors : array [0..SpriteMax * 256 - 1] of integer;                     // 398
+SpriteSizeX  : array [0..SpriteMax - 1] of byte;                              // 399
+SpriteSizeY  : array [0..SpriteMax - 1] of byte;                              // 400
 ```
 
 There is no `Sprite[0..255, 0..7] of TBitmap` structure. Sprite orientations are computed at render time using the coordinate arithmetic in the `case t4 of` block (lines 2123–2132). No pre-rendering or bilinear scaling is performed.
@@ -3154,7 +3492,12 @@ There is no `Sprite[0..255, 0..7] of TBitmap` structure. Sprite orientations are
 |---|---|
 | `vUpdate = False` (default) | End of every `PLOT_Update` call (line 2154) |
 | `vUpdate = True` (manual mode) | Only when `key_update` is encountered in `PLOT_Update` (lines 2145–2146) |
-| Always | When `key_clear` runs (`ClearBitmap` is called, then update-mode rule applies) |
+| `key_clear` | **Never directly.** `ClearBitmap` (3235) only repaints `Bitmap[0]`; visibility is still governed by the two rows above |
+
+> **⚠️ Corrected.** An earlier revision listed a third row reading "**Always** — when `key_clear` runs".
+> That is false: `key_clear: ClearBitmap;` (2143-2144), and `ClearBitmap` never calls
+> `BitmapToCanvas`. In manual-update mode a `CLEAR` on its own therefore produces **no visible change**
+> until an explicit `UPDATE`.
 
 ---
 
@@ -3162,12 +3505,17 @@ There is no `Sprite[0..255, 0..7] of TBitmap` structure. Sprite orientations are
 
 ### 21.1 Color System
 
-Drawing colors (`vPlotColor`, `vTextColor`, `vBackColor`) are stored internally in the P2 RGB24 format (`$RRGGBB`). Before writing to a Windows GDI `TCanvas`, the shared helper `WinRGB` (used at line 2052 for text, and implicitly by the Smooth* helpers) byte-swaps R↔B because Windows GDI uses BGR order.
+Drawing colors (`vPlotColor`, `vTextColor`, `vBackColor`) are stored internally in the P2 RGB24
+format (`$RRGGBB`). `WinRGB` (3175-3178) byte-swaps R↔B and is applied **only where a Windows GDI
+`TCanvas` colour is assigned** — e.g. the TEXT font colour at 2052:
 
 ```pascal
 // Used at line 2052 for TEXT:
 Bitmap[0].Canvas.Font.Color := WinRGB(vTextColor);
 ```
+
+The `Smooth*` rasterizers do **not** call `WinRGB`: `SmoothFillSetup` (3745-3766) and `SmoothPlot`
+(3810-3831, e.g. 3820-3822) write the RGB24 low/mid/high bytes straight into the 24-bit BGR scanline.
 
 **Default color constants** (assigned in `PLOT_Configure`, 1877–1878, and global
 `SetDefaults`, 2891) — `clXxx` are literal RGB24 values from `DebugDisplayUnit.pas`
@@ -3179,10 +3527,37 @@ Bitmap[0].Canvas.Font.Color := WinRGB(vTextColor);
 | `vTextColor` | `DefaultTextColor` = `clWhite` | `$FFFFFF` | 1878 |
 | `vBackColor` | `DefaultBackColor` = `clBlack` | `$000000` | 2891 (global) |
 
-There is no `TranslateColor` function in PLOT and no `vGridColor` variable (PLOT draws
-no grid), and no default scope-color table relevant to PLOT. Named colors
-(`BLACK`…`GRAY`) are resolved by the shared `KeyColor` helper; per-element colors and
-sprite palettes are taken as literal RGB24/RGBA values.
+#### `TranslateColor` **is** on PLOT's colour path
+
+> **⚠️ Corrected.** An earlier revision claimed "there is no `TranslateColor` function in PLOT and no
+> `vGridColor` variable", and that numeric colours are taken as literal RGB24. **All three claims are
+> false.**
+
+Every PLOT colour directive (`COLOR` 1937, `BACKCOLOR` 1901/1933, and `LUTCOLORS` — which calls
+`KeyColor` 256×, `KeyLutColors` 2806-2815) goes through the shared `KeyColor` (2752-2783), and
+`KeyColor` ends in `TranslateColor` (3090-3173) on **both** of its branches:
+
+```pascal
+// KeyColor 2774 — a NAMED colour (ORANGE..GRAY + optional 0-15 brightness nibble):
+c := TranslateColor(h shl 5 or p shl 1, key_rgbi8x);
+// KeyColor 2780 — a NUMERIC colour:
+c := TranslateColor(val, vColorMode);
+```
+
+**Consequence (a real footgun):** a **numeric** `COLOR` value is interpreted through the **current
+`vColorMode`**, *not* as literal RGB24. `RGB24` is merely the *default* mode (`SetDefaults` 2889:
+`vColorMode := key_rgb24`), and PLOT accepts the full colour-mode group in **both** phases (1896-1897
+config, 1928-1929 update). After `LUMA8`, `COLOR $FF` is a luma level — not white.
+
+- `BLACK` and `WHITE` take **no** brightness nibble (`KeyColor` 2764-2768 assign the fixed literals
+  `$000000` / `$FFFFFF`). Writing `BLACK 8` leaves the `8` in the element stream for the *next*
+  `KeyColor` to eat as a numeric colour.
+- **Sprite palette entries are the only colours read raw**: `SPRITEDEF` reads them with a bare
+  `KeyVal(SpriteColors[...])` (2100) — no `TranslateColor` — as literal `$AARRGGBB`.
+- `vGridColor` **does exist** (declared at 318; `SetDefaults` 2892 sets it to `DefaultGridColor`).
+  PLOT never draws a *grid* with it, but it is on PLOT's path: it colours the mouse coordinate-readout
+  text (`FormMouseMove` 782, `CursorColor.Canvas.Font.Color := WinRGB(vGridColor)`) and `ClearBitmap`
+  sets `Pen.Color := WinRGB(vGridColor)` (3242) before its per-display-type `case`.
 
 ### 21.2 Fixed-Point Arithmetic
 
@@ -3219,13 +3594,20 @@ end;
 
 ### 21.4 Precision Mode (`vPrecise`)
 
-`vPrecise` is an `integer` (not a boolean). It holds either `8` (**default — whole-pixel input, sub-pixel off**) or `0` (**sub-pixel 8.8 input, on**). The `PRECISE` directive XORs it: `vPrecise := vPrecise xor 8` (line 1947), so the first `PRECISE` enables sub-pixel input. (v55 ratification 2026-07-11: the on/off sense is this way round — matches the v55 language ref "PRECISE turns sub-pixel on.")
+`vPrecise` is a **`byte`** (declared 342) — **not** a boolean, and not an `integer`. It holds either `8` (**default — whole-pixel input, sub-pixel off**) or `0` (**sub-pixel 8.8 input, on**). The `PRECISE` directive XORs it: `vPrecise := vPrecise xor 8` (line 1947), so the first `PRECISE` enables sub-pixel input. (v55 ratification 2026-07-11: the on/off sense is this way round — matches the v55 language ref "PRECISE turns sub-pixel on.")
 
 There is no `PRECISE_OFF` command — a single `PRECISE` directive toggles the state.
 
 ### 21.5 Text Rendering Infrastructure
 
-Text rendering uses the Windows GDI `TCanvas.TextOut` with a custom `LOGFONT`. The complete implementation is `AngleTextOut` (lines 3483–3520; see §8.4). Font properties (weight, italic, underline) are encoded in `vTextStyle`; font size is in `vTextSize`. There is no separate `vFont`/`vFontName` variable in PLOT — the font face is whatever is set on `Bitmap[0].Canvas.Font` by the size assignment at line 2050.
+Text rendering uses the Windows GDI `TCanvas.TextOut` with a custom `LOGFONT`. The complete implementation is `AngleTextOut` (lines 3483–3520; see §8.4). Font properties (weight, italic, underline) are encoded in `vTextStyle`; font size is in `vTextSize`.
+
+There is no `vFont`/`vFontName` variable in PLOT. The font **face** is set **once, in `FormCreate`**
+(line 600: `Bitmap[0].Canvas.Font.Name := FontName;` — the global editor font preference), for every
+window type. `TEXT` sets only the **size** (2050: `Bitmap[0].Canvas.Font.Size := a[0]`), and
+`AngleTextOut` then clones the resulting `LOGFONT` (3491) and overrides only escapement, orientation,
+weight, italic and underline. (An earlier revision attributed the face to the size assignment at 2050
+— that line cannot set a face.)
 
 ### 21.6 Origin and Flip Control
 
@@ -3238,17 +3620,33 @@ vDirX    : boolean;   // X flip (set by CARTESIAN {flipy {flipx}})
 vDirY    : boolean;   // Y flip (set by CARTESIAN {flipy {flipx}})
 ```
 
-There are no `vFlipX`/`vFlipY` integer variables (those would be ±1 multipliers), no `FLIPX`/`FLIPY` commands, and no `vScale`/`vRange` variables. Direction is controlled as boolean flags through the `CARTESIAN` directive.
+There are no `vFlipX`/`vFlipY` integer variables (those would be ±1 multipliers) and no `FLIPX`/`FLIPY`
+commands. Direction is controlled as boolean flags through the `CARTESIAN` directive.
+
+`vScale` (declared 348, `extended`) and `vRange` (declared 282, `integer`) **do exist** on the shared
+`TDebugDisplayForm` — they belong to SCOPE_XY / SPECTRO / MIDI. They are simply **never read or written
+by PLOT**. (An earlier revision said they do not exist at all.)
 
 ### 21.7 Sprite System
 
-Sprite data is shared globally between PLOT and BITMAP windows via the flat arrays described in §4.5. Sprites are **not** pre-rendered into orientation bitmaps; all 8 orientations are rendered on-the-fly during `SPRITE` execution using the pixel-position formulas in lines 2123–2132 (see §10.4).
+Sprite storage uses the same flat-array layout in PLOT and BITMAP, but the arrays are **private
+instance fields of `TDebugDisplayForm`** (397-400) — **each window owns its own copy**, zeroed by its
+own `_Configure` (`FillChar`, 1910-1913). **Sprite definitions are NOT shared across windows**: a
+sprite defined in a PLOT window is invisible to a BITMAP window, and vice-versa. (Earlier revisions
+described them as globals shared between PLOT and BITMAP — see §4.5.)
+
+Sprites are **not** pre-rendered into orientation bitmaps; all 8 orientations are rendered on-the-fly during `SPRITE` execution using the pixel-position formulas in lines 2123–2132 (see §10.4).
 
 Sprite scale range is **1–64** (integer pixel size per sprite pixel, enforced by `KeyValWithin(t5, 1, 64)` at line 2109). There is no fractional scale or `scale=256` convention.
 
 ### 21.8 File Operations
 
-The `SAVE` command invokes `KeySave` (line 2148), a shared helper that writes the current canvas contents to a `.bmp` file. The `LAYER` command uses `PlotBitmap[t1-1].LoadFromFile(PChar(val))` directly (line 2061). There is no `LOAD` command distinct from `LAYER`; `LAYER` is the only file-load directive.
+The `SAVE` command invokes `KeySave` (line 2148; the helper itself is 2839-2866) — see the full
+six-form grammar in the Directive Reference above. Note that `SAVE 'name'` writes **`Bitmap[1]`**, the
+front/display buffer — **not** the render target `Bitmap[0]` — so in manual-`UPDATE` mode a `SAVE`
+before the next `UPDATE` writes the **stale previous frame**.
+
+The `LAYER` command uses `PlotBitmap[t1-1].LoadFromFile(PChar(val))` directly (line 2061). There is no `LOAD` command distinct from `LAYER`; `LAYER` is the only file-load directive.
 
 ---
 
@@ -3312,7 +3710,13 @@ FillChar(SpriteSizeY,  SizeOf(SpriteSizeY),  0);
 SetSize(0, 0, 0, 0);
 ```
 
-`SetSize` is the shared helper that creates the bitmaps and sizes the form.
+`SetSize` (2926-2971) is the shared helper that **resizes** the (already-created) bitmaps and sizes the
+form. It does **not** create them — `Bitmap[0]`/`Bitmap[1]` were created as `pf24bit` back in
+`FormCreate` (596-599). For PLOT it sets `ClientWidth := vWidth * vDotSize` /
+`ClientHeight := vHeight * vDotSizeY` (2936-2937), sizes both bitmaps to the **logical** `vWidth ×
+vHeight` (2947-2951 — PLOT can never set `vSparse`, so the physical-size branch at 2938-2944 is
+unreachable), re-caches the `BitmapLine[]` scanline pointers (2967), and finishes with `ClearBitmap`
+(2970).
 
 ### 22.3 Polar Mode Initialization
 
@@ -3364,7 +3768,15 @@ begin
 end;
 ```
 
-Only the layer bitmaps are freed here. The shared sprite arrays (`SpritePixels`, `SpriteColors`, `SpriteSizeX`, `SpriteSizeY`) are global and not freed per-window. The main `Bitmap[0]`/`Bitmap[1]` are freed by the shared form destruction logic.
+Only the layer bitmaps are freed here — they are the only heap-allocated PLOT-specific objects
+(`TBitmap.Create` × 8, 1908). The sprite arrays (`SpritePixels`, `SpriteColors`, `SpriteSizeX`,
+`SpriteSizeY`) need no freeing because they are **fixed-size private instance fields** of the form
+(397-400), not heap allocations and not globals — they die with the form. (An earlier revision said
+they "are global and not freed per-window"; they are neither global, nor is there anything to free.)
+The main `Bitmap[0]`/`Bitmap[1]` are freed by the shared form destruction logic.
+
+`PLOT_Close` is reached via the form's close path — including the one driven by the **`CLOSE`
+directive** (dispatched in `p2com.asm`; see the Directive Reference) and by `DEBUG_END_SESSION`.
 
 ---
 
@@ -3398,7 +3810,7 @@ The **PLOT** display window is a comprehensive vector graphics system for the Pr
 - 256 sprite definitions
 - 8 orientations (flips and rotations)
 - Scaling and opacity control
-- Shared with BITMAP display
+- Same layout/code as the BITMAP display, but **per-window private data** — sprites do **not** cross windows (§4.5)
 
 **Interactive Features**:
 - Keyboard input feedback (PC_KEY)

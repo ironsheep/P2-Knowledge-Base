@@ -36,11 +36,19 @@
 
 ### 1.1 Purpose
 
-The **SPECTRO** (Spectrogram) display window is a real-time frequency spectrum analyzer that visualizes audio or signal frequency content over time. Unlike the FFT display which shows a single frequency snapshot, SPECTRO creates a **waterfall display** where:
+The **SPECTRO** (Spectrogram) display window is a real-time frequency spectrum analyzer that visualizes audio or signal frequency content over time. Unlike the FFT display which shows a single frequency snapshot, SPECTRO creates a **waterfall display** where **color intensity always represents signal magnitude** and the two screen axes carry time and frequency — *which way round depends on `TRACE`*:
 
-- **Horizontal axis**: Represents frequency bins (configurable range)
-- **Vertical axis**: Represents time (scrolling history)
-- **Color intensity**: Represents signal magnitude at each frequency
+- **Trace directions 4–7 — including the default `TRACE $F`**: **horizontal = time**, **vertical = frequency bins**.
+- **Trace directions 0–3**: **horizontal = frequency bins**, **vertical = time**.
+
+The mapping is decided by the width/height swap in `SPECTRO_Configure` (1781-1787), which runs **only** when bit 2 of `vTrace` is clear:
+
+```pascal
+1781:  vHeight := FFTlast - FFTfirst + 1;
+1782:  if vTrace and $4 = 0 then    // only traces 0..3 swap
+```
+
+`DEPTH` writes `vWidth` (1751), so at the default `vTrace = $F` (1724) the depth stays on the **horizontal** axis. (§16.1 and §4.3 state the same rule.)
 
 This creates a scrolling "heat map" visualization perfect for analyzing time-varying frequency content, identifying harmonics, tracking frequency shifts, and visualizing spectral evolution.
 
@@ -50,7 +58,7 @@ This creates a scrolling "heat map" visualization perfect for analyzing time-var
 - **Waterfall visualization**: Time-scrolling color-coded frequency display
 - **Flexible color mapping**: Multiple color modes including luminance, HSV, and RGB encodings
 - **Logarithmic scaling**: Optional log-scale magnitude display for wide dynamic range
-- **Configurable depth**: Time history depth (vertical dimension) independent of FFT size
+- **Configurable depth**: Time-history depth, independent of FFT size (default **256**; lands on the *horizontal* axis for traces 4–7 including the default, on the *vertical* axis for traces 0–3)
 - **Magnification control**: Adjustable FFT magnitude scaling (bit-shift magnification)
 - **Frequency range selection**: Display subset of frequency bins (FFTfirst to FFTlast)
 - **Rate throttling**: Control display update rate independent of sample rate
@@ -84,7 +92,7 @@ The SPECTRO display is identified by `dis_spectro = 4` in the display type enume
 
 ### 2.2 FFT-Related Constants
 
-**DebugDisplayUnit.pas:154-177**
+**DebugDisplayUnit.pas:154-177** (plus `fft_default` at **206**, in a separate const group)
 ```pascal
 const
   DataSetsExp           = 11;
@@ -202,23 +210,30 @@ var
 
 ### 3.4 Configuration Variables
 
-**DebugDisplayUnit.pas:284-313**
+**DebugDisplayUnit.pas:272-355** (the form's `v*` state block; the fields SPECTRO uses are
+scattered through it — individual declaration lines given below)
 ```pascal
 var
-  vSamples              : integer;  // FFT size (power-of-2)
-  vWidth                : integer;  // Display width (time depth)
-  vHeight               : integer;  // Display height (frequency bins)
-  vRange                : integer;  // Magnitude range
-  vRate                 : integer;  // Update rate divisor
-  vRateCount            : integer;  // Rate counter
-  vTrace                : integer;  // Trace direction (0-7, +8 for scroll)
-  vDotSize              : integer;  // Horizontal pixel scaling
-  vDotSizeY             : integer;  // Vertical pixel scaling
-  vColorMode            : integer;  // Color encoding mode
-  vColorTune            : integer;  // Color hue offset
-  vLogScale             : boolean;  // Logarithmic magnitude scaling
-  vPixelX               : integer;  // Current trace X position
-  vPixelY               : integer;  // Current trace Y position
+  vWidth                : integer;  // 276 — display width (time depth, or bins after swap)
+  vHeight               : integer;  // 277 — display height (frequency bins, or depth after swap)
+  vRange                : integer;  // 282 — magnitude range
+  vSamples              : integer;  // 283 — FFT size (power-of-2)
+  vRate                 : integer;  // 284 — update rate divisor
+  vRateCount            : integer;  // 285 — rate counter
+  vColorTune            : integer;  // 313 — color tint / hue offset
+  vLogScale             : boolean;  // 325 — logarithmic magnitude scaling
+  vHideXY               : boolean;  // 328 — suppress measurement-cursor readout
+  vColorMode            : integer;  // 331 — color encoding mode
+  vTrace                : integer;  // 332 — trace direction (0-7, +8 for scroll)
+  vPixelX               : integer;  // 333 — current trace X position
+  vPixelY               : integer;  // 334 — current trace Y position
+  vDotSize              : integer;  // 336 — horizontal pixel scaling
+  vDotSizeY             : integer;  // 337 — vertical pixel scaling
+  vPackAlt              : boolean;  // 351 — ALT modifier   (see §11)
+  vPackSignx            : boolean;  // 352 — SIGNED modifier (see §11)
+  vPackMask             : integer;  // 353
+  vPackShift            : integer;  // 354
+  vPackCount            : integer;  // 355
 ```
 
 ---
@@ -236,22 +251,44 @@ Accepted in `SPECTRO_Configure` (lines 1719–1790). All are optional; defaults 
 |---|---|---|---|---|
 | `TITLE 'str'` | string | window title | `"<name> - SPECTRO"` (FormCreate:626) | 1737-1738 |
 | `POS left top` | two integers | window position | host origin ≈(0,210), no cascade (FormCreate:628-629, KeyPos:2712-2716) | 1739-1740 |
-| `SAMPLES n {first last}` | n = FFT size; optional first/last bin | n clamped to nearest power-of-2 in 4..2048; first ∈ [0, n/2−2], last ∈ [first+1, n/2−1] | 512 (bins 0..255) | 1741-1750 |
-| `DEPTH n` | integer | 1..2048 (time-history lines) | *varies by trace* | 1751-1752 |
+| `SAMPLES n {first last}` | n = FFT size; optional first/last bin | n clamped to 4..2048, then **rounded DOWN** to the next lower-or-equal power of 2 (`Trunc(Log2(...))`, 1744); first ∈ [0, n/2−2], last ∈ [first+1, n/2−1] | 512 (bins 0..255) | 1741-1750 |
+| `DEPTH n` | integer | 1..2048 (time-history lines); writes `vWidth` (1751) — see note below on which *axis* it lands on | **256** (`SetDefaults`:2884) | 1751-1752 |
 | `MAG n` | integer | 0..11 (2^n magnitude multiplier) | 0 | 1753-1754 |
 | `RANGE n` | integer | 1..$7FFFFFFF | $7FFFFFFF | 1755-1756 |
 | `RATE n` | integer | 1..2048 samples per display update | samples÷8 | 1757-1758 |
 | `TRACE n` | integer | 0..15 (bits 0-2 = direction, bit 3 = scroll) | 15 ($F) | 1759-1760 |
-| `DOTSIZE x {y}` | 1 or 2 integers | each 1..16 | 1, 1 | 1761-1765 |
-| color-mode | one keyword | **RESTRICTED:** `LUMA8`, `LUMA8W`, `LUMA8X`, `HSV16`, `HSV16W`, `HSV16X` only (line 1767) | `LUMA8X` | 1767-1768 |
+| `DOTSIZE x {y}` | 1 or 2 integers | each clamped 1..16 (vs BITMAP's 1..256) | 1, 1 | 1761-1765 |
+| color-mode | `mode-keyword {tune}` | **RESTRICTED:** `LUMA8`, `LUMA8W`, `LUMA8X`, `HSV16`, `HSV16W`, `HSV16X` only (line 1767). Each takes an **optional tune parameter** — see note below | `LUMA8X`, `vColorTune = 0` | 1767-1768 |
 | `LOGSCALE` | none | enable log-magnitude display | off | 1769-1770 |
-| `HIDEXY` | none | suppress on-screen measurement cursor | off | 1771-1772 |
-| packed `LONGS_1BIT..BYTES_4BIT` | none | select data packing mode | none | 1773-1774 |
+| `HIDEXY` | none | suppress on-screen measurement-cursor readout | off | 1771-1772 |
+| packed `LONGS_1BIT..BYTES_4BIT` | `{ALT} {SIGNED}` (both optional, either order) | select data packing mode | **unpacked** (`SetDefaults`:2915 → `SetPack(0, False, False)`) | 1773-1774 |
 
-**Color-mode restriction** (line 1767): SPECTRO accepts only the luminance and
-16-bit HSV families — `key_luma8..key_luma8x` and `key_hsv16..key_hsv16x`.
+**`SAMPLES` rounds down, never up** (1744-1745): `SAMPLES 1000` → `Log2(1000) = 9.97` →
+`FFTexp = 9` → `vSamples = 512` (**not** 1024).
+
+**`DEPTH` axis** (1751, 1781-1787): `DEPTH` always writes `vWidth`. Whether that becomes the
+**horizontal** or the **vertical** extent depends on the trace direction — for traces 4–7
+(including the default `$F`) it stays horizontal; for traces 0–3 the W/H swap moves it to
+vertical. See §4.3. The *default value* does not vary: it is **256**, seeded unconditionally
+by `SetDefaults` (2884) before `SPECTRO_Configure` runs.
+
+**Color-mode restriction** (line 1767): SPECTRO accepts only **six** color modes — the
+luminance and 16-bit HSV families (`key_luma8..key_luma8x`, `key_hsv16..key_hsv16x`).
 The broader LUT, RGBI, RGB8, HSV8, RGB16, RGB24 families present in other
 windows are **not** accepted here.
+
+**Color-mode tune parameter** (`KeyColorMode`, 2785-2804): the color-mode keyword is not bare —
+it optionally consumes one following element into `vColorTune`.
+- `LUMA8` / `LUMA8W` / `LUMA8X` take **either** a color keyword `ORANGE`..`GRAY`
+  (→ `vColorTune = val − key_orange`, i.e. 0..7, 2797) **or** a bare number (2800).
+  Both `LUMA8 CYAN` and `LUMA8 3` are legal.
+- `HSV16` / `HSV16W` / `HSV16X` take a **numeric hue offset only** (2803).
+- Default `vColorTune = 0` (`SetDefaults`:2890).
+
+**Packing modifiers** (`KeyPack`, 2817-2832): `ALT` = alternate bit/nibble ordering
+(`NewPack`, 4158-4164 — a **full within-byte bit reversal** for the 1-bit modes);
+`SIGNED` = sign-extend each unpacked sub-sample (`UnPack`, 4170). Neither is implied by the
+mode — see §11.2.
 
 ### Display / data directives
 
@@ -261,12 +298,44 @@ Accepted in `SPECTRO_Update` (lines 1792–1834).
 |---|---|---|
 | numeric sample stream | bare `ele_num` values; unpacked through current packing mode; triggers FFT+draw when buffer full and rate cycles | 1818-1831 |
 | `CLEAR` | clears bitmap, resets sample-pop counter and rate counter, resets trace position | 1801-1808 |
-| `SAVE` | saves current bitmap to file | 1809-1810 |
+| `SAVE …` | six forms — see the grammar below. **A bare `SAVE` writes nothing.** | 1809-1810 → `KeySave` 2839-2865 |
 | `PC_KEY` | polls latched keypress; triggers `SendKeyPress` | 1811-1812 |
 | `PC_MOUSE` | polls cursor position + buttons + wheel; triggers `SendMousePos` | 1813-1814 |
+| `CLOSE` | closes the window and frees its display slot. **Dispatched at the parser layer, not in `SPECTRO_Update`** — see below. | *(none in `DebugDisplayUnit.pas`)* |
 
 Strings and all other directives not listed above are rejected (string causes
 immediate loop break; unrecognised keys are silently skipped).
+
+**`SAVE` grammar** (`KeySave`, 2839-2865). The filename always comes **last**; `.bmp` is appended:
+
+| Form | Writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` (the front/display buffer) → `name.bmp` (2843) |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect — includes title bar and borders; vulnerable to occlusion (2846-2864) |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region (2856-2864) |
+| `SAVE WINDOW` | captures to `DesktopBitmap` in memory — **no file** |
+| `SAVE l t w h` | captures to `DesktopBitmap` in memory — **no file** |
+| `SAVE` (bare) | `NextStr`/`NextKey`/`KeyVal` all fail → **`Exit`; nothing at all is written** |
+
+> ⚠️ **Sharp edge (2848):** a non-`WINDOW` keyword after `SAVE` is **consumed and then discarded**
+> by the `Exit`. `` `Spec1 SAVE CLEAR `` does nothing **and eats the `CLEAR`**.
+>
+> ⚠️ **`SAVE 'name'` writes the bitmap at 1× LOGICAL scale — un-`DOTSIZE`d.** SPECTRO never sets
+> `vSparse`, so `SetSize` (2946-2951) always allocates `Bitmap[0/1]` at `vWidth × vHeight`;
+> `DOTSIZE` magnification is applied at display time only (`ClientWidth := vWidth * vDotSize`,
+> 2936-2937). To capture the magnified on-screen appearance, use `SAVE WINDOW 'name'`.
+
+**`CLOSE`** (`key_close` = 49) is a **real, working directive** even though it appears in no
+`XXX_Update` case statement — it is dispatched one layer up, in `p2com.asm`:
+`parse_debug_string` (p2com.asm:19565-19572) detects `CLOSE` on an *existing-display command*,
+reverts the name symbol and clears that display's bit in `debug_display_ena`
+(p2com.asm:19613-19624); `TDebugForm.ChrIn` (`DebugUnit.pas:236-237`) then runs the **full**
+`UpdateDisplay(...)` and only afterwards closes the form. Consequences:
+- **Command-only** — ignored in a *new-display declaration*.
+- **Multi-target** — `` `Spec1 Spec2 CLOSE `` closes all named targets.
+- **Update-first, close-second** — `` `Spec1 SAVE 'shot' CLOSE `` **saves, then closes.**
+- It reclaims one of the 32 display slots; the id and the name become reusable. It is the
+  per-window counterpart of the global `DEBUG_END_SESSION` teardown.
 
 ### Keyboard & mouse
 
@@ -277,8 +346,8 @@ mouse handling logic beyond coordinate mapping.
 |---|---|---|
 | `WMGetDlgCode` | 585-589 | Captures Tab key (`DLGC_WANTTAB`); Tab does not change focus. |
 | `FormMouseMove` | 647-809 | Draws live measurement cursor showing `x,y` coordinates. For SPECTRO: `x = pixel ÷ vDotSize`, `y = pixel ÷ vDotSizeY` (line 733-734). Suppressed when `HIDEXY` set (line 737). |
-| `FormMouseWheel` | 811-823 | Latches wheel direction (+1/−1) into `vMouseWheel` for 100 ms, then auto-clears. |
-| `FormKeyPress` | 825-831 | Latches key byte into `vKeyPress` for 100 ms, then auto-clears. |
+| `FormMouseWheel` | 811-817 | Latches wheel direction (+1/−1) into `vMouseWheel`; auto-cleared 100 ms later by `FormMouseWheelTimerTick` (819-823). |
+| `FormKeyPress` | 825-831 | Latches key byte into `vKeyPress`; auto-cleared 100 ms later by `FormKeyTimerTick` (853-857). |
 | `FormKeyDown` | 833-851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12. |
 
 **`PC_KEY` → `SendKeyPress`** (3579-3583): transmits one LONG = latched `vKeyPress` byte (0 if none), then clears it. Behaviour is identical across all nine windows.
@@ -389,17 +458,18 @@ end;
 |-----------|-----|------|-------|---------|-------------|
 | **title** | key_title | string | - | `"<name> - SPECTRO"` | Window title text |
 | **pos** | key_pos | left, top | - | host origin ≈(0,210), no cascade | Window position (offset only; `KeyPos` reads 2 values, no size) |
-| **samples** | key_samples | integer | 4-2048 (power-of-2) | 512 | FFT size (also accepts bin range) |
-| **depth** | key_depth | integer | 1-2048 | varies | Time history depth (vertical pixels) |
+| **samples** | key_samples | integer | 4-2048, floored to a power-of-2 | 512 | FFT size (also accepts bin range) |
+| **depth** | key_depth | integer | 1-2048 | **256** (`SetDefaults`:2884) | Time-history depth in pixels; written to `vWidth` (1751). Becomes the **vertical** extent only for traces 0–3 (post-swap); for traces 4–7 — including the default `$F` — it is the **horizontal** extent |
 | **mag** | key_mag | integer | 0-11 | 0 | Magnitude bit-shift (2^mag multiplier) |
 | **range** | key_range | integer | 1-$7FFFFFFF | $7FFFFFFF | Maximum magnitude for scaling |
 | **rate** | key_rate | integer | 1-2048 | samples/8 | Display update rate (samples per update) |
 | **trace** | key_trace | integer | 0-15 | 15 | Trace direction and scroll mode |
 | **dotsize** | key_dotsize | integer(s) | 1-16 | 1 | Pixel scaling (X, optional Y) |
-| **colormode** | key_luma8..key_luma8x, key_hsv16..key_hsv16x | enum | restricted set (line 1767) | key_luma8x | Color encoding mode |
+| **colormode** | key_luma8..key_luma8x, key_hsv16..key_hsv16x | enum + optional tune | restricted set of **six** (line 1767) | key_luma8x | Color encoding mode; consumes an optional tune value into `vColorTune` (`KeyColorMode`, 2785-2804) |
+| **colortune** | *(operand of the color-mode key)* | keyword `ORANGE`..`GRAY` **or** integer | 0-7 by keyword; any integer numerically | 0 (`SetDefaults`:2890) | LUMA8 family: tint. HSV16 family: numeric hue offset |
 | **logscale** | key_logscale | boolean | - | false | Logarithmic magnitude scaling |
-| **hidexy** | key_hidexy | boolean | - | false | Hide axis labels |
-| **packing** | key_longs_1bit..key_bytes_4bit | enum | - | none | Data packing mode |
+| **hidexy** | key_hidexy | boolean | - | false | Suppress the on-screen measurement-cursor coordinate readout (`FormMouseMove`:737). SPECTRO draws **no axis labels or text at all** (§12.3). Does **not** affect `PC_MOUSE` reporting |
+| **packing** | key_longs_1bit..key_bytes_4bit | enum + `{ALT} {SIGNED}` | 12 modes | **unpacked** (`SetPack(0,False,False)`, `SetDefaults`:2915) | Data packing mode; see §11 |
 
 ### 4.3 Dimension Calculation
 
@@ -526,9 +596,10 @@ end;
 | Command | Key | Action |
 |---------|-----|--------|
 | **CLEAR** | key_clear | Clear display, reset sample buffer, reset trace position |
-| **SAVE** | key_save | Save current display to image file |
+| **SAVE** | key_save | Write `Bitmap[1]` to `<name>.bmp`, **or** scrape a desktop region — six forms, three of which write no file. A **bare `SAVE` writes nothing** (`KeySave` 2839-2865; see the grammar table in the Directive Reference) |
 | **PC_KEY** | key_pc_key | Send keyboard input to connected system |
 | **PC_MOUSE** | key_pc_mouse | Send mouse position to connected system |
+| **CLOSE** | key_close | Close the window and free its display slot. Dispatched in `p2com.asm`, **not** in `SPECTRO_Update` — the rest of the message executes first (see the Directive Reference) |
 
 **CLEAR Command Behavior** (lines 1801-1808):
 ```pascal
@@ -545,7 +616,7 @@ SetTrace(vTrace, False);        // Reset trace position
 
 ### 6.1 PrepareFFT Method
 
-**DebugDisplayUnit.pas:4170-4183**
+**DebugDisplayUnit.pas:4178-4191**
 ```pascal
 procedure TDebugDisplayForm.PrepareFFT;
 var
@@ -575,7 +646,7 @@ w[n] = 0.5 × (1 - cos(2πn / N))
 
 ### 6.2 PerformFFT Method
 
-**DebugDisplayUnit.pas:4185-4243**
+**DebugDisplayUnit.pas:4193-4251**
 ```pascal
 procedure TDebugDisplayForm.PerformFFT;
 var
@@ -658,7 +729,7 @@ For each pair (a, b):
   b' = a - r
 ```
 
-**Magnitude Formula** (line 4240):
+**Magnitude Formula** (line 4248):
 ```pascal
 magnitude = √(real² + imag²) / (scaling_factor)
 scaling_factor = $800 << FFTexp >> FFTmag
@@ -673,7 +744,7 @@ scaling_factor = $800 << FFTexp >> FFTmag
 
 ### 6.4 Bit-Reversal Function
 
-**DebugDisplayUnit.pas:4245-4252**
+**DebugDisplayUnit.pas:4253-4260**
 ```pascal
 function TDebugDisplayForm.Rev32(i: integer): int64;
 const
@@ -685,9 +756,16 @@ begin
 end;
 ```
 
-**Purpose**: Reverse the bit pattern of a 32-bit integer (used for FFT bit-reversal indexing).
+**Purpose**: Reverse the **low 12 bits** of the index into the **high 12 bits** of the result
+(the `and $FFF00000` mask at 4259). It reads only nibbles at `shr 0`, `shr 4` and `shr 8` —
+**bits 12..31 of the input are discarded** (`Rev32($1000) = 0`). Twelve bits is exactly enough,
+because `FFTexpMax = 11`. It is *not* a general 32-bit bit-reversal.
 
-**Example**: Rev32(1) = $80000000, Rev32(2) = $40000000
+Used in two places:
+- the twiddle phase in `PrepareFFT` (4185: `Tf := Rev32(i) / $100000000 * Pi`), and
+- the output bit-reversal permutation in `PerformFFT` (4245: `i2 := Rev32(i1) shr (32 - FFTexp)`).
+
+**Example**: `Rev32(1) = $80000000`, `Rev32(2) = $40000000`, `Rev32($1000) = 0` (out of range).
 
 ---
 
@@ -695,11 +773,16 @@ end;
 
 ### 7.1 TranslateColor Method
 
-**DebugDisplayUnit.pas:3082-3165**
+**DebugDisplayUnit.pas:3090-3173**
 
-The `TranslateColor` method converts pixel values from various color encodings to 24-bit RGB format for display.
+The `TranslateColor` method converts pixel values from various color encodings to 24-bit RGB format for display. It is **shared by all nine windows**; the table below lists the modes `TranslateColor` implements.
 
-**Supported Color Modes**:
+> ⚠️ **SPECTRO accepts only SIX of them** — `LUMA8`, `LUMA8W`, `LUMA8X`, `HSV16`, `HSV16W`,
+> `HSV16X` (`SPECTRO_Configure`:1767, `key_luma8..key_luma8x, key_hsv16..key_hsv16x`). The LUT,
+> HSV8, RGBI8, RGB8, RGB16 and RGB24 rows below are reachable in other windows only. Only
+> §7.2 (LUMA branch) and §7.3 (HSV branch) are on SPECTRO's path.
+
+**Supported Color Modes** (of `TranslateColor`):
 
 | Mode | Bits | Description | Color Space |
 |------|------|-------------|-------------|
@@ -716,45 +799,56 @@ The `TranslateColor` method converts pixel values from various color encodings t
 
 ### 7.2 Luminance Modes (LUMA8, LUMA8W, LUMA8X)
 
-**DebugDisplayUnit.pas:3097-3134**
+**DebugDisplayUnit.pas:3105-3142** — note the case label is **shared with the RGBI8 family**;
+the branch is transcribed here verbatim:
 ```pascal
-key_luma8, key_luma8w, key_luma8x:
-begin
-  v := vColorTune and 7;         // Color selection (0-7)
-  p := p and $FF;                // 8-bit luminance value
-
-  // Extended range scaling
-  if (mode = key_luma8x) and (v <> 7) then
-    if (p >= $80) then p := not p and $7F shl 1
-    else p := p shl 1;
-
-  // White variant inversion
-  w := (mode = key_luma8w) or
-       (mode = key_luma8x) and (v <> 7) and (p >= $80);
-
-  if w then
-  begin   // from white to color
-    if v = 0 then
-      p := (p shl 7 and $007F00 or p) xor $FFFFFF    // orange
-    else
+    key_luma8,
+    key_luma8w,
+    key_luma8x,
+    key_rgbi8,
+    key_rgbi8w,
+    key_rgbi8x:
     begin
-      if v <> 7 then v := v xor 7;
-      p := (v shr 2 and 1 * p shl 16 or
-            v shr 1 and 1 * p shl 8  or
-            v shr 0 and 1 * p shl 0) xor $FFFFFF;
+      if mode in [key_luma8, key_luma8w, key_luma8x] then
+      begin
+        v := vColorTune and 7;                            // color selection (0-7)
+        p := p and $FF;                                   // 8-bit luminance value
+      end
+      else
+      begin
+        v := p shr 5 and 7;                               // (RGBI8: tint from the value itself)
+        p := p and $1F shl 3 or p and $1C shr 2;
+      end;
+      // white flag FIRST — computed from the UN-rescaled p
+      w := (mode in [key_luma8w, key_rgbi8w]) or (mode in [key_luma8x, key_rgbi8x]) and (v <> 7) and (p >= $80);
+      // extended-range rescale SECOND
+      if (mode in [key_luma8x, key_rgbi8x]) and (v <> 7) then if (p >= $80) then p := not p and $7F shl 1 else p := p shl 1;
+      if w then
+      begin   // from white to color
+        if v = 0 then p := (p shl 7 and $007F00 or p) xor $FFFFFF    // orange
+        else
+        begin
+          if v <> 7 then v := v xor 7;
+          p := (v shr 2 and 1 * p shl 16 or
+                v shr 1 and 1 * p shl 8  or
+                v shr 0 and 1 * p shl 0) xor $FFFFFF;
+        end;
+      end
+      else
+      begin  // from black to color
+        if v = 0 then p := p shl 16 or p shl 7 and $007F00    // orange
+        else p := v shr 2 and 1 * p shl 16 or
+                  v shr 1 and 1 * p shl 8  or
+                  v shr 0 and 1 * p shl 0;
+      end;
     end;
-  end
-  else
-  begin  // from black to color
-    if v = 0 then
-      p := p shl 16 or p shl 7 and $007F00    // orange
-    else
-      p := v shr 2 and 1 * p shl 16 or
-           v shr 1 and 1 * p shl 8  or
-           v shr 0 and 1 * p shl 0;
-  end;
-end;
 ```
+
+> ⚠️ **Statement order is load-bearing.** `w` is computed at **3122**, *before* the extended-range
+> rescale at **3123** — so the `p >= $80` test in `w` sees the **original** value, not the remapped
+> one. Reversing the two statements inverts the `LUMA8X` white/black polarity: e.g. `p = $C0` →
+> Pascal gives `w = True` with rescaled `p = $7E`; rescale-first would give `w = False`. Any port
+> must emit `w :=` first.
 
 **Color Tuning Values** (vColorTune and 7):
 
@@ -771,42 +865,40 @@ end;
 
 ### 7.3 HSV Modes (HSV8, HSV16)
 
-**DebugDisplayUnit.pas:3135-3152**
+**DebugDisplayUnit.pas:3143-3160** (transcribed verbatim):
 ```pascal
-key_hsv8, key_hsv8w, key_hsv8x,
-key_hsv16, key_hsv16w, key_hsv16x:
-begin
-  // Expand 8-bit to 16-bit if needed
-  if mode in [key_hsv8, key_hsv8w, key_hsv8x] then
-    p := p and $F0 * $110 or p and $0F * $11;
-
-  // Look up base color from polar color wheel
-  v := PolarColors[(p shr 8 + vColorTune) and $FF];
-  p := p and $FF;  // Saturation/value
-
-  // Extended range scaling
-  if mode in [key_hsv8x, key_hsv16x] then
-    if (p >= $80) then p := p and $7F shl 1 xor $FE
-    else p := p shl 1;
-
-  // White variant
-  w := (mode in [key_hsv8w, key_hsv16w]) or
-       (mode in [key_hsv8x, key_hsv16x]) and (p >= $80);
-
-  if w then v := v xor $FFFFFF;
-
-  // Blend base color with saturation/value
-  p := (v shr 16 and $FF * p + $FF) shr 8 shl 16 or
-       (v shr  8 and $FF * p + $FF) shr 8 shl  8 or
-       (v shr  0 and $FF * p + $FF) shr 8 shl  0;
-
-  if w then p := p xor $FFFFFF;
-end;
+    key_hsv8,
+    key_hsv8w,
+    key_hsv8x,
+    key_hsv16,
+    key_hsv16w,
+    key_hsv16x:
+    begin
+      // expand 8-bit to 16-bit if needed
+      if mode in [key_hsv8, key_hsv8w, key_hsv8x] then p := p and $F0 * $110 or p and $0F * $11;
+      // look up base color from the polar color wheel
+      v := PolarColors[(p shr 8 + vColorTune) and $FF];
+      p := p and $FF;                                   // saturation/value
+      // white flag FIRST — computed from the UN-rescaled p
+      w := (mode in [key_hsv8w, key_hsv16w]) or (mode in [key_hsv8x, key_hsv16x]) and (p >= $80);
+      // extended-range rescale SECOND
+      if mode in [key_hsv8x, key_hsv16x] then if (p >= $80) then p := p and $7F shl 1 xor $FE else p := p shl 1;
+      if w then v := v xor $FFFFFF;
+      // blend base color with saturation/value
+      p := (v shr 16 and $FF * p + $FF) shr 8 shl 16 or
+           (v shr  8 and $FF * p + $FF) shr 8 shl  8 or
+           (v shr  0 and $FF * p + $FF) shr 8 shl  0;
+      if w then p := p xor $FFFFFF;
+    end;
 ```
+
+> ⚠️ **Same order trap as §7.2, and this is exactly SPECTRO's `HSV16X` path.** `w` is computed at
+> **3153**, *before* the extended-range rescale at **3154**. A port that rescales first inverts the
+> `HSV16X` white/black polarity.
 
 ### 7.4 PolarColors Table
 
-**DebugDisplayUnit.pas:3199-3220**
+**DebugDisplayUnit.pas:3207-3228**
 ```pascal
 procedure TDebugDisplayForm.SetPolarColors;
 const
@@ -965,17 +1057,23 @@ v_scaled = log₂(v + 1) / log₂(range + 1) × range
 
 **Purpose**: Compress wide dynamic range into displayable range while preserving detail in low-amplitude regions.
 
-**Example** (vRange = 1000):
-- Linear v=1 → p=0.255 (barely visible)
-- Log v=1 → p=1.02 (enhanced)
-- Linear v=100 → p=25.5 (dim)
-- Log v=100 → p=67.1 (brighter)
-- Linear v=1000 → p=255 (max)
-- Log v=1000 → p=255 (max)
+**Key point**: `LOGSCALE` rewrites `v` **back into the full 0..vRange domain** (it multiplies by
+`vRange`, not by 255); the *same* `p := Round(v * fScale)` at 1850 then maps that to 0..255. So the
+log curve is applied **before** the linear scaling, not instead of it.
+
+**Example** (`vRange = 1000` ⇒ `fScale = 255/1000 = 0.255`; `Log2(1001) ≈ 9.9672`):
+
+| Input `v` | Linear — `p = Round(v × 0.255)` | Log — `v' = Round(Log2(v+1)/Log2(1001) × 1000)` | Log — `p = Round(v' × 0.255)` |
+|---|---|---|---|
+| 1 | `Round(0.255)` = **0** (invisible) | `Log2(2)/9.9672 × 1000 ≈ 100.3` → **100** | `Round(25.5)` = **26** (now visible) |
+| 100 | `Round(25.5)` = **26** (dim) | `Log2(101)/9.9672 × 1000 ≈ 668.0` → **668** | `Round(170.3)` = **170** (much brighter) |
+| 1000 | `Round(255)` = **255** (max) | `Log2(1001)/9.9672 × 1000` = **1000** | **255** (max) |
+
+The endpoints are fixed (`v = 0 → 0`, `v = vRange → 255`); everything between is lifted.
 
 ### 8.4 PlotPixel Method
 
-**DebugDisplayUnit.pas:3425-3436**
+**DebugDisplayUnit.pas:3433-3444**
 ```pascal
 procedure TDebugDisplayForm.PlotPixel(p: integer);
 var
@@ -1082,7 +1180,7 @@ end;
 
 ### 9.4 ScrollBitmap Method
 
-**DebugDisplayUnit.pas:3438-3473**
+**DebugDisplayUnit.pas:3446-3481**
 ```pascal
 procedure TDebugDisplayForm.ScrollBitmap(x, y: integer);
 var
@@ -1142,7 +1240,7 @@ end;
 
 ### 10.1 RateCycle Function
 
-**DebugDisplayUnit.pas:3071-3080**
+**DebugDisplayUnit.pas:3079-3088**
 ```pascal
 function TDebugDisplayForm.RateCycle: boolean;
 begin
@@ -1213,44 +1311,100 @@ The SPECTRO display uses the same 12-mode data packing system as other displays 
 
 ### 11.1 Packing Modes
 
-**DebugDisplayUnit.pas:139-152**
+**DebugDisplayUnit.pas:140-152**
 ```pascal
-const
-  PackTable: array [key_longs_1bit..key_bytes_4bit] of integer =
-    (1 shl 16 +  1 shl 8 + 32,   // key_longs_1bit:  sign=1, shift=1,  count=32
-     1 shl 16 +  2 shl 8 + 16,   // key_longs_2bit:  sign=1, shift=2,  count=16
-     1 shl 16 +  4 shl 8 + 8,    // key_longs_4bit:  sign=1, shift=4,  count=8
-     1 shl 16 +  8 shl 8 + 4,    // key_longs_8bit:  sign=1, shift=8,  count=4
-     1 shl 16 + 16 shl 8 + 2,    // key_longs_16bit: sign=1, shift=16, count=2
-     0 shl 16 +  1 shl 8 + 16,   // key_words_1bit:  sign=0, shift=1,  count=16
-     0 shl 16 +  2 shl 8 + 8,    // key_words_2bit:  sign=0, shift=2,  count=8
-     0 shl 16 +  4 shl 8 + 4,    // key_words_4bit:  sign=0, shift=4,  count=4
-     0 shl 16 +  8 shl 8 + 2,    // key_words_8bit:  sign=0, shift=8,  count=2
-     0 shl 16 +  1 shl 8 + 8,    // key_bytes_1bit:  sign=0, shift=1,  count=8
-     0 shl 16 +  2 shl 8 + 4,    // key_bytes_2bit:  sign=0, shift=2,  count=4
-     0 shl 16 +  4 shl 8 + 2);   // key_bytes_4bit:  sign=0, shift=4,  count=2
+  PackDef               : array [key_longs_1bit..key_bytes_4bit] of integer = (
+                          0 shl 16 +  1 shl 8 + 32,   // key_longs_1bit:  shift=1,  count=32
+                          0 shl 16 +  2 shl 8 + 16,   // key_longs_2bit:  shift=2,  count=16
+                          0 shl 16 +  4 shl 8 + 8,    // key_longs_4bit:  shift=4,  count=8
+                          0 shl 16 +  8 shl 8 + 4,    // key_longs_8bit:  shift=8,  count=4
+                          0 shl 16 + 16 shl 8 + 2,    // key_longs_16bit: shift=16, count=2
+                          0 shl 16 +  1 shl 8 + 16,   // key_words_1bit:  shift=1,  count=16
+                          0 shl 16 +  2 shl 8 + 8,    // key_words_2bit:  shift=2,  count=8
+                          0 shl 16 +  4 shl 8 + 4,    // key_words_4bit:  shift=4,  count=4
+                          0 shl 16 +  8 shl 8 + 2,    // key_words_8bit:  shift=8,  count=2
+                          0 shl 16 +  1 shl 8 + 8,    // key_bytes_1bit:  shift=1,  count=8
+                          0 shl 16 +  2 shl 8 + 4,    // key_bytes_2bit:  shift=2,  count=4
+                          0 shl 16 +  4 shl 8 + 2);   // key_bytes_4bit:  shift=4,  count=2
 ```
 
-### 11.2 Packing Table
+> ⚠️ **There is no per-mode sign flag.** Every `PackDef` entry encodes `0 shl 16`; the
+> `shl 16` field is always zero and is **never read** — `SetPack` (4146-4156) consumes only
+> `i shr 8 and $FF` (shift) and `i and $FF` (count), and takes `signx` as a *parameter*.
+> Sign-extension is a **runtime flag** set only by a trailing `SIGNED` keyword (§11.2).
 
-| Mode | Sign Extend | Bits/Sample | Samples/Long | Bandwidth Multiplier |
-|------|-------------|-------------|--------------|----------------------|
-| **LONGS_1BIT** | Yes | 1 | 32 | 32× |
-| **LONGS_2BIT** | Yes | 2 | 16 | 16× |
-| **LONGS_4BIT** | Yes | 4 | 8 | 8× |
-| **LONGS_8BIT** | Yes | 8 | 4 | 4× |
-| **LONGS_16BIT** | Yes | 16 | 2 | 2× |
-| **WORDS_1BIT** | No | 1 | 16 | 16× |
-| **WORDS_2BIT** | No | 2 | 8 | 8× |
-| **WORDS_4BIT** | No | 4 | 4 | 4× |
-| **WORDS_8BIT** | No | 8 | 2 | 2× |
-| **BYTES_1BIT** | No | 1 | 8 | 8× |
-| **BYTES_2BIT** | No | 2 | 4 | 4× |
-| **BYTES_4BIT** | No | 4 | 2 | 2× |
+**Default packing is UNPACKED.** `SetDefaults` (2915) calls `SetPack(0, False, False)`,
+and `SetPack` special-cases `val = 0` (4152-4155) — bypassing `PackDef` entirely:
+`vPackShift = 32`, `vPackCount = 1`, `vPackMask = $FFFFFFFF` ⇒ **one full 32-bit sample per
+transmitted long.** A packing mode is only ever in effect if a packing keyword appears in
+`SPECTRO_Configure` (1773-1774). Packing is **fixed at window creation** — the pack keys
+appear only in the configure loop, never in `SPECTRO_Update`.
+
+### 11.2 Packing Table and the `ALT` / `SIGNED` modifiers
+
+Each packing keyword may be followed by **`ALT` and/or `SIGNED`** — both optional, either
+order, up to two (`KeyPack`, 2817-2832):
+
+```pascal
+2822:  v := val;
+2823:  alt := False;
+2824:  signx := False;
+2825:  if NextKey and (val in [key_alt, key_signed]) then
+2826:  begin
+2827:    if val = key_alt then alt := True else signx := True;
+2828:    if NextKey and (val in [key_alt, key_signed]) then
+2829:      if val = key_alt then alt := True else signx := True;
+2830:  end;
+2831:  SetPack(v, alt, signx);
+```
+
+| Mode | Bits/Sample | Samples/Long | Bandwidth Multiplier |
+|------|-------------|--------------|----------------------|
+| **LONGS_1BIT** | 1 | 32 | 32× |
+| **LONGS_2BIT** | 2 | 16 | 16× |
+| **LONGS_4BIT** | 4 | 8 | 8× |
+| **LONGS_8BIT** | 8 | 4 | 4× |
+| **LONGS_16BIT** | 16 | 2 | 2× |
+| **WORDS_1BIT** | 1 | 16 | 16× |
+| **WORDS_2BIT** | 2 | 8 | 8× |
+| **WORDS_4BIT** | 4 | 4 | 4× |
+| **WORDS_8BIT** | 8 | 2 | 2× |
+| **BYTES_1BIT** | 1 | 8 | 8× |
+| **BYTES_2BIT** | 2 | 4 | 4× |
+| **BYTES_4BIT** | 4 | 2 | 2× |
+
+**Sign Extend** — deliberately *not* a column above: it is **never implied by the mode**. Every
+mode is **unsigned** unless the directive carries a trailing `SIGNED` keyword, which sets the
+runtime flag `vPackSignx` consumed by `UnPack` (4170). `LONGS_4BIT` alone is unsigned;
+`LONGS_4BIT SIGNED` is signed (range −8..+7).
+
+**`ALT`** sets `vPackAlt`, consumed by `NewPack` (4158-4164):
+
+```pascal
+4158:  function TDebugDisplayForm.NewPack: integer;
+4159:  begin
+4160:    Result := val;
+4161:    if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
+4162:    if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
+4163:    if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
+4164:  end;
+```
+
+The three guards are **cumulative**, not exclusive:
+
+- **1-bit modes** (`vPackShift = 1`): **all three fire** ⇒ each byte's 8 bits are **fully
+  reversed** (`$01 → $80`). It is *not* a stage-1 adjacent-bit swap.
+- **2-bit modes**: only the pair-swap and nibble-swap apply.
+- **4-bit modes**: only the nibble-swap applies.
+- **8- and 16-bit modes**: `ALT` is a **no-op** (all three guards fail).
+
+Note also that `NewPack` **does not read the element stream** — it begins `Result := val;`,
+reusing the value already latched by the enclosing `while NextNum do` (`SPECTRO_Update`, 1818-1821).
+It consumes nothing and advances nothing.
 
 ### 11.3 UnPack Method
 
-**DebugDisplayUnit.pas:4158-4163**
+**DebugDisplayUnit.pas:4166-4171**
 ```pascal
 function TDebugDisplayForm.UnPack(var v: integer): integer;
 begin
@@ -1262,20 +1416,24 @@ end;
 ```
 
 **Operation**:
-1. Extract lowest bits (mask)
-2. Shift packed value right
-3. Sign-extend if enabled and MSB=1
+1. Extract the **lowest** sub-field first (mask)
+2. Shift the packed value right
+3. Sign-extend **only if** `vPackSignx` is set (i.e. `SIGNED` was given) **and** the extracted
+   sub-field's own top bit (`Result shr (vPackShift − 1) and 1`) is 1
 
-**Example** (LONGS_4BIT, signed):
-- Packed: $87654321
-- Sample 1: $1 → sign-extend → $FFFFFFF1 (-15)
-- Sample 2: $2 → $00000002 (+2)
-- Sample 3: $3 → $00000003 (+3)
-- Sample 4: $4 → $00000004 (+4)
-- Sample 5: $5 → $00000005 (+5)
-- Sample 6: $6 → $00000006 (+6)
-- Sample 7: $7 → $00000007 (+7)
-- Sample 8: $8 → sign-extend → $FFFFFFF8 (-8)
+**Example** (`LONGS_4BIT SIGNED` — `vPackShift = 4`, so the sign test is `Result shr 3 and 1`;
+signed range is **−8..+7**):
+- Packed: `$87654321`
+- Sample 1: `$1` → bit 3 = 0 → **no** sign-extend → `$00000001` (+1)
+- Sample 2: `$2` → bit 3 = 0 → `$00000002` (+2)
+- Sample 3: `$3` → bit 3 = 0 → `$00000003` (+3)
+- Sample 4: `$4` → bit 3 = 0 → `$00000004` (+4)
+- Sample 5: `$5` → bit 3 = 0 → `$00000005` (+5)
+- Sample 6: `$6` → bit 3 = 0 → `$00000006` (+6)
+- Sample 7: `$7` → bit 3 = 0 → `$00000007` (+7)
+- Sample 8: `$8` → bit 3 = 1 → **sign-extend** → `$FFFFFFF8` (−8)
+
+Without the `SIGNED` keyword the same long yields the unsigned samples +1 … +8.
 
 ---
 
@@ -1345,21 +1503,28 @@ PixelHeight = vHeight × vDotSizeY
 
 ### 13.1 Configuration Command
 
-**Format** (element array):
+**Format** (element array). Element `[0]` is the **display type** (`ele_dis`) and `[1]` the
+**window name** (`ele_nam`); directives begin at `ptr := 2` (`FormCreate`:625-632). There is
+exactly **one** terminating `ele_end`:
 ```
-ele_key, dis_spectro,
-ele_key, key_title, ele_str, "title text", ele_end,
-ele_key, key_samples, ele_num, fft_size,
-ele_key, key_depth, ele_num, time_depth,
-ele_key, key_mag, ele_num, magnification,
-ele_key, key_range, ele_num, max_magnitude,
-ele_key, key_rate, ele_num, update_rate,
-ele_key, key_trace, ele_num, trace_mode,
-ele_key, key_dotsize, ele_num, x_scale, ele_num, y_scale,
-ele_key, key_luma8x,  // or other color mode
-ele_key, key_logscale,
-ele_end
+[0] ele_dis, dis_spectro,
+[1] ele_nam, "MySpec",
+    ele_key, key_title,   ele_str, "title text",
+    ele_key, key_samples, ele_num, fft_size,
+    ele_key, key_depth,   ele_num, time_depth,
+    ele_key, key_mag,     ele_num, magnification,
+    ele_key, key_range,   ele_num, max_magnitude,
+    ele_key, key_rate,    ele_num, update_rate,
+    ele_key, key_trace,   ele_num, trace_mode,
+    ele_key, key_dotsize, ele_num, x_scale, ele_num, y_scale,
+    ele_key, key_luma8x,  // or another of the six accepted color modes; may take a tune operand
+    ele_key, key_logscale,
+    ele_end
 ```
+
+> ⚠️ **The configure phase is KEY-ONLY** (`while NextKey do`, 1735). A non-key element — a stray
+> string or a bare number — **terminates the configure parse**, and the remainder of the create
+> message is silently dropped. Do not put update-phase directives or bare data in a create message.
 
 ### 13.2 Update Command
 
@@ -1368,13 +1533,21 @@ ele_end
 ele_num, sample1, ele_num, sample2, ..., ele_end
 ```
 
-**Or with packing**:
+**Or with packing** — note the packing mode is selected **in the CREATE message**, not here:
 ```
-ele_key, key_longs_4bit,  // select packing mode
+' create message (SPECTRO_Configure, 1773-1774):
+ele_key, key_longs_4bit, ele_end        // + optional ALT / SIGNED keys
+
+' subsequent update messages carry only the packed numbers:
 ele_num, packed_value1,   // contains 8 samples
 ele_num, packed_value2,
 ..., ele_end
 ```
+
+> ⚠️ **Packing cannot be changed mid-stream.** `SPECTRO_Update`'s case statement (1800-1815) has
+> arms for `key_clear` / `key_save` / `key_pc_key` / `key_pc_mouse` **only** — a `key_longs_*` /
+> `key_words_*` / `key_bytes_*` element arriving in an update message matches no arm and is
+> **silently skipped**. The mode set at create time stays in force for the life of the window.
 
 ### 13.3 Control Commands
 
@@ -1383,9 +1556,24 @@ ele_num, packed_value2,
 ele_key, key_clear, ele_end
 ```
 
-**Save Image**:
+**Save Image** — the filename is **required** for a file to be written (`KeySave`, 2839-2865):
 ```
-ele_key, key_save, ele_end
+ele_key, key_save, ele_str, "filename", ele_end      → writes Bitmap[1] to filename.bmp (2843)
+```
+
+Alternate forms (desktop scrape via `BitBlt`, 2861-2864):
+```
+ele_key, key_save, ele_key, key_window, ele_str, "filename", ele_end   → whole window incl. title bar/borders
+ele_key, key_save, ele_num, l, ele_num, t, ele_num, w, ele_num, h,
+                   ele_str, "filename", ele_end                        → arbitrary screen region
+```
+
+> ⚠️ `ele_key, key_save, ele_end` (bare `SAVE`) is **non-functional**: `NextStr` fails, `NextKey`
+> fails, `KeyVal(l)` fails → `Exit`. **Nothing is written.**
+
+**Close Window**:
+```
+ele_key, key_close, ele_end     → parser-layer dispatch (p2com.asm); command messages only
 ```
 
 ---
@@ -1399,7 +1587,7 @@ ele_key, key_save, ele_end
 **Configuration**:
 ```
 SPECTRO
-  SAMPLES 1024       ' 1024-point FFT (0-512 bins)
+  SAMPLES 1024       ' 1024-point FFT (512 bins, numbered 0..511 — FFTlast := vSamples div 2 - 1, 1747)
   DEPTH 400          ' 400 pixels of time history
   RATE 128           ' Update every 128 samples
   TRACE 8            ' Left-to-right, scrolling down
@@ -1485,15 +1673,21 @@ SPECTRO
 ```
 SPECTRO
   SAMPLES 512
-  LONGS_8BIT         ' Pack 4 samples per long
+  LONGS_8BIT SIGNED  ' 4 samples per long; SIGNED because the audio samples are signed
 ```
 
-**Propeller 2 Code**:
+Without the trailing `SIGNED`, `UnPack` leaves each 8-bit field **unsigned** (0..255) —
+`LONGS_8BIT` alone carries **no** sign flag (§11.2).
+
+**Propeller 2 Code** — packing keeps the *first* sample in the **low** field, because `UnPack`
+yields the low sub-field first (4168):
 ```spin2
 ' Pack 4 8-bit samples into one long
 packed := (sample1 << 0) | (sample2 << 8) | (sample3 << 16) | (sample4 << 24)
-debug(`SPECTRO `UDEC_(packed))
+debug(`MySpec `UDEC_(packed))      ' feed by INSTANCE name, not by display type
 ```
+(The window must first be declared, e.g. `` debug(`SPECTRO MySpec SAMPLES 512 LONGS_8BIT SIGNED) ``;
+feeding `` `SPECTRO `` — the *type* keyword — does not address a window.)
 
 **Bandwidth**: 4× reduction vs. sending individual samples.
 
@@ -1615,14 +1809,14 @@ Both displays share:
 
 ### 17.1 Fixed-Point Arithmetic
 
-**FFT Coefficient Scaling** (line 4179-4181):
+**FFT Coefficient Scaling** (lines 4187-4189):
 ```pascal
 FFTsin[i] := Round(Yf * $1000);    // Scale by 4096
 FFTcos[i] := Round(Xf * $1000);
 FFTwin[i] := Round(w * $1000);
 ```
 
-**Butterfly Computation** (line 4216-4217):
+**Butterfly Computation** (lines 4224-4225):
 ```pascal
 rx := (bx * FFTcos[th] - by * FFTsin[th]) div $1000;
 ry := (bx * FFTsin[th] + by * FFTcos[th]) div $1000;
@@ -1644,7 +1838,7 @@ Normal:  0 1 2 3 4 5 6 7
 Reversed: 0 4 2 6 1 5 3 7
 ```
 
-**Application** (line 4237):
+**Application** (line 4245):
 ```pascal
 i2 := Rev32(i1) shr (32 - FFTexp);
 ```
@@ -1653,7 +1847,7 @@ Reverses only the significant bits (FFTexp bits).
 
 ### 17.3 Hanning Window
 
-**Formula** (line 4181):
+**Formula** (line 4189):
 ```pascal
 FFTwin[i] := Round((1 - Cos((i / (1 shl FFTexp)) * Pi * 2)) * $1000)
 ```
@@ -1674,7 +1868,7 @@ w[n] = 1 - cos(2πn / N)
 
 ### 17.4 Magnitude Calculation
 
-**Hypot Function** (line 4240):
+**Hypot Function** (line 4248):
 ```pascal
 FFTpower[i1] := Round(Hypot(rx, ry) / ($800 shl FFTexp shr FFTmag));
 ```
@@ -1697,7 +1891,7 @@ scale = $800 << FFTexp >> FFTmag
 
 ### 17.5 Phase Calculation
 
-**ArcTan2 Function** (line 4241):
+**ArcTan2 Function** (line 4249):
 ```pascal
 FFTangle[i1] := Round(ArcTan2(rx, ry) / (Pi * 2) * $100000000) and $FFFFFFFF;
 ```
@@ -1739,15 +1933,17 @@ not handled by `SPECTRO_Configure` (lines 1735-1775). FFT size is set with
 A representative configuration element array is:
 
 ```
-Element Array:
-[0] type=ele_key   value=key_samples   → SAMPLES
-[1] type=ele_num   value=512           → 512-point FFT (FFTexp = 9, bins 0..255)
-[2] type=ele_key   value=key_depth     → DEPTH
-[3] type=ele_num   value=400           → 400 time-history lines (vWidth)
-[4] type=ele_key   value=key_trace     → TRACE
-[5] type=ele_num   value=$F            → direction 7 + scroll (KeyVal → vTrace)
-[6] type=ele_key   value=key_luma8x    → LUMA8X color mode
-[7] type=ele_end   value=0
+Element Array (directives begin at ptr := 2; [0] = ele_dis, [1] = ele_nam — FormCreate:625-632):
+[0] type=ele_dis   value=dis_spectro   → display type
+[1] type=ele_nam   value="MySpec"      → window name
+[2] type=ele_key   value=key_samples   → SAMPLES
+[3] type=ele_num   value=512           → 512-point FFT (FFTexp = 9, bins 0..255)
+[4] type=ele_key   value=key_depth     → DEPTH
+[5] type=ele_num   value=400           → 400 time-history lines (vWidth)
+[6] type=ele_key   value=key_trace     → TRACE
+[7] type=ele_num   value=$F            → direction 7 + scroll (KeyVal → vTrace)
+[8] type=ele_key   value=key_luma8x    → LUMA8X color mode
+[9] type=ele_end   value=0
 ```
 
 `SAMPLES` passes its first numeric value through `Within(val, 4, FFTmax)` and
@@ -1787,7 +1983,7 @@ fill level up to `vSamples`; the buffer is "full" once `SamplePop = vSamples`
 3. Copy newest vSamples into FFTsamp, perform FFT (SPECTRO_Draw 1842-1844)
 4. Magnitude/phase produced in FFTpower/FFTangle (PerformFFT)
 5. Scale + (optional) log + (HSV16) phase, TranslateColor (SPECTRO_Draw 1846-1852)
-6. PlotPixel writes one bin per pixel at vPixelX,vPixelY (3433-3445)
+6. PlotPixel writes one bin per pixel at vPixelX,vPixelY (3433-3444)
 7. StepTrace advances/scrolls the bitmap for the waterfall effect (2982-3061)
 ```
 
@@ -1822,7 +2018,8 @@ strip with background; the next line of bins is then plotted into that strip.
 SPECTRO renders into the shared `Bitmap[0]` (drawing target) and presents via
 `BitmapToCanvas(0)` (line 3522). `PlotPixel` writes directly to scanline
 pointers cached in `BitmapLine[]` as **RGB24** (3 bytes/pixel: blue, green, red —
-`PlotPixel` lines 3438-3442). There is no separate RGBA buffer.
+`PlotPixel` lines 3441-3443). There is no separate RGBA buffer, and no alpha channel: the
+bitmaps are `pf24bit`.
 
 ### 20.2 Waterfall Rendering
 
@@ -1851,7 +2048,7 @@ end;
 ### 20.3 Color Mapping
 
 SPECTRO does not use a runtime LUT. Color is produced by `TranslateColor(p, vColorMode)`
-(called inside `PlotPixel`, line 3437), and `vColorMode` is restricted to the
+(called inside `PlotPixel`, line 3438), and `vColorMode` is restricted to the
 luminance and 16-bit HSV families only (`key_luma8..key_luma8x`,
 `key_hsv16..key_hsv16x`; restriction at `SPECTRO_Configure` line 1767). For the
 HSV16 family, `SPECTRO_Draw` packs phase into bits 8-15 of `p` before plotting
@@ -1874,7 +2071,7 @@ SPECTRO shares the same fixed-point FFT engine as FFT display:
 
 ### 21.2 Color System
 
-SPECTRO shares the standard color path: `TranslateColor` (3082-3165) plus the
+SPECTRO shares the standard color path: `TranslateColor` (3090-3173) plus the
 `PolarColors[0..255]` table (declared line 365, built by `SetPolarColors`
 lines 3207-3228). There is no `DefaultSpectrumColors` array in v55 —
 `PolarColors` is the only precomputed color table, and it serves the HSV color
@@ -1893,14 +2090,21 @@ mode:
 | LUMA8W, HSV16W (white-base "W" modes) | `clWhite` | `$FFFFFF` |
 
 `clBlack`/`clWhite` are literal RGB24 values (`DebugDisplayUnit.pas` 187–188).
-(SPECTRO restricts its config color mode to the LUMA8/HSV16 families — see §17.4.)
+(SPECTRO restricts its config color mode to the six LUMA8/HSV16 modes — see §7.1 and the
+Directive Reference.)
 
 ### 21.3 Data Packing
 
-Uses standard 12 packing modes:
-- LONGS_1BIT through BYTES_4BIT
-- Sign extension for signed modes
-- Efficient unpacking during sample collection
+Uses the standard 12 packing modes:
+- `LONGS_1BIT` through `BYTES_4BIT` — all **opt-in**; the default is **unpacked**
+  (`SetPack(0, False, False)`, `SetDefaults`:2915) ⇒ one full 32-bit sample per long
+- Sign extension **only** when the trailing `SIGNED` keyword is given (`KeyPack`:2825-2830 →
+  `vPackSignx`, read at `UnPack`:4170). **No mode is signed by itself** — `PackDef` carries no
+  sign flag
+- Optional `ALT` modifier reorders bits/nibbles within each long (`NewPack`:4158-4164)
+- Efficient unpacking during sample collection (`SPECTRO_Update`:1821-1825)
+
+See §11 for the full table and the `ALT`/`SIGNED` semantics.
 
 ---
 
@@ -1946,7 +2150,7 @@ to the correct starting corner for the trace direction.
 
 FFT size derives from `vSamples`/`FFTexp` set during step 1-2 above. `FFTexp` is
 `Trunc(Log2(...))` of the clamped `SAMPLES` value (line 1744); `FFTmag` is the
-0..11 magnitude shift from `MAG` (line 1753). `PrepareFFT` (4170-4183) then
+0..11 magnitude shift from `MAG` (line 1753). `PrepareFFT` (4178-4191) then
 fills `FFTsin`/`FFTcos`/`FFTwin` for `1 shl FFTexp` points. There is no separate
 `FFTsize` variable — the size is always `1 shl FFTexp` / `vSamples`.
 

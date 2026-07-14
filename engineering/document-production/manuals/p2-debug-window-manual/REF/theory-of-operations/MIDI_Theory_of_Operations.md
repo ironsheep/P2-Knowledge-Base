@@ -45,7 +45,7 @@ The **MIDI** display window provides a real-time visual representation of MIDI (
 
 - **Piano keyboard**: Visual representation of 88 keys (or configurable range)
 - **Note activity**: Illuminated keys for active notes
-- **Velocity visualization**: Key color intensity proportional to note velocity
+- **Velocity visualization**: the key is filled from the bottom up with the configured on-colour, the **fill height** being proportional to velocity (the colour itself never changes — `MIDI_DrawKey`, 2675-2678)
 - **Channel filtering**: Display notes from a specific MIDI channel (0-15)
 - **Customizable range**: Display any subset of 128 MIDI notes (0-127)
 - **Scalable display**: Adjustable key size for different screen resolutions
@@ -217,7 +217,7 @@ Each row: directive → parameter(s) with **type · legal range · default** (ma
 | `TITLE 'str'` | `'text'` · free string · default `"<name> - MIDI"` (FormCreate:626) | 2508–2509 |
 | `POS left top` | left, top · int (offset from base window pos) | 2510–2511 |
 | `SIZE n` | n · int **1..50** · **4** — key-size scalar (NOT pixels); `MidiKeySize = 8 + n×4` | 2512–2513 |
-| `RANGE firstKey lastKey` | firstKey · int **0..127** · **21**; lastKey · int **firstKey..127** · **108** (lastKey clamped ≥ firstKey, 2517–2518) | 2514–2519 |
+| `RANGE firstKey {lastKey}` | firstKey · int **0..127** · **21** (window default); lastKey · int **firstKey..127** · **108** *only when `RANGE` is not given*. **Issuing `RANGE` sets `MidiKeyLast := MidiKeyFirst` first (2517)**, *before* the optional 2nd value is read (2518) — so `RANGE 60` alone yields the one-key range **60..60**, not 60..108 | 2514–2519 |
 | `CHANNEL n` | n · int **0..15** · **0** — exact MIDI channel filter (no "all" sentinel) | 2520–2521 |
 | `COLOR onWhite onBlack` | onWhite, onBlack · color, color · **CYAN, MAGENTA** — velocity colors for white keys then black keys (`vColor[0]`, `vColor[1]`) | 2522–2524 |
 
@@ -233,18 +233,42 @@ Accepted in `MIDI_Update` (run on every subsequent message).
 |---|---|---|
 | Numeric byte stream (`ele_num` values) | Raw MIDI bytes; decoded by 5-state note-on/off velocity machine | 2606–2641 |
 | `CLEAR` | Reset all 128 note velocities to 0 and redraw | 2597–2598 |
-| `SAVE` | Save window bitmap to file (`KeySave`) | 2599–2600 |
+| `SAVE …` | Save the display bitmap or a desktop scrape to a `.bmp` file (`KeySave`) — full grammar below | 2599–2600 |
+| `PC_KEY` | Send the latched key byte (`SendKeyPress`) | 2601–2602 |
+| `PC_MOUSE` | Send mouse position + pixel (`SendMousePos`) | 2603–2604 |
+| `CLOSE` | **Closes the window.** Dispatched at the *parser* layer, not in `MIDI_Update` — see below | — (`p2com.asm` 19565–19624) |
+
+#### `SAVE` grammar (`KeySave`, 2839–2866)
+
+The filename always comes **last**, and `.bmp` is appended automatically. Six forms; three of them silently write nothing:
+
+| Form | Writes |
+|---|---|
+| `SAVE 'name'` | `Bitmap[1]` — the **front/display** buffer (2843) → `name.bmp` |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect (2849–2852) — **includes title bar and borders**, and is vulnerable to occlusion |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region (2856–2859) |
+| `SAVE WINDOW` | captures to memory, **writes no file** (the trailing `NextStr` at 2864 fails) |
+| `SAVE l t w h` | captures to memory, **writes no file** |
+| `SAVE` (bare) | `Exit` — **nothing at all** |
+
+**Sharp edge** (2846–2848): a non-`WINDOW` keyword after `SAVE` is **consumed and then discarded** by the `Exit` at 2848. So `` `MyMidi SAVE CLEAR `` does nothing **and eats the `CLEAR`**.
+
+#### `CLOSE`
+
+`CLOSE` (`key_close` = 49, :84) appears in **no** `XXX_Update` case statement — including `MIDI_Update` — and that absence is *not* evidence that it is dead. It is dispatched one layer up, in `p2com.asm`: `parse_debug_string` detects `CLOSE` on an **existing-display command** (19565–19572), reverts the name symbol and **clears that display's bit in `debug_display_ena`** (19613–19624); `TDebugForm.ChrIn` (`DebugUnit.pas` 236–237) then runs the full update and only afterwards closes the form whose enable bit went to 0.
+
+Consequences: `CLOSE` is **command-only** (ignored in a new-display declaration), **multi-target** (`` `Midi1 Midi2 CLOSE `` closes both), and **update-first, close-second** — `` `MyMidi SAVE 'shot' CLOSE `` **saves, then closes**. Its purpose is to reclaim one of the 32 display slots.
 
 **Not accepted in Update phase**: `UPDATE`, `TRACE`, `SET`, `SCROLL`, color-mode directives, `HIDEXY` — none present in `MIDI_Update`.
 
 ### Keyboard & mouse
 
-MIDI uses the **identical shared input model** as all nine windows (`TDebugDisplayForm` form-level handlers). There is **no per-MIDI coordinate mapping** — `FormMouseMove` draws no measurement cursor, and `SendMousePos` reports raw pixel coordinates (off-window sentinel `$03FFFFFF` / `$FFFFFFFF` applies normally).
+MIDI uses the **identical shared input model** as all nine windows (`TDebugDisplayForm` form-level handlers). There is **no per-MIDI coordinate mapping** — `FormMouseMove`'s `case DisplayType of` (659-735) has **no `dis_midi` arm**, so the coordinate string `Str` stays `''` and **no coordinate readout text is drawn** (the `if Str <> ''` block at 778-787 is skipped). The shared **crosshair cursor itself is still built and installed**: the code unconditionally clears the colour/mask bitmaps (771-776), draws the cross (788-799), and calls `CreateIconIndirect` / `Cursor := DebugCursor` (800-808). `SendMousePos` reports raw client pixel coordinates (off-window sentinel `$03FFFFFF` / `$FFFFFFFF` applies normally).
 
 | Handler / directive | Lines | Behavior |
 |---|---|---|
 | `WMGetDlgCode` | 585–589 | Captures Tab (`DLGC_WANTTAB`) |
-| `FormMouseMove` | 647–809 | Live measurement cursor suppressed when `HIDEXY` set (737) — but MIDI never sets `HIDEXY` |
+| `FormMouseMove` | 647–809 | Crosshair cursor built + installed (771–808); **no coordinate readout for MIDI** (no `dis_midi` arm in the `case` at 659–735). The `HIDEXY` suppression at 737 is moot — MIDI never sets `vHideXY` |
 | `FormMouseWheel` | 811–823 | Latches wheel direction (`vMouseWheel` ±1) for 100 ms |
 | `FormKeyPress` / `FormKeyDown` | 825–857 | Latches key byte for 100 ms; non-printable mapped: Left=1 Right=2 Up=3 Down=4 Home=5 End=6 Del=7 Ins=10 PgUp=11 PgDn=12 |
 | `PC_KEY` (Update) | `SendKeyPress` 3579–3583 | Sends latched `vKeyPress` byte (0 if none) |
@@ -374,7 +398,7 @@ end;
 | **title** | key_title | string | - | `"<name> - MIDI"` | Window title text |
 | **pos** | key_pos | left, top | - | host origin ≈(0,210), no cascade | Window position (offset only; `KeyPos:2712-2716` reads 2 values — no width/height) |
 | **size** | key_size | integer | 1-50 | 4 | Key size multiplier |
-| **range** | key_range | first, last | 0-127 | 21-108 | Note range to display |
+| **range** | key_range | first, {last} | 0-127 | 21-108 | Note range to display. **21..108 is the default only when `RANGE` is absent** — issuing `RANGE` forces `MidiKeyLast := MidiKeyFirst` (2517) before reading the optional 2nd value, so `RANGE 60` ⇒ 60..60 |
 | **channel** | key_channel | integer | 0-15 | 0 | MIDI channel to monitor |
 | **color** | key_color | 2 integers | RGB24 | cyan, magenta | Active key colors (white, black) |
 
@@ -390,22 +414,37 @@ W  B   W  B   W  W  B   W  B   W  B   W
 
 **Black Keys**: C#, D#, F#, G#, A# (5 per octave)
 
-**Tweak Values** (note label positioning within key):
+**Tweak Values** — a **1/32-of-a-white-key horizontal offset** measured from the running white-key boundary `x`. What the tweak positions **depends on the key colour** (`MIDI_Configure`, 2551-2565):
 
-| Note | Name | Color | Tweak | Purpose |
-|------|------|-------|-------|---------|
-| 0 | C | White | 10 | Center-left |
-| 1 | C# | Black | -2 | Offset left |
-| 2 | D | White | 16 | Center |
-| 3 | D# | Black | 2 | Offset right |
-| 4 | E | White | 22 | Center-right |
-| 5 | F | White | 9 | Center-left |
-| 6 | F# | Black | -4 | Offset left |
-| 7 | G | White | 14 | Center-left |
-| 8 | G# | Black | 0 | Center |
-| 9 | A | White | 18 | Center-right |
-| 10 | A# | Black | 4 | Offset right |
-| 11 | B | White | 23 | Center-right |
+- **White key** (2560-2563): the tweak positions **only the note-number label**. The key rectangle itself is `[x, x + MidiKeySize)` and **ignores** the tweak:
+  ```pascal
+  left := x;  right := left + MidiKeySize;                 // 2560-2561  no tweak
+  MidiNumX[i] := x + (MidiKeySize * tweak + 16) div 32;    // 2563  tweak positions the LABEL
+  ```
+- **Black key** (2553-2556): the tweak positions the **key itself** — it sets the key's **left edge**; the width is fixed at `MidiKeySize × 20/32`. The label is then simply the key's centre:
+  ```pascal
+  left := x - (MidiKeySize * (10 - tweak) + 16) div 32;    // 2553  tweak positions the KEY
+  right := left + MidiKeySize * 20 div 32;                 // 2554  fixed width
+  MidiNumX[i] := (left + right + 1) div 2;                 // 2556  label = key centre
+  ```
+  (Which lands on the same `x + MidiKeySize × tweak/32` anchor as the white-key label formula — the two forms agree by construction.)
+
+| Note | Name | Color | Tweak | What the tweak positions |
+|------|------|-------|-------|--------------------------|
+| 0 | C | White | 10 | Label, at 10/32 of the key width from its left edge |
+| 1 | C# | Black | -2 | Key: left edge at `x − 12/32 × MidiKeySize` (left of the boundary) |
+| 2 | D | White | 16 | Label, at 16/32 (key centre) |
+| 3 | D# | Black | 2 | Key: left edge at `x − 8/32 × MidiKeySize` |
+| 4 | E | White | 22 | Label, at 22/32 of the key width |
+| 5 | F | White | 9 | Label, at 9/32 of the key width |
+| 6 | F# | Black | -4 | Key: left edge at `x − 14/32 × MidiKeySize` (furthest left) |
+| 7 | G | White | 14 | Label, at 14/32 of the key width |
+| 8 | G# | Black | 0 | Key: left edge at `x − 10/32 × MidiKeySize` |
+| 9 | A | White | 18 | Label, at 18/32 of the key width |
+| 10 | A# | Black | 4 | Key: left edge at `x − 6/32 × MidiKeySize` (furthest right) |
+| 11 | B | White | 23 | Label, at 23/32 of the key width |
+
+Black-key **labels are always centred on the key** (2556) — the tweak never moves a black-key label independently of its key.
 
 **Black Key Geometry**:
 ```pascal
@@ -777,7 +816,7 @@ fill_amount = 138 × 64 / 127 ≈ 69 pixels
 top_of_fill = 144 - 6 - 69 = 69
 ```
 
-Key filled from pixel 69 to pixel 144 (bottom 69 pixels in cyan).
+Key filled from pixel 69 to pixel 144 — a **75**-pixel band (69 px of velocity fill + the 6 px corner-radius allowance) in cyan. The `RoundRect` runs from `top_of_fill` all the way to `MidiBottom[i]` (2676-2678), so it also swallows the `r` the fill term subtracted.
 
 ### 7.3 Color Interpretation
 
@@ -847,7 +886,7 @@ White:  [  C  ][  D  ][  E  ][  F  ][  G  ][  A  ][  B  ]
 Black:      [C#]  [D#]      [F#]  [G#]  [A#]
 ```
 
-**Tweak Adjustment**: Positions black keys to match real piano geometry.
+**Tweak Adjustment**: for a **black** key the tweak positions the **key itself** — its left edge (2553), the width being fixed at `MidiKeySize × 20/32` (2554) — to match real piano geometry. For a **white** key the tweak positions only the note-number label (2563); the white key rectangle is `[x, x + MidiKeySize)` regardless of tweak. See §4.3.
 
 ### 8.3 Note Number Labels
 
@@ -979,7 +1018,7 @@ clBlack   = $000000;  // black-key fill (2662)
 clGray2   = $808080;  // keyboard outline pen + black-key labels (2651, 2660)
 clGray3   = $D0D0D0;  // white-key labels (2656)
 ```
-The keyboard background is the Windows system color `clInactiveCaption` (2650) — a
+The keyboard background is the Windows system color `clInactiveCaption` (2652, filled at 2653) — a
 GDI palette color, **not** a fixed RGB24 literal. All other colors above are literal
 RGB24 values; `WinRGB` swaps R↔B to BGR only at GDI draw time.
 
@@ -1042,17 +1081,17 @@ octave = note / 12
 note_in_octave = note % 12
 ```
 
-**Example**:
+**Example** (note-class from `note mod 12`; octave named in **scientific pitch notation**, the convention used throughout this document — A0 = 21, C4 = 60, C8 = 108):
 ```
-Note 60: 60/12 = 5, 60%12 = 0 → C5 (Middle C)
-Note 69: 69/12 = 5, 69%12 = 9 → A5 (440 Hz)
-Note 21: 21/12 = 1, 21%12 = 9 → A1 (A0 in piano naming)
+Note 60: 60 mod 12 = 0  → note-class C, octave 4 → C4 (middle C)
+Note 69: 69 mod 12 = 9  → note-class A, octave 4 → A4 (440 Hz, concert pitch)
+Note 21: 21 mod 12 = 9  → note-class A, octave 0 → A0 (lowest piano key)
 ```
 
 **Note Naming Convention**:
-- **MIDI**: C5 = middle C (note 60)
-- **Piano**: C4 = middle C (note 60)
-- **This implementation**: Uses MIDI numbering
+- The window displays **note numbers only** — the key label is the decimal MIDI note number: `AngleTextOut(..., IntToStr(i), $20, -900)` (`MIDI_DrawKey`, 2681). **The Pascal renders no pitch names at all.**
+- Octave naming (C4 = middle C) is therefore **prose convention only** in this document, not something the implementation computes or displays. This doc uses scientific pitch notation consistently (A0 = 21, C4 = 60, C8 = 108) — see §2.3 and §11.3.
+- (Some MIDI vendors number the same note 60 as "C5". That is a naming convention, not a difference in the note number, and it has no bearing on the rendering.)
 
 ### 11.2 Octave Pattern
 
@@ -1069,13 +1108,16 @@ note := i mod 12;
 black := note in [1, 3, 6, 8, 10];
 ```
 
-**Layout**:
+**Layout** (scientific pitch notation — octave number = `note div 12 − 1`, so C4 = 60):
 ```
-Octave 0: C0, C#0, D0, D#0, E0, F0, F#0, G0, G#0, A0, A#0, B0
-Octave 1: C1, C#1, D1, D#1, E1, F1, F#1, G1, G#1, A1, A#1, B1
+Notes   0- 11 → C-1, C#-1, D-1, D#-1, E-1, F-1, F#-1, G-1, G#-1, A-1, A#-1, B-1
+Notes  12- 23 → C0,  C#0,  D0,  D#0,  E0,  F0,  F#0,  G0,  G#0,  A0,  A#0,  B0
 ...
-Octave 10: C10, C#10, D10, D#10, E10, F10, F#10, G10
+Notes  60- 71 → C4,  C#4,  D4,  D#4,  E4,  F4,  F#4,  G4,  G#4,  A4,  A#4,  B4   (C4 = middle C)
+...
+Notes 120-127 → C9,  C#9,  D9,  D#9,  E9,  F9,  F#9,  G9
 ```
+(Again: these names are prose only — the window labels each key with the **note number**, `IntToStr(i)` at 2681.)
 
 ### 11.3 Standard Piano Range
 
@@ -1113,15 +1155,22 @@ Note 108: C8   (highest note)
 
 **Format** (element array):
 ```
-ele_key, dis_midi,
-ele_key, key_title, ele_str, "MIDI", ele_end,
-ele_key, key_pos, ele_num, x, ele_num, y, ele_num, w, ele_num, h,
-ele_key, key_size, ele_num, size,
-ele_key, key_range, ele_num, first, ele_num, last,
+ele_dis, dis_midi,                                            // element [0] — display type
+ele_nam, '<window name>',                                     // element [1] — window name
+ele_key, key_title,   ele_str, 'text',
+ele_key, key_pos,     ele_num, left, ele_num, top,            // exactly 2 values
+ele_key, key_size,    ele_num, size,
+ele_key, key_range,   ele_num, first, ele_num, last,
 ele_key, key_channel, ele_num, channel,
-ele_key, key_color, ele_num, white_color, ele_num, black_color,
-ele_end
+ele_key, key_color,   ele_num, whiteOnColor, ele_num, blackOnColor,
+ele_end                                                       // one terminator, at the very end
 ```
+
+Three points the parser enforces (`FormCreate` 625-632, `KeyPos` 2712-2716, `NextEnd` 4124-4127):
+
+- **Elements [0] and [1] are `ele_dis` / `ele_nam`, not `ele_key`.** `FormCreate` reads them positionally — `DisplayType := P2.DebugDisplayValue[0]` (625), the window name from `[1]` (626) — and only then starts the keyword parse at `ptr := 2` (632). (`ele_dis` = 1, `ele_nam` = 2, `ele_key` = 3; constants at 15-20.)
+- **`POS` takes exactly two numbers** — `KeyPos` reads left and top and nothing else (2714-2715). There is **no** width/height. (See also §4.2.)
+- **There is exactly one `ele_end`, at the end.** `NextEnd` returns True on the *first* `ele_end` it sees (4124-4127), which terminates the whole element list — an `ele_end` placed after `TITLE` would end the configuration right there and silently drop every directive after it.
 
 ### 12.2 MIDI Data Stream
 
@@ -1238,7 +1287,7 @@ repeat 4
   vel += 32  ' Increase velocity
 ```
 
-**Effect**: Key lights up progressively brighter (32, 64, 96, 127).
+**Effect**: the coloured fill climbs higher up the key on each repeat (≈25%, 50%, 75%, 100% of the key height for velocity 32, 64, 96, 127) — **same hue throughout**. Velocity scales the *height* of the on-colour `RoundRect` (`MIDI_DrawKey`, 2677: `MidiBottom[i] - r - (MidiBottom[i] - r) * MidiVelocity[i] div 127`); the brush colour (2675) is the flat `WinRGB(OnColor)` and never changes.
 
 ### 13.5 Multi-Channel Setup
 
@@ -1263,9 +1312,10 @@ MIDI SIZE 20 RANGE 21 108  ' Large keys
 ```
 
 **Result**:
-- MidiKeySize = 8 + 20×4 = 88 pixels
+- MidiKeySize = 8 + 20×4 = 88 pixels (2527)
+- Border = `88 div ((8+4) div 2)` = 88 div 6 = **14** pixels (2530)
 - White key: 88 × 528 pixels
-- Display: ~4576 × 532 pixels (fits 4K display)
+- Display: **4604 × 542** pixels — `vWidth = 88×52 + 2×14` (2584), `vHeight = 88×6 + 14` (2585)
 
 ---
 
@@ -1300,15 +1350,15 @@ MIDI SIZE 20 RANGE 21 108  ' Large keys
 
 ### 14.3 Memory Usage
 
-**Bitmap Buffers** (88-key display, MidiSize=4):
-- Bitmap[0], Bitmap[1]: 1256 × 148 pixels × 3 bytes = 557,376 bytes (~545 KB)
-- **Total**: ~1.09 MB
+**Bitmap Buffers** (88-key display, MidiSize=4) — both bitmaps are `pf24bit` (**3 bytes/pixel**, BGR, no alpha; `FormCreate` 596-599) and both are sized to the client rect by `SetSize` (2958-2961):
+- Bitmap[0] + Bitmap[1]: 1256 × 148 × 3 bytes = **557,664 bytes each** (~545 KiB)
+- Two buffers → **1,115,328 bytes (~1.06 MiB)**
 
 **Geometry Arrays**:
 - MidiBlack, MidiLeft, MidiRight, MidiBottom, MidiNumX, MidiVelocity
-- 128 × (1 + 4×4 + 4) bytes = 2,688 bytes (~2.6 KB)
+- 128 × (1 + 4×4 + 4) bytes = 2,688 bytes (~2.6 KiB)
 
-**Total Memory**: ~1.09 MB
+**Total Memory**: ~1.06 MiB (dominated by the two bitmaps)
 
 ### 14.4 Latency
 
@@ -1337,9 +1387,7 @@ Serial transmission → State machine → Velocity update → Redraw → Display
 - **Note-On** ($9n): With velocity (1-127)
 - **Note-Off** ($8n): With release velocity
 - **Running Status**: Consecutive messages without status byte
-
-**Partially Supported**:
-- **Note-On with velocity 0**: Not treated as note-off (standard practice)
+- **Note-On with velocity 0**: turns the key **off** — it needs no special case in the state machine. State 2 stores the raw value (`MidiVelocity[MidiNote] := val`, 2625, so `0` stores `0`) and `MIDI_DrawKey` fills only `if MidiVelocity[i] > 0` (2673), so a `$9n note 0` renders exactly as a `$8n` note-off does. See §15.4.
 
 **Not Supported**:
 - Program Change ($Cn)
@@ -1388,11 +1436,21 @@ Bits: 7 6 5 4 3 2 1 0
 
 **MIDI Standard**: Note-On with velocity 0 should be treated as Note-Off.
 
-**This Implementation**: Not implemented (velocity 0 would display as inactive, but state machine doesn't recognize it).
+**This implementation**: velocity-0 note-on is *not special-cased* in the state machine — and it needs no special case. `MIDI_Update` state 2 stores the raw value (2625):
+```pascal
+2:   // note-on, get velocity
+begin
+  MidiVelocity[MidiNote] := val;   // 2625 — val = 0 stores 0
+```
+and `MIDI_DrawKey` paints the on-colour **only** when the stored value is positive (2673):
+```pascal
+if MidiVelocity[i] > 0 then        // 2673 — 0 => no coloured fill
+```
+So a `$9n note 0` leaves the key in its OffColor — visually identical to the result of a `$8n` note-off (which stores `-val`, 2636).
 
-**Implication**: Devices using velocity-0 note-off may not render correctly.
+**Implication**: devices that use velocity-0 note-off render **correctly**. There is no mis-render and no workaround is required.
 
-**Workaround**: Use proper Note-Off messages ($8n).
+**Note on the stored value**: a velocity-0 note-on stores `0` while a note-off stores `-velocity`; both satisfy `MidiVelocity[i] <= 0`, so both render the key off. The distinction is invisible on screen.
 
 ---
 
@@ -1486,7 +1544,14 @@ AngleTextOut(x, y, text, style, angle);
 
 **Angle**: -900 (90° clockwise, in tenths of degrees)
 
-**Text Direction**: Vertical, reading upward from bottom
+**Text Direction**: vertical, rotated 90° **clockwise** — the note number reads **downward**, from the top of the key toward the bottom.
+
+`MIDI_DrawKey` (2681) passes `angle = -900`, and `AngleTextOut` puts it straight into the logical font (3492-3493):
+```pascal
+NewLogFont.lfEscapement := angle;    // 3492
+NewLogFont.lfOrientation := angle;   // 3493
+```
+GDI escapement is tenths of a degree **counter-clockwise**, so `-900` is a 90° **clockwise** rotation: the text advance direction points **down** the key. (Reading upward from the bottom would require `+900`.)
 
 **Font Size**: `vTextSize = MidiKeySize / 3`
 
@@ -1524,7 +1589,7 @@ end;
 
 **Real configuration state** (2497–2503, defaults set before the loop):
 - **MidiSize** — key-size scalar 1..50, default 4.
-- **MidiKeyFirst / MidiKeyLast** — display range 0..127, default 21..108.
+- **MidiKeyFirst / MidiKeyLast** — display range 0..127, default 21..108. Note the order of operations in the `key_range` arm above: `MidiKeyLast := MidiKeyFirst` (2517) executes **before** the second `KeyValWithin` (2518), so the 108 default survives only if `RANGE` is never issued — `RANGE 60` alone leaves the range at 60..60.
 - **MidiChannel** — exact channel filter 0..15, default 0. There is **no "all channels" value**; channel 0 means literally channel 0.
 - **vColor[0] / vColor[1]** — white-key and black-key velocity colors, defaults `clCyan` / `clMagenta`.
 
@@ -1622,7 +1687,18 @@ A full redraw (`MIDI_Draw(False)`) fires once per completed note-on or note-off 
 
 ## 19. Bitmap System and Double-Buffering
 
-The **MIDI** window renders into a single off-screen bitmap, `Bitmap[0]`, then blits it to the visible canvas with `BitmapToCanvas(0)` (2664). There is **no** front/back buffer pair, no `SwapBuffers`, and no `vUpdate` mode — MIDI does not accept `UPDATE`, so every note event paints immediately.
+MIDI draws into the **back** buffer `Bitmap[0]`, then calls `BitmapToCanvas(0)` (2664). That shared helper (3522-3530) copies `Bitmap[0]` → `Bitmap[1]` and blits `Bitmap[1]` to the visible canvas:
+
+```pascal
+if Level = 0 then
+  Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);   // 3525  back -> front (the "swap")
+...
+  Canvas.Draw(0, 0, Bitmap[1]);             // 3529  front -> screen
+```
+
+So `Bitmap[1]` **is** the front buffer, and MIDI *does* have a front/back pair: both bitmaps are created in `FormCreate` (596-599) and both are sized by `SetSize` (2958-2961). `FormPaint` re-blits the front buffer alone via `BitmapToCanvas(1)` (859-862), and `SAVE 'name'` writes the **front** buffer to disk (`KeySave`, 2843: `Bitmap[1].SaveToFile(...)`).
+
+What MIDI lacks is the *deferred* `vUpdate` mode — it does not accept the `UPDATE` directive, so `BitmapToCanvas(0)` runs on **every** note event and the front buffer is never stale. The missing piece is the deferred-update mode, **not** the second bitmap.
 
 ### 19.1 Draw Pass (MIDI_Draw)
 
@@ -1669,11 +1745,23 @@ After the fill, the note number label is drawn rotated −90° via `AngleTextOut
 
 ## 20. Shared Infrastructure
 
-The **MIDI** window uses the same shared canvas helpers as the other windows, but its keyboard geometry and labels are MIDI-specific and are computed in `MIDI_Configure`, not via the helper functions invented in earlier drafts (no `NoteToPixelX`, `WhiteKeyIndex`, `GetBlackKeyOffset`, `NoteToString`, `IsBlackKey` bitmask, or `TranslateColor` exist).
+The **MIDI** window uses the same shared canvas helpers as the other windows, but its keyboard geometry and labels are MIDI-specific and are computed in `MIDI_Configure`, not via the helper functions invented in earlier drafts (no `NoteToPixelX`, `WhiteKeyIndex`, `GetBlackKeyOffset`, `NoteToString`, or `IsBlackKey` bitmask exist).
 
 ### 20.1 Color System
 
-MIDI stores its two velocity colors in the shared `vColor[]` array — `vColor[0]` (white-key on, default `clCyan`) and `vColor[1]` (black-key on, default `clMagenta`), set at 2502–2503 and overridable by `COLOR` (2522–2524). At draw time the brush color is resolved through the shared `WinRGB(...)` helper (2670, 2675); fixed colors used directly are `clInactiveCaption` (background), `clGray2`/`clGray3` (pen and label colors), `clWhite`, and `clBlack`. There is no `TranslateColor`/`GetSysColor` indirection in this path.
+MIDI stores its two velocity colors in the shared `vColor[]` array — `vColor[0]` (white-key on, default `clCyan`) and `vColor[1]` (black-key on, default `clMagenta`), set at 2502–2503 and overridable by `COLOR` (2522–2524).
+
+**Parse path — `TranslateColor` *is* on MIDI's path.** MIDI's `COLOR` parameters are resolved by the shared `KeyColor` (2752–2783), which calls `TranslateColor` (3090–3173) on **both** of its branches:
+
+```pascal
+c := TranslateColor(h shl 5 or p shl 1, key_rgbi8x);  // 2774  named-colour path (RGBI8X)
+...
+c := TranslateColor(val, vColorMode);                 // 2780  numeric path, through vColorMode
+```
+
+For MIDI `vColorMode` is always `key_rgb24` (the `SetDefaults` value, 2889) because MIDI accepts no colour-mode directive — so a numeric `COLOR` value is read as `$RRGGBB`.
+
+**Draw path.** At draw time the brush color is resolved through the shared `WinRGB(...)` helper (2670, 2675), which swaps R↔B to BGR for GDI. Fixed colors used directly are `clInactiveCaption` (background), `clGray2`/`clGray3` (pen and label colors), `clWhite`, and `clBlack`. No `GetSysColor` indirection is used in the draw path except for the Delphi system constant `clInactiveCaption` (2652).
 
 ### 20.2 Rotated Number Labels
 

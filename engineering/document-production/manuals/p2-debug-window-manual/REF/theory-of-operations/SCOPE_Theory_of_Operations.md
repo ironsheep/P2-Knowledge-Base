@@ -2,6 +2,9 @@
 
 **Current as of**: PNut v55 for Propeller 2
 **Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Re-ratified against raw v55 source**: 2026-07-14 — usage/example layer corrected (create-vs-update
+phase model, positional channel-def order, packing default, packed-sample distribution, trigger-offset
+edge mapping, `SAVE` grammar, `CLOSE`, 24-bit bitmaps, stale citations)
 **Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
@@ -113,9 +116,14 @@ The SCOPE window operates as part of the P2 debug display system:
 
 ### 2.2 Data Flow
 
-**Configuration Flow** (Window Creation):
+**Configuration Flow** (Window Creation — **keys only**):
 ```
-Serial Command → Parse Channels → SCOPE_Configure → Set Metrics → Create Window
+Create message → FormCreate → SetDefaults → SCOPE_Configure (keys) → Set Metrics → Show Window
+```
+
+**Channel Definition Flow** (a *separate*, later message):
+```
+Update message → SCOPE_Update → 'label' … → vLabel/vAuto/vLow/vHigh/vTall/vBase/vGrid/vColor
 ```
 
 **Sample Flow** (Data Acquisition):
@@ -162,7 +170,7 @@ Y_PtrMask        = Y_Sets - 1;           // 2047 (for circular buffer)
 Y_SampleBuff: 2048 sets × 8 samples × 4 bytes = 65,536 bytes = 64 KB
 ```
 
-**Source Locations**: Lines 167-169 in DebugDisplayUnit.pas
+**Source Locations**: `DataSetsExp` = 154, `DataSets` = 155, **`Channels` = 157**, `Y_SetSize`/`Y_Sets`/`Y_PtrMask` = 167-169 in DebugDisplayUnit.pas.
 
 ### 3.3 Size Constraints
 
@@ -275,7 +283,7 @@ begin
 end;
 ```
 
-**Source Locations**: Lines 304-310
+**Source Locations**: Lines **303-311** — `vLabel` 303, `vAuto` 304, `vHigh` 305, `vLow` 306, `vMag` 307 *(FFT-only)*, `vTall` 308, `vBase` 309, `vGrid` 310, `vColor` 311.
 
 ### 4.3 Trigger State Variables
 
@@ -311,10 +319,25 @@ vTriggered      : boolean;       // Trigger event occurred
   - Arm when signal rises above TriggerArm
   - Fire when signal falls below TriggerFire
 
-**vTriggerOffset**: Pre/post-trigger position
-- `0`: Trigger at left edge (show what happens after trigger)
-- `vSamples/2`: Trigger at center (default)
-- `vSamples-1`: Trigger at right edge (show what led up to trigger)
+**vTriggerOffset**: Pre/post-trigger position. It is a **SAMPLE INDEX — a count of sample sets back
+from the newest — not a pixel offset.** It is clamped to `0..vSamples-1` (`KeyValWithin(vTriggerOffset,
+0, vSamples - 1)`, `SCOPE_Update` 1248) and it selects the tested sample by *age*:
+
+```pascal
+t := Y_SampleBuff[((SamplePtr - vTriggerOffset - 1) and Y_PtrMask) * Y_SetSize + vTriggerChannel];  // 1295
+```
+
+`SCOPE_Draw` plots the `k`-sets-back sample at `x = (vMarginLeft + vWidth - 1) shl 8 - k/vSamples ×
+vWidth × $100` (1358) — **k = 0 (newest) is the RIGHT edge**, `k = vSamples-1` (oldest) the left. The
+trigger indicator confirms it: `x := vBitmapWidth - vMarginRight - Round((vTriggerOffset + 1) /
+vSamples * vWidth)` (`ClearBitmap` 3353) — measured **leftward from the right edge**. So:
+
+- `0`: Trigger at the **RIGHT** edge — the whole screen is **pre-trigger** history (what led up to the trigger)
+- `vSamples/2`: Trigger at center (default) — half pre-trigger, half post-trigger
+- `vSamples-1`: Trigger at the **LEFT** edge — the whole screen is **post-trigger** (what happened after the trigger)
+
+*(Rendered pixel position of the indicator line is a `Round()` of the above; exact sub-pixel placement is
+**NEEDS-HARDWARE**, but the edge mapping is unambiguous from the code.)*
 
 **Default Initialization** (lines 1198-1203):
 ```pascal
@@ -334,8 +357,8 @@ vWidth          : integer;       // Display width in pixels
 vHeight         : integer;       // Display height in pixels
 vRate           : integer;       // Rate divisor (1 = every sample triggers draw)
 vRateCount      : integer;       // Current rate counter
-vDotSize        : integer;       // Dot diameter (pixels, 0 = no dots)
-vLineSize       : integer;       // Line thickness (pixels, 0 = no lines)
+vDotSize        : integer;       // Dot size (0 = no dots) — passed to SmoothDot as `vDotSize shl 7`
+vLineSize       : integer;       // Line thickness (0 = no lines) — passed to SmoothLine as `vLineSize shl 6`
 vTextSize       : integer;       // Label font size
 vIndex          : integer;       // Number of active channels
 ```
@@ -350,6 +373,11 @@ vIndex          : integer;       // Number of active channels
 
 Accepted by `SCOPE_Configure` (lines 1151–1207). All directives are optional; the window may be opened with only a name.
 
+> 🔴 **The create message accepts KEYS ONLY** (`while NextKey do`, 1161). A channel-def string,
+> `TRIGGER` or `HOLDOFF` here ends the parse and discards the rest of the message — and per **EF-003**
+> a channel def on the create line **prevents the window from being created at all**. Those belong in a
+> separate update message (§6.1).
+
 | Directive | Parameters | Range / default | Pascal lines |
 |---|---|---|---|
 | `TITLE` | `'string'` | `"<name> - SCOPE"` (FormCreate:626) | 1163–1164 |
@@ -362,9 +390,21 @@ Accepted by `SCOPE_Configure` (lines 1151–1207). All directives are optional; 
 | `TEXTSIZE` | `n` | int 6–200 / 10 (`FontSize`) | 1177–1178 |
 | `COLOR` | `back grid` | each: named color or RGB24 / black `$000000`, gray `$404040` | 1179–1181 |
 | `HIDEXY` | *(flag)* | — / shown | 1182–1183 |
-| `LONGS_1BIT`…`BYTES_4BIT` | *(packing mode)* | 12 modes / LONGS_1BIT | 1184–1185 |
+| `LONGS_1BIT`…`BYTES_4BIT` `{ALT}` `{SIGNED}` | *(packing mode)* | 12 modes / **none — the default is UNPACKED**² | 1184–1185 |
 
 ¹ Post-configure default: if both `DOTSIZE` and `LINESIZE` are 0, `DOTSIZE` is forced to 1 (line 1188).
+`DOTSIZE` takes a **single** value for SCOPE (`KeyValWithin(vDotSize, 0, 32)`, 1173-1174) — the optional
+second (`y`) value exists only for SPECTRO/PLOT/BITMAP.
+
+² **There is no default packing mode.** `SetDefaults` (2915) runs before `SCOPE_Configure` and calls
+`SetPack(0, False, False)`; `SetPack` (4152-4155) special-cases `val = 0`, **bypassing the `PackDef`
+table**: `vPackCount = 1`, `vPackShift = 32`, `vPackMask = $FFFFFFFF` ⇒ **one full 32-bit sample per
+transmitted long**. `LONGS_1BIT` is one of twelve opt-in keys, **not** the default. `ALT` and `SIGNED`
+are optional trailing modifiers (up to two, either order — `KeyPack` 2817-2832); sign-extension is a
+**runtime flag**, never a property of the mode.
+
+**Note on `SAMPLES`/`RATE`/`HOLDOFF` clamps**: `KeyValWithin` is **assign-and-clamp** — an
+out-of-range value is saturated into range, never ignored (`Within`, GlobalUnit.pas:222-227).
 
 ### Display / data directives
 
@@ -372,13 +412,18 @@ Accepted by `SCOPE_Update` (lines 1209–1337) on every subsequent message.
 
 | Directive | Parameters | Range / value-set / default | Pascal lines |
 |---|---|---|---|
-| *string* (channel def) | `'label' (AUTO \| lo hi) {tall} {base} {grid} {color}` | `label`: free string. `AUTO`: keyword flag → vAuto:=True. `lo`/`hi`: int32 (defaults −$80000000 / $7FFFFFFF). `tall`: int / vHeight. `base`: int / 0. `grid`: int / 0 — **4-bit `%abcd` mask, rendered** (bit0=baseline line, bit1=top line, bit2=min-value TEXT, bit3=max-value TEXT) in `ClearBitmap` 3298-3333; see §19.3. `color`: named or RGB24 / `DefaultScopeColors[i]`. Up to 8 channels (`Channels`=8); further defs ignored | 1217–1231 |
-| `TRIGGER` | `channel (AUTO \| arm fire) {offset}` | `channel`: int **−1..7** (−1=disabled/free-run). `AUTO`: keyword flag → vTriggerAuto:=True (else `arm`,`fire`: int32). `offset`: int **0…vSamples−1** / vSamples div 2 | 1236–1249 |
+| *string* (channel def) | `'label' (AUTO \| lo hi) {tall} {base} {grid} {color}` — **strictly positional** | `label`: free string. `AUTO`: keyword flag → vAuto:=True. `lo`/`hi`: int32 (defaults −$80000000 / $7FFFFFFF). `tall`: int / vHeight. `base`: int / 0. `grid`: int / 0 — **4-bit `%abcd` mask, rendered** (bit0=baseline line, bit1=top line, bit2=min-value TEXT, bit3=max-value TEXT) in `ClearBitmap` 3298-3333; see §19.3. `color`: named keyword or numeric (via `vColorMode`) / `DefaultScopeColors[i]` — **requires every preceding positional**. Up to 8 channels (`Channels`=8); a **9th def overwrites channel 8 in place** (`vIndex` saturates at 1219, but the write still lands at `vIndex-1` = 7) | 1217–1231 |
+| `TRIGGER` | `channel (AUTO \| arm fire) {offset}` | `channel`: int **−1..7** (−1=disabled/free-run). `AUTO`: keyword flag → vTriggerAuto:=True (else `arm`,`fire`: int32). `offset`: **a SAMPLE INDEX**, int **0…vSamples−1** / vSamples div 2 (not pixels — see §4.3) | 1236–1249 |
 | `HOLDOFF` | `n` | int **2..2048** / vSamples (set in Configure); resets vHoldOffCount:=0 | 1250–1251 |
-| `CLEAR` | *(none)* | Clears bitmap + resets SamplePop and RateCount | 1252–1259 |
-| `SAVE` | *{filename}* | Saves window bitmap to BMP | 1260–1261 |
+| `CLEAR` | *(none)* | `vTriggered:=False` (suppresses the trigger indicator), clears + presents the bitmap, resets SamplePop and vRateCount | 1252–1259 |
+| `SAVE` | `'name'` \| `WINDOW {'name'}` \| `l t w h {'name'}` \| *(bare)* | `SAVE 'name'` → writes `Bitmap[1]` (the **front** buffer) to `name.bmp`. `SAVE WINDOW 'name'` → desktop **BitBlt scrape** of the window's *outer* rect (title bar + borders; occludable). `SAVE l t w h 'name'` → desktop scrape of an arbitrary screen region. Omitting the filename in the two scrape forms captures to memory and **writes no file**. **Bare `SAVE` writes nothing** (`Exit`). ⚠️ A non-`WINDOW` key after `SAVE` is **consumed and discarded** — `` `MyScope SAVE CLEAR `` does nothing *and eats the `CLEAR`* (`KeySave` 2843-2848). | 1260–1261 |
+| `CLOSE` | *(none)* | **Closes the window** and frees its display slot. Handled one layer up — at the **parser**, not in `SCOPE_Update` (`p2com.asm` 19565-19624 clears the display's `debug_display_ena` bit; `TDebugForm.ChrIn`, DebugUnit.pas:236-237, runs the full update and *then* closes). Command-only (ignored in a create message), multi-target, and **update-first/close-second** — `` `MyScope SAVE 'shot' CLOSE `` saves, then closes. | *(parser layer)* |
 | `PC_KEY` | *(none)* | Transmits latched key byte → P2 | 1262–1263 |
 | `PC_MOUSE` | *(none)* | Transmits mouse position + color → P2 | 1264–1265 |
+
+> ⚠️ `SAVE 'name'` writes **`Bitmap[1]`, the front buffer**. SCOPE presents via `BitmapToCanvas(0)`
+> on every draw, so the front buffer is normally current — but any `SAVE` issued in a message that
+> has not yet triggered a draw writes the **previously presented** frame.
 
 ### Keyboard & mouse
 
@@ -426,8 +471,12 @@ TRIGGER channel (AUTO | arm fire) {offset}
   AUTO    : arm/fire auto-computed from buffer range each sample set
   arm     : arm threshold (integer)
   fire    : fire threshold (integer)
-  offset  : trigger position 0..vSamples-1 (default = vSamples div 2)
+  offset  : trigger position as a SAMPLE INDEX (sets back from newest), 0..vSamples-1
+            (default = vSamples div 2). 0 = trigger at the RIGHT edge; vSamples-1 = LEFT edge. See §4.3.
 ```
+
+`TRIGGER` and `HOLDOFF` are **update-phase only** — `SCOPE_Configure`'s `case` (1162-1186) has no
+`key_trigger`/`key_holdoff` arm. Placing them in the create message truncates the configure parse (§6.1).
 
 ---
 
@@ -497,12 +546,17 @@ end;
 | Size | `SIZE width height` | 256 × 256 | 32-2048 | Display dimensions |
 | Samples | `SAMPLES count` | 256 | 16-2048 | Horizontal resolution |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
-| Dot Size | `DOTSIZE pixels` | 0 | 0-32 | Dot diameter (0 = no dots) |
-| Line Size | `LINESIZE pixels` | 3 | 0-32 | Line thickness (0 = no lines) |
+| Dot Size | `DOTSIZE n` | 0 | 0-32 | Dot size (0 = no dots; rendered width **NEEDS-HARDWARE** — see §20.3) |
+| Line Size | `LINESIZE n` | 3 | 0-32 | Line thickness (0 = no lines; `LINESIZE 3` renders 3 px, measured) |
 | Text Size | `TEXTSIZE size` | 10 (FontSize) | 6-200 | Label font size |
 | Colors | `COLOR back grid` | Black/Gray | RGB24 | Background and grid colors |
 | Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
-| Packing | `LONGS_1BIT` etc. | LONGS_1BIT | 12 modes | Data packing format |
+| Packing | `LONGS_1BIT` etc. `{ALT} {SIGNED}` | **unpacked** (1 sample/long, 32-bit, unsigned) | 12 opt-in modes | Data packing format |
+
+**Packing default** — `SetDefaults` (line 2915) calls `SetPack(0, False, False)` *before*
+`SCOPE_Configure` runs; `SetPack` (4152-4155) treats `val = 0` as a special case that **bypasses
+`PackDef`**: `vPackCount := 1`, `vPackShift := 32`, `vPackMask := $FFFFFFFF`. So with **no** packing
+keyword, each transmitted long is **one full 32-bit sample**. `LONGS_1BIT` is *not* the default.
 
 ### 5.3 Rendering Mode Validation
 
@@ -521,10 +575,38 @@ if (vDotSize = 0) and (vLineSize = 0) then vDotSize := 1;
 
 ### 6.1 Channel Configuration Syntax
 
-**String Element Format**:
+> ### 🔴 Channel definitions are **UPDATE-phase only** — never on the create line
+>
+> `SCOPE_Configure` is a **key-only** parser: `while NextKey do` (line 1161). `NextKey` fails on the
+> first non-key element, so a **channel-def string — or `TRIGGER`, or `HOLDOFF` — placed in the create
+> message terminates the configure parse, and every element after it is silently discarded.**
+> `key_trigger`/`key_holdoff` have no arm in `SCOPE_Configure`'s `case` (1162-1186) at all; they are
+> parsed **only** by `SCOPE_Update` (1236-1251), and channel defs only by `SCOPE_Update`'s
+> `if NextStr then` branch (1217-1231).
+>
+> **Hardware-confirmed consequence (EF-003): a SCOPE channel-def on the create line prevents the
+> window from being created at all.** It does not "open empty" — no window appears.
+>
+> **Always use the two-message pattern** (as every shipped Spin2 demo does):
+>
+> ```spin2
+> debug(`SCOPE MyScope SIZE 254 84 SAMPLES 128)   ' 1. CREATE — keys only
+> debug(`MyScope 'Sawtooth' 0 63 64 10 %1111)     ' 2. UPDATE — channel def
+> debug(`MyScope TRIGGER 0 HOLDOFF 2)             ' 3. UPDATE — trigger/holdoff
+> ```
+>
+> (`DEBUG-TESTING/DEBUG_SCOPE.spin2:5-6`, `DEBUG_SCOPE_2CHAN.spin2:5-8`.)
+
+**String Element Format** (an element of an **update** message — `SCOPE_Update` 1217-1231):
 ```
 'label' {AUTO | low high} {tall} {base} {grid} {color}
 ```
+
+**⚠️ The parameters are strictly POSITIONAL.** After the label, `SCOPE_Update` reads them in fixed
+order — `AUTO` *or* `low`+`high`, then `tall`, `base`, `grid`, then `color` — and any `KeyVal` that
+finds no number does `Continue`, abandoning the rest of that def. There is **no way to skip a
+positional and supply a later one**: a bare number after the label is the **`low` bound**, never a
+color, and a numeric color requires *every* preceding positional to be present.
 
 **Parameters**:
 - `label`: Channel name
@@ -533,16 +615,16 @@ if (vDotSize = 0) and (vLineSize = 0) then vDotSize := 1;
 - `tall`: Vertical height in pixels (default: vHeight)
 - `base`: Vertical offset in pixels (default: 0)
 - `grid`: Grid flag bitmask (default: 0; bits select baseline/top lines and min/max labels — see §4.2/§19.3)
-- `color`: Trace color (RGB24, default: cycle through DefaultScopeColors)
+- `color`: Trace color — named keyword or numeric (interpreted through the current `vColorMode`, default RGB24); default `DefaultScopeColors[i]`
 
 ### 6.2 Auto-Ranging Mode
 
-**Syntax**:
+**Syntax** (in an **update** message, after the window exists):
 ```
-'SENSOR' AUTO
+debug(`MyScope 'SENSOR' AUTO)
 ```
 
-**Configuration Code** (lines 1217-1232):
+**Channel-def parsing code** — `SCOPE_Update` (lines 1217-1232):
 ```pascal
 if NextStr then
 begin
@@ -569,12 +651,12 @@ end
 
 ### 6.3 Manual Ranging Mode
 
-**Syntax**:
+**Syntax** (in an **update** message):
 ```
-'ADC' -128 127 256 0 0 $FF0000
+debug(`MyScope 'ADC' -128 127 256 0 0 $FF0000)
 ```
 
-**Parameters**:
+**Parameters** (positional — `label low high tall base grid color`):
 - Label: "ADC"
 - Low: -128 (bottom of display)
 - High: 127 (top of display)
@@ -590,46 +672,59 @@ end
 
 ### 6.4 Overlay Configuration
 
-**Multiple Channels with Offsets**:
-```
-'CH1' AUTO 128 0   $00FF00
-'CH2' AUTO 128 128 $FF0000
+**Multiple Channels with Offsets** (each channel def is its own **update**-message element; `grid` must
+be supplied before `color`):
+```spin2
+debug(`SCOPE MyScope)                            ' create — keys only
+debug(`MyScope 'CH1' AUTO 128 0   0 $00FF00)     ' label AUTO tall base grid color
+debug(`MyScope 'CH2' AUTO 128 128 0 $FF0000)
 ```
 
 **Result**:
-- CH1: Green, full height (128px), bottom half of display
-- CH2: Red, full height (128px), top half of display
+- CH1: Green, 128px tall, bottom half of display
+- CH2: Red, 128px tall, top half of display
 - Overlaid on same time base
+
+> ⚠️ **Do not omit `grid`.** Written as `'CH1' AUTO 128 0 $00FF00` (five elements), `SCOPE_Update`
+> 1228-1231 consumes `128`→`vTall`, `0`→`vBase`, **`$00FF00`→`vGrid`**, and then `KeyColor(vColor[…])`
+> finds nothing — so the channel keeps its **default** `DefaultScopeColors[i]` and gets a nonsense
+> grid mask. (The trace still *looks* green because `DefaultScopeColors[0]` happens to be `clLime`
+> — the right answer for the wrong reason. CH2 would be **red-by-default**, not red-by-request.)
 
 ### 6.5 Configuration Examples
 
+Every SCOPE session is **at least two messages**: a create message carrying **keys only**, then one or
+more update messages carrying the channel defs (see the caution in §6.1).
+
 **Example 1: Single Auto-Ranging Channel**:
-```
-SCOPE 'TEMPERATURE' AUTO
+```spin2
+debug(`SCOPE MyScope)                    ' create
+debug(`MyScope 'TEMPERATURE' AUTO)       ' update: channel def
 ```
 
 Result:
 - 1 channel
 - Automatic range detection
-- Lime green (DefaultScopeColors[0])
+- Green (`DefaultScopeColors[0]` = `clLime` `$00FF00`)
 
 **Example 2: Fixed Range ADC**:
-```
-SCOPE 'ADC' 0 1023 256
+```spin2
+debug(`SCOPE MyScope)                    ' create
+debug(`MyScope 'ADC' 0 1023 256)         ' update: label low high tall
 ```
 
 Result:
 - 1 channel
 - Fixed 0-1023 range
 - 256 pixels tall
-- Lime green
+- Green (default color; `base`/`grid`/`color` were not supplied, so parsing stops after `tall`)
 
 **Example 3: Multi-Channel with Colors**:
-```
-SCOPE SIZE 512 384
-      'X' AUTO 128 0   0 $FF0000
-      'Y' AUTO 128 128 0 $00FF00
-      'Z' AUTO 128 256 0 $0000FF
+```spin2
+debug(`SCOPE MyScope SIZE 512 384)               ' create — keys only
+debug(`MyScope 'X' AUTO 128 0   0 $FF0000)       ' update: 3 channel defs
+debug(`MyScope 'Y' AUTO 128 128 0 $00FF00)
+debug(`MyScope 'Z' AUTO 128 256 0 $0000FF)
 ```
 
 Result:
@@ -638,6 +733,9 @@ Result:
 - 128 pixels each
 - Stacked vertically (base offsets: 0, 128, 256)
 - Red, green, blue
+
+(The three defs may also be packed into **one** update message — `SCOPE_Update`'s `while not NextEnd`
+loop, 1215, takes any number of strings — but they may **never** ride on the create message.)
 
 ---
 
@@ -791,17 +889,27 @@ end;
    - Process trigger
    - Reset channel counter for next set
 
-**Example** (4 channels, LONGS_1BIT):
-```
-Packed value 1:  32 samples of channel 0
-Packed value 2:  32 samples of channel 1
-Packed value 3:  32 samples of channel 2
-Packed value 4:  32 samples of channel 3
+**⚠️ Sub-samples go ROUND-ROBIN across the channels.** `ch` is declared once, at the top of
+`SCOPE_Update` (1213: `ch := 0;`), and is **never reset per transmitted long** — it advances through the
+sub-samples of a long and wraps only when a set completes (`if ch = vIndex then ch := 0`, 1277-1279).
+A single packed long therefore feeds **successive channels**, not one channel.
 
-Each iteration through outer loop:
-  - Processes 32 sample sets
-  - Stores 32 × 4 = 128 samples total
+**Example** (4 channels, `LONGS_1BIT` → `vPackCount = 32`):
 ```
+One transmitted long unpacks to 32 sub-samples, distributed round-robin
+across the active channels:
+  sub-sample 0→ch0, 1→ch1, 2→ch2, 3→ch3, 4→ch0, 5→ch1, …
+
+⇒ 32 / 4 = 8 complete sample sets stored per transmitted long
+  (32 sub-samples × 1 long = 32 samples total, i.e. 8 sets × 4 channels).
+```
+
+`UnPack` (4166-4171) takes the **LOW** sub-field first (`Result := v and vPackMask; v := v shr
+vPackShift;`), so within one long the sub-samples are consumed **least-significant field first**.
+
+**Default (no packing keyword)**: `vPackCount = 1`, so **one transmitted long = one sample for one
+channel**, and `vIndex` consecutive longs form one complete set — the case the shipped demos use
+(`DEBUG_SCOPE_2CHAN.spin2:11` sends `` `(a,b) `` = two longs per set).
 
 ### 8.3 Buffer Management
 
@@ -845,7 +953,10 @@ TRIGGER channel {AUTO | arm fire} {offset}
 - `channel`: Channel to trigger on (-1 = disabled, 0-7 = channel index)
 - `AUTO`: Auto-calculate arm/fire levels
 - `arm fire`: Manual arm/fire threshold levels
-- `offset`: Trigger position in display (0..vSamples-1)
+- `offset`: Trigger position as a **sample index** (sets back from the newest), 0..vSamples-1 — **not pixels** (§4.3)
+
+**Phase**: `TRIGGER` is parsed **only** by `SCOPE_Update` (1236-1249). It cannot appear in the create
+message (§6.1).
 
 **Configuration Code** (lines 1236-1249):
 ```pascal
@@ -1127,9 +1238,9 @@ vLow = 0, vHigh = 1023, vTall = 256
 
 fScale = (256 - 1) / |1023 - 0| × 256
        = 255 / 1023 × 256
-       = 63.87
+       = 63.81
 
-Value 512: y_offset = 512 × 63.87 = 32,702 (fixed-point) ≈ 128 pixels
+Value 512: y_offset = 512 × 63.81 = 32,672 (fixed-point) ≈ 128 pixels
 ```
 
 ### 10.4 Coordinate Calculation
@@ -1187,11 +1298,11 @@ vHigh = 1023
 vTall = 256
 vBase = 0
 
-fScale = 255 / 1023 × 256 = 63.87
+fScale = 255 / 1023 × 256 = 63.81
 
-Value 0:    y = (top + 255) × 256 - (0 - 0) × 63.87 = bottom
-Value 512:  y = (top + 255) × 256 - 512 × 63.87 = middle
-Value 1023: y = (top + 255) × 256 - 1023 × 63.87 = top
+Value 0:    y = (top + 255) × 256 - (0 - 0) × 63.81 = bottom
+Value 512:  y = (top + 255) × 256 - 512 × 63.81 = middle
+Value 1023: y = (top + 255) × 256 - 1023 × 63.81 = top
 ```
 
 **Example 2: Signed Temperature (-40 to +85 °C)**:
@@ -1263,27 +1374,33 @@ Handles inverted ranges correctly.
 | `SIZE` | width height | Set display dimensions (32-2048) |
 | `SAMPLES` | count | Set horizontal resolution (16-2048) |
 | `RATE` | divisor | Set display update rate (1-2048) |
-| `DOTSIZE` | pixels | Set dot diameter (0-32, 0=no dots) |
-| `LINESIZE` | pixels | Set line thickness (0-32, 0=no lines) |
+| `DOTSIZE` | n | Set dot size (0-32, 0=no dots) — **single value**; the optional `{y}` form is SPECTRO/PLOT/BITMAP-only |
+| `LINESIZE` | n | Set line thickness (0-32, 0=no lines) |
 | `TEXTSIZE` | size | Set label font size (6-200) |
 | `COLOR` | back grid | Set background and grid colors |
 | `HIDEXY` | - | Hide mouse coordinates |
-| Packing modes | - | Set data packing format (12 modes) |
+| Packing modes | `{ALT} {SIGNED}` | Set data packing format (12 opt-in modes; **default = unpacked**) |
 
 ### 12.2 Runtime Commands
 
 | Command | Parameters | Purpose |
 |---------|------------|---------|
-| `TRIGGER` | channel {AUTO\|arm fire} {offset} | Configure trigger |
+| *string* | 'label' {AUTO\|low high} {tall} {base} {grid} {color} | Define / redefine a channel (positional) |
+| `TRIGGER` | channel {AUTO\|arm fire} {offset} | Configure trigger (offset = sample index) |
 | `HOLDOFF` | count | Set holdoff count (2-2048) |
-| `CLEAR` | - | Clear display and reset buffer |
-| `SAVE` | {filename} | Save display to BMP file |
+| `CLEAR` | - | Clear display, reset SamplePop/vRateCount, suppress trigger indicator |
+| `SAVE` | 'name' \| WINDOW {'name'} \| l t w h {'name'} | Save `Bitmap[1]` (front buffer), or desktop-scrape a region, to `name.bmp`. **Bare `SAVE` writes nothing.** |
+| `CLOSE` | - | Close the window (parser-layer directive; the rest of the message executes first) |
 | `PC_KEY` | - | Request keyboard state |
 | `PC_MOUSE` | - | Request mouse position/color |
 
+**All of the above are UPDATE-phase directives** — none of them may appear in the create message
+(`SCOPE_Configure` is `while NextKey do`, 1161; only `CLOSE` is special, being handled above
+`DebugDisplayUnit.pas` entirely, and it is ignored in a create message by design).
+
 ### 12.3 Channel Configuration Format
 
-**String Element**:
+**String Element** (update phase only; strictly positional):
 ```
 'label' {AUTO | low high} {tall} {base} {grid} {color}
 ```
@@ -1307,11 +1424,21 @@ Total: ~400 bytes
 ```
 
 **Display Bitmaps**:
+
+Both bitmaps are **`pf24bit` — 3 bytes/pixel, BGR, no alpha** (`FormCreate` 597/599:
+`Bitmap[0].PixelFormat := pf24bit;`), and `SetSize` (2956-2961) sizes them to the **client area**
+(`vMarginLeft + vWidth + vMarginRight` × `vMarginTop + vHeight + vMarginBottom`), not to
+`vWidth × vHeight`:
+
 ```
-Typical: 512×256 × 4 bytes × 2 = 1 MB
+Typical (vWidth=512, vHeight=256; margins = ChrWidth, ChrHeight*2, ChrWidth, ChrWidth
+         → at FontSize 10: ChrWidth ≈ 8, ChrHeight ≈ 16):
+
+client ≈ (8 + 512 + 8) × (32 + 256 + 8) = 528 × 296
+528 × 296 × 3 bytes × 2 bitmaps ≈ 937 KB  (~0.9 MB)
 ```
 
-**Total**: ~1.1 MB (typical)
+**Total**: ~1.0 MB (typical — 64 KB sample buffer + ~0.9 MB bitmaps + ~0.4 KB channel config)
 
 ### 13.2 Rendering Performance
 
@@ -1376,29 +1503,35 @@ Example: 4 channels × 512 samples = 2048 calls
 
 ## 15. Usage Examples
 
+> **All examples follow the mandatory two-message pattern** — create with **keys only**, then feed the
+> channel defs / `TRIGGER` / `HOLDOFF` in separate **update** messages addressed to the window's
+> instance name. A channel def or `TRIGGER` on the create line prevents the window from being created
+> (EF-003; `SCOPE_Configure`'s `while NextKey do`, line 1161). See §6.1.
+
 ### 15.1 Basic Single-Channel Scope
 
-**Configuration**:
-```
-SCOPE 'ADC' AUTO
+**Setup**:
+```spin2
+debug(`SCOPE MyScope)                 ' create (keys only)
+debug(`MyScope 'ADC' AUTO)            ' update: channel def
 ```
 
 **P2 Code**:
 ```spin2
 repeat
   value := adc_read()
-  debug(`scope `value)
+  debug(`MyScope `(value))
 ```
 
 **Result**: Auto-ranging oscilloscope display of ADC values.
 
 ### 15.2 Multi-Channel with Fixed Ranges
 
-**Configuration**:
-```
-SCOPE SIZE 512 256 SAMPLES 256
-      'X' -100 100 128 0 0 $FF0000
-      'Y' -100 100 128 128 0 $00FF00
+**Setup**:
+```spin2
+debug(`SCOPE MyScope SIZE 512 256 SAMPLES 256)   ' create (keys only)
+debug(`MyScope 'X' -100 100 128 0   0 $FF0000)   ' update: label low high tall base grid color
+debug(`MyScope 'Y' -100 100 128 128 0 $00FF00)
 ```
 
 **P2 Code**:
@@ -1406,43 +1539,48 @@ SCOPE SIZE 512 256 SAMPLES 256
 repeat
   x := accelerometer_x()
   y := accelerometer_y()
-  debug(`scope `x `y)
+  debug(`MyScope `(x,y))              ' one long per channel, in channel order
 ```
 
 **Result**: Two channels (X/Y) with fixed ±100 range, stacked display.
 
 ### 15.3 Triggered Capture
 
-**Configuration**:
-```
-SCOPE SAMPLES 512 'SIGNAL' 0 1023 TRIGGER 0 500 600 256
+**Setup**:
+```spin2
+debug(`SCOPE MyScope SAMPLES 512)        ' create (keys only)
+debug(`MyScope 'SIGNAL' 0 1023)          ' update: channel def
+debug(`MyScope TRIGGER 0 500 600 256)    ' update: channel 0, arm 500, fire 600, offset 256
 ```
 
 **P2 Code**:
 ```spin2
 repeat
   value := read_signal()
-  debug(`scope `value)
+  debug(`MyScope `(value))
 ```
 
-**Result**: Display updates when signal rises from <500 to >600, showing 256 samples before and after.
+**Result**: Display updates when the signal on channel 0 rises from <500 (arm) to >600 (fire). With
+`offset = 256` of `SAMPLES 512`, the trigger point sits **mid-screen**: the left half shows the 256
+samples that led up to the trigger, the right half the 256 samples after it (see §4.3).
 
 ### 15.4 High-Speed with Rate Limiting
 
-**Configuration**:
-```
-SCOPE SAMPLES 1024 RATE 100 'DATA' AUTO
+**Setup**:
+```spin2
+debug(`SCOPE MyScope SAMPLES 1024 RATE 100)   ' create (keys only)
+debug(`MyScope 'DATA' AUTO)                   ' update: channel def
 ```
 
 **P2 Code**:
 ```spin2
 repeat
   value := fast_sample()
-  debug(`scope `value)
+  debug(`MyScope `(value))
   waitx(10)
 ```
 
-**Result**: Fast sampling, display updates every 100th sample (reduces PC CPU load).
+**Result**: Fast sampling, display updates every 100th sample set (reduces PC CPU load).
 
 ---
 
@@ -1450,12 +1588,18 @@ repeat
 
 ### 16.1 Data Packing
 
-**Same as LOGIC**: 12 packing modes from LONGS_1BIT to BYTES_4BIT.
+**Same as LOGIC**: 12 **opt-in** packing modes, `LONGS_1BIT` … `BYTES_4BIT`, each optionally followed by
+`ALT` and/or `SIGNED`. **With no packing keyword the window is UNPACKED** — `SetDefaults`:2915 →
+`SetPack(0,…)` ⇒ `vPackCount = 1`, `vPackShift = 32`, `vPackMask = $FFFFFFFF` (one full 32-bit sample
+per long). Packing is fixed at creation: the pack keys appear only in `SCOPE_Configure`, never in
+`SCOPE_Update`.
 
-**Example** (4 channels, LONGS_8BIT):
+**Example** (4 channels, `LONGS_8BIT` → `vPackCount = 4`):
 ```
-Each long contains 4 samples (one per channel, 8 bits each)
-Efficient for byte-range data (0-255)
+Each long unpacks to 4 sub-samples, LOW byte first, distributed round-robin:
+  byte0 → ch0, byte1 → ch1, byte2 → ch2, byte3 → ch3
+⇒ exactly one complete 4-channel sample set per long.
+Efficient for byte-range data (0-255; add SIGNED for -128..127)
 ```
 
 ### 16.2 Fixed-Point Arithmetic
@@ -1487,34 +1631,62 @@ ele_end
 
 The SCOPE display receives configuration and sample data through an **element array protocol** that uses parallel arrays of types and values.
 
-**Element Storage** (GlobalUnit.pas:126-127):
+**Element Storage** (GlobalUnit.pas:126-127; `DebugDisplayLimit = 1100`, GlobalUnit.pas:35):
 ```pascal
-DebugDisplayType:  array[0..DebugDisplayLimit - 1] of integer;
+DebugDisplayType:  array[0..DebugDisplayLimit - 1] of byte;      // type tags are BYTES
 DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;
 ```
 
 **Capacity**: 1100 elements per message
 
-### 17.2 SCOPE Configuration Message Example
+Element `[0]` is the display type (`ele_dis`) and `[1]` the window name (`ele_nam`); directives begin at
+`ptr := 2` (`FormCreate` 625-632).
+
+### 17.2 SCOPE **Configuration** Message Example — keys only
+
+`SCOPE_Configure` runs `while NextKey do` (1161), so the create message may contain **nothing but keys
+and their numeric arguments**. A channel-def string here would end the parse (and, per EF-003, the
+window would not be created at all):
 
 ```
-Element Array:
-[0] type=ele_key   value=key_samples     → SAMPLES
-[1] type=ele_num   value=512             → horizontal resolution
-[2] type=ele_key   value=key_longs_16bit → LONGS_16BIT
-[3] type=ele_str   value=<ptr>           → 'Signal1'
-[4] type=ele_num   value=$FF0000         → red color
-[5] type=ele_str   value=<ptr>           → 'Signal2'
-[6] type=ele_num   value=$00FF00         → green color
+Element Array (create message):
+[0] type=ele_dis   value=dis_scope       → display type
+[1] type=ele_nam   value=<ptr>           → 'MyScope' (window/instance name)
+[2] type=ele_key   value=key_samples     → SAMPLES
+[3] type=ele_num   value=512             → horizontal resolution
+[4] type=ele_key   value=key_longs_16bit → LONGS_16BIT (packing)
+[5] type=ele_end   value=0
+```
+
+### 17.3 SCOPE **Channel-Definition** Message Example (update phase)
+
+Channel defs are parsed by `SCOPE_Update` 1217-1231, strictly **positionally**
+(`label` → `AUTO | low high` → `tall` → `base` → `grid` → `color`):
+
+```
+Element Array (update message):
+[0] type=ele_str   value=<ptr>           → 'Signal1'
+[1] type=ele_num   value=0               → low
+[2] type=ele_num   value=1023            → high
+[3] type=ele_num   value=200             → tall
+[4] type=ele_num   value=0               → base
+[5] type=ele_num   value=15              → grid (%1111)
+[6] type=ele_key   value=key_red         → color  (or ele_num $FF0000, via vColorMode)
 [7] type=ele_end   value=0
 ```
 
-### 17.3 SCOPE Sample Data Message Example
+A bare number immediately after the label is the **`low` bound** — it is never read as a color.
+
+### 17.4 SCOPE Sample Data Message Example
+
+Packed sub-samples are distributed **round-robin across the active channels** (§8.2), and `UnPack`
+(4166-4171) yields the **low** sub-field first (`Result := v and vPackMask; v := v shr vPackShift`):
 
 ```
+(2 channels, LONGS_16BIT SIGNED → vPackCount = 2; low half unpacked first)
 Element Array:
-[0] type=ele_num   value=$00640032       → packed: ch0=100, ch0=50
-[1] type=ele_num   value=$FF9CFF38       → packed: ch1=-100, ch1=-200
+[0] type=ele_num   value=$00640032       → set N:   ch0 = $0032 = 50,   ch1 = $0064 = 100
+[1] type=ele_num   value=$FF9CFF38       → set N+1: ch0 = $FF38 = -200, ch1 = $FF9C = -100
 [2] type=ele_end   value=0
 ```
 
@@ -1532,10 +1704,10 @@ SamplePtr    : integer;                                        // line 402
 SamplePop    : integer;                                        // line 403
 ```
 
-**Constants** (lines 167-169, resolved via §7.2 of the matrix):
+**Constants** (`Channels` = line **157**; `Y_SetSize`/`Y_Sets`/`Y_PtrMask` = lines **167-169**; `DataSets` = 155):
 ```
 Channels  = 8            // also Y_SetSize: one slot per channel in each set
-Y_Sets    = 2048         // number of sample sets
+Y_Sets    = 2048         // number of sample sets (= DataSets = 1 shl 11)
 Y_PtrMask = Y_Sets - 1   // 2047, circular wrap mask
 Total = 2048 × 8 × 4 bytes = 65,536 bytes
 ```
@@ -1588,15 +1760,15 @@ See §9 for the full arm→fire state machine, holdoff, and free-run path.
 
 ### 19.1 Bitmap Architecture
 
-Two bitmaps, both 24-bit, created in `FormCreate` (lines 596-599) and freed in `FormDestroy` (lines 875-876):
+Two bitmaps, both **`pf24bit` — 3 bytes/pixel, BGR, no alpha** — created in `FormCreate` (lines 596-599) and freed in `FormDestroy` (lines 875-876):
 
 ```pascal
 Bitmap : array[0..1] of TBitmap;   // line 257
-Bitmap[0].PixelFormat := pf24bit;  // render target
-Bitmap[1].PixelFormat := pf24bit;  // present buffer
+Bitmap[0].PixelFormat := pf24bit;  // 597 — render target
+Bitmap[1].PixelFormat := pf24bit;  // 599 — present buffer
 ```
 
-`Bitmap[0]` is the off-screen render target; `Bitmap[1]` is the buffer drawn to the window canvas. Both are sized to the full client area in `SetSize` (lines 2958-2964); for SCOPE that is `vMarginLeft + vWidth + vMarginRight` × `vMarginTop + vHeight + vMarginBottom`, so `vBitmapWidth`/`vBitmapHeight` are the client dimensions (not an unconditional 512×512).
+`Bitmap[0]` is the off-screen render target; `Bitmap[1]` is the buffer drawn to the window canvas (and the one `SAVE 'name'` writes to disk). Both are sized to the full client area in `SetSize` (lines **2956-2961**, cached into `vBitmapWidth`/`vBitmapHeight` at 2963-2964); for SCOPE that is `vMarginLeft + vWidth + vMarginRight` × `vMarginTop + vHeight + vMarginBottom` — the **client area**, not `vWidth × vHeight` and certainly not an unconditional 512×512.
 
 `BitmapToCanvas(0)` (lines 3522-3530) performs the present: copy `Bitmap[0]`→`Bitmap[1]`, then `Canvas.Draw(0,0,Bitmap[1])` (SCOPE is **not** in the StretchDraw set `[dis_spectro,dis_plot,dis_bitmap]`, so it blits 1:1, no stretch).
 
@@ -1660,11 +1832,19 @@ DefaultScopeColors: array[0..7] of integer = (
 
 **Source Location**: Line 241 in DebugDisplayUnit.pas
 
+> **`clLime` is a Delphi `clXxx` palette constant — it is NOT a DEBUG colour keyword.** The DEBUG
+> keyword that names `$00FF00` is **`GREEN`**. The two colour systems are distinct: `DefaultScopeColors`
+> is written in Delphi's vocabulary, while a channel def's `color` element takes a DEBUG keyword
+> (`GREEN`, `RED`, …, each optionally followed by a 0-15 brightness nibble — except `BLACK`/`WHITE`,
+> which take none) or a **numeric** value interpreted through the current `vColorMode`
+> (`TranslateColor`, 3090-3173; default `key_rgb24`, `SetDefaults` 2889).
+
 ### 20.2 Data Packing System
 
-SCOPE typically uses:
-- **LONGS_16BIT**: 2 samples per long (16-bit signed)
-- **LONGS_8BIT**: 4 samples per long (8-bit signed)
+**Default: unpacked** (`SetDefaults`:2915 → `SetPack(0, False, False)` — one full 32-bit sample per
+long, unsigned). When a packing mode *is* selected, SCOPE typically uses:
+- **LONGS_16BIT**: 2 sub-samples per long (append `SIGNED` for signed values)
+- **LONGS_8BIT**: 4 sub-samples per long (append `SIGNED` for signed values)
 
 ```pascal
 // UnPack (lines 4166-4171)
@@ -1677,15 +1857,33 @@ begin
 end;
 ```
 
-The unpack state uses `vPackMask`, `vPackShift`, and `vPackSignx` (set by `KeyPack`); there is no `vPackSize`/`vPackIndex` counter. `SCOPE_Update` iterates `vPackCount` sub-samples per transmitted value (line 1272), each obtained from a fresh `v := NewPack` (line 1271). `NewPack` (lines 4158-4164) optionally re-orders nibble/word lanes when the `ALT` modifier is active.
+The unpack state uses `vPackMask`, `vPackShift`, and `vPackSignx` (set by `KeyPack` 2817-2832 → `SetPack`); there is no `vPackSize`/`vPackIndex` counter. `SCOPE_Update` iterates `vPackCount` sub-samples per transmitted value (line 1272), each obtained from a fresh `v := NewPack` (line 1271). **`UnPack` yields the LOW sub-field first**, then shifts `v` right for the next one.
+
+**Sign extension is a RUNTIME flag, not a property of the mode.** `PackDef` (140-152) encodes `0 shl 16`
+for *every* entry and `SetPack` reads only bits 0-15 — so no mode is "inherently signed". Sign-extension
+happens only when the trailing `SIGNED` keyword set `vPackSignx` **and** the sub-sample's own top bit is 1
+(4170).
+
+**`ALT`** (`NewPack`, 4158-4164) applies three **cumulative** guards (`vPackShift <= 1`, `<= 2`, `<= 4`).
+For a 1-bit mode all three fire ⇒ each byte's 8 bits are **fully reversed** (`$01 → $80`) — it is *not* a
+stage-1 adjacent-bit swap. For `*_2BIT` only the pair+nibble swaps apply; for `*_4BIT` only the nibble
+swap; for 8/16/32-bit modes `ALT` is a no-op. `NewPack` **consumes no elements** — it begins
+`Result := val;`, reusing the value already latched by the enclosing `while NextNum do`.
 
 ### 20.3 Fixed-Point Arithmetic
 
-**8.8 fixed-point** for sub-pixel rendering. `SCOPE_Draw` builds `x`/`y` in `<<8` units (lines 1358-1359) and `DrawLineDot` scales pen/dot sizes the same way (`vLineSize shl 6`, `vDotSize shl 7`, lines 3425-3427):
+**8.8 fixed-point** for sub-pixel rendering. `SCOPE_Draw` builds `x`/`y` in `<<8` units (lines 1358-1359) and `DrawLineDot` (3423-3431) scales pen/dot sizes the same way — **`vLineSize shl 6` at line 3426**, **`vDotSize shl 7` at line 3428** (line 3427 is only the `if (vDotSize > 0) then` test):
 ```pascal
 x := (vMarginLeft + vWidth - 1) shl 8 - Round(k / vSamples * vWidth * $100);  // 1358
 y := (vMarginTop + vHeight - 1 - vBase[j]) shl 8 - Round((v - offset) * fScale); // 1359
 ```
+
+> **The shift constants are code fact; the rendered widths are not derivable from them.**
+> `LINESIZE 3` — despite `shl 6` — renders as **3 whole pixels** (hardware-measured, EF-027): the
+> anti-aliasing envelope in `SmoothLine` widens small radii, so the tidy "half-pixel" arithmetic does
+> not predict what appears on screen. Because that derivation demonstrably fails for `LINESIZE`, it
+> cannot be trusted for `DOTSIZE` either: **`DOTSIZE`'s rendered width has never been measured —
+> NEEDS-HARDWARE.** This document therefore does not claim `DOTSIZE` is a radius *or* a diameter.
 
 ---
 
@@ -1693,10 +1891,10 @@ y := (vMarginTop + vHeight - 1 - vBase[j]) shl 8 - Round((v - offset) * fScale);
 
 ### 21.1 Window Creation Sequence
 
-The real lifecycle runs entirely in `FormCreate` (lines 591-643), which dispatches to `SCOPE_Configure` for `dis_scope`. There is no `vLineStyle`/`vTrigger` boolean, no per-channel buffer init loop, and `vAuto` defaults to **False**, not True.
+The real lifecycle runs entirely in `FormCreate` (lines **591-645**), which dispatches to `SCOPE_Configure` for `dis_scope` (635) and ends with `Show;` (644). There is no `vLineStyle`/`vTrigger` boolean, no per-channel buffer init loop, and `vAuto` defaults to **False**, not True.
 
 ```pascal
-// FormCreate (591-635), abridged
+// FormCreate (591-645), abridged
 Bitmap[0] := TBitmap.Create;  Bitmap[0].PixelFormat := pf24bit;   // 596-597
 Bitmap[1] := TBitmap.Create;  Bitmap[1].PixelFormat := pf24bit;   // 598-599
 vTextSize := FontSize;  SetTextMetrics;                           // 601-602
@@ -1706,12 +1904,14 @@ SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType]); // 6
 Left := P2.DebugDisplayLeft;  Top := P2.DebugDisplayTop;          // 628-629
 SetDefaults;                                                       // 631 (2880-2917)
 ptr := 2;
-case DisplayType of
+case DisplayType of                                                // 633
   dis_scope: SCOPE_Configure;                                      // 635
   ...
+end;                                                               // 643
+Show;                                                              // 644
 ```
 
-`SetDefaults` (lines 2880-2917) primes the shared state before SCOPE's own defaults: `vWidth:=256`, `vHeight:=256`, `vSamples:=256`, `vIndex:=0`, `vColor[i]:=DefaultScopeColors[i]` for all 8 channels (line 2888), `vColorMode:=key_rgb24`. `SCOPE_Configure` then overrides `vRate:=1`, `vDotSize:=0`, `vLineSize:=3`, `vTextSize:=FontSize` (lines 1156-1159).
+`SetDefaults` (lines 2880-2917) primes the shared state before SCOPE's own defaults: `vWidth:=256`, `vHeight:=256`, `vSamples:=256`, `vIndex:=0`, `vColor[i]:=DefaultScopeColors[i]` for all 8 channels (line 2888), `vColorMode:=key_rgb24`, `vLabel[i]:=''` (2914), and — critically — **`SetPack(0, False, False)` (2915) ⇒ the window starts UNPACKED** (1 sample/long, 32-bit, unsigned). `SCOPE_Configure` then overrides `vRate:=1`, `vDotSize:=0`, `vLineSize:=3`, `vTextSize:=FontSize` (lines 1156-1159). **No window sets a packing default of its own.**
 
 ### 21.2 Configuration Parameter Processing
 
@@ -1785,8 +1985,12 @@ Bitmap[1].Free;   // FormDestroy, 876
 
 The **SCOPE** display window is a comprehensive multi-channel oscilloscope for the Propeller 2 debug environment, providing real-time analog signal visualization with automatic and manual scaling, level-based triggering, and flexible display control.
 
+**Usage in one line**: **create with keys only, then feed channel defs / `TRIGGER` / `HOLDOFF` in
+separate update messages** — `SCOPE_Configure` is a key-only parser (1161), and a channel def on the
+create line prevents the window from being created (EF-003).
+
 **Key Capabilities**:
-- Up to 8 analog channels with independent configuration
+- Up to 8 analog channels with independent configuration (a 9th def overwrites channel 8)
 - Auto-ranging or manual range specification per channel
 - Level-based triggering with rising/falling edge detection
 - Vertical scaling (vTall) and offset (vBase) for channel overlay

@@ -20,14 +20,14 @@
 ## 0. How directives reach a window (protocol framing)
 
 Each DEBUG display message is a stream of **elements**. The element type tags
-(`DebugDisplayUnit.pas:14-19`) are:
+(`DebugDisplayUnit.pas:15-20`) are:
 
 | `ele_*` | Value | Meaning |
 |---|---|---|
 | `ele_end` | 0 | end of message |
 | `ele_dis` | 1 | display-type selector (first element of a window's creation) |
 | `ele_nam` | 2 | window instance name |
-| `ele_key` | 3 | a **keyword directive** (one of `key_*`, 41–92) |
+| `ele_key` | 3 | a **keyword id** — **any** `key_*`, **0–92** (named color 0–9, color mode 10–28, packed format 29–40, or functional keyword 41–92) |
 | `ele_num` | 4 | a numeric parameter |
 | `ele_str` | 5 | a string parameter |
 
@@ -44,8 +44,11 @@ Two lifecycle phases matter for this matrix:
   *runtime / data-display* directives and the **input** directives (`PC_KEY`,
   `PC_MOUSE`).
 
-The full keyword vocabulary is `key_alt`(41) … `key_window`(92)
-(`DebugDisplayUnit.pas:78-105`).
+The full keyword vocabulary is `key_black`(0) … `key_window`(92)
+(`DebugDisplayUnit.pas:32-127`); the *functional* keywords — the ones tabulated in
+§2/§3 below — are `key_alt`(41) … `key_window`(92) (`76-127`). Named colors, color
+modes and packed formats also arrive as `ele_key` elements and are dispatched from
+the same `case val of` statements.
 
 ---
 
@@ -105,6 +108,7 @@ TITLE TRACE TRIGGER UPDATE WINDOW`.
 | `CHANNEL n`          | —  | —  | —  | —  | —  | — | — | — | ✅ |
 | `UPDATE`             | —  | —  | —  | —  | —  | ✅ | ✅ | ✅ | — |
 | `HIDEXY`             | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| `CLOSE`              | —¹² | —¹² | —¹² | —¹² | —¹² | —¹² | —¹² | —¹² | —¹² |
 | *string = channel def* | ✅¹⁰ | — | ✅¹¹ | — | — | — | — | — | — |
 
 **Footnotes (config):**
@@ -120,6 +124,19 @@ TITLE TRACE TRIGGER UPDATE WINDOW`.
 9. MIDI: `RANGE firstKey lastKey` (MIDI note range 0–127, `2514-2519`).
 10. LOGIC channel def: `'name' {count} {RANGE} {color}` (`971-1005`).
 11. SCOPE_XY channel def: `'label' {color}` (`1429-1434`).
+12. `CLOSE` is **command-only** — it is *silently ignored* in a new-display
+    declaration. The parser only latches it when the message targets an
+    **existing** display (`p2com.asm:19569-19570`: `cmp [symbol2],0` / `jne @@enter`
+    skips the flag when a display name is being *declared*). It is a live
+    **update-phase** directive — see §3 and §6.2.
+
+> ⚠️ **Configure is KEY-ONLY.** `XXX_Configure` runs `while NextKey do`: the first
+> **non-keyword** element (a number, a string) **ends the configure parse**, and the
+> remainder of the create message is silently dropped. An update-only directive
+> (`TRIGGER`, `POLAR`, a SCOPE channel-def string) placed in the create message
+> therefore truncates the configuration — for SCOPE it prevents the window from
+> being created at all. Configure and display directives must be sent in **separate
+> messages**.
 
 ---
 
@@ -135,9 +152,10 @@ stream each window consumes.
 | `TRIGGER ...`   | ✅¹ | ✅² | — | — | — | — | — | — | — |
 | `HOLDOFF n`     | ✅ | ✅ | — | — | — | — | — | — | — |
 | `CLEAR`         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `SAVE ...`      | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `SAVE ...`      | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ | ✅⁴ |
+| `CLOSE`         | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ | ✅⁵ |
 | `UPDATE`        | — | — | — | — | — | ✅ | ✅ | ✅ | — |
-| color `BLACK..GRAY` / `COLOR` | — | — | — | — | — | ✅ | ✅ | — | — |
+| color `BLACK..GRAY` / `COLOR` | — | — | — | — | — | ✅ | ✅⁶ | — | — |
 | `BACKCOLOR`     | — | — | — | — | — | ✅ | ✅ | — | — |
 | color-mode `LUT1..RGB24` | — | — | — | — | — | ✅ | — | ✅ | — |
 | `LUTCOLORS`     | — | — | — | — | — | ✅ | — | ✅ | — |
@@ -161,6 +179,17 @@ stream each window consumes.
 1. LOGIC `TRIGGER mask match {offset}` (`1043-1049`).
 2. SCOPE `TRIGGER channel (AUTO | arm fire) {offset}` (`1236-1249`).
 3. BITMAP `SET x y` also cancels scrolling (`2433-2438`).
+4. `SAVE` has **six forms**, three of which write no file — see **§6.1** for the full
+   grammar (`KeySave`, `2839-2866`).
+5. `CLOSE` has **no case arm in any `_Update`** — it is dispatched one layer up, in
+   the **parser** (`p2com.asm`), which clears the display's bit in
+   `debug_display_ena`; `TDebugForm.ChrIn` then runs the **full** `UpdateDisplay`
+   and only *afterwards* closes the form (`DebugUnit.pas:236-237`). The rest of the
+   message therefore **executes first**. See **§6.2** for the dispatch path.
+6. TERM does **not** accept the `COLOR` keyword in the update phase — `TERM_Update`
+   has `key_black..key_gray` (2232) and `key_backcolor` (2238) only. `COLOR` is
+   **config-only** for TERM (`TERM_Configure`, 2203). PLOT accepts **both**
+   (`PLOT_Update`, 1934: `key_color, key_black..key_gray:`).
 
 **TERM numeric control codes** (`2258-2305`): `0`=clear+home, `1`=home,
 `2 n`=set column, `3 n`=set row, `4..7`=select color pair, `8`=backspace,
@@ -327,15 +356,97 @@ Line refs are to `DebugDisplayUnit.pas` (v55).
   mapping (§4.4).
 - **`SIZE` is overloaded:** pixels (SCOPE/FFT/PLOT/BITMAP), square-from-half
   (SCOPE_XY), columns×rows (TERM), key-size scalar (MIDI). Not a uniform directive.
-- **`SAVE`** (`KeySave`, 2839-2866) writes the window bitmap to `<name>.bmp`, or a
-  desktop region (`WINDOW` keyword, or l/t/w/h) — available in every window's
-  update phase.
-- **`CLOSE`** (`key_close`=49) and **`CHANNEL`** (`key_channel`=46) exist in the
-  keyword table; `CLOSE` has no live handler in the display windows (only PLOT has
-  a `_Close` for cleanup, 2169), and `CHANNEL` is used only by MIDI config.
+- **`CHANNEL`** (`key_channel`=46) is used only by MIDI config (2520).
 - **`UPDATE`** turns a window into buffered/manual-refresh mode (PLOT/TERM/BITMAP):
   drawing accumulates in `Bitmap[0]` and is only copied to screen on an explicit
   `UPDATE` directive.
+
+### 6.1 `SAVE` — the full grammar (`KeySave`, 2839-2866)
+
+`SAVE` is accepted in **every** window's update phase. It has **six forms**, and
+**three of them silently write nothing**:
+
+| Form | What it writes | Line |
+|---|---|---|
+| `SAVE 'name'` | `Bitmap[1]` — the **front / display** buffer → `name.bmp` | 2843 |
+| `SAVE WINDOW 'name'` | desktop **scrape** of the window's *outer* rect (`Left`/`Top`/`Width`/`Height`) — **includes the title bar and borders**, and is vulnerable to occlusion by other windows | 2848-2852, 2862-2864 |
+| `SAVE left top width height 'name'` | desktop scrape of an arbitrary screen region | 2856-2859, 2862-2864 |
+| `SAVE WINDOW` *(no filename)* | captures to `DesktopBitmap` in memory — **no file** | 2864 (`if NextStr` fails) |
+| `SAVE l t w h` *(no filename)* | captures to memory — **no file** | 2864 |
+| `SAVE` *(bare)* | `Exit` — **nothing at all** | 2856 |
+
+The **filename always comes last**; the `.bmp` extension is appended automatically
+(`PChar(val) + '.bmp'`).
+
+⚠️ **Sharp edges:**
+- **`SAVE` swallows a following keyword.** A non-`WINDOW` keyword after `SAVE` is
+  consumed by `NextKey` and then thrown away by the `Exit` at 2848
+  (`if val <> key_window then Exit;`). `` `Win SAVE CLEAR `` does **nothing** *and*
+  **eats the `CLEAR`**.
+- **`SAVE` writes the *front* buffer, `Bitmap[1]`.** In `UPDATE` (manual) mode,
+  drawing accumulates in `Bitmap[0]` and only reaches `Bitmap[1]` on an explicit
+  `UPDATE`. **A `SAVE` issued before that `UPDATE` writes the STALE previous frame.**
+- **`SAVE 'name'` writes the bitmap at 1× LOGICAL scale — un-`DOTSIZE`d.** `DOTSIZE`
+  magnification is a display-time `StretchDraw` (`BitmapToCanvas`, 3526-3527) that
+  never touches `Bitmap[1]`. This applies to BITMAP, PLOT and SPECTRO. **Sole
+  exception:** BITMAP with `SPARSE` active *and* `DOTSIZE >= 4` on both axes, where
+  `SetSize` (2938-2943) allocates the bitmaps at **physical** size. To capture the
+  magnified on-screen appearance, use `SAVE WINDOW 'name'`.
+
+### 6.2 `CLOSE` — live, and dispatched at the PARSER layer
+
+**`CLOSE` (`key_close`=49) is a real, working directive in all nine windows.** It
+appears in **no** `XXX_Update` `case` statement — and that absence is *not* evidence
+of deadness: the handler lives one layer up, in **`p2com.asm`**, which a
+`DebugDisplayUnit.pas`-only sweep cannot see. (PLOT's `PLOT_Close`, 2169, is an
+unrelated internal cleanup routine, not this directive's handler.)
+
+**Dispatch path:**
+
+1. `parse_debug_string` (`p2com.asm:19565-19572`) detects `CLOSE` on an
+   **existing-display command** and sets a flag:
+   ```asm
+   @@check:  cmp  al,dd_key            ;allow keyword, but check for command and dd_key_close
+             jne  @@notkey
+             cmp  ebx,dd_key_close
+             jne  @@enter
+             cmp  [symbol2],0
+             jne  @@enter
+             mov  [@@close_flag],1
+   ```
+   The `cmp [symbol2],0` / `jne @@enter` pair (19569-19570) is what makes `CLOSE`
+   **command-only**: a non-zero `symbol2` means a display name is being *declared*, so
+   the flag is never set and the `CLOSE` is silently dropped.
+2. `p2com.asm:19617-19624` reverts each target's name symbol `dd_nam` → `dd_unk` and
+   **clears that display's bit in `debug_display_ena`** (= Pascal `P2.DebugDisplayEna`,
+   `GlobalUnit.pas:123`):
+   ```asm
+   @@close:  mov  eax,[dd_sym_exists_ptr+ecx*4-4]  ;change display name symbol type(s) from dd_nam to dd_unk
+             mov  [byte eax-1],dd_unk
+             mov  bl,[byte eax-1-4]                ;get id from symbol value
+             call @@toggle                         ;cancel id bit in debug_display_ena
+             loop @@close                          ;loop until done
+   ```
+3. `TDebugForm.ChrIn` (`DebugUnit.pas:236-237`) then runs the **full**
+   `UpdateDisplay` and only *afterwards* closes the form:
+   ```pascal
+   DisplayForm[j].UpdateDisplay(P2.DebugDisplayTargs);
+   if P2.DebugDisplayEna shr j and 1 = 0 then DisplayForm[j].Close;  // free display if closed by command
+   ```
+
+**Semantics:**
+
+- **Command-only.** Ignored in a *new-display declaration* (`19569-19570`) — putting
+  `CLOSE` on the create line does nothing.
+- **Multi-target.** `` `Plot1 Plot2 CLOSE `` closes **all** named targets
+  (`loop @@close`, 19624).
+- **Update-first, close-second.** The rest of the message **executes**, then the
+  window closes. `` `MyPlot SAVE 'shot' CLOSE `` **saves, then closes.**
+- **It reclaims one of the 32 display slots** — the display id and its name become
+  reusable.
+- It is the per-window counterpart of the global `DEBUG_END_SESSION` teardown
+  (`TDebugForm.CloseDisplays`, `DebugUnit.pas:125-134`, which `Free`s every display
+  whose `DebugDisplayEna` bit is set).
 
 ---
 
@@ -363,8 +474,29 @@ defaults" then override some of these.
 | update mode | off | hideXY | off |
 | rate | 0 | holdOff | 0 |
 | polar | off | twoPi / theta | `$100000000` / 0 |
-| sparse | −1 (off) | plotColor | `clCyan` `$00FFFF` |
-| textColor | `clWhite` `$FFFFFF` | channel colors | `DefaultScopeColors[0..7]` (see §7.1 palette) |
+| sparse | −1 (off) | channel colors | `DefaultScopeColors[0..7]` (see §7.1 palette) |
+| **packing** | **UNPACKED** — `SetPack(0, False, False)` (2915) | pack count / shift / mask | **1 / 32 / `$FFFFFFFF`** |
+
+🔴 **The default packing mode is UNPACKED — for all nine windows. `LONGS_1BIT` is
+NOT the default anywhere.** `FormCreate` (631) runs `SetDefaults` *before* the
+`_Configure` dispatch (633-643); `SetDefaults` (2915) calls `SetPack(0, False, False)`;
+and `SetPack` (4152-4155) **special-cases `val = 0`, bypassing the `PackDef` table**
+entirely — `vPackCount := 1; vPackShift := 32; vPackMask := $FFFFFFFF`. ⇒ **one full
+32-bit sample per transmitted long.**
+`SetPack` is called from exactly **two** places in the whole unit — `SetDefaults` (2915)
+and `KeyPack` (2831) — and `KeyPack` is reachable only from an explicit
+`key_longs_*`/`key_words_*`/`key_bytes_*` case arm. **No window sets a packing default
+of its own** (verified across all nine `// Set unique defaults` blocks). Packing is also
+**fixed at window creation** — the pack keys appear only in `_Configure`, never in
+`_Update`. PLOT / TERM / MIDI have no pack key at all and never call `UnPack`; packing
+is inert for them.
+
+> **PLOT-only defaults — these are *not* `SetDefaults` state.** `vPlotColor :=
+> DefaultPlotColor` (`clCyan` `$00FFFF`) and `vTextColor := DefaultTextColor`
+> (`clWhite` `$FFFFFF`) are set in **`PLOT_Configure`, 1877-1878** — not in
+> `SetDefaults`. TERM separately sets `vTextColor := vColor[0]` (`TERM_Configure`, 2213).
+> `vDotSize` likewise has no `SetDefaults` value; each window seeds it in its own
+> unique-defaults block.
 
 ### 7.0a Per-window font size & default window size
 
@@ -415,7 +547,7 @@ nibble `0..15` (default `8`) for all except BLACK/WHITE (`KeyColor`, `2756-2783`
 
 ⚠️ **These named-directive colors are NOT the `clXxx` palette constants** (see
 the palette table below). Only `BLACK` and `WHITE` are returned as fixed literals
-(`$000000`/`$FFFFFF`, special-cased at `2764-2767`). The other eight are *computed*
+(`$000000`/`$FFFFFF`, special-cased at `2764-2768`). The other eight are *computed*
 through the **RGBI8X** color space: `c := TranslateColor(h shl 5 or p shl 1,
 key_rgbi8x)` where `h = id − key_orange` (the hue 0-7) and `p` is the brightness
 nibble. The resolved RGB therefore depends on brightness and only *approximates*
@@ -473,9 +605,19 @@ bits:
 | `LONGS_16BIT` | 2 × 16 | `BYTES_1BIT` | 8 × 1 |
 | `BYTES_2BIT`  | 4 × 2  | `BYTES_4BIT` | 2 × 4 |
 
-Modifiers (follow a packed keyword, `KeyPack` 2817-2832): `ALT` (alternate
-nibble/word ordering) and `SIGNED` (sign-extend sub-samples). Either or both,
-any order.
+Modifiers (follow a packed keyword, `KeyPack` 2817-2832): `ALT` and `SIGNED`. Either
+or both, in any order.
+
+- **`ALT` reverses sub-sample order *within each byte*.** `NewPack` (4158-4164) applies
+  three **cumulative** guards (`vPackShift <= 1`, `<= 2`, `<= 4`). For a **1-bit** mode
+  **all three fire**, so each byte's 8 bits are **fully reversed** (`$01 → $80`) — it is
+  *not* a single adjacent-bit swap. For `*_2BIT` only the pair+nibble swaps apply; for
+  `*_4BIT` only the nibble swap; for 8- and 16-bit modes `ALT` is a **no-op**.
+- **`SIGNED` is a RUNTIME flag, not a per-mode property.** `PackDef` (140-152) encodes
+  `0 shl 16` for **every** entry — the `shl 16` field is always 0 and is never read
+  (`SetPack` reads only bits 0-15). Sign-extension happens in `UnPack` (4166-4171) and is
+  gated on `vPackSignx` **and** the sub-sample's own top bit. **All packed modes are
+  unsigned unless `SIGNED` is given** — there is no "LONGS_\* are signed" rule.
 
 **Standalone modifier keywords:** `AUTO` (SCOPE channel/trigger auto-range;
 PLOT CROP), `RANGE` (LOGIC channel range grouping), `WINDOW` (SAVE whole-window
@@ -496,11 +638,18 @@ region).
 | `DataSets` (`LogicSets`,`Y_Sets`,`XY_Sets`,`FFTmax`,`SmoothFillMax`) | 2048 ¹ | `Channels` | 8 |
 | `LogicChannels` | 32 | `FFTexpMax` | 11 |
 | `fft_default` | 512 | `DefaultCols` × `DefaultRows` | 40 × 20 |
-| `scope/scope_xy/plot _wmin/_hmin` | 32 | `…_wmax/_hmax` | 2048 |
+| `scope_wmin/_hmin`, `plot_wmin/_hmin` | 32 | `scope_wmax/_hmax`, `plot_wmax/_hmax` | 2048 |
+| `scope_xy_wmin` | 32 | `scope_xy_wmax` | 2048 ² |
 | `bitmap_wmin/_hmin` | 1 | `bitmap_wmax/_hmax` | 2048 |
 | `term_colmin/_rowmin` | 1 | `term_colmax/_rowmax` | 256 |
 | `plot_layermax` | 8 | `SpriteMax` | 256 |
 | `SpriteMaxX/Y` | 32 | `DefaultTextSize` | 10 |
+
+² **There is no `scope_xy_hmin`/`scope_xy_hmax`** — lines 215-216 define only
+`scope_xy_wmin = 32;` and `scope_xy_wmax = SmoothFillMax;`. SCOPE_XY's height is not
+clamped by a constant at all; it is **copied from the width**: `SCOPE_XY_Configure`
+1404 `vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax);` then 1405
+`vHeight := vWidth;`. (`scope_*` and `plot_*` do have both w and h min/max — 210-221.)
 
 ¹ These five are all `DataSets = 1 shl 11 = 2048` in **`DebugDisplayUnit.pas`** (the nine
 debug-display windows). ⚠️ The single-step debugger is a separate unit: **`DebuggerUnit.pas`
@@ -511,6 +660,16 @@ carry the 2048 value across to the debugger window.
 
 Each row: directive → parameter(s) with **type · legal range / legal set ·
 default**. "color" = named color (§7.1) or numeric-through-color-mode.
+
+> ⚠️ **`DOTSIZE` — the accepted range is code fact; the rendered pixel unit is
+> NEEDS-HARDWARE.** The ranges below are the exact `KeyValWithin` clamps. What a given
+> `DOTSIZE` value *looks like on screen* is a different question: the value is scaled by
+> a shift constant (`shl 7` / `shl 6` depending on the window) and then handed to the
+> anti-aliased `SmoothDot`/`SmoothLine` rasterizer, whose AA envelope widens small radii.
+> The equivalent shift-constant derivation for LOGIC `LINESIZE` **demonstrably fails** to
+> predict rendered width (measured: `LINESIZE 3` renders 3 px, 1:1), so it cannot be
+> trusted for `DOTSIZE` either. **This document therefore does not assert "radius" or
+> "diameter" in user-facing pixel terms for `DOTSIZE` — that has never been measured.**
 
 #### LOGIC (`Configure 926`, `Update 1034`)
 | Directive | Parameter(s) — type · range · default |
@@ -551,23 +710,32 @@ default**. "color" = named color (§7.1) or numeric-through-color-mode.
 #### SCOPE_XY (`Configure 1386`, `Update 1443`)
 | Directive | Parameter(s) — type · range · default |
 |---|---|
-| `SIZE` | n · int; effective width = `n*2` clamped **32..2048**; square |
+| `SIZE` | n · int — the argument is a **radius**; stored `vWidth` = `n*2` clamped **32..2048**; `vHeight := vWidth` (1405), always square. Default `vWidth = 256` (2884) ⇒ the **argument's** default is **128** |
 | `RANGE` | n · int **1..$7FFFFFFF** · $7FFFFFFF |
 | `SAMPLES` | n · int **0..2048** · 256 (0 = persistent display) |
 | `RATE` | n · int **1..2048** · 1 |
 | `DOTSIZE` | n · int **2..20** · 6 |
 | `TEXTSIZE` | n · int **6..200** · 10 |
 | `COLOR` | back, grid · color, color |
-| `POLAR` | twoPi · int (−1/0 ⇒ `$100000000`, else value); theta · int |
+| `POLAR` | twoPi · int (**`0` ⇒ `$100000000`; `-1` ⇒ `-$100000000`** — the **negative** value, which reverses the direction of rotation; any other value is used as-is); theta · int · 0 |
 | `LOGSCALE` / `HIDEXY` | *(flags)* |
 | label str | `'label'` · {color} |
+
+`POLAR`'s `-1` does **not** collapse to `$100000000` — `KeyTwoPi` (2736-2750) is
+`case val of  -1: vTwoPi := -$100000000;  0: vTwoPi := $100000000;  else vTwoPi := val;`
+and `vTwoPi` is declared **`int64`** (315) precisely so it can hold ±`$100000000`. The
+sign is load-bearing: `PolarToCartesian` divides by `vTwoPi` (3067), and `FormMouseMove`
+tests **both** signs (`(vTwoPi = $100000000) or (vTwoPi = -$100000000)`, 711).
+θ = 0 points **EAST** and increasing θ is **counter-clockwise** — Delphi's
+`SinCos(Tf, Xf, Yf)` is *sine-first*, giving `x = Rf·sin(Tf)`, `y = Rf·cos(Tf)`
+(1537-1540). **SCOPE_XY and PLOT do not differ here.**
 
 #### FFT (`Configure 1552`, `Update 1620`)
 | Directive | Parameter(s) — type · range · default |
 |---|---|
 | `SIZE` | w, h · int **32..2048** · 256, 256 |
-| `SAMPLES` | n · int **4..2048** (→ rounded to power of 2) · 512; first · int **0..n/2−2** · 0; last · int **first+1..n/2−1** · n/2−1 |
-| `RATE` | n · int **1..2048** |
+| `SAMPLES` | n · int **4..2048** (→ **truncated DOWN** to a power of 2) · 512; first · int **0..n/2−2** · 0; last · int **first+1..n/2−1** · n/2−1 |
+| `RATE` | n · int **1..2048** · **`vSamples`** (i.e. 512 at the default `SAMPLES`) |
 | `DOTSIZE` | n · int **0..32** · 0 |
 | `LINESIZE` | n · int **−32..32** · 3 (negative ⇒ vertical filled bars) |
 | `TEXTSIZE` | n · int **6..200** · 10 |
@@ -575,18 +743,30 @@ default**. "color" = named color (§7.1) or numeric-through-color-mode.
 | `LOGSCALE` / `HIDEXY` / packed | as above |
 | channel str | `'label'` · mag · int **0..11**; high · int **1..$7FFFFFFF**; tall, base, grid · int · {color} |
 
+`RATE`'s default is not a literal: `FFT_Configure` ends with `if vRate = 0 then vRate :=
+vSamples;` (**1603**), so an un-specified `RATE` becomes the sample count.
+`MAG` is a **GAIN ×2ⁿ**, not a divisor — `FFTpower := Hypot(rx, ry) / ($800 shl FFTexp
+shr FFTmag)` (4248): raising `MAG` **shrinks the divisor**.
+`SAMPLES n` truncates **DOWN** to a power of two (`FFTexp := Trunc(Log2(Within(val, 4,
+FFTmax)))`, 1576-1577) — `SAMPLES 1000` ⇒ **512**, not 1024.
+
 #### SPECTRO (`Configure 1719`, `Update 1792`)
 | Directive | Parameter(s) — type · range · default |
 |---|---|
-| `SAMPLES` | n · int **4..2048** · 512; first/last as FFT |
-| `DEPTH` | n · int **1..2048** |
+| `SAMPLES` | n · int **4..2048** (truncated down to a power of 2) · 512; first/last as FFT |
+| `DEPTH` | n · int **1..2048** · **256** (writes `vWidth`, 1751; inherits the `SetDefaults` `vWidth = 256`, 2884) |
 | `MAG` | n · int **0..11** · 0 |
 | `RANGE` | n · int **1..$7FFFFFFF** · $7FFFFFFF |
-| `RATE` | n · int **1..2048** |
+| `RATE` | n · int **1..2048** · **`vSamples div 8`** (= **64** at the default `SAMPLES 512`) |
 | `TRACE` | n · int (bit-field; 3 dir bits + scroll) · $F |
 | `DOTSIZE` | x · int **1..16** · 1; y · int **1..16** · 1 |
 | color-mode | `LUMA8 LUMA8W LUMA8X HSV16 HSV16W HSV16X` only · LUMA8X |
 | `LOGSCALE` / `HIDEXY` / packed | as above |
+
+`RATE`'s default is `SPECTRO_Configure` **1778**: `if vRate = 0 then vRate := vSamples
+div 8;` — note this is **not** the same rule as FFT's (1603, `vRate := vSamples`).
+At the **default** `vTrace = $F` (bit 2 set) there is **no W/H swap** (`if vTrace and $4
+= 0 then` … 1782-1787), so the default axis mapping is **time on X, frequency on Y**.
 
 #### PLOT (`Configure 1864`, `Update 1918`)
 | Directive | Parameter(s) — type · range · default |
@@ -607,41 +787,130 @@ default**. "color" = named color (§7.1) or numeric-through-color-mode.
 | *(Update)* `OVAL`/`BOX` | width, height {linesize {opacity}} |
 | *(Update)* `OBOX` | width, height, xradius, yradius {linesize {opacity}} |
 | *(Update)* `TEXT` | {size {style {angle}}} `'string'` — 3 optional positional fields, **local to the call** (seeded from the persistent vars, do not persist; `size` not clamped); `style` is the packed bitfield below |
-| *(Update)* `TEXTSIZE` (n · int **6..200**, persists→vTextSize) / `TEXTSTYLE` (n · **bit-packed byte**: bits0-1 weight {100,400,700,900}, 2 italic, 3 underline, 4-5 H-justify {center,center,left,right}, 6-7 V-justify {center,center,bottom,top}; persists→vTextStyle) / `TEXTANGLE` (n · degrees, persists→vTextAngle) |
+| *(Update)* `TEXTSIZE` (n · int **6..200**, persists→vTextSize) / `TEXTSTYLE` (n · **bit-packed byte** — see the table below; persists→vTextStyle) / `TEXTANGLE` (n · degrees, persists→vTextAngle) |
 | *(Update)* `LAYER` | n · int **1..8**; `'file.bmp'` (must exist) |
 | *(Update)* `CROP` | layer **1..8**; (`AUTO` x y \| left top width height {x y}) |
 | *(Update)* `SPRITEDEF` | id **0..255**; xsize **1..32**; ysize **1..32**; pixels…; 256 colors |
 | *(Update)* `SPRITE` | id **0..255** {orient **0..7** {scale **1..64** {opacity **0..255**}}} |
 | *(Update)* `POLAR` | {twoPi; theta} · int | `CARTESIAN` {flipY {flipX} · bool} |
 
-#### TERM (`Configure 2181`, `Update 2223`)
+##### PLOT `TEXTSTYLE` — the packed style byte (`AngleTextOut`, 3483-3516)
+
+| Bits | Field | Values |
+|---|---|---|
+| **0-1** | **weight** (4 levels) | `0` = 100 (thin) · `1` = **400 (normal)** · `2` = **700 (bold)** · `3` = 900 (black) — `weight: array [0..3] of integer = (100, 400, 700, 900);` (3485), selected by `NewLogFont.lfWeight := weight[style and 3];` (3494) |
+| **2** | italic | `lfItalic := style and $04 shr 2` (3495) |
+| **3** | underline | `lfUnderline := style and $08 shr 3` (3496) |
+| **4-5** | horizontal justify | see below (`case style and $30 shr 4 of`, 3502-3506) |
+| **6-7** | vertical justify | see below (`case style and $C0 shr 6 of`, 3507-3511) |
+
+⚠️ **There is no strikeout bit.** Bits 0-1 are a **4-level weight**, not two independent
+bold/italic flags: the default `vTextStyle = DefaultTextStyle = 1` (201, 2895) is
+therefore **normal weight (400)**, and `$02` is **BOLD (700)** — not "normal".
+
+**Justification.** The offsets are applied as `TextOut(x + rx, y - ry)` (3516), on a DC
+left at its default `TA_LEFT | TA_TOP` (there is **no** `SetTextAlign`/`TA_*` call
+anywhere in the source). Screen **Y grows downward**, and the `y - ry` negation is what
+makes bit-pattern `%10` place ink *above* the anchor:
+
+| bits | Pascal | Where the ink lands | Which edge the anchor is |
+|:--:|---|---|---|
+| `%00`, `%01` | `tx := -w / 2` (3503) | horizontally **centred** on the anchor | the text's horizontal **centre** |
+| `%10` | `tx := 0` (3504) | the text sits **to the RIGHT** of the anchor point | the anchor is the text's **LEFT** edge |
+| `%11` | `tx := -w` (3505) | the text sits **to the LEFT** of the anchor point | the anchor is the text's **RIGHT** edge |
+| `%00`, `%01` | `ty := h / 2` (3508) | vertically **centred** on the anchor | the text's vertical **middle** |
+| `%10` | `ty := h` (3509) | the text sits **ABOVE** the anchor point | the anchor is the text's **BOTTOM** edge |
+| `%11` | `ty := 0` (3510) | the text sits **BELOW** the anchor point | the anchor is the text's **TOP** edge |
+
+> 🔴 **Read the two halves together — a bare axis name is ambiguous and is what caused
+> this row to be documented backwards.** "`%10` = left" (anchor-edge vocabulary) and
+> "`%10` = right" (ink-side vocabulary) describe the **same pixels**. This table states
+> **both halves** for every value, so it cannot be misread either way. The Pascal `case`
+> arms are **bare** — Chip wrote no `//Left-aligned`-style comments; every such name in
+> the REF was invented downstream, and that invention is the origin of the dispute.
+> Hardware measurement and the code **agree**.
 | Directive | Parameter(s) — type · range · default |
 |---|---|
 | `SIZE` | cols · int **1..256** · 40; rows · int **1..256** · 20 |
 | `TEXTSIZE` | n · int **6..200** · 10 |
-| `COLOR` | up to **8** colors (4 text/back pairs) · default `ORANGE/BLACK ×2, LIME/BLACK ×2` |
+| `COLOR` | up to **8** colors = **4 text/background pairs** · default = four **inverse-video** pairs (below) · **config-phase only** |
 | `BACKCOLOR` | color |
 | `UPDATE` / `HIDEXY` | *(flags)* |
-| *(Update)* color | `BLACK..GRAY` (text {, back}) · `BACKCOLOR` color |
+| *(Update)* color | `BLACK..GRAY` (text {, back}) · `BACKCOLOR` color — **`COLOR` itself is NOT accepted here** |
 | *(Update)* control | int **0..13** (0=clr+home,1=home,2=col,3=row,4-7=color pair,8=bksp,9=tab,10/13=newline) and **32..255**=printable |
 | *(Update)* string | any text (printed verbatim) |
 
 `set column` arg **0..cols−1**; `set row` arg **0..rows−1** (2273-2275).
+
+**Default color pairs — four INVERSE-VIDEO pairs, not two duplicated ones.**
+`DefaultTermColors` (242) is
+`(clOrange, clBlack, clBlack, clOrange, clLime, clBlack, clBlack, clLime)` and
+`TERM_Update`'s codes 4..7 select the pair `(vColor[(val-4)*2+0], vColor[(val-4)*2+1])`
+(2278-2279) — so pairs **1** and **3** are the *reverses* of pairs 0 and 2:
+
+| Code | Pair | Text | Background |
+|:--:|:--:|---|---|
+| `4` | 0 | ORANGE | BLACK |
+| `5` | 1 | BLACK | **ORANGE** |
+| `6` | 2 | GREEN | BLACK |
+| `7` | 3 | BLACK | **GREEN** |
+
+⚠️ **The keyword is `GREEN`, not `LIME`.** `clLime` (`$00FF00`, 179-191) is a **Delphi
+`clXxx` palette constant** — the literal used to *seed* the default table. It is **not a
+DEBUG color keyword**; there is no `LIME` in `key_black..key_gray`. The two color systems
+are distinct (§7.1): the palette constants are fixed literals used for window/channel
+defaults, while the named-directive colors (`BLACK WHITE ORANGE BLUE GREEN CYAN RED
+MAGENTA YELLOW GRAY`) are *computed* through RGBI8X with a brightness nibble. Keep the
+**value**, use the **`GREEN`** name.
+
+**TERM does not accept `COLOR` in the update phase** (see §3 footnote 6): `TERM_Update`
+has `key_black..key_gray` (2232) and `key_backcolor` (2238) only — `COLOR` is parsed only
+by `TERM_Configure` (2203). Only codes 11, 12 and 14-31 are inert (no case arm ⇒ silent
+no-op; never printed).
 
 #### BITMAP (`Configure 2372`, `Update 2416`)
 | Directive | Parameter(s) — type · range · default |
 |---|---|
 | `SIZE` | w · int **1..2048** · 256; h · int **1..2048** · 256 |
 | `DOTSIZE` | x · int **1..256** · 1; y · int **1..256** · 1 |
-| `SPARSE` | color (−1 = off/normal) |
+| `SPARSE` | color (−1 = off/normal) · **requires `DOTSIZE >= 4` on BOTH axes** — see below |
 | color-mode / `LUTCOLORS` | as PLOT |
 | `TRACE` | n · int (8 scan patterns + scroll bit) · 0 |
-| `RATE` | n · int (−1 ⇒ width×height) |
+| `RATE` | n · int (−1 ⇒ width×height — **create message only**, see below) |
 | packed / `UPDATE` / `HIDEXY` | as above |
 | *(Update)* `SET` | x · int **0..w−1**; y · int **0..h−1** (cancels scroll) |
 | *(Update)* `SCROLL` | x · int **−w..w**; y · int **−h..h** |
 | *(Update)* `TRACE` | n · int | `RATE` n · int |
 | *(Update)* pixel | int (through color mode / packing) |
+
+⚠️ **`SPARSE` silently self-disables below `DOTSIZE 4`.** Setting a sparse color is
+necessary but **not sufficient** — `SetSize` (2938) gates on **all three** conditions:
+```pascal
+if (vSparse <> -1) and (vDotSize >= 4) and (vDotSizeY >= 4) then
+```
+…and the `else` branch (2947) does `vSparse := -1;` — **the sparse color you set is
+thrown away**, with no error. `DOTSIZE >= 4` is required on **both** axes. When the gate
+*does* pass, the bitmaps are allocated at **physical** (dot-multiplied) size (2940-2943)
+rather than logical size — which is why sparse BITMAP is the **sole** case where a plain
+`SAVE 'name'` captures the magnified appearance (§6.1).
+
+⚠️ **`RATE -1` works in the CREATE message only.** The `-1 → vWidth*vHeight` substitution
+lives at the tail of `BITMAP_Configure` (2413); `BITMAP_Update`'s handler is a bare
+`KeyVal(vRate)` with **no** substitution. Because `RateCycle` (3079-3087) tests
+**equality** (`if vRateCount = vRate then`, 3082), not `>=`, a runtime `RATE -1` (or
+`RATE 0`) leaves
+the rate non-positive, the cycle can **never** match, and **auto-refresh freezes** until a
+subsequent `TRACE` / `CLEAR` / explicit `UPDATE` intervenes. Real v55 behavior — a footgun,
+not a bug in this document.
+
+⚠️ **BITMAP `CLEAR` silently discards a user-set `RATE`.** The `key_clear` arm
+(2443-2448) ends with `SetTrace(vTrace, True)` — `ModifyRate = True` **unconditionally** —
+so `vRate` is re-derived to `vWidth` (scan patterns 0-3) or `vHeight` (4-7).
+
+**BITMAP has no drawing primitives** — no `LINE`, no `CIRCLE`, no `TEXT`. It does **not**
+inherit PLOT's vector command set; its update phase consumes a pixel stream plus
+`SET`/`SCROLL`/`TRACE`/`RATE`/color-mode/`LUTCOLORS`/`CLEAR`/`UPDATE`/`SAVE` only
+(`BITMAP_Update`, 2416).
 
 #### MIDI (`Configure 2492`, `Update 2590`)
 | Directive | Parameter(s) — type · range · default |
@@ -653,22 +922,43 @@ default**. "color" = named color (§7.1) or numeric-through-color-mode.
 | *(Update)* MIDI bytes | int **0..255** (note-on/off velocity state machine) |
 | *(Update)* `CLEAR`/`SAVE` | — |
 
-*(All windows additionally accept `PC_KEY` and `PC_MOUSE` in their update phase — see §4 for the shared keyboard/mouse model and return-value layouts.)*
+#### Universal update-phase directives (all nine windows)
+
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `CLEAR` | *(no parameters)* — clears the bitmap; also clears `vTriggered` (LOGIC, 1054) and, in BITMAP, re-derives `vRate` (2443-2448) |
+| `SAVE` | **six forms** — `SAVE 'name'` \| `SAVE WINDOW 'name'` \| `SAVE l t w h 'name'` \| `SAVE WINDOW` \| `SAVE l t w h` \| `SAVE` (bare). The last three write **no file**. Filename **last**, `.bmp` appended. Full grammar + sharp edges: **§6.1** (`KeySave`, 2839-2866) |
+| `CLOSE` | *(no parameters)* — closes the window and **reclaims its display slot**. **Command-only** (ignored on a create line); **multi-target**; **update-first, close-second** — the rest of the message runs, *then* the window closes. Dispatched in the **parser**, not in any `_Update`: **§6.2** (`p2com.asm:19565-19572`, `19617-19624`; `DebugUnit.pas:236-237`) |
+| `PC_KEY` | *(no parameters)* — transmits one LONG (§4.2) |
+| `PC_MOUSE` | *(no parameters)* — transmits two LONGs (§4.3); coordinate basis varies per window (§4.4) |
 
 ---
 
 ## 8. TypeScript parity status (per window)
 
-> Added by the **9-window parity sprint** (`DOCs/plans/NINE-WINDOW-PARITY-FIX-SPRINT-PLAN.md`).
+> Added by the **9-window parity sprint**
+> (`DOCs/plans/archive/NINE-WINDOW-PARITY-FIX-SPRINT-PLAN.md`; sprint closed 2026-06-16 —
+> `DOCs/plans/archive/CLOSEOUT-2026-06-16-NINE-WINDOW-PARITY-FIX.md`).
 > Sections 0–7 above describe the Pascal **spec**; this section tracks the **TS implementation's
 > parity against that spec**, so the matrix tracks parity, not just Pascal. Authoritative
-> per-directive detail and the deliberate-deviation log live in the sprint plan (§ numbers below)
-> and `DOCs/project-specific/TECHNICAL-DEBT.md`.
+> per-directive detail and the deliberate-deviation log live in the archived sprint plan
+> (§ numbers below) and `DOCs/project-specific/TECHNICAL-DEBT.md`.
 
 **Shared infrastructure (sprint §1–§7)** underpins every window: the `PC_MOUSE` wire model
 (raw-vs-readout coordinate split), parser clamp/parity helpers (`KeyValWithin`-style clamping
 instead of aborting a parse), color systems kept as **two distinct systems** (`clXxx` window
 chrome vs the `RGBI8X` named-directive colors — never unified), and the create-time config parse.
+
+> ⚠️ **`PC_MOUSE` — two encoders exist in the TS tree; only one is live.** The
+> **Pascal-parity 2-LONG packed form** (matching `SendMousePos`, 3537-3577, incl. the
+> `$03FFFFFF` off-window sentinel) lives in **`src/classes/shared/tLongTransmission.ts`**
+> and **is the live path**. A **legacy 7-LONG / 28-byte encoder** (`xpos, ypos, wheeldelta,
+> lbutton, mbutton, rbutton, pixel`) still exists in
+> **`src/classes/shared/inputForwarder.ts::sendMouseEvent`** (268-286) — it is **NOT at
+> parity**, but it is **provably unreachable**: it hard-guards on `this.usbSerial`, which is
+> assigned **only** by `setUsbSerial()` (52), and `setUsbSerial()` **is never called anywhere
+> in `src/`**. The guard therefore always throws before a byte is written. **Dead code —
+> pending removal**; it is not a shipped parity gap.
 
 | Window | TS class | Parity status | Sprint § | Parity / unit tests |
 |---|---|---|:--:|---|
@@ -694,5 +984,12 @@ chrome vs the `RGBI8X` named-directive colors — never unified), and the create
 
 *Authored 2026-05-31, value/range reference added 2026-06-01, against PNut v55
 `DebugDisplayUnit.pas`. **TS parity-status layer (§8) added 2026-06-06** by the 9-window parity
-sprint. This matrix is the punch-list for refreshing the nine per-window Theory-of-Operations docs
-under `DOCs/pascal-REF/theory-of-operations/` (which were last verified at v51 / 2025-11-08).*
+sprint. **Reconciled against raw v55 source 2026-07-14** (conflict audit + downstream doc-team
+handoff): `CLOSE` established as **live** and dispatched at the parser layer (§6.2); full `SAVE`
+grammar added (§6.1); packing default stated explicitly as **UNPACKED** (§7.0); PLOT `TEXTSTYLE`
+justify + weight bitfield corrected (§7.3); SCOPE_XY `POLAR -1` sign restored; BITMAP `SPARSE`
+`DOTSIZE >= 4` gate, FFT/SPECTRO `RATE` and SPECTRO `DEPTH` defaults added; TERM `COLOR`
+config-only + four inverse-video default pairs (`GREEN`, not `LIME`); stale line citations
+re-anchored. This matrix is the punch-list for refreshing the nine per-window
+Theory-of-Operations docs under `DOCs/pascal-REF/theory-of-operations/` (which were last verified
+at v51 / 2025-11-08).*
