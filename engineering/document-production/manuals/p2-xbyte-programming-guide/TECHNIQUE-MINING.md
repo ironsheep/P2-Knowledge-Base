@@ -580,6 +580,73 @@ single verdict. **L3 is now the highest-value missing source.**
 
 ---
 
+## 10c. Sources L/M — `i8086_xt` + `i8086_xt-psram` — **the controlled experiment**
+
+`REF-NO-COMMIT/i8086_xt/` (2022-07-12, 8,314 lines) — a full IBM PC **XT**: BIOS ROM, CGA, BASIC.
+Ships **both** variants: `i8086_xt.spin2` (guest memory in **hub**) and `i8086_xt-psram.spin2`
+(guest memory in **PSRAM**). Same emulator, two memory backends. Also from thread **L1**.
+
+### L1 · THE CONTROLLED EXPERIMENT — dispatch is orthogonal to the memory model
+
+Diffing the hub variant against the PSRAM variant:
+
+| Measure | Result |
+|---|---|
+| Total changed lines | **115** of 8,314 (~1.4%) |
+| Changed lines touching **dispatch** (`execf` / `i_opimpl` / `i_optable`) | **ZERO** |
+| What *did* change | **only** the memory-access path — PSRAM pin config, a scratch buffer, the read/write routines |
+
+**They swapped the entire memory backend and the dispatch did not notice.**
+
+### L2 · The three separable concerns — and the coupling lesson
+
+Our §10.1 teaches **two separable assets** (auto-fetch, table dispatch). The evidence says the honest
+model has **three separable concerns**:
+
+1. **The fetch** — where does the guest's code come from?
+2. **The dispatch** — how do you get from opcode to handler?
+3. **The memory model** — how does the guest read/write data?
+
+The XT pair proves **(2) is independent of (1) and (3)**.
+
+**And here is *why* they could do that — the lesson worth the chapter.** They **hand-rolled the
+fetch** (`call #\i_readcodeb`, which goes through the memory path). So when guest memory moved to
+PSRAM, the fetch followed for free. **Had they taken XBYTE's auto-fetch, the PSRAM port would have
+been impossible without rewriting the dispatch mechanism entirely** — the FIFO streams hub only.
+
+> **THE TRADEOFF, provable from this single pair of files:**
+> **XBYTE's auto-fetch is free speed, but it welds the guest's code to hub RAM.** A hand-rolled fetch
+> costs clocks and buys a **swappable memory backend**. If the guest might ever outgrow hub, do not
+> take the auto-fetch — you will pay for it once, in a rewrite.
+
+This reframes the concerns table's *"where does the guest's code live"* column: it is **not a yes/no
+gate on a feature — it is a coupling decision made at the start of the project.** That is the single
+most useful thing this mining has produced.
+
+### L3 · Same guest CPU, three dispatch strategies — a ladder, not a binary
+
+| Implementation | Fetch | Dispatch | P2 features used |
+|---|---|---|---|
+| **`i8086_xt`** | hand-rolled | **plain jump table** — `rdlong i_opimpl,…` + **`jmp i_opimpl`**; prefixes by explicit `cmp` chain (`$26/$2E/$36/$3E`, `$F2/$F3`) | **none** |
+| **`Simple-i8086`** (K) | hand-rolled | **`EXECF` + skip patterns**; shared bodies; two-level LUT group tables | dispatch asset |
+| **thread L3 (missing)** | ? | **XBYTE** (reportedly) | both assets |
+
+Three rungs of one ladder, **on one guest CPU**. This shows the reader that **you do not have to
+climb all the way** — the honest thing our §10.1 implies and never demonstrates. It is a far better
+Chapter 10 than the one we have, and it is *free*: the material already exists.
+
+> Do **not** infer an evolution story (Simple → XT) from the archive dates. `Simple-i8086` (2022-06-09)
+> uses `EXECF`; `i8086_xt` (2022-07-12) does not. Authorship/lineage is **not established** — record
+> the strategies, not a narrative about how they came to be.
+
+### L4 · The FIFO is spent elsewhere
+
+In the XT, `RDFAST`/`RFBYTE` appear **only** in the **CGA video** path and the **serial TX buffer** —
+never in instruction fetch. Another instance of the resource-contention point: the FIFO, like LUT, is
+a *cog* resource that the rest of the system also wants.
+
+---
+
 ## 11. Open questions
 
 1. **X2** — is `GETBRK` D[25] "XBYTE pending" (Silicon Doc) or "C,Z affected" (our theory doc)?
