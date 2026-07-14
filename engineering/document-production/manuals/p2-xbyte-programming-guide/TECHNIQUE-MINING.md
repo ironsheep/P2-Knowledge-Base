@@ -647,6 +647,132 @@ a *cog* resource that the rest of the system also wants.
 
 ---
 
+## 10d. Sources E/F — the 68000 **and Z80** cores (MegaYume) — **the decisive insight**
+
+### E1 · The 68000 dispatch — §10.2 is wrong in its specifics
+
+```
+mk_nextop
+        jatn  mk_cogatnptr              ' <- interrupt poll (SAME idiom as the 8080)
+mk_ihook1  nop                          ' <- HOOK SLOTS: self-modifiable NOPs
+mk_ihook2  nop
+mk_nextop_nohook
+        call  mk_getopf                 ' fetch the 16-bit opcode word (INDIRECT -> swappable)
+        push  #mk_nextop
+        getnib mk_memtmp0, mk_opword,#3 ' <- the TOP NIBBLE of the opcode word
+        altd  mk_memtmp0, #mk_nibble_impl_tbl
+        jmp   0-0                       ' <- ALTD-patched jump, 16-entry table
+```
+
+**What §10.2 claims vs. what the 68000 actually does:**
+
+| Our §10.2 | Reality |
+|---|---|
+| *"read the word with `RFWORD`"* | ❌ `call mk_getopf` — an **indirect, swappable** fetch through the memory path. No `RFWORD`. |
+| *"dispatch on the opcode word via a table"* | ❌ **You cannot table-dispatch a 16-bit opcode — that is 65,536 entries.** It dispatches on a **4-bit FIELD**: the top nibble → a **16-entry** table. |
+| *"decode further by hand"* | ✅ correct |
+| (implied: table dispatch via LUT/EXECF) | ❌ an **`ALTD`-patched `jmp`**, not `EXECF`, not LUT |
+
+**The general lesson for any word-opcode CISC** (which §10.2 should have said): you dispatch on a
+**field** of the opcode, not the opcode. The 68000's top nibble is its classic "line" decode — 16
+lines, then per-line decode. → folds into **F-219**'s sibling correction.
+
+### E2 · **THE DECISIVE INSIGHT — XBYTE's loop is hardware, so there is no loop body**
+
+The Z80 core (Mega Drive's sound CPU) shows what a **software** dispatch loop is really *for*:
+
+```
+zk_nextop
+        rdword pa,#zbus_request  wz     ' 1. BUS ARBITRATION (the Z80 shares a bus)
+        ...
+zk_irqhook   nop                        ' 2. IRQ HOOK SLOT (a self-modified NOP)
+zk_nextop_nohook
+        mul  zk_cycles, zk_cycletime    ' 3. CYCLE PACING:
+        add  zk_cycles, zk_lastwait     '    compute elapsed vs. target...
+        getct pa
+        sub  zk_cycles, pa
+        cmps zk_cycles,#1  wc
+  if_ae waitx zk_cycles                 '    ...and WAITX to throttle to REAL Z80 SPEED
+        getct zk_lastwait
+        mov  zk_cycles,#1
+
+        mov  zk_temphl, zk_hl           ' 4. per-instruction register setup
+        mov  zk_hlptr, #zk_hl
+        mov  zk_tempidx, zk_hl
+        mov  zk_prefix, #0              ' 5. PREFIX STATE reset
+        incmod zk_refresh,#127          ' 6. the Z80 R (REFRESH) REGISTER
+
+        call #zk_readcode               ' 7. fetch
+        mov  zk_opcode, zk_tmp8
+        rdlut zk_opimpl, zk_opcode      ' 8. LUT dispatch table
+        bitl zk_opimpl,#10  wcz         ' 9. (see T18)
+        push #zk_nextop
+        execf zk_opimpl                 ' 10. EXECF dispatch
+```
+
+**Every one of items 1–6 is cross-cutting, per-instruction work. Under XBYTE, NONE of it can exist —
+because XBYTE's loop is *hardware*. There is no loop body to put anything in.** All of it would have
+to be replicated inside *every handler*, or dropped.
+
+> **This — not memory alone — is why the big emulators decline XBYTE.**
+> XBYTE buys you a free dispatch and **takes away the one place where per-instruction cross-cutting
+> work naturally lives**: cycle pacing, interrupt polling, debug hooks, guest refresh registers,
+> prefix-state reset, bus arbitration.
+>
+> A software loop costs ~3 extra clocks per instruction and gives you **a place to stand.**
+
+It also explains **A4** in retrospect: the 8080 (which *does* use XBYTE) has to **comment the engine
+out** and substitute a software loop in order to debug — because with XBYTE there is nowhere to put
+the `debug()`. MegaYume never faces that problem: it just leaves two NOPs (`mk_ihook1`, `zk_irqhook`)
+in its loop, self-modifiable into jumps when needed. **Same problem, two solutions, and only one of
+them is free.**
+
+This is the honest, load-bearing content for **§13.7 "When XBYTE is the wrong tool"** and for the
+concerns table — and it is attested across three implementations.
+
+### E3 · The Z80 core — dispatch asset yes, auto-fetch no
+
+`call #zk_readcode` (hand-rolled fetch) → `rdlut zk_opimpl, zk_opcode` (**LUT** table) →
+`execf zk_opimpl` (**EXECF** dispatch). The same shape as Simple-i8086 (K1) and MisoYume: **keep the
+dispatch asset, hand-feed the fetch.** Now attested by **four** independent guest cores.
+
+### T18 · Steal skip-pattern bit 10 as a free per-opcode flag *(converged)*
+
+> `bitl zk_opimpl,#10  wcz   ' first instruction can't be skipped, use as flag for (HL) ops`
+> (MisoYume does the identical thing: `bitl rk_opimpl,#10 wcz` → `if_nc execf rk_opimpl`)
+
+**Why it is sound (mechanism):** a table entry is `handler | skipf<<10`, so **bit 10 is the skip
+pattern's LSB — the bit that would cancel the handler's *first* instruction.** You jumped there to
+run it, so a legitimate pattern **never** sets bit 10. It is therefore **free storage for one boolean
+per opcode**. `BITL D,#10 WCZ` reads the old value into C/Z **and clears it**, leaving a clean pattern
+for `EXECF`. Read-and-clear in one instruction.
+
+Passes the filter on **(c) mechanism** and on **(a) convergence** across two guest cores.
+⚠️ Same author for both — so convergence is *within* one author. Present as a technique with its
+reasoning, not as "everyone does this."
+
+### T19 · Guest-interrupt poll via `JATN` in the dispatch loop — **T1 CONVERGES**
+
+`jatn mk_cogatnptr` in MegaYume's 68000 loop is the **same idiom** as the 8080's `jatn #int_event`
+(**A1**) — *different authors, different guest CPUs*. **T1 graduates from "one implementation" to a
+converged RULE.**
+
+Note the placement difference, and it is the whole point of **E2**: MegaYume polls **in the loop**
+(one place); the 8080, having no loop, must poll **inside a handler**.
+
+### T20 · Guest quirks the concerns table must carry (observed, not invented)
+
+- **Z80 `R` (refresh) register** — `incmod zk_refresh,#127`. A real guest register that ticks every
+  instruction fetch; software reads it.
+- **Cycle pacing is real-time throttling**, not just counting — `WAITX` to slow the P2 *down* to the
+  guest's speed.
+- **Bus arbitration** — the Mega Drive's Z80 shares a bus with the 68000 (`zbus_request`/`zbus_status`).
+- **Z80 prefixes are BOTH kinds** (perfect illustration for **F-219**): `CB`/`ED` are **map**
+  prefixes (a different opcode table → one-shot `SETQ2` territory), while `DD`/`FD` are **modifier**
+  prefixes (they retarget `HL` → `IX`/`IY` — hence `zk_hlptr`, `zk_tempidx`, `zk_prefix` as *state*).
+
+---
+
 ## 11. Open questions
 
 1. **X2** — is `GETBRK` D[25] "XBYTE pending" (Silicon Doc) or "C,Z affected" (our theory doc)?
