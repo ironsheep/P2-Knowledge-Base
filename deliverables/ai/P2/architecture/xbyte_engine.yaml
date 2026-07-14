@@ -61,11 +61,17 @@ starting_xbyte:
     code: |
       _RET_   SETQ    {#}D     ' Configure PERSISTENT XBYTE mode (armed once)
       _RET_   SETQ2   {#}D     ' Configure ONE-SHOT XBYTE mode (next bytecode only, then reverts)
-    requirement: "$1FF must be on stack (from CALL)"
+    requirement: "$1FF must be on top of the hardware stack, placed there by 'PUSH #$1FF'"
 
   configuration:
     d_parameter: "32-bit configuration value (the same mode operand for both SETQ and SETQ2)"
     stack_requirement: "Hardware stack must contain $1FF"
+    stack_note: |
+      Use 'PUSH #$1FF' to place it. A CALL will NOT do -- a CALL pushes its own
+      return address, not $1FF, so the _RET_ would simply return and XBYTE would
+      never engage. Silicon Doc: "Starting XBYTE and establishing its operating
+      mode is done all at once by a '_RET_ SETQ {#}D' instruction, with the top
+      of the hardware stack holding $1FF."
 
   automatic_start:
     description: |
@@ -107,16 +113,37 @@ starting_xbyte:
     source: "Chip Gracey, P2 silicon designer; v55 Spin2 interpreter Theory-of-Operations review."
 
 configuration_patterns:
+  legend: |
+    %A = LUT base address bit(s).  %BBBB = compression threshold (must be > 0).
+    %F = flag-write bit (see flag_control).  %x = SEE x_bit_undocumented BELOW.
+
+  x_bit_undocumented:
+    status: "UNDOCUMENTED -- do not guess at it. Tracked as F-223."
+    detail: |
+      The Silicon Doc prints the 256-entry patterns as %A000000xF and %ABBBB00xF.
+      It defines %A, %BBBB and %F -- and never defines %x (mode-operand bit 1).
+      Chip Gracey's own XBYTE demo comment, carried verbatim in the Silicon Doc AND
+      in Parallax's official resources/FPGA Examples/xbyte.spin2, reads:
+        _ret_  setq  #$100   'start xbyte with LUT base = $100, no stack pop
+      which suggests bit 1 is a stack-pop control -- but this is NOT confirmed.
+    empirical: |
+      Every known implementation leaves bit 1 = 0: Chip's Spin2 interpreter ($1A1
+      and $081), the 8080 games emulator ($000), Zog ($0), and Parallax's demo
+      ($100). No implementation exercises the other state, so usage cannot
+      disambiguate it either.
+    guidance: "Leave bit 1 = 0. That is what every working implementation does."
+
   full_256_bytecodes:
     pattern: "%A000000xF"
     lut_base: "%A00000000"
     index_calc: "I = bytecode[7:0]"
     bytecodes: 256
     lut_usage: "256 longs"
-    
+
   compressed_16_bytecodes:
     pattern: "%ABBBB00xF"
     lut_base: "%A00000000"
+    threshold: "%BBBB must be > 0 (Silicon Doc). %BBBB = %0001 gives the 16/240 split below."
     operation: |
       If bytecode[7:4] < %BBBB: Use full bytecode as index
       If bytecode[7:4] >= %BBBB: Use compressed index
@@ -203,30 +230,32 @@ programming_examples:
       ' Start FIFO for bytecode stream
       RDFAST  #0, bytecode_ptr
       
-      ' Start XBYTE engine
-      CALL    #xbyte_start
-      
-      xbyte_start:
-      _RET_   SETQ    #%00000001  ' 256 bytecodes, set flags
-      
+      ' Start XBYTE engine -- PUSH $1FF, then arm on the _RET_
+      PUSH    #$1FF                       ' XBYTE triggers on RET to $1F8..$1FF
+      _RET_   SETQ    #%0_0000_00_0_1     ' A=0 (table at LUT $000), F=1 (write flags)
+
   bytecode_routine_example:
     code: |
-      ' LUT entry: routine address | skip pattern
-      LONG    (@push_routine << 23) | 0
-      
+      ' A LUT entry is:  routine address in [9:0]  |  SKIPF pattern in [31:10]
+      ' Shift the PATTERN, never the address. Use the COG/LUT address (no '@',
+      ' which would yield a HUB address that EXECF cannot use).
+      LONG    push_routine | (%0 << 10)   ' no instructions skipped
+
       push_routine:
       RFLONG  data              ' Read inline parameter
-      WRLONG  data, stack_ptr   ' Push to stack
-      ADD     stack_ptr, #4     ' Adjust stack
-      _RET_   NOP              ' Return to XBYTE
-      
+      WRLONG  data, stack_ptr   ' Push to VM stack
+      _RET_   ADD  stack_ptr, #4   ' Adjust, and return to XBYTE
+
   compressed_mode:
     code: |
-      ' Configure for 16 primary + compressed
-      _RET_   SETQ    #%F_0000_00_1
-      ' F = base address (4 bits)
-      ' 0000 = compression threshold
-      ' 1 = set flags from bytecode
+      ' Compression: 16 primary bytecodes + 240 extended (%ABBBB00xF).
+      ' Threshold %BBBB must be > 0. With %BBBB = %0001:
+      '   b[7:4] <  %0001  -> primary:  $00..$0F, 16 individual entries
+      '   b[7:4] >= %0001  -> extended: $10..$FF, 240 codes in 15 group entries
+      _RET_   SETQ    #%1_0001_00_0_1
+      ' 1    = A, the LUT base bit -> table at LUT $100  (ONE bit, not four)
+      ' 0001 = %BBBB, the compression threshold (four bits)
+      ' 1    = F, write the bytecode's index LSBs to C and Z
 
 performance:
   overhead_per_bytecode: "6 clocks"

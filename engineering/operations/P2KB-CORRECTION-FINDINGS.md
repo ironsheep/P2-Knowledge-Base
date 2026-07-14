@@ -1718,7 +1718,7 @@ fetch-on-`_RET_` loop cannot express as a plain `_RET_` handler.
 >
 > **File:** `deliverables/ai/P2/architecture/xbyte_engine.yaml`
 
-### F-220 — `bytecode_routine_example`: the LUT table entry is built with the wrong shift **and** the wrong address space — `CONFIRMED`
+### F-220 — `bytecode_routine_example`: the LUT table entry is built with the wrong shift **and** the wrong address space — `DONE (2026-07-14)`
 
 ```
 ' LUT entry: routine address | skip pattern
@@ -1736,7 +1736,7 @@ LONG    (@push_routine << 23) | 0          # line 215
 **Ground truth** — Chip: `bc_read  long  var_rd | %0111001110 << 10`. Parallax: `bytetable  long  r0`.
 Correct form: `LONG  push_routine | (skip_pattern << 10)` — **no `@`, shift the *pattern*, not the address.**
 
-### F-221 — `simple_interpreter`: never pushes `$1FF`, so it would not start XBYTE — `CONFIRMED`
+### F-221 — `simple_interpreter`: never pushes `$1FF`, so it would not start XBYTE — `DONE (2026-07-14)`
 
 ```
 ' Start XBYTE engine
@@ -1754,7 +1754,7 @@ instruction, **with the top of the hardware stack holding `$1FF`**"* — and giv
 `PUSH #$1FF` / `_RET_ SETQ #$100`. **All nine implementations we read use `PUSH #$1FF`.** The
 `(from CALL)` gloss on line 64 is also wrong and must go.
 
-### F-222 — `compressed_mode`: does not assemble, mislabels its own fields, and would not compress — `CONFIRMED`
+### F-222 — `compressed_mode`: does not assemble, mislabels its own fields, and would not compress — `DONE (2026-07-14)`
 
 ```
 _RET_   SETQ    #%F_0000_00_1               # line 226
@@ -1775,7 +1775,7 @@ _RET_   SETQ    #%F_0000_00_1               # line 226
    **`%0001`**: high-nibble 0 → 16 primary bytecodes `$00–$0F`; high-nibble ≥ 1 → 240 extended in 15
    groups. **16 + 240 = 256.** ✓
 
-### F-223 — the `x` bit of the mode operand is **undefined** in the Silicon Doc, the YAML, and our manual — `NEEDS-VERIFICATION (Chip question)`
+### F-223 — the `x` bit of the mode operand is **undefined** in the Silicon Doc, the YAML, and our manual — `NEEDS-VERIFICATION (Chip question — queued, task #54 Q7)` · **YAML now MARKS it undocumented rather than leaving it dangling**
 
 Both `configuration_patterns` entries print an unexplained bit:
 
