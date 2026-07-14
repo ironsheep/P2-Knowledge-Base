@@ -1550,11 +1550,17 @@ together. YAML side rides F-212 + its addendum.
   reader it is an *"initial draft for review … hardware confirmation pending."* That misreports the document's
   **maturity**, not merely its version number.
 
-- **DISPOSITION (Stephen 2026-07-14): DEFERRED — not a reader-comprehension defect.** No reader's understanding
-  of the technical material (ADC, CORDIC, DAC, smart-pin measurement, TASK, stack sizing) is harmed by a stale
-  version table. So this does **not** justify re-rendering and re-releasing six documents on its own. **Each app
-  note's Revision History is corrected as part of its NEXT natural release**, whenever that comes. A doc must not
-  ship again carrying this defect.
+- **DISPOSITION (Stephen 2026-07-14): DEFERRED RENDER, SOURCE FIXED NOW.** No reader's understanding of the
+  technical material (ADC, CORDIC, DAC, smart-pin measurement, TASK, stack sizing) is harmed by a stale version
+  table, so this does **not** justify re-rendering and re-releasing six documents on its own. But the *source* is
+  corrected immediately, so each doc is already right when its next natural release comes — the fix and the gate
+  land in the same window and meet at that release.
+- **✅ SOURCE FIXED 2026-07-14 — all six.** Every app note's `## Revision History` now lists exactly the versions
+  `git tag` says shipped, top entry == cover version, no never-shipped draft. Each new row is **derived from the
+  audited CHANGELOG entry**, not authored fresh. Form follows history depth: a **table** for 2+ shipped versions
+  (P2AN001–005), a **single bullet describing the document** for exactly one (P2AN006/007 — the style guide's
+  "initial releases describe the document, not a delta"). P2AN005 converted bullet→table (it has two shipped
+  versions). The released PDFs still carry the old tables until each doc re-renders — that is the accepted defer.
 - **The rule it breaks:** `methodology/changelog-style-guide.md` — **"Never-shipped versions are never mentioned … For users, they never existed. If a version number was never released, delete any artifact referencing it."** v0.1.0 was a review draft: never in `deliverables/documents/README.md`, never tagged. It must not appear in reader-facing history. The same guide's **"Initial releases describe the document, not a delta"** means the v1.0.0 entry must holistically describe the document, not delta against the unpublished draft.
 - **Why it slipped:** the release process promotes `opus-master/CHANGELOG.md` (which P2AN005/6 got *right* — a single holistic initial entry) but the **doc's own in-PDF Revision History is a separate artifact** that nothing gated. `audit-changelog` audits `CHANGELOG.md`; no check compared it to the rendered Revision History. The two drifted silently.
 - **P2AN007 (fixed pre-release, 2026-07-13):** the changelog audit gate caught it before promotion. `CHANGELOG.md` rewritten as a conforming initial entry (holistic, no delta headings, no draft reference) and the doc's Revision History reduced to the single v1.0.0 entry. Re-rendered.
@@ -1567,13 +1573,23 @@ together. YAML side rides F-212 + its addendum.
   against a prior *published* version). Style authority: `methodology/changelog-style-guide.md` — *"Never-shipped
   versions are never mentioned … If a version number was never released, delete any artifact referencing it"* and
   *"Initial releases describe the document, not a delta."*
-- **🔧 PROCESS GAP — THIS IS THE REAL FIX; without it, Class A regenerates on every release.** `release-manual`
-  Phase 2a audits `opus-master/CHANGELOG.md` and **never looks at the doc's in-PDF Revision History**, which is a
-  *separate artifact*. The two drift silently, and the bump that causes the drift is the release itself. The gate
-  must additionally assert: **(1)** the rendered Revision History's top entry **matches the cover version**, and
-  **(2)** it names **no version that was never tagged**. This defect is invisible to the current gate — which is
-  precisely why six of seven app notes carry it. *(Skill is central-owned: **propose, do not edit** —*
-  `feedback_never_modify_central_skills`*.)*
+- **🔧 PROCESS GAP — ✅ CLOSED 2026-07-14. This was the real fix; without it Class A regenerates on every release.**
+  The drift is *caused by the release itself*: it bumps the cover and leaves the in-doc table behind. Two-sided fix,
+  because of an **ordering constraint that was initially got wrong** — the Revision History lives *inside the body
+  markdown that gets rendered*, so `release-manual` (which runs **after** the PDF exists) physically **cannot** fix
+  it; by then the stale table is already printed. Authoring must happen at prep time.
+  - **`prepare-manual/project-overlay.md` (NEW) — authors it.** Step 5 enumerated only *two* version locations
+    (markdown cover, `request.json`) and even warned that bumping one without the other creates a mismatch. It did
+    not know about the **third**: the in-doc `## Revision History`. The overlay adds it, requires the new entry be
+    **derived from the CHANGELOG** entry being released (two artifacts telling the same story in independently-written
+    prose *will* diverge), and makes **`git tag`** — not the CHANGELOG, not memory — the authority for "was it shipped."
+  - **`release-manual/project-overlay.md` — verifies it (backstop).** Phase 1 now asserts, against the RENDERED PDF:
+    top Revision-History entry **==** cover version, and **no untagged version named**. A mismatch blocks the release
+    exactly as a content-drop does (and costs a full re-render, which is why prep owns the authoring).
+  - **Correction to an earlier claim in this entry:** it said the skill was *"central-owned: propose, do not edit."*
+    **That was false** — `release-manual` and `prepare-manual` are **project-local** (`.claude/skills/`), not in
+    `~/.claude/skills/`. The claim was inherited from a prior session and repeated without checking. Both were edited
+    directly.
 - **Origin:** surfaced 2026-07-13 running the mandatory changelog audit gate for P2AN007's release; the sibling comparison against P2AN005/P2AN006 exposed it as pre-existing and shipped.
 
 ---

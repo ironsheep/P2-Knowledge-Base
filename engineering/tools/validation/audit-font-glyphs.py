@@ -29,12 +29,29 @@ logs, plus the emoji/superscript-letter ranges that text fonts do not carry.
 When a new "Missing character:" warning appears in a compile log, add the
 codepoint here so the next document never reships it.
 
+TEMPLATE GLYPH FALLBACKS (--templates)
+-------------------------------------
+A codepoint the FONT cannot draw still renders correctly if a template the
+document loads declares a \newunicodechar fallback for it. Coverage is therefore
+a property of the DOCUMENT's .sty stack, not a global fact -- e.g. U+26A0 WARNING
+SIGN is genuinely missing in the Debug Window Manual (which loads only the
+platform templates) but renders as a colored triangle in every app note, because
+p2kb-appnote-local.sty maps it. Flagging it there is a FALSE POSITIVE, and a gate
+that cries wolf on every app note is a gate that gets ignored -- which is exactly
+how the next silent glyph-hole ships.
+
+So: pass --templates with the .sty directories the document actually loads. Every
+\newunicodechar{X} found is treated as COVERED and will not be flagged. Omit the
+flag and the audit stays conservative (font-only), which can over-report.
+
 USAGE
     python3 audit-font-glyphs.py <assembled.md> [--source-dir <opus-master>]
+                                                [--templates <dir> [<dir> ...]]
 
 EXIT
     0 = clean    1 = offending glyphs found    2 = bad usage
 """
+import re
 import sys
 import pathlib
 import unicodedata
@@ -47,18 +64,60 @@ DENY_CODEPOINTS = {
     0xFE0F,  # VARIATION SELECTOR-16 (emoji form) -- observed missing 2026-07-14
 }
 
-# Ranges text fonts do not carry. Superscript DIGITS (U+00B2/B3/B9) are Latin-1
-# and DO render, so they are deliberately not in these ranges.
+# Ranges text fonts do not carry.
+#
+# SUPERSCRIPTS/SUBSCRIPTS -- LETTERS only, NOT digits. The U+2070..U+209F block
+# mixes them, and the render font (IBM Plex) carries the DIGITS but not the
+# LETTERS. Proven both ways in SHIPPED PDFs:
+#   renders   -- '2⁶ and 2⁷' and 'log₂' print correctly in P2AN002 v1.0.1
+#   missing   -- 'ⁿ' (superscript n) printed NOTHING in the Debug Window Manual,
+#                silently turning "MAG multiplies by 2^n" into "multiplies by 2"
+# A blanket 2070..209F range flagged the digits too, which would have forced
+# correct, well-rendering math to be butchered into prose ("to the power 6") --
+# a false positive that DEGRADES the document. Deny only what is actually absent:
+#   U+2071        superscript i
+#   U+207F        superscript n
+#   U+2090..209C  subscript letters (a e o x schwa h k l m n p s t)
+# Latin-1 superscript digits (U+00B2/B3/B9) render and are likewise not denied.
 DENY_RANGES = [
-    (0x2070, 0x209F, "superscript/subscript letters"),
+    (0x2071, 0x2071, "superscript letter"),
+    (0x207F, 0x207F, "superscript letter"),
+    (0x2090, 0x209C, "subscript letters"),
     (0x1F300, 0x1FAFF, "emoji"),
     (0x2600, 0x27BF, "misc symbols / dingbats"),
     (0xFE00, 0xFE0F, "variation selectors"),
 ]
 
 
-def offending(ch: str):
+# \newunicodechar{X}{...} -- the template supplying a glyph the font lacks.
+_NEWUNICODECHAR = re.compile(r"\\newunicodechar\s*\{(.)\}")
+
+
+def covered_by_templates(dirs):
+    """Codepoints a loaded template explicitly draws via \\newunicodechar.
+
+    These render correctly even though the font cannot draw them, so they are
+    NOT defects. Scans *.sty in each given directory (non-recursive: a template
+    stack is flat).
+    """
+    covered = {}
+    for d in dirs:
+        p = pathlib.Path(d)
+        if not p.is_dir():
+            continue
+        for sty in sorted(p.glob("*.sty")):
+            for line in sty.read_text(encoding="utf-8", errors="replace").splitlines():
+                if line.lstrip().startswith("%"):      # a commented-out mapping does not render
+                    continue
+                for m in _NEWUNICODECHAR.finditer(line):
+                    covered.setdefault(ord(m.group(1)), sty.name)
+    return covered
+
+
+def offending(ch: str, covered=None):
     cp = ord(ch)
+    if covered and cp in covered:
+        return None                                    # the template draws it
     if cp in DENY_CODEPOINTS:
         return "known-missing glyph"
     for lo, hi, why in DENY_RANGES:
@@ -82,6 +141,16 @@ def main() -> int:
     if "--source-dir" in sys.argv:
         source_dir = pathlib.Path(sys.argv[sys.argv.index("--source-dir") + 1])
 
+    # --templates <dir> [<dir> ...] : .sty stacks this document loads. Any
+    # \newunicodechar they declare supplies a glyph the font lacks, so it renders.
+    template_dirs = []
+    if "--templates" in sys.argv:
+        for a in sys.argv[sys.argv.index("--templates") + 1:]:
+            if a.startswith("--"):
+                break
+            template_dirs.append(a)
+    covered = covered_by_templates(template_dirs)
+
     # Map each offending character back to the chapter that authored it.
     def chapters_containing(ch: str):
         if not source_dir or not source_dir.is_dir():
@@ -95,7 +164,7 @@ def main() -> int:
     bq_headings = []
     for lineno, line in enumerate(assembled.read_text(encoding="utf-8").splitlines(), 1):
         for col, ch in enumerate(line, 1):
-            why = offending(ch)
+            why = offending(ch, covered)
             if why:
                 hits.append((lineno, col, ch, why, line.strip()[:70]))
         # A heading nested in a blockquote ("> ### Title") does NOT survive the
@@ -105,6 +174,12 @@ def main() -> int:
         # ("> **Title.**") for a callout heading instead.
         if line.lstrip().startswith(">") and line.lstrip(" >").startswith("#"):
             bq_headings.append((lineno, line.strip()[:70]))
+
+    # State the exemptions out loud -- a silent exemption is how a real defect
+    # hides behind a template fallback that was later removed.
+    if covered:
+        chars = " ".join(sorted(chr(cp) for cp in covered))
+        print(f"{assembled.name}: template fallbacks honored ({len(covered)}): {chars}")
 
     if not hits and not bq_headings:
         print(f"{assembled.name}: OK (no non-renderable glyphs, no blockquote headings)")
