@@ -42,7 +42,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
 | `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
 | color mode | `LUT1` … `RGB24` | `RGB24` | How color values are interpreted ([Chapter 4](#ch-4)) |
-| `LUTCOLORS` | `rgb24 rgb24 …` | (LUT is all black) | Loads the palette used by the `LUT1`–`LUT8` modes |
+| `LUTCOLORS` | `rgb24 rgb24 ...` | (LUT is all black) | Loads the palette used by the `LUT1`–`LUT8` modes |
 | `BACKCOLOR` | `rgb` | black | Background fill color (`$RRGGBB`) |
 | `UPDATE` | — | off | Enables buffered mode (see "The update model") |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
@@ -339,7 +339,8 @@ PUB main()
   debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF)
   debug(`Labels TEXTSIZE 14)
   ' COLOR sits immediately before each TEXT -- that is what makes it black
-  debug(`Labels SET 300 300 COLOR $000000 TEXT 'Default')   ' size 14 (the window default)
+  ' size 14 -- the window default
+  debug(`Labels SET 300 300 COLOR $000000 TEXT 'Default')
   debug(`Labels SET 300 200 COLOR $000000 TEXT 20 'Bigger') ' size 20
   ' size 16, bold, rotated 90 degrees
   debug(`Labels SET 300 100 COLOR $000000 TEXT 16 $02 90 'Rotated')
@@ -705,7 +706,7 @@ PASM so the example builds and runs on a bare P2 board.
 
 > **`+/`, not `/` — Spin2's plain `/` is a *signed* divide.** The angle step is
 > `$FFFF_FFFF +/ 511`. Written with a plain `/`, Spin2 reads `$FFFF_FFFF` as the
-> signed value **−1**, and `−1 / 511` truncates to **`0`** — so `angle` would be 0
+> signed value **−1**, and `-1 / 511` truncates to **`0`** — so `angle` would be 0
 > for every column, `sine()` would return the same value 512 times, and the "sine
 > wave" would come out as a **flat horizontal line lying exactly on top of the grey
 > axis this program draws two statements earlier**. It compiles, it runs, and it

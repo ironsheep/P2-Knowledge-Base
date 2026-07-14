@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.2\par}
+{\large\color{blue}Version 1.1.0\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -272,9 +272,13 @@ A number in the feed stream is interpreted one of two ways, and you control whic
 - A number put into the stream as **display text** shows as its digits. In a TERM
   you do this with a `` `(value) `` substitution inside single-quoted text:
   `` `(x) `` is signed decimal, `` `$(x) `` hex, `` `%(x) `` binary, `` `.(x) ``
-  floating point, and `` `#(x) `` sends the character whose code is `x`. If `x`
-  holds 25, then a `` `(x) `` substitution inside single-quoted text shows the two
-  characters `2` and `5`.
+  floating point, `` `?(x) `` boolean (printing `TRUE` or `FALSE`), and `` `#(x) ``
+  sends the character whose code is `x`. If `x` holds 25, then a `` `(x) ``
+  substitution inside single-quoted text shows the two characters `2` and `5`.
+
+  These punctuation forms are shorthands for the long-named formatters:
+  `` `(x) `` is `SDEC_`, `` `.(x) `` is `FDEC_`, and `` `?(x) `` is `BOOL_`. Use
+  whichever reads better — they compile to the same thing.
 
   The value-only `DEBUG()` formatters you use for serial output — `` `udec_(x) ``,
   `` `uhex_(x) ``, `` `sdec_(x) ``, and so on — also put a value in the stream, but
@@ -335,10 +339,14 @@ after the window name, the same way you send data:
   accept `SAVE 'filename'`, and optionally `SAVE WINDOW 'filename'` to capture the
   whole window rather than just the display area. The file is a `.bmp`; the
   extension is appended automatically, so give the name *without* it (`'scope'`,
-  not `'scope.bmp'`).
+  not `'scope.bmp'`). **`SAVE` has four traps — read the box below before you use it.**
 - **`CLOSE`** — close one window and free it. Most programs never need this — a
   window also stops when the program stops feeding it — but `` `CLOSE `` lets you
   dismiss a single window explicitly while the rest of the program keeps running.
+  `CLOSE` is a command only (it takes no arguments), it accepts more than one window
+  name in a message, and it runs **after** the rest of that message — so
+  `` `Win SAVE 'shot' CLOSE `` saves *and then* closes, in that order. Closing a
+  window gives back one of the **32 display slots** the debug system has to hand out.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This prevents flicker when
@@ -351,6 +359,58 @@ after the window name, the same way you send data:
 Each window also has commands of its own — `TRIGGER` and `HOLDOFF` on SCOPE and
 LOGIC, the drawing commands on PLOT, and so on. Those belong to the window and are
 documented in its chapter.
+
+### The four `SAVE` traps
+
+`SAVE` writes a file and tells you nothing about how it went. All four of these
+failures are silent, and all four have been confirmed on hardware:
+
+1. **No filename, no file.** The filename is *required*. A bare `` `Win SAVE ``
+   writes nothing at all — no file, no error, no warning. It simply does not happen.
+2. **A keyword after `SAVE` is eaten.** The filename must be the **last** thing in the
+   message. Anything you put after `SAVE` other than a filename is consumed and
+   discarded — `` `Win SAVE CLEAR `` writes no file **and** does not clear the window.
+   You lose both commands.
+3. **In buffered mode you save the *previous* frame.** `SAVE` captures the front
+   buffer — what is on screen — not the drawing you have accumulated off-screen.
+   Under `UPDATE` mode, send `` `UPDATE `` *before* `SAVE`, or you will file the frame
+   before the one you meant.
+4. **`SAVE WINDOW` scrapes the desktop.** The plain form renders the display area from
+   the window's own bitmap, but `SAVE WINDOW` copies the region of the *screen* the
+   window occupies — so anything overlapping it gets captured too. Keep the window
+   unobscured, or prefer the plain form.
+
+Trap 1 and trap 3 are the ones that waste an afternoon: in both cases the program
+runs, the file appears (or doesn't) without complaint, and the picture you get is a
+plausible one — just not the picture you asked for.
+
+> **`SAVE WINDOW` is currently unreliable on PNut.** It can capture a truncated or
+> offset rectangle, a neighboring window, or bare desktop. This is a tool bug, reported
+> upstream — the plain `SAVE 'name'` form is correct in every case and is what you
+> should build on.
+
+### Ending a debug session
+
+`` `CLOSE `` dismisses one window. `DEBUG_END_SESSION` ends the **whole session** —
+it is the global counterpart, and it is not a window command but a `DEBUG()`
+statement of its own:
+
+```spin2
+{Spin2_v52}                ' must be the FIRST line of the file
+
+PUB main()
+  ' ... your program ...
+  debug(DEBUG_END_SESSION) ' close every window and the log file
+```
+
+Executing it closes any open DEBUG windows *and* the `DEBUG.LOG` file, and **your P2
+program keeps running**. It exists chiefly so that a run can signal "the output is
+complete": the log file is closed and flushed, which is what lets a script — or an AI
+coding assistant — know the results are ready to read rather than still being written.
+
+`DEBUG_END_SESSION` was added in Spin2 v52, and it is **version-gated**: without
+`{Spin2_v52}` (or later) as the literal first line of your source file, the compiler
+does not know the symbol and the build fails with an expression error.
 
 ## How these differ from the single-step debugger
 
@@ -382,8 +442,9 @@ drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
 The `DEBUG()` link carries every element you send — every sample, pixel, and
 value — over a single serial connection, so **the link is the budget.** At the
 2 Mbaud the tool uses, 8N1 framing costs about 10 bits per byte, so the wire
-moves roughly **200 KB/s of raw bytes**, and after the `DEBUG()` command and
-formatting overhead you can count on **~100–150 KB/s of actual payload**.
+moves roughly **200 KB/s of raw bytes**. After the `DEBUG()` command and
+formatting overhead the usable payload is lower — as a rough working estimate,
+on the order of **100–150 KB/s**.
 Everything a window shows has to fit through that.
 
 Most debugging fits comfortably: text, status panels, sensors read at a few Hz
@@ -516,8 +577,9 @@ changes.
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
 > `x`; a bare `13` is the newline command,
-> not the text "13". The value-only output formatters are `UDEC_`, `SDEC_`,
-> `UHEX_`, `SHEX_`, and `UBIN_` — these feed a numeric data element (consumed by the
+> not the text "13". Value-only output formatters such as `UDEC_`, `SDEC_`,
+> `UHEX_`, `SHEX_`, and `UBIN_` — every DEBUG output command has a trailing-underscore
+> value-only form — feed a numeric data element (consumed by the
 > graphing windows), so to display a value's text in a TERM use `` `(value) ``
 > substitution instead.
 
@@ -532,8 +594,8 @@ signal drives a display window exactly the way a real sensor would. Throughout
 this manual, examples produce their own data using:
 
 - **counters** — a variable you increment in a loop,
-- **the CORDIC solver** — `QSIN` / `QROTATE` for smooth waveforms and rotations,
-- **the random-number generator** — `GETRND` (or the `?` operator) for noise,
+- **the CORDIC solver** — `QSIN` / `ROTXY` for smooth waveforms and rotations,
+- **the random-number generator** — `GETRND` (or the `??` operator) for noise,
 - **`GETCT`** — the system counter, for timing and elapsed-time measurements.
 
 A counter feeding a text window, a CORDIC sine wave feeding a SCOPE, RNG noise
@@ -669,8 +731,8 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `TERM` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - TERM` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
@@ -774,6 +836,14 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 | 2 | `6` | Lime | Black |
 | 3 | `7` | Black | Lime |
 
+> **The default green is the palette value `$00FF00`, not the `GREEN` keyword.** The
+> default palette uses a pure, fully saturated green — `$00FF00`, with no red and no
+> blue in it at all. The `GREEN` *keyword* is a computed color and resolves to
+> `$09FF09` at its default brightness: a trace of red and blue rides along with it, so
+> it reads as very slightly washed out beside the palette green rather than as a
+> cleaner one. **There is no `LIME` keyword.** To reproduce the default exactly, write
+> `$00FF00` ([Appendix C](#appendix-c) explains why keywords and palette values differ).
+
 ```spin2
 debug(`Status 4 'normal' 13)     ' pair 0: orange on black
 debug(`Status 6 'ok' 13)         ' pair 2: lime on black
@@ -783,16 +853,35 @@ To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-debug(`TERM Log SIZE 60 20 COLOR ...
-      $FF7F00 $000000 ...                ' pair0 fg/bg
-      $000000 $FF7F00 ...                ' pair1 fg/bg
-      $00FF00 $000000 ...                ' pair2 fg/bg
-      $FF0000 $000000)                   ' pair3 fg/bg
+' COLOR pairs: pair0 orange/black, pair1 black/orange,
+'             pair2 green/black,  pair3 red/black
+debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 ...
+      $00FF00 $000000 $FF0000 $000000)
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
 lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
+
+### Setting a color directly, without a pair
+
+The four pairs are not your only option. From **Spin2 v52** onward you can name a
+color *in the feed itself* and skip the pair system entirely — send a color keyword
+and, optionally, a second one for the background:
+
+```spin2
+debug(`Log RED 'fault: overtemp' 13)          ' red text
+debug(`Log YELLOW BLACK 'warning' 13)         ' yellow on black
+debug(`Log GREEN 12 'all systems nominal' 13) ' green at brightness 12
+```
+
+Each keyword takes the optional `0`–`15` brightness described in
+[Appendix C](#appendix-c). A runtime `BACKCOLOR` sets just the text background. The
+color stays in force until you change it or select a pair with a `4`–`7` code.
+
+> This is a **v52 addition**. Build with a `pnut_ts` of v52 or later and put
+> `{Spin2_v52}` (or later) on the source file's first line; an older compiler does not
+> recognize the directive.
 
 ## Cursor, tabs, and scrolling
 
@@ -857,7 +946,9 @@ PRI read_press() : v
 Three more runtime keyword commands round out the set:
 
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE 'name' `` — saves the window image to `name.bmp` on the host. The filename
+  is **required** and must come last — a bare `` `SAVE `` writes nothing at all, and
+  says nothing about it ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ## A positioned dashboard
@@ -871,7 +962,9 @@ draw the labels once, then overprint just the value fields in place with the `3`
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count
-  debug(`TERM Panel SIZE 40 8)
+  ' pairs: 0 = labels (black/white), 1 = header (white/blue),
+  '        2 = ok (white/green), 3 = alert (white/red)
+  debug(`TERM Panel SIZE 40 8 BACKCOLOR WHITE COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' Draw the static layout once: a title and three fixed labels.
   debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
@@ -890,9 +983,9 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (red), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (white on red = alert), then back to pair 0
     else
-      ' pair 2 (lime), then back to pair 0
+      ' pair 2 (white on green = ok), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4
@@ -942,8 +1035,8 @@ or register read, and the same panel reports live values.
 ## Try it
 
 Start with the dashboard example above. Then: switch it to color — print the label
-in pair 0 and the value in pair 2, and turn the value red (pair 3) when it crosses a
-threshold. You will have a live, color-coded status panel in a dozen lines, and
+in pair 0 and the value in pair 2, and set a custom `COLOR` combo so pair 3 is red,
+switching the value to pair 3 when it crosses a threshold. You will have a live, color-coded status panel in a dozen lines, and
 you will have used creation config, command codes, color pairs, and buffered
 updates together.
 
@@ -992,11 +1085,11 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - BITMAP` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
-| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
-| `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
+| `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification — each logical pixel becomes an x×y block; each is **1–256** |
+| `SPARSE` | `color` | off | Sparse mode: draw each pixel as a **round dot** on a solid `color` background (needs `DOTSIZE` ≥ 4) |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
@@ -1032,8 +1125,12 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without defining a palette, the palette is uninitialized and LUT-mode pixels
-render as garbage — you must supply one with `LUTCOLORS`.
+mode without first defining a palette, every lookup-table entry is `$000000`: the
+table is zero-filled at creation, so the result is not random garbage but a
+uniformly **black** picture — pixels arrive, indices resolve, and every one of them
+paints black. That is a confusing failure precisely *because* it looks like nothing
+arrived at all. Always send `LUTCOLORS` to load the palette before feeding LUT-mode
+pixel data.
 
 **Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
 color. The LUMA modes map the value against a single tint color you pick with a
@@ -1042,12 +1139,13 @@ bits) and take no tint keyword:
 
 | Mode | Meaning |
 |------|---------|
-| `LUMA8` / `LUMA8W` / `LUMA8X` | Brightness in one color: black-base, white-base, expanded-range |
+| `LUMA8` / `LUMA8W` / `LUMA8X` | Brightness in one color: black-to-color, white-to-color, black-to-color-to-white |
 | `RGBI8` / `RGBI8W` / `RGBI8X` | Upper 3 bits select a color, lower 5 bits are intensity |
 
 For the LUMA modes you name the tint color after the keyword (for example,
 `LUMA8 GREEN`); the 8-bit value then runs that color from dark to bright. The `W`
-variants run from white toward the color; the `X` variants expand the value range.
+variants run from white toward the color; the `X` variants ramp black → color →
+white, peaking in white.
 
 **HSV (hue/value) modes** — pack a hue and a brightness into each pixel:
 
@@ -1058,7 +1156,7 @@ variants run from white toward the color; the `X` variants expand the value rang
 
 Hue maps around a color wheel (red → yellow → green → cyan → blue → magenta → red);
 value sets brightness. As with the luminance modes, `W` runs from white and `X`
-expands the range.
+ramps black → color → white, peaking in white.
 
 **Direct RGB modes** — the value *is* the color:
 
@@ -1087,10 +1185,8 @@ entries at the first non-numeric element:
 PUB main() | x, y
   ' LUT4: a 16-color palette defined inline
   debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS ...
-         $000000 $202020 $400000 $004000 ...
-         $000040 $404000 $004040 $400040 ...
-         $808080 $C0C0C0 $FF0000 $00FF00 ...
-         $0000FF $FFFF00 $00FFFF $FFFFFF)
+        $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 ...
+        $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
   repeat y from 0 to 15
     repeat x from 0 to 15
       debug(`Tiles `((x ^ y) & $0F))  ' each pixel is a 4-bit palette index
@@ -1162,9 +1258,13 @@ pixels (one row), vertical patterns every `height` pixels (one column).
 ### Packed pixel data
 
 The DEBUG serial link is the bottleneck for any sizable image, so BITMAP can unpack
-several pixels from each number you send. You enable a packing format on the
-creation line or mid-stream; from then on, each number is split into multiple
-pixels before plotting.
+several pixels from each number you send. You enable a packing format **on the
+creation line** — it is not a runtime command, so you cannot switch packing formats
+mid-stream the way you can switch color modes. From then on, each number is split
+into multiple pixels before plotting.
+
+There is **no default packing format**: unless you name one at creation, the window
+is *unpacked* and reads each long you feed it as one full pixel value.
 
 The formats name the container size and the bits per pixel, running from
 `LONGS_1BIT` (32 one-bit pixels per long) through `BYTES_4BIT` (2 four-bit pixels
@@ -1221,7 +1321,7 @@ Several change configuration mid-stream; the rest manage the display.
 | `SCROLL` | `x y` | Shift the canvas by `x`, `y` pixels; fill the vacated strips |
 | `CLEAR` | — | Fill the canvas with the background color; reset position |
 | `UPDATE` | — | Refresh the display now (required in manual-update mode) |
-| `SAVE` | — | Save the current canvas image to a file on the host |
+| `SAVE` | `'name'` | Save the canvas to `name.bmp` on the host; the filename is **required** |
 | `CLOSE` | — | Close this window and free its resources |
 
 `SCROLL` shifts the whole canvas by a signed amount: positive `x` scrolls right,
@@ -1243,11 +1343,23 @@ flicker-free updates — write an entire frame, then show it at once.
 `RATE` tunes the automatic-update cadence: the display refreshes once every `count`
 pixels. A small count repaints often (smoother, slower); a large count repaints
 rarely (faster, choppier). The default is one scan line — `width` pixels for
-horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
-(`width x height`).
+horizontal patterns, `height` for vertical.
 
-`SAVE` writes the current canvas to an image file on the host running
-`pnut_term_ts`.
+> **`RATE -1` is a create-line-only shorthand — at runtime it freezes the display.**
+> On the *creation line*, `RATE -1` is substituted with the full canvas
+> (`width x height`), giving you one refresh per complete frame. That substitution
+> does **not** happen for a runtime `` `RATE -1 ``: the value is stored as-is, and
+> the refresh counter — which fires on an *equality* test against an ever-increasing
+> count — can never match it. The window stops updating. It is not an error and it
+> is not reported; pixels keep arriving and the picture simply stops moving.
+> A runtime `` `RATE `` with any positive count resumes refreshing normally.
+> (Hardware-verified.)
+
+`SAVE 'name'` writes the canvas to `name.bmp` on the host. The filename is
+**required** — a bare `` `SAVE `` writes nothing at all, and says nothing. See
+[Chapter 1](#ch-1) for the full set of `SAVE` traps; the one that bites hardest
+here is that in manual-update mode `SAVE` captures the frame currently *shown*, so
+send `` `UPDATE `` before you `SAVE` or you will file the previous frame.
 
 ## A complete example
 
@@ -1259,10 +1371,10 @@ spot over a cool background. No hardware is involved — the temperatures are
 computed in software — but the data has exactly the shape a real array would
 produce.
 
-The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel block
-with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
-built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
-bright (hot):
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel cell with
+`DOTSIZE` and drawn as a round dot on a gray field with `SPARSE` (the magnified,
+low-resolution display the window is built for). `LUMA8 RED` maps each cell's 8-bit
+temperature from dark (cool) to bright (hot):
 
 ```{.spin2 caption="ch04-bitmap-heatmap.spin2"}
 CON
@@ -1272,7 +1384,7 @@ CON
 
 PUB main() | x, y, ang, cx, cy
 
-  ' 32x24 grid: each cell a 12px block with grid border; temperature -> tint
+  ' 32x24 grid: each cell a 12px round dot on the GRAY background; temperature -> tint
   debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
   ang := 0
@@ -1347,10 +1459,12 @@ and the heatmap shows live infrared.
   pass, `UPDATE` mode prevents the partial-frame flicker you would see with automatic
   refresh. For a steadily growing image, automatic refresh with a suitable `RATE` is
   simpler.
-- **Sparse mode is for magnified, low-resolution displays.** `DOTSIZE` with `SPARSE`
-  draws each logical pixel as a `DOTSIZE`-square block with a grid border — useful for
-  LED-matrix and pixel-art views — but it renders far more slowly than the 1:1 path,
-  so keep the logical canvas small.
+- **Sparse mode is for magnified, low-resolution displays.** `SPARSE` draws each
+  magnified pixel as a large round dot against its background color (and requires a
+  `DOTSIZE` of at least 4); plain `DOTSIZE` without `SPARSE` fills the full
+  `DOTSIZE`×`DOTSIZE` square block instead. Either is useful for LED-matrix and
+  pixel-art views — but sparse mode renders far more slowly than the 1:1 path, so
+  keep the logical canvas small.
 - **There are no drawing primitives here.** BITMAP plots pixels only. For lines,
   shapes, text, and sprites, use the PLOT window ([Chapter 5](#ch-5)), which shares BITMAP's
   color modes but adds a coordinate system and drawing commands.
@@ -1406,13 +1520,24 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Plot` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - PLOT` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
 | `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
+| color mode | `LUT1` … `RGB24` | `RGB24` | How color values are interpreted ([Chapter 4](#ch-4)) |
+| `LUTCOLORS` | `rgb24 rgb24 ...` | (LUT is all black) | Loads the palette used by the `LUT1`–`LUT8` modes |
 | `BACKCOLOR` | `rgb` | black | Background fill color (`$RRGGBB`) |
 | `UPDATE` | — | off | Enables buffered mode (see "The update model") |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
+
+If you omit `POS`, the window is placed by whatever tool is hosting the debug
+session — do not count on a particular screen position, or on windows avoiding
+one another. Give `POS` explicitly when the layout matters.
+
+PLOT draws in full `RGB24` unless you select one of the other color modes — the
+same 19 modes the BITMAP window uses, described in [Chapter 4](#ch-4). If you
+select a `LUT` mode, load the palette with `LUTCOLORS`: the LUT is zero-filled at
+creation, so **every index resolves to black until you load it**.
 
 `SIZE` is measured in pixels, and both dimensions are clamped to the range
 **32–2048**. The default is `256 256`. The canvas is drawn into an off-screen
@@ -1423,11 +1548,12 @@ picture rather than revealing more canvas.
 a 2×2 block, which is useful when you want a small drawing shown large. The two
 axes can differ.
 
-`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **runtime commands, not creation-line
-keywords** — issue them after the window exists, not in the `DEBUG(\`PLOT …)`
-creation call. `CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE`
-sets the default font size for `TEXT` (default `10`, range 6–200). They are
-described in the sections that follow.
+`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **feeding commands, not
+window-instantiation keywords** — they belong to the drawing you feed the window,
+not to how the window is created, which is why they are not in the table above.
+`CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE` sets the default
+font size for `TEXT` (default `10`, range 6–200). They are described in the
+sections that follow.
 
 ## The coordinate system
 
@@ -1507,12 +1633,23 @@ POLAR {twopi {theta}}
 - `theta` — an angular offset added to every angle, which rotates the entire
   coordinate system.
 
+The default `twopi` of `$1_0000_0000` is one count too large for a 32-bit
+argument, so it has a **shorthand**: write `POLAR 0` for `$1_0000_0000` and
+`POLAR -1` for `-$1_0000_0000`. `POLAR 0` is therefore not "a full turn of zero"
+— it selects the full 32-bit angle scale, which is exactly what `QROTATE` and
+`QSIN` produce.
+
+By default the angle is measured the mathematical way: `theta` = 0 points **East**
+(along +x), and increasing `theta` sweeps **counter-clockwise** (a negative `twopi`,
+above, flips that sweep to clockwise). The `theta` offset then rotates this whole
+system to a new zero direction.
+
 With the origin at the canvas center, polar mode draws radial figures directly:
 
 ```spin2
 PUB main() | theta
-  debug(`PLOT Rose SIZE 512 512 POLAR $1_0000 BACKCOLOR $000000)
-  debug(`Rose ORIGIN 256 256)
+  debug(`PLOT Rose SIZE 512 512 BACKCOLOR $000000)
+  debug(`Rose ORIGIN 256 256 POLAR $1_0000)
   debug(`Rose COLOR $00FFFF)
   debug(`Rose SET 0 0)
   repeat theta from 0 to $1_0000
@@ -1523,17 +1660,24 @@ Send `CARTESIAN` to leave polar mode.
 
 ### PRECISE — sub-pixel positioning
 
-Coordinates are stored internally in a fixed-point format, and by default the
-window keeps **sub-pixel precision** (1/256 of a pixel), so anti-aliased
-primitives land on exact positions. `PRECISE` toggles this:
+Coordinates are stored internally in a fixed-point format, and `PRECISE` decides
+whether you address that format directly. `PRECISE` mode starts **off**: `DOT`
+and `LINE` take whole-pixel coordinates and line sizes, which is what you want
+for most drawing. `PRECISE` toggles it:
 
 ```debug-update
 PRECISE
 ```
 
-Each `PRECISE` flips between sub-pixel mode (the default) and whole-pixel mode.
-Whole-pixel mode aligns coordinates to integer pixels. Sub-pixel mode is the
-right choice for smooth curves and animation; you rarely need to change it.
+With `PRECISE` **on**, the line size and the (x, y) of `DOT` and `LINE` are
+expressed in **256ths of a pixel**, so an anti-aliased primitive can land on a
+sub-pixel position — the right choice for smooth curves and animation, where
+rounding every point to an integer pixel makes motion visibly step. In this mode
+a coordinate of `256` means *one pixel*, not 256 of them: scale your values up by
+256 (`x << 8`) when you turn it on.
+
+Each `PRECISE` flips the mode. Because sub-pixel is **not** the default, the
+first `PRECISE` switches **to** sub-pixel mode; a second returns to whole pixels.
 
 > **Read coordinates through the active system.** A primitive's position is
 > always the cursor, transformed by polar conversion (if active), then the
@@ -1544,8 +1688,14 @@ right choice for smooth curves and animation; you rarely need to change it.
 
 The window provides six geometric primitives plus text. Each is drawn at — or,
 for `LINE`, *to* — the current cursor, in the current color, with anti-aliasing.
-Where a primitive takes `linesize` and `opacity`, both are optional and default
-to the window's current line size and opacity.
+Where a primitive takes `linesize` and `opacity`, both are optional — but an
+omitted `linesize` does **not** mean the same thing everywhere:
+
+- For `DOT` and `LINE` it falls back to the window's `LINESIZE` (default `1`).
+- For the four shapes — `CIRCLE`, `OVAL`, `BOX`, `OBOX` — it falls back to
+  **`0`, which means *filled***, not to the window's `LINESIZE`.
+
+An omitted `opacity` always falls back to the window's `OPACITY`.
 
 ### DOT — a dot at the cursor
 
@@ -1650,37 +1800,53 @@ debug(`Canvas OBOX 120 100 15 15 4 200)   ' outline, thickness 4
 TEXT {size {style {angle}}} 'string'
 ```
 
-`TEXT` renders the string at the cursor, in the current text color. All three
-numeric arguments are optional and default to the window's current text size,
-style, and angle:
+`TEXT` renders the string at the cursor, in the **text color**. All three numeric
+arguments are optional and default to the window's current text size, style, and
+angle:
 
 - `size` — font size in points.
 - `style` — a style byte (below).
 - `angle` — rotation in degrees, `0`–`359`. In polar mode the angle is given in
   `twopi` units instead.
 
+> **`COLOR` only reaches `TEXT` when `TEXT` comes next.** The window keeps the
+> text color *separately* from the drawing color, and a `COLOR` command updates
+> it **only when the very next key is `TEXT`**. Put `COLOR` immediately before
+> each `TEXT`, in the same `DEBUG` statement. If anything intervenes — even a
+> `SET` — the text keeps its previous color, which starts out **white**. On a
+> light background that is invisible text, and nothing in the output tells you
+> why.
+
 ```spin2
 PUB main()
-  debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF TEXTSIZE 14)
-  debug(`Labels COLOR $000000 SET 300 200)
-  debug(`Labels TEXT 'Default')           ' size 14 (the window default)
-  debug(`Labels TEXT 20 'Bigger')         ' size 20
+  debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF)
+  debug(`Labels TEXTSIZE 14)
+  ' COLOR sits immediately before each TEXT -- that is what makes it black
+  ' size 14 -- the window default
+  debug(`Labels SET 300 300 COLOR $000000 TEXT 'Default')
+  debug(`Labels SET 300 200 COLOR $000000 TEXT 20 'Bigger') ' size 20
   ' size 16, bold, rotated 90 degrees
-  debug(`Labels TEXT 16 $02 90 'Rotated')
+  debug(`Labels SET 300 100 COLOR $000000 TEXT 16 $02 90 'Rotated')
 ```
 
 The `style` byte packs weight, italic, underline, and alignment into one value:
 
 | Bits | Field | Values |
 |------|-------|--------|
-| 0–1 | Weight | `0`=light, `1`=normal, `2`=bold, `3`=heavy |
+| 0–1 | Weight | `0`=thin, `1`=normal, `2`=bold, `3`=heavy |
 | 2 | Italic | `0`=normal, `1`=italic |
 | 3 | Underline | `0`=none, `1`=underline |
 | 4–5 | Horizontal align | `0`/`1`=center, `2`=right, `3`=left |
-| 6–7 | Vertical align | `0`/`1`=center, `2`=bottom, `3`=top |
+| 6–7 | Vertical align | `0`/`1`=center, `2`=top, `3`=bottom |
 
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
-`$20` right-aligns. The defaults (style `$00`) are light weight, centered both ways.
+`$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
+centered both ways.
+
+The weight field selects a *nominal* font weight, but the DEBUG display font does
+not render it as a weight progression: `$00` looks identical to the `$01` default,
+and `$02`/`$03` are *not* heavier — if anything they render with slightly less ink,
+not more. Don't rely on the weight field to make text bolder.
 
 You can set the text defaults independently with `TEXTSIZE size`, `TEXTSTYLE
 style`, and `TEXTANGLE angle`; a later `TEXT` that omits an argument uses the
@@ -1698,8 +1864,14 @@ COLOR rgb
 The argument is a `$RRGGBB` value — for example `COLOR $FF0000` is red,
 `COLOR $00FF00` is green, `COLOR $0000FF` is blue. Named colors (`RED`, `GREEN`,
 `BLUE`, `WHITE`, `BLACK`, `CYAN`, `MAGENTA`, `YELLOW`, `ORANGE`, `GRAY`) are also
-accepted in the command stream. Until you set `COLOR`, the default draw color is
-cyan (`$00FFFF`) and the default text color is white (`$FFFFFF`).
+accepted in the command stream, each with an optional `0`–`15` brightness — but a
+keyword resolves to a *computed* color, not to the palette value of the same name
+([Appendix C](#appendix-c)). Until you set `COLOR`, the default drawing color is
+cyan (`$00FFFF`).
+
+`COLOR` sets the color the *primitives* draw in. The **text** color is a separate
+setting, and `COLOR` updates it only when `TEXT` is the next key — so a `COLOR`
+meant for a label must sit immediately before that label's `TEXT`.
 
 `BACKCOLOR rgb` sets the background fill — the color `CLEAR` paints the canvas
 with. It is most often set on the creation line.
@@ -1711,11 +1883,16 @@ own:
 OPACITY byte
 ```
 
-The value is a byte `0`–`255` (values outside that range wrap to their low 8 bits,
-so they are not saturated), where `255` is fully opaque and lower values blend the
-primitive with whatever is already on the canvas. A per-primitive
-`opacity` argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest)
-overrides this default for that one primitive.
+The value is a byte `0`–`255`, where `255` is fully opaque and lower values blend
+the primitive with whatever is already on the canvas. A per-primitive `opacity`
+argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest) overrides
+this default for that one primitive.
+
+> **`OPACITY 256` makes everything vanish.** The value is stored in a byte and it
+> is **not** clamped — it wraps. Reach past the top of the range for "as opaque as
+> possible" and `256` wraps to **`0`, fully transparent**: every primitive you draw
+> next is invisible, with no error and no clue. The most opaque value is **`255`**.
+> (Hardware-verified.)
 
 ```spin2
 PUB main()
@@ -1725,8 +1902,9 @@ PUB main()
   debug(`Blend SET 180 128 BOX 100 100)  ' this box uses the 128 default
 ```
 
-`LINESIZE size` sets the default line/dot thickness used when `DOT` and `LINE`
-omit their `linesize` argument.
+`LINESIZE size` sets the default line/dot thickness, in pixels, used when `DOT`
+and `LINE` omit their `linesize` argument. The default is `1`. (It does not reach
+the shapes — an omitted shape `linesize` is `0`, which fills.)
 
 ## Layers, CROP, and sprites
 
@@ -1735,9 +1913,11 @@ Beyond live primitives, the PLOT window holds **eight bitmap layers** and a
 rather than redrawing primitives every frame: you composite a layer or stamp a
 sprite with a single command, which avoids re-issuing the geometry that built it.
 
-> **`{Spin2_v50}` required.** `LAYER`, `CROP`, `SPRITEDEF`, and `SPRITE` are V50
-> additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
-> with a Spin2 v50+ `pnut_ts`; without it these commands are not recognized.
+> **`LAYER`/`CROP` need `{Spin2_v50}`.** The hidden-bitmap `LAYER` and `CROP`
+> commands are V50 additions; `SPRITEDEF` and `SPRITE` were added earlier (V35n).
+> Because this section uses `LAYER` and `CROP`, build it with a Spin2 v50+
+> `pnut_ts` and put `{Spin2_v50}` (or later) on the source file's first line;
+> without that, those two commands are not recognized.
 
 ### LAYER — load a bitmap into a layer
 
@@ -1810,8 +1990,23 @@ SPRITE id {orientation {scale {opacity}}}
 ```
 
 - `id` — which sprite to draw, **`0`–`255`**.
-- `orientation` — **`0`–`7`**, selecting one of eight flips/rotations (0 = normal,
-  1 = flip-X, 2 = flip-Y, 3 = 180°, 4–7 = the 90° rotations and their flips).
+- `orientation` — **`0`–`7`**, selecting one of the eight ways a square can be
+  laid down. It is not a rotation counter — it is **three independent bits** that
+  compose: bit 0 flips X, bit 1 flips Y, and bit 2 **transposes** (swaps the two
+  axes). So `4` on its own is a diagonal mirror, and the 90° rotations are the
+  combinations that pair the transpose with a flip:
+
+  | Code | Bits | Result |
+  |------|------|--------|
+  | `0` | `%000` | normal |
+  | `1` | `%001` | flip X |
+  | `2` | `%010` | flip Y |
+  | `3` | `%011` | flip X + flip Y (= 180° rotation) |
+  | `4` | `%100` | transpose (mirror about the main diagonal) |
+  | `5` | `%101` | transpose + flip X (a 90° rotation) |
+  | `6` | `%110` | transpose + flip Y (the other 90° rotation) |
+  | `7` | `%111` | transpose + both flips (the anti-diagonal mirror) |
+
 - `scale` — pixel magnification, **`1`–`64`**; each sprite pixel becomes a
   `scale x scale` block.
 - `opacity` — an overall alpha multiplier, `0`–`255`, applied on top of each
@@ -1904,10 +2099,18 @@ Three more commands round out display control:
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
   becomes visible at the next `UPDATE`.
-- `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
-  `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
-  extension is added for you — do not include it).
+- `` `SAVE 'name' `` — save the canvas image to a BMP file on the host. The
+  filename is **required** and must come last: `SAVE 'name'` writes `name.bmp`
+  (the `.bmp` extension is added for you — do not include it).
 - `` `CLOSE `` — close this window and free its resources.
+
+> **In buffered mode, `SAVE` captures the frame you are *showing*, not the one you
+> are *drawing*.** `SAVE` reads the front buffer. If you draw a frame and then
+> `SAVE` without an intervening `` `UPDATE ``, the file holds the **previous**
+> frame — the new drawing is still off-screen. Send `` `UPDATE `` first, then
+> `SAVE`. (Hardware-verified — and easy to miss, because the file is written, it
+> is valid, and it looks plausible.) See [Chapter 1](#ch-1) for the rest of the
+> `SAVE` traps.
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
@@ -1947,7 +2150,7 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave COLOR $00FF00)
   debug(`Wave SET 0 0)
   repeat x from 0 to 511
-    angle := x * ($FFFF_FFFF / 511)
+    angle := x * ($FFFF_FFFF +/ 511)             ' +/ is UNSIGNED divide
     y := sine(angle, 200)                        ' amplitude 200 px
     debug(`Wave LINE `(x) `(y) 1 255)
 
@@ -1959,10 +2162,9 @@ PUB main() | x, y, angle, i, sx, sy
     debug(`Wave SET `(sx) `(sy))
     debug(`Wave DOT 4 200)
 
-  ' White centered label
-  debug(`Wave COLOR $FFFFFF)
+  ' White centered label -- COLOR must sit immediately before TEXT
   debug(`Wave SET 256 230)
-  debug(`Wave TEXT 16 'QSIN + scatter')
+  debug(`Wave COLOR $FFFFFF TEXT 16 'QSIN + scatter')
 
   repeat                                         ' keep the window open
 
@@ -1984,6 +2186,16 @@ point (`length`, 0) by `angle`, and **GETQY** returns `length x sin(angle)` — 
 software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
+
+> **`+/`, not `/` — Spin2's plain `/` is a *signed* divide.** The angle step is
+> `$FFFF_FFFF +/ 511`. Written with a plain `/`, Spin2 reads `$FFFF_FFFF` as the
+> signed value **−1**, and `-1 / 511` truncates to **`0`** — so `angle` would be 0
+> for every column, `sine()` would return the same value 512 times, and the "sine
+> wave" would come out as a **flat horizontal line lying exactly on top of the grey
+> axis this program draws two statements earlier**. It compiles, it runs, and it
+> looks plausible. Any time you treat a 32-bit value as a full unsigned range —
+> which is exactly what a full-circle angle is — use the unsigned operators: `+/`
+> and `+//`. (`1 << 23` computes the same step here with no divide at all.)
 
 ## A worked instrument: an analog gauge
 
@@ -2210,32 +2422,51 @@ elements inside the same statement** — a quoted label, optionally followed by 
 count, the `RANGE` keyword, and a color. There are no `CHANNELS`, `LABELS`, or
 `COLORS` keywords; the labels, counts, and colors *are* the channel declaration.
 
-```spin2
+```{.spin2 caption="ch06-logic-declare.spin2"}
+CON _clkfreq = 200_000_000
+
 PUB main() | sample
-  ' create + declare 4 channels
-  debug(`LOGIC Bus SAMPLES 64 'CLK' $00FF00 'DATA' $FFFF00 'CS' 'WR')
-  debug(`Bus `(sample))  ' feed it by name
+  ' create + declare 4 channels -- the 1 before each color is the channel COUNT
+  debug(`LOGIC Bus SAMPLES 64 'CLK' 1 $00FF00 'DATA' 1 $FFFF00 'CS' 'WR')
+
+  repeat
+    sample := getrnd() & $0F       ' four bits -> the four channels
+    debug(`Bus `(sample))          ' feed it by name
+    waitms(50)
 ```
 
 That line creates a window named `Bus` with four single-bit channels: `CLK`
 (green), `DATA` (yellow), and `CS` and `WR` (default cycling colors). Channel 0 is
 the first declared label, channel 1 the second, and so on.
 
+> **The `1` in front of each color is load-bearing.** The first number after a label
+> is read as the channel **count**, not as a color — so `'CLK' $00FF00` does not
+> declare a green `CLK`, it declares **65,280 channels named `CLK`**, capped at the
+> window's limit of 32. The labels that follow are then silently dropped, and you
+> get 32 identical channels instead of the four you asked for. Whenever you give a
+> channel an explicit color, give it an explicit count first.
+
 The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | Range | What it sets |
 |---------|-----------|---------|-------|--------------|
-| `TITLE` | `'text'` | `Logic` | — | The window's title-bar text |
-| `POS` | `left top` | cascaded | screen px | Window position, in pixels |
+| `TITLE` | `'text'` | `<name> - LOGIC` | — | The window's title-bar text |
+| `POS` | `left top` | host-placed | screen px | Window position, in pixels |
 | `SAMPLES` | `count` | `32` | 4–2047 | Horizontal resolution — samples shown across the width |
 | `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
-| `DOTSIZE` | `pixels` | `0` | 0–32 | Dot diameter at each sample (`0` = no dots) |
-| `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
-| `TEXTSIZE` | `points` | `10` | 6–200 | Channel-label font size |
+| `LINESIZE` | `half-pixels` | `3` | 1–32 | Waveform line thickness, in **half-pixels** |
+| `DOTSIZE` | `diameter` | `0` | 0–32 | Sample-dot diameter in pixels (`0` = no dots) |
+| `TEXTSIZE` | `points` | editor size | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
+
+> **`LINESIZE` is measured in half-pixels; `DOTSIZE` is not.** A `LINESIZE` of `3`
+> — the default — draws a trace about 1.5 pixels wide, and the maximum of `32`
+> draws 16 pixels. `DOTSIZE`, by contrast, is a plain pixel **diameter**: `DOTSIZE 8`
+> is an 8-pixel dot. The two are a half-step apart, and the only way to know is to
+> be told.
 
 `SAMPLES` and `SPACING` together set the window width: width in pixels is
 `SAMPLES x SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
@@ -2263,6 +2494,9 @@ combinations shown below:
   waveform instead of a single high/low line.
 - **`color`** — an `$RRGGBB` waveform color. Omit it and channels cycle through eight
   built-in colors (lime, red, cyan, yellow, magenta, blue, orange, olive).
+  **A color must be preceded by an explicit count** — the parser reads the first
+  number after a label as the count, so a bare `'CLK' $00FF00` is a channel *count*
+  of `$00FF00`, not a green channel. Write `'CLK' 1 $00FF00`.
 
 **One single-bit channel:**
 
@@ -2308,8 +2542,8 @@ debug(`Bus `(sample))              ' one sample; its bits feed the channels
 ```
 
 For the four-channel `Bus` above (`CLK DATA CS WR`, all single-bit), a sample value
-of `%1011` lights channel 0 (`CLK`) high, channel 1 (`DATA`) low, channel 2 (`CS`)
-high, channel 3 (`WR`) high. You build that value in your own code — from a counter,
+of `%1011` lights channel 0 (`CLK`) high, channel 1 (`DATA`) high, channel 2 (`CS`)
+low, channel 3 (`WR`) high. You build that value in your own code — from a counter,
 from `GETRND`, from port reads, or from a software-simulated signal — and the window
 draws whatever bits you send.
 
@@ -2427,12 +2661,17 @@ Three runtime commands manage the display:
 - `` `CLEAR `` — clears the trace, empties the sample buffer (`SamplePop` returns to
   zero), resets the trigger indicator, and resets the rate counter. The window starts
   collecting fresh samples from empty.
-- `` `SAVE `` — saves the current window image to a `.bmp` file on the host.
+- `` `SAVE 'file' `` — saves the current display area to `file.bmp` on the host.
+  **The `.bmp` extension is added for you — do not write it yourself**, or you will
+  get `file.bmp.bmp`. Add `WINDOW` before the filename
+  (`` `SAVE WINDOW 'file' ``) to capture the entire window instead of just the
+  display area. The filename is required, and it must be the last thing in the
+  message ([Chapter 1](#ch-1) has the full set of `SAVE` traps).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
-debug(`Bus CLEAR)                  ' empty the buffer and blank the trace
-debug(`Bus SAVE)  ' write the current image to a bitmap file
+debug(`Bus CLEAR)              ' empty the buffer and blank the trace
+debug(`Bus SAVE 'trace')   ' writes trace.bmp -- no extension
 ```
 
 ## A complete software-only example
@@ -2452,8 +2691,7 @@ CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 ...
-         'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
+  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00)
   ' align display to CS going low (frame start)
   debug(`SPIbus TRIGGER $1 $0 32)
 
@@ -2574,6 +2812,10 @@ trigger, and decode-in-code approach shows a live bus.
   the cost of assembling that value in your code ([Chapter 13](#ch-13)).
 - **`RATE` thins redraws, not samples.** A high `RATE` divisor reduces how often the
   trace repaints, lowering host load, while every sample still enters the buffer.
+  **What it divides depends on whether a trigger is armed:** free-running, `RATE`
+  counts *samples*; with a `TRIGGER` set, the rate counter only advances on samples
+  that actually fire the trigger, so `RATE` counts *triggers*. `TRIGGER ... RATE 10`
+  means "redraw every tenth trigger," not "every tenth sample."
 - **LOGIC vs. SCOPE.** Use LOGIC for discrete digital lines and bit patterns; use
   SCOPE ([Chapter 7](#ch-7)) for a continuously varying analog value over time. A `RANGE`
   channel bridges the two when you want a small multi-bit value shown as a stepped
@@ -2645,17 +2887,24 @@ The configuration keywords you can place on the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Scope` | The window's title-bar text |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - SCOPE` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Display size in pixels; each is **32–2048** |
 | `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
-| `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
-| `LINESIZE` | `pixels` | `3` | Line thickness; **0–32** (`0` = no lines) |
+| `DOTSIZE` | `diameter` | `0` | Dot diameter in pixels; **0–32** (`0` = no dots) |
+| `LINESIZE` | `half-pixels` | `3` | Line thickness in **half-pixels**; **0–32** (`0` = no lines) |
 | `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
-| Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see [Chapter 13](#ch-13)) |
+| Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
+
+> **`LINESIZE` is in half-pixels; `DOTSIZE` is in whole pixels.** The default
+> `LINESIZE 3` draws a trace about 1.5 pixels wide, and the maximum `32` draws 16
+> pixels — whereas `DOTSIZE 8` is a plain 8-pixel diameter.
+>
+> **There is no default packing format.** Unless you name one, the window is
+> *unpacked*: each long you feed it is one complete sample value.
 
 If you set both `DOTSIZE` and `LINESIZE` to `0`, the window forces a dot size of 1
 so traces remain visible.
@@ -2682,16 +2931,22 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
 The first label declares channel 0, the next channel 1, and so on, up to eight.
-Send the channel declarations as a **separate message after creating the window** —
-a channel declaration placed on the create line is ignored, because the create
-message accepts only configuration keywords, so the window opens with no channels.
+Send the channel declarations as a **separate message after creating the window**.
+
+> **A channel definition on the create line is not ignored — it stops the window from
+> being created at all.** The create message accepts only configuration keywords; a
+> quoted channel label among them aborts the creation, and you get **no window**, no
+> error, and no trace. If a SCOPE never appears, look for a label on the create line
+> first. (Hardware-verified.) Create the window, *then* declare its channels in a
+> second message.
+
 So this declares three channels:
 
 ```spin2
 debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
 debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
-  'Tri'   -1000 1000 100 100 0 $FF0000 ...
-  'Noise' -1000 1000 100 200 0 $00AAFF)
+             'Tri'   -1000 1000 100 100 0 $FF0000 ...
+             'Noise' -1000 1000 100 200 0 $00AAFF)
 ```
 
 Each channel here has a fixed range of −1000 to 1000, is 100 pixels tall, and is
@@ -2739,9 +2994,11 @@ The sample timing is entirely yours: the window plots a set whenever one arrives
 the spacing of your `DEBUG` calls in the loop is what determines the time scale. A
 `waitms` or `waitx` in the loop sets how fast samples are produced.
 
-> Send sample values with the `` `() `` form, which transmits the *value*. This is
-> the same distinction as in the TERM chapter: `` `udec_(x) `` would send the visible
-> *digits* of `x`, which is not what a sample stream wants.
+> Send sample values with the `` `() `` form. It is shorthand for `SDEC_`, so it
+> renders each value as a **signed** decimal the SCOPE reads directly — including
+> negative samples (a value of −5 arrives as −5). Avoid the unsigned `` `udec_ ``
+> form for signed traces: it emits the unsigned 32-bit interpretation, so a small
+> negative sample like −5 is transmitted as `4294967291` and plots far off-scale.
 
 ## Triggering
 
@@ -2824,13 +3081,15 @@ Three more runtime commands round out the set:
 
 - `` `CLEAR `` — clears the display and resets the sample buffer, so the next samples
   start a fresh trace from the right edge.
-- `` `SAVE `` — saves the current display image to a `.bmp` file on the host. An
-  optional filename may follow; without one, the host names the file.
+- `` `SAVE 'name' `` — saves the current display image to `name.bmp` on the host. The
+  filename is **required**: a bare `` `SAVE `` writes nothing, silently
+  ([Chapter 1](#ch-1)). Do not put the `.bmp` in the name — it is appended for you.
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
-debug(`Sig SAVE)    ' write the current trace to a bitmap on the PC
-debug(`Sig CLEAR)   ' wipe the buffer and start over
+' writes trace.bmp on the PC -- the name is required
+debug(`Sig SAVE 'trace')
+debug(`Sig CLEAR)          ' wipe the buffer and start over
 ```
 
 ## A complete worked example
@@ -2848,9 +3107,7 @@ PUB main() | ang, sine, tri, dir, noise
   ' Three stacked channels: fixed -1000..1000 range,
   ' 100px tall, offset by 'base'
   debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2)
-  debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
-    'Tri'   -1000 1000 100 100 0 $FF0000 ...
-    'Noise' -1000 1000 100 200 0 $00AAFF)
+  debug(`Waves 'Sine' -1000 1000 100 0 0 $00FF00 'Tri' -1000 1000 100 100 0 $FF0000 'Noise' -1000 1000 100 200 0 $00AAFF)
 
   ang := 0
   tri := -1000
@@ -3027,6 +3284,9 @@ channel, trigger, and capture code shows the live signal.
   (the default) the window redraws on every sample set. With `RATE 16` it accepts and
   buffers every set but redraws only on every sixteenth — which lowers the host's
   drawing load for fast streams. It does not change how often *you* send samples.
+  **When a `TRIGGER` is armed, `RATE` divides *triggers*, not samples**: the rate
+  counter only advances on sample sets that fire the trigger, so `RATE 10` with a
+  trigger means "redraw every tenth trigger."
 - **You set the time scale, not the window.** The horizontal axis is one column per
   sample set. How fast time appears to move is set by the spacing of your `DEBUG`
   calls — the `waitms`/`waitx` in your loop — not by any window parameter.
@@ -3101,19 +3361,38 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
-| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `radius` | `256x256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256x256 (the default is a 256-pixel width, not a radius) |
+| `TITLE` | `'text'` | `<name> - SCOPE_XY` | The window's title-bar caption |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
+| `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` square. The default radius of `128` gives a 256×256 plot |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
-| `DOTSIZE` | `pixels` | `6` | Dot diameter, `2`–`20` |
-| `TEXTSIZE` | `points` | `10` | Legend text size, `6`–`200` |
+| `DOTSIZE` | `half-pixels` | `6` | Sample-dot diameter in **half-pixels**, `2`–`20` (the default `6` draws a 3-pixel dot) |
+| `TEXTSIZE` | `points` | editor size | Legend text size, `6`–`200` |
 | `COLOR` | `back {grid}` | black, gray | Background color and, optionally, grid color |
 | `POLAR` | `{twopi {offset}}` | — | Interpret pairs as `(radius, angle)` instead of `(x, y)` — see below |
 | `LOGSCALE` | — | linear | Logarithmic radial scale, to magnify points near the center |
 | `HIDEXY` | — | shown | Hide the X,Y coordinate readout at the mouse pointer |
+| Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 | `'name' {color}` | — | next default color | Declare a channel (trace), optionally with a color |
+
+> ### ⚠️ A stray number in the create message will hang your tool
+>
+> Every value on a SCOPE_XY create line must belong to a keyword. A number that
+> follows no keyword sends **PNut's** configuration parser into an **infinite loop**:
+> no error, no diagnostic, no window — the tool simply locks up and has to be killed.
+>
+> ```spin2
+> debug(`SCOPE_XY W 128 'A')      ' HANGS PNut -- 128 follows no keyword
+> debug(`SCOPE_XY W SIZE 128 'A') ' what was meant
+> ```
+>
+> The trigger is an ordinary typo: a dropped `SIZE`, `RANGE`, or `SAMPLES` keyword
+> leaves its number stranded. SCOPE_XY is the only window with this exposure — the
+> others reject or truncate the stray value instead of spinning on it — and
+> `pnut_term_ts` does not share the defect. It is a PNut bug, reported upstream;
+> until it is fixed, a SCOPE_XY window that never opens and a tool that stops
+> responding are the same symptom. (Hardware-verified.)
 
 Three of these behave differently from what their names might suggest, and getting
 them wrong is the most common SCOPE_XY mistake:
@@ -3168,8 +3447,13 @@ debug(`Phase `(x1, y1, x2, y2))   ' (x1,y1) -> A, (x2,y2) -> B
 ```
 
 SCOPE_XY collects values until it has a complete set — two per declared channel —
-then plots all channels at once and starts the next set. You can also split a set
-across several feeds; the window assembles them in arrival order.
+then plots all channels at once and starts the next set.
+
+> **Send a complete set in one message.** The window assembles a set *within* a
+> single `DEBUG` message; it does not carry a half-finished set across to the next
+> one. Split a set across two feeds and the leftover values are **silently
+> discarded** — nothing is plotted, and nothing tells you why. With two channels
+> declared, send all four numbers together.
 
 ## Polar mode
 
@@ -3189,8 +3473,11 @@ debug(`SCOPE_XY Rose SIZE 256 RANGE 1000 POLAR 360 'Rose')
   default explicitly, or `-1` to run angles the other direction.
 - **`offset`** — an angular offset added to every angle, rotating the whole plot.
 
-Angle `0` points up; increasing angle sweeps around the circle. Feed
-`(radius, angle)` pairs exactly as you feed `(x, y)` pairs in Cartesian mode:
+Angle `0` points **east** — along the +x axis, to the right — and increasing angle
+sweeps **counter-clockwise**, the mathematical convention (the same one PLOT uses,
+[Chapter 5](#ch-5)). A negative `twopi` reverses the sweep to clockwise, and `offset`
+rotates the zero direction wherever you want it. Feed `(radius, angle)` pairs exactly
+as you feed `(x, y)` pairs in Cartesian mode:
 
 ```spin2
 debug(`Rose `(radius, angle))
@@ -3333,7 +3620,7 @@ like a sine wave on SCOPE shows up on FFT as a single tall spike at that tone's
 frequency. Mix three tones together and you see three spikes; add noise and you
 see a low carpet under them.
 
-The window runs a Cooley-Tukey FFT on the samples you feed it and displays the
+The window runs an FFT on the samples you feed it and displays the
 resulting **magnitude spectrum** — one point per frequency bin, drawn as a line,
 dot, or filled-bar trace. It supports up to **8 channels**, each transformed and
 drawn independently.
@@ -3398,16 +3685,16 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `FFT` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - FFT` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Plot area in pixels; each is **32–2048** |
 | `SAMPLES` | `N {first last}` | `512` | FFT size, and an optional displayed bin range |
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
-| `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
-| `LINESIZE` | `width` | `3` | Line width (**−32–32**; negative draws filled bars) |
-| `TEXTSIZE` | `points` | font (≈11) | Label font size; defaults to the window font (**6–200**) |
+| `DOTSIZE` | `diameter` | `0` | Dot diameter in pixels (**0–32**) |
+| `LINESIZE` | `half-pixels` | `3` | Line width in **half-pixels** (**−32–32**; negative draws filled bars, wider for larger negative values) |
+| `TEXTSIZE` | `points` | editor text size | Label font size; defaults to the editor's text size (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
-| `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
+| `LOGSCALE` | — | off | Logarithmic amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 | packing | — | off | Sample packing format (see "Packing samples") |
 
@@ -3451,12 +3738,16 @@ label:
 | Position | Meaning | Range |
 |----------|---------|-------|
 | label | Channel name (string) | — |
-| `MAG` shift | Magnitude bit-shift | **0–11** |
+| `MAG` gain | Magnitude **gain**: multiplies by 2ⁿ (a higher `MAG` makes the trace *taller*) | **0–11** |
 | high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
-| grid | Grid flags: bit 0 = baseline line, bit 1 = top line | — |
+| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | default `0` |
 | color | Trace color (`$RRGGBB`) | — |
+
+The two upper `grid` bits add printed **legend text**, not lines: bit 3 labels the
+channel's maximum, and bit 2 its minimum — which for FFT always reads `+0`, because
+the window never sets a low value.
 
 A single green channel, full height, with a baseline grid line:
 
@@ -3474,8 +3765,8 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 ...
-         'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
+  debug(`Dual 'Left'  0 $7FFF_FFFF 128   0 1 $00FF00 ...
+              'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)
@@ -3499,15 +3790,15 @@ You have two independent controls over how tall the spectrum is drawn.
 (`MAG 0`). It is set in the channel declaration, in the `MAG` shift position
 shown above.
 
-**`LOGSCALE`** is a bare flag on the creation line. It applies a **log2-based**
+**`LOGSCALE`** is a bare flag on the creation line. It applies a **logarithmic**
 compression to the amplitude before drawing, expanding small values and
-compressing large ones so a wide dynamic range fits in one window. When
-`LOGSCALE` is active, the window also draws power-of-2 markers (1, 2, 4, 8, …)
-along the amplitude axis.
+compressing large ones so a wide dynamic range fits in one window.
 
-`LOGSCALE` is **not a decibel mode**. There is no dB scale, no dB markers, and no
-keyword that produces one — the markers are powers of 2, and the underlying math
-is log2 of the magnitude.
+`LOGSCALE` is **not a decibel mode**. There is no calibrated dB scale, no dB
+markers, and no keyword that produces one — the scaling is a logarithm of the
+(uncalibrated) magnitude, in arbitrary power units. The window's only visible
+acknowledgement of the flag is the word `logscale` printed on the display; it draws
+no scale markings of any kind.
 
 ```spin2
 debug(`FFT Spectrum SIZE 512 256 SAMPLES 512 LOGSCALE)
@@ -3543,7 +3834,9 @@ Three runtime commands work in the feed stream:
 - `` `CLEAR `` — erases the display and resets the sample buffer, so the next
   spectrum is built from fresh samples rather than blending with what was already
   collected.
-- `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host.
+- `` `SAVE 'name' `` — saves the **display area** to `name.bmp` on the host; write
+  `` `SAVE WINDOW 'name' `` to capture the whole window instead. The filename is
+  required ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
@@ -3655,8 +3948,9 @@ stay the same.
 - **The window is fixed; there is no choice of window function.** Every transform
   is Hanning-windowed internally. Do not look for a `WINDOW` keyword or alternate
   window types — there are none.
-- **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log2 compression with
-  power-of-2 markers, and `MAG` is a power-of-2 gain. Neither produces decibels.
+- **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log compression and `MAG`
+  is a power-of-2 gain. Neither produces decibels, and neither draws a calibrated
+  scale — the only thing `LOGSCALE` adds to the display is the word `logscale`.
 - **The frequency axis is yours to compute.** The window plots bins, not Hertz.
   Bin `k` is at `k x sample_rate / N`; if you want Hz labels, you add them.
 - **One FFT per channel per redraw.** Each channel runs its own transform, so
@@ -3673,7 +3967,7 @@ stay the same.
 
 - **FFT** — you care about *which frequencies* are present: tones, harmonics,
   resonances, noise floor.
-- **SCOPE** ([Chapter 8](#ch-8)) — you care about the *waveform over time*: shape, timing,
+- **SCOPE** ([Chapter 7](#ch-7)) — you care about the *waveform over time*: shape, timing,
   transients.
 - **SPECTRO** ([Chapter 10](#ch-10)) — you care about *how the spectrum changes over time*:
   a scrolling waterfall built from the same FFT, one column per transform.
@@ -3696,7 +3990,7 @@ Start with the multi-tone example above. Then:
    scaling, then raise `MAG` on the channel to lift weak content further.
 
 You will have used creation config, the `SAMPLES` size and bin range, a channel
-declaration with color and grid, and both amplitude controls together — a
+declaration with color and grid flags, and both amplitude controls together — a
 complete software-only spectrum analyzer in a few dozen lines.
 
 
@@ -3749,9 +4043,9 @@ The configuration keywords for the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `SPECTRO` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SAMPLES` | `count` | `512` | FFT size; a power of two, **4–2048** |
+| `TITLE` | `'text'` | `<name> - SPECTRO` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
+| `SAMPLES` | `count {first last}` | `512` | FFT size (a power of two, **4–2048**), and an optional displayed bin range |
 | `DEPTH` | `pixels` | `256` | Time-history depth (the scrolling dimension), **1–2048** |
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
@@ -3768,6 +4062,11 @@ effective sample rate). A `SAMPLES 512` window analyzes 512 points into 256 bins
 `SAMPLES 2048` gives 1024 bins. `SAMPLES` is rounded to a power of two — values that
 are not powers of two are reduced to the next lower power, and the range is clamped
 to 4–2048.
+
+`SAMPLES` also accepts an optional **bin range** — two more numbers giving the first
+and last bin to display. `SAMPLES 2048 0 236` runs a full 2048-point transform but
+plots only bins 0 through 236, which is how you zoom the waterfall onto the band you
+care about without shrinking the transform that produced it.
 
 `SAMPLES` and `DEPTH` set the two axes. The frequency axis is `SAMPLES`/2 bins long.
 The time axis is `DEPTH` pixels long — that is how many past spectra stay on screen
@@ -3798,18 +4097,20 @@ transform and draw.
 You can send several samples in one `DEBUG` call by listing them, and you can pack
 multiple samples per long for higher throughput. SPECTRO uses the same 12-mode
 packing scheme as the other sampling windows: a packing keyword on the feed selects
-how many samples each long carries and whether they are sign-extended.
+how many samples each long carries; an optional `SIGNED` keyword sign-extends them.
 
 ```spin2
-debug(`SPECTRO Pk SAMPLES 512 RANGE $4000 LONGS_8BIT LUMA8X)
-' four signed bytes -> four samples
+debug(`SPECTRO Pk SAMPLES 512 RANGE $4000 LONGS_8BIT SIGNED LUMA8X)
+' four signed bytes -> four samples ($C0 = -64)
 debug(`Pk `($7F | $40 << 8 | $C0 << 16 | $10 << 24))
 ```
 
 The packing keywords are `LONGS_1BIT`, `LONGS_2BIT`, `LONGS_4BIT`, `LONGS_8BIT`,
-`LONGS_16BIT` (sign-extended), and `WORDS_1BIT`/`2BIT`/`4BIT`/`8BIT` and
-`BYTES_1BIT`/`2BIT`/`4BIT` (zero-extended). `LONGS_8BIT` carries four 8-bit signed
-samples per long, a 4× bandwidth gain over sending one sample per long.
+`LONGS_16BIT`, and `WORDS_1BIT`/`2BIT`/`4BIT`/`8BIT` and
+`BYTES_1BIT`/`2BIT`/`4BIT`. Every mode delivers unsigned (zero-extended) values by
+default; append the optional `SIGNED` keyword to sign-extend them. `LONGS_8BIT`
+carries four 8-bit samples per long, a 4× bandwidth gain over sending one sample
+per long.
 
 ## Scroll direction — TRACE
 
@@ -3838,7 +4139,7 @@ horizontally — use a direction in the 4–7 group with bit 3 set, for example
 
 ```spin2
 debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
-       RANGE $20000 HSV16X LOGSCALE)
+      RANGE $20000 HSV16X LOGSCALE)
 ```
 
 > **Set scrolling on (`TRACE` 8–15) for a waterfall.** Values 0–7 wrap in place,
@@ -3859,7 +4160,7 @@ represents.
 
 ```spin2
 debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 ...
-       RANGE $80000 LUMA8X)
+      RANGE $80000 LUMA8X)
 ```
 
 `RATE` accepts **1–2048**.
@@ -3897,6 +4198,16 @@ on its creation line are the luminance and 16-bit HSV families:
 | `HSV16W` | 16-bit HSV | White variant |
 | `HSV16X` | 16-bit HSV | Extended range |
 
+Each mode takes an optional **tune** argument that follows the keyword. For the
+`LUMA8` family it is the tint the ramp runs toward — one of the named colors
+(`ORANGE`, `BLUE`, `GREEN`, `CYAN`, `RED`, `MAGENTA`, `YELLOW`, `GRAY`), so
+`LUMA8X GREEN` gives a green waterfall instead of the default orange. For the
+`HSV16` family it is a numeric `0`–`255` phase offset that rotates the hue wheel:
+
+```spin2
+debug(`SPECTRO Wfall SAMPLES 512 DEPTH 256 RANGE $40000 LUMA8X GREEN)
+```
+
 `LUMA8X` is the default if you name no mode. The luminance modes render a brightness
 ramp — the natural "heat map" look for a single magnitude. The HSV16 modes encode
 phase as well: the FFT's per-bin phase angle is folded into the hue while magnitude
@@ -3916,12 +4227,14 @@ Three keyword commands work at runtime, sent by the window's name:
 - `` `CLEAR `` — clears the display, resets the sample buffer (so the window waits
   for a fresh full window before drawing again), and resets the trace position to
   its starting edge.
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE 'name' `` — saves the **display area** to `name.bmp` on the host; write
+  `` `SAVE WINDOW 'name' `` to capture the whole window instead. The filename is
+  required, and nothing may follow it ([Chapter 1](#ch-1)).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Wfall CLEAR)
-debug(`Wfall SAVE)
+debug(`Wfall SAVE 'waterfall')
 ```
 
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`
@@ -3943,8 +4256,7 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 ...
-         RATE 512 TRACE 8 LUMA8X)
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
@@ -4092,12 +4404,12 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `MIDI` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - MIDI` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `multiplier` | `4` | Key-size multiplier, **1–50** |
 | `RANGE` | `first last` | `21 108` | First and last MIDI note to display, each **0–127** |
 | `CHANNEL` | `channel` | `0` | The single MIDI channel to display, **0–15** |
-| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each `$RRGGBB` |
+| `COLOR` | `white_active black_active` | cyan, magenta | Lit-key colors (white key, then black key), each a named color (optional 0–15 brightness) or an `$RRGGBB` value |
 
 A few things to know about these:
 
@@ -4113,12 +4425,14 @@ A few things to know about these:
   MIDI channels are numbered 1–16 on instruments, so channel 1 is `0` here and
   channel 16 is `15`.
 - **`COLOR`** takes exactly two color values: the first is the lit color for
-  white keys, the second for black keys. Unlit white keys are always white and
-  unlit black keys are always black; only the *active* fill color is configurable.
+  white keys, the second for black keys. Each value may be a named color
+  (optionally with a `0`–`15` brightness) or a full `$RRGGBB` value. Unlit white
+  keys are always white and unlit black keys are always black; only the *active*
+  fill color is configurable.
 
 ```spin2
 ' One octave, large keys, green/orange lit colors, channel 0
-debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF7F00)
+debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR GREEN ORANGE)
 ```
 
 Each key is labelled with its MIDI **note number** (0–127), drawn rotated along
@@ -4191,8 +4505,15 @@ debug(`Piano $90 `(note) `(vel))   ' note-on with variable note and velocity
 
 This is the same distinction as in the other windows: `` `(note) `` sends the
 *value* of `note` as a byte the parser consumes, whereas a formatter such as
-`` `udec_(note) `` would render the digits as text — which the MIDI window does
-not accept and would ignore as a string.
+`` `udec_(note) `` would render the digits as **text**.
+
+> **A string does not get ignored — it ends the feed.** When the MIDI window meets a
+> string element, it **stops processing that message**: every byte after the string is
+> discarded, not just the string itself. So a stray `` `udec_() `` in the middle of a
+> feed silently swallows the rest of your MIDI bytes.
+>
+> Note that `` `uhex_byte_() `` is **not** a string in this sense — it is a
+> value-carrying formatter, and it is the normal way to feed MIDI bytes from PASM.
 
 ## Clearing and saving
 
@@ -4201,7 +4522,9 @@ Three runtime keyword commands round out the set:
 - `` `CLEAR `` — resets every key to off (clears all stored velocities) and
   redraws an empty keyboard. Use it between takes, or to recover if a Note-Off
   was missed and a key is stuck lit.
-- `` `SAVE `` — saves the current window image to a file on the host.
+- `` `SAVE {WINDOW} 'filename' `` — writes a `.bmp` of the display area (or of the
+  whole window if you add the `WINDOW` keyword) to `'filename'` on the host; a
+  filename is required.
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
@@ -4256,7 +4579,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | vel
-  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR GREEN ORANGE)
 
   vel := 24
   repeat 5
@@ -4362,9 +4685,12 @@ becomes a control surface as well.
 
 The mechanism is shared. `PC_KEY` and `PC_MOUSE` work on any display window — TERM,
 PLOT, SCOPE, BITMAP, all of them — because you address the input to a window by
-name and the host reports the state of that window. The window must have focus for
-input to be noticed: keypresses and wheel events go to whichever window the host
-user has clicked into.
+name and the host reports the state of that window.
+
+**Focus governs keys and the wheel, not the pointer.** Keypresses go to whichever
+window the host user has clicked into, and the scroll-wheel delta likewise. Mouse
+**position, buttons, and the pixel color under the pointer** are reported on hover —
+you do not have to click the window first to read where the pointer is.
 
 Both commands follow the same shape: you pass a **pointer to a buffer in hub RAM**,
 and the host writes the current input state into that buffer. They do not return a
@@ -4489,9 +4815,26 @@ The seven longs, in order, are:
 | `mouse[5]` | right button | `0` released, `-1` pressed. |
 | `mouse[6]` | pixel | Color at the mouse position, `$00_RR_GG_BB`, or `-1` if the mouse is outside the window. |
 
-The position units depend on the window type — for a TERM window they are character
-column and row; for pixel-based windows like BITMAP they are pixels. (See the per-
-window hover-coordinate behavior in each window's chapter.)
+### The value you receive is not the number on the screen
+
+Most windows print a coordinate readout next to the mouse pointer. **That readout is
+drawn by the host, and for five of the nine windows it is not what your P2 receives.**
+The window computes a friendly, chapter-native number for the display — a sample
+index, a signal value, an inverted Y, a polar angle — and sends your program the
+**raw pixel position inside the window's client area** instead.
+
+| Window | What `mouse[0]` / `mouse[1]` actually carry |
+|--------|---------------------------------------------|
+| TERM | character **column and row** |
+| PLOT, BITMAP, SPECTRO | canvas pixels — divided by `DOTSIZE`, and flipped if `CARTESIAN` flipped them |
+| **LOGIC, SCOPE, SCOPE_XY, FFT, MIDI** | **raw client pixels** — *not* the sample index, value, or angle shown on screen |
+
+For the five windows in the last row, the transform you see on screen is
+**display-only**. If you read `mouse[0]` from a SCOPE expecting the sample index under
+the pointer, or from a SCOPE_XY expecting a polar angle, you will get a pixel offset
+that happens to look plausible — and every hit-test you build on it will be quietly
+wrong. Do the conversion yourself, from pixels, using the window geometry you
+configured.
 
 **Buttons are a full-long state, not a bitmask.** Each button long is either `0`
 (released) or `-1` (pressed). Test it directly — `if mouse[3]` is true when the left
@@ -4597,7 +4940,7 @@ reads both input devices, using nothing but the debug link and a bare P2 board.
 Every element you send to a window travels over the `DEBUG()` serial link. That
 link is finite. The P2 transmits debug output on pin P62 in 8-N-1 format at the
 rate set by the `DEBUG_BAUD` symbol, which defaults to `DOWNLOAD_BAUD` — **2 Mbaud**.
-`pnut_term_ts` is certified at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
+`pnut_term_ts` runs at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
 explicitly only if you have changed `DOWNLOAD_BAUD` or your clock requires it, and
 do not drop the DEBUG link to a slow rate such as 115200 — debugging needs the
 bandwidth. (If you drive the windows from the Spin Tools IDE, confirm it runs at
@@ -4676,16 +5019,16 @@ A mode keyword may be followed by either or both of two optional keywords:
 - **`SIGNED`** — the host sign-extends each unpacked value. Without it, values are
   unsigned (the left column above); with it, they take the right column's signed
   range. Use it when your packed fields represent signed quantities.
-- **`ALT`** — the host swaps **adjacent same-width fields** throughout the element:
-  neighbouring bits (0↔1, 2↔3, …), or 2-bit pairs, or nibbles, depending on the
-  mode's field width — a butterfly swap of neighbours across the whole long, not a
-  within-byte or end-to-end reversal. This helps when your source data has its
-  sub-field order swapped from what the display expects — most often bitmap data
-  composed in a standard pixel format.
+- **`ALT`** — **within each byte sent**, the host reorders the sub-units (the bits,
+  double-bits, or nibbles set by the mode's field width) **end-to-end** — a per-byte
+  reversal of sub-unit order, applied independently to each byte of the element. This
+  helps when your source data has its sub-field order swapped from what the display
+  expects — most often bitmap data composed in a standard pixel format.
 
 ```spin2
 ' two signed 16-bit values per long
-debug(`SCOPE Sig SIZE 256 128 'val' LONGS_16BIT SIGNED)
+debug(`SCOPE Sig SIZE 256 128 LONGS_16BIT SIGNED)
+debug(`Sig 'val')
 ```
 
 ## How to send packed data
@@ -4695,23 +5038,29 @@ Packing is set on the window's creation line — you add the mode keyword to the
 that window is treated as a packed container and unpacked according to the mode.
 You do the packing on the P2 side; the host does the unpacking.
 
-This example feeds a two-channel LOGIC window with `LONGS_1BIT`. Each long carries
-32 one-bit samples; with two channels declared, the host unpacks the first long as
-32 samples of channel 0 and the next long as 32 samples of channel 1. The data is
-generated in software with the random-number generator, so it runs on a bare board
-with no wiring:
+This example feeds a single-channel LOGIC window with `LONGS_1BIT`. Each long carries
+32 one-bit samples; the host unpacks them LSB-first and applies them to the channel
+in turn, so one long becomes 32 successive samples of `D0`. The data is generated in
+software with the random-number generator, so it runs on a bare board with no wiring:
 
 ```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i
-  debug(`LOGIC Stream SAMPLES 256 'D0' 'D1' LONGS_1BIT)
+VAR long buff[8]                              ' 8 longs x 32 samples = 256 = one full window
+
+PUB main() | i, j, packed
+  debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
-    packed := 0
-    repeat i from 0 to 31
-      ' pack 32 one-bit samples into a long
-      packed := (packed << 1) | (getrnd() & 1)
-    debug(`Stream `(packed))  ' send one long = 32 samples
+    repeat j from 0 to 7                       ' build one window of packed samples
+      packed := 0
+      repeat i from 0 to 31
+        ' pack 32 one-bit samples into a long, FIRST sample into the LOW bit
+        packed := packed | ((getrnd() & 1) << i)
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 32 samples LSB-first (packed data is streamed as an array, not one long
+    ' per DEBUG call)
+    debug(`Stream `uhex_long_array_(@buff, 8))
     waitms(50)
 ```
 
@@ -4719,38 +5068,84 @@ The packing loop builds the long bit by bit. You can build it any way you like �
 from a streamer capture in hub RAM, from CORDIC results, from a shift register —
 as long as the bits you want unpacked first land in the low end of the element.
 
+Stream the packed longs as an **array** — one full window's worth per message,
+using `` `uhex_long_array_(@buff, count) `` — rather than one long per `DEBUG`
+call. Packed data is delivered as a batch the host unpacks in one pass; a full
+window per frame is the pattern the Spin2 documentation uses for packed capture.
+
+Packing is not tied to one channel — it is a **fixed bit budget** you choose how to
+spend. Every `LONGS_` mode delivers the same 32 bits per element: `LONGS_1BIT` as
+32 one-bit values, `LONGS_2BIT` as 16 two-bit values, `LONGS_4BIT` as 8 four-bit
+values. You spend that budget on **time** — one channel, the most samples per long,
+as above — or across **channels**, several signals carried at once. Declaring two
+channels and packing with `LONGS_2BIT` sends a *pair* of one-bit logic channels
+(`D0` in bit 0, `D1` in bit 1), sixteen sample-pairs to a long — the same 32-bit
+budget split two ways instead of one:
+
+```{.spin2 caption="ch13-packed-logic-multi.spin2"}
+CON _clkfreq = 200_000_000
+
+VAR long buff[16]                            ' 16 longs x 16 sample-pairs = 256 = one full window
+
+PUB main() | i, j, packed
+  debug(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+  repeat
+    repeat j from 0 to 15                      ' build one window of packed sample-pairs
+      packed := 0
+      repeat i from 0 to 15
+        ' pack 16 two-bit samples into a long, FIRST sample into the LOW pair
+        packed := packed | ((getrnd() & %11) << (i*2))
+      buff[j] := packed
+    ' feed the whole window in one message; the host unpacks each long into
+    ' 16 two-bit samples (one bit per channel), streamed as an array -- not one
+    ' long per DEBUG call
+    debug(`Pair `uhex_long_array_(@buff, 16))
+    waitms(50)
+```
+
+Same packing mechanism, same array feed — only the channel count and the mode's
+bit width changed. That is the whole point: high-density capture serves a single
+channel and many channels equally.
+
 A scope works the same way. Here four 8-bit samples ride in each long under
 `LONGS_8BIT`, packed low byte first:
 
 ```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
-PUB main() | packed, i, ch
-  debug(`SCOPE Sig SIZE 256 128 'A' 'B' LONGS_8BIT)
+VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+
+PUB main() | i, ch
+  debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
+  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
   ch := 0
   repeat
-    packed := 0
-    repeat i from 0 to 3
-      ' four 8-bit values, low byte first
-      packed := packed | ((ch++ & $FF) << (i * 8))
-    debug(`Sig `(packed))  ' one long = 4 samples
+    repeat i from 0 to 127
+      ' four 8-bit values per long, low byte first
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+    ' feed the whole window in one message; the host unpacks each long into
+    ' four 8-bit values (packed data is streamed as an array, not one long
+    ' per DEBUG call)
+    debug(`Sig `uhex_long_array_(@buff, 128))
     waitms(20)
 ```
 
 A BITMAP window unpacks the same formats into pixels. With a `LUT2` (two-bit) color
 mode you would pack with `LONGS_2BIT`; with a one-bit source you can drive a
-two-color image using `LONGS_1BIT`, sending one long per 32-pixel row segment:
+two-color image using `LUT1` with `LONGS_1BIT`, sending one long per 32-pixel
+row segment:
 
 ```{.spin2 caption="ch13-packed-bitmap-frame.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT2 LONGS_1BIT)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
   repeat
     repeat row from 0 to 15
       packed := 0
       repeat x from 0 to 31
-        bit := ((x + row) & 3) == 0  ' a diagonal stripe pattern
+        bit := (((x + row) & 3) == 0) & 1  ' a diagonal stripe pattern
         packed := packed | (bit << x)
       debug(`Frame `(packed))  ' one long = 32 pixels of one row
     waitms(200)
@@ -4803,8 +5198,9 @@ link, capture a finite burst and dump it rather than trying to stream live.
   first — is your code's responsibility.
 - **LSB-first ordering is fixed.** The first unpacked value always comes from the
   low end of the element. Shift your first sample into the low bits. Use `ALT` only
-  to swap adjacent same-width fields throughout the element (bits 0↔1, 2↔3, …,
-  2-bit pairs, or nibbles by mode width), not to reverse whole elements.
+  to reverse the order of the sub-units (bits, 2-bit pairs, or nibbles by mode width)
+  end-to-end within each byte of the element — a per-byte sub-unit reversal, not a
+  whole-element reversal.
 - **Packing is per window, set at creation.** All elements fed to that window are
   unpacked the same way for its lifetime; there is no per-element mode switch.
 - **Send whole multiples of the values-per-element count.** A `LONGS_1BIT` LOGIC
@@ -4821,13 +5217,15 @@ chapter is the shared reference for what those keywords mean.
 
 ## Try it
 
-Start with the LOGIC example above. Change `LONGS_1BIT` to `LONGS_2BIT` and pack two
-bits per value instead of one — now each long carries 16 two-bit samples (16×), and
-the unpacked values range 0..3. Then declare the window with `SIGNED` and watch the
-same bit patterns reinterpret as −2..1. Finally, switch the container from `LONGS_`
-to `WORDS_` and `BYTES_` for the same bit width and observe how the values-per-element
-count — and therefore the number of elements you send per screen — changes with the
-container size.
+You have now seen the same two-bit element spent two ways — as one channel at maximum
+time-resolution (`LONGS_1BIT`), and as two 1-bit channels (`LONGS_2BIT`). Spend it a
+third way: keep `LONGS_2BIT`, but declare a **single** channel with a `0 3` range, so
+each two-bit sample is one *value* (0..3) instead of two channel bits — now the same
+mode draws a stepped 0..3 waveform on one channel. Then declare the window with
+`SIGNED` and watch the same bit patterns reinterpret as −2..1. Finally, switch the
+container from `LONGS_` to `WORDS_` and `BYTES_` for the same bit width and observe how
+the values-per-element count — and therefore the number of elements you send per
+screen — changes with the container size.
 
 
 # Chapter 14: Multiple Windows and PASM Debugging {#ch-14}
@@ -4852,7 +5250,8 @@ the window type, then a **unique name** you choose. From then on you address eac
 window by its name, independently of every other window.
 
 ```spin2
-debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+debug(`SCOPE Wave POS 0 0 SIZE 400 200)
+debug(`Wave 'Sine' -1000 1000)
 debug(`TERM Status POS 420 0 SIZE 40 10)
 ```
 
@@ -4863,23 +5262,27 @@ the name is how every later feed is routed to the right window.
 ### Placing windows with POS
 
 Every display type takes a `POS left top` keyword on its creation line, giving the
-window's position on the host screen in pixels (default `0, 0`). With more than one
-window open, set `POS` on each so they do not stack on top of each other. In the
-example above, `Wave` sits at the top-left corner and `Status` sits 420 pixels to
-its right — clear of a 400-pixel-wide SCOPE.
+window's position on the host screen in pixels. With more than one window open, set
+`POS` on each so they do not stack on top of each other. In the example above, `Wave`
+sits at the top-left corner and `Status` sits 420 pixels to its right — clear of a
+400-pixel-wide SCOPE.
 
 > Two host-wide offsets shift *all* displays together: the `DEBUG_DISPLAY_LEFT` and
 > `DEBUG_DISPLAY_TOP` symbols add to every window's `POS` coordinates. Set them in a
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 
-If you declare several windows **without** `POS`, `pnut_term_ts` places them for
-you — it offsets each new window from the base display position rather than opening
-them all on top of each other. That is enough to get started, but the arrangement is
-automatic, not one you chose. To capture a layout you *do* like, **drag a window**:
-while you move it, its title bar shows the window's current `left,top` in pixels.
-Read those numbers off and encode them into `POS` on that window's creation line,
-and your chosen arrangement reappears on every run.
+If you declare several windows **without** `POS`, **your tool places them** — and what
+it does is up to that tool, not to the P2. Some hosts arrange the windows so they do
+not overlap; others simply stack every window at the same origin, leaving you with
+one visible window and the rest hidden underneath it. Neither is a property of the
+debug system, and neither is guaranteed.
+
+**So give `POS` explicitly whenever the layout matters** — which, with more than one
+window, is essentially always. To capture a layout you like, **drag a window**: while
+you move it, its title bar shows the window's current `left,top` in pixels. Read those
+numbers off and encode them into `POS` on that window's creation line, and your chosen
+arrangement reappears on every run, on every tool.
 
 ### Feeding each window in your loop
 
@@ -4892,7 +5295,8 @@ CON
 
 PUB main() | ang, sine, count
   ' Two independent windows, each created by name and placed with POS.
-  debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+  debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
+  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
   debug(`TERM Status POS 420 0 SIZE 40 10)
 
   ang := 0
@@ -4986,7 +5390,8 @@ PUB main()
 DAT
               org
 blink
-              debug(`SCOPE Wave SIZE 400 200 'Ramp' 0 255)
+              debug(`SCOPE Wave SIZE 400 200)  ' create with config only
+              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF
@@ -5105,7 +5510,8 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256 'Signal' -1000 1000)
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
+  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0
@@ -5120,9 +5526,7 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
-    debug(`Panel 0 'Samples: `(count)' 13 ...
-          'Current: `(signal)' 13 ...
-          'Peak:    `(peak)' 13)  ' a fresh status block to the TERM
+    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)  ' fresh status block
 
     ang   += 4
     count += 1
@@ -5242,7 +5646,7 @@ a little arithmetic; all the pixels were drawn in an image editor. This is the
 sprite-sheet (blitting) model — the technique behind the richest DEBUG instrument
 panels.
 
-> **Requires `{Spin2_v50}`.** The `LAYER`, `CROP`, and sprite commands are V50
+> **Requires `{Spin2_v50}`.** The `LAYER` and `CROP` commands are V50
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
 > with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
 
@@ -5267,8 +5671,8 @@ completely. Three consequences follow, and they are the rules of the technique:
   background; the pixels inside come from the sprite. For an invisible seam, author the
   cell's border to match the background exactly — same colors, same box.
 
-`CROP` has three forms ([Chapter 5](#ch-5) documents them in full), and each is one
-idiom of this technique:
+`CROP` has several forms ([Chapter 5](#ch-5) documents them in full); three of them
+are the idioms of this technique:
 
 ```debug-update
 CROP layer                           ' whole layer: paint/reset the scene
@@ -5340,9 +5744,13 @@ A status panel becomes a control panel when the window reads input. The same
 `PC_KEY` / `PC_MOUSE` commands from [Chapter 12](#ch-12) turn any window into a
 surface you operate: the user clicks a drawn button or presses a key, and your program
 acts. Three rules carry over from that chapter — each input command must be the **last**
-command in its `DEBUG()` statement, the window must have **focus**, and `PC_MOUSE`
-fills **seven consecutive longs** (`xpos, ypos, wheel, left, middle, right, pixel`,
-buttons `0`/`-1`, coordinates negative when the pointer is outside).
+command in its `DEBUG()` statement; **focus** is required for keypresses and the
+scroll wheel, though pointer position, buttons, and the pixel color report on hover
+without it; and `PC_MOUSE` fills **seven consecutive longs** (`xpos, ypos, wheel,
+left, middle, right, pixel`, buttons `0`/`-1`, coordinates negative when the pointer
+is outside). The panel here is a PLOT window, so its coordinates arrive as canvas
+pixels — but in a LOGIC, SCOPE, SCOPE_XY, FFT, or MIDI window they would be **raw
+client pixels**, not the values shown on screen ([Chapter 12](#ch-12)).
 
 Two patterns make a panel interactive:
 
@@ -5662,7 +6070,9 @@ every window are listed once at the end.
 
 ## SCOPE — time-domain oscilloscope (Chapter 7)
 
-**Create:** `` DEBUG(`SCOPE Name <config> <channels>) ``
+**Create:** `` DEBUG(`SCOPE Name <config>) `` — configuration keywords only.
+**Then declare channels in a second message:** `` DEBUG(`Name <channels>) ``.
+A channel label on the create line **prevents the window from being created at all**.
 
 **Configuration directives:**
 
@@ -5729,7 +6139,9 @@ every window are listed once at the end.
 
 ## FFT — frequency spectrum (Chapter 9)
 
-**Create:** `` DEBUG(`FFT Name <config> <channels>) ``
+**Create:** `` DEBUG(`FFT Name <config>) `` — configuration keywords only.
+**Then declare channels in a second message:** `` DEBUG(`Name <channels>) ``.
+A channel label placed on the create line is rejected by the parser.
 
 **Configuration directives:**
 
@@ -5744,7 +6156,7 @@ every window are listed once at the end.
 | `LINESIZE` | −32…32; negative = filled bars |
 | `TEXTSIZE` | |
 | `COLOR back grid` | |
-| `LOGSCALE` | log2 amplitude |
+| `LOGSCALE` | logarithmic amplitude |
 | `HIDEXY` | |
 
 **Channels:** `'label' MAG-shift(0-11) high tall base grid color`. A Hanning window is always applied; it is not selectable.
@@ -5817,9 +6229,18 @@ every window are listed once at the end.
 - `` DEBUG(`Name PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. See [Chapter 12](#ch-12) for the key-code table.
 - `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
-- `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save the window image to a host file.
-- `` DEBUG(`Name CLOSE) `` — close and free this one window. A different action from
-  ending the whole debug session; works on all nine window types.
+- `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save to `file.bmp` on the host (no
+  extension in the name). **The filename is required and must be last**: a bare
+  `SAVE` writes nothing, and a keyword placed after `SAVE` is consumed and discarded.
+  In buffered mode `SAVE` captures the *front* buffer — send `` `UPDATE `` first. See
+  [Chapter 1](#ch-1).
+- `` DEBUG(`Name CLOSE) `` — close and free this one window; reclaims one of the 32
+  display slots. Runs *after* the rest of its message, and accepts several window
+  names. A different action from ending the whole debug session; works on all nine
+  window types.
+- `` DEBUG(DEBUG_END_SESSION) `` — `{Spin2_v52}`. Ends the whole session: closes every
+  window and the `DEBUG.LOG` file. The P2 program keeps running. Note this is a
+  `DEBUG()` statement in its own right, not a `` `Name `` window command.
 
 
 # Appendix B: Packed-Data Format Reference {#appendix-b}
@@ -5851,8 +6272,10 @@ Maximum compression is **32×** (`LONGS_1BIT`). Fields are extracted LSB-first.
 
 - `SIGNED` — sign-extend each field instead of treating it as unsigned. Signed
   ranges: 1-bit −1…0, 2-bit −2…1, 4-bit −8…7, 8-bit −128…127, 16-bit −32768…32767.
-- `ALT` — swap adjacent same-width fields throughout the container (bits 0↔1, 2↔3,
-  …, 2-bit pairs, or nibbles by mode width), not a reversal.
+- `ALT` — reorder the same-width sub-fields (bits, 2-bit pairs, or nibbles by mode
+  width) end-to-end **within each byte sent** — i.e. reverse their order inside each
+  byte (for 1-bit fields, bit 0↔7, 1↔6, 2↔5, 3↔4). The reorder never crosses a byte
+  boundary, so in `WORDS_*` and `LONGS_*` modes each byte is reversed independently.
 
 Syntax: `<packing-mode> {ALT} {SIGNED}`.
 
@@ -5867,8 +6290,42 @@ accept packed data include BITMAP, LOGIC, SCOPE, SCOPE_XY, FFT, and SPECTRO.
 
 ## Color values
 
-Colors are 24-bit RGB written `$RRGGBB` (for example `$FF7F00` is orange). You can
-also use the Spin2 named color constants where a color is expected.
+Colors are 24-bit RGB written `$RRGGBB` (for example `$FF7F00` is orange).
+
+### Named color keywords
+
+Anywhere a debug display takes a color you may write a **keyword** instead of a
+number. There are ten, and eight of them accept an optional trailing **brightness**
+nibble, `0`–`15`, defaulting to `8`:
+
+```debug-update
+COLOR GREEN        ' green at the default brightness, 8
+COLOR GREEN 15     ' the brightest green
+COLOR GREEN 2      ' a dark green
+```
+
+| Keyword | at brightness 8 | Keyword | at brightness 8 |
+|---------|-----------------|---------|-----------------|
+| `BLACK` | `$000000` (fixed) | `CYAN` | `$09FFFF` |
+| `WHITE` | `$FFFFFF` (fixed) | `RED` | `$FF0909` |
+| `ORANGE` | `$FF8409` | `MAGENTA` | `$FF09FF` |
+| `BLUE` | `$0909FF` | `YELLOW` | `$FFFF09` |
+| `GREEN` | `$09FF09` | `GRAY` | `$848484` |
+
+A higher brightness blends the hue toward white, a lower one toward black.
+`BLACK` and `WHITE` are fixed literals and take no brightness.
+
+> **A keyword does not reproduce the color of the same name.** The eight tinted
+> keywords are *computed* through the `RGBI8X` color space, while the window's own
+> defaults are fixed palette literals. They are near neighbors, not equals:
+> `ORANGE` at the default brightness is `$FF8409`, but the default orange a window
+> paints itself with is `$FF7F00`. If you need an exact color, write the
+> `$RRGGBB` value — do not type the keyword and expect a match.
+>
+> One consequence catches people out: there is **no `LIME` keyword**. TERM's default
+> green is the palette literal `$00FF00` (a pure, fully saturated green). The `GREEN`
+> keyword resolves to `$09FF09`, which carries a little red and blue and so reads as
+> slightly *washed out* next to it. To reproduce TERM's green exactly, write `$00FF00`.
 
 ### TERM color pairs
 
@@ -5877,19 +6334,24 @@ TERM holds four foreground/background pairs, selected at runtime with command co
 
 | Pair | Code | Foreground | Background |
 |------|------|-----------|------------|
-| 0 | `4` | Orange | Black |
-| 1 | `5` | Black | Orange |
-| 2 | `6` | Lime | Black |
-| 3 | `7` | Black | Lime |
+| 0 | `4` | Orange (`$FF7F00`) | Black |
+| 1 | `5` | Black | Orange (`$FF7F00`) |
+| 2 | `6` | Green (`$00FF00`) | Black |
+| 3 | `7` | Black | Green (`$00FF00`) |
 
 Set your own with `COLOR` on the creation line (eight values: fg0 bg0 fg1 bg1 fg2 bg2 fg3 bg3).
 
 ### BITMAP color modes
 
-BITMAP selects a pixel format with one of these mode keywords (default `RGB24`):
-`LUT1` `LUT2` `LUT4` `LUT8` · `LUMA8` `LUMA8W` `LUMA8X` · `RGBI8` `RGBI8W` `RGBI8X` ·
-`HSV8` `HSV8W` `HSV8X` · `HSV16` `HSV16W` `HSV16X` · `RGB8` (3:3:2) · `RGB16` (5:6:5) · `RGB24` (8:8:8).
-`LUT`-mode palettes are loaded with `LUTCOLORS`.
+BITMAP and PLOT select a pixel format with one of these 19 mode keywords
+(default `RGB24`), in this order:
+
+`LUT1` `LUT2` `LUT4` `LUT8` · `LUMA8` `LUMA8W` `LUMA8X` · `HSV8` `HSV8W` `HSV8X` ·
+`RGBI8` `RGBI8W` `RGBI8X` · `RGB8` (3:3:2) · `HSV16` `HSV16W` `HSV16X` ·
+`RGB16` (5:6:5) · `RGB24` (8:8:8).
+
+`LUT`-mode palettes are loaded with `LUTCOLORS`. Until you load one, every LUT
+entry is `$000000` — a `LUT` mode with no `LUTCOLORS` draws a black picture.
 
 ### SPECTRO color modes
 
@@ -5906,7 +6368,7 @@ or `HSV16` / `HSV16W` / `HSV16X`.
 | SCOPE | Time advances left-to-right one step per sample set; vertical is the channel's value range (`AUTO` or `lo hi`) |
 | SCOPE_XY | Centered; `SIZE` is the radius and `RANGE` the symmetric ± extent; `POLAR` accepts (rho, theta) |
 | FFT | Horizontal = frequency bin (bin k ≈ k × sample_rate / N); vertical = magnitude |
-| SPECTRO | Horizontal = frequency; the display scrolls over time per `TRACE`/`RATE`; color = magnitude |
+| SPECTRO | At the default `TRACE $F`: horizontal = **time** (the display scrolls), vertical = **frequency**; color = magnitude. Only traces `0`–`3` swap the axes, putting frequency on the horizontal ([Chapter 10](#ch-10)) |
 | MIDI | A piano keyboard spanning the note `RANGE`; key fill height = note velocity |
 
 Frequency-in-hertz labeling for FFT and SPECTRO is your own calculation from the

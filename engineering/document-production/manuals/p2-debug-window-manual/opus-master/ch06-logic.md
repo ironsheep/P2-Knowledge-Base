@@ -287,7 +287,7 @@ Three runtime commands manage the display:
 
 ```spin2
 debug(`Bus CLEAR)              ' empty the buffer and blank the trace
-debug(`Bus SAVE 'trace')       ' writes trace.bmp -- no extension in the name
+debug(`Bus SAVE 'trace')   ' writes trace.bmp -- no extension
 ```
 
 ## A complete software-only example
@@ -430,7 +430,7 @@ trigger, and decode-in-code approach shows a live bus.
   trace repaints, lowering host load, while every sample still enters the buffer.
   **What it divides depends on whether a trigger is armed:** free-running, `RATE`
   counts *samples*; with a `TRIGGER` set, the rate counter only advances on samples
-  that actually fire the trigger, so `RATE` counts *triggers*. `TRIGGER … RATE 10`
+  that actually fire the trigger, so `RATE` counts *triggers*. `TRIGGER ... RATE 10`
   means "redraw every tenth trigger," not "every tenth sample."
 - **LOGIC vs. SCOPE.** Use LOGIC for discrete digital lines and bit patterns; use
   SCOPE ([Chapter 7](#ch-7)) for a continuously varying analog value over time. A `RANGE`

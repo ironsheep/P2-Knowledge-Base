@@ -252,14 +252,21 @@ it is the global counterpart, and it is not a window command but a `DEBUG()`
 statement of its own:
 
 ```spin2
-debug(DEBUG_END_SESSION)   ' {Spin2_v52} -- closes every window and the log file
+{Spin2_v52}                ' must be the FIRST line of the file
+
+PUB main()
+  ' ... your program ...
+  debug(DEBUG_END_SESSION) ' close every window and the log file
 ```
 
 Executing it closes any open DEBUG windows *and* the `DEBUG.LOG` file, and **your P2
 program keeps running**. It exists chiefly so that a run can signal "the output is
 complete": the log file is closed and flushed, which is what lets a script — or an AI
 coding assistant — know the results are ready to read rather than still being written.
-It needs `{Spin2_v52}` or later.
+
+`DEBUG_END_SESSION` was added in Spin2 v52, and it is **version-gated**: without
+`{Spin2_v52}` (or later) as the literal first line of your source file, the compiler
+does not know the symbol and the build fails with an expression error.
 
 ## How these differ from the single-step debugger
 

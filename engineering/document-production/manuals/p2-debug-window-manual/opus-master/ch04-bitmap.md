@@ -141,7 +141,9 @@ entries at the first non-numeric element:
 ```spin2
 PUB main() | x, y
   ' LUT4: a 16-color palette defined inline
-  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
+  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS ...
+        $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 ...
+        $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
   repeat y from 0 to 15
     repeat x from 0 to 15
       debug(`Tiles `((x ^ y) & $0F))  ' each pixel is a 4-bit palette index
