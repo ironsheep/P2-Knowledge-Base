@@ -24,16 +24,16 @@ syntax:
 
 configuration_directives:
   note: "Accepted in BITMAP_Configure (window creation)."
-  TITLE: "TITLE 'string' -- window caption"
+  TITLE: "TITLE 'string' -- window caption. Default caption is '<name> - BITMAP', not a bare type name."
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SIZE: "SIZE w h -- pixels, each 1..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel magnification, each 1..256 (default 1x1; y copies x). Client size = w*x by h*y."
-  SPARSE: "SPARSE color -- grid-border color for the magnified-pixel view (named/RGB24); -1 = off"
-  color_mode: "Color mode keyword -- one of 19: LUT1 LUT2 LUT4 LUT8 LUMA8 LUMA8W LUMA8X RGBI8 RGBI8W RGBI8X RGB8 HSV8 HSV8W HSV8X HSV16 HSV16W HSV16X RGB16 RGB24 (default RGB24). Max depth is RGB24 -- no 32-bit/alpha."
-  LUTCOLORS: "LUTCOLORS c0..cN -- up to 256 RGB24 palette entries (LUT modes only)"
+  SPARSE: "SPARSE color -- sparse mode: each magnified pixel is drawn as a ROUND DOT on a SOLID BACKGROUND FILL of <color> (named/RGB24); -1 = off. It is NOT a grid border or an outline -- <color> fills the block BEHIND the dot. GATE: sparse rendering requires DOTSIZE >= 4; at DOTSIZE 3 or less it does not engage (hardware-verified, EF-042). Sparse renders far more slowly than the 1:1 path -- keep the logical canvas small."
+  color_mode: "Color mode keyword -- one of 19, in this order: LUT1 LUT2 LUT4 LUT8 LUMA8 LUMA8W LUMA8X HSV8 HSV8W HSV8X RGBI8 RGBI8W RGBI8X RGB8 HSV16 HSV16W HSV16X RGB16 RGB24 (default RGB24). Max depth is RGB24 -- no 32-bit/alpha."
+  LUTCOLORS: "LUTCOLORS c0..cN -- up to 256 RGB24 palette entries (LUT modes only). The LUT is ZERO-INITIALIZED: until LUTCOLORS loads it, every entry is $000000, so a LUT mode with no LUTCOLORS renders a uniformly BLACK picture (not random garbage). Load the palette before feeding LUT-mode pixel data."
   TRACE: "TRACE n -- 0..15 bitfield: bits 0-2 = scan pattern (0..7), bit 3 = scroll (default 0)"
-  RATE: "RATE n -- pixels per refresh; -1 = w*h (whole frame), 0 = width (h-scan) or height (v-scan) (default 0)"
+  RATE: "RATE n -- pixels per refresh (CREATE LINE). Here -1 is substituted with w*h (whole frame) and 0 with width (h-scan) or height (v-scan) (default 0). NOTE the substitution is a CREATE-LINE behavior only -- see the runtime RATE under display_directives."
   packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes), with optional ALT and/or SIGNED modifiers"
   UPDATE: "UPDATE -- manual-refresh mode (output accumulates until a runtime UPDATE)"
   HIDEXY: "HIDEXY -- suppress the on-screen cursor readout (PC_MOUSE still reports)"
@@ -44,13 +44,13 @@ display_directives:
   color_mode: "A color-mode keyword may be sent mid-stream to change translation."
   LUTCOLORS: "Runtime palette replacement (LUT modes)."
   TRACE: "TRACE n -- mid-stream scan/scroll change; resets pixel position."
-  RATE: "RATE n -- runtime pixels-per-refresh change."
+  RATE: "RATE n -- runtime pixels-per-refresh change. WARNING: the create-line substitution of -1/0 does NOT happen at runtime. A runtime RATE -1 (or 0) stores the value as-is, and the refresh counter -- which fires on an EQUALITY test against an ever-increasing count -- can then never match it, so auto-refresh FREEZES: pixels keep arriving and the display silently stops updating. It is not an error and is not reported. A runtime RATE with any positive count resumes refreshing. Hardware-verified: EF-052. (v55's own Feeding table advertises RATE -1 as a legal runtime directive -- it is the trap.)"
   SET: "SET x y -- random-access pixel position; x 0..w-1, y 0..h-1; CANCELS scroll."
   SCROLL: "SCROLL x y -- shift the bitmap; x -w..w (+x = right), y -h..h (+y = down); vacated area filled with background."
   CLEAR: "CLEAR -- fill with background, reset trace position, refresh (unless in UPDATE mode)"
   UPDATE: "UPDATE -- force a canvas refresh (needed in manual-refresh mode)"
-  SAVE: "SAVE {filename} | SAVE WINDOW | SAVE l t w h -- write the bitmap (or a region) to <name>.bmp"
-  CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
+  SAVE: "SAVE 'filename' | SAVE WINDOW 'filename' | SAVE l t w h 'filename' -- write the bitmap (or a region, or the whole window) to <filename>.bmp. The FILENAME IS REQUIRED in every form and must come LAST: a bare SAVE writes NOTHING (silently), and a keyword placed after SAVE is consumed and discarded (`Win SAVE CLEAR writes no file AND loses the CLEAR). In UPDATE mode SAVE captures the FRONT buffer -- i.e. the frame currently shown, not the one you have been drawing off-screen -- so send `UPDATE before SAVE or you will file the previous frame. The plain SAVE renders from the window's own bitmap; SAVE WINDOW scrapes the desktop region and is occlusion-vulnerable."
+  CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."
@@ -69,21 +69,21 @@ examples:
       DEBUG(`BITMAP Heat SIZE 16 16 DOTSIZE 16 SPARSE $202020 RGB24)
       REPEAT
         DEBUG(`Heat `(color))
-    description: "Magnified pixels with a sparse grid border"
+    description: "Magnified pixels drawn as round dots on a solid background fill (SPARSE)"
 
 not_supported:
   - "No 32-bit / RGBA8888 / alpha pixel mode -- maximum depth is RGB24."
   - "The 16-bit mode is RGB16 (the 'RGB565' label is not a valid keyword)."
   - "No zoom or pan -- only integer DOTSIZE magnification."
   - "No animation/playback engine -- pixels are rate-gated streaming only."
-  - "No histogram, color-picker, fit-to-window, 1:1-view, or grid-toggle controls -- the grid is the render-time SPARSE effect."
+  - "No histogram, color-picker, fit-to-window, 1:1-view, or grid-toggle controls -- SPARSE is a render-time dot-on-background effect, not a grid overlay."
   - "Pixel addressing follows the TRACE scan patterns -- there is no column-major buffer formula."
   - "No sprites -- SPRITE/SPRITEDEF belong to the PLOT window, not BITMAP."
 
 notes:
   - "Pixel stream order follows the TRACE scan pattern; SET gives random access, SCROLL shifts the image."
   - "LUT color modes use the LUTCOLORS palette; max depth is RGB24."
-  - "RATE -1 refreshes the whole frame; RATE 0 refreshes per scan-line."
+  - "RATE -1 / RATE 0 are CREATE-LINE shorthands (whole frame / per scan-line). At RUNTIME they are NOT substituted and FREEZE auto-refresh instead (EF-052)."
 
 related:
   - language/spin2/statements/debug.yaml

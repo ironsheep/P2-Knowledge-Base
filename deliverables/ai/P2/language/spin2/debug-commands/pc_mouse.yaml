@@ -41,13 +41,14 @@ returns:
       description: "Pixel color at the mouse position: $00_RR_GG_BB, or -1 if outside the display"
 
 coordinate_basis_per_window:
-  note: "The reported xpos/ypos basis is transformed per display type (matrix section 4.4)."
-  LOGIC: "sample index x channel row (origin bottom-right)"
-  SCOPE_FFT: "pixel offset from plot origin, Y inverted"
-  SCOPE_XY: "scaled data value; Cartesian or polar (rho,theta) per POLAR/LOGSCALE"
-  PLOT_SPECTRO_BITMAP: "pixel / DOTSIZE, honoring direction/flip flags"
-  TERM: "character column,row; off-text-area returns the off-window sentinel"
-  MIDI: "no coordinate readout"
+  note: "CRITICAL -- the value the P2 RECEIVES is not always the coordinate the window DISPLAYS next to the pointer. The friendly on-screen readout (sample index, signal value, inverted Y, polar rho/theta) is computed for the DISPLAY ONLY. For LOGIC, SCOPE, SCOPE_XY, FFT and MIDI the wire value delivered to your buffer is RAW CLIENT PIXELS. Do not build a hit-test from the on-screen readout for those five -- convert from pixels yourself using the window geometry you configured."
+  LOGIC: "RAW CLIENT PIXELS (the on-screen sample-index x channel-row readout is display-only)"
+  SCOPE: "RAW CLIENT PIXELS (the on-screen value/Y-inverted readout is display-only)"
+  FFT: "RAW CLIENT PIXELS (the on-screen bin/magnitude readout is display-only)"
+  SCOPE_XY: "RAW CLIENT PIXELS (the on-screen scaled-value / polar (rho,theta) readout is display-only)"
+  MIDI: "RAW CLIENT PIXELS"
+  PLOT_SPECTRO_BITMAP: "pixel / DOTSIZE, honoring direction/flip flags (wire value matches the readout)"
+  TERM: "character column,row; off-text-area returns the off-window sentinel (wire value matches the readout)"
 
 examples:
   - code: |

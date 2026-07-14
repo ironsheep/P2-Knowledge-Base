@@ -71,7 +71,7 @@ strings:
 
 # CONTROL
 control:
-  DLY: {use: "delay ms after output", syntax: "DLY(1000)"}
+  DLY: {use: "delay ms after output; MUST be the LAST element in the DEBUG() statement, and it RELEASES LOCK[15] while it waits (other cogs can emit DEBUG output during the delay)", syntax: "DLY(1000)"}
   IF: {use: "conditional output - only output if true", syntax: "IF(condition)"}
   IFNOT: {use: "conditional output - only output if false", syntax: "IFNOT(condition)"}
   PC_KEY: {use: "read keyboard input"}

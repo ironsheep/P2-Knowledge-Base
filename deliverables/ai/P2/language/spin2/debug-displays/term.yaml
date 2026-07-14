@@ -25,12 +25,12 @@ syntax:
 
 configuration_directives:
   note: "Accepted in TERM_Configure (window creation)."
-  TITLE: "TITLE 'string' -- title-bar text"
+  TITLE: "TITLE 'string' -- title-bar text. Default caption is '<name> - TERM' (the window name, then the type), not a bare type name."
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SIZE: "SIZE cols rows -- size in CHARACTERS (columns x rows), NOT pixels. cols 1..256 (default 40), rows 1..256 (default 20)"
   TEXTSIZE: "TEXTSIZE n -- font point size, 6..200 (default 10)"
-  COLOR: "COLOR c0..c7 -- up to 8 RGB24 values = 4 text/background pairs (pair0=c0,c1 .. pair3=c6,c7). Default pairs: ORANGE/BLACK, BLACK/ORANGE, LIME/BLACK, BLACK/LIME"
+  COLOR: "COLOR c0..c7 -- up to 8 RGB24 values = 4 text/background pairs (pair0=c0,c1 .. pair3=c6,c7). Default pairs: ORANGE/BLACK, BLACK/ORANGE, GREEN/BLACK, BLACK/GREEN -- where the default green is the PALETTE literal $00FF00 (clLime) and the default orange is $FF7F00 (clOrange). CAUTION: there is NO 'LIME' color KEYWORD -- clLime is an internal palette constant, not something you can type. The typeable GREEN keyword is a COMPUTED color that resolves to $09FF09 at its default brightness 8, which is NOT the same value. To reproduce a default exactly, write the $RRGGBB literal."
   BACKCOLOR: "BACKCOLOR color -- canvas (clear/scroll) fill color at config time; distinct from the runtime BACKCOLOR which sets text background"
   UPDATE: "UPDATE -- enable buffered mode (output accumulates until a runtime UPDATE flushes it)"
   HIDEXY: "HIDEXY -- hide the on-screen coordinate readout (does NOT disable PC_MOUSE reporting)"
@@ -43,12 +43,12 @@ display_directives:
   CLEAR: "CLEAR -- clear the window and home the cursor to (0,0)"
   UPDATE: "UPDATE -- flush buffered output to the canvas (BitmapToCanvas)"
   SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional."
-  CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
+  CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG back to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair back to the P2 (see pc_mouse.yaml)"
 
 control_codes:
-  note: "Numeric values streamed to TERM act as control codes. Only 0..13 and 32..255 act; 14..31 (which includes 12) do NOTHING."
+  note: "Numeric values streamed to TERM act as control codes. Codes 0-10 and 13 act; codes 11, 12, and 14-31 do NOTHING; 32..255 are printable characters."
   "0": "clear screen and home cursor to (0,0)"
   "1": "home cursor (no clear)"
   "2 n": "set column; n clamped to 0..cols-1"
@@ -60,7 +60,7 @@ control_codes:
   "8": "backspace -- cursor moves back one column (wraps); NON-DESTRUCTIVE; no-op at (0,0)"
   "9": "tab -- advance to the next 8-column boundary (spaces)"
   "10": "line feed -- treated the same as carriage return (CR)"
-  "12": "NO ACTION -- 12 is in the 14..31 fall-through range and renders nothing. Clear the screen with code 0 or the CLEAR keyword, NOT 12."
+  "12": "NO ACTION -- code 12 is one of the inert codes (11, 12, and 14-31 do nothing) and renders nothing. Clear the screen with code 0 or the CLEAR keyword, NOT 12."
   "13": "carriage return -- move to next row (scrolls at bottom), column 0; a following 10 is absorbed"
   "32..255": "printable glyph rendered at the cursor; cursor advances one column"
 

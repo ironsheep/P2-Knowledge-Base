@@ -2,9 +2,9 @@ display_type: MIDI
 category: DEBUG Display Types
 description: |
   MIDI is the P2 DEBUG piano-keyboard window. It draws a piano keyboard and lights
-  keys from a MIDI note-on/note-off byte stream, coloring each by velocity. It is a
-  live keyboard display only: it has NO event list, piano-roll/timeline, analysis,
-  filtering, or MIDI-file import/export.
+  keys from a MIDI note-on/note-off byte stream, filling each key to a height set by
+  its velocity. It is a live keyboard display only: it has NO event list,
+  piano-roll/timeline, analysis, filtering, or MIDI-file import/export.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
 source: "PNut/Spin2 v55 DebugDisplayUnit.pas (MIDI display implementation: Configure/Update) + Parallax Spin2 Language Reference v51a (DEBUG displays, MIDI usage example); examples compile-verified with pnut_ts v1.55.0"
@@ -25,18 +25,18 @@ configuration_directives:
   note: "Accepted in MIDI_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'MIDI')"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SIZE: "SIZE n -- key-size scalar 1..50 (default 4); pixel key size is 8 + n*4. This is NOT a pixel dimension."
   RANGE: "RANGE firstKey lastKey -- displayed MIDI note range, each 0..127 (default 21..108); lastKey is clamped to be >= firstKey."
   CHANNEL: "CHANNEL n -- MIDI channel to display, 0..15 (default 0). This is an exact channel filter: 0 means channel-0-only, NOT an 'all channels' mode."
-  COLOR: "COLOR onWhite onBlack -- two velocity colors for lit white vs black keys (defaults CYAN, MAGENTA)"
+  COLOR: "COLOR onWhite onBlack -- the lit colors for white vs black keys (defaults CYAN, MAGENTA). COLOR sets the HUE; VELOCITY sets the fill HEIGHT. There is no velocity color gradient -- the hue is fixed per key type."
 
 display_directives:
   note: "Accepted in MIDI_Update."
-  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. Running status is honored. (n = channel nibble.) NOTE: a velocity-0 Note-On ($9n, note, 0) does NOT release the key in this window -- the common 'velocity-0 = note-off' idiom is not honored here; send an explicit Note-Off ($8n) to release."
+  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key, filling it to a HEIGHT proportional to velocity; Note-Off ($8n, note, 0) releases it. Running status is honored. (n = channel nibble.) A velocity-0 Note-On ($9n, note, 0) DOES release the key -- the standard 'velocity-0 = note-off' idiom is honored (the stored velocity becomes 0 and the fill test is 'velocity > 0', so the key reads OFF). An explicit Note-Off ($8n) is not required. A string element in the feed ABORTS the rest of that message -- every byte after it is discarded."
   CLEAR: "CLEAR -- clear the keyboard (reset all 128 key velocities to 0 and redraw)"
   SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional."
-  CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
+  CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
 
@@ -68,7 +68,7 @@ not_supported:
   - "MIDI is the only DEBUG window that does NOT accept HIDEXY (it has no XY readout to suppress)."
 
 notes:
-  - "MIDI is a live piano-keyboard display driven by note-on ($9n) / note-off ($8n) bytes; velocity sets the key color."
+  - "MIDI is a live piano-keyboard display driven by note-on ($9n) / note-off ($8n) bytes; velocity sets the key fill HEIGHT (not its color -- COLOR sets the hue, fixed per key type)."
   - "SIZE is a key-size scalar (1..50), not pixels (the drawn key size is 8 + SIZE*4 pixels)."
   - "CHANNEL is an exact filter -- there is no 'all channels' value; 0 displays channel 0 only."
 

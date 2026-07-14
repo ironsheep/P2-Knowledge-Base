@@ -256,7 +256,7 @@ debug_architecture:
       ZERO code - no runtime overhead whatsoever.
     symbols:
       - "DEBUG_DISABLE - Globally disable ALL debug statements"
-      - "DEBUG_MASK - 32-bit mask for selective debug[N]() channels (requires {Spin2_v46})"
+      - "DEBUG_MASK - 32-bit mask for selective debug[N]() channels (introduced in v46; NO {Spin2_v##} directive required)"
 
   level_2_output_infrastructure:
     name: "Debug Output Infrastructure (Runtime)"
@@ -450,7 +450,7 @@ usage_examples:
       _CLKFREQ = 200_000_000   ' 200 MHz
       
   selective_debug: |
-    {Spin2_v46}                          ' Required for DEBUG_MASK/debug[N]()
+    ' DEBUG_MASK/debug[N]() need NO {Spin2_v##} directive (introduced in v46)
     CON
       DEBUG_MASK = %00000011             ' Enable debug channels 0 and 1
       
@@ -504,7 +504,7 @@ notes:
   - "Undefined symbols use their defaults"
   - "DEBUG() with parentheses outputs data"
   - "DEBUG without parentheses enters debugger"
-  - "DEBUG_MASK requires {Spin2_v46} version directive for debug[N]() syntax"
+  - "DEBUG_MASK needs NO {Spin2_v##} version directive -- debug[N]() was introduced in v46 and is ungated"
 
 related:
   - language/spin2/system-variables/clkfreq.yaml

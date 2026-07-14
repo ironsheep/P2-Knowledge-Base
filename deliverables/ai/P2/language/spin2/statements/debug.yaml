@@ -53,7 +53,7 @@ window_runtime_directives:
   note: "Directives streamed to a NAMED window after creation: DEBUG(`WindowName ...). See each debug-displays/*.yaml for the per-window set."
   CLEAR: "Clear the window contents"
   UPDATE: "Flush buffered output (windows in UPDATE mode)"
-  SAVE: "Write the window bitmap to <name>.bmp"
+  SAVE: "SAVE {WINDOW} 'filename' -- write the window bitmap to <filename>.bmp. The FILENAME IS REQUIRED and must be LAST: a bare SAVE writes NOTHING, silently, and a keyword placed after SAVE is consumed and discarded."
   CLOSE: "Close (free) the named window. Distinct from DEBUG(DEBUG_END_SESSION), which ends the whole DEBUG session; see language/spin2/constants/debug-end-session.yaml"
 
 formatting_functions:
@@ -67,7 +67,7 @@ formatting_functions:
     - "ZSTR(address) - zero-terminated string"
     - "LSTR(address, length) - length-specified string"
   special:
-    - "DLY(ms) - inter-update pacing delay"
+    - "DLY(ms) - inter-update pacing delay. MUST be the LAST element in the DEBUG() statement. It RELEASES LOCK[15] while it waits, so other cogs can emit DEBUG output during the delay."
     - "PC_KEY / PC_MOUSE - read host keyboard / mouse (see debug-commands/pc_key.yaml, pc_mouse.yaml)"
     
 control_characters:

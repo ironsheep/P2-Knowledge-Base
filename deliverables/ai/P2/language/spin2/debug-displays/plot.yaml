@@ -29,9 +29,9 @@ syntax:
 
 configuration_directives:
   note: "Accepted in PLOT_Configure (window creation)."
-  TITLE: "TITLE 'string' -- window title"
+  TITLE: "TITLE 'string' -- window title. Default caption is '<name> - PLOT', not a bare type name."
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen position. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SIZE: "SIZE width height -- canvas size in pixels, each 32..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel scale, each axis 1..256 (default 1x1; y copies x if omitted); also the divisor applied to reported PC_MOUSE cursor coordinates"
   color_mode: "One of LUT1 LUT2 LUT4 LUT8 LUMA8/8W/8X HSV8/8W/8X RGBI8/8W/8X RGB8 HSV16/16W/16X RGB16 RGB24 -- how packed numeric data maps to pixels"
@@ -47,7 +47,7 @@ display_directives:
     LUTCOLORS: "Update the LUT palette (up to 256 longs)"
     BACKCOLOR: "Set background color"
     COLOR: "COLOR (value | named {brightness}) -- a color value OR a named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble). A COLOR issued immediately before a TEXT directive also sets the text color."
-    OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255). The 0..255 bound is byte truncation on store, NOT a saturating clamp: a value > 255 WRAPS mod 256 (e.g. OPACITY 300 -> 44), it does not clip to 255. Same wrap applies to the inline opacity arg on DOT/LINE/shape directives."
+    OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255). NOT a saturating clamp: the value is truncated to a byte on store, so it WRAPS mod 256. OPACITY 256 -> 0 = FULLY TRANSPARENT (reaching past the top of the range for 'more opaque' makes everything you draw next invisible); OPACITY 300 -> 44. The most opaque value is 255. Hardware-verified: EF-048. (This wrap is a property of the OPACITY directive; the inline opacity argument on DOT/LINE/shape directives takes a different parse path -- do not assume the same behavior there.)"
     PRECISE: "PRECISE -- toggle sub-pixel coordinates (8.8 fixed-point, coords shifted <<8). Disabled (OFF) by default; each PRECISE toggles it."
     LINESIZE: "LINESIZE n -- stroke width for subsequent strokes"
   geometry:
@@ -60,7 +60,7 @@ display_directives:
     BOX: "BOX width height {linesize {opacity}} -- rectangle centered on the current position; linesize 0 = filled"
     OBOX: "OBOX width height xradius yradius {linesize {opacity}} -- ROUNDED rectangle (corner radii xradius/yradius) centered on the current position; linesize 0 = filled"
     POLAR: "POLAR {twopi {theta}} -- interpret subsequent coordinates as polar (rho, theta). twopi = full-circle units (default $100000000): 0 => +$100000000 (default, counter-clockwise winding), -1 => -$100000000 (reversed, clockwise winding) -- 0 and -1 are NOT equivalent; any other value is taken literally (e.g. 360 = degrees). Orientation: theta=0 points East (+x); positive twopi increases theta counter-clockwise, negative twopi clockwise. theta = angular offset (default 0)."
-    CARTESIAN: "CARTESIAN {flipy {flipx}} -- interpret coordinates as Cartesian; optional flipy/flipx (0 or 1) set the vDirY/vDirX axis-flip flags"
+    CARTESIAN: "CARTESIAN {flipy {flipx}} -- interpret coordinates as Cartesian; optional flipy/flipx (0 or 1) set the vDirY/vDirX axis-flip flags. DEFAULT ORIENTATION (both flags 0, the state at window creation): origin BOTTOM-LEFT, x increases RIGHTWARD and y increases UPWARD -- the mathematical convention, NOT the screen convention. flipy=1 selects Y-DOWN (screen-native, origin top-left); flipx=1 makes x increase leftward. Hardware-verified: EF-020."
   text:
     TEXT: "TEXT {size {style {angle}}} 'string' -- draw text at the current position; the optional inline size/style/angle override the current TEXTSIZE/TEXTSTYLE/TEXTANGLE for this string"
     TEXTSIZE: "TEXTSIZE n -- label font point size (clamped 6..200)"
@@ -75,7 +75,7 @@ display_directives:
     CLEAR: "CLEAR -- clear the canvas to the background color"
     UPDATE: "UPDATE -- copy the accumulated buffer (Bitmap[0]) to screen (when in UPDATE mode)"
     SAVE: "SAVE 'name' -- write the canvas to <name>.bmp; SAVE l t w h 'name' writes a desktop region; SAVE WINDOW 'name' writes the window region"
-    CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
+    CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."
