@@ -1,0 +1,163 @@
+'' =====================================================================
+'' conflict-testQ-doc-claims-battery.spin2
+''
+'' WHY THIS EXISTS: six claims are about to be written into the Debug Window
+'' Manual on the strength of "v55 and the REF agree" -- and NOTHING ELSE.  That
+'' is the exact combination that produced ch04:49 ("outline"), ch04:241
+'' ("ignored"), ch04:84 ("garbage"), the LONGS_1BIT packing default, and the FFT
+'' MAG inversion.  Every one of them was WRONG.  Two agreeing documents is not
+'' evidence.  Settle them on silicon before they ship.
+''
+'' EVERY WINDOW GETS AN EXPLICIT POS.  SAVE WINDOW / desktop scrapes are
+'' occlusion-vulnerable, and PNut has NO auto-layout -- no-POS windows stack at
+'' the host origin and the scrapes capture whichever window is on top.  That
+'' silently voided an earlier run (gateP_ds03 turned out to be a byte-for-byte
+'' crop of gateP_ds04).  Never again.
+''
+'' EVIDENCE IS FILE-EXISTENCE + IMAGE CONTENT.  No log is required, so this runs
+'' identically on PNut (which emits no debug log) and on pnut-term-ts.
+''
+'' ---------------------------------------------------------------------
+'' Q1  Does a BARE `SAVE` (no filename) write anything?
+''       doc says: NO -- silently writes nothing.
+''       RAIL : q1_rail.bmp (a normal SAVE) MUST exist -> proves SAVE works here.
+''       TEST : if the doc is right, NO extra file appears.
+''
+'' Q2  Is a keyword after SAVE consumed and DISCARDED?
+''       doc says: `Win SAVE CLEAR  writes NO file AND loses the CLEAR.
+''       TEST : q2 window is filled GREEN, then sent `SAVE CLEAR .
+''              - no q2*.bmp should appear
+''              - the window should STILL BE GREEN (the CLEAR was eaten)
+''       RAIL : q2b window gets a plain `CLEAR  -> it MUST go black.
+''              If q2b does not clear, CLEAR is broken and Q2 is INCONCLUSIVE.
+''
+'' Q3  Does SAVE write the FRONT buffer (a stale frame under UPDATE mode)?
+''       doc says: YES -- you capture the PREVIOUS frame.
+''       TEST : q3 is created with UPDATE (buffered).  Fill RED -> `UPDATE (red is
+''              now the front buffer).  Fill GREEN but do NOT update.  SAVE.
+''              - saved image RED   -> doc right: SAVE captured the STALE frame.
+''              - saved image GREEN -> doc WRONG: SAVE captured the live buffer.
+''
+'' Q4  Does a RUNTIME `RATE -1 freeze BITMAP auto-refresh?
+''       doc says: YES -- no -1 substitution outside the create message, and the
+''                 rate cycle tests equality against an up-counter, so it never
+''                 matches.  (v55's own Feeding table advertises RATE -1 as legal!)
+''       TEST : q4 filled GREEN and captured (q4_before).  Then `RATE -1, then fed
+''              a full canvas of RED, then captured again (q4_after).
+''              - q4_after still GREEN -> doc right: auto-refresh FROZE.
+''              - q4_after RED         -> doc WRONG: it kept refreshing.
+''       RAIL : q5 does the identical thing with `RATE 6 (a legal positive rate).
+''              q5_after MUST be RED.  If it is not, the feed itself is broken and
+''              Q4 is INCONCLUSIVE, not a confirmation.
+''
+'' Q6  Is an out-of-range BITMAP `SET` CLAMPED, or IGNORED?
+''       *** THIS ONE REVERSES SHIPPED TEXT.  ch04:241 says "ignored, not clamped." ***
+''       doc(REF) says: CLAMPED (KeyValWithin = assign-and-clamp).
+''       TEST : q6 canvas is 8x8, cleared BLACK.  `SET 999 999 then plot ONE WHITE
+''              pixel.
+''              - a white pixel at the BOTTOM-RIGHT corner -> CLAMPED (REF right,
+''                the manual is wrong and must be reversed).
+''              - no white pixel anywhere               -> IGNORED (the manual is
+''                right; do NOT reverse it).
+''
+'' Q7  Does PLOT `OPACITY 256 wrap to 0 (transparent)?
+''       doc says: YES -- assigned into a byte with range-checking off, so 256 -> 0.
+''                 The exact inverse of what a reader expects (fully opaque).
+''       TEST : q7 draws TWO dots -- LEFT at OPACITY 255, RIGHT at OPACITY 256.
+''              - left visible, right INVISIBLE -> doc right: 256 wrapped to 0.
+''              - both visible                  -> doc WRONG: 256 clamped to 255.
+''       The left dot is the rail: if IT is missing, the drawing is broken.
+''
+'' Q8  CLOSE: does the rest of the message run FIRST, then the window close?
+''       doc says: YES -- update-first, close-second.
+''       TEST : `q8 SAVE 'q8_saved' CLOSE   (both in ONE message)
+''              - q8_saved.bmp EXISTS *and* the q8 window is GONE -> doc right.
+''              - file missing                                    -> CLOSE ran first.
+''              - window still open                               -> CLOSE is a no-op.
+''       RUN LAST -- it destroys its own window.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  '' ---------- Q1 : bare SAVE writes nothing? ----------
+  debug(`BITMAP q1 POS 0 0 SIZE 8 8 DOTSIZE 8 RGB24)
+  repeat i from 0 to 63
+    debug(`q1 `($00FF00))
+  waitms(200)
+  debug(`q1 save 'q1_rail')            ' RAIL: this file MUST appear
+  debug(`q1 save)                      ' TEST: bare SAVE -- expect NO file
+
+  '' ---------- Q2 : is a keyword after SAVE eaten? ----------
+  debug(`BITMAP q2 POS 200 0 SIZE 8 8 DOTSIZE 8 RGB24)
+  debug(`BITMAP q2b POS 400 0 SIZE 8 8 DOTSIZE 8 RGB24)
+  repeat i from 0 to 63
+    debug(`q2  `($00FF00))
+    debug(`q2b `($00FF00))
+  waitms(200)
+  debug(`q2 save clear)                ' TEST: expect NO file AND the CLEAR is eaten
+  debug(`q2b clear)                    ' RAIL: a plain CLEAR -- q2b MUST go black
+  waitms(200)
+  debug(`q2  save window 'q2_after')   ' expect STILL GREEN (clear was eaten)
+  debug(`q2b save window 'q2b_rail')   ' expect BLACK
+
+  '' ---------- Q3 : does SAVE write the stale front buffer? ----------
+  debug(`BITMAP q3 POS 0 200 SIZE 8 8 DOTSIZE 8 RGB24 UPDATE)
+  repeat i from 0 to 63
+    debug(`q3 `($FF0000))              ' RED
+  debug(`q3 update)                    ' RED is now the front buffer
+  waitms(200)
+  repeat i from 0 to 63
+    debug(`q3 `($00FF00))              ' GREEN -- drawn but NOT updated
+  waitms(200)
+  debug(`q3 save 'q3_stale')           ' RED => stale (doc right).  GREEN => live.
+
+  '' ---------- Q4/Q5 : does a runtime RATE -1 freeze the display? ----------
+  debug(`BITMAP q4 POS 200 200 SIZE 8 8 DOTSIZE 8 RGB24)
+  debug(`BITMAP q5 POS 400 200 SIZE 8 8 DOTSIZE 8 RGB24)
+  repeat i from 0 to 63
+    debug(`q4 `($00FF00))
+    debug(`q5 `($00FF00))
+  waitms(200)
+  debug(`q4 save window 'q4_before')   ' GREEN
+  debug(`q5 save window 'q5_before')   ' GREEN
+
+  debug(`q4 rate -1)                   ' TEST : doc says this FREEZES auto-refresh
+  debug(`q5 rate 6)                    ' RAIL : a legal positive rate -- must keep working
+  repeat i from 0 to 63
+    debug(`q4 `($FF0000))              ' feed RED
+    debug(`q5 `($FF0000))              ' feed RED
+  waitms(300)
+  debug(`q4 save window 'q4_after')    ' still GREEN => FROZE (doc right).  RED => not frozen.
+  debug(`q5 save window 'q5_after')    ' MUST be RED, or Q4 is inconclusive
+
+  '' ---------- Q6 : is an out-of-range SET clamped, or ignored? ----------
+  '' *** reverses ch04:241 if CLAMPED ***
+  debug(`BITMAP q6 POS 600 200 SIZE 8 8 DOTSIZE 8 RGB24)
+  repeat i from 0 to 63
+    debug(`q6 `($000000))              ' all black
+  waitms(200)
+  debug(`q6 set 999 999)               ' far out of range on a 8x8 canvas
+  debug(`q6 `($FFFFFF))                ' plot ONE white pixel
+  waitms(200)
+  debug(`q6 save window 'q6_clamp')    ' white at BOTTOM-RIGHT => CLAMPED.  none => IGNORED.
+
+  '' ---------- Q7 : does PLOT OPACITY 256 wrap to 0 (transparent)? ----------
+  debug(`PLOT q7 POS 600 0 SIZE 200 100 BACKCOLOR BLACK)
+  debug(`q7 WHITE LINESIZE 20)
+  debug(`q7 SET 50 50 DOT 20 255)      ' RAIL: opacity 255 -- MUST be visible
+  debug(`q7 SET 150 50 DOT 20 256)     ' TEST: 256 -> 0 (invisible) if it wraps
+  waitms(200)
+  debug(`q7 save 'q7_opacity')
+
+  '' ---------- Q8 : CLOSE -- update first, close second?  (RUN LAST) ----------
+  debug(`BITMAP q8 POS 0 400 SIZE 8 8 DOTSIZE 8 RGB24)
+  repeat i from 0 to 63
+    debug(`q8 `($00FFFF))              ' cyan, so it is unmistakable
+  waitms(300)
+  debug(`q8 save 'q8_saved' close)     ' file EXISTS + window GONE => update-first
+  waitms(500)
+
+  repeat
