@@ -1,5 +1,49 @@
 # P2 XBYTE Programming Guide - Changelog
 
+## v0.2.0 (2026-07-14) — the evidence-grounded edition (in development)
+
+Reworked from the ground up after studying **nine live, working P2 emulators** (Chip Gracey's
+own Spin2 interpreter; the 8080 arcade emulators; the Yume console suite for 68000/Z80/65816;
+two Intel 8086 implementations incl. a hub-vs-PSRAM pair; Zog/ZPU; a RISC-V JIT; and Parallax's
+official `xbyte.spin2`). The study found the old Part III's central framing was **derived, not
+observed, and wrong** — it graded guests on instruction shape, when the deciding factors are
+where the guest's code lives, whether LUT is free, and how much per-instruction work the guest
+needs. Every technique added below is carried anonymously into the body and credited to its
+project in Appendix C; the full mining ledger is `TECHNIQUE-MINING.md`.
+
+**Grew from 15 chapters / ~12k words to 18 chapters / ~24k words. Every code block now compiles
+(`pnut-ts`).**
+
+- **Chapter 11 — The Three Decisions (rewrite of "Mapping CPU Families").** The honest model:
+  *fetch · dispatch · memory* are separable, dispatch is a **ladder** (jump table → `EXECF` →
+  XBYTE) you may stop anywhere on, auto-fetch is a **coupling decision** (it welds the guest's
+  code to hub), and XBYTE's loop is hardware so **there is no loop body** for cross-cutting work.
+- **Chapter 12 — What Will Hurt (NEW).** The per-processor survey: two tables (can you take the
+  engine · what will hurt anyway) across ten guests, with a diamond marking rows grounded in a
+  real implementation, then a subsection per concern (prefixes, flags, decimal, interrupts,
+  cycle accuracy, the long tail).
+- **Chapter 9 — Debugging XBYTE (NEW).** `GETBRK` state, the debugger's strikethrough view, and
+  the de-arm-and-substitute software-loop trace for guest-level debugging.
+- **Chapter 14 — Servicing Guest Interrupts (NEW).** Guest IE as a cog register, `JATN` polling,
+  the *where-to-poll* design decision, and interrupt injection via a synthesized `EXECF` operand.
+- **Chapter 15 — Prefixes and Alternate Tables (widened from the 6809 vignette).** The
+  **map-vs-modifier** prefix taxonomy (only map prefixes want `SETQ2`), and `SETQ2` as a general
+  two-stage grammar, not just a prefix trick.
+- **Correctness & mechanism fixes** — §5.4 the `REP` interrupt fence (a real hazard the old §5.3
+  sold as a pure benefit); §2.5 skip-suspension-inside-CALL, the trailing-pattern trap, and the
+  free bit-10 flag; §6 the `PUSH #$1FF` rule, the undocumented `x` bit stated honestly, and the
+  `SETQ2` double-meaning; §8.3 resuming the stream from `PB`; §13.4 two-stage addressing-mode
+  dispatch; §16.7 the three disqualifiers and the JIT option.
+- **Two complete, compiled examples** — the minimal VM (Ch. 10) and a display-list engine
+  (Ch. 16), byte-identical to their manual code blocks, under `examples/`. The manual's first
+  compiled code, ever — the compile pass found that even Chapter 2's foundational SKIP examples
+  never assembled.
+
+Routed to the corrections register from this work: **F-217** (§5.3 hazard, fixed), **F-219**
+(x86 prefix taxonomy), **F-220–223** (`xbyte_engine.yaml` broken examples, fixed), **F-224**
+(Assembly Manual CORDIC/REP cross-reference). The `x`-bit meaning is an open question queued for
+Chip Gracey.
+
 ## v0.1.0 (2026-06-26)
 
 First draft — initial review build. Stands up the manual on the shared `p2kb-platform-*`
