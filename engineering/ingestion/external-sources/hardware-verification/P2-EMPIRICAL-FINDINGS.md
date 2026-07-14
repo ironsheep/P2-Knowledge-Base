@@ -399,7 +399,7 @@ correction rests on ground truth, not on the port.
 Pascal's shift geometry + both renders). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testK-dotsize-render.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testL-scope-linesize.spin2`.
 
-### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED`
+### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED (pnut-term-ts) · PNut PENDING`
 *How proven:* `conflict-testM-bitmap-sparse` — a 6×4 canvas of pure-green `$00FF00` pixels at `DOTSIZE 12`, with
 `SPARSE $FF0000`, captured via `SAVE WINDOW` (a plain BITMAP `SAVE` writes the bitmap **1× un-DOTSIZEd** and would
 have shown nothing). Rail: the same window with **no** `SPARSE` contains **no red at all**. *Result:* the sparse
@@ -426,7 +426,28 @@ test design, not by disagreement — see below).
 > image (md5 `4856803a…`). Rails that cannot discriminate ⇒ INCONCLUSIVE, never a verdict.
 > **That failure is itself independent confirmation of EF-043** — PNut windows *do* overlap. `conflict-testP` now
 > carries an **explicit `POS` on every window** and is re-runnable on both tools.
-**BONUS — BITMAP window size = canvas × `DOTSIZE`, exactly 1:1** (read free from the pnut-term-ts placement log,
+> ### 🔴 PROVENANCE — THIS ENTRY RESTS ON THE MIRROR, NOT ON GROUND TRUTH (flagged by Stephen, 2026-07-14)
+> **Every observation in EF-042 was made on pnut-term-ts.** The PNut leg of both runs is **VOID**:
+> `conflict-testM`/`conflict-testP` gave their BITMAP windows **no `POS`**, and PNut (unlike term-ts) has **no
+> auto-layout** — all four windows stacked at the host origin. Since `SAVE WINDOW` is a **desktop scrape**, every
+> PNut capture grabbed whichever window was **topmost** (`Gp04`, created last). Proof: `gateP_ds03` is
+> **byte-for-byte a top-left crop of `gateP_ds04`**, and the two DS12 scrapes were byte-identical (md5 `4856803a…`).
+> **Not one PNut gateP capture shows the window it names.**
+>
+> **This matters:** EF-042 is what reverses `ch04:49` from "outline / grid-border" to "background fill" — a
+> reader-facing change — and **pnut-term-ts is a PORT that has diverged from PNut four times this week**
+> (SCOPE_XY polar, PLOT vertical TEXTSTYLE, PLOT `OPACITY`, `SAVE…CLOSE`). A render measured on the mirror is not
+> ground truth. `reference_pnut_is_ground_truth_termts_mirrors`.
+>
+> **What DOES support it, short of a PNut render:** the Pascal (`SmoothShape` — a round dot over a full-cell square)
+> and **v55 L1331** ("large **round** pixels against a **coloured background**") both agree with what term-ts drew.
+> Three-way agreement, but **zero PNut pixels.**
+>
+> **TO CLOSE:** re-run the **fixed** `conflict-testP` on PNut — it now carries an **explicit `POS` on every window**,
+> so they cannot occlude one another. Until then EF-042 must not be cited as PNut/P2 ground truth, and `ch04:49`
+> must not ship on it.
+
+**BONUS (pnut-term-ts log only — PNut emits no such log) — BITMAP window size = canvas × `DOTSIZE`, exactly 1:1** (read free from the pnut-term-ts placement log,
 no measurement needed): `BITMAP 'SpGate' **18x12**` (canvas 6×4 at `DOTSIZE 3`) and `BITMAP 'SpOff'/'SpOn' **72x48**`
 (same canvas at `DOTSIZE 12`). 6×3=18, 4×3=12; 6×12=72, 4×12=48. This also states plainly why the `DOTSIZE 3` capture
 was unreadable — an 18×12 window is **smaller than its own title bar.** The log said so before a single pixel was
@@ -454,7 +475,11 @@ behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert
 ### EF-044 · SCOPE_XY `SIZE` is a RADIUS: the canvas is 2×SIZE, and the default is radius 128 (a 256×256 canvas) — `CONFIRMED`
 *How proven:* read straight off the pnut-term-ts placement log in `conflict-testO`. *Result:* `SCOPE_XY Good SIZE 150`
 → window **340×340** (canvas 300×300 = 2×150, + 40px margins); `SCOPE_XY Bad` with **no** `SIZE` → window **296×296**
-(canvas **256×256**, i.e. an implied radius of **128**). *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
+(canvas **256×256**, i.e. an implied radius of **128**). **PNut-CONFIRMED (2026-07-14):** the `SIZE`-is-a-radius half is independently visible in the PNut captures —
+`conflict-testK`'s `SCOPE_XY SIZE 150` window saves at **360×360** (canvas **300** = 2×150, + margins). *(The
+`default = 128` half still rests on the term-ts placement log; PNut emits no such log. Low risk — v55 states it —
+but note the provenance.)*
+*Date/rig:* 2026-07-14, real P2 (Stephen); radius half on **both PNut and pnut-term-ts**, default half term-ts only.
 *Grounds:* v55 L1179 ("display **radius**", default **128**) is **CORRECT**; the pre-cleanup SCOPE_XY ToO §4a claim of
 "SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
 2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2` (log).
