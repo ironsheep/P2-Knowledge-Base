@@ -125,7 +125,7 @@ label:
 | Position | Meaning | Range |
 |----------|---------|-------|
 | label | Channel name (string) | — |
-| `MAG` gain | Magnitude **gain**: multiplies by 2ⁿ (a higher `MAG` makes the trace *taller*) | **0–11** |
+| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** |
 | high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
