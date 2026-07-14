@@ -1,0 +1,65 @@
+CON
+  _clkfreq = 200_000_000
+
+DAT
+                org
+
+' ---- start the VM -------------------------------------------------
+start
+                setq2   #4-1                ' load 4 longs into LUT $000..
+                rdlong  $000, ##disp_table  ' the dispatch table
+                rdfast  #0, ##program       ' FIFO -> bytecode stream
+                push    #$1ff               ' return target per bytecode
+        _ret_   setq    #0                  ' arm: 256-entry table @ LUT
+                                            ' $000, F=0 — XBYTE starts now
+' XBYTE now runs the stream; control reaches 'done' only via HALT.
+done
+                jmp     #done               ' park the cog
+
+' ---- bytecode handlers (cog-resident) -----------------------------
+h_pushc                                     ' $00: push inline constant
+                rfvar   v
+                wrlong  v, sp
+        _ret_   add     sp, #4
+
+h_add                                       ' $01: pop b, a; push a+b
+                sub     sp, #4
+                rdlong  b, sp
+                sub     sp, #4
+                rdlong  a, sp
+                add     a, b
+                wrlong  a, sp
+        _ret_   add     sp, #4
+
+h_sub                                       ' $02: pop b, a; push a-b
+                sub     sp, #4
+                rdlong  b, sp
+                sub     sp, #4
+                rdlong  a, sp
+                sub     a, b
+                wrlong  a, sp
+        _ret_   add     sp, #4
+
+h_halt          jmp     #done               ' $03: exit XBYTE
+
+' ---- cog variables ------------------------------------------------
+sp              long    stack                ' VM stack pointer (hub)
+v               res     1
+a               res     1
+b               res     1
+
+' ---- hub data: dispatch table, program, stack ---------------------
+                orgh
+disp_table      long    h_pushc             ' entry $00 -> PUSHC
+                long    h_add               ' entry $01 -> ADD
+                long    h_sub               ' entry $02 -> SUB
+                long    h_halt              ' entry $03 -> HALT
+
+program         byte    $00, 7              ' PUSHC 7
+                byte    $00, 5              ' PUSHC 5
+                byte    $01                 ' ADD      -> 12
+                byte    $00, 3              ' PUSHC 3
+                byte    $02                 ' SUB      -> 9
+                byte    $03                 ' HALT
+
+stack           long    0[16]               ' VM stack lives in hub
