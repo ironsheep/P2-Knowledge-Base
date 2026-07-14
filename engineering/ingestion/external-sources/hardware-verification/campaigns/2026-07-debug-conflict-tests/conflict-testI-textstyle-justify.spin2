@@ -33,18 +33,25 @@ CON
 
 PUB main()
   ' ---- HORIZONTAL justification: guide = vertical line at anchor x=160 ----
+  ' NOTE (fixed 2026-07-14): COLOR only carries into TEXT when TEXT is the NEXT
+  ' key.  The original of this test wrote `COLOR SET ... TEXT ...`, so the SET
+  ' intervened and every row rendered in the DEFAULT WHITE -- the same white as
+  ' the guide line.  (Verified: the captured BMPs contain no green/cyan/yellow at
+  ' all.)  The test still resolved, because the rows are separable by POSITION
+  ' rather than by colour -- but the colour coding was dead.  Same defect as the
+  ' manual's ch05:302-310.  COLOR now sits immediately before each TEXT.
   debug(`PLOT TXJ_h SIZE 320 210 BACKCOLOR BLACK)
-  debug(`TXJ_h WHITE SET 160 5 LINE 160 205 1 255)       ' vertical guide @ x=160
-  debug(`TXJ_h GREEN  SET 160 30  TEXT 28 $00 0 'HHHH')   ' align0 center: straddles (control)
-  debug(`TXJ_h CYAN   SET 160 95  TEXT 28 $20 0 'HHHH')   ' horiz %10: LEFT(REF) or RIGHT(v55)?
-  debug(`TXJ_h YELLOW SET 160 160 TEXT 28 $30 0 'HHHH')   ' horiz %11: opposite of the above
+  debug(`TXJ_h WHITE SET 160 5 LINE 160 205 1 255)                ' vertical guide @ x=160
+  debug(`TXJ_h SET 160 30  GREEN  TEXT 28 $00 0 'HHHH')   ' align0 center: straddles (control)
+  debug(`TXJ_h SET 160 95  CYAN   TEXT 28 $20 0 'HHHH')   ' horiz %10: LEFT(REF) or RIGHT(v55)?
+  debug(`TXJ_h SET 160 160 YELLOW TEXT 28 $30 0 'HHHH')   ' horiz %11: opposite of the above
 
   ' ---- VERTICAL justification: guide = horizontal line at anchor y=105 ----
   debug(`PLOT TXJ_v SIZE 320 210 BACKCOLOR BLACK)
-  debug(`TXJ_v WHITE SET 5 105 LINE 315 105 1 255)        ' horizontal guide @ y=105
-  debug(`TXJ_v GREEN  SET 55  105 TEXT 28 $00 0 'VV')     ' align0 center: straddles (control)
-  debug(`TXJ_v CYAN   SET 160 105 TEXT 28 $80 0 'VV')     ' vert %10: TOP(REF) or BOTTOM(v55)?
-  debug(`TXJ_v YELLOW SET 260 105 TEXT 28 $C0 0 'VV')     ' vert %11: opposite of the above
+  debug(`TXJ_v WHITE SET 5 105 LINE 315 105 1 255)                ' horizontal guide @ y=105
+  debug(`TXJ_v SET 55  105 GREEN  TEXT 28 $00 0 'VV')     ' align0 center: straddles (control)
+  debug(`TXJ_v SET 160 105 CYAN   TEXT 28 $80 0 'VV')     ' vert %10: TOP(REF) or BOTTOM(v55)?
+  debug(`TXJ_v SET 260 105 YELLOW TEXT 28 $C0 0 'VV')     ' vert %11: opposite of the above
 
   waitms(300)
   debug(`TXJ_h save 'textI_horiz')

@@ -1,0 +1,72 @@
+'' =====================================================================
+'' conflict-testL-scope-linesize.spin2  --  settles H-3 (SCOPE LINESIZE
+''   rendered width)
+''
+'' QUESTION: EF-027 measured LINESIZE on LOGIC only (1->1px, 3->3px, 7->5px,
+''   20->11px, 32->17px -- 1:1 at the default, sub-linear above).  ch07:58
+''   currently asserts "in pixels" for SCOPE purely by EXTRAPOLATION from that
+''   LOGIC result.  v55 L1159 says SCOPE LINESIZE is in "HALF-pixels" -- a claim
+''   EF-027 already refuted for LOGIC through the same shl-6 path, and which we
+''   have therefore BANNED from the docs.  But banned-for-LOGIC is not the same
+''   as measured-for-SCOPE.  Measure it rather than extrapolate.
+''
+'' TWO-RAIL DESIGN:
+''   RAIL-THIN:  LINESIZE 1  -- minimal stroke.
+''   RAIL-THICK: LINESIZE 32 -- must be MUCH thicker.
+''   Rails that do not measurably differ => INCONCLUSIVE, never a false positive.
+''
+'' METHOD: DOTSIZE 0 (no dots -- only the connecting trace) + a CONSTANT feed, so
+''   the trace is a single FLAT HORIZONTAL LINE.  Its thickness is then a clean
+''   vertical measurement, uncontaminated by slope.
+''   NOTE the SCOPE safety net: if DOTSIZE and LINESIZE are BOTH 0, DOTSIZE is
+''   forced to 1.  Every case here has LINESIZE >= 1, so the net never fires.
+''
+'' READ (image-tools): measure the trace's VERTICAL thickness in whole pixels at
+''   mid-plot (away from the margins).  Build the n -> px map and compare it with
+''   EF-027's LOGIC curve:
+''     - tracks LOGIC (3->3px, 32->17px)  => one rule covers both; ch07:58's
+''       "in pixels" wording is sound and EF-027 generalizes.
+''     - differs                          => SCOPE needs its own wording, and the
+''       LOGIC curve must NOT be extrapolated to other windows.
+''
+'' SAVE-TRAP COMPLIANCE: filename present and LAST; nothing follows SAVE; no
+''   UPDATE mode (SAVE writes the FRONT buffer).  SCOPE create line = CONFIG KEYS
+''   ONLY; channel-def is a separate message (EF-003).
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  debug(`SCOPE Ls01 SIZE 400 200 SAMPLES 64 DOTSIZE 0 LINESIZE 1  BACKCOLOR BLACK)
+  debug(`SCOPE Ls03 SIZE 400 200 SAMPLES 64 DOTSIZE 0 LINESIZE 3  BACKCOLOR BLACK)
+  debug(`SCOPE Ls07 SIZE 400 200 SAMPLES 64 DOTSIZE 0 LINESIZE 7  BACKCOLOR BLACK)
+  debug(`SCOPE Ls20 SIZE 400 200 SAMPLES 64 DOTSIZE 0 LINESIZE 20 BACKCOLOR BLACK)
+  debug(`SCOPE Ls32 SIZE 400 200 SAMPLES 64 DOTSIZE 0 LINESIZE 32 BACKCOLOR BLACK)
+
+  ' channel defs -- SEPARATE messages (EF-003)
+  debug(`Ls01 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ls03 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ls07 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ls20 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ls32 'A' 0 100 180 10 0 $00FF00)
+
+  ' CONSTANT feed -> a single FLAT horizontal trace; thickness is then unambiguous
+  repeat i from 0 to 63
+    debug(`Ls01 `(50))
+    debug(`Ls03 `(50))
+    debug(`Ls07 `(50))
+    debug(`Ls20 `(50))
+    debug(`Ls32 `(50))
+
+  waitms(400)
+
+  debug(`Ls01 save 'lsL_scope01')
+  debug(`Ls03 save 'lsL_scope03')
+  debug(`Ls07 save 'lsL_scope07')
+  debug(`Ls20 save 'lsL_scope20')
+  debug(`Ls32 save 'lsL_scope32')
+
+  waitms(500)
+  repeat

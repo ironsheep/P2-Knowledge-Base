@@ -1,0 +1,74 @@
+'' =====================================================================
+'' conflict-testN-pos-origin-overlap.spin2  --  H-6 (POS / no-POS placement)
+''
+'' *** READ THIS FIRST -- THE QUESTION CHANGED (Stephen, 2026-07-14) ***
+''
+'' There is NO single truth to find here.  No-POS window placement is
+'' TOOL-DEPENDENT BY DESIGN:
+''
+''   pnut-term-ts : has an AUTO-LAYOUT capability -- with no POS directive it
+''                  arranges windows for you.  This is a FEATURE.
+''   PNut (Win)   : has NO such capability.  FormCreate places every window at
+''                  the host display origin (DebugDisplayLeft/Top), and display
+''                  windows do NOT cascade -- so successive no-POS windows land
+''                  on top of each other.
+''
+'' That difference IS the finding.  Two consequences, and they are the whole point
+'' of running this:
+''
+''   1. The MANUAL must not assert either behavior as "what happens".  It should
+''      teach the feature-forward rule -- "omit POS and your tool places the window
+''      for you; specify POS only when you need a fixed layout" -- and print NO
+''      pixel values.
+''   2. logic.yaml / term.yaml currently claim windows "DON'T OVERLAP".  If that is
+''      pnut-term-ts's auto-layout being recorded as P2 fact, it is a KB defect --
+''      the KB would be teaching a remote agent a TOOL behavior as a chip/language
+''      behavior.  This test is how we find out.
+''
+'' *** PROVENANCE IS MANDATORY: label every capture with the TOOL that made it. ***
+'' A result from this test is NEVER promoted to the empirical ledger as "P2/PNut
+'' truth" -- it is promoted as "<tool> places no-POS windows like this".
+''
+'' TWO-RAIL DESIGN:
+''   RAIL (known-true, calibrates the instrument): Pref is created with an EXPLICIT
+''     POS 500 0.  An explicit POS is honored by BOTH tools, so Pref must land in a
+''     predictable place in either.  If we cannot locate Pref, the capture is not
+''     measuring window geometry -> INCONCLUSIVE, never a false positive.
+''   REAL CASE: Pa/Pb/Pc are created with NO POS, in DECREASING SIZE.  The sizes are
+''     what make the arrangement readable in one picture:
+''       NESTED corners (blue on green on red, sharing a top-left) => stacked/overlapping
+''                                                                    (expected: PNut)
+''       TILED / arranged / stepped                                 => auto-layout
+''                                                                    (expected: pnut-term-ts)
+''
+'' READ (image-tools): report, PER TOOL -- (a) the arrangement of Pa/Pb/Pc;
+''   (b) where Pref landed relative to them; (c) whether the no-POS windows overlap.
+''   Do NOT average the two tools together.  The DELTA is the deliverable.
+''
+'' SAVE NOTE: this uses the desktop-region form `SAVE l t w h 'name' -- the only
+''   variant that can capture WHERE WINDOWS ARE.  It is a screen scrape: nothing may
+''   sit on top of these windows while it fires.  If the region runs off your screen,
+''   a plain OS screenshot answers all three questions equally well -- take one.
+''   (Filename is LAST, after the four region numbers; nothing follows SAVE.)
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main()
+
+  ' Three no-POS windows, DECREASING size -- so a stack reads as nested corners
+  debug(`PLOT Pa SIZE 400 300 BACKCOLOR RED)
+  debug(`PLOT Pb SIZE 300 220 BACKCOLOR GREEN)
+  debug(`PLOT Pc SIZE 200 150 BACKCOLOR BLUE)
+
+  ' Calibration rail: an EXPLICIT POS -- honored by both tools
+  debug(`PLOT Pref SIZE 200 150 BACKCOLOR WHITE POS 500 0)
+
+  waitms(600)
+
+  ' Desktop-region scrape: left, top, width, height, then the filename LAST
+  debug(`Pa save 0 0 1600 1000 'posN_desktop')
+
+  waitms(500)
+  repeat

@@ -1450,6 +1450,50 @@ lock-guarded multi-writer form explicitly.
 
 ## Shipped app-note PDFs contradict their own cover — Revision History still says "v0.1.0 initial draft" (2026-07-13) — F-215
 
+### F-216 — Debug Window Manual: SIX SHIP-BLOCKERS, three of them in SHIPPED, hardware-run example code — `CONFIRMED` (held for the single coordinated Debug sweep)
+
+**Surfaced:** 2026-07-14, the 5-agent 4-way reconciliation (v55 ↔ rebuilt REF ↔ manual ↔ YAML ↔ examples) run against the
+REF re-grounded on raw `DebugDisplayUnit.pas` + `p2com.asm`. Every item hand-verified before acceptance.
+**Full working list (gitignored workspace):** `…/p2-debug-window-manual/audit/SWEEP-FIX-LIST-2026-07-14.md` — ~75 manual
+fixes, ~54 YAML fixes. **This register entry carries the blockers**, which must not be lost with the workspace.
+
+**🔴 SB-1 — `ch05-plot-wave-scatter.spin2:22` + `ch05:599`: the sine wave is a FLAT LINE.**
+`angle := x * ($FFFF_FFFF / 511)`. Spin2's `/` is a **signed** divide; `$FFFF_FFFF` = −1; −1 / 511 = **0**.
+Compile-verified (`pnut-ts` 1.55.0): `$FFFF_FFFF / 511` → `0x00000000`; `+/` → `0x00804020`. So `angle` is 0 for every
+column and the chapter's headline "one cycle of a CORDIC sine wave" renders as a horizontal line — **lying on top of the
+grey axis the program draws two statements earlier**. **Shipped in the released PDF and the example ZIP.** It compiles,
+it runs, it draws a plausible picture. Fix (both files): `($FFFF_FFFF +/ 511)`.
+
+**🔴 SB-2 — `ch06-logic.md:44`: the LOGIC chapter's FIRST example declares 32 channels, not 4.**
+The parser takes the first number after a label as the channel **COUNT**. `'CLK' $00FF00` ⇒ 65,280 → clamped to **32**;
+the index saturates and `'DATA'`, `'CS'`, `'WR'` are **silently dropped**. Proof in-repo: `ch06-logic-spi-bus.spin2` (run
+on silicon) writes `'CS' 1 $00FFFF …` — **with** explicit counts. **Root cause: the snippet is inline-only — it has NO
+example file**, so it never went through compile-and-run.
+
+**🔴 SB-3 — `ch13:121` + `:160` (+ their twin `.spin2` files): pack MSB-first while the chapter's own rule says LSB-first.**
+`packed := (packed << 1) | …` puts the FIRST sample in bit 31; the host unpacks LSB-first ⇒ each long replays in
+**reverse time order**. **Root cause: the twins ran on silicon and PASSED — because the payload is `getrnd()`. Reversed
+random noise is indistinguishable from forward random noise.** The test data could not reveal the bug.
+
+**🔴 SB-4 — `ch05:161-176`: PLOT `PRECISE` default INVERTED.** Manual says sub-pixel is ON by default; it is **OFF**
+(`vPrecise` starts at 8 = whole-pixel). v55, `plot.yaml` and the REF all agree the manual is wrong.
+
+**🔴 SB-5 — `ch05:302-310`: white text on a white background.** `COLOR` only carries into `TEXT` when `TEXT` is the
+**next** key; a `SET` intervenes, so `vTextColor` stays at its default white. *(The same defect was in `conflict-testI`,
+the hardware test we used as TEXTSTYLE ground truth — its colour-coding never worked.)*
+
+**🔴 SB-6 — `appendix-c:47` + `spectro.yaml:52,53,82`: SPECTRO axes INVERTED.** At the default `TRACE $F` the W/H swap
+does **not** fire ⇒ horizontal = **TIME**, vertical = frequency. `ch10:124-126` already says this correctly — the
+appendix contradicts its own chapter, and the KB ships the inversion three times.
+
+**Structural lesson (the reason these survived every gate):** three blockers, three *different* holes in the same net —
+a construct with **no example file**; test data that **cannot reveal** the defect; and a failure that **hides under a
+grid line**. Compile-and-run is necessary and **not sufficient**. What catches this class is an example for *every*
+construct we teach, plus test data whose expected output is **asymmetric**.
+
+**Gate:** all of this lands in ONE coordinated sweep (manual + examples ZIP + YAMLs), then re-render and re-release
+together. YAML side rides F-212 + its addendum.
+
 ### F-215 — Released app notes carry a never-shipped draft version in their in-document Revision History — `CONFIRMED` (P2AN007 fixed pre-release; P2AN005/P2AN006 shipped wrong)
 
 - **Location:** the `## Revision History` section of each app note's `opus-master/<ID>.md`. **Verified in the SHIPPED PDFs** (text-extracted, not inferred):

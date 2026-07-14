@@ -397,7 +397,7 @@ mattering). **PNut and pnut-term-ts agree, and both agree with v55** — so term
 correction rests on ground truth, not on the port.
 *Date/rig:* 2026-07-14, real P2 (Stephen), **both PNut and pnut-term-ts**; corroborated 4 ways (v55 text + the
 Pascal's shift geometry + both renders). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
-*Source:* `.../conflict-testK-dotsize-render.spin2`, `.../conflict-testL-scope-linesize.spin2`.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testK-dotsize-render.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testL-scope-linesize.spin2`.
 
 ### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED`
 *How proven:* `conflict-testM-bitmap-sparse` — a 6×4 canvas of pure-green `$00FF00` pixels at `DOTSIZE 12`, with
@@ -426,7 +426,7 @@ test design, not by disagreement — see below).
 > image (md5 `4856803a…`). Rails that cannot discriminate ⇒ INCONCLUSIVE, never a verdict.
 > **That failure is itself independent confirmation of EF-043** — PNut windows *do* overlap. `conflict-testP` now
 > carries an **explicit `POS` on every window** and is re-runnable on both tools.
-*Source:* `.../conflict-testM-bitmap-sparse.spin2`, `.../conflict-testP-sparse-gate.spin2`.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testM-bitmap-sparse.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testP-sparse-gate.spin2`.
 
 ### EF-043 · No-POS window placement is TOOL-DEPENDENT — pnut-term-ts AUTO-ARRANGES (no overlap); PNut has no such feature — `CONFIRMED (pnut-term-ts)`
 *How proven:* `conflict-testN-pos-origin-overlap` — three PLOT windows created with **no `POS`**, in decreasing size.
@@ -444,7 +444,7 @@ origin and display windows do **not** cascade, so successive no-POS windows ther
 different tools.** *Consequences:* (1) `logic.yaml` / `term.yaml` claim windows "don't overlap" — that is **term-ts
 behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert either placement; it should teach
 "omit `POS` and your tool places the window for you" and print **no pixel values**.
-*Source:* `.../conflict-testN-pos-origin-overlap.spin2`.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testN-pos-origin-overlap.spin2`.
 
 ### EF-044 · SCOPE_XY `SIZE` is a RADIUS: the canvas is 2×SIZE, and the default is radius 128 (a 256×256 canvas) — `CONFIRMED`
 *How proven:* read straight off the pnut-term-ts placement log in `conflict-testO`. *Result:* `SCOPE_XY Good SIZE 150`
@@ -452,7 +452,7 @@ behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert
 (canvas **256×256**, i.e. an implied radius of **128**). *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
 *Grounds:* v55 L1179 ("display **radius**", default **128**) is **CORRECT**; the pre-cleanup SCOPE_XY ToO §4a claim of
 "SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
-2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `.../conflict-testO-scopexy-parser-hang.spin2` (log).
+2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2` (log).
 
 ### EF-045 · A bare number in a SCOPE_XY create message HANGS PNut — and pnut-term-ts does NOT share the defect — `CONFIRMED (PNut) / REFUTED (pnut-term-ts)` — a TOOL DIVERGENCE
 The suspected infinite loop (`SCOPE_XY_Configure`'s `while not NextEnd do` matching neither `NextKey` nor `NextStr`,
@@ -497,7 +497,7 @@ the config loop — which is precisely why the SCOPE window is never created.)*
 *Consequences:* (1) **ch08 must now carry the warning** — it is a real hazard, and the "write nothing until confirmed"
 hold is lifted. (2) **PNut v55 bug report drafted:** `DRAFTS/PNUT-BUG-scope-xy-parser-hang.md` (minimal repro,
 mechanism, blast radius, one-line fix) — for Stephen to route to Parallax/Chip.
-*Source:* `.../conflict-testO-scopexy-parser-hang.spin2`.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2`.
 
 ## Open / pending empirical questions
 

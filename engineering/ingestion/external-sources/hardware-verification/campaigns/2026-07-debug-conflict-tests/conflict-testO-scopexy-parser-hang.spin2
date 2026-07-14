@@ -1,0 +1,86 @@
+'' =====================================================================
+'' conflict-testO-scopexy-parser-hang.spin2  --  settles H-5
+''
+'' *** RUN THIS ONE LAST, ON ITS OWN. IT MAY HANG PNut. ***
+'' *** Do NOT run it in the same session as K/L/M/N -- if it hangs, anything ***
+'' *** queued behind it never executes and you lose those captures.          ***
+''
+'' QUESTION: does a BARE NUMBER in a SCOPE_XY *create* message hang the parser?
+''   SCOPE_XY_Configure's loop is
+''       while not NextEnd do begin  if NextKey then ... else if NextStr then ...  end
+''   An `ele_num` element matches NEITHER branch, so `ptr` is never advanced and
+''   NextEnd never fires -> a suspected INFINITE LOOP.  (Contrast SCOPE, whose loop
+''   is `while NextKey do` -- a stray number merely TRUNCATES the parse there, and
+''   contrast FFT, which is `while NextKey do` too and is therefore NOT exposed.)
+''
+'' This was derived from source by the REF team and has NEVER been observed.  It is
+'' the one finding in this sweep we refuse to write into the manual unverified: an
+'' unconfirmed hang claim is worse than silence.
+''
+'' TWO-RAIL DESIGN (order matters -- the safe rail runs and SAVES first):
+''   RAIL-GOOD (known-true, runs first): a well-formed SCOPE_XY create -- every
+''     number follows the keyword that consumes it, the label string comes last.
+''     It must appear and SAVE.  That proves SCOPE_XY works in this session, so a
+''     later failure cannot be blamed on the window type.
+''   REAL CASE (runs last): `SCOPE_XY Bad 128 'A'` -- the 128 follows NO keyword.
+''
+'' OUTCOME -- there is no bitmap for the real case; the evidence is behavioural:
+''   HANG      : PNut stops responding; the 'Bad' window never appears; the
+''               "still alive" TERM counter below STOPS advancing.  -> CONFIRMED.
+''               Kill PNut.  This becomes a documented footgun in ch08.
+''   NO HANG   : the counter keeps advancing and/or a 'Bad' window appears.
+''               -> REFUTED (or the window merely truncates, like SCOPE).  Say which.
+''
+'' The TERM heartbeat is the instrument: it is what distinguishes "PNut hung" from
+'' "the window just didn't open".  Watch it, not the SCOPE_XY window.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  ' Heartbeat -- this is how we tell a HANG from a merely-absent window
+  debug(`TERM Beat SIZE 30 3 TEXTSIZE 14)
+  debug(`Beat 'alive: ')
+
+  ' ---- RAIL-GOOD: a well-formed SCOPE_XY. Must appear, must save. ----
+  debug(`SCOPE_XY Good SIZE 150 RANGE 100 SAMPLES 0 DOTSIZE 6 BACKCOLOR BLACK 'A')
+  repeat i from 0 to 3
+    debug(`Good `(i * 40 - 60) `(0))
+  waitms(300)
+  debug(`Good save 'hangO_good')          ' filename LAST, nothing after
+  waitms(300)
+
+  ' prove we are still running BEFORE the dangerous line
+  repeat i from 1 to 5
+    debug(`Beat 13 'pre  ' `udec_(i))
+    waitms(200)
+
+  ' ================= THE REAL CASE -- may never return =================
+  ' `128' follows no keyword.  If the parser hangs, everything below this line
+  ' never runs and the heartbeat freezes at "pre 5".
+  debug(`SCOPE_XY Bad 128 'A')
+  ' ====================================================================
+
+  ' If we get here, the parser did NOT hang.  The heartbeat resumes counting.
+  repeat i from 1 to 20
+    debug(`Beat 13 'post ' `udec_(i))
+    waitms(200)
+
+  debug(`Beat 13 'NO HANG - parser recovered')
+
+  ' ---- LOG-FREE EVIDENCE CHANNEL (added 2026-07-14, for the PNut re-run) ----
+  ' PNut emits no debug log, so the heartbeat above is invisible to read-back.
+  ' Make the FILE ITSELF the evidence: this SAVE is only reachable if the parser
+  ' survived the line above.
+  '     hangO_survived.bmp EXISTS  -> NO HANG   (parser recovered)
+  '     hangO_survived.bmp MISSING -> HANG      (execution never got here)
+  ' hangO_good.bmp is saved BEFORE the dangerous line, so it exists either way --
+  ' its presence proves the program ran and SAVE works in this session, which is
+  ' what makes the ABSENCE of hangO_survived.bmp meaningful rather than ambiguous.
+  waitms(300)
+  debug(`Beat save 'hangO_survived')
+
+  waitms(500)
+  repeat

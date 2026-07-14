@@ -1,0 +1,101 @@
+'' =====================================================================
+'' conflict-testK-dotsize-render.spin2  --  settles H-2 (DOTSIZE rendered
+''   width -- NEVER MEASURED, for any window)
+''
+'' QUESTION: what does a given DOTSIZE actually RENDER?  Nothing grounds the
+''   user-facing unit.  Three of our own docs assert three different answers
+''   for the SAME rasterizer:
+''     ch06/ch07 "diameter in pixels"   ch09 "radius in pixels"
+''     v55 L1183 "half-pixels" (SCOPE_XY)  v55 L1158/1211 "pixels" (SCOPE/FFT)
+''   The Pascal passes `size shl 7` (SCOPE dots) / `shl 6` (SCOPE_XY dots) as a
+''   geometric disc RADIUS in 8.8 fixed point -- but that derivation is KNOWN TO
+''   FAIL for rendered output: EF-027 measured LOGIC LINESIZE 3 -> 3px (1:1)
+''   through the same shl-6 path, because the anti-aliasing envelope widens
+''   small radii.  The shift constant CANNOT predict what the user sees.
+''   Only a measurement can.  We are about to ship a unit word in 4 chapters
+''   and 4 YAMLs; until this runs, every one of them says "range only, no unit".
+''
+'' TWO-RAIL DESIGN:
+''   RAIL-SMALL: DOTSIZE 1 (SCOPE) / 2 (SCOPE_XY) -- minimal blob.
+''   RAIL-LARGE: DOTSIZE 32 (SCOPE) / 20 (SCOPE_XY) -- much larger blob.
+''   If the two rails do not measurably differ, the sampler cannot discriminate
+''   -> INCONCLUSIVE (we know it), never a false positive.
+''   The sweep between them gives the value->pixel MAP, as EF-027 did for LINESIZE.
+''
+'' METHOD: LINESIZE 0 (dots only, no connecting trace) + a CONSTANT feed, so all
+''   dots land on ONE row -> clean, isolated discs.  8 samples across 400px spaces
+''   them ~50px apart: no overlap even at DOTSIZE 32.
+''
+'' READ (image-tools): in each bmp measure ONE disc's width AND height in whole
+''   pixels.  Report n -> px per window.  Then decide: is the face value the
+''   DIAMETER (px == n), the RADIUS (px == 2n), or a HALF-PIXEL count (px == n/2)?
+''   SCOPE and SCOPE_XY use DIFFERENT shifts and may legitimately differ -- do not
+''   assume one answer covers both.
+''
+'' SAVE-TRAP COMPLIANCE (the traps this sweep itself just documented):
+''   - a filename is present and LAST on every SAVE   (a bare SAVE writes NOTHING)
+''   - nothing follows SAVE in the message            (a trailing keyword is EATEN)
+''   - no UPDATE mode anywhere  (SAVE writes the FRONT buffer -> stale frame)
+''   - SCOPE create line carries CONFIG KEYS ONLY; the channel-def is a separate
+''     message (EF-003: a channel-def on the create line prevents creation)
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  '' ---------------- SCOPE dots (shl 7 path) ----------------
+  debug(`SCOPE Ds01 SIZE 400 200 SAMPLES 8 DOTSIZE 1  LINESIZE 0 BACKCOLOR BLACK)
+  debug(`SCOPE Ds02 SIZE 400 200 SAMPLES 8 DOTSIZE 2  LINESIZE 0 BACKCOLOR BLACK)
+  debug(`SCOPE Ds04 SIZE 400 200 SAMPLES 8 DOTSIZE 4  LINESIZE 0 BACKCOLOR BLACK)
+  debug(`SCOPE Ds08 SIZE 400 200 SAMPLES 8 DOTSIZE 8  LINESIZE 0 BACKCOLOR BLACK)
+  debug(`SCOPE Ds16 SIZE 400 200 SAMPLES 8 DOTSIZE 16 LINESIZE 0 BACKCOLOR BLACK)
+  debug(`SCOPE Ds32 SIZE 400 200 SAMPLES 8 DOTSIZE 32 LINESIZE 0 BACKCOLOR BLACK)
+
+  ' channel defs -- SEPARATE messages (EF-003)
+  debug(`Ds01 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ds02 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ds04 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ds08 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ds16 'A' 0 100 180 10 0 $00FF00)
+  debug(`Ds32 'A' 0 100 180 10 0 $00FF00)
+
+  ' CONSTANT feed -> every dot on the same row, isolated
+  repeat i from 0 to 7
+    debug(`Ds01 `(50))
+    debug(`Ds02 `(50))
+    debug(`Ds04 `(50))
+    debug(`Ds08 `(50))
+    debug(`Ds16 `(50))
+    debug(`Ds32 `(50))
+
+  '' ---------------- SCOPE_XY dots (shl 6 path -- may DIFFER) ----------------
+  debug(`SCOPE_XY Xs02 SIZE 150 RANGE 100 SAMPLES 0 DOTSIZE 2  BACKCOLOR BLACK 'P')
+  debug(`SCOPE_XY Xs06 SIZE 150 RANGE 100 SAMPLES 0 DOTSIZE 6  BACKCOLOR BLACK 'P')
+  debug(`SCOPE_XY Xs12 SIZE 150 RANGE 100 SAMPLES 0 DOTSIZE 12 BACKCOLOR BLACK 'P')
+  debug(`SCOPE_XY Xs20 SIZE 150 RANGE 100 SAMPLES 0 DOTSIZE 20 BACKCOLOR BLACK 'P')
+
+  ' 4 dots spread along the X axis, well separated
+  repeat i from 0 to 3
+    debug(`Xs02 `(i * 40 - 60) `(0))
+    debug(`Xs06 `(i * 40 - 60) `(0))
+    debug(`Xs12 `(i * 40 - 60) `(0))
+    debug(`Xs20 `(i * 40 - 60) `(0))
+
+  waitms(400)
+
+  ' ---- SAVE: filename LAST, nothing after it ----
+  debug(`Ds01 save 'dotK_scope01')
+  debug(`Ds02 save 'dotK_scope02')
+  debug(`Ds04 save 'dotK_scope04')
+  debug(`Ds08 save 'dotK_scope08')
+  debug(`Ds16 save 'dotK_scope16')
+  debug(`Ds32 save 'dotK_scope32')
+  debug(`Xs02 save 'dotK_xy02')
+  debug(`Xs06 save 'dotK_xy06')
+  debug(`Xs12 save 'dotK_xy12')
+  debug(`Xs20 save 'dotK_xy20')
+
+  waitms(500)
+  repeat

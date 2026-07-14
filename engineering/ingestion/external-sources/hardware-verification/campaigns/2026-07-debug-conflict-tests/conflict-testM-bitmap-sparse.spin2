@@ -1,0 +1,71 @@
+'' =====================================================================
+'' conflict-testM-bitmap-sparse.spin2  --  settles H-4 (BITMAP SPARSE: the
+''   user-facing word) and confirms the DOTSIZE >= 4 gate
+''
+'' QUESTION 1 (the WORD):  our own docs disagree about what SPARSE looks like.
+''     ch04:49  + bitmap.yaml:32 : "OUTLINE each magnified pixel / grid-BORDER color"
+''     ch04:398 + the example     : "round dot against its BACKGROUND"
+''     v55 L1331                  : "large ROUND pixels against a COLORED BACKGROUND"
+''     REF BITMAP_ToO             : "NOT a border/frame -- a SOLID FILL of the whole
+''                                   cell, with a round dot in the pixel's own color
+''                                   drawn on top"
+''   The mechanism is settled; the WORD WE SHOW THE READER is not, and there is no
+''   BITMAP entry in the empirical ledger.  Figure and ground are inverted between
+''   two passages of the SAME chapter.  A picture ends it.
+''
+'' QUESTION 2 (the GATE):  SetSize self-disables SPARSE unless DOTSIZE >= 4 on BOTH
+''   axes.  Ratified from source, never seen.  If real, the DOTSIZE-3 rail below
+''   shows NO sparse color at all.
+''
+'' TWO-RAIL DESIGN (three rails, actually):
+''   RAIL-OFF  (known-false): DOTSIZE 12, NO SPARSE  -> solid GREEN blocks, NO RED
+''                            anywhere.  Proves red only ever comes from SPARSE.
+''   RAIL-GATE (known-false): DOTSIZE 3, SPARSE RED  -> gate FAILS (3 < 4), so SPARSE
+''                            self-disables -> again NO RED.  Proves the gate.
+''   REAL CASE (the question): DOTSIZE 12, SPARSE RED -> where does the RED go?
+''   If RAIL-OFF and the REAL CASE look the same, the sampler cannot discriminate
+''   -> INCONCLUSIVE (we know it), never a false positive.
+''
+'' COLOR CHOICE: every pixel fed is pure GREEN $00FF00; SPARSE is pure RED $FF0000.
+''   Maximum separation, and it makes the read a simple question about WHERE the red
+''   is -- not a judgement call about shape vocabulary:
+''     red forms a SOLID SQUARE CELL behind a round green dot  -> "background" (v55/ToO)
+''     red forms only a THIN OUTLINE around a green square      -> "border/grid" (ch04:49)
+''
+'' *** SAVE WINDOW IS MANDATORY HERE -- DO NOT "SIMPLIFY" IT TO SAVE ***
+''   A non-WINDOW BITMAP SAVE writes the bitmap at 1x, UN-DOTSIZEd: it would hand
+''   back the 6x4 source pixels and tell us NOTHING about the magnified rendering,
+''   which is the entire question.  SAVE WINDOW scrapes the on-screen window.
+''   Consequence: SAVE WINDOW is a DESKTOP scrape and is OCCLUSION-VULNERABLE --
+''   keep these three windows unobscured while the program runs.
+''
+'' OTHER SAVE-TRAP COMPLIANCE: filename present and LAST; nothing follows SAVE
+''   (a trailing keyword is consumed and discarded); no UPDATE mode (SAVE writes
+''   the FRONT buffer and would capture a stale frame).
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  ' 6 x 4 canvas so the cell structure is large and unmistakable when magnified
+  debug(`BITMAP SpOff  SIZE 6 4 DOTSIZE 12 RGB24)                     ' RAIL-OFF
+  debug(`BITMAP SpGate SIZE 6 4 DOTSIZE 3  RGB24 SPARSE $FF0000)      ' RAIL-GATE (3 < 4)
+  debug(`BITMAP SpOn   SIZE 6 4 DOTSIZE 12 RGB24 SPARSE $FF0000)      ' REAL CASE
+
+  ' every pixel pure GREEN -- so ANY red on screen can only have come from SPARSE
+  repeat i from 0 to 23
+    debug(`SpOff  `($00FF00))
+    debug(`SpGate `($00FF00))
+    debug(`SpOn   `($00FF00))
+
+  waitms(400)
+
+  ' SAVE WINDOW -- see the banner above.  Filename LAST, nothing after it.
+  debug(`SpOff  save window 'sparseM_off')
+  debug(`SpGate save window 'sparseM_gate3')
+  debug(`SpOn   save window 'sparseM_on12')
+
+  waitms(500)
+  repeat

@@ -1,0 +1,106 @@
+'' =====================================================================
+'' conflict-testP-sparse-gate.spin2  --  settles the BITMAP `DOTSIZE >= 4`
+''   SPARSE gate.  (Re-run: conflict-testM answered the SPARSE *shape*
+''   (EF-042) but its GATE rail was UNREADABLE -- see below.)
+''
+'' WHY M's GATE RAIL FAILED -- the lesson is in the test design, not the tool:
+''   M used a 6x4 canvas.  At DOTSIZE 3 that is an 18x12 LOGICAL window --
+''   narrower than its own title bar.  pnut-term-ts produced a degenerate window
+''   whose canvas rendered solid BLACK (verified: zero green pixels in the whole
+''   capture), and the only red in the image was a TRAFFIC-LIGHT BUTTON on the
+''   chrome.  A histogram read of that would have been a FALSE POSITIVE off window
+''   furniture.  `SAVE WINDOW` behaved correctly; the SPECIMEN was too small.
+''   => This test uses a 20x15 canvas, so even DOTSIZE 3 gives a 60x45 window.
+''
+'' QUESTION: SetSize is reported to self-disable SPARSE unless DOTSIZE >= 4 on
+''   BOTH axes.  Ratified from source; never observed.
+''
+'' TWO-RAIL DESIGN -- a clean BINARY read, "is there any red?":
+''   RAIL-OFF   (known-false): DOTSIZE 12, NO SPARSE     -> NO RED. Proves red can
+''                             only ever come from SPARSE.
+''   RAIL-SHAPE (known-true):  DOTSIZE 12, SPARSE RED    -> RED PRESENT, as round
+''                             dots on a solid fill (re-confirms EF-042 at this
+''                             canvas size, and proves the instrument discriminates).
+''   BRACKET (the question):   DOTSIZE 3  vs  DOTSIZE 4, both SPARSE RED.
+''                             gate REAL  -> DS3 has NO RED (sparse self-disabled,
+''                                           solid green cells), DS4 HAS RED.
+''                             gate FALSE -> BOTH have red.
+''   If RAIL-OFF and RAIL-SHAPE do not differ, INCONCLUSIVE (we know it).
+''
+'' READ: the question is only "does this window contain RED?"  No geometry, no
+''   centroid, no arithmetic -- the class of read that cannot invert on us.
+''
+'' *** SAVE WINDOW IS MANDATORY (do NOT simplify to SAVE) ***
+''   A non-WINDOW BITMAP SAVE writes the bitmap at 1x, UN-DOTSIZEd -- it would hand
+''   back the 20x15 source pixels and say nothing about the magnified rendering,
+''   which IS the question.
+''
+'' *** EXPLICIT POS IS MANDATORY TOO (added 2026-07-14 after the PNut run failed) ***
+''   SAVE WINDOW is a DESKTOP SCRAPE of a screen rectangle.  The first version of this
+''   test gave the windows NO POS -- which is fine on pnut-term-ts (it AUTO-ARRANGES
+''   them, so they do not overlap) but BROKE ON PNut, which has no auto-layout and
+''   STACKS every no-POS window at the host origin.  All four windows landed on top of
+''   one another, so both DS12 scrapes grabbed the identical screen region and came back
+''   BYTE-IDENTICAL (md5 4856803a...).  The rails could not discriminate -> INCONCLUSIVE.
+''   (Amusingly, that failure is itself independent confirmation of EF-043: PNut windows
+''   DO overlap.)  The POS values below separate the windows on BOTH tools.
+''
+'' *** ALSO SETTLES: is a plain BITMAP `SAVE` really 1x UN-DOTSIZED? (Stephen's question) ***
+''   Stephen is right that a plain `SAVE` writes the window's OWN buffer (Bitmap[1]) and is
+''   therefore IMMUNE to occlusion -- unlike `SAVE WINDOW`, which is a desktop scrape.  So
+''   why not just use `SAVE` and dodge the whole overlap problem?
+''   Because BOTH sources claim a plain BITMAP `SAVE` is UN-MAGNIFIED:
+''     v55 L1347         : "...or just the bitmap at 1x scale."
+''     REF BITMAP ToO:229: "SAVE 'name' is UN-DOTSIZED.  DOTSIZE magnification is display-time."
+''   If true, a plain SAVE would hand back the raw 20x15 pixel array -- no dots, no SPARSE,
+''   nothing to read.  BUT THAT CLAIM HAS NEVER BEEN VERIFIED, and we are about to SHIP it
+''   as a manual correction (ch04).  This session has repeatedly shown what a two-source
+''   doc agreement is worth.  So: save the SAME window BOTH ways and compare.
+''     plain SAVE == 20x15   -> the 1x claim is TRUE; SAVE WINDOW was necessary; ship it.
+''     plain SAVE == 240x180 -> the 1x claim is FALSE; a plain SAVE would have sufficed all
+''                              along (Stephen right), AND ch04/bitmap.yaml/the REF carry
+''                              another doc defect to fix.
+''   Either way we learn something we are otherwise about to publish on faith.
+''
+'' OTHER SAVE-TRAP COMPLIANCE: filename present and LAST; nothing follows SAVE;
+''   no UPDATE mode (SAVE writes the FRONT buffer -> would capture a stale frame).
+''
+'' RUNS ON BOTH TOOLS.  Evidence is BMP-only -- no log required.
+'' =====================================================================
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | i
+
+  ' 20 x 15 canvas -- big enough that even DOTSIZE 3 is a real window (60x45)
+  ' EXPLICIT POS on every window -- SAVE WINDOW is a desktop scrape, and PNut stacks
+  ' no-POS windows at the host origin (they would occlude each other; see the banner).
+  debug(`BITMAP GpOff POS 0   0   SIZE 20 15 DOTSIZE 12 RGB24)                  ' RAIL-OFF   : no red
+  debug(`BITMAP GpRef POS 300 0   SIZE 20 15 DOTSIZE 12 RGB24 SPARSE $FF0000)   ' RAIL-SHAPE : red, round dots
+  debug(`BITMAP Gp03  POS 0   300 SIZE 20 15 DOTSIZE 3  RGB24 SPARSE $FF0000)   ' BRACKET LOW  (3 < 4)
+  debug(`BITMAP Gp04  POS 300 300 SIZE 20 15 DOTSIZE 4  RGB24 SPARSE $FF0000)   ' BRACKET HIGH (4 >= 4)
+
+  ' every pixel pure GREEN -- so ANY red on screen can only have come from SPARSE
+  repeat i from 0 to 299
+    debug(`GpOff `($00FF00))
+    debug(`GpRef `($00FF00))
+    debug(`Gp03  `($00FF00))
+    debug(`Gp04  `($00FF00))
+
+  waitms(500)
+
+  ' --- the gate bracket: SAVE WINDOW (magnified, what the reader sees) ---
+  debug(`GpOff save window 'gateP_off12')
+  debug(`GpRef save window 'gateP_ref12')
+  debug(`Gp03  save window 'gateP_ds03')
+  debug(`Gp04  save window 'gateP_ds04')
+
+  ' --- the SAME windows saved the OTHER way: plain SAVE (window's own buffer) ---
+  ' Compare gateP_plain_ref12 against gateP_ref12.  See the banner: this settles whether
+  ' a plain BITMAP SAVE is really "1x un-dotsized" (a claim we are about to ship).
+  debug(`GpRef save 'gateP_plain_ref12')
+  debug(`Gp04  save 'gateP_plain_ds04')
+
+  waitms(500)
+  repeat
