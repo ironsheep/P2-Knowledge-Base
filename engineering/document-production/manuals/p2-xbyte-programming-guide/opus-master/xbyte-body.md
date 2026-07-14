@@ -138,6 +138,39 @@ The bytecode that means "subtract" points at `alu_body` with a skip pattern that
 Design handler bodies so the *common* path has the fewest skips. Every kept instruction runs; every skipped one is free. A well-factored shared body can serve a dozen related bytecodes with one copy of the code.
 :::
 
+## 2.5 Two things a pattern does when you are not looking {#sec-2-5}
+
+The shared body above rests on one behaviour you have not been told about, and steps neatly around a trap you have not been warned of. Both matter before you write your own.
+
+**Skipping is suspended inside a `CALL`.**
+
+Look at `alu_body` again. It opens with `call #pop_two` and ends with `_ret_ call #push_a`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
+
+This is not folklore; the hardware tracks it explicitly. The **`CALL` depth since the pattern began** is one of the fields `GETBRK` reports (§9.1), and **skipping is suspended whenever that depth is non-zero**.
+
+It is also the fact that makes shared bodies *practical*. Without it, every skip pattern would have to account for every instruction inside every helper the body calls — and factoring common work into subroutines would be impossible. You have been relying on it since the first example in this chapter.
+
+**A pattern longer than its body runs past the end of it.**
+
+The pattern is consumed as instructions execute. If it carries more bits than the body has instructions, the leftovers do not evaporate. They fall on **whatever runs next**.
+
+Under XBYTE this is harmless — the engine cancels any leftover pattern at clock 1 of the next dispatch (§5.1). But it becomes a real trap the moment you dispatch by hand (§4.4, and Chapter 9, where it bites hardest). The discipline that prevents it is one line long: **size each pattern to the body it belongs to.**
+
+::: hardware
+There is a third consequence, and this one is free money.
+
+A dispatch-table entry is `handler | pattern << 10` (§4.1). So **bit 10 is the pattern's lowest bit — the bit that would cancel the handler's *first* instruction.** But you jumped there in order to run that instruction. A legitimate pattern therefore **never** sets bit 10.
+
+Which makes bit 10 spare storage: **one free boolean per bytecode.** Read it and clear it in a single instruction on the way in, and `EXECF` still sees a clean pattern:
+
+```pasm2
+                bitl    entry, #10      wcz ' C,Z = the old bit; bit now cleared
+        if_c    jmp     #special_case       ' ...and the pattern is clean for EXECF
+```
+
+Emulators in the field use exactly this to carry a per-opcode flag that would otherwise have cost them a second table.
+:::
+
 # Chapter 3: The Bytecode Stream {#ch-3}
 
 XBYTE reads its bytecodes from the **hub FIFO** — the same fast, sequential hub-reading hardware every cog has. This chapter covers how the stream is primed and read, because a bytecode program is just bytes in hub memory, and the FIFO is how they reach the engine.
@@ -256,6 +289,17 @@ nextbc                                      ' the hand-written loop
 
 Read a byte, use it to index the table, read the entry, execute it. That is fetch-look-up-execute — the loop from §1.1, in four instructions. **XBYTE is this loop in hardware**, with the return folded in so handlers end in `_RET_` and the engine re-enters the loop on its own — it also writes the bytecode to `PA` and the stream pointer to `PB` along the way, which the hand-written version above does not. Chapter 5 walks the hardware version clock by clock.
 
+::: tip
+**Do not file this loop away as a stepping stone.** It is easy to read the next chapter and conclude that the hand-written version was scaffolding — something you needed once, to understand the engine, and will never write again.
+
+That is exactly wrong, and it is the most useful thing this chapter has to tell you. This loop is:
+
+- **your debug mode.** The engine's loop is hardware and has no body, so there is nowhere to put a `debug()`. To trace which bytecode ran and where in the stream it came from, you take the engine out and run *this* instead (Chapter 9).
+- **what most working P2 emulators actually ship.** Not because their authors could not manage XBYTE, but because the engine's auto-fetch requires the guest's code to live in hub — and a console's ROM does not. They keep the `EXECF` dispatch and write the fetch themselves. That is this loop (Chapter 11).
+
+The engine is a specialisation. This is the general case, and you will come back to it.
+:::
+
 # Part II: The XBYTE Engine
 
 Part I built the pieces: the skip family, the FIFO stream, the LUT dispatch table. This part is the engine itself — the cycle that runs those pieces in hardware, the single instruction that arms it, the table-size and compression options that shape it, and the rules the handlers must follow. It is the reference for how XBYTE behaves.
@@ -358,7 +402,11 @@ So arming XBYTE takes two things in place:
 After that `_ret_ setq`, the engine is running: it fetches the first bytecode and dispatches it, and keeps going until stopped.
 
 ::: caution
-**The `$1FF` must be on the stack before the arming `_RET_`.** Without it, the `_RET_` returns somewhere else and the engine never engages. The usual idiom is an explicit `PUSH #$1FF` (or arriving via a `CALL` whose return address is `$1FF`) immediately before the `_ret_ setq`.
+**The `$1FF` must be on the stack before the arming `_RET_`, and you put it there with `PUSH #$1FF`.**
+
+Without it, the `_RET_` simply returns wherever the stack happens to point and **the engine never engages** — silently. Nothing faults; your program just runs on as if you had never armed it, which is a memorable afternoon.
+
+In particular, **a `CALL` will not do the job for you.** A `CALL` pushes *its own* return address, which is not `$1FF`. Every working implementation — the Silicon Doc's own demo included — writes the explicit `PUSH`.
 :::
 
 ## 6.2 The mode operand {#sec-6-2}
@@ -370,6 +418,16 @@ The D value handed to SETQ is the **mode operand**. It packs three independent c
 - the **F bit** (bit 0) — whether dispatch writes the flags.
 
 For a full 256-entry table at LUT base `$100` with flags untouched, the operand is `$100` — table base in the high bits, the size/F bits clear. Chapter 7 is the full map.
+
+::: hardware
+**One bit of the mode operand is undocumented, and we will not pretend otherwise.**
+
+The published mode patterns (§7.2) are written `%A000000xF` and `%ABBBB00xF`. The `A` bits are the LUT base, the `B` bits are the compression threshold, and `F` is the flag-write bit — all specified. **The `x` — bit 1 — is defined nowhere.** The one clue on record is a comment in the reference demo, which arms with `$100` and calls it *"LUT base = $100, no stack pop."*
+
+So bit 1 appears to control something about the stack, and that is the honest extent of what is known.
+
+**What to do about it:** leave it **0**. Every working XBYTE program does — the Spin2 interpreter, the demo, and every emulator we can point you at in Appendix C. The arming idiom in this chapter leaves it 0, and nothing in this book needs it otherwise.
+:::
 
 ## 6.3 Persistent vs one-shot — SETQ and SETQ2 {#sec-6-3}
 
@@ -388,6 +446,24 @@ The one-shot form lets a VM keep a default dispatch table and *borrow* an altern
 
 ::: tip
 The "2" in SETQ2 is the alternate/one-shot form throughout the instruction set — the same personality split as the block-move SETQ/SETQ2. If you remember "SETQ2 = the temporary one," you will reach for the right one when building a prefix bytecode.
+:::
+
+::: caution
+**`SETQ2` does two entirely different jobs, and only the *next instruction* tells them apart.**
+
+You have already used it both ways in this book, and it is worth stopping to notice:
+
+```pasm2
+                setq2   #256-1              ' (a) BLOCK MOVE:
+                rdlong  $100, ##table       '     load 256 longs into LUT
+
+        _ret_   setq2   #alt_mode           ' (b) ONE-SHOT XBYTE MODE:
+                                            '     next bytecode only
+```
+
+Same mnemonic. In **(a)** it is a block-transfer count, consumed by the `RDLONG` that follows. In **(b)** it is an XBYTE mode operand, consumed by the `_RET_`. Nothing about the `SETQ2` itself distinguishes them — **the instruction that follows decides what it meant.**
+
+The two never collide in practice, because a block move is followed by a memory instruction and an arming is followed by a return. But a `SETQ2` read out of context tells you nothing, and a misplaced one fails in a way that will not look like the mistake you made. When you read someone else's XBYTE code — or your own, six months on — **look at the next line first.**
 :::
 
 # Chapter 7: Table-Size & Compression Modes {#ch-7}
@@ -436,6 +512,32 @@ Setting F lets a routine *"differentiate behavior within a bytecode routine, esp
 
 ::: hardware
 The F bit and the SKIPF pattern are complementary selectors. The skip pattern chooses *which instructions* a handler runs; the flags (via F) let those instructions *branch* on two bits of the bytecode. Compression, the SKIPF pattern, and the F bit together are how a small table serves a large, regular bytecode set.
+:::
+
+## 7.5 A real mode operand, decoded {#sec-7-5}
+
+Everything in this chapter is easier to trust once you have taken a real one apart. So here is the mode operand the **P2's own Spin2 interpreter** arms with — the reference XBYTE program, written by the silicon's designer:
+
+```pasm2
+        _ret_   setq    #$1A1               ' the real thing
+```
+
+`$1A1` is nine bits: `%1_1010_0001`. Lay it against the compression pattern `%ABBBB00xF` from §7.3:
+
+| Field | Bits | Value | Meaning |
+|-------|------|-------|---------|
+| **A** | 1 | `%1` | table base = `%A00000000` = **LUT `$100`** |
+| **BBBB** | 4 | `%1010` | compression threshold = **`$A`** |
+| `00` | 2 | `%00` | the 256-entry-with-compression selector |
+| **x** | 1 | `%0` | the undocumented bit (§6.2) — left 0, as always |
+| **F** | 1 | `%1` | **flags written** from the bytecode index |
+
+Read it back out in words: *a 256-entry dispatch table at LUT `$100`; bytecodes `$00`–`$9F` get individual entries; bytecodes `$A0`–`$FF` compress — each group of sixteen sharing one entry and one handler, which reads the actual bytecode from `PA`; and dispatch writes C and Z from the bytecode's low bits.*
+
+That is the whole of §7.2, §7.3 and §7.4 exercised at once, in a single instruction, in production.
+
+::: tip
+Work the other way when you design your own: decide the **base** (where in LUT can you afford 256 longs?), decide the **threshold** (how many bytecodes genuinely need their own handler, and where does the regular, operand-carrying tail begin?), then decide the **F bit** (do any handlers want two selector bits in the flags?). Concatenate, and you have your operand. The three choices are independent — that is the point of packing them into one value.
 :::
 
 # Chapter 8: Bytecode Routines {#ch-8}
