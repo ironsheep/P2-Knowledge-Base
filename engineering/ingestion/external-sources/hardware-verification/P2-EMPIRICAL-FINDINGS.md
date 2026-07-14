@@ -399,7 +399,7 @@ correction rests on ground truth, not on the port.
 Pascal's shift geometry + both renders). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testK-dotsize-render.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testL-scope-linesize.spin2`.
 
-### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED (pnut-term-ts) · PNut PENDING`
+### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL, and the `DOTSIZE >= 4` gate is REAL — `CONFIRMED (PNut + pnut-term-ts)`
 *How proven:* `conflict-testM-bitmap-sparse` — a 6×4 canvas of pure-green `$00FF00` pixels at `DOTSIZE 12`, with
 `SPARSE $FF0000`, captured via `SAVE WINDOW` (a plain BITMAP `SAVE` writes the bitmap **1× un-DOTSIZEd** and would
 have shown nothing). Rail: the same window with **no** `SPARSE` contains **no red at all**. *Result:* the sparse
@@ -483,6 +483,41 @@ but note the provenance.)*
 *Grounds:* v55 L1179 ("display **radius**", default **128**) is **CORRECT**; the pre-cleanup SCOPE_XY ToO §4a claim of
 "SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
 2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2` (log).
+
+### EF-050 · BITMAP `SET` out-of-range is NOT clamped — the manual was RIGHT and the REF is WRONG — `CONFIRMED (PNut)`
+**This one PREVENTED a regression: we were about to reverse correct shipped text.** *How proven:* `conflict-testQ` Q6 —
+an 8×8 BITMAP cleared to black, then `` `SET 999 999 `` followed by a single **white** pixel. *Result:* the saved canvas
+is **100 % BLACK — no white pixel anywhere.** A clamped `SET` would have put it at **(7,7)**. It is not there.
+⇒ **`SET` out-of-range is NOT clamped.** The REF's "`KeyValWithin` = assign-and-clamp" reading does **not** hold for
+`SET`, and the manual's `ch04:241` — *"an out-of-range coordinate is **ignored, not clamped**"* — **is CORRECT AS
+SHIPPED. Do not reverse it.** (The `FIX-MANUAL` item that would have done so is **killed**.)
+*Honest caveat:* the test fed exactly 64 pixels into a 64-pixel canvas, so the write pointer was already past the end
+when `SET` fired — "ignored" and "accepted-then-drawn-off-canvas" both predict no white pixel. **The CLAMP hypothesis is
+dead either way**, which is all the manual turns on; the precise mechanism is not cleanly isolated. A follow-up (feed 32
+pixels, then `SET 999 999`, then a white pixel) would separate them.
+*Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
+
+### EF-051 · A keyword placed after `SAVE` is CONSUMED AND DISCARDED — `` `Win SAVE CLEAR `` writes no file AND loses the CLEAR — `CONFIRMED (PNut)`
+*How proven:* `conflict-testQ` Q2 — two identical green BITMAPs. One is sent `` `SAVE CLEAR ``; the other (the **rail**)
+is sent a plain `` `CLEAR ``. *Result:* the `SAVE CLEAR` window is **100 % GREEN** (the `CLEAR` never ran) and **no file
+was written**; the rail window is **100 % BLACK** (a plain `CLEAR` works perfectly). The rail discriminates, so the
+finding is real and not a dead feed. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55.
+**Reader consequence:** `SAVE` swallows the next keyword. Put `SAVE 'name'` **last**, or you silently lose both the file
+and the command you thought you sent.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
+
+### EF-052 · A runtime `` `RATE -1 `` FREEZES BITMAP auto-refresh — and v55's own Feeding table advertises it as legal — `CONFIRMED (PNut)`
+*How proven:* `conflict-testQ` Q4/Q5 — two identical green BITMAPs are each fed a full canvas of **red**. One is first
+sent `` `RATE -1 `` (the test); the other `` `RATE 6 `` (the **rail**). *Result:* the `RATE -1` window stays **100 %
+GREEN — auto-refresh froze**; the rail window goes **94 % RED — still refreshing**. The rail proves the feed was alive,
+so the freeze is real. *Mechanism (REF):* the `-1` → `width×height` substitution happens **only at the end of
+`BITMAP_Configure`**; the update handler is a bare `KeyVal(vRate)`, and the rate cycle tests **equality** against a
+counter that only counts up from 0 — so a negative rate can never match. A later `TRACE`, `CLEAR` or explicit `UPDATE`
+un-freezes it. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55.
+**Reader consequence — a real trap:** **v55 L1342's Feeding table advertises `RATE -1` as a runtime directive.** It is
+meaningful **only in the create message**. At runtime it silently kills the display.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-046 · PNut v55 `SAVE WINDOW` captures the WRONG RECTANGLE — truncated, offset, sometimes the neighbouring window — `CONFIRMED (PNut)` — TOOL BUG
 `SAVE WINDOW 'name'` is meant to write a `.bmp` of the **entire window**. On PNut v55 the capture rectangle is both
