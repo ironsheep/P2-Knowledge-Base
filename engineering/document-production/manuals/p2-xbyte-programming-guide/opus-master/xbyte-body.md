@@ -1525,17 +1525,91 @@ This is "the byte is both the selector and an operand" in its cleanest form. Bec
 
 A **display list** is a stream of drawing commands — set a color, move the pen, draw a run — that a renderer walks once per frame. Each command byte selects a primitive; its parameters follow inline in the stream, pulled with the FIFO reads of Chapter 3. And because the FIFO position *is* the list cursor (§8.3), a "repeat" or "jump" command is nothing but an `RDFAST` to a new address — the very mechanism a guest CPU's branch used in Chapter 13, here doing ordinary graphics:
 
-```pasm2
-h_moveto                                    ' set the pen position
-                rfword  penx                ' inline X (16-bit)
-        _ret_   rfword  peny                ' inline Y (16-bit), return
+Here is the whole thing — the complete **non-interpreter** build, and the counterpart to the VM of Chapter 10. It compiles, and it exercises every asset the engine has:
 
-h_setcolor                                  ' load the current color
-        _ret_   rfvar   pencol              ' inline color, return
+```spin2
+CON
+  _clkfreq = 200_000_000
 
-h_loop                                      ' restart: re-point the FIFO
-        _ret_   rdfast  #0, ##displaylist   ' stream resumes from the top
+  FB_W    = 64                              ' framebuffer width, pixels
+  FB_H    = 32                              ' framebuffer height, pixels
+
+DAT
+                org
+
+' ---- start the display-list engine --------------------------------
+start
+                setq2   #5-1                ' load 5 longs into LUT $000..
+                rdlong  $000, ##cmd_table   ' the command dispatch table
+                rdfast  #0, ##displaylist   ' FIFO -> the display list
+                push    #$1ff               ' return target per command
+        _ret_   setq    #0                  ' arm: table @ LUT $000, F=0
+
+' XBYTE now walks the list. Control reaches 'done' only via END.
+done
+                jmp     #done               ' park the cog
+
+' ---- command handlers (cog-resident) ------------------------------
+h_end           jmp     #done               ' $00: leave the engine
+
+h_color _ret_   rfvar   pencol              ' $01: inline colour
+
+h_moveto                                    ' $02: inline X, then Y
+                rfword  penx
+        _ret_   rfword  peny
+
+h_hline                                     ' $03: paint a horizontal run
+                rfvar   len                 ' inline run length
+                mov     addr, peny          ' addr = fb + y*FB_W + x
+                mul     addr, #FB_W
+                add     addr, penx
+                add     addr, fbase
+                add     penx, len           ' pen ends past the run
+                tjz     len, #.empty        ' zero-length run: nothing to do
+.px             wrbyte  pencol, addr        ' paint one pixel
+                add     addr, #1
+                djnz    len, #.px
+.empty          ret                         ' run complete
+
+h_repeat                                    ' $04: walk the list again
+                djnz    reps, #.rewind      ' any passes left?
+                ret                         ' no - fall through to END
+.rewind _ret_   rdfast  #0, ##displaylist   ' yes - rewind the cursor
+
+' ---- cog variables ------------------------------------------------
+fbase           long    fb                  ' framebuffer base (hub)
+reps            long    3                   ' draw the whole list 3 times
+pencol          res     1
+penx            res     1
+peny            res     1
+len             res     1
+addr            res     1
+
+' ---- hub data: table, display list, framebuffer -------------------
+                orgh
+cmd_table       long    h_end               ' $00 -> END
+                long    h_color             ' $01 -> COLOR
+                long    h_moveto            ' $02 -> MOVETO
+                long    h_hline             ' $03 -> HLINE
+                long    h_repeat            ' $04 -> REPEAT
+
+displaylist     byte    $01, $0F            ' COLOR 15
+                byte    $02, 4,0, 2,0       ' MOVETO 4,2
+                byte    $03, 20             ' HLINE 20
+                byte    $02, 4,0, 3,0       ' MOVETO 4,3
+                byte    $03, 20             ' HLINE 20
+                byte    $04                 ' REPEAT (3 passes)
+                byte    $00                 ' END
+
+fb              byte    0[FB_W * FB_H]      ' the framebuffer
 ```
+
+Five commands, five handlers, and the engine walks a stream of *drawing instructions* with exactly the machinery a language gets. Note what each handler leans on:
+
+- **`h_color`** and **`h_moveto`** pull their parameters straight out of the stream with the FIFO reads of Chapter 3 — `RFVAR` for a small value, `RFWORD` for a coordinate. The read cursor advances itself, so the next dispatch lands correctly with no bookkeeping.
+- **`h_hline`** does real work, and shows that a handler is just PASM2 — nothing about it is XBYTE-specific.
+- **`h_repeat`** is the interesting one. It re-points the FIFO at the top of the list, and that single `RDFAST` *is* the loop. The read cursor is a free, movable program counter (§8.3) — the very same mechanism a guest CPU's branch used in Chapter 13, here doing ordinary graphics.
+- **`h_end`** leaves the engine by simply not returning to `$1FF` (§8.4).
 
 The command stream is *data you emit*, not a program you compile — a scene, a sprite list, a UI layout — yet the engine walks it with the same auto-fetch and dispatch a language gets. This is the mental shift the chapter turns on: XBYTE runs bytecode, and a display list is just bytecode whose "instructions" draw.
 

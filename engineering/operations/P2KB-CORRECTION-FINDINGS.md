@@ -1736,6 +1736,13 @@ LONG    (@push_routine << 23) | 0          # line 215
 **Ground truth** — Chip: `bc_read  long  var_rd | %0111001110 << 10`. Parallax: `bytetable  long  r0`.
 Correct form: `LONG  push_routine | (skip_pattern << 10)` — **no `@`, shift the *pattern*, not the address.**
 
+**A third defect in the same example, found later by actually compiling:** the routine ended
+`_RET_   NOP`. **That does not assemble** — `pnut-ts` rejects it outright: *"NOP cannot have a
+condition or `_RET_`."* The fix already applied (`_RET_ ADD stack_ptr, #4`) removes it, but it was
+corrected by luck rather than by knowledge, and it is worth recording *why* it was missed: the
+example was read for **semantics** and never **compiled**. A code example that has not been through
+the assembler is an assertion, not a fact.
+
 ### F-221 — `simple_interpreter`: never pushes `$1FF`, so it would not start XBYTE — `DONE (2026-07-14)`
 
 ```
