@@ -237,7 +237,21 @@ was corrected 4→8 in `f3e702ed` (audited faithful), but the shipped **KB YAML*
   measurements must stay within one group; single-pin ratiometric reads are absolute) is **correct** —
   only the group **size/count** (4/16 → 8/8) and the group boundaries (…0-3,4-7… → …0-7,8-15…) are wrong.
 
-### F-212 — Debug-displays YAML corrections surfaced by the 2026-07-12 coverage re-audit (per-file batch) — `CONFIRMED` (held for the debug-displays YAML pass, bundled with F-207/F-208)
+### F-212 — Debug-displays YAML corrections surfaced by the 2026-07-12 coverage re-audit (per-file batch) — `DONE`
+
+> **APPLIED 2026-07-14** (commit `35166ad4`), as the KB half of the single coordinated Debug sweep, together with
+> F-216's manual half. 13 files: the 9 window YAMLs + `pc_mouse.yaml`, `statements/debug.yaml`,
+> `debug-formatters-complete.yaml`, `constants/special-configuration-symbols.yaml`.
+> Landed: the **inversions** (`fft.yaml` MAG = GAIN not divisor; `spectro.yaml` axes; `midi.yaml` velocity-0
+> note-off + velocity-sets-HEIGHT; `pc_mouse.yaml` raw-client-pixels for 5 of 9 windows; `term.yaml` the
+> non-existent `LIME` keyword); the **unsourced packing default** (`scope.yaml`/`scope_xy.yaml` "default
+> LONGS_1BIT" → there is no default, unpacked); the ADDENDUM in full; and the hardware verdicts (EF-020 CARTESIAN
+> Y-UP — the single most important PLOT fact, previously absent from the KB entirely; EF-042 SPARSE + the
+> DOTSIZE≥4 gate; EF-043 POS is tool-dependent, swept across **all nine** windows; EF-048 OPACITY 256 → 0;
+> EF-052 runtime `RATE -1` freeze), plus `CLOSE` semantics and the real TITLE default caption across all nine.
+> **Validated:** YAML parse clean; `validate-crossref-keys.py` — all cross-references resolve.
+> **DO-NOT-TOUCH list honored:** `scope.yaml` "prevents the window from being created" (correct — the *manual*
+> was the one to fix, and was); `bitmap.yaml`/`ch10` packing "unsigned by default" (correct).
 
 **Surfaced:** 2026-07-12, the coverage-tracked exhaustive re-audit of the Debug Window Manual against the latest ratified
 REF (matrix + 9 Theory-of-Operations docs re-grounded on raw `DebugDisplayUnit.pas`, commit `360a9c15`). Full per-item
@@ -1450,7 +1464,18 @@ lock-guarded multi-writer form explicitly.
 
 ## Shipped app-note PDFs contradict their own cover — Revision History still says "v0.1.0 initial draft" (2026-07-13) — F-215
 
-### F-216 — Debug Window Manual: SIX SHIP-BLOCKERS, three of them in SHIPPED, hardware-run example code — `CONFIRMED` (held for the single coordinated Debug sweep)
+### F-216 — Debug Window Manual: SIX SHIP-BLOCKERS, three of them in SHIPPED, hardware-run example code — `DONE`
+
+> **APPLIED 2026-07-14** (commits `a4f66ef0` ship-blockers, `7a2ae625` per-chapter + TEACH, `35166ad4` YAML).
+> All six blockers fixed in `opus-master/` **and** in the example files, in lockstep. SB-1 (`+/`), SB-2 (explicit
+> channel counts **+ the missing example file created**, `ch06-logic-declare.spin2` — closing the root cause: the
+> construct had no compile-and-run coverage), SB-3 (LSB-first packing in both twins), SB-4 (`PRECISE` default),
+> SB-5 (`COLOR` immediately before `TEXT`), SB-6 (SPECTRO axes in appendix-c). Examples ZIP regenerated.
+> **Verified:** all 34 examples compile under `pnut-ts -d`, and all 34 are byte-identical to their manual code blocks.
+> **NOT applied — the RIG-VERDICTS reversal:** the fix list's body called for reversing `ch04:241` to "SET is
+> clamped." **EF-050 proved on silicon that `SET` is NOT clamped** — the shipped sentence is CORRECT, and applying
+> the body would have broken correct text. The two other items resting on that same wrong REF reading (the ch05
+> LAYER/CROP "clamped" rewrite and the ch01 global "everything clamps" TEACH) were likewise dropped.
 
 **Surfaced:** 2026-07-14, the 5-agent 4-way reconciliation (v55 ↔ rebuilt REF ↔ manual ↔ YAML ↔ examples) run against the
 REF re-grounded on raw `DebugDisplayUnit.pas` + `p2com.asm`. Every item hand-verified before acceptance.
