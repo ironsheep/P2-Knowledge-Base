@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-11T03:28:04.005156",
+    "generated": "2026-07-14T07:13:45.375398",
     "total_entries": 1129,
     "total_categories": 59,
-    "total_aliases": 1712,
-    "multi_target_aliases": 74,
+    "total_aliases": 1724,
+    "multi_target_aliases": 75,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -1399,7 +1399,7 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "DETENT NORMALIZATION": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "DIGITAL SIGNALS": [
       "p2kbSpin2Logic"
@@ -1618,7 +1618,7 @@
       "p2kbSpin2Fft"
     ],
     "FREQUENCY MEASUREMENT": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "FTDI FT231X PROGRAMMER": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
@@ -1719,7 +1719,7 @@
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "HIGH-TIME MEASUREMENT": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "HOW BIG A STACK": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
@@ -1922,7 +1922,7 @@
       "p2kbHwHub75AdapterHub75Adapter"
     ],
     "LIGHT TO FREQUENCY": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "LISSAJOUS": [
       "p2kbSpin2ScopeXy"
@@ -2016,6 +2016,9 @@
     ],
     "MEASURING STACK SPACE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "MEMBER BITFIELDS": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "MERGEB": [
       "p2kbPasm2Mergeb"
@@ -2120,6 +2123,9 @@
     "MUXZ": [
       "p2kbPasm2Muxz"
     ],
+    "NAMELESS STRUCT MEMBER": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "NAN": [
       "p2kbSpin2Nan"
     ],
@@ -2185,6 +2191,7 @@
       "p2kbSpin2KwOBJ"
     ],
     "OFFSETOF": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbSpin2Offsetof"
     ],
     "ONE BUS MANY COGS": [
@@ -2427,6 +2434,9 @@
     "PACKED RECORD": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "PACKED STATUS WORD": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "PARALLAX WX ESP8266 WI-FI MODULE": [
       "p2kbHwAddonWxWifiAddonWxWifi"
     ],
@@ -2446,13 +2456,13 @@
       "p2kbArchPinPowerDomains"
     ],
     "PERIOD MEASUREMENT": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
     ],
     "PHOTOCELL READER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "PIANO KEYBOARD": [
       "p2kbSpin2Midi"
@@ -2591,7 +2601,7 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
-    "POWER GROUP OF 4": [
+    "POWER GROUP OF 8": [
       "p2kbArchPinPowerDomains"
     ],
     "PROP PLUG": [
@@ -2634,10 +2644,10 @@
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
     "PULSE MEASUREMENT": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "PULSE WIDTH MEASUREMENT": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "PUSH": [
       "p2kbPasm2Push"
@@ -2740,10 +2750,10 @@
       "p2kbPasm2Qsqrt"
     ],
     "QUADRATURE ENCODER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "QUADRATURE KNOB": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "QUEUE": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -2755,10 +2765,10 @@
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "RC DECAY READER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "RC decay reader": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "RCFAST": [
       "p2kbArchClockSystem"
@@ -2773,7 +2783,7 @@
       "p2kbArchClockSystem"
     ],
     "RCTIME": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "RCZL": [
       "p2kbPasm2Rczl"
@@ -2825,7 +2835,7 @@
       "p2kbHwAddonRtcAddonRtc"
     ],
     "RECIPROCAL FREQUENCY COUNTER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "RECORDS": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -2942,7 +2952,7 @@
       "p2kbPasm2Ror"
     ],
     "ROTARY ENCODER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "ROTATE A POINT": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -3003,10 +3013,13 @@
       "p2kbSpin2Send"
     ],
     "SENSOR READING": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "SENTINEL FILL TECHNIQUE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "SEQLOCK": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "SEQUENCE COUNTER": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -3270,6 +3283,9 @@
     "STRUCT": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "STRUCT BITFIELDS": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "STRUCT POINTER": [
       "p2kbSpin2OpTypedPointers"
     ],
@@ -3389,7 +3405,7 @@
       "p2kbSpin2Term"
     ],
     "THERMISTOR READER": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "THISTASK": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
@@ -3419,6 +3435,9 @@
     "TOP-LEVEL APPLICATION OBJECT": [
       "p2kbSpin2ObjectArchetypes"
     ],
+    "TORN READ": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "TOUCH SENSING ADD-ON": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
@@ -3438,7 +3457,7 @@
       "p2kbSpin2Trunc"
     ],
     "TSL235R": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "TT_BITS": [
       "p2kbArchSmartPins"
@@ -4175,7 +4194,7 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "detent normalization": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "diagnostic_output": [
       "p2kbSpin2Spin2DiagnosticOutput"
@@ -4388,7 +4407,7 @@
       "p2kbSpin2Fft"
     ],
     "frequency measurement": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "getbrk": [
       "p2kbPasm2Getbrk"
@@ -4462,7 +4481,7 @@
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "high-time measurement": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "how big a stack": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
@@ -4619,7 +4638,7 @@
       "p2kbSpin2Spin2LayeredArchitecture"
     ],
     "light to frequency": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "loc": [
       "p2kbPasm2Loc"
@@ -4696,6 +4715,9 @@
     ],
     "measuring stack space": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "member bitfields": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "memory_allocation": [
       "p2kbSpin2Spin2MemoryAllocation"
@@ -4815,6 +4837,9 @@
     "muxz": [
       "p2kbPasm2Muxz"
     ],
+    "nameless struct member": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "nan": [
       "p2kbSpin2Nan"
     ],
@@ -4915,6 +4940,9 @@
     "packed record": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "packed status word": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "pasm2_hub_synchronization": [
       "p2kbPasm2Pasm2HubSynchronization"
     ],
@@ -4928,13 +4956,13 @@
       "p2kbArchPinPowerDomains"
     ],
     "period measurement": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "phase plot": [
       "p2kbSpin2ScopeXy"
     ],
     "photocell reader": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "piano keyboard": [
       "p2kbSpin2Midi"
@@ -5052,7 +5080,7 @@
     "popb": [
       "p2kbPasm2Popb"
     ],
-    "power group of 4": [
+    "power group of 8": [
       "p2kbArchPinPowerDomains"
     ],
     "proto board": [
@@ -5069,10 +5097,10 @@
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "pulse measurement": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "pulse width measurement": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "push": [
       "p2kbPasm2Push"
@@ -5113,10 +5141,10 @@
       "p2kbPasm2Qsqrt"
     ],
     "quadrature encoder": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "quadrature knob": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "queue": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -5137,7 +5165,7 @@
       "p2kbPasm2Rcr"
     ],
     "rctime": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "rczl": [
       "p2kbPasm2Rczl"
@@ -5177,7 +5205,7 @@
       "p2kbHwAddonRtcAddonRtc"
     ],
     "reciprocal frequency counter": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "records": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -5288,7 +5316,7 @@
       "p2kbPasm2Ror"
     ],
     "rotary encoder": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "rotate a point": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -5328,7 +5356,7 @@
       "p2kbSpin2Send"
     ],
     "sensor reading": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "sensor_fusion": [
       "p2kbSpin2SensorFusion"
@@ -5338,6 +5366,9 @@
     ],
     "sentinel fill technique": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "seqlock": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "sequence counter": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -5589,6 +5620,9 @@
     "strsize": [
       "p2kbSpin2Strsize"
     ],
+    "struct bitfields": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
     "struct pointer": [
       "p2kbSpin2OpTypedPointers"
     ],
@@ -5686,7 +5720,7 @@
       "p2kbSpin2Term"
     ],
     "thermistor reader": [
-      "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement"
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "timing_control": [
       "p2kbArchTimingControlAnalysis",
@@ -5715,6 +5749,9 @@
     ],
     "top-level application object": [
       "p2kbSpin2ObjectArchetypes"
+    ],
+    "torn read": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "touch sensing add-on": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
@@ -5923,8 +5960,8 @@
   "files": {
     "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
       "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
-      "mtime": 1783103488,
-      "sha256": "15f60243652c5b82c9a2677ee114a52ae2cc379f71b113fddb73b012e9012cc9"
+      "mtime": 1783814014,
+      "sha256": "c8fbfe278adbd585682a5b4e698c2ede7af96dfff79dfb4b923ef766d49317fc"
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
@@ -5936,10 +5973,10 @@
       "mtime": 1783109814,
       "sha256": "b37896c3fa557f65f0d5ca5589b962f4f8fa56396a93b24d89a9f9ffd8c579dd"
     },
-    "p2kbAppNoteP2an004FrequencyPeriodPulseMeasurement": {
-      "path": "deliverables/ai/P2/application-notes/p2an004-frequency-period-pulse-measurement.yaml",
-      "mtime": 1783123138,
-      "sha256": "904a67b1f172ea14ff5f69131afce440c8d8a74cbcd5014787d117bbf7872c18"
+    "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement": {
+      "path": "deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml",
+      "mtime": 1783814531,
+      "sha256": "18bdd8f7a2c06a9d5bf8665c96c7824988f88e08aae06acbcdd61461a25f413e"
     },
     "p2kbAppNoteP2an005CooperativeMultitaskingTasks": {
       "path": "deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml",
@@ -5953,8 +5990,8 @@
     },
     "p2kbAppNoteP2an007DataStructuresNewFacilities": {
       "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
-      "mtime": 1783374481,
-      "sha256": "b2dc8db17f1b706fd3952ca2490212f7659b262abca7dd686a15baed99108ffc"
+      "mtime": 1783971810,
+      "sha256": "f9deddb4d65e52353375b6f7ba4b131ab9b63b9abb2f42accee46ee97da56b70"
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
@@ -6183,8 +6220,8 @@
     },
     "p2kbArchPinPowerDomains": {
       "path": "deliverables/ai/P2/architecture/pin-power-domains.yaml",
-      "mtime": 1782849425,
-      "sha256": "f8977d58976caf66f72d5c936aaafa6bfeb25f09aab2180556cdaa0c54a79098"
+      "mtime": 1783814014,
+      "sha256": "dc3efb91f7a37981f84e02a736440d47c7b065cdd9fa533a2266c2200b78c780"
     },
     "p2kbArchSerialLoader": {
       "path": "deliverables/ai/P2/architecture/serial_loader.yaml",
@@ -6313,18 +6350,18 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1782849425,
-      "sha256": "ce194acb63f4cdbab079b3a50e3550b63ea132cc644bfc44ebcdda0c364cf3fb"
+      "mtime": 1783814014,
+      "sha256": "298419cad8781615c94da093a3441b1ae7870cd282ccbe991ec1f6e71f0d862b"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
-      "mtime": 1783374514,
-      "sha256": "b4021bf6e5351d34cf9b8b2d75e9ff893375f513001ad44fbcd89dbfbb07e21e"
+      "mtime": 1783814014,
+      "sha256": "6284eef488e7bac53933ca40641977456b43afd3b56c3416b8b0541e8b19b3c7"
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1783047774,
-      "sha256": "674cb0e7fc5703fa5976213b8be84528c89c75308f6b23e521cf46dff8f83a69"
+      "mtime": 1783814014,
+      "sha256": "99fcb93e65925dccc475fa2b700ad722fd8251a42ef38e66f0dad8aac5184a1b"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
@@ -9733,8 +9770,8 @@
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1781076792,
-      "sha256": "54ccb36f6b887503f4b9bdc73fdc199f0d3f6ab5aad34deccaea92bee1b7fcc2"
+      "mtime": 1784009392,
+      "sha256": "74bba628c8140bbed062340ed19de14e57c2c78f537bf248937323df20ec9048"
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
@@ -9843,8 +9880,8 @@
     },
     "p2kbSpin2DbgDebugFormattersComplete": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-complete.yaml",
-      "mtime": 1764449566,
-      "sha256": "ad42a11ca43c92423463f536931e4c1a1bf1053d739dde593e11f8379a0bec52"
+      "mtime": 1784009392,
+      "sha256": "221e3854e758a42d56e1768bab7a2293c9866f1329e77bacd2f89a2008ee9688"
     },
     "p2kbSpin2DbgDebugFormattersDecimal": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-decimal.yaml",
@@ -9888,53 +9925,53 @@
     },
     "p2kbSpin2DbgPcMouse": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_mouse.yaml",
-      "mtime": 1781325191,
-      "sha256": "4b1b91818f61b28189851821fed1c62ecb282fd67635d6239ace2f0f7b406735"
+      "mtime": 1784009392,
+      "sha256": "bb4a128319e8387b27c9cc4b4ea424559b9e359a937f688e4f99db4a51fa2e15"
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
-      "mtime": 1781760573,
-      "sha256": "2b2f86b1ec8f0ab066ce6ce1556c94845825b501e0eae1e14dad627b06adf525"
+      "mtime": 1784012415,
+      "sha256": "7c8202bca638bc9d92d2371a5bddb2b1a555a50317313f4e4fecdaefbb85434a"
     },
     "p2kbSpin2Fft": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/fft.yaml",
-      "mtime": 1781760573,
-      "sha256": "3b5bc6aaf06b32820acf27146bcc7936b259ac96c958ed90b34b83bc6aff474b"
+      "mtime": 1784009392,
+      "sha256": "6d97874aebc3869c05fb9acc3e9e67054fe8eb24cd7ddf3f6206dcb7e9152f7c"
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1781760573,
-      "sha256": "5952441f037a49ab891215fec189991a98173fb2185b089fcaa95739b3ad15c0"
+      "mtime": 1784009392,
+      "sha256": "e9720e83d7d92c3294ba7af5bd78d9f14ccec27c3583071252209ad5c902e238"
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1781760573,
-      "sha256": "775225f32101e526e8b0d8638e7e59f5f679f63cdc61ee5a257f2ac4d5035c55"
+      "mtime": 1784009392,
+      "sha256": "8151b99c21eb5573f5ba48540c42e35d270bc4ea287ff654b6e60733c9429893"
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1781981347,
-      "sha256": "917496a15bf67ee4344c8270b2298780d559d70f52c950b312990f8f6f55f6fa"
+      "mtime": 1784009392,
+      "sha256": "5c00b4e90201188859ea2fb58d04812969b1ed0e724e1dc248e80ca2268bda4c"
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
-      "mtime": 1781760573,
-      "sha256": "3958e5dcf54f577c4362471018ae4d2b533795a8c44687c23e4b6ce8e9f0f6c4"
+      "mtime": 1784009392,
+      "sha256": "b6e0fb2380aaa9a045dd8c8f6adf81a4a267903787987a370fb4f83dcb4b20ba"
     },
     "p2kbSpin2ScopeXy": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope_xy.yaml",
-      "mtime": 1781760573,
-      "sha256": "805d6666c075280a2bc06b5752645e1cdea08e5f4819572019646826e642b9f8"
+      "mtime": 1784009392,
+      "sha256": "c4b2cbd3d6c40a0510a16309f005c5e228fe960a43d6e923e50248a28615d60e"
     },
     "p2kbSpin2Spectro": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/spectro.yaml",
-      "mtime": 1781760573,
-      "sha256": "dc4c48f1d55a019360bd04177092303e2d87e7ee3dc6f1bfa3e4b8bc253a3b84"
+      "mtime": 1784009392,
+      "sha256": "8337090f34c0acf08d10bfaf3e426e083cba55faa768fa8101f4fccc4483e600"
     },
     "p2kbSpin2Term": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/term.yaml",
-      "mtime": 1781823801,
-      "sha256": "c65d9cfee817c042b9401191a5fb6536f025b127a41f7cdab40ef29c7c61d6b5"
+      "mtime": 1784009392,
+      "sha256": "382d39cf6959ad59aea35c0b3b90e7a64f04d3ef499e1077941f38fc3f78e3e9"
     },
     "p2kbSpin2BitManipulation": {
       "path": "deliverables/ai/P2/language/spin2/idioms/bit-manipulation.yaml",
@@ -11533,8 +11570,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1781981347,
-      "sha256": "75281f27402d2f28d0ac640ab958e8a95e9388926fcac67ca14aefd82482a9f9"
+      "mtime": 1784009392,
+      "sha256": "9cc20ccfb2d930d8332ac0addb333e47a847305955b2216a29d3bf9626f37e94"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",
