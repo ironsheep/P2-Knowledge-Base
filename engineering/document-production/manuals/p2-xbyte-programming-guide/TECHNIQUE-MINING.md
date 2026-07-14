@@ -784,5 +784,36 @@ Note the placement difference, and it is the whole point of **E2**: MegaYume pol
 3. **J3** — what is *"no stack pop"*?
 4. **T1** — guest-interrupt injection still rests on **one** implementation (A). Do the Yume cores
    do it the same way? (They have no XBYTE, so their answer may not transfer.)
-5. **L3** — an XBYTE 8086 would be the single most valuable remaining source. **Blocked on the
-   captcha.**
+5. ~~**L3** — an XBYTE 8086 would be the single most valuable remaining source.~~ **CLOSED
+   2026-07-14 — NO SOURCE EXISTS.** Stephen retrieved thread 173345 ("8086 CPU XBYTE emulator
+   working"): **19 posts, zero downloadables.**
+   - The claim *"XBYTE interpreters for the 8086 have been written and work very well, with XBYTE
+     resulting in the fastest possible emulation"* is therefore an **unverified forum claim with no
+     artifact behind it.** Per our standing rule (community/forum = upstream **lead**, never a
+     reader-facing citation; no unsourced claims), **it must not enter the manual as fact.**
+   - **Nor may we overclaim in the other direction.** Two real x86 implementations exist and neither
+     uses XBYTE — that is evidence about *those two*, not proof that x86 *cannot*. The manual states
+     what we can show: x86's **dispatch** fits a table; its **fetch** does not fit auto-fetch, for
+     structural reasons (segmented `CS:IP`, modifier prefixes, `REP`, and no loop body). We do **not**
+     assert that nobody has done it.
+
+## 12. Mining status — CONVERGED (2026-07-14)
+
+**Nine implementations, five-plus authors.** Every row of the concerns table is now grounded in code
+we have actually read.
+
+| Guest | Source | Fetch | Dispatch |
+|---|---|---|---|
+| Spin2 bytecode | Chip's interpreter (B) | **XBYTE** | **XBYTE** |
+| toy bytecode | Parallax demo (J) | **XBYTE** | **XBYTE** |
+| ZPU | Zog (I) | **XBYTE** | **XBYTE** |
+| 8080 | 8080 games emulator (A) | **XBYTE** | **XBYTE** |
+| Z80 | MegaYume (E) | hand-rolled | LUT + `EXECF` |
+| 65816 | MisoYume (G) | hand-rolled (PSRAM queue) | hub table + `EXECF` |
+| 68000 | MegaYume (E) | hand-rolled | nibble table + `ALTD`-patched `jmp` |
+| x86 | `Simple-i8086` (K) | hand-rolled | hub + LUT tables + `EXECF` |
+| x86 | `i8086_xt` (L) | hand-rolled | hub table + plain `jmp` |
+| RISC-V | riscvemu (H) | — | **JIT to native PASM2** |
+
+**The pattern, stated once:** *everyone* keeps the **dispatch** asset. Only the small,
+hub-resident guests keep **auto-fetch**. Nothing further is blocked — **write.**

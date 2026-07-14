@@ -57,6 +57,99 @@ Resulting v0.1.0 shape: **15** chapters in 4 parts + Appendices A–D + Index �
 
 ---
 
+## 0-bis. SCOPE REVISION — **v0.2.0, the evidence-grounded edition** (2026-07-14) — *PROPOSED, awaiting Stephen*
+
+> **This section governs v0.2.0 and supersedes §4 below** (the architectural-families
+> contrast), which was written from reasoning and has now **failed verification three times**.
+> **Evidence:** `TECHNIQUE-MINING.md` — nine implementations, five-plus authors, all read.
+
+### Why this revision exists
+
+Stephen asked for a per-processor **"what will hurt when you emulate this"** table, and proposed
+grounding it in **live working emulators** rather than ISA reasoning. That study found the guide's
+Part III framing is **confidently wrong**, and produced far more than a table.
+
+**Root cause, stated plainly:** Chapter 10 was **derived, not observed**. Three of its claims failed
+against real code (the x86 prefix claim → **F-219**; the 68000 `RFWORD` claim; and the 65816 —
+graded "the sweet spot" — which is emulated on P2 **without XBYTE at all**).
+
+### The four ideas that reshape the manual
+
+1. **Three separable concerns, not two assets.** §10.1 teaches *auto-fetch* + *table dispatch*. The
+   honest model is **fetch** · **dispatch** · **memory model**. Proven by the `i8086_xt` hub-vs-PSRAM
+   pair: swapping the entire memory backend changed **115 of 8,314 lines and ZERO dispatch lines**.
+2. **Auto-fetch is a coupling decision, not a feature.** The FIFO streams **hub only**. Taking
+   auto-fetch **welds the guest's code to hub RAM**; hand-rolling the fetch costs clocks and buys a
+   **swappable memory backend**. If the guest may outgrow hub, you pay for auto-fetch once — in a
+   rewrite.
+3. **There is no loop body.** XBYTE's loop is *hardware*. Every cross-cutting per-instruction
+   concern — cycle pacing, interrupt polling, debug hooks, guest refresh registers, prefix-state
+   reset, bus arbitration — **has nowhere to live.** MegaYume's Z80 loop does all six. A software
+   loop costs ~3 clocks and gives you **a place to stand**. *This is the real reason the big
+   emulators decline XBYTE, and the manual never says it.*
+4. **A ladder, not a binary.** Plain jump table → `EXECF` + skip patterns → XBYTE. All three exist
+   **on one guest CPU** (the 8086), so the reader can see every rung with the guest held constant.
+   **You do not have to climb all the way.**
+
+### Chapter-by-chapter
+
+| Ch | Change | Source |
+|----|--------|--------|
+| **1** | **ADD** "If you're building…" router (mirrors Streamer §1.7; forward-points to Ch. 13 — §13.2 already *is* this content, buried). **ADD** "What XBYTE costs you": 256 LUT longs, handler space, the `$1FF` stack slot, `PA`/`PB`, **and the FIFO**. **REVISE** §1.5 with the honest cost (idea 3). | T-budget; L4 |
+| **2** | **ADD** skipping is **suspended inside a `CALL`** (Silicon Doc — our own Ch. 11 depends on it and never says why it's safe). **ADD** a trailing pattern runs **past** the handler → the NOP landing pad. **ADD** (aside) bit 10 is the pattern's LSB → free per-opcode flag. | D3/T4 · A3/T5 · T18 |
+| **4** | **REFRAME** §4.4 "Dispatch, by hand" — not pedagogy: it is the **debug mode** *and* what production emulators actually ship (4 independent sightings). **ADD** `orgf` table placement. | A4/T6 · T11 |
+| **5** | ✅ **CONFIRMED** by Parallax's official clock table. **FIX §5.3 (F-217)** — interruptibility is sold as a pure benefit; handlers doing atomic work must shield with **`REP`** (Chip does it 8×). *Correctness hazard.* | J1 · B4 |
+| **6** | **ADD** the `SETQ2` collision caution (block-move vs one-shot mode). **RESOLVE J3** — *"no stack pop"* in Parallax's arming line; **verify against the Silicon Doc before writing.** | B6/T12 · J3 |
+| **7** | ✅ **CONFIRMED** by Chip's `$1A1`. **ADD** it as a worked reference (compression + F together, in a real bytecode set). | B2/T14 |
+| **8** | **ADD** re-point the FIFO from `PB` to resume after a hub call. | A5/T8 |
+| **NEW** | **Guest interrupts** — `JATN` poll + guest IE as a cog register + **inject via a synthesized `EXECF` operand**. *Converged: two authors, two guests.* And the placement lesson: with a loop you poll once; under XBYTE you must poll **inside handlers**. | T1/T19 |
+| **NEW** | **Debugging XBYTE** — `GETBRK` exposes the 9-bit mode + the live skip pattern; the debugger *displays* both (struck-through instructions); the debug ISR preserves the hardware stack, which is **why** XBYTE survives being debugged; and the **de-arm-and-substitute** technique. Motivated by idea 3. | D1/D2/D4 · A4 |
+| **10** | ⚠️ **REWRITE.** Becomes: three concerns (1) → the dispatch ladder (4) → the coupling decision (2) → no loop body (3) → **the concerns table** → prose per concern → why the 6502. | all |
+| **11** | Keep **tiny & illustrative** (charter holds). **ADD** a forward pointer to **two-stage dispatch** (opcode → addressing mode → operation) as the real way the addressing-mode matrix is solved — *converged across two authors*. Do not build it. | T15 |
+| **12** | **WIDEN.** The **prefix taxonomy** (F-219): **map/escape** prefixes change *which handler runs* → `SETQ2` ✅; **modifier** prefixes change *how it behaves* → state register ❌. Z80 has **both** (`CB`/`ED` map; `DD`/`FD` modifier) — the perfect illustration. **ADD** Chip's `SETQ2`-as-**grammar** and two live tables at different LUT bases. | K3/F-219 · B3/T9/T10 |
+| **13** | **§13.7 "When XBYTE is the wrong tool" gets the real content** (idea 3 + hub-only fetch + LUT/FIFO contention). **ADD** JIT as an option we never name. | E2 · T16 |
+| **App C** | Credit every mined project (existence proofs a reader can study). | all |
+| **App D** | **ADD** the new traps: landing pad · `REP` shield · `SETQ2` collision. | A3 · B4 · B6 |
+
+### The concerns table (Stephen's original ask — now evidence-driven)
+
+Rows: **6502/65C02 · Z80 · 8080 · 6809 · 8051 · 65816 · 68000 · x86 · ARM/MIPS · CHIP-8**
+Cells are **short words, not symbols** (Stephen: *"don't make it harder to read"* — and Ch. 13
+already uses ★/◑/○ for *fit*, where filled = **good**; reusing them for *concerns*, where filled =
+**bad**, is exactly the trap).
+
+Columns, **as the evidence now dictates** — note the first two were **not** in the original design
+and they **dominate every real target**:
+
+**Where the code lives** · **Is LUT free** · **Dispatch fit** · **Prefixes** (map / modifier) ·
+**Flags** · **Decimal** · **Guest interrupts** · **Cycle accuracy** · **Quirks**
+
+Then one prose subsection **per concern** (not per CPU). Cycle-accuracy and undocumented opcodes stay
+prose, not columns — forcing them into the grid is what would wreck it.
+
+### Deliberately NOT claimed
+
+- **The 8086-on-XBYTE claim is an unverified forum lead with no artifact** (thread 173345: 19 posts,
+  zero downloadables). It does **not** enter the manual as fact — **and we do not overclaim the
+  converse either.** Two x86 implementations decline XBYTE; that is evidence about *those two*, not
+  proof that x86 *cannot*.
+- **No evolution narrative** from the archive dates (`Simple-i8086` uses `EXECF`; `i8086_xt` does
+  not). Authorship/lineage is **not established** — record strategies, not stories.
+- **T18** converges across two cores **by the same author.** Present it with its mechanism, not as
+  "everyone does this."
+
+### Flagged decisions for Stephen
+
+1. **Scope.** This is a Ch. 10 rewrite + two new chapters + fixes across seven — v0.1.0 → **v0.2.0**,
+   not a patch. Confirm.
+2. **The concerns table** — inside Ch. 10, or its own chapter? (It is now big enough to stand alone.)
+3. **The worked example** (display list, compiled + committed) — still wanted? It also closes a real
+   gap: **the manual currently ships ZERO `.spin2` files**, though `creation-guide.md` §5.3 requires
+   examples to compile.
+4. **J3 blocks Ch. 6** — *"no stack pop"* must be resolved against the Silicon Doc first. Do not guess.
+
+---
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
