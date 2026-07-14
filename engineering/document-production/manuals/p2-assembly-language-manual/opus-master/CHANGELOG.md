@@ -1,5 +1,13 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.4 (2026-07-14)
+
+**Hyphenated names print exactly as written** — compound terms and cross-references keep their authored spelling.
+
+### Fixed
+- Hyphenated compound terms read as written: `not-taken` branch timing, `1..4-byte` FIFO values.
+- The cross-reference to the **P2 I/O & Smart Pins User Guide** carries that guide's exact name, so it resolves.
+
 ## v3.1.3 (2026-07-11)
 
 **A silicon- and hardware-grounded accuracy pass** — instruction semantics, flag effects, and timing across the reference verified against the P2 documentation and real-hardware measurement.

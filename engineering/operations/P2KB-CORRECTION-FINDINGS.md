@@ -1462,7 +1462,7 @@ lock-guarded multi-writer form explicitly.
 
 ---
 
-## Shipped app-note PDFs contradict their own cover — Revision History still says "v0.1.0 initial draft" (2026-07-13) — F-215
+## Shipped app-note PDFs contradict their own cover — in-doc Revision History goes stale on every release (2026-07-13; scope corrected 2026-07-14) — F-215
 
 ### F-216 — Debug Window Manual: SIX SHIP-BLOCKERS, three of them in SHIPPED, hardware-run example code — `DONE`
 
@@ -1519,17 +1519,61 @@ construct we teach, plus test data whose expected output is **asymmetric**.
 **Gate:** all of this lands in ONE coordinated sweep (manual + examples ZIP + YAMLs), then re-render and re-release
 together. YAML side rides F-212 + its addendum.
 
-### F-215 — Released app notes carry a never-shipped draft version in their in-document Revision History — `CONFIRMED` (P2AN007 fixed pre-release; P2AN005/P2AN006 shipped wrong)
+### F-215 — App-note in-document Revision History drifts from the cover and cites never-shipped drafts — `CONFIRMED` · **DEFERRED: rides each doc's next natural release** (Stephen 2026-07-14)
 
-- **Location:** the `## Revision History` section of each app note's `opus-master/<ID>.md`. **Verified in the SHIPPED PDFs** (text-extracted, not inferred):
-  - `P2AN005.pdf` — cover reads **Version 1.0.1**; Revision History reads **"v0.1.0 (July 2026) — initial draft for review."**
-  - `P2AN006.pdf` — cover reads **Version 1.0.0**; Revision History reads **"v0.1.0 (July 2026) — initial draft for review."**
-  A reader sees a released version on the cover and a *draft* in the history of the same document.
+> **SCOPE CORRECTED 2026-07-14 — this is SIX of seven app notes, not two.** As originally filed, F-215
+> named only P2AN005/P2AN006, because the detection grep matched `v0.1.0` / "initial draft". **P2AN001–004
+> express the same defect in a different shape** — a Revision History *table* whose draft row reads a bare
+> `0.1.0` / "First draft" — and were missed. A full re-sweep of all seven app notes (and of the seven
+> manuals, which carry **no** in-doc Revision History at all, so are out of scope) gives the true picture.
+> *Lesson: the first sweep keyed on one literal spelling of the defect rather than on its shape.*
+
+**The two defect classes (a doc may have both):**
+
+| App note | Cover | Rev-History top | Never-shipped draft row | Classes |
+|---|---|---|---|---|
+| P2AN001 | 1.0.2 | 1.0.1 | `0.1.0` "First draft" | **A + B** |
+| P2AN002 | 1.0.1 | 1.0.0 | `0.1.0` "First draft" | **A + B** |
+| P2AN003 | 1.0.1 | 1.0.0 | `0.1.0` "First draft" | **A + B** |
+| P2AN004 | 1.0.1 | 1.0.0 | `0.1.0` "First draft" | **A + B** |
+| P2AN005 | 1.0.1 | `v0.1.0` (only entry) | `v0.1.0` "initial draft" | **A + B** |
+| P2AN006 | 1.0.0 | `v0.1.0` (only entry) | `v0.1.0` "initial draft" | **A + B** |
+| P2AN007 | 1.0.0 | 1.0.0 | — | clean ✅ |
+
+- **Class A — the Revision History does not list the version the document IS.** Every released app note except
+  P2AN007 has a cover version that appears nowhere in its own history. This is the *systemic* half: the
+  2026-07-12 fleet release bumped these covers and never touched the in-doc tables, so **the table goes stale
+  on every release**. It will keep re-breaking until the gate below is closed.
+- **Class B — never-shipped draft rows.** `git tag` confirms **no `0.1.0` tag has ever existed** for any app
+  note; those rows describe a version the public never saw.
+- **Worst sub-case (P2AN005/P2AN006):** the draft row is the *only* entry, so a released doc's history tells the
+  reader it is an *"initial draft for review … hardware confirmation pending."* That misreports the document's
+  **maturity**, not merely its version number.
+
+- **DISPOSITION (Stephen 2026-07-14): DEFERRED — not a reader-comprehension defect.** No reader's understanding
+  of the technical material (ADC, CORDIC, DAC, smart-pin measurement, TASK, stack sizing) is harmed by a stale
+  version table. So this does **not** justify re-rendering and re-releasing six documents on its own. **Each app
+  note's Revision History is corrected as part of its NEXT natural release**, whenever that comes. A doc must not
+  ship again carrying this defect.
 - **The rule it breaks:** `methodology/changelog-style-guide.md` — **"Never-shipped versions are never mentioned … For users, they never existed. If a version number was never released, delete any artifact referencing it."** v0.1.0 was a review draft: never in `deliverables/documents/README.md`, never tagged. It must not appear in reader-facing history. The same guide's **"Initial releases describe the document, not a delta"** means the v1.0.0 entry must holistically describe the document, not delta against the unpublished draft.
 - **Why it slipped:** the release process promotes `opus-master/CHANGELOG.md` (which P2AN005/6 got *right* — a single holistic initial entry) but the **doc's own in-PDF Revision History is a separate artifact** that nothing gated. `audit-changelog` audits `CHANGELOG.md`; no check compared it to the rendered Revision History. The two drifted silently.
 - **P2AN007 (fixed pre-release, 2026-07-13):** the changelog audit gate caught it before promotion. `CHANGELOG.md` rewritten as a conforming initial entry (holistic, no delta headings, no draft reference) and the doc's Revision History reduced to the single v1.0.0 entry. Re-rendered.
-- **Outstanding — P2AN005 + P2AN006 need the same edit and a re-render** (content-identical otherwise; bundle with the F-214 Assembly re-render). **A shipped PDF is only fixed by re-rendering it.**
-- **Process gap to close:** `release-manual` Phase 2a audits `CHANGELOG.md` only. It should also assert that the doc's rendered Revision History top entry **matches the cover version** and mentions **no unreleased version** — this defect is invisible to the current gate. (Skill change is central-owned; propose, do not edit.)
+- **Outstanding — six docs, deferred (see DISPOSITION).** P2AN001–006 each carry the fix into their next release.
+  **A shipped PDF is only fixed by re-rendering it**, so until a doc re-renders for its own reasons, the released
+  PDF keeps the defect. Not bundled with the F-214 Assembly re-render (Assembly is a *manual* — no in-doc
+  Revision History — so it is untouched by this finding).
+- **The fix, when each doc's turn comes:** drop the never-shipped draft row entirely, and ensure the top entry is
+  the version on the cover. P2AN007 is the model (single holistic entry for an initial release; delta entries only
+  against a prior *published* version). Style authority: `methodology/changelog-style-guide.md` — *"Never-shipped
+  versions are never mentioned … If a version number was never released, delete any artifact referencing it"* and
+  *"Initial releases describe the document, not a delta."*
+- **🔧 PROCESS GAP — THIS IS THE REAL FIX; without it, Class A regenerates on every release.** `release-manual`
+  Phase 2a audits `opus-master/CHANGELOG.md` and **never looks at the doc's in-PDF Revision History**, which is a
+  *separate artifact*. The two drift silently, and the bump that causes the drift is the release itself. The gate
+  must additionally assert: **(1)** the rendered Revision History's top entry **matches the cover version**, and
+  **(2)** it names **no version that was never tagged**. This defect is invisible to the current gate — which is
+  precisely why six of seven app notes carry it. *(Skill is central-owned: **propose, do not edit** —*
+  `feedback_never_modify_central_skills`*.)*
 - **Origin:** surfaced 2026-07-13 running the mandatory changelog audit gate for P2AN007's release; the sibling comparison against P2AN005/P2AN006 exposed it as pre-existing and shipped.
 
 ---
