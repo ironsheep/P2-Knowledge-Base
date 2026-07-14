@@ -4,7 +4,7 @@ This first part builds the mental model. It opens on the one idea XBYTE exists t
 
 # Chapter 1: Understanding XBYTE {#ch-1}
 
-## 1.1 The loop at the center of every interpreter
+## 1.1 The loop at the center of every interpreter {#sec-1-1}
 
 Every interpreter ever written runs the same loop. Fetch the next instruction — a small number, a *bytecode* — from a stream. Look up what that number means. Jump to the code that does it. Run that code. Repeat.
 
@@ -12,7 +12,7 @@ A *bytecode* is just one small number that stands for one operation the interpre
 
 Written by hand on the P2, that loop costs something on every single bytecode: read the byte, use it to index a table, branch to the handler. Those few instructions run *between* every pair of useful operations, so their cost is multiplied by the length of the program. For an interpreter, the dispatch loop is the tax you pay on everything.
 
-## 1.2 What XBYTE is
+## 1.2 What XBYTE is {#sec-1-2}
 
 **XBYTE is hardware that runs that loop for you.** Once armed, the P2's bytecode-execution engine fetches the next bytecode from the hub FIFO, writes it where your handler can see it, indexes a 256-entry dispatch table in LUT RAM, and jumps to the handler — and when the handler ends, it does it all again, automatically, until you stop it. You write the handlers; the engine runs the loop between them.
 
@@ -26,13 +26,17 @@ The payoff is the cost of that loop. The *Parallax Propeller 2 Documentation v35
 **XBYTE is built out of ordinary instructions you can use yourself.** The engine's dispatch is an **EXECF** — a jump plus a skip pattern — fed from a **RDLUT**, fed from an **RFBYTE** off the FIFO. None of these are special to XBYTE. Chapter 2 teaches them as the everyday instructions they are; Chapter 5 shows the engine running exactly that sequence, in hardware, in six clocks.
 :::
 
-## 1.3 Why the P2 has it
+## 1.3 Why the P2 has it {#sec-1-3}
 
 The P2 is fast at running native PASM2, but native code is large: a big program does not fit in a cog's 512 longs, and even hub-executed code trades speed for space. Interpreted bytecode is the classic answer — compact programs, a small interpreter — and it is how Spin2 itself runs on the P2. The cost of interpretation is the dispatch loop, and XBYTE exists to make that cost small enough that an interpreted language, or an emulated CPU, stays practical.
 
-That last case is the one this guide builds toward. Emulating another processor is interpretation: each of the guest's instructions is a "bytecode," and the handler is the PASM2 that reproduces it. When dispatch is cheap, a single cog can emulate a whole small CPU and still have clocks left to drive video and sound — which is exactly what the community projects in Appendix C do.
+That second case is the one this guide builds toward. Emulating another processor *is* interpretation: each of the guest's instructions is a "bytecode," and the handler is the PASM2 that reproduces it. When dispatch is cheap, a single cog can emulate a whole small CPU and still have clocks left to drive video and sound — which is what the 8080 arcade emulators in Appendix C achieve.
 
-## 1.4 The pieces, and where they live
+::: caution
+**Emulating a CPU is where XBYTE gets interesting, and it is also where it gets conditional.** Some of the P2's most impressive emulators — the console emulators in Appendix C — do **not** use the engine at all, for reasons that have nothing to do with their guests' instruction sets. Chapters 11 and 12 are about exactly that, and it is worth reading them *before* you commit to an architecture rather than after.
+:::
+
+## 1.4 The pieces, and where they live {#sec-1-4}
 
 XBYTE coordinates five pieces of the P2 you already have. This guide devotes a chapter to each; here is the map.
 
@@ -47,17 +51,58 @@ XBYTE coordinates five pieces of the P2 you already have. This guide devotes a c
 
 The handlers themselves live in cog or LUT RAM and end in **RET** or **`_RET_`**. The engine is armed with one instruction — **SETQ** (or **SETQ2**) — and a `$1FF` on the stack. Those are Chapter 6.
 
-## 1.5 When to reach for XBYTE
+## 1.5 When to reach for XBYTE {#sec-1-5}
 
-XBYTE pays off when dispatch cost dominates — any time your "program" is a stream of byte-sized operations read from hub memory and each one selects a small piece of work. The famous case is an interpreter or VM with many small operations, or a CPU emulator, but it is not the only one: a protocol parser, a data-format decoder, a graphics display list, an event sequencer — anything shaped like *walk a byte stream, dispatch on each byte* is a candidate. Chapter 16 widens the lens well beyond interpreters; this section is the general test.
+XBYTE pays off when dispatch cost dominates — any time your "program" is a stream of byte-sized operations **read from hub memory**, and each one selects a small piece of work. The famous case is an interpreter or VM with many small operations, or a CPU emulator, but it is not the only one: a protocol parser, a data-format decoder, a graphics display list, an event sequencer — anything shaped like *walk a byte stream, dispatch on each byte* is a candidate. Chapter 16 widens the lens well beyond interpreters.
 
-It is the wrong tool when there is no stream to walk — a single fixed computation, or code small enough to run natively — or when the "dispatch" is really just a table lookup with no per-symbol work to do (a plain `RDLUT` is cheaper than arming the engine). And it consumes resources: the dispatch table occupies LUT RAM, and handlers live in cog/LUT space (Chapter 8 covers the limits; §16.7 collects the anti-patterns).
+It is the **wrong** tool when there is no stream to walk, or when the "dispatch" is really just a lookup with no per-symbol work to do — a plain `RDLUT` is cheaper than arming the engine. And there are three conditions that rule it out entirely, no matter how well your problem fits in every other respect. They are worth knowing now, in one sentence each, because they are architectural:
+
+- **Your stream must live in hub RAM.** The FIFO reads hub, and nothing else. Data in external PSRAM cannot be auto-fetched — at all.
+- **LUT must be free.** The engine reads its table from LUT, so if a palette or a buffer has claimed it, the engine is unavailable.
+- **You must have nothing to do between symbols.** The engine's loop is *hardware* — there is no loop body, and therefore nowhere to put per-symbol work like pacing, tracing, or a progress check.
+
+None of these is a matter of degree. Chapter 11 is where they come from and §16.7 is the full list; if one of them holds, you want the software loop of §4.4 — which is not a consolation prize, but what most working P2 emulators actually ship.
 
 ::: tip
 If you have written an interpreter before: XBYTE replaces your `next:` dispatch label — the `fetch / index / jump` you wrote by hand — with hardware. Your handlers stay yours; you delete the loop between them.
+
+And that is precisely the trade. **You delete the loop between them** — including anything else you were keeping there.
 :::
 
-To see what the engine makes possible in real, on-silicon projects — a single P2 emulating an 8-bit micro per cog while generating video and audio, and full console emulators — see **Appendix C: Further Implementations**; for the breadth of *non*-interpreter uses, see **Chapter 16: XBYTE Beyond Interpreters**.
+## 1.6 What XBYTE costs you {#sec-1-6}
+
+The engine is not free, and its price is paid in cog resources rather than clocks. Know the bill before you commit:
+
+| Resource | What arming XBYTE takes |
+|----------|-------------------------|
+| **LUT RAM** | **256 longs** for the dispatch table — half of LUT. Smaller table modes cost less (Chapter 7) |
+| **Cog / LUT space** | your handlers, which must live in cog or LUT — they cannot run from hub |
+| **The hardware stack** | one of its eight levels, holding `$1FF`, for as long as the engine runs (§6.1) |
+| **`PA`** (`$1F6`) | overwritten with the current bytecode on **every** dispatch |
+| **`PB`** (`$1F7`) | overwritten with the FIFO read pointer on **every** dispatch |
+| **The cog's FIFO** | held by `RDFAST` for the bytecode stream — so it cannot simultaneously stream video or drive a block move |
+| **The dispatch loop** | **there isn't one.** No place for per-bytecode work of any kind |
+
+The first six are ordinary budgeting. **The last one is the one that surprises people**, and it is the subject of §11.4.
+
+## 1.7 If you're building… {#sec-1-7}
+
+You have probably arrived with an application already in mind. Find it here; the chapters on the right are the ones to read closely first.
+
+| If you're building… | XBYTE gives you… | Start at |
+|---------------------|------------------|----------|
+| a **bytecode VM** or scripting language | the whole engine — this is what it was built for | Ch. 10 |
+| a **CPU emulator** | it depends on your guest — and the answer may surprise you | **Ch. 11, Ch. 12** |
+| a **terminal / ANSI parser** | the *table* as state — `ESC` borrows an alternate table | §16.3 |
+| a **MIDI or protocol decoder** | the *byte* as data — the channel or type rides in `PA` | §16.4 |
+| a **graphics display list** | the *stream* as a movable cursor | §16.5 |
+| a **binary format / TLV decoder** | the byte as a type tag | §16.2 |
+| an **event or animation sequencer** | seek — the read cursor loops and branches for free | §16.2 |
+| something else that walks a byte stream | the general test | §1.5, then §16.7 |
+
+If your project is a **CPU emulator**, read Chapters 11 and 12 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*.
+
+To see what the engine makes possible on real silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
 
 # Chapter 2: The Skip Family {#ch-2}
 
@@ -1639,21 +1684,48 @@ The appendices are lookup material and pointers: the quick-reference cards, the 
 
 # Appendix C: Further Implementations {#app-c}
 
-The P2 community has built real interpreters and CPU/console emulators that run on physical silicon. These are pointers for further study — each entry gives the project, who built it, what it emulates, where to find it, and its license where stated. Whether a given project uses XBYTE for its dispatch, versus a hand-rolled loop, is noted only where the project's own materials state it.
+The P2 community has built real interpreters and CPU emulators that run on physical silicon. These are pointers for further study — and they are also the **evidence** behind Chapters 11 and 12. Everything those chapters claim about what emulators actually do was checked against the code below.
 
-## C.1 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-1}
+The most useful thing this appendix can tell you is **which rung of the dispatch ladder (§11.2) each one stands on** — because the pattern is not the one most people expect:
+
+| Guest | Rung | Fetch | Dispatch |
+|-------|------|-------|----------|
+| Spin2 bytecode *(the reference)* | **3 — XBYTE** | auto-fetch | XBYTE |
+| ZPU | **3 — XBYTE** | auto-fetch | XBYTE |
+| Intel 8080 | **3 — XBYTE** | auto-fetch | XBYTE |
+| Zilog Z80 | 2 | hand-rolled | LUT + `EXECF` |
+| 65816 | 2 | hand-rolled (PSRAM queue) | hub table + `EXECF` |
+| Motorola 68000 | 2 | hand-rolled | nibble table + patched `JMP` |
+| Intel 8086 | 2 | hand-rolled | `EXECF` — *and*, in a second implementation, a plain `JMP` |
+| RISC-V | — | — | **JIT to native PASM2** |
+
+**Everyone keeps the dispatch asset. Only the small, hub-resident guests keep auto-fetch.** That single sentence is what the code below will teach you, and it is worth going to read it.
+
+## C.1 The reference: Parallax's own XBYTE {#sec-c-1}
+
+Two pieces of first-party code are worth more than any commentary.
+
+- **The XBYTE demo** — `parallaxinc/propeller`, under `resources/FPGA Examples/xbyte.spin2`. Sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 5.
+- **The Spin2 interpreter** — the language's own bytecode engine, and the most sophisticated XBYTE program in existence. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§15.4) are all used in anger. If you read one thing, read this.
+
+## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}
 
 A single P2 module emulating the **Intel 8080** and driving **up to eight simultaneous mini arcade cabinets** — one cog per console, each running an 8080 emulator while also generating composite video and one channel of audio. The arcade games run original ROM code; a multiplayer tank game and a light-cycles game were written in 8080 assembler for the project.
 
 - **Builders:** Chip Egues (lead architect); Baggers (8080 emulator co-development, original multiplayer games); VonSzarvas (PCB); Coley (cabinet); cabinet graphics by Andy C. Spencer (Retro Computer Museum, UK).
-- **What it emulates:** Intel 8080 (one instance per cog).
-- **Links:** Parallax product page — `https://www.parallax.com/p2arc8de-one-p2-ec-module-provides-audio-video-and-buttons-for-eight-8-concurrent-games/`; forum thread "P2 Arc8de Project" — `https://forums.parallax.com/discussion/173341/p2-arc8de-project`; Autodesk Fusion cabinet model on OBEX — `https://obex.parallax.com/obex/autodesk-fusion-model-of-p2-arca8de-8in1/`.
+- **Links:** Parallax product page — `https://www.parallax.com/p2arc8de-one-p2-ec-module-provides-audio-video-and-buttons-for-eight-8-concurrent-games/`; forum thread "P2 Arc8de Project" — `https://forums.parallax.com/discussion/173341/p2-arc8de-project`.
 - **License:** CC BY-SA 3.0 (project materials).
 - **Dispatch mechanism:** not stated in the project's public materials.
 
-## C.2 The "Yume" emulator suite — console emulators on P2 + PSRAM {#sec-c-2}
+## C.3 8080 games emulators — XBYTE in production {#sec-c-3}
 
-A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**), under the umbrella project **p2-dreamy-emulators** (`https://sr.ht/~wuerfel_21/p2-dreamy-emulators/`). Each runs console ROM images on a P2 with external PSRAM. Their guest CPUs are concrete instances of the families discussed in Chapter 11.
+The P2 Space Invaders / "Spacies" emulators run 8080 arcade ROMs, and they are the clearest example of **rung 3** outside the Spin2 interpreter. The 8080's 64 KB address space fits in hub, so the guest's code can be streamed — and it is.
+
+They are also where three techniques in this book were found: the **guest-interrupt injection** of §14.4, the **halt-and-back-the-stream-up** idiom of §14.5, and — usefully — the **de-arm-and-substitute** debug technique of §9.3, which appears in the source as a commented-out arming pair beside a hand-rolled loop carrying a `debug()`.
+
+## C.4 The "Yume" emulator suite — console emulators on P2 + PSRAM {#sec-c-4}
+
+A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**), under the umbrella project **p2-dreamy-emulators** (`https://sr.ht/~wuerfel_21/p2-dreamy-emulators/`). Each runs console ROM images on a P2 with external PSRAM.
 
 | Project | Console | Guest CPU(s) | Repository | Status |
 |---------|---------|--------------|------------|--------|
@@ -1661,7 +1733,25 @@ A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**
 | **NeoYume** | SNK Neo Geo AES | Motorola 68000 + Z80 | `https://github.com/IRQsome/NeoYume` | released |
 | **MisoYume** | Super Nintendo (SNES) | 65(C)816 | `https://github.com/IRQsome/MisoYume` | beta |
 
-- **License / dispatch mechanism:** see each repository. A 68000 guest is the "word-opcode CISC" case of §11.2, where dispatch and auto-fetch apply only partially — confirm any specifics from the project source rather than assuming.
+**These use no XBYTE at all — and that is the most instructive fact in this appendix.** They keep `EXECF`/`SKIPF` dispatch and write their own fetch, for the reasons Chapter 11 sets out: a console ROM is megabytes and lives in PSRAM, which the FIFO cannot reach; LUT is wanted for other things; and cycle-accurate emulation needs a loop body to pace in.
+
+Read **MisoYume** first if you want the point made sharply: the 65816 is byte-stream and opcode-first — by instruction shape the *ideal* XBYTE guest — and it takes rung 2 anyway. Read **MegaYume's Z80 core** for the dispatch loop that does bus arbitration, cycle pacing, and a refresh register between every guest instruction (§11.4), and for the two-level nibble dispatch its 68000 uses (§12.2).
+
+## C.5 Intel 8086 — the same guest, more than one way {#sec-c-5}
+
+Several 8086 emulators exist for the P2, including a complete IBM PC XT with BIOS, CGA and BASIC. They are the best available demonstration that **dispatch is a ladder, not a switch** (§11.2): one reads its opcode and `EXECF`s through a table with skip patterns; another reads its opcode and takes a plain `JMP` through a table of bare addresses. Same guest processor, two rungs.
+
+One of them ships in **two variants — guest memory in hub, and guest memory in PSRAM.** Diffing that pair is the single most illuminating hour you can spend on this subject: the memory backend changes completely and **the dispatch does not move at all** (§11.1).
+
+They are discussed across several Parallax forum threads; search the forums for "8086 emulator."
+
+## C.6 Zog — the ZPU {#sec-c-6}
+
+A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, with a P2 port maintained by **totalspectrum** (Eric Smith): `https://github.com/totalspectrum/zog`. The ZPU is a byte-opcode stack machine whose memory image fits comfortably in hub, which puts it squarely at **rung 3** — and it arms XBYTE exactly as Chapter 6 describes.
+
+## C.7 riscvemu — the road not taken {#sec-c-7}
+
+A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§16.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder — and this is the P2 proof of it.
 
 # Appendix D: Troubleshooting {#app-d}
 
