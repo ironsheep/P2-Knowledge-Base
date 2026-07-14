@@ -1668,6 +1668,43 @@ D[25]. The two are different facts about different bits, and our doc appears to 
   tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
   instead of being trusted.
 
+### F-219 — XBYTE Guide §10.2 assigns **all** x86 prefixes to one-shot `SETQ2`; the real 8086 emulator does not, and cannot — `CONFIRMED`
+
+**What §10.2 says today:** of x86 — *"the byte stream fits; the decode explodes — prefixes and escapes
+are a job for one-shot SETQ2 alternate tables, and the long tail is hand-rolled."*
+
+**This conflates two different kinds of prefix**, and is wrong for one of them:
+
+| Kind | Examples | What it changes | Right tool |
+|---|---|---|---|
+| **Map / escape** | 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` | **which handler runs** — selects a different opcode map | **one-shot `SETQ2`** ✅ |
+| **Modifier** | x86 segment override, `REP`, `LOCK`, operand-size | **not** which handler runs — *how it behaves* | **state register + re-fetch** ❌ |
+
+An alternate table **redirects dispatch**. A segment-override prefix does not want dispatch
+redirected — it wants the *same* handler to touch *different memory*. The real 8086 emulator
+(`Simple-i8086`, from forum thread 174634) uses a shared body plus a state register plus a jump back
+to the fetch loop:
+
+`i_seg_cs/ds/es/ss  mov i_override, i_cs/ds/es/ss` (one body, four prefixes, selected by the table
+entry's skip pattern) → `bith i_override,#31` → `jmp #\i_next`.
+
+`REP` likewise re-executes the following instruction N times **without re-fetching**, which XBYTE's
+fetch-on-`_RET_` loop cannot express as a plain `_RET_` handler.
+
+- **Provenance of the defect:** the §10.2 x86 row was **Claude's derivation**, written from ISA
+  knowledge plus XBYTE mechanics, never checked against an implementation. Same root cause as **X3**
+  (the 68000 `RFWORD` claim, also unverified — see below).
+- **Fix:** split the prefix taxonomy in Ch. 12 / Ch. 10; correct the x86 row.
+- **Related, not yet filed:** §10.2's 68000 row (*"read the word with `RFWORD`, decode further by
+  hand"*) is also an unverified derivation — and **two 68000 emulators exist (MegaYume, NeoYume) and
+  neither uses XBYTE at all.** Filing deferred until those cores are read properly.
+- **Wider correction to the same chapter:** §10.2 grades guest CPUs on **instruction shape**, but the
+  axis that actually decides it is *(a)* **does the guest's code live in hub** (the FIFO streams hub
+  only) and *(b)* **is LUT free** (XBYTE reads its table from LUT). The 65816 — "the sweet spot" by
+  our table — is emulated on P2 **without XBYTE** for exactly these two reasons. Full evidence: the
+  mining ledger §8.
+- **Evidence ledger:** `engineering/document-production/manuals/p2-xbyte-programming-guide/TECHNIQUE-MINING.md` §10b.
+
 ---
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*

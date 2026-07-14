@@ -473,6 +473,113 @@ XBYTE column**, and our §10.2 grading of it needs revisiting.
 
 ---
 
+## 10b. Source K — `Simple-i8086` (**the x86 row**, from thread L1)
+
+`REF-NO-COMMIT/Simple-i8086/simple_i8086.spin2` — 92 KB, archived 2022-06-09. Ships with
+`MONITOR.ASM` + `MONITOR.ROM` (the Seattle Computer Products 8086 monitor). **Stephen captured this
+from the captcha-walled thread L1.**
+
+### K1 · It uses the dispatch asset, NOT the auto-fetch asset — the loop is hand-rolled
+
+```
+i_next
+        call    #\i_readop      ' fetch the opcode ourselves
+        push    #i_nextop       ' push OUR OWN return address -- not $1FF
+        execf   i_opimpl        ' dispatch
+
+i_readop
+        call    #\i_readcodeb   ' read a code byte via segmented CS:IP
+        mov     i_opcode, i_tmpb
+        shl     i_tmpb, #2
+        add     i_tmpb, i_optable
+  _ret_ rdlong  i_opimpl, i_tmpb   ' <- primary table lives in HUB
+```
+
+**No `push #$1FF`. No `_RET_ SETQ` arming. No `RDFAST`/`RFBYTE`.** This is precisely the software
+dispatch loop our §4.4 teaches as *pedagogy* — running in production, in a full 8086. (Third
+independent sighting of the software loop as a real tool: cf. **A4**, **G**.)
+
+**Table placement:** the **primary** opcode table is in **hub** (`rdlong ... , i_optable`); the
+**secondary** group tables are in **LUT** (`add pa, #i_rotshift8_tbl - $200` → `rdlut i_opimpl, pa`
+— the `- $200` is LUT-space addressing). So LUT is spent on the *second* decode level.
+
+### K2 · Two-level decode — the ModR/M group tables
+
+x86's "group" opcodes select among 8 sub-operations via the ModR/M **reg** field. The emulator
+extracts it and indexes a **second** `EXECF` table in LUT:
+
+`mov pa,i_modrm` → `shr pa,#3` → `and pa,#7` → `add pa,#i_rotshift8_tbl - $200` →
+`rdlut i_opimpl,pa` → `call #\i_rep_opimpl`.
+
+This is the same **two-stage dispatch** shape as MisoYume's addressing-mode table (**T15**), reached
+independently by a different author on a different guest. **T15 is now converged (a) — promote.**
+
+### K3 · **§10.2 is WRONG about x86 prefixes** — they are not one SETQ2 job
+
+Our §10.2 says of x86: *"prefixes and escapes are a job for one-shot SETQ2 alternate tables."* The
+real 8086 does **not** do that for segment overrides. It uses a **shared body + a state register +
+re-fetch**:
+
+```
+i_seg_cs   mov  i_override, i_cs    ' a      <- one body, four prefixes,
+i_seg_ds   mov  i_override, i_ds    ' | b       selected by the table entry's
+i_seg_es   mov  i_override, i_es    ' | | c     skip pattern (note the a/b/c/d
+i_seg_ss   mov  i_override, i_ss    ' | | | d   comment columns)
+           bith i_override, #31     ' a b c d
+           jmp  #\i_next            ' a b c d <- set state, GO FETCH AGAIN
+```
+
+**The distinction our manual is missing.** Prefixes are not one thing — they are **two**:
+
+| Kind | Examples | What it changes | Right tool |
+|---|---|---|---|
+| **Map / escape prefix** | 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` | **which handler runs** — it selects a different opcode map | **one-shot `SETQ2`** ✅ (our Ch. 12 is right *here*) |
+| **Modifier prefix** | x86 segment override, `REP`, `LOCK`, operand-size | **not** which handler runs — *how it behaves* | **state register + re-fetch loop** ❌ SETQ2 is the wrong tool |
+
+An alternate table redirects dispatch; a segment override does not want dispatch redirected — it
+wants the *same* handler to touch *different memory*. Our §10.2 lumps "prefixes, escape bytes,
+ModR/M, SIB" together and assigns them all to SETQ2. **That is Claude's derivation and it is wrong
+for the modifier half.** → correction **X4**.
+
+### K4 · `REP` — why the engine's auto-fetch buys nothing here
+
+```
+i_rep_opimpl
+.loop           push    #.ret
+                execf   i_opimpl
+.ret    _ret_   djnz    i_rep_cnt, #.loop
+```
+
+`REP` must re-execute **the following instruction** N times **without re-fetching it each time**.
+Under XBYTE's fetch-on-`_RET_` loop you *cannot* express that as a plain `_RET_` handler — the
+engine would fetch a new bytecode every iteration. The `REP` handler must therefore hand-roll its
+own fetch and re-dispatch, which is exactly what this does (`i_repne` / `i_rep_loop` do
+`call #\i_readop`, then loop `execf`).
+
+> **Stated carefully:** this does **not** make `REP` *impossible* under XBYTE — a handler may loop
+> internally instead of returning. It makes the engine's auto-fetch **worthless on that path**: you
+> hand-roll the fetch anyway. Do not overstate this in the manual.
+
+### K5 · Also present
+
+- **Cycle counting** — `mov i_cycles, #0` per instruction (cf. **T17**).
+- **The guest's trap flag *is* single-step** — `testb i_flags,#I_TF_BIT` → `i_trap`. The 8086's TF
+  is the guest-side equivalent of the debug interrupt; a nice mirror for the debugging section.
+
+### K6 · The x86 verdict for the concerns table
+
+| Asset | x86 | Why |
+|---|---|---|
+| Table/`EXECF` dispatch | ✅ **yes** — two-level (hub primary + LUT group tables) | the opcode still indexes a table |
+| Auto-fetch | ❌ **no** | the stream is **segmented `CS:IP`**, not a linear hub address; modifier prefixes re-fetch with state; `REP` re-executes without re-fetching |
+
+**⚠️ NOT the last word.** Thread **L3** ("8086 CPU XBYTE emulator working") describes a *different*
+8086 that reportedly **does** use XBYTE. If both exist, we have the richest possible teaching
+contrast — **the same guest CPU, two strategies, tradeoffs explicit** — which is far better than a
+single verdict. **L3 is now the highest-value missing source.**
+
+---
+
 ## 11. Open questions
 
 1. **X2** — is `GETBRK` D[25] "XBYTE pending" (Silicon Doc) or "C,Z affected" (our theory doc)?
