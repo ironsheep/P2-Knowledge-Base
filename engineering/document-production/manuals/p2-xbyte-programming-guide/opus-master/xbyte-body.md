@@ -115,13 +115,15 @@ All three take a pattern of bits and use it to *not execute* selected instructio
 **SKIP** takes a 32-bit pattern in D and, as the next up-to-32 instructions come down the pipeline, **cancels** each one whose corresponding bit is set. Bit 0 governs the first instruction after SKIP, bit 1 the second, and so on. A cancelled instruction still passes through the pipeline — it simply has no effect, taking its time but doing nothing.
 
 ```pasm2
-                skip    ##%0000_0110        ' cancel the 2nd and 3rd
+                skip    #%0000_0110         ' cancel the 2nd and 3rd
                                             ' following instructions
                 add     x, #1               ' bit 0 = 0 -> runs
-                add     x, #10              ' bit 1 = 1 -> cancelled
-                add     x, #100             ' bit 2 = 1 -> cancelled
-                add     x, #1000            ' bit 3 = 0 -> runs
+                add     x, #2               ' bit 1 = 1 -> cancelled
+                add     x, #4               ' bit 2 = 1 -> cancelled
+                add     x, #8               ' bit 3 = 0 -> runs
 ```
+
+`x` ends up holding `%1001` — read it as a bitmap of which instructions survived.
 
 Because a cancelled instruction still spends its clocks, SKIP's cost is the cost of the instructions it skips over. Its value is that one straight-line block of code can be made to behave like many different sequences, chosen by the pattern — the basis of a *shared handler*.
 
@@ -134,11 +136,11 @@ Because a cancelled instruction still spends its clocks, SKIP's cost is the cost
 **SKIPF** is the *fast* skip. Instead of cancelling instructions one by one as they arrive, it makes the program counter **leap past** the skipped instructions entirely, in cog or LUT RAM. Where SKIP pays for what it skips, SKIPF skips for free — a run of skipped instructions costs essentially nothing, because the PC simply does not visit them.
 
 ```pasm2
-                skipf   ##%0000_0110        ' leap over the 2nd and 3rd
+                skipf   #%0000_0110         ' leap over the 2nd and 3rd
                 add     x, #1               ' runs
-                add     x, #10              ' leapt over (no cost)
-                add     x, #100             ' leapt over (no cost)
-                add     x, #1000            ' runs
+                add     x, #2               ' leapt over (no cost)
+                add     x, #4               ' leapt over (no cost)
+                add     x, #8               ' runs
 ```
 
 The trade for that speed is the restriction: SKIPF works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing), and its pattern is **22 bits** wide, governing the next 22 instructions. That width is not a coincidence — it is exactly the width XBYTE stores in each dispatch-table entry.
@@ -200,6 +202,21 @@ It is also the fact that makes shared bodies *practical*. Without it, every skip
 The pattern is consumed as instructions execute. If it carries more bits than the body has instructions, the leftovers do not evaporate. They fall on **whatever runs next**.
 
 Under XBYTE this is harmless — the engine cancels any leftover pattern at clock 1 of the next dispatch (§5.1). But it becomes a real trap the moment you dispatch by hand (§4.4, and Chapter 9, where it bites hardest). The discipline that prevents it is one line long: **size each pattern to the body it belongs to.**
+
+::: caution
+**A skip pattern counts *instructions*, not source lines — and `##` makes one line into two instructions.**
+
+A large immediate does not fit in an instruction's 9-bit operand field, so the assembler quietly emits an **`AUGS`** ahead of it to supply the missing bits. One line of source, **two longs of code**:
+
+```pasm2
+                add     x, #100             ' 1 instruction
+                add     x, ##1000           ' 2 instructions: AUGS, then ADD
+```
+
+Now count what that does to a hand-written pattern. If a skipped body contains a `##` operand — a large constant, a hub address, a `##`-form jump target — then **every bit of your pattern from that line onwards is off by one**, and the symptom is that the wrong instructions run for reasons the source code does not show.
+
+Two defences, and you want both. **Keep large constants out of skipped bodies** (load them into a register before the pattern begins). And when a pattern misbehaves, **count the longs, not the lines** — the debugger's strikethrough view (§9.2) shows you the instructions the hardware actually sees, which is exactly the view you need.
+:::
 
 ::: hardware
 There is a third consequence, and this one is free money.
