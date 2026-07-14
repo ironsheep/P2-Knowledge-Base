@@ -297,11 +297,40 @@ Three figures from the silicon documentation, stated precisely so they are not c
 These are **hardware dispatch** clocks — a property of the engine, measured against the P2's sysclk. They are not the run time of any particular interpreted language's methods, which depend on the handlers a given interpreter ships. The figure to cite for XBYTE is the 6-clock overhead.
 :::
 
-## 5.3 Flags and interruption {#sec-5-3}
+## 5.3 Flags {#sec-5-3}
 
 At clock 5 the engine can write **C** and **Z** from the low bits of the bytecode index, when the **F bit** is set in the mode operand (Chapter 7). When F is clear, dispatch leaves the flags alone, so a handler can carry flag state across bytecodes deliberately.
 
-XBYTE is also **interruptible**: an interrupt can occur during dispatch, and the engine resumes the bytecode stream afterward. Bytecode interpretation does not lock out a cog's interrupts.
+## 5.4 Interruption — and the fence you will need {#sec-5-4}
+
+XBYTE is **interruptible**. An interrupt can occur during dispatch, and the engine resumes the bytecode stream afterwards; bytecode interpretation does not lock out a cog's interrupts.
+
+That is genuinely good news, and it is where most descriptions of XBYTE stop. **They stop one sentence too early.**
+
+Read it again, from the other side: **an interrupt can land in the middle of your handler.** The engine will resume the stream correctly afterwards — but it makes no promise whatever about the *work your handler was halfway through* when the interrupt fired. If that work had to be atomic, it has just been cut in half.
+
+::: caution
+**If a handler performs a multi-instruction sequence that must not be interrupted, you must fence it yourself.**
+
+The cases are easy to recognise once you know to look:
+
+- a **CORDIC** operation — you issue the command, then collect the result some clocks later, and an interrupt in between will collect somebody else's answer;
+- a **read-modify-write** of a variable another cog can see;
+- any sequence where a scratch register holds a half-finished value that a second entry to the same code would clobber.
+
+The fence is **`REP`**. A `REP` block cannot be interrupted, so wrapping the critical sequence in a one-iteration `REP` shields it:
+
+```pasm2
+                rep     @.done, #1          ' shield: no interrupt inside
+                qmul    x, y                '   CORDIC command...
+                getqx   lo                  '   ...and its result, safely paired
+.done
+```
+
+This is not a theoretical hazard, and it is not a rare one. The P2's own Spin2 interpreter — the reference XBYTE program, written by the silicon's designer — uses exactly this fence in **eight** separate places, guarding CORDIC operations and shared-variable updates.
+:::
+
+The rule of thumb is simple: **XBYTE gives you interrupts for free, and it is your job to say where they may not go.** A handler that only touches its own cog registers needs no fence at all. A handler that reaches for the CORDIC, or for memory another cog shares, needs one every time.
 
 # Chapter 6: Arming XBYTE {#ch-6}
 

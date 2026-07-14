@@ -1604,7 +1604,7 @@ together. YAML side rides F-212 + its addendum.
 > the lineage lives). **Note the path:** it lives at the manual **root**, not in `audit/`, because
 > `.gitignore:175` ignores `manuals/*/audit/` — a durable source-of-record cannot live there.
 
-### F-217 — XBYTE Guide §5.3 presents interruptibility as a pure benefit and omits that handlers doing atomic work must shield with `REP` — `CONFIRMED`
+### F-217 — XBYTE Guide §5.3 presents interruptibility as a pure benefit and omits that handlers doing atomic work must shield with `REP` — `DONE (2026-07-14)` · class-wide sweep run → **F-224**
 
 **What §5.3 says today**, in full:
 
@@ -1799,6 +1799,47 @@ will not guess.**
   The XBYTE Guide will teach that and **footnote bit 1 as undocumented**, rather than invent a meaning.
 - **Note this is an upstream (Silicon Doc) documentation gap** that propagated into our YAML and our
   manual — not a defect we introduced.
+
+### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `CONFIRMED` (low severity, cross-reference gap)
+
+**Raised by F-217's class-wide sweep.** Having found that the XBYTE Guide sold interruptibility as a
+pure benefit, the same question was asked of every other manual: *does anything show a CORDIC
+issue/collect pair without telling the reader it must be fenced?*
+
+**The Assembly Manual is NOT wrong.** `part-ii/instructions-r.md` teaches the fence properly, and even
+uses a CORDIC example:
+
+> `' Protect CORDIC operation from interrupts` … `qmul  y, x`
+
+and states the mechanism outright: *"Interrupts are blocked during REP execution — including debug
+interrupts that ordinary masking cannot hold off — to maintain timing precision and keep the repeated
+block atomic."* It also carries the useful nuance that the idiom *"is only needed in PASM2 code with
+interrupts enabled; Spin2 operators are already protected by the interpreter."*
+
+**But the warning is not where the affected reader is standing:**
+
+| Page | Content | Interrupt mentions |
+|---|---|---|
+| `instructions-q.md` | **QMUL · QROTATE · QDIV** — the CORDIC **issue** ops | **0** |
+| `instructions-g.md` | **GETQX · GETQY** — the CORDIC **collect** ops | 3 — **all from GETBRK**, none about CORDIC |
+| `instructions-r.md` | REP | ✅ the fence, with a CORDIC example |
+
+A reader who looks up `QMUL` — which is exactly what someone about to *write* a CORDIC sequence does —
+learns nothing about the hazard. They find it only by happening to read the `REP` page.
+
+- **Severity: low.** This is an omission at the point of need, not a false claim. Same *class* as F-217,
+  milder in kind: the information exists in the manual.
+- **Fix (small):** a cross-reference note on the CORDIC issue/collect pages — "a CORDIC command and its
+  result must not be split by an interrupt; see REP" — costing a few lines, no content change elsewhere.
+- **Release consideration for Stephen:** the Assembly Manual shipped **v3.1.4 on 2026-07-14** (a
+  render-only patch). This is a *content* change and would need its own bump. It is a documentation
+  improvement, not a correctness bug in the shipped text, so it can ride the manual's next natural
+  release rather than forcing one.
+
+**Also observed (not a defect):** 22 stray `*.backup-encoding-conversion` files sit in
+`p2-assembly-language-manual/opus-master/part-ii/`. They are **untracked** — `git ls-files` returns
+zero — so nothing ships and no glob in the assemble scripts reaches them (those use explicit
+`REQUIRED_FILES[]`). Working-tree clutter only; worth sweeping, not a release concern.
 
 ---
 
