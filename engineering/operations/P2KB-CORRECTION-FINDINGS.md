@@ -274,6 +274,31 @@ not publish the Debug manual until landed (`yaml-knowledge-base-maintenance` →
   (hardware-hold vs the REF's "overlap" — needs a multi-window capture, do not mechanically flip); `bitmap.yaml`/`ch10`
   packing "unsigned by default" (correct — the **SPECTRO ToO** carries the stale sign mislabel, not the YAML).
 
+**ADDENDUM 2026-07-14 — surfaced by the systematic v55 ↔ REF diff** (`…/audit/v55-vs-REF-systematic-2026-07-13.md`;
+the first pass to walk the v55 reference *directive by directive* rather than chasing a conflict list):
+
+- **`scope.yaml` L39 + `scope_xy.yaml` L43 (HIGH — NEW):** both ship *"(12 modes; default **LONGS_1BIT**)"*. **There is no
+  packing default — the default is UNPACKED** (one 32-bit sample per fed long). The `LONGS_1BIT` claim is **unsourced**: the
+  matrix's `SetDefaults` transcription (2880-2917) has **no packing row**; SCOPE_XY ToO L2083 quotes the init as
+  `SetPack(0, False, False)`; and the REF's own `SetPack` transcription gives `val = 0` ⇒ shift 32, count 1, mask
+  `$FFFFFFFF`. LOGIC ToO §6.4 (L627-631) says exactly this — three sections after its own table says the opposite.
+  **Silicon confirms:** `ch06-logic-spi-bus.spin2` declares no pack mode, feeds one plain long per `debug()`, and renders a
+  coherent 3-channel SPI trace — impossible if one long exploded into 32 one-bit samples. `logic.yaml` is **clean** (makes no
+  default claim). *Same defect exists in the LOGIC/SCOPE/SCOPE_XY ToO directive tables → REF cleanup rail.*
+- **Confirms `fft.yaml` MAG (above), independently** — the gain reading is closed by arithmetic on the REF's own quoted
+  power formula (`shl`/`shr` are equal-precedence, left-to-right: raising MAG *shrinks* the divisor). No further evidence
+  needed.
+- **Manual-side surface the YAMLs do NOT need to carry, recorded so it is not lost:** the REF is a *host-side* Pascal
+  distillation and is **silent on the P2-side API** — `PC_MOUSE`'s **7-long chip structure** (the REF documents only the
+  2-long wire format), the "must be the last command in the DEBUG() statement" rule, hub-vs-cog pointer rules, and the
+  `DEBUG_PIN_TX=62`/`DEBUG_PIN_RX=63`/`DEBUG_MASK`/`DEBUG_END_SESSION` gating layer. These are **manual** work
+  (`document-finalize`), not KB YAML edits.
+
+> **GATE (Stephen, 2026-07-14):** do **not** drain any of this piecemeal. The REF-authoring agent is cleaning the
+> matrix/ToO internal contradictions first (handoff: `engineering/planning/REF audit v55 vs. theops/REF-CLEANUP-HANDOFF-2026-07-14.md`).
+> When it returns, we re-run the systematic v55 ↔ REF diff against the cleaned REF, then apply **one** coordinated sweep —
+> manual + examples ZIP + all debug-displays YAMLs — and re-release together. One bump, one moment.
+
 > **REF-doc defects are NOT in this finding.** The re-audit also found ~15 places the ratified **matrix/ToO** contradict the
 > correct manual/YAML (TEXTSTYLE/EF-031, trigger-offset inversions, MAG-divisor, color-mode enum order, SPECTRO sign-label,
 > CLOSE §6 dropped clause, etc.). Those are REF corrections (Stephen-adjudicated), catalogued in the COVERAGE report §3 — not
