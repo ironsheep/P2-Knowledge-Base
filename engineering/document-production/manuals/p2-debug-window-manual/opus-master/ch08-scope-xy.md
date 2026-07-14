@@ -63,9 +63,11 @@ The configuration keywords you can add to the creation line:
 
 > ### ⚠️ A stray number in the create message will hang your tool
 >
-> Every value on a SCOPE_XY create line must belong to a keyword. A number that
-> follows no keyword sends **PNut's** configuration parser into an **infinite loop**:
-> no error, no diagnostic, no window — the tool simply locks up and has to be killed.
+> **Every value on a SCOPE_XY create line must belong to a keyword.** A bare number —
+> one that follows no keyword — is not valid there in the first place, exactly as it is
+> not valid on a LOGIC create line. But where other windows discard it, **PNut's**
+> SCOPE_XY configuration parser goes into an **infinite loop** on it: no error, no
+> diagnostic, no window — the tool simply locks up and has to be killed.
 >
 > ```spin2
 > debug(`SCOPE_XY W 128 'A')      ' HANGS PNut -- 128 follows no keyword

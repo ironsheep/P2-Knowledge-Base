@@ -384,10 +384,23 @@ Trap 1 and trap 3 are the ones that waste an afternoon: in both cases the progra
 runs, the file appears (or doesn't) without complaint, and the picture you get is a
 plausible one — just not the picture you asked for.
 
-> **`SAVE WINDOW` is currently unreliable on PNut.** It can capture a truncated or
-> offset rectangle, a neighboring window, or bare desktop. This is a tool bug, reported
-> upstream — the plain `SAVE 'name'` form is correct in every case and is what you
-> should build on.
+There is also a **region** form, `SAVE left top width height 'name'`, which captures a
+rectangle rather than the window. It carries a trap of its own:
+
+> **The region form's numbers are not `POS` numbers.** `POS` places a window in the
+> *host application's* coordinates; the region form's `left`/`top` are read as *physical
+> screen* pixels. On a display running above 100% scaling — which most modern desktops
+> do — those two coordinate spaces differ by the scaling factor. So a window created at
+> `POS 300 0` and then captured with `SAVE 300 0 400 400 'shot'` **does not capture that
+> window.** The numbers look like they should match. They don't.
+
+> **Prefer the plain `SAVE 'name'` form for everything.** It renders from the window's
+> own buffer, so it is immune to all of this: no coordinate spaces, no occlusion, no
+> chrome. Both screen-scraping forms — `SAVE WINDOW` and the region form — go through
+> the host's screen-capture path, and on PNut that path is **currently unreliable**: it
+> can return a truncated or offset rectangle, a neighboring window, or bare desktop.
+> That is a tool bug, reported upstream. The plain form was correct in every case we
+> exercised.
 
 ### Ending a debug session
 
@@ -3378,9 +3391,11 @@ The configuration keywords you can add to the creation line:
 
 > ### ⚠️ A stray number in the create message will hang your tool
 >
-> Every value on a SCOPE_XY create line must belong to a keyword. A number that
-> follows no keyword sends **PNut's** configuration parser into an **infinite loop**:
-> no error, no diagnostic, no window — the tool simply locks up and has to be killed.
+> **Every value on a SCOPE_XY create line must belong to a keyword.** A bare number —
+> one that follows no keyword — is not valid there in the first place, exactly as it is
+> not valid on a LOGIC create line. But where other windows discard it, **PNut's**
+> SCOPE_XY configuration parser goes into an **infinite loop** on it: no error, no
+> diagnostic, no window — the tool simply locks up and has to be killed.
 >
 > ```spin2
 > debug(`SCOPE_XY W 128 'A')      ' HANGS PNut -- 128 follows no keyword

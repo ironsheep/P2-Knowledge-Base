@@ -541,6 +541,18 @@ size, so its plain `SAVE` comes out magnified.)*
 *Methodological note:* every `SAVE WINDOW`-based read in this campaign is therefore **void**; the tests were rewritten
 to use plain `SAVE` throughout. Stephen called this early — *"I would think you'd get window specific content if using
 save only even when overlap"* — and he was right, for a better reason than either of us had.
+
+> **ROOT CAUSE (added 2026-07-14) — provenance: PNut-Term-TS team source/binary analysis, NOT our silicon run.**
+> `KeySave` feeds the form's `Left/Top/Width/Height` straight into a `BitBlt` from a **desktop DC**, assuming the
+> process's window coordinates are physical screen pixels. `PNut_v55.exe` ships with **no application manifest** ⇒
+> the process is **DPI-unaware** ⇒ above 100% display scaling Windows virtualizes its coordinate space while the
+> framebuffer stays physical. Our own numbers corroborate it: the file is **70×93** — the form's own `Width`/`Height`
+> written straight through — against a window measuring **~114** on screen, and `93 × 1.25 = 116`. **Our observations
+> above stand unchanged; this explains them.**
+> **RETRACTED:** our bug report's original "suggested area to look at" (client-vs-outer-frame rectangle) was **wrong**
+> — `Width`/`Height` on a VCL top-level form *are* the outer frame. Corrected in the report before routing.
+> **One datum still unexplained:** we observed the wallpaper strip on the **right** edge; the DPI model predicts
+> **left**. Open question back to us — Stephen's box is the only one that can settle it (re-run at 100% scaling).
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`, `…/conflict-testP-sparse-gate.spin2`.
 
 ### EF-047 · `SAVE` writes the FRONT buffer — under `UPDATE` mode you capture the STALE previous frame — `CONFIRMED (PNut)`
