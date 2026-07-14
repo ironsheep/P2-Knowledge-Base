@@ -1,10 +1,56 @@
 # P2 Debug Window Manual — Change Log
 
+## v1.1.0 (2026-07-14)
+
+**Verified against P2 silicon.** Every load-bearing claim in this manual was re-tested on real
+hardware, and the example library is updated to match — **download the current example ZIP** to
+pick up the latest programs.
+
+### Fixed
+
+- The PLOT worked example draws a full cycle of a CORDIC sine wave, taking its full-circle angle
+  step with Spin2's unsigned divide (`+/`).
+- The Chapter 13 packed-data examples place each sample in the low bits first, the order the host
+  unpacks them in.
+- The LOGIC channel-declaration example gives each channel an explicit count (`'CLK' 1 $00FF00`)
+  and ships as a compile-and-run program in the library.
+- PLOT `PRECISE` starts off — the first `PRECISE` selects sub-pixel positioning.
+- PLOT text renders in the color you set: a `COLOR` reaches `TEXT` when `TEXT` is the next key.
+- SPECTRO axes: at the default `TRACE $F` the horizontal axis is time and the vertical is
+  frequency, in both Chapter 10 and Appendix C.
+- SCOPE channel definitions belong in a message sent after the create line.
+- FFT: `MAG` is a gain, the channel `grid` field is four bits, and `LOGSCALE` is described by what
+  it draws.
+- `LINESIZE` is stated in half-pixels for the LOGIC, SCOPE and FFT windows.
+- Worked `SAVE` examples name the file they write.
+
+### Added
+
+- **What `PC_MOUSE` delivers to your program** (Chapter 12) — in the LOGIC, SCOPE, SCOPE_XY, FFT
+  and MIDI windows you receive raw client pixels; the coordinate shown beside the pointer is drawn
+  host-side. A table gives the basis for all nine windows.
+- **The four `SAVE` traps** (Chapter 1) — the filename is required and comes last, buffered mode
+  captures the frame you are showing, and `SAVE WINDOW` captures the screen.
+- **Window lifecycle** (Chapter 1) — `CLOSE` runs after the rest of its message and returns one of
+  the 32 display slots; `DEBUG_END_SESSION` ends the whole session.
+- **The named-color keyword system** (Appendix C) — ten keywords, a 0–15 brightness, and the values
+  they resolve to.
+- **Create-line rules** — every value on a SCOPE_XY create line belongs to a keyword; a LOGIC
+  channel color follows an explicit count.
+- **Window placement** — with no `POS`, your tool places the window; give `POS` when the layout
+  matters.
+- **Runtime behavior worth knowing** — `OPACITY` wraps above 255, a runtime `RATE -1` stops a
+  BITMAP refreshing, and a PLOT sprite's orientation is three composable bits (flip-X, flip-Y,
+  transpose).
+- **The unsigned operators** (Chapter 5) — when a value spans the full 32-bit range, `+/` and `+//`
+  are the ones you want.
+- A new LOGIC example brings the downloadable library to 34 compile-clean Spin2 programs.
+
 ## v1.0.2 (2026-07-07)
 
 **Text- and link-detail encodings aligned with Spin2 v55.** No windows, examples, or code changed.
 
-- **PLOT text style (Chapter 5)** — the `TEXTSTYLE` bit table matches Spin2 v55: horizontal alignment is `2`=right, `3`=left; vertical alignment is `2`=bottom, `3`=top; `$20` right-aligns. Weight values are labeled light / normal / bold / heavy.
+- **PLOT text style (Chapter 5)** — the `TEXTSTYLE` bit table gives horizontal alignment as `2`=right, `3`=left, and vertical alignment as `2`=top, `3`=bottom; `$20` right-aligns. Weight values are labeled light / normal / bold / heavy.
 - **TERM text size default (Chapter 3)** — `TEXTSIZE` defaults to the editor text size.
 - **Multi-window debug link (Chapter 14)** — the shared debug lock is described as a hardware lock, and output-pacing guidance advises tuning combined traffic against your own serial baud rate and message sizes.
 

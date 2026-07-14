@@ -3379,7 +3379,7 @@ The configuration keywords you can add to the creation line:
 | Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 | `'name' {color}` | — | next default color | Declare a channel (trace), optionally with a color |
 
-> ### ⚠️ Every value on the create line must belong to a keyword
+> **Every value on the create line must belong to a keyword.**
 >
 > A **bare number** — one that follows no keyword — is not valid in a SCOPE_XY create
 > message, exactly as it is not valid on a LOGIC create line. The usual way to write one
@@ -3740,7 +3740,7 @@ label:
 | Position | Meaning | Range |
 |----------|---------|-------|
 | label | Channel name (string) | — |
-| `MAG` gain | Magnitude **gain**: multiplies by 2ⁿ (a higher `MAG` makes the trace *taller*) | **0–11** |
+| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** |
 | high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |

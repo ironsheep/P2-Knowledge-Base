@@ -27,7 +27,7 @@ prose), with all per-publication detail in the roster.*
 | I/O & Smart Pins | manual | 1.0.5 | 398 | ✅ |
 | Assembly Reference | manual | 3.1.3 | 505 | ✅ |
 | DeSilva Tutorial | manual | 3.0.3 | 164 | ✅ |
-| Debug Window | manual | 1.0.2 | 160 | ✅ |
+| Debug Window | manual | 1.1.0 | 169 | ✅ |
 | Streamer Guide | manual | 1.0.6 | 75 | ✅ |
 | Architect's Guide | manual | 1.0.1 | 53 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.2 | 20 | ✅ |
