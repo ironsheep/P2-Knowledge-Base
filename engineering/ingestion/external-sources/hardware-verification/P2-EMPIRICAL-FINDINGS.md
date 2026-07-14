@@ -129,6 +129,22 @@ centroid PIL (Claire). *Grounds:* F-205b — horiz **v55 text correct** (REF §4
 (`2:ty:=h //top; 3:ty:=0 //bottom`); the manual's `2=bottom,3=top` is inverted → fix to
 `2=top,3=bottom`. *Source:* `.../conflict-testI-textstyle-justify.spin2`.
 
+> **RE-VERIFIED 2026-07-14 — EF-031 STANDS. Do not "correct" it, and do not align the manual to the REF here.**
+> The 2026-07-14 REF rebuild asserts the **opposite ink on BOTH axes** (`%10` ⇒ *"the text sits to the RIGHT of
+> the anchor"*) and adds the line *"Hardware measurement and the code agree."* **It does not.** Re-measured
+> straight from the original `img-macOS/textI_horiz.bmp` / `textI_vert.bmp`, with PLOT's **Y-UP** mapping applied
+> (`screen_y = 209 − user_y`; forgetting this is what makes the rows read in reverse order and is the trap here):
+> both `$00` controls **straddle** the guide (so the instrument discriminates — the test is valid), and
+> `$20`(%10) ink lands **LEFT** (x 72–157, centre 114.5, anchor 160) while `$30`(%11) lands **RIGHT**
+> (163–247, centre 205.4); `$80`(%10) lands **BELOW** the guide (centre 122.4, guide 104) and `$C0`(%11)
+> **ABOVE** (centre 89.6). Identical to the original record.
+> The REF derives its claim from `2: tx := 0` and argues no implementation could put ink left of a zero offset —
+> but silicon says it does, on both axes. **The mechanism is an open question for the REF/`.pas` side; the
+> observation is not.** Manual `ch05:319-320` and `plot.yaml:67` match this ledger and are CORRECT — leave them.
+> *(Aside: `conflict-testI` itself carried the ch05 COLOR/TEXT defect — the colour keyword sat before `SET`
+> instead of before `TEXT`, so every row rendered default white and the intended colour-coding never happened.
+> The test resolved anyway because its rows are separable by position. Fixed 2026-07-14.)*
+
 ### EF-032 · PLOT POLAR: θ=0 points EAST (+x); increasing θ is counter-clockwise; no flip — `CONFIRMED`
 *How proven:* `conflict-testJ-polar-theta0` — render a POLAR wheel with four colored spokes at
 0°/90°/180°/270°; sample color at ρ≈150 around the origin (200,200). *Result:* **East=RED(0°)**
