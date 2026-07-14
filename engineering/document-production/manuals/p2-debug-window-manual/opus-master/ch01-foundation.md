@@ -240,23 +240,13 @@ Trap 1 and trap 3 are the ones that waste an afternoon: in both cases the progra
 runs, the file appears (or doesn't) without complaint, and the picture you get is a
 plausible one — just not the picture you asked for.
 
-There is also a **region** form, `SAVE left top width height 'name'`, which captures a
-rectangle rather than the window. It carries a trap of its own:
-
-> **The region form's numbers are not `POS` numbers.** `POS` places a window in the
-> *host application's* coordinates; the region form's `left`/`top` are read as *physical
-> screen* pixels. On a display running above 100% scaling — which most modern desktops
-> do — those two coordinate spaces differ by the scaling factor. So a window created at
-> `POS 300 0` and then captured with `SAVE 300 0 400 400 'shot'` **does not capture that
-> window.** The numbers look like they should match. They don't.
-
-> **Prefer the plain `SAVE 'name'` form for everything.** It renders from the window's
-> own buffer, so it is immune to all of this: no coordinate spaces, no occlusion, no
-> chrome. Both screen-scraping forms — `SAVE WINDOW` and the region form — go through
-> the host's screen-capture path, and on PNut that path is **currently unreliable**: it
-> can return a truncated or offset rectangle, a neighboring window, or bare desktop.
-> That is a tool bug, reported upstream. The plain form was correct in every case we
-> exercised.
+> **Prefer the plain `SAVE 'name'` form.** It renders from the window's own buffer, so
+> it captures exactly your window's contents and nothing else. The two forms that
+> capture the *screen* instead — `SAVE WINDOW`, and the `SAVE left top width height`
+> region form — go through the host's screen-capture path, which brings in whatever is
+> on screen at the time. On PNut that path is **currently unreliable**: it can return a
+> truncated or offset rectangle, a neighboring window, or bare desktop. That is a tool
+> bug, reported upstream. The plain form was correct in every case we exercised.
 
 ### Ending a debug session
 
