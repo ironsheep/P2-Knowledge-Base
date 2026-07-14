@@ -209,8 +209,8 @@ A dispatch-table entry is `handler | pattern << 10` (§4.1). So **bit 10 is the 
 Which makes bit 10 spare storage: **one free boolean per bytecode.** Read it and clear it in a single instruction on the way in, and `EXECF` still sees a clean pattern:
 
 ```pasm2
-                bitl    entry, #10      wcz ' C,Z = the old bit; bit now cleared
-        if_c    jmp     #special_case       ' ...and the pattern is clean for EXECF
+                bitl    entry, #10      wcz ' C,Z = old bit; bit cleared
+        if_c    jmp     #special_case       ' pattern clean for EXECF
 ```
 
 Emulators in the field use exactly this to carry a per-opcode flag that would otherwise have cost them a second table.
@@ -412,7 +412,7 @@ The fence is **`REP`**. A `REP` block cannot be interrupted, so wrapping the cri
 ```pasm2
                 rep     @.done, #1          ' shield: no interrupt inside
                 qmul    x, y                '   CORDIC command...
-                getqx   lo                  '   ...and its result, safely paired
+                getqx   lo                  '   ...and its result
 .done
 ```
 
@@ -631,6 +631,25 @@ jmp_rel
 
 Re-pointing the FIFO with RDFAST is how a guest "branch" works under XBYTE: change where the stream reads from, and the next bytecode comes from the new location. `PB` gives the handler the current position to compute the target from.
 
+::: hardware
+**`PB` is also how you get the stream back after you have left it.**
+
+Sooner or later a handler must do something the FIFO cannot survive — call out to hub code for a device, run a routine that itself uses `RDFAST`, hand work to another cog and wait. Any of those may leave the FIFO pointing somewhere else entirely, and when your handler returns, the engine will happily fetch the next "bytecode" from wherever the FIFO now happens to be.
+
+The fix is two instructions, and it is the standard idiom:
+
+```pasm2
+' Handler that calls out to hub code, then resumes the stream cleanly.
+op_port_write
+                rfbyte  port                ' the port number, inline
+                call    hub_write_port      ' ...may disturb the FIFO
+                add     pb, #1              ' step past the operand
+        _ret_   rdfast  #0, pb              ' re-point the FIFO and carry on
+```
+
+`PB` held the read position from the moment the engine dispatched this bytecode (clock 5, §5.1), so it is still a valid anchor even after the FIFO has been used for something else. Adjust it for whatever operand bytes you consumed, `RDFAST` back to it, and the next dispatch lands exactly where it should.
+:::
+
 ## 8.4 Stopping the engine {#sec-8-4}
 
 XBYTE runs until a handler chooses **not** to return to `$1FF`. A "halt" bytecode's handler simply does not end in the dispatch-continuing return — it branches to ordinary code instead, leaving the engine. That is the clean way to exit: one bytecode whose handler jumps out of the loop rather than back into it.
@@ -693,9 +712,9 @@ Comment out the two arming instructions, and substitute this:
 ```pasm2
 ' Debug mode: the software equivalent of the engine, with a place to stand.
 ' Trades ~3 clocks per bytecode for a guest-level trace.
-landing         nop                         ' see the caution below - this pad
-                nop                         '   absorbs any leftover skip
-                nop                         '   pattern from the last handler
+landing         nop                         ' pad: absorbs a leftover
+                nop                         '   skip pattern from the
+                nop                         '   previous handler
                 nop
                 nop
                 nop
@@ -704,9 +723,9 @@ landing         nop                         ' see the caution below - this pad
 dispatch        rfbyte  pa                  ' fetch the bytecode  (clock 1)
                 getptr  pb                  ' stream position     (clock 5)
                 debug(uhex_byte(pa), uhex_long(pb))
-                rdlut   entry, pa           ' the table entry     (clock 2-3)
+                rdlut   entry, pa           ' table entry    (clock 2-3)
                 push    #landing            ' handlers _RET_ back to here
-                execf   entry               ' jump + skip         (clock 4-5)
+                execf   entry               ' jump + skip    (clock 4-5)
 ```
 
 Every line maps onto a clock of the hardware cycle (Chapter 5) — that is the point. The engine's behaviour is reproduced exactly, and now `PA` and `PB` pass through code you own, so a `debug()` can print **which bytecode** and **where in the stream** on every single dispatch. That is a guest-level trace, and the hardware cannot give it to you.
@@ -729,10 +748,10 @@ Both modes are only a couple of instructions, so build your program to hold them
 
 ```pasm2
 ' Arm the engine - the fast path.
-                push    #$1FF               ' XBYTE triggers on RET to $1F8..$1FF
+                push    #$1FF               ' XBYTE fires on RET to $1FF
         _ret_   setq    #mode               ' ...and away it goes
 
-' Debug path: comment the two lines above, jump to the software loop instead.
+' Debug path: comment out the two above; use the software loop.
 ```
 
 The cost of keeping the software loop in your source is a few longs of cog space. The cost of *not* keeping it is rediscovering, at the worst possible moment, that your hardware dispatch loop has no window in it.
@@ -1209,7 +1228,21 @@ The shared-body idiom collapses the 6502's many ALU and load/store opcodes the w
 
 ## 13.4 What this slice shows, and what it omits {#sec-13-4}
 
-The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode, correct flag semantics on every operation, and accurate timing — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
+The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode (§12.6), correct flag semantics on every operation (§12.5), interrupt servicing (Chapter 14), and accurate timing (§12.8) — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
+
+One omission deserves more than a mention, because it is the one that would shape a real build.
+
+::: tip
+**The addressing-mode matrix wants a second dispatch, not a bigger table.**
+
+The 6502 has 56 operations and 13 addressing modes, and it is tempting to give the resulting combinations one table entry each — which is exactly how you end up hand-writing hundreds of nearly identical handlers.
+
+Working emulators do something better, and two independent implementations of *different* guest processors arrived at the same shape: **dispatch twice.** The opcode's table entry carries not only its handler but a small field naming its **addressing mode**. A first, shared block — indexed by that field — computes the effective address (read the operand, apply the index register, handle page wrap, add the cycle penalty). *Then* the opcode's own handler runs, and finds its operand already waiting.
+
+Opcode → addressing mode → operation. One shared addressing block instead of a mode's worth of duplication in every handler, and the table entry is doing double duty (§2.5 has a related trick — the spare pattern bit — that is often how the mode field is afforded).
+
+It is the industrial version of the shared-body idiom in §2.4, and it is the single technique that most separates a toy emulator from a real one.
+:::
 
 # Chapter 14: Servicing Guest Interrupts {#ch-14}
 
@@ -1239,7 +1272,7 @@ The interrupt itself comes from *outside* your emulation cog — a timer cog, a 
 The P2 has exactly that, in the **attention** mechanism. Another cog raises it; your cog tests it with **`JATN`**, a jump-if-attention that costs two clocks and never blocks:
 
 ```pasm2
-                jatn    #int_pending        ' anything waiting? (2 clocks if not)
+                jatn    #int_pending        ' anything waiting? (2 clocks)
 ```
 
 That is the cheapest interrupt poll the P2 offers, and it is what the field uses.
@@ -1279,10 +1312,10 @@ So servicing a guest interrupt is not a special mechanism at all. It is a **byte
 ```pasm2
 int_pending
                 testb   inte, #0        wc  ' are guest interrupts enabled?
-        if_nc   jmp     #int_ignore         ' no - resume the stream untouched
-                bitl    inte, #0            ' yes - guest disables IE on entry
+        if_nc   jmp     #int_ignore         ' no - resume the stream
+                bitl    inte, #0            ' yes - guest clears IE
                 mov     pb, guest_pc        ' remember where the guest was
-        _ret_   execf   int_vector_entry    ' ...and "dispatch" the interrupt
+        _ret_   execf   int_vector_entry    ' ...and "dispatch" it
 ```
 
 `int_vector_entry` is a table entry you constructed — the address of your interrupt-sequence handler, OR'd with whatever skip pattern that handler needs:
@@ -1380,7 +1413,7 @@ An x86 segment-override prefix says *"the next instruction's memory access goes 
 ```pasm2
 ' A modifier prefix: remember it, then fetch the instruction it modifies.
 op_seg_es       mov     override, seg_es    ' remember which segment...
-                jmp     #next_op            ' ...and go fetch the real opcode
+                jmp     #next_op            ' ...and fetch the opcode
 ```
 
 Every memory-touching handler then consults `override`, and clears it once the instruction retires. That is the whole mechanism, and it is the shape every working implementation uses. The Z80's `DD`/`FD` are the same idea wearing a different hat: they do not select a table, they change which register `HL` means for one instruction.
@@ -1665,7 +1698,10 @@ The appendices are lookup material and pointers: the quick-reference cards, the 
 
 **F bit:** 0 = flags untouched; 1 = C ← index bit 1, Z ← index bit 0.
 
+**The `x` bit** (bit 1) is **undocumented** — see §6.2. Leave it **0**, as every working XBYTE program does.
+
 **Arming checklist:** load table → LUT · `RDFAST` the stream · `PUSH #$1FF` · `_RET_ SETQ #mode`.
+(A `CALL` will *not* substitute for the `PUSH` — it pushes its own return address, not `$1FF`.)
 
 # Appendix B: Instruction Encoding Summary {#app-b}
 
@@ -1763,42 +1799,74 @@ A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.co
 | Handler runs the wrong variant | wrong SKIPF pattern in the table entry | recompute the pattern; remember every set bit *skips* (§2.4) |
 | Dispatch corrupts after a few bytecodes | hardware stack overflow | shorten handler call chains; the stack is 8 levels (§8.1) |
 | Flags behave unexpectedly across bytecodes | F bit set when not intended (or vice-versa) | set/clear bit 0 of the mode operand deliberately (§7.4) |
-| A prefixed/extended opcode decodes as the base opcode | no alternate-table handling | make the prefix a one-shot `SETQ2` handler (§6.3, Ch. 15) |
+| A prefixed/extended opcode decodes as the base opcode | no alternate-table handling | make the prefix a one-shot `SETQ2` handler (§6.3, §15.2) |
+| A prefix corrupts the *next* instruction rather than redirecting it | it is a **modifier** prefix, not a map prefix — `SETQ2` is the wrong tool | set a state register and re-fetch (§15.3) |
 | Branch goes nowhere | guest PC changed without re-pointing the FIFO | a branch is a `RDFAST` to the new address (§8.3) |
+| Stream resumes at the wrong place after a hub call | the called code left the FIFO elsewhere | re-point from `PB`: `RDFAST #0, PB` on the way out (§8.3) |
+| **A handler is corrupted intermittently, under load** | an **interrupt split an atomic sequence** — a CORDIC command and its result, or a read-modify-write | fence it with a one-iteration `REP` (§5.4). *This is the bug that will cost you the most time, because it is timing-dependent and will not reproduce* |
+| Instructions **after** a handler get skipped | the handler's SKIPF pattern was **longer than the handler** and ran on past it | size each pattern to its body; in a hand-rolled loop, add a `NOP` landing pad (§2.5, §9.3) |
+| `SETQ2` did something you did not intend | it does **two** jobs — block-move count, or one-shot mode — and only the *next* instruction decides which | look at the instruction after it (§6.3) |
+| Engine works, but you cannot see what it is doing | there is no loop body to instrument | read the state with `GETBRK`, or de-arm and substitute the software loop (Chapter 9) |
 
 # Index {#index}
 
+- **Addressing-mode matrix** (two-stage dispatch) — §13.4
 - **Application map** (other uses) — Ch. 16, §16.2
 - **Arming** — Ch. 6; quick card, App. A
+- **Auto-fetch** (the asset, and its cost) — §11.1, §11.3
 - **Beyond interpreters** (applications) — Ch. 16
+- **Bit 10** (spare flag in a table entry) — §2.5
+- **Budget** (what XBYTE costs you) — §1.6
 - **Bytecode** (definition) — Ch. 1; in `PA` — Ch. 4, §8.2
-- **Compression mode** (`%ABBBB`) — §7.3
+- **CALL depth** (skipping suspended) — §2.5, §9.1
+- **Compression mode** (`%ABBBB`) — §7.3; decoded — §7.5
+- **Cycle accuracy** (guest) — §12.8, §11.4
+- **Debugging XBYTE** — Ch. 9; `GETBRK` — §9.1; de-arm and substitute — §9.3
+- **Decimal mode** (guest BCD) — §12.6
+- **Dispatch by hand** (the software loop) — §4.4, §9.3
 - **Dispatch cycle** (8 clocks) — Ch. 5; App. A
+- **Dispatch ladder** (jump table · `EXECF` · XBYTE) — §11.2
 - **Dispatch table** (LUT) — Ch. 4; building entries — §4.2
 - **Display list** (application) — §16.5
-- **EXECF** — §2.3; Ch. 17
-- **F bit** (flags from bytecode) — §7.4, §18.1
-- **FIFO** — Ch. 3; `RDFAST` — §3.1
-- **GETPTR / PB** — §3.4, §18.2
+- **EXECF** — §2.3; synthesised operand — §14.4; Ch. 17
+- **F bit** (flags from bytecode) — §7.4, §7.5, §18.1
+- **FIFO** — Ch. 3; `RDFAST` — §3.1; resuming after a hub call — §8.3
+- **Flags** (guest) — §12.5
+- **`GETBRK`** — §9.1
+- **GETPTR / PB** — §3.4, §8.3, §18.2
+- **Guest CPU survey** — Ch. 12
 - **Hardware stack / `$1FF`** — §6.1, §8.1
 - **Inline operands** — §3.3, §8.3
+- **Interrupts (guest)** — Ch. 14; injecting one — §14.4; halt — §14.5
+- **Interrupts (P2)** — §5.4; the `REP` fence — §5.4
+- **JIT** (translate, don't interpret) — §16.7
+- **Landing pad** (trailing skip pattern) — §2.5, §9.3
+- **Loop body** (there isn't one) — §11.4, §1.6
 - **LUT entry format** — §4.1, §18.2
+- **Memory model** (where the guest's code lives) — §11.1, §11.3, §12.2
 - **MIDI dispatcher** (application) — §16.4
-- **Mode operand** — §6.2, Ch. 7, §18.1
+- **Mode operand** — §6.2, Ch. 7; a real one, decoded — §7.5; App. A
 - **Overhead** (6 clocks) — §1.2, §5.2
 - **PA** (current bytecode) — §4.3, §18.2
-- **Prefix / alternate table** — §6.3, §16.6, Ch. 15
+- **Prefixes** — the two kinds — §15.1; map — §15.2; modifier — §15.3
+- **`REP`** (as an interrupt fence) — §5.4
 - **RFBYTE / RFWORD / RFLONG** — §3.2, Ch. 17
 - **RFVAR / RFVARS** — §3.3, Ch. 17
-- **SETQ / SETQ2** — §6.3, §16.6, Ch. 17
-- **Shared-handler idiom** — §2.4, §10.3
+- **SETQ / SETQ2** — §6.3, §16.6, Ch. 17; its **two jobs** — §6.3; as grammar — §15.4
+- **Shared-handler idiom** — §2.4, §10.3; industrial form — §13.4
 - **SKIP** — §2.1, Ch. 17
-- **SKIPF** — §2.2, Ch. 17
-- **State machine** (table-as-state) — §16.3, §16.6
+- **SKIPF** — §2.2, Ch. 17; suspended in a `CALL` — §2.5
+- **State machine** (table-as-state) — §16.3, §16.6, §15.4
 - **Table sizes** — §7.2; App. A
 - **Terminal / ANSI reader** (application) — §16.3
-- **When to reach for XBYTE** — §1.5, §16.7
+- **Three decisions** (fetch · dispatch · memory) — §11.1
+- **When to reach for XBYTE** — §1.5, §1.7, §16.7
+- **`x` bit** (undocumented) — §6.2, App. A
 - **6502 emulator** — Ch. 13
-- **6809 / SETQ2 vignette** — Ch. 15
+- **6809 / prefix pages** — §15.2
+- **8086 / x86** — §12.2, §15.1, §15.3
+- **65816** (the sweet spot that isn't) — §12.2
+- **68000** — §12.2
+- **Z80** (both kinds of prefix) — §15.1, §12.3
 
 
