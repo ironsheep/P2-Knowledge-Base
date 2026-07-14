@@ -91,6 +91,19 @@ no clamp; `SAMPLES` `s2047`=2097px vs `s2048`=2097px **identical** → **2048 cl
 64·8+50). *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:* C-R1/C-R2/C-R3 — v55 text
 (`1_to_7`/`4_to_2048`/`2_to_32`) INVERTS; `logic.yaml` + manual stand. *Source:* `.../conflict-testC-logic-ranges.spin2`.
 
+> **⚠️ PARTIAL CORRECTION 2026-07-14 — the RANGES stand; the UNIT CONCLUSION was WRONG.**
+> **STANDS:** `LINESIZE` default **3**, accepted to **32** (no clamp at 7); `SAMPLES` max **2047**;
+> `SPACING` min **1**, default **8**. Those are unaffected.
+> **RETRACTED: the "`LINESIZE 3` -> 3px, therefore 1:1 / whole-pixels" reading.** It took a single
+> *small-n* point as proof of a 1:1 law. **EF-027's own curve refutes it:** widths 1,3,5,**11**,**17** for
+> `LINESIZE` 1,3,7,**20**,**32** -> the slope from 20 to 32 is `(17-11)/(32-20)` = **0.5**. That is
+> **half-pixels**, riding a ~1px anti-aliasing envelope that dominates at small n and vanishes at large n.
+> Directly re-measured 2026-07-14 (`conflict-testL`, SCOPE, flat trace): `LINESIZE` 3/7/20/32 ->
+> **2/4/10/16** logical px = **exactly n/2**. See **EF-041**.
+> **Consequence:** the "half-pixel wording is BANNED" instruction derived from this entry was wrong, was
+> propagated into the 2026-07-14 REF cleanup handoff, and caused correct half-pixel wording to be stripped
+> from the REF. v55's "half-pixels" was right all along.
+
 ### EF-028 · PLOT TEXTSTYLE weight bits are honored but the DEBUG font does NOT visibly distinguish the four weights ($00 renders == $01) — `CONFIRMED`
 The style byte's weight field (bits 0–1) selects nominal font weights — Pascal
 `weight[0..3] = (100,400,700,900)` = thin/normal/bold/heavy (PLOT theory-of-ops) — but the
@@ -361,6 +374,75 @@ kind=**6**, flags=**7**; `SIZEOF(hdr_t)`=**8**; payload starts at **+8**; every 
 back correctly by name. For `reading_t(LONG timestamp, LONG value, BYTE status)` — `SIZEOF`=**9**.
 *Verdict:* CONFIRMED 2026-07-13. *Grounds:* P2AN007 R6/R1 + `methods/offsetof.yaml`; confirms the
 Verify text the note prints is correct as published.
+
+
+### EF-041 · `LINESIZE` and `DOTSIZE` units are decided by the shift constant: `shl 6` = HALF-pixels, `shl 7` = WHOLE pixels — `CONFIRMED`
+The rendered size of a `LINESIZE`/`DOTSIZE` value is **not** one rule across the windows — it follows the
+call site's shift, exactly as the v55 text says. *How proven:* `conflict-testK-dotsize-render` (isolated dots,
+`LINESIZE 0`, constant feed) + `conflict-testL-scope-linesize` (flat trace, `DOTSIZE 0`); measured on the
+captured BMPs, halved for the 2x Retina device-pixel scale (the window's own declared `SIZE` is the ruler).
+*Result (logical px):*
+| directive | path | measured | v55 says |
+|---|---|---|---|
+| SCOPE `DOTSIZE` | `shl 7` | 2→2, 4→4, 8→8, 16→16, 32→**32** (slope **1**) | "dot size **in pixels**" ✅ |
+| SCOPE_XY `DOTSIZE` | `shl 6` | 2→1, 6→3, 12→6, 20→**10** (slope **½**) | "dot size in **half-pixels**" ✅ |
+| SCOPE `LINESIZE` | `shl 6` | 3→2, 7→4, 20→10, 32→**16** (slope **½**) | "line size in **half-pixels**" ✅ |
+**v55 is correct on every one.** `shl 7` face value = a whole-pixel **diameter**; `shl 6` face value = **half-pixels**
+(i.e. rendered width = n/2). At small n a ~1px anti-aliasing envelope inflates the measurement — which is exactly
+what made EF-027 misread its own data. FFT `DOTSIZE` is the same `shl 7` path as SCOPE (inferred, not measured).
+*Date/rig:* 2026-07-14, real P2 (Stephen), **pnut-term-ts** render; corroborated 3 ways (v55 text + the Pascal's
+shift geometry + this render). *Grounds:* supersedes EF-027's unit conclusion; settles H-2/H-3.
+*Source:* `.../conflict-testK-dotsize-render.spin2`, `.../conflict-testL-scope-linesize.spin2`.
+
+### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL — it is not an outline or a border — `CONFIRMED`
+*How proven:* `conflict-testM-bitmap-sparse` — a 6×4 canvas of pure-green `$00FF00` pixels at `DOTSIZE 12`, with
+`SPARSE $FF0000`, captured via `SAVE WINDOW` (a plain BITMAP `SAVE` writes the bitmap **1× un-DOTSIZEd** and would
+have shown nothing). Rail: the same window with **no** `SPARSE` contains **no red at all**. *Result:* the sparse
+window renders as a **solid red field carrying a grid of round green dots** — the sparse colour is a full-cell
+**background fill** behind a round dot drawn in the pixel's own colour (dot ≈ ¾ of the cell; measured green/(green+red)
+= 43%, against 44% predicted for a ¾-diameter disc in its cell). *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
+*Grounds:* v55 L1331 ("large **round** pixels against a **coloured background**") and the REF ToO ("a solid fill of the
+whole cell") are **CORRECT**; the manual's `ch04:49` ("outline each magnified pixel … the outline (grid) colour") and
+`bitmap.yaml:32` ("grid-border colour") are **WRONG** — figure and ground inverted. `ch04:398-400` was already right.
+*Still open:* the **`DOTSIZE >= 4` gate** — INCONCLUSIVE, see the note in H-4 (the `DOTSIZE 3` window's canvas is
+smaller than its own title bar, so the capture contained only window chrome).
+*Source:* `.../conflict-testM-bitmap-sparse.spin2`.
+
+### EF-043 · No-POS window placement is TOOL-DEPENDENT — pnut-term-ts AUTO-ARRANGES (no overlap); PNut has no such feature — `CONFIRMED (pnut-term-ts)`
+*How proven:* `conflict-testN-pos-origin-overlap` — three PLOT windows created with **no `POS`**, in decreasing size.
+The instrument turned out to be the **log, not the screenshot**: pnut-term-ts emits a `WINDOW_PLACED` line per
+auto-placed window. *Result:* `Pa` (400×300) → `POS 1076,60`; `Pb` (300×220) → `POS 622,60`; `Pc` (200×150) →
+`POS 1680,60` — **distinct x, common y, tiled, NOT overlapping, NOT cascaded.** The 4th window, created with an
+**explicit** `POS 500 0`, got **no** `WINDOW_PLACED` line — the layout engine only engages when `POS` is absent.
+*Date/rig:* 2026-07-14, real P2 (Stephen), **pnut-term-ts**.
+**⚠️ THIS IS A TOOL BEHAVIOUR, NOT A P2/PNut FACT.** Stephen: *"pnut-term-ts has special auto-layout ability when no
+POS directive is specified… PNut on Windows has no such capability."* PNut places every window at its host display
+origin and display windows do **not** cascade, so successive no-POS windows there **overlap**. **Both are true, of
+different tools.** *Consequences:* (1) `logic.yaml` / `term.yaml` claim windows "don't overlap" — that is **term-ts
+behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert either placement; it should teach
+"omit `POS` and your tool places the window for you" and print **no pixel values**.
+*Source:* `.../conflict-testN-pos-origin-overlap.spin2`.
+
+### EF-044 · SCOPE_XY `SIZE` is a RADIUS: the canvas is 2×SIZE, and the default is radius 128 (a 256×256 canvas) — `CONFIRMED`
+*How proven:* read straight off the pnut-term-ts placement log in `conflict-testO`. *Result:* `SCOPE_XY Good SIZE 150`
+→ window **340×340** (canvas 300×300 = 2×150, + 40px margins); `SCOPE_XY Bad` with **no** `SIZE` → window **296×296**
+(canvas **256×256**, i.e. an implied radius of **128**). *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
+*Grounds:* v55 L1179 ("display **radius**", default **128**) is **CORRECT**; the pre-cleanup SCOPE_XY ToO §4a claim of
+"SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
+2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `.../conflict-testO-scopexy-parser-hang.spin2` (log).
+
+### EF-045 · A bare number in a SCOPE_XY create message does NOT hang pnut-term-ts — `REFUTED (pnut-term-ts); UNTESTED on PNut`
+The suspected infinite loop (`SCOPE_XY_Configure`'s `while not NextEnd do` matching neither `NextKey` nor `NextStr`,
+so `ptr` never advances) **does not occur in pnut-term-ts**. *How proven:* `conflict-testO-scopexy-parser-hang` — a TERM
+**heartbeat** is the instrument, distinguishing "the tool hung" from "the window just didn't open". *Result:* the
+heartbeat printed `pre 1…5`, the suspect line `` `SCOPE_XY Bad 128 'A' `` executed, and the heartbeat continued
+`post 1…20` → **"NO HANG - parser recovered"**. Moreover the `Bad` window **was created**, at the **default** 256×256
+canvas — so the stray number ended (or was skipped in) the config parse rather than hanging it, and the `'A'` label
+after it was not applied. *Date/rig:* 2026-07-14, real P2 (Stephen), pnut-term-ts.
+**⚠️ SCOPE LIMIT:** the hang was derived from **PNut's Pascal**, and PNut is ground truth. term-ts is a *port* and may
+simply not share the defect. **This refutes the hang for term-ts; it does NOT clear PNut.** Until a Windows-PNut run
+says otherwise, write **nothing** about this in the manual — an unconfirmed hang claim is worse than silence.
+*Source:* `.../conflict-testO-scopexy-parser-hang.spin2`.
 
 ## Open / pending empirical questions
 
