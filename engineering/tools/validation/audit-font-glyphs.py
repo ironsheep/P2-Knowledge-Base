@@ -92,15 +92,35 @@ def main() -> int:
         )
 
     hits = []
+    bq_headings = []
     for lineno, line in enumerate(assembled.read_text(encoding="utf-8").splitlines(), 1):
         for col, ch in enumerate(line, 1):
             why = offending(ch)
             if why:
                 hits.append((lineno, col, ch, why, line.strip()[:70]))
+        # A heading nested in a blockquote ("> ### Title") does NOT survive the
+        # LaTeX escape: the '#' is not at column 0, so latex-escape-all.sh escapes
+        # it and the reader sees a literal "### Title" on the page. Shipped this
+        # way once (Debug Window Manual ch08, 2026-07-14). Use a bold lead-in
+        # ("> **Title.**") for a callout heading instead.
+        if line.lstrip().startswith(">") and line.lstrip(" >").startswith("#"):
+            bq_headings.append((lineno, line.strip()[:70]))
 
-    if not hits:
-        print(f"{assembled.name}: OK (no non-renderable glyphs)")
+    if not hits and not bq_headings:
+        print(f"{assembled.name}: OK (no non-renderable glyphs, no blockquote headings)")
         return 0
+
+    if bq_headings:
+        print(f"\n{assembled.name}: HEADING INSIDE A BLOCKQUOTE\n")
+        for lineno, ctx in bq_headings:
+            print(f"  line {lineno}: {ctx}")
+        print(
+            "\nThese print as LITERAL '###' on the page -- the '#' is not at column 0,\n"
+            "so the LaTeX escape step escapes it instead of pandoc making a heading.\n"
+            "Use a bold lead-in for a callout heading:  > **Title.**\n"
+        )
+        if not hits:
+            return 1
 
     print(f"\n{assembled.name}: NON-RENDERABLE GLYPHS FOUND\n")
     for lineno, col, ch, why, ctx in hits:

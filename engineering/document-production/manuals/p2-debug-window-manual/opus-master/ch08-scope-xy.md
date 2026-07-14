@@ -61,7 +61,7 @@ The configuration keywords you can add to the creation line:
 | Packing keyword | — | unpacked | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 | `'name' {color}` | — | next default color | Declare a channel (trace), optionally with a color |
 
-> ### Every value on the create line must belong to a keyword
+> **Every value on the create line must belong to a keyword.**
 >
 > A **bare number** — one that follows no keyword — is not valid in a SCOPE_XY create
 > message, exactly as it is not valid on a LOGIC create line. The usual way to write one
