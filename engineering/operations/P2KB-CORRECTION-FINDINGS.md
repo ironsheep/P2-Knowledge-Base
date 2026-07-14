@@ -1707,4 +1707,99 @@ fetch-on-`_RET_` loop cannot express as a plain `_RET_` handler.
 
 ---
 
+## `architecture/xbyte_engine.yaml` — all three programming examples are broken (2026-07-14) — F-220…F-223
+
+> **Origin.** Chasing an open question for the XBYTE Guide (*what does Chip's "no stack pop" mean?*), the
+> authoritative KB entry `p2kbArchXbyteEngine` was consulted — and **every one of its three
+> `programming_examples` is wrong.** This is the YAML an agent would use to generate XBYTE code.
+> Ground truth used below: the **Silicon Doc** narrative + demo, **Chip's own Spin2 interpreter**,
+> **Parallax's official `xbyte.spin2`**, plus Zog and the 8080 emulator — nine implementations, all
+> agreeing. Evidence: `manuals/p2-xbyte-programming-guide/TECHNIQUE-MINING.md`.
+>
+> **File:** `deliverables/ai/P2/architecture/xbyte_engine.yaml`
+
+### F-220 — `bytecode_routine_example`: the LUT table entry is built with the wrong shift **and** the wrong address space — `CONFIRMED`
+
+```
+' LUT entry: routine address | skip pattern
+LONG    (@push_routine << 23) | 0          # line 215
+```
+
+**Two defects in one line:**
+
+1. **`<< 23` is wrong.** The *same YAML*, at `lut_table_format` (~line 100), states it correctly:
+   `[9:0] = routine address`, `[31:10] = SKIPF pattern`. Shifting the address left **23** buries it
+   inside the skip-pattern field. The entry cannot dispatch.
+2. **`@` yields a HUB address.** `EXECF` jumps to a **cog/LUT** address (`$000–$3FF`). The `@` operator
+   returns a hub address, which will not fit `[9:0]` and is meaningless to `EXECF`.
+
+**Ground truth** — Chip: `bc_read  long  var_rd | %0111001110 << 10`. Parallax: `bytetable  long  r0`.
+Correct form: `LONG  push_routine | (skip_pattern << 10)` — **no `@`, shift the *pattern*, not the address.**
+
+### F-221 — `simple_interpreter`: never pushes `$1FF`, so it would not start XBYTE — `CONFIRMED`
+
+```
+' Start XBYTE engine
+CALL    #xbyte_start                        # line 207
+xbyte_start:
+_RET_   SETQ    #%00000001                  # line 210
+```
+…and the `starting_xbyte` block asserts: `requirement: "$1FF must be on stack (from CALL)"` (line 64).
+
+**A `CALL` pushes its own return address — not `$1FF`.** So the `_RET_` returns to the instruction after
+the `CALL`, XBYTE never engages, and the example silently does nothing.
+
+**The Silicon Doc is explicit** — *"Starting XBYTE … is done all at once by a `_RET_ SETQ {#}D`
+instruction, **with the top of the hardware stack holding `$1FF`**"* — and gives the sequence
+`PUSH #$1FF` / `_RET_ SETQ #$100`. **All nine implementations we read use `PUSH #$1FF`.** The
+`(from CALL)` gloss on line 64 is also wrong and must go.
+
+### F-222 — `compressed_mode`: does not assemble, mislabels its own fields, and would not compress — `CONFIRMED`
+
+```
+_RET_   SETQ    #%F_0000_00_1               # line 226
+' F = base address (4 bits)                 # line 227
+' 0000 = compression threshold              # line 228
+' 1 = set flags from bytecode               # line 229
+```
+
+**Three defects:**
+
+1. **It does not assemble.** `%` introduces a **binary** literal; **`F` is not a binary digit.**
+2. **The field labels are inverted.** In `%ABBBB00xF` the base **`A` is ONE bit**; the **four `B` bits**
+   are the compression threshold. The comment calls the leading field *"base address (4 bits)"* — and
+   reuses the letter **F**, which collides with `F` = the flag-write bit.
+3. **The threshold value defeats the example's own purpose.** The Silicon Doc requires **`%BBBB > 0`**.
+   With `BBBB = %0000` nothing is compressed as described. For the *"16 primary + 240 extended"* split
+   this example claims (and which the YAML's own `compression:` field states), the threshold must be
+   **`%0001`**: high-nibble 0 → 16 primary bytecodes `$00–$0F`; high-nibble ≥ 1 → 240 extended in 15
+   groups. **16 + 240 = 256.** ✓
+
+### F-223 — the `x` bit of the mode operand is **undefined** in the Silicon Doc, the YAML, and our manual — `NEEDS-VERIFICATION (Chip question)`
+
+Both `configuration_patterns` entries print an unexplained bit:
+
+- `full_256_bytecodes: "%A000000xF"` (line 111)
+- `compressed_16_bytecodes: "%ABBBB00xF"` (line 118)
+
+The Silicon Doc defines **`A`** (LUT base), **`B`** (compression threshold) and **`F`** (flag write) — and
+**never defines `x`.** Yet Chip's own demo comment, carried verbatim in the Silicon Doc *and* in
+Parallax's official `xbyte.spin2`, reads:
+
+> `_ret_  setq  #$100    'start xbyte with LUT base = $100, **no stack pop**`
+
+…which strongly suggests `x` (mode-operand **bit 1**) is a **stack-pop control**. **We do not know, and we
+will not guess.**
+
+- **Empirical check across the whole corpus:** every known implementation leaves it **0** — Chip's `$1A1`
+  and `$081`, the 8080's `$000`, Zog's `$0`, Parallax's `$100`. **Nobody uses the other state**, so usage
+  cannot disambiguate it either.
+- **Route to Chip Gracey** (fold into the expert queue with the IOSP questions).
+- **Not blocking.** The safe idiom is universal and attested nine ways (`PUSH #$1FF` + `_RET_ SETQ #mode`).
+  The XBYTE Guide will teach that and **footnote bit 1 as undocumented**, rather than invent a meaning.
+- **Note this is an upstream (Silicon Doc) documentation gap** that propagated into our YAML and our
+  manual — not a defect we introduced.
+
+---
+
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
