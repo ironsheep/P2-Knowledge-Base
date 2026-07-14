@@ -37,13 +37,24 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | (window name) | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - PLOT` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
 | `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
+| color mode | `LUT1` … `RGB24` | `RGB24` | How color values are interpreted ([Chapter 4](#ch-4)) |
+| `LUTCOLORS` | `rgb24 rgb24 …` | (LUT is all black) | Loads the palette used by the `LUT1`–`LUT8` modes |
 | `BACKCOLOR` | `rgb` | black | Background fill color (`$RRGGBB`) |
 | `UPDATE` | — | off | Enables buffered mode (see "The update model") |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
+
+If you omit `POS`, the window is placed by whatever tool is hosting the debug
+session — do not count on a particular screen position, or on windows avoiding
+one another. Give `POS` explicitly when the layout matters.
+
+PLOT draws in full `RGB24` unless you select one of the other color modes — the
+same 19 modes the BITMAP window uses, described in [Chapter 4](#ch-4). If you
+select a `LUT` mode, load the palette with `LUTCOLORS`: the LUT is zero-filled at
+creation, so **every index resolves to black until you load it**.
 
 `SIZE` is measured in pixels, and both dimensions are clamped to the range
 **32–2048**. The default is `256 256`. The canvas is drawn into an off-screen
@@ -139,6 +150,12 @@ POLAR {twopi {theta}}
 - `theta` — an angular offset added to every angle, which rotates the entire
   coordinate system.
 
+The default `twopi` of `$1_0000_0000` is one count too large for a 32-bit
+argument, so it has a **shorthand**: write `POLAR 0` for `$1_0000_0000` and
+`POLAR -1` for `-$1_0000_0000`. `POLAR 0` is therefore not "a full turn of zero"
+— it selects the full 32-bit angle scale, which is exactly what `QROTATE` and
+`QSIN` produce.
+
 By default the angle is measured the mathematical way: `theta` = 0 points **East**
 (along +x), and increasing `theta` sweeps **counter-clockwise** (a negative `twopi`,
 above, flips that sweep to clockwise). The `theta` offset then rotates this whole
@@ -160,20 +177,24 @@ Send `CARTESIAN` to leave polar mode.
 
 ### PRECISE — sub-pixel positioning
 
-Coordinates are stored internally in a fixed-point format. By default `PRECISE`
-mode is **on**, so that line size and (x, y) for `DOT` and `LINE` are expressed
-in **256ths of a pixel** — letting anti-aliased primitives land on sub-pixel
-positions. `PRECISE` toggles this:
+Coordinates are stored internally in a fixed-point format, and `PRECISE` decides
+whether you address that format directly. `PRECISE` mode starts **off**: `DOT`
+and `LINE` take whole-pixel coordinates and line sizes, which is what you want
+for most drawing. `PRECISE` toggles it:
 
 ```debug-update
 PRECISE
 ```
 
-Each `PRECISE` flips between sub-pixel mode (the default) and whole-pixel mode.
-Sub-pixel mode is the right choice for smooth curves and animation, so most
-drawing leaves it on; whole-pixel mode aligns coordinates to integer pixels.
-Because sub-pixel is the default, a single `PRECISE` switches **to** whole-pixel
-mode — issue `PRECISE` again to return to sub-pixel.
+With `PRECISE` **on**, the line size and the (x, y) of `DOT` and `LINE` are
+expressed in **256ths of a pixel**, so an anti-aliased primitive can land on a
+sub-pixel position — the right choice for smooth curves and animation, where
+rounding every point to an integer pixel makes motion visibly step. In this mode
+a coordinate of `256` means *one pixel*, not 256 of them: scale your values up by
+256 (`x << 8`) when you turn it on.
+
+Each `PRECISE` flips the mode. Because sub-pixel is **not** the default, the
+first `PRECISE` switches **to** sub-pixel mode; a second returns to whole pixels.
 
 > **Read coordinates through the active system.** A primitive's position is
 > always the cursor, transformed by polar conversion (if active), then the
@@ -184,8 +205,14 @@ mode — issue `PRECISE` again to return to sub-pixel.
 
 The window provides six geometric primitives plus text. Each is drawn at — or,
 for `LINE`, *to* — the current cursor, in the current color, with anti-aliasing.
-Where a primitive takes `linesize` and `opacity`, both are optional and default
-to the window's current line size and opacity.
+Where a primitive takes `linesize` and `opacity`, both are optional — but an
+omitted `linesize` does **not** mean the same thing everywhere:
+
+- For `DOT` and `LINE` it falls back to the window's `LINESIZE` (default `1`).
+- For the four shapes — `CIRCLE`, `OVAL`, `BOX`, `OBOX` — it falls back to
+  **`0`, which means *filled***, not to the window's `LINESIZE`.
+
+An omitted `opacity` always falls back to the window's `OPACITY`.
 
 ### DOT — a dot at the cursor
 
@@ -290,23 +317,32 @@ debug(`Canvas OBOX 120 100 15 15 4 200)   ' outline, thickness 4
 TEXT {size {style {angle}}} 'string'
 ```
 
-`TEXT` renders the string at the cursor, in the current text color (white,
-`$FFFFFF`, until you set `COLOR`). All three numeric arguments are optional and
-default to the window's current text size, style, and angle:
+`TEXT` renders the string at the cursor, in the **text color**. All three numeric
+arguments are optional and default to the window's current text size, style, and
+angle:
 
 - `size` — font size in points.
 - `style` — a style byte (below).
 - `angle` — rotation in degrees, `0`–`359`. In polar mode the angle is given in
   `twopi` units instead.
 
+> **`COLOR` only reaches `TEXT` when `TEXT` comes next.** The window keeps the
+> text color *separately* from the drawing color, and a `COLOR` command updates
+> it **only when the very next key is `TEXT`**. Put `COLOR` immediately before
+> each `TEXT`, in the same `DEBUG` statement. If anything intervenes — even a
+> `SET` — the text keeps its previous color, which starts out **white**. On a
+> light background that is invisible text, and nothing in the output tells you
+> why.
+
 ```spin2
 PUB main()
   debug(`PLOT Labels SIZE 600 400 BACKCOLOR $FFFFFF)
-  debug(`Labels TEXTSIZE 14 COLOR $000000 SET 300 200)
-  debug(`Labels TEXT 'Default')           ' size 14 (the window default)
-  debug(`Labels TEXT 20 'Bigger')         ' size 20
+  debug(`Labels TEXTSIZE 14)
+  ' COLOR sits immediately before each TEXT -- that is what makes it black
+  debug(`Labels SET 300 300 COLOR $000000 TEXT 'Default')   ' size 14 (the window default)
+  debug(`Labels SET 300 200 COLOR $000000 TEXT 20 'Bigger') ' size 20
   ' size 16, bold, rotated 90 degrees
-  debug(`Labels TEXT 16 $02 90 'Rotated')
+  debug(`Labels SET 300 100 COLOR $000000 TEXT 16 $02 90 'Rotated')
 ```
 
 The `style` byte packs weight, italic, underline, and alignment into one value:
@@ -344,9 +380,14 @@ COLOR rgb
 The argument is a `$RRGGBB` value — for example `COLOR $FF0000` is red,
 `COLOR $00FF00` is green, `COLOR $0000FF` is blue. Named colors (`RED`, `GREEN`,
 `BLUE`, `WHITE`, `BLACK`, `CYAN`, `MAGENTA`, `YELLOW`, `ORANGE`, `GRAY`) are also
-accepted in the command stream. Until you set `COLOR`, the default drawing color
-is cyan (`$00FFFF`); the same `COLOR` also colors `TEXT`, so set it just before a
-`TEXT` command to change the text color.
+accepted in the command stream, each with an optional `0`–`15` brightness — but a
+keyword resolves to a *computed* color, not to the palette value of the same name
+([Appendix C](#appendix-c)). Until you set `COLOR`, the default drawing color is
+cyan (`$00FFFF`).
+
+`COLOR` sets the color the *primitives* draw in. The **text** color is a separate
+setting, and `COLOR` updates it only when `TEXT` is the next key — so a `COLOR`
+meant for a label must sit immediately before that label's `TEXT`.
 
 `BACKCOLOR rgb` sets the background fill — the color `CLEAR` paints the canvas
 with. It is most often set on the creation line.
@@ -358,11 +399,16 @@ own:
 OPACITY byte
 ```
 
-The value is a byte `0`–`255` (values outside that range wrap to their low 8 bits,
-so they are not saturated), where `255` is fully opaque and lower values blend the
-primitive with whatever is already on the canvas. A per-primitive
-`opacity` argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest)
-overrides this default for that one primitive.
+The value is a byte `0`–`255`, where `255` is fully opaque and lower values blend
+the primitive with whatever is already on the canvas. A per-primitive `opacity`
+argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest) overrides
+this default for that one primitive.
+
+> **`OPACITY 256` makes everything vanish.** The value is stored in a byte and it
+> is **not** clamped — it wraps. Reach past the top of the range for "as opaque as
+> possible" and `256` wraps to **`0`, fully transparent**: every primitive you draw
+> next is invisible, with no error and no clue. The most opaque value is **`255`**.
+> (Hardware-verified.)
 
 ```spin2
 PUB main()
@@ -372,8 +418,9 @@ PUB main()
   debug(`Blend SET 180 128 BOX 100 100)  ' this box uses the 128 default
 ```
 
-`LINESIZE size` sets the default line/dot thickness used when `DOT` and `LINE`
-omit their `linesize` argument.
+`LINESIZE size` sets the default line/dot thickness, in pixels, used when `DOT`
+and `LINE` omit their `linesize` argument. The default is `1`. (It does not reach
+the shapes — an omitted shape `linesize` is `0`, which fills.)
 
 ## Layers, CROP, and sprites
 
@@ -459,8 +506,23 @@ SPRITE id {orientation {scale {opacity}}}
 ```
 
 - `id` — which sprite to draw, **`0`–`255`**.
-- `orientation` — **`0`–`7`**, selecting one of eight flips/rotations (0 = normal,
-  1 = flip-X, 2 = flip-Y, 3 = 180°, 4–7 = the 90° rotations and their flips).
+- `orientation` — **`0`–`7`**, selecting one of the eight ways a square can be
+  laid down. It is not a rotation counter — it is **three independent bits** that
+  compose: bit 0 flips X, bit 1 flips Y, and bit 2 **transposes** (swaps the two
+  axes). So `4` on its own is a diagonal mirror, and the 90° rotations are the
+  combinations that pair the transpose with a flip:
+
+  | Code | Bits | Result |
+  |------|------|--------|
+  | `0` | `%000` | normal |
+  | `1` | `%001` | flip X |
+  | `2` | `%010` | flip Y |
+  | `3` | `%011` | flip X + flip Y (= 180° rotation) |
+  | `4` | `%100` | transpose (mirror about the main diagonal) |
+  | `5` | `%101` | transpose + flip X (a 90° rotation) |
+  | `6` | `%110` | transpose + flip Y (the other 90° rotation) |
+  | `7` | `%111` | transpose + both flips (the anti-diagonal mirror) |
+
 - `scale` — pixel magnification, **`1`–`64`**; each sprite pixel becomes a
   `scale x scale` block.
 - `opacity` — an overall alpha multiplier, `0`–`255`, applied on top of each
@@ -553,10 +615,18 @@ Three more commands round out display control:
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
   becomes visible at the next `UPDATE`.
-- `` `SAVE 'name' `` — save the current canvas image to a BMP file on the host.
-  A filename is required: `SAVE 'name'` writes `name.bmp` (the `.bmp` extension is
-  added for you — do not include it).
+- `` `SAVE 'name' `` — save the canvas image to a BMP file on the host. The
+  filename is **required** and must come last: `SAVE 'name'` writes `name.bmp`
+  (the `.bmp` extension is added for you — do not include it).
 - `` `CLOSE `` — close this window and free its resources.
+
+> **In buffered mode, `SAVE` captures the frame you are *showing*, not the one you
+> are *drawing*.** `SAVE` reads the front buffer. If you draw a frame and then
+> `SAVE` without an intervening `` `UPDATE ``, the file holds the **previous**
+> frame — the new drawing is still off-screen. Send `` `UPDATE `` first, then
+> `SAVE`. (Hardware-verified — and easy to miss, because the file is written, it
+> is valid, and it looks plausible.) See [Chapter 1](#ch-1) for the rest of the
+> `SAVE` traps.
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
@@ -596,7 +666,7 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave COLOR $00FF00)
   debug(`Wave SET 0 0)
   repeat x from 0 to 511
-    angle := x * ($FFFF_FFFF / 511)
+    angle := x * ($FFFF_FFFF +/ 511)             ' +/ is UNSIGNED divide
     y := sine(angle, 200)                        ' amplitude 200 px
     debug(`Wave LINE `(x) `(y) 1 255)
 
@@ -608,10 +678,9 @@ PUB main() | x, y, angle, i, sx, sy
     debug(`Wave SET `(sx) `(sy))
     debug(`Wave DOT 4 200)
 
-  ' White centered label
-  debug(`Wave COLOR $FFFFFF)
+  ' White centered label -- COLOR must sit immediately before TEXT
   debug(`Wave SET 256 230)
-  debug(`Wave TEXT 16 'QSIN + scatter')
+  debug(`Wave COLOR $FFFFFF TEXT 16 'QSIN + scatter')
 
   repeat                                         ' keep the window open
 
@@ -633,6 +702,16 @@ point (`length`, 0) by `angle`, and **GETQY** returns `length x sin(angle)` — 
 software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
+
+> **`+/`, not `/` — Spin2's plain `/` is a *signed* divide.** The angle step is
+> `$FFFF_FFFF +/ 511`. Written with a plain `/`, Spin2 reads `$FFFF_FFFF` as the
+> signed value **−1**, and `−1 / 511` truncates to **`0`** — so `angle` would be 0
+> for every column, `sine()` would return the same value 512 times, and the "sine
+> wave" would come out as a **flat horizontal line lying exactly on top of the grey
+> axis this program draws two statements earlier**. It compiles, it runs, and it
+> looks plausible. Any time you treat a 32-bit value as a full unsigned range —
+> which is exactly what a full-circle angle is — use the unsigned operators: `+/`
+> and `+//`. (`1 << 23` computes the same step here with no divide at all.)
 
 ## A worked instrument: an analog gauge
 

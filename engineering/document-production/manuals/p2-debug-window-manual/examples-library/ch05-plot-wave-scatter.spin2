@@ -19,7 +19,7 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave COLOR $00FF00)
   debug(`Wave SET 0 0)
   repeat x from 0 to 511
-    angle := x * ($FFFF_FFFF / 511)
+    angle := x * ($FFFF_FFFF +/ 511)             ' +/ is UNSIGNED divide
     y := sine(angle, 200)                        ' amplitude 200 px
     debug(`Wave LINE `(x) `(y) 1 255)
 
@@ -31,10 +31,9 @@ PUB main() | x, y, angle, i, sx, sy
     debug(`Wave SET `(sx) `(sy))
     debug(`Wave DOT 4 200)
 
-  ' White centered label
-  debug(`Wave COLOR $FFFFFF)
+  ' White centered label -- COLOR must sit immediately before TEXT
   debug(`Wave SET 256 230)
-  debug(`Wave TEXT 16 'QSIN + scatter')
+  debug(`Wave COLOR $FFFFFF TEXT 16 'QSIN + scatter')
 
   repeat                                         ' keep the window open
 

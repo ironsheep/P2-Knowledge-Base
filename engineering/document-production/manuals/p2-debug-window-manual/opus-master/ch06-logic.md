@@ -38,32 +38,51 @@ elements inside the same statement** — a quoted label, optionally followed by 
 count, the `RANGE` keyword, and a color. There are no `CHANNELS`, `LABELS`, or
 `COLORS` keywords; the labels, counts, and colors *are* the channel declaration.
 
-```spin2
+```{.spin2 caption="ch06-logic-declare.spin2"}
+CON _clkfreq = 200_000_000
+
 PUB main() | sample
-  ' create + declare 4 channels
-  debug(`LOGIC Bus SAMPLES 64 'CLK' $00FF00 'DATA' $FFFF00 'CS' 'WR')
-  debug(`Bus `(sample))  ' feed it by name
+  ' create + declare 4 channels -- the 1 before each color is the channel COUNT
+  debug(`LOGIC Bus SAMPLES 64 'CLK' 1 $00FF00 'DATA' 1 $FFFF00 'CS' 'WR')
+
+  repeat
+    sample := getrnd() & $0F       ' four bits -> the four channels
+    debug(`Bus `(sample))          ' feed it by name
+    waitms(50)
 ```
 
 That line creates a window named `Bus` with four single-bit channels: `CLK`
 (green), `DATA` (yellow), and `CS` and `WR` (default cycling colors). Channel 0 is
 the first declared label, channel 1 the second, and so on.
 
+> **The `1` in front of each color is load-bearing.** The first number after a label
+> is read as the channel **count**, not as a color — so `'CLK' $00FF00` does not
+> declare a green `CLK`, it declares **65,280 channels named `CLK`**, capped at the
+> window's limit of 32. The labels that follow are then silently dropped, and you
+> get 32 identical channels instead of the four you asked for. Whenever you give a
+> channel an explicit color, give it an explicit count first.
+
 The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | Range | What it sets |
 |---------|-----------|---------|-------|--------------|
-| `TITLE` | `'text'` | (window name) | — | The window's title-bar text |
-| `POS` | `left top` | cascaded | screen px | Window position, in pixels |
+| `TITLE` | `'text'` | `<name> - LOGIC` | — | The window's title-bar text |
+| `POS` | `left top` | host-placed | screen px | Window position, in pixels |
 | `SAMPLES` | `count` | `32` | 4–2047 | Horizontal resolution — samples shown across the width |
 | `SPACING` | `pixels` | `8` | 1–32 | Horizontal pixels between samples |
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
-| `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
-| `DOTSIZE` | `diameter` | `0` | 0–32 | Sample-dot diameter (`0` = no dots) |
+| `LINESIZE` | `half-pixels` | `3` | 1–32 | Waveform line thickness, in **half-pixels** |
+| `DOTSIZE` | `diameter` | `0` | 0–32 | Sample-dot diameter in pixels (`0` = no dots) |
 | `TEXTSIZE` | `points` | editor size | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
+
+> **`LINESIZE` is measured in half-pixels; `DOTSIZE` is not.** A `LINESIZE` of `3`
+> — the default — draws a trace about 1.5 pixels wide, and the maximum of `32`
+> draws 16 pixels. `DOTSIZE`, by contrast, is a plain pixel **diameter**: `DOTSIZE 8`
+> is an 8-pixel dot. The two are a half-step apart, and the only way to know is to
+> be told.
 
 `SAMPLES` and `SPACING` together set the window width: width in pixels is
 `SAMPLES x SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
@@ -91,6 +110,9 @@ combinations shown below:
   waveform instead of a single high/low line.
 - **`color`** — an `$RRGGBB` waveform color. Omit it and channels cycle through eight
   built-in colors (lime, red, cyan, yellow, magenta, blue, orange, olive).
+  **A color must be preceded by an explicit count** — the parser reads the first
+  number after a label as the count, so a bare `'CLK' $00FF00` is a channel *count*
+  of `$00FF00`, not a green channel. Write `'CLK' 1 $00FF00`.
 
 **One single-bit channel:**
 
@@ -255,14 +277,17 @@ Three runtime commands manage the display:
 - `` `CLEAR `` — clears the trace, empties the sample buffer (`SamplePop` returns to
   zero), resets the trigger indicator, and resets the rate counter. The window starts
   collecting fresh samples from empty.
-- `` `SAVE 'file.bmp' `` — saves the current display area to the named `.bmp` file on
-  the host. Add `WINDOW` before the filename (`` `SAVE WINDOW 'file.bmp' ``) to capture
-  the entire window instead of just the display area. The filename is required.
+- `` `SAVE 'file' `` — saves the current display area to `file.bmp` on the host.
+  **The `.bmp` extension is added for you — do not write it yourself**, or you will
+  get `file.bmp.bmp`. Add `WINDOW` before the filename
+  (`` `SAVE WINDOW 'file' ``) to capture the entire window instead of just the
+  display area. The filename is required, and it must be the last thing in the
+  message ([Chapter 1](#ch-1) has the full set of `SAVE` traps).
 - `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
-debug(`Bus CLEAR)                  ' empty the buffer and blank the trace
-debug(`Bus SAVE 'trace.bmp')       ' write current image to a bitmap file
+debug(`Bus CLEAR)              ' empty the buffer and blank the trace
+debug(`Bus SAVE 'trace')       ' writes trace.bmp -- no extension in the name
 ```
 
 ## A complete software-only example
@@ -403,6 +428,10 @@ trigger, and decode-in-code approach shows a live bus.
   the cost of assembling that value in your code ([Chapter 13](#ch-13)).
 - **`RATE` thins redraws, not samples.** A high `RATE` divisor reduces how often the
   trace repaints, lowering host load, while every sample still enters the buffer.
+  **What it divides depends on whether a trigger is armed:** free-running, `RATE`
+  counts *samples*; with a `TRIGGER` set, the rate counter only advances on samples
+  that actually fire the trigger, so `RATE` counts *triggers*. `TRIGGER … RATE 10`
+  means "redraw every tenth trigger," not "every tenth sample."
 - **LOGIC vs. SCOPE.** Use LOGIC for discrete digital lines and bit patterns; use
   SCOPE ([Chapter 7](#ch-7)) for a continuously varying analog value over time. A `RANGE`
   channel bridges the two when you want a small multi-bit value shown as a stepped

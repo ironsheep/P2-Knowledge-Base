@@ -117,8 +117,8 @@ PUB main() | i, j, packed
     repeat j from 0 to 7                       ' build one window of packed samples
       packed := 0
       repeat i from 0 to 31
-        ' pack 32 one-bit samples into a long
-        packed := (packed << 1) | (getrnd() & 1)
+        ' pack 32 one-bit samples into a long, FIRST sample into the LOW bit
+        packed := packed | ((getrnd() & 1) << i)
       buff[j] := packed
     ' feed the whole window in one message; the host unpacks each long into
     ' 32 samples LSB-first (packed data is streamed as an array, not one long
@@ -156,8 +156,8 @@ PUB main() | i, j, packed
     repeat j from 0 to 15                      ' build one window of packed sample-pairs
       packed := 0
       repeat i from 0 to 15
-        ' pack 16 two-bit samples into a long: bit 0 -> D0, bit 1 -> D1
-        packed := (packed << 2) | (getrnd() & %11)
+        ' pack 16 two-bit samples into a long, FIRST sample into the LOW pair
+        packed := packed | ((getrnd() & %11) << (i*2))
       buff[j] := packed
     ' feed the whole window in one message; the host unpacks each long into
     ' 16 two-bit samples (one bit per channel), streamed as an array -- not one

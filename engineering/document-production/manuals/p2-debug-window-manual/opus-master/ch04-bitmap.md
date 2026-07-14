@@ -42,11 +42,11 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
-| `POS` | `left top` | auto | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `<name> - BITMAP` | The window's title-bar text |
+| `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
 | `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification — each logical pixel becomes an x×y block; each is **1–256** |
-| `SPARSE` | `color` | off | Sparse mode: outline each magnified pixel; `color` sets the outline (grid) color |
+| `SPARSE` | `color` | off | Sparse mode: draw each pixel as a **round dot** on a solid `color` background (needs `DOTSIZE` ≥ 4) |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
@@ -82,9 +82,12 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without first defining a palette, the lookup table is **uninitialized** — its
-entries hold arbitrary values, so pixels translate to garbage colors. Always send
-`LUTCOLORS` to load the palette before feeding LUT-mode pixel data.
+mode without first defining a palette, every lookup-table entry is `$000000`: the
+table is zero-filled at creation, so the result is not random garbage but a
+uniformly **black** picture — pixels arrive, indices resolve, and every one of them
+paints black. That is a confusing failure precisely *because* it looks like nothing
+arrived at all. Always send `LUTCOLORS` to load the palette before feeding LUT-mode
+pixel data.
 
 **Luminance and RGB-intensity modes** — two ways to turn an 8-bit value into a
 color. The LUMA modes map the value against a single tint color you pick with a
@@ -210,9 +213,13 @@ pixels (one row), vertical patterns every `height` pixels (one column).
 ### Packed pixel data
 
 The DEBUG serial link is the bottleneck for any sizable image, so BITMAP can unpack
-several pixels from each number you send. You enable a packing format on the
-creation line or mid-stream; from then on, each number is split into multiple
-pixels before plotting.
+several pixels from each number you send. You enable a packing format **on the
+creation line** — it is not a runtime command, so you cannot switch packing formats
+mid-stream the way you can switch color modes. From then on, each number is split
+into multiple pixels before plotting.
+
+There is **no default packing format**: unless you name one at creation, the window
+is *unpacked* and reads each long you feed it as one full pixel value.
 
 The formats name the container size and the bits per pixel, running from
 `LONGS_1BIT` (32 one-bit pixels per long) through `BYTES_4BIT` (2 four-bit pixels
@@ -269,7 +276,7 @@ Several change configuration mid-stream; the rest manage the display.
 | `SCROLL` | `x y` | Shift the canvas by `x`, `y` pixels; fill the vacated strips |
 | `CLEAR` | — | Fill the canvas with the background color; reset position |
 | `UPDATE` | — | Refresh the display now (required in manual-update mode) |
-| `SAVE` | — | Save the current canvas image to a file on the host |
+| `SAVE` | `'name'` | Save the canvas to `name.bmp` on the host; the filename is **required** |
 | `CLOSE` | — | Close this window and free its resources |
 
 `SCROLL` shifts the whole canvas by a signed amount: positive `x` scrolls right,
@@ -291,11 +298,23 @@ flicker-free updates — write an entire frame, then show it at once.
 `RATE` tunes the automatic-update cadence: the display refreshes once every `count`
 pixels. A small count repaints often (smoother, slower); a large count repaints
 rarely (faster, choppier). The default is one scan line — `width` pixels for
-horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
-(`width x height`).
+horizontal patterns, `height` for vertical.
 
-`SAVE` writes the current canvas to an image file on the host running
-`pnut_term_ts`.
+> **`RATE -1` is a create-line-only shorthand — at runtime it freezes the display.**
+> On the *creation line*, `RATE -1` is substituted with the full canvas
+> (`width x height`), giving you one refresh per complete frame. That substitution
+> does **not** happen for a runtime `` `RATE -1 ``: the value is stored as-is, and
+> the refresh counter — which fires on an *equality* test against an ever-increasing
+> count — can never match it. The window stops updating. It is not an error and it
+> is not reported; pixels keep arriving and the picture simply stops moving.
+> A runtime `` `RATE `` with any positive count resumes refreshing normally.
+> (Hardware-verified.)
+
+`SAVE 'name'` writes the canvas to `name.bmp` on the host. The filename is
+**required** — a bare `` `SAVE `` writes nothing at all, and says nothing. See
+[Chapter 1](#ch-1) for the full set of `SAVE` traps; the one that bites hardest
+here is that in manual-update mode `SAVE` captures the frame currently *shown*, so
+send `` `UPDATE `` before you `SAVE` or you will file the previous frame.
 
 ## A complete example
 
@@ -307,10 +326,10 @@ spot over a cool background. No hardware is involved — the temperatures are
 computed in software — but the data has exactly the shape a real array would
 produce.
 
-The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel outlined
-block with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
-built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
-bright (hot):
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel cell with
+`DOTSIZE` and drawn as a round dot on a gray field with `SPARSE` (the magnified,
+low-resolution display the window is built for). `LUMA8 RED` maps each cell's 8-bit
+temperature from dark (cool) to bright (hot):
 
 ```{.spin2 caption="ch04-bitmap-heatmap.spin2"}
 CON
