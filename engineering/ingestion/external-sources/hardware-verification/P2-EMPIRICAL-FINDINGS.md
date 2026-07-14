@@ -484,6 +484,56 @@ but note the provenance.)*
 "SIZE default 256 (→ 512 px)" was wrong (it mistook the stored pixel width for the directive's argument), which the
 2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2` (log).
 
+### EF-046 · PNut v55 `SAVE WINDOW` captures the WRONG RECTANGLE — truncated, offset, sometimes the neighbouring window — `CONFIRMED (PNut)` — TOOL BUG
+`SAVE WINDOW 'name'` is meant to write a `.bmp` of the **entire window**. On PNut v55 the capture rectangle is both
+**too small** and **mis-positioned**, and it fails **silently** — the file is a valid `.bmp` of plausible size, so
+nothing signals that the capture is bad. *How proven:* `conflict-testQ-doc-claims-battery` + `conflict-testP-sparse-gate`
+— several BITMAP windows at **explicit, non-overlapping `POS`**, each saved **both ways** (plain `SAVE` and `SAVE WINDOW`).
+*Result:*
+| observation | evidence |
+|---|---|
+| **Truncates the bottom** | window = ~50px title bar + 64px canvas ≈ **114px** tall; capture = **93px**. The bottom **~21 rows of canvas are missing**, and ~4px of desktop wallpaper bleeds in on the right ⇒ the rect is offset horizontally too. |
+| **Can miss the window entirely** | four other windows' `SAVE WINDOW` files contain **nothing but desktop wallpaper** — correct dimensions, zero window content. |
+| **Can capture the WRONG window** | the `SPARSE` window (`POS 300 0`) returned a **solid green** image — the content of its **non-sparse neighbour** at `POS 0 0`. A plain `SAVE` of that same window, moments later, correctly showed the red-background/green-dot sparse pattern. |
+**The plain `SAVE` form is CORRECT in every case we exercised** — it writes the window's own buffer: occlusion-immune,
+chrome-free, and accurate. *(It is 1× un-`DOTSIZE`d, per v55 L1347 — which is why `SAVE WINDOW` is the documented tool
+for capturing a magnified view, and why this bug matters. A `SPARSE` window is the exception: it allocates at physical
+size, so its plain `SAVE` comes out magnified.)*
+*Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55 (Windows); confirmed visually by Stephen.
+*Grounds:* **This dissolves an apparent mystery** — we briefly suspected PNut's *screen* did not render `SPARSE`, because
+`SAVE WINDOW` returned solid green for a sparse window. It was the same bug: the rect had drifted onto the neighbour.
+**One bug, not two.** Bug report drafted: `DRAFTS/PNUT-BUG-save-window-wrong-rect.md`.
+*Methodological note:* every `SAVE WINDOW`-based read in this campaign is therefore **void**; the tests were rewritten
+to use plain `SAVE` throughout. Stephen called this early — *"I would think you'd get window specific content if using
+save only even when overlap"* — and he was right, for a better reason than either of us had.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`, `…/conflict-testP-sparse-gate.spin2`.
+
+### EF-047 · `SAVE` writes the FRONT buffer — under `UPDATE` mode you capture the STALE previous frame — `CONFIRMED (PNut)`
+*How proven:* `conflict-testQ` Q3 — a BITMAP created with `UPDATE` (buffered). Fill **RED** → `` `UPDATE `` (red is now
+the front buffer) → fill **GREEN** but do **not** update → `` `SAVE ``. *Result:* the saved file is **100% RED**. The
+live green buffer was not captured. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55. *Grounds:* confirms the REF's
+front-buffer reading. **Reader consequence:** in buffered mode you must send `` `UPDATE `` *before* `` `SAVE ``, or you
+will silently save the previous frame. This is live in ch04, ch05 and ch15 — all of which run buffered.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
+
+### EF-048 · PLOT `OPACITY 256` WRAPS to 0 — fully TRANSPARENT, the exact inverse of "fully opaque" — `CONFIRMED (PNut)`
+*How proven:* `conflict-testQ` Q7 — two dots on a black PLOT: left at `OPACITY 255` (the rail), right at `OPACITY 256`.
+*Result:* the capture shows **one dot**. The `OPACITY 255` dot is visible; the `OPACITY 256` dot is **absent**. The value
+is assigned into a byte with range-checking off, so 256 → **0**. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55.
+**Reader consequence — a genuinely nasty trap:** a user reaching for "more opaque than 255" types 256, and **everything
+they draw afterwards disappears**. The failure looks like "my drawing commands stopped working."
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
+
+### EF-049 · `CLOSE` is UPDATE-FIRST, CLOSE-SECOND — and a bare `SAVE` (no filename) writes nothing — `CONFIRMED (PNut)`
+*How proven:* `conflict-testQ` Q8 + Q1. **Q8:** `` `q8 SAVE 'q8_saved' CLOSE `` — a single message carrying both.
+*Result:* **`q8_saved.bmp` was written AND the window closed** (Stephen, visually). So the rest of the message executes
+before the close — the `` `Win SAVE 'shot' CLOSE `` idiom is real and usable. **Q1:** a bare `` `SAVE `` with no
+filename produced **no file at all**, silently (the rail — a normal `SAVE 'name'` — wrote its file). *Date/rig:*
+2026-07-14, real P2 (Stephen), PNut v55. *Grounds:* confirms the REF's `p2com.asm` dispatch reading (EF-045) and the
+`KeySave` grammar. **Reader consequence:** the filename is mandatory and must come last; without it nothing is written
+and nothing complains.
+*Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
+
 ### EF-045 · A bare number in a SCOPE_XY create message HANGS PNut — and pnut-term-ts does NOT share the defect — `CONFIRMED (PNut) / REFUTED (pnut-term-ts)` — a TOOL DIVERGENCE
 The suspected infinite loop (`SCOPE_XY_Configure`'s `while not NextEnd do` matching neither `NextKey` nor `NextStr`,
 so `ptr` never advances) **does not occur in pnut-term-ts**. *How proven:* `conflict-testO-scopexy-parser-hang` — a TERM
