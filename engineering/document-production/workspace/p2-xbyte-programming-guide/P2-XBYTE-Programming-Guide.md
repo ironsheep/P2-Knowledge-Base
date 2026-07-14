@@ -17,9 +17,9 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 XBYTE Programming Guide\par}
+{\fontsize{36}{42}\selectfont\bfseries P2 Interpreters \& Emulators Guide\par}
 \vspace{0.3cm}
-{\Large\itshape Building Interpreters and Emulators on the Propeller 2\par}
+{\Large\itshape The XBYTE Engine and Bytecode Dispatch on the Propeller 2\par}
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}

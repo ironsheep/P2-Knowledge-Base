@@ -8,7 +8,7 @@
 > source before it goes in print).
 
 - **Slug:** `p2-xbyte-programming-guide` (matches the Streamer guide pattern)
-- **Provisional title:** *P2 XBYTE Programming Guide* — subtitle TBD, around
+- **Title (v0.2.0):** *P2 Interpreters & Emulators Guide* — subtitle *The XBYTE Engine and Bytecode Dispatch on the Propeller 2*. XBYTE moved to the subtitle in the v0.2.0 rework: the book teaches building interpreters/emulators, of which XBYTE is the central engine but (per Ch.11) one rung of a ladder, not the whole story. Slug + PDF filename stay `p2-xbyte-programming-guide` / `P2-XBYTE-Programming-Guide` (XBYTE = the durable identifier). *Was, through v0.1.0: "P2 XBYTE Programming Guide".*
   *Building Interpreters and Emulators on the Propeller 2*
 - **Status:** In progress (roster: `## In progress`, type=manual)
 - **Originated:** 2026-06-26
