@@ -46,7 +46,7 @@ The friendly on-ramp to the Propeller 2 — the orientation layer that sits belo
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-getting-started-guide-changelog.md)
 
 ### [P2 Assembly Language Reference Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf)
-**Complete PASM2 Instruction Set Documentation** — *Version 3.1.3*
+**Complete PASM2 Instruction Set Documentation** — *Version 3.1.4*
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 
