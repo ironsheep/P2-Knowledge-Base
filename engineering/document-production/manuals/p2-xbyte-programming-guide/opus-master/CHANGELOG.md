@@ -1,5 +1,35 @@
 # P2 XBYTE Programming Guide - Changelog
 
+## v0.3.0 (2026-07-15) — the reader's-frame edition (in development)
+
+Added a front orientation layer so the guide opens on *why* and *what*, not mechanism. A reader
+was gathering detail from the front with no frame; now two XBYTE-free chapters precede everything
+and you meet the engine already knowing what you are pointing it at. Structural, not a patch:
+a new **Part I** was inserted, so former Chapters 1–18 are now **3–20** and former Parts I–V are
+now **II–VI** (all cross-references and anchors renumbered to match).
+
+- **Part I — The Landscape (NEW, XBYTE-free).** Two chapters that build the concepts, then name them:
+  - **Chapter 1 — Why Emulate on the P2.** The draw (a single cog out-runs the machine it emulates,
+    with clocks to spare for the video and sound the original needed separate hardware for); the
+    full range of emulation with this guide's slice marked (instruction-at-a-time, behavior not
+    timing) and each other approach given a one-line reason it is out of scope; two reading
+    on-ramps, for the experienced and the new.
+  - **Chapter 2 — What This Kind of Emulation Asks of You.** The cross-cutting concerns seeded in
+    plain language — where the guest lives and comes from, state-not-timing, multi-step
+    instructions, guest interrupts, the no-loop-body trade, and the shared-memory budget — each
+    carried forward as a question about *your* guest. Closes with the vocabulary the rest of the
+    book speaks (host/guest, emulator/interpreter, behavior- vs cycle-accurate, object code) as a
+    page to turn back to.
+- **Part title aligned** — the building Part is now **Building Interpreters & Emulators** in the
+  body, matching the cover organization (the body heading still said "Building a VM").
+- **Front-matter** — the Guide Organization panel and the How-to-Use map rebuilt for the
+  six-Part / twenty-chapter structure.
+
+Deferred to the next increment (gated on hardware verification against the KB): the deep payoffs
+the new front layer forward-references — SD/flash provisioning, the PSRAM↔display bandwidth budget
+on the 32 MB Edge module, and the overlay/paging why-not — land in the decisions chapter once the
+Edge-board SKUs and drivers are confirmed.
+
 ## v0.2.0 (2026-07-14) — the evidence-grounded edition (in development)
 
 Reworked from the ground up after studying **nine live, working P2 emulators** (Chip Gracey's

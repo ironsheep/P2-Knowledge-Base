@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.2.0\par}
+{\large\color{blue}Version 0.3.0\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -41,7 +41,13 @@
 \vspace{0.08cm}
 {\footnotesize
 \begin{minipage}[t]{0.45\textwidth}
-\textbf{Part I: XBYTE Fundamentals}
+\textbf{Part I: The Landscape}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Why Emulate on the P2
+\item What Emulation Asks of You
+\end{itemize}
+\vspace{0.03cm}
+\textbf{Part II: XBYTE Fundamentals}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Understanding XBYTE
 \item The Skip Family
@@ -49,7 +55,7 @@
 \item LUT Dispatch
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part II: The XBYTE Engine}
+\textbf{Part III: The XBYTE Engine}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item The Dispatch Cycle
 \item Arming XBYTE
@@ -57,8 +63,10 @@
 \item Bytecode Routines
 \item Debugging XBYTE
 \end{itemize}
-\vspace{0.03cm}
-\textbf{Part III: Building Interpreters \& Emulators}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.50\textwidth}
+\textbf{Part IV: Building Interpreters \& Emulators}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A Minimal Custom VM
 \item The Three Decisions
@@ -68,16 +76,14 @@
 \item Prefixes \& Alternate Tables
 \item XBYTE Beyond Interpreters
 \end{itemize}
-\end{minipage}%
-\hfill%
-\begin{minipage}[t]{0.50\textwidth}
-\textbf{Part IV: Reference}
+\vspace{0.03cm}
+\textbf{Part V: Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Instruction Reference
 \item Configuration Constants \& Patterns
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Appendices}
+\textbf{Part VI: Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A: XBYTE Quick Reference
 \item B: Instruction Encoding Summary
@@ -150,13 +156,14 @@ This guide serves developers building interpreters, virtual machines, and CPU em
 
 **Structure:**
 
-- **Part I (Fundamentals)** builds the mental model — read this first. It teaches the skip family (SKIP/SKIPF/EXECF) before XBYTE, because the engine is built out of them.
-- **Part II (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, the rules bytecode routines follow, and how to debug a hardware dispatch loop.
-- **Part III (Building Interpreters & Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
-- **Part IV (Reference)** is quick lookup for the instructions and the configuration bits.
+- **Part I (The Landscape)** builds the picture before any mechanism — what emulation is, why the P2 is unusually good at it, and the handful of concerns any emulator must handle. It names no P2 machinery. Read it first; skim it if you have built emulators before.
+- **Part II (Fundamentals)** builds the mental model of the engine — it teaches the skip family (SKIP/SKIPF/EXECF) before XBYTE, because the engine is built out of them.
+- **Part III (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, the rules bytecode routines follow, and how to debug a hardware dispatch loop.
+- **Part IV (Building Interpreters & Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
+- **Part V (Reference)** is quick lookup for the instructions and the configuration bits.
 - **Appendices** contain quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 
-The 6502 emulator in Part III is deliberately **tiny and illustrative** — enough to show the technique end to end, not a faithful or complete emulator. Its two worked programs (the minimal VM and the display-list engine) are complete and compile.
+The 6502 emulator in Part IV is deliberately **tiny and illustrative** — enough to show the technique end to end, not a faithful or complete emulator. Its two worked programs (the minimal VM and the display-list engine) are complete and compile.
 
 ## Document Conventions
 

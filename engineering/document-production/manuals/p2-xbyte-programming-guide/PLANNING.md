@@ -150,6 +150,149 @@ prose, not columns — forcing them into the grid is what would wreck it.
 
 ---
 
+## 0-ter. SCOPE REVISION — **v0.3.0, the reader's-frame edition** (2026-07-15, in discussion with Stephen) — *PROPOSED, awaiting Stephen's OK before body edits*
+
+> **This section governs v0.3.0 and adds a front orientation layer above everything
+> §0-bis produced.** It does not revise the engine/craft chapters' *content* — it fixes
+> their *order and on-ramp*. Source: a design conversation with Stephen (2026-07-15) plus
+> the terminology-research the agent supplied.
+
+### Why this revision exists
+
+Stephen read the v0.2.0 draft front-to-back and was **lost gathering detail with no frame** —
+the book opens on mechanism (§1.1 "the loop at the center of every interpreter" → SKIP/SKIPF/FIFO/LUT)
+with no lay-of-the-land first. Two wounds, the **same shape at two altitudes**:
+
+1. **Vocabulary used without definition.** Body counts: **guest ×125, host ×0** (guest is never
+   paired with the thing it's a guest *of*); **emulator (54) and interpreter (39)** carry heavy load
+   with their relationship **never defined**; **behavior-accurate / architectural-state / object-code /
+   instruction-interpreting = 0 each**; **no glossary** (the Index defines exactly one term, "Bytecode").
+2. **The journey has no map.** Orientation *pieces* exist but are buried and mis-scoped inside
+   "Ch. 1 Understanding XBYTE" (which is really *understanding the engine*).
+
+**Fix = an advance-organizer front layer**, genuinely XBYTE-free, that builds the *concept* first and
+**then bestows the terminology as labels** for concepts already held (Stephen's rule: *do not involve
+the reader in the terminology until they have the conceptual framework*).
+
+### The reshape — NEW **Part I: The Landscape** (XBYTE-free), two lean chapters
+
+Everything you have shifts down one Part (current Part I "XBYTE Fundamentals" → **Part II**, etc.).
+
+- **Ch 1 — Why Emulate on the P2.**
+  - *The draw* (page one): a single cog out-runs the original chip, with clocks to spare for the
+    video/sound the original needed separate hardware for. This hook is currently **nowhere** up front.
+  - *What emulation is*, and the **full field** — cycle/hardware-accurate · full-system · dynamic
+    binary translation/JIT · static recompilation · **instruction-level, behavior-accurate ← THIS BOOK** —
+    each out-of-scope item with a **one-line why-not** (reads as command of the field, does scoping for free).
+  - *How to read this book* — **two on-ramps**: new-to-emulation → read Part I fully, then straight
+    through; experienced → skim the field, note we're behavior-accurate/instruction-level, jump to the engine.
+- **Ch 2 — What This Kind of Emulation Asks of You.** The cross-cutting concerns **seeded in plain
+  language, no XBYTE / no instruction names** — each a question the reader now *carries forward*:
+  - state, **not** timing (why cycle-accuracy is deliberately dropped)
+  - one guest instruction is often **several steps**
+  - **guest interrupts** are yours to service
+  - the moment you step **off the hardware engine**, per-step work becomes yours
+  - **[LEAD concern] where the guest's code and data come from *and* where they run** — the two-axis
+    **source → execution** model (below)
+  - **shared-memory budget** — the memory your emulator wants is often wanted by the display (below)
+  - **Closes with the NAMING BLOCK** — vocabulary *bestowed as labels* for the concepts just built:
+    host/guest · emulator vs interpreter · behavior- vs cycle-accurate · guest object code. Doubles as
+    the **one-page glossary** the rest of the book points back to (introduce-in-context + collect-for-reference).
+  - **Ch 2 is the plain-language preview of Ch. 11's Three Decisions** — same framework, two altitudes.
+
+### Two-axis location model — **source feeds execution** (Stephen confirmed this framing)
+
+| Tier | Options | In book today? |
+|------|---------|----------------|
+| **Execution** (fetched at run time) | **hub** (fast, XBYTE-eligible) · external **PSRAM** (large, hand-rolled) | Yes — Ch. 11 |
+| **Source / provisioning** (persists, loads *from*) | boot flash · **microSD** · host download → loaded **into** hub or PSRAM, then executed | **NO — new** |
+
+- microSD is a **source tier, not an execution tier** — you load *from* SD *into* hub/PSRAM, then run;
+  you never instruction-fetch from SD. Getting this right prevents a misconception.
+- **"Other artifacts"** (ROMs, character sets, disk/cartridge images, media, save states) — bulky,
+  swappable, natural home = microSD; enriches the **opportunity axis** (ship a *library*, load on demand).
+- **Reference** the stable SD/FAT drivers as a live capability (Appendix-C discipline); **do NOT teach
+  the filesystem.** The book stays about emulation.
+
+### Overlays / demand-paging — **OUT, but NAMED** (intelligent why-not)
+
+- **Why out (principled, not "too hard"):** PSRAM (8–32 MB) holds even a large classic guest **resident**;
+  overlays would swap pieces to fake a memory you can just *have*. Overlay/demand-paging **from SD** =
+  paging at guest-instruction granularity against SD **block latency** (~1000× mismatch), with
+  **uncontrollable guest control flow** — a guest branches anywhere, so every branch is a potential
+  fault; it is **not** cooperatively partitioned the way a hand-written overlaid program is. And it is
+  **incompatible with XBYTE auto-fetch** (no loop body, §11.4, to insert a residency check).
+- **Distinction kept:** code overlays / paging the executable image = **OUT**; streaming bulky guest
+  **data** assets from SD at natural boundaries = **IN** (that's the "other artifacts" story — assets
+  are touched in predictable bursts, SD latency tolerable at load boundaries).
+- **Placement:** one **scope line** in Ch. 1's what's-out map + a **one-paragraph why-not aside** in
+  Ch. 11 where PSRAM-for-large-guests is established.
+
+### PSRAM ⟷ HDMI contention — the 32 MB Edge-module shape — **IN**
+
+Folds into the existing shared-resource spine (§11.3's LUT/FIFO contention) **one memory tier out**:
+the large memory the emulator wants is the memory the **display** wants.
+
+- **Load-bearing correctness:** the binding constraint is **BANDWIDTH, not capacity.** 32 MB holds a
+  multi-MB guest *and* a framebuffer side by side; they contend for the **single PSRAM interface's
+  throughput**, and the display's demand is **continuous + hard-real-time** (underrun = visible glitch).
+  Frame it as a **bandwidth budget on one shared bus**, never "just partition the 32 MB."
+- **Taskings** (as decisions, not an HDMI tutorial): small guest → keep in **hub**, PSRAM = framebuffer;
+  small display mode → framebuffer in **hub**, PSRAM = guest; both large → **size the display mode**
+  (res/depth/refresh) to leave PSRAM bandwidth headroom for emulation traffic.
+- Good teaching example of "P2 memory is a shared budget" + the **opportunity/cost tension** (the 32 MB
+  module both *enables* large-guest emulation and is *where* large-guest + on-screen-output collide).
+- **Placement:** plain seed in Ch. 2; concrete payoff in Ch. 11 alongside LUT/FIFO. **Reference** the
+  display drivers; **do NOT teach HDMI.**
+
+### Ch. 11 becomes the deep payoff of the front layer
+
+§11.1's own opening admits it — *"the judgement that comes before you use it… the most important chapter
+in the book"* — yet it sits at position 11, after nine engine chapters. The front layer **hoists its
+Three-Decisions framework to plain-language altitude**; Ch. 11 stays the full engine-grounded payoff and
+**gains**: the source/loading dimension (SD/flash provisioning), the overlay why-not aside, the
+PSRAM⟷display bandwidth contention.
+
+### Seams to reconcile (don't say it twice)
+
+- **§1.7 "If you're building…" router** (just added by §0-bis) → a **light** version moves up into Part I
+  (a which-are-you map); the **detailed** application map stays at §16.2.
+- **§1.5 "When to reach for XBYTE" / §1.6 "What it costs"** → stay, but as the **detailed payoff** of a
+  concern Ch. 2 already seeded in plain terms.
+- **Index's lone "Bytecode (definition)"** → the naming block is the real glossary home; Index points there.
+
+### Renumber sweep (mechanical, GATED — verify, don't trust)
+
+New Part I pushes every Part/chapter down one. **Every `{#ch-N}` anchor, every `§N.M` / `Ch. N`
+cross-reference, and the Index must be swept and re-verified.** This is the highest-risk mechanical step;
+do it as its own pass with a full cross-ref check before render.
+
+### Write-time hardware-verify gate (against the hardware KB, NOT memory, before committing sentences)
+
+- exact **32 MB PSRAM Edge-module SKU** (P2-EC32MB?) + that HDMI framebuffers conventionally live in PSRAM;
+- Edge **board/breakout SKUs** carrying boot flash + the **microSD** socket (SD is often on the
+  breakout/carrier, not the bare module — pin this down);
+- confirm the **stable SD/FAT driver(s)** to reference by name.
+
+### Two communities (the reason the terminology work matters)
+
+**New-to-emulation** (needs *why the P2 is good* + *what emulation is*) and **experienced** (needs
+*field placement* + *how to apply*) — served by **one front with two on-ramps** + threaded-then-collected
+vocabulary. One road, two on-ramps; neither audience gets a dumbed-down or bloated book.
+
+### Flagged decisions for Stephen
+
+1. **Part vs Prologue.** Recommend a real **Part I** (unskippable-by-design, load-bearing vocabulary +
+   concerns) over unnumbered front-matter an impatient reader skips. Confirm.
+2. **Version.** v0.2.0 → **v0.3.0** (structural: new Part + renumber + cross-cutting seeds), not a patch.
+   In-dev, owes no release. Confirm.
+3. **§1.7 router** — light-version-up + detailed-stays (recommended), or relocate entirely? Confirm.
+4. **Pivot conditions I'll self-apply:** Part I starts as **2 lean chapters**; if Ch. 2's concerns bloat
+   past no-detail, split. Loading story starts **light** (clause + driver pointer); earns its own section
+   only if flash-vs-SD-vs-host + load-on-demand grows legs.
+
+---
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
