@@ -4,17 +4,17 @@ This Part is the map. It says what emulation is, why the Propeller 2 is unusuall
 
 # Chapter 1: Why Emulate on the P2 {#ch-1}
 
-## 1.1 A cog that out-runs the machine it emulates {#sec-1-1}
+## 1.1 What draws people to the P2 {#sec-1-1}
 
-Here is the thing that draws people to the Propeller 2 for this work.
+Three things draw people to the Propeller 2 for this work — and raw speed is not the first of them.
 
-A single one of the P2's eight processors — a *cog* — running an emulator written in the P2's own assembly language, can reproduce an older processor like the 8080, the 6502, or the Z80 **faster than the original chip ever ran** — and still leave time, on that cog or its seven siblings, to generate the video and sound the original machine needed separate hardware to produce. A whole late-1970s arcade machine — its processor, its display, its audio — can live on one chip and run at full speed or better.
+**The P2 is built for interpreters.** Underneath every interpreter is one small loop: fetch the next instruction, look up what it means, carry it out, repeat. The P2 has hardware made for exactly that loop, so writing an interpreter — for almost *any* instruction set — is unusually direct, with the machine carrying the busywork. This flexibility is the largest part of the draw: you can turn a stream of *someone else's* instructions into running code, and the P2 was designed to help you do it. (The P2 doing the emulating is the **host**; the processor it reproduces — an 8080, a 6502, a Z80 — is the **guest**. Those two words run through the whole book. You meet the hardware itself in Part II.)
 
-That is the draw. Not that emulation is *possible* — emulation is possible on almost any computer fast enough. The draw is that on the P2 it is **fast, whole, and small**: fast enough to keep up with the original in real time, whole enough to bring the display and I/O along on the same chip, and small enough to fit a complete machine where you expected to fit only its processor.
+**A whole machine on one chip.** The P2 has eight processors, called *cogs*. One cog can run the emulator; the seven beside it can generate the video and sound the original needed separate hardware to produce — a whole late-1970s arcade machine, processor and display and audio, on one inexpensive chip. Speed lives here too, honestly sized: the host runs its own instructions far faster than the one-to-a-few-megahertz classics, so for many **low-end** guests — simple 8-bit micros, only a few steps to reproduce each instruction — it keeps up with room to spare, sometimes beating the original outright. That is a bonus simple guests hand you, not a promise for all of them. The more complex a guest's instructions get — several bytes each, many addressing modes, several pieces of state touched at once — the more host steps every one costs, and the smaller that margin grows, until simply *keeping* real time is the goal. (Chapter 2 returns to this: how many steps a guest instruction takes is one of the first things that decide what it will cost you.)
 
-The reason is a gap in speed. The classic processors people most want to emulate ran at a few million instructions per second. The P2 runs its own instructions far faster than that — fast enough that it can spend *many* of its own instructions reproducing *one* of the guest's and still come out ahead. Emulation trades the host's surplus speed for the guest's behavior, and on the P2 the surplus is large.
+**More than one at a time.** Those eight cogs are independent, so a single chip can run several emulators side by side — different guests, or many copies of the same one — each on its own cog, all at once. On most platforms an emulator is the whole machine's job; on the P2 it is often a single cog's job, and the rest of the chip stays free.
 
-> **If you have done this before:** the surprising part is not the CPU — it is that the same chip has clocks and pins to spare for the framebuffer and the sound. On the P2, the emulator is usually not the hard part of the project.
+> **If you have done this before:** the surprising part is usually not the CPU — it is how much the chip does *around* it: hardware that carries the dispatch, sibling cogs that drive the screen and sound, room for more than one guest at once. On the P2, the emulator is often not the hard part of the project.
 
 ## 1.2 The range of emulation — and where this book sits {#sec-1-2}
 
@@ -92,7 +92,7 @@ The fast memory and the large memory your emulator wants are wanted by the rest 
 
 ## 2.7 The words for all this {#sec-2-7}
 
-The ideas are now in place, so here are the names the field puts on them. This is the vocabulary the rest of the book speaks; it is also a page to turn back to.
+The ideas are now in place, so here are the names the field puts on them — the vocabulary the rest of the book speaks, gathered as one page to turn back to. You already met **host** and **guest** in Chapter 1; they lead the list, and the rest join them here.
 
 - **Host** — the P2 itself: its hardware and its native instruction set, the machine doing the emulating.
 - **Guest** — the processor you are emulating, together with its programs. A guest's compiled program is its **object code** (or **guest binary**) — the machine code you load and carry out.
@@ -881,7 +881,7 @@ The cost of keeping the software loop in your source is a few longs of cog space
 Two failure modes, two tools. If a **handler** is wrong — the wrong variant ran, the flags came out strange — use the debugger and read the skip pattern; the strikethrough will usually show you the bug directly. If the **stream** is wrong — the wrong bytecode ran, or you branched somewhere unintended — take the engine out and trace the loop. Reaching for the wrong tool is the most common way to spend an afternoon.
 :::
 
-# Part IV: Building Interpreters & Emulators
+# Part IV: Building Interpreters and Emulators
 
 Parts II and III explained the engine — and Chapter 11 showed you how to see it running. This part proves it by building. Chapter 12 builds a complete, working bytecode VM from nothing: the smallest thing that exercises the whole engine. Chapter 13 then steps back and asks the question that comes *before* any emulator — which of the engine's assets you can actually take, and what each one costs — and Chapter 14 answers it for the classic guest processors, one by one. Chapters 15 through 17 build a tiny 6502, service its interrupts, and handle prefix bytes with alternate tables. Chapter 18 closes the part by widening the frame off interpreters entirely: the same engine parsing protocols, decoding formats, and driving displays.
 
@@ -1250,6 +1250,7 @@ Every guest but CHIP-8 has them, and servicing them under a *hardware* dispatch 
 
 - **The guest's interrupt-enable flag is just a cog register you own.** `DI` and `EI` become one instruction each.
 - **Where you poll matters more than how.** With a software loop you poll once, in the loop. Under XBYTE **there is no loop** (§13.4) — so the poll must live inside handlers, at points where interrupting is safe. That is a design decision, not a detail, and it is the clearest practical consequence of taking rung 3.
+- **The guest decides *when* it accepts, not just whether.** Enable-delays (the Z80/8080 `EI` waits one instruction), prefix and atomic sequences that hold interrupts off, and interruptible-and-resumable instructions are all part of the guest's architecture — a faithfulness dial most emulators leave off, and one §16.3 shows how to honour when a guest's own code depends on it.
 
 The Z80's three interrupt modes and the 68000's seven vectored levels are more *bookkeeping* than the 6502's single IRQ line, but the mechanism is the same in all of them.
 
@@ -1421,6 +1422,14 @@ A shipped 8080 emulator takes the third road: it polls in the shared body that e
 
 This is the sharpest practical consequence of taking rung 3 (§13.4). The engine gave you a free dispatch and took away the place where the check naturally belonged, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
 :::
+
+**"Consistent state" is only half the rule — the guest's architecture fixes the other half.** *Where* you may safely inject is a property of *your* handlers; *when the guest will accept* an interrupt is a property of the *guest*, and the two are not the same. Real processors defer, block, or allow interrupts at points their own designers chose, and a faithful emulator honours those rules rather than taking an interrupt wherever a poll happens to fall:
+
+- **Enable-delay.** On the Z80 and 8080, `EI` does not take effect until *after the next instruction* — so `EI` followed by `RET` cannot be interrupted between the two, and interrupt-return code depends on that to finish cleanly. (The 6502 has its own one-instruction quirk around `CLI`/`SEI`.) Model it by making the enable *pending*: a flag that the *following* instruction promotes to "enabled," not the `EI` handler itself. Poll where you like — but gate *acceptance* on the delayed flag.
+- **Atomic sequences that block acceptance.** The Z80 holds interrupts off *across a prefix* — a `DD`/`FD`/`CB`/`ED` byte and the opcode it modifies are indivisible, and no interrupt may land between them. If your prefix handling spans two dispatches (Chapter 17), the poll must not fire on the first.
+- **Interruptible-and-resumable instructions.** The opposite case: the Z80's block moves (`LDIR`) and the x86 string repeats (`REP MOVS`) can be interrupted *partway* and *resumed* — the guest keeps its progress in its own registers and re-enters where it left off. Implement such an instruction as a P2 loop and the interrupt boundary lives *inside* it, at each iteration, not only at its end.
+
+None of this is mandatory. Most P2 emulators poll at convenient points and never reproduce the enable-delay, because the guest software they run does not lean on it. It matters only when the guest's own code does — an interrupt-return that assumes one more instruction runs, a driver that toggles the enable in a tight sequence. Treat it as a **faithfulness dial**, set by what your guest actually needs, exactly like decimal mode (§14.6) or cycle accuracy (§14.8) — but know the dial is here, because the "consistent state" rule above will otherwise let an interrupt through a full instruction too early.
 
 ## 16.4 Injecting the interrupt {#sec-16-4}
 

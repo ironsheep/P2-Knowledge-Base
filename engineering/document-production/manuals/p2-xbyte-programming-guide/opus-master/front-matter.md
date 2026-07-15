@@ -66,7 +66,7 @@
 \end{minipage}%
 \hfill%
 \begin{minipage}[t]{0.50\textwidth}
-\textbf{Part IV: Building Interpreters \& Emulators}
+\textbf{Part IV: Building Interpreters and Emulators}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A Minimal Custom VM
 \item The Three Decisions
@@ -159,7 +159,7 @@ This guide serves developers building interpreters, virtual machines, and CPU em
 - **Part I (The Landscape)** builds the picture before any mechanism — what emulation is, why the P2 is unusually good at it, and the handful of concerns any emulator must handle. It names no P2 machinery. Read it first; skim it if you have built emulators before.
 - **Part II (Fundamentals)** builds the mental model of the engine — it teaches the skip family (SKIP/SKIPF/EXECF) before XBYTE, because the engine is built out of them.
 - **Part III (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, the rules bytecode routines follow, and how to debug a hardware dispatch loop.
-- **Part IV (Building Interpreters & Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
+- **Part IV (Building Interpreters and Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
 - **Part V (Reference)** is quick lookup for the instructions and the configuration bits.
 - **Appendices** contain quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 

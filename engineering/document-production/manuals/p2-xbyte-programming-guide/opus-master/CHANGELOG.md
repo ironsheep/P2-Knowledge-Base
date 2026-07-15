@@ -9,19 +9,24 @@ a new **Part I** was inserted, so former Chapters 1–18 are now **3–20** and 
 now **II–VI** (all cross-references and anchors renumbered to match).
 
 - **Part I — The Landscape (NEW, XBYTE-free).** Two chapters that build the concepts, then name them:
-  - **Chapter 1 — Why Emulate on the P2.** The draw (a single cog out-runs the machine it emulates,
-    with clocks to spare for the video and sound the original needed separate hardware for); the
-    full range of emulation with this guide's slice marked (instruction-at-a-time, behavior not
-    timing) and each other approach given a one-line reason it is out of scope; two reading
-    on-ramps, for the experienced and the new.
+  - **Chapter 1 — Why Emulate on the P2.** The draw, in three parts — the P2's *facility* for
+    writing interpreters (hardware built for the interpreter's inner loop, the largest draw); a
+    whole machine on one chip (the guest CPU plus its video/sound/IO on-chip, with speed a *bonus*
+    for low-end guests that erodes as instruction complexity rises — not the primary sell); and
+    several emulators running at once on independent cogs. Then the full range of emulation with
+    this guide's slice marked (instruction-at-a-time, behavior not timing), each other approach
+    given a one-line reason it is out of scope; and two reading on-ramps, for the experienced and
+    the new. Host/guest are introduced on first use in §1.1, not deferred to the naming block.
   - **Chapter 2 — What This Kind of Emulation Asks of You.** The cross-cutting concerns seeded in
     plain language — where the guest lives and comes from, state-not-timing, multi-step
     instructions, guest interrupts, the no-loop-body trade, and the shared-memory budget — each
     carried forward as a question about *your* guest. Closes with the vocabulary the rest of the
     book speaks (host/guest, emulator/interpreter, behavior- vs cycle-accurate, object code) as a
     page to turn back to.
-- **Part title aligned** — the building Part is now **Building Interpreters & Emulators** in the
-  body, matching the cover organization (the body heading still said "Building a VM").
+- **Part title aligned** — the building Part is now **Building Interpreters and Emulators** in the
+  body, matching the cover organization (the body heading said "Building a VM"). Spelled "and"
+  rather than "&": the Part-heading filter emits the title into a raw LaTeX command unescaped, so
+  an ampersand there becomes a live alignment tab (chapter titles escape fine via pandoc's path).
 - **Front-matter** — the Guide Organization panel and the How-to-Use map rebuilt for the
   six-Part / twenty-chapter structure.
 

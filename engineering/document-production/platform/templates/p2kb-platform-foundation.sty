@@ -191,11 +191,15 @@
 % relative sizes land at section 17.3pt / subsection 14.4pt / sub-subsection 12.0pt
 % (the sans-v5 demo scale; chapter stays \Huge = 24.8pt above).
 % Keep-with-next. Two mechanisms, deliberately split by level:
-%   * SECTION: a \needspace reserve large enough to cover the section head + an
-%     immediately-following SUBSECTION head + a few content lines. If that much
-%     room isn't left, the whole section migrates to the next page. The reserve is
-%     bigger than the raw "lines wanted" because the \LARGE font + beforeskip eat
-%     ~2.5 baselineskips before any content.
+%   * SECTION: a SMALL \needspace reserve (3 baselineskips ~= the section head +
+%     a line or two). titlesec's native \@afterheading already forbids a break
+%     between the section head and the element right after it, so the head can
+%     never be orphaned; this reserve is only belt-and-suspenders. It was 7
+%     baselineskips, which proved OVER-AGGRESSIVE: near a page bottom the \needspace
+%     forced the WHOLE section to migrate to the next page even with ample room
+%     left, blanking the tail of the current page (worst case: a Part-opener page
+%     whose first long section jumped entirely to the next page). Reducing to 3
+%     keeps pages full without orphaning heads. (2026-07-15, forge-test verified.)
 %   * SUBSECTION / SUBSUBSECTION: NO \needspace. titlesec's native \@afterheading
 %     already forbids a page break between a heading and the block right after it,
 %     which keeps a section glued to a following subsection and a subsection glued
@@ -203,7 +207,7 @@
 %     its reserve doesn't fit) and STRAND the section heading above it — exactly the
 %     §9.4 widow. Code boxes (which issue their own \par and would otherwise break
 %     away) are held by the \nobreak in the Shaded environment below.
-\titleformat*{\section}{\needspace{7\baselineskip}\sffamily\bfseries\LARGE}
+\titleformat*{\section}{\needspace{3\baselineskip}\sffamily\bfseries\LARGE}
 \titleformat*{\subsection}{\sffamily\bfseries\Large}
 \titleformat*{\subsubsection}{\sffamily\bfseries\large}
 
