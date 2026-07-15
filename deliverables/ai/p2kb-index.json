@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-14T07:13:45.375398",
+    "generated": "2026-07-15T23:11:12.875931",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1724,
@@ -6360,8 +6360,8 @@
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1783814014,
-      "sha256": "99fcb93e65925dccc475fa2b700ad722fd8251a42ef38e66f0dad8aac5184a1b"
+      "mtime": 1784155870,
+      "sha256": "c80dbffed768eda2e9b3830a21060bfffa4ff17f40beacb195b54dfc015bffdb"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
@@ -6455,8 +6455,8 @@
     },
     "p2kbArchXbyteEngine": {
       "path": "deliverables/ai/P2/architecture/xbyte_engine.yaml",
-      "mtime": 1781076792,
-      "sha256": "e2a6bf9524f028166e45b764ea6d7a5d97d1471c254778a62a11336dc9855e60"
+      "mtime": 1784064867,
+      "sha256": "beffa9e9818a8a77b1f9eb4cfcbbcfc24f91b12d6546f5f61747d60013ec5bfd"
     },
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
