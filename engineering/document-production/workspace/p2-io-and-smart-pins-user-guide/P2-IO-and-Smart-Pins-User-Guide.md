@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.5\par}
+{\large\color{blue}Version 1.0.6\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -5797,6 +5797,8 @@ Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 
 > **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits realized depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
 
+> **Two independent rates — the dither runs far faster than your updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
+
 ### P_DAC_DITHER_RND (%00010)
 
 Uses pseudo-random dithering for smooth 16-bit output.
@@ -9693,6 +9695,8 @@ X[7:2]:   A (arm) value, 6-bit MSB-justified (0-252, step 4)
 X[1:0]:   Filter: %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
+> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when you choose the `A`/`B` trigger thresholds.
+
 The hysteretic trigger works as follows:
 
 1. Signal must cross arm level to arm the trigger
@@ -10891,6 +10895,8 @@ PUB setup_noise_dac()
 | N | IN raised every N clocks |
 
 **Note:** The DAC outputs noise continuously regardless of sample period. The sample period only affects when IN is raised.
+
+> **Why `X[15:0] = 0` is the low-power setting.** When you don't need a sample period at all, `0` selects the longest possible window (65,536 clocks). Maximizing this *unused* sample period **reduces switching power** — so `0` is the right choice for a free-running noise source whose `IN` cadence you never read, as the examples here use.
 
 ### Voltage Range
 
@@ -14516,7 +14522,7 @@ Single-channel oscilloscope-style ADC with hysteretic triggering. Up to four suc
 |----------|----------|
 | X[15:10] | B trigger value (6-bit) |
 | X[7:2] | A trigger value (6-bit) |
-| X[1:0] | Filter select (%00/%01 Tukey, %1x Hann) |
+| X[1:0] | Filter select (%00/%01 Tukey, %1x Hann); samples normalize to 8 bits but DC dynamic range is only ~5–6 bits per filter |
 | Z | 8-bit sample (RDPIN; C = armed) |
 | IN | Trigger fired |
 
