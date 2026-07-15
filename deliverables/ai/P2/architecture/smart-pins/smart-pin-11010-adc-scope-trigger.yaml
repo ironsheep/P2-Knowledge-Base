@@ -24,7 +24,7 @@ registers:
     function: "Trigger and filter configuration (set via WXPIN)"
     X[15:10]: "B trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
     X[7:2]: "A trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
-    X[1:0]: "Filter select: %00=68-tap Tukey, %01=45-tap Tukey, %1x=28-tap Hann"
+    X[1:0]: "Filter select (windowed FIR on the scope bitstream): %00=68-tap Tukey, %01=45-tap Tukey, %1x=28-tap Hann. Each sample normalizes to 8 bits, but the effective DC dynamic range is only ~5-6 bits depending on filter length."
     trigger_pattern: |
       The A/B relationship sets the arm-then-trigger pattern:
         A>B:  arm when sample[7:2] >= A, then trigger when sample[7:2] < B
@@ -133,6 +133,7 @@ configuration_constants:
 notes:
   - "Trigger A/B values and the filter select are all in the X register (WXPIN); Y is not used"
   - "A and B are 6-bit; they MSB-justify to sample[7:2] for comparison. Their relationship (A>B vs A<=B) sets the arm-then-trigger pattern"
+  - "Each sample normalizes to 8 bits, but the effective DC dynamic range is only ~5-6 bits depending on the selected filter length — treat the low bits as filter residue when choosing A/B trigger thresholds"
   - "RDPIN/RQPIN returns the 8-bit sample; the C flag returns the 'armed' state"
   - "Useful for capturing signals around specific voltage thresholds"
   - "Can be combined with software buffering for waveform storage"

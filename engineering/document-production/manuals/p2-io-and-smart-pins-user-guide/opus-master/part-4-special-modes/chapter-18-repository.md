@@ -142,6 +142,8 @@ PUB setup_noise_dac()
 
 **Note:** The DAC outputs noise continuously regardless of sample period. The sample period only affects when IN is raised.
 
+> **Why `X[15:0] = 0` is the low-power setting.** When you don't need a sample period at all, `0` selects the longest possible window (65,536 clocks). Maximizing this *unused* sample period **reduces switching power** — so `0` is the right choice for a free-running noise source whose `IN` cadence you never read, as the examples here use.
+
 ### Voltage Range
 
 The noise spans the full scale of the selected DAC range. See Chapter 10 §10.2 for the resistor-DAC voltage options.

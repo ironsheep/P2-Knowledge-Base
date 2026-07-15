@@ -1,5 +1,13 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.6 (2026-07-15)
+
+Three scope- and DAC-mode clarifications, each grounded in the Silicon Doc.
+
+- **Scope-mode filter DC range (Chapter 16 §16.5, Appendix F)** — the `X[1:0]` filter select (68-/45-tap Tukey, 28-tap Hann) now carries its cost: scope samples normalize to 8 bits, but the real DC dynamic range is only ~5–6 bits depending on the filter length — so the low bits are filter residue rather than signal when you set trigger thresholds.
+- **DAC dither cadence (Chapter 10 §10.4)** — the pseudo-random dither is applied to the 8-bit DAC on every system clock; the `X[15:0]` sample period is a separate timer that only gates when the output value is recaptured and `IN` is raised. An 8-bit dither does not imply a sysclk/256 output rate.
+- **DAC-noise low-power setting (Chapter 18 §18.3)** — spells out why `X[15:0] = 0` is the low-power choice for free-running noise: it selects the longest sample window (65,536 clocks), maximizing the unused period and reducing switching power.
+
 ## v1.0.5 (2026-07-11)
 
 A hardware-grounded accuracy pass across smart-pin behavior, pin configuration, and the worked examples.

@@ -986,7 +986,7 @@ Single-channel oscilloscope-style ADC with hysteretic triggering. Up to four suc
 |----------|----------|
 | X[15:10] | B trigger value (6-bit) |
 | X[7:2] | A trigger value (6-bit) |
-| X[1:0] | Filter select (%00/%01 Tukey, %1x Hann) |
+| X[1:0] | Filter select (%00/%01 Tukey, %1x Hann); samples normalize to 8 bits but DC dynamic range is only ~5–6 bits per filter |
 | Z | 8-bit sample (RDPIN; C = armed) |
 | IN | Trigger fired |
 

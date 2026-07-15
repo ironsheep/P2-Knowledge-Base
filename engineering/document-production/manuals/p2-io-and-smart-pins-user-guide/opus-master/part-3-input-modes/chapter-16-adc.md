@@ -352,6 +352,8 @@ X[7:2]:   A (arm) value, 6-bit MSB-justified (0-252, step 4)
 X[1:0]:   Filter: %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
+> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when you choose the `A`/`B` trigger thresholds.
+
 The hysteretic trigger works as follows:
 
 1. Signal must cross arm level to arm the trigger

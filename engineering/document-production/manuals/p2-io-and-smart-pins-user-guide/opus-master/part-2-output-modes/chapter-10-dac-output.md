@@ -193,6 +193,8 @@ Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 
 > **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits realized depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
 
+> **Two independent rates — the dither runs far faster than your updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
+
 ### P_DAC_DITHER_RND (%00010)
 
 Uses pseudo-random dithering for smooth 16-bit output.
