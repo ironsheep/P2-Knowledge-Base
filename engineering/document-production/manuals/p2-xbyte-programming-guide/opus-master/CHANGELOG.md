@@ -29,6 +29,23 @@ now **II–VI** (all cross-references and anchors renumbered to match).
   an ampersand there becomes a live alignment tab (chapter titles escape fine via pandoc's path).
 - **Front-matter** — the Guide Organization panel and the How-to-Use map rebuilt for the
   six-Part / twenty-chapter structure.
+- **§16.3 + §14.7 — guest interrupt *acceptance timing* (correctness).** The guest architecture
+  decides *when* an interrupt is accepted, not just whether: Z80/8080 `EI` enable-delay, prefix /
+  atomic sequences that block acceptance, and interruptible-and-resumable instructions (`LDIR`,
+  `REP MOVS`). §16.3's "consistent state" rule alone accepts one instruction too early after `EI`;
+  now framed as a faithfulness dial, like decimal mode and cycle accuracy.
+- **§14.9 — self-modifying code, the FIFO-flush escape hatch.** You can keep auto-fetch and honour
+  a rewrite by re-priming the FIFO with `RDFAST` (it re-initialises, discarding stale prefetch), at
+  a per-fetch refill cost that collapses toward rung 2 — a real technique, almost never the trade.
+- **§4.6 — "Designing skip patterns" (NEW).** A consolidated process — find the family → superset
+  body → factor shared work into `CALL`s → assign patterns common-path-first → the F bit when a
+  pattern can't express it — plus the two traps (a `##` is two longs; a pattern must fit the 22-bit
+  window). Pulls together guidance that was scattered across §4.4/§4.5, §6.2, and §9.4.
+- **Layout.** Platform section keep-together reserve `\needspace 7→3 baselineskip` — whole long
+  sections no longer migrate off a Part-opener page and ~6 pages of trailing whitespace are
+  recovered (fleet-wide platform change; titlesec `\@afterheading` still prevents orphaned heads).
+  Front-matter running header no longer bleeds "Copyright and License" onto the how-to-use /
+  conventions pages (blanked with `\markboth`, restored when the body's first chapter sets its mark).
 
 Deferred to the next increment (gated on hardware verification against the KB): the deep payoffs
 the new front layer forward-references — SD/flash provisioning, the PSRAM↔display bandwidth budget

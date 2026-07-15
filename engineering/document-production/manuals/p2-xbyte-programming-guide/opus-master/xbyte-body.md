@@ -337,6 +337,28 @@ Which makes bit 10 spare storage: **one free boolean per bytecode.** Read it and
 Emulators in the field use exactly this to carry a per-opcode flag that would otherwise have cost them a second table.
 :::
 
+## 4.6 Designing skip patterns — a process {#sec-4-6}
+
+The shared-handler idiom is powerful, but a body serving a dozen bytecodes is only as good as the patterns that carve it up. Here is a repeatable way to design them — and, at the end, the two ways a pattern misbehaves for reasons the source does not show.
+
+**The process.**
+
+1. **Find the family.** Group the bytecodes that do *almost* the same work — same operands fetched, same result stored, differing only in the operation between. An ALU group, a load/store group, a "push small constant" group. The wider and more regular the family, the more one body earns its keep.
+2. **Write the superset body.** Lay every instruction *any* member needs into one straight-line body, in a fixed order. Each member is then a *subset* of that body — its pattern leaves that member's instructions and skips the rest (§4.4).
+3. **Factor shared work into `CALL`s.** Common setup and teardown — pop the operands, push the result — go in subroutines. Skipping is *suspended inside a call* (§4.5), so a helper's instructions never consume pattern bits; the body stays short and every pattern stays simple. This is what makes wide families practical at all.
+4. **Assign each member's pattern, common path first.** A member's pattern skips the instructions it does not want. Order the body so the *most common* members skip the least — under SKIPF every kept instruction runs and every skipped one is free (§4.2). Build the table entry with the handler address in the low 10 bits and the pattern in the high 22 (§6.2).
+5. **When a pattern can't say it, use the flag.** A skip pattern chooses *which instructions* run; it cannot make a kept instruction *behave two ways*. When members differ in behaviour rather than in instruction-selection — a conditional, a loop count, two variants of one operation — carry two selector bits in the bytecode and let the **F bit** deliver them as flags (§9.4). Pattern and flag are complementary selectors; reach for the flag only when the pattern runs out.
+
+**Watch — the pattern lies to you in exactly two ways** (both from §4.5): a `##` immediate is *two* longs, so one `##` inside a skipped region throws every bit after it off by one; and a pattern with more bits than its body has instructions spills onto whatever runs next. Count longs, not lines, and size each pattern to its body.
+
+**Avoid.**
+
+- Transposing the fields — address is the **low** 10 bits, pattern the **high** 22 (§6.2).
+- Letting a family outgrow the **22-bit window**: the dispatch pattern is 22 bits, so a body can be skipped across at most 22 instructions. A wider family splits into two bodies, or pushes more work into calls.
+- Accounting for a helper's internals in a pattern — you never need to (§4.5), and it breaks the moment the helper changes.
+
+Get the family and the body right and the patterns almost write themselves: each is just *keep these, skip those*, counted in longs.
+
 # Chapter 5: The Bytecode Stream {#ch-5}
 
 XBYTE reads its bytecodes from the **hub FIFO** — the same fast, sequential hub-reading hardware every cog has. This chapter covers how the stream is primed and read, because a bytecode program is just bytes in hub memory, and the FIFO is how they reach the engine.
@@ -1270,7 +1292,7 @@ The survey tables stop where the honest advice becomes *"it depends on your gues
 
 **Undocumented opcodes.** The 6502's illegal opcodes and the Z80's `IX`/`IY` half-register instructions are used by real software — demos and copy-protection especially. They cost you table entries, not architecture. Decide up front whether you are emulating the *specification* or the *silicon*; they are different machines.
 
-**Self-modifying guest code.** Harmless when your handlers read the guest's memory on every fetch — which, if you hand-rolled the fetch, they do. But if you have taken **auto-fetch**, the FIFO may have already read ahead past code the guest just rewrote. Another quiet consequence of rung 3, and one more reason a self-modifying guest wants rung 2.
+**Self-modifying guest code.** Harmless when your handlers read the guest's memory on every fetch — which, if you hand-rolled the fetch, they do. But if you have taken **auto-fetch**, the FIFO may have already read ahead past code the guest just rewrote. Another quiet consequence of rung 3, and one more reason a self-modifying guest wants rung 2 — though not an absolute one. You *can* keep auto-fetch and still honour a rewrite by re-priming the FIFO with `RDFAST` before the affected fetch: `RDFAST` re-initialises the FIFO, discarding the bytes it prefetched past the change, so the next read comes fresh from hub. The catch is that re-priming makes the FIFO refill from hub every time — erasing the very prefetch that made auto-fetch worth taking — so doing it on every instruction pays rung 2's price while still on rung 3. (A guest that rewrites code only occasionally can be smarter: flush *only* when a store lands in the code region, not blindly per instruction.) The technique is real; it is almost never the right trade, and the usual answer stays rung 2.
 
 **Memory-mapped I/O and banking.** The guest's address space is rarely flat. A clean way through, seen in the field: make the memory-access routine a **register holding an address**, so the routine itself can be swapped per region — ROM, RAM, I/O, banked window. `CALL` through it, and the map becomes data instead of a chain of comparisons.
 
