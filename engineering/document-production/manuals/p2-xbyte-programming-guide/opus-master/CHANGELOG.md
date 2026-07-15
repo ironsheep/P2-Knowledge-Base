@@ -47,10 +47,14 @@ now **II–VI** (all cross-references and anchors renumbered to match).
   Front-matter running header no longer bleeds "Copyright and License" onto the how-to-use /
   conventions pages (blanked with `\markboth`, restored when the body's first chapter sets its mark).
 
-Deferred to the next increment (gated on hardware verification against the KB): the deep payoffs
-the new front layer forward-references — SD/flash provisioning, the PSRAM↔display bandwidth budget
-on the 32 MB Edge module, and the overlay/paging why-not — land in the decisions chapter once the
-Edge-board SKUs and drivers are confirmed.
+- **§13.3 — the memory system, up close.** The deep payoffs the front layer forward-references,
+  now hardware-verified against the KB and landed: where the guest and its assets load from (the
+  Edge module's 16 MB flash and on-module microSD share pins P58–P61 — *load-then-run*, never
+  fetched at instruction speed); why a large guest is held **whole in PSRAM** (P2-EC32MB, 32 MB
+  linear) rather than paged from storage; and the **PSRAM bandwidth budget** — one 16-bit bus
+  (~300 MB/s, 8 µs refresh) shared between the emulator's memory traffic and the display's
+  framebuffer, arbitrated by the per-cog priority in the MegaYume PSRAM driver. Capacity is ample;
+  bandwidth is the constraint.
 
 ## v0.2.0 (2026-07-14) — the evidence-grounded edition (in development)
 

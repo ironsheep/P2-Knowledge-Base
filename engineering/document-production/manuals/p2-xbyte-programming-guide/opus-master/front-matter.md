@@ -161,13 +161,13 @@ This guide serves developers building interpreters, virtual machines, and CPU em
 **Structure:**
 
 - **Part I (The Landscape)** builds the picture before any mechanism — what emulation is, why the P2 is unusually good at it, and the handful of concerns any emulator must handle. It names no P2 machinery. Read it first; skim it if you have built emulators before.
-- **Part II (Fundamentals)** builds the mental model of the engine — it teaches the skip family (SKIP/SKIPF/EXECF) before XBYTE, because the engine is built out of them.
+- **Part II (Fundamentals)** builds the mental model of the engine — it teaches the skip family (SKIP/SKIPF/EXECF) before the XBYTE engine, because the engine is built out of them.
 - **Part III (The Engine)** is the reference for the dispatch cycle, arming, the table-size and compression modes, the rules bytecode routines follow, and how to debug a hardware dispatch loop.
 - **Part IV (Building Interpreters and Emulators)** proves the engine by building — a minimal custom VM — then steps back to the decisions that come *before* any emulator: which of the engine's assets you can take, what each classic guest CPU will cost you, and how to service guest interrupts and prefix bytes. It closes by widening the frame beyond interpreters entirely.
 - **Part V (Reference)** is quick lookup for the instructions and the configuration bits.
 - **Appendices** contain quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 
-The 6502 emulator in Part IV is deliberately **tiny and illustrative** — enough to show the technique end to end, not a faithful or complete emulator. Its two worked programs (the minimal VM and the display-list engine) are complete and compile.
+The 6502 emulator in Part IV is deliberately **tiny and illustrative** — enough to show the technique end to end, not a faithful or complete emulator. The guide's two complete programs — the minimal VM and the display-list engine — do compile.
 
 ## Document Conventions
 

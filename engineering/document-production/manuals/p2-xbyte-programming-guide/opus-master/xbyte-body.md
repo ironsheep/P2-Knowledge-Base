@@ -142,16 +142,16 @@ That second case is the one this guide builds toward. Emulating another processo
 
 ## 3.4 The pieces, and where they live {#sec-3-4}
 
-XBYTE coordinates five pieces of the P2 you already have. This guide devotes a chapter to each; here is the map.
+XBYTE coordinates six pieces of the P2 you already have. This guide covers each in the chapter shown; here is the map.
 
 | Piece | What it does for XBYTE | Where it is | Chapter |
 |-------|------------------------|-------------|---------|
-| The **hub FIFO** | delivers the bytecode stream, one byte at a time | hub → cog, primed by **RDFAST** | 3 |
-| The **dispatch table** | maps each bytecode to a handler + a skip pattern | 256 longs in LUT RAM | 4 |
-| **EXECF** | the jump-plus-skip that *is* dispatch | a cog instruction | 2 |
-| **PA** (`$1F6`) | holds the current bytecode for the handler to use | a cog register | 4 |
-| **PB** (`$1F7`) | holds the FIFO pointer (for inline operands) | a cog register | 3 |
-| The **hardware stack** | holds `$1FF`, the address each routine returns *to* | the cog's call stack | 6 |
+| The **hub FIFO** | delivers the bytecode stream, one byte at a time | hub → cog, primed by **RDFAST** | 5 |
+| The **dispatch table** | maps each bytecode to a handler + a skip pattern | 256 longs in LUT RAM | 6 |
+| **EXECF** | the jump-plus-skip that *is* dispatch | a cog instruction | 4 |
+| **PA** (`$1F6`) | holds the current bytecode for the handler to use | a cog register | 6 |
+| **PB** (`$1F7`) | holds the FIFO pointer (for inline operands) | a cog register | 5 |
+| The **hardware stack** | holds `$1FF`, the address each routine returns *to* | the cog's call stack | 8 |
 
 The handlers themselves live in cog or LUT RAM and end in **RET** or **`_RET_`**. The engine is armed with one instruction — **SETQ** (or **SETQ2**) — and a `$1FF` on the stack. Those are Chapter 8.
 
@@ -687,7 +687,7 @@ The rule is on the bytecode's high nibble:
 - if **b[7:4] < BBBB**, the bytecode indexes the table normally (I = b[7:0]) — these are the **primary** bytecodes, each with its own entry;
 - if **b[7:4] ≥ BBBB**, the whole group of 16 that shares that high nibble maps to a **single** entry — these are the **extended** bytecodes.
 
-This is most useful *"when the bytecode, which is always written to PA, is used as an operand within the bytecode routine."* A family like "push constant 0..15" can be 16 bytecodes that share one handler — the handler reads the actual value from `PA`. Sixteen opcodes, one table entry, one routine.
+This is most useful *"when the bytecode, which is always written to PA, is used as an operand within the bytecode routine."* A family like "push constant 0..15" can be 16 bytecodes that share one handler — the handler reads the actual value from `PA`. Sixteen bytecodes, one table entry, one routine.
 
 ## 9.4 The F bit — flags from the bytecode {#sec-9-4}
 
@@ -1105,6 +1105,12 @@ If there is any chance your guest will outgrow hub, do not take the auto-fetch. 
 
 And there is a second, quieter cost. XBYTE reads its dispatch table from **LUT**, and LUT is a cog resource that the rest of your system also wants — for a prefetch queue, a palette, a line buffer, a sine table. At least one emulator in the field moved its dispatch table *out* of LUT for exactly this reason, and XBYTE went with it. The FIFO is contended the same way: in one emulator the FIFO is busy streaming the video framebuffer, and could not have fetched instructions even if the guest's code had been in hub. Chapter 3's resource budget (§3.6) is not a formality — it is the second half of this decision.
 
+**Where the guest — and its assets — come from.** All of that is about where the guest's code *runs*; a separate question is where it *comes from*. A guest's program, its ROMs, and its media are loaded into hub or PSRAM before anything executes, and on a P2 Edge module they load from one of two places on the module itself: the **16 MB SPI flash** or the **microSD socket** — which, on the Edge modules, **share the same four pins (P58–P61)**, so you reach one or the other, not both at once. Flash suits a single fixed guest that boots on power-up; a microSD card is the natural home for the bulky, swappable things — a shelf of ROMs, a library of disk images — read on demand through a community SD/FAT driver. Either way the shape is *load, then run*: nothing is fetched from the card at instruction speed.
+
+**Which is why you do not page the guest from storage.** When a guest outgrows hub, the answer is to hold its image **whole in PSRAM** — the 32 MB module (**P2-EC32MB**) maps all 32 MB as one linear space, room for any classic guest and its RAM several times over. Swapping pieces of code in and out from microSD as the guest runs — an overlay or demand-paging scheme — is the wrong shape for this machine: a card read is thousands of times slower than a PSRAM access, and a guest branches wherever it likes, so there are no quiet boundaries to confine the swapping to. Load the image into PSRAM once, and let the card go back to sleep.
+
+**And PSRAM is a shared road.** The 32 MB module reaches its four PSRAM chips over a **single 16-bit bus** — one clock, one chip-enable — that peaks near **300 MB/s** and must free the bus every 8 µs for refresh. That one bus carries everything external: the emulator's guest-memory traffic *and*, on most projects, the **framebuffer the display streams to show the guest's screen**. Capacity is not the contest — 32 MB holds a large guest and a framebuffer with room to spare; **bandwidth is**, and the display's share is continuous and unforgiving (starve the framebuffer and the picture tears). So you budget the bus: size the display mode so its stream leaves headroom for the emulation, or keep a small guest in hub and give PSRAM wholly to the picture, or lean on a driver that arbitrates — the PSRAM driver from the **MegaYume** emulator hands out **per-cog priority** for exactly this, so a video cog and an emulation cog can share the road without the picture breaking.
+
 ## 13.4 There is no loop body {#sec-13-4}
 
 The third decision is the one nobody warns you about, and it is the reason the largest emulators decline XBYTE even when memory would allow it.
@@ -1187,14 +1193,14 @@ The first decision dominates: **where does the guest's code live?** The FIFO rea
 |-------|---|---------------------|-------------------|----------------|
 | **6502 / 65C02** | | 64 KB — **fits hub** | byte, opcode-first | **3 — XBYTE** |
 | **8080** | • | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
-| **Z80** | • | 64 KB — fits hub | byte, opcode-first | 3 — *if* you can forgo cycle pacing |
+| **Z80** | • | 64 KB — fits hub | byte, opcode-first | **2** — needs cycle pacing |
 | **6809** | | 64 KB — fits hub | byte, opcode-first | **3 — XBYTE** |
 | **8051** | | 64 KB code — fits hub | byte, opcode-first | **3 — XBYTE** |
 | **CHIP-8** | | 4 KB — fits hub | 2-byte, nibble-decoded | 3 — via compression (§9.3) |
 | **65816** | • | 16 MB — **off-chip** | byte, opcode-first | **2** — the ROM cannot be streamed |
 | **68000** | • | 16 MB — off-chip | 16-bit word opcodes | **2** |
 | **x86 (8086)** | • | 1 MB, **segmented** | byte, but `CS:IP` | **2** |
-| **ARM / MIPS** | • | — | 32-bit fixed words | **2**, or **JIT** |
+| **ARM / MIPS** | | — | 32-bit fixed words | **2**, or **JIT** |
 
 ::: caution
 **Read the 65816 row twice.** It is byte-stream and opcode-first — by instruction shape it is *identical* to the 6502, which sits comfortably at rung 3. And the working P2 implementation of it uses **neither** XBYTE nor auto-fetch, because a 65816 machine's ROM is megabytes and lives off-chip.
@@ -1223,26 +1229,7 @@ The rest of this chapter takes each column in turn, because *what the column cos
 
 ## 14.4 Prefixes are two different things {#sec-14-4}
 
-This is the distinction that most often gets an emulator wrong, and it is worth stating carefully, because the two kinds look identical in a hex dump and want opposite treatment.
-
-| Kind | Examples | What it changes | The tool |
-|------|----------|-----------------|----------|
-| **Map prefix** (escape) | 6809 `$10`/`$11` · Z80 `CB`/`ED` · x86 `$0F` | **which handler runs** — it selects a *different opcode map* | **one-shot `SETQ2`** (Chapter 17) |
-| **Modifier prefix** | x86 segment override, `REP`, `LOCK` · Z80 `DD`/`FD` | **not** which handler runs — *how that handler behaves* | **a state register**, then re-fetch |
-
-A map prefix genuinely redirects dispatch: after `$10`, byte `$83` means something else entirely, so you want a different table. That is exactly what one-shot `SETQ2` is for, and Chapter 17 builds it.
-
-A modifier prefix does **not** want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment, which is absurd. The working implementations set a **state register** and jump back to the fetch:
-
-```pasm2
-' a modifier prefix: set state, then go fetch the real opcode
-seg_override    mov     override, seg_reg   ' remember it...
-                jmp     #next_op            ' ...and fetch again
-```
-
-::: caution
-The Z80 carries **both kinds at once**, which makes it the perfect teacher and a genuine trap. Its `CB` and `ED` prefixes are **map** prefixes — different opcode tables. Its `DD` and `FD` prefixes are **modifier** prefixes — they retarget `HL` to `IX` or `IY`, leaving the opcode map alone. Treat `DD` like `CB` and you will duplicate a table you did not need to; treat `CB` like `DD` and you will decode the wrong instruction.
-:::
+The distinction that most often gets an emulator wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
 
 ## 14.5 Flags — the cost nobody budgets for {#sec-14-5}
 
@@ -1860,7 +1847,7 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 The value handed to SETQ/SETQ2, written `%A...F`:
 
 - **A** (high bits) — the LUT base address of the dispatch table; the number of A bits grows as the table shrinks (§9.2).
-- **middle pattern** — selects table size (256/128/64/32/16) and, in the 256 case, compression (§9.2–7.3).
+- **middle pattern** — selects table size (256/128/64/32/16) and, in the 256 case, compression (§9.2–9.3).
 - **F** (bit 0) — flag write: F=1 writes C ← index bit 1, Z ← index bit 0 each dispatch; F=0 leaves flags alone (§9.4).
 
 | Goal | Operand |
@@ -1967,17 +1954,16 @@ The most useful thing this appendix can tell you is **which rung of the dispatch
 
 Two pieces of first-party code are worth more than any commentary.
 
-- **The XBYTE demo** — `parallaxinc/propeller`, under `resources/FPGA Examples/xbyte.spin2`. Sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 7.
+- **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (`https://github.com/parallaxinc/propeller`), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 7.
 - **The Spin2 interpreter** — the language's own bytecode engine, and the most sophisticated XBYTE program in existence. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all used in anger. If you read one thing, read this.
 
 ## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}
 
-A single P2 module emulating the **Intel 8080** and driving **up to eight simultaneous mini arcade cabinets** — one cog per console, each running an 8080 emulator while also generating composite video and one channel of audio. The arcade games run original ROM code; a multiplayer tank game and a light-cycles game were written in 8080 assembler for the project.
+A single P2-EC module emulating the **Intel 8080** on **all eight cogs at once** — one cog per cabinet, each running an 8080 emulator that executes original arcade ROM code while also generating video (one pin), audio (one pin), and reading five buttons (one pin). Eight independent mini arcade cabinets driven in parallel from one chip — "eight instances of Space Invaders, at once."
 
-- **Builders:** Chip Egues (lead architect); Baggers (8080 emulator co-development, original multiplayer games); VonSzarvas (PCB); Coley (cabinet); cabinet graphics by Andy C. Spencer (Retro Computer Museum, UK).
-- **Links:** Parallax product page — `https://www.parallax.com/p2arc8de-one-p2-ec-module-provides-audio-video-and-buttons-for-eight-8-concurrent-games/`; forum thread "P2 Arc8de Project" — `https://forums.parallax.com/discussion/173341/p2-arc8de-project`.
-- **License:** CC BY-SA 3.0 (project materials).
-- **Dispatch mechanism:** not stated in the project's public materials.
+A P2 Forum community project (begun 2020), built by **Coley, Baggers, Chip, and VonSzarvas** with support from Parallax; write-up by **Ken Gracey**. Its dispatch mechanism is not documented in the public materials, so it appears here as an existence proof, not a mined technique.
+
+- **Link:** Parallax project page — `https://www.parallax.com/p2arc8de-one-p2-ec-module-provides-audio-video-and-buttons-for-eight-8-concurrent-games/`
 
 ## C.3 8080 games emulators — XBYTE in production {#sec-c-3}
 
@@ -1987,7 +1973,7 @@ They are also where three techniques in this book were found: the **guest-interr
 
 ## C.4 The "Yume" emulator suite — console emulators on P2 + PSRAM {#sec-c-4}
 
-A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**), under the umbrella project **p2-dreamy-emulators** (`https://sr.ht/~wuerfel_21/p2-dreamy-emulators/`). Each runs console ROM images on a P2 with external PSRAM.
+A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**; also mirrored on SourceHut as `~wuerfel_21`). Each runs console ROM images on a P2 with external PSRAM.
 
 | Project | Console | Guest CPU(s) | Repository | Status |
 |---------|---------|--------------|------------|--------|
