@@ -1668,7 +1668,7 @@ D[25]. The two are different facts about different bits, and our doc appears to 
   tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
   instead of being trusted.
 
-### F-219 — XBYTE Guide §10.2 assigns **all** x86 prefixes to one-shot `SETQ2`; the real 8086 emulator does not, and cannot — `CONFIRMED`
+### F-219 — XBYTE Guide §10.2 assigns **all** x86 prefixes to one-shot `SETQ2`; the real 8086 emulator does not, and cannot — `DONE (2026-07-15)` (map/modifier prefix split now correct across §14.4/§17.1–17.3; verified in the release-gate audit — the section renumbered §10.2→§14.4 in the v0.3.0 reshape)
 
 **What §10.2 says today:** of x86 — *"the byte stream fits; the decode explodes — prefixes and escapes
 are a job for one-shot SETQ2 alternate tables, and the long tail is hand-rolled."*

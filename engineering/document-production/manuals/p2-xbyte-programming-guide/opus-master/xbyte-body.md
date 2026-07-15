@@ -247,7 +247,11 @@ Because a cancelled instruction still spends its clocks, SKIP's cost is the cost
                 add     x, #8               ' runs
 ```
 
-The trade for that speed is the restriction: SKIPF works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing), and its pattern is **22 bits** wide, governing the next 22 instructions. That width is not a coincidence — it is exactly the width XBYTE stores in each dispatch-table entry.
+The trade for that speed is the restriction: SKIPF works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing). Its pattern is the full **32 bits** of the operand `D`, applied LSB-first — so a standalone SKIPF governs the next 32 instructions. (Inside XBYTE the pattern comes from **EXECF**, which spends its low 10 bits on a jump address and so carries only a **22-bit** pattern — §4.3. That 22 is the width XBYTE stores in each dispatch-table entry: not because SKIPF is 22-bit, but because EXECF reserves ten bits for *where to jump*.)
+
+::: hardware
+"Free" has one small print. SKIPF steps the PC forward 1 to 8 instructions at a time, so **at most 7 in a row are leapt at once**; every **8th** consecutive skipped instruction is stepped through as a **2-clock NOP**. A handler that skips fewer than eight in an unbroken run — the usual case — really does skip for free; only a long unbroken run pays the occasional 2-clock tick.
+:::
 
 ## 4.3 EXECF — jump, then skip {#sec-4-3}
 
@@ -263,7 +267,7 @@ That is the entire mechanism of dispatch. If a table entry holds an EXECF operan
 | Instruction | Skips by | Also does | Pattern width | Works in |
 |-------------|----------|-----------|---------------|----------|
 | **SKIP**  | cancelling in place | — | 32 bits | cog, LUT, hub |
-| **SKIPF** | leaping the PC | — | 22 bits | cog, LUT |
+| **SKIPF** | leaping the PC | — | 32 bits | cog, LUT |
 | **EXECF** | leaping the PC | jumps to D[9:0] first | 22 bits (D[31:10]) | cog, LUT |
 
 ## 4.4 One body, many bytecodes — the shared-handler idiom {#sec-4-4}
@@ -559,7 +563,7 @@ The fence is **`REP`**. A `REP` block cannot be interrupted, so wrapping the cri
 .done
 ```
 
-This is not a theoretical hazard, and it is not a rare one. The P2's own Spin2 interpreter — the reference XBYTE program, written by the silicon's designer — uses exactly this fence in **eight** separate places, guarding CORDIC operations and shared-variable updates.
+This is not a theoretical hazard, and it is not a rare one. The P2's own Spin2 interpreter — the reference XBYTE program, written by the silicon's designer — uses exactly this fence **repeatedly** (well over a dozen times in its source), guarding CORDIC operations and shared-variable updates.
 :::
 
 The rule of thumb is simple: **XBYTE gives you interrupts for free, and it is your job to say where they may not go.** A handler that only touches its own cog registers needs no fence at all. A handler that reaches for the CORDIC, or for memory another cog shares, needs one every time.
@@ -785,7 +789,7 @@ The fix is two instructions, and it is the standard idiom:
 ' Handler that calls out to hub code, then resumes the stream cleanly.
 op_port_write
                 rfbyte  port                ' the port number, inline
-                call    hub_write_port      ' ...may disturb the FIFO
+                call    #hub_write_port     ' ...may disturb the FIFO
                 add     pb, #1              ' step past the operand
         _ret_   rdfast  #0, pb              ' re-point the FIFO and carry on
 ```
@@ -840,7 +844,7 @@ You rarely need to call `GETBRK` yourself, because the P2's single-step debugger
 
 Better still: in the disassembly view, **an instruction that the current skip pattern will cancel is drawn struck through.** You can *see* the pattern working — which instructions of a shared body are live for this bytecode and which have been skipped away. For debugging a SKIPF pattern that is off by one bit, nothing else comes close.
 
-And XBYTE survives being debugged, for a reason worth knowing: the debug interrupt service routine **saves and restores the full eight-level hardware stack**. The `$1FF` that the engine depends on (§8.1) is preserved across every breakpoint. You can stop the world, look around, and let it run on.
+And XBYTE survives being debugged, for a reason worth knowing: the debug interrupt does **not** use the 8-level hardware stack at all — it enters and exits through dedicated shadow registers (`IJMP0`/`IRET0`, via `RETI0`) and saves only registers `$000-$00F`. Because it never touches that stack, the `$1FF` the engine depends on (§8.1) is left undisturbed across every breakpoint. You can stop the world, look around, and let it run on. (A debugger that itself makes calls still has to budget the 8-level stack — the ROM does not manage it for you.)
 
 ## 11.3 The technique the engine cannot give you {#sec-11-3}
 
@@ -1159,7 +1163,7 @@ Chapter 14 turns these three decisions into a per-processor survey: what each cl
 The capstone in Chapter 15 is the **6502**, and this chapter's framework makes the choice concrete:
 
 - **Its code fits in hub.** A 6502's entire address space is 64 KB — it fits in hub with room to spare, so auto-fetch is genuinely available. This is decision one, and the 6502 passes it where a console does not.
-- **Byte-stream, opcode-first.** Every instruction begins with a one-byte opcode followed by 0–2 operand bytes. `RFBYTE` fetches the opcode; `RFVAR`/`RFVARS` pull the operands.
+- **Byte-stream, opcode-first.** Every instruction begins with a one-byte opcode followed by 0–2 operand bytes. `RFBYTE` fetches the opcode; `RFBYTE`/`RFWORD` pull its fixed-width operand bytes — **not** `RFVAR`/`RFVARS`, which decode variable-length (self-sizing) values and would misread any operand byte ≥ `$80`. (`RFVAR` belongs to a bytecode VM's operands — §12.2 — not a fixed-width guest CPU.)
 - **A table that fits.** The 6502 defines about 151 of 256 opcodes — a 256-entry table maps them directly, one bytecode per opcode.
 - **Regular families.** Its addressing modes and ALU operations are regular enough that the shared-handler idiom (§4.4) collapses many opcodes onto a few bodies — a natural showcase for skip patterns.
 
@@ -1221,7 +1225,7 @@ The rung you land on says nothing about how hard the *guest* is. These costs are
 | **6809** | **`$10`/`$11` — map** | `CC` register | `DAA` | IRQ, FIRQ, NMI | modest |
 | **8051** | none | `PSW` | `DA A` | 5 sources, 2 levels | modest |
 | **68000** | none | `CCR` + the `X` bit | `ABCD`/`SBCD` | 7 levels, vectored | **required** |
-| **x86 (8086)** | **`$0F` map · segment/`REP`/`LOCK` modifier** | the lazy-flags problem | `AAA`/`DAA` family | `INT` + the `IF` flag | modest |
+| **x86 (8086)** | **`$0F` map (286+) · segment/`REP`/`LOCK` modifier** | the lazy-flags problem | `AAA`/`DAA` family | `INT` + the `IF` flag | modest |
 | **ARM / MIPS** | — | `NZCV` (ARM) | none | exception vectors | rarely |
 | **CHIP-8** | none | `VF` only | none | none — timers only | timers only |
 
@@ -1229,7 +1233,7 @@ The rest of this chapter takes each column in turn, because *what the column cos
 
 ## 14.4 Prefixes are two different things {#sec-14-4}
 
-The distinction that most often gets an emulator wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
+The distinction that most often gets an emulator wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` (286+) — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
 
 ## 14.5 Flags — the cost nobody budgets for {#sec-14-5}
 
@@ -1305,7 +1309,7 @@ In a 6502 emulator the correspondence is direct:
 | 6502 concept | XBYTE realization |
 |--------------|-------------------|
 | the opcode byte | the **bytecode** — fetched by the engine, handed to the handler in `PA` |
-| operand bytes (immediate, address) | **inline operands** — `RFVAR`/`RFVARS` off the FIFO |
+| operand bytes (immediate, address) | **inline operands** — `RFBYTE`/`RFWORD` off the FIFO (fixed-width) |
 | the opcode → microcode decode | the **dispatch table** — one entry per opcode |
 | the program counter | the **FIFO read position** — advanced by reads, re-pointed by `RDFAST` on a branch |
 | A, X, Y, S, P registers | cog registers |
@@ -1323,7 +1327,7 @@ The 6502 register set is a few cog longs, and arming is the same sequence as Cha
                 rdfast  #0, ##reset_vector  ' FIFO -> 6502 code in hub
                 push    #$1ff
         _ret_   setq    #$100               ' 256-entry table @ LUT $100,
-                                            ' F=0 (see Ch.7 for the operand)
+                                            ' F=0 (see §8.2)
 ```
 
 Each opcode that the slice implements gets a table entry pointing at its handler; unimplemented opcodes point at a shared `op_undef` that flags the gap. (A real build fills all 256; this slice fills the few below and routes the rest to `op_undef`.)
@@ -1453,7 +1457,7 @@ int_pending
                 testb   inte, #0        wc  ' are guest interrupts enabled?
         if_nc   jmp     #int_ignore         ' no - resume the stream
                 bitl    inte, #0            ' yes - guest clears IE
-                mov     pb, guest_pc        ' remember where the guest was
+                mov     guest_pc, pb        ' remember where the guest was
         _ret_   execf   int_vector_entry    ' ...and "dispatch" it
 ```
 
@@ -1503,7 +1507,7 @@ Look at what a prefix actually *does* to the byte that follows it, and they fall
 
 | | **Map prefix** (escape) | **Modifier prefix** |
 |---|---|---|
-| Examples | 6809 `$10`/`$11` · Z80 `CB`/`ED` · x86 `$0F` | x86 segment override, `REP`, `LOCK` · Z80 `DD`/`FD` |
+| Examples | 6809 `$10`/`$11` · Z80 `CB`/`ED` · x86 `$0F` (286+) | x86 segment override, `REP`, `LOCK` · Z80 `DD`/`FD` |
 | What it changes | **which handler runs** — a *different opcode map* | **how the handler behaves** — same instruction, different memory or register |
 | The tool | **one-shot `SETQ2`** — an alternate table | **a state register**, then re-fetch |
 
@@ -1658,7 +1662,7 @@ h_note_on                                   ' $9n: Note On, channel n
         _ret_   call    #voice_on           ' start the voice, return
 ```
 
-This is "the byte is both the selector and an operand" in its cleanest form. Because the eight commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§9.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") is a natural extension: a data-valued byte re-enters the current command's handler, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.
+This is "the byte is both the selector and an operand" in its cleanest form. Because the seven channel-voice commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§9.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") is a natural extension: a data-valued byte re-enters the current command's handler, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.
 
 ## 18.5 A display list — the stream as a movable cursor {#sec-18-5}
 
@@ -1763,7 +1767,7 @@ Chapter 17 introduced one-shot `SETQ2` through the 6809's prefix pages, where it
 - the **6809** `$10` / `$11` prefix pages (Chapter 17),
 - an **ANSI terminal**'s `ESC` (§18.3),
 - **MIDI** System Exclusive, where `$F0` opens a manufacturer data block a different table consumes,
-- the **Z80** `CB` / `ED` and **x86** `$0F` escape prefixes (§17.1).
+- the **Z80** `CB` / `ED` and **x86** `$0F` (286+) escape prefixes (§17.1).
 
 It is also how Parallax's own **Spin2 interpreter** works internally: the interpreter uses one-shot `SETQ2` to reach a whole family of *variable-operator* bytecodes through an alternate table, then reverts — the persistent table never has to hold room for them. When you meet a stream where "the next thing means something different," `SETQ2` is the answer, and its automatic revert (§8.3) is what makes the shift free.
 
@@ -1852,7 +1856,7 @@ The value handed to SETQ/SETQ2, written `%A...F`:
 
 | Goal | Operand |
 |------|---------|
-| 256-entry table at LUT `$100`, flags off | `$100` (`%1_0000_0000_0`) |
+| 256-entry table at LUT `$100`, flags off | `$100` |
 | 256-entry table at LUT `$000`, flags off | `$0` |
 | 256-entry table, flags **on** | base, with bit 0 = 1 |
 | 256 with 16-primary compression, threshold B | `%ABBBB00xF` (§9.3) |
