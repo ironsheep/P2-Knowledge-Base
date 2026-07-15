@@ -20,6 +20,16 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.4] - 2026-07-15
+
+**Smart Pin scope filter range; XBYTE engine examples**
+
+### Added
+- Smart Pin scope mode (%11010): filter DC dynamic range documented (~5–6 bits, per selected Tukey/Hann filter)
+
+### Changed
+- XBYTE engine (`architecture/xbyte_engine.yaml`): the three programming examples are compile-verified — LUT entries carry the routine address in [9:0] with the SKIPF pattern in [31:10], and the interpreter arms XBYTE with `PUSH #$1FF` + `_RET_ SETQ #mode`; mode-operand bit 1 (`x`) is documented as undefined pending vendor confirmation
+
 ## [1.14.3] - 2026-07-14
 
 **The DEBUG display windows, verified on silicon**
