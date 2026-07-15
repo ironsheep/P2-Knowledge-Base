@@ -74,7 +74,7 @@ The complete guide to the P2's nine DEBUG display windows — TERM, BITMAP, PLOT
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-debug-window-manual-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-debug-window-manual-src-260714.zip)
 
 ### [P2 I/O & Smart Pins User Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-IO-and-Smart-Pins-User-Guide.pdf)
-**Complete P2 Pin I/O and Smart Pin Reference** — *Version 1.0.5*
+**Complete P2 Pin I/O and Smart Pin Reference** — *Version 1.0.6*
 
 The complete reference for the Propeller 2's pin I/O and Smart Pins — working up from direct pin control through the smart pin architecture to all 32 smart pin modes. Chapters organized by function (digital, pulse/transition, NCO, PWM, DAC, serial, timing, counting, period/frequency, ADC, repository, USB) give register-level configuration, worked Spin2 and PASM2 examples, and a "where you'd use this" framing — with hardware-grounded coverage of the details that bite: init ordering, IN-flag handshakes, data justification, and measurement math. Reference appendices provide a task-oriented intent index, the full P\_ constant tables, a formulas reference, mode-comparison charts, a troubleshooting guide, a complete 32-mode register reference, and FPGA board differences. Includes a downloadable library of 15 compile-clean Spin2 example programs that run on a bare P2 board.
 
