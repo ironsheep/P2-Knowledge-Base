@@ -1,5 +1,11 @@
 # P2 I/O & Smart Pins User Guide — Change Log
 
+## v1.0.7 (2026-07-16)
+
+A grounded note on complementary PWM for half-bridge drive.
+
+- **Complementary outputs and dead-band (Chapter 9 §9.1)** — a half-bridge gate-drive pair is two Smart Pins, one per side, enabled together with the low side inverted; the dead-band that keeps the high and low sides from ever overlapping is produced in software by offsetting the two duty values. There is no single-pin complementary mode and no dead-band-width register.
+
 ## v1.0.6 (2026-07-15)
 
 Three scope- and DAC-mode clarifications, each grounded in the Silicon Doc.
