@@ -612,13 +612,13 @@ The D value handed to SETQ is the **mode operand**. It packs three independent c
 For a full 256-entry table at LUT base `$100` with flags untouched, the operand is `$100` — table base in the high bits, the size/F bits clear. Chapter 9 is the full map.
 
 ::: hardware
-**One bit of the mode operand is undocumented, and we will not pretend otherwise.**
+**Bit 1 of the mode operand selects the index form.**
 
-The published mode patterns (§9.2) are written `%A000000xF` and `%ABBBB00xF`. The `A` bits are the LUT base, the `B` bits are the compression threshold, and `F` is the flag-write bit — all specified. **The `x` — bit 1 — is defined nowhere.** The one clue on record is a comment in the reference demo, which arms with `$100` and calls it *"LUT base = $100, no stack pop."*
+Across the smaller-table modes (§9.2), bit 1 chooses *which half* of the bytecode indexes the dispatch table: `0` indexes from the bytecode's **low** bits, `1` from its **high** bits — the latter freeing the low bits as an operand in `PA`. The §9.2 patterns show it directly: `%AAxx0010F` and `%AAxx0011F` are the *same* 128-entry mode, differing only in bit 1.
 
-So bit 1 appears to control something about the stack, and that is the honest extent of what is known.
+In the **256-entry mode** the bytecode already fills all eight index bits, so there is no low/high choice to make and **bit 1 is simply ignored** — a genuine don't-care in that mode.
 
-**What to do about it:** leave it **0**. Every working XBYTE program does — the Spin2 interpreter, the demo, and every emulator we can point you at in Appendix C. The arming idiom in this chapter leaves it 0, and nothing in this book needs it otherwise.
+**What to do about it:** leave it **0** unless you specifically want a smaller table's high-bits index form. Every arming idiom in this book leaves it 0, which selects the low-bits form (and in 256 mode makes no difference either way).
 :::
 
 ## 8.3 Persistent vs one-shot — SETQ and SETQ2 {#sec-8-3}
@@ -672,15 +672,22 @@ The mode operand is written `%A...F` — a high field **A** that sets the LUT ba
 
 ## 9.2 Table sizes {#sec-9-2}
 
+Every table size except 256 comes in **two index forms**, selected by **bit 1** of the operand (§8.2): the **primary** form (bit 1 = 0) indexes from the bytecode's *low* bits; the **alternate** form (bit 1 = 1) indexes from its *high* bits, leaving the low bits free as an operand in `PA`. Here is the full set — every form the silicon accepts:
+
 | LUT size | Index bits | Operand pattern | LUT base | Index from bytecode |
 |----------|-----------|-----------------|----------|---------------------|
 | **256** | 8 | `%A000000`*x*`F` | `%A00000000` | I = b[7:0] |
-| **128** | 7 | `%AAxx0010F` | `%AA0000000` | I = b[6:0] |
-| **64**  | 6 | `%AAAx1010F` | `%AAA000000` | I = b[5:0] |
-| **32**  | 5 | `%AAAAx100F` | `%AAAA00000` | I = b[4:0] |
-| **16**  | 4 | `%AAAAA110F` | `%AAAAA0000` | I = b[3:0] |
+| **256** + compression | 8 | `%ABBBB00`*x*`F` (BBBB > 0) | `%A00000000` | b[7:4] < BBBB → b[7:0]; else group (§9.3) |
+| **128** primary | 7 | `%AAxx0010F` | `%AA0000000` | I = b[6:0] |
+| **128** alternate | 7 | `%AAxx0011F` | `%AA0000000` | I = b[7:1] |
+| **64** primary | 6 | `%AAAx1010F` | `%AAA000000` | I = b[5:0] |
+| **64** alternate | 6 | `%AAAx1011F` | `%AAA000000` | I = b[7:2] |
+| **32** primary | 5 | `%AAAAx100F` | `%AAAA00000` | I = b[4:0] |
+| **32** alternate | 5 | `%AAAAx101F` | `%AAAA00000` | I = b[7:3] |
+| **16** primary | 4 | `%AAAAA110F` | `%AAAAA0000` | I = b[3:0] |
+| **16** alternate | 4 | `%AAAAA111F` | `%AAAAA0000` | I = b[7:4] |
 
-The more **A** bits the operand carries, the higher the LUT base can sit and the smaller the table — a 16-entry table needs only 4 index bits, so the other bits position it. Each size also has an **alternate** form that indexes from the bytecode's *high* bits instead of its low bits (for example, 128-entry `%AAxx0011F` indexes by b[7:1]); these let the dispatch key on the top of the bytecode while the low bits stay free as an operand in `PA`. Appendix A tabulates every form.
+The more **A** bits the operand carries, the higher the LUT base can sit and the smaller the table — a 16-entry table needs only 4 index bits, so the other bits position it. The **256-entry mode is the exception to the bit-1 rule**: the bytecode already fills all eight index bits, so there is no low/high choice to make and bit 1 is ignored there (§8.2). In its place, the 256 mode offers **compression** (§9.3) rather than an alternate index form.
 
 ## 9.3 Compression — 16 primary plus 240 extended {#sec-9-3}
 
@@ -721,7 +728,7 @@ Everything in this chapter is easier to trust once you have taken a real one apa
 | **A** | 1 | `%1` | table base = `%A00000000` = **LUT `$100`** |
 | **BBBB** | 4 | `%1010` | compression threshold = **`$A`** |
 | `00` | 2 | `%00` | the 256-entry-with-compression selector |
-| **x** | 1 | `%0` | the undocumented bit (§8.2) — left 0, as always |
+| **x** (bit 1) | 1 | `%0` | index-form select — ignored in 256 mode (§8.2), so `0` here |
 | **F** | 1 | `%1` | **flags written** from the bytecode index |
 
 Read it back out in words: *a 256-entry dispatch table at LUT `$100`; bytecodes `$00`–`$9F` get individual entries; bytecodes `$A0`–`$FF` compress — each group of sixteen sharing one entry and one handler, which reads the actual bytecode from `PA`; and dispatch writes C and Z from the bytecode's low bits.*
@@ -1915,7 +1922,7 @@ The appendices are lookup material and pointers: the quick-reference cards, the 
 
 **F bit:** 0 = flags untouched; 1 = C ← index bit 1, Z ← index bit 0.
 
-**The `x` bit** (bit 1) is **undocumented** — see §8.2. Leave it **0**, as every working XBYTE program does.
+**Bit 1** selects the index form: `0` = low-bits index (primary), `1` = high-bits index (the *Alt index* column). Ignored in 256 mode. Leave **0** unless you want the alternate form (§8.2).
 
 **Arming checklist:** load table → LUT · `RDFAST` the stream · `PUSH #$1FF` · `_RET_ SETQ #mode`.
 (A `CALL` will *not* substitute for the `PUSH` — it pushes its own return address, not `$1FF`.)
@@ -2077,7 +2084,7 @@ A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.co
 - **Terminal / ANSI reader** (application) — §18.3
 - **Three decisions** (fetch · dispatch · memory) — §13.1
 - **When to reach for XBYTE** — §3.5, §3.7, §18.7
-- **`x` bit** (undocumented) — §8.2, App. A
+- **Bit 1** (index-form select; ignored in 256 mode) — §8.2, §9.2, App. A
 - **6502 emulator** — Ch. 15
 - **6809 / prefix pages** — §17.2
 - **8086 / x86** — §14.2, §17.1, §17.3

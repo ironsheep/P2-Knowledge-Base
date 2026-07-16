@@ -1782,30 +1782,38 @@ _RET_   SETQ    #%F_0000_00_1               # line 226
    **`%0001`**: high-nibble 0 → 16 primary bytecodes `$00–$0F`; high-nibble ≥ 1 → 240 extended in 15
    groups. **16 + 240 = 256.** ✓
 
-### F-223 — the `x` bit of the mode operand is **undefined** in the Silicon Doc, the YAML, and our manual — `NEEDS-VERIFICATION (Chip question — queued, task #54 Q7)` · **YAML now MARKS it undocumented rather than leaving it dangling**
+### F-223 — mode-operand **bit 1 is the index-form selector**, not an undocumented/stack bit — `RESOLVED (2026-07-16, documentary + Chip-confirmed)`
 
-Both `configuration_patterns` entries print an unexplained bit:
+**Prior (incorrect) reading — now retired.** F-223 was originally logged as "the `x` bit is undefined;
+the demo's *no stack pop* comment suggests it's a stack-pop control; route to Chip." That reading was
+**wrong**: it treated bit 1 as a single undocumented bit and read the demo comment as a hint about the
+stack.
 
-- `full_256_bytecodes: "%A000000xF"` (line 111)
-- `compressed_16_bytecodes: "%ABBBB00xF"` (line 118)
+**The resolved definition.** Reading the *full* Silicon Doc v35 mode table (all ten forms, not just the
+two 256-entry patterns) shows bit 1 straight down the column:
 
-The Silicon Doc defines **`A`** (LUT base), **`B`** (compression threshold) and **`F`** (flag write) — and
-**never defines `x`.** Yet Chip's own demo comment, carried verbatim in the Silicon Doc *and* in
-Parallax's official `xbyte.spin2`, reads:
+| mode | primary (bit 1 = 0) | alternate (bit 1 = 1) |
+|------|--------------------|-----------------------|
+| 128 | `%AAxx0010F` → b[6:0] | `%AAxx0011F` → b[7:1] |
+| 64 | `%AAAx1010F` → b[5:0] | `%AAAx1011F` → b[7:2] |
+| 32 | `%AAAAx100F` → b[4:0] | `%AAAAx101F` → b[7:3] |
+| 16 | `%AAAAA110F` → b[3:0] | `%AAAAA111F` → b[7:4] |
 
-> `_ret_  setq  #$100    'start xbyte with LUT base = $100, **no stack pop**`
+**Bit 1 selects the index form**: `0` = index the dispatch table from the bytecode's *low* bits;
+`1` = index from its *high* bits (freeing the low bits as an operand in `PA`). In the **256-entry mode**
+the bytecode already fills all eight index bits, so there is no low/high choice and **bit 1 is ignored** —
+a genuine don't-care in that mode only. This is where the two 256 patterns print it as a bare `x`.
 
-…which strongly suggests `x` (mode-operand **bit 1**) is a **stack-pop control**. **We do not know, and we
-will not guess.**
-
-- **Empirical check across the whole corpus:** every known implementation leaves it **0** — Chip's `$1A1`
-  and `$081`, the 8080's `$000`, Zog's `$0`, Parallax's `$100`. **Nobody uses the other state**, so usage
-  cannot disambiguate it either.
-- **Route to Chip Gracey** (fold into the expert queue with the IOSP questions).
-- **Not blocking.** The safe idiom is universal and attested nine ways (`PUSH #$1FF` + `_RET_ SETQ #mode`).
-  The XBYTE Guide will teach that and **footnote bit 1 as undocumented**, rather than invent a meaning.
-- **Note this is an upstream (Silicon Doc) documentation gap** that propagated into our YAML and our
-  manual — not a defect we introduced.
+- **Authority:** documentary (directly readable from the v35 mode table) **and confirmed by Chip Gracey**
+  in conversation — *"there is nothing to switch between with 8-bit, so the bit is ignored."* Not a
+  finding to verify; not a guess.
+- The demo's *"no stack pop"* comment is **unrelated to bit 1** — that speculation is withdrawn.
+- **Applied to the manual (2026-07-16):** XBYTE Guide §8.2 rewritten (bit 1 = index-form select; ignored
+  in 256), §9.2 table expanded to all ten forms with the primary/alternate split, §9.5 + Appendix A +
+  the see-also index all corrected. `opus-master/xbyte-body.md`.
+- **YAML follow-through (this cycle):** `architecture/xbyte_engine.yaml` must replace its "x = undocumented"
+  marking with the index-form definition — see F-223b below / the YAML rail.
+- **Chip queue:** Q7 is **resolved** — remove from `DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.md` and task #54.
 
 ### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `CONFIRMED` (low severity, cross-reference gap)
 

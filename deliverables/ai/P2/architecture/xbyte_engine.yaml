@@ -115,23 +115,32 @@ starting_xbyte:
 configuration_patterns:
   legend: |
     %A = LUT base address bit(s).  %BBBB = compression threshold (must be > 0).
-    %F = flag-write bit (see flag_control).  %x = SEE x_bit_undocumented BELOW.
+    %F = flag-write bit (see flag_control).  %x = mode-operand bit 1 (see
+    index_form_bit): in the 256 patterns it is ignored; in the smaller tables
+    bit 1 is the index-form selector (0 = low-bits index, 1 = high-bits index).
 
-  x_bit_undocumented:
-    status: "UNDOCUMENTED -- do not guess at it. Tracked as F-223."
+  index_form_bit:
+    name: "Mode-operand bit 1 -- index-form selector"
+    status: "DEFINED. Documentary (full Silicon Doc v35 mode table) and confirmed by Chip Gracey. Resolves F-223."
     detail: |
-      The Silicon Doc prints the 256-entry patterns as %A000000xF and %ABBBB00xF.
-      It defines %A, %BBBB and %F -- and never defines %x (mode-operand bit 1).
-      Chip Gracey's own XBYTE demo comment, carried verbatim in the Silicon Doc AND
-      in Parallax's official resources/FPGA Examples/xbyte.spin2, reads:
-        _ret_  setq  #$100   'start xbyte with LUT base = $100, no stack pop
-      which suggests bit 1 is a stack-pop control -- but this is NOT confirmed.
-    empirical: |
-      Every known implementation leaves bit 1 = 0: Chip's Spin2 interpreter ($1A1
-      and $081), the 8080 games emulator ($000), Zog ($0), and Parallax's demo
-      ($100). No implementation exercises the other state, so usage cannot
-      disambiguate it either.
-    guidance: "Leave bit 1 = 0. That is what every working implementation does."
+      Bit 1 selects WHICH HALF of the bytecode indexes the dispatch table:
+        bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)
+        bit 1 = 1  -> index from the bytecode's HIGH bits (the 'alternate' form),
+                      leaving the low bits free as an operand in PA.
+      Visible straight down the full v35 mode table: e.g. 128-entry %AAxx0010F
+      (I = b[6:0]) vs %AAxx0011F (I = b[7:1]) differ only in bit 1. Each of the
+      128/64/32/16 sizes has this primary/alternate pair (see alt_pattern below).
+    exception_256: |
+      In the 256-entry mode the bytecode already fills all eight index bits, so
+      there is no low/high choice to make and bit 1 is IGNORED -- a genuine
+      don't-care in that mode only. This is why the two 256 patterns print it as
+      a bare %x. (Chip Gracey: "there is nothing to switch between with 8-bit,
+      so the bit is ignored.")
+    withdrawn_reading: |
+      An earlier revision read bit 1 as a 'stack-pop control', inferred from the
+      demo's 'no stack pop' comment. That reading was INCORRECT and is withdrawn;
+      the 'no stack pop' comment is unrelated to bit 1.
+    guidance: "Leave bit 1 = 0 unless you deliberately want a smaller table's high-bits index form."
 
   full_256_bytecodes:
     pattern: "%A000000xF"
@@ -139,6 +148,7 @@ configuration_patterns:
     index_calc: "I = bytecode[7:0]"
     bytecodes: 256
     lut_usage: "256 longs"
+    bit1_note: "256 mode fills all 8 index bits; bit 1 (the %x) is ignored -- no alternate index form (see index_form_bit)."
 
   compressed_16_bytecodes:
     pattern: "%ABBBB00xF"
@@ -153,24 +163,32 @@ configuration_patterns:
     pattern: "%AAxx0010F"
     lut_base: "%AA0000000"
     index_calc: "I = bytecode[6:0]"
+    alt_pattern: "%AAxx0011F"
+    alt_index_calc: "I = bytecode[7:1]  (bit 1 = 1; high-bits index -- see index_form_bit)"
     bytecodes: 128
-    
+
   64_bytecodes:
     pattern: "%AAAx1010F"
     lut_base: "%AAA000000"
     index_calc: "I = bytecode[5:0]"
+    alt_pattern: "%AAAx1011F"
+    alt_index_calc: "I = bytecode[7:2]  (bit 1 = 1; high-bits index -- see index_form_bit)"
     bytecodes: 64
-    
+
   32_bytecodes:
     pattern: "%AAAAx100F"
     lut_base: "%AAAA00000"
     index_calc: "I = bytecode[4:0]"
+    alt_pattern: "%AAAAx101F"
+    alt_index_calc: "I = bytecode[7:3]  (bit 1 = 1; high-bits index -- see index_form_bit)"
     bytecodes: 32
-    
+
   16_bytecodes:
     pattern: "%AAAAA110F"
     lut_base: "%AAAAA0000"
     index_calc: "I = bytecode[3:0]"
+    alt_pattern: "%AAAAA111F"
+    alt_index_calc: "I = bytecode[7:4]  (bit 1 = 1; high-bits index -- see index_form_bit)"
     bytecodes: 16
 
 flag_control:

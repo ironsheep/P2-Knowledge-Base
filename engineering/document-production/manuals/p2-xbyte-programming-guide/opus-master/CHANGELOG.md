@@ -8,6 +8,15 @@ and you meet the engine already knowing what you are pointing it at. Structural,
 a new **Part I** was inserted, so former Chapters 1–18 are now **3–20** and former Parts I–V are
 now **II–VI** (all cross-references and anchors renumbered to match).
 
+- **§8.2 · §9.2 · §9.5 · Appendix A — mode-operand bit 1 corrected (correctness).** The guide
+  formerly called bit 1 an "undocumented `x` bit" and floated a "stack-pop control" reading from the
+  demo's *no stack pop* comment. That was wrong. Reading the *full* Silicon Doc mode table (all ten
+  forms, not just the two 256-entry patterns) shows **bit 1 is the index-form selector**: `0` indexes
+  the dispatch table from the bytecode's low bits, `1` from its high bits — and in the 256-entry mode,
+  where the byte fills all eight index bits, bit 1 is simply **ignored**. Confirmed by Chip Gracey.
+  §9.2's table is now expanded from five rows to the **full ten forms** (primary + alternate per size),
+  the false "stack-pop" speculation is removed, and the leave-it-0 default is re-explained (it selects
+  the low-bits form). Resolves **F-223**; retires Chip question Q7.
 - **Part I — The Landscape (NEW, XBYTE-free).** Two chapters that build the concepts, then name them:
   - **Chapter 1 — Why Emulate on the P2.** The draw, in three parts — the P2's *facility* for
     writing interpreters (hardware built for the interpreter's inner loop, the largest draw); a
