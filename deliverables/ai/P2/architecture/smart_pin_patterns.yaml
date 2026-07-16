@@ -95,24 +95,36 @@ spi_patterns:
 
 pwm_patterns:
   motor_pwm_with_deadtime:
-    description: PWM for motor control with dead-time insertion
+    description: >-
+      Complementary half-bridge PWM (high-side + low-side) with software
+      dead-time to prevent shoot-through. IMPORTANT: the P2 has NO single-pin
+      complementary-output or dead-band PWM mode. A complementary pair is
+      ALWAYS two Smart Pins -- one per side -- enabled together and coordinated
+      carefully; the dead-band is produced in software, not by any pin mode.
     mode: P_PWM_SAWTOOTH
+    pins: "two Smart Pins per half-bridge -- one high-side, one low-side"
     setup: |
-      ' Configure PWM with base period
-      wrpin   ##P_PWM_SAWTOOTH | P_OE, pwm_pin
-      wxpin   pwm_frame_ticks, pwm_pin ' Frame period
-      dirh    pwm_pin                  ' Enable smart pin
-      wypin   #0, pwm_pin              ' Initial duty = 0 (Y after enable)
-      
-      ' Update duty cycle
-      wxpin   duty_value, pwm_pin      ' New duty
-      wypin   #1, pwm_pin              ' Trigger update
+      ' TWO Smart Pins, one per side. The low-side pin inverts its output
+      ' (P_INVERT_OUTPUT) so the pair is complementary; both share one frame.
+      wrpin   ##P_PWM_SAWTOOTH | P_OE, pin_pwm_h            ' high side (true)
+      wrpin   ##P_PWM_SAWTOOTH | P_OE | P_INVERT_OUTPUT, pin_pwm_l  ' low (inv)
+      wxpin   pwm_frame_ticks, pin_pwm_h   ' same frame period on both pins
+      wxpin   pwm_frame_ticks, pin_pwm_l
+      dirh    pin_pwm_h
+      dirh    pin_pwm_l                     ' enable both pins together
     dead_time_handling: |
-      ' Complementary outputs with dead-time
-      ' High-side and low-side must never overlap
-      sub     high_duty, dead_time     ' Reduce high-side
-      add     low_start, dead_time     ' Delay low-side
-    source: isp_bldc_motor.spin2
+      ' Dead-time is inserted in SOFTWARE by offsetting the two duty values so
+      ' the active intervals never overlap -- the gap between them IS the
+      ' dead-band. (isp_bldc_motor.spin2: high side on later, low side off earlier.)
+      sub     high_duty, dead_time     ' high side switches on later
+      add     low_duty,  dead_time     ' low side switches off earlier
+      wypin   high_duty, pin_pwm_h
+      wypin   low_duty,  pin_pwm_l
+    source: "isp_bldc_motor.spin2 (OBEX 2874, ISP BLDC Motor Control)"
+    authority: >-
+      Two-pin requirement confirmed by Chip Gracey (2026-07-16); mechanism
+      grounded in isp_bldc_motor.spin2 (two WRPIN, high=true / low=inverted,
+      software dead-gap offset).
     
   dac_dithered_output:
     description: 16-bit DAC using 8-bit DAC with dithering

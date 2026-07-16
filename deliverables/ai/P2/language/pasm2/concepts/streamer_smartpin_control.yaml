@@ -217,12 +217,18 @@ smart_pin_modes:
       
     pwm_sawtooth:
       mode: "P_PWM_SAWTOOTH"
-      description: "PWM for motor control"
+      description: "PWM for motor control (one output pin per Smart Pin)"
+      complementary_note: >-
+        A complementary half-bridge pair (high + low side) is NOT one Smart Pin:
+        the P2 has no single-pin dead-band mode (confirmed by Chip Gracey, 2026-07-16).
+        Use TWO Smart Pins -- one per side, low side inverted (P_INVERT_OUTPUT),
+        enabled together -- and insert dead-time in software. Full pattern in
+        architecture/smart_pin_patterns.yaml (motor_pwm_with_deadtime).
       dead_time_critical: |
-        ' CRITICAL: Dead-time prevents shoot-through
-        ' High-side and low-side must never overlap!
-        sub     high_duty, dead_time
-        add     low_start, dead_time
+        ' Dead-time (shoot-through prevention) is a TWO-PIN, software technique:
+        ' offset the high- and low-side duty so their active intervals never overlap.
+        sub     high_duty, dead_time    ' high side switches on later
+        add     low_duty,  dead_time    ' low side switches off earlier
       source: isp_bldc_motor.spin2
       
     nco_frequency:

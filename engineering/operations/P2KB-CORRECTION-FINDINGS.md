@@ -1857,6 +1857,38 @@ learns nothing about the hazard. They find it only by happening to read the `REP
 zero — so nothing ships and no glob in the assemble scripts reaches them (those use explicit
 `REQUIRED_FILES[]`). Working-tree clutter only; worth sweeping, not a release concern.
 
+### F-225 — two KB YAMLs framed complementary-output **dead-time as a single-pin PWM feature** — `DONE (2026-07-16, Chip-confirmed)`
+
+**Surfaced by the F-223 "what else did we miss?" sweep** (same failure class: a downstream
+derivation that dropped a fact its faithful source had). Two pattern YAMLs presented dead-time as
+an attribute of one PWM Smart Pin:
+
+- `architecture/smart_pin_patterns.yaml` → `motor_pwm_with_deadtime` (single `pwm_pin`; the second
+  pin never appears)
+- `language/pasm2/concepts/streamer_smartpin_control.yaml` → `pwm_sawtooth.dead_time_critical` (same)
+
+**Chip Gracey (conversation, 2026-07-16):** the P2 has **no single-pin complementary-output or
+dead-band mode**. A complementary pair is **always two Smart Pins**, one per side, coordinated
+carefully. Corroborated by `isp_bldc_motor.spin2` (OBEX 2874): high side true, low side inverted
+(`P_INVERT_OUTPUT`), **software** dead-gap offset so the active intervals never overlap. The faithful
+upstream (`engineering/ingestion/sources/code-analysis/bldc-motor-control-analysis.md`) had it right
+(two `wrpin`, one inverted) — the pattern YAMLs collapsed it to one pin.
+
+- **Fixed:** both YAMLs now show two pins + `P_INVERT_OUTPUT` + software dead-gap, with the
+  no-single-pin-mode framing and a cross-ref between them.
+- **Manual:** IOSP §9.1 gained a short "Complementary Outputs and Dead-Band" note (two coordinated
+  Smart Pins; dead-band is software, no width register). The IOSP body had shipped **no** dead-band
+  claim, so nothing wrong was public — this closes the RA-15 proposed-add (premise refuted).
+- **YAML publishes on the next KB release rail (§9).**
+
+### F-226 — DAC ENOB is **unmeasured** — ship the qualitative caveat, print no number — `RESOLVED (2026-07-16, Chip-confirmed)`
+
+**Chip Gracey (conversation, 2026-07-16):** the dithered 16-bit DAC's effective-number-of-bits has
+**not been measured**, and no better answer exists. So no ENOB figure is printable. The IOSP manual
+already ships only the qualitative caveat ("nominal 16-bit, averaged over time; absolute accuracy
+limited by the 8-bit DAC core") — **no edit needed**. The reviewer's "~10–12 bits" stays out
+(opinion, and now confirmed never-measured). Closes the RA-18/36/49/56 ENOB question.
+
 ---
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
