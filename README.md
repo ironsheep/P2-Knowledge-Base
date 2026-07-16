@@ -2,7 +2,7 @@
 
 > Comprehensive documentation and resources for the Parallax Propeller 2 (P2) multicore microcontroller
 
-[![Version](https://img.shields.io/badge/version-1.14.4-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
+[![Version](https://img.shields.io/badge/version-1.14.5-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
 ## 🤖 Using with AI Assistants (Claude, GPT, etc.)

@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.14.5] - 2026-07-16
+
+**XBYTE mode-operand index forms; complementary-PWM dead-band**
+
+### Added
+- XBYTE table-size reference lists all ten mode forms, including the alternate high-bits index forms for the 128-, 64-, 32-, and 16-entry tables.
+
+### Changed
+- XBYTE mode operand: bit 1 is the index-form selector — 0 indexes the dispatch table from the bytecode's low bits, 1 from its high bits; the 256-entry mode ignores it.
+- Complementary PWM for half-bridge drive is documented as a two-Smart-Pin technique: one pin per side, the low side inverted, with the dead-band produced in software so the high- and low-side active intervals never overlap.
+
 ## [1.14.4] - 2026-07-15
 
 **Smart Pin scope filter range; XBYTE engine examples**
