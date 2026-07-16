@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-15T23:11:12.875931",
+    "generated": "2026-07-16T22:56:58.003642",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1724,
@@ -6395,8 +6395,8 @@
     },
     "p2kbArchSmartPinPatterns": {
       "path": "deliverables/ai/P2/architecture/smart_pin_patterns.yaml",
-      "mtime": 1781981347,
-      "sha256": "83656477a1cd415e2128a8a083717fb9b94205ef07814d908a3cbddcc0b370e6"
+      "mtime": 1784241752,
+      "sha256": "f4f70198b8672d2c41ea744fcd54a01f21bc8d54443378af71762de93afb6004"
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
@@ -6455,8 +6455,8 @@
     },
     "p2kbArchXbyteEngine": {
       "path": "deliverables/ai/P2/architecture/xbyte_engine.yaml",
-      "mtime": 1784064867,
-      "sha256": "beffa9e9818a8a77b1f9eb4cfcbbcfc24f91b12d6546f5f61747d60013ec5bfd"
+      "mtime": 1784236986,
+      "sha256": "6c06e6f097a1983945ad00311df92d33f9b4bc2e4026ffe51df55ecb9782f892"
     },
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
@@ -7915,8 +7915,8 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1782935020,
-      "sha256": "a6dadc6c15a24bdef6af6ac51a976bdf9587988d9743ef7576ce444f17c2d608"
+      "mtime": 1784241752,
+      "sha256": "8c41c10c4d8c3bfc26d7099c6c4748971f4b3f215c4a8effccace9eba770e5d2"
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
