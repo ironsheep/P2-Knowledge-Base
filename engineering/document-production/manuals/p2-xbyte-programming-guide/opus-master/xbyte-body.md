@@ -1845,8 +1845,8 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 |-------------|--------|----------|--------|
 | **RDFAST** | `RDFAST {#}D,{#}S` | `EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS` | Begin a fast sequential hub FIFO read at S[19:0]; D[13:0] = block size in 64-byte units (0 = unlimited), D[31] = no-wait. Precedes all RFxxxx reads. |
 | **RFBYTE** | `RFBYTE D {WC/WZ/WCZ}` | `EEEE 1101011 CZ0 DDDDDDDDD 000010000` | Read a zero-extended byte from the FIFO into D. C = byte MSB, Z if zero. Fetches the bytecode. |
-| **RFWORD** | `RFWORD D {WC/WZ/WCZ}` | (FIFO read family) | Read a zero-extended word from the FIFO — a fixed 16-bit inline operand. |
-| **RFLONG** | `RFLONG D {WC/WZ/WCZ}` | (FIFO read family) | Read a long from the FIFO — a fixed 32-bit inline operand. |
+| **RFWORD** | `RFWORD D {WC/WZ/WCZ}` | `EEEE 1101011 CZ0 DDDDDDDDD 000010001` | Read a zero-extended word from the FIFO — a fixed 16-bit inline operand. |
+| **RFLONG** | `RFLONG D {WC/WZ/WCZ}` | `EEEE 1101011 CZ0 DDDDDDDDD 000010010` | Read a long from the FIFO — a fixed 32-bit inline operand. |
 | **RFVAR** | `RFVAR D {WC/WZ/WCZ}` | `EEEE 1101011 CZ0 DDDDDDDDD 000010011` | Read a **zero-extended** 1–4-byte variable-length value into D. C = 0. |
 | **RFVARS** | `RFVARS D {WC/WZ/WCZ}` | `EEEE 1101011 CZ0 DDDDDDDDD 000010100` | Read a **sign-extended** 1–4-byte variable-length value into D. C = value MSB. |
 | **GETPTR** | `GETPTR D` | `EEEE 1101011 000 DDDDDDDDD 000110100` | Get the current FIFO hub pointer into D. XBYTE writes this to `PB` each dispatch. |

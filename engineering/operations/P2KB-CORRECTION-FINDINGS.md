@@ -1811,9 +1811,10 @@ a genuine don't-care in that mode only. This is where the two 256 patterns print
 - **Applied to the manual (2026-07-16):** XBYTE Guide §8.2 rewritten (bit 1 = index-form select; ignored
   in 256), §9.2 table expanded to all ten forms with the primary/alternate split, §9.5 + Appendix A +
   the see-also index all corrected. `opus-master/xbyte-body.md`.
-- **YAML follow-through (this cycle):** `architecture/xbyte_engine.yaml` must replace its "x = undocumented"
-  marking with the index-form definition — see F-223b below / the YAML rail.
-- **Chip queue:** Q7 is **resolved** — remove from `DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.md` and task #54.
+- **YAML (applied 2026-07-16):** `architecture/xbyte_engine.yaml` — the `x_bit_undocumented` block is
+  replaced by `index_form_bit` (bit 1 = index-form select; 256 don't-care), and the 128/64/32/16 entries
+  gained `alt_pattern`/`alt_index_calc`. Commit `bb02525a`. Publishes on the next KB release rail (§9).
+- **Chip queue:** Q7 is **resolved** — removed from `DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.md`; strike from task #54.
 
 ### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `CONFIRMED` (low severity, cross-reference gap)
 
