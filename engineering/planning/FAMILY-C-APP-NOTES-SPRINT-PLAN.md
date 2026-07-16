@@ -296,7 +296,7 @@ each workspace from opus-master, clone the `p2kb-appnote-*` templates (incl. the
 `p2kb-appnote-diagrams.sty` — task #160 propagation applies), escape LaTeX, stage **only
 changed files** to `outbound/P2AN005|006|007/`, no ToC / no `--toc`. Leave all three staged
 for Stephen to run on the Forge. (First render is a v0.1.0 draft-review PDF per note — the
-XBYTE "stood up" bar.) Publish each `examples-library/` as `P2ANxxx-src-<YYMMDD>.zip` at
+XBYTE "stood up" bar.) Publish each `examples-library/` as `P2ANxxx-src.zip` at
 release (release is a later step, not this stand-up sprint).
 
 **5c — Untrack the mistakenly-committed fodder (final step).** Two tracked files under the

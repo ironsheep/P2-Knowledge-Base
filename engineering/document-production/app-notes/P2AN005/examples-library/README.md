@@ -25,7 +25,7 @@ watch each recipe work.
 - **R2/R3/R4** are pure DEBUG — no external parts. R2's `YIELD_EVERY` and R3's
   consumer pace are the knobs to experiment with (see the note's Verify sections).
 
-**Packaging.** At release these files are published as `P2AN005-src-<YYMMDD>.zip`
+**Packaging.** At release these files are published as `P2AN005-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

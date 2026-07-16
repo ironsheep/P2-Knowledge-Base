@@ -24,7 +24,7 @@ appears.
   the irradiance curve). The code paths compile and run; the absolute readings are
   confirmed against hardware in a later pass (see the note's Verify sections).
 
-**Packaging.** At release these files are published as `P2AN004-src-<YYMMDD>.zip`
+**Packaging.** At release these files are published as `P2AN004-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

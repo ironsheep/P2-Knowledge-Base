@@ -27,7 +27,7 @@ reproduced here — they are scaled-up compositions of these same primitives.
 hear or see the output, add an RC low-pass (or a headphone/line coupling capacitor)
 on the DAC pin per the note's Hardware section.
 
-**Packaging.** At release, these files are published as `P2AN003-src-<YYMMDD>.zip`
+**Packaging.** At release, these files are published as `P2AN003-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

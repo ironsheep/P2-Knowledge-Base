@@ -302,7 +302,11 @@ git add deliverables/documents/README.md \
         engineering/README.md
 # plus, if uncommitted from prior sessions: the manual's opus-master/CHANGELOG.md (post-audit) +
 # source, MANUAL-DESCRIPTOR.md, any shared platform edit, the workspace render, and a force-add
-# for a gitignored example ZIP:  git add -f deliverables/documents/DOCs/<slug>-src-YYMMDD.zip
+# for a gitignored example ZIP:  git add -f deliverables/documents/DOCs/<slug>-src.zip
+# ^ the ZIP name carries NO date — a stable, permanent filename overwritten in place each
+#   release (git tracks history). A dated name mints a new URL every rebuild, forcing a
+#   hand-edit of every download link at two sites (roster post + review-page README) and
+#   orphaning the prior dated copy in DOCs/. Version lives in the roster row + changelog.
 git commit -m "Release <slug> vX.Y.Z"
 git tag -a <slug>-vX.Y.Z -m "<Manual Name> vX.Y.Z"
 ```

@@ -37,7 +37,7 @@ on a P2 board (two cogs actually contending) — see each recipe's Verify sectio
 design should use, and why (copy vs. reference, latest-wins vs. queue), is a
 contract decision covered by the **P2 Architect's Guide**, not this library.
 
-**Packaging.** At release these files are published as `P2AN007-src-<YYMMDD>.zip`
+**Packaging.** At release these files are published as `P2AN007-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

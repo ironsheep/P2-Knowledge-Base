@@ -26,7 +26,7 @@ folder. Build with DEBUG enabled (`-d`) — the utility reports through `debug()
 Watching the overflow halt actually fire (shrink a stack below what its code
 needs) is a bench step on a P2 board.
 
-**Packaging.** At release these files are published as `P2AN006-src-<YYMMDD>.zip`
+**Packaging.** At release these files are published as `P2AN006-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

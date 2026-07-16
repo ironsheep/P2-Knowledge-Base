@@ -19,7 +19,7 @@ drift.
 appear. Each recipe's expected result is a closed-form value you can check by hand
 (see the note's Verify steps) — the CORDIC computes deterministic math.
 
-**Packaging.** At release, these files are published as `P2AN002-src-<YYMMDD>.zip`
+**Packaging.** At release, these files are published as `P2AN002-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

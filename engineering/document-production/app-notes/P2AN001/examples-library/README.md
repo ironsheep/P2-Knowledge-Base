@@ -21,7 +21,7 @@ deltas; apply them to `adc-single-pin-base.spin2`. The eight-channel capstone is
 appears, and jumper the DAC pin to the ADC pin per the note. The expected reading is
 ~1,650,000 µV (the loopback half-scale); see the note's Verify steps.
 
-**Packaging.** At release, these files are published as `P2AN001-src-<YYMMDD>.zip`
+**Packaging.** At release, these files are published as `P2AN001-src.zip`
 beside the PDF in `deliverables/documents/DOCs/`, with a download link in the
 publication roster (per the app-note production convention — see
 `../../APP-NOTE-CREATION-GUIDE.md` §6).

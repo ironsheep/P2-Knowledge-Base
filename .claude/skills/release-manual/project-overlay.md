@@ -14,7 +14,7 @@ For any manual that publishes an `examples-library.zip`, the PDF silent-drop
 check is **not sufficient** — also verify the example corpus has not drifted:
 
 - **Run the identity checker; it must be GREEN before the ZIP is published**
-  (before the `git add -f …-src-YYMMDD.zip` in Phase 5, and before any re-zip):
+  (before the `git add -f …-src.zip` in Phase 5, and before any re-zip):
 
   ```bash
   python3 engineering/tools/verify-example-corpus-identity.py            # default: Debug Window
