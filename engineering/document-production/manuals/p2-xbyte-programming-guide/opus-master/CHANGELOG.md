@@ -1,6 +1,39 @@
 # P2 XBYTE Programming Guide - Changelog
 
-## v0.3.0 (2026-07-15) — the reader's-frame edition (in development)
+## v0.4.0 (2026-07-17) — the community-thread pass (in development)
+
+A Parallax forum thread — **"basic XBYTE questions"** (`discussion/176253`) — and
+its attached minimal VM were tested against the guide, question by question. The
+guide already answered the things its reader was stuck on: where the dispatch
+table lives, how to load it, how to arm the engine, and why handlers cannot run
+from hub. Three additions close what it did *not* cover. None is a correction;
+all are additive, and each traces to the Silicon Doc or the `SETLUTS` definition —
+not to the community code, which serves only as a corroborating example.
+
+- **§6.1 — the 256-entry ceiling and the *own*-cog LUT (enhancement).** A new
+  HARDWARE note answers a misconception the thread surfaced (trying to "double" the
+  table across two cogs' LUTs to fit a large opcode set): a bytecode is one byte,
+  so it indexes at most **256** entries, read from the running cog's own LUT.
+  `SETLUTS` mirrors a companion cog's LUT *writes* and does **not** merge address
+  spaces. For more than 256 distinct opcodes the tool is a prefix + one-shot
+  `SETQ2` **alternate table** (§8.3, Chapter 17), not more LUT; compression (§9.3)
+  is the complement for *shared* handlers.
+- **§8.1 + §10.4 + Appendix D — the arming `$1FF` is never popped
+  (completeness).** §8.1 now states the mechanism the Silicon Doc gives verbatim —
+  the triggering return *"does not pop the stack,"* which is why a single
+  `PUSH #$1FF` serves every dispatch. §10.4 adds the consequence the guide's
+  run-once examples never hit: a **reusable** interpreter cog that re-arms must
+  `POP` that stale `$1FF` on exit, or the eight-level hardware stack drifts one
+  entry per job and eventually wraps with no fault. New Appendix D row for the
+  symptom.
+- **§12.4 + Appendix C.8 — the dedicated interpreter cog (enhancement).** A new
+  §12.4 names the structural step every real interpreter takes right after the
+  minimal VM works — give the engine its own cog, launched by `COGINIT` with the
+  table already in its LUT and fed by a hub mailbox — and a new Appendix C entry
+  cites the thread's community example (refaQtor's *essential XBYTE*) as a compact,
+  real instance of that shape, and of the §10.4 `POP`.
+
+## v0.3.0 (2026-07-15) — the reader's-frame edition
 
 Added a front orientation layer so the guide opens on *why* and *what*, not mechanism. A reader
 was gathering detail from the front with no frame; now two XBYTE-free chapters precede everything
