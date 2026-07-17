@@ -1296,11 +1296,11 @@ Ask this question early, because the answer changes your architecture.
 
 **If the guest drives real hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
 
-And now the sting: **that per-instruction pacing has nowhere to live under XBYTE** (§13.4). This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §14.2 carries the caveat it does.
+And now the catch: **that per-instruction pacing has nowhere to live under XBYTE** (§13.4). This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §14.2 carries the caveat it does.
 
 If your guest is a language runtime, a scripting VM, or a self-contained program with no externally visible timing, you need none of this — and rung 3 is yours.
 
-## 14.9 The long tail {#sec-14-9}
+## 14.9 Edge cases {#sec-14-9}
 
 The survey tables stop where the honest advice becomes *"it depends on your guest."* Three things routinely bite, and none of them are P2-specific:
 
@@ -1982,7 +1982,7 @@ The most useful thing this appendix can tell you is **which rung of the dispatch
 Two pieces of first-party code are worth more than any commentary.
 
 - **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (`https://github.com/parallaxinc/propeller`), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 7.
-- **The Spin2 interpreter** — the language's own bytecode engine, and the most sophisticated XBYTE program in existence. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all used in anger. If you read one thing, read this.
+- **The Spin2 interpreter** — the language's own bytecode engine, and the most sophisticated XBYTE program in existence. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all put to full use. If you read one thing, read this.
 
 ## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}
 
@@ -2033,7 +2033,7 @@ A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.co
 Everything above is a production interpreter or emulator. This last pointer is the opposite, and just as useful: the **smallest complete XBYTE VM** a community member could reduce it to — four bytecodes (`PUSH`, `ADD`, `SUB`, `HALT`) that compute a value and blink it on an LED. It is worth reading for two things this book otherwise only describes:
 
 - it runs the engine in a **dedicated cog**, launched with `COGINIT` and driven by a three-long hub **mailbox** (the §12.4 pattern), and
-- its halt handler **pops the arming `$1FF`** before returning the cog to idle, so the cog can be armed again for the next job (the §10.4 re-arm rule, in the flesh).
+- its halt handler **pops the arming `$1FF`** before returning the cog to idle, so the cog can be armed again for the next job (the §10.4 re-arm rule, made concrete).
 
 It appears in the Parallax forum thread **"basic XBYTE questions"** — `https://forums.parallax.com/discussion/176253/basic-xbyte-questions` — posted by **refaQtor**, where **Eric Smith (ersmith)** and **Christof Eb.** work through the same table-in-LUT, arming, and hub-versus-LUT points this book makes. Read it as a compact worked example, not a specification: it is community code, and the authority for everything it does is the Silicon Doc and the chapters here.
 

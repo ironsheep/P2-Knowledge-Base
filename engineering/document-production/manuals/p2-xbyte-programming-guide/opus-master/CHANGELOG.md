@@ -32,6 +32,12 @@ not to the community code, which serves only as a corroborating example.
   table already in its LUT and fed by a hub mailbox — and a new Appendix C entry
   cites the thread's community example (refaQtor's *essential XBYTE*) as a compact,
   real instance of that shape, and of the §10.4 `POP`.
+- **Clarity — obscure idioms replaced with plain wording.** This guide serves human
+  readers *and* AI code-generation agents, so culturally-specific idioms whose literal
+  words mislead were swapped for plain terms (the deliberate, clear metaphor voice —
+  ladder/rung, road, tax/ledger — is untouched): *used in anger* → *put to full use*
+  (§C.1); *The long tail* → *Edge cases* (§14.9 heading); *the sting* → *the catch*
+  (§14.8); *in the flesh* → *made concrete* (§C.8).
 
 ## v0.3.0 (2026-07-15) — the reader's-frame edition
 
