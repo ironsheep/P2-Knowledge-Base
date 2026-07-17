@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.3.0\par}
+{\large\color{blue}Version 0.4.0\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -639,6 +639,10 @@ The *Parallax Propeller 2 Documentation v35* states it directly: the table *"mus
 **Do not transpose the two fields.** The address is the **low** 10 bits; the skip pattern is the **high** 22 bits. A handler that lives at LUT address `$200` with no skipping has the entry `$0000_0200`, not the address shifted left. Build entries with the address in the low bits and the pattern shifted up by 10.
 :::
 
+::: hardware
+**The table is *this* cog's LUT — and 256 entries is the ceiling.** A bytecode is one byte, so it indexes at most **256** entries, and the engine reads them from the LUT of the cog that is running it. You cannot enlarge the table by *sharing* LUT across two cogs: **`SETLUTS`** mirrors a companion cog's LUT *writes* into this cog's LUT — it does **not** merge the two into one address space, and each cog still has its own 512-long LUT. So when a guest needs **more than 256 distinct opcodes**, the answer is not more LUT but a **prefix bytecode that borrows an alternate table** with one-shot `SETQ2` (§8.3, Chapter 17) — exactly how a CPU's extended-opcode pages are handled. **Compression** (§9.3) is the complementary tool, for when many bytecodes *share* one handler rather than needing new ones.
+:::
+
 ## 6.2 Building a table entry {#sec-6-2}
 
 Because an entry packs an address and a pattern, build it by OR-ing the two fields. Assemblers let you compute this at assembly time:
@@ -785,7 +789,7 @@ So arming XBYTE takes two things in place:
                                             '    starts now
 ```
 
-After that `_ret_ setq`, the engine is running: it fetches the first bytecode and dispatches it, and keeps going until stopped.
+After that `_ret_ setq`, the engine is running: it fetches the first bytecode and dispatches it, and keeps going until stopped. The `$1FF` is **not consumed** as it goes — the Silicon Doc is explicit that the triggering return *"does not pop the stack,"* so the single `PUSH` you did at arm time serves *every* dispatch that follows, sitting on the hardware stack for as long as the engine runs. (That it is never popped has a consequence when you eventually leave the engine — §10.4.)
 
 ::: caution
 **The `$1FF` must be on the stack before the arming `_RET_`, and you put it there with `PUSH #$1FF`.**
@@ -1001,6 +1005,10 @@ op_port_write
 ## 10.4 Stopping the engine {#sec-10-4}
 
 XBYTE runs until a handler chooses **not** to return to `$1FF`. A "halt" bytecode's handler simply does not end in the dispatch-continuing return — it branches to ordinary code instead, leaving the engine. That is the clean way to exit: one bytecode whose handler jumps out of the loop rather than back into it.
+
+::: caution
+**If the cog will re-arm, reclaim the `$1FF` first.** The arming `$1FF` was never popped (§8.1) — so the moment a handler jumps *out* of the loop instead of returning to it, that `$1FF` is still sitting on the hardware stack. For a **run-once** VM that halts and parks (the shape of §12.2), that is harmless; the cog never touches the stack again. But a **reusable interpreter cog** — one that finishes a job, drops back to an idle wait, and later arms *again* for the next job — must **`POP`** that stale `$1FF` as it exits, or the hardware stack gains one entry per job. With only eight levels, and any handler or between-jobs code that also uses `CALL`/`RET`, that drift eventually starves the stack — and it **wraps with no fault** to warn you. The rule is simple: if you will arm more than once, pop on the way out. (Appendix C's minimal community example, §C.8, is a reusable cog that does exactly this.)
+:::
 
 # Chapter 11: Debugging XBYTE {#ch-11}
 
@@ -1224,6 +1232,14 @@ alu                                         ' shared ADD/SUB body
 ```
 
 `ADD`'s entry skips the `sub a,b` line; `SUB`'s entry skips the `add a,b` line. The table changes from two handler addresses to two `alu`-with-pattern entries; the body exists once. For two bytecodes the saving is small, but for a dozen ALU operations it is the difference between one routine and a dozen.
+
+## 12.4 In practice: the engine usually runs in its own cog {#sec-12-4}
+
+The VM above arms XBYTE in the same cog that set it up, then parks — ideal for seeing the whole thing at once. A real interpreter is almost always different in one structural way: **the engine gets a cog to itself.** The Spin2 interpreter does this; so does every emulator in Appendix C.
+
+The shape is always the same. A launching cog builds an image whose LUT already holds the dispatch table, starts a cog on it with **`COGINIT`**, and shares a small **mailbox** in hub — a few longs the two cogs use to say *"here is the program," "here is where to put the result,"* and *"go."* The interpreter cog's *first act* is the arming sequence of Chapter 8; from then on the exit rules of §10.4 — including the re-arm `POP` if it will serve more than one job — are what keep it re-usable.
+
+This guide stops at the engine and leaves cog orchestration (`COGINIT`, mailbox protocols) to the general P2 references. The pattern is named here only because it is where most projects go the moment their first bytecodes run. For a complete, minimal, community-written instance of exactly this shape — a dedicated XBYTE cog fed by a hub mailbox, popping its `$1FF` between jobs — see **Appendix C, §C.8**.
 
 # Chapter 13: The Three Decisions {#ch-13}
 
@@ -2206,6 +2222,15 @@ A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, w
 
 A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§18.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder — and this is the P2 proof of it.
 
+## C.8 A minimal community example — the "essential XBYTE" VM {#sec-c-8}
+
+Everything above is a production interpreter or emulator. This last pointer is the opposite, and just as useful: the **smallest complete XBYTE VM** a community member could reduce it to — four bytecodes (`PUSH`, `ADD`, `SUB`, `HALT`) that compute a value and blink it on an LED. It is worth reading for two things this book otherwise only describes:
+
+- it runs the engine in a **dedicated cog**, launched with `COGINIT` and driven by a three-long hub **mailbox** (the §12.4 pattern), and
+- its halt handler **pops the arming `$1FF`** before returning the cog to idle, so the cog can be armed again for the next job (the §10.4 re-arm rule, in the flesh).
+
+It appears in the Parallax forum thread **"basic XBYTE questions"** — `https://forums.parallax.com/discussion/176253/basic-xbyte-questions` — posted by **refaQtor**, where **Eric Smith (ersmith)** and **Christof Eb.** work through the same table-in-LUT, arming, and hub-versus-LUT points this book makes. Read it as a compact worked example, not a specification: it is community code, and the authority for everything it does is the Silicon Doc and the chapters here.
+
 # Appendix D: Troubleshooting {#app-d}
 
 | Symptom | Likely cause | Fix |
@@ -2215,6 +2240,7 @@ A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.co
 | Wrong handler runs | address/skip fields transposed in a table entry | address in [9:0], SKIPF pattern in [31:10] (§6.1) |
 | Handler runs the wrong variant | wrong SKIPF pattern in the table entry | recompute the pattern; remember every set bit *skips* (§4.4) |
 | Dispatch corrupts after a few bytecodes | hardware stack overflow | shorten handler call chains; the stack is 8 levels (§10.1) |
+| A **reusable** interpreter cog drifts or faults after several *jobs* | each arming left its `$1FF` on the stack — the exit never popped it | `POP` the `$1FF` as the halt handler exits, before re-arming (§8.1, §10.4) |
 | Flags behave unexpectedly across bytecodes | F bit set when not intended (or vice-versa) | set/clear bit 0 of the mode operand deliberately (§9.4) |
 | A prefixed/extended opcode decodes as the base opcode | no alternate-table handling | make the prefix a one-shot `SETQ2` handler (§8.3, §17.2) |
 | A prefix corrupts the *next* instruction rather than redirecting it | it is a **modifier** prefix, not a map prefix — `SETQ2` is the wrong tool | set a state register and re-fetch (§17.3) |
