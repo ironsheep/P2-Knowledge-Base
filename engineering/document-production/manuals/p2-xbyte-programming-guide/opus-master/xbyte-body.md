@@ -1075,9 +1075,9 @@ This guide stops at the engine and leaves cog orchestration (`COGINIT`, mailbox 
 
 # Chapter 13: The Three Decisions {#ch-13}
 
-Everything so far has taught the engine. This chapter is the judgement that comes *before* you use it — and it is the most important chapter in the book, because the obvious way to think about XBYTE is wrong.
+Everything so far has taught the engine. This chapter is the judgement that comes *before* you use it: which of the engine's assets your guest can actually take. The intuitive test is not the one that decides it.
 
-The obvious way is to ask: *does my guest's instruction shape fit the engine?* Byte-stream and opcode-first, and you are in the sweet spot; word opcodes or fixed-width words, and you are not. It is a tidy story, and it is not what happens. There are working P2 emulators for guests that are *perfectly* byte-stream and opcode-first, and they do not use XBYTE at all. There are others whose instruction shape is a poor fit, and they use half of it very happily.
+The intuitive test is to ask: *does my guest's instruction shape fit the engine?* Byte-stream and opcode-first, and you are in the sweet spot; word opcodes or fixed-width words, and you are not. That test is tidy, but it does not predict what real emulators do. There are working P2 emulators for guests that are *perfectly* byte-stream and opcode-first, and they do not use XBYTE at all. There are others whose instruction shape is a poor fit, and they use half of it very happily.
 
 Instruction shape is not the axis. **Three decisions are**, and this chapter is about them.
 
@@ -1096,9 +1096,9 @@ They are genuinely independent: you can take the second without the first. But t
 | **The dispatch** | How do you get from opcode to handler? | a jump table · `EXECF` · XBYTE |
 | **The memory model** | How does the guest read and write its *data*? | hub · external RAM · memory-mapped I/O |
 
-The dispatch is **independent of the other two**. That is not a claim from theory — it is measurable. There exists an emulator published in two variants, identical but for where the guest's memory lives: one keeps it in hub, the other in external PSRAM. Between those two variants, **about a hundred lines change out of more than eight thousand, and not one of them is in the dispatch.** The opcode table, the decode, the handler jump: untouched. Swap the entire memory backend and the dispatch never notices.
+The dispatch is **independent of the other two**, and one emulator lets you see it directly. Marco Maccaferri's P2 8086 PC-XT emulator was published in two variants that differ only in where the guest's memory lives: one keeps it in hub, the other in external PSRAM. Diff the two and **about a hundred lines change out of more than eight thousand — and not one of them is in the dispatch.** The opcode table, the decode, the handler jump: untouched. Swap the entire memory backend and the dispatch never notices. (Both variants, and a second 8086 emulator that takes a different dispatch rung, are in Appendix C.)
 
-Hold that result. Everything else in this chapter follows from it.
+That independence is the result the rest of the chapter builds on.
 
 ## 13.2 The dispatch ladder {#sec-13-2}
 
@@ -1131,12 +1131,12 @@ The other builds `EXECF` entries and lets the skip pattern collapse whole famili
 Look at what is the same and what changed. Both hand-roll the **fetch**. Both push their **own** return address. The only difference is the last instruction — and that difference buys the whole shared-body idiom.
 
 ::: tip
-This is the most useful thing to know about XBYTE: **you can take the dispatch asset without taking the engine.** `EXECF` plus a LUT table is available to any program, any time, with no arming, no `$1FF`, and no constraint on where the guest's code lives. Most working P2 emulators live exactly here, on rung 2 — and they get there deliberately, not because they failed to reach rung 3.
+A key point: **you can take the dispatch asset without taking the engine.** `EXECF` plus a LUT table is available to any program, any time, with no arming, no `$1FF`, and no constraint on where the guest's code lives. Most working P2 emulators live exactly here, on rung 2; §13.3 explains why.
 :::
 
 ## 13.3 The coupling decision {#sec-13-3}
 
-So why do they stop at rung 2? Because of the fetch — and the fetch is not a feature choice. **It is a coupling decision, and you make it on the first day.**
+They stop at rung 2 because of the fetch, and the fetch is not a feature choice but a coupling decision — one you make on the first day.
 
 The FIFO reads **hub memory**. That is the whole of it, and everything follows:
 
@@ -1146,47 +1146,47 @@ If the guest's program fits in hub, auto-fetch is free speed and you should take
 
 But a console's ROM is *megabytes*. It lives in external PSRAM or HyperRAM, and the FIFO cannot reach it. Not awkwardly — **at all**. So the emulator must supply its own fetch: a routine that pulls bytes from external memory, usually through a prefetch queue. And the moment you write that routine, XBYTE's auto-fetch has nothing left to do.
 
-Now recall §13.1's measurement — the emulator published in a hub variant and a PSRAM variant, a hundred lines apart, dispatch untouched. **Why could they do that?** Because they had hand-rolled the fetch. Their fetch went through the memory path like every other access, so when the memory backend changed, the fetch followed for free.
+Now recall §13.1's measurement — the emulator published in a hub variant and a PSRAM variant, a hundred lines apart, dispatch untouched. That was possible because they had hand-rolled the fetch: their fetch went through the memory path like every other access, so when the memory backend changed, the fetch followed with it.
 
-Had they taken auto-fetch, that port would have been impossible without tearing out the dispatch mechanism entirely.
+Had they taken auto-fetch, that port would have forced a far larger rewrite — auto-fetch welds the guest's code to hub, and undoing that means replacing the fetch throughout (§14.9 notes the one narrow exception).
 
 ::: caution
 **Auto-fetch is fast, and it welds your guest's code to hub RAM.** A hand-rolled fetch costs you clocks and buys you a **swappable memory backend**.
 
-If there is any chance your guest will outgrow hub, do not take the auto-fetch. You will pay for it exactly once — in a rewrite.
+If there is any chance your guest will outgrow hub, do not take the auto-fetch — undoing it later means a rewrite of the fetch path.
 :::
 
-And there is a second, quieter cost. XBYTE reads its dispatch table from **LUT**, and LUT is a cog resource that the rest of your system also wants — for a prefetch queue, a palette, a line buffer, a sine table. At least one emulator in the field moved its dispatch table *out* of LUT for exactly this reason, and XBYTE went with it. The FIFO is contended the same way: in one emulator the FIFO is busy streaming the video framebuffer, and could not have fetched instructions even if the guest's code had been in hub. Chapter 3's resource budget (§3.6) is not a formality — it is the second half of this decision.
+And there is a second, quieter cost. XBYTE reads its dispatch table from **LUT**, and LUT is a cog resource that the rest of your system also wants — for a prefetch queue, a palette, a line buffer, a sine table. An emulator that needs LUT for one of those must move its dispatch table off LUT, and XBYTE goes with it. The FIFO is contended the same way: a cog streaming a video framebuffer through the FIFO cannot also use it to fetch instructions, even if the guest's code lives in hub. Chapter 3's resource budget (§3.6) is not a formality — it is the second half of this decision.
 
 **Where the guest — and its assets — come from.** All of that is about where the guest's code *runs*; a separate question is where it *comes from*. A guest's program, its ROMs, and its media are loaded into hub or PSRAM before anything executes, and on a P2 Edge module they load from one of two places on the module itself: the **16 MB SPI flash** or the **microSD socket** — which, on the Edge modules, **share the same four pins (P58–P61)**, so you reach one or the other, not both at once. Flash suits a single fixed guest that boots on power-up; a microSD card is the natural home for the bulky, swappable things — a shelf of ROMs, a library of disk images — read on demand through a community SD/FAT driver. Either way the shape is *load, then run*: nothing is fetched from the card at instruction speed.
 
-**Which is why you do not page the guest from storage.** When a guest outgrows hub, the answer is to hold its image **whole in PSRAM** — the 32 MB module (**P2-EC32MB**) maps all 32 MB as one linear space, room for any classic guest and its RAM several times over. Swapping pieces of code in and out from microSD as the guest runs — an overlay or demand-paging scheme — is the wrong shape for this machine: a card read is thousands of times slower than a PSRAM access, and a guest branches wherever it likes, so there are no quiet boundaries to confine the swapping to. Load the image into PSRAM once, and let the card go back to sleep.
+**Which is why you do not page the guest from storage.** When a guest outgrows hub, the answer is to hold its image **whole in PSRAM** — the 32 MB module (**P2-EC32MB**) maps all 32 MB as one linear space, room for any classic guest and its RAM several times over. Swapping pieces of code in and out from microSD as the guest runs — an overlay or demand-paging scheme — is the wrong shape for this machine: a card read is orders of magnitude slower than a PSRAM access, and a guest branches wherever it likes, so there are no quiet boundaries to confine the swapping to. Load the image into PSRAM once, and let the card go back to sleep.
 
-**And PSRAM is a shared road.** The 32 MB module reaches its four PSRAM chips over a **single 16-bit bus** — one clock, one chip-enable — that peaks near **300 MB/s** and must free the bus every 8 µs for refresh. That one bus carries everything external: the emulator's guest-memory traffic *and*, on most projects, the **framebuffer the display streams to show the guest's screen**. Capacity is not the contest — 32 MB holds a large guest and a framebuffer with room to spare; **bandwidth is**, and the display's share is continuous and unforgiving (starve the framebuffer and the picture tears). So you budget the bus: size the display mode so its stream leaves headroom for the emulation, or keep a small guest in hub and give PSRAM wholly to the picture, or lean on a driver that arbitrates — the PSRAM driver from the **MegaYume** emulator hands out **per-cog priority** for exactly this, so a video cog and an emulation cog can share the road without the picture breaking.
+**And PSRAM is a shared road.** The 32 MB module reaches its PSRAM over a single external bus, and that one bus carries everything external: the emulator's guest-memory traffic *and*, on most projects, the **framebuffer the display streams to show the guest's screen**. Capacity is not the contest — 32 MB holds a large guest and a framebuffer with room to spare; **bandwidth is**, and the display's share is continuous and unforgiving (starve the framebuffer and the picture tears). So you budget the bus: size the display mode so its stream leaves headroom for the emulation, or keep a small guest in hub and give PSRAM wholly to the picture, or lean on a PSRAM driver that arbitrates between cogs — MegaYume's does exactly this — so a video cog and an emulation cog can share the road without the picture breaking.
 
 ## 13.4 There is no loop body {#sec-13-4}
 
-The third decision is the one nobody warns you about, and it is the reason the largest emulators decline XBYTE even when memory would allow it.
+The third decision is the subtlest, and it is why some emulators decline XBYTE for reasons that have nothing to do with memory.
 
 **XBYTE's loop is hardware. There is no loop body.**
 
-Think about what that means. In a software interpreter, the dispatch loop is a *place* — a few instructions that run once per guest instruction, where cross-cutting work naturally lives. Real emulators put a great deal there. A working Z80 core, in the handful of instructions between one guest instruction and the next, does all of this:
+Consider what that means. In a software interpreter, the dispatch loop is a *place* — a few instructions that run once per guest instruction, where cross-cutting work naturally lives. Real emulators put a great deal there. The dispatch loop of a real Z80 core is a busy place; between one guest instruction and the next it may:
 
-- **arbitrates the bus** it shares with another guest processor;
-- reserves a **hook slot** — a `NOP` that can be patched into a jump — for breakpoints and tracing;
-- **paces the emulation**: it computes elapsed time against the guest's cycle budget and `WAITX`es to throttle the P2 *down* to real Z80 speed;
-- sets up per-instruction register state;
-- clears the **prefix state** left by the previous instruction;
-- ticks the Z80's **refresh register**, which the guest's own software can read.
+- **arbitrate the bus** it shares with another guest processor;
+- reserve a **hook slot** — a `NOP` that can be patched into a jump — for breakpoints and tracing;
+- **pace the emulation**: compute elapsed time against the guest's cycle budget and `WAITX` to throttle the P2 *down* to real Z80 speed;
+- set up per-instruction register state;
+- clear the **prefix state** left by the previous instruction;
+- tick the Z80's **refresh register**, which the guest's own software can read.
 
-Six cross-cutting concerns, one place, once per instruction.
+That is a great deal of cross-cutting work, in one place, once per instruction. (MegaYume's Z80 core does the bus-arbitration, pacing, and refresh among them — §C.4.)
 
 Under XBYTE, **none of that has anywhere to live.** The engine goes from your handler's `_RET_` straight to the next handler's first instruction, in hardware, in six clocks. There is no gap. Every one of those six concerns would have to be replicated inside *every handler* — or dropped.
 
 ::: hardware
-This is the honest trade, and it is not the one most people expect:
+This is the trade, stated plainly:
 
-**XBYTE buys you a free dispatch and takes away the one place where per-instruction work naturally lives.**
+**XBYTE gives you hardware dispatch and takes away the one place where per-instruction work naturally lives.**
 
 A software loop costs you roughly three extra clocks per instruction and gives you **a place to stand**. Whether that is a bargain or a disaster depends entirely on how much cross-cutting work your guest demands — and cycle-accurate emulation of real hardware demands a great deal.
 :::
@@ -1203,7 +1203,7 @@ The three decisions have a natural order, because each one constrains the next.
 
 Three roads to rung 2, and only one combination — **code in hub, little cross-cutting work, LUT free** — arrives at rung 3.
 
-That is not a discouraging result. It is a precise one, and it maps exactly onto what XBYTE was built for: **an interpreted language.** A bytecode VM keeps its program in hub, does no cycle-accurate anything, and wants its LUT for exactly one thing. It is not a coincidence that the P2's own Spin2 interpreter is the engine's showcase — it is the shape XBYTE was designed around, and on that shape nothing else comes close.
+That is a precise result, and it maps exactly onto what XBYTE was built for: **an interpreted language.** A bytecode VM keeps its program in hub, does no cycle-accurate anything, and wants its LUT for exactly one thing. It is no coincidence that the P2's own Spin2 interpreter is the engine's showcase — it is the shape XBYTE was designed around, and the shape it serves best.
 
 Chapter 14 turns these three decisions into a per-processor survey: what each classic guest will actually cost you.
 
