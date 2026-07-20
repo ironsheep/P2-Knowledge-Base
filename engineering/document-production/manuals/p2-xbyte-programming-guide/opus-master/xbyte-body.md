@@ -1363,7 +1363,7 @@ In a 6502 emulator the correspondence is direct:
 | the program counter | the **FIFO read position** — advanced by reads, re-pointed by `RDFAST` on a branch |
 | A, X, Y, S, P registers | cog registers |
 
-The guest's program counter *is* the FIFO position, which is the single most elegant part of the fit: incrementing the PC is free (the FIFO advances as it reads), and a branch is a `RDFAST` to the new address.
+The guest's program counter *is* the FIFO position: incrementing the PC is automatic (the FIFO advances as it reads), and a branch is a `RDFAST` to the new address.
 
 ## 15.2 Register file and dispatch {#sec-15-2}
 
@@ -1414,18 +1414,18 @@ The shared-body idiom collapses the 6502's many ALU and load/store opcodes the w
 
 The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode (§14.6), correct flag semantics on every operation (§14.5), interrupt servicing (Chapter 16), and accurate timing (§14.8) — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
 
-One omission deserves more than a mention, because it is the one that would shape a real build.
+One omission would shape a real build, so it gets its own note.
 
 ::: tip
 **The addressing-mode matrix wants a second dispatch, not a bigger table.**
 
-The 6502 has 56 operations and 13 addressing modes, and it is tempting to give the resulting combinations one table entry each — which is exactly how you end up hand-writing hundreds of nearly identical handlers.
+The 6502 has 56 operations and 13 addressing modes. The brute-force route gives each combination its own table entry — hundreds of nearly identical handlers.
 
-Working emulators do something better, and two independent implementations of *different* guest processors arrived at the same shape: **dispatch twice.** The opcode's table entry carries not only its handler but a small field naming its **addressing mode**. A first, shared block — indexed by that field — computes the effective address (read the operand, apply the index register, handle page wrap, add the cycle penalty). *Then* the opcode's own handler runs, and finds its operand already waiting.
+Working emulators do something better — the 68000 core in Appendix C among them: **dispatch twice.** The opcode's table entry carries not only its handler but a small field naming its **addressing mode**. A first, shared block — indexed by that field — computes the effective address (read the operand, apply the index register, handle page wrap, add the cycle penalty). *Then* the opcode's own handler runs, and finds its operand already waiting.
 
-Opcode → addressing mode → operation. One shared addressing block instead of a mode's worth of duplication in every handler, and the table entry is doing double duty (§4.5 has a related trick — the spare pattern bit — that is often how the mode field is afforded).
+Opcode → addressing mode → operation. One shared addressing block instead of a mode's worth of duplication in every handler.
 
-It is the industrial version of the shared-body idiom in §4.4, and it is the single technique that most separates a toy emulator from a real one.
+It is the industrial-strength version of the shared-body idiom in §4.4, and it is what keeps a full instruction set manageable.
 :::
 
 # Chapter 16: Servicing Guest Interrupts {#ch-16}
@@ -1434,7 +1434,7 @@ Your guest has an interrupt line. Almost all of them do — and Chapter 15's 650
 
 In a software interpreter this is a solved problem so ordinary that nobody writes it down: you check the interrupt line once per pass, at the top of the dispatch loop, and if one is pending you push the guest's program counter and vector to its handler. One check, one place.
 
-**XBYTE has no dispatch loop.** The engine goes from `_RET_` to the next handler in hardware, and there is nowhere to put the check. This chapter is how real emulators solve that — and the answer turns out to be more interesting than the problem.
+**XBYTE has no dispatch loop.** The engine goes from `_RET_` to the next handler in hardware, and there is nowhere to put the check. This chapter is how real emulators solve that.
 
 ## 16.1 The guest's interrupt state is just cog registers {#sec-16-1}
 
@@ -1459,7 +1459,7 @@ The P2 has exactly that, in the **attention** mechanism. Another cog raises it; 
                 jatn    #int_pending        ' anything waiting? (2 clocks)
 ```
 
-That is the cheapest interrupt poll the P2 offers, and it is what the field uses.
+That is a two-clock, non-blocking poll — exactly what this needs.
 
 ## 16.3 Where to poll — the real question {#sec-16-3}
 
@@ -1482,7 +1482,7 @@ A shipped 8080 emulator takes the third road: it polls in the shared body that e
 ::: caution
 **Choose the safe points deliberately.** An interrupt must only be taken where the guest's state is *consistent* — the previous instruction fully retired, no half-computed address in a scratch register. Handlers that have already finished their work and are about to return are safe; the middle of a multi-step addressing-mode computation is not.
 
-This is the sharpest practical consequence of taking rung 3 (§13.4). The engine gave you a free dispatch and took away the place where the check naturally belonged, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
+This is the sharpest practical consequence of taking rung 3 (§13.4). The engine gave you hardware dispatch and took away the place where the check naturally belonged, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
 :::
 
 **"Consistent state" is only half the rule — the guest's architecture fixes the other half.** *Where* you may safely inject is a property of *your* handlers; *when the guest will accept* an interrupt is a property of the *guest*, and the two are not the same. Real processors defer, block, or allow interrupts at points their own designers chose, and a faithful emulator honours those rules rather than taking an interrupt wherever a poll happens to fall:
@@ -1495,7 +1495,7 @@ None of this is mandatory. Most P2 emulators poll at convenient points and never
 
 ## 16.4 Injecting the interrupt {#sec-16-4}
 
-Here is the idea that makes the whole thing elegant.
+The mechanism rests on one observation about the dispatch table.
 
 A dispatch-table entry is **just a long** — a handler address in the low ten bits, a skip pattern above (§6.1). The engine reads one from LUT and hands it to `EXECF`. But nothing says an `EXECF` operand has to *come* from the table. **You can build one yourself and execute it.**
 
@@ -1519,12 +1519,12 @@ int_vector_entry  long  int_go | (%0 << 10)  ' a hand-built dispatch entry
 The engine does not know, and does not care, that this bytecode was not in the stream. It jumps and skips exactly as it would for a real one.
 
 ::: tip
-This is worth sitting with, because it generalises. **`EXECF` is the dispatch primitive; the table is merely the usual place to keep its operands.** Once you see that, a whole class of problems opens up — synthesising a dispatch, chaining one handler into another, or building an entry from parts at run time. The interrupt is simply the first place you need it.
+This generalises. **`EXECF` is the dispatch primitive; the table is merely the usual place to keep its operands.** A whole class of problems opens up once you see it that way — synthesising a dispatch, chaining one handler into another, or building an entry from parts at run time. The interrupt is simply the first place you need it.
 :::
 
 ## 16.5 Halt, and waiting for an interrupt {#sec-16-5}
 
-Most guests have an instruction that stops the processor until an interrupt arrives — the 8080's `HLT`, the 6502's various idle idioms. It looks like it needs special support. It does not, and the solution shows off the FIFO one last time.
+Most guests have an instruction that stops the processor until an interrupt arrives — the 8080's `HLT`, the 6502's various idle idioms. It looks like it needs special support, but it does not — the FIFO handles it.
 
 `JNATN` is the mirror of `JATN`: jump if there is **no** attention. So a halt handler spins on it. And when no interrupt has arrived, the handler must arrange for the guest to **execute the same instruction again** — which, because the guest's program counter *is* the FIFO position (§10.3), means backing the stream up by one byte:
 
@@ -1536,19 +1536,19 @@ op_halt         jnatn   #.still_halted      ' no interrupt yet?
         _ret_   rdfast  #0, pb              ' ...and re-run this same HLT
 ```
 
-Four instructions, and the guest's halt semantics are exactly right: it sits there re-executing `HLT` until something wakes it, and if interrupts are disabled it sits there **forever** — which is precisely what the real silicon does.
+Four instructions: the handler re-executes `HLT` until an attention arrives, then hands off to `int_pending` — which services the interrupt if the guest has them enabled, or resumes the stream if it does not. (A guest that must halt *forever* with interrupts disabled — the true 8080 semantics — would gate that exit on the enable flag; this illustrative version wakes on any attention.)
 
 ## 16.6 What this costs you {#sec-16-6}
 
 Nothing here is expensive in clocks. `JATN` is two, the injection is one `EXECF`, and the guest's interrupt-enable flag is a single bit you were keeping anyway.
 
-What it costs is **a decision you would not have had to make** on a software loop: *where are my interrupt boundaries?* The engine bought you three clocks per bytecode and handed you that question in exchange. For a language interpreter — which has no interrupts to service — it is a pure gift. For a CPU emulator it is a real, if modest, tax, and one more entry on the ledger of Chapter 13.
+What it costs is **a decision you would not have had to make** on a software loop: *where are my interrupt boundaries?* The engine bought you three clocks per bytecode and handed you that question in exchange. For a language interpreter — which has no interrupts to service — it costs nothing. For a CPU emulator it is a real, if modest, tax, and one more entry on the ledger of Chapter 13.
 
 # Chapter 17: Prefixes and Alternate Tables {#ch-17}
 
 Almost every guest processor eventually runs out of opcodes and solves it with a **prefix byte** — a byte that changes the meaning of the byte after it. XBYTE has an instruction that looks made for exactly this: the one-shot **SETQ2** (§8.3), which borrows an alternate dispatch table for precisely one bytecode and then reverts on its own.
 
-The temptation is to conclude that `SETQ2` is *the* answer to prefixes. **It is the answer to half of them**, and knowing which half is the difference between an elegant emulator and a tangle.
+`SETQ2` is *an* answer to prefixes — but only to half of them. Knowing which half is what separates a clean prefix implementation from a tangle.
 
 ## 17.1 Prefixes are two different things {#sec-17-1}
 
