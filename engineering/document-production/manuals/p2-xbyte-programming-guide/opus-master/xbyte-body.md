@@ -1226,7 +1226,7 @@ Be clear about what the capstone is *not*. Our 6502 is a **teaching artifact** �
 
 Chapter 13 gave you three decisions. This chapter answers them for the processors people actually emulate, so you can see at a glance what you are signing up for.
 
-Two tables, because a reader arrives with two different questions. The first is *"can I use the engine at all?"* The second is *"what is going to hurt me regardless?"* They are not the same question, and mixing them into one grid would help nobody.
+Two tables, because a reader arrives with two different questions. The first is *"can I use the engine at all?"* The second is *"what is going to hurt me regardless?"* They are not the same question, so they get separate tables.
 
 ## 14.1 How to read this survey {#sec-14-1}
 
@@ -1256,9 +1256,9 @@ The first decision dominates: **where does the guest's code live?** The FIFO rea
 | **ARM / MIPS** | | — | 32-bit fixed words | **2**, or **JIT** |
 
 ::: caution
-**Read the 65816 row twice.** It is byte-stream and opcode-first — by instruction shape it is *identical* to the 6502, which sits comfortably at rung 3. And the working P2 implementation of it uses **neither** XBYTE nor auto-fetch, because a 65816 machine's ROM is megabytes and lives off-chip.
+**The 65816 row is the one to dwell on.** It is byte-stream and opcode-first — by instruction shape *identical* to the 6502, which sits comfortably at rung 3. And the working P2 implementation of it uses **neither** XBYTE nor auto-fetch, because a 65816 machine's ROM is megabytes and lives off-chip.
 
-The instruction shape did not decide it. **The address space did.** That is the whole lesson of Chapter 13, and this one row contains it.
+The instruction shape did not decide it; the address space did — the lesson of Chapter 13 in a single row.
 :::
 
 ## 14.3 What will hurt anyway? {#sec-14-3}
@@ -1282,29 +1282,29 @@ The rest of this chapter takes each column in turn, because *what the column cos
 
 ## 14.4 Prefixes are two different things {#sec-14-4}
 
-The distinction that most often gets an emulator wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` (286+) — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
+A distinction that is easy to get wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` (286+) — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
 
 ## 14.5 Flags — the cost nobody budgets for {#sec-14-5}
 
 The P2 has two flags: `C` and `Z`. Your guest almost certainly has more, and every one of them must be *computed*, *stored*, and *read back* — on every instruction that touches them.
 
-This is the single largest hidden cost in most emulators, and it scales with how faithful you must be.
+For many guests this is the largest hidden cost, and it scales with how faithful you must be.
 
 - **6502** is kind: `N` and `Z` fall out of the result almost free, and `C`/`V` are cheap. A single shared `set_nz` helper serves most of the instruction set.
 - **Z80 and 8080** are not kind. The Z80's `F` register carries **`H` (half-carry)** and **`N` (subtract)** bits that exist for one reason: to make `DAA` work afterwards. They are pure bookkeeping — no program reads them directly — and you must maintain them anyway, on every arithmetic instruction, or `DAA` produces the wrong answer.
-- **x86** is where emulators traditionally cheat, and the cheat has a name: **lazy flags.** Rather than compute all six status flags on every ALU operation, you store the operands and the operation, and only *derive* the flags if something actually reads them. Most instructions never have their flags read. It is a large win and a large complication.
+- **x86** is where emulators traditionally cheat, and the cheat has a name: **lazy flags.** Rather than compute all six status flags on every ALU operation, you store the operands and the operation, and only *derive* the flags if something actually reads them. In practice many instructions' flags are never read. It is a large win and a large complication.
 
 ::: tip
-The F bit (§9.4) can help here, but not the way people first assume. It does not carry your *guest's* flags — it writes the **bytecode's own low bits** into `C` and `Z` at dispatch. That is a way to let one handler body branch four ways on which opcode selected it; it is not a guest flag register. Your guest's flags live in a cog register you maintain yourself.
+The F bit (§9.4) can help here, but not as a guest flag register. It does not carry your *guest's* flags — it writes the **bytecode's own low bits** into `C` and `Z` at dispatch. That is a way to let one handler body branch four ways on which opcode selected it; it is not a guest flag register. Your guest's flags live in a cog register you maintain yourself.
 :::
 
 ## 14.6 Decimal mode {#sec-14-6}
 
-Almost every 8-bit guest has one, almost every emulator gets it wrong first, and almost no test program exercises it until something breaks.
+Decimal mode is easy to under-test: almost every 8-bit guest has one, and a test program rarely exercises it until real software trips over it.
 
 The 6502's `D` flag silently changes what `ADC` and `SBC` *mean*. The 8080, Z80 and 6809 instead provide `DAA`, which corrects a binary result to a packed-BCD one **after the fact** — and to do that, `DAA` must know the half-carry and (on the Z80) whether the last operation was an add or a subtract. That is why those bookkeeping flags in §14.5 exist, and why you cannot skip them.
 
-The honest advice: **decimal mode is small, fiddly, well-specified, and testable.** Write it early, test it against a known-good table, and never think about it again. Emulators that defer it spend a long time chasing a bug that turns out to be a scoring routine in a game.
+The honest advice: **decimal mode is small, fiddly, well-specified, and testable.** Write it early, test it against a known-good table, and never think about it again. Deferred, it tends to resurface later as a puzzling bug — a miscomputed score, a wrong address — that is slow to trace back to decimal mode.
 
 ## 14.7 Guest interrupts {#sec-14-7}
 
@@ -1334,7 +1334,7 @@ The survey tables stop where the honest advice becomes *"it depends on your gues
 
 **Self-modifying guest code.** Harmless when your handlers read the guest's memory on every fetch — which, if you hand-rolled the fetch, they do. But if you have taken **auto-fetch**, the FIFO may have already read ahead past code the guest just rewrote. Another quiet consequence of rung 3, and one more reason a self-modifying guest wants rung 2 — though not an absolute one. You *can* keep auto-fetch and still honour a rewrite by re-priming the FIFO with `RDFAST` before the affected fetch: `RDFAST` re-initialises the FIFO, discarding the bytes it prefetched past the change, so the next read comes fresh from hub. The catch is that re-priming makes the FIFO refill from hub every time — erasing the very prefetch that made auto-fetch worth taking — so doing it on every instruction pays rung 2's price while still on rung 3. (A guest that rewrites code only occasionally can be smarter: flush *only* when a store lands in the code region, not blindly per instruction.) The technique is real; it is almost never the right trade, and the usual answer stays rung 2.
 
-**Memory-mapped I/O and banking.** The guest's address space is rarely flat. A clean way through, seen in the field: make the memory-access routine a **register holding an address**, so the routine itself can be swapped per region — ROM, RAM, I/O, banked window. `CALL` through it, and the map becomes data instead of a chain of comparisons.
+**Memory-mapped I/O and banking.** The guest's address space is rarely flat. A clean way through: make the memory-access routine a **register holding an address**, so the routine itself can be swapped per region — ROM, RAM, I/O, banked window. `CALL` through it, and the map becomes data instead of a chain of comparisons.
 
 ## 14.10 Reading the survey for your own guest {#sec-14-10}
 
