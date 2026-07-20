@@ -27,6 +27,27 @@ audit doctrine:
   provides", "side effect", "eliminates", "automatically",
   "synchronizes", "mechanism for", vague "enables …". Treat each as a
   prompt to go re-verify against a source.
+- **Watch the *shape* as well as the vocabulary — the payoff sentence.**
+  *(Locally adopted 2026-07-20, promotion-pending — see the
+  `sprint-retrospective` overlay's adopt → certify → promote model.)*
+  The red-flag list above catches a **word choice**. The costlier failure
+  in narrative-voice documents is a **sentence structure**: a closing
+  crescendo ("that is a remarkable amount of insight for two
+  instructions…") creates a slot that demands a punchy technical payoff,
+  and when no true one is available an invented one fills it. At write
+  time, whenever you close a section or a `:::` callout with a flourish,
+  **strip the rhetoric and read what is left as a bare claim** — then
+  satisfy it or delete it. Two cheap tests, neither needing a source:
+  *(a)* does the document already say the opposite somewhere else?
+  *(b)* does the sentence lean on `never · always · every · only ·
+  everyone · nothing · impossible · forever · free · the single most`?
+  Beware **hedge-drop** — stating a fact correctly with its small print,
+  then restating it absolutely a few sections later. A number advertising
+  its own rigour ("not a claim from theory — it is measurable") must name
+  its source in the same breath. Detection-side counterpart:
+  `document-audit` Dimension #4c. (Origin: the XBYTE guide, where an
+  external expert found one such claim and the sweep found four more, all
+  refutable from the document itself.)
 - **`NEEDS-VERIFICATION` is not a license to ship.** A finding labelled
   needs-verification is *not* permitted to carry past this finalize pass
   if the sources to resolve it are in the repo. Before closing the

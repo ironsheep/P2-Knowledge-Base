@@ -279,6 +279,55 @@ authority (HDMI/TMDS spec, Silicon Doc) — never at a forum thread.*
   manual's `./audit/`), cleared only by verification against a primary/empirical source or by
   removal — not by wording.
 
+**Dimension #4c — Payoff-sentence sweep (flourish-carried claims).** Dimension #4 detects a
+**vocabulary**; #4b detects a **provenance** mismatch. This one detects a **structure** — and it
+is the only one of the three that needs no source at all.
+
+*Origin (2026-07-20, XBYTE guide):* the P2 silicon designer found one false claim — §11.1 closed
+with *"That is a remarkable amount of insight for two instructions. You can ask the engine, at any
+moment: am I armed? what mode? what pattern is running? how many instructions of it are left?"*
+The last clause is impossible (routine end is defined by `_RET_`, a property of the code, not of
+engine state), **and the same document states the correct fact 540 lines earlier**. So this was
+not a sourcing failure. The sentence opened as a crescendo, the crescendo demanded a payoff, and
+a capability claim was invented to fill the slot. Sweeping for that structure turned up **four
+more confirmed-false claims** plus a plain error in the instruction-reference table.
+
+Run it on any **narrative-voice** document (one built on "here is why this matters" section
+payoffs). Reference-voice documents — entry-per-instruction, table-driven — do not produce this
+defect; a fleet probe over 65,509 master lines found it concentrated in a single document.
+
+1. **Extract by position, not by vocabulary.** Every last sentence before a heading, and every
+   last sentence before a closing `:::`. Callouts are not optional — several of the worst
+   instances live in boxed asides rather than section bodies. This yields a bounded, countable
+   set (~112 in a 2,100-line guide); **report the count as coverage**.
+2. **Strip the rhetoric.** Restate each as a bare technical claim with the crescendo removed. If
+   nothing survives stripping, it is tone, not a finding — route it to voice review, not here.
+   *"That is a remarkable amount of insight"* strips to nothing; what remains is checkable.
+3. **Contradiction pass — do this BEFORE any source check.** grep the document for its own
+   statements about the same fact. Cheapest test, highest yield: 4 of the 5 confirmed-false items
+   were refuted by the document itself. An internal contradiction is a `CRITICAL` finding
+   regardless of which side is right — the document cannot be both.
+4. **Quantifier pass.** `never · always · every · only · everyone · nothing · impossible ·
+   forever · free · the single most · nothing else comes close`. Each must be sourced or
+   downgraded to a hedge. Watch for **hedge-drop**: the document states a fact correctly with its
+   small print, then restates it absolutely a few sections later ("costs essentially nothing" →
+   "every skipped one is free", 40 lines apart).
+5. **Unnamed-practice and number pass.** `the field · everyone · most emulators · in practice ·
+   seen in the field` → name the instance or cut the appeal. Every number → a live-verified
+   source (`feedback_verify_citations_live_not_ledger`). Numbers framed as **measured** are the
+   highest risk: a claim that advertises its own rigour ("that is not a claim from theory — it is
+   measurable") and then names no source is worse than an unhedged guess.
+6. **Trust-anchor check.** If the document asserts blanket verification anywhere ("everything
+   these chapters claim was checked against the code below"), test that assurance against its own
+   appendix. An assurance broader than its evidence is a `CRITICAL` finding — it is the sentence
+   a reader uses to decide whether to trust everything else.
+
+**Relation to the voice audit.** A payoff-sentence sweep and a voice review read the same
+sentences for different reasons. Run this one first: it produces the falsifiable subset, and the
+tone findings fall out as a by-product (step 2's residue-free sentences are exactly the tone
+list). Never let a voice pass close a `#4c` finding by rewording — the claim must be corrected or
+removed, not softened.
+
 ### Theme D — Linkage & Examples
 
 **Dimension #2 — Cross-reference integrity.** Every "see Chapter X" / "see Appendix Y" /
@@ -295,6 +344,44 @@ corrected version, not a removal.
 `code_line_budget_K`. Run `audit-code-line-length.py` against K (LaTeX `\item`/keyconcepts lines
 are prose, not code — exclude). Over-budget lines are an authorship defect; never reintroduce
 breaklines — shorten the content.
+
+**Dimension #3c — Example placement & distribution.** #2/#3/#3b all ask *are the examples
+correct*. This asks *are they where the reader needs them*. A document can pass every other
+example check and still teach badly.
+
+*Origin (2026-07-20, XBYTE guide):* the reviewer asked for an example that **already existed**
+four lines from its explanation — because both of that section's code blocks sat inside `:::`
+admonition boxes, rendered as asides outside the running text. The volume was fine; the placement
+was not.
+
+**The authoring guideline this enforces:**
+
+> A **table shows the space; one line of code shows a point in it.** Any bit-field, mode value,
+> or numeric rule the reader must *construct* gets one concrete instance **at the point of first
+> explanation** — not at the point of first use.
+
+Four measurements, all scriptable:
+
+1. **Density by chapter group.** Code-lines ÷ prose-lines for concept-teaching chapters vs worked
+   chapters vs reference matter. A concept group running **>3× below** the worked group is the
+   clustering signature. (XBYTE: 0.152 vs 0.790 = 5.2×; worked chapters were 20% of the document
+   and held 53% of all code.) Flag any concept chapter at **zero**.
+2. **First-explanation → nearest-example gap.** For each core concept, the line where it is first
+   explained and the line of the nearest example. **A gap that crosses a chapter boundary is a
+   finding**; crossing a Part boundary is `HIGH`. Report the count: 9-of-16 in XBYTE.
+3. **Admonition containment.** Any code block inside a `:::` fence is *visually removed from the
+   running text*. Where a section's **only** examples are boxed, that is a finding on its own —
+   the reader scanning body prose does not see them.
+4. **Rule-violation check (highest value).** Infer the document's *implicit* rule from behaviour —
+   what consistently gets an example versus what consistently does not — then find where it breaks
+   its own rule. Documents that break their rule **correctly** in one place and not in the
+   structurally identical place next door give you a small, self-evidenced fix list. XBYTE
+   yielded ~8 lines across 5 sections this way.
+
+**Fix rule:** prefer *adding one concrete instance at first explanation* or *unboxing an existing
+example* over relocating worked examples — the worked chapters are where they belong. Count the
+delta in code lines; if a distribution finding proposes more than ~15 new lines, re-check whether
+the real defect is chapter ordering instead.
 
 ### Theme E — Consistency
 
