@@ -293,7 +293,7 @@ alu_body
         _ret_   call    #push_a              ' result -> stack, return
 ```
 
-The bytecode that means "subtract" points at `alu_body` with a skip pattern that leaps the `add`, `and`, and `or` lines; "add" skips the other three; and so on. Four bytecodes, one body. This is the single most common XBYTE handler pattern, and it is pure SKIPF — the engine just supplies the pattern for you, from the table, on every bytecode.
+The bytecode that means "subtract" points at `alu_body` with a skip pattern that leaps the `add`, `and`, and `or` lines; "add" skips the other three; and so on. Four bytecodes, one body. This is the most common XBYTE handler pattern, and it is pure SKIPF — the engine just supplies the pattern for you, from the table, on every bytecode.
 
 ::: tip
 Design handler bodies so the *common* path has the fewest skips. Every kept instruction runs; a skipped one costs almost nothing (§4.2). A well-factored shared body can serve a dozen related bytecodes with one copy of the code.
@@ -427,8 +427,8 @@ Use **RFVAR** for unsigned operands (addresses, indices) and **RFVARS** for sign
 Sometimes a handler needs to know *where* in hub memory the stream currently sits — to take a relative branch, or to compute a target address. **GETPTR** returns the FIFO's current hub pointer into D.
 
 ```pasm2
-                getptr  ptr                 ' current stream address -> ptr
-                                            ' (under XBYTE, just read PB instead)
+                getptr  ptr                 ' stream address -> ptr
+                                            ' (or read PB under XBYTE)
 ```
 
 XBYTE makes this automatic: on every dispatch it writes the FIFO pointer into **PB** (`$1F7`), so a handler can read the current stream position from `PB` without issuing GETPTR itself. Between `PA` (the current bytecode, §6.3) and `PB` (the current stream pointer), a handler has both halves of its context handed to it automatically.
@@ -482,8 +482,8 @@ When XBYTE dispatches bytecode `N`, it writes `N` into **PA** (`$1F6`) before th
 This matters for **compression** (Chapter 9), where a group of bytecodes shares one table entry and the handler tells them apart by reading `PA`. It is also simply convenient: a "push small constant" family can encode the constant *in the bytecode* and read it straight from `PA`:
 
 ```pasm2
-                mov     value, pa           ' the bytecode itself is the datum
-                and     value, #$0f         ' e.g. low nibble = constant 0..15
+                mov     value, pa           ' the bytecode is the datum
+                and     value, #$0f         ' low nibble = constant 0..15
 ```
 
 ## 6.4 Dispatch, by hand {#sec-6-4}
@@ -582,7 +582,7 @@ The fence is **`REP`**. A `REP` block cannot be interrupted, so wrapping the cri
 This is not a theoretical hazard, and it is not a rare one. The P2's own Spin2 interpreter — the reference XBYTE program, written by the silicon's designer — uses exactly this fence **repeatedly** (well over a dozen times in its source), guarding CORDIC operations and shared-variable updates.
 :::
 
-The rule of thumb is simple: **XBYTE gives you interrupts for free, and it is your job to say where they may not go.** A handler that only touches its own cog registers needs no fence at all. A handler that reaches for the CORDIC, or for memory another cog shares, needs one every time.
+The rule of thumb is simple: **XBYTE leaves interrupts working, and it is your job to say where they may not go.** A handler that only touches its own cog registers needs no fence at all. A handler that reaches for the CORDIC, or for memory another cog shares, needs one every time.
 
 # Chapter 8: Arming XBYTE {#ch-8}
 
@@ -741,7 +741,7 @@ The F bit and the SKIPF pattern are complementary selectors. The skip pattern ch
 Everything in this chapter is easier to trust once you have taken a real one apart. So here is the mode operand the **P2's own Spin2 interpreter** arms with — the reference XBYTE program, written by the silicon's designer:
 
 ```pasm2
-        _ret_   setq    #$1A1               ' Spin2 interpreter's arming operand
+        _ret_   setq    #$1A1               ' Spin2 interpreter's operand
 ```
 
 `$1A1` is nine bits: `%1_1010_0001`. Lay it against the compression pattern `%ABBBB00xF` from §9.3:
@@ -1560,7 +1560,7 @@ Look at what a prefix actually *does* to the byte that follows it, and they fall
 | What it changes | **which handler runs** — a *different opcode map* | **how the handler behaves** — same instruction, different memory or register |
 | The tool | **one-shot `SETQ2`** — an alternate table | **a state register**, then re-fetch |
 
-A **map** prefix genuinely redirects dispatch. After the 6809's `$10`, the byte `$83` names a different instruction than `$83` alone does. You want a different table, and one-shot `SETQ2` hands you one for free.
+A **map** prefix genuinely redirects dispatch. After the 6809's `$10`, the byte `$83` names a different instruction than `$83` alone does. You want a different table, and one-shot `SETQ2` hands you one — and reverts on its own.
 
 A **modifier** prefix does *not* want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment register, which is absurd. The right answer is a register (§17.3).
 
