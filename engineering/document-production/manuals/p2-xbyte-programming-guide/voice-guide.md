@@ -111,7 +111,7 @@ finishing the exposition — a verdict, a reversal, a directive to the reader, a
 aphorism that restates with force. One well-placed beat is good writing. The
 failure mode is **regularity**: when nearly every section ends on one, the
 reader stops hearing the individual beat and starts hearing the *metronome* —
-"instantly recognizable, rapidly fatiguing" (Chip Gracey, XBYTE review 2026-07).
+"instantly recognizable and becoming rapidly fatiguing" (Chip Gracey, XBYTE review 2026-07-20).
 
 The recognizable-AI quality is the pattern, not any one sentence, so the fix is
 distribution, not deletion. Budget:
