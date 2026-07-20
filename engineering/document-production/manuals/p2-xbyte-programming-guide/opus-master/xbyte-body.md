@@ -1572,7 +1572,7 @@ Treat `DD` like `CB` and you will build a duplicate table you never needed. Trea
 
 ## 17.2 Map prefixes — the 6809's pages {#sec-17-2}
 
-The Motorola 6809 is the cleanest small demonstration, so it earns the worked example.
+The Motorola 6809 is a clean small demonstration, so it carries the worked example.
 
 It extends its opcode space with two **prefix bytes**, `$10` and `$11`. An opcode introduced by `$10` belongs to "page 2"; one introduced by `$11` belongs to "page 3". The same second byte means different things depending on which prefix — if any — preceded it. A flat 256-entry table cannot express that: byte `$83` is one instruction on page 1 and another on page 2.
 
@@ -1590,10 +1590,10 @@ op_page3                                    ' $11: select page-3 table
 
 When the 6809 stream contains `$10 $83`, the `$10` handler arms the page-2 table one-shot; the `$83` that follows dispatches through page 2; and the engine then reverts to page 1 on its own — *"without having to restore the original XBYTE mode afterwards."* No flag to clear, no mode to put back. The prefix byte costs one dispatch, and the alternate page is in effect for exactly the one opcode that needs it.
 
-The elegance is in what is **absent**. Written by hand, a prefix means keeping an "am I in a prefix?" flag and testing it before every single opcode. Here there is no flag and no test: the prefix shifts the machine for exactly one dispatch, and normal decoding resumes with no code to put it back.
+What matters here is what is **absent**. Written by hand, a prefix means keeping an "am I in a prefix?" flag and testing it before every single opcode. Here there is no flag and no test: the prefix shifts the machine for exactly one dispatch, and normal decoding resumes with no code to put it back.
 
 ::: tip
-This is the general pattern for **any map prefix** — the 6809's pages, the Z80's `CB`/`ED`, the x86 `$0F` escape. Each becomes a one-shot-`SETQ2` handler pointing at the alternate table for that page, and `SETQ2`'s automatic revert is what makes it free.
+This is the general pattern for **any map prefix** — the 6809's pages, the Z80's `CB`/`ED`, the x86 `$0F` escape. Each becomes a one-shot-`SETQ2` handler pointing at the alternate table for that page, and `SETQ2`'s automatic revert does the bookkeeping for you.
 :::
 
 ## 17.3 Modifier prefixes — state, not dispatch {#sec-17-3}
@@ -1608,7 +1608,7 @@ op_seg_es       mov     override, seg_es    ' remember which segment...
                 jmp     #next_op            ' ...and fetch the opcode
 ```
 
-Every memory-touching handler then consults `override`, and clears it once the instruction retires. That is the whole mechanism, and it is the shape every working implementation uses. The Z80's `DD`/`FD` are the same idea wearing a different hat: they do not select a table, they change which register `HL` means for one instruction.
+Every memory-touching handler then consults `override`, and clears it once the instruction retires. That is the whole mechanism. The Z80's `DD`/`FD` are the same idea wearing a different hat: they do not select a table, they change which register `HL` means for one instruction.
 
 ::: hardware
 Be honest about what this costs under XBYTE.
@@ -1617,12 +1617,12 @@ Setting state and returning is fine — the engine dispatches the next bytecode,
 
 The awkward case is a modifier that must **re-execute** the following instruction rather than merely colour it. x86's `REP` is the notorious example: it runs the *next* instruction over and over until a counter expires. XBYTE fetches a **new** bytecode on every `_RET_`, so a `REP` handler cannot express *"run that one again"* as a plain return. It must fetch and dispatch the repeated instruction **itself**, in a loop — which is to say it hand-rolls exactly the loop the engine was supposed to save it (§6.4).
 
-The engine still dispatches everything else beautifully. It simply has nothing to offer this one pattern, and it is better to know that before you design around it.
+The engine still dispatches everything else; it simply has nothing to offer this one pattern, which is worth knowing before you design around it.
 :::
 
 ## 17.4 `SETQ2` is bigger than prefixes {#sec-17-4}
 
-It would be easy to file one-shot `SETQ2` away as "the prefix trick." That undersells it badly, and the reference implementation shows why.
+One-shot `SETQ2` is more than "the prefix trick," and the Spin2 interpreter shows why.
 
 The P2's own Spin2 interpreter runs **two dispatch tables at once** — its main bytecode table, and a second table of *variable operators* at a different LUT base. Handlers that need the second one end like this:
 
@@ -1631,13 +1631,13 @@ The P2's own Spin2 interpreter runs **two dispatch tables at once** — its main
                                             ' variable operator
 ```
 
-Read that comment again. It does not say *"the next byte is on an extended page."* It says **"the next byte is a different kind of thing."** The bytecode stream has a small *grammar* — some bytecodes are operations, others are operands-with-behaviour that must be decoded through their own table — and one-shot `SETQ2` is what expresses it.
+The second table does not hold an *extended page* of the same kind of thing — it holds a *different kind of thing*, a variable operator decoded through its own table. The bytecode stream has a small *grammar* — some bytecodes are operations, others are operands-with-behaviour that must be decoded through their own table — and one-shot `SETQ2` is what expresses it.
 
 Prefixes are merely the most obvious instance of a much larger idea:
 
 > **The table *is* state.** Change the table and you change what the machine *is* — for one bytecode with `SETQ2`, or for good with `SETQ`.
 
-Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, a parser whose states *are* tables, a decoder that switches interpretation mid-stream. Chapter 18 takes that idea well outside emulation, and it turns out to be where some of XBYTE's best non-obvious uses live.
+Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, a parser whose states *are* tables, a decoder that switches interpretation mid-stream. Chapter 18 takes that idea well outside emulation, into some of XBYTE's less obvious uses.
 
 # Chapter 18: XBYTE Beyond Interpreters {#ch-18}
 
@@ -1692,7 +1692,7 @@ h_esc                                       ' $1B: arm the escape table
         _ret_   setq2   #esc_mode           ' next byte only, then reverts
 ```
 
-The elegance is what is *absent*. A hand-written terminal keeps an "am I in an escape?" flag and branches on it for every byte; here there is no flag and no branch. `ESC` shifts the machine for exactly one dispatch, and normal text resumes with no code to put the state back. A multi-byte sequence (`ESC [ 3 1 m`) chains the same trick — each state's handler arms the table for the next byte — so the parser *is* its table set, not a tangle of conditionals.
+Again, what matters is what is *absent*. A hand-written terminal keeps an "am I in an escape?" flag and branches on it for every byte; here there is no flag and no branch. `ESC` shifts the machine for exactly one dispatch, and normal text resumes with no code to put the state back. A multi-byte sequence (`ESC [ 3 1 m`) chains the same trick — each state's handler arms the table for the next byte — so the parser *is* its table set, not a tangle of conditionals.
 
 ::: tip
 The reverting one-shot is the whole reason this stays clean. If a sequence needs to hold an alternate table across several bytes, arm it with persistent `SETQ` on the way in and re-arm the base table on the way out — `SETQ2` for a one-byte shift, `SETQ` for a mode you stay in.
@@ -1711,7 +1711,7 @@ h_note_on                                   ' $9n: Note On, channel n
         _ret_   call    #voice_on           ' start the voice, return
 ```
 
-This is "the byte is both the selector and an operand" in its cleanest form. Because the seven channel-voice commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§9.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") is a natural extension: a data-valued byte re-enters the current command's handler, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.
+This is "the byte is both the selector and an operand" in its cleanest form. Because the seven channel-voice commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§9.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") needs a little more: the handler remembers the current command and routes a data-valued byte back into it. That is not free — but it is small, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.
 
 ## 18.5 A display list — the stream as a movable cursor {#sec-18-5}
 
@@ -1843,13 +1843,13 @@ The engine is not free. Some problems are stream-shaped and still do not want it
 | The unit is a fixed-width **word**, not a byte | byte auto-fetch does not apply — the RISC case (§14.2) | read the word, dispatch on an extracted **field** — or see below |
 
 ::: hardware
-**And one option this book has not yet named: do not interpret at all.**
+**One more option: do not interpret at all.**
 
 For a fixed-width RISC guest — ARM, MIPS, RISC-V — there is a strategy that beats every rung of the ladder: **translate the guest's instructions into native PASM2 once, and then just run them.** A just-in-time translator does the decode a single time per instruction *ever*, instead of once per *execution*, and a hot loop then runs at native P2 speed with no dispatch at all.
 
 This is not hypothetical; it is what the P2's RISC-V implementation does. It is a substantially bigger undertaking than an interpreter, and it is the right answer when the guest's instructions are regular enough to translate and hot enough to be worth translating.
 
-XBYTE is a superb interpreter engine. Interpretation is not always the goal.
+XBYTE is an interpreter engine; interpretation is not always the goal.
 :::
 
 The through-line is Chapter 13's three decisions, generalised beyond CPUs: **XBYTE pays when your data is in hub, your LUT is free, you have no per-symbol cross-cutting work, and the byte genuinely selects one of many behaviours.** Weaken any of those and a simpler loop will match it — without spending 256 longs of LUT on a table.
@@ -1871,7 +1871,7 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 | Instruction | Syntax | Encoding | Effect |
 |-------------|--------|----------|--------|
 | **SKIP** | `SKIP {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110001` | Cancel each of the next up-to-32 instructions whose bit in D is set; cancelled instructions still consume their clocks. Works in cog, LUT, and hub. No flag effect. |
-| **SKIPF** | `SKIPF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110010` | Fast skip: the PC leaps over each of the next up-to-22 instructions whose bit in D is set; skipped instructions cost nothing. Cog/LUT only. No flag effect. |
+| **SKIPF** | `SKIPF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110010` | Fast skip: the PC leaps over each of the next up-to-32 instructions whose bit in D is set; skipped instructions cost nothing. (Under XBYTE the pattern comes from EXECF and is 22 bits — §4.3.) Cog/LUT only. No flag effect. |
 | **EXECF** | `EXECF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110011` | Jump to D[9:0] in cog/LUT, then apply D[31:10] as a SKIPF pattern. PC = {10'b0, D[9:0]}. The dispatch vehicle. No flag effect. 4 clocks. |
 
 ## 19.2 Arming {#sec-19-2}
@@ -1986,9 +1986,9 @@ The appendices are lookup material and pointers: the quick-reference cards, the 
 
 # Appendix C: Further Implementations {#app-c}
 
-The P2 community has built real interpreters and CPU emulators that run on physical silicon. These are pointers for further study — and they are also the **evidence** behind Chapters 13 and 14. Everything those chapters claim about what emulators actually do was checked against the code below.
+The P2 community has built real interpreters and CPU emulators that run on physical silicon. These are pointers for further study, and the implementations the rung assignments in Chapters 13 and 14 are drawn from. (Where those chapters cite a specific behaviour, it comes from one of these; where a project's dispatch is not publicly documented, the entry says so.)
 
-The most useful thing this appendix can tell you is **which rung of the dispatch ladder (§13.2) each one stands on** — because the pattern is not the one most people expect:
+The useful thing to read from this table is **which rung of the dispatch ladder (§13.2) each one stands on** — the pattern is not the obvious one:
 
 | Guest | Rung | Fetch | Dispatch |
 |-------|------|-------|----------|
@@ -2001,14 +2001,14 @@ The most useful thing this appendix can tell you is **which rung of the dispatch
 | Intel 8086 | 2 | hand-rolled | `EXECF` — *and*, in a second implementation, a plain `JMP` |
 | RISC-V | — | — | **JIT to native PASM2** |
 
-**Everyone keeps the dispatch asset. Only the small, hub-resident guests keep auto-fetch.** That single sentence is what the code below will teach you, and it is worth going to read it.
+The pattern in that table: nearly every emulator keeps the dispatch asset (`EXECF` plus a table), while only the small, hub-resident guests also keep auto-fetch — and a fixed-width RISC guest skips interpretation altogether (§C.7).
 
 ## C.1 The reference: Parallax's own XBYTE {#sec-c-1}
 
-Two pieces of first-party code are worth more than any commentary.
+Two pieces of first-party code are the best primary sources here.
 
 - **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (`https://github.com/parallaxinc/propeller`), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 7.
-- **The Spin2 interpreter** — the language's own bytecode engine, and the most sophisticated XBYTE program in existence. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all put to full use. If you read one thing, read this.
+- **The Spin2 interpreter** — the language's own bytecode engine, and the most complete XBYTE program available to study. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all put to full use.
 
 ## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}
 
@@ -2034,17 +2034,17 @@ A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**
 | **NeoYume** | SNK Neo Geo AES | Motorola 68000 + Z80 | `https://github.com/IRQsome/NeoYume` | released |
 | **MisoYume** | Super Nintendo (SNES) | 65(C)816 | `https://github.com/IRQsome/MisoYume` | beta |
 
-**These use no XBYTE at all — and that is the most instructive fact in this appendix.** They keep `EXECF`/`SKIPF` dispatch and write their own fetch, for the reasons Chapter 13 sets out: a console ROM is megabytes and lives in PSRAM, which the FIFO cannot reach; LUT is wanted for other things; and cycle-accurate emulation needs a loop body to pace in.
+**These use no XBYTE at all** — the appendix's sharpest illustration that instruction shape does not decide the rung. They keep `EXECF`/`SKIPF` dispatch and write their own fetch, for the reasons Chapter 13 sets out: a console ROM is megabytes and lives in PSRAM, which the FIFO cannot reach; LUT is wanted for other things; and cycle-accurate emulation needs a loop body to pace in.
 
-Read **MisoYume** first if you want the point made sharply: the 65816 is byte-stream and opcode-first — by instruction shape the *ideal* XBYTE guest — and it takes rung 2 anyway. Read **MegaYume's Z80 core** for the dispatch loop that does bus arbitration, cycle pacing, and a refresh register between every guest instruction (§13.4), and for the two-level nibble dispatch its 68000 uses (§14.2).
+MisoYume makes the point sharply: the 65816 is byte-stream and opcode-first — by instruction shape the *ideal* XBYTE guest — and it takes rung 2 anyway. Read **MegaYume's Z80 core** for the dispatch loop that does bus arbitration, cycle pacing, and a refresh register between every guest instruction (§13.4), and for the two-level nibble dispatch its 68000 uses (§14.2).
 
 ## C.5 Intel 8086 — the same guest, more than one way {#sec-c-5}
 
-Several 8086 emulators exist for the P2, including a complete IBM PC XT with BIOS, CGA and BASIC. They are the best available demonstration that **dispatch is a ladder, not a switch** (§13.2): one reads its opcode and `EXECF`s through a table with skip patterns; another reads its opcode and takes a plain `JMP` through a table of bare addresses. Same guest processor, two rungs.
+The P2 has more than one 8086 emulator, and together they are the clearest demonstration that **dispatch is a ladder, not a switch** (§13.2). **Marco Maccaferri** wrote two. His **`simple_i8086`** reads each opcode and `EXECF`s through a table with skip patterns — rung 2 with the dispatch asset. His **`i8086_xt`** — a complete IBM PC XT with BIOS, CGA, and BASIC — instead reads the opcode and takes a plain `JMP` through a table of bare addresses. Same guest processor, two rungs, one author.
 
-One of them ships in **two variants — guest memory in hub, and guest memory in PSRAM.** Diffing that pair is the single most illuminating hour you can spend on this subject: the memory backend changes completely and **the dispatch does not move at all** (§13.1).
+`i8086_xt` also ships in **two variants — guest memory in hub, and guest memory in PSRAM** — and diffing that pair is the demonstration behind §13.1: the memory backend changes completely (about a hundred lines out of more than eight thousand) and **the dispatch does not move at all.**
 
-They are discussed across several Parallax forum threads; search the forums for "8086 emulator."
+Both are presented in the *Intel 8086 CPU Emulator* thread on the Parallax forums (`https://forums.parallax.com/discussion/174634/intel-8086-cpu-emulator`).
 
 ## C.6 Zog — the ZPU {#sec-c-6}
 
@@ -2052,7 +2052,7 @@ A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, w
 
 ## C.7 riscvemu — the road not taken {#sec-c-7}
 
-A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§18.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder — and this is the P2 proof of it.
+A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§18.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder, and riscvemu is the P2 example.
 
 ## C.8 A minimal community example — the "essential XBYTE" VM {#sec-c-8}
 
