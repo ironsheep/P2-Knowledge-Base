@@ -426,7 +426,12 @@ Use **RFVAR** for unsigned operands (addresses, indices) and **RFVARS** for sign
 
 Sometimes a handler needs to know *where* in hub memory the stream currently sits — to take a relative branch, or to compute a target address. **GETPTR** returns the FIFO's current hub pointer into D.
 
-XBYTE makes this automatic: on every dispatch it writes the FIFO pointer into **PB** (`$1F7`), so a handler can read the current stream position from `PB` without issuing GETPTR itself. Between `PA` (the current bytecode, §6.3) and `PB` (the current stream pointer), a handler has both halves of its context handed to it for free.
+```pasm2
+                getptr  ptr                 ' current stream address -> ptr
+                                            ' (under XBYTE, just read PB instead)
+```
+
+XBYTE makes this automatic: on every dispatch it writes the FIFO pointer into **PB** (`$1F7`), so a handler can read the current stream position from `PB` without issuing GETPTR itself. Between `PA` (the current bytecode, §6.3) and `PB` (the current stream pointer), a handler has both halves of its context handed to it automatically.
 
 # Chapter 6: LUT Dispatch {#ch-6}
 
@@ -474,7 +479,12 @@ The handler address comes from the label; the skip pattern is whatever leaves th
 
 When XBYTE dispatches bytecode `N`, it writes `N` into **PA** (`$1F6`) before the handler runs. The handler can therefore use the bytecode value itself as data — as an immediate operand, a small constant, or an index — without re-reading it.
 
-This matters for **compression** (Chapter 9), where a group of bytecodes shares one table entry and the handler tells them apart by reading `PA`. It is also simply convenient: a "push small constant" family can encode the constant *in the bytecode* and read it straight from `PA`.
+This matters for **compression** (Chapter 9), where a group of bytecodes shares one table entry and the handler tells them apart by reading `PA`. It is also simply convenient: a "push small constant" family can encode the constant *in the bytecode* and read it straight from `PA`:
+
+```pasm2
+                mov     value, pa           ' the bytecode itself is the datum
+                and     value, #$0f         ' e.g. low nibble = constant 0..15
+```
 
 ## 6.4 Dispatch, by hand {#sec-6-4}
 
@@ -492,14 +502,12 @@ nextbc                                      ' the hand-written loop
 Read a byte, use it to index the table, read the entry, execute it. That is fetch-look-up-execute — the loop from §3.1, in four instructions. **XBYTE is this loop in hardware**, with the return folded in so handlers end in `_RET_` and the engine re-enters the loop on its own — it also writes the bytecode to `PA` and the stream pointer to `PB` along the way, which the hand-written version above does not. Chapter 7 walks the hardware version clock by clock.
 
 ::: tip
-**Do not file this loop away as a stepping stone.** It is easy to read the next chapter and conclude that the hand-written version was scaffolding — something you needed once, to understand the engine, and will never write again.
-
-That is exactly wrong, and it is the most useful thing this chapter has to tell you. This loop is:
+**This loop is not a stepping stone.** It is easy to read the next chapter and treat the hand-written version as scaffolding — needed once to understand the engine, never written again. It is the opposite: this loop is one you will come back to, for two reasons. It is:
 
 - **your debug mode.** The engine's loop is hardware and has no body, so there is nowhere to put a `debug()`. To trace which bytecode ran and where in the stream it came from, you take the engine out and run *this* instead (Chapter 11).
-- **what most working P2 emulators actually ship.** Not because their authors could not manage XBYTE, but because the engine's auto-fetch requires the guest's code to live in hub — and a console's ROM does not. They keep the `EXECF` dispatch and write the fetch themselves. That is this loop (Chapter 13).
+- **what most working P2 emulators actually ship.** The engine's auto-fetch requires the guest's code to live in hub — and a console's ROM does not — so they keep the `EXECF` dispatch and write the fetch themselves. That is this loop (Chapter 13).
 
-The engine is a specialisation. This is the general case, and you will come back to it.
+The engine is a specialisation; this hand-written loop is the general case.
 :::
 
 # Part III: The XBYTE Engine
@@ -551,9 +559,7 @@ At clock 5 the engine can write **C** and **Z** from the low bits of the bytecod
 
 XBYTE is **interruptible**. An interrupt can occur during dispatch, and the engine resumes the bytecode stream afterwards; bytecode interpretation does not lock out a cog's interrupts.
 
-That is genuinely good news, and it is where most descriptions of XBYTE stop. **They stop one sentence too early.**
-
-Read it again, from the other side: **an interrupt can land in the middle of your handler.** The engine will resume the stream correctly afterwards — but it makes no promise whatever about the *work your handler was halfway through* when the interrupt fired. If that work had to be atomic, it has just been cut in half.
+That is good news, with a flip side worth stating plainly: **an interrupt can land in the middle of your handler.** The engine will resume the stream correctly afterwards — but it makes no promise whatever about the *work your handler was halfway through* when the interrupt fired. If that work had to be atomic, it has just been cut in half.
 
 ::: caution
 **If a handler performs a multi-instruction sequence that must not be interrupted, you must fence it yourself.**
@@ -606,7 +612,7 @@ After that `_ret_ setq`, the engine is running: it fetches the first bytecode an
 ::: caution
 **The `$1FF` must be on the stack before the arming `_RET_`, and you put it there with `PUSH #$1FF`.**
 
-Without it, the `_RET_` simply returns wherever the stack happens to point and **the engine never engages** — silently. Nothing faults; your program just runs on as if you had never armed it, which is a memorable afternoon.
+Without it, the `_RET_` simply returns wherever the stack happens to point and **the engine never engages** — silently. Nothing faults; your program just runs on as if you had never armed it, so the cause can be slow to find.
 
 In particular, **a `CALL` will not do the job for you.** A `CALL` pushes *its own* return address, which is not `$1FF`. Every working implementation — the Silicon Doc's own demo included — writes the explicit `PUSH`.
 :::
@@ -717,7 +723,14 @@ Bit 0 of the mode operand is the **F bit**:
 - **F = 0** — dispatch does not affect C or Z; flag state carries across bytecodes.
 - **F = 1** — at clock 5, dispatch writes **C = bytecode index bit 1** and **Z = bytecode index bit 0**.
 
-Setting F lets a routine *"differentiate behavior within a bytecode routine, especially in cases of conditional looping, where a SKIPF pattern would have been insufficient, on its own."* In other words, when one handler must behave four slightly different ways and a skip pattern cannot express the difference, encode two selector bits in the bytecode's low bits and let the flags carry them in.
+Setting F lets a routine *"differentiate behavior within a bytecode routine, especially in cases of conditional looping, where a SKIPF pattern would have been insufficient, on its own."* In other words, when one handler must behave four slightly different ways and a skip pattern cannot express the difference, encode two selector bits in the bytecode's low bits and let the flags carry them in:
+
+```pasm2
+' Armed with F=1: each dispatch has set Z = index bit 0, C = index bit 1.
+' One shared handler reads those two bits straight from the flags:
+        if_z    jmp     #odd_variant        ' bytecode's low bit was 1
+        if_c    add     step, #1            ' next bit selects a behaviour
+```
 
 ::: hardware
 The F bit and the SKIPF pattern are complementary selectors. The skip pattern chooses *which instructions* a handler runs; the flags (via F) let those instructions *branch* on two bits of the bytecode. Compression, the SKIPF pattern, and the F bit together are how a small table serves a large, regular bytecode set.
@@ -728,7 +741,7 @@ The F bit and the SKIPF pattern are complementary selectors. The skip pattern ch
 Everything in this chapter is easier to trust once you have taken a real one apart. So here is the mode operand the **P2's own Spin2 interpreter** arms with — the reference XBYTE program, written by the silicon's designer:
 
 ```pasm2
-        _ret_   setq    #$1A1               ' the real thing
+        _ret_   setq    #$1A1               ' Spin2 interpreter's arming operand
 ```
 
 `$1A1` is nine bits: `%1_1010_0001`. Lay it against the compression pattern `%ABBBB00xF` from §9.3:
@@ -743,7 +756,7 @@ Everything in this chapter is easier to trust once you have taken a real one apa
 
 Read it back out in words: *a 256-entry dispatch table at LUT `$100`; bytecodes `$00`–`$9F` get individual entries; bytecodes `$A0`–`$FF` compress — each group of sixteen sharing one entry and one handler, which reads the actual bytecode from `PA`; and dispatch writes C and Z from the bytecode's low bits.*
 
-That is the whole of §9.2, §9.3 and §9.4 exercised at once, in a single instruction, in production.
+This single operand exercises §9.2, §9.3 and §9.4 at once.
 
 ::: tip
 Work the other way when you design your own: decide the **base** (where in LUT can you afford 256 longs?), decide the **threshold** (how many bytecodes genuinely need their own handler, and where does the regular, operand-carrying tail begin?), then decide the **F bit** (do any handlers want two selector bits in the flags?). Concatenate, and you have your operand. The three choices are independent — that is the point of packing them into one value.
