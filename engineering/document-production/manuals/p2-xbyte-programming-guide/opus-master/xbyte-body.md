@@ -607,14 +607,14 @@ So arming XBYTE takes two things in place:
                                             '    starts now
 ```
 
-After that `_ret_ setq`, the engine is running: it fetches the first bytecode and dispatches it, and keeps going until stopped. The `$1FF` is **not consumed** as it goes — the Silicon Doc is explicit that the triggering return *"does not pop the stack,"* so the single `PUSH` you did at arm time serves *every* dispatch that follows, sitting on the hardware stack for as long as the engine runs. (That it is never popped has a consequence when you eventually leave the engine — §10.4.)
+After that `_ret_ setq`, the engine is running: it fetches the first bytecode and dispatches it, and keeps going until stopped. The `$1FF` is **not consumed** as it goes — the *Parallax Propeller 2 Documentation v35* is explicit that the triggering return *"does not pop the stack,"* so the single `PUSH` you did at arm time serves *every* dispatch that follows, sitting on the hardware stack for as long as the engine runs. (That it is never popped has a consequence when you eventually leave the engine — §10.4.)
 
 ::: caution
 **The `$1FF` must be on the stack before the arming `_RET_`, and you put it there with `PUSH #$1FF`.**
 
 Without it, the `_RET_` simply returns wherever the stack happens to point and **the engine never engages** — silently. Nothing faults; your program just runs on as if you had never armed it, so the cause can be slow to find.
 
-In particular, **a `CALL` will not do the job for you.** A `CALL` pushes *its own* return address, which is not `$1FF`. Every working implementation — the Silicon Doc's own demo included — writes the explicit `PUSH`.
+In particular, **a `CALL` will not do the job for you.** A `CALL` pushes *its own* return address, which is not `$1FF`. Every working implementation — the documentation's own demo included — writes the explicit `PUSH`.
 :::
 
 ## 8.2 The mode operand {#sec-8-2}
@@ -2061,7 +2061,7 @@ Everything above is a production interpreter or emulator. This last pointer is t
 - it runs the engine in a **dedicated cog**, launched with `COGINIT` and driven by a three-long hub **mailbox** (the §12.4 pattern), and
 - its halt handler **pops the arming `$1FF`** before returning the cog to idle, so the cog can be armed again for the next job (the §10.4 re-arm rule, made concrete).
 
-It appears in the Parallax forum thread **"basic XBYTE questions"** — `https://forums.parallax.com/discussion/176253/basic-xbyte-questions` — posted by **refaQtor**, where **Eric Smith (ersmith)** and **Christof Eb.** work through the same table-in-LUT, arming, and hub-versus-LUT points this book makes. Read it as a compact worked example, not a specification: it is community code, and the authority for everything it does is the Silicon Doc and the chapters here.
+It appears in the Parallax forum thread **"basic XBYTE questions"** — `https://forums.parallax.com/discussion/176253/basic-xbyte-questions` — posted by **refaQtor**, where **Eric Smith (ersmith)** and **Christof Eb.** work through the same table-in-LUT, arming, and hub-versus-LUT points this book makes. Read it as a compact worked example, not a specification: it is community code, and the authority for everything it does is the *Parallax Propeller 2 Documentation v35* and the chapters here.
 
 # Appendix D: Troubleshooting {#app-d}
 
@@ -2140,7 +2140,7 @@ It appears in the Parallax forum thread **"basic XBYTE questions"** — `https:/
 - **6502 emulator** — Ch. 15
 - **6809 / prefix pages** — §17.2
 - **8086 / x86** — §14.2, §17.1, §17.3
-- **65816** (the sweet spot that isn't) — §14.2
+- **65816** (byte-stream, but off-chip → rung 2) — §14.2
 - **68000** — §14.2
 - **Z80** (both kinds of prefix) — §17.1, §14.3
 
