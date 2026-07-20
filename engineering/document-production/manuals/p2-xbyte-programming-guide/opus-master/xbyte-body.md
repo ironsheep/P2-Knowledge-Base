@@ -8,7 +8,7 @@ This Part is the map. It says what emulation is, why the Propeller 2 is unusuall
 
 Three things draw people to the Propeller 2 for this work — and raw speed is not the first of them.
 
-**The P2 is built for interpreters.** Underneath every interpreter is one small loop: fetch the next instruction, look up what it means, carry it out, repeat. The P2 has hardware made for exactly that loop, so writing an interpreter — for almost *any* instruction set — is unusually direct, with the machine carrying the busywork. This flexibility is the largest part of the draw: you can turn a stream of *someone else's* instructions into running code, and the P2 was designed to help you do it. (The P2 doing the emulating is the **host**; the processor it reproduces — an 8080, a 6502, a Z80 — is the **guest**. Those two words run through the whole book. You meet the hardware itself in Part II.)
+**The P2 is built for interpreters.** Underneath every interpreter is one small loop: fetch the next instruction, look up what it means, carry it out, repeat. The P2 has hardware made for exactly that loop, so writing an interpreter — for a wide range of instruction sets — is unusually direct, with the machine carrying the busywork. This flexibility is the largest part of the draw: you can turn a stream of *someone else's* instructions into running code, and the P2 was designed to help you do it. (The P2 doing the emulating is the **host**; the processor it reproduces — an 8080, a 6502, a Z80 — is the **guest**. Those two words run through the whole book. You meet the hardware itself in Part II.)
 
 **A whole machine on one chip.** The P2 has eight processors, called *cogs*. One cog can run the emulator; the seven beside it can generate the video and sound the original needed separate hardware to produce — a whole late-1970s arcade machine, processor and display and audio, on one inexpensive chip. Speed lives here too, honestly sized: the host runs its own instructions far faster than the one-to-a-few-megahertz classics, so for many **low-end** guests — simple 8-bit micros, only a few steps to reproduce each instruction — it keeps up with room to spare, sometimes beating the original outright. That is a bonus simple guests hand you, not a promise for all of them. The more complex a guest's instructions get — several bytes each, many addressing modes, several pieces of state touched at once — the more host steps every one costs, and the smaller that margin grows, until simply *keeping* real time is the goal. (Chapter 2 returns to this: how many steps a guest instruction takes is one of the first things that decide what it will cost you.)
 
@@ -30,7 +30,7 @@ Three things draw people to the Propeller 2 for this work — and raw speed is n
 
 - **Instruction-at-a-time interpretation — reproducing behavior, not timing.** ← **This is the book.** You reproduce what the guest *computes*: the contents of its registers, its status flags, its memory, and the path its control flow takes — one guest instruction at a time. You do **not** reproduce exact timing. For the very large range of things people actually want to run, that is precisely enough — and it is the kind the P2's hardware was built to make cheap.
 
-Naming the field this way does two jobs at once. If emulation is new to you, you now know the shape of the territory and where we are standing in it. If it is not, you know exactly which trade-offs we are *not* making, so nothing later comes as a surprise.
+This framing serves whether or not emulation is new to you. If it is new, you now know the shape of the territory and where we are standing in it. If it is not, you know exactly which trade-offs we are *not* making.
 
 ## 1.3 How to read this book {#sec-1-3}
 
@@ -38,7 +38,7 @@ This guide is written for two readers, and it is one road with two on-ramps.
 
 **If emulation is new to you:** read this Part straight through, then continue in order. It builds the picture — what emulation is, why the P2 suits it, and what any emulator must handle — that every later chapter assumes. You will reach the P2's dispatch engine already understanding what it is *for*, instead of gathering its details and hoping they add up.
 
-**If you have built emulators before:** skim the field above, note that we work **at the instruction level** and reproduce **behavior rather than timing**, and go to the engine (Part II) and then to the decisions chapter (Chapter 13), where the P2-specific judgment lives. That chapter — *which* of the engine's assets your particular guest can actually use — is the one this book exists to get right, and for many guests the honest answer will surprise you.
+**If you have built emulators before:** skim the field above, note that we work **at the instruction level** and reproduce **behavior rather than timing**, and go to the engine (Part II) and then to the decisions chapter (Chapter 13), where the P2-specific judgment lives: *which* of the engine's assets your particular guest can actually use. For many guests the answer is only one of them, not both — and Chapter 13 is where that is worked out.
 
 The next chapter meets you in the middle: it lays out, in plain terms, the handful of concerns every emulator of our kind must answer — and then, at its end, gives you the vocabulary the rest of the book will speak.
 
@@ -78,7 +78,7 @@ Real machines get interrupted — a key is pressed, a timer expires, a scan line
 
 ## 2.5 When you step off the engine, the in-between work becomes yours {#sec-2-5}
 
-The P2 has a hardware feature — you will meet it in the next Part, and it is the reason this book exists — that runs the fetch-and-dispatch loop of an interpreter *for you, for free*. It is remarkable, and it comes with one catch worth planting now: it runs the loop so completely that it leaves **no gap** between one guest instruction and the next. And that gap is exactly where a real emulator often needs to slip in small recurring jobs — pacing itself to real speed, checking whether an interrupt has arrived, ticking a counter the guest can read back, leaving a hook for a debugger.
+The P2 has a hardware feature — you meet it in the next Part — that runs the fetch-and-dispatch loop of an interpreter *for you, in hardware*, at a small fixed cost per instruction. It comes with one catch worth planting now: it runs the loop so completely that it leaves **no gap** between one guest instruction and the next. And that gap is exactly where a real emulator often needs to slip in small recurring jobs — pacing itself to real speed, checking whether an interrupt has arrived, ticking a counter the guest can read back, leaving a hook for a debugger.
 
 So there is a trade at the center of this whole book: take the free loop and you give up the one place that in-between work naturally lives; keep a place for that work and you run the loop yourself, at a small cost. Which is the bargain depends on how much your guest needs done between its instructions — and that is a decision you make per project, with eyes open.
 
@@ -104,7 +104,7 @@ With the picture drawn and the words in hand, the next Part is where the P2 earn
 
 # Part II: XBYTE Fundamentals
 
-This part builds the mental model of the engine. It opens on the one idea XBYTE exists to serve — the loop at the center of every interpreter — then teaches the **skip family** (SKIP, SKIPF, EXECF) that XBYTE is built from, the **FIFO** that feeds it bytecodes, and the **LUT dispatch table** it reads. By the end of Part II, XBYTE itself (Part III) is no longer magic: it is hardware that runs a dispatch you already understand, once per bytecode, for free.
+This part builds the mental model of the engine. It opens on the one idea XBYTE exists to serve — the loop at the center of every interpreter — then teaches the **skip family** (SKIP, SKIPF, EXECF) that XBYTE is built from, the **FIFO** that feeds it bytecodes, and the **LUT dispatch table** it reads. By the end of Part II, XBYTE itself (Part III) is no longer magic: it is hardware that runs a dispatch you already understand, once per bytecode, at a fixed six-clock cost (§7.2).
 
 # Chapter 3: Understanding XBYTE {#ch-3}
 
@@ -137,7 +137,7 @@ The P2 is fast at running native PASM2, but native code is large: a big program 
 That second case is the one this guide builds toward. Emulating another processor *is* interpretation: each of the guest's instructions is a "bytecode," and the handler is the PASM2 that reproduces it. When dispatch is cheap, a single cog can emulate a whole small CPU and still have clocks left to drive video and sound — which is what the 8080 arcade emulators in Appendix C achieve.
 
 ::: caution
-**Emulating a CPU is where XBYTE gets interesting, and it is also where it gets conditional.** Some of the P2's most impressive emulators — the console emulators in Appendix C — do **not** use the engine at all, for reasons that have nothing to do with their guests' instruction sets. Chapters 13 and 14 are about exactly that, and it is worth reading them *before* you commit to an architecture rather than after.
+**Emulating a CPU is where using XBYTE becomes conditional.** Several of the P2's console emulators (Appendix C) do **not** use the engine at all, for reasons that have nothing to do with their guests' instruction sets. Chapters 13 and 14 set out those reasons; read them before you commit to an architecture.
 :::
 
 ## 3.4 The pieces, and where they live {#sec-3-4}
@@ -168,9 +168,7 @@ It is the **wrong** tool when there is no stream to walk, or when the "dispatch"
 None of these is a matter of degree. Chapter 13 is where they come from and §18.7 is the full list; if one of them holds, you want the software loop of §6.4 — which is not a consolation prize, but what most working P2 emulators actually ship.
 
 ::: tip
-If you have written an interpreter before: XBYTE replaces your `next:` dispatch label — the `fetch / index / jump` you wrote by hand — with hardware. Your handlers stay yours; you delete the loop between them.
-
-And that is precisely the trade. **You delete the loop between them** — including anything else you were keeping there.
+If you have written an interpreter before: XBYTE replaces your `next:` dispatch label — the `fetch / index / jump` you wrote by hand — with hardware. Your handlers stay yours; you delete the loop between them — including anything else you were keeping there.
 :::
 
 ## 3.6 What XBYTE costs you {#sec-3-6}
@@ -187,7 +185,7 @@ The engine is not free, and its price is paid in cog resources rather than clock
 | **The cog's FIFO** | held by `RDFAST` for the bytecode stream — so it cannot simultaneously stream video or drive a block move |
 | **The dispatch loop** | **there isn't one.** No place for per-bytecode work of any kind |
 
-The first six are ordinary budgeting. **The last one is the one that surprises people**, and it is the subject of §13.4.
+The first six are ordinary budgeting. The last one is different in kind — not a resource the engine spends but a place to work that it removes — and it is the subject of §13.4.
 
 ## 3.7 If you're building… {#sec-3-7}
 
@@ -196,7 +194,7 @@ You have probably arrived with an application already in mind. Find it here; the
 | If you're building… | XBYTE gives you… | Start at |
 |---------------------|------------------|----------|
 | a **bytecode VM** or scripting language | the whole engine — this is what it was built for | Ch. 12 |
-| a **CPU emulator** | it depends on your guest — and the answer may surprise you | **Ch. 13, Ch. 14** |
+| a **CPU emulator** | it depends on your guest — often one asset, not both | **Ch. 13, Ch. 14** |
 | a **terminal / ANSI parser** | the *table* as state — `ESC` borrows an alternate table | §18.3 |
 | a **MIDI or protocol decoder** | the *byte* as data — the channel or type rides in `PA` | §18.4 |
 | a **graphics display list** | the *stream* as a movable cursor | §18.5 |
@@ -264,6 +262,14 @@ So EXECF means: *go to this routine, and skip these instructions inside it.* One
 
 That is the entire mechanism of dispatch. If a table entry holds an EXECF operand — a handler address in the low 10 bits, a skip pattern in the high 22 — then "execute the operand" is exactly "run handler N in variant M." XBYTE's dispatch table is precisely a table of EXECF operands (Chapter 6), and the engine's core step is precisely an EXECF (Chapter 7).
 
+That operand is just one long — an address ORed with a pattern shifted up by ten. Nothing more constructs it:
+
+```pasm2
+' Handler at cog address $120; pattern %1110 keeps instruction 0
+' and skips the next three (a set bit skips; §4.2).
+entry           long    $120 | (%1110 << 10)    ' "run one line of four"
+```
+
 | Instruction | Skips by | Also does | Pattern width | Works in |
 |-------------|----------|-----------|---------------|----------|
 | **SKIP**  | cancelling in place | — | 32 bits | cog, LUT, hub |
@@ -290,12 +296,12 @@ alu_body
 The bytecode that means "subtract" points at `alu_body` with a skip pattern that leaps the `add`, `and`, and `or` lines; "add" skips the other three; and so on. Four bytecodes, one body. This is the single most common XBYTE handler pattern, and it is pure SKIPF — the engine just supplies the pattern for you, from the table, on every bytecode.
 
 ::: tip
-Design handler bodies so the *common* path has the fewest skips. Every kept instruction runs; every skipped one is free. A well-factored shared body can serve a dozen related bytecodes with one copy of the code.
+Design handler bodies so the *common* path has the fewest skips. Every kept instruction runs; a skipped one costs almost nothing (§4.2). A well-factored shared body can serve a dozen related bytecodes with one copy of the code.
 :::
 
 ## 4.5 Two things a pattern does when you are not looking {#sec-4-5}
 
-The shared body above rests on one behaviour you have not been told about, and steps neatly around a trap you have not been warned of. Both matter before you write your own.
+The shared body above depends on one behaviour and must step around one trap. Both matter before you write your own.
 
 **Skipping is suspended inside a `CALL`.**
 
@@ -303,7 +309,7 @@ Look at `alu_body` again. It opens with `call #pop_two` and ends with `_ret_ cal
 
 This is not folklore; the hardware tracks it explicitly. The **`CALL` depth since the pattern began** is one of the fields `GETBRK` reports (§11.1), and **skipping is suspended whenever that depth is non-zero**.
 
-It is also the fact that makes shared bodies *practical*. Without it, every skip pattern would have to account for every instruction inside every helper the body calls — and factoring common work into subroutines would be impossible. You have been relying on it since the first example in this chapter.
+It is also the fact that makes shared bodies *practical*. Without it, every skip pattern would have to account for every instruction inside every helper the body calls — and factoring common work into subroutines would be impractical. You have been relying on it since `alu_body` above.
 
 **A pattern longer than its body runs past the end of it.**
 
@@ -327,9 +333,9 @@ Two defences, and you want both. **Keep large constants out of skipped bodies** 
 :::
 
 ::: hardware
-There is a third consequence, and this one is free money.
+There is a third consequence, and it hands you a spare bit.
 
-A dispatch-table entry is `handler | pattern << 10` (§6.1). So **bit 10 is the pattern's lowest bit — the bit that would cancel the handler's *first* instruction.** But you jumped there in order to run that instruction. A legitimate pattern therefore **never** sets bit 10.
+A dispatch-table entry is `handler | pattern << 10` (§6.1). So **bit 10 is the pattern's lowest bit — the bit that would cancel the handler's *first* instruction.** But you jumped there in order to run that instruction. A normal dispatch entry therefore leaves bit 10 clear.
 
 Which makes bit 10 spare storage: **one free boolean per bytecode.** Read it and clear it in a single instruction on the way in, and `EXECF` still sees a clean pattern:
 
@@ -338,7 +344,7 @@ Which makes bit 10 spare storage: **one free boolean per bytecode.** Read it and
         if_c    jmp     #special_case       ' pattern clean for EXECF
 ```
 
-Emulators in the field use exactly this to carry a per-opcode flag that would otherwise have cost them a second table.
+This carries a per-opcode flag that would otherwise have cost a second table.
 :::
 
 ## 4.6 Designing skip patterns — a process {#sec-4-6}
@@ -353,7 +359,7 @@ The shared-handler idiom is powerful, but a body serving a dozen bytecodes is on
 4. **Assign each member's pattern, common path first.** A member's pattern skips the instructions it does not want. Order the body so the *most common* members skip the least — under SKIPF every kept instruction runs and every skipped one is free (§4.2). Build the table entry with the handler address in the low 10 bits and the pattern in the high 22 (§6.2).
 5. **When a pattern can't say it, use the flag.** A skip pattern chooses *which instructions* run; it cannot make a kept instruction *behave two ways*. When members differ in behaviour rather than in instruction-selection — a conditional, a loop count, two variants of one operation — carry two selector bits in the bytecode and let the **F bit** deliver them as flags (§9.4). Pattern and flag are complementary selectors; reach for the flag only when the pattern runs out.
 
-**Watch — the pattern lies to you in exactly two ways** (both from §4.5): a `##` immediate is *two* longs, so one `##` inside a skipped region throws every bit after it off by one; and a pattern with more bits than its body has instructions spills onto whatever runs next. Count longs, not lines, and size each pattern to its body.
+**Two ways a pattern misleads you** (both from §4.5): a `##` immediate is *two* longs, so one `##` inside a skipped region throws every bit after it off by one; and a pattern with more bits than its body has instructions spills onto whatever runs next. Count longs, not lines, and size each pattern to its body.
 
 **Avoid.**
 
@@ -361,7 +367,7 @@ The shared-handler idiom is powerful, but a body serving a dozen bytecodes is on
 - Letting a family outgrow the **22-bit window**: the dispatch pattern is 22 bits, so a body can be skipped across at most 22 instructions. A wider family splits into two bodies, or pushes more work into calls.
 - Accounting for a helper's internals in a pattern — you never need to (§4.5), and it breaks the moment the helper changes.
 
-Get the family and the body right and the patterns almost write themselves: each is just *keep these, skip those*, counted in longs.
+Get the family and the body right and each pattern is just *keep these, skip those*, counted in longs.
 
 # Chapter 5: The Bytecode Stream {#ch-5}
 
