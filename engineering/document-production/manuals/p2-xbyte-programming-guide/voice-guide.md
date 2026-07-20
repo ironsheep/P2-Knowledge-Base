@@ -67,11 +67,30 @@ Teaching-register rules:
 | Avoid | Why | Instead |
 |-------|-----|---------|
 | "Let's explore XBYTE..." | Tutorial voice (reference layer) | "XBYTE dispatches..." |
-| "You might wonder why..." | Hedging | State the fact directly |
+| "You might wonder why..." | **Tutorial filler** (NOT the same as calibrated confidence — see §2.2a) | State the fact directly |
 | "Simply arm the engine..." | Dismissive of complexity | "Arm the engine..." |
 | "Basically, it works like..." | Vague | Precise description |
 | "Congratulations!" | Tutorial celebration | (omit) |
+| "the obvious way to think about X is wrong" · "it is tempting to..." · "Read that again" | **Reader-as-foil** — tells the reader what they think, then corrects them (the "besserwisser" register) | State the correct fact; let the reader draw the contrast |
+| "this one is free money" · "the single most elegant part" · "nothing else comes close" · "if you read one thing, read this" | **Self-admiration** — the text praising its subject or its own explanation | State what the thing does; let the reader judge it |
+| "and here is the trap" · "they stop one sentence too early" · "Hold that result" | **Staged reveal** — withholding a fact to manufacture a beat | Deliver the fact where it belongs, unstaged |
 | interpreter clock timings for Spin2 methods | Banned class (unverifiable, rev-dependent) | cite the 6-clock HARDWARE overhead only, or describe the code path |
+
+#### 2.2a Calibrated confidence is required — it is not hedging {#sec-2-2a}
+
+Banning tutorial filler ("you might wonder", "let's explore") does **not** mean
+banning *uncertainty*. A qualifier that reflects the true state of the evidence
+— "usually", "often", "on most guests", "in practice" — is **accuracy**, not
+hedging, and it is required wherever the unqualified claim would overstate.
+
+The test is one line: **never state a claim above its evidence.** "It sits there
+forever" is wrong if the code exits on any interrupt; "most emulators" is wrong
+if you have counted none. Say what is true at the confidence it is true, and
+point at the primary source when a solid figure is lacking (see the
+[[document-audit]] payoff-sentence sweep, Dimension #4c, and the
+[[document-finalize]] write-time counterpart). A rhetorical flourish that
+*demands* a punchy payoff is exactly where an unsupported claim slips in — strip
+the flourish and read what is left as a bare claim before keeping it.
 
 ### 2.3 Voice Comparison
 
@@ -79,9 +98,40 @@ Teaching-register rules:
 |--------|------------------|------------------------------|-----------------------------|
 | Person | Second ("you") | Third (component names) | Second allowed, sparingly |
 | Tone | Warm, encouraging | Authoritative, precise | Warm, plain-spoken |
-| Hedging | Occasional | Never | Never |
+| Tutorial filler | Occasional | Never | Never |
+| Calibrated qualifiers | Yes | **Yes, where true** (§2.2a) | **Yes, where true** (§2.2a) |
 | Analogy | Yes | Rarely | Yes, as a mental-model aid |
 | Celebration | Yes ("Uff!") | Never | Never |
+| Closing beat every section | — | No (budget — §2.4) | No (budget — §2.4) |
+
+### 2.4 Cadence budget — not every section earns a beat {#sec-2-4}
+
+A *beat* is a closing sentence that lands a rhetorical punch rather than
+finishing the exposition — a verdict, a reversal, a directive to the reader, an
+aphorism that restates with force. One well-placed beat is good writing. The
+failure mode is **regularity**: when nearly every section ends on one, the
+reader stops hearing the individual beat and starts hearing the *metronome* —
+"instantly recognizable, rapidly fatiguing" (Chip Gracey, XBYTE review 2026-07).
+
+The recognizable-AI quality is the pattern, not any one sentence, so the fix is
+distribution, not deletion. Budget:
+
+- **At most ~half of section closings may be beats.** If most sections end on a
+  punch, cut the weakest ones back to a plain informational close.
+- **No long runs.** Never more than **~4 sections in a row** all closing on a
+  beat. A stretch of flat, informational closes is not a defect — it is rest.
+- **Chapter closers are the worst offenders** — aim well below a beat on every
+  chapter exit.
+- **A declared refrain is not a beat.** A deliberate, announced structural
+  device (e.g. this guide's *"Carry the question:"* refrains) is structure, not
+  cadence drift — keep it.
+- **Protect the earned ones.** A beat that carries real information, lowers the
+  text's own confidence, or resolves a genuine tension survives the pass. Do not
+  flatten the whole document to hit a number — that trades one defect for
+  another.
+
+Detection tooling: the [[document-audit]] payoff-sentence sweep (Dimension #4c)
+measures closing-beat rate and the longest consecutive run.
 
 ---
 
