@@ -1,9 +1,11 @@
 # P2 XBYTE Programming Guide - Changelog
 
-## v0.5.0 (2026-07-20) — accuracy, examples, and voice (in development)
+## v1.0.0 (2026-07-20) — first community-review release
 
-A close technical read of the whole guide drove three coordinated passes:
-correctness fixes, more in-place examples, and a readability pass on the prose.
+This is the first public (community-review) release of the guide. It follows a
+close expert technical read that drove three coordinated passes — correctness
+fixes, more in-place examples, and a readability pass on the prose — over the
+in-development drafts (v0.1.0–v0.4.0, summarized below).
 
 **Corrections.** A handful of claims were stated more strongly than the
 hardware supports, and each is now fixed:
