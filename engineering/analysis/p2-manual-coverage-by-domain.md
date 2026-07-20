@@ -16,7 +16,7 @@
 | P2 Assembly Language Reference (PASM2, 503pp) | **A** (instruction set) | reference — every PASM2 instruction; touches all domains but as ISA, not application |
 | DeSilva PASM2 Tutorial (162pp) | **A** | tutorial — learning PASM2 |
 | P2 Streamer Programming Guide (68pp) | **D** Streaming & video gen | systematic reference |
-| P2 XBYTE Programming Guide (v0.1.0, in dev) | **D** (XBYTE engine) | reference (draft) |
+| P2 Interpreters & Emulators Guide (XBYTE) (v1.0.0, released) | **D** (XBYTE engine) | reference |
 | P2 Debug Window Manual (156pp) | **K** Dev tools | reference |
 | P2 Single-Step Debugger Manual | **K** | reference |
 | Getting Started with the P2 (25pp) | **K** / orientation | on-ramp (cross-cutting) |

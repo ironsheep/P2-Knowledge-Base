@@ -6,8 +6,8 @@ what builds.
 
 | File | Manual | What it shows |
 |------|--------|---------------|
-| `xbyte-minimal-vm.spin2` | Ch. 10 | The smallest complete XBYTE program: load a table, prime the FIFO, arm the engine, four bytecode handlers, halt. Exercises the whole engine once. |
-| `xbyte-display-list.spin2` | Ch. 16 | The complete **non-interpreter** build — the same engine walking a graphics display list. Auto-fetch, inline operands, and a seeking read cursor. |
+| `xbyte-minimal-vm.spin2` | Ch. 12 (§12.2) | The smallest complete XBYTE program: load a table, prime the FIFO, arm the engine, four bytecode handlers, halt. Exercises the whole engine once. |
+| `xbyte-display-list.spin2` | Ch. 18 (§18.5) | The complete **non-interpreter** build — the same engine walking a graphics display list. Auto-fetch, inline operands, and a seeking read cursor. |
 
 ## Building
 

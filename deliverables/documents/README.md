@@ -87,6 +87,13 @@ The design-and-realization companion to the reference manuals, picking up where 
 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-architect-guide-changelog.md)
 
+### [P2 Interpreters & Emulators Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-XBYTE-Programming-Guide.pdf)
+**The XBYTE Engine and Bytecode Dispatch on the Propeller 2** — *Version 1.0.0*
+
+The complete guide to the Propeller 2's XBYTE hardware bytecode engine — the skip family (SKIP/SKIPF/EXECF), the FIFO bytecode stream, and LUT dispatch that together let one indexed jump select and run a handler with no software in the loop. It works up from what the engine is and how it dispatches each bytecode to building on it: a minimal custom virtual machine, then — where the engine fits the guest — a compact, illustrative CPU emulator, with chapters on servicing guest interrupts, prefix bytes and alternate tables, and using the engine beyond interpreters to parse protocols and drive displays. Written in two registers — a warm teaching layer for the concepts and a precise reference layer for the tables, encodings, and configuration bits — and grounded throughout in the P2 documentation, the knowledge base, and worked community code. Includes a downloadable library of two compile-clean Spin2 example programs.
+
+*July 2026 - Community Review Edition* | [Changelog](DOCs/p2-xbyte-programming-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-xbyte-programming-guide-src.zip)
+
 ### Application Notes
 
 Worked, task-specific companions to the reference manuals — each pairs a focused technique with compile-clean, runnable code.
@@ -152,11 +159,6 @@ The rest of the set — in production or on the drawing board:
 **Observe and Control Your Running P2 Code**
 
 A practical guide to single-stepping P2 code — pausing and resuming a running program, inspecting values and timing, and driving the debugger from the host.
-
-#### P2 XBYTE Programming Guide
-**Building Interpreters and Emulators on the Propeller 2**
-
-A deep dive into the P2's XBYTE hardware bytecode engine and the skip family (SKIP/SKIPF/EXECF) — using FIFO/LUT dispatch to build a custom virtual machine, then a compact illustrative 6502 emulator.
 
 #### Application Notes in Planning
 

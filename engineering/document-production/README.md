@@ -30,6 +30,7 @@ prose), with all per-publication detail in the roster.*
 | Debug Window | manual | 1.1.0 | 169 | ✅ |
 | Streamer Guide | manual | 1.0.6 | 75 | ✅ |
 | Architect's Guide | manual | 1.0.1 | 53 | ✅ |
+| Interpreters & Emulators (XBYTE) | manual | 1.0.0 | 100 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.2 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.1 | 14 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.1 | 19 | ✅ |
@@ -43,7 +44,6 @@ prose), with all per-publication detail in the roster.*
 
 | Document | Type | State |
 |----------|------|-------|
-| XBYTE Guide | manual | v0.1.0 first draft |
 | Single-Step Debugger | manual | draft; in technical review |
 | P2 Layout Torture Test | instrument | serves the layout-standards effort |
 

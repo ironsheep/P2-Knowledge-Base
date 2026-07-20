@@ -1261,7 +1261,7 @@ alu                                         ' shared ADD/SUB body
 
 ## 12.4 In practice: the engine usually runs in its own cog {#sec-12-4}
 
-The VM above arms XBYTE in the same cog that set it up, then parks — ideal for seeing the whole thing at once. A real interpreter is almost always different in one structural way: **the engine gets a cog to itself.** The Spin2 interpreter does this; so does every emulator in Appendix C.
+The VM above arms XBYTE in the same cog that set it up, then parks — ideal for seeing the whole thing at once. A real interpreter is almost always different in one structural way: **the engine gets a cog to itself.** The Spin2 interpreter does this, and so does the community XBYTE VM in §C.8.
 
 The shape is always the same. A launching cog builds an image whose LUT already holds the dispatch table, starts a cog on it with **`COGINIT`**, and shares a small **mailbox** in hub — a few longs the two cogs use to say *"here is the program," "here is where to put the result,"* and *"go."* The interpreter cog's *first act* is the arming sequence of Chapter 8; from then on the exit rules of §10.4 — including the re-arm `POP` if it will serve more than one job — are what keep it re-usable.
 
@@ -2258,6 +2258,8 @@ Everything above is a production interpreter or emulator. This last pointer is t
 It appears in the Parallax forum thread **"basic XBYTE questions"** — `https://forums.parallax.com/discussion/176253/basic-xbyte-questions` — posted by **refaQtor**, where **Eric Smith (ersmith)** and **Christof Eb.** work through the same table-in-LUT, arming, and hub-versus-LUT points this book makes. Read it as a compact worked example, not a specification: it is community code, and the authority for everything it does is the *Parallax Propeller 2 Documentation v35* and the chapters here.
 
 # Appendix D: Troubleshooting {#app-d}
+
+When the engine misbehaves, the cause is almost always one of a handful of arming, table, or timing mistakes. Match the symptom below to its likely cause, the fix, and the section that explains it.
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|

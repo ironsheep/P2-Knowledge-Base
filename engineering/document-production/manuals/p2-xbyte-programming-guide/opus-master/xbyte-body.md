@@ -2065,6 +2065,8 @@ It appears in the Parallax forum thread **"basic XBYTE questions"** — `https:/
 
 # Appendix D: Troubleshooting {#app-d}
 
+When the engine misbehaves, the cause is almost always one of a handful of arming, table, or timing mistakes. Match the symptom below to its likely cause, the fix, and the section that explains it.
+
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Engine never dispatches | no `$1FF` on the stack before the arming `_RET_` | `PUSH #$1FF` immediately before `_RET_ SETQ` (§8.1) |
