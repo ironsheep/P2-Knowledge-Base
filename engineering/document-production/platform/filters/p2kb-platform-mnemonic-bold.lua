@@ -269,7 +269,10 @@ local function is_english_context(word, prev_word, next_word, suffix)
        next == "rig" or next == "bench" or next == "first" then
       return true
     end
-    return false
+    -- Default: bare prose "test" is the common English noun/verb ("the intuitive
+    -- test", "that test is tidy"); a genuine TEST-instruction reference is written
+    -- in code (`TEST`) or as "the TEST instruction", both caught above.
+    return true
   end
 
   -- "call" as verb: "call the", "to call", "will call"
@@ -311,7 +314,10 @@ local function is_english_context(word, prev_word, next_word, suffix)
     if next == "directive" or next == "statement" then
       return false
     end
-    return false
+    -- Default: bare prose "fit" is the common English noun/verb/adjective ("a poor
+    -- fit", "these fit", "fit equally well"); the FIT directive is rare and written
+    -- in code (`FIT`) or as "the FIT directive/statement", both caught above.
+    return true
   end
 
   -- "push" as verb: "push the", "to push"
