@@ -832,7 +832,14 @@ op_port_write
 XBYTE runs until a handler chooses **not** to return to `$1FF`. A "halt" bytecode's handler simply does not end in the dispatch-continuing return — it branches to ordinary code instead, leaving the engine. That is the clean way to exit: one bytecode whose handler jumps out of the loop rather than back into it.
 
 ::: caution
-**If the cog will re-arm, reclaim the `$1FF` first.** The arming `$1FF` was never popped (§8.1) — so the moment a handler jumps *out* of the loop instead of returning to it, that `$1FF` is still sitting on the hardware stack. For a **run-once** VM that halts and parks (the shape of §12.2), that is harmless; the cog never touches the stack again. But a **reusable interpreter cog** — one that finishes a job, drops back to an idle wait, and later arms *again* for the next job — must **`POP`** that stale `$1FF` as it exits, or the hardware stack gains one entry per job. With only eight levels, and any handler or between-jobs code that also uses `CALL`/`RET`, that drift eventually starves the stack — and it **wraps with no fault** to warn you. The rule is simple: if you will arm more than once, pop on the way out. (Appendix C's minimal community example, §C.8, is a reusable cog that does exactly this.)
+**If the cog will re-arm, reclaim the `$1FF` first.** The arming `$1FF` was never popped (§8.1) — so the moment a handler jumps *out* of the loop instead of returning to it, that `$1FF` is still sitting on the hardware stack. For a **run-once** VM that halts and parks (the shape of §12.2), that is harmless; the cog never touches the stack again. But a **reusable interpreter cog** — one that finishes a job, drops back to an idle wait, and later arms *again* for the next job — must **`POP`** that stale `$1FF` as it exits, or the hardware stack gains one entry per job. With only eight levels, and any handler or between-jobs code that also uses `CALL`/`RET`, that drift eventually starves the stack — and it **wraps with no fault** to warn you. The rule is simple: if you will arm more than once, pop on the way out.
+
+```pasm2
+h_halt          pop     tmp                 ' reclaim the arming $1FF
+                jmp     #idle               ' back to the between-jobs wait
+```
+
+(Appendix C's minimal community example, §C.8, is a reusable cog that does exactly this.)
 :::
 
 # Chapter 11: Debugging XBYTE {#ch-11}
@@ -866,25 +873,25 @@ Fortunately, the silicon anticipated this.
 | `Z` | set when **no** skip pattern is queued (and `D` = 0) |
 | `D` | the full **32-bit** `SKIP`/`SKIPF`/`EXECF`/XBYTE pattern, used LSB-first |
 
-That is a remarkable amount of insight for two instructions. You can ask the engine, at any moment: *am I armed? what mode? what pattern is running? how many instructions of it are left?*
+Between them, these answer *what the engine is doing right now*: whether it is armed, in which mode, and what pattern is currently queued. Note what is **not** among them — how many instructions remain in the current bytecode routine. The queued pattern bits are visible, but a routine ends at its `_RET_`, which is a property of your code, not a length the engine tracks.
 
 ::: hardware
 Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely on this.
 :::
 
-## 11.2 The debugger already shows you all of it {#sec-11-2}
+## 11.2 The debugger shows you the engine's state {#sec-11-2}
 
 You rarely need to call `GETBRK` yourself, because the P2's single-step debugger does it for you. Its display carries **the live 32-bit skip pattern** and **the 9-bit XBYTE mode**, side by side with the registers and the program counter.
 
-Better still: in the disassembly view, **an instruction that the current skip pattern will cancel is drawn struck through.** You can *see* the pattern working — which instructions of a shared body are live for this bytecode and which have been skipped away. For debugging a SKIPF pattern that is off by one bit, nothing else comes close.
+Better still: in the disassembly view, **an instruction that the current skip pattern will cancel is drawn struck through.** You can *see* the pattern working — which instructions of a shared body are live for this bytecode and which have been skipped away. For a SKIPF pattern that is off by one bit, this view is the quickest way to spot the error.
 
-And XBYTE survives being debugged, for a reason worth knowing: the debug interrupt does **not** use the 8-level hardware stack at all — it enters and exits through dedicated shadow registers (`IJMP0`/`IRET0`, via `RETI0`) and saves only registers `$000-$00F`. Because it never touches that stack, the `$1FF` the engine depends on (§8.1) is left undisturbed across every breakpoint. You can stop the world, look around, and let it run on. (A debugger that itself makes calls still has to budget the 8-level stack — the ROM does not manage it for you.)
+And XBYTE survives being debugged, for a reason worth knowing: the debug interrupt enters and exits through its dedicated debug-interrupt vectors (`IJMP0`/`IRET0`, via `RETI0`) rather than the 8-level call stack. Because it never touches that stack, the `$1FF` the engine depends on (§8.1) is left undisturbed across every breakpoint. You can stop the world, look around, and let it run on. (A debugger that itself makes calls still has to budget the 8-level stack — the ROM does not manage it for you.)
 
 ## 11.3 The technique the engine cannot give you {#sec-11-3}
 
 The debugger steps **P2 instructions**. That is exactly right when your handler is misbehaving — and exactly wrong when your question is *"which bytecode ran, and where in the stream was it?"* No amount of stepping through hardware dispatch will show you a **guest-level** trace, because the dispatch is not made of instructions you can stop on.
 
-The answer is the one the field arrived at independently: **take the engine out and put the loop back.**
+The answer is a direct one: **take the engine out and put the loop back.**
 
 Recall §6.4, where you dispatched by hand before meeting XBYTE. That was not merely a teaching device. It is the **debug mode** — a software loop that does exactly what the engine does, with one crucial difference: **it has a body you can write in.**
 
@@ -912,7 +919,7 @@ dispatch        rfbyte  pa                  ' fetch the bytecode  (clock 1)
 Every line maps onto a clock of the hardware cycle (Chapter 7) — that is the point. The engine's behaviour is reproduced exactly, and now `PA` and `PB` pass through code you own, so a `debug()` can print **which bytecode** and **where in the stream** on every single dispatch. That is a guest-level trace, and the hardware cannot give it to you.
 
 ::: caution
-**The landing pad is not decoration, and here is the trap.**
+**The landing pad is not decoration — it prevents a specific trap.**
 
 A skip pattern is consumed as instructions execute. If a handler's pattern is *longer than the handler* — more bits than there are instructions to cancel — the leftover bits do not evaporate. They fall on **whatever executes next**.
 
@@ -938,14 +945,14 @@ Both modes are only a couple of instructions, so build your program to hold them
 The cost of keeping the software loop in your source is a few longs of cog space. The cost of *not* keeping it is rediscovering, at the worst possible moment, that your hardware dispatch loop has no window in it.
 
 ::: tip
-Two failure modes, two tools. If a **handler** is wrong — the wrong variant ran, the flags came out strange — use the debugger and read the skip pattern; the strikethrough will usually show you the bug directly. If the **stream** is wrong — the wrong bytecode ran, or you branched somewhere unintended — take the engine out and trace the loop. Reaching for the wrong tool is the most common way to spend an afternoon.
+Two failure modes, two tools. If a **handler** is wrong — the wrong variant ran, the flags came out strange — use the debugger and read the skip pattern; the strikethrough will usually show you the bug directly. If the **stream** is wrong — the wrong bytecode ran, or you branched somewhere unintended — take the engine out and trace the loop.
 :::
 
 # Part IV: Building Interpreters and Emulators
 
 Parts II and III explained the engine — and Chapter 11 showed you how to see it running. This part proves it by building. Chapter 12 builds a complete, working bytecode VM from nothing: the smallest thing that exercises the whole engine. Chapter 13 then steps back and asks the question that comes *before* any emulator — which of the engine's assets you can actually take, and what each one costs — and Chapter 14 answers it for the classic guest processors, one by one. Chapters 15 through 17 build a tiny 6502, service its interrupts, and handle prefix bytes with alternate tables. Chapter 18 closes the part by widening the frame off interpreters entirely: the same engine parsing protocols, decoding formats, and driving displays.
 
-Everything in this part is **tiny and illustrative** — sized to show a technique end to end and to compile, not to be a faithful or complete implementation. That is a deliberate charter, restated where it matters.
+Everything in this part is **tiny and illustrative** — sized to show a technique end to end, not to be a faithful or complete implementation. (The two complete programs, the Chapter 12 VM and the Chapter 18 display list, compile; the shorter handlers elsewhere are representative fragments.) That is a deliberate charter.
 
 # Chapter 12: A Minimal Custom VM {#ch-12}
 
