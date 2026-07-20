@@ -1,5 +1,58 @@
 # P2 XBYTE Programming Guide - Changelog
 
+## v0.5.0 (2026-07-20) — accuracy, examples, and voice (in development)
+
+A close technical read of the whole guide drove three coordinated passes:
+correctness fixes, more in-place examples, and a readability pass on the prose.
+
+**Corrections.** A handful of claims were stated more strongly than the
+hardware supports, and each is now fixed:
+
+- **§11.1 — `GETBRK` does not report "instructions remaining."** The guide had
+  listed, among the questions `GETBRK` answers, *how many instructions of a
+  routine are left.* It cannot: the queued skip pattern is visible, but a
+  bytecode routine ends at its `_RET_`, which is a property of the code, not a
+  length the engine tracks. The passage now states that boundary explicitly.
+- **§19.1 — SKIPF pattern width.** The instruction-reference row read
+  "up-to-22 instructions." A standalone `SKIPF` governs the next **32**; the 22
+  is `EXECF`'s, which spends ten bits on its jump address (the guide explains
+  this correctly in §4.2/§4.3). The reference row now agrees.
+- **§16.5 — the halt handler.** The `HLT` example was described as sitting
+  "forever" with interrupts disabled, "precisely what the real silicon does."
+  The shown code does neither — it wakes on any attention. The text now
+  describes what the code does and notes, honestly, that true halt-forever
+  semantics would gate the exit on the enable flag.
+- **§15.4 — the addressing-mode aside.** Removed a claim that §4.5's single
+  spare pattern bit could supply an addressing-mode field; one bit cannot name
+  a many-way field.
+- **Appendix C — dispatch survey.** The summary line "everyone keeps the
+  dispatch asset" is corrected (a RISC guest can skip interpretation entirely),
+  and the blanket verification note is scoped to what the appendix actually
+  documents.
+- **Sourcing.** Several figures that were stated without a traceable source are
+  now either sourced or removed. The independence-of-dispatch result in §13.1
+  is now tied to its actual source — **Marco Maccaferri's P2 8086 emulator**,
+  published in hub-memory and PSRAM variants — and Appendix C.5 names both that
+  emulator and its plain-`JMP` sibling, with the forum thread they appear in.
+  Unsourced PSRAM bandwidth figures and anonymous "in the field" anecdotes were
+  removed, and remaining approximate figures are framed as approximate.
+
+**More examples in place.** Following the guidance that a concept meets its
+first concrete example where it is *explained*, short code was added at the
+points that previously carried none: the **EXECF operand layout** (§4.3, a
+resolved dispatch entry), the **F bit** (§9.4 — previously explained with no
+code anywhere in the guide), reading the **bytecode as data** from `PA` (§6.3),
+the **`GETPTR`/`PB`** read (§5.4), and the re-arm **`POP`** on a reusable cog's
+exit (§10.4).
+
+**Voice.** A readability pass reduced a recognizable over-confident register:
+superlatives and self-referential flourishes were trimmed, passages that
+addressed the reader as holding a wrong belief were restated as plain fact, and
+the habit of ending nearly every section on a rhetorical beat was thinned so
+the prose reads less like a performance and more like a reference. Deliberate
+teaching imagery and the genuinely useful callouts were kept. The guide's
+voice-guide gained matching rules so future edits hold the line.
+
 ## v0.4.0 (2026-07-17) — the community-thread pass (in development)
 
 A Parallax forum thread — **"basic XBYTE questions"** (`discussion/176253`) — and
