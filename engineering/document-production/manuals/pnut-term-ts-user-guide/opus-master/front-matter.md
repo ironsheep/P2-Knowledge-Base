@@ -40,25 +40,29 @@
 
 \vspace{0.3cm}
 \begin{minipage}[t]{0.45\textwidth}
-\textbf{Getting Started \& Core Features}
+\textbf{Getting Oriented \& Using the GUI}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Introduction
-\item Operating Modes
-\item Quick Start
+\item Where It Fits, and the Fork
 \item The Main Window
-\item Menus \& Settings
-\item Devices, Recording \& Monitoring
-\item Logging
+\item Downloading \& Running
+\item The Serial Terminal
+\item Debug Windows \& Placement
+\item The Single-Step Debugger
+\item Recording \& Playback
+\item Performance Monitoring
+\item Menus, Settings, Devices
 \end{itemize}
 \end{minipage}%
 \begin{minipage}[t]{0.45\textwidth}
-\textbf{Debug Windows \& Reference}
+\textbf{Headless \& Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Debug Windows Overview
+\item Running Headless
+\item Ending a Run Cleanly
+\item The Log as Feedback Loop
+\item A Complete Automated Run
 \item Command-Line Reference
 \item Keyboard Shortcuts
 \item Troubleshooting
-\item Tips \& Best Practices
 \item Support \& Resources
 \end{itemize}
 \end{minipage}
