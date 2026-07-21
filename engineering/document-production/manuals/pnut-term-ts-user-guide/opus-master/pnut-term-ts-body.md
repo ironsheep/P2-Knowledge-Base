@@ -49,8 +49,11 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 If you are building an *agentic* P2 workflow — an assistant that writes code,
 compiles it, runs it on real silicon, and reads back the result to decide what to
 do next — this tool is the piece that lets the assistant *observe the hardware*.
-That workflow is described in depth in **The P2 Architect's Guide, Part 3**; this
-guide is the operating manual for the tool that makes it possible.
+That agent-in-the-loop way of working is the subject of **The P2 Architect's
+Guide, Part 3**, which names this very tool chain — `pnut_ts`, `pnut_term_ts`,
+and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
+read loop on its own. This guide is the operating manual for the tool that makes
+it possible.
 
 # Chapter 2: Three Tools in One
 

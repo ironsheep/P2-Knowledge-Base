@@ -26,9 +26,16 @@ and explain what it is.
 - *(optional)* the **Spin2 VS Code extension** — editor with syntax + semantic
   highlighting.
 
-This tool is the *runtime/observation* leg. It delivers, concretely, the
-agentic usability that **The P2 Architect's Guide, Part 3** describes in the
-abstract — so Part 3 is a first-class bidirectional cross-reference (§4).
+This tool is the *runtime/observation* leg. **The P2 Architect's Guide, Part 3**
+("The Same Work, with an Agent") walks the P2 design workflow with an agent in
+the loop, and — in its Chapter 12 — names *this very tool chain* (`pnut_ts`,
+`pnut_term_ts`, and the Knowledge Base) as the hosted set that lets an agent
+close the write-compile-run-read loop on real silicon by itself. This guide is
+the operating manual for that runtime leg, so Part 3 is a first-class
+bidirectional cross-reference (§4). (Scope note: Part 3's *depth* is the
+agent-collaboration methodology; the closed tool-chain loop is one well-drawn
+element of it, not its whole subject — cite it as "names/describes," not
+"treats in depth.")
 
 ### Identity — three tools integrated into one
 
