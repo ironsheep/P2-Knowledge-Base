@@ -81,10 +81,29 @@ Teaching-register rules:
 | Avoid | Why | Instead |
 |-------|-----|---------|
 | "Let's explore the streamer..." | Tutorial voice | "The streamer provides..." |
-| "You might wonder why..." | Hedging | State the fact directly |
+| "You might wonder why..." | **Tutorial filler** (NOT the same as calibrated confidence — see §2.2a) | State the fact directly |
 | "Simply configure..." | Dismissive of complexity | "Configure..." |
 | "Basically, it works like..." | Vague | Precise description |
 | "Congratulations!" | Tutorial celebration | (omit) |
+| "the obvious way to set the NCO is wrong" · "it is tempting to reach for XINIT here" · "Read that formula again" | **Reader-as-foil** — tells the reader what they think, then corrects them (the "besserwisser" register) | State the correct fact; let the reader draw the contrast |
+| "this is where the streamer really shines" · "the single most elegant part of the FIFO" · "nothing else on the P2 comes close" | **Self-admiration** — the text praising its subject or its own explanation | State what the thing does; let the reader judge it |
+| "and here is the trap" · "but there's a catch we'll get to" · "Hold that phase value" | **Staged reveal** — withholding a fact to manufacture a beat | Deliver the fact where it belongs, unstaged |
+
+#### 2.2a Calibrated confidence is required — it is not hedging {#sec-2-2a}
+
+Banning tutorial filler ("you might wonder", "let's explore") does **not** mean
+banning *uncertainty*. A qualifier that reflects the true state of the evidence
+— "essentially exact at any sysclk", "on most display timings", "in practice" —
+is **accuracy**, not hedging, and it is required wherever the unqualified claim
+would overstate. The test is one line: **never state a claim above its
+evidence.** "The NCO never drifts" is wrong if it drifts by one LSB per
+rollover; "most video modes need XZERO" is wrong if you have not surveyed them.
+Say what is true at the confidence it is true, and cite the Silicon Doc when a
+solid figure is lacking. A rhetorical flourish that *demands* a punchy payoff is
+exactly where an unsupported claim slips in — strip the flourish and read what is
+left as a bare claim before keeping it. (Shared discipline: the
+`documentation-voices-catalog` §"Shared Discipline"; detection: `document-audit`
+Dimension #4c payoff-sentence sweep.)
 
 ### 2.3 Voice Comparison
 
@@ -92,11 +111,38 @@ Teaching-register rules:
 |--------|------------------|----------------|
 | Person | Second ("you") | Third (component names) |
 | Tone | Warm, encouraging | Authoritative, precise |
-| Hedging | Occasional | Never |
+| Tutorial filler | Occasional | Never |
+| Calibrated qualifiers | Yes | **Yes, where true** (§2.2a) |
 | Examples | Progressive, extensive | Targeted, illuminating |
 | Celebration | Yes ("Uff!") | Never |
 | Questions | Yes ("Why?") | No |
 | Asides | Yes | Rarely, only for critical warnings |
+| Closing beat every section | — | No (budget — §2.4) |
+
+### 2.4 Cadence budget — not every section earns a beat {#sec-2-4}
+
+A *beat* is a closing sentence that lands a rhetorical punch rather than
+finishing the exposition — a verdict, a reversal, a directive to the reader, an
+aphorism that restates with force. One well-placed beat is good writing. The
+failure mode is **regularity**: when nearly every section ends on one, the reader
+stops hearing the individual beat and starts hearing the *metronome* — "instantly
+recognizable and becoming rapidly fatiguing" (Chip Gracey, XBYTE review
+2026-07-20; adopted platform-wide). The recognizable-AI quality is the pattern,
+not any one sentence, so the fix is distribution, not deletion:
+
+- **At most ~half of section closings may be beats.** Cut the weakest back to a
+  plain informational close.
+- **No long runs** — never more than **~4 sections in a row** all closing on a
+  beat. A stretch of flat, informational closes is rest, not a defect.
+- **Chapter closers are the worst offenders** — aim well below a beat on every
+  chapter exit.
+- **A declared refrain is not a beat** — a deliberate, announced structural
+  device is structure, keep it.
+- **Protect the earned ones** — a beat that carries real information or lowers the
+  text's own confidence survives. Do not flatten the document to hit a number.
+
+Detection tooling: `document-audit` Dimension #4c (payoff-sentence sweep) measures
+closing-beat rate and the longest consecutive run.
 
 ---
 

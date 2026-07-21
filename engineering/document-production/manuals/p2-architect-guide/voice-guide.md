@@ -72,8 +72,11 @@ the *Getting Started* orientation already — write **to a peer who knows the ch
 | Exhaustive enumeration | that's the reference manuals' job | orient + link out |
 | **"The right design is…", "you should structure it as…"** (Act II) | **prescribes a unique-per-project outcome** | **"here's how to *derive* it; your answer will differ"** |
 | Agent hype / "just prompt it and it's done" (Act III) | overclaims; erases the judgment that stays yours | amplification framed honestly, with the human's role named |
-| Hedging ("maybe", "probably") on facts | undermines authority | state sourced facts directly |
+| Hedging ("maybe", "probably") on facts | undermines authority | state sourced facts directly (keep *calibrated* qualifiers where true — §2.6) |
 | Marketing / undocumented roadmap | trust chain | present-tense, sourced facts |
+| "the obvious decomposition is wrong" · "it is tempting to give each device its own cog" · "read that derivation again" | **Reader-as-foil** — tells the reader their (wrong) answer, then corrects it; doubly bad here, it *prescribes* the very outcome §2.4 forbids | state the correct move as a question the reader asks of *their* design; let them draw the contrast |
+| "this is the most elegant part of the method" · "the derivation is beautiful" · "nothing else captures design like this" | **Self-admiration** — the text praising its subject or its own explanation | say what the technique lets the reader *do*; let them judge it |
+| "and here is the trap" · "but there's a catch we'll reach" · "hold that boundary" | **Staged reveal** — withholding a fact to manufacture a beat | deliver the fact where it belongs, unstaged |
 
 ### 2.3 The anti-glibness rule (Act II)
 Functional decomposition is not lightweight, so we never make it *sound* lightweight. No "it's easy," no "just
@@ -96,6 +99,36 @@ Part III is an *additive* lens, never a replacement. Two things stay true in eve
 deciding what to build, the pin map, the probe, judging the cut against the hardest deadline — every time you
 name what the agent takes on. The voice is energized but honest: no "the agent designs it for you." And keep
 the book's own discipline visible — *confirm the agent's understanding before you let it proceed.*
+
+### 2.6 Calibrated confidence and cadence — the shared narrative discipline (load-bearing)
+This guide is pure narrative argument — the register that drifts most easily into a *recognizably-AI*
+voice: over-confident, self-admiring, and closing nearly every section on a rhetorical beat. Because
+this book has no code and no tables to break the rhythm, it is the fleet's **highest-risk** document
+for this defect. Two guards, adopted platform-wide (origin: the XBYTE guide review, Chip Gracey
+2026-07; canonical statement in `documentation-voices-catalog.md` §"Shared Discipline"):
+
+- **Calibrated confidence, not false confidence.** Banning hedging does *not* ban *uncertainty*. A
+  qualifier that reflects the true state of the evidence — "usually", "on most projects", "in
+  practice" — is **accuracy**, required wherever the bare claim would overstate. Never state a claim
+  above its evidence. The trap is acute here: a closing crescendo *demands* a payoff, and where no
+  true one exists an invented design-rule fills the slot — which also violates §2.4 anti-prescription.
+  Strip the flourish off any closing sentence and read what remains as a bare claim before keeping it.
+- **Cadence is budgeted.** A *beat* is a closing sentence that lands a rhetorical punch rather than
+  finishing the thought. One good beat is fine; the failure is *regularity* — "instantly recognizable
+  and rapidly fatiguing." At most ~half of section closings may be beats, never more than ~4 in a row,
+  and chapter closers across Parts I–III stay well below.
+
+Two protections specific to this book:
+
+- **Declared refrains are structure, not beats.** The deliberate, announced devices — *"Carry the
+  method, never the map,"* the "one application's answer, shown to make the method visible" framing
+  on each derivation — are load-bearing structure (§2.4, §5.3). Keep them; they do not count against
+  the budget.
+- **The send-off is an earned beat.** §5.5 "In Closing" is *meant* to land — *"So go build
+  something"* is the book's one fully-earned crescendo. Protect it, and precisely *because* the
+  ending earns its beat, keep the chapter closers before it flat, so the send-off stands alone.
+
+Detection: `document-audit` Dimension #4c (payoff-sentence sweep, with a longest-run measure).
 
 ---
 

@@ -74,13 +74,38 @@ voice serves all four — the newcomer is welcomed in; the working dev still fin
 | Dictionary dryness | loses the newcomer | motivate, then state |
 | "Simply…", "just…", "obviously…" | dismissive of real difficulty | state the step plainly |
 | Exhaustive enumeration | that's the reference manuals' job | orient + link out |
-| Hedging ("maybe", "probably") on facts | undermines authority | state sourced facts directly |
+| Hedging ("maybe", "probably") on facts | undermines authority | state sourced facts directly (but keep *calibrated* qualifiers where true — §2.4) |
 | Marketing / undocumented roadmap | trust chain | present-tense, sourced facts |
+| "the obvious way to think about eight cogs is wrong" · "you might assume the hub is just RAM" · "read that again" | **Reader-as-foil** — telling the reader what they think, then correcting them; even a warm mentor never does this | state it plainly and let the reader form the picture |
+| "this is the most elegant part of the P2" · "the smart pins are pure genius" · "nothing else comes close" | **Self-admiration** — the text praising its subject or its own explanation (a cousin of marketing) | say what the feature *does*; let the reader be impressed on their own |
+| "and here's the catch" · "but we'll get to the surprise" · "hold that thought" | **Staged reveal** — withholding a fact to manufacture a beat | deliver the fact where it belongs, unstaged |
 
 ### 2.3 The anti-glibness rule
 The P2's features aren't trivial, so we never make them *sound* trivial. No "it's easy," no "just wire it up,"
 no false reassurance. We respect real difficulty by being precise and by walking the reader through what's
 actually happening. Difficulty is honored, not hidden — and never inflated to sound impressive either.
+
+### 2.4 Calibrated confidence and cadence — the shared narrative discipline
+This is a warm narrative guide, which is exactly the register that most easily drifts into a
+*recognizably-AI* voice — over-confident, self-admiring, and closing nearly every section on a
+rhetorical beat. Two guards, adopted platform-wide (origin: the XBYTE guide review, Chip Gracey
+2026-07; the canonical statement is `documentation-voices-catalog.md` §"Shared Discipline"):
+
+- **Calibrated confidence, not false confidence.** Banning hedging does *not* mean banning
+  *uncertainty*. A qualifier that reflects the true state of the evidence — "usually", "on most
+  boards", "in practice" — is **accuracy**, not hedging, and is required wherever the bare claim
+  would overstate. Never state a claim above its evidence. The warm-voice trap: a closing
+  crescendo *demands* a punchy payoff, and where no true one exists an invented claim fills the
+  slot — so strip the flourish off any closing sentence and read what remains as a bare claim
+  before keeping it.
+- **Cadence is budgeted.** A *beat* is a closing sentence that lands a rhetorical punch rather than
+  finishing the thought. One good beat is fine; the failure is *regularity* — "instantly
+  recognizable and rapidly fatiguing." At most ~half of section closings may be beats, never more
+  than ~4 in a row, and chapter closers stay well below. A flat, informational close is rest, not a
+  defect; an earned beat that carries real information or *lowers* the text's confidence is
+  protected — do not flatten the guide to hit a number.
+
+Detection: `document-audit` Dimension #4c (payoff-sentence sweep, with a longest-run measure).
 
 ---
 
