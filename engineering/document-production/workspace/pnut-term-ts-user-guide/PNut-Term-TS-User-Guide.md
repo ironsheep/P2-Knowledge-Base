@@ -264,10 +264,12 @@ tool*.
 Launch it normally and you get the full graphical application: a main window with
 a terminal, a toolbar to download and reset, and debug windows that pop open on
 their own as your program draws to them. This is the mode you use **at your desk**,
-watching a P2 and reacting to what you see.
+watching a P2 and reacting to what you see. You can start it on its own and load a
+program from the GUI, or name a program on the command line to download at once:
 
 ```command
-pnut-term-ts -r myprogram.bin
+pnut-term-ts                    # open the GUI, load a file from it
+pnut-term-ts -r myprogram.bin   # open the GUI and download this file
 ```
 
 ## Headless — no windows, for automation
@@ -290,6 +292,9 @@ Between these two poles are a few in-between modes — downloading from the comm
 line but keeping the GUI, a headed "batch" run that exits when the program signals
 it is done, and an IDE-integration mode. They are covered where they belong, in
 the part for your workflow.
+
+Whichever way you launch it, the tool's help is built in: run `pnut-term-ts
+--help` at any time for the full list of options.
 
 # Chapter 4: Which Path Is Yours
 
@@ -388,22 +393,32 @@ The active reset line (DTR or RTS) lives on the *toolbar* button, not here.
 The core loop at your desk is: hand PNut-Term-TS a compiled program, tell it
 where to put it on the P2, and watch it run.
 
+## Two ways to load a program
+
+There are two ways to hand PNut-Term-TS your compiled `.bin`, and you can mix
+them freely:
+
+- **Interactively (standalone).** Launch PNut-Term-TS on its own, with no file —
+  it opens ready and waiting. Click **Download** on the toolbar to choose a
+  binary, then send it to the P2 with the **RAM** or **FLASH** button. Open the
+  app once and load, and re-load, programs from the GUI as you work.
+- **From the command line.** Name the binary when you launch, and PNut-Term-TS
+  downloads and runs it straight away, keeping the GUI open:
+
+```command
+pnut-term-ts -r myprogram.bin      # download to RAM and run
+pnut-term-ts -f myprogram.bin      # download to FLASH and run
+```
+
 ## RAM or flash
 
-You choose where the program goes:
+Either way you load it, you choose *where* the program goes on the P2:
 
 - **RAM** (`-r`, or the toolbar **RAM** button) — the program is loaded and run
   immediately, but does not survive a power cycle. This is the fast path for the
   edit-compile-run loop of development.
 - **FLASH** (`-f`, or the toolbar **FLASH** button) — the program is written to
   the P2's flash, so it runs on its own every time the board powers up.
-
-From the command line you name the binary directly, and the GUI stays open:
-
-```command
-pnut-term-ts -r myprogram.bin      # download to RAM and run
-pnut-term-ts -f myprogram.bin      # download to FLASH and run
-```
 
 You use one or the other — `-r` and `-f` cannot be combined. PNut-Term-TS resets
 the P2 into its loader at the right moment, downloads the program, and begins
@@ -926,6 +941,9 @@ The material both paths point into: the full command-line reference, the keyboar
 shortcuts, troubleshooting, and where to go for more.
 
 # Chapter 16: Command-Line Reference
+
+This same list is built into the tool — run `pnut-term-ts --help` for it at any
+time.
 
 ```command
 pnut-term-ts [options]
