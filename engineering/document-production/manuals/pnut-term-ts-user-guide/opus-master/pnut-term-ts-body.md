@@ -484,10 +484,8 @@ are placed by their own rules.)
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[3in]{Screenshot to capture: several debug windows open at once
-(e.g. TERM, SCOPE, PLOT, LOGIC) auto-laid-out on screen. If you can, drag one
-mid-capture so its title bar shows the live x, y readout for us to annotate.}
-\caption{Several debug windows, opened and auto-placed on screen.}
+\screenshotfig[width=\linewidth]{inbox/assets/multi-window-desktop.png}
+\caption{Several debug windows auto-placed on a real desktop: SCOPE, a TERM status readout, and a Software-SPI LOGIC trace filling the top rows, with the main window and Debug Logger along the bottom in their reserved cells.}
 \end{figure}
 ```
 
@@ -940,12 +938,12 @@ one.
   Figure status (see PLANNING.md "Open items"): 8 figure slots.
   - 3 DIAGRAMS authored in TikZ (2026-07-21): tool-chain position [Ch1],
     three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
-  - 4 SCREENSHOTS wired in (2026-07-21, Stephen's captures in
+  - ALL 5 SCREENSHOTS wired in (2026-07-21, Stephen's captures in
     ./REF-NO-COMMIT/screenshots/, staged to workspace assets as
-    inbox/assets/*.png): main-window-and-logger [Ch5] · single-step-debugger
-    [Ch9] · preferences-user-settings [Ch10] · preferences-propplug [Ch10].
-  - 1 SCREENSHOT still \placeholderfig: several debug DISPLAY windows auto-placed,
-    ideally one mid-drag showing the x,y title-bar readout [Ch8].
+    inbox/assets/*.png): main-window-and-logger [Ch5] · multi-window-desktop
+    [Ch8] · single-step-debugger [Ch9] · preferences-user-settings [Ch10] ·
+    preferences-propplug [Ch10]. No \placeholderfig remain — all 8 figures
+    (3 diagrams + 5 screenshots) are real.
   (Recording/playback + performance monitoring were de-emphasized into Ch 11
   "Further Features" 2026-07-21 — no screenshots for those.)
   ===========================================================================

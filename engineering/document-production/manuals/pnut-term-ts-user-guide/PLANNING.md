@@ -115,15 +115,16 @@ against v0.10.3, track the tool, **re-pull the feeds + re-verify at release.**
   boxes carry capture/authoring notes + real captions (figure numbers + LoF
   entries reserved). Swap each `\placeholderfig` → `\screenshotfig{inbox/assets/…}`
   (or TikZ) as assets land.
-  - **4 SCREENSHOTS WIRED (2026-07-21)** — Stephen's captures, canonical copies
-    in `./screenshots/` + build copies in `workspace/.../assets/`, referenced as
-    `inbox/assets/*.png`: (1) `main-window-and-logger` [Ch5, cropped to remove
-    desktop wallpaper — shows the two startup windows], (2) `single-step-debugger`
-    [Ch9, macOS], (3) `preferences-user-settings` [Ch10], (4) `preferences-propplug`
-    [Ch10]. All verified rendering (forge-test v6/v7).
-  - **1 SCREENSHOT STILL OPEN** — several debug DISPLAY windows (scope/plot/logic)
-    auto-placed, ideally one mid-drag showing the x,y title-bar readout [Ch8].
-    Still a `\placeholderfig`; optional (the Ch8 diagram carries the section).
+  - **ALL 5 SCREENSHOTS WIRED (2026-07-21)** — Stephen's captures, canonical
+    copies in `./screenshots/` + build copies in `workspace/.../assets/`,
+    referenced as `inbox/assets/*.png`, all verified rendering (forge-test
+    v6/v7/v8): (1) `main-window-and-logger` [Ch5, cropped — the two startup
+    windows], (2) `multi-window-desktop` [Ch8 — several display windows
+    auto-placed on a full desktop; main window + Debug Logger in the bottom
+    reserved cells, matching the Ch8 diagram], (3) `single-step-debugger`
+    [Ch9, macOS], (4) `preferences-user-settings` [Ch10], (5) `preferences-propplug`
+    [Ch10]. **No placeholders remain — all 8 figures (3 diagrams + 5 screenshots)
+    are real.**
     *(Transport-strip + Performance-Monitor shots dropped when recording/perf were
     de-emphasized into Ch 11.)*
   - **3 DIAGRAMS (Claude to author, TikZ):** tool-chain position [Ch1],
