@@ -14,7 +14,7 @@ to commits). Newest entry first.
 
 A readability refinement. No chapters added, no technical content changed.
 
-- **Prose polish** — the pacing of section endings was evened out so the narrative reads more naturally, with a few rhetorical flourishes trimmed. The method, the two worked derivations, and every design point are unchanged.
+- **Prose** — the narrative reads with steadier pacing across its section endings. The method, the two worked derivations, and every design point are unchanged.
 
 ---
 

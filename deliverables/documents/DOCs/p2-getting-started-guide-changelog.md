@@ -10,6 +10,14 @@ commits). Newest entry first.
 
 ---
 
+## v1.0.2 (2026-07-21)
+
+A readability refinement. No chapters added, no technical content changed.
+
+- **Prose** — the orientation reads more naturally, with more variety in how its sections open and close.
+
+---
+
 ## v1.0.1 (2026-07-11)
 
 An accuracy refinement. No chapters added.

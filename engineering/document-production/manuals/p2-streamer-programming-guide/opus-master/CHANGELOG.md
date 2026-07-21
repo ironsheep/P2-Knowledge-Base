@@ -4,7 +4,7 @@
 
 A readability refinement. No chapters added, no mode encodings or technical content changed.
 
-- **Prose polish** — a few chapter openers were reworded to read more directly (removing a rhetorical aside and two flourishes). All mode tables, encodings, and worked examples are unchanged.
+- **Prose** — several chapter openers read more directly. All mode tables, encodings, and worked examples are unchanged.
 
 ## v1.0.6 (2026-07-11)
 

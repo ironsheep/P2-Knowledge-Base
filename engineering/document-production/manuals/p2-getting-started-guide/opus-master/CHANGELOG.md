@@ -14,7 +14,7 @@ commits). Newest entry first.
 
 A readability refinement. No chapters added, no technical content changed.
 
-- **Prose polish** — a recurring summarizing phrase ("that's the whole …") was varied so the narration reads more naturally from chapter to chapter.
+- **Prose** — the orientation reads more naturally, with more variety in how its sections open and close.
 
 ---
 

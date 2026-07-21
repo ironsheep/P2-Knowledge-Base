@@ -23,13 +23,13 @@ prose), with all per-publication detail in the roster.*
 
 | Document | Type | Ver | pp | Released |
 |----------|------|-----|:--:|:--:|
-| Getting Started | manual | 1.0.1 | 25 | ✅ |
+| Getting Started | manual | 1.0.2 | 25 | ✅ |
 | I/O & Smart Pins | manual | 1.0.7 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.4 | 505 | ✅ |
 | DeSilva Tutorial | manual | 3.0.3 | 164 | ✅ |
 | Debug Window | manual | 1.1.0 | 169 | ✅ |
-| Streamer Guide | manual | 1.0.6 | 75 | ✅ |
-| Architect's Guide | manual | 1.0.1 | 53 | ✅ |
+| Streamer Guide | manual | 1.0.7 | 72 | ✅ |
+| Architect's Guide | manual | 1.0.2 | 52 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.0.0 | 100 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.2 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.1 | 14 | ✅ |

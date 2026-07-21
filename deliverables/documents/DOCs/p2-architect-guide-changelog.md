@@ -10,6 +10,14 @@ to commits). Newest entry first.
 
 ---
 
+## v1.0.2 (2026-07-21)
+
+A readability refinement. No chapters added, no technical content changed.
+
+- **Prose** — the narrative reads with steadier pacing across its section endings. The method, the two worked derivations, and every design point are unchanged.
+
+---
+
 ## v1.0.1 (2026-07-11)
 
 An accuracy refinement. No chapters added.

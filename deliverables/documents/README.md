@@ -39,7 +39,7 @@ Two short companion reads go deeper on the questions every reviewer asks:
 Six documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
 ### [Getting Started with the Propeller 2](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Getting-Started-Guide.pdf)
-**Meet the Chip, Read Its Code, Put It to Work** — *Version 1.0.1*
+**Meet the Chip, Read Its Code, Put It to Work** — *Version 1.0.2*
 
 The friendly on-ramp to the Propeller 2 — the orientation layer that sits below the reference manuals. It builds a mental model of the chip (eight cogs, smart pins, the CORDIC solver, the streamer, the memory tiers, and boot), teaches you to read P2 code (Spin2 and PASM2 structure), and puts it to work with hands-on, compile-clean examples — then points you to the reference manuals for depth and to the *P2 Architect's Guide* for whole-system design. Migration sidebars throughout call out what's the same, changed, or new coming from the Propeller 1.
 
@@ -60,7 +60,7 @@ This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutori
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-pasm-desilva-style-src.zip)
 
 ### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
-**A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.6*
+**A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.7*
 
 An introduction to the P2 streamer — the DMA-like engine that moves data between hub RAM, pins, and DACs — built to make a genuinely tricky part of the chip make sense. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
 
@@ -81,7 +81,7 @@ The complete reference for the Propeller 2's pin I/O and Smart Pins — working 
 *July 2026 - Community Review Edition* | [Changelog](DOCs/p2-io-and-smart-pins-user-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-io-and-smart-pins-user-guide-src.zip)
 
 ### [The P2 Architect's Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Architect-Guide.pdf)
-**Thinking in Cogs, Pins, and Forces** — *Version 1.0.1*
+**Thinking in Cogs, Pins, and Forces** — *Version 1.0.2*
 
 The design-and-realization companion to the reference manuals, picking up where *Getting Started with the Propeller 2* leaves off. It moves in three acts: getting a real project off the ground (choosing hardware and buses, spending the pin budget, getting the parts to talk), then **deriving** the software architecture from physical forces rather than guessing it (which cog owns what, how the pieces talk across the gaps, how mismatched rates are matched), and finally walking the whole process again with an AI agent at your side. It teaches a method, not a catalogue — its two worked derivations are demonstrations on deliberately different hardware, never templates — and it's grounded throughout in the P2 Knowledge Base and in real, hardware-verified projects.
 
