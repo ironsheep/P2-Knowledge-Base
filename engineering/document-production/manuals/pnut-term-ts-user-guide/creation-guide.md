@@ -74,6 +74,7 @@ rather than editing the snapshots in place.
 |--------|------|
 | `REF-NO-COMMIT/User-Guide-FEED.md` | PRIMARY — operating modes, main window, menus, settings hierarchy, PropPlug/device management, recording & playback, performance monitor, debug-windows overview, full CLI reference, troubleshooting. (← repo `DOCs/USER-GUIDE.md`, v0.10.3) |
 | `REF-NO-COMMIT/LOGGING-STANDARDS-FEED.md` | PRIMARY — logging principles: the four content buckets, program-output-stays-clean, USB traffic log scope + direction-by-mode, version banners, canonical as-built filenames. (← repo `project-specific/LOGGING-STANDARDS.md`) |
+| `REF-NO-COMMIT/WINDOW-LAYOUT-FEED.md` | PRIMARY — the automatic window-placement algorithm (adaptive grid sized to the display; Half-Moon Descending center-out fill; reserved Main-Window/Debug-Logger cells; cascade when full; special Debugger + COG-grid strategies). Code-accurate, re-derived from `src/utils/windowPlacer.ts`. Currency **v0.10.8** (newer than the two feeds above). |
 | The live **PNut-Term-TS** repo | Source of truth if a feed is stale — `https://github.com/ironsheep/PNut-Term-TS` |
 
 **Currency:** both feeds current as of **PNut-Term-TS v0.10.3 (2026-07-20)**,

@@ -12,6 +12,7 @@ authoritative_sources: see ./creation-guide.md    # behavior-guide grounding; th
 source_highlights:
   - ./REF-NO-COMMIT/User-Guide-FEED.md            # PRIMARY — operating modes, main window, menus, settings, device mgmt, recording, CLI reference, troubleshooting (← repo DOCs/USER-GUIDE.md, v0.10.3)
   - ./REF-NO-COMMIT/LOGGING-STANDARDS-FEED.md      # PRIMARY — logging principles, four content buckets, USB traffic log, canonical as-built filenames (← repo project-specific/LOGGING-STANDARDS.md)
+  - ./REF-NO-COMMIT/WINDOW-LAYOUT-FEED.md          # PRIMARY — auto window-placement algorithm (adaptive grid; Half-Moon Descending center-out fill; reserved Main/Logger cells; cascade-when-full; Debugger + COG-grid strategies). Code-accurate from src/utils/windowPlacer.ts; currency v0.10.8
   - https://github.com/ironsheep/PNut-Term-TS      # source of truth if a feed is stale — re-pull the feeds, do not edit snapshots in place
 high_risk_tables:
   - "Command-Line Reference options table (option / long form / argument / description) — many rows; verify each vs the tool's actual --help and validation"

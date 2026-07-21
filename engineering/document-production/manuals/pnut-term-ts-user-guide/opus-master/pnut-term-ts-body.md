@@ -401,40 +401,67 @@ that decides what the window shows. The window types are:
 
 ## Automatic Window Placement
 
-Here is a convenience worth calling out. A P2 program can name a screen position
-for each window with a `POS` directive — but it does not have to. **A window with
-no `POS` is placed for you automatically**, laid out on screen so windows do not
-land on top of one another. Windows that *do* carry a `POS` are put exactly where
-they ask.
+Here is a genuine convenience. A P2 program can name a screen position for each
+window with a `POS` directive, but it does not have to. **A window with no `POS`
+is placed for you automatically** — PNut-Term-TS lays the whole set out as a tidy
+*dashboard*, so the windows never land on top of one another. (Windows that *do*
+carry a `POS` are put exactly where they ask.)
+
+The dashboard is a grid **sized to your display**: the height sets how many rows,
+the width how many columns. A typical 1920×1080 screen gives a **3×3** grid; a
+2560×1440 or a 4K display gives more cells (5×3 or 5×4); an ultra-wide gives more
+columns still, up to seven. There is always an odd number of columns, so a true
+center column exists to build around.
+
+Windows fill the grid in a fixed **center-out** order: the first window takes the
+top-center cell, the next two flank it, and the arrangement widens outward and
+works its way down, row by row, staying balanced left-to-right as it goes. Two
+cells along the bottom are reserved, so the **main window** and the **debug
+logger** always keep their places; and if you open more windows than the grid
+holds, the extras cascade neatly from the top-left.
 
 ```{=latex}
 \begin{figure}[H]
 \centering
 \diagramscale{
-\begin{tikzpicture}
-\draw[draw=diagram-border, line width=1pt, rounded corners=2pt, fill=white]
-   (-0.15,-0.15) rectangle (11.15,6.35);
-\node[iospsub] at (5.5,6.7) {the screen};
-\foreach \i/\x/\y in {1/0.3/3.3, 2/3.8/3.3, 3/7.3/3.3, 4/0.3/0.3, 5/3.8/0.3} {
+\begin{tikzpicture}[x=1cm,y=1cm]
+\def\cw{2.0}\def\ch{1.5}\def\gp{0.18}
+\draw[draw=diagram-border, line width=1pt, rounded corners=3pt, fill=white]
+   (-0.35,-0.35) rectangle (10.75,5.35);
+\node[iospsub] at (5.2,5.62) {your screen};
+% auto-placed windows, labelled by fill order (Half-Moon Descending)
+\foreach \lbl/\c/\r in {1/2/0, 2/1/0, 3/3/0, 4/2/1, 5/1/1, 6/3/1,
+                        7/0/0, 8/4/0, 9/0/1, 10/4/1, 11/1/2, 12/3/2, 13/0/2} {
+  \pgfmathsetmacro\px{\c*(\cw+\gp)}
+  \pgfmathsetmacro\py{(2-\r)*(\ch+\gp)}
   \draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
-     (\x,\y) rectangle ++(3.1,2.5);
+     (\px,\py) rectangle ++(\cw,\ch);
   \draw[draw=diagram-border, fill=diagram-highlight, rounded corners=1.5pt]
-     (\x,\y) ++(0,2.1) rectangle ++(3.1,0.4);
-  \node[font=\Large\bfseries, text=diagram-text] at ($(\x,\y)+(1.55,1.05)$) {\i};
+     (\px,\py) ++(0,\ch-0.3) rectangle ++(\cw,0.3);
+  \node[font=\large\bfseries, text=diagram-text] at (\px+\cw/2,\py+0.6) {\lbl};
 }
-\node[iospsub, align=center] at (9.0,1.55)
-   {each window placed\\in turn, without\\overlapping the last};
+% reserved cells (bottom row)
+\foreach \lbl/\c in {{Main\\Window}/2, {Debug\\Logger}/4} {
+  \pgfmathsetmacro\px{\c*(\cw+\gp)}
+  \draw[draw=diagram-border!70, fill=diagram-border!12, dashed, rounded corners=1.5pt]
+     (\px,0) rectangle ++(\cw,\ch);
+  \node[font=\scriptsize\itshape, text=diagram-text, align=center] at (\px+\cw/2,0.75) {\lbl};
+}
 \end{tikzpicture}
 }
-\caption{Automatic Window Placement --- where unpositioned windows land, in order.}
+\caption{Automatic Window Placement: unpositioned windows fill a screen-sized grid
+center-out, top row first (numbers = open order; shown on the canonical 5-column
+$\times$ 3-row layout). The main window and debug logger keep reserved cells.}
 \end{figure}
 ```
 
-And when you *do* want to pin a window to a spot, you do not have to guess
-coordinates: **drag a display window and its title bar shows its live `x, y`
-position** as it moves. Read the numbers off, and bake them into a `POS`
-directive in your source. (The cog logger, the debugger, and the message-log
-windows do not show this readout — they are not positioned this way.)
+The result is that you can throw a handful of `debug()` displays on screen and get
+a readable dashboard with no `POS` directives at all. And when you *do* want to
+pin a window to an exact spot, you do not have to guess coordinates: **drag a
+display window and its title bar shows its live `x, y` position** as it moves —
+read the numbers off and bake them into a `POS` directive in your source. (The cog
+logger, the debugger, and the message-log windows do not show this readout; they
+are placed by their own rules.)
 
 ```{=latex}
 \begin{figure}[H]
