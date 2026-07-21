@@ -136,12 +136,16 @@ tool serving an effort, never released — carried here while it's actively used
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
+| PNut-Term-TS User Guide | guide | 0.1.0 | | | | — | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
 
 **P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
+
+**PNut-Term-TS User Guide** · `pnut-term-ts-user-guide` · guide
+User guide for **PNut-Term-TS**, the cross-platform desktop debug terminal for the P2 — a *tool* guide (`doc_class: behavior`), not a P2 silicon/language reference. Subtitle: *The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2*. **Purpose = positioning within the P2 agentic tool chain** (P2KB MCP + `pnut_ts` + `pnut_term_ts`, optional Spin2 VS Code extension); delivers the agentic usability that **The P2 Architect's Guide, Part 3** describes. Identity = **three tools in one** (downloader · Parallax Serial Terminal replacement · PNut debug-window replacement/production, now cross-platform). Pedagogy = **shared orientation trunk → fork by intent** (GUI vs headless). Seeded 2026-07-21 (standing structure only, no content drafted); grounded on two feeds snapshotted from the PNut-Term-TS repo (v0.10.3) in its `REF-NO-COMMIT/`. Chip review n/a (no P2 silicon claims). Expected to ride the `p2kb-platform` stack (ships code + screenshots), unlike the off-platform AI Privacy Guide — Forge template wiring TBD at first render. Closest sibling for voice/scaffolding: the Single-Step Debugger Manual (same host application). **Release gate: co-releases with the P2 Single-Step Debugger Manual, timed to PNut-Term-TS v1.0** (Debug Window Manual already released).
 
 **P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
 Test / standards harness — manual-shaped (full folder triad, generates PDFs) but **never released**; serves the manual layout-standards effort (`methodology/manual-layout-standards-*`), not the community. Not consistency-bound. **Its analysis IS its product** — its `audit/` is git-tracked alongside its cases (the `.gitignore` exception), so the instrument, its analysis, and the fixes it drives version together. Resume into the effort it serves.
