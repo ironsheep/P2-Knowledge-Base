@@ -164,10 +164,21 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[2.4in]{Diagram (Claude to draw): the P2 agentic tool chain
---- P2KB MCP, pnut\_ts, and pnut\_term\_ts (+ optional Spin2 VS Code
-extension) --- with the developer/agent and the P2, this tool marked as the
-run-and-observe leg.}
+\diagramscale{
+\begin{tikzpicture}
+\node[iospbox] (agent) {You / your\\AI agent};
+\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut\_ts}\\compiler};
+\node[iospkey, right=14mm of compile] (term) {\texttt{pnut\_term\_ts}\\download + observe};
+\node[iospbox, right=20mm of term] (p2) {Propeller~2\\silicon};
+\node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
+\draw[iospflow] (mcp) -- (agent);
+\draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
+\draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
+\draw[iospflow] (term) -- node[above, font=\scriptsize]{run} (p2);
+\draw[iospflow] (p2.south) to[out=-90, in=-90, looseness=0.5]
+   node[below, font=\scriptsize]{DEBUG output the agent reads back} (agent.south);
+\end{tikzpicture}
+}
 \caption{Where PNut-Term-TS sits in the P2 agentic tool chain.}
 \end{figure}
 ```
@@ -217,9 +228,21 @@ reason the tool exists in the form it does.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[2.4in]{Diagram (Claude to draw): one box (PNut-Term-TS) fed by
-its three roles --- downloader, Parallax Serial Terminal replacement, and PNut
-debug-window replacement/production --- all cross-platform.}
+\diagramscale{
+\begin{tikzpicture}
+\node[iospbox, align=center] (dl) at (0,1.9) {Downloader};
+\node[iospbox, align=center] (term) at (0,0)
+   {Serial terminal\\{\scriptsize replaces Parallax Serial Terminal}};
+\node[iospbox, align=center] (dbg) at (0,-1.9)
+   {Debug-window display\\{\scriptsize replaces PNut's --- now cross-platform}};
+\node[iospkey, align=center, minimum height=15mm, minimum width=30mm] (one) at (7,0)
+   {\textbf{PNut-Term-TS}};
+\node[iospsub, below=1.5mm of one] {one app \textperiodcentered\ Windows \textperiodcentered\ macOS \textperiodcentered\ Linux};
+\draw[iospflow] (dl) -- (one);
+\draw[iospflow] (term) -- (one);
+\draw[iospflow] (dbg) -- (one);
+\end{tikzpicture}
+}
 \caption{The three tools PNut-Term-TS folds into one.}
 \end{figure}
 ```
@@ -502,9 +525,22 @@ they ask.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[2.6in]{Diagram (Claude to draw): a screen rectangle showing
-where successive POS-less debug windows are placed, numbered in the order they
-open, so the reader can see the automatic layout pattern.}
+\diagramscale{
+\begin{tikzpicture}
+\draw[draw=diagram-border, line width=1pt, rounded corners=2pt, fill=white]
+   (-0.15,-0.15) rectangle (11.15,6.35);
+\node[iospsub] at (5.5,6.7) {the screen};
+\foreach \i/\x/\y in {1/0.3/3.3, 2/3.8/3.3, 3/7.3/3.3, 4/0.3/0.3, 5/3.8/0.3} {
+  \draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
+     (\x,\y) rectangle ++(3.1,2.5);
+  \draw[draw=diagram-border, fill=diagram-highlight, rounded corners=1.5pt]
+     (\x,\y) ++(0,2.1) rectangle ++(3.1,0.4);
+  \node[font=\Large\bfseries, text=diagram-text] at ($(\x,\y)+(1.55,1.05)$) {\i};
+}
+\node[iospsub, align=center] at (9.0,1.55)
+   {each window placed\\in turn, without\\overlapping the last};
+\end{tikzpicture}
+}
 \caption{Automatic Window Placement --- where unpositioned windows land, in order.}
 \end{figure}
 ```
@@ -975,14 +1011,13 @@ one.
 <!--
   ===========================================================================
   END OF DRAFTED CONTENT — full guide (Parts 1–4, Chapters 1–20).
-  Still pending (see PLANNING.md "Open items"): 8 figure slots carry visible
-  \placeholderfig boxes with capture/authoring notes + real captions (so they
-  hold figure numbers + List-of-Figures entries). 5 are SCREENSHOTS for Stephen
-  to capture (main window · debug-windows-on-screen · single-step debugger ·
-  Preferences User Settings · PropPlug Management); 3 are DIAGRAMS for Claude to
-  author in TikZ (tool-chain position · three-in-one identity · auto-placement
-  order). Swap each \placeholderfig -> \screenshotfig{inbox/assets/...} (or the
-  TikZ) as assets land. Text stands on its own without them for this draft.
+  Figure status (see PLANNING.md "Open items"): 8 figure slots.
+  - 3 DIAGRAMS authored in TikZ (2026-07-21): tool-chain position [Ch1],
+    three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
+  - 5 SCREENSHOTS still carry \placeholderfig boxes for Stephen to capture
+    (main window · debug-windows-on-screen · single-step debugger · Preferences
+    User Settings · PropPlug Management). Swap each \placeholderfig ->
+    \screenshotfig{inbox/assets/...} as captures land.
   (Recording/playback + performance monitoring were de-emphasized into Ch 11
   "Further Features" 2026-07-21 — no screenshots for those.)
   ===========================================================================
