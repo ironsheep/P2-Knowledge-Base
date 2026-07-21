@@ -1,5 +1,11 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.7 (2026-07-21)
+
+A readability refinement. No chapters added, no mode encodings or technical content changed.
+
+- **Prose polish** — a few chapter openers were reworded to read more directly (removing a rhetorical aside and two flourishes). All mode tables, encodings, and worked examples are unchanged.
+
 ## v1.0.6 (2026-07-11)
 
 A Silicon-Doc accuracy pass across the streamer's timing, worked examples, and mode-encoding reference. No chapters added.
