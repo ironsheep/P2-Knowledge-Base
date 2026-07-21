@@ -24,6 +24,22 @@ $for(header-includes)$
 $header-includes$
 $endfor$
 
+% ==================== DRAFT IMAGE PLACEHOLDER ====================
+% Renders a labeled keyline box where an image will go but has not been
+% captured/authored yet. Drop-in shape-match for \screenshotfig: used inside the
+% same figure+caption block, so the slot gets a real figure number + LoF entry
+% now. Swap \placeholderfig[<h>]{<desc>} -> \screenshotfig[...]{inbox/assets/x.png}
+% (or a TikZ diagram) once the asset exists. Optional arg = box height (def 2.6in).
+\newcommand{\placeholderfig}[2][2.6in]{%
+  \setlength{\fboxsep}{0pt}%
+  \fcolorbox{gray}{gray!8}{%
+    \begin{minipage}[c][#1][c]{0.985\linewidth}%
+      \centering\normalfont
+      {\ttfamily\bfseries [\ IMAGE PLACEHOLDER\ ]}\\[8pt]
+      {\itshape\small #2}%
+    \end{minipage}}%
+}
+
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 

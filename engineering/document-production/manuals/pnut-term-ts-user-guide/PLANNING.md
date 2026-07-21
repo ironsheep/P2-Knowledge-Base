@@ -115,10 +115,18 @@ against v0.10.3, track the tool, **re-pull the feeds + re-verify at release.**
   should get its own **part-divider page** — currently `\manualpart` renders the
   Part heading inline atop the first chapter (Part 1 + Chapter 1 share a page).
   Acceptable for now; revisit if we want divider pages.
-- **Screenshots** — GUI branch needs them (main window, toolbar, status bar,
-  Preferences tabs, PropPlug Management, Automatic Window Placement in action).
-  Capture plan TBD; `./screenshots/` staged empty. Stephen captures externally.
-- **Trunk diagrams** — the two positioning diagrams (tool-chain; three-in-one).
+- **Figure slots — PLACEHOLDERS IN PLACE (2026-07-21).** 10 `\placeholderfig`
+  boxes carry capture/authoring notes + real captions (figure numbers + LoF
+  entries reserved). Swap each `\placeholderfig` → `\screenshotfig{inbox/assets/…}`
+  (or TikZ) as assets land.
+  - **7 SCREENSHOTS (Stephen to capture):** (1) main window [Ch5], (2) several
+    debug windows auto-placed on screen, one mid-drag showing x,y [Ch8],
+    (3) single-step debugger window, macOS/Linux preferred [Ch9], (4) playback
+    transport strip [Ch10], (5) Performance Monitor [Ch11], (6) Preferences ·
+    User Settings tab [Ch12], (7) Preferences · PropPlug Management tab [Ch12].
+    Land captures in `./screenshots/` → then `inbox/assets/` at build.
+  - **3 DIAGRAMS (Claude to author, TikZ):** tool-chain position [Ch1],
+    three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
 - **Examples** — command-line recipe snippets go under `./examples-library/`.
 - **Re-pull check** — confirm the feeds still match the repo (v0.10.3+) before
   release.

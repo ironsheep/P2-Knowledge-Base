@@ -162,11 +162,25 @@ are working by hand or driving the whole thing from an AI coding assistant:
 Think of the first three as compile, and run-and-observe. `pnut_ts` produces the
 binary; **PNut-Term-TS is where you watch it come alive.**
 
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[2.4in]{Diagram (Claude to draw): the P2 agentic tool chain
+--- P2KB MCP, pnut\_ts, and pnut\_term\_ts (+ optional Spin2 VS Code
+extension) --- with the developer/agent and the P2, this tool marked as the
+run-and-observe leg.}
+\caption{Where PNut-Term-TS sits in the P2 agentic tool chain.}
+\end{figure}
+```
+
 If you are building an *agentic* P2 workflow — an assistant that writes code,
 compiles it, runs it on real silicon, and reads back the result to decide what to
 do next — this tool is the piece that lets the assistant *observe the hardware*.
-That workflow is described in depth in **The P2 Architect's Guide, Part 3**; this
-guide is the operating manual for the tool that makes it possible.
+That agent-in-the-loop way of working is the subject of **The P2 Architect's
+Guide, Part 3**, which names this very tool chain — `pnut_ts`, `pnut_term_ts`,
+and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
+read loop on its own. This guide is the operating manual for the tool that makes
+it possible.
 
 # Chapter 2: Three Tools in One
 
@@ -200,6 +214,16 @@ reason the tool exists in the form it does.
 > in **T**ype**S**cript." The *Terminal* is jobs 1 and 2; the *TypeScript* is why
 > job 3 runs everywhere instead of on Windows alone. The name is a compact
 > reminder of what the tool is.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[2.4in]{Diagram (Claude to draw): one box (PNut-Term-TS) fed by
+its three roles --- downloader, Parallax Serial Terminal replacement, and PNut
+debug-window replacement/production --- all cross-platform.}
+\caption{The three tools PNut-Term-TS folds into one.}
+\end{figure}
+```
 
 The `debug()` display windows themselves — what each one shows and how to author
 them from your Spin2 source — are the subject of the **P2 Debug Window Manual**,
@@ -279,8 +303,15 @@ top to bottom: a **menu bar**, a **toolbar**, a **text-entry field**, the
 the rest — are separate windows that open on their own; the main window is your
 home base for connecting, downloading, and reading text output.
 
-<!-- FIGURE (screenshot TBD): annotated main window — toolbar, text-entry,
-     terminal, status bar. See PLANNING.md "Open items / Screenshots". -->
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[3in]{Screenshot to capture: the full main window. We will
+annotate the toolbar, the text-entry field, the terminal display, and the
+status bar onto it.}
+\caption{The PNut-Term-TS main window.}
+\end{figure}
+```
 
 ## The toolbar
 
@@ -470,11 +501,31 @@ no `POS` is placed for you automatically**, laid out on screen so windows do not
 land on top of one another. Windows that *do* carry a `POS` are put exactly where
 they ask.
 
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[2.6in]{Diagram (Claude to draw): a screen rectangle showing
+where successive POS-less debug windows are placed, numbered in the order they
+open, so the reader can see the automatic layout pattern.}
+\caption{Automatic Window Placement --- where unpositioned windows land, in order.}
+\end{figure}
+```
+
 And when you *do* want to pin a window to a spot, you do not have to guess
 coordinates: **drag a display window and its title bar shows its live `x, y`
 position** as it moves. Read the numbers off, and bake them into a `POS`
 directive in your source. (The cog logger, the debugger, and the message-log
 windows do not show this readout — they are not positioned this way.)
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[3in]{Screenshot to capture: several debug windows open at once
+(e.g. TERM, SCOPE, PLOT, LOGIC) auto-laid-out on screen. If you can, drag one
+mid-capture so its title bar shows the live x, y readout for us to annotate.}
+\caption{Several debug windows, opened and auto-placed on screen.}
+\end{figure}
+```
 
 ## Two more shared behaviors
 
@@ -503,6 +554,17 @@ why the tool exists.
 > is covered fully in the **P2 Single-Step Debugger Manual**. This guide's part
 > is only that the window is *here*, cross-platform, and interactive.
 
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[3.2in]{Screenshot to capture: the single-step debugger window
+as PNut-Term-TS renders it --- macOS or Linux is especially nice here, to show
+it running off Windows. (The debugger's regions are covered in depth in the
+Single-Step Debugger Manual; this shot just shows it lives in this tool.)}
+\caption{The single-step debugger window, hosted by PNut-Term-TS.}
+\end{figure}
+```
+
 # Chapter 10: Recording and Playback
 
 PNut-Term-TS can capture a whole debug session and replay it later — timing and
@@ -529,6 +591,16 @@ a file chooser and begins playback. Playback reproduces the captured stream
 so a replayed run looks just like the original. The transport strip (Chapter 5)
 gives you play / pause / stop, a scrubber, and 0.5× / 1× / 2× speed.
 
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[1.3in]{Screenshot to capture: the playback transport strip ---
+play/pause/stop, the elapsed-and-total time readout, the scrubber, and the
+0.5x/1x/2x speed selector.}
+\caption{The playback transport strip.}
+\end{figure}
+```
+
 The Play chooser lists only `.p2rec` files.
 
 # Chapter 11: Performance Monitoring
@@ -546,6 +618,15 @@ Monitor** opens a view of the serial-to-window data path:
 
 Use it to confirm the pipeline keeps up. If buffer usage climbs toward full,
 lower the data rate or close windows you are not watching.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[2.8in]{Screenshot to capture: the Performance Monitor window ---
+throughput, buffer usage, queue depth, and message counts.}
+\caption{The Performance Monitor.}
+\end{figure}
+```
 
 # Chapter 12: Menus, Settings, and Devices
 
@@ -598,6 +679,16 @@ The **Project Settings** tab carries the same controls, each with an **override*
 checkbox: only the boxes you tick override your user defaults for the current
 project, and the rest show and inherit your global values.
 
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[3in]{Screenshot to capture: the Preferences dialog open on the
+User Settings tab, showing the Terminal / Serial Port / Logging / Recordings /
+Debug Logger groups.}
+\caption{Preferences --- the User Settings tab.}
+\end{figure}
+```
+
 ## PropPlug and device management
 
 PNut-Term-TS remembers every USB serial device it has seen and lets you name it
@@ -618,6 +709,16 @@ When you have more than one device, which one a run uses is decided in this orde
 3. Your user default.
 4. Auto-detect — used when exactly one device is connected.
 5. Otherwise, you are asked to choose (or the run errors if nothing matches).
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\placeholderfig[2.8in]{Screenshot to capture: the PropPlug Management tab with
+at least one device in the known-devices table (serial, friendly name, control
+line, last-used).}
+\caption{Preferences --- the PropPlug Management tab.}
+\end{figure}
+```
 
 # Part 3: Headless and Automation
 
@@ -909,10 +1010,15 @@ one.
 <!--
   ===========================================================================
   END OF DRAFTED CONTENT — full guide (Parts 1–4, Chapters 1–20).
-  Still pending (see PLANNING.md "Open items"): GUI screenshots (Ch5/8/12
-  figure slots marked with FIGURE comments) and the two trunk diagrams
-  (tool-chain position; three-in-one identity). Text stands on its own
-  without them for this draft.
+  Still pending (see PLANNING.md "Open items"): 10 figure slots now carry
+  visible \placeholderfig boxes with capture/authoring notes + real captions
+  (so they hold figure numbers + List-of-Figures entries). 7 are SCREENSHOTS
+  for Stephen to capture (main window · debug-windows-on-screen · single-step
+  debugger · transport strip · performance monitor · Preferences User Settings
+  · PropPlug Management); 3 are DIAGRAMS for Claude to author in TikZ
+  (tool-chain position · three-in-one identity · auto-placement order). Swap
+  each \placeholderfig -> \screenshotfig{inbox/assets/...} (or the TikZ) as
+  assets land. Text stands on its own without them for this draft.
   ===========================================================================
 -->
 
