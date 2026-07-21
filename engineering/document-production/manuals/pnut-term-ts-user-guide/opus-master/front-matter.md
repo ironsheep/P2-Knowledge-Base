@@ -48,9 +48,8 @@
 \item The Serial Terminal
 \item Debug Windows \& Placement
 \item The Single-Step Debugger
-\item Recording \& Playback
-\item Performance Monitoring
 \item Menus, Settings, Devices
+\item Further Features
 \end{itemize}
 \end{minipage}%
 \begin{minipage}[t]{0.45\textwidth}

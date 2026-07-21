@@ -128,7 +128,7 @@ a terminal, a toolbar to download and reset, and debug windows that pop open on
 their own as your program draws to them. This is the mode you use **at your desk**,
 watching a P2 and reacting to what you see.
 
-```bash
+```command
 pnut-term-ts -r myprogram.bin
 ```
 
@@ -140,7 +140,7 @@ file, and exits on a signal you define. This is the mode built for **continuous
 integration pipelines, containers, and AI coding assistants** running
 hardware-in-the-loop tests — anywhere a program, not a person, is watching.
 
-```bash
+```command
 pnut-term-ts --headless -r test.bin --end-marker
 ```
 
@@ -203,29 +203,28 @@ Left to right:
 
 - **Reset control line** — a button labeled with the active reset line (**DTR**
   or **RTS**) and a checkbox. Click it to assert a reset on the P2. Which line a
-  device uses is set per device in PropPlug Management (Chapter 12); this button
+  device uses is set per device in PropPlug Management (Chapter 10); this button
   just shows and fires it.
 - **RAM** / **FLASH** — download the loaded binary into the P2's RAM or its
   flash and run it. The small indicator beside them is green for the active
   download target.
 - **Download** (the tray icon) — pick a binary file to load.
-- **Record** / **Play** — start or stop a recording, and play one back. A status
-  label beside them reads "Ready", "Recording…", and so on.
+- **Record** / **Play** — start or stop a recording, and play one back, with a
+  status label beside them ("Ready", "Recording…"). Recording is a further
+  feature covered briefly in Chapter 11.
 
 ## The text-entry field
 
 The field just below the toolbar sends a line of text to the running P2 when you
-press **Enter** — this is how you type back to a program that reads input. During
-playback of a recording, a transport strip appears here instead, with
-play / pause / stop, an elapsed-and-total time readout, a scrubber, and a speed
-selector (0.5×, 1×, 2×).
+press **Enter** — this is how you type back to a program that reads input. (During
+playback of a recording, a transport strip appears here instead — see Chapter 11.)
 
 ## The terminal display
 
 The large central area shows the text your program sends: its `DEBUG()` output
 and any other serial text. How it looks — terminal mode, color theme, font, and
 whether each line is tagged with the cog that produced it — is yours to set;
-Chapter 7 covers the terminal, and Chapter 12 the settings behind it.
+Chapter 7 covers the terminal, and Chapter 10 the settings behind it.
 
 ## The status bar
 
@@ -263,7 +262,7 @@ You choose where the program goes:
 
 From the command line you name the binary directly, and the GUI stays open:
 
-```bash
+```command
 pnut-term-ts -r myprogram.bin      # download to RAM and run
 pnut-term-ts -f myprogram.bin      # download to FLASH and run
 ```
@@ -276,7 +275,7 @@ capturing debug output.
 
 To start your program cleanly, the P2 has to be reset. Whether that happens the
 moment PNut-Term-TS connects is governed by one preference, **Reset P2 on App
-Startup** (Chapter 12), and it reflects two different ways of working:
+Startup** (Chapter 10), and it reflects two different ways of working:
 
 - **On** (the default) — reset on connect. Use this during development, so every
   run starts from a known state.
@@ -285,7 +284,7 @@ Startup** (Chapter 12), and it reflects two different ways of working:
 
 The reset itself is asserted over one of two control lines — **DTR** or **RTS**.
 Parallax PropPlugs and most FTDI adapters use **DTR**; some clones need **RTS**.
-The line is remembered per device (Chapter 12), and you can override it for one
+The line is remembered per device (Chapter 10), and you can override it for one
 session with `--rts`.
 
 ## The debug baud rate — you should not need to set it
@@ -331,7 +330,7 @@ status bar so they are not shown twice.
 
 ## Look and feel
 
-The terminal's appearance is set in Preferences (Chapter 12); the choices that
+The terminal's appearance is set in Preferences (Chapter 10); the choices that
 shape day-to-day reading are:
 
 | Setting | Choices | Default |
@@ -449,70 +448,7 @@ Single-Step Debugger Manual; this shot just shows it lives in this tool.)}
 \end{figure}
 ```
 
-# Chapter 10: Recording and Playback
-
-PNut-Term-TS can capture a whole debug session and replay it later — timing and
-all. A recording is useful for regression testing, for sharing a reproduction
-with someone else, and for studying a run offline.
-
-## Recording a session
-
-Start with **File → Start Recording** (`Ctrl+R`); stop with **File → Stop
-Recording**. While a recording is running, the toolbar's status label reads
-"Recording…". The capture is written as a **`.p2rec`** file — a binary format
-that carries timing along with the data.
-
-Recordings land in a `sessions` folder inside your Recordings Directory (by
-default `./recordings/`, and configurable), created the first time you record.
-Each file is auto-named with a timestamp; **File → Save Recording As…** copies a
-finished recording anywhere you like.
-
-## Playing one back
-
-Load a recording with **File → Open Recording…** (or `Ctrl+P`) — either one opens
-a file chooser and begins playback. Playback reproduces the captured stream
-*including its timing*, driving the debug windows exactly as the live session did,
-so a replayed run looks just like the original. The transport strip (Chapter 5)
-gives you play / pause / stop, a scrubber, and 0.5× / 1× / 2× speed.
-
-```{=latex}
-\begin{figure}[H]
-\centering
-\placeholderfig[1.3in]{Screenshot to capture: the playback transport strip ---
-play/pause/stop, the elapsed-and-total time readout, the scrubber, and the
-0.5x/1x/2x speed selector.}
-\caption{The playback transport strip.}
-\end{figure}
-```
-
-The Play chooser lists only `.p2rec` files.
-
-# Chapter 11: Performance Monitoring
-
-At high baud rates a lot of data flows from the P2 into the windows, and it is
-worth being able to see whether the tool is keeping up. **Window → Performance
-Monitor** opens a view of the serial-to-window data path:
-
-- **Throughput** — the recent data-rate history.
-- **Buffer usage** — how full the receive and message buffers are.
-- **Queue depth** — how many messages are pending across all windows, and per
-  window, so you can spot a single window falling behind.
-- **Message counts** — totals and current rate, plus any overflow or parse-error
-  counts.
-
-Use it to confirm the pipeline keeps up. If buffer usage climbs toward full,
-lower the data rate or close windows you are not watching.
-
-```{=latex}
-\begin{figure}[H]
-\centering
-\placeholderfig[2.8in]{Screenshot to capture: the Performance Monitor window ---
-throughput, buffer usage, queue depth, and message counts.}
-\caption{The Performance Monitor.}
-\end{figure}
-```
-
-# Chapter 12: Menus, Settings, and Devices
+# Chapter 10: Menus, Settings, and Devices
 
 This chapter collects the GUI's configuration: the menus, the settings that shape
 every run, and the management of the USB devices you connect through.
@@ -604,6 +540,36 @@ line, last-used).}
 \end{figure}
 ```
 
+# Chapter 11: Further Features
+
+Two capabilities sit outside the everyday download-and-watch loop. They are
+documented here — briefly, and deliberately out of the main flow — because one is
+present but not yet exhaustively exercised, and the other is aimed at development
+and diagnostics rather than routine use. Reach for them if they fit your need, but
+do not build a workflow on them yet.
+
+## Recording and playback
+
+PNut-Term-TS can capture a whole debug session to a **`.p2rec`** file and replay
+it later, timing and all — useful for regression testing, for sharing a
+reproduction, or for studying a run offline. Start and stop a recording from
+**File → Start Recording** (`Ctrl+R`) and **File → Stop Recording**; replay one
+with **File → Open Recording…** (`Ctrl+P`), which reproduces the captured stream —
+including its timing — driving the debug windows exactly as the live run did.
+Recordings land in your Recordings Directory (default `./recordings/`).
+
+> This feature has had only limited testing so far. Treat it as experimental:
+> it is here if it helps you, but it is not yet a foundation to build on.
+
+## Performance monitoring
+
+**Window → Performance Monitor** opens a view of the serial-to-window data path —
+throughput, buffer usage, queue depth, and message counts — so you can see
+whether the tool is keeping up at high baud rates. It is primarily a
+**developer and diagnostic** aid: reach for it if you suspect the pipeline is
+falling behind (buffer usage climbing toward full), and otherwise you can leave
+it closed.
+
 # Part 3: Headless and Automation
 
 This part is for running PNut-Term-TS where **no person is watching** — a
@@ -613,13 +579,13 @@ interface here; the **log file is how the run is seen**. If you are working at
 your desk, *Part 2 — Using the GUI* is your part; both rejoin in *Part 4 —
 Reference*.
 
-# Chapter 13: Running Headless
+# Chapter 12: Running Headless
 
 Add `--headless` and PNut-Term-TS runs with **no windows at all**. It downloads
 your program, captures everything the P2 sends to a timestamped log file, and
 runs until you tell it to stop.
 
-```bash
+```command
 pnut-term-ts --headless -r test.bin -p P9cektn7
 ```
 
@@ -634,19 +600,19 @@ Between the full GUI and fully headless sit two in-between modes you may reach f
   signals it is done, draining any pending window SAVEs and logs first. Use it
   for scripted capture that still needs on-screen rendering:
 
-  ```bash
+  ```command
   pnut-term-ts -r gen.bin --exit-on-end-session -p P9cektn7
   ```
 
 - **IDE integration** — a minimal UI meant to be driven by an editor such as the
   Spin2 VS Code extension:
 
-  ```bash
+  ```command
   pnut-term-ts --ide -p P9cektn7          # DTR reset
   pnut-term-ts --ide --rts -p P9cektn7    # RTS reset
   ```
 
-# Chapter 14: Ending a Run Cleanly
+# Chapter 13: Ending a Run Cleanly
 
 A person closes the GUI when they are done. An automated run needs a defined way
 to stop — and a way to tell success from failure without looking. PNut-Term-TS
@@ -661,7 +627,7 @@ A headless run ends on any of:
 - an **end marker** — `--end-marker`, which stops the run when a phrase appears in
   the output.
 
-```bash
+```command
 pnut-term-ts --headless -r test.bin --end-marker    # stop on the marker
 pnut-term-ts --headless -r test.bin --timeout 60    # stop after 60s
 ```
@@ -670,7 +636,7 @@ By default the end marker matches either `END_SESSION` or `DEBUG_END_SESSION`
 (a case-sensitive match anywhere in the output), so a program that prints one of
 those when it finishes will end the run by itself. Give `--end-marker "PHRASE"` to
 match your own phrase instead. The same marker mechanism drives the headed-batch
-`--exit-on-end-session` mode from Chapter 13.
+`--exit-on-end-session` mode from Chapter 12.
 
 ## Exit codes — how a script reads the outcome
 
@@ -692,7 +658,7 @@ anything runs**. If an option is wrong, PNut-Term-TS reports *every* problem wit
 it at once and exits — no device is touched, no download attempted, no window
 opened.
 
-# Chapter 15: The Log Is Your Feedback Loop
+# Chapter 14: The Log Is Your Feedback Loop
 
 In headless mode the log file is not a side effect — **it is the whole point.** It
 is how an automated caller, or an assistant reading back the behavior of code it
@@ -749,7 +715,7 @@ One consequence is worth remembering: **an empty USB traffic log is meaningful.*
 It means the P2 never produced any runtime traffic — most often because the
 download failed and the program never started.
 
-# Chapter 16: A Complete Automated Run
+# Chapter 15: A Complete Automated Run
 
 Putting Part 3 together, here is the shape of a hardware-in-the-loop run an
 assistant or a CI job can drive end to end: **download, run, stop on a marker,
@@ -758,7 +724,7 @@ then read the log.**
 Have your program print a known phrase when it finishes — for example a line
 containing `DEBUG_END_SESSION` — so the run ends by itself. Then:
 
-```bash
+```command
 pnut-term-ts --headless -r build/test.bin -p P9cektn7 --end-marker
 ```
 
@@ -781,9 +747,9 @@ than a person, develop and verify P2 code on real silicon.
 The material both paths point into: the full command-line reference, the keyboard
 shortcuts, troubleshooting, and where to go for more.
 
-# Chapter 17: Command-Line Reference
+# Chapter 16: Command-Line Reference
 
-```
+```command
 pnut-term-ts [options]
 ```
 
@@ -816,7 +782,7 @@ any error is reported in full and the tool exits with code 2.
 
 **Examples.**
 
-```bash
+```command
 pnut-term-ts -n                                  # list devices
 pnut-term-ts -r prog.bin -p P9cektn7             # RAM download (GUI)
 pnut-term-ts -f prog.bin                         # FLASH download
@@ -826,7 +792,7 @@ pnut-term-ts --headless -r test.bin --end-marker # headless, exit on marker
 pnut-term-ts --headless -r test.bin --timeout 60 # headless, exit after 60s
 ```
 
-# Chapter 18: Keyboard Shortcuts
+# Chapter 17: Keyboard Shortcuts
 
 Application-level shortcuts (use `Cmd` instead of `Ctrl` on macOS):
 
@@ -844,7 +810,7 @@ debug window, mouse and key input may be forwarded to the running program when i
 asked for them (`PC_MOUSE` / `PC_KEY`); dragging a display window shows its
 position in the title bar (Chapter 8).
 
-# Chapter 19: Troubleshooting
+# Chapter 18: Troubleshooting
 
 **The P2 is not detected.** Check the USB cable and that the P2 is powered. Run
 `pnut-term-ts -n` to see whether it enumerates. Install FTDI drivers if needed and
@@ -880,7 +846,7 @@ one.
   (`sudo usermod -a -G dialout $USER`, then log back in); devices appear as
   `/dev/ttyUSB*`.
 
-# Chapter 20: Support and Resources
+# Chapter 19: Support and Resources
 
 - **Report an issue** — the PNut-Term-TS GitHub issue tracker.
 - **The `debug()` display directives** — the official Parallax P2 DEBUG
@@ -894,14 +860,15 @@ one.
 <!--
   ===========================================================================
   END OF DRAFTED CONTENT — full guide (Parts 1–4, Chapters 1–20).
-  Still pending (see PLANNING.md "Open items"): 10 figure slots now carry
-  visible \placeholderfig boxes with capture/authoring notes + real captions
-  (so they hold figure numbers + List-of-Figures entries). 7 are SCREENSHOTS
-  for Stephen to capture (main window · debug-windows-on-screen · single-step
-  debugger · transport strip · performance monitor · Preferences User Settings
-  · PropPlug Management); 3 are DIAGRAMS for Claude to author in TikZ
-  (tool-chain position · three-in-one identity · auto-placement order). Swap
-  each \placeholderfig -> \screenshotfig{inbox/assets/...} (or the TikZ) as
-  assets land. Text stands on its own without them for this draft.
+  Still pending (see PLANNING.md "Open items"): 8 figure slots carry visible
+  \placeholderfig boxes with capture/authoring notes + real captions (so they
+  hold figure numbers + List-of-Figures entries). 5 are SCREENSHOTS for Stephen
+  to capture (main window · debug-windows-on-screen · single-step debugger ·
+  Preferences User Settings · PropPlug Management); 3 are DIAGRAMS for Claude to
+  author in TikZ (tool-chain position · three-in-one identity · auto-placement
+  order). Swap each \placeholderfig -> \screenshotfig{inbox/assets/...} (or the
+  TikZ) as assets land. Text stands on its own without them for this draft.
+  (Recording/playback + performance monitoring were de-emphasized into Ch 11
+  "Further Features" 2026-07-21 — no screenshots for those.)
   ===========================================================================
 -->

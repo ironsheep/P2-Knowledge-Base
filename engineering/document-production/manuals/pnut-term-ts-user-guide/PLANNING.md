@@ -58,43 +58,39 @@ See `creation-guide.md` §2–§3.
    (CI / container / agent-in-the-loop) → Book B.
    *(Trunk diagrams: (1) tool-chain position; (2) three-in-one identity.)*
 
-### Book A — GUI branch
-5. The Main Window — toolbar, text-entry, terminal/log display, status bar.
-6. Downloading & Running — RAM vs flash; reset control line (DTR/RTS); the
+### Book A — GUI branch (Part 2) — AS BUILT
+5. The Main Window — toolbar, text-entry, terminal display, status bar.
+6. Downloading and Running — RAM vs flash; reset control line (DTR/RTS); the
    "you should not need to set baud" behavior.
 7. The Serial Terminal — sending input, echo, terminal modes/themes (PST vs ANSI).
-8. Debug Windows + **Automatic Window Placement** — windows open automatically
-   from `debug()`; auto-layout (no need to `POS` every window); drag to read
-   coordinates and bake a `POS` back into source; SAVE; PC_KEY/PC_MOUSE.
-   *(Cross-ref OUT: Debug Window Manual for what each window is / how to author.)*
-9. The Single-Step Debugger interface — how this tool renders and drives it.
-   *(Cross-ref OUT: Single-Step Debugger Manual for using the debugger.)*
-10. Recording & Playback — `.p2rec`, capture, replay with timing.
-11. Performance Monitoring — throughput / buffers / queue depth / message counts.
-12. Menus & Settings (GUI) — macOS native vs Windows/Linux in-window (NOT
-    equivalent); the 3-tier settings hierarchy; PropPlug / device management.
+8. Debug Windows and **Automatic Window Placement** — windows open automatically
+   from `debug()`; auto-layout; drag to read coordinates; SAVE; PC_KEY/PC_MOUSE.
+   *(Cross-ref OUT: Debug Window Manual.)*
+9. The Single-Step Debugger — how this tool renders/drives it.
+   *(Cross-ref OUT: Single-Step Debugger Manual.)*
+10. Menus, Settings, and Devices — macOS vs Windows/Linux menus; 3-tier settings;
+    PropPlug / device management.
+11. **Further Features** *(de-emphasized 2026-07-21, honest caveats)* — recording
+    & playback (present but lightly tested — experimental) and performance
+    monitoring (developer/diagnostic aid). Kept out of the main flow on purpose;
+    UI references elsewhere point here. **Not illustrated.**
 
-### Book B — Headless branch
-13. Headless invocation — `--headless`, download, device selection.
-14. Ending a run — `--end-marker` / `--timeout`; the end-session markers.
-15. Exit codes — 0/1/2/3/124/125; branching on `$?` (identical GUI vs headless).
-16. **The log as the automation feedback loop** — program output stays clean;
-    canonical as-built filenames; version banners; reading the log as the agent's
-    window into its own code.
-17. USB traffic log — scope (runtime bytes both directions headed; RX-only
-    headless); when an empty log is meaningful.
-18. CI / agent-in-the-loop patterns — a complete *"your first automated run"*
-    recipe (download → run → end-marker → read the log).
+### Book B — Headless branch (Part 3) — AS BUILT
+12. Running Headless — `--headless`, download, device selection; the in-between
+    modes (headed batch `--exit-on-end-session`, IDE `--ide`).
+13. Ending a Run Cleanly — `--end-marker` / `--timeout`; the exit codes
+    (0/1/2/3/124/125), identical GUI vs headless.
+14. The Log Is Your Feedback Loop — program output stays clean; canonical
+    as-built filenames; version banners; the USB traffic log (direction by mode).
+15. A Complete Automated Run — the download → run → marker → read recipe.
 
-### Shared reference tail (both branches point in)
-19. Command-Line Reference — full option table, examples, constraints.
-20. Keyboard Shortcuts.
-21. Settings hierarchy (full reference).
-22. Troubleshooting — not detected / garbled / no reset / blank window /
-    recording problems / platform notes.
-23. Support & Resources.
+### Shared reference tail (Part 4) — AS BUILT
+16. Command-Line Reference — full option table, examples, constraints, exit codes.
+17. Keyboard Shortcuts.
+18. Troubleshooting — not detected / garbled / no reset / blank window / platform.
+19. Support and Resources.
 
-*(Chapter grouping/numbering to firm up as drafting begins; the Book 0 → A/B →
+*(19 chapters as built. The Book 0 → A/B →
 tail spine is the fixed decision.)*
 
 ## Release gate
@@ -119,12 +115,14 @@ against v0.10.3, track the tool, **re-pull the feeds + re-verify at release.**
   boxes carry capture/authoring notes + real captions (figure numbers + LoF
   entries reserved). Swap each `\placeholderfig` → `\screenshotfig{inbox/assets/…}`
   (or TikZ) as assets land.
-  - **7 SCREENSHOTS (Stephen to capture):** (1) main window [Ch5], (2) several
+  - **5 SCREENSHOTS (Stephen to capture):** (1) main window [Ch5], (2) several
     debug windows auto-placed on screen, one mid-drag showing x,y [Ch8],
-    (3) single-step debugger window, macOS/Linux preferred [Ch9], (4) playback
-    transport strip [Ch10], (5) Performance Monitor [Ch11], (6) Preferences ·
-    User Settings tab [Ch12], (7) Preferences · PropPlug Management tab [Ch12].
+    (3) single-step debugger window, macOS/Linux preferred [Ch9], (4) Preferences ·
+    User Settings tab [Ch10], (5) Preferences · PropPlug Management tab [Ch10].
     Land captures in `./screenshots/` → then `inbox/assets/` at build.
+    *(Transport-strip + Performance-Monitor shots dropped 2026-07-21 when
+    recording/playback + perf monitoring were de-emphasized into Ch 11 "Further
+    Features" — deliberately not illustrated.)*
   - **3 DIAGRAMS (Claude to author, TikZ):** tool-chain position [Ch1],
     three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
 - **Examples** — command-line recipe snippets go under `./examples-library/`.
