@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.1 — Community Review Edition\par}
+{\large\color{blue}Version 1.0.2 — Community Review Edition\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -493,7 +493,7 @@ DAT                           ' data, tables, and PASM2 code live here
   greeting  byte  "hi", 0
 ```
 
-That's the whole grammar of a P2 file at the top level. The six blocks:
+At the top level, every P2 file is just an arrangement of six blocks:
 
 - **`CON` — constants.** Fixed values with names: the clock speed, pin numbers, sizes.
   A file starts in `CON` mode even before you write the word, so constants can sit at
@@ -670,7 +670,7 @@ You can now read a P2 program. You know a file is an object built from six kinds
 block; that methods are the named pieces of work, and the first `PUB` is where things
 start; that indentation — not punctuation — is the structure; how values, names, and the
 `...` continuation look on the page; how objects compose through a name; and what a line
-of PASM2 is made of. That's the literacy every example in this guide assumes. With it in
+of PASM2 is made of. Every example in this guide assumes that much literacy. With it in
 hand, the next chapter stops reading and starts *doing* — your first real program, a
 second cog, and the choices a P2 program actually makes.
 
@@ -704,7 +704,7 @@ PUB main()
     waitms(250)
 ```
 
-That's the whole thing. A few things worth noticing, because they're true of every P2
+A few things in that program are worth noticing, because they're true of every P2
 program:
 
 - The `CON` block holds **constants**. `_clkfreq` is the one constant you'll almost
@@ -894,7 +894,7 @@ whatever other cogs the design needs with `cogspin` (for Spin2) or its assembly 
 `coginit` (for a dedicated PASM2 cog). There's no operating system underneath deciding
 what runs — the cogs you start are the cogs that run, exactly as you arranged them.
 
-That is the entire run-time story: boot loads you, Cog 0 starts your `main`, and your
+In short, the run model is this: boot loads you, Cog 0 starts your `main`, and your
 program spreads itself across as many of the eight cogs as it needs.
 
 ## Where this leaves us

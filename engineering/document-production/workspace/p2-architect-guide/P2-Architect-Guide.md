@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.2cm}
-{\large Version 1.0.1\par}
+{\large Version 1.0.2\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -275,8 +275,8 @@ any new part is blunt — *am I talking to it correctly, and am I getting anythi
 logic analyzer is how you answer it, which is why it pays to design every rig so you can always
 attach one. Sometimes the rig itself is the test: two of the same chip wired together so each
 checks the other, as when an eight-channel serial driver was certified by lashing two P2s together
-with sixteen wires and verifying every round trip. And beneath all of it sits the unglamorous
-constant of every project ever built: *where do I plug this in, and what's the wiring?*
+with sixteen wires and verifying every round trip. Underlying all of it is the routine work of
+tracking where each part plugs in and how it is wired.
 
 ```{=latex}
 \FourPhaseSpineDiagram
@@ -349,8 +349,8 @@ And then the long tail the first release never shows you. Vendors ship new firmw
 keeping up means diffing their changes against what you built and deciding what to fold back in — a
 chore heavy enough to stall a project for a year. The time-of-flight driver still carries a known
 gap, a coordinate table and some angle math left undone, with a pile of newer vendor code waiting
-to be reconciled. Knowing that a project can be *shipped while honestly incomplete* — clear about
-what isn't finished — is part of the craft too.
+to be reconciled. A project can be shipped while honestly incomplete, as long as what isn't
+finished is documented clearly.
 
 ## Where this leaves you
 
@@ -472,8 +472,8 @@ buffer, a coordinator — are your *vocabulary*: the nouns. The **forces** are t
 the rules that decide which nouns to instantiate, how many of each, and where the
 boundaries between them fall. A vocabulary list tells you what words exist; only a grammar
 tells you how to build a correct sentence you've never spoken before. This part is about
-the grammar. (The vocabulary — the object archetypes — we'll lean on as we go but not
-catalogue here; the point of this part is the grammar that puts them to work.)
+the grammar. (The vocabulary — the object archetypes — we'll lean on as we go rather than
+catalogue here.)
 
 ### Two axes, co-designed
 
@@ -509,8 +509,8 @@ chosen by analogy to some example rather than derived from how the hardware is a
 wired. It compiles. It even runs during single-cog bring-up. Then it fails — as
 intermittent, timing-dependent, nearly-undebuggable flakiness — the first moment the
 derivation it skipped would have forbidden the cut. We'll see exactly how that happens when
-we meet Force 1. The cure is to derive the shape instead of guessing it, and that's what the
-forces are for.
+we meet Force 1. The cure is to derive the shape from the wiring instead of guessing it; the four
+forces are how you do that.
 
 # Chapter 7: The Forces That Do the Cutting
 
@@ -524,7 +524,8 @@ buses you'll see are illustrations of a force in motion, never a rule to transpl
 A word on emphasis before we start: for each force, the *why* matters more than the *what*.
 An engineer who knows why a force exists on the P2 specifically will generalize it to
 hardware we never imagined; one who memorizes a rule will eventually meet the case the rule
-didn't cover and apply it wrongly. So we'll dwell on the reasons.
+didn't cover and apply it wrongly. The sections below therefore lead with the reasoning, not the
+rule.
 
 ### Force 1 — Who owns this wire?
 
@@ -1040,8 +1041,8 @@ durable principle, or a softer heuristic. The pattern is reliable enough to coun
 the hardware survive, cuts anchored in a pattern you merely liked tend to drift. That comparison — an
 **as-built audit** — tells you which of your forces were truly load-bearing, and it catches the one
 thing a forward derivation never can: the mechanism you *built but only half-adopted* (a wake path wired
-into a buffer manager but used by only one of three consumers, say). An omission you *named* was a
-decision; a divergence you never circled back to notice is a lesson you paid for and threw away.
+into a buffer manager but used by only one of three consumers, say). Catching those quiet
+divergences is what the as-built audit is for.
 
 ## Watching the method run: a walking robot
 
@@ -1432,8 +1433,8 @@ your own feet already stood. And amplification compounds: once the agent makes a
 tractable — the arm's motion, a complex high-speed sensor's driver — you can *compose*, dropping a
 tested, exported object with its theory of operations and its logic-analyzer-proven communications
 straight onto the next project, so a 180-degree field-of-view sensor lands on the walking robot as
-a near-afterthought. You get to go beyond the single thing you were building, and that is exactly
-where the fun comes back.
+a near-afterthought. Each finished piece becomes raw material for the next, and the reach compounds
+from one project to the next.
 
 # In Closing
 
