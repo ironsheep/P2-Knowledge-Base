@@ -4,6 +4,16 @@ This document catalogues narrative improvements to add more detail in future rev
 
 ---
 
+## Hub RDLONG/WRLONG "shapes" timing — hardware study TABLED (OPEN)
+
+**Status:** ⏳ Tabled 2026-07-21 — the RDLONG half is measured on real P2; parked pending a decision to pursue hub-timing enrichment. (Was todo #203; relocated here as it has no pending action.)
+
+A hardware study of how the *shape* of a hub read changes its cost was run on real P2 silicon (2026-07-12) and written up: 8 RDLONG shapes (single / consecutive-inline same+seq / REP same+ptra++ / DJNZ / SETQ-block / RDFAST+RFLONG), dual-tail (prove-true + prove-false) design, clean results. Artifacts — harness + logs + writeup — in `engineering/document-production/manuals/p2-assembly-language-manual/audit/verification-tests/hub-rdlong-shapes-timing/` (`STUDY.md`, `SPEC.md`, `hub-rdlong-shapes.spin2`).
+
+**Not acted on by design.** To become source-of-truth it should be *paired with ~3 more hardware runs* — **WRLONG** (the write counterpart) and other RD/WR variants — to complete the hub-access-timing picture. Only then: route to Chip Gracey for confirm → fold into the KB hub-timing YAMLs + Assembly Ref ch04/SETQ/RDLONG/WRLONG → replicate to the empirical ledger (EF-NNN). Would add technical depth but is **not necessarily needed**. Surfaced by Rayman forum #68 + F-FB06 (the Silicon Doc gives no consecutive-RDLONG cadence).
+
+---
+
 ## Platform-migration doc drift (OPEN)
 
 **Status:** ⏳ Open — surfaced 2026-06-25 during the v3.1.0 dead-filter cleanup.
