@@ -115,14 +115,17 @@ against v0.10.3, track the tool, **re-pull the feeds + re-verify at release.**
   boxes carry capture/authoring notes + real captions (figure numbers + LoF
   entries reserved). Swap each `\placeholderfig` → `\screenshotfig{inbox/assets/…}`
   (or TikZ) as assets land.
-  - **5 SCREENSHOTS (Stephen to capture):** (1) main window [Ch5], (2) several
-    debug windows auto-placed on screen, one mid-drag showing x,y [Ch8],
-    (3) single-step debugger window, macOS/Linux preferred [Ch9], (4) Preferences ·
-    User Settings tab [Ch10], (5) Preferences · PropPlug Management tab [Ch10].
-    Land captures in `./screenshots/` → then `inbox/assets/` at build.
-    *(Transport-strip + Performance-Monitor shots dropped 2026-07-21 when
-    recording/playback + perf monitoring were de-emphasized into Ch 11 "Further
-    Features" — deliberately not illustrated.)*
+  - **4 SCREENSHOTS WIRED (2026-07-21)** — Stephen's captures, canonical copies
+    in `./screenshots/` + build copies in `workspace/.../assets/`, referenced as
+    `inbox/assets/*.png`: (1) `main-window-and-logger` [Ch5, cropped to remove
+    desktop wallpaper — shows the two startup windows], (2) `single-step-debugger`
+    [Ch9, macOS], (3) `preferences-user-settings` [Ch10], (4) `preferences-propplug`
+    [Ch10]. All verified rendering (forge-test v6/v7).
+  - **1 SCREENSHOT STILL OPEN** — several debug DISPLAY windows (scope/plot/logic)
+    auto-placed, ideally one mid-drag showing the x,y title-bar readout [Ch8].
+    Still a `\placeholderfig`; optional (the Ch8 diagram carries the section).
+    *(Transport-strip + Performance-Monitor shots dropped when recording/perf were
+    de-emphasized into Ch 11.)*
   - **3 DIAGRAMS (Claude to author, TikZ):** tool-chain position [Ch1],
     three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
 - **Examples** — command-line recipe snippets go under `./examples-library/`.

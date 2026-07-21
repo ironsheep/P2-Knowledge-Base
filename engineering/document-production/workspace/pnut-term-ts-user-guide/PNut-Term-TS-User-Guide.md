@@ -324,19 +324,22 @@ debug windows. If you are here to automate P2 runs instead, skip ahead to *Part 
 
 # Chapter 5: The Main Window
 
-When you launch PNut-Term-TS normally, one main window opens. It has five areas,
-top to bottom: a **menu bar**, a **toolbar**, a **text-entry field**, the
-**terminal display**, and a **status bar**. Debug windows — scopes, plots, and
-the rest — are separate windows that open on their own; the main window is your
-home base for connecting, downloading, and reading text output.
+When you launch PNut-Term-TS, **two windows open**: the **main window** and the
+**Debug Logger** (a separate window that captures the run's log). These are the
+two windows the auto-layout keeps reserved spots for (Chapter 8); the other debug
+windows — scopes, plots, and the rest — open on their own later, as your program
+draws to them.
+
+This chapter is about the main window: your home base for connecting,
+downloading, and reading text output. It has five areas, top to bottom — a **menu
+bar**, a **toolbar**, a **text-entry field**, the **terminal display**, and a
+**status bar**.
 
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[3in]{Screenshot to capture: the full main window. We will
-annotate the toolbar, the text-entry field, the terminal display, and the
-status bar onto it.}
-\caption{The PNut-Term-TS main window.}
+\screenshotfig[width=\linewidth]{inbox/assets/main-window-and-logger.png}
+\caption{Startup opens two windows: the PNut-Term-TS main window (left) and the Debug Logger (right).}
 \end{figure}
 ```
 
@@ -633,11 +636,8 @@ why the tool exists.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[3.2in]{Screenshot to capture: the single-step debugger window
-as PNut-Term-TS renders it --- macOS or Linux is especially nice here, to show
-it running off Windows. (The debugger's regions are covered in depth in the
-Single-Step Debugger Manual; this shot just shows it lives in this tool.)}
-\caption{The single-step debugger window, hosted by PNut-Term-TS.}
+\screenshotfig[width=\linewidth]{inbox/assets/single-step-debugger.png}
+\caption{The single-step debugger window, hosted by PNut-Term-TS (shown here on macOS).}
 \end{figure}
 ```
 
@@ -695,9 +695,7 @@ project, and the rest show and inherit your global values.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[3in]{Screenshot to capture: the Preferences dialog open on the
-User Settings tab, showing the Terminal / Serial Port / Logging / Recordings /
-Debug Logger groups.}
+\screenshotfig[width=0.82\linewidth]{inbox/assets/preferences-user-settings.png}
 \caption{Preferences --- the User Settings tab.}
 \end{figure}
 ```
@@ -726,9 +724,7 @@ When you have more than one device, which one a run uses is decided in this orde
 ```{=latex}
 \begin{figure}[H]
 \centering
-\placeholderfig[2.8in]{Screenshot to capture: the PropPlug Management tab with
-at least one device in the known-devices table (serial, friendly name, control
-line, last-used).}
+\screenshotfig[width=0.82\linewidth]{inbox/assets/preferences-propplug.png}
 \caption{Preferences --- the PropPlug Management tab.}
 \end{figure}
 ```
@@ -1059,10 +1055,12 @@ one.
   Figure status (see PLANNING.md "Open items"): 8 figure slots.
   - 3 DIAGRAMS authored in TikZ (2026-07-21): tool-chain position [Ch1],
     three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
-  - 5 SCREENSHOTS still carry \placeholderfig boxes for Stephen to capture
-    (main window · debug-windows-on-screen · single-step debugger · Preferences
-    User Settings · PropPlug Management). Swap each \placeholderfig ->
-    \screenshotfig{inbox/assets/...} as captures land.
+  - 4 SCREENSHOTS wired in (2026-07-21, Stephen's captures in
+    ./REF-NO-COMMIT/screenshots/, staged to workspace assets as
+    inbox/assets/*.png): main-window-and-logger [Ch5] · single-step-debugger
+    [Ch9] · preferences-user-settings [Ch10] · preferences-propplug [Ch10].
+  - 1 SCREENSHOT still \placeholderfig: several debug DISPLAY windows auto-placed,
+    ideally one mid-drag showing the x,y title-bar readout [Ch8].
   (Recording/playback + performance monitoring were de-emphasized into Ch 11
   "Further Features" 2026-07-21 — no screenshots for those.)
   ===========================================================================
