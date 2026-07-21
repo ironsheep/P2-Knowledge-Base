@@ -104,6 +104,10 @@ both-modes-in-view, as-built-not-aspirational.
 
 ### How best to show it (depth target)
 
+**Code line budget** — **Max code columns (K): 76** (platform-inherited default;
+LM-Mono reference width). Command-lines and code blocks must fit within K —
+they do not wrap.
+
 `doc_class: behavior` → **show behavior, don't just tabulate it.**
 - Lead each capability with a **task**, then mechanize it.
 - **Worked, runnable command-lines** are the connective tissue — especially one

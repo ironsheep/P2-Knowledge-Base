@@ -1,0 +1,42 @@
+% PNut-Term-TS User Guide - Main Template
+% PLATFORM-UNIFIED stack (see methodology/presentation-platform-unification-STUDY.md).
+% Part+Chapter structure (top-level division = chapter; `# Part N` promoted to
+% \manualpart by the p2kb-platform-pagination filter). Loads only the three
+% shared platform layers — no manual-specific .sty (this is a tool guide, not a
+% diagram-heavy reference). Based on the Single-Step Debugger Manual template.
+% Version: 0.1  -  Author: Iron Sheep Productions, LLC
+
+\documentclass[11pt,letterpaper,oneside,english]{book}
+
+% ==================== LOAD PLATFORM STACK (shared) ====================
+\usepackage{p2kb-platform-foundation}  % shared: geometry, penalties, titlesec, fontspec, caption, fig/table numbering
+\usepackage{p2kb-platform-content}      % shared: code/reference box family, screenshot keyline (\screenshotfig)
+\usepackage{p2kb-platform-diagrams}     % shared: diagram styles (staged for parity; light use in this guide)
+
+% ==================== DOCUMENT METADATA ====================
+\title{$title$}
+\author{$author$}
+\date{$date$}
+\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+
+% Pandoc header-includes (syntax-highlight macros, etc.)
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Cover/title page, TOC, and copyright come from front-matter.md (the shared
+% front-matter style with the Parallax-approved book artwork), prepended to the
+% body — NOT hardcoded here — so this guide matches the other P2 manuals.
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (front matter first, then chapters)
+$body$
+
+\end{document}
+$for(include-after)$
+$include-after$
+$endfor$

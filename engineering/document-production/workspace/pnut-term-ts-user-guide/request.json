@@ -4,7 +4,7 @@
     {
       "input": "PNut-Term-TS-User-Guide.md",
       "output": "PNut-Term-TS-User-Guide.pdf",
-      "template": "TEMPLATE-TBD-see-PLANNING",
+      "template": "p2kb-pnut-term-ts",
       "pandoc_args": [
         "--top-level-division=chapter",
         "--pdf-engine=xelatex",

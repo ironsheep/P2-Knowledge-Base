@@ -105,11 +105,16 @@ against v0.10.3, track the tool, **re-pull the feeds + re-verify at release.**
 
 ## Open items / decisions to finalize before first render
 
-- **Forge template + platform-filter wiring — TBD.** `Type = guide` but this
-  guide rides the `p2kb-platform` stack (ships code + screenshots). Decide at
-  first render: dedicated `p2kb-pnut-term-ts-guide` template vs map to an
-  existing platform template. `workspace/.../request.json` carries a placeholder
-  flagged TBD.
+- **Forge template — BASELINE ESTABLISHED (2026-07-21).** `p2kb-pnut-term-ts.latex`
+  (in `workspace/.../templates/`, based on the SSDB template's minimal
+  platform-stack loader — loads only the three shared `p2kb-platform-*` layers,
+  no manual-specific `.sty`). Proven by a clean `forge-test` round-trip of Book 0
+  (`pnut-term-ts-test-v1`: 9pp, compile-log clean, all content present — cover,
+  Part/Chapter promotion, platform tables, inline mono, fork router). Production
+  `request.json` now points at it. *Open sub-decision:* whether a `# Part N`
+  should get its own **part-divider page** — currently `\manualpart` renders the
+  Part heading inline atop the first chapter (Part 1 + Chapter 1 share a page).
+  Acceptable for now; revisit if we want divider pages.
 - **Screenshots** — GUI branch needs them (main window, toolbar, status bar,
   Preferences tabs, PropPlug Management, Automatic Window Placement in action).
   Capture plan TBD; `./screenshots/` staged empty. Stephen captures externally.
