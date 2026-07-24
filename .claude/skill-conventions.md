@@ -78,6 +78,20 @@ MODEL_TIERS:   ["opus", "sonnet"]
 DEFAULT_MODEL: opus
 ```
 
+## Promotion role
+
+P2-Knowledge-Base is a **promotion source** — the origin of the
+`overlay-survey` → `fleet-skill-survey` → central-promotion pipeline. Its
+`sprint-retrospective` therefore keeps candidate-buffer entries through an
+**adopt → certify → promote** window (central §5's promotion-source verdicts),
+rather than deleting them the moment they're addressed. Adopted 2026-07-24
+during the v1→v3 overlay reconcile (central v2 absorbed the lifecycle natively;
+this slot selects it).
+
+```yaml
+PROMOTION_SOURCE: yes
+```
+
 ## Audience & vocabulary
 
 ```yaml

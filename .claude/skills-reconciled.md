@@ -1,3 +1,3 @@
-reconciled-against: v1
-date: 2026-06-22
-note: first reconcile — no prior marker (pre-mechanism legacy), so a full run over all 8 overlays. sprint-retrospective trimmed (build-sized rule + premise, central caught up on buffer triage); plan-to-tasks/sprint-plan/sprint-start PLAN_DIR-sentinel rules refreshed to the unified-dir decision; the other 5 overlays are project-specific essence, kept unchanged.
+reconciled-against: v5
+date: 2026-07-24
+note: delta run over (v3, v5]. No overlay impact — both rows say so explicitly. v4 (bootstrap-conventions/overlay-survey/overlay-reconcile/SKILLS-RECONCILE §4): the detector gets an owner; stamping now also installs the currency check. This project was stamped at v3 with NO detector, so this run backfilled it — added the canonical Skill-currency check block to CLAUDE.md's "Session Start (MANDATORY)" section, immediately after the whats-next resume ritual. v5 (SKILLS-RECONCILE §3): close-out intake + bin/check-closeout.sh guard — central-maintenance discipline only, nothing this project carries. None of v4/v5's changed skills are overlaid here. No promotion candidates; no override demotions.
