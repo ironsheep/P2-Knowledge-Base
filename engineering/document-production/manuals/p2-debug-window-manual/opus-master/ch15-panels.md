@@ -236,8 +236,8 @@ PUB main() | m[7], key, value, dirty, lastL
   repeat
     ' Poll both inputs; each is the LAST command in its statement.
     key := 0
-    debug(`Ctrl PC_KEY(@key))
-    debug(`Ctrl PC_MOUSE(@m))
+    debug(`Ctrl `PC_KEY(@key))
+    debug(`Ctrl `PC_MOUSE(@m))
 
     case key                                 ' keyboard: arrows nudge
       1: value -= 5                           ' Left  arrow
@@ -279,6 +279,40 @@ Click the window to give it focus, then click a button or use the arrow keys. Th
 `lastL` variable holds the previous left-button state so a click fires once on the
 press edge rather than every poll while the button is held. The `dirty` flag means the
 panel sits idle — polling but not redrawing — until an input changes the value.
+
+### When the panel is artwork, the hit test needs a Y flip
+
+The panel above needs no coordinate conversion, and it is worth being precise
+about *why*: the buttons are **drawn** by `SET`/`BOX` in the PLOT window's own
+coordinate space, and `PC_MOUSE` reports the pointer in that **same** space. Draw
+and hit test agree because both are expressed in PLOT coordinates — origin
+bottom-left, y increasing upward.
+
+Compose the panel from bitmap layers instead (Technique 3) and that agreement
+breaks. A BMP is authored the way image editors work — **origin top-left, y
+increasing downward** — so a button that sits 40 px from the top of your artwork
+is at a *large* y in mouse coordinates, not a small one. Hit-testing artwork
+coordinates against mouse coordinates directly puts every button in the wrong row,
+mirrored about the panel's middle. Flip once, at the boundary, before the grid math:
+
+```spin2
+PRI hitSlot(px, py) : slot | col, row
+' Mouse arrives bottom-left (y up); the artwork is authored top-left (y down).
+' Flip y here so the grid math matches the BMP.
+  py := (PANEL_H - 1) - py
+  col := (px - GRID_X) / PITCH_X
+  row := (py - GRID_Y) / PITCH_Y
+  ...
+```
+
+The `PANEL_H - 1` (not `PANEL_H`) is deliberate: for a panel of height *h* the
+valid rows are `0`..`h-1`, so the top row must map to `0` and the bottom row to
+`h-1`. Doing the flip in one place, immediately after the poll, keeps every
+downstream coordinate in artwork space where your layout constants already live.
+
+The symptom to recognize: clicks register — the press edge fires, the log shows
+plausible coordinates — but they land on the *wrong* control, and the error is
+mirrored top-to-bottom. That is a missing flip, not a broken hit test.
 
 ### Where you'd use this
 

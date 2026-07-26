@@ -335,8 +335,8 @@ A channel label placed on the create line is rejected by the parser.
 
 ## Commands common to every window
 
-- `` DEBUG(`Name PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. See [Chapter 12](#ch-12) for the key-code table.
-- `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
+- `` DEBUG(`Name `PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. **Note the second backtick**: `PC_KEY` is a Spin2 debug command, not display text, so it must be ticked back into command mode. See [Chapter 12](#ch-12) for the key-code table.
+- `` DEBUG(`Name `PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. Same backtick rule as `PC_KEY`. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
 - `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save to `file.bmp` on the host (no
   extension in the name). **The filename is required and must be last**: a bare

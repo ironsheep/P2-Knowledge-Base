@@ -14,6 +14,7 @@ syntax: "PC_KEY(pointer_to_long)"
 
 usage_rules:
   - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only."
+  - "MUST be prefixed with its own backtick inside a display message -- DEBUG(`Win `PC_KEY(@key)). Text after the display name is display text, so an un-backticked PC_KEY compiles clean and is transmitted to the window as the literal characters 'PC_KEY(@key'; no command runs and the long is never written. Silent runtime failure, no compile error."
   - "Must be the LAST command in the DEBUG() statement."
   - "The DEBUG() display must have focus for keypresses to be noticed."
   - "Reports a keypress only if it occurred within the last ~100 ms of the poll (the host latch auto-clears after 100 ms); otherwise 0."
@@ -52,7 +53,7 @@ examples:
       PUB main()
         DEBUG(`TERM MyTerm)
         REPEAT
-          DEBUG(`MyTerm PC_KEY(@key))        ' PC_KEY must be last in the statement
+          DEBUG(`MyTerm `PC_KEY(@key))       ' note the 2nd backtick; PC_KEY must be last
           IF key
             handle_key(key)
     description: "Read host keypresses into a Spin2 hub long"

@@ -23,18 +23,37 @@ value. You read the result afterward from the variable you pointed at:
 PUB main() | key, mouse[7]
   debug(`TERM Console SIZE 40 10)
 
-  debug(`Console PC_KEY(@key))            ' host writes key code into key
+  debug(`Console `PC_KEY(@key))           ' host writes key code into key
 
-  debug(`Console PC_MOUSE(@mouse))        ' host fills 7 longs
+  debug(`Console `PC_MOUSE(@mouse))       ' host fills 7 longs
 
   repeat
 ```
 
-One rule governs both: **`PC_KEY` and `PC_MOUSE` must be the last command in their
-`DEBUG()` statement.** You can send output earlier in the same statement, but the
-input command comes last. In Spin2 the buffer lives in hub RAM, so you pass its
-address with `@` — `@key`, `@mouse`. (In PASM the buffer is a cog register and you
-pass it with `#`; this chapter is Spin2.)
+Two rules govern both, and the second one is the trap.
+
+**1. `PC_KEY` and `PC_MOUSE` must be the last command in their `DEBUG()`
+statement.** You can send output earlier in the same statement, but the input
+command comes last. In Spin2 the buffer lives in hub RAM, so you pass its address
+with `@` — `@key`, `@mouse`. (In PASM the buffer is a cog register and you pass it
+with `#`; this chapter is Spin2.)
+
+**2. Both commands need their own backtick.** Everything after `` `Console `` is
+*display text* — keywords, numbers, and quoted strings bound for the window. A
+Spin2 debug command has to tick its way back out of display text into command
+mode, exactly like the `` `(expr) `` value substitutions you have used since
+Chapter 2:
+
+```spin2
+debug(`Console `PC_KEY(@key))   ' ✅ ticked — the command runs
+debug(`Console PC_KEY(@key))    ' ❌ no tick — "PC_KEY(@key" is sent to the window as text
+```
+
+The second line **compiles without error**. Nothing is written to `key`, ever;
+the characters `PC_KEY(@key` are simply printed into the window. A control loop
+built on it runs forever and never responds to a single keystroke. This is the
+same class of silent failure as using double quotes in a display string — the
+compiler cannot help you, so check the backtick first when input "does nothing."
 
 ## PC_KEY — reading the keyboard
 
@@ -45,13 +64,13 @@ this is wrong:
 
 ```spin2
 ' WRONG - PC_KEY does not return a value
-key := debug(`Console PC_KEY)
+key := debug(`Console `PC_KEY)
 ```
 
 The correct form passes a pointer and then reads the long:
 
 ```spin2
-debug(`Console PC_KEY(@key))   ' host fills key
+debug(`Console `PC_KEY(@key))  ' host fills key
 case key                        ' now read it
   ...
 ```
@@ -97,7 +116,7 @@ PUB main() | key, value
   show(value)
   repeat
     key := 0
-    debug(`Adjust PC_KEY(@key))
+    debug(`Adjust `PC_KEY(@key))
     case key
       3: value += 1                       ' Up arrow
       4: value -= 1                       ' Down arrow
@@ -123,7 +142,7 @@ host fills all seven with the current mouse state relative to the named window.
 Declare the buffer as `long mouse[7]` and pass `@mouse`:
 
 ```spin2
-debug(`Watch PC_MOUSE(@mouse))
+debug(`Watch `PC_MOUSE(@mouse))
 ```
 
 The seven longs, in order, are:
@@ -192,7 +211,7 @@ CON _clkfreq = 200_000_000
 PUB main() | mouse[7]
   debug(`TERM Pointer SIZE 40 8 TITLE 'Mouse State')
   repeat
-    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer `PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
       debug(`Pointer 'Pointer outside window' 13)

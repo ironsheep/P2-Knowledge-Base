@@ -6,7 +6,7 @@ PUB main() | key, value
   show(value)
   repeat
     key := 0
-    debug(`Adjust PC_KEY(@key))
+    debug(`Adjust `PC_KEY(@key))
     case key
       3: value += 1                       ' Up arrow
       4: value -= 1                       ' Down arrow

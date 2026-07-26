@@ -1889,6 +1889,57 @@ already ships only the qualitative caveat ("nominal 16-bit, averaged over time; 
 limited by the 8-bit DAC core") — **no edit needed**. The reviewer's "~10–12 bits" stays out
 (opinion, and now confirmed never-measured). Closes the RA-18/36/49/56 ENOB question.
 
+## Interactive DEBUG examples never ran — `PC_KEY`/`PC_MOUSE` shipped without their escape backtick (2026-07-26) — F-227
+
+### F-227 — un-backticked `PC_KEY`/`PC_MOUSE` inside a display message is sent to the window as **literal text**; the command never runs — `DONE (2026-07-26, compiler-proven)` · re-test pending
+
+**Surfaced by Stephen's run-verification pass** over the Debug Window Manual's 34-program example
+library on PNut/Windows: 30 ran, 4 failed. Three of the four are every example in the library that
+uses `PC_KEY`/`PC_MOUSE` — a 3-of-3 hit rate on one construct.
+
+**Root cause.** Everything following the display name in a backtick statement is *display text*. A
+Spin2 debug command must tick back out of display text into command mode, exactly as `` `(expr) ``
+does. All three examples omitted that second backtick. Proven with `pnut-ts -d` v1.55.0 by reading
+the emitted display strings out of the two binaries:
+
+| source | emitted display text |
+|---|---|
+| `` debug(`Adjust PC_KEY(@key)) `` | `` `Adjust PC_KEY(@key `` — the characters are transmitted to the window; **no command compiled** |
+| `` debug(`Adjust `PC_KEY(@key)) `` | `` `Adjust `` + the real `PC_KEY` command bytes |
+
+The pointer variable is therefore **never written**; the control loop polls forever and responds to
+nothing. **No compile error** — same silent-failure class as double quotes in a display string
+(`DEBUG-Statement-Quoting-Briefing`, §2). Uppercase after the tick compiles identically to the
+lowercase form used in the bench-certified reference (`REF/robot-dog/test_dog_panel.spin2`:
+`` DEBUG(`pnl `pc_key(@keyCode)) ``), which is what exposed the defect.
+
+**Why it survived to release:** these three are the manual's only *interactive* examples. Their
+figure-generator harnesses cannot be certified from a screenshot, and the 2026-07-11 run audit
+accepted a structural argument in place of a hardware run. A structural contrast is only as good as
+the idiom it is compared against — and the comparison against the dog-panel idiom was recorded as a
+TODO and never performed.
+
+- **KB fixed:** `debug-commands/pc_key.yaml`, `debug-commands/pc_mouse.yaml` — new `usage_rules`
+  entry naming the silent failure, and both worked examples corrected. **Publishes on the next KB
+  release rail (§9).**
+- **Manual fixed:** examples `ch12-keyboard-adjust`, `ch12-mouse-pointer`, `ch15-control-panel` +
+  their three `fig-*` harnesses; prose in `ch12-bidirectional.md` (the rule is now taught as rule 2
+  of two, with the ✅/❌ contrast), `ch15-panels.md`, `appendix-a-command-reference.md`. Byte-identity
+  across all 34 examples re-verified.
+- **Also added (Stephen, from the dog panel):** ch15 now teaches the mouse-vs-artwork Y flip —
+  drawn panels need none (draw and `PC_MOUSE` share PLOT space), BMP-authored panels need
+  `py := (PANEL_H - 1) - py` because artwork is authored top-left. Bench-confirmed 2026-06-06 in
+  `test_dog_panel.spin2:hitSlot()`.
+- **Open:** the fourth failure (`ch14-scope-trace`, SCOPE window does not open) is **not** this
+  defect and has no proven cause yet — see the note below.
+
+**Not yet grounded — `ch14-scope-trace`.** A keyword-collision hypothesis (display named `Trace`
+vs. the `TRACE` keyword) was **refuted by our own hardware evidence**: the 2026-07-11 capture
+`fig-14-scope-trace-scope_WDW.bmp` OCRs as *"Trace - SCOPE"* with channel *"Signal"* rendered, from
+a byte-identical create sequence. Display names are read positionally and may be keywords. Cause
+still open; awaiting a symptom read + a re-run of the known-good figure generator on the current
+bench.
+
 ---
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*

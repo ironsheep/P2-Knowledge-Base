@@ -10,8 +10,8 @@ PUB main() | m[7], key, value, dirty, lastL
   repeat
     ' Poll both inputs; each is the LAST command in its statement.
     key := 0
-    debug(`Ctrl PC_KEY(@key))
-    debug(`Ctrl PC_MOUSE(@m))
+    debug(`Ctrl `PC_KEY(@key))
+    debug(`Ctrl `PC_MOUSE(@m))
 
     case key                                 ' keyboard: arrows nudge
       1: value -= 5                           ' Left  arrow

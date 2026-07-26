@@ -23,7 +23,7 @@ PUB main() | mouse[7], polls, lastL
   polls := 0
   lastL := 0
   repeat
-    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer `PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
       debug(`Pointer 'Pointer outside window' 13)

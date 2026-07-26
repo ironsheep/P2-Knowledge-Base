@@ -3,7 +3,7 @@ CON _clkfreq = 200_000_000
 PUB main() | mouse[7]
   debug(`TERM Pointer SIZE 40 8 TITLE 'Mouse State')
   repeat
-    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer `PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
       debug(`Pointer 'Pointer outside window' 13)

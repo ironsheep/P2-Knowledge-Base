@@ -14,6 +14,7 @@ syntax: "PC_MOUSE(pointer_to_7_longs)"
 
 usage_rules:
   - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only."
+  - "MUST be prefixed with its own backtick inside a display message -- DEBUG(`Win `PC_MOUSE(@xpos)). Text after the display name is display text, so an un-backticked PC_MOUSE compiles clean and is transmitted to the window as the literal characters 'PC_MOUSE(@xpos'; no command runs and the 7 longs are never written. Silent runtime failure, no compile error."
   - "Must be the LAST command in the DEBUG() statement."
   - "The DEBUG() display must have focus for the scroll-wheel delta to be reported."
   - "Universal: accepted in every DEBUG display window's update phase."
@@ -58,7 +59,7 @@ examples:
       PUB main()
         DEBUG(`PLOT MyPlot SIZE 256 256)
         REPEAT
-          DEBUG(`MyPlot PC_MOUSE(@xpos))     ' PC_MOUSE must be last; fills 7 longs
+          DEBUG(`MyPlot `PC_MOUSE(@xpos))    ' note the 2nd backtick; must be last; fills 7 longs
           IF lb                               ' left button pressed (-1)
             DEBUG(`MyPlot SET `(xpos) `(ypos) DOT)
     description: "Track mouse position and draw on left-click"
