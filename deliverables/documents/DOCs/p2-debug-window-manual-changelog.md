@@ -1,5 +1,27 @@
 # P2 Debug Window Manual — Change Log
 
+## v1.1.1 (2026-07-27)
+
+**Every program in the example library runs on hardware.** All 34 programs verified on real P2
+silicon under PNut v55 — the interactive ones included. **Download the current example ZIP.**
+
+### Fixed
+
+- The keyboard and mouse examples (Chapter 12) and the control panel (Chapter 15) read host input
+  and respond to it.
+- Chapter 14's coordinated scope-and-status example opens both of its windows, and Chapter 5's
+  `LINE` snippet opens its plot.
+- Ordinary English words that share a P2 mnemonic's spelling — "fit", "test" — read as prose.
+
+### Added
+
+- **Both input commands carry their own backtick** (Chapter 12, Appendix A) — working and
+  non-working forms side by side, with the runtime symptom.
+- **Naming a display window** (Chapter 2) — the complete five-part rule, including the 103 reserved
+  display words (Spin2's own reserved words stay available).
+- **Mouse coordinates against panel artwork** (Chapter 15) — drawn panels need no conversion;
+  bitmap-authored panels need a Y flip.
+
 ## v1.1.0 (2026-07-14)
 
 **Verified against P2 silicon.** Every load-bearing claim in this manual was re-tested on real

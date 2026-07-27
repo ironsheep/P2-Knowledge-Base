@@ -9,20 +9,18 @@ silicon under PNut v55 — the interactive ones included. **Download the current
 
 - The keyboard and mouse examples (Chapter 12) and the control panel (Chapter 15) read host input
   and respond to it.
-- Chapter 14's coordinated scope-and-status example opens both of its windows.
+- Chapter 14's coordinated scope-and-status example opens both of its windows, and Chapter 5's
+  `LINE` snippet opens its plot.
+- Ordinary English words that share a P2 mnemonic's spelling — "fit", "test" — read as prose.
 
 ### Added
 
-- **Both input commands carry their own backtick** (Chapter 12, Appendix A) — `` `PC_KEY `` and
-  `` `PC_MOUSE `` tick back out of display text into command mode, with the working and
-  non-working forms side by side and the symptom that identifies the difference at runtime.
-- **Naming a display window** (Chapter 2) — the complete five-part rule: the legal character set,
-  the 103 reserved display words, one name per open window, case-insensitive matching, and the
-  30-character limit. Spin2's own reserved words are yours to use. The chapter names the symptom
-  too: a window that never appears, silently.
-- **Mouse coordinates against panel artwork** (Chapter 15) — a drawn panel needs no conversion
-  because drawing and `PC_MOUSE` share one coordinate space; a panel composed from bitmap layers
-  needs a Y flip, and the mirrored-click symptom tells you when one is missing.
+- **Both input commands carry their own backtick** (Chapter 12, Appendix A) — working and
+  non-working forms side by side, with the runtime symptom.
+- **Naming a display window** (Chapter 2) — the complete five-part rule, including the 103 reserved
+  display words (Spin2's own reserved words stay available).
+- **Mouse coordinates against panel artwork** (Chapter 15) — drawn panels need no conversion;
+  bitmap-authored panels need a Y flip.
 
 ## v1.1.0 (2026-07-14)
 
