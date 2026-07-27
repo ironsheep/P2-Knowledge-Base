@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.15.0] - 2026-07-27
+
+**DEBUG display window naming and host-input syntax, from the PNut v55 source**
+
+### Added
+- Window-name rules for `DEBUG()` displays: the legal character set, the 103 reserved display words (all enumerated), one name per open window, case-insensitive matching, and the 30-character limit — with the symptom to recognize, since an illegal name produces no compile error and no window.
+- Spin2's own reserved words are available as window names; only the display vocabulary collides.
+
+### Changed
+- `PC_KEY` and `PC_MOUSE` carry their own backtick inside a display message — `` DEBUG(`Win `PC_KEY(@key)) `` — in the reference entries, the worked examples, and every window's directive list.
+
 ## [1.14.5] - 2026-07-16
 
 **XBYTE mode-operand index forms; complementary-PWM dead-band**
