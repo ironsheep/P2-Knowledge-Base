@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-07-16T22:56:58.003642",
+    "generated": "2026-07-27T01:09:46.244381",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1724,
@@ -9920,13 +9920,13 @@
     },
     "p2kbSpin2DbgPcKey": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_key.yaml",
-      "mtime": 1781325191,
-      "sha256": "6b6d063f204f1be6c53e73f647c51c0b3a1d07e99aebb33021796e2eed574891"
+      "mtime": 1785109627,
+      "sha256": "74880d04eb42d6c20a60178340e90a9008dde0e63caeb9d2107881bb6108a78c"
     },
     "p2kbSpin2DbgPcMouse": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_mouse.yaml",
-      "mtime": 1784009392,
-      "sha256": "bb4a128319e8387b27c9cc4b4ea424559b9e359a937f688e4f99db4a51fa2e15"
+      "mtime": 1785109627,
+      "sha256": "8e23be08853c43f89b8691dd907b8efe17e6683e60f0830f772a31b8d4702379"
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
@@ -9935,18 +9935,18 @@
     },
     "p2kbSpin2Fft": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/fft.yaml",
-      "mtime": 1784009392,
-      "sha256": "6d97874aebc3869c05fb9acc3e9e67054fe8eb24cd7ddf3f6206dcb7e9152f7c"
+      "mtime": 1785111337,
+      "sha256": "1588a40f99f2d6ba8a0ec07a19bb059a0a6b3ff0fb9eb3423c8e584a22a8611d"
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1784009392,
-      "sha256": "e9720e83d7d92c3294ba7af5bd78d9f14ccec27c3583071252209ad5c902e238"
+      "mtime": 1785111337,
+      "sha256": "5d5e039e79e3b243513edd146b0fa39164d6e1e64b60b0f6e7d71941604c6aa4"
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1784009392,
-      "sha256": "8151b99c21eb5573f5ba48540c42e35d270bc4ea287ff654b6e60733c9429893"
+      "mtime": 1785111337,
+      "sha256": "dbbbfef1b170522085b8b8f44190c3ea38e2942a463f60d91f6b74a62b010ca2"
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
@@ -9955,23 +9955,23 @@
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
-      "mtime": 1784009392,
-      "sha256": "b6e0fb2380aaa9a045dd8c8f6adf81a4a267903787987a370fb4f83dcb4b20ba"
+      "mtime": 1785111337,
+      "sha256": "61f17c4647e8fe57eb4b0a8427e118c71a72b53a896df460bcb7aae2257f9a32"
     },
     "p2kbSpin2ScopeXy": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope_xy.yaml",
-      "mtime": 1784009392,
-      "sha256": "c4b2cbd3d6c40a0510a16309f005c5e228fe960a43d6e923e50248a28615d60e"
+      "mtime": 1785111337,
+      "sha256": "4007099d878bb74bc246d9a2b62bec821c6656f2b483f4e1272fa2a85b3637ff"
     },
     "p2kbSpin2Spectro": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/spectro.yaml",
-      "mtime": 1784009392,
-      "sha256": "8337090f34c0acf08d10bfaf3e426e083cba55faa768fa8101f4fccc4483e600"
+      "mtime": 1785111337,
+      "sha256": "cba996b03be531a36ac3ad0d6923aa1cd5e556e1276c1093d336adf7f305e3ef"
     },
     "p2kbSpin2Term": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/term.yaml",
-      "mtime": 1784009392,
-      "sha256": "382d39cf6959ad59aea35c0b3b90e7a64f04d3ef499e1077941f38fc3f78e3e9"
+      "mtime": 1785111337,
+      "sha256": "44dbc3486dc4143d83f73a48744c15731e23e6580a7cfd6055737b2e8c806c09"
     },
     "p2kbSpin2BitManipulation": {
       "path": "deliverables/ai/P2/language/spin2/idioms/bit-manipulation.yaml",
@@ -11570,8 +11570,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1784009392,
-      "sha256": "9cc20ccfb2d930d8332ac0addb333e47a847305955b2216a29d3bf9626f37e94"
+      "mtime": 1785112301,
+      "sha256": "55137306eeece6f340f8e5d67ffbf3db20b3fbf5280242cd8c6d454dcf9e3409"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",

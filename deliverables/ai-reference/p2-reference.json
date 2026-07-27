@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-07-16",
-    "last_updated": "2026-07-16T22:56:58.047405",
+    "release_date": "2026-07-27",
+    "last_updated": "2026-07-27T01:09:46.286685",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-07-16T22:56:58.047405",
+    "extraction_date": "2026-07-27T01:09:46.286685",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-07-16T22:56:58.047405",
+    "extraction_date": "2026-07-27T01:09:46.286685",
     "categories": {
       "keywords": {
         "count": 37,
@@ -28831,6 +28831,7 @@
             "syntax": "PC_KEY(pointer_to_long)",
             "usage_rules": [
               "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",
+              "MUST be prefixed with its own backtick inside a display message -- DEBUG(`Win `PC_KEY(@key)). Text after the display name is display text, so an un-backticked PC_KEY compiles clean and is transmitted to the window as the literal characters 'PC_KEY(@key'; no command runs and the long is never written. Silent runtime failure, no compile error.",
               "Must be the LAST command in the DEBUG() statement.",
               "The DEBUG() display must have focus for keypresses to be noticed.",
               "Reports a keypress only if it occurred within the last ~100 ms of the poll (the host latch auto-clears after 100 ms); otherwise 0.",
@@ -28863,7 +28864,7 @@
             },
             "examples": [
               {
-                "code": "' Spin2: read keypresses from a TERM window (long in hub)\nVAR\n  long key\nPUB main()\n  DEBUG(`TERM MyTerm)\n  REPEAT\n    DEBUG(`MyTerm PC_KEY(@key))        ' PC_KEY must be last in the statement\n    IF key\n      handle_key(key)\n",
+                "code": "' Spin2: read keypresses from a TERM window (long in hub)\nVAR\n  long key\nPUB main()\n  DEBUG(`TERM MyTerm)\n  REPEAT\n    DEBUG(`MyTerm `PC_KEY(@key))       ' note the 2nd backtick; PC_KEY must be last\n    IF key\n      handle_key(key)\n",
                 "description": "Read host keypresses into a Spin2 hub long"
               }
             ],
@@ -28942,6 +28943,7 @@
             "syntax": "PC_MOUSE(pointer_to_7_longs)",
             "usage_rules": [
               "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",
+              "MUST be prefixed with its own backtick inside a display message -- DEBUG(`Win `PC_MOUSE(@xpos)). Text after the display name is display text, so an un-backticked PC_MOUSE compiles clean and is transmitted to the window as the literal characters 'PC_MOUSE(@xpos'; no command runs and the 7 longs are never written. Silent runtime failure, no compile error.",
               "Must be the LAST command in the DEBUG() statement.",
               "The DEBUG() display must have focus for the scroll-wheel delta to be reported.",
               "Universal: accepted in every DEBUG display window's update phase."
@@ -28995,7 +28997,7 @@
             },
             "examples": [
               {
-                "code": "' Spin2: read the mouse in a PLOT window (7 longs in hub)\nVAR\n  long xpos, ypos, wheel, lb, mb, rb, pixel\nPUB main()\n  DEBUG(`PLOT MyPlot SIZE 256 256)\n  REPEAT\n    DEBUG(`MyPlot PC_MOUSE(@xpos))     ' PC_MOUSE must be last; fills 7 longs\n    IF lb                               ' left button pressed (-1)\n      DEBUG(`MyPlot SET `(xpos) `(ypos) DOT)\n",
+                "code": "' Spin2: read the mouse in a PLOT window (7 longs in hub)\nVAR\n  long xpos, ypos, wheel, lb, mb, rb, pixel\nPUB main()\n  DEBUG(`PLOT MyPlot SIZE 256 256)\n  REPEAT\n    DEBUG(`MyPlot `PC_MOUSE(@xpos))    ' note the 2nd backtick; must be last; fills 7 longs\n    IF lb                               ' left button pressed (-1)\n      DEBUG(`MyPlot SET `(xpos) `(ypos) DOT)\n",
                 "description": "Track mouse position and draw on left-click"
               }
             ],
