@@ -1967,6 +1967,11 @@ the screenshot nor the argument could settle it alone.
   ch05 → `Canvas` (`BOX` is a PLOT shape directive).
 - **Taught:** ch02 now states the restriction where naming is introduced, with the silent-failure
   symptom; Appendix A opens by declaring itself the reserved-word list for display names.
+- **Scope (Stephen, 2026-07-27) — two independent vocabularies, only one collides.** Spin2's
+  reserved words are irrelevant: the compiler emits the display name as raw text and never
+  interprets it. `ch05-plot-field.spin2` names a PLOT window `Field` — `FIELD` is a Spin2 keyword
+  (the `FIELD[ptr]` alias, v37+) — and it runs correctly on his bench. Only the **host display
+  parser's** directive vocabulary can collide. ch02 teaches the contrast with both examples.
 - **Library sweep:** all display names across the 34 examples, the opus-master snippets and the
   figure generators were checked against the full keyword vocabulary — `Trace` and `Box` were the
   only two collisions, and both are fixed.

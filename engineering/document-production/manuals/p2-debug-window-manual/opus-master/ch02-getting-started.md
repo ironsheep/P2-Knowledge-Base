@@ -82,15 +82,24 @@ the rest of the program. The window type determines what the window draws and wh
 commands it accepts — covered chapter by chapter — but the two-step pattern never
 changes.
 
-**One restriction on the name you choose: it must not be a DEBUG keyword.** The
-display parser classifies each token before it decides what to do with it, and a
-token it already knows as a keyword can never become a display name. Naming a
-window `Trace`, `Box`, `Line`, `Text`, `Color`, `Size`, `Range` or any other
-directive from [Appendix A](#appendix-a) declares **no window at all** — and, as with
-the other display-text traps, the compiler reports nothing. The window simply never
-appears, and every feed you address to that name goes nowhere. Choose a name that
-is not on the directive list — `Scan`, `Panel`, `Waves`, `Status` — and you will
-never meet this.
+**One restriction on the name you choose: it must not be a DEBUG display
+directive.** Two different vocabularies are in play here, and only one of them can
+collide with your window name:
+
+- **Spin2's reserved words do not matter.** The compiler passes the display name
+  through as raw text; it never interprets it. A window named `Field` works
+  perfectly well even though `FIELD` is a Spin2 keyword.
+- **The display parser's own directive names do matter.** That parser classifies
+  each token before deciding what to do with it, and a token it already knows as a
+  directive can never become a window name. Naming a window `Trace`, `Box`, `Line`,
+  `Text`, `Color`, `Size` or `Range` declares **no window at all**.
+
+The failure is silent at both layers: the program compiles without complaint, the
+host reports nothing, and no window appears — every feed addressed to that name
+goes nowhere. If a window you created never shows up, check its name against
+[Appendix A](#appendix-a) first; that list is the reserved-word list for display
+names. Pick anything that is not on it — `Scan`, `Panel`, `Waves`, `Status` — and
+the question never arises.
 
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
