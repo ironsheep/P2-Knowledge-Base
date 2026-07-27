@@ -265,8 +265,16 @@ existed). So, in the same pass:
   convention.
 - **Existing document** → bump its row's version (the transition endpoint, e.g. `[v1.0.0 -> v1.0.3]`);
   the evergreen blurb usually needs no change.
-- **Spot-check every other row's version against the roster** while you're in the file — this draft
-  drifts across releases that forgot it; fix any stale version you find.
+- **VERSION ENDPOINTS COME FROM GIT TAG PRESENCE — always.** Do not derive them from the previous
+  announcement, the roster, or the changelog. For the document being released:
+  `vOld` = its **latest existing tag**, `vNew` = the version about to be tagged. One command
+  settles it: `git tag | grep "^<slug>-v" | sort -V | tail -1`. (Getting this wrong is easy in the
+  other direction: reading the last *posted* announcement produced `[v1.0.2 -> v1.1.1]` for a
+  manual whose `v1.1.0` tag had already shipped — the span had to start at `v1.1.0`.)
+- **Spot-check every other row against the tags** while you're in the file — this draft drifts
+  across releases that forgot it. A row whose `vNew` is behind that slug's latest tag is stale;
+  fix it. (One pass caught two: Assembly showing v3.1.3 with `v3.1.4` tagged, I/O showing v1.0.6
+  with `v1.0.7` tagged.)
 This is the community-facing twin of the README index (Phase 2d): the README is committed and pushed;
 this draft is **NOT** part of the git hand-off (Phase 5) — it stays a local draft for the user to post.
 
