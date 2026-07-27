@@ -1998,7 +1998,18 @@ no action or report from the doc side. The manual and KB fixes above stand regar
 host is at fault, because a keyword-named display is invalid against ground truth.
 
 **Re-tested and closed (Stephen, 2026-07-27): the full 34-program example library runs under
-PNut v55.** Ships in Debug Window Manual **v1.1.1**.
+PNut v55.** Ships in Debug Window Manual **v1.1.1** (released 2026-07-27) and KB **v1.15.0**.
+
+**YAML→Manual impact survey (KB v1.15.0, release-yamls §8).** The delta (10 files: `pc_key`,
+`pc_mouse`, `statements/debug`, 7 `debug-displays/*`) was intersected against every live manual's
+`MANUAL-DESCRIPTOR.md` declared sources. **Two intersections, neither needing a re-audit flag:**
+- `p2-debug-window-manual` — the consuming manual, whose twin **shipped simultaneously** (v1.1.1);
+  it is the source of the delta, not a document lagging behind it.
+- `pnut-term-ts-user-guide` — its descriptor declares an explicit **scope boundary** ("do NOT
+  reproduce the `debug()` directive syntax … cross-reference only"), and it is an undrafted v0.1.0
+  with no content, so nothing can be behind HEAD. No flag.
+
+No other live manual declares these sources. Survey done, not skipped.
 
 ---
 
