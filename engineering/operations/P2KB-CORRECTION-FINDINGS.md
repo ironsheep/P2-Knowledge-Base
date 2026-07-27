@@ -1933,12 +1933,50 @@ TODO and never performed.
 - **Open:** the fourth failure (`ch14-scope-trace`, SCOPE window does not open) is **not** this
   defect and has no proven cause yet — see the note below.
 
-**Not yet grounded — `ch14-scope-trace`.** A keyword-collision hypothesis (display named `Trace`
-vs. the `TRACE` keyword) was **refuted by our own hardware evidence**: the 2026-07-11 capture
-`fig-14-scope-trace-scope_WDW.bmp` OCRs as *"Trace - SCOPE"* with channel *"Signal"* rendered, from
-a byte-identical create sequence. Display names are read positionally and may be keywords. Cause
-still open; awaiting a symptom read + a re-run of the known-good figure generator on the current
-bench.
+**The fourth failure is a separate defect — see F-228.**
+
+### F-228 — a display **named after a DEBUG keyword** is never declared; the window silently never opens — `DONE (2026-07-27, isolated on silicon)` · re-test pending
+
+**Symptom** (Stephen, 2026-07-26/27, PNut/Windows): `ch14-scope-trace.spin2` opens its TERM
+"Panel" window but **no SCOPE window**. The TERM create is issued *after* the SCOPE create, so the
+program and the debug link are healthy — only the SCOPE create is rejected.
+
+**Isolated by a six-way single-run probe** (`audit/verification-tests/probe-ch14-scope-create.spin2`),
+built after a first pass produced an ambiguous count. Six SCOPE creates differing by one token
+each; **A–E all opened, `Trace` did not**:
+
+```spin2
+debug(`SCOPE D     POS 0 0 SIZE 400 220 SAMPLES 256)   ' opened
+debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' did NOT open
+```
+
+Byte-identical apart from the name. `TRACE` is in the functional keyword vocabulary (SPECTRO/BITMAP
+config). `parse_debug_string` classifies each element (`cmp al,dd_key`) before a name symbol can be
+claimed, so a keyword token can never become a `dd_nam` — no display is declared, and every
+`` `Trace … `` feed afterward addresses nothing. **No compile error.**
+
+**Method note worth keeping.** The keyword hypothesis was raised early, then **correctly discarded**
+when `figure-generators/screenshots/fig-14-scope-trace-scope_WDW.bmp` (2026-07-11) OCR'd as
+*"Trace - SCOPE"* with channel "Signal" — a working window from this same create line. Only a
+controlled probe *with a passing control* re-established it. Two runs, opposite results, same
+source: the discriminator is which host rendered them (see the open question below), and neither
+the screenshot nor the argument could settle it alone.
+
+- **Fixed:** `ch14-scope-trace` display renamed `Trace` → `Scan` (example + opus-master code block +
+  `fig-14-scope-trace.spin2`; SAVE filenames unchanged). Same class in prose: `` `PLOT Box `` in
+  ch05 → `Canvas` (`BOX` is a PLOT shape directive).
+- **Taught:** ch02 now states the restriction where naming is introduced, with the silent-failure
+  symptom; Appendix A opens by declaring itself the reserved-word list for display names.
+- **Library sweep:** all display names across the 34 examples, the opus-master snippets and the
+  figure generators were checked against the full keyword vocabulary — `Trace` and `Box` were the
+  only two collisions, and both are fixed.
+
+**Open question — which host, not which version.** The July capture proves this line rendered a
+window *then*. The likeliest explanation is not a PNut regression but that the figure run used
+**`pnut_term_ts`** while the 2026-07-26 run used **PNut**. If so this is a host divergence, and per
+the standing rule (PNut is ground truth, term-ts mirrors) it is a **term-ts repair item**:
+`pnut_term_ts` is accepting a keyword as a display name where PNut rejects it. Confirm which tool
+produced the Jul-11 figures before reporting anything to either team.
 
 ---
 

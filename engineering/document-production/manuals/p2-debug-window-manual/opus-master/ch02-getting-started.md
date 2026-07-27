@@ -82,6 +82,16 @@ the rest of the program. The window type determines what the window draws and wh
 commands it accepts — covered chapter by chapter — but the two-step pattern never
 changes.
 
+**One restriction on the name you choose: it must not be a DEBUG keyword.** The
+display parser classifies each token before it decides what to do with it, and a
+token it already knows as a keyword can never become a display name. Naming a
+window `Trace`, `Box`, `Line`, `Text`, `Color`, `Size`, `Range` or any other
+directive from [Appendix A](#appendix-a) declares **no window at all** — and, as with
+the other display-text traps, the compiler reports nothing. The window simply never
+appears, and every feed you address to that name goes nowhere. Choose a name that
+is not on the directive list — `Scan`, `Panel`, `Waves`, `Status` — and you will
+never meet this.
+
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
 > `x`; a bare `13` is the newline command,

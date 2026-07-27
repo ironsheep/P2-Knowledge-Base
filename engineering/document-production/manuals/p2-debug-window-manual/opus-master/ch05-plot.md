@@ -242,9 +242,9 @@ a connected path by issuing `LINE` repeatedly:
 
 ```spin2
 PUB main()
-  debug(`PLOT Box SIZE 512 512)
-  debug(`Box COLOR $FFFFFF SET 0 0)
-  debug(`Box LINE 100 0 LINE 100 100 LINE 0 100 LINE 0 0)  ' a square
+  debug(`PLOT Canvas SIZE 512 512)
+  debug(`Canvas COLOR $FFFFFF SET 0 0)
+  debug(`Canvas LINE 100 0 LINE 100 100 LINE 0 100 LINE 0 0)  ' a square
 ```
 
 - `linesize` — line thickness in pixels.
