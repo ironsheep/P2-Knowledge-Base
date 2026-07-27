@@ -55,8 +55,8 @@ display_directives:
   CLEAR: "CLEAR -- erase and reset the sample/rate counters"
   SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional."
   CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
-  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
-  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2; FFT transmits RAW client-pixel x,y (see pc_mouse.yaml)"
+  PC_KEY: "`PC_KEY(@key) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "`PC_MOUSE(@buf7) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the mouse position+buttons LONG pair to the P2; FFT transmits RAW client-pixel x,y (see pc_mouse.yaml)"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."

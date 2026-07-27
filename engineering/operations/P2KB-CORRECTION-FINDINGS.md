@@ -1976,12 +1976,15 @@ the screenshot nor the argument could settle it alone.
   figure generators were checked against the full keyword vocabulary — `Trace` and `Box` were the
   only two collisions, and both are fixed.
 
-**Open question — which host, not which version.** The July capture proves this line rendered a
-window *then*. The likeliest explanation is not a PNut regression but that the figure run used
-**`pnut_term_ts`** while the 2026-07-26 run used **PNut**. If so this is a host divergence, and per
-the standing rule (PNut is ground truth, term-ts mirrors) it is a **term-ts repair item**:
-`pnut_term_ts` is accepting a keyword as a display name where PNut rejects it. Confirm which tool
-produced the Jul-11 figures before reporting anything to either team.
+**Host divergence — Stephen's to carry (2026-07-27).** The Jul-11 capture proves this create line
+rendered a window *then*, so a host accepted what PNut v55 rejects; the likely split is
+`pnut_term_ts` (figure run) vs. PNut (the 2026-07-26 run). Per the standing rule (PNut is ground
+truth, term-ts mirrors) that would be a term-ts repair item. **Stephen is handling it directly** —
+no action or report from the doc side. The manual and KB fixes above stand regardless of which
+host is at fault, because a keyword-named display is invalid against ground truth.
+
+**Re-tested and closed (Stephen, 2026-07-27): the full 34-program example library runs under
+PNut v55.** Ships in Debug Window Manual **v1.1.1**.
 
 ---
 

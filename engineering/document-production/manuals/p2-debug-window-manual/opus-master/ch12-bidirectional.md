@@ -45,8 +45,8 @@ mode, exactly like the `` `(expr) `` value substitutions you have used since
 Chapter 2:
 
 ```spin2
-debug(`Console `PC_KEY(@key))   ' ✅ ticked — the command runs
-debug(`Console PC_KEY(@key))    ' ❌ no tick — "PC_KEY(@key" is sent to the window as text
+debug(`Console `PC_KEY(@key))   ' ticked - the command runs
+debug(`Console PC_KEY(@key))    ' no tick - sent to the window as text
 ```
 
 The second line **compiles without error**. Nothing is written to `key`, ever;

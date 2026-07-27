@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large July 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.1.0\par}
+{\large\color{blue}Version 1.1.1\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -576,6 +576,25 @@ You declare a window once with a type and a name, then drive it by that name for
 the rest of the program. The window type determines what the window draws and what
 commands it accepts — covered chapter by chapter — but the two-step pattern never
 changes.
+
+**One restriction on the name you choose: it must not be a DEBUG display
+directive.** Two different vocabularies are in play here, and only one of them can
+collide with your window name:
+
+- **Spin2's reserved words do not matter.** The compiler passes the display name
+  through as raw text; it never interprets it. A window named `Field` works
+  perfectly well even though `FIELD` is a Spin2 keyword.
+- **The display parser's own directive names do matter.** That parser classifies
+  each token before deciding what to do with it, and a token it already knows as a
+  directive can never become a window name. Naming a window `Trace`, `Box`, `Line`,
+  `Text`, `Color`, `Size` or `Range` declares **no window at all**.
+
+The failure is silent at both layers: the program compiles without complaint, the
+host reports nothing, and no window appears — every feed addressed to that name
+goes nowhere. If a window you created never shows up, check its name against
+[Appendix A](#appendix-a) first; that list is the reserved-word list for display
+names. Pick anything that is not on it — `Scan`, `Panel`, `Waves`, `Status` — and
+the question never arises.
 
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of
@@ -1728,9 +1747,9 @@ a connected path by issuing `LINE` repeatedly:
 
 ```spin2
 PUB main()
-  debug(`PLOT Box SIZE 512 512)
-  debug(`Box COLOR $FFFFFF SET 0 0)
-  debug(`Box LINE 100 0 LINE 100 100 LINE 0 100 LINE 0 0)  ' a square
+  debug(`PLOT Canvas SIZE 512 512)
+  debug(`Canvas COLOR $FFFFFF SET 0 0)
+  debug(`Canvas LINE 100 0 LINE 100 100 LINE 0 100 LINE 0 0)  ' a square
 ```
 
 - `linesize` — line thickness in pixels.
@@ -4702,18 +4721,37 @@ value. You read the result afterward from the variable you pointed at:
 PUB main() | key, mouse[7]
   debug(`TERM Console SIZE 40 10)
 
-  debug(`Console PC_KEY(@key))            ' host writes key code into key
+  debug(`Console `PC_KEY(@key))           ' host writes key code into key
 
-  debug(`Console PC_MOUSE(@mouse))        ' host fills 7 longs
+  debug(`Console `PC_MOUSE(@mouse))       ' host fills 7 longs
 
   repeat
 ```
 
-One rule governs both: **`PC_KEY` and `PC_MOUSE` must be the last command in their
-`DEBUG()` statement.** You can send output earlier in the same statement, but the
-input command comes last. In Spin2 the buffer lives in hub RAM, so you pass its
-address with `@` — `@key`, `@mouse`. (In PASM the buffer is a cog register and you
-pass it with `#`; this chapter is Spin2.)
+Two rules govern both, and the second one is the trap.
+
+**1. `PC_KEY` and `PC_MOUSE` must be the last command in their `DEBUG()`
+statement.** You can send output earlier in the same statement, but the input
+command comes last. In Spin2 the buffer lives in hub RAM, so you pass its address
+with `@` — `@key`, `@mouse`. (In PASM the buffer is a cog register and you pass it
+with `#`; this chapter is Spin2.)
+
+**2. Both commands need their own backtick.** Everything after `` `Console `` is
+*display text* — keywords, numbers, and quoted strings bound for the window. A
+Spin2 debug command has to tick its way back out of display text into command
+mode, exactly like the `` `(expr) `` value substitutions you have used since
+Chapter 2:
+
+```spin2
+debug(`Console `PC_KEY(@key))   ' ticked - the command runs
+debug(`Console PC_KEY(@key))    ' no tick - sent to the window as text
+```
+
+The second line **compiles without error**. Nothing is written to `key`, ever;
+the characters `PC_KEY(@key` are simply printed into the window. A control loop
+built on it runs forever and never responds to a single keystroke. This is the
+same class of silent failure as using double quotes in a display string — the
+compiler cannot help you, so check the backtick first when input "does nothing."
 
 ## PC_KEY — reading the keyboard
 
@@ -4724,13 +4762,13 @@ this is wrong:
 
 ```spin2
 ' WRONG - PC_KEY does not return a value
-key := debug(`Console PC_KEY)
+key := debug(`Console `PC_KEY)
 ```
 
 The correct form passes a pointer and then reads the long:
 
 ```spin2
-debug(`Console PC_KEY(@key))   ' host fills key
+debug(`Console `PC_KEY(@key))  ' host fills key
 case key                        ' now read it
   ...
 ```
@@ -4776,7 +4814,7 @@ PUB main() | key, value
   show(value)
   repeat
     key := 0
-    debug(`Adjust PC_KEY(@key))
+    debug(`Adjust `PC_KEY(@key))
     case key
       3: value += 1                       ' Up arrow
       4: value -= 1                       ' Down arrow
@@ -4802,7 +4840,7 @@ host fills all seven with the current mouse state relative to the named window.
 Declare the buffer as `long mouse[7]` and pass `@mouse`:
 
 ```spin2
-debug(`Watch PC_MOUSE(@mouse))
+debug(`Watch `PC_MOUSE(@mouse))
 ```
 
 The seven longs, in order, are:
@@ -4871,7 +4909,7 @@ CON _clkfreq = 200_000_000
 PUB main() | mouse[7]
   debug(`TERM Pointer SIZE 40 8 TITLE 'Mouse State')
   repeat
-    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer `PC_MOUSE(@mouse))
     debug(`Pointer 0)                                 ' clear + home
     if mouse[0] < 0
       debug(`Pointer 'Pointer outside window' 13)
@@ -5512,8 +5550,8 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
-  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
+  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)    ' create with config only
+  debug(`Scan 'Signal' -1000 1000)                       ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0
@@ -5527,7 +5565,7 @@ PUB main() | ang, signal, peak, count
 
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
-    debug(`Trace `(signal))                ' one sample to the SCOPE
+    debug(`Scan `(signal))                 ' one sample to the SCOPE
     debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)  ' fresh status block
 
     ang   += 4
@@ -5779,8 +5817,8 @@ PUB main() | m[7], key, value, dirty, lastL
   repeat
     ' Poll both inputs; each is the LAST command in its statement.
     key := 0
-    debug(`Ctrl PC_KEY(@key))
-    debug(`Ctrl PC_MOUSE(@m))
+    debug(`Ctrl `PC_KEY(@key))
+    debug(`Ctrl `PC_MOUSE(@m))
 
     case key                                 ' keyboard: arrows nudge
       1: value -= 5                           ' Left  arrow
@@ -5822,6 +5860,40 @@ Click the window to give it focus, then click a button or use the arrow keys. Th
 `lastL` variable holds the previous left-button state so a click fires once on the
 press edge rather than every poll while the button is held. The `dirty` flag means the
 panel sits idle — polling but not redrawing — until an input changes the value.
+
+### When the panel is artwork, the hit test needs a Y flip
+
+The panel above needs no coordinate conversion, and it is worth being precise
+about *why*: the buttons are **drawn** by `SET`/`BOX` in the PLOT window's own
+coordinate space, and `PC_MOUSE` reports the pointer in that **same** space. Draw
+and hit test agree because both are expressed in PLOT coordinates — origin
+bottom-left, y increasing upward.
+
+Compose the panel from bitmap layers instead (Technique 3) and that agreement
+breaks. A BMP is authored the way image editors work — **origin top-left, y
+increasing downward** — so a button that sits 40 px from the top of your artwork
+is at a *large* y in mouse coordinates, not a small one. Hit-testing artwork
+coordinates against mouse coordinates directly puts every button in the wrong row,
+mirrored about the panel's middle. Flip once, at the boundary, before the grid math:
+
+```spin2
+PRI hitSlot(px, py) : slot | col, row
+' Mouse arrives bottom-left (y up); artwork is authored top-left (y down).
+' Flip y here so the grid math matches the BMP.
+  py := (PANEL_H - 1) - py
+  col := (px - GRID_X) / PITCH_X
+  row := (py - GRID_Y) / PITCH_Y
+  ...
+```
+
+The `PANEL_H - 1` (not `PANEL_H`) is deliberate: for a panel of height *h* the
+valid rows are `0`..`h-1`, so the top row must map to `0` and the bottom row to
+`h-1`. Doing the flip in one place, immediately after the poll, keeps every
+downstream coordinate in artwork space where your layout constants already live.
+
+The symptom to recognize: clicks register — the press edge fires, the log shows
+plausible coordinates — but they land on the *wrong* control, and the error is
+mirrored top-to-bottom. That is a missing flip, not a broken hit test.
 
 ### Where you'd use this
 
@@ -5896,6 +5968,12 @@ chapters in Parts I through III do the teaching.
 A per-window summary of creation/configuration directives and runtime commands.
 Ranges and defaults are as documented in each window's chapter. Commands shared by
 every window are listed once at the end.
+
+> **Every directive listed here is also a name your window cannot have.** The
+> display parser recognizes keywords before names, so `` DEBUG(`SCOPE Trace ...) ``
+> or `` DEBUG(`PLOT Box ...) `` declares no window — silently, with no compile
+> error. Read this appendix as the reserved-word list when you name a display.
+> See [Chapter 2](#ch-2).
 
 ## TERM — text terminal (Chapter 3)
 
@@ -6228,8 +6306,8 @@ A channel label placed on the create line is rejected by the parser.
 
 ## Commands common to every window
 
-- `` DEBUG(`Name PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. See [Chapter 12](#ch-12) for the key-code table.
-- `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
+- `` DEBUG(`Name `PC_KEY(@keyvar)) `` — host writes the latest key code (0 if none) into the long at `@keyvar`. **Note the second backtick**: `PC_KEY` is a Spin2 debug command, not display text, so it must be ticked back into command mode. See [Chapter 12](#ch-12) for the key-code table.
+- `` DEBUG(`Name `PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. Same backtick rule as `PC_KEY`. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
 - `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save to `file.bmp` on the host (no
   extension in the name). **The filename is required and must be last**: a bare

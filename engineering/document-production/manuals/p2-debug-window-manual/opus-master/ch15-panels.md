@@ -297,7 +297,7 @@ mirrored about the panel's middle. Flip once, at the boundary, before the grid m
 
 ```spin2
 PRI hitSlot(px, py) : slot | col, row
-' Mouse arrives bottom-left (y up); the artwork is authored top-left (y down).
+' Mouse arrives bottom-left (y up); artwork is authored top-left (y down).
 ' Flip y here so the grid math matches the BMP.
   py := (PANEL_H - 1) - py
   col := (px - GRID_X) / PITCH_X

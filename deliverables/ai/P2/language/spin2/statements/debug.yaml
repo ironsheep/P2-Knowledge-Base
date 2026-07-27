@@ -11,6 +11,17 @@ documentation_level: comprehensive
 syntax:
   basic: "DEBUG(`DISPLAY_TYPE WindowName <config>)   ' create a named display window, then stream to it by name"
   inline: "DEBUG(\"text\", value)   ' plain output to the default TERM -- no backtick needed"
+
+window_name_rules:
+  note: |
+    TWO INDEPENDENT VOCABULARIES -- only one can collide with a window name. The compiler emits the
+    display name as RAW TEXT and never interprets it, so Spin2 reserved words are FREE to use as
+    window names (a PLOT named `Field` works, though FIELD is a Spin2 keyword). The HOST display
+    parser classifies each element as keyword-vs-name BEFORE a name symbol can be claimed, so a
+    token it already knows as a DISPLAY DIRECTIVE can never become a window name.
+  rule: "A window name MUST NOT be a DEBUG display directive (TRACE, BOX, LINE, TEXT, COLOR, SIZE, RANGE, POS, SET, DOT, CLEAR, SAVE, CLOSE, UPDATE, TITLE, ... -- also the named colors and color-mode/packed keywords)."
+  failure_mode: "SILENT AT BOTH LAYERS. DEBUG(`SCOPE Trace ...) compiles clean (no compile error) and the host reports nothing -- NO display is declared, the window never opens, and every later DEBUG(`Trace ...) feed addresses nothing. Hardware-isolated 2026-07-27 on PNut v55: six SCOPE creates differing only by name, `Trace` was the only one that failed to open."
+  guidance: "When generating code, pick a window name that is not a display directive (Scan, Panel, Waves, Status, Probe). The per-window directive lists in debug-displays/*.yaml are the reserved-word list."
   
 display_types:
   - name: TERM

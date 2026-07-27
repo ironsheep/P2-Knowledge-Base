@@ -5,8 +5,8 @@ Ranges and defaults are as documented in each window's chapter. Commands shared 
 every window are listed once at the end.
 
 > **Every directive listed here is also a name your window cannot have.** The
-> display parser recognizes keywords before names, so `` DEBUG(`SCOPE Trace …) ``
-> or `` DEBUG(`PLOT Box …) `` declares no window — silently, with no compile
+> display parser recognizes keywords before names, so `` DEBUG(`SCOPE Trace ...) ``
+> or `` DEBUG(`PLOT Box ...) `` declares no window — silently, with no compile
 > error. Read this appendix as the reserved-word list when you name a display.
 > See [Chapter 2](#ch-2).
 

@@ -1,5 +1,28 @@
 # P2 Debug Window Manual — Change Log
 
+## v1.1.1 (2026-07-27)
+
+**Every program in the example library runs on hardware.** All 34 programs verified on real P2
+silicon under PNut v55 — the interactive ones included. **Download the current example ZIP.**
+
+### Fixed
+
+- The keyboard and mouse examples (Chapter 12) and the control panel (Chapter 15) read host input
+  and respond to it.
+- Chapter 14's coordinated scope-and-status example opens both of its windows.
+
+### Added
+
+- **Both input commands carry their own backtick** (Chapter 12, Appendix A) — `` `PC_KEY `` and
+  `` `PC_MOUSE `` tick back out of display text into command mode, with the working and
+  non-working forms side by side and the symptom that identifies the difference at runtime.
+- **Naming a display window** (Chapter 2) — Spin2's reserved words are yours to use; the display
+  parser's directive names are not. Appendix A serves as the reserved-word list, and the chapter
+  names the symptom: a window that never appears, silently.
+- **Mouse coordinates against panel artwork** (Chapter 15) — a drawn panel needs no conversion
+  because drawing and `PC_MOUSE` share one coordinate space; a panel composed from bitmap layers
+  needs a Y flip, and the mirrored-click symptom tells you when one is missing.
+
 ## v1.1.0 (2026-07-14)
 
 **Verified against P2 silicon.** Every load-bearing claim in this manual was re-tested on real
