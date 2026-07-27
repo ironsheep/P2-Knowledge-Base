@@ -13,15 +13,27 @@ syntax:
   inline: "DEBUG(\"text\", value)   ' plain output to the default TERM -- no backtick needed"
 
 window_name_rules:
+  documentation_source: "PNut v55 compiler source (p2com.asm: check_word_chr_initial/check_word_chr @8888, debug_symbols table @19335, parse_debug_string, symbol_size_limit=30); hardware-isolated on real silicon 2026-07-27"
   note: |
     TWO INDEPENDENT VOCABULARIES -- only one can collide with a window name. The compiler emits the
     display name as RAW TEXT and never interprets it, so Spin2 reserved words are FREE to use as
-    window names (a PLOT named `Field` works, though FIELD is a Spin2 keyword). The HOST display
-    parser classifies each element as keyword-vs-name BEFORE a name symbol can be claimed, so a
-    token it already knows as a DISPLAY DIRECTIVE can never become a window name.
-  rule: "A window name MUST NOT be a DEBUG display directive (TRACE, BOX, LINE, TEXT, COLOR, SIZE, RANGE, POS, SET, DOT, CLEAR, SAVE, CLOSE, UPDATE, TITLE, ... -- also the named colors and color-mode/packed keywords)."
-  failure_mode: "SILENT AT BOTH LAYERS. DEBUG(`SCOPE Trace ...) compiles clean (no compile error) and the host reports nothing -- NO display is declared, the window never opens, and every later DEBUG(`Trace ...) feed addresses nothing. Hardware-isolated 2026-07-27 on PNut v55: six SCOPE creates differing only by name, `Trace` was the only one that failed to open."
-  guidance: "When generating code, pick a window name that is not a display directive (Scan, Panel, Waves, Status, Probe). The per-window directive lists in debug-displays/*.yaml are the reserved-word list."
+    window names (a PLOT named `Field` works and is hardware-run, though FIELD is a Spin2 keyword).
+    Only the 103 reserved DEBUG-DISPLAY words below can collide.
+  definition: "A window name is legal IF AND ONLY IF all five rules below hold."
+  rules:
+    - "1. CHARACTER SET -- starts with a letter or _, then letters/digits/_ only. A LEADING DIGIT makes the token parse as a NUMBER and aborts (a distinct failure, not a keyword collision)."
+    - "2. NOT one of the 103 reserved debug-display words (9 display types + 11 colors + 19 color modes + 12 packed modes + 52 directives -- full list in reserved_words below)."
+    - "3. NOT the name of a display that is CURRENTLY OPEN (it resolves to the existing display). After CLOSE the name reverts to unknown and IS REUSABLE."
+    - "4. MATCHING IS CASE-INSENSITIVE -- Trace, TRACE and trace are the SAME symbol, so case gives no escape from rule 2. The DISPLAYED name keeps your original casing."
+    - "5. TRUNCATED AT 30 CHARACTERS -- extra characters are silently dropped, so two names sharing their first 30 characters COLLIDE."
+  failure_mode: "SILENT AT BOTH LAYERS. A name violating rule 1 or 2 raises NO compile error and NO host error: no display is declared, the window never opens, and every later feed addressed to that name goes nowhere. Hardware-isolated on PNut v55: six SCOPE creates differing ONLY by name -- five opened, the one named `Trace` did not."
+  guidance: "When generating code, pick a short name that is not in reserved_words (Scan, Panel, Waves, Status, Probe, Mon). Do NOT treat one window's directive list as the reserved set -- a color name, a color-mode name, or ANOTHER window's directive is equally fatal."
+  reserved_words:
+    display_types: [LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, PLOT, TERM, BITMAP, MIDI]
+    colors: [BLACK, WHITE, ORANGE, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, GRAY, GREY]
+    color_modes: [LUT1, LUT2, LUT4, LUT8, LUMA8, LUMA8W, LUMA8X, HSV8, HSV8W, HSV8X, RGBI8, RGBI8W, RGBI8X, RGB8, HSV16, HSV16W, HSV16X, RGB16, RGB24]
+    packed_modes: [LONGS_1BIT, LONGS_2BIT, LONGS_4BIT, LONGS_8BIT, LONGS_16BIT, WORDS_1BIT, WORDS_2BIT, WORDS_4BIT, WORDS_8BIT, BYTES_1BIT, BYTES_2BIT, BYTES_4BIT]
+    directives: [ALT, AUTO, BACKCOLOR, BOX, CARTESIAN, CHANNEL, CIRCLE, CLEAR, CLOSE, COLOR, CROP, DEPTH, DOT, DOTSIZE, HIDEXY, HOLDOFF, LAYER, LINE, LINESIZE, LOGSCALE, LUTCOLORS, MAG, OBOX, OPACITY, ORIGIN, OVAL, PC_KEY, PC_MOUSE, POLAR, POS, PRECISE, RANGE, RATE, SAMPLES, SAVE, SCROLL, SET, SIGNED, SIZE, SPACING, SPARSE, SPRITE, SPRITEDEF, TEXT, TEXTANGLE, TEXTSIZE, TEXTSTYLE, TITLE, TRACE, TRIGGER, UPDATE, WINDOW]
   
 display_types:
   - name: TERM

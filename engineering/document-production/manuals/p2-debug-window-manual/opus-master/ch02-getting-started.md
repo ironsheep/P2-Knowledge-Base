@@ -89,17 +89,36 @@ collide with your window name:
 - **Spin2's reserved words do not matter.** The compiler passes the display name
   through as raw text; it never interprets it. A window named `Field` works
   perfectly well even though `FIELD` is a Spin2 keyword.
-- **The display parser's own directive names do matter.** That parser classifies
-  each token before deciding what to do with it, and a token it already knows as a
-  directive can never become a window name. Naming a window `Trace`, `Box`, `Line`,
-  `Text`, `Color`, `Size` or `Range` declares **no window at all**.
+- **The display vocabulary's own words do matter.** The parser classifies each token
+  before deciding what to do with it, and a token it already knows can never become
+  a window name. Naming a window `Trace`, `Box`, `Red`, `RGB24` or `Size` declares
+  **no window at all**.
 
 The failure is silent at both layers: the program compiles without complaint, the
 host reports nothing, and no window appears — every feed addressed to that name
-goes nowhere. If a window you created never shows up, check its name against
-[Appendix A](#appendix-a) first; that list is the reserved-word list for display
-names. Pick anything that is not on it — `Scan`, `Panel`, `Waves`, `Status` — and
-the question never arises.
+goes nowhere. If a window you created never shows up, suspect its name first.
+
+The complete rule has five parts. A name is legal when **all** of them hold:
+
+1. **It starts with a letter or `_`**, followed by letters, digits or `_`. A leading
+   digit makes the token parse as a *number*, which aborts the statement — a
+   different failure from the one above, and just as quiet.
+2. **It is not one of the 103 reserved display words** — the nine window types, the
+   eleven color names, the nineteen color modes, the twelve packed-data modes, and
+   the fifty-two directives. [Appendix A](#appendix-a) lists the directives;
+   remember that the colors, color modes and packed modes are reserved too, and
+   that *another* window's directive is as fatal as your own window's.
+3. **It is not the name of a window that is currently open.** Names are per-session
+   symbols, so a second `SCOPE Waves` addresses the existing `Waves`.
+4. **Case does not distinguish names.** `Trace`, `TRACE` and `trace` are one symbol,
+   so changing capitalization never escapes rule 2. Your original casing is what
+   the window's title bar displays.
+5. **Only the first 30 characters count.** Anything longer is truncated silently,
+   so two names that share their first 30 characters are the same window.
+
+In practice: pick a short, ordinary word that is not a display term — `Scan`,
+`Panel`, `Waves`, `Status`, `Probe` — and none of this comes up. Names are also
+reusable: `CLOSE` a window and its name is free again.
 
 > Display values as text, issue commands with bare numbers.
 > In a TERM, a `` `(x) `` substitution inside single-quoted text shows the digits of

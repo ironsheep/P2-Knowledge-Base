@@ -16,9 +16,10 @@ silicon under PNut v55 — the interactive ones included. **Download the current
 - **Both input commands carry their own backtick** (Chapter 12, Appendix A) — `` `PC_KEY `` and
   `` `PC_MOUSE `` tick back out of display text into command mode, with the working and
   non-working forms side by side and the symptom that identifies the difference at runtime.
-- **Naming a display window** (Chapter 2) — Spin2's reserved words are yours to use; the display
-  parser's directive names are not. Appendix A serves as the reserved-word list, and the chapter
-  names the symptom: a window that never appears, silently.
+- **Naming a display window** (Chapter 2) — the complete five-part rule: the legal character set,
+  the 103 reserved display words, one name per open window, case-insensitive matching, and the
+  30-character limit. Spin2's own reserved words are yours to use. The chapter names the symptom
+  too: a window that never appears, silently.
 - **Mouse coordinates against panel artwork** (Chapter 15) — a drawn panel needs no conversion
   because drawing and `PC_MOUSE` share one coordinate space; a panel composed from bitmap layers
   needs a Y flip, and the mirrored-click symptom tells you when one is missing.

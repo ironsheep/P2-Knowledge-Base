@@ -1965,8 +1965,22 @@ the screenshot nor the argument could settle it alone.
 - **Fixed:** `ch14-scope-trace` display renamed `Trace` → `Scan` (example + opus-master code block +
   `fig-14-scope-trace.spin2`; SAVE filenames unchanged). Same class in prose: `` `PLOT Box `` in
   ch05 → `Canvas` (`BOX` is a PLOT shape directive).
-- **Taught:** ch02 now states the restriction where naming is introduced, with the silent-failure
-  symptom; Appendix A opens by declaring itself the reserved-word list for display names.
+- **Taught:** ch02 now carries the **complete five-part naming rule** with the silent-failure
+  symptom; Appendix A points at it and states that the reserved set is wider than the appendix.
+- **Definitive rules recorded (2026-07-27)** — Stephen commissioned an agent study of the **PNut
+  v55** source and the result is now the citable reference:
+  `manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-NAME-RULES.md`. A name is legal iff: (1) leading
+  letter/`_` then letters/digits/`_` — a leading digit parses as a *number* and aborts; (2) not one
+  of the **103** reserved display words (`debug_symbols`, `p2com.asm:19335`) = 9 types + 11 colors
+  (**`GREY` and `GRAY`**) + 19 color modes + 12 packed modes + 52 directives; (3) not a currently
+  open display's name — freed and reusable after `CLOSE`; (4) **case-insensitive** matching, with
+  original casing kept for display; (5) truncated at **30** characters, so shared 30-char prefixes
+  collide. Mirrored into `statements/debug.yaml` `window_name_rules` (full 103 enumerated for code
+  generation; count-verified).
+- **Re-sweep against the full 103** (the earlier sweep used only the directive subset — it omitted
+  the nine display types and `GREY`): across all 34 examples, the opus-master snippets, the figure
+  generators and the probe, the only hits remain `Trace` and `Box`, both already fixed. No name
+  exceeds 30 characters or starts with a digit.
 - **Scope (Stephen, 2026-07-27) — two independent vocabularies, only one collides.** Spin2's
   reserved words are irrelevant: the compiler emits the display name as raw text and never
   interprets it. `ch05-plot-field.spin2` names a PLOT window `Field` — `FIELD` is a Spin2 keyword

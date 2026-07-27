@@ -5,10 +5,11 @@ Ranges and defaults are as documented in each window's chapter. Commands shared 
 every window are listed once at the end.
 
 > **Every directive listed here is also a name your window cannot have.** The
-> display parser recognizes keywords before names, so `` DEBUG(`SCOPE Trace ...) ``
-> or `` DEBUG(`PLOT Box ...) `` declares no window — silently, with no compile
-> error. Read this appendix as the reserved-word list when you name a display.
-> See [Chapter 2](#ch-2).
+> display parser recognizes its own words before names, so a window named `Trace`
+> or `Box` is never declared — silently, with no compile error. The reserved set is
+> wider than this appendix: it also covers the nine window types, the eleven color
+> names, the nineteen color modes and the twelve packed-data modes — 103 words in
+> all. Matching ignores case. See [Chapter 2](#ch-2) for the complete naming rule.
 
 ## TERM — text terminal (Chapter 3)
 
