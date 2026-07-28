@@ -12,6 +12,7 @@
 \usepackage{p2kb-platform-foundation}  % shared: geometry, penalties, titlesec, fontspec, caption, fig/table numbering
 \usepackage{p2kb-platform-content}      % shared: code/reference box family, screenshot keyline (\screenshotfig)
 \usepackage{p2kb-platform-diagrams}     % shared: diagram styles (staged for parity; light use in this guide)
+\usepackage{p2kb-platform-isp-cover}    % shared: ISP-only cover standard (band, palette, mark placements)
 
 % ==================== DOCUMENT METADATA ====================
 \title{$title$}
@@ -43,9 +44,10 @@ $endfor$
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 
-% Cover/title page, TOC, and copyright come from front-matter.md (the shared
-% front-matter style with the Parallax-approved book artwork), prepended to the
-% body — NOT hardcoded here — so this guide matches the other P2 manuals.
+% Cover/title page, TOC, and copyright come from front-matter.md, prepended to
+% the body — NOT hardcoded here. This guide is an Iron Sheep Productions-only
+% document, so it uses the ISP cover standard (p2kb-platform-isp-cover) rather
+% than the shared P2 Knowledge Base book banner the other manuals carry.
 \thispagestyle{empty}
 \enlargethispage{2cm}
 

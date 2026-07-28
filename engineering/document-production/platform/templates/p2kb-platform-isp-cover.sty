@@ -1,0 +1,118 @@
+% P2KB Platform ISP Cover — the cover/identity STANDARD for Iron Sheep
+% Productions-only documents (documents that are NOT part of the P2 Knowledge
+% Base publication family and therefore must NOT carry the shared KB banner,
+% the Parallax mark, or the "P2 Knowledge Base Project" affiliation line).
+%
+% Adopted 2026-07-27 after a six-round cover study on the PNut-Term-TS User
+% Guide (engineering/pdf-forge/interactive-testing, requests isp-cover-test-v1..v6).
+%
+% THE STANDARD — palette and geometry, not one fixed image, so a later ISP
+% title can carry its own subject text in the same band and the set still
+% reads as one line:
+%   · band  : 5:1 (0.20\textwidth tall), INSET to the text block, maroon field
+%   · field : regular circuit-trace texture at 0.32in pitch, right-hand side
+%   · mark  : full lockup 0.9in, bottom-right of the cover, standing alone
+%   · palette: maroon #600000 · black #000000 · off-white #F0F0F0 (sampled
+%     from the Iron Sheep mark: 61% off-white, 16% black, 7% maroon)
+%   · copyright page: full lockup 1.1in, TOP-RIGHT
+%   · colophon: full lockup 2.0in, centred, on the closing page
+%
+% WHY THE TRACE FIELD IS DELIBERATELY REGULAR (do not "improve" this):
+% an earlier round drew genuinely plausible routing — IC fan-out, a bus,
+% vias, SMD footprints, a serpentine length-match. It read as too real, and a
+% too-real board invites the eye to VALIDATE it instead of reading the cover.
+% The regular field stays abstract, so it reads as texture. Regularity is the
+% feature. If it ever looks too sparse, tighten the pitch; do not add realism.
+%
+% Band inset vs full bleed: INSET is the standard. These documents are printed
+% by readers on desktop printers (no edge-to-edge printing) and on both Letter
+% and A4 — a bled band comes out clipped or with an asymmetric white crescent,
+% which reads as a printing defect rather than a choice.
+%
+% Author: Iron Sheep Productions, LLC
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-platform-isp-cover}[2026/07/27 P2KB Platform ISP Cover v1.0]
+
+\RequirePackage{tikz}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+
+% ==================== ISP PALETTE ====================
+\definecolor{ispmaroon}{HTML}{600000}    % the field
+\definecolor{ispblack}{HTML}{000000}
+\definecolor{ispwhite}{HTML}{F0F0F0}     % reversed-out type
+\definecolor{ispcopper}{HTML}{8C2020}    % trace
+\definecolor{ispcopperlt}{HTML}{A33636}  % pad
+
+\newlength{\ispbandheight}
+
+% ==================== THE MARK ====================
+% One asset, one size per position. Staged to the manual's assets/ and
+% referenced through the Forge inbox path like every other cover image.
+\newcommand{\ispmarkpath}{inbox/assets/SteveFinalLogoV5-m-200x269.png}
+
+% Cover mark — bottom-right, standing alone (no strapline, no rule). The
+% trailing space keeps the mark clear of the page edge: with a \vfill above it
+% and a fixed skip below, the mark lands ABOVE the bottom of the text block
+% rather than being pushed against (and clipped by) it.
+\newcommand{\ispcovermark}{%
+  \hbox to \linewidth{\hfill\includegraphics[width=0.9in]{\ispmarkpath}}%
+  \vspace{0.6cm}%
+}
+% Copyright-page mark — top-right. \hbox to \linewidth (not a bare \hfill):
+% a bare \hfill shares its glue with whatever text follows on the same line,
+% which centres the mark instead of right-aligning it.
+\newcommand{\ispcopyrightmark}{%
+  \noindent\hbox to \linewidth{\hfill\includegraphics[width=1.1in]{\ispmarkpath}}\par%
+}
+% Colophon mark — large, centred, closing page.
+\newcommand{\ispcolophonmark}{\includegraphics[width=2.0in]{\ispmarkpath}}
+% In-chapter mark (e.g. a Support & Resources opener beside a contact block).
+\newcommand{\ispchaptermark}{\includegraphics[width=1.4in]{\ispmarkpath}}
+
+% ==================== THE TRACE FIELD ====================
+% Three numbers, all here: pitch, pad radius, pad centre height. Settled
+% 2026-07-27 at 0.32in / 0.018in / 0.153in.
+\newcommand{\ispfieldpitch}{0.32}
+\newcommand{\ispfieldpadr}{0.018}
+\newcommand{\ispfieldpady}{0.153}
+\newcommand{\ispfieldstartx}{3.55}
+\newcommand{\ispfieldcount}{9}
+
+% #1 = band height (a length already set in \ispbandheight by the caller)
+\newcommand{\ispdrawfield}{%
+  \begin{scope}[line cap=round, line join=round]
+  \foreach \i in {0,...,\ispfieldcount} {
+    \pgfmathsetmacro{\xx}{\ispfieldstartx+\i*\ispfieldpitch}
+    \pgfmathsetmacro{\jog}{0.86-mod(\i,2)*0.10}   % alternate the corner height
+    \draw[ispcopper, line width=1.0pt]
+      (\xx in,1.30in) -- (\xx in,\jog in)
+      -- (\xx in+\ispfieldpitch in*0.55,\jog in-\ispfieldpitch*0.55 in)
+      -- (\xx in+\ispfieldpitch in*0.55,\ispfieldpady in);
+    \fill[ispcopperlt] (\xx in+\ispfieldpitch in*0.55,\ispfieldpady in)
+      circle (\ispfieldpadr in);
+  }
+  \end{scope}%
+}
+
+% ==================== THE COVER BAND ====================
+% \ispcoverband{<product name>}{<strapline>}
+% Inset to the text block, 5:1. Reversed-out product name upper-left,
+% small-caps strapline at the foot of the band, trace field at the right.
+\newcommand{\ispcoverband}[2]{%
+  \setlength{\ispbandheight}{0.20\textwidth}%
+  \noindent\begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\textwidth,\ispbandheight);
+    \fill[ispmaroon] (0,0) rectangle (\textwidth,\ispbandheight);
+    \begin{scope}
+      \clip (0,0) rectangle (\textwidth,\ispbandheight);
+      \ispdrawfield
+    \end{scope}
+    \node[anchor=west, text=ispwhite, align=left] at (0.55in, \ispbandheight-0.52in)
+      {\fontsize{26}{30}\selectfont\bfseries #1};
+    \node[anchor=west, text=ispwhite, align=left] at (0.55in, 0.26in)
+      {\fontsize{10}{12}\selectfont\scshape #2};
+  \end{tikzpicture}%
+}
+
+\endinput
