@@ -273,3 +273,9 @@ engineering/planning/yaml-audit-report.yaml
 /engineering/document-production/manuals/p2-debug-window-manual/REF/robot-dog
 /OBEX
 /engineering/planning/REF audit v55 vs. theops
+
+# Private personal document — NOT part of the P2 Knowledge Base.
+# All three production folders (source / prep / staging) are local-only.
+/engineering/document-production/manuals/Donna-Manuscript
+/engineering/document-production/workspace/Donna-Manuscript
+/engineering/document-production/outbound/Donna-Manuscript
