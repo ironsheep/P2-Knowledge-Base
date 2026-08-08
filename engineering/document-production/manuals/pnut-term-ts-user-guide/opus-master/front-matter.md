@@ -79,6 +79,12 @@
 % the mark alone on the preceding page. The TOC entry is added by hand so the
 % page still lists as "Copyright and License".
 \ispcopyrightmark
+% \phantomsection is REQUIRED before a hand-added TOC line: without an anchor of
+% its own, hyperref points the entry at the last anchor it saw -- the document
+% start -- so the bookmark and the TOC link both jumped to the cover instead of
+% this page. (Verified in the 2026-08-08 pre-release check: entry targeted p1,
+% section lives on p5.)
+\phantomsection
 \addcontentsline{toc}{chapter}{Copyright and License}
 \markboth{Copyright and License}{}
 \vspace{0.5cm}
