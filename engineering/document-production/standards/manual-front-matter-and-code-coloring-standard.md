@@ -31,7 +31,8 @@ The front matter lives in the manual's `opus-master/front-matter.md` and is **pr
 
 5. **`\clearpage \pagestyle{fancy}`**, then **`\tableofcontents \clearpage`**. Add **`\listoffigures \clearpage`** *only if the manual actually contains figures* (omit it for figure-free manuals to avoid an empty page).
 
-6. **Copyright & License** (markdown `# Copyright and License`): `Copyright © <year> Iron Sheep Productions, LLC and Parallax Inc.`, the **CC BY-SA 4.0** statement, a **Trademarks** note (`Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.`), and optional **Acknowledgments**.
+6. **Copyright & License** (markdown `# Copyright and License`): `Copyright © <year> Iron Sheep Productions, LLC and Parallax Inc.`, the **CC BY-SA 4.0** statement, a **Trademarks** note (`Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.`) carrying the trademark-scope sentence, and optional **Acknowledgments**.
+   **Copy the block verbatim from `engineering/standards/LICENSING-DECISION.md` §5.1** — that record is authoritative and this entry defers to it. (This standard already specified BY-SA when 17 documents were flipped to BY-NC-ND around it in 2026-06; nothing checked the documents against it, so the drift shipped for two months. `engineering/tools/validation/audit-license-block.py` is now that check.)
 
 7. Close with a `{=latex} \clearpage`.
 

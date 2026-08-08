@@ -3,7 +3,8 @@
 > Comprehensive documentation and resources for the Parallax Propeller 2 (P2) multicore microcontroller
 
 [![Version](https://img.shields.io/badge/version-1.15.0-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
-[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
+[![Docs: CC BY-SA 4.0](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-brightgreen.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+[![Code: MIT](https://img.shields.io/badge/code-MIT-brightgreen.svg)](LICENSE)
 
 ## 🤖 Using with AI Assistants (Claude, GPT, etc.)
 
@@ -62,14 +63,16 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project uses dual licensing:
+This project is dual-licensed:
 
-- **Code and Data** (YAML, Python, scripts): [MIT License](LICENSE)
-- **Documentation** (manuals, PDFs, guides): [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+- **Documentation** (manuals, guides, app notes, PDFs): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) — share and adapt, including commercially, with attribution and under the same terms.
+- **Code and data** (YAML, Python, scripts, templates): [MIT License](LICENSE)
 
-Copyright © 2025–2026 Iron Sheep Productions, LLC and Parallax Inc.
+Copyright © 2024–2026 Iron Sheep Productions, LLC and Parallax Inc.
 
-See individual files for specific licensing. Propeller 2, P2, and Parallax are trademarks of Parallax Inc.
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+
+Full rationale and canonical text: [engineering/standards/LICENSING-DECISION.md](engineering/standards/LICENSING-DECISION.md)
 
 ---
 

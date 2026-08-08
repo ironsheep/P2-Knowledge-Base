@@ -3,7 +3,10 @@
 > PDF documents generated from the P2 Knowledge Base.
 
 
-[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/license-CC%20BY--SA%204.0-brightgreen.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+
+These documents are licensed **CC BY-SA 4.0** — share and adapt them, including
+commercially, with attribution and under the same terms.
 
 ## About These Documents
 

@@ -286,7 +286,12 @@ Contributors will be:
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions are licensed under the terms
+this project publishes under: **MIT** for code and data, and **CC BY-SA 4.0**
+for documentation. These are the same terms your contribution ships under — we
+do not ask contributors for broader rights than we grant readers.
+
+See [engineering/standards/LICENSING-DECISION.md](engineering/standards/LICENSING-DECISION.md).
 
 ---
 
