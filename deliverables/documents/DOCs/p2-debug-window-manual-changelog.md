@@ -1,5 +1,12 @@
 # P2 Debug Window Manual — Change Log
 
+## v1.1.2 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this manual, including commercially, with attribution and under the same terms.
+
+
 ## v1.1.1 (2026-07-27)
 
 **Every program in the example library runs on hardware.** All 34 programs verified on real P2

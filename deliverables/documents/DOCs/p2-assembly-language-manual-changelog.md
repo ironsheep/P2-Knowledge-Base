@@ -1,5 +1,12 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.5 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this manual, including commercially, with attribution and under the same terms.
+
+
 ## v3.1.4 (2026-07-14)
 
 **Hyphenated names print exactly as written** — compound terms and cross-references keep their authored spelling.

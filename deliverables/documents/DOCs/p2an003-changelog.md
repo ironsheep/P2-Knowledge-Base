@@ -1,5 +1,12 @@
 # P2AN003 — DAC & Analog Signal Generation — Changelog
 
+## v1.0.2 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this note, including commercially, with attribution and under the same terms.
+
+
 ## v1.0.1 (2026-07-11)
 
 A DAC precision refinement. No recipes added.

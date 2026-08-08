@@ -10,6 +10,13 @@ commits). Newest entry first.
 
 ---
 
+## v1.0.3 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this guide, including commercially, with attribution and under the same terms.
+
+
 ## v1.0.2 (2026-07-21)
 
 A readability refinement. No chapters added, no technical content changed.

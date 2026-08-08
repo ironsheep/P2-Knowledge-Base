@@ -1,5 +1,12 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.4 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this manual, including commercially, with attribution and under the same terms.
+
+
 ## v3.0.3 (2026-07-11)
 
 **A technical-accuracy pass** — instruction semantics, timing, and the worked examples verified against the P2 silicon documentation and the current compiler.

@@ -1,5 +1,12 @@
 # P2 XBYTE Programming Guide - Changelog
 
+## v1.0.1 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this guide, including commercially, with attribution and under the same terms.
+
+
 ## v1.0.0 (2026-07-20) — Initial release for community review
 
 The P2 Interpreters & Emulators Guide: a guide to the Propeller 2's XBYTE

@@ -1,5 +1,12 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.0.8 (2026-08-08)
+
+A licensing change. No technical content changed.
+
+- **Licensed CC BY-SA 4.0** — share and adapt this guide, including commercially, with attribution and under the same terms.
+
+
 ## v1.0.7 (2026-07-21)
 
 A readability refinement. No chapters added, no mode encodings or technical content changed.
