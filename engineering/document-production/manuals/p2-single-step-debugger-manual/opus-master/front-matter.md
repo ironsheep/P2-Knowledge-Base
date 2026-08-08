@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape Observe and Control Your Running P2 Code\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large August 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 

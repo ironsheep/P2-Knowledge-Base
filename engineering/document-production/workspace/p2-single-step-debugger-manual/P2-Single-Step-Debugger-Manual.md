@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape Observe and Control Your Running P2 Code\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large August 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
@@ -81,25 +81,23 @@
 
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
-This work is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
+This work is licensed under the Creative Commons Attribution–ShareAlike 4.0 International License (CC BY-SA 4.0).
 
 You are free to:
 
 - **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
 
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made (for example, formatting or excerpting).
-- **NonCommercial** — You may not use the material for commercial purposes.
-- **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
 
-**Commercial use:** For uses that may be commercial (including paid courses, kits, or redistribution with products), please contact Iron Sheep Productions, LLC and Parallax Inc. (info@ironsheep.biz) for separate permission.
-
-To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
 
 ### Trademarks
 
-Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc. This license grants permissions under copyright only; it does not grant rights to use these trademarks, and adapted or redistributed copies must not imply endorsement by, or official status with, Iron Sheep Productions, LLC or Parallax Inc.
 
 ```{=latex}
 \clearpage

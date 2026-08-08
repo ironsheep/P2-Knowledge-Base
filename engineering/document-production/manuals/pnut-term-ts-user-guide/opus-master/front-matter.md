@@ -11,7 +11,7 @@
 \vspace{0.35cm}
 {\Large\itshape The Cross-Platform Downloader, Terminal,\\ and Debug Display for the Propeller 2\par}
 \vspace{0.9cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.15cm}
 {\large\color{blue}Version 0.1.0 (draft)\par}
 

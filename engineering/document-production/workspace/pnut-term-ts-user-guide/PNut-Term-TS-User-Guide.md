@@ -11,7 +11,7 @@
 \vspace{0.35cm}
 {\Large\itshape The Cross-Platform Downloader, Terminal,\\ and Debug Display for the Propeller 2\par}
 \vspace{0.9cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.15cm}
 {\large\color{blue}Version 0.1.0 (draft)\par}
 
@@ -90,25 +90,23 @@ Copyright © 2026 Iron Sheep Productions, LLC.
 
 PNut-Term-TS is © 2024–2026 Iron Sheep Productions, LLC and is licensed under the MIT License.
 
-This user guide is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
+This user guide is licensed under the Creative Commons Attribution–ShareAlike 4.0 International License (CC BY-SA 4.0).
 
 You are free to:
 
 - **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
 
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made (for example, formatting or excerpting).
-- **NonCommercial** — You may not use the material for commercial purposes.
-- **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
 
-**Commercial use:** For uses that may be commercial (including paid courses, kits, or redistribution with products), please contact Iron Sheep Productions, LLC (info@ironsheep.biz) for separate permission.
-
-To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
 
 ### Trademarks
 
-Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc. This license grants permissions under copyright only; it does not grant rights to use these trademarks, and adapted or redistributed copies must not imply endorsement by, or official status with, Iron Sheep Productions, LLC.
 
 ```{=latex}
 \clearpage
