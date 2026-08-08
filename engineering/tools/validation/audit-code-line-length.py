@@ -24,11 +24,15 @@ USAGE
     audit-code-line-length.py [options] <markdown-file> [<markdown-file> ...]
 
 OPTIONS
-    --budget N           Override K (else read from the creation guide).
-    --creation-guide P   creation-guide.md to read K from. If omitted, it is
-                         auto-derived: the nearest creation-guide.md at, or above,
-                         each markdown file's directory (handles the usual
-                         manuals/<name>/opus-master/<file>.md layout).
+    --budget N           Override K (else read from the manual's config).
+    --creation-guide P   Config file to read K from. If omitted, it is
+                         auto-derived: the nearest creation-guide.md OR
+                         MANUAL-DESCRIPTOR.md at, or above, each markdown file's
+                         directory — covering both the manuals/<name>/opus-master/
+                         layout (K in creation-guide.md as the tagged line above)
+                         and app-notes/<id>/opus-master/ (K in that note's
+                         MANUAL-DESCRIPTOR.md as "code_line_budget_K: 76", since
+                         app notes share one class-wide creation guide).
     --tabstop N          Tab width in columns for display-width counting
                          (default 8 - the fancyvrb Verbatim default the colored
                          code boxes render with).
@@ -58,29 +62,40 @@ CODE_BUDGET_RE = re.compile(r'Max\s+code\s+columns\s*\(K\)\s*:\s*(\d+)', re.IGNO
 # with a tagged line: "Code-line gate: EXEMPT (instrument)". Over-budget lines are
 # then reported for information but do NOT fail the run (exit stays 0).
 CODE_GATE_EXEMPT_RE = re.compile(r'Code[-\s]line\s+gate\s*:\s*EXEMPT', re.IGNORECASE)
+# App notes carry no creation-guide.md — the app-note doc class shares one
+# (APP-NOTE-CREATION-GUIDE.md) and each note records its own K in its
+# MANUAL-DESCRIPTOR.md front matter as "code_line_budget_K: 76".
+DESCRIPTOR_BUDGET_RE = re.compile(r'^\s*code_line_budget_K\s*:\s*(\d+)', re.MULTILINE)
+# Config files that can carry K, in resolution order within a directory.
+BUDGET_CONFIG_NAMES = ('creation-guide.md', 'MANUAL-DESCRIPTOR.md')
 FENCE_RE = re.compile(r'^(\s*)(`{3,}|~{3,})(.*)$')
 
 
 def find_creation_guide(md_path):
-    """Walk up from the markdown file's directory looking for creation-guide.md."""
+    """Walk up from the markdown file's directory looking for a config that
+    carries K — creation-guide.md (manuals) or MANUAL-DESCRIPTOR.md (app notes).
+    Within a directory, creation-guide.md wins."""
     d = os.path.dirname(os.path.abspath(md_path))
     prev = None
     while d and d != prev:
-        candidate = os.path.join(d, 'creation-guide.md')
-        if os.path.isfile(candidate):
-            return candidate
+        for name in BUDGET_CONFIG_NAMES:
+            candidate = os.path.join(d, name)
+            if os.path.isfile(candidate):
+                return candidate
         prev, d = d, os.path.dirname(d)
     return None
 
 
 def read_budget(creation_guide_path):
-    """Extract K from the creation guide's tagged line, or None if absent."""
+    """Extract K from the config's tagged line, or None if absent. Accepts both
+    the creation-guide form ("Max code columns (K): 76") and the app-note
+    descriptor form ("code_line_budget_K: 76")."""
     try:
         with open(creation_guide_path, encoding='utf-8') as fh:
             text = fh.read()
     except OSError:
         return None
-    m = CODE_BUDGET_RE.search(text)
+    m = CODE_BUDGET_RE.search(text) or DESCRIPTOR_BUDGET_RE.search(text)
     return int(m.group(1)) if m else None
 
 
@@ -191,13 +206,13 @@ def main(argv=None):
         if budget is None:
             cg = args.creation_guide or find_creation_guide(md)
             if not cg:
-                print(f'error: no creation-guide.md found for {md} and no --budget '
-                      f'given', file=sys.stderr)
+                print(f'error: no creation-guide.md or MANUAL-DESCRIPTOR.md found '
+                      f'for {md} and no --budget given', file=sys.stderr)
                 return 2
             budget = read_budget(cg)
             if budget is None:
-                print(f'error: no "Max code columns (K): N" line in {cg}',
-                      file=sys.stderr)
+                print(f'error: no "Max code columns (K): N" / "code_line_budget_K: N" '
+                      f'line in {cg}', file=sys.stderr)
                 return 2
             source = cg
 
