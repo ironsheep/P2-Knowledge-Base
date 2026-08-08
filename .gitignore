@@ -27,12 +27,34 @@ _build/
 
 # Temporary files
 *.tmp
-*.bak
-*.backup
-*.backup.*
 .~*
 
-# Backup directories
+# ---------------------------------------------------------------------------
+# BACKUPS — one rule, one location. (Established 2026-08-08.)
+#
+# Every safety copy required by Sacred Rule #1 is made with
+# `engineering/tools/backup-file.sh <path>` and lands in .backups/, mirroring the file's
+# repo-relative path with a timestamp appended. That keeps backups OUT of the
+# working tree, so they can never be picked up by a grep, glob, find, audit
+# script, or source-selection step — the failure that once had backup copies
+# of the DeSilva opus-masters mistaken for the live source.
+#
+# This single line replaced fifteen accumulated rules (eight naming shapes,
+# three of them naming individual files by hand). Do not add per-file backup
+# rules here; use the script and this rule covers it.
+/.backups/
+
+# Defensive net for backups made by *other* tools (editors, `sed -i.bak`,
+# `patch`, merge conflicts) that don't route through the script.
+*.bak
+*.bak[0-9]
+*.backup
+*.backup.*
+*.backup-*
+*.orig
+*.rej
+
+# Legacy backup directories (pre-2026-08-08; contents relocated to .backups/)
 **/backups/
 backups/
 
@@ -106,10 +128,7 @@ DOT-TODO-MCP/
 Scratchpad/
 
 # PDF generation workspace - NOW VERSIONED (critical working files)
-# But exclude backups and temporary versions
-*.backup.*
-*.bak
-*.bak[0-9]
+# (Backup exclusions consolidated into the BACKUPS block near the top.)
 
 # Exclude suffixed test/temporary versions
 *-TEST.md
@@ -131,10 +150,8 @@ Scratchpad/
 
 # Script temporary work areas
 tools/*.tmp
-tools/*.backup
 tools/temp/
 tools/work/
-*.backup.*
 *.tmp.*
 
 # Generated/formatted versions (keep only source)
@@ -224,11 +241,6 @@ engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-
 
 # DOD validation local state
 engineering/tools/.dod-validation-history.json
-*.backup-encoding-conversion
-
-# Timestamped edit backups (Sacred Rule #1 workspace artifacts) - never versioned;
-# generalizes the ad-hoc *.backup-YYYYMMDD entries scattered below
-*.backup-*
 
 # Compiled example binaries (Stephen 2026-07-13): example .bin are NEVER committed
 # nor shipped in example ZIPs - always recreatable from the versioned .spin2 via
@@ -237,7 +249,6 @@ engineering/document-production/**/*.bin
 
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/
-engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md.pre-merge-backup.20251209_052816
 engineering/document-production/workspace/p2-assembly-language-manual/request-align-test.json
 /engineering/narrative/my-posts
 /engineering/narrative
@@ -245,12 +256,8 @@ engineering/document-production/manuals/p2-smart-pins-tutorial/TITUS-MIGRATION-A
 /engineering/document-production/workspace/p2-smart-pins-tutorial/pasm2-validation
 /engineering/document-production/workspace/p2-smart-pins-tutorial/spin2-validation
 /engineering/document-production/workspace/p2-assembly-language-manual/outbound
-engineering/document-production/manuals/p2-smart-pins-tutorial/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial.md.backup-20251213-pre-audit-fixes
-*.backup-pasm-conversion
 engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-PCB-OS.dip
 engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-SCHEMATIC-OS.dch
-deliverables/ai/P2/hardware/edge-32mb-module.yaml.backup-20250108
-*.backup-20250108
 engineering/history/CONVERSATION-ARCHIVES-INDEX.md
 engineering/document-production/manuals/p2-assembly-language-manual/v2.0-changelog-draft.md
 engineering/document-production/manuals/p2-assembly-language-manual/v2.0-commit-summary.md
