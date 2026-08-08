@@ -13,8 +13,8 @@
 ```
 opus-master/
 ├── README.md                           # This file
-├── front-matter.md                     # Title, credits, how to use this manual
-├── part-i/                             # Architectural Foundation (6 chapters)
+├── front-matter.md                     # Title, credits, how to use it
+├── part-i/                             # Architectural Foundation (6 ch)
 │   ├── chapter-01-execution-model.md   # The P2 Execution Model
 │   ├── chapter-02-instruction-format.md # The Instruction Format
 │   ├── chapter-03-flags.md             # Flags and Conditional Execution
