@@ -38,21 +38,21 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
-| Getting Started | manual | 1.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| I/O & Smart Pins | manual | 1.0.7 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Assembly Reference | manual | 3.1.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| DeSilva Tutorial | manual | 3.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| Debug Window | manual | 1.1.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| Streamer Guide | manual | 1.0.7 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| Architect's Guide | manual | 1.0.2 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| Interpreters & Emulators (XBYTE) | manual | 1.0.0 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| P2AN001 — ADC Instrumentation | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN002 — CORDIC for Real Work | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN003 — DAC & Signal Generation | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | 1.0.0 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| Getting Started | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| I/O & Smart Pins | manual | 1.0.8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Assembly Reference | manual | 3.1.5 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| DeSilva Tutorial | manual | 3.0.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Debug Window | manual | 1.1.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| Streamer Guide | manual | 1.0.8 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Architect's Guide | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| Interpreters & Emulators (XBYTE) | manual | 1.0.1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| P2AN001 — ADC Instrumentation | app-note | 1.0.3 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN003 — DAC & Signal Generation | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN007 — Data Structures, in-cog + cross-cog (C2) | app-note | 1.0.1 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | AI Privacy Guide | guide | — | ✅ | ✅ | — | ✅ | ✅ | ✅ |
 
 Legend: ✅ done · 🔄 in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached. `Chip`/`Comm`
@@ -257,6 +257,21 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-08-08 22:47  PUBLISH   p2-assembly-language-manual      (v3.1.5, 503pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified: 503pp (was 505; the -2 investigated, not accepted — whole-document content intact, front matter + all 6 Part-I chapters + Part II @p128 + Part III @p404 on their expected pages, 490 outline entries, and the instruction-letter run complete at 22 letters ABCDEFGHIJLMNOPQRSTWXZ; K/U/V/Y absent because no PASM2 instruction begins with them — source carries exactly those 22 files and the KB confirms 0 entries for each. The -2 is the same tighter table packing DeSilva shows, a platform improvement absorbed at this render). Page count matches the compile log exactly; 0 LaTeX errors; licence page p15 eyeballed — CC BY-SA with the restored Adapt bullet, joint Iron Sheep + Parallax copyright, single-period "Parallax Inc.")
+2026-08-08 22:33  PUBLISH   p2-io-and-smart-pins-user-guide  (v1.0.8, 396pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 396pp (= v1.0.7, no shift — the largest manual absorbed the longer licence block with no downstream movement), 31 outline entries, compile log clean and its page count matches, licence section present + correct.)
+2026-08-08 22:28  PUBLISH   p2-getting-started-guide         (v1.0.3, 25pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 25pp (= v1.0.2), only p1 and the licence page differ from the prior release, compile-clean.)
+2026-08-08 22:26  PUBLISH   p2-streamer-programming-guide    (v1.0.8, 73pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 73pp (was 72; +1 is the longer BY-SA block, which pushes "Enhancement Markers" onto its own p9 — a sparse but complete page, NOT an orphan; flagged to Stephen as a layout judgement call, recommendation was to leave it). Compile-clean, licence section p7.)
+2026-08-08 22:24  PUBLISH   p2-xbyte-programming-guide       (v1.0.1, 100pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 100pp (= v1.0.0, no shift), 30 outline entries, compile-clean, licence section p8.)
+2026-08-08 22:23  PUBLISH   p2-debug-window-manual           (v1.1.2, 168pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 168pp (= v1.1.1, no shift), 18 outline entries, compile-clean with no "Unable to load picture" (its figures all resolved), licence section p7.)
+2026-08-08 22:21  PUBLISH   p2-pasm-desilva-style            (v3.0.4, 162pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 162pp (was 164; the -2 is an IMPROVEMENT, not a drop — whole-document content is intact at 155,520 vs 155,490 non-space chars, and published p126/p127 held only 410/644 chars each where a table was pushed whole onto a fresh page; this render packs them into one page and adds a proper "continued from previous page" header. Front matter and Ch1-Ch14 start on IDENTICAL pages; only Ch15/Ch16 move up 2). Compile-clean, licence section p8.)
+2026-08-08 22:19  PUBLISH   p2-architect-guide               (v1.0.3, 52pp — licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 52pp (= v1.0.2, no shift), 19 outline entries, compile-clean, licence section p4.)
+2026-08-08 21:46  PUBLISH   P2AN007                          (v1.0.1, 16pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 16pp, licence section present, compile-clean.)
+2026-08-08 21:44  PUBLISH   P2AN006                          (v1.0.1, 13pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 13pp (was 12; +1 = the longer BY-SA block), licence section complete, compile-clean.)
+2026-08-08 21:44  PUBLISH   P2AN005                          (v1.0.2, 12pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 12pp; content confirmed complete against an independent daemon build (zero words lost) — production packs the Revision History and the full licence block onto one page.)
+2026-08-08 21:43  PUBLISH   P2AN004                          (v1.0.2, 15pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 15pp (was 14; +1 = the longer BY-SA block), licence section complete, compile-clean.)
+2026-08-08 21:38  PUBLISH   P2AN003                          (v1.0.2, 19pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 19pp, licence section complete, compile-clean.)
+2026-08-08 21:38  PUBLISH   P2AN002                          (v1.0.2, 14pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 14pp, licence section complete, compile-clean.)
+2026-08-08 21:36  PUBLISH   P2AN001                          (v1.0.3, 20pp — app-note licensing patch, CC BY-SA 4.0 restored; ZERO technical content change. Render-verified 20pp, licence section complete, compile-clean.)
 2026-07-27 00:33  PUBLISH   p2-debug-window-manual           (v1.1.1, 168pp — run-verification patch: Stephen ran ALL 34 example programs against PNut v55 on real silicon; 4 failed and are fixed. F-227 — the three PC_KEY/PC_MOUSE examples omitted the command's own escape backtick, so the compiler transmitted the characters "PC_KEY(@key" to the window and compiled NO command (proven by reading the emitted display strings out of two pnut-ts -d binaries); the pointer was never written, so the control loops polled forever and responded to nothing. Class-wide: the MANUAL TAUGHT the broken form (ch12 x6, ch15, App A) and so did the KB (pc_key/pc_mouse yaml) — all corrected. F-228 — a display NAMED AFTER a display keyword is never declared; isolated by a 6-way probe where five SCOPE creates opened and the one named `Trace` did not, from byte-identical create lines. Stephen then supplied the DEFINITIVE naming rules from a PNut v55 p2com.asm study (now REF/DEBUG-WINDOW-NAME-RULES.md + debug.yaml window_name_rules): legal iff leading letter/_, not one of the 103 reserved display words, not a currently-open name, case-insensitive, 30-char truncation. ch02 teaches all five; App A corrected (it had implied its own directive list WAS the reserved set — it is 103 words incl. the 9 types, GREY+GRAY, color modes, packed modes). Render-verified: 168pp (was 169; investigated rather than accepted — heading set IDENTICAL, every diffed line accounted for, word count +709, and the -1 is explained by this build ABSORBING the 07-20 mnemonic-bold test/fit fix, which v1.1.0 had shipped as 7 visible "does not FIT"/"a bit TEST" corruptions — that answers the fleet-sweep follow-up on the PLATFORM line below for THIS manual), outline complete (15 ch + 3 app), compile-clean 0 LaTeX errors, 0 missing glyphs, pp.18/19/119/146/149 eyeballed. Example ZIP rebuilt: 34 programs, all compile-clean, all byte-identical to their manual code blocks, and the RELEASED DOCs/ zip refreshed — it had still been shipping the broken code.)
 2026-07-21 22:55  PUBLISH   p2-streamer-programming-guide    (v1.0.7, 72pp — readability pass: a reader-as-foil aside and two self-referential flourishes removed from chapter openers, no technical change; render-verified 72pp (was 75, −3 benign section-keep reflow, no drop — all 18 ch + Parts I–V + App A–D + Index present), edited openers text-present, compile-clean)
 2026-07-21 22:53  PUBLISH   p2-architect-guide               (v1.0.2, 52pp — readability pass: closing-cadence evened (7 weakest section-ending beats flattened, opening metronome broken), refrains + send-off intact, no technical change; render-verified 52pp (was 53, −1 benign reflow, no drop — full outline Parts I–III + In Closing + App A/B + Glossary + Where to Next), compile-clean)
@@ -323,13 +338,26 @@ lives in the Live-section detail above — not repeated here.)
 
 | Manual | Ver | Freshness | Why |
 |--------|-----|:--:|-----|
-| `p2-debug-window-manual` | 1.1.1 | ✅ current | rebuilt 07-27 (run-verification patch; 168pp) |
-| `p2-assembly-language-manual` | 3.1.3 | ✅ current | rebuilt 07-12 (fleet correction wave) |
-| `p2-pasm-desilva-style` | 3.0.3 | ✅ current | rebuilt 07-12 (fleet correction wave) |
-| `p2-streamer-programming-guide` | 1.0.6 | ✅ current | rebuilt 07-12 (fleet correction wave) |
-| `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit |
-| `p2-io-and-smart-pins-user-guide` | 1.0.7 | ✅ current | rebuilt 07-16 (Ch.9 §9.1 dead-band note; KB v1.14.5, F-225) |
+| `p2-assembly-language-manual` | 3.1.5 | ✅ current | rebuilt 08-08 (licensing wave; 503pp) |
+| `p2-io-and-smart-pins-user-guide` | 1.0.8 | ✅ current | rebuilt 08-08 (licensing wave; 396pp) |
+| `p2-debug-window-manual` | 1.1.2 | ✅ current | rebuilt 08-08 (licensing wave; 168pp) |
+| `p2-pasm-desilva-style` | 3.0.4 | ✅ current | rebuilt 08-08 (licensing wave; 162pp) |
+| `p2-xbyte-programming-guide` | 1.0.1 | ✅ current | rebuilt 08-08 (licensing wave; 100pp) |
+| `p2-streamer-programming-guide` | 1.0.8 | ✅ current | rebuilt 08-08 (licensing wave; 73pp) |
+| `p2-architect-guide` | 1.0.3 | ✅ current | rebuilt 08-08 (licensing wave; 52pp) |
+| `p2-getting-started-guide` | 1.0.3 | ✅ current | rebuilt 08-08 (licensing wave; 25pp) |
+| `P2AN001`…`P2AN007` | see roster | ✅ current | all seven rebuilt 08-08 (licensing wave) |
+| `p2-single-step-debugger-manual` | draft | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 edit. **Release is imminent** — co-releases with PNut-Term-TS, now that the tool has shipped |
+| `pnut-term-ts-user-guide` | 0.1.0 | ⏳ never published | drafted; co-releases with the Single-Step Debugger Manual |
 | `p2-layout-torture-test` | — | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
+
+> **Prune status after the 2026-08-08 licensing wave: nothing is prunable yet, and that is
+> correct.** All 15 live documents now carry a `PUBLISH` above every `PLATFORM` line, but the
+> prune rule requires *every consuming manual* to sit above — and `p2-single-step-debugger-manual`
+> (last built 2026-06-10) plus the never-published `pnut-term-ts-user-guide` still sit below
+> everything from 2026-06-12 onward. **Releasing those two collapses this ledger substantially**
+> — every `PLATFORM` line from 06-12 through 07-20 becomes fully absorbed and can be dropped in
+> one pass. Worth doing as the closing step of that release rather than piecemeal.
 
 **Pending platform change — 2026-07-07 (`mnemonic-bold.lua` "ones" fix):** every live
 manual consumes `p2kb-platform-mnemonic-bold.lua` (the lone exception is the retired
