@@ -68,7 +68,7 @@ This project is dual-licensed:
 - **Documentation** (manuals, guides, app notes, PDFs): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) — share and adapt, including commercially, with attribution and under the same terms.
 - **Code and data** (YAML, Python, scripts, templates): [MIT License](LICENSE)
 
-Copyright © 2024–2026 Iron Sheep Productions, LLC and Parallax Inc.
+Documents © 2024–2026 Iron Sheep Productions, LLC and Parallax Inc. Code and data © 2024–2026 Iron Sheep Productions, LLC.
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 

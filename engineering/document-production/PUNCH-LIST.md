@@ -48,3 +48,43 @@ IOSP Chapter 16 §16.5 (smart-pin mode %11010, ADC scope-with-trigger) is docume
 Not blocking the ADC-foundation enrichment or the P2AN001 app note.
 
 ---
+
+## Legacy backup artifacts — disposition pending — OPEN
+
+**Status:** ⏳ Open — surfaced 2026-08-08 during the backup-convention overhaul
+(`engineering/standards/BACKUP-CONVENTION.md`, commit `c3c7366f`).
+
+That sweep relocated **532 files / 57 MB** of mechanical backups into `.backups/`.
+Four artifacts were **deliberately left in place** because they are not mechanical
+clutter and deleting or moving them is a judgement call, not a cleanup.
+
+**1 — Incident salvage (untracked, left in the tree).** Deliberate archive, not prune:
+
+- `engineering/document-production/pipelines/backups/pdf-generation-guide-RECOVERED.md.backup.20250820_212847`
+- `engineering/pipelines/backups/pdf-generation-workflow-v2.md.backup.20250821_191710`
+- `engineering/pipelines/backups/pdf-workflow.md.backup.20250821_191500`
+
+Dated the night of the **2025-08-21 loss of 3300+ lines of PDF-generation
+documentation** — the incident that created Sacred Rule #1 — and one is named
+*RECOVERED*. These look like the salvaged artifacts of that loss. They are
+untracked, so deletion would be unrecoverable. Decide where they belong (a
+deliberate archive under `engineering/history/`?) rather than letting a future
+prune take them.
+
+**2 — Tracked backup files (repo content, not clutter).** Moving these is a repo
+change, so they were left alone:
+
+- `engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER-backup-2025-12-06-pre-backport.md`
+  — sitting **in the DeSilva master folder**, which is exactly the adjacency the
+  new convention exists to prevent. It has already caused a wrong-source
+  incident, and during this very sprint a first-match glob in the new license
+  gate selected *it* instead of the real master. Git preserves its content, so
+  removing it from the working tree is safe whenever the call is made.
+- `engineering/history/sessions/SESSION-END-BACKUP-20250825.md` — reads as a
+  session history document that merely has "BACKUP" in its name. Probably keep
+  as-is; confirm and leave.
+
+Not blocking anything. The convention and its gate are in place; this is only
+the disposition of what predates them.
+
+---

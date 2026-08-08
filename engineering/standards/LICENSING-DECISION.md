@@ -205,7 +205,7 @@ This project is dual-licensed:
 - **Documentation** (manuals, guides, app notes, PDFs): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) — share and adapt, including commercially, with attribution and under the same terms.
 - **Code and data** (YAML, Python, scripts, templates): [MIT License](LICENSE)
 
-Copyright © 2024–2026 Iron Sheep Productions, LLC and Parallax Inc.
+Documents © 2024–2026 Iron Sheep Productions, LLC and Parallax Inc. Code and data © 2024–2026 Iron Sheep Productions, LLC.
 
 Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 ```
@@ -243,12 +243,20 @@ change indefensible, and the statement should make its absence explicit.
 
 ---
 
-## 7. Open point for confirmation
+## 7. Copyright holders differ by bucket
 
-The root `LICENSE` file previously read `Copyright (c) 2024 Parallax Inc.` — a
-stale year, and it named only one of the two holders used everywhere else in
-the repository. It now reads `2024–2026 Iron Sheep Productions, LLC and
-Parallax Inc.`, consistent with every other statement. **Whether Parallax is
-in fact a copyright holder of the repository's code and data** (as distinct
-from the jointly-authored documents) is worth confirming; if not, the MIT
-holder line should name Iron Sheep Productions, LLC alone.
+The two licenses do not cover the same authorship, and the holder lines
+reflect that:
+
+| Bucket | License | Copyright |
+|---|---|---|
+| **Documents** — manuals, guides, app notes, PDFs | CC BY-SA 4.0 | Iron Sheep Productions, LLC **and Parallax Inc.** (jointly authored) |
+| **Code and data** — YAML, Python, scripts, templates | MIT | **Iron Sheep Productions, LLC** alone |
+
+The root `LICENSE` previously read `Copyright (c) 2024 Parallax Inc.` — a stale
+year, and the wrong holder entirely for the bucket it governs. It now reads
+`Copyright (c) 2024-2026 Iron Sheep Productions, LLC` (confirmed 2026-08-08).
+
+Do not "correct" the MIT holder line to match the document copyright. The
+asymmetry is deliberate: the documents are a joint work, the tooling and
+knowledge base are not.
