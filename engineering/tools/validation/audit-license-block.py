@@ -93,6 +93,12 @@ RETIRED = {
     "p2-smart-pins-tutorial",  # superseded by the I/O & Smart Pins User Guide
 }
 
+# Authoring scaffolding that lives beside a master but is never part of the
+# rendered document, so it can never carry a license block. Without this the
+# combined-master fallback below sweeps them in and they land in the
+# "without a license block" count -- noise that hides a real omission.
+NON_DOCUMENT_FILES = {"CHANGELOG.md", "README.md", "PLANNING.md", "NOTES.md"}
+
 
 BACKUP_NAME = re.compile(
     r"(\.bak$|\.backup|[-.]backup[-.]|[-.]pre-[a-z]+-backup|~$|\.orig$)", re.I
@@ -133,7 +139,7 @@ def document_sources():
         # master, which is precisely the adjacent-backup confusion that
         # BACKUP-CONVENTION.md exists to prevent.
         for alt in sorted(d.glob("*.md")):
-            if is_backup_name(alt.name):
+            if is_backup_name(alt.name) or alt.name in NON_DOCUMENT_FILES:
                 continue
             found.append(alt)
 
@@ -187,12 +193,17 @@ def main(argv):
             print(p.relative_to(REPO))
         return 0
 
-    checked = failed = skipped = 0
+    checked = failed = 0
+    skipped = []
     for p in targets:
         result = audit(p)
         rel = p.relative_to(REPO) if p.is_relative_to(REPO) else p
         if result is None:
-            skipped += 1
+            # NAME it. A silent count is how a document with no license block at
+            # all hides behind a "0 failing" summary -- the same shape of blind
+            # spot as a gate that checks a phrase is PRESENT rather than that it
+            # READS correctly. Absence is a finding to look at, not a tally.
+            skipped.append(rel)
             continue
         checked += 1
         if result:
@@ -203,8 +214,16 @@ def main(argv):
         else:
             print(f"ok    {rel}")
 
+    if skipped:
+        print()
+        for rel in skipped:
+            print(f"NO BLOCK  {rel}")
+        print("        ^ carries no license block. Expected for an instrument or a")
+        print("          non-P2 manuscript; a real publication listed here is a gap.")
+
     print()
-    print(f"{checked} document(s) checked, {failed} failing, {skipped} without a license block.")
+    print(f"{checked} document(s) checked, {failed} failing, "
+          f"{len(skipped)} without a license block.")
     if failed:
         print(f"Canonical text: {DECISION} §5")
     return 1 if failed else 0
