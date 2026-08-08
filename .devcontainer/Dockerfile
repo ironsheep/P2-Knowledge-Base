@@ -39,12 +39,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # --- pnut-ts P2 compiler (was an unzip in postCreateCommand) --------------------
-COPY pnut-ts-linux-arm64-015500.zip /tmp/pnut-ts.zip
+COPY pnut-ts-linux-arm64-015502.zip /tmp/pnut-ts.zip
 RUN cd /tmp \
     && unzip -o pnut-ts.zip \
-    && cp /tmp/pnut-ts-linux-arm64-015500/pnut_ts/pnut-ts /usr/local/bin/pnut-ts \
+    && cp /tmp/pnut-ts-linux-arm64-015502/pnut_ts/pnut-ts /usr/local/bin/pnut-ts \
     && chmod +x /usr/local/bin/pnut-ts \
-    && rm -rf /tmp/pnut-ts.zip /tmp/pnut-ts-linux-arm64-015500
+    && rm -rf /tmp/pnut-ts.zip /tmp/pnut-ts-linux-arm64-015502
 
 # --- isolated venv with the full PDF extraction bundle (docling pulls torch ~GB) -
 RUN python3 -m venv /opt/pdf-tools/venv \

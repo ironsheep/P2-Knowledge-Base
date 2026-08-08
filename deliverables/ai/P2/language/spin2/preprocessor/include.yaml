@@ -8,10 +8,9 @@ description: |
   Inserts the contents of another Spin2 file at the directive location.
   The included file is processed as if its contents were written directly
   at the #INCLUDE location. This enables code reuse and modular organization.
-  A PNut-TS extension: the Spin2 v55 documentation, which specifies PNut's
-  preprocessor, documents only the #DEFINE/#UNDEF/#IFDEF/#IFNDEF/#ELSEIFDEF/
-  #ELSEIFNDEF/#ELSE/#ENDIF set and does not cover #INCLUDE. Source that must also
-  build under PNut cannot rely on this directive.
+  #INCLUDE is a PNut-TS extension -- the original PNut does not provide it, and
+  it uses wording of its own rather than PNut's shared diagnostic text.
+  Source that must also build under PNut cannot rely on this directive.
 
 syntax:
   basic: '#INCLUDE "filename"'
@@ -168,7 +167,7 @@ anti_patterns:
       #INCLUDE "methods"   ' Include at appropriate location
 
 notes:
-  - "A PNut-TS extension -- not part of the directive set PNut's own documentation (Spin2 v55) specifies"
+  - "#INCLUDE is a PNut-TS extension; the original PNut does not provide it -- source that must build under PNut cannot use it"
   - "Filename must be enclosed in double quotes"
   - "The .spin2 extension is optional (added automatically)"
   - "Only .spin2 files can be included"

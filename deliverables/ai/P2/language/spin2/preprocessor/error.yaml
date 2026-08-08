@@ -8,10 +8,9 @@ description: |
   Generates a compile-time error with a custom message, stopping compilation.
   Use this directive to enforce required configuration, detect incompatible
   option combinations, or provide clear guidance when configuration is incomplete.
-  A PNut-TS extension: the Spin2 v55 documentation, which specifies PNut's
-  preprocessor, documents only the #DEFINE/#UNDEF/#IFDEF/#IFNDEF/#ELSEIFDEF/
-  #ELSEIFNDEF/#ELSE/#ENDIF set and does not cover #ERROR. Source that must also
-  build under PNut cannot rely on this directive.
+  #ERROR is a PNut-TS extension -- the original PNut does not provide it, and
+  it uses wording of its own rather than PNut's shared diagnostic text.
+  Source that must also build under PNut cannot rely on this directive.
 
 syntax:
   basic: '#ERROR "message"'
@@ -104,7 +103,7 @@ common_patterns:
       #ENDIF
 
 notes:
-  - "A PNut-TS extension -- not part of the directive set PNut's own documentation (Spin2 v55) specifies"
+  - "#ERROR is a PNut-TS extension; the original PNut does not provide it -- source that must build under PNut cannot use it"
   - "Message is everything after the directive; quotes are OPTIONAL. One surrounding pair of matching quotes is stripped, so #ERROR \"text\" and #ERROR text produce the same message"
   - "Compilation halts immediately - no object file produced"
   - "#ERROR is subject to conditional compilation like any other content-bearing directive: one inside a branch that is NOT taken does not fire. This is what makes the fall-through idiom safe -- an #ERROR in the final #ELSE of a configuration chain fires only when no configuration matched"

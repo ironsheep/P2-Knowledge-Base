@@ -57,11 +57,45 @@ limits:
 
 predefined_symbols:
   - symbol: "__DEBUG__"
-    description: "Automatically defined when debug output is enabled"
+    description: "Defined as 1 only when compiling debug() statements is enabled (-d given). The one predefined symbol both compilers provide."
+    compilers: "PNut and PNut-TS"
     example: |
       #IFDEF __DEBUG__
           ' Code compiled only when debug is enabled
       #ENDIF
+  - symbol: "__P2__"
+    description: "Defined as 1 -- compiling for Propeller 2"
+    compilers: "PNut-TS"
+  - symbol: "__propeller__"
+    description: "Defined as 2 -- the Propeller generation being compiled for"
+    compilers: "PNut-TS"
+  - symbol: "__propeller2__"
+    description: "Defined as 1 -- compiling for Propeller 2"
+    compilers: "PNut-TS"
+  - symbol: "__PNUT_TS__"
+    description: "Defined as 1 -- indicates the PNut-TS compiler is in use. Guard PNut-TS-only source with it (the #ERROR/#WARN/#INCLUDE/#PRAGMA extensions) so the same file still builds under PNut."
+    compilers: "PNut-TS"
+    example: |
+      #IFDEF __PNUT_TS__
+      #WARN Building with the PNut-TS extensions
+      #ENDIF
+  - symbol: "__DATE__"
+    description: "String holding the date compilation began"
+    compilers: "PNut-TS"
+  - symbol: "__TIME__"
+    description: "String holding the time compilation began"
+    compilers: "PNut-TS"
+  - symbol: "__FILE__"
+    description: "String giving the file currently being compiled"
+    compilers: "PNut-TS"
+
+# Every symbol above was confirmed present by compiling an #IFDEF probe for each
+# under PNut-TS v1.55.2 (2026-08-08). Two notes on that release's own
+# Preprocessor.md table:
+#   - it spells the compiler marker __PNUTTS__; the symbol the compiler actually
+#     defines is __PNUT_TS__ (probed above), which is what this entry documents.
+#   - it lists __VERSION__, which is NOT defined under any spelling tried, so it
+#     is omitted here rather than documented as usable.
 
 examples:
   - code: |

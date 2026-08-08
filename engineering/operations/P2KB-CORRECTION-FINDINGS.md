@@ -2131,7 +2131,16 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
   believe an unquoted message is a syntax error.
 - **Applied:** both notes rewritten to state quotes are optional and describe the one-pair stripping.
 
-### F-233 — four directives are advertised as **"Available in PNut/pnut_ts v47+"** but are **PNut-TS extensions** — `CONFIRMED · YAML applied 2026-08-08 (pending KB publish)` · **NEW, surfaced while fixing** · ⚠ **wants Stephen's confirmation**
+### F-233 — four directives are advertised as **"Available in PNut/pnut_ts v47+"** but are **PNut-TS extensions** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+
+> **SETTLED by first-party documentation 2026-08-08** — no longer needs Stephen's confirmation. The
+> v1.55.2 release ships `pnut_ts/Preprocessor.md`, which states at **line 257**: *"`#error`, `#warn`,
+> `#include` and `#pragma` are PNut-TS extensions and use wording of their own."* The same file
+> corroborates F-230 at **line 265**: *"The original PNut limits conditional nesting to 8 levels.
+> PNut-TS does not impose that limit … If your source needs to build under both compilers, stay
+> within 8 levels."*
+> The conservative "PNut's documentation does not cover it" wording was therefore **upgraded** to
+> state plainly that the original PNut does not provide these four directives.
 
 - **Files:** `error.yaml`, `warn.yaml`, `include.yaml`, `pragma-exportdef.yaml` — each carried
   *"Available in PNut/pnut_ts v47 and later compilers"* in its description **and** an
@@ -2148,17 +2157,49 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
   absence of documentation is not proof of absence of support. If PNut does implement any of them,
   that file's wording needs a second pass.
 
-### ⚠ Verification caveat — the container's toolchain is **v1.55.0**, the request describes **v1.55.2**
+### ✅ Verification caveat — **RESOLVED 2026-08-08**: toolchain upgraded to v1.55.2 and every claim re-tested
 
-`pnut-ts -V` here reports **v1.55.0 (build 2026-05-13)**. Consequences, measured 2026-08-08:
-- **`#ERROR` never fires on v1.55.0** — not even unconditionally at the top of a file, quoted or
-  unquoted; the build succeeds and writes a binary. So the `#ELSE`/`#ERROR` fall-through shipped in
-  F-231 is *inert* on this build (harmless, and correct for v1.55.2).
-- **`#UNDEF` of an unknown symbol errors rather than warns** on this build (see F-231).
-- Therefore **§3.1 and §3.2 could NOT be verified locally**; they are written per D1 as plain
-  current behavior on the request's authority (v1.55.2), not on our own observation.
-- **Acceptance criterion 3 passed on v1.55.0** (the replacement compiles clean and produces a
-  binary); re-confirm on v1.55.2 when that toolchain is installed.
+The container originally carried **v1.55.0**, on which `#ERROR` never fires and `#UNDEF` of an
+unknown symbol is a hard parse error — so §3.1/§3.2 were initially written on the request's
+authority alone. Stephen supplied the **v1.55.2 linux-arm64** build the same day; the devcontainer
+`Dockerfile` now installs it (`pnut-ts-linux-arm64-015502.zip`). **Every ENH-02 claim is now
+first-hand verified:**
+
+| Claim | Test | Result on v1.55.2 |
+|---|---|---|
+| §3.1 warning + exact text | `#UNDEF` of a never-defined symbol | `warning:#undef symbol [NEVER_DEFINED] not found`, build continues, binary written — text matches the KB **character-for-character** |
+| §3.2 taken branch | `#ERROR` in a taken `#ELSE` | fires: `error:fall-through fired`, no binary |
+| §3.2 untaken branch | `#ERROR` in an untaken branch | silent, binary produced — branch-guarding confirmed |
+| §3.3 quoting | `#ERROR text` vs `#ERROR "text"` | identical messages; one quote pair stripped |
+| **Criterion 3** | replacement example, `USE_MODE_A` defined | **clean**, binary produced |
+| F-231 (as filed) | old pattern on v1.55.2 | `warning:#undef symbol [USE_MODE_B] not found` — the *warning* the request described |
+
+**F-231's dual severity is real and both halves stand:** on **v1.55.2** the shipped pattern warns
+(as filed); on **v1.55.0** it fails the build outright. Either way the replacement is correct, and
+it now also demonstrably fires its `#ERROR` fall-through when no mode is selected.
+
+### ENH-04 — predefined preprocessor symbols: the KB documented **1 of 8**; and the compiler's own doc lists **2 that do not exist** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+
+- **Gap:** `external-symbols.yaml` carried only `__DEBUG__`. The v1.55.2 `Preprocessor.md` table
+  lists nine. A remote agent had no way to discover the rest.
+- **⚠ Probed, not trusted — and the shipped table is wrong twice.** Compiling an `#IFDEF` probe for
+  each symbol under v1.55.2 showed `__PNUTTS__` and `__VERSION__` **not defined**, though
+  `Preprocessor.md` documents both. Stephen (PNut-TS's author) immediately asked *"is it
+  `__PNUT_TS__`?"* — and the probe confirms it: **`__PNUT_TS__` IS defined; `__PNUTTS__` is a typo
+  in the doc.** (`__pnut_ts__` resolves too — independent corroboration of F-229's
+  case-insensitivity finding.) `__VERSION__` is defined under **no** spelling tried
+  (`__PNUT_TS_VERSION__`, `__VER__`, `__COMPILER_VERSION__`, `__PNUT_VERSION__`, `__BUILD__`).
+- **Applied:** seven verified PNut-TS symbols + `__DEBUG__`, with per-symbol compiler attribution
+  (`__DEBUG__` is the only one PNut also provides — v55:40): `__propeller__`, `__P2__`,
+  `__propeller2__`, **`__PNUT_TS__`**, `__DATE__`, `__FILE__`, `__TIME__`. **`__VERSION__` was
+  deliberately OMITTED** rather than documented as usable, with an inline comment recording both
+  discrepancies.
+- **Why the spelling mattered:** `__PNUT_TS__` is *the* way to guard PNut-TS-only source (F-233).
+  Had we copied the doc's `__PNUTTS__`, every guarded block would have silently evaluated false —
+  the PNut-TS extensions inside would never compile, with no diagnostic to explain it.
+- **→ For Stephen (PNut-TS):** `Preprocessor.md:277` should read `__PNUT_TS__`, and `:281`
+  documents a `__VERSION__` the compiler does not define. Doc-vs-implementation, KB follows the
+  implementation.
 
 **Exit gate:** the request's §7 acceptance criteria are testable — run all 7 before release.
 **Manual impact:** expected to be effectively none (only P2AN006, incidentally) — confirm via the
