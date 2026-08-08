@@ -180,7 +180,7 @@ where you need signed overflow detection, see ADDS.
 
 | Rule | Bad Example | Why |
 |------|-------------|-----|
-| Never hedge | "The C flag may be set" ❌ | Creates ambiguity |
+| Never write vague hedging | "The C flag may be set" ❌ | Creates ambiguity about what the silicon does. NOT the same as a calibrated qualifier — see §4.2a |
 | Never use first person | "We can see that..." ❌ | Tutorial voice |
 | Never use second person | "You should use..." ❌ | Tutorial voice |
 | Never be conversational | "Let's explore..." ❌ | DeSilva voice |
@@ -191,6 +191,41 @@ where you need signed overflow detection, see ADDS.
 | Never reassure that the hardware is correct | "the result is properly sign-extended" ❌ | Congratulates the silicon; conveys nothing |
 | Never justify an example with a vague domain | "commonly used for physics calculations" ❌ | A domain name-drop carries no information |
 | Never restate a fact already given | intro → section → subsection each repeating "parallel execution" ❌ | Padding; state each fact once, then add only new detail |
+| Never use the reader as a foil | "the obvious way to set the S field is wrong" · "it is tempting to reach for ALTD here" ❌ | **Reader-as-foil** — tells the reader what they think, then corrects them (the "besserwisser" register). State the correct fact; let the reader draw the contrast |
+| Never admire the subject or the explanation | "this is where SKIPF really shines" · "the single most elegant part of the pipeline" ❌ | **Self-admiration** — the text praising what it documents. State what the instruction does; let the reader judge it. (Sibling of "never market or promote" above) |
+| Never withhold a fact to manufacture a beat | "and here is the trap" · "but there's a catch we'll come to" ❌ | **Staged reveal** — deliver the fact where it belongs, unstaged. A reference reader may arrive at that section directly and never see the setup |
+
+#### 4.2a Calibrated confidence is required — it is not hedging {#sec-4-2a}
+
+Banning vague hedging ("may be set") does **not** mean banning *uncertainty*. The
+two are different and must not be conflated. A qualifier that reflects the true
+state of the evidence — "on Rev B silicon", "for hub addresses only", "in the
+documented range" — is **accuracy**, and it is required wherever the unqualified
+claim would overstate. The test is one line: **never state a claim above its
+evidence.**
+
+The distinction in this manual's terms:
+
+- ❌ *"The C flag may be set"* — vague. Which is it? The reader cannot write code
+  against this.
+- ✅ *"C is set when the addition carries out of bit 31; WC is required for C to
+  be affected at all"* — precise, and the qualifier is load-bearing.
+- ✅ *"This timing holds for cog and LUT execution; hub execution adds the FIFO
+  refill cost"* — a scope qualifier that prevents a false universal.
+
+A rhetorical flourish that *demands* a punchy payoff is exactly where an
+unsupported claim slips in. At write time, strip the flourish off any closing
+sentence and read what remains as a bare claim — satisfy it from the Silicon Doc
+or the instruction's own encoding, or cut it. Two source-free tests: does the
+manual already say the opposite elsewhere, and does the sentence lean on
+`never / always / every / only / nothing / impossible / free / the single most`?
+
+Those absolute words are **not banned** — in a reference manual they are usually
+precision ("cog memory stores 32-bit longs only"). The test is whether the word
+is carrying a *fact* or a *flourish*.
+
+(Shared discipline: `engineering/standards/documentation-standards/documentation-voices-catalog.md`
+§"Shared Discipline"; detection: `document-audit` Dimension #4c payoff-sentence sweep.)
 
 ### 4.3 Voice Comparison Table
 
@@ -198,12 +233,53 @@ where you need signed overflow detection, see ADDS.
 |--------|------------------|----------------|
 | Person | Second ("you") | Third (instruction names) |
 | Tone | Warm, encouraging | Authoritative, precise |
-| Hedging | Occasional ("usually") | Never |
+| Vague hedging ("may be") | Occasional | Never |
+| Calibrated qualifiers | Yes | **Yes, where true** (§4.2a) |
+| Closing beat every section | — | No (budget — §4.4) |
 | Examples | Extensive, progressive | Targeted, illuminating |
 | Celebration | Yes ("Well done!") | Never |
 | Questions | Yes ("Why? Because...") | No |
 | Asides | Yes ("Uff!") | Never |
 | Pitfall warnings | Occasional | Systematic |
+
+### 4.4 Cadence budget — not every section earns a beat {#sec-4-4}
+
+A *beat* is a closing sentence that lands a rhetorical punch rather than
+finishing the exposition — a verdict, a reversal, a directive to the reader, an
+aphorism that restates with force. One well-placed beat is good writing. The
+failure mode is **regularity**: when nearly every section ends on one, the reader
+stops hearing the individual beat and starts hearing the *metronome* — "instantly
+recognizable and becoming rapidly fatiguing" (Chip Gracey, XBYTE review
+2026-07-20; adopted platform-wide). The recognizable-AI quality is the pattern,
+not any one sentence, so the fix is distribution, not deletion:
+
+- **At most ~half of section closings may be beats.** Cut the weakest back to a
+  plain informational close.
+- **No long runs** — never more than **~4 sections in a row** all closing on a
+  beat. A stretch of flat, informational closes is rest, not a defect.
+- **Chapter closers are the worst offenders** — aim well below a beat on every
+  chapter exit.
+- **A declared refrain is not a beat** — a deliberate, announced structural device
+  is structure, keep it.
+- **Protect the earned ones** — a beat that carries real information or lowers the
+  text's own confidence survives. Do not flatten the manual to hit a number.
+
+**Where this applies in this manual.** The risk is concentrated in the
+**front-matter/preface and Part I** narrative — the same region §1.3 flags for
+redundancy and promotional residue. Part II's entry-per-instruction sections and
+Part III's tables are reference-voice and close on the fact by construction; they
+rarely exhibit the defect, and a per-entry "beat" would be noise. Do not go
+looking for cadence problems in the instruction entries.
+
+Detection tooling: `document-audit` Dimension #4c (payoff-sentence sweep) measures
+closing-beat rate and the longest consecutive run.
+
+> **Baseline (audited 2026-08-08, v3.1.5).** The narrative region measured **7%**
+> of 220 section closings carrying an absolute, longest consecutive run **2**, and
+> **zero** instances of tutorial filler, reader-as-foil, self-admiration, or
+> staged reveal. All 15 absolute-word hits were precision, not flourish. The
+> manual was already compliant when this discipline was written into the guide —
+> these rules are the **write-time guard against drift**, not a backlog of fixes.
 
 ---
 
