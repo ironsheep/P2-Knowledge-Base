@@ -2011,6 +2011,87 @@ PNut v55.** Ships in Debug Window Manual **v1.1.1** (released 2026-07-27) and KB
 
 No other live manual declares these sources. Survey done, not skipped.
 
+## Preprocessor corrections from the PNut-TS v1.55.2 update request (2026-08-08) — F-229…F-231, ENH-02/03
+
+> **Source:** `engineering/ingestion/external-inputs/p2kb-update-requests/Preprocessor-P2KB-Update-Request.md`
+> (PNut-TS v1.55.2, dated 2026-08-08). Routed through this register per Stephen's decision **D2**
+> (2026-08-08): the factual corrections and the broken example become F-numbers, the documentation
+> additions become ENH-*; edits then run through `yaml-knowledge-base-maintenance`.
+>
+> **Decision D1 (Stephen, 2026-08-08) governs the wording of all of these:** do **NOT** introduce a
+> compiler-version axis. No "PNut-TS v1.55.2+" metadata, and do not overload the `{Spin2_vNN}`
+> language-gate convention to carry it. Per-tool-version state goes false the moment the tool is
+> fixed — the same principle as *manuals document intent, not tool bugs*. Naming **which compiler**
+> a divergent behavior belongs to is different from, and allowed where, the behaviors genuinely
+> differ (F-230, ENH-03).
+
+### F-229 — the preprocessor YAMLs claim symbol names are **case-sensitive**; Spin2 source is **case-INSENSITIVE** — `CONFIRMED`
+
+- **What's wrong:** 18 occurrences across 9 files in `deliverables/ai/P2/language/spin2/preprocessor/`
+  state that preprocessor symbol names are case-sensitive, two of them illustrating the claim
+  (`define.yaml:68` — *"case-sensitive (DEBUG != debug)"*, `preprocessor-overview.yaml:77-78`).
+- **Ground truth (three independent lines agree):**
+  1. **Spin2 v55 primary source, line 165** — *"Source code is case-insensitive."*
+  2. **Our own KB already says so** — `language/fundamentals/case-sensitivity.yaml`:
+     *"Both Spin2 and PASM2 are CASE-INSENSITIVE languages"* (Spin2 v51 docs). The preprocessor
+     files were therefore **internally inconsistent with the KB** before PNut-TS ever tested it.
+  3. **PNut-TS v1.55.2 empirical** — the update request's §2.1 test.
+- **Therefore this is a plain LANGUAGE RULE with no compiler qualifier** (D1) — not a PNut-TS
+  divergence. Blast radius is ~5× what the request states (it names 3 places; actual = 18/9).
+- **Correction:** every occurrence states symbols are case-INSENSITIVE; the `DEBUG != debug`
+  illustration inverts to show they are the *same* symbol. Class-wide — the acceptance criterion
+  *"no longer claims symbol names are case-sensitive"* only passes if all 18 are fixed.
+
+### F-230 — the 8-level `#IFDEF` nesting cap is stated as a **language rule**; it is **PNut-specific** — `CONFIRMED`
+
+- **What's wrong:** 5 files (`preprocessor-overview`, `ifdef`, `ifndef`, `endif`, `elseifdef`) state
+  an unqualified "Maximum nesting depth is 8 levels" / "up to 8 levels".
+- **Ground truth:** Spin2 v55 line 40 carries the cap inside **PNut's own v48 release note** —
+  *"Up to 8 levels of #IFDEF/#IFNDEF nesting are allowed"* — i.e. it is documented as **PNut**
+  behavior, not as a property of the language. PNut-TS v1.55.2 reports no such cap.
+- **Correction:** attribute the cap to PNut by name rather than deleting it (it is real, and code
+  targeting PNut must respect it). Acceptance criterion: *no entry states an 8-level maximum
+  without naming PNut as its source.*
+- **Do NOT touch** the unrelated "8 levels" hits in `stack_operations`, `xbyte_engine`, `cog`, and
+  `p2-architecture-mental-model` — different subject (hardware stack depth), not this cap.
+
+### F-231 — the `contradictory_conditions` **"correct" example** recommends a pattern that warns on every build — `CONFIRMED`
+
+- **What's wrong:** `preprocessor-overview.yaml` anti-pattern `contradictory_conditions` shows a
+  defensive `#UNDEF USE_MODE_B` inside `#IFDEF USE_MODE_A`. In the common case — `USE_MODE_B` was
+  simply never defined — that `#undef` of a never-defined symbol emits
+  `#undef symbol [USE_MODE_B] not found` on **every build** (see ENH-02 §3.1).
+- **Why this outranks the additions:** we are **actively recommending** the pattern. Wrong guidance
+  in shipped material outranks missing guidance — a remote agent generating code from this KB
+  reproduces the noise by design.
+- **Correction:** replace the `correct` block with a plain `#ELSEIFDEF` chain plus an `#ELSE` →
+  `#ERROR` fall-through (which is already mutually exclusive and needs no defensive `#UNDEF`), and
+  add the note explaining why the `#UNDEF` was dropped. The anti-pattern itself stays.
+
+### ENH-02 — document five preprocessor behaviors the KB does not carry (request §3.1–3.5) — `OPEN`
+
+`#undef` of an unknown symbol is a **warning** with exact text `#undef symbol [NAME] not found` ·
+`#ERROR`/`#WARN` fire **only from taken branches** (write as plain current behavior, **no version
+qualifier** — D1) · message-text parsing strips **one** surrounding pair of matching quotes ·
+an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · diagnostics go to
+**stderr** as `<file>:<line>:error|warning:<msg>`, no ANSI, all errors reported in one build.
+
+> **Free win (no edit needed):** §3.2 and §3.4 make our existing `missing_default_case` and
+> `unbalanced_conditionals` anti-patterns **true** — they were aspirational when written.
+
+### ENH-03 — name the compiler where PNut and PNut-TS diverge, and state the portable subset — `OPEN`
+
+- **Preserve deliberately:** the misspelling *"Must be preceeded by #IFDEF or #IFNDEF"* is **PNut's
+  own** diagnostic text — do not "correct" it.
+- **Confirmed correct, leave alone:** `__DEBUG__` auto-defined with `-d`; `#INCLUDE` appends `.spin2`.
+- **OUT OF SCOPE — explicitly not endorsed, do not infer:** a `minimum_version v47`, `-D`/`-U`
+  (v48+) annotations, `#undef` of a **built-in** symbol under PNut-TS, and the 4 named anti-patterns
+  the request lists but does not substantiate.
+
+**Exit gate:** the request's §7 acceptance criteria are testable — run all 7 before release.
+**Manual impact:** expected to be effectively none (only P2AN006, incidentally) — confirm via the
+`release-yamls` §8 YAML→Manual impact survey rather than assuming.
+
 ---
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
