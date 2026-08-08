@@ -112,8 +112,6 @@ datasheets:
 
 provenance:
   board_revision: "A (schematic last updated 21 Jul 2019)"
-  copyright: "2019 Parallax Incorporated"
-  license: "Open Source Hardware, CC BY-SA 4.0"
   product_guide_version: "1.0 (Original Release)"
 
 use_cases:

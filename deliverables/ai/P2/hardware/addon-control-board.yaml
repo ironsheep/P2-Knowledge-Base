@@ -145,7 +145,6 @@ resources:
     author: "Jon 'JonnyMac' McPhalen"
     url: "https://obex.parallax.com/obex/p2es-control/"
     driver_file: "jm_p2-es_control.spin2"
-    license: "MIT"
   quick_bytes:
     - title: "LEDs - Beyond the Basics"
       url: "https://www.parallax.com/leds-beyond-the-basics/"

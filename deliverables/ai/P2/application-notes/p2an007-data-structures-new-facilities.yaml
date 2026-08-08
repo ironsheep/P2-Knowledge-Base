@@ -173,4 +173,3 @@ provenance:
     - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
   companion_publication:
     - "P2 Architect's Guide (contract decisions); P2AN005 Cooperative Multitasking (companion P2 Knowledge Base publications)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

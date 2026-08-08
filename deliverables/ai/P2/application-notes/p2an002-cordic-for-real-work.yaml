@@ -128,4 +128,3 @@ provenance:
     - "OBEX #5278 compass drivers (polynomial atan2 contrast); OBEX #5361 FFT/IFFT (SaucySoliton)"
   companion_publication:
     - "P2 Assembly Language Reference Manual; P2 Streamer Programming Guide (companion P2 Knowledge Base publications)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

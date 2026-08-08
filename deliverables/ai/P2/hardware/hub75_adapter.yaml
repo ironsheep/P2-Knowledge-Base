@@ -227,7 +227,6 @@ resources:
     author: "Stephen M Moraco (Iron Sheep Productions)"
     url: "https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/"
     driver_file: "isp_hub75_matrix.spin2"
-    license: "MIT"
     complexity: "complex_driver"
     recommendation: "Use OBEX driver - do not attempt to implement manually"
 

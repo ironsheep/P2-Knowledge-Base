@@ -570,7 +570,6 @@ resources:
     driver_files:
       - "psram.spin2"
       - "psram16drv.spin2"
-    license: "MIT"
     features:
       - "16-bit PSRAM burst read/write"
       - "Fill operations (byte/word/long)"

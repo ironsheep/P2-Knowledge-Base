@@ -136,4 +136,3 @@ provenance:
     - "P2 Knowledge Base cooperative-tasking pattern (patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
   companion_publication:
     - "P2AN006 Sizing Cog & Task Stacks; P2AN007 Data Structures with the New Language Facilities (companion P2 Knowledge Base publications)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

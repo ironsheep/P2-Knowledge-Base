@@ -121,4 +121,3 @@ provenance:
     - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC, MIT License) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
   companion_publication:
     - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0. Bundled isp_stack_check.spin2 (c) 2024 Iron Sheep Productions, LLC under MIT."

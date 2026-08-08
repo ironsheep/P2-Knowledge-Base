@@ -142,4 +142,3 @@ provenance:
     - "Parallax 'Analog Frequency to DAC' and 'Digital Sample ADC to DAC' example code (Michael Mulholland, Chip Gracey) — grounded the synthesis and passthrough recipes"
   companion_publication:
     - "P2 I/O & Smart Pins User Guide (Ch.10 DAC, Ch.16 ADC); P2 Streamer Programming Guide; application note P2AN001 (companion P2 Knowledge Base publications)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

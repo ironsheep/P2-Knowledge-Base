@@ -132,4 +132,3 @@ provenance:
     - "Parallax Quick Bytes 'Using Smart Pins to Measure Frequency Output of TSL235R' (Ken Gracey; code by Francis Bauer, Jon McPhalen, Chip Gracey) — grounded R2, incl. the F. Bauer fb_measfreq2P single-pin reciprocal routing"
   companion_publication:
     - "P2 I/O & Smart Pins User Guide (Ch.13 time, Ch.14 counting/quadrature, Ch.15 frequency/period); application note P2AN001 (companion P2 Knowledge Base publications)"
-  copyright: "Copyright (c) 2026 Iron Sheep Productions, LLC and Parallax Inc. — CC BY-NC-ND 4.0"

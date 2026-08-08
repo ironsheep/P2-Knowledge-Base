@@ -133,7 +133,6 @@ resources:
     author: "Jon 'JonnyMac' McPhalen"
     url: "https://obex.parallax.com/obex/p2es-matrix/"
     driver_file: "jm_p2-es_matrix.spin2"
-    license: "MIT"
     features:
       - "8x7 charlieplex refresh in a dedicated cog"
       - "ASCII character display with a 5x7 font"
