@@ -2201,9 +2201,16 @@ it now also demonstrably fires its `#ERROR` fall-through when no mode is selecte
   documents a `__VERSION__` the compiler does not define. Doc-vs-implementation, KB follows the
   implementation.
 
-**Exit gate:** the request's §7 acceptance criteria are testable — run all 7 before release.
-**Manual impact:** expected to be effectively none (only P2AN006, incidentally) — confirm via the
-`release-yamls` §8 YAML→Manual impact survey rather than assuming.
+**Exit gate:** ✅ all 7 of the request's §7 acceptance criteria PASS, re-run on v1.55.2.
+
+**Manual impact survey (KB v1.16.0, `release-yamls` §8): NO MANUAL IMPACT — surveyed, not assumed.**
+The delta is the 14 `language/spin2/preprocessor/` YAMLs plus the licensing-term removals in
+`p2an006-*.yaml`, `hardware/addon-hd-audio.yaml`, `hardware/addon-rtc.yaml`. Checked two ways:
+(1) no live manual or app-note `MANUAL-DESCRIPTOR.md` declares the preprocessor, RTC, or HD-audio
+sources; (2) **no live doc body contains `#IFDEF`/`#DEFINE`/`#ELSEIFDEF` at all** — the preprocessor
+is simply not taught in any shipped document. The earlier expectation that P2AN006 was incidentally
+affected did **not** hold: its YAML companion changed (a license term dropped from a provenance
+line), but the *document* is untouched and needs no re-audit flag. Nothing to flag.
 
 ---
 
