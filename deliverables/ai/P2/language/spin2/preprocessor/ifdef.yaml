@@ -7,8 +7,8 @@ minimum_version: "v47"
 description: |
   Begins a conditional compilation block that is compiled only if the specified 
   symbol IS defined. The block extends until a matching #ELSE, #ELSEIFDEF, 
-  #ELSEIFNDEF, or #ENDIF directive. Conditional blocks can be nested up to 8 
-  levels deep.
+  #ELSEIFNDEF, or #ENDIF directive. PNut allows conditional blocks to be nested 
+  up to 8 levels deep; PNut-TS imposes no such limit.
   Available in PNut/pnut_ts v47 and later compilers. No version directive required.
 
 syntax:
@@ -34,7 +34,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to test (case-sensitive)"
+    description: "Name of the symbol to test (case-insensitive)"
 
 examples:
   - code: |
@@ -100,9 +100,9 @@ examples:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
-  - "Maximum nesting depth is 8 levels"
-  - "Every #IFDEF must have a matching #ENDIF"
+  - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
+  - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
+  - "Every #IFDEF must have a matching #ENDIF -- an unterminated block is an error, 'Expected #ENDIF', reported against the line that OPENED it"
   - "Can be combined with #ELSE for if-else logic"
   - "Can be chained with #ELSEIFDEF/#ELSEIFNDEF for multi-way selection"
   - "Code in non-matching blocks is completely removed - no runtime overhead"

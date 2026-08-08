@@ -57,7 +57,7 @@ examples:
     description: "Nested conditionals with labeled #ENDIF"
     
   - code: |
-      ' Complex nesting (up to 8 levels)
+      ' Complex nesting (PNut allows up to 8 levels)
       #IFDEF LEVEL_1
           #IFDEF LEVEL_2
               #IFDEF LEVEL_3
@@ -94,7 +94,7 @@ notes:
   - "Every #IFDEF and #IFNDEF MUST have a matching #ENDIF"
   - "#ENDIF takes no parameters"
   - "Comments after #ENDIF are recommended for clarity in nested blocks"
-  - "Missing #ENDIF causes compile error: 'Expected #ENDIF'"
+  - "Missing #ENDIF causes compile error: 'Expected #ENDIF' -- reported against the line that OPENED the block, not the end of file"
   - "Extra #ENDIF causes compile error: 'Unexpected #ENDIF'"
   - "Proper nesting is required - #ENDIF closes innermost open block"
 

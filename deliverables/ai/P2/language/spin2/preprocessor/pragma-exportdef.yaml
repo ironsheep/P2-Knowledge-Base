@@ -9,7 +9,10 @@ description: |
   The exported symbol acts like a -D command-line option for all child objects,
   allowing a top-level object to configure symbols that propagate to all
   dependencies without requiring command-line changes.
-  Available in PNut/pnut_ts v47 and later compilers.
+  A PNut-TS extension: the Spin2 v55 documentation, which specifies PNut's
+  preprocessor, documents only the #DEFINE/#UNDEF/#IFDEF/#IFNDEF/#ELSEIFDEF/
+  #ELSEIFNDEF/#ELSE/#ENDIF set and does not cover #PRAGMA. Source that must also
+  build under PNut cannot rely on this directive.
 
 syntax:
   basic: "#PRAGMA EXPORTDEF symbol"
@@ -18,7 +21,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to export (case-sensitive)"
+    description: "Name of the symbol to export (case-insensitive)"
   - name: "value"
     type: "optional"
     description: "Optional value to associate with the symbol"
@@ -141,7 +144,7 @@ common_patterns:
         module2 : "module2"    ' Has logging if ENABLE_LOGGING set
 
 notes:
-  - "Available in v47+ compilers"
+  - "A PNut-TS extension -- not part of the directive set PNut's own documentation (Spin2 v55) specifies"
   - "Exported symbols affect all child objects in OBJ section"
   - "Propagation is recursive - affects entire dependency tree"
   - "Command-line -D overrides #PRAGMA EXPORTDEF"

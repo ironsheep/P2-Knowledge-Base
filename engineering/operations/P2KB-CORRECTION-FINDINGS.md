@@ -2025,7 +2025,15 @@ No other live manual declares these sources. Survey done, not skipped.
 > a divergent behavior belongs to is different from, and allowed where, the behaviors genuinely
 > differ (F-230, ENH-03).
 
-### F-229 — the preprocessor YAMLs claim symbol names are **case-sensitive**; Spin2 source is **case-INSENSITIVE** — `CONFIRMED`
+### F-229 — the preprocessor YAMLs claim symbol names are **case-sensitive**; Spin2 source is **case-INSENSITIVE** — `DONE 2026-08-08 (YAML applied; pending KB publish)`
+
+> **Applied 2026-08-08:** all **18** occurrences across **9** files corrected to case-INSENSITIVE.
+> The two illustrated claims were inverted rather than deleted — `define.yaml` now reads *"DEBUG,
+> Debug and debug are the SAME symbol"*, `preprocessor-overview.yaml` likewise. Source trace:
+> `spin2-v55-text.txt:165` (*"Source code is case-insensitive"*) + our own
+> `language/fundamentals/case-sensitivity.yaml`. `external-symbols.yaml` (the `-D` command-line
+> side, **not** named in the request) was included under the class-wide sweep rule — Stephen
+> agreed 2026-08-08. Verified: zero residual "case-sensitive" claims in the directory.
 
 - **What's wrong:** 18 occurrences across 9 files in `deliverables/ai/P2/language/spin2/preprocessor/`
   state that preprocessor symbol names are case-sensitive, two of them illustrating the claim
@@ -2042,7 +2050,15 @@ No other live manual declares these sources. Survey done, not skipped.
   illustration inverts to show they are the *same* symbol. Class-wide — the acceptance criterion
   *"no longer claims symbol names are case-sensitive"* only passes if all 18 are fixed.
 
-### F-230 — the 8-level `#IFDEF` nesting cap is stated as a **language rule**; it is **PNut-specific** — `CONFIRMED`
+### F-230 — the 8-level `#IFDEF` nesting cap is stated as a **language rule**; it is **PNut-specific** — `DONE 2026-08-08 (YAML applied; pending KB publish)`
+
+> **Applied 2026-08-08:** all 7 occurrences across the 5 files now name PNut and state the portable
+> guidance ("*PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap — keep to 8 for
+> portability*"), including the two in-example comments (`preprocessor-overview`, `endif`). The cap
+> was **kept, not deleted** — it is real for PNut. Source trace: `spin2-v55-text.txt:40`, where the
+> cap appears inside PNut's own v48 release note. The unrelated hardware-stack "8 levels" hits
+> (`stack_operations`, `xbyte_engine`, `cog`, `p2-architecture-mental-model`) were confirmed
+> off-topic and left untouched.
 
 - **What's wrong:** 5 files (`preprocessor-overview`, `ifdef`, `ifndef`, `endif`, `elseifdef`) state
   an unqualified "Maximum nesting depth is 8 levels" / "up to 8 levels".
@@ -2055,7 +2071,25 @@ No other live manual declares these sources. Survey done, not skipped.
 - **Do NOT touch** the unrelated "8 levels" hits in `stack_operations`, `xbyte_engine`, `cog`, and
   `p2-architecture-mental-model` — different subject (hardware stack depth), not this cap.
 
-### F-231 — the `contradictory_conditions` **"correct" example** recommends a pattern that warns on every build — `CONFIRMED`
+### F-231 — the `contradictory_conditions` **"correct" example** recommends a pattern that **breaks the build** (filed as "warns") — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **severity raised on test**
+
+> **⚠ WORSE THAN FILED — measured, not assumed (2026-08-08).** The request describes the defensive
+> `#UNDEF` as producing a *warning* under PNut-TS **v1.55.2**. On the **v1.55.0** toolchain actually
+> installed here it is a **hard build failure**: the preprocessor does not consume a `#UNDEF` of a
+> never-defined symbol, leaves the directive **in the preprocessed output** (confirmed by reading
+> `-i` output — `#UNDEF NEVER_DEFINED` survives into `*__pre.spin2`), and the Spin2 parser then
+> rejects it with `error:Expected "," or end of line`. **No binary is produced.**
+> Reproduced with the exact shipped pattern (`USE_MODE_A` defined, `USE_MODE_B` never defined):
+> `p2kb_old.spin2:5:error:Expected "," or end of line` → no `.bin`. The replacement compiles clean
+> and writes its binary under identical conditions.
+> **So the KB was recommending a pattern that fails the build outright on a released compiler** —
+> which is why this outranked every documentation addition in the batch.
+
+> **Applied 2026-08-08:** `preprocessor-overview.yaml` `contradictory_conditions.correct` replaced
+> with the plain `#ELSEIFDEF` chain + `#ELSE`/`#ERROR` fall-through; the `wrong` block and the
+> anti-pattern itself are unchanged. Added the `note` explaining that an `#ELSEIFDEF` chain is
+> already mutually exclusive so the defensive `#UNDEF` buys nothing. `undef.yaml` gained a matching
+> caution pointing back at this anti-pattern.
 
 - **What's wrong:** `preprocessor-overview.yaml` anti-pattern `contradictory_conditions` shows a
   defensive `#UNDEF USE_MODE_B` inside `#IFDEF USE_MODE_A`. In the common case — `USE_MODE_B` was
@@ -2087,6 +2121,44 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
 - **OUT OF SCOPE — explicitly not endorsed, do not infer:** a `minimum_version v47`, `-D`/`-U`
   (v48+) annotations, `#undef` of a **built-in** symbol under PNut-TS, and the 4 named anti-patterns
   the request lists but does not substantiate.
+
+### F-232 — `error.yaml` / `warn.yaml` claim the message **"must be enclosed in double quotes"**; quotes are **optional** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+
+- **Not in the request's correction list** — surfaced by reading the files while applying ENH-02 §3.3.
+- **What's wrong:** both files stated quoting as a requirement. Per §3.3 the message is *everything
+  after the directive*, with **one** surrounding pair of matching quotes stripped — so
+  `#ERROR "text"` and `#ERROR text` produce the identical message. A reader following our text would
+  believe an unquoted message is a syntax error.
+- **Applied:** both notes rewritten to state quotes are optional and describe the one-pair stripping.
+
+### F-233 — four directives are advertised as **"Available in PNut/pnut_ts v47+"** but are **PNut-TS extensions** — `CONFIRMED · YAML applied 2026-08-08 (pending KB publish)` · **NEW, surfaced while fixing** · ⚠ **wants Stephen's confirmation**
+
+- **Files:** `error.yaml`, `warn.yaml`, `include.yaml`, `pragma-exportdef.yaml` — each carried
+  *"Available in PNut/pnut_ts v47 and later compilers"* in its description **and** an
+  *"Available in v47+ compilers"* note, i.e. telling readers PNut supports them.
+- **Evidence:** the Spin2 v55 primary source contains **zero** occurrences of `#ERROR`, `#WARN`,
+  `#INCLUDE`, or `#PRAGMA`; the preprocessor set it specifies (v55:40, PNut's v48 release note) is
+  exactly `#DEFINE`/`#UNDEF`/`#IFDEF`/`#IFNDEF`/`#ELSEIFDEF`/`#ELSEIFNDEF`/`#ELSE`/`#ENDIF`. The
+  update request states independently (§3.5) that these four are **PNut-TS extensions**.
+- **Applied conservatively** — the wording asserts only what the evidence supports: that PNut's own
+  documentation does not cover the directive and that source which must also build under PNut cannot
+  rely on it. It does **not** claim PNut rejects it.
+- ⚠ **Open question for Stephen** (PNut-TS's author): confirm these four are genuinely PNut-TS-only.
+  The evidence is *silence* in PNut's documentation plus the request's assertion — strong, but
+  absence of documentation is not proof of absence of support. If PNut does implement any of them,
+  that file's wording needs a second pass.
+
+### ⚠ Verification caveat — the container's toolchain is **v1.55.0**, the request describes **v1.55.2**
+
+`pnut-ts -V` here reports **v1.55.0 (build 2026-05-13)**. Consequences, measured 2026-08-08:
+- **`#ERROR` never fires on v1.55.0** — not even unconditionally at the top of a file, quoted or
+  unquoted; the build succeeds and writes a binary. So the `#ELSE`/`#ERROR` fall-through shipped in
+  F-231 is *inert* on this build (harmless, and correct for v1.55.2).
+- **`#UNDEF` of an unknown symbol errors rather than warns** on this build (see F-231).
+- Therefore **§3.1 and §3.2 could NOT be verified locally**; they are written per D1 as plain
+  current behavior on the request's authority (v1.55.2), not on our own observation.
+- **Acceptance criterion 3 passed on v1.55.0** (the replacement compiles clean and produces a
+  binary); re-confirm on v1.55.2 when that toolchain is installed.
 
 **Exit gate:** the request's §7 acceptance criteria are testable — run all 7 before release.
 **Manual impact:** expected to be effectively none (only P2AN006, incidentally) — confirm via the

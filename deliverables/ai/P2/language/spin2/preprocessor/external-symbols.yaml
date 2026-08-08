@@ -43,7 +43,7 @@ command_line:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to define/undefine (case-sensitive, max 31 chars)"
+    description: "Name of the symbol to define/undefine (case-insensitive, max 31 chars)"
   - name: "value"
     type: "string"
     description: "Optional value to associate with -D symbol"
@@ -202,7 +202,7 @@ include_search_order:
 
 notes:
   - "Available in v48+ compilers"
-  - "-D symbols are case-sensitive"
+  - "-D symbols are case-insensitive, like all Spin2 symbols"
   - "Maximum of 16 external symbols can be defined via -D"
   - "Maximum symbol name length is 31 characters"
   - "-D symbols CANNOT be undefined with #UNDEF in source"

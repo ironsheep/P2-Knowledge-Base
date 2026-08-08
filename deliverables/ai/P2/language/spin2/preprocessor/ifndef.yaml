@@ -26,7 +26,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to test (case-sensitive)"
+    description: "Name of the symbol to test (case-insensitive)"
 
 examples:
   - code: |
@@ -95,10 +95,10 @@ examples:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
+  - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "#IFNDEF is the logical inverse of #IFDEF"
-  - "Maximum nesting depth is 8 levels"
-  - "Every #IFNDEF must have a matching #ENDIF"
+  - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
+  - "Every #IFNDEF must have a matching #ENDIF -- an unterminated block is an error, 'Expected #ENDIF', reported against the line that OPENED it"
   - "Commonly used for include guards and default configurations"
   - "Useful for providing defaults that can be overridden externally"
 

@@ -16,7 +16,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to define (case-sensitive)"
+    description: "Name of the symbol to define (case-insensitive)"
 
 examples:
   - code: |
@@ -65,7 +65,7 @@ examples:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive (DEBUG != debug)"
+  - "Symbol names are case-insensitive: DEBUG, Debug and debug are the SAME symbol"
   - "Symbol persists until end of file or #UNDEF"
   - "Symbols have no value - they are either defined or not defined"
   - "Maximum symbol name length is 31 characters"

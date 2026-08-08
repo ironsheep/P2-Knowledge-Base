@@ -75,9 +75,9 @@ syntax:
 
 key_characteristics:
   - characteristic: "Case sensitivity"
-    description: "Symbol names are case-sensitive (DEBUG_MODE != debug_mode)"
+    description: "Symbol names are case-INSENSITIVE: DEBUG_MODE and debug_mode are the same symbol (Spin2 source is case-insensitive)"
   - characteristic: "Maximum nesting"
-    description: "Up to 8 levels of nested conditionals supported"
+    description: "PNut allows up to 8 levels of nested conditionals; PNut-TS imposes no such limit. Stay within 8 to remain portable across both compilers."
   - characteristic: "Symbol scope"
     description: "Symbols persist from definition until end of file or #UNDEF"
   - characteristic: "External symbols"
@@ -110,7 +110,7 @@ examples:
     description: "Multi-platform code selection"
     
   - code: |
-      ' Nested conditionals (up to 8 levels)
+      ' Nested conditionals (PNut allows up to 8 levels)
       #IFDEF FEATURE_SERIAL
           #IFDEF USE_HIGH_SPEED
               serial.start(921600)
@@ -188,12 +188,19 @@ anti_patterns:
       #ENDIF
       #ENDIF
     correct: |
+      ' Test the modes in priority order - the chain itself enforces exclusivity
       #IFDEF USE_MODE_A
-      #UNDEF USE_MODE_B     ' Make mutual exclusivity explicit
         ' Mode A code
       #ELSEIFDEF USE_MODE_B
         ' Mode B code
+      #ELSE
+      #ERROR Define exactly one of USE_MODE_A or USE_MODE_B
       #ENDIF
+    note: >-
+      An #ELSEIFDEF chain is already mutually exclusive; a defensive #UNDEF adds
+      nothing and warns when the symbol was never defined. The #ELSE/#ERROR
+      fall-through turns "neither mode selected" into a build-time error instead
+      of a silently empty block.
 
   - anti_pattern: "overusing_preprocessor_for_logic"
     severity: "design"
@@ -264,16 +271,38 @@ anti_patterns:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
-  - "Maximum nesting depth is 8 levels"
+  - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
+  - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
   - "Symbols defined with #DEFINE persist until #UNDEF or end of file"
   - "External symbols can be defined via command line with -D option (v48+)"
   - "External symbols can be blocked with -U option (v48+)"
   - "The __DEBUG__ symbol is automatically defined when debug output is enabled"
   - "Preprocessor runs before compilation - no runtime overhead"
-  - "#INCLUDE inserts file contents at directive location"
-  - "#ERROR and #WARN provide compile-time diagnostics"
+  - "#INCLUDE inserts file contents at directive location; the .spin2 extension is appended"
+  - "#ERROR and #WARN provide compile-time diagnostics, and fire ONLY from branches that are taken"
   - "#PRAGMA EXPORTDEF propagates symbols to child objects"
+  - "#UNDEF of a symbol that was never defined is a WARNING, not an error: '#undef symbol [NAME] not found'"
+  - "Diagnostics go to stderr, one per line in source order, as <filespec>:<line>:error|warning:<message> -- no ANSI color codes; all preprocessor errors in a file are reported from a single build"
+
+compiler_portability:
+  summary: >-
+    Two compilers implement this preprocessor -- PNut (Chip Gracey's, the reference)
+    and PNut-TS. They agree on the whole directive set; the differences below are the
+    only ones that affect portable source.
+  divergences:
+    - topic: "Conditional nesting depth"
+      pnut: "Maximum 8 levels of #IFDEF/#IFNDEF nesting"
+      pnut_ts: "No documented limit"
+      portable: "Keep nesting to 8 levels or fewer"
+    - topic: "#ERROR / #WARN / #INCLUDE / #PRAGMA"
+      pnut: "Not provided"
+      pnut_ts: "PNut-TS extensions, with wording of their own"
+      portable: "Source that must build under PNut cannot rely on these"
+  shared_diagnostic_wording: >-
+    Several diagnostics use identical wording in both compilers, so one search matches
+    build logs from either: 'Expected a preprocessor symbol',
+    'Must be preceeded by #IFDEF or #IFNDEF', 'Expected #ENDIF'. The misspelling in the
+    second is PNut's own text, reproduced deliberately -- do not correct it.
 
 related:
   - language/spin2/preprocessor/define.yaml

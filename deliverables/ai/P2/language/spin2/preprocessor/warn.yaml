@@ -9,7 +9,10 @@ description: |
   compilation. The warning is displayed to the user, but the build continues.
   Use this for non-fatal configuration issues, deprecation notices, or
   informational messages.
-  Available in PNut/pnut_ts v47 and later compilers.
+  A PNut-TS extension: the Spin2 v55 documentation, which specifies PNut's
+  preprocessor, documents only the #DEFINE/#UNDEF/#IFDEF/#IFNDEF/#ELSEIFDEF/
+  #ELSEIFNDEF/#ELSE/#ENDIF set and does not cover #WARN. Source that must also
+  build under PNut cannot rely on this directive.
 
 syntax:
   basic: '#WARN "message"'
@@ -89,9 +92,11 @@ common_patterns:
       #ENDIF
 
 notes:
-  - "Available in v47+ compilers"
-  - "Message must be enclosed in double quotes"
+  - "A PNut-TS extension -- not part of the directive set PNut's own documentation (Spin2 v55) specifies"
+  - "Message is everything after the directive; quotes are OPTIONAL. One surrounding pair of matching quotes is stripped, so #WARN \"text\" and #WARN text produce the same message"
   - "Compilation continues after warning"
+  - "#WARN is subject to conditional compilation like any other content-bearing directive: one inside a branch that is NOT taken does not fire"
+  - "Diagnostics go to stderr, one per line in source order, as <filespec>:<line>:warning:<message> -- no ANSI color codes"
   - "Use for non-fatal issues - deprecation, hints, defaults"
   - "For fatal errors that should stop compilation, use #ERROR instead"
   - "Warnings help maintain code quality without blocking builds"

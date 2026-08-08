@@ -17,7 +17,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to undefine (case-sensitive)"
+    description: "Name of the symbol to undefine (case-insensitive)"
 
 examples:
   - code: |
@@ -77,8 +77,9 @@ examples:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
-  - "Undefining a non-existent symbol is allowed (no error)"
+  - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
+  - "Undefining a non-existent symbol is allowed: it is a WARNING, not an error -- the build continues and output artifacts are written. Diagnostic text: '#undef symbol [NAME] not found'"
+  - "Do not use a defensive #UNDEF to force mutual exclusivity: it warns whenever the symbol was never defined. An #ELSEIFDEF chain is already exclusive -- see preprocessor-overview contradictory_conditions"
   - "External symbols (defined via -D) cannot be undefined with #UNDEF"
   - "After #UNDEF, the symbol can be redefined with #DEFINE"
 

@@ -32,7 +32,7 @@ syntax:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to test (case-sensitive)"
+    description: "Name of the symbol to test (case-insensitive)"
 
 examples:
   - code: |
@@ -109,13 +109,13 @@ examples:
 
 notes:
   - "Available in v47+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
+  - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "Must appear after #IFDEF or #IFNDEF"
   - "Must appear before #ELSE (if present) and #ENDIF"
   - "Multiple #ELSEIFDEF directives can be chained"
   - "Only the first matching branch is compiled"
   - "Reduces nesting depth compared to nested #IFDEF blocks"
-  - "Maximum nesting depth of 8 levels applies to the outer block"
+  - "PNut's 8-level maximum nesting depth applies to the outer block; PNut-TS has no such cap"
 
 related:
   - ifdef
