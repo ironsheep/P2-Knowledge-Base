@@ -144,7 +144,7 @@ documentation:
 resources:
   product_page: "www.parallax.com (search 64014) - latest guide, schematics, example code"
   codec_datasheet: "AKM AK5704EN datasheet (www.akm.com) - authoritative for the codec register map"
-  example_drivers: "Parallax #64014 driver set (Spin2, MIT): AK5704_Driver.spin2 (ADC), 4DAC_Analog_Driver.spin2 (DAC), ADCtoDAC + AnalogDAC demos - on the 64014 product page"
+  example_drivers: "Parallax #64014 driver set (Spin2): AK5704_Driver.spin2 (ADC), 4DAC_Analog_Driver.spin2 (DAC), ADCtoDAC + AnalogDAC demos - on the 64014 product page"
   schematic: "64014-RevA P2 HD Audio Add-on Set schematic (2022-08-22) - CAD strap / address"
 
 see_also:

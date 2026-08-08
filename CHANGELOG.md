@@ -20,6 +20,23 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.16.0] - 2026-08-08
+
+**Spin2 preprocessor coverage, verified against the compiler**
+
+### Added
+- Diagnostic behavior for the conditional directives: `#UNDEF` of a symbol that was never defined is a warning (`#undef symbol [NAME] not found`) and the build continues; an `#IFDEF`/`#IFNDEF` left unclosed reports `Expected #ENDIF` against the line that opened the block.
+- `#ERROR` and `#WARN` fire only from branches that are taken, which is what makes the `#ELSE` → `#ERROR` fall-through safe for catching an unselected configuration.
+- Message parsing for `#ERROR`/`#WARN`: quotes are optional, with one surrounding pair stripped, so `#ERROR text` and `#ERROR "text"` read the same. Diagnostics arrive on stderr as `<file>:<line>:error|warning:<message>`, and every preprocessor diagnostic in a file is reported from a single build.
+- Predefined preprocessor symbols with per-compiler attribution — `__P2__`, `__propeller__`, `__propeller2__`, `__PNUT_TS__`, `__DATE__`, `__TIME__`, `__FILE__`, and `__DEBUG__`. Guard PNut-TS-only source with `#IFDEF __PNUT_TS__` so the same file still builds under PNut.
+- A compiler-portability section naming where PNut and PNut-TS differ and what the portable subset is, plus the diagnostic wording the two share so one search matches build logs from either.
+
+### Changed
+- Preprocessor symbol names are case-insensitive, matching Spin2 source generally: `DEBUG`, `Debug`, and `debug` are one symbol.
+- The 8-level conditional-nesting maximum is documented as PNut's limit, with the guidance to stay within it for source that must build under both compilers.
+- `#ERROR`, `#WARN`, `#INCLUDE`, and `#PRAGMA` are identified as PNut-TS extensions, so source targeting PNut can plan around them.
+- The mutual-exclusion recipe uses an `#ELSEIFDEF` chain — already exclusive on its own — with an `#ERROR` fall-through that names the configuration mistake at build time.
+
 ## [1.15.0] - 2026-07-27
 
 **DEBUG display window naming and host-input syntax, from the PNut v55 source**

@@ -87,7 +87,7 @@
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
 
-### F-206 — `debug-displays/{term,fft,logic,midi,scope,scope_xy}.yaml` under-specify the `SAVE` command's required filename (inconsistent across the set) — `CONFIRMED · YAML APPLIED 2026-07-11 (pending KB publish)`
+### F-206 — `debug-displays/{term,fft,logic,midi,scope,scope_xy}.yaml` under-specify the `SAVE` command's required filename (inconsistent across the set) — `DONE — YAML applied 2026-07-11, PUBLISHED in KB v1.15.0`
 
 > **APPLIED 2026-07-11:** all six `SAVE` lines standardized to `SAVE {WINDOW} 'filename' -- ...
 > filename is REQUIRED; WINDOW optional`, matching v55 L1139 (WINDOW = entire window; absence =
@@ -125,7 +125,7 @@
 
 **Proposed KB action:** (1) add a **packed full-window array-feed example** to `debug-displays/logic.yaml` and `debug-displays/scope.yaml` (and the packed-mode note in `statements/debug.yaml`) — `` `uhex_long_array_(@buff, N) `` matching v55's only packed example — plus the caveat: *a single packed-long feed advances the scrolling window by one column only; the full window requires the array feed* (BITMAP is exempt). (2) Document the **mode↔channel-count** rule in `logic.yaml` (LONGS_NBIT ⇒ N one-bit channels) and the SCOPE value-interleave form in `scope.yaml`.
 
-> **KB APPLIED 2026-07-11 (pending KB publish):** both facets landed. `logic.yaml` — `packed:` gains the
+> **KB APPLIED 2026-07-11 — PUBLISHED in KB v1.15.0.** Both facets landed. `logic.yaml` — `packed:` gains the
 > sub-sample-width = channel-count rule (Facet B) + a new LONGS_2BIT full-window array-feed example
 > and an array-feed/unpack note (Facet A, unpack semantics quoted from v55 L1143/L1406). `scope.yaml`
 > — `packed:` gains the per-channel-value interleave form (Facet B) + a LONGS_8BIT array-feed example
@@ -148,7 +148,7 @@
 
 **Proposed correction (KB → yaml head):** in `plot.yaml` POLAR directive, state that **θ=0 points East (+x)**; the default (positive `twopi`) sense is **counter-clockwise**; a **negative `twopi` reverses to clockwise**. Replace the `"twopi -1/0"` shorthand with that sign-based rule.
 
-> **YAML APPLIED 2026-07-11 (pending KB publish):** `plot.yaml:62` POLAR now reads "*Orientation:
+> **YAML APPLIED 2026-07-11 — PUBLISHED in KB v1.15.0.** `plot.yaml:62` POLAR now reads "*Orientation:
 > theta=0 points East (+x); with the default (positive) twopi the angle increases counter-clockwise;
 > a NEGATIVE twopi reverses the sweep to clockwise*" — the murky `"twopi -1/0"` shorthand is gone.
 > Manual side already applied (#195). Grounded EF-032/Test J.
@@ -183,7 +183,7 @@
 
 **Grounding:** P2 Silicon Doc HUBSET clock-config field layout (`%PPPP_CC_SS`: CC=caps bits 3:2, SS=source bits 1:0); matches Ch4.
 
-### F-211 — I/O pin power-domain group size is wrong across the KB: "isolated groups of **four**" (16 groups) — actual = **8 groups of 8** (P0-7 … P56-63) — `DONE 2026-07-11 (YAML applied; pending KB publish at §9)`
+### F-211 — I/O pin power-domain group size is wrong across the KB: "isolated groups of **four**" (16 groups) — actual = **8 groups of 8** (P0-7 … P56-63) — `DONE — YAML applied 2026-07-11, PUBLISHED in KB v1.15.0`
 
 > **APPLIED 2026-07-11 (yaml head).** Corrected 4→8 across all 5 files: `pin-power-domains.yaml`
 > (title, description, `power_grouping.group_size` 4→8, `groups:` "16 groups"→"8 groups", boundaries
@@ -1420,7 +1420,7 @@ lock-guarded multi-writer form explicitly.
 > reads horizontal `2=right/3=left` (unchanged — was already correct), **vertical
 > `2=top/3=bottom` (corrected from `2=bottom/3=top`)**, weight `0=thin` + a render
 > caveat that the font does not visibly distinguish the four weights.
-> **YAML side APPLIED 2026-07-11** (pending KB publish): `plot.yaml:67` TEXTSTYLE now
+> **YAML side APPLIED 2026-07-11 — PUBLISHED in KB v1.15.0.** `plot.yaml:67` TEXTSTYLE now
 > carries the per-axis mapping (horiz `%10`=right/`%11`=left; vert `%10`=top/`%11`=bottom)
 > + the weight render caveat (`$00`==`$01`; `$02`/`$03` not visibly heavier).
 - **Location:** PLOT `TEXTSTYLE` byte `%YYXXUIWW` — the `%XX` (horizontal) and `%YY` (vertical) value→direction mapping. Affects `manuals/p2-debug-window-manual/opus-master/ch05-plot.md` (TEXTSTYLE table), `deliverables/ai/P2/language/spin2/debug-displays/plot.yaml` (currently states only the **bit positions**, silent on the value mapping), and any doc asserting which of `%10`/`%11` is left/right/top/bottom.
@@ -2025,7 +2025,7 @@ No other live manual declares these sources. Survey done, not skipped.
 > a divergent behavior belongs to is different from, and allowed where, the behaviors genuinely
 > differ (F-230, ENH-03).
 
-### F-229 — the preprocessor YAMLs claim symbol names are **case-sensitive**; Spin2 source is **case-INSENSITIVE** — `DONE 2026-08-08 (YAML applied; pending KB publish)`
+### F-229 — the preprocessor YAMLs claim symbol names are **case-sensitive**; Spin2 source is **case-INSENSITIVE** — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0`
 
 > **Applied 2026-08-08:** all **18** occurrences across **9** files corrected to case-INSENSITIVE.
 > The two illustrated claims were inverted rather than deleted — `define.yaml` now reads *"DEBUG,
@@ -2050,7 +2050,7 @@ No other live manual declares these sources. Survey done, not skipped.
   illustration inverts to show they are the *same* symbol. Class-wide — the acceptance criterion
   *"no longer claims symbol names are case-sensitive"* only passes if all 18 are fixed.
 
-### F-230 — the 8-level `#IFDEF` nesting cap is stated as a **language rule**; it is **PNut-specific** — `DONE 2026-08-08 (YAML applied; pending KB publish)`
+### F-230 — the 8-level `#IFDEF` nesting cap is stated as a **language rule**; it is **PNut-specific** — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0`
 
 > **Applied 2026-08-08:** all 7 occurrences across the 5 files now name PNut and state the portable
 > guidance ("*PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap — keep to 8 for
@@ -2071,7 +2071,7 @@ No other live manual declares these sources. Survey done, not skipped.
 - **Do NOT touch** the unrelated "8 levels" hits in `stack_operations`, `xbyte_engine`, `cog`, and
   `p2-architecture-mental-model` — different subject (hardware stack depth), not this cap.
 
-### F-231 — the `contradictory_conditions` **"correct" example** recommends a pattern that **breaks the build** (filed as "warns") — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **severity raised on test**
+### F-231 — the `contradictory_conditions` **"correct" example** recommends a pattern that **breaks the build** (filed as "warns") — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0` · **severity raised on test**
 
 > **⚠ WORSE THAN FILED — measured, not assumed (2026-08-08).** The request describes the defensive
 > `#UNDEF` as producing a *warning* under PNut-TS **v1.55.2**. On the **v1.55.0** toolchain actually
@@ -2122,7 +2122,7 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
   (v48+) annotations, `#undef` of a **built-in** symbol under PNut-TS, and the 4 named anti-patterns
   the request lists but does not substantiate.
 
-### F-232 — `error.yaml` / `warn.yaml` claim the message **"must be enclosed in double quotes"**; quotes are **optional** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+### F-232 — `error.yaml` / `warn.yaml` claim the message **"must be enclosed in double quotes"**; quotes are **optional** — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0` · **NEW, surfaced while fixing**
 
 - **Not in the request's correction list** — surfaced by reading the files while applying ENH-02 §3.3.
 - **What's wrong:** both files stated quoting as a requirement. Per §3.3 the message is *everything
@@ -2131,7 +2131,7 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
   believe an unquoted message is a syntax error.
 - **Applied:** both notes rewritten to state quotes are optional and describe the one-pair stripping.
 
-### F-233 — four directives are advertised as **"Available in PNut/pnut_ts v47+"** but are **PNut-TS extensions** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+### F-233 — four directives are advertised as **"Available in PNut/pnut_ts v47+"** but are **PNut-TS extensions** — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0` · **NEW, surfaced while fixing**
 
 > **SETTLED by first-party documentation 2026-08-08** — no longer needs Stephen's confirmation. The
 > v1.55.2 release ships `pnut_ts/Preprocessor.md`, which states at **line 257**: *"`#error`, `#warn`,
@@ -2178,7 +2178,7 @@ first-hand verified:**
 (as filed); on **v1.55.0** it fails the build outright. Either way the replacement is correct, and
 it now also demonstrably fires its `#ERROR` fall-through when no mode is selected.
 
-### ENH-04 — predefined preprocessor symbols: the KB documented **1 of 8**; and the compiler's own doc lists **2 that do not exist** — `DONE 2026-08-08 (YAML applied; pending KB publish)` · **NEW, surfaced while fixing**
+### ENH-04 — predefined preprocessor symbols: the KB documented **1 of 8**; and the compiler's own doc lists **2 that do not exist** — `DONE — YAML applied 2026-08-08, PUBLISHED in KB v1.16.0` · **NEW, surfaced while fixing**
 
 - **Gap:** `external-symbols.yaml` carried only `__DEBUG__`. The v1.55.2 `Preprocessor.md` table
   lists nine. A remote agent had no way to discover the rest.

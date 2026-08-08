@@ -75,7 +75,7 @@ rtc_chip:
     datasheet); resolved from the NXP PCF8523 datasheet (Table 46 slave address;
     register-overview Table 5, addresses 00h-13h) and CORROBORATED by the
     official Parallax 64013 RTC driver (64013_RTC_Driver.spin2, M. Mulholland /
-    JonnyMac, MIT) which uses $68 at 400 kHz with a 3.3K pull-up. (Gap G-013
+    JonnyMac) which uses $68 at 400 kHz with a 3.3K pull-up. (Gap G-013
     resolved.)
   register_map:
     "00h": "Control_1 (CAP_SEL, STOP, SR, 12_24, SIE, AIE, CIE)"
@@ -130,7 +130,7 @@ documentation:
 resources:
   product_page: "www.parallax.com (search 64013) - latest guide, schematic, example code"
   rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
-  example_driver: "Parallax 64013 RTC Driver/Example (Spin2, MIT) - on the 64013 product page; uses jm_i2c at 400 kHz, 3.3K pull-up"
+  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c at 400 kHz, 3.3K pull-up"
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
 
 see_also:

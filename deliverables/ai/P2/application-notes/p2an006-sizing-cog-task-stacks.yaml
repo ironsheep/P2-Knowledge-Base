@@ -42,7 +42,7 @@ summary: |
   routine (granular checkStack between init calls; the one that halts names the culprit); and R4 size
   a TASKSPIN task stack (the identical technique on an intra-cog task buffer -- the instrument only
   watches a hub buffer, so it does not care whether the buffer feeds a cog or a task). Built around
-  the MIT-licensed isp_stack_check utility (Stephen M. Moraco), shipped in the example library. The
+  the isp_stack_check utility (Stephen M. Moraco), shipped in the example library. The
   hub method stack sized here is NOT the P2 8-level hardware call stack. Every recipe compiles clean
   under pnut_ts -d; observing the overflow halt fire is a bench step.
 audience: [human, agent]
@@ -63,7 +63,7 @@ mechanism_reference:
 runnable_code:
   examples_zip: "P2AN006-src-<YYMMDD>.zip"        # published beside the PDF at release
   recipes:
-    - {id: isp_stack_check,      file: isp_stack_check.spin2,      note: "the instrument — sentinel-fill stack-overflow utility (Stephen M. Moraco, MIT); shipped verbatim"}
+    - {id: isp_stack_check,      file: isp_stack_check.spin2,      note: "the instrument — sentinel-fill stack-overflow utility (Stephen M. Moraco); shipped verbatim"}
     - {id: instrument-cog-stack, file: instrument-cog-stack.spin2, note: "R1 — guard a cogspin worker: prepStackForCheck (before launch) + checkStack (running guard)"}
     - {id: high-water-mark,      file: high-water-mark.spin2,      note: "R2 — reportStackUse reads the high-water mark; right-size to ~1.5x N"}
     - {id: pinpoint-overflow,    file: pinpoint-overflow.spin2,    note: "R3 — granular checkStack between init calls localizes the overrunning routine"}
@@ -118,6 +118,6 @@ provenance:
   cross_check_sources:
     - "P2 Knowledge Base cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
   community_examples:
-    - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC, MIT License) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
+    - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
   companion_publication:
     - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication)"
