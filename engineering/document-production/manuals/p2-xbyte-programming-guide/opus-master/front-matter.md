@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape The XBYTE Engine and Bytecode Dispatch on the Propeller 2\par}
 \vspace{0.35cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0.1\par}
 

@@ -24,7 +24,7 @@
 \vspace{0.25cm}
 {\Large\itshape Run several jobs in one cog — the TASK methods that retire the hand-coded coroutine\par}
 \vspace{0.35cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.15cm}
 {\large\color{blue}Version 1.0.2\par}
 

@@ -24,7 +24,7 @@
 \vspace{0.25cm}
 {\Large\itshape Three smart-pin instruments that turn a transducer into a number — no external counter or ADC\par}
 \vspace{0.35cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.15cm}
 {\large\color{blue}Version 1.0.2\par}
 

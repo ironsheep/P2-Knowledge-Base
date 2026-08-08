@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 3.0.4\par}
 

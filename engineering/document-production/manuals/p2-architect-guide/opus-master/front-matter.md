@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape Thinking in Cogs, Pins, and Forces\par}
 \vspace{0.35cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.2cm}
 {\large Version 1.0.3\par}
 

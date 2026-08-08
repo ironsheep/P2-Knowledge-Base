@@ -24,7 +24,7 @@
 \vspace{0.25cm}
 {\Large\itshape Spin2 STRUCT for in-cog records — and the worked code for sharing them safely across cogs\par}
 \vspace{0.35cm}
-{\large July 2026\par}
+{\large August 2026\par}
 \vspace{0.15cm}
 {\large\color{blue}Version 1.0.1\par}
 
