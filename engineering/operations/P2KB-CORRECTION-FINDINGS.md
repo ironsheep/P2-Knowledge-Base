@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-216`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover)
+**Next finding ID: `F-245`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2102,7 +2102,7 @@ No other live manual declares these sources. Survey done, not skipped.
   `#ERROR` fall-through (which is already mutually exclusive and needs no defensive `#UNDEF`), and
   add the note explaining why the `#UNDEF` was dropped. The anti-pattern itself stays.
 
-### ENH-02 — document five preprocessor behaviors the KB does not carry (request §3.1–3.5) — `OPEN`
+### ENH-02 — document five preprocessor behaviors the KB does not carry (request §3.1–3.5) — `CLOSED 2026-08-09 — verified already applied in KB v1.16.0` (see the v1.55.3 sweep below)
 
 `#undef` of an unknown symbol is a **warning** with exact text `#undef symbol [NAME] not found` ·
 `#ERROR`/`#WARN` fire **only from taken branches** (write as plain current behavior, **no version
@@ -2113,7 +2113,7 @@ an unterminated `#IFDEF` reports *"Expected #ENDIF"* at the **opening** line · 
 > **Free win (no edit needed):** §3.2 and §3.4 make our existing `missing_default_case` and
 > `unbalanced_conditionals` anti-patterns **true** — they were aspirational when written.
 
-### ENH-03 — name the compiler where PNut and PNut-TS diverge, and state the portable subset — `OPEN`
+### ENH-03 — name the compiler where PNut and PNut-TS diverge, and state the portable subset — `CLOSED 2026-08-09 — verified already applied in KB v1.16.0, extended to 6 divergences` (see the v1.55.3 sweep below)
 
 - **Preserve deliberately:** the misspelling *"Must be preceeded by #IFDEF or #IFNDEF"* is **PNut's
   own** diagnostic text — do not "correct" it.
@@ -2202,6 +2202,208 @@ it now also demonstrably fires its `#ERROR` fall-through when no mode is selecte
   implementation.
 
 **Exit gate:** ✅ all 7 of the request's §7 acceptance criteria PASS, re-run on v1.55.2.
+
+---
+
+## 2026-08-09 — PNut-TS v1.55.3 revalidation sweep (F-234..F-244)
+
+**Trigger:** PNut-TS v1.55.3 shipped (installed in the devcontainer this session; `Dockerfile`
+bumped 015502 → 015503). It fixed all three items KB v1.16.0 had referred back to Stephen
+(`__PNUTTS__` doc typo, missing `__VERSION__`, unguarded `#UNDEF` of a built-in), **changed**
+`#DEFINE`/`#UNDEF` semantics, and shipped a line-by-line re-verified `Preprocessor.md`. Re-running
+the preprocessor YAMLs against it exposed claims that were wrong **all along**, not merely stale.
+
+**Method — probed, not read.** Every claim below was settled by compiling a probe under v1.55.3 and
+reading the `-i` intermediate (`*__pre.spin2`) to observe substitution directly. PNut's side was
+settled from the ingested v55 documentation — `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt`,
+the v48 release note (`PNut_v48 filename -D egg -D bee`, 16 command-line symbols, `#DEFINE symbol`
+presence-only, no `-U`, 8 nesting levels, `__DEBUG__` the only predefined symbol) and its
+32-character symbol-name limit. **Neither compiler's behavior was inferred.**
+
+**Provenance of the bad claims — an upstream input doc, not our invention.** The false `-U`
+semantics and the value-carrying `#PRAGMA EXPORTDEF` came into the KB verbatim from
+`engineering/ingestion/external-inputs/pnut_ts_facts/Preprocessor-Usage-Guide.md`
+(§"-U (Undefine Symbol)": *"Prevents a symbol from being defined, even if `#define` appears in
+source"*, its `-U DEBUG_BUILD` release-build recipe, and `#pragma exportdef HARDWARE_REV 2`). That
+guide is now contradicted by the shipped compiler and by its own re-verified `Preprocessor.md`; a
+supersession note was added to it so a later ingestion pass cannot re-infect the KB.
+
+### F-234 — `-U` documented as "prevents a symbol from being defined"; it does **no such thing** — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `external-symbols.yaml` (option table, syntax, an entire worked example "Override source
+  #DEFINE with -U for release builds", use-case, 2 notes), `preprocessor-overview.yaml` (option
+  purpose + note), `pragma-exportdef.yaml` (consistent, and the only file that had it right).
+- **Probe:** source `#DEFINE DEBUG_BUILD` compiled with `-U DEBUG_BUILD` → the symbol is **still
+  defined**, the guarded code still compiles. `-U`'s only observable effect is blocking a
+  `#PRAGMA EXPORTDEF` (probed both ways: with the pragma active the child takes the `#IFDEF` branch;
+  with `-U` it takes the `#ELSE`).
+- **Also probed:** `-U SYM -D SYM` and `-D SYM -U SYM` both leave SYM **defined** — so the old note
+  about "-U is processed before -D" described a mechanism that does not exist (it happened to state
+  the right outcome for one of the two orders).
+- **PNut:** has no `-U` at all. `-U` and `-I` are PNut-TS-only options.
+- **Applied:** `-U` restated as "blocks `#PRAGMA EXPORTDEF` of that symbol; it does NOT undefine or
+  prevent anything"; the release-build example replaced with the portable `#IFNDEF RELEASE` pattern
+  (compile-verified both ways: debug build 9254 bytes, `-D RELEASE` build 9234 — the debug line drops).
+
+### F-235 — `-D symbol=value` documented in three files; **no such form exists**, and it silently defines nothing — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `external-symbols.yaml` (`syntax.define_with_value`, the `pnut`/`pnut_ts` command lines
+  `-DDEBUG_MODE -DVERSION=2`, a `value` parameter, a "Version embedding" use case, 2 code examples),
+  `error.yaml:53` (`use -D CLOCK_SPEED=200000000`).
+- **Probe:** `pnut_ts -D VERS=200` → `VERS` is **not defined** (`#IFDEF VERS` takes the `#ELSE`), and
+  **no diagnostic is issued**. Same for the attached form `-DVERS=200`. `-DVERS` (no value) defines
+  normally.
+- **PNut:** the v55 v48 note shows `-D egg -D bee` only — no `=value` form there either. The form is
+  fabricated for **both** compilers, so it was removed outright rather than compiler-qualified.
+- **Reader impact:** anyone following the KB to pass a version or clock into a build got a silently
+  undefined symbol and a silently-skipped `#IFDEF` — no error to explain it.
+- **→ For Stephen (PNut-TS):** `-D SYM=value` deserves a diagnostic; today it is accepted and drops
+  the definition on the floor.
+
+### F-236 — "External symbols (defined via `-D`) cannot be undefined with `#UNDEF`" — **false**; they can — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `undef.yaml` note, `external-symbols.yaml` note + a whole example captioned "External
+  symbols persist (cannot be #UNDEF'd)".
+- **Probe:** `-D EXTSYM` + `#UNDEF EXTSYM` → the symbol is **removed**, silently, with no warning;
+  the later `#IFDEF` takes the `#ELSE`. `-D` symbols are ordinary user symbols.
+- **What IS protected:** the predefined `__*__` set (F-238/ENH-04's symbols) — see the v1.55.3
+  behavior in ENH-05.
+- **Applied:** claim inverted in both files; the example rewritten to demonstrate the real behavior.
+
+### F-237 — `define.yaml`: "Symbols have no value — they are either defined or not defined" — a **compiler divergence**, not a flat fact — `DONE — YAML applied 2026-08-09`
+
+- **True of PNut** (v55: `#DEFINE symbol` — "Defines a preprocessor symbol for forward references"),
+  **false of PNut-TS**, where a symbol carries substitution text.
+- **Probe:** `#DEFINE MSG hello there world` → `byte "MSG", 0` emits `hello there world` (whole
+  multi-word value, interior spacing preserved); `#DEFINE NOTED 42 ' comment` → `CON N = NOTED`
+  compiles as `N = 42` (trailing tick comment excluded); bare `#DEFINE BARE` substitutes the text `1`.
+- **Applied:** documented as a named divergence in `define.yaml` (description, `with_value` syntax,
+  a `value` parameter, a worked example) and in `preprocessor-overview.yaml`
+  (`key_characteristics.Symbol values` + a `compiler_portability` divergence row). Portable subset
+  stated: use presence only, tested with `#IFDEF`/`#IFNDEF`.
+
+### F-238 — predefined symbols described as "Defined as 1" / "Defined as 2", implying an observable value — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `external-symbols.yaml` `predefined_symbols` (all 8 entries).
+- **Probe:** `byte "__P2__", 0` emits the **literal text** `__P2__` — presence-only symbols never
+  substitute. Only `__DATE__` / `__TIME__` / `__FILE__` / `__VERSION__` substitute (observed:
+  `2026-08-09`, `18:17`, `p1_version.spin2`, `1.55.3`). There is no `#IF` expression evaluation, so a
+  presence-only symbol's numeric "value" is not observable by any means (see F-241).
+- **Applied:** every entry carries an explicit `kind: presence-only | substituting`, with a header
+  comment explaining the two kinds; the "Defined as N" wording is gone; `__DATE__`/`__TIME__`/`__FILE__`
+  descriptions now give their actual observed formats, including that `__FILE__` inside an `#INCLUDE`
+  names the **included** file.
+
+### F-239 — `__VERSION__` deliberately omitted as "not defined"; it **exists** as of v1.55.3 — `DONE — YAML applied 2026-08-09`
+
+- ENH-04 (KB v1.16.0) omitted `__VERSION__` after probing it absent under v1.55.2 — correct at the
+  time, and the compiler-side fix it triggered has now landed.
+- **Probe:** defined, substituting, bare dotted version (`1.55.3`), visible everywhere including
+  includes and child objects.
+- **Applied:** added with `kind: substituting`, `minimum_version: PNut-TS v1.55.3`, a worked
+  `byte "__VERSION__", 0` example, and the use-site caveat — the substituted text is a bare dotted
+  string and is **not a legal Spin2 expression**, so `CON V = __VERSION__` fails; use it inside a
+  quoted string or test it with `#IFDEF`. The file's provenance comment was rewritten to record the
+  v1.55.2 history rather than assert the symbol does not exist.
+
+### F-240 — `pragma-exportdef.yaml` teaches a **value-carrying** export; only **presence** is exported — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `syntax.with_value`, a `value` parameter, 4 examples/patterns passing values
+  (`HARDWARE_REV 2`, `BUFFER_SIZE 512`, `CLOCK_SPEED 200000000`, `SYSTEM_VERSION 100`,
+  `BUILD_NUMBER 2847`), and a 3-level `interaction_with_command_line.precedence` table.
+- **Probe:** top file `#define USE_PSRAM banana` + `#pragma exportdef USE_PSRAM` → the child's
+  `#IFDEF` sees the symbol, but `byte "USE_PSRAM", 0` in the child emits the **literal text** — the
+  value does not cross the object boundary. Also observed: the pragma **exports without defining
+  locally** (a bare `#pragma exportdef SOLO` with no prior `#define` left the symbol undefined in the
+  exporting file while the child saw it).
+- **Applied:** file rewritten — presence-only export stated in the description, behavior list and
+  notes; value syntax/parameter and every value-passing example removed; the invented precedence
+  table replaced with the two real interactions (`-U` blocks the export; a symbol exports once). New
+  `exporting_a_value` anti-pattern added showing the wrong idiom and the flag-symbol replacement.
+  Compile-verified: with the pragma the child selects the PSRAM branch, with `-U` it selects `#ELSE`.
+
+### F-241 — `pragma-exportdef.yaml:86-88` used `#IF` / `#ELSEIF`, which **do not exist** — the example breaks the build — `DONE — YAML applied 2026-08-09` · **severity raised on test** (F-231 class)
+
+- **What's wrong:** the "Child object responding to exported symbol" example was written with
+  `#IF HARDWARE_REV == 2` / `#ELSEIF HARDWARE_REV == 1`. This preprocessor has **no expression
+  evaluation of any kind** — the directive set is exactly `#DEFINE #UNDEF #IFDEF #IFNDEF #ELSEIFDEF
+  #ELSEIFNDEF #ELSE #ENDIF` (+ the PNut-TS extensions `#ERROR #WARN #INCLUDE #PRAGMA`).
+- **Probe — worse than "unsupported":** the `#IF` line does **not** open a conditional and is not
+  itself reported; the guarded body compiles **unconditionally**; the matching `#ENDIF` is then a
+  stray and the build fails with `Must be preceeded by #IFDEF or #IFNDEF` — reported at the `#ENDIF`,
+  several lines from the `#IF` that caused it. A reader copying our example gets a confusing failure
+  at the wrong line, and if they delete the "extra" `#ENDIF` to make it build, they get silently
+  ungated code.
+- **Applied:** the example removed; a new `no_if_expression_directive` anti-pattern in
+  `preprocessor-overview.yaml` documents both halves (wrong form + the flag-symbol replacement), a
+  `key_characteristics.No expression evaluation` entry states the rule positively, and
+  `pragma-exportdef.yaml` cross-references it. Both blocks compile-verified — the wrong form fails
+  exactly as described, the correct form builds and its `#ERROR` fall-through fires when no flag is set.
+- **→ For Stephen (PNut-TS):** `#if`/`#elseif` are silently swallowed where an unknown directive is
+  otherwise an error; they should be diagnosed at the `#if`, not indirectly at the `#endif`.
+
+### F-242 — "Maximum symbol name length is **31** characters" — the documented limit is **32** — `DONE — YAML applied 2026-08-09`
+
+- **Where:** `define.yaml` note, `external-symbols.yaml` parameter + `limits.max_name_length`.
+- **Authority:** v55 documentation — *"Symbolic names can be up to 32 characters in length."*
+- **Probe:** a 32-character symbol defines and tests correctly under PNut-TS.
+- Not a divergence — an off-by-one in our own text, wrong for both compilers.
+
+### F-243 — "Up to 16 external symbols" stated as a flat fact; it is **PNut's** cap — `DONE — YAML applied 2026-08-09` (F-230 class)
+
+- **Authority:** v55 v48 note — "Command line syntax can be used to define up to 16 preprocessor
+  symbols". **Probe:** PNut-TS accepts 17 `-D` symbols and defines the 17th.
+- **Applied:** attributed to PNut with the portability guidance ("keep to 16"), in `define.yaml`,
+  `external-symbols.yaml` (`limits.max_symbols` carries an inline comment) and a new
+  `compiler_portability` divergence row — the same treatment F-230 gave the 8-level nesting cap.
+
+### F-244 — `error.yaml` / `warn.yaml` parameter descriptions still said the message is "enclosed in double quotes" — `DONE — YAML applied 2026-08-09` · **residual of F-232**
+
+- F-232 (KB v1.16.0) corrected the `notes:` in both files to state quotes are optional, but left
+  `parameters[0].description` asserting the old requirement — each file contradicted itself.
+- **Applied:** both parameter descriptions restated (message is everything after the directive;
+  quotes optional; one surrounding pair stripped).
+
+### ENH-05 — document the three preprocessor behaviors **new in PNut-TS v1.55.3** — `DONE — YAML applied 2026-08-09`
+
+1. **`#UNDEF` of a predefined `__*__` symbol is refused** — warning
+   `cannot undefine built-in symbol [__P2__]`, the symbol **stays defined**, the build continues
+   (probed). This closes the item ENH-03 explicitly listed as out-of-scope/unsubstantiated: the
+   behavior is now defined and observable. Earlier releases removed the symbol silently.
+2. **`#UNDEF` removal is complete** — after `#UNDEF`, the symbol is absent from `#IFDEF` **and** its
+   text no longer substitutes, so a later `#DEFINE` installs a new value (probed: `hello` → `#undef`
+   → re-`#define goodbye` emits `goodbye`). Earlier releases removed only the `#IFDEF` presence while
+   the stale substitution kept expanding.
+3. **A function-like `#DEFINE` is an error** — `#define does not support arguments — only simple
+   symbol definitions`, and no output file is written (probed). There are no parameterized macros in
+   either compiler. Earlier releases accepted `#DEFINE SQ(x) ((x)*(x))` with no diagnostic and never
+   expanded it, so every use site was silently wrong.
+
+Applied to `undef.yaml` (3 notes), `define.yaml` (note + `with_value` semantics) and
+`preprocessor-overview.yaml` (2 notes + 2 `compiler_portability` divergence rows).
+
+### ENH-02 — `CLOSED — verified already applied` (was `OPEN`)
+
+All five behaviors were applied in KB v1.16.0 and the status simply never flipped. Verified in place
+this pass: `#undef` unknown-symbol warning + exact text (`undef.yaml:81`, overview note), `#ERROR`/
+`#WARN` fire only from taken branches (`error.yaml:109`, `warn.yaml:97`, overview note), one-pair
+quote stripping (`error.yaml:107`, `warn.yaml:95`), `Expected #ENDIF` reported at the **opening**
+line (`ifdef.yaml:105`, `ifndef.yaml:101`, `endif.yaml:97`), stderr diagnostic format (overview
+note). The one loose end it left behind is filed and fixed as **F-244**.
+
+### ENH-03 — `CLOSED — verified already applied, and extended` (was `OPEN`)
+
+The `compiler_portability` block delivering this landed in KB v1.16.0 (divergences, portable subset,
+shared diagnostic wording, PNut's `preceeded` misspelling preserved). Extended this pass from 2
+divergence rows to 6 — symbol values (F-237), command-line options (F-234/F-235), symbol count
+(F-243), `#UNDEF` of a built-in and function-like `#DEFINE` (ENH-05). Its out-of-scope item
+*"`#undef` of a built-in symbol under PNut-TS"* is now **answered**, not merely unsubstantiated.
+
+**Manual impact survey (`release-yamls` §8): NO MANUAL IMPACT — surveyed, not assumed.** The delta is
+6 files, all under `language/spin2/preprocessor/`. Re-ran the v1.16.0 survey and it still holds: no
+live manual or app-note `MANUAL-DESCRIPTOR.md` declares the preprocessor as a source, and no live doc
+body contains `#IFDEF`/`#DEFINE`/`#ELSEIFDEF` — the preprocessor is not taught in any shipped
+document. Nothing to flag for re-audit.
 
 **Manual impact survey (KB v1.16.0, `release-yamls` §8): NO MANUAL IMPACT — surveyed, not assumed.**
 The delta is the 14 `language/spin2/preprocessor/` YAMLs plus the licensing-term removals in

@@ -19,7 +19,7 @@ syntax:
 parameters:
   - name: "message"
     type: "string"
-    description: "Warning message text enclosed in double quotes"
+    description: "Warning message text -- everything after the directive. Quotes are OPTIONAL; one surrounding pair of matching quotes is stripped"
 
 behavior:
   - "Warning is displayed during compilation"

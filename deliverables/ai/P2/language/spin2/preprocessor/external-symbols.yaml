@@ -7,95 +7,130 @@ minimum_version: "v48"
 description: |
   Preprocessor symbols and include paths can be configured from the command line,
   allowing the same source code to be compiled with different configurations
-  without modifying source files. Three options are available:
-  - -D: Define a symbol (as if #DEFINE appeared at file start)
-  - -U: Prevent a symbol from being defined (overrides source #DEFINE)
-  - -I: Add directories to the #INCLUDE search path
+  without modifying source files. Options available:
+  - -D: Define a symbol (as if #DEFINE appeared at file start). Both compilers.
+  - -U: Block a #PRAGMA EXPORTDEF of that symbol. PNut-TS only.
+  - -I: Add directories to the #INCLUDE search path. PNut-TS only.
   Available in PNut/pnut_ts v48 and later compilers.
+
+  A command-line symbol is DEFINED ONLY -- it carries no value. There is no
+  -D symbol=value form in either compiler: the symbol is presence-only, testable
+  with #IFDEF/#IFNDEF.
 
 command_line_options:
   - option: "-D"
     purpose: "Define preprocessor symbol"
-    syntax: "-D symbol or -D symbol=value"
-    description: "Defines symbol before source is processed, overrides source #DEFINE"
+    syntax: "-D symbol"
+    description: >-
+      Defines symbol before any source is processed, in every file of the compilation
+      (including #INCLUDEd files and OBJ children). Presence only -- no value.
   - option: "-U"
-    purpose: "Undefine/prevent symbol"
+    purpose: "Block a symbol's #PRAGMA EXPORTDEF"
     syntax: "-U symbol"
-    description: "Prevents symbol from being defined, even if #DEFINE appears in source"
+    description: >-
+      PNut-TS only. Prevents a #PRAGMA EXPORTDEF of the named symbol from taking
+      effect, so the symbol stays private to the file that defined it. It does NOT
+      undefine or prevent a symbol -- a source #DEFINE (or a -D) of that symbol
+      remains fully in effect.
   - option: "-I"
     purpose: "Add include directory"
     syntax: "-I path"
-    description: "Adds directory to search path for #INCLUDE files"
+    description: "PNut-TS only. Adds directory to search path for #INCLUDE files"
 
 syntax:
   define_symbol: "-D symbol"
-  define_with_value: "-D symbol=value"
-  undefine_symbol: "-U symbol"
+  block_export: "-U symbol"
   include_path: "-I path"
 
 command_line:
-  pnut: "pnut -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
-  pnut_ts: "pnut_ts -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
-  with_undefine: "pnut_ts -U DEBUG_MODE source.spin2"
+  pnut: "pnut -D DEBUG_MODE -D BOARD_P2EDGE myprogram.spin2"
+  pnut_ts: "pnut_ts -D DEBUG_MODE -D BOARD_P2EDGE myprogram.spin2"
+  with_export_block: "pnut_ts -U USE_PSRAM source.spin2"
   with_include: "pnut_ts -I ./includes -I ./drivers source.spin2"
-  combined: "pnut_ts -D RELEASE -U DEBUG_MODE -I ./lib source.spin2"
+  combined: "pnut_ts -D RELEASE -U USE_PSRAM -I ./lib source.spin2"
 
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to define/undefine (case-insensitive, max 31 chars)"
-  - name: "value"
-    type: "string"
-    description: "Optional value to associate with -D symbol"
+    description: "Name of the symbol (case-insensitive, max 32 chars)"
   - name: "path"
     type: "directory"
     description: "Directory path for -I include search"
 
 limits:
-  max_symbols: 16
-  max_name_length: 31
+  max_symbols: 16          # PNut's documented cap; PNut-TS does not enforce it
+  max_name_length: 32
 
+# The predefined symbols come in two KINDS. A presence-only symbol exists to be
+# tested with #IFDEF/#IFNDEF -- it is never text-substituted, and its numeric
+# "value" is not observable, because this preprocessor has no #IF expression
+# evaluation: the only question you can ask is defined-or-not. A substituting
+# symbol carries text that replaces the symbol name wherever it appears in the
+# file, including inside a quoted string -- which is the normal way to use one.
 predefined_symbols:
   - symbol: "__DEBUG__"
-    description: "Defined as 1 only when compiling debug() statements is enabled (-d given). The one predefined symbol both compilers provide."
+    kind: "presence-only"
+    description: "Defined only when compiling debug() statements is enabled (-d given). The one predefined symbol both compilers provide."
     compilers: "PNut and PNut-TS"
     example: |
       #IFDEF __DEBUG__
           ' Code compiled only when debug is enabled
       #ENDIF
   - symbol: "__P2__"
-    description: "Defined as 1 -- compiling for Propeller 2"
+    kind: "presence-only"
+    description: "Defined -- compiling for Propeller 2"
     compilers: "PNut-TS"
   - symbol: "__propeller__"
-    description: "Defined as 2 -- the Propeller generation being compiled for"
+    kind: "presence-only"
+    description: "Defined -- compiling for a Propeller"
     compilers: "PNut-TS"
   - symbol: "__propeller2__"
-    description: "Defined as 1 -- compiling for Propeller 2"
+    kind: "presence-only"
+    description: "Defined -- compiling for Propeller 2"
     compilers: "PNut-TS"
   - symbol: "__PNUT_TS__"
-    description: "Defined as 1 -- indicates the PNut-TS compiler is in use. Guard PNut-TS-only source with it (the #ERROR/#WARN/#INCLUDE/#PRAGMA extensions) so the same file still builds under PNut."
+    kind: "presence-only"
+    description: "Defined -- indicates the PNut-TS compiler is in use. Guard PNut-TS-only source with it (the #ERROR/#WARN/#INCLUDE/#PRAGMA extensions) so the same file still builds under PNut. Note the underscore: there is no __PNUTTS__."
     compilers: "PNut-TS"
     example: |
       #IFDEF __PNUT_TS__
       #WARN Building with the PNut-TS extensions
       #ENDIF
   - symbol: "__DATE__"
-    description: "String holding the date compilation began"
+    kind: "substituting"
+    description: "The date compilation of the file began, as YYYY-MM-DD (e.g. 2026-08-09)"
     compilers: "PNut-TS"
   - symbol: "__TIME__"
-    description: "String holding the time compilation began"
+    kind: "substituting"
+    description: "The time compilation of the file began, as HH:MM (e.g. 18:17)"
     compilers: "PNut-TS"
   - symbol: "__FILE__"
-    description: "String giving the file currently being compiled"
+    kind: "substituting"
+    description: "The name of the file being preprocessed (e.g. myfile.spin2). Inside an #INCLUDEd file this is the INCLUDED file's name, not the top file's."
     compilers: "PNut-TS"
+  - symbol: "__VERSION__"
+    kind: "substituting"
+    description: >-
+      The PNut-TS version, bare with no v prefix (e.g. 1.55.3), matching the version the
+      CLI banner reports. The substituted text is a bare dotted string and is NOT a legal
+      Spin2 expression -- CON V = __VERSION__ fails at the use site. Use it inside a quoted
+      string, or test it with #IFDEF.
+    compilers: "PNut-TS"
+    example: |
+      DAT
+        byte "__VERSION__", 0     ' emits: 1.55.3
+    minimum_version: "PNut-TS v1.55.3"
 
-# Every symbol above was confirmed present by compiling an #IFDEF probe for each
-# under PNut-TS v1.55.2 (2026-08-08). Two notes on that release's own
-# Preprocessor.md table:
-#   - it spells the compiler marker __PNUTTS__; the symbol the compiler actually
-#     defines is __PNUT_TS__ (probed above), which is what this entry documents.
-#   - it lists __VERSION__, which is NOT defined under any spelling tried, so it
-#     is omitted here rather than documented as usable.
+# Every symbol above was confirmed by compiling probes under PNut-TS v1.55.3
+# (2026-08-09): an #IFDEF probe for presence, and an emitted `byte "SYM", 0`
+# read back from the -i intermediate file for substitution. The presence-only
+# symbols were confirmed NOT to substitute -- byte "__P2__" stays literal.
+# All predefined __*__ symbols are protected from #UNDEF (see undef.yaml).
+#
+# History: v1.55.2 and earlier defined __VERSION__ too late for the preprocessor
+# to see it, so any use failed; it was omitted from this file until v1.55.3 made
+# it real. The v1.55.2 Preprocessor.md also spelled the compiler marker
+# __PNUTTS__, a documentation typo -- the symbol has always been __PNUT_TS__.
 
 examples:
   - code: |
@@ -124,7 +159,7 @@ examples:
     
   - code: |
       ' Multiple external symbols for build configuration
-      ' Compile with: pnut_ts -DRELEASE -DOPTIMIZE -DVERSION=100 app.spin2
+      ' Compile with: pnut_ts -D RELEASE -D OPTIMIZE app.spin2
       
       #IFDEF RELEASE
           #IFNDEF DEBUG_MODE
@@ -150,21 +185,28 @@ examples:
     description: "Using the predefined __DEBUG__ symbol"
     
   - code: |
-      ' External symbols cannot be undefined
-      ' This is intentional - preserves build system control
-
-      ' Compile with: pnut_ts -DBUILD_CONFIG myprogram.spin2
+      ' An external symbol is an ORDINARY symbol -- it can be undefined in source
+      ' Compile with: pnut_ts -D BUILD_CONFIG myprogram.spin2
 
       #IFDEF BUILD_CONFIG
-          ' This block is ALWAYS compiled when -DBUILD_CONFIG is used
-          ' #UNDEF BUILD_CONFIG would have no effect on external symbols
+          ' Compiled -- the command line defined it
       #ENDIF
-    description: "External symbols persist (cannot be #UNDEF'd)"
+
+      #UNDEF BUILD_CONFIG     ' silently removes it, no warning
+
+      #IFDEF BUILD_CONFIG
+          ' NOT compiled -- the symbol is gone for the rest of the file
+      #ENDIF
+    description: "A -D symbol can be #UNDEF'd (only the predefined __*__ symbols are protected)"
 
   - code: |
-      ' Using -U to override source file defaults
-      ' Source file has DEBUG_BUILD defined:
-      #DEFINE DEBUG_BUILD
+      ' Selecting a release build from the command line
+      ' -U does NOT do this: it only blocks #PRAGMA EXPORTDEF, and leaves a
+      ' source #DEFINE fully in effect. Drive the choice with a symbol instead.
+
+      #IFNDEF RELEASE
+      #DEFINE DEBUG_BUILD          ' debug is the default
+      #ENDIF
 
       PUB main()
       #IFDEF DEBUG_BUILD
@@ -172,9 +214,9 @@ examples:
       #ENDIF
         run_app()
 
-      ' Compile for release (removes debug code):
-      ' pnut_ts -U DEBUG_BUILD source.spin2
-    description: "Override source #DEFINE with -U for release builds"
+      ' Debug build:   pnut_ts source.spin2
+      ' Release build: pnut_ts -D RELEASE source.spin2
+    description: "Release vs debug selection -- the portable pattern, since -U cannot remove a symbol"
 
   - code: |
       ' Using -I for include paths
@@ -196,16 +238,14 @@ examples:
 
   - code: |
       ' Combined options for CI/CD builds
-      ' pnut_ts -D RELEASE -D VERSION=200 -U DEBUG_MODE -I ./lib source.spin2
+      ' pnut_ts -D RELEASE -U LOCAL_OVERRIDE -I ./lib source.spin2
 
       #IFDEF RELEASE
         ' Production code paths
       #ENDIF
 
-      #IFDEF DEBUG_MODE
-        ' This code will NOT be compiled due to -U DEBUG_MODE
-        debug("Debug output")
-      #ENDIF
+      ' -U LOCAL_OVERRIDE does not undefine anything -- it keeps a
+      ' #PRAGMA EXPORTDEF LOCAL_OVERRIDE from reaching the child objects
 
       #INCLUDE "common_utils"  ' Found in ./lib directory
     description: "Combining -D, -U, and -I for CI/CD builds"
@@ -217,10 +257,8 @@ use_cases:
     description: "Define TARGET_* symbols to select hardware configuration"
   - case: "Feature flags"
     description: "Enable/disable features without source modification"
-  - case: "Version embedding"
-    description: "Pass version numbers into compilation"
   - case: "Release builds"
-    description: "Use -U to override source debug symbols without modifying code"
+    description: "Define a RELEASE symbol and let the source select against it with #IFNDEF"
   - case: "Library organization"
     description: "Use -I to locate includes in library directories"
 
@@ -237,12 +275,13 @@ include_search_order:
 notes:
   - "Available in v48+ compilers"
   - "-D symbols are case-insensitive, like all Spin2 symbols"
-  - "Maximum of 16 external symbols can be defined via -D"
-  - "Maximum symbol name length is 31 characters"
-  - "-D symbols CANNOT be undefined with #UNDEF in source"
-  - "-D symbols have priority over source-defined symbols"
-  - "-U prevents symbol definition even if #DEFINE appears in source"
-  - "-U is processed before -D, so -U SYM -D SYM results in SYM being defined"
+  - "There is NO -D symbol=value form in either compiler. PNut-TS accepts the text without complaint and defines NOTHING -- pnut_ts -D VERS=200 leaves VERS undefined, with no diagnostic. To carry a value, use a source #DEFINE (PNut-TS only)"
+  - "PNut accepts up to 16 external symbols via -D; PNut-TS does not enforce that cap -- keep to 16 for portability"
+  - "Maximum symbol name length is 32 characters"
+  - "-D symbols CAN be undefined with #UNDEF in source -- they are ordinary user symbols. Only the predefined __*__ symbols are protected from #UNDEF"
+  - "-D symbols are defined before any source is read, so a later source #DEFINE of the same symbol is a redefinition, not a conflict"
+  - "-U does NOT undefine or prevent a symbol -- its only effect is to block a #PRAGMA EXPORTDEF of that symbol. A source #DEFINE of the symbol remains fully in effect, and -U SYM -D SYM leaves SYM defined (in either order)"
+  - "-U and -I are PNut-TS options; PNut provides only -D"
   - "-I directories are searched before source file directory for #INCLUDE"
   - "Multiple -I options are searched in command-line order"
   - "The __DEBUG__ symbol is predefined when debug output is enabled"

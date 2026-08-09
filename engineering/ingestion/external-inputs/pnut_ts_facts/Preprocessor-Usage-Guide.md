@@ -1,5 +1,22 @@
 # Preprocessor Usage Guide
 
+> ## ⚠ PARTIALLY SUPERSEDED — verified against PNut-TS v1.55.3 on 2026-08-09
+>
+> This guide is retained as the historical input document. Three of its claims are
+> **contradicted by the shipped compiler** and by the re-verified `Preprocessor.md`
+> that ships in the v1.55.3 package. Do **not** carry them into the P2KB — they were
+> filed as F-234, F-235 and F-240 and corrected in `language/spin2/preprocessor/`.
+>
+> | This guide says | Actual behavior (probed on v1.55.3) |
+> |---|---|
+> | §"-U (Undefine Symbol)": *"Prevents a symbol from being defined, even if `#define` appears in source"*, and the `-U DEBUG_BUILD` release-build recipe | `-U` does **not** undefine or prevent anything. Its **only** effect is to block a `#PRAGMA EXPORTDEF` of that symbol. A source `#define` (or a `-D`) survives `-U` intact. |
+> | `#pragma exportdef HARDWARE_REV 2` — a value handed to child objects | `#pragma exportdef` exports the symbol's **presence** only. The value does not cross the object boundary; the symbol does not text-substitute in the child. |
+> | Implied `-D SYMBOL=value` usage | There is no `=value` form in **either** compiler. `pnut_ts -D VERS=200` defines **nothing**, with no diagnostic. |
+>
+> Its `-U` blocks-`#pragma exportdef` statement (in the `#pragma` section) is **correct** and
+> was confirmed by probe. For PNut's own behavior, the authority is the ingested v55
+> documentation, not this guide.
+
 ## Overview
 
 The Spin2 preprocessor provides conditional compilation, symbol definition, file inclusion, and diagnostic directives. These directives are processed before compilation begins, allowing code to be configured for different build configurations, platforms, or hardware variants.

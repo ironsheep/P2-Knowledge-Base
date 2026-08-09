@@ -58,7 +58,7 @@ command_line_options:
     purpose: "Define symbol before compilation"
     file: "external-symbols.yaml"
   - option: "-U symbol"
-    purpose: "Prevent symbol from being defined"
+    purpose: "Block a #PRAGMA EXPORTDEF of that symbol (PNut-TS only) -- it does NOT undefine anything"
     file: "external-symbols.yaml"
   - option: "-I path"
     purpose: "Add include directory to search path"
@@ -81,7 +81,11 @@ key_characteristics:
   - characteristic: "Symbol scope"
     description: "Symbols persist from definition until end of file or #UNDEF"
   - characteristic: "External symbols"
-    description: "Symbols can be defined via -D command line option (v48+)"
+    description: "Symbols can be defined via -D command line option (v48+). Presence only -- there is no -D symbol=value form in either compiler"
+  - characteristic: "Symbol values"
+    description: "COMPILER DIVERGENCE. Under PNut a symbol is presence-only -- defined or not. Under PNut-TS a symbol also carries substitution text (#DEFINE MSG hello there world), replacing the symbol name wherever it appears, including inside a quoted string. Presence-only usage is the portable subset"
+  - characteristic: "No expression evaluation"
+    description: "There is no #IF/#ELSEIF directive and no expression evaluation of any kind. The only question the preprocessor can ask is defined-or-not, via #IFDEF/#IFNDEF/#ELSEIFDEF/#ELSEIFNDEF. Encode choices as flag symbols"
 
 examples:
   - code: |
@@ -202,6 +206,33 @@ anti_patterns:
       fall-through turns "neither mode selected" into a build-time error instead
       of a silently empty block.
 
+  - anti_pattern: "no_if_expression_directive"
+    severity: "compile_error"
+    description: >-
+      Writing #IF or #ELSEIF. Neither exists in this preprocessor -- there is no
+      expression evaluation. The #IF line does not open a conditional and does not
+      gate anything, so its body compiles UNCONDITIONALLY; the matching #ENDIF is
+      then a stray and the build fails with 'Must be preceeded by #IFDEF or #IFNDEF'.
+      The failure is reported at the #ENDIF, several lines away from the #IF that
+      caused it.
+    wrong: |
+      #DEFINE BOARD_REV 2
+      #IF BOARD_REV == 2
+        ' compiled no matter what BOARD_REV is
+      #ELSEIF BOARD_REV == 1
+        ' also not gated
+      #ENDIF          ' error: Must be preceeded by #IFDEF or #IFNDEF
+    correct: |
+      ' Encode each choice as its own flag symbol and test presence
+      #DEFINE BOARD_REV_2
+      #IFDEF BOARD_REV_2
+        ' Rev 2 code
+      #ELSEIFDEF BOARD_REV_1
+        ' Rev 1 code
+      #ELSE
+      #ERROR Define exactly one BOARD_REV_n
+      #ENDIF
+
   - anti_pattern: "overusing_preprocessor_for_logic"
     severity: "design"
     description: "Using preprocessor where runtime logic is more appropriate"
@@ -274,8 +305,12 @@ notes:
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
   - "Symbols defined with #DEFINE persist until #UNDEF or end of file"
-  - "External symbols can be defined via command line with -D option (v48+)"
-  - "External symbols can be blocked with -U option (v48+)"
+  - "External symbols can be defined via command line with -D option (v48+); presence only -- there is no -D symbol=value form in either compiler"
+  - "-U does NOT undefine or block a symbol -- its only effect is to block a #PRAGMA EXPORTDEF of that symbol (PNut-TS only)"
+  - "There is no #IF or #ELSEIF directive and no expression evaluation -- see the no_if_expression_directive anti-pattern"
+  - "PNut-TS: a symbol carries substitution text; under PNut a symbol is presence-only. Presence-only usage is the portable subset"
+  - "PNut-TS: #UNDEF of a predefined __*__ symbol is refused with a warning and the symbol stays defined; a -D symbol, by contrast, can be #UNDEF'd normally"
+  - "PNut-TS: a function-like #DEFINE NAME(args) is an error -- there are no parameterized macros"
   - "The __DEBUG__ symbol is automatically defined when debug output is enabled"
   - "Preprocessor runs before compilation - no runtime overhead"
   - "#INCLUDE inserts file contents at directive location; the .spin2 extension is appended"
@@ -298,6 +333,26 @@ compiler_portability:
       pnut: "Not provided"
       pnut_ts: "PNut-TS extensions, with wording of their own"
       portable: "Source that must build under PNut cannot rely on these"
+    - topic: "Symbol values and text substitution"
+      pnut: "A symbol has no value -- #DEFINE symbol makes it defined, nothing more"
+      pnut_ts: "A symbol carries substitution text (everything after the name; 1 if omitted), replacing the symbol wherever it appears, including inside a quoted string"
+      portable: "Use presence only, tested with #IFDEF/#IFNDEF; do not rely on a symbol substituting"
+    - topic: "Command-line options"
+      pnut: "-D only"
+      pnut_ts: "-D, plus -U (blocks #PRAGMA EXPORTDEF) and -I (include search path)"
+      portable: "Only -D is available in both, and only in its presence form -- there is no -D symbol=value in either"
+    - topic: "Number of command-line symbols"
+      pnut: "Up to 16"
+      pnut_ts: "No enforced cap"
+      portable: "Keep to 16 or fewer"
+    - topic: "#UNDEF of a predefined __*__ symbol"
+      pnut: "Not documented"
+      pnut_ts: "Refused -- warning 'cannot undefine built-in symbol [NAME]', the symbol stays defined, the build continues"
+      portable: "Do not #UNDEF a predefined symbol"
+    - topic: "Function-like #DEFINE"
+      pnut: "Not provided -- there are no parameterized macros"
+      pnut_ts: "Error: '#define does not support arguments — only simple symbol definitions'"
+      portable: "There are no macros with arguments in either compiler"
   shared_diagnostic_wording: >-
     Several diagnostics use identical wording in both compilers, so one search matches
     build logs from either: 'Expected a preprocessor symbol',

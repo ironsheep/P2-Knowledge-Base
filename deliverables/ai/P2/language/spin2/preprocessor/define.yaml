@@ -5,18 +5,31 @@ category: Preprocessor Directives
 minimum_version: "v47"
 
 description: |
-  Defines a preprocessor symbol that can be tested with #IFDEF or #IFNDEF 
-  conditional compilation directives. The symbol persists from the point of 
+  Defines a preprocessor symbol that can be tested with #IFDEF or #IFNDEF
+  conditional compilation directives. The symbol persists from the point of
   definition until the end of the file or until removed with #UNDEF.
   Available in PNut/pnut_ts v47 and later compilers. No version directive required.
 
+  The two compilers differ on whether a symbol carries a VALUE. Under PNut a
+  symbol is presence-only -- it is defined or it is not. Under PNut-TS a symbol
+  also carries text that is substituted wherever the symbol name appears. Source
+  that must build under both compilers should use presence only, and test it with
+  #IFDEF/#IFNDEF.
+
 syntax:
   basic: "#DEFINE symbol"
+  with_value: "#DEFINE symbol value        ' PNut-TS only"
 
 parameters:
   - name: "symbol"
     type: "identifier"
     description: "Name of the symbol to define (case-insensitive)"
+  - name: "value"
+    type: "text"
+    description: >-
+      PNut-TS only. Optional substitution text: EVERYTHING after the symbol name,
+      with interior spacing preserved and a trailing tick or brace comment excluded.
+      Omitted, the symbol substitutes the text 1.
 
 examples:
   - code: |
@@ -63,13 +76,28 @@ examples:
       #ENDIF
     description: "Feature flag pattern for modular builds"
 
+  - code: |
+      ' PNut-TS ONLY: a symbol carries substitution text
+      #DEFINE MSG hello there world     ' MSG substitutes: hello there world
+      #DEFINE NOTED 42 ' trailing tick comment is NOT part of the value
+      #DEFINE BARE                      ' no value given: BARE substitutes: 1
+
+      CON
+        N = NOTED                       ' compiles as: N = 42
+
+      DAT
+        byte "MSG", 0                   ' emits: hello there world
+    description: "Value substitution (PNut-TS only; under PNut these symbols are presence-only)"
+
 notes:
   - "Available in v47+ compilers - no version directive required"
   - "Symbol names are case-insensitive: DEBUG, Debug and debug are the SAME symbol"
   - "Symbol persists until end of file or #UNDEF"
-  - "Symbols have no value - they are either defined or not defined"
-  - "Maximum symbol name length is 31 characters"
-  - "Up to 16 external symbols can be defined via command line"
+  - "COMPILER DIVERGENCE -- symbol values: under PNut a symbol has no value, it is simply defined or not. Under PNut-TS a symbol also carries substitution text: the value is everything after the symbol name, and the symbol name is replaced by it wherever it appears in the file, including inside a quoted string. A symbol defined with no value substitutes the text 1. Use presence only (#IFDEF/#IFNDEF) for source that must build under both"
+  - "PNut-TS: a trailing tick or brace comment on the #DEFINE line is excluded from the value; interior spacing within the value is preserved"
+  - "PNut-TS: a function-like #DEFINE is an ERROR -- '#define does not support arguments — only simple symbol definitions'. There are no parameterized macros in this preprocessor. Earlier PNut-TS releases accepted #DEFINE SQ(x) ((x)*(x)) with no diagnostic and the macro never expanded, so every use site was silently wrong"
+  - "Maximum symbol name length is 32 characters"
+  - "Up to 16 external symbols can be defined via command line under PNut; PNut-TS does not impose that cap -- keep to 16 for portability"
   - "Defining an already-defined symbol is allowed (no error)"
 
 related:

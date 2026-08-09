@@ -80,7 +80,9 @@ notes:
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "Undefining a non-existent symbol is allowed: it is a WARNING, not an error -- the build continues and output artifacts are written. Diagnostic text: '#undef symbol [NAME] not found'"
   - "Do not use a defensive #UNDEF to force mutual exclusivity: it warns whenever the symbol was never defined. An #ELSEIFDEF chain is already exclusive -- see preprocessor-overview contradictory_conditions"
-  - "External symbols (defined via -D) cannot be undefined with #UNDEF"
+  - "External symbols (defined via -D) CAN be undefined with #UNDEF -- they are ordinary user symbols, and the removal is silent. Only the predefined __*__ symbols are protected"
+  - "PNut-TS: #UNDEF of a predefined __*__ symbol is REFUSED -- the symbol stays defined, the build continues, and a warning is reported: 'cannot undefine built-in symbol [__P2__]'. These symbols describe the compilation environment, so removing one would misbehave far from the file that removed it"
+  - "PNut-TS: removal is COMPLETE -- after #UNDEF the symbol is absent from #IFDEF and its text is no longer substituted, so a later #DEFINE installs a new value. Earlier PNut-TS releases removed only the #IFDEF presence while the old substitution silently kept expanding"
   - "After #UNDEF, the symbol can be redefined with #DEFINE"
 
 related:

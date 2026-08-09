@@ -18,7 +18,7 @@ syntax:
 parameters:
   - name: "message"
     type: "string"
-    description: "Error message text enclosed in double quotes"
+    description: "Error message text -- everything after the directive. Quotes are OPTIONAL; one surrounding pair of matching quotes is stripped"
 
 behavior:
   - "Compilation stops immediately when #ERROR is encountered"
@@ -49,8 +49,8 @@ examples:
 
   - code: |
       ' Validate clock configuration
-      #IFNDEF CLOCK_SPEED
-      #ERROR "CLOCK_SPEED must be defined (use -D CLOCK_SPEED=200000000)"
+      #IFNDEF CLOCK_FAST
+      #ERROR CLOCK_FAST or CLOCK_SLOW must be defined (use -D CLOCK_FAST)
       #ENDIF
     description: "Require external symbol definition"
 

@@ -5,63 +5,63 @@ category: Preprocessor Directives
 minimum_version: "v47"
 
 description: |
-  Exports a symbol definition to child objects and subsequent compilations.
-  The exported symbol acts like a -D command-line option for all child objects,
-  allowing a top-level object to configure symbols that propagate to all
-  dependencies without requiring command-line changes.
+  Exports the PRESENCE of a preprocessor symbol to the rest of the compilation.
+  Normally a preprocessor symbol takes effect only in the single file that defined
+  it; #PRAGMA EXPORTDEF makes the symbol defined in all subsequent files, including
+  child objects named in OBJ -- exactly as if -D SYMNAME had been given on the
+  command line.
   #PRAGMA is a PNut-TS extension -- the original PNut does not provide it, and
   it uses wording of its own rather than PNut's shared diagnostic text.
   Source that must also build under PNut cannot rely on this directive.
 
+  What is exported is the FACT THAT THE SYMBOL IS DEFINED, not its value. An
+  exported symbol tests true with #IFDEF/#IFNDEF in every file, but it does not
+  text-substitute in those other files. Use it to select configuration branches
+  in child objects, not to pass data to them.
+
 syntax:
   basic: "#PRAGMA EXPORTDEF symbol"
-  with_value: "#PRAGMA EXPORTDEF symbol value"
 
 parameters:
   - name: "symbol"
     type: "identifier"
     description: "Name of the symbol to export (case-insensitive)"
-  - name: "value"
-    type: "optional"
-    description: "Optional value to associate with the symbol"
 
 behavior:
   - "Exported symbols are visible in all child objects (OBJ declarations)"
   - "Acts as if -D was specified for child object compilation"
-  - "Symbol propagates to entire dependency tree"
-  - "Command-line -U can prevent #PRAGMA EXPORTDEF from taking effect"
-  - "Command-line -D takes precedence over #PRAGMA EXPORTDEF"
+  - "Symbol propagates to the entire dependency tree"
+  - "PRESENCE only -- the symbol's value, if it has one, does NOT cross into the other files"
+  - "The pragma exports; it does not define. The exporting file sees the symbol only if it also #DEFINEs it"
+  - "Command-line -U blocks the export, keeping the symbol private to the file that defined it"
+  - "A symbol may be exported only once -- if #PRAGMA EXPORTDEF appears more than once for the same symbol, only the first takes effect"
+  - "If the symbol was defined on the command line with -D, the pragma has no additional effect -- it is already defined everywhere"
 
 examples:
   - code: |
-      ' Top-level object exports hardware revision
-      #PRAGMA EXPORTDEF HARDWARE_REV 2
+      ' Top-level file main.spin2 -- select a driver in the child object
+      #DEFINE USE_PSRAM
+      #PRAGMA EXPORTDEF USE_PSRAM
 
       OBJ
-        sensor : "sensor_driver"
-        display : "display_driver"
-
-      ' Both sensor_driver and display_driver will have
-      ' HARDWARE_REV defined with value 2
-    description: "Export configuration to all child objects"
+        flash : "flash_driver"
+    description: "Export a configuration flag to child objects"
 
   - code: |
-      ' Top-level configures debug mode for entire project
-      #PRAGMA EXPORTDEF DEBUG_MODE
-
-      OBJ
-        serial : "serial_driver"
-        storage : "sd_driver"
-
-      ' All drivers will have DEBUG_MODE defined,
-      ' enabling their debug code paths
-    description: "Enable debug mode across all dependencies"
+      ' Child object flash_driver.spin2 -- responds to the exported symbol
+      #IFDEF USE_PSRAM
+      OBJ driver : "psram_driver"
+      #ELSE
+      OBJ driver : "default_driver"
+      #ENDIF
+    description: "Child object selecting on an exported symbol"
 
   - code: |
-      ' Export multiple configuration symbols
+      ' Export several independent configuration flags
+      #DEFINE TARGET_BOARD_V2
+      #DEFINE USE_FAST_CLOCK
       #PRAGMA EXPORTDEF TARGET_BOARD_V2
       #PRAGMA EXPORTDEF USE_FAST_CLOCK
-      #PRAGMA EXPORTDEF BUFFER_SIZE 512
 
       OBJ
         core : "core_driver"
@@ -80,59 +80,74 @@ examples:
     description: "Conditional symbol export"
 
   - code: |
-      ' In child object (sensor_driver.spin2):
-      #IFDEF HARDWARE_REV
-        ' Hardware revision was exported from parent
-        #IF HARDWARE_REV == 2
-          ' Rev 2 specific code
-        #ELSEIF HARDWARE_REV == 1
-          ' Rev 1 specific code
-        #ENDIF
-      #ELSE
-        ' No revision specified - use defaults
-      #ENDIF
-    description: "Child object responding to exported symbol"
+      ' A VALUE does not cross the object boundary -- encode the choice as
+      ' separate flag symbols and test them with #IFDEF
+      #DEFINE HARDWARE_REV_2
+      #PRAGMA EXPORTDEF HARDWARE_REV_2
 
-interaction_with_command_line:
-  precedence:
-    - priority: 1
-      source: "Command-line -D"
-      description: "Takes highest precedence, overrides all other definitions"
-    - priority: 2
-      source: "#PRAGMA EXPORTDEF"
-      description: "Propagates to children unless overridden by -D"
-    - priority: 3
-      source: "#DEFINE in child"
-      description: "Lowest precedence, can be overridden by exported symbols"
-  blocking:
-    description: "Command-line -U prevents #PRAGMA EXPORTDEF from taking effect"
-    example: "pnut_ts -U HARDWARE_REV main.spin2  # Blocks HARDWARE_REV export"
+      OBJ
+        sensor : "sensor_driver"
+
+      ' In sensor_driver.spin2:
+      '   #IFDEF HARDWARE_REV_2
+      '     ' Rev 2 specific code
+      '   #ELSEIFDEF HARDWARE_REV_1
+      '     ' Rev 1 specific code
+      '   #ELSE
+      '   #ERROR Define exactly one HARDWARE_REV_n
+      '   #ENDIF
+    description: "Selecting a hardware revision -- flag symbols, because values do not export"
+
+anti_patterns:
+  - anti_pattern: "exporting_a_value"
+    severity: "logic_error"
+    description: >-
+      Attempting to hand a value to child objects with #PRAGMA EXPORTDEF. Only the
+      symbol's presence is exported; in the child the symbol name does not substitute,
+      so any arithmetic or comparison written against it is not the value you intended.
+      There is also no #IF expression evaluation in this preprocessor -- see
+      preprocessor-overview no_if_expression_directive.
+    wrong: |
+      ' Top level -- looks like it passes 2 to the children. It does not.
+      #DEFINE HARDWARE_REV 2
+      #PRAGMA EXPORTDEF HARDWARE_REV
+
+      ' Child object -- HARDWARE_REV does not substitute here
+      #IFDEF HARDWARE_REV
+      CON BOARD_REV = HARDWARE_REV     ' NOT 2 -- the value did not cross
+      #ENDIF
+    correct: |
+      ' Export one flag symbol per configuration and branch on presence
+      #DEFINE HARDWARE_REV_2
+      #PRAGMA EXPORTDEF HARDWARE_REV_2
+
+      ' Child object
+      #IFDEF HARDWARE_REV_2
+      CON BOARD_REV = 2
+      #ELSEIFDEF HARDWARE_REV_1
+      CON BOARD_REV = 1
+      #ELSE
+      #ERROR Define exactly one HARDWARE_REV_n
+      #ENDIF
 
 common_patterns:
   - pattern: "project_wide_config"
-    description: "Configure entire project from top-level object"
+    description: "Configure an entire project from the top-level object"
     code: |
       ' main.spin2 - top-level project file
-      #PRAGMA EXPORTDEF CLOCK_SPEED 200000000
-      #PRAGMA EXPORTDEF TARGET_BOARD P2EDGE
+      #DEFINE TARGET_BOARD_P2EDGE
+      #DEFINE CLOCK_FAST
+      #PRAGMA EXPORTDEF TARGET_BOARD_P2EDGE
+      #PRAGMA EXPORTDEF CLOCK_FAST
 
       OBJ
         driver1 : "driver1"
         driver2 : "driver2"
         lib1 : "library1"
-      ' All objects share same clock and board configuration
-
-  - pattern: "version_propagation"
-    description: "Propagate version information to all components"
-    code: |
-      #PRAGMA EXPORTDEF SYSTEM_VERSION 100
-      #PRAGMA EXPORTDEF BUILD_NUMBER 2847
-
-      OBJ
-        app : "application"
+      ' All objects select against the same two flags
 
   - pattern: "feature_cascade"
-    description: "Enable feature across all dependencies"
+    description: "Enable a feature across all dependencies"
     code: |
       #IFDEF ENABLE_LOGGING
         #PRAGMA EXPORTDEF LOGGING_ENABLED
@@ -144,12 +159,12 @@ common_patterns:
 
 notes:
   - "#PRAGMA is a PNut-TS extension; the original PNut does not provide it -- source that must build under PNut cannot use it"
-  - "Exported symbols affect all child objects in OBJ section"
-  - "Propagation is recursive - affects entire dependency tree"
-  - "Command-line -D overrides #PRAGMA EXPORTDEF"
-  - "Command-line -U blocks #PRAGMA EXPORTDEF"
-  - "Useful for project-wide configuration from single location"
-  - "Cannot export symbols that were defined with -U on command line"
+  - "Exports PRESENCE, not value: the symbol tests true with #IFDEF in every later file, but its text does NOT substitute there. To vary a VALUE per configuration, export flag symbols and let each object define its own constants"
+  - "Exported symbols affect all child objects in the OBJ section"
+  - "Propagation is recursive - affects the entire dependency tree"
+  - "The pragma exports the symbol; it does not define it locally -- #DEFINE it in the exporting file if that file also needs to test it"
+  - "Command-line -U blocks #PRAGMA EXPORTDEF of that symbol -- this is the ONLY thing -U does"
+  - "A symbol may be exported only once; a second #PRAGMA EXPORTDEF of the same symbol has no effect"
 
 related:
   - language/spin2/preprocessor/define.yaml
@@ -163,4 +178,4 @@ see_also:
   - "Object hierarchy"
   - "Build system integration"
 
-oneliner: "Export symbol definition to child objects and dependencies (v47+)"
+oneliner: "Export a symbol's presence to child objects and dependencies (v47+, PNut-TS only)"

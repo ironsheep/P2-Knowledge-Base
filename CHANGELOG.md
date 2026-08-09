@@ -20,6 +20,24 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.16.1] - 2026-08-09
+
+**Preprocessor symbol and command-line semantics, verified against PNut-TS v1.55.3**
+
+### Added
+- `__VERSION__`: the PNut-TS version as a bare dotted string (e.g. `1.55.3`), available everywhere including includes and child objects. Use it inside a quoted string or with `#IFDEF` — the bare form is not a legal Spin2 expression.
+- Predefined symbols are classified by kind: `__P2__`, `__propeller__`, `__propeller2__`, `__PNUT_TS__` and `__DEBUG__` answer `#IFDEF` and are never substituted, while `__DATE__`, `__TIME__`, `__FILE__` and `__VERSION__` substitute their text, with the format each one produces.
+- `#DEFINE` value semantics under PNut-TS: the value is everything after the symbol name, interior spacing preserved and a trailing comment excluded, substituting wherever the symbol appears — including inside a quoted string. A symbol defined with no value substitutes `1`. Under PNut a symbol is presence-only, which is the portable subset.
+- `#UNDEF` protection: a predefined `__*__` symbol stays defined and a warning names it, while a `-D` symbol is an ordinary symbol that `#UNDEF` removes.
+- `#DEFINE` takes simple symbol definitions only; a function-like `#DEFINE NAME(args)` is a compile error.
+
+### Changed
+- Conditional compilation is presence-based throughout — `#IFDEF`/`#IFNDEF`/`#ELSEIFDEF`/`#ELSEIFNDEF` over one flag symbol per configuration, with an `#ELSE` → `#ERROR` fall-through to catch an unselected build.
+- `#PRAGMA EXPORTDEF` exports a symbol's presence to child objects, so each object selects its own branch and defines its own constants.
+- `-U` blocks a `#PRAGMA EXPORTDEF` of the named symbol, keeping it private to the file that defined it. `-U` and `-I` are PNut-TS options; PNut provides `-D`.
+- `-D` defines a symbol's presence, in every file of the compilation. Build configuration reads it with `#IFNDEF RELEASE` to pick a default in source.
+- Symbol names are up to 32 characters, and PNut's 16-symbol command-line maximum is the portable ceiling.
+
 ## [1.16.0] - 2026-08-08
 
 **Spin2 preprocessor coverage, verified against the compiler**
