@@ -1,11 +1,26 @@
 # Preprocessor Usage Guide
 
-> ## ⚠ PARTIALLY SUPERSEDED — verified against PNut-TS v1.55.3 on 2026-08-09
+> # ⛔ OUTDATED — NOT AUTHORITATIVE (as of 2026-08-09)
 >
-> This guide is retained as the historical input document. Three of its claims are
-> **contradicted by the shipped compiler** and by the re-verified `Preprocessor.md`
-> that ships in the v1.55.3 package. Do **not** carry them into the P2KB — they were
-> filed as F-234, F-235 and F-240 and corrected in `language/spin2/preprocessor/`.
+> **This document is no longer factual truth for the P2 knowledge base.** It is retained
+> only as the historical input record and as provenance for findings F-234, F-235 and
+> F-240. Do **not** cite it, quote it, or carry any claim from it into the P2KB, a manual,
+> an app note, or an answer — including claims not listed in the table below. It has been
+> shown to state confidently things the compiler does not do, so **no** statement in it
+> carries authority on its own.
+>
+> **What to use instead, in this order:**
+> 1. **The `pnut-ts` compiler itself** — compile a probe; `-i` writes a `*__pre.spin2`
+>    intermediate that shows exactly what the preprocessor did. This is ground truth.
+> 2. **`Preprocessor.md` from the installed PNut-TS release package** — re-verified line
+>    by line for v1.55.3 (the devcontainer installs that build).
+> 3. **The ingested v55 documentation** (`engineering/ingestion/sources/spin2-v55/`) — the
+>    authority for **PNut's** behavior, which this guide does not distinguish from PNut-TS's.
+> 4. **The shipped P2KB** — `deliverables/ai/P2/language/spin2/preprocessor/`, corrected
+>    against all of the above in KB v1.16.1.
+>
+> **The specific defects that prompted this demotion** (each probed on v1.55.3 — the list
+> is illustrative, **not** a boundary of what is wrong here):
 >
 > | This guide says | Actual behavior (probed on v1.55.3) |
 > |---|---|
@@ -13,9 +28,13 @@
 > | `#pragma exportdef HARDWARE_REV 2` — a value handed to child objects | `#pragma exportdef` exports the symbol's **presence** only. The value does not cross the object boundary; the symbol does not text-substitute in the child. |
 > | Implied `-D SYMBOL=value` usage | There is no `=value` form in **either** compiler. `pnut_ts -D VERS=200` defines **nothing**, with no diagnostic. |
 >
-> Its `-U` blocks-`#pragma exportdef` statement (in the `#pragma` section) is **correct** and
-> was confirmed by probe. For PNut's own behavior, the authority is the ingested v55
-> documentation, not this guide.
+> One statement here did survive probing — the `#pragma` section's note that `-U` blocks
+> `#pragma exportdef`. That is recorded for completeness only; **it does not restore this
+> document's authority.** A claim from this guide is worth exactly as much as the probe
+> that re-establishes it, so probe it and cite the compiler, not this file.
+>
+> *Demoted while releasing KB v1.16.1. Full analysis: the "PNut-TS v1.55.3 revalidation
+> sweep" section of `engineering/operations/P2KB-CORRECTION-FINDINGS.md`.*
 
 ## Overview
 
