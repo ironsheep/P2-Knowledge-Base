@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-08T22:19:21.437524",
+    "generated": "2026-08-09T18:45:59.889261",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1724,
@@ -11335,8 +11335,8 @@
     },
     "p2kbSpin2Define": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/define.yaml",
-      "mtime": 1786225750,
-      "sha256": "32f5c1b72fcb7c35cb2b5f76a7cb8c208c0f4394fb8c36e7608a49b529b29938"
+      "mtime": 1786301128,
+      "sha256": "61d5f079402a5244fccec8a7a59bb23b7fd15ec4b52adb1b2d0717bae5d1844a"
     },
     "p2kbSpin2Else": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/else.yaml",
@@ -11360,13 +11360,13 @@
     },
     "p2kbSpin2Error": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/error.yaml",
-      "mtime": 1786226422,
-      "sha256": "ee1981dd1a9aed60d5ae0730c2a1f86afa31019a9b2770fe4a0ba3faa6172c46"
+      "mtime": 1786301128,
+      "sha256": "907336df931ca335d9fa2af1d2bc2b45f83880ae1018e80d777e602b879984fc"
     },
     "p2kbSpin2ExternalSymbols": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/external-symbols.yaml",
-      "mtime": 1786226422,
-      "sha256": "7768972db03cdd43285f75407aa5c272787c6d48233f8d12100a32c3aecea110"
+      "mtime": 1786301128,
+      "sha256": "4ca8fec64e7f6d2690ea2e286ed97bfb215b26f17c4a95ff347308dde46edf19"
     },
     "p2kbSpin2Ifdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/ifdef.yaml",
@@ -11385,23 +11385,23 @@
     },
     "p2kbSpin2PragmaExportdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/pragma-exportdef.yaml",
-      "mtime": 1786226422,
-      "sha256": "275b2cb3ef33cb02fbb3497916847b97f2f9c75ea6d909a24ea6954f07b54c50"
+      "mtime": 1786301128,
+      "sha256": "17cd10e60127a7e66a785d0b2e441bface74df76c1ac6f4b6a4f2aea004536d0"
     },
     "p2kbSpin2PreprocessorOverview": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/preprocessor-overview.yaml",
-      "mtime": 1786225750,
-      "sha256": "d665b5467657c02b351cea1b2842a83e60920125d80ecd5f7bc183b28bfe22e5"
+      "mtime": 1786301128,
+      "sha256": "2f1fb5a1c262384ff54b0b6043124008a381a949d43b37d26bf03ed81ccc71b5"
     },
     "p2kbSpin2Undef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/undef.yaml",
-      "mtime": 1786225750,
-      "sha256": "a1601d48cb01d154dfa46ae8b74d0bbd490e7b9b378df5a7150fb35b39a5389e"
+      "mtime": 1786301128,
+      "sha256": "b0e88875dcc32b127e1ff82811aef366aabacc3f09734c58ea2c987f2a4deb7c"
     },
     "p2kbSpin2Warn": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/warn.yaml",
-      "mtime": 1786226422,
-      "sha256": "e66d8d4fc9d8437d1ac8b79da725c953987520c3e8f93a68212dd91f70131965"
+      "mtime": 1786301128,
+      "sha256": "28ab7b6fd67e4a8bd29416711cb901a2e9e9e6f0cc967d392dab42175b85073c"
     },
     "p2kbSpin2RegDira": {
       "path": "deliverables/ai/P2/language/spin2/registers/dira.yaml",
