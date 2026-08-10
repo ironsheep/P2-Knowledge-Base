@@ -4,12 +4,12 @@
 
 A licensing change. No technical content changed.
 
-- **Licensed CC BY-SA 4.0** — share and adapt this manual, including commercially, with attribution and under the same terms.
+- **Licensed CC BY-SA 4.0**: share and adapt this manual, including commercially, with attribution and under the same terms.
 
 
 ## v3.1.4 (2026-07-14)
 
-**Hyphenated names print exactly as written** — compound terms and cross-references keep their authored spelling.
+**Hyphenated names print exactly as written**: compound terms and cross-references keep their authored spelling.
 
 ### Fixed
 - Hyphenated compound terms read as written: `not-taken` branch timing, `1..4-byte` FIFO values.
@@ -17,45 +17,45 @@ A licensing change. No technical content changed.
 
 ## v3.1.3 (2026-07-11)
 
-**A silicon- and hardware-grounded accuracy pass** — instruction semantics, flag effects, and timing across the reference verified against the P2 documentation and real-hardware measurement.
+**A silicon- and hardware-grounded accuracy pass**: instruction semantics, flag effects, and timing across the reference verified against the P2 documentation and real-hardware measurement.
 
 ### Changed
-- Instruction behavior and flag effects read as the silicon defines them — including the AUGS/AUGD augment surviving intervening instructions before its `#` immediate, and the TEST, interrupt-priority, COGINIT, and QEXP semantics.
+- Instruction behavior and flag effects read as the silicon defines them, including the AUGS/AUGD augment surviving intervening instructions before its `#` immediate, and the TEST, interrupt-priority, COGINIT, and QEXP semantics.
 - Timing reflects measured behavior: bracketing code with two GETCT reads carries a fixed 2-clock overhead, hardware-confirmed on real P2 silicon.
 
 ## v3.1.2 (2026-07-04)
 
-**Event-wait timeout documentation** — the event-waiting instructions document how a preceding SETQ arms a hardware timeout, hardware-verified on P2 silicon.
+**Event-wait timeout documentation**: the event-waiting instructions document how a preceding SETQ arms a hardware timeout, hardware-verified on P2 silicon.
 
 ### Changed
-- The event-wait instructions (WAITSE1–WAITSE4, WAITCT1–WAITCT3, WAITPAT, WAITATN, and the WAITxxx event family) document the SETQ-armed timeout: a System-Counter target loaded into SETQ immediately before the wait bounds it, so a single instruction stalls on its event or the deadline — whichever comes first — with C/Z reporting which. With no preceding SETQ the wait carries no timeout, and its WC/WZ/WCZ form clears both flags as a one-instruction flag-clear.
+- The event-wait instructions (WAITSE1–WAITSE4, WAITCT1–WAITCT3, WAITPAT, WAITATN, and the WAITxxx event family) document the SETQ-armed timeout: a System-Counter target loaded into SETQ immediately before the wait bounds it, so a single instruction stalls on its event or the deadline, whichever comes first, with C/Z reporting which. With no preceding SETQ the wait carries no timeout, and its WC/WZ/WCZ form clears both flags as a one-instruction flag-clear.
 - The affected `Operation:` lines carry the timeout condition (`C/Z = timeout`, with the prior SETQ supplying the System-Counter deadline).
 
 ## v3.1.1 (2026-06-29)
 
-**Execution-model and instruction-reference refinements** — a clearer cog/LUT/hub model and the streamer's role in Chapter 1, better guidance on reading an instruction entry, and an uppercase style for mnemonics in prose.
+**Execution-model and instruction-reference refinements**: a clearer cog/LUT/hub model and the streamer's role in Chapter 1, better guidance on reading an instruction entry, and an uppercase style for mnemonics in prose.
 
 ### Added
-- §1.4.4 "Moving Hub Data: the Cog and the Streamer" — cog-driven hub access (RDLONG/WRLONG, with SETQ for fast bursts) alongside each cog's own streamer, a close cousin of a DMA channel that moves data on its own at a set rate. A REP block of transfers is interrupt-atomic.
-- REP reference (Part II): a REP block is interrupt-atomic — uninterruptible for its duration, including debug interrupts — the blocking counterpart to the streamer's autonomous transfer.
-- §2.8.3 (reading an entry): explains the conditional `Operation:` line — exact pseudocode carried when an instruction's behavior is not obvious from its description — illustrated with ADDX.
+- §1.4.4 "Moving Hub Data: the Cog and the Streamer", cog-driven hub access (RDLONG/WRLONG, with SETQ for fast bursts) alongside each cog's own streamer, a close cousin of a DMA channel that moves data on its own at a set rate. A REP block of transfers is interrupt-atomic.
+- REP reference (Part II): a REP block is interrupt-atomic, uninterruptible for its duration, including debug interrupts, the blocking counterpart to the streamer's autonomous transfer.
+- §2.8.3 (reading an entry): explains the conditional `Operation:` line, exact pseudocode carried when an instruction's behavior is not obvious from its description, illustrated with ADDX.
 - CMP carries an `Operation:` line (`C = borrow of (D - S); Z = (D == S)`), matching its CMPS / CMPX / CMPSX / CMPR / CMPM compare-family siblings.
 
 ### Changed
-- §1.6 Execution Modes presents cog and LUT execution as one contiguous 1024-long fast space — identical two-clock timing, the program counter rolling from cog RAM into LUT RAM ($1FF to $200) at no cost — in a single "Cog and LUT Execution" section, with hub execution as the performance boundary where instructions stream through the FIFO and a branch to hub costs at least 13 clocks. REP repeats a cog/LUT block with no per-iteration branch.
+- §1.6 Execution Modes presents cog and LUT execution as one contiguous 1024-long fast space, identical two-clock timing, the program counter rolling from cog RAM into LUT RAM ($1FF to $200) at no cost, in a single "Cog and LUT Execution" section, with hub execution as the performance boundary where instructions stream through the FIFO and a branch to hub costs at least 13 clocks. REP repeats a cog/LUT block with no per-iteration branch.
 - Instruction mnemonics in prose are set in uppercase, marking them as code tokens.
 
 ## v3.1.0 (2026-06-25)
 
-**Instruction-reference accuracy and presentation pass** — a content re-audit against the Knowledge Base alongside a voicing, layout, and typography refresh.
+**Instruction-reference accuracy and presentation pass**: a content re-audit against the Knowledge Base alongside a voicing, layout, and typography refresh.
 
 ### Changed
 - Refreshed typography for a cleaner, more consistent look across the manual.
 - Each instruction entry reads as a single unit, its syntax flowing directly into Operation and Result.
 - 206 instruction entries carry a concise `Operation:` line summarizing the instruction's effect.
 - Faster-instruction and related-instruction cross-references (e.g. SCA/SCAS, FLE/FGE) make lower-cycle alternatives discoverable from each entry.
-- Smart-pin setup (WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN) — the ordering correct for every mode and required by the trigger and serial modes.
-- Appendix F: configuration-word field labels follow the Silicon Doc — `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
+- Smart-pin setup (WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN), the ordering correct for every mode and required by the trigger and serial modes.
+- Appendix F: configuration-word field labels follow the Silicon Doc, `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
 
 ### Fixed
 - Signed add/subtract flag semantics: ADDS, ADDSX, SUBS, SUBSX, and the SUM family document C as carrying the correct sign of the result.
@@ -67,7 +67,7 @@ A licensing change. No technical content changed.
 
 ## v3.0.0 (2026-06-10)
 
-**Full content re-audit on the shared presentation platform** — every checkable claim re-verified against the current P2 Knowledge Base, with figures, tables, and code rendered on the common manual platform.
+**Full content re-audit on the shared presentation platform**: every checkable claim re-verified against the current P2 Knowledge Base, with figures, tables, and code rendered on the common manual platform.
 
 ### Part I: Architectural Foundation
 
@@ -96,7 +96,7 @@ A licensing change. No technical content changed.
 
 ## v2.3.0 (2026-05-22)
 
-**Periodic release** — Hub-exec timing accuracy across timing tables and prose, ALTx cross-mode compatibility documented, inline-PASM-with-multitasking gap closed, and seven code-example fixes.
+**Periodic release**: Hub-exec timing accuracy across timing tables and prose, ALTx cross-mode compatibility documented, inline-PASM-with-multitasking gap closed, and seven code-example fixes.
 
 ### Critical Fix
 

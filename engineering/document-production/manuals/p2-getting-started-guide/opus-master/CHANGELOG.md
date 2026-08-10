@@ -1,6 +1,6 @@
-# Changelog — Getting Started with the Propeller 2
+# Changelog: Getting Started with the Propeller 2
 
-All notable changes to *Getting Started with the Propeller 2 — Meet the Chip, Read
+All notable changes to *Getting Started with the Propeller 2, Meet the Chip, Read
 Its Code, Put It to Work* are recorded here. The manual owns its own version (manual
 head); this is the source of truth for the version string carried in `request.json`
 metadata and on the title page.
@@ -14,14 +14,14 @@ commits). Newest entry first.
 
 A licensing change. No technical content changed.
 
-- **Licensed CC BY-SA 4.0** — share and adapt this guide, including commercially, with attribution and under the same terms.
+- **Licensed CC BY-SA 4.0**: share and adapt this guide, including commercially, with attribution and under the same terms.
 
 
 ## v1.0.2 (2026-07-21)
 
 A readability refinement. No chapters added, no technical content changed.
 
-- **Prose** — the orientation reads more naturally, with more variety in how its sections open and close.
+- **Prose**: the orientation reads more naturally, with more variety in how its sections open and close.
 
 ---
 
@@ -29,13 +29,13 @@ A readability refinement. No chapters added, no technical content changed.
 
 An accuracy refinement. No chapters added.
 
-- **Instruction timing** — most register-to-register PASM2 instructions execute in two clocks, while branches and hub accesses take more.
+- **Instruction timing**: most register-to-register PASM2 instructions execute in two clocks, while branches and hub accesses take more.
 
 ---
 
 ## v1.0.0 (2026-06-24)
 
-**Initial release for community review.** A warm orientation on-ramp to the Propeller 2 —
+**Initial release for community review.** A warm orientation on-ramp to the Propeller 2,
 the layer below the reference manuals: it builds a mental model of the chip, teaches you to
 read P2 code, and puts it to work, then points you to the reference manuals for depth and to
 the companion *P2 Architect's Guide* for whole-system design. P1-migration sidebars

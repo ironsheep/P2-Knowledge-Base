@@ -1,16 +1,16 @@
-# P2AN006 — Sizing Cog & Task Stacks — Changelog
+# P2AN006 Changelog: Sizing Cog & Task Stacks
 
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.
 
-- **Licensed CC BY-SA 4.0** — share and adapt this note, including commercially, with attribution and under the same terms.
+- **Licensed CC BY-SA 4.0**: share and adapt this note, including commercially, with attribution and under the same terms.
 
 
 ## v1.0.0 (2026-07-07)
 
 Initial release for community review. A techniques-catalog application note for sizing the stack
-buffers that `cogspin` (new-cog) and `TASKSPIN` (intra-cog task) require on the P2 — where an
+buffers that `cogspin` (new-cog) and `TASKSPIN` (intra-cog task) require on the P2, where an
 undersized stack silently overwrites hub memory with no hardware trap. One shared idea (fill the
 stack with a known pattern and watch a sentinel just past its end) applied through four runnable
 recipes: instrument a new-cog stack against overflow, find the high-water mark and right-size,

@@ -4,22 +4,22 @@
 
 A licensing change. No technical content changed.
 
-- **Licensed CC BY-SA 4.0** — share and adapt this manual, including commercially, with attribution and under the same terms.
+- **Licensed CC BY-SA 4.0**: share and adapt this manual, including commercially, with attribution and under the same terms.
 
 
 ## v3.0.3 (2026-07-11)
 
-**A technical-accuracy pass** — instruction semantics, timing, and the worked examples verified against the P2 silicon documentation and the current compiler.
+**A technical-accuracy pass**: instruction semantics, timing, and the worked examples verified against the P2 silicon documentation and the current compiler.
 
 ### Changed
-- PASM2 behavior and timing read as the silicon defines them — the CORDIC is one solver the cogs share through hub slots, `MUL` is a 16×16→32 multiply, and the RCFAST oscillator runs at a nominal ~24 MHz.
+- PASM2 behavior and timing read as the silicon defines them, the CORDIC is one solver the cogs share through hub slots, `MUL` is a 16×16→32 multiply, and the RCFAST oscillator runs at a nominal ~24 MHz.
 
 ### Fixed
-- The `TESTP` WZ result reflects the pin state as the silicon reports it, and the async-serial transmit recipe drives its output pin (`P_OE`) — so these worked examples behave as the text describes.
+- The `TESTP` WZ result reflects the pin state as the silicon reports it, and the async-serial transmit recipe drives its output pin (`P_OE`): so these worked examples behave as the text describes.
 
 ## v3.0.2 (2026-07-07)
 
-**A naming refinement and three event-encoding corrections** — an example titled for what it teaches, and event-table entries that match the silicon.
+**A naming refinement and three event-encoding corrections**: an example titled for what it teaches, and event-table entries that match the silicon.
 
 ### Changed
 - The dedicated-cog servo example is titled "Real-World Example: Dedicated-Cog Servo Control," and its lead-in describes the timing as rock-steady. Accurate framing for a focused teaching example; no code changed.
@@ -29,12 +29,12 @@ A licensing change. No technical content changed.
 
 ## v3.0.1 (2026-06-25)
 
-**Accuracy re-audit, typography refresh, and a companion example library** — every code example compile-checked against the current compiler, with a presentation pass on the shared manual platform.
+**Accuracy re-audit, typography refresh, and a companion example library**: every code example compile-checked against the current compiler, with a presentation pass on the shared manual platform.
 
 ### Changed
 - Refreshed typography for a cleaner, more consistent look across the manual.
 - A companion example library collects ready-to-run versions of the manual's early programs (first blink, multi-cog blink, hub counters).
-- The smart-pin recipe (Ch 14) enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
+- The smart-pin recipe (Ch 14) enables the pin (DIRH) before writing the Y parameter (WYPIN): the one ordering correct for every mode, and the ordering the trigger and serial modes require.
 - Every PASM2 and Spin2 example compiles against the current compiler, using P2 instructions and current Spin2 syntax: in-range immediates, absolute (`#\`) long jumps, DAT-label string addresses (`##@label`), the `{Spin2_v43}` directive for the `BYTE()`/`LONG()`/`LSTRING()` composers, long-aligned DAT data, and labels clear of instruction and keyword names.
 
 ### Fixed
@@ -48,7 +48,7 @@ A licensing change. No technical content changed.
 
 ## v3.0.0 (2026-06-10)
 
-**Content re-audit on the shared presentation platform** — every technical claim re-verified against the current P2 Knowledge Base, delivered on the common P2 manual presentation platform.
+**Content re-audit on the shared presentation platform**: every technical claim re-verified against the current P2 Knowledge Base, delivered on the common P2 manual presentation platform.
 
 ### Instruction Semantics
 
@@ -78,7 +78,7 @@ A licensing change. No technical content changed.
 
 ## v2.2.0 (2026-05-23)
 
-**Periodic release** — Hub-exec timing accuracy, expanded pedagogical structure across Chapters 4-6 and 13-15, and consistent Your Turn block rendering throughout.
+**Periodic release**: Hub-exec timing accuracy, expanded pedagogical structure across Chapters 4-6 and 13-15, and consistent Your Turn block rendering throughout.
 
 ### New Content
 
