@@ -201,34 +201,45 @@ say "machine has; the second is worth checking even though that capture"
 say "did not list it, since the capture also missed IBM Plex."
 
 report_stem() {
-  # $1 = a *-Regular font file; report whether the four-style set exists
+  # $1 = an upright font file; report whether the four-style set exists.
+  #
+  # The upright face is NOT always called "-Regular". Several of the best
+  # book families in TeX Live name it "-Roman" (Cochineal, XCharter,
+  # Domitian, Crimson) and a few use "-Book". An earlier version of this
+  # script only knew "-Regular" and therefore reported "no complete set"
+  # for exactly the families we most wanted — so try each upright spelling.
   f="$1"
   base=$(basename "$f"); ext="${base##*.}"
-  case "$base" in
-    *-Regular.*|*-regular.*) : ;;
-    *) return 0 ;;
-  esac
-  stem=$(printf '%s' "$base" | sed -E 's/-[Rr]egular\.(otf|ttf)$//I')
   dir=$(dirname "$f")
+
+  upright=""
+  for u in Regular Roman Book; do
+    case "$base" in
+      *-$u.*) upright="$u"; break ;;
+    esac
+  done
+  [ -z "$upright" ] && return 0
+
+  stem=$(printf '%s' "$base" | sed -E "s/-${upright}\.(otf|ttf)$//")
   ok=1
-  for s in Regular Bold Italic BoldItalic; do
+  for s in "$upright" Bold Italic BoldItalic; do
     [ -f "$dir/$stem-$s.$ext" ] || ok=0
   done
   if [ "$ok" -eq 1 ]; then
     say ""
     say "    READY — all four styles present:"
     say "      \\setmainfont{$stem}[Extension=.$ext,"
-    say "        UprightFont=*-Regular, BoldFont=*-Bold,"
+    say "        UprightFont=*-$upright, BoldFont=*-Bold,"
     say "        ItalicFont=*-Italic,   BoldItalicFont=*-BoldItalic]"
     if have otfinfo; then
-      fe=$(otfinfo -f "$dir/$stem-Regular.$ext" 2>/dev/null)
+      fe=$(otfinfo -f "$dir/$stem-$upright.$ext" 2>/dev/null)
       s=no; o=no
       printf '%s\n' "$fe" | grep -q '^smcp' && s=YES
       printf '%s\n' "$fe" | grep -q '^onum' && o=YES
       say "      real small caps: $s     oldstyle figures: $o"
     fi
   else
-    say "      (no complete Regular/Bold/Italic/BoldItalic set under stem '$stem')"
+    say "      (no complete $upright/Bold/Italic/BoldItalic set under stem '$stem')"
   fi
 }
 
