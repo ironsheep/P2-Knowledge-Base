@@ -1451,7 +1451,15 @@ lock-guarded multi-writer form explicitly.
 
 ## Platform filter corrupts hyphenated names — `NOT-taken`, `p2-io-AND-smart-pins-user-guide` in a RELEASED manual (2026-07-13) — F-214
 
-### F-214 — `p2kb-platform-mnemonic-bold.lua` uppercases a mnemonic inside a hyphenated compound token — `CONFIRMED` (filter FIXED; affected PDFs need re-render)
+### F-214 — `p2kb-platform-mnemonic-bold.lua` uppercases a mnemonic inside a hyphenated compound token — `DONE (2026-08-08 — filter fixed, all affected PDFs re-rendered)`
+
+> **CLOSED 2026-08-08.** The filter fix (`eb0df87d`) removed the defect at the source; the
+> **2026-08-08 release wave** (`dca936b1` + `acc695e3`) then re-rendered and promoted all 15
+> published documents, so every shipped PDF now carries the fix. The Assembly Language Manual —
+> the one release that was carrying the seven corrupted renders, including the corrupted
+> cross-manual reference `p2-io-AND-smart-pins-user-guide` — re-rendered in that wave. The XByte
+> guide absorbed the fix at its next build as predicted. **The "Outstanding" paragraph below is
+> historical: nothing remains to re-render.**
 
 - **Location:** `engineering/document-production/platform/filters/p2kb-platform-mnemonic-bold.lua` — the `is_part_of_identifier` guard in `uppercase_mnemonics_in_line()`. **Shared platform filter → every manual that renders inline code is exposed.**
 - **The defect:** the filter uppercases Spin2 mnemonics inside inline code spans (by design — uppercase carries mnemonic identity, policy 2026-06-29). Its guard skips a word that is *part of an identifier*, but only recognized `[%w_]` as connector characters — **not the hyphen**. So in a hyphenated compound token, a mnemonic-looking component sits between two hyphens, reads as standalone, and gets uppercased.
@@ -1519,7 +1527,17 @@ construct we teach, plus test data whose expected output is **asymmetric**.
 **Gate:** all of this lands in ONE coordinated sweep (manual + examples ZIP + YAMLs), then re-render and re-release
 together. YAML side rides F-212 + its addendum.
 
-### F-215 — App-note in-document Revision History drifts from the cover and cites never-shipped drafts — `CONFIRMED` · **DEFERRED: rides each doc's next natural release** (Stephen 2026-07-14)
+### F-215 — App-note in-document Revision History drifts from the cover and cites never-shipped drafts — `DONE (2026-08-08 — all seven re-rendered; verified out of the shipped PDFs)`
+
+> **CLOSED 2026-08-08.** The deferred renders came due in the 2026-08-08 release wave
+> (`dca936b1` + `acc695e3`), which re-rendered and promoted every app note, so the corrected
+> sources reached the published PDFs. **Verified 2026-08-10 by text-extracting the seven shipped
+> PDFs, not by inference:** zero occurrences of `0.1.0` anywhere in any of them (Class B gone),
+> and each doc's Revision History top entry equals its cover version (Class A gone) —
+> P2AN001 1.0.3 · P2AN002 1.0.2 · P2AN003 1.0.2 · P2AN004 1.0.2 · P2AN005 1.0.2 ·
+> P2AN006 v1.0.1 · P2AN007 v1.0.1. The prep-time authoring gate (below) held through a full
+> release wave, which is what stops Class A regenerating. **The "Outstanding — six docs,
+> deferred" paragraph below is historical.**
 
 > **SCOPE CORRECTED 2026-07-14 — this is SIX of seven app notes, not two.** As originally filed, F-215
 > named only P2AN005/P2AN006, because the detection grep matched `v0.1.0` / "initial draft". **P2AN001–004
