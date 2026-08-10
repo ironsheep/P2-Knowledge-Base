@@ -449,7 +449,7 @@ that decides what the window shows. The window types are:
 Here is a genuine convenience. A P2 program can name a screen position for each
 window with a `POS` directive, but it does not have to. **A window with no `POS`
 is placed for you automatically** — PNut-Term-TS lays the whole set out as a tidy
-*dashboard*, so the windows never land on top of one another. (Windows that *do*
+*dashboard* instead of stacking every window on the same spot. (Windows that *do*
 carry a `POS` are put exactly where they ask.)
 
 The dashboard is a grid **sized to your display**: the height sets how many rows,
@@ -460,10 +460,16 @@ center column exists to build around.
 
 Windows fill the grid in a fixed **center-out** order: the first window takes the
 top-center cell, the next two flank it, and the arrangement widens outward and
-works its way down, row by row, staying balanced left-to-right as it goes. Two
-cells along the bottom are reserved, so the **main window** and the **debug
-logger** always keep their places; and if you open more windows than the grid
-holds, the extras cascade neatly from the top-left.
+works its way down, row by row, staying balanced left-to-right as it goes. If you
+open more windows than the grid holds, the extras cascade from the top-left.
+
+**The bottom row is not really yours.** The **main window** and the **debug
+logger** live there, and both are wider than a single column — so each of them
+also claims the cell beside it, which is what a window too wide for its cell
+always does. Between them they take the rest of the bottom row; on a typical
+screen they even overlap each other, as you can see in Figure 5.1. In practice
+that leaves the far-left cell as the only bottom slot an auto-placed window can
+land in.
 
 ```{=latex}
 \begin{figure}[H]
@@ -474,9 +480,11 @@ holds, the extras cascade neatly from the top-left.
 \draw[draw=diagram-border, line width=1pt, rounded corners=3pt, fill=white]
    (-0.35,-0.35) rectangle (10.75,5.35);
 \node[iospsub] at (5.2,5.62) {your screen};
-% auto-placed windows, labelled by fill order (Half-Moon Descending)
+% Auto-placed windows, labelled by fill order (Half-Moon Descending). Only the
+% first TEN are drawn as ordinary cells: they fill the top two rows exactly.
+% The bottom row is NOT three more free cells -- see below.
 \foreach \lbl/\c/\r in {1/2/0, 2/1/0, 3/3/0, 4/2/1, 5/1/1, 6/3/1,
-                        7/0/0, 8/4/0, 9/0/1, 10/4/1, 11/1/2, 12/3/2, 13/0/2} {
+                        7/0/0, 8/4/0, 9/0/1, 10/4/1} {
   \pgfmathsetmacro\px{\c*(\cw+\gp)}
   \pgfmathsetmacro\py{(2-\r)*(\ch+\gp)}
   \draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
@@ -485,20 +493,48 @@ holds, the extras cascade neatly from the top-left.
      (\px,\py) ++(0,\ch-0.3) rectangle ++(\cw,0.3);
   \node[font=\large\bfseries, text=diagram-text] at (\px+\cw/2,\py+0.6) {\lbl};
 }
-% reserved cells (bottom row)
-\foreach \lbl/\c in {{Main\\Window}/2, {Debug\\Logger}/4} {
-  \pgfmathsetmacro\px{\c*(\cw+\gp)}
-  \draw[draw=diagram-border!70, fill=diagram-border!12, dashed, rounded corners=1.5pt]
-     (\px,0) rectangle ++(\cw,\ch);
-  \node[font=\scriptsize\itshape, text=diagram-text, align=center] at (\px+\cw/2,0.75) {\lbl};
-}
+% The 11th window: the one bottom cell the system windows leave alone.
+\draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
+   (0,0) rectangle ++(\cw,\ch);
+\draw[draw=diagram-border, fill=diagram-highlight, rounded corners=1.5pt]
+   (0,\ch-0.3) rectangle ++(\cw,0.3);
+\node[font=\large\bfseries, text=diagram-text] at (\cw/2,0.6) {11};
+% THE BOTTOM ROW IS NOT A ROW OF CELLS. Both system windows are wider than one
+% column, and a width-overflowing window reserves the cells beside it -- so
+% between them they take the rest of the row. They are drawn here at real
+% relative width, overlapping, which is what they actually do on screen.
+\def\mwl{2.18}\def\mwr{7.70}\def\dll{6.95}\def\dlr{10.72}
+\draw[draw=diagram-border!70, fill=diagram-border!12, rounded corners=1.5pt]
+   (\mwl,0) rectangle (\mwr,\ch);
+\node[font=\scriptsize\itshape, text=diagram-text, align=center]
+   at ({(\mwl+\dll)/2},0.75) {Main\\Window};
+% drawn second, so it sits ON TOP of the main window the way it really does
+\draw[draw=diagram-border, fill=diagram-border!22, rounded corners=1.5pt]
+   (\dll,0) rectangle (\dlr,\ch);
+\node[font=\scriptsize\itshape, text=diagram-text, align=center]
+   at ({(\dll+\dlr)/2},0.75) {Debug\\Logger};
+\node[iospsub, align=center] at (6.6,-0.72)
+   {both are wider than a column, and they overlap each other:\\
+    no auto-placed window fits between them};
 \end{tikzpicture}
 }
 \caption{Automatic Window Placement: unpositioned windows fill a screen-sized grid
 center-out, top row first (numbers = open order; shown on the canonical 5-column
-$\times$ 3-row layout). The main window and debug logger keep reserved cells.}
+$\times$ 3-row layout). The bottom row belongs to the main window and the debug
+logger --- both are wider than one column, so they take the cells beside them
+too, leaving only the far-left cell for an eleventh window.}
 \end{figure}
 ```
+
+> **One thing to expect on a 1920-wide screen.** The fill *order* is defined
+> against the five-column layout above, but the *pixel* positions are computed
+> from the columns your display actually gets — and 1920 wide gives you three.
+> The two outermost positions then fall off the right-hand edge of the work area
+> and get clamped back to it, so those later windows stack near the right edge
+> rather than tiling cleanly. It is a known constraint of the current placer, not
+> something you have done wrong. Displays 2000 px and wider get five columns and
+> lay out exactly as drawn. If you want a specific arrangement on a 1920-wide
+> screen, that is a good moment to reach for `POS`.
 
 The result is that you can throw a handful of `debug()` displays on screen and get
 a readable dashboard with no `POS` directives at all. And when you *do* want to
