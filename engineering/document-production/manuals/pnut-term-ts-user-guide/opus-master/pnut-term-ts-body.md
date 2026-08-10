@@ -53,24 +53,46 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \begin{tikzpicture}
 \node[iospbox] (agent) {You / your\\AI agent};
 \node[iospbox, right=14mm of agent] (compile) {\texttt{pnut\_ts}\\compiler};
-\node[iospkey, right=14mm of compile] (term) {\texttt{pnut\_term\_ts}\\download + observe};
-\node[iospbox, right=20mm of term] (p2) {Propeller~2\\silicon};
+\node[iospkey, right=16mm of compile] (term) {\texttt{pnut\_term\_ts}\\download + observe};
+\node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
 \node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
+\node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
+\node[iospsub, below=1.5mm of log] (logsub)
+   {\texttt{debug\_*.log} (GUI)\\\texttt{headless\_*.log} (headless)};
 \draw[iospflow] (mcp) -- (agent);
 \draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
 \draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
-\draw[iospflow] (term) -- node[above, font=\scriptsize]{run} (p2);
-\draw[iospflow] (p2.south) to[out=-90, in=-90, looseness=0.5]
-   node[below, font=\scriptsize]{DEBUG output the agent reads back} (agent.south);
+% The serial link is a TWO-WAY conversation, and both directions terminate at
+% pnut_term_ts -- never at the agent. Drawn as a matched pair rather than one
+% arrow, because the return leg is the whole point of the figure.
+\draw[iospflow] ([yshift=2mm]term.east) --
+   node[above, font=\scriptsize]{run} ([yshift=2mm]p2.west);
+\draw[iospflow] ([yshift=-2mm]p2.west) --
+   node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
+\draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
+\draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
+   node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
+   {the agent reads the log} (agent.south);
 \end{tikzpicture}
 }
-\caption{Where PNut-Term-TS sits in the P2 agentic tool chain.}
+\caption{Where PNut-Term-TS sits in the P2 agentic tool chain. The loop closes
+through the \emph{log file}, not through a direct line from the chip: everything
+the P2 sends comes back to PNut-Term-TS, which writes it to a log, and it is that
+log the agent reads.}
 \end{figure}
 ```
 
+Notice how that loop closes, because it is easy to picture it wrongly. The agent
+never reads the P2. **Everything the P2 sends comes back to PNut-Term-TS, which
+writes it to a log file in the `logs` folder — and it is that file the agent
+reads.** The log is not a convenience feature bolted on the side; for an agent it
+*is* the return path. (Logs land next to the run, in `./logs/` relative to the
+folder you launched from, so the evidence stays beside the program that produced
+it. You can point them somewhere else if you would rather.)
+
 If you are building an *agentic* P2 workflow — an assistant that writes code,
-compiles it, runs it on real silicon, and reads back the result to decide what to
-do next — this tool is the piece that lets the assistant *observe the hardware*.
+compiles it, runs it on real silicon, and reads the log back to decide what to do
+next — this tool is the piece that lets the assistant *observe the hardware*.
 That agent-in-the-loop way of working is the subject of **The P2 Architect's
 Guide, Part 3**, which names this very tool chain — `pnut_ts`, `pnut_term_ts`,
 and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
@@ -114,7 +136,12 @@ reason the tool exists in the form it does.
 \begin{figure}[H]
 \centering
 \diagramscale{
-\begin{tikzpicture}
+% These three lines are NOT traffic -- nothing flows along them. They say
+% "this role is folded into that app," which is a statement about identity,
+% not about data. Dashed keeps them from borrowing the solid-arrow vocabulary
+% Figure 1.1 uses for the real serial/file path, where the arrows DO mean flow.
+\begin{tikzpicture}[iospindicate/.style={iospflow, dashed,
+                                         dash pattern=on 2.2pt off 1.8pt}]
 \node[iospbox, align=center] (dl) at (0,1.9) {Downloader};
 \node[iospbox, align=center] (term) at (0,0)
    {Serial terminal\\{\scriptsize replaces Parallax Serial Terminal}};
@@ -123,9 +150,9 @@ reason the tool exists in the form it does.
 \node[iospkey, align=center, minimum height=15mm, minimum width=30mm] (one) at (7,0)
    {\textbf{PNut-Term-TS}};
 \node[iospsub, below=1.5mm of one] {one app \textperiodcentered\ Windows \textperiodcentered\ macOS \textperiodcentered\ Linux};
-\draw[iospflow] (dl) -- (one);
-\draw[iospflow] (term) -- (one);
-\draw[iospflow] (dbg) -- (one);
+\draw[iospindicate] (dl) -- (one);
+\draw[iospindicate] (term) -- (one);
+\draw[iospindicate] (dbg) -- (one);
 \end{tikzpicture}
 }
 \caption{The three tools PNut-Term-TS folds into one.}
