@@ -39,11 +39,11 @@ are working by hand or driving the whole thing from an AI coding assistant:
 | Tool | Its job |
 |------|---------|
 | **P2KB MCP** | Serves the P2 knowledge base — instructions, the language, the silicon — to an assistant that is writing P2 code. |
-| **`pnut_ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
-| **`pnut_term_ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
+| **`pnut-ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
+| **`pnut-term-ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
 | Spin2 VS Code extension *(optional)* | Your editor, with Spin2 syntax and semantic highlighting. |
 
-Think of the first three as compile, and run-and-observe. `pnut_ts` produces the
+Think of the first three as compile, and run-and-observe. `pnut-ts` produces the
 binary; **PNut-Term-TS is where you watch it come alive.**
 
 ```{=latex}
@@ -52,8 +52,8 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \diagramscale{
 \begin{tikzpicture}
 \node[iospbox] (agent) {You / your\\AI agent};
-\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut\_ts}\\compiler};
-\node[iospkey, right=16mm of compile] (term) {\texttt{pnut\_term\_ts}\\download + observe};
+\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut-ts}\\compiler};
+\node[iospkey, right=16mm of compile] (term) {\texttt{pnut-term-ts}\\download + observe};
 \node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
 \node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
 \node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
@@ -63,7 +63,7 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
 \draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
 % The serial link is a TWO-WAY conversation, and both directions terminate at
-% pnut_term_ts -- never at the agent. Drawn as a matched pair rather than one
+% pnut-term-ts -- never at the agent. Drawn as a matched pair rather than one
 % arrow, because the return leg is the whole point of the figure.
 \draw[iospflow] ([yshift=2mm]term.east) --
    node[above, font=\scriptsize]{run} ([yshift=2mm]p2.west);
@@ -82,8 +82,8 @@ log the agent reads.}
 \end{figure}
 ```
 
-Notice how that loop closes, because it is easy to picture it wrongly. The agent
-never reads the P2. **Everything the P2 sends comes back to PNut-Term-TS, which
+Follow how that loop closes. The agent does not read the P2 directly.
+**Everything the P2 sends comes back to PNut-Term-TS, which
 writes it to a log file in the `logs` folder — and it is that file the agent
 reads.** The log is not a convenience feature bolted on the side; for an agent it
 *is* the return path. (Logs land next to the run, in `./logs/` relative to the
@@ -94,14 +94,14 @@ If you are building an *agentic* P2 workflow — an assistant that writes code,
 compiles it, runs it on real silicon, and reads the log back to decide what to do
 next — this tool is the piece that lets the assistant *observe the hardware*.
 That agent-in-the-loop way of working is the subject of **The P2 Architect's
-Guide, Part 3**, which names this very tool chain — `pnut_ts`, `pnut_term_ts`,
+Guide, Part 3**, which names this very tool chain — `pnut-ts`, `pnut-term-ts`,
 and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
 read loop on its own. This guide is the operating manual for the tool that makes
 it possible.
 
 # Chapter 2: Three Tools in One
 
-The quickest way to understand PNut-Term-TS is to know what it replaces. It folds
+To understand PNut-Term-TS, start from what it replaces. It folds
 **three** jobs that used to need separate tools — or a specific operating system —
 into one program that runs the same way everywhere.
 
@@ -124,13 +124,12 @@ The P2's `debug()` system can draw far more than text: oscilloscope traces, logi
 timing, plots, bitmaps, spectra, and an interactive single-step debugger. PNut can
 show these windows too — but only on Windows. **PNut-Term-TS renders the same
 windows on Windows, macOS, and Linux**, and it is where you *produce* the saved
-images and captures those windows can emit. This cross-platform reach is the whole
-reason the tool exists in the form it does.
+images and captures those windows can emit. That cross-platform reach is a large
+part of why the tool takes the form it does.
 
 > **What the name tells you.** *PNut-Term-TS* reads as "PNut **Term**inal, written
 > in **T**ype**S**cript." The *Terminal* is jobs 1 and 2; the *TypeScript* is why
-> job 3 runs everywhere instead of on Windows alone. The name is a compact
-> reminder of what the tool is.
+> job 3 runs everywhere instead of on Windows alone.
 
 ```{=latex}
 \begin{figure}[H]
@@ -167,8 +166,8 @@ need the windows in depth, those manuals are where to go.
 
 # Chapter 3: Two Ways to Run — GUI and Headless
 
-PNut-Term-TS runs in two fundamentally different ways, and knowing both up front
-will save you a lot of confusion. You choose between them by *how you launch the
+PNut-Term-TS runs in two fundamentally different ways, and the rest of this guide
+is organized around the difference. You choose between them by *how you launch the
 tool*.
 
 ## Headed — the interactive GUI
@@ -196,9 +195,9 @@ hardware-in-the-loop tests — anywhere a program, not a person, is watching.
 pnut-term-ts --headless -r test.bin --end-marker
 ```
 
-In headless mode the **log file is the whole point** — it is how an automated
-caller (or an assistant reading back its own program's behavior) sees what the P2
-did. We return to that idea in depth in the headless part of this guide.
+In headless mode the log file is how an automated caller — or an assistant reading
+back its own program's behavior — sees what the P2 did. The headless part of this
+guide covers it in depth.
 
 Between these two poles are a few in-between modes — downloading from the command
 line but keeping the GUI, a headed "batch" run that exits when the program signals
@@ -365,9 +364,9 @@ writes the value into the image — including when your source sets its own rate
 CON  DEBUG_BAUD = 921600   ' picked up automatically
 ```
 
-If your source says nothing, everything in the P2 world defaults to **2,000,000**
-bits per second, and so does PNut-Term-TS. Either way, it just works, with no
-flag from you.
+If your source says nothing, the P2 toolchain defaults to **2,000,000** bits per
+second, and so does PNut-Term-TS. Either way, downloading a binary sets the rate
+for you, with no flag from you.
 
 There is an override, `-b` (`--debugbaud`), but it exists only for the cases the
 binary cannot tell us about: attaching to a P2 that is **already running** (no
@@ -446,7 +445,7 @@ that decides what the window shows. The window types are:
 
 ## Automatic Window Placement
 
-Here is a genuine convenience. A P2 program can name a screen position for each
+A P2 program can name a screen position for each
 window with a `POS` directive, but it does not have to. **A window with no `POS`
 is placed for you automatically** — PNut-Term-TS lays the whole set out as a tidy
 *dashboard* instead of stacking every window on the same spot. (Windows that *do*

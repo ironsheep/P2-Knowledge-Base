@@ -77,7 +77,11 @@ program's `debug()` session:
    live repo disagree, the repo wins.
 3. **Names, exactly.** The application is **PNut-Term-TS** (the invocation is
    `pnut-term-ts`). The compiler that produces the `.bin` and bakes in the
-   debug baud is **`pnut_ts`**. There is no "PNut IDE" and no `pnut.exe`. The
+   debug baud is **`pnut-ts`** (product: **PNut-TS**). **Both names are
+   hyphenated** — the underscore forms `pnut_ts` / `pnut_term_ts` are wrong and
+   do not exist as executables; every feed uses the hyphenated form, and the
+   compiler's own usage banner reads `PNut-TS: Usage: pnut-ts [optons] filename`
+   (verified 2026-08-11). There is no "PNut IDE" and no `pnut.exe`. The
    debug **display windows** (TERM, SCOPE, PLOT, LOGIC, …) open automatically
    from the P2's `debug()` directives — never from a menu.
 4. **As-built, not aspirational.** Document only behavior the tool actually has.

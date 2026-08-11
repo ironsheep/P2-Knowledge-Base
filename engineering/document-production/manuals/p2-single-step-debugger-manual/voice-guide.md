@@ -53,15 +53,21 @@ How to **use the single-step debugger** to understand and fix P2 programs:
 2. **P2, never P1.** Use P2 syntax exclusively: `COGINIT` / `COGSPIN` (never
    `cognew`), `GETCT` (never `CNT`). When a P1 habit is a likely trap, name it
    once explicitly ("P1 used `cognew`; on the P2 you use `COGSPIN`/`COGINIT`").
-3. **Correct tooling, always.** The compiler is **`pnut_ts`** (`-d` / `--debug`
-   compiles with DEBUG enabled). The host program that shows the debugger and the
-   DEBUG display windows is **`pnut_term_ts`**. There is no "PNut IDE", no
+3. **Correct tooling, always — and the names are hyphenated.** The compiler is
+   **`pnut-ts`** (`-d` / `--debug` compiles with DEBUG enabled); as a product it is
+   **PNut-TS**. The host program that shows the debugger and the DEBUG display
+   windows is **`pnut-term-ts`** (product: **PNut-Term-TS**). The underscore forms
+   `pnut_ts` / `pnut_term_ts` are **wrong and do not exist** — no such executable
+   is installed, and every REF/feed source uses the hyphenated form. (`pnut_ts`
+   shipped in this manual through v1.0 prep; a reader who typed it got
+   "command not found." Verified 2026-08-11 against the binary's own usage banner:
+   `PNut-TS: Usage: pnut-ts [optons] filename`.) There is no "PNut IDE", no
    `Run → Debug Enable` menu, no `pnut.exe`. Any such reference from the source
    docs is removed.
 4. **Valid DEBUG formatters only.** `UDEC/SDEC/UHEX/SHEX/UBIN` (each with an
    optional trailing `_` to suppress the auto label). Never bare `DEC/HEX/BIN`
    (not valid Spin2 DEBUG output formatters). Every code example must be
-   compilable by `pnut_ts`.
+   compilable by `pnut-ts`.
 5. **Stay in our lane.** The nine DEBUG **display windows** (Scope, Plot, FFT,
    Logic, etc.) are the **Debug Window Manual's** subject. Here we mention they
    exist and cross-reference that manual — we do not teach them.
@@ -153,14 +159,14 @@ longest-consecutive-run measure).
 
 **This manual (teaching, correct):**
 > Before the debugger can help you, your program has to be compiled *with
-> debugging turned on*. With the `pnut_ts` compiler you do that with the `-d`
+> debugging turned on*. With the `pnut-ts` compiler you do that with the `-d`
 > flag:
 >
 > ```
-> pnut_ts -d myprogram.spin2
+> pnut-ts -d myprogram.spin2
 > ```
 >
-> Then you run it from `pnut_term_ts`, the host program that opens the debugger
+> Then you run it from `pnut-term-ts`, the host program that opens the debugger
 > window. The first time a `DEBUG` statement (or a PASM `DEBUG` instruction) is
 > reached, execution pauses and the single-step debugger appears — your program
 > is now waiting for you.

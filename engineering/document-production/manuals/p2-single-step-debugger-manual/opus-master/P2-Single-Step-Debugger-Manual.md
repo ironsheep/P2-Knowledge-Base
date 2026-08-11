@@ -3,7 +3,7 @@
 *Observe and Control Your Running P2 Code*
 
 **Author:** Iron Sheep Productions, LLC
-**Compiler:** `pnut_ts`  **Debug host:** `pnut_term_ts`
+**Compiler:** `pnut-ts`  **Debug host:** `pnut-term-ts`
 
 
 # Chapter 1: What Single-Step Debugging Is
@@ -127,11 +127,11 @@ to a paused program.
 
 ## Step 1: Compile with debugging enabled
 
-The P2 compiler is **`pnut_ts`**. Add the `-d` flag to build your program with
+The P2 compiler is **`pnut-ts`**. Add the `-d` flag to build your program with
 debugging turned on:
 
 ```command
-pnut_ts -d myprogram.spin2
+pnut-ts -d myprogram.spin2
 ```
 
 Without `-d`, your `DEBUG` statements are stripped out and the debugger never
@@ -142,14 +142,14 @@ finished build, and it means you can leave `DEBUG` statements in your source.
 
 You need a **debug host** — the program that downloads your binary and puts the
 debugger window on screen (see *Which tool shows you the debugger* in Chapter 1).
-This manual shows **`pnut_term_ts`**, which combines a serial terminal, the nine
+This manual shows **`pnut-term-ts`**, which combines a serial terminal, the nine
 DEBUG display windows, a downloader, and the single-step debugger in one
 cross-platform application. Launch your compiled program through it to download
 to the P2 and open the debug session.
 
 If you are running **PNut** instead, the same thing happens and the debugger
 window is the same; only the surrounding application differs. Read
-`pnut_term_ts` throughout as "your debug host."
+`pnut-term-ts` throughout as "your debug host."
 
 ## Step 3: Reach a breakpoint
 
@@ -209,7 +209,7 @@ turn this behavior on with the INIT breakpoint in Chapter 6.)
 The three ways above all place a breakpoint *in your code*. You can also make the
 debugger open automatically — without adding a single `DEBUG` line — by defining
 a constant in your program's top-level `CON` block. These are read at compile
-time, so you still build with `pnut_ts -d`. Two of them open the debugger, and a
+time, so you still build with `pnut-ts -d`. Two of them open the debugger, and a
 third narrows down which cogs are watched:
 
 | Constant | What it does |
@@ -627,10 +627,10 @@ PRI add_two(x, y) : result
 **1. Compile with debugging and run it.**
 
 ```command
-pnut_ts -d firststep.spin2
+pnut-ts -d firststep.spin2
 ```
 
-Launch it from `pnut_term_ts`. The program runs until it reaches the
+Launch it from `pnut-term-ts`. The program runs until it reaches the
 argument-less `DEBUG`, then the single-step debugger window appears and execution
 pauses. (The second statement, `DEBUG("sum = ", UDEC_(sum))`, has arguments, so it only
 prints to the display windows — it will not stop here.) Your program is now
@@ -999,7 +999,7 @@ timing by running between breakpoints, not by stepping.
 Beyond the single-step debugger, the P2 can stream live data to a set of
 graphical **DEBUG display windows** — a serial terminal, a logic analyzer, an
 oscilloscope, an XY scope, a plot, an FFT spectrum view, a bitmap display, and a
-MIDI view — all hosted in `pnut_term_ts` alongside the debugger.
+MIDI view — all hosted in `pnut-term-ts` alongside the debugger.
 
 Those windows are a large topic with their own commands and workflows, and they
 are covered in depth in the **P2 Debug Window Manual**. This manual stays focused
@@ -1036,7 +1036,7 @@ DEBUG(UDEC(count))                  ' prints: count = 42  (auto label)
 
 | Symptom | Likely cause / fix |
 |---------|--------------------|
-| Debugger never appears | Did you compile with `pnut_ts -d`? Without `-d`, DEBUG is stripped. |
+| Debugger never appears | Did you compile with `pnut-ts -d`? Without `-d`, DEBUG is stripped. |
 | A cog will not respond | It may be stalled; check whether it is waiting (e.g. on an event or `waitct`). |
 | Lost in hub memory | Click the hub heat-map to jump, or dial the address in with the scroll wheel. |
 | A breakpoint never hits | Re-check the address and that the matching condition (ADDR/DEBUG/INT…) is armed. |
@@ -1062,6 +1062,6 @@ there.
 | Complete feature set | v51 and later |
 
 > Note: this manual documents the debugger as delivered in the current
-> environment — compiled with `pnut_ts` and hosted in `pnut_term_ts` — where the
+> environment — compiled with `pnut-ts` and hosted in `pnut-term-ts` — where the
 > interaction model is carried forward unchanged from the original P2 single-step
 > debugger.
