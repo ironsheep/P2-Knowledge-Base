@@ -57,9 +57,25 @@ specifications:
 built_in_peripherals:
   leds:
     quantity: 8
-    type: "User controllable"
-    pins: "TBD - check documentation"
+    type: "Buffered LED bank"
+    pins: "P56-P63 (one LED per pin)"
+    buffer: "Driven through an LED buffer that isolates them from the I/O signals"
     purpose: "Debug indication, user interface"
+    power_at_startup: |
+      P58-P63 are shared with the USB data and P2 memory signals, so these LEDs are
+      especially active at power-up and after a reset. P56 and P57 are free by default
+      and are the usual choice for a user-programmable indicator.
+    alternative_functions:
+      P56: "none (free)"
+      P57: "Common LDO enable (not connected by default, user option)"
+      P58: "microSD MISO (SDO) / Flash SPI DO"
+      P59: "microSD MOSI (SDI) / Flash SPI DI"
+      P60: "microSD CS / Flash SPI CLK"
+      P61: "microSD CLK / Flash SPI CS"
+      P62: "PC-USB RXD (P2 TXD)"
+      P63: "PC-USB TXD (P2 RXD)"
+    caution: "P62/P63 carry the PC-USB serial link -- driving them disturbs programming"
+    source: "#64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax, 2020), feature 12 'LED Bank' + the P56-P63 alternative-function table"
   switches:
     reset_switch: "Hardware reset"
     user_switches: "TBD quantity"

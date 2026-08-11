@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-250`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-252`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -113,13 +113,23 @@
   user-controllable"; the reader's board is Rev B. Do **not** fill these from
   convention or from the Edge-module LED rows (different boards — see F-249, where the
   Edge data *is* solid). **→ likely TRACKED → ingestion** (obtain the #64000 Rev B/Rev C
-  schematic or product guide). Status: `NEEDS-VERIFICATION` — **source study done 2026-08-11, still blocked.**
-> **STUDIED 2026-08-11 (no source found — do not guess):** searched the whole ingestion
-> tree. `sources/p2-eval-board/` is **Rev C** and records only "8 LEDs, user-controllable";
-> its own cross-source analysis lists the LED pin map in its **gaps** section. The only
-> concrete "buffered LED" pin data in the repo is for the **Edge** modules (P56/P57
-> standard, P38/P39 32MB) — a different board; using it here would be fabrication.
-> Still blocked on the #64000 Rev B/C schematic or product guide. **→ ingestion head.**
+  schematic or product guide). Status: **`DONE` 2026-08-11.**
+> **RESOLVED 2026-08-11 — the source was in the repo all along; my first two searches
+> were wrong.** Stephen pushed back ("you should see this in ingested docs") and he was
+> right: `engineering/ingestion/sources/p2-eval-board/64000 Propeller 2 Eval Board Rev C
+> Guide.pdf` states it explicitly. **Why grep missed it — the real story:** that PDF's
+> font encoding drops **every digit** under `pdftotext`, so "pins P56 through P63" extracts
+> as "pins P through P". The ingested `p2-eval-board-narrative.txt` carries digits on only
+> **91 of 1315 lines**; forcing OCR (`pdf-ocr --force-ocr`) raises that to **368**. No
+> pin-number search could ever have hit. See **F-250**.
+> **APPLIED** to `hardware/p2-eval-board.yaml` from the OCR'd source (feature 12 "LED Bank"
+> + the P56-P63 alternative-function table): 8 LEDs on **P56-P63**, driven through an **LED
+> buffer that isolates them from the I/O signals**; per-pin alternative functions (P58-P61
+> microSD/Flash SPI, P62/P63 PC-USB serial); the guide's note that P58-P63 are shared with
+> USB-data and memory signals and so are **especially active at power-up and after reset**;
+> and that **P56/P57 are free by default** (which is why the tutorials use P56). Added a
+> caution that P62/P63 carry the programming link. `switches.user_switches` left `TBD` —
+> the board has a Mode Selection Switch Bank, not a plain user-switch count; separate item.
 
 - **F-249 — the Edge modules' LED DIP switch is documented by *function* but not by
   *position*.** `hardware/edge-standard-module.yaml:319` and
@@ -155,6 +165,39 @@
 > objects. Drive high/low or enable pull-ups to control."* The gap was never the YAML; it
 > was that **the manuals' blink examples hardcode pin 56 without saying which board that
 > assumes** (fixed in DeSilva this pass; other manuals not yet swept).
+
+- **F-250 — the #64000 Eval Board Rev C guide was ingested with EVERY DIGIT MISSING; any
+  numeric fact traced to it is unsafe.** `engineering/ingestion/sources/p2-eval-board/`
+  was extracted with a text-layer tool, but that PDF's font encoding does not map numerals —
+  `pdftotext` silently drops them. Evidence: the shipped `p2-eval-board-narrative.txt` has
+  digits on **91 of 1315 lines**; `pdf-ocr --force-ocr` + re-extract yields **368**. Lines
+  read *"The Propeller has cores, KB of hub RAM, and Smart I/O pins"* (8 / 512 / 64 gone)
+  and *"Buffered LEDs on top eight I/O pins"* survives only because "eight" is spelled out.
+  **Consequences:** (1) the LED pin map sat as `TBD` in `hardware/p2-eval-board.yaml` for
+  months while the answer was in the repo (F-248) — no grep for `P56` could hit a document
+  with no digits; (2) **every** voltage, current, capacity, pin number, part number and page
+  reference sourced from this extraction is suspect; (3) the extraction audit and
+  cross-source analysis both list "LED pins" as a *gap*, so the loss was mistaken for the
+  source being silent. **→ TRACKED → ingestion:** re-ingest this source with forced OCR,
+  re-verify every numeric claim already derived from it, and — the general lesson —
+  **add a digit-density sanity check to the ingestion pass**: a hardware document whose
+  extraction is nearly digit-free has failed, not been read. Worth spot-checking the other
+  board/hardware sources for the same font family. Status: `CONFIRMED`.
+
+- **F-251 — the "why do the LEDs glow when I touch a pin" explanation must account for the
+  LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** The #64000 guide
+  (feature 12) and both Edge module YAMLs describe the onboard LEDs as **buffered** — the P2
+  pin drives a buffer *input*, and the buffer drives the LED. DeSilva v3.0.5's new Chapter 1
+  aside "Why Your LEDs Glow When You Touch Them" instead explains the effect as microamps
+  coupling *through the LED itself*, which would produce a faint glow. On a buffered board
+  the floating **buffer input** picks up the coupling and the buffer drives the LED at full
+  strength — which matches the reader's actual report ("the leds will light up", not "glow
+  faintly"). The aside's conclusion (floating pins have no opinion; drive them or use
+  pull-ups) is right; the mechanism is wrong. **→ manual head:** correct the aside in the
+  next DeSilva patch. Also worth stating there that on the #64000 **P58-P63 are shared with
+  the USB-data and memory signals**, so those LEDs are active at power-up and after reset by
+  design — a second, entirely non-mysterious reason a reader sees lit LEDs. Status:
+  `CONFIRMED`.
 
 ---
 
