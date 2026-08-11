@@ -290,23 +290,28 @@ The P2 Edge modules put their two buffered LEDs on different pins depending on w
 |-------|----------|
 | P2 Edge Module (P2-EC) | P56, P57 |
 | P2 Edge 32MB PSRAM Module (P2-EC32MB) | **P38, P39** |
+| P2 Eval Board (#64000) | P56-P63 (P56, P57 free) |
 
 That difference is not cosmetic. On the 32MB module, P56 and P57 are the PSRAM **clock** and **chip-enable** lines - so `drvh #56` there doesn't light anything, and it *does* stamp on the memory bus. Change the pin number, don't fight it.
 
 Two more things that will save you an evening:
 
-- Both Edge modules have a bank of mini DIP switches, one of which is labelled **LED**. It controls power to those LEDs. If it's off, your code is fine and your LEDs are dark.
+- Both Edge modules have a bank of mini DIP switches, one of which is labelled **LED**. It gates power to those LEDs, and it is labelled ON/OFF - it must be **ON**. If it's off, your code is fine and your LEDs are dark.
 - Those LED pins sit in a **high-impedance** state until you drive them, and they're sensitive to nearby objects. Which brings us to a trick of the light worth knowing about...
 :::
 
 ::: sidetrack
 ### Why Your LEDs Glow When You Touch Them
 
-You may notice - before running any code at all - that brushing a pin with a finger, or clipping on a scope probe, or just draping a long wire nearby, makes an onboard LED come up faintly. Nothing is broken. You have not damaged anything.
+You may notice - before running any code at all - that brushing a pin with a finger, or clipping on a scope probe, or just draping a long wire nearby, lights an onboard LED. Nothing is broken. You have not damaged anything.
 
-Out of reset, P2 pins are **inputs**: high-impedance, driving nothing, holding no particular level. A pin in that state is an antenna, and you - or your probe lead - are a fairly good one at mains frequency. The microamps that couple in are far too little to matter to the chip, but a modern high-efficiency LED will glow visibly on microamps. So the LED is faithfully reporting a real (and completely harmless) current.
+The key is that these LEDs are **buffered**. Your P2 pin doesn't feed the LED directly; it feeds the *input* of a buffer, and the buffer drives the LED from board power when that input goes high. That buffer is what keeps the LEDs from loading down your signals - but its input is a high-impedance node, and out of reset your P2 pin isn't driving it either. A pin in that state is an antenna, and you - or your probe lead - are a fairly good one at mains frequency. It takes very little to push that floating input past the buffer's threshold, and when it crosses, the buffer switches: the LED doesn't glimmer, it comes **on**.
 
-The cure is the same as the lesson: **a floating pin has no opinion.** The moment your code executes `drvh` or `drvl`, the cog's output driver wins and the shimmer stops. If you want a pin held at a known level *without* driving it, the P2 gives you pull-ups and pull-downs for exactly that. Uff - your first piece of real hardware intuition, and you got it by accident.
+This isn't a quirk anyone is embarrassed about - the P2 Edge module guides say so outright, noting that because the P2's pins are high-impedance by default, "the LEDs will be sensitive to objects moving close to" those pins. It's the price of a deliberate trade: the buffer keeps the LEDs from loading those pins, so they stay completely free for you to use.
+
+On the P2 Eval board there's a second, entirely unmysterious reason for lit LEDs. The LEDs on **P58 through P63** are shared with the USB data lines and the memory signals, so they're genuinely busy during boot and after every reset. That's the board working, not a fault. P56 and P57 are the two left free for you.
+
+The cure is the same as the lesson: **a floating pin has no opinion.** The moment your code executes `drvh` or `drvl`, the cog's output driver wins and the flicker stops. If you want a pin held at a known level *without* driving it, the P2 gives you pull-ups and pull-downs for exactly that. Uff - your first piece of real hardware intuition, and you got it by accident.
 :::
 
 ## What's Really Happening
@@ -473,6 +478,8 @@ This one's a bit tricky - we'll use PWM to fade the LED:
         
 level   long    0
 ```
+
+What you should see: the LED climbs from dark to full over about a second and a third, then **snaps** back to dark and climbs again. That snap is `and level, #$FF` rolling 255 back to 0 in a single step - the brightness ramp is a sawtooth. Don't let the mode name mislead you: `P_PWM_TRIANGLE` describes the counter *inside* the smart pin, running at hundreds of kilohertz, not the shape of the brightness you see. If you'd rather it breathed in and out, ramp `level` back down instead of letting it wrap.
 
 Don't worry if the PWM example seems complex - we'll cover smart pins in detail in Chapter 14!
 
@@ -4918,7 +4925,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 
 **Golden Rule:** DIRL before WRPIN · WXPIN before DIRH · WYPIN (data) after DIRH · `P_OE` on *every* output mode
 
-**The silent failure:** every output mode - NCO, PWM, pulse, transition, serial TX, DAC, USB - needs `P_OE`. Without it the smart pin runs perfectly and drives nothing, and it still assembles clean. If a mode is supposed to make a pin *do* something and the pin is dead, suspect `P_OE` first. Receive and measuring modes (RX, ADC, quadrature, the counters) don't take it.
+**The silent failure:** every output mode (NCO, PWM, pulse, transition, serial TX, DAC, USB) needs `P_OE`. Without it the smart pin runs perfectly and drives nothing, and it still assembles clean. If a mode is supposed to make a pin *do* something and the pin is dead, suspect `P_OE` first. Receive and measuring modes (RX, ADC, quadrature, the counters) don't take it.
 :::
 
 ## Your Turn

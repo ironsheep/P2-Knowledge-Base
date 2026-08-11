@@ -12,9 +12,11 @@
 
 ### Added
 - **"Which Pin Is *Your* LED?"** (Chapter 1): LED pins differ by board — P56/P57 on the P2 Edge Module, **P38/P39** on the 32MB PSRAM Module
-- **"Why Your LEDs Glow When You Touch Them"** (Chapter 1): pins leave reset high-impedance, and an LED glows on the microamps a finger couples in
+- **"Why Your LEDs Glow When You Touch Them"** (Chapter 1): the onboard LEDs are buffered, so a floating buffer input switches them on
 - `P_OE` introduced in Chapter 1 where the first smart pin appears
 - Smart Pin Quick Reference (Chapter 14): `P_OE` in the recipe, the Golden Rule, and marked on every output mode
+- Chapter 1 states what the fading experiment looks like: a ramp to full, then a snap back to dark
+- LED pin table covers the P2 Eval Board (#64000) too, and names the LED switch position (ON)
 
 
 ## v3.0.4 (2026-08-08)
