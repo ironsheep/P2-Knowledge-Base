@@ -4895,20 +4895,20 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 **The Recipe:**
 
 1. **DIRL** pin — Reset the pin first
-2. **WRPIN** mode, pin — Set the operating mode
+2. **WRPIN** mode, pin — Set the operating mode (`| P_OE` if it *outputs*)
 3. **WXPIN** x, pin — Set X parameter
 4. **DIRH** pin — Enable the smart pin
 5. **WYPIN** y, pin — Write Y / data (after enable)
 
-**Common Modes:**
+**Common Modes:** (☑ = an output mode, so OR in `P_OE`)
 
-- **UART TX**: `P_ASYNC_TX` — Serial transmit
+- ☑ **UART TX**: `P_ASYNC_TX` — Serial transmit
 - **UART RX**: `P_ASYNC_RX` — Serial receive
-- **PWM**: `P_PWM_SAWTOOTH` — Sawtooth wave output
-- **PWM**: `P_PWM_TRIANGLE` — Triangle wave output
+- ☑ **PWM**: `P_PWM_SAWTOOTH` — Sawtooth wave output
+- ☑ **PWM**: `P_PWM_TRIANGLE` — Triangle wave output
 - **ADC**: `P_ADC` — Analog input
 - **Quadrature**: `P_QUADRATURE` — Encoder
-- **NCO**: `P_NCO_FREQ` — Frequency output
+- ☑ **NCO**: `P_NCO_FREQ` — Frequency output
 
 **Data Flow:**
 
@@ -4916,7 +4916,9 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 - **RDPIN** = Read data FROM smart pin (clears IN)
 - **TESTP** = Check if IN flag set
 
-**Golden Rule:** DIRL before WRPIN · WXPIN before DIRH · WYPIN (data) after DIRH
+**Golden Rule:** DIRL before WRPIN · WXPIN before DIRH · WYPIN (data) after DIRH · `P_OE` on *every* output mode
+
+**The silent failure:** every output mode - NCO, PWM, pulse, transition, serial TX, DAC, USB - needs `P_OE`. Without it the smart pin runs perfectly and drives nothing, and it still assembles clean. If a mode is supposed to make a pin *do* something and the pin is dead, suspect `P_OE` first. Receive and measuring modes (RX, ADC, quadrature, the counters) don't take it.
 :::
 
 ## Your Turn
@@ -4926,7 +4928,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 
 Create a PWM output that dims an LED:
 
-1. Configure a pin for PWM sawtooth mode
+1. Configure a pin for PWM sawtooth mode — it's an output, so don't forget `| P_OE`
 2. Set a 1 kHz period (at 160 MHz that's 160,000 clocks—too big for the 16-bit base-period field, so split it: base period = 1000, frame = 160)
 3. Vary duty cycle from 0% to 100%
 

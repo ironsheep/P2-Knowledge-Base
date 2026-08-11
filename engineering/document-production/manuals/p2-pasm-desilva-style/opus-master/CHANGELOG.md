@@ -14,6 +14,7 @@
 - **"Which Pin Is *Your* LED?"** — a Chapter 1 aside naming the LED pins per board, because they differ: P56/P57 on the P2 Edge Module, but **P38/P39** on the P2 Edge 32MB PSRAM Module, where P56 and P57 are the PSRAM clock and chip-enable instead. Also flags the LED DIP switch that silently keeps the LEDs dark.
 - **"Why Your LEDs Glow When You Touch Them"** — a Chapter 1 aside explaining why a finger, a scope probe, or a long wire lights an onboard LED before any code runs: pins come out of reset as high-impedance inputs, and a high-efficiency LED glows on the microamps that couple in. Harmless, and a first lesson in why a floating pin has no opinion.
 - **A note on `P_OE` at the point of first contact** in Chapter 1, so the trap is named where readers first meet it rather than ten chapters later.
+- **The Chapter 14 Smart Pin Quick Reference now names `P_OE`** — in the recipe step that sets the mode, in the Golden Rule, and against each output mode in the Common Modes list (☑). A new "silent failure" note spells out the rule: every output mode needs it, code without it still assembles clean, and receive or measuring modes must not have it. This is the page a reader reaches for while debugging a dead pin, and it had been silent on the one cause most likely to explain it. Exercise 1 says so too.
 
 
 ## v3.0.4 (2026-08-08)
