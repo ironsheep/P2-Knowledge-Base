@@ -1,0 +1,125 @@
+% ============================================================================
+%  p2kb-ssdbg-regions.sty — LOCAL to the Single-Step Debugger Manual
+%
+%  Two jobs, both deliberately kept OUT of the shared p2kb-platform-* layers so
+%  no other manual can be affected by them:
+%
+%  1. \ssdbregionfig — the annotated debugger screenshot, drawn once per group
+%     with only that group's markers. The 19 marker positions live here, in ONE
+%     place, so the three figures cannot drift apart. Numbers are stable 1..19
+%     across all three images: the same region always wears the same number, and
+%     prose elsewhere in the manual can say "region 19" and mean it.
+%
+%  2. regiontbl — the region table geometry.
+%     WHY THIS EXISTS: the shared tables filter sizes columns as fixed
+%     Q[wd=fraction] widths summing to 0.93\linewidth, and then tblr ALSO adds
+%     colsep on both sides of every column. At five columns and colsep=4pt that
+%     is a further 40pt, so the table lands ~7pt wider than the text block and
+%     xelatex reports an Overfull \hbox (tabularray says "Table width is too
+%     small, need 7.12pt more"). Using PROPORTIONAL X columns instead hands the
+%     arithmetic to tabularray, which subtracts the colsep before distributing
+%     the remaining width — so the table fits at any \linewidth, by construction
+%     rather than by a hand-tuned fudge factor.
+%     The wider "Region" column is the other half of the fix: at the filter's
+%     0.091\linewidth the single word "Disassembly" could not fit and had no
+%     break point, giving an 8.08pt overfull box of its own.
+%
+%  Author: Iron Sheep Productions, LLC  -  no version (deliberate)
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-ssdbg-regions}[2026/08/10 SSDB region figures and table]
+
+\RequirePackage{tikz}
+\RequirePackage{tabularray}
+
+% ---------------------------------------------------------------- marker style
+\tikzset{ssdbcq/.style={circle, draw=black, line width=0.4pt, fill=yellow,
+  text=black, font=\sffamily\bfseries\tiny, inner sep=0.3pt, minimum size=2.4ex}}
+
+% ------------------------------------------------- the 19 marker positions
+% Fractions of the screenshot's width/height, origin at its bottom-left.
+% Carried over unchanged from the original single all-markers figure.
+\newcommand{\ssdb@defpos}[2]{\expandafter\def\csname ssdb@pos@#1\endcsname{#2}}
+\ssdb@defpos{1}{0.166,0.980}
+\ssdb@defpos{2}{0.183,0.936}
+\ssdb@defpos{3}{0.051,0.100}
+\ssdb@defpos{4}{0.142,0.067}
+\ssdb@defpos{5}{0.633,0.608}
+\ssdb@defpos{6}{0.718,0.667}
+\ssdb@defpos{7}{0.872,0.750}
+\ssdb@defpos{8}{0.967,0.533}
+\ssdb@defpos{9}{0.214,0.485}
+\ssdb@defpos{10}{0.755,0.485}
+\ssdb@defpos{11}{0.214,0.421}
+\ssdb@defpos{12}{0.610,0.421}
+\ssdb@defpos{13}{0.220,0.335}
+\ssdb@defpos{14}{0.442,0.335}
+\ssdb@defpos{15}{0.291,0.271}
+\ssdb@defpos{16}{0.407,0.142}
+\ssdb@defpos{17}{0.715,0.142}
+\ssdb@defpos{18}{0.938,0.367}
+\ssdb@defpos{19}{0.500,0.020}
+
+% -------------------------------------------------------- the figure itself
+% #1 = comma-separated region numbers to mark, e.g. \ssdbregionfig{1,2,5,9,18,19}
+%
+% THE WIDTH IS LOAD-BEARING, not taste. The screenshot is 1721x1200 (aspect
+% 1.43), so at full \linewidth it stands 4.55in tall on a 9in text block. Add
+% the heading, the intro line, the caption and a seven-row table and the page
+% overflows -- and because a tblr cannot break across pages, the WHOLE table
+% jumps to the next page, stranding 40% of this one as white space. That is the
+% defect this chapter was restructured to remove, so do not raise this back to
+% 1.0 without re-checking that each pass still holds its image AND its table on
+% one page. Marker positions are relative to the image node, so they scale with
+% it automatically.
+% Each pass owns TWO pages -- image on one, its table on the next -- so the
+% image gets the full measure and no table is ever split or bumped whole.
+\newcommand{\ssdbfigwidth}{\linewidth}
+
+% ---------------------------------------------------- the image/table spread
+% The document is `oneside`, so LaTeX has no verso/recto to place onto. What
+% decides which side a page shows up on in a two-up reader is PARITY: with the
+% cover alone, viewers pair (2,3), (4,5)... so an EVEN page is the left of a
+% spread. \ssdbspreadstart forces the image onto an even page, putting its table
+% on the odd page facing it. \AtBeginDocument below asks the reader to pair
+% pages that way in the first place.
+%
+% This is the one place in the manual that deliberately spends a blank page.
+% The filler carries no head and no folio so it reads as intentional.
+\newcommand{\ssdbspreadstart}{%
+  \clearpage
+  \ifodd\value{page}%
+    \hbox{}\thispagestyle{empty}\clearpage
+  \fi}
+
+\AtBeginDocument{\hypersetup{pdfpagelayout=TwoPageRight}}
+\newcommand{\ssdbregionfig}[1]{%
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0] (ssimg) at (0,0)
+      {\screenshotfig[width=\ssdbfigwidth]{inbox/assets/ssdb-fullScreen.png}};
+    \begin{scope}[x={(ssimg.south east)},y={(ssimg.north west)}]
+      \foreach \n in {#1}{%
+        \expandafter\let\expandafter\ssdb@p\csname ssdb@pos@\n\endcsname
+        \node[ssdbcq] at (\ssdb@p) {\n};%
+      }
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+% ------------------------------------------------------------ the region table
+% Proportional columns: tabularray removes the colsep from \linewidth first,
+% then splits what is left in these ratios. Nothing to keep in sync by hand.
+\NewTblrEnviron{regiontbl}
+\SetTblrInner[regiontbl]{
+  width=\linewidth,
+  rowsep=2pt,
+  colsep=4pt,
+  colspec={X[5,l] X[15,l] X[20,l] X[27,l] X[33,l]},
+  cells={font=\footnotesize},
+  row{1}={font=\footnotesize\bfseries},
+  hline{1,2}={solid},
+  hline{Z}={solid},
+}
+
+\endinput

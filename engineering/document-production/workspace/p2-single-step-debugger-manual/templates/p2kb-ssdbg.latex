@@ -10,6 +10,12 @@
 \usepackage{p2kb-platform-content}      % shared: code/reference box family, screenshot keyline (\screenshotfig)
 \usepackage{p2kb-platform-diagrams}     % shared: special-registers map diagram + diagram styles
 
+% ==================== LOCAL LAYER (this manual only) ====================
+% Deliberately NOT a p2kb-platform-* file. It carries the annotated-screenshot
+% figure and the region-table geometry, both of which are specific to this
+% manual's Chapter 3 and must not be able to change any other document.
+\usepackage{p2kb-ssdbg-regions}
+
 % ==================== DOCUMENT METADATA ====================
 \title{$title$}
 \author{$author$}

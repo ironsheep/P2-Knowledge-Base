@@ -327,79 +327,141 @@ the Smart-Pin Watch), and several — the
 disassembly, the hint bar — carry no label at all. You are expected to recognize
 each region by *where it sits* and by *the text inside it*.
 
-This chapter is the map that makes that easy. Figure 3-1 numbers every region;
-the table right after it names each one, tells you how to recognize it, and — the
-part that matters most — tells you **how you interact with it right there.** The
-rest of the chapter is a zone-by-zone tour. You do not need to memorize any of
-it; just know that this is where to look when you are lost on the screen.
+This chapter is the map that makes that easy — and it hands you the screen in
+**three passes** rather than all at once. Each pass shows the same screenshot
+with only one group of regions marked, and the table beneath it names those
+regions, tells you how to recognize each one, and — the part that matters most —
+tells you **how you interact with it right there.**
 
-## The screen at a glance
+The three passes are:
+
+1. **Where you are, and how you step** — the handful you use on every single step.
+2. **The cog's own state** — the registers and execution state private to this cog.
+3. **What the cog reaches** — hub memory, pins, and interrupts.
+
+The numbering runs 1 to 19 across all three, and a region keeps its number
+wherever it appears, so "region 19" always means the same thing. After the three
+passes the rest of the chapter is a zone-by-zone tour. You do not need to
+memorize any of it; just know that this is where to look when you are lost on the
+screen.
+
+```{=latex}
+\ssdbspreadstart
+```
+
+## Pass 1 — Where you are, and how you step
+
+These six are the working set: the ones you read and press on every step. Learn
+these and you can drive the debugger; everything else is detail you look up.
 
 ```{=latex}
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-\node[anchor=south west, inner sep=0] (ssimg) at (0,0)
-  {\screenshotfig{inbox/assets/ssdb-fullScreen.png}};
-\begin{scope}[x={(ssimg.south east)},y={(ssimg.north west)}]
-\tikzset{cq/.style={circle,draw=black,line width=0.4pt,fill=yellow,text=black,%
-  font=\sffamily\bfseries\tiny,inner sep=0.3pt,minimum size=2.4ex}}
-\node[cq] at (0.166,0.980) {1};
-\node[cq] at (0.183,0.936) {2};
-\node[cq] at (0.051,0.100) {3};
-\node[cq] at (0.142,0.067) {4};
-\node[cq] at (0.633,0.608) {5};
-\node[cq] at (0.718,0.667) {6};
-\node[cq] at (0.872,0.750) {7};
-\node[cq] at (0.967,0.533) {8};
-\node[cq] at (0.214,0.485) {9};
-\node[cq] at (0.755,0.485) {10};
-\node[cq] at (0.214,0.421) {11};
-\node[cq] at (0.610,0.421) {12};
-\node[cq] at (0.220,0.335) {13};
-\node[cq] at (0.442,0.335) {14};
-\node[cq] at (0.291,0.271) {15};
-\node[cq] at (0.407,0.142) {16};
-\node[cq] at (0.715,0.142) {17};
-\node[cq] at (0.938,0.367) {18};
-\node[cq] at (0.500,0.020) {19};
-\end{scope}
-\end{tikzpicture}
-\caption{The single-step debugger window with every region numbered; the table below names each one. (Debugging cog 0.)}
+\ssdbregionfig{1,2,5,9,18,19}
+\caption{Pass 1 --- where you are, and how you step. (Debugging cog 0.)}
 \end{figure}
 ```
 
-## Region reference
+```{=latex}
+\clearpage
+```
 
-Read this once to get the lay of the land, then use it as a lookup. The middle
-column is how you *find* a region on an unlabeled screen; the last column is what
-you can *do* there — the interactions are collected in full in Chapter 5.
-
-| # | Region | Find it on screen by… | What it shows | You act here by… |
-|---|--------|-----------------------|---------------|------------------|
-| 1 | Title bar | top edge: *Debugger - Cog N* | which cog this window is for | — (each cog gets its own window) |
-| 2 | Status strip | top row: `C Z PC SKIPF XBYTE CT` | where you are: flags, PC, skip pattern, XBYTE state, system counter | click **PC** to re-lock the disassembly to the PC; hover **CT** for elapsed seconds |
-| 3 | Cog register map | far-left tall column tagged `REG` | heat map of all cog RAM ($000–$1FF) | click a spot to lock the disassembly to that cog address |
-| 4 | LUT register map | 2nd tall column tagged `LUT` | heat map of all LUT RAM ($200–$3FF) | click to lock the disassembly there |
-| 5 | Disassembly | center; code lines, one highlighted | your code, decoded; the highlighted line is the next instruction | L-click = lock to PC · R-click a line = toggle an address breakpoint · wheel scrolls |
-| 6 | Register Watch | tagged `REG` with a delta marker, right of disassembly | cog registers that just changed | press **R** or click the box to reset the list |
-| 7 | Special registers | register-name column, `IJMP3` through `INB` | the 16 special-function registers, $1F0–$1FF | click a **PTRA**/**PTRB** value to jump the hub viewer there |
-| 8 | Event flags | far-right column of event names (`INT`, `CT1`, ... `QMT`), each `0/1` | which hardware events are set | click an event name to arm a break on that event |
-| 9 | Execution mode | small tag below disassembly | `MAIN`, or `INT1/2/3` while in an interrupt | — (read-only) |
-| 10 | Call stack | band tagged `STACK`, 8 hex values | the 8-level hardware CALL stack | click a value to jump the disassembly to that return address |
-| 11 | Interrupt status | left of the pointer band: `INT1/2/3` | each interrupt's state: `off / idle / wait / busy` | — (read-only) |
-| 12 | Pointers | rows `RFxx / PTRA / PTRB` + hub bytes | the FIFO and PTRA/PTRB, with the hub bytes around each | click **PTRA**/**PTRB** to jump the hub viewer there |
-| 13 | Cog status | dim stack: `INIT STALLI STR MOD LUTS` | miscellaneous cog-state flags, lit when active | — (read-only) |
-| 14 | Pin states | rows `DIR / OUT / IN`, 64 bits each | pin direction, output, and live input for all 64 pins | — (read-only) |
-| 15 | Smart-Pin Watch | one-row strip tagged `RQPIN` with a delta marker | smart pins whose `RQPIN` value changed | L-click = reset · R-click = reset **and** toggle the DIR-only/all-pins filter |
-| 16 | Hub viewer | bottom band tagged `HUB`: address + hex + ASCII | shared hub RAM as hex and text | arrows/PgUp/PgDn/wheel to scroll; click a byte to jump |
-| 17 | Hub heat map | colored block right of the hub data | recent hub read/write activity | click a bright spot to jump the hub viewer there |
-| 18 | Break buttons & Go | bottom-right cluster around the big button | which break conditions are armed; run/step control | L-click a condition = set it exclusively · R-click = toggle · **Go**: SPACE / ENTER |
-| 19 | Hint bar | very bottom edge (empty until you hover) | a one-line description of whatever you point at | hover any region to read what it is and how to use it |
+```{=latex}
+\begin{regiontbl}{}
+  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
+  1 & Title bar & top edge: \emph{Debugger - Cog N} & which cog this window is for & --- (each cog gets its own window) \\
+  2 & Status strip & top row: \texttt{C Z PC SKIPF XBYTE CT} & where you are: flags, PC, skip pattern, XBYTE state, system counter & click \textbf{PC} to re-lock the disassembly to the PC; hover \textbf{CT} for elapsed seconds \\
+  5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls \\
+  9 & Execution mode & small tag below disassembly & \texttt{MAIN}, or \texttt{INT1/2/3} while in an interrupt & --- (read-only) \\
+  18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle \textperiodcentered{} \textbf{Go}: SPACE / ENTER \\
+  19 & Hint bar & very bottom edge (empty until you hover) & a one-line description of whatever you point at & hover any region to read what it is and how to use it \\
+\end{regiontbl}
+```
 
 > **The fastest way to learn the screen is region 19.** Hover the mouse over
 > anything and the **hint bar** tells you what it is and what a click will do. If
 > you remember only one thing from this chapter, remember that.
+
+```{=latex}
+\clearpage
+```
+
+```{=latex}
+\ssdbspreadstart
+```
+
+## Pass 2 — The cog's own state
+
+Everything in this group belongs to *this* cog and nothing else: its registers,
+its stack, its flags. On screen they wrap around the disassembly — the tall
+columns down the left, the register columns down the right.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\ssdbregionfig{3,4,6,7,8,10,13}
+\caption{Pass 2 --- the cog's own state.}
+\end{figure}
+```
+
+```{=latex}
+\clearpage
+```
+
+```{=latex}
+\begin{regiontbl}{}
+  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
+  3 & Cog register map & far-left tall column tagged \texttt{REG} & heat map of all cog RAM (\$000--\$1FF) & click a spot to lock the disassembly to that cog address \\
+  4 & LUT register map & 2nd tall column tagged \texttt{LUT} & heat map of all LUT RAM (\$200--\$3FF) & click to lock the disassembly there \\
+  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & press \textbf{R} or click the box to reset the list \\
+  7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click a \textbf{PTRA}/\textbf{PTRB} value to jump the hub viewer there \\
+  8 & Event flags & far-right column of event names (\texttt{INT}, \texttt{CT1}, ... \texttt{QMT}), each \texttt{0/1} & which hardware events are set & click an event name to arm a break on that event \\
+  10 & Call stack & band tagged \texttt{STACK}, 8 hex values & the 8-level hardware CALL stack & click a value to jump the disassembly to that return address \\
+  13 & Cog status & dim stack: \texttt{INIT STALLI STR MOD LUTS} & miscellaneous cog-state flags, lit when active & --- (read-only) \\
+\end{regiontbl}
+```
+
+```{=latex}
+\clearpage
+```
+
+```{=latex}
+\ssdbspreadstart
+```
+
+## Pass 3 — What the cog reaches
+
+The last group is everything beyond the cog itself: shared hub memory, the pins,
+and the interrupts that arrive from outside. These sit across the lower half of
+the window.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\ssdbregionfig{11,12,14,15,16,17}
+\caption{Pass 3 --- what the cog reaches: hub, pins, and interrupts.}
+\end{figure}
+```
+
+```{=latex}
+\clearpage
+```
+
+```{=latex}
+\begin{regiontbl}{}
+  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
+  11 & Interrupt status & left of the pointer band: \texttt{INT1/2/3} & each interrupt's state: \texttt{off / idle / wait / busy} & --- (read-only) \\
+  12 & Pointers & rows \texttt{RFxx / PTRA / PTRB} + hub bytes & the FIFO and PTRA/PTRB, with the hub bytes around each & click \textbf{PTRA}/\textbf{PTRB} to jump the hub viewer there \\
+  14 & Pin states & rows \texttt{DIR / OUT / IN}, 64 bits each & pin direction, output, and live input for all 64 pins & --- (read-only) \\
+  15 & Smart-Pin Watch & one-row strip tagged \texttt{RQPIN} with a delta marker & smart pins whose \texttt{RQPIN} value changed & L-click = reset \textperiodcentered{} R-click = reset \textbf{and} toggle the DIR-only/all-pins filter \\
+  16 & Hub viewer & bottom band tagged \texttt{HUB}: address + hex + ASCII & shared hub RAM as hex and text & arrows/PgUp/PgDn/wheel to scroll; click a byte to jump \\
+  17 & Hub heat map & colored block right of the hub data & recent hub read/write activity & click a bright spot to jump the hub viewer there \\
+\end{regiontbl}
+```
+
+```{=latex}
+\clearpage
+```
 
 ## The tour
 
@@ -499,7 +561,7 @@ matching button over in the control cluster lights up to confirm.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\screenshotfig[width=\linewidth]{inbox/assets/watch-sfr-events.png}
+\screenshotfig[width=0.58\linewidth]{inbox/assets/watch-sfr-events.png}
 \caption{The watch cluster: the Register Watch (tagged REG), the special registers, and the event flags.}
 \end{figure}
 ```
