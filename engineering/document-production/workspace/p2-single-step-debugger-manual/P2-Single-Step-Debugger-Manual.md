@@ -186,6 +186,35 @@ manual uses the P2 forms throughout:
 The single-step debugger itself is new to you regardless of which Propeller you
 came from — there was nothing quite like it on the P1.
 
+## Which tool shows you the debugger
+
+One thing to settle before you start, because it decides how much of this manual
+applies to you.
+
+The single-step debugger is a **P2 facility**: the chip cooperates by pausing
+your program and reporting its state. But the *window* you look at is drawn by
+the program on your desk, not by the P2 — so which tool you run matters. Three
+present it:
+
+- **PNut** — the original. These windows were designed and implemented here
+  first, and the other two follow it.
+- **PNut-Term-TS** — the cross-platform host, the same windows on Windows,
+  macOS, and Linux. **The screenshots in this manual were taken here.**
+- **Spin Tools IDE** — a third implementation, developed alongside PNut-Term-TS.
+
+**The intent is that this manual covers all three.** PNut and PNut-Term-TS
+present the same debugger, and what follows is written against both. Spin Tools
+IDE is being built to the same design and may well already match it — but *we*
+have not certified it against this text, and we would rather tell you that than
+let you assume it. We expect its developer to certify it in due course. Until
+then: if you are running Spin Tools IDE, take this manual as very likely
+accurate rather than as verified.
+
+This manual describes how the debugger is *meant* to behave — the behavior PNut
+established and the others are built to. If a particular host lags that in some
+small way, the answer is a fix to that host, not a footnote here, so you will not
+find this text cataloguing which build does what.
+
 ## How this manual is organized
 
 Chapters 2–3 get you a running debug session and oriented in the window.
@@ -217,10 +246,16 @@ finished build, and it means you can leave `DEBUG` statements in your source.
 
 ## Step 2: Run it from the debug host
 
-The host program is **`pnut_term_ts`**. It combines a serial terminal, the nine
+You need a **debug host** — the program that downloads your binary and puts the
+debugger window on screen (see *Which tool shows you the debugger* in Chapter 1).
+This manual shows **`pnut_term_ts`**, which combines a serial terminal, the nine
 DEBUG display windows, a downloader, and the single-step debugger in one
-cross-platform application. Launch your compiled program through `pnut_term_ts`
-to download it to the P2 and open the debug session.
+cross-platform application. Launch your compiled program through it to download
+to the P2 and open the debug session.
+
+If you are running **PNut** instead, the same thing happens and the debugger
+window is the same; only the surrounding application differs. Read
+`pnut_term_ts` throughout as "your debug host."
 
 ## Step 3: Reach a breakpoint
 
@@ -340,10 +375,18 @@ The three passes are:
 3. **What the cog reaches** — hub memory, pins, and interrupts.
 
 The numbering runs 1 to 19 across all three, and a region keeps its number
-wherever it appears, so "region 19" always means the same thing. After the three
-passes the rest of the chapter is a zone-by-zone tour. You do not need to
-memorize any of it; just know that this is where to look when you are lost on the
-screen.
+wherever it appears, so "region 19" always means the same thing.
+
+Each table's last two columns are the ones to come back to: **Mouse** and
+**Keys**, for *that region specifically*. The debugger has no menus, so what a
+region does is what you can click or press while you are over it — and where a
+Keys cell is empty, that region genuinely has no keyboard command of its own.
+Chapter 5 lists every command in one place; these columns tell you which of them
+belong to the thing you are looking at.
+
+After the three passes the rest of the chapter is a zone-by-zone tour. You do not
+need to memorize any of it; just know that this is where to look when you are
+lost on the screen.
 
 ```{=latex}
 \ssdbspreadstart
@@ -368,13 +411,13 @@ these and you can drive the debugger; everything else is detail you look up.
 
 ```{=latex}
 \begin{regiontbl}{}
-  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
-  1 & Title bar & top edge: \emph{Debugger - Cog N} & which cog this window is for & --- (each cog gets its own window) \\
-  2 & Status strip & top row: \texttt{C Z PC SKIPF XBYTE CT} & where you are: flags, PC, skip pattern, XBYTE state, system counter & click \textbf{PC} to re-lock the disassembly to the PC; hover \textbf{CT} for elapsed seconds \\
-  5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls \\
-  9 & Execution mode & small tag below disassembly & \texttt{MAIN}, or \texttt{INT1/2/3} while in an interrupt & --- (read-only) \\
-  18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle \textperiodcentered{} \textbf{Go}: SPACE / ENTER \\
-  19 & Hint bar & very bottom edge (empty until you hover) & a one-line description of whatever you point at & hover any region to read what it is and how to use it \\
+  \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
+  1 & Title bar & top edge: \emph{Debugger - Cog N} & which cog this window is for & --- & --- \\
+  2 & Status strip & top row: \texttt{C Z PC SKIPF XBYTE CT} & where you are: flags, PC, skip pattern, XBYTE state, system counter & click \textbf{PC} to re-lock the disassembly to the PC; hover \textbf{CT} for elapsed seconds & --- \\
+  5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls (\textbf{Ctrl} $\times$4, \textbf{Shift} $\times$16) & --- \\
+  9 & Execution mode & small tag below disassembly & \texttt{MAIN}, or \texttt{INT1/2/3} while in an interrupt & --- & --- \\
+  18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle \textperiodcentered{} L-click \textbf{Go} = run to next break \textperiodcentered{} R-click \textbf{Go} = run through breaks & \textbf{SPACE} = Go \textperiodcentered{} \textbf{ENTER} = run/stop \textperiodcentered{} \textbf{B} \textbf{I} \textbf{D} \textbf{M} toggle BREAK/INIT/DEBUG/MAIN \\
+  19 & Hint bar & very bottom edge (empty until you hover) & a one-line description of whatever you point at & hover any region to read what it is and how to use it & --- \\
 \end{regiontbl}
 ```
 
@@ -410,14 +453,14 @@ columns down the left, the register columns down the right.
 
 ```{=latex}
 \begin{regiontbl}{}
-  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
-  3 & Cog register map & far-left tall column tagged \texttt{REG} & heat map of all cog RAM (\$000--\$1FF) & click a spot to lock the disassembly to that cog address \\
-  4 & LUT register map & 2nd tall column tagged \texttt{LUT} & heat map of all LUT RAM (\$200--\$3FF) & click to lock the disassembly there \\
-  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & press \textbf{R} or click the box to reset the list \\
-  7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click a \textbf{PTRA}/\textbf{PTRB} value to jump the hub viewer there \\
-  8 & Event flags & far-right column of event names (\texttt{INT}, \texttt{CT1}, ... \texttt{QMT}), each \texttt{0/1} & which hardware events are set & click an event name to arm a break on that event \\
-  10 & Call stack & band tagged \texttt{STACK}, 8 hex values & the 8-level hardware CALL stack & click a value to jump the disassembly to that return address \\
-  13 & Cog status & dim stack: \texttt{INIT STALLI STR MOD LUTS} & miscellaneous cog-state flags, lit when active & --- (read-only) \\
+  \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
+  3 & Cog register map & far-left tall column tagged \texttt{REG} & heat map of all cog RAM (\$000--\$1FF) & click a spot to lock the disassembly to that cog address & --- \\
+  4 & LUT register map & 2nd tall column tagged \texttt{LUT} & heat map of all LUT RAM (\$200--\$3FF) & click to lock the disassembly there & --- \\
+  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & click the box to reset the list & \textbf{R} = reset \\
+  7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click a \textbf{PTRA}/\textbf{PTRB} value to jump the hub viewer there & --- \\
+  8 & Event flags & far-right column of event names (\texttt{INT}, \texttt{CT1}, \ldots{} \texttt{QMT}), each \texttt{0/1} & which hardware events are set & L-click a name = arm a break on that event \textperiodcentered{} R-click = toggle & --- \\
+  10 & Call stack & band tagged \texttt{STACK}, 8 hex values & the 8-level hardware CALL stack & click a value to jump the disassembly to that return address & --- \\
+  13 & Cog status & dim stack: \texttt{INIT STALLI STR MOD LUTS} & miscellaneous cog-state flags, lit when active & --- & --- \\
 \end{regiontbl}
 ```
 
@@ -449,13 +492,13 @@ the window.
 
 ```{=latex}
 \begin{regiontbl}{}
-  \# & Region & Find it on screen by\ldots{} & What it shows & You act here by\ldots{} \\
-  11 & Interrupt status & left of the pointer band: \texttt{INT1/2/3} & each interrupt's state: \texttt{off / idle / wait / busy} & --- (read-only) \\
-  12 & Pointers & rows \texttt{RFxx / PTRA / PTRB} + hub bytes & the FIFO and PTRA/PTRB, with the hub bytes around each & click \textbf{PTRA}/\textbf{PTRB} to jump the hub viewer there \\
-  14 & Pin states & rows \texttt{DIR / OUT / IN}, 64 bits each & pin direction, output, and live input for all 64 pins & --- (read-only) \\
-  15 & Smart-Pin Watch & one-row strip tagged \texttt{RQPIN} with a delta marker & smart pins whose \texttt{RQPIN} value changed & L-click = reset \textperiodcentered{} R-click = reset \textbf{and} toggle the DIR-only/all-pins filter \\
-  16 & Hub viewer & bottom band tagged \texttt{HUB}: address + hex + ASCII & shared hub RAM as hex and text & arrows/PgUp/PgDn/wheel to scroll; click a byte to jump \\
-  17 & Hub heat map & colored block right of the hub data & recent hub read/write activity & click a bright spot to jump the hub viewer there \\
+  \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
+  11 & Interrupt status & left of the pointer band: \texttt{INT1/2/3} & each interrupt's state: \texttt{off / idle / wait / busy} & --- & --- \\
+  12 & Pointers & rows \texttt{RFxx / PTRA / PTRB} + hub bytes & the FIFO and PTRA/PTRB, with the hub bytes around each & click \textbf{PTRA}/\textbf{PTRB} to jump the hub viewer there & --- \\
+  14 & Pin states & rows \texttt{DIR / OUT / IN}, 64 bits each & pin direction, output, and live input for all 64 pins & --- & --- \\
+  15 & Smart-Pin Watch & one-row strip tagged \texttt{RQPIN} with a delta marker & smart pins whose \texttt{RQPIN} value changed & L-click = reset \textperiodcentered{} R-click = reset \textbf{and} toggle the DIR-only/all-pins filter & --- \\
+  16 & Hub viewer & bottom band tagged \texttt{HUB}: address + hex + ASCII & shared hub RAM as hex and text & click a byte to jump there \textperiodcentered{} wheel over the address digits changes one nibble & $\uparrow$ $\downarrow$ = $\pm$\$10 \textperiodcentered{} \textbf{PgUp}/\textbf{PgDn} = $\pm$\$80 (\textbf{Ctrl} \$1000, \textbf{Shift} \$10000) \\
+  17 & Hub heat map & colored block right of the hub data & recent hub read/write activity & click a bright spot to jump the hub viewer there & --- \\
 \end{regiontbl}
 ```
 
@@ -772,15 +815,29 @@ kinds at once.
 
 A break-condition register controls which conditions are armed:
 
-| Condition | Stops when… |
-|-----------|-------------|
-| **MAIN** | main code executes |
-| **INT1 / INT2 / INT3** | the corresponding interrupt fires |
-| **DEBUG** | a `DEBUG` statement or `debug` instruction is reached |
-| **INIT** | a cog starts (COGINIT) |
-| **EVENT** | a selected event triggers |
-| **ADDR** | execution reaches a chosen address |
-| **COGBRK** | another cog requests an asynchronous break |
+| Condition | The button reads | Stops when… |
+|-----------|------------------|-------------|
+| **MAIN** | `MAIN` | main code executes |
+| **INT1 / INT2 / INT3** | `INT1` `INT2` `INT3` | the corresponding interrupt fires |
+| **INT1 / 2 / 3 entry** | **→INT1** **→INT2** **→INT3** | that interrupt is *entered* — catches the handler's first instruction |
+| **DEBUG** | `DEBUG` | a `DEBUG` statement or `debug` instruction is reached |
+| **INIT** | `INIT` | a cog starts (COGINIT) |
+| **EVENT** | the **event's own name**, e.g. **CT1↑** | the selected event triggers |
+| **ADDR** | the **address**, e.g. `00000` | execution reaches that address |
+| **COGBRK** | — (no button) | another cog requests an asynchronous break |
+
+Two of those labels catch people out, and both are worth reading twice.
+
+**There is no button that says "EVENT".** It wears the name of whichever event is
+selected, plus an up-arrow — **CT1↑** — and it shows that name dimmed even before
+you arm anything. Likewise **there is no button that says "ADDR"**: it displays
+the chosen address, reading `00000` until you set one by right-clicking a
+disassembly line.
+
+**And there are two buttons per interrupt.** The plain `INT1` breaks whenever
+INT1 is executing; the arrowed **→INT1** breaks only as INT1 is *entered*. They sit
+in different columns and do different things, so when this manual says "click
+INT1" it means the plain one.
 
 You arm and disarm these with the condition buttons in the bottom-right cluster.
 **Left-click** a button to set that condition exclusively; **right-click** to
@@ -788,6 +845,12 @@ toggle it without disturbing the others. Three of them also have keyboard toggle
 from Chapter 5 — **D** (DEBUG), **I** (INIT), and **M** (MAIN). An armed condition
 shows bright, a disarmed one dim — there is no numeric "break value" on screen, so
 the button brightness *is* your confirmation of what is armed.
+
+One exception to that rule, and it is the one that will confuse you if you meet it
+cold: **`BREAK`, at the top of the cluster, lights up when *nothing* is armed.**
+It is not a condition that just switched on — it is the debugger telling you there
+are no break conditions left, so nothing will stop the program. Disarm your last
+condition and you will see it come on.
 
 ## Breaking on an event
 

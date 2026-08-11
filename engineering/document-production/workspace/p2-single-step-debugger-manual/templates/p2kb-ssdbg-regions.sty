@@ -115,7 +115,10 @@
   width=\linewidth,
   rowsep=2pt,
   colsep=4pt,
-  colspec={X[5,l] X[15,l] X[20,l] X[27,l] X[33,l]},
+  % SIX columns: the action column is split into Mouse and Keys. They scan very
+  % differently, and separating them makes the GAPS meaningful -- an empty Keys
+  % cell tells the reader at a glance that a region is mouse-only.
+  colspec={X[4,l] X[13,l] X[17,l] X[22,l] X[27,l] X[17,l]},
   cells={font=\footnotesize},
   row{1}={font=\footnotesize\bfseries},
   hline{1,2}={solid},
