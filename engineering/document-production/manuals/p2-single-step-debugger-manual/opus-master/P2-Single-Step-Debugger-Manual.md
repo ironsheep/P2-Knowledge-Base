@@ -80,6 +80,33 @@ manual uses the P2 forms throughout:
 The single-step debugger itself is new to you regardless of which Propeller you
 came from — there was nothing quite like it on the P1.
 
+## Which tool shows you the debugger
+
+One thing to settle before you start, because it decides how much of this manual
+applies to you.
+
+The single-step debugger is a **P2 facility**: the chip cooperates by pausing
+your program and reporting its state. But the *window* you look at is drawn by
+the program on your desk, not by the P2 — so which tool you run matters. Three
+present it:
+
+- **PNut** — the original. These windows were designed and implemented here
+  first, and the other two follow it.
+- **PNut-Term-TS** — the cross-platform host, the same windows on Windows,
+  macOS, and Linux. **The screenshots in this manual were taken here.**
+- **Spin Tools IDE** — a third implementation, developed alongside PNut-Term-TS.
+
+**The intent is that this manual covers all three.** PNut and PNut-Term-TS
+present the same debugger, and what follows is written against both. Spin Tools
+IDE is being built to the same design and may well already match it — but *we*
+have not certified it against this text, and we would rather tell you that than
+let you assume it. We expect its developer to certify it in due course. Until
+then: if you are running Spin Tools IDE, take this manual as very likely
+accurate rather than as verified.
+
+Where the two hosts we have verified differ in some small way, this manual says
+so at that point.
+
 ## How this manual is organized
 
 Chapters 2–3 get you a running debug session and oriented in the window.
@@ -111,10 +138,16 @@ finished build, and it means you can leave `DEBUG` statements in your source.
 
 ## Step 2: Run it from the debug host
 
-The host program is **`pnut_term_ts`**. It combines a serial terminal, the nine
+You need a **debug host** — the program that downloads your binary and puts the
+debugger window on screen (see *Which tool shows you the debugger* in Chapter 1).
+This manual shows **`pnut_term_ts`**, which combines a serial terminal, the nine
 DEBUG display windows, a downloader, and the single-step debugger in one
-cross-platform application. Launch your compiled program through `pnut_term_ts`
-to download it to the P2 and open the debug session.
+cross-platform application. Launch your compiled program through it to download
+to the P2 and open the debug session.
+
+If you are running **PNut** instead, the same thing happens and the debugger
+window is the same; only the surrounding application differs. Read
+`pnut_term_ts` throughout as "your debug host."
 
 ## Step 3: Reach a breakpoint
 
