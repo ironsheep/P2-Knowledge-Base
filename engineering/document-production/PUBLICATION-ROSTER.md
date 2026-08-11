@@ -41,7 +41,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | Getting Started | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | I/O & Smart Pins | manual | 1.0.8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Assembly Reference | manual | 3.1.5 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
-| DeSilva Tutorial | manual | 3.0.4 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
+| DeSilva Tutorial | manual | 3.0.5 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Debug Window | manual | 1.1.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | Streamer Guide | manual | 1.0.8 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |
 | Architect's Guide | manual | 1.0.3 | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ |

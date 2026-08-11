@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0.4\par}
+{\large\color{blue}Version 3.0.5\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -279,6 +279,36 @@ DAT
 
 That's it! Five lines of code and you have a blinking LED. Load this into any cog and watch the magic happen.
 
+::: sidetrack
+### Which Pin Is *Your* LED?
+
+Before you go further: **pin 56 is not universal.** Every example in this book says 56, because that is the built-in LED on the P2 Eval board I'm writing against. Your board may disagree, and a perfectly correct program blinking a pin with no LED on it is a demoralizing way to start.
+
+The P2 Edge modules put their two buffered LEDs on different pins depending on which module you have:
+
+| Board | LED pins |
+|-------|----------|
+| P2 Edge Module (P2-EC) | P56, P57 |
+| P2 Edge 32MB PSRAM Module (P2-EC32MB) | **P38, P39** |
+
+That difference is not cosmetic. On the 32MB module, P56 and P57 are the PSRAM **clock** and **chip-enable** lines - so `drvh #56` there doesn't light anything, and it *does* stamp on the memory bus. Change the pin number, don't fight it.
+
+Two more things that will save you an evening:
+
+- Both Edge modules have a bank of mini DIP switches, one of which is labelled **LED**. It controls power to those LEDs. If it's off, your code is fine and your LEDs are dark.
+- Those LED pins sit in a **high-impedance** state until you drive them, and they're sensitive to nearby objects. Which brings us to a trick of the light worth knowing about...
+:::
+
+::: sidetrack
+### Why Your LEDs Glow When You Touch Them
+
+You may notice - before running any code at all - that brushing a pin with a finger, or clipping on a scope probe, or just draping a long wire nearby, makes an onboard LED come up faintly. Nothing is broken. You have not damaged anything.
+
+Out of reset, P2 pins are **inputs**: high-impedance, driving nothing, holding no particular level. A pin in that state is an antenna, and you - or your probe lead - are a fairly good one at mains frequency. The microamps that couple in are far too little to matter to the chip, but a modern high-efficiency LED will glow visibly on microamps. So the LED is faithfully reporting a real (and completely harmless) current.
+
+The cure is the same as the lesson: **a floating pin has no opinion.** The moment your code executes `drvh` or `drvl`, the cog's output driver wins and the shimmer stops. If you want a pin held at a known level *without* driving it, the P2 gives you pull-ups and pull-downs for exactly that. Uff - your first piece of real hardware intuition, and you got it by accident.
+:::
+
 ## What's Really Happening
 
 Well, now that you've seen it work (you did try it, right?), let's talk about what's actually going on here.
@@ -431,12 +461,12 @@ This one's a bit tricky - we'll use PWM to fade the LED:
         org     0
         
         dirl    #56                    ' Reset the pin before configuring
-        wrpin   ##P_PWM_TRIANGLE, #56  ' Configure pin 56 for PWM
+        wrpin   ##P_PWM_TRIANGLE | P_OE, #56 ' PWM mode, output enabled
         wxpin   ##$0100_0001, #56      ' Frame = 256 base periods
         dirh    #56                    ' Enable the pin
         
 .fade   wypin   level, #56             ' Set duty cycle
-        waitx   ##100_000              ' Small delay
+        waitx   ##1_000_000            ' ~1.3 s per ramp at 200 MHz
         add     level, #1              ' Increment brightness
         and     level, #$FF            ' Wrap at 256
         jmp     #.fade
@@ -445,6 +475,8 @@ level   long    0
 ```
 
 Don't worry if the PWM example seems complex - we'll cover smart pins in detail in Chapter 14!
+
+One piece of it is worth pointing at now, though, because it bites everybody once: the `| P_OE`. **DIRH** starts the smart pin, but it does *not* connect the smart pin to the pin's output driver - `P_OE` does. Leave it out and the smart pin dutifully generates your waveform and drives it precisely nowhere. The LED just sits there, dark, and the code looks perfect.
 
 ::: medicine-cabinet
 Feeling overwhelmed? Here's the simplified prescription:
@@ -4738,12 +4770,12 @@ Here are the modes you'll use most often:
         dirh    #TX_PIN
 
 ' Send the first byte immediately -- the buffer is empty right after enable
-        wypin   byte, #TX_PIN
+        wypin   txbyte, #TX_PIN
 
 ' Before each *subsequent* byte, wait until the pin is ready for more
-send    testp   #TX_PIN wc      ' IN rises once a word moves to the shifter
-  if_nc jmp     #send
-        wypin   byte, #TX_PIN   ' Send the next byte
+.send   testp   #TX_PIN wc      ' IN rises once a word moves to the shifter
+  if_nc jmp     #.send
+        wypin   txbyte, #TX_PIN ' Send the next byte
 ```
 
 ```pasm2
@@ -4754,10 +4786,10 @@ send    testp   #TX_PIN wc      ' IN rises once a word moves to the shifter
         dirh    #RX_PIN
 
 ' Get a byte
-recv    testp   #RX_PIN wc      ' Check for received byte
-  if_nc jmp     #recv
-        rdpin   byte, #RX_PIN   ' Get it
-        shr     byte, #24       ' Shift to low byte
+.recv   testp   #RX_PIN wc      ' Check for received byte
+  if_nc jmp     #.recv
+        rdpin   rxbyte, #RX_PIN ' Get it
+        shr     rxbyte, #24     ' Shift to low byte
 ```
 
 ### PWM Output
@@ -4794,7 +4826,9 @@ read_adc
 ```pasm2
 ' Quadrature decoder - A on pin, B on pin+1
         dirl    #ENC_PIN
-        wrpin   ##P_QUADRATURE, #ENC_PIN
+        ' P_PLUS1_B routes the B phase from the next pin up
+        wrpin   ##P_QUADRATURE | P_PLUS1_B, #ENC_PIN
+        wxpin   #0, #ENC_PIN            ' 0 = continuous totalizer
         dirh    #ENC_PIN
 
 ' Read position
@@ -4819,7 +4853,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 
 ```antipattern
 ' WRONG - Pin may be in unknown state!
-        wrpin   ##P_PWM_SAWTOOTH, #PIN
+        wrpin   ##P_PWM_SAWTOOTH | P_OE, #PIN
         wxpin   ##1000, #PIN
         dirh    #PIN
 ```
@@ -4829,7 +4863,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 ```pasm2
 ' RIGHT - Start clean
         dirl    #PIN                    ' Reset first!
-        wrpin   ##P_PWM_SAWTOOTH, #PIN
+        wrpin   ##P_PWM_SAWTOOTH | P_OE, #PIN
         wxpin   ##1000, #PIN
         dirh    #PIN
 ```

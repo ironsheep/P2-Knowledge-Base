@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-245`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover)
+**Next finding ID: `F-250`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -34,6 +34,78 @@
 - **F-093 (`WONTFIX`):** `lockrel.yaml` C-flag polarity — the appendix's "inverted" claim is the error; the YAML is correct (C = lock-was-held).
 - **F-114b (`RESOLVED-INVALID`):** the MIDI display modes KEYBOARD / GRID / ROLL / MONITOR do **not** exist in PNut v55 — do **not** add them to `midi.yaml` (it carries an explicit `not_supported:` claim).
 - **Verified-resolved (don't re-chase):** the Jan-2026 streamer KB audit's issues were all reconciled in the 2026-05/06 passes (DAC routing, 32-pin groups, mode encoding, xcont/xzero phase wording, setxfrq 2³¹ formula, streamer symbols). Only the XZERO concept text was open and is fixed (F-003).
+
+---
+
+## Open — CONFIRMED corrections (2026-08-11, DeSilva reader-report sweep)
+
+> **Sweep origin:** a reader reported that the DeSilva tutorial's Ch.1 "Experiment 3:
+> Fading" does not fade on a P2 EVAL (#64000 Rev B) — copied, pasted, triple-checked.
+> Root cause: the smart-pin mode was written **without `P_OE`**, so the smart pin
+> generated the PWM but the pin's output driver stayed disabled. Confirmed against
+> `language/spin2/methods/wrpin.yaml` `tt_field` — `when_smart_pin_on: "x0=output
+> disabled, x1=output enabled (regardless of DIR)"` and `p_oe_required_for: "All output
+> modes (NCO, PWM, Pulse, Transition, Serial TX, DAC, USB)"`. The manual was fixed the
+> same pass; **the same class is still present in the KB's own examples**, below.
+> Note this class had already been fixed once in DeSilva (v3.0.3 corrected the
+> async-serial TX recipe to `P_ASYNC_TX | P_OE`) but was **not swept class-wide** —
+> which is how the PWM example survived to a reader.
+
+- **F-245 — `language/pasm2/wrpin.yaml:77` "Configure PWM output" example omits `P_OE`.**
+  `WRPIN ##P_PWM_TRIANGLE, #16` configures the smart pin but leaves the pin's output
+  driver disabled; the example as shipped produces no output. **Correction:**
+  `WRPIN ##P_PWM_TRIANGLE | P_OE, #16`. Authority: this file's own `tt_field` table
+  (`p_oe_required_for`) and `architecture/smart-pins/smart-pin-01000-pwm-triangle.yaml`,
+  whose example already writes `P_PWM_TRIANGLE | P_OE`. Status: `CONFIRMED`.
+
+- **F-246 — `language/pasm2/concepts/streamer_smartpin_control.yaml:91,166` omit `P_OE`
+  on async-serial transmit.** Both write `WRPIN ##P_ASYNC_TX, #<pin>`; async TX is an
+  output mode. **Correction:** `##P_ASYNC_TX | P_OE`. Authority: `smart-pin-11110-async-
+  serial-transmit.yaml` — `required_modifiers: "P_OE (P_TT_01) to enable output"`.
+  Status: `CONFIRMED`.
+
+- **F-247 — `language/spin2/methods/pinstart.yaml:38,96` omit `P_OE` on output modes.**
+  `PINSTART(8, P_PWM_TRIANGLE, 1000, 500)` and `PINSTART(SPI_CLK, P_TRANSITION, 1, 0)`
+  are both output modes shown without output enable. **Correction:** OR in `P_OE`.
+  Authority: as F-245. Status: `CONFIRMED`. *(Excluded deliberately:
+  `spin2/concepts/basic-io.yaml:436-437`, which is a labelled teaching antipattern —
+  its comment already reads "Still no output!".)*
+
+- **F-248 — `hardware/p2-eval-board.yaml` cannot say which pins the 8 onboard LEDs are
+  on.** `built_in_peripherals.leds.pins: "TBD - check documentation"`, and
+  `switches.user_switches: "TBD quantity"`. Every P2 tutorial we ship (DeSilva Ch.1
+  onward) teaches "the LED on pin 56", and a reader debugging an LED example has no
+  KB-backed way to confirm the pin map or the LED drive circuit for their board
+  revision. **Needs a source before correcting** — the ingested eval-board material
+  (`engineering/ingestion/sources/p2-eval-board/`) is Rev C and records only "8 LEDs,
+  user-controllable"; the reader's board is Rev B. Do **not** fill these from
+  convention or from the Edge-module LED rows (different boards — see F-249, where the
+  Edge data *is* solid). **→ likely TRACKED → ingestion** (obtain the #64000 Rev B/Rev C
+  schematic or product guide). Status: `NEEDS-VERIFICATION`.
+
+- **F-249 — the Edge modules' LED DIP switch is documented by *function* but not by
+  *position*.** `hardware/edge-standard-module.yaml:319` and
+  `hardware/edge-32mb-module.yaml:409` both record `LED: "Enable/disable onboard LEDs
+  (…)"`, and the `led_pins` blocks add `control: "DIP switch to disable LED power"`.
+  Nothing in the KB or in `engineering/ingestion/sources/edge-*/` says **which switch
+  position enables the LEDs**. A reader reported fumbling exactly this ("the 'LED' one
+  needs to be UP, I think, for the led to shine") — *"I think"* is not an authority, so
+  do **not** write a direction in from this report. Terminology note: these are **mini
+  DIP switches**, not jumpers (the YAMLs already say "DIP switch" — keep that word in
+  any reader-facing text). **→ TRACKED → ingestion:** capture
+  the switch-position table from the Edge module product guide / silkscreen photo, then
+  add `position_on:` to both YAMLs. Status: `NEEDS-VERIFICATION`.
+
+> **✅ VERIFIED-CORRECT in the same sweep — do NOT "fix" these.** The reader also flagged
+> that the 32MB Edge module's LEDs are on P38/P39, not P56/P57. **The KB already has this
+> right, on both modules and specifically:** `edge-standard-module.yaml` (P2-EC) →
+> `led_pins: P56, P57`, with an explicit `# DIFFERENT PINS than 32MB module!` marker;
+> `edge-32mb-module.yaml` (P2-EC32MB) → `led_pins: P38, P39`, with P56/P57 correctly
+> assigned to **PSRAM CLK / CE#** instead. Both files also already carry the note that
+> answers the reader's other observation — *"High-Z by default; LEDs sensitive to nearby
+> objects. Drive high/low or enable pull-ups to control."* The gap was never the YAML; it
+> was that **the manuals' blink examples hardcode pin 56 without saying which board that
+> assumes** (fixed in DeSilva this pass; other manuals not yet swept).
 
 ---
 
