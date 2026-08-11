@@ -1,5 +1,22 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.5 (2026-08-11)
+
+**Worked examples that run as written** — the smart-pin and serial examples assemble and behave as their text describes, and Chapter 1 tells you which pin your board's LED is on.
+
+### Fixed
+- Chapter 1 "Experiment 3: Fading": the LED fades, ramping over about 1.3 seconds
+- Smart-pin examples drive their pins (`P_OE`), including PWM and the configuration-order example
+- Async serial transmit and receive examples assemble as printed
+- Quadrature example reads its B phase from the next pin up (`P_PLUS1_B`)
+
+### Added
+- **"Which Pin Is *Your* LED?"** (Chapter 1): LED pins differ by board — P56/P57 on the P2 Edge Module, **P38/P39** on the 32MB PSRAM Module
+- **"Why Your LEDs Glow When You Touch Them"** (Chapter 1): pins leave reset high-impedance, and an LED glows on the microamps a finger couples in
+- `P_OE` introduced in Chapter 1 where the first smart pin appears
+- Smart Pin Quick Reference (Chapter 14): `P_OE` in the recipe, the Golden Rule, and marked on every output mode
+
+
 ## v3.0.4 (2026-08-08)
 
 A licensing change. No technical content changed.

@@ -26,7 +26,7 @@ prose), with all per-publication detail in the roster.*
 | Getting Started | manual | 1.0.3 | 25 | ✅ |
 | I/O & Smart Pins | manual | 1.0.8 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.5 | 503 | ✅ |
-| DeSilva Tutorial | manual | 3.0.4 | 162 | ✅ |
+| DeSilva Tutorial | manual | 3.0.5 | 164 | ✅ |
 | Debug Window | manual | 1.1.2 | 168 | ✅ |
 | Streamer Guide | manual | 1.0.8 | 73 | ✅ |
 | Architect's Guide | manual | 1.0.3 | 52 | ✅ |

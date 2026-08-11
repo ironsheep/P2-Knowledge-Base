@@ -2,19 +2,19 @@
 
 ## v3.0.5 (2026-08-11)
 
-**A reader-reported fix and the sweep behind it**: the Chapter 1 fading experiment now actually fades, three more smart-pin and serial examples now do what their comments promise, and new guidance tells you which pin your board's LED is really on.
+**Worked examples that run as written** — the smart-pin and serial examples assemble and behave as their text describes, and Chapter 1 tells you which pin your board's LED is on.
 
 ### Fixed
-- **Chapter 1, "Experiment 3: Fading" now fades.** The smart pin was configured without `P_OE`, so it generated the PWM waveform correctly and drove it nowhere — the LED stayed dark no matter how carefully the code was copied. The mode now enables the pin's output driver, and the ramp is slowed to about 1.3 seconds so the fade reads as a fade rather than a flicker. Reported from the bench by a reader.
-- **The smart-pin "always DIRL first" example** now also enables its output, so the block held up as correct is correct in full, not only in the ordering it teaches.
-- **The asynchronous serial transmit and receive examples now assemble.** They used `byte`, `send`, and `recv` as names; all three are reserved words, so the examples stopped at the assembler for anyone who pasted them in. Renamed to `txbyte`, `rxbyte`, `.send`, and `.recv`.
-- **The quadrature encoder example now reads its B phase from the next pin up**, as its comment always claimed, and sets the continuous-count mode explicitly instead of inheriting whatever was there.
+- Chapter 1 "Experiment 3: Fading": the LED fades, ramping over about 1.3 seconds
+- Smart-pin examples drive their pins (`P_OE`), including PWM and the configuration-order example
+- Async serial transmit and receive examples assemble as printed
+- Quadrature example reads its B phase from the next pin up (`P_PLUS1_B`)
 
 ### Added
-- **"Which Pin Is *Your* LED?"** — a Chapter 1 aside naming the LED pins per board, because they differ: P56/P57 on the P2 Edge Module, but **P38/P39** on the P2 Edge 32MB PSRAM Module, where P56 and P57 are the PSRAM clock and chip-enable instead. Also flags the LED DIP switch that silently keeps the LEDs dark.
-- **"Why Your LEDs Glow When You Touch Them"** — a Chapter 1 aside explaining why a finger, a scope probe, or a long wire lights an onboard LED before any code runs: pins come out of reset as high-impedance inputs, and a high-efficiency LED glows on the microamps that couple in. Harmless, and a first lesson in why a floating pin has no opinion.
-- **A note on `P_OE` at the point of first contact** in Chapter 1, so the trap is named where readers first meet it rather than ten chapters later.
-- **The Chapter 14 Smart Pin Quick Reference now names `P_OE`** — in the recipe step that sets the mode, in the Golden Rule, and against each output mode in the Common Modes list (☑). A new "silent failure" note spells out the rule: every output mode needs it, code without it still assembles clean, and receive or measuring modes must not have it. This is the page a reader reaches for while debugging a dead pin, and it had been silent on the one cause most likely to explain it. Exercise 1 says so too.
+- **"Which Pin Is *Your* LED?"** (Chapter 1): LED pins differ by board — P56/P57 on the P2 Edge Module, **P38/P39** on the 32MB PSRAM Module
+- **"Why Your LEDs Glow When You Touch Them"** (Chapter 1): pins leave reset high-impedance, and an LED glows on the microamps a finger couples in
+- `P_OE` introduced in Chapter 1 where the first smart pin appears
+- Smart Pin Quick Reference (Chapter 14): `P_OE` in the recipe, the Golden Rule, and marked on every output mode
 
 
 ## v3.0.4 (2026-08-08)
