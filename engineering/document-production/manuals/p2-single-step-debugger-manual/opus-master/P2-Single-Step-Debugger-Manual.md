@@ -104,8 +104,10 @@ let you assume it. We expect its developer to certify it in due course. Until
 then: if you are running Spin Tools IDE, take this manual as very likely
 accurate rather than as verified.
 
-Where the two hosts we have verified differ in some small way, this manual says
-so at that point.
+This manual describes how the debugger is *meant* to behave — the behavior PNut
+established and the others are built to. If a particular host lags that in some
+small way, the answer is a fix to that host, not a footnote here, so you will not
+find this text cataloguing which build does what.
 
 ## How this manual is organized
 
@@ -699,15 +701,29 @@ kinds at once.
 
 A break-condition register controls which conditions are armed:
 
-| Condition | Stops when… |
-|-----------|-------------|
-| **MAIN** | main code executes |
-| **INT1 / INT2 / INT3** | the corresponding interrupt fires |
-| **DEBUG** | a `DEBUG` statement or `debug` instruction is reached |
-| **INIT** | a cog starts (COGINIT) |
-| **EVENT** | a selected event triggers |
-| **ADDR** | execution reaches a chosen address |
-| **COGBRK** | another cog requests an asynchronous break |
+| Condition | The button reads | Stops when… |
+|-----------|------------------|-------------|
+| **MAIN** | `MAIN` | main code executes |
+| **INT1 / INT2 / INT3** | `INT1` `INT2` `INT3` | the corresponding interrupt fires |
+| **INT1 / 2 / 3 entry** | **→INT1** **→INT2** **→INT3** | that interrupt is *entered* — catches the handler's first instruction |
+| **DEBUG** | `DEBUG` | a `DEBUG` statement or `debug` instruction is reached |
+| **INIT** | `INIT` | a cog starts (COGINIT) |
+| **EVENT** | the **event's own name**, e.g. **CT1↑** | the selected event triggers |
+| **ADDR** | the **address**, e.g. `00000` | execution reaches that address |
+| **COGBRK** | — (no button) | another cog requests an asynchronous break |
+
+Two of those labels catch people out, and both are worth reading twice.
+
+**There is no button that says "EVENT".** It wears the name of whichever event is
+selected, plus an up-arrow — **CT1↑** — and it shows that name dimmed even before
+you arm anything. Likewise **there is no button that says "ADDR"**: it displays
+the chosen address, reading `00000` until you set one by right-clicking a
+disassembly line.
+
+**And there are two buttons per interrupt.** The plain `INT1` breaks whenever
+INT1 is executing; the arrowed **→INT1** breaks only as INT1 is *entered*. They sit
+in different columns and do different things, so when this manual says "click
+INT1" it means the plain one.
 
 You arm and disarm these with the condition buttons in the bottom-right cluster.
 **Left-click** a button to set that condition exclusively; **right-click** to
@@ -715,6 +731,12 @@ toggle it without disturbing the others. Three of them also have keyboard toggle
 from Chapter 5 — **D** (DEBUG), **I** (INIT), and **M** (MAIN). An armed condition
 shows bright, a disarmed one dim — there is no numeric "break value" on screen, so
 the button brightness *is* your confirmation of what is armed.
+
+One exception to that rule, and it is the one that will confuse you if you meet it
+cold: **`BREAK`, at the top of the cluster, lights up when *nothing* is armed.**
+It is not a condition that just switched on — it is the debugger telling you there
+are no break conditions left, so nothing will stop the program. Disarm your last
+condition and you will see it come on.
 
 ## Breaking on an event
 
