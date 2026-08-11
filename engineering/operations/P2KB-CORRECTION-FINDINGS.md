@@ -132,13 +132,18 @@
   DIP switches**, not jumpers (the YAMLs already say "DIP switch" — keep that word in
   any reader-facing text). **→ TRACKED → ingestion:** capture
   the switch-position table from the Edge module product guide / silkscreen photo, then
-  add `position_on:` to both YAMLs. Status: `NEEDS-VERIFICATION` — **source study done 2026-08-11, still blocked.**
-> **STUDIED 2026-08-11 (no source found — do not guess):** grepped every `sources/edge-*/`
-> doc for switch-position wording (up/down/on/off/toward/silkscreen). The extraction audits
-> record the switch's **function** (`edge-32mb-complete-extraction-audit.md:104` — "LED
-> Power: Enable/disable P38/P39 LEDs") but never its **position**. The reader's "UP, I
-> think" is explicitly NOT written in. Needs the Edge product guide or a silkscreen photo.
-> **→ ingestion head.**
+  add `position_on:` to both YAMLs. Status: **`DONE` 2026-08-11.**
+> **RESOLVED 2026-08-11 — hardware observation (Stephen, both Edge modules in hand):**
+> the LED switches on **both** modules are **labeled ON/OFF** (not by direction), and
+> **ON powers the LEDs**. This also supersedes the reader's earlier "UP, I think" — the
+> switch is not labeled by orientation, so no up/down wording goes in the KB.
+> **APPLIED:** `hardware/edge-standard-module.yaml` + `hardware/edge-32mb-module.yaml` —
+> `boot_modes.switches.LED` now reads "…Labeled ON/OFF; set ON to power the LEDs", and
+> all four `led_pins.*.control` lines now read "LED DIP switch (labeled ON/OFF) gates LED
+> power; must be ON for the LED to light" (was the passive "DIP switch to disable LED
+> power", which never said which position was which). Provenance is an **empirical
+> hardware observation**, not a documentary citation — first-class per the trust chain,
+> and recorded as such. Verified: both files parse clean, crossref validator green.
 
 > **✅ VERIFIED-CORRECT in the same sweep — do NOT "fix" these.** The reader also flagged
 > that the 32MB Edge module's LEDs are on P38/P39, not P56/P57. **The KB already has this

@@ -252,7 +252,7 @@ pin_mapping:
       vio_regulator: "V56"
       buffer: "Dual Schmitt-trigger, high-Z input"
       led_visible: "Both sides of PCB"
-      control: "DIP switch to disable LED power"
+      control: "LED DIP switch (labeled ON/OFF) gates LED power; must be ON for the LED to light"
       note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
     P57:
       function: "Buffered LED"
@@ -260,7 +260,7 @@ pin_mapping:
       vio_regulator: "V56"
       buffer: "Dual Schmitt-trigger, high-Z input"
       led_visible: "Both sides of PCB"
-      control: "DIP switch to disable LED power"
+      control: "LED DIP switch (labeled ON/OFF) gates LED power; must be ON for the LED to light"
       note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
 
   # Flash and microSD shared pins
@@ -316,7 +316,7 @@ pin_mapping:
 boot_modes:
   description: "DIP switch settings for boot mode selection"
   switches:
-    LED: "Enable/disable onboard LEDs (P56, P57)"
+    LED: "Enable/disable onboard LEDs (P56, P57). Labeled ON/OFF; set ON to power the LEDs."
     FLASH: "Flash boot enable"
     triangle_up: "P59 pull-up (boot option)"
     triangle_down: "P59 pull-down (boot option)"
