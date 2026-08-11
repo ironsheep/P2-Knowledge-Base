@@ -79,6 +79,12 @@
 % the mark alone on the preceding page. The TOC entry is added by hand so the
 % page still lists as "Copyright and License".
 \ispcopyrightmark
+% \phantomsection is REQUIRED before a hand-added TOC line: without an anchor of
+% its own, hyperref points the entry at the last anchor it saw -- the document
+% start -- so the bookmark and the TOC link both jumped to the cover instead of
+% this page. (Verified in the 2026-08-08 pre-release check: entry targeted p1,
+% section lives on p5.)
+\phantomsection
 \addcontentsline{toc}{chapter}{Copyright and License}
 \markboth{Copyright and License}{}
 \vspace{0.5cm}
@@ -154,11 +160,11 @@ are working by hand or driving the whole thing from an AI coding assistant:
 | Tool | Its job |
 |------|---------|
 | **P2KB MCP** | Serves the P2 knowledge base — instructions, the language, the silicon — to an assistant that is writing P2 code. |
-| **`pnut_ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
-| **`pnut_term_ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
+| **`pnut-ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
+| **`pnut-term-ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
 | Spin2 VS Code extension *(optional)* | Your editor, with Spin2 syntax and semantic highlighting. |
 
-Think of the first three as compile, and run-and-observe. `pnut_ts` produces the
+Think of the first three as compile, and run-and-observe. `pnut-ts` produces the
 binary; **PNut-Term-TS is where you watch it come alive.**
 
 ```{=latex}
@@ -167,34 +173,56 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \diagramscale{
 \begin{tikzpicture}
 \node[iospbox] (agent) {You / your\\AI agent};
-\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut\_ts}\\compiler};
-\node[iospkey, right=14mm of compile] (term) {\texttt{pnut\_term\_ts}\\download + observe};
-\node[iospbox, right=20mm of term] (p2) {Propeller~2\\silicon};
+\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut-ts}\\compiler};
+\node[iospkey, right=16mm of compile] (term) {\texttt{pnut-term-ts}\\download + observe};
+\node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
 \node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
+\node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
+\node[iospsub, below=1.5mm of log] (logsub)
+   {\texttt{debug\_*.log} (GUI)\\\texttt{headless\_*.log} (headless)};
 \draw[iospflow] (mcp) -- (agent);
 \draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
 \draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
-\draw[iospflow] (term) -- node[above, font=\scriptsize]{run} (p2);
-\draw[iospflow] (p2.south) to[out=-90, in=-90, looseness=0.5]
-   node[below, font=\scriptsize]{DEBUG output the agent reads back} (agent.south);
+% The serial link is a TWO-WAY conversation, and both directions terminate at
+% pnut-term-ts -- never at the agent. Drawn as a matched pair rather than one
+% arrow, because the return leg is the whole point of the figure.
+\draw[iospflow] ([yshift=2mm]term.east) --
+   node[above, font=\scriptsize]{run} ([yshift=2mm]p2.west);
+\draw[iospflow] ([yshift=-2mm]p2.west) --
+   node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
+\draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
+\draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
+   node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
+   {the agent reads the log} (agent.south);
 \end{tikzpicture}
 }
-\caption{Where PNut-Term-TS sits in the P2 agentic tool chain.}
+\caption{Where PNut-Term-TS sits in the P2 agentic tool chain. The loop closes
+through the \emph{log file}, not through a direct line from the chip: everything
+the P2 sends comes back to PNut-Term-TS, which writes it to a log, and it is that
+log the agent reads.}
 \end{figure}
 ```
 
+Follow how that loop closes. The agent does not read the P2 directly.
+**Everything the P2 sends comes back to PNut-Term-TS, which
+writes it to a log file in the `logs` folder — and it is that file the agent
+reads.** The log is not a convenience feature bolted on the side; for an agent it
+*is* the return path. (Logs land next to the run, in `./logs/` relative to the
+folder you launched from, so the evidence stays beside the program that produced
+it. You can point them somewhere else if you would rather.)
+
 If you are building an *agentic* P2 workflow — an assistant that writes code,
-compiles it, runs it on real silicon, and reads back the result to decide what to
-do next — this tool is the piece that lets the assistant *observe the hardware*.
+compiles it, runs it on real silicon, and reads the log back to decide what to do
+next — this tool is the piece that lets the assistant *observe the hardware*.
 That agent-in-the-loop way of working is the subject of **The P2 Architect's
-Guide, Part 3**, which names this very tool chain — `pnut_ts`, `pnut_term_ts`,
+Guide, Part 3**, which names this very tool chain — `pnut-ts`, `pnut-term-ts`,
 and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
 read loop on its own. This guide is the operating manual for the tool that makes
 it possible.
 
 # Chapter 2: Three Tools in One
 
-The quickest way to understand PNut-Term-TS is to know what it replaces. It folds
+To understand PNut-Term-TS, start from what it replaces. It folds
 **three** jobs that used to need separate tools — or a specific operating system —
 into one program that runs the same way everywhere.
 
@@ -217,19 +245,23 @@ The P2's `debug()` system can draw far more than text: oscilloscope traces, logi
 timing, plots, bitmaps, spectra, and an interactive single-step debugger. PNut can
 show these windows too — but only on Windows. **PNut-Term-TS renders the same
 windows on Windows, macOS, and Linux**, and it is where you *produce* the saved
-images and captures those windows can emit. This cross-platform reach is the whole
-reason the tool exists in the form it does.
+images and captures those windows can emit. That cross-platform reach is a large
+part of why the tool takes the form it does.
 
 > **What the name tells you.** *PNut-Term-TS* reads as "PNut **Term**inal, written
 > in **T**ype**S**cript." The *Terminal* is jobs 1 and 2; the *TypeScript* is why
-> job 3 runs everywhere instead of on Windows alone. The name is a compact
-> reminder of what the tool is.
+> job 3 runs everywhere instead of on Windows alone.
 
 ```{=latex}
 \begin{figure}[H]
 \centering
 \diagramscale{
-\begin{tikzpicture}
+% These three lines are NOT traffic -- nothing flows along them. They say
+% "this role is folded into that app," which is a statement about identity,
+% not about data. Dashed keeps them from borrowing the solid-arrow vocabulary
+% Figure 1.1 uses for the real serial/file path, where the arrows DO mean flow.
+\begin{tikzpicture}[iospindicate/.style={iospflow, dashed,
+                                         dash pattern=on 2.2pt off 1.8pt}]
 \node[iospbox, align=center] (dl) at (0,1.9) {Downloader};
 \node[iospbox, align=center] (term) at (0,0)
    {Serial terminal\\{\scriptsize replaces Parallax Serial Terminal}};
@@ -238,9 +270,9 @@ reason the tool exists in the form it does.
 \node[iospkey, align=center, minimum height=15mm, minimum width=30mm] (one) at (7,0)
    {\textbf{PNut-Term-TS}};
 \node[iospsub, below=1.5mm of one] {one app \textperiodcentered\ Windows \textperiodcentered\ macOS \textperiodcentered\ Linux};
-\draw[iospflow] (dl) -- (one);
-\draw[iospflow] (term) -- (one);
-\draw[iospflow] (dbg) -- (one);
+\draw[iospindicate] (dl) -- (one);
+\draw[iospindicate] (term) -- (one);
+\draw[iospindicate] (dbg) -- (one);
 \end{tikzpicture}
 }
 \caption{The three tools PNut-Term-TS folds into one.}
@@ -255,8 +287,8 @@ need the windows in depth, those manuals are where to go.
 
 # Chapter 3: Two Ways to Run — GUI and Headless
 
-PNut-Term-TS runs in two fundamentally different ways, and knowing both up front
-will save you a lot of confusion. You choose between them by *how you launch the
+PNut-Term-TS runs in two fundamentally different ways, and the rest of this guide
+is organized around the difference. You choose between them by *how you launch the
 tool*.
 
 ## Headed — the interactive GUI
@@ -284,9 +316,9 @@ hardware-in-the-loop tests — anywhere a program, not a person, is watching.
 pnut-term-ts --headless -r test.bin --end-marker
 ```
 
-In headless mode the **log file is the whole point** — it is how an automated
-caller (or an assistant reading back its own program's behavior) sees what the P2
-did. We return to that idea in depth in the headless part of this guide.
+In headless mode the log file is how an automated caller — or an assistant reading
+back its own program's behavior — sees what the P2 did. The headless part of this
+guide covers it in depth.
 
 Between these two poles are a few in-between modes — downloading from the command
 line but keeping the GUI, a headed "batch" run that exits when the program signals
@@ -453,9 +485,9 @@ writes the value into the image — including when your source sets its own rate
 CON  DEBUG_BAUD = 921600   ' picked up automatically
 ```
 
-If your source says nothing, everything in the P2 world defaults to **2,000,000**
-bits per second, and so does PNut-Term-TS. Either way, it just works, with no
-flag from you.
+If your source says nothing, the P2 toolchain defaults to **2,000,000** bits per
+second, and so does PNut-Term-TS. Either way, downloading a binary sets the rate
+for you, with no flag from you.
 
 There is an override, `-b` (`--debugbaud`), but it exists only for the cases the
 binary cannot tell us about: attaching to a P2 that is **already running** (no
@@ -534,10 +566,10 @@ that decides what the window shows. The window types are:
 
 ## Automatic Window Placement
 
-Here is a genuine convenience. A P2 program can name a screen position for each
+A P2 program can name a screen position for each
 window with a `POS` directive, but it does not have to. **A window with no `POS`
 is placed for you automatically** — PNut-Term-TS lays the whole set out as a tidy
-*dashboard*, so the windows never land on top of one another. (Windows that *do*
+*dashboard* instead of stacking every window on the same spot. (Windows that *do*
 carry a `POS` are put exactly where they ask.)
 
 The dashboard is a grid **sized to your display**: the height sets how many rows,
@@ -548,10 +580,16 @@ center column exists to build around.
 
 Windows fill the grid in a fixed **center-out** order: the first window takes the
 top-center cell, the next two flank it, and the arrangement widens outward and
-works its way down, row by row, staying balanced left-to-right as it goes. Two
-cells along the bottom are reserved, so the **main window** and the **debug
-logger** always keep their places; and if you open more windows than the grid
-holds, the extras cascade neatly from the top-left.
+works its way down, row by row, staying balanced left-to-right as it goes. If you
+open more windows than the grid holds, the extras cascade from the top-left.
+
+**The bottom row is not really yours.** The **main window** and the **debug
+logger** live there, and both are wider than a single column — so each of them
+also claims the cell beside it, which is what a window too wide for its cell
+always does. Between them they take the rest of the bottom row; on a typical
+screen they even overlap each other, as you can see in Figure 5.1. In practice
+that leaves the far-left cell as the only bottom slot an auto-placed window can
+land in.
 
 ```{=latex}
 \begin{figure}[H]
@@ -562,9 +600,11 @@ holds, the extras cascade neatly from the top-left.
 \draw[draw=diagram-border, line width=1pt, rounded corners=3pt, fill=white]
    (-0.35,-0.35) rectangle (10.75,5.35);
 \node[iospsub] at (5.2,5.62) {your screen};
-% auto-placed windows, labelled by fill order (Half-Moon Descending)
+% Auto-placed windows, labelled by fill order (Half-Moon Descending). Only the
+% first TEN are drawn as ordinary cells: they fill the top two rows exactly.
+% The bottom row is NOT three more free cells -- see below.
 \foreach \lbl/\c/\r in {1/2/0, 2/1/0, 3/3/0, 4/2/1, 5/1/1, 6/3/1,
-                        7/0/0, 8/4/0, 9/0/1, 10/4/1, 11/1/2, 12/3/2, 13/0/2} {
+                        7/0/0, 8/4/0, 9/0/1, 10/4/1} {
   \pgfmathsetmacro\px{\c*(\cw+\gp)}
   \pgfmathsetmacro\py{(2-\r)*(\ch+\gp)}
   \draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
@@ -573,20 +613,48 @@ holds, the extras cascade neatly from the top-left.
      (\px,\py) ++(0,\ch-0.3) rectangle ++(\cw,0.3);
   \node[font=\large\bfseries, text=diagram-text] at (\px+\cw/2,\py+0.6) {\lbl};
 }
-% reserved cells (bottom row)
-\foreach \lbl/\c in {{Main\\Window}/2, {Debug\\Logger}/4} {
-  \pgfmathsetmacro\px{\c*(\cw+\gp)}
-  \draw[draw=diagram-border!70, fill=diagram-border!12, dashed, rounded corners=1.5pt]
-     (\px,0) rectangle ++(\cw,\ch);
-  \node[font=\scriptsize\itshape, text=diagram-text, align=center] at (\px+\cw/2,0.75) {\lbl};
-}
+% The 11th window: the one bottom cell the system windows leave alone.
+\draw[draw=diagram-border, fill=diagram-box, rounded corners=1.5pt]
+   (0,0) rectangle ++(\cw,\ch);
+\draw[draw=diagram-border, fill=diagram-highlight, rounded corners=1.5pt]
+   (0,\ch-0.3) rectangle ++(\cw,0.3);
+\node[font=\large\bfseries, text=diagram-text] at (\cw/2,0.6) {11};
+% THE BOTTOM ROW IS NOT A ROW OF CELLS. Both system windows are wider than one
+% column, and a width-overflowing window reserves the cells beside it -- so
+% between them they take the rest of the row. They are drawn here at real
+% relative width, overlapping, which is what they actually do on screen.
+\def\mwl{2.18}\def\mwr{7.70}\def\dll{6.95}\def\dlr{10.72}
+\draw[draw=diagram-border!70, fill=diagram-border!12, rounded corners=1.5pt]
+   (\mwl,0) rectangle (\mwr,\ch);
+\node[font=\scriptsize\itshape, text=diagram-text, align=center]
+   at ({(\mwl+\dll)/2},0.75) {Main\\Window};
+% drawn second, so it sits ON TOP of the main window the way it really does
+\draw[draw=diagram-border, fill=diagram-border!22, rounded corners=1.5pt]
+   (\dll,0) rectangle (\dlr,\ch);
+\node[font=\scriptsize\itshape, text=diagram-text, align=center]
+   at ({(\dll+\dlr)/2},0.75) {Debug\\Logger};
+\node[iospsub, align=center] at (6.6,-0.72)
+   {both are wider than a column, and they overlap each other:\\
+    no auto-placed window fits between them};
 \end{tikzpicture}
 }
 \caption{Automatic Window Placement: unpositioned windows fill a screen-sized grid
 center-out, top row first (numbers = open order; shown on the canonical 5-column
-$\times$ 3-row layout). The main window and debug logger keep reserved cells.}
+$\times$ 3-row layout). The bottom row belongs to the main window and the debug
+logger --- both are wider than one column, so they take the cells beside them
+too, leaving only the far-left cell for an eleventh window.}
 \end{figure}
 ```
+
+> **One thing to expect on a 1920-wide screen.** The fill *order* is defined
+> against the five-column layout above, but the *pixel* positions are computed
+> from the columns your display actually gets — and 1920 wide gives you three.
+> The two outermost positions then fall off the right-hand edge of the work area
+> and get clamped back to it, so those later windows stack near the right edge
+> rather than tiling cleanly. It is a known constraint of the current placer, not
+> something you have done wrong. Displays 2000 px and wider get five columns and
+> lay out exactly as drawn. If you want a specific arrangement on a 1920-wide
+> screen, that is a good moment to reach for `POS`.
 
 The result is that you can throw a handful of `debug()` displays on screen and get
 a readable dashboard with no `POS` directives at all. And when you *do* want to

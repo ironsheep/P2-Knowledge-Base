@@ -109,7 +109,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 *Observe and Control Your Running P2 Code*
 
 **Author:** Iron Sheep Productions, LLC
-**Compiler:** `pnut_ts`  **Debug host:** `pnut_term_ts`
+**Compiler:** `pnut-ts`  **Debug host:** `pnut-term-ts`
 
 
 # Chapter 1: What Single-Step Debugging Is
@@ -177,7 +177,7 @@ way it did, watching memory get corrupted, or following how two cogs interact.
 
 ## A note for readers coming from the P1
 
-If your background is the Propeller 1, two habits will trip you up, and this
+If your background is the Propeller 1, two habits do not carry over, and this
 manual uses the P2 forms throughout:
 
 - Start a cog with **`COGSPIN`** / **`COGINIT`**, not the P1's `cognew`.
@@ -233,11 +233,11 @@ to a paused program.
 
 ## Step 1: Compile with debugging enabled
 
-The P2 compiler is **`pnut_ts`**. Add the `-d` flag to build your program with
+The P2 compiler is **`pnut-ts`**. Add the `-d` flag to build your program with
 debugging turned on:
 
 ```command
-pnut_ts -d myprogram.spin2
+pnut-ts -d myprogram.spin2
 ```
 
 Without `-d`, your `DEBUG` statements are stripped out and the debugger never
@@ -248,14 +248,14 @@ finished build, and it means you can leave `DEBUG` statements in your source.
 
 You need a **debug host** — the program that downloads your binary and puts the
 debugger window on screen (see *Which tool shows you the debugger* in Chapter 1).
-This manual shows **`pnut_term_ts`**, which combines a serial terminal, the nine
+This manual shows **`pnut-term-ts`**, which combines a serial terminal, the nine
 DEBUG display windows, a downloader, and the single-step debugger in one
 cross-platform application. Launch your compiled program through it to download
 to the P2 and open the debug session.
 
 If you are running **PNut** instead, the same thing happens and the debugger
 window is the same; only the surrounding application differs. Read
-`pnut_term_ts` throughout as "your debug host."
+`pnut-term-ts` throughout as "your debug host."
 
 ## Step 3: Reach a breakpoint
 
@@ -315,14 +315,14 @@ turn this behavior on with the INIT breakpoint in Chapter 6.)
 The three ways above all place a breakpoint *in your code*. You can also make the
 debugger open automatically — without adding a single `DEBUG` line — by defining
 a constant in your program's top-level `CON` block. These are read at compile
-time, so you still build with `pnut_ts -d`. Two of them open the debugger, and a
+time, so you still build with `pnut-ts -d`. Two of them open the debugger, and a
 third narrows down which cogs are watched:
 
 | Constant | What it does |
 |----------|--------------|
 | `DEBUG_MAIN` | Simply *defining* this symbol breaks at the very start of your program, ready to single-step from the first instruction. |
-| `DEBUG_COGINIT` | Defining this symbol breaks every time a Cog is started (COGINIT), catching each Cog right at its entry point. |
-| `DEBUG_COGS` | An 8-bit mask choosing *which* Cogs have debugging enabled — bit 0 is Cog 0 through bit 7 for Cog 7. A Cog whose bit is **clear** runs with debugging off entirely: its `DEBUG` statements produce nothing and the debugger will not break in it. Defaults to all eight. |
+| `DEBUG_COGINIT` | Defining this symbol breaks every time a cog is started (COGINIT), catching each cog right at its entry point. |
+| `DEBUG_COGS` | An 8-bit mask choosing *which* cogs have debugging enabled — bit 0 is cog 0 through bit 7 for cog 7. A cog whose bit is **clear** runs with debugging off entirely: its `DEBUG` statements produce nothing and the debugger will not break in it. Defaults to all eight. |
 
 `DEBUG_MAIN` and `DEBUG_COGINIT` are switches: their mere presence in the `CON`
 block turns the behavior on, so you write them with no value. `DEBUG_COGS` does
@@ -331,8 +331,8 @@ take a value, because it carries the cog mask:
 ```spin2
 CON
   DEBUG_MAIN                  ' open the debugger at program start
-  DEBUG_COGINIT              ' ...and again whenever a COG starts
-  DEBUG_COGS    = %0000_0011  ' but only watch COGs 0 and 1
+  DEBUG_COGINIT              ' ...and again whenever a cog starts
+  DEBUG_COGS    = %0000_0011  ' but only watch cogs 0 and 1
 ```
 
 Reach for `DEBUG_MAIN` when you want to step from the very beginning;
@@ -421,9 +421,9 @@ these and you can drive the debugger; everything else is detail you look up.
 \end{regiontbl}
 ```
 
-> **The fastest way to learn the screen is region 19.** Hover the mouse over
-> anything and the **hint bar** tells you what it is and what a click will do. If
-> you remember only one thing from this chapter, remember that.
+> **The hint bar is how you learn the rest of the screen.** Hover the mouse over
+> anything and region 19 tells you what it is and what a click will do, so you can
+> read any region you have not met yet without leaving the window.
 
 ```{=latex}
 \clearpage
@@ -702,11 +702,12 @@ ENTER again to stop). Chapters 5 and 6 cover these in full.
 \end{figure}
 ```
 
-## The one habit worth forming
+## A habit worth forming
 
 Before you step, glance at three things: the **PC** (where am I), the **flags**
-(C/Z), and the **Register Watch** (what just changed). After you step, glance
-again and see what changed. That rhythm — look, step, look — is the whole craft.
+(C/Z), and the **Register Watch** (what just changed). Step, then glance at the
+same three again. Most of a debugging session is that loop, with breakpoints
+(Chapter 6) to skip past the stretches you do not need to watch.
 
 
 # Chapter 4: Your First Session
@@ -732,10 +733,10 @@ PRI add_two(x, y) : result
 **1. Compile with debugging and run it.**
 
 ```command
-pnut_ts -d firststep.spin2
+pnut-ts -d firststep.spin2
 ```
 
-Launch it from `pnut_term_ts`. The program runs until it reaches the
+Launch it from `pnut-term-ts`. The program runs until it reaches the
 argument-less `DEBUG`, then the single-step debugger window appears and execution
 pauses. (The second statement, `DEBUG("sum = ", UDEC_(sum))`, has arguments, so it only
 prints to the display windows — it will not stop here.) Your program is now
@@ -761,8 +762,9 @@ happen one instruction at a time.
 **5. Resume.** Press **Enter** to let the program run again. It
 continues to the second `DEBUG`, prints `sum = 42`, and finishes.
 
-That is a complete debug session: **stop, look, step, look, resume.** Everything
-else in this manual builds on those five moves.
+That is a complete debug session: **stop, look, step, look, resume.** The chapters
+that follow add breakpoints, so you can skip ahead to the part you care about
+instead of stepping from the start, and more places to look while you are stopped.
 
 > Try this: run it again, and this time keep stepping *into* `add_two` instead of
 > resuming. Watch the call stack pane gain a level as you enter the method and
@@ -826,7 +828,7 @@ A break-condition register controls which conditions are armed:
 | **ADDR** | the **address**, e.g. `00000` | execution reaches that address |
 | **COGBRK** | — (no button) | another cog requests an asynchronous break |
 
-Two of those labels catch people out, and both are worth reading twice.
+Two of those buttons are not labeled with the condition name used above.
 
 **There is no button that says "EVENT".** It wears the name of whichever event is
 selected, plus an up-arrow — **CT1↑** — and it shows that name dimmed even before
@@ -846,8 +848,8 @@ from Chapter 5 — **D** (DEBUG), **I** (INIT), and **M** (MAIN). An armed condi
 shows bright, a disarmed one dim — there is no numeric "break value" on screen, so
 the button brightness *is* your confirmation of what is armed.
 
-One exception to that rule, and it is the one that will confuse you if you meet it
-cold: **`BREAK`, at the top of the cluster, lights up when *nothing* is armed.**
+There is one exception to that rule. **`BREAK`, at the top of the cluster, lights
+up when *nothing* is armed.**
 It is not a condition that just switched on — it is the debugger telling you there
 are no break conditions left, so nothing will stop the program. Disarm your last
 condition and you will see it come on.
@@ -891,7 +893,7 @@ would send output to the display windows instead of breaking.
 One cog can break another. Enable **BREAK** mode (press **B**) in the cog you
 want to be interruptible; the break can then be fired across to it while you are
 stopped in another cog's debugger. This is how you stop a misbehaving worker cog
-— essential for multi-cog debugging (Chapter 8).
+that is not hitting a breakpoint of its own (Chapter 8).
 
 You can see when a cog is a candidate for this. A cog running free and not
 hitting any break gradually **dims**, and its **Go** button changes to read
@@ -1018,8 +1020,8 @@ a             res       1
 b             res       1
 ```
 
-This instruction-by-instruction view is the most direct way to understand what a
-piece of PASM really does to the machine.
+Stepping this way shows each instruction's effect on the registers and flags
+before the next one runs.
 
 ## Multi-cog debugging
 
@@ -1050,7 +1052,7 @@ PUB main()
 PRI blink(pin, half) | t
   t := GETCT()
   repeat
-    ' break in the blink COG (opens its own window)
+    ' break in the blink cog (opens its own window)
     DEBUG
     PINTOGGLE(pin)
     t += half
@@ -1103,7 +1105,7 @@ timing by running between breakpoints, not by stepping.
 Beyond the single-step debugger, the P2 can stream live data to a set of
 graphical **DEBUG display windows** — a serial terminal, a logic analyzer, an
 oscilloscope, an XY scope, a plot, an FFT spectrum view, a bitmap display, and a
-MIDI view — all hosted in `pnut_term_ts` alongside the debugger.
+MIDI view — all hosted in `pnut-term-ts` alongside the debugger.
 
 Those windows are a large topic with their own commands and workflows, and they
 are covered in depth in the **P2 Debug Window Manual**. This manual stays focused
@@ -1140,7 +1142,7 @@ DEBUG(UDEC(count))                  ' prints: count = 42  (auto label)
 
 | Symptom | Likely cause / fix |
 |---------|--------------------|
-| Debugger never appears | Did you compile with `pnut_ts -d`? Without `-d`, DEBUG is stripped. |
+| Debugger never appears | Did you compile with `pnut-ts -d`? Without `-d`, DEBUG is stripped. |
 | A cog will not respond | It may be stalled; check whether it is waiting (e.g. on an event or `waitct`). |
 | Lost in hub memory | Click the hub heat-map to jump, or dial the address in with the scroll wheel. |
 | A breakpoint never hits | Re-check the address and that the matching condition (ADDR/DEBUG/INT…) is armed. |
@@ -1166,7 +1168,7 @@ there.
 | Complete feature set | v51 and later |
 
 > Note: this manual documents the debugger as delivered in the current
-> environment — compiled with `pnut_ts` and hosted in `pnut_term_ts` — where the
+> environment — compiled with `pnut-ts` and hosted in `pnut-term-ts` — where the
 > interaction model is carried forward unchanged from the original P2 single-step
 > debugger.
 
