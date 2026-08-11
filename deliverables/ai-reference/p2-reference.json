@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-08-09",
-    "last_updated": "2026-08-09T18:45:59.935422",
+    "release_date": "2026-08-11",
+    "last_updated": "2026-08-11T21:53:36.744759",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-08-09T18:45:59.935422",
+    "extraction_date": "2026-08-11T21:53:36.744759",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-08-09T18:45:59.935422",
+    "extraction_date": "2026-08-11T21:53:36.744759",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22499,7 +22499,7 @@
                 "description": "Configure pin as ADC input"
               },
               {
-                "code": "' Start PWM on pin 8\nPINSTART(8, P_PWM_TRIANGLE, 1000, 500)\n",
+                "code": "' Start PWM on pin 8\nPINSTART(8, P_PWM_TRIANGLE | P_OE, 1000, 500)\n",
                 "description": "Configure PWM with period=1000, duty=500"
               },
               {
@@ -22521,7 +22521,7 @@
                 "source": "sensor_array"
               },
               {
-                "code": "' Flash FS SPI pin configuration\nCON\n  SPI_CLK = 56\n  SPI_MOSI = 57\n  SPI_MISO = 58\n  SPI_CS = 59\n  \nPUB setup_spi()\n  ' Configure SPI pins as group\n  PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)\n  \n  ' Then set specific modes\n  PINSTART(SPI_CLK, P_TRANSITION, 1, 0)\n  PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)\n  PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)\n",
+                "code": "' Flash FS SPI pin configuration\nCON\n  SPI_CLK = 56\n  SPI_MOSI = 57\n  SPI_MISO = 58\n  SPI_CS = 59\n  \nPUB setup_spi()\n  ' Configure SPI pins as group\n  PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)\n  \n  ' Then set specific modes\n  PINSTART(SPI_CLK, P_TRANSITION | P_OE, 1, 0)\n  PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)\n  PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)\n",
                 "description": "Configure SPI pins for flash filesystem",
                 "source": "P2-FLASH-FS"
               }
@@ -22580,8 +22580,10 @@
               "WXPIN",
               "WYPIN",
               "PINWRITE",
-              "PINREAD"
+              "PINREAD",
+              "language/spin2/methods/wrpin.yaml"
             ],
+            "output_enable_note": "PINSTART writes the whole 32-bit mode word (DIRL, WRPIN, WXPIN, DIRH, WYPIN),\nso every call must carry P_OE if the mode drives the pin \u2014 a later PINSTART on\na pin replaces any P_OE set by an earlier group call. Output modes (NCO, PWM,\npulse, transition, serial TX, DAC, USB) produce no pin activity without it and\nstill compile clean. Receive/measuring modes (ADC, RX, counters) omit it.\nAuthority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for\n",
             "production_patterns": {
               "hub75_panel": {
                 "description": "HUB75 RGB LED panel uses pin groups",
