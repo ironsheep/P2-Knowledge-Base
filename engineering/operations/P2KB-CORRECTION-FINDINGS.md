@@ -56,18 +56,50 @@
   driver disabled; the example as shipped produces no output. **Correction:**
   `WRPIN ##P_PWM_TRIANGLE | P_OE, #16`. Authority: this file's own `tt_field` table
   (`p_oe_required_for`) and `architecture/smart-pins/smart-pin-01000-pwm-triangle.yaml`,
-  whose example already writes `P_PWM_TRIANGLE | P_OE`. Status: `CONFIRMED`.
+  whose example already writes `P_PWM_TRIANGLE | P_OE`. Status: **`DONE` 2026-08-11**.
+> **APPLIED 2026-08-11:** `language/pasm2/wrpin.yaml:77` now reads
+> `WRPIN ##P_PWM_TRIANGLE | P_OE, #16` (comment reworded to "PWM triangle, output
+> enabled"). Source trace: `language/spin2/methods/wrpin.yaml:44` (`P_TT_01` = `$40`,
+> alias `P_OE`, "Output enabled regardless of DIR") + `:49`
+> (`p_oe_required_for: "All output modes …"`). Verified: format-parse clean, crossref
+> validator green.
 
 - **F-246 — `language/pasm2/concepts/streamer_smartpin_control.yaml:91,166` omit `P_OE`
   on async-serial transmit.** Both write `WRPIN ##P_ASYNC_TX, #<pin>`; async TX is an
   output mode. **Correction:** `##P_ASYNC_TX | P_OE`. Authority: `smart-pin-11110-async-
   serial-transmit.yaml` — `required_modifiers: "P_OE (P_TT_01) to enable output"`.
-  Status: `CONFIRMED`.
+  Status: **`DONE` 2026-08-11**.
+> **APPLIED 2026-08-11:** both sites now carry `| P_OE`. Note the file was already
+> self-contradicting — its own WRPIN bit-field table at `:87` documents
+> `7_6_TT: "… P_OE=$40 …"` four lines above the example that omitted it. Also added
+> `language/spin2/methods/wrpin.yaml` to `related:` so the authority is one hop away.
+> Verified: format-parse clean, crossref validator green.
 
 - **F-247 — `language/spin2/methods/pinstart.yaml:38,96` omit `P_OE` on output modes.**
   `PINSTART(8, P_PWM_TRIANGLE, 1000, 500)` and `PINSTART(SPI_CLK, P_TRANSITION, 1, 0)`
   are both output modes shown without output enable. **Correction:** OR in `P_OE`.
-  Authority: as F-245. Status: `CONFIRMED`. *(Excluded deliberately:
+  Status: **`DONE` 2026-08-11**.
+> **APPLIED 2026-08-11:** both sites now carry `| P_OE`.
+> **Evidence-scoping — the SPI-clock site was upgraded from suspicion to confirmed.**
+> `:96` (`PINSTART(SPI_CLK, P_TRANSITION, …)`) was initially held back because the
+> example is attributed `source: P2-FLASH-FS` (real shipping code), and we do not call
+> a defect in someone's working driver from a YAML excerpt. Five independent sources
+> then agreed an output clock needs `P_OE`: our own **hardware-verified** tests
+> (`ingestion/external-sources/hardware-verification/campaigns/2026-06-debug-windows-and-
+> smart-pins/tests/debug-windows/test3-smartpin-00101-y0-continuous.spin2:105` and
+> `test4-init-order-compare.spin2:59` — both `wrpin(pin, P_TRANSITION | P_OE)`); the IOSP
+> example library (`ch11-spi-master.spin2:17`); our own `language/pasm2/wypin.yaml:44`
+> (`##P_TRANSITION | P_OE, #SPI_CLK_PIN`); the flash-FS pattern doc itself
+> (`sources/silicon-doc/chip-flash-filesystem-complete-analysis/patterns/p2-optimizations/
+> smart-pin-integration.md:45` — `WRPIN(P_SYNC_TX | P_OE | P_INVERT_OUTPUT, CLOCK_PIN)`);
+> and `wrpin.yaml` `tt_field`. Mechanism: PINSTART writes the whole 32-bit mode word, so
+> `:96` replaced the `P_OE` set by the group call at `:93`. Constants re-verified from the
+> compiler: `P_TRANSITION`=$0A (%00101), `P_SYNC_TX`=$38 (%11100), `P_OE`=$40.
+> Also added an `output_enable_note:` + `wrpin.yaml` cross-ref (the file had **no**
+> pointer to the P_OE rule). Verified: format-parse clean, crossref validator green.
+> *(Left untouched, correct as written: `spin2/concepts/basic-io.yaml:436/437/482` — all
+> inside `anti_patterns:` with `wrong:`/`correct:` pairs. That file already documents this
+> exact trap as `missing_output_enable`, while three sibling files shipped it as a bug.)* *(Excluded deliberately:
   `spin2/concepts/basic-io.yaml:436-437`, which is a labelled teaching antipattern —
   its comment already reads "Still no output!".)*
 
@@ -81,7 +113,13 @@
   user-controllable"; the reader's board is Rev B. Do **not** fill these from
   convention or from the Edge-module LED rows (different boards — see F-249, where the
   Edge data *is* solid). **→ likely TRACKED → ingestion** (obtain the #64000 Rev B/Rev C
-  schematic or product guide). Status: `NEEDS-VERIFICATION`.
+  schematic or product guide). Status: `NEEDS-VERIFICATION` — **source study done 2026-08-11, still blocked.**
+> **STUDIED 2026-08-11 (no source found — do not guess):** searched the whole ingestion
+> tree. `sources/p2-eval-board/` is **Rev C** and records only "8 LEDs, user-controllable";
+> its own cross-source analysis lists the LED pin map in its **gaps** section. The only
+> concrete "buffered LED" pin data in the repo is for the **Edge** modules (P56/P57
+> standard, P38/P39 32MB) — a different board; using it here would be fabrication.
+> Still blocked on the #64000 Rev B/C schematic or product guide. **→ ingestion head.**
 
 - **F-249 — the Edge modules' LED DIP switch is documented by *function* but not by
   *position*.** `hardware/edge-standard-module.yaml:319` and
@@ -94,7 +132,13 @@
   DIP switches**, not jumpers (the YAMLs already say "DIP switch" — keep that word in
   any reader-facing text). **→ TRACKED → ingestion:** capture
   the switch-position table from the Edge module product guide / silkscreen photo, then
-  add `position_on:` to both YAMLs. Status: `NEEDS-VERIFICATION`.
+  add `position_on:` to both YAMLs. Status: `NEEDS-VERIFICATION` — **source study done 2026-08-11, still blocked.**
+> **STUDIED 2026-08-11 (no source found — do not guess):** grepped every `sources/edge-*/`
+> doc for switch-position wording (up/down/on/off/toward/silkscreen). The extraction audits
+> record the switch's **function** (`edge-32mb-complete-extraction-audit.md:104` — "LED
+> Power: Enable/disable P38/P39 LEDs") but never its **position**. The reader's "UP, I
+> think" is explicitly NOT written in. Needs the Edge product guide or a silkscreen photo.
+> **→ ingestion head.**
 
 > **✅ VERIFIED-CORRECT in the same sweep — do NOT "fix" these.** The reader also flagged
 > that the 32MB Edge module's LEDs are on P38/P39, not P56/P57. **The KB already has this

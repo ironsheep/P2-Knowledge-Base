@@ -35,7 +35,7 @@ examples:
     description: "Configure pin as ADC input"
   - code: |
       ' Start PWM on pin 8
-      PINSTART(8, P_PWM_TRIANGLE, 1000, 500)
+      PINSTART(8, P_PWM_TRIANGLE | P_OE, 1000, 500)
     description: "Configure PWM with period=1000, duty=500"
   - code: |
       ' Start async serial TX on pin 62 at 115200 baud, 8 data bits
@@ -93,7 +93,7 @@ examples:
         PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)
         
         ' Then set specific modes
-        PINSTART(SPI_CLK, P_TRANSITION, 1, 0)
+        PINSTART(SPI_CLK, P_TRANSITION | P_OE, 1, 0)
         PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)
         PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)
     description: "Configure SPI pins for flash filesystem"
@@ -153,6 +153,14 @@ related:
   - WYPIN
   - PINWRITE
   - PINREAD
+  - language/spin2/methods/wrpin.yaml
+output_enable_note: |
+  PINSTART writes the whole 32-bit mode word (DIRL, WRPIN, WXPIN, DIRH, WYPIN),
+  so every call must carry P_OE if the mode drives the pin — a later PINSTART on
+  a pin replaces any P_OE set by an earlier group call. Output modes (NCO, PWM,
+  pulse, transition, serial TX, DAC, USB) produce no pin activity without it and
+  still compile clean. Receive/measuring modes (ADC, RX, counters) omit it.
+  Authority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for
 production_patterns:
   hub75_panel:
     description: "HUB75 RGB LED panel uses pin groups"

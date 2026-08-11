@@ -74,7 +74,7 @@ examples:
 - description: Configure PWM output
   code: 'DIRL  #16                '' REQUIRED: Reset smart pin
 
-    WRPIN ##P_PWM_TRIANGLE, #16 '' Set PWM triangle mode
+    WRPIN ##P_PWM_TRIANGLE | P_OE, #16 '' PWM triangle, output enabled
 
     WXPIN ##$100_0100, #16   '' Set period and frame
 

@@ -88,7 +88,7 @@ smart_pin_system:
         5_1_SSSSS: "Smart pin mode selector (5 bits, 32 modes)"
         0: "Always 0"
       example: |
-        WRPIN ##P_ASYNC_TX, #tx_pin  ' Configure for async serial
+        WRPIN ##P_ASYNC_TX | P_OE, #tx_pin  ' Async serial, output enabled
     
     WXPIN:
       syntax: "WXPIN value, #pin"
@@ -163,7 +163,7 @@ smart_pin_modes:
       x_param: "Baud rate timing"
       y_param: "Character to send"
       example: |
-        WRPIN ##P_ASYNC_TX, #pin
+        WRPIN ##P_ASYNC_TX | P_OE, #pin
         WXPIN baud_timing, #pin
         DIRH #pin
         WYPIN char, #pin
@@ -473,6 +473,7 @@ related:
   - architecture/streamer/_index.yaml
   - architecture/smart-pins/smart-pin-00101-transition-output.yaml
   - architecture/smart-pins/spi-implementation-guide.yaml
+  - language/spin2/methods/wrpin.yaml
   - architecture/boot-rom/spi-flash-boot.yaml
   - code-examples/flash-loader-case-study.yaml
 
