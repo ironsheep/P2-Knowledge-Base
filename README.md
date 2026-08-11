@@ -2,7 +2,7 @@
 
 > Comprehensive documentation and resources for the Parallax Propeller 2 (P2) multicore microcontroller
 
-[![Version](https://img.shields.io/badge/version-1.16.1-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
+[![Version](https://img.shields.io/badge/version-1.16.2-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
 [![Docs: CC BY-SA 4.0](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-brightgreen.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 [![Code: MIT](https://img.shields.io/badge/code-MIT-brightgreen.svg)](LICENSE)
 

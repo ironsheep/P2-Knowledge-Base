@@ -20,6 +20,18 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.16.2] - 2026-08-11
+
+**Smart-pin examples that drive their pins**
+
+### Fixed
+- Smart-pin output-mode examples enable the pin output (`P_OE`) in `wrpin`, `pinstart`, and the streamer/smart-pin concept page
+
+### Added
+- P2 Eval Board (#64000): eight buffered LEDs documented on P56-P63, with each pin's alternative function
+- Edge modules: the LED DIP switch is labeled ON/OFF, and ON powers the LEDs
+- `PINSTART` carries an output-enable note and links to the `WRPIN` mode-word reference
+
 ## [1.16.1] - 2026-08-09
 
 **Preprocessor symbol and command-line semantics, verified against PNut-TS v1.55.3**
