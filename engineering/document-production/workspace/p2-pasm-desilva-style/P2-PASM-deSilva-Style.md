@@ -4900,15 +4900,15 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 4. **DIRH** pin — Enable the smart pin
 5. **WYPIN** y, pin — Write Y / data (after enable)
 
-**Common Modes:** (☑ = an output mode, so OR in `P_OE`)
+**Common Modes:** (**[OE]** = an output mode, so OR in `P_OE`)
 
-- ☑ **UART TX**: `P_ASYNC_TX` — Serial transmit
+- **[OE]** **UART TX**: `P_ASYNC_TX` — Serial transmit
 - **UART RX**: `P_ASYNC_RX` — Serial receive
-- ☑ **PWM**: `P_PWM_SAWTOOTH` — Sawtooth wave output
-- ☑ **PWM**: `P_PWM_TRIANGLE` — Triangle wave output
+- **[OE]** **PWM**: `P_PWM_SAWTOOTH` — Sawtooth wave output
+- **[OE]** **PWM**: `P_PWM_TRIANGLE` — Triangle wave output
 - **ADC**: `P_ADC` — Analog input
 - **Quadrature**: `P_QUADRATURE` — Encoder
-- ☑ **NCO**: `P_NCO_FREQ` — Frequency output
+- **[OE]** **NCO**: `P_NCO_FREQ` — Frequency output
 
 **Data Flow:**
 
