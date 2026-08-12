@@ -749,34 +749,30 @@ cannot name.
 
 ## Mouse — the wheel
 
-**Over the disassembly.** If the disassembly is following the PC, the first scroll
-switches it to cog or hub lock mode, seeded from the address on screen. The step
-size depends on the mode and the modifier:
+Every wheel region moves in four tiers, selected by the modifier you hold. The
+tiers are not the same everywhere, so they are worth reading across:
 
-| Modifier | Cog mode | Hub mode |
-|----------|----------|----------|
-| *none* | 1 register | 4 bytes (one long) |
-| **Ctrl** | 4 registers | 16 bytes |
-| **Shift** | 16 registers | 64 bytes |
-| **Ctrl+Shift** | 32 registers | 128 bytes |
+| Modifier | Disassembly, cog mode | Disassembly, hub mode | Hub data |
+|----------|----------------------|-----------------------|----------|
+| *none* | 1 register | 4 bytes (one long) | 16 bytes (one row) |
+| **Ctrl** | 4 registers | 16 bytes | 1 byte |
+| **Shift** | 16 registers | 64 bytes | 4 bytes |
+| **Ctrl+Shift** | 32 registers | 128 bytes | 128 bytes (one sub-block) |
 
-Cog-mode scrolling **stops** at `$000` and `$3F0` — it does not wrap around. In
-hub mode the disassembly and the hub viewer share a single hub address, so
-scrolling one moves the other.
+Note the hub-data column: unmodified is the *coarse* step there and **Ctrl** the
+fine one — the reverse of the disassembly, where the modifiers only ever make the
+step bigger.
 
-**Over the hub address digits.** Each scroll step changes the hex digit under the
+**Over the disassembly**, if the display is following the PC, the first scroll
+switches it to cog or hub lock mode, seeded from the address on screen. Cog-mode
+scrolling **stops** at `$000` and `$3F0` — it does not wrap around. In hub mode
+the disassembly and the hub viewer share a single hub address, so scrolling one
+moves the other.
+
+**Over the hub address digits**, each scroll step changes the hex digit under the
 pointer by one, so you can dial an address in place.
 
-**Over the hub data.**
-
-| Modifier | Scrolls by |
-|----------|------------|
-| *none* | 16 bytes (one row) |
-| **Ctrl** | 1 byte |
-| **Shift** | 4 bytes |
-| **Ctrl+Shift** | 128 bytes (one sub-block) |
-
-**Over the hub heat map.** Nothing — the heat map is deliberately excluded from
+**Over the hub heat map**, nothing — the heat map is deliberately excluded from
 wheel scrolling. Click it to jump instead.
 
 ## Mouse — hover
