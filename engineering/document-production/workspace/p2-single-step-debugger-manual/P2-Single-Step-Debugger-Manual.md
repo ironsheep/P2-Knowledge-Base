@@ -104,14 +104,6 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 ```
 
 
-# P2 Single-Step Debugger Manual
-
-*Observe and Control Your Running P2 Code*
-
-**Author:** Iron Sheep Productions, LLC
-**Compiler:** `pnut-ts`  **Debug host:** `pnut-term-ts`
-
-
 # Chapter 1: What Single-Step Debugging Is
 
 You have written a P2 program. You compile it, you run it, and it does not do
@@ -863,34 +855,30 @@ cannot name.
 
 ## Mouse — the wheel
 
-**Over the disassembly.** If the disassembly is following the PC, the first scroll
-switches it to cog or hub lock mode, seeded from the address on screen. The step
-size depends on the mode and the modifier:
+Every wheel region moves in four tiers, selected by the modifier you hold. The
+tiers are not the same everywhere, so they are worth reading across:
 
-| Modifier | Cog mode | Hub mode |
-|----------|----------|----------|
-| *none* | 1 register | 4 bytes (one long) |
-| **Ctrl** | 4 registers | 16 bytes |
-| **Shift** | 16 registers | 64 bytes |
-| **Ctrl+Shift** | 32 registers | 128 bytes |
+| Modifier | Disassembly, cog mode | Disassembly, hub mode | Hub data |
+|----------|----------------------|-----------------------|----------|
+| *none* | 1 register | 4 bytes (one long) | 16 bytes (one row) |
+| **Ctrl** | 4 registers | 16 bytes | 1 byte |
+| **Shift** | 16 registers | 64 bytes | 4 bytes |
+| **Ctrl+Shift** | 32 registers | 128 bytes | 128 bytes (one sub-block) |
 
-Cog-mode scrolling **stops** at `$000` and `$3F0` — it does not wrap around. In
-hub mode the disassembly and the hub viewer share a single hub address, so
-scrolling one moves the other.
+Note the hub-data column: unmodified is the *coarse* step there and **Ctrl** the
+fine one — the reverse of the disassembly, where the modifiers only ever make the
+step bigger.
 
-**Over the hub address digits.** Each scroll step changes the hex digit under the
+**Over the disassembly**, if the display is following the PC, the first scroll
+switches it to cog or hub lock mode, seeded from the address on screen. Cog-mode
+scrolling **stops** at `$000` and `$3F0` — it does not wrap around. In hub mode
+the disassembly and the hub viewer share a single hub address, so scrolling one
+moves the other.
+
+**Over the hub address digits**, each scroll step changes the hex digit under the
 pointer by one, so you can dial an address in place.
 
-**Over the hub data.**
-
-| Modifier | Scrolls by |
-|----------|------------|
-| *none* | 16 bytes (one row) |
-| **Ctrl** | 1 byte |
-| **Shift** | 4 bytes |
-| **Ctrl+Shift** | 128 bytes (one sub-block) |
-
-**Over the hub heat map.** Nothing — the heat map is deliberately excluded from
+**Over the hub heat map**, nothing — the heat map is deliberately excluded from
 wheel scrolling. Click it to jump instead.
 
 ## Mouse — hover
@@ -1199,6 +1187,19 @@ duration of the interrupt. It clears when you step out through the return.
 Use the **CT** system counter to measure how long a section takes: note CT,
 run the section, note CT again. Because single-stepping itself is slow, measure
 timing by running between breakpoints, not by stepping.
+
+Do not measure *across* a `DEBUG` statement either. Every `DEBUG` hands the cog
+to the debug ISR, and the cog does not resume until that message has finished
+going out the serial link — far longer than the code you were trying to time. A
+CT span that contains a `DEBUG` measures the reporting, not the program. Read CT
+on both sides of the section, then print the difference afterward:
+
+```spin2
+  t1 := GETCT()
+  work_you_are_timing()
+  t2 := GETCT()
+  DEBUG("elapsed = ", UDEC_(t2 - t1))   ' outside the measured span
+```
 
 
 # Chapter 9: DEBUG Display Windows (Cross-Reference)
