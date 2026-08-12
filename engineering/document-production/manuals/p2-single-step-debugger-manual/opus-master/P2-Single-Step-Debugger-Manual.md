@@ -1,11 +1,3 @@
-# P2 Single-Step Debugger Manual
-
-*Observe and Control Your Running P2 Code*
-
-**Author:** Iron Sheep Productions, LLC
-**Compiler:** `pnut-ts`  **Debug host:** `pnut-term-ts`
-
-
 # Chapter 1: What Single-Step Debugging Is
 
 You have written a P2 program. You compile it, you run it, and it does not do
@@ -1093,6 +1085,19 @@ duration of the interrupt. It clears when you step out through the return.
 Use the **CT** system counter to measure how long a section takes: note CT,
 run the section, note CT again. Because single-stepping itself is slow, measure
 timing by running between breakpoints, not by stepping.
+
+Do not measure *across* a `DEBUG` statement either. Every `DEBUG` hands the cog
+to the debug ISR, and the cog does not resume until that message has finished
+going out the serial link — far longer than the code you were trying to time. A
+CT span that contains a `DEBUG` measures the reporting, not the program. Read CT
+on both sides of the section, then print the difference afterward:
+
+```spin2
+  t1 := GETCT()
+  work_you_are_timing()
+  t2 := GETCT()
+  DEBUG("elapsed = ", UDEC_(t2 - t1))   ' outside the measured span
+```
 
 
 # Chapter 9: DEBUG Display Windows (Cross-Reference)
