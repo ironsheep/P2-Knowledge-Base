@@ -356,6 +356,49 @@
   coltitle=white, fonttitle=\sffamily\bfseries\small, title={HARDWARE}
 }
 
+% ==================== TOOL-DEVELOPER REVIEW (DRAFT SCAFFOLDING) ====================
+% A question put to a named outside tool author, inside a review draft that goes
+% only to those authors. NOT a reader-facing element: every one of these is meant
+% to be answered and DELETED before the document is published.
+%
+% It is therefore drawn to look like scaffolding rather than like part of the book.
+% The whole advisory family above is rounded, solid, with a heavy left rule; this
+% is SQUARE, with a DASHED outer border and violet -- the one hue not already
+% spoken for (teal=tip, amber=caution, graphite=hardware, blue=Spin2, green=PASM2,
+% grey=code/reference). A reader who has never seen one still reads it as "this is
+% not finished", which is exactly right for a document under review.
+%
+% The title bar names the person being asked, so a reviewer skimming a 37-page PDF
+% can find their own questions without reading anyone else's:
+%
+%     ::: {.tool-review who="Eric Smith — FlexSpin"}
+%     Does FlexSpin ...?
+%     :::
+%
+% NO RELEASE SWITCH, DELIBERATELY. There is no draft flag that hides these,
+% because a hidden box is one someone forgets to answer -- and the workflow is to
+% write the answer INTO the prose, which means the box goes away on its own. What
+% guards the release is a gate, not a switch: validate-dod-release.py fails if a
+% tool-review box survives into a document being published.
+\definecolor{iosp-review-bg}{HTML}{F5EDFA}       % Light violet
+\definecolor{iosp-review-border}{HTML}{6A1B9A}   % Deep violet
+
+\newtcolorbox{ToolReviewBlock}[1]{%
+  enhanced, breakable, contmarkers,
+  colback=iosp-review-bg, colframe=iosp-review-border, colbacktitle=iosp-review-border,
+  boxrule=0.9pt, sharp corners,
+  borderline={0.5pt}{3pt}{iosp-review-border, dashed},
+  left=12pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=18pt,
+  % Unlike the advisory boxes -- which hold one short paragraph each -- this one
+  % holds a question and often a reviewer's multi-paragraph answer, so it needs
+  % real paragraph separation. Without this the paragraphs butt together and the
+  % box reads as one run-on block.
+  before upper={\setlength{\parskip}{6pt}\setlength{\parindent}{0pt}},
+  coltitle=white, fonttitle=\sffamily\bfseries\small,
+  title={TOOL DEVELOPER REVIEW \textemdash\ #1}
+}
+
 % ==================== REFERENCE BLOCKS (non-language notation) ====================
 % Two-tier pedagogy: the LANGUAGE blocks above (Spin2 blue, PASM2 green) are
 % saturated/IDE-aligned = "code you would type". The REFERENCE blocks below are a

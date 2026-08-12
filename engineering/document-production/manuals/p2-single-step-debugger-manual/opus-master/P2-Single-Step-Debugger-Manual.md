@@ -308,7 +308,7 @@ these and you can drive the debugger; everything else is detail you look up.
   \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
   1 & Title bar & top edge: \emph{Debugger - Cog N} & which cog this window is for & --- & --- \\
   2 & Status strip & top row: \texttt{C Z PC SKIPF XBYTE CT} & where you are: flags, PC, skip pattern, XBYTE state, system counter & click \textbf{PC} to re-lock the disassembly to the PC; hover \textbf{CT} for elapsed seconds & --- \\
-  5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls (\textbf{Ctrl} $\times$4, \textbf{Shift} $\times$16) & --- \\
+  5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls, faster with \textbf{Ctrl}, \textbf{Shift}, \textbf{Ctrl+Shift} (full step sizes in Chapter 5) & --- \\
   9 & Execution mode & small tag below disassembly & \texttt{MAIN}, or \texttt{INT1/2/3} while in an interrupt & --- & --- \\
   18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle \textperiodcentered{} L-click \textbf{Go} = run to next break \textperiodcentered{} R-click \textbf{Go} = run through breaks & \textbf{SPACE} = Go \textperiodcentered{} \textbf{ENTER} = run/stop \textperiodcentered{} \textbf{B} \textbf{I} \textbf{D} \textbf{M} toggle BREAK/INIT/DEBUG/MAIN \\
   19 & Hint bar & very bottom edge (empty until you hover) & a one-line description of whatever you point at & hover any region to read what it is and how to use it & --- \\
@@ -350,8 +350,8 @@ columns down the left, the register columns down the right.
   \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
   3 & Cog register map & far-left tall column tagged \texttt{REG} & heat map of all cog RAM (\$000--\$1FF) & click a spot to lock the disassembly to that cog address & --- \\
   4 & LUT register map & 2nd tall column tagged \texttt{LUT} & heat map of all LUT RAM (\$200--\$3FF) & click to lock the disassembly there & --- \\
-  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & click the box to reset the list & \textbf{R} = reset \\
-  7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click a \textbf{PTRA}/\textbf{PTRB} value to jump the hub viewer there & --- \\
+  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & click the box to reset the list & \textbf{R} = reset \emph{both} this list and the LUT one \\
+  7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click \emph{any} value to follow it: \texttt{IJMP3}--\texttt{IRET1} reach cog space only when the value is below \$400, and every other case is read as a hub pointer & --- \\
   8 & Event flags & far-right column of event names (\texttt{INT}, \texttt{CT1}, \ldots{} \texttt{QMT}), each \texttt{0/1} & which hardware events are set & L-click a name = arm a break on that event \textperiodcentered{} R-click = toggle & --- \\
   10 & Call stack & band tagged \texttt{STACK}, 8 hex values & the 8-level hardware CALL stack & click a value to jump the disassembly to that return address & --- \\
   13 & Cog status & dim stack: \texttt{INIT STALLI STR MOD LUTS} & miscellaneous cog-state flags, lit when active & --- & --- \\
@@ -391,8 +391,8 @@ the window.
   12 & Pointers & rows \texttt{RFxx / PTRA / PTRB} + hub bytes & the FIFO and PTRA/PTRB, with the hub bytes around each & click \textbf{PTRA}/\textbf{PTRB} to jump the hub viewer there & --- \\
   14 & Pin states & rows \texttt{DIR / OUT / IN}, 64 bits each & pin direction, output, and live input for all 64 pins & --- & --- \\
   15 & Smart-Pin Watch & one-row strip tagged \texttt{RQPIN} with a delta marker & smart pins whose \texttt{RQPIN} value changed & L-click = reset \textperiodcentered{} R-click = reset \textbf{and} toggle the DIR-only/all-pins filter & --- \\
-  16 & Hub viewer & bottom band tagged \texttt{HUB}: address + hex + ASCII & shared hub RAM as hex and text & click a byte to jump there \textperiodcentered{} wheel over the address digits changes one nibble & $\uparrow$ $\downarrow$ = $\pm$\$10 \textperiodcentered{} \textbf{PgUp}/\textbf{PgDn} = $\pm$\$80 (\textbf{Ctrl} \$1000, \textbf{Shift} \$10000) \\
-  17 & Hub heat map & colored block right of the hub data & recent hub read/write activity & click a bright spot to jump the hub viewer there & --- \\
+  16 & Hub viewer & bottom band tagged \texttt{HUB}: address + hex + ASCII & shared hub RAM as hex and text & click a byte to jump there --- hex and ASCII are separate regions, same effect \textperiodcentered{} wheel over the address digits changes one nibble \textperiodcentered{} wheel over the data scrolls it (step sizes in Chapter 5) & $\uparrow$ $\downarrow$ = $\pm$\$10 \textperiodcentered{} \textbf{PgUp}/\textbf{PgDn} = $\pm$\$80 (\textbf{Ctrl} \$1000, \textbf{Shift} \$10000) \\
+  17 & Hub heat map & colored block right of the hub data & recent hub read/write activity & click a bright spot to jump the viewer to that 128-byte sub-block \textperiodcentered{} the wheel does \emph{nothing} here --- click, do not scroll & --- \\
 \end{regiontbl}
 ```
 
@@ -669,36 +669,137 @@ instead of stepping from the start, and more places to look while you are stoppe
 # Chapter 5: Command Reference
 
 Chapter 3 introduced these controls where they live, region by region. This
-chapter gathers them into one place to look up. They are the same whether you
-reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a cog start.
+chapter is the **complete set**, gathered in one place to look up — every key,
+every click, every wheel step. Nothing here needs Chapter 3 to make sense, and
+nothing in Chapter 3 is left out. They are the same whether you reached the
+debugger from a Spin2 `DEBUG`, a PASM `debug`, or a cog start.
 
 ## Keyboard commands
 
 | Key | Action | What it does |
 |-----|--------|--------------|
 | **Space** | Go to next break | Run to the next armed break (same as left-clicking **Go**); with MAIN armed, that is one instruction per press |
-| **Enter** | Run / stop | Run continuously through breaks; press again to stop (same as right-clicking **Go**) |
+| **Enter** | Run / stop | Run continuously through breaks, with the display updated at a throttled rate — about 20 breaks a second, not every one; press again to stop (same as right-clicking **Go**) |
 | **B** | BREAK mode | Click the **BREAK** button — async-break mode; clears the other conditions |
 | **D** | DEBUG toggle | Toggle break-on-`DEBUG` |
 | **I** | INIT toggle | Toggle break-on-COGINIT |
 | **M** | MAIN toggle | Toggle break-on-MAIN (single-step main code) |
-| **R** | Reset watch | Clear the register watch list |
+| **R** | Reset watches | Clear **both** delta watch lists — the register one and the LUT one |
 | **↑ / ↓** | Hub scroll | Scroll the hub data viewer one row (±$10) |
 | **PgUp / PgDn** | Hub page | Page the hub data viewer ($80 per press; $1000 with Ctrl, $10000 with Shift) |
+
+**Letter keys are case-insensitive**, and they dispatch on the character you type
+rather than on the physical key position — so a non-QWERTY layout behaves exactly
+the same way.
 
 > **No key switches between cogs.** Each cog that hits a breakpoint opens its
 > **own window**, titled *Debugger - Cog N*; the windows cascade on screen as
 > they open. To work on a different cog, switch to its window. (The Tab key is
 > intentionally inert inside the debugger window.)
 
-## Mouse controls
+## Control-key combinations
 
-- **Left-click a button** — activate that function.
-- **Right-click a mode button** — toggle its state.
-- **Left-click a value** (register, SFR, stack entry, or pointer) — jump the
-  disassembly or hub viewer to the address it holds.
-- **Right-click a disassembly line** — set or clear an address breakpoint there.
-- **Scroll wheel** — move through the hub viewer or the disassembly.
+Five Ctrl combinations reach the hub-navigation commands instead of the letter
+commands. Every other Ctrl combination does nothing.
+
+| Key | Action |
+|-----|--------|
+| **Ctrl+C** | Hub scroll up one row (same as ↑) |
+| **Ctrl+D** | Hub scroll down one row (same as ↓) |
+| **Ctrl+K** | Hub page up |
+| **Ctrl+L** | Hub page down |
+| **Ctrl+M** | Run / stop (same as Enter) |
+
+::: caution
+**Ctrl+D is not the DEBUG toggle.** `D` on its own toggles break-on-`DEBUG`, but
+holding Ctrl reaches hub-scroll-down instead — a different command, in a different
+part of the window, with no visible complaint. If your DEBUG condition is not
+toggling, check whether Ctrl is down.
+:::
+
+## Mouse — clicks by region
+
+Left and right do different jobs in most regions, and in a few the difference is
+the whole point. The controls fall into two groups: the cluster that runs the
+program, and everything you click to look at something.
+
+### Running the program
+
+| Region | Left-click | Right-click |
+|--------|------------|-------------|
+| **Break-condition button** | set that condition **exclusively** — replaces the others, except INIT | toggle it on or off, leaving the others alone |
+| **BREAK button** | clear every condition except INIT | the same — BREAK does not distinguish the buttons |
+| **Go button** | run to the next break (same as Space) | run through breaks (same as Enter) |
+| **Go button, while running** | stop | stop — either button |
+
+### Looking at something
+
+Most of these move the disassembly or the hub viewer to an address you clicked.
+One of them can refuse: a right-click address breakpoint is **declined in hub mode
+when the line resolves below `$400`**. Nothing appears to happen, and nothing is
+wrong — that address is cog space, which an address breakpoint set from hub mode
+cannot name.
+
+| Region | Left-click | Right-click |
+|--------|------------|-------------|
+| **Disassembly** | lock the disassembly to follow the PC | toggle an address breakpoint on the clicked line |
+| **REG or LUT heat map** | lock the disassembly to the clicked address, placed mid-window | — |
+| **PC box** | lock the disassembly to follow the PC | — |
+| **Special-function register** | follow the value: `IJMP3`–`IRET1` reach cog space only when the value is below `$400`; every other case is read as a hub pointer | — |
+| **Stack value** | follow the value; a hub-range value takes the disassembly with it | — |
+| **Pointer address** | move the hub viewer *and* the disassembly there | — |
+| **Register Watch box** | reset the list | — |
+| **Smart-Pin Watch box** | reset the list | reset it **and** switch between all pins and only pins with DIR set |
+| **Hub data, hex** | move the hub address to the clicked byte | — |
+| **Hub data, ASCII** | the same, one character per byte — a separate region from the hex | — |
+| **Hub heat map** | jump the viewer to that 128-byte sub-block | — |
+| **Event name** | set the break event to that event **and arm it** | toggle that event break off or on |
+
+## Mouse — the wheel
+
+**Over the disassembly.** If the disassembly is following the PC, the first scroll
+switches it to cog or hub lock mode, seeded from the address on screen. The step
+size depends on the mode and the modifier:
+
+| Modifier | Cog mode | Hub mode |
+|----------|----------|----------|
+| *none* | 1 register | 4 bytes (one long) |
+| **Ctrl** | 4 registers | 16 bytes |
+| **Shift** | 16 registers | 64 bytes |
+| **Ctrl+Shift** | 32 registers | 128 bytes |
+
+Cog-mode scrolling **stops** at `$000` and `$3F0` — it does not wrap around. In
+hub mode the disassembly and the hub viewer share a single hub address, so
+scrolling one moves the other.
+
+**Over the hub address digits.** Each scroll step changes the hex digit under the
+pointer by one, so you can dial an address in place.
+
+**Over the hub data.**
+
+| Modifier | Scrolls by |
+|----------|------------|
+| *none* | 16 bytes (one row) |
+| **Ctrl** | 1 byte |
+| **Shift** | 4 bytes |
+| **Ctrl+Shift** | 128 bytes (one sub-block) |
+
+**Over the hub heat map.** Nothing — the heat map is deliberately excluded from
+wheel scrolling. Click it to jump instead.
+
+## Mouse — hover
+
+Point at anything and the hint bar at the bottom of the window describes it. What
+you get depends on where you are:
+
+| Pointing at | The hint bar shows |
+|-------------|--------------------|
+| a register | its address, name, and current value |
+| an event | what that event means |
+| a break button | what that condition breaks on |
+| **CT** | elapsed seconds at the current clock frequency |
+| **XBYTE** | the full mode description |
+| hub data | the address and the byte value |
 
 
 # Chapter 6: Breakpoints

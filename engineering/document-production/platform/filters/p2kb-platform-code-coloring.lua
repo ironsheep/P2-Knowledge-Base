@@ -373,6 +373,25 @@ function Div(div)
     table.insert(result, pandoc.RawBlock('latex', '\\end{HardwareBlock}'))
     return result
 
+  -- ===== TOOL-DEVELOPER REVIEW (draft scaffolding, never published) =====
+  -- ::: {.tool-review who="Eric Smith — FlexSpin"} -> ToolReviewBlock
+  -- A question put to a named outside tool author in a review draft. The `who`
+  -- attribute becomes the box title, so a reviewer can find their own questions
+  -- in a long PDF. Every one of these is meant to be answered and deleted before
+  -- publication; the release gate fails if one survives (see the .sty comment).
+  -- `who` is escaped: these titles carry real names and em-dashes, and an
+  -- unescaped & or _ in a macro argument would abort the build.
+  elseif classes:includes("tool-review") then
+    local who = div.attributes["who"] or "unattributed"
+    who = who:gsub("\\", "\\textbackslash{}"):gsub("([&%%%$#_{}])", "\\%1")
+    local result = {pandoc.RawBlock('latex',
+      '\\begin{ToolReviewBlock}{' .. who .. '}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{ToolReviewBlock}'))
+    return result
+
   -- ===== DESILVA PEDAGOGICAL ELEMENTS =====
 
   elseif classes:includes("medicine-cabinet") then

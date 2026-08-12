@@ -13,7 +13,9 @@
 \vspace{0.9cm}
 {\large August 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 0.1.0 (draft)\par}
+{\large\color{iosp-review-border}\bfseries Version 0.9.0 — Tool Developer Review Draft\par}
+\vspace{0.15cm}
+{\normalsize\color{iosp-review-border}Circulated to named tool authors for review. Not for public distribution.\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -66,6 +68,38 @@
 
 \clearpage
 \pagestyle{fancy}
+
+% ---- REVIEW-DRAFT ROADMAP -------------------------------------------------
+% Draft scaffolding. Deleted when the reviewers' answers are written in; the
+% release gate fails on any surviving ToolReviewBlock, this one included.
+\begin{ToolReviewBlock}{Marco Maccaferri and Eric Smith}
+Thank you for reading this. PNut-Term-TS downloads and runs binaries from any P2
+compiler, and this guide now says so — which means it makes claims about
+\emph{your} tools. We would rather print your words than our assumptions, so this
+draft goes to you before it goes to anyone else.
+
+\vspace{4pt}
+Violet boxes like this one are questions for you, and each carries the name of the
+person it is meant for. There are four, and they are all short:
+
+\vspace{4pt}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=0pt]
+\item \textbf{Chapter 2} --- \emph{Marco}: we describe Spin Tools IDE as fully
+      supported (debug windows and the debugger). Confirm or correct.
+\item \textbf{Chapter 2} --- \emph{Eric}: what does FlexSpin's \texttt{debug()}
+      output actually reach --- the display windows, or debug text only?
+\item \textbf{Chapter 6} --- \emph{Eric}: we say a FlexSpin binary carries no
+      readable debug baud rate. Is that right?
+\item \textbf{Chapter 9} --- \emph{Eric}: can FlexSpin compile in the debugger
+      kernel the single-step debugger needs?
+\end{itemize}
+
+\vspace{4pt}
+Anything you would like said about your own tool, we will print as you write it.
+Corrections anywhere else in the guide are welcome too.
+\end{ToolReviewBlock}
+
+\clearpage
 
 \tableofcontents
 \clearpage
@@ -232,6 +266,56 @@ It loads your compiled program onto the P2 and starts it running — either into
 **RAM** (fast, for the edit-run-edit loop of development) or into **flash** (so
 the program sticks and runs on power-up). It handles resetting the P2 into its
 loader for you.
+
+**It will download a binary from any compiler.** Downloading is the P2's own boot
+protocol, so what built the image does not come into it. PNut, `pnut-ts`, FlexSpin
+and Spin Tools IDE all produce binaries this tool loads and starts, and so does
+anything else that can build for the P2 — if your toolchain produces a binary that
+downloads and runs, PNut-Term-TS can download and run it. You do not have to
+change compilers to use this tool.
+
+What comes *back* follows a single rule, and it is a rule about the bytes on the
+wire rather than about your compiler:
+
+| What the P2 sends | Where it appears |
+|---|---|
+| debug output formed as *Parallax Spin2 Documentation v55* specifies | the debug log, and the debug windows it addresses |
+| anything else written to the serial port | the terminal |
+
+Both halves matter. A program built **without** debug is not a lesser case — every
+byte it writes still arrives and is shown in the terminal, exactly as any serial
+terminal would show it. Build **with** debug and that output is recognised for
+what it is and routed onward, to the log and to the windows the commands name.
+
+Which means the way for any compiler to be fully supported here is written down
+and public: emit what the Spin2 documentation specifies, and this tool will
+receive it. The one thing that is not carried on the wire is the debug baud rate —
+see Chapter 6, where compilers do differ.
+
+::: {.tool-review who="Marco Maccaferri — Spin Tools IDE"}
+We understand Spin Tools IDE compiles `debug()` statements, and that its binaries
+therefore drive both the debug windows and the single-step debugger — so we have
+named it above as a toolchain that works fully with PNut-Term-TS.
+
+**Is that accurate as written?** Please correct it if not. And if there is
+anything you would want a Spin Tools IDE user to read at this point in the guide —
+a caveat, a version floor, a difference worth knowing — send us the wording and we
+will include it.
+:::
+
+::: {.tool-review who="Eric Smith — FlexSpin"}
+The claim above is deliberately about the *format*, not about any one compiler:
+anything that emits debug output as *Parallax Spin2 Documentation v55* specifies
+is routed to the debug log and the debug windows.
+
+**Where does a FlexSpin-built binary sit against that?** Specifically: does
+FlexSpin's debug support emit output in that form, and does it extend to the
+display-window commands (`SCOPE`, `PLOT`, `LOGIC`, `TERM` and the rest), or to
+debug text only? We would rather print your answer than our guess.
+
+Anything you would want a FlexSpin user to read at this point in the guide is
+welcome, and we will include it as you write it.
+:::
 
 ## 2. A serial terminal — replacing Parallax Serial Terminal
 
@@ -489,13 +573,37 @@ If your source says nothing, the P2 toolchain defaults to **2,000,000** bits per
 second, and so does PNut-Term-TS. Either way, downloading a binary sets the rate
 for you, with no flag from you.
 
-There is an override, `-b` (`--debugbaud`), but it exists only for the cases the
-binary cannot tell us about: attaching to a P2 that is **already running** (no
-download to read from), or a program built by a toolchain we do not recognize. If
-you pass `-b` and it disagrees with the binary you are downloading, PNut-Term-TS
+This is the one place in the download path where compilers differ, so it is worth
+being plain about which. **PNut and `pnut-ts` write the debug baud rate into the
+image**, which is why downloading normally settles the question with no flag from
+you. A **FlexSpin**-built binary does not carry a rate this tool can read, so with
+one of those you set the rate yourself.
+
+There is an override, `-b` (`--debugbaud`), for exactly the two cases the binary
+cannot tell us about:
+
+- **Attaching to a P2 that is already running** — no download, so there is no
+  image to read a rate out of.
+- **A binary that does not carry its rate**, as above.
+
+Either way you have two ways to say it: `-b` for one session, or the **Default
+Baud Rate** preference (Chapter 10) if you would rather set it once and forget it.
+
+If you pass `-b` and it disagrees with the binary you are downloading, PNut-Term-TS
 warns you — the P2 will transmit at its own compiled rate regardless, and the
 mismatch would make the output unreadable. When text comes out garbled, the first
 thing to try is *dropping* `-b`.
+
+::: {.tool-review who="Eric Smith — FlexSpin"}
+We say above that a FlexSpin-built binary does not carry a debug baud rate this
+tool can read, and that a FlexSpin user should therefore set the rate with `-b` or
+the Default Baud Rate preference.
+
+**Is that right?** If FlexSpin does record the rate somewhere in the image we
+could read, tell us where and we will read it — this is a limitation we would much
+rather remove than document. If it does not, is there a default rate a FlexSpin
+user should expect, so we can name it here instead of leaving them to guess?
+:::
 
 # Chapter 7: The Serial Terminal
 
@@ -706,6 +814,19 @@ why the tool exists.
 \caption{The single-step debugger window, hosted by PNut-Term-TS (shown here on macOS).}
 \end{figure}
 ```
+
+::: {.tool-review who="Eric Smith — FlexSpin"}
+The debugger is the one feature in this guide that we do not think a compiler can
+reach by emitting the right output alone. As we understand it the debugger kernel
+has to be built into the image itself, which makes this a question about codegen
+rather than about the debug stream.
+
+**Can FlexSpin compile in the debugger kernel the single-step debugger needs?** If
+it can — today, or behind an option — say so and we will document it here, and in
+the *P2 Single-Step Debugger Manual*, which releases alongside this guide. If it
+cannot, we would rather say that plainly than leave a FlexSpin user to discover it
+by trying.
+:::
 
 # Chapter 10: Menus, Settings, and Devices
 
@@ -1074,12 +1195,14 @@ position in the title bar (Chapter 8).
 `pnut-term-ts -n` to see whether it enumerates. Install FTDI drivers if needed and
 try another port. On Linux and macOS, check serial-port permissions (below).
 
-**Text is garbled or missing.** Almost always a baud mismatch. If you passed `-b`,
-**try dropping it** — a downloaded binary carries its own debug baud and it is
-read automatically (Chapter 6); watch for the warning that `-b` disagrees with the
-binary. If you are attaching to an *already-running* P2 (no download), there is no
-binary to read from, so set the rate yourself with `-b` or the Default Baud Rate
-preference. Common rates are 115200, 921600, and 2000000.
+**Text is garbled or missing.** Almost always a baud mismatch, and which way to
+fix it depends on where the binary came from. If you built with PNut or `pnut-ts`
+and passed `-b`, **try dropping it** — those binaries carry their own debug baud
+and it is read automatically (Chapter 6); watch for the warning that `-b`
+disagrees with the binary. If you built with **FlexSpin**, or you are attaching to
+an *already-running* P2, there is no rate for us to read, so it is the opposite
+move: set the rate yourself with `-b` or the Default Baud Rate preference. Common
+rates are 115200, 921600, and 2000000.
 
 **The P2 does not reset or the program does not start.** The reset control line
 may be wrong for your adapter. Set **DTR** or **RTS** for the device in PropPlug
