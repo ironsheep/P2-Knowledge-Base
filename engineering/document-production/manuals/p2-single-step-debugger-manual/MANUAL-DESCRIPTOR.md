@@ -29,6 +29,7 @@ fragile_areas:
   - "P1-isms from the source blends: cognew -> COGSPIN/COGINIT, CNT -> GETCT. The manual names the P1->P2 bridge once, deliberately; do not add an architecture refresher."
   - "Timing claims — do not measure across a DEBUG statement (the cog waits for the serial TX to finish) and do not measure by stepping. Chapter 8 states both; keep them together."
   - "AUGS/AUGD atomicity — one Space can advance two instructions when the first is a ## prefix. This reads as a stuck key; the troubleshooting row explaining it is load-bearing."
+  - "Chapter 3 spends ONE deliberate blank page. \\ssdbspreadstart (templates/p2kb-ssdbg-regions.sty) forces each pass's annotated screenshot onto an EVEN page so its region table faces it on the odd page; when the spread would start odd it emits a filler carrying no head and no folio. A blank-page scan WILL flag it — verify the three passes still land even (Figures 3.1/3.2/3.3) with their tables facing, then leave it alone. It is not a defect."
   - "Release gate: co-releases with the PNut-Term-TS User Guide, timed to PNut-Term-TS v1.0."
 ---
 
