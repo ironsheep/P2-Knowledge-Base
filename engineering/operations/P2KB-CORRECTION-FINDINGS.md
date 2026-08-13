@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-253`** (F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-254`** (F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2608,6 +2608,56 @@ sources; (2) **no live doc body contains `#IFDEF`/`#DEFINE`/`#ELSEIFDEF` at all*
 is simply not taught in any shipped document. The earlier expectation that P2AN006 was incidentally
 affected did **not** hold: its YAML companion changed (a license term dropped from a provenance
 line), but the *document* is untouched and needs no re-audit flag. Nothing to flag.
+
+---
+
+## Sync Serial Receive advertises "SPI slave" without the frame-sync constraint (2026-08-13) — F-253
+
+**Origin:** verifying a forum claim (evanh, Parallax forum "P2 Harness" thread 2026-08-02, post #2)
+against the KB while assessing an agent-instrumentation proposal. The forum post is the **lead**;
+the finding below is corroborated **structurally from the KB's own mode definition**, not accepted
+on forum authority.
+
+- **F-253 — `architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml` presents SPI-slave
+  use with no mention that the mode has no chip-select/frame-sync input.**
+
+  **Locations:** `:185` (`common_uses: - "SPI slave"`) and `:75` (the Spin2 example's comment
+  `' 8-bit SPI slave RX, positive edge`).
+
+  **What's wrong:** the file lists SPI slave as a common use — which is legitimate — but never
+  states the constraint that governs whether it will actually work. The mode's inputs are
+  **A = data, B = clock, and nothing else**; the bit count comes from `X[4:0]` (bit_count − 1) and
+  the shifter counts clock edges from whenever the pin was enabled. There is **no CS/enable input
+  and no hardware path that realigns the shifter on a chip-select edge.** An SPI slave built from
+  this entry stays frame-aligned only while the master does not clock between frames; once
+  alignment is lost there is no hardware means to recover it. An agent generating an SPI-slave
+  implementation from this YAML would walk straight into that, with nothing in the entry to warn it.
+
+  **Evidence (all from the file itself):** `operation:` — "A=data input, B=clock input";
+  `x_register:` — `X[4:0]: "bit_count - 1"`; `pins:` — lists only `data_pin` (A-input) and
+  `clock_pin` (B-input); no CS/enable field appears anywhere in the mode or its encoding.
+  The absence is the evidence, and it is complete: the entry enumerates its inputs exhaustively.
+
+  **Proposed correction — ADD the constraint; do NOT remove "SPI slave."** The use is real, and
+  Sacred-Rule-adjacent practice here is to state the limit rather than delete the capability. Add a
+  short `limitations:` (or extend `critical_requirements:`, which already carries the mandatory
+  B-input clock-routing warning — the natural neighbour) stating: no chip-select or frame-sync
+  input exists; the shifter counts clock edges from pin-enable; SPI-slave use is sound while the
+  master does not clock continuously between frames. Wording should match the source's own
+  vocabulary, not paraphrase it.
+
+  **Status: `CONFIRMED`** (the gap), for the next YAML update pass.
+
+  **Sub-item, `NEEDS-VERIFICATION` — do not write until sourced.** The obvious remedy — re-arming
+  the smart pin (`DIRL`/`DIRH`) on a separately-detected CS edge to force realignment — is **my
+  inference, not a sourced claim**, and must not enter the YAML on that basis. Either find it in an
+  authority or prove it on hardware (a clean jumper-only two-pin rig; good VO-J candidate) before any
+  such guidance is added.
+
+  **Class-wide sweep — done, scope is this one file.** Grepped every YAML for SPI-slave claims:
+  only this file makes one. `smart-pin-11100-sync-serial-transmit.yaml:150` lists **"SPI master"**,
+  which is unaffected — a master drives CS itself and owns frame boundaries, so no frame-sync
+  problem arises. No other occurrence in the KB.
 
 ---
 
