@@ -47,7 +47,9 @@ CON
   _clkfreq = 200_000_000
 
 VAR
-  long blk[8]                            ' [0]=progress [1]=marker [2]=phase
+  long blk[16]                           ' [0]=progress [1]=marker [2]=phase
+                                         ' [8]=@disp (in) [9]=@prog (in)
+                                         ' [6]=Spin2 addr [7]=PASM ## addr
   long stack[64]
 
 PUB main() | p0, p1, m1, p2, m2
@@ -73,17 +75,22 @@ PUB main() | p0, p1, m1, p2, m2
   ' single-long read -- which is what round 5's checkpoint suggests
   ' (LUT[0] came back $011F_C97C, not a plausible cog address).
   ' A = immediate form (the guide's).  B = register form (every KB example).
-  longfill(@blk[0], 0, 8)
+  longfill(@blk[0], 0, 16)
+  blk[8] := @disp0
+  blk[9] := @prog0
   coginit(NEWCOG, @engine_lut, @blk[0])
   waitms(50)
-  debug("PASS A  setq2 + rdlong \$000, ##addr   -> LUT[0]=", uhex_long_(blk[1]), " LUT[1]=", uhex_long_(blk[2]))
-  debug("PASS B  mov r,##addr / setq2 / rdlong -> LUT[0]=", uhex_long_(blk[3]), " LUT[4]=", uhex_long_(blk[4]))
-  debug("        expected: two SMALL cog addresses (handlers live below \$100)")
-  if blk[1] <> blk[3]
-    debug("*** THE TWO FORMS DISAGREE. The immediate/AUGS form is the suspect,")
-    debug("*** and it is the form the guide's 12.2 VM publishes.")
+  debug("ADDRESS CHECK  Spin2 @disp0=", uhex_long_(blk[6]), "   PASM ##disp0=", uhex_long_(blk[7]))
+  debug("PASS A  load via Spin2 @disp0  -> LUT[0]=", uhex_long_(blk[1]), " LUT[1]=", uhex_long_(blk[2]))
+  debug("PASS B  load via PASM ##disp0  -> LUT[0]=", uhex_long_(blk[3]), " LUT[1]=", uhex_long_(blk[4]))
+  debug("        expected: SMALL cog addresses (handlers live below \$100)")
+  if blk[6] <> blk[7]
+    debug("*** THE TWO ADDRESSES DIFFER by ", udec_(blk[6] - blk[7]), " bytes.")
+    debug("*** '##hubsym' inside DAT ORG is OBJECT-RELATIVE; at runtime the")
+    debug("*** object sits above the Spin2 interpreter, so the guide's 12.2 VM")
+    debug("*** form reads the wrong hub memory entirely.")
   else
-    debug("Both forms agree -- AUGS is not the problem; look elsewhere.")
+    debug("Addresses agree -- '##hubsym' is absolute; look elsewhere.")
   debug(" ")
 
   ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
@@ -92,7 +99,9 @@ PUB main() | p0, p1, m1, p2, m2
   ' _RET_ CALL we run the guide's published VM shape itself.  If PASS 0 does
   ' not dispatch either, the fault is in this harness (or in the guide's own
   ' example) -- NOT in the idiom under test.
-  longfill(@blk[0], 0, 8)
+  longfill(@blk[0], 0, 16)
+  blk[8] := @disp0
+  blk[9] := @prog0
   coginit(NEWCOG, @engine0, @blk[0])
   waitms(50)
   p0 := blk[0]
@@ -120,6 +129,8 @@ PUB main() | p0, p1, m1, p2, m2
   blk[0] := 0                            ' progress
   blk[1] := 0                            ' helper marker
   blk[2] := 0                            ' phase: 1 = reached halt
+  blk[8] := @disp1
+  blk[9] := @prog1
   coginit(NEWCOG, @engine1, @blk[0])
   waitms(50)
   p1 := blk[0]
@@ -131,6 +142,8 @@ PUB main() | p0, p1, m1, p2, m2
   blk[0] := 0
   blk[1] := 0
   blk[2] := 0
+  blk[8] := @disp2
+  blk[9] := @prog2
   coginit(NEWCOG, @engine2, @blk[0])
   waitms(50)
   p2 := blk[0]
@@ -169,9 +182,15 @@ DAT             org
 engine_lut
                 mov     pl, ptra
 
-                ' --- A: immediate operand, AUGS between SETQ2 and RDLONG ---
+                ' --- A: the address Spin2 handed us, via @disp0 ---
+                mov     tc, pl
+                add     tc, #8*4
+                rdlong  tc, tc
+                mov     tp, pl
+                add     tp, #6*4
+                wrlong  tc, tp                  ' blk[6] = Spin2's @disp0
                 setq2   #4-1
-                rdlong  $000, ##disp0
+                rdlong  $000, tc
                 rdlut   ta, #0
                 rdlut   tb, #1
                 mov     tp, pl
@@ -185,8 +204,11 @@ engine_lut
                 wrlut   tc, #0
                 wrlut   tc, #1
 
-                ' --- B: address in a register, no prefix in between ---
+                ' --- B: the assembly-time value of ##disp0 ---
                 mov     tc, ##disp0
+                mov     tp, pl
+                add     tp, #7*4
+                wrlong  tc, tp                  ' blk[7] = PASM's ##disp0
                 setq2   #4-1
                 rdlong  $000, tc
                 rdlut   ta, #0
@@ -232,19 +254,28 @@ DAT             org
 engine0
                 mov     pblk0, ptra
 
+                mov     tv0, pblk0
+                add     tv0, #8*4
+                rdlong  tv0, tv0              ' Spin2's @disp0
                 setq2   #4-1
-                rdlong  $000, ##disp0         ' 4 longs -> LUT $000..$003
+                rdlong  $000, tv0             ' 4 longs -> LUT $000..$003
                 rdlut   tv0, #0               ' read LUT[0] back
                 mov     tq0, pblk0
                 add     tq0, #3*4
                 wrlong  tv0, tq0              ' blk[3] = LUT[0] (0 => load failed)
 
-                rdfast  #0, ##prog0
+                mov     tq0, pblk0
+                add     tq0, #9*4
+                rdlong  tq0, tq0              ' Spin2's @prog0
+                rdfast  #0, tq0
                 rfbyte  tv0                   ' peek first bytecode
                 mov     tq0, pblk0
                 add     tq0, #4*4
                 wrlong  tv0, tq0              ' blk[4] = first byte (expect $00)
-                rdfast  #0, ##prog0           ' re-point after the peek
+                mov     tq0, pblk0
+                add     tq0, #9*4
+                rdlong  tq0, tq0
+                rdfast  #0, tq0               ' re-point after the peek
 
                 mov     tq0, pblk0
                 add     tq0, #5*4
@@ -279,9 +310,15 @@ DAT             org
 '' ---------------------------------------------------------------------------
 engine1
                 mov     pblk, ptra
+                mov     tv, pblk
+                add     tv, #8*4
+                rdlong  tv, tv
                 setq2   #4-1
-                rdlong  $000, ##disp1        ' dispatch table -> LUT $000
-                rdfast  #0, ##prog1          ' FIFO -> bytecode stream
+                rdlong  $000, tv             ' dispatch table -> LUT $000
+                mov     tv, pblk
+                add     tv, #9*4
+                rdlong  tv, tv
+                rdfast  #0, tv               ' FIFO -> bytecode stream
                 push    #$1ff                 ' XBYTE re-entry target
         _ret_   setq    #0                    ' arm: 256-entry table @ LUT $000
 
@@ -353,9 +390,15 @@ DAT             org
 
 engine2
                 mov     pblk2, ptra
+                mov     tv2, pblk2
+                add     tv2, #8*4
+                rdlong  tv2, tv2
                 setq2   #4-1
-                rdlong  $000, ##disp2        ' engine2's OWN table
-                rdfast  #0, ##prog2          ' the CONTROL stream
+                rdlong  $000, tv2            ' engine2's OWN table
+                mov     tv2, pblk2
+                add     tv2, #9*4
+                rdlong  tv2, tv2
+                rdfast  #0, tv2              ' the CONTROL stream
                 push    #$1ff
         _ret_   setq    #0
 
