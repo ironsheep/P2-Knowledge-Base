@@ -1,0 +1,263 @@
+'' =============================================================================
+''  test-F260 (round 6)  --  does the DDS/Goertzel streamer mode work at all?
+'' =============================================================================
+''  ROUNDS 1-5 WERE ALL VOID, AND EVERY TIME IT WAS MY INSTRUMENT.  Recorded
+''  so nobody repeats them:
+''    r1-r3  load_lut() ran SETQ2+RDLONG over LUT $000..$1FF from inline PASM
+''           inside the Spin2 interpreter's own cog.  The interpreter lives in
+''           COG+LUT, so it wiped itself out and ran wild (that is what opened
+''           the single-step debugger).
+''    r4     POLLQMT used as a pre-read guard.  It is the CORDIC-READ-BUT-EMPTY
+''           flag, SET BY a failed GETQX -- not "a result is waiting".  The
+''           read could never execute.
+''    r5     Read GETQX/GETQY at all.  WRONG HARDWARE.  Goertzel accumulators
+''           come from GETXACC (KB p2kbPasm2Getxacc).  No CORDIC op was ever
+''           issued, so of course QMT was set on every row.
+''    r5     SETXFRQ computed against 2^32.  KB is explicit: the NCO masks its
+''           MSB, so the scale is $8000_0000 = 2^31.  Every rate was 2x off.
+''    r5     Waited 2 ms for a 1024-sample run at ~1 kHz -- about 1 second of
+''           work.  Caught roughly two samples.
+''
+''  EVERY INSTRUCTION BELOW WAS CHECKED AGAINST P2KB BEFORE BEING WRITTEN.
+''    GETXACC  X into D, Y into the NEXT instruction's S; clears accumulators.
+''             "Must have appropriate instruction following GETXACC."
+''    QVECTOR  D=X, S=Y -> GETQX = magnitude, GETQY = angle, 55 clocks later.
+''    SETXFRQ  D = target_freq * $8000_0000 / clkfreq   (2^31, NOT 2^32)
+''    WAITXFI  wait for streamer to finish.
+''
+''  RIG: jumper DAC_PIN (0) -> ADC_PIN (1).  Same 8-pin power group (0..7).
+''
+''  CONTROLS -- this probe answers nothing without them:
+''    C1  jumper continuity, digital.
+''    C2  STREAMER PATH: run a plain streamer output mode and confirm it moves
+''        the pin.  Rounds 1-5 proved the DAC pin path but NEVER proved the
+''        streamer works in this harness.  If C2 fails, Goertzel results are
+''        meaningless.
+''    C3  WAITXFI DURATION: time the run.  A streamer that never started
+''        returns instantly; one that ran takes samples x NCO period.  This
+''        single number separates "mode broken" from "command word wrong".
+''    C4  POSITIVE vs NEGATIVE: detect a tone we are generating AT the target
+''        frequency, then detune the target and confirm magnitude collapses.
+''        A non-zero accumulator alone proves nothing; the ratio does.
+''
+''  Build: pnut-ts -d test-f260-goertzel.spin2
+'' =============================================================================
+
+CON
+  _clkfreq  = 200_000_000
+  DAC_PIN   = 0
+  ADC_PIN   = 1
+
+  SAMPLES   = 1024                       ' Goertzel sample count
+  ' NCO rate: sysclk/16 so SAMPLES finish in ~16k clocks, not ~1 second.
+  ' D = f * $8000_0000 / clkfreq, and f = clkfreq/16, so D = $8000_0000/16.
+  XFRQ_FAST = $0800_0000
+
+  DDS_SINC1 = $F007_0000                 ' X_DDS_GOERTZEL_SINC1
+
+DAT
+s_ok            byte    "OK", 0
+s_bad           byte    "*** FAILED ***", 0
+
+VAR
+  long sine[512]
+  long g[16]
+
+PUB main() | i
+
+  debug("=== F-260 round 6: DDS/Goertzel, KB-verified instrument ===")
+  debug("RIG: jumper pin ", udec_(DAC_PIN), " -> pin ", udec_(ADC_PIN))
+
+  if not c1_jumper()
+    debug("@@@ ABORTED: no jumper. @@@")
+    stop_here()
+
+  build_sine()
+  g[0] := @sine
+  g[4] := DAC_PIN
+  g[5] := ADC_PIN
+
+  if not c2_streamer_path()
+    debug("*** C2 FAILED: the streamer does not drive this pin in this harness.")
+    debug("*** Goertzel results below would be meaningless. STOP.")
+    stop_here()
+
+  c3_and_c4()
+  stop_here()
+
+
+PRI stop_here()
+  debug(" ")
+  debug("@@@ TEST COMPLETE: F-260 goertzel @@@")
+  debug("@@@ nothing further will print - safe to stop the session @@@")
+  repeat
+
+
+'' --- C1: digital continuity ------------------------------------------------
+PRI c1_jumper() : ok | hi, lo
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+  pinf(ADC_PIN)
+  pinh(DAC_PIN)
+  waitms(2)
+  hi := pinr(ADC_PIN)
+  pinl(DAC_PIN)
+  waitms(2)
+  lo := pinr(ADC_PIN)
+  pinf(DAC_PIN)
+  ok := (hi == 1) and (lo == 0)
+  debug("C1 jumper: high->", udec_(hi), " low->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
+
+
+'' --- C2: prove the STREAMER moves the pin, before trusting Goertzel --------
+'' Uses a plain immediate->pins mode (X_IMM_32X1_1DAC1, %0100) writing an
+'' alternating pattern.  If the ADC pin does not change between an all-ones
+'' and an all-zeros pattern, the streamer path is dead in this harness.
+PRI c2_streamer_path() : ok | hi, lo
+  pinclear(DAC_PIN)
+  pinl(DAC_PIN)                          ' plain output, DIR=1
+  pinclear(ADC_PIN)
+  pinf(ADC_PIN)
+
+  hi := stream_pattern($FFFF_FFFF)
+  lo := stream_pattern($0000_0000)
+  ok := hi <> lo
+  debug("C2 streamer path: ones->", udec_(hi), "  zeros->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
+
+
+PRI stream_pattern(pat) : level
+  g[6] := pat
+  g[7] := 0
+  run_engine(@stream_engine)
+  waitms(2)
+  level := pinr(ADC_PIN)
+
+
+'' --- C3 + C4: duration, then positive/negative detection -------------------
+PRI c3_and_c4() | mag_on, mag_off, ticks_on
+
+  debug(" ")
+  debug("--- C3: does the streamer actually RUN? (WAITXFI duration) ---")
+
+  ' Target the frequency we are generating: sysclk/16 NCO over a 512-entry
+  ' sine table -> tone at NCO/512.
+  mag_on  := goertzel(XFRQ_FAST, true)
+  ticks_on := g[9]
+  debug("ON-TARGET : WAITXFI took ", udec_(ticks_on), " clocks;  magnitude=", uhex_long_(mag_on))
+  debug("            (instant return => the command never started)")
+
+  if ticks_on < 100
+    debug("*** C3 FAILED: WAITXFI returned immediately. The documented command")
+    debug("*** word does not start this mode. THAT is the finding -- and it is")
+    debug("*** now OUR measurement, with a proven streamer path (C2).")
+    return
+
+  debug(" ")
+  debug("--- C4: positive vs negative control ---")
+  mag_off := goertzel(XFRQ_FAST >> 3, false)     ' detune the detector 8x
+  debug("OFF-TARGET: magnitude=", uhex_long_(mag_off))
+  debug(" ")
+  if mag_on > (mag_off << 2)
+    debug("GOERTZEL WORKS: on-target magnitude >> off-target. The mode is fine;")
+    debug("the guide's TEXT (undeclared dds_s, adc_pin<<17 colliding with the")
+    debug("required %111 in D[18:16]) is the whole defect.")
+  elseif mag_on == 0 and mag_off == 0
+    debug("NO ACCUMULATION EITHER WAY, despite the streamer running (C3).")
+    debug("Command word is the suspect. Next: vary the S operand -- the guide's")
+    debug("undeclared 'dds_s' -- before considering escalation.")
+  else
+    debug("INCONCLUSIVE: on/off magnitudes too close. Detector may not be")
+    debug("tuned to the generated tone. Adjust before drawing any conclusion.")
+
+
+'' Run one Goertzel measurement.  Returns magnitude; g[9] = WAITXFI clocks.
+PRI goertzel(xfrq, drive_tone) : magnitude
+  g[3] := xfrq
+  g[6] := drive_tone ? 1 : 0
+  g[7] := 0
+  run_engine(@goertzel_engine)
+  magnitude := g[1]
+
+
+PRI run_engine(addr) | cogn, t0
+  cogn := coginit(NEWCOG, addr, @g[0])
+  t0 := getct()
+  repeat until g[7] == 1 or (getct() - t0) > (clkfreq / 4)
+  if g[7] <> 1
+    cogstop(cogn)
+    debug("*** engine did not finish within 250 ms")
+
+
+PRI build_sine() | i
+  repeat i from 0 to 511
+    sine[i] := qsin(32767, i << 23, 0)
+
+
+DAT             org
+
+'' g: [0]=@sine [1]=magnitude [2]=angle [3]=xfrq [4]=dacpin [5]=adcpin
+''    [6]=arg [7]=done [8]=(spare) [9]=waitxfi clocks
+goertzel_engine
+                mov     gb, ptra
+                rdlong  gsine, gb
+                add     gb, #3*4
+                rdlong  gxfrq, gb
+                mov     gbase, ptra
+
+                setq2   ##512-1               ' our own cog's LUT: safe
+                rdlong  0, gsine
+
+                setxfrq gxfrq
+                getct   gt0
+                xinit   ##DDS_SINC1 | SAMPLES, #0
+                waitxfi
+                getct   gt1
+                sub     gt1, gt0
+
+                getxacc gx                    ' X -> gx, Y -> NEXT instr's S
+                qvector gx, 0-0               ' S receives Y from GETXACC
+                getqx   gmag
+                getqy   gang
+
+                mov     gt, gbase
+                add     gt, #1*4
+                wrlong  gmag, gt
+                add     gt, #4
+                wrlong  gang, gt
+                mov     gt, gbase
+                add     gt, #9*4
+                wrlong  gt1, gt
+                mov     gt, gbase
+                add     gt, #7*4
+                wrlong  #1, gt
+                cogid   gt
+                cogstop gt
+
+'' C2: plain immediate-to-pins streamer mode, to prove the streamer path.
+stream_engine
+                mov     gb, ptra
+                mov     gbase, ptra
+                add     gb, #6*4
+                rdlong  gpat, gb
+
+                setxfrq ##$1000_0000
+                xinit   ##$4000_0000 | 32, gpat     ' X_IMM_32X1_1DAC1, 32 bits
+                waitxfi
+
+                mov     gt, gbase
+                add     gt, #7*4
+                wrlong  #1, gt
+                cogid   gt
+                cogstop gt
+
+gb              res     1
+gbase           res     1
+gsine           res     1
+gxfrq           res     1
+gpat            res     1
+gx              res     1
+gmag            res     1
+gang            res     1
+gt              res     1
+gt0             res     1
+gt1             res     1

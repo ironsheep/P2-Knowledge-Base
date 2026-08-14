@@ -66,6 +66,26 @@ PUB main() | p0, p1, m1, p2, m2
     repeat
   debug("Harness sound: cog runs, PTRA good, hub writes land.")
 
+  ' ---------- PASS A: does SETQ2 survive an AUGS prefix? -------------------
+  ' The guide's 12.2 VM writes:  setq2 #4-1 / rdlong $000, ##disp_table
+  ' '##' emits an AUGS PREFIX, and SETQ2 applies to "the next instruction".
+  ' If AUGS does not pass Q through, that block load silently degrades to a
+  ' single-long read -- which is what round 5's checkpoint suggests
+  ' (LUT[0] came back $011F_C97C, not a plausible cog address).
+  ' A = immediate form (the guide's).  B = register form (every KB example).
+  longfill(@blk[0], 0, 8)
+  coginit(NEWCOG, @engine_lut, @blk[0])
+  waitms(50)
+  debug("PASS A  setq2 + rdlong \$000, ##addr   -> LUT[0]=", uhex_long_(blk[1]), " LUT[1]=", uhex_long_(blk[2]))
+  debug("PASS B  mov r,##addr / setq2 / rdlong -> LUT[0]=", uhex_long_(blk[3]), " LUT[4]=", uhex_long_(blk[4]))
+  debug("        expected: two SMALL cog addresses (handlers live below \$100)")
+  if blk[1] <> blk[3]
+    debug("*** THE TWO FORMS DISAGREE. The immediate/AUGS form is the suspect,")
+    debug("*** and it is the form the guide's 12.2 VM publishes.")
+  else
+    debug("Both forms agree -- AUGS is not the problem; look elsewhere.")
+  debug(" ")
+
   ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
   ' Now instrumented so a failure says WHERE, not just THAT.
   ' Round 2 still returned progress=0 with the '@' fix, so before blaming
@@ -137,6 +157,54 @@ PUB main() | p0, p1, m1, p2, m2
 
   repeat
 
+
+DAT             org
+
+'' ---------------------------------------------------------------------------
+'' engine_lut -- does SETQ2 survive the AUGS prefix that '##' emits?
+''   A: setq2 #3 / rdlong $000, ##disp0        (the guide's form)
+''   B: mov r,##disp0 / setq2 #3 / rdlong $000, r   (every KB example's form)
+'' Both load the SAME table; we read LUT back after each and compare.
+'' ---------------------------------------------------------------------------
+engine_lut
+                mov     pl, ptra
+
+                ' --- A: immediate operand, AUGS between SETQ2 and RDLONG ---
+                setq2   #4-1
+                rdlong  $000, ##disp0
+                rdlut   ta, #0
+                rdlut   tb, #1
+                mov     tp, pl
+                add     tp, #1*4
+                wrlong  ta, tp
+                add     tp, #4
+                wrlong  tb, tp
+
+                ' --- wipe LUT so B cannot inherit A's result ---
+                mov     tc, #0
+                wrlut   tc, #0
+                wrlut   tc, #1
+
+                ' --- B: address in a register, no prefix in between ---
+                mov     tc, ##disp0
+                setq2   #4-1
+                rdlong  $000, tc
+                rdlut   ta, #0
+                rdlut   tb, #1
+                mov     tp, pl
+                add     tp, #3*4
+                wrlong  ta, tp
+                add     tp, #4
+                wrlong  tb, tp
+
+                cogid   tp
+                cogstop tp
+
+pl              res     1
+tp              res     1
+ta              res     1
+tb              res     1
+tc              res     1
 
 DAT             org
 

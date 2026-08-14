@@ -10,7 +10,11 @@ grounded in our own sources and does **not** need the bench.
 |---|---|---|---|---|
 | 1 | `test-f263-cordic-pipeline-depth.spin2` | F-263 | bare board | whether the Assembly ch.5 CORDIC example gets rewritten **at all** |
 | 2 | `test-f256-retcall-xbyte.spin2` | F-256 | bare board | whether XBYTE §15.3 is patched or restructured |
-| 3 | `test-f259-f260-dac-and-goertzel.spin2` | F-259, F-260 | **one jumper: pin 0 → pin 1** | whether the Streamer DDS mode can be presented as buildable |
+| 3 | `test-f260-goertzel.spin2` | F-260 | **one jumper: pin 0 → pin 1** | whether the Streamer DDS mode can be presented as buildable |
+
+**F-259 and F-263 are CLOSED — do not re-run them.** F-259: the guide's recipe drives (TT=%01 →
+6,737 vs 1,408 off); the defect is `+` composition carrying into `P_BITDAC`. F-263: ARM D clean
+through FILL=7 — Chip's model holds, and the rule is no hub access inside either CORDIC loop.
 
 Probe 3 is last because it is the only one needing a jumper.
 
