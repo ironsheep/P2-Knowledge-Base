@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-264`** (F-259 = REVISED: guide's DAC recipe is CORRECT (bench-disproven report); real defect is `+` composition of pin constants — P_OE == P_CHANNEL, and `+` carries into P_BITDAC [RELEASED]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = Assembly ch.5 CORDIC fill-6-then-drain example bench-disproven, contradicts its own chapter [RELEASED]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-264`** (F-259 = REVISED: guide's DAC recipe is CORRECT (bench-disproven report); real defect is `+` composition of pin constants — P_OE == P_CHANNEL, and `+` carries into P_BITDAC [RELEASED]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = CONFIRMED: hub access inside a CORDIC fill/drain loop loses results (Chip's model correct); P2AN002 AND Assembly ch.5 both violate it [RELEASED, our bench]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2991,43 +2991,47 @@ he field-reported separately — i.e. this gap has already produced a real tool 
 **Proposed correction:** copy SCOPE's "If omitted" column into the FFT chapter's channel-definition
 table. **Verify the values against PNut** (ground truth) rather than assuming FFT matches SCOPE.
 
-### F-263 — Assembly Manual's CORDIC fill-6-then-drain example reported bench-disproven — **but our own authority says the pattern is correct.** `NEEDS-VERIFICATION`
+### F-263 — CONFIRMED with the cause identified: hub access inside a CORDIC loop loses results. Chip's model is correct. `CONFIRMED` (our bench, 2026-08-14)
 
-> **RECLASSIFIED 2026-08-14 (was `CONFIRMED (bench)`).** Stephen asked whether we had prior CORDIC
-> bench work. **We do, and it contradicts the report** — so this must not be actioned as a confirmed
-> defect. Counter-evidence, both internal:
->
-> 1. **`engineering/knowledge-base/P2-support/clarifications/chip-clarifications/CORDIC-pipeline-theory.md`**
->    — *"Authoritative — derived from P2 designer explanation"* (Chip Gracey, 2025-11-26). It
->    documents exactly the three-phase **Fill → Steady-state → Drain** model the Assembly example
->    uses, states **"Pipeline capacity per COG: 54 ÷ 8 ≈ 6-7 operations can be in flight,"** and
->    shows a fill phase submitting 8 back-to-back. Critically it also says GETQX/GETQY **stall**
->    when a result is not ready — *"the COG blocks until the result arrives"* — i.e. the documented
->    failure mode is a **stall, not scrambled data.**
-> 2. **`app-notes/P2AN002/examples-library/cordic-pipeline-throughput.spin2`** — our **released**
->    CORDIC app note ships a `FILL = 6` (*"in flight (~6-7: 54-stage/8)"*) fill/steady/drain example
->    of the same shape.
->
-> So the reporter's *"two-in-flight retrieval scrambled all outputs"* conflicts with a Chip-sourced
-> clarification **and** a shipped example of ours. One of three things is true: his rig had a
-> defect; the Assembly manual's example differs from P2AN002's in some way that matters; or our
-> authority is incomplete. **Do not rewrite the manual until we know which.**
+**Our board, our measurement.** P2 Edge @ 200 MHz. Control: queue one op, retrieve immediately —
+stalled **58 clocks**, exactly the documented `GETQX` maximum (`2...58`), so the rig can see the
+failure mode. Four shapes swept over fill depth 1–7, checked against single-op `ROTXY` ground truth:
 
-**Location:** `manuals/p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:~100–126`.
-**RELEASED.**
+| Shape | Hub access inside a CORDIC loop? | First failure |
+|---|---|---|
+| **ARM B** — P2AN002's shape (`RDLONG` in the fill) | fill | **FILL = 2** |
+| **ARM C** — register-only fill, `WRLONG` in the drain | drain | **FILL = 3** |
+| **ARM D** — register-only fill **and** drain, hub I/O batched after | none | **CLEAN THROUGH 7** |
+| ARM A — Assembly ch.5 shape (2×`RDLONG` + `CALL`/`RET` per issue) | fill | 15 of 16 wrong at FILL=6 |
 
-The example queues 6 rotations, runs a retrieve-one/queue-one steady state, then drains 6. The
-reporter's bench reports **two-in-flight retrieval scrambled all outputs**
-(`logs/1500_fft_pasm_fail_260812-195718.log`).
+**Chip's clarification is vindicated.** Deep pipelining works — 6–7 operations in flight is real, and
+`GETQX`/`GETQY` stall correctly. **The rule is: no hub access inside either CORDIC loop.** Issue and
+retrieve at the 8-clock slot cadence; batch hub reads and writes outside. Break it in the fill and
+you lose results from the fill onward; break it in the drain and you lose them from the drain onward.
 
-What makes this actionable rather than merely reported: **the same chapter's other CORDIC
-statements matched his silicon exactly** — the steady-state retrieve-before-issue loop and *"results
-persist until the next CORDIC operation starts."* So the chapter contains a correct rule and an
-example that violates it. His request is the right one: **reconcile the two passages.**
+**The community report is right in effect and wrong in cause.** It is not a 2-deep result buffer —
+it is a fill/drain that cannot keep up with the pipeline. (Supporting evidence: the ARM B failure
+depth **moved between otherwise identical runs** — FILL=3 in one, FILL=2 in another. A fixed
+hardware buffer depth would be deterministic; a timing race is not.)
 
-**Action:** replicate on our bench (jumper-free, VO-J) before rewriting — then either correct the
-example to obey the chapter's own rule, or, if deep pipelining *is* valid under conditions the
-example omits, state those conditions.
+**Both of our documents are wrong, for exactly this reason:**
+
+- **`app-notes/P2AN002/examples-library/cordic-pipeline-throughput.spin2` (RELEASED)** — `rdlong t, inp`
+  inside the fill loop, `wrlong r, outp` inside the steady loop.
+- **`manuals/p2-assembly-language-manual/.../chapter-05-hardware.md:~100–126` (RELEASED)** — the
+  `queue_rotation` helper does **two** `RDLONG`s plus a `CALL`/`RET` per issue, and the steady loop
+  does two `WRLONG`s per retrieval. Slower than ARM B, and it measures worst of all.
+
+**Proposed correction (same fix for both):** hoist hub I/O out of the CORDIC loops — block-read the
+inputs into cog registers first (or compute them in-register), keep fill and drain to
+register-only operations, then block-write the results afterwards. State the rule explicitly next
+to the example, because the pattern *looks* correct and fails silently with plausible-looking
+numbers.
+
+**EF candidate:** this belongs in `P2-EMPIRICAL-FINDINGS.md` — our own board, our own probe, with a
+control that stalled at the documented maximum. Probe:
+`campaigns/2026-08-manual-corrections/tests/test-f263-cordic-pipeline-depth.spin2`.
+
 
 ---
 
