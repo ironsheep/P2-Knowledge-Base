@@ -100,6 +100,25 @@ CON
   MODE_C2    = 1
   MODE_XCONT = 2
   MODE_ADC   = 3
+  MODE_SIG   = 4
+
+  '' Round 8. Round 7 proved the mode RUNS -- WAITXFI came back at 20,015
+  '' clocks against a predicted 20,000 -- but nothing accumulated, and the
+  '' S sum-select = 0 control did not read zero. Three changes:
+  ''   1. The DAC pin was configured WITHOUT P_CHANNEL. Our own F-259 bench
+  ''      proved on this board that P_CHANNEL (TT=%01) is what enables a DAC
+  ''      channel in non-smart-pin DAC mode: 1,408 counts without it, 6,737
+  ''      with. So there was probably no tone at all and every round-7 number
+  ''      was measuring silence.
+  ''   2. A dummy GETXACC before each run, so the accumulators provably start
+  ''      cleared and the sum-select-zero arm becomes a real control.
+  ''   3. C5, an ANALOG loopback control. C1 proves the wire, C2 proves the
+  ''      streamer drives digitally -- neither proves an analog signal reaches
+  ''      the ADC pin. C5 drives a static DAC level and counts one-bits in the
+  ''      ADC pin's raw delta-sigma stream, with and without P_CHANNEL. That
+  ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
+  ''      downstream is measured, and re-confirms F-259 in this exact rig.
+  SIG_SAMPLES = 2000
 
   '' --- streamer-body.md:607, the SAME adc_pin<<17 idiom on a DIFFERENT mode --
   '' X_1ADC8_0P_1DAC8_WFBYTE template (Spin2 v55 / Silicon Doc):
@@ -145,6 +164,12 @@ PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
   if not c2_streamer_path()
     debug("*** C2 FAILED: the streamer does not drive this pin in this harness.")
     debug("*** Everything below would be meaningless. STOP.")
+    stop_here()
+
+  if not c5_analog_path()
+    debug("*** C5 FAILED: no analog signal crosses the jumper, so there is no")
+    debug("*** tone for the detector to find. Everything below would be")
+    debug("*** measuring silence -- which is what round 7 did. STOP.")
     stop_here()
 
   debug(" ")
@@ -249,6 +274,43 @@ PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
     if abuf[i] <> SENTINEL
       nbytes := i + 1
       quit
+
+
+'' --- C5: analog loopback, and which pin config actually drives -------------
+PRI c5_analog_path() : ok | a_hi, a_lo, b_hi, b_lo, da, db
+  a_hi := sig(0, 255)
+  a_lo := sig(0, 0)
+  b_hi := sig(1, 255)
+  b_lo := sig(1, 0)
+  da := spread(a_hi, a_lo)
+  db := spread(b_hi, b_lo)
+  debug(" ")
+  debug("C5 analog loopback, ", udec_(SIG_SAMPLES), " samples of the ADC pin")
+  debug("   plain P_DAC_124R_3V      : level255 ones=", udec_(a_hi), "  level0 ones=", udec_(a_lo), "  spread=", udec_(da))
+  debug("   with P_CHANNEL added     : level255 ones=", udec_(b_hi), "  level0 ones=", udec_(b_lo), "  spread=", udec_(db))
+  ok := db > 200
+  if ok and da <= 200
+    debug("   P_CHANNEL IS WHAT DRIVES -- F-259 reconfirmed in this rig, and")
+    debug("   round 7 was measuring silence because the probe omitted it.")
+  elseif ok
+    debug("   both configurations drive; P_CHANNEL was not the round-7 cause.")
+  else
+    debug("   NEITHER configuration drives an analog signal across the jumper.")
+
+
+PRI spread(x, y) : d
+  d := x > y ? x - y : y - x
+
+
+PRI sig(withchan, level) : nbits
+  longfill(@g[0], 0, 20)
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[4] := withchan
+  g[5] := level
+  g[6] := MODE_SIG
+  start_engine()
+  nbits := g[13]
 
 
 PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
@@ -405,9 +467,12 @@ engine
         if_z    jmp     #c2_arm
                 cmp     v_mode, #MODE_ADC       wz
         if_z    jmp     #adc_arm_code
+                cmp     v_mode, #MODE_SIG       wz
+        if_z    jmp     #sig_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
-                wrpin   ##P_DAC_124R_3V, #DAC_PIN
+                ' P_CHANNEL enables the DAC channel -- F-259, our own bench
+                wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
                 dirh    #DAC_PIN
 
                 ' Raw delta-sigma bitstream: ADC pin config, NO smart-pin mode.
@@ -417,6 +482,11 @@ engine
         if_z    dirl    #ADC_PIN
 
                 call    #build_table
+
+                ' clear the accumulators first, so a zero result later is a
+                ' real zero and not leftover state
+                getxacc gclr
+                mov     gclr2, 0-0              ' the mandatory follower
 
                 setxfrq xfrq
                 getct   t0
@@ -454,6 +524,38 @@ c2_arm
                 testp   #ADC_PIN                wc
         if_c    mov     lvl, #1
                 waitxfi
+                jmp     #report
+
+'' --- C5: does an analog signal actually cross the jumper? ------------------
+'' Drive a STATIC DAC level on pin 0 and count one-bits in pin 1's raw
+'' delta-sigma stream.  Density tracks voltage, so level 255 and level 0 must
+'' give very different counts if the path works.  Run with and without
+'' P_CHANNEL to see which configuration actually drives.
+sig_arm_code
+                mov     t, ptra
+                add     t, #4*4
+                rdlong  achan, t                ' use P_CHANNEL?
+                mov     t, ptra
+                add     t, #5*4
+                rdlong  alev, t                 ' DAC level 0..255
+
+                mov     tw2, ##P_DAC_124R_3V
+                cmp     achan, #0               wz
+        if_nz   or      tw2, ##P_CHANNEL
+                shl     alev, #8                ' level sits in D bits 15..8
+                or      tw2, alev
+                wrpin   tw2, #DAC_PIN
+                dirh    #DAC_PIN
+
+                wrpin   ##P_ADC_1X, #ADC_PIN    ' raw bitstream, no smart mode
+                dirl    #ADC_PIN
+
+                waitx   ##200_000               ' 1 ms to settle
+                mov     lvl, #0
+                mov     tc2, ##SIG_SAMPLES
+.sigloop        testp   #ADC_PIN                wc
+        if_c    add     lvl, #1
+                djnz    tc2, #.sigloop
                 jmp     #report
 
 '' --- :607 arm: run a capture command and let the BYTE COUNT say which mode
@@ -584,3 +686,9 @@ tmo             res     1
 abufp           res     1
 apin            res     1
 aprop           res     1
+achan           res     1
+alev            res     1
+tw2             res     1
+tc2             res     1
+gclr            res     1
+gclr2           res     1
