@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 6
+  BUILD     = 7
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -138,9 +138,10 @@ CON
   MODE_COUNT = 1
   MODE_NOCMD = 2                         ' GETXACC with NO streamer command
   MODE_TWICE = 3                         ' clear, then GETXACC again, no command
+  MODE_SEQ   = 4                         ' A/B/C/D reads around two commands, ONE cog
 
 VAR
-  long g[16]
+  long g[24]
   '  [0] dds_d  [1] dds_s  [2] mode
   '  [0] dds_d [1] dds_s [2] mode [3] detector Hz
   '  [8] cos [9] sin [10] density [11] waitxfi [12] magnitude [15] done
@@ -174,6 +175,7 @@ PUB main() | hi, lo
   dc_pair(S_NONE, 9)
   debug(" ")
   instrument_check()
+  seq_check()
   tone_arms()
   halt()
 
@@ -196,6 +198,20 @@ PRI instrument_check()
 '' independent of the streamer and of any cog's DAC channels. The detector is
 '' then swept against it. This is the first time this comparison has been made
 '' with the debug interrupt OUT of the streaming cog.
+'' --- A/B/C/D in one cog: do my commands register at all? -------------------
+PRI seq_check()
+  debug(" ")
+  debug("--- SEQ: four reads around two commands, all in ONE cog ---")
+  run_at(DDS_D, S_BASE1, MODE_SEQ, TONE_HZ)
+  debug("  A before any command : cos=", sdec_(g[16]), " sin=", sdec_(g[17]))
+  debug("  B after command 1    : cos=", sdec_(g[18]), " sin=", sdec_(g[19]))
+  debug("  C re-read, no command: cos=", sdec_(g[20]), " sin=", sdec_(g[21]))
+  debug("  D after command 2    : cos=", sdec_(g[22]), " sin=", sdec_(g[23]))
+  debug("  A must be 0 (fresh cog). C must equal B (documented). D must be a")
+  debug("  NEW value -- if D equals B the reads are latched and my XINITs are")
+  debug("  not registering as new streamer commands.")
+
+
 PRI tone_arms() | on_t, off_t, null_t
   debug(" ")
   debug("--- TONE: independent smart-pin NCO on pin 0, detector swept ---")
@@ -329,7 +345,7 @@ PRI run(ddsd, ssel, mode) | cogn, t0
 
 
 PRI run_at(ddsd, ssel, mode, detector_hz) | cogn, t0
-  longfill(@g[0], 0, 16)
+  longfill(@g[0], 0, 24)
   g[0] := ddsd
   g[1] := ssel
   g[2] := mode
@@ -372,6 +388,8 @@ engine
         if_z    jmp     #nocmd_arm
                 cmp     mode_, #MODE_TWICE      wz
         if_z    jmp     #twice_arm
+                cmp     mode_, #MODE_SEQ        wz
+        if_z    jmp     #seq_arm
 
                 ' NCO word: QFRAC gives (f<<32)/clk; the NCO masks its MSB so
                 ' the scale is 2^31 -- halve it.
@@ -417,6 +435,55 @@ twice_arm
                 mov     gclr2_, 0-0
                 getxacc cos_
                 mov     sin_, 0-0
+                jmp     #report
+
+'' Everything in ONE cog, so no cross-cog or ordering question can intrude:
+''   A  read before any command      -- a fresh cog must be 0
+''   B  read after command 1         -- should be that run's accumulation
+''   C  read again, no new command   -- documented to repeat B
+''   D  read after command 2         -- should be a NEW accumulation
+'' If A is non-zero the cog does not start clean. If B == C == D the reads are
+'' latched and my XINITs are not registering as new commands.
+seq_arm
+                qfrac   ##TONE_HZ, ##_clkfreq
+                getqx   xfrq_
+                shr     xfrq_, #1
+                call    #build_table
+                setxfrq xfrq_
+
+                getxacc sa_                     ' A
+                mov     sa2_, 0-0
+
+                xinit   ddsd_, ssel_
+                waitxfi                         ' cog 0 times out and stops us
+                getxacc sb_                     ' B
+                mov     sb2_, 0-0
+
+                getxacc sc_                     ' C -- no new command between
+                mov     sc2_, 0-0
+
+                xinit   ddsd_, ssel_            ' command 2
+                waitxfi
+                getxacc sd_                     ' D
+                mov     sd2_, 0-0
+
+                mov     t_, pb_
+                add     t_, #16*4
+                wrlong  sa_, t_
+                add     t_, #4
+                wrlong  sa2_, t_
+                add     t_, #4
+                wrlong  sb_, t_
+                add     t_, #4
+                wrlong  sb2_, t_
+                add     t_, #4
+                wrlong  sc_, t_
+                add     t_, #4
+                wrlong  sc2_, t_
+                add     t_, #4
+                wrlong  sd_, t_
+                add     t_, #4
+                wrlong  sd2_, t_
                 jmp     #report
 
 count_arm
@@ -482,3 +549,11 @@ z_              res     1
 w_              res     1
 sx_             res     1
 sy_             res     1
+sa_             res     1
+sa2_            res     1
+sb_             res     1
+sb2_            res     1
+sc_             res     1
+sc2_            res     1
+sd_             res     1
+sd2_            res     1
