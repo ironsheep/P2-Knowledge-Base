@@ -621,6 +621,7 @@ PRI ext_tone_arms() | b1, b2, b3
   s_sweep()
   blk_sweep()
   v_sweep()
+  n_sweep()
 
 
 '' --- S: which pin, if any, does the Goertzel summer actually listen to? ----
@@ -700,6 +701,45 @@ PRI v_sweep() | v, on_c, off_c, on_s, off_s
     off_s := g[9]
     debug("  variant ", udec_(v), "  delta cos=", sdec_(on_c - off_c), "  delta sin=", sdec_(on_s - off_s), "   (on cos=", sdec_(on_c), ")")
   debug("  (a variant with a LARGE delta is the setup the mode actually needs)")
+
+
+'' --- N: what are the accumulators actually accumulating? -------------------
+'' An unchased clue: B2 ran HALF as long as B1 (10,015 clocks vs 20,015,
+'' correct for a 2 MHz detector) and totalled the SAME ~1,000,000. A running
+'' sum of per-sample products cannot do that -- halve the samples and you
+'' should roughly halve the sum.
+'' So sweep the cycle count directly and watch how the total scales:
+''   proportional to cycles -> it IS accumulating samples, from a stuck input
+''   flat across cycles     -> it is NOT a sample sum; we are reading
+''                             something else entirely, and every magnitude
+''                             this campaign has printed needs re-reading
+''   zero everywhere        -> the dummy GETXACC is clearing correctly and
+''                             nothing accumulates without a live input
+PRI n_sweep() | i, cyc, c, sn
+  debug(" ")
+  debug("--- N: does the accumulation scale with the cycle count? ---")
+  tone_on(NCO_Y_1M)
+  repeat i from 0 to 3
+    cyc := 25 << i                       ' 25, 50, 100, 200 cycles
+    ext_arm_cycles(cyc)
+    c  := g[8]
+    sn := g[9]
+    debug("  cycles=", udec_(cyc), "  waitxfi=", udec_(g[12]), "  cos=", sdec_(c), "  sin=", sdec_(sn))
+  tone_off()
+  debug("  (cos/sin proportional to cycles = a real sample sum of a stuck input;")
+  debug("   flat = not a sample sum at all, and every magnitude so far is suspect)")
+
+
+PRI ext_arm_cycles(ncyc) : magnitude
+  longfill(@g[0], 0, 20)
+  g[0] := X_DDS_G_SINC1 | ncyc
+  g[1] := DDS_S_OK
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[6] := MODE_XINIT
+  g[19] := 1
+  start_engine()
+  magnitude := g[10]
 
 
 PRI ext_arm_setup(detector_hz, variant) : magnitude
