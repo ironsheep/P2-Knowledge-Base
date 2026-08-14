@@ -21,8 +21,10 @@ Probe 3 is last because it is the only one needing a jumper.
 This is deliberate and it is the part not to skip. A rig that cannot fail proves nothing, so each
 probe reports its control **first** and tells you when the rest of its output is void:
 
-- **F-263** — retrieve from an empty CORDIC pipeline. Per Chip's clarification this **must stall**
-  (~54 clocks). If it returns fast, the rig cannot detect the failure mode under test.
+- **F-263** — **queue one operation, then retrieve it immediately.** Per Chip's clarification this
+  **must stall** (~54 clocks). If it returns fast, the rig cannot detect the failure mode under
+  test. (Round 1 retrieved from an *empty* pipeline instead — with nothing in flight there is
+  nothing to wait for, so that control never exercised the stall at all.)
 - **F-256** — a bytecode handler that deliberately leaves XBYTE. The progress counter **must stop
   at 2**. If it keeps climbing, the counter is lying.
 - **F-259** — the no-`P_OE` row and the `P_OE` row **must differ substantially**. If every row reads
