@@ -620,6 +620,7 @@ PRI ext_tone_arms() | b1, b2, b3
 
   s_sweep()
   blk_sweep()
+  v_sweep()
 
 
 '' --- S: which pin, if any, does the Goertzel summer actually listen to? ----
@@ -674,6 +675,44 @@ PRI blk_sweep() | i, on_c, off_c, on_s, off_s, cmd
     off_s := g[9]
     debug("  pppp=", udec_(i), " (base pin ", udec_(i * 4), ")  delta cos=", sdec_(on_c - off_c), "  delta sin=", sdec_(on_s - off_s))
   debug("  (block 0 should be the one that moves; anything else relocates the field)")
+
+
+'' --- V: walk the ADC-pin SETUP space (F-265) --------------------------------
+'' S and BLK both came back flat, so the input is not being selected -- it is
+'' not being ENABLED. The Silicon Doc disagrees with itself about how: its
+'' STREAMER intro says smart pins configured as ADCs, its DDS/Goertzel section
+'' says raw streams with no smart pin mode, and its ADCs/Pins section requires
+'' SETSCP to route pins into the SCOPE channels. This walks all five
+'' combinations against the independent tone. This is the exhaustion step: if
+'' every variant is flat, the question has earned its way to Chip.
+PRI v_sweep() | v, on_c, off_c, on_s, off_s
+  debug(" ")
+  debug("--- V: ADC-pin setup variants, tone ON vs OFF ---")
+  debug("    0 raw+DIRL   1 raw+DIRH   2 smart-pin ADC   3 SETSCP+raw   4 SETSCP+smart")
+  repeat v from 0 to 4
+    tone_on(NCO_Y_1M)
+    ext_arm_setup(TONE_HZ, v)
+    on_c := g[8]
+    on_s := g[9]
+    tone_off()
+    ext_arm_setup(TONE_HZ, v)
+    off_c := g[8]
+    off_s := g[9]
+    debug("  variant ", udec_(v), "  delta cos=", sdec_(on_c - off_c), "  delta sin=", sdec_(on_s - off_s), "   (on cos=", sdec_(on_c), ")")
+  debug("  (a variant with a LARGE delta is the setup the mode actually needs)")
+
+
+PRI ext_arm_setup(detector_hz, variant) : magnitude
+  longfill(@g[0], 0, 20)
+  g[0] := DDS_D_EXT
+  g[1] := DDS_S_OK
+  g[2] := detector_hz
+  g[3] := clkfreq
+  g[5] := variant
+  g[6] := MODE_XINIT
+  g[19] := 1
+  start_engine()
+  magnitude := g[10]
 
 
 PRI ext_arm_cmd(cmd, sel) : magnitude
@@ -910,20 +949,30 @@ engine
         if_z    wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
         if_z    dirh    #DAC_PIN
 
-                ' F-265: the Silicon Doc contradicts itself on this pin.
-                '   STREAMER intro (part2-pixel-ops.txt:82): Goertzel works
-                '     "from smart pins configured as ADC's"
-                '   DDS/Goertzel section (part2-more-content.txt:176): the pins
-                '     carry "raw delta-sigma bit streams, with no smart pin mode
-                '     selected"
-                ' v_adir picks which: 0 = raw + DIR low, 1 = raw + DIR high,
-                ' 2 = a real smart-pin ADC. One run settles it.
+                ' F-265 setup variants. The Silicon Doc contradicts itself on
+                ' this pin -- STREAMER intro (part2-pixel-ops.txt:82) says
+                ' Goertzel works "from smart pins configured as ADC's", while
+                ' the DDS/Goertzel section (part2-more-content.txt:176) says
+                ' the pins carry raw bit streams "with no smart pin mode
+                ' selected". The ADCs/Pins section additionally requires SETSCP
+                ' to route pins into the SCOPE channels. v_adir walks the whole
+                ' space so one run decides it:
+                '   0 raw + DIR low        1 raw + DIR high
+                '   2 smart-pin ADC        3 SETSCP + raw
+                '   4 SETSCP + smart-pin ADC
+                cmp     v_adir, #3              wz
+        if_z    setscp  #%1_0000_00             ' enable, pin base 0 (pins 0..3)
+                cmp     v_adir, #4              wz
+        if_z    setscp  #%1_0000_00
+
                 cmp     v_adir, #2              wz
         if_z    jmp     #adc_smart
+                cmp     v_adir, #4              wz
+        if_z    jmp     #adc_smart
                 wrpin   ##P_ADC_1X, #ADC_PIN    ' raw bitstream, no smart mode
-                cmp     v_adir, #0              wz
-        if_nz   dirh    #ADC_PIN
-        if_z    dirl    #ADC_PIN
+                cmp     v_adir, #1              wz
+        if_z    dirh    #ADC_PIN
+        if_nz   dirl    #ADC_PIN
                 jmp     #adc_done
 adc_smart       wrpin   ##(P_ADC_1X | P_ADC), #ADC_PIN
                 wxpin   #12, #ADC_PIN           ' 2^12 sample period
