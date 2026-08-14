@@ -1,43 +1,72 @@
 '' =============================================================================
-''  test-F256  --  does `_RET_ CALL #helper` keep XBYTE dispatch alive?
+''  test-F256  --  is `_RET_ CALL #helper` equivalent to `CALL #helper` + `RET`?
 '' =============================================================================
-''  QUESTION (F-256). The XBYTE Programming Guide states at xbyte-body.md:879
+''  QUESTION (F-256).  The XBYTE Programming Guide says at xbyte-body.md:879
 ''  that "Chapter 15's _RET_ CALL #set_nz idiom depends entirely on" skip
 ''  suspension during a call, and uses the idiom at :416, :793, :1391, :1400.
+''  `_ret_ call #x` ASSEMBLES CLEAN, so the community objection "you cannot
+''  combine a CALL with ret" is wrong as stated -- but the compiler proves
+''  LEGALITY, NOT SEMANTICS.  When one instruction both pushes a return
+''  address and returns, does control reach the helper AND resume XBYTE
+''  dispatch at $1FF?
 ''
-''  `_ret_ call #x` ASSEMBLES CLEAN (pnut-ts 1.55.3) -- so the community
-''  objection "you cannot combine a CALL with ret" is wrong as stated.  But
-''  the compiler proves LEGALITY, not SEMANTICS.  Unresolved: when one
-''  instruction both pushes a return address and returns, does control reach
-''  the helper and then resume XBYTE dispatch at $1FF, or does the push/pop
-''  ordering break re-entry?  Not answerable from the KB or the Silicon Doc.
+''  ROUND 3 -- WHAT CHANGED, AND WHY
 ''
-''  DESIGN -- three bytecode handlers, each incrementing a hub progress
-''  counter so we can see exactly how far dispatch got:
+''  1. THE TEST IS NOW DIFFERENTIAL, NOT ABSOLUTE.
+''     Earlier rounds asked "does a counter keep climbing", which tests against
+''     an EXPECTATION.  This round runs the same work two ways:
+''         $01  h_retcall   ... _ret_ call #helper   (return ON the call line)
+''         $04  h_callret   ... call #helper / ret   (return AFTER it)
+''     These are supposed to be the same thing.  If their trails match, the
+''     idiom is proven EQUIVALENT by construction.  If they diverge, the
+''     divergence itself localises the defect.  $04 is the reference; nothing
+''     is concluded from $01 alone.
 ''
-''    $00 h_plain  ends `_ret_ add`            KNOWN-GOOD arm.  If dispatch
-''                                             dies here the rig is broken.
-''    $01 h_retcall ends `_ret_ call #helper`  THE QUESTION.  Helper also
-''                                             stamps a marker so we can tell
-''                                             "helper ran" from "dispatch
-''                                             survived" -- they are different
-''                                             failures.
-''    $02 h_break  ends `jmp #stop`            CONTROL THAT MUST FAIL.  This
-''                                             deliberately leaves XBYTE.  If
-''                                             progress keeps climbing past
-''                                             it, the counter is lying and
-''                                             every other result is void.
+''  2. A TRAIL, NOT A COUNTER.  A count says how far it got; it cannot say
+''     whether the callee was ever entered.  Every handler and the helper
+''     APPEND a token, so we read execution ORDER:
+''         caller stamp   -- the handler was entered
+''         callee stamp   -- the helper actually ran, tagged with WHO called it
+''         continuation   -- the next bytecode's handler appended its own token
+''     Which separates the failure modes:
+''         no caller stamp .................. dispatch broke BEFORE the idiom;
+''                                            the idiom is untested, not
+''                                            disproven
+''         caller, no callee ................ the CALL half never happened
+''         caller + callee, trail ends ...... the RET half did not re-enter
+''                                            XBYTE at $1FF
+''         caller + callee + continuation ... it works -- and if the trail
+''                                            matches $04's, it is equivalent
 ''
-''  Program stream:  $00 $00 $01 $00 $03(halt)   then a second pass ending $02
+''  3. THE RETURN ADDRESS IS MEASURED, NOT INFERRED.  The helper pops the
+''     hardware stack, records what the CALL pushed, and pushes it straight
+''     back.  So "returned to $1FF" becomes a number we read instead of
+''     something we deduce from dispatch continuing.
 ''
-''  No hang: the engine runs in its own cog and the main cog times out, so a
-''  broken _RET_ CALL shows up as a stalled counter rather than a dead board.
+''  4. ADDRESS RESOLUTION IS A GATE, NOT A VARIABLE.  See below.
 ''
-''  ROUND 2 FIX: round 1 used ##@disp1 / ##@prog1.  In an ORGH block the
-''  symbol IS already the hub address, so the '@' double-offset it, XBYTE
-''  armed against a garbage table and executed wild addresses -- which is why
-''  progress read 0 and blk[2] came back scribbled.  The guide's own working
-''  VM (xbyte-body.md 12.2) writes ##disp_table / ##program with no '@'.
+''  THE ADDRESS BUG THAT VOIDED ROUNDS 1-2 (proven statically, no bench)
+''  `orgh` inside a Spin2 DAT assigns hub addresses from $400 -- the STANDALONE
+''  PASM convention, where the image really is loaded at hub $0.  In a Spin2
+''  program that is false: the object lands high (~$1888 in a build like this
+''  one).  Decoding the emitted AUGS+MOV pair for a test file proved it: a
+''  table whose runtime address is $018A4 encodes as ##value $00414, which is
+''  exactly $400 + the size of the preceding org code; adding one instruction
+''  moved BOTH by 4.  So `##disp` names low hub memory -- interpreter and
+''  debugger territory -- which is why LUT[0] came back $F603_9BD5 and why the
+''  "first bytecode" read $5E on one run and $F8 on the next: that region is
+''  live, changing memory.
+''  This does NOT make `##hubsym` a broken idiom.  In a pure-PASM top-level
+''  file its precondition holds.  Moving the DAT into a Spin2 object silently
+''  removes it.
+''  So: every VM arm takes its table and program addresses from Spin2 via `@`,
+''  held constant, and PASS 1 measures `@disp` against `##disp` ONCE, off to
+''  the side, consuming nothing.  If those two agree the whole story is dead
+''  and I start over.
+''
+''  Note the dispatch TABLE ENTRIES stay bare cog addresses -- a LUT entry is
+''  [9:0] routine address + [31:10] SKIPF pattern, and EXECF cannot use a hub
+''  address.  It is the table's OWN hub address that needs `@`.
 ''
 ''  Build: pnut-ts -d test-f256-retcall-xbyte.spin2
 ''  Rig:   bare board.  No jumpers.  (VO-J class.)
@@ -46,195 +75,206 @@
 CON
   _clkfreq = 200_000_000
 
+  ' trail tokens
+  T_PLAIN   = $A0
+  T_RETCALL = $A1                        ' return ON the call line
+  T_BREAK   = $A2
+  T_HALT    = $A3
+  T_CALLRET = $A4                        ' return AFTER the call line
+  T_HELP_RC = $B1                        ' helper ran, invoked by _RET_ CALL
+  T_HELP_CR = $B4                        ' helper ran, invoked by CALL + RET
+
+  ' normalised forms, so the two arms can be compared element by element
+  N_CALLER  = $AA
+  N_HELPER  = $BB
+
+DAT
+s_plain         byte    "h_plain", 0
+s_retcall       byte    "h_retcall  (_RET_ CALL)", 0
+s_callret       byte    "h_callret  (CALL + RET)", 0
+s_break         byte    "h_break    (leaves XBYTE)", 0
+s_halt          byte    "h_halt", 0
+s_help_rc       byte    "  -> helper, called by _RET_ CALL", 0
+s_help_cr       byte    "  -> helper, called by CALL + RET", 0
+s_unknown       byte    "???", 0
+
 VAR
-  long blk[16]                           ' [0]=progress [1]=marker [2]=phase
-                                         ' [8]=@disp (in) [9]=@prog (in)
-                                         ' [6]=Spin2 addr [7]=PASM ## addr
-  long stack[64]
+  long blk[32]
+  '  [0]      trail count
+  '  [1..15]  trail tokens
+  '  [16]     @disp   (in)
+  '  [17]     @prog   (in)
+  '  [18]     address Spin2 handed the cog
+  '  [19]     value of PASM's ##disp
+  '  [20][21] LUT[0], LUT[1] loaded via the Spin2 address
+  '  [22]     first bytecode read from the FIFO
+  '  [23]     return address the helper saw (_RET_ CALL arm)
+  '  [24]     return address the helper saw (CALL + RET arm)
+  '  [25]     done
+  '  [26]     plain-cog harness counter
+  '  [27][28] LUT[0], LUT[1] loaded via ##disp
+  long trailA[16], cntA, radr_rc
+  long trailB[16], cntB, radr_cr
 
-PUB main() | p0, p1, m1, p2, m2
 
-  ' ---------- PASS -1: no XBYTE at all.  Does a cog run and write hub? ----
-  blk[0] := 0
+PUB main()
+
+  debug("=== F-256 round 3: _RET_ CALL vs CALL+RET, by trail ===")
+
+  '' ---- PASS -1: can a plain cog run and write hub at all? ----------------
+  longfill(@blk[0], 0, 32)
   coginit(NEWCOG, @engine_null, @blk[0])
   waitms(50)
-  debug("=== F-256 _RET_ CALL inside XBYTE ===")
-  debug("PASS -1  plain cog, no XBYTE: progress=", udec_(blk[0]), " (expect 3)")
-  if blk[0] <> 3
-    debug("*** THE HARNESS ITSELF IS BROKEN -- a plain cog cannot even count.")
-    debug("*** Nothing about XBYTE can be concluded. Fix coginit/hub plumbing.")
-    debug(" ")
-    debug("@@@ TEST COMPLETE: F-256 retcall-xbyte (HARNESS FAILED) @@@")
-    repeat
-  debug("Harness sound: cog runs, PTRA good, hub writes land.")
-
-  ' ---------- PASS A: does SETQ2 survive an AUGS prefix? -------------------
-  ' The guide's 12.2 VM writes:  setq2 #4-1 / rdlong $000, ##disp_table
-  ' '##' emits an AUGS PREFIX, and SETQ2 applies to "the next instruction".
-  ' If AUGS does not pass Q through, that block load silently degrades to a
-  ' single-long read -- which is what round 5's checkpoint suggests
-  ' (LUT[0] came back $011F_C97C, not a plausible cog address).
-  ' A = immediate form (the guide's).  B = register form (every KB example).
-  longfill(@blk[0], 0, 16)
-  blk[8] := @disp0
-  blk[9] := @prog0
-  coginit(NEWCOG, @engine_lut, @blk[0])
-  waitms(50)
-  debug("ADDRESS CHECK  Spin2 @disp0=", uhex_long_(blk[6]), "   PASM ##disp0=", uhex_long_(blk[7]))
-  debug("PASS A  load via Spin2 @disp0  -> LUT[0]=", uhex_long_(blk[1]), " LUT[1]=", uhex_long_(blk[2]))
-  debug("PASS B  load via PASM ##disp0  -> LUT[0]=", uhex_long_(blk[3]), " LUT[1]=", uhex_long_(blk[4]))
-  debug("        expected: SMALL cog addresses (handlers live below \$100)")
-  if blk[6] <> blk[7]
-    debug("*** THE TWO ADDRESSES DIFFER by ", udec_(blk[6] - blk[7]), " bytes.")
-    debug("*** '##hubsym' inside DAT ORG is OBJECT-RELATIVE; at runtime the")
-    debug("*** object sits above the Spin2 interpreter, so the guide's 12.2 VM")
-    debug("*** form reads the wrong hub memory entirely.")
-  else
-    debug("Addresses agree -- '##hubsym' is absolute; look elsewhere.")
+  debug("PASS -1  plain cog, no XBYTE: count=", udec_(blk[26]), " (expect 3)")
+  if blk[26] <> 3
+    debug("*** THE HARNESS ITSELF IS BROKEN. Nothing about XBYTE can be said.")
+    stop_here()
+  debug("         harness sound: coginit, PTRA and hub writes all land.")
   debug(" ")
 
-  ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
-  ' Now instrumented so a failure says WHERE, not just THAT.
-  ' Round 2 still returned progress=0 with the '@' fix, so before blaming
-  ' _RET_ CALL we run the guide's published VM shape itself.  If PASS 0 does
-  ' not dispatch either, the fault is in this harness (or in the guide's own
-  ' example) -- NOT in the idiom under test.
-  longfill(@blk[0], 0, 16)
-  blk[8] := @disp0
-  blk[9] := @prog0
-  coginit(NEWCOG, @engine0, @blk[0])
+  '' ---- PASS 1: the address gate -----------------------------------------
+  longfill(@blk[0], 0, 32)
+  blk[16] := @disp
+  coginit(NEWCOG, @engine_addr, @blk[0])
   waitms(50)
-  p0 := blk[0]
-  debug("        checkpoints: LUT[0]=", uhex_long_(blk[3]), " (0 => LUT load FAILED)")
-  debug("        first bytecode from FIFO=", uhex_byte_(blk[4]), " (expect $00)")
-  debug("        reached arm point=", uhex_long_(blk[5]), " (expect \$A11E)")
-  debug("PASS 0  guide's own VM shape: progress=", udec_(p0), " (expect 3)")
-  if p0 <> 3
-    debug("*** THE BASE VM DOES NOT DISPATCH.")
-    if blk[3] == 0
-      debug("*** -> the LUT block load failed. SETQ2+RDLONG is the suspect.")
-    elseif blk[4] <> 0
-      debug("*** -> the FIFO did not deliver the program. RDFAST is the suspect.")
-    elseif blk[5] <> $A11E
-      debug("*** -> never reached the arm point. Something earlier faulted.")
-    else
-      debug("*** -> LUT loaded, FIFO good, arm reached: XBYTE ITSELF DID NOT ENGAGE.")
-      debug("*** That is a real question about the guide's 12.2 VM under -d.")
-    debug(" ")
-    debug("@@@ TEST COMPLETE: F-256 retcall-xbyte (BASE VM FAILED) @@@")
-    repeat
-  debug("Base VM dispatches -> the harness is sound; the idiom test is valid.")
-
-  ' ---------- PASS 1: plain, retcall, plain, halt --------------------------
-  blk[0] := 0                            ' progress
-  blk[1] := 0                            ' helper marker
-  blk[2] := 0                            ' phase: 1 = reached halt
-  blk[8] := @disp1
-  blk[9] := @prog1
-  coginit(NEWCOG, @engine1, @blk[0])
-  waitms(50)
-  p1 := blk[0]
-  m1 := blk[1]
-
-  debug("PASS 1  progress=", udec_(p1), " (expect 4)   helperMarker=", uhex_long_(m1), " (expect $5A5A_5A5A)   reachedHalt=", udec_(blk[2]))
-
-  ' ---------- PASS 2: control that MUST stop dispatch ----------------------
-  blk[0] := 0
-  blk[1] := 0
-  blk[2] := 0
-  blk[8] := @disp2
-  blk[9] := @prog2
-  coginit(NEWCOG, @engine2, @blk[0])
-  waitms(50)
-  p2 := blk[0]
-  m2 := blk[1]
-  debug("PASS 2  progress=", udec_(p2), " (expect 2 -- the break handler leaves XBYTE)")
-
-  ' ---------- interpretation ------------------------------------------------
-  debug("--- VERDICT ---")
-  if p2 <> 2
-    debug("*** CONTROL WRONG (progress=", udec_(p2), ", wanted 2). The counter cannot")
-    debug("*** distinguish 'dispatch continued' from 'dispatch stopped'. VOID.")
+  debug("PASS 1   ADDRESS CHECK")
+  debug("         Spin2 @disp = ", uhex_long_(blk[18]), "     PASM ##disp = ", uhex_long_(blk[19]))
+  debug("         via @disp : LUT[0]=", uhex_long_(blk[20]), " LUT[1]=", uhex_long_(blk[21]))
+  debug("         via ##disp: LUT[0]=", uhex_long_(blk[27]), " LUT[1]=", uhex_long_(blk[28]))
+  debug("         (expect small cog addresses; handlers live below \$100)")
+  if blk[18] == blk[19]
+    debug("         ADDRESSES AGREE -- the orgh/\$400 story is DEAD. Start over.")
   else
-    if p1 == 4 and m1 == $5A5A_5A5A
-      debug("_RET_ CALL WORKS: helper ran AND dispatch resumed. Guide :879 stands.")
-    elseif p1 == 2 and m1 == $5A5A_5A5A
-      debug("HELPER RAN BUT DISPATCH DIED -> the idiom is broken. XBYTE 15.3, :416,")
-      debug(":793 and the :879 explanation all need rework.")
-    elseif p1 == 2 and m1 == 0
-      debug("HELPER NEVER RAN and dispatch died -> _RET_ CALL does not call at all.")
+    debug("         they differ by ", udec_(blk[18] - blk[19]), " bytes, as predicted:")
+    debug("         orgh in a Spin2 DAT numbers from \$400, not from the object.")
+  debug(" ")
+
+  '' ---- PASS 2: the reference arm, CALL + RET ----------------------------
+  '' Run the REFERENCE first. If the known-good long form cannot dispatch,
+  '' nothing can be concluded about the idiom, and we say so instead of
+  '' reporting numbers.
+  run_vm(@progCR)
+  cntB := blk[0]
+  longmove(@trailB[0], @blk[1], 15)
+  debug("PASS 2   REFERENCE  \$00 \$04 \$00 \$03   (call #helper / ret)")
+  report()
+  radr_cr := blk[24]
+  debug("         helper saw return address ", uhex_long_(radr_cr))
+
+  if cntB < 3
+    debug("*** THE REFERENCE ARM DID NOT DISPATCH.")
+    debug("*** The rig cannot run a VM at all, so _RET_ CALL is UNTESTED --")
+    debug("*** not disproven. Fix the rig before reading anything below.")
+    stop_here()
+
+  '' ---- PASS 3: the arm under test, _RET_ CALL ---------------------------
+  run_vm(@progRC)
+  cntA := blk[0]
+  longmove(@trailA[0], @blk[1], 15)
+  debug(" ")
+  debug("PASS 3   UNDER TEST  \$00 \$01 \$00 \$03   (_ret_ call #helper)")
+  report()
+  radr_rc := blk[23]
+  debug("         helper saw return address ", uhex_long_(radr_rc))
+
+  '' ---- PASS 4: the control that MUST fail -------------------------------
+  run_vm(@progBK)
+  debug(" ")
+  debug("PASS 4   CONTROL  \$00 \$02 \$00 \$03   (\$02 jumps out of XBYTE)")
+  report()
+  if blk[0] <> 2
+    debug("*** CONTROL DID NOT FAIL. A handler that leaves XBYTE still let")
+    debug("*** dispatch continue, so the trail is lying and PASS 2 and PASS 3")
+    debug("*** are both VOID.")
+    stop_here()
+  debug("         control failed exactly as it must: trail stops at the break.")
+
+  verdict()
+  stop_here()
+
+
+PRI verdict() | i, same
+  debug(" ")
+  debug("--- VERDICT ---")
+
+  same := true
+  if cntA <> cntB
+    debug("TRAIL LENGTHS DIFFER: _RET_ CALL ", udec_(cntA), " vs CALL+RET ", udec_(cntB))
+    same := false
+  else
+    repeat i from 0 to cntA - 1
+      if norm(trailA[i]) <> norm(trailB[i])
+        debug("TRAILS DIVERGE at step ", udec_(i + 1), ": ", uhex_byte_(trailA[i]), " vs ", uhex_byte_(trailB[i]))
+        same := false
+
+  if same
+    debug("THE TWO FORMS PRODUCE IDENTICAL TRAILS.")
+    debug("`_RET_ CALL #helper` reaches the helper AND resumes XBYTE dispatch,")
+    debug("exactly as `CALL #helper` followed by `RET` does. The idiom at")
+    debug("xbyte-body.md :416 :793 :1391 :1400 is sound, and the community")
+    debug("objection is wrong in substance as well as in form.")
+    if radr_rc == radr_cr
+      debug("Both forms pushed the same return address, too.")
     else
+      debug("NOTE: the pushed return addresses differ -- same outcome,")
+      debug("      different mechanism. Worth documenting in the guide.")
+  else
+    debug("THE TWO FORMS ARE NOT EQUIVALENT. Read the trails above: the step")
+    debug("where they part is the defect, and the guide's idiom is implicated.")
+
+
+PRI norm(tk) : n
+  n := tk
+  if tk == T_RETCALL or tk == T_CALLRET
+    n := N_CALLER
+  if tk == T_HELP_RC or tk == T_HELP_CR
+    n := N_HELPER
+
+
+PRI report() | i
+  debug("         first bytecode from FIFO = ", uhex_byte_(blk[22]), " (expect \$00)")
+  debug("         trail (", udec_(blk[0]), " steps):")
+  repeat i from 1 to blk[0]
+    debug("           ", udec_(i), ": ", uhex_byte_(blk[i]), "  ", zstr_(name_of(blk[i])))
+
+
+PRI name_of(tk) : p
+  case tk
+    T_PLAIN:   p := @s_plain
+    T_RETCALL: p := @s_retcall
+    T_CALLRET: p := @s_callret
+    T_BREAK:   p := @s_break
+    T_HALT:    p := @s_halt
+    T_HELP_RC: p := @s_help_rc
+    T_HELP_CR: p := @s_help_cr
+    other:     p := @s_unknown
+
+
+PRI run_vm(prog_addr) | cogn, tstart
+  longfill(@blk[0], 0, 26)
+  blk[16] := @disp
+  blk[17] := prog_addr
+  cogn := coginit(NEWCOG, @engine_vm, @blk[0])
+  tstart := getct()
+  repeat until blk[25] == 1 or (getct() - tstart) > (clkfreq / 4)
+  if blk[25] <> 1
+    cogstop(cogn)
+    debug("         *** VM did not finish within 250 ms (dispatch hung)")
+
+
+PRI stop_here()
   debug(" ")
   debug("@@@ TEST COMPLETE: F-256 retcall-xbyte @@@")
   debug("@@@ nothing further will print - safe to stop the session @@@")
-
   repeat
 
 
+'' ===========================================================================
 DAT             org
-
-'' ---------------------------------------------------------------------------
-'' engine_lut -- does SETQ2 survive the AUGS prefix that '##' emits?
-''   A: setq2 #3 / rdlong $000, ##disp0        (the guide's form)
-''   B: mov r,##disp0 / setq2 #3 / rdlong $000, r   (every KB example's form)
-'' Both load the SAME table; we read LUT back after each and compare.
-'' ---------------------------------------------------------------------------
-engine_lut
-                mov     pl, ptra
-
-                ' --- A: the address Spin2 handed us, via @disp0 ---
-                mov     tc, pl
-                add     tc, #8*4
-                rdlong  tc, tc
-                mov     tp, pl
-                add     tp, #6*4
-                wrlong  tc, tp                  ' blk[6] = Spin2's @disp0
-                setq2   #4-1
-                rdlong  $000, tc
-                rdlut   ta, #0
-                rdlut   tb, #1
-                mov     tp, pl
-                add     tp, #1*4
-                wrlong  ta, tp
-                add     tp, #4
-                wrlong  tb, tp
-
-                ' --- wipe LUT so B cannot inherit A's result ---
-                mov     tc, #0
-                wrlut   tc, #0
-                wrlut   tc, #1
-
-                ' --- B: the assembly-time value of ##disp0 ---
-                mov     tc, ##disp0
-                mov     tp, pl
-                add     tp, #7*4
-                wrlong  tc, tp                  ' blk[7] = PASM's ##disp0
-                setq2   #4-1
-                rdlong  $000, tc
-                rdlut   ta, #0
-                rdlut   tb, #1
-                mov     tp, pl
-                add     tp, #3*4
-                wrlong  ta, tp
-                add     tp, #4
-                wrlong  tb, tp
-
-                cogid   tp
-                cogstop tp
-
-pl              res     1
-tp              res     1
-ta              res     1
-tb              res     1
-tc              res     1
-
-DAT             org
-
-'' ---------------------------------------------------------------------------
-'' engine_null -- no XBYTE.  Just proves coginit + PTRA + hub writes work.
-'' ---------------------------------------------------------------------------
+'' engine_null -- no XBYTE.  Proves coginit, PTRA and hub writes work.
 engine_null
                 mov     pn, ptra
+                add     pn, #26*4
                 mov     tn, #3
 .lp             rdlong  vn, pn
                 add     vn, #1
@@ -246,193 +286,172 @@ pn              res     1
 tn              res     1
 vn              res     1
 
+
+'' ===========================================================================
 DAT             org
+'' engine_addr -- the gate.  Reports both addresses and what each one loads.
+engine_addr
+                mov     pa_, ptra
 
-'' ---------------------------------------------------------------------------
-'' engine0 -- BASE VM, no _RET_ CALL.  Program $00 $00 $00 $03 -> progress 3.
-'' ---------------------------------------------------------------------------
-engine0
-                mov     pblk0, ptra
+                mov     ta_, pa_
+                add     ta_, #16*4
+                rdlong  ta_, ta_                ' the address Spin2 handed us
+                mov     tq_, pa_
+                add     tq_, #18*4
+                wrlong  ta_, tq_
 
-                mov     tv0, pblk0
-                add     tv0, #8*4
-                rdlong  tv0, tv0              ' Spin2's @disp0
-                setq2   #4-1
-                rdlong  $000, tv0             ' 4 longs -> LUT $000..$003
-                rdlut   tv0, #0               ' read LUT[0] back
-                mov     tq0, pblk0
-                add     tq0, #3*4
-                wrlong  tv0, tq0              ' blk[3] = LUT[0] (0 => load failed)
+                mov     tb_, ##disp             ' what PASM thinks it is
+                mov     tq_, pa_
+                add     tq_, #19*4
+                wrlong  tb_, tq_
 
-                mov     tq0, pblk0
-                add     tq0, #9*4
-                rdlong  tq0, tq0              ' Spin2's @prog0
-                rdfast  #0, tq0
-                rfbyte  tv0                   ' peek first bytecode
-                mov     tq0, pblk0
-                add     tq0, #4*4
-                wrlong  tv0, tq0              ' blk[4] = first byte (expect $00)
-                mov     tq0, pblk0
-                add     tq0, #9*4
-                rdlong  tq0, tq0
-                rdfast  #0, tq0               ' re-point after the peek
+                setq2   #8-1                    ' load via Spin2's address
+                rdlong  $000, ta_
+                rdlut   tc_, #0
+                mov     tq_, pa_
+                add     tq_, #20*4
+                wrlong  tc_, tq_
+                rdlut   tc_, #1
+                add     tq_, #4
+                wrlong  tc_, tq_
 
-                mov     tq0, pblk0
-                add     tq0, #5*4
-                wrlong  ##$A11E, tq0          ' blk[5] = reached the arm point
+                mov     tc_, #0                 ' wipe, so the second load
+                wrlut   tc_, #0                 ' cannot inherit the first
+                wrlut   tc_, #1
 
-                push    #$1ff
-        _ret_   setq    #0
+                setq2   #8-1                    ' load via PASM's ##disp
+                rdlong  $000, tb_
+                rdlut   tc_, #0
+                mov     tq_, pa_
+                add     tq_, #27*4
+                wrlong  tc_, tq_
+                rdlut   tc_, #1
+                add     tq_, #4
+                wrlong  tc_, tq_
 
-h_bump0         call    #bump0
-        _ret_   add     tv0, #0
+                cogid   tq_
+                cogstop tq_
+pa_             res     1
+ta_             res     1
+tb_             res     1
+tc_             res     1
+tq_             res     1
 
-h_halt0         jmp     #stop0
 
-bump0           mov     tq0, pblk0
-                rdlong  tv0, tq0
-                add     tv0, #1
-                wrlong  tv0, tq0
-                ret
-
-stop0           cogid   tq0
-                cogstop tq0
-
-pblk0           res     1
-tq0             res     1
-tv0             res     1
-
+'' ===========================================================================
 DAT             org
-
-'' ---------------------------------------------------------------------------
-'' engine1 -- program: $00 $00 $01 $00 $03
-''            progress should reach 4 (three plain + one retcall) then halt.
-'' ---------------------------------------------------------------------------
-engine1
+'' engine_vm -- ONE cog image, run three times with different programs, so the
+'' bytecode stream is the only thing that varies between arms.
+engine_vm
                 mov     pblk, ptra
-                mov     tv, pblk
-                add     tv, #8*4
-                rdlong  tv, tv
-                setq2   #4-1
-                rdlong  $000, tv             ' dispatch table -> LUT $000
-                mov     tv, pblk
-                add     tv, #9*4
-                rdlong  tv, tv
-                rdfast  #0, tv               ' FIFO -> bytecode stream
-                push    #$1ff                 ' XBYTE re-entry target
-        _ret_   setq    #0                    ' arm: 256-entry table @ LUT $000
+                mov     tv, #0
 
-' --- handlers ---------------------------------------------------------------
-h_plain                                       ' $00: bump progress, plain _RET_
-                call    #bump
-        _ret_   add     tv, #0                ' harmless; the plain _RET_ form
+                mov     tq, pblk                ' dispatch table -> LUT $000
+                add     tq, #16*4
+                rdlong  tq, tq
+                setq2   #8-1
+                rdlong  $000, tq
 
-h_retcall                                     ' $01: bump, then THE QUESTION
-                call    #bump
-        _ret_   call    #helper               ' <=== the idiom under test
-
-h_break                                       ' $02: leave XBYTE deliberately
-                call    #bump
-                jmp     #stop1
-
-h_halt                                        ' $03: normal exit
+                mov     tq, pblk                ' bytecode stream -> FIFO
+                add     tq, #17*4
+                rdlong  tprog, tq
+                rdfast  #0, tprog
+                rfbyte  tc                      ' peek the first bytecode
                 mov     tq, pblk
-                add     tq, #2*4
-                wrlong  #1, tq                ' phase = reached halt
-                jmp     #stop1
+                add     tq, #22*4
+                wrlong  tc, tq
+                rdfast  #0, tprog               ' re-point after the peek
 
-' --- helpers ----------------------------------------------------------------
-bump            mov     tq, pblk
-                rdlong  tv, tq
-                add     tv, #1
-                wrlong  tv, tq
+                push    #$1ff                   ' XBYTE re-entry target
+        _ret_   setq    #0                      ' arm: 256 entries @ LUT $000
+
+'' --- handlers --------------------------------------------------------------
+h_plain         mov     tok, #T_PLAIN
+                call    #append
+        _ret_   or      tv, #0                  ' the plain _RET_ form
+
+h_retcall       mov     tok, #T_RETCALL         ' caller stamp
+                call    #append
+                mov     hid, #T_HELP_RC
+                mov     hslot, #23
+        _ret_   call    #helper                 ' <=== THE IDIOM UNDER TEST
+
+h_callret       mov     tok, #T_CALLRET         ' caller stamp
+                call    #append
+                mov     hid, #T_HELP_CR
+                mov     hslot, #24
+                call    #helper                 ' the same work, long form
                 ret
 
-helper          mov     tq, pblk              ' stamp: proves the helper RAN
-                add     tq, #1*4
-                wrlong  mark, tq
+h_break         mov     tok, #T_BREAK
+                call    #append
+                jmp     #vm_stop                ' deliberately leaves XBYTE
+
+h_halt          mov     tok, #T_HALT
+                call    #append
+                jmp     #vm_stop
+
+'' --- the callee ------------------------------------------------------------
+'' Records what the CALL actually pushed, then puts it straight back so the
+'' $1FF underneath is never disturbed.
+helper          pop     tret
+                push    tret
+                mov     tok, hid
+                call    #append
+                mov     tq, pblk
+                mov     tw, hslot
+                shl     tw, #2
+                add     tq, tw
+                wrlong  tret, tq
                 ret
 
-stop1           cogid   tq
+'' --- trail append ----------------------------------------------------------
+append          mov     tq, pblk
+                rdlong  tc, tq                  ' current count
+                cmp     tc, #15         wc      ' room left?
+        if_nc   ret                             ' full: drop, never corrupt
+                add     tc, #1
+                wrlong  tc, tq
+                mov     tw, tc
+                shl     tw, #2
+                add     tq, tw
+                wrlong  tok, tq
+                ret
+
+vm_stop         mov     tq, pblk
+                add     tq, #25*4
+                wrlong  #1, tq
+                cogid   tq
                 cogstop tq
 
-mark            long    $5A5A_5A5A
 pblk            res     1
 tq              res     1
+tc              res     1
+tw              res     1
+tok             res     1
 tv              res     1
+hid             res     1
+hslot           res     1
+tret            res     1
+tprog           res     1
 
-'' ---------------------------------------------------------------------------
-'' engine2 -- program: $00 $02 $00 $00 $03
-''            The $02 break handler leaves XBYTE, so progress must stop at 2.
-'' ---------------------------------------------------------------------------
+
+'' ===========================================================================
+DAT
+'' Dispatch table and the three bytecode streams.  A LUT entry is
+'' [9:0] routine address + [31:10] SKIPF pattern; our skip pattern is 0, so a
+'' bare cog address is the whole entry.  These are COG addresses on purpose --
+'' EXECF cannot use a hub address.
                 orgh
-disp0           long    h_bump0               ' $00
-                long    h_bump0               ' $01
-                long    h_bump0               ' $02
-                long    h_halt0               ' $03
-prog0           byte    $00, $00, $00, $03
+disp            long    h_plain                 ' $00
+                long    h_retcall               ' $01
+                long    h_break                 ' $02
+                long    h_halt                  ' $03
+                long    h_callret               ' $04
+                long    h_plain                 ' $05
+                long    h_plain                 ' $06
+                long    h_plain                 ' $07
 
-disp1           long    h_plain               ' $00
-                long    h_retcall             ' $01
-                long    h_break               ' $02
-                long    h_halt                ' $03
-
-disp2           long    h_plain2              ' $00
-                long    h_retcall2            ' $01
-                long    h_break2              ' $02
-                long    h_halt2               ' $03
-
-prog1           byte    $00, $00, $01, $00, $03
-prog2           byte    $00, $02, $00, $00, $03
-
-
-DAT             org
-
-engine2
-                mov     pblk2, ptra
-                mov     tv2, pblk2
-                add     tv2, #8*4
-                rdlong  tv2, tv2
-                setq2   #4-1
-                rdlong  $000, tv2            ' engine2's OWN table
-                mov     tv2, pblk2
-                add     tv2, #9*4
-                rdlong  tv2, tv2
-                rdfast  #0, tv2              ' the CONTROL stream
-                push    #$1ff
-        _ret_   setq    #0
-
-' engine2 reuses the same handler shapes, its own copies so the cog is
-' self-contained (a cog image cannot reach engine1's registers).
-h_plain2        call    #bump2
-        _ret_   add     tv2, #0
-
-h_retcall2      call    #bump2
-        _ret_   call    #helper2
-
-h_break2        call    #bump2
-                jmp     #stop2
-
-h_halt2         mov     tq2, pblk2
-                add     tq2, #2*4
-                wrlong  #1, tq2
-                jmp     #stop2
-
-bump2           mov     tq2, pblk2
-                rdlong  tv2, tq2
-                add     tv2, #1
-                wrlong  tv2, tq2
-                ret
-
-helper2         mov     tq2, pblk2
-                add     tq2, #1*4
-                wrlong  mark2, tq2
-                ret
-
-stop2           cogid   tq2
-                cogstop tq2
-
-mark2           long    $5A5A_5A5A
-pblk2           res     1
-tq2             res     1
-tv2             res     1
+progRC          byte    $00, $01, $00, $03      ' plain, _RET_ CALL, plain, halt
+progCR          byte    $00, $04, $00, $03      ' plain, CALL+RET,   plain, halt
+progBK          byte    $00, $02, $00, $03      ' plain, break,      plain, halt
