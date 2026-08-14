@@ -120,6 +120,30 @@ CON
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
 
+  '' Round 9. Round 8's C5 ran and disproved my own fix: the plain DAC config
+  '' drove the jumper cleanly (spread 1297 of 2000) while adding P_CHANNEL
+  '' KILLED it (spread 25).  That is not a contradiction of F-259, it is what
+  '' P_CHANNEL actually does:
+  ''
+  ''    P_CHANNEL (TT=%01) does not "enable the DAC".  It switches the DAC's
+  ''    SOURCE from the pin's own WRPIN level field (D bits 15..8) to the COG
+  ''    DAC CHANNEL -- the value written by SETDACS, or overridden by the
+  ''    streamer.
+  ''
+  '' C5 drove via the WRPIN level, so P_CHANNEL disconnected it.  F-259 drove
+  '' via the cog DAC channel, so P_CHANNEL was required there.  Both bench
+  '' results are correct; round 8 simply gated on the wrong path.
+  ''
+  '' The streamer's DAC override IS the cog-channel path, so the Goertzel arm
+  '' keeps P_CHANNEL -- and now has a control that tests THAT path:
+  ''    C5  WRPIN-level DAC, no P_CHANNEL   -> proves wire + DAC + ADC work
+  ''    C6  P_CHANNEL + SETDACS             -> proves the cog DAC channel
+  ''                                           reaches the pin, which is the
+  ''                                           route the streamer overrides
+  '' C6 is the gate for everything downstream.
+  SRC_WRPIN   = 0
+  SRC_SETDACS = 1
+
   '' --- streamer-body.md:607, the SAME adc_pin<<17 idiom on a DIFFERENT mode --
   '' X_1ADC8_0P_1DAC8_WFBYTE template (Spin2 v55 / Silicon Doc):
   ''     %1111_DDDD_W000_0010 << 16     with the S operand carrying %ss
@@ -152,7 +176,7 @@ VAR
 
 PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
 
-  debug("=== F-260 round 7: DDS/Goertzel, built from the Silicon Doc field spec ===")
+  debug("=== F-260 round 9: DDS/Goertzel, with an analog gate on the streamer path ===")
   debug("RIG: jumper pin ", udec_(DAC_PIN), " (DAC) -> pin ", udec_(ADC_PIN), " (ADC)")
   debug("Predicted WAITXFI for an on-target run: ", udec_(PREDICT), " clocks")
   debug(" ")
@@ -167,9 +191,10 @@ PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
     stop_here()
 
   if not c5_analog_path()
-    debug("*** C5 FAILED: no analog signal crosses the jumper, so there is no")
-    debug("*** tone for the detector to find. Everything below would be")
-    debug("*** measuring silence -- which is what round 7 did. STOP.")
+    debug("*** ANALOG GATE FAILED -- see which of C5/C6 above is red. Until the")
+    debug("*** cog DAC channel provably reaches the pin there is no tone for")
+    debug("*** the detector to find, and every magnitude below would be")
+    debug("*** measuring silence, which is what round 7 did. STOP.")
     stop_here()
 
   debug(" ")
@@ -277,38 +302,52 @@ PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
 
 
 '' --- C5: analog loopback, and which pin config actually drives -------------
-PRI c5_analog_path() : ok | a_hi, a_lo, b_hi, b_lo, da, db
-  a_hi := sig(0, 255)
-  a_lo := sig(0, 0)
-  b_hi := sig(1, 255)
-  b_lo := sig(1, 0)
-  da := spread(a_hi, a_lo)
-  db := spread(b_hi, b_lo)
+PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
+  '' C5 -- WRPIN-level DAC, no P_CHANNEL. Proves wire + DAC + ADC end to end.
+  w_hi := sig(0, 255, SRC_WRPIN)
+  w_lo := sig(0,   0, SRC_WRPIN)
+  dw   := spread(w_hi, w_lo)
+  '' C6 -- cog DAC channel via SETDACS, with P_CHANNEL. This is the route the
+  '' streamer overrides, so this is the one that gates the measurements.
+  d_hi := sig(1, 255, SRC_SETDACS)
+  d_lo := sig(1,   0, SRC_SETDACS)
+  dd   := spread(d_hi, d_lo)
+
   debug(" ")
-  debug("C5 analog loopback, ", udec_(SIG_SAMPLES), " samples of the ADC pin")
-  debug("   plain P_DAC_124R_3V      : level255 ones=", udec_(a_hi), "  level0 ones=", udec_(a_lo), "  spread=", udec_(da))
-  debug("   with P_CHANNEL added     : level255 ones=", udec_(b_hi), "  level0 ones=", udec_(b_lo), "  spread=", udec_(db))
-  ok := db > 200
-  if ok and da <= 200
-    debug("   P_CHANNEL IS WHAT DRIVES -- F-259 reconfirmed in this rig, and")
-    debug("   round 7 was measuring silence because the probe omitted it.")
-  elseif ok
-    debug("   both configurations drive; P_CHANNEL was not the round-7 cause.")
+  debug("C5/C6 analog loopback, ", udec_(SIG_SAMPLES), " samples of the ADC pin")
+  debug("   C5 WRPIN level, no P_CHANNEL : hi=", udec_(w_hi), " lo=", udec_(w_lo), " spread=", udec_(dw))
+  debug("   C6 SETDACS, with P_CHANNEL   : hi=", udec_(d_hi), " lo=", udec_(d_lo), " spread=", udec_(dd))
+
+  if dw > 200
+    debug("   C5 OK: the jumper, the DAC and the ADC all work.")
   else
-    debug("   NEITHER configuration drives an analog signal across the jumper.")
+    debug("   C5 FAILED: the analog loopback itself is dead. Check the jumper")
+    debug("   and the board before reading anything else.")
+
+  if dd > 200
+    debug("   C6 OK: the cog DAC channel reaches the pin, so the streamer")
+    debug("   override has a route to drive. P_CHANNEL confirmed as a SOURCE")
+    debug("   select, not an enable -- F-259 and C5 now both explained.")
+  else
+    debug("   C6 FAILED: P_CHANNEL + SETDACS does not drive the pin, so the")
+    debug("   streamer override cannot reach it either. Until this is green,")
+    debug("   any Goertzel magnitude below is measuring silence.")
+
+  ok := (dw > 200) and (dd > 200)
 
 
 PRI spread(x, y) : d
   d := x > y ? x - y : y - x
 
 
-PRI sig(withchan, level) : nbits
+PRI sig(withchan, level, source) : nbits
   longfill(@g[0], 0, 20)
   g[2] := TONE_HZ
   g[3] := clkfreq
   g[4] := withchan
   g[5] := level
   g[6] := MODE_SIG
+  g[18] := source
   start_engine()
   nbits := g[13]
 
@@ -538,14 +577,20 @@ sig_arm_code
                 mov     t, ptra
                 add     t, #5*4
                 rdlong  alev, t                 ' DAC level 0..255
+                mov     t, ptra
+                add     t, #18*4
+                rdlong  asrc, t                 ' 0 = WRPIN level, 1 = SETDACS
 
                 mov     tw2, ##P_DAC_124R_3V
                 cmp     achan, #0               wz
         if_nz   or      tw2, ##P_CHANNEL
-                shl     alev, #8                ' level sits in D bits 15..8
-                or      tw2, alev
+
+                cmp     asrc, #SRC_SETDACS      wz
+        if_nz   shl     alev, #8                ' level sits in D bits 15..8
+        if_nz   or      tw2, alev
                 wrpin   tw2, #DAC_PIN
                 dirh    #DAC_PIN
+        if_z    setdacs alev                    ' DAC0 = D[7:0] -> pin 0
 
                 wrpin   ##P_ADC_1X, #ADC_PIN    ' raw bitstream, no smart mode
                 dirl    #ADC_PIN
@@ -687,6 +732,7 @@ abufp           res     1
 apin            res     1
 aprop           res     1
 achan           res     1
+asrc            res     1
 alev            res     1
 tw2             res     1
 tc2             res     1
