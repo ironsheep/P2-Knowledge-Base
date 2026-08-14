@@ -36,7 +36,20 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 3
+  BUILD     = 4
+
+  '' BUILD 3 RESULT: on-target 1,058,407 / detuned 1,059,491 / tone-off
+  '' 1,059,658 -- all within 0.1%. No selectivity. But two faults were MINE:
+  ''   1. "tone off" FLOATED the pin. A floating input is a noise source, not
+  ''      a null. The DC test already showed a DRIVEN static level integrates
+  ''      to near nothing -- that is the real null.
+  ''   2. I printed only the QVECTOR magnitude. The DC arms show cos in the
+  ''      hundreds while the tone arms show magnitude near 1,059,000, and I
+  ''      cannot reconcile those without the raw accumulators.
+  '' BUILD 4 prints cos, sin and the WAITXFI duration for every tone arm --
+  '' duration is the control that proves the detector frequency actually
+  '' changed (100 cycles at 2 MHz must take half as long as at 1 MHz) -- and
+  '' nulls by driving the pin low instead of floating it.
 
   '' BUILD 2 RESULT -- the debugger was the confound.
   ''   no crash; the launched cogs' "CogN INIT" lines vanished, confirming
@@ -134,13 +147,10 @@ PRI tone_arms() | on_t, off_t, null_t
   debug(" ")
   debug("--- TONE: independent smart-pin NCO on pin 0, detector swept ---")
   tone_on()
-  on_t  := gtzl_mag(TONE_HZ)
-  off_t := gtzl_mag(TONE_HZ * 2)
+  on_t  := tone_row(TONE_HZ, 1)
+  off_t := tone_row(TONE_HZ * 2, 2)
   tone_off()
-  null_t := gtzl_mag(TONE_HZ)
-  debug("  on-target 1 MHz = ", udec_(on_t))
-  debug("  detuned   2 MHz = ", udec_(off_t))
-  debug("  tone OFF        = ", udec_(null_t))
+  null_t := tone_row(TONE_HZ, 0)
   debug(" ")
   if on_t > (null_t * 4) and on_t > (off_t * 4)
     debug("GOERTZEL DETECTS. On-target beats both the detuned detector and the")
@@ -151,6 +161,15 @@ PRI tone_arms() | on_t, off_t, null_t
     debug("Still no selective detection, but now with a CLEAN streamer cog.")
     debug("That is a very different claim from the earlier nulls, and it is")
     debug("the one worth putting to Chip.")
+
+
+'' One tone measurement, printing the raw accumulators and the run duration.
+'' Duration is the control that the detector frequency really changed: 100
+'' cycles at 2 MHz must take half the clocks of 100 cycles at 1 MHz.
+PRI tone_row(detector_hz, tag) : mag
+  run_at(DDS_D, S_BASE1, MODE_GTZL, detector_hz)
+  mag := g[12]
+  debug("  tag ", udec_(tag), "  detector ", udec_(detector_hz / 1000), " kHz   waitxfi=", udec_(g[11]), "   cos=", sdec_(g[8]), " sin=", sdec_(g[9]), "  mag=", udec_(mag))
 
 
 PRI gtzl_mag(detector_hz) : mag
@@ -167,9 +186,11 @@ PRI tone_on()
   waitms(5)
 
 
+'' A real null: the pin DRIVEN to a static level. Floating it would leave the
+'' ADC on an undriven input, which is a noise source, not a null.
 PRI tone_off()
   pinclear(DAC_PIN)
-  pinf(DAC_PIN)
+  pinl(DAC_PIN)
   waitms(5)
 
 
