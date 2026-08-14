@@ -36,7 +36,24 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 2
+  BUILD     = 3
+
+  '' BUILD 2 RESULT -- the debugger was the confound.
+  ''   no crash; the launched cogs' "CogN INIT" lines vanished, confirming
+  ''   DEBUG_COGS took effect
+  ''   accumulators collapsed from ~1,000,000-7,000,000 to 0/350/-86/168/422,
+  ''   so those millions were debug-interrupt damage, NOT the by-design offset
+  ''   I attributed them to
+  ''   S=0 gave delta 0,0 EXACTLY -- the sum-select control works for the first
+  ''   time
+  ''   base+1 (the ADC pin) moved 563/-277 while base+0/2/3 all sat on the same
+  ''   fixed artifact (-127/-3), so THE SUMMER READS THE PIN
+  ''
+  '' Note the DC test could only ever answer "is the pin connected to the
+  '' summer": Goertzel REJECTS DC by construction, integrating a static input to
+  '' near zero over whole NCO cycles, so a small delta there is correct.
+  '' The real question needs a TONE -- and every tone null this campaign was
+  '' taken with the debug interrupt live in the streaming cog.
 
   '' THE DEBUGGER WAS IN THE STREAMER'S COG THE WHOLE TIME.
   '' p2kbArchDebugInterrupt, limitations:
@@ -55,6 +72,7 @@ CON
   ADC_PIN   = 1
 
   CYCLES    = 100
+  NCO_Y_1M  = 21_474_836                 ' 2^32 * 1 MHz / 200 MHz, X=1
   TONE_HZ   = 1_000_000
   SAMPLES   = 2000
 
@@ -72,7 +90,8 @@ CON
 VAR
   long g[16]
   '  [0] dds_d  [1] dds_s  [2] mode
-  '  [8] cos  [9] sin  [10] density  [11] waitxfi  [15] done
+  '  [0] dds_d [1] dds_s [2] mode [3] detector Hz
+  '  [8] cos [9] sin [10] density [11] waitxfi [12] magnitude [15] done
 
 
 PUB main() | hi, lo
@@ -102,10 +121,56 @@ PUB main() | hi, lo
   dc_pair(S_BASE3, 3)
   dc_pair(S_NONE, 9)
   debug(" ")
-  debug("base+1 is the ADC pin, so that row is the one that must move.")
-  debug("A flat base+1 row means the summer never reads the pin, and no tone")
-  debug("test could ever have worked -- that is the question for Chip.")
+  tone_arms()
   halt()
+
+
+'' --- the real test: an independent tone, detector swept ---------------------
+'' A smart-pin NCO on the DAC pin makes a real 1 MHz square wave from cog 0,
+'' independent of the streamer and of any cog's DAC channels. The detector is
+'' then swept against it. This is the first time this comparison has been made
+'' with the debug interrupt OUT of the streaming cog.
+PRI tone_arms() | on_t, off_t, null_t
+  debug(" ")
+  debug("--- TONE: independent smart-pin NCO on pin 0, detector swept ---")
+  tone_on()
+  on_t  := gtzl_mag(TONE_HZ)
+  off_t := gtzl_mag(TONE_HZ * 2)
+  tone_off()
+  null_t := gtzl_mag(TONE_HZ)
+  debug("  on-target 1 MHz = ", udec_(on_t))
+  debug("  detuned   2 MHz = ", udec_(off_t))
+  debug("  tone OFF        = ", udec_(null_t))
+  debug(" ")
+  if on_t > (null_t * 4) and on_t > (off_t * 4)
+    debug("GOERTZEL DETECTS. On-target beats both the detuned detector and the")
+    debug("tone-off null, against a source the detector shares no NCO with.")
+    debug("The mode works. The guide's TEXT is the whole defect -- and the")
+    debug("debug interrupt in the streaming cog was what hid it for 23 rounds.")
+  else
+    debug("Still no selective detection, but now with a CLEAN streamer cog.")
+    debug("That is a very different claim from the earlier nulls, and it is")
+    debug("the one worth putting to Chip.")
+
+
+PRI gtzl_mag(detector_hz) : mag
+  run_at(DDS_D, S_BASE1, MODE_GTZL, detector_hz)
+  mag := g[12]
+
+
+PRI tone_on()
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_NCO_FREQ | P_OE)
+  wxpin(DAC_PIN, 1)
+  pinhigh(DAC_PIN)                         ' enable FIRST, then set frequency
+  wypin(DAC_PIN, NCO_Y_1M)
+  waitms(5)
+
+
+PRI tone_off()
+  pinclear(DAC_PIN)
+  pinf(DAC_PIN)
+  waitms(5)
 
 
 PRI dc_pair(ssel, label) | hi_c, hi_s, lo_c, lo_s
@@ -162,10 +227,15 @@ PRI gtzl(ssel)
 
 
 PRI run(ddsd, ssel, mode) | cogn, t0
+  run_at(ddsd, ssel, mode, TONE_HZ)
+
+
+PRI run_at(ddsd, ssel, mode, detector_hz) | cogn, t0
   longfill(@g[0], 0, 16)
   g[0] := ddsd
   g[1] := ssel
   g[2] := mode
+  g[3] := detector_hz
   cogn := coginit(NEWCOG, @engine, @g[0])
   t0 := getct()
   repeat until g[15] == 1 or (getct() - t0) > (clkfreq / 4)
@@ -201,7 +271,10 @@ engine
 
                 ' NCO word: QFRAC gives (f<<32)/clk; the NCO masks its MSB so
                 ' the scale is 2^31 -- halve it.
-                qfrac   ##TONE_HZ, ##_clkfreq
+                mov     t_, pb_
+                add     t_, #3*4
+                rdlong  freq_, t_
+                qfrac   freq_, ##_clkfreq
                 getqx   xfrq_
                 shr     xfrq_, #1
 
@@ -222,6 +295,8 @@ engine
 
                 getxacc cos_                    ' cos -> D, sin -> next S
                 mov     sin_, 0-0
+                qvector cos_, sin_              ' D = X (cos), S = Y (sin)
+                getqx   mag_
                 jmp     #report
 
 count_arm
@@ -258,6 +333,8 @@ report
                 wrlong  dens_, t_
                 add     t_, #4
                 wrlong  t1_, t_
+                add     t_, #4
+                wrlong  mag_, t_
                 mov     t_, pb_
                 add     t_, #15*4
                 wrlong  #1, t_                  ' done -- always the last write
@@ -273,6 +350,8 @@ tc_             res     1
 ddsd_           res     1
 ssel_           res     1
 mode_           res     1
+freq_           res     1
+mag_            res     1
 xfrq_           res     1
 cos_            res     1
 sin_            res     1
