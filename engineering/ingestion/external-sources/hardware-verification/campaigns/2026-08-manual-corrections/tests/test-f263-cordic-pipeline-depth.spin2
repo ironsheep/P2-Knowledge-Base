@@ -1,0 +1,273 @@
+'' =============================================================================
+''  test-F263  --  CORDIC deep pipelining: does fill-6/steady/drain scramble?
+'' =============================================================================
+''  QUESTION (F-263). A community bench reports the Assembly Manual ch.5
+''  fill-6-then-drain CORDIC example produces scrambled output -- "two
+''  in-flight retrieval scrambled all outputs".
+''
+''  OUR OWN AUTHORITY SAYS OTHERWISE, which is why this is a COMPARISON and
+''  not a confirmation:
+''    - Chip Gracey clarification (CORDIC-pipeline-theory.md, 2025-11-26):
+''      54-stage pipeline, 8-clock slots, "6-7 operations can be in flight",
+''      and GETQX/GETQY *STALL* when a result is not ready -- the documented
+''      failure mode is a STALL, not wrong data.
+''    - P2AN002 (released) ships cordic-pipeline-throughput.spin2 with FILL=6.
+''
+''  The experiment tells three outcomes apart:
+''    A dirty / B clean -> the Assembly ch.5 shape specifically is wrong
+''    both dirty        -> deep pipelining itself is suspect (escalate)
+''    both clean        -> the reporter's rig had a defect; manual is fine
+''
+''  ARM A   = Assembly ch.5 shape: QROTATE, fill 6, steady (GETQX+GETQY+queue),
+''            drain 6.  TWO results retrieved per operation.
+''  ARM B   = P2AN002 shape: QMUL, fill 6, steady (GETQX+queue), drain 6.
+''            ONE result retrieved per operation.
+''  CONTROL = retrieve from an EMPTY pipeline.  This MUST stall.  If it does
+''            not, the rig cannot detect the failure mode under test and every
+''            other number here is void.  (Rig must fail loudly.)
+''
+''  GROUND TRUTH is computed with Spin2's ROTXY operator -- the same CORDIC
+''  hardware but ONE OPERATION AT A TIME, so it cannot be corrupted by
+''  pipelining.  We compare pipelined results against single-op results.
+''
+''  Build: pnut-ts -d test-f263-cordic-pipeline-depth.spin2
+''  Rig:   bare board.  No jumpers, no external hardware.  (VO-J class.)
+'' =============================================================================
+
+CON
+  _clkfreq = 200_000_000
+  N        = 16                         ' operations per arm
+  FILL     = 6                          ' in flight (54 stages / 8-clock slot)
+  ANGLE    = $2000_0000                 ' 45 deg (2^32 = full circle)
+
+VAR
+  long inx[N],  iny[N]                  ' ARM A inputs
+  long gotx[N], goty[N]                 ' ARM A results (from the cog engine)
+  long expx[N], expy[N]                 ' ARM A ground truth (single-op ROTXY)
+  long inm[N],  gotm[N], expm[N]        ' ARM B input / result / ground truth
+  long blk[12]                          ' parameter block handed to the engine
+  long stack[64]
+
+PUB main() | i, badA, badB, ctlx, ctly, ctlticks
+
+  ' ---- inputs ---------------------------------------------------------------
+  repeat i from 0 to N-1
+    inx[i] := 1000 + (i * 100)
+    iny[i] := 0                          ' rotate a pure x-axis vector
+    inm[i] := 10 + i
+
+  ' ---- ground truth, computed ONE OPERATION AT A TIME ----------------------
+  repeat i from 0 to N-1
+    expx[i], expy[i] := ROTXY(inx[i], iny[i], ANGLE)   ' single op in flight
+    expm[i] := inm[i] * inm[i]                         ' plain Spin2 multiply
+
+  ' ---- parameter block ------------------------------------------------------
+  blk[0] := @inx
+  blk[1] := @iny
+  blk[2] := @gotx
+  blk[3] := @goty
+  blk[4] := @inm
+  blk[5] := @gotm
+  blk[6] := ANGLE
+  blk[7] := 0                            ' <- control x
+  blk[8] := 0                            ' <- control y
+  blk[9] := 0                            ' <- control stall ticks
+  blk[10] := 0                           ' <- done flag
+
+  debug("=== F-263 CORDIC pipeline-depth probe ===")
+  debug("N=", udec_(N), "  FILL=", udec_(FILL))
+
+  coginit(NEWCOG, @engine, @blk[0])
+
+  repeat until blk[10] == 1              ' engine sets done
+
+  ctlx := blk[7]
+  ctly := blk[8]
+  ctlticks := blk[9]
+
+  ' ---- CONTROL first: if it did not stall, nothing below is trustworthy ----
+  debug("CONTROL empty-pipeline retrieve: ticks=", udec_(ctlticks), "  x=", uhex_long_(ctlx), "  y=", uhex_long_(ctly))
+  if ctlticks < 40
+    debug("*** CONTROL DID NOT STALL (<40 ticks) -- rig cannot prove the arms.")
+    debug("*** Treat ARM A / ARM B results below as VOID.")
+  else
+    debug("CONTROL stalled as Chip's clarification predicts -- rig is live.")
+
+  ' ---- ARM A ----------------------------------------------------------------
+  badA := 0
+  repeat i from 0 to N-1
+    if gotx[i] <> expx[i] or goty[i] <> expy[i]
+      badA++
+      if badA <= 3
+        debug("  A[", udec_(i), "] got x=", shex_long_(gotx[i]), " y=", shex_long_(goty[i]))
+        debug("        exp x=", shex_long_(expx[i]), " y=", shex_long_(expy[i]))
+  debug("ARM A (Assembly ch.5 shape, 2 results/op): mismatches=", udec_(badA), " of ", udec_(N))
+
+  ' ---- ARM B ----------------------------------------------------------------
+  badB := 0
+  repeat i from 0 to N-1
+    if gotm[i] <> expm[i]
+      badB++
+      if badB <= 3
+        debug("  B[", udec_(i), "] got=", udec_(gotm[i]), " exp=", udec_(expm[i]))
+  debug("ARM B (P2AN002 shape, 1 result/op): mismatches=", udec_(badB), " of ", udec_(N))
+
+  ' ---- verdict --------------------------------------------------------------
+  debug("--- VERDICT ---")
+  if badA == 0 and badB == 0
+    debug("BOTH CLEAN -> deep pipelining works; report NOT reproduced. Manual stands.")
+  elseif badA <> 0 and badB == 0
+    debug("A DIRTY / B CLEAN -> the Assembly ch.5 shape specifically is wrong. Fix it.")
+  elseif badA <> 0 and badB <> 0
+    debug("BOTH DIRTY -> deep pipelining itself is suspect. ESCALATE before editing.")
+  else
+    debug("A CLEAN / B DIRTY -> unexpected; P2AN002's shape is the problem.")
+
+  repeat
+
+
+DAT             org
+
+'' The engine runs CONTROL, then ARM A, then ARM B, then raises the done flag.
+'' PTRA -> blk[0]
+engine
+                mov     p_inx,  ptra
+                rdlong  a_inx,  p_inx
+                add     p_inx,  #4
+                rdlong  a_iny,  p_inx
+                add     p_inx,  #4
+                rdlong  a_gotx, p_inx
+                add     p_inx,  #4
+                rdlong  a_goty, p_inx
+                add     p_inx,  #4
+                rdlong  a_inm,  p_inx
+                add     p_inx,  #4
+                rdlong  a_gotm, p_inx
+                add     p_inx,  #4
+                rdlong  angq,   p_inx
+                mov     p_blk,  ptra          ' keep base for writebacks
+
+' --- CONTROL: retrieve with nothing queued.  Must stall. ---------------------
+                getct   t0
+                getqx   cx                    ' MUST block ~54 clocks or more
+                getqy   cy
+                getct   t1
+                sub     t1, t0
+                mov     t2, p_blk
+                add     t2, #7*4
+                wrlong  cx, t2
+                add     t2, #4
+                wrlong  cy, t2
+                add     t2, #4
+                wrlong  t1, t2                ' stall ticks
+
+' --- ARM A: Assembly Manual ch.5 shape --------------------------------------
+                mov     px, a_inx
+                mov     py, a_iny
+                mov     ox, a_gotx
+                mov     oy, a_goty
+                mov     ii, #0
+.fillA          cmp     ii, #FILL       wcz
+        if_ae   jmp     #.steadyA
+                rdlong  vx, px
+                add     px, #4
+                rdlong  vy, py
+                add     py, #4
+                setq    vy
+                qrotate vx, angq
+                add     ii, #1
+                jmp     #.fillA
+
+.steadyA        mov     jj, #0
+.sloopA         cmp     jj, #N-FILL     wcz
+        if_ae   jmp     #.drainA
+                getqx   rx
+                getqy   ry
+                wrlong  rx, ox
+                add     ox, #4
+                wrlong  ry, oy
+                add     oy, #4
+                rdlong  vx, px
+                add     px, #4
+                rdlong  vy, py
+                add     py, #4
+                setq    vy
+                qrotate vx, angq
+                add     jj, #1
+                jmp     #.sloopA
+
+.drainA         mov     jj, #0
+.dloopA         cmp     jj, #FILL       wcz
+        if_ae   jmp     #.armB
+                getqx   rx
+                getqy   ry
+                wrlong  rx, ox
+                add     ox, #4
+                wrlong  ry, oy
+                add     oy, #4
+                add     jj, #1
+                jmp     #.dloopA
+
+' --- ARM B: P2AN002 shape ----------------------------------------------------
+.armB           mov     px, a_inm
+                mov     ox, a_gotm
+                mov     ii, #0
+.fillB          cmp     ii, #FILL       wcz
+        if_ae   jmp     #.steadyB
+                rdlong  vx, px
+                add     px, #4
+                qmul    vx, vx
+                add     ii, #1
+                jmp     #.fillB
+
+.steadyB        mov     jj, #0
+.sloopB         cmp     jj, #N-FILL     wcz
+        if_ae   jmp     #.drainB
+                getqx   rx
+                wrlong  rx, ox
+                add     ox, #4
+                rdlong  vx, px
+                add     px, #4
+                qmul    vx, vx
+                add     jj, #1
+                jmp     #.sloopB
+
+.drainB         mov     jj, #0
+.dloopB         cmp     jj, #FILL       wcz
+        if_ae   jmp     #.fin
+                getqx   rx
+                wrlong  rx, ox
+                add     ox, #4
+                add     jj, #1
+                jmp     #.dloopB
+
+.fin            mov     t2, p_blk
+                add     t2, #10*4
+                wrlong  #1, t2                ' done
+                cogid   t0
+                cogstop t0
+
+p_inx           res     1
+p_blk           res     1
+a_inx           res     1
+a_iny           res     1
+a_gotx          res     1
+a_goty          res     1
+a_inm           res     1
+a_gotm          res     1
+angq            res     1
+px              res     1
+py              res     1
+ox              res     1
+oy              res     1
+vx              res     1
+vy              res     1
+rx              res     1
+ry              res     1
+ii              res     1
+jj              res     1
+t0              res     1
+t1              res     1
+t2              res     1
+cx              res     1
+cy              res     1

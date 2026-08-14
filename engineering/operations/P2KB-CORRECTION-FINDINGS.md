@@ -2947,7 +2947,27 @@ he field-reported separately — i.e. this gap has already produced a real tool 
 **Proposed correction:** copy SCOPE's "If omitted" column into the FFT chapter's channel-definition
 table. **Verify the values against PNut** (ground truth) rather than assuming FFT matches SCOPE.
 
-### F-263 — Assembly Manual's CORDIC fill-6-then-drain example is bench-disproven, and contradicts the same chapter's own correct guidance. `CONFIRMED` (bench) / verify on our silicon
+### F-263 — Assembly Manual's CORDIC fill-6-then-drain example reported bench-disproven — **but our own authority says the pattern is correct.** `NEEDS-VERIFICATION`
+
+> **RECLASSIFIED 2026-08-14 (was `CONFIRMED (bench)`).** Stephen asked whether we had prior CORDIC
+> bench work. **We do, and it contradicts the report** — so this must not be actioned as a confirmed
+> defect. Counter-evidence, both internal:
+>
+> 1. **`engineering/knowledge-base/P2-support/clarifications/chip-clarifications/CORDIC-pipeline-theory.md`**
+>    — *"Authoritative — derived from P2 designer explanation"* (Chip Gracey, 2025-11-26). It
+>    documents exactly the three-phase **Fill → Steady-state → Drain** model the Assembly example
+>    uses, states **"Pipeline capacity per COG: 54 ÷ 8 ≈ 6-7 operations can be in flight,"** and
+>    shows a fill phase submitting 8 back-to-back. Critically it also says GETQX/GETQY **stall**
+>    when a result is not ready — *"the COG blocks until the result arrives"* — i.e. the documented
+>    failure mode is a **stall, not scrambled data.**
+> 2. **`app-notes/P2AN002/examples-library/cordic-pipeline-throughput.spin2`** — our **released**
+>    CORDIC app note ships a `FILL = 6` (*"in flight (~6-7: 54-stage/8)"*) fill/steady/drain example
+>    of the same shape.
+>
+> So the reporter's *"two-in-flight retrieval scrambled all outputs"* conflicts with a Chip-sourced
+> clarification **and** a shipped example of ours. One of three things is true: his rig had a
+> defect; the Assembly manual's example differs from P2AN002's in some way that matters; or our
+> authority is incomplete. **Do not rewrite the manual until we know which.**
 
 **Location:** `manuals/p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:~100–126`.
 **RELEASED.**

@@ -1,0 +1,205 @@
+'' =============================================================================
+''  test-F256  --  does `_RET_ CALL #helper` keep XBYTE dispatch alive?
+'' =============================================================================
+''  QUESTION (F-256). The XBYTE Programming Guide states at xbyte-body.md:879
+''  that "Chapter 15's _RET_ CALL #set_nz idiom depends entirely on" skip
+''  suspension during a call, and uses the idiom at :416, :793, :1391, :1400.
+''
+''  `_ret_ call #x` ASSEMBLES CLEAN (pnut-ts 1.55.3) -- so the community
+''  objection "you cannot combine a CALL with ret" is wrong as stated.  But
+''  the compiler proves LEGALITY, not SEMANTICS.  Unresolved: when one
+''  instruction both pushes a return address and returns, does control reach
+''  the helper and then resume XBYTE dispatch at $1FF, or does the push/pop
+''  ordering break re-entry?  Not answerable from the KB or the Silicon Doc.
+''
+''  DESIGN -- three bytecode handlers, each incrementing a hub progress
+''  counter so we can see exactly how far dispatch got:
+''
+''    $00 h_plain  ends `_ret_ add`            KNOWN-GOOD arm.  If dispatch
+''                                             dies here the rig is broken.
+''    $01 h_retcall ends `_ret_ call #helper`  THE QUESTION.  Helper also
+''                                             stamps a marker so we can tell
+''                                             "helper ran" from "dispatch
+''                                             survived" -- they are different
+''                                             failures.
+''    $02 h_break  ends `jmp #stop`            CONTROL THAT MUST FAIL.  This
+''                                             deliberately leaves XBYTE.  If
+''                                             progress keeps climbing past
+''                                             it, the counter is lying and
+''                                             every other result is void.
+''
+''  Program stream:  $00 $00 $01 $00 $03(halt)   then a second pass ending $02
+''
+''  No hang: the engine runs in its own cog and the main cog times out, so a
+''  broken _RET_ CALL shows up as a stalled counter rather than a dead board.
+''
+''  Build: pnut-ts -d test-f256-retcall-xbyte.spin2
+''  Rig:   bare board.  No jumpers.  (VO-J class.)
+'' =============================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+VAR
+  long blk[8]                            ' [0]=progress [1]=marker [2]=phase
+  long stack[64]
+
+PUB main() | p1, m1, p2, m2
+
+  ' ---------- PASS 1: plain, retcall, plain, halt --------------------------
+  blk[0] := 0                            ' progress
+  blk[1] := 0                            ' helper marker
+  blk[2] := 0                            ' phase: 1 = reached halt
+  coginit(NEWCOG, @engine1, @blk[0])
+  waitms(50)
+  p1 := blk[0]
+  m1 := blk[1]
+
+  debug("=== F-256 _RET_ CALL inside XBYTE ===")
+  debug("PASS 1  progress=", udec_(p1), " (expect 4)   helperMarker=", uhex_long_(m1), " (expect $5A5A_5A5A)   reachedHalt=", udec_(blk[2]))
+
+  ' ---------- PASS 2: control that MUST stop dispatch ----------------------
+  blk[0] := 0
+  blk[1] := 0
+  blk[2] := 0
+  coginit(NEWCOG, @engine2, @blk[0])
+  waitms(50)
+  p2 := blk[0]
+  m2 := blk[1]
+  debug("PASS 2  progress=", udec_(p2), " (expect 2 -- the break handler leaves XBYTE)")
+
+  ' ---------- interpretation ------------------------------------------------
+  debug("--- VERDICT ---")
+  if p2 <> 2
+    debug("*** CONTROL WRONG (progress=", udec_(p2), ", wanted 2). The counter cannot")
+    debug("*** distinguish 'dispatch continued' from 'dispatch stopped'. VOID.")
+  else
+    if p1 == 4 and m1 == $5A5A_5A5A
+      debug("_RET_ CALL WORKS: helper ran AND dispatch resumed. Guide :879 stands.")
+    elseif p1 == 2 and m1 == $5A5A_5A5A
+      debug("HELPER RAN BUT DISPATCH DIED -> the idiom is broken. XBYTE 15.3, :416,")
+      debug(":793 and the :879 explanation all need rework.")
+    elseif p1 == 2 and m1 == 0
+      debug("HELPER NEVER RAN and dispatch died -> _RET_ CALL does not call at all.")
+    else
+      debug("UNEXPECTED combination -- capture and analyse before editing anything.")
+
+  repeat
+
+
+DAT             org
+
+'' ---------------------------------------------------------------------------
+'' engine1 -- program: $00 $00 $01 $00 $03
+''            progress should reach 4 (three plain + one retcall) then halt.
+'' ---------------------------------------------------------------------------
+engine1
+                mov     pblk, ptra
+                setq2   #4-1
+                rdlong  $000, ##@disp1        ' dispatch table -> LUT $000
+                rdfast  #0, ##@prog1          ' FIFO -> bytecode stream
+                push    #$1ff                 ' XBYTE re-entry target
+        _ret_   setq    #0                    ' arm: 256-entry table @ LUT $000
+
+' --- handlers ---------------------------------------------------------------
+h_plain                                       ' $00: bump progress, plain _RET_
+                call    #bump
+        _ret_   add     tv, #0                ' harmless; the plain _RET_ form
+
+h_retcall                                     ' $01: bump, then THE QUESTION
+                call    #bump
+        _ret_   call    #helper               ' <=== the idiom under test
+
+h_break                                       ' $02: leave XBYTE deliberately
+                call    #bump
+                jmp     #stop1
+
+h_halt                                        ' $03: normal exit
+                mov     tq, pblk
+                add     tq, #2*4
+                wrlong  #1, tq                ' phase = reached halt
+                jmp     #stop1
+
+' --- helpers ----------------------------------------------------------------
+bump            mov     tq, pblk
+                rdlong  tv, tq
+                add     tv, #1
+                wrlong  tv, tq
+                ret
+
+helper          mov     tq, pblk              ' stamp: proves the helper RAN
+                add     tq, #1*4
+                wrlong  mark, tq
+                ret
+
+stop1           cogid   tq
+                cogstop tq
+
+mark            long    $5A5A_5A5A
+pblk            res     1
+tq              res     1
+tv              res     1
+
+'' ---------------------------------------------------------------------------
+'' engine2 -- program: $00 $02 $00 $00 $03
+''            The $02 break handler leaves XBYTE, so progress must stop at 2.
+'' ---------------------------------------------------------------------------
+                orgh
+disp1           long    h_plain               ' $00
+                long    h_retcall             ' $01
+                long    h_break               ' $02
+                long    h_halt                ' $03
+
+disp2           long    h_plain2              ' $00
+                long    h_retcall2            ' $01
+                long    h_break2              ' $02
+                long    h_halt2               ' $03
+
+prog1           byte    $00, $00, $01, $00, $03
+prog2           byte    $00, $02, $00, $00, $03
+
+
+DAT             org
+
+engine2
+                mov     pblk2, ptra
+                setq2   #4-1
+                rdlong  $000, ##@disp2        ' engine2's OWN table
+                rdfast  #0, ##@prog2          ' the CONTROL stream
+                push    #$1ff
+        _ret_   setq    #0
+
+' engine2 reuses the same handler shapes, its own copies so the cog is
+' self-contained (a cog image cannot reach engine1's registers).
+h_plain2        call    #bump2
+        _ret_   add     tv2, #0
+
+h_retcall2      call    #bump2
+        _ret_   call    #helper2
+
+h_break2        call    #bump2
+                jmp     #stop2
+
+h_halt2         mov     tq2, pblk2
+                add     tq2, #2*4
+                wrlong  #1, tq2
+                jmp     #stop2
+
+bump2           mov     tq2, pblk2
+                rdlong  tv2, tq2
+                add     tv2, #1
+                wrlong  tv2, tq2
+                ret
+
+helper2         mov     tq2, pblk2
+                add     tq2, #1*4
+                wrlong  mark2, tq2
+                ret
+
+stop2           cogid   tq2
+                cogstop tq2
+
+mark2           long    $5A5A_5A5A
+pblk2           res     1
+tq2             res     1
+tv2             res     1
