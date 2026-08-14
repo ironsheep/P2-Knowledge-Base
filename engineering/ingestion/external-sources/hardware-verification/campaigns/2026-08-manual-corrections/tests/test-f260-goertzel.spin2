@@ -162,7 +162,21 @@ CON
   ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
-  BUILD       = 20                       ' bump EVERY round; the banner prints it
+  BUILD       = 21
+
+  '' Round 21. C10 read 966 vs 991 of 2000 -- ~48%, MID-SCALE -- where
+  '' undriven reads ~335 (17%) and driven-high ~1627 (81%). That is my bug, and
+  '' the KB states it: DDS/Goertzel outputs the LUT bytes to the DACs with
+  '' their MSBs INVERTED, so signed table values drive unsigned DACs
+  '' (p2kbArchDdsGoertzel: "Output LUT bytes to DACs (XOR $80 for unsigned)").
+  '' So the two "extremes" I chose both land mid-scale, one LSB apart:
+  ''     $FF ^ $80 = $7F = 127
+  ''     $00 ^ $80 = $80 = 128
+  '' The levels that actually reach the rails are $80 (-> $00) and $7F (-> $FF).
+  '' Note the pin DID move from undriven-low to mid-scale, which is the DAC
+  '' driving -- but that is an inference, so this round measures it properly.
+  DAC_LO_BYTE = $80                      ' -> DAC $00 after the MSB inversion
+  DAC_HI_BYTE = $7F                      ' -> DAC $FF after the MSB inversion                       ' bump EVERY round; the banner prints it
 
   '' Round 9. Round 8's C5 ran and disproved my own fix: the plain DAC config
   '' drove the jumper cleanly (spread 1297 of 2000) while adding P_CHANNEL
@@ -815,11 +829,11 @@ PRI chip_arms() | i, on_c, on_s, off_c, off_s
 
 '' --- C10: the streamer DAC override, from a launched cog -------------------
 PRI c10_streamer_dac() | hi, lo
-  hi := dacdrv($FF)
-  lo := dacdrv($00)
+  hi := dacdrv(DAC_HI_BYTE)
+  lo := dacdrv(DAC_LO_BYTE)
   debug(" ")
   debug("   C10 streamer DAC override from a launched cog, M(3:0)=cogid:")
-  debug("       LUT constant FF -> ", udec_(hi), "   00 -> ", udec_(lo), "   spread=", udec_(spread(hi, lo)))
+  debug("       LUT byte $7F (DAC full) -> ", udec_(hi), "   $80 (DAC zero) -> ", udec_(lo), "   spread=", udec_(spread(hi, lo)))
   if spread(hi, lo) > 200
     debug("       C10 OK -- the streamer override DOES drive from a launched")
     debug("       cog when the pin names it in M(3:0). Chip's cog-id idiom is")
