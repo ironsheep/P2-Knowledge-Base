@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 8
+  BUILD     = 9
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -176,6 +176,7 @@ PUB main() | hi, lo
   debug(" ")
   instrument_check()
   seq_check(1)
+  bisect_tone()
   tone_arms()
 
   '' The discriminator: the SAME arm again, after the tone section. If it now
@@ -222,6 +223,39 @@ PRI seq_check(tag) | dens
   debug("  A must be 0 (fresh cog). C must equal B (documented). D must be a")
   debug("  NEW value -- if D equals B the reads are latched and my XINITs are")
   debug("  not registering as new streamer commands.")
+
+
+'' --- which STEP of tone_on() flips the reading? -----------------------------
+'' SEQ pass 1 and pass 2 ran the same code on the same (floating, 51%) input
+'' and differed by three orders of magnitude, with pass 2 already large at A --
+'' before any command, in a fresh cog. So the state survives COGINIT, survives
+'' pinclear, and survives driving the pin to a rail. The only thing between the
+'' passes was tone_on(). This walks its four steps, running SEQ after each, so
+'' the exact operation that flips it is visible. Each pass prints its own ADC
+'' density, so no row can lie about its input.
+PRI bisect_tone()
+  debug(" ")
+  debug("=== BISECT: which step of tone_on() changes GETXACC forever? ===")
+  drive(0)
+  seq_check(10)                            ' baseline, pin driven low
+
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_NCO_FREQ | P_OE)        ' configured, DIR still low
+  seq_check(11)
+
+  wxpin(DAC_PIN, 1)
+  pinhigh(DAC_PIN)                         ' smart pin ENABLED, Y still 0
+  seq_check(12)
+
+  wypin(DAC_PIN, NCO_Y_1M)                 ' tone actually running
+  seq_check(13)
+
+  pinclear(DAC_PIN)
+  drive(0)                                 ' back to a plain driven low
+  seq_check(14)
+  debug("  10 baseline | 11 after WRPIN | 12 after enable | 13 tone running")
+  debug("  14 after pinclear back to plain low. The first LARGE pass names the")
+  debug("  operation responsible; 14 staying large means it never comes back.")
 
 
 PRI tone_arms() | on_t, off_t, null_t
