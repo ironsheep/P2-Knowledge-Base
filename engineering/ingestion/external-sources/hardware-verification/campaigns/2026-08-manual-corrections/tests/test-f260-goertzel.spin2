@@ -99,13 +99,37 @@ CON
   MODE_XINIT = 0
   MODE_C2    = 1
   MODE_XCONT = 2
+  MODE_ADC   = 3
+
+  '' --- streamer-body.md:607, the SAME adc_pin<<17 idiom on a DIFFERENT mode --
+  '' X_1ADC8_0P_1DAC8_WFBYTE template (Spin2 v55 / Silicon Doc):
+  ''     %1111_DDDD_W000_0010 << 16     with the S operand carrying %ss
+  '' D[22:20] are FIXED ZEROS -- there is no pin field at all -- and the ADC
+  '' channel is chosen by S[1:0], not by D.  The guide writes
+  ''     mov cmd, ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON
+  ''     add cmd, ##adc_pin<<17 + 1024
+  '' so adc_pin<<17 lands inside D[19:16] = %0010 and the ADD CARRIES:
+  ''     pin 0 -> %0010  1-ADC8 WFBYTE   (correct)
+  ''     pin 1 -> %0100  2-ADC8 WFWORD   (a different mode)
+  ''     pin 2 -> %0110  4-ADC8 WFLONG   (a different mode)
+  '' Each mode writes a different number of BYTES PER NCO ROLLOVER: 1, 2, 4.
+  '' So the byte count in the buffer is a direct read-out of which mode the
+  '' silicon actually ran -- and it does not depend on the ADC being set up,
+  '' on SETSCP, or on any analog behaviour.  That is the whole point of this
+  '' arm: every confounder that voided rounds 1-6 is designed out.
+  X_1ADC8_WFB  = $F002_0000
+  X_WRITE_ON_  = $0080_0000
+  N_SAMPLES    = 1024
+  ABUFSZ       = 8192
+  SENTINEL     = $A5
 
 DAT
 s_ok            byte    "OK", 0
 s_bad           byte    "*** FAILED ***", 0
 
 VAR
-  long g[18]
+  long g[20]
+  byte abuf[ABUFSZ]
 
 PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
 
@@ -160,7 +184,71 @@ PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
   show()
 
   verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
+
+  adc_capture_arms()
   stop_here()
+
+
+'' --- streamer-body.md:607 -- does the guide's line change the MODE? --------
+PRI adc_capture_arms() | b0, b1, b2, bok, bscp
+  debug(" ")
+  debug("--- :607  ADC-capture mode corruption (byte-count signature) ---")
+  debug("    1-ADC8 writes 1 byte per rollover, 2-ADC8 2, 4-ADC8 4.")
+  debug("    ", udec_(N_SAMPLES), " rollovers => 1024 / 2048 / 4096 bytes.")
+
+  b0 := adc_arm(guide_cmd(0), 0, 0, 0)
+  debug("G0 guide's line, adc_pin=0  cmd=", uhex_long_(guide_cmd(0)), "  bytes=", udec_(b0), " (expect 1024)")
+  b1 := adc_arm(guide_cmd(1), 0, 1, 0)
+  debug("G1 guide's line, adc_pin=1  cmd=", uhex_long_(guide_cmd(1)), "  bytes=", udec_(b1), " (expect 2048)")
+  b2 := adc_arm(guide_cmd(2), 0, 2, 0)
+  debug("G2 guide's line, adc_pin=2  cmd=", uhex_long_(guide_cmd(2)), "  bytes=", udec_(b2), " (expect 4096)")
+  bok := adc_arm(X_1ADC8_WFB | X_WRITE_ON_ | N_SAMPLES, 0, 0, 0)
+  debug("C  corrected: pin NOT in D, channel in S[1:0]     bytes=", udec_(bok), " (expect 1024)")
+  bscp := adc_arm(X_1ADC8_WFB | X_WRITE_ON_ | N_SAMPLES, 0, 0, 1)
+  debug("C+ corrected AND properly set up (SETSCP, P_ADC)  bytes=", udec_(bscp), " (expect 1024)")
+
+  debug(" ")
+  if b0 == 0 and bok == 0
+    debug("NOTHING WAS WRITTEN AT ALL. The capture never ran, so the byte-count")
+    debug("signature cannot be read and G1/G2 mean nothing. Likely the mode")
+    debug("needs SETSCP to capture -- see C+ -- which is itself a finding.")
+    return
+  if b1 > b0 and b2 > b1
+    debug("MODE CORRUPTION REPRODUCED ON SILICON. The guide's own line writes")
+    debug("more bytes per rollover as adc_pin rises, because adc_pin<<17")
+    debug("carries into D[19:16] and selects 2-ADC8 then 4-ADC8. It is correct")
+    debug("ONLY for adc_pin = 0, and it never selects the channel at all --")
+    debug("that lives in S[1:0].")
+  else
+    debug("NO CORRUPTION SEEN. The D[19:16] reading is wrong, or the count")
+    debug("field does not mean what the Silicon Doc says. Do not edit :607.")
+
+
+PRI guide_cmd(pin) : cmd
+  '' transcribed operator-for-operator from streamer-body.md:607
+  cmd := (X_1ADC8_WFB | X_WRITE_ON_) + (pin<<17) + N_SAMPLES
+
+
+PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
+  bytefill(@abuf[0], SENTINEL, ABUFSZ)
+  longfill(@g[0], 0, 20)
+  g[0] := cmd
+  g[1] := sval
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[4] := pin
+  g[6] := MODE_ADC
+  g[17] := @abuf[0]
+  g[18] := proper
+  start_engine()
+  '' highest byte the streamer touched.  A written byte could coincidentally
+  '' equal the sentinel, which costs a byte or two at the tail -- nowhere near
+  '' enough to blur 1024 / 2048 / 4096.
+  nbytes := 0
+  repeat i from ABUFSZ - 1 to 0
+    if abuf[i] <> SENTINEL
+      nbytes := i + 1
+      quit
 
 
 PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
@@ -315,6 +403,8 @@ engine
 
                 cmp     v_mode, #MODE_C2        wz
         if_z    jmp     #c2_arm
+                cmp     v_mode, #MODE_ADC       wz
+        if_z    jmp     #adc_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
                 wrpin   ##P_DAC_124R_3V, #DAC_PIN
@@ -364,6 +454,53 @@ c2_arm
                 testp   #ADC_PIN                wc
         if_c    mov     lvl, #1
                 waitxfi
+                jmp     #report
+
+'' --- :607 arm: run a capture command and let the BYTE COUNT say which mode
+'' the silicon actually ran.  Nothing here depends on the ADC producing
+'' meaningful data -- only on how wide each write is.
+adc_arm_code
+                mov     t, ptra
+                add     t, #17*4
+                rdlong  abufp, t                ' hub capture buffer
+                mov     t, ptra
+                add     t, #4*4
+                rdlong  apin, t                 ' adc_pin
+                mov     t, ptra
+                add     t, #18*4
+                rdlong  aprop, t                ' proper setup?
+
+                cmp     aprop, #0               wz
+        if_nz   jmp     #adc_proper
+
+                ' the guide's own pin setup, verbatim (:600-602)
+                wrpin   ##P_ADC_100X, apin
+                drvl    apin
+                jmp     #adc_go
+
+adc_proper
+                ' what the Silicon Doc actually asks for: SETSCP selects the
+                ' block of four pins feeding the SCOPE channels, and the pin
+                ' must be in an ADC SMART PIN mode and enabled.
+                setscp  #%1_0000_00             ' enable, pin base = 0 (pins 0..3)
+                wrpin   ##(P_ADC_100X | P_ADC), apin
+                dirh    apin
+
+adc_go
+                setxfrq xfrq
+                wrfast  #0, abufp
+                getct   t0
+                xinit   v_ddsd, v_ddss
+                mov     tq, t0
+                add     tq, ##20_000_000
+                setq    tq
+                waitxfi                         wc
+        if_c    mov     tmo, #1
+                getct   t1
+                sub     t1, t0
+                ' a fresh WRFAST waits for the previous one to finish, which
+                ' flushes any bytes still sitting in the write FIFO
+                wrfast  #0, abufp
                 jmp     #report
 
 '' --- build the 512-entry LUT table -----------------------------------------
@@ -444,3 +581,6 @@ sy              res     1
 oy              res     1
 tq              res     1
 tmo             res     1
+abufp           res     1
+apin            res     1
+aprop           res     1
