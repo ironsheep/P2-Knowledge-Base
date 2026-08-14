@@ -36,7 +36,23 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 4
+  BUILD     = 5
+
+  '' BUILD 4 RESULT -- the duration control PASSED (20,009 at 1 MHz vs 10,009
+  '' at 2 MHz), so the detector really is being swept and the flat reading is
+  '' not a parameter that failed to arrive. But it exposed a contradiction
+  '' INSIDE THIS PROBE:
+  ''     DC section, pin driven, S_BASE1, detector 1 MHz : cos ~112
+  ''     TONE tag 0, pin driven LOW by the same pinclear+pinl, same S_BASE1,
+  ''       same command, same detector                    : cos ~1,057,440
+  '' Same pin state, same parameters, four orders of magnitude apart. One of
+  '' those readings is lying, and until I know which, NEITHER the DC conclusion
+  '' ("the summer reads the pin") nor the tone conclusion ("no selectivity") is
+  '' safe. So BUILD 5 runs the two code paths back to back on identical
+  '' configurations and prints both. If the repeat matches the DC section, the
+  '' difference is something in the tone path; if it matches the tone section,
+  '' the difference is HISTORY -- state left behind by whatever ran earlier --
+  '' and every arm in this probe is order-dependent.
 
   '' BUILD 3 RESULT: on-target 1,058,407 / detuned 1,059,491 / tone-off
   '' 1,059,658 -- all within 0.1%. No selectivity. But two faults were MINE:
@@ -151,6 +167,22 @@ PRI tone_arms() | on_t, off_t, null_t
   off_t := tone_row(TONE_HZ * 2, 2)
   tone_off()
   null_t := tone_row(TONE_HZ, 0)
+
+  '' Same configuration as the DC section, run again HERE, late in the
+  '' sequence. This is the discriminator: path or history?
+  debug(" ")
+  debug("--- REPEAT of the DC configuration, run late ---")
+  drive(1)
+  gtzl(S_BASE1)
+  debug("  pin HIGH via the DC path : waitxfi=", udec_(g[11]), "  cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
+  drive(0)
+  gtzl(S_BASE1)
+  debug("  pin LOW  via the DC path : waitxfi=", udec_(g[11]), "  cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
+  float_pin()
+  debug("  DC section reported cos in the HUNDREDS for this configuration.")
+  debug("  Matching that here => the tone path differs. Matching the tone")
+  debug("  rows (~1,000,000) => the probe is ORDER-DEPENDENT and every")
+  debug("  earlier reading in it is suspect.")
   debug(" ")
   if on_t > (null_t * 4) and on_t > (off_t * 4)
     debug("GOERTZEL DETECTS. On-target beats both the detuned detector and the")
