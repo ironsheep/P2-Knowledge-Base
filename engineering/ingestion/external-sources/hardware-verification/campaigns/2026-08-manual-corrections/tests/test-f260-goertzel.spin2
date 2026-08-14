@@ -325,15 +325,58 @@ PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
     debug("   and the board before reading anything else.")
 
   if dd > 200
-    debug("   C6 OK: the cog DAC channel reaches the pin, so the streamer")
-    debug("   override has a route to drive. P_CHANNEL confirmed as a SOURCE")
-    debug("   select, not an enable -- F-259 and C5 now both explained.")
+    debug("   C6 OK: the cog DAC channel reaches the pin from a launched cog.")
   else
-    debug("   C6 FAILED: P_CHANNEL + SETDACS does not drive the pin, so the")
-    debug("   streamer override cannot reach it either. Until this is green,")
-    debug("   any Goertzel magnitude below is measuring silence.")
+    debug("   C6 red: P_CHANNEL + SETDACS did not drive from a launched cog.")
 
-  ok := (dw > 200) and (dd > 200)
+  ok := c7_f259_replica() and (dw > 200)
+  if ok and dd <= 200
+    debug("   => the cog DAC path works, but NOT the way my engine does it.")
+    debug("      C7 vs C6 differ in cog, SETDACS order, pinclear and sensing;")
+    debug("      bisect those before trusting any streamer-driven tone.")
+
+
+'' --- C7: the F-259 experiment, replicated EXACTLY ---------------------------
+'' F-259 drove the cog DAC channel and got 1,408 (TT=%00) vs 6,737 (TT=%01) on
+'' this same board. My C6 did the same thing four ways differently -- launched
+'' cog instead of cog 0, SETDACS after the pin config instead of before, no
+'' pinclear, and raw bit-counting instead of a smart-pin ADC. Four variables
+'' at once, which is why C6 failing said nothing. This is the reference:
+'' F-259's sequence, in cog 0, sensed F-259's way.
+PRI c7_f259_replica() : ok | hi, lo
+  hi := dac_probe($FF)
+  lo := dac_probe($00)
+  debug("   C7 F-259 replica (cog 0, TT=%01, smart-pin ADC):")
+  debug("      cog DAC channel FF -> ", udec_(hi), "     00 -> ", udec_(lo))
+  ok := spread(hi, lo) > 200
+  if ok
+    debug("      C7 OK: the cog DAC channel DOES drive the pin. So the route the")
+    debug("      streamer overrides is sound, and C6 differs from C7 only in")
+    debug("      cog, SETDACS order, pinclear, or sensing method.")
+  else
+    debug("      C7 FAILED: we cannot even reproduce F-259 on this rig today.")
+    debug("      Stop and settle THAT before anything else -- a conclusive")
+    debug("      finding that will not reproduce is the first problem to fix.")
+
+
+PRI dac_probe(level) : counts
+  set_dac_ch0(level)                       ' cog DAC channel 0 = level
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)  ' TT=%01, level bits left at 0
+  pinlow(DAC_PIN)                          ' DIR=1, OUT=0 -- F-259's DRVL
+  waitms(5)
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, P_ADC_1X | P_ADC)         ' smart-pin ADC, F-259's sensing
+  wxpin(ADC_PIN, 12)                       ' 2^12 sample period
+  pinhigh(ADC_PIN)
+  waitms(5)
+  counts := rdpin(ADC_PIN) & $7FFF_FFFF    ' bit 31 carries C, not data
+
+
+PRI set_dac_ch0(level)
+  org
+              setdacs level
+  end
 
 
 PRI spread(x, y) : d
@@ -585,12 +628,17 @@ sig_arm_code
                 cmp     achan, #0               wz
         if_nz   or      tw2, ##P_CHANNEL
 
+                ' SETDACS FIRST, then clear the pin, then configure it --
+                ' the order F-259 used when this path provably drove.
                 cmp     asrc, #SRC_SETDACS      wz
+        if_z    setdacs alev                    ' DAC0 = D[7:0] -> pin 0
         if_nz   shl     alev, #8                ' level sits in D bits 15..8
         if_nz   or      tw2, alev
+
+                dirl    #DAC_PIN                ' pinclear equivalent
+                wrpin   #0, #DAC_PIN
                 wrpin   tw2, #DAC_PIN
                 dirh    #DAC_PIN
-        if_z    setdacs alev                    ' DAC0 = D[7:0] -> pin 0
 
                 wrpin   ##P_ADC_1X, #ADC_PIN    ' raw bitstream, no smart mode
                 dirl    #ADC_PIN
