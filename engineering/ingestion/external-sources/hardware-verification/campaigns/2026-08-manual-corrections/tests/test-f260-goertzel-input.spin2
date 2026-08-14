@@ -36,7 +36,20 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 1
+  BUILD     = 2
+
+  '' THE DEBUGGER WAS IN THE STREAMER'S COG THE WHOLE TIME.
+  '' p2kbArchDebugInterrupt, limitations:
+  ''     streamer_interaction: "Debug can disrupt streamer operations."
+  ''     workaround:           "Disable debug when using streamer."
+  '' DEBUG_COGS defaults to %11111111 -- EVERY cog has debug capability enabled
+  '' at runtime -- and the "CogN INIT ..." lines in every log this campaign are
+  '' the debugger announcing cog starts, i.e. proof it was live in the launched
+  '' engine cogs. Every streamer measurement we have taken was made with the
+  '' highest-priority interrupt in the P2 enabled inside the cog running the
+  '' streamer, in a probe that is entirely about the streamer.
+  '' Restrict it to cog 0, which is the only cog that reports.
+  DEBUG_COGS = %0000_0001
 
   DAC_PIN   = 0
   ADC_PIN   = 1
