@@ -2722,10 +2722,13 @@ All live manuals are already clean, formal, and correct —
 Architect's, Assembly, XBYTE, IOSP, Getting Started, Debug Window, Streamer all credit Parallax,
 Chip Gracey, the P2 community (and IOSP additionally Jon Titus) with no self-listing, no giants
 line, no generic reviewer credits, no AI claim. deSilva is the **outlier**, consistent with it
-being the oldest of the set — written before the house convention settled. Two further copies carry
-the text but are **inert**: `opus-master/archived-2025/COMBINED-COMPLETE-MASTER.md` and
-`initial-chapter-generation/00-acknowledgments.md`; `p2-smart-pins-tutorial/TECHNICAL-REVIEW-STATUS.md`
-matched the grep but is an internal working doc, not shipped.
+being the oldest of the set — written before the house convention settled. Two further copies of the
+text exist inside deSilva's own folder and are **inert** (not assembled into the render):
+`opus-master/archived-2025/COMBINED-COMPLETE-MASTER.md` and
+`initial-chapter-generation/00-acknowledgments.md`.
+
+> **Sweep scope:** the **live set only** (roster Done / In progress / Upcoming). Roster-Abandoned
+> documents are excluded from the search itself and are not reported on.
 
 ### F-255 — XBYTE §15.3: `set_nz` is never defined, and the contract shown cannot work. `CONFIRMED`
 
