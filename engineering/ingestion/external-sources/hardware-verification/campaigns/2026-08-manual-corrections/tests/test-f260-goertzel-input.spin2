@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 5
+  BUILD     = 6
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -136,6 +136,8 @@ CON
 
   MODE_GTZL = 0
   MODE_COUNT = 1
+  MODE_NOCMD = 2                         ' GETXACC with NO streamer command
+  MODE_TWICE = 3                         ' clear, then GETXACC again, no command
 
 VAR
   long g[16]
@@ -171,8 +173,22 @@ PUB main() | hi, lo
   dc_pair(S_BASE3, 3)
   dc_pair(S_NONE, 9)
   debug(" ")
+  instrument_check()
   tone_arms()
   halt()
+
+
+'' --- verify GETXACC before trusting anything it returns ---------------------
+PRI instrument_check()
+  debug(" ")
+  debug("--- INSTRUMENT: is GETXACC returning what I think? ---")
+  run_at(0, 0, MODE_NOCMD, TONE_HZ)
+  debug("  no command issued at all : cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
+  run_at(0, 0, MODE_TWICE, TONE_HZ)
+  debug("  cleared, then read again : cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
+  debug("  Both must be 0. A large value with NO command means the reading")
+  debug("  never came from our streamer run, and every magnitude this campaign")
+  debug("  has printed is an artifact of how I read GETXACC.")
 
 
 '' --- the real test: an independent tone, detector swept ---------------------
@@ -215,9 +231,9 @@ PRI tone_arms() | on_t, off_t, null_t
     debug("The mode works. The guide's TEXT is the whole defect -- and the")
     debug("debug interrupt in the streaming cog was what hid it for 23 rounds.")
   else
-    debug("Still no selective detection, but now with a CLEAN streamer cog.")
-    debug("That is a very different claim from the earlier nulls, and it is")
-    debug("the one worth putting to Chip.")
+    debug("No selective detection. Check the INSTRUMENT rows first -- if")
+    debug("GETXACC returns the same value with no command issued, these")
+    debug("numbers describe my reading of GETXACC, not the Goertzel mode.")
 
 
 '' One tone measurement, printing the raw accumulators and the run duration.
@@ -351,6 +367,12 @@ engine
                 cmp     mode_, #MODE_COUNT      wz
         if_z    jmp     #count_arm
 
+                ' --- instrument checks on GETXACC itself ---
+                cmp     mode_, #MODE_NOCMD      wz
+        if_z    jmp     #nocmd_arm
+                cmp     mode_, #MODE_TWICE      wz
+        if_z    jmp     #twice_arm
+
                 ' NCO word: QFRAC gives (f<<32)/clk; the NCO masks its MSB so
                 ' the scale is 2^31 -- halve it.
                 mov     t_, pb_
@@ -379,6 +401,22 @@ engine
                 mov     sin_, 0-0
                 qvector cos_, sin_              ' D = X (cos), S = Y (sin)
                 getqx   mag_
+                jmp     #report
+
+'' Read the accumulators in a fresh cog that has issued NO streamer command.
+'' A non-zero result here means the value never came from our command.
+nocmd_arm
+                getxacc cos_
+                mov     sin_, 0-0
+                jmp     #report
+
+'' Clear with one GETXACC, then read again -- still with no command issued.
+'' GETXACC is documented to clear on read, so the second read must be 0.
+twice_arm
+                getxacc gclr_
+                mov     gclr2_, 0-0
+                getxacc cos_
+                mov     sin_, 0-0
                 jmp     #report
 
 count_arm
