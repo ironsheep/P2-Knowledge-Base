@@ -50,7 +50,28 @@ VAR
   long blk[8]                            ' [0]=progress [1]=marker [2]=phase
   long stack[64]
 
-PUB main() | p1, m1, p2, m2
+PUB main() | p0, p1, m1, p2, m2
+
+  ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
+  ' Round 2 still returned progress=0 with the '@' fix, so before blaming
+  ' _RET_ CALL we run the guide's published VM shape itself.  If PASS 0 does
+  ' not dispatch either, the fault is in this harness (or in the guide's own
+  ' example) -- NOT in the idiom under test.
+  blk[0] := 0
+  blk[1] := 0
+  blk[2] := 0
+  coginit(NEWCOG, @engine0, @blk[0])
+  waitms(50)
+  p0 := blk[0]
+  debug("=== F-256 _RET_ CALL inside XBYTE ===")
+  debug("PASS 0  guide's own VM shape: progress=", udec_(p0), " (expect 3)")
+  if p0 <> 3
+    debug("*** THE BASE VM DOES NOT DISPATCH. Everything below is meaningless.")
+    debug("*** Fix the harness (or investigate the guide's 12.2 example) first.")
+    debug(" ")
+    debug("@@@ TEST COMPLETE: F-256 retcall-xbyte (BASE VM FAILED) @@@")
+    repeat
+  debug("Base VM dispatches -> the harness is sound; the idiom test is valid.")
 
   ' ---------- PASS 1: plain, retcall, plain, halt --------------------------
   blk[0] := 0                            ' progress
@@ -61,7 +82,6 @@ PUB main() | p1, m1, p2, m2
   p1 := blk[0]
   m1 := blk[1]
 
-  debug("=== F-256 _RET_ CALL inside XBYTE ===")
   debug("PASS 1  progress=", udec_(p1), " (expect 4)   helperMarker=", uhex_long_(m1), " (expect $5A5A_5A5A)   reachedHalt=", udec_(blk[2]))
 
   ' ---------- PASS 2: control that MUST stop dispatch ----------------------
@@ -96,6 +116,35 @@ PUB main() | p1, m1, p2, m2
 
 
 DAT             org
+
+'' ---------------------------------------------------------------------------
+'' engine0 -- BASE VM, no _RET_ CALL.  Program $00 $00 $00 $03 -> progress 3.
+'' ---------------------------------------------------------------------------
+engine0
+                mov     pblk0, ptra
+                setq2   #4-1
+                rdlong  $000, ##disp0
+                rdfast  #0, ##prog0
+                push    #$1ff
+        _ret_   setq    #0
+
+h_bump0         call    #bump0
+        _ret_   add     tv0, #0
+
+h_halt0         jmp     #stop0
+
+bump0           mov     tq0, pblk0
+                rdlong  tv0, tq0
+                add     tv0, #1
+                wrlong  tv0, tq0
+                ret
+
+stop0           cogid   tq0
+                cogstop tq0
+
+pblk0           res     1
+tq0             res     1
+tv0             res     1
 
 '' ---------------------------------------------------------------------------
 '' engine1 -- program: $00 $00 $01 $00 $03
@@ -153,6 +202,12 @@ tv              res     1
 ''            The $02 break handler leaves XBYTE, so progress must stop at 2.
 '' ---------------------------------------------------------------------------
                 orgh
+disp0           long    h_bump0               ' $00
+                long    h_bump0               ' $01
+                long    h_bump0               ' $02
+                long    h_halt0               ' $03
+prog0           byte    $00, $00, $00, $03
+
 disp1           long    h_plain               ' $00
                 long    h_retcall             ' $01
                 long    h_break               ' $02

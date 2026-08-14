@@ -48,7 +48,7 @@ VAR
   long expx[N], expy[N]
   long blk[16]
 
-PUB main() | i, f, bad, firstbad
+PUB main() | i, f, bad, firstbad, cfirstbad
 
   repeat i from 0 to N-1
     inm[i] := 10 + i
@@ -89,6 +89,21 @@ PUB main() | i, f, bad, firstbad
     debug("FILL=", udec_(f), "  mismatches=", udec_(bad), " of ", udec_(N), "   got[0]=", udec_(gotm[0]), " exp[0]=", udec_(expm[0]))
     if bad > 0 and firstbad == 0
       firstbad := f
+
+  ' ---------- SAME SWEEP, but with Chip's register-only fill --------------
+  debug(" ")
+  debug("--- FILL sweep (ARM C: Chip's shape -- register-only fill, no hub read) ---")
+  cfirstbad := 0
+  repeat f from 1 to MAXFILL
+    longfill(@gotm, 0, N)
+    run_engine(f, 3)
+    bad := 0
+    repeat i from 0 to f-1                 ' ARM C drains exactly f results
+      if gotm[i] <> expm[i]
+        bad++
+    debug("FILL=", udec_(f), "  mismatches=", udec_(bad), " of ", udec_(f), "   got[0]=", udec_(gotm[0]), " exp[0]=", udec_(expm[0]))
+    if bad > 0 and cfirstbad == 0
+      cfirstbad := f
 
   ' ---------- ARM A at FILL=6, the Assembly ch.5 shape ---------------------
   debug(" ")
@@ -158,6 +173,8 @@ engine
         if_z    jmp     #do_control
                 cmp     modeq, #1       wz
         if_z    jmp     #do_armb
+                cmp     modeq, #3       wz
+        if_z    jmp     #do_armc
                 jmp     #do_arma
 
 '' ---- CONTROL: exactly one op in flight, retrieved at once.  MUST stall.
@@ -205,6 +222,25 @@ do_armb
                 add     ox, #4
                 sub     jj, #1
                 jmp     #.dloopb
+
+'' ---- ARM C: Chip's fill shape.  REGISTER-ONLY issue, no hub access.
+''      Inputs are COMPUTED in-register (10,11,12...) rather than read from
+''      hub, so the fill runs at the 4-clock cadence Chip's phase-1 example
+''      uses.  Then drain immediately.  If ARM C is clean where ARM B is
+''      dirty at the same FILL, the fault is the SLOW FILL, not the silicon.
+do_armc
+                mov     vx, #10
+                rep     #2, fillq             ' 2 instrs, fillq times
+                qmul    vx, vx
+                add     vx, #1
+                mov     ox, a_gotm
+                mov     jj, fillq
+.dloopc         tjz     jj, #finish
+                getqx   rx
+                wrlong  rx, ox
+                add     ox, #4
+                sub     jj, #1
+                jmp     #.dloopc
 
 '' ---- ARM A: Assembly ch.5 shape.  QROTATE, GETQX + GETQY per op.
 do_arma

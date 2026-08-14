@@ -48,12 +48,20 @@ CON
   ' X_DDS_GOERTZEL_SINC1 base, per the Streamer Guide / streamer symbols
   DDS_SINC1 = $F007_0000
 
+DAT
+s_ok            byte    "JUMPER OK", 0
+s_bad           byte    "*** NO JUMPER ***", 0
+
 VAR
   long lutbuf[512]
 
 PUB main()
   debug("=== F-259 / F-260 probe ===")
   debug("RIG: jumper pin ", udec_(DAC_PIN), " -> pin ", udec_(ADC_PIN), " (same 8-pin power group)")
+  if not verify_jumper()
+    debug("@@@ ABORTED: jumper not detected between pin ", udec_(DAC_PIN), " and pin ", udec_(ADC_PIN), " @@@")
+    debug("@@@ fit the jumper and re-run - no measurement below would mean anything @@@")
+    repeat
   part1_dac_gating()
   part2_goertzel()
   debug(" ")
@@ -88,15 +96,44 @@ PRI part1_dac_gating() | v1, v2, v3, v4, v5, v6
   debug("6  +P_OE (no P_CHANNEL)      OUT=1 : ", udec_(v6))
 
   debug(" ")
-  if abs(v5 - v2) < 500
-    debug("*** ROWS 2 AND 5 BARELY DIFFER -- CHECK THE JUMPER / ADC.")
-    debug("*** PART 2 below is NOT trustworthy until this separation appears.")
+  ' Row 1 is the OFF state (no P_CHANNEL, no P_OE).  Compare every other row
+  ' against IT -- comparing two rows that are both ON proves nothing, which is
+  ' the mistake round 2 made.
+  if abs(v5 - v1) < 500
+    debug("*** NO ROW LIFTS ABOVE THE OFF STATE -- the DAC never drove.")
+    debug("*** PART 2 below is NOT trustworthy.")
   else
-    debug("Separation present -- rig is live; PART 2 results are meaningful.")
-    if v4 > v2 + 500
-      debug("OE alone gates the drive (row 4 lifts without OUT).")
-    if v3 > v2 + 500
-      debug("OUT also participates (row 3 lifts without OE).")
+    debug("Drive detected (row 1 = off, ", udec_(v1), " -> row 5 = on, ", udec_(v5), ").")
+    if v2 > v1 + 500
+      debug("P_CHANNEL ALONE enables the drive -- P_OE is NOT required here.")
+    else
+      debug("P_CHANNEL alone does NOT drive -- P_OE is required.")
+    if v6 > v1 + 500
+      debug("P_OE alone also enables the drive (row 6, no P_CHANNEL).")
+    if abs(v3 - v2) < 500
+      debug("OUT does not matter (rows 2 and 3 agree).")
+    else
+      debug("OUT participates (rows 2 and 3 differ).")
+
+
+'' Prove the short DIGITALLY before trusting any analog reading.  Drive the
+'' DAC pin both ways as a plain output and read the other pin back.  A short
+'' follows; an open does not.  This is the rig control -- an analog rail that
+'' happens to sit near full scale looks identical to a working jumper, so the
+'' continuity test has to come first and has to be digital.
+PRI verify_jumper() : ok | hi, lo
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+  pinf(ADC_PIN)                            ' ADC pin floats as an input
+  pinh(DAC_PIN)                            ' drive high
+  waitms(2)
+  hi := pinr(ADC_PIN)
+  pinl(DAC_PIN)                            ' drive low
+  waitms(2)
+  lo := pinr(ADC_PIN)
+  pinf(DAC_PIN)
+  ok := (hi == 1) and (lo == 0)
+  debug("JUMPER CHECK: drive high -> read ", udec_(hi), " ; drive low -> read ", udec_(lo), "   ", zstr_(ok ? @s_ok : @s_bad))
 
 
 '' Configure the DAC pin, set OUT, read the jumpered ADC pin.
@@ -192,13 +229,20 @@ PRI sweep_one(cmd) | x, y
 '' starts never finishes.  A bounded WAITX cannot hang, and for "does this
 '' mode accumulate at all" a fixed wait is sufficient.  (The reporter saw
 '' WAITXFI complete on schedule, so his symptom differs from that hang.)
+'' ROUND 3: GETQX is now GUARDED.  Round 2 still died after the PART 2
+'' header -- with nothing accumulated, GETQX blocks forever waiting for a
+'' result that never comes (round 2's own CONTROL proved GETQX stalls).
+'' POLLQMT is the non-blocking "is a result waiting" check; if none is, we
+'' report the sentinel instead of hanging.
 PRI goertzel_once(cmd, xf) : rx, ry
+  rx := ry := $DEAD_0000                   ' sentinel = no result available
   org
               setxfrq xf
               xinit   cmd, #0
               waitx   ##400_000            ' ~2 ms at 200 MHz -- bounded
-              getqx   rx
-              getqy   ry
+              pollqmt         wc            ' C = a CORDIC result is waiting
+        if_c  getqx   rx
+        if_c  getqy   ry
   end
 
 
