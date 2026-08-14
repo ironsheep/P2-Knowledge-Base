@@ -1,0 +1,272 @@
+'' =============================================================================
+''  test-F260-input  --  does the Goertzel summer read its ADC pin AT ALL?
+'' =============================================================================
+''  WHY A SECOND, SMALLER PROBE
+''  test-f260-goertzel.spin2 grew across 23 rounds to 1,640 lines and 214
+''  debug() sites. Spin2 DEBUG() statements resolve to unique BRK #1..255
+''  instructions (Spin2 v55 doc), so that probe was near the ceiling -- and its
+''  last run came back as a debugger memory dump instead of output. Most of its
+''  arms answer questions that are now CLOSED and recorded in the findings
+''  register and in git; carrying them costs debug slots, run time and log
+''  legibility. This probe carries only the open question.
+''
+''  WHAT IS ALREADY SETTLED (do not re-test here):
+''    the analog loopback works, DC, repeatedly (C5: ~1,635 high / ~336 low)
+''    the streamer DAC override drives from a launched cog when the pin names
+''      that cog in M[3:0] -- Chip's `setnib dacmode,cogid,#2` idiom (C10:
+''      1,640 vs 332)
+''    pppp*4 = base pin; S[15:12] = sum-select; S[19:16] = invert-select
+''    the NCO scale is 2^31; DAC output inverts each LUT byte's MSB
+''    the accumulators carry a large offset by design -- Chip's demo calibrates
+''      it out
+''    sum-select, block-select and all five documented ADC setups are FLAT
+''      against a real tone
+''
+''  THE OPEN QUESTION
+''  Eight rounds tested with a TONE. DC is far more robust: if the summer reads
+''  the pin at all, holding it HIGH vs LOW makes the bitstream sum m
+''  predominantly +1 vs -1, and the accumulators must move a long way. No
+''  frequency match, no phase alignment, no correlation subtleties to get wrong.
+''  A flat result here means the input path is dead and no tone test could ever
+''  have worked.
+''
+''  Build: pnut-ts -d test-f260-goertzel-input.spin2
+''  Rig:   jumper pin 0 -> pin 1. Unchanged.
+'' =============================================================================
+
+CON
+  _clkfreq  = 200_000_000
+  BUILD     = 1
+
+  DAC_PIN   = 0
+  ADC_PIN   = 1
+
+  CYCLES    = 100
+  TONE_HZ   = 1_000_000
+  SAMPLES   = 2000
+
+  X_DDS_G_SINC1 = $F007_0000             ' verified: Spin2 v55 symbol table
+  DDS_D     = X_DDS_G_SINC1 | CYCLES     ' block base 0 (pins 0..3), no DAC out
+  S_BASE0   = %0001 << 12                ' sum base+0 = pin 0
+  S_BASE1   = %0010 << 12                ' sum base+1 = pin 1, our ADC pin
+  S_BASE2   = %0100 << 12
+  S_BASE3   = %1000 << 12
+  S_NONE    = 0
+
+  MODE_GTZL = 0
+  MODE_COUNT = 1
+
+VAR
+  long g[16]
+  '  [0] dds_d  [1] dds_s  [2] mode
+  '  [8] cos  [9] sin  [10] density  [11] waitxfi  [15] done
+
+
+PUB main() | hi, lo
+
+  debug("=== F-260 input probe, BUILD ", udec_(BUILD), " ===")
+
+  if not continuity()
+    debug("*** no jumper on pin 0 -> pin 1. STOP.")
+    halt()
+
+  '' ---- C5: prove the analog path, DC, before asking anything else --------
+  hi := level_density(1)
+  lo := level_density(0)
+  debug("C5 analog path : pin high -> ", udec_(hi), "   low -> ", udec_(lo), "   spread ", udec_(hi - lo))
+  if (hi - lo) < 200
+    debug("*** C5 FAILED: the ADC pin does not see the driven level. Nothing")
+    debug("*** below can mean anything. STOP.")
+    halt()
+  debug("   the ADC pin's raw bitstream tracks the driven level.")
+
+  '' ---- DC: does the summer respond to that same static input? -----------
+  debug(" ")
+  debug("--- DC response, by sum-select ---")
+  dc_pair(S_BASE0, 0)
+  dc_pair(S_BASE1, 1)
+  dc_pair(S_BASE2, 2)
+  dc_pair(S_BASE3, 3)
+  dc_pair(S_NONE, 9)
+  debug(" ")
+  debug("base+1 is the ADC pin, so that row is the one that must move.")
+  debug("A flat base+1 row means the summer never reads the pin, and no tone")
+  debug("test could ever have worked -- that is the question for Chip.")
+  halt()
+
+
+PRI dc_pair(ssel, label) | hi_c, hi_s, lo_c, lo_s
+  drive(1)
+  gtzl(ssel)
+  hi_c := g[8]
+  hi_s := g[9]
+  drive(0)
+  gtzl(ssel)
+  lo_c := g[8]
+  lo_s := g[9]
+  float_pin()
+  debug("  sum base+", udec_(label), "  delta cos=", sdec_(hi_c - lo_c), "  delta sin=", sdec_(hi_s - lo_s), "   (high cos=", sdec_(hi_c), ")")
+
+
+'' Hold the DAC pin at a hard digital level from cog 0 and leave it held.
+PRI drive(high)
+  pinclear(DAC_PIN)
+  if high
+    pinh(DAC_PIN)
+  else
+    pinl(DAC_PIN)
+  waitms(5)
+
+
+PRI float_pin()
+  pinf(DAC_PIN)
+
+
+PRI continuity() : ok | hi, lo
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+  pinf(ADC_PIN)
+  pinh(DAC_PIN)
+  waitms(2)
+  hi := pinr(ADC_PIN)
+  pinl(DAC_PIN)
+  waitms(2)
+  lo := pinr(ADC_PIN)
+  pinf(DAC_PIN)
+  ok := (hi == 1) and (lo == 0)
+
+
+'' Count one-bits in the ADC pin's raw bitstream while cog 0 holds a level.
+PRI level_density(high) : bits
+  drive(high)
+  run(0, 0, MODE_COUNT)
+  float_pin()
+  bits := g[10]
+
+
+PRI gtzl(ssel)
+  run(DDS_D, ssel, MODE_GTZL)
+
+
+PRI run(ddsd, ssel, mode) | cogn, t0
+  longfill(@g[0], 0, 16)
+  g[0] := ddsd
+  g[1] := ssel
+  g[2] := mode
+  cogn := coginit(NEWCOG, @engine, @g[0])
+  t0 := getct()
+  repeat until g[15] == 1 or (getct() - t0) > (clkfreq / 4)
+  if g[15] <> 1
+    cogstop(cogn)
+    debug("   *** engine did not finish")
+
+
+PRI halt()
+  debug(" ")
+  debug("@@@ TEST COMPLETE @@@")
+  repeat
+
+
+'' ===========================================================================
+DAT             org
+
+engine
+                mov     pb_, ptra
+                mov     t_, pb_
+                rdlong  ddsd_, t_
+                add     t_, #4
+                rdlong  ssel_, t_
+                add     t_, #4
+                rdlong  mode_, t_
+
+                ' ADC pin: raw delta-sigma, no smart-pin mode, no DIR --
+                ' the DDS/Goertzel section's requirement, and Chip's demo's.
+                wrpin   ##P_ADC_1X, #ADC_PIN
+
+                cmp     mode_, #MODE_COUNT      wz
+        if_z    jmp     #count_arm
+
+                ' NCO word: QFRAC gives (f<<32)/clk; the NCO masks its MSB so
+                ' the scale is 2^31 -- halve it.
+                qfrac   ##TONE_HZ, ##_clkfreq
+                getqx   xfrq_
+                shr     xfrq_, #1
+
+                call    #build_table
+                setxfrq xfrq_
+
+                getxacc gclr_                   ' start from cleared accs
+                mov     gclr2_, 0-0             ' the mandatory follower
+
+                getct   t0_
+                xinit   ddsd_, ssel_
+                mov     tq_, t0_
+                add     tq_, ##20_000_000       ' 100 ms timeout
+                setq    tq_
+                waitxfi                         wc
+                getct   t1_
+                sub     t1_, t0_
+
+                getxacc cos_                    ' cos -> D, sin -> next S
+                mov     sin_, 0-0
+                jmp     #report
+
+count_arm
+                waitx   ##200_000
+                mov     dens_, #0
+                mov     tc_, ##SAMPLES
+.cl             testp   #ADC_PIN                wc
+        if_c    add     dens_, #1
+                djnz    tc_, #.cl
+                jmp     #report
+
+'' 512-entry table: sine in byte 3, cosine in byte 2 -- the Goertzel
+'' reference. Byte 0 is unused here; this probe drives no DAC.
+build_table
+                mov     z_, #$1FF
+.bt             mov     w_, z_
+                shl     w_, #32-9
+                qrotate #127, w_
+                getqy   sy_
+                getqx   sx_
+                shl     sy_, #24
+                setbyte sy_, sx_, #2
+                wrlut   sy_, z_                 ' register address: full 0..511
+                djnf    z_, #.bt
+                ret
+
+report
+                mov     t_, pb_
+                add     t_, #8*4
+                wrlong  cos_, t_
+                add     t_, #4
+                wrlong  sin_, t_
+                add     t_, #4
+                wrlong  dens_, t_
+                add     t_, #4
+                wrlong  t1_, t_
+                mov     t_, pb_
+                add     t_, #15*4
+                wrlong  #1, t_                  ' done -- always the last write
+                cogid   t_
+                cogstop t_
+
+pb_             res     1
+t_              res     1
+t0_             res     1
+t1_             res     1
+tq_             res     1
+tc_             res     1
+ddsd_           res     1
+ssel_           res     1
+mode_           res     1
+xfrq_           res     1
+cos_            res     1
+sin_            res     1
+dens_           res     1
+gclr_           res     1
+gclr2_          res     1
+z_              res     1
+w_              res     1
+sx_             res     1
+sy_             res     1
