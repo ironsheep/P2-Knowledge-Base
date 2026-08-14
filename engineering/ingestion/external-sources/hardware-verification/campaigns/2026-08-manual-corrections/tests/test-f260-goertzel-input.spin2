@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 7
+  BUILD     = 8
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -175,8 +175,18 @@ PUB main() | hi, lo
   dc_pair(S_NONE, 9)
   debug(" ")
   instrument_check()
-  seq_check()
+  seq_check(1)
   tone_arms()
+
+  '' The discriminator: the SAME arm again, after the tone section. If it now
+  '' reports ~930,000 the change is HISTORY -- something tone_on() does that
+  '' persists. If it still reports hundreds, then the tone and DC-repeat arms
+  '' differ from this one in CODE, not in when they run.
+  seq_check(2)
+  debug(" ")
+  debug("SEQ pass 1 vs pass 2 is the whole question: same code, different")
+  debug("point in the session. Different answers = history; same answers =")
+  debug("the other arms differ in code, and SEQ is the one to trust.")
   halt()
 
 
@@ -199,9 +209,11 @@ PRI instrument_check()
 '' then swept against it. This is the first time this comparison has been made
 '' with the debug interrupt OUT of the streaming cog.
 '' --- A/B/C/D in one cog: do my commands register at all? -------------------
-PRI seq_check()
+PRI seq_check(tag) | dens
   debug(" ")
-  debug("--- SEQ: four reads around two commands, all in ONE cog ---")
+  debug("--- SEQ pass ", udec_(tag), ": four reads around two commands, ONE cog ---")
+  run_at(0, 0, MODE_COUNT, TONE_HZ)
+  debug("  ADC pin density right now = ", udec_(g[10]), "/2000")
   run_at(DDS_D, S_BASE1, MODE_SEQ, TONE_HZ)
   debug("  A before any command : cos=", sdec_(g[16]), " sin=", sdec_(g[17]))
   debug("  B after command 1    : cos=", sdec_(g[18]), " sin=", sdec_(g[19]))
