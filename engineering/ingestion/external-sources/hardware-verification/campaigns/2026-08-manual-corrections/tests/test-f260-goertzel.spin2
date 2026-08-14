@@ -104,6 +104,21 @@ CON
   MODE_HOLD  = 5                         ' drive from a launched cog, then HOLD
   MODE_SAMP  = 6                         ' sample the ADC pin only, drive nothing
   MODE_CHIP  = 7                         ' Chip's shipped demo, ported to our rig
+  MODE_DACDRV = 8                        ' streamer DAC override, launched cog
+
+  '' Round 20. C6b came back red: the cog id in M[3:0] did NOT make a launched
+  '' cog's SETDACS drive. But re-reading Chip's demo, that tested the wrong
+  '' path -- HE NEVER CALLS SETDACS. His DACs are driven by the STREAMER
+  '' (dds_d carries DDDD=%1111), so M[3:0]=cogid names which cog's DAC channels
+  '' the pin follows, and it is that cog's streamer override that supplies the
+  '' value. The Silicon Doc separates them explicitly: SETDACS values are
+  '' "constantly output, except at times when the streamer ... override them."
+  ''
+  '' So this arm tests the path that actually matters, and that open question 4
+  '' has been asking about all along: does the STREAMER's DAC override reach
+  '' the pin from a launched cog? It fills the LUT with a constant, runs a long
+  '' DDS command, and samples the pin's own density WHILE the streamer runs --
+  '' no WAITXFI, so the cog can watch its own output.
 
   '' Round 18 -- Goertzel_DEBUG_Demo.spin2, Chip's shipped example (2021).
   '' It answers what sixteen rounds of probing could not:
@@ -147,7 +162,7 @@ CON
   ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
-  BUILD       = 19                       ' bump EVERY round; the banner prints it
+  BUILD       = 20                       ' bump EVERY round; the banner prints it
 
   '' Round 9. Round 8's C5 ran and disproved my own fix: the plain DAC config
   '' drove the jumper cleanly (spread 1297 of 2000) while adding P_CHANNEL
@@ -658,6 +673,7 @@ PRI ext_tone_arms() | b1, b2, b3
     debug("NO DETECTION even against a real independent tone and a clean null.")
     debug("Before calling that silicon: sweep what the summer listens to.")
 
+  c10_streamer_dac()
   chip_arms()
   s_sweep()
   blk_sweep()
@@ -795,6 +811,37 @@ PRI chip_arms() | i, on_c, on_s, off_c, off_s
     debug("     DAC muted       : cos=", sdec_(off_c), " sin=", sdec_(off_s))
     debug("     CALIBRATED delta: cos=", sdec_(on_c - off_c), "  sin=", sdec_(on_s - off_s))
   debug("  (a large calibrated delta = the mode works and the cog-id fix was it)")
+
+
+'' --- C10: the streamer DAC override, from a launched cog -------------------
+PRI c10_streamer_dac() | hi, lo
+  hi := dacdrv($FF)
+  lo := dacdrv($00)
+  debug(" ")
+  debug("   C10 streamer DAC override from a launched cog, M(3:0)=cogid:")
+  debug("       LUT constant FF -> ", udec_(hi), "   00 -> ", udec_(lo), "   spread=", udec_(spread(hi, lo)))
+  if spread(hi, lo) > 200
+    debug("       C10 OK -- the streamer override DOES drive from a launched")
+    debug("       cog when the pin names it in M(3:0). Chip's cog-id idiom is")
+    debug("       confirmed for the path that matters, and answers open Q4.")
+  else
+    debug("       C10 red -- the streamer override does not reach the pin from")
+    debug("       a launched cog even naming the cog. Then the Goertzel arms")
+    debug("       never had a tone from the streamer, and the guide's own")
+    debug("       17.1 shape cannot work as printed on this part.")
+
+
+PRI dacdrv(level) : nbits
+  reset_pins()
+  longfill(@g[0], 0, 20)
+  g[0] := X_DDS_G_SINC1 | X_DACS_X_X_X_0 | $FFFF   ' long run, DAC0 <- X0
+  g[1] := DDS_S_OK
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[5] := level
+  g[6] := MODE_DACDRV
+  start_engine()
+  nbits := g[13]
 
 
 PRI chip_run(cmd, gain) : magnitude
@@ -1060,6 +1107,8 @@ engine
         if_z    jmp     #samp_arm_code
                 cmp     v_mode, #MODE_CHIP      wz
         if_z    jmp     #chip_arm_code
+                cmp     v_mode, #MODE_DACDRV    wz
+        if_z    jmp     #dacdrv_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
                 ' With an external smart-pin tone, do not touch the DAC pin at
@@ -1144,6 +1193,42 @@ c2_arm
                 testp   #ADC_PIN                wc
         if_c    mov     lvl, #1
                 waitxfi
+                jmp     #report
+
+'' --- Does the STREAMER's DAC override drive from a launched cog? -----------
+'' The LUT is filled with a constant so the DAC output is a DC level, then the
+'' command runs long while this same cog samples the jumpered ADC pin. Two
+'' runs, level $FF and $00: a large density difference means the streamer
+'' override reaches the pin, which is what Chip's M[3:0]=cogid is for and what
+'' every tone in this campaign has depended on.
+dacdrv_arm_code
+                mov     t, ptra
+                add     t, #5*4
+                rdlong  alev, t                 ' constant DAC level
+
+                wrpin   ##P_ADC_1X, #ADC_PIN    ' sense pin, raw
+                dirl    #ADC_PIN
+
+                cogid   tc2                     ' name THIS cog in M[3:0]
+                shl     tc2, #8
+                or      tc2, ##(P_DAC_124R_3V | P_CHANNEL)
+                dirl    #DAC_PIN
+                wrpin   #0, #DAC_PIN
+                wrpin   tc2, #DAC_PIN
+                dirh    #DAC_PIN
+
+                mov     z, #$1FF                ' LUT: constant in byte 0
+.dfill          wrlut   alev, z
+                djnf    z, #.dfill
+
+                setxfrq xfrq
+                xinit   v_ddsd, v_ddss          ' long command; no WAITXFI --
+                waitx   ##200_000               ' let it get going, then watch
+                mov     lvl, #0
+                mov     tw2, ##SIG_SAMPLES
+.dloop          testp   #ADC_PIN                wc
+        if_c    add     lvl, #1
+                djnz    tw2, #.dloop
                 jmp     #report
 
 '' --- Chip's configuration, ported to the 2-pin rig -------------------------
