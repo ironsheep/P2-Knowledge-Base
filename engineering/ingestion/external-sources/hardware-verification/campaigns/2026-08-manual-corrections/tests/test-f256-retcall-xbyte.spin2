@@ -52,6 +52,20 @@ VAR
 
 PUB main() | p0, p1, m1, p2, m2
 
+  ' ---------- PASS -1: no XBYTE at all.  Does a cog run and write hub? ----
+  blk[0] := 0
+  coginit(NEWCOG, @engine_null, @blk[0])
+  waitms(50)
+  debug("=== F-256 _RET_ CALL inside XBYTE ===")
+  debug("PASS -1  plain cog, no XBYTE: progress=", udec_(blk[0]), " (expect 3)")
+  if blk[0] <> 3
+    debug("*** THE HARNESS ITSELF IS BROKEN -- a plain cog cannot even count.")
+    debug("*** Nothing about XBYTE can be concluded. Fix coginit/hub plumbing.")
+    debug(" ")
+    debug("@@@ TEST COMPLETE: F-256 retcall-xbyte (HARNESS FAILED) @@@")
+    repeat
+  debug("Harness sound: cog runs, PTRA good, hub writes land.")
+
   ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
   ' Round 2 still returned progress=0 with the '@' fix, so before blaming
   ' _RET_ CALL we run the guide's published VM shape itself.  If PASS 0 does
@@ -63,7 +77,6 @@ PUB main() | p0, p1, m1, p2, m2
   coginit(NEWCOG, @engine0, @blk[0])
   waitms(50)
   p0 := blk[0]
-  debug("=== F-256 _RET_ CALL inside XBYTE ===")
   debug("PASS 0  guide's own VM shape: progress=", udec_(p0), " (expect 3)")
   if p0 <> 3
     debug("*** THE BASE VM DOES NOT DISPATCH. Everything below is meaningless.")
@@ -118,6 +131,24 @@ PUB main() | p0, p1, m1, p2, m2
 DAT             org
 
 '' ---------------------------------------------------------------------------
+'' engine_null -- no XBYTE.  Just proves coginit + PTRA + hub writes work.
+'' ---------------------------------------------------------------------------
+engine_null
+                mov     pn, ptra
+                mov     tn, #3
+.lp             rdlong  vn, pn
+                add     vn, #1
+                wrlong  vn, pn
+                djnz    tn, #.lp
+                cogid   tn
+                cogstop tn
+pn              res     1
+tn              res     1
+vn              res     1
+
+DAT             org
+
+'' ---------------------------------------------------------------------------
 '' engine0 -- BASE VM, no _RET_ CALL.  Program $00 $00 $00 $03 -> progress 3.
 '' ---------------------------------------------------------------------------
 engine0
@@ -145,6 +176,8 @@ stop0           cogid   tq0
 pblk0           res     1
 tq0             res     1
 tv0             res     1
+
+DAT             org
 
 '' ---------------------------------------------------------------------------
 '' engine1 -- program: $00 $00 $01 $00 $03

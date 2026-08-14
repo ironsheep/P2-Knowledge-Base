@@ -4,6 +4,11 @@
 ''  TWO QUESTIONS in one file, because the second is meaningless until the
 ''  first has established that the DAC pin path works at all.
 ''
+''  ROUND 4 NOTE -- P_OE and P_CHANNEL are THE SAME BIT (Spin2 v55 symbol
+''  table: both are %..._01_00000_0 = P_TT_01, in a group marked 'pick one').
+''  Round 3's six-row sweep therefore tested one configuration six times.
+''  This round sweeps the TT field itself and demonstrates the '+' carry.
+''
 ''  F-259 (corroborate on OUR silicon).  The Streamer Guide ships
 ''      wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins
 ''      drvl  dac_pins
@@ -54,6 +59,7 @@ s_bad           byte    "*** NO JUMPER ***", 0
 
 VAR
   long lutbuf[512]
+  long g[8]
 
 PUB main()
   debug("=== F-259 / F-260 probe ===")
@@ -74,46 +80,48 @@ PUB main()
 '' ===========================================================================
 '' PART 1 (F-259) -- what actually gates cog-DAC drive?
 '' ===========================================================================
-PRI part1_dac_gating() | v1, v2, v3, v4, v5, v6
+PRI part1_dac_gating() | v_tt00, v_tt01, v_tt10, v_tt11, v_carry, v_out1
 
   debug(" ")
   debug("--- PART 1: cog-DAC drive gating (F-259) ---")
+  debug("SOURCE FACT (Spin2 v55 symbol table, 'DIR/OUT Control -- pick one'):")
+  debug("  P_OE == P_CHANNEL == P_TT_01   (identical bit pattern)")
+  debug("  P_BITDAC == P_TT_10")
+  debug("Round 3's six-row sweep was DEGENERATE -- rows 2..6 were the same word.")
+  debug("This round sweeps the TT field itself, which is what actually varies.")
+  debug(" ")
 
   set_dac_ch0($FF)                                  ' channel 0 -> full scale
 
-  v1 := try_dac(P_DAC_124R_3V,                     false)
-  v2 := try_dac(P_DAC_124R_3V | P_CHANNEL,         false)
-  v3 := try_dac(P_DAC_124R_3V | P_CHANNEL,         true)
-  v4 := try_dac(P_DAC_124R_3V | P_CHANNEL | P_OE,  false)
-  v5 := try_dac(P_DAC_124R_3V | P_CHANNEL | P_OE,  true)
-  v6 := try_dac(P_DAC_124R_3V | P_OE,              true)
+  v_tt00 := try_dac(P_DAC_124R_3V | P_TT_00, false)
+  v_tt01 := try_dac(P_DAC_124R_3V | P_TT_01, false)
+  v_tt10 := try_dac(P_DAC_124R_3V | P_TT_10, false)
+  v_tt11 := try_dac(P_DAC_124R_3V | P_TT_11, false)
+  v_out1 := try_dac(P_DAC_124R_3V | P_TT_01, true)
 
-  debug("1  base                      OUT=0 : ", udec_(v1))
-  debug("2  +P_CHANNEL                OUT=0 : ", udec_(v2), "   <== THE GUIDE'S RECIPE")
-  debug("3  +P_CHANNEL                OUT=1 : ", udec_(v3))
-  debug("4  +P_CHANNEL +P_OE          OUT=0 : ", udec_(v4))
-  debug("5  +P_CHANNEL +P_OE          OUT=1 : ", udec_(v5), "   <== EXPECTED ANSWER")
-  debug("6  +P_OE (no P_CHANNEL)      OUT=1 : ", udec_(v6))
+  ' THE HAZARD: '+' with two names from the same pick-one field CARRIES.
+  ' P_CHANNEL + P_OE = %01 + %01 = %10 = P_BITDAC -- a DIFFERENT mode.
+  v_carry := try_dac(P_DAC_124R_3V + P_CHANNEL + P_OE, false)
 
+  debug("TT=%00 (P_TT_00, no drive)        : ", udec_(v_tt00))
+  debug("TT=%01 (P_CHANNEL == P_OE)        : ", udec_(v_tt01), "   <== THE GUIDE'S RECIPE")
+  debug("TT=%10 (P_BITDAC)                 : ", udec_(v_tt10))
+  debug("TT=%11                            : ", udec_(v_tt11))
+  debug("TT=%01, OUT=1                     : ", udec_(v_out1))
+  debug("P_CHANNEL + P_OE via '+' (CARRY)  : ", udec_(v_carry), "   <== lands on TT=%10")
   debug(" ")
-  ' Row 1 is the OFF state (no P_CHANNEL, no P_OE).  Compare every other row
-  ' against IT -- comparing two rows that are both ON proves nothing, which is
-  ' the mistake round 2 made.
-  if abs(v5 - v1) < 500
-    debug("*** NO ROW LIFTS ABOVE THE OFF STATE -- the DAC never drove.")
-    debug("*** PART 2 below is NOT trustworthy.")
+
+  if abs(v_tt01 - v_tt00) < 500
+    debug("*** TT=%01 DOES NOT LIFT ABOVE TT=%00 -- the DAC never drove. VOID.")
   else
-    debug("Drive detected (row 1 = off, ", udec_(v1), " -> row 5 = on, ", udec_(v5), ").")
-    if v2 > v1 + 500
-      debug("P_CHANNEL ALONE enables the drive -- P_OE is NOT required here.")
+    debug("Drive confirmed: TT=%00 off (", udec_(v_tt00), ") -> TT=%01 on (", udec_(v_tt01), ").")
+    if abs(v_carry - v_tt10) < 500
+      debug("CARRY HAZARD CONFIRMED: 'P_CHANNEL + P_OE' lands on TT=%10, not %01.")
+      debug("The guide composes modes with '+'. That is the trap. Use '|'.")
+    if abs(v_out1 - v_tt01) < 500
+      debug("OUT does not affect the cog-DAC drive (TT=%01 same either way).")
     else
-      debug("P_CHANNEL alone does NOT drive -- P_OE is required.")
-    if v6 > v1 + 500
-      debug("P_OE alone also enables the drive (row 6, no P_CHANNEL).")
-    if abs(v3 - v2) < 500
-      debug("OUT does not matter (rows 2 and 3 agree).")
-    else
-      debug("OUT participates (rows 2 and 3 differ).")
+      debug("OUT DOES affect the drive.")
 
 
 '' Prove the short DIGITALLY before trusting any analog reading.  Drive the
@@ -168,24 +176,26 @@ PRI read_adc() : counts
 
 '' ===========================================================================
 '' PART 2 (F-260) -- the DDS/Goertzel command word, exactly as documented
+''
+'' ROUND 4 -- WHY THIS MOVED INTO ITS OWN COG.  Rounds 1-3 all died right
+'' after the PART 2 header, and round 3 opened the single-step debugger.
+'' Cause: load_lut() ran SETQ2 + RDLONG over LUT $000..$1FF from inline PASM
+'' *inside the Spin2 interpreter's own cog*.  The Spin2 interpreter lives in
+'' COG + LUT, so that wipes the interpreter out from under itself -- it then
+'' executes garbage, which is what tripped the debugger.  It was never
+'' WAITXFI.  The streamer work needs the LUT, so it needs a cog of its own.
 '' ===========================================================================
-PRI part2_goertzel() | cmd, x, y, i, adc
+PRI part2_goertzel() | cmd, i, adc
 
   debug(" ")
   debug("--- PART 2: DDS/Goertzel as documented (F-260) ---")
 
-  ' Use the configuration PART 1 proved actually drives.
-  pinclear(DAC_PIN)
-  wrpin(DAC_PIN, P_DAC_124R_3V | P_CHANNEL | P_OE)
-  pinhigh(DAC_PIN)
+  build_sine()                             ' hub table; the COG loads the LUT
 
-  pinclear(ADC_PIN)
-  wrpin(ADC_PIN, P_ADC_1X | P_ADC)
-  wxpin(ADC_PIN, 12)
-  pinhigh(ADC_PIN)
-
-  build_sine()
-  load_lut()
+  g[0] := @lutbuf
+  g[3] := XFRQ_1KHZ
+  g[4] := DAC_PIN
+  g[5] := ADC_PIN
 
   ' The guide writes:  mode | X_DACS_0N0_0N0 + adc_pin<<17 + cycles
   ' adc_pin<<17 COLLIDES with the %111 the guide also requires in D[18:16].
@@ -193,33 +203,37 @@ PRI part2_goertzel() | cmd, x, y, i, adc
   ' what the collided word actually does on silicon.
   cmd := DDS_SINC1 | (ADC_PIN << 17) | 1024
   debug("cmd = ", uhex_long_(cmd), "  (as documented, collision included)")
+  sweep_one(cmd)
 
-  x, y := goertzel_once(cmd, XFRQ_1KHZ)
-  adc := rdpin(ADC_PIN)
-  debug("after WAITXFI:  getqx=", shex_long_(x), "  getqy=", shex_long_(y), "  adc=", udec_(adc))
-
-  if x == 0 and y == 0
-    debug("NO ACCUMULATION -- reproduces the community report.")
+  if g[1] == $DEAD_0000 and g[2] == $DEAD_0000
+    debug("NO CORDIC RESULT EVER BECAME AVAILABLE (POLLQMT never set C).")
+  elseif g[1] == 0 and g[2] == 0
+    debug("Result available but ZERO -- reproduces the community report.")
   else
     debug("ACCUMULATED -- the mode works; the guide's TEXT is what is wrong.")
 
-  ' Sweep what the reporter swept, so we do not repeat blind.
   debug(" ")
-  debug("--- field sweep ---")
+  debug("--- field sweep (the same fields the reporter swept) ---")
   repeat i from 0 to 3
     sweep_one(DDS_SINC1 | (lookupz(i : 1, 2, 4, 8) << 24) | (ADC_PIN << 17) | 1024)
   sweep_one(DDS_SINC1 | (1 << 19) | (ADC_PIN << 17) | 1024)     ' D19 set
   sweep_one($F087_0000 | (ADC_PIN << 17) | 1024)                ' D23 set
-  sweep_one(DDS_SINC1 | 1024)                                   ' no pin field at all
+  sweep_one(DDS_SINC1 | 1024)                                   ' no pin field
 
   debug(" ")
-  debug("If every row is zero, the documented command word cannot start this")
-  debug("mode -- escalate to QUESTIONS-FOR-CHIP-GRACEY.md with these logs.")
+  debug("If every row shows no result, the documented command word cannot")
+  debug("start this mode -- escalate with these logs.")
 
 
-PRI sweep_one(cmd) | x, y
-  x, y := goertzel_once(cmd, XFRQ_1KHZ)
-  debug("cmd=", uhex_long_(cmd), "  x=", shex_long_(x), "  y=", shex_long_(y))
+'' Launch the streamer engine in ITS OWN cog (it needs the LUT) and wait.
+PRI sweep_one(cmd)
+  g[1] := $DEAD_0000
+  g[2] := $DEAD_0000
+  g[6] := cmd
+  g[7] := 0                                ' done
+  coginit(NEWCOG, @dds_engine, @g[0])
+  repeat until g[7] == 1
+  debug("cmd=", uhex_long_(g[6]), "  x=", shex_long_(g[1]), "  y=", shex_long_(g[2]), "  adc=", udec_(rdpin(ADC_PIN)))
 
 
 '' XINIT / GETQX / GETQY are PASM-only.
@@ -229,31 +243,52 @@ PRI sweep_one(cmd) | x, y
 '' starts never finishes.  A bounded WAITX cannot hang, and for "does this
 '' mode accumulate at all" a fixed wait is sufficient.  (The reporter saw
 '' WAITXFI complete on schedule, so his symptom differs from that hang.)
-'' ROUND 3: GETQX is now GUARDED.  Round 2 still died after the PART 2
-'' header -- with nothing accumulated, GETQX blocks forever waiting for a
-'' result that never comes (round 2's own CONTROL proved GETQX stalls).
-'' POLLQMT is the non-blocking "is a result waiting" check; if none is, we
-'' report the sentinel instead of hanging.
-PRI goertzel_once(cmd, xf) : rx, ry
-  rx := ry := $DEAD_0000                   ' sentinel = no result available
-  org
-              setxfrq xf
-              xinit   cmd, #0
-              waitx   ##400_000            ' ~2 ms at 200 MHz -- bounded
-              pollqmt         wc            ' C = a CORDIC result is waiting
-        if_c  getqx   rx
-        if_c  getqy   ry
-  end
-
-
 PRI build_sine() | i
   repeat i from 0 to 511
     lutbuf[i] := qsin(32767, i << 23, 0)
 
 
-PRI load_lut() | p
-  p := @lutbuf                             ' PTRA is not ours inside a method
-  org
-              setq2   ##512-1
-              rdlong  0, p                 ' hub sine table -> LUT $000..$1FF
-  end
+DAT             org
+
+'' The streamer/Goertzel engine.  PTRA -> g[0].
+'' g: [0]=@sine [1]=x [2]=y [3]=xfrq [4]=dacpin [5]=adcpin [6]=cmd [7]=done
+dds_engine
+                mov     gp, ptra
+                rdlong  sinep, gp
+                add     gp, #3*4
+                rdlong  xfrqv, gp
+                add     gp, #3*4
+                rdlong  cmdv,  gp
+                mov     gbase, ptra
+
+                setq2   ##512-1
+                rdlong  0, sinep              ' SAFE HERE: our own cog's LUT
+
+                setxfrq xfrqv
+                xinit   cmdv, #0
+                waitx   ##400_000             ' bounded; never WAITXFI
+                pollqmt                wc     ' C = a CORDIC result is waiting
+                mov     gx, ##$DEAD_0000
+                mov     gy, ##$DEAD_0000
+        if_c    getqx   gx
+        if_c    getqy   gy
+
+                mov     gt, gbase
+                add     gt, #1*4
+                wrlong  gx, gt
+                add     gt, #4
+                wrlong  gy, gt
+                mov     gt, gbase
+                add     gt, #7*4
+                wrlong  #1, gt                ' done
+                cogid   gt
+                cogstop gt
+
+gp              res     1
+gbase           res     1
+sinep           res     1
+xfrqv           res     1
+cmdv            res     1
+gx              res     1
+gy              res     1
+gt              res     1

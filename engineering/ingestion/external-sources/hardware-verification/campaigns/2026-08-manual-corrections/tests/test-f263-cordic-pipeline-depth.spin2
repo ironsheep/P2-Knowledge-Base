@@ -48,7 +48,7 @@ VAR
   long expx[N], expy[N]
   long blk[16]
 
-PUB main() | i, f, bad, firstbad, cfirstbad
+PUB main() | i, f, bad, firstbad, cfirstbad, dfirstbad
 
   repeat i from 0 to N-1
     inm[i] := 10 + i
@@ -104,6 +104,21 @@ PUB main() | i, f, bad, firstbad, cfirstbad
     debug("FILL=", udec_(f), "  mismatches=", udec_(bad), " of ", udec_(f), "   got[0]=", udec_(gotm[0]), " exp[0]=", udec_(expm[0]))
     if bad > 0 and cfirstbad == 0
       cfirstbad := f
+
+  ' ---------- ARM D: register-only fill AND drain -------------------------
+  debug(" ")
+  debug("--- FILL sweep (ARM D: register-only fill AND drain, hub writes after) ---")
+  dfirstbad := 0
+  repeat f from 1 to MAXFILL
+    longfill(@gotm, 0, N)
+    run_engine(f, 4)
+    bad := 0
+    repeat i from 0 to f-1
+      if gotm[i] <> expm[i]
+        bad++
+    debug("FILL=", udec_(f), "  mismatches=", udec_(bad), " of ", udec_(f))
+    if bad > 0 and dfirstbad == 0
+      dfirstbad := f
 
   ' ---------- ARM A at FILL=6, the Assembly ch.5 shape ---------------------
   debug(" ")
@@ -175,6 +190,8 @@ engine
         if_z    jmp     #do_armb
                 cmp     modeq, #3       wz
         if_z    jmp     #do_armc
+                cmp     modeq, #4       wz
+        if_z    jmp     #do_armd
                 jmp     #do_arma
 
 '' ---- CONTROL: exactly one op in flight, retrieved at once.  MUST stall.
@@ -241,6 +258,36 @@ do_armc
                 add     ox, #4
                 sub     jj, #1
                 jmp     #.dloopc
+
+'' ---- ARM D: Chip's shape for BOTH phases -- register-only fill AND
+''      register-only drain (results land in cog registers via ALTD, hub
+''      writes happen afterwards).  ARM C fixed the fill but still did a
+''      WRLONG between retrievals, so it was not retrieving at the 8-clock
+''      cadence either.  Chip's drain is GETQY/GETQX back to back with no
+''      hub access.  If ARM D is clean to FILL=7, Chip's model is fully
+''      vindicated and the rule is: NO HUB ACCESS INSIDE EITHER CORDIC LOOP.
+do_armd
+                mov     vx, #10
+                rep     #2, fillq             ' fast fill, register-only
+                qmul    vx, vx
+                add     vx, #1
+
+                mov     kk, #0                ' fast drain into cog registers
+                rep     #2, fillq
+                altd    kk, #dbuf
+                getqx   0-0
+                add     kk, #1
+
+                mov     ox, a_gotm            ' NOW the hub writes, off-cadence
+                mov     kk, #0
+.wrd            cmp     kk, fillq       wcz
+        if_ae   jmp     #finish
+                alts    kk, #dbuf
+                mov     rx, 0-0
+                wrlong  rx, ox
+                add     ox, #4
+                add     kk, #1
+                jmp     #.wrd
 
 '' ---- ARM A: Assembly ch.5 shape.  QROTATE, GETQX + GETQY per op.
 do_arma
@@ -319,3 +366,5 @@ jj              res     1
 t0              res     1
 t1              res     1
 t2              res     1
+kk              res     1
+dbuf            res     8
