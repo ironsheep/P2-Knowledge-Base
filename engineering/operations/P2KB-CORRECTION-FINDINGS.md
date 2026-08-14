@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-254`** (F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-259`** (F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2658,6 +2658,170 @@ on forum authority.
   only this file makes one. `smart-pin-11100-sync-serial-transmit.yaml:150` lists **"SPI master"**,
   which is unaffected — a master drives CS itself and owns frame boundaries, so no frame-sync
   problem arises. No other occurrence in the KB.
+
+---
+
+## Forum docs-feedback sweep (2026-08-14) — F-254…F-258
+
+**Origin:** Parallax forum posts #104–#117 (2026-08-12/13), reviewing the deSilva tutorial, the
+XBYTE Programming Guide, and the P2 Architect's Guide. Full analysis (with the tone/positioning
+items that are *not* defects) lives at
+`engineering/document-production/FORUM-NO-COMMMIT/Docs-findings-360813/DOCS-FINDINGS-ANALYSIS.md`
+(gitignored — find it by path). Forum posts are the **lead**; every finding below was verified
+against the live opus-master, `pnut-ts` 1.55.3, or P2KB before filing.
+
+### F-254 — deSilva Acknowledgments: the author is listed among the "giants," reviewers are credited generically, and an AI claim is false. `CONFIRMED`
+
+**Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md:113–160`.
+**This is in a SHIPPED document (v3.0.5).** Three distinct defects in one block:
+
+1. **Self-listing.** The section opens *"This manual stands on the shoulders of giants. We
+   gratefully acknowledge:"* → `### Primary Contributors` → deSilva, **Iron Sheep Productions LLC
+   (Stephen M Moraco)**, Chip Gracey. Structurally the text declares the giants and then lists the
+   author among them. Raised by Christof Eb. (#109): *"Newton bows to other great scientists and
+   makes himself small; Stephen has styled himself to be a giant here."* The idiom itself is
+   canonical (AJL, #105, is right about that) — the defect is which side of it the author sits on.
+   The Newton quote also appears **twice** (paraphrase at `:113`, quotation at `:154`).
+2. **Unearned reviewer credit.** `### Technical Reviewers` — *"Special thanks to those who reviewed
+   drafts, tested code examples, and provided invaluable feedback"* — lists only generic
+   placeholders: *"The P2 Documentation Team at Parallax"*, *"Community members who beta-tested
+   examples"*, *"Everyone who reported errors."* **No named person.** If that review did not occur
+   as described, this claims a validation process we did not run — a trust-chain defect, not a
+   style one.
+3. **False factual claim.** *Production Notes* states the manual used *"AI-assisted content
+   generation **trained on** deSilva's writing style."* **Nothing was trained.** The accurate
+   statement is AI-assisted authorship *in the style of* deSilva's P1 tutorial, with every example
+   compiled. Precision matters especially here — the same thread carries hostility about
+   AI-generated content.
+
+Also present and low-value: an `### Inspiration` block crediting the MIT AI Lab, Donald Knuth, and
+the Demoscene, none of whom contributed to this work.
+
+**Proposed correction** (essentially evanh's advice, #106 — *"delete the whole line, and the
+'Primary Contributors' line too. Keep it formal. 'Acknowledgements' is all that's needed"*):
+drop the giants opener and the closing Newton quote; drop the `Primary Contributors` heading;
+**remove Iron Sheep / Stephen Moraco from the acknowledgments entirely** (the author belongs on the
+title page); delete the Technical Reviewers block **unless real named reviewers can replace it**;
+delete the Inspiration block; correct or delete the "trained on" sentence.
+
+**Class-wide sweep — DONE, and the result is good news: this is ISOLATED to deSilva.** Swept every
+manual and app-note front-matter. All the others are already clean, formal, and correct —
+Architect's, Assembly, XBYTE, IOSP, Getting Started, Debug Window, Streamer all credit Parallax,
+Chip Gracey, the P2 community (and IOSP additionally Jon Titus) with no self-listing, no giants
+line, no generic reviewer credits, no AI claim. deSilva is the **outlier**, consistent with it
+being the oldest of the set — written before the house convention settled. Two further copies carry
+the text but are **inert**: `opus-master/archived-2025/COMBINED-COMPLETE-MASTER.md` and
+`initial-chapter-generation/00-acknowledgments.md`; `p2-smart-pins-tutorial/TECHNICAL-REVIEW-STATUS.md`
+matched the grep but is an internal working doc, not shipped.
+
+### F-255 — XBYTE §15.3: `set_nz` is never defined, and the contract shown cannot work. `CONFIRMED`
+
+**Location:** `manuals/p2-xbyte-programming-guide/opus-master/xbyte-body.md:1388–1401`
+(Christof's "page 66"). Guide is **in community review**.
+
+Two representative handlers end with `_ret_ call #set_nz` — `op_lda_imm` after loading `a`, and
+`op_inx` after incrementing `x`. **`set_nz` is never defined anywhere in the manual** (it appears
+only at these two call sites plus prose mentions at `:879` and `:1293`). Worse than missing:
+`:1293` asserts *"A single shared `set_nz` helper serves most of the instruction set,"* but the two
+call sites require flags from **different registers** and the helper takes **no operand** — no
+shared result register, no calling convention, nothing. As written the pattern cannot do what the
+text claims. Christof's objection (*"how should that routine guess from what it could set the Z
+flag?"*) is correct and unanswerable.
+
+**Second defect, same section:** §15.3's closing paragraph credits the handlers with *"each
+opcode's table entry supplying the SKIPF pattern"* — but **none of the three handlers shown carries
+a skip pattern**. The examples do not demonstrate the mechanism the prose attributes to them.
+(Christof: *"There is no skip pattern."*)
+
+**Proposed correction:** define `set_nz` and make its calling convention explicit (shared result
+register, or an operand), show at least one handler family with real skip patterns, and **compile
+the slice**.
+
+**Scope check — deliberately NOT inflated.** A sweep of every `call`/`jmp` target inside the
+guide's PASM2 blocks found **12 of 13 undefined as labels** (`pop_two`, `push_a`, `push_value`,
+`read_opcode`, `hub_write_port`, `next_op`, `idle`, `int_ignore`, `odd_variant`, `special_case`,
+`voice_on`, `set_nz`). **Only `set_nz` is a defect.** The others are legitimate illustrative
+stand-ins whose names fully convey their job and whose internals are irrelevant to the lesson.
+`set_nz` differs because the *surrounding text makes a claim about the helper's shareability* — its
+contract is load-bearing, so it cannot be a stand-in. **Do not "fix" the other eleven.**
+Corroborating the guide is not broadly broken: the complete VM in §12.2 (`xbyte-body.md:975–1044`)
+was extracted and **compiles clean** under `pnut-ts -q`.
+
+### F-256 — `_RET_ CALL` is a load-bearing idiom in a shipped guide and its semantics are unverified. `NEEDS-VERIFICATION`
+
+**Location:** `xbyte-body.md:879` (*"Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely on
+this"*), used at `:1391`, `:1400`, `:416`, `:793`.
+
+Christof (#110) doubted *"you can combine a CALL with ret."* **Tested: `_ret_ call #set_nz`
+assembles clean under `pnut-ts` 1.55.3**, and `language/pasm2/call.yaml:11` describes CALL paired
+"with a `_RET_` condition" — so as stated the objection is wrong.
+
+**But the compiler proves legality, not semantics.** The open question is what the hardware does
+when one instruction both pushes a return address and returns: does control reach the helper and
+then return to `$1FF` (XBYTE re-entry intact), or does the push/pop ordering break dispatch?
+`architecture/xbyte_engine.yaml:71` is suggestive but addresses a *different* case (why a CALL
+cannot substitute for `PUSH #$1FF` at arm time). **Not resolvable from the KB or the Silicon Doc;
+no answer is asserted here.**
+
+**Action:** jumper-free, single-board hardware test — arm XBYTE, run a handler ending in
+`_RET_ CALL`, report whether dispatch continues. Ideal **VO-J** candidate; result goes to the EF
+ledger either way. **A load-bearing idiom in a guide under community review must not stay
+unverified.** If it fails, §15.3 and the Chapter 9 explanation both need rework.
+
+### F-257 — deSilva Appendix A platform comparison omits the current competitor and the axis where we are weakest. `CONFIRMED`
+
+**Location:** `COMPLETE-OPUS-MASTER.md:5876+`. **SHIPPED document.** Raised by Christof (#111).
+
+- **RP2040/RP2350 (Raspberry Pi Pico 2 / 2 W) is absent.** The table lists STM32, ESP32,
+  Arduino/AVR, PIC32, P2. The RP2350 is the current default for a large share of hobby projects and
+  its PIO is the nearest real competitor to the P2's pin-level story. Omitting it reads as
+  avoidance.
+- **The comparison is hardware-only.** It compares cores, peripheral location, and timing, and
+  never mentions **libraries, ecosystem, or language** — Arduino/ESP-IDF/MicroPython versus having
+  to learn Spin2 + PASM2 is for many readers *the* deciding factor. A comparison that omits the
+  axis where we are weakest invites the "marketing leaflet" charge Christof levels.
+- **Pricing** (Edge modules) is unmentioned; independently echoed by evanh in a separate thread.
+
+**Proposed correction — fix, do not delete.** Add the RP2350 row; add a software/ecosystem
+dimension that states plainly where the P2 loses; keep the technical claims, which are accurate and
+already properly hedged (the "2 clocks" passage correctly calls itself a lower bound). Consider
+adopting Christof's own framing of the P2's strength, which is sharper than ours and comes from a
+critic: *"the probability to succeed in a project is higher, because you can always fall back to
+dedicate a core to some time critical part — much more easy than working with interrupts."*
+
+### F-258 — "XBYTE is wrong for vintage-CPU emulation" — the guide already says so. `RESOLVED-INVALID`
+
+**Filed deliberately so this is not re-raised from the forum thread.**
+
+Wuerfel_21 (#112) argued the guide is *"misleading"* for presenting XBYTE as suitable for emulating
+vintage CPUs, since XBYTE allows no common code between handlers (needed for virtual interrupts and
+cycle-precise timing). **Checked against the guide: it already makes exactly that argument, in
+detail, and reaches his conclusion.**
+
+- `:23` — *"**This book does not do this** [cycle-accurate]"*, forward-referencing why the P2's
+  fastest emulator path and exact timing "pull in opposite directions."
+- `:100` — *"This book is behavior-accurate; it is not cycle-accurate, and that is a deliberate
+  choice."*
+- `:1201` — the rung framework: *"Cycle-accurate timing, interrupt polling, bus sharing… If the
+  answer is 'a lot,' you want a loop body, and XBYTE takes it away. Stop at rung 2."*
+- `:1206` — *"it maps exactly onto what XBYTE was built for: an interpreted language… the P2's own
+  Spin2 interpreter is the engine's showcase."* (Wuerfel_21's own point.)
+- `:1222` — the 6502 capstone is explicitly *"a teaching artifact"*; a cycle-accurate 6502 *"would
+  land on rung 2."*
+- `:1823` — an entire section, **§18.7 "When XBYTE is the wrong tool."**
+- `:2037–2039` — cites **MisoYume and MegaYume by name** as using *"no XBYTE at all,"* and notes the
+  65816 is *"by instruction shape the ideal XBYTE guest — and it takes rung 2 anyway."*
+
+**Not a content defect.** TonyB_ corroborates from the other side (#116: *"XBYTE is not always the
+right option as the manual says more than once"*) — he read it and found the framing. What this
+*does* evidence is that the framing is **not reaching readers**, which is a prominence/findability
+issue, not a correctness one — track it with the findability work, and do **not** rewrite the
+technical framing, which is already correct and already agrees with its critic.
+
+> **Related, NOT filed as findings** (editorial decisions, in the analysis doc): TonyB_'s proposal
+> to restructure as *"P2 Instruction Skipping, Interpreters & Emulators Guide"* with SKIPF/EXECF
+> first; the findability complaints against XBYTE and the Architect's Guide; and refaQtor's
+> `p2-manuals-review-findings.zip` (#108), which we do not yet have.
 
 ---
 
