@@ -616,7 +616,88 @@ PRI ext_tone_arms() | b1, b2, b3
     debug("Read the raw accumulators before concluding.")
   else
     debug("NO DETECTION even against a real independent tone and a clean null.")
-    debug("That is now a silicon question worth asking, not an instrument one.")
+    debug("Before calling that silicon: sweep what the summer listens to.")
+
+  s_sweep()
+  blk_sweep()
+
+
+'' --- S: which pin, if any, does the Goertzel summer actually listen to? ----
+'' B1 == B2 == B3 says the accumulation ignores the tone entirely, so `m` is
+'' stuck on something we are not driving. Rather than guess at the field for a
+'' fourth time, sweep it: set ONE sum-select bit at a time and measure the
+'' change when the tone is switched off. Whichever bit moves is the pin the
+'' summer is really reading.
+''   base+0 = pin 0 = the NCO tone pin itself (digital IN)
+''   base+1 = pin 1 = the ADC pin, jumpered from pin 0  <- what we intend
+'' A delta on base+0 would mean the summer takes pin IN directly and our ADC
+'' pin never mattered. No delta anywhere means the block select (D[22:19]) is
+'' wrong, not the sum select.
+PRI s_sweep() | i, sel, on_c, off_c, on_s, off_s
+  debug(" ")
+  debug("--- S: sum-select sweep, tone ON vs OFF (delta = the pin it hears) ---")
+  repeat i from 0 to 3
+    sel := (1 << i) << 12
+    tone_on(NCO_Y_1M)
+    ext_arm_sel(TONE_HZ, sel)
+    on_c := g[8]
+    on_s := g[9]
+    tone_off()
+    ext_arm_sel(TONE_HZ, sel)
+    off_c := g[8]
+    off_s := g[9]
+    debug("  base+", udec_(i), "  tone-on cos=", sdec_(on_c), " sin=", sdec_(on_s))
+    debug("          tone-off cos=", sdec_(off_c), " sin=", sdec_(off_s))
+    debug("          delta cos=", sdec_(on_c - off_c), "  delta sin=", sdec_(on_s - off_s))
+  debug("  (a base+N row whose delta is large is the pin the summer reads;")
+  debug("   all rows flat means the D block-select is wrong, not S)")
+
+
+'' --- BLOCK sweep: is D[22:19] really the four-pin block select? -------------
+'' Sum-select all four pins of a block, then walk the block field. Our signal
+'' is on pins 0 and 1, so block 0 should respond and nothing else should. If a
+'' DIFFERENT block responds, the field is not where we think it is; if none
+'' responds with every pin summed, the input path is not selected by these
+'' fields at all.
+PRI blk_sweep() | i, on_c, off_c, on_s, off_s, cmd
+  debug(" ")
+  debug("--- BLK: block-select sweep, all four pins summed, tone ON vs OFF ---")
+  repeat i from 0 to 7
+    cmd := X_DDS_G_SINC1 | (i << 19) | CYCLES
+    tone_on(NCO_Y_1M)
+    ext_arm_cmd(cmd, %1111 << 12)
+    on_c := g[8]
+    on_s := g[9]
+    tone_off()
+    ext_arm_cmd(cmd, %1111 << 12)
+    off_c := g[8]
+    off_s := g[9]
+    debug("  pppp=", udec_(i), " (base pin ", udec_(i * 4), ")  delta cos=", sdec_(on_c - off_c), "  delta sin=", sdec_(on_s - off_s))
+  debug("  (block 0 should be the one that moves; anything else relocates the field)")
+
+
+PRI ext_arm_cmd(cmd, sel) : magnitude
+  longfill(@g[0], 0, 20)
+  g[0] := cmd
+  g[1] := sel
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[6] := MODE_XINIT
+  g[19] := 1
+  start_engine()
+  magnitude := g[10]
+
+
+PRI ext_arm_sel(detector_hz, sel) : magnitude
+  longfill(@g[0], 0, 20)
+  g[0] := DDS_D_EXT
+  g[1] := sel
+  g[2] := detector_hz
+  g[3] := clkfreq
+  g[6] := MODE_XINIT
+  g[19] := 1
+  start_engine()
+  magnitude := g[10]
 
 
 PRI ext_arm(detector_hz) : magnitude
