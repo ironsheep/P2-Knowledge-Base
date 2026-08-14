@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 10
+  BUILD     = 11
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -520,7 +520,10 @@ twice_arm
 '' If A is non-zero the cog does not start clean. If B == C == D the reads are
 '' latched and my XINITs are not registering as new commands.
 seq_arm
-                qfrac   ##TONE_HZ, ##_clkfreq
+                mov     t_, pb_                 ' detector frequency from the
+                add     t_, #3*4                ' mailbox -- NOT hardcoded. The
+                rdlong  freq_, t_               ' hardcoded ##TONE_HZ here made
+                qfrac   freq_, ##_clkfreq       ' every delta row run at 1 MHz
                 getqx   xfrq_
                 shr     xfrq_, #1
                 call    #build_table
