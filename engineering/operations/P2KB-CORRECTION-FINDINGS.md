@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-264`** (F-259 = Streamer cog-DAC examples omit `P_OE` + `DRVL` should be `DRVH`, DAC outputs nothing [RELEASED, bench]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = Assembly ch.5 CORDIC fill-6-then-drain example bench-disproven, contradicts its own chapter [RELEASED]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-264`** (F-259 = REVISED: guide's DAC recipe is CORRECT (bench-disproven report); real defect is `+` composition of pin constants — P_OE == P_CHANNEL, and `+` carries into P_BITDAC [RELEASED]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = Assembly ch.5 CORDIC fill-6-then-drain example bench-disproven, contradicts its own chapter [RELEASED]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2856,28 +2856,72 @@ committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
 
 **All five below are in RELEASED manuals.**
 
-### F-259 — Streamer Guide cog-DAC examples omit `P_OE` and drive the pin low: the DAC outputs nothing. `CONFIRMED` (source-verified; bench-proven by reporter)
+### F-259 — REVISED: the guide's DAC recipe is CORRECT. The real defect is composing pin constants with `+`. `CONFIRMED` (our bench)
 
-**Location:** `manuals/p2-streamer-programming-guide/opus-master/streamer-body.md:1306–1307`
-(guide §17.1 / DDS examples). **RELEASED.**
+> **REVISED 2026-08-14 after running it on our own board. The community report is NOT reproduced,
+> and the original filing above was wrong to accept it.** Bench: P2 Edge, 200 MHz, jumper P0→P1
+> (continuity verified digitally before measuring).
 
-```pasm2
-wrpin   ##P_DAC_124R_3V + P_CHANNEL, dac_pins
-drvl    dac_pins
+**What the silicon says.** Sweeping the TT field with the DAC driven to full scale by `SETDACS`:
+
+| Configuration | ADC counts |
+|---|---|
+| `TT=%00` (no drive) | 1,408 |
+| **`TT=%01` (`P_CHANNEL`) — the guide's recipe** | **6,733 — DRIVES** |
+| `TT=%10` (`P_BITDAC`) | 1,406 |
+| `TT=%11` | 1,406 |
+| `TT=%01`, OUT=1 | 6,735 (OUT is irrelevant) |
+| **`P_CHANNEL + P_OE` composed with `+`** | **1,406 — DEAD** |
+
+So `wrpin ##P_DAC_124R_3V + P_CHANNEL` **works as published**. The reporter's claim that it "leaves
+the pin at ground" does not reproduce.
+
+**Why his bench disagreed — the source explains it.** Spin2 v55's symbol table lists, under a group
+headed **"DIR/OUT Control (pick one)"**:
+
+```
+%..._01_00000_0  P_TT_01
+%..._01_00000_0  P_OE        Enable output in smart pin mode, regardless of DIR
+%..._01_00000_0  P_CHANNEL   Enable DAC channel in non-smart pin DAC mode
+%..._10_00000_0  P_BITDAC
 ```
 
-Reporter's six-way sweep with `SETDACS` driving channel 0 at `$FF` shows output requires **all
-three** of `P_CHANNEL` (TT=%01), **`P_OE`** (bit 8), and **DIR high**:
-`TT=%01 no-OE, DIR high → ground (1,228 counts)`; `TT=%01 + P_OE, DIR high → full scale (6,707)`.
-As shipped the example **leaves the pin at ground**.
+**`P_OE` and `P_CHANNEL` are the identical bit** — two names for `TT=%01`, chosen by context.
+They are not additive flags; they are one *field*. Consequently `P_CHANNEL + P_OE` = `%01 + %01`
+= **`%10` = `P_BITDAC`** — a different mode, which our bench shows is dead (1,406). The reporter's
+own rows (*"TT=%10/%11 any → ground"*) match ours exactly; his **interpretation** — that `P_OE` is
+required — is what is wrong. He was comparing `%01` against `%10`, not "without OE" against
+"with OE".
 
-**Proposed correction:** `wrpin ##P_DAC_124R_3V | P_CHANNEL | P_OE, dac_pins` + `drvh` — and state
-which of OUT/OE actually gates the DAC drive.
+**THE ACTUAL DEFECT: `+` composition.** With `|`, combining two names from one field is idempotent
+and harmless. With `+` it **silently carries into a neighbouring mode**. Class-wide sweep of smart-pin
+configuration lines (`WRPIN`/`PINSTART`) across every live manual, app-note, and the KB YAML:
 
-**This is a RECURRENCE of the F-245…F-247 class.** That sweep fixed the missing-`P_OE` defect in the
-**KB YAML** (including "streamer examples") but **did not reach the manuals**. Required here: a
-**class-wide `P_OE` sweep across every live manual and app-note**, not just this one example.
-Note the reporter's finding is *stronger* than F-245's — it also pins down `DRVL`→`DRVH`.
+| Operator | Config lines |
+|---|---|
+| `\|` | **281** |
+| `+` | **2 — both in the Streamer Guide** |
+
+- `streamer-body.md:1238` — `wrpin ##P_TRANSITION + P_OE, #spi_clk`
+- `streamer-body.md:1306` — `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins`
+
+Both **produce correct values today** (their terms are in disjoint fields, so `+` == `|` there), so
+this is a latent trap rather than a live bug — but it is the trap that produced a public bug report
+against us, because the moment a reader adds a second term from the same field the mode silently
+changes.
+
+**Proposed correction.**
+1. Change both Streamer Guide lines to `|`, matching the 281 lines everywhere else.
+2. State the house rule where readers will meet it: **compose pin/mode constants with `|`, never
+   `+`** — the fields are "pick one", and `+` carries.
+3. Add a note that **`P_OE` and `P_CHANNEL` are the same bit** (smart-pin vs non-smart-pin DAC
+   naming), so "add `P_OE` as well" is at best redundant and, with `+`, destructive.
+4. Re-examine `wrpin.yaml:49`'s `p_oe_required_for` listing DAC: correct in substance, but for the
+   cog-DAC path the bit's name is `P_CHANNEL`, and the phrasing invites exactly the mistake above.
+
+**Note for F-245's class:** that sweep's "add `P_OE`" remedy is right for *smart-pin output modes*.
+It must **not** be applied mechanically to non-smart-pin cog-DAC configuration, where the same bit
+is `P_CHANNEL` and adding a second name for it with `+` breaks the mode.
 
 ### F-260 — Streamer §17.1 DDS/Goertzel: undeclared operand, self-contradicting bit fields, and the mode is unbuildable from the published text. `CONFIRMED` (doc defects) + `NEEDS-VERIFICATION` (silicon)
 
