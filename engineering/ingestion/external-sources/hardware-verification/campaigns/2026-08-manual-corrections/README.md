@@ -14,6 +14,17 @@ grounded in our own sources and does **not** need the bench.
 
 Probe 3 is last because it is the only one needing a jumper.
 
+**Each probe ends with an explicit terminator** so you are never left wondering whether more
+output is coming:
+
+```
+@@@ TEST COMPLETE: <probe name> @@@
+@@@ nothing further will print - safe to stop the session @@@
+```
+
+If you run headless, `@@@ TEST COMPLETE` works directly as PNut-Term-TS's `--end-marker`, so the
+session closes itself instead of needing a timeout.
+
 ---
 
 ## Every probe carries a control that must fail

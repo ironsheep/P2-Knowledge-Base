@@ -88,7 +88,9 @@ PUB main() | p1, m1, p2, m2
     elseif p1 == 2 and m1 == 0
       debug("HELPER NEVER RAN and dispatch died -> _RET_ CALL does not call at all.")
     else
-      debug("UNEXPECTED combination -- capture and analyse before editing anything.")
+  debug(" ")
+  debug("@@@ TEST COMPLETE: F-256 retcall-xbyte @@@")
+  debug("@@@ nothing further will print - safe to stop the session @@@")
 
   repeat
 

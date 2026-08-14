@@ -56,6 +56,10 @@ PUB main()
   debug("RIG: jumper pin ", udec_(DAC_PIN), " -> pin ", udec_(ADC_PIN), " (same 8-pin power group)")
   part1_dac_gating()
   part2_goertzel()
+  debug(" ")
+  debug("@@@ TEST COMPLETE: F-259/F-260 dac-and-goertzel @@@")
+  debug("@@@ nothing further will print - safe to stop the session @@@")
+
   repeat
 
 

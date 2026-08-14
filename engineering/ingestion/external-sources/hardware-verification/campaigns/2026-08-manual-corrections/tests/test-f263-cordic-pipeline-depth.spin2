@@ -115,7 +115,9 @@ PUB main() | i, f, bad, firstbad
       debug("STAGES, not retrievable RESULTS. ESCALATE -- do not edit yet.")
     else
       debug("Deeper than the report claimed, shallower than FILL=6. Both docs")
-      debug("still need their fill depth corrected to this measured number.")
+  debug(" ")
+  debug("@@@ TEST COMPLETE: F-263 cordic-pipeline-depth @@@")
+  debug("@@@ nothing further will print - safe to stop the session @@@")
 
   repeat
 
