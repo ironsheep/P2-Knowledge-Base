@@ -38,6 +38,27 @@ CON
   _clkfreq  = 200_000_000
   BUILD     = 5
 
+  '' STUDY PASS, before running BUILD 5. Two things the sources settle:
+  ''
+  '' 1. part2-pixel-ops.txt:99 -- "The MSB of the resultant phase value
+  ''    indicates NCO rollover and is used as a trigger to advance the state of
+  ''    the streamer. This is true for every mode EXCEPT DDS/Goertzel, in which
+  ''    case the streamer runs CONTINUOUSLY." So this mode accumulates every
+  ''    clock, while D[15:0] counts NCO ROLLOVERS. The 1 MHz and 2 MHz arms
+  ''    therefore ran 20,009 and 10,009 clocks -- half the samples -- and
+  ''    returned the same total to within 0.2%. A per-clock sum cannot do that,
+  ''    so the number being read is NOT that run's accumulation.
+  ''
+  '' 2. tag 0 read ~1.05M even though tone_off had returned pin 0 to a plain
+  ''    driven low. That is HISTORY, not present state, and the obvious suspect
+  ''    is that PINCLEAR did not actually stop the smart-pin NCO -- leaving pin
+  ''    1 still seeing the tone through the jumper.
+  ''
+  '' So every row now carries its own evidence of what its input actually was:
+  '' each measurement first counts the ADC pin's bitstream density, then runs
+  '' the Goertzel. A row claiming "tone off" while its density says ~50% is
+  '' self-refuting, and no conclusion can be drawn from it by mistake.
+
   '' BUILD 4 RESULT -- the duration control PASSED (20,009 at 1 MHz vs 10,009
   '' at 2 MHz), so the detector really is being swept and the flat reading is
   '' not a parameter that failed to arrive. But it exposed a contradiction
@@ -173,9 +194,13 @@ PRI tone_arms() | on_t, off_t, null_t
   debug(" ")
   debug("--- REPEAT of the DC configuration, run late ---")
   drive(1)
+  run(0, 0, MODE_COUNT)
+  debug("  pin HIGH density=", udec_(g[10]), "/2000")
   gtzl(S_BASE1)
   debug("  pin HIGH via the DC path : waitxfi=", udec_(g[11]), "  cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
   drive(0)
+  run(0, 0, MODE_COUNT)
+  debug("  pin LOW  density=", udec_(g[10]), "/2000")
   gtzl(S_BASE1)
   debug("  pin LOW  via the DC path : waitxfi=", udec_(g[11]), "  cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
   float_pin()
@@ -198,10 +223,14 @@ PRI tone_arms() | on_t, off_t, null_t
 '' One tone measurement, printing the raw accumulators and the run duration.
 '' Duration is the control that the detector frequency really changed: 100
 '' cycles at 2 MHz must take half the clocks of 100 cycles at 1 MHz.
-PRI tone_row(detector_hz, tag) : mag
+PRI tone_row(detector_hz, tag) : mag | dens
+  '' First: what IS the input right now? ~50% density = the pin is toggling,
+  '' ~17%/~82% = it is sitting at a rail. This is the row's own control.
+  run_at(0, 0, MODE_COUNT, detector_hz)
+  dens := g[10]
   run_at(DDS_D, S_BASE1, MODE_GTZL, detector_hz)
   mag := g[12]
-  debug("  tag ", udec_(tag), "  detector ", udec_(detector_hz / 1000), " kHz   waitxfi=", udec_(g[11]), "   cos=", sdec_(g[8]), " sin=", sdec_(g[9]), "  mag=", udec_(mag))
+  debug("  tag ", udec_(tag), "  detector ", udec_(detector_hz / 1000), " kHz  density=", udec_(dens), "/2000  waitxfi=", udec_(g[11]), "  cos=", sdec_(g[8]), " sin=", sdec_(g[9]))
 
 
 PRI gtzl_mag(detector_hz) : mag
