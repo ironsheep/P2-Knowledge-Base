@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 9
+  BUILD     = 10
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -260,7 +260,19 @@ PRI bisect_tone()
 
 PRI tone_arms() | on_t, off_t, null_t
   debug(" ")
-  debug("--- TONE: independent smart-pin NCO on pin 0, detector swept ---")
+  debug("--- TONE by DELTA: the measurement that actually means something ---")
+  tone_on()
+  delta_row(TONE_HZ, 1)                    ' on target
+  delta_row(TONE_HZ * 2, 2)                ' detector detuned, tone unchanged
+  delta_row(TONE_HZ / 2, 3)                ' detuned the other way
+  tone_off()
+  delta_row(TONE_HZ, 0)                    ' no tone at all
+  debug("  tag 1 on-target, tags 2 and 3 detuned, tag 0 no tone.")
+  debug("  A large tag-1 delta with small 2/3/0 is a working Goertzel.")
+  debug(" ")
+
+  '' the old absolute-value rows, kept only to show they say nothing
+  debug("--- the same runs read ABSOLUTELY (meaningless, kept for contrast) ---")
   tone_on()
   on_t  := tone_row(TONE_HZ, 1)
   off_t := tone_row(TONE_HZ * 2, 2)
@@ -301,6 +313,23 @@ PRI tone_arms() | on_t, off_t, null_t
 '' One tone measurement, printing the raw accumulators and the run duration.
 '' Duration is the control that the detector frequency really changed: 100
 '' cycles at 2 MHz must take half the clocks of 100 cycles at 1 MHz.
+'' --- DELTA measurement: the only reading that means anything ---------------
+'' The bisect proved the accumulators are never zeroed -- a fresh cog inherits
+'' the previous cog's value, and successive commands ADD (pass 13: D was twice
+'' B for two identical runs). So the absolute accumulator is meaningless and
+'' the CHANGE across one command is the measurement. This is what Chip's
+'' xcal/ycal subtraction is really for.
+PRI delta_row(detector_hz, tag) | dens, a_c, a_s, b_c, b_s
+  run_at(0, 0, MODE_COUNT, detector_hz)
+  dens := g[10]
+  run_at(DDS_D, S_BASE1, MODE_SEQ, detector_hz)
+  a_c := g[16]                             ' before the command
+  a_s := g[17]
+  b_c := g[18]                             ' after the command
+  b_s := g[19]
+  debug("  tag ", udec_(tag), " det ", udec_(detector_hz / 1000), " kHz  density=", udec_(dens), "/2000  DELTA cos=", sdec_(b_c - a_c), "  sin=", sdec_(b_s - a_s))
+
+
 PRI tone_row(detector_hz, tag) : mag | dens
   '' First: what IS the input right now? ~50% density = the pin is toggling,
   '' ~17%/~82% = it is sitting at a rail. This is the row's own control.
