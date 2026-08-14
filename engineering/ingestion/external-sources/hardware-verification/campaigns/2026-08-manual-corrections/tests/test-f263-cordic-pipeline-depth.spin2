@@ -134,17 +134,27 @@ PUB main() | i, f, bad, firstbad, cfirstbad, dfirstbad
   ' ---------- verdict -------------------------------------------------------
   debug(" ")
   debug("--- VERDICT ---")
-  if firstbad == 0
-    debug("Clean through FILL=", udec_(MAXFILL), " -> deep pipelining is fine.")
-    debug("Round 1 was harness error. F-263 closes RESOLVED-INVALID; manual stands.")
+  debug("ARM B  hub RDLONG inside fill        first failure at FILL=", udec_(firstbad))
+  debug("ARM C  register fill, hub WRLONG drain  first failure at FILL=", udec_(cfirstbad))
+  debug("ARM D  register fill AND drain       first failure at FILL=", udec_(dfirstbad))
+  debug(" ")
+  if dfirstbad == 0
+    debug("ARM D CLEAN THROUGH FILL=", udec_(MAXFILL), " -> CHIP'S MODEL IS VINDICATED.")
+    debug("Deep pipelining works. The rule is: NO HUB ACCESS INSIDE EITHER CORDIC")
+    debug("LOOP -- issue and retrieve at the 8-clock slot cadence, batch hub I/O")
+    debug("outside. ARM B (RDLONG in fill) and ARM C (WRLONG in drain) each break")
+    debug("it in one phase, and each loses results from that phase onward.")
+    debug("=> P2AN002 (RDLONG in fill, WRLONG in steady) and Assembly ch.5")
+    debug("   (two RDLONGs + CALL/RET per issue) are BOTH wrong for that reason.")
+    debug("=> The community report is CORRECT in effect, WRONG in cause: it is")
+    debug("   not a 2-deep result buffer, it is a fill/drain that cannot keep up.")
+  elseif dfirstbad > 0 and dfirstbad == cfirstbad and cfirstbad == firstbad
+    debug("ALL THREE SHAPES FAIL AT THE SAME DEPTH -> loop speed is NOT the cause.")
+    debug("That contradicts Chip's clarification, so SUSPECT THE RIG FIRST.")
+    debug("Do NOT edit any manual on this result.")
   else
-    debug("Usable depth = ", udec_(firstbad - 1), "  (first failure at FILL=", udec_(firstbad), ")")
-    if firstbad < 4
-      debug("SUPPORTS the community report, and indicts P2AN002 as well as the")
-      debug("Assembly manual. Chip's '6-7 in flight' would then describe pipeline")
-      debug("STAGES, not retrievable RESULTS. ESCALATE -- do not edit yet.")
-    else
-      debug("Deeper than the report claimed, shallower than FILL=6. Both docs")
+    debug("PARTIAL: ARM D fails at FILL=", udec_(dfirstbad), " -- deeper than ARM B/C but not clean.")
+    debug("Capture and analyse before editing. Do not escalate on this alone.")
   debug(" ")
   debug("@@@ TEST COMPLETE: F-263 cordic-pipeline-depth @@@")
   debug("@@@ nothing further will print - safe to stop the session @@@")

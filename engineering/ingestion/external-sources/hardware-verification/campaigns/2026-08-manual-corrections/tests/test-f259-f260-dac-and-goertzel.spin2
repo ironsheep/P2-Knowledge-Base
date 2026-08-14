@@ -4,12 +4,13 @@
 ''  TWO QUESTIONS in one file, because the second is meaningless until the
 ''  first has established that the DAC pin path works at all.
 ''
-''  INSTRUMENT CAVEAT (read before trusting PART 2).  The guard uses POLLQMT
-''  ("a CORDIC result is waiting").  It is UNVERIFIED whether Goertzel
-''  accumulation raises that event at all -- it may only fire for explicit
-''  CORDIC ops (QMUL/QROTATE/...).  So "POLLQMT never fired" may mean the
-''  mode produced nothing, OR that we are asking the wrong question.  Do not
-''  report a null result from PART 2 as a finding without settling this.
+''  CAVEAT RESOLVED (KB lookup, not a guess).  POLLQMT is the
+''  CORDIC-READ-BUT-EMPTY flag: it is SET BY a GETQX/GETQY that found nothing
+''  available or in progress.  It is NOT a "result is waiting" poll.  Rounds
+''  1-4 used it as a pre-read guard, which could never let the read happen --
+''  so PART 2's "no result" in every row was MY INSTRUMENT, not the silicon.
+''  PART 2's earlier null result is VOID.  Corrected here: read first, then
+''  ask whether that read was empty.
 ''
 ''  ROUND 4 NOTE -- P_OE and P_CHANNEL are THE SAME BIT (Spin2 v55 symbol
 ''  table: both are %..._01_00000_0 = P_TT_01, in a group marked 'pick one').
@@ -68,7 +69,7 @@ s_res           byte    "(RESULT PRESENT)", 0
 
 VAR
   long lutbuf[512]
-  long g[8]
+  long g[12]
 
 PUB main()
   debug("=== F-259 / F-260 probe ===")
@@ -214,8 +215,8 @@ PRI part2_goertzel() | cmd, i, adc
   debug("cmd = ", uhex_long_(cmd), "  (as documented, collision included)")
   sweep_one(cmd)
 
-  if g[1] == $DEAD_0000 and g[2] == $DEAD_0000
-    debug("NO CORDIC RESULT EVER BECAME AVAILABLE (POLLQMT never set C).")
+  if g[8] == 1
+    debug("READ WAS EMPTY (QMT set) -- no CORDIC result available or in progress.")
   elseif g[1] == 0 and g[2] == 0
     debug("Result available but ZERO -- reproduces the community report.")
   else
@@ -235,14 +236,21 @@ PRI part2_goertzel() | cmd, i, adc
 
 
 '' Launch the streamer engine in ITS OWN cog (it needs the LUT) and wait.
-PRI sweep_one(cmd)
+PRI sweep_one(cmd) | t0, cogn
   g[1] := $DEAD_0000
   g[2] := $DEAD_0000
   g[6] := cmd
   g[7] := 0                                ' done
-  coginit(NEWCOG, @dds_engine, @g[0])
-  repeat until g[7] == 1
-  debug("cmd=", uhex_long_(g[6]), "  x=", uhex_long_(g[1]), "  y=", uhex_long_(g[2]), "  adc=", udec_(rdpin(ADC_PIN)), "   ", zstr_(g[1] == $DEAD_0000 ? @s_nores : @s_res))
+  cogn := coginit(NEWCOG, @dds_engine, @g[0])
+  t0 := getct()
+  repeat until g[7] == 1 or (getct() - t0) > (clkfreq / 4)      ' 250 ms cap
+  if g[7] <> 1
+    cogstop(cogn)
+    debug("cmd=", uhex_long_(cmd), "  *** ENGINE DID NOT FINISH.")
+    debug("      Unexpected: GETQX is bounded at 58 clocks (KB), so this is not")
+    debug("      a CORDIC stall. Suspect the streamer command or the cog itself.")
+    return
+  debug("cmd=", uhex_long_(g[6]), "  x=", uhex_long_(g[1]), "  y=", uhex_long_(g[2]), "  adc=", udec_(rdpin(ADC_PIN)), "  wasEmpty=", udec_(g[8]), "   ", zstr_(g[1] == $DEAD_0000 ? @s_nores : @s_res))
 
 
 '' XINIT / GETQX / GETQY are PASM-only.
@@ -261,6 +269,7 @@ DAT             org
 
 '' The streamer/Goertzel engine.  PTRA -> g[0].
 '' g: [0]=@sine [1]=x [2]=y [3]=xfrq [4]=dacpin [5]=adcpin [6]=cmd [7]=done
+''     [8]=POLLQMT-fired flag
 dds_engine
                 mov     gp, ptra
                 rdlong  sinep, gp
@@ -276,11 +285,27 @@ dds_engine
                 setxfrq xfrqv
                 xinit   cmdv, #0
                 waitx   ##400_000             ' bounded; never WAITXFI
-                pollqmt                wc     ' C = a CORDIC result is waiting
-                mov     gx, ##$DEAD_0000
-                mov     gy, ##$DEAD_0000
-        if_c    getqx   gx
-        if_c    getqy   gy
+                ' POLLQMT CORRECTED (KB p2kbPasm2Pollqmt).  It is the
+                ' CORDIC-READ-BUT-EMPTY flag, SET BY a GETQX/GETQY that found
+                ' nothing available or in progress -- it is NOT a
+                ' "result is waiting" poll.  Rounds 1-4 used it as a guard
+                ' BEFORE the read, so the read could never happen and every
+                ' row reported "no result".  That null was entirely my
+                ' instrument, not the silicon.
+                '
+                ' GETQX also cannot hang: KB gives clocks 2...58, "waits in
+                ' case result is not ready".  So read first, then ask whether
+                ' the read was empty.
+                pollqmt                       ' clear any stale QMT flag
+                getqx   gx                    ' bounded wait, <=58 clocks
+                getqy   gy
+                pollqmt                wc     ' C=1 => THAT read was empty
+                mov     gt, gbase
+                add     gt, #8*4
+        if_c    wrlong  #1, gt                ' g[8] = 1 -> read was empty
+        if_nc   wrlong  #0, gt                ' g[8] = 0 -> real result
+        if_c    mov     gx, ##$DEAD_0000
+        if_c    mov     gy, ##$DEAD_0000
 
                 mov     gt, gbase
                 add     gt, #1*4

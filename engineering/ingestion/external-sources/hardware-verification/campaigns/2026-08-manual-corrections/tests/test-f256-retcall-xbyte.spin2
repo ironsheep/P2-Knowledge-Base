@@ -67,20 +67,30 @@ PUB main() | p0, p1, m1, p2, m2
   debug("Harness sound: cog runs, PTRA good, hub writes land.")
 
   ' ---------- PASS 0: the GUIDE'S OWN VM (xbyte-body.md 12.2) --------------
+  ' Now instrumented so a failure says WHERE, not just THAT.
   ' Round 2 still returned progress=0 with the '@' fix, so before blaming
   ' _RET_ CALL we run the guide's published VM shape itself.  If PASS 0 does
   ' not dispatch either, the fault is in this harness (or in the guide's own
   ' example) -- NOT in the idiom under test.
-  blk[0] := 0
-  blk[1] := 0
-  blk[2] := 0
+  longfill(@blk[0], 0, 8)
   coginit(NEWCOG, @engine0, @blk[0])
   waitms(50)
   p0 := blk[0]
+  debug("        checkpoints: LUT[0]=", uhex_long_(blk[3]), " (0 => LUT load FAILED)")
+  debug("        first bytecode from FIFO=", uhex_byte_(blk[4]), " (expect $00)")
+  debug("        reached arm point=", uhex_long_(blk[5]), " (expect \$A11E)")
   debug("PASS 0  guide's own VM shape: progress=", udec_(p0), " (expect 3)")
   if p0 <> 3
-    debug("*** THE BASE VM DOES NOT DISPATCH. Everything below is meaningless.")
-    debug("*** Fix the harness (or investigate the guide's 12.2 example) first.")
+    debug("*** THE BASE VM DOES NOT DISPATCH.")
+    if blk[3] == 0
+      debug("*** -> the LUT block load failed. SETQ2+RDLONG is the suspect.")
+    elseif blk[4] <> 0
+      debug("*** -> the FIFO did not deliver the program. RDFAST is the suspect.")
+    elseif blk[5] <> $A11E
+      debug("*** -> never reached the arm point. Something earlier faulted.")
+    else
+      debug("*** -> LUT loaded, FIFO good, arm reached: XBYTE ITSELF DID NOT ENGAGE.")
+      debug("*** That is a real question about the guide's 12.2 VM under -d.")
     debug(" ")
     debug("@@@ TEST COMPLETE: F-256 retcall-xbyte (BASE VM FAILED) @@@")
     repeat
@@ -153,9 +163,25 @@ DAT             org
 '' ---------------------------------------------------------------------------
 engine0
                 mov     pblk0, ptra
+
                 setq2   #4-1
-                rdlong  $000, ##disp0
+                rdlong  $000, ##disp0         ' 4 longs -> LUT $000..$003
+                rdlut   tv0, #0               ' read LUT[0] back
+                mov     tq0, pblk0
+                add     tq0, #3*4
+                wrlong  tv0, tq0              ' blk[3] = LUT[0] (0 => load failed)
+
                 rdfast  #0, ##prog0
+                rfbyte  tv0                   ' peek first bytecode
+                mov     tq0, pblk0
+                add     tq0, #4*4
+                wrlong  tv0, tq0              ' blk[4] = first byte (expect $00)
+                rdfast  #0, ##prog0           ' re-point after the peek
+
+                mov     tq0, pblk0
+                add     tq0, #5*4
+                wrlong  ##$A11E, tq0          ' blk[5] = reached the arm point
+
                 push    #$1ff
         _ret_   setq    #0
 
