@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-266`** (F-259 = REVISED: guide's DAC recipe is CORRECT (bench-disproven report); real defect is `+` composition of pin constants — P_OE == P_CHANNEL, and `+` carries into P_BITDAC [RELEASED]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = CONFIRMED: hub access inside a CORDIC fill/drain loop loses results (Chip's model correct); P2AN002 AND Assembly ch.5 both violate it [RELEASED, our bench]; F-264 = wrpin.yaml tt_field flattens the four context-dependent %TT meanings and tells readers to add P_OE to DAC outputs, which breaks a level-driven DAC (bench-measured 1305 -> 25) [RELEASED]; F-265 = Silicon Doc contradicts itself on whether Goertzel ADC pins are smart pins; KB should state the resolved answer; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-267`** (F-259 = REVISED: guide's DAC recipe is CORRECT (bench-disproven report); real defect is `+` composition of pin constants — P_OE == P_CHANNEL, and `+` carries into P_BITDAC [RELEASED]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = CONFIRMED: hub access inside a CORDIC fill/drain loop loses results (Chip's model correct); P2AN002 AND Assembly ch.5 both violate it [RELEASED, our bench]; F-264 = wrpin.yaml tt_field flattens the four context-dependent %TT meanings and tells readers to add P_OE to DAC outputs, which breaks a level-driven DAC (bench-measured 1305 -> 25) [RELEASED]; F-265 = RESOLVED: Goertzel ADC pins are RAW (P_ADC_x, smart-pin mode %00000, no DIR) per Chip's shipped demo -- the DDS/Goertzel section is right, the STREAMER intro is loose; F-266 = the debug interrupt disrupts the streamer and DEBUG_COGS defaults to ALL cogs [RELEASED + KB gap]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -3031,6 +3031,63 @@ numbers.
 **EF candidate:** this belongs in `P2-EMPIRICAL-FINDINGS.md` — our own board, our own probe, with a
 control that stalled at the documented maximum. Probe:
 `campaigns/2026-08-manual-corrections/tests/test-f263-cordic-pipeline-depth.spin2`.
+
+### F-260 — RESOLVED ON THE BENCH 2026-08-14: the mode works; the guide's text is the whole defect, plus a protocol it never states. `CONFIRMED`
+
+**Bench result (P2 Edge 200 MHz, jumper pin 0 -> pin 1, `test-f260-goertzel-input.spin2` BUILD 11):**
+
+| arm | ADC density | delta cos | delta sin | magnitude |
+|-----|-------------|-----------|-----------|-----------|
+| on-target, 1 MHz detector, 1 MHz tone | 1020/2000 | 1,051,655 | -124,573 | **1,059,000** |
+| detuned, 2 MHz detector | 1021/2000 | -1,865 | 1,775 | 2,575 |
+| detuned, 500 kHz detector | 1020/2000 | 207 | -198 | 286 |
+| no tone, driven pin | 349/2000 | -409 | 134 | 430 |
+
+Identical densities across the three tone rows, so the only variable is the detector
+frequency. **Selectivity 411:1 against the 2x detune, 3,700:1 against the 0.5x detune, and a
+2,460:1 null.** The DDS/Goertzel mode detects and is frequency-selective.
+
+**THE PROTOCOL THE GUIDE NEVER STATES, and the reason 20+ probe rounds read flat:**
+**the Goertzel accumulators are never zeroed.** A fresh cog inherits the previous cog's value
+(measured: each SEQ pass's pre-command read equalled the previous pass's last read, five times
+running, across `COGINIT`), and successive commands ADD (measured: two identical commands gave
+exactly twice one command's total). So an absolute `GETXACC` read is meaningless. **Read before
+the command, read after, and take the difference.** This is precisely what Chip's shipped
+`Goertzel_DEBUG_Demo.spin2` does with its `xcal`/`ycal` subtraction -- that calibration removes
+the inherited baseline, not an analog offset.
+
+**Field semantics, all confirmed against Chip's shipped demo and our bench:**
+`pppp`x4 = base pin of the four-pin input block (`base<<17` is his own idiom, valid because the
+base is a multiple of four); `S[15:12]` = sum-select, `S[19:16]` = invert-select, `S[11:0]` =
+loop size + LUT window; NCO scale is 2^31; DAC output inverts each LUT byte's MSB; and in
+`DAC_MODE` with `TT=%01`, `M[3:0]` selects **which cog's** DAC channels drive the pin (his
+`setnib dacmode,cogid,#2`) -- the pin's low two bits pick the channel.
+
+**Corrections for the guide** (all still required; the working mode does not excuse them):
+1. `:1324` `dds_s` undeclared -- and S is mandatory, since `S[15:12]` selects which ADC pins are
+   summed. `S = 0` sums nothing.
+2. `:990` / `:607` `adc_pin<<17` is correct **only** when `adc_pin` is a multiple of 4, because
+   `(adc_pin>>2)<<19 == adc_pin<<17` exactly then. The field names a four-pin BLOCK.
+3. The section must state the read-before/read-after protocol above.
+
+### F-266 — the debug interrupt disrupts the streamer, and `DEBUG_COGS` defaults to ALL cogs. `CONFIRMED` (our bench, 2026-08-14)
+
+**Location:** Streamer Guide (no warning anywhere) + KB gap.
+
+`p2kbArchDebugInterrupt` already records it under `limitations`: *"streamer_interaction: Debug can
+disrupt streamer operations. Workaround: Disable debug when using streamer."* And
+`DEBUG_COGS` defaults to `%11111111` -- every cog has debug capability at runtime.
+
+**Measured cost:** with `-d` and the default mask, our streamer probe crashed into the
+single-step debugger's memory dump, and its Goertzel accumulators read 1,000,000-7,000,000 of
+pure corruption. Setting `DEBUG_COGS = %0000_0001` (report from cog 0 only) stopped the crash,
+made the launched cogs' `CogN INIT` lines disappear, and collapsed the accumulators to their
+true small values. Every streamer measurement taken before that fix was confounded.
+
+**Why it matters to a reader:** anyone debugging streamer code with `-d` -- the normal way to
+debug -- has the P2's highest-priority interrupt live inside their streaming cog by default, and
+nothing in the guide warns them. **Action:** warn in the Streamer Guide, and surface the
+existing KB limitation where a streamer author will meet it.
 
 ### F-264 — `wrpin.yaml`'s `tt_field` flattens four context-dependent `%TT` meanings into one, and tells readers to add `P_OE` to DAC outputs where it breaks them. `CONFIRMED` (source-verified + bench-corroborated, 2026-08-14)
 
