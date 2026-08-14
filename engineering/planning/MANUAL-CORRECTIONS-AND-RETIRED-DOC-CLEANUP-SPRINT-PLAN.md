@@ -34,6 +34,28 @@ level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-p
 F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
 nothing warns a streamer author).
 
+### Authoring source
+
+The bench leg produced more than corrections: it produced **positive teaching material** about how
+these features actually work, most of it absent from every doc we ship. That is written up for
+authoring in
+`campaigns/2026-08-manual-corrections/BENCH-FINDINGS-FOR-AUTHORING.md` — each test with its
+question, rig, measured results and discovery path, and every outcome tagged **CORRECTION** (the
+doc says something wrong), **TEACH** (the doc omits something the reader needs) or **TRAP**
+(something that will bite a reader, found by being bitten).
+
+The highest-value TEACH items, none of which are defects in the ordinary sense:
+
+- **The Goertzel accumulators are never zeroed** — read before, read after, take the difference.
+  Without this the mode looks completely dead while returning large, stable, plausible numbers.
+- **Debugging streamer code with `-d` puts the P2's highest-priority interrupt inside your
+  streaming cog** by default. One CON line fixes it; nothing warns anyone.
+- **`%TT` is four different fields** depending on smart-pin and DAC_MODE state — and our own
+  `wrpin.yaml` currently teaches only one of the four.
+- **Pin-mode constants are bit fields**: combine with `|`, never `+`.
+- **`##hubsymbol` inside a Spin2 object's DAT resolves against `$400`**, not the object's load
+  address.
+
 ### Confirming runs required before §4 and the `:607` edit
 
 F-266 was discovered *after* the F-256 and `:607` measurements were taken, and both were made with
