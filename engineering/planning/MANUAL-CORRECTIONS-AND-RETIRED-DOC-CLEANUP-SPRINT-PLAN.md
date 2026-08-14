@@ -6,6 +6,9 @@
 **Analysis:** `engineering/document-production/FORUM-NO-COMMMIT/Docs-findings-360813/DOCS-FINDINGS-ANALYSIS.md`
 (gitignored; find by path).
 
+**Community bench review:** `p2-manuals-review-findings.md` (the posted zip) — folded in as **§7**,
+findings **F-259…F-263**, all five verified and all five in **RELEASED** manuals.
+
 **Not in this sprint:** F-253 (P2KB YAML, accumulating for the next YAML flush per Stephen);
 F-258 (RESOLVED-INVALID, no work); the findability pass and TonyB_'s restructure proposal (editorial
 decisions — see §Open Question 5).
@@ -38,9 +41,16 @@ that present the tutorial as a **current, live manual**; leave historical record
 lineage citations in other manuals' creation-guides ("adopted from Smart Pins") alone, since that
 provenance is true. Detail in §5.
 
-**4. Do we hold a section for refaQtor's `p2-manuals-review-findings.zip`?**
-You are locating it; contents unknown. *Recommendation: **hold §7 as a placeholder***, generate its
-tasks when the contents are known, and do not let it block the rest.
+**4. RESOLVED — the bench review is in hand and folded in as §7.**
+All five findings verified against our sources and filed as F-259…F-263. **They outrank §1–§2 in
+severity** — technically wrong content in five released manuals, versus a credits block. The
+sequencing section is reordered accordingly. Two follow-on calls this raises:
+*(a)* **§7a and §7c are both class-wide sweep failures** — F-245's `P_OE` fix and F-211's 4→8 fix
+each landed in the YAML and never reached the manuals. *Recommendation: make "does this correction
+have a manual-side sweep?" a standing step, not a per-finding remembering.*
+*(b)* **§7b's silicon question may need Chip.** *Recommendation: give our bench one pass first; if
+the DDS/Goertzel mode still will not run from the documented command word, it goes to
+`DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.md`.*
 
 **5. Findability work and TonyB_'s restructure — out of scope, confirm?**
 Both are editorial judgment calls, not defects. F-258 established the XBYTE technical framing is
@@ -259,23 +269,103 @@ than restate it. Editing four copies and hoping they stay aligned is exactly how
 
 ---
 
-## 7. refaQtor's review findings — placeholder
+## 7. Community bench review (refaQtor) — five defects in RELEASED manuals · **F-259…F-263**
 
-`p2-manuals-review-findings.zip` (2.6 KB, forum post #108). Reported: still chasing "the goertzel
-issue, maybe me"; **others are clear**; some example code **proven**. It is the only structured
-findings artifact in the thread. **Not yet in hand** — Stephen locating.
+**Source:** `p2-manuals-review-findings.md` (the posted zip), P2 Rev C @ 300 MHz, `pnut_ts` 1.55,
+committed harness + logs, manuals as downloaded 2026-08-13. **All five verified against our own
+sources.** Full detail in the corrections register.
 
-When received: triage into the corrections register as new findings, then fold the actionable ones
-into this sprint or the next. Do not block §1–§5 on it.
+> **Trust handling.** A third party's bench is a **high-quality lead**, not an accepted P2KB
+> empirical finding. Fix the documentation defects the *source* proves; **replicate on our bench**
+> anything we intend to cite as ground truth. His §5 "confirmations" are corroboration — they do
+> **not** go into `P2-EMPIRICAL-FINDINGS.md` as our own tests.
+
+**These outrank §1–§2 in severity: they are technically wrong content in shipped manuals.**
+
+### 7a. Streamer Guide — cog-DAC examples output nothing (F-259) · RELEASED
+
+`streamer-body.md:1306–1307` ships `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins` + `drvl`. Bench
+proves output needs **all three** of `P_CHANNEL`, **`P_OE`**, and **DIR high** (no-OE → 1,228
+counts = ground; +`P_OE` → 6,707 = full scale). Fix: `| P_OE` and `drvh`, and state which of OUT/OE
+gates the drive.
+
+**This is a recurrence of the F-245…F-247 `P_OE` class** — that sweep fixed the **YAML** and never
+reached the **manuals**. So the deliverable is not one example: **sweep `P_OE` across every live
+manual and app-note.** Treat the single fix as insufficient.
+
+### 7b. Streamer §17.1 DDS/Goertzel — unbuildable as published (F-260) · RELEASED
+
+Two confirmed doc defects: **`dds_s` is used at `:1324` and never declared** (one occurrence in the
+whole guide — the example cannot assemble), and **`adc_pin<<17` at `:607`/`:990` collides with the
+required `%111` in D[18:16]**. Fix both now.
+
+Separately, the mode itself did not work on the reporter's bench (runs, no DAC output, no
+accumulation) across a wide sweep. That needs **our** bench, and if it stays unresolved becomes a
+**question for Chip**. Until settled, the guide must not present this mode as buildable.
+
+### 7c. IOSP Guide — power groups of four, one month after we corrected it to eight (F-261) · RELEASED
+
+`chapter-16-adc.md:263` and `:382` say *"isolated groups of four — pins 0–3, 4–7, …"*. **F-211**
+settled this as **8 groups of 8** and shipped in **KB v1.15.0 on 2026-07-11**; our own **P2AN001
+says eight**. The reporter caught us contradicting ourselves.
+
+Three repairs, not one: the group size and boundary list; the **layout rule** built on it (with
+wrong boundaries it misleads — it implies 3/4 straddle when 7/8 do); and `:382`'s **worked example
+reasoning** (*"pins 40–47 — two full groups"* — that is **one** group; the conclusion survives, the
+reasoning does not).
+
+**Process deliverable:** F-211 swept YAML and missed manuals. Any correction landing in the KB must
+carry a manual-side sweep, or this recurs.
+
+### 7d. Debug Window Manual — FFT chapter has no channel defaults (F-262) · RELEASED
+
+`ch07-scope.md:86` has an `If omitted` column; `ch09-fft.md` has none for `high`/`tall`. The manual
+calls the arguments optional and never says what omitting them does. Reporter ties this to a real
+**pnut-term-ts strict-parser divergence** he filed separately — the gap has already caused a tool
+disagreement. Fix: add the column — **verify values against PNut**, do not assume FFT matches SCOPE.
+
+### 7e. Assembly Manual — CORDIC fill-6-then-drain example is bench-disproven (F-263) · RELEASED
+
+`chapter-05-hardware.md:~100–126` queues 6, runs steady state, drains 6. Bench: **two-in-flight
+retrieval scrambled all outputs.** What makes it actionable: the same chapter's *other* CORDIC
+statements matched his silicon exactly, so the chapter holds a correct rule and an example that
+violates it. **Replicate on our bench first**, then either fix the example or state the conditions
+under which deep pipelining is valid.
+
+**Verification (all of 7a–7e).**
+*Normal:* each corrected example compiles, and the ones with silicon claims run correctly on our
+bench.
+*Edge:* 7a's fix is applied **class-wide**, not just at `:1306`; 7c's three repairs all land, not
+just the number.
+*Error:* where our bench and the reporter's disagree, **confirm the measurement by an independent
+path before acting** — do not rewrite a released manual on a single external log.
 
 ---
 
-## Sequencing
+## 8. Release wave
 
-1. **§3** (bench test) — gates §4, and needs Stephen.
-2. **§1 + §2** (deSilva) — independent; can run in parallel with §3. Both land in one v3.0.6 render.
-3. **§4** (XBYTE) — after §3 returns.
-4. **§5** (cleanup) — independent of everything; safe to run any time.
-5. **§7** — when the zip arrives.
+§1, §2, §7a–7e touch **five released manuals** — deSilva, Streamer, IOSP, Debug Window, Assembly.
+Per the wave rules: **stage shortest-first**, and any changed shared common-named file rides
+**one** manual only. Each manual takes its own patch version and CHANGELOG entry (current-state
+voice, never prior-wrong-state). `release-manual` owns the roster rows and the Platform Freshness
+Ledger `PUBLISH` lines.
 
-§1 and §2 share a render, so they should be finished together before `prepare-manual`.
+---
+
+## Sequencing (revised — the bench findings reorder this)
+
+1. **§7c** (IOSP 4→8) — highest severity: a released manual contradicting our own published KB and
+   app note, on a fact we already settled. No new research needed; the answer is in F-211.
+2. **§7a** (Streamer `P_OE`) + its **class-wide manual sweep** — bench-proven broken examples.
+3. **§7b doc defects** (`dds_s`, field collision) — source-verified, fix now; the silicon question
+   goes to the bench queue.
+4. **§3** (our `_RET_ CALL` bench test) — batch with §7b's and §7e's bench work into **one bench
+   session**, since all three need Stephen and the board.
+5. **§7d** (FFT defaults) — needs a PNut check, otherwise small.
+6. **§7e** (CORDIC) — after its bench replication.
+7. **§4** (XBYTE §15.3) — after §3 returns.
+8. **§1 + §2** (deSilva) — independent; land together in one v3.0.6 render.
+9. **§5** (retired-doc cleanup) — independent; any time.
+10. **§8** — the release wave, once the above land.
+
+**Bench session batching:** §3, §7b, §7e (and any 7a re-proof) all want the board. Group them.

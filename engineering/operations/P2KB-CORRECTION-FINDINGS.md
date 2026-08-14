@@ -13,7 +13,7 @@
 
 **No inference or derivation.** Every correction must trace to an authoritative source (compiler / hardware-verified / Silicon / authoritative derived YAML). Aligning a file to an authority it contradicts (its own fields, a sibling, the instruction CSV, the compiler) is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, do **not** make it: log it as a finding that needs a source (or proposes removing the unsupportable content). Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-259`** (F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
+**Next finding ID: `F-264`** (F-259 = Streamer cog-DAC examples omit `P_OE` + `DRVL` should be `DRVH`, DAC outputs nothing [RELEASED, bench]; F-260 = Streamer §17.1 DDS/Goertzel undeclared `dds_s` + `adc_pin<<17` field collision + mode unbuildable [RELEASED]; F-261 = IOSP ch.16 still says power groups of FOUR, contradicting F-211's 4→8 correction and P2AN001 [RELEASED]; F-262 = Debug Window FFT chapter lacks the channel-default column SCOPE has [RELEASED]; F-263 = Assembly ch.5 CORDIC fill-6-then-drain example bench-disproven, contradicts its own chapter [RELEASED]; F-254 = deSilva Acknowledgments self-listing + generic reviewer credit + false "trained on" claim [SHIPPED]; F-255 = XBYTE §15.3 `set_nz` undefined/impossible contract + missing skip patterns; F-256 = `_RET_ CALL` semantics unverified [VO-J]; F-257 = deSilva platform comparison omits RP2350 + the software axis [SHIPPED]; F-258 = XBYTE-for-emulation framing already correct, RESOLVED-INVALID, do not re-raise; F-253 = Sync Serial Receive advertises "SPI slave" without the no-CS/frame-sync constraint; F-205 = PLOT TEXTSTYLE justification; F-206 = debug-displays `SAVE` filename; F-207 = packed-feed pattern for scrolling LOGIC/SCOPE windows; F-208 = PLOT POLAR orientation undocumented; F-209 = Debug sweep v55-over-Pascal reversals; F-210 = Assembly Ch5 clock-field naming; F-211 = I/O pin power-domain group size 4→8 across KB; F-212 = debug-displays YAML corrections from the 2026-07-12 coverage re-audit; F-213 = P2AN007 R3 ack-handshake removal invites a torn read; F-214 = mnemonic-bold filter uppercases mnemonics inside hyphenated names, corrupting filenames/slugs in RELEASED PDFs; F-215 = shipped app-note PDFs carry a never-shipped v0.1.0 draft in their Revision History, contradicting their own cover; F-245..F-247 = smart-pin examples shipped without `P_OE` (KB's own wrpin/pinstart/streamer examples); F-248 = P2 EVAL #64000 LED pin map is TBD in the KB; F-249 = Edge LED DIP-switch position undocumented)
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -2838,6 +2838,132 @@ technical framing, which is already correct and already agrees with its critic.
 > to restructure as *"P2 Instruction Skipping, Interpreters & Emulators Guide"* with SKIPF/EXECF
 > first; the findability complaints against XBYTE and the Architect's Guide; and refaQtor's
 > `p2-manuals-review-findings.zip` (#108), which we do not yet have.
+
+---
+
+## Community bench review — refaQtor, P2 Rev C @ 300 MHz (2026-08-14) — F-259…F-263
+
+**Origin:** `p2-manuals-review-findings.md` (posted as `p2-manuals-review-findings.zip`, forum
+#108), reviewing the manuals **as downloaded 2026-08-13**. Author states every claim has a
+committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
+
+> **Trust note.** This is a *third party's* bench, not ours. It is far stronger than a forum
+> opinion — reproducible rigs with logs — but it is **not** an accepted P2KB empirical finding and
+> must **not** be written into `P2-EMPIRICAL-FINDINGS.md` as if it were our own test. Treat each
+> claim as a **high-quality lead**: verify against our sources (done below), fix the documentation
+> defect where the source proves it, and **replicate on our bench** anything we intend to cite as
+> ground truth. His §5 "confirmations" are likewise corroboration, not EF entries.
+
+**All five below are in RELEASED manuals.**
+
+### F-259 — Streamer Guide cog-DAC examples omit `P_OE` and drive the pin low: the DAC outputs nothing. `CONFIRMED` (source-verified; bench-proven by reporter)
+
+**Location:** `manuals/p2-streamer-programming-guide/opus-master/streamer-body.md:1306–1307`
+(guide §17.1 / DDS examples). **RELEASED.**
+
+```pasm2
+wrpin   ##P_DAC_124R_3V + P_CHANNEL, dac_pins
+drvl    dac_pins
+```
+
+Reporter's six-way sweep with `SETDACS` driving channel 0 at `$FF` shows output requires **all
+three** of `P_CHANNEL` (TT=%01), **`P_OE`** (bit 8), and **DIR high**:
+`TT=%01 no-OE, DIR high → ground (1,228 counts)`; `TT=%01 + P_OE, DIR high → full scale (6,707)`.
+As shipped the example **leaves the pin at ground**.
+
+**Proposed correction:** `wrpin ##P_DAC_124R_3V | P_CHANNEL | P_OE, dac_pins` + `drvh` — and state
+which of OUT/OE actually gates the DAC drive.
+
+**This is a RECURRENCE of the F-245…F-247 class.** That sweep fixed the missing-`P_OE` defect in the
+**KB YAML** (including "streamer examples") but **did not reach the manuals**. Required here: a
+**class-wide `P_OE` sweep across every live manual and app-note**, not just this one example.
+Note the reporter's finding is *stronger* than F-245's — it also pins down `DRVL`→`DRVH`.
+
+### F-260 — Streamer §17.1 DDS/Goertzel: undeclared operand, self-contradicting bit fields, and the mode is unbuildable from the published text. `CONFIRMED` (doc defects) + `NEEDS-VERIFICATION` (silicon)
+
+**Location:** `streamer-body.md:1324`, `:607`, `:990`. **RELEASED.**
+
+Two **confirmed documentation defects**, both verified in source:
+
+1. **`:1324` — `xcont dds_cmd, dds_s`. `dds_s` is never declared.** It appears exactly once in the
+   entire guide. The example cannot be assembled as printed.
+2. **The ADC-pin field contradicts itself.** `:607` (`add cmd, ##adc_pin<<17 + 1024`) and `:990`
+   (`mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_pin<<17 + cycles`) place the ADC pin at
+   `<<17`, which **collides with the required config bits `%111` in D[18:16]**.
+
+**Plus an unresolved silicon question.** With the pin path proven good by `SETDACS` (F-259), the
+reporter built the command exactly per the guide and Assembly App. G — it runs (`WAITXFI` completes
+on schedule) but **drives no DAC and accumulates nothing**. Swept without success: `%dddd` ∈
+{1,2,4,8}, D[19] 0/1, D[23] set, accumulators read mid-run and after `WAITXFI`.
+
+Three questions the guide must answer and currently cannot:
+- exact `XINIT`/`XCONT` **S-operand semantics** for this mode;
+- which field enumerates the **summed ADC pin(s)** ("m = ±1 per selected ADC pin, −3..+3");
+- whether anything beyond the command word must be armed (`SETCMOD`? DAC channel enables?).
+
+**Action:** fix the two doc defects now. The silicon behavior needs our own bench and, if it stays
+unresolved, becomes a **question for Chip** (`DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.md`). Until settled,
+the guide should not present this mode as buildable. A verbatim, compile-tested, silicon-run
+example would close all three questions at once.
+
+### F-261 — IOSP Guide still says power groups of **four**; we corrected this to **eight** in the KB a month ago. `CONFIRMED`
+
+**Location:** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-3-input-modes/chapter-16-adc.md:263`
+and `:382`. **RELEASED.**
+
+Both passages state *"isolated groups of **four** — pins 0–3, 4–7, 8–11, …, 60–63."* The truth,
+settled in **F-211** (`DONE — YAML applied 2026-07-11, PUBLISHED in KB v1.15.0`), is **8 groups of
+8** (P0–7 … P56–63). The reporter caught it as a **contradiction against our own P2AN001**, which
+correctly says eight.
+
+**F-211's class-wide sweep covered the YAML and missed the manuals.** That is the precise failure
+our class-wide-sweep rule exists to prevent, and it shipped.
+
+Three distinct repairs, not one:
+- `:263` — group size and the boundary list (`0–3, 4–7…` → `0–7, 8–15…`).
+- `:263`/`:382` — the **layout rule** built on it. With wrong boundaries the advice actively
+  misleads: it implies pins 3/4 straddle a domain when in fact 7/8 do.
+- `:382` — the **worked example's reasoning is wrong**: *"spans pins 40–47 — two full groups
+  (40–43, 44–47)"*. Pins 40–47 are **one** group. The conclusion ("fine, channels are independent")
+  survives; the reasoning does not.
+
+**Class-wide sweep — DONE.** Grepped every live manual and app-note opus-master for the 4-group
+wording and boundary lists: **only these two locations.** (One unrelated "group of four bits"
+false positive in the Assembly manual's MERGEB description — not this defect, do not touch.)
+
+### F-262 — Debug Window Manual: the FFT chapter never states channel-definition defaults that the SCOPE chapter does. `CONFIRMED`
+
+**Location:** `manuals/p2-debug-window-manual/opus-master/ch09-fft.md` vs `ch07-scope.md:86`.
+**RELEASED.**
+
+`ch07-scope.md:86` gives a proper `| Argument | Meaning | **If omitted** |` table. `ch09-fft.md` has
+no "If omitted" column anywhere — its `:73` table gives defaults for *keywords* (`TEXTSIZE` etc.)
+but never for the **channel-definition arguments** (`high`/`tall`). The manual says the arguments
+are optional and then does not say what happens when they are omitted, so an implementer must guess.
+
+The reporter identifies this as the plausible cause of a **pnut-term-ts strict-parser divergence**
+he field-reported separately — i.e. this gap has already produced a real tool disagreement.
+
+**Proposed correction:** copy SCOPE's "If omitted" column into the FFT chapter's channel-definition
+table. **Verify the values against PNut** (ground truth) rather than assuming FFT matches SCOPE.
+
+### F-263 — Assembly Manual's CORDIC fill-6-then-drain example is bench-disproven, and contradicts the same chapter's own correct guidance. `CONFIRMED` (bench) / verify on our silicon
+
+**Location:** `manuals/p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:~100–126`.
+**RELEASED.**
+
+The example queues 6 rotations, runs a retrieve-one/queue-one steady state, then drains 6. The
+reporter's bench reports **two-in-flight retrieval scrambled all outputs**
+(`logs/1500_fft_pasm_fail_260812-195718.log`).
+
+What makes this actionable rather than merely reported: **the same chapter's other CORDIC
+statements matched his silicon exactly** — the steady-state retrieve-before-issue loop and *"results
+persist until the next CORDIC operation starts."* So the chapter contains a correct rule and an
+example that violates it. His request is the right one: **reconcile the two passages.**
+
+**Action:** replicate on our bench (jumper-free, VO-J) before rewriting — then either correct the
+example to obey the chapter's own rule, or, if deep pipelining *is* valid under conditions the
+example omits, state those conditions.
 
 ---
 
