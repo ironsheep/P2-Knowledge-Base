@@ -147,6 +147,7 @@ CON
   ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
+  BUILD       = 19                       ' bump EVERY round; the banner prints it
 
   '' Round 9. Round 8's C5 ran and disproved my own fix: the plain DAC config
   '' drove the jumper cleanly (spread 1297 of 2000) while adding P_CHANNEL
@@ -171,6 +172,7 @@ CON
   '' C6 is the gate for everything downstream.
   SRC_WRPIN   = 0
   SRC_SETDACS = 1
+  SRC_SETDACS_COGID = 2                  ' SETDACS with M[3:0] = this cog's id
 
   '' Round 14. The D-split settled it: SETDACS is the half that matters, and a
   '' LAUNCHED cog's DAC channels do not reach the pin (D3 drives with a
@@ -228,7 +230,7 @@ VAR
 
 PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk, m_smart
 
-  debug("=== F-260 round 13: DDS/Goertzel -- splitting SETDACS from pin ownership ===")
+  debug("=== F-260 probe, BUILD ", udec_(BUILD), " -- the banner identifies the binary ===")
   debug("RIG: jumper pin ", udec_(DAC_PIN), " (DAC) -> pin ", udec_(ADC_PIN), " (ADC)")
   debug("Predicted WAITXFI for an on-target run: ", udec_(PREDICT), " clocks")
   debug(" ")
@@ -362,7 +364,7 @@ PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
 
 
 '' --- C5: analog loopback, and which pin config actually drives -------------
-PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
+PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd, k_hi, k_lo, dk
   '' C5 -- WRPIN-level DAC, no P_CHANNEL. Proves wire + DAC + ADC end to end.
   w_hi := sig(0, 255, SRC_WRPIN)
   w_lo := sig(0,   0, SRC_WRPIN)
@@ -372,6 +374,9 @@ PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
   d_hi := sig(1, 255, SRC_SETDACS)
   d_lo := sig(1,   0, SRC_SETDACS)
   dd   := spread(d_hi, d_lo)
+  k_hi := sig(1, 255, SRC_SETDACS_COGID)
+  k_lo := sig(1,   0, SRC_SETDACS_COGID)
+  dk   := spread(k_hi, k_lo)
 
   debug(" ")
   debug("C5/C6 analog loopback, ", udec_(SIG_SAMPLES), " samples of the ADC pin")
@@ -384,10 +389,19 @@ PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
     debug("   C5 FAILED: the analog loopback itself is dead. Check the jumper")
     debug("   and the board before reading anything else.")
 
+  debug("   C6b SETDACS + M(3:0)=cogid   : hi=", udec_(k_hi), " lo=", udec_(k_lo), " spread=", udec_(dk))
   if dd > 200
     debug("   C6 OK: the cog DAC channel reaches the pin from a launched cog.")
   else
     debug("   C6 red: P_CHANNEL + SETDACS did not drive from a launched cog.")
+  if dk > 200
+    debug("   C6b OK -- CHIP'S COG-ID FIX CONFIRMED. Naming the cog in M(3:0)")
+    debug("   makes a launched cog's SETDACS drive the pin. M(3:0) is the COG")
+    debug("   selector, and M(3:0)=0 simply meant cog 0 all along.")
+  else
+    debug("   C6b red: even with the cog id in M(3:0) a launched cog does not")
+    debug("   drive. My reading of Chip's setnib is then wrong -- do not carry")
+    debug("   the cog-id claim into any finding until this is green.")
 
   ok := c7_f259_replica() and (dw > 200)
   bisect()
