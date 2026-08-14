@@ -178,7 +178,7 @@ VAR
 
 PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk, m_smart
 
-  debug("=== F-260 round 9: DDS/Goertzel, with an analog gate on the streamer path ===")
+  debug("=== F-260 round 13: DDS/Goertzel -- splitting SETDACS from pin ownership ===")
   debug("RIG: jumper pin ", udec_(DAC_PIN), " (DAC) -> pin ", udec_(ADC_PIN), " (ADC)")
   debug("Predicted WAITXFI for an on-target run: ", udec_(PREDICT), " clocks")
   debug(" ")
@@ -401,12 +401,79 @@ PRI c9_cog0_drive_raw_sense(level) : nbits
 
 
 PRI hold_drive(level) : cogn | tstart
+  cogn := hold_drive_mode(level, 0)
+
+
+'' mode: 0 = SETDACS and pin config, 1 = SETDACS only, 2 = pin config only
+PRI hold_drive_mode(level, submode) : cogn | tstart
   longfill(@g[0], 0, 20)
+  g[4] := submode
   g[5] := level
   g[6] := MODE_HOLD
   cogn := coginit(NEWCOG, @engine, @g[0])
   tstart := getct()
   repeat until g[15] == 1 or (getct() - tstart) > (clkfreq / 10)
+
+
+'' --- D-arms: split "launched cog" into its two halves ----------------------
+'' The 2x2 above proves the failing variable is the launched cog -- but that
+'' bundles TWO things: who EXECUTES SETDACS, and who ASSERTS DIR / owns the
+'' pin. These four arms separate them. Sensing is held constant (cog 0, the
+'' smart-pin method that C7 validated), so the only thing moving is which cog
+'' does which half.
+PRI dsplit() | d1, d2, d3, d4
+  d1 := spread(d_arm(0, 0, $FF), d_arm(0, 0, $00))    ' cog0 SETDACS, cog0 pin
+  d2 := spread(d_arm(1, 1, $FF), d_arm(1, 1, $00))    ' cog1 SETDACS, cog1 pin
+  d3 := spread(d_arm(0, 1, $FF), d_arm(0, 1, $00))    ' cog0 SETDACS, cog1 pin
+  d4 := spread(d_arm(1, 0, $FF), d_arm(1, 0, $00))    ' cog1 SETDACS, cog0 pin
+  debug(" ")
+  debug("   D-SPLIT -- who runs SETDACS x who owns the pin (spread, >200 = drives)")
+  debug("     D1 cog0 SETDACS, cog0 pin : ", udec_(d1))
+  debug("     D2 cog1 SETDACS, cog1 pin : ", udec_(d2))
+  debug("     D3 cog0 SETDACS, cog1 pin : ", udec_(d3))
+  debug("     D4 cog1 SETDACS, cog0 pin : ", udec_(d4))
+  if d3 > 200 and d4 <= 200
+    debug("     => SETDACS IS THE HALF THAT MATTERS. A pin takes its DAC value")
+    debug("        from cog 0's channels here, whoever owns the pin.")
+  elseif d4 > 200 and d3 <= 200
+    debug("     => PIN OWNERSHIP IS THE HALF THAT MATTERS. Any cog's SETDACS")
+    debug("        works, but the pin must be owned by cog 0.")
+  elseif d3 > 200 and d4 > 200
+    debug("     => EITHER HALF ALONE WORKS. Only doing BOTH in a launched cog")
+    debug("        fails, which points back at the engine, not the silicon.")
+  else
+    debug("     => NEITHER SPLIT DRIVES. The two halves are not independent;")
+    debug("        do not theorise -- add arms.")
+
+
+'' setdacs_cog / pin_cog: 0 = cog 0, 1 = a launched cog. Sensed from cog 0.
+PRI d_arm(setdacs_cog, pin_cog, level) : counts | cogn
+  reset_pins()
+  cogn := 0
+  if setdacs_cog == 1 and pin_cog == 1
+    cogn := hold_drive_mode(level, 0)              ' launched does both
+  elseif setdacs_cog == 1
+    cogn := hold_drive_mode(level, 1)              ' launched does SETDACS
+    pinclear(DAC_PIN)                              ' cog 0 owns the pin
+    wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)
+    pinlow(DAC_PIN)
+  elseif pin_cog == 1
+    set_dac_ch0(level)                             ' cog 0 does SETDACS
+    cogn := hold_drive_mode(level, 2)              ' launched owns the pin
+  else
+    set_dac_ch0(level)
+    pinclear(DAC_PIN)
+    wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)
+    pinlow(DAC_PIN)
+  waitms(5)
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, P_ADC_1X | P_ADC)
+  wxpin(ADC_PIN, 12)
+  pinhigh(ADC_PIN)
+  waitms(5)
+  counts := rdpin(ADC_PIN) & $7FFF_FFFF
+  if cogn <> 0
+    cogstop(cogn)
 
 
 PRI bisect() | c8_hi, c8_lo, c9_hi, c9_lo
@@ -416,8 +483,8 @@ PRI bisect() | c8_hi, c8_lo, c9_hi, c9_lo
   c9_lo := c9_cog0_drive_raw_sense($00)
   debug(" ")
   debug("   BISECT -- who drives x how we sense")
-  debug("     C7 cog0 drive,     smart sense: 6740 vs 1410   WORKS (this run above)")
-  debug("     C6 launched drive, raw sense  : see above      FAILS")
+  debug("     C7 cog0 drive,     smart sense: see the C7 line above")
+  debug("     C6 launched drive, raw sense  : see the C6 line above")
   debug("     C8 launched drive, smart sense: ", udec_(c8_hi), " vs ", udec_(c8_lo), "  spread=", udec_(spread(c8_hi, c8_lo)))
   debug("     C9 cog0 drive,     raw sense  : ", udec_(c9_hi), " vs ", udec_(c9_lo), "  spread=", udec_(spread(c9_hi, c9_lo)))
   if spread(c9_hi, c9_lo) > 200 and spread(c8_hi, c8_lo) <= 200
@@ -433,6 +500,7 @@ PRI bisect() | c8_hi, c8_lo, c9_hi, c9_lo
   else
     debug("     => NEITHER WORKS. Only the exact C7 combination drives, which")
     debug("        means cog AND sensing interact. Do not guess; add arms.")
+  dsplit()
 
 
 '' Every arm starts from a known pin state. DIR is OR-ed across cogs, so a
@@ -738,12 +806,20 @@ hold_arm_code
                 mov     t, ptra
                 add     t, #5*4
                 rdlong  alev, t
+                mov     t, ptra
+                add     t, #4*4
+                rdlong  achan, t                ' 0=both 1=SETDACS only 2=pin only
 
-                setdacs alev
+                cmp     achan, #2               wz      ' pin-only? skip SETDACS
+        if_nz   setdacs alev
+
+                cmp     achan, #1               wz      ' SETDACS-only? skip pin
+        if_z    jmp     #hold_ready
                 dirl    #DAC_PIN
                 wrpin   #0, #DAC_PIN
                 wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
                 dirh    #DAC_PIN
+hold_ready
 
                 mov     t, ptra                 ' say we are driving
                 add     t, #15*4
