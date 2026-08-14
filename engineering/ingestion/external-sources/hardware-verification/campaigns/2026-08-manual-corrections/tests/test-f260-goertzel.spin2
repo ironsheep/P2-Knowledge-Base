@@ -146,6 +146,30 @@ CON
   SRC_WRPIN   = 0
   SRC_SETDACS = 1
 
+  '' Round 14. The D-split settled it: SETDACS is the half that matters, and a
+  '' LAUNCHED cog's DAC channels do not reach the pin (D3 drives with a
+  '' launched cog owning the pin; D4 does not with cog 0 owning it). The
+  '' Goertzel engine MUST run in a launched cog -- the interpreter owns cog 0's
+  '' LUT, which is what killed rounds 1-3 -- so generating the tone with that
+  '' cog's streamer DAC override was never going to be a reliable rig.
+  ''
+  '' So stop generating the tone with the thing under test. A smart-pin NCO on
+  '' the DAC pin produces a real square wave, independent of any cog's DAC
+  '' channels and of the streamer entirely. This is what the Silicon Doc's own
+  '' example did with an external function generator.
+  ''
+  '' It also repairs a design flaw carried since round 7: sharing one NCO
+  '' between generator and detector meant detuning the detector detuned the
+  '' tone with it, so there was never a real selectivity test. With an
+  '' independent source there is:
+  ''     B1  tone 1 MHz, detector 1 MHz   -> expect detection
+  ''     B2  tone 1 MHz, detector 2 MHz   -> expect much less
+  ''     B3  tone OFF,   detector 1 MHz   -> expect nothing
+  '' Y = 2^32 * Fout / Fclk with X=1 (smart-pin NCO frequency mode).
+  NCO_Y_1M   = 21_474_836                ' 1 MHz   at 200 MHz
+  NCO_Y_100K = 2_147_484                 ' 100 kHz at 200 MHz
+  DDS_D_EXT  = X_DDS_G_SINC1 | CYCLES    ' no DAC routing: tone is external
+
   '' --- streamer-body.md:607, the SAME adc_pin<<17 idiom on a DIFFERENT mode --
   '' X_1ADC8_0P_1DAC8_WFBYTE template (Spin2 v55 / Silicon Doc):
   ''     %1111_DDDD_W000_0010 << 16     with the S operand carrying %ss
@@ -230,6 +254,8 @@ PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk, m_sma
   debug("A7 GUIDE'S 17.1 EXAMPLE (dds_s undeclared)  mag=", uhex_long_(m_guide))
   debug("   cmd=", uhex_long_(DDS_D_GUIDE), " vs corrected ", uhex_long_(DDS_D_OK))
   show()
+
+  ext_tone_arms()
 
   m_smart := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 0, 2, MODE_XINIT)
   debug("A9 ON-TARGET, ADC pin as a SMART-pin ADC   mag=", uhex_long_(m_smart))
@@ -555,6 +581,72 @@ PRI sig(withchan, level, source) : nbits
   nbits := g[13]
 
 
+'' --- B arms: independent smart-pin tone, detector swept -------------------
+PRI ext_tone_arms() | b1, b2, b3
+  debug(" ")
+  debug("--- B: smart-pin NCO tone on the DAC pin, detector swept independently ---")
+
+  '' These arms cannot use reset_pins() -- cog 0 must keep holding the tone on
+  '' the DAC pin. So clear the ADC pin explicitly instead of inheriting
+  '' whatever the C/D arms left on it.
+  pinclear(ADC_PIN)
+  pinf(ADC_PIN)
+
+  tone_on(NCO_Y_1M)
+  b1 := ext_arm(TONE_HZ)                   ' detector on target
+  debug("B1 tone 1 MHz, detector 1 MHz   mag=", uhex_long_(b1))
+  show()
+
+  b2 := ext_arm(TONE_HZ * 2)               ' detector detuned, tone unchanged
+  debug("B2 tone 1 MHz, detector 2 MHz   mag=", uhex_long_(b2))
+  show()
+
+  tone_off()
+  b3 := ext_arm(TONE_HZ)                   ' no tone at all
+  debug("B3 tone OFF,   detector 1 MHz   mag=", uhex_long_(b3))
+  show()
+
+  debug(" ")
+  if b1 > (b3 << 2) and b1 > (b2 << 2)
+    debug("GOERTZEL DETECTS. On-target beats both the detuned detector and the")
+    debug("tone-off null, with a source the detector does not share an NCO")
+    debug("with. The mode works; the guide's TEXT is the whole defect.")
+  elseif b1 > (b3 << 2)
+    debug("Energy detected and the null is clean, but selectivity is weak.")
+    debug("Read the raw accumulators before concluding.")
+  else
+    debug("NO DETECTION even against a real independent tone and a clean null.")
+    debug("That is now a silicon question worth asking, not an instrument one.")
+
+
+PRI ext_arm(detector_hz) : magnitude
+  '' Note: no reset_pins() here -- cog 0 is holding the tone on the DAC pin.
+  longfill(@g[0], 0, 20)
+  g[0] := DDS_D_EXT
+  g[1] := DDS_S_OK
+  g[2] := detector_hz
+  g[3] := clkfreq
+  g[6] := MODE_XINIT
+  g[19] := 1                               ' hands off the DAC pin
+  start_engine()
+  magnitude := g[10]
+
+
+PRI tone_on(y_value)
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_NCO_FREQ | P_OE)
+  wxpin(DAC_PIN, 1)                        ' base period 1 = best resolution
+  pinhigh(DAC_PIN)                         ' enable FIRST, then set frequency
+  wypin(DAC_PIN, y_value)
+  waitms(2)
+
+
+PRI tone_off()
+  pinclear(DAC_PIN)
+  pinf(DAC_PIN)
+  waitms(2)
+
+
 PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk, m_smart)
   debug(" ")
   debug("--- VERDICT ---")
@@ -728,9 +820,14 @@ engine
         if_z    jmp     #samp_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
-                ' P_CHANNEL enables the DAC channel -- F-259, our own bench
-                wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
-                dirh    #DAC_PIN
+                ' With an external smart-pin tone, do not touch the DAC pin at
+                ' all -- cog 0 owns it and is driving the square wave.
+                mov     t, ptra
+                add     t, #19*4
+                rdlong  v_ext, t
+                cmp     v_ext, #0               wz
+        if_z    wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
+        if_z    dirh    #DAC_PIN
 
                 ' F-265: the Silicon Doc contradicts itself on this pin.
                 '   STREAMER intro (part2-pixel-ops.txt:82): Goertzel works
@@ -993,6 +1090,7 @@ v_clk           res     1
 v_t2x           res     1
 v_adir          res     1
 v_mode          res     1
+v_ext           res     1
 v_pat           res     1
 xfrq            res     1
 cosa            res     1
