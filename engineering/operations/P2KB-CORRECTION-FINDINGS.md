@@ -2712,13 +2712,13 @@ the defect:
 | Defect class | Swept for | Result |
 |---|---|---|
 | **Self-listing in acknowledgments** | `Iron Sheep`/`Moraco` outside copyright/trademark context | **deSilva `:119` only.** Every other hit is the cover byline `{\small Iron Sheep Productions, LLC\par}` (correct) or, in XBYTE `front-matter.md:153`, a *Sources* citation of our own P2KB YAML — honest provenance, not a thank-you. |
-| **Unnamed / unearned reviewer credit** | `those who`, `beta.test`, `reviewers`, `reviewed drafts`, `tested code`, `everyone who`, `special thanks` | **deSilva `:129–135` only** among live docs. One milder instance in `p2-smart-pins-tutorial` (*"The Parallax community for validation and feedback"*) — that manual is **superseded by the IOSP User Guide** per the roster and is **not in `deliverables/`**, so it does not ship. |
+| **Unnamed / unearned reviewer credit** | `those who`, `beta.test`, `reviewers`, `reviewed drafts`, `tested code`, `everyone who`, `special thanks` | **deSilva `:129–135` only.** |
 | **False AI-provenance claim** | `ai-assisted`, `ai-generated`, `trained on`, `LLM`, `large language model` | **deSilva `:150` only.** The Assembly Manual `front-matter.md:316` ("a format suited to both human reading and AI-assisted development") describes the *audience and format*, not how the text was produced — accurate, **leave it alone**. |
 | **Padding credits** (parties with no connection to the work) | manual read of every acknowledgments block | **deSilva only** (MIT AI Lab, Knuth, Demoscene). |
 
 **App-notes P2AN001–P2AN007 carry no acknowledgments section at all** — clean by absence.
 
-All the other live manuals are already clean, formal, and correct —
+All live manuals are already clean, formal, and correct —
 Architect's, Assembly, XBYTE, IOSP, Getting Started, Debug Window, Streamer all credit Parallax,
 Chip Gracey, the P2 community (and IOSP additionally Jon Titus) with no self-listing, no giants
 line, no generic reviewer credits, no AI claim. deSilva is the **outlier**, consistent with it
