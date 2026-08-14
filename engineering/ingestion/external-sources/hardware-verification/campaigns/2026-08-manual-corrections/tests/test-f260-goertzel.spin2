@@ -103,6 +103,32 @@ CON
   MODE_SIG   = 4
   MODE_HOLD  = 5                         ' drive from a launched cog, then HOLD
   MODE_SAMP  = 6                         ' sample the ADC pin only, drive nothing
+  MODE_CHIP  = 7                         ' Chip's shipped demo, ported to our rig
+
+  '' Round 18 -- Goertzel_DEBUG_Demo.spin2, Chip's shipped example (2021).
+  '' It answers what sixteen rounds of probing could not:
+  ''
+  ''   cogid  x  /  setnib dacmode,x,#2
+  '' setnib nibble 2 is WRPIN bits 11:8 = M[3:0], and he writes the COG ID.
+  '' So "M[3:0] selects cog DAC channel" means it selects WHICH COG's DAC
+  '' channels drive the pin -- the pin's low two bits pick the channel, M[3:0]
+  '' picks the cog. That is the whole D-split result: my M[3:0] was 0, so every
+  '' pin listened to cog 0, which is why cog 0's SETDACS drove and a launched
+  '' cog's never could. Nothing was special about cog 0; M[3:0]=0 IS cog 0.
+  ''
+  '' Also settled, from working code:
+  ''   dds_d %1111_1111_0000_1111<<16 + (base<<17), "input from pin +4..7"
+  ''     -> pppp*4 = base pin, and base<<17 is Chip's own idiom
+  ''   dds_s %0000_1000_...           , "input from pin +3"
+  ''     -> S[15:12] sum-select confirmed
+  ''   adcmode = P_ADC_100X, smart mode %00000, and NO DIRH on the ADC pin
+  ''     -> F-265 settled for the DDS/Goertzel section, against the intro
+  ''   xfreq scale 65536.0 * 32768.0 = 2^31
+  ''   and he CALIBRATES: capture xcal/ycal once, subtract from every reading.
+  ''     -> the big constant in my accumulators is expected, by design
+  CHIP_CYCLES = 600                      ' his 120*5, not my 100
+  CHIP_D_TONE = X_DDS_G_SINC1 | X_DACS_3_2_1_0 | CHIP_CYCLES
+  CHIP_D_MUTE = X_DDS_G_SINC1 | CHIP_CYCLES      ' same, but no DAC output
 
   '' Round 8. Round 7 proved the mode RUNS -- WAITXFI came back at 20,015
   '' clocks against a predicted 20,000 -- but nothing accumulated, and the
@@ -618,6 +644,7 @@ PRI ext_tone_arms() | b1, b2, b3
     debug("NO DETECTION even against a real independent tone and a clean null.")
     debug("Before calling that silicon: sweep what the summer listens to.")
 
+  chip_arms()
   s_sweep()
   blk_sweep()
   v_sweep()
@@ -728,6 +755,45 @@ PRI n_sweep() | i, cyc, c, sn
   tone_off()
   debug("  (cos/sin proportional to cycles = a real sample sum of a stuck input;")
   debug("   flat = not a sample sum at all, and every magnitude so far is suspect)")
+
+
+'' --- CHIP: his shipped configuration, ported to our two-pin rig ------------
+'' His rig is the #64006G Goertzel add-on board: three drive electrodes at
+'' base+0..2, driven 120 degrees apart, capacitively coupled into a shared
+'' centre sense pad at base+7. Ours is a direct wire from pin 0 to pin 1. The
+'' REGISTER setup ports; the analog arrangement does not, which is why the
+'' gain is swept rather than copied, and why his calibration matters -- the
+'' large accumulator offset he subtracts is the same one that has been
+'' showing up here as an unexplained constant.
+PRI chip_arms() | i, on_c, on_s, off_c, off_s
+  debug(" ")
+  debug("--- CHIP: shipped Goertzel_DEBUG_Demo config, M[3:0] = cog id ---")
+  debug("    cycles=", udec_(CHIP_CYCLES), "  block base pin 0, summing base+1 (our ADC pin)")
+  repeat i from 0 to 1
+    chip_run(CHIP_D_TONE, i)
+    on_c := g[8]
+    on_s := g[9]
+    chip_run(CHIP_D_MUTE, i)
+    off_c := g[8]
+    off_s := g[9]
+    debug("  ADC gain variant ", udec_(i), " (0 = P_ADC_1X, 1 = P_ADC_100X)")
+    debug("     streamer DAC on : cos=", sdec_(on_c), " sin=", sdec_(on_s))
+    debug("     DAC muted       : cos=", sdec_(off_c), " sin=", sdec_(off_s))
+    debug("     CALIBRATED delta: cos=", sdec_(on_c - off_c), "  sin=", sdec_(on_s - off_s))
+  debug("  (a large calibrated delta = the mode works and the cog-id fix was it)")
+
+
+PRI chip_run(cmd, gain) : magnitude
+  reset_pins()
+  longfill(@g[0], 0, 20)
+  g[0] := cmd
+  g[1] := DDS_S_OK                         ' sum base+1 = our ADC pin
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[5] := gain
+  g[6] := MODE_CHIP
+  start_engine()
+  magnitude := g[10]
 
 
 PRI ext_arm_cycles(ncyc) : magnitude
@@ -978,6 +1044,8 @@ engine
         if_z    jmp     #hold_arm_code
                 cmp     v_mode, #MODE_SAMP      wz
         if_z    jmp     #samp_arm_code
+                cmp     v_mode, #MODE_CHIP      wz
+        if_z    jmp     #chip_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
                 ' With an external smart-pin tone, do not touch the DAC pin at
@@ -1062,6 +1130,47 @@ c2_arm
                 testp   #ADC_PIN                wc
         if_c    mov     lvl, #1
                 waitxfi
+                jmp     #report
+
+'' --- Chip's configuration, ported to the 2-pin rig -------------------------
+'' Changed from his demo ONLY what the rig requires: our block is pins 0..3
+'' (base 0) instead of 20..23, and the ADC sits at base+1 rather than base+3
+'' because the jumper is pin 0 -> pin 1. Everything else is his.
+chip_arm_code
+                ' His adcmode is P_ADC_100X with no smart-pin mode and no DIR.
+                ' The 100X is for his board's tiny capacitive coupling; our
+                ' direct wire may saturate it, so the gain is swept.
+                cmp     v_adir, #0              wz
+        if_z    wrpin   ##P_ADC_1X, #ADC_PIN
+        if_nz   wrpin   ##P_ADC_100X, #ADC_PIN
+
+                cogid   tw2                     ' THE missing piece: M[3:0] is
+                shl     tw2, #8                 ' the COG whose DAC channels
+                or      tw2, ##(P_DAC_124R_3V | P_CHANNEL)   ' drive this pin
+                wrpin   tw2, #DAC_PIN
+                dirh    #DAC_PIN
+
+                call    #build_table
+                setxfrq xfrq
+
+                getxacc gclr                    ' start from cleared accs
+                mov     gclr2, 0-0
+
+                getct   t0
+                xcont   v_ddsd, v_ddss          ' he uses XCONT with no XINIT
+                mov     tq, t0
+                add     tq, ##20_000_000
+                setq    tq
+                waitxfi                         wc
+        if_c    mov     tmo, #1
+                getct   t1
+                sub     t1, t0
+
+                getxacc cosa
+                mov     sina, 0-0
+                qvector cosa, sina
+                getqx   mag
+                getqy   ang
                 jmp     #report
 
 '' --- C8 bisect: drive from a LAUNCHED cog, then hold the pin ---------------
