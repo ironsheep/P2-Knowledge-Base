@@ -273,7 +273,7 @@ do_armd
                 add     vx, #1
 
                 mov     kk, #0                ' fast drain into cog registers
-                rep     #2, fillq
+                rep     #3, fillq             ' THREE instructions in the block
                 altd    kk, #dbuf
                 getqx   0-0
                 add     kk, #1

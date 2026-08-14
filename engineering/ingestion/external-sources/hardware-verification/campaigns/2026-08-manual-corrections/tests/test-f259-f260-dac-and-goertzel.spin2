@@ -4,6 +4,13 @@
 ''  TWO QUESTIONS in one file, because the second is meaningless until the
 ''  first has established that the DAC pin path works at all.
 ''
+''  INSTRUMENT CAVEAT (read before trusting PART 2).  The guard uses POLLQMT
+''  ("a CORDIC result is waiting").  It is UNVERIFIED whether Goertzel
+''  accumulation raises that event at all -- it may only fire for explicit
+''  CORDIC ops (QMUL/QROTATE/...).  So "POLLQMT never fired" may mean the
+''  mode produced nothing, OR that we are asking the wrong question.  Do not
+''  report a null result from PART 2 as a finding without settling this.
+''
 ''  ROUND 4 NOTE -- P_OE and P_CHANNEL are THE SAME BIT (Spin2 v55 symbol
 ''  table: both are %..._01_00000_0 = P_TT_01, in a group marked 'pick one').
 ''  Round 3's six-row sweep therefore tested one configuration six times.
@@ -56,6 +63,8 @@ CON
 DAT
 s_ok            byte    "JUMPER OK", 0
 s_bad           byte    "*** NO JUMPER ***", 0
+s_nores         byte    "(no result - POLLQMT never fired)", 0
+s_res           byte    "(RESULT PRESENT)", 0
 
 VAR
   long lutbuf[512]
@@ -233,7 +242,7 @@ PRI sweep_one(cmd)
   g[7] := 0                                ' done
   coginit(NEWCOG, @dds_engine, @g[0])
   repeat until g[7] == 1
-  debug("cmd=", uhex_long_(g[6]), "  x=", shex_long_(g[1]), "  y=", shex_long_(g[2]), "  adc=", udec_(rdpin(ADC_PIN)))
+  debug("cmd=", uhex_long_(g[6]), "  x=", uhex_long_(g[1]), "  y=", uhex_long_(g[2]), "  adc=", udec_(rdpin(ADC_PIN)), "   ", zstr_(g[1] == $DEAD_0000 ? @s_nores : @s_res))
 
 
 '' XINIT / GETQX / GETQY are PASM-only.
