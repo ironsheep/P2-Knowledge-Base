@@ -1,44 +1,55 @@
 '' =============================================================================
-''  test-F260 (round 6)  --  does the DDS/Goertzel streamer mode work at all?
+''  test-F260 (round 7)  --  DDS/Goertzel: prove the field layout on silicon
 '' =============================================================================
-''  ROUNDS 1-5 WERE ALL VOID, AND EVERY TIME IT WAS MY INSTRUMENT.  Recorded
-''  so nobody repeats them:
-''    r1-r3  load_lut() ran SETQ2+RDLONG over LUT $000..$1FF from inline PASM
-''           inside the Spin2 interpreter's own cog.  The interpreter lives in
-''           COG+LUT, so it wiped itself out and ran wild (that is what opened
-''           the single-step debugger).
-''    r4     POLLQMT used as a pre-read guard.  It is the CORDIC-READ-BUT-EMPTY
-''           flag, SET BY a failed GETQX -- not "a result is waiting".  The
-''           read could never execute.
-''    r5     Read GETQX/GETQY at all.  WRONG HARDWARE.  Goertzel accumulators
-''           come from GETXACC (KB p2kbPasm2Getxacc).  No CORDIC op was ever
-''           issued, so of course QMT was set on every row.
-''    r5     SETXFRQ computed against 2^32.  KB is explicit: the NCO masks its
-''           MSB, so the scale is $8000_0000 = 2^31.  Every rate was 2x off.
-''    r5     Waited 2 ms for a 1024-sample run at ~1 kHz -- about 1 second of
-''           work.  Caught roughly two samples.
+''  WHAT CHANGED IN ROUND 7
+''  Rounds 1-6 were all void, and every one was MY instrument.  Round 7 is not
+''  built from memory or from the Streamer Guide -- it is built from the
+''  Silicon Doc's own DDS/Goertzel section, which contains a complete worked
+''  program (including the `dds_s` the guide leaves undeclared), cross-checked
+''  against the Spin2 v55 symbol table.  We still PROVE it on the bench: a
+''  source telling us how does not make it true on this board.
 ''
-''  EVERY INSTRUCTION BELOW WAS CHECKED AGAINST P2KB BEFORE BEING WRITTEN.
-''    GETXACC  X into D, Y into the NEXT instruction's S; clears accumulators.
-''             "Must have appropriate instruction following GETXACC."
-''    QVECTOR  D=X, S=Y -> GETQX = magnitude, GETQY = angle, 55 clocks later.
-''    SETXFRQ  D = target_freq * $8000_0000 / clkfreq   (2^31, NOT 2^32)
-''    WAITXFI  wait for streamer to finish.
+''  THE FIELD LAYOUT (Spin2 v55 symbol table + Silicon Doc, both agree)
+''    %1111_DDDD_0PPP_P111 << 16     X_DDS_GOERTZEL_SINC1 = $F007_0000
+''    %1111_DDDD_1PPP_P111 << 16     X_DDS_GOERTZEL_SINC2 = $F087_0000
+''      D[31:28] %1111  mode
+''      D[27:24] DDDD   DAC channel routing (X_DACS_*)
+''      D[23]           SINC1 / SINC2 select   <-- NOT X_PINS_ON (r6 got this wrong)
+''      D[22:19] pppp   ADC input BLOCK: pppp*4 is the BASE PIN of four
+''      D[18:16] %111   required
+''      D[15:0]         cycles
+''      S[19:16]        which of the four pins are INVERTED
+''      S[15:12]        which of the four pins are SUMMED   <-- mandatory; 0 = none
+''      S[11:0]         loop size + LUT window (%000_TTTTTTTTT = 512 entries)
+''    DAC channel N drives pins whose low two bits are N.
 ''
-''  RIG: jumper DAC_PIN (0) -> ADC_PIN (1).  Same 8-pin power group (0..7).
+''  ROUNDS 1-6, recorded so nobody repeats them:
+''    r1-r3  loaded the LUT from inline PASM inside the Spin2 interpreter's own
+''           cog.  The interpreter lives in COG+LUT -- it wiped itself out.
+''    r4     POLLQMT as a pre-read guard.  It is the CORDIC-read-but-empty flag
+''           SET BY a failed GETQX, not "a result is waiting".
+''    r5     read GETQX/GETQY for the accumulators.  WRONG HARDWARE -- Goertzel
+''           accumulators come from GETXACC.
+''    r5     SETXFRQ computed against 2^32.  The NCO masks its MSB: 2^31.
+''    r6     "D[23] is the missing pin-enable."  Wrong for this mode -- D[23] is
+''           the SINC select.  It IS the bug in the C2 control below, whose
+''           X_IMM_32X1_1DAC1 template (%0100_DDDD_EPPP_PPPA) does carry the
+''           enable at bit 23.  That is why C2 has failed every round.
 ''
-''  CONTROLS -- this probe answers nothing without them:
-''    C1  jumper continuity, digital.
-''    C2  STREAMER PATH: run a plain streamer output mode and confirm it moves
-''        the pin.  Rounds 1-5 proved the DAC pin path but NEVER proved the
-''        streamer works in this harness.  If C2 fails, Goertzel results are
-''        meaningless.
-''    C3  WAITXFI DURATION: time the run.  A streamer that never started
-''        returns instantly; one that ran takes samples x NCO period.  This
-''        single number separates "mode broken" from "command word wrong".
-''    C4  POSITIVE vs NEGATIVE: detect a tone we are generating AT the target
-''        frequency, then detune the target and confirm magnitude collapses.
-''        A non-zero accumulator alone proves nothing; the ratio does.
+''  EVERY INSTRUCTION BELOW WAS LOOKED UP IN P2KB BEFORE BEING WRITTEN.
+''    GETXACC  cos -> D, sin -> NEXT instruction's S.  Following instruction
+''             is mandatory.  Accumulators cleared on read.
+''    QVECTOR  D = X (cos), S = Y (sin) -> GETQX magnitude, GETQY angle.
+''    QFRAC    GETQX = (D<<32)/S, so halve it for the NCO's 2^31 scale.
+''    WRLUT    a PLAIN IMMEDIATE address is capped at #0..#255.  The table is
+''             512 entries, so the address MUST be a register operand.
+''    DJNF     decrements and jumps while the result is not -1.
+''    TESTP    reads the actual pin state into C.
+''    WAITXFI  no preceding SETQ => no timeout armed.
+''
+''  RIG: jumper pin 0 -> pin 1.  Pin 0 = DAC out (DAC channel 0, since 0 mod 4
+''  = 0).  Pin 1 = ADC in, raw delta-sigma, no smart-pin mode.  Same 8-pin
+''  power group, so both share VIO/GIO.
 ''
 ''  Build: pnut-ts -d test-f260-goertzel.spin2
 '' =============================================================================
@@ -48,42 +59,154 @@ CON
   DAC_PIN   = 0
   ADC_PIN   = 1
 
-  SAMPLES   = 1024                       ' Goertzel sample count
-  ' NCO rate: sysclk/16 so SAMPLES finish in ~16k clocks, not ~1 second.
-  ' D = f * $8000_0000 / clkfreq, and f = clkfreq/16, so D = $8000_0000/16.
-  XFRQ_FAST = $0800_0000
+  CYCLES    = 100                        ' NCO cycles per measurement
+  TONE_HZ   = 1_000_000                  ' Silicon Doc's own example rate
+  SLOW_HZ   = 100_000                    ' hedge against analog bandwidth
 
-  DDS_SINC1 = $F007_0000                 ' X_DDS_GOERTZEL_SINC1
+  ' Predicted WAITXFI duration = CYCLES * (clkfreq / TONE_HZ) = 100 * 200
+  PREDICT   = CYCLES * (_clkfreq / TONE_HZ)
+
+  X_DDS_G_SINC1 = $F007_0000             ' verified: Spin2 v55 symbol table
+
+  ' CORRECTED command.  ADC pins 0..3 => block pppp = 0, so D[22:19] = 0.
+  ' X_DACS_X_X_X_0 routes X0 (= LUT byte 0) to DAC channel 0, and DAC channel N
+  ' drives pins whose low two bits are N -- so byte 0 lands on pin 0.  Without
+  ' a DDDD routing the streamer drives NO DAC at all and there is no tone; the
+  ' Silicon Doc's example leaves it 0 because it used a function generator.
+  DDS_D_OK    = X_DDS_G_SINC1 | X_DACS_X_X_X_0 | CYCLES
+  ' Sum base pin +1 (= pin 1, our ADC).  S[15:12] = %0010.  S[11:0] = 0 => 512.
+  DDS_S_OK    = %0010 << 12
+  DDS_S_NONE  = 0                        ' sum-select empty: must accumulate nothing
+
+  ' THE GUIDE'S §17.1 EXAMPLE AS PRINTED (streamer-body.md:1340 + :1322).
+  ' Its D is actually fine for pins 0..3 -- pppp = 0 names that block.  What
+  ' kills it is :1324's `xcont dds_cmd, dds_s`, where dds_s is never declared
+  ' anywhere in the guide.  An unset S selects NO pins to sum.
+  DDS_D_GUIDE = X_DDS_G_SINC1 | X_DACS_0N0_0N0 | CYCLES
+
+  ' Correct command, but pppp = 1 => block base pin 4, i.e. pins 4..7.  Our
+  ' signal is on pin 1.  If D[22:19] really is the block selector this must
+  ' detect nothing -- which is what makes the guide's `adc_pin<<17` wrong.
+  ' (That formula is only accidentally right when adc_pin is a multiple of 4:
+  '  (adc_pin>>2)<<19 == adc_pin<<17 exactly then.  For pin 1 it either lands
+  '  on bit 17 -- already set inside the required %111, so silently ignored --
+  '  or, in the `add` form at :607, carries out of %111 and corrupts the mode.)
+  DDS_D_WRONGBLK = X_DDS_G_SINC1 | X_DACS_X_X_X_0 | (1<<19) | CYCLES
+
+  ' C2 control: X_IMM_32X1_1DAC1 (%0100) + X_PINS_ON (bit 23) + pin<<17 + 32.
+  C2_MODE   = $4000_0000 | $0080_0000 | (DAC_PIN<<17) | 32
+
+  MODE_XINIT = 0
+  MODE_C2    = 1
+  MODE_XCONT = 2
 
 DAT
 s_ok            byte    "OK", 0
 s_bad           byte    "*** FAILED ***", 0
 
 VAR
-  long sine[512]
-  long g[16]
+  long g[18]
 
-PUB main() | i
+PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
 
-  debug("=== F-260 round 6: DDS/Goertzel, KB-verified instrument ===")
-  debug("RIG: jumper pin ", udec_(DAC_PIN), " -> pin ", udec_(ADC_PIN))
+  debug("=== F-260 round 7: DDS/Goertzel, built from the Silicon Doc field spec ===")
+  debug("RIG: jumper pin ", udec_(DAC_PIN), " (DAC) -> pin ", udec_(ADC_PIN), " (ADC)")
+  debug("Predicted WAITXFI for an on-target run: ", udec_(PREDICT), " clocks")
+  debug(" ")
 
   if not c1_jumper()
     debug("@@@ ABORTED: no jumper. @@@")
     stop_here()
 
-  build_sine()
-  g[0] := @sine
-  g[4] := DAC_PIN
-  g[5] := ADC_PIN
-
   if not c2_streamer_path()
     debug("*** C2 FAILED: the streamer does not drive this pin in this harness.")
-    debug("*** Goertzel results below would be meaningless. STOP.")
+    debug("*** Everything below would be meaningless. STOP.")
     stop_here()
 
-  c3_and_c4()
+  debug(" ")
+  debug("--- C3 + C4: the measurements ---")
+
+  m_on := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 0, 0, MODE_XINIT)
+  debug("A1 ON-TARGET  (corrected cmd, tone 1x)      mag=", uhex_long_(m_on))
+  show()
+
+  m_off := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 1, 0, MODE_XINIT)
+  debug("A2 OFF-TARGET (same detector, tone at 2x)   mag=", uhex_long_(m_off))
+  show()
+
+  m_none := arm(DDS_D_OK, DDS_S_NONE, TONE_HZ, 0, 0, MODE_XINIT)
+  debug("A3 S sum-select = 0 (no pins summed)        mag=", uhex_long_(m_none))
+  show()
+
+  m_dirh := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 0, 1, MODE_XINIT)
+  debug("A4 ON-TARGET but ADC pin driven (DIRH)      mag=", uhex_long_(m_dirh))
+  show()
+
+  m_slow := arm(DDS_D_OK, DDS_S_OK, SLOW_HZ, 0, 0, MODE_XINIT)
+  debug("A5 ON-TARGET at 100 kHz                     mag=", uhex_long_(m_slow))
+  show()
+
+  m_xcont := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 0, 0, MODE_XCONT)
+  debug("A6 ON-TARGET issued with XCONT, not XINIT   mag=", uhex_long_(m_xcont))
+  show()
+
+  m_guide := arm(DDS_D_GUIDE, DDS_S_NONE, TONE_HZ, 0, 0, MODE_XINIT)
+  debug("A7 GUIDE'S 17.1 EXAMPLE (dds_s undeclared)  mag=", uhex_long_(m_guide))
+  debug("   cmd=", uhex_long_(DDS_D_GUIDE), " vs corrected ", uhex_long_(DDS_D_OK))
+  show()
+
+  m_blk := arm(DDS_D_WRONGBLK, DDS_S_OK, TONE_HZ, 0, 0, MODE_XINIT)
+  debug("A8 pppp names the WRONG 4-pin block (4..7)  mag=", uhex_long_(m_blk))
+  show()
+
+  verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
   stop_here()
+
+
+PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
+  debug(" ")
+  debug("--- VERDICT ---")
+
+  if m_on == 0 and m_slow == 0
+    debug("NO DETECTION AT EITHER RATE, with C2 green.")
+    debug("The Silicon Doc's own field layout does not detect on this board.")
+    debug("THAT is a silicon question worth Chip's time -- unlike rounds 1-6.")
+    return
+
+  if m_on > (m_off << 2) or m_slow > (m_off << 2)
+    debug("DETECTED, and frequency-selective (on-target >> off-target).")
+  else
+    debug("Detected energy but POOR SELECTIVITY -- read the raw accumulators")
+    debug("before concluding anything about the mode.")
+
+  if m_none <> 0
+    debug("BUT: S sum-select = 0 still accumulated. The S[15:12] reading is WRONG.")
+  else
+    debug("S[15:12] confirmed: clearing the sum-select stops accumulation dead.")
+
+  if m_blk == 0
+    debug("D[22:19] confirmed as the 4-pin BLOCK selector: naming block 4..7")
+    debug("while the signal is on pin 1 detects nothing.")
+  else
+    debug("BUT: the wrong block still detected. The D[22:19] reading is WRONG.")
+
+  if m_guide == 0
+    debug("THE GUIDE'S 17.1 EXAMPLE ACCUMULATES NOTHING -- on our bench, with")
+    debug("an otherwise identical command that DOES detect. The whole defect is")
+    debug("documentation:")
+    debug("  1. dds_s is never declared, and an unset S sums NO ADC pins.")
+    debug("     S[15:12] picks which of the four; S[19:16] which are inverted.")
+    debug("  2. adc_pin<<17 (:990, :607) is only accidentally right when the")
+    debug("     pin is a multiple of 4. The field is D[22:19] and it names a")
+    debug("     BLOCK: pppp*4 is the base pin.")
+    debug("=> The community report is right in effect. NO ESCALATION TO CHIP.")
+  else
+    debug("Unexpected: the guide's command accumulated something.")
+    debug("Do not draw the doc conclusion until that is understood.")
+
+
+PRI show()
+  debug("     waitxfi=", udec_(g[12]), " clocks  xfrq=", uhex_long_(g[14]), "  cos=", sdec_(g[8]), "  sin=", sdec_(g[9]), "  timeout=", udec_(g[16]))
 
 
 PRI stop_here()
@@ -93,7 +216,7 @@ PRI stop_here()
   repeat
 
 
-'' --- C1: digital continuity ------------------------------------------------
+'' --- C1: digital continuity -------------------------------------------------
 PRI c1_jumper() : ok | hi, lo
   pinclear(DAC_PIN)
   pinclear(ADC_PIN)
@@ -106,158 +229,218 @@ PRI c1_jumper() : ok | hi, lo
   lo := pinr(ADC_PIN)
   pinf(DAC_PIN)
   ok := (hi == 1) and (lo == 0)
-  debug("C1 jumper: high->", udec_(hi), " low->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
+  debug("C1 jumper    : high->", udec_(hi), " low->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
 
 
-'' --- C2: prove the STREAMER moves the pin, before trusting Goertzel --------
-'' Uses a plain immediate->pins mode (X_IMM_32X1_1DAC1, %0100) writing an
-'' alternating pattern.  If the ADC pin does not change between an all-ones
-'' and an all-zeros pattern, the streamer path is dead in this harness.
+'' --- C2: prove the STREAMER moves the pin ----------------------------------
+'' Rounds 1-6 never proved this.  The fix is X_PINS_ON at bit 23, which the
+'' X_IMM_32X1_1DAC1 template carries and every earlier round left clear.
+'' The pin is sampled MID-STREAM (32 bits at 1 MHz = 32 us; we look at ~10 us)
+'' so we read the streamer driving the pin, not whatever it settles to after.
 PRI c2_streamer_path() : ok | hi, lo
-  pinclear(DAC_PIN)
-  pinl(DAC_PIN)                          ' plain output, DIR=1
-  pinclear(ADC_PIN)
-  pinf(ADC_PIN)
-
-  hi := stream_pattern($FFFF_FFFF)
-  lo := stream_pattern($0000_0000)
-  ok := hi <> lo
-  debug("C2 streamer path: ones->", udec_(hi), "  zeros->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
+  hi := c2_pattern($FFFF_FFFF)
+  lo := c2_pattern($0000_0000)
+  ok := (hi == 1) and (lo == 0)
+  debug("C2 streamer  : ones->", udec_(hi), " zeros->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
 
 
-PRI stream_pattern(pat) : level
-  g[6] := pat
-  g[7] := 0
-  run_engine(@stream_engine)
-  waitms(2)
-  level := pinr(ADC_PIN)
+PRI c2_pattern(pat) : level
+  longfill(@g[0], 0, 18)
+  g[0] := C2_MODE
+  g[2] := TONE_HZ
+  g[3] := clkfreq
+  g[6] := MODE_C2
+  g[7] := pat
+  start_engine()
+  level := g[13]
 
 
-'' --- C3 + C4: duration, then positive/negative detection -------------------
-PRI c3_and_c4() | mag_on, mag_off, ticks_on
-
-  debug(" ")
-  debug("--- C3: does the streamer actually RUN? (WAITXFI duration) ---")
-
-  ' Target the frequency we are generating: sysclk/16 NCO over a 512-entry
-  ' sine table -> tone at NCO/512.
-  mag_on  := goertzel(XFRQ_FAST, true)
-  ticks_on := g[9]
-  debug("ON-TARGET : WAITXFI took ", udec_(ticks_on), " clocks;  magnitude=", uhex_long_(mag_on))
-  debug("            (instant return => the command never started)")
-
-  if ticks_on < 100
-    debug("*** C3 FAILED: WAITXFI returned immediately. The documented command")
-    debug("*** word does not start this mode. THAT is the finding -- and it is")
-    debug("*** now OUR measurement, with a proven streamer path (C2).")
-    return
-
-  debug(" ")
-  debug("--- C4: positive vs negative control ---")
-  mag_off := goertzel(XFRQ_FAST >> 3, false)     ' detune the detector 8x
-  debug("OFF-TARGET: magnitude=", uhex_long_(mag_off))
-  debug(" ")
-  if mag_on > (mag_off << 2)
-    debug("GOERTZEL WORKS: on-target magnitude >> off-target. The mode is fine;")
-    debug("the guide's TEXT (undeclared dds_s, adc_pin<<17 colliding with the")
-    debug("required %111 in D[18:16]) is the whole defect.")
-  elseif mag_on == 0 and mag_off == 0
-    debug("NO ACCUMULATION EITHER WAY, despite the streamer running (C3).")
-    debug("Command word is the suspect. Next: vary the S operand -- the guide's")
-    debug("undeclared 'dds_s' -- before considering escalation.")
-  else
-    debug("INCONCLUSIVE: on/off magnitudes too close. Detector may not be")
-    debug("tuned to the generated tone. Adjust before drawing any conclusion.")
+'' --- one Goertzel measurement ----------------------------------------------
+PRI arm(ddsd, ddss, freq, tone2x, adc_dirh, mode) : magnitude
+  longfill(@g[0], 0, 18)
+  g[0] := ddsd
+  g[1] := ddss
+  g[2] := freq
+  g[3] := clkfreq
+  g[4] := tone2x
+  g[5] := adc_dirh
+  g[6] := mode
+  start_engine()
+  magnitude := g[10]
 
 
-'' Run one Goertzel measurement.  Returns magnitude; g[9] = WAITXFI clocks.
-PRI goertzel(xfrq, drive_tone) : magnitude
-  g[3] := xfrq
-  g[6] := drive_tone ? 1 : 0
-  g[7] := 0
-  run_engine(@goertzel_engine)
-  magnitude := g[1]
-
-
-PRI run_engine(addr) | cogn, t0
-  cogn := coginit(NEWCOG, addr, @g[0])
-  t0 := getct()
-  repeat until g[7] == 1 or (getct() - t0) > (clkfreq / 4)
-  if g[7] <> 1
+PRI start_engine() | cogn, tstart
+  cogn := coginit(NEWCOG, @engine, @g[0])
+  tstart := getct()
+  repeat until g[15] == 1 or (getct() - tstart) > (clkfreq / 4)
+  if g[15] <> 1
     cogstop(cogn)
-    debug("*** engine did not finish within 250 ms")
+    debug("     *** engine did not finish within 250 ms (hung)")
 
 
-PRI build_sine() | i
-  repeat i from 0 to 511
-    sine[i] := qsin(32767, i << 23, 0)
-
-
+'' ===========================================================================
 DAT             org
 
-'' g: [0]=@sine [1]=magnitude [2]=angle [3]=xfrq [4]=dacpin [5]=adcpin
-''    [6]=arg [7]=done [8]=(spare) [9]=waitxfi clocks
-goertzel_engine
-                mov     gb, ptra
-                rdlong  gsine, gb
-                add     gb, #3*4
-                rdlong  gxfrq, gb
-                mov     gbase, ptra
+'' mailbox at PTRA:
+''   in : 0 dds_d  1 dds_s  2 freq  3 clkfreq  4 tone2x  5 adc_dirh
+''        6 mode   7 c2 pattern
+''   out: 8 cos  9 sin  10 magnitude  11 angle  12 waitxfi clocks
+''        13 c2 level  14 xfrq  15 done
+engine
+                mov     lvl, #0
+                mov     tmo, #0
 
-                setq2   ##512-1               ' our own cog's LUT: safe
-                rdlong  0, gsine
+                mov     t, ptra
+                rdlong  v_ddsd, t
+                add     t, #4
+                rdlong  v_ddss, t
+                add     t, #4
+                rdlong  v_freq, t
+                add     t, #4
+                rdlong  v_clk, t
+                add     t, #4
+                rdlong  v_t2x, t
+                add     t, #4
+                rdlong  v_adir, t
+                add     t, #4
+                rdlong  v_mode, t
+                add     t, #4
+                rdlong  v_pat, t
 
-                setxfrq gxfrq
-                getct   gt0
-                xinit   ##DDS_SINC1 | SAMPLES, #0
+                ' NCO word: QFRAC gives (freq<<32)/clkfreq; the NCO masks its
+                ' MSB, so the scale is 2^31 -- halve it.
+                qfrac   v_freq, v_clk
+                getqx   xfrq
+                shr     xfrq, #1
+
+                cmp     v_mode, #MODE_C2        wz
+        if_z    jmp     #c2_arm
+
+'' --- DDS/Goertzel arm ------------------------------------------------------
+                wrpin   ##P_DAC_124R_3V, #DAC_PIN
+                dirh    #DAC_PIN
+
+                ' Raw delta-sigma bitstream: ADC pin config, NO smart-pin mode.
+                wrpin   ##P_ADC_1X, #ADC_PIN
+                cmp     v_adir, #0              wz
+        if_nz   dirh    #ADC_PIN
+        if_z    dirl    #ADC_PIN
+
+                call    #build_table
+
+                setxfrq xfrq
+                getct   t0
+                cmp     v_mode, #MODE_XCONT     wz
+        if_z    xcont   v_ddsd, v_ddss
+        if_nz   xinit   v_ddsd, v_ddss
+                ' Arm a 100 ms timeout so a command that never finishes reports
+                ' itself instead of hanging the cog.  SETQ + WC per WAITXFI's
+                ' documented timeout form; C = 1 means the timeout won.
+                mov     tq, t0
+                add     tq, ##20_000_000
+                setq    tq
+                waitxfi                         wc
+        if_c    mov     tmo, #1
+                getct   t1
+                sub     t1, t0
+
+                getxacc cosa                    ' cos -> D, sin -> next S
+                mov     sina, 0-0               ' ...the mandatory follower
+                qvector cosa, sina              ' D = X (cos), S = Y (sin)
+                getqx   mag
+                getqy   ang
+                jmp     #report
+
+'' --- C2 arm: does the streamer drive the pin at all? -----------------------
+c2_arm
+                wrpin   #0, #DAC_PIN            ' plain digital output
+                dirh    #DAC_PIN
+                wrpin   #0, #ADC_PIN            ' plain digital input
+                dirl    #ADC_PIN
+
+                setxfrq xfrq
+                xinit   v_ddsd, v_pat
+                waitx   ##2000                  ' ~10 us into a ~32 us stream
+                testp   #ADC_PIN                wc
+        if_c    mov     lvl, #1
                 waitxfi
-                getct   gt1
-                sub     gt1, gt0
+                jmp     #report
 
-                getxacc gx                    ' X -> gx, Y -> NEXT instr's S
-                qvector gx, 0-0               ' S receives Y from GETXACC
-                getqx   gmag
-                getqy   gang
+'' --- build the 512-entry LUT table -----------------------------------------
+'' byte3 = sine, byte2 = cosine (both signed, the Goertzel reference).
+'' byte0 = the DAC output waveform.  For the OFF-TARGET arm the output angle
+'' is doubled, so the tone sits at 2x while the detector stays at 1x -- one
+'' NCO, one LUT, a real frequency-selectivity test.
+build_table
+                mov     z, #$1FF
+bt_loop
+                mov     w, z
+                shl     w, #32-9                ' angle into the top 9 bits
+                qrotate #127, w
+                getqy   sy                      ' sine
+                getqx   sx                      ' cosine
+                shl     sy, #24                 ' sine into byte3
+                setbyte sy, sx, #2              ' cosine into byte2
 
-                mov     gt, gbase
-                add     gt, #1*4
-                wrlong  gmag, gt
-                add     gt, #4
-                wrlong  gang, gt
-                mov     gt, gbase
-                add     gt, #9*4
-                wrlong  gt1, gt
-                mov     gt, gbase
-                add     gt, #7*4
-                wrlong  #1, gt
-                cogid   gt
-                cogstop gt
+                mov     w, z
+                shl     w, #32-9
+                cmp     v_t2x, #0               wz
+        if_nz   shl     w, #1                   ' double the angle => tone at 2x
+                qrotate #127, w
+                getqy   oy
+                setbyte sy, oy, #0              ' output waveform into byte0
 
-'' C2: plain immediate-to-pins streamer mode, to prove the streamer path.
-stream_engine
-                mov     gb, ptra
-                mov     gbase, ptra
-                add     gb, #6*4
-                rdlong  gpat, gb
+                wrlut   sy, z                   ' REGISTER address: full 0..511
+                djnf    z, #bt_loop
+                ret
 
-                setxfrq ##$1000_0000
-                xinit   ##$4000_0000 | 32, gpat     ' X_IMM_32X1_1DAC1, 32 bits
-                waitxfi
+'' --- report and stop -------------------------------------------------------
+report
+                mov     t, ptra
+                add     t, #8*4
+                wrlong  cosa, t
+                add     t, #4
+                wrlong  sina, t
+                add     t, #4
+                wrlong  mag, t
+                add     t, #4
+                wrlong  ang, t
+                add     t, #4
+                wrlong  t1, t
+                add     t, #4
+                wrlong  lvl, t
+                add     t, #4
+                wrlong  xfrq, t                 ' [14]
+                mov     t, ptra
+                add     t, #16*4
+                wrlong  tmo, t                  ' [16] -- must land BEFORE done
+                mov     t, ptra
+                add     t, #15*4
+                wrlong  #1, t                   ' [15] done -- always the last write
+                cogid   t
+                cogstop t
 
-                mov     gt, gbase
-                add     gt, #7*4
-                wrlong  #1, gt
-                cogid   gt
-                cogstop gt
-
-gb              res     1
-gbase           res     1
-gsine           res     1
-gxfrq           res     1
-gpat            res     1
-gx              res     1
-gmag            res     1
-gang            res     1
-gt              res     1
-gt0             res     1
-gt1             res     1
+t               res     1
+t0              res     1
+t1              res     1
+v_ddsd          res     1
+v_ddss          res     1
+v_freq          res     1
+v_clk           res     1
+v_t2x           res     1
+v_adir          res     1
+v_mode          res     1
+v_pat           res     1
+xfrq            res     1
+cosa            res     1
+sina            res     1
+mag             res     1
+ang             res     1
+lvl             res     1
+z               res     1
+w               res     1
+sx              res     1
+sy              res     1
+oy              res     1
+tq              res     1
+tmo             res     1
