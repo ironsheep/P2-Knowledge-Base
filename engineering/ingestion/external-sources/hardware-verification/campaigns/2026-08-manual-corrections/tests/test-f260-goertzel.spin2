@@ -162,7 +162,7 @@ CON
   ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
-  BUILD       = 21
+  BUILD       = 22
 
   '' Round 21. C10 read 966 vs 991 of 2000 -- ~48%, MID-SCALE -- where
   '' undriven reads ~335 (17%) and driven-high ~1627 (81%). That is my bug, and
@@ -175,6 +175,27 @@ CON
   '' The levels that actually reach the rails are $80 (-> $00) and $7F (-> $FF).
   '' Note the pin DID move from undriven-low to mid-scale, which is the DAC
   '' driving -- but that is an inference, so this round measures it properly.
+  '' Round 22. C10 is GREEN -- 1,640 vs 332, spread 1,308, matching C5's
+  '' profile. The streamer's DAC override DOES drive from a launched cog when
+  '' the pin names that cog in M[3:0]. Chip's idiom is confirmed on our
+  '' silicon and open question 4 is answered: yes.
+  ''
+  '' So both tone sources are now proven real, and the Goertzel still does not
+  '' respond: S-sweep flat, BLK-sweep flat, all five V variants flat (deltas
+  '' ~127-250 against ~5,000,000). One uncontrolled variable is left -- Chip's
+  '' PIN GEOMETRY. His block is pins 20..23, the UPPER four of the 8-pin group
+  '' 16..23, with the sense pad at base+3; ours is pins 0..3, the LOWER four of
+  '' group 0..7, sensing base+1. His gtzl_base comment even says "must be a
+  '' multiple of 8".
+  ''
+  '' So this build tests BOTH geometries and picks whichever is wired. Move the
+  '' jumper to pin 16 -> pin 23 and the Chip-geometry pass runs; leave it on
+  '' 0 -> 1 and the original pass runs. Continuity decides, not a flag.
+  ALT_DAC_PIN = 16                       ' Chip's base+0, a drive electrode
+  ALT_ADC_PIN = 23                       ' Chip's base+7, the centre sense pad
+  ALT_BLOCK   = 5                        ' pppp=5 -> base pin 20, so ADC = +3
+  ALT_S_SEL   = %1000 << 12              ' sum base+3, exactly his dds_s
+
   DAC_LO_BYTE = $80                      ' -> DAC $00 after the MSB inversion
   DAC_HI_BYTE = $7F                      ' -> DAC $FF after the MSB inversion                       ' bump EVERY round; the banner prints it
 
@@ -254,7 +275,7 @@ s_ok            byte    "OK", 0
 s_bad           byte    "*** FAILED ***", 0
 
 VAR
-  long g[20]
+  long g[24]
   byte abuf[ABUFSZ]
 
 PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk, m_smart
@@ -372,7 +393,7 @@ PRI guide_cmd(pin) : cmd
 PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
   reset_pins()
   bytefill(@abuf[0], SENTINEL, ABUFSZ)
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := cmd
   g[1] := sval
   g[2] := TONE_HZ
@@ -489,7 +510,7 @@ PRI c9_cog0_drive_raw_sense(level) : nbits
   wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)
   pinlow(DAC_PIN)
   waitms(5)
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[6] := MODE_SAMP                        ' a launched cog only counts bits
   start_engine()
   nbits := g[13]
@@ -501,7 +522,7 @@ PRI hold_drive(level) : cogn | tstart
 
 '' mode: 0 = SETDACS and pin config, 1 = SETDACS only, 2 = pin config only
 PRI hold_drive_mode(level, submode) : cogn | tstart
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[4] := submode
   g[5] := level
   g[6] := MODE_HOLD
@@ -639,7 +660,7 @@ PRI spread(x, y) : d
 
 PRI sig(withchan, level, source) : nbits
   reset_pins()
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[2] := TONE_HZ
   g[3] := clkfreq
   g[4] := withchan
@@ -689,6 +710,7 @@ PRI ext_tone_arms() | b1, b2, b3
 
   c10_streamer_dac()
   chip_arms()
+  alt_geometry_arms()
   s_sweep()
   blk_sweep()
   v_sweep()
@@ -847,7 +869,7 @@ PRI c10_streamer_dac() | hi, lo
 
 PRI dacdrv(level) : nbits
   reset_pins()
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := X_DDS_G_SINC1 | X_DACS_X_X_X_0 | $FFFF   ' long run, DAC0 <- X0
   g[1] := DDS_S_OK
   g[2] := TONE_HZ
@@ -858,11 +880,51 @@ PRI dacdrv(level) : nbits
   nbits := g[13]
 
 
+'' --- Chip's PIN GEOMETRY, if the jumper is on 16 -> 23 ----------------------
+'' His block is pins 20..23 -- the UPPER four of the 8-pin group 16..23 -- with
+'' the sense pad at base+3. Ours is 0..3, the lower four of group 0..7, sensing
+'' base+1. His own comment says gtzl_base "must be a multiple of 8". That
+'' difference is the last uncontrolled variable, so run his geometry verbatim
+'' when it is wired and compare.
+PRI alt_geometry_arms() | on_c, on_s, off_c, off_s, cmd_tone, cmd_mute
+  if not continuity(ALT_DAC_PIN, ALT_ADC_PIN)
+    debug(" ")
+    debug("--- ALT geometry (pins 16 -> 23) not wired; skipped.")
+    debug("    Move the jumper there to run Chip's exact pin layout.")
+    return
+  cmd_tone := X_DDS_G_SINC1 | X_DACS_3_2_1_0 | (ALT_BLOCK << 19) | CHIP_CYCLES
+  cmd_mute := X_DDS_G_SINC1 | (ALT_BLOCK << 19) | CHIP_CYCLES
+  debug(" ")
+  debug("--- ALT: Chip's pin geometry, block base 20, sensing base+3 (pin 23) ---")
+  chip_run_pins(cmd_tone, 0, ALT_DAC_PIN, ALT_ADC_PIN, ALT_S_SEL)
+  on_c := g[8]
+  on_s := g[9]
+  chip_run_pins(cmd_mute, 0, ALT_DAC_PIN, ALT_ADC_PIN, ALT_S_SEL)
+  off_c := g[8]
+  off_s := g[9]
+  debug("    tone cos=", sdec_(on_c), " sin=", sdec_(on_s))
+  debug("    mute cos=", sdec_(off_c), " sin=", sdec_(off_s))
+  debug("    CALIBRATED delta cos=", sdec_(on_c - off_c), "  sin=", sdec_(on_s - off_s))
+  if spread(on_c, off_c) > 10000 or spread(on_s, off_s) > 10000
+    debug("    ALT DETECTS where pins 0..3 did not -- the geometry matters, and")
+    debug("    that is a constraint no source states.")
+  else
+    debug("    ALT is flat too. With both tone paths proven and every documented")
+    debug("    setup and geometry swept, the question has earned its way to Chip.")
+
+
 PRI chip_run(cmd, gain) : magnitude
+  chip_run_pins(cmd, gain, DAC_PIN, ADC_PIN, DDS_S_OK)
+  magnitude := g[10]
+
+
+PRI chip_run_pins(cmd, gain, dacp, adcp, ssel) : magnitude
   reset_pins()
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
+  g[20] := dacp
+  g[21] := adcp
   g[0] := cmd
-  g[1] := DDS_S_OK                         ' sum base+1 = our ADC pin
+  g[1] := ssel                         ' sum base+1 = our ADC pin
   g[2] := TONE_HZ
   g[3] := clkfreq
   g[5] := gain
@@ -872,7 +934,7 @@ PRI chip_run(cmd, gain) : magnitude
 
 
 PRI ext_arm_cycles(ncyc) : magnitude
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := X_DDS_G_SINC1 | ncyc
   g[1] := DDS_S_OK
   g[2] := TONE_HZ
@@ -884,7 +946,7 @@ PRI ext_arm_cycles(ncyc) : magnitude
 
 
 PRI ext_arm_setup(detector_hz, variant) : magnitude
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := DDS_D_EXT
   g[1] := DDS_S_OK
   g[2] := detector_hz
@@ -897,7 +959,7 @@ PRI ext_arm_setup(detector_hz, variant) : magnitude
 
 
 PRI ext_arm_cmd(cmd, sel) : magnitude
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := cmd
   g[1] := sel
   g[2] := TONE_HZ
@@ -909,7 +971,7 @@ PRI ext_arm_cmd(cmd, sel) : magnitude
 
 
 PRI ext_arm_sel(detector_hz, sel) : magnitude
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := DDS_D_EXT
   g[1] := sel
   g[2] := detector_hz
@@ -922,7 +984,7 @@ PRI ext_arm_sel(detector_hz, sel) : magnitude
 
 PRI ext_arm(detector_hz) : magnitude
   '' Note: no reset_pins() here -- cog 0 is holding the tone on the DAC pin.
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := DDS_D_EXT
   g[1] := DDS_S_OK
   g[2] := detector_hz
@@ -1012,19 +1074,26 @@ PRI stop_here()
 
 
 '' --- C1: digital continuity -------------------------------------------------
-PRI c1_jumper() : ok | hi, lo
-  pinclear(DAC_PIN)
-  pinclear(ADC_PIN)
-  pinf(ADC_PIN)
-  pinh(DAC_PIN)
+PRI c1_jumper() : ok
+  ok := continuity(DAC_PIN, ADC_PIN)
+  debug("C1 jumper 0->1   : ", zstr_(ok ? @s_ok : @s_bad))
+  if continuity(ALT_DAC_PIN, ALT_ADC_PIN)
+    debug("C1 jumper 16->23 : OK -- Chip's geometry is wired, its pass will run")
+
+
+'' Digital continuity between any two pins, from cog 0.
+PRI continuity(drv, sns) : ok | hi, lo
+  pinclear(drv)
+  pinclear(sns)
+  pinf(sns)
+  pinh(drv)
   waitms(2)
-  hi := pinr(ADC_PIN)
-  pinl(DAC_PIN)
+  hi := pinr(sns)
+  pinl(drv)
   waitms(2)
-  lo := pinr(ADC_PIN)
-  pinf(DAC_PIN)
+  lo := pinr(sns)
+  pinf(drv)
   ok := (hi == 1) and (lo == 0)
-  debug("C1 jumper    : high->", udec_(hi), " low->", udec_(lo), "  ", zstr_(ok ? @s_ok : @s_bad))
 
 
 '' --- C2: prove the STREAMER moves the pin ----------------------------------
@@ -1053,7 +1122,7 @@ PRI c2_pattern(pat) : level
 '' --- one Goertzel measurement ----------------------------------------------
 PRI arm(ddsd, ddss, freq, tone2x, adc_dirh, mode) : magnitude
   reset_pins()
-  longfill(@g[0], 0, 20)
+  longfill(@g[0], 0, 24)
   g[0] := ddsd
   g[1] := ddss
   g[2] := freq
@@ -1250,18 +1319,25 @@ dacdrv_arm_code
 '' (base 0) instead of 20..23, and the ADC sits at base+1 rather than base+3
 '' because the jumper is pin 0 -> pin 1. Everything else is his.
 chip_arm_code
+                mov     t, ptra                 ' pins come from the mailbox so
+                add     t, #20*4                ' this arm can run either
+                rdlong  dpin, t                 ' geometry: ours or Chip's
+                mov     t, ptra
+                add     t, #21*4
+                rdlong  apin, t
+
                 ' His adcmode is P_ADC_100X with no smart-pin mode and no DIR.
                 ' The 100X is for his board's tiny capacitive coupling; our
                 ' direct wire may saturate it, so the gain is swept.
                 cmp     v_adir, #0              wz
-        if_z    wrpin   ##P_ADC_1X, #ADC_PIN
-        if_nz   wrpin   ##P_ADC_100X, #ADC_PIN
+        if_z    wrpin   ##P_ADC_1X, apin
+        if_nz   wrpin   ##P_ADC_100X, apin
 
                 cogid   tw2                     ' THE missing piece: M[3:0] is
                 shl     tw2, #8                 ' the COG whose DAC channels
                 or      tw2, ##(P_DAC_124R_3V | P_CHANNEL)   ' drive this pin
-                wrpin   tw2, #DAC_PIN
-                dirh    #DAC_PIN
+                wrpin   tw2, dpin
+                dirh    dpin
 
                 call    #build_table
                 setxfrq xfrq
@@ -1499,6 +1575,7 @@ tq              res     1
 tmo             res     1
 abufp           res     1
 apin            res     1
+dpin            res     1
 aprop           res     1
 achan           res     1
 asrc            res     1
