@@ -10,7 +10,7 @@ grounded in our own sources and does **not** need the bench.
 |---|---|---|---|---|
 | 1 | `test-f263-cordic-pipeline-depth.spin2` | F-263 | bare board | whether the Assembly ch.5 CORDIC example gets rewritten **at all** |
 | 2 | `test-f256-retcall-xbyte.spin2` | F-256 | bare board | whether XBYTE §15.3 is patched or restructured |
-| 3 | `test-f259-f260-dac-and-goertzel.spin2` | F-259, F-260 | **one jumper: pin 32 → pin 33** | whether the Streamer DDS mode can be presented as buildable |
+| 3 | `test-f259-f260-dac-and-goertzel.spin2` | F-259, F-260 | **one jumper: pin 0 → pin 1** | whether the Streamer DDS mode can be presented as buildable |
 
 Probe 3 is last because it is the only one needing a jumper.
 
@@ -28,6 +28,25 @@ probe reports its control **first** and tells you when the rest of its output is
 - **F-259** — the no-`P_OE` row and the `P_OE` row **must differ substantially**. If every row reads
   alike, the jumper is missing or the ADC is not converting — and a dead rig's null result looks
   exactly like the broken-mode null result Part 2 is hunting.
+
+## Round 1 (2026-08-13) — all three VOID, all three fixed
+
+Round 1 produced **no usable finding about any manual**; two probes declared their own results void,
+which is the controls working as designed. Fixes now in place:
+
+| Probe | Round-1 failure | Round-2 fix |
+|---|---|---|
+| F-256 | `progress=0`, scribbled hub — used `##@disp1` / `##@prog1`, but in an `ORGH` block the symbol **is** the hub address, so `@` double-offset it and XBYTE armed on garbage | `@` removed, matching the guide's own working §12.2 VM |
+| F-263 | control retrieved from a pipeline never fed, so GETQX had nothing to wait for and returned instantly | control now **queues one op then retrieves it** — that must stall ~54 clocks |
+| F-259/260 | every DAC row read alike (jumper was not fitted); Part 2 then **hung in `WAITXFI`** | pins moved to **0 → 1** for the small Edge carrier; `WAITXFI` replaced with a bounded `WAITX` so a dead streamer cannot hang the run |
+
+**Round 1's CORDIC data changed that probe's shape.** Both arms came back offset by *exactly* 4 —
+ARM B returned 14²/15²/16² for inputs 10/11/12 — while ground truth was correct. A clean index shift
+in both arms at `FILL = 6` is what you would see if the CORDIC buffers **fewer completed results
+than we queued and silently drops the oldest**. That is the community reporter's claim, and it
+contradicts both Chip's clarification and our released P2AN002. So round 2 **sweeps FILL from 1 to
+7**: the largest value that returns clean is the real usable depth, and where it breaks decides
+whether this closes as harness error or escalates into a finding against a shipped app note.
 
 ---
 

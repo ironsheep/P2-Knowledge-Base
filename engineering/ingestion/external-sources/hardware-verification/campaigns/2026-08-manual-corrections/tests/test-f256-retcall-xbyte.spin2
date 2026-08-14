@@ -33,6 +33,12 @@
 ''  No hang: the engine runs in its own cog and the main cog times out, so a
 ''  broken _RET_ CALL shows up as a stalled counter rather than a dead board.
 ''
+''  ROUND 2 FIX: round 1 used ##@disp1 / ##@prog1.  In an ORGH block the
+''  symbol IS already the hub address, so the '@' double-offset it, XBYTE
+''  armed against a garbage table and executed wild addresses -- which is why
+''  progress read 0 and blk[2] came back scribbled.  The guide's own working
+''  VM (xbyte-body.md 12.2) writes ##disp_table / ##program with no '@'.
+''
 ''  Build: pnut-ts -d test-f256-retcall-xbyte.spin2
 ''  Rig:   bare board.  No jumpers.  (VO-J class.)
 '' =============================================================================
@@ -96,8 +102,8 @@ DAT             org
 engine1
                 mov     pblk, ptra
                 setq2   #4-1
-                rdlong  $000, ##@disp1        ' dispatch table -> LUT $000
-                rdfast  #0, ##@prog1          ' FIFO -> bytecode stream
+                rdlong  $000, ##disp1        ' dispatch table -> LUT $000
+                rdfast  #0, ##prog1          ' FIFO -> bytecode stream
                 push    #$1ff                 ' XBYTE re-entry target
         _ret_   setq    #0                    ' arm: 256-entry table @ LUT $000
 
@@ -164,8 +170,8 @@ DAT             org
 engine2
                 mov     pblk2, ptra
                 setq2   #4-1
-                rdlong  $000, ##@disp2        ' engine2's OWN table
-                rdfast  #0, ##@prog2          ' the CONTROL stream
+                rdlong  $000, ##disp2        ' engine2's OWN table
+                rdfast  #0, ##prog2          ' the CONTROL stream
                 push    #$1ff
         _ret_   setq    #0
 

@@ -19,8 +19,8 @@
 ''  was driven and nothing accumulated.
 ''
 ''  RIG -- ONE JUMPER (VO-J class):
-''      DAC_PIN (32)  ---- jumper ---->  ADC_PIN (33)
-''  Both sit in the same EIGHT-pin power group (32..39) so they share one
+''      DAC_PIN (0)  ---- jumper ---->  ADC_PIN (1)
+''  Both sit in the same EIGHT-pin power group (0..7) so they share one
 ''  VIO/GIO domain.  (Group size is 8, not 4 -- see F-211 / F-261.)
 ''
 ''  CONTROL DISCIPLINE.  PART 1 must show a LARGE separation between the
@@ -29,13 +29,17 @@
 ''  anything in PART 2.  A null result from a dead rig looks exactly like a
 ''  null result from a broken mode.
 ''
+''  ROUND 2 CHANGES: pins moved to 0/1 (small Edge carrier has no 32/33);
+''  WAITXFI replaced with a bounded WAITX so a dead streamer cannot hang the
+''  probe the way it did in round 1.
+''
 ''  Build: pnut-ts -d test-f259-f260-dac-and-goertzel.spin2
 '' =============================================================================
 
 CON
   _clkfreq  = 200_000_000
-  DAC_PIN   = 32
-  ADC_PIN   = 33
+  DAC_PIN   = 0                          ' low-range: fits the small Edge carrier
+  ADC_PIN   = 1                          ' same 8-pin power group (0..7)
   SETTLE_MS = 5
 
   ' SETXFRQ value for a ~1 kHz tone at 200 MHz:  1000 / 200_000_000 * 2^32
@@ -177,12 +181,18 @@ PRI sweep_one(cmd) | x, y
   debug("cmd=", uhex_long_(cmd), "  x=", shex_long_(x), "  y=", shex_long_(y))
 
 
-'' XINIT / WAITXFI / GETQX / GETQY are PASM-only.
+'' XINIT / GETQX / GETQY are PASM-only.
+''
+'' ROUND 2: WAITXFI is deliberately NOT used.  In round 1 it blocked forever
+'' and killed the run right after the PART 2 header -- a streamer that never
+'' starts never finishes.  A bounded WAITX cannot hang, and for "does this
+'' mode accumulate at all" a fixed wait is sufficient.  (The reporter saw
+'' WAITXFI complete on schedule, so his symptom differs from that hang.)
 PRI goertzel_once(cmd, xf) : rx, ry
   org
               setxfrq xf
               xinit   cmd, #0
-              waitxfi
+              waitx   ##400_000            ' ~2 ms at 200 MHz -- bounded
               getqx   rx
               getqy   ry
   end
