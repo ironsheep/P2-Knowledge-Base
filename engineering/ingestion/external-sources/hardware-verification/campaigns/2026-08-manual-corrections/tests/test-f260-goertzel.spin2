@@ -56,6 +56,10 @@
 
 CON
   _clkfreq  = 200_000_000
+
+  '' CONFIRMING RUN for the :607 byte-count arms, which are STREAMER
+  '' measurements taken before DEBUG_COGS was understood (F-266).
+  DEBUG_COGS = %0000_0001
   DAC_PIN   = 0
   ADC_PIN   = 1
 

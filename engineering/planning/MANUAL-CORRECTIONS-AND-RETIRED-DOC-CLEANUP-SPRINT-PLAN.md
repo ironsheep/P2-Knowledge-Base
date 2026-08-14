@@ -15,6 +15,34 @@ decisions — see §Open Question 5).
 
 ---
 
+## Bench leg — COMPLETE 2026-08-14 (results, and what they change)
+
+The sequencing note's batched bench session (§3, §7a re-proof, §7b, §7e) ran on 2026-08-14.
+Full evidence: `campaigns/2026-08-manual-corrections/`, findings register F-253..F-266.
+
+| plan item | finding | bench outcome |
+|-----------|---------|---------------|
+| §7a | F-259 | **REVISED — the guide is RIGHT.** TT=%01 drives (6,737 vs 1,408 off). The community report is not reproduced. The real defect is `+` composition of pin constants, which carries `%01+%01` into `%10`. Class sweep: 281 lines use `\|`, exactly 2 use `+`, both in the Streamer Guide (`:1238`, `:1306`), both currently computing correctly — a latent trap, not a live bug. Reproduced 3x. |
+| §7b | F-260 | **RESOLVED — the mode WORKS.** On-target magnitude 1,059,000 vs 2,575 (2x detune), 286 (0.5x detune), 430 (null). **The missing protocol: the Goertzel accumulators are never zeroed** — a fresh cog inherits the previous cog's value and successive commands add, so read before, read after, take the difference. That is what Chip's shipped demo's `xcal`/`ycal` really does. Doc corrections still required: undeclared `dds_s`; `adc_pin<<17` valid only for multiples of 4; and the protocol itself. |
+| §7b sibling | `:607` | **CONFIRMED — mode corruption, bench-proven.** Byte-count signature 1024 / 2048 / 4096 as `adc_pin` rises, because the shift carries into `D[19:16]`. Reproduced 4x. **Needs a confirming run** — see below. |
+| §7e | F-263 | **CONFIRMED with cause.** No hub access inside either CORDIC loop; Chip's model vindicated. 7 consistent runs. P2AN002 and Assembly ch.5 both violate it. |
+| §3 | F-256 | **ANSWERED — and the answer triggers this section's own error clause.** `_RET_ CALL` does **not** return to XBYTE; it behaves as a plain `CALL` and execution falls through into the following code. `pnut-ts` does emit the `_RET_` form, so this is silicon, not a compiler bug. **§4 therefore needs restructuring, not just a `set_nz` definition** — exactly the contingency Open Question 2 flagged. |
+
+**New findings this leg, not previously in the plan:** F-264 (`wrpin.yaml`'s `tt_field` flattens
+four context-dependent `%TT` meanings and tells readers to add `P_OE` to DAC outputs, which kills a
+level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-pin mode, no DIR), and
+F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
+nothing warns a streamer author).
+
+### Confirming runs required before §4 and the `:607` edit
+
+F-266 was discovered *after* the F-256 and `:607` measurements were taken, and both were made with
+the debug interrupt live inside the launched cog — the confound that produced 1,000,000–7,000,000 of
+pure corruption in our Goertzel accumulators. XBYTE and the streamer are both hardware sequencers;
+neither can be assumed immune. **§3's error clause already demands an independent confirmation of a
+"the idiom is broken" result before restructuring a chapter, and this is that path.** Both probes now
+carry `DEBUG_COGS = %0000_0001` and need one short bench session before their sections are written.
+
 ## Open Questions — resolve before tasking
 
 Per the sprint-plan gate, these are unresolved and each carries my recommendation.

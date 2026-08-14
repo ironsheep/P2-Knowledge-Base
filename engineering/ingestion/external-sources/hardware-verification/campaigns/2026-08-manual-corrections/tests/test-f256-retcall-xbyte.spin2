@@ -75,6 +75,16 @@
 CON
   _clkfreq = 200_000_000
 
+  '' CONFIRMING RUN. The round-3 result -- that _RET_ CALL falls through
+  '' instead of returning to XBYTE -- was measured BEFORE we found that
+  '' DEBUG_COGS defaults to %11111111, putting the P2's highest-priority
+  '' interrupt inside every launched cog. That confound wrecked our streamer
+  '' measurements (F-266). XBYTE is another hardware sequencer and I have no
+  '' basis for assuming it is immune, so this re-run restricts debug to cog 0.
+  '' The sprint plan's own §3 error clause requires confirming a "the idiom is
+  '' broken" result by an independent path before restructuring XBYTE §15.3.
+  DEBUG_COGS = %0000_0001
+
   ' trail tokens
   T_PLAIN   = $A0
   T_RETCALL = $A1                        ' return ON the call line
