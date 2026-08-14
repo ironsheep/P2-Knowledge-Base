@@ -287,6 +287,7 @@ PRI guide_cmd(pin) : cmd
 
 
 PRI adc_arm(cmd, sval, pin, proper) : nbytes | i
+  reset_pins()
   bytefill(@abuf[0], SENTINEL, ABUFSZ)
   longfill(@g[0], 0, 20)
   g[0] := cmd
@@ -375,6 +376,7 @@ PRI c7_f259_replica() : ok | hi, lo
 '' If C9 works, raw sensing is exonerated and the COG is the variable.
 '' If C8 fails too, that confirms it from the other side.
 PRI c8_launched_drive_smart_sense(level) : counts | cogn
+  reset_pins()
   cogn := hold_drive(level)                ' launched cog drives and holds DIR
   pinclear(ADC_PIN)
   wrpin(ADC_PIN, P_ADC_1X | P_ADC)
@@ -386,6 +388,7 @@ PRI c8_launched_drive_smart_sense(level) : counts | cogn
 
 
 PRI c9_cog0_drive_raw_sense(level) : nbits
+  reset_pins()
   set_dac_ch0(level)                       ' cog 0 drives, F-259's way
   pinclear(DAC_PIN)
   wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)
@@ -432,7 +435,22 @@ PRI bisect() | c8_hi, c8_lo, c9_hi, c9_lo
     debug("        means cog AND sensing interact. Do not guess; add arms.")
 
 
+'' Every arm starts from a known pin state. DIR is OR-ed across cogs, so a
+'' cog that never floats a pin keeps driving it into the NEXT arm -- which is
+'' what invalidated the first bisect: C7 left cog 0 asserting DIR on the DAC
+'' pin with its own DAC channel loaded, and C8 left the ADC pin enabled as a
+'' smart pin. Both then leaked into the arms that followed.
+PRI reset_pins()
+  set_dac_ch0(0)                           ' cog 0's DAC channels quiet
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+  pinf(DAC_PIN)                            ' DIR=0 from cog 0
+  pinf(ADC_PIN)
+  waitms(2)
+
+
 PRI dac_probe(level) : counts
+  reset_pins()
   set_dac_ch0(level)                       ' cog DAC channel 0 = level
   pinclear(DAC_PIN)
   wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)  ' TT=%01, level bits left at 0
@@ -457,6 +475,7 @@ PRI spread(x, y) : d
 
 
 PRI sig(withchan, level, source) : nbits
+  reset_pins()
   longfill(@g[0], 0, 20)
   g[2] := TONE_HZ
   g[3] := clkfreq
@@ -572,7 +591,8 @@ PRI c2_pattern(pat) : level
 
 '' --- one Goertzel measurement ----------------------------------------------
 PRI arm(ddsd, ddss, freq, tone2x, adc_dirh, mode) : magnitude
-  longfill(@g[0], 0, 18)
+  reset_pins()
+  longfill(@g[0], 0, 20)
   g[0] := ddsd
   g[1] := ddss
   g[2] := freq
