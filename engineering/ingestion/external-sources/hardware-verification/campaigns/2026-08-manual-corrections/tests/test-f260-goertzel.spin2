@@ -101,6 +101,8 @@ CON
   MODE_XCONT = 2
   MODE_ADC   = 3
   MODE_SIG   = 4
+  MODE_HOLD  = 5                         ' drive from a launched cog, then HOLD
+  MODE_SAMP  = 6                         ' sample the ADC pin only, drive nothing
 
   '' Round 8. Round 7 proved the mode RUNS -- WAITXFI came back at 20,015
   '' clocks against a predicted 20,000 -- but nothing accumulated, and the
@@ -335,6 +337,7 @@ PRI c5_analog_path() : ok | w_hi, w_lo, d_hi, d_lo, dw, dd
     debug("   C6 red: P_CHANNEL + SETDACS did not drive from a launched cog.")
 
   ok := c7_f259_replica() and (dw > 200)
+  bisect()
   if ok and dd <= 200
     debug("   => the cog DAC path works, but NOT the way my engine does it.")
     debug("      C7 vs C6 differ in cog, SETDACS order, pinclear and sensing;")
@@ -362,6 +365,71 @@ PRI c7_f259_replica() : ok | hi, lo
     debug("      C7 FAILED: we cannot even reproduce F-259 on this rig today.")
     debug("      Stop and settle THAT before anything else -- a conclusive")
     debug("      finding that will not reproduce is the first problem to fix.")
+
+
+'' --- the 2x2 bisect: {who drives} x {how we sense} -------------------------
+'' C7 = cog0 drive + smart-pin sense : WORKS  (6740 vs 1410)
+'' C6 = launched drive + raw sense   : FAILS  (335 vs 333)
+'' C8 = launched drive + smart sense : ?
+'' C9 = cog0 drive + raw sense       : ?
+'' If C9 works, raw sensing is exonerated and the COG is the variable.
+'' If C8 fails too, that confirms it from the other side.
+PRI c8_launched_drive_smart_sense(level) : counts | cogn
+  cogn := hold_drive(level)                ' launched cog drives and holds DIR
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, P_ADC_1X | P_ADC)
+  wxpin(ADC_PIN, 12)
+  pinhigh(ADC_PIN)
+  waitms(5)
+  counts := rdpin(ADC_PIN) & $7FFF_FFFF
+  cogstop(cogn)
+
+
+PRI c9_cog0_drive_raw_sense(level) : nbits
+  set_dac_ch0(level)                       ' cog 0 drives, F-259's way
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_DAC_124R_3V | P_TT_01)
+  pinlow(DAC_PIN)
+  waitms(5)
+  longfill(@g[0], 0, 20)
+  g[6] := MODE_SAMP                        ' a launched cog only counts bits
+  start_engine()
+  nbits := g[13]
+
+
+PRI hold_drive(level) : cogn | tstart
+  longfill(@g[0], 0, 20)
+  g[5] := level
+  g[6] := MODE_HOLD
+  cogn := coginit(NEWCOG, @engine, @g[0])
+  tstart := getct()
+  repeat until g[15] == 1 or (getct() - tstart) > (clkfreq / 10)
+
+
+PRI bisect() | c8_hi, c8_lo, c9_hi, c9_lo
+  c8_hi := c8_launched_drive_smart_sense($FF)
+  c8_lo := c8_launched_drive_smart_sense($00)
+  c9_hi := c9_cog0_drive_raw_sense($FF)
+  c9_lo := c9_cog0_drive_raw_sense($00)
+  debug(" ")
+  debug("   BISECT -- who drives x how we sense")
+  debug("     C7 cog0 drive,     smart sense: 6740 vs 1410   WORKS (this run above)")
+  debug("     C6 launched drive, raw sense  : see above      FAILS")
+  debug("     C8 launched drive, smart sense: ", udec_(c8_hi), " vs ", udec_(c8_lo), "  spread=", udec_(spread(c8_hi, c8_lo)))
+  debug("     C9 cog0 drive,     raw sense  : ", udec_(c9_hi), " vs ", udec_(c9_lo), "  spread=", udec_(spread(c9_hi, c9_lo)))
+  if spread(c9_hi, c9_lo) > 200 and spread(c8_hi, c8_lo) <= 200
+    debug("     => RAW SENSING IS FINE. The variable is WHICH COG runs SETDACS")
+    debug("        and owns the pin -- a launched cog does not drive the pin's")
+    debug("        DAC from its own cog DAC channel here.")
+  elseif spread(c8_hi, c8_lo) > 200 and spread(c9_hi, c9_lo) <= 200
+    debug("     => THE COG IS FINE. The variable is the SENSING METHOD: raw bit")
+    debug("        counting cannot see this drive, though it saw C5's.")
+  elseif spread(c8_hi, c8_lo) > 200 and spread(c9_hi, c9_lo) > 200
+    debug("     => BOTH WORK. C6's failure is something else again -- re-read")
+    debug("        C6 against C8/C9 line by line before concluding anything.")
+  else
+    debug("     => NEITHER WORKS. Only the exact C7 combination drives, which")
+    debug("        means cog AND sensing interact. Do not guess; add arms.")
 
 
 PRI dac_probe(level) : counts
@@ -566,6 +634,10 @@ engine
         if_z    jmp     #adc_arm_code
                 cmp     v_mode, #MODE_SIG       wz
         if_z    jmp     #sig_arm_code
+                cmp     v_mode, #MODE_HOLD      wz
+        if_z    jmp     #hold_arm_code
+                cmp     v_mode, #MODE_SAMP      wz
+        if_z    jmp     #samp_arm_code
 
 '' --- DDS/Goertzel arm ------------------------------------------------------
                 ' P_CHANNEL enables the DAC channel -- F-259, our own bench
@@ -635,6 +707,40 @@ c2_arm
                 testp   #ADC_PIN                wc
         if_c    mov     lvl, #1
                 waitxfi
+                jmp     #report
+
+'' --- C8 bisect: drive from a LAUNCHED cog, then hold the pin ---------------
+'' C7 (cog 0, smart-pin sensing) drives. C6 (launched cog, raw sensing) does
+'' not. Two variables left. This arm drives from a launched cog and then holds
+'' DIR asserted so cog 0 can read the pin ITS way -- isolating the cog from
+'' the sensing method.
+hold_arm_code
+                mov     t, ptra
+                add     t, #5*4
+                rdlong  alev, t
+
+                setdacs alev
+                dirl    #DAC_PIN
+                wrpin   #0, #DAC_PIN
+                wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
+                dirh    #DAC_PIN
+
+                mov     t, ptra                 ' say we are driving
+                add     t, #15*4
+                wrlong  #1, t
+                jmp     #$                      ' hold; cog 0 stops us
+
+'' --- C9 bisect: sample only, drive nothing ---------------------------------
+'' The mirror image: cog 0 drives F-259's way, a launched cog counts raw bits.
+samp_arm_code
+                wrpin   ##P_ADC_1X, #ADC_PIN
+                dirl    #ADC_PIN
+                waitx   ##200_000
+                mov     lvl, #0
+                mov     tc2, ##SIG_SAMPLES
+.samploop       testp   #ADC_PIN                wc
+        if_c    add     lvl, #1
+                djnz    tc2, #.samploop
                 jmp     #report
 
 '' --- C5: does an analog signal actually cross the jumper? ------------------
