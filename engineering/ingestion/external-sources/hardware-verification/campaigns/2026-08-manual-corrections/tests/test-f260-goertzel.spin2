@@ -162,7 +162,22 @@ CON
   ''      separates "no tone" from "Goertzel not accumulating" BEFORE anything
   ''      downstream is measured, and re-confirms F-259 in this exact rig.
   SIG_SAMPLES = 2000
-  BUILD       = 22
+  BUILD       = 23
+
+  '' Round 23. Stephen: with no add-on board attached there is no pin-group
+  '' significance -- all pins behave alike, and "multiple of 8" in Chip's demo
+  '' is a P2 Eval add-on HEADER constraint, not a Goertzel one. Correct: the
+  '' DAC-channel rule is the pin's low two bits, the %pppp block is any
+  '' 4-aligned base, and SETSCP's base is D[5:2] -- all uniform across pins.
+  '' The ALT-geometry arm stays but self-skips; it was a shot in the dark.
+  ''
+  '' The real gap is that I have tested with a TONE for eight rounds when DC is
+  '' far more robust -- and C5 already proves DC works end to end on this rig
+  '' (1,635 high vs 336 low). If the summer reads the ADC pin at all, holding
+  '' it HIGH vs LOW makes m predominantly +1 vs -1 and the accumulators must
+  '' move a long way. No frequency match, no phase alignment, no correlation
+  '' subtleties. If they are identical, the summer never reads the pin, and
+  '' every tone null this campaign is explained at a stroke.
 
   '' Round 21. C10 read 966 vs 991 of 2000 -- ~48%, MID-SCALE -- where
   '' undriven reads ~335 (17%) and driven-high ~1627 (81%). That is my bug, and
@@ -708,6 +723,7 @@ PRI ext_tone_arms() | b1, b2, b3
     debug("NO DETECTION even against a real independent tone and a clean null.")
     debug("Before calling that silicon: sweep what the summer listens to.")
 
+  dc_response()
   c10_streamer_dac()
   chip_arms()
   alt_geometry_arms()
@@ -943,6 +959,44 @@ PRI ext_arm_cycles(ncyc) : magnitude
   g[19] := 1
   start_engine()
   magnitude := g[10]
+
+
+'' --- DC: the control I should have established eight rounds ago -------------
+'' Cog 0 holds the DAC pin at a hard digital high, then a hard low, while the
+'' engine runs an ordinary Goertzel command that does NOT touch that pin. The
+'' ADC pin sees the level through the jumper. This is the simplest possible
+'' question: does the summer respond to its input at all?
+PRI dc_response() | hi_c, hi_s, lo_c, lo_s
+  debug(" ")
+  debug("--- DC: does the summer respond to a STATIC input? ---")
+  pinclear(ADC_PIN)
+  pinclear(DAC_PIN)
+
+  pinh(DAC_PIN)                            ' hard high, held by cog 0
+  waitms(5)
+  ext_arm_setup(TONE_HZ, 0)
+  hi_c := g[8]
+  hi_s := g[9]
+
+  pinl(DAC_PIN)                            ' hard low
+  waitms(5)
+  ext_arm_setup(TONE_HZ, 0)
+  lo_c := g[8]
+  lo_s := g[9]
+  pinf(DAC_PIN)
+
+  debug("    pin HIGH: cos=", sdec_(hi_c), "  sin=", sdec_(hi_s))
+  debug("    pin LOW : cos=", sdec_(lo_c), "  sin=", sdec_(lo_s))
+  debug("    delta   : cos=", sdec_(hi_c - lo_c), "  sin=", sdec_(hi_s - lo_s))
+  if spread(hi_c, lo_c) > 100000 or spread(hi_s, lo_s) > 100000
+    debug("    THE SUMMER READS THE PIN. Input path is live, so the problem is")
+    debug("    in the correlation -- frequency, phase or table -- not the")
+    debug("    plumbing. Every tone arm should be re-read in that light.")
+  else
+    debug("    THE SUMMER DOES NOT READ THE PIN, even for a rail-to-rail static")
+    debug("    input on a pin C5 proves is live. That is the finding: no tone")
+    debug("    test could ever have worked, and the question is now a clean one")
+    debug("    for Chip -- what enables the Goertzel input?")
 
 
 PRI ext_arm_setup(detector_hz, variant) : magnitude
