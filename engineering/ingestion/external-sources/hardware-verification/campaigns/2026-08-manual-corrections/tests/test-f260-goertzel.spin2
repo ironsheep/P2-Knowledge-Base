@@ -174,7 +174,7 @@ VAR
   long g[20]
   byte abuf[ABUFSZ]
 
-PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
+PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk, m_smart
 
   debug("=== F-260 round 9: DDS/Goertzel, with an analog gate on the streamer path ===")
   debug("RIG: jumper pin ", udec_(DAC_PIN), " (DAC) -> pin ", udec_(ADC_PIN), " (ADC)")
@@ -229,11 +229,16 @@ PUB main() | m_on, m_off, m_none, m_dirh, m_slow, m_guide, m_xcont, m_blk
   debug("   cmd=", uhex_long_(DDS_D_GUIDE), " vs corrected ", uhex_long_(DDS_D_OK))
   show()
 
+  m_smart := arm(DDS_D_OK, DDS_S_OK, TONE_HZ, 0, 2, MODE_XINIT)
+  debug("A9 ON-TARGET, ADC pin as a SMART-pin ADC   mag=", uhex_long_(m_smart))
+  debug("   F-265: the Silicon Doc says both raw and smart-pin. A1 vs A9 says which.")
+  show()
+
   m_blk := arm(DDS_D_WRONGBLK, DDS_S_OK, TONE_HZ, 0, 0, MODE_XINIT)
   debug("A8 pppp names the WRONG 4-pin block (4..7)  mag=", uhex_long_(m_blk))
   show()
 
-  verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
+  verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk, m_smart)
 
   adc_capture_arms()
   stop_here()
@@ -395,7 +400,7 @@ PRI sig(withchan, level, source) : nbits
   nbits := g[13]
 
 
-PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
+PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk, m_smart)
   debug(" ")
   debug("--- VERDICT ---")
 
@@ -421,6 +426,16 @@ PRI verdict(m_on, m_off, m_none, m_slow, m_guide, m_blk)
     debug("while the signal is on pin 1 detects nothing.")
   else
     debug("BUT: the wrong block still detected. The D[22:19] reading is WRONG.")
+
+  if m_smart > (m_on << 1)
+    debug("F-265: the SMART-pin ADC detects and the raw pin does not. The")
+    debug("Silicon Doc's STREAMER intro is right and its DDS/Goertzel section")
+    debug("is the misleading one.")
+  elseif m_on > (m_smart << 1)
+    debug("F-265: the RAW pin detects and the smart-pin ADC does not. The")
+    debug("DDS/Goertzel section is right; the STREAMER intro is loose.")
+  else
+    debug("F-265 unresolved: raw and smart-pin ADC gave similar results.")
 
   if m_guide == 0
     debug("THE GUIDE'S 17.1 EXAMPLE ACCUMULATES NOTHING -- on our bench, with")
@@ -557,11 +572,25 @@ engine
                 wrpin   ##(P_DAC_124R_3V | P_CHANNEL), #DAC_PIN
                 dirh    #DAC_PIN
 
-                ' Raw delta-sigma bitstream: ADC pin config, NO smart-pin mode.
-                wrpin   ##P_ADC_1X, #ADC_PIN
+                ' F-265: the Silicon Doc contradicts itself on this pin.
+                '   STREAMER intro (part2-pixel-ops.txt:82): Goertzel works
+                '     "from smart pins configured as ADC's"
+                '   DDS/Goertzel section (part2-more-content.txt:176): the pins
+                '     carry "raw delta-sigma bit streams, with no smart pin mode
+                '     selected"
+                ' v_adir picks which: 0 = raw + DIR low, 1 = raw + DIR high,
+                ' 2 = a real smart-pin ADC. One run settles it.
+                cmp     v_adir, #2              wz
+        if_z    jmp     #adc_smart
+                wrpin   ##P_ADC_1X, #ADC_PIN    ' raw bitstream, no smart mode
                 cmp     v_adir, #0              wz
         if_nz   dirh    #ADC_PIN
         if_z    dirl    #ADC_PIN
+                jmp     #adc_done
+adc_smart       wrpin   ##(P_ADC_1X | P_ADC), #ADC_PIN
+                wxpin   #12, #ADC_PIN           ' 2^12 sample period
+                dirh    #ADC_PIN
+adc_done
 
                 call    #build_table
 
