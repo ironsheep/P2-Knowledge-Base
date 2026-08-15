@@ -398,6 +398,91 @@ this sprint is fixing: text made **less** accurate by an over-broad rule. It is 
 diff for qualifier removals against claims whose evidence was genuinely partial. Report count and
 severity. **No edits during planning.**
 
+### RESULT — «#214», 2026-08-15: **NIL. Count 0, severity none.**
+
+**No qualifier-stripping damage reached released Streamer v1.0.8 or Assembly v3.1.5 text.**
+Zero manual edits were made by this investigation, and no `P2KB-CORRECTION-FINDINGS` entry is
+filed, because the gate for filing one — real damage — was not met.
+
+**First, a correction to this section's own premise.** The window above is wrong. The word
+blacklist did **not** arrive with `acf3b4a2` (2026-07-20). `git log -S'No hedging language'` over
+each `voice-guide.md` dates it to **each guide's birth**: Streamer `10bb35d5` (2026-01-22),
+Assembly `1e51f086` (2025-11-26). `acf3b4a2`/§2.2a was the **corrective**, not the cause. The real
+exposure window is **seven to nine months**, not the three-to-four weeks assumed here, so the
+investigation was re-run over the full window.
+
+**Streamer — clean zero.** Across every commit touching `streamer-body.md` from guide birth to
+HEAD, **no commit ever removed a `may` / `might` / `probably` / `typically` line.** Its single
+in-window body pass, `de698340`, changed 7 lines and removed only reader-as-foil ("It is tempting
+to see the mode tables as a random pile… They are not") and self-admiration ("headline act",
+"cleverest mode"). Its audit record `audit/voice-audit-2026-07-21.md` contains no hedging or
+qualifier item at all.
+
+**Assembly — 19 commits flagged, all 19 read, 0 damage.** They fall into five classes:
+
+| Class | Commits | Verdict |
+|---|---|---|
+| False hit — qualifier present on **both** sides of the diff | `c2ed84eb` (casing sweep), `be8095ab`, `6908f0a9`, `9dca73ca`, `7292a2c3`, `ea1096ed` | not damage |
+| Hedge covered a **wrong or fabricated** claim; audit replaced both | `44383f57` ("typically one clock cycle" → 2), `44383f57` (WC/WZ "may be used internally" — no such behavior), `d122c820` (WRC/WRZ "typically bit 0" — no bit-select operand exists), `d122c820` ("2+" notation) | **correct fix** |
+| Qualifier **preserved**, value corrected | `f3e702ed` ("typically ~24 MHz" → "nominally ~24 MHz") | improvement |
+| Restructure that dropped an **unsourced** estimate | `056f1f7d`, `16d15b43`, `59c91023`, `9b9e8aad` | not damage |
+| Pure file deletion (23 `.backup-*` files, 0 insertions) | `e68683a6` | noise |
+
+**The one live candidate was cleared by reading the shipped context.** `10736d5d` (2025-12-13,
+"Directives voice audit") converted *"This data **may be** emitted into the Hub memory image…; the
+actual data start **and alignment** will vary"* into *"This data **is** emitted… the relative
+layout remains constant"* — at `part-ii/directives.md:776` and `:861`, both still shipped in
+v3.1.5. From the diff alone this reads as textbook damage: a voice-audit commit hardening a hedge
+and dropping "alignment". It is not. **Both sites are the *before*-alignment examples** — neither
+code block contains `ALIGNL`/`ALIGNW`, the data packs contiguously, and the very next paragraph
+says so ("without any automatic padding or alignment"). Relative layout genuinely is constant
+there; the *original* was the less accurate sentence. Judging from the diff without opening the
+file would have filed a false finding — the fifth time in this study that not-reading would have
+misled.
+
+**Positive counter-evidence: the auditors preserved hedges on purpose.**
+`audit/periodic-audit-2026-05-22.md` §F.1 ran a hedge-pattern grep across all chapter and
+instruction files, reported *"zero systemic voice-guide violations"*, listed three borderline
+qualifiers — `chapter-05-hardware.md:572` "typically 20-25 MHz", `chapter-04-timing.md:673`
+"Programs typically keep inner loops…", `chapter-01-execution-model.md:208` "typically resides at
+addresses $400 and above" — **kept all three with reasons**, and closed **Verified-OK**. All three
+survive in today's text. The `full-audit-2026-06-10` adjudication says outright *"keep the '+'
+hedge"* (AF-199) and elsewhere *"the footnote already hedges… so no over-claim there"*. Every
+auditor who met the rule read it as calibrated confidence, not as a word ban. **The checklists were
+dangerous in principle; judgment absorbed them in practice.**
+
+**The mechanism is real, though — it just self-corrected.** `648b424a` (2025-12-09) replaced
+*"which **may require** further attention"* with a definite assertion that the long *"auto-aligns
+to the next long boundary (L2), adding two more padding bytes"* — which was **false**, and was
+removed four days later by `88f19d3a`, "Data packing corrections: Remove incorrect auto-alignment
+statements". A hedge→definite conversion did produce a wrong claim; the release cycle caught it. It
+never shipped.
+
+### Carried forward — suppression at write time (hypothesis, not a finding)
+
+The hypothesis this section tested was damage by **removal**, which is visible in diffs. The
+measurement above suggests the likelier exposure is damage by **suppression** — qualifiers never
+written in the first place, which no diff can show. Density of `may|might|probably|typically` per
+1,000 body lines, blacklist-carrying manuals against the rest:
+
+| Carries a word blacklist | per 1k | No word blacklist | per 1k |
+|---|---:|---|---:|
+| Streamer | 0.56 | Getting Started | 6.28 |
+| IOSP | 0.82 | Architect | 5.65 |
+| Assembly | 2.55 | XBYTE | 5.58 |
+| | | DeSilva | 5.20 |
+| | | Single-Step Debugger | 3.42 |
+| **mean** | **1.31** | **mean** | **5.23** |
+
+A ~4× gap, and the three blacklist manuals hold three of the four lowest densities. **This is
+correlation only and is confounded** by genre, length, author and era — a deterministic hardware
+reference legitimately needs fewer qualifiers than a tutorial. It is recorded as a question for
+Sprint 2, **not** as a finding, and it must not be treated as one without a content-level test:
+sample claims in IOSP and Streamer whose underlying evidence is known to be partial, and check
+whether the shipped sentence states them absolutely. IOSP is the better probe — 12 qualifiers
+across 14,702 lines in a guide covering ADC accuracy and temperature-dependent analog behavior is
+the least plausible number in the table.
+
 ---
 
 ## Feeding P2
@@ -410,11 +495,12 @@ Each decision above sets the standard P2 measures against:
 3. **DeSilva** — **no cadence measurement**; E3 is rejected. Measure E1 (technical claims above their evidence) and the two adopted E2 rows only.
 4. All targets — the E1 reconciliation is a guide edit, not a text edit; it changes what P2 counts
    as a defect (a qualifier is no longer one).
-5. **Re-check any manual already audited against a checklist carrying the unscoped no-hedging
-   line.** If an audit or finalize pass has already run against XBYTE, Streamer or Assembly using
-   those checklists, calibrated qualifiers may have been stripped from shipped text as "defects".
-   P2 should look for that specifically — it would be a defect we introduced, in the opposite
-   direction from the one we are fixing.
+5. ~~**Re-check any manual already audited against a checklist carrying the unscoped no-hedging
+   line.**~~ **DONE — «#214», result NIL** (see *Damage assessment → RESULT*). Nothing was stripped
+   from shipped Streamer or Assembly text. What P2 should measure instead is the **suppression**
+   question that investigation surfaced: qualifiers never written under the blacklist. **IOSP is
+   the priority probe** — 12 qualifiers across 14,702 lines, in a guide covering ADC accuracy and
+   temperature-dependent analog behavior.
 
 
 ---
@@ -440,8 +526,12 @@ the other two are unexamined.
 
 ### Still unknown, unmeasured
 
-1. **Whether the damage occurred.** The Streamer/Assembly word blacklists *may* have caused
-   qualifier removals in released text. Hypothesis only; nothing measured.
+1. ~~**Whether the damage occurred.**~~ **MEASURED AND CLOSED by «#214» (2026-08-15) — NIL.** No
+   qualifier removals reached released Streamer v1.0.8 or Assembly v3.1.5 text; all 19 flagged
+   Assembly commits were read and adjudicated, and Streamer never removed a qualifier at all. See
+   the RESULT block in *Damage assessment*, which also corrects this study's exposure window
+   (blacklists date from each guide's **birth**, not `acf3b4a2`). One question is **carried
+   forward, unmeasured**: suppression at *write* time, which no diff can reveal.
 2. **How far any manual's TEXT sits from its guide.** P2 has not run. Zero measurements exist —
    including Debug Window's self-declared *"substantial rewrite"*, which has no count attached.
 3. **DeSilva's staged-reveal row** — recorded as a judgement call, still undecided.
