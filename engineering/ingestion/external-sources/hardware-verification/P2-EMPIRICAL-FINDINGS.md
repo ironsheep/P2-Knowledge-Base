@@ -14,7 +14,7 @@ document. Cite these when grounding a YAML or manual change. Format per entry: t
 disproved the claim) · `NOT-OBSERVED` (could not reproduce; not asserted) ·
 `HOST` (a toolchain/host behavior, not silicon).
 
-**Campaigns:** [2026-06 — DEBUG windows & smart pins](campaigns/2026-06-debug-windows-and-smart-pins/README.md)
+**Campaigns:** [2026-06 — DEBUG windows & smart pins](campaigns/2026-06-debug-windows-and-smart-pins/README.md) · [2026-08 — manual corrections](campaigns/2026-08-manual-corrections/README.md)
 
 ---
 
@@ -625,6 +625,150 @@ the config loop — which is precisely why the SCOPE window is never created.)*
 hold is lifted. (2) **PNut v55 bug report drafted:** `DRAFTS/PNUT-BUG-scope-xy-parser-hang.md` (minimal repro,
 mechanism, blast radius, one-line fix) — for Stephen to route to Parallax/Chip.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2`.
+
+## 2026-08 manual-corrections campaign (P2 Edge, 200 MHz)
+
+<!-- Bench leg 2026-08-14. Probes + logs: campaigns/2026-08-manual-corrections/tests/.
+     Authoring source with full evidence grading: that campaign's BENCH-FINDINGS-FOR-AUTHORING.md.
+     Grades used below: [M] measured after the DEBUG_COGS fix (EF-057); [M-pre] measured before it —
+     trustworthy where the test uses no streamer. Documentary and inferred material from that
+     campaign is deliberately NOT carried here; this ledger holds only what our board showed us. -->
+
+### EF-053 · Hub access inside a CORDIC fill or drain loop silently loses results; register-only loops stay clean to FILL=7 — `CONFIRMED`
+Deep CORDIC pipelining works. What breaks it is **hub I/O inside the fill or drain loop** — and it
+fails *silently*: the reader gets wrong numbers, not missing ones. *How proven:*
+`test-f263-cordic-pipeline-depth` — four arms issuing `QMUL` and retrieving with `GETQX`, differing
+only in where hub access sits, swept FILL 1→7 against single-op `ROTXY` ground truth. **Control that
+must fail:** queue-one-then-retrieve **stalled 58 clocks**, exactly the documented `GETQX` maximum
+(`2…58`) — the rig was proven able to see the failure mode before any arm was trusted. *Result:* arm
+**B** (`RDLONG` inside fill) first wrong at **FILL=2**; arm **C** (`WRLONG` inside drain) at
+**FILL=3**; arm **D** (register-only fill *and* drain, hub I/O batched outside) **clean through
+FILL=7**; arm **A** (Assembly ch.5 shape — two `RDLONG`s plus `CALL`/`RET` per issue) **15 of 16
+results wrong**. Seven runs, fully consistent. *Date/rig:* 2026-08-14, real P2 (Stephen). [M-pre —
+streamer-free, so the debug confound does not apply; 7 runs.] *Scope — do not overstate:* this
+measures **where** results are lost, not **why**. We did not test every hub operation or cadence, so
+state it as the tested shape — keep hub access out of both loops — not as an absolute law about "any
+hub access", and do not prescribe a clock-level discipline we did not measure. *Grounds:* F-263;
+**refutes** the community report of a ~2-deep result buffer; Chip's fill/steady/drain model stands.
+**Two of our own shipped documents violate it:** `P2AN002/examples-library/cordic-pipeline-throughput.spin2`
+and Assembly `chapter-05-hardware.md:~100-126`. *Source:* `campaigns/2026-08-manual-corrections/tests/test-f263-cordic-pipeline-depth.spin2`.
+
+### EF-054 · A cog DAC drives with `TT=%01` alone; `P_OE`, `P_CHANNEL` and `P_TT_01` are ONE bit, so composing them with `+` breaks the mode — `CONFIRMED`
+The Streamer Guide's cog-DAC recipe is **correct** — `TT=%01` drives, and `OUT` is irrelevant to it.
+The real defect the sweep exposed is arithmetic: `P_OE`, `P_CHANNEL` and `P_TT_01` are three names for
+the **same** bit-field value, so `P_CHANNEL + P_OE` carries `%01 + %01` into `%10` = `P_BITDAC`, a
+different mode that does not drive. *How proven:* jumper P0→P1 (continuity verified digitally first);
+P0 a cog DAC with `%TT` swept, P1 read by a smart-pin ADC (`P_ADC_1X | P_ADC`, `WXPIN` 12, `RDPIN`).
+*Result:* `%00` = 1,408 (no drive) · **`%01` = 6,737 — drives** · `%10` = 1,409 · `%11` = 1,408 ·
+`%01` with `OUT=1` = 6,737 (OUT irrelevant) · **`P_CHANNEL + P_OE` via `+` = 1,407 — dead**.
+Reproduced three times; an independent replication returned 6,737 / 1,410. *Date/rig:* 2026-08-14,
+real P2 (Stephen). [M-pre — streamer-free.] *Grounds:* F-259 — **CONFIRMED-FALSE** for the community
+report that the recipe drives nothing (the reporter compared `%01` against `%10`, not with-OE against
+without). Class sweep: 281 doc config lines use `|`, exactly **2** use `+`, both in the Streamer Guide
+(`streamer-body.md:1238`, `:1306`) and both computing correctly today — a latent trap, not a live bug.
+*Source:* `campaigns/2026-08-manual-corrections/tests/test-f260-goertzel.spin2`.
+
+### EF-055 · In `DAC_MODE` with the smart pin off, `TT=%01` switches the DAC's SOURCE — adding `P_OE`/`P_CHANNEL` to a level-driven DAC kills its output — `CONFIRMED`
+`%TT` is **context-dependent**, keyed on whether the smart pin is on and whether `DAC_MODE`
+(`M[12:10]=%101`) is active. With the smart pin off in `DAC_MODE`, `TT=%01` does not "enable output" —
+it selects a **cog DAC channel** as the source instead of the pin's own level field. *How proven:* a
+`P_DAC_124R_3V` pin driven from its level field, measured before and after adding `P_CHANNEL`.
+*Result:* level-driven spread **1,305 of 2,000 samples**; **adding `P_CHANNEL` dropped it to 25.**
+*Date/rig:* 2026-08-14, real P2 (Stephen). [M-pre — streamer-free.] *Grounds:* F-264 — the KB's
+`architecture/smart_pins.yaml:249-253` carries the four-context table correctly, but
+`language/spin2/methods/wrpin.yaml`'s `tt_field` gives one context-free meaning and its
+`p_oe_required_for: "All output modes (… DAC …)"` is **wrong for the non-smart-pin DAC**. **This is
+the highest-severity class we carry: guidance that, applied in a legitimate context, breaks working
+code** — F-245's "add `P_OE`" remedy must never be applied to a cog-DAC configuration.
+
+### EF-056 · DDS/Goertzel works and is sharply frequency-selective; with a discrete `XINIT`/`WAITXFI`/`GETXACC` sequence the reads are RUNNING TOTALS — `CONFIRMED`
+The mode detects, and it always did. *How proven:* an independent tone — smart-pin NCO
+(`P_NCO_FREQ | P_OE`) on P0 producing a real 1 MHz square wave from cog 0, sharing no NCO with the
+detector — read through the jumper on P1 by DDS/Goertzel in a launched cog. **Every row measures its
+own ADC bitstream density before its Goertzel run**, so no row can misreport its own input.
+*Result:* on-target 1 MHz detector, density 1020/2000 → magnitude **1,059,000**; 2× detuned → 2,575;
+0.5× detuned → 286; no tone → 430. Densities identical across the three tone rows, so the only
+variable is detector frequency: **selectivity 411:1, 3,700:1, and a 2,460:1 null.** *Date/rig:*
+2026-08-14, real P2 (Stephen). [M — taken after the EF-057 fix.] **The protocol, which is the
+finding:** with this discrete sequence a *fresh cog's first read equalled the previous cog's last
+read* (five times, across `COGINIT`), and *two identical commands returned exactly twice one
+command's total*. Absolute reads did not track the input; the difference across one command did.
+**So read before the command, read after, and take the difference.** *Explicitly NOT established —
+do not assert it:* that the accumulators are never zeroed. That over-reaches from one tested pattern,
+and Chip's shipped `XCONT`-loop demo is evidence against it — his per-command reads plot a live
+position and do not ramp without bound. Which of `XINIT` vs `XCONT`, the wait, or the cog lifecycle
+accounts for the difference is **unknown**. *Grounds:* F-260, F-265 (the ADC pin is **raw** —
+`P_ADC_x`, smart-pin mode `%00000`, no DIR). *Source:* `.../tests/test-f260-goertzel-input.spin2`.
+
+### EF-057 · `DEBUG_COGS` defaults to ALL EIGHT cogs, and the debug interrupt corrupts streamer measurements — `CONFIRMED`
+Debugging with `-d` — the normal way to debug — places the P2's **highest-priority interrupt inside
+the cog running your streamer**, by default. *How proven:* not a question we set out to ask; our probe
+crashed into the single-step debugger's memory dump. The `CogN INIT …` lines in every log were the
+debugger announcing cog starts — direct evidence it was live inside the launched cogs. *Result:* with
+the default mask the Goertzel accumulators read **1,000,000–7,000,000 of pure corruption**; setting
+**`DEBUG_COGS = %0000_0001`** (report from cog 0 only) stopped the crash, made the launched cogs'
+`INIT` lines disappear, and collapsed the accumulators to their true values **in the hundreds**.
+**Every streamer measurement taken before this fix was confounded** — which is what the `[M-pre]`
+grade on the entries above records. *Date/rig:* 2026-08-14, real P2 (Stephen). [M] *Grounds:* F-266.
+`p2kbArchDebugInterrupt` already carries the limitation (*"Debug can disrupt streamer operations"*)
+but nothing surfaces it where a streamer author will meet it. *General form worth teaching:* any
+hardware sequencer measured under the debugger may be perturbed by it — restrict `DEBUG_COGS` to the
+reporting cog when measuring.
+
+### EF-058 · `_RET_ CALL` does NOT return to XBYTE — it behaves as a plain `CALL` and execution falls through — `CONFIRMED`
+The idiom **assembles**, so the objection "you cannot combine a CALL with ret" is wrong as stated —
+but the `_RET_` is silently ineffective on `CALL`, and dispatch does not resume. *How proven:* a
+**differential** test, not an absolute one — two bytecode handlers doing identical work, differing
+only in where the return lives (`$01` = `_ret_ call #helper`; `$04` = `call #helper` / `ret`, the
+reference), both in the same cog and the same run. Handlers append tokens to a **trail**, so execution
+*order* is readable rather than just a count. The reference arm runs first, so a dispatch failure
+reports the idiom untested rather than disproven. **Control that must fail:** a handler deliberately
+leaving XBYTE — its trail stopped at the break, exactly as required. *Result:* reference = 5 steps
+(`h_plain → h_callret → helper → h_plain → h_halt`, correct); under test = **7 steps**
+(`h_plain → h_retcall → helper → h_callret → helper → h_plain → h_halt`) — and **`$04` is not in that
+bytecode stream**: `h_callret` ran because control fell into it. The helper reported the pushed return
+address as **`$8000_001A`**, and the map places `H_CALLRET` at cog `$01A`, the instruction immediately
+after the `_ret_ call`; the reference pushed `$8000_001F`, its own `ret`. **Both forms pushed "next
+instruction."** The compiler is not at fault: `_ret_ call #tgt` emits `$0DB00008` with `EEEE=%0000`
+(the `_RET_` condition genuinely present) versus `$FDB00004`/`EEEE=%1111` for a plain call.
+*Date/rig:* 2026-08-14, real P2 (Stephen). [M-pre — but a differential in one run: a confound acting
+on both arms equally cannot manufacture a 7-vs-5 trail difference, and the result is self-consistent
+three ways (trail, return address vs map, compiler encoding).] *Grounds:* F-256 — the XBYTE Guide's
+`:879` claim and every use of the idiom (`:416`, `:793`, `:1391`, `:1400`); §15.3 needs
+**restructuring**, not a patch. *The failure is silent and misleading:* the next handler in cog memory
+executes spuriously, which a reader would hunt in their VM logic for days. *Source:*
+`.../tests/test-f256-retcall-xbyte.spin2`.
+
+### EF-059 · `adc_pin<<17` in `X_1ADC8_0P_1DAC8_WFBYTE` changes the streamer MODE — the byte-count signature proves it — `CONFIRMED`
+That mode's template is `%1111_DDDD_W000_0010`: `D[22:20]` are fixed zeros, **there is no pin field**,
+and the ADC channel is selected by `S[1:0]`. So `adc_pin<<17` lands inside `D[19:16]` and the `add`
+carries, silently selecting a *different* streamer mode. *How proven:* nothing analog required — the
+three candidate modes write 1, 2 and 4 bytes per NCO rollover, so the byte count reads out which mode
+the silicon actually ran. A hub buffer pre-filled with a sentinel; the guide's line run verbatim at
+three pin values; highest modified byte read back. *Result:* `adc_pin`=0 → `$F082_0400` → **1,024
+bytes** (correct, 1-ADC8→WFBYTE); =1 → `$F084_0400` → **2,048** (2-ADC8→WFWORD); =2 → `$F086_0400` →
+**4,096** (4-ADC8→WFLONG); corrected form → 1,024. Reproduced four times, hitting the a-priori
+prediction exactly. *Date/rig:* 2026-08-14, real P2 (Stephen). [M-pre — this one *does* use the
+streamer, so the grade is honest; but debug interference produces jitter and dropped samples and
+cannot convert one byte per rollover into *exactly* two or *exactly* four — the write width is set by
+the mode field. A confirming run is cheap insurance rather than an open question.] *Grounds:* F-260
+sibling at `streamer-body.md:607` — the line is correct **only** for `adc_pin = 0` and never selects
+the channel at all. *The defect is invisible in testing:* the capture "works", the buffer fills, and
+the data is simply the wrong shape.
+
+### EF-060 · Inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address — `CONFIRMED`
+A PASM fragment that is correct in a standalone file reads **interpreter memory** when pasted into a
+Spin2 object. *How proven:* surfaced while getting the EF-058 rig working — compare the address Spin2
+reports for a `DAT` symbol against the one PASM sees via `##`. *Result:* `@disp` = **`$1AF9`** from
+Spin2 versus `##disp` = **`$0651`** from PASM — differing by **5,288 bytes**; the `##` form returned
+garbage. In a **standalone PASM** file the precondition holds and `##hubsym` is correct. *Date/rig:*
+2026-08-14, real P2 (Stephen). [M-pre — streamer-free.] *Grounds:* no F-number yet; this bites anyone
+who copies a PASM fragment out of a guide into a Spin2 object, which is how most P2 code is written,
+and our guides present standalone-PASM fragments without saying so. *Workaround:* pass hub addresses
+in from Spin2 with `@`, or use PTRA.
+
+---
+
 
 ## Open / pending empirical questions
 
