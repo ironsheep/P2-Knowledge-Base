@@ -5,6 +5,28 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
+## Front-matter `\markboth{}{}` missing in four manuals — OPEN
+
+**Status:** ⏳ Open — relocated here 2026-08-15 from a stale auto-memory during the Sprint-2
+entry check. Verified still owed at relocation time, not carried forward on trust.
+
+XBYTE's front matter carries the copyright-page `\markboth{}{}` one-liner; **four manuals do
+not.** Measured 2026-08-15 (`grep -c markboth opus-master/front-matter.md`): XBYTE **1**;
+Streamer, Architect's Guide, Getting Started, Debug Window all **0**.
+
+**Two of the four — Streamer and Debug Window — are in Sprint 2's release wave.** They are
+being re-rendered and patch-bumped anyway, so the one-liner should ride those renders rather
+than earn its own cycle later. Architect's Guide and Getting Started are not in the wave and
+wait for their next render.
+
+**Sibling item, verified DONE and NOT carried:** the platform `\needspace 7→3` change is
+already applied in `platform/templates/p2kb-platform-foundation.sty` (§194 documents the
+3-baselineskip reserve; §198 records that 7 proved over-aggressive), and the 2026-08-08
+render wave verified 14/15 full documents against it. Recorded here only so the next reader
+does not re-open it.
+
+---
+
 ## Guide-conformance instrument — standards-tree coverage — OPEN
 
 **Status:** ⏳ Open — deferred 2026-08-15 by Stephen's decision on the Sprint-2 planning

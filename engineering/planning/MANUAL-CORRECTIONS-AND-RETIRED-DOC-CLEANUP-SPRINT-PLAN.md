@@ -786,6 +786,81 @@ path before acting** — do not rewrite a released manual on a single external l
 
 ---
 
+## 7f. SPRINT 2 START — agreed versions, commit gate, entry checks (2026-08-15)
+
+### ⛔ COMMIT GATE — opus-master edits are NOT committed by the agent
+
+**Stephen's hard constraint, given at sprint-start.** Every change under any
+`manuals/<slug>/opus-master/` or `app-notes/<n>/opus-master/` tree — the document prose
+itself, which is this sprint's entire content deliverable (§1, §2, §4, §7a–7e) — is left
+**uncommitted**. At the end of the opus-master work, stop and hand over the diff. Stephen wants
+one opportunity to review the commit differences **before** anything is committed.
+
+**This suspends central `task-handoff` §3c for those tasks.** Committing at the task boundary
+to protect the work is normally right and is explicitly off here. Do not work around it by
+committing one task's opus-master edits while "waiting" on another.
+
+Still committable without asking, because none of it is the document: plan / punch-list /
+register / standing-doc updates · tooling and instrument changes · `.claude/` skill and
+convention changes · analysis artifacts. **A task that mixes both commits the non-opus-master
+half only, and says so.**
+
+Hand-back shape: the located change list (chapter + within-chapter section per item, per the
+diagram-review-locations rule) alongside `git diff --stat` and the diff itself — so Stephen
+reviews differences rather than reconstructs them. Then wait for his go.
+
+### Agreed outgoing versions — every affected manual takes a PATCH bump
+
+Stephen's call, 2026-08-15. Current versions from `PUBLICATION-ROSTER.md`:
+
+| Manual | Sections | Now | Ships as |
+|---|---|---|---|
+| DeSilva Tutorial | §1, §2 | 3.0.5 | **3.0.6** |
+| Streamer Guide | §7a, §7b | 1.0.8 | **1.0.9** |
+| I/O & Smart Pins (IOSP) | §7c | 1.0.8 | **1.0.9** |
+| Debug Window | §7d | 1.1.2 | **1.1.3** |
+| Assembly Reference | §7e | 3.1.5 | **3.1.6** |
+| Interpreters & Emulators (XBYTE) | §4 | 1.0.1 | **1.0.2** |
+
+**Six are pinned; the final count is not, and that is by design.** §7a's deliverable is a
+**class-wide `P_OE` sweep across every live manual and app-note**, so which *additional*
+elements bump is decided by that sweep's first run — the certified rule that an instrument's
+first run is a planning input, applied to a sweep. Measured candidate set (2026-08-15,
+`P_CHANNEL|P_DAC_` across live opus-masters): Streamer · IOSP · Assembly — all three already
+bumping — plus **P2AN001 (1.0.3) and P2AN003 (1.0.2)**, which are *candidates only*. Many hits
+will be constant tables, appendices and indexes that carry no defect. **Do not pre-commit
+those two to a bump; size and confirm them after the sweep reads its sites.**
+(`p2-smart-pins-tutorial` also matches and is **roster-Abandoned — never swept**.)
+
+Also riding these renders, from the punch list: the front-matter `\markboth{}{}` one-liner that
+**Streamer and Debug Window** are missing.
+
+### Entry checks — both recorded, both green
+
+**Working tree (sprint-start §2):** clean at `68b2bd5c`; no uncommitted edits and no untracked
+files anywhere in the blast radius.
+
+**Baseline (sprint-start §4)** — per the `sprint-start` overlay this is a **manual** sprint, so
+there is no local build gate for the documents themselves (they render on PDF Forge); the
+measurable entry baseline is the YAML head's validators, and it is **identical to Sprint 1's
+exit**, so the exit assertion compares like with like:
+
+- `verify-yaml-format.py` — **1129 parsed clean / 0 failed**
+- `validate-crossref-keys.py` — **all cross-references validated**
+- `validate-dod-release.py` — **ALL VALIDATIONS PASSED**
+
+`BUILD_COMMAND` now names `verify-yaml-format.py`; it named `validate-yaml-syntax.py` until
+2026-08-15, which returns a hollow green over the content tree. Never quote that script as the
+baseline.
+
+**Tracking (sprint-start §3):** board clean — Sprint 1's eleven tasks archived, nothing
+stranded. Context pruned 73 → 55 keys (18 closed-work keys deleted, snapshot
+`project_dump_20260815_223820.json` taken first). Two pending tasks «#216» «#217» are
+skills-infrastructure from the v5→v8 reconcile and are **deliberately NOT folded into this
+sprint** — they serve the toolchain, not the documentation release.
+
+---
+
 ## 8. Release wave
 
 §1, §2, §7a–7e touch **five released manuals** — deSilva, Streamer, IOSP, Debug Window, Assembly.
