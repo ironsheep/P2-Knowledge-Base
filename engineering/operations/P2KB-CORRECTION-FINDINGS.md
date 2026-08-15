@@ -105,6 +105,37 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
+## Golden-source defect — duplicate EF id (2026-08-15) — F-267
+
+### F-267 — `EF-020` names TWO unrelated findings in the empirical ledger, and both are cited from RELEASED documents. `CONFIRMED`
+
+**Location:** `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`
+`:291` and `:794`. **The ledger is the golden source** — a citation into it must resolve to one fact.
+
+- `:291` **EF-020** · `SETQ`+`WAITSEx` = single-instruction event-OR-timeout; no-SETQ `WCZ` is a free flag-clear.
+- `:794` **EF-020** · PLOT default coordinates are bottom-left / Y-UP.
+
+**Both are cited externally, in shipped material** — so "just renumber it" is a citation-identity
+change, not a typo fix:
+
+| Citation | Means |
+|---|---|
+| `PUBLICATION-ROSTER.md` — IOSP v1.0.1, Assembly v3.1.2 | the SETQ/WAITSEx entry |
+| `YAML-HEAD-DASHBOARD.md` v1.14.0 | the SETQ/WAITSEx entry |
+| `YAML-HEAD-DASHBOARD.md` v1.14.3 | the PLOT entry |
+| Debug Window manual `REF/theory-of-operations/PLOT_Theory_of_Operations.md` ×2 | the PLOT entry |
+
+**Proposed correction — Stephen's call, not swept.** The SETQ entry has priority: it was assigned
+2026-07-04 with F-193. The PLOT entry was retro-absorbed later (folded in at KB v1.14.3, and it sits
+in the ledger's *"Prior-session empirical facts (absorbed)"* section), taking a number already in use.
+So **renumber the PLOT entry to `EF-061`** and update the four citation sites above. Do not renumber
+the SETQ entry — it is the one cited from two released manuals' roster history.
+
+**Surfaced by:** the duplicate-ID STOP rule in `.claude/skills/REGISTER-CONSULTATION.md`, while
+appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced rather than resolved.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
