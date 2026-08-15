@@ -247,3 +247,51 @@ Each decision above sets the standard P2 measures against:
    those checklists, calibrated qualifiers may have been stripped from shipped text as "defects".
    P2 should look for that specifically — it would be a defect we introduced, in the opposite
    direction from the one we are fixing.
+
+
+---
+
+## What we do NOT know — the honest gap list
+
+The survey above covers **per-manual `voice-guide.md` files only**. That is one layer of three, and
+the other two are unexamined.
+
+### Newly found this pass — changes the shape of the work
+
+| artifact | status | why it matters |
+|----------|--------|----------------|
+| `engineering/standards/documentation-standards/documentation-voices-catalog.md` | **last touched 2026-07-20 — the same day as the XBYTE tweaks** | It is a **house-level** catalog of voices with failure modes, and its Chip Voice entry already carries an E1-flavoured guard: *"false precision — a derived/measured value stated as if it were spec. Guard: state numbers only at their source's confidence."* **We do not know whether the intended model is "define once in the catalog, reference from each guide" or "copy into all ten."** That decision determines whether the E1 work is one edit plus pointers, or eleven parallel edits. |
+| `engineering/document-production/app-notes/APP-NOTE-VOICE-GUIDE.md` | **E1 ✗ E2 ✗ E3 ✗ — at zero** | Governs **every** `P2ANxxx`, including **P2AN002 — a correction target in this sprint**. This is an **11th target** the study did not have. |
+| every manual's `creation-guide.md` | **unexamined** | All eleven carry voice/tone content (3–14 hits each). A voice rule living there can contradict the voice guide exactly as the quality checklists do. This is a whole second layer, and we found the checklist conflict only by reading. |
+| `engineering/document-production/repo-voice-profile.md` | **ruled out** | Not a manual standard — it profiles Stephen's voice for the X/Patreon work. Noted so nobody re-investigates it. |
+
+### Still unknown, unmeasured
+
+1. **Whether the damage occurred.** The Streamer/Assembly word blacklists *may* have caused
+   qualifier removals in released text. Hypothesis only; nothing measured.
+2. **How far any manual's TEXT sits from its guide.** P2 has not run. Zero measurements exist —
+   including Debug Window's self-declared *"substantial rewrite"*, which has no count attached.
+3. **DeSilva's staged-reveal row** — recorded as a judgement call, still undecided.
+4. **Whether other manuals received reviewer voice feedback that never propagated.** Chip's critique
+   reached the XBYTE guide. We do not know whether any other manual has an equivalent input sitting
+   unapplied.
+5. **What Chip's full critique said.** We have three distilled tweaks. Whether the original raised
+   more that was never captured is unknown.
+6. **Whether voice conformance is enforced at any gate.** `document-audit` Dimension #9 exists;
+   whether it runs per release is unverified. If it does not, guides drift unchecked — which is how
+   we got here.
+7. **Smart Pins Tutorial's three style documents** — not surveyed. It is being retired, but we do
+   not know whether other guides reference it.
+
+### Do we need to go deeper per document?
+
+**Yes at the house layer, now. Not yet at manual text.**
+
+- **Now:** the voices catalog and the app-note voice guide. Both are cheap, and the catalog may
+  collapse eleven edits into one plus pointers — doing per-manual work before settling that risks
+  building the wrong thing eleven times.
+- **Now:** a creation-guide pass for the manuals we are correcting, looking specifically for voice
+  rules that contradict the voice guide. Same failure shape as the checklists, and we already know
+  that shape exists here.
+- **Not yet:** per-manual text depth. That is P2, and it cannot run until the guides are settled —
+  measuring text against a standard we are about to change wastes the measurement.
