@@ -109,6 +109,67 @@ remainder cheap, and leaving four guides unreconciled re-creates the drift.
 
 ---
 
+### SPRINT 1 — STARTED 2026-08-15 (`sprint-start` record)
+
+**Head / element.** Sprint 1 is **cross-cutting standards work**, not one element of one head.
+Its target is the **guide layer itself** — the house voices catalog, the app-note class guides, and
+every manual's `voice-guide.md` / `creation-guide.md`. `active_element` is therefore **left pointing
+at the manual-corrections effort** and is not repointed; per `whats-next`, operations/standards work
+has no `active_element` form.
+
+**Build number: N/A — Sprint 1 ships no versioned artifact** (Stephen, 2026-08-15). It edits no
+manual text, triggers no render, and bumps no version. The seven version bumps all belong to Sprint 2.
+`BUILD_VERSION_*` therefore does not resolve for this sprint, by design rather than omission.
+
+**Working-tree audit (§2).** `git status --short` **clean**; no untracked files anywhere in the blast
+radius (`document-production/`, `standards/`, `planning/`). Nothing to commit, stash, or review first.
+
+**Tracking readiness (§3) — READY.** Task board **empty** (no leftovers, nothing stranded, nothing to
+archive). Context pruned **92 → 73 keys** (out of the audit band): deleted 19 superseded
+resume/session-close/sprint-state snapshots, all of which declared themselves closed
+(`nextup_session_close_*` ×6, `sprint_fabrication_audit_*` ×2, `nextup_fleet_*` ×2, five closed
+Debug-Window pointers, the F-214/F-215 pair, the hub-RDLONG study, and the closed DeSilva P_OE
+session). Snapshot taken first: `tasks/backups/project_dump_20260815_195233.json`. `MEMORY.md` 134
+lines (under the ~150 threshold).
+
+**Deliberately KEPT** — these are live or unrecoverable, not clutter:
+
+| key | why kept |
+|-----|----------|
+| `nextup_preprocessor_p2kb_request` | live pending work — "STUDIED + SCOPED, **NOT STARTED**" |
+| `nextup_asm_forum_response_post` | Stephen's to own; drafts live in gitignored `DRAFTS/` |
+| `nextup_debug_outbound_docs` | awaiting Stephen's routing **and** gitignored — context is the only record |
+| `donna_manuscript_state` | that tree is gitignored and unversioned — **git cannot recover it** |
+
+*Cross-audit note (§4):* 19 resume-shaped snapshots had accumulated, i.e. supersede-and-delete is not
+firing at session close. **First recorded occurrence — data, not yet a methodology candidate.** If the
+same shape appears at closeout, it earns an entry in `feedback_skill_evolution_candidates.md`.
+
+**Entry baseline (§4) — GREEN, and it is a *substitute* gate.**
+
+| gate | result |
+|------|--------|
+| `verify-yaml-format.py` (true content-syntax gate per the overlay) | **1129 scanned · 1129 clean · 0 failed** |
+| `validate-crossref-keys.py` | **ALL RESOLVED — 100%** (1823 `related:`, 717 `see_also:`, …) |
+| `validate-dod-release.py` | **ALL VALIDATIONS PASSED** |
+
+Per the overlay, `validate-yaml-syntax.py` was **not** used — it scans `manifests/` +
+`knowledge-base/` and reports a green that verifies almost nothing of the content tree.
+
+**Two honesty qualifiers on this baseline, both load-bearing:**
+
+1. **It is a substitute gate, not a test suite.** It proves the YAML *parses and resolves*; it proves
+   nothing *behavioral*. Behavioral verification for this project lives on the bench
+   (`P2-EMPIRICAL-FINDINGS.md`), and none is in Sprint 1's scope.
+2. **Sprint 1 touches no YAML at all**, so this baseline is a **no-regression anchor**, not a gate on
+   the work. A green YAML baseline says nothing about the guide layer this sprint edits — **the guide
+   layer currently has no automated gate whatsoever**, which is exactly why the plan's §6 owes a
+   doc-audit instrument. `plan-to-tasks` §2a makes that a mandatory task.
+
+**No failure groups. Nothing deferred. Exit baseline must match all three greens at closeout.**
+
+---
+
 ### Planning-phase research — the two audits that scope this sprint
 
 **These are planning work, not sprint work.** We cannot task the voice dimension without walking a
@@ -725,3 +786,45 @@ Ledger `PUBLISH` lines.
 10. **§8** — the release wave, once the above land.
 
 **Bench session batching:** §3, §7b, §7e (and any 7a re-proof) all want the board. Group them.
+
+---
+
+## Sprint 1 — section ↔ task cross-reference
+
+Tag: **`guide-normalization`** · 11 tasks, `«#205»`–`«#215»`, seq 1–11 · est. **11h 0m**.
+Source sections: the plan's **SETTLED — the voice-guide tree** block and
+`VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md` §00 / §0c / §0d / §0e / §1.
+
+| Source § | Deliverable | Task | seq | est |
+|----------|-------------|------|-----|-----|
+| SETTLED (house canon) · study §00 | Voices catalog → **R1–R4**, E2 promoted, 3 structural rules | `«#205»` | 1 | 60m |
+| Plan §6 (instrument owed) · study §1 | **Guide-layer conformance instrument** + `DOC_AUDIT_COMMAND` | `«#206»` | 2 | 90m |
+| Study §1.5 **D2** | `pnut_ts` → `pnut-ts` fleet sweep (~70 occurrences) | `«#207»` | 3 | 45m |
+| Study §1.5 **D1** · §1.6 · plan §5b | Dead authority paths · retired-doc refs · codenames | `«#208»` | 4 | 45m |
+| Study §0e · §1.5 **D3/D4** | **DeSilva** new `voice-guide.md` + the Sprint-2 gate | `«#209»` | 5 | 75m |
+| Study §0c (🔴 HIGH tier) | **IOSP + Debug Window** — 10 voice sites + 1 creation checklist | `«#210»` | 6 | 90m |
+| Study §1.3 (**Class B**) | Debug Window creation guide — retire the Discovery-Guide voice | `«#211»` | 7 | 75m |
+| Study §0c (🔴 blacklists) · §1.4 (**Class C**) · §1.6 | **Assembly + Streamer** + the un-swept cog-casing fix + 3 collateral | `«#212»` | 8 | 75m |
+| Study §0c (🟡/🟢 tail) | XBYTE · app-note · SSDB · PNut-Term-TS · Architect · Getting Started | `«#213»` | 9 | 60m |
+| Study "Damage assessment" | **Damage investigation** (research only; repair is Sprint 2) | `«#214»` | 10 | 60m |
+| Plan §6 | **Documentation blast radius** (owns every downstream artifact) | `«#215»` | 11 | 45m |
+
+**Ordering rationale (rework pass, `plan-to-tasks` §3a).**
+*Standards before application* — `«#205»` writes the canon everything else adapts to, so it is
+unconditionally first. *Audit before execution* — `«#206»` builds the instrument **before** the
+sweeps it verifies, which also replaces a hand count that has been wrong four times in this study
+with a mechanically-derived one. *Discovery before utilization* — the mechanical class-wide sweeps
+(`«#207»`, `«#208»`) run before the per-guide authoring so those passes see clean tool names and live
+paths. `«#209»` sits early because **D4 gates Sprint 2**. The per-guide work then descends by
+severity: 🔴 no-R1 → Class B → 🔴 blacklists → 🟡/🟢 tail.
+
+**Atomic green-unit (`plan-to-tasks` §3b) — `«#206»` + `«#207»`…`«#213»`.**
+`«#206»` switches detection on and will report roughly a hundred latent instances **at its own
+completion**. That red is **by design, not a regression**, and must not be resolved by weakening the
+detections — `«#207»`–`«#213»` clear the instances, and `«#213»` closes the unit. Both ends of this
+are written into the task text so an executing agent does not "fix" its own correct work.
+
+**Exit condition.** All three entry validators still green (`verify-yaml-format` ·
+`validate-crossref-keys` · `validate-dod-release`), the instrument reports clean across the guide
+layer, and `git diff --stat` shows **zero opus-master edits** — the structural proof Sprint 1 stayed
+inside the guide layer.
