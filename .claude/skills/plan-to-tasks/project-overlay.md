@@ -10,6 +10,40 @@ The slots that are still **routing sentinels** (`BUILD_VERSION_*`,
 `PUNCH_LIST_DOC`, `RELEASE_NOTES_DOC`, `SPEC_DOC`) resolve per head via
 `.claude/skills/HEAD-DISPATCH-DRAFT.md`, keyed off the `active_element` pointer.
 
+## Augments §1 — the CURRENCY GATE: prove the plan is current before creating any task
+
+Central §1 says read the plan top to bottom before creating anything. That instruction is
+self-assessed, and on 2026-08-15 it was self-assessed wrongly: an 18-task sprint was generated from
+plan §7 — pre-bench prose — while a block superseding it sat **680 lines above**, and the findings
+register held verdicts that reversed four of the tasks. Entering at §Open Questions and reading
+*forward* is what did it, so **drop that entry pattern: the entry point is always the head of the
+document, never the section the skill happens to gate on.**
+
+**Before creating the first task, post a four-line currency check.** It is short by design, and it
+cannot be produced without doing the reading:
+
+1. **Plan span and head** — the plan's total line count, and the line number + date of its newest
+   state block. If the newest state block is *below* where you started reading, you started in the
+   wrong place.
+2. **Sections superseded** — any section whose content a later block contradicts, by number. "None"
+   is a valid answer only if you can say what you compared.
+3. **Register state for every finding in scope** — each finding ID with **its status and line
+   number**, per `.claude/skills/REGISTER-CONSULTATION.md` §1. This is the line that would have
+   caught 2026-08-15: F-259 REVISED, F-260 resolved-and-duplicated, F-256 answered, F-263 confirmed
+   with cause — all filed, none read.
+4. **Blocking standing rules** — any recorded rule that gates the work. On 2026-08-15 two findings
+   read `resolution deferred until the bench campaign closes` ({{USER_NAME}}'s standing rule), which
+   blocked most of the sprint being tasked.
+
+**Any contradiction found is a STOP, not an input to weigh.** Surface it and wait. Choosing the
+entry that suits the plan is how a duplicate becomes a decision.
+
+**Why this shape:** an instruction to "read carefully" cannot be checked by anyone, including the
+agent following it. A required artifact can — a missing or vague currency check is visible in the
+output, and it cannot be written without having read the head, the register, and the statuses.
+That is the whole difference between a rule and a rule that is hard to avoid.
+(See [[feedback_drop_techniques_that_lower_quality]].)
+
 ## Augments §3a-ii — the two-environment split as a scheduling resource
 
 Central schedules limited-environment work into the wait windows the canonical

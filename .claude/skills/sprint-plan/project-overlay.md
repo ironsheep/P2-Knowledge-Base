@@ -39,10 +39,53 @@ App-Note Roster's first cut over-stated the compute-model gap by counting only
 shipped manuals — the in-development P2 Architect's Guide Act II + decomposition
 YAML layer already owned it; Stephen caught it.)*
 
-## Augments §2 code-research — scope boundaries come from the artifact, never from prose
+## Augments §2 code-research — SCOPE INPUTS come from the artifact, never from prose
 
-**Any date or commit that bounds an investigation's scope must be derived from the
-artifact under investigation — never inherited from a narrative that cites it.**
+**Any input that bounds or defines a sprint's scope must be derived from the artifact under
+investigation — never inherited from a narrative that cites it.** Dates and commits, yes; and
+equally **which findings are open, what a finding's verdict is, whether a test has already run,
+and what state a document is in.**
+
+*Widened 2026-08-15, and the widening is the point.* This rule previously read "any **date or
+commit**." It was written around the instance that produced it instead of the shape, so when the
+same defect recurred in a different guise — an entire finding set taken from a superseded plan
+section while the register held the current verdicts — **reading the rule triggered nothing.** A
+rule scoped to its origin story only fires on its origin story. State the shape.
+
+Before any scope claim, name the artifact and derive from it:
+
+| Scope input | The artifact — never the narrative |
+|---|---|
+| a date or commit window | `git log -S'<the actual text>' -- <the file>` |
+| whether a finding is open, and its verdict | the register entry + **its status field** — see `.claude/skills/REGISTER-CONSULTATION.md` |
+| whether a bench/verification run has happened | the register status and `P2-EMPIRICAL-FINDINGS.md`, not a plan's summary of them |
+| a document's version or lifecycle status | `PUBLICATION-ROSTER.md` |
+| a defect count or file set | the instrument's own output |
+
+**A cited SHA is evidence that something changed then. It is never evidence that nothing changed
+before.** The same asymmetry holds for every row: a narrative citing a finding is evidence the
+finding existed, never evidence of its current state.
+
+*Certified 2026-08-15 («#214»).* The study and the task body both scoped a damage investigation to
+"since `acf3b4a2` (2026-07-20)". Pickaxing the rule text instead dated it to each guide's **birth**
+— Streamer `10bb35d5` (2026-01-22), Assembly `1e51f086` (2025-11-26); `acf3b4a2` was the
+**corrective**, not the cause. Real window 7–9 months, not 3–4 weeks. Executed as written the task
+would have scanned ~1 commit instead of ~120 and returned a NIL that cleared nothing. Cost of the
+check: one command.
+
+*Re-certified 2026-08-15, on the widened form.* Sprint 2's entire task set was generated from plan
+§7 — pre-bench prose — while a superseding bench-results block sat 680 lines above it and the
+register carried the current verdicts. Four findings were tasked backwards, one already-filed KB
+defect was re-derived from scratch, and the wrong app note was placed in the release wave.
+
+## Augments §plan-authoring — plans POINT at registers, they never restate them
+
+A plan names a finding and its status; it does not reproduce the finding's verdict, reasoning, or
+numbers. See `.claude/skills/REGISTER-CONSULTATION.md` §4 for why, with the live example — this
+plan's own bench-results table contradicted the register within a day.
+
+**Applies retroactively:** when revising a plan that already carries restated register state,
+**delete the restatement** rather than updating it. Updating it preserves the shape that drifts.
 
 Run the pickaxe on the *actual text* of the thing being investigated before you
 fix a window:
