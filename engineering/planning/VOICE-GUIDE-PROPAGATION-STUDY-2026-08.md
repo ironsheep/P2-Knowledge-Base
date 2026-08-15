@@ -1,7 +1,47 @@
 # Voice-Guide Propagation Study — 2026-08
 
 **Planning artifact (P1)** for `MANUAL-CORRECTIONS-AND-RETIRED-DOC-CLEANUP-SPRINT-PLAN.md`.
-**Status:** current-state survey COMPLETE for all ten guides (read, not grepped). Decisions recorded for IOSP, Debug Window and DeSilva. Remaining decisions — E3 adoption for the six guides lacking it, and the E1 reconciliation wording per guide — are drafted below and await Stephen. **No guide has been edited; this is research into current state.**
+**Status:** **DECIDED 2026-08-15 — Stephen approved the tree, the four-rule house layer, the DeSilva
+per-row decisions, and the creation-guide rule.** Survey complete for all ten guides plus the
+catalog and the app-note guide (read, not grepped). **No guide has been edited; this is research
+plus decisions.**
+
+> **§00 — THE SETTLED MODEL (read this before the sections below, which record how we got here).**
+>
+> **The house layer already existed and already answered the sizing question.** Commit `3d8a653c`
+> (2026-07-20) added a normative **"The Shared Discipline — applies to every voice"** section to
+> `documentation-voices-catalog.md`, which states the rules and then says *"the write-time
+> counterparts live in each manual's voice-guide."* Six of ten guides already cite it as canonical.
+> The model is **canonical statement in the catalog, local adaptation in each guide** — not
+> "define once and point" and not "copy into eleven".
+>
+> **Three layers:** house canon (`documentation-voices-catalog.md`) → class
+> (`APP-NOTE-VOICE-GUIDE.md`) → document (`<element>/voice-guide.md`). Adjacent files
+> (`creation-guide.md`, `style-guide.md`) **may reference voice rules, never restate them.**
+>
+> **Three structural rules:** (1) never restate a shared rule, adapt it; (2) record rejections with
+> reasons; (3) **quality checklists point at rules, never re-encode them** — rule 3 alone would have
+> prevented every contradiction in §0 and §0b.
+>
+> **The house layer goes to FOUR named rules** — the catalog's three and Chip's three are *not the
+> same three*. **E2 is missing from the house layer** (it lives only as prose inside the Claude Voice
+> failure-mode paragraph) although seven of ten guides carry the rows. Promote it:
+>
+> | | rule | maps to |
+> |---|------|---------|
+> | **R1** | Calibrated confidence — never state a claim above its evidence | E1 |
+> | **R2** | The payoff-sentence test | E1 (second half) |
+> | **R3** | The anti-pattern family — tutorial filler · reader-as-foil · self-admiration · staged reveal | **E2, promoted** |
+> | **R4** | Cadence budget — the metronome | E3 |
+>
+> Every guide declares **ADOPT / ADAPT / REJECT against R1–R4, with a reason**.
+>
+> **The root cause of every contradiction below, stated once:** *the rule was written by naming
+> banned **words** instead of naming the **defect**.* The fix pattern, applied identically
+> everywhere: **(1)** name the defect ("vague hedging that avoids commitment"), never a word list;
+> **(2)** every restatement site gets a pointer to that guide's calibrated-confidence section;
+> **(3)** checklists point, never re-encode. Architect and Getting Started already do all three and
+> are the template.
 
 **Purpose.** The XBYTE guide's 2026-07-20 audit produced three voice-guide changes. They have been
 propagating outward unevenly. This study decides, **per gaining guide**, which elements are
@@ -152,12 +192,45 @@ different ones. Deciding this from reputation would have got it backwards.
 | **Tutorial filler** ("you might wonder", "let's explore") | **REJECT** | XBYTE's own §2.3 table lists DeSilva as *"Tutorial filler: Occasional"* — the origin document permits it here. It is the register. |
 | **Reader-as-foil** ("the obvious way to think about X is wrong", "it is tempting to…") | **ADOPT** | DeSilva's style guide already states **"No condescension: Respect reader intelligence."** Reader-as-foil *is* condescension — the besserwisser tells the reader what they think, then corrects them. This element **reinforces an existing DeSilva principle.** ⚠ Adapt the wording so *gentle prerequisite checks with escape routes* — an explicitly preserved element — are not caught by it. Those offer the reader an exit; they do not correct a belief imputed to them. |
 | **Self-admiration** (text praising its subject or its own explanation) | **ADOPT — adapted** | DeSilva celebrates the **reader's** achievement ("Uff!" = shared relief, "emotional punctuation", verdict *"✅ HELPS"*), which is a different act from the text admiring itself. Adopt, and state the carve-out explicitly so celebration of reader progress survives untouched. |
-| **Staged reveal** ("and here is the trap", "Hold that result") | **REJECT as written — judgement call, flag for Stephen** | The tutorial's pedagogy is *"Show before explaining"* and *"Conversational responsiveness"*, which is sequencing in service of learning, not withholding to manufacture a beat. The two are hard to separate by rule. Recommend rejecting the row rather than risk flattening the pedagogy, while noting the underlying concern (withholding *purely* for effect) remains covered by E1 — an unstaged fact cannot be overstated. |
+| **Staged reveal** ("and here is the trap", "Hold that result") | **DECIDED 2026-08-15 — ADOPT the defect, REJECT the phrase list** | Measured against the shipped master rather than reasoned from the style guide. See **§0e** below. |
 
 | element | decision | reason |
 |---------|----------|--------|
 | **E1** | **ADOPT** | Accuracy is register-independent, and a tutorial's worked examples are exactly where an overstated claim reaches a beginner. DeSilva may be our most §2.2a-native voice already: *"Acknowledge complexity: 'This is tricky, and that's okay'"* is calibration, and the persona is explicitly *"sometimes-wrong-but-honest"*. ⚠ Scope it to **technical claims about the P2** — not to the voice's playful self-assessment, which is a different act. |
 | **E3** | **REJECT** | Two reasons, both from the sources. (1) **E3's own carve-out applies:** *"A declared refrain is not a beat. A deliberate, announced structural device … is structure, not cadence drift — keep it."* DeSilva's Chapter End boxes and celebration moments are exactly that — declared, structural, and documented in the style guide's box-type list. (2) The rationale document defends emotional punctuation as pedagogy (Emotional Design; achievement milestones), so a budget that thins it trades a documented learning benefit for a cadence metric. |
+
+### §0e. DeSilva staged reveal — decided on measurement
+
+**The row is self-inconsistent at the source.** In XBYTE it names a *defect* in its "Why" column
+(*"withholding a fact to manufacture a beat"*) but bans *phrases* in its "Avoid" column. That is the
+identical mistake §0/§0b exist to fix, and rejecting the whole row would have let it stand here.
+
+**What the shipped text does.** Every reveal-vocabulary hit in `COMPLETE-OPUS-MASTER.md` (6,176
+lines) was located and then **read in context**. Three real candidates:
+
+| site | text | verdict |
+|------|------|---------|
+| `:1151` | Heading **"When does _RET_ NOT return?"** → *"Here's the catch: if the instruction itself branches, no return happens."* | **Not a defect.** The heading announces the topic; the fact lands in the same sentence. A signpost, not withholding. |
+| `:167` | *"…you're probably right… but here's the secret: it's actually simpler than traditional architectures"* | **Not staged reveal** (payoff in the same sentence). **But it IS an R1 hit** — an unsourced comparative claim. |
+| `:5824` | Epilogue: *"But here's the secret: everything you've learned is just the foundation."* | **Protected** — declared crescendo in the send-off, the same carve-out Architect gets for *"So go build something."* |
+
+**Zero instances of the actual defect.** Not one place where a fact is held back across a paragraph
+or section boundary to land a beat. The vocabulary appears three times; the behaviour appears never.
+
+**Decision — the wording for DeSilva's voice guide:**
+
+> **Staged reveal — adopted as a defect, not as a phrase ban.** Never withhold a fact *across* a
+> paragraph or section boundary so its arrival lands a beat. Announced signposts ("Here's the
+> catch:") followed immediately by the fact are **structure**, and the style guide's *"Show before
+> explaining"* sequencing is **pedagogy** — neither is staged reveal. **The test is distance:** if
+> the fact arrives in the same breath as the signpost, it is a signpost.
+
+**Why this beats "reject as written".** A blanket rejection applies a standard to DeSilva we have
+just rejected everywhere else (ban the words, not the defect), and it leaves the real defect
+uncovered — which, by this study's own rule, invites the next sweep to re-add the row unread.
+
+**Carried to Sprint 2:** `:167`'s comparative claim is a genuine R1 finding in released DeSilva
+text. It shows R1 adoption there has real bite rather than being a formality.
 
 **Standing caution for this manual.** `why-desilva-voice-works.md` carries an explicit
 *"DON'T Add These Modern 'Improvements'"* list — learning-objective boxes, formal assessment
@@ -174,8 +247,8 @@ manual has been "improved" before.
 | **IOSP** | ✗ none | ✗ explicit *"Never hedge"* rule §3.2 + §3.3 cell | ✗ 0 | ✗ | 🟠 **HIGH** |
 | **Debug Window** | ✗ none | ✗ same, inherited from IOSP | ✗ 0 | ✗ | 🟠 **HIGH** |
 | **XBYTE** *(origin)* | ✅ §2.2a | ✗ L47 · L219 checklist (unscoped, no word list) | ✅ 3 | ✅ §2.4 | 🟡 MEDIUM |
-| **Single-Step Debugger** | ✅ section | ✗ L43 register description | ✅ 3 | ✗ | 🟡 MEDIUM |
-| **PNut-Term-TS** | ✅ section | ✗ L63 register description | ✅ 3 | ✗ | 🟡 MEDIUM |
+| **Single-Step Debugger** | ✅ section | ✗ Tone bullet | ✅ 3 | **✅ present** *(corrected)* | 🟡 MEDIUM |
+| **PNut-Term-TS** | ✅ section | ✗ Tone bullet | ✅ 3 | **✅ present** *(corrected)* | 🟡 MEDIUM |
 | **Architect** | ✅ bullet (§2.6) | ✅ L75 row reconciled · L237 checklist scoped "on facts" | ✅ 3 | ✗ | 🟢 LOW |
 | **Getting Started** | ✅ bullet (§2.4) | ✅ L77 row reconciled · L180 checklist scoped | ✅ 3 | ✗ | 🟢 LOW |
 | **DeSilva** | ✗ | n/a | 2 adopt / 2 reject | **reject** | — see decision above |
@@ -203,10 +276,58 @@ Getting Started do both: the rule row carries *"keep **calibrated** qualifiers w
 **and** the checklist is scoped to *"No hedging **on facts**"* rather than listing banned words.
 **Use their pattern as the template for the E1 sweep.**
 
-#### E3 gap
+#### E3 / R4 gap — **corrected 2026-08-15**
 
-Present in Streamer, Assembly, XBYTE. **Absent in Architect, Getting Started, Single-Step,
-PNut-Term-TS, IOSP, Debug Window.** Rejected for DeSilva (reasons recorded above).
+Present in **five**: Streamer, Assembly, XBYTE, **Single-Step, PNut-Term-TS**. Commit `04f6e4e2`
+(2026-08-11, *"Voice guides: adopt the shared narrative discipline in SSDB and PNut-Term-TS"*) gave
+both the full three-guard section four days before this study ran; the table above originally
+recorded them as absent. **Absent in Architect, Getting Started, IOSP, Debug Window.** Rejected for
+DeSilva (reasons recorded above).
+
+*That is the fourth time a keyword pass misled in this study.* Both guides drop to a one-line fix.
+
+---
+
+## §0c. The full site inventory — 21 unreconciled sites across 8 guides
+
+Counted by reading every guide end to end, not by headline. This is the Sprint 1 work list for R1.
+
+| guide | sites | severity | where |
+|-------|-------|----------|-------|
+| **IOSP** | **5** | 🔴 | §2.1 bans **"typically sets"** by name · §3.2 rule row · §3.3 comparison cell · §6 checklist · §7 summary. No R1 anywhere. |
+| **Debug Window** | **5** | 🔴 | header note · §2.1 bans **"typically scrolls"** by name · §3.2 rule row · §3.3 cell · §7 checklist. Inherited from IOSP. |
+| **Assembly** | **3** | 🔴 | §7 checklist **word list incl. "typically"** · §1.1 · §2.1. (§4.2 row and §4.3 cell already reconciled — half-fixed.) |
+| **Streamer** | **2** | 🔴 | §7 checklist word list · §1.4 register description. |
+| **XBYTE** *(origin)* | **2** | 🟡 | §1.4 · §6 checklist. **Also the only guide that never cites the catalog.** |
+| **App-note guide** | **2** | 🟠 | **§3.2 labels "You might wonder whether…" as *Hedging*** — the exact conflation R1 exists to prevent · §1 register description. |
+| **Single-Step** | **1** | 🟡 | Tone bullet only. |
+| **PNut-Term-TS** | **1** | 🟡 | Tone bullet only. |
+| Architect · Getting Started | **0** | 🟢 | The template. |
+
+**Severity revision.** IOSP and Debug Window rise to 🔴 alongside the checklists. Their §2.1 lines do
+not merely ban a category — they ban **"typically"** *by name*, in the voice-characteristics section
+an author reads first. That is the same defect as a checklist word list, one section earlier.
+
+**The app-note guide is 🟠 for reach, not count.** It governs every `P2ANxxx` including **P2AN002, a
+Sprint 2 correction target**, and its single mislabelled row teaches the conflation directly.
+
+---
+
+## §0d. Collateral defects found while reading — not R1/R4, but surfaced
+
+Per the every-commit-raises-quality rule these are recorded rather than dropped. All are in files
+Sprint 1 opens anyway, except the last.
+
+| # | file | defect |
+|---|------|--------|
+| 1 | Assembly `voice-guide.md` §7 | Checklist says *"Operation describes step-by-step behavior"* — but **§6.3 explicitly supersedes** the step-by-step Operation idea and forbids it (*"❌ A procedural 1-2-3-4 step list"*). **Same failure shape as the hedging rows: the checklist was not swept when the rule changed.** |
+| 2 | Assembly `voice-guide.md` §6.6 | Example prose reads *"within the **COG**'s ALU"* — all-caps COG, which **§5.1 of the same file** calls out as never correct. |
+| 3 | IOSP `voice-guide.md` §3.3 | Comparison column headed *"Green Book Tutorial"* — a **codename**, against our official-titles rule. |
+| 4 | `desilva-style-guide.md` | **Self-contradictory on a colour:** the body specifies Medicine Cabinet as tan/beige (`#FFF8F0`/`#D2A679`); the v1.2.0 change log says it changed to cyan (`#E0F7FA`/`#00ACC1`). One is stale. **Presentation, not voice — out of Sprint 1 scope**, recorded here so it is not lost. |
+
+Defect 1 is the most significant: it is independent evidence that **checklist drift is the failure
+mode of this repo's guides**, not a one-off in the hedging rules. It is the strongest argument for
+structural rule 3 (*checklists point, never re-encode*).
 
 ---
 
@@ -255,6 +376,11 @@ Each decision above sets the standard P2 measures against:
 
 The survey above covers **per-manual `voice-guide.md` files only**. That is one layer of three, and
 the other two are unexamined.
+
+> **Updated 2026-08-15.** Two of the three unexamined artifacts below have now been **read**, and the
+> catalog turned out to answer the sizing question outright (§00). What remains genuinely unexamined
+> is the **creation-guide layer** — eleven files, the next study. Gap-list item 3 (DeSilva staged
+> reveal) is **resolved** in §0e.
 
 ### Newly found this pass — changes the shape of the work
 

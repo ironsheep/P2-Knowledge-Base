@@ -50,14 +50,62 @@ cannot run against a moving standard. And the guides today would actively misdir
 following IOSP's *"Never hedge"* rule would strip exactly the qualifiers §2.2a requires. Fixing the
 standard first is the only order that does not waste the measurement.
 
-**Settle at the START of Sprint 1**, because it sizes that sprint: is the model *"define once in
-`documentation-voices-catalog.md` and reference from each guide"* or *"copy into all eleven"*? The
-catalog was last touched **2026-07-20 — the same day as the XBYTE tweaks** — and already carries an
-E1-flavoured guard. We do not know whether that was intended as the canonical home.
-
 **Damage placement:** the *investigation* (did the word-blacklist checklists cause qualifier
 removals in released text?) sits in Sprint 1, because Sprint 1 artifacts caused it. Any *text
 repair* is Sprint 2 work.
+
+---
+
+### SETTLED 2026-08-15 — the voice-guide tree *(Stephen approved)*
+
+The sizing question this section previously left open — *"define once in the catalog"* vs *"copy
+into all eleven"* — **was a false binary, and the catalog had already answered it.** Commit
+`3d8a653c` (2026-07-20, *"voices-catalog: add per-voice failure modes + shared discipline"*) added a
+normative **"The Shared Discipline — applies to every voice"** section that states the rules and then
+says: *"The write-time counterparts live in each manual's voice-guide (template: the XBYTE guide's
+§2.2a … and §2.4)."* Six of ten guides already cite the catalog as canonical. **The model is
+canonical statement in the catalog, local adaptation in each guide** — one house edit plus ten
+adaptations, not eleven parallel authorings.
+
+**The tree:**
+
+| Layer | File(s) | Owns | Boundary rule |
+|-------|---------|------|---------------|
+| **House canon** | `engineering/standards/documentation-standards/documentation-voices-catalog.md` | the seven voices + failure modes; the Shared Discipline rules stated once, normatively | rules are **stated** here and nowhere else |
+| **Class** | `app-notes/APP-NOTE-VOICE-GUIDE.md` (the `P2ANxxx` series) | register blend for a document class | adapts house rules for the class; never restates them |
+| **Document** | each manual's `voice-guide.md` | reader, register(s), terminology, section-specific voice, **and the local adaptation of each house rule** | per rule: **ADOPT / ADAPT / REJECT, with a reason** |
+| *(adjacent)* | each manual's `creation-guide.md`, `style-guide.md` | what goes where; presentation | **may reference voice rules, never restate them** |
+
+**Three structural rules hold it together:**
+
+1. **Never restate a shared rule — adapt it.** A restatement goes stale; an adaptation with a reason
+   does not.
+2. **Record rejections.** An undocumented rejection reads as an oversight and gets "fixed" by the
+   next sweep — this is how DeSilva would lose its voice.
+3. **Quality checklists point at rules; they never re-encode them.** This single rule would have
+   prevented every contradiction catalogued in the study.
+
+**The house layer goes to FOUR named rules.** The catalog's Shared Discipline and Chip's three tweaks
+are not the same three things — the catalog has {calibrated confidence · payoff-sentence test ·
+cadence}, the origin has {calibrated confidence *(payoff folded in)* · anti-pattern rows · cadence}.
+**E2 is missing from the house layer**, existing only as prose inside the Claude Voice failure-mode
+paragraph, although seven of ten guides already carry the rows. Sprint 1 promotes it:
+
+| | rule | maps to |
+|---|------|---------|
+| **R1** | Calibrated confidence — never state a claim above its evidence | E1 |
+| **R2** | The payoff-sentence test — strip the flourish, read what remains as a bare claim | E1 (second half) |
+| **R3** | The anti-pattern family — tutorial filler · reader-as-foil · self-admiration · staged reveal | **E2 (promoted)** |
+| **R4** | Cadence budget — the metronome problem | E3 |
+
+Every guide then declares against **R1–R4**.
+
+**Sprint 1 scope, as settled:** one house edit (catalog → four rules, E2 promoted) · ten guide
+adaptations covering **21 unreconciled sites** · one new DeSilva `voice-guide.md` · the app-note
+guide's mislabelled row · a creation-guide pass under *reference, never restate* · the damage
+investigation. This **supersedes** the "Open for Stephen" question in §B below (propagate only where
+we are editing vs all ten): **all ten, plus the app-note guide** — the house edit makes the
+remainder cheap, and leaving four guides unreconciled re-creates the drift.
 
 ---
 
@@ -145,7 +193,17 @@ Only then is the correction map below tasked.
 
 Each manual carries its own: `voice-guide.md` for most, `desilva-style-guide.md` (plus
 `why-desilva-voice-works.md`) for DeSilva, `style-guide.md` alongside the voice guide for the
-Assembly manual and the Smart Pins Tutorial. **Our corrections are new prose in released documents
+Assembly manual and the Smart Pins Tutorial.
+
+> **Sprint 1 closes the DeSilva exception.** DeSilva is the one element where the conventional
+> `<element>/voice-guide.md` lookup returns nothing — which is precisely why it sat outside the
+> propagation, and why the next sweep would miss it too. Sprint 1 authors a **thin new
+> `voice-guide.md`** there: reader/register identity, the R1–R4 declaration table with per-row
+> reasons, and pointers out to `why-desilva-voice-works.md` (rationale, including its standing
+> *"DON'T Add These Modern 'Improvements'"* guard) and `desilva-style-guide.md` (presentation). The
+> style guide keeps its formatting remit — it calls itself the source of truth for *formatting*
+> decisions, so that boundary is already clean — and gains one back-pointer under *reference, never
+> restate*. **Our corrections are new prose in released documents
 and must read as though the original author wrote them.** This matters most for the Streamer
 Guide's §17.1, which is not a token fix but real new teaching content.
 
@@ -161,7 +219,9 @@ and **§2.4 cadence budget** (the "metronome" problem — at most ~half of secti
 beats, never more than ~4 in a row, chapter closers worst). Those have been propagating outward,
 unevenly.
 
-**State of the sweep** — keyword-level survey only; each target still needs a real read:
+**State of the sweep** — **superseded 2026-08-15** by the read-based survey in
+`VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md`. The table below was a keyword survey and was wrong in
+two places; the study's table is authoritative. Kept for the record of what the keyword pass claimed:
 
 | manual | calibrated confidence | cadence budget | anti-patterns | state |
 |--------|----------------------|----------------|---------------|-------|
@@ -170,11 +230,16 @@ unevenly.
 | Assembly | ✅ | ✅ | ✅ | full |
 | Architect | ✅ | — | ✅ | partial |
 | Getting Started | ✅ | — | ✅ | partial |
-| Single-Step Debugger | ✅ | — | ✅ | partial |
-| PNut-Term-TS | ✅ | — | ✅ | partial |
+| Single-Step Debugger | ✅ | — *(WRONG — present, added `04f6e4e2` 2026-08-11)* | ✅ | partial |
+| PNut-Term-TS | ✅ | — *(WRONG — present, added `04f6e4e2` 2026-08-11)* | ✅ | partial |
 | **I/O & Smart Pins** | — | — | — | **none** (guide untouched since 2026-01-25) |
 | **Debug Window** | — | — | — | **none** (untouched since 2026-06-01) |
 | **DeSilva** | — | — | — | none, and deliberately so |
+
+**The corrections both shrink the sprint.** Cadence (R4) is present in **five** guides, not three;
+Single-Step and PNut-Term-TS each drop to a one-line fix. The keyword pass also undercounted the
+anti-pattern rows in Architect and Getting Started (they write "reader-as-foil" where XBYTE writes
+"besserwisser"). **Grep misled four times across this study — read, do not grep.**
 
 **The collision.** I/O & Smart Pins (target #2) and Debug Window (target #5) are both correction
 targets *and* have entirely un-propagated voice guides. Editing them first would write new prose to
@@ -192,19 +257,27 @@ The elements are not equally portable. Proposed discriminator, to be confirmed p
   chatty tutorial exactly as it applies to a reference, and this sprint is the case in point: the
   bench leg exists because claims outran evidence.
 - **Register elements are voice-dependent.** Cadence budget, reader-as-foil, staged reveal,
-  self-admiration. In DeSilva several of these are arguably *the voice itself* — direct address and
-  staged reveal are what make it work, which is why `why-desilva-voice-works.md` exists as its own
-  rationale. Propagating them there would flatten the thing that makes the manual valuable.
+  self-admiration. In DeSilva several of these might be *the voice itself*, which is why
+  `why-desilva-voice-works.md` exists as its own rationale — propagating them blindly would flatten
+  the thing that makes the manual valuable.
+
+  **DECIDED per-row 2026-08-15 (see the study).** The evidence overturned the working hypothesis:
+  reader-as-foil and self-admiration **reinforce** rules DeSilva already has, tutorial filler is
+  **rejected** (the origin's own §2.3 permits it here), and **staged reveal is adopted as a defect
+  but not as a phrase ban** — a read of all reveal-vocabulary hits in the 6,176-line master found
+  **zero instances of the actual defect** (withholding across a boundary) and three signposts where
+  the fact lands in the same sentence. Banning the phrases would flag three false positives and
+  catch nothing. **R4 (cadence) is rejected for DeSilva**, reasons recorded in the study.
 
 **Per-target deliverable.** For each gaining voice guide, a short written decision: which elements
 are adopted, which are adapted (and how), which are rejected (and why). The rejections matter most
 — an undocumented rejection reads as an oversight and gets "fixed" by the next sweep.
 
-**Open for Stephen:** whether the propagation sweep is *inside* this sprint for the manuals we are
-touching (IOSP, Debug Window, Streamer, Assembly, DeSilva, XBYTE) and deferred for the rest, or
-run to completion across all ten as its own pass. My recommendation is the former — propagate where
-we are already editing, so the voice standard and the text land together in one release, and leave
-Architect / Getting Started / Single-Step / PNut-Term-TS to a later dedicated pass.
+**RESOLVED 2026-08-15 — all ten, plus the app-note guide.** This question ("propagate only where we
+are editing, or run to completion?") assumed eleven parallel authorings. Once the catalog is the
+canonical statement, the remaining guides are cheap adaptations, and leaving four unreconciled
+re-creates exactly the drift we are fixing. See **SETTLED — the voice-guide tree** above; the whole
+sweep is Sprint 1, and Sprint 2 edits no guides.
 
 ### Correction map — which documents, and in what order
 
