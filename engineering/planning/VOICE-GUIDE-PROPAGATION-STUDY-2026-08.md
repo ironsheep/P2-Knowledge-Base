@@ -43,6 +43,44 @@ outran evidence. A rule that forbids qualification *causes* that failure.
 
 ---
 
+## §0b. The propagation is incomplete EVERYWHERE — including in the origin
+
+Reading the four guides that already carry §2.2a shows the element was added as a **section** while
+the rest of each guide was never swept. **Every one of them still contains an unreconciled
+"no hedging" statement, and three of them have it in their QUALITY CHECKLIST:**
+
+| guide | §2.2a present | residual unreconciled statements |
+|-------|---------------|----------------------------------|
+| **XBYTE** *(origin)* | ✅ | L47 "no hedging"; **L219 checklist** — "Reference layer: third person, no hedging, no tutorial voice" |
+| **Streamer** | ✅ | L61 "no hedging"; **L317 checklist** — "No hedging language ('may,' 'might,' 'probably')" |
+| **Assembly** | ✅ (§4.2a) | L16, L57; **L431 checklist** — "No hedging language ('may,' 'might,' 'probably,' 'typically')" |
+| IOSP | ✗ | §3.2 rule + §3.3 cell |
+| Debug Window | ✗ | §3.2 rule + §3.3 cell |
+
+**The checklist instances are the dangerous ones.** A quality checklist is what an auditor runs
+mechanically. One that says *"No hedging language ('may', 'might', 'probably', 'typically')"*
+instructs an auditor to strip exactly the calibrated qualifiers §2.2a requires — so the guide
+contains its own counter-order, and the mechanical half wins.
+
+**The correct pattern already exists**, in the Assembly guide's §4.2 table:
+
+> | Never write **vague** hedging | "The C flag may be set" ❌ | Creates ambiguity about what the
+> silicon does. **NOT the same as a calibrated qualifier — see §4.2a** |
+
+Scoped to *vague* hedging, with a cross-reference. Follow it.
+
+**Consequence for the work.** The E1 task is **not** "add §2.2a". It is:
+
+1. add (or reconcile) §2.2a, **and**
+2. sweep **every** hedging statement in that guide — philosophy bullets, register descriptions,
+   voice-comparison cells, and above all the quality checklist — scoping each to *vague* hedging
+   with a cross-reference to §2.2a.
+
+**This adds a target the sprint was not counting: the XBYTE guide itself.** It is where the element
+was authored and it has the same residual conflict.
+
+---
+
 ## The three source elements
 
 From `acf3b4a2`, *"XBYTE voice-guide: three tweaks from Chip's voice critique"*:
@@ -131,8 +169,9 @@ manual has been "improved" before.
 
 | guide | current state | note |
 |-------|---------------|------|
-| Streamer | E1 ✅ E2 ✅ E3 ✅ | verify by reading; it is a correction target |
-| Assembly | E1 ✅ E2 ✅ E3 ✅ | verify; more anti-pattern hits than XBYTE — local additions or reworded duplicates? |
+| **XBYTE** *(origin)* | E1 ✅ E2 ✅ E3 ✅ | **NOT complete** — residual "no hedging" at L47 and in the L219 checklist (§0b). Needs the E1 sweep. |
+| **Streamer** | E1 ✅ E2 ✅ E3 ✅ | **NOT complete** — residual at L61 and the L317 checklist (§0b). Correction target, so fix in the same pass. |
+| **Assembly** | E1 ✅ (§4.2a) E2 ✅ E3 ✅ (§4.4) | **NOT complete** — L16, L57 and the L431 checklist (§0b). But its §4.2 table is the **model reconciliation**; copy that pattern outward. |
 | Architect | E1 ✅ E2 ✅ **E3 ✗** | finish |
 | Getting Started | E1 ✅ E2 ✅ **E3 ✗** | finish |
 | Single-Step Debugger | E1 ✅ E2 ✅ **E3 ✗** | finish |
@@ -155,3 +194,8 @@ Each decision above sets the standard P2 measures against:
 3. **DeSilva** — **no cadence measurement**; E3 is rejected. Measure E1 (technical claims above their evidence) and the two adopted E2 rows only.
 4. All targets — the E1 reconciliation is a guide edit, not a text edit; it changes what P2 counts
    as a defect (a qualifier is no longer one).
+5. **Re-check any manual already audited against a checklist carrying the unscoped no-hedging
+   line.** If an audit or finalize pass has already run against XBYTE, Streamer or Assembly using
+   those checklists, calibrated qualifiers may have been stripped from shipped text as "defects".
+   P2 should look for that specifically — it would be a defect we introduced, in the opposite
+   direction from the one we are fixing.
