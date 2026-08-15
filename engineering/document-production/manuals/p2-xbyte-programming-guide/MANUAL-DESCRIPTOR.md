@@ -8,14 +8,14 @@ guide_paths:
   voice_guide: ./voice-guide.md
   style_guide: ./voice-guide.md                   # no separate style-guide; voice-guide §4 carries terminology/format standards
   planning: ./PLANNING.md                         # seed/design doc — scope decisions of record
-authoritative_sources: see ./creation-guide.md §4 # Silicon Doc v35 XBYTE section (PRIMARY hardware truth) + KB YAML deliverables/ai/P2/architecture/xbyte_engine.yaml + language/pasm2/{skip,skipf,execf,setq,setq2,rdfast,rfbyte,rfvar,rfvars,getptr}.yaml ; grounding digest in ./audit/xbyte-source-grounding-digest-2026-06-26.md
+authoritative_sources: see ./creation-guide.md §4 # P2 Documentation v35 XBYTE section (PRIMARY hardware truth) + KB YAML deliverables/ai/P2/architecture/xbyte_engine.yaml + language/pasm2/{skip,skipf,execf,setq,setq2,rdfast,rfbyte,rfvar,rfvars,getptr}.yaml ; grounding digest in ./audit/xbyte-source-grounding-digest-2026-06-26.md
 high_risk_tables:                                 # transposition-prone — weight heavily on audit  (chapter #s = v0.3.0 reshape)
   - "Ch.9 Table-Size & Compression Modes — the 256/128/64/32/16 (+alt) bit-pattern table; index-calc columns"
   - "Ch.4 (EXECF) / Ch.6 (LUT Dispatch) LUT entry format ([9:0] address vs [31:10] SKIPF pattern) — do not transpose the field split"
   - "Appendix B Instruction Encoding Summary (SKIP/SKIPF/EXECF/SETQ/SETQ2/RDFAST/RFxxxx/GETPTR)"
   - "Ch.7 the 8-clock dispatch-cycle table (clock→activity rows)"
 high_risk_quant:                                  # hot spots
-  - "6-clock overhead vs 9-clock software dispatch vs 8-clock minimum loop (Silicon Doc verbatim — cite, never round/restate)"
+  - "6-clock overhead vs 9-clock software dispatch vs 8-clock minimum loop (P2 Documentation v35 verbatim — cite, never round/restate)"
   - "Mode-operand bit layout %A…F (table base / %BBBB compression threshold / F bit)"
   - "PA = $1F6, PB = $1F7 ; LUT routine range $200–$3FF, COG range $000–$1FF ; hardware stack 8 levels"
 fragile_areas:                                    # known-thin / discipline-sensitive
@@ -31,7 +31,7 @@ Thin per-manual overlay read by document-audit (and prepare-/release-/finalize-m
 Everything not listed above is inherited from the central skill body + the guides above.
 
 - **Grounding model:** `reference` — verify every XBYTE / skip-family / FIFO claim against
-  the **Silicon Doc v35** XBYTE section (`engineering/ingestion/sources/silicon-doc/`,
+  the **P2 Documentation v35** XBYTE section (`engineering/ingestion/sources/silicon-doc/`,
   PRIMARY hardware truth) and the KB YAML under `deliverables/ai/P2/architecture/xbyte_engine.yaml`
   + `language/pasm2/` (skip/skipf/execf/setq/setq2/rdfast/rfbyte/rfvar/rfvars/getptr). Read YAML
   from disk, not p2kb-mcp (currency). The compiled grounding digest is in `./audit/`.

@@ -8,11 +8,11 @@ guide_paths:
   voice_guide: ./voice-guide.md
   style_guide: ./voice-guide.md           # no separate style-guide; voice-guide carries style rules
 authoritative_sources: see ./creation-guide.md §"Verification Requirements"
-  # Primary: Silicon Doc (engineering/ingestion/sources/silicon/), hardware-verification ledger
-  #          (engineering/ingestion/external-sources/hardware-verification/ — 🏆), P2 instruction
-  #          spreadsheet, pnut_ts. Derived: KB YAML deliverables/ai/P2/ (architecture/smart-pins/,
+  # Primary: P2 Documentation v35 (engineering/ingestion/sources/silicon-doc/), hardware-verification
+  #          ledger (engineering/ingestion/external-sources/hardware-verification/ — 🏆), P2 instruction
+  #          spreadsheet, pnut-ts. Derived: KB YAML deliverables/ai/P2/ (architecture/smart-pins/,
   #          language/pasm2/, language/spin2/). Cross-check-only (community/derived, NOT primary):
-  #          John Titus smart-pin extracts.
+  #          Jon Titus smart-pin extracts.
 high_risk_tables:                         # transposition-prone — Dimension #7
   - "Per-mode Register Usage tables (X[..]/Y[..]/Z/IN rows) — every chapter 6-19"
   - "Appendix F Complete Mode Reference (Register Usage + Key Constants per %mode)"

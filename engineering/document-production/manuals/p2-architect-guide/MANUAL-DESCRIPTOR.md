@@ -29,7 +29,7 @@ skill body + the guides above.
 **doc_class note.** This is a **narrative design/method book**, not an instruction reference — but it
 is classed `reference` *for grounding rigor* (the same choice as the sibling *Getting Started*):
 every architectural/language fact it states must trace to the KB YAML
-(`deliverables/ai/P2/architecture/`, `language/`) or the Silicon Doc, and it gets **no**
+(`deliverables/ai/P2/architecture/`, `language/`) or P2 Documentation v35, and it gets **no**
 tutorial-voice hallucination pass. Most of the book, however, is *method and reasoning* (the
 functional-decomposition procedure, the two worked derivations, the agent-amplification argument) —
 that content is not KB-derived fact, so the audit's centre of gravity is **voice/stance conformance

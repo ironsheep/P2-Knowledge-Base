@@ -25,9 +25,9 @@ fragile_areas:
   - "USB traffic log direction differs by mode BY DESIGN: headed = bi-directional; headless = receive-only (no transmit path exists after download). An empty USB log is meaningful (P2 produced no runtime traffic — usually a failed download)."
   - "Reset control line — DTR (Parallax PropPlugs / most FTDI) vs RTS (some clones); stored per device; --rts overrides for a session. Not set in the Logging/Serial tabs — it's in PropPlug Management."
   - "Operating modes are five and distinct (interactive GUI / command-line download / headed batch --exit-on-end-session / IDE --ide / headless --headless); --timeout and --end-marker are headless/batch-gated. Don't conflate them."
-  - "Names — application is PNut-Term-TS (invocation pnut-term-ts); compiler is pnut_ts; there is no 'PNut IDE' / pnut.exe. Debug display windows open automatically from debug() directives, never from a menu."
+  - "Names — application is PNut-Term-TS (invocation pnut-term-ts); compiler is pnut-ts (hyphenated — the underscore forms pnut_ts / pnut_term_ts are wrong and no such executable is installed); there is no 'PNut IDE' / pnut.exe. Debug display windows open automatically from debug() directives, never from a menu."
   - "Scope boundary — do NOT reproduce the debug() directive syntax (Parallax P2 DEBUG spec / Debug Window Manual) or teach the single-step debugger (its own manual). This tool DISPLAYS/PRODUCES what those manuals DESCRIBE. Cross-reference only."
-  - "Positioning claims — the agentic tool suite (P2KB MCP + pnut_ts + pnut_term_ts, optional Spin2 VS Code extension) and the bidirectional link to The P2 Architect's Guide Part 3 are load-bearing framing; verify the suite membership + the Part-3 relationship stay accurate as those docs evolve."
+  - "Positioning claims — the agentic tool suite (P2KB MCP + pnut-ts + pnut-term-ts, optional Spin2 VS Code extension) and the bidirectional link to The P2 Architect's Guide Part 3 are load-bearing framing; verify the suite membership + the Part-3 relationship stay accurate as those docs evolve."
 ---
 
 # PNut-Term-TS User Guide — Descriptor

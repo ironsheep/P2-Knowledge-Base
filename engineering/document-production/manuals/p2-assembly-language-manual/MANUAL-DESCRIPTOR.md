@@ -13,7 +13,7 @@ source_highlights:
   - deliverables/ai/P2/language/spin2/             # inline-PASM / Spin2 interop
   - engineering/ingestion/sources/silicon-doc/     # silicon truth
   - "Parallax P2 Instructions v35 - Rev B_C Silicon CSV"   # encoding + Operation-line source (col 5)
-  - pnut_ts                                        # compiler validation (use -d for DEBUG-window code)
+  - pnut-ts                                        # compiler validation (use -d for DEBUG-window code)
 high_risk_tables:
   - "Per-instruction encoding tables (COND / INSTR / FX / DEST / SRC / Write / C / Z / Clocks) — Part II + Appendix A"
   - "Appendix C categorical index (instruction → category groupings)"

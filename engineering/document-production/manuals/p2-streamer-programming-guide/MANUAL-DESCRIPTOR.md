@@ -7,7 +7,7 @@ guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
   style_guide: ./voice-guide.md                   # no separate style-guide; voice-guide §4 carries terminology/format standards
-authoritative_sources: see ./creation-guide.md §4 # Silicon Doc v35 (PRIMARY hardware truth) + Spin2 symbol reference + KB YAML under deliverables/ai/P2/{architecture/streamer,language/spin2/symbols,language/pasm2}
+authoritative_sources: see ./creation-guide.md §4 # P2 Documentation v35 (PRIMARY hardware truth) + Spin2 symbol reference + KB YAML under deliverables/ai/P2/{architecture/streamer,language/spin2/symbols,language/pasm2}
 high_risk_tables:                                 # transposition-prone (Dimension #7) — F-154/F-155 history lives exactly here
   - "§4.2 Mode Field D[31:28] table (streamer-body.md) — mode→source→dest rows"
   - "§4.3 DAC Routing Field D[27:24] + §4.5 Pin Group Field D[22:20]"
@@ -34,7 +34,7 @@ Everything not listed above is inherited from the central skill body + the guide
 - **Grounding model:** `reference` — verify claims against KB YAML under
   `deliverables/ai/P2/architecture/streamer/`, `language/spin2/symbols/streamer-symbols.yaml`,
   the relevant `language/pasm2/` streamer instructions (RDFAST/WRFAST/RFxxxx/WFxxxx/XINIT/
-  XCONT/XZERO/SETXFRQ), and the **Silicon Doc v35** (PRIMARY hardware truth,
+  XCONT/XZERO/SETXFRQ), and **P2 Documentation v35** (PRIMARY hardware truth,
   `engineering/ingestion/sources/silicon-doc/`). Read YAML from disk, not p2kb-mcp (currency).
 - **Structure (Dimension #10):** 18 chapters in 5 parts + Appendices A–D + clickable Index,
   per creation-guide §2.1. Front matter = house standard.

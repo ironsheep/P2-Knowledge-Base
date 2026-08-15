@@ -1,10 +1,35 @@
 # Voice-Guide Propagation Study — 2026-08
 
 **Planning artifact (P1)** for `MANUAL-CORRECTIONS-AND-RETIRED-DOC-CLEANUP-SPRINT-PLAN.md`.
-**Status:** **DECIDED 2026-08-15 — Stephen approved the tree, the four-rule house layer, the DeSilva
-per-row decisions, and the creation-guide rule.** Survey complete for all ten guides plus the
-catalog and the app-note guide (read, not grepped). **No guide has been edited; this is research
-plus decisions.**
+**Status:** **APPLIED 2026-08-15 — Sprint 1 executed every decision in this study.** Stephen approved
+the tree, the four-rule house layer, the DeSilva per-row decisions, and the creation-guide rule;
+tasks «#205»–«#215» then carried them into the files. Survey covered all ten guides plus the catalog
+and the app-note guide (read, not grepped).
+
+> **The sentence above used to end "No guide has been edited; this is research plus decisions."**
+> That is no longer true, and the study is kept as the *record of how the decisions were reached*.
+> **What the guide layer now says is the guide layer's business, not this document's** — read the
+> files, or run the instrument. This study is history plus one open question (§"Carried forward").
+
+> **§00a — WHERE EACH DECISION LANDED.** Every decision recorded below is APPLIED. The instrument
+> is the authority on the current state, not this table:
+>
+> | decision | section | applied by |
+> |---|---|---|
+> | Three-layer tree; catalog is the sole home of the house rules | §00 | «#205» `add7da6c` |
+> | Four named house rules R1–R4, with **R3 promoted** out of the Claude-Voice prose | §00 | «#205» `add7da6c` |
+> | Mechanical inventory replaces every hand count | §0c | «#206» `2fb2be3d` |
+> | D2 — the compiler is `pnut-ts` | §0c, §1.2 | «#207» `e33d9cc8` |
+> | D3/D4/D5 — dead authority paths · codenames · retired-doc pointers | §0c, §0d, §1.5 | «#208» `79695df7` |
+> | DeSilva per-row ADOPT/ADAPT/REJECT + the staged-reveal call | §0e, "DeSilva PASM2 Tutorial" | «#209» `a62a5a40` |
+> | Creation guides reference, never restate | §1.3, §1.4 | «#210» `bf3e14cd`, «#211» `77d5c33c` |
+> | R1 word blacklists deleted; the defect named instead | §0c R1 work list, §1.2 | «#212» `4e6da1c6`, «#213» `3a78a36a` |
+> | Damage assessment — did the blacklists strip shipped text? | §"Damage assessment" | «#214» `ac7124b9` — **NIL** |
+> | Blast radius — this table, the descriptors, the structural proof | §00a | «#215» |
+>
+> **Sprint 1 edited no reader-facing manual text.** `git diff --stat add7da6c^..HEAD -- '*opus-master*'`
+> returns empty across the whole sprint — the structural proof «#215» exists to produce. All seven
+> version bumps the corrections effort needs belong to **Sprint 2**, across its nine targets.
 
 > **§00 — THE SETTLED MODEL (read this before the sections below, which record how we got here).**
 >
@@ -318,6 +343,23 @@ DeSilva (reasons recorded above).
 **Per-file matrix:** the instrument prints it on demand (`--inventory`); it is deliberately not
 copied here, because a pasted table is exactly the artifact that drifts behind the files and then
 reads green because it simply did not run.
+
+> **CLOSED 2026-08-15 — the table above is the sweep's ENTRY state, kept as the measurement that
+> sized the work.** Its exit state is **PASS: 0 findings across 28 files, D1–D6 all zero**, with 24
+> exemptions and 4 roster-Abandoned exclusions (`p2-smart-pins-tutorial`) printed by name.
+> Trajectory **176 → 113 → 45 → 43 → 0** across «#207»–«#213».
+>
+> **No detection was ever weakened to reach zero.** Three were *strengthened* mid-sweep and **D6
+> (`cog`-casing) was added outright** — so the exit number is measured against a strictly harder
+> instrument than the entry number. The file count moved 27 → 28 for the same reason: the sweep
+> found guides the first glob missed.
+>
+> Two coverage gaps are **known and deliberately left open** for Sprint 2 to decide, because closing
+> them re-opens the atomic green unit «#213» closed: the instrument does not scan
+> **`MANUAL-DESCRIPTOR.md` files** or the other **17 files in
+> `engineering/standards/documentation-standards/`**. That gap is not theoretical — «#215» found
+> D2, D3 and D4 defects in the descriptors *by hand*, including a `sources/silicon/` citation for a
+> directory that does not exist. See the sprint plan's carry-forward.
 
 **Two false-positive classes were found and fixed while verifying the instrument**, both of which
 would have made it cry wolf on correct work — a gate that cries wolf gets ignored:

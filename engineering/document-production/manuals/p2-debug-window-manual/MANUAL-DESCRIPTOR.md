@@ -14,7 +14,7 @@ source_highlights:
   - ./REF/DEBUG-Statement-Quoting-Briefing-for-Doc-Agents.md   # DEBUG-statement quoting rules (single-quote text; backtick-command contents)
   - engineering/ingestion/sources/spin2-v55/       # Spin2 v55 DEBUG-display reference (command syntax / keyword gating)
   - engineering/ingestion/external-sources/hardware-verification/campaigns/2026-06-debug-windows-and-smart-pins/   # empirical 🏆 top-of-trust-chain captures
-  - pnut_ts                                         # compile-cert of ALL examples — use `pnut-ts -d` (without -d the compiler ignores debug() contents = false pass)
+  - pnut-ts                                         # compile-cert of ALL examples — use `pnut-ts -d` (without -d the compiler ignores debug() contents = false pass)
 high_risk_tables:
   - "Appendix A command reference — the master directive table (many rows × name / syntax / range / default); transposition-prone, verify each row vs REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md"
   - "Per-window directive / parameter tables (each window chapter) — parameter / range / default columns vs that window's REF/theory-of-operations/<WINDOW>_Theory_of_Operations.md"
@@ -24,7 +24,7 @@ fragile_areas:
   - "DEBUG window 3-phase lifecycle (create → one-time config → looping update). SCOPE/FFT config is its OWN message after the create line; LOGIC/SCOPE_XY config rides the create message — easy to state wrong."
   - "Session-end mechanisms — three distinct forms, often conflated: per-window `` `CLOSE ``; on-chip DEBUG(DEBUG_END_SESSION) ({Spin2_v52}); host --end-marker string."
   - "DEBUG statement quoting — single-quoted display text only; backtick-command contents must compile with `pnut-ts -d` (a no-`d` compile is a false pass; inner-backtick commands slip through)."
-  - "DEBUG/window directives are PASM/DEBUG, not Spin2 methods (e.g. DIRH/DIRL) — a pnut_ts blind spot; verify against the directive matrix, not by compile alone."
+  - "DEBUG/window directives are PASM/DEBUG, not Spin2 methods (e.g. DIRH/DIRL) — a pnut-ts blind spot; verify against the directive matrix, not by compile alone."
   - "Window names + counts — nine DEBUG display windows (TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI); assertion of '9 windows' and the window roster is high-bug-density (Dimension #5)."
 ---
 

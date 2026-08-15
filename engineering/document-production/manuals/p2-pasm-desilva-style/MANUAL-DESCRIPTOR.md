@@ -5,7 +5,7 @@ code_line_budget_K: 76                            # platform-inherited (creation
 last_published_tag: p2-pasm-desilva-style-v3.0.1  # baseline for Dimension #15 (PDF dated 2026-06-25, 162pp)
 guide_paths:
   creation_guide: ./creation-guide.md
-  voice_guide: ./desilva-style-guide.md           # no separate voice-guide; voice rationale in ./why-desilva-voice-works.md
+  voice_guide: ./voice-guide.md                   # thin per-document guide: ADOPT/ADAPT/REJECT against house rules R1-R4 (added 2026-08-15); voice rationale in ./why-desilva-voice-works.md
   style_guide: ./desilva-style-guide.md
 authoritative_sources: see ./creation-guide.md    # canonical source list + Content Verification Protocol live there
 source_highlights:
@@ -13,7 +13,7 @@ source_highlights:
   - deliverables/ai/P2/language/spin2/             # Spin2 interop used in examples
   - engineering/ingestion/sources/silicon-doc/     # silicon truth (architecture / COG memory / egg-beater)
   - engineering/ingestion/external-sources/hardware-verification/   # empirical ledger (smart-pin ordering, etc.)
-  - pnut_ts                                        # compiler validation (use -d for any DEBUG-window code)
+  - pnut-ts                                        # compiler validation (use -d for any DEBUG-window code)
 high_risk_tables:
   - "SKIP / SKIPF bit-order table (LSB-first) — historically inverted, fixed in the v3.0.0 re-audit"
   - "Smart-pin mode / recipe table (Ch 14) — DIRH-before-WYPIN ordering (v3.0.1 fix)"
@@ -34,7 +34,7 @@ from the central `document-audit` skill body + the guides referenced above.
 
 **Doc-class note:** `tutorial` (deSilva-style). Factual dimensions (A, B, #1, #5, C) still verify
 against the reference KB read from disk under `deliverables/ai/P2/language/` (not `p2kb-mcp`, which
-serves the lagging published index) and the Silicon Doc for architecture claims. **Dimension #9
+serves the lagging published index) and P2 Documentation v35 for architecture claims. **Dimension #9
 permits tutorial voice** — the deSilva voice (encouragement, "Your Turn", Medicine Cabinet,
 celebration moments) is intentional per `./desilva-style-guide.md` and is NOT a finding.
 

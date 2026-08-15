@@ -280,9 +280,12 @@ and **§2.4 cadence budget** (the "metronome" problem — at most ~half of secti
 beats, never more than ~4 in a row, chapter closers worst). Those have been propagating outward,
 unevenly.
 
-**State of the sweep** — **superseded 2026-08-15** by the read-based survey in
-`VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md`. The table below was a keyword survey and was wrong in
-two places; the study's table is authoritative. Kept for the record of what the keyword pass claimed:
+**State of the sweep** — **superseded TWICE, and now CLOSED.** First by the read-based survey in
+`VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md`, then by the mechanical inventory «#206» built — and as
+of **2026-08-15 the sweep is finished**: the instrument reports **PASS, 0 findings across 28 files**
+(`python3 engineering/tools/validation/audit-guide-conformance.py --inventory`). Every row below now
+reads ✅ ✅ ✅. **Do not read the table for current state — run the instrument.** It is kept only as
+the record of what the original keyword pass claimed, and of how badly a keyword pass can miss:
 
 | manual | calibrated confidence | cadence budget | anti-patterns | state |
 |--------|----------------------|----------------|---------------|-------|
@@ -828,3 +831,46 @@ are written into the task text so an executing agent does not "fix" its own corr
 `validate-crossref-keys` · `validate-dod-release`), the instrument reports clean across the guide
 layer, and `git diff --stat` shows **zero opus-master edits** — the structural proof Sprint 1 stayed
 inside the guide layer.
+
+### Sprint 1 — OUTCOME (2026-08-15, all 11 tasks complete)
+
+| Task | Landed as | Result |
+|---|---|---|
+| `«#205»` | `add7da6c` | Catalog states R1–R4 as their sole home; R3 promoted to a 4-row family |
+| `«#206»` | `2fb2be3d` | `audit-guide-conformance.py` — the guide layer's first automated gate; `DOC_AUDIT_COMMAND` set |
+| `«#207»` | `e33d9cc8` | 66 `pnut_ts` → `pnut-ts` across 15 files |
+| `«#208»` | `79695df7` | Dead authority paths · retired-doc pointers · 62 codenames |
+| `«#209»` | `a62a5a40` | DeSilva gains a thin `voice-guide.md`; the Sprint-2 edit-vs-regenerate gate; the `::: your-turn` fence |
+| `«#210»` | `bf3e14cd` | IOSP + Debug Window — 11 sites *reconciled* (not appended to), each gaining §3.4 + a shown R1 example |
+| `«#211»` | `77d5c33c` | Debug Window creation guide stops teaching the voice it forbids |
+| `«#212»` | `4e6da1c6` | Assembly + Streamer word blacklists deleted; cog-casing fix → **D6 added** |
+| `«#213»` | `3a78a36a` | The tail; **green unit closes — guide layer reports PASS** |
+| `«#214»` | `ac7124b9` | Damage investigation — **NIL**, count 0, severity none |
+| `«#215»` | *this task* | Blast radius; descriptors repaired; structural proof produced |
+
+**Exit condition MET.** `validate-crossref-keys` all-resolved (Sprint 1 touched no YAML); instrument
+**PASS 0/28, D1–D6 all zero**; `git diff --stat add7da6c^..HEAD -- '*opus-master*'` **empty**.
+Detection trajectory **176 → 113 → 45 → 43 → 0**, against an instrument that got *harder* mid-sweep
+(three detections strengthened, D6 added, file set 27 → 28). **No versioned artifact shipped** —
+no CHANGELOG entry, no version bump, per Stephen's decision at sprint start.
+
+### Carried into Sprint 2 (from «#214» and «#215»)
+
+1. **Suppression at write time — the open question «#214» surfaced.** The damage hypothesis tested
+   removal, which diffs can see; the likelier exposure is qualifiers *never written*. Density per 1k
+   body lines: blacklist manuals **1.31** (Streamer 0.56 · IOSP 0.82 · Assembly 2.55) vs **5.23**
+   without. **Correlation only — confounded by genre, length and era; not a finding.** Test at
+   content level. **IOSP is the priority probe.**
+2. **Instrument coverage gap.** `MANUAL-DESCRIPTOR.md` files and 17 of the 18 files in
+   `engineering/standards/documentation-standards/` are outside the glob. «#215» found D2, D3 and
+   D4 defects in the descriptors **by hand** — including `sources/silicon/`, a directory that does
+   not exist, cited as PRIMARY authority. Widening the glob re-opens the closed green unit, so it is
+   a deliberate Sprint-2 call.
+3. **Four orphaned extraction-era style guides** in the standards tree — `desilva-style-guide.md`,
+   `pasm2-manual-style-guide.md`, `smartpins-style-guide.md`, `pasm2-spreadsheet-style-guide.md`.
+   Untouched since 2025-09-01, referenced by nothing live, superseded by the per-manual copies, each
+   carrying a "vs Silicon Doc" section. Archive candidates — **Stephen's call**, not swept.
+4. **299 files repo-wide still carry `pnut_ts`/`pnut_term_ts`** (opus-masters, CHANGELOGs, READMEs,
+   workflow docs) — out of Sprint 1's charter by design. The D4/D6 classes almost certainly extend
+   into manual text the same way D2 does.
+5. **DeSilva master line 167** — study §0e flags it as a live R1 finding in released text.
