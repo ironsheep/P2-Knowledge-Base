@@ -71,15 +71,17 @@ This manual replaces and enhances the partial Parallax draft:
 - **Location:** `deliverables/ai/P2/language/pasm2/` — the shipped P2 Knowledge Base.
   Note that `engineering/knowledge-base/` is documented as a **transient** tree and
   would not be the authority even where it exists.
-- **Count** (verified against the tree 2026-08-15): **381 YAML files at the top level**
-  - 361 instructions
-  - 13 assembly directives (ORG, ORGF, ORGH, BYTE, WORD, LONG, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES)
+- **Count** (enumerated against the tree 2026-08-15): **381 YAML files at the top level**
+  - **359 instructions** — matching the instruction count in §1.1 above
+  - 14 assembly directives (ORG, ORGF, ORGH, BYTE, WORD, LONG, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES, HUBEXEC)
   - 6 constants (TRUE, FALSE, PI, NEGX, POSX, COGEXEC)
   - 1 special-registers reference file
+  - 1 concept file (`conditional-debug`)
   - plus the subdirectories `concepts/ conventions/ groups/ idioms/ patterns/ registers/`,
     bringing the tree to 421 YAML files
-- **Two directives are documented elsewhere** — look there rather than concluding they
-  are undocumented: `FILE` → `deliverables/ai/P2/language/spin2/assembly-directives/file.yaml`,
+- **Two directives named in §1.1 have no file here** — look where they *are* documented
+  rather than concluding they are undocumented (Sacred Rule #7):
+  `FILE` → `deliverables/ai/P2/language/spin2/assembly-directives/file.yaml`,
   `END` → `deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml`.
 - **Status:** Complete language element inventory with structured data
 
@@ -95,7 +97,7 @@ This manual replaces and enhances the partial Parallax draft:
 ### 2.1 Rationale
 
 The P2 is a genuinely unique architecture. Concepts from ARM, x86, or RISC-V can mislead developers:
-- 8 symmetric COGs with true parallel execution
+- 8 symmetric cogs with true parallel execution
 - Deterministic timing on every instruction
 - 64 Smart Pins with embedded processors
 - CORDIC coprocessor for hardware math
@@ -141,9 +143,9 @@ COMPREHENSIVE INDEX
 Part I establishes the mental model. It is **reference material, not tutorial** - concise, authoritative, precise.
 
 **Chapter 1: The P2 Execution Model**
-- COG architecture (512 longs, parallel execution)
+- Cog architecture (512 longs, parallel execution)
 - Hub memory (shared 512KB, access timing)
-- LUT memory (per-COG, fast access)
+- LUT memory (per-cog, fast access)
 - The execution pipeline
 
 **Chapter 2: The Instruction Format**
@@ -186,7 +188,7 @@ The heart of the manual - complete documentation for all PASM2 language elements
 - ORG, ORGH - Assembly origin control
 - BYTE, WORD, LONG - Data declarations
 - RES - Reserve space
-- FIT - Verify code fits in COG
+- FIT - Verify code fits in cog
 - ALIGNL, ALIGNW - Alignment directives
 - HUBEXEC - Hub execution mode
 
@@ -194,7 +196,7 @@ The heart of the manual - complete documentation for all PASM2 language elements
 - TRUE, FALSE - Boolean constants
 - PI - Mathematical constant
 - NEGX, POSX - Signed range boundaries
-- COGEXEC - COG execution mode constant
+- COGEXEC - cog execution mode constant
 
 **Special Registers:**
 - DIRA, DIRB - Pin direction registers
@@ -252,7 +254,7 @@ We design this manual to teach well through its structure.
 - **Chunking** - Related information grouped visually
 
 #### Schema Building
-- **Part I builds the schema** - COGs, Hub, Flags become mental "folders"
+- **Part I builds the schema** - cogs, Hub, Flags become mental "folders"
 - **Part II references the schema** - "See Chapter 3" tells brain where to file
 - **Consistent categories** - Every instruction labeled with category
 - **Cross-references** - "Related: ADDX, ADDS" builds instruction families
@@ -304,7 +306,7 @@ Knowing what NOT to do is as important as knowing what to do:
 
 | Source | Location | Content | Authority |
 |--------|----------|---------|-----------|
-| **YAML Instruction Files** | `deliverables/ai/P2/language/pasm2/` | 361 instruction definitions (381 top-level YAMLs) | PRIMARY - structured, validated |
+| **YAML Instruction Files** | `deliverables/ai/P2/language/pasm2/` | 359 instruction definitions (381 top-level YAMLs — see §1.4) | PRIMARY - structured, validated |
 | **Parallax PASM2 Manual** | `/engineering/ingestion/sources/pasm2-manual/` | Original descriptions, examples | SECONDARY - prose reference |
 | **P2 Spreadsheet** | (ingested) | Encoding data, complete inventory | PRIMARY - encoding authority |
 | **P2 Documentation v35** | (ingested) | Hardware behavior details | PRIMARY - hardware truth |
@@ -694,10 +696,10 @@ Use these terms consistently throughout:
 |----------------|-----------|-------|
 | C flag | carry flag, C, carry | Always "C flag" in prose |
 | Z flag | zero flag, Z, zero | Always "Z flag" in prose |
-| COG | cog, Cog | All caps |
-| Hub | hub, HUB | Title case |
+| cog | COG, CPU | **Lowercase "cog" in prose.** Capitalize **Cog** only at sentence start, in headings/titles, and in numbered forms (Cog 0–7). **Never all-caps "COG."** Use "cog," never "CPU," for the processor unit. *(Corrected 2026-08-15 — this table still said "All caps" long after `voice-guide.md` §5.1 recorded the correction. The sibling never got the sweep.)* |
+| hub | HUB | Same rule as **cog**: lowercase "hub" in plain reference prose; capitalize **Hub** only in titles/headings, special-meaning, or proper-noun uses. Be consistent, not artificial. |
 | LUT | lut, Lut | All caps (Lookup Table) |
-| register | location, address, variable | For COG memory locations |
+| register | location, address, variable | For cog memory locations |
 | immediate | literal, constant, value | For # values |
 | effect | modifier, flag effect | For WC, WZ, WCZ |
 | condition | conditional, IF | For IF_x prefixes |
@@ -837,12 +839,12 @@ Instruction encodings use a **horizontal table format** with styled gray header:
 TikZ is reserved for visual concepts that benefit from graphical representation:
 
 **Part I Architectural Diagrams:**
-- COG memory map (addresses 0-511, showing register regions)
+- Cog memory map (addresses 0-511, showing register regions)
 - Hub memory organization (512KB layout)
-- LUT memory layout (512 longs per COG)
+- LUT memory layout (512 longs per cog)
 - Egg beater hub access timing diagram
 - Instruction pipeline visualization
-- 8-COG parallel execution overview
+- 8-cog parallel execution overview
 
 **Directive Memory Layout Diagrams:**
 - Byte/Word/Long alignment (ALIGNW, ALIGNL examples)
@@ -877,7 +879,7 @@ These diagrams show the 32-bit value with labeled positions, arrows indicating m
 
 1. **`\MemoryMap{start}{end}{regions}`**
    - Generic memory region visualization
-   - Used for COG, Hub, and LUT maps
+   - Used for cog, Hub, and LUT maps
    - Configurable labels and highlighting
 
 2. **`\ByteAlignment{size}{values}`**
@@ -919,7 +921,7 @@ See `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/
 
 | Diagram Type | Count | Notes |
 |--------------|-------|-------|
-| Part I Architectural | ~8 | COG, Hub, LUT maps, pipeline, timing |
+| Part I Architectural | ~8 | Cog, Hub, LUT maps, pipeline, timing |
 | Directive Memory | ~5 | ALIGNW, ALIGNL, BYTE/WORD/LONG layouts |
 | Bit Reordering | ~12 | SPLITB/W, MERGB/W, MOVBYTS, ROLxxx, etc. |
 | Special Registers | ~4 | $1F0-$1FF map, PTRA/PTRB structure |
@@ -976,10 +978,21 @@ Every update should document:
 
 ### What We Don't Say
 
-- Hedging: "probably", "typically", "usually"
+Voice is governed by **`voice-guide.md`** — this creation guide references those rules
+and does not restate them. The one that matters most here is **§4.2a, calibrated
+confidence**, and the items below are deliberately *not* a word list.
+
+- **Vague hedging** that avoids commitment on a fact we know — see `voice-guide.md`
+  §4.2a for the distinction, and §4.2 for the rule row
 - Tutorial voice: "Let's explore...", "You might wonder..."
 - Informal: "basically", "just", "simply"
 - Vague: "works like", "similar to" (without specifics)
+
+> **Why this is no longer a word list.** It previously read *Hedging: "probably",
+> "typically", "usually"* — and **"usually" is `voice-guide.md` §4.2a's own canonical
+> example of a REQUIRED qualifier.** The guide banned by name the word its own rule
+> requires, in the section an author reads while drafting. That is the whole defect
+> this standard exists to prevent: naming banned *words* instead of the *defect*.
 
 ---
 

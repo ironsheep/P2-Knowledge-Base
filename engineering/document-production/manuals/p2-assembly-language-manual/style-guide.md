@@ -86,9 +86,17 @@ All LaTeX templates for this manual use the prefix `p2kb-pasm2-` to distinguish 
 - Matches canonical folder name
 - Single master file (no `-Working-Copy` variants)
 
-**Backup Naming:** `P2-Assembly-Language-Manual.md.backup.YYYYMMDD_HHMMSS`
-- Automatic timestamped backups
-- Created before significant edits
+**Backups:** made with **`engineering/tools/backup-file.sh <path>`** — the only sanctioned
+way. It writes to `.backups/<repo-relative-path>.<YYYYMMDD-HHMMSS>`, outside the working
+tree and covered by one `.gitignore` rule.
+
+- **Never hand-name a backup**, and never add a per-file backup rule to `.gitignore`.
+- Never back up a regenerable artifact (workspace renders, generated indexes) — the
+  generator is the backup.
+- Full rationale: `engineering/standards/BACKUP-CONVENTION.md`
+
+> *(This entry previously prescribed `*.md.backup.YYYYMMDD_HHMMSS` beside the file —
+> hand-named, inside the working tree, in direct violation of Sacred Rule #1.)*
 
 ### 2.4 Deployment Structure
 
@@ -303,8 +311,8 @@ Each instruction entry follows strict visual hierarchy:
 │   │ Bit field diagram                    [Bordered box]   │ │
 │   └───────────────────────────────────────────────────────┘ │
 │                                                             │
-│ OPERATION                                                   │
-│   Numbered steps                                            │
+│ OPERATION  (only where it earns its place)                  │
+│   Compact pseudocode line — NOT numbered steps              │
 │                                                             │
 │ TIMING                                                      │
 │   Cycle and hub access information                          │
@@ -739,7 +747,7 @@ Never use a different table format for encoding data. If a simpler display is ne
 
 % Usage:
 \partichapter{The P2 Execution Model}{%
-    Understanding COGs, Hub memory, and the unique P2 architecture
+    Understanding cogs, Hub memory, and the unique P2 architecture
 }
 ```
 
@@ -764,8 +772,8 @@ Each Part I chapter ends with a summary box:
 
 % Usage:
 \begin{keyconcepts}
-\item Each COG has 512 longs of private register memory
-\item Hub memory is shared among all COGs
+\item Each cog has 512 longs of private register memory
+\item Hub memory is shared among all cogs
 \item Hub access follows the "egg beater" timing pattern
 \item Most instructions execute in 2 clock cycles
 \item The P2 achieves determinism through architecture, not interrupts

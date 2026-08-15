@@ -21,7 +21,7 @@ This guide does two complementary jobs. It **teaches** what the streamer is, why
 **This document is NOT:**
 - A *tutorial* — it teaches the hardware and how to think about it, but it does not walk you through building a project step by step with progressive exercises (that is the DeSilva style; this guide teaches understanding, not a guided build)
 - A complete video system design guide (it covers the streamer, not full video architecture)
-- A substitute for the P2 basics — it builds the streamer-specific background a newcomer needs, but assumes general familiarity with PASM2 and the P2's COG/Hub model
+- A substitute for the P2 basics — it builds the streamer-specific background a newcomer needs, but assumes general familiarity with PASM2 and the P2's cog/Hub model
 
 ### 1.2 Target Audience
 
@@ -32,7 +32,7 @@ This guide serves developers who:
 4. **Are debugging streamer-based code** (mode configuration, timing issues)
 
 **Assumed Knowledge:**
-- P2 COG and Hub memory architecture
+- P2 cog and Hub memory architecture
 - Basic PASM2 instruction set
 - RDFAST/WRFAST FIFO operations
 - Pin and DAC fundamentals
@@ -487,9 +487,12 @@ Include pre-calculated common values:
 
 See `voice-guide.md` for complete voice specifications.
 
-**Key Points:**
-- Third person, authoritative
-- No hedging ("may", "might", "probably")
+**Key Points** — this is a pointer list, not a restatement; the rules live in
+`voice-guide.md` and are not duplicated here:
+- Third person, authoritative (reference layer)
+- **Voice rules R1–R4 per `voice-guide.md`** — in particular §2.2a, calibrated
+  confidence. *(This bullet previously read* No hedging ("may", "might", "probably") *—
+  a word list that told an author to strip the very qualifiers §2.2a requires.)*
 - No tutorial voice ("let's", "you'll discover")
 - Precise specifications
 - Practical examples

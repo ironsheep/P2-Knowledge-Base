@@ -13,7 +13,8 @@
 
 This is a **technical reference**, not a tutorial. The voice must be:
 - **Authoritative** - This is the source of truth
-- **Precise** - No ambiguity, no hedging
+- **Precise** - No ambiguity; no *vague* hedging (§4.2a — a qualifier that reflects
+  partial evidence is precision, not vagueness)
 - **Efficient** - Every word serves a purpose
 - **Enhanced** - Goes beyond the original with actionable guidance
 
@@ -54,7 +55,9 @@ cleared (0) if no overflow."
 ```
 - Exact terminology: "9-bit literal," "32-bit augmented literal"
 - Specific values: "Src[8:0]," "Dest[17:9]," "0-511"
-- No hedging: "is set" not "may be set"
+- State a known behavior as known: "is set" not "may be set" — **where the silicon's
+  behavior is in fact fixed.** Where the evidence is partial, the qualifier is required
+  accuracy (§4.2a)
 
 **Formal Tone**
 - Third person throughout: "ADDS sums the two signed values..."
@@ -253,16 +256,12 @@ recognizable and becoming rapidly fatiguing" (Chip Gracey, XBYTE review
 2026-07-20; adopted platform-wide). The recognizable-AI quality is the pattern,
 not any one sentence, so the fix is distribution, not deletion:
 
-- **At most ~half of section closings may be beats.** Cut the weakest back to a
-  plain informational close.
-- **No long runs** — never more than **~4 sections in a row** all closing on a
-  beat. A stretch of flat, informational closes is rest, not a defect.
-- **Chapter closers are the worst offenders** — aim well below a beat on every
-  chapter exit.
-- **A declared refrain is not a beat** — a deliberate, announced structural device
-  is structure, keep it.
-- **Protect the earned ones** — a beat that carries real information or lowers the
-  text's own confidence survives. Do not flatten the manual to hit a number.
+**Decision: ADOPT R4 as written** — the budget, the run limit, the chapter-closer
+emphasis, the declared-refrain carve-out, and the protection for earned beats all apply
+to this manual unchanged. The numbers themselves are stated once, in the house canon
+(`engineering/standards/documentation-standards/documentation-voices-catalog.md`, R4);
+they are not copied here, because a copied number is one that drifts from the rule it
+came from while still reading as authoritative.
 
 **Where this applies in this manual.** The risk is concentrated in the
 **front-matter/preface and Part I** narrative — the same region §1.3 flags for
@@ -415,7 +414,7 @@ Categorized with bold-text markers, concise:
    where you need signed overflow detection, see ADDS.
 
 ✅ **Hardware:** The addition completes in a single clock cycle within
-   the COG's ALU. No pipeline stalls occur.
+   the cog's ALU. No pipeline stalls occur.
 
 ❌ Note: Be careful with this instruction. (vague, no specific guidance)
 ```
@@ -428,9 +427,11 @@ Before finalizing any instruction entry, verify:
 
 ### Voice Consistency
 - [ ] Third person throughout (no "you," "we," "I")
-- [ ] No hedging language ("may," "might," "probably," "typically")
+- [ ] No **vague** hedging — see §4.2a. **This item points; it does not re-encode.**
+      It previously listed "may / might / probably / typically" as banned words, which
+      instructed an auditor to strip exactly the calibrated qualifiers §4.2a requires.
 - [ ] No tutorial voice ("let's," "congratulations," "simply")
-- [ ] Definitive statements only
+- [ ] Definitive where the evidence is definitive; calibrated where it is partial (§4.2a)
 - [ ] No marketing / promotional framing (state capability as fact, don't sell it)
 - [ ] No hardware-correctness reassurance ("properly," "correctly," "automatically handles")
 - [ ] Examples lead with what the code does, not a vague application domain
@@ -453,7 +454,8 @@ Before finalizing any instruction entry, verify:
 ### Clarity
 - [ ] Brief description is one sentence, starts with verb
 - [ ] Parameters explain what each can be
-- [ ] Operation describes step-by-step behavior
+- [ ] Operation, **where present**, is the compact pseudocode line of §6.3 — **not** a
+      procedural 1-2-3-4 step list, which §6.3 supersedes and forbids
 - [ ] Flag effects are precise and complete
 - [ ] Examples show *why*, not just *what*
 

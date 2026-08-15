@@ -39,7 +39,7 @@ Unlike tutorial manuals, reference documents serve learning through **repeated r
 The Streamer Programming Guide serves a **spectrum** of readers, and the two registers exist to serve both ends of it:
 
 - **Newcomers** — developers (including hobbyist and DIY engineers) coming to the P2 who have heard of the streamer but do not yet know what it is, why it exists, or when to reach for it. The **teaching register** is for them: the conceptual chapter and chapter openers assume no prior streamer knowledge and define unfamiliar terms as they appear.
-- **Experienced developers** — readers who understand P2 COG/Hub architecture and want to implement video, high-speed I/O, or signal processing, or who are porting or debugging streamer code. The **reference register** is for them: quick lookup of modes, constants, configurations, and exact bit fields.
+- **Experienced developers** — readers who understand P2 cog/Hub architecture and want to implement video, high-speed I/O, or signal processing, or who are porting or debugging streamer code. The **reference register** is for them: quick lookup of modes, constants, configurations, and exact bit fields.
 
 The teaching layer builds the background a newcomer needs (hub memory and the FIFO, pins, DACs) rather than assuming it; the reference layer assumes it. A single reader typically starts in the teaching register and graduates into the reference register as they build.
 
@@ -58,7 +58,7 @@ Teaching-register rules:
 - **Comparative grounding is a soft bridge, never a crutch.** When a real-world parallel (DMA is the obvious one) would help an experienced reader, offer it as a clearly skippable aside — a `> If you've used X before:` note. The explanation must always stand on its own for a reader who has never met that parallel. Do not make understanding depend on outside knowledge.
 - **Applications are pointers, not pitches.** Frame applications as "if you're building X, these are the modes to understand," directing the reader rather than selling the hardware.
 
-**Use the reference register for:** mode tables, bit-field specifications, symbol tables, per-instruction syntax and effects, frequency tables, and worked code examples. Its rules are in Sections 2–6 (third person, no hedging, dense, exact). Those rules govern the reference layer only; the teaching register relaxes the no-"you" and no-analogy constraints as described above.
+**Use the reference register for:** mode tables, bit-field specifications, symbol tables, per-instruction syntax and effects, frequency tables, and worked code examples. Its rules are in Sections 2–6 (third person, no *vague* hedging — §2.2a, dense, exact). Those rules govern the reference layer only; the teaching register relaxes the no-"you" and no-analogy constraints as described above.
 
 **The handoff.** A chapter typically opens in the teaching register (a short orientation — what these modes are for, how they differ) and then shifts into the reference register for the tables and specifications. The two coexist on the page: guidance up front, precision underneath.
 
@@ -130,16 +130,13 @@ recognizable and becoming rapidly fatiguing" (Chip Gracey, XBYTE review
 2026-07-20; adopted platform-wide). The recognizable-AI quality is the pattern,
 not any one sentence, so the fix is distribution, not deletion:
 
-- **At most ~half of section closings may be beats.** Cut the weakest back to a
-  plain informational close.
-- **No long runs** — never more than **~4 sections in a row** all closing on a
-  beat. A stretch of flat, informational closes is rest, not a defect.
-- **Chapter closers are the worst offenders** — aim well below a beat on every
-  chapter exit.
-- **A declared refrain is not a beat** — a deliberate, announced structural
-  device is structure, keep it.
-- **Protect the earned ones** — a beat that carries real information or lowers the
-  text's own confidence survives. Do not flatten the document to hit a number.
+**Decision: ADOPT R4 as written** — the budget, the run limit, the chapter-closer
+emphasis, the declared-refrain carve-out, and the protection for earned beats all apply
+to this guide unchanged, and they bear hardest on the *teaching* register rather than
+the reference layer. The numbers themselves are stated once, in the house canon
+(`engineering/standards/documentation-standards/documentation-voices-catalog.md`, R4);
+they are not copied here, because a copied number is one that drifts from the rule it
+came from while still reading as authoritative.
 
 Detection tooling: `document-audit` Dimension #4c (payoff-sentence sweep) measures
 closing-beat rate and the longest consecutive run.
@@ -313,10 +310,12 @@ Factual recaps:
 ## 7. Quality Checklist
 
 ### Voice Consistency
-- [ ] Third person throughout (no "you," "we," "I")
-- [ ] No hedging language ("may," "might," "probably")
+- [ ] Third person throughout (no "you," "we," "I") — reference layer
+- [ ] No **vague** hedging — see §2.2a. **This item points; it does not re-encode.**
+      It previously listed "may / might / probably" as banned words, which instructed
+      an auditor to strip exactly the calibrated qualifiers §2.2a requires.
 - [ ] No tutorial voice ("let's," "congratulations")
-- [ ] Definitive statements only
+- [ ] Definitive where the evidence is definitive; calibrated where it is partial (§2.2a)
 
 ### Terminology Consistency
 - [ ] Instruction names bold uppercase in prose

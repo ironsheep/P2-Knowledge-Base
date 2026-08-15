@@ -14,8 +14,12 @@ count got wrong at least once.
 This script replaces the hand count. Each detection below corresponds to a
 defect class that study found by reading.
 
-THE FIVE DETECTIONS
--------------------
+THE DETECTIONS
+--------------
+Five were specified up front; D6 was added when a class-wide defect surfaced
+mid-sweep and hand-tracking which files still carried it proved to be exactly the
+kind of bookkeeping this instrument exists to replace.
+
   D1  RESTATED VOICE RULE
       A hedging or cadence rule stated ANYWHERE outside the catalog. The
       catalog is the single home of R1-R4; a guide states its local
@@ -50,6 +54,12 @@ THE FIVE DETECTIONS
   D5  RETIRED-DOC REFERENCE
       A roster-Abandoned document presented as a live, current sibling manual.
       The retired set is read from PUBLICATION-ROSTER.md, not hard-coded.
+
+  D6  ALL-CAPS COG
+      The processor unit is a "cog" — lowercase in prose, "Cog" only at sentence
+      start, in headings, and in numbered forms (Cog 0-7); never "COG", and never
+      "CPU". Instruction mnemonics (COGINIT, COGID, COGEXEC, …) are correctly
+      upper-case and are excluded by the word boundary.
 
 DELIBERATE MENTIONS ARE NOT DEFECTS
 -----------------------------------
@@ -371,6 +381,30 @@ def make_detect_d5(retired_names, retired_slugs):
 
 
 # --------------------------------------------------------------------------
+# D6 — all-caps COG
+# --------------------------------------------------------------------------
+
+# The processor unit is a "cog": lowercase in prose, "Cog" only at sentence start,
+# in headings, and in numbered forms. Never "COG", and never "CPU". The word
+# boundary keeps the instruction mnemonics (COGINIT, COGID, COGSTOP, COGEXEC, …)
+# out of it — they are correctly upper-case.
+ALLCAPS_COG = re.compile(r"\bCOGs?\b")
+COG_DECLARED_WRONG = re.compile(
+    r"(never all-caps|not the|❌|\bwrong\b|NOT These|lowercase|incorrect|was wrongly)", re.I)
+
+
+def detect_d6(path, lineno, line, is_catalog, context=()):
+    m = ALLCAPS_COG.search(line)
+    if not m:
+        return None
+    if any(COG_DECLARED_WRONG.search(c) for c in context):
+        return exempt("named in order to forbid it, or inside the rule stating the casing",
+                      m.start())
+    return finding('all-caps "COG" — the unit is a cog (lowercase; "Cog" only at '
+                   'sentence start, headings, numbered forms)', m.start())
+
+
+# --------------------------------------------------------------------------
 # Scan + report
 # --------------------------------------------------------------------------
 
@@ -380,6 +414,7 @@ DETECTION_TITLES = {
     "D3": "DEAD CITED PATH — an authority that does not resolve on disk",
     "D4": "CODENAME — against the official-titles rule",
     "D5": "RETIRED-DOC REFERENCE — a roster-Abandoned document shown as live",
+    "D6": "ALL-CAPS COG — the unit is a cog, not a COG and never a CPU",
 }
 
 
@@ -387,7 +422,7 @@ EXCERPT_WIDTH = 118
 
 # Detectors whose exemption test is about AUTHORIAL INTENT rather than the text
 # of one line; these are handed the surrounding lines as well.
-INTENT_DETECTORS = {"D1", "D2", "D4", "D5"}
+INTENT_DETECTORS = {"D1", "D2", "D4", "D5", "D6"}
 
 
 def scan(files, detectors):
@@ -471,7 +506,8 @@ def main(argv):
         print("ERROR: the glob matched no guide files — the guide layer moved?", file=sys.stderr)
         return 2
 
-    detectors = [("D1", detect_d1), ("D2", detect_d2), ("D3", detect_d3), ("D4", detect_d4)]
+    detectors = [("D1", detect_d1), ("D2", detect_d2), ("D3", detect_d3),
+                 ("D4", detect_d4), ("D6", detect_d6)]
     d5 = make_detect_d5(retired_names, retired_slugs)
     if d5:
         detectors.append(("D5", d5))
