@@ -8,8 +8,9 @@ Creating a pedagogical PASM2 manual that captures deSilva's teaching philosophy:
 ### Modular Manual Strategy (2025-01-09 Addition)
 This manual is part of a modular documentation system:
 - **This Manual**: Core PASM2 assembly programming with basic I/O (250-300 pages)
-- **Smart Pins Manual**: Comprehensive Smart Pin modes and applications (separate)
-- **I/O Manual**: Advanced I/O techniques and protocols (separate)
+- **P2 I/O & Smart Pins User Guide**: Comprehensive Smart Pin modes, applications, and
+  advanced I/O (separate). This one document now covers both roles; the earlier Smart
+  Pins Tutorial that split them is retired and superseded by it.
 - **DEBUG Manual**: Debug system reference (separate or integrated)
 
 **Rationale**: Cognitive load management - Core PASM2 alone is substantial enough for one focused manual.
@@ -33,7 +34,7 @@ defect caught by the `prepare-manual` line-length audit
 ### Primary Content Sources
 
 #### 1. YAML Instruction Files (Technical Accuracy)
-**Location**: `engineering/yaml/instructions/`
+**Location**: `deliverables/ai/P2/language/pasm2/`
 - Complete instruction set documentation
 - Accurate timing and flag information  
 - Hardware operation details
@@ -55,7 +56,7 @@ defect caught by the `prepare-manual` line-length audit
 #### 4. Smart Pins & I/O Documentation
 **For Chapter 8 Basic I/O only**:
 - Extract only basic pin operations (DRVH, DRVL, TESTP)
-- Reference Smart Pins manual for advanced features
+- Reference the P2 I/O & Smart Pins User Guide for advanced features
 - Keep focus on assembly, not peripheral complexity
 
 ### Production Method
@@ -100,9 +101,9 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 | **Instruction behavior** | YAML `description:` field | "ADD stores sum in Dest" |
 | **Flag effects** | YAML `flags:` field | "C flag set on carry" |
 | **Timing claims** | YAML `clocks:` field | "Takes 2 clock cycles" |
-| **Architecture claims** | Silicon Doc ONLY | "8 COGs share Hub" |
-| **COG memory model** | Silicon Doc ONLY | "512 longs of COG RAM" |
-| **Hub access patterns** | Silicon Doc ONLY | "Egg beater timing" |
+| **Architecture claims** | P2 Documentation v35 ONLY | "8 COGs share Hub" |
+| **COG memory model** | P2 Documentation v35 ONLY | "512 longs of COG RAM" |
+| **Hub access patterns** | P2 Documentation v35 ONLY | "Egg beater timing" |
 | **Code example behavior** | pnut-ts compilation | "This blinks the LED" |
 
 ### Red-Flag Phrases for Pedagogical Content
@@ -131,7 +132,7 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 │                                                                 │
 │  2. Can I cite a source?                                        │
 │     □ YAML instruction file (for instruction claims)            │
-│     □ Silicon Doc (for hardware/architecture claims)            │
+│     □ P2 Documentation v35 (for hardware/architecture claims)   │
 │     □ pnut-ts compilation (for code behavior claims)            │
 │                                                                 │
 │  3. Is my analogy accurate?                                     │
@@ -297,8 +298,8 @@ This document follows the project-wide Technical Climbing Methodology, contribut
 - **Assembly Optimization**: Pipeline, timing, efficiency
 
 #### What This Manual References (Not Covers)
-- **Smart Pin Details** → "See Smart Pins Manual for PWM, UART, etc."
-- **Complex Protocols** → "See I/O Manual for SPI, I2C implementations"
+- **Smart Pin Details** → "See the P2 I/O & Smart Pins User Guide for PWM, UART, etc."
+- **Complex Protocols** → "See the P2 I/O & Smart Pins User Guide for SPI, I2C implementations"
 - **Video Generation** → "See Video Guide for VGA/HDMI details"
 - **DEBUG System** → "See DEBUG Manual for visualization tools"
 - **Advanced Signal Processing** → "See DSP Guide for filters, FFT"
@@ -310,8 +311,9 @@ When encountering out-of-scope topics:
 Here's basic bit-banged UART to understand timing:
 [code example]
 
-📚 **For Hardware UART**: See Smart Pins Manual Chapter 3 for 
-configuring Smart Pins as UART with automatic baud rate generation.
+📚 **For Hardware UART**: See the P2 I/O & Smart Pins User Guide (Serial
+Transmit / Serial Receive) for configuring Smart Pins as UART with automatic
+baud rate generation.
 ```
 
 ### Chapter Structure Template

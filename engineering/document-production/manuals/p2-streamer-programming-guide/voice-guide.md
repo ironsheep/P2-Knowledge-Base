@@ -98,7 +98,7 @@ is **accuracy**, not hedging, and it is required wherever the unqualified claim
 would overstate. The test is one line: **never state a claim above its
 evidence.** "The NCO never drifts" is wrong if it drifts by one LSB per
 rollover; "most video modes need XZERO" is wrong if you have not surveyed them.
-Say what is true at the confidence it is true, and cite the Silicon Doc when a
+Say what is true at the confidence it is true, and cite the P2 Documentation v35 when a
 solid figure is lacking. A rhetorical flourish that *demands* a punchy payoff is
 exactly where an unsupported claim slips in — strip the flourish and read what is
 left as a bare claim before keeping it. (Shared discipline: the
@@ -341,16 +341,16 @@ Factual recaps:
 ## 8. Summary: The Voice Equation
 
 ```
-Our Voice = Silicon Documentation Precision + Practical Developer Guidance
+Our Voice = P2 Documentation v35 Precision + Practical Developer Guidance
 ```
 
-**From Silicon Doc, we preserve:**
+**From P2 Documentation v35, we preserve:**
 - Technical accuracy and completeness
 - Precise bit field specifications
 - Authoritative mode descriptions
 - Timing and hardware details
 
-**To Silicon Doc, we add:**
+**To P2 Documentation v35, we add:**
 - ⚠️ Pitfall warnings for common mistakes
 - 💡 Tips for effective usage
 - 🔧 Hardware notes for integration

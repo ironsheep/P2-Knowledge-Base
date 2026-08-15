@@ -12,7 +12,7 @@
 
 ### 1.1 Purpose and Scope
 
-This guide does two complementary jobs. It **teaches** what XBYTE is, why the P2 has it, and how to think about it — the conceptual understanding a reader needs before the details mean anything — and it serves as the **reference** for the engine: the dispatch cycle, the arming sequence, the table-size and compression modes, the instruction set XBYTE is built from, and the configuration bits. It consolidates the Silicon Doc, the KB YAML, and worked code into a single authoritative source, written in two registers (see `voice-guide.md` §1.4): a warm teaching register for the conceptual chapters and chapter openers, and a precise reference register for the tables, encodings, and specifications.
+This guide does two complementary jobs. It **teaches** what XBYTE is, why the P2 has it, and how to think about it — the conceptual understanding a reader needs before the details mean anything — and it serves as the **reference** for the engine: the dispatch cycle, the arming sequence, the table-size and compression modes, the instruction set XBYTE is built from, and the configuration bits. It consolidates the P2 Documentation v35, the KB YAML, and worked code into a single authoritative source, written in two registers (see `voice-guide.md` §1.4): a warm teaching register for the conceptual chapters and chapter openers, and a precise reference register for the tables, encodings, and specifications.
 
 **This document IS:**
 - A conceptual introduction to XBYTE — what it is, why it exists, when to reach for it
@@ -103,7 +103,7 @@ This guide reuses the two-register learning model of the Streamer guide (`../p2-
 
 | Source | Location | Content | Authority |
 |--------|----------|---------|-----------|
-| **Silicon Doc v35 — XBYTE section** | `engineering/ingestion/sources/silicon-doc/` (`part2-code-blocks.txt`, `part2-beginning.txt`) | the dispatch walk, overhead figures, mode/compression table, F bit, arming | PRIMARY — hardware truth |
+| **P2 Documentation v35 — XBYTE section** | `engineering/ingestion/sources/silicon-doc/` (`part2-code-blocks.txt`, `part2-beginning.txt`) | the dispatch walk, overhead figures, mode/compression table, F bit, arming | PRIMARY — hardware truth |
 | **XBYTE engine YAML** | `deliverables/ai/P2/architecture/xbyte_engine.yaml` | structured XBYTE reference (cycle, modes, registers, constraints) | PRIMARY — KB |
 | **Instruction YAML** | `deliverables/ai/P2/language/pasm2/{skip,skipf,execf,setq,setq2,rdfast,rfbyte,rfvar,rfvars,getptr}.yaml` | encodings, syntax, flag effects, timing | PRIMARY — KB |
 | **Grounding digest** | `./audit/xbyte-source-grounding-digest-2026-06-26.md` | the above, compiled + cross-checked, with citations | derived — cite the primaries it points to |
@@ -112,8 +112,8 @@ This guide reuses the two-register learning model of the Streamer guide (`../p2-
 
 ### 4.2 Authority Hierarchy
 
-1. **Silicon Doc** — hardware behavior is ground truth
-2. **KB YAML** — structured derived truth (aligned to the Silicon Doc)
+1. **P2 Documentation v35** — hardware behavior is ground truth
+2. **KB YAML** — structured derived truth (aligned to the P2 Documentation v35)
 3. **Compiled example code** — `pnut-ts`-proven patterns
 4. **External project pages** — Appendix C references only
 
@@ -122,7 +122,7 @@ This guide reuses the two-register learning model of the Streamer guide (`../p2-
 Hallucinations occur **at the moment of writing**. Before writing any XBYTE claim:
 
 1. **What am I claiming?** (cycle / mode bits / encoding / register / overhead)
-2. **Which source contains it?** (Silicon Doc XBYTE section / instruction YAML / xbyte_engine.yaml)
+2. **Which source contains it?** (P2 Documentation v35 XBYTE section / instruction YAML / xbyte_engine.yaml)
 3. **Can I cite the exact location?** (file + section/line via the grounding digest)
 4. **Does the source say this exactly?** YES → write it; extrapolating → don't; absent → mark unverified / log a finding.
 

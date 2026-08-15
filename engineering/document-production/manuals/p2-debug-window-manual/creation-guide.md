@@ -111,33 +111,33 @@ This section formalizes the No Handwaving Principle into a systematic verificati
 | "automatically detects" | **CRITICAL** | Auto-detection is complex | DEBUG is display-focused, not analysis-focused |
 | "maximum of N" | **HIGH** | Limits must be tested | Resource limits vary by application |
 | "approximately" | MEDIUM | Vague numbers suggest guessing | Get exact values from testing |
-| "internally" | MEDIUM | Internal behavior needs source | Check Pascal source or Silicon Doc |
+| "internally" | MEDIUM | Internal behavior needs source | Check Pascal source or P2 Documentation v35 |
 | "supports" (vague) | MEDIUM | What exactly is supported? | List specific capabilities |
 
 #### The Verification Protocol for Debug Content
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ DEBUG WINDOW CLAIM VERIFICATION CHECKLIST │
+│ DEBUG WINDOW CLAIM VERIFICATION CHECKLIST                       │
 ├─────────────────────────────────────────────────────────────────┤
-│ │
-│ 1. What am I claiming? (capability/syntax/parameter/visual) │
-│ │
-│ 2. Which source should contain this? │
-│ □ Spin2 v5.1 Reference: command syntax, parameters │
-│ □ Phase 1 Studies: discovered capabilities, patterns │
-│ □ Pascal Source: internal behavior, PC integration │
-│ □ Direct Testing: visual behavior, limits, performance │
-│ │
-│ 3. Can I prove this claim? │
-│ □ Screenshot showing the behavior │
-│ □ Code example that demonstrates it │
-│ □ Documentation citation │
-│ │
-│ 4. Am I speculating from similar systems? │
-│ □ If YES → DON'T WRITE IT │
-│ □ Mark as "not found" if feature doesn't exist │
-│ │
+│                                                                 │
+│ 1. What am I claiming? (capability/syntax/parameter/visual)     │
+│                                                                 │
+│ 2. Which source should contain this?                            │
+│ □ Spin2 v5.1 Reference: command syntax, parameters              │
+│ □ Phase 1 Studies: discovered capabilities, patterns            │
+│ □ Pascal Source: internal behavior, PC integration              │
+│ □ Direct Testing: visual behavior, limits, performance          │
+│                                                                 │
+│ 3. Can I prove this claim?                                      │
+│ □ Screenshot showing the behavior                               │
+│ □ Code example that demonstrates it                             │
+│ □ Documentation citation                                        │
+│                                                                 │
+│ 4. Am I speculating from similar systems?                       │
+│ □ If YES → DON'T WRITE IT                                       │
+│ □ Mark as "not found" if feature doesn't exist                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -304,7 +304,7 @@ Author all content per that guide; its §3 (rules), §4 (debug-domain content ru
 
 #### What This Manual References (Not Covers)
 - **Basic P2 Programming** → "See PASM2 Manual for instruction details"
-- **Smart Pin Operation** → "See Smart Pins Manual for pin debugging"
+- **Smart Pin Operation** → "See the P2 I/O & Smart Pins User Guide for pin debugging"
 - **Hardware Setup** → "See Hardware Manual for physical connections"
 - **Advanced Applications** → "See specific application guides"
 
@@ -315,8 +315,8 @@ When encountering out-of-scope topics:
 Here's how to monitor Smart Pin state changes:
 [debug example]
 
-📚 **For Smart Pin Configuration**: See Smart Pins Manual Chapter 5 for
-proper Smart Pin setup and operation details.
+📚 **For Smart Pin Configuration**: See the P2 I/O & Smart Pins User Guide
+(Smart Pin Configuration) for proper Smart Pin setup and operation details.
 ```
 
 ### Chapter Structure Template

@@ -154,7 +154,7 @@ before we start writing code."*
 One or two plain sentences on what it is, then what it's *for*, then a link out. ✅ *"The CORDIC solver is a
 piece of math hardware shared by all eight cogs. You hand it an angle or a vector and it hands back sines,
 magnitudes, logarithms — the trigonometry you'd otherwise write by hand. (The full operation list is in the
-Silicon Doc; here, just know it's there and it's fast.)"*
+P2 Documentation v35; here, just know it's there and it's fast.)"*
 
 ### 5.3 Reading code (Ch2 "Reading P2 Code")
 Warm and walked-through. Show a short example, then read it line by line in plain language so the reader learns

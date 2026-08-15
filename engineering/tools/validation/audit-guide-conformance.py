@@ -318,11 +318,11 @@ CODENAME_DECLARED_WRONG = re.compile(
     r"(never (?:say|write|use)|not the|official title|codename|nickname|❌|instead of)", re.I)
 
 
-def detect_d4(path, lineno, line, is_catalog):
+def detect_d4(path, lineno, line, is_catalog, context=()):
     m = CODENAMES.search(line)
     if not m:
         return None
-    if CODENAME_DECLARED_WRONG.search(line):
+    if any(CODENAME_DECLARED_WRONG.search(c) for c in context):
         return exempt(f"deliberate mention — {m.group(1)} named in order to forbid it", m.start())
     return finding(f"codename \"{m.group(1)}\" — use the official title a newcomer can search",
                    m.start())
@@ -345,11 +345,11 @@ def make_detect_d5(retired_names, retired_slugs):
         return None
     pattern = re.compile("|".join(re.escape(n) for n in needles), re.I)
 
-    def detect_d5(path, lineno, line, is_catalog):
+    def detect_d5(path, lineno, line, is_catalog, context=()):
         m = pattern.search(line)
         if not m:
             return None
-        if LINEAGE.search(line):
+        if any(LINEAGE.search(c) for c in context):
             return exempt(f"lineage/history reference to {m.group(0)} — true, keep", m.start())
         return finding(f"retired document \"{m.group(0)}\" presented as live/current", m.start())
 
@@ -371,6 +371,10 @@ DETECTION_TITLES = {
 
 EXCERPT_WIDTH = 118
 
+# Detectors whose exemption test is about AUTHORIAL INTENT rather than the text
+# of one line; these are handed the surrounding lines as well.
+INTENT_DETECTORS = {"D2", "D4", "D5"}
+
 
 def scan(files, detectors):
     """Returns (findings, exemptions); each entry is (code, path, lineno, why, excerpt)."""
@@ -380,11 +384,14 @@ def scan(files, detectors):
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         for lineno, line in enumerate(lines, 1):
             # A rule and the wording that scopes it often wrap across lines, so
-            # detectors that judge intent get the neighbourhood too.
+            # the detectors that judge INTENT (is this named in order to declare
+            # it wrong? is this lineage rather than a live pointer?) read the
+            # neighbourhood. The alternative — reflowing prose so each statement
+            # fits one line — would be shaping the documents to suit the tool.
             context = lines[max(0, lineno - 3):lineno + 2]
             for code, detect in detectors:
                 result = (detect(path, lineno, line, is_catalog, context)
-                          if code == "D2" else detect(path, lineno, line, is_catalog))
+                          if code in INTENT_DETECTORS else detect(path, lineno, line, is_catalog))
                 if result is None:
                     continue
                 kind, why, pos = result

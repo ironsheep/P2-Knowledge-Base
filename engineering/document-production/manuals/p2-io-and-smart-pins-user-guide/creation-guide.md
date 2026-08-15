@@ -39,8 +39,9 @@ This guide serves as the **complete practical reference** for the Propeller 2 pi
 - Bilingual throughout (Spin2 + PASM2)
 
 **This document is NOT:**
-- A tutorial for learning from scratch (that's the Green Book)
-- A replacement for silicon documentation (hardware truth)
+- A tutorial for learning from scratch (the Smart Pins Tutorial that once served that
+  role is **retired** — superseded by this guide)
+- A replacement for P2 Documentation v35 (hardware truth)
 - A beginner's first introduction to P2
 - Limited to just Smart Pins (covers all I/O)
 
@@ -58,9 +59,9 @@ This guide serves multiple audiences with different entry points:
 | Document | Purpose | Relationship |
 |----------|---------|--------------|
 | **This guide** | Complete I/O reference | Practical usage, all options |
-| `p2-smart-pins-tutorial` | Green Book - learning | Pedagogical complement |
+| `p2-smart-pins-tutorial` | Smart Pins Tutorial — **retired** | Superseded by this guide; kept for history only, never cited as current |
 | `p2-assembly-language-manual` | PASM2 instruction reference | Covers pin *instructions* |
-| Silicon documentation | Hardware truth | Authoritative for edge cases |
+| P2 Documentation v35 | Hardware truth | Authoritative for edge cases |
 
 ### 1.4 Source Materials
 
@@ -69,8 +70,8 @@ This guide serves multiple audiences with different entry points:
 | Smart Pins catalog | `/engineering/ingestion/smart-pins-catalog/ingestionSources/` | Mode extracts |
 | Spin2 v51 manual | `/engineering/ingestion/sources/spin2-v51/` | P_ constants, methods |
 | P_ constants | `/engineering/ingestion/sources/spin2-v51/smartpin-symbols.txt` | Complete constant list |
-| Silicon doc | `/engineering/ingestion/sources/silicon/` | Hardware behavior |
-| John Titus extracts | `*/john-titus-extract.md` | Detailed mode docs |
+| *Propeller 2 Documentation v35 — Rev B/C Silicon* | `engineering/ingestion/sources/silicon-doc/` | Hardware behavior |
+| Jon Titus extracts | `*/john-titus-extract.md` | Detailed mode docs |
 
 ---
 
@@ -406,11 +407,11 @@ Visual comparison matrices:
 
 | Claim Type | Required Source |
 |------------|-----------------|
-| Direct I/O behavior | Silicon doc, PASM2 manual |
+| Direct I/O behavior | P2 Documentation v35, PASM2 manual |
 | P_ constant values | Spin2 v51 smartpin-symbols.txt |
-| Smart Pin mode behavior | Silicon doc + Titus extract |
-| Register function | Silicon doc |
-| Timing | Silicon doc |
+| Smart Pin mode behavior | P2 Documentation v35 + Titus extract |
+| Register function | P2 Documentation v35 |
+| Timing | P2 Documentation v35 |
 | Examples | Must compile and test |
 
 ### 6.2 Verification Checklist
@@ -541,7 +542,9 @@ For each mode/topic:
 
 - **Workspace:** `/engineering/document-production/workspace/p2-io-and-smart-pins-user-guide/`
 - **Outbound:** `/engineering/document-production/outbound/p2-io-and-smart-pins-user-guide/`
-- **Template:** To be created (may inherit from Smart Pins Tutorial)
+- **Template:** the shared `p2kb-platform-*` stack plus this guide's thin `p2kb-iosp-*`
+  locals (this guide rides the platform, per the Code Line Budget section above).
+  The retired Smart Pins Tutorial is **not** a template donor.
 
 ---
 

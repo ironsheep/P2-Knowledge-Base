@@ -134,7 +134,7 @@ Include "when to use" and "considerations" throughout:
 
 ### 3.3 Voice Comparison
 
-| Aspect | Green Book Tutorial | This User Guide |
+| Aspect | Smart Pins Tutorial (retired) | This User Guide |
 |--------|---------------------|-----------------|
 | Person | Second ("you") | Third (instruction/mode names) |
 | Tone | Warm, encouraging | Authoritative, comprehensive |

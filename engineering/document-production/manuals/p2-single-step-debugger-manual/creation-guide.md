@@ -98,7 +98,8 @@ filter, driven by the fenced-code language tag:
 
 Sibling filters to copy from (same lineage — Smart Pins → IOSP → here):
 - `workspace/p2-assembly-language-manual/filters/p2kb-pasm2-code-coloring.lua`
-- `workspace/p2-smart-pins-tutorial/filters/p2kb-sp-code-coloring.lua`
+- `workspace/p2-smart-pins-tutorial/filters/p2kb-sp-code-coloring.lua` — **retired
+  document**; named because it is where the lineage starts, not as a copy source
 - `workspace/p2-io-and-smart-pins-user-guide/filters/p2kb-iosp-code-coloring.lua`
   (best-maintained; also carries the blank-line-preservation fix and
   mnemonic-uppercasing — start from this one)
@@ -143,9 +144,9 @@ defect caught by the `prepare-manual` line-length audit
 Each item is a trust-chain fix, sourced:
 
 - [ ] **Tooling:** remove PNut-IDE menus, `pnut.exe -bd/-cd`, "PNut IDE". Replace
-      with `pnut-ts -d` (compile w/ DEBUG; per `tools/documentation/
-      pnut_ts-usage-guide.md`) and `pnut-term-ts` (host/debug terminal; per
-      `narrative/my-posts/my-pnut-term-ts.md`).
+      with `pnut-ts -d` (compile w/ DEBUG; per
+      `engineering/tools/documentation/pnut_ts-usage-guide.md`) and `pnut-term-ts`
+      (host/debug terminal; per `engineering/narrative/my-posts/my-pnut-term-ts.md`).
 - [ ] **P1-isms:** `cognew` → `COGSPIN`/`COGINIT`; `CNT` → `GETCT`. (current-doc
       lines ~71,74,151,161.)
 - [ ] **DEBUG formatters:** bare `DEC/HEX/BIN` → `UDEC/UHEX/UBIN` (+`_` variant

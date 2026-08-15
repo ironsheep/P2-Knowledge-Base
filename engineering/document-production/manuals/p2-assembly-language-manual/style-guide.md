@@ -74,7 +74,9 @@ Following the established P2KB document production pattern:
 
 All LaTeX templates for this manual use the prefix `p2kb-pasm2-` to distinguish from:
 - `p2kb-desilva-*` (DeSilva tutorial manual)
-- `p2kb-smart-pins-*` (Smart Pins tutorial)
+- `p2kb-smart-pins-*` (Smart Pins Tutorial — **retired**; the prefix is listed so it is
+  recognised, not so it is copied. The live smart-pin manual is
+  `p2-io-and-smart-pins-user-guide`, prefix `p2kb-iosp-*`.)
 - `p2kb-foundation.*` (shared foundation, if applicable)
 
 ### 2.3 Document Naming

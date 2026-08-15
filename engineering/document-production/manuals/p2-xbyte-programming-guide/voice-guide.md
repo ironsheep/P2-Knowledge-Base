@@ -227,7 +227,7 @@ measures closing-beat rate and the longest consecutive run.
 - [ ] Registers/symbols in monospace (`PA`, `PB`, `_RET_`)
 
 ### Discipline
-- [ ] Every hardware claim traces to the Silicon Doc / KB YAML (grounding digest)
+- [ ] Every hardware claim traces to the P2 Documentation v35 / KB YAML (grounding digest)
 - [ ] The 6-clock figure cited as the hardware overhead; NO Spin2-method interpreter clock timings
 - [ ] Capstone/vignette code is tiny & illustrative and compiles with `pnut-ts`
 - [ ] No "systems similar to the P2" content in v0.1.0; external projects only in Appendix C as links

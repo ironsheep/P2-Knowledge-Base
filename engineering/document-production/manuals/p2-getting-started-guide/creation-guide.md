@@ -34,8 +34,8 @@ the spatial-computing thesis) is the sibling book, *The P2 Architect's Guide*, t
 **This document is NOT:**
 - A Spin2 reference — that is the **Spin2 Language Reference v55** (excellent; we do not replace or duplicate it).
 - A PASM2 reference — that is the **P2 Assembly Language Manual**.
-- A per-subsystem deep dive — those are the **I/O & Smart Pins ("Blue Book")**, **Streamer**, and **Debug** guides.
-- A re-spec of the silicon — that is the **Silicon Doc** (a spec, not a teaching doc).
+- A per-subsystem deep dive — those are the **I/O & Smart Pins**, **Streamer**, and **Debug** guides.
+- A re-spec of the silicon — that is the **P2 Documentation v35** (a spec, not a teaching doc).
 - A learn-by-building tutorial — that is **DeSilva** (a guided build with a strong narrator).
 - **A design / decomposition book.** Functional decomposition and the spatial-computing thesis are the advanced
   follow-on, *The P2 Architect's Guide* (`manuals/p2-architect-guide/`). This book hands the ready reader off to it.
@@ -55,7 +55,7 @@ any prior P2 (or P1) experience. The chapters build the background in order; eac
 |--------|-------------|
 | **Spin2 Language Reference v55** | The Spin2 reference. This guide orients you to Spin2's *role* and the Spin2-vs-PASM2 choice, then links here. |
 | **P2 Assembly Language Manual** | The PASM2 reference. Same: orient, link out. |
-| **I/O & Smart Pins User Guide ("Blue Book")** | The smart-pin deep dive (the 32 modes). This guide introduces *what smart pins are for*, then links. |
+| **I/O & Smart Pins User Guide** | The smart-pin deep dive (the 32 modes). This guide introduces *what smart pins are for*, then links. |
 | **P2 Streamer Programming Guide** | The streamer deep dive. Orient + link. |
 | **P2 Debug Window / Single-Step Debugger** | Tooling for observing/stepping. Referenced where relevant. |
 | **DeSilva PASM2 Tutorial** | A guided PASM build with a narrator. This guide is the conceptual orientation, not a build — complementary, not overlapping. |
@@ -136,7 +136,7 @@ paths explicitly.
 ### 4.1 Primary sources (all in-repo; nothing invented)
 | Chapter | Primary sources |
 |---------|-----------------|
-| Ch1 — Meet the Propeller 2 | `deliverables/ai/P2/architecture/` — `p2-architecture-mental-model.yaml`, `cog.yaml`, `hub.yaml`, `cordic.yaml`, `streamer/`, `event_system.yaml`, `interrupts.yaml`, `clock_system.yaml`, `boot-rom/`, `locks.yaml`, `lookup_ram.yaml`, `fifo.yaml`, `xbyte_engine.yaml`; Silicon Doc v35; P2 datasheet |
+| Ch1 — Meet the Propeller 2 | `deliverables/ai/P2/architecture/` — `p2-architecture-mental-model.yaml`, `cog.yaml`, `hub.yaml`, `cordic.yaml`, `streamer/`, `event_system.yaml`, `interrupts.yaml`, `clock_system.yaml`, `boot-rom/`, `locks.yaml`, `lookup_ram.yaml`, `fifo.yaml`, `xbyte_engine.yaml`; P2 Documentation v35; P2 datasheet |
 | Ch2 — Reading P2 Code | `language/` YAML (Spin2 syntax/methods/operators, PASM2 instruction shape); `guides/spin2-getting-started.yaml`, `guides/pasm2-getting-started.yaml`; Spin2 v55 + PASM2 manual (for link-outs) |
 | Ch3 — Putting It to Work | `guides/spin2-getting-started.yaml`, `guides/pasm2-getting-started.yaml`; `serial_loader.yaml` / `boot-rom/`; `language/` YAML; Spin2 v55 + PASM2 manual (for link-outs) |
 | "P1 note:" sidebars | `engineering/ingestion/P1-DOCUMENT-LINEAGE.md` (P1↔P2 edges) + `central-analysis/p1-p2-comparison/P1-P2-FEATURE-COMPARISON.md` |
@@ -145,17 +145,17 @@ paths explicitly.
 > *The P2 Architect's Guide* (`manuals/p2-architect-guide/creation-guide.md`).
 
 ### 4.2 Authority hierarchy
-The KB YAML is the canonical home for every fact. Where YAML is silent, the Silicon Doc and P2 datasheet are
+The KB YAML is the canonical home for every fact. Where YAML is silent, the P2 Documentation v35 and P2 datasheet are
 authoritative for silicon facts. The manual **derives** from these and asserts nothing independently.
 
 ### 4.3 Content verification protocol (hallucination prevention)
-- **Every factual claim traces to the KB / Silicon Doc / datasheet.** No unsourced performance numbers, no
+- **Every factual claim traces to the KB / P2 Documentation v35 / datasheet.** No unsourced performance numbers, no
   invented behavior, no undocumented roadmap claims. Nothing is asserted from memory.
 - **Code examples** compile-cert with `pnut-ts` (`-d` for any DEBUG code) before inclusion.
 - **Reading-literacy gate (Ch2):** review every later code example against the question *"did Ch2 teach the
   reader to read every construct this example uses?"* If an example uses something Ch2 never made readable, fix
   Ch2 (or simplify the example). See §3.3 — this is Ch2's definition-of-done.
-- **Link-out gate:** review every section against *"am I duplicating Spin2 v55 / the Blue Book / PASM2 manual?"*
+- **Link-out gate:** review every section against *"am I duplicating Spin2 v55 / the P2 I/O & Smart Pins User Guide / PASM2 manual?"*
   If yes, cut to an orientation + a link.
 
 ---
@@ -166,7 +166,7 @@ authoritative for silicon facts. The manual **derives** from these and asserts n
 Feature-first orientation. For each subsystem: what it is (one or two plain sentences), what it's *for* (the
 motivating use), and a pointer to its deep manual. Order to build intuition (cogs → hub/memory → pins/smart
 pins → CORDIC/streamer → events → clock/boot). Imagery and "you" are welcome. **No** spatial-computing
-abstraction; **no** exhaustive enumeration (e.g., name that smart pins have 32 modes, link to the Blue Book —
+abstraction; **no** exhaustive enumeration (e.g., name that smart pins have 32 modes, link to the P2 I/O & Smart Pins User Guide —
 do not list them).
 
 ### 5.2 Chapter 2 — Reading P2 Code
@@ -191,7 +191,7 @@ Short, optional, in-context margin/callout boxes for migrating P1 veterans: "sam
 
 ### 5.5 Back matter — Where to go next
 A light map that hands the ready reader off: the reference manuals for depth (Spin2 v55, the P2 Assembly Language
-Manual, the I/O & Smart Pins "Blue Book," the Streamer guide, the Debug guides) and, for the reader ready to
+Manual, the I/O & Smart Pins User Guide, the Streamer guide, the Debug guides) and, for the reader ready to
 think about *designing* systems on the P2, the sibling design book — *The P2 Architect's Guide* (functional
 decomposition and the spatial-computing thesis). Each entry gets a one-line "read this when…". This is a
 sign-post, not a chapter; keep it short.

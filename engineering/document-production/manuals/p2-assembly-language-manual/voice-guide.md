@@ -215,7 +215,7 @@ The distinction in this manual's terms:
 
 A rhetorical flourish that *demands* a punchy payoff is exactly where an
 unsupported claim slips in. At write time, strip the flourish off any closing
-sentence and read what remains as a bare claim — satisfy it from the Silicon Doc
+sentence and read what remains as a bare claim — satisfy it from the P2 Documentation v35
 or the instruction's own encoding, or cut it. Two source-free tests: does the
 manual already say the opposite elsewhere, and does the sentence lean on
 `never / always / every / only / nothing / impossible / free / the single most`?

@@ -23,7 +23,7 @@ This manual serves as the **definitive source of truth** for the Propeller 2 ass
 
 **This document is NOT:**
 - A tutorial for learning assembly (that's the DeSilva manual: `p2-pasm-desilva-style`)
-- A comprehensive Smart Pins guide (that's `p2-smart-pins-tutorial`)
+- A comprehensive Smart Pins guide (that's `p2-io-and-smart-pins-user-guide`)
 - A beginner's first introduction to P2
 
 ### 1.2 Target Audience
@@ -54,7 +54,7 @@ This manual serves three audiences, in order of primary focus:
 |--------|---------|--------------|
 | **This manual** | Instruction reference, source of truth | The definitive technical reference |
 | `p2-pasm-desilva-style` | Tutorial - "Discovering P2 Assembly" | Pedagogical complement; readers graduate to this manual |
-| `p2-smart-pins-tutorial` | Smart Pin modes and applications | This manual covers Smart Pin *instructions*; that manual covers *modes* |
+| `p2-io-and-smart-pins-user-guide` | Smart Pin modes and applications | This manual covers Smart Pin *instructions*; that guide covers *modes* |
 | `p2-debug-window-manual` | DEBUG system reference | This manual covers DEBUG instruction; that manual covers DEBUG windows |
 
 ### 1.4 Source Material
@@ -68,16 +68,23 @@ This manual replaces and enhances the partial Parallax draft:
 - **Gap:** ~60 instructions had minimal or no documentation
 
 **Knowledge Base Source (Authoritative):**
-- **Location:** `/engineering/knowledge-base/P2/language/pasm2/`
-- **Count:** 376 YAML files total:
-  - 359 instructions
-  - 15 directives (ORG, ORGF, ORGH, BYTE, WORD, LONG, FILE, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES, END)
+- **Location:** `deliverables/ai/P2/language/pasm2/` — the shipped P2 Knowledge Base.
+  Note that `engineering/knowledge-base/` is documented as a **transient** tree and
+  would not be the authority even where it exists.
+- **Count** (verified against the tree 2026-08-15): **381 YAML files at the top level**
+  - 361 instructions
+  - 13 assembly directives (ORG, ORGF, ORGH, BYTE, WORD, LONG, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES)
   - 6 constants (TRUE, FALSE, PI, NEGX, POSX, COGEXEC)
-  - 1 special registers reference file
+  - 1 special-registers reference file
+  - plus the subdirectories `concepts/ conventions/ groups/ idioms/ patterns/ registers/`,
+    bringing the tree to 421 YAML files
+- **Two directives are documented elsewhere** — look there rather than concluding they
+  are undocumented: `FILE` → `deliverables/ai/P2/language/spin2/assembly-directives/file.yaml`,
+  `END` → `deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml`.
 - **Status:** Complete language element inventory with structured data
 
 **Additional Sources:**
-- Silicon documentation
+- P2 Documentation v35
 - P2 spreadsheet (encoding data)
 - Community-validated examples
 
@@ -297,15 +304,15 @@ Knowing what NOT to do is as important as knowing what to do:
 
 | Source | Location | Content | Authority |
 |--------|----------|---------|-----------|
-| **YAML Instruction Files** | `/engineering/knowledge-base/P2/language/pasm2/` | 375 instruction definitions | PRIMARY - structured, validated |
+| **YAML Instruction Files** | `deliverables/ai/P2/language/pasm2/` | 361 instruction definitions (381 top-level YAMLs) | PRIMARY - structured, validated |
 | **Parallax PASM2 Manual** | `/engineering/ingestion/sources/pasm2-manual/` | Original descriptions, examples | SECONDARY - prose reference |
 | **P2 Spreadsheet** | (ingested) | Encoding data, complete inventory | PRIMARY - encoding authority |
-| **Silicon Documentation** | (ingested) | Hardware behavior details | PRIMARY - hardware truth |
+| **P2 Documentation v35** | (ingested) | Hardware behavior details | PRIMARY - hardware truth |
 
 ### 4.2 Authority Hierarchy
 
 When sources conflict:
-1. **Silicon documentation** - Hardware behavior is ground truth
+1. **P2 Documentation v35** - Hardware behavior is ground truth
 2. **YAML files** - Structured, validated data
 3. **Spreadsheet** - Encoding accuracy
 4. **Parallax manual** - Prose descriptions, examples
@@ -317,7 +324,7 @@ Each instruction entry should be traceable to sources:
 - Which YAML file contains the structured data
 - Which page of Parallax manual has prose (if any)
 - Whether encoding was verified against spreadsheet
-- Any silicon doc references for hardware behavior
+- Any P2 Documentation v35 references for hardware behavior
 
 ---
 
@@ -338,13 +345,13 @@ For PASM2 instruction documentation, every claim falls into these categories:
 
 | Claim Type | Required Source | Example Claim |
 |------------|-----------------|---------------|
-| **Instruction behavior** | YAML `description:` + Silicon Doc | "ADD stores sum in Dest" |
+| **Instruction behavior** | YAML `description:` + P2 Documentation v35 | "ADD stores sum in Dest" |
 | **Flag effects** | YAML `flags:` field | "C flag set on carry" |
 | **Cycle timing** | YAML `clocks:` field | "Takes 2 clock cycles" |
 | **Encoding bits** | YAML `encoding:` + Spreadsheet | "Opcode is 0001000" |
 | **Syntax forms** | YAML `syntax:` field | "ADD Dest, {#}Src {WC}" |
-| **Hardware capability** | Silicon Doc ONLY | "CORDIC computes sin/cos" |
-| **Synchronization claims** | Silicon Doc ONLY | "Hub access every 8 clocks" |
+| **Hardware capability** | P2 Documentation v35 ONLY | "CORDIC computes sin/cos" |
+| **Synchronization claims** | P2 Documentation v35 ONLY | "Hub access every 8 clocks" |
 | **Worked example / idiom** | Same source as the behavior it demonstrates | "abs + if_c neg = edge-case-safe abs" — an example IS a claim; verify it end-to-end (see 4A.8) |
 
 ### 4A.2 Red-Flag Phrases for PASM2
@@ -353,14 +360,14 @@ For PASM2 instruction documentation, every claim falls into these categories:
 
 | Phrase | Risk Level | Why Suspicious | Action |
 |--------|------------|----------------|--------|
-| "provides synchronization" | **CRITICAL** | F01/F02 fabrications used this | Find in Silicon Doc or DON'T WRITE |
+| "provides synchronization" | **CRITICAL** | F01/F02 fabrications used this | Find in P2 Documentation v35 or DON'T WRITE |
 | "eliminates variation" | **CRITICAL** | Optimization claims need proof | Citation required |
-| "side effect of" | HIGH | Invented secondary behaviors | Must be in YAML or Silicon Doc |
+| "side effect of" | HIGH | Invented secondary behaviors | Must be in YAML or P2 Documentation v35 |
 | "also enables" | HIGH | Capability creep | Verify the capability exists |
 | "automatically" | MEDIUM | Automatic behavior must be documented | Check source for automatic behavior |
 | "can be used to" | MEDIUM | Use case attribution | Verify the use case is valid |
 | "mechanism for" | MEDIUM | Implementation claim | Must trace to hardware doc |
-| "in parallel" / "overlaps" / "while … proceeds" | **CRITICAL** | 2026-07-09 §4.6.2 fabricated RDLONG parallelism | A plain hub/mem op BLOCKS — verify vs Silicon Doc/CSV or DON'T WRITE |
+| "in parallel" / "overlaps" / "while … proceeds" | **CRITICAL** | 2026-07-09 §4.6.2 fabricated RDLONG parallelism | A plain hub/mem op BLOCKS — verify vs P2 Documentation v35/CSV or DON'T WRITE |
 | "pipelined" (of a hub read / any single op) | HIGH | Only FIFO/streamer + SETQ-burst hide hub latency | Name the actual mechanism or DON'T WRITE |
 | "C/Z indicates <edge/special case>" | **CRITICAL** | 2026-07-09 §3.5.4 ABS invented a C-edge-case (C is the original sign) | Verify the flag's ACTUAL meaning (CSV C/Z column) |
 | "takes N clock cycles" (for M instructions) | HIGH | Cycle-count vs instruction-count confusion (§3.3) | Each instr ≥2 clocks; sum per-instruction clocks from the CSV |
@@ -377,13 +384,13 @@ For PASM2 instruction documentation, every claim falls into these categories:
 │  1. What am I claiming? (behavior/timing/capability/syntax)     │
 │                                                                 │
 │  2. Which source should contain this?                           │
-│     □ YAML file: /engineering/knowledge-base/P2/language/pasm2/ │
-│     □ Silicon Doc: specific section                             │
+│     □ YAML file: deliverables/ai/P2/language/pasm2/             │
+│     □ P2 Documentation v35: specific section                    │
 │     □ Spreadsheet: encoding data                                │
 │                                                                 │
 │  3. Can I cite the EXACT location?                              │
 │     □ YAML field name and value                                 │
-│     □ Silicon Doc page/section                                  │
+│     □ P2 Documentation v35 page/section                         │
 │     □ Spreadsheet row/column                                    │
 │                                                                 │
 │  4. Does the source say this EXACTLY?                           │
@@ -410,8 +417,8 @@ Claim to write: "ADD sets the C flag if carry occurs"
 Attempted claim: "HUBSET provides a synchronization mechanism that eliminates hub access variation"
 
 1. Claim type: Hardware capability
-2. Required source: Silicon Doc HUBSET section
-3. Check: Silicon Doc lists 5 HUBSET functions: clock config, crystal control, PLL, hub sync mode, cog reset
+2. Required source: P2 Documentation v35 HUBSET section
+3. Check: P2 Documentation v35 lists 5 HUBSET functions: clock config, crystal control, PLL, hub sync mode, cog reset
 4. Does "eliminates variation" appear? NO
 5. Does "synchronization mechanism" appear? NO (only "sync mode" for specific crystal function)
 6. Result: **CLAIM BLOCKED** - This is extrapolation/fabrication
@@ -423,15 +430,15 @@ Claim to write: "WRPIN timing varies based on Smart Pin mode"
 1. Claim type: Timing behavior
 2. Required source: YAML `clocks:` field
 3. Check: YAML shows fixed clock count, no mode variation documented
-4. Silicon Doc check: No Smart Pin timing variation table found
+4. P2 Documentation v35 check: No Smart Pin timing variation table found
 5. Result: **Don't write as fact** → Instead write: "Timing is [X clocks] as specified; mode-specific variations, if any, are not documented in available sources."
 
 ### 4A.5 Source Location Quick Reference
 
 | Content | Primary Location |
 |---------|------------------|
-| Instruction YAML files | `/engineering/knowledge-base/P2/language/pasm2/` |
-| Silicon documentation | `/engineering/ingestion/sources/silicon/` |
+| Instruction YAML files | `deliverables/ai/P2/language/pasm2/` |
+| *Propeller 2 Documentation v35 — Rev B/C Silicon* | `engineering/ingestion/sources/silicon-doc/` |
 | Parallax draft manual | `/engineering/ingestion/sources/pasm2-manual/` |
 | Encoding spreadsheet | (ingested data, cross-reference via YAML) |
 | Audit findings | `./audit/` (this manual's audit folder) |
@@ -459,7 +466,7 @@ exactly where the fabrications hid. Write-time rules:
    case" must be verified end-to-end (each instruction's clocks from the CSV; each flag's
    real meaning) BEFORE writing — like any instruction-entry claim.
 2. **Trust-chain proof applies to conceptual prose too:** silicon → YAML → doc. The YAML
-   is not authority until itself proven against the CSV / Silicon Doc.
+   is not authority until itself proven against the CSV / P2 Documentation v35.
 3. **Operator notation** (see §6.2): in behavior descriptions `=` = receives, `==` =
    comparison — a comparison written `=` is a defect; in fenced Spin2 code use `:=` / `==`.
 4. Full method: methodology §5.4 (exhaustive prose coverage), §6.4 (operator rule), §8.6
@@ -772,7 +779,7 @@ Maintain tracking of:
 ### 8.2 Enhancement Process
 
 1. **Select instruction** - Prioritize by usage frequency or gap severity
-2. **Research sources** - Check Parallax manual, silicon doc, forums
+2. **Research sources** - Check Parallax manual, P2 Documentation v35, forums
 3. **Write/enhance sections** - Fill gaps, improve descriptions
 4. **Validate** - Run checklist, test examples
 5. **Cross-reference** - Ensure related instructions link correctly
@@ -790,7 +797,7 @@ Maintain tracking of:
 ### 8.4 PDF Generation
 
 - **Template:** To be created (similar to other P2KB manuals)
-- **Output directory:** `/engineering/pdf-forge/production/p2-assembly-language-manual/`
+- **Output directory:** `engineering/document-production/outbound/p2-assembly-language-manual/`
 - **Lua filters:** As needed for formatting
 - **Request file:** `request.json` with appropriate pandoc_args
 

@@ -10,7 +10,7 @@
 
 ### 1.1 Purpose and Scope
 
-This guide does two complementary jobs. It **teaches** what the streamer is, why the P2 has one, and how to think about it — the conceptual understanding a reader needs before the details mean anything — and it serves as the **comprehensive reference** for every streamer mode, constant, and configuration. It consolidates silicon documentation, Spin2 documentation, and real-world code into a single authoritative source, written in two registers (see `voice-guide.md`, Section 1.4): a warm teaching register for the conceptual chapter and chapter openers, and a precise reference register for the tables and specifications.
+This guide does two complementary jobs. It **teaches** what the streamer is, why the P2 has one, and how to think about it — the conceptual understanding a reader needs before the details mean anything — and it serves as the **comprehensive reference** for every streamer mode, constant, and configuration. It consolidates P2 Documentation v35, Spin2 documentation, and real-world code into a single authoritative source, written in two registers (see `voice-guide.md`, Section 1.4): a warm teaching register for the conceptual chapter and chapter openers, and a precise reference register for the tables and specifications.
 
 **This document IS:**
 - A conceptual introduction to the streamer — what it is, why it exists, and when to use it
@@ -42,7 +42,7 @@ This guide serves developers who:
 | Manual | Relationship |
 |--------|-------------|
 | **P2 Assembly Language Manual** | Covers XINIT/XCONT/XZERO instructions; this guide covers streamer *usage* |
-| **P2 Smart Pins Tutorial** | Smart pins often coordinate with streamer (SPI clocks, etc.) |
+| **P2 I/O & Smart Pins User Guide** | Smart pins often coordinate with streamer (SPI clocks, etc.) |
 | **P2 Debug Window Manual** | DEBUG can observe streamer output |
 | **DeSilva PASM Style** | A true step-by-step tutorial; this guide teaches concepts and explains the hardware, but is not a guided build |
 
@@ -254,7 +254,7 @@ See `voice-guide.md` Section 1.2 for the summary of pedagogical grounding.
 
 | Source | Location | Content | Authority |
 |--------|----------|---------|-----------|
-| **Silicon Doc v35** | `/engineering/ingestion/sources/silicon-doc/` | Detailed streamer operation, encoding tables, timing | PRIMARY - hardware truth |
+| **P2 Documentation v35** | `/engineering/ingestion/sources/silicon-doc/` | Detailed streamer operation, encoding tables, timing | PRIMARY - hardware truth |
 | **Spin2 v51 Docs** | `/engineering/ingestion/sources/spin2-v51/` | Complete symbol reference (X_* constants) | PRIMARY - constant definitions |
 | **Flash Loader Source** | `/engineering/ingestion/external-inputs/source-code/spin-flash-loader/` | Real-world streamer+smart pin coordination | EXAMPLE - official ROM code |
 | **Quick Bytes Goertzel** | `/engineering/ingestion/sources/quick-bytes-code/` | DDS/Goertzel implementation | EXAMPLE - Parallax examples |
@@ -263,7 +263,7 @@ See `voice-guide.md` Section 1.2 for the summary of pedagogical grounding.
 ### 4.2 Authority Hierarchy
 
 When sources conflict:
-1. **Silicon Documentation** - Hardware behavior is ground truth
+1. **P2 Documentation v35** - Hardware behavior is ground truth
 2. **Spin2 Documentation** - Symbol definitions
 3. **Official ROM Code** - Proven implementations
 4. **Community Examples** - Validated patterns
@@ -283,12 +283,12 @@ The PASM2 manual audit discovered that **hallucinations occur at the moment of w
 
 | Claim Type | Required Source | Example Claim |
 |------------|-----------------|---------------|
-| **Mode encoding** | Silicon Doc mode tables | "RFBYTE uses D[31:28] = %1000" |
+| **Mode encoding** | P2 Documentation v35 mode tables | "RFBYTE uses D[31:28] = %1000" |
 | **Symbol values** | Spin2 X_* constant reference | "X_RFBYTE_1P_1DAC1 = %1000 << 28" |
-| **NCO behavior** | Silicon Doc NCO section | "NCO rolls over every N clocks" |
-| **DAC routing** | Silicon Doc DAC section | "DAC0 drives pins %xxxx00" |
-| **Pin behavior** | Silicon Doc ONLY | "Pins output in specified order" |
-| **Timing claims** | Silicon Doc + validated code | "Pixel rate of 25 MHz requires..." |
+| **NCO behavior** | P2 Documentation v35 NCO section | "NCO rolls over every N clocks" |
+| **DAC routing** | P2 Documentation v35 DAC section | "DAC0 drives pins %xxxx00" |
+| **Pin behavior** | P2 Documentation v35 ONLY | "Pins output in specified order" |
+| **Timing claims** | P2 Documentation v35 + validated code | "Pixel rate of 25 MHz requires..." |
 | **Integration patterns** | Official ROM code (flash loader) | "WAITXFI synchronization pattern" |
 
 #### Red-Flag Phrases for Streamer Documentation
@@ -297,11 +297,11 @@ The PASM2 manual audit discovered that **hallucinations occur at the moment of w
 
 | Phrase | Risk Level | Why Suspicious | Action |
 |--------|------------|----------------|--------|
-| "automatically" | **CRITICAL** | Streamer requires explicit configuration | Verify in Silicon Doc |
+| "automatically" | **CRITICAL** | Streamer requires explicit configuration | Verify in P2 Documentation v35 |
 | "synchronizes" | **HIGH** | Sync claims need hardware evidence | Find specific mechanism |
 | "optimizes" | **HIGH** | Optimization claims need proof | Cite performance data |
 | "enables" (vague) | MEDIUM | Capability attribution | Find specific mode/symbol |
-| "internally buffers" | MEDIUM | Buffer behavior must be documented | Check Silicon Doc |
+| "internally buffers" | MEDIUM | Buffer behavior must be documented | Check P2 Documentation v35 |
 | "protocol support" | MEDIUM | Streamer is raw data, not protocol-aware | Clarify what mode does |
 
 #### The Verification Protocol for Streamer
@@ -316,13 +316,13 @@ The PASM2 manual audit discovered that **hallucinations occur at the moment of w
 │  1. What am I claiming? (mode/NCO/DAC/pin/timing)               │
 │                                                                 │
 │  2. Which source should contain this?                           │
-│     □ Silicon Doc: mode tables, NCO, DAC, timing                │
+│     □ P2 Documentation v35: mode tables, NCO, DAC, timing       │
 │     □ Spin2 Docs: X_* symbol values                             │
 │     □ ROM Code: proven implementation patterns                  │
 │     □ OBEX/Community: validated usage examples                  │
 │                                                                 │
 │  3. Can I cite the EXACT location?                              │
-│     □ Silicon Doc section (Part 2 - Pixel Operations)           │
+│     □ P2 Documentation v35 section (Part 2 - Pixel Operations)  │
 │     □ Spin2 symbol name and hex value                           │
 │     □ Code file and line                                        │
 │                                                                 │
@@ -341,8 +341,8 @@ The PASM2 manual audit discovered that **hallucinations occur at the moment of w
 Claim to write: "X_RFBYTE_1P_1DAC1 outputs one byte per NCO rollover to 1 pin and 1 DAC"
 
 1. Claim type: Mode behavior + symbol
-2. Required source: Silicon Doc mode table + Spin2 symbol reference
-3. Check: Silicon Doc → RFBYTE mode table → "1P" = 1 pin, "1DAC1" = DAC channel 1
+2. Required source: P2 Documentation v35 mode table + Spin2 symbol reference
+3. Check: P2 Documentation v35 → RFBYTE mode table → "1P" = 1 pin, "1DAC1" = DAC channel 1
 4. Check: Spin2 → X_RFBYTE_1P_1DAC1 exists with documented value
 5. Source says exactly this? YES → Write the claim
 
@@ -351,8 +351,8 @@ Claim to write: "X_RFBYTE_1P_1DAC1 outputs one byte per NCO rollover to 1 pin an
 Attempted claim: "The streamer automatically synchronizes with Hub access timing"
 
 1. Claim type: Synchronization capability
-2. Required source: Silicon Doc streamer/hub interaction section
-3. Check: Silicon Doc describes NCO as independent timing source
+2. Required source: P2 Documentation v35 streamer/hub interaction section
+3. Check: P2 Documentation v35 describes NCO as independent timing source
 4. Does "automatic hub synchronization" appear? NO
 5. Result: **CLAIM BLOCKED** - This is an assumption about behavior
 
@@ -365,7 +365,7 @@ For comprehensive post-write audit procedures, see:
 
 ### 4.5 Key Source Files
 
-**Silicon Documentation (Part 2 - Pixel Operations):**
+**P2 Documentation v35 (Part 2 - Pixel Operations):**
 - `part2-pixel-ops.txt` - Streamer mode tables, DAC routing
 - `part2-video-output.txt` - HDMI/DVI, colorspace converter
 - `part2-more-content.txt` - DDS/Goertzel detailed operation
@@ -553,7 +553,7 @@ channel number. DAC0 → pins %xxxx00, DAC1 → pins %xxxx01, etc.
 ### 8.1 Validation Checklist
 
 **Per Mode:**
-- [ ] Encoding matches silicon documentation
+- [ ] Encoding matches P2 Documentation v35
 - [ ] Symbol matches Spin2 documentation
 - [ ] D field structure documented
 - [ ] S field usage documented
@@ -595,7 +595,7 @@ All code examples must:
 
 ### 9.2 Review Process
 
-1. **Technical accuracy** - Verify against silicon doc
+1. **Technical accuracy** - Verify against P2 Documentation v35
 2. **Code validation** - Compile all examples
 3. **Consistency check** - Terminology, formatting
 4. **Completeness** - All modes, symbols covered
@@ -619,7 +619,7 @@ All code examples must:
 
 ### 10.1 Update Triggers
 
-- New silicon documentation release
+- New P2 Documentation v35 release
 - Symbol additions in Spin2
 - Community-discovered modes or techniques
 - Error corrections
@@ -650,7 +650,7 @@ All code examples must:
 
 ## Appendix: Key Content Extracted
 
-### From Silicon Documentation
+### From P2 Documentation v35
 
 **Mode Encoding Tables:**
 - Immediate → LUT → Pins/DACs (0000-0011)
