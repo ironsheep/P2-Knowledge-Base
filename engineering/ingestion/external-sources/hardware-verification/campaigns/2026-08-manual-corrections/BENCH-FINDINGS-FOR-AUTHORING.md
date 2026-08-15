@@ -22,6 +22,44 @@ it maps to a reader-facing trap. The test of inclusion is: *would this have save
 
 ---
 
+## Evidence grading — read this before authoring anything
+
+We spent this campaign discovering that our own assumptions were the problem. The failure mode we
+must not now hand to readers is **writing an inference as if it were a measurement.** Every claim
+below carries a grade:
+
+| grade | meaning |
+|-------|---------|
+| **[M]** | **Measured** on our bench, after the `DEBUG_COGS` fix. Safe to author. |
+| **[M-pre]** | Measured, but **before** the `DEBUG_COGS` fix (Test 6), i.e. with the debug interrupt live in the cog. **Trustworthy only if the test used no streamer.** A streamer measurement at this grade needs a confirming run. |
+| **[D]** | **Documentary** — from the Silicon Doc, the Spin2 v55 symbol table, or Chip's shipped demo. Not measured by us. Cite it as documentation, not as our result. |
+| **[I]** | **Inference** — our reading of a measurement or a source. State the observation, not the mechanism, unless we can support the mechanism. |
+
+**Timeline that decides the grades.** `DEBUG_COGS = %0000_0001` entered `test-f260-goertzel-input`
+at BUILD 2. Everything from `test-f260-goertzel` (the 23-round probe) predates it. So:
+
+- **Safe [M]:** the input probe's C5, DC-by-sum-select, INSTRUMENT, SEQ, BISECT and TONE-delta rows.
+- **Safe despite [M-pre]:** F-259 and F-263 — neither uses the streamer at all (cog DAC + smart-pin
+  ADC; CORDIC + hub). F-263 additionally has seven consistent runs.
+- **Needs a confirming run:** anything [M-pre] that *does* use the streamer — `:607`'s byte counts,
+  C10's streamer DAC override, and F-256 (XBYTE is a different sequencer, but we have no basis for
+  assuming it is immune).
+
+### Known open — do NOT author these yet
+
+1. **`:607` byte counts** — reproduced four times, but all four with the debugger in the streaming
+   cog. Re-run staged.
+2. **`_RET_ CALL` falls through** — one run, pre-fix. The sprint plan's §3 error clause already
+   demands independent confirmation before restructuring XBYTE §15.3. Re-run staged.
+3. **Streamer DAC override from a launched cog / `M[3:0]` = cog id** — the mechanism is [D] from
+   Chip's `setnib dacmode,cogid,#2`; our supporting measurement (C10) is [M-pre] and used the
+   streamer. Note also that our own `SETDACS`-path test of the same idea (C6b) came back negative,
+   which we explained as testing the wrong path. That explanation is [I].
+4. **`pppp × 4` = base pin** — [D] only. Our block-select sweep was [M-pre] and came back flat, so
+   we have *not* independently confirmed it.
+
+---
+
 ## Test 1 — Cog-DAC drive gating (F-259)
 
 **Question.** A community reader reported that the Streamer Guide's cog-DAC recipe drives nothing
@@ -87,15 +125,22 @@ the rig can see the failure mode before any arm was trusted.
 | **D** | register-only fill **and** drain, hub I/O outside | **clean through FILL=7** |
 | A | Assembly ch.5 shape | 15 of 16 results wrong |
 
-**What it means.** Chip's model is correct — deep pipelining works. The community report is
-**right in effect, wrong in cause**: it is not a 2-deep result buffer, it is a fill/drain loop
-that cannot keep up with the 8-clock slot cadence.
+**What it means. [M-pre, streamer-free]** Deep pipelining works — ARM D returned correct results
+through FILL=7, which is inconsistent with a 2-deep result buffer. So the community report's
+*conclusion* about buffer depth is not supported. **[I]** Our explanation — that the fill/drain
+loop cannot keep up — is a reading of where results are lost, not something we measured directly;
+state it as "results are lost from whichever phase contains the hub access", which is what the
+data shows.
 
 ### Authoring
 
-- **TEACH** — the rule, stated positively: **no hub access inside either CORDIC loop.** Issue and
-  retrieve at the 8-clock slot cadence and batch hub I/O outside. Break the fill and you lose
-  results from the fill onward; break the drain and you lose from the drain onward.
+- **TEACH [M-pre, streamer-free, 7 runs]** — what we actually tested: a `RDLONG` inside the fill
+  loop and a `WRLONG` inside the drain loop each cost results from that phase onward, while a
+  register-only fill *and* drain stayed clean through FILL=7. The safe way to state it is as the
+  tested shape: **keep hub access out of both CORDIC loops and batch it outside.** We did not test
+  every hub operation or every cadence, so avoid writing an absolute law about "any hub access" or
+  prescribing an exact 8-clock discipline we did not measure. **[I]** on the cause: "the loop
+  cannot keep up" is our reading; the measurement shows *where* results are lost, not *why*.
 - **CORRECTION** — two of our own shipped documents violate it:
   `P2AN002/examples-library/cordic-pipeline-throughput.spin2` (`rdlong` in fill, `wrlong` in
   steady state) and Assembly ch.5 `chapter-05-hardware.md:~100-126` (two `rdlong`s plus
@@ -235,23 +280,41 @@ Densities identical across the three tone rows — the only variable is the dete
 
 **The mode works.** It always worked.
 
-### The protocol nobody documents — and the reason 20+ probe rounds read flat
+### Why 20+ probe rounds read flat — stated as what we measured, not as a mechanism
 
-**The Goertzel accumulators are never zeroed.**
+**[M] What we observed, with our discrete `XINIT` → `WAITXFI` → `GETXACC` pattern:**
 
-- A **fresh cog inherits the previous cog's value.** Measured: each test pass's pre-command read
-  equalled the previous pass's last read, five times running, across `COGINIT`.
-- **Successive commands add.** Measured: two identical commands returned exactly twice one
-  command's total.
+- A **fresh cog's first read equalled the previous cog's last read** — five times running, across
+  `COGINIT`.
+- **Two identical commands returned exactly twice one command's total.**
+- **Absolute reads did not track the input at all**; the difference across one command did, with
+  the selectivity in the table above.
 
-So an absolute `GETXACC` read carries no information — it returns roughly the same number
-regardless of the input, which is precisely what every "flat" sweep in this campaign was showing.
-**Read before the command, read after, and take the difference.**
+**[M] The practical rule that follows for that pattern:** read before the command, read after, and
+take the difference. An absolute `GETXACC` value in this pattern is not a per-command measurement.
 
-This is exactly what Chip's shipped `Goertzel_DEBUG_Demo.spin2` does with its `xcal`/`ycal`
-subtraction. That calibration is removing the **inherited baseline**, not an analog offset.
+**[I] — and a caution we must not skip.** It is tempting to conclude "the Goertzel accumulators are
+never zeroed." **That over-reaches, and Chip's shipped demo is evidence against it.** His loop is
+`xcont` / `getxacc` — one read per command — and he plots the result as a live position. If the
+accumulators never reset, his readings would ramp without bound; they do not. So the honest
+position is:
 
-### Field semantics, confirmed against Chip's shipped demo and our bench
+> With a discrete `XINIT` + `WAITXFI` + `GETXACC` sequence we measured running-total behaviour.
+> With Chip's continuous `XCONT` loop, per-command reads evidently work. **We have not established
+> which part of the difference — `XINIT` vs `XCONT`, the wait, or the cog lifecycle — is
+> responsible.**
+
+**Author the protocol, not the mechanism.** Tell the reader to take the difference across a
+command (or to follow the `XCONT`-loop pattern with an initial calibration, as the shipped demo
+does). Do **not** tell them the accumulators are never cleared — we have not shown that, and it
+would mislead anyone using the `XCONT` pattern.
+
+**[I] on Chip's calibration:** we previously described his `xcal`/`ycal` as removing an analog
+offset, then as removing an inherited baseline. Both were guesses. What is safe to say is that his
+demo **establishes a baseline on the first pass and subtracts it from every later reading**, and
+that a reader measuring absolute accumulator values without such a baseline will be misled.
+
+### Field semantics — mostly [D], with the grades marked
 
 | field | meaning |
 |-------|---------|
@@ -264,11 +327,19 @@ subtraction. That calibration is removing the **inherited baseline**, not an ana
 | `S[15:12]` | which of the four pins are **summed** — mandatory; `0` sums nothing |
 | `S[11:0]` | loop size + LUT window |
 
-Plus: the NCO scale is **2³¹**, not 2³²; DAC output **inverts each LUT byte's MSB** so signed
-table values drive unsigned DACs; and in `DAC_MODE` with `TT=%01`, **`M[3:0]` selects which
-*cog's* DAC channels drive the pin** (Chip's `setnib dacmode,cogid,#2`) while the pin's low two
-bits pick the channel. The streamer's DAC override does work from a launched cog once the pin
-names that cog.
+The table above is **[D]** — the Spin2 v55 symbol table, the Silicon Doc, and the comments in
+Chip's shipped demo. Of it we have independently confirmed only **`S[15:12]` sum-select** **[M]**:
+in the DC-by-sum-select test, `base+1` (our ADC pin) was the only selector position that responded,
+and the empty selector returned exactly zero. **`pppp × 4` = base pin remains [D]** — our own block
+sweep was [M-pre] and flat.
+
+Plus: the NCO scale is **2³¹**, not 2³² **[D]**; DAC output **inverts each LUT byte's MSB** so
+signed table values drive unsigned DACs **[D]**, which we met the hard way when `$FF` and `$00`
+both landed one LSB apart at mid-scale **[M-pre]**; and in `DAC_MODE` with `TT=%01`, `M[3:0]`
+selects which **cog's** DAC channels drive the pin **[D]**, from Chip's `setnib dacmode,cogid,#2`,
+while the pin's low two bits pick the channel **[D]**. Our supporting measurement that the
+streamer's DAC override works from a launched cog is **[M-pre]** and used the streamer — it needs
+the confirming run before it is authored.
 
 ### Authoring
 
