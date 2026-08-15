@@ -116,7 +116,7 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 | "simply" / "just" | **HIGH** | Oversimplification may hide complexity | Learners confused when "simple" fails |
 | "always" / "never" | **HIGH** | Absolute claims need verification | Creates wrong mental models |
 | "similar to" | MEDIUM | Analogy may be misleading | Wrong assumptions transfer |
-| "typically" | MEDIUM | What's the actual behavior? | Learners don't know exceptions |
+| "typically" | MEDIUM | What's the actual behavior? | Learners don't know exceptions. **Stop and verify — this is not a banned word.** If the behavior is fixed, say what it is; if it genuinely varies, "typically" is *required* accuracy under R1 (see `voice-guide.md` §2), and the exception belongs in the sentence. |
 | "behind the scenes" | MEDIUM | Invented implementation details | Can't be verified by learner |
 
 ### The Verification Protocol for Tutorial Content
@@ -438,7 +438,7 @@ Key elements to show:
 - Clear success criteria prevents frustration
 
 ```markdown
-:::yourturn
+::: your-turn
 **Your Turn:** [Action verb + specific task]
 
 Starting code:
@@ -810,7 +810,15 @@ When reviewing Opus-generated content, preserve these natural strengths:
 - Typography or layout fixes
 - Box styling adjustments
 
-**Critical Principle**: Edit passes are NEVER for content. If content needs fixing, regenerate with improved guide/sources.
+**Critical Principle**: **Edit the opus-master in place — never the workspace render.**
+`opus-master/` is canonical; the workspace copy is a regenerable artifact and an edit
+made there is lost on the next assembly (see `READ-ONLY-PROTECTION.md`).
+
+A **content** fix — a wrong claim, a stale section, a correction from an audit — is an
+ordinary surgical edit to the opus-master. Regeneration is for a *structural* change:
+when the chapter plan, the sources, or the guide itself changed enough that re-deriving
+the chapter is cheaper and safer than patching it. Regenerating a shipped 6,000-line
+manual to correct two sections is not the practice and never was.
 
 ---
 

@@ -179,3 +179,25 @@ Current template (lines 148-163):
   - Lines 229-241: Meet the Cogs changed to sidetrack box with correct P2 specs
   - Line 91: WAITX instruction reference uppercased
   - Line 194: All instruction references in chapter end uppercased
+---
+
+## OPEN — Medicine Cabinet colour: three documents, two answers (2026-08-15)
+
+Surfaced by the Sprint-1 guide-layer normalization. **Presentation, so it is Stephen's
+call — recorded here rather than guessed at.** The evidence has been gathered so the
+decision takes one glance:
+
+| where | says | dated |
+|---|---|---|
+| `desilva-style-guide.md` body (box-type table) | **tan** — bg `#FFF8F0`, border `#D2A679` ("warm cream / band-aid tan") | original |
+| `desilva-style-guide.md` change log, v1.2.0 | **cyan** — `#E0F7FA`/`#00ACC1`, "changed from teal to cyan — distinct from PASM green" | 2025-12-12 |
+| `creation-guide.md` | **cyan** — `#E0F7FA`/`#00ACC1` | — |
+| **what actually renders**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva-local.sty` L25-26 | **tan** — `desilva-medicine-bg` `FFF8F0`, `desilva-medicine-border` `D2A679` | shipped |
+
+**So the shipped PDF is tan, and the two cyan claims are stale** — the v1.2.0 palette
+change was recorded in the change log and the creation guide but never made it into the
+`.sty`. That is the fact; which colour *should* be current is the decision.
+
+- If **cyan** was intended: update `p2kb-desilva-local.sty` L25-26 and the style-guide body.
+- If **tan** is correct: strike the cyan line from the v1.2.0 change-log entry and fix the
+  creation guide, so the record stops claiming a change that never happened.

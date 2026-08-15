@@ -200,6 +200,14 @@ The LaTeX escaping script must:
 
 ## Writing Voice
 
+> **Reference, never restate.** The manual's position on the four house voice rules
+> (R1 calibrated confidence · R2 the payoff-sentence test · R3 the anti-pattern family ·
+> R4 cadence budget) is declared in **`voice-guide.md`**, and the rules themselves are
+> stated in `engineering/standards/documentation-standards/documentation-voices-catalog.md`.
+> **This file remains the source of truth for FORMATTING.** The style notes below are the
+> presentational face of the voice; they are not the voice rules and must not grow into a
+> second copy of them.
+
 ### deSilva's Conversational Style
 - Direct address: "You'll discover..."
 - Encouragement: "You've got this!"
