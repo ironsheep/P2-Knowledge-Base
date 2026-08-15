@@ -34,6 +34,75 @@ level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-p
 F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
 nothing warns a streamer author).
 
+### Voice-guide conformance and the in-flight propagation sweep
+
+**Two requirements sit on top of every edit in this sprint, and one of them reorders the work.**
+
+#### A. Every edit must conform to its manual's own voice guide
+
+Each manual carries its own: `voice-guide.md` for most, `desilva-style-guide.md` (plus
+`why-desilva-voice-works.md`) for DeSilva, `style-guide.md` alongside the voice guide for the
+Assembly manual and the Smart Pins Tutorial. **Our corrections are new prose in released documents
+and must read as though the original author wrote them.** This matters most for the Streamer
+Guide's §17.1, which is not a token fix but real new teaching content.
+
+Practically: before editing a manual, read its voice guide; after editing, re-read the new prose
+against it. A correction that is factually right and tonally foreign is still a defect.
+
+#### B. A voice-guide propagation sweep is part-way done, and it collides with the correction map
+
+The XBYTE guide's audit produced three voice-guide changes (commit `acf3b4a2`, *"three tweaks from
+Chip's voice critique"*): the **anti-pattern rows** (tutorial filler · reader-as-foil ·
+self-admiration · staged reveal), **§2.2a calibrated confidence is required — it is not hedging**,
+and **§2.4 cadence budget** (the "metronome" problem — at most ~half of section closings may be
+beats, never more than ~4 in a row, chapter closers worst). Those have been propagating outward,
+unevenly.
+
+**State of the sweep** — keyword-level survey only; each target still needs a real read:
+
+| manual | calibrated confidence | cadence budget | anti-patterns | state |
+|--------|----------------------|----------------|---------------|-------|
+| XBYTE | ✅ | ✅ | ✅ | **origin** |
+| Streamer | ✅ | ✅ | ✅ | full |
+| Assembly | ✅ | ✅ | ✅ | full |
+| Architect | ✅ | — | ✅ | partial |
+| Getting Started | ✅ | — | ✅ | partial |
+| Single-Step Debugger | ✅ | — | ✅ | partial |
+| PNut-Term-TS | ✅ | — | ✅ | partial |
+| **I/O & Smart Pins** | — | — | — | **none** (guide untouched since 2026-01-25) |
+| **Debug Window** | — | — | — | **none** (untouched since 2026-06-01) |
+| **DeSilva** | — | — | — | none, and deliberately so |
+
+**The collision.** I/O & Smart Pins (target #2) and Debug Window (target #5) are both correction
+targets *and* have entirely un-propagated voice guides. Editing them first would write new prose to
+a stale standard that a later sweep flags — our own corrections failing the audit.
+
+**Sequencing rule that follows: a manual's voice-guide propagation is decided and applied BEFORE
+its text is edited.** For IOSP that means the propagation study comes ahead of the F-261 fix.
+
+#### C. Propagation is a study, not a copy
+
+The elements are not equally portable. Proposed discriminator, to be confirmed per target:
+
+- **Accuracy elements propagate everywhere, including highly stylized manuals.** §2.2a's rule —
+  *never state a claim above its evidence* — is about truthfulness, not register. It applies to a
+  chatty tutorial exactly as it applies to a reference, and this sprint is the case in point: the
+  bench leg exists because claims outran evidence.
+- **Register elements are voice-dependent.** Cadence budget, reader-as-foil, staged reveal,
+  self-admiration. In DeSilva several of these are arguably *the voice itself* — direct address and
+  staged reveal are what make it work, which is why `why-desilva-voice-works.md` exists as its own
+  rationale. Propagating them there would flatten the thing that makes the manual valuable.
+
+**Per-target deliverable.** For each gaining voice guide, a short written decision: which elements
+are adopted, which are adapted (and how), which are rejected (and why). The rejections matter most
+— an undocumented rejection reads as an oversight and gets "fixed" by the next sweep.
+
+**Open for Stephen:** whether the propagation sweep is *inside* this sprint for the manuals we are
+touching (IOSP, Debug Window, Streamer, Assembly, DeSilva, XBYTE) and deferred for the rest, or
+run to completion across all ten as its own pass. My recommendation is the former — propagate where
+we are already editing, so the voice standard and the text land together in one release, and leave
+Architect / Getting Started / Single-Step / PNut-Term-TS to a later dedicated pass.
+
 ### Correction map — which documents, and in what order
 
 Nine targets. Released versions from `PUBLICATION-ROSTER.md`.
@@ -70,6 +139,15 @@ Nine targets. Released versions from `PUBLICATION-ROSTER.md`.
    as **v3.0.6** rather than waiting, since F-254 is a public-facing credit claim.
 7. **XBYTE last of the content work** — §4's shape depends on the `_RET_ CALL` confirming run. Do
    not start it early and write it twice.
+
+**All seven content targets are PAST RELEASES** — IOSP v1.0.8, Streamer v1.0.8, Assembly v3.1.5,
+P2AN002 v1.0.2, Debug Window v1.1.2, DeSilva v3.0.5, XBYTE v1.0.1. Every one needs a version bump
+and re-release, and every one corrects text readers already hold. The two exceptions are #8
+(retired-doc cleanup — repo hygiene, not a released document) and #1 (the YAML — published, but on
+the KB commit/tag/push cadence rather than a PDF render).
+
+**Voice-guide gate:** for IOSP and Debug Window, the propagation decision (§B above) precedes the
+text edit.
 
 **Decisions that are Stephen's, not mine:** whether DeSilva re-releases on its own or rides the
 wave; whether the cross-cutting TEACH items (bit-field composition, `DEBUG_COGS`, the `$400` hub
