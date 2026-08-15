@@ -34,6 +34,69 @@ level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-p
 F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
 nothing warns a streamer author).
 
+### Planning-phase research — the two audits that scope this sprint
+
+**These are planning work, not sprint work.** We cannot task the voice dimension without walking a
+dependency chain, and each link is a research question:
+
+> **propagation decision → what each guide will say → how far the shipped text diverges → the size
+> of the job**
+
+So two audits belong in the planning phase, before any task list is written.
+
+#### P1 — Voice-guide propagation audit *(per gaining guide)*
+
+For each guide that would gain elements from the XBYTE audit, study each element against that
+manual's voice and produce a written decision: **adopted · adapted (and how) · rejected (and why)**.
+Rejections carry the most weight — an undocumented rejection reads as an oversight and gets
+"fixed" by the next sweep, quietly converting a deliberate choice into a defect.
+
+Deliverable: the **future text** of each target voice guide, decided. Until that exists, P2 cannot
+run, because there is no standard to measure against.
+
+Note the current propagation table below is a **keyword survey**, not a read. It says where to
+look, not what is there — the Assembly guide shows more anti-pattern hits than XBYTE, which may be
+extra local patterns or the same ones worded differently. P1 must read, not grep.
+
+#### P2 — Manual-vs-new-guide divergence audit *(per manual we are touching)*
+
+With P1's answer in hand, measure how far each manual's **existing** text sits from its **new**
+guide. This is the number that scopes the sprint, and it separates two very different jobs:
+
+| job | scope | negotiable? |
+|-----|-------|-------------|
+| **New prose we write** conforms to the new guide | small — our corrections only | **No.** Mandatory. |
+| **Legacy shipped text** conformed to a newly-tightened guide | potentially large | **Yes — a scope decision, and Stephen's.** |
+
+Conflating those two would turn a correction sprint into a fleet-wide re-edit. They must be
+counted separately.
+
+**Tooling already exists, and it carries fleet data.** `document-audit` **Dimension #4c —
+payoff-sentence sweep** was created by this very XBYTE audit (2026-07-20). Its guidance is directly
+relevant to scoping:
+
+- It extracts **by position, not vocabulary** — every last sentence before a heading and before a
+  closing `:::`.
+- *"Reference-voice documents — entry-per-instruction, table-driven — do not produce this defect; a
+  fleet probe over **65,509 master lines** found it concentrated in a **single document**."*
+  So the legacy-remediation risk for our reference-voice targets is probably small. **P2 should
+  confirm that by measurement rather than assume it in either direction.**
+- **Run #4c before the tone pass** — it produces the falsifiable subset, and the tone findings fall
+  out as a by-product.
+- **A `#4c` finding is never closed by rewording.** If a beat carries a false claim, the *claim* is
+  corrected or removed — not softened. That rule matters here: our own §17.1 rewrite will be
+  written to a cadence budget, and we must not let tone work paper over accuracy work.
+
+#### P3 — Output of the planning phase
+
+1. The decided future text of each affected voice guide (from P1).
+2. A per-manual divergence count separating *new-prose conformance* from *legacy remediation* (P2).
+3. A scope recommendation for the legacy half, for Stephen's decision.
+
+Only then is the correction map below tasked.
+
+---
+
 ### Voice-guide conformance and the in-flight propagation sweep
 
 **Two requirements sit on top of every edit in this sprint, and one of them reorders the work.**
