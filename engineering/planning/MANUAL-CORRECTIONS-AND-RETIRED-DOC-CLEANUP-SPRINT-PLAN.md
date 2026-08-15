@@ -34,6 +34,33 @@ level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-p
 F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
 nothing warns a streamer author).
 
+### SPLIT INTO TWO SPRINTS *(Stephen, 2026-08-15)*
+
+This plan is being split. The voice work is not a sub-task of the manual work — it is the
+**standard** the manual work is measured against, and it currently contains contradictions that
+would misdirect that work.
+
+| | sprint | contents | release model |
+|---|--------|----------|---------------|
+| **1** | **Normalize the guides** | all voice guides + creation guides + the house layer (voices catalog, app-note voice guide); the E1 reconciliation sweep; E2/E3 adoption decisions; the damage *investigation* | no renders, no PDF wave, no manual version bumps |
+| **2** | **The manual work** | the nine correction targets below; any text repair the damage investigation turns up | full renders, version bumps, coordinated release wave |
+
+**Why the split is forced, not tidy.** P2 — the divergence audit that *scopes* the manual work —
+cannot run against a moving standard. And the guides today would actively misdirect an author: one
+following IOSP's *"Never hedge"* rule would strip exactly the qualifiers §2.2a requires. Fixing the
+standard first is the only order that does not waste the measurement.
+
+**Settle at the START of Sprint 1**, because it sizes that sprint: is the model *"define once in
+`documentation-voices-catalog.md` and reference from each guide"* or *"copy into all eleven"*? The
+catalog was last touched **2026-07-20 — the same day as the XBYTE tweaks** — and already carries an
+E1-flavoured guard. We do not know whether that was intended as the canonical home.
+
+**Damage placement:** the *investigation* (did the word-blacklist checklists cause qualifier
+removals in released text?) sits in Sprint 1, because Sprint 1 artifacts caused it. Any *text
+repair* is Sprint 2 work.
+
+---
+
 ### Planning-phase research — the two audits that scope this sprint
 
 **These are planning work, not sprint work.** We cannot task the voice dimension without walking a
