@@ -885,16 +885,56 @@ no CHANGELOG entry, no version bump, per Stephen's decision at sprint start.
    body lines: blacklist manuals **1.31** (Streamer 0.56 · IOSP 0.82 · Assembly 2.55) vs **5.23**
    without. **Correlation only — confounded by genre, length and era; not a finding.** Test at
    content level. **IOSP is the priority probe.**
-2. **Instrument coverage gap.** `MANUAL-DESCRIPTOR.md` files and 17 of the 18 files in
-   `engineering/standards/documentation-standards/` are outside the glob. «#215» found D2, D3 and
-   D4 defects in the descriptors **by hand** — including `sources/silicon/`, a directory that does
-   not exist, cited as PRIMARY authority. Widening the glob re-opens the closed green unit, so it is
-   a deliberate Sprint-2 call.
-3. **Four orphaned extraction-era style guides** in the standards tree — `desilva-style-guide.md`,
-   `pasm2-manual-style-guide.md`, `smartpins-style-guide.md`, `pasm2-spreadsheet-style-guide.md`.
-   Untouched since 2025-09-01, referenced by nothing live, superseded by the per-manual copies, each
-   carrying a "vs Silicon Doc" section. Archive candidates — **Stephen's call**, not swept.
+2. **Instrument coverage gap — RESOLVED 2026-08-15: widen to DESCRIPTORS ONLY.** Stephen's call.
+   `MANUAL-DESCRIPTOR.md` (17 files) comes into the glob in Sprint 2; the
+   `engineering/standards/documentation-standards/` tree does **not** — that half is punch-listed
+   (*Guide-conformance instrument — standards-tree coverage*). The line was drawn on what serves a
+   documentation release: `document-audit` resolves per-manual overlays **from the descriptors**, so
+   a descriptor defect misdirects the audits that gate the releases; the standards tree is authoring
+   infrastructure that reaches no shipped PDF.
+
+   **Measured before tasking, per the certified rule that an instrument's first run is a planning
+   input** (scratch copy, both globs widened, 2026-08-15): 28 files/**0** findings →
+   63 files/**60** findings across 19 files. Split: **descriptors 38** (11 files) · standards tree
+   22 (8 files). By detection: D2 `pnut_ts` 22 · D4 codename 31 · D6 all-caps COG 5 · D1 restated
+   rule 2.
+
+   **Size the descriptor task from the shape, not the 38.** 32 of the 38 are in the seven app-note
+   descriptors (4–5 each) and are overwhelmingly **D2 — one cloned template defect**, not 32
+   independent findings; they were bootstrapped from a common descriptor. The remaining 6 are spread
+   across four manual descriptors. `p2-architect-guide/MANUAL-DESCRIPTOR.md` scores **0**, so this is
+   a bounded, fixable class. The D2 work here also derisks carry-forward #4 below — same defect,
+   bigger blast radius.
+
+   **This does not re-open Sprint 1's green unit.** The instrument never scanned these files, so its
+   zero was true about a smaller layer than it read as. State it that way in the closeout and the
+   176→0 trajectory stays honest.
+3. **Extraction-era standards-tree cleanup — RESOLVED 2026-08-15: PUNCH-LISTED IN FULL.** Stephen's
+   call — the goal is releasing repaired documentation, and this effort serves none of it. Moved to
+   `engineering/document-production/PUNCH-LIST.md` (*Extraction-era standards-tree cleanup*), where
+   the inventory was also corrected: it is **six** files, not four (`style-guide-extraction-tasks.md`,
+   `documentation-generation-planning.md` and `instruction-documentation-template.md` have **zero**
+   referrers), and archiving them changes nothing measured while the glob covers descriptors only.
+
+   **One carve-out is still open and is NOT hygiene:** `desilva-style-guide.md` is not an orphan —
+   it is a **stale 207-line fork of the live 282-line guide** in `manuals/p2-pasm-desilva-style/`,
+   which a **released** manual's descriptor and Sprint-1 voice-guide both depend on. Live pointers
+   are relative and resolve correctly; the exposure is a filename lookup finding the stale copy. This
+   project has been bitten by superseded DeSilva copies before. Cost to close: one `git mv`. Awaiting
+   Stephen's call on whether it rides with the punch list or is pulled forward.
 4. **299 files repo-wide still carry `pnut_ts`/`pnut_term_ts`** (opus-masters, CHANGELOGs, READMEs,
    workflow docs) — out of Sprint 1's charter by design. The D4/D6 classes almost certainly extend
    into manual text the same way D2 does.
 5. **DeSilva master line 167** — study §0e flags it as a live R1 finding in released text.
+6. **Overlay rules recommended for central promotion — RESOLVED 2026-08-15: recommendation only,
+   and out of Sprint 2's path.** Not a sprint deliverable and not gating anything. Three candidates,
+   all verified central-absent during the v5→v8 overlay reconcile:
+   (a) *an instrument's first run is a planning input, not just a gate* (`plan-to-tasks` overlay);
+   (b) *scope boundaries come from the artifact, never from prose* (`sprint-plan` overlay);
+   (c) *the payoff sentence* (`document-finalize` overlay, promotion-pending since 2026-07-20).
+   (a) and (b) are already stated generally and each carries a certified, measured origin; (c) is
+   written in narrative-documentation vocabulary and needs generalizing before it could travel.
+   **Promotion is Stephen's alone** — under every route (convergence, reconciliation contribution,
+   owner judgment) an agent proposes and never self-authorizes, central is the maintenance agent's
+   tree, and the install is fleet-wide distribution gated on Stephen every time. Nothing to do here
+   but keep the candidates flagged.
