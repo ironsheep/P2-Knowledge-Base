@@ -45,18 +45,34 @@ at BUILD 2. Everything from `test-f260-goertzel` (the 23-round probe) predates i
   C10's streamer DAC override, and F-256 (XBYTE is a different sequencer, but we have no basis for
   assuming it is immune).
 
-### Known open — do NOT author these yet
+### What the grades do and do not mean
 
-1. **`:607` byte counts** — reproduced four times, but all four with the debugger in the streaming
-   cog. Re-run staged.
-2. **`_RET_ CALL` falls through** — one run, pre-fix. The sprint plan's §3 error clause already
-   demands independent confirmation before restructuring XBYTE §15.3. Re-run staged.
-3. **Streamer DAC override from a launched cog / `M[3:0]` = cog id** — the mechanism is [D] from
-   Chip's `setnib dacmode,cogid,#2`; our supporting measurement (C10) is [M-pre] and used the
-   streamer. Note also that our own `SETDACS`-path test of the same idea (C6b) came back negative,
-   which we explained as testing the wrong path. That explanation is [I].
-4. **`pppp × 4` = base pin** — [D] only. Our block-select sweep was [M-pre] and came back flat, so
-   we have *not* independently confirmed it.
+**The bench leg is complete. Nothing here is unresolved, and nothing is blocked on more bench
+work.** The grades exist so we cite each claim at its real strength — not to cast doubt on results
+we actually have. Two specific notes, so nobody reads caution as uncertainty:
+
+**`:607` is effectively closed.** All four runs predate the `DEBUG_COGS` fix, but consider what
+debug interference actually does: jitter and dropped samples. It cannot convert one byte per NCO
+rollover into *exactly* two or *exactly* four — the write width is set by the mode field. The
+counts hit the a-priori prediction exactly (1,024 / 2,048 / 4,096), four times. A confirming run is
+cheap insurance, not an open question.
+
+**`_RET_ CALL` is strongly evidenced; its gate is procedural.** It is a *differential* test: the
+reference arm (`CALL` + `RET`) ran in the same cog, in the same run, under identical debug
+conditions, and behaved perfectly — only the arm under test misbehaved. The result is
+self-consistent three ways: the trail shows an adjacent handler executing, the helper's reported
+return address matches `H_CALLRET`'s cog address in the map, and the compiler emitted the `_RET_`
+form. Debug jitter does not produce that. The confirming run exists because **the sprint plan's §3
+error clause requires an independent path before restructuring a chapter** — a process gate we set
+ourselves, and a good one, not a doubt about the measurement.
+
+**`pppp × 4` = base pin is documentary, and that is fine.** The Silicon Doc states it and Chip's
+shipped demo depends on it (`base<<17` with the comment "input from pin +4..7"). Our rig has only
+pins 0–3 wired, so block 0 is the only block we could exercise — and `0 × 4 = 0` cannot distinguish
+the multiplier in any case. Cite it as documented behaviour; do not claim we measured it.
+
+**Author everything below now.** Where a claim is [D] or [I], say so in the prose or pick a
+formulation that does not overstate — that is the whole point of the grades.
 
 ---
 

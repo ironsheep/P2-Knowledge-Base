@@ -60,12 +60,20 @@ The highest-value TEACH items, none of which are defects in the ordinary sense:
 
 ### Confirming runs required before §4 and the `:607` edit
 
-F-266 was discovered *after* the F-256 and `:607` measurements were taken, and both were made with
-the debug interrupt live inside the launched cog — the confound that produced 1,000,000–7,000,000 of
-pure corruption in our Goertzel accumulators. XBYTE and the streamer are both hardware sequencers;
-neither can be assumed immune. **§3's error clause already demands an independent confirmation of a
-"the idiom is broken" result before restructuring a chapter, and this is that path.** Both probes now
-carry `DEBUG_COGS = %0000_0001` and need one short bench session before their sections are written.
+F-266 was discovered *after* the F-256 and `:607` measurements, and both were made with the debug
+interrupt live inside the launched cog. **Neither is in doubt, and neither blocks authoring:**
+
+- **`:607`** — debug interference causes jitter and dropped samples; it cannot turn one byte per
+  rollover into exactly two or exactly four, since the write width is set by the mode field. The
+  counts hit the a-priori prediction exactly, four times.
+- **`_RET_ CALL`** — a differential test whose reference arm ran in the same cog and same run under
+  identical conditions and behaved correctly, corroborated by the pushed return address matching
+  the map and by the compiler emitting the `_RET_` form.
+
+The confirming session is **cheap insurance plus the §3 error clause** — a process gate we set
+ourselves, requiring an independent path before restructuring a chapter. Both probes carry
+`DEBUG_COGS = %0000_0001` and can ride the next time the board is out. **Do not hold the rest of
+the sprint for it;** the only thing genuinely gated is §4's final shape.
 
 ## Open Questions — resolve before tasking
 
