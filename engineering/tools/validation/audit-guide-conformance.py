@@ -185,7 +185,16 @@ QUOTED_BLACKLIST = re.compile(
     r"['\"`‘’“”]\s*(" + "|".join(BLACKLIST_WORDS) + r")\s*[,;]?\s*['\"`‘’“”]",
     re.I)
 HEDGE_RULE = re.compile(r"\b(never|avoid|don't|do not|no|banned?)\b[^.\n]{0,60}?hedg", re.I)
-HEDGE_CELL = re.compile(r"hedg\w*\s*[:|]\s*(never|none|no)\b", re.I)
+# Two shapes of blanket verdict in a voice-comparison table:
+#   "Hedging: Never"            and   "| Hedging | Occasional | Never |"
+HEDGE_CELL = re.compile(r"hedg\w*[^|\n]*[:|][^|\n]*\bnever\b", re.I)
+
+# A guide may QUOTE a rule it has just removed, in order to explain why it was
+# wrong. That passage is the record of the correction — deleting it would delete
+# the reasoning and invite the next sweep to restore the defect.
+D1_HISTORICAL = re.compile(
+    r"(previously read|previously said|used to (?:read|say)|counter-order"
+    r"|is always wrong|no longer|was removed|replaced (?:by|with))", re.I)
 RESTATED_CADENCE = re.compile(
     r"(half of (?:the )?section closings|(?:more than\s*)?~?\s*4 in a row|cadence budget of)", re.I)
 
@@ -207,13 +216,18 @@ def reconciled(line):
     names words, not the defect, so detect_d1 checks it before coming here.
     """
     low = line.lower()
-    if "calibrated" in low or SCOPED_HEDGE.search(line):
-        return True
-    return "vague" in low and ("§" in line or "see " in low)
+    return ("calibrated" in low
+            or bool(SCOPED_HEDGE.search(line))
+            or "vague" in low)
 
 
-def detect_d1(path, lineno, line, is_catalog):
+def detect_d1(path, lineno, line, is_catalog, context=()):
     if is_catalog:
+        return None
+    if any(D1_HISTORICAL.search(c) for c in context):
+        if HEDGE_RULE.search(line) or HEDGE_CELL.search(line) or QUOTED_BLACKLIST.search(line):
+            return exempt("quoted as a rule that WAS wrong — the record of the correction",
+                          0)
         return None
     hits = list(QUOTED_BLACKLIST.finditer(line))
     if len({m.group(1).lower() for m in hits}) >= 2:
@@ -373,7 +387,7 @@ EXCERPT_WIDTH = 118
 
 # Detectors whose exemption test is about AUTHORIAL INTENT rather than the text
 # of one line; these are handed the surrounding lines as well.
-INTENT_DETECTORS = {"D2", "D4", "D5"}
+INTENT_DETECTORS = {"D1", "D2", "D4", "D5"}
 
 
 def scan(files, detectors):

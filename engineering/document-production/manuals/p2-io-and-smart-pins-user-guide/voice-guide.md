@@ -61,7 +61,9 @@ the bit count minus one (0-31 for 1-32 bits).
 
 - Exact terminology throughout
 - Specific values and ranges
-- No hedging: "sets" not "typically sets"
+- State a known value as a known value: "sets" not "typically sets" — **where the
+  behavior is in fact fixed.** Where it genuinely varies, the qualifier is required
+  accuracy, not hedging (§3.4, R1)
 
 ### 2.2 Structured Predictability
 
@@ -124,7 +126,7 @@ Include "when to use" and "considerations" throughout:
 
 | Rule | Bad Example | Why |
 |------|-------------|-----|
-| Never hedge | "The pin might be driven" ❌ | Creates ambiguity |
+| Never write **vague** hedging | "The pin might be driven" ❌ | Creates ambiguity about what the silicon does. **NOT the same as a calibrated qualifier — see §3.4 (R1).** |
 | Never use first person | "We configure the pin..." ❌ | Tutorial voice |
 | Never use second person | "You should set..." ❌ | Tutorial voice |
 | Never be conversational | "Let's explore..." ❌ | Tutorial voice |
@@ -139,10 +141,42 @@ Include "when to use" and "considerations" throughout:
 | Person | Second ("you") | Third (instruction/mode names) |
 | Tone | Warm, encouraging | Authoritative, comprehensive |
 | Coverage | Selected examples | ALL options |
-| Hedging | Occasional | Never |
+| Vague hedging | Occasional | Never |
+| Calibrated qualifiers (§3.4, R1) | Occasional | **Required where evidence is partial** |
 | Celebration | Yes ("Well done!") | Never |
 | Questions | Yes ("Why?") | No |
 | Decision guidance | Occasional | Systematic |
+
+### 3.4 The four house rules — this guide's declaration
+
+The rules themselves are stated once, in
+`engineering/standards/documentation-standards/documentation-voices-catalog.md`
+("The Shared Discipline — the four house rules"). This section states what *this*
+guide does about them. It does not restate them.
+
+| rule | decision | how it applies here |
+|------|----------|---------------------|
+| **R1** Calibrated confidence | **ADOPT** | **Never state a claim above its evidence** — and note that this *corrects* the older blanket "never hedge" rule, which is why §3.2 and §3.3 above are scoped rather than absolute. A qualifier that reflects the true state of the evidence is **accuracy**, and it is **required** wherever the bare claim would overstate. See §3.4.1 for what this looks like in the I/O domain. |
+| **R2** The payoff-sentence test | **ADOPT** | Strip the flourish off any section- or callout-closing sentence and read what remains as a bare claim; satisfy it from the *Propeller 2 Documentation v35* / the KB YAML, or cut it. Highest risk in the "Considerations" sections (§4.4), which are the only argument-driven prose in an otherwise tabular document. |
+| **R3** Anti-pattern family | **ADOPT — adapted** | *Tutorial filler* and *reader-as-foil* are already covered by §3.2's bans on conversational voice, second person, and "As you know…". **Newly added here:** *self-admiration* (no praising a mode as "elegant" or a mechanism as "the single most powerful") and *staged reveal* (no withholding a mode's real constraint until after the example). All four are consistent with an authoritative third-person register. |
+| **R4** Cadence budget | **ADOPT — as a forward guard** | A reference document with a mode-per-chapter structure is not the class that produces the metronome defect, so near-zero legacy findings are expected. Adopted so that new prose — chapter openers and Considerations sections — cannot drift into it. **Confirm by measurement, not by assumption, in either direction.** |
+
+#### 3.4.1 R1 in the I/O domain — the distinction, shown
+
+The rule is about **the defect, not the words.** There is no banned-word list, and a
+checklist that names `may / might / typically` is always wrong: those words are R1
+compliance as often as they are defects.
+
+| ❌ vague hedging — avoids commitment on a fact we know | ✅ calibrated — states exactly what the evidence supports |
+|---|---|
+| "The pin might be driven." | "DRVH drives the pin high." *(The behavior is fixed; say so.)* |
+| "WRPIN typically sets the mode bits." | "WRPIN sets mode bits D[4:0]." *(Fixed; say so.)* |
+| "Settling is usually fast enough." | "Settling takes 2 clocks after the mode write; add margin above 250 MHz, where this has not been characterized." *(Partial evidence; the qualifier is where the honesty lives.)* |
+| "This mode should work with most sensors." | "This mode is documented for sensors presenting a rail-to-rail output; behavior with a biased output is undocumented." |
+
+**The test:** ask *what does the evidence actually support?* If the answer is a firm
+fact, state it firmly. If the answer is "this much and no further", say that much — and
+saying it is not hedging, it is the claim being true.
 
 ---
 
@@ -315,9 +349,10 @@ Before finalizing any section, verify:
 
 ### Voice Consistency
 - [ ] Third person throughout
-- [ ] No hedging language
 - [ ] No tutorial voice
-- [ ] Definitive statements only
+- [ ] **Voice rules R1–R4 satisfied — see §3.4.** (This item points; it does not
+      re-encode. A checklist that restates a rule in its own words becomes a
+      counter-order the moment the rule is refined.)
 
 ### Completeness
 - [ ] ALL options listed (not just common ones)
@@ -342,7 +377,7 @@ Voice = Authoritative + Comprehensive + Practical
 
 **Core principles:**
 - Every option presented, not just common ones
-- Definitive statements, no hedging
+- Definitive where the evidence is definitive; calibrated where it is partial (§3.4, R1)
 - Third person, no tutorial voice
 - Both languages (Spin2 + PASM2) always
 - "When to use" guidance throughout

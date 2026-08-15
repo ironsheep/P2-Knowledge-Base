@@ -518,11 +518,19 @@ For each mode/topic:
 
 ### 8.3 Voice Checklist
 
-- [ ] Third person throughout
-- [ ] No hedging ("may", "might", "typically")
-- [ ] No tutorial voice ("you", "we", "let's")
-- [ ] Definitive statements only
-- [ ] All options presented, not just favorites
+Voice is governed by **`voice-guide.md`** — this creation guide references those
+rules and does not restate them. Run the checklist there.
+
+- [ ] **`voice-guide.md` §6 Quality Checklist run** — including §3.4, this guide's
+      declaration against the four house rules (R1–R4)
+- [ ] All options presented, not just favorites *(a coverage requirement of this
+      document's charter, not a voice rule)*
+
+> **Why this is a pointer and not a list.** It previously read *"No hedging ('may',
+> 'might', 'typically')"*. That instructed an auditor to strip exactly the calibrated
+> qualifiers R1 **requires** — so the guide carried its own counter-order, and the
+> mechanical half wins. Word lists are how that happens; a pointer cannot go stale
+> against the rule it points at.
 
 ---
 

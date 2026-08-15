@@ -5,7 +5,7 @@
 
 **Basis:** Derived from the **P2 I/O & Smart Pins User Guide** voice guide (same document class — a comprehensive user guide for a P2 hardware subsystem with many modes), with debug-domain content rules folded in from the Single-Step Debugger Manual's voice guide. This was chosen deliberately after surveying all manual voice guides; the IOSP model fits a multi-mode subsystem user guide better than the reference-only (Assembly, Streamer) or tutorial (DeSilva, Smart Pins Tutorial) models.
 
-**One deliberate divergence from the IOSP model:** this guide uses **second person** ("you"), to match this manual's onboarding/guiding job and the sibling Single-Step Debugger Manual. All of IOSP's other disciplines — no marketing, no hedging, no celebration, comprehensive coverage, grounded claims — are kept intact; voice rigor is independent of grammatical person.
+**One deliberate divergence from the IOSP model:** this guide uses **second person** ("you"), to match this manual's onboarding/guiding job and the sibling Single-Step Debugger Manual. All of IOSP's other disciplines — no marketing, no vague hedging, no celebration, comprehensive coverage, grounded claims (§3.4) — are kept intact; voice rigor is independent of grammatical person.
 
 **Status:** Active — adopted 2026-05-31.
 
@@ -73,7 +73,9 @@ packet you send plots one sample column; the window scrolls left when full.
 
 - Exact terminology throughout (window type names in caps, command keywords as written).
 - Specific values and ranges, sourced from the window's theory-of-operations.
-- No hedging: "scrolls" not "typically scrolls."
+- State a known behavior as known: "scrolls" not "typically scrolls" — **where the
+  behavior is in fact fixed.** Where it genuinely varies (window sizes, host timing),
+  the qualifier is required accuracy, not hedging (§3.4, R1).
 - Second person, but never chatty: "you send" is fine; "you'll love how easy this is" is not.
 
 ### 2.2 Structured predictability
@@ -126,7 +128,7 @@ Considerations:
 |------|-------------|-----|
 | Never use marketing/superlatives | "Revolutionary," "20× faster," "rivals \$10,000 equipment" ❌ | Out of house standard; unverifiable |
 | Never celebrate | "Now you've unlocked the power of…" ❌ | Tutorial/marketing voice |
-| Never hedge | "The window might scroll" ❌ | Creates ambiguity |
+| Never write **vague** hedging | "The window might scroll" ❌ | Creates ambiguity about what the tool does. **NOT the same as a calibrated qualifier — see §3.4 (R1).** |
 | Never get chatty/breezy | "You'll love how easy this is" ❌ | Second-person tempts celebration/marketing creep |
 | Never minimize | "Simply configure…" ❌ | Dismissive of real complexity |
 | Never omit options | document one command of several ❌ | Incomplete |
@@ -140,7 +142,43 @@ Considerations:
 | Tone | Promotional, "iceberg," superlatives | Authoritative, comprehensive |
 | Coverage | Highlight reel of impressive features | ALL commands/options per window |
 | Claims | "20× faster," "$10,000 equipment" | Source-backed, quantified only when sourced |
-| Hedging / celebration | Present | Never |
+| Vague hedging / celebration | Present | Never |
+| Calibrated qualifiers (§3.4, R1) | Absent — claims outran evidence | **Required where evidence is partial** |
+
+### 3.4 The four house rules — this guide's declaration
+
+The rules themselves are stated once, in
+`engineering/standards/documentation-standards/documentation-voices-catalog.md`
+("The Shared Discipline — the four house rules"). This section states what *this*
+guide does about them, in second person. **Voice rigor is independent of grammatical
+person** — the divergence noted in this guide's header changes the address, not the
+standard.
+
+| rule | decision | how it applies here |
+|------|----------|---------------------|
+| **R1** Calibrated confidence | **ADOPT** | **Never state a claim above its evidence** — and note that this *corrects* the older blanket "never hedge" rule inherited from the IOSP guide, which is why §3.2 and §3.3 above are scoped rather than absolute. A qualifier reflecting the true state of the evidence is **accuracy**, and it is **required** wherever the bare claim would overstate. See §3.4.1. |
+| **R2** The payoff-sentence test | **ADOPT — highest priority in this manual** | This is the guide whose shipped v2 draft was written in a promotional register; the payoff sentence is precisely where "20× faster" and "rivals \$10,000 equipment" came from. Strip the flourish off any closing sentence and read what remains as a bare claim: satisfy it from a source, or cut it. |
+| **R3** Anti-pattern family | **ADOPT — adapted** | §3.2 already bans marketing, superlatives, celebration and chattiness — a stricter starting point than IOSP's, because of this manual's history. **Newly added here:** *reader-as-foil* (no "the obvious way to debug this is wrong"), *self-admiration* (no praising a window as elegant), and *staged reveal* (no withholding a window's real limitation until after the demo). *Tutorial filler* is already covered by the chattiness ban. |
+| **R4** Cadence budget | **ADOPT — and measure early** | **Higher risk here than in any sibling reference guide.** Second person plus an onboarding job is the combination that produces closing beats, so this manual ranks **first** for cadence measurement rather than last. |
+
+#### 3.4.1 R1 in the DEBUG domain — the distinction, shown
+
+The rule names **the defect, not the words.** There is no banned-word list, and a
+checklist naming `may / might / typically` is always wrong: those words are R1
+compliance as often as they are defects.
+
+| ❌ vague hedging — avoids commitment on a fact we know | ✅ calibrated — states exactly what the evidence supports |
+|---|---|
+| "The window might scroll." | "The window scrolls left when full." *(Fixed behavior; say so.)* |
+| "The plot typically updates each packet." | "Each data packet plots one sample column." *(Fixed; say so.)* |
+| "Update rate is fast." | "Update rate is bounded by the host's redraw, which we have not characterized; treat it as a display, not a measurement." *(Partial evidence — the qualifier is where the honesty lives.)* |
+| "This works on any host." | "Verified on the hosts listed in §6; other platforms are untested." |
+
+**The test:** ask *what does the evidence actually support?* A firm fact is stated
+firmly. Where the evidence reaches only so far, saying so is not hedging — it is the
+claim being true. This manual's own history is the argument: its promotional draft
+failed by stating claims **above** their evidence, which is the same rule violated in
+the opposite direction.
 
 ---
 
@@ -190,7 +228,9 @@ Before finalizing any window chapter, verify:
 **Voice**
 - [ ] Second person; speaks to the reader directly, without chattiness or celebration.
 - [ ] No marketing, superlatives, or celebration.
-- [ ] No hedging; definitive statements only.
+- [ ] **Voice rules R1–R4 satisfied — see §3.4.** (This item points; it does not
+      re-encode. A checklist that restates a rule in its own words becomes a
+      counter-order the moment the rule is refined.)
 
 **Completeness**
 - [ ] ALL of the window's commands and options documented.
