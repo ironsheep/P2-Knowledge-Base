@@ -1,7 +1,7 @@
 # Voice-Guide Propagation Study — 2026-08
 
 **Planning artifact (P1)** for `MANUAL-CORRECTIONS-AND-RETIRED-DOC-CLEANUP-SPRINT-PLAN.md`.
-**Status:** in progress — IOSP, Debug Window and DeSilva decided; the partial set and the two "full" guides pending verification.
+**Status:** current-state survey COMPLETE for all ten guides (read, not grepped). Decisions recorded for IOSP, Debug Window and DeSilva. Remaining decisions — E3 adoption for the six guides lacking it, and the E1 reconciliation wording per guide — are drafted below and await Stephen. **No guide has been edited; this is research into current state.**
 
 **Purpose.** The XBYTE guide's 2026-07-20 audit produced three voice-guide changes. They have been
 propagating outward unevenly. This study decides, **per gaining guide**, which elements are
@@ -165,22 +165,70 @@ questions, rigid structural requirements, academic citations in the main text. A
 propagation into this guide should be checked against that list first; it exists because the
 manual has been "improved" before.
 
-### Remaining targets — **PENDING**
+### Complete current-state survey — all ten guides *(read, not grepped)*
 
-| guide | current state | note |
-|-------|---------------|------|
-| **XBYTE** *(origin)* | E1 ✅ E2 ✅ E3 ✅ | **NOT complete** — residual "no hedging" at L47 and in the L219 checklist (§0b). Needs the E1 sweep. |
-| **Streamer** | E1 ✅ E2 ✅ E3 ✅ | **NOT complete** — residual at L61 and the L317 checklist (§0b). Correction target, so fix in the same pass. |
-| **Assembly** | E1 ✅ (§4.2a) E2 ✅ E3 ✅ (§4.4) | **NOT complete** — L16, L57 and the L431 checklist (§0b). But its §4.2 table is the **model reconciliation**; copy that pattern outward. |
-| Architect | E1 ✅ E2 ✅ **E3 ✗** | finish |
-| Getting Started | E1 ✅ E2 ✅ **E3 ✗** | finish |
-| Single-Step Debugger | E1 ✅ E2 ✅ **E3 ✗** | finish |
-| PNut-Term-TS | E1 ✅ E2 ✅ **E3 ✗** | finish |
-| Smart Pins Tutorial | not surveyed | has `style-guide.md` + `presentation-style-guide.md`; being retired (sprint §5) — decide whether it gains anything at all |
+| guide | E1 present | E1 **reconciled** elsewhere? | E2 rows | E3 | residual severity |
+|-------|-----------|------------------------------|---------|----|-------------------|
+| **Streamer** | ✅ §2.2a | ✗ L61 · **L317 checklist is a WORD BLACKLIST** | ✅ 3 | ✅ §2.4 | 🔴 **CRITICAL** |
+| **Assembly** | ✅ §4.2a | partial — L183 row reconciled ✅, but L16, L57 and **L431 checklist WORD BLACKLIST** | ✅ 3 | ✅ §4.4 | 🔴 **CRITICAL** |
+| **IOSP** | ✗ none | ✗ explicit *"Never hedge"* rule §3.2 + §3.3 cell | ✗ 0 | ✗ | 🟠 **HIGH** |
+| **Debug Window** | ✗ none | ✗ same, inherited from IOSP | ✗ 0 | ✗ | 🟠 **HIGH** |
+| **XBYTE** *(origin)* | ✅ §2.2a | ✗ L47 · L219 checklist (unscoped, no word list) | ✅ 3 | ✅ §2.4 | 🟡 MEDIUM |
+| **Single-Step Debugger** | ✅ section | ✗ L43 register description | ✅ 3 | ✗ | 🟡 MEDIUM |
+| **PNut-Term-TS** | ✅ section | ✗ L63 register description | ✅ 3 | ✗ | 🟡 MEDIUM |
+| **Architect** | ✅ bullet (§2.6) | ✅ L75 row reconciled · L237 checklist scoped "on facts" | ✅ 3 | ✗ | 🟢 LOW |
+| **Getting Started** | ✅ bullet (§2.4) | ✅ L77 row reconciled · L180 checklist scoped | ✅ 3 | ✗ | 🟢 LOW |
+| **DeSilva** | ✗ | n/a | 2 adopt / 2 reject | **reject** | — see decision above |
+| Smart Pins Tutorial | ✗ | not surveyed in depth | ✗ | ✗ | retiring (§5) — decide whether it gains anything at all |
 
-The ✅/✗ above are **keyword-survey results and must be confirmed by reading.** §0 is the proof
-that grep misses what matters: neither IOSP nor Debug Window showed a conflict at keyword level,
-and both contain one.
+*Correction to my own earlier count:* Architect and Getting Started **do** carry all three E2 rows.
+They write "Reader-as-foil" where XBYTE writes "besserwisser", so the keyword survey undercounted
+them. Third time grep misled in this study.
+
+#### The severity ladder for the E1 residual
+
+1. 🔴 **Word blacklists in a quality checklist** — Streamer L317 *("may," "might," "probably")*,
+   Assembly L431 *(adds "typically")*. These name **the exact words §2.2a requires**. An auditor
+   running the checklist mechanically will delete calibrated qualifiers as defects.
+2. 🟠 **An explicit "Never hedge" rule with no §2.2a at all** — IOSP, Debug Window. The guide gives
+   only the older, absolute instruction.
+3. 🟡 **Unreconciled register descriptions** — XBYTE, Single-Step, PNut-Term-TS. A reader who finds
+   §2.2a is fine; one who reads only the register summary is not.
+4. 🟢 **Already correct** — Architect and Getting Started.
+
+#### The model is Architect / Getting Started, not Assembly
+
+Assembly reconciles its *rule row* but leaves a word blacklist in its checklist. Architect and
+Getting Started do both: the rule row carries *"keep **calibrated** qualifiers where true — §2.6"*,
+**and** the checklist is scoped to *"No hedging **on facts**"* rather than listing banned words.
+**Use their pattern as the template for the E1 sweep.**
+
+#### E3 gap
+
+Present in Streamer, Assembly, XBYTE. **Absent in Architect, Getting Started, Single-Step,
+PNut-Term-TS, IOSP, Debug Window.** Rejected for DeSilva (reasons recorded above).
+
+---
+
+## Damage assessment — a task for P2, arising from §0b
+
+The word-blacklist checklists are not merely inconsistent; they may already have **caused** edits.
+
+**The question:** has any `document-audit` or `document-finalize` pass run against the Streamer or
+Assembly checklists since §2.2a was added, and did it remove calibrated qualifiers from shipped
+text as "hedging"?
+
+Both manuals are **released** — Streamer v1.0.8, Assembly v3.1.5 — and Assembly's list includes
+**"typically"**, which is among the commonest legitimate qualifiers in a hardware reference.
+
+**Why it matters.** That would be a defect *we* introduced, in the opposite direction from the one
+this sprint is fixing: text made **less** accurate by an over-broad rule. It is exactly the failure
+§2.2a exists to prevent, delivered by the guide that contains §2.2a.
+
+**Method (P2, research only):** identify audit/finalize passes on those two manuals after
+`acf3b4a2` (2026-07-20); check their findings for hedging-language items; where found, check the
+diff for qualifier removals against claims whose evidence was genuinely partial. Report count and
+severity. **No edits during planning.**
 
 ---
 
