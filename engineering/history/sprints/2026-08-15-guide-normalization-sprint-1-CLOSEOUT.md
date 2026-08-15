@@ -1,6 +1,7 @@
 # Sprint 1 — Guide Normalization — CLOSEOUT
 
 **Closed:** 2026-08-15
+**Retrospective:** `engineering/history/sprints/2026-08-15-guide-normalization-sprint-1-Retrospective.md`
 **Tag:** `guide-normalization` · 11 tasks `«#205»`–`«#215»` · est. 11h 0m
 **Plan:** `engineering/planning/MANUAL-CORRECTIONS-AND-RETIRED-DOC-CLEANUP-SPRINT-PLAN.md`
 **Study:** `engineering/planning/VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md`

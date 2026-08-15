@@ -43,3 +43,27 @@ proposes work that duplicates an active effort. *(Certified 2026-06-30: the
 App-Note Roster's first cut over-stated the compute-model gap by counting only
 shipped manuals — the in-development P2 Architect's Guide Act II + decomposition
 YAML layer already owned it; Stephen caught it.)*
+
+## Augments §2 code-research — scope boundaries come from the artifact, never from prose
+
+**Any date or commit that bounds an investigation's scope must be derived from the
+artifact under investigation — never inherited from a narrative that cites it.**
+
+Run the pickaxe on the *actual text* of the thing being investigated before you
+fix a window:
+
+```
+git log --oneline --date=short --format='%h %ad %s' -S'<the rule/claim text>' -- <the file>
+```
+
+**A cited SHA is evidence that something changed then. It is never evidence that
+nothing changed before.** The two are constantly confused, and the confusion is
+invisible in the finished plan — the window simply looks authoritative.
+
+*Certified 2026-08-15 («#214»).* The study and the task body both scoped a damage
+investigation to "since `acf3b4a2` (2026-07-20)". Pickaxing the rule text instead
+dated it to each guide's **birth** — Streamer `10bb35d5` (2026-01-22), Assembly
+`1e51f086` (2025-11-26); `acf3b4a2` was the **corrective**, not the cause. Real
+window 7–9 months, not 3–4 weeks. Executed as written the task would have scanned
+~1 commit instead of ~120 and returned a NIL that cleared nothing. Cost of the
+check: one command.
