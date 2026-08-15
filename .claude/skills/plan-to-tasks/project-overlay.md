@@ -1,17 +1,25 @@
 # P2-Knowledge-Base overlay — plan-to-tasks
 
-> **Status (2026-06-22).** Work Type Routing model adopted; `PLAN_DIR` resolved
-> to the unified dir (below). No open dependencies.
+## Augments Step 0a — resolving the per-head sentinels
 
-## Augments Step 0a — `PLAN_DIR` is a single unified dir
+`PLAN_DIR` and `PLAN_ARCHIVE_DIR` are literal values in conventions; read them
+there. Name the head/element in every plan filename so the one shared directory
+stays navigable.
 
-`PLAN_DIR` resolved to **one shared directory for all engineering heads** —
-`engineering/planning/` (decided 2026-06-11; supersedes the former per-head
-sentinel). Write plan artifacts there regardless of head, and name the
-head/element in the filename so the single dir stays navigable; the archive is
-`PLAN_ARCHIVE_DIR` (`engineering/history/sprints/`). The *other* per-head
-sentinels (`BUILD_VERSION_*`, `PUNCH_LIST_DOC`, …) still resolve via
-`.claude/skills/HEAD-DISPATCH-DRAFT.md`.
+The slots that are still **routing sentinels** (`BUILD_VERSION_*`,
+`PUNCH_LIST_DOC`, `RELEASE_NOTES_DOC`, `SPEC_DOC`) resolve per head via
+`.claude/skills/HEAD-DISPATCH-DRAFT.md`, keyed off the `active_element` pointer.
+
+## Augments §3a-ii — the two-environment split as a scheduling resource
+
+Central schedules limited-environment work into the wait windows the canonical
+side creates. Here the windows are long and predictable: **every PDF is a
+round-trip through Stephen** (stage outbound → he runs Forge → the PDF comes
+back), and so is every hardware-verification run. Schedule container-side work —
+YAML edits, validator runs, audit passes, the next manual's prep — into those
+windows rather than idling on the render. The correctness constraint still binds:
+a content change must land *before* the render that is supposed to show it, and
+editing a manual after its PDF was verified decertifies that verification.
 
 ## Note — per-task detail artifacts stay off
 

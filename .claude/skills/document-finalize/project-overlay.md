@@ -2,8 +2,10 @@
 
 This project finalizes **technical** documents (P2 manuals, the P2KB YAML
 set) whose claims are consumed downstream — by readers and by remote AI
-agents generating code. A wrong claim is not cosmetic; it corrupts what
-the consumer produces. These augments tighten the audit and the handback
+agents generating code. `DELIVERABLE_AUDIENCE` splits them: manuals are
+`human-reader`, the YAML set is `agent-consumer`, so central §5's strict bar
+(**cite the authority or omit the entry**) is the live one whenever the finalize
+pass touches the KB. These augments tighten the audit and the handback
 accordingly. Manuals render on **PDF Forge** (handback model —
 `DOC_RENDER_COMMAND` is unset by design), so the §5/§6 handback *is* the
 deliverable, and it must be located precisely enough for {{USER_NAME}} to
@@ -11,18 +13,22 @@ verify against the rendered PDF in one pass.
 
 ## Augments §1 — Audit and gather every finding
 
-The central step gathers findings. For technical documents, **how** a
-finding is judged correct is not freeform — it follows the project's
-audit doctrine:
+Central §1 now owns claim verification itself: judge every domain assertion
+against `{{DOMAIN_AUTHORITY}}` and classify it. This overlay adds only what is
+project-shaped on top of that.
 
-- **Verify against primary sources, not memory.** Build a truth matrix
-  from the golden sources before judging a claim. Authority order for P2
-  language facts: `pnut_ts` compiler → Spin2 v55 docs
-  (`engineering/ingestion/sources/spin2-v55/`) → Silicon Doc. The full
-  framework is `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`;
-  each manual's `creation-guide.md` names its own verification sources.
-- **Classify every extracted claim** as `VERIFIED` / `MODIFIED` /
-  `UNVERIFIED` / `FABRICATED` — do not leave a claim unclassified.
+- **The truth matrix comes first.** Before judging any claim, build the matrix
+  from the sources the slot names — the framework is
+  `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`, and
+  each manual's `creation-guide.md` names its own verification sources on top of
+  the project-wide precedence.
+- **This project's classification is four-valued**, and the extra value carries
+  information central's three do not. Map it as: `VERIFIED` → verified;
+  `UNVERIFIED` → unverified; `MODIFIED` and `FABRICATED` are both *contradicted*,
+  but they are logged distinctly — MODIFIED means the source says something
+  different, FABRICATED means the source says nothing at all and the claim was
+  invented. Do not collapse them; the fabrication rate is what the audit
+  methodology tracks.
 - **Watch the red-flag phrases** that tend to precede fabrication: "also
   provides", "side effect", "eliminates", "automatically",
   "synchronizes", "mechanism for", vague "enables …". Treat each as a

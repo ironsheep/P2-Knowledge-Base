@@ -42,10 +42,21 @@ The one head with an objective local green/red is the **P2KB YAML set**.
 PDF Forge (no local gate); ingestion uses quality gates + dashboard.
 
 ```yaml
-BUILD_COMMAND:          python3 engineering/tools/validate-yaml-syntax.py
+BUILD_COMMAND:          python3 engineering/tools/verify-yaml-format.py
 TEST_COMMAND:           python3 engineering/tools/validate-crossref-keys.py
 CANONICAL_TEST_TARGET:  local Python validators over the P2KB YAML set (YAML syntax + cross-reference; DoD via validate-dod-release.py)
 ```
+
+`BUILD_COMMAND` was `validate-yaml-syntax.py` until 2026-08-15. That script scans
+only `manifests/` + `engineering/knowledge-base/` and reports "0 files checked /
+ALL VALID" for the `deliverables/ai/P2/` content tree — a **hollow green**. The
+`baseline-health` overlay had documented the trap for months while the slot kept
+naming the trapped command. `verify-yaml-format.py` is the real content-tree
+syntax gate.
+
+There is **no automated behavioral test suite** — these validators are the
+substitute gate (`baseline-health` §2a). A green here never implies the
+documentation is *correct*, only that it parses and resolves.
 
 ## Doc audit — the guide layer
 
@@ -87,12 +98,120 @@ RELEASE_NOTES_DOC:  <per-head — manual CHANGELOG, or P2KB YAML release notes; 
 SPEC_DOC:           <per-head — N/A for ingestion; see skill overlay>
 ```
 
-## Model strategy
+## Execution environments — the two-environment split
+
+This project shares one working tree across two environments (central v7
+vocabulary). Everything authored here; three classes of verdict are not
+observable here at all.
 
 ```yaml
-MODEL_TIERS:   ["opus", "sonnet"]
-DEFAULT_MODEL: opus
+EXEC_ENV_LIMITED:    the dev container — authors and edits every artifact; runs the Python
+                     validators, the guide-conformance instrument, and the PDF-tooling chain;
+                     compiles Spin2/PASM2 with `pnut-ts` (add `-d` for DEBUG code). Has NO GUI,
+                     NO P2 silicon, and NO PDF renderer (local Pandoc is 1.19 and off-limits).
+EXEC_ENV_CANONICAL:  Stephen's host — (1) PDF Forge renders every manual PDF; (2) real P2
+                     silicon runs the hardware-verification tests behind the empirical ledger;
+                     (3) the DEBUG display windows render there and come back as BMP captures.
 ```
+
+Applying the three rules here: a missing renderer or absent P2 board in the
+container is **the shape of the project, never a defect** — do not engineer
+around it. **Stopping at the outbound bundle is a complete outcome**
+(`prepare-manual` is designed to end there). And a **clean compile or a clean
+Forge log is provisional**: it proves legality and exit-0, never semantics and
+never that the page rendered — the PDF that comes back must be *looked at*.
+
+## Domain authority
+
+```yaml
+DOMAIN_AUTHORITY:  the ingested primary sources under `engineering/ingestion/`, in this
+                   precedence order: (1) empirical / hardware-verified results in
+                   `engineering/ingestion/external-sources/hardware-verification/`
+                   (P2-EMPIRICAL-FINDINGS.md) — strongest, and has overturned every other
+                   tier; (2) the `pnut-ts` compiler's actual behavior, for legality only;
+                   (3) Parallax documentary sources (Propeller 2 Documentation v35 Rev B/C,
+                   Spin2 v55 release notes) under `engineering/ingestion/sources/`;
+                   (4) the published P2KB YAML set. Community/forum/Titus material is an
+                   UPSTREAM LEAD, never a citable authority.
+```
+
+**`p2kb-mcp` is deliberately NOT the authority here.** It serves what *this
+project publishes*, so citing it inside this project is circular — it is the
+authority for every *other* project's P2 questions, not for ours. Ours is the
+ingestion tree the YAML was built from. Likewise, one P2 manual or app note is
+never authority for another (they are peer derivations).
+
+## Who the deliverable serves — per head
+
+```yaml
+DELIVERABLE_AUDIENCE:  manual / app-note / guide  -> human-reader
+                       P2KB YAML set (deliverables/ai/P2/, served via p2kb-mcp) -> agent-consumer
+                       ingestion artifacts (feed the YAML set) -> agent-consumer
+                       OBEX + Quick Bytes integration records  -> agent-consumer
+                       example corpora + verification .spin2   -> code-user
+```
+
+The **agent-consumer bar is the strict one and it governs the KB heads**: cite
+the authority or **omit the entry** — an entry shipped marked-unverified is a
+defect wearing a caveat, because a remote agent cannot weigh a hedge and a wrong
+fact becomes silently authoritative in generated code. This is the same rule the
+project already ran under its own names (no inference or derivation in YAML; no
+unsourced claims); the slot is what makes it apply automatically at the
+`document-finalize` and `sprint-closeout` gates.
+
+## Conformance guides
+
+Replaces the retired `STYLE_GUIDE_DOC` / `HELP_VOICING_GUIDE` /
+`MANUAL_VOICING_GUIDE` slots (central v8). The guide layer this maps was
+normalized and gated by Sprint 1 (2026-08-15) — three layers: house canon →
+class guide → per-document guide, with the document layer declaring
+ADOPT/ADAPT/REJECT per rule.
+
+```yaml
+CONFORMANCE_GUIDES:
+  - surface:  any manual / guide prose (opus-master)
+    guide:    engineering/standards/documentation-standards/documentation-voices-catalog.md
+              (house canon — sole home of rules R1–R4), THEN the element's own
+              engineering/document-production/manuals/<slug>/voice-guide.md
+    when:     read before authoring into the surface; re-read at finalize
+    strength: reference
+
+  - surface:  app notes
+    guide:    engineering/standards/documentation-standards/APP-NOTE-VOICE-GUIDE.md
+              (class layer), THEN the app note's own voice-guide.md
+    when:     read before authoring
+    strength: reference
+
+  - surface:  the guide layer itself (voice/creation/style guides, MANUAL-DESCRIPTORs)
+    guide:    documentation-voices-catalog.md R1–R4
+    when:     any edit to a guide
+    strength: gate      # DOC_AUDIT_COMMAND is the instrument; must read 0 findings
+
+  - surface:  every CHANGELOG.md (manuals, app notes, the P2KB YAML set, repo root)
+    guide:    central:changelog-voicing        # mode: Released · class: 3 (Published document)
+    when:     before writing any changelog entry
+    strength: reference
+    note:     ADOPTION INCOMPLETE — central's Class 3 profile is an unauthored stub
+              ("to be authored when a manual release calls for it"). The shared core
+              (§1–§4) governs now; the project's local
+              engineering/document-production/methodology/changelog-style-guide.md is
+              RETAINED as the Class 3 taxonomy until that profile is authored upstream.
+              Tracked as a task; do NOT delete the local guide before then.
+
+  - surface:  authored .spin2 source (example corpora, verification tests)
+    guide:    central:spin2-authoring-guide
+    when:     before writing or editing any .spin2 file
+    strength: gate
+    note:     STYLE_GATE_COMMAND is unset — the gate is OWED, not waived. `pnut-ts`
+              proves legality only, never style and never semantics.
+
+STYLE_GATE_COMMAND:  <unset — owed. Reference implementation: tools/check_style.sh in P2-uSD-FAT32-FS>
+```
+
+**Never copy a `central:` guide into this repo** — a copy is a fork. The one
+`SPIN2-AUTHORING-GUIDE.md` under `engineering/ingestion/external-inputs/` is a
+*received* external artifact inside an ingestion handoff package, not a project
+guide; it stays where it is as part of that record.
 
 ## Promotion role
 
@@ -130,9 +249,16 @@ the user to render rather than running a local render command.
 - **Filename patterns** — omitted; central defaults apply (per-head plan
   naming is designed in overlays).
 - **Voicing / style guides** (`MANUAL_VOICING_GUIDE`, `STYLE_GUIDE_DOC`,
-  `HELP_VOICING_GUIDE`) — per-manual under
-  `engineering/standards/documentation-standards/`; no single global file,
-  so omitted (resolved per manual when needed).
+  `HELP_VOICING_GUIDE`) — **retired by central v8**; converted to
+  `CONFORMANCE_GUIDES` rows above, which is what the three-differently-voiced-
+  surfaces shape needed all along.
+- **Model strategy** (`MODEL_TIERS`, `DEFAULT_MODEL`) — removed with the
+  `model-strategy` skill's retirement (central v8). Model choice is now an
+  optional one-line `recommended model:` annotation in `plan-to-tasks` §2.
+  CLAUDE.md's own model table remains as project guidance.
+- **`P2_DEBUG_BAUD`** — N/A. `p2-dev-cycle` is not part of this project's
+  workflow (see above), so v8's `-b` toolchain-conditional re-check does not
+  apply: no wrapper or template here downloads to a P2.
 - **Per-task detail artifacts**, `PROJECT_INIT_DATE`, `TEST_FLEET_DESCRIPTION`
   — omitted; defaults apply.
 
