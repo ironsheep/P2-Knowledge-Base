@@ -36,7 +36,7 @@
 
 CON
   _clkfreq  = 200_000_000
-  BUILD     = 11
+  BUILD     = 12
 
   '' STUDY PASS, before running BUILD 5. Two things the sources settle:
   ''
@@ -133,12 +133,20 @@ CON
   S_BASE2   = %0100 << 12
   S_BASE3   = %1000 << 12
   S_NONE    = 0
+  S_B1_INV  = (%0010 << 12) | (%0010 << 16)   ' sum base+1 AND invert base+1
+  DDS_D_BLK1 = X_DDS_G_SINC1 | (1 << 19) | CYCLES  ' block 1 = pins 4..7
 
   MODE_GTZL = 0
   MODE_COUNT = 1
   MODE_NOCMD = 2                         ' GETXACC with NO streamer command
   MODE_TWICE = 3                         ' clear, then GETXACC again, no command
   MODE_SEQ   = 4                         ' A/B/C/D reads around two commands, ONE cog
+
+DAT
+s_blk0          byte    "block 0 (our pin), sum base+1  ", 0
+s_blk1          byte    "block 1 (pins 4..7), same S    ", 0
+s_inv           byte    "block 0, sum base+1 INVERTED   ", 0
+s_null          byte    "block 0, sum base+1, NO TONE   ", 0
 
 VAR
   long g[24]
@@ -174,6 +182,7 @@ PUB main() | hi, lo
   dc_pair(S_BASE3, 3)
   dc_pair(S_NONE, 9)
   debug(" ")
+  field_confirmations()
   instrument_check()
   seq_check(1)
   bisect_tone()
@@ -210,6 +219,42 @@ PRI instrument_check()
 '' then swept against it. This is the first time this comparison has been made
 '' with the debug interrupt OUT of the streaming cog.
 '' --- A/B/C/D in one cog: do my commands register at all? -------------------
+'' --- convert documentary field claims into measured ones -------------------
+'' These are claims we would otherwise cite as "the Silicon Doc says". For
+'' training material we want them measured. Each uses the delta method against
+'' the independent smart-pin tone, with the ADC density printed so no row can
+'' misreport its own input.
+''   pppp   the block field: block 0 contains our ADC pin, block 1 (pins 4..7)
+''          does not. Detect on 0 and not on 1 => pppp really selects a block.
+''   S[19:16] invert-select: inverting the summed pin must flip the SIGN of the
+''          accumulation while preserving its magnitude.
+'' The on-target detection itself also measures the NCO scale: our detector
+'' word is computed as f * 2^31 / clkfreq, so if the scale were 2^32 the
+'' detector would sit an octave away and would not detect at all.
+PRI field_confirmations()
+  debug(" ")
+  debug("--- FIELD CONFIRMATIONS (delta method, independent tone) ---")
+  tone_on()
+  field_row(DDS_D,      S_BASE1,  @s_blk0)
+  field_row(DDS_D_BLK1, S_BASE1,  @s_blk1)
+  field_row(DDS_D,      S_B1_INV, @s_inv)
+  tone_off()
+  field_row(DDS_D,      S_BASE1,  @s_null)
+  debug("  Expect: row 1 large; row 2 near zero (wrong block); row 3 same")
+  debug("  magnitude as row 1 with opposite sign (invert-select); row 4 null.")
+
+
+PRI field_row(ddsd, ssel, label) | dens, a_c, a_s, b_c, b_s
+  run_at(0, 0, MODE_COUNT, TONE_HZ)
+  dens := g[10]
+  run_at(ddsd, ssel, MODE_SEQ, TONE_HZ)
+  a_c := g[16]
+  a_s := g[17]
+  b_c := g[18]
+  b_s := g[19]
+  debug("  ", zstr_(label), " : density=", udec_(dens), "/2000  DELTA cos=", sdec_(b_c - a_c), " sin=", sdec_(b_s - a_s))
+
+
 PRI seq_check(tag) | dens
   debug(" ")
   debug("--- SEQ pass ", udec_(tag), ": four reads around two commands, ONE cog ---")
