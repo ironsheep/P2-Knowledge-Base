@@ -47,6 +47,22 @@ TEST_COMMAND:           python3 engineering/tools/validate-crossref-keys.py
 CANONICAL_TEST_TARGET:  local Python validators over the P2KB YAML set (YAML syntax + cross-reference; DoD via validate-dod-release.py)
 ```
 
+## Doc audit — the guide layer
+
+The **guide layer** (house voice canon · app-note class guides · each manual's
+voice/creation/style guides) has its own gate, added 2026-08-15 by Sprint 1.
+It is the layer an author reads *before* writing, so a defect there misdirects
+every document downstream. Its file set is globbed, never hand-maintained, and
+its exclusions are printed by name.
+
+Five detections: restated voice rule (incl. word blacklists) · the non-existent
+`pnut_ts` tool name · dead cited authority paths · codenames · retired-doc
+references shown as live.
+
+```yaml
+DOC_AUDIT_COMMAND:  python3 engineering/tools/validation/audit-guide-conformance.py --inventory
+```
+
 ## Build version — PER-HEAD (sentinel)
 
 No global project version. The manual you're working on, or the P2KB YAML

@@ -288,9 +288,56 @@ DeSilva (reasons recorded above).
 
 ---
 
-## §0c. The full site inventory — 21 unreconciled sites across 8 guides
+## §0c. The full site inventory — MECHANICAL, 176 findings across 23 files
 
-Counted by reading every guide end to end, not by headline. This is the Sprint 1 work list for R1.
+> **Superseded 2026-08-15 by measurement.** This section previously carried a hand count
+> ("21 unreconciled sites across 8 guides"). Hand counting was wrong four separate times in
+> this study, so «#206» built `engineering/tools/validation/audit-guide-conformance.py` and the
+> numbers below are now **its output**, not anyone's reading. Reproduce with:
+>
+> ```
+> python3 engineering/tools/validation/audit-guide-conformance.py --inventory
+> ```
+>
+> **The hand count was not merely imprecise — it was the wrong order of magnitude**, and the gap
+> is concentrated in a class the hand pass barely sampled: **62 codename sites (D4)**, almost all
+> `Silicon Doc`, against the 5 `Green Book`/`Blue Book` sites the sprint plan names by hand.
+> The R1 hedging work list below survives essentially intact; everything else grew.
+
+**Totals by detection** (23 scanned files with ≥1 finding; 27 files scanned; 4 excluded and named):
+
+| detection | count | note |
+|---|---:|---|
+| **D1** restated voice rule | **29** | = 16 unreconciled hedging rules + **5 word blacklists** + 8 verbatim R4 cadence restatements |
+| **D2** tool name `pnut_ts` | **63** | worst: SSDB creation-guide **14**, Debug Window voice-guide **8** |
+| **D3** dead cited path | **7** | includes both PRIMARY-authority citations |
+| **D4** codename | **62** | overwhelmingly `Silicon Doc`; the Green/Blue Book sites are a small minority |
+| **D5** retired-doc reference | **15** | Smart Pins Tutorial / "Green Book" / "Smart Pins Manual" shown as live |
+| **exempt** | 3 | deliberate declared-wrong mentions + one lineage reference — printed, never silent |
+
+**Per-file matrix:** the instrument prints it on demand (`--inventory`); it is deliberately not
+copied here, because a pasted table is exactly the artifact that drifts behind the files and then
+reads green because it simply did not run.
+
+**Two false-positive classes were found and fixed while verifying the instrument**, both of which
+would have made it cry wolf on correct work — a gate that cries wolf gets ignored:
+
+1. **Template placeholders.** `…/manuals/folder-name/creation-guide.md` in the Assembly style
+   guide is a blank for an author to fill, not a broken citation.
+2. **The declared template's own checklist.** *"No hedging on facts"* (Architect + Getting Started)
+   is the CORRECT reconciled shape — it names the defect rather than a word class — and an early
+   version of D1 flagged it, which would have ordered edits to the two guides the sprint explicitly
+   protects. `reconciled()` now accepts scoping to facts as conformant.
+
+A third fix was to the report rather than a detection: a fixed-width excerpt was truncating away
+the very phrase being flagged, so genuine findings read as noise. The excerpt now centres on the
+match.
+
+### The R1 work list (still the qualitative guide to the D1 findings)
+
+Read end to end, guide by guide. The counts here are the ORIGINAL hand count and are retained
+because the *locations* are what the repair tasks act on; where a count disagrees with the
+instrument, **the instrument is right**.
 
 | guide | sites | severity | where |
 |-------|-------|----------|-------|
