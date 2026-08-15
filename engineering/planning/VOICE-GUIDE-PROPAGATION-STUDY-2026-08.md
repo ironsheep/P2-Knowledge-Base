@@ -421,3 +421,132 @@ the other two are unexamined.
   that shape exists here.
 - **Not yet:** per-manual text depth. That is P2, and it cannot run until the guides are settled —
   measuring text against a standard we are about to change wastes the measurement.
+
+---
+
+# §1. THE CREATION-GUIDE LAYER — surveyed 2026-08-15
+
+**Method:** read end to end — 11 `creation-guide.md`, 2 `style-guide.md`, and
+`APP-NOTE-CREATION-GUIDE.md`. **Excluded:** the Smart Pins Tutorial's two files (roster status
+`## Abandoned` — out of scope by rule) and, for voice purposes, `p2-layout-torture-test`
+(instrument; read anyway and confirmed to carry **no** voice content, which is correct for its type).
+
+**Headline: the layer carries four contradiction classes, and only the first is about voice.** The
+predicted class is present exactly as forecast. The other three were not predicted, and two of them
+would break an author's work outright.
+
+## §1.1 The structural rule is VALIDATED
+
+The two guides that already practise *reference, never restate* — **XBYTE** (defers to
+`voice-guide.md` §1.4) and the **app-note creation guide** (defers to `APP-NOTE-VOICE-GUIDE.md`) —
+carry **zero** voice contradictions. **Every guide that restates a voice rule carries at least
+one.** That is the whole case for the rule, made by the corpus rather than by argument.
+
+## §1.2 Class A — R1 word blacklists extend into this layer (predicted)
+
+Six more sites, taking the R1 inventory from **21 to 27, across 12 files**:
+
+| guide | site | severity |
+|-------|------|----------|
+| **Assembly** creation §10 | *"Hedging: 'probably', 'typically', **'usually'**"* + *"Complete — no gaps, no 'probably'"* | 🔴 **worst in the fleet** — it bans **"usually"**, which is R1's own canonical example of a *required* qualifier |
+| **IOSP** creation §8.3 "Voice Checklist" | *"No hedging ('may', 'might', 'typically')"* | 🔴 word list incl. "typically" — IOSP's **6th** site |
+| **Streamer** creation §6.1 "Voice Summary" | *"No hedging ('may', 'might', 'probably')"* | 🔴 |
+| **DeSilva** creation, red-flag table | *"typically \| MEDIUM \| What's the actual behavior?"* | 🟢 **not a ban** — it says *stop and verify*. Reconcile the wording, don't delete the row |
+| **Getting Started** creation §6 | bare "hedging" in the don't-do list | 🟡 |
+| **Architect** creation §6 | bare "hedging" in the don't-do list | 🟡 |
+
+## §1.3 Class B — a creation guide written in the voice its own voice guide bans
+
+**Debug Window.** Its §Voice correctly declares the "Discovery Guide" register **superseded** and
+*"must not be used."* The rest of the same file **is that register**:
+
+- Document Philosophy: *"Visual Discovery Through Systematic Exploration"* · *"Transform basic DEBUG
+  usage into expert-level debugging strategies"*
+- Core Problem: **"The 'Iceberg Effect'"** — the exact framing the voice guide names as out of standard
+- Sources: *"Phase 1 Comprehensive Window Studies (**Revolutionary Discoveries**)"* · *"the Layer
+  System Discovery: **20× performance improvement**"*
+- Success Metrics: *"Transforms debugging from frustration to insight"* · *"**Showcases** P2's unique
+  debugging advantages"*
+- **Sharpest:** the Formal Claim Verification table uses *"Layer system provides 20× improvement"* as
+  its **exemplar of a properly-sourced performance claim** — while the voice guide cites *"20× faster"*
+  as marketing it forbids.
+
+**Why this outranks a checklist contradiction:** an author absorbs register by *reading* the guide,
+not by reading its rules. The banned voice is being taught by demonstration.
+
+*(Also stale: §Size Guidelines says 200–250 pp / 16 chapters; shipped v1.1.2 is 168 pp / 14 chapters.)*
+
+## §1.4 Class C — a correction that landed in the voice guide and never swept to the creation guide
+
+**Assembly, cog casing.** `voice-guide.md` §5.1: *"**Lowercase 'cog' in prose.** … **Never all-caps
+'COG.'** (**Corrected v1.1 — was wrongly 'all caps'**; conflicts with the applied cog-casing sweep +
+Parallax corpus.)"* — `creation-guide.md` §6.1 still reads *"COG | cog, Cog | **All caps**"* (and
+*"Hub | hub, HUB | Title case"*).
+
+**The voice guide explicitly records that this rule was wrong and was fixed. The creation guide still
+carries the pre-correction version.** This is the F-211 / F-245 shape — a correction landing in one
+artifact and never reaching its sibling — recurring *inside the guide layer itself*.
+
+## §1.5 Class D — four defects that would break an author's work
+
+**D1. Dead authority paths — verified by `ls`.**
+
+| cited as PRIMARY authority | in | exists? |
+|---|---|---|
+| `engineering/knowledge-base/P2/language/pasm2/` | Assembly creation §4.1, §4A.5 | ❌ **MISSING** |
+| `engineering/yaml/instructions/` | DeSilva creation | ❌ **MISSING** |
+| `deliverables/ai/P2/language/pasm2/` | XBYTE + app-note creation guides | ✅ 388 entries |
+
+An author following either broken guide finds nothing where the trust chain's authority should be.
+(`engineering/knowledge-base/` is separately documented as *transient*, so it would not be the
+authority even if it existed.)
+
+**D2. The compiler name — verified against the binary.** `/usr/local/bin/` contains **only
+`pnut-ts`**; `pnut_ts` does not exist. The SSDB and PNut-Term-TS voice guides (commit `c203fa52`,
+2026-08-11) record this as a verified, reader-impacting bug — *"a reader who typed it got 'command
+not found'"*. **That correction swept those two files and stopped.** ~70 occurrences of the
+underscore forms remain across the guide layer, including:
+
+- **14 in the Single-Step creation guide** — in the *same folder* as the voice guide declaring them wrong;
+- **8 in the Debug Window voice guide**, which states `pnut_ts` as the *correct* name;
+- 7 in the app-note creation guide, 6 in PNut-Term-TS's own creation guide, 5 each in DeSilva and Debug Window creation guides.
+
+*(CLAUDE.md's tools table also carries `pnut_ts` — local and gitignored, noted not tasked.)*
+
+**D3. A fence form the filter does not map.** DeSilva creation-guide's "Your Turn Exercise" template
+writes `:::yourturn`; its own Box Styles table writes `:::your-turn`; the filter
+(`p2kb-desilva-code-coloring.lua:267`) matches **only** `your-turn`. The shipped master uses
+`::: your-turn` 16× and is **fine** — but an author following the guide's template produces an
+unstyled box. See [[reference_desilva_yourturn_fence]].
+
+**D4. A stale rule that forbids the work Sprint 2 is about to do.** DeSilva creation-guide, Part 3:
+> ***Critical Principle**: Edit passes are NEVER for content. If content needs fixing, regenerate
+> with improved guide/sources.*
+
+Sprint 2's DeSilva targets (F-254 Acknowledgments, F-257 Appendix A) are precisely content edits to
+`opus-master`. Followed literally, this rule says to **regenerate a 6,176-line shipped manual**
+rather than fix two sections. It contradicts current practice
+([[feedback_edit_opus_master_not_workspace_render]]) and the folder's own
+`READ-ONLY-PROTECTION.md`. **Must be corrected before Sprint 2 touches DeSilva.**
+
+## §1.6 Collateral, recorded not tasked
+
+| # | where | defect |
+|---|-------|--------|
+| 1 | Assembly `style-guide.md` §5.1 | The entry-structure box still shows *"OPERATION / Numbered steps"* — contradicting **§5.1.1 of the same file** and voice-guide §6.3. **Third** occurrence of the Operation contradiction (voice-guide §7 checklist, here, and the §5.1 box). |
+| 2 | Assembly `style-guide.md` §2.3 | Prescribes **hand-named backups** (`*.md.backup.YYYYMMDD_HHMMSS`) — contradicts Sacred Rule #1 / `BACKUP-CONVENTION.md` (`backup-file.sh` into `.backups/`, **never** hand-name). |
+| 3 | DeSilva `creation-guide` vs `style-guide` | **Three-way** Medicine Cabinet colour disagreement: creation-guide **cyan** `#E0F7FA`/`#00ACC1` · style-guide **body tan** `#FFF8F0`/`#D2A679` · style-guide **changelog cyan**. Two against one; the body is the outlier. |
+| 4 | IOSP §1.3 · Streamer §1.3 · Assembly §1.3 · DeSilva (several *"See Smart Pins Manual Chapter N"*) · Single-Step §5a | The **retired** Smart Pins Tutorial cited as a **live sibling manual**. Sprint plan §5b **bucket 1 → FIX** (these present it as current, unlike the lineage citations bucket 3 leaves alone). |
+| 5 | IOSP creation ×2 + IOSP voice §3.3 (*"Green Book"*); Getting Started creation ×3 (*"Blue Book"*) | **Codenames** in live guides, against the official-titles rule. |
+| 6 | IOSP creation §7.1 | *"Compile — Spin2 with **FlexProp**"* — not our toolchain; PASM2 in the same list says `pnut_ts`. |
+
+## §1.7 What this changes for Sprint 1
+
+- The creation-guide pass is **not** a formality: **6** new R1 sites, **1** guide written in a banned
+  voice, **1** un-swept correction, and **4** author-breaking defects.
+- **D4 is a gate**, not a cleanup item — it must land before Sprint 2 edits DeSilva.
+- **D1 and D2 are class-wide sweeps** in the F-211/F-245 mould, and D2's blast radius (~70
+  occurrences) is larger than the entire R1 inventory.
+- The *reference, never restate* rule is **validated by the corpus** (§1.1) and should be applied by
+  rewriting each restating guide's voice section down to a pointer — which retires most of Class A
+  rather than reconciling it site by site.
