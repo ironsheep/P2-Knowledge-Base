@@ -182,7 +182,25 @@ appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced r
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
 
-### F-207 — packed-data feed for **scrolling** LOGIC/SCOPE windows requires a **full-window array feed** (`` `uhex_long_array_ ``); a single `` `(packed) `` long does NOT fill the window — `CONFIRMED` (manual DONE + HW-verified · KB enrichment pending)
+### F-207 — packed-data feed for **scrolling** LOGIC/SCOPE windows requires a **full-window array feed** (`` `uhex_long_array_ ``); a single `` `(packed) `` long does NOT fill the window — `PARTIAL — manual DONE + HW-verified · KB DONE (v1.15.0) · one manual design decision open`
+
+> **Heading corrected in place 2026-08-15.** It read *"KB enrichment pending"* while this entry's own
+> body recorded **"KB APPLIED 2026-07-11 — PUBLISHED in KB v1.15.0. Both facets landed."** Verified
+> against the YAML rather than the note: `language/spin2/debug-displays/logic.yaml` carries the
+> array-feed example **and** the sub-sample-width = channel-count rule; `scope.yaml` carries the
+> array feed; `language/spin2/statements/debug.yaml` carries the cross-referencing example. **No KB
+> work is owed — do not re-file this as a YAML item.**
+>
+> **What is actually still open, and it is manual-head:** whether `ch13-packed-logic-stream` becomes
+> the richer **2-channel + `LONGS_2BIT`** demo. Today's single-channel `'D0'` + `LONGS_1BIT` version
+> is internally consistent and hardware-confirmed, so nothing is broken; adopting the richer form
+> costs one more render. **Stephen's design call.**
+>
+> **Ordering caveat worth carrying:** this entry's own "verify first" note says Facet B (the
+> mode↔channel-count rule) was a **peer report, not our own hardware run**, and directs us to confirm
+> on silicon *before* enriching the KB — but the KB enrichment shipped in v1.15.0 regardless, so that
+> order was inverted. The 2-channel render above **is** the confirming run. Until it happens, Facet B
+> in the KB rests on a peer report plus how LOGIC is documented to unpack, not on our own bench.
 
 **Surfaced:** 2026-07-11, fleet-release sweep — two published Debug Window Manual ch13 examples rendered only a fragment. **Root cause hardware-verified** the same day (Stephen ran the reshaped figure-generators; Claire read the BMPs back via image-tools).
 
