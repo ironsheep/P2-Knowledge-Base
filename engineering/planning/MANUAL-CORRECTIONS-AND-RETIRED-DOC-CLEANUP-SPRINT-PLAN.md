@@ -15,6 +15,22 @@ decisions — see §Open Question 5).
 
 ---
 
+> ## LIFECYCLE — this plan is HALF CLOSED
+>
+> This plan carries **two sprints**, split by Stephen on 2026-08-15.
+>
+> **SPRINT 1 — guide normalization — CLOSED 2026-08-15.** All 11 tasks `«#205»`–`«#215»` certified.
+> Audit: `engineering/history/sprints/2026-08-15-guide-normalization-sprint-1-CLOSEOUT.md`.
+> Exit: instrument **PASS 0/28**, three entry validators unchanged, **zero opus-master edits**.
+> No versioned artifact shipped. See *Sprint 1 — OUTCOME* and *Carried into Sprint 2* at the end.
+>
+> **SPRINT 2 — the manual work — OPEN.** Sections **§1–§5, §6, §7, §8** and the *Sequencing* block
+> are Sprint 2's, plus the six carry-forwards Sprint 1 produced. Nine targets, seven version bumps.
+>
+> **This plan is therefore NOT archived.** It stays in `engineering/planning/` until Sprint 2 closes.
+
+---
+
 ## Bench leg — COMPLETE 2026-08-14 (results, and what they change)
 
 The sequencing note's batched bench session (§3, §7a re-proof, §7b, §7e) ran on 2026-08-14.
@@ -664,9 +680,17 @@ as current.
 
 ## 6. Documentation Blast Radius
 
-> **`DOC_AUDIT_COMMAND` is unset for this project — there is no doc-audit instrument yet.**
-> This section is composed **by hand this once**, as the skill directs. `plan-to-tasks` should
-> generate a task to build one. Unset means *owed*, not exempt.
+> **RESOLVED 2026-08-15.** `DOC_AUDIT_COMMAND` was unset when this section was written, so the
+> table below was composed **by hand**, as the skill directs — and the debt it recorded ("`plan-to-
+> tasks` should generate a task to build one") became `«#206»`. The instrument now exists
+> (`engineering/tools/validation/audit-guide-conformance.py`) and the slot is set
+> (`.claude/skill-conventions.md:63`). It scans the **guide layer only**; it does not yet cover the
+> artifacts below.
+>
+> **This section is SPRINT 2's blast radius and remains OPEN.** Sprint 1's `«#215»` carries the same
+> name but covered a different artifact set (planning docs, `MANUAL-DESCRIPTOR.md` files, the
+> structural proof). Exactly one row overlaps — the `HEAD-DISPATCH-DRAFT.md` check, now discharged.
+> **Do not read the `Plan §6 → «#215»` cross-reference row as marking this section done.**
 
 | Artifact | Why in radius | Section |
 |---|---|---|
@@ -679,7 +703,7 @@ as current.
 | `P2KB-CORRECTION-FINDINGS.md` | **Annotate as you fix, same pass** — flip F-254…F-257 to `DONE` with applied-notes. A stale register lies. | all |
 | Live process docs listing current manuals | Enumerated in §5b bucket 1 | 5 |
 | `audit-license-block.py` | Skip-list entry removed | 5 |
-| `.claude/skills/HEAD-DISPATCH-DRAFT.md` | References the slug; check whether as live or historical | 5 |
+| ~~`.claude/skills/HEAD-DISPATCH-DRAFT.md`~~ | **CHECKED «#215» — no action.** The row was wrong: the file does not reference the slug, and `git log -S` shows it never has. A hand-survey artifact. | 5 |
 
 **Duplication watch.** The current-manual list appears in several process docs
 (`TEMPLATE-CATALOG.md`, `PDF-PRODUCTION-ARCHITECTURE.md`, `manual-production-working-set.md`,
