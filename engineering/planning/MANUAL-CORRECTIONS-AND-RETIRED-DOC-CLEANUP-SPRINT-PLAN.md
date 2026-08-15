@@ -34,6 +34,48 @@ level-driven DAC), F-265 (**resolved** — Goertzel ADC pins are raw, no smart-p
 F-266 (**the debug interrupt disrupts the streamer; `DEBUG_COGS` defaults to all eight cogs**, and
 nothing warns a streamer author).
 
+### Correction map — which documents, and in what order
+
+Nine targets. Released versions from `PUBLICATION-ROSTER.md`.
+
+| # | target | released | findings | size of job |
+|---|--------|----------|----------|-------------|
+| 1 | **P2KB YAML** `deliverables/ai/P2/` | continuous | F-264 (`wrpin.yaml` `tt_field` + `p_oe_required_for`), F-265 + `usage_pattern` defects (`dds-goertzel.yaml`), F-266 surfacing, F-253 | medium, no render |
+| 2 | **P2 I/O & Smart Pins User Guide** | v1.0.8, 396pp | F-261 — power groups FOUR→EIGHT, three repairs (`chapter-16-adc.md:263`, `:382`, and the layout rule built on it) | small, answer already in F-211 |
+| 3 | **P2 Streamer Programming Guide** | v1.0.8, 73pp | F-259 (`:1238`, `:1306`), F-260 §17.1 (`:1324`, `:990`), `:607`, F-266 warning, `##hubsym` ENH | **largest — real new prose** |
+| 4 | **P2 Assembly Language Reference** + **P2AN002** | v3.1.5 503pp / v1.0.2 14pp | F-263 — `chapter-05-hardware.md:~100-126` and `examples-library/cordic-pipeline-throughput.spin2` | medium; same finding, two docs |
+| 5 | **P2 Debug Window Manual** | v1.1.2, 168pp | F-262 — FFT chapter channel-default column | small |
+| 6 | **DeSilva PASM2 Tutorial** | v3.0.5, 164pp | F-254 Acknowledgments, F-257 Appendix A | small |
+| 7 | **P2 Interpreters & Emulators Guide** | v1.0.1, 100pp | F-256 (`:879`, `:416`, `:793`, `:1391`, `:1400`), F-255 §15.3 | **gated** — shape depends on the confirming run |
+| 8 | **Retired-doc cleanup** | — | §5, Smart Pins Tutorial out of the search path | independent |
+| 9 | **Release wave** | — | §8 | after the above |
+
+**Why this order.**
+
+1. **YAML first — it is upstream.** F-264 is the root of a class: `wrpin.yaml`'s `tt_field` is the
+   file F-245 was resolved against, and its `p_oe_required_for` is what would tell an author to add
+   `P_OE` to a cog-DAC config and break it. Correct the source before correcting the documents that
+   cite it, per the trust chain. No render, so it costs little.
+2. **IOSP next — highest-severity manual defect.** A RELEASED manual contradicting our own
+   published KB (v1.15.0) *and* our own app note P2AN001, on a fact we settled a month ago. No
+   research needed. It is also the cleanest demonstration of the process finding: F-211 landed in
+   the YAML and never reached the manuals.
+3. **Streamer Guide third** — the biggest authoring job, and where most of the new TEACH content
+   lands. Doing it after the YAML means §17.1 is written against a corrected `dds-goertzel.yaml`
+   rather than the reverse.
+4. **Assembly ch.5 + P2AN002 together** — one finding, two documents; writing them in one sitting
+   keeps the wording consistent and the rule stated identically in both.
+5–6. **Debug Window and DeSilva** — small and independent; either can be pulled forward to ride a
+   render if scheduling favours it. Note the sprint's Open Question 1 recommends DeSilva re-release
+   as **v3.0.6** rather than waiting, since F-254 is a public-facing credit claim.
+7. **XBYTE last of the content work** — §4's shape depends on the `_RET_ CALL` confirming run. Do
+   not start it early and write it twice.
+
+**Decisions that are Stephen's, not mine:** whether DeSilva re-releases on its own or rides the
+wave; whether the cross-cutting TEACH items (bit-field composition, `DEBUG_COGS`, the `$400` hub
+address) live in each manual or in one place referenced from several; and how wide the F-259 `+`
+class sweep goes beyond the two known lines.
+
 ### Authoring source
 
 The bench leg produced more than corrections: it produced **positive teaching material** about how
