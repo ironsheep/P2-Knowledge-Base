@@ -113,10 +113,11 @@ for this defect. Two guards, adopted platform-wide (origin: the XBYTE guide revi
   above its evidence. The trap is acute here: a closing crescendo *demands* a payoff, and where no
   true one exists an invented design-rule fills the slot — which also violates §2.4 anti-prescription.
   Strip the flourish off any closing sentence and read what remains as a bare claim before keeping it.
-- **Cadence is budgeted.** A *beat* is a closing sentence that lands a rhetorical punch rather than
-  finishing the thought. One good beat is fine; the failure is *regularity* — "instantly recognizable
-  and rapidly fatiguing." At most ~half of section closings may be beats, never more than ~4 in a row,
-  and chapter closers across Parts I–III stay well below.
+- **Cadence is budgeted (R4) — ADOPTED as written.** A *beat* is a closing sentence that lands a
+  rhetorical punch rather than finishing the thought. One good beat is fine; the failure is
+  *regularity* — "instantly recognizable and rapidly fatiguing." The budget, the run limit and the
+  chapter-closer emphasis apply to Parts I–III unchanged; the numbers are stated once in the house
+  canon (voices catalog, R4) rather than copied here, where they would drift from the rule.
 
 Two protections specific to this book:
 

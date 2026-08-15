@@ -203,8 +203,8 @@ Voice is specified in full in `voice-guide.md`. In brief: **a mentor's guided to
 content-driven density**, kept maximally warm throughout (this is the orientation on-ramp). Terminology: "cog"
 not "CPU" (lowercase in prose); canonical P2 terms; show code *constants*, not arithmetic values;
 instruction/bit-field formatting per platform standards; inherit `repo-voice-profile.md` + the shared platform
-voice. What we don't do: exhaustive enumeration, marketing, hedging, undocumented roadmap claims, unsourced
-numbers.
+voice. What we don't do: exhaustive enumeration, marketing, *vague* hedging (see `voice-guide.md` §2.4 —
+calibrated qualifiers are required, not banned), undocumented roadmap claims, unsourced numbers.
 
 ---
 

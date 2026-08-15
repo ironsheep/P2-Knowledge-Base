@@ -44,7 +44,7 @@ Teaching-register rules:
 - **Comparative grounding is a soft bridge, never a crutch.** A real-world parallel (a `switch` statement, a threaded interpreter) can be offered as a clearly skippable aside — a `> If you've written an interpreter before:` note. The explanation must always stand on its own.
 - **Applications are pointers, not pitches.** "If you're emulating an 8-bit micro, these are the modes to understand."
 
-**Use the reference register for:** the dispatch-cycle table, mode/compression tables, the LUT-entry bit-field, per-instruction syntax and effects, configuration recipes, and worked code. Third person, no hedging, dense, exact.
+**Use the reference register for:** the dispatch-cycle table, mode/compression tables, the LUT-entry bit-field, per-instruction syntax and effects, configuration recipes, and worked code. Third person, no *vague* hedging (§2.2a), dense, exact.
 
 **The handoff.** A chapter typically opens in the teaching register (a short orientation — what this mechanism is for, how the pieces differ) then shifts into the reference register for the tables and code. Guidance up front, precision underneath.
 
@@ -77,6 +77,15 @@ Teaching-register rules:
 | interpreter clock timings for Spin2 methods | Banned class (unverifiable, rev-dependent) | cite the 6-clock HARDWARE overhead only, or describe the code path |
 
 #### 2.2a Calibrated confidence is required — it is not hedging {#sec-2-2a}
+
+> **Where the rules live.** §2.2a and §2.4 were authored here, from the 2026-07-20 review,
+> and were then promoted into the house canon:
+> `engineering/standards/documentation-standards/documentation-voices-catalog.md`
+> ("The Shared Discipline — the four house rules"), where they are **R1** and **R4**.
+> That file is now the single statement of the rules; this guide states this document's
+> position on them. Being the origin is not an exemption from citing the canon — until
+> 2026-08-15 this was the only voice guide in the fleet that cited it nowhere at all,
+> which is how the rule and its birthplace drift apart.
 
 Banning tutorial filler ("you might wonder", "let's explore") does **not** mean
 banning *uncertainty*. A qualifier that reflects the true state of the evidence
@@ -116,19 +125,12 @@ reader stops hearing the individual beat and starts hearing the *metronome* —
 The recognizable-AI quality is the pattern, not any one sentence, so the fix is
 distribution, not deletion. Budget:
 
-- **At most ~half of section closings may be beats.** If most sections end on a
-  punch, cut the weakest ones back to a plain informational close.
-- **No long runs.** Never more than **~4 sections in a row** all closing on a
-  beat. A stretch of flat, informational closes is not a defect — it is rest.
-- **Chapter closers are the worst offenders** — aim well below a beat on every
-  chapter exit.
-- **A declared refrain is not a beat.** A deliberate, announced structural
-  device (e.g. this guide's *"Carry the question:"* refrains) is structure, not
-  cadence drift — keep it.
-- **Protect the earned ones.** A beat that carries real information, lowers the
-  text's own confidence, or resolves a genuine tension survives the pass. Do not
-  flatten the whole document to hit a number — that trades one defect for
-  another.
+**Decision: ADOPT R4 as written** — the budget, the run limit, the chapter-closer
+emphasis, the declared-refrain carve-out, and the protection for earned beats all apply
+to this document unchanged. The numbers themselves are stated once, in the house canon
+(`engineering/standards/documentation-standards/documentation-voices-catalog.md`, R4);
+they are not copied here, because a copied number is one that drifts from the rule it
+came from while still reading as authoritative.
 
 Detection tooling: the [[document-audit]] payoff-sentence sweep (Dimension #4c)
 measures closing-beat rate and the longest consecutive run.
@@ -216,7 +218,8 @@ measures closing-beat rate and the longest consecutive run.
 ## 6. Quality Checklist
 
 ### Voice Consistency
-- [ ] Reference layer: third person, no hedging, no tutorial voice
+- [ ] Reference layer: third person, no tutorial voice, **voice rules R1–R4 satisfied — see §2.2a
+      and §2.4.** (This item points; it does not re-encode.)
 - [ ] Teaching layer: plain language, terms defined on first use, analogy as a mental-model aid
 - [ ] No celebration, no "simply"/"basically"
 

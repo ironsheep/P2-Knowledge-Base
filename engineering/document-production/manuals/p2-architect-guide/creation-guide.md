@@ -350,7 +350,8 @@ Voice is specified in full in `voice-guide.md`. In brief: **a mentor's guided to
 content-driven density**, warm *throughout* — Act I welcoming and concrete, Act II carrying rigor without
 glibness (the decomposition method), Act III the amplification/agent voice. Terminology: **"cog," not "CPU" or
 "core"** (lowercase in prose); canonical P2 terms; **named constants, not arithmetic values**. What we don't
-do: exhaustive enumeration, marketing, hedging, undocumented roadmap claims, unsourced numbers, **prescribed
+do: exhaustive enumeration, marketing, *vague* hedging (see `voice-guide.md` §2.6 — calibrated
+qualifiers are required, not banned), undocumented roadmap claims, unsourced numbers, **prescribed
 decompositions**. Inherit `repo-voice-profile.md` + the shared platform voice.
 
 ---

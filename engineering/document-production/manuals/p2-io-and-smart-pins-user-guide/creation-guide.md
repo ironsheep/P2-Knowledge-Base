@@ -109,7 +109,7 @@ PART III: INPUT MODES (simple → complex)
 └── Chapter 17: Serial Receive
 
 PART IV: SPECIAL MODES
-├── Chapter 18: Inter-COG Data Sharing (Repository)
+├── Chapter 18: Inter-cog Data Sharing (Repository)
 └── Chapter 19: USB Host/Device
 
 PART V: APPENDICES
@@ -359,7 +359,7 @@ Categories to cover:
 - Control outputs (digital, DAC)
 - Read inputs (digital, ADC)
 - Communicate (SPI, I²C, UART, USB)
-- Coordinate (multi-pin, multi-COG)
+- Coordinate (multi-pin, multi-cog)
 
 ### 5.2 Appendix B: P_ Constants Reference
 

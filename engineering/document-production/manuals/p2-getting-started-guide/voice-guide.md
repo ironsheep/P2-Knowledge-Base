@@ -98,12 +98,12 @@ rhetorical beat. Two guards, adopted platform-wide (origin: the XBYTE guide revi
   crescendo *demands* a punchy payoff, and where no true one exists an invented claim fills the
   slot — so strip the flourish off any closing sentence and read what remains as a bare claim
   before keeping it.
-- **Cadence is budgeted.** A *beat* is a closing sentence that lands a rhetorical punch rather than
-  finishing the thought. One good beat is fine; the failure is *regularity* — "instantly
-  recognizable and rapidly fatiguing." At most ~half of section closings may be beats, never more
-  than ~4 in a row, and chapter closers stay well below. A flat, informational close is rest, not a
-  defect; an earned beat that carries real information or *lowers* the text's confidence is
-  protected — do not flatten the guide to hit a number.
+- **Cadence is budgeted (R4) — ADOPTED as written.** A *beat* is a closing sentence that lands a
+  rhetorical punch rather than finishing the thought. One good beat is fine; the failure is
+  *regularity* — "instantly recognizable and rapidly fatiguing." The budget, the run limit, the
+  chapter-closer emphasis, the flat-close-is-rest carve-out and the protection for earned beats all
+  apply to this guide unchanged; the numbers are stated once in the house canon (voices catalog, R4)
+  rather than copied here, where they would drift from the rule.
 
 Detection: `document-audit` Dimension #4c (payoff-sentence sweep, with a longest-run measure).
 

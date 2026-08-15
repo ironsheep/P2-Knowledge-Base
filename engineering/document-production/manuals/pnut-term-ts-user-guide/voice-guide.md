@@ -60,7 +60,9 @@ program's `debug()` session:
   PropPlug, then let's download the program and watch it run" — guided, not
   lectured.
 - **Confident and concrete.** Real flags, real menu paths, real defaults, real
-  exit codes. No hedging, no marketing ("powerful", "revolutionary",
+  exit codes. No *vague* hedging — calibrated qualifiers are required where the
+  evidence is partial (see the calibrated-confidence rule below). No marketing
+  ("powerful", "revolutionary",
   "seamless" — cut these).
 - **Respectful of the reader's time.** Short sentences. One idea per paragraph.
   Tables for option/menu/setting reference; prose for concepts and workflows.
@@ -155,16 +157,12 @@ force. One good beat is good writing. The failure is **regularity**: when nearly
 every section ends on one, the reader stops hearing the beat and starts hearing the
 *metronome* — "instantly recognizable and becoming rapidly fatiguing."
 
-- **At most ~half of section closings may be beats.** Cut the weakest back to a
-  plain informational close.
-- **No long runs** — never more than ~4 sections in a row closing on a beat. A
-  stretch of flat closes is rest, not a defect.
-- **Chapter closers are the worst offenders** — stay well below a beat on every
-  chapter exit.
-- **A declared refrain is structure, not a beat** — keep an announced structural
-  device.
-- **Protect the earned ones.** A beat that carries real information or *lowers* the
-  text's confidence survives. Do not flatten the guide to hit a number.
+**Decision: ADOPT R4 as written** — the budget, the run limit, the chapter-closer
+emphasis, the declared-refrain carve-out, and the protection for earned beats all apply
+to this document unchanged. The numbers themselves are stated once, in the house canon
+(`engineering/standards/documentation-standards/documentation-voices-catalog.md`, R4);
+they are not copied here, because a copied number is one that drifts from the rule it
+came from while still reading as authoritative.
 
 The tool-guide version of the trap: option tables, menu walkthroughs, and
 troubleshooting entries are *lists of similar things*, and closing each one on a

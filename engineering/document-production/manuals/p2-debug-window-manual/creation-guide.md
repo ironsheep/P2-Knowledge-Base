@@ -313,7 +313,7 @@ Author all content per that guide; its §3 (rules), §4 (debug-domain content ru
 - **Visualization Techniques**: Graphical debug outputs, plots, scopes
 - **Performance Monitoring**: Timing analysis, resource usage
 - **System State Display**: Register contents, memory, flags
-- **Multi-COG Debugging**: Coordinated debugging across COGs
+- **Multi-cog Debugging**: Coordinated debugging across cogs
 - **PASM Assembly Debugging**: Debug capabilities within assembly language code
 - **Debug Workflows**: Systematic debugging methodologies
 - **Integration Patterns**: Debug with other development tools
@@ -397,7 +397,7 @@ DEBUG: Timing delta = 2 clocks
 
 1. Add timing markers at key points
 2. Monitor data buffers before/after transmission
-3. Check for timing conflicts between COGs
+3. Check for timing conflicts between cogs
 4. Verify protocol timing requirements
 5. Compare expected vs. actual data patterns
 :::
@@ -416,7 +416,7 @@ DEBUG: Timing delta = 2 clocks
 #### Debug Tips
 ```markdown
 :::debug-tip
-💡 **Pro Tip**: Use different debug channels for different COGs to avoid output conflicts.
+💡 **Pro Tip**: Use different debug channels for different cogs to avoid output conflicts.
 :::
 ```
 
@@ -429,7 +429,7 @@ DEBUG: Timing delta = 2 clocks
 ### Hardware Accessibility Levels
 
 **Level 0: Software-Only Examples** (Preferred)
-- **Built-in P2 resources only**: 2 LEDs, CORDIC engine, multiple COGs, RNG, internal timers
+- **Built-in P2 resources only**: 2 LEDs, CORDIC engine, multiple cogs, RNG, internal timers
 - **Mathematical demonstrations**: Waveform generation, signal processing, algorithm visualization
 - **Software simulation**: Protocol patterns, sensor networks, control systems
 - **Learning focus**: Debug techniques and visualization concepts
@@ -525,7 +525,7 @@ PRI simulate_motor_system
 
 **Examples:**
 - `' Debug Example - Serial Dropouts - Buffer Monitoring`
-- `' Debug Example - COG Timing - Synchronization Check`
+- `' Debug Example - cog Timing - Synchronization Check`
 - `' Debug Example - Memory Issues - Address Validation`
 - `' Debug Example - Interrupt Problems - State Logging`
 
@@ -656,7 +656,7 @@ manual covers all nine windows in the pages it has.
  debug "Timer: ", udec_(timer_value), " Status: ", uhex_(status)
 
 ' GOOD: Clear debug labels
- debug "COG", udec_(cogid), ": Starting main loop"
+ debug "cog", udec_(cogid), ": Starting main loop"
 
 ' BAD: Unclear debug output
  debug udec_(x) ' What is x? When does this print?
@@ -725,7 +725,7 @@ manual covers all nine windows in the pages it has.
 - DEBUG instruction variants and formatting
 - Terminal window interaction and display
 - Debug performance monitoring
-- Multi-COG debug coordination
+- Multi-cog debug coordination
 - Visual debug output (plots, scopes)
 - Debug integration with development workflow
 - Advanced debug techniques for complex systems

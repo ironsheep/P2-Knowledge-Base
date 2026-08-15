@@ -33,7 +33,7 @@ pnut-ts truth.
 
 ## 3. Audience & assumed knowledge
 
-- **Assumed:** P2 has COGs, hub RAM, registers, flags (C/Z), pins; reader can
+- **Assumed:** P2 has cogs, hub RAM, registers, flags (C/Z), pins; reader can
   write/compile a basic Spin2/PASM2 program.
 - **NOT assumed:** any debugger experience; any knowledge of breakpoints,
   watches, single-stepping, heat maps.
@@ -51,7 +51,7 @@ pnut-ts truth.
    COGINIT-with-debug). (From `current-document` Quick Start + `DEBUGGER-USER`
    "Invoking", CORRECTED for tooling.)
 3. **Orientation: the debugger window** — the 123×77 layout and what each pane
-   shows (COG/LUT heat maps, control registers, disassembly, watch, stack, hub
+   shows (cog/LUT heat maps, control registers, disassembly, watch, stack, hub
    viewer, buttons). Introduce each pane's *purpose* before its mechanics.
    (From `DEBUGGER-USER` "Window Interface".)
 4. **Your first session (guided)** — a tiny program, set one breakpoint, step,
@@ -61,9 +61,9 @@ pnut-ts truth.
    `DEBUGGER-USER`, verbatim-accurate.)
 6. **Breakpoints in depth** — kinds (MAIN/INT/DEBUG/INIT/EVENT/ADDR/COGBRK), the
    break-condition register, setting/clearing. (From `DEBUGGER-USER`.)
-7. **Observing state** — memory (COG/LUT/hub), registers + SFR map, flags, call
+7. **Observing state** — memory (cog/LUT/hub), registers + SFR map, flags, call
    stack, smart pins, events, heat-map reading. (From `DEBUGGER-USER`.)
-8. **Working sessions / richer tasks** — PASM-level debugging, multi-COG
+8. **Working sessions / richer tasks** — PASM-level debugging, multi-cog
    debugging, performance/timing, finding memory corruption, debugging
    interrupts. (From both; CORRECTED.)
 9. **DEBUG output, briefly** — just enough to read DEBUG text output; the nine
@@ -76,7 +76,7 @@ pnut-ts truth.
 ## 5. In-scope vs cross-referenced
 
 - **In scope:** the single-step debugger UI, commands, breakpoints, memory/
-  register/stack inspection, multi-COG single-step workflows, DEBUG-to-trigger.
+  register/stack inspection, multi-cog single-step workflows, DEBUG-to-trigger.
 - **Cross-referenced (NOT taught here):** the nine DEBUG **display windows**
   (Terminal, Logic, Scope, XY, Plot, FFT, Bitmap, MIDI, Logger) → Debug Window
   Manual. Deep DEBUG output formatting → Debug Window Manual / Spin2 reference.

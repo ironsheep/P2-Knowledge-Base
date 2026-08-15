@@ -11,7 +11,7 @@
 
 The P2 documentation set already speaks in two established registers:
 
-- the **reference register** of the manuals (Streamer, Smart Pins, I/O) — third person, authoritative, dense, no hedging, optimized for the hundredth lookup; and
+- the **reference register** of the manuals (Streamer, Smart Pins, I/O) — third person, authoritative, dense, no *vague* hedging (§3.2), optimized for the hundredth lookup; and
 - the **tutorial register** of the DeSilva PASM guide — warm, second person, progressive, celebratory, optimized for the first read-through.
 
 An application note is **neither**. It is the third register, and it has its own job:
@@ -68,7 +68,7 @@ An app note deliberately shifts voice by section, because its sections do differ
 | "Let's explore the wonderful world of…" | Tutorial padding | "This note shows how to…" |
 | "Simply set the pin and you're done!" | Dismissive; hides real complexity | State the actual steps |
 | "Congratulations, you did it!" | Tutorial celebration | (omit — the working result is the reward) |
-| "You might wonder whether…" | Hedging | State the fact or the choice directly |
+| "You might wonder whether…" | **Tutorial filler** — words that announce the writing instead of doing it. **Not hedging**, and not the same as calibrated confidence: a qualifier that reflects genuinely partial evidence is *required* accuracy (§7's "no hedging **in factual statements**"). | State the fact or the choice directly |
 | Re-teaching P2 basics from zero | That's the manual/tutorial's job | Link to it; assume the stated prerequisites |
 | A feature tour with no build | That makes it a manual chapter, not an app note | Keep one concrete outcome in view throughout |
 | Unsourced capability claims | Trust-chain violation | Verify first (creation guide §5), or don't write it |

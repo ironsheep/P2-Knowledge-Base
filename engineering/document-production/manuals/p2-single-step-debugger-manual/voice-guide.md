@@ -15,7 +15,7 @@ This guide defines the voice for the P2 Single-Step Debugger Manual. It is a
 ## Who the reader is
 
 - **Knows the P2 only lightly.** May be coming from the P1 (Propeller 1), or may
-  be newer still. Comfortable that the P2 has COGs, hub RAM, registers, pins —
+  be newer still. Comfortable that the P2 has cogs, hub RAM, registers, pins —
   but not deeply fluent.
 - **Has never used this debugger.** Possibly has never used *any* single-step
   debugger. We cannot assume the reader knows what a breakpoint, a watch, or
@@ -30,7 +30,7 @@ This guide defines the voice for the P2 Single-Step Debugger Manual. It is a
 
 How to **use the single-step debugger** to understand and fix P2 programs:
 - what single-step debugging *is* and when to reach for it,
-- what you can **observe** (COG/LUT/hub memory, registers, C/Z flags, PC, the
+- what you can **observe** (cog/LUT/hub memory, registers, C/Z flags, PC, the
   call stack, smart pins, events),
 - what you can **control** (step, run, break, breakpoints of several kinds),
 - and the concrete keystrokes/mouse actions that do each of those.
@@ -125,16 +125,12 @@ with force. One good beat is good writing. The failure is **regularity**: when
 nearly every section ends on one, the reader stops hearing the beat and starts
 hearing the *metronome* — "instantly recognizable and becoming rapidly fatiguing."
 
-- **At most ~half of section closings may be beats.** Cut the weakest back to a
-  plain informational close.
-- **No long runs** — never more than ~4 sections in a row closing on a beat. A
-  stretch of flat closes is rest, not a defect.
-- **Chapter closers are the worst offenders** — stay well below a beat on every
-  chapter exit.
-- **A declared refrain is structure, not a beat** — keep an announced structural
-  device.
-- **Protect the earned ones.** A beat that carries real information or *lowers*
-  the text's confidence survives. Do not flatten the manual to hit a number.
+**Decision: ADOPT R4 as written** — the budget, the run limit, the chapter-closer
+emphasis, the declared-refrain carve-out, and the protection for earned beats all apply
+to this document unchanged. The numbers themselves are stated once, in the house canon
+(`engineering/standards/documentation-standards/documentation-voices-catalog.md`, R4);
+they are not copied here, because a copied number is one that drifts from the rule it
+came from while still reading as authoritative.
 
 The step-by-step chapters have their own version of this: a procedure that ends
 every numbered walkthrough with "and now you can see exactly what your program

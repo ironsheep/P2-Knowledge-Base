@@ -67,7 +67,7 @@ defect caught by the `prepare-manual` line-length audit
 3. **Rewrite Chapter 8** as "Basic I/O" (no Smart Pins complexity)
 4. **Develop Chapters 9-12** with core assembly focus
 5. **Minimize Chapters 13-15** to brief examples with external references
-6. **Enhance Chapter 16** (Multi-COG) with pattern examples
+6. **Enhance Chapter 16** (Multi-cog) with pattern examples
 
 #### Phase 2: Pedagogical Enhancement
 1. **Add Medicine Cabinet** sections to each chapter
@@ -101,8 +101,8 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 | **Instruction behavior** | YAML `description:` field | "ADD stores sum in Dest" |
 | **Flag effects** | YAML `flags:` field | "C flag set on carry" |
 | **Timing claims** | YAML `clocks:` field | "Takes 2 clock cycles" |
-| **Architecture claims** | P2 Documentation v35 ONLY | "8 COGs share Hub" |
-| **COG memory model** | P2 Documentation v35 ONLY | "512 longs of COG RAM" |
+| **Architecture claims** | P2 Documentation v35 ONLY | "8 cogs share Hub" |
+| **cog memory model** | P2 Documentation v35 ONLY | "512 longs of cog RAM" |
 | **Hub access patterns** | P2 Documentation v35 ONLY | "Egg beater timing" |
 | **Code example behavior** | pnut-ts compilation | "This blinks the LED" |
 
@@ -154,13 +154,13 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 
 **Example 1: Correct Simplification**
 
-Claim to write: "Think of COGs as 8 workers in a kitchen, each with their own cutting board"
+Claim to write: "Think of cogs as 8 workers in a kitchen, each with their own cutting board"
 
-1. Claim type: Analogy for COG parallelism
-2. Verify: Does analogy hold? COGs ARE parallel AND independent → YES
-3. Check: Does analogy break? Workers can talk, COGs need explicit Hub → NOTE THIS
+1. Claim type: Analogy for cog parallelism
+2. Verify: Does analogy hold? Cogs ARE parallel AND independent → YES
+3. Check: Does analogy break? Workers can talk, cogs need explicit Hub → NOTE THIS
 4. Safe for learning? YES, captures essential concept
-5. Result: Write analogy, but add "unlike kitchen workers, COGs need explicit Hub to share data"
+5. Result: Write analogy, but add "unlike kitchen workers, cogs need explicit Hub to share data"
 
 **Example 2: Dangerous Simplification**
 
@@ -289,12 +289,12 @@ This document follows the project-wide Technical Climbing Methodology, contribut
 
 #### What This Manual Covers
 - **Core PASM2 Instructions**: Complete instruction set with examples
-- **COG Architecture**: 8-processor parallel model, hub/cog relationship
+- **cog Architecture**: 8-processor parallel model, hub/cog relationship
 - **Basic I/O**: DRVH, DRVL, TESTP, FLTL, WAITP (no Smart Pins)
 - **Hub Operations**: RDLONG, WRLONG, block transfers
 - **Math & Logic**: Hardware multiply/divide, boolean operations
 - **CORDIC Basics**: Unique P2 feature for trig/rotation
-- **Multi-COG Patterns**: Communication, synchronization, orchestration
+- **Multi-cog Patterns**: Communication, synchronization, orchestration
 - **Assembly Optimization**: Pipeline, timing, efficiency
 
 #### What This Manual References (Not Covers)
@@ -423,7 +423,7 @@ Question: [what needs checking]
 :::diagram
 🎨 **DIAGRAM NEEDED**
 
-[Description of diagram: e.g., "8-COG hub access timing"]
+[Description of diagram: e.g., "8-cog hub access timing"]
 Key elements to show:
 - Element 1
 - Element 2
@@ -529,7 +529,7 @@ You now understand:
   - `' LED Blinker - With Register`
   - `' LED Pattern - SOS`
   - `' PWM Fader - Triangle Wave`
-  - `' Multi-COG Example - Synchronized LEDs`
+  - `' Multi-cog Example - Synchronized LEDs`
 
 **Why This Matters for P2KB**:
 - Searchable by concept ("Find all PWM examples")
@@ -595,7 +595,7 @@ Medicine: Just use MUL for now - it's good enough for most cases
 
 **Type 2: Concrete Analogy**
 ```markdown
-COGs seem confusing?
+Cogs seem confusing?
 Medicine: Think of it like 8 people in a kitchen, each with their own cutting board
 ```
 
@@ -713,7 +713,7 @@ REGENERATION:
 - **Green** (`#EBFCEB`/`#4CB04C`): PASM2 code - most common
 - **Blue** (`#E3F2FD`/`#1976D2`): Spin2 code - IDE-aligned
 - **Purple** (`#F8F5FF`/`#A785C2`): CORDIC math operations
-- **Teal** (`#E0F2F1`/`#00897B`): Multi-COG parallel examples
+- **Teal** (`#E0F2F1`/`#00897B`): Multi-cog parallel examples
 - **Red** (`#FFF5F5`/`#C08080`): Antipatterns - what NOT to do
 
 **Pedagogical Environment Pastels:**

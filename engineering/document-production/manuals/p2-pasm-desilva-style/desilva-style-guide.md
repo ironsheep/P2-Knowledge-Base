@@ -100,7 +100,7 @@ The warm amber color contrasts with cool green PASM code blocks, signaling "shif
 - **Green** (`#EBFCEB`/`#4CB04C`): PASM2 code - most common
 - **Blue** (`#E3F2FD`/`#1976D2`): Spin2 code - IDE-aligned
 - **Purple** (`#F8F5FF`/`#A785C2`): CORDIC math operations
-- **Teal** (`#E0F2F1`/`#00897B`): Multi-COG parallel examples
+- **Teal** (`#E0F2F1`/`#00897B`): Multi-cog parallel examples
 - **Red** (`#FFEBEE`/`#E53935`): Antipatterns - what NOT to do (unmistakable warning)
 
 **Pedagogical Containers (softer pastels, don't compete with code):**
