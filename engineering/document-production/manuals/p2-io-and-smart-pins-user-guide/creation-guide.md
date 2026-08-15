@@ -333,7 +333,7 @@ Every mode entry MUST include:
 - [ ] Complete configuration table (all registers)
 - [ ] ALL applicable P_ constants listed
 - [ ] Working Spin2 example (compiles with FlexProp)
-- [ ] Working PASM2 example (compiles with pnut_ts)
+- [ ] Working PASM2 example (compiles with pnut-ts)
 - [ ] Configuration considerations (all choices explained)
 - [ ] Use cases
 - [ ] Related modes
@@ -437,7 +437,7 @@ Stop and verify when about to write:
 
 ### 7.1 All Examples Must
 
-1. **Compile** - Spin2 with FlexProp, PASM2 with pnut_ts
+1. **Compile** - Spin2 with FlexProp, PASM2 with pnut-ts
 2. **Be complete** - Not fragments, runnable as-is
 3. **Be realistic** - Use real values with explanations
 4. **Be commented** - Explain what AND why

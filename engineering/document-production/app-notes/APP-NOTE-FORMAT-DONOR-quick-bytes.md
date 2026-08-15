@@ -63,7 +63,7 @@ Graft the app-note *depth* into the middle of the Quick Byte *ergonomic front*:
 
 [ App-note depth — THE ADDED VALUE (no QB analogue) ]
   4. How it works — the composition: which subsystems, wired how, and WHY
-  5. The worked, validated code (the anchor)          ← QB Source Code, but ours + pnut_ts-checked
+  5. The worked, validated code (the anchor)          ← QB Source Code, but ours + pnut-ts-checked
   6. Gotchas / edge cases / tradeoffs
 
 [ Close ]

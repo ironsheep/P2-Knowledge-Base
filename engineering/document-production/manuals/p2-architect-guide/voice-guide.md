@@ -163,7 +163,7 @@ Keep markers rare — this is a narrative guide, not a reference peppered with b
 - **No embedded code:** the book carries zero code examples by design (the mechanics belong to *Getting
   Started* and the reference manuals). Where code would once have appeared, describe the *technique* and link
   out. If a future snippet is ever added, it uses named **constants** not arithmetic, fenced (```spin2 /
-  ```pasm2), `pnut_ts`-verified (`-d` for DEBUG), within the platform K=76 budget.
+  ```pasm2), `pnut-ts`-verified (`-d` for DEBUG), within the platform K=76 budget.
 - Inherit `repo-voice-profile.md` + the shared platform voice; this guide layers the design/architect register
   on top.
 

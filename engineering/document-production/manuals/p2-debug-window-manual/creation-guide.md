@@ -227,7 +227,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 
 #### Phase 2: Manual Generation (CURRENT PHASE)
 1. **Generate chapters using Opus 4.1** - Leveraging Phase 1 discoveries
-2. **Create 50+ working examples** - All pnut_ts validated
+2. **Create 50+ working examples** - All pnut-ts validated
 3. **Document layer patterns** - Layer system, CROP commands
 4. **Document PLOT sprites** - SPRITEDEF/SPRITE commands with 0-255 IDs, 1-32 pixel dimensions
 5. **Include PC input integration** - Mouse and keyboard debug control
@@ -235,7 +235,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 7. **Document only verified features** - No speculation about undocumented capabilities
 
 #### Phase 3: Quality Validation
-1. **Test all examples** with pnut_ts compiler
+1. **Test all examples** with pnut-ts compiler
 2. **Verify debug outputs** match discovered behaviors
 3. **Validate layer techniques** for performance claims
 4. **Check cross-references** to Phase 1 studies
@@ -591,7 +591,7 @@ data commands → control commands → one compilable example → when-to-use/co
 ### Part I — Foundation
 1. **The DEBUG Display Windows** — the shared create-by-name/feed-by-name model, the nine
  windows, the values-vs-command-codes rule, the boundary with the single-step debugger.
-2. **Getting Started** — tooling (`pnut_ts -d`, `pnut_term_ts`), your first window, the
+2. **Getting Started** — tooling (`pnut-ts -d`, `pnut-term-ts`), your first window, the
  no-hardware philosophy, optional DEBUG configuration symbols.
 
 ### Part II — The Windows (one chapter each, simplest to richest)
@@ -623,7 +623,7 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 ## 🔧 Technical Requirements
 
 ### Code Validation
-- **MUST compile with pnut_ts** without errors or warnings
+- **MUST compile with pnut-ts** without errors or warnings
 - **MUST produce actual debug output** when run
 - **MUST be complete programs** (not code fragments)
 - **MUST use consistent debug formatting** throughout manual
@@ -643,7 +643,7 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 ```
 
 ### Example Verification Process
-1. **Compile** all examples with latest pnut_ts
+1. **Compile** all examples with latest pnut-ts
 2. **Run** examples on P2 hardware or P2 emulator
 3. **Capture debug window screenshots** using P2's built-in bitmap save
 4. **Include screenshot alongside code** for visual verification

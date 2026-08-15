@@ -739,13 +739,13 @@ Each instruction entry must pass:
 - [ ] **Flag accuracy** - C and Z behavior verified
 - [ ] **Timing accuracy** - Cycle count verified
 - [ ] **Cross-references valid** - All "Related" instructions exist
-- [ ] **Example compiles** - If present, tested with pnut_ts
+- [ ] **Example compiles** - If present, tested with pnut-ts
 - [ ] **Terminology consistent** - Uses canonical terms
 
 ### 7.2 Code Example Testing
 
 All code examples must:
-1. Compile with `pnut_ts` without errors
+1. Compile with `pnut-ts` without errors
 2. Be syntactically correct PASM2
 3. Demonstrate the instruction's purpose
 4. Include explanatory comments

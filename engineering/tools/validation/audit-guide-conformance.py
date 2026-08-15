@@ -239,15 +239,23 @@ def detect_d1(path, lineno, line, is_catalog):
 
 BAD_TOOL = re.compile(r"\bpnut_(?:term_)?ts\b", re.I)
 DECLARED_WRONG = re.compile(
-    r"(not\s+[`'\"]?pnut_|underscore|command not found|does not exist|doesn't exist"
-    r"|is wrong|incorrect|❌|never write|wrong form)", re.I)
+    r"(not\s+[`'\"]?pnut_|underscore|command not found|(?:do(?:es)?n?'?t?|not)\s+exist"
+    r"|no such|\bwrong\b|incorrect|❌|never write)", re.I)
+
+# `pnut_ts-usage-guide.md` is a REAL file on disk. Flagging a filename would
+# invite a "fix" that breaks the citation — the D3 defect, manufactured.
+REAL_FILENAMES = re.compile(r"pnut_ts-usage-guide")
 
 
-def detect_d2(path, lineno, line, is_catalog):
+def detect_d2(path, lineno, line, is_catalog, context=()):
     m = BAD_TOOL.search(line)
     if not m:
         return None
-    if DECLARED_WRONG.search(line):
+    if REAL_FILENAMES.search(line) and not BAD_TOOL.search(REAL_FILENAMES.sub("", line)):
+        return exempt("real on-disk filename, not a tool invocation", m.start())
+    # The declaration and the forms it declares wrong routinely span a wrapped
+    # sentence, so judge the neighbourhood, not the line.
+    if any(DECLARED_WRONG.search(c) for c in context):
         return exempt("deliberate mention — declares the underscore form wrong", m.start())
     return finding("the underscore form does not exist (use pnut-ts / pnut-term-ts)", m.start())
 
@@ -369,10 +377,14 @@ def scan(files, detectors):
     findings, exemptions = [], []
     for path in files:
         is_catalog = path == CATALOG
-        text = path.read_text(encoding="utf-8", errors="replace")
-        for lineno, line in enumerate(text.splitlines(), 1):
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for lineno, line in enumerate(lines, 1):
+            # A rule and the wording that scopes it often wrap across lines, so
+            # detectors that judge intent get the neighbourhood too.
+            context = lines[max(0, lineno - 3):lineno + 2]
             for code, detect in detectors:
-                result = detect(path, lineno, line, is_catalog)
+                result = (detect(path, lineno, line, is_catalog, context)
+                          if code == "D2" else detect(path, lineno, line, is_catalog))
                 if result is None:
                     continue
                 kind, why, pos = result

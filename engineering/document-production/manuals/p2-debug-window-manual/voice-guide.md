@@ -37,7 +37,7 @@ The voice must be:
 
 ### 1.2 Scope: the nine DEBUG display windows
 
-This guide covers the complete set of P2 DEBUG display windows, all hosted in `pnut_term_ts`:
+This guide covers the complete set of P2 DEBUG display windows, all hosted in `pnut-term-ts`:
 
 | Window | One-line purpose |
 |--------|------------------|
@@ -83,7 +83,7 @@ Every window chapter follows the same format:
 - The configuration/declaration command and all its parameters.
 - The per-update data commands and their formats.
 - Control/feature commands (color, scaling, layers, cropping, triggers — whatever that window supports).
-- A complete, `pnut_ts`-compilable example.
+- A complete, `pnut-ts`-compilable example.
 - Use cases and considerations.
 
 ### 2.3 Comprehensive coverage
@@ -115,7 +115,7 @@ Considerations:
 | Use definitive statements | "PLOT renders to a back buffer, then swaps" ✅ |
 | Be specific about values | "channel count 1–8" ✅ |
 | List ALL of a window's commands/options | document every control command, not just the example's ✅ |
-| Show complete, compilable examples | every example builds with `pnut_ts` ✅ |
+| Show complete, compilable examples | every example builds with `pnut-ts` ✅ |
 | Cross-reference related windows | "See also: SCOPE_XY for phase plots" ✅ |
 | Speak to the reader (second person) | "You declare the window with…" ✅ |
 | Ground every claim in the theory-of-operations | cite the window's `REF/theory-of-operations/` doc ✅ |
@@ -148,9 +148,9 @@ Considerations:
 
 These are correctness rules specific to the DEBUG subsystem (carried from the Single-Step Debugger Manual's voice guide, where they were established):
 
-1. **Correct tooling, always.** The compiler is **`pnut_ts`** (`-d` / `--debug` compiles with DEBUG enabled). The host application that opens the DEBUG display windows is **`pnut_term_ts`**. There is no "PNut IDE," no `pnut.exe`, no `Run → Debug Enable` menu. Strip any such reference from the source drafts.
+1. **Correct tooling, always.** The compiler is **`pnut-ts`** (`-d` / `--debug` compiles with DEBUG enabled). The host application that opens the DEBUG display windows is **`pnut-term-ts`**. There is no "PNut IDE," no `pnut.exe`, no `Run → Debug Enable` menu. Strip any such reference from the source drafts.
 2. **Valid DEBUG output formatters only.** `UDEC` / `SDEC` / `UHEX` / `SHEX` / `UBIN`, each with an optional trailing `_` to suppress the auto label. Never bare `DEC` / `HEX` / `BIN` (not valid Spin2 DEBUG formatters).
-3. **Every code example compiles** with `pnut_ts`. Stub any helper methods so examples build without external hardware (this manual's example corpus already uses this pattern).
+3. **Every code example compiles** with `pnut-ts`. Stub any helper methods so examples build without external hardware (this manual's example corpus already uses this pattern).
 4. **P2, never P1.** P2 syntax exclusively: `COGSPIN` / `COGINIT` (never `cognew`), `GETCT` (never `CNT`).
 5. **Native comment syntax only** in code blocks: `'` line comments, `{ }` / `{{ }}` blocks. No `//`, `/* */`, `;`, or `#`-prefixed comments — even in pseudocode.
 6. **Software-only, no external hardware** (creation-guide "Minimal Hardware Design Philosophy" — Level 0 is preferred). Every example must run on a bare P2 board + PC with no wiring, generating its own data in software: CORDIC (`QSIN`/`QROTATE`), the RNG (`GETRND` / `?` operator), counters, `GETCT` timing, and software simulation of sensors/signals/protocols. Never require an external sensor, probe, or wiring to see a window work. If a real-hardware application is worth showing, add it as a short optional "extension" note *after* the software-only version.
@@ -165,7 +165,7 @@ These are correctness rules specific to the DEBUG subsystem (carried from the Si
 | TERM / BITMAP / PLOT / LOGIC / SCOPE / SCOPE_XY / FFT / SPECTRO / MIDI | mixed case, abbreviations | Window type names in caps, as the `DEBUG()` keyword is written |
 | single-step debugger | step debugger, the debugger | The *other* manual's subject; cross-ref only |
 | `DEBUG()` statement | debug print, debug call | The Spin2/PASM mechanism that feeds the windows |
-| `pnut_term_ts` | terminal, the host | The host application |
+| `pnut-term-ts` | terminal, the host | The host application |
 | sysclk | system clock | Clock-frequency reference |
 
 - **PASM2 instructions:** bold uppercase. **Spin2 methods:** bold mixed case.
@@ -194,14 +194,14 @@ Before finalizing any window chapter, verify:
 
 **Completeness**
 - [ ] ALL of the window's commands and options documented.
-- [ ] A complete, `pnut_ts`-compilable example.
+- [ ] A complete, `pnut-ts`-compilable example.
 - [ ] "When to use" / considerations included.
 - [ ] Cross-references to related windows.
 
 **Accuracy**
 - [ ] Every claim traced to the window's theory-of-operations doc.
 - [ ] Examples compile; comment syntax is native; formatters are valid.
-- [ ] Tooling is `pnut_ts` / `pnut_term_ts` only.
+- [ ] Tooling is `pnut-ts` / `pnut-term-ts` only.
 
 ---
 

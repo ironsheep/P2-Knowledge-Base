@@ -137,7 +137,7 @@ Keep markers rare — this is a narrative guide, not a reference peppered with b
 | Spin2 / PASM2 | Spin / PASM (when meaning P2) | reserve unqualified for P1 context |
 - **Code:** show the compiler's symbolic **constants**, not arithmetic values (validate the symbol↔value off to
   the side; don't replace the symbol with a number). Instruction names and bit-field notation per platform
-  standards. Fenced code (```spin2 / ```pasm2), `pnut_ts`-verified (`-d` for DEBUG).
+  standards. Fenced code (```spin2 / ```pasm2), `pnut-ts`-verified (`-d` for DEBUG).
 - Inherit `repo-voice-profile.md` + the shared platform voice; this guide layers the orientation register on top.
 
 ---
@@ -176,7 +176,7 @@ then where to go when you need more."*
 **Discipline**
 - [ ] Link out, never duplicate the reference manuals
 - [ ] Low persona — warmth from clarity, not a character
-- [ ] "cog" not "CPU"/"core" (lowercase in prose); code constants not arithmetic; `pnut_ts`-verified code
+- [ ] "cog" not "CPU"/"core" (lowercase in prose); code constants not arithmetic; `pnut-ts`-verified code
 - [ ] No hedging on facts; no marketing; no undocumented roadmap claims
 
 ---

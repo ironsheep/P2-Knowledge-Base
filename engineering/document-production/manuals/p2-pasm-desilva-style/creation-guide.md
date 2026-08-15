@@ -76,7 +76,7 @@ defect caught by the `prepare-manual` line-length audit
 5. **Connect chapters** with preview/review bridges
 
 #### Phase 3: Quality Validation
-1. **Test all code examples** with pnut_ts compiler
+1. **Test all code examples** with pnut-ts compiler
 2. **Verify technical accuracy** against YAML sources
 3. **Check pedagogical flow** for smooth progression
 4. **Ensure voice consistency** throughout
@@ -103,7 +103,7 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 | **Architecture claims** | Silicon Doc ONLY | "8 COGs share Hub" |
 | **COG memory model** | Silicon Doc ONLY | "512 longs of COG RAM" |
 | **Hub access patterns** | Silicon Doc ONLY | "Egg beater timing" |
-| **Code example behavior** | pnut_ts compilation | "This blinks the LED" |
+| **Code example behavior** | pnut-ts compilation | "This blinks the LED" |
 
 ### Red-Flag Phrases for Pedagogical Content
 
@@ -132,7 +132,7 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 │  2. Can I cite a source?                                        │
 │     □ YAML instruction file (for instruction claims)            │
 │     □ Silicon Doc (for hardware/architecture claims)            │
-│     □ pnut_ts compilation (for code behavior claims)            │
+│     □ pnut-ts compilation (for code behavior claims)            │
 │                                                                 │
 │  3. Is my analogy accurate?                                     │
 │     □ Does the comparison hold in ALL relevant ways?            │
@@ -143,7 +143,7 @@ The PASM2 technical reference audit discovered that **hallucinations occur at th
 │     □ Will they need to UNLEARN this later?                     │
 │                                                                 │
 │  5. Does the code ACTUALLY work?                                │
-│     □ Compiled with pnut_ts → no errors                         │
+│     □ Compiled with pnut-ts → no errors                         │
 │     □ Produces the claimed result                               │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -174,7 +174,7 @@ Attempted claim: "Just add WC and the carry flag takes care of itself"
 ### Code Example Verification
 
 **Every code example MUST:**
-1. Compile with `pnut_ts` without errors
+1. Compile with `pnut-ts` without errors
 2. Produce the claimed observable result
 3. Be complete enough to run (no "..." snippets for working code)
 4. Have comments that match actual behavior

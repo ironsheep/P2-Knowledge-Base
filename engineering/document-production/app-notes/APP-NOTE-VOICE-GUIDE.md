@@ -126,7 +126,7 @@ App notes inherit the house formatting so code, symbols, and bit fields look ide
 
 **How It Works.** Reference voice. Precise, worked, exact. Borrow the manual register wholesale here; this is the section a returning reader scans.
 
-**Build It.** Build voice. One complete program, walked through. Every example compiles under `pnut_ts` (creation guide §5). Comments explain *why*, never restate the instruction.
+**Build It.** Build voice. One complete program, walked through. Every example compiles under `pnut-ts` (creation guide §5). Comments explain *why*, never restate the instruction.
 
 **See It Work / Verify.** Empirical voice. What success looks like, and the honest failure branch. Never skip this — it is what makes a note trustworthy.
 
@@ -154,7 +154,7 @@ App notes inherit the house formatting so code, symbols, and bit fields look ide
 - [ ] Instructions UPPERCASE (not bold); symbols monospace; bit fields bracketed
 - [ ] Symbolic constants taught, not raw numbers
 - [ ] "cog" lowercase in prose
-- [ ] Every code block compiles under `pnut_ts`
+- [ ] Every code block compiles under `pnut-ts`
 - [ ] Markers (⚠️ 💡 🔧 🔍) used where they earn their place
 - [ ] Deeper material pointed to by official title, not re-taught
 

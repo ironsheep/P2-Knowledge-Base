@@ -71,7 +71,7 @@ content.
 **Why app notes earn a YAML form when OBEX/Quick Bytes don't.** It's authorship.
 We can only trust-stamp and serve content we *author* — community OBEX/Quick
 Bytes we only *catalog* (point to). App notes are first-party and
-`pnut_ts`-validated, so we can bring their content *fully* into the served KB.
+`pnut-ts`-validated, so we can bring their content *fully* into the served KB.
 App notes are the one "lesson" type an agent can consume structurally without
 opening the document.
 

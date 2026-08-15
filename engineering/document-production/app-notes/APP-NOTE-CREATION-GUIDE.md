@@ -35,7 +35,7 @@ A note takes one of two shapes. Both obey everything above; they differ only in 
 Two guardrails keep a catalog an app note and not a manual chapter:
 
 1. **Shared conceptual base first.** All recipes build on **one** "The Idea / How It Works" foundation, taught once, never re-explained per recipe. The recipes vary the *application*, not the mechanism.
-2. **Every technique is a complete, verified, runnable recipe — plus a decision aid.** Each catalog entry is a build-it + verify (compiles under `pnut_ts`, shows expected output), not a described mode. A **decision table** (need → technique) gives the reader the "which one do I use" spine. If an entry is a mode description with no runnable recipe, it's manual-chapter content — cut it or move it to the manual.
+2. **Every technique is a complete, verified, runnable recipe — plus a decision aid.** Each catalog entry is a build-it + verify (compiles under `pnut-ts`, shows expected output), not a described mode. A **decision table** (need → technique) gives the reader the "which one do I use" spine. If an entry is a mode description with no runnable recipe, it's manual-chapter content — cut it or move it to the manual.
 
 **Decomposition rule (both archetypes).** Foundation belongs in the **manual**; the note **applies** it. When a note needs a mechanism the manual under-documents, *enrich the manual* and have the note cite it — do not grow the note into the manual. (P2AN001 rests on the enriched I/O & Smart Pins User Guide Ch.16; the note teaches the *use*, the chapter owns the *mechanism*.)
 
@@ -110,7 +110,7 @@ FRONT MATTER
 4. THE IDEA                  [teaching]   the mental model BEFORE any register detail
 5. HOW IT WORKS              [reference]  the mechanism: modes/registers/instructions, diagram,
 │                                          worked numeric example
-6. BUILD IT                  [build]      one complete, runnable, pnut_ts-validated program,
+6. BUILD IT                  [build]      one complete, runnable, pnut-ts-validated program,
 │                                          walked through ("how this works")
 7. SEE IT WORK / VERIFY      [empirical]  expected output (DEBUG/scope/logic) + failure branch
 8. ADAPT IT / GOING FURTHER  [build]      the parameter space, variations, where it breaks
@@ -126,7 +126,7 @@ FRONT MATTER
 
 - **§2 What You'll Build** can be a single italic line right under the Abstract; it does not need its own heading on a short note. Its job is to put the outcome in view immediately.
 - **§5 How It Works** is the one section that reads like a manual. Borrow the reference register here, and *cite the manual* for the full enumeration rather than reproducing it.
-- **§6 Build It** is the centerpiece. The program is complete and runnable on the stated board. Every code block compiles under `pnut_ts` (§5 verification). The walkthrough explains *why*, never restates the instruction.
+- **§6 Build It** is the centerpiece. The program is complete and runnable on the stated board. Every code block compiles under `pnut-ts` (§5 verification). The walkthrough explains *why*, never restates the instruction.
 - **§7 Verify** is non-negotiable. A note without a verification step is not trustworthy. Show the expected DEBUG window / capture, the expected value, and at least one honest failure branch.
 - **§8 Adapt It** is what separates an app note from a recipe — it teaches the reader to *change* the result, which is the actual point of a note.
 - **Catalog mapping (§1.1).** This skeleton is written for the single-build archetype. A techniques-catalog keeps §1–§5 as the shared base, then **repeats §6–§7 (Build It + Verify) per recipe** after a decision table; §8 becomes "which recipe / going further." The fixed flow — orient → concept → mechanism → build → verify → adapt — is per-recipe once the shared base is set.
@@ -142,13 +142,13 @@ App notes are downstream of the trust chain (`Trusted Sources → Trusted YAML �
 When sources conflict, in order:
 1. **Empirical / hardware-verified** findings (`engineering/ingestion/external-sources/hardware-verification/` — the EF ledger). Ground truth; outranks everything.
 2. **P2 Knowledge Base YAML** (`deliverables/ai/P2/`) — the curated, version-tracked authority. Validate idioms against the KB *first* (it is what the code was generated from).
-3. **`pnut_ts` compiler** — for code correctness and symbol↔value checks (compile DEBUG code with `-d`).
+3. **`pnut-ts` compiler** — for code correctness and symbol↔value checks (compile DEBUG code with `-d`).
 4. **Silicon / Spin2 documentation** — for mechanism and encoding.
 5. **Official ROM / Parallax example code, then community (OBEX)** — for proven usage patterns.
 
 ### 5.2 Verification rules
 
-- **Every code example compiles under `pnut_ts`** (with `-d` when it contains `debug()`), and is validated against the KB idioms before the compiler — never prefer a compiler guess over the YAML authority.
+- **Every code example compiles under `pnut-ts`** (with `-d` when it contains `debug()`), and is validated against the KB idioms before the compiler — never prefer a compiler guess over the YAML authority.
 - **Every capability claim traces to a source.** No inference, no "reasonable" behavior invented to fill a gap. If it can't be sourced, it's a *finding* (route to `engineering/operations/P2KB-CORRECTION-FINDINGS.md`), not a sentence in the note.
 - **Worked numbers are derived from an authority** (compiler/silicon/KB), not computed by reasoning and asserted.
 - **Verification output is real.** The expected DEBUG/scope result shown in §7 must come from an actual run (Stephen runs hardware/GUI externally — see the hardware-verification model), not an imagined screenshot.
@@ -219,7 +219,7 @@ Production specifics, **settled by the P2AN001 pilot (2026-06-28)**:
 - **Marker authoring caveat** — the platform `mnemonic-bold` filter bolds bare PASM2/Spin2 mnemonics even in prose, and its English-word disambiguation is imperfect (it false-bolds e.g. “ones”). Avoid bare mnemonic-words as plain English in app-note prose (write “samples” not “ones”).
 - **Cross-reference filter** — clickable Chapter/§ refs (`p2kb-platform-crossref`) is the planned next adoption per the platform crossref-filter tracker (opt-in, with a visual audit).
 - **No table of contents.** App notes carry **no** `\tableofcontents` and pass **no** `--toc`/`--toc-depth` (drop both from the cloned `front-matter.md` and `request.json`). The shared platform is chapter-centric (`book` class, `tocdepth 1`); a note has only `##` sections and no `#` chapters, so a ToC renders an **empty "Contents" page**. A note is 5–20 pp and the cover's **"What You'll Build"** box already lists every recipe — that *is* the contents. (Established 2026-06-30 across P2AN001/P2AN002.)
-- **Example-library source ZIP.** Every runnable recipe is also a standalone file under the note's **`examples-library/`** (one `.spin2` per recipe + a `README.md` table), extracted verbatim from the opus-master so the download never drifts from the document. `release-manual` publishes them as **`P2ANxxx-src.zip`** beside the PDF in `deliverables/documents/DOCs/`, with a `raw.githubusercontent.com` download link in the publication roster (the same mechanism the manuals use). **The ZIP name carries no date** — it is a stable, permanent filename that is **overwritten in place** on every release (git version-controls the history). A dated name would mint a new URL on every rebuild, forcing a hand-edit of every download link at two sites (roster post + review-page README) and leaving the prior dated copy orphaned in `DOCs/`; the edition/version already lives in the roster row and changelog, so the date in the filename is redundant. (Established 2026-07-16 — the un-dating sweep.) The note's **Resources** section names the ZIP (no in-PDF link). Every file in `examples-library/` must compile clean under `pnut_ts` (`-d` if it uses `debug()`), same gate as the embedded blocks.
+- **Example-library source ZIP.** Every runnable recipe is also a standalone file under the note's **`examples-library/`** (one `.spin2` per recipe + a `README.md` table), extracted verbatim from the opus-master so the download never drifts from the document. `release-manual` publishes them as **`P2ANxxx-src.zip`** beside the PDF in `deliverables/documents/DOCs/`, with a `raw.githubusercontent.com` download link in the publication roster (the same mechanism the manuals use). **The ZIP name carries no date** — it is a stable, permanent filename that is **overwritten in place** on every release (git version-controls the history). A dated name would mint a new URL on every rebuild, forcing a hand-edit of every download link at two sites (roster post + review-page README) and leaving the prior dated copy orphaned in `DOCs/`; the edition/version already lives in the roster row and changelog, so the date in the filename is redundant. (Established 2026-07-16 — the un-dating sweep.) The note's **Resources** section names the ZIP (no in-PDF link). Every file in `examples-library/` must compile clean under `pnut-ts` (`-d` if it uses `debug()`), same gate as the embedded blocks.
 - **Cite OBEX objects by their permanent number.** When a note references an OBEX object, give its **`OBEX #NNNN`** (the permanent object id) at every mention and in Resources — the number is the stable, searchable identifier; the slug-based URL is secondary. (Do not invent a URL; if unsure of the slug, cite the number and point the reader to `obex.parallax.com`.)
 - **Attribute sources by who actually authored them — never default everything to "Parallax Inc."** Three tiers: (1) **Parallax primary sources** (the *Propeller 2 Documentation / Silicon* v35, the *Datasheet*, the *Spin2 Language Documentation*) — cite as *(Chip Gracey, Parallax Inc.)*; these genuinely are Parallax's and the provenance must not be stripped. (2) **Companion P2 Knowledge Base manuals** (the *P2 I/O & Smart Pins User Guide*, *P2 Assembly Language Reference Manual*, *P2 Streamer Programming Guide*, *P2 Architect's Guide*, …) — name them by their canonical title as **"a companion P2 Knowledge Base publication"**; they are **not** "Parallax Inc." documents (they are joint Iron Sheep / Parallax works — see the copyright rule below). Put these in **Resources** (companion reading), and keep formal **References** to the primary sources the facts trace to. (3) **Community** (OBEX, forums) — author/handle + OBEX #.
 - **Close with the joint copyright/license back-matter** (creation-guide §4 item 14), mirroring the manual family: a **`## Copyright & License`** section — *"Copyright © <year> Iron Sheep Productions, LLC and Parallax Inc."*, the **CC BY-SA 4.0** statement, the Parallax trademark line **with the trademark-scope sentence** — followed by **`## Acknowledgments`** (Parallax Inc., Chip Gracey, the specific community authors whose code grounded the note). The work is **jointly** Iron Sheep + Parallax; the cover already carries the *"P2 Knowledge Base Project"* branding.
@@ -261,7 +261,7 @@ A recreation re-derives every number against P2 silicon and notes where a P1 idi
 - [ ] Resources + cross-references point onward to manuals/notes
 
 **Sourcing**
-- [ ] Every code block compiles under `pnut_ts` (`-d` if it has `debug()`)
+- [ ] Every code block compiles under `pnut-ts` (`-d` if it has `debug()`)
 - [ ] Idioms validated against the P2KB YAML before the compiler
 - [ ] No unsourced capability claim; worked numbers derived from an authority
 - [ ] Verification output came from a real run

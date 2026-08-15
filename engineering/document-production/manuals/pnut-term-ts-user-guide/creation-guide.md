@@ -20,16 +20,16 @@ and explain what it is.
 
 **The agentic tool suite:**
 - **P2KB MCP** — the P2 knowledge base, served to an agent.
-- **`pnut_ts`** — the Spin2/PASM2 compiler.
-- **`pnut_term_ts`** (this tool) — the downloader + terminal + debug-window
+- **`pnut-ts`** — the Spin2/PASM2 compiler.
+- **`pnut-term-ts`** (this tool) — the downloader + terminal + debug-window
   runtime that closes the hardware-in-the-loop observation loop.
 - *(optional)* the **Spin2 VS Code extension** — editor with syntax + semantic
   highlighting.
 
 This tool is the *runtime/observation* leg. **The P2 Architect's Guide, Part 3**
 ("The Same Work, with an Agent") walks the P2 design workflow with an agent in
-the loop, and — in its Chapter 12 — names *this very tool chain* (`pnut_ts`,
-`pnut_term_ts`, and the Knowledge Base) as the hosted set that lets an agent
+the loop, and — in its Chapter 12 — names *this very tool chain* (`pnut-ts`,
+`pnut-term-ts`, and the Knowledge Base) as the hosted set that lets an agent
 close the write-compile-run-read loop on real silicon by itself. This guide is
 the operating manual for that runtime leg, so Part 3 is a first-class
 bidirectional cross-reference (§4). (Scope note: Part 3's *depth* is the
@@ -121,7 +121,7 @@ they do not wrap.
 - **Worked, runnable command-lines** are the connective tissue — especially one
   complete *"your first automated run"* recipe in the headless branch.
 - **Two positioning diagrams** earn their place in the trunk: (1) the tool-chain
-  diagram (MCP + `pnut_ts` + `pnut_term_ts` + optional VS Code ext, with the
+  diagram (MCP + `pnut-ts` + `pnut-term-ts` + optional VS Code ext, with the
   P2), and (2) the three-in-one identity diagram.
 - **Annotated screenshots** carry the GUI branch (main window, toolbar, status
   bar, Preferences tabs, PropPlug Management, and **Automatic Window Placement**
@@ -164,7 +164,7 @@ Working outline; see `PLANNING.md` for the chapter-level detail.
 - **P2 Single-Step Debugger Manual** — the single-step debugger interface this
   tool *renders and drives*; that manual is *how to use the debugger*.
 - **Parallax P2 DEBUG documentation** — the `debug()` display-directive syntax.
-- **Suite-mates named in the trunk:** P2KB MCP, `pnut_ts`, the Spin2 VS Code
+- **Suite-mates named in the trunk:** P2KB MCP, `pnut-ts`, the Spin2 VS Code
   extension.
 
 ## 5. Release gate

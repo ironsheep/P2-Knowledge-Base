@@ -557,7 +557,7 @@ channel number. DAC0 → pins %xxxx00, DAC1 → pins %xxxx01, etc.
 - [ ] Symbol matches Spin2 documentation
 - [ ] D field structure documented
 - [ ] S field usage documented
-- [ ] Example compiles with pnut_ts
+- [ ] Example compiles with pnut-ts
 - [ ] Pitfalls identified where applicable
 
 **Per Chapter:**
@@ -575,7 +575,7 @@ channel number. DAC0 → pins %xxxx00, DAC1 → pins %xxxx01, etc.
 ### 8.2 Code Testing
 
 All code examples must:
-1. Compile with `pnut_ts` without errors
+1. Compile with `pnut-ts` without errors
 2. Be syntactically correct PASM2 or Spin2
 3. Demonstrate the described functionality
 4. Include meaningful comments

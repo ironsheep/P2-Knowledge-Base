@@ -151,7 +151,7 @@ authoritative for silicon facts. The manual **derives** from these and asserts n
 ### 4.3 Content verification protocol (hallucination prevention)
 - **Every factual claim traces to the KB / Silicon Doc / datasheet.** No unsourced performance numbers, no
   invented behavior, no undocumented roadmap claims. Nothing is asserted from memory.
-- **Code examples** compile-cert with `pnut_ts` (`-d` for any DEBUG code) before inclusion.
+- **Code examples** compile-cert with `pnut-ts` (`-d` for any DEBUG code) before inclusion.
 - **Reading-literacy gate (Ch2):** review every later code example against the question *"did Ch2 teach the
   reader to read every construct this example uses?"* If an example uses something Ch2 never made readable, fix
   Ch2 (or simplify the example). See §3.3 — this is Ch2's definition-of-done.
@@ -175,14 +175,14 @@ object/method structure and its blocks (`CON`/`VAR`/`OBJ`/`PUB`/`PRI`/`DAT`), th
 recur, indentation-as-structure, and how a PASM2 instruction reads (label · instruction · operands · effects)
 so the assembly snippets later in the book and in the reference manuals are not opaque. This is *literacy*, not
 a full language tour — teach what the reader will actually meet, and link out for the complete reference. Code
-examples are short, `pnut_ts`-verified, and chosen to illustrate a reading construct. **Definition-of-done:**
+examples are short, `pnut-ts`-verified, and chosen to illustrate a reading construct. **Definition-of-done:**
 every construct used by any example in this book (Ch1, Ch3, and Ch2 itself) has been made readable here (§3.3,
 §4.3 reading-literacy gate).
 
 ### 5.3 Chapter 3 — Putting It to Work
 Show the features *in use*. The cog/object/run-time model; launching cogs; the Spin2-vs-PASM2 decision (as a
 *decision*, with the trade-offs, not a syntax tour); hub sharing; the boot/run model. Code examples are short,
-purposeful, and `pnut_ts`-verified, showing *why* not just *what*. Link out for full language detail. Every
+purposeful, and `pnut-ts`-verified, showing *why* not just *what*. Link out for full language detail. Every
 construct an example uses must already be readable from Ch2 (§4.3 gate).
 
 ### 5.4 "P1 note:" sidebars
