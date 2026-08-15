@@ -46,6 +46,19 @@ So two audits belong in the planning phase, before any task list is written.
 
 #### P1 — Voice-guide propagation audit *(per gaining guide)*
 
+**In progress: `VOICE-GUIDE-PROPAGATION-STUDY-2026-08.md`.** IOSP and Debug Window decided;
+DeSilva and the partial set pending. It has already returned two results that change the work:
+
+- **§2.2a is a RECONCILIATION, not an addition, for IOSP and Debug Window.** Both guides carry
+  *"Never hedge"* as an explicit rule, which §2.2a corrects. Appending §2.2a would leave each
+  guide self-contradictory, and an author obeying the older rule would strip exactly the
+  qualifiers that keep claims honest — the failure this sprint's bench leg exists to remedy.
+- **The Debug Window Manual has a large PRE-EXISTING voice debt**, documented in its own guide's
+  migration note: the shipped v2 master is in an enthusiastic "Discovery Guide" voice the guide
+  calls out of conformance with the entire house standard, and says *"bringing v2 into conformance
+  … is a substantial rewrite."* Not created by this sweep, and it must not be silently absorbed
+  into this sprint. P2 counts it separately from anything we introduce.
+
 For each guide that would gain elements from the XBYTE audit, study each element against that
 manual's voice and produce a written decision: **adopted · adapted (and how) · rejected (and why)**.
 Rejections carry the most weight — an undocumented rejection reads as an oversight and gets
