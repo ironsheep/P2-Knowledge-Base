@@ -3,25 +3,37 @@
 **Canonical Name:** `p2-debug-window-manual`
 
 ## 🎯 Document Purpose
-Creating a comprehensive practical guide to P2's Debug Window system - the built-in visualization and monitoring capabilities that make P2 development uniquely interactive and accessible.
+The complete practical reference for the P2 DEBUG window system: the nine built-in
+display windows, their commands and parameters, and how to use them while developing.
 
 ### Document Philosophy
-**"Visual Discovery Through Systematic Exploration"**
-- **Transform basic DEBUG usage into expert-level debugging strategies**
-- **Explore all 9 window types beyond SPIN-2 v5.1's minimal examples**
-- **Discover rich parameter combinations through systematic experimentation**
-- **Provide immediate visual verification** - every code example paired with actual screenshot
-- **Bridge the capability gap** - users know basics but miss the sophisticated possibilities
+
+> **Voice note.** This guide is written in the register it asks authors to write in —
+> Authoritative + Comprehensive + Practical, per `voice-guide.md`. It previously opened
+> in the superseded "Discovery Guide" voice while its own §Voice section forbade that
+> voice, which taught the banned register by example. An author absorbs register by
+> reading a guide, not by reading its rules.
+
+- **Document all nine window types completely** — every command and parameter, not the
+  subset the Spin2 documentation illustrates.
+- **Document parameter combinations**, which are where the windows' real behavior lives
+  and where the source material is thinnest.
+- **Pair every code example with a screenshot** of what it actually produces.
+- **Close the gap between basic and complete use** — the syntax most developers already
+  know covers a small part of what the windows do.
 
 ### Core Problem This Manual Solves
-**The "Iceberg Effect"**: Developers use basic `DEBUG` syntax but remain unaware of:
-- 9 specialized window types with rich parameter systems
-- Advanced visualization capabilities hiding in plain sight
-- PASM assembly debugging possibilities
-- Professional debugging workflows and patterns
-- Parameter interactions that create powerful debugging displays
 
-**Our Solution**: Systematic capability discovery with visual proof of every technique.
+The DEBUG statement most developers use is a small entry point to a much larger system.
+Undocumented or thinly documented from the reader's side:
+
+- nine specialized window types, each with its own parameter set
+- PASM-level debugging
+- multi-window coordination
+- parameter interactions that change what a window displays
+
+**The approach:** document each window from its theory of operations, and show visual
+proof of every technique rather than describing it.
 
 ## 🚫 No Handwaving Principle
 
@@ -99,7 +111,7 @@ This section formalizes the No Handwaving Principle into a systematic verificati
 | **Command syntax** | Spin2 v5.1 docs | "DEBUG(\`window BITMAP SIZE 100 100)" |
 | **Parameter values** | Testing + documentation | "TRACE modes range 0-15" |
 | **Visual behavior** | Screenshot verification | "Grid overlay appears when..." |
-| **Performance claims** | Tested benchmarks | "Layer system provides 20× improvement" |
+| **Performance claims** | Tested benchmarks, **quoted with their conditions** | "Full-window redraw measured at *N* ms on *host/version*; layer updates at *M* ms for the same frame" — a bare multiplier ("20× faster") is not a sourced claim, it is the marketing `voice-guide.md` §3.2 forbids |
 | **PC integration** | Pascal source + testing | "Mouse coordinates reported via..." |
 | **Capability limits** | Testing ONLY | "Maximum simultaneous windows is..." |
 
@@ -187,15 +199,18 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 - Debug system architecture and capabilities
 - Performance characteristics of debug operations
 
-#### 2. Phase 1 Comprehensive Window Studies (Revolutionary Discoveries)
-**Location**: `/engineering/document-production/manuals/p2-debug-window-manual/studies/`
-- **12 comprehensive study documents** covering all 9 window types
-- **the Layer System Discovery**: 20× performance improvement through sprite-based updates
-- **PC Input Integration**: Bidirectional debugging unique to P2
-- **CROP Command Mastery**: Selective display updates for efficiency
-- **45 YAML Knowledge Gaps**: Documented and prioritized for AI capability enhancement
-- **Multi-Window Coordination Patterns**: Professional debugging workflows
-- **Complete Syntax Reference**: Unified command reference from all studies
+#### 2. Phase 1 Comprehensive Window Studies
+**Location**: `engineering/document-production/manuals/p2-debug-window-manual/studies/`
+- **12 study documents** covering all 9 window types
+- **The layer system** — sprite-based partial updates. *(The studies record a large
+  redraw-cost reduction. Any figure carried into the manual must come with its
+  measurement conditions — see the performance-claim row in the verification protocol
+  above; an unconditioned multiplier is the marketing this manual's voice guide forbids.)*
+- **PC input integration** — the host reports keyboard and mouse back to the P2
+- **The CROP command** — selective region updates
+- **45 YAML knowledge gaps**, documented and prioritized
+- **Multi-window coordination patterns**
+- **Complete syntax reference** — unified command reference from all studies
 
 #### 3. OBEX and Source Code Projects (Real-World Implementation Patterns)
 **Location**: Various ingested project sources throughout P2 knowledge base
@@ -219,7 +234,8 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 1. **Cataloged all 9 debug window types** - TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI
 2. **Extracted SPIN-2 v5.1 minimal examples** as baseline reference points
 3. **Parameter matrix exploration** - Discovered layer patterns, CROP commands, layer system
-4. **Pattern extraction from source code** - Revolutionary 20× performance improvements found
+4. **Pattern extraction from source code** - sprite-based partial-update patterns found,
+   with a large measured redraw-cost reduction (carry the figure only with its conditions)
 5. **Developed complementary examples** - Software-only demonstrations for accessibility
 6. **PASM debugging integration** - Assembly-level debug capabilities documented
 7. **Created 12 comprehensive study documents** - ~400KB of discoveries and analysis
@@ -351,8 +367,8 @@ Help readers recognize similar situations
 Provide code with issues for reader to identify and fix
 
 ## Advanced Techniques
-[More sophisticated debugging for this scenario]
-Professional-level debugging approaches
+[Further techniques for this scenario — multi-window coordination, PASM-level
+debugging, parameter combinations beyond the common case]
 
 ## Summary: Debug Checklist
 [Quick reference for this type of debugging]
@@ -611,8 +627,12 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 > in `SALVAGE-CANDIDATES.md` for clean-room re-authoring into the window chapters above.
 
 ## 📏 Size Guidelines
-- **Target length**: 200-250 pages
-- **Chapter size**: 10-15 pages each
+**As shipped (v1.1.2, 2026-08-08): 168 pages, 15 chapters + 3 appendices.** These are the
+verified figures from the render and the publication roster, not a target. The original
+targets (200–250 pages, 16 chapters) were never met and are not goals to restore — the
+manual covers all nine windows in the pages it has.
+
+- **Chapter size**: 10–15 pages each
 - **Example density**: 2-3 working examples per chapter
 - **Practical focus**: 70% examples, 30% explanation
 
@@ -684,18 +704,18 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 # PART 6: SUCCESS METRICS
 
 ## Quantitative Goals
-- 32+ complete debug examples
-- 16 chapters with systematic coverage
-- 100% code compilation success
-- <10 minutes to implement any debug technique
-- 200-250 pages of practical content
+- **Every example compiles**, and every example file is byte-identical to its code
+  block in the manual *(met: 34 programs, all verified on real silicon as of v1.1.1)*
+- **All nine window types documented completely** — every command and parameter
+- A worked, screenshot-backed example for each window
+- *(As shipped: 168 pages, 15 chapters + 3 appendices. Recorded, not targeted.)*
 
 ## Qualitative Goals
-- **Transforms debugging from frustration to insight**
-- **Makes P2's debug capabilities accessible to all skill levels**
-- **Serves as the definitive reference for P2 debugging**
-- **Enables confident debugging of complex P2 systems**
-- **Showcases P2's unique debugging advantages**
+- **Every claim traceable** to the Spin2 documentation, a per-window theory of
+  operations, a study, or a test — the No Handwaving Principle above is the standard
+- **Complete rather than selective** — all options documented, not the impressive ones
+- **Usable as a reference** — a reader who knows which window they need can find the
+  parameter they need without reading the chapter
 
 ---
 
@@ -746,5 +766,10 @@ code line wider than the budget below.
 - **Status**: Phase 2 Manual Generation Ready
 - **Phase 1**: ✅ COMPLETED - 12 comprehensive window studies
 - **Phase 2**: 🚧 IN PROGRESS - Opus 4.1 manual generation
-- **Major Discoveries**: Layer System (20× performance), PC Input Integration, CROP Commands
+- **Major findings**: the layer system (sprite-based partial updates), PC input
+  integration, CROP commands
 - **Next Step**: Generate chapters 1-14 using Opus 4.1
+
+> **Historical record — this status block describes 2025-09-14, not today.** The manual
+> shipped v1.0.0 on 2026-06-16 and is at **v1.1.2 (168pp, 15 chapters + 3 appendices)**.
+> Kept because the phase history is genuine provenance; read it as history, not state.
