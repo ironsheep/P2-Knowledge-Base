@@ -110,6 +110,13 @@ ROSTER = REPO_ROOT / "engineering/document-production/PUBLICATION-ROSTER.md"
 APP_NOTE_GLOB = "engineering/document-production/app-notes/APP-NOTE-*.md"
 MANUAL_GUIDE_GLOB = "engineering/document-production/manuals/*/*guide*.md"
 
+# Descriptors are in scope because `document-audit` resolves each manual's audit
+# overlay FROM its MANUAL-DESCRIPTOR.md, so a descriptor defect misdirects the
+# audits that gate the releases themselves. One glob covers both element classes
+# (manuals/<slug>/ and app-notes/<slug>/) -- globbed, never hand-listed, so a new
+# element is in scope the day it is created.
+DESCRIPTOR_GLOB = "engineering/document-production/*/*/MANUAL-DESCRIPTOR.md"
+
 # Excluded by identity, not by lifecycle: a private, non-KB manuscript that
 # shares the tree but is governed by nothing in this layer.
 PRIVATE_ELEMENTS = {"Donna-Manuscript"}
@@ -157,6 +164,7 @@ def collect_files(excluded_slugs):
         candidates.append(CATALOG)
     candidates.extend(REPO_ROOT.glob(APP_NOTE_GLOB))
     candidates.extend(REPO_ROOT.glob(MANUAL_GUIDE_GLOB))
+    candidates.extend(REPO_ROOT.glob(DESCRIPTOR_GLOB))
 
     scanned, excluded = [], []
     for path in sorted(set(candidates)):

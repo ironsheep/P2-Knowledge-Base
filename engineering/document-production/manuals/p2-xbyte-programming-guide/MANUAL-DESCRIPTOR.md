@@ -17,7 +17,7 @@ high_risk_tables:                                 # transposition-prone — weig
 high_risk_quant:                                  # hot spots
   - "6-clock overhead vs 9-clock software dispatch vs 8-clock minimum loop (P2 Documentation v35 verbatim — cite, never round/restate)"
   - "Mode-operand bit layout %A…F (table base / %BBBB compression threshold / F bit)"
-  - "PA = $1F6, PB = $1F7 ; LUT routine range $200–$3FF, COG range $000–$1FF ; hardware stack 8 levels"
+  - "PA = $1F6, PB = $1F7 ; LUT routine range $200–$3FF, cog range $000–$1FF ; hardware stack 8 levels"
 fragile_areas:                                    # known-thin / discipline-sensitive
   - "Capstone 6502 emulator (Ch.15) + prefixes/alternate-tables (Ch.17, incl. the 6809 SETQ2 pages) — TINY & ILLUSTRATIVE by charter; guest-CPU ISA facts are historical, but all PASM2 must pnut-ts compile"
   - "Appendix C external-implementation links (Arc8de, Yume suite) — links + author + what-it-emulates + license ONLY; never claim XBYTE use unless sourced; NO narrative use elsewhere (scope decision of record)"
@@ -40,7 +40,8 @@ Everything not listed above is inherited from the central skill body + the guide
   Streamer guide.
 - **Voice (Dimension #9):** two registers (teaching + reference) per voice-guide. Teaching
   register (Ch.1, chapter openers) allows "you" + analogy; reference register (tables,
-  encodings, per-instruction detail) is third-person, no hedging. Banned patterns from
+  encodings, per-instruction detail) is third-person, no *vague* hedging — a qualifier
+  that reflects partial evidence is R1 compliance and stays. Banned patterns from
   voice-guide §2.2. "cog" lowercase in prose.
 - **Terminology (Dimension #8):** voice-guide §4 canonical terms (bytecode not "opcode" for
   the stream; dispatch not "decode"; routine/handler not "function"; the skip *family*).

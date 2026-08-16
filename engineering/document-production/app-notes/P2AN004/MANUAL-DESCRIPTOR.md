@@ -9,7 +9,7 @@ guide_paths:
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
   style_guide: ../APP-NOTE-VOICE-GUIDE.md
 companion_yaml: deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml
-authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Silicon Doc v35 (Smart Pins: measurement modes %10001 P_HIGH_TICKS / %10101 P_COUNTER_TICKS / %10111 P_COUNTER_PERIODS / %01011 P_QUADRATURE + A/B input routing) + TSL235R datasheet (ams/TAOS, 3rd-party = cross-check tier) + Spin2 docs (pinstart/wrpin/wxpin/rdpin/pinread/pinh/pinl/pinf/pinw/muldiv64) + IOSP Ch.13-15 (companion manual) + OBEX (#2831 P2_rctime, #2829 Quadrature Encoder) + pnut_ts
+authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # P2 Documentation v35 (Smart Pins: measurement modes %10001 P_HIGH_TICKS / %10101 P_COUNTER_TICKS / %10111 P_COUNTER_PERIODS / %01011 P_QUADRATURE + A/B input routing) + TSL235R datasheet (ams/TAOS, 3rd-party = cross-check tier) + Spin2 docs (pinstart/wrpin/wxpin/rdpin/pinread/pinh/pinl/pinf/pinw/muldiv64) + IOSP Ch.13-15 (companion manual) + OBEX (#2831 P2_rctime, #2829 Quadrature Encoder) + pnut-ts
 high_risk_quant:
   - "Reciprocal frequency counter (R2): frequency = periods x clkfreq / ticks via MULDIV64; %10101 (ticks) + %10111 (periods) run over the SAME X window; worked check 50 kHz/100 ms/200 MHz -> 5000 periods, 20e6 ticks -> 50_000 Hz"
   - "TSL235R (datasheet, cross-check tier): fO = 250 kHz typ at Ee = 430 uW/cm^2, lambda_p = 635 nm, VDD = 5 V; 2.7-5.5 V operating; dark output 0.4-10 Hz; Ee = freq * 430 / 250_000"
@@ -17,8 +17,8 @@ high_risk_quant:
   - "R1: P_HIGH_TICKS %10001 latches the high duration in clocks and raises IN on the high->low crossing only; us = clocks / (clkfreq / 1_000_000)"
   - "Single-pin reciprocal routing: signal pin uses default-local A/B in P_COUNTER_TICKS; the periods pin on SIG_PIN+1 routes BOTH inputs back one pin (P_MINUS1_A | P_MINUS1_B) so it watches the same signal"
 fragile_areas:
-  - "P_B_A_INPUT does NOT exist (undefined in pnut_ts, F-176) — single-pin count/quadrature routing is the BARE mode constant (A/B default local) plus P_MINUS1_A|P_MINUS1_B (reciprocal) or P_PLUS1_B (quadrature); never re-introduce P_B_A_INPUT"
-  - "A period is A-input rise to B-input rise (Silicon Doc): a neighbour cell watching the signal must route BOTH A and B (P_MINUS1_A|P_MINUS1_B) or its idle B never rises and the window hangs — R2 routes both, correctly (see corrections register F-192 re: the YAML idiom)"
+  - "P_B_A_INPUT does NOT exist (undefined in pnut-ts, F-176) — single-pin count/quadrature routing is the BARE mode constant (A/B default local) plus P_MINUS1_A|P_MINUS1_B (reciprocal) or P_PLUS1_B (quadrature); never re-introduce P_B_A_INPUT"
+  - "A period is A-input rise to B-input rise (P2 Documentation v35): a neighbour cell watching the signal must route BOTH A and B (P_MINUS1_A|P_MINUS1_B) or its idle B never rises and the window hangs — R2 routes both, correctly (see corrections register F-192 re: the YAML idiom)"
   - "R1 depends on P_LOW_FLOAT: OUT=1 drives (charge), OUT=0 floats (discharge through sensor). P_OE keeps the driver enabled regardless of DIR, so the DIR pulse (pinf/pinl) resets/starts the smart pin WITHOUT disturbing the charge — do not 're-fix' the pinf/pinl order"
   - "An open sensor / too-short charge HANGS the R1 poll loop (IN rises only on high->low); it does NOT read $8000_0000. Near-zero = missing P_LOW_FLOAT (low output drives to ground)"
   - "R2 irradiance scale is folded into the constant (muldiv64(freq, CAL_UW*100, CAL_HZ)) so the x100 lands in the 64-bit path — do NOT revert to freq*100 (32-bit pre-multiply, overflows above ~21 MHz for the generalized-sensor case)"
@@ -37,7 +37,7 @@ foundational fork EMPTY, advanced fork PRESENT).
 - **Grounding model:** `reference` — verify against the measurement-mode YAMLs
   (`architecture/smart-pins/smart-pin-{10001,10101,10111,01011}-*.yaml`), the Spin2
   method/PASM2 pages (`pinstart/wrpin/wxpin/rdpin/pinread/pinhigh/pinlow/pinfloat/pinwrite/
-  muldiv64`), the **Silicon Doc v35** Smart Pins measurement section (period = A-rise to
+  muldiv64`), the **Parallax Propeller 2 Documentation v35 - Rev B/C** Smart Pins measurement section (period = A-rise to
   B-rise + A/B routing), and the **TSL235R datasheet** (ams/TAOS, cross-check tier) for the
   transducer facts. IOSP Ch.13 (time), Ch.14 (counting/quadrature), Ch.15 (frequency/period)
   own the mechanism.
@@ -54,4 +54,4 @@ foundational fork EMPTY, advanced fork PRESENT).
   moves with light); absolute calibration (lux, temperature, irradiance) DEFERS to a hardware
   run (-> EF ledger when accepted). No invented sensor readings.
 - **Code (Dimensions #3/#3b):** every embedded block + every `examples-library/*.spin2` compiles
-  under `pnut_ts` (all three use `debug()` so need `-d`); K=76; inline code ASCII-only.
+  under `pnut-ts` (all three use `debug()` so need `-d`); K=76; inline code ASCII-only.

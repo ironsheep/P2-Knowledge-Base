@@ -39,7 +39,9 @@ Everything not listed above is inherited from the central skill body + the guide
 - **Structure (Dimension #10):** 18 chapters in 5 parts + Appendices A–D + clickable Index,
   per creation-guide §2.1. Front matter = house standard.
 - **Voice (Dimension #9):** banned patterns derive from voice-guide §2.2 "What We DON'T Say"
-  + §2.3 (Never: hedging / celebration / tutorial-voice / questions / "simply"/"basically").
+  + §2.3 (Never: *vague* hedging / celebration / tutorial-voice / questions /
+  "simply"/"basically"). A qualifier that reflects partial evidence is R1 compliance,
+  not vagueness — never strip a calibrated one.
   Third person (component names), authoritative-precise register.
 - **Terminology (Dimension #8):** voice-guide §4.1 canonical terms (NCO not oscillator/clock;
   rollover not overflow; command not instruction; count/mode/phase fields; "streamer" the

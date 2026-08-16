@@ -1,6 +1,6 @@
 ---
 manual_slug: P2AN005
-doc_class: reference                              # app note — YAML/KB-backed; verifies claims against KB YAML + pnut_ts
+doc_class: reference                              # app note — YAML/KB-backed; verifies claims against KB YAML + pnut-ts
 element_type: application-note                    # ships doc + first-party YAML companion (four-artifact model)
 code_line_budget_K: 76                            # inherits platform K (creation-guide §6.3); Dimension #3b
 last_published_tag: unreleased                    # first draft (v0.1.0); Dimension #15 baseline = whole doc
@@ -9,7 +9,7 @@ guide_paths:
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
   style_guide: ../APP-NOTE-VOICE-GUIDE.md
 companion_yaml: deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml
-authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language Documentation v47+ (TASK method family + NEWTASK/THISTASK + TASKHLT register) + Spin2 v55 keyword table (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149) + the P2KB cooperative-tasking pattern (spin2_cooperative_tasking.yaml) + pnut_ts v1.55.0 ground-truth probes
+authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language Documentation v47+ (TASK method family + NEWTASK/THISTASK + TASKHLT register) + Spin2 v55 keyword table (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149) + the P2KB cooperative-tasking pattern (spin2_cooperative_tasking.yaml) + pnut-ts v1.55.0 ground-truth probes
 high_risk_quant:
   - "TASKCHK returns 0=free / 1=running / 2=halted (taskchk.yaml) — R3 tests ==2 for halted, R4 tallies 1 vs 2"
   - "TASKSPIN expression form returns the assigned task id, or -1 if all 32 slots are full (v55 text:39; compile-proved) — R3 captures prodId this way"
@@ -38,7 +38,7 @@ home; advanced-fork-only (foundational fork EMPTY).
   (`language/spin2/methods/task*.yaml`, `constants/{newtask,thistask}.yaml`,
   `registers/taskhlt.yaml`), the cooperative-tasking pattern
   (`patterns/implementation/spin2_cooperative_tasking.yaml`), the **Spin2 v55** keyword table, and
-  `pnut_ts` v1.55.0 for every code-legality claim. No P1 content is read or cited (lineage only).
+  `pnut-ts` v1.55.0 for every code-legality claim. No P1 content is read or cited (lineage only).
 - **App-note agreement gate:** doc and `companion_yaml` must AGREE (method inventory, key
   semantics, gotchas). Companion is a digest+links, never a prose clone.
 - **Structure (Dimension #10):** techniques-catalog per creation-guide §1.1/§4 — shared base
@@ -46,7 +46,7 @@ home; advanced-fork-only (foundational fork EMPTY).
   Verify) → Adapt It → Pitfalls → Conclusion → Resources → References → Revision History →
   Copyright/Acknowledgments. **No ToC.** No rendered figures (code + DEBUG only).
 - **Verification model:** every embedded block + every `examples-library/*.spin2` compiles under
-  `pnut_ts -d` (all four use `debug()`). Live scheduling / halt-resume timing / cog-frees-on-last-
+  `pnut-ts -d` (all four use `debug()`). Live scheduling / halt-resume timing / cog-frees-on-last-
   return are runtime behaviors described from the v47+ docs; hardware confirmation deferred (→ EF
   ledger when a run is accepted). No invented DEBUG captures.
 - **Code (Dimensions #3/#3b):** K=76; inline code ASCII-only; no wrapped lines.

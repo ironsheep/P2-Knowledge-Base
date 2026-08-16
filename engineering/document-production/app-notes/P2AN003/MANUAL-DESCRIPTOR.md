@@ -9,10 +9,10 @@ guide_paths:
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
   style_guide: ../APP-NOTE-VOICE-GUIDE.md
 companion_yaml: deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml
-authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Silicon Doc v35 (Smart Pins: DAC modes %00001/%00010/%00011) + P2 Datasheet (DAC electrical) + Spin2 docs (WRPIN/WXPIN/WYPIN, QSIN, QROTATE, MULDIV64, frac) + IOSP Ch.10/§18.3 (companion manual) + OBEX (#2861 reSound, #2860 EZ Sound) + pnut_ts
+authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # P2 Documentation v35 (Smart Pins: DAC modes %00001/%00010/%00011) + P2 Datasheet (DAC electrical) + Spin2 docs (WRPIN/WXPIN/WYPIN, QSIN, QROTATE, MULDIV64, frac) + IOSP Ch.10/§18.3 (companion manual) + OBEX (#2861 reSound, #2860 EZ Sound) + pnut-ts
 high_risk_quant:
   - "DAC is physically 8-bit; the dither modes reach a NOMINAL 16-bit output averaged over time — no ENOB/SNR/THD number printed (G-003 resolved; figures defer to a hardware run)"
-  - "PWM dither adds a Fclock/256 (sysclock/256) spectral line at -48 dB — SOURCED (Silicon Doc part4-smart-pins; Titus corroborates); do not restate as an unqualified fabrication"
+  - "PWM dither adds a Fclock/256 (sysclock/256) spectral line at -48 dB — SOURCED (P2 Documentation v35, part4-smart-pins; Titus corroborates); do not restate as an unqualified fabrication"
   - "PWM dither X period MUST be a multiple of 256 clocks (256 minimum, X[7:0]=0); PRNG dither X=1 updates every clock"
   - "Voltage math V = (code/65536) x Vfs; $8000->1.65V, $4000->0.825V at Vfs=3.3V; muldiv64(CODE,VFS_UV,$10000)"
   - "Output configs: P_DAC_990R_3V / P_DAC_600R_2V / P_DAC_124R_3V (123.75 ohm) / P_DAC_75R_2V (990/600/124/75 ohm; 3.3V or 2.0V peak)"
@@ -38,7 +38,7 @@ IOSP-campaign mine-and-delineate — foundational fork EMPTY, advanced fork PRES
   (`architecture/smart-pins/smart-pin-000{01,10,11}-*.yaml`), the ADC mode
   (`smart-pin-11000-adc-internal-clock.yaml`, for Recipe 4), the PASM2 instruction pages
   (`wrpin/wxpin/wypin/rdpin/setse1/waitse1/qrotate/getqx/getqy/zerox/muls/sar/fges/fles`),
-  the Spin2 method/operator pages (`qsin/muldiv64/op_FRAC`), and the **Silicon Doc v35**
+  the Spin2 method/operator pages (`qsin/muldiv64/op_FRAC`), and the **Parallax Propeller 2 Documentation v35 - Rev B/C**
   Smart Pins DAC section. IOSP Ch.10 (DAC Output) + §18.3 (DAC noise) own the mechanism.
 - **App-note agreement gate:** doc and `companion_yaml` must AGREE (composition recipe, key
   parameters, gotchas). Companion is a digest+links, never a prose clone.
@@ -51,5 +51,5 @@ IOSP-campaign mine-and-delineate — foundational fork EMPTY, advanced fork PRES
   jumper, no bench gear). Numeric audio-quality figures (SNR/THD/effective bits) DEFER to a
   hardware run (-> EF ledger when accepted), exactly as P2AN001's ENOB-pending table.
 - **Code (Dimensions #3/#3b):** every embedded block + every `examples-library/*.spin2` compiles
-  under `pnut_ts` (Recipes 1-5 plain; the Tier-0 verify snippet uses `debug()` so needs `-d`);
+  under `pnut-ts` (Recipes 1-5 plain; the Tier-0 verify snippet uses `debug()` so needs `-d`);
   K=76; inline code ASCII-only.

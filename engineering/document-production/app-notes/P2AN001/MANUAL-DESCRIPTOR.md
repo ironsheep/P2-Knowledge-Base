@@ -9,7 +9,7 @@ guide_paths:
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md         # shared app-note voice
   style_guide: ../APP-NOTE-VOICE-GUIDE.md         # voice guide carries house style
 companion_yaml: deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml
-authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Silicon Doc v35 (Chip Gracey) + KB YAML (smart-pin ADC, muldiv64, cordic, wrpin/rdpin/setse1) + IOSP Ch.16 (mechanism owner) + "Improved ADC Pin Techniques" forum thread + pnut_ts (compile-cert)
+authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # P2 Documentation v35 (Chip Gracey) + KB YAML (smart-pin ADC, muldiv64, cordic, wrpin/rdpin/setse1) + IOSP Ch.16 (mechanism owner) + "Improved ADC Pin Techniques" forum thread + pnut-ts (compile-cert)
 high_risk_tables:                                 # Dimension #7 — transposition-prone
   - "Choosing a Technique decision table (need -> recipe) — recipe/what-it-adds columns"
   - "Revision History table"
@@ -38,7 +38,7 @@ guides above. This is the **first app-note release** and the **companion-schema 
 - **Grounding model:** `reference` — verify claims against KB YAML under
   `deliverables/ai/P2/` (smart-pin ADC `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml`,
   `language/spin2/methods/muldiv64.yaml`, `architecture/cordic.yaml`, the smart-pin config
-  instructions), the **Silicon Doc v35** (ADC front end), and the **I/O & Smart Pins User Guide
+  instructions), the **Parallax Propeller 2 Documentation v35 - Rev B/C** (ADC front end), and the **I/O & Smart Pins User Guide
   Ch.16** (the mechanism owner this note *applies* — the note must cite, not re-teach). The
   "Improved ADC Pin Techniques" forum thread (Chip Gracey, designer) is the technique source;
   designer-stated figures (e.g. the 15 mV floor) are trust-stamped as designer-authoritative.
@@ -54,4 +54,4 @@ guides above. This is the **first app-note release** and the **companion-schema 
   "cog" lowercase; symbolic constants taught not raw numbers; avoid bare mnemonic-words as
   plain English (mnemonic-bold false-bolds them).
 - **Code (Dimensions #3/#3b):** every embedded block + every `examples-library/*.spin2` compiles
-  under `pnut_ts` (`-d`, it uses `debug()`); K=76; inline code spans ASCII-only.
+  under `pnut-ts` (`-d`, it uses `debug()`); K=76; inline code spans ASCII-only.

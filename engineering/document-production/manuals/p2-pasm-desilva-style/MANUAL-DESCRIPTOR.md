@@ -11,7 +11,7 @@ authoritative_sources: see ./creation-guide.md    # canonical source list + Cont
 source_highlights:
   - deliverables/ai/P2/language/pasm2/             # primary derived YAML (instruction behavior / flags / clocks)
   - deliverables/ai/P2/language/spin2/             # Spin2 interop used in examples
-  - engineering/ingestion/sources/silicon-doc/     # silicon truth (architecture / COG memory / egg-beater)
+  - engineering/ingestion/sources/silicon-doc/     # silicon truth (architecture / cog memory / egg-beater)
   - engineering/ingestion/external-sources/hardware-verification/   # empirical ledger (smart-pin ordering, etc.)
   - pnut-ts                                        # compiler validation (use -d for any DEBUG-window code)
 high_risk_tables:
@@ -19,7 +19,7 @@ high_risk_tables:
   - "Smart-pin mode / recipe table (Ch 14) — DIRH-before-WYPIN ordering (v3.0.1 fix)"
   - "Instruction summary / flag tables embedded in chapter prose"
 fragile_areas:
-  - "Ch 2 'COG Anatomy 101' — the `\\CogAnatomyDiagram` image was repaired in v3.0.1 ('Each Cog Contains:' / 'Cog RAM'); egg-beater diagram fixed in v3.0.0. Re-verify the diagram still reads as a P2 part each render."
+  - "Ch 2 'Cog Anatomy 101' — the `\\CogAnatomyDiagram` image was repaired in v3.0.1 ('Each Cog Contains:' / 'Cog RAM'); egg-beater diagram fixed in v3.0.0. Re-verify the diagram still reads as a P2 part each render."
   - "Smart-pin recipe (Ch 14) — enable pin (DIRH) before writing Y (WYPIN); the one ordering correct for every mode (v3.0.1)"
   - "LOCKTRY spin-locks — correct carry polarity on retry (two were inverted pre-v3.0.0)"
   - "SETSE edge/level modes — a fabricated edge mode was removed in v3.0.0; re-verify against silicon"
