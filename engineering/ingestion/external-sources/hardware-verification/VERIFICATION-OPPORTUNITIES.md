@@ -46,7 +46,7 @@ would provide if the rig were ever stood up.
 | ID | Would verify | External hardware needed | Benefit if done | Status |
 |----|--------------|--------------------------|-----------------|--------|
 | **VO-X-001** | Exact ADC gain-mode input endpoints **and their device tolerance** (absolute, not nominal) | A calibrated external voltage reference + a precision meter (traceable), across several parts/temperatures | Upgrades the §16.2 **nominal** windows to **guaranteed, tolerance-bounded absolute specs** (datasheet-grade). Not needed for correctness — the nominal + calibration-caveat treatment is already correct — this would only tighten "nominal" → "characterized." | CATALOGED |
-| **VO-X-002** | ADC **pin-to-pin absolute spread** (F-203 §16.8 "different pins can read ~15 mV apart") — how far pins **across the chip's VIO/GIO supply groups** read the same true voltage, raw vs. per-pin-calibrated | A **group-independent, calibrated absolute voltage reference** (not the on-chip DAC — see analysis) fanned to one ADC pin in each of several 8-pin groups; ideally a precision meter on each group's VIO/GIO to attribute supply variation vs. device mismatch; several parts/temperatures for a real bound | Turns §16.8's *representative* "~15 mV" into a **measured, attributed** figure — and quantifies how much per-pin two-point calibration (the §16.8 mitigation) actually recovers. Correctness of §16.8 does not depend on it (the qualitative "calibrate per pin" guidance is already right); this would let us state a real number and split it into group-supply vs. device-mismatch causes. | CATALOGED (reclassified from VO-J-002, 2026-07-07) |
+| **VO-X-002** | ADC **pin-to-pin absolute spread** (F-203 §16.8 "different pins can read ~15 mV apart") — how far pins **across the chip's VIO/GIO supply groups** read the same true voltage, raw vs. per-pin-calibrated | A **group-independent, calibrated absolute voltage reference** (not the on-chip DAC — see analysis) fanned to one ADC pin in each of several silicon VIO/GIO domains (four pins each — see the analysis below); ideally a precision meter on each domain's VIO/GIO to attribute supply variation vs. device mismatch; several parts/temperatures for a real bound | Turns §16.8's *representative* "~15 mV" into a **measured, attributed** figure — and quantifies how much per-pin two-point calibration (the §16.8 mitigation) actually recovers. Correctness of §16.8 does not depend on it (the qualitative "calibrate per pin" guidance is already right); this would let us state a real number and split it into group-supply vs. device-mismatch causes. | CATALOGED (reclassified from VO-J-002, 2026-07-07) |
 
 ### Why VO-X-002 is NOT a simple-jumper test — the analysis (do not lose this)
 
@@ -54,30 +54,42 @@ The pin-to-pin spread *looks* jumper-only (tie a DAC pin and several ADC pins to
 compare readings). Analysis of the P2 ADC architecture shows a simple-jumper rig cannot
 give a clean, attributable answer:
 
-- **VIO/GIO are PER-GROUP, not global.** The 64 pins are 8 groups of 8 (P0-7, P8-15, …
-  P56-63); each group has its **own** `VIO_{x}_{y}` (3.3 V) and `GIO_{x}_{y}` (ground) supply
-  pins, and the ADC calibrates **ratiometrically against its own group's VIO/GIO** (Silicon
-  Doc: "Delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration"). So the spread's
-  dominant cause is **group-to-group supply-reference variation** (each group's real VIO/GIO
-  sitting at a slightly different potential — board IR drop, decoupling, routing, bond-wire),
-  NOT within-group device mismatch.
-- **A same-group rig sees almost nothing.** Pins in one group share VIO/GIO; after ratiometric
-  reconstruction the shared supply cancels, leaving only small (sub-mV → low-mV) per-pin
-  device mismatch. The first probe attempt used **P1-P6, all in group 0** — it would have
-  under-measured the effect and falsely "refuted" the claim. (That probe,
-  `…/adc-pin-spread-probe.spin2`, is retained as an annotated reference, marked insufficient.)
-- **The on-chip DAC is itself anchored to ITS group's VIO** — so it cannot serve as the
-  group-independent absolute reference the measurement needs. Driving the node from the DAC
-  means the *source* is referenced to group 0 while each ADC pin reconstructs against its own
-  group — a confound that a jumper rig cannot remove. A clean **absolute** pin-to-pin spread
-  needs an **external** reference independent of every group's VIO/GIO.
+- **VIO/GIO are PER-DOMAIN, not global — and there are TWO grouping layers.** In the
+  **silicon**, the 64 pins are **16 domains of FOUR** (P0-3, P4-7, … P60-63); each domain has
+  its **own** `VIO_{x}_{y}` (3.3 V) package pin and `GIO_{x}_{y}` (ground) block, and the ADC
+  calibrates **ratiometrically against its own domain's VIO/GIO** (Silicon Doc: "Delta-sigma
+  ADC with 5 ranges, 2 sources, and VIO/GIO calibration"). On a **P2 Edge module** the eight
+  3.3 V LDOs group the headers in **eights**, one LDO feeding **two** silicon domains — a
+  shared supply *net*, but each domain still reaches the die through its own VIO pin and bond
+  wire. Both layers are real; the reference domain the ADC actually follows is the silicon
+  four. Grounded in **F-269** (`P2KB-CORRECTION-FINDINGS.md`) — Silicon Doc v35 Part 1 p.9
+  pinout + P2 datasheet *"powered in groups of 4 via VIO pins"*. **This bullet is where the
+  error F-269 corrects was originally seeded**: it asserted "8 groups of 8" with no source of
+  its own, and F-211 later cited it back as authority for a silicon fact. It carries its
+  grounding now for exactly that reason.
+- So the spread's dominant cause is **domain-to-domain supply-reference variation** (each
+  domain's real VIO/GIO sitting at a slightly different potential — board IR drop, decoupling,
+  routing, bond-wire), NOT within-domain device mismatch.
+- **A same-domain rig sees almost nothing.** Pins in one domain share a VIO pin and a GIO
+  block; after ratiometric reconstruction the shared supply cancels, leaving only small
+  (sub-mV → low-mV) per-pin device mismatch. The first probe attempt used **P1-P6**, which
+  spans two silicon domains (P1-P3 in `VIO_0_3`, P4-P6 in `VIO_4_7`) but only **one** Edge LDO
+  net (P0-7) — so it exposed bond-wire and package IR differences at best and cancelled the
+  board-level supply term entirely. It would still have under-measured the effect and falsely
+  "refuted" the claim. (That probe, `…/adc-pin-spread-probe.spin2`, is retained as an
+  annotated reference, marked insufficient.)
+- **The on-chip DAC is itself anchored to ITS domain's VIO** — so it cannot serve as the
+  domain-independent absolute reference the measurement needs. Driving the node from the DAC
+  means the *source* is referenced to the DAC pin's own domain while each ADC pin reconstructs
+  against its own — a confound that a jumper rig cannot remove. A clean **absolute** pin-to-pin
+  spread needs an **external** reference independent of every domain's VIO/GIO.
 - **Raw vs. calibrated are two different numbers.** A user doing the naive fixed-scale
-  conversion (`sample * 3300 / 16383`, no per-pin GIO/VIO) eats the full group-to-group spread
+  conversion (`sample * 3300 / 16383`, no per-pin GIO/VIO) eats the full domain-to-domain spread
   — that is the ~15 mV §16.8 warns about. A user doing per-pin two-point calibration (§16.8's
   recommended fix) cancels most of it. A trustworthy test must report both and attribute the
   difference, which needs the external reference (+ ideally per-group VIO/GIO metering).
 
-Note: a *crude relative* spread (max−min across cross-group pins, DAC-driven) is technically
+Note: a *crude relative* spread (max−min across cross-domain pins, DAC-driven) is technically
 jumper-feasible, but it is neither absolute nor attributable and is not worth doing on a
 release cadence — hence the external-hardware classification. §16.8 stands as-is (qualitative,
 correct) until VO-X-002 is ever run.

@@ -319,6 +319,56 @@ the durable fix; scope it as its own item rather than folding it into a correcti
 
 ---
 
+## A shipped YAML companion contradicts its own released app note (2026-08-16) — F-270
+
+### F-270 — `p2an001-…-adc.yaml`'s SINC2 tip carries the sampling-mode restriction into filtering mode, contradicting the correction P2AN001 v1.0.2 already shipped. `CONFIRMED`
+
+**Surfaced by:** «#239»'s owed step 4 — *"confirm no OTHER P2AN001 site carries the old grouping."*
+The power-domain line in the companion was already correct; reading its neighbours found this.
+
+**The defect.** `deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml:105`
+carries, as a `tip`: *"Keep the SINC2 sample period a power of two (period = 2^X[3:0]); the builds
+use 128 (%0111)."* The note's builds run **SINC2 filtering** mode, where that restriction **does not
+apply** — and P2AN001 corrected exactly this in **v1.0.2** (2026-07-11), which the document and its
+CHANGELOG both record. The correction was never propagated into the companion YAML, so the two
+halves of the same released deliverable now say opposite things.
+
+**Authority — Silicon Doc, read directly** (`sources/silicon-doc/p2-documentation.txt:8421-8425`),
+verbatim: *"For modes other than SINC2 Sampling (X[5:4] > %00), WYPIN may be used after WXPIN to
+override the initial period established by X[3:0] and replace it with the arbitrary value in
+Y[13:0]. … The smart pin accumulators are 27 bits wide. This allows … up to 2^(27/2), or 11,585,
+clocks in SINC2 filtering mode."* So: the power-of-two form is the **initial** period only, it is
+overridable in every mode except SINC2 Sampling, and the filtering ceiling is 11,585 clocks — an
+arbitrary value, not a power of two.
+
+**Why it matters more than a stale tip.** An agent reading the companion gets a **false constraint**
+and will refuse or round a legal period; the document it accompanies says the opposite on the same
+page of the same release. A companion that contradicts its note is worse than a companion that omits
+the point — it spends the note's credibility.
+
+**Class sweep — DONE, and it is single-site.** Every other "power of two" period statement in the
+tree is correctly scoped: `manuals/p2-io-and-smart-pins-user-guide/…/chapter-16-adc.md:601` says
+*"In SINC2 **sampling** mode the period must be a power of two"* — correct as written;
+`pasm2/getxacc.yaml:56`'s power-of-two guidance is the **Goertzel/SETXFRQ iteration-count**
+constraint, an unrelated fact and correct. **No sweep beyond the one line.**
+
+**The process point.** The v1.0.2 pass fixed the document and stopped. **A correction to an app note
+is not complete until its YAML companion carries it** — the companion is half the deliverable and
+ships under the same version. This belongs in the app-note correction checklist, not just in this
+entry.
+
+**Remediation:** rewrite `:105` to state the mechanism rather than a prohibition — `X[3:0]` sets a
+power-of-two **initial** period (the builds use 128, `%0111`), and a `WYPIN` after the `WXPIN`
+replaces it with any period up to 11,585 clocks in SINC2 filtering; the power-of-two restriction is
+SINC2 **Sampling** mode only.
+
+**Status:** `CONFIRMED`. **Fold-or-defer is Stephen's call** — KB v1.16.3 is committed but not yet
+tagged or pushed, so this is the cheapest moment it will ever have; after the push it costs a full
+v1.16.4 cycle (content commit → index regen → tag → push → MCP restart). Folding requires
+re-running the validators and regenerating the index on top of the new content commit.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled

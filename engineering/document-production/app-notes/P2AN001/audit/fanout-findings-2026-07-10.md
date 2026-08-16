@@ -5,6 +5,29 @@
 
 > Candidate findings — each survived an independent adversarial refute pass. **Pending human hand-check + class-wide sweep.** Not yet applied to the document.
 
+> ## ⛔ S1 · S2 · S3 ARE WRONG — DO NOT RE-DERIVE FROM THEM (2026-08-16)
+>
+> The three `adc-pin-power-group-size` rows below (S1, S2, S3) inverted a **correct** fact. They
+> claim the P2's I/O power domains are "8 groups of EIGHT"; the silicon's domains are **16 groups
+> of FOUR** (P0-3, P4-7, … P60-63). The document was **right before** this audit; applying these
+> rows is what shipped the error into KB v1.15.0 and into P2AN001 v1.0.2 (commit `f3e702ed`).
+> Repaired 2026-08-16 in KB v1.16.3 and in P2AN001 v1.0.4.
+>
+> **Their "Tier-1 says" column is not Tier 1.** S2 cites our own internal
+> `VERIFICATION-OPPORTUNITIES.md` note (no source of its own — since corrected); S1 and S3 cite the
+> Silicon Doc's `{x}_{y}` **placeholder** pin-description text, which states no number, and read
+> that silence as "eight". The actual authority is the package **pinout figure** seven pages
+> earlier (v35 Part 1 p.9 — sixteen `VIO_0_3 … VIO_60_63` pins, each centred in the four it names,
+> closing the TQFP-100 count at exactly 100) plus the P2 datasheet's *"powered in groups of 4 via
+> VIO pins."*
+>
+> **Both numbers exist and only one is silicon.** P2 Edge modules do group headers in eights — one
+> board LDO feeds **two** silicon domains. Board-level "8-pin group" statements are correct where
+> they appear and must never be swept.
+>
+> Full grounding, blast radius and remediation: **F-269** in
+> `engineering/operations/P2KB-CORRECTION-FINDINGS.md`. Everything else in this file stands.
+
 ## Survivors (confirmed/refine)
 
 | Location | Kind | Verdict | Conf | Class | Claim | Tier-1 says | Correct statement |
