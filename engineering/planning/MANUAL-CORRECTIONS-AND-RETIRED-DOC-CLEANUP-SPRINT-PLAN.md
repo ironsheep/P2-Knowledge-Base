@@ -874,43 +874,46 @@ The only canonical-side item left is the §7d PNut observation.
 
 ## Sprint 2 — section ↔ task cross-reference
 
-Tag: **`manual-corrections-2`** · 18 tasks, `«#218»`–`«#235»`, seq 1–18 · est. **29h 30m**.
+Tag: **`manual-corrections-2`** · 20 tasks, seq 1–20 · est. **~34h**.
+**Respecified 2026-08-15** after the original set was generated from pre-bench text. Rewritten in
+place, not re-created, so these IDs stay valid as references. «#216»/«#217» (seq 21–22) are
+skills-infrastructure and deliberately outside this sprint.
 
-| Plan § | Deliverable | Task | seq | Env | Commit? |
-|---|---|---|---|---|---|
-| §3 · §7b · §7d · §7e (prep) | Canonical work package — every bench/PNut question in ONE handoff | «#218» | 1 | limited → hands to canonical | ✅ |
-| §7c | IOSP ADC power groups — three repairs (F-261) | «#219» | 2 | limited | ⛔ |
-| §7a | Streamer `P_OE` + the class-wide sweep (F-259) — **decides the final bump list** | «#220» | 3 | limited | ⛔ |
-| §7b | Streamer §17.1 DDS/Goertzel — documentary half (F-260) | «#221» | 4 | limited | ⛔ |
-| §1 | deSilva Acknowledgments (F-254) | «#222» | 5 | limited | ⛔ |
-| §2 + CF#5 | deSilva Appendix A (F-257) + the line-167 R1 finding | «#223» | 6 | limited | ⛔ |
-| §5a/5c/5d/5e | Archive the retired Smart Pins Tutorial | «#224» | 7 | limited | ✅ |
-| §5b + §6 dup-watch | Classify 130 references; canonicalise the duplicated manual list | «#225» | 8 | limited | ✅ |
-| CF#2 | Widen the glob to descriptors + drive that layer to zero | «#226» | 9 | limited | ✅ |
-| §4 | XBYTE §15.3 `set_nz` (F-255) — **gated on «#218»** | «#227» | 10 | limited (after canonical) | ⛔ |
-| §7e | Assembly CORDIC (F-263) — **gated on «#218»** | «#228» | 11 | limited (after canonical) | ⛔ |
-| §7d + §7b | FFT defaults + DDS/Goertzel verdict (F-262) — **gated on «#218»** | «#229» | 12 | limited (after canonical) | ⛔ |
-| CF#1 | Suppression-at-write-time probe — IOSP first | «#230» | 13 | limited | ✅ (analysis) |
-| CF#4 | Tool-name/codename/COG sweep in the releasing manuals' text | «#231» | 14 | limited | ⛔ |
-| §6 | Documentation blast radius + flip F-254…F-263 to DONE | «#232» | 15 | limited | ✅ |
-| punch-list | Front-matter `\markboth{}{}` for Streamer + Debug Window | «#233» | 16 | limited | ⛔ |
-| — | **⛔ REVIEW GATE — hand Stephen the accumulated opus-master diff and WAIT** | «#234» | 17 | limited | n/a |
-| §8 | Release wave — shortest-first, patch bump each | «#235» | 18 | limited → Forge (canonical) | ✅ after go |
+| seq | Task | Deliverable | Commit? |
+|---|---|---|---|
+| 1 | «#218» | **KB corrections ×8** — F-264 · G-004 · F-265 · F-260 · F-263 · F-266 · F-259 · EF-060 | ✅ |
+| 2 | «#237» | **KB patch release** — publish so the manuals can cite it | ✅ |
+| 3 | «#219» | IOSP ADC power groups, three repairs (F-261) | ⛔ |
+| 4 | «#220» | Streamer `+`→`\|` at 2 sites + the composition rule (F-259) | ⛔ |
+| 5 | «#221» | Streamer §17.1 — the mode WORKS; author the protocol (F-260) | ⛔ |
+| 6 | «#222» | deSilva Acknowledgments (F-254) | ⛔ |
+| 7 | «#223» | deSilva Appendix A + the line-167 R1 finding (F-257) | ⛔ |
+| 8 | «#227» | XBYTE §15.3 — **restructure**, plus `set_nz` (F-255/F-256) | ⛔ |
+| 9 | «#228» | Assembly ch.5 CORDIC — hub I/O out of both loops (F-263) | ⛔ |
+| 10 | «#236» | **P2AN002 CORDIC** — same rule, shipped app note, four artifacts | ⛔ |
+| 11 | «#229» | Debug Window FFT channel defaults (F-262) — needs the PNut observation | ⛔ |
+| 12 | «#231» | Tool-name / codename / COG sweep in the releasing manuals | ⛔ |
+| 13 | «#233» | Front-matter `\markboth{}{}` for Streamer + Debug Window | ⛔ |
+| 14 | «#224» | Archive the retired Smart Pins Tutorial | ✅ |
+| 15 | «#225» | Classify the 130 references; canonicalise the manual list | ✅ |
+| 16 | «#226» | Widen the guide-conformance glob to descriptors, drive to zero | ✅ |
+| 17 | «#230» | Suppression-at-write-time probe — IOSP first | ✅ |
+| 18 | «#232» | Blast radius: changelogs, indexes, register applied-notes | ✅ |
+| 19 | «#234» | **⛔ REVIEW GATE — hand Stephen the opus-master diff and WAIT** | n/a |
+| 20 | «#235» | Release wave — **seven elements**, shortest-first | ✅ after go |
 
-**Not in this sprint:** «#216» and «#217» (seq 21–22) are skills-infrastructure from the v5→v8
-overlay reconcile. They serve the toolchain, not the documentation release, and are parked at the
-end of the board so `todo_next` does not offer them.
+**What the respec changed, and why each was wrong before.** «#218» was "build the bench package" for
+a bench that had already run — it is now the early YAML pass. «#220» ordered a P_OE sweep against a
+finding our bench **reversed**. «#221» told an author to mark a working mode unbuildable. «#227» was
+gated on a branch the bench had already decided — it is a restructure. «#228» was gated on a
+replication that had already happened. «#236» is new scope the bench created: P2AN002 was not in the
+wave until EF-053 put it there. «#229» lost its §7b half and is now the sprint's only
+canonical-side item.
 
-**Ordering notes.** «#218» runs first so the single bench session is unblocked as early as
-possible and every other task fills the wait — the two-environment split used as a scheduling
-resource, not just a limit. «#219» leads the content work on severity: a released manual
-contradicting our own published KB outranks a credits block. The three bench-gated tasks
-(«#227» «#228» «#229») sit after the probes that feed them, so nothing is written twice.
-«#226» widens the instrument **and** fixes what it finds in one unit, so the gate is never left
-red — no atomic-green-unit split was needed. «#233» lands before «#234» because any edit after
-the review decertifies it.
+**The one structural rule the order encodes:** the KB leads. Streamer §17.1's protocol and Assembly
+ch.5's CORDIC rule are the same facts as the KB entries at «#218» — written in parallel they drift,
+written from a published KB they cannot.
 
----
 
 ## Sprint 1 — section ↔ task cross-reference
 
