@@ -20,6 +20,19 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.16.4] - 2026-08-16
+
+**`_RET_` returns only if the instruction did not branch**
+
+### Fixed
+- `_RET_` (condition `%0000`) is documented with its qualifier: the instruction always executes, and the return happens **only if that instruction did not branch**, popping `stack[19:0]` into PC. On a branching instruction the branch stands and no return occurs
+- `_RET_ CALL #target` is named as the trap it is — it assembles clean and is silently a plain `CALL`, so execution falls out of the routine into whatever follows it in cog RAM. Use `CALL` + `RET`
+- `CALL`'s description now says a **non-branching** instruction carrying `_RET_` returns; the unqualified wording was true only for that case
+- The PASM2 condition alignment check no longer certifies the condition category as a complete match — it compared condition *names*, not their semantics, and that is now stated
+
+### Added
+- `RET` gains the prefix form, aliases and cross-references; it previously made no mention of `_RET_` at all
+
 ## [1.16.3] - 2026-08-16
 
 **Streamer, CORDIC and pin-mode behaviour as the silicon does it**
