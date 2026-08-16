@@ -375,6 +375,60 @@ survey's conclusions are unchanged. Re-checked, not assumed.
 
 ---
 
+## The whole app-note companion set is version-frozen (2026-08-16) — F-271
+
+### F-271 — every `application-notes/*.yaml` companion still carries its maiden `version:` while the note it ships with has moved on, so an agent cannot tell which edition it holds. `CONFIRMED — scope decision owed, deliberately NOT swept`
+
+**Surfaced by:** the F-270 content probe against the published MCP. The corrected SINC2 line came
+back live and correct — sitting four lines under `version: "1.0.0"`, in a companion to a note that
+is at **1.0.3** and going to 1.0.4.
+
+**The defect, across all seven:**
+
+| Companion | `version:` | Note's released version (roster) |
+|---|---|---|
+| p2an001-single-pin-instrumentation-adc | `1.0.0` | **1.0.3** (→1.0.4 in the wave) |
+| p2an002-cordic-for-real-work | `1.0.0` | **1.0.2** |
+| p2an003-dac-analog-signal-generation | `1.0.0` | **1.0.2** |
+| p2an004-frequency-rotation-rc-timing-measurement | `1.0.0` | **1.0.2** |
+| p2an005-cooperative-multitasking-tasks | `0.1.0` | **1.0.2** |
+| p2an006-sizing-cog-task-stacks | `0.1.0` | **1.0.1** |
+| p2an007-data-structures-new-facilities | `1.0.0` | **1.0.1** |
+
+**Seven for seven — so this is the convention failing, not a missed file.** The stamp has never been
+advanced by any release.
+
+**Why it matters, and it is not cosmetic.** P2AN001's companion has been **edited twice this sprint
+alone** — the F-269 power-domain rewrite and the F-270 SINC2 correction — and still reports `1.0.0`.
+An agent that caches by version sees no change and keeps serving the body that contradicted the note.
+The version field is the only edition signal a consumer has; frozen, it is worse than absent,
+because absent invites a re-fetch and `1.0.0` actively asserts "unchanged since first release."
+
+**This is F-270's rule showing up structurally.** F-270 established that *an app-note correction is
+not complete until its YAML companion carries it.* The companion here **did** carry the content — and
+still shipped a false edition stamp. So the rule needs its second half: **the companion ships under
+the note's version, and that stamp is advanced at release, not at edit.**
+
+**Deliberately NOT swept.** Two things need Stephen's decision before any edit:
+1. **Semantics.** Does `version:` mean *the note's version* (then all seven get stamped and it becomes
+   a `release-manual` step) or *the companion's own schema/content revision* (then it needs renaming
+   to say so, and a separate `note_version:` added)? The files carry no comment either way. Guessing
+   here and sweeping seven published files is exactly the F-211 failure mode — a class-wide sweep
+   amplifying an ungrounded reading.
+2. **Whether it is a KB bump at all.** These are published `deliverables/ai/P2/` files, so any stamp
+   change ships in a KB release; but the *natural* moment to advance them is each app note's own
+   release. Those two cadences are not the same and the answer decides which skill owns the step.
+
+**Recommendation:** the companion tracks the **note's** version, stamped by `release-manual` at each
+app-note release — which is also where the roster row and the cover/`request.json` versions already
+get advanced, per the three-version-locations rule. That would make it **four** locations, and the
+companion is the one an agent reads. P2AN001's stamp would then move 1.0.0 → 1.0.4 in the current
+wave and the remaining six catch up at their next release rather than in a bulk edit.
+
+**Status:** `CONFIRMED`, unswept, awaiting the semantics call. Not Sprint 2 scope.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
