@@ -494,6 +494,46 @@ NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explic
 
 ---
 
+## Open question surfaced by «#221» — does a STREAMER-driven DAC need `P_CHANNEL`? (2026-08-16) — F-272
+
+### F-272 — the `%TT` setting for a DAC pin the STREAMER writes is not stated by any source we hold. `OPEN — question, not a defect claim`
+
+**How it surfaced.** Streamer Guide §17.1 shipped `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins`
+alongside `X_DACS_0N0_0N0` in the command — i.e. a **streamer-driven** differential DAC. «#220»
+corrected the `+` to `|` (value-neutral). «#221» then had to decide whether `P_CHANNEL` belongs
+there at all, and **could not ground it either way.**
+
+**What the authority actually shows.** The Silicon Doc's worked Goertzel program
+(`p2-documentation.txt:4225-4305`) does **not** drive its DAC from the streamer. Its command long is
+`dds_d = %1111_0000_0000_0111<<16 + sinc2<<23 + cycles` — **DAC routing nibble `%0000`, i.e.
+`X_DACS_OFF`** — and the DAC pin is updated by re-issuing `WRPIN` with the power byte inserted into
+the mode word (`setbyte dacmode,x,#1` / `wrpin dacmode,#dacpin`). Its `dacmode` long is
+`%0000_0000_000_10110_00000000_00_00000_0`: **`TT = %00`, smart pin off, DAC_MODE**, level driven
+from `M[7:0]`. Per F-264 that is exactly the context where adding `P_OE`/`P_CHANNEL` **kills** the
+output. So for the *level-driven* DAC the answer is settled: no `P_CHANNEL`.
+
+**What remains open:** the guide's arrangement was a *different* one — DAC values supplied by the
+**streamer** through the DAC-routing field. In that arrangement the pin must take its value from a
+cog DAC channel, which is precisely what `P_CHANNEL` (`%01`) selects — so `P_CHANNEL` may well be
+**required** there. No source we hold works that arrangement, and it was never on the bench.
+
+**Resolution taken in the manual — avoid, do not guess.** §17.1 is titled *Goertzel Frequency
+Detection*, so it was rewritten as a **detector**: DAC routing off (`X_DACS_OFF`), input pin only,
+every line traceable to the Silicon Doc program. The generate-while-measuring case moved to a
+forward reference to §17.2. **Nothing asserts a `%TT` value for a streamer-driven DAC**, which is
+the honest state. [[feedback_understand_mechanism_before_documenting]] — a corrected-*looking*
+recipe we have not seen work is worse than an obviously incomplete one.
+
+**Why keep the question.** It is the same axis as **F-264**, whose impact survey already flagged
+**P2AN001 / P2AN003 / P2AN004** for re-audit on cog-DAC configuration. If any of them configures a
+streamer-fed DAC, this question governs it. Settle it on the bench (drive a DAC from the streamer
+with `TT = %00` and with `%01`, compare) before writing the streamer-driven form into any document.
+
+**Status:** `OPEN`. Not a defect claim against any current text — the manual no longer makes the
+claim in either direction.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
