@@ -145,28 +145,62 @@ DOMAIN_AUTHORITY (the ingestion tree, empirical findings first), **not** against
 text — the finding is a pointer to the authority, not a substitute for it."* Doing exactly that
 returned the opposite of what the task asked us to write. **The instruction worked.**
 
+> **CHALLENGED AND RE-GROUNDED 2026-08-16 (Stephen).** *"Given the headers on the breakout boards I
+> would suggest groups of 8 — but we have to absolutely ground this from ingested sources."*
+> Correct on both counts, and the challenge produced the answer this entry now carries: **there are
+> TWO real grouping layers, and they are different numbers.** Neither of us was wrong about our own
+> layer; F-211's error was writing the board layer into the silicon file.
+
+### The two layers — both grounded, both true, never to be conflated again
+
+| Layer | Grouping | Grounded in |
+|---|---|---|
+| **SILICON** — `P2X8C4M64P` package | **16 domains of FOUR pins.** `VIO_0_3 … VIO_60_63` + `GIO_0_3 … GIO_60_63` | Silicon Doc v35 Part 1 p.9 pinout figure; P2 datasheet *"groups of 4"* |
+| **BOARD** — P2 Edge modules + breakouts | **8 domains of EIGHT pins.** `V00`→P0-7, `V08`→P8-15, … `V56`→P56-63, 300 mA each | `extraction-matrices/edge-module-breakout-compatibility-matrix.md:69-83` — *"8 independent 3.3V LDO regulators"* + the VIO Supply Mapping table; `sources/edge-mini-breakout/…-extraction-audit.md:104` |
+
+**Each Edge LDO feeds TWO silicon VIO pins** (`V00` → `VIO_0_3` + `VIO_4_7`). That is why the boards
+present 8-pin headers while the chip has 16 domains — and why the breakout intuition is right about
+the board and wrong about the chip.
+
+**Which one governs the ADC guidance:** the **silicon** one. `P_ADC_GIO`/`P_ADC_VIO` reference the
+pin's own `VIO_{x}_{y}`/`GIO_{x}_{y}` package rails, so the reference domain is **four pins**. Two
+pins in adjacent 4-groups on an Edge module share an LDO *net* but not the same package pin or bond
+wire, so IR drop and bond-wire drop still differ between them. **"Stay within four" is correct on
+every board; "stay within eight" is an Edge-specific relaxation and must not be taught as the chip's
+behaviour.** The 8-pin figure remains correct where it belongs — current budgeting on Edge hardware.
+
 **The authority — two independent primary sources, both Parallax, both already in the ingestion tree:**
 
 1. **The Silicon Doc's own package pinout** — `sources/silicon-doc/assets/images-20260706/P2-Silicon-Doc-v35-Part1_page09_render.png`
-   (v35, Part 1, page 9). Read directly. The TQFP-100 perimeter carries **sixteen VIO pins**, labelled
-   `VIO_0_3 · VIO_4_7 · VIO_8_11 · VIO_12_15 · VIO_16_19 · VIO_20_23 · VIO_24_27 · VIO_28_31 ·
-   VIO_32_35 · VIO_36_39 · VIO_40_43 · VIO_44_47 · VIO_48_51 · VIO_52_55 · VIO_56_59 · VIO_60_63`,
-   and sixteen matching internal `GIO_0_3 … GIO_60_63` blocks. **Four I/O pins per VIO/GIO domain,
-   sixteen domains.**
+   (v35, Part 1, page 9). Read directly, and re-read at 5× magnification on both rails after the
+   challenge above. The TQFP-100 perimeter carries **sixteen VIO pins** — `VIO_0_3 · VIO_4_7 ·
+   VIO_8_11 · VIO_12_15 · VIO_16_19 · VIO_20_23 · VIO_24_27 · VIO_28_31 · VIO_32_35 · VIO_36_39 ·
+   VIO_40_43 · VIO_44_47 · VIO_48_51 · VIO_52_55 · VIO_56_59 · VIO_60_63` — and **sixteen matching
+   internal `GIO_0_3 … GIO_60_63` blocks** (verified separately; the GIO grouping is what the ADC's
+   ground reference actually follows, so it was checked rather than assumed from VIO).
+
+   **The rail pattern is the proof, not just the labels.** Both rails repeat on a strict six-pin
+   cycle — `P(n) · P(n+1) · VIO_n_(n+3) · P(n+2) · P(n+3) · VDD` — placing each VIO pin **centred
+   inside the exact four I/O pins it names**. Left rail: `TEST VDD P0 P1 VIO_0_3 P2 P3 VDD P4 P5
+   VIO_4_7 P6 P7 VDD …`. Right rail: `P47 P46 VIO_44_47 P45 P44 VDD P43 P42 VIO_40_43 P41 P40 VDD …`.
 2. **The P2 datasheet** — `sources/p2-datasheet/p2-datasheet-narrative.txt:226`, verbatim:
    *"Smart I/O pins: 3.3 VDC, powered in **groups of 4** via VIO pins."*
 
+**The package arithmetic closes exactly, and leaves no room for any other arrangement:**
+64 I/O + **16 VIO** + 16 VDD + TEST/RESN/XI/XO = **100 pins**, the full TQFP-100. Eight VIO pins
+would leave eight package pins unaccounted for; the figure has none spare. GIO consumes no package
+pins — it is drawn as internal blocks, which is why it does not appear in the count.
+
 Corroborating, independently derived: the Silicon Doc image catalog
 (`…/images-20260706/P2-Silicon-Doc-v35_image_catalog.md:84`) records the same labels from the same
-figure. And the pin budget only closes at four: 64 I/O + 16 VIO + ~15 VDD + TEST/RESN/XI/XO = 100,
-with GIO drawn as **internal** blocks rather than package pins.
+figure, harvested in a separate pass.
 
 **Why F-211 reached "8 groups of 8" — each of its three evidences fails on inspection:**
 
 | F-211's evidence | What it actually is |
 |---|---|
 | `VERIFICATION-OPPORTUNITIES.md:57` — *"the 64 pins are 8 groups of 8"* | **Our own internal analysis note**, carrying no source of its own. F-211 cited us back to ourselves — circular, and the note is now known wrong. |
-| Edge Mini Breakout: *"300 mA per 8-pin group; one VIO3V3/GND pair per 8-pin header"* | A **BOARD-LEVEL** spec, from `sources/edge-mini-breakout/…-extraction-audit.md:104`, about a breakout board's header wiring and current budget. Not the silicon's VIO domains. **This is the whole error: a board fact imported into the chip's power-domain file.** |
+| Edge Mini Breakout: *"300 mA per 8-pin group; one VIO3V3/GND pair per 8-pin header"* | **True — of the board.** It describes the Edge's eight LDOs and header wiring, not the chip's VIO domains. **This is the whole error: a board fact imported into the chip's power-domain file.** The fix is not to delete it but to file it under the layer it belongs to. |
 | *"The Silicon Doc uses `{x}_{y}` placeholders, so it does not state 4"* | True of the **text** pin-description table — and false of the **figure seven pages earlier in the same document**, which states it explicitly. Silence was inferred from a partial read. |
 
 **And F-211 deleted a TRUE citation as fabricated.** Its applied-note records *"Removed the fabricated
@@ -197,6 +231,14 @@ group. **Only the size, count and boundaries invert** — 8→**4** pins, 8→**
 `hardware/edge-32mb-module.yaml:237` (*"One LDO per 8-pin group"*), and the other `hardware/*.yaml`
 8-pin-group references. Those are **board-level and correct.** The lesson of this finding is exactly
 that the two levels are different facts; a blind 8→4 sweep would break the true ones.
+
+**The remediation is therefore an ENRICHMENT, not a revert.** Restoring "4" alone would leave the KB
+one challenge away from flipping back — the breakout headers are visible to every reader, so "8" will
+keep looking right until the KB explains why both numbers exist. `pin-power-domains.yaml` should
+carry **both layers, named and separated**: the silicon's 16×4 VIO/GIO domains (what
+`P_ADC_GIO`/`P_ADC_VIO` reference, and what the multi-pin layout rule follows) and the Edge boards'
+8×8 LDO groups (what the 300 mA budget follows), with the note that one Edge LDO feeds two silicon
+domains. The ADC files then point at it rather than restating a number.
 
 **Process consequence, and it is the durable half.** The class-wide-sweep rule did its job — F-211
 swept five files consistently. What no rule caught is that the *fact being swept* was wrong, so the
