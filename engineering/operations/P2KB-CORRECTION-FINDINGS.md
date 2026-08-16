@@ -136,6 +136,37 @@ appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced r
 
 ---
 
+## YAML→Manual impact survey — KB v1.16.3 (2026-08-16, `release-yamls` §8)
+
+Delta: `spin2/methods/wrpin.yaml` · `architecture/smart_pins.yaml` ·
+`architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` · `architecture/cordic.yaml` ·
+`architecture/streamer/overview.yaml` · `architecture/streamer/dds-goertzel.yaml` ·
+`pasm2/getxacc.yaml` · `spin2/integration/spin2-pasm2-integration.yaml` ·
+`spin2/special-symbols/at.yaml`.
+
+Intersected against every live manual's `MANUAL-DESCRIPTOR.md` declared sources. **Survey done, not
+skipped.** Most intersections are already owned by an in-flight Sprint 2 task, so no duplicate flag
+is raised for them; the ones that are **not** covered are flagged below.
+
+| Element | Intersects on | Disposition |
+|---|---|---|
+| Streamer Guide | streamer, dds-goertzel, getxacc, DEBUG_COGS | **covered** — «#220» «#221» |
+| IOSP | `architecture/smart-pins/`, smart_pins | **covered** — «#219» (and the F-264 %TT material rides its v1.0.9 pass) |
+| Assembly Reference | cordic, streamer | **covered** — «#228» |
+| P2AN002 | cordic | **covered** — «#236» |
+| XBYTE Guide | streamer | **covered** — «#227» (§15.3 restructure); see the F-268 flag below |
+| **P2AN001 / P2AN003** | wrpin | **⚑ FLAG — re-audit against v1.16.3.** These two were read site-by-site and taken OUT of the release wave, but that read answered **F-259's** question (does every executable example carry `\| P_OE`?). **F-264 is a different fact** — that `%TT` is context-dependent and that adding `P_OE`/`P_CHANNEL` to a **non-smart-pin cog DAC** kills it. Any cog-DAC or `P_DAC_*` configuration in these app notes was never checked against that. Do not treat the wave exclusion as covering it. |
+| **P2AN004** | wrpin | **⚑ FLAG — same class as above**, and it was never in the wave at all. |
+| **Architect's Guide** | CORDIC, streamer | **⚑ FLAG — re-audit against v1.16.3.** Not in the release wave. Declares both sources; the CORDIC hub-in-loop rule (F-263) and the `DEBUG_COGS` streamer caveat (F-266) are new since its last pass. |
+| **DeSilva Tutorial** | CORDIC | **⚑ FLAG — re-audit against v1.16.3.** It *is* in the wave, but for §1/§2 (Acknowledgments, Appendix A) only — its CORDIC material is untouched by «#222»/«#223» and unexamined against F-263. |
+| All elements showing PASM fragments | `spin2-pasm2-integration.yaml` | **⚑ FLAG — F-268 class sweep**, filed below and deliberately not folded into a correction task. |
+
+These flags are the drift signal `document-audit` drains on each element's next pass. They are
+**not** Sprint 2 scope and must not be pulled into it silently — surface them to Stephen as a scope
+decision.
+
+---
+
 ## Spin2/PASM2 boundary defect promoted from the empirical ledger (2026-08-16) — F-268
 
 ### F-268 — inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address. `PARTIAL — KB DONE 2026-08-16; guide-side sweep owed`
