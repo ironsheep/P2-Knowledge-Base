@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-08-11",
-    "last_updated": "2026-08-11T21:53:36.744759",
+    "release_date": "2026-08-16",
+    "last_updated": "2026-08-16T00:27:58.044907",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-08-11T21:53:36.744759",
+    "extraction_date": "2026-08-16T00:27:58.044907",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -16912,7 +16912,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Get the streamer's Goertzel X accumulator into D and the Y accumulator into the next instruction's S, clear accumulators. Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis. The X,Y values represent the real/imaginary components of the Goertzel filter output. Follow with QVECTOR to compute magnitude and phase from the X,Y pair.",
+            "description": "Capture the streamer's Goertzel accumulators into holding registers and clear them; write the captured cosine (X) accumulation into D and place the captured sine (Y) accumulation into the next instruction's S value. SUBSEQUENT GETXACC INSTRUCTIONS RETURN THE SAME CAPTURED VALUES UNTIL A NEW STREAMER COMMAND EXECUTES \u2014 GETXACC reads a holding register, not a live accumulator. Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis. The X,Y values represent the real/imaginary components of the Goertzel filter output. Follow with QVECTOR to compute magnitude and phase from the X,Y pair.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16939,7 +16939,7 @@
                 "valueType": 24
               }
             },
-            "documentation_source": "original",
+            "documentation_source": "Silicon Doc p2-documentation.txt:4096-4099 (capture-into-holding-registers, clear, and the repeat-read rule)",
             "documentation_level": "enhanced"
           },
           "SETXFRQ": {
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-08-11T21:53:36.744759",
+    "extraction_date": "2026-08-16T00:27:58.044907",
     "categories": {
       "keywords": {
         "count": 37,
@@ -26792,9 +26792,11 @@
                   "effect": "Output enabled regardless of DIR, SMART/OTHER drives"
                 }
               },
+              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe `constants:` effects above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc p2-documentation.txt:7646-7660, part4-locks.txt:118-139.\n",
               "when_smart_pin_on": "x0=output disabled, x1=output enabled (regardless of DIR)",
               "source_selection": "0x=SMART/OUT drives, 1x=SMART/OTHER drives",
-              "p_oe_required_for": "All output modes (NCO, PWM, Pulse, Transition, Serial TX, DAC, USB)",
+              "p_oe_required_for": "SMART-PIN output modes only (NCO, PWM, Pulse, Transition, Serial TX, the smart-pin DAC modes %00001-%00011, USB). NOT the non-smart-pin (cog) DAC: with the smart pin off in DAC_MODE, the same bit is named P_CHANNEL and it SWITCHES THE DAC'S SOURCE from the pin's own level field to a cog DAC channel. Adding P_OE/P_CHANNEL to a level-driven DAC kills its output.",
+              "one_bit_three_names": "P_TT_01, P_OE and P_CHANNEL are the SAME bit-field value ($40, %01) under three context names - not three features, and not additive. Compose mode constants with `|`, never `+`; see architecture/smart_pins.yaml (configuration_format.composition_rule).",
               "see_also": "architecture/smart_pins.yaml for full TT behavioral specification"
             },
             "examples": [
@@ -29417,7 +29419,8 @@
               "Use @@ to convert stored @ values to absolute addresses at runtime",
               "Symbol without @ returns the DATA at that address, not the address itself",
               "@method creates a 32-bit method pointer with index and VAR base encoded",
-              "First long of object's VAR space stores object base for method pointers"
+              "First long of object's VAR space stores object base for method pointers",
+              "The PASM-side counterpart: inside a Spin2 object, `##hubsymbol` in a DAT block does NOT give the symbol's runtime hub address (it resolves against $400) - pass the address in from Spin2 with @, or use PTRA. See language/spin2/integration/spin2-pasm2-integration.yaml (integration_rules.hub_address_resolution)."
             ],
             "related": [
               "language/spin2/special-symbols/double_at.yaml",

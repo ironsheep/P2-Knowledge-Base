@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-11T21:53:36.701000",
+    "generated": "2026-08-16T00:27:58.002927",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1724,
@@ -6050,8 +6050,8 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1782849425,
-      "sha256": "9062f63f574dd7b357423575d0d3ab9f37fd6a16d96f0150c61aed4acab5ce79"
+      "mtime": 1786839805,
+      "sha256": "e465aea20b60b68e0aaf921b3536d354625377958bd4eac1b508895c4101e237"
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
@@ -6365,8 +6365,8 @@
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
-      "mtime": 1782935020,
-      "sha256": "1b961688d7a6a43d0cf202224ae31c5c8af59f6fc6bef7ef563b513353664c85"
+      "mtime": 1786839805,
+      "sha256": "12c6d261ec2de446d2a2c37334f3e467a3268e5bf3e809c763e4a3af7fc47583"
     },
     "p2kbArchSmartPin11100SyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml",
@@ -6400,8 +6400,8 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1781981347,
-      "sha256": "cde014ace0da9ffb4a4d412e0158921905003af27ee7f00c1b8e4aaf71688d11"
+      "mtime": 1786839805,
+      "sha256": "52f947ebc3b5b3f02c1fee868feb81d58de2ea743d24f7640e5300a5d8c41e04"
     },
     "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -6415,8 +6415,8 @@
     },
     "p2kbArchDdsGoertzel": {
       "path": "deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml",
-      "mtime": 1780519328,
-      "sha256": "3c0f4f6ae59565c6c9eeb9d919641f6e810563ad17ccd867f331ca213312c87f"
+      "mtime": 1786839805,
+      "sha256": "8b7d9a1cc259388cf99cf845488f2b1b71a91bf9ec011af248c3cd69095c65a6"
     },
     "p2kbArchModesReference": {
       "path": "deliverables/ai/P2/architecture/streamer/modes-reference.yaml",
@@ -6430,8 +6430,8 @@
     },
     "p2kbArchOverview": {
       "path": "deliverables/ai/P2/architecture/streamer/overview.yaml",
-      "mtime": 1769124063,
-      "sha256": "9fdb4aade7151502f884db3ea4340ec25cb5e7e99631dd620eaf3fd6f1d95830"
+      "mtime": 1786839805,
+      "sha256": "3aeb173cc7d0d9d551a3ab4f0f11764cddbbae424fbc884b764d37a50f00a936"
     },
     "p2kbArchPinSelection": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-selection.yaml",
@@ -8190,8 +8190,8 @@
     },
     "p2kbPasm2Getxacc": {
       "path": "deliverables/ai/P2/language/pasm2/getxacc.yaml",
-      "mtime": 1782955060,
-      "sha256": "2fbfaa0d16858eefb4dcc0388087ea20446e5797d7bfdd22b709c2f1ef9d7d4d"
+      "mtime": 1786839805,
+      "sha256": "0b88032ccecafd789258c1203faecb7a1a784608f8ec91e654415fa5fb94d7c2"
     },
     "p2kbPasm2CounterEventJumps": {
       "path": "deliverables/ai/P2/language/pasm2/groups/counter_event_jumps.yaml",
@@ -10005,8 +10005,8 @@
     },
     "p2kbSpin2Spin2Pasm2Integration": {
       "path": "deliverables/ai/P2/language/spin2/integration/spin2-pasm2-integration.yaml",
-      "mtime": 1777496128,
-      "sha256": "2188f6a85389b937894d9e79fa51e7a4dbd1f0292b7cd7920115343ac0a6b74c"
+      "mtime": 1786839805,
+      "sha256": "09afa9c27d14e8c2edb31ded9061627dff467af56c11d8e760a1ace38a90f670"
     },
     "p2kbSpin2KwABORT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/ABORT.yaml",
@@ -10680,8 +10680,8 @@
     },
     "p2kbSpin2Wrpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wrpin.yaml",
-      "mtime": 1782935020,
-      "sha256": "d24b97a2e8edb3f78405520426ae04253d09004de6c1364d38c3b8d1f233fb3c"
+      "mtime": 1786839805,
+      "sha256": "4fe3341f7c77b8be8aa1c435288040261b0fd64c4274f126a508e93c223861c1"
     },
     "p2kbSpin2Wxpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wxpin.yaml",
@@ -11505,8 +11505,8 @@
     },
     "p2kbSpin2SymAt": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/at.yaml",
-      "mtime": 1769203447,
-      "sha256": "1a3f04eae651e08cc11c6db805109d690b040497bafad1a4631adbcc0db7fe3f"
+      "mtime": 1786839805,
+      "sha256": "37b954e826609bfcf4a2e042993c94a7a7e26b2396e32294c795d91980ada722"
     },
     "p2kbSpin2SymCaretAt": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/caret_at.yaml",
