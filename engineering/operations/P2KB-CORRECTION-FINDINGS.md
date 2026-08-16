@@ -1367,7 +1367,7 @@ he field-reported separately — i.e. this gap has already produced a real tool 
 **Proposed correction:** copy SCOPE's "If omitted" column into the FFT chapter's channel-definition
 table. **Verify the values against PNut** (ground truth) rather than assuming FFT matches SCOPE.
 
-### F-263 — CONFIRMED with the cause identified: hub access inside a CORDIC loop loses results. Chip's model is correct. `PARTIAL — KB DONE 2026-08-16; two documents owed («#228» Assembly ch.5, «#236» P2AN002)`
+### F-263 — CONFIRMED with the cause identified: hub access inside a CORDIC loop loses results. Chip's model is correct. `DONE (2026-08-16) — KB + both documents applied`
 
 > **KB APPLIED 2026-08-16 («#218»).** `architecture/cordic.yaml` →
 > `critical_usage_pattern.keep_hub_access_out_of_both_loops`: the rule, why it matters (the failure
@@ -1380,6 +1380,22 @@ table. **Verify the values against PNut** (ground truth) rather than assuming FF
 > **Still owed (manual head):** `chapter-05-hardware.md:~100-126` («#228») and
 > `P2AN002/examples-library/cordic-pipeline-throughput.spin2` («#236») — both derive their wording
 > from the KB entry above so the rule reads identically in both.
+
+> **MANUAL HALVES APPLIED 2026-08-16 («#228», «#236») — uncommitted under the «#234» gate.**
+> Both were rewritten to **ARM D's measured-clean shape**, not to a plausible-looking repair: the
+> rig's own ARM D is register-only in *both* loops with `ALTS`/`ALTD` indexing a cog buffer and the
+> hub traffic batched outside, and it also carries **no `CALL` inside the loops**. Assembly ch.5's
+> `queue_rotation` helper is therefore gone rather than merely hoisted — reproducing the shape that
+> was proven, instead of applying the rule's wording to the old structure.
+> • **Assembly ch.5 §5.1.6** — block `RDLONG` in, `REP`-based register-only fill/steady/drain,
+>   block `WRLONG` out, plus a `hardware` callout carrying the measured depths (2 · 3 · clean-to-7),
+>   the silent-failure warning, and the throughput-not-buffer-depth cause. The old performance
+>   claim ("roughly 320 vs 864 clocks — nearly 3× faster") described the *broken* code and was
+>   **removed rather than recomputed** — no invented cycle counts on new code.
+> • **P2AN002** — `examples-library/cordic-pipeline-throughput.spin2` and the note's code block
+>   rewritten together and verified **byte-identical**; the "How this works" prose now describes
+>   where the hub traffic actually is, and a new pitfall carries the same measured rule.
+> Both slices compile clean under `pnut-ts -d`.
 
 **Our board, our measurement.** P2 Edge @ 200 MHz. Control: queue one op, retrieve immediately —
 stalled **58 clocks**, exactly the documented `GETQX` maximum (`2...58`), so the rig can see the
