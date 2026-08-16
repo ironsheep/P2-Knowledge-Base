@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-16T03:43:46.943357",
+    "generated": "2026-08-16T05:47:55.313091",
     "total_entries": 1129,
     "total_categories": 59,
-    "total_aliases": 1730,
+    "total_aliases": 1737,
     "multi_target_aliases": 75,
     "source": "deliverables/ai/P2/"
   },
@@ -1093,6 +1093,9 @@
     "CALL": [
       "p2kbPasm2Call",
       "p2kbSpin2Call"
+    ],
+    "CALL AND RETURN": [
+      "p2kbPasm2Ret"
     ],
     "CALLA": [
       "p2kbPasm2Calla"
@@ -2903,6 +2906,9 @@
     "RETI3": [
       "p2kbPasm2Reti3"
     ],
+    "RETURN FROM SUBROUTINE": [
+      "p2kbPasm2Ret"
+    ],
     "REV": [
       "p2kbPasm2Rev"
     ],
@@ -3788,6 +3794,15 @@
     "_RCSLOW": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
+    "_RET_": [
+      "p2kbPasm2Ret"
+    ],
+    "_RET_ PREFIX": [
+      "p2kbPasm2Ret"
+    ],
+    "_RET_ prefix": [
+      "p2kbPasm2Ret"
+    ],
     "_XINFREQ": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
@@ -4028,6 +4043,9 @@
     "call": [
       "p2kbPasm2Call",
       "p2kbSpin2Call"
+    ],
+    "call and return": [
+      "p2kbPasm2Ret"
     ],
     "calla": [
       "p2kbPasm2Calla"
@@ -5284,6 +5302,9 @@
     ],
     "reti3": [
       "p2kbPasm2Reti3"
+    ],
+    "return from subroutine": [
+      "p2kbPasm2Ret"
     ],
     "rev": [
       "p2kbPasm2Rev"
@@ -7743,8 +7764,8 @@
     },
     "p2kbPasm2Call": {
       "path": "deliverables/ai/P2/language/pasm2/call.yaml",
-      "mtime": 1764449566,
-      "sha256": "fd87eb6041c9d1ac1a598e04864330cc153ed3caf209c032722588075204339d"
+      "mtime": 1786859149,
+      "sha256": "01834648eb45a07d4862c4bd9798426ea1899cd798710a9dcab8b3334767ef63"
     },
     "p2kbPasm2Calla": {
       "path": "deliverables/ai/P2/language/pasm2/calla.yaml",
@@ -7863,8 +7884,8 @@
     },
     "p2kbPasm2ConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml",
-      "mtime": 1780269492,
-      "sha256": "e103d82f3f1de6b0cc9634c1bfcbe56d3a81603f892d58eb651a28b06c2820a2"
+      "mtime": 1786859149,
+      "sha256": "c7b5041fbaa3fffd4f9856e6b8358127ada92ae97d14c3dbf5998f2afaded9d0"
     },
     "p2kbPasm2CordicSolver": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cordic_solver.yaml",
@@ -7893,8 +7914,8 @@
     },
     "p2kbPasm2ManualCategoryAlignmentCheck": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/manual_category_alignment_check.yaml",
-      "mtime": 1764449566,
-      "sha256": "f8d14bb9c861c19c3d458fa507a830384b15f53d088fcf0c4cfd43cd6880d180"
+      "mtime": 1786859149,
+      "sha256": "64359a4e9a8ed25b89931b6b5249aba2b1f5c9d82a4b0dbd40d3e832986c60ac"
     },
     "p2kbPasm2MultiCogSynchronization": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/multi_cog_synchronization.yaml",
@@ -8988,8 +9009,8 @@
     },
     "p2kbPasm2Ret": {
       "path": "deliverables/ai/P2/language/pasm2/ret.yaml",
-      "mtime": 1764449566,
-      "sha256": "0f87223b7fb08e63f3ae87fbc6aadbe14c3bcf5e32fcdf99d847fd0729cf2e35"
+      "mtime": 1786859149,
+      "sha256": "fa76289f75c8978c8cdf42ffe7d0754ab565d8ffe888bdcaed7088ea082d8924"
     },
     "p2kbPasm2Reta": {
       "path": "deliverables/ai/P2/language/pasm2/reta.yaml",

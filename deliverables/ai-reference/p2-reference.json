@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-08-16",
-    "last_updated": "2026-08-16T03:44:20.925731",
+    "last_updated": "2026-08-16T05:47:55.354872",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-08-16T03:44:20.925731",
+    "extraction_date": "2026-08-16T05:47:55.354872",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -13802,7 +13802,7 @@
                 "notes": "Syntax 2 - address from register"
               }
             ],
-            "description": "CALL records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute a RET instruction, or an instruction with a _RET_ condition, to return to the recorded address (the instruction following the CALL) and optionally restore the C and Z flag state as it was prior.\nIn syntax 1, #Addr and #\\Addr encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: CALL #SendBit or CALL #\\DebugStatus\nIn syntax 2, the format of the value at Dest is CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. Syntax 2 effectively swaps the flags and PC with the value in the Dest register (and RET swaps them back), making it convenient for switching between two threads.\nIf the WC or WCZ effect is specified, the C flag is updated to match D[31], after its original state is recorded.\nIf the WZ or WCZ effect is specified, the Z flag is updated to match D[30], after its original state is recorded.",
+            "description": "CALL records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute a RET instruction, or a NON-BRANCHING instruction carrying a _RET_ condition, to return to the recorded address (the instruction following the CALL) and optionally restore the C and Z flag state as it was prior. (A _RET_ condition returns only if that instruction did not branch -- see ret_prefix_caveat below.)\nIn syntax 1, #Addr and #\\Addr encodes the instruction with relative and absolute addressing, respectively. The relative form (the default) is vital for creating relocatable code. In either case, use symbolic references for Addr and the assembler will encode it properly. Examples: CALL #SendBit or CALL #\\DebugStatus\nIn syntax 2, the format of the value at Dest is CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA. C is the new C flag state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x are don't-care bits. Syntax 2 effectively swaps the flags and PC with the value in the Dest register (and RET swaps them back), making it convenient for switching between two threads.\nIf the WC or WCZ effect is specified, the C flag is updated to match D[31], after its original state is recorded.\nIf the WZ or WCZ effect is specified, the Z flag is updated to match D[30], after its original state is recorded.",
             "result": "Push current C and Z flags and address of the next instruction onto the hardware stack, set PC to new relative or absolute address, and optionally update C and/or Z to new state.",
             "timing": {
               "cycles": 4,
@@ -14604,7 +14604,10 @@
             "syntax_variants": [
               "RET {WC/WZ/WCZ}"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/call.yaml",
+              "language/pasm2/concepts/conditional_execution.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -18386,7 +18389,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-08-16T03:44:20.925731",
+    "extraction_date": "2026-08-16T05:47:55.354872",
     "categories": {
       "keywords": {
         "count": 37,
