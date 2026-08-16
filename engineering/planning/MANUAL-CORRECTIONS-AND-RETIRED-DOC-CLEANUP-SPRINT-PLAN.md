@@ -874,7 +874,7 @@ The only canonical-side item left is the §7d PNut observation.
 
 ## Sprint 2 — section ↔ task cross-reference
 
-Tag: **`manual-corrections-2`** · 20 tasks, seq 1–20 · est. **~34h**.
+Tag: **`manual-corrections-2`** · 21 tasks, seq 1–21 · est. **~35h**.
 **Respecified 2026-08-15** after the original set was generated from pre-bench text. Rewritten in
 place, not re-created, so these IDs stay valid as references. «#216»/«#217» (seq 21–22) are
 skills-infrastructure and deliberately outside this sprint.
@@ -898,9 +898,10 @@ skills-infrastructure and deliberately outside this sprint.
 | 15 | «#225» | Classify the 130 references; canonicalise the manual list | ✅ |
 | 16 | «#226» | Widen the guide-conformance glob to descriptors, drive to zero | ✅ |
 | 17 | «#230» | Suppression-at-write-time probe — IOSP first | ✅ |
-| 18 | «#232» | Blast radius: changelogs, indexes, register applied-notes | ✅ |
-| 19 | «#234» | **⛔ REVIEW GATE — hand Stephen the opus-master diff and WAIT** | n/a |
-| 20 | «#235» | Release wave — **seven elements**, shortest-first | ✅ after go |
+| 18 | «#238» | **F-267 — EF-020 collision:** renumber the PLOT entry to EF-061, repoint 3 citations | ✅ |
+| 19 | «#232» | Blast radius: changelogs, indexes, register applied-notes | ✅ |
+| 20 | «#234» | **⛔ REVIEW GATE — hand Stephen the opus-master diff and WAIT** | n/a |
+| 21 | «#235» | Release wave — **seven elements**, shortest-first | ✅ after go |
 
 **What the respec changed, and why each was wrong before.** «#218» was "build the bench package" for
 a bench that had already run — it is now the early YAML pass. «#220» ordered a P_OE sweep against a
@@ -909,6 +910,11 @@ gated on a branch the bench had already decided — it is a restructure. «#228�
 replication that had already happened. «#236» is new scope the bench created: P2AN002 was not in the
 wave until EF-053 put it there. «#229» lost its §7b half and is now the sprint's only
 canonical-side item.
+
+**«#238» is in the sprint, not parked** (Stephen, 2026-08-15). A duplicate id in the golden source
+is corrosive in a way that compounds — every future citation of `EF-020` is ambiguous, and the
+ambiguity is invisible at the citation site. It runs **before** «#232» so the register's
+applied-notes and the changelogs cite settled ids.
 
 **The one structural rule the order encodes:** the KB leads. Streamer §17.1's protocol and Assembly
 ch.5's CORDIC rule are the same facts as the KB entries at «#218» — written in parallel they drift,
