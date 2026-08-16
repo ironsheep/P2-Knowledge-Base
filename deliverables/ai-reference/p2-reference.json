@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-08-16",
-    "last_updated": "2026-08-16T02:15:31.929532",
+    "last_updated": "2026-08-16T03:44:20.925731",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-08-16T02:15:31.929532",
+    "extraction_date": "2026-08-16T03:44:20.925731",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18386,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-08-16T02:15:31.929532",
+    "extraction_date": "2026-08-16T03:44:20.925731",
     "categories": {
       "keywords": {
         "count": 37,

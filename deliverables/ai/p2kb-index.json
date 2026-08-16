@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-16T02:15:31.886508",
+    "generated": "2026-08-16T03:43:46.943357",
     "total_entries": 1129,
     "total_categories": 59,
     "total_aliases": 1730,
@@ -5978,8 +5978,8 @@
   "files": {
     "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
       "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
-      "mtime": 1786846449,
-      "sha256": "52c75e668885b00b02b0c565b08ebb667f837fc9744716463abbaa6146a9f691"
+      "mtime": 1786851744,
+      "sha256": "b9fc2bcad334e3f1c307f3af91f947c914829b2fe2db3854a543c37b7915e12e"
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
