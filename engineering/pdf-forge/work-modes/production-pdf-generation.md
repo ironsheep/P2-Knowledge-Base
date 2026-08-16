@@ -42,11 +42,10 @@
 cat /engineering/document-production/workspace/[document-name]/request-requirements.json
 ```
 
-**Common document folders:**
-- `p2-smart-pins-tutorial` - Smart Pins Green Book
-- `pasm2-desilva-tutorial` - De Silva Tutorial  
-- `pasm2-reference-manual` - PASM2 Reference Manual
-- `p2-spin2-manual` - Spin2 Language Manual
+**Which document folders exist** is not restated here — see
+[`PUBLICATION-ROSTER.md`](../../document-production/PUBLICATION-ROSTER.md), which carries
+every document exactly once with its lifecycle status. A list copied into this file goes
+stale silently and has done so before.
 
 **If file exists**, it contains MANDATORY pandoc arguments like:
 ```json
@@ -127,16 +126,16 @@ cat /engineering/document-production/workspace/[document-name]/request-requireme
 
 **Why This Matters:** PDF Forge remembers installed files. Copying unchanged files wastes time and causes confusion about what actually changed.
 
-**Example for Smart Pins:**
+**Example** (`<doc>` = the document's canonical folder name):
 ```bash
 # From workspace to outbound
-cp P2-Smart-Pins-Green-Book-Tutorial-divs.md ../../../outbound/p2-smart-pins-tutorial/
-cp -r assets/ ../../../outbound/p2-smart-pins-tutorial/
-cp request.json ../../../outbound/p2-smart-pins-tutorial/
+cp <Document-Body>.md ../../../outbound/<doc>/
+cp -r assets/ ../../../outbound/<doc>/
+cp request.json ../../../outbound/<doc>/
 
-# Only if modified:
-cp filters/non-floating-images.lua ../../../outbound/p2-smart-pins-tutorial/  # If fixed
-cp templates/p2kb-smart-pins.latex ../../../outbound/p2-smart-pins-tutorial/ # If changed
+# Only if modified this session:
+cp filters/<changed-filter>.lua ../../../outbound/<doc>/
+cp templates/<changed-template>.latex ../../../outbound/<doc>/
 ```
 
 **Checklist:**
@@ -152,11 +151,9 @@ cp templates/p2kb-smart-pins.latex ../../../outbound/p2-smart-pins-tutorial/ # I
 
 ## Common Document Requirements
 
-### Smart Pins Tutorial
-```json
-"pandoc_args": ["--top-level-division=part"],
-"lua_filters": ["non-floating-images", "smart-pins-colored-blocks"]
-```
+Each document's mandatory pandoc args and filter list live in its own
+`request-requirements.json` (Step 1) — read them from the document rather than from a
+copy kept here.
 
 ### De Silva Tutorial  
 ```json

@@ -36,11 +36,14 @@ path points into the right authoring tree). App notes additionally use the share
 family artwork; the manuals' Parts/Chapters cover box is repurposed to an app-note
 "What You'll Build" box). P2AN001 is the pilot (2026-06-28).
 
-**Canonical names** are established when a document is created and never change:
-- `p2-assembly-language-manual`
-- `p2-pasm-desilva-style`
-- `p2-smart-pins-tutorial`
-- etc.
+**Canonical names** are established when a document is created and never change
+(e.g. `p2-assembly-language-manual`, `p2-pasm-desilva-style`).
+
+**The list of documents and their statuses lives in exactly one place:
+[`PUBLICATION-ROSTER.md`](PUBLICATION-ROSTER.md).** Do not restate it here. Every
+manual-shaped folder appears in the roster exactly once, under its lifecycle status
+(Done / In progress / Upcoming / Abandoned) and with its Type — that is the authority
+a sweep consults, and a second copy in this file is how the two drift apart.
 
 ---
 
@@ -241,15 +244,20 @@ manuals/opus-master  →  workspace/  →  outbound/  →  PDF Forge
 
 ## Active Documents Status
 
-| Canonical Name | manuals/ | workspace/ | outbound/ | Status |
-|----------------|----------|------------|-----------|--------|
-| `p2-assembly-language-manual` | ✓ | ✓ | ✓ | Active |
-| `p2-debug-window-manual` | ✓ | ✓ | ✓ | Active |
-| `p2-pasm-desilva-style` | ✓ | ✓ | ✓ | Active |
-| `p2-single-step-debugger-manual` | ✓ | ✓ | ✓ | Active |
-| `p2-smart-pins-tutorial` | ✓ | ✓ | ✓ | Active |
-| `ai-privacy-guide` | — | ✓ | ✓ | Utility doc (no manual needed) |
-| `spin2-reference-manual` | — | ✓ | — | Future - workspace placeholder |
+**This table used to enumerate the documents and their statuses. It no longer does** —
+that enumeration is [`PUBLICATION-ROSTER.md`](PUBLICATION-ROSTER.md)'s job, and keeping a
+second copy here is precisely how this file came to list a retired document as `Active`.
+
+What belongs here is the *shape* every document follows, not which documents exist:
+
+| Tree | Holds | Who writes it |
+|------|-------|---------------|
+| `manuals/<name>/` | `opus-master/` (canonical content), `audit/`, `CHANGELOG.md`, the creation and voice guides | authored by hand — this is the source of truth for content |
+| `workspace/<name>/` | the assembled render input, templates, filters, assets | regenerated from `opus-master/` by `prepare-manual`; never hand-edited |
+| `outbound/<name>/` | only the files that changed this session | staged for the Forge, which persists everything by filename |
+
+A document may legitimately have a `workspace/` with no `manuals/` (a utility doc or a
+placeholder). Look it up in the roster rather than inferring status from which folders exist.
 
 ---
 

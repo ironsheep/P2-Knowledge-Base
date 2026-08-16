@@ -1,5 +1,21 @@
 # Smart Pins Visual Refinement Guide
 
+> ## ⚠️ RETIRED WORK MODE — the document it serves no longer exists in the live tree
+>
+> This work mode drives the **Smart Pins Tutorial**, which was superseded by the I/O &
+> Smart Pins User Guide and **archived on 2026-08-16** to the gitignored local `archive/`.
+> Every path below — the workspace markdown, the `p2kb-*` templates, the `filters/*.lua`,
+> the `request-requirements.json` — is gone from the live tree. Do not enter this mode and
+> do not route work to the `smart_pins_visual` tag.
+>
+> **If you meant the I/O & Smart Pins User Guide**, that is a different, live document with
+> its own creation and voice guides under
+> `manuals/p2-io-and-smart-pins-user-guide/`. Check
+> [`PUBLICATION-ROSTER.md`](../PUBLICATION-ROSTER.md) for its status.
+>
+> Retained as the record of how visual-refinement iteration was run, which later work modes
+> were shaped by.
+
 **Purpose**: Iterate Smart Pins visual presentation through feedback loops
 
 ## Session Start

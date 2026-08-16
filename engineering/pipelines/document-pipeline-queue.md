@@ -20,6 +20,13 @@ When reviewing sprints, we ask: "We're going breadth first, which one of these d
 
 ## Currently Queued Documents
 
+> **This queue is a wish-list of candidate documents, not a status board.** Whether any
+> entry below has since been started, shipped, or abandoned is recorded in
+> [`PUBLICATION-ROSTER.md`](../document-production/PUBLICATION-ROSTER.md) — the single
+> authority, one row per document. Do not read a queue entry as "not yet built" and do not
+> restate the roster's statuses here; several entries below have already shipped under
+> different names.
+
 ### 1. Terminal Window User's Manual
 **Purpose**: Document P2's built-in debug visualization capabilities
 **Content**:

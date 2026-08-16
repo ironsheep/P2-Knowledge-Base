@@ -60,14 +60,12 @@ Every document in production follows this consistent pattern with canonical nami
 
 **Canonical Names** ensure consistency across all three folders. Each document has ONE canonical name used everywhere.
 
-### Current Canonical Names:
-- `p2-pasm-desilva-style` - deSilva P2 Guide
-- `p2-smart-pins-tutorial` - Smart Pins Green Book Tutorial
-- `p2-single-step-debugger-manual` - Single-Step Debugger Manual
-- `p2-debug-terminal-manual` - Debug Terminal Window Manual
-- `pasm2-reference-manual` - PASM2 Reference Manual
-- `spin2-reference-manual` - Spin2 Reference Manual
-- `ai-privacy-guide` - AI Privacy Guide
+### Current Canonical Names
+
+**Not listed here.** `engineering/document-production/PUBLICATION-ROSTER.md` is the single
+authority: every document appears there exactly once, under its lifecycle status
+(Done / In progress / Upcoming / Abandoned) and with its Type. This file used to keep a
+second copy, which is how it came to advertise a retired document as current.
 
 ---
 

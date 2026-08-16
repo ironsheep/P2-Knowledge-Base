@@ -17,9 +17,10 @@
 
 ### Workspace-to-Outbound Mapping
 **Parallel folder structure for easy navigation:**
-- `/workspace/p2-smart-pins-tutorial/` → `/outbound/p2-smart-pins-tutorial/`
-- `/workspace/p2-pasm-desilva-style/` → `/outbound/p2-pasm-desilva-style/`
-- `/workspace/pasm2-reference-manual/` → `/outbound/pasm2-reference-manual/`
+- `/workspace/<canonical-name>/` → `/outbound/<canonical-name>/`
+
+e.g. `/workspace/p2-pasm-desilva-style/` → `/outbound/p2-pasm-desilva-style/`. The set of
+canonical names lives in `PUBLICATION-ROSTER.md`, not here.
 
 **The folders have identical names** - just swap "workspace" for "outbound" in the path.
 

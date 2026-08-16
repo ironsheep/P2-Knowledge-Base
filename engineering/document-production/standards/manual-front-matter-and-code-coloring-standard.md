@@ -77,7 +77,7 @@ Both produce the **same** `Spin2Block` / `Pasm2Block` (`PASM2Block`) `tcolorbox`
 2. Add the `*-code-coloring.lua` filter to the manual's `filters/`.
 3. List it in `request.json` `lua_filters`.
 
-Reference: `workspace/p2-single-step-debugger-manual/filters/p2kb-ssdbg-code-coloring.lua` (+ `templates/p2kb-ssdbg-content.sty`) for the fenced-block model; `workspace/p2-smart-pins-tutorial/filters/p2kb-sp-code-coloring.lua` for the div model.
+Reference: `workspace/p2-single-step-debugger-manual/filters/p2kb-ssdbg-code-coloring.lua` (+ `templates/p2kb-ssdbg-content.sty`) for the fenced-block model. The div model's reference implementation was the Smart Pins Tutorial's `p2kb-sp-code-coloring.lua`, **archived 2026-08-16 with that retired document** — recoverable from git history, but no live manual uses the div model.
 
 ---
 

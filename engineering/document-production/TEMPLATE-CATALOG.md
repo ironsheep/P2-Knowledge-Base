@@ -1,63 +1,62 @@
 # P2 Knowledge Base - Template Catalog
 
+> ## ⚠️ SUPERSEDED — do not choose a template from this document
+>
+> **Last accurate: 2025-11-23.** Everything below describes the *per-manual template fork*
+> era, where each document carried its own `p2kb-<slug>-*` stack in its own workspace. That
+> era is over: live documents build on the **shared `p2kb-platform-*` stack** in
+> `platform/templates/` with thin per-document overrides.
+>
+> Two consequences make the pages below actively misleading rather than merely dated:
+> the `p2kb-sp-*` stack it recommends **no longer exists in the live tree** (archived
+> 2026-08-16 with the retired Smart Pins Tutorial), and the per-manual foundation layers
+> it documents have been replaced by the platform foundation.
+>
+> **Where to look instead**
+>
+> | Question | Authority |
+> |---|---|
+> | Which documents exist, and their status | [`PUBLICATION-ROSTER.md`](PUBLICATION-ROSTER.md) — the single roster, one row per document |
+> | What the shared stack provides | `platform/templates/` + `platform/README.md` |
+> | How a document is assembled and staged | [`PDF-PRODUCTION-ARCHITECTURE.md`](PDF-PRODUCTION-ARCHITECTURE.md) |
+> | What a specific manual uses | that manual's `MANUAL-DESCRIPTOR.md` |
+>
+> Retained as a record of the fork-era stacks, which still explains why some older
+> workspaces are shaped the way they are. **A rewrite is on the punch list.**
+
 **Purpose:** Quick reference for all document templates across the P2KB project
 **Last Updated:** 2025-11-23
 **Template Organization:** Each workspace has its own `templates/` folder with document-specific templates
 
-## 🎯 Quick Template Selection Guide
+## 🎯 Quick Template Selection Guide *(fork era — superseded)*
 
 ### By Document Type
 
 | Need | Template | Location | Best For |
 |------|----------|----------|----------|
 | **Tutorial/Learning** | `p2kb-desilva-*` | `p2-pasm-desilva-style/templates/` | Pedagogical manuals with progressive learning |
-| **Tutorial (Enhanced)** | `p2kb-sp-*` | `p2-smart-pins-tutorial/templates/` | Comprehensive tutorials with rich visual elements |
 | **Visual Discovery** | `p2kb-debugwin-*` | `p2-debug-window-manual/templates/` | Discovery-driven docs with screenshot integration |
 | **Presentation** | `p2kb-presentation-*` | `ai-privacy-guide/templates/` | Simple presentation-style documents |
-| **Reference Manual** | Start from `p2kb-sp-*` | Smart Pins templates | Formal reference documentation |
 
 ### By Template Stack Complexity
 
 | Layers | Template | Purpose |
 |--------|----------|---------|
-| **4-Layer** | `p2kb-sp-*` | Maximum flexibility: foundation + content + numbering + presentation |
 | **2-Layer** | `p2kb-desilva-*`, `p2kb-debugwin-*` | Streamlined: foundation + content |
 | **1-Layer** | `p2kb-presentation-*` | Minimal: self-contained template |
 
 ## 📚 Available Templates
 
-### 1. Smart Pins Tutorial Templates
-**Location:** `workspace/p2-smart-pins-tutorial/templates/`
-**Prefix:** `p2kb-sp-*`
-**Status:** ✅ Production-Ready
+### 1. Smart Pins Tutorial Templates — **RETIRED, NOT AVAILABLE**
 
-**Template Hierarchy:**
-```
-Layer 1: p2kb-foundation.sty (core infrastructure)
-Layer 2: p2kb-sp-styles.sty (Smart Pins content styling)
-Layer 3: p2kb-sp-numbering.sty (numbering system)
-Layer 4: p2kb-tech-review.sty (presentation branding)
-Main:    p2kb-sp-template.latex
-```
+The `p2kb-sp-*` four-layer stack belonged to the Smart Pins Tutorial, which was
+superseded by the I/O & Smart Pins User Guide and **archived out of the live tree on
+2026-08-16** along with its templates and its `p2kb-sp-semantic.lua` filter fork. No
+live document consumes a `p2kb-sp-` file.
 
-**Features:**
-- 4-layer stack for maximum modularity
-- 3 code block types (Configuration, Spin2, PASM2)
-- 7 semantic marker boxes with distinct borders
-- Pastel color palette for extended reading
-- 10.5pt body text, 1.25x line spacing
-- Technical review title pages
-
-**Best For:**
-- Tutorial-style learning documents
-- Documents with progressive examples
-- Reference manuals with rich formatting
-- Technical review phase documents
-
-**Special Requirements:**
-- Requires `--top-level-division=part` pandoc arg
-- Lua filter pipeline support
-- Assets folder for images
+It is described here only because several later stacks were derived from it, so its
+shape explains theirs. **Do not copy from it and do not cite it as a starting point** —
+it is not on disk. New documents start from the shared `p2kb-platform-*` stack.
 
 ---
 
@@ -158,9 +157,8 @@ Main: p2kb-presentation.latex (self-contained)
 **Prefix:** `p2kb-pasm-ref-*` (to be established)
 **Status:** 🔴 Planned
 
-**Recommended Starting Point:**
-- Copy from `p2kb-sp-*` if technical reference style desired
-- Copy from `p2kb-desilva-*` if approachable reference style desired
+**Recommended Starting Point:** the shared `p2kb-platform-*` stack plus a thin per-document
+override — not a copy of another manual's fork. (`p2kb-sp-*` is archived and unavailable.)
 
 **Content Focus:**
 - Formal instruction set specifications
@@ -174,9 +172,9 @@ Main: p2kb-presentation.latex (self-contained)
 **Prefix:** `p2kb-spin2-ref-*` (to be established)
 **Status:** 🔴 Planned
 
-**Recommended Starting Point:**
-- Copy from `p2kb-sp-*` or `p2kb-desilva-*`
-- Coordinate style with PASM2 Reference if both are formal
+**Recommended Starting Point:** the shared `p2kb-platform-*` stack plus a thin per-document
+override; coordinate style with PASM2 Reference if both are formal. (`p2kb-sp-*` is archived
+and unavailable.)
 
 **Content Focus:**
 - Language syntax and semantics
@@ -192,9 +190,8 @@ Main: p2kb-presentation.latex (self-contained)
 **Status:** 🔴 Planned
 
 **Recommended Starting Point:**
-- `p2kb-debugwin-*` if visual/discovery approach
-- `p2kb-desilva-*` if tutorial approach
-- `p2kb-sp-*` if reference approach
+- the shared `p2kb-platform-*` stack, with a thin override chosen by approach
+  (visual/discovery, tutorial, or reference). (`p2kb-sp-*` is archived and unavailable.)
 
 **Content Focus:** TBD based on document approach
 
@@ -211,9 +208,9 @@ Main: p2kb-presentation.latex (self-contained)
    ```
 3. **Rename files** with new prefix:
    ```bash
-   # Example: p2kb-sp-* → p2kb-mynew-*
+   # Example: p2kb-desilva-* → p2kb-mynew-*
    cd workspace/[new-doc]/templates/
-   for f in p2kb-sp-*; do mv "$f" "${f/p2kb-sp-/p2kb-mynew-}"; done
+   for f in p2kb-desilva-*; do mv "$f" "${f/p2kb-desilva-/p2kb-mynew-}"; done
    ```
 4. **Update template/README.md** - Document new template hierarchy
 5. **Update workspace/README.md** - Point to new templates
@@ -234,7 +231,6 @@ Each workspace `templates/` folder contains:
 **Pattern:** `p2kb-[document-identifier]-[layer].[ext]`
 
 ### Examples:
-- `p2kb-sp-foundation.sty` - Smart Pins foundation layer
 - `p2kb-desilva-content.sty` - DeSilva content layer
 - `p2kb-debugwin.latex` - Debug Window main template
 
@@ -275,11 +271,11 @@ Each workspace `templates/` folder contains:
 Need a template?
 ├─ Tutorial/Learning?
 │  ├─ With rich pedagogy? → p2kb-desilva-*
-│  └─ With visual elements? → p2kb-sp-*
+│  └─ With visual elements? → p2kb-debugwin-*
 ├─ Visual/Discovery?
 │  └─ Screenshots/exploration? → p2kb-debugwin-*
 ├─ Reference Manual?
-│  └─ Start from p2kb-sp-* (adapt as needed)
+│  └─ Start from p2kb-platform-* (adapt as needed)
 └─ Simple/Presentation?
    └─ p2kb-presentation-*
 ```

@@ -37,7 +37,7 @@ Six P2 manuals (confirmed by their generated PDFs) plus the AI privacy guide:
 
 | Workspace | Why dormant |
 |-----------|-------------|
-| p2-smart-pins-tutorial | Smart Pins "Green Book" tutorial — not currently produced. Note: the only doc using `--top-level-division=part` and a heavy bespoke fork. If revived, it needs its own layout pass. |
+| ~~p2-smart-pins-tutorial~~ | **Retired and archived 2026-08-16** — superseded by the I/O & Smart Pins User Guide; moved out of the live tree to the gitignored local `archive/` together with its bespoke `p2kb-sp-` fork. No longer dormant-but-revivable: out of scope permanently unless deliberately revived from git history. |
 | spin2-reference-manual | Placeholder/planning stage; foundation copy only, no source manual. |
 
 ## Scope implications for the layout-standards effort
@@ -89,7 +89,7 @@ is a *workspace* with no `manuals/` source at all.
 | p2-pasm-desilva-style | LIVE | `COMPLETE-OPUS-MASTER.md` (6,537 ln) | single-file master |
 | p2-single-step-debugger-manual | LIVE | `P2-Single-Step-Debugger-Manual.md` (700 ln) | single-file master |
 | p2-streamer-programming-guide | LIVE | `streamer-body.md` (1,589 ln) | single-file master |
-| p2-smart-pins-tutorial | **DORMANT** | `COMPLETE-OPUS-MASTER.md` (3,506 ln) | full master exists; not live |
+| ~~p2-smart-pins-tutorial~~ | **ARCHIVED 2026-08-16** | — | moved out of the live tree; recoverable from git history |
 
 ### Workspaces with NO `manuals/` source folder
 
@@ -139,7 +139,8 @@ part-using docs.
 `PUBLICATION-ROSTER.md` previously listed **3 live** (iosp, pasm2, desilva — the
 convention-reconciled reference set). On 2026-06-04 the live set expanded to **7**: the three
 originals **plus** debug-window, single-step-debugger (ssdbg), streamer, and ai-privacy-guide.
-Only **smart-pins-tutorial** and **spin2-reference-manual** remain dormant. The four newly-promoted
+Of those, **smart-pins-tutorial** has since been retired and archived (2026-08-16), leaving
+**spin2-reference-manual** as the only dormant workspace. The four newly-promoted
 publications are live but their cross-publication convention reconciliation is **pending** — that
 reconciliation is part of this layout-standards effort. See PUBLICATION-ROSTER.md for the
 authoritative table and the per-publication "reconciled?" status.
