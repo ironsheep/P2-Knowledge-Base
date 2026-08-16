@@ -589,6 +589,42 @@ coverage.** A check that compares only names must say so rather than certify the
 converts an unexamined area into a documented all-clear. Same failure shape as F-269's fan-out audit
 and F-211's sweep: an artifact asserting correctness it never established.
 
+### WE ALREADY FOUND THIS, IN JUNE — and half the fix landed
+
+**The Assembly Language Manual's full audit of 2026-06-10 got the qualifier right, two months before
+the bench run.** `audit/full-audit-2026-06-10/_ADJUDICATION-DETAIL.md:1532` adjudicates the
+`%0000` / `IF_NEVER` confusion, concludes *"Do NOT edit the manual … Instead fix the SOURCE:
+`PASM2-ENCODING-REFERENCE.md:49-52`"*, and prescribes the replacement text verbatim:
+
+> *"`%0000` is the `_RET_` form (always-execute + **return-if-no-branch**); the assembler emits it
+> only via the `_RET_` prefix. `%1111` is the default `IF_ALWAYS` …"*
+
+It then says: **"Route to the P2KB corrections register."**
+
+**Two things went wrong, and together they are the whole failure:**
+
+1. **The fix was applied by halves.** The `IF_NEVER` clause landed in
+   `PASM2-ENCODING-REFERENCE.md` — the note has read *"`%0000` is exclusively the `_RET_` prefix …
+   it is NOT the encoding for `IF_NEVER`"* ever since. **The `return-if-no-branch` qualifier was
+   dropped in transcription.** The half that mattered for correctness is the half that vanished.
+2. **It was never filed in the register.** Grepping this file for `return-if-no-branch` or
+   `IF_NEVER` returns **nothing**. With no entry, there was no record that a correction was owed,
+   so nothing ever noticed that only part of it arrived.
+
+So the qualifier was **found, written down correctly, routed — and lost**, and two months later a
+guide under community review shipped `_RET_ CALL` because the KB it derives from no longer said it.
+The bench then spent a rig, three build rounds and a day of Stephen's time re-discovering it.
+
+**The durable rule this argues for:** *a correction is not routed until it is IN THE REGISTER.* An
+adjudication that names the fix in an audit artifact and trusts the fix to be carried across by hand
+has no closing gate — and a partially-applied correction is invisible precisely because the file
+*did* change. If the register had carried this, the drain gate would have caught the missing half.
+[[feedback_batch_and_verify_workflow]] · [[project_p2kb_corrections_register]].
+
+*(The 2026-06-10 audit tree is gitignored working history, so its now-stale rows — e.g.
+`part-iii-appendices-sourcing.md:56`, which records `_RET_ | %0000 | Always + Return | **VERIFIED**`
+— are left as the record of what that pass concluded. The authority is here.)*
+
 ### Consequences for the other entries
 
 - **F-256** — recast from `NEEDS-VERIFICATION`/hardware question to a **documentation** finding whose
