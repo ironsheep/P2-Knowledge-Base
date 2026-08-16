@@ -20,6 +20,23 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.16.3] - 2026-08-16
+
+**Streamer, CORDIC and pin-mode behaviour as the silicon does it**
+
+### Added
+- DDS/Goertzel: ADC pins are raw delta-sigma inputs — a `P_ADC_*` constant at smart-pin mode `%00000`, and no DIR
+- DDS/Goertzel: the four-pin input block model (`D[22:19]`), the mandatory `S[15:12]` sum-select, and a working setup sequence
+- GETXACC reads a holding register: one read per streamer command, and read-before/read-after for a per-command measurement
+- CORDIC: keep hub access out of both the fill and drain loops — register-only loops stay correct through a fill depth of 7
+- Smart pins: pin-mode constants are bit fields, combined with `|`. `P_OE`, `P_CHANNEL` and `P_TT_01` are one bit under three context names
+- Streamer: `DEBUG_COGS` covers all eight cogs by default, so `-d` places the debug interrupt inside a streaming cog. One `CON` line scopes it to the reporting cog
+- Streamer command words: mode fields are positional and vary by mode
+- Spin2 + PASM2: `##hubsymbol` in a `DAT` block inside a Spin2 object resolves against `$400` — pass addresses in with `@`, or use PTRA
+
+### Changed
+- WRPIN: `%TT` documented across all four of its contexts, with `P_OE` scoped to smart-pin output modes and the cog-DAC source-select behaviour named
+
 ## [1.16.2] - 2026-08-11
 
 **Smart-pin examples that drive their pins**
