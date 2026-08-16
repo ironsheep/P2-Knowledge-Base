@@ -1103,7 +1103,7 @@ contract is load-bearing, so it cannot be a stand-in. **Do not "fix" the other e
 Corroborating the guide is not broadly broken: the complete VM in §12.2 (`xbyte-body.md:975–1044`)
 was extracted and **compiles clean** under `pnut-ts -q`.
 
-### F-256 — `_RET_ CALL` is a load-bearing idiom in a shipped guide and its semantics are unverified. `NEEDS-VERIFICATION`
+### F-256 — `_RET_ CALL` does NOT return to XBYTE. The idiom is broken, and it is used in a guide under community review. `CONFIRMED (EF-058) — manual restructure APPLIED 2026-08-16 («#227»)`
 
 **Location:** `xbyte-body.md:879` (*"Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely on
 this"*), used at `:1391`, `:1400`, `:416`, `:793`.
@@ -1118,6 +1118,35 @@ then return to `$1FF` (XBYTE re-entry intact), or does the push/pop ordering bre
 `architecture/xbyte_engine.yaml:71` is suggestive but addresses a *different* case (why a CALL
 cannot substitute for `PUSH #$1FF` at arm time). **Not resolvable from the KB or the Silicon Doc;
 no answer is asserted here.**
+
+> **ANSWERED ON SILICON — EF-058, `CONFIRMED`.** The status line above was stale: this entry still
+> read `NEEDS-VERIFICATION` while the empirical ledger already carried the answer. **The idiom is
+> broken.** `_RET_ CALL` assembles (so Christof's objection is wrong *as stated*) but the `_RET_` is
+> **silently ineffective on `CALL`** — both forms push *"next instruction"*, so control falls through
+> into whatever follows instead of returning to XBYTE, and **the next handler in cog memory executes
+> spuriously.** Proven by a *differential* test in one run: reference arm (`call` + `ret`) = 5 steps,
+> correct; test arm (`_ret_ call`) = **7 steps**, executing a handler whose bytecode was never in the
+> stream. Self-consistent three ways — trail order, pushed return address (`$8000_001A`) versus the
+> cog map, and the compiler encoding (`$0DB00008`, `EEEE=%0000` — the `_RET_` condition genuinely
+> present). Not a compiler fault.
+>
+> **Grade honestly: `[M-pre]`** — taken before the `DEBUG_COGS` confound (EF-057) was found, and
+> `BENCH-FINDINGS-FOR-AUTHORING.md` stages a confirming run with `DEBUG_COGS = %0000_0001` and says
+> *"do not author §15.3 until it returns."* **The manual work went ahead anyway, deliberately, and
+> only in the direction that is safe under BOTH outcomes:** every `_RET_ CALL` was replaced with the
+> explicit `call` + `ret` pair, which is exactly the bench's *reference* arm — the form that ran
+> correctly. If the confirming run reverses EF-058, `call`+`ret` is still correct and the only loss
+> is one instruction of tail-call thrift. Leaving prose that *endorsed* a broken idiom was not safe
+> under both outcomes, which is what forced the call.
+>
+> **Applied in `xbyte-body.md` («#227», uncommitted under the «#234» gate):** §15.3's handlers and
+> the shared `ld_imm` family; §4.4's `alu_body`; §5's `push_const`; §17's `voice_on` handler; and the
+> two *explanations* that endorsed the idiom — `:882` (Chapter 11) now says plainly what the CALL
+> depth does and does **not** license, and §15.3 carries a `hardware` callout teaching the rule
+> (**an instruction cannot both push-and-jump and return**) plus the trap (the failure is silent and
+> reads as corruption elsewhere). Slices recompiled clean under `pnut-ts`.
+>
+> **Still owed when the confirming run returns:** flip this grade to `[M]`, or reopen if it reverses.
 
 **Action:** jumper-free, single-board hardware test — arm XBYTE, run a handler ending in
 `_RET_ CALL`, report whether dispatch continues. Ideal **VO-J** candidate; result goes to the EF
