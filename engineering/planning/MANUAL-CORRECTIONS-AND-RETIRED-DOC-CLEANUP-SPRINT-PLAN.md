@@ -713,78 +713,45 @@ than restate it. Editing four copies and hoping they stay aligned is exactly how
 
 ---
 
-## 7. Community bench review (refaQtor) — five defects in RELEASED manuals · **F-259…F-263**
+## 7. Community bench review (refaQtor) — SETTLED ON OUR BENCH · F-259…F-263
 
-**Source:** `p2-manuals-review-findings.md` (the posted zip), P2 Rev C @ 300 MHz, `pnut_ts` 1.55,
-committed harness + logs, manuals as downloaded 2026-08-13. **All five verified against our own
-sources.** Full detail in the corrections register.
+> **REWRITTEN 2026-08-15.** This section previously carried ~120 lines of pre-bench analysis that
+> read as live while the bench had already answered it, and an 18-task sprint was generated from it.
+> Four of the five findings came back **different from the filing** — one was reversed outright. The
+> stale text is deleted rather than banner-ed, and the per-finding verdicts are **not restated here**:
+> a plan that summarises the register drifts from it, which is how this section and the register came
+> to disagree within a day.
+>
+> **The register is the authority.** Read each finding there, status first, per
+> `.claude/skills/REGISTER-CONSULTATION.md`. Evidence and authoring guidance live in
+> `campaigns/2026-08-manual-corrections/BENCH-FINDINGS-FOR-AUTHORING.md`; measurements are ledger
+> entries **EF-053…EF-060**.
 
-> **Trust handling.** A third party's bench is a **high-quality lead**, not an accepted P2KB
-> empirical finding. Fix the documentation defects the *source* proves; **replicate on our bench**
-> anything we intend to cite as ground truth. His §5 "confirmations" are corroboration — they do
-> **not** go into `P2-EMPIRICAL-FINDINGS.md` as our own tests.
+**What each one turned into — pointers only, so this cannot drift:**
 
-**These outrank §1–§2 in severity: they are technically wrong content in shipped manuals.**
+| § | Finding | Where it now lives | Head |
+|---|---|---|---|
+| 7a | F-259 | register + EF-054 | Streamer — **the guide's recipe is CORRECT**; the defect is `+` composition, 2 sites |
+| 7b | F-260 | register + EF-056 | Streamer — **the mode WORKS**; author the protocol it never states |
+| 7c | F-261 | register | IOSP — three repairs; needs no bench |
+| 7d | F-262 | register | Debug Window — still needs the PNut observation |
+| 7e | F-263 | register + EF-053 | Assembly ch.5 **and P2AN002** both violate the rule |
+| — | F-256 | register + EF-058 | XBYTE §15.3 — **restructure**, not patch |
+| — | F-264/265/266 | register + EF-055/056/057 | **KB** — these are the early YAML pass |
 
-### 7a. Streamer Guide — cog-DAC examples output nothing (F-259) · RELEASED
+**Two consequences that change the sprint's shape, and they are the reason to read the register
+before tasking anything:**
 
-`streamer-body.md:1306–1307` ships `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins` + `drvl`. Bench
-proves output needs **all three** of `P_CHANNEL`, **`P_OE`**, and **DIR high** (no-OE → 1,228
-counts = ground; +`P_OE` → 6,707 = full scale). Fix: `| P_OE` and `drvh`, and state which of OUT/OE
-gates the drive.
-
-**This is a recurrence of the F-245…F-247 `P_OE` class** — that sweep fixed the **YAML** and never
-reached the **manuals**. So the deliverable is not one example: **sweep `P_OE` across every live
-manual and app-note.** Treat the single fix as insufficient.
-
-### 7b. Streamer §17.1 DDS/Goertzel — unbuildable as published (F-260) · RELEASED
-
-Two confirmed doc defects: **`dds_s` is used at `:1324` and never declared** (one occurrence in the
-whole guide — the example cannot assemble), and **`adc_pin<<17` at `:607`/`:990` collides with the
-required `%111` in D[18:16]**. Fix both now.
-
-Separately, the mode itself did not work on the reporter's bench (runs, no DAC output, no
-accumulation) across a wide sweep. That needs **our** bench, and if it stays unresolved becomes a
-**question for Chip**. Until settled, the guide must not present this mode as buildable.
-
-### 7c. IOSP Guide — power groups of four, one month after we corrected it to eight (F-261) · RELEASED
-
-`chapter-16-adc.md:263` and `:382` say *"isolated groups of four — pins 0–3, 4–7, …"*. **F-211**
-settled this as **8 groups of 8** and shipped in **KB v1.15.0 on 2026-07-11**; our own **P2AN001
-says eight**. The reporter caught us contradicting ourselves.
-
-Three repairs, not one: the group size and boundary list; the **layout rule** built on it (with
-wrong boundaries it misleads — it implies 3/4 straddle when 7/8 do); and `:382`'s **worked example
-reasoning** (*"pins 40–47 — two full groups"* — that is **one** group; the conclusion survives, the
-reasoning does not).
-
-**Process deliverable:** F-211 swept YAML and missed manuals. Any correction landing in the KB must
-carry a manual-side sweep, or this recurs.
-
-### 7d. Debug Window Manual — FFT chapter has no channel defaults (F-262) · RELEASED
-
-`ch07-scope.md:86` has an `If omitted` column; `ch09-fft.md` has none for `high`/`tall`. The manual
-calls the arguments optional and never says what omitting them does. Reporter ties this to a real
-**pnut-term-ts strict-parser divergence** he filed separately — the gap has already caused a tool
-disagreement. Fix: add the column — **verify values against PNut**, do not assume FFT matches SCOPE.
-
-### 7e. Assembly Manual — CORDIC fill-6-then-drain example is bench-disproven (F-263) · RELEASED
-
-`chapter-05-hardware.md:~100–126` queues 6, runs steady state, drains 6. Bench: **two-in-flight
-retrieval scrambled all outputs.** What makes it actionable: the same chapter's *other* CORDIC
-statements matched his silicon exactly, so the chapter holds a correct rule and an example that
-violates it. **Replicate on our bench first**, then either fix the example or state the conditions
-under which deep pipelining is valid.
-
-**Verification (all of 7a–7e).**
-*Normal:* each corrected example compiles, and the ones with silicon claims run correctly on our
-bench.
-*Edge:* 7a's fix is applied **class-wide**, not just at `:1306`; 7c's three repairs all land, not
-just the number.
-*Error:* where our bench and the reporter's disagree, **confirm the measurement by an independent
-path before acting** — do not rewrite a released manual on a single external log.
+1. **An early YAML pass is now a real, scoped deliverable** — eight KB corrections, every one traced
+   to an EF entry or a primary source and every one verified *absent* from the YAML tree. It runs
+   **first**, because the manual text for Streamer §17.1 and Assembly ch.5 should derive from a KB
+   that already carries the corrected facts rather than being written in parallel with it.
+2. **P2AN002 joins the release wave** — its `examples-library/cordic-pipeline-throughput.spin2`
+   violates EF-053 (`rdlong` in fill, `wrlong` in steady state). It was not in the original wave; the
+   bench put it there.
 
 ---
+
 
 ## 7f. SPRINT 2 START — agreed versions, commit gate, entry checks (2026-08-15)
 
@@ -871,25 +838,39 @@ Ledger `PUBLISH` lines.
 
 ---
 
-## Sequencing (revised — the bench findings reorder this)
+## Sequencing — the bench is DONE; the KB leads
 
-1. **§7c** (IOSP 4→8) — highest severity: a released manual contradicting our own published KB and
-   app note, on a fact we already settled. No new research needed; the answer is in F-211.
-2. **§7a** (Streamer `P_OE`) + its **class-wide manual sweep** — bench-proven broken examples.
-3. **§7b doc defects** (`dds_s`, field collision) — source-verified, fix now; the silicon question
-   goes to the bench queue.
-4. **§3** (our `_RET_ CALL` bench test) — batch with §7b's and §7e's bench work into **one bench
-   session**, since all three need Stephen and the board.
-5. **§7d** (FFT defaults) — needs a PNut check, otherwise small.
-6. **§7e** (CORDIC) — after its bench replication.
-7. **§4** (XBYTE §15.3) — after §3 returns.
-8. **§1 + §2** (deSilva) — independent; land together in one v3.0.6 render.
-9. **§5** (retired-doc cleanup) — independent; any time.
-10. **§8** — the release wave, once the above land.
+> **REWRITTEN 2026-08-15.** The previous ordering batched a bench session that had already run on
+> 2026-08-14, and ordered repairs against findings whose verdicts had since changed. Deleted, not
+> annotated.
 
-**Bench session batching:** §3, §7b, §7e (and any 7a re-proof) all want the board. Group them.
+**The shape now, and the one structural rule behind it: the knowledge base leads the documents.**
+
+1. **The early YAML pass** — eight KB corrections (F-259, F-260, F-263, F-264, F-265, F-266, G-004,
+   EF-060). Every one traced to an EF entry or a primary source, and every one verified absent from
+   `deliverables/ai/P2/` before being scoped. **Then release it** — patch bump, validators, index
+   regenerated after the content commit, tag, push. Pushing is publishing.
+2. **The manual repairs that need no further input** — IOSP §7c first on severity (a released manual
+   contradicting our own published KB), then Streamer `+`→`|` and §17.1, deSilva §1 + §2, Assembly
+   ch.5 and P2AN002 CORDIC, XBYTE §15.3 (a **restructure**, per EF-058).
+3. **The one thing still owed from the canonical side** — §7d's FFT channel defaults, which need a
+   PNut observation. Everything else proceeds around it; it does not gate the wave.
+4. **The non-document work**, scheduled into any wait: retired-doc archive + reference classification,
+   the descriptor-glob widening, the suppression probe.
+5. **Blast radius + register annotation**, then the **⛔ review gate** — Stephen reads the accumulated
+   opus-master diff before anything is committed.
+6. **The release wave**, shortest-first.
+
+**Why the KB leads, concretely.** Streamer §17.1's protocol text and Assembly ch.5's CORDIC rule are
+*the same facts* as the KB entries for F-260 and F-263. Written in parallel they drift; written from
+a published KB they cannot. This is also the standing fix for the recurrence §7c records — F-211 and
+F-245 both landed in the YAML and never reached the manuals. Here the order is reversed on purpose.
+
+**No bench session is scheduled.** The campaign completed 2026-08-14; its results are EF-053…EF-060.
+The only canonical-side item left is the §7d PNut observation.
 
 ---
+
 
 ## Sprint 2 — section ↔ task cross-reference
 
