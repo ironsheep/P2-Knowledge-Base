@@ -33,8 +33,10 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 - Streamer: `DEBUG_COGS` covers all eight cogs by default, so `-d` places the debug interrupt inside a streaming cog. One `CON` line scopes it to the reporting cog
 - Streamer command words: mode fields are positional and vary by mode
 - Spin2 + PASM2: `##hubsymbol` in a `DAT` block inside a Spin2 object resolves against `$400` — pass addresses in with `@`, or use PTRA
-
 - I/O pin power domains: the silicon's sixteen four-pin VIO/GIO domains and the P2 Edge boards' eight LDO groups are documented as the separate layers they are, with the ADC reference following the silicon one
+
+### Fixed
+- P2AN001 companion: the SINC2 sample period is a power of two only in SINC2 *sampling* mode. The note's builds run SINC2 *filtering*, where a `WYPIN` after the `WXPIN` sets any period up to 11,585 clocks — the companion now says so, matching the app note
 
 ### Changed
 - WRPIN: `%TT` documented across all four of its contexts, with `P_OE` scoped to smart-pin output modes and the cog-DAC source-select behaviour named

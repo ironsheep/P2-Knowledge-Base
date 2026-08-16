@@ -321,7 +321,7 @@ the durable fix; scope it as its own item rather than folding it into a correcti
 
 ## A shipped YAML companion contradicts its own released app note (2026-08-16) — F-270
 
-### F-270 — `p2an001-…-adc.yaml`'s SINC2 tip carries the sampling-mode restriction into filtering mode, contradicting the correction P2AN001 v1.0.2 already shipped. `CONFIRMED`
+### F-270 — `p2an001-…-adc.yaml`'s SINC2 tip carries the sampling-mode restriction into filtering mode, contradicting the correction P2AN001 v1.0.2 already shipped. `DONE (2026-08-16)`
 
 **Surfaced by:** «#239»'s owed step 4 — *"confirm no OTHER P2AN001 site carries the old grouping."*
 The power-domain line in the companion was already correct; reading its neighbours found this.
@@ -362,10 +362,16 @@ power-of-two **initial** period (the builds use 128, `%0111`), and a `WYPIN` aft
 replaces it with any period up to 11,585 clocks in SINC2 filtering; the power-of-two restriction is
 SINC2 **Sampling** mode only.
 
-**Status:** `CONFIRMED`. **Fold-or-defer is Stephen's call** — KB v1.16.3 is committed but not yet
-tagged or pushed, so this is the cheapest moment it will ever have; after the push it costs a full
-v1.16.4 cycle (content commit → index regen → tag → push → MCP restart). Folding requires
-re-running the validators and regenerating the index on top of the new content commit.
+**Status:** `DONE (2026-08-16)`. **Stephen chose to fold it into v1.16.3** rather than spend a
+v1.16.4 cycle — the bump was committed but not yet tagged, so it was the cheapest moment available.
+Applied at `:105`, `Fixed` entry added to the v1.16.3 CHANGELOG, recorded in the
+`YAML-HEAD-DASHBOARD` release row, index regenerated on top of the content commit, validators
+re-run green.
+
+**Survey note, stated rather than left implied:** folding added a file to v1.16.3's delta *after*
+the YAML→manual impact survey had run. The added file is an app-note **companion**, and no manual
+declares a companion as a source — companions derive from their note, not the reverse — so the
+survey's conclusions are unchanged. Re-checked, not assumed.
 
 ---
 

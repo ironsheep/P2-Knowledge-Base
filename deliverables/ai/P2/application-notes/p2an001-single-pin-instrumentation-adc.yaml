@@ -102,7 +102,7 @@ gotchas:                           # the note's consolidated pitfalls/hardware n
   - flag: pitfall
     text: "Stay at a legal clock: builds run at 200 MHz; P2 spec max is 300 MHz. The original research code's 320 MHz is over-spec. The ADC works from ~10 MHz up — do not overclock for resolution (use integration time)."
   - flag: tip
-    text: "Keep the SINC2 sample period a power of two (period = 2^X[3:0]); the builds use 128 (%0111)."
+    text: "X[3:0] sets a power-of-two INITIAL sample period (the builds use 128, %0111), but that is not a ceiling: in SINC2 FILTERING mode - which these builds run - a WYPIN issued after the WXPIN replaces it with any period up to 11,585 clocks, trading sample rate for per-sample resolution. The power-of-two restriction applies to SINC2 SAMPLING mode only."
   - flag: tip
     text: "The DAC loopback is a FUNCTIONAL check, not an accuracy benchmark — DAC and ADC share the same die and imperfections."
 
