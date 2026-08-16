@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-16T00:27:58.002927",
+    "generated": "2026-08-16T02:15:31.886508",
     "total_entries": 1129,
     "total_categories": 59,
-    "total_aliases": 1724,
+    "total_aliases": 1730,
     "multi_target_aliases": 75,
     "source": "deliverables/ai/P2/"
   },
@@ -1506,6 +1506,9 @@
     "EDGE CARRIER BOARD": [
       "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
     ],
+    "EDGE LDO GROUP": [
+      "p2kbArchPinPowerDomains"
+    ],
     "EDGE MINI BREAKOUT": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
     ],
@@ -1556,6 +1559,9 @@
     ],
     "EXTERNALIZED CONTEXT": [
       "p2kbSpin2OpTypedPointers"
+    ],
+    "Edge LDO group": [
+      "p2kbArchPinPowerDomains"
     ],
     "FBLOCK": [
       "p2kbPasm2Fblock"
@@ -2601,6 +2607,9 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
+    "POWER GROUP OF 4": [
+      "p2kbArchPinPowerDomains"
+    ],
     "POWER GROUP OF 8": [
       "p2kbArchPinPowerDomains"
     ],
@@ -3520,6 +3529,12 @@
       "p2kbArchPinPowerDomains"
     ],
     "VIO GIO grouping": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "VIO SUPPLY MAPPING": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "VIO supply mapping": [
       "p2kbArchPinPowerDomains"
     ],
     "VSCODE_SPIN2_COMMENTS": [
@@ -5080,6 +5095,9 @@
     "popb": [
       "p2kbPasm2Popb"
     ],
+    "power group of 4": [
+      "p2kbArchPinPowerDomains"
+    ],
     "power group of 8": [
       "p2kbArchPinPowerDomains"
     ],
@@ -5960,8 +5978,8 @@
   "files": {
     "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
       "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
-      "mtime": 1786218516,
-      "sha256": "00a03645fd884257aaf91b624755092aa0bcf3f60eb2eb68d76dd36d7df9caba"
+      "mtime": 1786846449,
+      "sha256": "52c75e668885b00b02b0c565b08ebb667f837fc9744716463abbaa6146a9f691"
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
@@ -6220,8 +6238,8 @@
     },
     "p2kbArchPinPowerDomains": {
       "path": "deliverables/ai/P2/architecture/pin-power-domains.yaml",
-      "mtime": 1783814014,
-      "sha256": "dc3efb91f7a37981f84e02a736440d47c7b065cdd9fa533a2266c2200b78c780"
+      "mtime": 1786846449,
+      "sha256": "835e68c9e4874d7fc8022c7fe6fb8fcaae816c37849cdda4eb7d036470a30c5c"
     },
     "p2kbArchSerialLoader": {
       "path": "deliverables/ai/P2/architecture/serial_loader.yaml",
@@ -6350,18 +6368,18 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1783814014,
-      "sha256": "298419cad8781615c94da093a3441b1ae7870cd282ccbe991ec1f6e71f0d862b"
+      "mtime": 1786846449,
+      "sha256": "db21426d109fe6f7bea00a40c370f5084f8e77392e1390e16465878ad9a4a061"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
-      "mtime": 1783814014,
-      "sha256": "6284eef488e7bac53933ca40641977456b43afd3b56c3416b8b0541e8b19b3c7"
+      "mtime": 1786846449,
+      "sha256": "1d4c7d21823aecec0aa3deef6edc822db17cc2c8694c16c3f42e6a94d1f98a8a"
     },
     "p2kbArchSmartPin11010AdcScopeTrigger": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
-      "mtime": 1784155870,
-      "sha256": "c80dbffed768eda2e9b3830a21060bfffa4ff17f40beacb195b54dfc015bffdb"
+      "mtime": 1786846449,
+      "sha256": "bc88de6268fb4b06959b8768f1803041e4a5e871301d7852e87d8853a8127fdd"
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
