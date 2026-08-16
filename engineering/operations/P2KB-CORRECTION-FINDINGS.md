@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-269`**
+**Next finding ID: `F-270`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -133,6 +133,82 @@ the SETQ entry — it is the one cited from two released manuals' roster history
 
 **Surfaced by:** the duplicate-ID STOP rule in `.claude/skills/REGISTER-CONSULTATION.md`, while
 appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced rather than resolved.
+
+---
+
+## ⛔ REVERSAL — a shipped KB correction went the wrong way (2026-08-16) — F-269
+
+### F-269 — I/O pin power domains are groups of **FOUR**, not eight. F-211 corrected a correct fact into a wrong one, and it shipped in KB v1.15.0 and a RELEASED app note. `CONFIRMED`
+
+**Surfaced by:** executing «#219», whose instruction was *"ground every number against the
+DOMAIN_AUTHORITY (the ingestion tree, empirical findings first), **not** against F-211's summary
+text — the finding is a pointer to the authority, not a substitute for it."* Doing exactly that
+returned the opposite of what the task asked us to write. **The instruction worked.**
+
+**The authority — two independent primary sources, both Parallax, both already in the ingestion tree:**
+
+1. **The Silicon Doc's own package pinout** — `sources/silicon-doc/assets/images-20260706/P2-Silicon-Doc-v35-Part1_page09_render.png`
+   (v35, Part 1, page 9). Read directly. The TQFP-100 perimeter carries **sixteen VIO pins**, labelled
+   `VIO_0_3 · VIO_4_7 · VIO_8_11 · VIO_12_15 · VIO_16_19 · VIO_20_23 · VIO_24_27 · VIO_28_31 ·
+   VIO_32_35 · VIO_36_39 · VIO_40_43 · VIO_44_47 · VIO_48_51 · VIO_52_55 · VIO_56_59 · VIO_60_63`,
+   and sixteen matching internal `GIO_0_3 … GIO_60_63` blocks. **Four I/O pins per VIO/GIO domain,
+   sixteen domains.**
+2. **The P2 datasheet** — `sources/p2-datasheet/p2-datasheet-narrative.txt:226`, verbatim:
+   *"Smart I/O pins: 3.3 VDC, powered in **groups of 4** via VIO pins."*
+
+Corroborating, independently derived: the Silicon Doc image catalog
+(`…/images-20260706/P2-Silicon-Doc-v35_image_catalog.md:84`) records the same labels from the same
+figure. And the pin budget only closes at four: 64 I/O + 16 VIO + ~15 VDD + TEST/RESN/XI/XO = 100,
+with GIO drawn as **internal** blocks rather than package pins.
+
+**Why F-211 reached "8 groups of 8" — each of its three evidences fails on inspection:**
+
+| F-211's evidence | What it actually is |
+|---|---|
+| `VERIFICATION-OPPORTUNITIES.md:57` — *"the 64 pins are 8 groups of 8"* | **Our own internal analysis note**, carrying no source of its own. F-211 cited us back to ourselves — circular, and the note is now known wrong. |
+| Edge Mini Breakout: *"300 mA per 8-pin group; one VIO3V3/GND pair per 8-pin header"* | A **BOARD-LEVEL** spec, from `sources/edge-mini-breakout/…-extraction-audit.md:104`, about a breakout board's header wiring and current budget. Not the silicon's VIO domains. **This is the whole error: a board fact imported into the chip's power-domain file.** |
+| *"The Silicon Doc uses `{x}_{y}` placeholders, so it does not state 4"* | True of the **text** pin-description table — and false of the **figure seven pages earlier in the same document**, which states it explicitly. Silence was inferred from a partial read. |
+
+**And F-211 deleted a TRUE citation as fabricated.** Its applied-note records *"Removed the fabricated
+`evidence` citation ('P2 Datasheet: Power for smart pins in groups of 4' — unverifiable)."* That
+citation was **accurate**; the datasheet says it, at the line quoted above. A correct source was
+removed because it disagreed with a conclusion drawn from a board document.
+
+**What is and is not wrong.** The **mechanism** the KB teaches is correct and must be preserved:
+VIO/GIO are per-group; a pin's `P_ADC_GIO`/`P_ADC_VIO` reference its own group's rails; that is what
+makes a single-pin ratiometric read absolute; multi-pin shared-node measurements must stay inside one
+group. **Only the size, count and boundaries invert** — 8→**4** pins, 8→**16** groups,
+`0-7, 8-15, …` → `0-3, 4-7, …, 60-63`, and the straddle example returns from pins 7/8 to **3/4**.
+
+**Blast radius — five published KB files and one released app note:**
+
+| Artifact | State |
+|---|---|
+| `architecture/pin-power-domains.yaml` | canonical file; `group_size: 8`, `"8 groups"`, boundaries, oneliner, alias, and a `sources:` line quoting the **board** spec as if it established the silicon group size |
+| `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` | `power_domain`, `multi_pin_layout`, `see_also`, and a code comment |
+| `architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml` | same class |
+| `architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml` | same class |
+| `application-notes/p2an001-single-pin-instrumentation-adc.yaml:99` | the pitfall line |
+| **P2AN001 (RELEASED app note)** | was "corrected" 4→8 in `f3e702ed` — **it was right before that commit** |
+| `VERIFICATION-OPPORTUNITIES.md:57` | the internal note that seeded the error |
+| IOSP `chapter-16-adc.md` | **correct as shipped — do not touch** (see F-261) |
+
+**Explicitly NOT wrong, do not sweep:** `hardware/edge-standard-module.yaml:164`,
+`hardware/edge-32mb-module.yaml:237` (*"One LDO per 8-pin group"*), and the other `hardware/*.yaml`
+8-pin-group references. Those are **board-level and correct.** The lesson of this finding is exactly
+that the two levels are different facts; a blind 8→4 sweep would break the true ones.
+
+**Process consequence, and it is the durable half.** The class-wide-sweep rule did its job — F-211
+swept five files consistently. What no rule caught is that the *fact being swept* was wrong, so the
+sweep propagated it faster and further. **A class-wide sweep amplifies whatever it starts with**, and
+the grounding step therefore has to be *stronger* than for a single-site fix, not the same. Two
+concrete gates this argues for: **(1)** a source that is a *board* document can never establish a
+*silicon* fact — check the tier of the artifact, not just its trustworthiness; **(2)** "the primary
+source is silent" is not a conclusion until the figures have been opened, per
+[[feedback_exhaust_resources_at_hand_first]] and [[feedback_reverify_source_silent_before_expert]].
+
+**Status:** `CONFIRMED`. Remediation is a **scope decision for Stephen** — it reverses a published KB
+correction and touches a released app note, so it is deliberately not folded into Sprint 2 unasked.
 
 ---
 
@@ -972,30 +1048,22 @@ unresolved, becomes a **question for Chip** (`DRAFTS/QUESTIONS-FOR-CHIP-GRACEY.m
 the guide should not present this mode as buildable. A verbatim, compile-tested, silicon-run
 example would close all three questions at once.
 
-### F-261 — IOSP Guide still says power groups of **four**; we corrected this to **eight** in the KB a month ago. `CONFIRMED`
+### F-261 — REVERSED: the IOSP Guide's "groups of four" is CORRECT. The defect is ours, in the KB. `RESOLVED-INVALID (2026-08-16) — superseded by F-269`
 
-**Location:** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-3-input-modes/chapter-16-adc.md:263`
-and `:382`. **RELEASED.**
+> **REWRITTEN IN PLACE 2026-08-16.** This entry accepted **F-211**'s verdict and asked for three
+> repairs to `chapter-16-adc.md:263` and `:382`. Grounding the numbers against the **domain
+> authority** instead of F-211's summary text — which is what «#219» was written to require —
+> shows the manual is **right** and F-211 is **wrong**. All three repairs would have INTRODUCED
+> defects into correct released text, including the third: *"pins 40–47 — two full groups
+> (40–43, 44–47)"* is exactly correct under four-pin groups.
+>
+> The reporter's observation stands — we **do** contradict ourselves, P2AN001 versus IOSP — but the
+> contradiction resolves the other way. **The full evidence and the real blast radius are in
+> F-269.** Nothing is owed against the IOSP manual for this finding.
 
-Both passages state *"isolated groups of **four** — pins 0–3, 4–7, 8–11, …, 60–63."* The truth,
-settled in **F-211** (`DONE — YAML applied 2026-07-11, PUBLISHED in KB v1.15.0`), is **8 groups of
-8** (P0–7 … P56–63). The reporter caught it as a **contradiction against our own P2AN001**, which
-correctly says eight.
-
-**F-211's class-wide sweep covered the YAML and missed the manuals.** That is the precise failure
-our class-wide-sweep rule exists to prevent, and it shipped.
-
-Three distinct repairs, not one:
-- `:263` — group size and the boundary list (`0–3, 4–7…` → `0–7, 8–15…`).
-- `:263`/`:382` — the **layout rule** built on it. With wrong boundaries the advice actively
-  misleads: it implies pins 3/4 straddle a domain when in fact 7/8 do.
-- `:382` — the **worked example's reasoning is wrong**: *"spans pins 40–47 — two full groups
-  (40–43, 44–47)"*. Pins 40–47 are **one** group. The conclusion ("fine, channels are independent")
-  survives; the reasoning does not.
-
-**Class-wide sweep — DONE.** Grepped every live manual and app-note opus-master for the 4-group
-wording and boundary lists: **only these two locations.** (One unrelated "group of four bits"
-false positive in the Assembly manual's MERGEB description — not this defect, do not touch.)
+**Location (for the record):** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-3-input-modes/chapter-16-adc.md:263`
+and `:382`. **RELEASED — and correct as shipped**, including its citation *"(P2 datasheet, pin
+descriptions)"*, which matches the source.
 
 ### F-262 — Debug Window Manual: the FFT chapter never states channel-definition defaults that the SCOPE chapter does. `CONFIRMED`
 
