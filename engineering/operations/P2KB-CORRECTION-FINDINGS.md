@@ -107,7 +107,20 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Golden-source defect — duplicate EF id (2026-08-15) — F-267
 
-### F-267 — `EF-020` names TWO unrelated findings in the empirical ledger, and both are cited from RELEASED documents. `CONFIRMED`
+### F-267 — `EF-020` names TWO unrelated findings in the empirical ledger, and both are cited from RELEASED documents. `DONE (2026-08-16) — renumbered, citations repointed`
+
+> **APPLIED 2026-08-16 («#238»).** The PLOT entry is now **EF-061**; the `SETQ`+`WAITSEx` entry
+> keeps EF-020. The renumbered heading carries an inline note recording the old id and why the
+> other entry kept it, so a reader arriving from an old citation is not stranded. Three citation
+> sites repointed — `PLOT_Theory_of_Operations.md` ×2 and the `YAML-HEAD-DASHBOARD.md` v1.14.3
+> row (which also records the renumber, since that row describes a release that shipped under the
+> old id). The v1.14.0 dashboard row and both `PUBLICATION-ROSTER.md` citations mean the SETQ
+> entry and were left alone.
+>
+> **Verified all three ways:** every remaining `EF-020` hit resolves to the SETQ/WAITSEx meaning;
+> `EF-061` resolves to the PLOT entry plus exactly its three repointed citations; and no EF id
+> appears twice as a heading in the ledger. The auto-memory `reference_plot_cartesian_flipy_semantics`
+> cites no EF number, so it needed no change.
 
 **Location:** `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`
 `:291` and `:794`. **The ledger is the golden source** — a citation into it must resolve to one fact.
@@ -1117,7 +1130,7 @@ items that are *not* defects) lives at
 (gitignored — find it by path). Forum posts are the **lead**; every finding below was verified
 against the live opus-master, `pnut-ts` 1.55.3, or P2KB before filing.
 
-### F-254 — deSilva Acknowledgments: the author is listed among the "giants," reviewers are credited generically, and an AI claim is false. `CONFIRMED`
+### F-254 — deSilva Acknowledgments: the author is listed among the "giants," reviewers are credited generically, and an AI claim is false. `DONE (2026-08-16) — applied in deSilva, ships in v3.0.6`
 
 **Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md:113–160`.
 **This is in a SHIPPED document (v3.0.5).** Three distinct defects in one block:
@@ -1177,7 +1190,7 @@ text exist inside deSilva's own folder and are **inert** (not assembled into the
 > **Sweep scope:** the **live set only** (roster Done / In progress / Upcoming). Roster-Abandoned
 > documents are excluded from the search itself and are not reported on.
 
-### F-255 — XBYTE §15.3: `set_nz` is never defined, and the contract shown cannot work. `CONFIRMED`
+### F-255 — XBYTE §15.3: `set_nz` is never defined, and the contract shown cannot work. `DONE (2026-08-16) — applied in XBYTE («#227»), ships in v1.0.2`
 
 **Location:** `manuals/p2-xbyte-programming-guide/opus-master/xbyte-body.md:1388–1401`
 (Christof's "page 66"). Guide is **in community review**.
@@ -1260,7 +1273,7 @@ no answer is asserted here.**
 ledger either way. **A load-bearing idiom in a guide under community review must not stay
 unverified.** If it fails, §15.3 and the Chapter 9 explanation both need rework.
 
-### F-257 — deSilva Appendix A platform comparison omits the current competitor and the axis where we are weakest. `CONFIRMED`
+### F-257 — deSilva Appendix A platform comparison omits the current competitor and the axis where we are weakest. `DONE (2026-08-16) — applied in deSilva, ships in v3.0.6`
 
 **Location:** `COMPLETE-OPUS-MASTER.md:5876+`. **SHIPPED document.** Raised by Christof (#111).
 
@@ -1296,7 +1309,7 @@ committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
 
 **All five below are in RELEASED manuals.**
 
-### F-259 — REVISED: the guide's DAC recipe is CORRECT. The real defect is composing pin constants with `+`. `PARTIAL — KB DONE 2026-08-16; manual half owed («#220»)`
+### F-259 — REVISED: the guide's DAC recipe is CORRECT. The real defect is composing pin constants with `+`. `DONE (2026-08-16) — KB + manual half both applied («#218», «#220»)`
 
 > **KB APPLIED 2026-08-16 («#218»).** The house rule is now **stated once**, in
 > `architecture/smart_pins.yaml` → `configuration_format.composition_rule`: combine pin-mode
@@ -1306,7 +1319,13 @@ committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
 > symbol list. `language/spin2/methods/wrpin.yaml` gains a `one_bit_three_names:` line that **points
 > at** that rule rather than restating it. Source trace: Spin2 v55 symbol table group *"DIR/OUT
 > Control (pick one)"* + EF-054.
-> **Still owed (manual head, «#220»):** the two `+` sites at `streamer-body.md:1238`, `:1306`, and
+> **MANUAL HALF APPLIED 2026-08-16 («#220») — uncommitted under the «#234» gate.** Verified in a
+> coverage audit: the `+` sites are gone and §13.4 now carries a *Combine pin-mode constants with
+> `|`, never `+`* subsection that teaches the field, the three context names for one bit, and the
+> measured 6,737-vs-1,407 silent failure. The one remaining `+` in the file is the **deliberate
+> labelled wrong-example** inside that teaching block — protected; do not "fix" it.
+>
+> ~~Still owed (manual head, «#220»): the two `+` sites at `streamer-body.md:1238`, `:1306`, and~~
 > the prose statement of the rule derived from the KB entry above.
 
 > **REVISED 2026-08-14 after running it on our own board. The community report is NOT reproduced,
@@ -1374,7 +1393,7 @@ changes.
 It must **not** be applied mechanically to non-smart-pin cog-DAC configuration, where the same bit
 is `P_CHANNEL` and adding a second name for it with `+` breaks the mode.
 
-### F-260 — Streamer §17.1 DDS/Goertzel: the mode WORKS; the guide's text is the whole defect, plus a protocol it never states. `PARTIAL — KB DONE 2026-08-16; manual half owed («#221»)`
+### F-260 — Streamer §17.1 DDS/Goertzel: the mode WORKS; the guide's text is the whole defect, plus a protocol it never states. `DONE (2026-08-16) — KB + manual half both applied («#218», «#221»)`
 
 > **KB APPLIED 2026-08-16 («#218»), and the MECHANISM IS NOW SOURCED — it is no longer an
 > inference.** Silicon Doc `p2-documentation.txt:4096-4099`, read live and quoted here because it
@@ -1393,8 +1412,11 @@ is `P_CHANNEL` and adding a second name for it with `+` breaks the mode.
 > untraced `documentation_source: original` replaced with the Silicon Doc citation; `see_also:` added
 > for findability. `architecture/streamer/dds-goertzel.yaml` — `reading_results` gains the four-step
 > capture semantics + `holding_register_protocol:`.
-> **Still owed (manual head, «#221»):** §17.1's three corrections and the protocol prose, derived
-> from these entries.
+> **MANUAL HALF APPLIED 2026-08-16 («#221») — uncommitted under the «#234» gate.** Verified in a
+> coverage audit: §17.1 carries the four-pin-block correction, the raw-ADC-pin rule (mode `%00000`,
+> no `DIRH` on the ADC pins), the gain-is-coupling note, and **Reading the result: one `GETXACC`
+> per command** — the holding-register semantics and the read-before/read-after difference
+> protocol, stated as a protocol rather than as a mechanism, per the finding's own constraint.
 
 **Location:** `streamer-body.md:1324`, `:607`, `:990`. **RELEASED.**
 
@@ -1458,10 +1480,42 @@ example would close all three questions at once.
 and `:382`. **RELEASED — and correct as shipped**, including its citation *"(P2 datasheet, pin
 descriptions)"*, which matches the source.
 
-### F-262 — Debug Window Manual: the FFT chapter never states channel-definition defaults that the SCOPE chapter does. `CONFIRMED`
+### F-262 — Debug Window Manual: the FFT chapter never states channel-definition defaults that the SCOPE chapter does. `DONE (2026-08-16) — manual applied, ships in v1.1.3`
 
 **Location:** `manuals/p2-debug-window-manual/opus-master/ch09-fft.md` vs `ch07-scope.md:86`.
 **RELEASED.**
+
+> **APPLIED 2026-08-16 («#229») — uncommitted under the «#234» gate.** `ch09-fft.md`'s
+> channel-declaration table gains an **`If omitted`** column, and the omission *rule* is stated in
+> prose beneath it.
+>
+> **The PNut-observation requirement is discharged from source, and no bench or PNut-on-Windows run
+> is owed.** The grounding is `p2-debug-window-manual/REF/theory-of-operations/FFT_Theory_of_Operations.md`
+> — a Theory-of-Operations analysis of PNut v55's own Pascal (`DebugDisplayUnit.pas`, `DebugUnit.pas`,
+> `SerialUnit.pas`, `GlobalUnit.pas`), living inside this manual's own `REF/` tree. **The Pascal *is*
+> PNut**, so the code is upstream of any observation of it: running the window would show one
+> rendered outcome, whereas the channel-init block states the defaults for all eight channels
+> outright (`FFT_Theory_of_Operations.md:393-401`, quoting `DebugDisplayUnit.pas` 1607-1614).
+> Defaults: `mag`=0 · `high`=`$7FFFFFFF` · `tall`=`vHeight` (the plot area, 256 px unless `SIZE`
+> changes it) · `base`=0 · `grid`=0 · `color`= the shared `DefaultScopeColors` palette entry for that
+> channel (`:3104-3119`).
+>
+> **The "verify, don't assume" instruction earned its keep — the proposed correction below would have
+> shipped a wrong table.** FFT and SCOPE do not share a signature: SCOPE takes
+> `'label' (AUTO | lo hi) {tall} {base} {grid} {color}`, FFT takes
+> `'label' {mag {high {tall {base {grid {color}}}}}}`. Copying SCOPE's column verbatim would have
+> introduced an `AUTO` keyword and an `lo` bound that FFT does not have, and dropped `mag`, which
+> SCOPE does not have.
+>
+> **Second fact, not in the original filing, and probably the more useful half:** omission is a
+> **positional abort**, not per-argument defaulting. Each parse step is
+> `if not KeyVal(…) then Continue` (`:593-599`), so the *first* absent argument ends the scan and
+> every later argument keeps its default — you cannot skip one to reach a later one. SCOPE's
+> companion doc states the same rule (`SCOPE_Theory_of_Operations.md:415`, `:720`). This is a
+> credible mechanism for the **pnut-term-ts strict-parser divergence** the reporter filed separately
+> (`pnut-term-ts-fft-channeldef.md`): a strict and a lenient parser will disagree precisely on
+> partial argument lists. Recorded as mechanism, not as a diagnosis of that filing — we have not
+> examined it.
 
 `ch07-scope.md:86` gives a proper `| Argument | Meaning | **If omitted** |` table. `ch09-fft.md` has
 no "If omitted" column anywhere — its `:73` table gives defaults for *keywords* (`TEXTSIZE` etc.)
@@ -1484,9 +1538,9 @@ table. **Verify the values against PNut** (ground truth) rather than assuming FF
 > unmeasured. `ops_in_flight_per_cog` upgraded from purely derived to empirically supported.
 > Source trace: EF-053. **Evidence-scoping honoured:** the entry states *where* results are lost and
 > does not assert *why*.
-> **Still owed (manual head):** `chapter-05-hardware.md:~100-126` («#228») and
-> `P2AN002/examples-library/cordic-pipeline-throughput.spin2` («#236») — both derive their wording
-> from the KB entry above so the rule reads identically in both.
+> ~~Still owed (manual head): `chapter-05-hardware.md:~100-126` («#228») and
+> `P2AN002/examples-library/cordic-pipeline-throughput.spin2` («#236»)~~ — **both applied
+> 2026-08-16; see the MANUAL HALVES note below.**
 
 > **MANUAL HALVES APPLIED 2026-08-16 («#228», «#236») — uncommitted under the «#234» gate.**
 > Both were rewritten to **ARM D's measured-clean shape**, not to a plausible-looking repair: the
@@ -1584,7 +1638,7 @@ loop size + LUT window; NCO scale is 2^31; DAC output inverts each LUT byte's MS
    `(adc_pin>>2)<<19 == adc_pin<<17` exactly then. The field names a four-pin BLOCK.
 3. The section must state the read-before/read-after protocol above.
 
-### F-266 — the debug interrupt disrupts the streamer, and `DEBUG_COGS` defaults to ALL cogs. `PARTIAL — KB DONE 2026-08-16; Streamer Guide warning owed («#221» wave)`
+### F-266 — the debug interrupt disrupts the streamer, and `DEBUG_COGS` defaults to ALL cogs. `DONE (2026-08-16) — KB + Streamer Guide warning both applied`
 
 > **KB APPLIED 2026-08-16 («#218»).** `architecture/streamer/overview.yaml` gains
 > `debug_interaction:` — the default `%11111111` mask, the one-CON-line fix
@@ -1593,7 +1647,16 @@ loop size + LUT window; NCO scale is 2^31; DAC output inverts each LUT byte's MS
 > debugger, and `see_also` pointers to `architecture/debug_interrupt.yaml` and the configuration-
 > symbols entry. This is the *surfacing* the finding asked for: the limitation already existed in
 > `debug_interrupt.yaml`, and now a streamer author meets it where they are standing.
-> Source trace: EF-057. **Still owed (manual head):** the same warning in the Streamer Guide.
+> Source trace: EF-057.
+
+> **MANUAL HALF APPLIED 2026-08-16 — uncommitted under the «#234» gate.** Found missing during a
+> coverage audit of the forum findings: «#221» closed without it, and no open task carried it.
+> `streamer-body.md` gains **§14.5 Debugging Streamer Code** — the default `%1111_1111` mask, the
+> interrupt's priority, the one-`CON`-line fix, the measured corruption (accumulators reading
+> 1,000,000–7,000,000 against true values in the hundreds, plausible enough to be believed), and
+> the general rule that any hardware sequencer under measurement wants a cog the debugger is not
+> interrupting. Appendix D gains a `-d` check under *Goertzel Results Invalid* plus a new
+> *Measurements Change When You Add DEBUG* symptom; three index entries point at §14.5.
 
 **Location:** Streamer Guide (no warning anywhere) + KB gap.
 

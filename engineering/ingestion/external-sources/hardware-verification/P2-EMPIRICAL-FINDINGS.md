@@ -807,7 +807,11 @@ Established by capture/verification in earlier sessions; recorded here so the go
 is whole. Their test artifacts predate this tree and are not yet migrated to a campaign
 folder — backfill a campaign + `.spin2` when located.
 
-### EF-020 · PLOT default coordinates are bottom-left / Y-UP — `CONFIRMED`
+### EF-061 · PLOT default coordinates are bottom-left / Y-UP — `CONFIRMED`
+> **Renumbered 2026-08-16 (F-267).** This entry was absorbed into the ledger at KB v1.14.3 under
+> the id **EF-020**, which was already held by the `SETQ`+`WAITSEx` finding assigned 2026-07-04
+> (`:291`). That entry keeps EF-020 — it is the older assignment and the one cited from two
+> released manuals' roster history. Cite this PLOT fact as **EF-061**.
 The PLOT window's default origin is bottom-left with Y increasing **upward**. `CARTESIAN
 flipy=1` flips it to Y-DOWN. The manual + theory-of-operations prose had this **backwards**;
 trust the `PLOT_GetXY` formula + the capture, not the ToO prose. (Also verified: raw-hex

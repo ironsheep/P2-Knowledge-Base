@@ -90,7 +90,12 @@ FORBIDDEN = [
 # text would make this gate cry wolf — and a gate that cries wolf gets ignored.
 # Keyed by manual folder slug; check PUBLICATION-ROSTER.md before adding.
 RETIRED = {
-    "p2-smart-pins-tutorial",  # superseded by the I/O & Smart Pins User Guide
+    # Empty by design as of 2026-08-16. The one entry that lived here,
+    # "p2-smart-pins-tutorial" (superseded by the I/O & Smart Pins User Guide),
+    # became vestigial when the document was moved out of the live tree into the
+    # gitignored local archive/ -- this walker no longer reaches it, so the skip
+    # had nothing left to skip. Keep the set: a future retirement that is archived
+    # later, or not at all, still needs it.
 }
 
 # Authoring scaffolding that lives beside a master but is never part of the

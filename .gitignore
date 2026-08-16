@@ -252,9 +252,8 @@ engineering/document-production/workspace/p2-assembly-language-manual/color-bar-
 engineering/document-production/workspace/p2-assembly-language-manual/request-align-test.json
 /engineering/narrative/my-posts
 /engineering/narrative
-engineering/document-production/manuals/p2-smart-pins-tutorial/TITUS-MIGRATION-ANALYSIS.md
-/engineering/document-production/workspace/p2-smart-pins-tutorial/pasm2-validation
-/engineering/document-production/workspace/p2-smart-pins-tutorial/spin2-validation
+# (Three p2-smart-pins-tutorial rules removed 2026-08-16: the document moved to the
+#  gitignored archive/, so the paths they named no longer exist in the live tree.)
 /engineering/document-production/workspace/p2-assembly-language-manual/outbound
 engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-PCB-OS.dip
 engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-SCHEMATIC-OS.dch

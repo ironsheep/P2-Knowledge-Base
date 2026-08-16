@@ -185,7 +185,7 @@ without an explicit revive decision; never consistency-bound.
 
 | Document | Type | Why retired |
 |----------|------|-------------|
-| Smart Pins Tutorial ("Green Book") · `p2-smart-pins-tutorial` | manual | superseded by the I/O & Smart Pins User Guide (newer generation) |
+| Smart Pins Tutorial · `p2-smart-pins-tutorial` | manual | superseded by the I/O & Smart Pins User Guide (newer generation). **Archived out of the live tree 2026-08-16** to `archive/2026-08-16-smart-pins-tutorial/` (gitignored, local; git history retains every version) — its `manuals/`, `workspace/` and the orphaned `p2kb-sp-semantic.lua` filter fork all moved together. **This row stays**: it is the authority the guide-conformance instrument reads to build its exclusion list, and deleting it would silently un-exclude four files. |
 
 ---
 
@@ -360,8 +360,11 @@ lives in the Live-section detail above — not repeated here.)
 > one pass. Worth doing as the closing step of that release rather than piecemeal.
 
 **Pending platform change — 2026-07-07 (`mnemonic-bold.lua` "ones" fix):** every live
-manual consumes `p2kb-platform-mnemonic-bold.lua` (the lone exception is the retired
-Smart Pins Tutorial, on its own `p2kb-sp-` fork), so by the detector's rule each sits
+manual consumes `p2kb-platform-mnemonic-bold.lua` — **without exception since 2026-08-16**,
+when the retired Smart Pins Tutorial and its `p2kb-sp-` filter fork left the live tree for
+the local archive. The prune rule is simpler for it: no live document uses a `p2kb-sp-`
+filter, so the fork family can be treated as gone rather than as a carve-out. By the
+detector's rule each manual sits
 below this `PLATFORM` line until its next render. The fix is **cosmetic** — it only
 changes how a bare "<adjective> ones" reads in prose (e.g. "the short ones") — so **no
 forced re-render is scheduled**; each manual **picks it up automatically on its next

@@ -718,7 +718,7 @@ The PLOT window features a sophisticated dual-mode coordinate system with origin
 > downward". That contradicts `PLOT_GetXY` — the very routine quoted immediately below. The default
 > `vDirY = False` takes the **`else`** branch, `y := vHeight - 1 - vOffsetY - vPixelY`, which **inverts
 > Y** against the screen. So at the defaults, user `(0, 0)` lands on screen row `vHeight-1` — the
-> bottom-left pixel — and increasing user Y moves **up** the screen. (Confirmed on hardware, EF-020;
+> bottom-left pixel — and increasing user Y moves **up** the screen. (Confirmed on hardware, EF-061;
 > the v55 language reference agrees: *"if ydir is 0, the Y axis points up"*.) `vDirY = True`
 > (`CARTESIAN 1`) is what selects the *screen-native* top-left / Y-down orientation.
 
@@ -3259,7 +3259,7 @@ if vDirY then y := vOffsetY + vPixelY                // vDirY=True  → screen-n
 > **⚠️ Corrected.** An earlier revision stated the user Y axis "increases downward (mathematical
 > convention requires `CARTESIAN 1` to flip Y)". That is backwards: the default **is** the
 > mathematical convention, and `CARTESIAN 1` flips *to* the screen-native downward Y.
-> (Confirmed on hardware, EF-020.)
+> (Confirmed on hardware, EF-061.)
 
 **Screen-native convention** (if you want user Y to match bitmap rows):
 ```
