@@ -166,7 +166,30 @@ input_routing:
 
 configuration_format:
   wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-  
+
+  composition_rule:
+    rule: "COMBINE PIN-MODE CONSTANTS WITH `|`, NEVER `+`."
+    why: |
+      The P_* constants are BIT FIELDS positioned inside the WRPIN mode word, not
+      additive flags. Names drawn from the same "pick one" group occupy the SAME bits,
+      so `+` carries out of the field and silently lands in a neighbouring mode, while
+      `|` is idempotent and harmless. There is no error and no warning — the pin simply
+      does something else.
+    worked_example: |
+      P_TT_01, P_OE and P_CHANNEL are ONE bit-field value ($40, %01) under three
+      context names — they are not three features. So:
+        P_CHANNEL | P_OE  ->  %01  (P_TT_01, unchanged — correct)
+        P_CHANNEL + P_OE  ->  %10  (P_BITDAC — a DIFFERENT MODE)
+      Measured on real P2 silicon: the `|` form drove a cog DAC (6,737 ADC counts);
+      the `+` form was dead (1,407, indistinguishable from no drive at all).
+    reading_the_symbol_list: |
+      Three names for one bit is deliberate — each name reads correctly in its own
+      context (P_OE for smart-pin output enable, P_CHANNEL for the non-smart-pin DAC's
+      source select, P_TT_01 for the raw field value). A reader who meets all three in
+      the symbol list will assume three independent features. They are one.
+    source: "Spin2 v55 symbol table, group 'DIR/OUT Control (pick one)'; measured EF-054 in engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md (2026-08-14)"
+
+
   fields:
     aaaa:
       bits: "31:28"

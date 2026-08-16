@@ -44,9 +44,25 @@ tt_field:
     P_TT_01: {value: "$40", binary: "%01", aliases: ["P_OE", "P_CHANNEL"], effect: "Output enabled regardless of DIR, SMART/OUT drives"}
     P_TT_10: {value: "$80", binary: "%10", aliases: ["P_BITDAC"], effect: "Output disabled, OTHER source selected"}
     P_TT_11: {value: "$C0", binary: "%11", effect: "Output enabled regardless of DIR, SMART/OTHER drives"}
+  context_dependent: |
+    %TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by
+    whether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.
+    The `constants:` effects above are the SMART-PIN-ON, non-DAC_MODE meanings only.
+    The four contexts:
+      1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives
+      2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;
+                                        %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;
+                                        %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC
+      3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;
+                                        0x/1x = SMART/OUT or SMART/OTHER drives
+      4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;
+                                        0x = OUT enables ADC, 1x = OTHER enables ADC
+    Full table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).
+    Source: Silicon Doc p2-documentation.txt:7646-7660, part4-locks.txt:118-139.
   when_smart_pin_on: "x0=output disabled, x1=output enabled (regardless of DIR)"
   source_selection: "0x=SMART/OUT drives, 1x=SMART/OTHER drives"
-  p_oe_required_for: "All output modes (NCO, PWM, Pulse, Transition, Serial TX, DAC, USB)"
+  p_oe_required_for: "SMART-PIN output modes only (NCO, PWM, Pulse, Transition, Serial TX, the smart-pin DAC modes %00001-%00011, USB). NOT the non-smart-pin (cog) DAC: with the smart pin off in DAC_MODE, the same bit is named P_CHANNEL and it SWITCHES THE DAC'S SOURCE from the pin's own level field to a cog DAC channel. Adding P_OE/P_CHANNEL to a level-driven DAC kills its output."
+  one_bit_three_names: "P_TT_01, P_OE and P_CHANNEL are the SAME bit-field value ($40, %01) under three context names - not three features, and not additive. Compose mode constants with `|`, never `+`; see architecture/smart_pins.yaml (configuration_format.composition_rule)."
   see_also: "architecture/smart_pins.yaml for full TT behavioral specification"
 
 examples:

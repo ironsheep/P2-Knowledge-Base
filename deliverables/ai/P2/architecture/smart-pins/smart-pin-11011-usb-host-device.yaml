@@ -57,11 +57,7 @@ flags:
   c_flag: "On RDPIN/RQPIN of the lower pin, C = receiver error flag"
   out_override: "OUT signals overridden for USB differential control"
 
-open_questions:
-  # Silicon covers the register/byte-level interface above. These remain
-  # Chip-gated (expert queue) — not stated in any primary source:
-  - "Receiver analog front-end detail beyond the digital status bits (e.g. any scope-style filter taps / thresholds)"
-  - "Exact electrical thresholds of the J / K / SE0 / SE1 line-state detectors"
+electrical_characteristics: "Receiver front-end thresholds for the J / K / SE0 / SE1 line-state detectors are electrical characteristics — see the P2 datasheet. The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status word) is complete above."
 
 code_examples:
   - title: "USB Pin Pair Configuration"

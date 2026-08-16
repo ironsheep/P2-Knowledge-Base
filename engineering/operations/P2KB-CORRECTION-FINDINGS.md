@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-267`**
+**Next finding ID: `F-269`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -133,6 +133,40 @@ the SETQ entry — it is the one cited from two released manuals' roster history
 
 **Surfaced by:** the duplicate-ID STOP rule in `.claude/skills/REGISTER-CONSULTATION.md`, while
 appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced rather than resolved.
+
+---
+
+## Spin2/PASM2 boundary defect promoted from the empirical ledger (2026-08-16) — F-268
+
+### F-268 — inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address. `PARTIAL — KB DONE 2026-08-16; guide-side sweep owed`
+
+**Origin:** EF-060, which had no F-number and no KB entry. Surfaced while getting the F-256/EF-058
+rig working, so it is a by-product rather than a target — and it is the broadest-reach item the
+2026-08 campaign produced.
+
+**The fact.** A PASM fragment that is correct in a **standalone** PASM file reads **interpreter
+memory** when pasted into a Spin2 object's `DAT` block: `##hubsym` resolves against `$400` rather
+than the object's load address. Measured on real P2 silicon: `@disp` = `$1AF9` from Spin2 versus
+`##disp` = `$0651` from PASM in the same object — **5,288 bytes apart**, and the `##` form returned
+garbage.
+
+**Why it matters more than its size suggests.** It bites anyone who copies a PASM fragment out of a
+guide or reference into a Spin2 object — which is how most P2 code is written. It assembles, it
+runs, and it reads the wrong memory. **Workaround:** pass hub addresses in from Spin2 with `@`, or
+address through PTRA/PTRB.
+
+> **KB APPLIED 2026-08-16 («#218»).**
+> `language/spin2/integration/spin2-pasm2-integration.yaml` →
+> `integration_rules.hub_address_resolution`: the rule, where it is instead correct (standalone
+> PASM), why it bites, the workaround, and the measurement. Findability: a matching one-line pointer
+> added to `language/spin2/special-symbols/at.yaml` `notes:`, since `@`'s
+> object-relative-vs-absolute entry is exactly where a reader chasing this lands — that file already
+> documented the Spin2 side of the same boundary and had no route to the PASM side.
+> Source trace: EF-060.
+
+**Still owed (manual head, NOT tasked in Sprint 2):** our guides present standalone-PASM fragments
+without saying so. A class-wide sweep of `##hubsym`-style fragments across the live manual set is
+the durable fix; scope it as its own item rather than folding it into a correction task.
 
 ---
 
@@ -253,7 +287,13 @@ appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced r
 
 > **Surfaced by the Titus rev5 cross-source Q&A + IOSP cross-audit (2026-06-12/13).** These are **additions** (content the KB does not yet carry), not corrections — filed here so the v1.10.1 sweep executes them alongside the F-corrections. G-001 was previously named only in the head dashboards; now formally logged. Per-item gating noted; the gated parts do **not** block the rest.
 
-### G-004 — `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` X/Y/Z registers were one-line stubs — `CONFIRMED — content COMPLETE; one YAML edit owed (remove the shipped open_questions block)`
+### G-004 — `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` X/Y/Z registers were one-line stubs — `DONE (2026-08-16)`
+
+> **APPLIED 2026-08-16 («#218»).** The `open_questions:` block (`:60-64`) is deleted and replaced by
+> a single `electrical_characteristics:` routing line: the J/K/SE0/SE1 detector thresholds are
+> datasheet territory, and the programming interface above is complete. A *routing* statement, not
+> an *unknown* statement — which is the whole distinction this entry turned on. Verified by re-read:
+> `deliverables/ai/P2/` now contains **no** `open_questions:` block. Closes G-004 in full.
 
 > **Rewritten in place 2026-08-15. There is nothing Chip-gated here, and there never really was**
 > (Stephen, 2026-08-15). The "gated remainder" was *receiver analog front-end detail and the exact
@@ -756,7 +796,18 @@ committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
 
 **All five below are in RELEASED manuals.**
 
-### F-259 — REVISED: the guide's DAC recipe is CORRECT. The real defect is composing pin constants with `+`. `CONFIRMED` (our bench)
+### F-259 — REVISED: the guide's DAC recipe is CORRECT. The real defect is composing pin constants with `+`. `PARTIAL — KB DONE 2026-08-16; manual half owed («#220»)`
+
+> **KB APPLIED 2026-08-16 («#218»).** The house rule is now **stated once**, in
+> `architecture/smart_pins.yaml` → `configuration_format.composition_rule`: combine pin-mode
+> constants with `|`, never `+`; why (they are bit fields, not additive flags, and same-group names
+> share bits); the worked `P_CHANNEL | P_OE` vs `P_CHANNEL + P_OE` contrast with the measured
+> 6,737-vs-1,407 counts; and the "three names, one bit" note for readers meeting all three in the
+> symbol list. `language/spin2/methods/wrpin.yaml` gains a `one_bit_three_names:` line that **points
+> at** that rule rather than restating it. Source trace: Spin2 v55 symbol table group *"DIR/OUT
+> Control (pick one)"* + EF-054.
+> **Still owed (manual head, «#220»):** the two `+` sites at `streamer-body.md:1238`, `:1306`, and
+> the prose statement of the rule derived from the KB entry above.
 
 > **REVISED 2026-08-14 after running it on our own board. The community report is NOT reproduced,
 > and the original filing above was wrong to accept it.** Bench: P2 Edge, 200 MHz, jumper P0→P1
@@ -823,7 +874,27 @@ changes.
 It must **not** be applied mechanically to non-smart-pin cog-DAC configuration, where the same bit
 is `P_CHANNEL` and adding a second name for it with `+` breaks the mode.
 
-### F-260 — Streamer §17.1 DDS/Goertzel: the mode WORKS; the guide's text is the whole defect, plus a protocol it never states. `CONFIRMED` (doc defects, bench-settled 2026-08-14)
+### F-260 — Streamer §17.1 DDS/Goertzel: the mode WORKS; the guide's text is the whole defect, plus a protocol it never states. `PARTIAL — KB DONE 2026-08-16; manual half owed («#221»)`
+
+> **KB APPLIED 2026-08-16 («#218»), and the MECHANISM IS NOW SOURCED — it is no longer an
+> inference.** Silicon Doc `p2-documentation.txt:4096-4099`, read live and quoted here because it
+> settles what the bench could only bound: *"both accumulators can be simultaneously captured into
+> holding registers and cleared using the GETXACC instruction … Subsequent GETXACC instructions will
+> return the same values until a new streamer command executes."* Corroborated by the Silicon Doc's
+> own worked demo, whose read is commented *"get prior Goertzel acc's"* (`:4252`).
+> That single rule accounts for every EF-056 observation without over-reaching: the accumulators
+> **are** cleared, and the **holding register** is what persists — so the earlier "never zeroed"
+> framing stays retired, and the `XINIT`-vs-`XCONT` question it raised is dissolved rather than
+> asserted.
+> **Landed:** `language/pasm2/getxacc.yaml` — `description` rewritten to lead with capture-into-
+> holding-registers + the repeat-read rule; new `reading_protocol:` (one GETXACC per streamer
+> command; read-before/read-after and take the difference in the discrete pattern; the failure is
+> invisible because the value returned is large, stable and plausible); `notes:` corrected; the
+> untraced `documentation_source: original` replaced with the Silicon Doc citation; `see_also:` added
+> for findability. `architecture/streamer/dds-goertzel.yaml` — `reading_results` gains the four-step
+> capture semantics + `holding_register_protocol:`.
+> **Still owed (manual head, «#221»):** §17.1's three corrections and the protocol prose, derived
+> from these entries.
 
 **Location:** `streamer-body.md:1324`, `:607`, `:990`. **RELEASED.**
 
@@ -911,7 +982,19 @@ he field-reported separately — i.e. this gap has already produced a real tool 
 **Proposed correction:** copy SCOPE's "If omitted" column into the FFT chapter's channel-definition
 table. **Verify the values against PNut** (ground truth) rather than assuming FFT matches SCOPE.
 
-### F-263 — CONFIRMED with the cause identified: hub access inside a CORDIC loop loses results. Chip's model is correct. `CONFIRMED` (our bench, 2026-08-14)
+### F-263 — CONFIRMED with the cause identified: hub access inside a CORDIC loop loses results. Chip's model is correct. `PARTIAL — KB DONE 2026-08-16; two documents owed («#228» Assembly ch.5, «#236» P2AN002)`
+
+> **KB APPLIED 2026-08-16 («#218»).** `architecture/cordic.yaml` →
+> `critical_usage_pattern.keep_hub_access_out_of_both_loops`: the rule, why it matters (the failure
+> is silent — wrong numbers, not missing ones), the measured arm table (RDLONG-in-fill wrong at
+> FILL=2 · WRLONG-in-drain at FILL=3 · register-only clean through 7), and an explicit `scope:` note
+> that this is the **tested shape**, not a law about "any hub access", with the cause left as
+> unmeasured. `ops_in_flight_per_cog` upgraded from purely derived to empirically supported.
+> Source trace: EF-053. **Evidence-scoping honoured:** the entry states *where* results are lost and
+> does not assert *why*.
+> **Still owed (manual head):** `chapter-05-hardware.md:~100-126` («#228») and
+> `P2AN002/examples-library/cordic-pipeline-throughput.spin2` («#236») — both derive their wording
+> from the KB entry above so the rule reads identically in both.
 
 **Our board, our measurement.** P2 Edge @ 200 MHz. Control: queue one op, retrieve immediately —
 stalled **58 clocks**, exactly the documented `GETQX` maximum (`2...58`), so the rig can see the
@@ -993,7 +1076,16 @@ loop size + LUT window; NCO scale is 2^31; DAC output inverts each LUT byte's MS
    `(adc_pin>>2)<<19 == adc_pin<<17` exactly then. The field names a four-pin BLOCK.
 3. The section must state the read-before/read-after protocol above.
 
-### F-266 — the debug interrupt disrupts the streamer, and `DEBUG_COGS` defaults to ALL cogs. `CONFIRMED` (our bench, 2026-08-14)
+### F-266 — the debug interrupt disrupts the streamer, and `DEBUG_COGS` defaults to ALL cogs. `PARTIAL — KB DONE 2026-08-16; Streamer Guide warning owed («#221» wave)`
+
+> **KB APPLIED 2026-08-16 («#218»).** `architecture/streamer/overview.yaml` gains
+> `debug_interaction:` — the default `%11111111` mask, the one-CON-line fix
+> (`DEBUG_COGS = %0000_0001`), the measured cost (accumulators 1,000,000-7,000,000 of corruption →
+> true values in the hundreds), the general rule for any hardware sequencer measured under the
+> debugger, and `see_also` pointers to `architecture/debug_interrupt.yaml` and the configuration-
+> symbols entry. This is the *surfacing* the finding asked for: the limitation already existed in
+> `debug_interrupt.yaml`, and now a streamer author meets it where they are standing.
+> Source trace: EF-057. **Still owed (manual head):** the same warning in the Streamer Guide.
 
 **Location:** Streamer Guide (no warning anywhere) + KB gap.
 
@@ -1012,7 +1104,21 @@ debug -- has the P2's highest-priority interrupt live inside their streaming cog
 nothing in the guide warns them. **Action:** warn in the Streamer Guide, and surface the
 existing KB limitation where a streamer author will meet it.
 
-### F-264 — `wrpin.yaml`'s `tt_field` flattens four context-dependent `%TT` meanings into one, and tells readers to add `P_OE` to DAC outputs where it breaks them. `CONFIRMED` (source-verified + bench-corroborated, 2026-08-14)
+### F-264 — `wrpin.yaml`'s `tt_field` flattens four context-dependent `%TT` meanings into one, and tells readers to add `P_OE` to DAC outputs where it breaks them. `DONE (2026-08-16)`
+
+> **APPLIED 2026-08-16 («#218»).** `language/spin2/methods/wrpin.yaml` `tt_field` gains
+> `context_dependent:` — an explicit statement that `%TT` has **no single meaning**, that the
+> `constants:` effects listed are the smart-pin-on non-DAC_MODE set **only**, and the four contexts
+> named with the smart-pin-off `DAC_MODE` row spelled out (`%01` selects a **cog DAC channel** as the
+> source). `p_oe_required_for` is rewritten to *"SMART-PIN output modes only …"* and now states
+> outright that adding `P_OE`/`P_CHANNEL` to a level-driven DAC kills its output. The full table
+> stays single-sourced in `architecture/smart_pins.yaml`; `wrpin.yaml` carries enough that a reader
+> cannot conclude the wrong thing without following the pointer — which was the specific ask.
+> Source trace: Silicon Doc `p2-documentation.txt:7646-7660` + `part4-locks.txt:118-139`;
+> bench corroboration EF-055 (1,305 of 2,000 → 25).
+> **Scoping check performed:** `architecture/smart_pins.yaml:263-265`'s `which_modes_need_p_oe` was
+> re-read and is **already correctly scoped** — its DAC entry names `%00001-%00011`, which are the
+> smart-pin DAC modes. Left untouched; the defect was specific to `wrpin.yaml`.
 
 **Location:** `language/spin2/methods/wrpin.yaml` — the `tt_field` block. **RELEASED.**
 
@@ -1056,7 +1162,26 @@ and this file was incomplete on exactly the axis that mattered.
 **Status:** `NOTED` 2026-08-14, resolution deferred until the bench campaign closes (Stephen's
 standing rule: no doc/YAML editing until every bench question is conclusive).
 
-### F-265 — the Silicon Doc contradicts itself on whether Goertzel ADC pins are smart pins; the KB must state the resolved answer. `CONFIRMED — answer settled 2026-08-14; KB statement still owed`
+### F-265 — the Silicon Doc contradicts itself on whether Goertzel ADC pins are smart pins; the KB must state the resolved answer. `DONE (2026-08-16)`
+
+> **APPLIED 2026-08-16 («#218»), and this entry's own closing condition is met.**
+> `architecture/streamer/dds-goertzel.yaml` gains `adc_input_pins:` stating the resolved answer —
+> ADC mode, smart-pin mode field `%00000`, **no DIR** — and, per the ask, **names the tension** in
+> `source_tension:` so the STREAMER intro's loose *"smart pins configured as ADC's"* cannot
+> re-mislead. Source trace: Silicon Doc `p2-documentation.txt:3997-3998` (verbatim), corroborated by
+> the Silicon Doc's own worked program at `:4174-4180`, which issues `wrpin adcmode,#adcpin` with
+> mode field `%00000` and gives **`dirh` to the DAC pin only**.
+> **The defect was wider than the finding named** — the file's own `usage_pattern` code was the very
+> thing the finding warns against, and it carried three more defects besides. All repaired in the
+> same pass, each against the Silicon Doc's worked program (`:4170-4185`, `:4289-4305`):
+> (a) `drvl #adc_pin` removed (that was the DIR the rule forbids); (b) `xcont dds_cmd, #0` → a real
+> `dds_s` — **S is mandatory**, `S[15:12]` selects which block pins are summed and `S=0` sums
+> nothing; (c) the NCO frequency now set with `SETXFRQ` and the missing `shr xfrq,#1` restored, so
+> the code matches the `frequency:` block directly above it (2³¹ scaling, not 2³²); (d) `P_ADC_100X`
+> → `P_ADC_1X`, with a `gain_choice:` note that gain is a property of the **coupling**, not the mode.
+> Also added: the four-pin **block** model (`D[22:19] = %pppp`, `%pppp × 4` = base pin), the
+> `base_pin<<17` validity condition, and the S-operand field map — all `p2-documentation.txt:4002-4006`.
+> **Guide-side §17.1 statement rides «#221»** and derives from this entry.
 
 > **Rewritten in place 2026-08-15.** This read `NEEDS-VERIFICATION` while the answer had already been
 > established on the bench — and while this register's own header line had it right. The contradiction

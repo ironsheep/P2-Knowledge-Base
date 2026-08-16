@@ -424,6 +424,17 @@ integration_rules:
     cog_call: "Runs in current cog, can be background or foreground"
     hub_call: "Runs in hub execution mode, slower but more flexible"
     
+  hub_address_resolution:
+    rule: |
+      INSIDE A SPIN2 OBJECT, `##hubsymbol` IN A DAT BLOCK DOES NOT RESOLVE TO THE
+      SYMBOL'S RUNTIME HUB ADDRESS. It resolves against $400 rather than the object's
+      load address, so the PASM reads interpreter memory and returns garbage.
+    correct_in: "A STANDALONE PASM file, where the load-address precondition holds and `##hubsym` is correct."
+    why_it_bites: "A PASM fragment copied out of a guide or reference into a Spin2 object — which is how most P2 code is written — carries this defect invisibly. It assembles, it runs, and it reads the wrong memory."
+    workaround: "Pass hub addresses in from Spin2 with `@` (e.g. `@buffer` into a DAT long or a PTRx), or address through PTRA/PTRB."
+    measured: "Real P2 silicon: `@disp` reported $1AF9 from Spin2 while `##disp` gave $0651 from PASM in the same object — 5,288 bytes apart."
+    source: "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-060 (2026-08-14)"
+
   memory_safety:
     cog_limits: "$000-$11F safe for user code, $120+ reserved"
     lut_limits: "$000-$00F safe for user, $010+ reserved"

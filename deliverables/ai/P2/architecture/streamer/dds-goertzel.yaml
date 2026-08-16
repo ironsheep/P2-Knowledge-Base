@@ -20,6 +20,32 @@ modes:
     q_factor: "Higher (sharper selectivity)"
     max_amplitude: "±10 (to prevent overflow)"
 
+# ADC input pins — RAW, not smart pins
+adc_input_pins:
+  rule: |
+    The ADC pins feeding Goertzel are RAW delta-sigma bit streams: configure them for ADC
+    mode (a P_ADC_* constant) with smart-pin mode field %00000, and DO NOT set DIR.
+    A smart pin left enabled on these pins produces no Goertzel accumulation.
+  source: "Silicon Doc p2-documentation.txt:3997-3998 (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected')"
+  source_tension: |
+    The Silicon Doc's STREAMER intro (part2-pixel-ops.txt:82) says Goertzel works "from smart
+    pins configured as ADC's". That wording is loose and MISLEADS: the DDS/Goertzel section
+    above is the specific, authoritative statement, and the Silicon Doc's own worked example
+    follows it — `wrpin adcmode,#adcpin` with mode field %00000 and no DIR on the ADC pin
+    (only the DAC pin gets `dirh`). Configure raw.
+
+  pin_block_selection:
+    field: "D[22:19] = %pppp selects a FOUR-PIN BLOCK; %pppp * 4 is the BASE pin"
+    note: "This selects a block, not a pin. Which of the four are summed/inverted is chosen in S (below)."
+    caution: "`base_pin<<17` is a valid idiom ONLY when base_pin is a multiple of 4, since (base>>2)<<19 == base<<17 exactly then."
+  s_operand:
+    field_19_16: "which of the four pins are INVERTED (allows subtraction of a channel)"
+    field_15_12: "which of the four pins are SUMMED — MANDATORY; S[15:12] = 0 sums nothing and the analyzer accumulates zero"
+    field_11_0: "loop size + LUT window"
+    source: "Silicon Doc p2-documentation.txt:4002-4006"
+  bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (p2-documentation.txt:3999-4001)."
+  gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
+
 # Operation (every clock cycle)
 operation:
   description: |
@@ -80,10 +106,24 @@ reading_results:
   instruction: "GETXACC D"
   
   operation: |
-    1. Cosine accumulator → D register
-    2. Sine accumulator → next instruction's S operand
-    3. Both accumulators cleared after read
-    
+    1. Both accumulators are CAPTURED into holding registers and cleared
+    2. The captured cosine accumulation → D register
+    3. The captured sine accumulation → next instruction's S operand
+    4. Subsequent GETXACC instructions return THE SAME captured values until a
+       new streamer command executes
+
+  holding_register_protocol: |
+    GETXACC reads a HOLDING REGISTER, not a live accumulator — so one GETXACC per
+    streamer command is the contract. Reading twice without an intervening command
+    returns the same numbers, and a value read before the command belongs to the
+    PREVIOUS command (the Silicon Doc's own demo comments its read "get prior
+    Goertzel acc's"). If you use a discrete XINIT / WAITXFI / GETXACC sequence,
+    read before the command and after it and take the DIFFERENCE — an absolute
+    read in that pattern is not a per-command measurement and looks plausible while
+    being meaningless. The XCONT-loop form in the Silicon Doc demo reads once per
+    command and subtracts a first-pass baseline.
+  source: "Silicon Doc p2-documentation.txt:4096-4099"
+
   example: |
     getxacc cos_result       ' Cosine → D
     mov     sin_result, 0-0  ' Sine → next S (trick)
@@ -156,28 +196,38 @@ usage_pattern:
     setq2   #$200-1
     rdlong  0, ##sine_table
     
-    ' 2. Configure ADC pin
-    wrpin   ##P_ADC_100X, #adc_pin
-    drvl    #adc_pin
-    
-    ' 3. Configure DAC output (differential)
-    wrpin   ##P_DAC_124R_3V, dac_pins
-    drvl    dac_pins
-    
-    ' 4. Calculate and set frequency
-    qfrac   target_freq, clkfreq
+    ' 2. Configure ADC pin — RAW: ADC mode, smart-pin mode %00000, NO DIR.
+    '    Match the gain to the coupling; a directly-wired signal wants low gain.
+    wrpin   ##P_ADC_1X, #adc_pin
+
+    ' 3. Configure DAC output pin (this one DOES get DIR)
+    wrpin   ##P_DAC_124R_3V, #dac_pin
+    dirh    #dac_pin
+
+    ' 4. Set the streamer NCO frequency (2^31 scaling — see `frequency:` above)
+    qfrac   target_freq, clkfreq   ' 2^32 * target/clkfreq
     getqx   xfrq
-    
-    ' 5. Start DDS/Goertzel
+    shr     xfrq, #1               ' halve to the NCO's 2^31 scaling
+    setxfrq xfrq
+
+    ' 5. Start DDS/Goertzel. S IS MANDATORY: S[15:12] selects which of the four
+    '    block pins are summed. S = 0 sums nothing and accumulates zero.
     setword dds_cmd, cycles, #0
-    setq    xfrq
-    xcont   dds_cmd, #0
-    
-    ' 6. Read result
+    xcont   dds_cmd, dds_s
+
+    ' 6. Read once per command; the read returns the PRIOR command's capture
     getxacc cos_acc
     mov     sin_acc, 0-0
     qvector cos_acc, sin_acc
     getqx   magnitude
+
+  data: |
+    ' Goertzel mode, four-pin block 0 (pins 0..3), %111 config bits in D[18:16]
+    dds_cmd     long    %1111_0000_0000_0111<<16 + sinc2<<23 + cycles
+    ' input on base pin +0 (S[15:12] = %0001), invert none, 512-entry LUT window
+    dds_s       long    %0000_0001_000_000000000
+
+  source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, p2-documentation.txt:4170-4185 (setup) and :4289-4305 (mode/data longs)."
 
 see_also:
   - modes-reference.yaml

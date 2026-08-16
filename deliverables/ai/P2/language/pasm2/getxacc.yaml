@@ -9,15 +9,17 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Get the streamer's Goertzel X accumulator into D and the Y accumulator
-  into the next instruction's S, clear accumulators. Used with DDS/Goertzel modes
-  for tone detection (DTMF) or signal analysis. The X,Y values represent the
-  real/imaginary components of the Goertzel filter output. Follow with QVECTOR
-  to compute magnitude and phase from the X,Y pair.
+description: Capture the streamer's Goertzel accumulators into holding registers and clear
+  them; write the captured cosine (X) accumulation into D and place the captured sine (Y)
+  accumulation into the next instruction's S value. SUBSEQUENT GETXACC INSTRUCTIONS RETURN
+  THE SAME CAPTURED VALUES UNTIL A NEW STREAMER COMMAND EXECUTES — GETXACC reads a holding
+  register, not a live accumulator. Used with DDS/Goertzel modes for tone detection (DTMF)
+  or signal analysis. The X,Y values represent the real/imaginary components of the Goertzel
+  filter output. Follow with QVECTOR to compute magnitude and phase from the X,Y pair.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: original
+documentation_source: "Silicon Doc p2-documentation.txt:4096-4099 (capture-into-holding-registers, clear, and the repeat-read rule)"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_d
@@ -58,8 +60,26 @@ related_instructions:
   - GETQY: Get phase result after QVECTOR
   - SETXFRQ: Set target detection frequency
   - XINIT: Start Goertzel sampling
+reading_protocol: |
+  ONE GETXACC PER STREAMER COMMAND. The accumulators are captured and cleared at the
+  GETXACC, and the holding registers keep those captured values until a new streamer
+  command executes — so a second GETXACC returns identical numbers, and a read taken
+  BEFORE a command belongs to the PREVIOUS command (the Silicon Doc's worked demo
+  comments its read "get prior Goertzel acc's").
+  With a discrete XINIT / WAITXFI / GETXACC sequence, read before the command and after
+  it and take the DIFFERENCE; an absolute read in that pattern is not a per-command
+  measurement, and it fails invisibly — the value returned is large, stable and
+  plausible-looking. The XCONT-loop form reads once per command and subtracts a
+  baseline established on the first pass.
+
 notes:
-  - Accumulators are cleared after GETXACC
+  - Accumulators are captured into holding registers and cleared by GETXACC
+  - A repeat GETXACC returns the same captured values until a new streamer command runs
   - Y value is injected into NEXT instruction's S operand
   - Must have appropriate instruction following GETXACC
   - Typical pattern: GETXACC + QVECTOR for magnitude extraction
+
+see_also:
+  - architecture/streamer/dds-goertzel.yaml
+  - architecture/streamer/overview.yaml
+  - language/pasm2/setxfrq.yaml

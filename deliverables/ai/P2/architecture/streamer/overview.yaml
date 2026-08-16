@@ -90,6 +90,15 @@ instructions:
 
 # Command word structure (D operand)
 command_format:
+  fields_are_positional_and_vary_by_mode: |
+    THE MAP BELOW IS THE COMMON CASE, NOT A UNIVERSAL LAYOUT. Each mode has its own
+    template, and a field present in one mode may be fixed or absent in another —
+    e.g. in DDS/Goertzel D[23] selects SINC1/SINC2 (not pin-output enable) and the
+    four-pin input BLOCK sits in D[22:19]; in X_1ADC8_0P_1DAC8_WFBYTE D[22:20] are
+    fixed zeros with NO pin field at all, and the channel is chosen in S[1:0].
+    Check the mode's own template in modes-reference.yaml before composing a command,
+    and compose with `|` rather than `+` — adding a shifted value into bits the mode
+    already defines silently selects A DIFFERENT MODE instead of raising an error.
   D_31_28: "Mode selector"
   D_27_24: "DAC routing (%dddd)"
   D_23: "Enable pin output (%e) or WRFAST (%w)"
@@ -119,6 +128,22 @@ usage_pattern:
     
     ' 5. Wait for completion
     waitxfi
+
+# Debugging streamer code — read this before trusting a measurement
+debug_interaction:
+  problem: |
+    DEBUG_COGS defaults to %11111111 — every cog has debug capability at runtime. So
+    compiling with -d, the normal way to debug, puts the P2's HIGHEST-PRIORITY INTERRUPT
+    inside the cog running your streamer.
+  fix: |
+    CON
+      DEBUG_COGS = %0000_0001   ' only the reporting cog carries the debug interrupt
+  measured_cost: "With the default mask a streamer probe crashed into the single-step debugger's memory dump and its Goertzel accumulators read 1,000,000-7,000,000 of corruption; restricting DEBUG_COGS to cog 0 collapsed them to their true values in the hundreds."
+  general_rule: "Any hardware sequencer measured under the debugger may be perturbed by it. Restrict DEBUG_COGS to the reporting cog when measuring."
+  source: "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-057 (2026-08-14); the limitation is also recorded in architecture/debug_interrupt.yaml (limitations.streamer_interaction)"
+  see_also:
+    - "architecture/debug_interrupt.yaml"
+    - "language/spin2/constants/special-configuration-symbols.yaml"
 
 # Events generated
 events:

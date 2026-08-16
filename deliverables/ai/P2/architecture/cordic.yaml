@@ -14,7 +14,7 @@ architecture:
   pipeline_type: "Fully pipelined"
   access_model: "Hub rotation (like hub RAM)"
   cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; Silicon Doc verbatim: 'every 1/2/4/8/16 (#cogs) clocks')"
-  ops_in_flight_per_cog: "up to ~6-7 (derived: 54-stage pipeline / 8-clock hub slot = 54/8; the Silicon Doc says 'several', stating no hard count)"
+  ops_in_flight_per_cog: "up to ~6-7 (54-stage pipeline / 8-clock hub slot = 54/8; the Silicon Doc says 'several', stating no hard count). MEASURED SUPPORT: a register-only fill and drain stayed correct through a fill depth of 7 on real P2 silicon, so deep pipelining is real and is not limited to a shallow result buffer."
   system_throughput: "1 operation per clock (all COGs combined)"
   result_latency: "55 clocks (Silicon Doc v35 verbatim: 'Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
   pipeline_depth: "54 clocks (separate from result latency; this is the depth that enables overlapping ops)"
@@ -26,6 +26,30 @@ critical_usage_pattern:
   steady_state: "Each 8-clock slot: retrieve one result + submit one op"
   drain_phase: "Retrieve remaining results (may stall)"
   warning: "GETQX/GETQY stalls COG if result not ready - use POLLQMT to check"
+
+  keep_hub_access_out_of_both_loops:
+    rule: |
+      KEEP HUB ACCESS OUT OF BOTH THE FILL LOOP AND THE DRAIN LOOP. Read inputs into
+      cog registers (or compute them in-register) BEFORE the fill, keep fill and drain
+      to register-only operations, and batch the hub writes AFTER the drain.
+    why_it_matters: |
+      The failure is SILENT. A pipelined sequence with hub I/O inside a loop returns
+      wrong numbers, not missing ones — the code looks correct and the results look
+      plausible. There is no flag, no stall, and no error to notice.
+    measured: |
+      Real P2 silicon, four arms differing only in where hub access sat, swept over
+      fill depths 1-7 against single-operation ground truth:
+        - RDLONG inside the fill loop   -> first wrong result at fill depth 2
+        - WRLONG inside the drain loop  -> first wrong result at fill depth 3
+        - register-only fill AND drain, hub I/O batched outside -> clean through 7
+      Seven consistent runs, with a control (queue one, retrieve immediately) that
+      stalled 58 clocks — the documented GETQX maximum — proving the rig could see
+      the failure before any arm was trusted.
+    scope: |
+      This states the TESTED SHAPE, not a law. The measurement shows WHERE results are
+      lost, not why; not every hub operation or cadence was tested. Do not generalize
+      it to "any hub access anywhere" and do not prescribe a clock-level discipline.
+    source: "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-053 (2026-08-14)"
 
 operations:
   multiply:

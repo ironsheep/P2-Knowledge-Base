@@ -216,6 +216,7 @@ notes:
   - "Symbol without @ returns the DATA at that address, not the address itself"
   - "@method creates a 32-bit method pointer with index and VAR base encoded"
   - "First long of object's VAR space stores object base for method pointers"
+  - "The PASM-side counterpart: inside a Spin2 object, `##hubsymbol` in a DAT block does NOT give the symbol's runtime hub address (it resolves against $400) - pass the address in from Spin2 with @, or use PTRA. See language/spin2/integration/spin2-pasm2-integration.yaml (integration_rules.hub_address_resolution)."
 
 related:
   - language/spin2/special-symbols/double_at.yaml
