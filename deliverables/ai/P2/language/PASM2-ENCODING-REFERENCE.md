@@ -29,7 +29,7 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 
 | EEEE | Mnemonic | Condition | Aliases |
 |------|----------|-----------|---------|
-| `0000` | _RET_ | Always + Return | IF_RET |
+| `0000` | _RET_ | Always; then return **if the instruction did not branch** | IF_RET |
 | `0001` | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_A, IF_GT, IF_00 |
 | `0010` | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
 | `0011` | IF_NC | C=0 | IF_AE, IF_GE, IF_0X |
@@ -46,7 +46,19 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 | `1110` | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_BE, IF_LE, IF_NOT_00 |
 | `1111` | IF_ALWAYS | Always | (no prefix) |
 
-> `%0000` is exclusively the `_RET_` prefix (always-execute + return); it is NOT
+> **`_RET_` returns only if the instruction did not branch.** The prefixed
+> instruction always executes; the return then happens **only if that instruction
+> did not branch**, popping `stack[19:0]` into PC with no C/Z context restore.
+> On a branching instruction the branch stands and **no return occurs** — so
+> `_RET_ CALL #target` assembles clean and is silently a plain `CALL`, and
+> execution falls out of the routine into whatever follows it. Use
+> `CALL #target` + `RET`. Sources: *P2 Assembly Language Manual* (Parallax,
+> 2022-11-01) condition table p.68 — *"always; execute instruction then return if
+> no branch; no context restore"*; *P2 Instructions v35 Rev B/C Silicon* row 410 —
+> *"Execute `<inst>` always and return if no branch. If `<inst>` is not branching
+> then return by popping stack[19:0] into PC."*
+
+> `%0000` is exclusively the `_RET_` prefix; it is NOT
 > the encoding for `IF_NEVER`. `IF_NEVER` assembles to EEEE=`%1111` (always),
 > identical to the bare no-prefix form, regardless of whether `WC`/`WZ` are written
 > (pnut-ts boundary-probed). `%1111` is the default (always), printed with no `IF_` prefix.

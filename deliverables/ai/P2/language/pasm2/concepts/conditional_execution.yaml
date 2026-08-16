@@ -7,7 +7,7 @@ category: "pasm2_core"
 importance: "fundamental"
 
 metadata:
-  query_tags: ["conditional", "if", "flags", "predicate", "branchless", "wcz"]
+  query_tags: ["conditional", "if", "flags", "predicate", "branchless", "wcz", "_RET_", "ret prefix", "ret call", "tail call"]
   complexity: "intermediate"
   use_cases: ["branchless_code", "conditional_operations", "flag_testing"]
   common_questions:
@@ -15,6 +15,8 @@ metadata:
     - "What are all the IF_ conditions?"
     - "How do C and Z flags work?"
     - "Can any instruction be conditional?"
+    - "Does _RET_ work on a CALL?"
+    - "Why did my _RET_ CALL not return?"
 
 fundamental_concept: |
   EVERY PASM2 instruction can optionally:
@@ -50,10 +52,10 @@ condition_codes:
   - value: "%0000"
     primary: "_RET_"
     aliases: ["IF_RET"]
-    condition: "Always + Return"
+    condition: "Always; then return IF THE INSTRUCTION DID NOT BRANCH"
     c_required: "X"
     z_required: "X"
-    note: "Special: Always executes AND returns"
+    note: "Special: the instruction ALWAYS executes, and a return is then performed ONLY IF that instruction did not branch. No C/Z context restore. On a BRANCHING instruction (CALL, JMP, ...) the branch stands and NO return occurs -- see ret_prefix_rule."
     
   - value: "%0001"
     primary: "IF_NC_AND_NZ"
@@ -241,13 +243,50 @@ usage_patterns:
       IF_Z    JMP #state2       ' State 2
               JMP #default      ' Default case
 
+ret_prefix_rule:
+  rule: "_RET_ RETURNS ONLY IF THE INSTRUCTION DID NOT BRANCH."
+  full_semantics: |
+    _RET_ is the EEEE=%0000 condition prefix. The prefixed instruction ALWAYS
+    executes. A return is then performed ONLY IF that instruction did not
+    branch: the return pops stack[19:0] into PC, with no C/Z context restore.
+    If the instruction DID branch, the branch stands and NO return happens.
+  on_branching_instructions: |
+    _RET_ ON A BRANCH NEVER RETURNS, AND IT ASSEMBLES CLEAN. '_RET_ CALL #target'
+    is silently just 'CALL #target': the CALL pushes the address of the NEXT
+    instruction and jumps, so when the callee returns, execution resumes at that
+    next instruction -- falling THROUGH the end of the routine instead of
+    returning from it. Whatever the assembler placed next then executes. The
+    same holds for JMP and the other branching instructions.
+  correct_form: |
+    ' WRONG -- assembles, never returns, falls into whatever follows:
+            _RET_   CALL    #helper
+    ' RIGHT -- call, then return:
+            CALL    #helper
+            RET
+  why_it_matters: |
+    The failure is silent and layout-dependent: no fault, no flag, and what runs
+    afterwards is whatever code happens to sit next in cog RAM. The routine's own
+    side effects all occur, so the symptom appears far from the cause.
+  works_as_expected_on: "Any NON-branching instruction. '_RET_ OR x,#0', '_RET_ CMP x,#0 WZ' and '_RET_ SETQ #mode' (the XBYTE arming form) all execute and then return."
+  source: |
+    Two independent Parallax primary sources state the qualifier:
+    - P2 Assembly Language Manual (Parallax, 2022-11-01), condition table p.68:
+      "_RET_  %0000  always; execute instruction then return if no branch; no context restore"
+    - P2 Instructions v35 - Rev B/C Silicon spreadsheet, row 410 (encoding
+      "0000 ------- --- --------- ---------", stack effect "Pop"):
+      "Execute <inst> always and return if no branch. If <inst> is not branching
+      then return by popping stack[19:0] into PC."
+    Corroborated on real P2 silicon 2026-08-14 (EF-058): a handler ending in
+    '_RET_ CALL' fell through into the following handler, which executed in full.
+
 special_patterns:
   return_conditions:
-    description: "Conditional returns using _RET_ prefix"
+    description: "Conditional returns using the _RET_ prefix -- valid only on NON-branching instructions (see ret_prefix_rule)"
     code: |
       _RET_   CMP x, #0 WZ     ' Compare and return
                                 ' Return happens AFTER instruction
-      
+                                ' (CMP does not branch, so the return occurs)
+
       ' Common pattern for conditional return
       CMP     x, limit WC
       IF_C    RET              ' Return if below limit
@@ -285,6 +324,14 @@ performance_benefits:
   universal: "Works on ALL instructions, not just a subset"
 
 common_mistakes:
+  - mistake: "Using _RET_ on a CALL to 'call and return in one instruction'"
+    wrong: |
+      _RET_   CALL    #helper   ' Assembles clean. NEVER returns.
+    right: |
+      CALL    #helper
+      RET
+    explanation: "_RET_ returns only if the instruction did not branch. CALL branches, so the return is suppressed and '_RET_ CALL' is silently a plain CALL -- the callee returns to the instruction AFTER the call, so execution falls out of the routine into whatever follows it in cog RAM. There is no error and no flag. See ret_prefix_rule for the sourced statement of the rule."
+
   - mistake: "Assuming IF_LT/IF_LE perform signed comparisons"
     wrong: |
       CMP  x, y WCZ      ' UNSIGNED compare

@@ -34,11 +34,18 @@ manual_categories_vs_our_files:
       - "IF_GT, IF_GE, IF_LT, IF_LE (signed comparisons)"
       - "IF_C, IF_NC, IF_Z, IF_NZ (flag tests)"
       - "IF_C_AND_Z, IF_C_OR_Z, etc. (complex combinations)"
-      - "_RET_ suffix for conditional return"
+      - "_RET_ PREFIX (%0000): always execute, then return IF NO BRANCH"
     our_coverage:
-      conditional_execution.yaml: "✅ Comprehensive coverage of all conditions"
-    alignment: "PERFECT - Complete match"
-    notes: "Manual confirms all condition names we documented"
+      conditional_execution.yaml: "Covers all 16 condition NAMES; see the correction below"
+    alignment: "NAMES match; one SEMANTIC gap was missed and is now closed"
+    notes: >-
+      Corrected 2026-08-16 (F-273). This check previously read "PERFECT - Complete
+      match" and described _RET_ as a suffix. Both were wrong. The check compared
+      the LIST OF CONDITION NAMES and found it complete, then reported the whole
+      category as matching -- but the manual's _RET_ row also carries a SEMANTIC
+      qualifier, "return if no branch", which our entry had dropped. Name coverage
+      is not semantic coverage, and an alignment check that compares only names
+      must say so rather than certify the category.
 
   effects:
     manual_lists:

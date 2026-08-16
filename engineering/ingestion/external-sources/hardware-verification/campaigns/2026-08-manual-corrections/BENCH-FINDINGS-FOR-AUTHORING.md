@@ -206,7 +206,20 @@ correct **only** for `adc_pin = 0`, and it never selects the channel at all.
 
 ---
 
-## Test 4 — `_RET_ CALL` inside XBYTE (F-256) · **confirming run pending**
+## Test 4 — `_RET_ CALL` inside XBYTE (F-256) · **RESOLVED FROM THE SOURCES — no confirming run needed**
+
+> **REFRAMED 2026-08-16 (F-273).** The question this test was built to answer was **already answered
+> in two ingested Parallax sources**: `_RET_` executes the instruction and returns **only if that
+> instruction did not branch** (*P2 Assembly Language Manual* 2022-11-01, condition table p.68; *P2
+> Instructions v35 Rev B/C Silicon*, row 410). `CALL` branches, so `_RET_ CALL` cannot return —
+> **by specification.** This test corroborates documented behaviour; it did not discover it.
+> **The hold below ("do not author §15.3 until it returns") is lifted, and the staged `DEBUG_COGS`
+> re-run is unnecessary** — it could only re-observe the spec. The real defect was that our KB had
+> dropped the qualifier (**F-273**).
+>
+> **One correction to the reading below:** dispatch **did** resume. All four bytecodes of the test
+> stream executed; the spurious handler's own `ret` returned to `$1FF`. The failure mode is **silent
+> extra execution**, not a lost dispatch — and it is layout-dependent.
 
 **Question.** `xbyte-body.md:879` says *"Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely
 on this,"* and the idiom is used at `:416`, `:793`, `:1391`, `:1400`. It assembles clean — so the
@@ -239,21 +252,25 @@ own `ret`. **Both forms pushed "next instruction."**
 The compiler is not at fault: `_ret_ call #tgt` emits `$0DB00008` with `EEEE=%0000` (the `_RET_`
 condition genuinely present), versus `$FDB00004` / `EEEE=%1111` for a plain call.
 
-**What it means.** `_RET_ CALL` does **not** return to XBYTE. It behaves as a plain `CALL`, and
-when the callee returns, execution falls through into whatever follows — in our case an entire
-adjacent handler ran, and dispatch only resumed by accident when *that* handler's `ret` popped the
-`$1FF`. The community objection was wrong in form and **right in substance**.
+**What it means.** `_RET_` returns **only if the instruction did not branch**; `CALL` branches, so
+`_RET_ CALL` is silently a plain `CALL`. When the callee returns, execution resumes at the
+instruction *after* the call — i.e. it falls out of the routine into whatever follows it in cog RAM.
+Here that was an entire adjacent handler, which ran in full; **its** `ret` then returned to `$1FF`,
+so dispatch resumed and the VM finished. The community objection was wrong in form and **right in
+substance** — and the rule was documented all along (F-273).
 
-> **Status:** one clean run, and it was taken **before** we found the `DEBUG_COGS` confound (Test
-> 6). The sprint plan's §3 error clause requires confirming a "the idiom is broken" result by an
-> independent path before restructuring a chapter. A re-run with `DEBUG_COGS = %0000_0001` is
-> staged. **Do not author §15.3 until it returns.**
+> **Status: CLOSED 2026-08-16.** The sprint plan's §3 error clause required confirming a "the idiom
+> is broken" result **by an independent path** before restructuring a chapter. That requirement is
+> **satisfied — by the documentation, which is a stronger path than a second run of the same rig**:
+> two independent Parallax primary sources specify the behaviour. The staged `DEBUG_COGS =
+> %0000_0001` re-run is no longer needed and the authoring hold is lifted.
 
-### Authoring (pending confirmation)
+### Authoring
 
 - **CORRECTION** — the `:879` claim, and every use of the idiom.
-- **TEACH** — an instruction cannot both push-and-jump and return; the `_RET_` is silently
-  ineffective on `CALL`. This is worth stating as a rule, because it *assembles*.
+- **TEACH the documented rule, not an inferred mechanism** — `_RET_` executes the instruction and
+  returns **only if it did not branch**. Do NOT write "an instruction cannot both push-and-jump and
+  return"; that is an inference we never measured. Cite the condition table.
 - **TRAP** — the failure is silent and looks like corruption elsewhere: the next handler in cog
   memory executes spuriously. A reader would hunt this in their VM logic for days.
 

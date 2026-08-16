@@ -7,10 +7,11 @@ description: >-
   next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by
   pushing to the stack (K), potentially updates the C and Z flags with new
   given states, and jumps to the given address or offset. The routine at the
-  new address should eventually execute a RET instruction, or an instruction
-  with a _RET_ condition, to return to the recorded address (the instruction
-  following the CALL) and optionally restore the C and Z flag state as it was
-  prior.
+  new address should eventually execute a RET instruction, or a NON-BRANCHING
+  instruction carrying a _RET_ condition, to return to the recorded address (the
+  instruction following the CALL) and optionally restore the C and Z flag state
+  as it was prior. (A _RET_ condition returns only if that instruction did not
+  branch -- see ret_prefix_caveat below.)
 
   In syntax 1, #Addr and #\Addr encodes the instruction with relative and
   absolute addressing, respectively. The relative form (the default) is vital
@@ -85,6 +86,16 @@ compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
+ret_prefix_caveat: >-
+  '_RET_ CALL #target' DOES NOT CALL-AND-RETURN. The _RET_ prefix returns only if
+  the instruction did not branch, and CALL branches -- so the return is suppressed
+  and the line is silently just 'CALL #target'. The callee returns to the
+  instruction AFTER the call, so execution falls out of the calling routine into
+  whatever the assembler placed next. It assembles clean; there is no error and no
+  flag. To call a helper and then return, write 'CALL #target' followed by 'RET'.
+  Sources: P2 Assembly Language Manual (2022-11-01) condition table p.68; P2
+  Instructions v35 Rev B/C Silicon row 410. Full rule:
+  language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
 oneliner: Call a subroutine; store return context on the stack
 related:
 - RET

@@ -715,9 +715,20 @@ but nothing surfaces it where a streamer author will meet it. *General form wort
 hardware sequencer measured under the debugger may be perturbed by it — restrict `DEBUG_COGS` to the
 reporting cog when measuring.
 
-### EF-058 · `_RET_ CALL` does NOT return to XBYTE — it behaves as a plain `CALL` and execution falls through — `CONFIRMED`
+### EF-058 · `_RET_ CALL` never returns — it is a plain `CALL`, and execution falls out of the routine — `CONFIRMED (corroborates documented behaviour — see F-273)`
+> **REFRAMED 2026-08-16 (F-273). This is NOT a hardware discovery.** Parallax documents the rule in
+> two independent primary sources: `_RET_` executes the instruction and returns **only if that
+> instruction did not branch** (*P2 Assembly Language Manual* 2022-11-01 condition table p.68; *P2
+> Instructions v35 Rev B/C Silicon* row 410 — *"if `<inst>` is not branching then return by popping
+> stack[19:0] into PC"*). `CALL` branches, so the return is suppressed **by specification**. This
+> test re-observed the spec; our KB had dropped the qualifier, which is the actual defect (F-273).
+> **Two corrections to what this entry originally claimed:** the `_RET_` is not "silently
+> ineffective" (it behaves exactly as documented), and **"dispatch does not resume" is FALSE** — see
+> the corrected reading below.
+
 The idiom **assembles**, so the objection "you cannot combine a CALL with ret" is wrong as stated —
-but the `_RET_` is silently ineffective on `CALL`, and dispatch does not resume. *How proven:* a
+and the reason is documented rather than mysterious: the prefix returns only on a non-branching
+instruction. *How proven:* a
 **differential** test, not an absolute one — two bytecode handlers doing identical work, differing
 only in where the return lives (`$01` = `_ret_ call #helper`; `$04` = `call #helper` / `ret`, the
 reference), both in the same cog and the same run. Handlers append tokens to a **trail**, so execution
@@ -726,7 +737,12 @@ reports the idiom untested rather than disproven. **Control that must fail:** a 
 leaving XBYTE — its trail stopped at the break, exactly as required. *Result:* reference = 5 steps
 (`h_plain → h_callret → helper → h_plain → h_halt`, correct); under test = **7 steps**
 (`h_plain → h_retcall → helper → h_callret → helper → h_plain → h_halt`) — and **`$04` is not in that
-bytecode stream**: `h_callret` ran because control fell into it. The helper reported the pushed return
+bytecode stream**: `h_callret` ran because control fell into it. **Dispatch was not lost.** The test
+stream was `$00 $01 $00 $03`, and all four bytecodes dispatched — steps 6 and 7 are the third and
+fourth. The spurious handler ran to completion and **its** `ret` performed the return to `$1FF`, so
+the VM finished normally having executed an entire handler it was never told to. **The failure mode
+is silent EXTRA EXECUTION, not a hang**, and what runs is whatever the assembler placed after the
+routine — so the damage is layout-dependent. The helper reported the pushed return
 address as **`$8000_001A`**, and the map places `H_CALLRET` at cog `$01A`, the instruction immediately
 after the `_ret_ call`; the reference pushed `$8000_001F`, its own `ret`. **Both forms pushed "next
 instruction."** The compiler is not at fault: `_ret_ call #tgt` emits `$0DB00008` with `EEEE=%0000`

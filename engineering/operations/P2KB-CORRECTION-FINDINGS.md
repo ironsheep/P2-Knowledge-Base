@@ -534,6 +534,77 @@ claim in either direction.
 
 ---
 
+## ROOT CAUSE of the XBYTE `_RET_ CALL` defect — the KB dropped a qualifier (2026-08-16) — F-273
+
+### F-273 — `_RET_` returns **only if the instruction did not branch**. The KB documented it as an unconditional "Always + Return", and a manual built on that shipped a broken idiom. `CONFIRMED — KB APPLIED 2026-08-16`
+
+**This entry supersedes the framing in F-256/EF-058.** Those treated `_RET_ CALL` as a *hardware*
+finding discovered on the bench. It is not. **It is documented Parallax behaviour that our KB failed
+to carry**, and the bench merely re-observed the specification.
+
+### The rule, from two independent Parallax primary sources
+
+| Source | Wording |
+|---|---|
+| **P2 Assembly Language Manual** (Parallax, 2022-11-01), condition table **p.68** — stated twice (`pasm2-manual-narrative.txt:844`, `:3633`) | *"`_RET_`  `%0000`  **always; execute instruction then return if no branch**; no context restore"* |
+| **P2 Instructions v35 – Rev B/C Silicon** spreadsheet, **row 410** (`p2-instructions-csv/…Sheet1.csv:434`), encoding `0000 ------- --- --------- ---------`, stack-effect column `Pop` | *"Execute `<inst>` always and return if no branch. **If `<inst>` is not branching then return by popping stack[19:0] into PC.**"* |
+
+So `_RET_` is **not** "always execute and return." It is **execute, then return *only if the
+instruction did not branch*.** `CALL` branches, so `_RET_ CALL` **never returns** — by
+specification, not by malfunction. The prefix is architectural and says nothing about XBYTE.
+
+### One rule explains every observation — no exceptions
+
+| Site (EF-058 rig) | Branches? | Rule predicts | Observed |
+|---|---|---|---|
+| `_ret_ or tv, #0` | no | returns | handler returns, dispatch continues ✅ |
+| `_ret_ setq #0` (XBYTE arming) | no | returns to `$1FF` | engine arms ✅ |
+| `_ret_ call #helper` | **yes** | **no return**; callee returns to the next instruction | falls through into the following handler ✅ |
+| `_RET_ SKIPF` (Silicon Doc `:1905`) | no | returns, pattern applies at the destination | documented as *"an automatic branch before skipping commences"* ✅ |
+
+### The KB defect — what was wrong, and where
+
+| File | Was | Now |
+|---|---|---|
+| `language/pasm2/concepts/conditional_execution.yaml` (the authoritative condition table) | `condition: "Always + Return"`, note *"Special: Always executes AND returns"* — **no branch qualifier** | the qualified rule, plus a new **`ret_prefix_rule:`** block (full semantics · the branch case · correct form · why it is silent · what it *does* work on · both sources) and a `common_mistakes` entry |
+| `language/PASM2-ENCODING-REFERENCE.md` | `Always + Return`; *"always-execute + return"* | qualified table cell + a sourced callout under the condition table |
+| `language/pasm2/call.yaml` | *"…or an instruction with a `_RET_` condition, to return…"* — true only for a non-branching instruction | qualified to **NON-BRANCHING**, plus a `ret_prefix_caveat:` naming the `_RET_ CALL` trap |
+| `language/pasm2/ret.yaml` | no mention of the prefix form at all | `ret_prefix_form:` + `aliases:` + `related:` so a reader at RET finds it |
+| `language/pasm2/concepts/manual_category_alignment_check.yaml` | *"`_RET_` **suffix**"*; **"PERFECT - Complete match"** | corrected to *prefix*; alignment restated honestly |
+
+**Grep proof of the gap:** before this fix, *"if no branch"* appeared **zero times** in
+`deliverables/ai/P2/`, while both Parallax sources state it.
+
+### Why this is the finding that matters
+
+**An author reading our KB was told the prefix "always executes AND returns."** Writing
+`_RET_ CALL #set_nz` is the correct inference from that sentence. The XBYTE Guide's idiom is not a
+careless mistake — it is the **predictable downstream consequence of a dropped qualifier**, and it
+reached community review because every layer below it agreed with itself.
+
+**The alignment check is the second lesson.** `manual_category_alignment_check.yaml` certified this
+category *"PERFECT - Complete match"* — because it compared the **list of condition names**, which
+was complete, and never compared the **semantics attached to them**. **Name coverage is not semantic
+coverage.** A check that compares only names must say so rather than certify the category, or it
+converts an unexamined area into a documented all-clear. Same failure shape as F-269's fan-out audit
+and F-211's sweep: an artifact asserting correctness it never established.
+
+### Consequences for the other entries
+
+- **F-256** — recast from `NEEDS-VERIFICATION`/hardware question to a **documentation** finding whose
+  answer was in the ingested sources the whole time. **No further rig run is required** — not for
+  generality outside XBYTE (the prefix is architectural) and not to confirm EF-058 (it can only
+  re-observe the spec). The `[M-pre]` grade and the staged `DEBUG_COGS` re-run are **moot for the
+  conclusion**.
+- **EF-058** — its *"dispatch does not resume"* clause is **false** and is corrected there: the rig's
+  own trail shows all four bytecodes dispatched, plus one spurious handler. The failure is **silent
+  extra execution**, not a hang.
+- **Manual halves owed:** the XBYTE Guide teaches this rule («#227» rework). The structural change
+  already applied there — every `_RET_ CALL` replaced by `CALL` + `RET` — remains correct; only the
+  *explanation* changes.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
@@ -1103,7 +1174,7 @@ contract is load-bearing, so it cannot be a stand-in. **Do not "fix" the other e
 Corroborating the guide is not broadly broken: the complete VM in §12.2 (`xbyte-body.md:975–1044`)
 was extracted and **compiles clean** under `pnut-ts -q`.
 
-### F-256 — `_RET_ CALL` does NOT return to XBYTE. The idiom is broken, and it is used in a guide under community review. `CONFIRMED (EF-058) — manual restructure APPLIED 2026-08-16 («#227»)`
+### F-256 — `_RET_ CALL` never returns, because `_RET_` returns only if the instruction did not branch. A DOCUMENTATION defect, not a hardware one. `RESOLVED — root cause is F-273; KB applied, manual restructure applied 2026-08-16 («#227»)`
 
 **Location:** `xbyte-body.md:879` (*"Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely on
 this"*), used at `:1391`, `:1400`, `:416`, `:793`.
@@ -1119,34 +1190,34 @@ then return to `$1FF` (XBYTE re-entry intact), or does the push/pop ordering bre
 cannot substitute for `PUSH #$1FF` at arm time). **Not resolvable from the KB or the Silicon Doc;
 no answer is asserted here.**
 
-> **ANSWERED ON SILICON — EF-058, `CONFIRMED`.** The status line above was stale: this entry still
-> read `NEEDS-VERIFICATION` while the empirical ledger already carried the answer. **The idiom is
-> broken.** `_RET_ CALL` assembles (so Christof's objection is wrong *as stated*) but the `_RET_` is
-> **silently ineffective on `CALL`** — both forms push *"next instruction"*, so control falls through
-> into whatever follows instead of returning to XBYTE, and **the next handler in cog memory executes
-> spuriously.** Proven by a *differential* test in one run: reference arm (`call` + `ret`) = 5 steps,
-> correct; test arm (`_ret_ call`) = **7 steps**, executing a handler whose bytecode was never in the
-> stream. Self-consistent three ways — trail order, pushed return address (`$8000_001A`) versus the
-> cog map, and the compiler encoding (`$0DB00008`, `EEEE=%0000` — the `_RET_` condition genuinely
-> present). Not a compiler fault.
+> **ANSWERED — AND THE ANSWER WAS IN THE INGESTED SOURCES ALL ALONG. See F-273.**
+> This was never a hardware question. **`_RET_` executes the instruction and returns *only if that
+> instruction did not branch*** — stated by *two* independent Parallax primary sources (Assembly
+> Language Manual 2022-11-01, condition table p.68; P2 Instructions v35 Rev B/C Silicon, row 410:
+> *"if `<inst>` is not branching then return by popping stack[19:0] into PC"*). `CALL` branches, so
+> `_RET_ CALL` cannot return. **The behaviour is specified, not anomalous.**
 >
-> **Grade honestly: `[M-pre]`** — taken before the `DEBUG_COGS` confound (EF-057) was found, and
-> `BENCH-FINDINGS-FOR-AUTHORING.md` stages a confirming run with `DEBUG_COGS = %0000_0001` and says
-> *"do not author §15.3 until it returns."* **The manual work went ahead anyway, deliberately, and
-> only in the direction that is safe under BOTH outcomes:** every `_RET_ CALL` was replaced with the
-> explicit `call` + `ret` pair, which is exactly the bench's *reference* arm — the form that ran
-> correctly. If the confirming run reverses EF-058, `call`+`ret` is still correct and the only loss
-> is one instruction of tail-call thrift. Leaving prose that *endorsed* a broken idiom was not safe
-> under both outcomes, which is what forced the call.
+> **The real defect is ours:** our KB documented the prefix as an unconditional *"Always + Return"*
+> and the qualifier *"if no branch"* appeared **nowhere** in `deliverables/ai/P2/`. An author
+> reading that writes `_RET_ CALL #set_nz` and is right to. **Root cause, KB fix and the
+> alignment-check lesson are all in F-273.**
 >
-> **Applied in `xbyte-body.md` («#227», uncommitted under the «#234» gate):** §15.3's handlers and
-> the shared `ld_imm` family; §4.4's `alu_body`; §5's `push_const`; §17's `voice_on` handler; and the
-> two *explanations* that endorsed the idiom — `:882` (Chapter 11) now says plainly what the CALL
-> depth does and does **not** license, and §15.3 carries a `hardware` callout teaching the rule
-> (**an instruction cannot both push-and-jump and return**) plus the trap (the failure is silent and
-> reads as corruption elsewhere). Slices recompiled clean under `pnut-ts`.
+> **What the bench actually showed (EF-058, corrected there too):** the handler falls through into
+> whatever follows it in cog RAM. In the rig that was another handler, which ran in full and whose
+> own `ret` returned to `$1FF` — so **all four bytecodes dispatched and the VM finished normally.**
+> The original claim *"dispatch does not resume"* is **false**. The failure mode is **silent extra
+> execution**, and it is **layout-dependent**.
 >
-> **Still owed when the confirming run returns:** flip this grade to `[M]`, or reopen if it reverses.
+> **NO FURTHER RIG RUN IS REQUIRED.** Not for generality outside XBYTE — the prefix is architectural
+> and the sources say nothing about XBYTE — and not to confirm EF-058, which can only re-observe the
+> specification. The `[M-pre]` grade and the staged `DEBUG_COGS` re-run are **moot for the
+> conclusion**; the conclusion now rests on documentation, with the bench as corroboration.
+>
+> **Applied in `xbyte-body.md` («#227», uncommitted under the «#234» gate):** every `_RET_ CALL`
+> replaced by `CALL` + `RET` — §15.3's handlers and the shared `ld_imm` family, §4.4's `alu_body`,
+> §5's `push_const`, §17's `voice_on` — plus the two explanations that endorsed the idiom (`:882`
+> and §15.3). **That structural change stands; its EXPLANATION is being rewritten** to teach the
+> documented rule rather than the mechanism previously inferred here. Slices recompile clean.
 
 **Action:** jumper-free, single-board hardware test — arm XBYTE, run a handler ending in
 `_RET_ CALL`, report whether dispatch continues. Ideal **VO-J** candidate; result goes to the EF

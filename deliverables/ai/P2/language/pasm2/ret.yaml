@@ -29,3 +29,21 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.426381'
 category: Branch
 oneliner: Return by popping stack (K)
+aliases:
+- "RET"
+- "_RET_"
+- "_RET_ prefix"
+- "return from subroutine"
+- "call and return"
+ret_prefix_form: >-
+  The same return can be folded into a preceding instruction with the _RET_
+  prefix (condition EEEE=%0000): the instruction executes and a return is then
+  performed ONLY IF that instruction did not branch. On a BRANCHING instruction
+  the branch stands and no return occurs, so '_RET_ CALL #target' is silently a
+  plain CALL and never returns -- write 'CALL #target' followed by 'RET' instead.
+  Sources: P2 Assembly Language Manual (2022-11-01) condition table p.68; P2
+  Instructions v35 Rev B/C Silicon row 410. Full rule:
+  language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
+related:
+- language/pasm2/call.yaml
+- language/pasm2/concepts/conditional_execution.yaml
