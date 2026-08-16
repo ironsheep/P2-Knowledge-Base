@@ -398,11 +398,35 @@ is at **1.0.3** and going to 1.0.4.
 **Seven for seven — so this is the convention failing, not a missed file.** The stamp has never been
 advanced by any release.
 
-**Why it matters, and it is not cosmetic.** P2AN001's companion has been **edited twice this sprint
-alone** — the F-269 power-domain rewrite and the F-270 SINC2 correction — and still reports `1.0.0`.
-An agent that caches by version sees no change and keeps serving the body that contradicted the note.
-The version field is the only edition signal a consumer has; frozen, it is worse than absent,
-because absent invites a re-fetch and `1.0.0` actively asserts "unchanged since first release."
+**Why it matters — and the severity claim this entry first carried was WRONG, corrected 2026-08-16
+on Stephen's challenge ("why are there version numbers in the yaml?").**
+
+The original text said a frozen stamp is *"worse than absent, because an agent that caches by version
+sees no change and keeps serving the stale body."* **Nothing caches by version.** Checked, not
+assumed: the published index carries exactly `path`, `mtime`, `sha256` per entry — change detection
+is the git commit timestamp plus a content hash, both of which updated correctly when F-270 shipped.
+A consumer mechanism was asserted without being verified, which is this sprint's own named failure
+mode. **The field is inert.**
+
+**What is left is real but smaller:** the stamp misleads anyone who *reads* it — a human opening the
+file, or an agent quoting `version` when citing the companion. P2AN001's was edited twice this sprint
+(F-269, F-270) and still reads `1.0.0`. It is a truthfulness defect in shipped metadata, not a
+cache-correctness defect. **Priority drops accordingly** — this is not urgent, and it is certainly
+not worth a bulk edit of seven published files.
+
+**The deeper finding, which is the actual reason to keep this entry.** `version:` appears in only
+**24 of 1129** published YAMLs, carrying **two unrelated meanings** under one key name, with no
+schema doc defining either (`APP-NOTE-DESIGN-DECISIONS.md`, which the companion header cites as its
+schema authority, does not mention `version` at all):
+
+| Population | What `version:` means there | Tell |
+|---|---|---|
+| **17 files** — `architecture/smart_pins.yaml` (1.2), `architecture/streamer/_index.yaml` (2.0), `spin2/conventions/*` (1.0.0–2.0.0), `guides/*` | **the file's own content revision** | almost always paired with `last_updated:`; refers to nothing outside the file |
+| **7 app-note companions** | positioned as **the note's** version — sits under `doc_id:` and above `kind: application-note`, beside the note's `title`/`subtitle` | no `last_updated:` |
+
+**So "which meaning is right" has no documented answer, and the tree's majority reading is the
+opposite of the one this entry first recommended.** That recommendation was made from the app-note
+files alone, before the other seventeen were looked at.
 
 **This is F-270's rule showing up structurally.** F-270 established that *an app-note correction is
 not complete until its YAML companion carries it.* The companion here **did** carry the content — and
@@ -419,13 +443,40 @@ the note's version, and that stamp is advanced at release, not at edit.**
    change ships in a KB release; but the *natural* moment to advance them is each app note's own
    release. Those two cadences are not the same and the answer decides which skill owns the step.
 
-**Recommendation:** the companion tracks the **note's** version, stamped by `release-manual` at each
-app-note release — which is also where the roster row and the cover/`request.json` versions already
-get advanced, per the three-version-locations rule. That would make it **four** locations, and the
-companion is the one an agent reads. P2AN001's stamp would then move 1.0.0 → 1.0.4 in the current
-wave and the remaining six catch up at their next release rather than in a bulk edit.
+**Ask the prior question first: what is this field FOR?** (Stephen, 2026-08-16: *"how is that version
+useful to agents?"*) Worked through honestly, **a bare `version:` is of no use to an agent**:
 
-**Status:** `CONFIRMED`, unswept, awaiting the semantics call. Not Sprint 2 scope.
+- It is **not** how change is detected — that is `mtime` + `sha256` in the index, and they work.
+- It is **not** how content is selected — an agent fetches by key and gets exactly one body. There is
+  no version negotiation, no second edition to choose between, no `1.0.3` still on the shelf.
+- It **cannot** be compared against anything the agent holds, because the agent has no prior copy.
+- A stamp only earns its place if something can be **checked against** it. `1.0.4` next to nothing is
+  a number an agent can only quote — and quoting it is precisely how a stale one does harm.
+
+**What would actually serve an agent** is the *note's* version — not as a bare number, but as the
+answer to a question an agent really has: *"the PDF in front of the user — does this digest match
+it?"* That makes the useful field an explicit, self-describing link to the human artifact
+(e.g. `describes_document: {doc_id: P2AN001, version: 1.0.4, released: 2026-08-16}`), which a
+reader can compare against the cover of the PDF they are holding. The bare `version:` key answers no
+question and, worse, reads as the *file's* version to anyone applying the tree's majority convention.
+
+**Revised recommendation — cheaper and more honest than the original.** Do **not** stamp the seven
+files with note versions and add a fourth version location to maintain. Instead:
+1. **Delete the bare `version:` from the seven companions** — it is inert, ambiguous, and currently
+   false. Removing a field that answers nothing beats maintaining it in seven places forever.
+2. **If** the match-the-PDF question is worth answering, add the explicit `describes_document:`
+   block in its place, stamped by `release-manual` alongside the roster row and cover/`request.json`
+   — one self-describing field, not a number whose meaning must be inferred.
+3. Leave the **17 non-app-note** files alone; there `version:` + `last_updated:` is a coherent
+   file-revision convention. Worth documenting, not changing.
+
+**Note the reversal:** this entry originally recommended stamping all seven to track the note. That
+was written from the app-note files alone, before the other seventeen or the index schema were
+looked at, and it would have institutionalised the ambiguity rather than removing it.
+[[feedback_drop_techniques_that_lower_quality]] — when a shape keeps producing defects, remove the
+shape rather than add a rule to maintain it.
+
+**Status:** `CONFIRMED`, unswept, awaiting Stephen's call on delete-vs-replace. Not Sprint 2 scope.
 
 ---
 
