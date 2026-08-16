@@ -476,7 +476,21 @@ looked at, and it would have institutionalised the ambiguity rather than removin
 [[feedback_drop_techniques_that_lower_quality]] — when a shape keeps producing defects, remove the
 shape rather than add a rule to maintain it.
 
-**Status:** `CONFIRMED`, unswept, awaiting Stephen's call on delete-vs-replace. Not Sprint 2 scope.
+**Status:** `RESOLVED — DECIDED AND PUNCH-LISTED (2026-08-16)`. **Do not re-file, do not work it now.**
+
+**Stephen's decision supersedes both recommendations above, including the revised one.** The
+principle is broader than this field: **the published KB has exactly one edition — the current one —
+so nothing in the tree should cite currency or a version at all.** Every reference means *latest*.
+That rules out the `describes_document:` block too; it is still a currency citation, just a
+better-labelled one. **Delete the shape rather than maintain it.**
+
+**Deferred deliberately, not forgotten** — *"we are trying to get to released documents, and we are
+not there yet given our task list. We should stay away from any diversions at this point in time."*
+Sprint 2's release wave comes first.
+
+**Carried to → `engineering/tools/p2kb-mcp/PUNCH-LIST.md` PL-004**, which holds the full scope
+(7 companions to strip; the other 17 `version:`/`last_updated:` bearers to review per-population,
+NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explicitly out of scope).
 
 ---
 

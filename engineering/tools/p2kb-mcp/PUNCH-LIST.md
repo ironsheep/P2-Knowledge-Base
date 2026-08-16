@@ -9,7 +9,44 @@ Backlog of improvements, fixes, and audit tasks for the P2KB MCP / Download-on-D
 
 ## Open Items
 
-*(none open — see Completed Items below)*
+### PL-004: Remove version/currency stamps from the published YAMLs — the KB is always "latest"
+
+**Priority:** Low (deliberately deferred — see Timing)
+**Discovered:** 2026-08-16, from F-271 (`P2KB-CORRECTION-FINDINGS.md`)
+**Decided:** 2026-08-16 by Stephen
+
+**The principle, and it is the durable half.** **The published KB has exactly one edition: the
+current one.** Every reference to it means *latest*. Nothing in the tree should cite currency or a
+version, because there is no other edition to distinguish it from — and a stamp we must keep true
+is a maintenance burden that buys nothing. Anything that reads as "as of version X" is a defect in
+shape, not a value to keep updated.
+
+**Why this came up.** F-271 found all seven `application-notes/*.yaml` companions frozen at their
+maiden `version:` while their notes had moved to 1.0.1–1.0.3. The first two proposed fixes were both
+wrong: stamping them (adds a fourth version location to maintain forever) and then a
+`describes_document:` block (still a currency citation). The right answer is that the field should
+not exist. **Delete the shape, do not maintain it.**
+
+**Scope when this is worked:**
+- **Delete** the bare `version:` from the **7 app-note companions** — inert (nothing consumes it;
+  the index detects change by `mtime` + `sha256`), ambiguous, and currently false.
+- **Review the other 17** `version:`/`last_updated:` bearers (`architecture/smart_pins.yaml`,
+  `architecture/streamer/_index.yaml`, `spin2/conventions/*`, `guides/*`, the `_index.yaml` files)
+  against the same principle. These use it as a *file revision*, which is a coherent convention but
+  still a currency citation the "always latest" rule argues against. **Grounded decision needed per
+  population — do not sweep on the app-note reading.** (F-211's lesson: a class-wide sweep amplifies
+  whatever fact it starts with.)
+- Sweep prose in published YAMLs for the same shape — "as of", "current as of", "latest version is".
+- **Out of scope:** PDF manuals and app notes ARE versioned (cover + `request.json` + Revision
+  History, per the three-version-locations rule), and the roster tracks those. This item is about
+  the **KB/YAML layer only**, which ships continuously rather than in editions.
+
+**Timing — do NOT pull this forward.** Stephen, 2026-08-16: *"we punch list it at this point because
+we are trying to get to released documents, and we are not there yet given our task list. We should
+stay away from any diversions at this point in time."* Sprint 2's release wave comes first. Pick this
+up after «#235».
+
+---
 
 ---
 
