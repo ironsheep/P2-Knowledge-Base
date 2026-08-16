@@ -733,7 +733,7 @@ than restate it. Editing four copies and hoping they stay aligned is exactly how
 |---|---|---|---|
 | 7a | F-259 | register + EF-054 | Streamer — **the guide's recipe is CORRECT**; the defect is `+` composition, 2 sites |
 | 7b | F-260 | register + EF-056 | Streamer — **the mode WORKS**; author the protocol it never states |
-| 7c | F-261 | register | IOSP — three repairs; needs no bench |
+| 7c | F-261 | register — **`RESOLVED-INVALID`, superseded by F-269** | **REVERSED 2026-08-16. IOSP is CORRECT as shipped and leaves the wave.** Grounding against the domain authority (as «#219» required) showed the defect is ours: the silicon powers I/O in **16 groups of FOUR**, and F-211 had written the P2 Edge **board's** 8-pin LDO grouping into the chip's KB file. Remediated in the KB as a two-layer enrichment (v1.16.3); **P2AN001 joins the wave** to carry the same repair. Read F-269, not this row. |
 | 7d | F-262 | register | Debug Window — still needs the PNut observation |
 | 7e | F-263 | register + EF-053 | Assembly ch.5 **and P2AN002** both violate the rule |
 | — | F-256 | register + EF-058 | XBYTE §15.3 — **restructure**, not patch |
@@ -784,7 +784,8 @@ Stephen's call, 2026-08-15. Current versions from `PUBLICATION-ROSTER.md`:
 |---|---|---|---|
 | DeSilva Tutorial | §1, §2 | 3.0.5 | **3.0.6** |
 | Streamer Guide | §7a, §7b | 1.0.8 | **1.0.9** |
-| I/O & Smart Pins (IOSP) | §7c | 1.0.8 | **1.0.9** |
+| ~~I/O & Smart Pins (IOSP)~~ | ~~§7c~~ | 1.0.8 | **WITHDRAWN — no bump** |
+| **P2AN001 — ADC Instrumentation** | **F-269** | **1.0.3** | **1.0.4** |
 | Debug Window | §7d | 1.1.2 | **1.1.3** |
 | Assembly Reference | §7e | 3.1.5 | **3.1.6** |
 | Interpreters & Emulators (XBYTE) | §4 | 1.0.1 | **1.0.2** |
@@ -883,7 +884,8 @@ skills-infrastructure and deliberately outside this sprint.
 |---|---|---|---|
 | 1 | «#218» | **KB corrections ×8** — F-264 · G-004 · F-265 · F-260 · F-263 · F-266 · F-259 · EF-060 | ✅ |
 | 2 | «#237» | **KB patch release** — publish so the manuals can cite it | ✅ |
-| 3 | «#219» | IOSP ADC power groups, three repairs (F-261) | ⛔ |
+| 3 | «#219» | ~~IOSP ADC power groups (F-261)~~ → **VOID; became F-269** — IOSP is correct as shipped | ✅ |
+| 3b | «#239» | **P2AN001 power-domain repair (F-269)** — replaces «#219» in the wave | ⛔ |
 | 4 | «#220» | Streamer `+`→`\|` at 2 sites + the composition rule (F-259) | ⛔ |
 | 5 | «#221» | Streamer §17.1 — the mode WORKS; author the protocol (F-260) | ⛔ |
 | 6 | «#222» | deSilva Acknowledgments (F-254) | ⛔ |
