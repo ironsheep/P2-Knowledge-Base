@@ -1,5 +1,24 @@
 # P2 Debug Window Manual: Change Log
 
+## v1.1.3 (2026-08-16)
+
+The FFT chapter now states what an omitted channel argument does, the way the SCOPE chapter already did.
+
+### Added
+
+- **FFT channel declarations carry an "If omitted" column** (Chapter 9): every position in
+  `'label' MAG high tall base grid color` states its default — magnitude gain `0`, full scale
+  `$7FFF_FFFF`, height the full plot area, baseline `0`, no grid, and the next color from the
+  default palette.
+- **Omission stops the scan** (Chapter 9): the channel arguments are positional, and the first one
+  you leave out ends the scan, so every argument after it keeps its default. Reaching a later
+  argument means supplying the earlier ones, even where you are only restating their defaults.
+
+### Fixed
+
+- **The tools are named `pnut-ts` and `pnut-term-ts`**, hyphenated, throughout — including the
+  command lines you type.
+
 ## v1.1.2 (2026-08-08)
 
 A licensing change. No technical content changed.

@@ -151,7 +151,7 @@ appending EF-053…EF-060. Nothing in flight depends on it, so it was surfaced r
 
 ## ⛔ REVERSAL — a shipped KB correction went the wrong way (2026-08-16) — F-269
 
-### F-269 — I/O pin power domains are groups of **FOUR**, not eight. F-211 corrected a correct fact into a wrong one, and it shipped in KB v1.15.0 and a RELEASED app note. `CONFIRMED`
+### F-269 — I/O pin power domains are groups of **FOUR**, not eight. F-211 corrected a correct fact into a wrong one, and it shipped in KB v1.15.0 and a RELEASED app note. `DONE (2026-08-16) — KB v1.16.3 + P2AN001 manual half applied`
 
 **Surfaced by:** executing «#219», whose instruction was *"ground every number against the
 DOMAIN_AUTHORITY (the ingestion tree, empirical findings first), **not** against F-211's summary
@@ -549,7 +549,7 @@ claim in either direction.
 
 ## ROOT CAUSE of the XBYTE `_RET_ CALL` defect — the KB dropped a qualifier (2026-08-16) — F-273
 
-### F-273 — `_RET_` returns **only if the instruction did not branch**. The KB documented it as an unconditional "Always + Return", and a manual built on that shipped a broken idiom. `CONFIRMED — KB APPLIED 2026-08-16`
+### F-273 — `_RET_` returns **only if the instruction did not branch**. The KB documented it as an unconditional "Always + Return", and a manual built on that shipped a broken idiom. `DONE (2026-08-16) — KB v1.16.4 + XBYTE manual half applied («#227»)`
 
 **This entry supersedes the framing in F-256/EF-058.** Those treated `_RET_ CALL` as a *hardware*
 finding discovered on the bench. It is not. **It is documented Parallax behaviour that our KB failed

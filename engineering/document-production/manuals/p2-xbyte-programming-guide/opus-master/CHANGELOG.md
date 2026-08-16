@@ -1,5 +1,21 @@
 # P2 XBYTE Programming Guide - Changelog
 
+## v1.0.2 (2026-08-16)
+
+**The shared flag helper, defined** — §15.3 states the calling convention its handlers depend on, and the guide is explicit that the return cannot be folded into the call.
+
+### Added
+
+- **`set_nz` is written out** (§15.3) with its contract stated: the caller leaves the 8-bit result in `val` immediately before the call, and the helper reads only `val`. Four instructions, called by every load, ALU and increment opcode in the guest — which is what makes defining it once worthwhile.
+- **Why a shared helper works inside a skip-built handler** (§15.3): the P2 suspends skipping for the duration of a `CALL` and resumes on return, so the helper's own instructions are safe from the caller's skip pattern.
+- **Do not fold the return into the call** (§15.3, hardware callout): `_RET_` executes the instruction and returns **only if it did not branch**, and `CALL` branches — so `_RET_ CALL` never returns. It assembles without complaint, nothing faults, and no flag is set; execution runs out of the handler into whatever the assembler placed next. Measured on P2 silicon running an entire adjacent handler whose bytecode was never in the stream, after which that handler's own `RET` returned to dispatch and the program finished having silently done work it was never asked to do.
+
+### Changed
+
+- **Handlers end with an explicit `RET` after the call**, throughout the guide's examples.
+- **§11.1's `CALL`-depth discussion** notes what the skip-suspension does *not* license, and points at §15.3.
+- **The immediate-load family** (§15.3) shows the shared-body idiom collapsing `LDA`/`LDX`/`LDY`, which differ only in which guest register receives the byte.
+
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.

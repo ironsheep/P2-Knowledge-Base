@@ -1,5 +1,13 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.6 (2026-08-16)
+
+**Keep hub access out of both CORDIC loops** — the chapter's pipelining example now has the shape that was measured clean on silicon.
+
+### Changed
+
+- **§5.1.6 CORDIC pipelining** issues and retrieves at the eight-clock slot cadence with the hub traffic batched outside: a block `RDLONG` in, a `REP`-based register-only fill/steady/drain using `ALTS`/`ALTD` against a cog buffer, and a block `WRLONG` out. A hardware callout carries the measured depths, the reason (throughput, not buffer depth), and the warning that the failure is silent — wrong numbers, not missing ones.
+
 ## v3.1.5 (2026-08-08)
 
 A licensing change. No technical content changed.

@@ -1,5 +1,21 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.6 (2026-08-16)
+
+**An honest platform comparison, and an acknowledgments page that credits only the people who contributed.**
+
+### Added
+
+- **The software axis** (Appendix A): the comparison table covers silicon, but platform decisions are made on language, libraries and tooling — so Appendix A now states plainly where the P2 is weakest. Two new languages to learn, a library situation that is not comparable to an ESP32's or a Pico's, a smaller tooling ecosystem, and a higher cost of entry.
+- **What that buys you** (Appendix A): the case for the P2 is not speed or price, it is the risk of the project failing. A task that must not be late gets a processor of its own and stops being a scheduling problem.
+- **The RP2350 (Pico 2)** joins the platform table, with its PIO blocks discussed as the nearest thing to the P2's approach — and the difference named: a PIO state machine is a specialised resource with a small restricted instruction set, a cog is a full processor running the same language as the rest of your program.
+
+### Changed
+
+- **Acknowledgments** credits deSilva, Chip Gracey and the P2 community. The production note describes AI-assisted authorship in the style of deSilva's P1 tutorial, with every example compiled.
+- **The parallel-processing pitch** (Preface) says what actually goes away — deciding which task gets the processor — and points at Appendix A for the honest cost.
+- **`cog` is the unit** in the event-system code comments, not "CPU".
+
 ## v3.0.5 (2026-08-11)
 
 **Worked examples that run as written** — the smart-pin and serial examples assemble and behave as their text describes, and Chapter 1 tells you which pin your board's LED is on.

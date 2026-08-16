@@ -1,5 +1,14 @@
 # P2AN002 Changelog: CORDIC for Real Work
 
+## v1.0.3 (2026-08-16)
+
+**The pipelining recipe keeps hub access out of both CORDIC loops** — the shape that was measured clean on silicon.
+
+### Changed
+
+- **Recipe 6 (pipelining)** and its example-library program are rewritten together: register-only fill and drain with the hub reads and writes batched outside the loops. The "How this works" prose describes where the hub traffic actually is.
+- **A new pitfall** carries the measured rule: hub access inside either CORDIC loop loses results, and the failure is silent — wrong numbers, not missing ones.
+
 ## v1.0.2 (2026-08-08)
 
 A licensing change. No technical content changed.
