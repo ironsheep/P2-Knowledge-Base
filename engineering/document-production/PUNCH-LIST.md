@@ -5,6 +5,34 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
+## A hand-named backup lives inside deSilva's `opus-master/` and is tracked — OPEN
+
+**Status:** ⏳ Open — found 2026-08-16 by «#222»'s F-254 class sweep, **not fixed** (deleting tracked
+content is not a correction task's call).
+
+`manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER-backup-2025-12-06-pre-backport.md`
+— 65 KB, mode `444`, **tracked in git**, sitting in the content directory.
+
+**Two problems, and the second is the live one:**
+1. It violates the backup convention (`engineering/standards/BACKUP-CONVENTION.md`, Sacred Rule #1):
+   backups are made by `engineering/tools/backup-file.sh` and land in `.backups/`, **never**
+   hand-named beside the file they copy.
+2. **It is sweep poison.** It carries the pre-repair F-254 text verbatim — the "shoulders of giants"
+   opener, the generic `Technical Reviewers` placeholders, and the false *"trained on deSilva's
+   writing style"* line. Every class sweep over `manuals/**` hits it and has to re-adjudicate it as
+   a false positive. This sweep did; the next one will too. It is the same failure shape as the
+   P2AN001 fan-out audit file that seeded F-269 — an inert artifact that reads as live evidence.
+
+Not assembled into the render (the workspace README names `COMPLETE-OPUS-MASTER.md` as the sole
+content source), so nothing ships from it.
+
+**When worked:** confirm nothing references it, then remove it from the tree — the git history *is*
+the backup, which is the whole point of the convention. Check the other manuals for the same shape
+(`archived-2025/` and `initial-chapter-generation/` under deSilva are known-inert and are
+deliberately retained; this one is not in that category).
+
+---
+
 ## IOSP joins two mutually exclusive smart-pin modes with `+` (two tables) — OPEN
 
 **Status:** ⏳ Open — found 2026-08-16 by «#220»'s class sweep, **deliberately not fixed** (IOSP is
