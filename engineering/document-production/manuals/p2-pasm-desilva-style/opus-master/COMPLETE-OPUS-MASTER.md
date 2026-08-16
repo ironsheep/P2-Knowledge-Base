@@ -110,13 +110,7 @@ The information in this manual is subject to change without notice. While every 
 
 # Acknowledgments
 
-This manual stands on the shoulders of giants. We gratefully acknowledge:
-
-### Primary Contributors
-
 **deSilva** - For creating the gold standard of microcontroller documentation with the P1 Assembly Tutorial. Your pedagogical approach, combining technical depth with human empathy, remains unmatched. This manual attempts to honor your legacy while adapting to the P2's capabilities.
-
-**Iron Sheep Productions LLC (Stephen M Moraco)** - For extensive P2 documentation efforts, community tools, and the vision of creating an AI-optimized knowledge base. Your systematic approach to extracting and organizing P2 knowledge made this comprehensive manual possible.
 
 **Chip Gracey** - Creator of the Propeller architecture. Thank you for giving us a microcontroller that thinks differently and challenges us to do the same.
 
@@ -126,32 +120,14 @@ This manual stands on the shoulders of giants. We gratefully acknowledge:
 
 **Early P2 Adopters** - Who dealt with evolving documentation, changing specifications, and still produced amazing projects that showed us what was possible.
 
-### Technical Reviewers
-
-Special thanks to those who reviewed drafts, tested code examples, and provided invaluable feedback:
-
-- The P2 Documentation Team at Parallax
-- Community members who beta-tested examples
-- Everyone who reported errors and suggested improvements
-
-### Inspiration
-
-**The MIT AI Lab** - For showing us that technical documentation can have personality
-
-**Donald Knuth** - For proving that programming texts can be literature
-
-**The Demoscene Community** - For pushing hardware beyond its limits and inspiring us to do the same
-
 ### Production Notes
 
 This manual was created using:
 
 - Knowledge extracted from official Parallax technical documentation and OBEX (Object Exchange) community contributions
-- AI-assisted content generation trained on deSilva's writing style
+- AI-assisted authorship in the style of deSilva's P1 Assembly Tutorial, with every example compiled
 - Community validation and real-world testing
 - A commitment to making parallel processing accessible to everyone
-
-*"If I have seen further, it is by standing on the shoulders of giants."* — Isaac Newton
 
 Any errors, omissions, or dad jokes that fell flat are entirely the responsibility of the authors, not our distinguished contributors.
 
@@ -164,7 +140,7 @@ Well, here we are! You're about to embark on a journey into the heart of the Pro
 
 The Propeller 2 isn't just another microcontroller. Oh no, it's something far more interesting. Imagine, if you will, eight independent processors (we call them cogs) all working together in perfect harmony, sharing a common memory space, yet each running their own programs at full speed. No interrupts fighting for attention, no complex priority schemes, just eight brains working in parallel.
 
-And if you think this sounds terribly complicated, you're probably right... but here's the secret: it's actually simpler than traditional architectures once you understand the philosophy.
+And if you think this sounds terribly complicated, you're probably right... but here's the secret: the thing that usually makes embedded work hard — deciding which task gets the processor, and when — largely goes away. You give a task its own cog, and it simply runs. Learning the P2 is real work, and Appendix A is honest about where that work is; this is what you get for it.
 
 ### About This Manual
 
@@ -2988,7 +2964,7 @@ Chapter 9 takes us into "Streaming Data" - the P2's incredible FIFO system that 
 Watch this data transfer magic:
 
 ```pasm2
-' Copy 512 longs (2KB) at maximum speed — the most a cog block move can hold
+' Copy 512 longs (2KB) fast — the most a cog block move can hold
         setq    ##512-1         ' Setup for 512 longs (cog RAM limit)
         rdlong  buffer, source  ' Read them all!
         setq    ##512-1         ' Setup for 512 longs
@@ -3639,7 +3615,7 @@ Chapter 11 tackles the controversial topic: "Why No Interrupts?" We'll explore w
 Here's a traditional interrupt-driven button handler:
 
 ```antipattern
-' Traditional approach (not P2!) — pseudocode for the interrupt-driven style
+' Traditional approach (not P2!) — interrupt-driven pseudocode
 ISR(BUTTON_INTERRUPT)
     ' Interrupt service routine
     buttonPressed = true
@@ -4990,12 +4966,12 @@ Chapter 15 explores the event system — how to stop polling and start waiting, 
 Remember all those busy loops waiting for things to happen?
 
 ```pasm2
-' OLD WAY: Spin waiting for serial data (burns CPU cycles!)
+' OLD WAY: Spin waiting for serial data (burns cog cycles!)
 wait_rx testp   #RX_PIN wc      ' Check over and over
   if_nc jmp     #wait_rx        ' Spin spin spin...
         rdpin   data, #RX_PIN
 
-' NEW WAY: Sleep until data arrives (zero CPU cycles!)
+' NEW WAY: Sleep until data arrives (zero cog cycles!)
         setse1  #%001<<6 + RX_PIN  ' Wake on IN rise
         waitse1                     ' Sleep until event
         rdpin   data, #RX_PIN
@@ -5889,7 +5865,10 @@ The embedded world is dominated by a handful of architectures:
 | **ESP32** | Xtensa/RISC-V | 2 | Fixed location | FreeRTOS scheduled |
 | **Arduino/AVR** | AVR | 1 | Fixed location | Deterministic but slow |
 | **PIC32** | MIPS | 1 | Fixed location | Interrupt-driven |
+| **RP2350** (Pico 2) | ARM Cortex-M33 or RISC-V | 2 | Fixed, plus **PIO** | Cores cached; PIO deterministic |
 | **P2 Propeller** | Custom | **8** | **Any pin** | **Deterministic** |
+
+The RP2350 deserves a closer look than the others, because its **PIO** blocks are the nearest thing to the P2's approach: small programmable state machines that drive pins on their own schedule, independent of the cores. If you have written PIO programs, you already understand why offloading pin timing to dedicated hardware changes what a small chip can do. The difference is what the helper *is*: a PIO state machine is a specialised resource with its own small, restricted instruction set, while a P2 cog is a full processor running the same language as the rest of your program. The table above shows how many of each you get.
 
 ## What Makes P2 Different
 
@@ -5997,7 +5976,29 @@ Every platform makes trade-offs. P2 optimizes for **determinism, parallelism, an
 | Ultra-low-power sleep | External modules or different platform |
 | Lowest unit cost at 100K+ volumes | P2 targets flexibility over commodity pricing |
 
-**The honest reality**: If your project is "connect to WiFi and display data," an ESP32 does that with less effort. But if your ESP32 project is fighting timing jitter, missing deadlines, or running out of peripheral pins—that's exactly what P2 solves.
+## The Software Axis
+
+The table above compares silicon. For most people choosing a platform, the decision is not made there — it is made on language, libraries, and tools. This is where the P2 is weakest, and you should hear it plainly before you commit a project to it.
+
+**You will learn two new languages.** Spin2 and PASM2 are specific to this chip. There is no Arduino core, no ESP-IDF, no CircuitPython image that makes your existing habits transfer. What you know from other platforms will help you think, but you will be typing unfamiliar code from day one.
+
+**The library situation is not comparable.** For an ESP32 or a Pico, a sensor you buy today almost certainly has a driver written, packaged, and installable in one line, along with a dozen tutorials. On the P2 you check OBEX, and if it is not there you write it from the datasheet. That is a real difference in project hours, and on a deadline it can be the whole decision.
+
+**The tooling is smaller.** One compiler family rather than a dozen, and a community of thousands rather than millions. When you hit something strange, the answer is often not already on the internet — you ask on the forum, or you work it out.
+
+**It costs more.** A Pico 2 is pocket change; a P2 Edge module and a breakout board is a different order of purchase, and at production volumes the gap does not close — the P2 is not competing for the commodity socket. (Parallax publishes current pricing; treat any figure quoted in a book as out of date.)
+
+None of that is a reason not to use the P2. It is the price of admission, and you should know what it is before you pay it rather than discover it in week three.
+
+## What You Are Buying With That
+
+The argument for the P2 is not that it is faster or cheaper, because it is often neither. It is about the **risk of your project failing.**
+
+On a conventional microcontroller, a hard real-time requirement is a scheduling problem you must solve — interrupt priorities, RTOS tasks, disabled sections, and the long tail of "why did that deadline slip once an hour?" On the P2, a task that must not be late gets a processor of its own, and stops being a scheduling problem at all. That raises your odds of finishing: whatever else goes wrong, you can always fall back to dedicating a cog to the time-critical part, which is a far easier move than getting an interrupt scheme right.
+
+That is a different kind of claim from a benchmark. It says the P2 makes a certain class of project *predictable to build*, and it is worth more than any timing number in this appendix.
+
+If your project is "connect to WiFi and display data," an ESP32 does that with less effort, and you should use one. Where the P2 earns its place is the project that is fighting timing jitter, missing deadlines, or running out of peripheral pins.
 
 ## Community Resources
 
@@ -6009,7 +6010,7 @@ While P2's ecosystem is smaller than ARM or Arduino, it's active and welcoming:
 
 **Community Support** - Unlike large platforms where your question disappears in a sea of posts, the P2 community is small enough that questions get noticed and answered. Many community members have decades of Propeller experience.
 
-Coming from Arduino's library-for-everything culture, you'll write more code yourself—but you'll understand it deeply, and help is always available when you get stuck.
+Coming from Arduino's library-for-everything culture, you will write more code yourself. Budget for that. What you get back is that you understand every layer of what you shipped, and there are people here who will help when you get stuck.
 
 ## The P2 Hardware Ecosystem
 

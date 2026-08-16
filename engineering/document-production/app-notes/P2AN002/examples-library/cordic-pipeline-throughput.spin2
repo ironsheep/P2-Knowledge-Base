@@ -20,49 +20,57 @@ PUB main() | i
 
 DAT             org
 
+' THE RULE: no hub access inside either CORDIC loop. Block-read the
+' inputs, keep fill and drain register-only, block-write the results.
+' This shape assumes N >= FILL.
 square_engine
-                mov     inp, ptra            ' @inbuf
-                mov     outp, ptra
-                add     outp, ##N*4          ' @outbuf
                 mov     donep, ptra
                 add     donep, ##N*8         ' @done
-                mov     ii, #0               ' issue index
-                mov     jj, #0               ' retire index
 
-' Fill phase: queue FILL operations before reading any result.
-.fill           cmp     ii, #FILL       wcz
-        if_ae   jmp     #.steady
-                cmp     ii, #N          wcz
-        if_ae   jmp     #.steady             ' N < FILL: queue only N
-                rdlong  t, inp
-                add     inp, #4
+                setq    #N-1                 ' one burst: hub -> cog
+                rdlong  vals, ptra           ' @inbuf -> vals[0..N-1]
+
+                mov     ii, #0               ' issue index (cog)
+                mov     jj, #0               ' retire index (cog)
+
+' Fill phase: queue FILL operations. Register-only.
+                rep     @.fill_end, #FILL
+                alts    ii, #vals
+                mov     t, 0-0
                 qmul    t, t                 ' queue: t*t
                 add     ii, #1
-                jmp     #.fill
+.fill_end
 
-' Steady state: retire one result, queue one more.
-.steady         cmp     jj, #N          wcz
-        if_ae   jmp     #.done
-                getqx   r                    ' next result, FIFO order
-                wrlong  r, outp
-                add     outp, #4
+' Steady state: retire one result, queue one more. Register-only.
+                rep     @.steady_end, #N-FILL
+                altd    jj, #vals
+                getqx   0-0                  ' result lands in cog RAM
                 add     jj, #1
-                cmp     ii, #N          wcz
-        if_ae   jmp     #.steady             ' none left -> drain
-                rdlong  t, inp
-                add     inp, #4
+                alts    ii, #vals
+                mov     t, 0-0
                 qmul    t, t
                 add     ii, #1
-                jmp     #.steady
+.steady_end
 
-.done           wrlong  #1, donep
+' Drain phase: retire the last FILL results. Register-only.
+                rep     @.drain_end, #FILL
+                altd    jj, #vals
+                getqx   0-0
+                add     jj, #1
+.drain_end
+
+                mov     outp, ptra
+                add     outp, ##N*4          ' @outbuf
+                setq    #N-1                 ' one burst: cog -> hub
+                wrlong  vals, outp
+
+                wrlong  #1, donep
                 cogid   t
                 cogstop t
 
-inp             res     1
 outp            res     1
 donep           res     1
 ii              res     1
 jj              res     1
 t               res     1
-r               res     1
+vals            res     N

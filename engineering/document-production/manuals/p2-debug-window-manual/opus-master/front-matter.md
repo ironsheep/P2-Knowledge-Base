@@ -93,6 +93,10 @@
 
 # Copyright and License
 
+```{=latex}
+\markboth{}{}
+```
+
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
 This work is licensed under the Creative Commons Attribution–ShareAlike 4.0 International License (CC BY-SA 4.0).

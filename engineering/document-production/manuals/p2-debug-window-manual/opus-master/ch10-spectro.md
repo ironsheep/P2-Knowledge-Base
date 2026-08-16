@@ -155,7 +155,7 @@ debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
 `RATE` is the number of samples the window collects between display updates. It does
 not change the FFT size; it controls how often a new line is drawn, and therefore
 how fast the waterfall scrolls. Smaller `RATE` means more updates per second and
-faster scrolling at higher CPU cost; larger `RATE` means slower scrolling.
+faster scrolling at higher redraw cost; larger `RATE` means slower scrolling.
 
 The default is `SAMPLES`/8 — for a 512-point FFT, an update every 64 samples. The
 effective scroll rate in lines per second is your sample feed rate divided by

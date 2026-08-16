@@ -12,11 +12,11 @@ Two things, and nothing else:
 
 - **A P2 board** connected to your computer over USB. Any P2 board works; no
   shields, sensors, probes, or external wiring are required.
-- **A PC running `pnut_term_ts`**, the host application that programs the P2 and
+- **A PC running `pnut-term-ts`**, the host application that programs the P2 and
   opens the DEBUG display windows.
 
-The compiler is `pnut_ts`, and the host application that opens the display windows
-is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
+The compiler is `pnut-ts`, and the host application that opens the display windows
+is `pnut-term-ts`; this manual uses that pair throughout. The same DEBUG display
 windows are also hosted by **PNut** and by the **Spin Tools IDE**, so the examples
 work in those environments too — just confirm your environment runs the DEBUG link
 at 2 Mbaud (see [Chapter 13](#ch-13)). Every example in this manual runs on a bare
@@ -30,24 +30,24 @@ overhead. To keep the DEBUG statements — and the display windows they drive �
 compile with the `-d` flag:
 
 ```command
-pnut_ts -d myprogram.spin2
+pnut-ts -d myprogram.spin2
 ```
 
-`-d` (equivalently `--debug`) tells `pnut_ts` to compile the DEBUG statements into
+`-d` (equivalently `--debug`) tells `pnut-ts` to compile the DEBUG statements into
 the binary instead of discarding them. Without it, the `DEBUG()` calls in your
 source produce no output and no windows open. This is the single most common
 reason a window fails to appear: the program was compiled without `-d`.
 
 ## Running it
 
-Run the compiled program from `pnut_term_ts`. It programs the P2 over USB and then
+Run the compiled program from `pnut-term-ts`. It programs the P2 over USB and then
 listens for DEBUG output. When your program executes a `DEBUG()` statement that
-names a display window, `pnut_term_ts` opens that window and begins drawing into
+names a display window, `pnut-term-ts` opens that window and begins drawing into
 it. The window stays open and updates live as more data arrives.
 
 DEBUG data travels from the P2 to the host over a serial link on the P2's pins 62
 (transmit) and 63 (receive) — the standard programming pins — at 2 Mbaud. You do
-not configure any of this; it is the default, and `pnut_term_ts` is already
+not configure any of this; it is the default, and `pnut-term-ts` is already
 listening on it. You only need to know the link exists, because its speed is the
 ceiling on how fast a window can update.
 
@@ -129,7 +129,7 @@ reusable: `CLOSE` a window and its name is free again.
 > graphing windows), so to display a value's text in a TERM use `` `(value) ``
 > substitution instead.
 
-Compile it with `pnut_ts -d`, run it from `pnut_term_ts`, and a small text window
+Compile it with `pnut-ts -d`, run it from `pnut-term-ts`, and a small text window
 titled `Status` opens showing `Reading: 42`.
 
 ## The no-hardware philosophy
@@ -183,7 +183,7 @@ symbols in a `CON` block and the compiler picks them up:
 | `DEBUG_WINDOWS_OFF` | `0` | Set non-zero to suppress all DEBUG windows after programming. |
 
 For display windows to open at all, `DEBUG_PIN_TX` must be 62 — that is the pin
-`pnut_term_ts` listens on. The defaults already satisfy this; the symbols exist for
+`pnut-term-ts` listens on. The defaults already satisfy this; the symbols exist for
 the cases where you must move the link or limit which cogs participate.
 
 ```{.spin2 caption="ch02-term-pin-config.spin2"}
@@ -203,7 +203,7 @@ PUB main()
 ## Where to go next
 
 You now have the loop that every chapter relies on: compile with `-d`, run from
-`pnut_term_ts`, address a window by the name you gave it. From here:
+`pnut-term-ts`, address a window by the name you gave it. From here:
 
 - **[Chapter 3](#ch-3) — TERM** covers the text window in full: cursor positioning, command
   codes, color pairs, and buffered updates. Start there if you are new to the

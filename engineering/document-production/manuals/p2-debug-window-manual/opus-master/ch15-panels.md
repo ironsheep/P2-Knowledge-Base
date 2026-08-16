@@ -107,7 +107,7 @@ panels.
 
 > **Requires `{Spin2_v50}`.** The `LAYER` and `CROP` commands are V50
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
-> with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
+> with a Spin2 v50+ `pnut-ts`. Without it, these commands are not recognized.
 
 **The BMP format matters.** `LAYER` loads a Windows BMP file — the path must name an
 existing `.bmp`. Author it as a **24-bit, uncompressed (BI_RGB), no-alpha** image:

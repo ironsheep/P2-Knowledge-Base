@@ -122,15 +122,23 @@ channels declared, samples alternate channel 0, channel 1, channel 0, channel 1.
 A channel declaration takes these arguments, in order, all optional after the
 label:
 
-| Position | Meaning | Range |
-|----------|---------|-------|
-| label | Channel name (string) | — |
-| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** |
-| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
-| tall | Channel height in pixels | — |
-| base | Baseline offset from the bottom, in pixels | — |
-| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | default `0` |
-| color | Trace color (`$RRGGBB`) | — |
+| Position | Meaning | Range | If omitted |
+|----------|---------|-------|------------|
+| label | Channel name (string) | — | required — the label is what declares the channel |
+| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** | `0` — magnitude drawn at ×1 |
+| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` | `$7FFF_FFFF` — the full positive 32-bit scale |
+| tall | Channel height in pixels | pixels | the full plot-area height — `SIZE`'s height, `256` unless you set it |
+| base | Baseline offset from the bottom, in pixels | pixels | `0` — baseline at the bottom of the plot area |
+| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | 4-bit mask | `0` — no grid lines, no legend text |
+| color | Trace color (`$RRGGBB`) | — | the next entry in the default palette: channel 0 green, 1 red, 2 cyan, 3 yellow, 4 magenta, 5 blue, 6 orange, 7 olive |
+
+The arguments are **positional, and omission stops the scan**. The window reads them
+in the order above and stops at the first one that is not there — so everything after
+that point keeps its default, whether you meant it to or not. There is no way to skip
+an argument to reach a later one: to set `color` you must supply `MAG`, `high`, `tall`,
+`base` and `grid` first, even where you are only restating their defaults. A channel
+declared as `'Signal' 0 $7FFF_FFFF` gets its default `tall`, `base`, `grid` and color,
+and one declared as `'Signal'` alone gets every default.
 
 The two upper `grid` bits add printed **legend text**, not lines: bit 3 labels the
 channel's maximum, and bit 2 its minimum — which for FFT always reads `+0`, because

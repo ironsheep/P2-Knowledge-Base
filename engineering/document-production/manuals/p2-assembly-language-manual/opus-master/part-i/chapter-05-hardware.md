@@ -91,50 +91,77 @@ The CORDIC generates event 15 when GETQX or GETQY executes with no results avail
 This example processes an array of coordinate pairs, rotating each by a fixed angle. The pipeline keeps multiple rotations in flight:
 
 ```pasm2
-' Rotate 16 coordinate pairs by angle
-' Input: point_array (pairs of X,Y longs), angle
-' Output: rotated coordinates written back to array
+' Rotate 16 coordinate pairs by a fixed angle.
+' Input:  point_array (16 pairs of X,Y longs), angle
+' Output: rotated coordinates written back to the same array
+'
+' THE RULE: no hub access inside either CORDIC loop. Block-read the
+' inputs into cog registers, keep fill and drain register-only, then
+' block-write the results back.
 rotate_points
-        mov     count, #16
-        mov     ptra, ##point_array         ' Read pointer
-        mov     ptrb, ##point_array         ' Write pointer (same array)
+        setq    #32-1                       ' 16 pairs = 32 longs
+        rdlong  pts, ##point_array          ' one burst: hub -> cog
 
-        ' Fill phase - start first 6 rotations
-        call    #queue_rotation             ' Queue op 0
-        call    #queue_rotation             ' Queue op 1
-        call    #queue_rotation             ' Queue op 2
-        call    #queue_rotation             ' Queue op 3
-        call    #queue_rotation             ' Queue op 4
-        call    #queue_rotation             ' Queue op 5
-        sub     count, #6
+        mov     ii, #0                      ' input cursor (cog)
+        mov     kk, #0                      ' output cursor (cog)
+        mov     count, #16-6
 
-        ' Steady state - retrieve one, queue one
-.loop   getqx   rotated_x                   ' Get previous result
-        getqy   rotated_y
-        wrlong  rotated_x, ptrb++           ' Store result
-        wrlong  rotated_y, ptrb++
-        call    #queue_rotation             ' Queue next
-        djnz    count, #.loop
+        ' Fill - queue the first 6 rotations. Register-only.
+        rep     @.fill_end, #6
+        alts    ii, #pts
+        mov     x, 0-0
+        add     ii, #1
+        alts    ii, #pts
+        mov     y, 0-0
+        add     ii, #1
+        setq    y                           ' Y to the Q register
+        qrotate x, angle
+.fill_end
 
-        ' Drain phase - retrieve final 6 results
+        ' Steady - retrieve one pair, queue the next. Register-only.
+        rep     @.steady_end, count
+        altd    kk, #pts
+        getqx   0-0
+        add     kk, #1
+        altd    kk, #pts
+        getqy   0-0
+        add     kk, #1
+        alts    ii, #pts
+        mov     x, 0-0
+        add     ii, #1
+        alts    ii, #pts
+        mov     y, 0-0
+        add     ii, #1
+        setq    y
+        qrotate x, angle
+.steady_end
+
+        ' Drain - retrieve the final 6 results. Register-only.
         rep     @.drain_end, #6
-        getqx   rotated_x
-        getqy   rotated_y
-        wrlong  rotated_x, ptrb++
-        wrlong  rotated_y, ptrb++
+        altd    kk, #pts
+        getqx   0-0
+        add     kk, #1
+        altd    kk, #pts
+        getqy   0-0
+        add     kk, #1
 .drain_end
-        ret
 
-' Helper: queue one rotation from point array
-queue_rotation
-        rdlong  x, ptra++
-        rdlong  y, ptra++
-        setq    y                           ' Y coordinate to Q register
-        qrotate x, angle                    ' Start rotation
+        setq    #32-1                       ' one burst: cog -> hub
+        wrlong  pts, ##point_array
         ret
 ```
 
-This pattern achieves one rotation result about every dozen instructions (the loop body plus the queue helper), rather than waiting 55 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
+Results overwrite the input buffer in place, which is safe because the output cursor `kk` trails the input cursor `ii` by six pairs for the whole run — every long is read before it is rewritten.
+
+::: hardware
+**Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on real P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
+
+The failure is silent and it is not a missing result — it is a *wrong* one. You get a full array of plausible-looking coordinates, some fraction of which are stale. Nothing faults, no flag is set, and `QMT` does not help: it records an erroneous early read after the fact rather than warning you first.
+
+The cause is throughput, not a hardware limit on results in flight. Deep pipelining genuinely works — six or seven operations in flight is real. What breaks is a fill or drain loop that cannot keep up with the CORDIC's cadence, so issue and retrieve back-to-back and do the hub work outside the loops.
+:::
+
+The payoff is that the CORDIC's 55-clock latency is paid once for the whole array rather than once per point: while one rotation is being retrieved, several more are already in flight. The hub traffic costs two burst transfers for all 16 points instead of a read and a write per point.
 
 ### 5.1.7 CORDIC Instructions Reference
 

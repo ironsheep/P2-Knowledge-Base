@@ -187,7 +187,7 @@ Each keyword takes the optional `0`–`15` brightness described in
 [Appendix C](#appendix-c). A runtime `BACKCOLOR` sets just the text background. The
 color stays in force until you change it or select a pair with a `4`–`7` code.
 
-> This is a **v52 addition**. Build with a `pnut_ts` of v52 or later and put
+> This is a **v52 addition**. Build with a `pnut-ts` of v52 or later and put
 > `{Spin2_v52}` (or later) on the source file's first line; an older compiler does not
 > recognize the directive.
 

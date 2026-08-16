@@ -170,7 +170,7 @@ debug(`Piano CLEAR)   ' all keys dark again
 
 ## A complete software-only example
 
-This program needs nothing but a P2 and the host running `pnut_term_ts`. It
+This program needs nothing but a P2 and the host running `pnut-term-ts`. It
 generates its own MIDI bytes: it plays a C-major scale one note at a time, then a
 C-major chord using running status, then clears the keyboard.
 

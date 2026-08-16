@@ -3,7 +3,7 @@
 Every element you send to a window travels over the `DEBUG()` serial link. That
 link is finite. The P2 transmits debug output on pin P62 in 8-N-1 format at the
 rate set by the `DEBUG_BAUD` symbol, which defaults to `DOWNLOAD_BAUD` — **2 Mbaud**.
-`pnut_term_ts` runs at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
+`pnut-term-ts` runs at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
 explicitly only if you have changed `DOWNLOAD_BAUD` or your clock requires it, and
 do not drop the DEBUG link to a slow rate such as 115200 — debugging needs the
 bandwidth. (If you drive the windows from the Spin Tools IDE, confirm it runs at

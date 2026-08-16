@@ -270,7 +270,7 @@ PUB main() | x
 Start from the two-window Spin2 example. Add a running peak: track the largest
 magnitude the signal reaches and print it on the TERM alongside the current value,
 so the SCOPE shows the waveform while the panel reports its numbers. The complete
-program below compiles with `pnut_ts` and runs on a bare P2 board with `pnut_term_ts`
+program below compiles with `pnut-ts` and runs on a bare P2 board with `pnut-term-ts`
 open — no wiring.
 
 ```{.spin2 caption="ch14-scope-trace.spin2"}

@@ -96,7 +96,7 @@ PUB main()
   repeat                           ' keep the program (and window) alive
 ```
 
-Compile this with `pnut_ts -d` ([Chapter 2](#ch-2) covers the setup) and a 40×20 terminal
+Compile this with `pnut-ts -d` ([Chapter 2](#ch-2) covers the setup) and a 40×20 terminal
 named `Status` opens and shows `Ready.`. The final `repeat` matters: when a P2
 program ends, it stops sending, so keep the program running while you want to watch
 the window.
@@ -290,10 +290,10 @@ you reach for these display windows.
 
 ## Tooling, in one line
 
-These windows are hosted by **`pnut_term_ts`**, the host application this manual
+These windows are hosted by **`pnut-term-ts`**, the host application this manual
 uses throughout to open and draw them. The same DEBUG display windows are also
 hosted by **PNut**, so the examples work there as well. You produce a program that
-drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+drives them by compiling with **`pnut-ts`** using the `-d` (debug) option.
 [Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates

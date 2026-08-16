@@ -258,8 +258,8 @@ debug(`Sig CLEAR)          ' wipe the buffer and start over
 
 This program needs no wiring. It generates three software waveforms and plots them
 on three stacked SCOPE channels: a CORDIC sine (`QSIN`), a counter-driven triangle,
-and random noise from `GETRND`. It compiles with `pnut_ts` and runs on a bare P2
-board with `pnut_term_ts` open.
+and random noise from `GETRND`. It compiles with `pnut-ts` and runs on a bare P2
+board with `pnut-term-ts` open.
 
 ```{.spin2 caption="ch07-scope-three-channel.spin2"}
 CON
