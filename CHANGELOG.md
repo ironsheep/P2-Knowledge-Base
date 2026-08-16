@@ -34,8 +34,11 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 - Streamer command words: mode fields are positional and vary by mode
 - Spin2 + PASM2: `##hubsymbol` in a `DAT` block inside a Spin2 object resolves against `$400` — pass addresses in with `@`, or use PTRA
 
+- I/O pin power domains: the silicon's sixteen four-pin VIO/GIO domains and the P2 Edge boards' eight LDO groups are documented as the separate layers they are, with the ADC reference following the silicon one
+
 ### Changed
 - WRPIN: `%TT` documented across all four of its contexts, with `P_OE` scoped to smart-pin output modes and the cog-DAC source-select behaviour named
+- ADC entries reference the pin-power-domain page for group size rather than carrying their own copy of it
 
 ## [1.16.2] - 2026-08-11
 

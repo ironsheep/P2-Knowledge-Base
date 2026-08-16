@@ -96,7 +96,7 @@ gotchas:                           # the note's consolidated pitfalls/hardware n
   - flag: pitfall
     text: "High-impedance sources load the pin (input resistance ~500 kOhm) and read low — buffer, or account for the divider (Recipe 4)."
   - flag: hardware
-    text: "Keep a multi-pin measurement inside ONE 8-pin power domain (pins 0-7, 8-15, ... 56-63): each group shares one VIO/GIO pair, which is what makes the measurement absolute. Straddling a group boundary mixes supply domains."
+    text: "Keep a multi-pin measurement inside ONE four-pin silicon power domain (pins 0-3, 4-7, ... 60-63): each group shares one VIO/GIO pair, which is what makes the measurement absolute. Straddling a boundary (e.g. pins 3 and 4) mixes supply domains. The 8-pin grouping on P2 Edge boards is the LDO/header layer, not the ADC's reference domain - see p2kbArchPinPowerDomains."
   - flag: hardware
     text: "Feed VIO from a clean LDO — the internal references track the VIO rail, so a noisy switch-mode VIO degrades every reading."
   - flag: pitfall

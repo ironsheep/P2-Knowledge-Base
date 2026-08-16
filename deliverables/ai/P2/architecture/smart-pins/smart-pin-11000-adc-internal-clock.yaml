@@ -113,8 +113,8 @@ code_examples:
       
       PUB main() | ch, values[4]
         ' Configure 4 consecutive pins for ADC. These are INDEPENDENT channels, so any
-        ' pins work; pins that share a node/reference must stay within ONE 8-pin power
-        ' group (0-7, 8-15, ...) to share a supply domain - see p2kbArchPinPowerDomains.
+        ' pins work; pins that share a node/reference must stay within ONE four-pin power
+        ' group (0-3, 4-7, ...) to share a supply domain - see p2kbArchPinPowerDomains.
         repeat ch from 0 to num_channels-1
           pinstart(adc_base + ch, $8_C600, %00_0111, 0)
         
@@ -169,13 +169,16 @@ notes:
 
 power_domain:
   fact: |
-    P_ADC_GIO / P_ADC_VIO reference THIS pin's own 8-pin power group (pins 0-7, 8-15, ...,
-    56-63 each share one isolated VIO/GIO supply pair). A single-pin ratiometric reading is
-    therefore absolute against its own group's rails.
+    P_ADC_GIO / P_ADC_VIO reference THIS pin's own SILICON power group of FOUR pins (0-3,
+    4-7, ..., 60-63), each sharing one isolated VIO_{x}_{y} / GIO_{x}_{y} supply pair. A
+    single-pin ratiometric reading is therefore absolute against its own group's rails.
   multi_pin_layout: |
-    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE 8-pin group to
-    share a reference domain; straddling a group boundary mixes supply domains and degrades
-    the result. Independent single-ended channels on different pins are unaffected.
+    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE FOUR-PIN group
+    to share a reference domain; straddling a boundary (e.g. pins 3 and 4) mixes supply
+    domains and degrades the result. Independent single-ended channels on different pins are
+    unaffected. NOTE: the 8-pin grouping on P2 Edge boards is the LDO/header layer, where one
+    regulator feeds two silicon groups - it is not the ADC's reference domain. Stay within
+    four; that rule holds on every board.
   reference: "Full mechanism + sourcing: p2kbArchPinPowerDomains"
 
 related:
@@ -183,4 +186,4 @@ related:
   - architecture/smart_pins.yaml
 
 see_also:
-  - "I/O pin power domains — isolated groups of 8 sharing VIO/GIO; governs the P_ADC_GIO/P_ADC_VIO reference: p2kbArchPinPowerDomains"
+  - "I/O pin power domains — silicon groups of 4 sharing VIO/GIO (and the separate 8-pin Edge board LDO layer); governs the P_ADC_GIO/P_ADC_VIO reference: p2kbArchPinPowerDomains"
