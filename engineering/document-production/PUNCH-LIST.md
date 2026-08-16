@@ -5,6 +5,33 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
+## IOSP joins two mutually exclusive smart-pin modes with `+` (two tables) — OPEN
+
+**Status:** ⏳ Open — found 2026-08-16 by «#220»'s class sweep, **deliberately not fixed** (IOSP is
+out of the Sprint-2 release wave, and «#220» is scoped to the Streamer Guide).
+
+Two IOSP tables read `P_PERIODS_HIGHS + P_PERIODS_TICKS`:
+- `part-5-appendices/appendix-d-mode-comparison-charts.md:119` — *"Duty cycle | … | Both measurements needed"*
+- `part-3-input-modes/chapter-15-period-frequency.md:19` — *"Duty cycle | … (or the time-window pair)"*
+
+**Why it is a defect and not just loose typography.** These are two **mutually exclusive smart-pin
+modes** in the `%SSSSS` field — `P_PERIODS_HIGHS` is `%10100`, `P_PERIODS_TICKS` is `%10011`
+(`architecture/smart-pins/smart-pin-10100-*.yaml` / `-10011-*.yaml`). They cannot be combined at
+all: `+` on them produces a third, wrong mode value. The cells *mean* "you need both measurements"
+— run both, on two pins — and the surrounding words support that reading, but the `+` sits between
+two mode constants in a table a reader scans for composable syntax.
+
+**It is the same class as F-259**, whose rule now ships in the Streamer Guide §13.4 ("Combine
+pin-mode constants with `|`, never `+`"): a reader taught that constants compose will read this as
+composition. Here the honest fix is **not** `|` — these do not compose either. Use prose or "and"
+so the cell stops looking like an expression.
+
+**When worked:** re-check the whole IOSP mode-comparison appendix for the same shape, and confirm no
+other manual pairs two mode constants with an operator. Ships with IOSP's next release; no bump is
+owed for it alone.
+
+---
+
 ## Front-matter `\markboth{}{}` missing in four manuals — OPEN
 
 **Status:** ⏳ Open — relocated here 2026-08-15 from a stale auto-memory during the Sprint-2
