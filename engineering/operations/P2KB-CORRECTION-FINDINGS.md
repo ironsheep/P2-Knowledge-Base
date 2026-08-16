@@ -654,6 +654,67 @@ has no closing gate — and a partially-applied correction is invisible precisel
 
 ---
 
+## IOSP suppressed-qualifier probe (2026-08-16, «#230») — F-274…F-275
+
+> **Method and full result:** `engineering/analysis/2026-08-16-iosp-suppressed-qualifier-probe.md`.
+> The probe asked whether a qualifier was ever **never written** — the half no diff can see, after
+> «#214» returned NIL on qualifier *removal*. Result is **not nil**: two findings, both in Ch.19,
+> the one chapter our own `KNOWLEDGE-GAPS.md` already flags as OPEN (G-005).
+>
+> **The pattern is the useful part, and it inverts hedge-counting.** Ch.16 (ADC) — the chapter that
+> qualifies most — is right, and says so explicitly (*"nominal resolution … not ENOB"*, *"a
+> mechanism, not a guaranteed specification"*, *"never a datasheet value"*). Ch.19 — the chapter
+> that qualifies least — is the one with the gap. The guide is well calibrated where its evidence
+> is rich, and goes quiet about its own uncertainty exactly where the evidence is thinnest. The
+> signature to look for is a missing **dependency**, not a missing **word**.
+>
+> **Neither finding ships in the current wave.** IOSP left it when F-261 reversed into F-269, so
+> both wait for IOSP's next release rather than being force-fitted into this one.
+
+### F-274 — IOSP Ch.19 §19.4 teaches an FS-USB configuration at exactly the clock its own source flags, and states no sysclk dependency anywhere. `CONFIRMED`
+
+**Location:** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-4-special-modes/chapter-19-usb.md:122-128`.
+**RELEASED (v1.0.8).**
+
+The chapter's only worked baud example computes full-speed (12 Mbps) USB at **80 MHz**.
+`engineering/ingestion/KNOWLEDGE-GAPS.md` **G-005 is OPEN**: *"Scope of smart-pin USB support;
+documented sysclk floor (**FS-USB > 80 MHz**, LS-USB less)."* The chapter states **no sysclk
+dependency for USB anywhere** — not in §19.4, not in §19.9 Limitations, not in the Quick Reference.
+A reader following the worked example lands on the boundary the open gap is about with nothing to
+tell them a boundary exists.
+
+**Do NOT "fix" this by asserting the floor.** G-005's only source is a reviewer comment (Granville)
+on the Titus document — an **upstream lead, not a citation**, and not something to carry into
+reader-facing prose as fact. Doing so would trade a silence for an unsourced claim.
+
+**Proposed correction:** rework the worked example at a clock unambiguously clear of the question
+(the chapter's own Spin2 example at `:264` already runs at 200 MHz), and state that USB signaling
+needs sysclk headroom with the exact floor unsettled. §19.4's existing transmit-pacing `::: caution`
+is the shape to copy — it already names its own limit correctly.
+
+**Not in scope of this finding:** the register-layer content (WXPIN config word, WYPIN line states,
+the 16-bit RX status word, per-pin IN semantics) is properly sourced to Silicon
+`p2-documentation.txt:8886-9006` and was verified sound during the probe. It is not implicated.
+
+### F-275 — IOSP Ch.19 §19.5 states the P2 provides USB bus power; §19.8 correctly says it does not. `CONFIRMED`
+
+**Location:** `…/chapter-19-usb.md:210` against `:329`. **RELEASED (v1.0.8).**
+
+`:210` — *"As a USB host, the P2: **Provides bus power (5V)**"*. The P2's I/O is 3.3 V and it
+sources no 5 V rail. `:329` correctly lists *"5V power supply for VBUS"* among the external
+components a host design must provide.
+
+A plain factual error, self-contradicted two sections later. Not a calibration defect — surfaced by
+the same read-the-claims pass, and recorded here rather than split off because it was found by the
+probe and belongs with its record.
+
+**Proposed correction:** §19.5 says the P2 *initiates* communication and *requires* a board-supplied
+5 V VBUS rail, pointing at §19.8 for the external components.
+
+**Next finding ID after this block: F-276.**
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
