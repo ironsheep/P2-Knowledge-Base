@@ -938,13 +938,35 @@ not compile and an example that promises three channels while showing two and a 
 `pdftotext` hit on page 76 was a **different**, correctly-rendered passage — checking the image is
 what separated them.)
 
-**The three sites, all in captioned `.spin2` blocks with example-library twins:**
+**The three sites, all in captioned `.spin2` blocks with example-library twins. All three pages were
+rendered and looked at; the severities are NOT equal:**
 
-| Site | Len | What is lost |
-|---|---|---|
-| `ch07-scope.md:272` | 121 | the third SCOPE channel of a three-channel example |
-| `ch06-logic.md:310` | 113 | the tail of the LOGIC create line |
-| `ch14-multiwindow-pasm.md:299` | 110 | the tail of a TERM status-block update |
+| Site | Len | Survives | What is lost | Program? |
+|---|---|---|---|---|
+| `ch07-scope.md:272` | 121 | ~101 | `100 200 0 $00AAFF)` — the **third SCOPE channel** | **BROKEN** — example promises three channels, shows two and a fraction |
+| `ch06-logic.md:310` | 113 | ~101 | `SI' 1 $FFFF00)` — the **third LOGIC channel + the closing paren** | **BROKEN** — line does not even close |
+| `ch14-multiwindow-pasm.md:299` | 110 | ~94 | `' fresh status block` — a **trailing comment only** | **INTACT** — code complete through its `)` |
+
+**So only two of the three are functionally broken.** The ch14 site loses a comment and looks wrong;
+its program is whole. That matters for triage: ch07 and ch06 hand the reader code that cannot run.
+
+**Capacity is ~101 columns, measured from the left edge INCLUDING indentation.** That is why ch14 cuts
+at 94 rather than 101 — it sits four spaces deeper. The budget is a *column* budget, not a
+content-length budget, so a deeply nested line has less room than a top-level one.
+
+**MECHANISM — and it points at a one-line platform fix.** Code blocks do **not** render through
+`listings`. `p2kb-platform-code-coloring.lua` emits every block as
+`\begin{Spin2Block}\begin{Verbatim}[xleftmargin=-10pt]…` — **fancyvrb's `Verbatim`, which has no line
+breaking by default.** The `breaklines=true` in `p2kb-platform-foundation.sty`'s `\lstset` (line 317)
+is **dead code for these blocks**; it configures a package this path never reaches. An over-wide line
+therefore runs off the page instead of wrapping, and nothing stops the build.
+
+**fancyvrb ≥ 3.0 supports `breaklines=true` on `Verbatim`.** Adding it to the filter's Verbatim
+options would convert silent truncation into visible wrapping **across the whole document set**, and
+would make K a style budget rather than a correctness cliff. That is a platform change touching every
+manual's rendering, so it wants a `forge-test` round-trip and a look at how existing long lines
+re-flow — but it is a far better answer than re-authoring lines one at a time, and it protects
+documents nobody has audited yet.
 
 **The declared budget is right; the other 21 over-budget lines are lucky, not correct.** Twenty-four
 lines exceed the manual's declared `code_line_budget_K: 76`. Measured against the shipped PDF, only
