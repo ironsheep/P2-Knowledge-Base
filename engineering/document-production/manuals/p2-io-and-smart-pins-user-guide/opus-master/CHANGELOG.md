@@ -9,6 +9,8 @@
 - **No 5V on P24–P31 or P56–P63 (§19.8)**: the second bank holds pins 56/57, used by this chapter's examples, so those hosts take VBUS elsewhere
 - **Oversampling resolution (Chapter 16 §16.8)**: each 4× oversampling adds about 1 bit only if the input carries enough noise to dither across a code boundary
 - **Wrong/right code pairs (Chapter 11, Chapter 17, Appendix E)**: the wrong half renders as an antipattern, visually distinct from the working code beside it
+- **Worked-example comments (Chapters 7, 9–12)**: every code line fits inside the printed box, with longer explanations carried on their own full-width lines above the code
+- **Exponent notation (Appendix C §C)**: powers of two print as written — `2^X[3:0]` — in the sample-period formulas
 
 ## v1.0.8 (2026-08-08)
 

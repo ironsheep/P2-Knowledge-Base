@@ -2600,7 +2600,7 @@ code read.
 shows the four TESTP forms each on one line in the production build; deSilva, P2AN001 and P2AN002 are
 unaffected (this filter is Assembly-local) and release without it.
 
-### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `CONFIRMED` — **tool fixed 2026-08-17; two released IOSP sites still to repair**
+### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `CONFIRMED` — **tool fixed 2026-08-17; all 11 IOSP sites repaired 2026-08-17, render owed**
 
 **Found:** 2026-08-17, asking a plain status question about Debug Window and IOSP while waiting on the
 Assembly render. Debug Window's code-line audit reported **clean** at K=76; measuring the same files
@@ -2664,6 +2664,21 @@ as `spi_tx_msb_first` on p175 already does — the manual's own neighbouring exa
 Rides IOSP **v1.0.9**, which is already owed a CHANGELOG entry. Debug Window's trio and its 21 other
 over-budget lines ride **v1.1.3**, and the `breaklines` platform fix may change what re-authoring is
 still needed there.
+
+**Done 2026-08-17 — and the scope was 11, not 2.** Repairing only the two cut sites would have left
+nine lines over budget, one of them (`chapter-07-pulse-transition.md:306`, **88 cols**) past the
+86-column box border and therefore already spilling into the margin — a visible defect, not a lucky
+one. All 11 were brought under K=76 by the sanctioned form: standalone comment blocks rewrapped,
+trailing comments moved to their own line above the instruction. Five captioned examples changed in
+lockstep with their masters.
+
+**Verified, not assumed:** code-line gate clean across all 30 IOSP masters (was 11 failures);
+`verify-example-corpus-identity.py` GREEN 15/15; all five changed examples compile clean under
+`pnut-ts -d`. **`pdftotext` reported the p163 comment complete while the rendered page cut it
+mid-word at "multipl"** — the text object exists off-page, so extraction is not evidence of what
+prints. The page image is.
+
+**Still owed:** render v1.0.9 and confirm p163 and p178 on the page.
 
 ### F-290 — nothing continues a `debug()` directive line: the Spin2 `...` and CON symbols both compile clean and ship a different program. `CONFIRMED` — **mechanism established 2026-08-17; prepare-manual guidance corrected**
 

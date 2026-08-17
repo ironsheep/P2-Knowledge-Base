@@ -448,8 +448,9 @@ CON
   _clkfreq = 200_000_000
   LED_PIN = 56
   PWM_FREQ = 500                            ' 500 Hz (no flicker)
-  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds the
-  ' 16-bit frame field, so split it across base and frame: base x frame = period.
+  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds
+  ' the 16-bit frame field, so split it across base and frame:
+  ' base x frame = period.
   BASE_PERIOD = 8
   FRAME_PERIOD = 50000                      ' 8 x 50,000 = 400,000 -> 500 Hz
 

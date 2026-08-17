@@ -429,14 +429,15 @@ PUB spi_deselect()
   PINHIGH(CS_PIN)
 
 PUB spi_tx_byte(value) | reversed
-  ' MSB first
-  reversed := value REV 7              ' reverse the 8 data bits for MSB-first (REV n covers bits 0..n)
+  ' MSB first: reverse the 8 data bits (REV n covers bits 0..n)
+  reversed := value REV 7
 
   WYPIN(MOSI_PIN, reversed)
   WYPIN(CLK_PIN, 16)                        ' 8 clock cycles
 
-  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock pin
-  ' rises when its transition count reaches zero; MOSI's IN only signals buffer-ready)
+  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock
+  ' pin rises when its transition count reaches zero; MOSI's IN only
+  ' signals buffer-ready)
   repeat until PINREAD(CLK_PIN)
 
 PUB spi_write_register(addr, value)
