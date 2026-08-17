@@ -106,9 +106,9 @@ So this declares three channels:
 
 ```spin2
 debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
-debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
-             'Tri'   -1000 1000 100 100 0 $FF0000 ...
-             'Noise' -1000 1000 100 200 0 $00AAFF)
+debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00)
+debug(`Waves 'Tri'   -1000 1000 100 100 0 $FF0000)
+debug(`Waves 'Noise' -1000 1000 100 200 0 $00AAFF)
 ```
 
 Each channel here has a fixed range of −1000 to 1000, is 100 pixels tall, and is

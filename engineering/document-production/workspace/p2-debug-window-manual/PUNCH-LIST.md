@@ -269,7 +269,13 @@ generator fixes above address the channel-def and text-render issues seen here):
   REF source): the top single-channel `Sig 'Wave' AUTO` example, the three-channel
   `Waves` example, and the "Channels are declared as elements" teaching section — an
   in-chapter inconsistency (new acquisition examples are separate-feed; these three are
-  creation-line). **TO RECONCILE once a round-trip confirms SCOPE's creation-line
+  creation-line). **RESOLVED 2026-08-17 (F-292): the `...` was the culprit, not the creation line.** A `debug()`
+  directive cannot be continued — the `...` embeds literally and everything after it is dropped
+  (F-290, proved by byte-comparing the binary). That is exactly the reported fig-07 symptom, an
+  empty "Channel 0" plot. The REF source was right: creation-line channel defs are valid. No
+  confirming capture needed. Original text follows for provenance.
+
+  ~~TO RECONCILE once a round-trip confirms SCOPE's creation-line
   behavior**: if creation-line truly fails for SCOPE (as the figure work observed and as
   FFT's pattern implies), rewrite those three ch07 spots to separate-feed to match ch09;
   if it actually works (REF source says it does), the new examples can stay separate-feed

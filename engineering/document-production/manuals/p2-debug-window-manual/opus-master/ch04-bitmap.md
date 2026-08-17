@@ -140,13 +140,12 @@ entries at the first non-numeric element:
 
 ```spin2
 PUB main() | x, y
-  ' LUT4: a 16-color palette defined inline
-  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS ...
-        $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 ...
-        $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
+  ' LUT2: a 4-color palette, loaded in one LUTCOLORS statement
+  debug(`BITMAP Tiles SIZE 16 16 LUT2)
+  debug(`Tiles LUTCOLORS $000000 $FF0000 $00FF00 $0000FF)
   repeat y from 0 to 15
     repeat x from 0 to 15
-      debug(`Tiles `((x ^ y) & $0F))  ' each pixel is a 4-bit palette index
+      debug(`Tiles `((x ^ y) & $03))  ' each pixel is a 2-bit palette index
 ```
 
 Because the pixels store palette *indices*, you can resend `LUTCOLORS` later to

@@ -142,8 +142,8 @@ horizontally — use a direction in the 4–7 group with bit 3 set, for example
 `TRACE 12`:
 
 ```spin2
-debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
-      RANGE $20000 HSV16X LOGSCALE)
+' {K-waiver: 80 cols, create line, inside the 86-col box}
+debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 RANGE $20000 HSV16X LOGSCALE)
 ```
 
 > **Set scrolling on (`TRACE` 8–15) for a waterfall.** Values 0–7 wrap in place,
@@ -163,8 +163,8 @@ effective scroll rate in lines per second is your sample feed rate divided by
 represents.
 
 ```spin2
-debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 ...
-      RANGE $80000 LUMA8X)
+' {K-waiver: 80 cols, create line, inside the 86-col box}
+debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 RANGE $80000 LUMA8X)
 ```
 
 `RATE` accepts **1–2048**.

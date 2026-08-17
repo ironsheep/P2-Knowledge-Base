@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-292`**
+**Next finding ID: `F-293`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2774,7 +2774,51 @@ render — red antipattern box, correctly indented inside the quote, trailing qu
 `ch08-scope-xy.md`'s wrong/right pair is split: the wrong form is an `antipattern` block, the
 correct form a `spin2` block beside it, matching the Chapter 12 treatment. Rides v1.1.3.
 
-**Next finding ID after this block: F-292.**
+### F-292 — six printed snippets teach a `...` continuation inside `debug()`, so each one silently ships a different program. `CONFIRMED` — **all six fixed 2026-08-17**
+
+**Found:** 2026-08-17, answering "any more outstanding issues with this manual?" after F-290
+established that a `debug()` directive cannot be continued at all. Searching the masters for the
+pattern found six.
+
+**Proved, not inferred.** The ch07 snippet compiled exactly as printed emits
+`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...` — **the `'Tri'` and `'Noise'` channels are gone**
+and the literal `...` is embedded (9,328 vs 9,393 bytes). A reader who copies it gets a one-channel
+scope where the page shows three.
+
+| Site | Reader silently got | Route taken | Authority |
+|---|---|---|---|
+| `ch07-scope.md:109` | 1 of 3 SCOPE channels | three separate feeds | `SCOPE_Update` accepts a channel def and `vIndex` only resets in `SetDefaults` |
+| `ch09-fft.md:163` | `'Left'` only, no `'Right'` | two separate feeds | `FFT_Update` accepts "CLEAR/SAVE/PC_KEY/PC_MOUSE **+ channel-defs** + samples" |
+| `ch04-bitmap.md:144` | palette truncated at entry 7 | LUTCOLORS as its own feed | REF: "Replace LUT palette entries at runtime"; the house form is proven by generator `fig-13-packed-bitmap-frame.spin2` |
+| `ch03-term.md:166` | colour pairs 2 and 3 lost | one line (`SIZE` dropped to fit) | `COLOR` is **config-only** for TERM — no `key_color` arm in `TERM_Update` |
+| `ch10-spectro.md:145` | everything after `TRACE 12` lost | one line + waiver | `SPECTRO_Update` accepts only CLEAR/SAVE/PC_KEY/PC_MOUSE |
+| `ch10-spectro.md:166` | everything after `TRACE 8` lost | one line + waiver | same |
+
+**Verified by compiling all six fixed forms together and reading the emitted directives:** every
+channel, colour pair and config keyword is present, and **zero** literal `...` remain in the binary.
+
+**Why every gate missed them, and this is the transferable part.** These are *uncaptioned*
+illustrative snippets — not paired with an `examples-library` file, so never compiled — and each
+PHYSICAL line was short, because the `...` is what made them fit. So the width gate saw nothing and
+the compile gate never ran. **The defect lived exactly in the gap between "too wide to print" and
+"too broken to run", and neither gate covers it.** Extending compile certification to uncaptioned
+fragments is a real question (fragments must be wrapped to compile) and is deliberately NOT decided
+here.
+
+**One pedagogical change, flagged rather than buried:** `ch04-bitmap.md`'s palette demo moves from
+LUT4 with sixteen entries to **LUT2 with four** (pixels `& $03`), because sixteen `$RRGGBB` values
+cannot fit a printable line by any means — `LUTCOLORS` overwrites from index 0, so it cannot be split
+across messages either. The teaching survives intact (LUT mode, inline palette in one statement,
+pixels as indices) at a smaller scale. The chapter's LUT-mode reference table still documents LUT4 as
+4 bits / 16 entries.
+
+**It also closes a punch-list question open since June.** The "Other" section asked whether the
+original `fig-07` failure — a creation-line channel def drawing an empty "Channel 0" plot — "came
+from a `...` line-continuation artifact." It did. The creation-line-versus-separate-feed debate was
+chasing the wrong variable; the `...` was dropping the channels, so the REF source was right all
+along and the TO-RECONCILE item closes on evidence rather than another capture.
+
+**Next finding ID after this block: F-293.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 
