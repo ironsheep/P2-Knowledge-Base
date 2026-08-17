@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-287`**
+**Next finding ID: `F-288`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2438,7 +2438,41 @@ Part titles and table captions still render as before.
 4. **`release-manual` 1d′ — read the whole page you opened.** F-285 cost nothing because it sat on
    F-284's page; a narrowly-scoped check would have passed it through again.
 
-**Next finding ID after this block: F-287.**
+### F-287 — the P2AN001 companion states the ~15 mV error floor as fact; the note marks it designer-stated. `CONFIRMED` — **fixed 2026-08-17**
+
+**Found:** 2026-08-17, acting on F-283's own scope note ("the same drift is plausible in every app
+note whose doc has advanced since its companion was written"). P2AN001 was in the release flight, so
+its pair was checked before shipping.
+
+**The disagreement.** `P2AN001.md:626` is careful about provenance: *"The P2's designer reports having
+seen pins read as much as 15 mV apart in absolute terms (Reference 2) — a designer-stated figure for
+the pin-to-pin spread, **not a characterized specification**."* The companion's `gotchas` carried the
+number flat — *"different pins can read up to ~15 mV apart in absolute terms. A hardware limit"* —
+with no provenance at all.
+
+**Why it matters more than a missing word.** An agent reading only the companion cites ~15 mV as a
+specification. That is the **confidence/source mismatch** that this project treats as a trust-killer,
+and it is the same failure as F-273: the qualifier is the half that goes missing, and its absence
+reads as a stronger claim rather than an incomplete one. The note also names where the front-end
+limits and calibration guidance live (I/O and Smart Pins User Guide §16.8); the companion did not.
+
+**Fixed:** the `gotchas` entry now carries the designer-stated qualifier, the explicit "NOT a
+characterized specification", the hardware-limit-not-noise distinction, the per-pin calibration
+remedy, and the §16.8 pointer.
+
+**Category swept, and it is otherwise clean.** All seven app-note companions were checked for OBEX
+citations: P2AN001/005/006/007 carry none; P2AN002 had four wrong or incomplete (F-283); P2AN003 (4
+citations) and P2AN004 (2) were verified against the live catalog and are **correct** — #2860 EZ Sound
+(Jon McPhalen / jonnymac), #2831 P2_rctime (phonoclese), #2829 Quadrature Encoder (Jon McPhalen /
+jonnymac), #2861 reSound. So the drift was specific to P2AN002, not systemic.
+
+**One open question, deliberately NOT edited.** P2AN003's companion credits OBEX #2861 reSound to
+**"Johannes Ahlebrand"**; the live catalog's author field reads only **"Johannes"**. The surname may
+be correct from the object's own source header, and absence from the catalog field is not proof it is
+wrong — so this is not treated as a defect to fix silently in a **published** note. Needs Stephen's
+call: verify against the object source, or fall back to the catalog form.
+
+**Next finding ID after this block: F-288.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

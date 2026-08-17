@@ -92,7 +92,7 @@ prerequisites:
 
 gotchas:                           # the note's consolidated pitfalls/hardware notes, as structured flags
   - flag: pitfall
-    text: "Matched-resistor error floor: GIO/VIO/pin are each measured through a separate on-chip resistor; different pins can read up to ~15 mV apart in absolute terms. A hardware limit — averaging does NOT remove it. Calibrate per pin for absolute work."
+    text: "Matched-resistor error floor: GIO/VIO/pin are each measured through a separate on-chip resistor, and those resistors do not match perfectly. The P2's designer reports having seen pins read as much as 15 mV apart in absolute terms — a DESIGNER-STATED figure for the pin-to-pin spread, NOT a characterized specification. It is a hardware limit rather than noise, so averaging does NOT remove it. Calibrate each pin once against a known voltage for absolute work. See the P2 I/O and Smart Pins User Guide section 16.8 for the front-end limits and the calibration guidance."
   - flag: pitfall
     text: "High-impedance sources load the pin (input resistance ~500 kOhm) and read low — buffer, or account for the divider (Recipe 4)."
   - flag: hardware
