@@ -2,6 +2,8 @@
 
 This section contains all PASM2 instructions beginning with the letter Q. The Q instructions are part of the CORDIC coprocessor family.
 
+**A CORDIC command and the GETQX/GETQY that collects its result must not be split by an interrupt.** Every instruction on this page queues an operation whose result arrives 55 clocks later, so the issue and the collection are separate instructions with a gap between them. In PASM2 with interrupts enabled, fence that gap with a REP block, which blocks interrupts for its duration — including debug interrupts that ordinary masking cannot hold off. See [REP](#rep) for the pattern. Spin2 needs no such fence; the interpreter already protects its own CORDIC use.
+
 
 
 ::: instrheader

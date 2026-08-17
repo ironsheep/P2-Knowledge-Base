@@ -136,6 +136,8 @@ Cog control instructions manage cog operations including starting and stopping c
 
 CORDIC (Coordinate Rotation Digital Computer) instructions provide hardware-accelerated mathematical operations. The dedicated coprocessor performs multiplication, division, square root, trigonometric functions, logarithms, and coordinate transformations with high precision.
 
+These instructions come in pairs: one queues an operation, and GETQX/GETQY collects its result 55 clocks later. **The two must not be split by an interrupt.** In PASM2 with interrupts enabled, fence the sequence with a REP block, which blocks interrupts for its duration — see [REP](#rep). Spin2 needs no such fence; the interpreter already protects its own CORDIC use.
+
 [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QEXP](#qexp), [QFRAC](#qfrac), [QLOG](#qlog), [QMUL](#qmul), [QROTATE](#qrotate), [QSQRT](#qsqrt), [QVECTOR](#qvector)
 
 ---

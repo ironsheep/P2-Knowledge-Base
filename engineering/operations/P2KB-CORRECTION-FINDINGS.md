@@ -1335,6 +1335,14 @@ learns nothing about the hazard. They find it only by happening to read the `REP
   improvement, not a correctness bug in the shipped text, so it can ride the manual's next natural
   release rather than forcing one.
 
+**RESOLVED 2026-08-17 («#235» wave prep).** Confirmed still open first — `instructions-q.md` had
+**zero** interrupt mentions, and `instructions-g.md`'s three were all GETBRK. The rule now opens the
+**Q instruction section** (where a reader looking up QMUL or QROTATE lands) and the **CORDIC
+Coprocessor category** (which reaches GETQX/GETQY too), both pointing at REP for the pattern and both
+noting Spin2 needs no fence. Plain reference prose, not `{.warningbox}` — that convention is reserved
+for silicon bugs, and this is a programming hazard. **Rides v3.1.6**, which was otherwise the one wave
+element with no prose change, so it costs nothing to carry.
+
 **Also observed (not a defect):** 22 stray `*.backup-encoding-conversion` files sit in
 `p2-assembly-language-manual/opus-master/part-ii/`. They are **untracked** — `git ls-files` returns
 zero — so nothing ships and no glob in the assemble scripts reaches them (those use explicit

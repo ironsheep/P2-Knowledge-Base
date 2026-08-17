@@ -8,6 +8,10 @@
 
 - **§5.1.6 CORDIC pipelining** issues and retrieves at the eight-clock slot cadence with the hub traffic batched outside: a block `RDLONG` in, a `REP`-based register-only fill/steady/drain using `ALTS`/`ALTD` against a cog buffer, and a block `WRLONG` out. A hardware callout carries the measured depths, the reason (throughput, not buffer depth), and the warning that the failure is silent — wrong numbers, not missing ones.
 
+### Added
+
+- **The CORDIC interrupt fence is stated where a reader meets it.** A CORDIC command and the GETQX/GETQY that collects its result 55 clocks later must not be split by an interrupt, and REP is the fence. The manual has always taught this on the REP page — but someone about to write a CORDIC sequence looks up QMUL or QROTATE, and those pages said nothing. The rule now opens the Q instruction section and the CORDIC Coprocessor category, both pointing at REP for the pattern, with the note that Spin2 needs no fence.
+
 ## v3.1.5 (2026-08-08)
 
 A licensing change. No technical content changed.

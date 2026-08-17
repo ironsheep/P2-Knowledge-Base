@@ -253,3 +253,52 @@ Not blocking anything. The convention and its gate are in place; this is only
 the disposition of what predates them.
 
 ---
+
+---
+
+## The corrections register has no machine-readable status — OPEN
+
+**Status:** ⏳ Open — diagnosed 2026-08-17 during «#235» wave prep, when Stephen asked how many
+findings we are losing by deferring them. **The answer was not a backlog; it was worse.**
+
+**The measurement.** 37 findings in `engineering/operations/P2KB-CORRECTION-FINDINGS.md`. Completion
+state is recorded in **four incompatible notations** and sometimes not at all:
+
+| Where | Examples |
+|---|---|
+| A tag in the `###` title | `CONFIRMED` · `OPEN` · `DONE (2026-08-16)` · `NEEDS-VERIFICATION` · `NOTED` |
+| Inline bold prose | `**RELEASED**` · `**APPLIED**` · `**KB APPLIED**` · `**FIXED**` · `**RESOLVED**` · `**MANUAL HALF APPLIED**` |
+| A `**Status:**` line | F-271 only |
+| Nowhere | 18 of 37 |
+
+**It is wrong in both directions, which is the actual danger.** Of the 18 unmarked findings, four were
+spot-checked against the artifacts — F-254, F-255, F-256, F-257 — and **all four were already fixed**.
+Meanwhile F-262 reads `RELEASED` but ships in v1.1.3, which has not shipped. So the register
+simultaneously hides completed work and claims work that has not gone out.
+
+**`MANUAL HALF APPLIED` is the worst offender** and cost real time in this very audit: it reads as
+"half done" and actually means *the manual half of a two-half KB+manual fix was applied*. Three
+Streamer findings carry it (F-259, F-260, F-266) and all three are complete.
+
+**Consequences, in order of severity:**
+
+1. **The drain gate cannot run.** `document-audit` claims to own a YAML-HEAD drain gate — *"no publish
+   while actionable corrections are pending."* Pending is not determinable without re-reading 37 prose
+   blocks, so the safety net meant to catch exactly this worry **is not armed**.
+2. Answering "what is outstanding?" costs a full re-read, so nobody does it routinely.
+3. Genuinely deferred work looks identical to finished work.
+
+**The fix.** One `**Status:**` line per finding, fixed vocabulary — `OPEN` · `FIXED-UNRELEASED` ·
+`RELEASED` · `BLOCKED-ON-EVIDENCE` · `PUNCH-LISTED` · `UNVERIFIED` — plus a small validator that
+prints the open set and can be called by the drain gate. **Mark `UNVERIFIED` wherever the state is not
+actually checked against the artifact**; a confidently wrong status is the same trap in a new costume,
+and this register already teaches that a status line is not evidence.
+
+**Deferred deliberately, not forgotten** — the goal right now is released PDFs, and this is a register
+refactor that touches 37 entries and gates nothing in the current wave (that cross-reference was run
+first: see the wave audit below). It should run **before the next audit cycle**, not before this
+release.
+
+**Verified consequence for the current wave: none.** All 37 findings were cross-referenced against the
+seven wave elements on 2026-08-17. Exactly two touched them and both were dealt with — F-281 (Debug
+Window, blocking, evidence-blocked) and F-224 (Assembly, fixed into v3.1.6 that same day).
