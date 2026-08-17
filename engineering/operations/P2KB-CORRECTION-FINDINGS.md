@@ -1751,6 +1751,52 @@ adopting Christof's own framing of the P2's strength, which is sharper than ours
 critic: *"the probability to succeed in a project is higher, because you can always fall back to
 dedicate a core to some time critical part — much more easy than working with interrupts."*
 
+### F-258 — XBYTE's fitness for vintage-CPU emulation, raised by Wuerfel_21 (#112). `RESOLVED-INVALID` — the guide already argues this position, using Wuerfel_21's own projects as its evidence
+
+> **Entry written 2026-08-17, three days after the fact it records.** F-258 was cited as resolved
+> in the sprint plan and the analysis doc, and the section header above counts it — but **no entry
+> was ever filed here.** A conclusion asserted in two planning documents and absent from the
+> register is not routed, and this one is load-bearing: it is the stated reason a community member's
+> detailed technical argument produced no change. Filed now, with every citation re-verified against
+> the live master rather than carried from the analysis doc.
+
+**The claim (#112):** XBYTE suits constructed bytecode machines, not vintage CPUs, because it
+allows no common code between handlers — which virtual interrupts and cycle-precise timing require.
+Cites MisoYume's per-instruction event checks; calls Chip's Space Invaders a hack that works only
+because its single VBlank interrupt is not timing-critical.
+
+**Verified against `xbyte-body.md` at HEAD (2026-08-17) — the guide reaches the same conclusion:**
+
+| Where | What it says |
+|---|---|
+| `:100` | the book is behaviour-accurate, "not cycle-accurate, and that is a deliberate choice" |
+| `:1203` | "Cycle-accurate timing, interrupt polling, bus sharing, refresh registers, tracing. If the answer is 'a lot,' you want a loop body, and **XBYTE takes it away. Stop at rung 2.**" |
+| `:1225` | the 6502 capstone is named "a teaching artifact" |
+| `:1875` | an entire section — **§18.7 "When XBYTE is the wrong tool"** |
+| `:2081` | **Appendix C.4** is devoted to the Yume suite, credited to **wuerfel\_21** by name, with the IRQsome GitHub organization and the SourceHut mirror |
+| `:2089` | "**These use no XBYTE at all** — the appendix's sharpest illustration that instruction shape does not decide the rung" |
+| `:2091` | "the 65816 is byte-stream and opcode-first — by instruction shape the *ideal* XBYTE guest — and it takes rung 2 anyway" |
+
+So the guide does not merely concede the boundary; it **builds its case on this poster's work and
+credits it by name.** TonyB\_ (#116) confirms the same from the opposite side of the technical
+argument — *"XBYTE is not always the right option **as the manual says more than once**"* — which
+is independent evidence that a reader who works through the book does find it.
+
+**Therefore: no content defect. Do not rewrite the framing.** Filed `RESOLVED-INVALID` so this is
+not re-opened off the thread.
+
+**What it does prove** is that the framing is **not reaching readers who sample the book rather
+than work through it**. That is a findability problem, and it belongs with the findability item
+Christof raised (#110) — not to the technical content.
+
+**One genuinely open suggestion from the same post, not a defect and not yet queued:** a
+**Brainfuck interpreter** as the guide's worked example — unambiguously a constructed bytecode
+machine, and far less rope than a 6502 slice. Unactioned; no owner.
+
+**Do not cite this thread as authority.** TonyB\_'s "XBYTE was designed for the Z80 in particular…
+via the forum and behind-the-scenes" is a design-intent claim with no traceable source. If the
+manual's framing ever needs it, it is a **question for Chip**, not a citation.
+
 ## Community bench review — refaQtor, P2 Rev C @ 300 MHz (2026-08-14) — F-259…F-263
 
 **Origin:** `p2-manuals-review-findings.md` (posted as `p2-manuals-review-findings.zip`, forum
