@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-291`**
+**Next finding ID: `F-292`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2720,7 +2720,61 @@ probably load-bearing in every channel declaration in the manual.
 `ch07-scope.md:272` (121, the SCOPE channel case, source-determined split available) and
 `ch14-multiwindow-pasm.md:299` (110, trailing comment only, comment-above fix).
 
-**Next finding ID after this block: F-291.**
+### F-291 — the escaper missed two code contexts, so five lines of a released manual print a literal backslash. `CONFIRMED` — **escaper fixed, sweep extended, sites verified clean 2026-08-17**
+
+**Found:** 2026-08-17, testing F-278's deferred question (does `> ```antipattern` render inside a
+blockquote?) on the daemon before risking a production render. The answer is **yes** — but the test
+page showed the code inside the blockquote as `DEBUG(\`SCOPE\_XY W 128 'A')`, with a literal
+backslash, while the identical pair *outside* the blockquote rendered `SCOPE_XY` correctly.
+
+**Five lines are affected in the RELEASED Debug Window v1.1.2**, verified by extracting the shipped PDF:
+
+| Page | Prints | Context |
+|---|---|---|
+| p88 | `DEBUG(\`SCOPE\_XY W 128 'A')` and the `W SIZE` line beside it | fenced block **inside a blockquote** |
+| p159 | `PC\_KEY`, `PC\_MOUSE`, `DEBUG\_END\_SESSION` | **double-backtick** inline spans |
+
+**Mechanism — two blind spots in `latex_escape_processor.py`, both proved by probe:**
+
+| Context | Before | Correct? |
+|---|---|---|
+| prose | escapes `_`→`\_` | ✅ right |
+| `` `single span` `` | protected | ✅ right |
+| ``` ``double span`` ``` | **escaped** | ❌ → p159 |
+| fenced block | protected | ✅ right |
+| `> ` fenced block | **escaped** | ❌ → p88 |
+| quoted prose | escapes | ✅ right |
+
+1. **Fence detection was not blockquote-aware.** It tested `line.strip()`, which leaves the `> ` in
+   place, so `> ```spin2` never registered as a fence; the body was treated as prose and escaped.
+   Fixed by stripping leading blockquote markers before the fence test only — quoted *prose* must
+   still escape exactly like unquoted prose, and it does.
+2. **Double-backtick spans were unmatched.** The inline pattern is `(?<!`)(`[^`\n]+`)`: its body
+   excludes backticks and it refuses a preceding backtick, so ``` ``DEBUG(`Name `PC_KEY(@v))`` ```
+   — the form used precisely *because* the content contains a backtick — fell through to prose.
+   Fixed by protecting double-backtick spans before single ones.
+
+**Why the escaped character PRINTS rather than escaping:** both contexts still render verbatim
+downstream, and inside verbatim `\_` is two literal characters. The escape was never wrong in
+LaTeX terms; it was applied where LaTeX rules do not apply.
+
+**`audit-tex-artifacts.py` (F-286) MISSED this, and now does not.** The sweep excluded verbatim
+regions wholesale — correct for every other check, since code legitimately contains almost every
+signature. But *inside* verbatim a backslash-escaped special is the one thing that IS a defect, so
+the sweep now scans verbatim for exactly `\_ \& \# \% \$`. Verified it flags the leak and does
+**not** flag legitimate PASM2 `#\label` (that is `\l`, not in the set) or correct prose escaping.
+**A skip-list is an assumption, and this one had a hole in it.**
+
+**Fixed and verified:** the staged Debug Window markdown now carries `SCOPE_XY`, `PC_KEY`,
+`PC_MOUSE` and `DEBUG_END_SESSION` clean in their code contexts, while prose occurrences still
+escape correctly (38 legitimate `\_` remain, all prose).
+
+**F-278's deferred site is now converted.** With the fence-in-blockquote combination proven to
+render — red antipattern box, correctly indented inside the quote, trailing quoted prose intact —
+`ch08-scope-xy.md`'s wrong/right pair is split: the wrong form is an `antipattern` block, the
+correct form a `spin2` block beside it, matching the Chapter 12 treatment. Rides v1.1.3.
+
+**Next finding ID after this block: F-292.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

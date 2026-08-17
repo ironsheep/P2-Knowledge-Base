@@ -120,6 +120,38 @@ CHECKS = [
 ]
 
 
+# Inside a Verbatim region the content is LITERAL, so a backslash-escaped special
+# is not escaping — it PRINTS the backslash. This is the one class that must be
+# checked INSIDE the regions every other check skips, and skipping it is why this
+# tool missed 5 shipped lines in Debug Window v1.1.2 (p88 "DEBUG(`SCOPE\_XY …",
+# p159 "PC\_KEY"/"PC\_MOUSE"/"DEBUG\_END\_SESSION").
+#
+# Root cause was upstream, in latex_escape_processor.py: it did not recognize a
+# fence carrying a blockquote marker ("> ```spin2") nor a double-backtick inline
+# span (``DEBUG(`Name `PC_KEY(@v))``), so it escaped both as prose. Both fixed —
+# this check is the backstop for whatever escapes next.
+#
+# `#\label` is legitimate PASM2 (backslash BEFORE a label), which is `\l`, not one
+# of these, so it does not match.
+_VERBATIM_ESCAPE_LEAK = re.compile(r"\\[_&#%$]")
+
+
+def scan_verbatim_escape_leaks(path):
+    """Return [(line_no, line_text)] for escaped specials INSIDE verbatim regions."""
+    findings = []
+    depth = 0
+    for i, ln in enumerate(Path(path).read_text(errors="replace").splitlines(), start=1):
+        if _BEGIN.search(ln):
+            depth += 1
+            continue
+        if _END.search(ln):
+            depth = max(0, depth - 1)
+            continue
+        if depth > 0 and _VERBATIM_ESCAPE_LEAK.search(ln):
+            findings.append((i, ln.strip()[:160]))
+    return findings
+
+
 def scan(path):
     """Return a list of (check_id, description, line_no, line_text)."""
     text = Path(path).read_text(errors="replace")
@@ -171,6 +203,11 @@ def main(argv):
             print(f"ERROR reading {p}: {e}")
             return 2
         name = Path(p).name
+        leaks = scan_verbatim_escape_leaks(p)
+        if leaks:
+            findings += [("verbatim-escape-leak",
+                          "backslash-escaped special INSIDE verbatim (prints the backslash)",
+                          ln, txt) for ln, txt in leaks]
         if not findings:
             print(f"CLEAN  {name}")
             continue

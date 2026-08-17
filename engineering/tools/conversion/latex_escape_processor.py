@@ -71,8 +71,17 @@ def process_latex_escaping(input_file, output_file):
         line = line.rstrip('\n')
 
         # Track code blocks (```pasm2, ```markdown, etc.) and raw LaTeX blocks
-        # Check the stripped line to handle indented code blocks
-        stripped = line.strip()
+        # Check the stripped line to handle indented code blocks.
+        #
+        # BLOCKQUOTE-AWARE: a fence inside a blockquote arrives as "> ```spin2".
+        # Testing line.strip() left the "> " in place, so the fence was never
+        # recognized, the block was treated as prose, and every _ inside it became
+        # \_ — which prints the backslash, because the block still renders verbatim.
+        # That shipped in Debug Window v1.1.2 p88 ("DEBUG(`SCOPE\_XY W 128 'A')").
+        # Strip leading blockquote markers before testing, and keep using `stripped`
+        # for the fence tests only — the body still escapes normally, since quoted
+        # PROSE must escape exactly like unquoted prose.
+        stripped = re.sub(r'^\s*(?:>\s*)+', '', line).strip() or line.strip()
         if stripped.startswith('```'):
             # Check if this is a raw LaTeX block opening/closing
             if stripped == '```{=latex}' or stripped.startswith('```{=latex}'):
@@ -208,8 +217,17 @@ def process_latex_escaping(input_file, output_file):
         # BUT preserve valid LaTeX commands like \textbf{}, \textit{}, etc.
         
         # PROTECT INLINE CODE FIRST (backticks)
-        # Find and protect inline code `like this`
+        # DOUBLE-backtick spans come first: ``DEBUG(`Name `PC_KEY(@v))`` is the form
+        # used when the content itself contains a backtick. The single-backtick
+        # pattern below cannot match it (its body excludes backticks and it refuses a
+        # preceding backtick), so the span was escaped as prose and printed
+        # "PC\_KEY" — shipped in Debug Window v1.1.2 p159, three lines.
         protected_inline_code = []
+        for match in re.finditer(r'``.+?``', line):
+            placeholder = f'XPROTECTINLINECODE{len(protected_inline_code)}X'
+            protected_inline_code.append(match.group(0))
+            line = line.replace(match.group(0), placeholder, 1)
+
         # Use negative lookbehind to avoid matching ``` code blocks
         inline_code_pattern = r'(?<!`)(`[^`\n]+`)'  # Match `text` but not ```
         for match in re.finditer(inline_code_pattern, line):

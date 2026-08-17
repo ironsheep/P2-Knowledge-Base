@@ -67,8 +67,11 @@ The configuration keywords you can add to the creation line:
 > message, exactly as it is not valid on a LOGIC create line. The usual way to write one
 > by accident is to drop a keyword and leave its number stranded:
 >
-> ```spin2
+> ```antipattern
 > debug(`SCOPE_XY W 128 'A')      ' WRONG -- 128 follows no keyword
+> ```
+>
+> ```spin2
 > debug(`SCOPE_XY W SIZE 128 'A') ' what was meant
 > ```
 >
