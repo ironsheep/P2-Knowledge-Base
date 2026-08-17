@@ -118,7 +118,7 @@ PUB logger_cog()
 
 When configured for DAC output, mode %00001 generates pseudo-random noise on the 8-bit DAC. Each pin produces a unique random pattern.
 
-`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode — the DAC_MODE bits (M[12:10]=%101) decide whether the pin acts as a long repository or a noise DAC.
+`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode. The DAC_MODE bits — `M[12:10]` = `%101` — decide whether the pin acts as a long repository or a noise DAC.
 
 ### Configuration
 

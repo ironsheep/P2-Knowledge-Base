@@ -2980,7 +2980,7 @@ WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 
 ## 4.10 Input Routing
 
-Smart pins draw their A and B inputs using the same input-routing constants introduced for Enhanced Direct I/O in §2.4: `P_LOCAL_A`/`P_PLUS1_A`…`P_MINUS1_A` (and the `_B` equivalents) select the source pin, `P_TRUE_A`/`P_INVERT_A` set the polarity, and `P_PASS_AB`/`P_AND_AB`/`P_OR_AB`/`P_XOR_AB`/`P_FILT0_AB`…`P_FILT3_AB` combine the A and B inputs before use. The A input is the primary input for most modes; the B input carries secondary signals (clock, quadrature channel B, etc.). See §2.4 for the full constant tables.
+Smart pins draw their A and B inputs using the same input-routing constants introduced for Enhanced Direct I/O in §2.4. The `P_LOCAL_A` through `P_MINUS1_A` constants (and their `_B` equivalents) select the source pin; `P_TRUE_A` and `P_INVERT_A` set the polarity; and `P_PASS_AB`, `P_AND_AB`, `P_OR_AB`, `P_XOR_AB`, and `P_FILT0_AB` through `P_FILT3_AB` combine the A and B inputs before use. The A input is the primary input for most modes; the B input carries secondary signals (clock, quadrature channel B, etc.). See §2.4 for the full constant tables.
 
 When a pin is **not** in a smart pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a smart pin.
 
@@ -9022,7 +9022,7 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
 
 ### Why Three Measurements?
 
-The actual measurement time extends beyond X clocks to complete the final period. Using P_COUNTER_TICKS provides the **actual** measurement duration, enabling precise calculations:
+The actual measurement time extends beyond X clocks to complete the final period. The `P_COUNTER_TICKS` mode provides the **actual** measurement duration, enabling precise calculations:
 
 ```formula
 actual_frequency = MULDIV64(periods, sysclk, time_clks)
@@ -10893,7 +10893,7 @@ PUB logger_cog()
 
 When configured for DAC output, mode %00001 generates pseudo-random noise on the 8-bit DAC. Each pin produces a unique random pattern.
 
-`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode — the DAC_MODE bits (M[12:10]=%101) decide whether the pin acts as a long repository or a noise DAC.
+`P_REPOSITORY` and `P_DAC_NOISE` name the same %00001 mode. The DAC_MODE bits — `M[12:10]` = `%101` — decide whether the pin acts as a long repository or a noise DAC.
 
 ### Configuration
 
@@ -12718,7 +12718,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | NCO Duty | P_NCO_DUTY | 0.05 Hz to 100 MHz | 32-bit | Variable | Yes | Medium | Variable duty waves |
 | PWM Triangle | P_PWM_TRIANGLE | 1 Hz to 390 kHz | 16-bit | Full range | Yes | Low | Motor, LED dimming |
 | PWM Sawtooth | P_PWM_SAWTOOTH | 1 Hz to 780 kHz | 16-bit | Full range | Yes | Low | Motor, audio |
-| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Autonomous | High | Power supply |
+| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Auto | High | Power supply |
 | DAC 8-bit | P_DAC_xxx | DC | 8-bit | N/A | Yes | Low | Voltage reference |
 | DAC 16-bit | P_DAC_DITHER_* | DC to audio | 16-bit | N/A | Yes | Medium | Audio, precision |
 | Sync TX | P_SYNC_TX | Clock rate | 1-32 bits | N/A | Clocked | Medium | SPI master |

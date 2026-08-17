@@ -474,7 +474,7 @@ Several critical registers exist outside the cog RAM address space and are acces
 
 The program counter is a 20-bit register that holds the hub RAM address of the currently executing instruction.
 
-**Access**: No dedicated read instruction; the PC value is captured implicitly as the return address a call saves (`CALLD`/`CALL`/`CALLPA`/`CALLPB`), and is modified by jumps and calls
+**Access**: No dedicated read instruction; the PC value is captured implicitly as the return address a call saves (`CALLD`, `CALL`, `CALLPA`, `CALLPB`), and is modified by jumps and calls
 
 **Range**: $00000-$FFFFF (full hub address space)
 

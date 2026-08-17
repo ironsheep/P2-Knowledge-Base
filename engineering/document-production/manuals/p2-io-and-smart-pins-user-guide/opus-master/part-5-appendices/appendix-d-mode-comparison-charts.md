@@ -15,7 +15,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | NCO Duty | P_NCO_DUTY | 0.05 Hz to 100 MHz | 32-bit | Variable | Yes | Medium | Variable duty waves |
 | PWM Triangle | P_PWM_TRIANGLE | 1 Hz to 390 kHz | 16-bit | Full range | Yes | Low | Motor, LED dimming |
 | PWM Sawtooth | P_PWM_SAWTOOTH | 1 Hz to 780 kHz | 16-bit | Full range | Yes | Low | Motor, audio |
-| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Autonomous | High | Power supply |
+| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Auto | High | Power supply |
 | DAC 8-bit | P_DAC_xxx | DC | 8-bit | N/A | Yes | Low | Voltage reference |
 | DAC 16-bit | P_DAC_DITHER_* | DC to audio | 16-bit | N/A | Yes | Medium | Audio, precision |
 | Sync TX | P_SYNC_TX | Clock rate | 1-32 bits | N/A | Clocked | Medium | SPI master |

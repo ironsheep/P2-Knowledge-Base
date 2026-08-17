@@ -469,7 +469,7 @@ WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 
 ## 4.10 Input Routing
 
-Smart pins draw their A and B inputs using the same input-routing constants introduced for Enhanced Direct I/O in §2.4: `P_LOCAL_A`/`P_PLUS1_A`…`P_MINUS1_A` (and the `_B` equivalents) select the source pin, `P_TRUE_A`/`P_INVERT_A` set the polarity, and `P_PASS_AB`/`P_AND_AB`/`P_OR_AB`/`P_XOR_AB`/`P_FILT0_AB`…`P_FILT3_AB` combine the A and B inputs before use. The A input is the primary input for most modes; the B input carries secondary signals (clock, quadrature channel B, etc.). See §2.4 for the full constant tables.
+Smart pins draw their A and B inputs using the same input-routing constants introduced for Enhanced Direct I/O in §2.4. The `P_LOCAL_A` through `P_MINUS1_A` constants (and their `_B` equivalents) select the source pin; `P_TRUE_A` and `P_INVERT_A` set the polarity; and `P_PASS_AB`, `P_AND_AB`, `P_OR_AB`, `P_XOR_AB`, and `P_FILT0_AB` through `P_FILT3_AB` combine the A and B inputs before use. The A input is the primary input for most modes; the B input carries secondary signals (clock, quadrature channel B, etc.). See §2.4 for the full constant tables.
 
 When a pin is **not** in a smart pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a smart pin.
 
