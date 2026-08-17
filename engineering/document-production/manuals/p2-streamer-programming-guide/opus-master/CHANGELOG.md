@@ -21,7 +21,7 @@
 - **Combine pin-mode constants with `|`, never `+`** (§13.4): the `P_*` constants are bit fields inside the mode word, not additive flags
 - **`P_TT_01`, `P_OE` and `P_CHANNEL`** are one bit-field value under three context names
 - **On silicon** the `|` form drove a cog DAC at 6,737 ADC counts against the `+` form's 1,407
-- **§13.4 sets the two forms in adjacent blocks**, correct green and wrong red — copying the wrong line fails silently and completely
+- **§13.4 sets the two forms in adjacent blocks**, the wrong one red — copying that line fails silently and completely
 - **Source documents are named by their official titles**, so a newcomer can search for them
 
 ## v1.0.8 (2026-08-08)
