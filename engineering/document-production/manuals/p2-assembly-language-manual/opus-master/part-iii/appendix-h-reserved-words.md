@@ -472,7 +472,7 @@ These are the canonical condition names:
 
 ### Comparison Aliases (15)
 
-Convenient aliases for post-comparison conditional execution. Two equivalent terminology styles are available—both encode to identical condition codes:
+Convenient aliases for post-comparison conditional execution. Two equivalent terminology styles are available — both encode to identical condition codes:
 
 **Magnitude terminology aliases:**
 

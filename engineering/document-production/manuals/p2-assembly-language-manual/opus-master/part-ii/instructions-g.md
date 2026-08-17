@@ -32,7 +32,7 @@ GETBRK retrieves cog status or debug information into the Dest register. A flag 
 
 With the WCZ effect, GETBRK returns the cog's internal status: C indicates STALLI versus ALLOWI interrupt mode, Z indicates whether the cog started in hubexec or cogexec mode, and Dest reports the active subsystems and interrupt configuration — colorspace-converter and streamer activity, RDFAST/WRFAST mode, the three interrupt selectors (INT1/INT2/INT3) and their states, and the STALLI and hubexec bits. During a debug ISR, WCZ additionally returns the 8-bit break code from the most recent BRK in Dest[31:24] and indicates whether the debug interrupt came from a COGINIT.
 
-With the WC effect, GETBRK reports skip and execution state: C is the LSB of the current SKIP/SKIPF/EXECF/XBYTE pattern, and Dest holds the CALL depth since that pattern began, the SKIP-versus-SKIPF/EXECF/XBYTE mode, the LUT-sharing and XBYTE state, and the 16 event-trap flags (CORDIC, attention, streamer, FIFO, pin-pattern, SE1-SE4, CT1-CT3, and interrupt events).
+With the WC effect, GETBRK reports skip and execution state: C is the LSB of the current SKIP/SKIPF/EXECF/XBYTE pattern, and Dest holds the CALL depth since that pattern began, the SKIP versus SKIPF/EXECF/XBYTE mode, the LUT-sharing and XBYTE state, and the 16 event-trap flags (CORDIC, attention, streamer, FIFO, pin-pattern, SE1-SE4, CT1-CT3, and interrupt events).
 
 With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest = 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
 
