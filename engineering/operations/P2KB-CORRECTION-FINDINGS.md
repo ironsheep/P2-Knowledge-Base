@@ -961,12 +961,43 @@ breaking by default.** The `breaklines=true` in `p2kb-platform-foundation.sty`'s
 is **dead code for these blocks**; it configures a package this path never reaches. An over-wide line
 therefore runs off the page instead of wrapping, and nothing stops the build.
 
-**fancyvrb ≥ 3.0 supports `breaklines=true` on `Verbatim`.** Adding it to the filter's Verbatim
-options would convert silent truncation into visible wrapping **across the whole document set**, and
-would make K a style budget rather than a correctness cliff. That is a platform change touching every
-manual's rendering, so it wants a `forge-test` round-trip and a look at how existing long lines
-re-flow — but it is a far better answer than re-authoring lines one at a time, and it protects
-documents nobody has audited yet.
+**PROVEN ON THE DAEMON 2026-08-17 — and the fix is NOT what this finding first said.** Adding
+`breaklines=true` to the filter's `Verbatim` options converts silent truncation into visible wrapping
+across the whole document set and demotes K from a correctness cliff to a style budget. Confirmed by
+round-trip, not by reading.
+
+**Correction: `breaklines` is NOT a base-fancyvrb option.** The first attempt (`breaklines-v1`) failed
+outright — `! Package keyval Error: breaklines undefined`, `No pages of output`. The Forge's
+`fancyvrb.sty` does not know the key; `breaklines`, `breakanywhere`, `breaksymbolright` and
+`breakindent` come from **`fvextra`**. So the platform change is TWO edits, not one:
+1. `\RequirePackage{fvextra}` in `p2kb-platform-foundation.sty` (fvextra IS present in the Forge's
+   TeX Live — verified), and
+2. the options on every `Verbatim` the code-coloring filter emits (**10 sites**, not one).
+
+**What it looks like (`breaklines-v2`, clean build, page rendered and READ).** Options used:
+`breaklines=true, breakanywhere=false, breaksymbolright=\tiny\ensuremath{\hookrightarrow},
+breakindent=2em`. Every previously-lost fragment came back:
+
+| Case | Before | After |
+|---|---|---|
+| SCOPE, 121 cols | third channel gone | `'Noise' -1000 1000 100 200 0 $00AAFF)` visible, closing paren included |
+| LOGIC, 113 cols | third channel + `)` gone | `'MOSI' 1 $FFFF00)` visible |
+| IOSP, 103 cols (F-289) | comment cut at `bits 0..` | `(REV n covers bits 0..n)` visible |
+| normal-width control | — | untouched: no wrap, no marker |
+
+`breakanywhere=false` keeps breaks on whitespace, so no token is split mid-word, and the `↪` marker
+appears at BOTH the break and the indented continuation — a reader cannot mistake a wrap for authored
+structure, which was the open worry.
+
+**NOT ADOPTED YET, deliberately.** The platform source is untouched; only the daemon's copies carry
+the patch (so a later `forge-test` in this workspace will use the patched filter — be aware). Adopting
+changes every manual's rendering, and Assembly's re-render is in flight with the current filters, so
+this lands in the render cycle «#249» with a full-manual render to confirm nothing else re-flows.
+
+**It also changes what re-authoring F-281 still needs:** with wrapping visible, the SCOPE and LOGIC
+lines are no longer losing content, so shortening them becomes a style choice rather than a repair —
+and the LOGIC case, which could not use the SCOPE fix without changing what the example teaches, stops
+being forced.
 
 **The declared budget is right; the other 21 over-budget lines are lucky, not correct.** Twenty-four
 lines exceed the manual's declared `code_line_budget_K: 76`. Measured against the shipped PDF, only
