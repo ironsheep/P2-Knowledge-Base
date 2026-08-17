@@ -331,6 +331,13 @@ USB host mode requires:
 - Current limiting for protection
 - Pull-up/pull-down resistors for speed identification
 
+**Where the 5V comes from on a P2 Edge board.** The Edge breakout boards do carry 5V to the I/O headers, which is worth being precise about because it is easy to read as the P2 supplying it. It is not: each 8-pin accessory header provides two grounds, a Vxx pin carrying 3.3V from that group's LDO regulator, and *optionally* 5V passed **straight through from the board's power jack**. Two consequences for a host design:
+
+- **Two headers have no 5V routed at all — P24–P31 and P56–P63.** That second bank contains the pin pair this chapter's examples use, so a host built on pins 56/57 must take VBUS from elsewhere on the board.
+- **The header 5V is the input supply, not a port rail.** It arrives unregulated by the board and with no current limit, so the current limiting listed above remains the design's responsibility.
+
+*(P2 Edge Mini Breakout Board #64019, P2 Edge Breakout Board #64029, and P2 Edge Module Breadboard #64020 product guides. On the Breadboard the header 5V is additionally gated by the ACC ON/OFF shunt.)*
+
 USB device mode requires:
 
 - Pull-up resistor on D+ (Full Speed) or D- (Low Speed)
