@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-290`**
+**Next finding ID: `F-291`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2665,7 +2665,62 @@ Rides IOSP **v1.0.9**, which is already owed a CHANGELOG entry. Debug Window's t
 over-budget lines ride **v1.1.3**, and the `breaklines` platform fix may change what re-authoring is
 still needed there.
 
-**Next finding ID after this block: F-290.**
+### F-290 — nothing continues a `debug()` directive line: the Spin2 `...` and CON symbols both compile clean and ship a different program. `CONFIRMED` — **mechanism established 2026-08-17; prepare-manual guidance corrected**
+
+**Found:** 2026-08-17, looking for a way to bring `ch06-logic.md:310` (113 cols) under K without
+losing what the example teaches. Both candidate fixes were compiled and the emitted binary inspected
+rather than trusted.
+
+**A `debug()` backtick directive is a LITERAL STRING assembled at compile time. It is not Spin2
+source, so no Spin2 syntax applies inside it.** Two consequences, each verified by compiling with
+`pnut-ts -d` and reading the directive text back out of the `.bin`:
+
+| Attempt | Compiles | Bytes | What actually shipped |
+|---|---|---|---|
+| baseline | ✅ | 9,482 | `LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00` |
+| Spin2 `...` continuation | ✅ | **9,438** | `LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 ...` — **`...` embedded literally and ALL THREE CHANNELS DROPPED.** The window would be created with zero declared channels. |
+| colors as `CON` symbols | ✅ | 9,476 | `'CS' 1 C_CS …` — **symbol names embedded verbatim, never resolved.** The PC-side `KeyColor` cannot read `C_CS`, so every channel silently falls back to `DefaultScopeColors`. |
+
+Only the `` `(expr) `` form substitutes a value into a directive; a bare token is text.
+
+**PROCESS DEFECT THIS EXPOSES — `prepare-manual`'s sanctioned fix is wrong for this line class.**
+The code-line gate's guidance reads: *"for a **code** overflow, break at a logical boundary with the
+legal Spin2 `...` line-continuation."* That is correct for ordinary Spin2 statements and **silently
+destroys a `debug()` directive** — which is the majority of the over-long lines in the Debug Window
+manual, i.e. exactly the population the guidance is aimed at. Corrected in the prepare-manual
+project overlay.
+
+**Same family as the trailing-`-` trap** already recorded under F-281 (compiles clean, 9,338 vs 9,408
+bytes). The generalization is now explicit rather than one anecdote: **a `debug()` directive line
+cannot be continued at all — it can only be shortened.** Byte-comparing the binary against the
+one-line form is what catches it; the compiler never will.
+
+**Applied to the LOGIC line (F-281, agreed with Stephen):** the create line drops `TITLE`, `SAMPLES`
+and `SPACING`, reaching **70 cols** and keeping all three named channels with their exact hex colors:
+
+```
+  debug(`LOGIC SPIbus 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00)
+```
+
+Costs nothing pedagogically — **checked, not assumed**: Chapter 6 already teaches all three dropped
+keywords 250 lines earlier (a table row each at 69–72, prose deriving `SAMPLES × SPACING` = window
+width at 87–89, and a prior worked example using `SAMPLES 64` at line 46). The over-long line sits in
+*"A complete software-only example"*, whose job is the SPI flow, not re-teaching configuration. No
+published figure is tied to that example, so nothing needs regenerating. Verified: compiles clean
+under `pnut-ts -d`, the emitted directive carries all three channels, and the printed block is
+byte-identical to `examples-library/ch06-logic-spi-bus.spin2`.
+
+**Also ruled out, and left as a bench question:** dropping the explicit `1` counts. `LOGIC_Configure`
+reads the next token as `count` via `KeyValWithin(v, 1, 32)` **before** reading the color, and whether
+a failed count consumes the token is not determinable from the manual's REF. If it consumes, the color
+is lost silently. Not usable without a PNut/bench check — which is also why the explicit `1` is
+probably load-bearing in every channel declaration in the manual.
+
+**Debug Window's remaining line work:** 23 lines over K=76, **2 still past the ~101-col cliff** —
+`ch07-scope.md:272` (121, the SCOPE channel case, source-determined split available) and
+`ch14-multiwindow-pasm.md:299` (110, trailing comment only, comment-above fix).
+
+**Next finding ID after this block: F-291.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

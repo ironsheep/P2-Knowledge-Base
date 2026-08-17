@@ -98,3 +98,39 @@ stale table is already printed. The authoring must happen here, **before** assem
 (Step 6.2, alongside the cover edit, so the new value flows into the assembled working
 copy). `release-manual` only *verifies* it, as a backstop — and a failure there costs a
 full re-render.
+
+## Augments Step 4 — a `debug()` directive line CANNOT be continued, only shortened
+
+The base skill's fix for a code overflow is: *"break at a logical boundary with the legal
+Spin2 `...` line-continuation."* That is right for ordinary Spin2 — and **it silently
+destroys a `debug()` directive**, which is the bulk of the over-long lines in the Debug
+Window manual and appears in every manual that teaches DEBUG.
+
+**Why:** a backtick directive is a **literal string assembled at compile time**, not Spin2
+source, so no Spin2 syntax applies inside it. Verified by compiling and reading the
+directive back out of the `.bin` (F-290):
+
+| Attempt | Compiles | What ships |
+|---|---|---|
+| `...` continuation | ✅ clean | `…SPACING 3 ...` — the `...` is embedded **literally** and **everything after it is dropped**. A three-channel LOGIC window became a zero-channel one, 9,438 vs 9,482 bytes. |
+| color as a `CON` symbol | ✅ clean | `'CS' 1 C_CS` — the symbol is embedded **verbatim, never resolved**; the PC-side parser can't read it as a color and falls back to defaults. |
+| trailing `-` splice | ✅ clean | different program, 9,338 vs 9,408 bytes (F-281) |
+
+Only `` `(expr) `` substitutes a value; a bare token is text.
+
+**So for an over-long `debug()` line the ONLY sanctioned fixes are:**
+1. **Drop optional directive keywords** — but first confirm the chapter teaches them elsewhere,
+   so nothing is lost. (For F-281's LOGIC line, `TITLE`/`SAMPLES`/`SPACING` were all already
+   taught 250 lines earlier with a table row, prose and a prior example: 113 → 70 cols, zero
+   pedagogical cost.)
+2. **Move a trailing comment to full lines above** the statement at its indent.
+3. **Shorten the instance name or label text** where that costs no meaning.
+
+**Never** split the directive. **Always** byte-compare the resulting `.bin` against the
+one-line form — a clean compile proves nothing here, and the compiler will never warn you.
+
+**Do NOT drop the explicit channel `count`** (the `1` in `'CS' 1 $00FFFF`) to save room:
+`LOGIC_Configure` reads the next token as `count` via `KeyValWithin(v, 1, 32)` **before** the
+color, and whether a failed count consumes the token is undetermined in the manual's REF. If it
+consumes, the color is lost silently. Treat the explicit count as load-bearing until a bench run
+says otherwise.
