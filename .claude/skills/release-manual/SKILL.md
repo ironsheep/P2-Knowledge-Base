@@ -162,7 +162,16 @@ the prepare-manual rules — read it, don't deploy it). If present:
 - Scan the log for serious signatures: `! LaTeX Error`, `! Undefined control sequence`,
   `Runaway argument`, `Emergency stop`, `Float(s) lost`, `No pages of output`,
   `! TeX capacity`. Any hit ⇒ investigate.
-- Read the `Output written … (N pages)` line — cross-check against 1b.
+- Read the `Output written … (N pages)` line — cross-check against 1b. **Take the LAST
+  one, not the first.** xelatex runs multiple passes and each writes its own line; early
+  passes report a SHORTER document because the TOC/refs have not settled. Assembly's log
+  carries three: 492, 504, 504 — the PDF is 504. deSilva's: 160, 166, 166 — the PDF is 166.
+  Reading the first pass manufactures a page-count shortfall that looks exactly like a
+  silent content-drop, which would stop a perfectly good release.
+
+  ```bash
+  grep -o 'Output written.*([0-9]* pages)' "$L" | tail -1
+  ```
 - **Overfull hboxes are NOT uniformly ignorable.** Most are cosmetic, but a *large* one
   is the only signal some content-destroying failures emit. F-284 shipped for two
   releases — an unescaped `&` in a table cell ate the AND out of a bit-level

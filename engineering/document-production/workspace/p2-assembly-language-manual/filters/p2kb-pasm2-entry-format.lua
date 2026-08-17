@@ -67,6 +67,50 @@ end
 
 -- Process Para elements to add line breaks between multiple syntax forms
 -- Pattern: Multiple **MNEMONIC** *operands* **{effects}** on separate lines
+-- The PASM2 flag-effect tokens. A bold run built ONLY from these is an effect
+-- group, never an instruction mnemonic.
+local EFFECT_FLAGS = {
+  WC = true, WZ = true, WCZ = true,
+  ANDC = true, ANDZ = true,
+  ORC  = true, ORZ  = true,
+  XORC = true, XORZ = true,
+}
+
+-- Is this bold run an instruction mnemonic (and therefore the start of a new
+-- syntax form, deserving a line break before it)?
+--
+-- THE TRAP THIS CLOSES: an effect group written in slash form — WC/WZ,
+-- ANDC/ANDZ, ORC/ORZ, XORC/XORZ — is character-for-character the same SHAPE as a
+-- dual mnemonic like CALL/RET, so the CAPS/CAPS pattern matched it and a line
+-- break was inserted BEFORE THE EFFECTS, splitting one syntax form across two
+-- lines. Sixteen lines rendered that way in the Assembly manual (TESTB, TESTBN,
+-- TESTP, TESTPN — four forms each). The bare forms (WC, WZ, WCZ, ANDZ, ORZ,
+-- XORZ — nine more sites) match the plain-CAPS pattern and carried the same
+-- latent bug.
+--
+-- The old guard was `not text:match("^{")`, which excluded only the BRACE form
+-- {WC|WZ|WCZ} — which is why TEST and TESTN, written that way, always rendered
+-- correctly while their neighbours did not. Shape-matching cannot separate these
+-- cases; membership can. So decide by MEMBERSHIP in EFFECT_FLAGS, and keep the
+-- decision in ONE place used by both loops below — the count and the insertion
+-- must never disagree about what a mnemonic is.
+local function is_mnemonic(text)
+  if text == nil or text == "" then return false end
+  -- Brace form is an effect group by construction: {WC|WZ|WCZ}
+  if text:match("^{") then return false end
+  -- A run whose every /- or |-separated part is a flag is an effect group.
+  local parts, all_flags = 0, true
+  for part in text:gmatch("[^/|]+") do
+    parts = parts + 1
+    if not EFFECT_FLAGS[part:match("^%s*(.-)%s*$")] then all_flags = false end
+  end
+  if parts > 0 and all_flags then return false end
+  -- Otherwise apply the original mnemonic shapes (ABS, CALL/RET, "MUL / MULS").
+  return (text:match("^[A-Z][A-Z0-9_]*$") ~= nil)
+      or (text:match("^[A-Z][A-Z0-9_]*/[A-Z0-9_]+$") ~= nil)
+      or (text:match("^[A-Z][A-Z0-9_]+ /") ~= nil)
+end
+
 -- ONLY operates on syntax definition paragraphs, NOT prose paragraphs
 function Para(elem)
   local content = elem.content
@@ -80,14 +124,8 @@ function Para(elem)
   local mnemonic_count = 0
   for i, item in ipairs(content) do
     if item.t == "Strong" then
-      local text = pandoc.utils.stringify(item)
-      -- Check if it looks like an instruction mnemonic (starts with caps)
-      -- Mnemonics are like ABS, ADDCT1, CALL/RET, etc.
-      -- NOT effect flags like {WC|WZ|WCZ}
-      if (text:match("^[A-Z][A-Z0-9_]*$") or
-          text:match("^[A-Z][A-Z0-9_]*/[A-Z0-9_]+$") or
-          text:match("^[A-Z][A-Z0-9_]+ /")) and
-         not text:match("^{") then
+      -- Mnemonics are ABS, ADDCT1, CALL/RET; effect flags are NOT (see is_mnemonic)
+      if is_mnemonic(pandoc.utils.stringify(item)) then
         mnemonic_count = mnemonic_count + 1
       end
     end
@@ -107,12 +145,8 @@ function Para(elem)
 
   for i, item in ipairs(content) do
     if item.t == "Strong" then
-      local text = pandoc.utils.stringify(item)
-      -- Check if it looks like an instruction mnemonic (not effect flags)
-      if (text:match("^[A-Z][A-Z0-9_]*$") or
-          text:match("^[A-Z][A-Z0-9_]*/[A-Z0-9_]+$") or
-          text:match("^[A-Z][A-Z0-9_]+ /")) and
-         not text:match("^{") then
+      -- Same predicate as the count above — they must never disagree
+      if is_mnemonic(pandoc.utils.stringify(item)) then
         if first_mnemonic_seen then
           -- Insert a LaTeX line break before this mnemonic
           table.insert(new_content, pandoc.RawInline('latex', '\\\\'))

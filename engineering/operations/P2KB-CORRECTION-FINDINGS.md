@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-288`**
+**Next finding ID: `F-289`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2472,7 +2472,60 @@ be correct from the object's own source header, and absence from the catalog fie
 wrong — so this is not treated as a defect to fix silently in a **published** note. Needs Stephen's
 call: verify against the object source, or fall back to the catalog form.
 
-**Next finding ID after this block: F-288.**
+### F-288 — an effect group in slash form is shaped exactly like a dual mnemonic, so 16 syntax forms print split across two lines. `CONFIRMED` — **filter fixed 2026-08-17; needs the Assembly render**
+
+**Found:** 2026-08-17, during release verification of Assembly v3.1.6. Found by **reading the whole
+of p.329** while confirming the F-285 repair — the repair itself is correct; this was the rest of the
+page. (Third time in two days that the free evidence on an opened page carried the next defect.)
+
+**Reader impact.** In the TESTB, TESTBN, TESTP and TESTPN entries — four syntax forms each, **16
+lines** — the flag-effect group is orphaned onto its own line, with vertical gaps between the pairs:
+
+```
+TESTP {#}Dest          instead of      TESTP {#}Dest WC/WZ
+WC/WZ                                  TESTP {#}Dest ANDC/ANDZ
+
+TESTP {#}Dest
+ANDC/ANDZ
+```
+
+In a reference manual's syntax block a form split across two lines reads as **two different forms**,
+and these four instructions are exactly where a reader goes to learn which effects each accepts.
+
+**Mechanism (code-verified, not inferred).** `workspace/p2-assembly-language-manual/filters/p2kb-pasm2-entry-format.lua`
+inserts `\\` before every bold run that matches an instruction-mnemonic *shape*, one shape being
+`^[A-Z][A-Z0-9_]*/[A-Z0-9_]+$` — intended for dual mnemonics like `CALL/RET`. **`WC/WZ`,
+`ANDC/ANDZ`, `ORC/ORZ` and `XORC/XORZ` are character-for-character that same shape**, so each was
+taken for a new mnemonic and given a break *before the effects*. The filter did try to exclude
+effect flags — `not text:match("^{")` — but that only catches the **brace** form `{WC|WZ|WCZ}`,
+which is precisely why TEST and TESTN, written that way, always rendered correctly while their
+neighbours did not.
+
+**Wider than the 16 visible lines.** The bare forms — `WC`, `WZ`, `WCZ`, `ANDZ`, `ORZ`, `XORZ`, nine
+further sites — match the plain-CAPS shape and carried the same latent bug.
+
+**NOT caused by the F-285 repair, and not new.** Independently checked against the **released v3.1.5
+PDF** (recovered from git), which renders these lines differently — so the visible symptom changed
+when the `&nbsp;` text was removed, but the filter defect predates it.
+
+**Fix applied.** Shape-matching cannot separate these cases; **membership** can. A single
+`is_mnemonic()` predicate now decides by membership in an explicit `EFFECT_FLAGS` set (handling the
+brace, slash and bare forms), and **both** loops — the mnemonic count and the break insertion — call
+it, so the two can never disagree about what a mnemonic is. Verified against the real token
+inventory: `WC/WZ`/`ANDC/ANDZ`/`ORC/ORZ`/`XORC/XORZ`/`WC`/`WZ`/`WCZ` are not mnemonics, while
+`CALL/RET`, `ABS`, `ADDCT1`, `MUL / MULS` still are. No PASM2 instruction is named `WC`, `ANDC`,
+`ORC` or `XORC`, so there is no collision — and `WRC`/`WRZ`, which ARE instructions, are absent from
+the flag set and stay mnemonics. Both copies of the filter (workspace + interactive-testing) fixed
+and confirmed identical.
+
+**Same class as F-286**, one day apart: a guard written for one shape, left to cover a family. The
+countermeasure is the same — one predicate, one place, used by every caller.
+
+**Owed:** one Assembly render. **Assembly v3.1.6 is HELD from the release wave** until p.329 shows
+the four TESTP forms each on one line; deSilva, P2AN001 and P2AN002 are unaffected (this filter is
+Assembly-local) and released without it.
+
+**Next finding ID after this block: F-289.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 
