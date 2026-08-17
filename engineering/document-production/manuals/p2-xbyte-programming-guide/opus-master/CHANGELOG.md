@@ -15,6 +15,9 @@
 - **Handlers end with an explicit `RET` after the call**, throughout the guide's examples.
 - **§11.1's `CALL`-depth discussion** notes what the skip-suspension does *not* license, and points at §15.3.
 - **The immediate-load family** (§15.3) shows the shared-body idiom collapsing `LDA`/`LDX`/`LDY`, which differ only in which guest register receives the byte.
+- **The `_RET_ CALL` callout says which examples it is about.** The chapter folds the return twice within twenty lines — `set_nz` ends `_ret_ muxc`, the `JMP abs` handler ends `_ret_ rdfast` — so the callout now names them and reads as the boundary of the idiom the reader has just learned, rather than a free-standing gotcha.
+- **`_RET_`'s semantics are cited to Parallax**, from the instruction table in *P2 Instructions v35 – Rev B/C Silicon* (row 410), rather than to a companion volume in this same documentation family.
+- **Instruction mnemonics read uniformly** where `SKIPF` appeared plain in §11.1.
 
 ## v1.0.1 (2026-08-08)
 

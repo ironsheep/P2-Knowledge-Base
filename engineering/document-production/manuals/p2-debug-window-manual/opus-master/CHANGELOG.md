@@ -14,6 +14,13 @@ The FFT chapter now states what an omitted channel argument does, the way the SC
   you leave out ends the scan, so every argument after it keeps its default. Reaching a later
   argument means supplying the earlier ones, even where you are only restating their defaults.
 
+### Changed
+
+- **Chapter 12's two wrong-code examples now look wrong.** The `PC_KEY` return-value mistake and
+  the mouse-button bitmask mistake sat in ordinary syntax-highlighted blocks, marked only by a
+  `' WRONG` comment — the same colour and the same visual weight as code that works. Each is now a
+  red anti-pattern block set against the correct form beside it.
+
 ### Fixed
 
 - **The tools are named `pnut-ts` and `pnut-term-ts`**, hyphenated, throughout — including the

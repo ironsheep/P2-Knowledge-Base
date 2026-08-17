@@ -895,7 +895,74 @@ at its next visit — this row is what makes sure the visit knows.
 **The correction is one substitution** — `pnut_ts` → `pnut-ts` — with no prose consequence. Check each
 site is the *command*; the project name in running text is properly **PNut-TS**.
 
-**Next finding ID after this block: F-281.**
+### F-281 — three code lines run off the page in the RELEASED Debug Window PDF, taking part of the program with them. `CONFIRMED` — **BLOCKS the v1.1.3 ship**
+
+**Found:** 2026-08-17 running the wave's code-line gate before staging («#235»).
+**RELEASED (v1.1.2), and v1.1.3 would re-publish it unchanged.**
+
+**Looked at, not inferred.** Page 80 of `deliverables/documents/DOCs/P2-Debug-Window-Manual.pdf`
+rendered at 130 dpi: the `DEBUG(\`Waves 'Sine' …` line of the "complete worked example" overruns the
+blue code box, overprints the right margin, and is cut off at the paper edge — the third channel's
+`200 0 $00AAFF)` is simply not on the page. A reader copying that example gets a program that does
+not compile and an example that promises three channels while showing two and a fraction.
+(`pdftotext` was the first signal, but it is only a claim; the page image is the evidence. An earlier
+`pdftotext` hit on page 76 was a **different**, correctly-rendered passage — checking the image is
+what separated them.)
+
+**The three sites, all in captioned `.spin2` blocks with example-library twins:**
+
+| Site | Len | What is lost |
+|---|---|---|
+| `ch07-scope.md:272` | 121 | the third SCOPE channel of a three-channel example |
+| `ch06-logic.md:310` | 113 | the tail of the LOGIC create line |
+| `ch14-multiwindow-pasm.md:299` | 110 | the tail of a TERM status-block update |
+
+**The declared budget is right; the other 21 over-budget lines are lucky, not correct.** Twenty-four
+lines exceed the manual's declared `code_line_budget_K: 76`. Measured against the shipped PDF, only
+these three are actually lost — the real overflow threshold sits between 100 and 110 characters. That
+is exactly why K is set conservatively at 76, and the twenty-one between 77 and 100 should come down
+at the manual's next authoring pass. **They are not part of this fix**; only demonstrable breakage is.
+
+**Why this is not a one-line edit.** These are compilable examples under a byte-identity gate, so any
+change lands in `examples-library/*.spin2` too, and the shortened form has to be one that *works* —
+not merely one that fits.
+
+**The SCOPE fix is determined at the source level.** `vIndex` (the active-channel count) is set to `0`
+in `SetDefaults` only, which runs **once at window creation** (`SCOPE_Theory_of_Operations.md` §21.1,
+`DebugDisplayUnit.pas` 2880-2917). Nothing resets it per update message, and the channel-def branch
+only ever increments it (`if vIndex <> Channels then Inc(vIndex)`, 1219). So three separate update
+messages accumulate to three channels, identical to one message declaring three:
+
+```spin2
+debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00)
+debug(`Waves 'Tri'   -1000 1000 100 100 0 $FF0000)
+debug(`Waves 'Noise' -1000 1000 100 200 0 $00AAFF)
+```
+
+Roughly 50 characters each. **Not applied**, because the mechanism being understood is not the same as
+having seen it run, and a corrected-looking recipe is worse than a visibly broken one. This needs one
+bench execution to close — the window either shows three stacked traces or it does not.
+
+**A splice on one physical line is NOT available, and the control proved it.** `-` as a continuation
+inside the backtick string **compiles clean and silently changes the program**: 9,338 bytes against
+9,408 for the one-line form, the trailing channels dropped. A clean `pnut-ts` compile is legality,
+never semantics — the byte-compare is what caught it.
+
+**LOGIC checked and cleared — not the same defect.** `ch06-logic.md:310` puts channel labels on the
+LOGIC *create* line, which for SCOPE would abort window creation entirely (EF-003). LOGIC's
+Theory-of-Operations shows the opposite: labels belong on its create line, and only `TRIGGER` must be
+split out — which this example already does correctly. **LOGIC's problem is length alone.** Because
+its labels cannot move to a second message, the fix there is authorial (shorten `TITLE`, or drop the
+explicit colors and take the defaults) and changes what the example teaches. `ch14`'s TERM site needs
+its own positional check against `TERM_Theory_of_Operations.md` before being split.
+
+**Platform observation worth its own look:** the overflow is *silent at build time*. The compile log
+was clean, the Forge reported success, and the manual shipped. A code line that runs off the page with
+no overfull-hbox stop is a render failure that only a human looking at the page will catch — which is
+the whole reason the "verify the rendered PDF, not the log" rule exists, and an argument for making
+the platform's listing environment fail loudly instead.
+
+**Next finding ID after this block: F-282.**
 
 ---
 

@@ -2,9 +2,12 @@
 
 ## v3.0.6 (2026-08-16)
 
-**An honest platform comparison, and an acknowledgments page that credits only the people who contributed.**
+**An honest platform comparison, the multi-cog hazard that was missing, and claims trimmed back to what is true.**
 
 ### Added
+
+- **"Two cogs touching the same pin"** now heads Chapter 16's multi-cog gotchas, because it is the one that costs a reader a debugging session. DIR and OUT bits from every cog are OR'd before they reach the pin, and a smart pin OR's the cog buses the same way, so two cogs driving one pin produce a result that looks like neither of them and nothing reports an error. `RQPIN` is named as the safe multi-cog read.
+- **The P2 Architect's Guide** joins Further Reading as the natural next book: where this manual teaches how to write PASM2, that one teaches how to decide what belongs in which cog.
 
 - **The software axis** (Appendix A): the comparison table covers silicon, but platform decisions are made on language, libraries and tooling — so Appendix A now states plainly where the P2 is weakest. Two new languages to learn, a library situation that is not comparable to an ESP32's or a Pico's, a smaller tooling ecosystem, and a higher cost of entry.
 - **What that buys you** (Appendix A): the case for the P2 is not speed or price, it is the risk of the project failing. A task that must not be late gets a processor of its own and stops being a scheduling problem.
@@ -15,6 +18,11 @@
 - **Acknowledgments** credits deSilva, Chip Gracey and the P2 community. The production note describes AI-assisted authorship in the style of deSilva's P1 tutorial, with every example compiled.
 - **The parallel-processing pitch** (Preface) says what actually goes away — deciding which task gets the processor — and points at Appendix A for the honest cost.
 - **`cog` is the unit** in the event-system code comments, not "CPU".
+- **Smart pins end the scramble for a pin that supports the function you need; they do not make peripheral conflicts impossible.** Chapter 11 and the Preface said the stronger thing, which is wrong in the way that costs a reader time — the pinmux conflict goes away, the resource conflict does not, and Chapter 16 now teaches the one that remains.
+- **The interrupt comparison concedes what interrupts can do.** "It's impossible to achieve this precision with interrupts" becomes what is actually true and more useful: a dedicated timer and a careful interrupt scheme will get there, and the argument is about what that scheme costs and what happens to it the day another job arrives. Chapter 11's soloist analogy carries the real point — one player taking every part in turn, against an orchestra where each keeps their own.
+- **"No surprises, ever" and "timing is guaranteed"** become the claims the silicon supports: a cog's timing does not change because another cog got busy, and what you measure today is what you measure next week.
+- **Appendix A argues from growth, not from benchmarks.** The case is what stays true as a design changes — put eight jobs on one processor and the eighth changes the timing of the seven already there — rather than a risk-of-failure claim the timing tables do not support. The library discussion says plainly that you write more code yourself, and what changes is the *kind* of hours.
+- **Instruction mnemonics read uniformly** in Chapters 3 through 15 — the mnemonic rule reaches body prose, asides, and the chapter-end checklists, and its four carve-outs (the instruction rather than the letters, headings, the Index, whole reference tables) are written into the style guide so they are not swept away later.
 
 ## v3.0.5 (2026-08-11)
 
