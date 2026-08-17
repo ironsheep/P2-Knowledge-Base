@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large August 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.1.2\par}
+{\large\color{blue}Version 1.1.3\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -92,6 +92,10 @@
 ```
 
 # Copyright and License
+
+```{=latex}
+\markboth{}{}
+```
 
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
@@ -238,7 +242,7 @@ PUB main()
   repeat                           ' keep the program (and window) alive
 ```
 
-Compile this with `pnut_ts -d` ([Chapter 2](#ch-2) covers the setup) and a 40×20 terminal
+Compile this with `pnut-ts -d` ([Chapter 2](#ch-2) covers the setup) and a 40×20 terminal
 named `Status` opens and shows `Ready.`. The final `repeat` matters: when a P2
 program ends, it stops sending, so keep the program running while you want to watch
 the window.
@@ -432,10 +436,10 @@ you reach for these display windows.
 
 ## Tooling, in one line
 
-These windows are hosted by **`pnut_term_ts`**, the host application this manual
+These windows are hosted by **`pnut-term-ts`**, the host application this manual
 uses throughout to open and draw them. The same DEBUG display windows are also
 hosted by **PNut**, so the examples work there as well. You produce a program that
-drives them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+drives them by compiling with **`pnut-ts`** using the `-d` (debug) option.
 [Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates
@@ -505,11 +509,11 @@ Two things, and nothing else:
 
 - **A P2 board** connected to your computer over USB. Any P2 board works; no
   shields, sensors, probes, or external wiring are required.
-- **A PC running `pnut_term_ts`**, the host application that programs the P2 and
+- **A PC running `pnut-term-ts`**, the host application that programs the P2 and
   opens the DEBUG display windows.
 
-The compiler is `pnut_ts`, and the host application that opens the display windows
-is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
+The compiler is `pnut-ts`, and the host application that opens the display windows
+is `pnut-term-ts`; this manual uses that pair throughout. The same DEBUG display
 windows are also hosted by **PNut** and by the **Spin Tools IDE**, so the examples
 work in those environments too — just confirm your environment runs the DEBUG link
 at 2 Mbaud (see [Chapter 13](#ch-13)). Every example in this manual runs on a bare
@@ -523,24 +527,24 @@ overhead. To keep the DEBUG statements — and the display windows they drive �
 compile with the `-d` flag:
 
 ```command
-pnut_ts -d myprogram.spin2
+pnut-ts -d myprogram.spin2
 ```
 
-`-d` (equivalently `--debug`) tells `pnut_ts` to compile the DEBUG statements into
+`-d` (equivalently `--debug`) tells `pnut-ts` to compile the DEBUG statements into
 the binary instead of discarding them. Without it, the `DEBUG()` calls in your
 source produce no output and no windows open. This is the single most common
 reason a window fails to appear: the program was compiled without `-d`.
 
 ## Running it
 
-Run the compiled program from `pnut_term_ts`. It programs the P2 over USB and then
+Run the compiled program from `pnut-term-ts`. It programs the P2 over USB and then
 listens for DEBUG output. When your program executes a `DEBUG()` statement that
-names a display window, `pnut_term_ts` opens that window and begins drawing into
+names a display window, `pnut-term-ts` opens that window and begins drawing into
 it. The window stays open and updates live as more data arrives.
 
 DEBUG data travels from the P2 to the host over a serial link on the P2's pins 62
 (transmit) and 63 (receive) — the standard programming pins — at 2 Mbaud. You do
-not configure any of this; it is the default, and `pnut_term_ts` is already
+not configure any of this; it is the default, and `pnut-term-ts` is already
 listening on it. You only need to know the link exists, because its speed is the
 ceiling on how fast a window can update.
 
@@ -622,7 +626,7 @@ reusable: `CLOSE` a window and its name is free again.
 > graphing windows), so to display a value's text in a TERM use `` `(value) ``
 > substitution instead.
 
-Compile it with `pnut_ts -d`, run it from `pnut_term_ts`, and a small text window
+Compile it with `pnut-ts -d`, run it from `pnut-term-ts`, and a small text window
 titled `Status` opens showing `Reading: 42`.
 
 ## The no-hardware philosophy
@@ -676,7 +680,7 @@ symbols in a `CON` block and the compiler picks them up:
 | `DEBUG_WINDOWS_OFF` | `0` | Set non-zero to suppress all DEBUG windows after programming. |
 
 For display windows to open at all, `DEBUG_PIN_TX` must be 62 — that is the pin
-`pnut_term_ts` listens on. The defaults already satisfy this; the symbols exist for
+`pnut-term-ts` listens on. The defaults already satisfy this; the symbols exist for
 the cases where you must move the link or limit which cogs participate.
 
 ```{.spin2 caption="ch02-term-pin-config.spin2"}
@@ -696,7 +700,7 @@ PUB main()
 ## Where to go next
 
 You now have the loop that every chapter relies on: compile with `-d`, run from
-`pnut_term_ts`, address a window by the name you gave it. From here:
+`pnut-term-ts`, address a window by the name you gave it. From here:
 
 - **[Chapter 3](#ch-3) — TERM** covers the text window in full: cursor positioning, command
   codes, color pairs, and buffered updates. Start there if you are new to the
@@ -891,11 +895,11 @@ debug(`Status 6 'ok' 13)         ' pair 2: lime on black
 To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
+<!-- {K-waiver: 86 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
 ' COLOR pairs: pair0 orange/black, pair1 black/orange,
 '             pair2 green/black,  pair3 red/black
-debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 ...
-      $00FF00 $000000 $FF0000 $000000)
+debug(`TERM Log COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
@@ -918,7 +922,7 @@ Each keyword takes the optional `0`–`15` brightness described in
 [Appendix C](#appendix-c). A runtime `BACKCOLOR` sets just the text background. The
 color stays in force until you change it or select a pair with a `4`–`7` code.
 
-> This is a **v52 addition**. Build with a `pnut_ts` of v52 or later and put
+> This is a **v52 addition**. Build with a `pnut-ts` of v52 or later and put
 > `{Spin2_v52}` (or later) on the source file's first line; an older compiler does not
 > recognize the directive.
 
@@ -997,16 +1001,17 @@ When a panel's *layout* is fixed — the labels never move, only the values chan
 draw the labels once, then overprint just the value fields in place with the `3`
 (set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
 
+<!-- {K-waiver: 81 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```{.spin2 caption="ch03-term-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count
   ' pairs: 0 = labels (black/white), 1 = header (white/blue),
   '        2 = ok (white/green), 3 = alert (white/red)
-  debug(`TERM Panel SIZE 40 8 BACKCOLOR WHITE COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
+  debug(`TERM Panel SIZE 40 8 COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' Draw the static layout once: a title and three fixed labels.
-  debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
+  debug(`Panel 0 5 'SIGNAL MONITOR')     ' clear, header pair, at (0,0)
   debug(`Panel 3 2 2 0 'Sample:')        ' row 2, col 0
   debug(`Panel 3 3 2 0 'Value :')        ' row 3, col 0
   debug(`Panel 3 4 2 0 'State :')        ' row 4, col 0
@@ -1022,7 +1027,8 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (white on red = alert), then back to pair 0
+      ' pair 3 (white on red = alert), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)
     else
       ' pair 2 (white on green = ok), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)
@@ -1222,13 +1228,12 @@ entries at the first non-numeric element:
 
 ```spin2
 PUB main() | x, y
-  ' LUT4: a 16-color palette defined inline
-  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS ...
-        $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 ...
-        $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
+  ' LUT2: a 4-color palette, loaded in one LUTCOLORS statement
+  debug(`BITMAP Tiles SIZE 16 16 LUT2)
+  debug(`Tiles LUTCOLORS $000000 $FF0000 $00FF00 $0000FF)
   repeat y from 0 to 15
     repeat x from 0 to 15
-      debug(`Tiles `((x ^ y) & $0F))  ' each pixel is a 4-bit palette index
+      debug(`Tiles `((x ^ y) & $03))  ' each pixel is a 2-bit palette index
 ```
 
 Because the pixels store palette *indices*, you can resend `LUTCOLORS` later to
@@ -1423,7 +1428,8 @@ CON
 
 PUB main() | x, y, ang, cx, cy
 
-  ' 32x24 grid: each cell a 12px round dot on the GRAY background; temperature -> tint
+  ' 32x24 grid: each cell a 12px round dot on the GRAY background;
+  ' temperature -> tint
   debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
   ang := 0
@@ -1955,7 +1961,7 @@ sprite with a single command, which avoids re-issuing the geometry that built it
 > **`LAYER`/`CROP` need `{Spin2_v50}`.** The hidden-bitmap `LAYER` and `CROP`
 > commands are V50 additions; `SPRITEDEF` and `SPRITE` were added earlier (V35n).
 > Because this section uses `LAYER` and `CROP`, build it with a Spin2 v50+
-> `pnut_ts` and put `{Spin2_v50}` (or later) on the source file's first line;
+> `pnut-ts` and put `{Spin2_v50}` (or later) on the source file's first line;
 > without that, those two commands are not recognized.
 
 ### LAYER — load a bitmap into a layer
@@ -1974,7 +1980,7 @@ pixel size you will display it. A 24-bit, uncompressed BMP is the safe choice.
   ignored.
 
 Because the bitmap is read from the host filesystem, `LAYER` depends on a file
-being present on the machine running `pnut_term_ts`; it is not generated by the
+being present on the machine running `pnut-term-ts`; it is not generated by the
 P2. The command form is what your P2 program sends; the artwork is supplied
 host-side.
 
@@ -2465,7 +2471,8 @@ count, the `RANGE` keyword, and a color. There are no `CHANNELS`, `LABELS`, or
 CON _clkfreq = 200_000_000
 
 PUB main() | sample
-  ' create + declare 4 channels -- the 1 before each color is the channel COUNT
+  ' create + declare 4 channels -- the 1 before each color
+  ' is the channel COUNT
   debug(`LOGIC Bus SAMPLES 64 'CLK' 1 $00FF00 'DATA' 1 $FFFF00 'CS' 'WR')
 
   repeat
@@ -2730,7 +2737,7 @@ CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00)
+  debug(`LOGIC SPIbus 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00)
   ' align display to CS going low (frame start)
   debug(`SPIbus TRIGGER $1 $0 32)
 
@@ -2983,9 +2990,9 @@ So this declares three channels:
 
 ```spin2
 debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
-debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
-             'Tri'   -1000 1000 100 100 0 $FF0000 ...
-             'Noise' -1000 1000 100 200 0 $00AAFF)
+debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00)
+debug(`Waves 'Tri'   -1000 1000 100 100 0 $FF0000)
+debug(`Waves 'Noise' -1000 1000 100 200 0 $00AAFF)
 ```
 
 Each channel here has a fixed range of −1000 to 1000, is 100 pixels tall, and is
@@ -3135,8 +3142,8 @@ debug(`Sig CLEAR)          ' wipe the buffer and start over
 
 This program needs no wiring. It generates three software waveforms and plots them
 on three stacked SCOPE channels: a CORDIC sine (`QSIN`), a counter-driven triangle,
-and random noise from `GETRND`. It compiles with `pnut_ts` and runs on a bare P2
-board with `pnut_term_ts` open.
+and random noise from `GETRND`. It compiles with `pnut-ts` and runs on a bare P2
+board with `pnut-term-ts` open.
 
 ```{.spin2 caption="ch07-scope-three-channel.spin2"}
 CON
@@ -3146,7 +3153,9 @@ PUB main() | ang, sine, tri, dir, noise
   ' Three stacked channels: fixed -1000..1000 range,
   ' 100px tall, offset by 'base'
   debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2)
-  debug(`Waves 'Sine' -1000 1000 100 0 0 $00FF00 'Tri' -1000 1000 100 100 0 $FF0000 'Noise' -1000 1000 100 200 0 $00AAFF)
+  debug(`Waves 'Sine' -1000 1000 100 0 0 $00FF00)
+  debug(`Waves 'Tri' -1000 1000 100 100 0 $FF0000)
+  debug(`Waves 'Noise' -1000 1000 100 200 0 $00AAFF)
 
   ang := 0
   tri := -1000
@@ -3346,7 +3355,7 @@ channel, trigger, and capture code shows the live signal.
 Start from the three-channel example. First switch the `Sine` channel from its fixed
 `-1000 1000` range to `AUTO` and watch the trace rescale on its own as you change the
 amplitude argument to `qsin`. Then add a trigger on the sine channel
-(`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
+(``debug(`Waves TRIGGER 0 -500 500 256)``) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
 `SAMPLES-1` to move the trigger point from the right edge to the center to the left
 edge, and see the post-trigger region grow.
@@ -3421,8 +3430,11 @@ The configuration keywords you can add to the creation line:
 > message, exactly as it is not valid on a LOGIC create line. The usual way to write one
 > by accident is to drop a keyword and leave its number stranded:
 >
-> ```spin2
+> ```antipattern
 > debug(`SCOPE_XY W 128 'A')      ' WRONG -- 128 follows no keyword
+> ```
+>
+> ```spin2
 > debug(`SCOPE_XY W SIZE 128 'A') ' what was meant
 > ```
 >
@@ -3773,15 +3785,23 @@ channels declared, samples alternate channel 0, channel 1, channel 0, channel 1.
 A channel declaration takes these arguments, in order, all optional after the
 label:
 
-| Position | Meaning | Range |
-|----------|---------|-------|
-| label | Channel name (string) | — |
-| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** |
-| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
-| tall | Channel height in pixels | — |
-| base | Baseline offset from the bottom, in pixels | — |
-| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | default `0` |
-| color | Trace color (`$RRGGBB`) | — |
+| Position | Meaning | Range | If omitted |
+|----------|---------|-------|------------|
+| label | Channel name (string) | — | required — the label is what declares the channel |
+| `MAG` gain | Magnitude **gain**: multiplies by 2 to the power `MAG` (a higher `MAG` makes the trace *taller*) | **0–11** | `0` — magnitude drawn at ×1 |
+| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` | `$7FFF_FFFF` — the full positive 32-bit scale |
+| tall | Channel height in pixels | pixels | the full plot-area height — `SIZE`'s height, `256` unless you set it |
+| base | Baseline offset from the bottom, in pixels | pixels | `0` — baseline at the bottom of the plot area |
+| grid | Flags, 4 bits: bit 0 = baseline line, bit 1 = top line, bit 2 = minimum-value label, bit 3 = maximum-value label | 4-bit mask | `0` — no grid lines, no legend text |
+| color | Trace color (`$RRGGBB`) | — | the next entry in the default palette: channel 0 green, 1 red, 2 cyan, 3 yellow, 4 magenta, 5 blue, 6 orange, 7 olive |
+
+The arguments are **positional, and omission stops the scan**. The window reads them
+in the order above and stops at the first one that is not there — so everything after
+that point keeps its default, whether you meant it to or not. There is no way to skip
+an argument to reach a later one: to set `color` you must supply `MAG`, `high`, `tall`,
+`base` and `grid` first, even where you are only restating their defaults. A channel
+declared as `'Signal' 0 $7FFF_FFFF` gets its default `tall`, `base`, `grid` and color,
+and one declared as `'Signal'` alone gets every default.
 
 The two upper `grid` bits add printed **legend text**, not lines: bit 3 labels the
 channel's maximum, and bit 2 its minimum — which for FFT always reads `+0`, because
@@ -3803,8 +3823,8 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128   0 1 $00FF00 ...
-              'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
+  debug(`Dual 'Left'  0 $7FFF_FFFF 128   0 1 $00FF00)
+  debug(`Dual 'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)
@@ -4088,7 +4108,7 @@ The configuration keywords for the creation line:
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
 | `TRACE` | `mode` | `15` | Scroll direction and scroll-enable (see "Scroll direction") |
-| `MAG` | `shift` | `0` | Magnitude pre-scale; multiplies FFT output by 2^shift, **0–11** |
+| `MAG` | `shift` | `0` | Magnitude pre-scale; multiplies FFT output by 2^shift^, **0–11** |
 | `DOTSIZE` | `x [y]` | `1` | Pixel scaling; one value sets both axes, two set them separately, **1–16** |
 | *color mode* | — | `LUMA8X` | One color-mode keyword (see "Color mapping") |
 | `LOGSCALE` | — | linear | Logarithmic magnitude scaling instead of linear |
@@ -4175,9 +4195,9 @@ For a vertical waterfall scrolling sideways — frequency up the side, time adva
 horizontally — use a direction in the 4–7 group with bit 3 set, for example
 `TRACE 12`:
 
+<!-- {K-waiver: 80 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
-debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
-      RANGE $20000 HSV16X LOGSCALE)
+debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 RANGE $20000 HSV16X LOGSCALE)
 ```
 
 > **Set scrolling on (`TRACE` 8–15) for a waterfall.** Values 0–7 wrap in place,
@@ -4189,16 +4209,16 @@ debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
 `RATE` is the number of samples the window collects between display updates. It does
 not change the FFT size; it controls how often a new line is drawn, and therefore
 how fast the waterfall scrolls. Smaller `RATE` means more updates per second and
-faster scrolling at higher CPU cost; larger `RATE` means slower scrolling.
+faster scrolling at higher redraw cost; larger `RATE` means slower scrolling.
 
 The default is `SAMPLES`/8 — for a 512-point FFT, an update every 64 samples. The
 effective scroll rate in lines per second is your sample feed rate divided by
 `RATE`. Set `RATE` to control how much real time each line of the display
 represents.
 
+<!-- {K-waiver: 80 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
-debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 ...
-      RANGE $80000 LUMA8X)
+debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 RANGE $80000 LUMA8X)
 ```
 
 `RATE` accepts **1–2048**.
@@ -4218,7 +4238,7 @@ debug(`SPECTRO Sens SAMPLES 512 RANGE $8000 MAG 4 LOGSCALE LUMA8X)
 
 Two more controls shape the magnitude before color:
 
-- **`MAG shift`** multiplies the FFT output by 2^shift (a 0–11 bit pre-shift),
+- **`MAG shift`** multiplies the FFT output by 2^shift^ (a 0–11 bit pre-shift),
   raising low-level signals before scaling.
 - **`LOGSCALE`** applies logarithmic magnitude scaling instead of linear, which
   compresses a wide dynamic range so faint detail stays visible alongside strong
@@ -4288,13 +4308,14 @@ frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
 vibration draws a **diagonal streak** down the waterfall — the run-up captured as
 a picture.
 
+<!-- {K-waiver: 77 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```{.spin2 caption="ch10-spectro-runup.spin2"}
 CON
   _clkfreq = 200_000_000
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
+  debug(`SPECTRO Run SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
@@ -4304,10 +4325,10 @@ PUB main() | i, phase, ainc, sample
     repeat i from 1 to 512
       sample := sine(2000, phase)
       phase += ainc            ' advance the synthesized vibration tone
-      debug(`RunUp `(sample))
+      debug(`Run `(sample))
     ainc += 5_000_000  ' motor speeds up -> higher tone -> diagonal streak
     if ainc > 400_000_000
-      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
+      debug(`Run CLEAR)      ' reached top speed: clear and run up again
       ainc := 8_000_000
 
 PRI sine(amp, angle) : y
@@ -4571,7 +4592,7 @@ debug(`Piano CLEAR)   ' all keys dark again
 
 ## A complete software-only example
 
-This program needs nothing but a P2 and the host running `pnut_term_ts`. It
+This program needs nothing but a P2 and the host running `pnut-term-ts`. It
 generates its own MIDI bytes: it plays a C-major scale one note at a time, then a
 C-major chord using running status, then clears the keyboard.
 
@@ -4777,7 +4798,7 @@ most recent keypress that occurred within the last 100 ms into that long, and
 writes **0 when no key was pressed**. It is not a function that returns the key —
 this is wrong:
 
-```spin2
+```antipattern
 ' WRONG - PC_KEY does not return a value
 key := debug(`Console `PC_KEY)
 ```
@@ -4897,7 +4918,7 @@ configured.
 (released) or `-1` (pressed). Test it directly — `if mouse[3]` is true when the left
 button is down. Do not mask it:
 
-```spin2
+```antipattern
 ' WRONG - buttons are 0 / -1, not packed bits
 if mouse[3] & 1
 ```
@@ -4997,7 +5018,7 @@ reads both input devices, using nothing but the debug link and a bare P2 board.
 Every element you send to a window travels over the `DEBUG()` serial link. That
 link is finite. The P2 transmits debug output on pin P62 in 8-N-1 format at the
 rate set by the `DEBUG_BAUD` symbol, which defaults to `DOWNLOAD_BAUD` — **2 Mbaud**.
-`pnut_term_ts` runs at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
+`pnut-term-ts` runs at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
 explicitly only if you have changed `DOWNLOAD_BAUD` or your clock requires it, and
 do not drop the DEBUG link to a slow rate such as 115200 — debugging needs the
 bandwidth. (If you drive the windows from the Spin Tools IDE, confirm it runs at
@@ -5103,20 +5124,20 @@ software with the random-number generator, so it runs on a bare board with no wi
 ```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[8]                              ' 8 longs x 32 samples = 256 = one full window
+VAR long buff[8]              ' 8 longs x 32 samples = 256 = one full window
 
 PUB main() | i, j, packed
   debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
-    repeat j from 0 to 7                       ' build one window of packed samples
+    repeat j from 0 to 7                ' build one window of packed samples
       packed := 0
       repeat i from 0 to 31
         ' pack 32 one-bit samples into a long, FIRST sample into the LOW bit
         packed := packed | ((getrnd() & 1) << i)
       buff[j] := packed
-    ' feed the whole window in one message; the host unpacks each long into
-    ' 32 samples LSB-first (packed data is streamed as an array, not one long
-    ' per DEBUG call)
+    ' feed the whole window in one message; the host unpacks each long
+    ' into 32 samples LSB-first (packed data is streamed as an array,
+    ' not one long per DEBUG call)
     debug(`Stream `uhex_long_array_(@buff, 8))
     waitms(50)
 ```
@@ -5142,20 +5163,20 @@ budget split two ways instead of one:
 ```{.spin2 caption="ch13-packed-logic-multi.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[16]                            ' 16 longs x 16 sample-pairs = 256 = one full window
+VAR long buff[16]       ' 16 longs x 16 sample-pairs = 256 = one full window
 
 PUB main() | i, j, packed
   debug(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
   repeat
-    repeat j from 0 to 15                      ' build one window of packed sample-pairs
+    repeat j from 0 to 15          ' build one window of packed sample-pairs
       packed := 0
       repeat i from 0 to 15
-        ' pack 16 two-bit samples into a long, FIRST sample into the LOW pair
+        ' pack 16 2-bit samples into a long, FIRST sample into the LOW pair
         packed := packed | ((getrnd() & %11) << (i*2))
       buff[j] := packed
-    ' feed the whole window in one message; the host unpacks each long into
-    ' 16 two-bit samples (one bit per channel), streamed as an array -- not one
-    ' long per DEBUG call
+    ' feed the whole window in one message; the host unpacks each long
+    ' into 16 two-bit samples (one bit per channel), streamed as an
+    ' array -- not one long per DEBUG call
     debug(`Pair `uhex_long_array_(@buff, 16))
     waitms(50)
 ```
@@ -5170,16 +5191,18 @@ A scope works the same way. Here four 8-bit samples ride in each long under
 ```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+VAR long buff[128]      ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
 
 PUB main() | i, ch
   debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
-  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
+  ' channel-defs (each needs a range) as a separate feed
+  debug(`Sig 'A' 0 255 'B' 0 255)
   ch := 0
   repeat
     repeat i from 0 to 127
       ' four 8-bit values per long, low byte first
-      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) ...
+                | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
     ' feed the whole window in one message; the host unpacks each long into
     ' four 8-bit values (packed data is streamed as an array, not one long
     ' per DEBUG call)
@@ -5196,8 +5219,9 @@ row segment:
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
-  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
+  ' 1-bit pixels -> LUT1 (2-color)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)   ' index 0 = background, 1 = cyan
   repeat
     repeat row from 0 to 15
       packed := 0
@@ -5353,7 +5377,7 @@ CON
 PUB main() | ang, sine, count
   ' Two independent windows, each created by name and placed with POS.
   debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
-  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
+  debug(`Wave 'Sine' -1000 1000)            ' channel-def as a separate feed
   debug(`TERM Status POS 420 0 SIZE 40 10)
 
   ang := 0
@@ -5448,7 +5472,7 @@ DAT
               org
 blink
               debug(`SCOPE Wave SIZE 400 200)  ' create with config only
-              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
+              debug(`Wave 'Ramp' 0 255)     ' channel-def as a separate feed
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF
@@ -5557,7 +5581,7 @@ PUB main() | x
 Start from the two-window Spin2 example. Add a running peak: track the largest
 magnitude the signal reaches and print it on the TERM alongside the current value,
 so the SCOPE shows the waveform while the panel reports its numbers. The complete
-program below compiles with `pnut_ts` and runs on a bare P2 board with `pnut_term_ts`
+program below compiles with `pnut-ts` and runs on a bare P2 board with `pnut-term-ts`
 open — no wiring.
 
 ```{.spin2 caption="ch14-scope-trace.spin2"}
@@ -5567,8 +5591,9 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)    ' create with config only
-  debug(`Scan 'Signal' -1000 1000)                       ' channel-def as a separate feed
+  ' create with config only
+  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)
+  debug(`Scan 'Signal' -1000 1000)          ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0
@@ -5583,7 +5608,10 @@ PUB main() | ang, signal, peak, count
     ' Coordination is nothing more than feeding both windows
     ' in the same loop:
     debug(`Scan `(signal))                 ' one sample to the SCOPE
-    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)  ' fresh status block
+    ' fresh status block
+    debug(`Panel 0 'Samples: `(count)' 13)
+    debug(`Panel 'Current: `(signal)' 13)
+    debug(`Panel 'Peak:    `(peak)' 13)
 
     ang   += 4
     count += 1
@@ -5705,7 +5733,7 @@ panels.
 
 > **Requires `{Spin2_v50}`.** The `LAYER` and `CROP` commands are V50
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
-> with a Spin2 v50+ `pnut_ts`. Without it, these commands are not recognized.
+> with a Spin2 v50+ `pnut-ts`. Without it, these commands are not recognized.
 
 **The BMP format matters.** `LAYER` loads a Windows BMP file — the path must name an
 existing `.bmp`. Author it as a **24-bit, uncompressed (BI_RGB), no-alpha** image:

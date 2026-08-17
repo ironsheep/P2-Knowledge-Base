@@ -2862,7 +2862,7 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 | Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
 | Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
 | Logarithm | [QLOG](#qlog) | Base-2 logarithm (5:27 fixed-point) in X |
-| Exponential | [QEXP](#qexp) | Base-2 exponential 2^x (inverse of QLOG) in X |
+| Exponential | [QEXP](#qexp) | Base-2 exponential 2^x^ (inverse of QLOG) in X |
 
 Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. QMUL returns the full 64-bit product, which fixed-point arithmetic uses directly.
 
@@ -8280,7 +8280,7 @@ If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the
 
 If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per cog, meaning each cog's RNG produces independent bit sequences at this position, useful for multi-cog systems requiring independent randomness.
 
-The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128 - 1).
+The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128^ - 1).
 
 
 
@@ -12019,8 +12019,8 @@ Both the instruction count (D) and repetition count (S) can exceed the 9-bit imm
 | Form | Limit | Mechanism |
 |------|-------|-----------|
 | `#count` | 0-511 | 9-bit immediate field |
-| `##count` | 0 to 2^32-1 | AUGD/AUGS prefix emitted automatically |
-| `register` | 0 to 2^32-1 | Register value used at runtime |
+| `##count` | 0 to 2^32^-1 | AUGD/AUGS prefix emitted automatically |
+| `register` | 0 to 2^32^-1 | Register value used at runtime |
 
 ```pasm2
 ' Extended repetition examples
@@ -15667,7 +15667,7 @@ XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-qual
 
 The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bit generator:
 
-- Long period (2^32 - 1 values before repeating)
+- Long period (2^32^ - 1 values before repeating)
 - Good distribution across all output bits
 - Fast execution (2 clocks per random number)
 - Small state requirement (single 32-bit value)

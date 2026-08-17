@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.8\par}
+{\large\color{blue}Version 1.0.9\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -2076,7 +2076,7 @@ PUB set_voltage(level) | config
 
 ## 2.13 Resetting to Default
 
-`PINCLEAR(pin)` sets `DIR=0` and then writes `WRPIN=0`, clearing all enhanced configuration and smart pin modes *and* lowering the pin's direction bit, returning the pin to basic Direct I/O operation. `WRPIN(pin, 0)` clears only the mode word and leaves `DIR` unchanged—so the two are not fully equivalent: a pin left with `DIR=1` keeps driving after `WRPIN(pin, 0)`, whereas `PINCLEAR` also releases it. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
+`PINCLEAR(pin)` sets `DIR=0` and then writes `WRPIN=0`, clearing all enhanced configuration and smart pin modes *and* lowering the pin's DIR bit, returning the pin to basic Direct I/O operation. `WRPIN(pin, 0)` clears only the mode word and leaves `DIR` unchanged—so the two are not fully equivalent: a pin left with `DIR=1` keeps driving after `WRPIN(pin, 0)`, whereas `PINCLEAR` also releases it. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
 
 ## 2.14 Quick Reference
 
@@ -2823,7 +2823,7 @@ Spin2 provides `AKPIN(PinField)`, the direct equivalent of the PASM2 AKPIN instr
 AKPIN(pin)                         ' Acknowledge without reading
 ```
 
-A discarded `RDPIN` also acknowledges, if you already have the value in hand:
+A discarded `RDPIN` also acknowledges, where the value is already in hand:
 ```spin2
 ack := RDPIN(pin)                  ' Read (discard result) to acknowledge
 ```
@@ -3199,9 +3199,9 @@ Every pattern above keeps the cog **executing** — the poll-spin loops on `TEST
               ' Handle the timeout
 ```
 
-The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so one flag is all you need.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
+The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so testing one flag is sufficient.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
 
-**If you need to do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
+**Where the cog must do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
 
 ```pasm2
               getct     deadline          ' Read current time
@@ -3219,7 +3219,7 @@ The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1
               ' Handle the timeout
 ```
 
-`ADDCT1` sets counter-comparator 1 to a deadline; `POLLCT1 WC` reports (and clears) whether that deadline has passed, exactly as `POLLSE1 WC` does for the pin event. This costs a few instructions per pass and keeps the cog running — use it when you have real work to do between checks; otherwise prefer the `SETQ`-armed stall above. For background servicing, that same SE1 event can instead drive an interrupt (via `SETINT1`), freeing the cog to run other code between events.
+`ADDCT1` sets counter-comparator 1 to a deadline; `POLLCT1 WC` reports (and clears) whether that deadline has passed, exactly as `POLLSE1 WC` does for the pin event. This costs a few instructions per pass and keeps the cog running — use it where the cog has real work to do between checks; otherwise prefer the `SETQ`-armed stall above. For background servicing, that same SE1 event can instead drive an interrupt (via `SETINT1`), freeing the cog to run other code between events.
 
 **Let the smart pin time itself out.** Several input modes carry a timeout in hardware, removing the software race entirely. `P_EVENTS_TICKS` (mode `%10010`) with Y[2] = 1 is a pure timeout watchdog: it raises IN only when X clocks pass with *no* A-input event (Chapter 13); an arriving event simply restarts the X-clock window and resets Z, without raising IN. A `WAITSE1` armed on this pin therefore fires on the *timeout* — use it to detect a stalled input, not to catch the event itself. The windowed measurement modes (`%10101`–`%10111`, Chapter 15) treat X as a *minimum* window: they accumulate across whole periods until X clocks have elapsed and then let the period in progress finish, so IN is raised after *at least* X clocks — a "wait roughly this long, then read" cadence. When one of these fits, prefer it: the work is done in silicon at zero cog cost.
 
@@ -4408,7 +4408,7 @@ CON
   STEP_PIN = 10
   STEP_PERIOD = 400                       ' 2 µs period
   STEP_LOW = 200                          ' X[31:16] compare = 1 µs low time
-                                          ' (high time = 400-200 = 200 = 1 µs, 50% duty)
+  ' (high time = 400-200 = 200 = 1 µs, 50% duty)
 
 PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)
@@ -4661,7 +4661,7 @@ The output edge can only move on a base-period boundary, and the frequency step 
 | 10 | 20,000,000 | Finer frequency step; more edge jitter |
 | 100 | 2,000,000 | Finest frequency step; lowest max frequency |
 
-For most applications, X[15:0] = 1 is the right choice — it gives the widest output-frequency range, the highest update rate, and the least edge jitter. Use X[15:0] > 1 only when you need a finer frequency step at low output frequencies.
+For most applications, X[15:0] = 1 is the right choice — it gives the widest output-frequency range, the highest update rate, and the least edge jitter. Use X[15:0] > 1 only where a finer frequency step at low output frequencies is required.
 
 
 ## 8.3 P_NCO_DUTY Mode (%00111)
@@ -5023,7 +5023,7 @@ All three PWM modes share a common architecture:
 
 ### Complementary Outputs and Dead-Band
 
-Each Smart Pin drives **one** physical pin, so a single PWM Smart Pin produces **one** output. There is no single-pin "complementary output" mode and no built-in dead-band. A complementary pair — for example the high-side and low-side gates of a half-bridge — is **always two Smart Pins**, one per side, enabled together and coordinated carefully.
+Each smart pin drives **one** physical pin, so a single PWM smart pin produces **one** output. There is no single-pin "complementary output" mode and no built-in dead-band. A complementary pair — for example the high-side and low-side gates of a half-bridge — is **always two smart pins**, one per side, enabled together and coordinated carefully.
 
 The two pins share one frame period; the low-side pin inverts its output (`P_INVERT_OUTPUT`) so the pair switches complementarily. The **dead-band** — the brief interval where *both* outputs are off, which prevents shoot-through in a half-bridge — is produced in **software**, by offsetting the two duty values so their active intervals never overlap:
 
@@ -5036,7 +5036,7 @@ high_duty := base_duty - dead_gap   ' high side switches on later
 low_duty  := base_duty + dead_gap   ' low side switches off earlier
 ```
 
-There is no dead-band-width register: the width is whatever timing offset you feed the two pins, and the right value depends on the switches and the load.
+There is no dead-band-width register: the width is whatever timing offset the two pins are given, and the right value depends on the switches and the load.
 
 ## 9.2 P_PWM_TRIANGLE Mode (%01000)
 
@@ -5435,8 +5435,9 @@ CON
   _clkfreq = 200_000_000
   LED_PIN = 56
   PWM_FREQ = 500                            ' 500 Hz (no flicker)
-  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds the
-  ' 16-bit frame field, so split it across base and frame: base x frame = period.
+  ' 500 Hz sawtooth: period = 200 MHz / 500 = 400,000 clocks. That exceeds
+  ' the 16-bit frame field, so split it across base and frame:
+  ' base x frame = period.
   BASE_PERIOD = 8
   FRAME_PERIOD = 50000                      ' 8 x 50,000 = 400,000 -> 500 Hz
 
@@ -5811,7 +5812,7 @@ Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 
 > **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits realized depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
 
-> **Two independent rates — the dither runs far faster than your updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
+> **Two independent rates — the dither runs far faster than the sample updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
 
 ### P_DAC_DITHER_RND (%00010)
 
@@ -5955,7 +5956,7 @@ In DAC_MODE a non-DAC smart mode like NCO does not feed the 8-bit DAC directly; 
 
 ### PWM + DAC Integration
 
-PWM modes can combine with DAC. Like NCO, a PWM smart mode in DAC_MODE drives BIT_DAC with its 1-bit output, toggling between the two 4-bit levels in M[7:4] and M[3:0] — you must populate those nibbles or the pin stays at 0V. RC-filter the pin to recover the analog average:
+PWM modes can combine with DAC. Like NCO, a PWM smart mode in DAC_MODE drives BIT_DAC with its 1-bit output, toggling between the two 4-bit levels in M[7:4] and M[3:0] — those nibbles must be populated or the pin stays at 0V. RC-filter the pin to recover the analog average:
 
 ```spin2
 ' PWM triangle toggles BIT_DAC between two 4-bit levels;
@@ -6072,12 +6073,13 @@ VAR
   long phase_inc
 
 PUB audio_init()
-  ' Initialize audio DAC. The PWM-dither sample period must be a multiple of
-  ' 256 clocks, so 44.1 kHz is not exactly achievable: truncating the period to
-  ' 4352 clocks yields ~46 kHz (200 MHz / 4352).
+  ' Initialize audio DAC. The PWM-dither sample period must be a multiple
+  ' of 256 clocks, so 44.1 kHz is not exactly achievable: truncating the
+  ' period to 4352 clocks yields ~46 kHz (200 MHz / 4352).
   PINFLOAT(AUDIO_PIN)
   WRPIN(AUDIO_PIN, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
-  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)  ' Period, rounded down to a 256-clock multiple
+  ' Period, rounded down to a 256-clock multiple
+  WXPIN(AUDIO_PIN, _clkfreq / SAMPLE_RATE / 256 * 256)
   WYPIN(AUDIO_PIN, $8000)                 ' Start at mid-scale
   PINLOW(AUDIO_PIN)
 
@@ -6091,8 +6093,9 @@ PUB audio_sample() : sample | sine_val
   ' Generate next audio sample
   phase += phase_inc
 
-  ' Get sine value (-32767 to +32767) using CORDIC (length, step, stepsInCircle)
-  ' stepsInCircle=0 selects a full $1_0000_0000-step circle, so phase is a step count
+  ' Get sine value (-32767 to +32767) using CORDIC
+  ' (length, step, stepsInCircle). stepsInCircle=0 selects a full
+  ' $1_0000_0000-step circle, so phase is a step count
   sine_val := QSIN(32767, phase, 0)
 
   ' Convert to 16-bit unsigned (0 to 65535)
@@ -6193,7 +6196,7 @@ The DAC output impedance determines load driving capability:
 | P_DAC_124R_3V | 124Ω | >1.2kΩ | 0.12V |
 | P_DAC_75R_2V | 75Ω | >750Ω | 0.08V |
 
-The "Min Load" column is a **rule-of-thumb guideline** (roughly 10× the output impedance), not a hard specification — keeping the load well above the output impedance holds the voltage drop small. Size the actual load to the voltage-drop budget your application can tolerate.
+The "Min Load" column is a **rule-of-thumb guideline** (roughly 10× the output impedance), not a hard specification — keeping the load well above the output impedance holds the voltage drop small. Size the actual load to the voltage-drop budget the application can tolerate.
 
 ### External Buffering
 
@@ -6433,7 +6436,7 @@ By default, the B-input reads from the local pin, which is useless for synchrono
 | P_MINUS3_B | Pin - 3 |
 
 **Wrong:**
-```spin2
+```antipattern
 mode := P_SYNC_TX | P_OE                    ' NO CLOCK ROUTING!
 ```
 
@@ -6690,14 +6693,15 @@ PUB spi_deselect()
   PINHIGH(CS_PIN)
 
 PUB spi_tx_byte(value) | reversed
-  ' MSB first
-  reversed := value REV 7              ' reverse the 8 data bits for MSB-first (REV n covers bits 0..n)
+  ' MSB first: reverse the 8 data bits (REV n covers bits 0..n)
+  reversed := value REV 7
 
   WYPIN(MOSI_PIN, reversed)
   WYPIN(CLK_PIN, 16)                        ' 8 clock cycles
 
-  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock pin
-  ' rises when its transition count reaches zero; MOSI's IN only signals buffer-ready)
+  ' Wait for the clock transitions to finish (IN on the P_TRANSITION clock
+  ' pin rises when its transition count reaches zero; MOSI's IN only
+  ' signals buffer-ready)
   repeat until PINREAD(CLK_PIN)
 
 PUB spi_write_register(addr, value)
@@ -7267,7 +7271,8 @@ PUB main()
 
   ' Configure button with pull-up and Schmitt trigger
   WRPIN(BUTTON_PIN, P_SCHMITT_A | P_HIGH_15K)
-  PINHIGH(BUTTON_PIN)                    ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+  ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+  PINHIGH(BUTTON_PIN)
 
   ' Main loop
   repeat
@@ -9476,7 +9481,7 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 | %1011 | 2048 clocks | 12 bits | 12 bits | overflow | overflow |
 | %1101 | 8192 clocks | 14 bits | 14 bits | overflow | overflow |
 
-*The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on your own hardware (see §16.8 Accuracy Considerations).*
+*The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on the target hardware (see §16.8 Accuracy Considerations).*
 
 † **SINC3 Filter:** the higher SINC3 figures assume an idealized doubling over simple bit-summing that the P2's ADC does not actually deliver — treat them as optimistic upper bounds, not attainable resolution.
 
@@ -9709,7 +9714,7 @@ X[7:2]:   A (arm) value, 6-bit MSB-justified (0-252, step 4)
 X[1:0]:   Filter: %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
-> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when you choose the `A`/`B` trigger thresholds.
+> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when choosing the `A`/`B` trigger thresholds.
 
 The hysteretic trigger works as follows:
 
@@ -9970,7 +9975,7 @@ PUB averaged_reading(num_samples) : average | sum, i
 ```
 
 **Oversampling for Extra Bits:**
-Each 4x oversampling adds approximately 1 bit of resolution.
+Each 4× oversampling adds approximately 1 bit of resolution, provided the input carries enough noise to dither the reading across a code boundary — averaging a perfectly quiet input returns the same code every time and adds nothing. What this buys is resolution against *noise*; it does not move the absolute-error floor described above.
 
 **Calibration:**
 ```spin2
@@ -10226,10 +10231,12 @@ Receives serial data synchronized to an external clock signal. Data is sampled o
 
 **The B-input defaults to the local pin, which is useless for SPI.** A pin-selection constant MUST be added:
 
-```spin2
+```antipattern
 ' WRONG - no clock routing:
 mode := P_SYNC_RX                               ' Will not work!
+```
 
+```spin2
 ' CORRECT - clock from adjacent pin:
 mode := P_SYNC_RX | P_PLUS1_B                   ' Clock on pin+1
 ```
@@ -10910,7 +10917,7 @@ PUB setup_noise_dac()
 
 **Note:** The DAC outputs noise continuously regardless of sample period. The sample period only affects when IN is raised.
 
-> **Why `X[15:0] = 0` is the low-power setting.** When you don't need a sample period at all, `0` selects the longest possible window (65,536 clocks). Maximizing this *unused* sample period **reduces switching power** — so `0` is the right choice for a free-running noise source whose `IN` cadence you never read, as the examples here use.
+> **Why `X[15:0] = 0` is the low-power setting.** Where no sample period is needed at all, `0` selects the longest possible window (65,536 clocks). Maximizing this *unused* sample period **reduces switching power** — so `0` is the right choice for a free-running noise source whose `IN` cadence is never read, as the examples here use.
 
 ### Voltage Range
 
@@ -11367,8 +11374,8 @@ USB requires an even/odd consecutive pin pair:
 
 | Pin | Function |
 |-----|----------|
-| Even (e.g., 56) | DM (D-) |
-| Odd (e.g., 57) | DP (D+) |
+| Even (e.g., 8) | DM (D-) |
+| Odd (e.g., 9) | DP (D+) |
 
 Valid pairs: 0/1, 2/3, 4/5, ..., 56/57, 58/59, 60/61, 62/63
 
@@ -11376,8 +11383,8 @@ Valid pairs: 0/1, 2/3, 4/5, ..., 56/57, 58/59, 60/61, 62/63
 
 ```spin2
 CON
-  USB_DM = 56                                   ' D- on even pin
-  USB_DP = 57                                   ' D+ on odd pin (DM+1)
+  USB_DM = 8                                    ' D- on even pin
+  USB_DP = 9                                    ' D+ on odd pin (DM+1)
 
 PUB configure_usb_pins() | baud
   ' Configure BOTH pins of the pair with identical WRPIN D data
@@ -11532,10 +11539,11 @@ As a USB device, the P2:
 
 As a USB host, the P2:
 
-- Provides bus power (5V)
 - Initiates all communication
 - Enumerates and configures devices
 - Must handle all connected device types
+
+Bus power is a board responsibility, not a P2 one. A host port supplies 5V on VBUS, which the P2 cannot source — its I/O operates at 3.3V. The external supply and its current limiting are covered in §19.8.
 
 **Host implementation is significantly more complex than device mode.**
 
@@ -11587,8 +11595,8 @@ PUB main()
 ```{.spin2 caption="ch19-usb-device-config.spin2"}
 CON
   _clkfreq = 200_000_000
-  USB_DM = 56
-  USB_DP = 57
+  USB_DM = 8
+  USB_DP = 9
 
 PUB configure_usb() | baud
   ' Reset both pins
@@ -11654,6 +11662,13 @@ USB host mode requires:
 - 5V power supply for VBUS
 - Current limiting for protection
 - Pull-up/pull-down resistors for speed identification
+
+**Where the 5V comes from on a P2 Edge board.** The Edge breakout boards do carry 5V to the I/O headers, which is worth being precise about because it is easy to read as the P2 supplying it. It is not: each 8-pin accessory header provides two grounds, a Vxx pin carrying 3.3V from that group's LDO regulator, and *optionally* 5V passed **straight through from the board's power jack**. Two consequences for a host design:
+
+- **Two headers have no 5V routed at all — P24–P31 and P56–P63.** A host built on a pin pair in either of those banks must take VBUS from elsewhere on the board.
+- **The header 5V is the input supply, not a port rail.** It arrives unregulated by the board and with no current limit, so the current limiting listed above remains the design's responsibility.
+
+*(P2 Edge Mini Breakout Board #64019, P2 Edge Breakout Board #64029, and P2 Edge Module Breadboard #64020 product guides. On the Breadboard the header 5V is additionally gated by the ACC ON/OFF shunt.)*
 
 USB device mode requires:
 
@@ -12325,7 +12340,7 @@ sample_rate = sysclk / 2^(X[3:0])
 
 **Variables:**
 
-- `X[3:0]`: Sample period exponent — 4-bit field, period = 2^X[3:0] clocks (useful range 1-13 for SINC2 Sampling; exponents 14-15 overflow)
+- `X[3:0]`: Sample period exponent — 4-bit field, period = 2^X[3:0]^ clocks (useful range 1-13 for SINC2 Sampling; exponents 14-15 overflow)
 
 **Worked Example (8-bit SINC2 at 200 MHz):**
 ```formula
@@ -13014,10 +13029,12 @@ WAITMS(1000)
 ### Solutions
 
 **Add P_OE to mode:**
-```spin2
+```antipattern
 ' WRONG - no output
 WRPIN(pin, P_PWM_SAWTOOTH)
+```
 
+```spin2
 ' CORRECT - output enabled
 WRPIN(pin, P_PWM_SAWTOOTH | P_OE)
 ```
@@ -13118,10 +13135,12 @@ Input measurements fluctuate, outputs have jitter, counts are erratic.
 ### Solutions
 
 **Add Schmitt trigger:**
-```spin2
+```antipattern
 ' WRONG - raw input
 mode := P_COUNT_RISES
+```
 
+```spin2
 ' CORRECT - Schmitt trigger for clean edges
 mode := P_COUNT_RISES | P_SCHMITT_A
 ```
@@ -13194,10 +13213,12 @@ WRPIN(RX_PIN, P_ASYNC_RX | P_INVERT_IN)
 ```
 
 **For P_SYNC_TX/RX, add clock routing:**
-```spin2
+```antipattern
 ' WRONG - no clock source specified
 mode := P_SYNC_TX | P_OE
+```
 
+```spin2
 ' CORRECT - clock from adjacent pin
 mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
 ```
