@@ -298,7 +298,9 @@ PUB main() | ang, signal, peak, count
     ' in the same loop:
     debug(`Scan `(signal))                 ' one sample to the SCOPE
     ' fresh status block
-    debug(`Panel 0 'Samples: `(count)' 13 'Current: `(signal)' 13 'Peak:    `(peak)' 13)
+    debug(`Panel 0 'Samples: `(count)' 13)
+    debug(`Panel 'Current: `(signal)' 13)
+    debug(`Panel 'Peak:    `(peak)' 13)
 
     ang   += 4
     count += 1

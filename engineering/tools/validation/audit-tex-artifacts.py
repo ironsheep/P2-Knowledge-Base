@@ -135,6 +135,10 @@ CHECKS = [
 # of these, so it does not match.
 _VERBATIM_ESCAPE_LEAK = re.compile(r"\\[_&#%$]")
 
+# \lstinline!...! — pandoc's inline-code form. The delimiter is whatever char
+# follows \lstinline, so match it and its partner.
+_LSTINLINE = re.compile(r"\\lstinline(\W)(?:(?!\1).)*\1")
+
 
 def scan_verbatim_escape_leaks(path):
     """Return [(line_no, line_text)] for escaped specials INSIDE verbatim regions."""
@@ -176,6 +180,15 @@ def scan(path):
             continue
         if depth > 0:
             continue
+
+        # INLINE CODE is verbatim too. pandoc emits a code span as
+        # \passthrough{\lstinline!code!}, and its content is literal, so every
+        # signature below is legitimate inside it. Blank the spans (length-preserving)
+        # before checking. Without this, `??` — the authored Spin2 random operator,
+        # ch02-getting-started.md:144 — trips the unresolved-ref check, which is the
+        # second false positive this tool produced (the first was ##Label). A gate
+        # that cries wolf gets ignored; each exclusion here is a real hit that wasn't.
+        ln = _LSTINLINE.sub(lambda m: " " * len(m.group(0)), ln)
 
         in_preamble = i <= doc_start
         for cid, desc, rx, preamble_ok in CHECKS:
