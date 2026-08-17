@@ -260,7 +260,8 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
+  ' {K-waiver: 77 cols, create line, inside the 86-col box}
+  debug(`SPECTRO Run SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 8_000_000           ' shaft frequency at rest (a low tone)
@@ -270,10 +271,10 @@ PUB main() | i, phase, ainc, sample
     repeat i from 1 to 512
       sample := sine(2000, phase)
       phase += ainc            ' advance the synthesized vibration tone
-      debug(`RunUp `(sample))
+      debug(`Run `(sample))
     ainc += 5_000_000  ' motor speeds up -> higher tone -> diagonal streak
     if ainc > 400_000_000
-      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
+      debug(`Run CLEAR)      ' reached top speed: clear and run up again
       ainc := 8_000_000
 
 PRI sine(amp, angle) : y

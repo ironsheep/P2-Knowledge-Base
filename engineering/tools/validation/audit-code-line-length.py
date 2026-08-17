@@ -62,6 +62,29 @@ CODE_BUDGET_RE = re.compile(r'Max\s+code\s+columns\s*\(K\)\s*:\s*(\d+)', re.IGNO
 # with a tagged line: "Code-line gate: EXEMPT (instrument)". Over-budget lines are
 # then reported for information but do NOT fail the run (exit stays 0).
 CODE_GATE_EXEMPT_RE = re.compile(r'Code[-\s]line\s+gate\s*:\s*EXEMPT', re.IGNORECASE)
+
+# PER-LINE WAIVER, narrow on purpose.
+#
+# A window-CREATE line carries every config keyword the window needs, and those are
+# not divisible: TERM's COLOR and SPECTRO's SAMPLES/DEPTH/RANGE/RATE are accepted
+# ONLY by the Configure phase, so they cannot move to a later feed the way channel
+# defs and text can. In a manual about DEBUG windows a fully-configured create line
+# simply does not fit 76 columns — that is a property of the subject, not sloppiness.
+#
+# So a line may carry a waiver naming its MEASURED width:
+#
+#     ' {K-waiver: 81 cols, create line, inside the 86-col box}
+#
+# The waiver is honored only if the line is at or under HARD_CEILING. 76 stays the
+# default for all ordinary code; 86 is where text begins spilling past the code box
+# into the margin (calibrated 2026-08-17: a 97-col line produced a 57.66pt overfull
+# and an 88-col line 12.85pt, i.e. ~5.24pt per column past 86). Beyond 86 no waiver
+# applies, because the defect is then visible on the page.
+#
+# The waiver lives in the SOURCE, next to the line it excuses, and must state the
+# width — so every exception is auditable and none can hide in a guide.
+WAIVER_RE = re.compile(r"\{K-waiver:\s*(\d+)\s*cols?\b", re.IGNORECASE)
+HARD_CEILING = 86
 # App notes carry no creation-guide.md — the app-note doc class shares one
 # (APP-NOTE-CREATION-GUIDE.md) and each note records its own K in its
 # MANUAL-DESCRIPTOR.md front matter as "code_line_budget_K: 76".
@@ -182,6 +205,18 @@ def scan_markdown(md_path, budget, tabstop):
         if fence is not None:
             cols = display_width(line, tabstop)
             if cols > budget:
+                # Honor a per-line waiver only if it names THIS line's measured width
+                # and the line stays inside the box (see WAIVER_RE / HARD_CEILING).
+                # A waiver whose number has drifted from reality is no waiver — the
+                # point is that the exception states, and keeps stating, the truth.
+                # The waiver normally sits on the PRECEDING line: a trailing waiver
+                # would add its own width to the line it excuses, which is
+                # self-defeating. Accept either position.
+                w = WAIVER_RE.search(line)
+                if w is None and idx >= 2:
+                    w = WAIVER_RE.search(lines[idx - 2])
+                if w and int(w.group(1)) == cols and cols <= HARD_CEILING:
+                    continue
                 violations.append((idx, cols, line))
     return violations
 

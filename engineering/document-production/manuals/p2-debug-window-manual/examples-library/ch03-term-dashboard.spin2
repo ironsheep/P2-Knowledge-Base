@@ -3,10 +3,11 @@ CON _clkfreq = 200_000_000
 PUB main() | ang, signal, count
   ' pairs: 0 = labels (black/white), 1 = header (white/blue),
   '        2 = ok (white/green), 3 = alert (white/red)
-  debug(`TERM Panel SIZE 40 8 BACKCOLOR WHITE COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
+  ' {K-waiver: 81 cols, create line, inside the 86-col box}
+  debug(`TERM Panel SIZE 40 8 COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' Draw the static layout once: a title and three fixed labels.
-  debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
+  debug(`Panel 0 5 'SIGNAL MONITOR')     ' clear, header pair, at (0,0)
   debug(`Panel 3 2 2 0 'Sample:')        ' row 2, col 0
   debug(`Panel 3 3 2 0 'Value :')        ' row 3, col 0
   debug(`Panel 3 4 2 0 'State :')        ' row 4, col 0
