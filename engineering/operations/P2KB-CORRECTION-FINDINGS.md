@@ -2504,9 +2504,21 @@ neighbours did not.
 **Wider than the 16 visible lines.** The bare forms — `WC`, `WZ`, `WCZ`, `ANDZ`, `ORZ`, `XORZ`, nine
 further sites — match the plain-CAPS shape and carried the same latent bug.
 
-**NOT caused by the F-285 repair, and not new.** Independently checked against the **released v3.1.5
-PDF** (recovered from git), which renders these lines differently — so the visible symptom changed
-when the `&nbsp;` text was removed, but the filter defect predates it.
+**The F-285 repair did not cause these defects — it ACTIVATED them.** (Corrects a first reading that
+called it unrelated.) `is_syntax_paragraph()` rejects any paragraph containing a top-level word, and
+the literal `&nbsp;` was exactly such a word — so in v3.1.5 the filter **never fired on these
+paragraphs at all**, and the four tight lines came from pandoc's hard breaks alone. Removing the
+entities made the paragraph parse as a syntax block for the first time, and the filter's latent bugs
+took effect. The bugs predate v3.1.5; their visibility does not. Verified against the released v3.1.5
+PDF recovered from git.
+
+**A SECOND defect, found by reasoning about what the re-render would show before spending it.** Once
+the effect-group breaks were fixed, the four forms would still have been separated by BLANK LINES:
+the filter inserts `\\` before each mnemonic **unconditionally**, while the source already ends each
+form with a trailing `\` — a markdown hard break pandoc renders as `\\`. The two compose to
+`\\\\`, a blank line between every syntax form. The filter now honors an existing `LineBreak` and
+supplies one only when the source lacks it — which preserves the reason the filter exists (forms
+written on separate source lines with no hard break still get their break).
 
 **Fix applied.** Shape-matching cannot separate these cases; **membership** can. A single
 `is_mnemonic()` predicate now decides by membership in an explicit `EFFECT_FLAGS` set (handling the
@@ -2521,9 +2533,17 @@ and confirmed identical.
 **Same class as F-286**, one day apart: a guard written for one shape, left to cover a family. The
 countermeasure is the same — one predicate, one place, used by every caller.
 
-**Owed:** one Assembly render. **Assembly v3.1.6 is HELD from the release wave** until p.329 shows
-the four TESTP forms each on one line; deSilva, P2AN001 and P2AN002 are unaffected (this filter is
-Assembly-local) and released without it.
+**PROVEN ON THE FORGE DAEMON, not merely reviewed** (run `f288-syntax-v1`, 2026-08-17). A five-case
+fixture was rendered and READ: the four slash-form `TESTP` forms print one per line with no gaps; the
+`{WC|WZ|WCZ}` control is unchanged; bare `WC`/`WZ`/`WCZ` print inline; **and both no-regression cases
+hold** — forms written without a hard break still receive an inserted break (the filter's actual
+purpose), and `CALL/RET`, `WRC`, `WRZ` are still treated as mnemonics. Compile log clean on all five
+serious signatures. This is what a Lua change with no local interpreter requires: the daemon, not a
+code read.
+
+**Owed:** one Assembly render (staged). **Assembly v3.1.6 is HELD from the release wave** until p.329
+shows the four TESTP forms each on one line in the production build; deSilva, P2AN001 and P2AN002 are
+unaffected (this filter is Assembly-local) and release without it.
 
 **Next finding ID after this block: F-289.**
 

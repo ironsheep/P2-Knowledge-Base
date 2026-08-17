@@ -147,7 +147,19 @@ function Para(elem)
     if item.t == "Strong" then
       -- Same predicate as the count above — they must never disagree
       if is_mnemonic(pandoc.utils.stringify(item)) then
-        if first_mnemonic_seen then
+        -- Insert a break before this mnemonic ONLY if the source did not already
+        -- put one there.
+        --
+        -- WHY: this filter exists for syntax forms written on separate source
+        -- lines with NO hard break, where pandoc yields a SoftBreak (a space) and
+        -- the forms would otherwise run together. But the Assembly source ends
+        -- each form with a trailing "\" — a markdown HARD break — which pandoc
+        -- already renders as "\\". Adding another produced "\\\\": a BLANK LINE
+        -- between every syntax form (F-288). Honor an existing LineBreak; only
+        -- supply one when it is missing.
+        local prev = (i > 1) and content[i - 1] or nil
+        local already_broken = (prev ~= nil) and (prev.t == "LineBreak")
+        if first_mnemonic_seen and not already_broken then
           -- Insert a LaTeX line break before this mnemonic
           table.insert(new_content, pandoc.RawInline('latex', '\\\\'))
         end
