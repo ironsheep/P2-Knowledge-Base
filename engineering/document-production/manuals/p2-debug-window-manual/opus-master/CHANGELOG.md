@@ -2,29 +2,28 @@
 
 ## v1.1.3 (2026-08-16)
 
-The FFT chapter now states what an omitted channel argument does, the way the SCOPE chapter already did.
+**What an omitted FFT channel argument does.**
 
 ### Added
 
 - **FFT channel declarations carry an "If omitted" column** (Chapter 9): every position in
-  `'label' MAG high tall base grid color` states its default — magnitude gain `0`, full scale
-  `$7FFF_FFFF`, height the full plot area, baseline `0`, no grid, and the next color from the
-  default palette.
-- **Omission stops the scan** (Chapter 9): the channel arguments are positional, and the first one
-  you leave out ends the scan, so every argument after it keeps its default. Reaching a later
-  argument means supplying the earlier ones, even where you are only restating their defaults.
+  `'label' MAG high tall base grid color` states its default
+- **Those defaults** (Chapter 9): magnitude gain `0`, full scale `$7FFF_FFFF`, full plot height,
+  baseline `0`, no grid, next palette color
+- **Omission stops the scan** (Chapter 9): the arguments are positional, so the first one omitted
+  ends the scan and everything after keeps its default
+- **Reaching a later argument means supplying the earlier ones** (Chapter 9), even where you are
+  only restating their defaults
 
 ### Changed
 
-- **Chapter 12's two wrong-code examples now look wrong.** The `PC_KEY` return-value mistake and
-  the mouse-button bitmask mistake sat in ordinary syntax-highlighted blocks, marked only by a
-  `' WRONG` comment — the same colour and the same visual weight as code that works. Each is now a
-  red anti-pattern block set against the correct form beside it.
+- **Chapter 12's `PC_KEY` and mouse-button mistakes** are red anti-pattern blocks, each set against
+  the correct form beside it
 
 ### Fixed
 
 - **The tools are named `pnut-ts` and `pnut-term-ts`**, hyphenated, throughout — including the
-  command lines you type.
+  command lines you type
 
 ## v1.1.2 (2026-08-08)
 

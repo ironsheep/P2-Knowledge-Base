@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Manual Releases
 
-PDF manuals ship independently from the repo's semver. Each manual carries its own version and its own per-manual changelog. The table below is the current state; full per-manual release history lives in the linked changelogs.
+PDF manuals, guides, and application notes ship independently from the repo's semver. Each carries its own version and its own changelog.
 
-| Manual | Current version | Released | Per-manual changelog |
-|---|---|---|---|
-| P2 Assembly Language Reference Manual | 2.3.0 | 2026-05-22 | [Changelog](deliverables/documents/DOCs/p2-assembly-language-manual-changelog.md) |
-| P2 Assembly Programming (deSilva style) | 2.2.0 | 2026-05-23 | [Changelog](deliverables/documents/DOCs/p2-pasm-desilva-style-changelog.md) |
+**The current version of every published document is listed in
+[`deliverables/documents/README.md`](deliverables/documents/README.md)**, alongside its
+download and its changelog. That index is the single source of truth for what is
+published; per-document release history lives in the changelogs it links.
 
 ---
 

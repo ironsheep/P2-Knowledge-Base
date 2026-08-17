@@ -2,13 +2,17 @@
 
 ## v1.0.4 (2026-08-16)
 
-A power-domain correction, the source behind the error floor, and a shorter revision table. No recipes added.
+**The pin power domain a measurement actually references.** No recipes added.
 
-- **I/O power domains are isolated groups of four**: the P2 powers its I/O pins in sixteen isolated groups of four — P0–3, P4–7, … P60–63 — each sharing one VIO/GIO supply pair. That is the domain a pin's ADC references, and it is what makes the ratiometric measurement absolute. A multi-pin shared-node measurement stays inside a single group; Recipe 2's pins 32–35 are exactly one.
-- **Why the boards suggest eight**: the Pitfalls entry now also explains the P2 Edge module's I/O headers, which come in eights because one board 3.3 V regulator feeds *two* of the chip's four-pin domains. The two share a supply net but reach the die through separate VIO pins and bond wires. The eight-pin figure is the one to use for current budgeting on an Edge — 300 mA per header group — not for choosing which pins share a reference.
-- **The error floor names its source**: the matched-resistor pitfall attributes the ~15 mV pin-to-pin figure to the P2's designer, reporting pins he has seen read that far apart, and marks it as a designer-stated figure rather than a characterized specification. The pointer to the I/O & Smart Pins User Guide §16.8 now goes to what that section actually carries — the front-end limits and the calibration guidance.
-- **Revision History is identity, not narrative**: the in-note table gives one line per version plus a pointer to this changelog, which is the authoritative record. A reader holding only the PDF can still tell which revision they have, and which example ZIP goes with it.
-- **The example library matches the note byte for byte**: the three programs in `P2AN001-src.zip` are now byte-identical to the code blocks printed in the note (blank-line drift only; no code changed). All three compile clean under `pnut-ts -d`.
+### Changed
+
+- **I/O power domains are isolated groups of four** — P0–3, P4–7, … P60–63 — each sharing the one VIO/GIO pair its ADC references
+- **A shared-node multi-pin measurement stays inside one group**; Recipe 2's pins 32–35 are exactly one
+- **Why the boards suggest eight** (Pitfalls): one Edge 3.3 V regulator feeds *two* four-pin domains, which reach the die through separate VIO pins
+- **The eight-pin figure is for current budgeting** on an Edge — 300 mA per header group — not for choosing which pins share a reference
+- **The error floor names its source**: the ~15 mV pin-to-pin figure is the P2 designer's, marked as a designer-stated figure rather than a characterized specification
+- **The §16.8 pointer** goes to what that section carries: the front-end limits and the calibration guidance
+- **The three programs in `P2AN001-src.zip`** are byte-identical to the code blocks printed in the note, and compile clean under `pnut-ts -d`
 
 ## v1.0.3 (2026-08-08)
 

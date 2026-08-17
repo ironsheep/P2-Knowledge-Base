@@ -2,27 +2,25 @@
 
 ## v3.0.6 (2026-08-16)
 
-**An honest platform comparison, the multi-cog hazard that was missing, and claims trimmed back to what is true.**
+**An honest platform comparison, and the multi-cog hazard that costs a debugging session.**
 
 ### Added
 
-- **"Two cogs touching the same pin"** now heads Chapter 16's multi-cog gotchas, because it is the one that costs a reader a debugging session. DIR and OUT bits from every cog are OR'd before they reach the pin, and a smart pin OR's the cog buses the same way, so two cogs driving one pin produce a result that looks like neither of them and nothing reports an error. `RQPIN` is named as the safe multi-cog read.
-- **The P2 Architect's Guide** joins Further Reading as the natural next book: where this manual teaches how to write PASM2, that one teaches how to decide what belongs in which cog.
-
-- **The software axis** (Appendix A): the comparison table covers silicon, but platform decisions are made on language, libraries and tooling — so Appendix A now states plainly where the P2 is weakest. Two new languages to learn, a library situation that is not comparable to an ESP32's or a Pico's, a smaller tooling ecosystem, and a higher cost of entry.
-- **What that buys you** (Appendix A): the case for the P2 is not speed or price, it is the risk of the project failing. A task that must not be late gets a processor of its own and stops being a scheduling problem.
-- **The RP2350 (Pico 2)** joins the platform table, with its PIO blocks discussed as the nearest thing to the P2's approach — and the difference named: a PIO state machine is a specialised resource with a small restricted instruction set, a cog is a full processor running the same language as the rest of your program.
+- **"Two cogs touching the same pin"** (Chapter 16): DIR and OUT are OR'd across cogs, so two drivers produce a result resembling neither, unreported
+- **`RQPIN`** named as the safe multi-cog pin read
+- **The RP2350 (Pico 2)** joins Appendix A's platform table, with PIO compared: a state machine is a restricted resource, a cog a full processor
+- **The software axis** (Appendix A): two languages to learn, a library situation not comparable to an ESP32's, a smaller ecosystem, a higher cost of entry
+- **The P2 Architect's Guide** in Further Reading: this manual teaches how to write PASM2, that one what belongs in which cog
 
 ### Changed
 
-- **Acknowledgments** credits deSilva, Chip Gracey and the P2 community. The production note describes AI-assisted authorship in the style of deSilva's P1 tutorial, with every example compiled.
-- **The parallel-processing pitch** (Preface) says what actually goes away — deciding which task gets the processor — and points at Appendix A for the honest cost.
-- **`cog` is the unit** in the event-system code comments, not "CPU".
-- **Smart pins end the scramble for a pin that supports the function you need; they do not make peripheral conflicts impossible.** Chapter 11 and the Preface said the stronger thing, which is wrong in the way that costs a reader time — the pinmux conflict goes away, the resource conflict does not, and Chapter 16 now teaches the one that remains.
-- **The interrupt comparison concedes what interrupts can do.** "It's impossible to achieve this precision with interrupts" becomes what is actually true and more useful: a dedicated timer and a careful interrupt scheme will get there, and the argument is about what that scheme costs and what happens to it the day another job arrives. Chapter 11's soloist analogy carries the real point — one player taking every part in turn, against an orchestra where each keeps their own.
-- **"No surprises, ever" and "timing is guaranteed"** become the claims the silicon supports: a cog's timing does not change because another cog got busy, and what you measure today is what you measure next week.
-- **Appendix A argues from growth, not from benchmarks.** The case is what stays true as a design changes — put eight jobs on one processor and the eighth changes the timing of the seven already there — rather than a risk-of-failure claim the timing tables do not support. The library discussion says plainly that you write more code yourself, and what changes is the *kind* of hours.
-- **Instruction mnemonics read uniformly** in Chapters 3 through 15 — the mnemonic rule reaches body prose, asides, and the chapter-end checklists, and its four carve-outs (the instruction rather than the letters, headings, the Index, whole reference tables) are written into the style guide so they are not swept away later.
+- **Appendix A argues from growth**: the eighth job on one processor changes the timing of the seven already there; per-cog, it does not
+- **The library discussion** states the cost plainly — you write more code yourself, and what changes is the *kind* of hours
+- **Smart pins** end the scramble for a pin that supports your function; the pinmux conflict goes, the resource conflict stays, and Chapter 16 teaches it
+- **The interrupt comparison** (Chapter 11): a dedicated timer and a careful scheme reach the same precision; the argument is what that scheme costs
+- **Timing claims are the ones silicon supports**: a cog's timing does not shift because another cog got busy, and today's measurement holds next week
+- **The parallel-processing pitch** (Preface) names what goes away — deciding which task gets the processor — and points at Appendix A for the cost
+- **Acknowledgments** credit deSilva, Chip Gracey and the P2 community; the production note describes AI-assisted authorship in deSilva's style, every example compiled
 
 ## v3.0.5 (2026-08-11)
 

@@ -2,22 +2,27 @@
 
 ## v1.0.9 (2026-08-16)
 
-**Goertzel, as a protocol you can build from** — the mode works, and this release states the parts the guide never did: what the input actually selects, how to read the accumulators, and why your measurements change when you add DEBUG.
+**Goertzel as a protocol you can build from** — what the input selects, how to read the accumulators, and why DEBUG moves your measurements.
 
 ### Added
 
-- **Reading the result: one `GETXACC` per command** (§17.1). `GETXACC` captures both accumulators into holding registers and clears them. A second read with no intervening streamer command returns the same numbers, and a read taken before a command belongs to the previous one — so read before and after and take the difference. An absolute read in that pattern fails invisibly, because the number returned is large, stable and entirely plausible.
-- **The input is a four-pin block, not a pin** (§17.1): `D[22:19]` selects a block of four whose base pin is `%pppp x 4`; the `S` operand chooses what happens to those four.
-- **Goertzel ADC pins are raw bitstreams** (§17.1): configure them with the smart-pin mode field at `%00000` and leave DIR low — an enabled smart pin on these pins produces no accumulation at all. This is the reverse of the scope-fed ADC modes of §9.2. Gain is a property of the coupling, not of the mode.
-- **§14.5 Debugging Streamer Code**: compiling with `-d` puts the P2's highest-priority interrupt inside your streaming cog, and `DEBUG_COGS` defaults to all eight. Carries the measured cost — accumulators reading in the millions where the true values were in the hundreds — the one-`CON`-line fix, and the general rule that any hardware sequencer under measurement wants a cog the debugger is not interrupting.
-- **Two troubleshooting symptoms** (Appendix D): a `-d` check under *Goertzel Results Invalid*, and *Measurements Change When You Add DEBUG*.
+- **One `GETXACC` per command** (§17.1): it captures both accumulators and clears them, so read before and after a command and take the difference
+- **An absolute accumulator read fails invisibly** (§17.1) — the number is large, stable and entirely plausible
+- **The input is a four-pin block** (§17.1): `D[22:19]` selects it, base pin `%pppp` × 4; the `S` operand chooses what happens to those four
+- **Goertzel ADC pins are raw bitstreams** (§17.1): mode field `%00000`, DIR low — an enabled smart pin accumulates nothing. The reverse of §9.2
+- **Gain is a property of the coupling** (§17.1), not of the mode
+- **§14.5 Debugging Streamer Code**: `-d` puts the highest-priority interrupt in your streaming cog, and `DEBUG_COGS` defaults to all eight
+- **The measured cost** (§14.5): accumulators reading in the millions against true values in the hundreds
+- **The one-`CON`-line fix** (§14.5), and the rule that a hardware sequencer under measurement wants a cog the debugger is not interrupting
+- **Two troubleshooting symptoms** (Appendix D): a `-d` check under *Goertzel Results Invalid*, and *Measurements Change When You Add DEBUG*
 
 ### Changed
 
-- **Combine pin-mode constants with `|`, never `+`** (§13.4): the `P_*` constants are bit fields positioned inside the mode word, not additive flags. `P_TT_01`, `P_OE` and `P_CHANNEL` are one bit-field value under three context names — measured on silicon, the `|` form drove a cog DAC at 6,737 ADC counts where the `+` form read 1,407.
-- **Source documents are named by their official titles**, so a newcomer can search for them.
-- **The wrong form of that `|`-versus-`+` example now looks wrong.** §13.4 had the correct and the incorrect line sharing one code block, distinguished only by a comment — identical highlighting, identical visual authority, in the one place where copying the wrong line fails silently and completely. The two are now adjacent blocks, the correct one green and the wrong one red.
-- **Instruction mnemonics read uniformly** in §13.4 and §14.3, where a few were left plain.
+- **Combine pin-mode constants with `|`, never `+`** (§13.4): the `P_*` constants are bit fields inside the mode word, not additive flags
+- **`P_TT_01`, `P_OE` and `P_CHANNEL`** are one bit-field value under three context names
+- **On silicon** the `|` form drove a cog DAC at 6,737 ADC counts against the `+` form's 1,407
+- **§13.4 sets the two forms in adjacent blocks**, correct green and wrong red — copying the wrong line fails silently and completely
+- **Source documents are named by their official titles**, so a newcomer can search for them
 
 ## v1.0.8 (2026-08-08)
 

@@ -6,12 +6,10 @@
 
 ### Changed
 
-- **Recipe 6 (pipelining)** and its example-library program are rewritten together: register-only fill and drain with the hub reads and writes batched outside the loops. The "How this works" prose describes where the hub traffic actually is.
-- **A new pitfall** carries the measured rule: hub access inside either CORDIC loop loses results, and the failure is silent — wrong numbers, not missing ones.
-- **The OBEX citations match the catalog listing**: object #2812 is named by its catalog title, *Binary Floating Point Routines (IEEE-32 subset)*, and credited to ersmith in the Acknowledgments as it already was in Resources — one name a reader can search on. Every object number, title, and author in the note was checked against the live OBEX catalog.
-- **Instruction mnemonics read as one token**: the four mnemonics that appeared in inline code — ALTS, ALTD, RDLONG, WRLONG — are written plainly in uppercase like every other mnemonic in the note, so a prose mention and a code occurrence look the same.
-- **Revision History is identity, not narrative**: the in-note table gives one line per version plus a pointer to this changelog, which is the authoritative record. A reader holding only the PDF can still tell which revision they have, and which example ZIP goes with it.
-- **The compiler is named as it runs**: `pnut-ts`, the name of the installed binary.
+- **Recipe 6 (pipelining)** and its example-library program are rewritten together: register-only fill and drain, hub reads and writes batched outside the loops
+- **A pitfall carries the measured rule**: hub access inside either CORDIC loop loses results, and the failure is silent — wrong numbers, not missing ones
+- **OBEX #2812 is named by its catalog title**, *Binary Floating Point Routines (IEEE-32 subset)*, and credited to ersmith in both Resources and the Acknowledgments
+- **Every OBEX number, title and author** in the note is checked against the live catalog
 
 ## v1.0.2 (2026-08-08)
 
