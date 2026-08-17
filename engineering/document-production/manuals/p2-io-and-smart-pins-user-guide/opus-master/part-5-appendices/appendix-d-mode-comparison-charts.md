@@ -6,20 +6,20 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 ### All Output Modes at a Glance
 
-| Mode | Constant | Freq Range | Resolution | Duty Control | Continuous | Complexity | Primary Use |
-|------|----------|------------|------------|--------------|------------|------------|-------------|
-| Digital | - | DC only | 1-bit | N/A | Yes | Low | On/off control |
-| Pulse | P_PULSE | DC to MHz | 16-bit timing | Fixed per pulse | One-shot | Low | Single pulses, triggers |
-| Transition | P_TRANSITION | DC to 100 MHz | 16-bit period | 50% fixed | Counted | Low | Clock generation |
-| NCO Freq | P_NCO_FREQ | 0.05 Hz to 100 MHz | 32-bit | 50% fixed | Yes | Low | Frequency synthesis |
-| NCO Duty | P_NCO_DUTY | 0.05 Hz to 100 MHz | 32-bit | Variable | Yes | Medium | Variable duty waves |
-| PWM Triangle | P_PWM_TRIANGLE | 1 Hz to 390 kHz | 16-bit | Full range | Yes | Low | Motor, LED dimming |
-| PWM Sawtooth | P_PWM_SAWTOOTH | 1 Hz to 780 kHz | 16-bit | Full range | Yes | Low | Motor, audio |
-| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Auto | High | Power supply |
-| DAC 8-bit | P_DAC_xxx | DC | 8-bit | N/A | Yes | Low | Voltage reference |
-| DAC 16-bit | P_DAC_DITHER_* | DC to audio | 16-bit | N/A | Yes | Medium | Audio, precision |
-| Sync TX | P_SYNC_TX | Clock rate | 1-32 bits | N/A | Clocked | Medium | SPI master |
-| Async TX | P_ASYNC_TX | 300 to 1M+ baud | 1-32 bits | N/A | Per-byte | Low | UART |
+| Mode | Constant | Freq Range | Resolution | Duty Control | Continuous | Primary Use |
+|------|----------|------------|------------|--------------|------------|-------------|
+| Digital | - | DC only | 1-bit | N/A | Yes | On/off control |
+| Pulse | P_PULSE | DC to MHz | 16-bit timing | Fixed per pulse | One-shot | Single pulses, triggers |
+| Transition | P_TRANSITION | DC to 100 MHz | 16-bit period | 50% fixed | Counted | Clock generation |
+| NCO Freq | P_NCO_FREQ | 0.05 Hz to 100 MHz | 32-bit | 50% fixed | Yes | Frequency synthesis |
+| NCO Duty | P_NCO_DUTY | 0.05 Hz to 100 MHz | 32-bit | Variable | Yes | Variable duty waves |
+| PWM Triangle | P_PWM_TRIANGLE | 1 Hz to 390 kHz | 16-bit | Full range | Yes | Motor, LED dimming |
+| PWM Sawtooth | P_PWM_SAWTOOTH | 1 Hz to 780 kHz | 16-bit | Full range | Yes | Motor, audio |
+| PWM SMPS | P_PWM_SMPS | Variable | 16-bit | Feedback | Auto | Power supply |
+| DAC 8-bit | P_DAC_xxx | DC | 8-bit | N/A | Yes | Voltage reference |
+| DAC 16-bit | P_DAC_DITHER_* | DC to audio | 16-bit | N/A | Yes | Audio, precision |
+| Sync TX | P_SYNC_TX | Clock rate | 1-32 bits | N/A | Clocked | SPI master |
+| Async TX | P_ASYNC_TX | 300 to 1M+ baud | 1-32 bits | N/A | Per-byte | UART |
 
 ## Input Mode Comparison
 

@@ -294,7 +294,7 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
 
 ### Why Three Measurements?
 
-The actual measurement time extends beyond X clocks to complete the final period. The `P_COUNTER_TICKS` mode provides the **actual** measurement duration, enabling precise calculations:
+The actual measurement time extends beyond X clocks to complete the final period. `P_COUNTER_TICKS` reports that **actual** duration, so the calculations stay exact:
 
 ```formula
 actual_frequency = MULDIV64(periods, sysclk, time_clks)
