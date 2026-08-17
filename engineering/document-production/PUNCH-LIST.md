@@ -5,6 +5,44 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
+## Certify the Forge — torture-test the F-286 escaping invariant — OPEN
+
+**Status:** ⏳ Open — queued 2026-08-17 (Stephen's call). **Deliberately sequenced AFTER** the
+current release flight (the four manuals) and after Debug Window 1.1.3 + IOSP 1.0.9 reach PDF.
+Not a blocker for any of those.
+
+**What it is.** F-286 fixed five filter sites that emitted `stringify()`'d text into raw LaTeX
+without escaping. Every one was measured **inert on today's content** — no live Part title, figure
+caption, or sidetrack title contains `&`, `%`, `#`, or `_`. That is exactly why a production render
+cannot validate the fix: there is no content to trigger the path. A render proves *no regression*;
+it cannot prove the escaping works.
+
+**The work.** Add positive cases to the **P2 Layout Torture Test** (`workspace/p2-layout-torture-test`),
+which already carries 3 Part headings and 5 figure captions and exists for precisely this purpose:
+
+| Case | Where | Must render as |
+|---|---|---|
+| `&` in a Part title | `# Part N: Boxes, Whitespace & Pagination` | `\manualpart{}` prints the ampersand |
+| `&` and `_` in a figure caption | a `figurecaption` div | `\caption{}` prints both literally |
+| `%` in a caption | a `figurecaption` div | text after the `%` still appears |
+
+Each case **cannot render before the fix and must render after** — that is what converts "measured
+inert" into "demonstrated working." Run through `forge-test` (interactive daemon store, so it never
+touches the manual store and has no release consequences).
+
+**Coverage this does NOT reach, and why:**
+- **Sidetrack title** (`\addcontentsline`) — deSilva is the only consumer; covered by its release render
+  as a no-regression check only.
+- **Modecard title** — IOSP is the only consumer. The change there was a rebinding to a hoisted
+  helper with an identical body, so risk is minimal, but it is unexercised until IOSP renders.
+- **`tables.lua` `stringify` fallbacks (×4)** — unreachable by any render by construction: they fire
+  only when `pandoc.write` fails. Code review is the only available check, and it is done.
+
+**Also fold in here:** the `breaklines` platform fix («#249» item 1) is the other change that can
+only be judged by looking at a rendered page, and the torture test is the right instrument for both.
+
+---
+
 ## A hand-named backup lives inside deSilva's `opus-master/` and is tracked — OPEN
 
 **Status:** ⏳ Open — found 2026-08-16 by «#222»'s F-254 class sweep, **not fixed** (deleting tracked
