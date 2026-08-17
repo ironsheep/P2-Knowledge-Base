@@ -3726,7 +3726,7 @@ check_servos
 ' Result: 8 servos with ZERO jitter!
 ```
 
-Try that with interrupts. I'll wait. Actually, I won't - it's impossible to achieve this precision with interrupts.
+Try that with interrupts. I'll wait. You *can* get there — a dedicated timer peripheral and a very careful interrupt scheme will do it — but notice what you just spent to buy it, and what happens to that scheme the day you add a ninth job.
 
 ## "But P2 HAS Interrupts!"
 
@@ -3893,10 +3893,10 @@ Traditional processors optimize for average-case performance:
 Propeller optimizes for worst-case determinism:
 
 - Every cog runs predictably
-- No surprises, ever
-- Timing is guaranteed
+- Your cog's timing doesn't change because another cog got busy
+- What you measure today is what you'll measure next week
 
-It's the difference between a talented soloist who might miss a note and an orchestra where everyone plays their part perfectly.
+It's the difference between one gifted soloist who has to play every part in turn, and an orchestra where each player has their own part and keeps to it whatever the others are doing.
 
 ## When Interrupts Actually Make Sense
 
@@ -5736,11 +5736,12 @@ The hardware gives you eight processors. Whether your *design* survives the jour
 
 Before you pull your hair out wondering why the eight-cog dream turned into a debugging nightmare, skim these:
 
-1. **Race conditions** - Use locks for shared write access
-2. **Deadlocks** - Avoid circular dependencies
-3. **Starvation** - Ensure all cogs get resources
-4. **Communication overhead** - Don't over-communicate
-5. **Debugging complexity** - Use LED indicators for each cog
+1. **Two cogs touching the same pin** - This is the one that will get you, so it goes first. DIR and OUT bits from every cog are OR'd together before they reach the pin, and a smart pin OR's the cog buses the same way. Two cogs driving one pin don't take turns — their outputs combine. If more than one cog must configure or read the same smart pin, be sure they do it at *different times*, or you'll clobber each other's bus data. (One happy exception: any number of cogs can read a smart pin at once with **RQPIN**, which stays off that shared bus entirely.) And don't reach for a lock here — a lock protects shared *data*; it can't un-corrupt a half-finished transaction. Give each bus or device one owning cog, and let the others talk to *that cog*.
+2. **Race conditions** - Use locks for shared write access
+3. **Deadlocks** - Avoid circular dependencies
+4. **Starvation** - Ensure all cogs get resources
+5. **Communication overhead** - Don't over-communicate
+6. **Debugging complexity** - Use LED indicators for each cog
 
 ## What We've Learned
 
@@ -5801,7 +5802,7 @@ But here's the secret: everything you've learned is just the foundation. The P2 
 
 ### What Makes You Different Now
 
-You're not just another embedded programmer anymore. You think in parallel. You see solutions that others miss. When someone says "that's impossible in real-time," you know better - you just dedicate a cog to it.
+You're not just another embedded programmer anymore. You think in parallel. You see solutions that others miss. When someone starts sketching an interrupt scheme to keep one job on time, you reach for a different move first - give that job a cog of its own, and let it simply run.
 
 ### The Community Awaits
 
@@ -5937,7 +5938,7 @@ You're used to WiFi/Bluetooth convenience and FreeRTOS abstractions. P2 takes a 
 | FreeRTOS timing | Deterministic hub | Cycle-accurate timing guaranteed |
 | Arduino framework | Spin2/PASM2 | Deeper control, deeper understanding |
 
-**The result**: 8 real cores running simultaneously, timing you can count on, I/O flexibility that eliminates peripheral conflicts.
+**The result**: 8 real cores running simultaneously, timing you can count on, and no more shuffling functions around to find pins that support them.
 
 ## Coming From Arduino/AVR
 
@@ -6039,10 +6040,10 @@ You add what you need - no paying for peripherals you won't use.
 
 ## Summary
 
-P2 represents a fundamentally different approach to embedded computing—one that eliminates entire categories of problems:
+P2 represents a fundamentally different approach to embedded computing—one that changes which problems you spend your time on:
 
 - **Eight processors** means your motor control never delays your serial handler
-- **64 smart pins** means peripheral conflicts become impossible
+- **64 smart pins** means no function is ever stuck waiting for the one pin that supports it
 - **Deterministic timing** means your code works the same way every time
 - **Hardware CORDIC** means real-time math without floating-point libraries
 

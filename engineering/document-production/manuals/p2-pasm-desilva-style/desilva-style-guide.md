@@ -28,6 +28,34 @@ This guide captures all pedagogical and formatting decisions for the P2 PASM man
 
 **Rationale:** PASM2 is case-insensitive, so we optimize for learning. The bold uppercase creates instant recognition: "This is a COMMAND with POWER."
 
+#### Where the rule does NOT reach — carve-outs
+
+*Added 2026-08-17, «#241», from the first pass that actually measured the master against
+this rule. All three were found by reading hits in context; a mechanical application would
+have made the manual worse in each.*
+
+1. **The rule is about the INSTRUCTION, not the letter sequence.** Bold it where the text
+   means the PASM2 instruction. Where the same letters mean something else, leave them
+   alone. Ch.2's car analogy — *"The **ABS** monitors wheel speed"* — is an anti-lock
+   braking system, in the manual's opening illustration of real-world parallelism. Bolding
+   it would turn a car's brakes into an absolute-value instruction, in the passage doing the
+   most work to make parallelism intuitive. **Read the sentence before applying the rule.**
+
+2. **Headings are exempt.** A heading is already emphasized by its own type; `### **REP** —
+   Hardware Loops` is redundant and reads worse. The mnemonic stays plain in headings.
+
+3. **The Index is exempt.** It is hand-authored reference apparatus with its own
+   conventions (`- REP instruction: Ch3`), not narrative, and bolding every entry would
+   destroy the scannability that is the whole point of an index.
+
+**In scope, and expected to be bold:** body prose, explanations, asides, box contents, and
+the chapter-end "what you learned" checklists.
+
+**Why these are written down rather than left to judgement:** an undocumented exception
+reads as an oversight and gets "fixed" by the next sweep. The word ABSOLUTE in the heading
+above is what invited the mechanical reading in the first place — these carve-outs are what
+make it safe to keep.
+
 ### Spin Method Names
 - Always lowercase: `getct()`, `cogstart()`, `wrpin()`
 - Not bolded (they're methods, not processor instructions)
