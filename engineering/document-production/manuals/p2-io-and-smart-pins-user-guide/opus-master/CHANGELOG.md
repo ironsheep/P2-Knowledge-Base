@@ -1,5 +1,15 @@
 # P2 I/O & Smart Pins User Guide: Change Log
 
+## v1.0.9 (2026-08-17)
+
+**Bus power is the board's job, not the P2's — and the oversampling rule now names what it depends on.**
+
+- **USB bus power (Chapter 19 §19.5)**: a host port supplies 5V on VBUS; the P2 cannot source it, and its I/O operates at 3.3V
+- **Edge board 5V (§19.8)**: the breakout headers pass the jack's 5V straight through, unregulated and unlimited — the board is a conduit, not a source
+- **No 5V on P24–P31 or P56–P63 (§19.8)**: the second bank holds pins 56/57, used by this chapter's examples, so those hosts take VBUS elsewhere
+- **Oversampling resolution (Chapter 16 §16.8)**: each 4× oversampling adds about 1 bit only if the input carries enough noise to dither across a code boundary
+- **Wrong/right code pairs (Chapter 11, Chapter 17, Appendix E)**: the wrong half renders as an antipattern, visually distinct from the working code beside it
+
 ## v1.0.8 (2026-08-08)
 
 A licensing change. No technical content changed.
