@@ -64,10 +64,10 @@ Test Bit
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
-**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
-**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
-**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
-**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
+**TESTB**  *Dest, {#}Src* **WC/WZ**\
+**TESTB**  *Dest, {#}Src* **ANDC/ANDZ**\
+**TESTB**  *Dest, {#}Src* **ORC/ORZ**\
+**TESTB**  *Dest, {#}Src* **XORC/XORZ**
 
 **Operation:** `C/Z = D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
 
@@ -111,10 +111,10 @@ Test Bit Negated
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
-**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
-**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
-**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
-**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
+**TESTBN**  *Dest, {#}Src* **WC/WZ**\
+**TESTBN**  *Dest, {#}Src* **ANDC/ANDZ**\
+**TESTBN**  *Dest, {#}Src* **ORC/ORZ**\
+**TESTBN**  *Dest, {#}Src* **XORC/XORZ**
 
 **Operation:** `C/Z = !D[S[4:0]]` (WC/WZ); AND/OR/XOR modes combine into prior C/Z
 
@@ -192,15 +192,15 @@ Test Pin / Test Pin Negated
 
 \hypertarget{testpn}{}
 
-**TESTP**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
-**TESTP**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
-**TESTP**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
-**TESTP**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
+**TESTP**  *{#}Dest* **WC/WZ**\
+**TESTP**  *{#}Dest* **ANDC/ANDZ**\
+**TESTP**  *{#}Dest* **ORC/ORZ**\
+**TESTP**  *{#}Dest* **XORC/XORZ**
 
-**TESTPN**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
-**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
-**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
-**TESTPN**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
+**TESTPN**  *{#}Dest* **WC/WZ**\
+**TESTPN**  *{#}Dest* **ANDC/ANDZ**\
+**TESTPN**  *{#}Dest* **ORC/ORZ**\
+**TESTPN**  *{#}Dest* **XORC/XORZ**
 
 **Operation:** `C/Z = IN[D[5:0]]` (TESTP) / `!IN[D[5:0]]` (TESTPN); AND/OR/XOR modes combine
 

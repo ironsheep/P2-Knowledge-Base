@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-285`**
+**Next finding ID: `F-286`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2338,4 +2338,39 @@ check compile logs, and this defect is invisible to both. It was found by render
 looking at it, prompted by triaging an overfull-hbox count. **An overfull hbox in a table is worth
 opening**; it is the only signal this failure emits.
 
-**Next finding ID after this block: F-285.**
+**Next finding ID after this block: F-286.**
+
+### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
+
+**Found:** 2026-08-17, verifying the Assembly re-render for F-284. The F-284 fix was confirmed
+good on p.326 and p.329 — and p.329 put this defect on screen at the same time. It is unrelated to
+F-284 and was not caused by it.
+
+**Location:** `part-ii/instructions-t.md` — 16 sites across the TESTB, TESTBN, TESTP and TESTPN
+syntax blocks. Visible at **P2-Assembly-Language-Manual p.329** and neighbours as, literally:
+
+    TESTP {#}Dest&nbsp;&nbsp;WC/WZ
+
+**Mechanism.** The source writes `*Dest*&nbsp;&nbsp;**WC/WZ**`. Pandoc did not resolve `&nbsp;` as
+an HTML entity; it treated the ampersand as literal text and emitted `\&nbsp;` into the `.tex`, so
+xelatex prints the entity as characters. The escape script is not at fault — the workspace copy
+still carries a bare `&nbsp;` — and it produces no warning or error at any stage.
+
+**Not new, and not from the platform fix.** Introduced 2025-12-21 by `096230a4` ("Fix multi-page
+tables and TESTP/TESTPN formatting"), present in the v3.1.5 tag's source, and therefore shipped in
+at least v3.1.5. The F-284 filter change touches only 9-column table cells; these are body prose.
+
+**It is a one-file anomaly, not a convention.** `&nbsp;` appears **nowhere else** in the manual —
+not in the other 21 instruction-letter files, not in Part I, not in Part III. The TEST page's own
+neighbouring syntax lines, four lines above the corrupted ones, use a plain space:
+`**TEST** *Dest, {#}Src* **{WC|WZ|WCZ}**`. So the fix is to match the file's own surroundings.
+
+**Fix applied:** all 16 `&nbsp;&nbsp;` replaced with a single space. No other file touched. No
+version bump — v3.1.6 has not shipped.
+
+**Owed:** one more Assembly render, then confirm p.329 reads `TESTP {#}Dest WC/WZ`.
+
+**Lesson, and it is the same one twice in a day.** Both F-284 and F-285 are invisible to every gate
+we own — clean log, no warning, correct source characters — and both were found by rendering a page
+and looking at it. F-285 also shows the cheaper half: **the page you open to verify one fix is free
+evidence about everything else on it.** Verifying narrowly would have missed this.
