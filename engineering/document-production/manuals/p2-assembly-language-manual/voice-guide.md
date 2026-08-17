@@ -280,6 +280,24 @@ closing-beat rate and the longest consecutive run.
 > manual was already compliant when this discipline was written into the guide —
 > these rules are the **write-time guard against drift**, not a backlog of fixes.
 
+> **Baseline extended to v3.1.6 (2026-08-17, «#244»).** Re-verified rather than
+> trusted: the anti-pattern sweep returns **zero hits across all 44 master files**
+> today, corroborating the 08-08 figure against the files rather than against its own
+> status line.
+>
+> **Only one body-prose delta existed since that audit** — §5.1.6's CORDIC pipelining
+> rework, which lands in Part I, the region §4.4 flags as the risk area. It was measured
+> and passes: R1 is sourced *in the sentence* ("Measured on real P2 silicon at 200 MHz");
+> §5.2 formatting is conformant; and the closing "The payoff is that…" sentence survives
+> the R2 test — strip the flourish and the bare claim is that the CORDIC's 55-clock
+> latency is paid once per array rather than once per point, with the mechanism given in
+> the same breath. That is an **earned beat**, which R4 protects.
+>
+> `4f5d8a61` (2026-08-10) touched this manual's CHANGELOG only, not body prose.
+>
+> **Result: no changes made.** Recorded so a later pass re-measures the *next* delta
+> rather than this one.
+
 ---
 
 ## 5. Terminology Standards
