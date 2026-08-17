@@ -1013,37 +1013,93 @@ no overfull-hbox stop is a render failure that only a human looking at the page 
 the whole reason the "verify the rendered PDF, not the log" rule exists, and an argument for making
 the platform's listing environment fail loudly instead.
 
-### F-282 — app-note release tags are two to three releases behind, so every diff-since-published audit reads the wrong baseline. `CONFIRMED`
+### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED`
 
-**Found:** 2026-08-17, enumerating what was pending for release alongside Debug Window and IOSP. The
-enumeration itself was the probe — a tag-versus-release comparison.
+> **Rewritten in place 2026-08-17, hours after it was filed.** The original text claimed the app-note
+> *tags* were two to three releases behind and that the app-note release path "never lays the tag."
+> **That was wrong, and the error was in the probe, not the repo.** The scan grepped for the
+> uppercase prefix `P2AN001-`, but the app-note tag namespace switched to **lowercase** at the
+> 2026-07-12 fleet release. `p2an001-v1.0.3`, `p2an002-v1.0.2`, `p2an003-v1.0.2`, `p2an004-v1.0.2`
+> all exist, and `git for-each-ref --format='%(creatordate:short)'` shows each was created **on its
+> release date** — not retroactively. Every app note and every manual is tagged current. The
+> conclusion "specific to the app-note release path" was false in both halves.
+>
+> The *symptom* the finding described is real. The cause is below.
 
-| Note | Latest tag | Actually released (deliverables catalog) | Untagged releases |
+**Found:** 2026-08-17, enumerating what was pending for release alongside Debug Window and IOSP.
+**Corrected the same day**, when preparing the six-element wave put the actual tag list on screen.
+
+**The tags are complete.** Every released version of every manual and app note has a tag at the
+commit that shipped it. Nothing is owed here.
+
+**The descriptors are stale.** `document-audit`'s changeset-integrity dimension (Dimension #15) does
+not read `git tag` — it reads the `last_published_tag:` field in each `MANUAL-DESCRIPTOR.md`. Those
+fields were written at seed time and never advanced by a release:
+
+| Element | Descriptor says | Actually released + tagged | Baseline error |
 |---|---|---|---|
-| P2AN001 | `P2AN001-v1.0.1` | **1.0.3** | 2 |
-| P2AN002 | `P2AN002-v1.0.0` | **1.0.2** | 2 |
-| P2AN003 | `P2AN003-v1.0.0` | **1.0.2** | 2 |
-| P2AN004 | `P2AN004-v1.0.0` | **1.0.2** | 2 |
+| P2AN001 | `unreleased` | **1.0.3** | whole doc reads as unreviewed |
+| P2AN002 | `unreleased` | **1.0.2** | whole doc reads as unreviewed |
+| P2AN003 | `unreleased` | **1.0.2** | whole doc reads as unreviewed |
+| P2AN004 | `unreleased` | **1.0.2** | whole doc reads as unreviewed |
+| Assembly | `v3.1.2` | **3.1.5** | 3 releases of published work |
+| Streamer | `v1.0.6` | **1.0.8** | 2 releases |
+| deSilva | `v3.0.1` | **3.0.5** | 4 releases |
+| Debug Window | `v1.0.0` | **1.1.2** | 5 releases |
+| XBYTE | `none` — "NOT yet released" | **1.0.1** | whole doc reads as unreviewed |
 
-**Manual tags are all current** — Debug Window v1.1.2, IOSP v1.0.8, deSilva v3.0.5, Streamer v1.0.8,
-XBYTE v1.0.1, Assembly v3.1.5 each match their released version. So this is specific to the app-note
-release path, which ships the PDF, the ZIP, the catalog row and the changelog but never lays the tag.
+So this is **not** an app-note problem. It is fleet-wide, and it is worse on the manuals than on the
+app notes — the opposite of what the original finding said.
 
-**Why it bites.** `document-audit`'s changeset-integrity dimension takes its baseline from
-`last_published_tag`, and each `MANUAL-DESCRIPTOR.md` records one. With the tag two releases behind,
-that audit diffs against content that shipped months ago and reports **already-published work as
-unreviewed change** — noise that trains the reader to skip the signal. It fails the same way the
-status-vocabulary problem does: wrong in a direction that looks like diligence.
+**Why it bites.** With the recorded baseline several releases behind, the audit diffs against content
+that shipped months ago and reports **already-published work as unreviewed change** — noise that
+trains the reader to skip the signal. It fails in a direction that looks like diligence.
 
-**It also made this very enumeration lie.** The pending-work scan flagged P2AN003 and P2AN004 as
-having unreleased content. They do not; that is tag lag. P2AN003 was separately verified clean when it
-was excluded from the Sprint 2 wave.
+**A second, smaller defect, and the one that caused the misdiagnosis:** the app-note tag namespace is
+**case-inconsistent** — `P2AN001-v1.0.0`/`-v1.0.1` uppercase, `p2an001-v1.0.2` onward lowercase. Any
+case-sensitive lookup of a "latest tag" silently resolves to the pre-July tag. That is what made the
+original probe read three missing releases that were never missing.
 
-**Fix:** lay the missing tags at the commits that shipped each version (recoverable from the catalog
-row + changelog dates + the release commits), and add the tag step to the app-note release path so it
-cannot be skipped again. **Tagging history is Stephen's call** — this finding does not create tags.
+**Fix:** (a) advance every `last_published_tag:` to the element's actually-released tag, and make
+advancing it a step in `release-manual` so it cannot drift again; (b) settle the app-note tag case
+one way and treat lookups as case-insensitive until it is. No tags need to be created.
 
-**Next finding ID after this block: F-283.**
+**Lesson, recorded because it cost a wrong finding:** the probe's *absence of a result* was read as
+a fact about the repository. A grep locates; it never concludes. This is the same failure mode as
+"a status line is not evidence," and it was caught only because a later task put the full `git tag`
+output on screen for an unrelated reason.
+
+### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `CONFIRMED` — **fails the app-note agreement gate**
+
+**Found:** 2026-08-17, running the doc↔companion agreement check while preparing P2AN002 v1.0.3 for
+the release wave.
+
+`MANUAL-DESCRIPTOR.md` states the gate: *"doc and `companion_yaml` must AGREE (composition recipe,
+key parameters, gotchas)."* Two disagreements, both introduced when the note advanced to v1.0.3 and
+the companion did not:
+
+1. **The measured pitfall is missing.** The note's v1.0.3 headline is that hub access inside either
+   CORDIC loop loses results, and does so **silently** — measured on real silicon at 200 MHz, with
+   the failure depths stated (`P2AN002.md:322`). The companion's `gotchas:` block carries the
+   pipelining entry as *"keep issued-minus-retired within what the pipeline holds"* and says nothing
+   about hub traffic. An agent reading only the companion gets the recipe that was measured wrong.
+2. **The OBEX #2812 attribution contradicts the note.** The note credits **ersmith** and uses the
+   live catalog title *Binary Floating Point Routines (IEEE-32 subset)* — a v1.0.3 correction made
+   against the live catalog. The companion's `community_examples:` still reads *"OBEX #2812 Binary
+   Floating-Point (Total Spectrum Software)."*
+
+**Location:** `deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml` —
+`gotchas:` and `provenance.community_examples:`.
+
+**Action:** carry both into the companion, sourced from the note's v1.0.3 CHANGELOG entry and the
+live OBEX catalog respectively. **Not applied here** — companion edits are YAML-head work and go
+through `yaml-knowledge-base-maintenance` with a plan first.
+
+**Note on scope:** only P2AN002's companion was checked, because only P2AN002 was in front of me.
+The same drift is plausible in every app note whose doc has advanced since its companion was
+written — a names-only pass on one file is not coverage of the category.
+
+**Next finding ID after this block: F-284.**
 
 ---
 

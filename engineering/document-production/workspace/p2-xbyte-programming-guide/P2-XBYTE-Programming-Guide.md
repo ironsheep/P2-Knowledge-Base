@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.1\par}
+{\large\color{blue}Version 1.0.2\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -437,15 +437,15 @@ Because a cancelled instruction still spends its clocks, SKIP's cost is the cost
                 add     x, #8               ' runs
 ```
 
-The trade for that speed is the restriction: SKIPF works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing). Its pattern is the full **32 bits** of the operand `D`, applied LSB-first — so a standalone SKIPF governs the next 32 instructions. (Inside XBYTE the pattern comes from **EXECF**, which spends its low 10 bits on a jump address and so carries only a **22-bit** pattern — §4.3. That 22 is the width XBYTE stores in each dispatch-table entry: not because SKIPF is 22-bit, but because EXECF reserves ten bits for *where to jump*.)
+The trade for that speed is the restriction: **SKIPF** works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing). Its pattern is the full **32 bits** of the operand `D`, applied LSB-first — so a standalone SKIPF governs the next 32 instructions. (Inside XBYTE the pattern comes from **EXECF**, which spends its low 10 bits on a jump address and so carries only a **22-bit** pattern — §4.3. That 22 is the width XBYTE stores in each dispatch-table entry: not because SKIPF is 22-bit, but because EXECF reserves ten bits for *where to jump*.)
 
 ::: hardware
-"Free" has one small print. SKIPF steps the PC forward 1 to 8 instructions at a time, so **at most 7 in a row are leapt at once**; every **8th** consecutive skipped instruction is stepped through as a **2-clock NOP**. A handler that skips fewer than eight in an unbroken run — the usual case — really does skip for free; only a long unbroken run pays the occasional 2-clock tick.
+"Free" has one small print. **SKIPF** steps the PC forward 1 to 8 instructions at a time, so **at most 7 in a row are leapt at once**; every **8th** consecutive skipped instruction is stepped through as a **2-clock NOP**. A handler that skips fewer than eight in an unbroken run — the usual case — really does skip for free; only a long unbroken run pays the occasional 2-clock tick.
 :::
 
 ## 4.3 EXECF — jump, then skip {#sec-4-3}
 
-**EXECF** is SKIPF with a jump bolted on. Its single operand D carries both:
+**EXECF** is **SKIPF** with a jump bolted on. Its single operand D carries both:
 
 - **D[9:0]** — a 10-bit cog/LUT address to **jump to**
 - **D[31:10]** — a 22-bit **SKIPF pattern** to apply once there
@@ -482,7 +482,8 @@ alu_body
                 sub     a, b                 ' "SUB" bytecode keeps this
                 and     a, b                 ' "AND" bytecode keeps this
                 or      a, b                 ' "OR"  bytecode keeps this
-        _ret_   call    #push_a              ' result -> stack, return
+                call    #push_a              ' result -> stack
+                ret                          ' back to XBYTE dispatch
 ```
 
 The bytecode that means "subtract" points at `alu_body` with a skip pattern that leaps the `add`, `and`, and `or` lines; "add" skips the other three; and so on. Four bytecodes, one body. This is the most common XBYTE handler pattern, and it is pure SKIPF — the engine just supplies the pattern for you, from the table, on every bytecode.
@@ -497,7 +498,7 @@ The shared body above depends on one behaviour and must step around one trap. Bo
 
 **Skipping is suspended inside a `CALL`.**
 
-Look at `alu_body` again. It opens with `call #pop_two` and ends with `_ret_ call #push_a`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
+Look at `alu_body` again. It opens with `call #pop_two` and ends with `call #push_a` followed by `ret`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
 
 This is not folklore; the hardware tracks it explicitly. The **`CALL` depth since the pattern began** is one of the fields `GETBRK` reports (§11.1), and **skipping is suspended whenever that depth is non-zero**.
 
@@ -605,7 +606,8 @@ Many bytecode formats follow an operation with an operand whose size varies — 
 ' bytecode in the stream as a variable-length value.
 push_const
                 rfvar   value               ' pull the inline constant
-        _ret_   call    #push_value         ' onto the VM stack, return
+                call    #push_value         ' onto the VM stack
+                ret                         ' back to XBYTE dispatch
 ```
 
 Because the FIFO advances as it is read, a handler can pull as many inline operand bytes as the operation needs and the next RFBYTE — the next dispatch — naturally lands on the following bytecode. The stream stays self-describing: operations and their operands interleave, and the read position takes care of itself.
@@ -982,7 +984,8 @@ Because the engine writes the bytecode to **PA** (`$1F6`) before the handler run
 push_small
                 mov     value, pa
                 and     value, #$0f         ' the constant is in PA[3:0]
-        _ret_   call    #push_value         ' onto the VM stack, return
+                call    #push_value         ' onto the VM stack
+                ret                         ' back to XBYTE dispatch
 ```
 
 ## 10.3 Inline operands — the FIFO and PB {#sec-10-3}
@@ -1068,7 +1071,7 @@ Fortunately, the silicon anticipated this.
 Between them, these answer *what the engine is doing right now*: whether it is armed, in which mode, and what pattern is currently queued. Note what is **not** among them — how many instructions remain in the current bytecode routine. The queued pattern bits are visible, but a routine ends at its `_RET_`, which is a property of your code, not a length the engine tracks.
 
 ::: hardware
-Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 15's `_RET_ CALL #set_nz` idiom depends entirely on this.
+Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 15's shared `set_nz` helper depends entirely on this. (What it does *not* license is folding the return into the call. `_RET_` returns only if the instruction did not branch, and `CALL` branches — so `_RET_ CALL` never returns, however much it looks like it should. §15.3 has the detail.)
 :::
 
 ## 11.2 The debugger shows you the engine's state {#sec-11-2}
@@ -1579,8 +1582,10 @@ Each opcode that the slice implements gets a table entry pointing at its handler
 
 ```pasm2
 op_lda_imm                                  ' $A9: LDA #immediate
-                rfbyte  a                   ' inline operand -> A
-        _ret_   call    #set_nz             ' update N,Z; return to dispatch
+                rfbyte  val                 ' inline operand -> val
+                mov     a, val              ' ...and into the accumulator
+                call    #set_nz             ' flags from val
+                ret                         ' back to XBYTE dispatch
 ```
 
 **`INX` ($E8)** — increment X, a single-byte instruction with no operand, flags from the result. The mask keeps the guest register 8-bit.
@@ -1589,8 +1594,34 @@ op_lda_imm                                  ' $A9: LDA #immediate
 op_inx                                      ' $E8: INX
                 add     x, #1
                 and     x, #$ff             ' 6502 X is 8-bit
-        _ret_   call    #set_nz             ' update N,Z; return to dispatch
+                mov     val, x              ' hand the result to the helper
+                call    #set_nz             ' flags from val
+                ret                         ' back to XBYTE dispatch
 ```
+
+**The shared flag helper.** Both handlers end the same way, and that is the point of the helper — but a shared routine needs a stated calling convention, because the two callers compute their results in *different* registers. The convention is one shared register: **the caller leaves the 8-bit result in `val` immediately before the call**, and `set_nz` reads only `val`.
+
+```pasm2
+' CONTRACT: caller leaves the 8-bit result in `val`. Nothing else is read.
+set_nz          cmp     val, #0     wz      ' Z: result is zero
+                test    val, #$80   wc      ' C: bit 7 -> the guest's N
+                muxz    p, #%0000_0010      ' guest status register: Z
+        _ret_   muxc    p, #%1000_0000      ' guest status register: N
+```
+
+`p` is the guest's status register; `muxz`/`muxc` write one flag bit each without disturbing the others. The helper is four instructions and is called by every load, ALU, and increment opcode in the guest — which is what makes defining it once worthwhile.
+
+The helper's own instructions are safe from the caller's skip pattern, because the P2 suspends skipping for the duration of a `CALL` and resumes it on return (§11.1). That is what makes a shared helper possible at all inside a skip-built handler.
+
+::: hardware
+**Do not fold the return into the call.** The fold is everywhere in this chapter — `set_nz` above ends `_ret_ muxc`, the `JMP abs` handler below ends `_ret_ rdfast` — and this is where it stops. `_RET_ CALL #set_nz` **assembles without complaint**, and never returns.
+
+Parallax's instruction table (*P2 Instructions v35 – Rev B/C Silicon*, row 410) defines `_RET_` as *"execute `<inst>` always and return **if no branch**."* `CALL` branches. The return is therefore suppressed, and the line is silently a plain `CALL`: the helper returns to the instruction *after* the call, and execution runs on out of the handler into whatever the assembler happened to place next.
+
+Nothing faults and no flag is set. On real P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
+
+**End the handler with an explicit `RET` after the call.**
+:::
 
 **`JMP abs` ($4C)** — an absolute jump: read the 16-bit target from the stream, then re-point the FIFO at it. This is where "the PC is the FIFO position" pays off.
 
@@ -1600,7 +1631,27 @@ op_jmp_abs                                  ' $4C: JMP $hhll
         _ret_   rdfast  #0, target          ' FIFO -> target = the branch
 ```
 
-The shared-body idiom collapses the 6502's many ALU and load/store opcodes the way §12.3 collapsed ADD/SUB: one body per family (loads, ALU ops, branches), with each opcode's table entry supplying the SKIPF pattern and, where four-way behavior is needed, the F bit (§9.4) carrying two opcode bits into the flags.
+The three handlers above are written one-per-opcode to keep them readable. A real 6502 does not stop there: the shared-body idiom collapses its many load, ALU, and store opcodes the way §12.3 collapsed ADD/SUB. The immediate loads are the clearest case — `LDA`, `LDX` and `LDY` differ only in *which* guest register receives the byte:
+
+```pasm2
+ld_imm                                      ' $A9 LDA / $A2 LDX / $A0 LDY
+                rfbyte  val                 ' inline operand -> val
+                mov     a, val              ' kept by LDA only
+                mov     x, val              ' kept by LDX only
+                mov     y, val              ' kept by LDY only
+                call    #set_nz             ' flags from val
+                ret                         ' back to XBYTE dispatch
+```
+
+One body, three opcodes. Each opcode's dispatch-table entry points at `ld_imm` and carries the SKIPF pattern that deletes the two moves it does not want — applied LSB-first from the entry point, a `1` bit meaning *skip*:
+
+| Opcode | Skip pattern | Survives |
+|--------|--------------|----------|
+| `LDA #imm` ($A9) | `%0_1100` | `rfbyte` · `mov a` · call+ret |
+| `LDX #imm` ($A2) | `%0_1010` | `rfbyte` · `mov x` · call+ret |
+| `LDY #imm` ($A0) | `%0_0110` | `rfbyte` · `mov y` · call+ret |
+
+The `rfbyte` and the closing call/return are never skipped, so every path reads its operand and sets its flags; only the destination changes. Extend the same body with the addressing-mode fetch and it absorbs the zero-page and absolute loads too. Where four-way behavior is needed, the F bit (§9.4) carries two opcode bits into the flags.
 
 ## 15.4 What this slice shows, and what it omits {#sec-15-4}
 
@@ -1900,7 +1951,8 @@ h_note_on                                   ' $9n: Note On, channel n
                 and     chan, #$0f          ' channel is PA[3:0]
                 rfbyte  note                ' data byte 1: note number
                 rfbyte  vel                 ' data byte 2: velocity
-        _ret_   call    #voice_on           ' start the voice, return
+                call    #voice_on           ' start the voice
+                ret                         ' back to XBYTE dispatch
 ```
 
 This is "the byte is both the selector and an operand" in its cleanest form. Because the seven channel-voice commands live in the *high* nibble, the alternate high-bit index of a 16-entry table (§9.2) dispatches straight on the command with the channel falling out in `PA[3:0]` — sixteen entries cover every voice message, and the channel never costs a fetch. Running status (a data byte arriving with no fresh status byte, meaning "same command as last time") needs a little more: the handler remembers the current command and routes a data-valued byte back into it. That is not free — but it is small, and the FIFO's self-advancing read keeps the note/velocity pairs aligned.

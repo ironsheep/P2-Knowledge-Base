@@ -1353,7 +1353,7 @@ Goertzel analysis reports how much of one chosen frequency is present in an inco
 
 ### The input is a four-pin block, not a pin
 
-The command's `D[22:19]` field selects a **block of four pins**; the block's base pin is `%pppp × 4` (documented behaviour — the P2 datasheet and the *Parallax Propeller 2 Documentation v35 - Rev B/C* state the block arithmetic). The block is only half the selection. The **`S` operand chooses what happens to those four pins**:
+The command's `D[22:19]` field selects a **block of four pins**; the block's base pin is `%pppp` × 4 (documented behaviour — the P2 datasheet and the *Parallax Propeller 2 Documentation v35 - Rev B/C* state the block arithmetic). The block is only half the selection. The **`S` operand chooses what happens to those four pins**:
 
 | `S` field | Purpose |
 |-----------|---------|
@@ -1426,7 +1426,7 @@ dds_s           long    %0000_0001_000_000000000
 ```
 
 ::: hardware
-**SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full `±127` waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at `±10`. The DAC bytes are emitted with their MSB inverted, so the output rails sit at `$7F` and `$80`, not `$FF` and `$00`.
+**SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full ±127 waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at ±10. The DAC bytes are emitted with their MSB inverted, so the output rails sit at `$7F` and `$80`, not `$FF` and `$00`.
 :::
 
 ## 17.2 DDS Waveform Generation

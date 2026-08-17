@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.8\par}
+{\large\color{blue}Version 1.0.9\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -104,6 +104,10 @@
 ```
 
 # Copyright and License
+
+```{=latex}
+\markboth{}{}
+```
 
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
@@ -425,7 +429,7 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 
 > **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
 
-The SETXFRQ word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+The **SETXFRQ** word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
 ```formula
 Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
@@ -773,22 +777,33 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 | `%1111_0101` | `X_2ADC8_16P_4DAC8_WFLONG` | 2 | 16 | WFLONG |
 | `%1111_0110` | `X_4ADC8_0P_4DAC8_WFLONG` | 4 | 0 | WFLONG |
 
-**ADC Pin Requirements:** ADC-capable pins must be configured for ADC mode using **WRPIN** before sampling.
+**ADC Pin Requirements:** ADC-capable pins must be configured for ADC mode using **WRPIN** before sampling, and the pin must be **enabled** (`DIRH`) — these modes read a smart pin's ADC result, not a raw bitstream. (The DDS/Goertzel mode of Chapter 10 is the opposite case and takes raw pins; see §17.1.)
+
+These modes take their input from the cog's **four-channel scope**, so the pins are routed with `SETSCP` rather than named in the streamer command. `SETSCP` takes the enable in `D[6]` and a **four-pin block** in `D[5:2]`; the streamer command then selects which of those four channels to sample in **`S[1:0]`**.
 
 ## 9.2 ADC Configuration Example
 
 ```pasm2
-' Configure pin for ADC
-        wrpin   ##P_ADC_100X, #adc_pin
-        drvl    #adc_pin
+' Route pins 0..3 into the four scope channels and enable the scope
+        setscp  #%1_0000        ' enable, D[5:2]=%0000 -> pin base 0
 
-' Capture 1024 ADC samples
+' Configure the ADC pin and ENABLE it
+        wrpin   ##P_ADC_1X, #adc_pin    ' gain matched to the coupling
+        dirh    #adc_pin
+
+' Capture 1024 ADC samples from scope channel 0
         wrfast  #0, ##adc_buffer
         mov     cmd, ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON
-        add     cmd, ##adc_pin<<17 + 1024
-        xinit   cmd, #0
+        add     cmd, ##1024             ' count only
+        xinit   cmd, #0                 ' S[1:0] = 0 -> scope channel 0
         waitxfi
 ```
+
+::: hardware
+**This mode has no pin field — do not add one.** `X_1ADC8_0P_1DAC8_WFBYTE` encodes as `%1111_DDDD_W000_0010`, in which `D[22:20]` are **fixed zeros**. Writing a pin number into the command (`adc_pin<<17`, the idiom that is correct in the pin-output modes) lands in `D[19:16]`, and the addition carries into the mode bits — **selecting a different streamer mode entirely**, with no error. The effect is measurable in the transfer size alone: with `adc_pin` = 0 the block above writes 1,024 bytes; with 1 it writes 2,048; with 2 it writes 4,096. It appears to work for `adc_pin` = 0 — and even then it never selected the channel, because the channel comes from `S`.
+
+Streamer command fields are **positional and mode-specific**. A field that exists in one mode is fixed or absent in another, so an idiom carried across modes is not portable. Chapter 4 gives the layout; Appendix A gives the per-mode templates.
+:::
 
 ::: hardware
 **ADC readings are 8-bit values.** For higher resolution, use smart pin ADC modes with post-processing.
@@ -1167,9 +1182,33 @@ mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + vga_base<<17 + 640
 ' SPI byte output (MSB first)
 mode := X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
 
-' Goertzel analysis (differential DAC)
-mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_pin<<17 + cycles
+' Goertzel — adc_base is a FOUR-PIN BLOCK, must be a multiple of 4
+mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_base<<17 + cycles
 ```
+
+In that last line `adc_base<<17` is shorthand for the block field `D[22:19]`, and it is only correct because `(adc_base>>2)<<19` equals `adc_base<<17` **exactly when `adc_base` is a multiple of four**. The field names a block of four pins, not a pin — §17.1 works through what that means for the input.
+
+### Combine pin-mode constants with `|`, never `+`
+
+The `P_*` constants that configure a pin through `WRPIN` are **bit fields positioned inside the mode word**, not additive flags. Constants drawn from the same "pick one" group occupy the **same bits**, so `+` carries out of the field and lands in a neighbouring mode, while `|` sets the field and is idempotent. There is no assembler error and no warning — the pin simply does something else.
+
+The clearest case is the `%TT` field at bits 7:6, because three of its names look like three separate features:
+
+```spin2
+' Correct — the field is set to %01 and stays there
+mode := P_CHANNEL | P_OE          ' %01 = P_TT_01
+```
+
+```antipattern
+' Wrong — the carry lands in the next mode up
+mode := P_CHANNEL + P_OE          ' %10 = P_BITDAC
+```
+
+`P_TT_01`, `P_OE` and `P_CHANNEL` are **one bit-field value** (`$40`, `%01`) under three context names — not three features, and not additive. Each name reads correctly in its own context: `P_OE` where a smart pin's output is being enabled, `P_CHANNEL` where a non-smart-pin DAC's source is being selected, `P_TT_01` for the raw field value. A reader who meets all three in the symbol list will assume three independent capabilities; there is one bit.
+
+The failure is silent and total. Measured on P2 silicon, the `|` form drove a cog DAC at 6,737 ADC counts while the `+` form read 1,407 — indistinguishable from no drive at all.
+
+Numeric fields are a separate matter. `adc_pin<<17` and `cycles` above are values shifted into their own positions in the streamer command word, so `+` and `|` agree — provided the field exists in the mode being built and the value fits it. Chapter 4 gives the command word's field layout, which varies by mode.
 
 # Chapter 14: Events and Synchronization {#ch-14}
 
@@ -1224,7 +1263,7 @@ The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), an
 - **XINIT**, **XCONT**, **XZERO** execution (these instructions re-arm the events)
 - **POLL**, **WAIT**, or **J** instruction execution for that event
 
-**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by XINIT/XCONT/XZERO. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
+**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by **XINIT**/**XCONT**/**XZERO**. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
 
 ## 14.4 Synchronization Patterns
 
@@ -1254,6 +1293,31 @@ line    xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 ::: tip
 Use **XZERO** at line start to prevent phase accumulation errors over many lines.
 :::
+
+## 14.5 Debugging Streamer Code {#sec-14-5}
+
+Compiling with `-d` puts the P2's **highest-priority interrupt** inside your streaming cog, and by
+default it does so in *every* cog: `DEBUG_COGS` defaults to `%1111_1111`. The debug interrupt is
+not aware of the streamer, so it can preempt a cog mid-transfer — and a streamer transfer that is
+interrupted does not resume where a reader would expect it to.
+
+The symptom is corrupted data, not a stopped program. In our own Goertzel measurements the streaming
+cog crashed into the single-step debugger's memory dump and the accumulators read between 1,000,000
+and 7,000,000, where the true values were in the hundreds — numbers large enough, stable enough, and
+plausible enough to be believed. Every measurement taken before the mask was narrowed was confounded.
+
+The fix is one `CON` line: report from the cog you are actually watching, and leave the streaming
+cog out of the mask.
+
+```spin2
+CON
+  DEBUG_COGS = %0000_0001    ' debug cog 0 only; streaming cog undisturbed
+```
+
+The general rule reaches past the streamer: **any hardware sequencer you are measuring should be
+running in a cog the debugger is not interrupting.** Smart pins, the CORDIC pipeline and the FIFO
+are all timing-sensitive in the same way. If adding DEBUG changes your numbers, the DEBUG is part
+of the measurement.
 
 # Part IV: Applications
 
@@ -1416,7 +1480,7 @@ The streamer outputs SPI data while a smart pin generates the clock.
 
 ```pasm2
                 ' Configure clock pin as transition counter
-                wrpin   ##P_TRANSITION + P_OE, #spi_clk
+                wrpin   ##P_TRANSITION | P_OE, #spi_clk
                 wxpin   ##1, #spi_clk           ' base period in clocks
                                                 ' (2 sysclks/clock cycle =
                                                 ' one NCO-÷2 data bit)
@@ -1468,43 +1532,65 @@ This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts
 
 ## 17.1 Goertzel Frequency Detection
 
-Goertzel analysis detects specific frequencies in ADC input.
+Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on real silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
 
 **Application:** Ultrasonic distance measurement, DTMF decoding, tone detection
 
-**Setup:**
+### The input is a four-pin block, not a pin
+
+The command's `D[22:19]` field selects a **block of four pins**; the block's base pin is `%pppp` × 4 (documented behaviour — the P2 datasheet and the *Parallax Propeller 2 Documentation v35 - Rev B/C* state the block arithmetic). The block is only half the selection. The **`S` operand chooses what happens to those four pins**:
+
+| `S` field | Purpose |
+|-----------|---------|
+| `S[15:12]` | which of the four pins are **summed** — **mandatory** |
+| `S[19:16]` | which of the four are **inverted** (lets a channel be subtracted) |
+| `S[11:0]` | loop size and LUT window |
+
+**`S[15:12]` = 0 sums nothing, and the analyzer accumulates zero.** This is the single most common way to build a Goertzel detector that appears completely dead: everything else is correct, the command issues, the loop runs, and every magnitude is noise. Supplying `S` is not optional.
+
+Each selected pin contributes ±1 per clock — an input `0` counts as −1 and a `1` as +1. Where two or four channels are summed, the total is always even and is shifted right one bit.
+
+### Setup
+
+The ADC pins feeding Goertzel are **raw delta-sigma bitstreams**. Configure them for ADC mode with the smart-pin mode field at `%00000`, and **do not raise DIR** — a smart pin left enabled on these pins produces no accumulation at all. (This is the reverse of the scope-fed ADC modes in §9.2, which require an enabled smart pin. The *Parallax Propeller 2 Documentation*'s own worked program follows the raw form: only the DAC pin gets `DIRH`.)
+
+Gain is a property of the **coupling**, not of this mode. A high-gain constant such as `P_ADC_100X` saturates on a directly-wired signal and reads a constant; it suits a capacitively-coupled touch pad, which is what the demo shipped with the *Parallax Propeller 2 Documentation* uses. A directly-coupled signal wants low gain.
 
 ```pasm2
                 ' Load sine/cosine table to LUT
                 setq2   #$200-1
                 rdlong  0, ##sine_table
 
-                ' Configure ADC pin
-                wrpin   ##P_ADC_100X, #adc_pin
-                drvl    #adc_pin
-
-                ' Configure DAC output (differential)
-                wrpin   ##P_DAC_124R_3V + P_CHANNEL, dac_pins
-                drvl    dac_pins
+                ' ADC pin: RAW — ADC mode, smart-pin field %00000, NO DIR
+                wrpin   ##P_ADC_1X, #adc_pin
 ```
 
-**Detection Loop:**
+This section builds a **detector** — the streamer's DAC routing stays off, and the only pin configured is the input. The same mode also *generates*, driving a synthesized waveform out of the DACs while it measures; that side is §17.2, and the DAC routing field is what turns it on.
+
+### Reading the result: one GETXACC per command
+
+`GETXACC` **captures** both accumulators into holding registers and **clears** them, returning the captured cosine in `D` and placing the captured sine into the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives.
+
+The consequence matters more than the mechanism: **`GETXACC` reads a holding register, not a live accumulator.** A second `GETXACC` with no intervening streamer command returns *the same numbers*, and a read taken before a command belongs to the **previous** one. The *Parallax Propeller 2 Documentation*'s own demo comments its read "get prior Goertzel acc's".
+
+So: **one read per streamer command.** With a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference** — an absolute read in that pattern is not a per-command measurement. It fails invisibly, because the number returned is large, stable and entirely plausible. The `XCONT` loop below reads once per command and subtracts a baseline established on the first pass.
+
+### Detection loop
 
 ```pasm2
 ' Calculate NCO frequency for target (2^31-scaled for the NCO)
                 rdlong  clkf, #$44              ' clkfreq from hub $44
-detect
                 qfrac   target_freq, clkf       ' QFRAC = 2^32 × target/clk
                 getqx   xfrq
                 shr     xfrq, #1                ' halve to the NCO's
                                                 ' 2^31 scaling
-
+                setxfrq xfrq
+detect
                 ' Run Goertzel analysis
                 setword dds_cmd, cycles, #0
-                setq    xfrq
                 xcont   dds_cmd, dds_s
 
-                ' Get result
+                ' One read per command; cos in D, sin into the next S
                 getxacc cos_acc
                 mov     sin_acc, 0-0
 
@@ -1518,8 +1604,15 @@ detect
 
                 jmp     #detect
 
-dds_cmd         long    X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0
+' Goertzel, four-pin block 0 (pins 0..3), DAC routing off
+dds_cmd         long    X_DDS_GOERTZEL_SINC1 | X_DACS_OFF
+' sum base pin +0 (S[15:12] = %0001), invert none, 512-entry LUT window
+dds_s           long    %0000_0001_000_000000000
 ```
+
+::: hardware
+**SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full ±127 waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at ±10. The DAC bytes are emitted with their MSB inverted, so the output rails sit at `$7F` and `$80`, not `$FF` and `$00`.
+:::
 
 ## 17.2 DDS Waveform Generation
 
@@ -1810,6 +1903,15 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 3. Sample count adequate for frequency resolution
 4. SINC2 amplitude reduced to ±10 to prevent overflow
 5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.4)
+6. **You compiled with `-d`.** Accumulators reading in the millions where you expect hundreds are the debug interrupt, not your signal — see §14.5
+
+## Symptom: Measurements Change When You Add DEBUG
+
+**Check:**
+
+1. `DEBUG_COGS` is limiting debug to the cogs you actually watch, not the default all-eight (§14.5)
+2. The streaming cog is excluded from that mask
+3. The measurement was re-taken *after* narrowing the mask — a run made under the default mask is not a baseline
 
 # Index
 
@@ -1845,6 +1947,9 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 - DAC routing table: [11.1](#sec-11-1)
 - DAC symbols: [13.3](#sec-13-3)
 - DDS mode: [Chapter 10](#ch-10)
+- DEBUG_COGS: [14.5](#sec-14-5)
+- Debugging streamer code: [14.5](#sec-14-5)
+- Debug interrupt: [14.5](#sec-14-5)
 - Double buffering: [18.1](#sec-18-1)
 
 ```{=latex}

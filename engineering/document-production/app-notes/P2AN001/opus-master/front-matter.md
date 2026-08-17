@@ -26,7 +26,7 @@
 \vspace{0.35cm}
 {\large August 2026\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.3\par}
+{\large\color{blue}Version 1.0.4\par}
 
 \vspace{0.25cm}
 % App-note cover box: repurposes the manuals' bottom-of-cover content table.

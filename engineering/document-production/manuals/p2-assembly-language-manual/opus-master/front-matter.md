@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.1.5\par}
+{\large\color{blue}Version 3.1.6\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -78,6 +78,10 @@
 ```
 
 # Copyright and License
+
+```{=latex}
+\markboth{}{}
+```
 
 Copyright © 2025–2026 Iron Sheep Productions, LLC and Parallax Inc.
 
