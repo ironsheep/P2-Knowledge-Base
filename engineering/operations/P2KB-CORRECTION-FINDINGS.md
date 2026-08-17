@@ -1124,7 +1124,7 @@ a fact about the repository. A grep locates; it never concludes. This is the sam
 "a status line is not evidence," and it was caught only because a later task put the full `git tag`
 output on screen for an unrelated reason.
 
-### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `CONFIRMED` — **fails the app-note agreement gate**
+### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `FIXED (2026-08-17)` — companion brought into agreement on four entries; agreement gate GREEN
 
 **Found:** 2026-08-17, running the doc↔companion agreement check while preparing P2AN002 v1.0.3 for
 the release wave.
