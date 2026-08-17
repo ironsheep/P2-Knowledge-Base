@@ -100,6 +100,14 @@ App notes use the same marker family as the manuals, so a reader moving between 
 
 `🔍 Verify` is **specific to app notes** — it carries the empirical-grounding job (P1 used scope captures inline; we mark the confirmation step so the reader always knows how to check their own result).
 
+**Marker glyph and heading form — decided against the series, 2026-08-17.** The pitfall marker is the
+**bare `⚠` (U+26A0)**, without the emoji variation selector. All seven notes use it; none uses `⚠️`.
+The table above shows the variation-selector form only because it was written before the series
+existed — **the notes are right, and none of them changes.** The heading form the series settled on is
+the marker, then a bolded title clause: `⚠ **Pitfall — the matched-resistor error floor.**` rather than
+the bare `⚠️ **Pitfall:**` shown above. Both are recorded here so the next pass does not "fix" seven
+documents toward a table cell.
+
 ---
 
 ## 5. Terminology & formatting
@@ -160,4 +168,24 @@ App notes inherit the house formatting so code, symbols, and bit fields look ide
 
 ---
 
-*Version 1.0 — initial app-note voice guide. Distilled from the Parallax P1 application notes (AN001/004/008/013/014) and the P2 manual voice family, with a pedagogical layer added. See `APP-NOTE-CREATION-GUIDE.md`.*
+*Version 1.1 — §4 marker glyph and heading form recorded against the series (2026-08-17), and §8 added.
+Distilled from the Parallax P1 application notes (AN001/004/008/013/014) and the P2 manual voice
+family, with a pedagogical layer added. See `APP-NOTE-CREATION-GUIDE.md`.*
+
+---
+
+## 8. Conformance baselines
+
+Measured against every declared row in §3–§6, prose surface only. Extend a baseline forward as its
+note changes; do not re-derive it.
+
+| Note | Baseline | Result |
+|---|---|---|
+| **P2AN001** | 2026-08-17, at v1.0.4 | Register blend, markers, `pnut-ts` naming, mnemonic form, and cog-lowercase all clean. One R1 finding: the ~15 mV matched-resistor figure was stated bare and pointed at a section that does not carry it — now attributed to the designer as a designer-stated figure. Example library made byte-identical to the printed blocks. |
+| **P2AN002** | 2026-08-17, at v1.0.3 | Register blend and markers clean; R1 exemplary throughout ("roughly seven", "about 28 bits", "measured on real P2 silicon"). Four backticked mnemonics normalised to the bare uppercase form of §5. Every OBEX number, title, and author verified against the live catalog — one Acknowledgments attribution (#2812) named a company where Resources and the catalog both say **ersmith**, now consistent. |
+
+**V-6 applied to both (the Revision History demotion).** The in-note table is now **identity plus
+pointer**: one terse line per version, a statement of which revision the reader holds, and the fact
+that the example ZIP is versioned with the note — with the external changelog named as the
+authoritative narrative record. The two artifacts have different jobs, so they can no longer disagree.
+**P2AN003–P2AN007 still carry the old narrative form** — see the note in `README.md`.

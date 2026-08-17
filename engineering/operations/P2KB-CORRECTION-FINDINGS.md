@@ -861,7 +861,41 @@ citation authority, and this guide has shipped fabricated names before (Appendix
 sound: deSilva `:5845` uses the Parallax name correctly, and the remainder are our own cover title and a
 CHANGELOG font note.
 
-**Next finding ID after this block: F-280.**
+### F-280 — `pnut_ts` survives in 16 masters as a command that does not run. `CONFIRMED`
+
+**Found:** 2026-08-17 during the P2AN001/P2AN002 voice pass («#247»), by checking the compiler name
+the two notes hand the reader against the name of the binary that exists.
+
+**This was already adjudicated and only half-swept.** Commit `c203fa52` (2026-08-11) established the
+finding on its merits: `command -v pnut_ts` finds nothing, the installed binary is `pnut-ts`, and the
+tool's own usage banner reads *"PNut-TS: Usage: pnut-ts [optons] filename"*. SSDB and the PNut-Term-TS
+guide were corrected then — 21 sites — and both voice guides were amended so it could not come back.
+**The rest of the set was never swept.** Thirty-three occurrences remain across eighteen files, against
+thirty-nine correct ones — a near-even split, so the set currently teaches both.
+
+**Fixed in this pass (2 sites, the two notes being touched):** `P2AN001/opus-master/CHANGELOG.md:37`
+and `P2AN002/opus-master/CHANGELOG.md:35`. Both are reader-facing — an app-note CHANGELOG is promoted
+to the published `p2anNNN-changelog.md` beside its PDF.
+
+**Remaining (31 sites, 16 files) — the class-wide sweep this finding owns:**
+
+| Element | Sites |
+|---|---|
+| Getting Started Guide | `getting-started-body.md` ×1 — **highest reader risk**: a beginner's first compile |
+| Architect's Guide | `architect-guide-body.md` ×1, `CHANGELOG.md` ×2 |
+| Assembly Language Manual | `CHANGELOG.md` ×1 |
+| PNut-Term-TS Guide | `CHANGELOG.md` ×1 (the body was swept at `c203fa52`; its CHANGELOG was missed) |
+| deSilva | `archived-2025/README-COMBINED-MASTER.md` ×3 — **archived scaffolding, not shipped; excluded** |
+| P2AN003 – P2AN007 | body ×17, `CHANGELOG.md` ×5 |
+
+**Not swept here on purpose.** Conform-on-touch: these elements are not being touched by Sprint 2, and
+pulling sixteen masters into a voice pass is the big-bang sweep the rule exists to avoid. Each takes it
+at its next visit — this row is what makes sure the visit knows.
+
+**The correction is one substitution** — `pnut_ts` → `pnut-ts` — with no prose consequence. Check each
+site is the *command*; the project name in running text is properly **PNut-TS**.
+
+**Next finding ID after this block: F-281.**
 
 ---
 

@@ -8,6 +8,10 @@
 
 - **Recipe 6 (pipelining)** and its example-library program are rewritten together: register-only fill and drain with the hub reads and writes batched outside the loops. The "How this works" prose describes where the hub traffic actually is.
 - **A new pitfall** carries the measured rule: hub access inside either CORDIC loop loses results, and the failure is silent — wrong numbers, not missing ones.
+- **The OBEX citations match the catalog listing**: object #2812 is named by its catalog title, *Binary Floating Point Routines (IEEE-32 subset)*, and credited to ersmith in the Acknowledgments as it already was in Resources — one name a reader can search on. Every object number, title, and author in the note was checked against the live OBEX catalog.
+- **Instruction mnemonics read as one token**: the four mnemonics that appeared in inline code — ALTS, ALTD, RDLONG, WRLONG — are written plainly in uppercase like every other mnemonic in the note, so a prose mention and a code occurrence look the same.
+- **Revision History is identity, not narrative**: the in-note table gives one line per version plus a pointer to this changelog, which is the authoritative record. A reader holding only the PDF can still tell which revision they have, and which example ZIP goes with it.
+- **The compiler is named as it runs**: `pnut-ts`, the name of the installed binary.
 
 ## v1.0.2 (2026-08-08)
 
@@ -32,4 +36,4 @@ recipes the reader selects among, distance and heading, point rotation, circle l
 waves, 64-bit-safe fixed-point scaling, and pipelining to retire one result every eight clocks,
 plus a field-oriented motor-control reference ceiling. Every recipe verifies against a closed-form
 answer you can derive by hand, with no bench instruments. All worked programs compile clean
-under `pnut_ts`. Ships with a downloadable example library of every recipe.
+under `pnut-ts`. Ships with a downloadable example library of every recipe.

@@ -32,7 +32,6 @@ PRI open_scope()
   debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
   debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
 
-
 DAT             org
 
 adc_engine
@@ -65,7 +64,6 @@ loop            mov     Gio, #0
                 call    #filter           ' fan it out across the 17 stages
                 jmp     #loop
 
-
 measure         mov     MsrA, #0
                 mov     pa, #3+8-1
 .s              waitse1
@@ -77,7 +75,6 @@ measure         mov     MsrA, #0
         if_nc   add     MsrA, pb
                 incmod  iter, pa
         _ret_   tjnz    iter, #.s
-
 
 ' Ratiometric uV via CORDIC: r = ABS(Sig-Gio)<<32 / ((Vio-Gio)<<1),
 ' then sample = r * (3_300_000<<1) >> 32. ABS+<<1 admit Sig<Gio and Sig>Vio.
@@ -93,7 +90,6 @@ compute         mov     pa, Sig
                 getqy   pa
         if_c    neg     pa
         _ret_   mov     sample, pa
-
 
 ' N-stage time-halving filter. Stage 0 is the raw sample; stage N is the
 ' average of two stage-(N-1) samples, emitted every 2^N periods. A bit-
@@ -128,7 +124,6 @@ filter          mov     fb+0, fa+0        ' shift sample into stage 0
                 shl     fenc, #2
                 add     fenc, SamplePtr
         _ret_   wrlong  pa, fenc
-
 
 SetGio          long    P_ADC_GIO | P_ADC
 SetVio          long    P_ADC_VIO | P_ADC

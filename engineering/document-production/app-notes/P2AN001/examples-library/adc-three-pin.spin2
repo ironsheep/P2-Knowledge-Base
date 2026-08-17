@@ -39,7 +39,6 @@ PRI open_scope()
   debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
   debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
 
-
 DAT             org
 
 adc_engine
@@ -93,7 +92,6 @@ loop            mov     Gio, #0
                 wrlong  #1, ptra[3]
                 jmp     #loop
 
-
 ' Sum eight clean SINC2 differentials from all three pins at once.
 measure         mov     MsrA, #0
                 mov     MsrB, #0
@@ -118,7 +116,6 @@ measure         mov     MsrA, #0
         if_nc   add     MsrC, pb
                 incmod  iter, pa
         _ret_   tjnz    iter, #.s
-
 
 SetGio          long    P_ADC_GIO | P_ADC
 SetVio          long    P_ADC_VIO | P_ADC

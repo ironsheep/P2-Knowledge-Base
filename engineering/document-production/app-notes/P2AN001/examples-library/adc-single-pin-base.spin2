@@ -45,7 +45,6 @@ PRI open_scope()
   debug(`SCOPE uV size 600 400 samples 256 rate 1 dotsize 2 pos 100 100)
   debug(`uV 'uV' 0 3_300_000 360 20 15 MAGENTA)
 
-
 DAT             org
 
 adc_engine
@@ -82,7 +81,6 @@ loop            mov     Gio, #0           ' clear the three accumulators
                 wrlong  #1, ptra[3]       ' fresh reading is ready
                 jmp     #loop
 
-
 ' Sum eight clean SINC2 differentials from the selected source. The
 ' first 3 samples after a source switch are contaminated (2 for the
 ' SINC2 filter, 1 for the front end to settle); the 4th is clean.
@@ -97,7 +95,6 @@ measure         mov     MsrA, #0
         if_nc   add     MsrA, pb          ' sum only clean samples
                 incmod  iter, pa
         _ret_   tjnz    iter, #.s
-
 
 SetGio          long    P_ADC_GIO | P_ADC ' internal ground reference
 SetVio          long    P_ADC_VIO | P_ADC ' internal supply reference
