@@ -989,10 +989,34 @@ breakindent=2em`. Every previously-lost fragment came back:
 appears at BOTH the break and the indented continuation — a reader cannot mistake a wrap for authored
 structure, which was the open worry.
 
-**NOT ADOPTED YET, deliberately.** The platform source is untouched; only the daemon's copies carry
-the patch (so a later `forge-test` in this workspace will use the patched filter — be aware). Adopting
-changes every manual's rendering, and Assembly's re-render is in flight with the current filters, so
-this lands in the render cycle «#249» with a full-manual render to confirm nothing else re-flows.
+**REJECTED 2026-08-17 — and the round-trip is what disproved it.** Stephen: *"one thing we shouldn't
+ever do is wrap code or comments within the code."* That policy is DECLARED, in two places, with this
+exact reasoning: `p2kb-platform-code-coloring.lua`'s header (*"a typeset wrap can't break a comment and
+re-indent it, nor add a language line continuation, so it produces wrong-looking code AND hides the
+problem"*) and `audit-code-line-length.py`'s own docstring. It was proposed and tested against a
+declared decision without that check being run first.
+
+**The render is the evidence the policy is right.** Both failure modes the policy names showed up in
+`breaklines-v2`:
+
+| Case | What the continuation line actually printed | Why it is wrong |
+|---|---|---|
+| C (comment) | `(REV n covers bits 0..n)` | **no `'` prefix** — a comment's tail rendered as though it were code |
+| A (statement) | `$FF0000 'Noise' -1000 1000 100 200 0 $00AAFF)` | **no Spin2 `...` continuation** — copy-paste yields a syntax error |
+
+Worse than truncation in one specific way: a truncated line is *visibly* broken, so a reader notices.
+A wrapped line looks complete and copies as broken. And it would have removed the pressure to fix the
+source, which is the "hides the problem" half.
+
+**Adoption reverted; the platform source never carried the patch** (it was tested on the daemon copies
+only, now restored). `fvextra` availability is recorded here only so nobody re-derives it.
+
+**THE FIX IS AUTHORSHIP, as the policy always said.** Over-long lines get shortened in `opus-master` by
+the sanctioned routes — comment moved to full lines above the instruction at its indent, or split with
+the continuation comment's `'` aligned to the inline `'` column; a statement broken at a logical
+boundary with the legal Spin2 `...`. The real mechanism is the **gate**, and F-289 just repaired it:
+it had been skipping every captioned block, which is why 24 Debug Window and 11 IOSP lines went
+unreported. A working gate plus authorship is the answer; a typeset wrap was never it.
 
 **It also changes what re-authoring F-281 still needs:** with wrapping visible, the SCOPE and LOGIC
 lines are no longer losing content, so shortening them becomes a style choice rather than a repair —

@@ -38,8 +38,13 @@ touches the manual store and has no release consequences).
 - **`tables.lua` `stringify` fallbacks (×4)** — unreachable by any render by construction: they fire
   only when `pandoc.write` fails. Code review is the only available check, and it is done.
 
-**Also fold in here:** the `breaklines` platform fix («#249» item 1) is the other change that can
-only be judged by looking at a rendered page, and the torture test is the right instrument for both.
+**The `breaklines` platform fix is NOT part of this — it was REJECTED 2026-08-17.** It was tested on
+the daemon and the render disproved it: a typeset wrap emits a comment continuation with no `'` and a
+statement continuation with no Spin2 `...`, so it prints wrong-looking code that copies as broken, and
+it removes the pressure to fix the source. Code boxes do not wrap — that policy is declared in
+`p2kb-platform-code-coloring.lua`'s header and in `audit-code-line-length.py`. Over-long lines are an
+authorship defect, and the enforcement mechanism is the gate, which F-289 repaired (it had been
+skipping every captioned block). Details in F-281.
 
 ---
 
