@@ -175,7 +175,16 @@ local function handle_encoding_table(el)
     if #cell.contents == 0 then
       return ""
     end
-    return pandoc.utils.stringify(cell.contents)
+    local text = pandoc.utils.stringify(cell.contents)
+    -- Escape special LaTeX characters in cell content.
+    -- stringify() flattens the cell to plain text, so nothing here is
+    -- intentional LaTeX. An unescaped & ends the cell early and shifts every
+    -- later column right; % silently comments out the rest of the row.
+    text = text:gsub("&", "\\&")
+    text = text:gsub("%%", "\\%%")
+    text = text:gsub("#", "\\#")
+    text = text:gsub("_", "\\_")
+    return text
   end
 
   -- Extract header row

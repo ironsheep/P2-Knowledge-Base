@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-270`**
+**Next finding ID: `F-285`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -1099,7 +1099,7 @@ through `yaml-knowledge-base-maintenance` with a plan first.
 The same drift is plausible in every app note whose doc has advanced since its companion was
 written — a names-only pass on one file is not coverage of the category.
 
-**Next finding ID after this block: F-284.**
+
 
 ---
 
@@ -2250,3 +2250,46 @@ campaign closes.
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
 
+### F-284 — the 9-column encoding-table filter never escaped `&`, so two shipped instruction definitions print with the AND operator eaten by LaTeX. `CONFIRMED` — **fixed 2026-08-17; Assembly must re-render**
+
+**Found:** 2026-08-17, verifying the six generated wave PDFs page by page. The compile log
+reported **zero errors**; the defect was visible only on the page.
+
+**Location:** `platform/filters/p2kb-platform-tables.lua` — the `cell_to_latex` helper in the
+9-column instruction-encoding table handler. Visible at **P2-Assembly-Language-Manual pp.326
+(TEST) and 329 (TESTN)**, sourced from `part-ii/instructions-t.md:38` and `:169`.
+
+**Mechanism.** That handler flattens each cell with `pandoc.utils.stringify()` and emitted the
+result verbatim. The near-identical 6-column handler beside it, at the same file, has always run
+`text:gsub("&", "\\&")` plus `%`, `#`, `_`. So one of two adjacent code paths escaped and the
+other did not. An unescaped `&` inside a `tblr` cell **is an alignment tab**: it ends the cell,
+shifts every later column one to the right, and pushes the row past the table's right border —
+which is what the 50.2pt overfull hbox in the log actually was.
+
+The reader sees the TEST row's C column as `Parity of (D` and the next cell as `S)`. **The AND
+operator is gone from a bit-level definition of what the instruction computes**, and the row's
+remaining columns are all off by one. It has been shipping this way since at least v3.1.5.
+
+**`%` is the worse latent case.** Through the same unescaped path it would comment out the rest
+of the row — silent, complete, and with a clean log. Same class as F-281.
+
+**Blast radius measured, not assumed:** 281 nine-column encoding tables across the manual,
+scanned for `&`, `%`, `#`, `_` outside code spans. **Exactly 2 hits, both `&`, both in
+`instructions-t.md`; zero `%`/`#`/`_` anywhere in that path.** The other five wave elements
+contain no nine-column encoding tables and were verified unaffected. The five `&` sites elsewhere
+in Assembly and deSilva all go through escaping paths and render correctly — checked in the `.tex`,
+not inferred.
+
+**Fix applied:** the 9-column helper now escapes the same four characters as its sibling. Since
+`stringify()` has already flattened the cell to plain text, no intentional LaTeX can be harmed.
+
+**Owed:** re-render `p2-assembly-language-manual` v3.1.6 and confirm pp.326/329 read
+`Parity of (D & S)` and `Parity of (D & !S)` inside a 9-column row. The platform file is staged.
+No version bump — v3.1.6 has not shipped.
+
+**Lesson.** The gate that would have caught this does not exist: we check source characters and we
+check compile logs, and this defect is invisible to both. It was found by rendering a page and
+looking at it, prompted by triaging an overfull-hbox count. **An overfull hbox in a table is worth
+opening**; it is the only signal this failure emits.
+
+**Next finding ID after this block: F-285.**
