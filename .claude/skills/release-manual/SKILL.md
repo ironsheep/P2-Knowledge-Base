@@ -122,13 +122,77 @@ for label,needle in CHECKS: print(f"{'p'+str(page_of(needle)) if page_of(needle)
 # render any page you want to eyeball: doc[N-1].get_pixmap(dpi=110).save('/tmp/p.png')  then Read it
 ```
 
+**1d′ — read the WHOLE page you opened.** Whenever a page is rendered to verify one
+thing, that page is free evidence about everything else on it. **Never verify narrowly.**
+F-285 — 16 sites printing a literal `&nbsp;` — was found at zero cost because it sat on
+the same page as the F-284 fix being confirmed. A check scoped to "does the AND appear in
+the TEST row" would have passed while the defect two lines below shipped again. Look at
+the whole page, and record what else you saw even when it is clean; that is what makes the
+next release's comparison possible.
+
+**1e0 — the `.tex` leak sweep (RUN IT; the log cannot see this class).** The `.tex` is
+the only artifact showing what LaTeX actually received. Two defects reached readers
+through a clean log and correct-looking source — F-284 (an unescaped `&` in a table cell
+ate the AND out of an instruction definition) and F-285 (`&nbsp;` printed literally, 16
+sites). Both are this class.
+
+```bash
+python3 engineering/tools/validation/audit-tex-artifacts.py \
+    engineering/document-production/outbound/<slug>/<DocName>.tex
+```
+
+- **Clean (exit 0)** — proceed. **Findings (exit 1)** — STOP; fix in `opus-master`,
+  re-prepare, regenerate.
+- Detects: HTML entities, raw HTML tags, literal markdown (heading/fence/bold),
+  double-escapes, `{=latex}` leaks, `??` unresolved refs, TODO markers.
+- **Tuned to zero false positives** against all eight outbound `.tex` (882 verified
+  pages). Its exclusions are load-bearing and documented in the script's header —
+  `` `` `` is LaTeX's opening quote, `\textbackslash{}` is legitimate `#\label` P2
+  syntax, `##Label` is the PASM2 AUGS prefix (not a heading), and `Verbatim` regions
+  are skipped because code legitimately contains nearly every signature. **If it ever
+  flags one of those, the tool is wrong — confirm against the rendered page before
+  changing any content.**
+- This is a backstop, not the primary defense: the entity half is now blocked at prep
+  by `latex_escape_processor.py`, and the unescaped-`&` half by the escaping invariant
+  in the platform filters. The sweep catches whatever new path appears next.
+
 **1e — compile-log scan (when available).** Generation hands back the `.tex` and
 `.compile.log` into `outbound/<slug>/` (a `.tex` in outbound is inbound-for-debugging, per
 the prepare-manual rules — read it, don't deploy it). If present:
 - Scan the log for serious signatures: `! LaTeX Error`, `! Undefined control sequence`,
   `Runaway argument`, `Emergency stop`, `Float(s) lost`, `No pages of output`,
-  `! TeX capacity`. Any hit ⇒ investigate. (Overfull/Underfull hbox are normal — ignore.)
+  `! TeX capacity`. Any hit ⇒ investigate.
 - Read the `Output written … (N pages)` line — cross-check against 1b.
+- **Overfull hboxes are NOT uniformly ignorable.** Most are cosmetic, but a *large* one
+  is the only signal some content-destroying failures emit. F-284 shipped for two
+  releases — an unescaped `&` in a table cell ate the AND out of a bit-level
+  instruction definition — and its sole trace in the log was a **50.2pt overfull
+  hbox**. This skill said to ignore it, so it was ignored. Triage by magnitude and
+  location rather than dismissing the class:
+
+  ```bash
+  L=engineering/document-production/outbound/<slug>/<DocName>.compile.log
+  # rank overfulls by how far they exceed the line; report the worst offenders
+  grep -o 'Overfull \\hbox ([0-9.]*pt' "$L" | grep -o '[0-9.]*' \
+    | sort -rn | head -5
+  grep -n 'Overfull \\hbox ([0-9.]*pt' "$L" | sort -t'(' -k2 -rn | head -10
+  ```
+
+  Ranking, not enumeration, is the point: Assembly v3.1.6's log carries **7,056**
+  overfull hboxes, of which **36** are ≥20pt. Listing the class is useless — which is
+  why the old "ignore" instruction existed — but the top of the ranking is a short,
+  reviewable list.
+
+  - **≥ 20pt ⇒ OPEN THE PAGE.** That is far past a loose line; something structural
+    is overflowing. Note the log reports the *table* environment's line numbers, so
+    use the `.tex` context to find which page, then render it and look.
+  - **Inside a table/`tblr`/`longtblr` context ⇒ open it regardless of magnitude.**
+    A cell that ends early shifts every later column right and runs the row past the
+    border — visible on the page, near-silent in the log.
+  - **Underfull hbox — still ignore.** Loose spacing, never content loss.
+  - Record the maximum overfull magnitude in the verification note, so the next
+    release can see whether it grew. (Assembly v3.1.6: max 35.8pt after the F-284
+    repair, down from 50.2pt.)
 
 **1f — if content is missing, locate the failure stage.** The drop is either pre-xelatex
 (pandoc/escape) or in xelatex:

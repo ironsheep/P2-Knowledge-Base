@@ -28,6 +28,19 @@
 --       registers the figure in the List of Figures. The div is already
 --       consolidated into this single caption -- there is no separate rendering.
 
+-- Helper: escape LaTeX specials in a plain-text string.
+--
+-- THE INVARIANT: any stringify()'d text this filter emits inside a RawBlock MUST
+-- pass through here. stringify() flattens an element to plain text, so nothing in
+-- the result is intentional LaTeX -- but a raw \caption{...} argument bypasses
+-- pandoc's escaping entirely. An unescaped & aborts the build ("Misplaced
+-- alignment tab character &"); % is worse, silently commenting out the rest of
+-- the line with a clean compile log. A caption naming a P2 symbol (P_OE, {#}) or
+-- joining two things with & is ordinary authoring, so the exposure is real.
+local function latex_escape(s)
+  return (s:gsub('([&%%$#_])', '\\%1'))
+end
+
 -- A "bold lead-in" is a short paragraph that is a single bold run -- a label like
 -- **Immediate -> LUT -> Pins/DACs:** that introduces the table directly below it.
 -- (Every top-level inline is Strong/Space/SoftBreak, at least one Strong, and the
@@ -128,8 +141,9 @@ function Blocks(blocks)
        next_block.classes and
        next_block.classes:includes("figurecaption") then
 
-      -- Extract caption text from the Div content
-      local caption_text = pandoc.utils.stringify(next_block.content)
+      -- Extract caption text from the Div content (escaped -- it lands in a raw
+      -- \caption{} argument, which bypasses pandoc's escaping)
+      local caption_text = latex_escape(pandoc.utils.stringify(next_block.content))
 
       -- Extract the label ID (e.g., "fig:some-id")
       local label_id = next_block.identifier or ""

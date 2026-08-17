@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-286`**
+**Next finding ID: `F-287`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2338,7 +2338,75 @@ check compile logs, and this defect is invisible to both. It was found by render
 looking at it, prompted by triaging an overfull-hbox count. **An overfull hbox in a table is worth
 opening**; it is the only signal this failure emits.
 
-**Next finding ID after this block: F-286.**
+### F-286 — the escaping that stops F-284's class was per-call-site discretion, so it drifted to five more raw-emission sites. `CONFIRMED` — **fixed 2026-08-17; needs the Assembly render to validate**
+
+**Found:** 2026-08-17, asking the process question after F-284/F-285: *what would routinely catch
+these?* The answer turned out to be a structural fix rather than a checklist.
+
+**The class.** A pandoc Lua filter that calls `stringify()` and emits the result inside a
+`RawBlock` bypasses pandoc's escaping entirely. `stringify()` flattens an element to plain text,
+so nothing in the result is intentional LaTeX — but `&` in a raw position IS an alignment tab, and
+`%` silently comments out the rest of the line **with a clean compile log**. F-284 was one instance.
+
+**The rule already existed, written down, with rationale — and was applied at one site in four.**
+`p2kb-platform-code-coloring.lua` carried a comment stating the principle exactly ("Special LaTeX
+characters in the title are re-escaped because the title text, once parsed by Pandoc, is emitted
+into a raw-LaTeX block"), and its `esc()` helper was declared **inside a single `elseif` branch** —
+so the sidetrack handler 100 lines below, which that very comment cites as using "the same
+addcontentsline technique", emitted its title unescaped. `p2kb-platform-pagination.lua` was the same
+shape: a `latex_escape()` helper at line 26, used for chapter subtitles, **not** used for the Part
+title 28 lines below.
+
+**Five unescaped raw-emission sites, all fixed:**
+
+| Filter | Site | Raw position |
+|---|---|---|
+| `p2kb-platform-pagination.lua` | Part title | `\manualpart{}` |
+| `p2kb-platform-figures.lua` | figure caption | `\caption{}` |
+| `p2kb-platform-code-coloring.lua` | sidetrack title | `\addcontentsline{}{}{}` |
+| `p2kb-platform-tables.lua` | table caption `stringify` fallback | `caption={}` outer key |
+| `p2kb-platform-tables.lua` | cell renderer `pandoc.write` fallbacks (×3) | `tblr` cell |
+
+Escaping is now a module-level helper in each filter with the invariant stated at its definition,
+rather than a decision re-made at each call site. That is the actual fix: **per-call-site escaping
+drifts; one shared helper is why it stops drifting.**
+
+**Blast radius measured, not assumed — zero live exposure.** All 38 `# Part` headings and all
+`figurecaption` divs across the live masters were scanned for `&` and `%`: the only hit is in a
+`creation-guide.md` (not a rendered master). So the change is **inert on today's content** and the
+five already-verified wave renders remain valid. The `tables.lua` cell-renderer holes are fallback
+paths that fire only when `pandoc.write` fails.
+
+**Deliberate scope limit.** `tables.lua`'s helper escapes `& % # _` — the same four its cell
+renderers already escaped inline — and deliberately **not** `{ } \`, because instruction tables
+legitimately carry P2 syntax like `{#}` and escaping those braces would change pages that render
+correctly today. Closing a hole must not move correct output.
+
+**Retires an authoring workaround.** Authors were told to spell "and" in Part titles because an `&`
+there broke the build. That restriction was a workaround for this bug and is no longer needed.
+
+**Owed:** the Assembly render already owed for F-285 validates all of it. Confirm p.329, and confirm
+Part titles and table captions still render as before.
+
+**The process changes that came out of this — the durable half:**
+1. **`latex_escape_processor.py` now hard-fails on HTML entities in prose.** Not a warning: this
+   processor escapes `&`→`\&` before pandoc runs, so `&nbsp;` becomes `\&nbsp;` and pandoc emits
+   the literal text. **There is no configuration in which writing an entity here works**, which is
+   why it is a gate and not advice. Verified against the real pre-fix source from git: all 32
+   occurrences caught at exact line/column, and silent across all 128 live master files.
+2. **`engineering/tools/validation/audit-tex-artifacts.py`** — new. Sweeps the returned `.tex` (the
+   only artifact showing what LaTeX actually received) for entities, raw HTML, literal markdown,
+   double-escapes, `{=latex}` leaks, `??`, TODO markers. Tuned to **zero false positives** across
+   all eight outbound `.tex`; its exclusions are load-bearing and documented in the script header.
+   Wired into `release-manual` as step 1e0.
+3. **`release-manual` no longer says to ignore overfull hboxes.** That instruction is what let F-284
+   ship: a 50.2pt overfull hbox was the defect's only signal, and the skill said to disregard it.
+   Now triaged by magnitude and location (≥20pt, or any inside a table ⇒ open the page). Assembly's
+   log carries 7,056 overfulls of which 36 are ≥20pt, so ranking is tractable where listing is not.
+4. **`release-manual` 1d′ — read the whole page you opened.** F-285 cost nothing because it sat on
+   F-284's page; a narrowly-scoped check would have passed it through again.
+
+**Next finding ID after this block: F-287.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

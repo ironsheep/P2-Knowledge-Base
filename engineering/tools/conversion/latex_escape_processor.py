@@ -6,6 +6,49 @@ LaTeX environments, and markdown headers.
 """
 import sys
 import re
+from html.entities import html5 as _HTML5_ENTITIES
+
+# Recognized HTML entity names, without the trailing ';' variants html5 also
+# carries. Used to make the pre-flight scan exact rather than heuristic.
+_ENTITY_NAMES = {name.rstrip(';') for name in _HTML5_ENTITIES}
+
+_ENTITY_RE = re.compile(r'&(#[0-9]{1,6}|#[xX][0-9A-Fa-f]{1,5}|[A-Za-z][A-Za-z0-9]{1,30});')
+_INLINE_CODE_RE = re.compile(r'`[^`]*`')
+
+
+def scan_html_entities(lines):
+    """Find HTML entities in prose. They are ALWAYS a defect in this pipeline.
+
+    Why this is a hard failure and not a warning: this processor escapes '&' to
+    '\\&' before pandoc ever runs. So '&nbsp;' becomes '\\&nbsp;', pandoc reads
+    an escaped ampersand followed by the literal text 'nbsp;', and the reader
+    gets '&nbsp;' printed on the page. The entity NEVER had a chance to resolve
+    -- there is no configuration in which writing one here works. It shipped that
+    way 16 times in the Assembly manual from 2025-12-21 through v3.1.5 (F-285),
+    with a clean compile log and correct-looking source.
+
+    The fix is always the same: write the actual character, or a plain space.
+
+    Scope is prose only -- fenced code blocks and inline code spans are skipped,
+    because a code sample may legitimately display entity text. Entity names are
+    matched against the real HTML5 set, so 'Tom&Jerry;' is not a false positive.
+    A gate that cries wolf is a gate that gets ignored.
+    """
+    findings = []
+    in_code_block = False
+    for n, raw in enumerate(lines, start=1):
+        stripped = raw.strip()
+        if stripped.startswith('```'):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        prose = _INLINE_CODE_RE.sub(lambda m: ' ' * len(m.group(0)), raw)
+        for m in _ENTITY_RE.finditer(prose):
+            body = m.group(1)
+            if body.startswith('#') or body in _ENTITY_NAMES:
+                findings.append((n, m.start() + 1, m.group(0)))
+    return findings
 
 
 def process_latex_escaping(input_file, output_file):
@@ -420,4 +463,20 @@ if __name__ == '__main__':
     
     input_file = sys.argv[1]
     output_file = sys.argv[2]
+
+    # PRE-FLIGHT GATE: HTML entities cannot survive this processor (see
+    # scan_html_entities). Fail before writing anything, so the defect is caught
+    # at prep instead of on a rendered page.
+    with open(input_file, 'r') as _f:
+        _hits = scan_html_entities(_f.readlines())
+    if _hits:
+        print(f"BLOCKED: {len(_hits)} HTML entit{'y' if len(_hits) == 1 else 'ies'} "
+              f"in prose -- these print literally on the page (F-285).",
+              file=sys.stderr)
+        for ln, col, text in _hits:
+            print(f"  {input_file}:{ln}:{col}: {text}", file=sys.stderr)
+        print("Fix in opus-master: write the actual character, or a plain space.",
+              file=sys.stderr)
+        sys.exit(1)
+
     process_latex_escaping(input_file, output_file)

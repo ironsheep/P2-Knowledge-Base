@@ -18,11 +18,18 @@ local first_chapter = true
 local just_emitted_part = false
 
 -- Helper: escape LaTeX specials in a plain-text string.
--- The chapter subtitle is emitted as a raw \chaptersubtitle{...} argument,
--- which bypasses pandoc's normal escaping — so an unescaped &, %, $, #, or _
--- in a subtitle (e.g. "Periods, Duty & Reciprocal Counting") reaches xelatex
--- raw and aborts the build ("Misplaced alignment tab character &"). Escape the
--- prose specials here so subtitles behave like the pandoc-escaped title part.
+--
+-- THE INVARIANT: any stringify()'d text this filter emits inside a RawBlock
+-- MUST pass through here. stringify() flattens an element to plain text, so
+-- nothing in the result is intentional LaTeX — but a raw argument bypasses
+-- pandoc's escaping entirely, and an unescaped &, %, $, #, or _ then reaches
+-- xelatex raw. & aborts with "Misplaced alignment tab character &"; % is worse,
+-- silently commenting out the rest of the line with a clean log.
+--
+-- Both raw sites are covered: \chaptersubtitle{} (e.g. "Periods, Duty &
+-- Reciprocal Counting") and \manualpart{}. The Part title went unescaped until
+-- 2026-08-17, which is why authors were told to spell "and" in Part titles —
+-- a workaround for this bug, no longer needed.
 local function latex_escape(s)
   return (s:gsub('([&%%$#_])', '\\%1'))
 end
@@ -51,7 +58,7 @@ function Header(header)
 
     -- Part headings → \manualpart{} (adds to TOC, own page, no break after)
     if title:match("^Part ") then
-      local manualpart = pandoc.RawBlock('latex', '\\manualpart{' .. title .. '}')
+      local manualpart = pandoc.RawBlock('latex', '\\manualpart{' .. latex_escape(title) .. '}')
       just_emitted_part = true
       return manualpart
     end

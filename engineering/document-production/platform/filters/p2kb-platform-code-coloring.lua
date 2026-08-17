@@ -27,6 +27,25 @@
 -- Date: 2025-11-26
 -- Source: Proven Smart Pins workspace filter (3-color -> 5-color expansion)
 
+-- Helper: escape LaTeX specials in a plain-text string.
+--
+-- THE INVARIANT: any stringify()'d text this filter emits inside a RawBlock MUST
+-- pass through here. stringify() flattens an element to plain text, so nothing in
+-- the result is intentional LaTeX -- but a raw argument (\addcontentsline{}{}{},
+-- a bold title line) bypasses pandoc's escaping entirely. An unescaped & aborts
+-- the build; % is worse, silently commenting out the rest of the line with a
+-- clean compile log.
+--
+-- Module-level ON PURPOSE. This lived inside the modecard branch, so the
+-- sidetrack handler 100 lines below -- which the modecard comment itself cites as
+-- using "the same addcontentsline technique" -- emitted its title unescaped.
+-- Per-call-site escaping drifts; one shared helper is why it stops drifting.
+local function raw_escape(s)
+  s = s:gsub("\\", "\\textbackslash{}")
+  s = s:gsub("([%%%$#&_{}])", "\\%1")
+  return s
+end
+
 -- ===== MNEMONIC UPPERCASING (integrated from p2kb-desilva-mnemonic-bold.lua) =====
 
 -- Complete list of IOSP mnemonics
@@ -305,14 +324,11 @@ function Div(div)
   -- title line INSIDE the bar (not as a section), with a manual TOC entry so the
   -- mode still appears in the table of contents and PDF bookmarks (same
   -- addcontentsline technique as the sidetrack handler below). Special LaTeX
-  -- characters in the title (%, _, & ...) are re-escaped because the title text,
-  -- once parsed by Pandoc, is emitted into a raw-LaTeX block.
+  -- characters in the title (%, _, & ...) are re-escaped via the module-level
+  -- raw_escape() because the title text, once parsed by Pandoc, is emitted into a
+  -- raw-LaTeX block.
   elseif classes:includes("modecard") then
-    local function esc(s)
-      s = s:gsub("\\", "\\textbackslash{}")
-      s = s:gsub("([%%%$#&_{}])", "\\%1")
-      return s
-    end
+    local esc = raw_escape
     local title = nil
     local body = {}
     for _, block in ipairs(div.content) do
@@ -424,7 +440,7 @@ function Div(div)
     -- Add TOC entry if we found a title
     if sidetrack_title then
       table.insert(result, pandoc.RawBlock('latex',
-        '\\addcontentsline{toc}{section}{Sidetrack: ' .. sidetrack_title .. '}'))
+        '\\addcontentsline{toc}{section}{Sidetrack: ' .. raw_escape(sidetrack_title) .. '}'))
     end
     for _, block in ipairs(div.content) do
       table.insert(result, block)

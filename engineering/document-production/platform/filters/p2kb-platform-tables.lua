@@ -21,6 +21,28 @@
 -- - All other tables: Auto-shrink to content width (no wrapping)
 -- - This produces cleaner output for short explanatory tables
 
+-- Helper: escape LaTeX specials in plain text bound for a raw LaTeX position.
+--
+-- THE INVARIANT: any stringify()'d text this filter emits into a raw position (a
+-- tblr cell, a caption={} key) MUST pass through here. stringify() flattens an
+-- element to plain text, so nothing in the result is intentional LaTeX. Inside a
+-- tblr cell an unescaped & IS an alignment tab: it ends the cell early and shifts
+-- every later column right (F-284 -- "Parity of (D & S)" shipped for two releases
+-- as "Parity of (D" | "S)"). An unescaped % is worse, silently commenting out the
+-- rest of the row with a clean compile log.
+--
+-- SCOPE IS DELIBERATELY & % # _ -- the same four the cell renderers already
+-- escape inline. It does NOT escape { } \, because instruction tables legitimately
+-- carry P2 syntax like {#}, and escaping those braces would change pages that
+-- render correctly today. Closing the hole must not move correct output.
+local function cell_escape(s)
+  s = s:gsub("&", "\\&")
+  s = s:gsub("%%", "\\%%")
+  s = s:gsub("#", "\\#")
+  s = s:gsub("_", "\\_")
+  return s
+end
+
 -- ==================== NUMBERED CAPTIONS (layout standard) ====================
 -- A markdown table caption ("Table: ...", or ": ..." below the table) lands in
 -- el.caption.long. Render it to LaTeX and pair it with the table's identifier
@@ -36,7 +58,9 @@ local function table_caption_and_label(el)
     if ok and res and res ~= "" then
       cap = res
     else
-      cap = pandoc.utils.stringify(el.caption.long)
+      -- pandoc.write escapes; the stringify fallback does not, and cap is emitted
+      -- into a raw caption={} key.
+      cap = cell_escape(pandoc.utils.stringify(el.caption.long))
     end
   end
   local label = el.identifier or ""
@@ -616,13 +640,14 @@ local function handle_auto_shrink_table(el)
       if latex_str then
         return latex_str:gsub("\n$", "")
       else
-        return pandoc.utils.stringify(cell.contents)
+        -- stringify does NOT escape; this lands raw in a tblr cell
+        return cell_escape(pandoc.utils.stringify(cell.contents))
       end
     end)
     if ok then
       return result or ""
     else
-      return pandoc.utils.stringify(cell.contents) or ""
+      return cell_escape(pandoc.utils.stringify(cell.contents)) or ""
     end
   end
 
@@ -1038,14 +1063,15 @@ local function handle_content_table(el)
       if latex_str then
         return latex_str:gsub("\n$", "")
       else
-        return pandoc.utils.stringify(cell.contents)
+        -- stringify does NOT escape; this lands raw in a tblr cell
+        return cell_escape(pandoc.utils.stringify(cell.contents))
       end
     end)
     if ok then
       return result or ""
     else
-      -- Fallback to stringify if pandoc.write fails
-      return pandoc.utils.stringify(cell.contents) or ""
+      -- Fallback to stringify if pandoc.write fails (escaped -- raw tblr cell)
+      return cell_escape(pandoc.utils.stringify(cell.contents)) or ""
     end
   end
 
