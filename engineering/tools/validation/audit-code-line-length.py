@@ -209,12 +209,29 @@ def scan_markdown(md_path, budget, tabstop):
                 # and the line stays inside the box (see WAIVER_RE / HARD_CEILING).
                 # A waiver whose number has drifted from reality is no waiver — the
                 # point is that the exception states, and keeps stating, the truth.
-                # The waiver normally sits on the PRECEDING line: a trailing waiver
-                # would add its own width to the line it excuses, which is
-                # self-defeating. Accept either position.
+                # WHERE THE WAIVER LIVES, and why it is not in the code.
+                #
+                # First attempt put it in the code block as a Spin2 comment. It
+                # RENDERED — "' {K-waiver: 81 cols...}" printed in the manual on p29,
+                # leaking build metadata into reader-facing output. A manual is the
+                # human face; production plumbing must never print.
+                #
+                # So the waiver is an HTML comment placed ABOVE the fence, which pandoc
+                # drops (verified on the Forge: the text is absent from the PDF while
+                # the code still renders). It stays in the source next to the block it
+                # excuses, so it remains auditable, and the examples-library file stays
+                # pure code — which byte-identity requires.
+                #
+                # Search back past the fence for it; also accept it inline/preceding for
+                # non-rendered files.
                 w = WAIVER_RE.search(line)
-                if w is None and idx >= 2:
-                    w = WAIVER_RE.search(lines[idx - 2])
+                if w is None:
+                    for back in range(idx - 2, max(-1, idx - 12), -1):
+                        if back < 0 or back >= len(lines):
+                            continue
+                        w = WAIVER_RE.search(lines[back])
+                        if w:
+                            break
                 if w and int(w.group(1)) == cols and cols <= HARD_CEILING:
                     continue
                 violations.append((idx, cols, line))

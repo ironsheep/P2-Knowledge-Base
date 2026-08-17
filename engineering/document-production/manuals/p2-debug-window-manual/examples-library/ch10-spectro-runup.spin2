@@ -3,7 +3,6 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  ' {K-waiver: 77 cols, create line, inside the 86-col box}
   debug(`SPECTRO Run SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0

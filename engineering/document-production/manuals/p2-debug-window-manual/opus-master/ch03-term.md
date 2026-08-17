@@ -160,10 +160,10 @@ debug(`Status 6 'ok' 13)         ' pair 2: lime on black
 To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
+<!-- {K-waiver: 86 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
 ' COLOR pairs: pair0 orange/black, pair1 black/orange,
 '             pair2 green/black,  pair3 red/black
-' {K-waiver: 86 cols, create line, COLOR is config-only and cannot be split}
 debug(`TERM Log COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 ```
 
@@ -266,13 +266,13 @@ When a panel's *layout* is fixed — the labels never move, only the values chan
 draw the labels once, then overprint just the value fields in place with the `3`
 (set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
 
+<!-- {K-waiver: 81 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```{.spin2 caption="ch03-term-dashboard.spin2"}
 CON _clkfreq = 200_000_000
 
 PUB main() | ang, signal, count
   ' pairs: 0 = labels (black/white), 1 = header (white/blue),
   '        2 = ok (white/green), 3 = alert (white/red)
-  ' {K-waiver: 81 cols, create line, inside the 86-col box}
   debug(`TERM Panel SIZE 40 8 COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' Draw the static layout once: a title and three fixed labels.

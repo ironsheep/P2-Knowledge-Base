@@ -141,8 +141,8 @@ For a vertical waterfall scrolling sideways — frequency up the side, time adva
 horizontally — use a direction in the 4–7 group with bit 3 set, for example
 `TRACE 12`:
 
+<!-- {K-waiver: 80 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
-' {K-waiver: 80 cols, create line, inside the 86-col box}
 debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 RANGE $20000 HSV16X LOGSCALE)
 ```
 
@@ -162,8 +162,8 @@ effective scroll rate in lines per second is your sample feed rate divided by
 `RATE`. Set `RATE` to control how much real time each line of the display
 represents.
 
+<!-- {K-waiver: 80 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```spin2
-' {K-waiver: 80 cols, create line, inside the 86-col box}
 debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 RANGE $80000 LUMA8X)
 ```
 
@@ -254,13 +254,13 @@ frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
 vibration draws a **diagonal streak** down the waterfall — the run-up captured as
 a picture.
 
+<!-- {K-waiver: 77 cols, window-create line; its config keywords are Configure-phase only and cannot be split} -->
 ```{.spin2 caption="ch10-spectro-runup.spin2"}
 CON
   _clkfreq = 200_000_000
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  ' {K-waiver: 77 cols, create line, inside the 86-col box}
   debug(`SPECTRO Run SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
