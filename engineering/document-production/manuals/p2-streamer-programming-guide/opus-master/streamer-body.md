@@ -244,7 +244,7 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 
 > **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
 
-The SETXFRQ word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+The **SETXFRQ** word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
 ```formula
 Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
@@ -1012,7 +1012,9 @@ The clearest case is the `%TT` field at bits 7:6, because three of its names loo
 ```spin2
 ' Correct — the field is set to %01 and stays there
 mode := P_CHANNEL | P_OE          ' %01 = P_TT_01
+```
 
+```antipattern
 ' Wrong — the carry lands in the next mode up
 mode := P_CHANNEL + P_OE          ' %10 = P_BITDAC
 ```
@@ -1076,7 +1078,7 @@ The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), an
 - **XINIT**, **XCONT**, **XZERO** execution (these instructions re-arm the events)
 - **POLL**, **WAIT**, or **J** instruction execution for that event
 
-**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by XINIT/XCONT/XZERO. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
+**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by **XINIT**/**XCONT**/**XZERO**. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
 
 ## 14.4 Synchronization Patterns
 

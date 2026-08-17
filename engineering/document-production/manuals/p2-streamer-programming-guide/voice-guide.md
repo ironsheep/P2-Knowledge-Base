@@ -200,6 +200,20 @@ Use these terms consistently:
 | In prose | Bold uppercase | "The **XINIT** instruction..." |
 | In lists | Uppercase, no bold | XINIT, XCONT, XZERO |
 | In code | Uppercase | `XINIT mode, data` |
+| **Attributive use** | **Uppercase, no bold** | "RDFAST modes", "the RDFAST FIFO", "WRFAST writes" |
+
+**On the attributive row** *(added 2026-08-17, «#242», from the first pass to measure the
+body against this table).* Bold when the text means *the instruction* — executing it, its
+syntax, its effect ("**Run RDFAST** before any capture command", "not re-armed by
+**XINIT**/**XCONT**/**XZERO**"). Leave it plain when the mnemonic is doing duty as a label
+for a class of modes, a data path, or a mechanism. §5.1's own model sentence already writes
+*"via the RDFAST FIFO"* unbolded, so this row records existing practice rather than
+inventing a rule; without it, a sweep reading only the "In prose" row would bold every
+attributive use and leave the page speckled.
+
+A slash-joined set inside a running sentence is **prose**, not a list — the "In lists" row
+means displayed lists and parenthetical enumerations like *"the small set of instructions
+(XINIT, XCONT, XZERO)"*.
 
 ### 4.3 Bit Field Notation
 
