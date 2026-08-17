@@ -94,10 +94,12 @@ WAITMS(1000)
 ### Solutions
 
 **Add P_OE to mode:**
-```spin2
+```antipattern
 ' WRONG - no output
 WRPIN(pin, P_PWM_SAWTOOTH)
+```
 
+```spin2
 ' CORRECT - output enabled
 WRPIN(pin, P_PWM_SAWTOOTH | P_OE)
 ```
@@ -198,10 +200,12 @@ Input measurements fluctuate, outputs have jitter, counts are erratic.
 ### Solutions
 
 **Add Schmitt trigger:**
-```spin2
+```antipattern
 ' WRONG - raw input
 mode := P_COUNT_RISES
+```
 
+```spin2
 ' CORRECT - Schmitt trigger for clean edges
 mode := P_COUNT_RISES | P_SCHMITT_A
 ```
@@ -274,10 +278,12 @@ WRPIN(RX_PIN, P_ASYNC_RX | P_INVERT_IN)
 ```
 
 **For P_SYNC_TX/RX, add clock routing:**
-```spin2
+```antipattern
 ' WRONG - no clock source specified
 mode := P_SYNC_TX | P_OE
+```
 
+```spin2
 ' CORRECT - clock from adjacent pin
 mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
 ```

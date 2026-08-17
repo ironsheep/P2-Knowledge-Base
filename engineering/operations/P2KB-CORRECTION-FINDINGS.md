@@ -711,6 +711,12 @@ probe and belongs with its record.
 **Proposed correction:** §19.5 says the P2 *initiates* communication and *requires* a board-supplied
 5 V VBUS rail, pointing at §19.8 for the external components.
 
+**RESOLVED 2026-08-17 («#246»).** The bullet is out of the P2-verb list — it never described anything
+the P2 does — and the fact it was carrying now stands on its own after the list: a host port supplies
+5 V on VBUS, the P2 cannot source it (3.3 V I/O), and §19.8 has the external supply and its current
+limiting. Fixed in opus-master; **IOSP is not in the release wave**, so it ships at IOSP's next
+release alongside F-278's site conversions.
+
 **Next finding ID after this block: F-276.**
 
 ---
@@ -823,6 +829,16 @@ no precedent in the set is a render risk, not a green light.
 
 **IOSP is not in the release wave.** Its sites are fixed in opus-master and ship at its next release —
 editing a master is not releasing a document.
+
+**IOSP RESOLVED 2026-08-17 («#246») — five sites, not four.** The four declared sites are converted.
+A **fifth** turned up because this pass used the broader wrong-code pattern
+(`WRONG|Wrong|INCORRECT|Do not do this`) rather than the `^' *WRONG` form that missed the Debug Window
+blockquote: `part-2-output-modes/chapter-11-serial-transmit.md:174`, a `**Wrong:**`-labelled
+```` ```spin2 ```` block already paired with its `**Correct:**` twin. **The narrow pattern under-counted
+this finding in two manuals; the enumeration above is the floor, not the census.** Three of the IOSP
+sites carried the wrong and correct forms in **one** block and were split the way Streamer's was —
+```` ```antipattern ```` then ```` ```spin2 ```` — so the reader gets red-beside-green rather than two
+comments in one box.
 
 ### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `CONFIRMED`
 

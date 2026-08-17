@@ -127,7 +127,7 @@ The output edge can only move on a base-period boundary, and the frequency step 
 | 10 | 20,000,000 | Finer frequency step; more edge jitter |
 | 100 | 2,000,000 | Finest frequency step; lowest max frequency |
 
-For most applications, X[15:0] = 1 is the right choice — it gives the widest output-frequency range, the highest update rate, and the least edge jitter. Use X[15:0] > 1 only when you need a finer frequency step at low output frequencies.
+For most applications, X[15:0] = 1 is the right choice — it gives the widest output-frequency range, the highest update rate, and the least edge jitter. Use X[15:0] > 1 only where a finer frequency step at low output frequencies is required.
 
 
 ## 8.3 P_NCO_DUTY Mode (%00111)

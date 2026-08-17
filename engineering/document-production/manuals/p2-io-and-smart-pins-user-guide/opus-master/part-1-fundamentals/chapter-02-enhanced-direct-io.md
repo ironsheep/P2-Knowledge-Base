@@ -491,7 +491,7 @@ PUB set_voltage(level) | config
 
 ## 2.13 Resetting to Default
 
-`PINCLEAR(pin)` sets `DIR=0` and then writes `WRPIN=0`, clearing all enhanced configuration and smart pin modes *and* lowering the pin's direction bit, returning the pin to basic Direct I/O operation. `WRPIN(pin, 0)` clears only the mode word and leaves `DIR` unchanged—so the two are not fully equivalent: a pin left with `DIR=1` keeps driving after `WRPIN(pin, 0)`, whereas `PINCLEAR` also releases it. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
+`PINCLEAR(pin)` sets `DIR=0` and then writes `WRPIN=0`, clearing all enhanced configuration and smart pin modes *and* lowering the pin's DIR bit, returning the pin to basic Direct I/O operation. `WRPIN(pin, 0)` clears only the mode word and leaves `DIR` unchanged—so the two are not fully equivalent: a pin left with `DIR=1` keeps driving after `WRPIN(pin, 0)`, whereas `PINCLEAR` also releases it. See §4.14 for the full reset-to-normal reference, including the fact that `WRPIN #0` takes effect even while a smart pin is running.
 
 ## 2.14 Quick Reference
 

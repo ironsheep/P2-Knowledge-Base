@@ -172,7 +172,7 @@ By default, the B-input reads from the local pin, which is useless for synchrono
 | P_MINUS3_B | Pin - 3 |
 
 **Wrong:**
-```spin2
+```antipattern
 mode := P_SYNC_TX | P_OE                    ' NO CLOCK ROUTING!
 ```
 

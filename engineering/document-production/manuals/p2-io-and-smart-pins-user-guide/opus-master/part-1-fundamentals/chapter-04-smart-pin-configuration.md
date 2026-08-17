@@ -312,7 +312,7 @@ Spin2 provides `AKPIN(PinField)`, the direct equivalent of the PASM2 AKPIN instr
 AKPIN(pin)                         ' Acknowledge without reading
 ```
 
-A discarded `RDPIN` also acknowledges, if you already have the value in hand:
+A discarded `RDPIN` also acknowledges, where the value is already in hand:
 ```spin2
 ack := RDPIN(pin)                  ' Read (discard result) to acknowledge
 ```

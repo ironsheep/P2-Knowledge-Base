@@ -119,7 +119,7 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 | %1011 | 2048 clocks | 12 bits | 12 bits | overflow | overflow |
 | %1101 | 8192 clocks | 14 bits | 14 bits | overflow | overflow |
 
-*The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on your own hardware (see §16.8 Accuracy Considerations).*
+*The bit figures above are **nominal resolution** — the width the decimation math produces — **not ENOB.** ENOB (Effective Number of Bits) is the *measured* effective resolution after noise and distortion; on the P2 it is lower than these nominal figures and must be characterized on the target hardware (see §16.8 Accuracy Considerations).*
 
 † **SINC3 Filter:** the higher SINC3 figures assume an idealized doubling over simple bit-summing that the P2's ADC does not actually deliver — treat them as optimistic upper bounds, not attainable resolution.
 
@@ -352,7 +352,7 @@ X[7:2]:   A (arm) value, 6-bit MSB-justified (0-252, step 4)
 X[1:0]:   Filter: %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
-> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when you choose the `A`/`B` trigger thresholds.
+> **What the filter buys — and its DC-range cost.** The `X[1:0]` selection applies a *windowed FIR* to the scope-mode bitstream — a 68- or 45-tap Tukey window, or a 28-tap Hann. A longer window rejects more noise but responds more slowly to a real edge. Note the ceiling: each captured sample is normalized to 8 bits, but the **actual DC dynamic range is only ~5–6 bits, depending on the filter length** — so treat the low bits as filter residue, not signal, when choosing the `A`/`B` trigger thresholds.
 
 The hysteretic trigger works as follows:
 
@@ -613,7 +613,7 @@ PUB averaged_reading(num_samples) : average | sum, i
 ```
 
 **Oversampling for Extra Bits:**
-Each 4x oversampling adds approximately 1 bit of resolution.
+Each 4× oversampling adds approximately 1 bit of resolution, provided the input carries enough noise to dither the reading across a code boundary — averaging a perfectly quiet input returns the same code every time and adds nothing. What this buys is resolution against *noise*; it does not move the absolute-error floor described above.
 
 **Calibration:**
 ```spin2

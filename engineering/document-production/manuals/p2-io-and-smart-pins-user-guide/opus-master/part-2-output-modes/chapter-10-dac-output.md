@@ -193,7 +193,7 @@ Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 
 > **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits realized depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
 
-> **Two independent rates — the dither runs far faster than your updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
+> **Two independent rates — the dither runs far faster than the sample updates.** The pseudo-random dither is applied to the 8-bit DAC **on every system clock**; it is *not* gated by the sample period. `X[15:0]` is a separate timer that decides only when `Y` is re-captured as the next output value and `IN` is raised (set it to `1` for immediate updates). So an 8-bit dither does **not** imply a sysclk/256 output rate — the 16-bit result comes from time-averaging the per-clock dither, with no fixed frame.
 
 ### P_DAC_DITHER_RND (%00010)
 
@@ -337,7 +337,7 @@ In DAC_MODE a non-DAC smart mode like NCO does not feed the 8-bit DAC directly; 
 
 ### PWM + DAC Integration
 
-PWM modes can combine with DAC. Like NCO, a PWM smart mode in DAC_MODE drives BIT_DAC with its 1-bit output, toggling between the two 4-bit levels in M[7:4] and M[3:0] — you must populate those nibbles or the pin stays at 0V. RC-filter the pin to recover the analog average:
+PWM modes can combine with DAC. Like NCO, a PWM smart mode in DAC_MODE drives BIT_DAC with its 1-bit output, toggling between the two 4-bit levels in M[7:4] and M[3:0] — those nibbles must be populated or the pin stays at 0V. RC-filter the pin to recover the analog average:
 
 ```spin2
 ' PWM triangle toggles BIT_DAC between two 4-bit levels;
@@ -575,7 +575,7 @@ The DAC output impedance determines load driving capability:
 | P_DAC_124R_3V | 124Ω | >1.2kΩ | 0.12V |
 | P_DAC_75R_2V | 75Ω | >750Ω | 0.08V |
 
-The "Min Load" column is a **rule-of-thumb guideline** (roughly 10× the output impedance), not a hard specification — keeping the load well above the output impedance holds the voltage drop small. Size the actual load to the voltage-drop budget your application can tolerate.
+The "Min Load" column is a **rule-of-thumb guideline** (roughly 10× the output impedance), not a hard specification — keeping the load well above the output impedance holds the voltage drop small. Size the actual load to the voltage-drop budget the application can tolerate.
 
 ### External Buffering
 

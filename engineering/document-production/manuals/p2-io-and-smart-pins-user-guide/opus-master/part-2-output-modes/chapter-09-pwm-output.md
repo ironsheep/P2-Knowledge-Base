@@ -36,7 +36,7 @@ All three PWM modes share a common architecture:
 
 ### Complementary Outputs and Dead-Band
 
-Each Smart Pin drives **one** physical pin, so a single PWM Smart Pin produces **one** output. There is no single-pin "complementary output" mode and no built-in dead-band. A complementary pair — for example the high-side and low-side gates of a half-bridge — is **always two Smart Pins**, one per side, enabled together and coordinated carefully.
+Each smart pin drives **one** physical pin, so a single PWM smart pin produces **one** output. There is no single-pin "complementary output" mode and no built-in dead-band. A complementary pair — for example the high-side and low-side gates of a half-bridge — is **always two smart pins**, one per side, enabled together and coordinated carefully.
 
 The two pins share one frame period; the low-side pin inverts its output (`P_INVERT_OUTPUT`) so the pair switches complementarily. The **dead-band** — the brief interval where *both* outputs are off, which prevents shoot-through in a half-bridge — is produced in **software**, by offsetting the two duty values so their active intervals never overlap:
 
@@ -49,7 +49,7 @@ high_duty := base_duty - dead_gap   ' high side switches on later
 low_duty  := base_duty + dead_gap   ' low side switches off earlier
 ```
 
-There is no dead-band-width register: the width is whatever timing offset you feed the two pins, and the right value depends on the switches and the load.
+There is no dead-band-width register: the width is whatever timing offset the two pins are given, and the right value depends on the switches and the load.
 
 ## 9.2 P_PWM_TRIANGLE Mode (%01000)
 

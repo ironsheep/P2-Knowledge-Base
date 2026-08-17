@@ -168,10 +168,12 @@ Receives serial data synchronized to an external clock signal. Data is sampled o
 
 **The B-input defaults to the local pin, which is useless for SPI.** A pin-selection constant MUST be added:
 
-```spin2
+```antipattern
 ' WRONG - no clock routing:
 mode := P_SYNC_RX                               ' Will not work!
+```
 
+```spin2
 ' CORRECT - clock from adjacent pin:
 mode := P_SYNC_RX | P_PLUS1_B                   ' Clock on pin+1
 ```

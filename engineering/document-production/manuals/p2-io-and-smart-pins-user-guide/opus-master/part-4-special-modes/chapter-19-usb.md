@@ -207,10 +207,11 @@ As a USB device, the P2:
 
 As a USB host, the P2:
 
-- Provides bus power (5V)
 - Initiates all communication
 - Enumerates and configures devices
 - Must handle all connected device types
+
+Bus power is a board responsibility, not a P2 one. A host port supplies 5V on VBUS, which the P2 cannot source — its I/O operates at 3.3V. The external supply and its current limiting are covered in §19.8.
 
 **Host implementation is significantly more complex than device mode.**
 

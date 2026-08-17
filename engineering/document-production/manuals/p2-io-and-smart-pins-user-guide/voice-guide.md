@@ -134,6 +134,10 @@ Include "when to use" and "considerations" throughout:
 | Never omit options | "Use P_HIGH_FAST" (only) ❌ | Incomplete |
 | Never assume context | "As you know..." ❌ | Must stand alone |
 
+**These rows carry carve-outs — read §3.5 before acting on a hit.** Several were
+measured against the body and narrowed; a hit that falls inside a recorded carve-out is
+not a defect.
+
 ### 3.3 Voice Comparison
 
 | Aspect | Smart Pins Tutorial (retired) | This User Guide |
@@ -177,6 +181,23 @@ compliance as often as they are defects.
 **The test:** ask *what does the evidence actually support?* If the answer is a firm
 fact, state it firmly. If the answer is "this much and no further", say that much — and
 saying it is not hedging, it is the claim being true.
+
+### 3.5 Carve-outs and adjudications — decided against the body, 2026-08-17
+
+The first full conformance pass over the master (Sprint 2, «#246») read every
+declared-row hit in context. Where a row fought the document and the **document** was
+right, the row was corrected — that is what the following records. **A carve-out here is
+a decision, not an oversight: do not "fix" against it.**
+
+| # | Row | Decision |
+|---|-----|----------|
+| C-1 | §3.1/§3.2/§3.3 **person** | **Carve-out: front matter and the CHANGELOG are out of scope.** The CC-BY-SA license text ("You are free to…") is quoted legal boilerplate and is reproduced verbatim; the Acknowledgements are an author's-voice page; the CHANGELOG is governed by the changelog style guide, not this one. The person rules govern the **reference body** — where the master is now third-person throughout. |
+| C-2 | §5.1 **"Smart Pin — Title case"** | **Adjudicated — the row was wrong.** The body carries ~155 lowercase "smart pin" against a handful of Title-case uses, and lowercase is what house style does with a common-noun device name (compare "cog"). **Title Case in titles and headings; lowercase "smart pin" in running prose.** What the row actually bans is the closed-up and camel forms — `smartpin`, `SmartPin` — of which the body has zero. |
+| C-3 | §5.2 **"PASM2 instructions: Bold uppercase"** | **Adjudicated — superseded by platform policy (2026-06-29).** Mnemonics render **UPPERCASE, not bold**: uppercase carries the mnemonic's identity and matches its appearance in code, and bold stays reserved for genuine emphasis. This guide's manual is the origin document for `p2kb-platform-mnemonic-bold`, which applies it grammar-aware at render. Authors write mnemonics plainly; do **not** hand-bold them. |
+| C-4 | §3.2 **"Never minimize"** | **Carve-out: "just" / "simply" meaning *merely*.** Eleven hits across the master, **zero** violations — every one describes what the hardware does ("a later WXPIN simply overwrites the long") or means *only* ("just before the B-input edge"). The row's defect is **dismissing the reader's effort**, not the adverb. Read the hit; do not sweep the word. |
+| C-5 | §5.1 **`sysclk`** | **Carve-out: "system clock" is correct as the English noun.** The row governs the **frequency reference** — write `sysclk` for the value. "System clock" naming the clock itself or its cycles ("counts system clocks while A-input is high") is right, and the body already uses both precisely in the same sentence where both are meant. |
+| C-6 | **R4** cadence budget | **Measured, not assumed — passes.** Across 827 sections, **7%** of closings land a rhetorical beat (budget ~50%), longest consecutive run **3** (limit ~4). The hits are **earned beats** carrying real information — silicon caveats, dependency notes, cross-references — and the per-chapter "This chapter covers…" / closing italic line is a **declared refrain**, which is structure, not a beat. Do not flatten either. §3.4's forward-guard prediction is confirmed for this document class. |
+| C-7 | **R3** anti-pattern family | **Clean.** Zero self-admiration and zero tutorial filler in the body. *Staged reveal* is prevented structurally: every mode section runs Function → Operation → Configuration → Example, so a mode's real constraint (clock routing, data justification, the Z preload) lands **before** the example that would trip on it. |
 
 ---
 
@@ -388,5 +409,11 @@ A complete reference that answers "how do I control P2 pins?" at every level - f
 
 ---
 
-*Last Updated: 2026-01-24*
-*Version: 2.0 - Expanded scope: Direct I/O + Smart Pins*
+*Last Updated: 2026-08-17*
+*Version: 2.2 — §3.5 carve-outs and adjudications from the first full conformance pass over the master*
+
+**Conformance baseline:** the opus-master was measured against every declared row in
+§3.2–§3.4 on **2026-08-17**, at master state **post-v1.0.8**. Prose surface only —
+these rules do not govern instruction tables, register layouts, code blocks, or
+quick-reference matter. Extend this baseline forward as the master changes; do not
+re-derive it.

@@ -78,9 +78,9 @@ Every pattern above keeps the cog **executing** — the poll-spin loops on `TEST
               ' Handle the timeout
 ```
 
-The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so one flag is all you need.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
+The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so testing one flag is sufficient.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
 
-**If you need to do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
+**Where the cog must do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
 
 ```pasm2
               getct     deadline          ' Read current time
@@ -98,7 +98,7 @@ The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1
               ' Handle the timeout
 ```
 
-`ADDCT1` sets counter-comparator 1 to a deadline; `POLLCT1 WC` reports (and clears) whether that deadline has passed, exactly as `POLLSE1 WC` does for the pin event. This costs a few instructions per pass and keeps the cog running — use it when you have real work to do between checks; otherwise prefer the `SETQ`-armed stall above. For background servicing, that same SE1 event can instead drive an interrupt (via `SETINT1`), freeing the cog to run other code between events.
+`ADDCT1` sets counter-comparator 1 to a deadline; `POLLCT1 WC` reports (and clears) whether that deadline has passed, exactly as `POLLSE1 WC` does for the pin event. This costs a few instructions per pass and keeps the cog running — use it where the cog has real work to do between checks; otherwise prefer the `SETQ`-armed stall above. For background servicing, that same SE1 event can instead drive an interrupt (via `SETINT1`), freeing the cog to run other code between events.
 
 **Let the smart pin time itself out.** Several input modes carry a timeout in hardware, removing the software race entirely. `P_EVENTS_TICKS` (mode `%10010`) with Y[2] = 1 is a pure timeout watchdog: it raises IN only when X clocks pass with *no* A-input event (Chapter 13); an arriving event simply restarts the X-clock window and resets Z, without raising IN. A `WAITSE1` armed on this pin therefore fires on the *timeout* — use it to detect a stalled input, not to catch the event itself. The windowed measurement modes (`%10101`–`%10111`, Chapter 15) treat X as a *minimum* window: they accumulate across whole periods until X clocks have elapsed and then let the period in progress finish, so IN is raised after *at least* X clocks — a "wait roughly this long, then read" cadence. When one of these fits, prefer it: the work is done in silicon at zero cog cost.
 
