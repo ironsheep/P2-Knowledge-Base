@@ -300,7 +300,7 @@ If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the
 
 If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per cog, meaning each cog's RNG produces independent bit sequences at this position, useful for multi-cog systems requiring independent randomness.
 
-The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128 - 1).
+The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128^ - 1).
 
 
 

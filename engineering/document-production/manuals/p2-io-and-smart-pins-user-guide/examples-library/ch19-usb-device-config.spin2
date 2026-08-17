@@ -1,7 +1,7 @@
 CON
   _clkfreq = 200_000_000
-  USB_DM = 56
-  USB_DP = 57
+  USB_DM = 8
+  USB_DP = 9
 
 PUB configure_usb() | baud
   ' Reset both pins

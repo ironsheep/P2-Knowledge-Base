@@ -14,6 +14,7 @@
 - **§5.1.6 CORDIC pipelining** issues and retrieves at the eight-clock slot cadence, hub traffic batched outside
 - **The loop is register-only** (§5.1.6): block `RDLONG` in, a `REP` fill/steady/drain over a cog buffer with `ALTS`/`ALTD`, block `WRLONG` out
 - **A hardware callout** (§5.1.6) carries the measured depths, the reason — throughput, not buffer depth — and the silent failure: wrong numbers, not missing ones
+- **Powers of two are set as superscripts** (§5.1 CORDIC table, GETRND, RDLONG/`##count`, XORO32): `2^32^`, `2^128^` and `2^x^` read as exponents on the page
 
 ## v3.1.5 (2026-08-08)
 
@@ -157,7 +158,7 @@ A licensing change. No technical content changed.
 
 ### Code Verification
 
-- 348 code examples audited with pnut_ts v1.51.7
+- 348 code examples audited with pnut-ts v1.51.7
 - Inline PASM examples: Correctly tagged as Spin2
 
 ---

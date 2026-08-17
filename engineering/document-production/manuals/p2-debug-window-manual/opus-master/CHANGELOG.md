@@ -26,6 +26,10 @@
   command lines you type
 - **The LOGIC, SCOPE and multi-window examples print complete** (Chapters 6, 7, 14): every
   channel declaration and comment appears on the page
+- **The SPECTRO `MAG` shift reads as a power of two** (Chapter 10): `2^shift^` is set as a
+  superscript in both the keyword table and the prose beside it
+- **Chapter 7's "Try it" paragraph reads as prose throughout** — the trigger walkthrough is
+  set in the body face from first word to last
 
 ## v1.1.2 (2026-08-08)
 

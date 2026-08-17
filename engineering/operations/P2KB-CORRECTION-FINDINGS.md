@@ -742,9 +742,23 @@ masters was read: the Architect's Guide (level shifters), deSilva ("P2 is 3.3V, 
 IOSP Ch.12 (legacy 5 V logic as an input case), and P2AN004 (the TSL235R's 2.7–5.5 V supply range) are
 all correct. **F-275 was the only site** — verified rather than assumed.
 
-**Related, not fixed here:** pins 56/57 are also the Edge Module's onboard LED pins and the P56–P63
-bank is the programming/WX-adapter header, so the chapter's example pin choice is worth a second look
-on its own merits at IOSP's next pass. Any even/odd consecutive pair works.
+**Related — looked at and FIXED 2026-08-17, at the next pass as scheduled.** Pins 56/57 are also the
+Edge Module's onboard LED pins and sit in the programming/WX-adapter bank — and the manual itself uses
+56 as `LED_PIN` in five places and 57 as `BUTTON_PIN`. Worse, this very release adds the statement
+that P56–P63 carries no 5V, so the chapter would have demonstrated a **bus-powered** peripheral on the
+one bank with no bus power. §19.8 had absorbed that by adding a caveat — *"the pin pair this chapter's
+examples use... must take VBUS from elsewhere"* — which is a workaround for a pin choice, not a
+reason for it.
+
+**Chapter 19's examples now use P8/P9**: a free even/odd pair in a 5V-bearing bank, clear of every
+other pin constant in the manual. The §19.8 caveat is gone with the need for it, and the bank fact
+stands on its own. Verified: byte-identity GREEN 15/15, `ch19-usb-device-config.spin2` compiles clean
+under `pnut-ts -d`, all IOSP gates clean. The "Valid pairs" enumeration still lists 56/57 — it is an
+enumeration of what the silicon allows, which is unchanged.
+
+**The lesson is the caveat itself.** Prose was written to explain around a defect instead of removing
+it, and that prose then read as settled. A sentence that exists only to excuse a choice is a marker
+for the choice, not a resolution of it.
 
 **Next finding ID after this block: F-276.**
 
@@ -1068,7 +1082,14 @@ no overfull-hbox stop is a render failure that only a human looking at the page 
 the whole reason the "verify the rendered PDF, not the log" rule exists, and an argument for making
 the platform's listing environment fail loudly instead.
 
-### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED`
+### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED` — **the 3 release-wave descriptors corrected 2026-08-17**
+
+> **Wave descriptors fixed 2026-08-17**, each checked against `git tag` rather than against the file's
+> own claim: Debug Window `v1.0.0`→**`v1.1.2`**, IOSP `unreleased`→**`v1.0.8`**, Assembly
+> `v3.1.2`→**`v3.1.5`**. Their trailing baseline comments described the OLD tags (wrong dates, wrong
+> page counts, one still calling IOSP a maiden release) and were rewritten to the real released dates
+> and page counts. **A stale comment beside a corrected value is the same defect wearing a disguise.**
+> Descriptors outside the wave are untouched and still stale.
 
 > **Rewritten in place 2026-08-17, hours after it was filed.** The original text claimed the app-note
 > *tags* were two to three releases behind and that the app-note release path "never lays the tag."
@@ -2922,11 +2943,16 @@ thorough about what it looked for — outline, page count, F-288's pages, log si
 not on the list. **A verification pass is only as wide as its checklist**, which is the F-285 lesson
 arriving a second time.
 
-**Noted, not fixed — an authorship inconsistency this exposed.** IOSP's own appendix-c writes
-`2^32^` (true superscript) at lines 35 and 501 but `2^X[3:0]` (literal) at line 171: one document,
-one concept, two renderings. Assembly and Debug Window use the literal form throughout. Whether the
-set should standardize on true superscript is a content decision across three manuals, not a
-by-product of a tool fix. **Not adjudicated.**
+**RESOLVED 2026-08-17 — the set standardizes on true superscript.** IOSP's appendix-c wrote `2^32^`
+(superscript) at lines 35 and 501 but `2^X[3:0]` (literal) at 171 — one document, one concept, two
+renderings. All 8 literal sites are now pandoc superscript pairs, joining the 5 that already were:
+**13 consistent exponents across three manuals**, verified by re-sweep (0 unmatched carets remain in
+renderable prose). The tool fix alone would have printed a correct-but-inconsistent circumflex; the
+notation decision is separate from it and is now made, not deferred.
+
+**Left alone deliberately:** `p2-pasm-desilva-style/opus-master/CHANGELOG.md:98` (`2^x`). CHANGELOGs
+render into no PDF (verified across all four), and it is a released entry — rewriting shipped history
+to fix text nobody renders is churn, not quality.
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

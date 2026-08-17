@@ -168,7 +168,7 @@ sample_rate = sysclk / 2^(X[3:0])
 
 **Variables:**
 
-- `X[3:0]`: Sample period exponent — 4-bit field, period = 2^X[3:0] clocks (useful range 1-13 for SINC2 Sampling; exponents 14-15 overflow)
+- `X[3:0]`: Sample period exponent — 4-bit field, period = 2^X[3:0]^ clocks (useful range 1-13 for SINC2 Sampling; exponents 14-15 overflow)
 
 **Worked Example (8-bit SINC2 at 200 MHz):**
 ```formula

@@ -20,7 +20,7 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 | Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
 | Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
 | Logarithm | [QLOG](#qlog) | Base-2 logarithm (5:27 fixed-point) in X |
-| Exponential | [QEXP](#qexp) | Base-2 exponential 2^x (inverse of QLOG) in X |
+| Exponential | [QEXP](#qexp) | Base-2 exponential 2^x^ (inverse of QLOG) in X |
 
 Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. QMUL returns the full 64-bit product, which fixed-point arithmetic uses directly.
 

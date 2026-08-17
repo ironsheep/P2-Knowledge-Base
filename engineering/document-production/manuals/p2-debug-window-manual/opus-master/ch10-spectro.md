@@ -54,7 +54,7 @@ The configuration keywords for the creation line:
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
 | `TRACE` | `mode` | `15` | Scroll direction and scroll-enable (see "Scroll direction") |
-| `MAG` | `shift` | `0` | Magnitude pre-scale; multiplies FFT output by 2^shift, **0–11** |
+| `MAG` | `shift` | `0` | Magnitude pre-scale; multiplies FFT output by 2^shift^, **0–11** |
 | `DOTSIZE` | `x [y]` | `1` | Pixel scaling; one value sets both axes, two set them separately, **1–16** |
 | *color mode* | — | `LUMA8X` | One color-mode keyword (see "Color mapping") |
 | `LOGSCALE` | — | linear | Logarithmic magnitude scaling instead of linear |
@@ -184,7 +184,7 @@ debug(`SPECTRO Sens SAMPLES 512 RANGE $8000 MAG 4 LOGSCALE LUMA8X)
 
 Two more controls shape the magnitude before color:
 
-- **`MAG shift`** multiplies the FFT output by 2^shift (a 0–11 bit pre-shift),
+- **`MAG shift`** multiplies the FFT output by 2^shift^ (a 0–11 bit pre-shift),
   raising low-level signals before scaling.
 - **`LOGSCALE`** applies logarithmic magnitude scaling instead of linear, which
   compresses a wide dynamic range so faint detail stays visible alongside strong

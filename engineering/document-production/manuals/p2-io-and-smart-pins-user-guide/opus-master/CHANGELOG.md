@@ -6,11 +6,12 @@
 
 - **USB bus power (Chapter 19 §19.5)**: a host port supplies 5V on VBUS; the P2 cannot source it, and its I/O operates at 3.3V
 - **Edge board 5V (§19.8)**: the breakout headers pass the jack's 5V straight through, unregulated and unlimited — the board is a conduit, not a source
-- **No 5V on P24–P31 or P56–P63 (§19.8)**: the second bank holds pins 56/57, used by this chapter's examples, so those hosts take VBUS elsewhere
+- **No 5V on P24–P31 or P56–P63 (§19.8)**: a host built on a pin pair in either bank takes VBUS from elsewhere on the board
 - **Oversampling resolution (Chapter 16 §16.8)**: each 4× oversampling adds about 1 bit only if the input carries enough noise to dither across a code boundary
 - **Wrong/right code pairs (Chapter 11, Chapter 17, Appendix E)**: the wrong half renders as an antipattern, visually distinct from the working code beside it
 - **Worked-example comments (Chapters 7, 9–12)**: every code line fits inside the printed box, with longer explanations carried on their own full-width lines above the code
-- **Exponent notation (Appendix C §C)**: powers of two print as written — `2^X[3:0]` — in the sample-period formulas
+- **Exponent notation (Appendix C §C)**: powers of two set as true superscripts, matching the formulas elsewhere in the appendices
+- **USB example pins (Chapter 19)**: the D–/D+ pair sits on P8/P9, in a bank whose breakout header carries 5V and clear of the LED and button pins used elsewhere
 
 ## v1.0.8 (2026-08-08)
 

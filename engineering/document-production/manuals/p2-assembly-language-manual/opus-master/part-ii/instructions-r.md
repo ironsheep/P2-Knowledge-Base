@@ -500,8 +500,8 @@ Both the instruction count (D) and repetition count (S) can exceed the 9-bit imm
 | Form | Limit | Mechanism |
 |------|-------|-----------|
 | `#count` | 0-511 | 9-bit immediate field |
-| `##count` | 0 to 2^32-1 | AUGD/AUGS prefix emitted automatically |
-| `register` | 0 to 2^32-1 | Register value used at runtime |
+| `##count` | 0 to 2^32^-1 | AUGD/AUGS prefix emitted automatically |
+| `register` | 0 to 2^32^-1 | Register value used at runtime |
 
 ```pasm2
 ' Extended repetition examples

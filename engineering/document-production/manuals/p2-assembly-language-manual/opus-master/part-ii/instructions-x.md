@@ -160,7 +160,7 @@ XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-qual
 
 The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bit generator:
 
-- Long period (2^32 - 1 values before repeating)
+- Long period (2^32^ - 1 values before repeating)
 - Good distribution across all output bits
 - Fast execution (2 clocks per random number)
 - Small state requirement (single 32-bit value)

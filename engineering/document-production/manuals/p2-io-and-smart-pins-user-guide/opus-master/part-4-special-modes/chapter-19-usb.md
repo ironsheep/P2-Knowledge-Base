@@ -42,8 +42,8 @@ USB requires an even/odd consecutive pin pair:
 
 | Pin | Function |
 |-----|----------|
-| Even (e.g., 56) | DM (D-) |
-| Odd (e.g., 57) | DP (D+) |
+| Even (e.g., 8) | DM (D-) |
+| Odd (e.g., 9) | DP (D+) |
 
 Valid pairs: 0/1, 2/3, 4/5, ..., 56/57, 58/59, 60/61, 62/63
 
@@ -51,8 +51,8 @@ Valid pairs: 0/1, 2/3, 4/5, ..., 56/57, 58/59, 60/61, 62/63
 
 ```spin2
 CON
-  USB_DM = 56                                   ' D- on even pin
-  USB_DP = 57                                   ' D+ on odd pin (DM+1)
+  USB_DM = 8                                    ' D- on even pin
+  USB_DP = 9                                    ' D+ on odd pin (DM+1)
 
 PUB configure_usb_pins() | baud
   ' Configure BOTH pins of the pair with identical WRPIN D data
@@ -263,8 +263,8 @@ PUB main()
 ```{.spin2 caption="ch19-usb-device-config.spin2"}
 CON
   _clkfreq = 200_000_000
-  USB_DM = 56
-  USB_DP = 57
+  USB_DM = 8
+  USB_DP = 9
 
 PUB configure_usb() | baud
   ' Reset both pins
@@ -333,7 +333,7 @@ USB host mode requires:
 
 **Where the 5V comes from on a P2 Edge board.** The Edge breakout boards do carry 5V to the I/O headers, which is worth being precise about because it is easy to read as the P2 supplying it. It is not: each 8-pin accessory header provides two grounds, a Vxx pin carrying 3.3V from that group's LDO regulator, and *optionally* 5V passed **straight through from the board's power jack**. Two consequences for a host design:
 
-- **Two headers have no 5V routed at all — P24–P31 and P56–P63.** That second bank contains the pin pair this chapter's examples use, so a host built on pins 56/57 must take VBUS from elsewhere on the board.
+- **Two headers have no 5V routed at all — P24–P31 and P56–P63.** A host built on a pin pair in either of those banks must take VBUS from elsewhere on the board.
 - **The header 5V is the input supply, not a port rail.** It arrives unregulated by the board and with no current limit, so the current limiting listed above remains the design's responsibility.
 
 *(P2 Edge Mini Breakout Board #64019, P2 Edge Breakout Board #64029, and P2 Edge Module Breadboard #64020 product guides. On the Breadboard the header 5V is additionally gated by the ACC ON/OFF shunt.)*

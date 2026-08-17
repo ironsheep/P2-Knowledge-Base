@@ -2,7 +2,7 @@
 manual_slug: p2-assembly-language-manual
 doc_class: reference                              # YAML-backed (PASM2 instruction reference)
 code_line_budget_K: 76                            # platform-inherited; LM-Mono calibrated (creation-guide v1.2)
-last_published_tag: p2-assembly-language-manual-v3.1.2   # baseline for Dimension #15 (released 2026-07-04, F-193 doc patch; was stale at v3.1.1 — corrected 2026-07-09)
+last_published_tag: p2-assembly-language-manual-v3.1.5   # baseline for Dimension #15 (released 2026-08-08, 504pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # v1.1 (user-suggestions sprint)
