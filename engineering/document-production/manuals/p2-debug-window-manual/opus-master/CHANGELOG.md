@@ -24,8 +24,8 @@
 
 - **The tools are named `pnut-ts` and `pnut-term-ts`**, hyphenated, throughout — including the
   command lines you type
-- **The SPI example's LOGIC window declares all three channels** (Chapter 6): `CS`, `CLK` and
-  `MOSI` with their colors, printed complete on the page
+- **The LOGIC, SCOPE and multi-window examples print complete** (Chapters 6, 7, 14): every
+  channel declaration and comment appears on the page
 
 ## v1.1.2 (2026-08-08)
 
