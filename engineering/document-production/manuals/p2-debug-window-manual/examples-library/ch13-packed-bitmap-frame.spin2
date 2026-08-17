@@ -1,8 +1,9 @@
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
-  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
+  ' 1-bit pixels -> LUT1 (2-color)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)   ' index 0 = background, 1 = cyan
   repeat
     repeat row from 0 to 15
       packed := 0

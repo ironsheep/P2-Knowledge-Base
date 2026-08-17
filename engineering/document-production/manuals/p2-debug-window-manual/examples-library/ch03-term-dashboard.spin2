@@ -22,7 +22,8 @@ PUB main() | ang, signal, count
     debug(`Panel 3 2 2 8 '`(count)    ')
     debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (white on red = alert), then back to pair 0
+      ' pair 3 (white on red = alert), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)
     else
       ' pair 2 (white on green = ok), then back to pair 0
       debug(`Panel 3 4 2 8 6 'ok   ' 4)

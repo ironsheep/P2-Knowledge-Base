@@ -4,8 +4,9 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)    ' create with config only
-  debug(`Scan 'Signal' -1000 1000)                       ' channel-def as a separate feed
+  ' create with config only
+  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)
+  debug(`Scan 'Signal' -1000 1000)          ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0

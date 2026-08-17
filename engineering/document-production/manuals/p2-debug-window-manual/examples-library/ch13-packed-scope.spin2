@@ -1,15 +1,17 @@
 CON _clkfreq = 200_000_000
 
-VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+VAR long buff[128]      ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
 
 PUB main() | i, ch
   debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
-  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
+  ' channel-defs (each needs a range) as a separate feed
+  debug(`Sig 'A' 0 255 'B' 0 255)
   ch := 0
   repeat
     repeat i from 0 to 127
       ' four 8-bit values per long, low byte first
-      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) ...
+                | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
     ' feed the whole window in one message; the host unpacks each long into
     ' four 8-bit values (packed data is streamed as an array, not one long
     ' per DEBUG call)

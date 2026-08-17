@@ -5,7 +5,8 @@ CON
 
 PUB main() | x, y, ang, cx, cy
 
-  ' 32x24 grid: each cell a 12px round dot on the GRAY background; temperature -> tint
+  ' 32x24 grid: each cell a 12px round dot on the GRAY background;
+  ' temperature -> tint
   debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
   ang := 0

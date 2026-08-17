@@ -66,7 +66,7 @@ CON
 PUB main() | ang, sine, count
   ' Two independent windows, each created by name and placed with POS.
   debug(`SCOPE Wave POS 0 0 SIZE 400 200)   ' create with config only
-  debug(`Wave 'Sine' -1000 1000)             ' channel-def as a separate feed
+  debug(`Wave 'Sine' -1000 1000)            ' channel-def as a separate feed
   debug(`TERM Status POS 420 0 SIZE 40 10)
 
   ang := 0
@@ -161,7 +161,7 @@ DAT
               org
 blink
               debug(`SCOPE Wave SIZE 400 200)  ' create with config only
-              debug(`Wave 'Ramp' 0 255)        ' channel-def as a separate feed
+              debug(`Wave 'Ramp' 0 255)     ' channel-def as a separate feed
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF
@@ -280,8 +280,9 @@ CON
 PUB main() | ang, signal, peak, count
   ' A SCOPE on the left, a TERM status panel on the right.
   ' Both are created up front, each by its own name, each placed with POS.
-  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)    ' create with config only
-  debug(`Scan 'Signal' -1000 1000)                       ' channel-def as a separate feed
+  ' create with config only
+  debug(`SCOPE Scan POS 0 0 SIZE 400 220 SAMPLES 256)
+  debug(`Scan 'Signal' -1000 1000)          ' channel-def as a separate feed
   debug(`TERM Panel POS 420 0 SIZE 32 8)
 
   ang   := 0

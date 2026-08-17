@@ -109,20 +109,20 @@ software with the random-number generator, so it runs on a bare board with no wi
 ```{.spin2 caption="ch13-packed-logic-stream.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[8]                              ' 8 longs x 32 samples = 256 = one full window
+VAR long buff[8]              ' 8 longs x 32 samples = 256 = one full window
 
 PUB main() | i, j, packed
   debug(`LOGIC Stream SAMPLES 256 'D0' LONGS_1BIT)
   repeat
-    repeat j from 0 to 7                       ' build one window of packed samples
+    repeat j from 0 to 7                ' build one window of packed samples
       packed := 0
       repeat i from 0 to 31
         ' pack 32 one-bit samples into a long, FIRST sample into the LOW bit
         packed := packed | ((getrnd() & 1) << i)
       buff[j] := packed
-    ' feed the whole window in one message; the host unpacks each long into
-    ' 32 samples LSB-first (packed data is streamed as an array, not one long
-    ' per DEBUG call)
+    ' feed the whole window in one message; the host unpacks each long
+    ' into 32 samples LSB-first (packed data is streamed as an array,
+    ' not one long per DEBUG call)
     debug(`Stream `uhex_long_array_(@buff, 8))
     waitms(50)
 ```
@@ -148,20 +148,20 @@ budget split two ways instead of one:
 ```{.spin2 caption="ch13-packed-logic-multi.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[16]                            ' 16 longs x 16 sample-pairs = 256 = one full window
+VAR long buff[16]       ' 16 longs x 16 sample-pairs = 256 = one full window
 
 PUB main() | i, j, packed
   debug(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
   repeat
-    repeat j from 0 to 15                      ' build one window of packed sample-pairs
+    repeat j from 0 to 15          ' build one window of packed sample-pairs
       packed := 0
       repeat i from 0 to 15
-        ' pack 16 two-bit samples into a long, FIRST sample into the LOW pair
+        ' pack 16 2-bit samples into a long, FIRST sample into the LOW pair
         packed := packed | ((getrnd() & %11) << (i*2))
       buff[j] := packed
-    ' feed the whole window in one message; the host unpacks each long into
-    ' 16 two-bit samples (one bit per channel), streamed as an array -- not one
-    ' long per DEBUG call
+    ' feed the whole window in one message; the host unpacks each long
+    ' into 16 two-bit samples (one bit per channel), streamed as an
+    ' array -- not one long per DEBUG call
     debug(`Pair `uhex_long_array_(@buff, 16))
     waitms(50)
 ```
@@ -176,16 +176,18 @@ A scope works the same way. Here four 8-bit samples ride in each long under
 ```{.spin2 caption="ch13-packed-scope.spin2"}
 CON _clkfreq = 200_000_000
 
-VAR long buff[128]                           ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
+VAR long buff[128]      ' 128 longs x 4 values = 512 = 256 sample-sets (A,B)
 
 PUB main() | i, ch
   debug(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create with config only
-  debug(`Sig 'A' 0 255 'B' 0 255)             ' channel-defs (each needs a range) as a separate feed
+  ' channel-defs (each needs a range) as a separate feed
+  debug(`Sig 'A' 0 255 'B' 0 255)
   ch := 0
   repeat
     repeat i from 0 to 127
       ' four 8-bit values per long, low byte first
-      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
+      buff[i] := (ch++ & $FF) | ((ch++ & $FF) << 8) ...
+                | ((ch++ & $FF) << 16) | ((ch++ & $FF) << 24)
     ' feed the whole window in one message; the host unpacks each long into
     ' four 8-bit values (packed data is streamed as an array, not one long
     ' per DEBUG call)
@@ -202,8 +204,9 @@ row segment:
 CON _clkfreq = 200_000_000
 
 PUB main() | row, x, packed, bit
-  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)   ' 1-bit pixels -> LUT1 (2-color)
-  debug(`Frame LUTCOLORS $000000 $00FFFF)                     ' index 0 = background, 1 = cyan
+  ' 1-bit pixels -> LUT1 (2-color)
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT1 LONGS_1BIT)
+  debug(`Frame LUTCOLORS $000000 $00FFFF)   ' index 0 = background, 1 = cyan
   repeat
     repeat row from 0 to 15
       packed := 0

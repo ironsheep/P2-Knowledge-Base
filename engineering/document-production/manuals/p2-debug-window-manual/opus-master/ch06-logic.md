@@ -42,7 +42,8 @@ count, the `RANGE` keyword, and a color. There are no `CHANNELS`, `LABELS`, or
 CON _clkfreq = 200_000_000
 
 PUB main() | sample
-  ' create + declare 4 channels -- the 1 before each color is the channel COUNT
+  ' create + declare 4 channels -- the 1 before each color
+  ' is the channel COUNT
   debug(`LOGIC Bus SAMPLES 64 'CLK' 1 $00FF00 'DATA' 1 $FFFF00 'CS' 'WR')
 
   repeat
