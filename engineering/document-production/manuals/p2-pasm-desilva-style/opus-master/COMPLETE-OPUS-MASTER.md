@@ -499,7 +499,7 @@ Before we move on, let me save you some debugging time:
 
 2. **Wrong pin number** - The P2 Eval board's eight LEDs are on pins 56-63. The P2 Edge Standard Module has two LEDs on pins 56-57; the 32MB Edge Module uses 56-57 for its PSRAM and places its two LEDs on pins 38-39 instead.
 
-3. **Clock setup required** - P2 boots on its internal RCFAST oscillator (nominally ~24MHz, spec'd 20MHz minimum). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust WAITX values if your clock differs.
+3. **Clock setup required** - P2 boots on its internal RCFAST oscillator (nominally ~24MHz, spec'd 20MHz minimum). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust **WAITX** values if your clock differs.
 
 4. **Cog already running** - If you `coginit` to a specific cog that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free cog.
 
@@ -693,7 +693,7 @@ A mailbox is just a hub location where cogs leave messages:
 
 ## The Timer: Everyone Gets One
 
-Every cog reads the same free-running 64-bit system counter (with GETCT), and each cog has its own CT1/CT2/CT3 compare targets to schedule timed events against it. This is incredibly useful:
+Every cog reads the same free-running 64-bit system counter (with **GETCT**), and each cog has its own CT1/CT2/CT3 compare targets to schedule timed events against it. This is incredibly useful:
 
 ```pasm2
 ' Method 1: Simple delay
@@ -968,7 +968,7 @@ The **MOV** family - your bread and butter:
         alts    dest, source    ' Modify NEXT inst's source field!
 ```
 
-Well, that escalated quickly! Don't worry about ALTD/ALTS yet - just know they exist and they're amazing.
+Well, that escalated quickly! Don't worry about **ALTD**/**ALTS** yet - just know they exist and they're amazing.
 
 ### Math Without Tears
 
@@ -1082,7 +1082,7 @@ The basic conditions:
 | `if_c_eq_z` | If C equals Z |
 | `if_c_ne_z` | If C not equal to Z |
 
-And the comparison conditions (use after CMP):
+And the comparison conditions (use after **CMP**):
 
 | Condition | Meaning |
 |-----------|---------|
@@ -1132,7 +1132,7 @@ Here's the catch: if the instruction itself branches, no return happens. The bra
         _ret_   djnz    count, #loop    ' Branch? No return. Zero? Return!
 ```
 
-That last one is interesting! If `count` isn't zero, DJNZ branches and no return. But when `count` hits zero, no branch occurs, so you get your return. Clever, right?
+That last one is interesting! If `count` isn't zero, **DJNZ** branches and no return. But when `count` hits zero, no branch occurs, so you get your return. Clever, right?
 
 **One-Instruction Subroutines**
 
@@ -1545,7 +1545,7 @@ if_c    jmp     #overflow      ' Handle overflow
 if_a    jmp     #x_greater     ' Jump if x > y (unsigned)
 ```
 
-Q isn't a flag at all—it's a 32-bit register you load with SETQ/SETQ2. It supplies an extra operand to block hub transfers (SETQ + RDLONG/WRLONG), CORDIC operations (Chapter 7), and the streamer. The only true condition flags are C and Z.
+Q isn't a flag at all—it's a 32-bit register you load with **SETQ**/**SETQ2**. It supplies an extra operand to block hub transfers (**SETQ** + **RDLONG**/**WRLONG**), CORDIC operations (Chapter 7), and the streamer. The only true condition flags are C and Z.
 
 ## Special Instructions That Will Blow Your Mind
 
@@ -1743,7 +1743,7 @@ This isn't accident - it's philosophy. The P2 was designed to make assembly prog
 - ✅ Basic data movement and math
 - ✅ Hardware multiply and divide (!)
 - ✅ Conditional execution on any instruction
-- ✅ Special instructions (SKIP, REP, ALT*)
+- ✅ Special instructions (**SKIP**, **REP**, the **ALT** family)
 - ✅ flag operations and testing
 - ✅ Why PASM2 is human-friendly
 
@@ -2209,7 +2209,7 @@ Think of CORDIC as your mathematical co-processor that can:
 - Find arctangent (angle between points)
 - Even do logarithms and exponentials!
 
-The pipeline itself is a fixed 55 clocks from command hand-off to result. Add the 0–7 clock wait for your cog's hub slot (plus the GETQX/GETQY read), and the end-to-end time varies only slightly around that.
+The pipeline itself is a fixed 55 clocks from command hand-off to result. Add the 0–7 clock wait for your cog's hub slot (plus the **GETQX**/**GETQY** read), and the end-to-end time varies only slightly around that.
 
 ## The CORDIC Pipeline - Your Mathematical Assembly Line
 
@@ -2525,7 +2525,7 @@ Before you pull your hair out debugging, know these:
 
 2. **55 clocks after hand-off** - Results are ready exactly 55 clocks after the solver *receives* your command—but your cog first waits 0 to 7 clocks (on an 8-cog P2) for its hub slot, so time it from hand-off, not from the instruction issue.
 
-3. **Don't forget SETQ** - For two-operand operations (QROTATE with X,Y), you must load Y into Q first.
+3. **Don't forget SETQ** - For two-operand operations (**QROTATE** with X,Y), you must load Y into Q first.
 
 4. **Results are scaled** - When rotating a vector of length $7FFF_FFFF, the X/Y results come back scaled so that $7FFF_FFFF represents 1.0 (full-scale signed).
 
@@ -2617,9 +2617,9 @@ Let's unpack what makes those three lines so short. Every P2 pin is bidirectiona
 
 Here's the mental model:
 
-- **Output instructions** (DRVH/DRVL/DRVNOT) automatically drive the pin (direction becomes output)
-- **Float instructions** (FLTL/FLTH) make the pin high-impedance (direction becomes input)
-- **Reading a pin** (TESTP) works regardless of its direction
+- **Output instructions** (**DRVH**/**DRVL**/**DRVNOT**) automatically drive the pin (direction becomes output)
+- **Float instructions** (**FLTL**/**FLTH**) make the pin high-impedance (direction becomes input)
+- **Reading a pin** (**TESTP**) works regardless of its direction
 - No setup required!
 
 ## Digital Output: Making Things Happen
@@ -2972,7 +2972,7 @@ Watch this data transfer magic:
         ' 2KB moved in microseconds!
 ```
 
-Four instructions. Two kilobytes. Faster than DMA on most processors. (A cog holds only 512 registers, so that's the ceiling for a single SETQ block through cog RAM—move more with the FIFO/streamer.) And we're just getting started...
+Four instructions. Two kilobytes. Faster than DMA on most processors. (A cog holds only 512 registers, so that's the ceiling for a single **SETQ** block through cog RAM—move more with the FIFO/streamer.) And we're just getting started...
 
 ## Block Transfers: The Power Move
 
@@ -2988,7 +2988,7 @@ The **SETQ** instruction is your gateway to block transfers:
         wrlong  buffer, hubaddr ' Writes 16 consecutive longs
 ```
 
-Here's the trick: SETQ tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0 (yes, we'll trip over that off-by-one at least once — everyone does).
+Here's the trick: **SETQ** tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0 (yes, we'll trip over that off-by-one at least once — everyone does).
 
 ## The FIFO: Your Streaming Pipeline
 
@@ -3200,7 +3200,7 @@ Before you pull your hair out wondering why your transfer is one long short, or 
 
 2. **FIFO is shared per cog** - Can't use FIFO for both code execution and data streaming simultaneously
 
-3. **Write synchronization** - WRFAST writes complete in the background. To force a flush, issue the next RDFAST/WRFAST with D[31]=0 (it waits for the prior WRFAST to finish) rather than relying on a fixed delay
+3. **Write synchronization** - **WRFAST** writes complete in the background. To force a flush, issue the next **RDFAST**/**WRFAST** with D[31]=0 (it waits for the prior **WRFAST** to finish) rather than relying on a fixed delay
 
 4. **Hub alignment** - Block transfers work best with long-aligned addresses
 
@@ -3254,7 +3254,7 @@ process_loop
 
 Your streaming skills now include:
 
-- ✅ Block transfers with SETQ
+- ✅ Block transfers with **SETQ**
 - ✅ FIFO reading and writing
 - ✅ Streaming pipeline concepts
 - ✅ Circular buffer techniques
@@ -4004,7 +4004,7 @@ Not all instructions are created equal:
 
 ## REP: The Speed Loop
 
-REP creates hardware-accelerated loops with zero overhead:
+**REP** creates hardware-accelerated loops with zero overhead:
 
 ```pasm2
 ' Traditional loop: overhead per iteration
@@ -4018,13 +4018,13 @@ REP creates hardware-accelerated loops with zero overhead:
         add     ptr, #4         ' 2 clocks = 4 total!
 ```
 
-That's about 50% faster: the traditional loop pays 2 + 2 + 4 clocks (the taken **DJNZ** costs 4), while the REP body is just 4 clocks.
+That's about 50% faster: the traditional loop pays 2 + 2 + 4 clocks (the taken **DJNZ** costs 4), while the **REP** body is just 4 clocks.
 
-**Hub-exec note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in cog or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
+**Hub-exec note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction **REP** loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep **REP** in cog or LUT memory. Hub-exec **REP** works correctly; it just isn't zero-overhead there.
 
 ## SKIP: Conditional Execution on Steroids
 
-SKIP and SKIPF let you conditionally execute patterns of instructions:
+**SKIP** and **SKIPF** let you conditionally execute patterns of instructions:
 
 ```pasm2
 ' Traditional: multiple jumps
@@ -4101,7 +4101,7 @@ CORDIC operations can overlap with other work:
         getqy   new_y           ' Get rotated Y
 ```
 
-Note: MUL/MULS are 2-clock ALU instructions that complete immediately (16x16->32). Use QMUL for 32x32->64 with CORDIC overlap.
+Note: **MUL**/**MULS** are 2-clock ALU instructions that complete immediately (16x16->32). Use **QMUL** for 32x32->64 with CORDIC overlap.
 
 ## Real-World Example: Fast Memory Copy
 
@@ -4157,7 +4157,7 @@ Optimization overwhelming you? Start with these simple improvements:
 data    long    $12345678
 ```
 
-3. **Use REP** for tight loops (note: `ptra++` works with the hub RD/WR instructions and with RDLUT/WRLUT—not with ordinary ALU ops—so we read first, then add)
+3. **Use REP** for tight loops (note: `ptra++` works with the hub RD/WR instructions and with **RDLUT**/**WRLUT**—not with ordinary ALU ops—so we read first, then add)
 
 ```pasm2
         rep     @.end, count
@@ -4245,7 +4245,7 @@ Sometimes removing the loop is faster. (Remember: `ptra++` works with the hub RD
 
 ## Common Optimization Gotchas
 
-Before you rewrite everything in REP and SKIP, a few sanity checks:
+Before you rewrite everything in **REP** and **SKIP**, a few sanity checks:
 
 1. **Premature optimization** - Get it working first, then optimize
 2. **Over-optimizing** - Sometimes clarity is worth 2 clocks
@@ -4282,7 +4282,7 @@ You're now an optimization expert:
 
 - ✅ Understanding the P2 pipeline
 - ✅ Instruction timing knowledge
-- ✅ REP and SKIP for zero-overhead loops
+- ✅ **REP** and **SKIP** for zero-overhead loops
 - ✅ FIFO for maximum throughput
 - ✅ Parallel operation techniques
 - ✅ Real-world optimization strategies
@@ -4379,7 +4379,7 @@ The destination operand is the LUT offset, not the absolute address — so you w
 
 ## LUT Sharing Between Cogs
 
-Here's something clever: adjacent cog pairs can share LUT data! When you enable LUT sharing with SETLUTS, writes your neighbor makes to their LUT are automatically *copied* to your LUT too.
+Here's something clever: adjacent cog pairs can share LUT data! When you enable LUT sharing with **SETLUTS**, writes your neighbor makes to their LUT are automatically *copied* to your LUT too.
 
 ```pasm2
 ' --- cog 1 (consumer) - MUST enable sharing FIRST ---
@@ -4399,10 +4399,10 @@ Here's something clever: adjacent cog pairs can share LUT data! When you enable 
 
 The key instruction is:
 
-- **SETLUTS**: Enable write copying - when neighbor writes with WRLUT, data is copied to YOUR LUT
+- **SETLUTS**: Enable write copying - when neighbor writes with **WRLUT**, data is copied to YOUR LUT
 - **RDLUT**: Read your own LUT (which now contains copied data)
 
-Important: The consumer cog must enable SETLUTS *before* the producer writes, otherwise the writes won't be copied!
+Important: The consumer cog must enable **SETLUTS** *before* the producer writes, otherwise the writes won't be copied!
 
 This gives you a 512-long shared buffer between cog pairs without touching hub memory. Perfect for high-bandwidth data passing!
 
@@ -4665,8 +4665,8 @@ Why is `wypin` shown last, *after* `dirh`? For the serial and trigger modes,
 **WYPIN** is how you *feed data* to a running pin -- each byte you transmit is a
 fresh `wypin` issued after the pin is enabled, so that's where it naturally
 lives. (The silicon documentation's configuration procedure actually writes
-WRPIN/WXPIN/WYPIN while DIR is low and *then* raises DIR; for pure value modes
-that order is fine too. Once the pin is live, feeding it with WYPIN is just the
+**WRPIN**/**WXPIN**/**WYPIN** while DIR is low and *then* raises DIR; for pure value modes
+that order is fine too. Once the pin is live, feeding it with **WYPIN** is just the
 normal operating pattern.)
 
 ::: sidetrack
@@ -4899,7 +4899,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 - **RDPIN** = Read data FROM smart pin (clears IN)
 - **TESTP** = Check if IN flag set
 
-**Golden Rule:** DIRL before WRPIN · WXPIN before DIRH · WYPIN (data) after DIRH · `P_OE` on *every* output mode
+**Golden Rule:** **DIRL** before **WRPIN** · **WXPIN** before **DIRH** · **WYPIN** (data) after **DIRH** · `P_OE` on *every* output mode
 
 **The silent failure:** every output mode (NCO, PWM, pulse, transition, serial TX, DAC, USB) needs `P_OE`. Without it the smart pin runs perfectly and drives nothing, and it still assembles clean. If a mode is supposed to make a pin *do* something and the pin is dead, suspect `P_OE` first. Receive and measuring modes (RX, ADC, quadrature, the counters) don't take it.
 :::
@@ -5343,7 +5343,7 @@ Rewrite a serial receive loop to use events instead of polling:
 
 1. Configure SE1 for UART RX smart pin ready
 
-2. Use WAITSE1 instead of TESTP loop
+2. Use **WAITSE1** instead of **TESTP** loop
 
 3. Measure the cycle count difference
 
@@ -5849,6 +5849,9 @@ This teaching manual focuses on concepts, patterns, and building your understand
 **Parallax Propeller 2 Documentation** *(v35, Rev B/C silicon, 2021-05-18)*
 : Official silicon documentation from Parallax covering hardware specifications, electrical characteristics, and detailed register maps.
 
+**The P2 Architect's Guide**
+: Where this manual taught you to write PASM2, that one teaches you how to decide what goes in which cog — how to derive a design from the physical facts of your project rather than guess at one. The natural next book if you have finished here and are staring at a blank page wondering how to carve up your own system.
+
 
 # Appendix A: Platform Comparison
 
@@ -5869,7 +5872,9 @@ The embedded world is dominated by a handful of architectures:
 | **RP2350** (Pico 2) | ARM Cortex-M33 or RISC-V | 2 | Fixed, plus **PIO** | Cores cached; PIO deterministic |
 | **P2 Propeller** | Custom | **8** | **Any pin** | **Deterministic** |
 
-The RP2350 deserves a closer look than the others, because its **PIO** blocks are the nearest thing to the P2's approach: small programmable state machines that drive pins on their own schedule, independent of the cores. If you have written PIO programs, you already understand why offloading pin timing to dedicated hardware changes what a small chip can do. The difference is what the helper *is*: a PIO state machine is a specialised resource with its own small, restricted instruction set, while a P2 cog is a full processor running the same language as the rest of your program. The table above shows how many of each you get.
+The RP2350 deserves a closer look than the others, because its **PIO** blocks are the nearest thing to the P2's approach: small programmable state machines that drive pins on their own schedule, independent of the cores. If you have written PIO programs, you already understand why offloading pin timing to dedicated hardware changes what a small chip can do. The difference is what the helper *is*: a PIO state machine is a specialised resource with its own small, restricted instruction set, while a P2 cog is a full processor running the same language as the rest of your program.
+
+There is a second difference, and Raspberry Pi's own datasheet is candid about it: past two UARTs, two SPIs and two I²Cs, the flexible path *is* PIO — twelve state machines in three blocks, where the four machines in a block share a single 32-slot instruction memory between them. That shared 32 slots is the wall PIO users actually run into, and it is not a wall the P2 has: the smart-pin hardware sits at all 64 pins independently, and each cog carries its own 2KB of program space.
 
 ## What Makes P2 Different
 
@@ -5993,13 +5998,13 @@ None of that is a reason not to use the P2. It is the price of admission, and yo
 
 ## What You Are Buying With That
 
-The argument for the P2 is not that it is faster or cheaper, because it is often neither. It is about the **risk of your project failing.**
+The argument for the P2 is not that it is faster or cheaper, because it is often neither. It is about what happens to a design as it grows.
 
-On a conventional microcontroller, a hard real-time requirement is a scheduling problem you must solve — interrupt priorities, RTOS tasks, disabled sections, and the long tail of "why did that deadline slip once an hour?" On the P2, a task that must not be late gets a processor of its own, and stops being a scheduling problem at all. That raises your odds of finishing: whatever else goes wrong, you can always fall back to dedicating a cog to the time-critical part, which is a far easier move than getting an interrupt scheme right.
+Put eight jobs on one processor and they are sharing it, so the eighth one changes the timing of the seven that were already there. Every handler you add reopens everybody else's timing budget, and the arrangement that worked last month has to be checked again. Give each job its own cog and that simply stops being true — adding the eighth cog does not disturb the first seven, because they were never sharing anything to disturb.
 
-That is a different kind of claim from a benchmark. It says the P2 makes a certain class of project *predictable to build*, and it is worth more than any timing number in this appendix.
+That is not a claim that the P2 is quicker; you have the timing tables above and they say what they say. It is a claim about what stays true when the design changes. On anything that runs longer than a weekend, that turns out to be the property you wanted.
 
-If your project is "connect to WiFi and display data," an ESP32 does that with less effort, and you should use one. Where the P2 earns its place is the project that is fighting timing jitter, missing deadlines, or running out of peripheral pins.
+If your project is "connect to WiFi and display data," an ESP32 does that with less effort, and you should use one. Where the P2 earns its place is the design with several jobs that each have to keep their own time, and a pin count that will not stop growing.
 
 ## Community Resources
 
@@ -6011,7 +6016,9 @@ While P2's ecosystem is smaller than ARM or Arduino, it's active and welcoming:
 
 **Community Support** - Unlike large platforms where your question disappears in a sea of posts, the P2 community is small enough that questions get noticed and answered. Many community members have decades of Propeller experience.
 
-Coming from Arduino's library-for-everything culture, you will write more code yourself. Budget for that. What you get back is that you understand every layer of what you shipped, and there are people here who will help when you get stuck.
+Coming from Arduino's library-for-everything culture, you will write more code yourself. Budget for that — it is real hours, and nothing below makes them go away.
+
+What it does change is the *kind* of hours. On a conventional part, a library is code you call from your own thread of control, so you inherit its blocking, its interrupt usage, its timing — and two libraries that each want the same timer, or each disable interrupts at the wrong moment, will fight. Debugging that means debugging somebody else's code inside your own timing budget, and it is some of the most miserable work in embedded. Here, the thing you reuse takes a cog and some pins and hands you a mailbox. It is not sharing your processor, so that particular fight does not start. And the driver you do write is usually smaller than the one you would have imported, because the smart pin is already handling the bit-level timing that would otherwise be most of the code.
 
 ## The P2 Hardware Ecosystem
 

@@ -48,6 +48,13 @@ have made the manual worse in each.*
    conventions (`- REP instruction: Ch3`), not narrative, and bolding every entry would
    destroy the scannability that is the whole point of an index.
 
+4. **Reference tables are exempt, as a whole table.** Ch.15's event table describes
+   `EVENT_PAT` as "SETPAT pattern detected" and `EVENT_QMT` as "GETQX/GETQY read with no
+   CORDIC result available" — plain, like every other row. Bolding the two rows that happen
+   to name an instruction would make the table *less* consistent, and bolding all of them
+   would clutter a lookup grid. A table is reference apparatus: leave it uniform, whichever
+   way it already is.
+
 **In scope, and expected to be bold:** body prose, explanations, asides, box contents, and
 the chapter-end "what you learned" checklists.
 
