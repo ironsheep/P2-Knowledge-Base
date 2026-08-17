@@ -1013,7 +1013,37 @@ no overfull-hbox stop is a render failure that only a human looking at the page 
 the whole reason the "verify the rendered PDF, not the log" rule exists, and an argument for making
 the platform's listing environment fail loudly instead.
 
-**Next finding ID after this block: F-282.**
+### F-282 — app-note release tags are two to three releases behind, so every diff-since-published audit reads the wrong baseline. `CONFIRMED`
+
+**Found:** 2026-08-17, enumerating what was pending for release alongside Debug Window and IOSP. The
+enumeration itself was the probe — a tag-versus-release comparison.
+
+| Note | Latest tag | Actually released (deliverables catalog) | Untagged releases |
+|---|---|---|---|
+| P2AN001 | `P2AN001-v1.0.1` | **1.0.3** | 2 |
+| P2AN002 | `P2AN002-v1.0.0` | **1.0.2** | 2 |
+| P2AN003 | `P2AN003-v1.0.0` | **1.0.2** | 2 |
+| P2AN004 | `P2AN004-v1.0.0` | **1.0.2** | 2 |
+
+**Manual tags are all current** — Debug Window v1.1.2, IOSP v1.0.8, deSilva v3.0.5, Streamer v1.0.8,
+XBYTE v1.0.1, Assembly v3.1.5 each match their released version. So this is specific to the app-note
+release path, which ships the PDF, the ZIP, the catalog row and the changelog but never lays the tag.
+
+**Why it bites.** `document-audit`'s changeset-integrity dimension takes its baseline from
+`last_published_tag`, and each `MANUAL-DESCRIPTOR.md` records one. With the tag two releases behind,
+that audit diffs against content that shipped months ago and reports **already-published work as
+unreviewed change** — noise that trains the reader to skip the signal. It fails the same way the
+status-vocabulary problem does: wrong in a direction that looks like diligence.
+
+**It also made this very enumeration lie.** The pending-work scan flagged P2AN003 and P2AN004 as
+having unreleased content. They do not; that is tag lag. P2AN003 was separately verified clean when it
+was excluded from the Sprint 2 wave.
+
+**Fix:** lay the missing tags at the commits that shipped each version (recoverable from the catalog
+row + changelog dates + the release commits), and add the tag step to the app-note release path so it
+cannot be skipped again. **Tagging history is Stephen's call** — this finding does not create tags.
+
+**Next finding ID after this block: F-283.**
 
 ---
 
