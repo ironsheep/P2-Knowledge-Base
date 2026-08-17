@@ -4164,8 +4164,8 @@ debug(`Pk `($7F | $40 << 8 | $C0 << 16 | $10 << 24))
 ```
 
 The packing keywords are `LONGS_1BIT`, `LONGS_2BIT`, `LONGS_4BIT`, `LONGS_8BIT`,
-`LONGS_16BIT`, and `WORDS_1BIT`/`2BIT`/`4BIT`/`8BIT` and
-`BYTES_1BIT`/`2BIT`/`4BIT`. Every mode delivers unsigned (zero-extended) values by
+`LONGS_16BIT`, and `WORDS_1BIT`, `WORDS_2BIT`, `WORDS_4BIT`, `WORDS_8BIT`,
+`BYTES_1BIT`, `BYTES_2BIT`, `BYTES_4BIT`. Every mode delivers unsigned (zero-extended) values by
 default; append the optional `SIGNED` keyword to sign-extend them. `LONGS_8BIT`
 carries four 8-bit samples per long, a 4× bandwidth gain over sending one sample
 per long.
@@ -5348,8 +5348,9 @@ window's position on the host screen in pixels. With more than one window open, 
 sits at the top-left corner and `Status` sits 420 pixels to its right — clear of a
 400-pixel-wide SCOPE.
 
-> Two host-wide offsets shift *all* displays together: the `DEBUG_DISPLAY_LEFT` and
-> `DEBUG_DISPLAY_TOP` symbols add to every window's `POS` coordinates. Set them in a
+> Two host-wide offsets shift *all* displays together: the symbols
+> `DEBUG_DISPLAY_LEFT` and `DEBUG_DISPLAY_TOP` add to every window's `POS`
+> coordinates. Set them in a
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 

@@ -37,8 +37,9 @@ window's position on the host screen in pixels. With more than one window open, 
 sits at the top-left corner and `Status` sits 420 pixels to its right — clear of a
 400-pixel-wide SCOPE.
 
-> Two host-wide offsets shift *all* displays together: the `DEBUG_DISPLAY_LEFT` and
-> `DEBUG_DISPLAY_TOP` symbols add to every window's `POS` coordinates. Set them in a
+> Two host-wide offsets shift *all* displays together: the symbols
+> `DEBUG_DISPLAY_LEFT` and `DEBUG_DISPLAY_TOP` add to every window's `POS`
+> coordinates. Set them in a
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 
