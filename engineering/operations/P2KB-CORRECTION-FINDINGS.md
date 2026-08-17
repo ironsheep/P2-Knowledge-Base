@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-289`**
+**Next finding ID: `F-290`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2545,7 +2545,72 @@ code read.
 shows the four TESTP forms each on one line in the production build; deSilva, P2AN001 and P2AN002 are
 unaffected (this filter is Assembly-local) and release without it.
 
-**Next finding ID after this block: F-289.**
+### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `CONFIRMED` — **tool fixed 2026-08-17; two released IOSP sites still to repair**
+
+**Found:** 2026-08-17, asking a plain status question about Debug Window and IOSP while waiting on the
+Assembly render. Debug Window's code-line audit reported **clean** at K=76; measuring the same files
+by hand found **29 code lines over 76 columns, the worst at 137 and 130** — both longer than any line
+F-281 named. A gate that silently passes is worse than no gate: nobody goes looking.
+
+**Mechanism.** `audit-code-line-length.py`'s `is_code_fence()` returned False for **any** fence info
+string starting with `{`:
+
+```python
+# ```{=latex} / ```{=html} / ```{.foo} attribute syntax -> not a plain code box
+if info.startswith('{'):
+    return False
+```
+
+Only `{=format}` is a raw passthrough. Pandoc **attribute** syntax —
+```` ```{.spin2 caption="ch07-scope-three-channel.spin2"} ```` — IS a code box, and it is the
+**captioned** form: exactly the form paired with an `examples-library/` file under the byte-identity
+rule. So the gate excluded the blocks that carry the shipped examples.
+
+**Fleet exposure: 56 captioned blocks were never gated** — Debug Window 34, IOSP 15, Getting Started
+4, deSilva 3.
+
+**This is how F-281 shipped.** Both Debug Window lines that lose a whole channel on the page
+(`ch07-scope.md:272`, 121 cols → the third SCOPE channel; `ch06-logic.md:310`, 113 cols → the third
+LOGIC channel and the closing paren) sit in captioned fences. The gate declared the manual clean
+while two of its pages were dropping code.
+
+**Fixed:** skip only `{=`. The `{=latex}` exemption still holds — verified: `ch03-term.md:73` (137
+cols) and `ch05-plot.md:784` (130 cols) are raw passthrough and are correctly still ignored.
+
+**The true picture, now that the gate measures what it claimed to:**
+
+| Manual | over K=76 | past the ~101-col render cliff |
+|---|---|---|
+| Debug Window (v1.1.2 released) | 24 | **3** — the F-281 trio |
+| IOSP (v1.0.8 released) | 11 | **2 — NEW, and shipped** |
+| deSilva · Assembly · Streamer · XBYTE · Architect · Getting Started | 0 | 0 |
+
+**TWO SHIPPED IOSP TRUNCATIONS, verified on the released PDF by rendering the pages and looking:**
+
+1. **p178** (`chapter-11-serial-transmit.md:433`, 103 cols) — `reversed := value REV 7` keeps its code,
+   but the trailing comment runs past the code box's right border and is cut at the page edge:
+   *"...for MSB-first (REV n covers bits 0.."* — the closing `n)` is gone.
+2. **p163** (`chapter-10-dac-output.md:462`, 102 cols) — `WXPIN(AUDIO_PIN, …)` keeps its code; the
+   comment is cut mid-word at *"a 256-clock multipl"*.
+
+**Severity: below the F-281 SCOPE/LOGIC cases.** In both IOSP sites the CODE is intact and only a
+comment tail is lost, so no reader can build a wrong program from them — but the line visibly
+breaches the box border, and a truncated explanatory comment is still a reader-facing defect in a
+published manual. Neither is a regression: both predate v1.0.8 (`git diff` against the tag shows the
+lines unchanged).
+
+**A first-match verification nearly missed this**, twice in one investigation: `reversed := value REV
+7` appears on **p175 and p178**, and p175 (a different method, comment moved above the code) renders
+perfectly. Checking only the first hit would have cleared a defect two pages later — the same trap
+as F-284's `Parity of (D & S)` resolving to p414 instead of the instruction pages.
+
+**Action:** both IOSP sites are repaired by the sanctioned comment fix (move it above the instruction,
+as `spi_tx_msb_first` on p175 already does — the manual's own neighbouring example shows the form).
+Rides IOSP **v1.0.9**, which is already owed a CHANGELOG entry. Debug Window's trio and its 21 other
+over-budget lines ride **v1.1.3**, and the `breaklines` platform fix may change what re-authoring is
+still needed there.
+
+**Next finding ID after this block: F-290.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 

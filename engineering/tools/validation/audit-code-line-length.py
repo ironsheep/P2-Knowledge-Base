@@ -126,10 +126,25 @@ def display_width(line, tabstop):
 
 
 def is_code_fence(info):
-    """True if a fence info string denotes a code box (not a raw passthrough)."""
+    """True if a fence info string denotes a code box (not a raw passthrough).
+
+    ONLY ```{=format} is a raw passthrough (```{=latex}, ```{=html}) — its content
+    is handed to the writer verbatim and never lands in a code box, so line width
+    is not this gate's business there.
+
+    Pandoc ATTRIBUTE syntax — ```{.spin2 caption="foo.spin2"} — IS a code box. It
+    is the captioned form, which is exactly the form paired with an examples-library
+    file under the byte-identity rule.
+
+    This function used to skip every info string starting with '{', which silently
+    excluded all 56 captioned blocks across the fleet (Debug Window 34, IOSP 15,
+    Getting Started 4, deSilva 3). That is how F-281 shipped: two Debug Window pages
+    lost a whole SCOPE/LOGIC channel to an over-wide line while this gate reported
+    the manual clean, because both offending lines sat in captioned fences. A gate
+    that silently passes is worse than no gate — nobody goes looking.
+    """
     info = info.strip()
-    # ```{=latex} / ```{=html} / ```{.foo} attribute syntax -> not a plain code box
-    if info.startswith('{'):
+    if info.startswith('{='):
         return False
     return True
 
