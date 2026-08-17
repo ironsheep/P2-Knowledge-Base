@@ -182,7 +182,18 @@ The screenshot-capture pipeline (`screenshot-capture/`, run on a P2 with `pnut-t
 compile + `pnut-term-ts -r` run; each example `SAVE`s its own window; `CLOSE` makes it
 hands-off) works end-to-end.
 
-### Capture queue — dw-examples sprint (2026-06-15)
+### Capture queue — dw-examples sprint (2026-06-15) — ✅ DONE (captured 2026-07-11)
+
+**CLOSED 2026-08-17.** Every figure below was captured on **2026-07-11** via `pnut-term-ts`
+(the capture host, per `figure-generators/README.md`) and converted into `assets/`. The
+queue text beneath is the original sprint list, kept for provenance; nothing in it is
+outstanding. Verified by file date, not by reading this list — it had sat here as
+"awaiting capture" for a month after the captures landed, and was quoted as current in a
+2026-08-17 status answer before the dates were checked.
+
+Note also that a figure does NOT have to match its example byte-for-byte: byte-identity is
+between the example FILE and the printed CODE BLOCK. A cosmetic change to an example
+(e.g. ch03's title moving to the header colour pair) does not oblige a re-capture.
 
 **All generators below are final and compile `pnut-ts -d` clean (verified 2026-06-15).
 Stephen captures in PNut (ground truth) → drops `*_WDW.bmp` in `figure-generators/screenshots/`

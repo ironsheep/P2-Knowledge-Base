@@ -924,7 +924,7 @@ at its next visit — this row is what makes sure the visit knows.
 **The correction is one substitution** — `pnut_ts` → `pnut-ts` — with no prose consequence. Check each
 site is the *command*; the project name in running text is properly **PNut-TS**.
 
-### F-281 — three code lines run off the page in the RELEASED Debug Window PDF, taking part of the program with them. `CONFIRMED` — **BLOCKS the v1.1.3 ship**
+### F-281 — three code lines run off the page in the RELEASED Debug Window PDF, taking part of the program with them. `CONFIRMED` — **ALL THREE FIXED 2026-08-17; no longer blocks v1.1.3**
 
 **Found:** 2026-08-17 running the wave's code-line gate before staging («#235»).
 **RELEASED (v1.1.2), and v1.1.3 would re-publish it unchanged.**
