@@ -88,6 +88,54 @@ backwards. Verified against the CHANGELOG **files**: seven elements carry a new
 a manual with no changelog entry and skipped one that had both. *A status line is not
 evidence* — second occurrence this sprint.
 
+### How the passes are run (Stephen, 2026-08-17) — three constraints
+
+> "generally find all there is to find, but be wary that our corrections are being
+> applied correctly, we still need to make sure that our voice gating is correct
+> for each manual"
+
+**1. Exhaustive, not sampled.** Find everything there is to find in the manual being
+touched. A partial pass that reports "conformant" is worse than no pass, because the
+next visit trusts it.
+
+**2. Verify the correction landed, don't assume it.** Applying a fix is not evidence the
+fix is right. Each correction is re-read in place, in its final context — the surrounding
+prose may no longer parse the way it did before the edit, and a repaired sentence can
+break the paragraph around it. This is the same discipline as verifying the rendered PDF
+rather than the compile log.
+
+**3. ⚠️ THE GATE ITSELF IS UNDER TEST — the pass is bidirectional.** Each manual's
+voice-guide declares ADOPT / ADAPT / REJECT per house rule. **Those declarations can be
+wrong**, and this is the first time most of them meet their manual's actual body.
+
+> **When a declared row fights the document, that is evidence about the ROW, not
+> permission to force the prose.** Stop, adjudicate, and if the row is wrong, fix the
+> guide — then apply the corrected row.
+
+This is not hypothetical: it is precisely how the earlier damage happened. IOSP's
+*"Never hedge"* row, applied mechanically, would strip exactly the qualifiers §2.2a
+requires — the row needed a carve-out, not the prose needing flattening. deSilva's guide
+already carries two corrections of this kind, both decided by measurement rather than
+taste (*"ADOPT the defect — REJECT the phrase list"*; Self-admiration adapted to protect
+reader celebration).
+
+**Record every adjudication back into that manual's `voice-guide.md`** — an undocumented
+rejection reads as an oversight and gets "fixed" by the next sweep. The guide's own words.
+
+### What the voice changes were (Stephen, 2026-08-17)
+
+The guide changes were **mostly narrative/prose**. Narrative-dominated manuals were worked
+**first** and already carry their treatment. What remains — this family — is the manuals we
+are here for **because they have errors**; the narrative changes ride along at the same
+visit **so that work is not lost**.
+
+**Scope the pass to prose, not to line count.** The guides govern narrative: explanatory
+prose, chapter framing, transitions, asides, closings. They do **not** govern reference
+apparatus — instruction tables, encodings, register layouts, code blocks, quick-reference
+matter. Assembly and Streamer are mostly reference, so their real prose surface is far
+smaller than file size implies. **deSilva is the outlier — almost entirely narrative, and
+therefore the big one.**
+
 ### Standing directive (Stephen, 2026-08-16)
 
 > "my goal to fix what's relevant, queue as little as possible"

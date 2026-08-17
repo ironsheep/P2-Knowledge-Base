@@ -715,6 +715,130 @@ probe and belongs with its record.
 
 ---
 
+## Stephen's review of the Sprint 2 gate release (2026-08-16, «#234») — F-276…F-279
+
+> **Full dispositions and reasoning:** `engineering/planning/SPRINT2-VISUAL-REVIEW-NOTES-2026-08-16.md`.
+> Eight observations (V-1…V-8) worked one at a time against the gate commit `fea28f1c`. Four became
+> findings; the rest were scope and structure decisions recorded in that file.
+>
+> **All four are tasked into the voice-conformance family «#240»–«#248» and are absorbed into the
+> per-manual pass rather than applied as point fixes** — applying them first and conformance-checking
+> after would write the same prose twice and have the second pass judge what the first just wrote.
+>
+> **Two of these were found by the review, not by the sprint's own sweeps**, and that is the useful
+> part: F-277's site sits in body text no Sprint 2 task touched. A findings-driven sweep sees the
+> diff; it does not see the document.
+
+### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `CONFIRMED`
+
+**Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` — §*"What You Are
+Buying With That"* (`:5993-6001`), with the same shape at `:225`, `:6001`, `:6049`.
+**NOT RELEASED** — written during Sprint 2, committed at `fea28f1c`, ships in v3.0.6.
+
+The section argues that conventional MCUs turn hard real-time into a scheduling problem with "a long
+tail of *why did that deadline slip once an hour?*", and that the P2 therefore "raises your odds of
+finishing." Three defects:
+
+1. **It argues against a strawman.** A correctly prioritised Cortex-M meets its deadlines; rate-monotonic
+   analysis is fifty years old. An RP2350 PIO state machine meets them absolutely. The reader best
+   qualified to judge the appendix concludes we are comparing the P2 against *badly built* alternatives.
+2. **It is unfalsifiable and unsourced.** "Raises your odds of finishing" is a project-outcome claim with
+   no evidence — a marketing claim in an engineering voice, in a document whose credibility is its
+   checkability.
+3. **It contradicts a passage two pages earlier.** The RP2350/PIO paragraph added in the same sprint
+   (`:5868`) already tells the reader that cheap deterministic offload hardware exists.
+
+It is also a declared **R1** violation under the manual's own `voice-guide.md` (ADOPT, scoped to
+technical P2 claims), written the day before the prose was.
+
+**Proposed correction:** replace with the **composability** claim — adding a task to a shared core
+perturbs the timing of the tasks already there; giving a task its own cog does not. Take the concept
+from the Architect's Guide Ch.7 but **not its vocabulary** (no "forces", no "cadence boundary"): use
+cogs, pins and locks, which the reader has earned over sixteen chapters. The section must stand fully
+alone for a reader who never opens that book. Sweep the same shape at `:225`, `:6001`, `:6049`;
+`:4275` uses "deadline" legitimately (delta-vs-absolute comparison under counter wraparound) — leave it.
+
+### F-277 — deSilva tells the reader that peripheral conflicts are impossible on the P2. They are not, and our own published manual documents why. `CONFIRMED`
+
+**Location:** `…/COMPLETE-OPUS-MASTER.md:6045` — *"**64 smart pins** means peripheral conflicts become
+impossible"* — and `:5940` — *"I/O flexibility that eliminates peripheral conflicts."*
+**RELEASED (v3.0.5)** — both sites are pre-existing body text; neither was touched by any Sprint 2 task.
+
+Smart pins eliminate the **pinmux** conflict: any pin can be any function, so a design never runs out of
+"the SPI pins." They do **not** eliminate **resource** conflict. *The P2 Architect's Guide* (v1.0.3,
+Ch.7 Force 1) states the opposite from the silicon: P2 pin outputs are OR'd with no hardware arbiter, so
+two cogs driving one bus corrupt it — and the symptom "presents as flaky hardware — intermittent,
+timing-dependent, and miserable to debug, because the symptom is three layers away from the cause."
+
+This is the most expensive kind of wrong claim: it tells a beginner that a real, nasty bug class cannot
+happen, in the manual most likely to be their first contact with the chip. It is also a declared **R1**
+violation, whose stated reason is precisely this case — *"a tutorial's worked examples are exactly where
+an overstated claim reaches a beginner who cannot yet check it."*
+
+**Proposed correction:** state what smart pins actually remove (the pinmux conflict, and running out of
+peripheral blocks) and keep single-ownership of a shared bus as a live concern. **Class-wide check
+owed:** the same "conflicts impossible / eliminates conflicts" phrasing may appear in other manuals.
+
+**Related, same pass, same manual — not separately numbered:** `:6042` "eliminates entire categories of
+problems"; `:3897` "No surprises, ever / Timing is guaranteed", self-contradicted by the *correct* hedge
+at `:5911` (5911 is right); `:3729` "impossible to achieve this precision with interrupts" (F-276's
+strawman); `:5804`'s impossibility aside. ⚠️ **The reader-celebration at `:5804` STAYS** — deSilva's
+voice guide explicitly protects celebration of reader progress as pedagogy, and an early draft of this
+finding wrongly proposed cutting it.
+
+### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `CONFIRMED`
+
+**Locations (7 sites):** Streamer `streamer-body.md:1016` **(NOT RELEASED, v1.0.9)** · Debug Window
+`ch12-bidirectional.md:66`, `:186` **(NOT RELEASED, v1.1.3)** · IOSP
+`part-5-appendices/appendix-e-troubleshooting.md:98`, `:202`, `:278` and
+`part-3-input-modes/chapter-17-serial-receive.md:172` **(RELEASED, v1.0.8)**.
+
+The platform provides `AntipatternBlock` (`p2kb-platform-content.sty:277` — red fill, red border, 4 pt
+left rule), reachable as a ```` ```antipattern ```` fence or `::: antipattern` div via
+`p2kb-platform-code-coloring.lua`. deSilva (6 sites) and Assembly (`appendix-h-reserved-words.md:569`)
+use it correctly. The seven sites above do not — wrong code sits in ```` ```spin2 ````, marked only by a
+`' WRONG` comment, so it carries identical highlighting and identical visual authority to correct code.
+
+**Streamer's is the worst**, because the correct and the wrong form share **one block**. A reader
+skimming code blocks — how people actually use a reference guide — can lift the wrong line without
+reading the comment. It is the EF-053 `P_OE` material, where the failure is silent and total: measured
+on silicon at 6,737 ADC counts for `|` against 1,407 for `+`, indistinguishable from no drive.
+
+**Proposed correction:** split Streamer's into two **adjacent** blocks — correct stays ```` ```spin2 ````,
+wrong becomes ```` ```antipattern ````. Green beside red is a stronger contrast than two comments in one
+block, so the pedagogy improves rather than suffers. Convert the Debug Window and IOSP sites in place.
+
+**Zero platform cost — verified:** `p2kb-streamer-reference.latex:21`, `p2kb-debugwin.latex:23` and
+`p2kb-iosp-reference.latex:22` all already load `p2kb-platform-content.sty`. Markdown-only in all three.
+
+**IOSP is not in the release wave.** Its sites are fixed in opus-master and ship at its next release —
+editing a master is not releasing a document.
+
+### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `CONFIRMED`
+
+**Location:** `manuals/p2-xbyte-programming-guide/opus-master/xbyte-body.md:1427`.
+**NOT RELEASED** — written during Sprint 2 («#227»), ships in v1.0.2.
+
+The `_RET_ CALL` hazard block cites *"the condition table in the **P2 Assembly Language Reference
+Manual**"* for `_RET_`'s branch-conditional semantics. That title is **not fabricated** — it is the cover
+title of our own manual (`p2-assembly-language-manual/opus-master/front-matter.md:20`). The defect is
+**circularity**: a peer derivation cannot ground a hardware claim, and unlike `P2AN002.md:378` — which
+cites the same manual while labelling it *"a companion P2 Knowledge Base publication"* — this site
+discloses nothing, so it reads to a reader as an external authority.
+
+**Proposed correction:** repoint to the Parallax primary sources F-273 was actually grounded on —
+*Propeller 2 Assembly Language (PASM2) Manual* draft (2022-11-01, p.68) and *P2 Instructions v35*
+(row 410). **Verify the citation against the live source, not against this register** — a ledger is not
+citation authority, and this guide has shipped fabricated names before (Appendix C).
+
+**No set-wide normalisation owed.** The other four sites naming this document were checked and are
+sound: deSilva `:5845` uses the Parallax name correctly, and the remainder are our own cover title and a
+CHANGELOG font note.
+
+**Next finding ID after this block: F-280.**
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
