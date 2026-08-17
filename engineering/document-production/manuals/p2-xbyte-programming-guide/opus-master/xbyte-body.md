@@ -245,15 +245,15 @@ Because a cancelled instruction still spends its clocks, SKIP's cost is the cost
                 add     x, #8               ' runs
 ```
 
-The trade for that speed is the restriction: SKIPF works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing). Its pattern is the full **32 bits** of the operand `D`, applied LSB-first — so a standalone SKIPF governs the next 32 instructions. (Inside XBYTE the pattern comes from **EXECF**, which spends its low 10 bits on a jump address and so carries only a **22-bit** pattern — §4.3. That 22 is the width XBYTE stores in each dispatch-table entry: not because SKIPF is 22-bit, but because EXECF reserves ten bits for *where to jump*.)
+The trade for that speed is the restriction: **SKIPF** works in **cog and LUT RAM only** (the PC-leap needs the cog/LUT addressing). Its pattern is the full **32 bits** of the operand `D`, applied LSB-first — so a standalone SKIPF governs the next 32 instructions. (Inside XBYTE the pattern comes from **EXECF**, which spends its low 10 bits on a jump address and so carries only a **22-bit** pattern — §4.3. That 22 is the width XBYTE stores in each dispatch-table entry: not because SKIPF is 22-bit, but because EXECF reserves ten bits for *where to jump*.)
 
 ::: hardware
-"Free" has one small print. SKIPF steps the PC forward 1 to 8 instructions at a time, so **at most 7 in a row are leapt at once**; every **8th** consecutive skipped instruction is stepped through as a **2-clock NOP**. A handler that skips fewer than eight in an unbroken run — the usual case — really does skip for free; only a long unbroken run pays the occasional 2-clock tick.
+"Free" has one small print. **SKIPF** steps the PC forward 1 to 8 instructions at a time, so **at most 7 in a row are leapt at once**; every **8th** consecutive skipped instruction is stepped through as a **2-clock NOP**. A handler that skips fewer than eight in an unbroken run — the usual case — really does skip for free; only a long unbroken run pays the occasional 2-clock tick.
 :::
 
 ## 4.3 EXECF — jump, then skip {#sec-4-3}
 
-**EXECF** is SKIPF with a jump bolted on. Its single operand D carries both:
+**EXECF** is **SKIPF** with a jump bolted on. Its single operand D carries both:
 
 - **D[9:0]** — a 10-bit cog/LUT address to **jump to**
 - **D[31:10]** — a 22-bit **SKIPF pattern** to apply once there
@@ -1422,9 +1422,9 @@ set_nz          cmp     val, #0     wz      ' Z: result is zero
 The helper's own instructions are safe from the caller's skip pattern, because the P2 suspends skipping for the duration of a `CALL` and resumes it on return (§11.1). That is what makes a shared helper possible at all inside a skip-built handler.
 
 ::: hardware
-**Do not fold the return into the call.** `_RET_ CALL #set_nz` looks like it should call the helper and return from the handler in one instruction, and it **assembles without complaint** — but it never returns.
+**Do not fold the return into the call.** The fold is everywhere in this chapter — `set_nz` above ends `_ret_ muxc`, the `JMP abs` handler below ends `_ret_ rdfast` — and this is where it stops. `_RET_ CALL #set_nz` **assembles without complaint**, and never returns.
 
-The condition table in the *P2 Assembly Language Reference Manual* defines `_RET_` as *execute the instruction, then return **if no branch***. `CALL` branches. The return is therefore suppressed, and the line is silently a plain `CALL`: the helper returns to the instruction *after* the call, and execution runs on out of the handler into whatever the assembler happened to place next.
+Parallax's instruction table (*P2 Instructions v35 – Rev B/C Silicon*, row 410) defines `_RET_` as *"execute `<inst>` always and return **if no branch**."* `CALL` branches. The return is therefore suppressed, and the line is silently a plain `CALL`: the helper returns to the instruction *after* the call, and execution runs on out of the handler into whatever the assembler happened to place next.
 
 Nothing faults and no flag is set. On real P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
 
