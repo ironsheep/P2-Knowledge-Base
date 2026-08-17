@@ -1,5 +1,27 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.6 (2026-08-16)
+
+**An honest platform comparison, and the multi-cog hazard that costs a debugging session.**
+
+### Added
+
+- **"Two cogs touching the same pin"** (Chapter 16): DIR and OUT are OR'd across cogs, so two drivers produce a result resembling neither, unreported
+- **`RQPIN`** named as the safe multi-cog pin read
+- **The RP2350 (Pico 2)** joins Appendix A's platform table, with PIO compared: a state machine is a restricted resource, a cog a full processor
+- **The software axis** (Appendix A): two languages to learn, a library situation not comparable to an ESP32's, a smaller ecosystem, a higher cost of entry
+- **The P2 Architect's Guide** in Further Reading: this manual teaches how to write PASM2, that one what belongs in which cog
+
+### Changed
+
+- **Appendix A argues from growth**: the eighth job on one processor changes the timing of the seven already there; per-cog, it does not
+- **The library discussion** states the cost plainly — you write more code yourself, and what changes is the *kind* of hours
+- **Smart pins** end the scramble for a pin that supports your function; the pinmux conflict goes, the resource conflict stays, and Chapter 16 teaches it
+- **The interrupt comparison** (Chapter 11): a dedicated timer and a careful scheme reach the same precision; the argument is what that scheme costs
+- **Timing claims are the ones silicon supports**: a cog's timing does not shift because another cog got busy, and today's measurement holds next week
+- **The parallel-processing pitch** (Preface) names what goes away — deciding which task gets the processor — and points at Appendix A for the cost
+- **Acknowledgments** credit deSilva, Chip Gracey and the P2 community; the production note describes AI-assisted authorship in deSilva's style, every example compiled
+
 ## v3.0.5 (2026-08-11)
 
 **Worked examples that run as written** — the smart-pin and serial examples assemble and behave as their text describes, and Chapter 1 tells you which pin your board's LED is on.

@@ -25,7 +25,7 @@ A licensing change. No technical content changed.
 
 A technical-precision pass on the ADC recipes. No recipes added.
 
-- **Pin power domains**: I/O power-domain grouping and its effect on a multi-pin shared-node measurement, which stays within a single group. (The group size stated in this release was wrong; it is corrected in v1.0.4.)
+- **Pin power domains**: I/O power-domain grouping and its effect on a multi-pin shared-node measurement, which stays within a single group.
 - **SINC2 filtering period**: the SINC2 *filtering* mode the recipes use accepts any sample period, not only powers of two; a `WYPIN` after `WXPIN` sets any period up to about 11,585 clocks, trading sample rate for per-sample resolution.
 - **Below-ground self-check**: the reading is build-dependent, so the CORDIC recipe carries the sign and reads negative below ground, while the unsigned `muldiv64` recipes peg off-scale high.
 

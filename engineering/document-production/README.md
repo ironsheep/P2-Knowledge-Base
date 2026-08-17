@@ -26,13 +26,13 @@ prose), with all per-publication detail in the roster.*
 | Getting Started | manual | 1.0.3 | 25 | ✅ |
 | I/O & Smart Pins | manual | 1.0.8 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.5 | 503 | ✅ |
-| DeSilva Tutorial | manual | 3.0.5 | 164 | ✅ |
+| DeSilva Tutorial | manual | 3.0.6 | 166 | ✅ |
 | Debug Window | manual | 1.1.2 | 168 | ✅ |
 | Streamer Guide | manual | 1.0.8 | 73 | ✅ |
 | Architect's Guide | manual | 1.0.3 | 52 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.0.1 | 100 | ✅ |
-| P2AN001 — ADC Instrumentation | app-note | 1.0.3 | 20 | ✅ |
-| P2AN002 — CORDIC for Real Work | app-note | 1.0.2 | 14 | ✅ |
+| P2AN001 — ADC Instrumentation | app-note | 1.0.4 | 20 | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.3 | 15 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.2 | 19 | ✅ |
 | P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.2 | 15 | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.2 | 12 | ✅ |

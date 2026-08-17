@@ -1,5 +1,16 @@
 # P2AN002 Changelog: CORDIC for Real Work
 
+## v1.0.3 (2026-08-16)
+
+**The pipelining recipe keeps hub access out of both CORDIC loops** — the shape that was measured clean on silicon.
+
+### Changed
+
+- **Recipe 6 (pipelining)** and its example-library program are rewritten together: register-only fill and drain, hub reads and writes batched outside the loops
+- **A pitfall carries the measured rule**: hub access inside either CORDIC loop loses results, and the failure is silent — wrong numbers, not missing ones
+- **OBEX #2812 is named by its catalog title**, *Binary Floating Point Routines (IEEE-32 subset)*, and credited to ersmith in both Resources and the Acknowledgments
+- **Every OBEX number, title and author** in the note is checked against the live catalog
+
 ## v1.0.2 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -23,4 +34,4 @@ recipes the reader selects among, distance and heading, point rotation, circle l
 waves, 64-bit-safe fixed-point scaling, and pipelining to retire one result every eight clocks,
 plus a field-oriented motor-control reference ceiling. Every recipe verifies against a closed-form
 answer you can derive by hand, with no bench instruments. All worked programs compile clean
-under `pnut_ts`. Ships with a downloadable example library of every recipe.
+under `pnut-ts`. Ships with a downloadable example library of every recipe.

@@ -1,5 +1,19 @@
 # P2AN001 Changelog: Single-Pin Instrumentation ADC
 
+## v1.0.4 (2026-08-16)
+
+**The pin power domain a measurement actually references.** No recipes added.
+
+### Changed
+
+- **I/O power domains are isolated groups of four** — P0–3, P4–7, … P60–63 — each sharing the one VIO/GIO pair its ADC references
+- **A shared-node multi-pin measurement stays inside one group**; Recipe 2's pins 32–35 are exactly one
+- **Why the boards suggest eight** (Pitfalls): one Edge 3.3 V regulator feeds *two* four-pin domains, which reach the die through separate VIO pins
+- **The eight-pin figure is for current budgeting** on an Edge — 300 mA per header group — not for choosing which pins share a reference
+- **The error floor names its source**: the ~15 mV pin-to-pin figure is the P2 designer's, marked as a designer-stated figure rather than a characterized specification
+- **The §16.8 pointer** goes to what that section carries: the front-end limits and the calibration guidance
+- **The three programs in `P2AN001-src.zip`** are byte-identical to the code blocks printed in the note, and compile clean under `pnut-ts -d`
+
 ## v1.0.3 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -11,7 +25,7 @@ A licensing change. No technical content changed.
 
 A technical-precision pass on the ADC recipes. No recipes added.
 
-- **Pin power domains**: the P2 powers its I/O in eight groups of eight (P0–7, P8–15, … P56–63), each group sharing one VIO/GIO pair; a multi-pin shared-node measurement stays within a single group.
+- **Pin power domains**: I/O power-domain grouping and its effect on a multi-pin shared-node measurement, which stays within a single group.
 - **SINC2 filtering period**: the SINC2 *filtering* mode the recipes use accepts any sample period, not only powers of two; a `WYPIN` after `WXPIN` sets any period up to about 11,585 clocks, trading sample rate for per-sample resolution.
 - **Below-ground self-check**: the reading is build-dependent, so the CORDIC recipe carries the sign and reads negative below ground, while the unsigned `muldiv64` recipes peg off-scale high.
 
@@ -27,6 +41,6 @@ ADC, no external converter. A shared ratiometric base build (measure the chip's 
 references alongside the pin and take a ratio, so supply and temperature drift divide out) plus
 four recipes the reader selects among, three pins for lower noise, a filter cascade for every
 rate at once, a series resistor for voltages above 3.3 V, and mains-cycle averaging, and an
-eight-channel reference ceiling. Every worked program compiles clean under `pnut_ts`;
+eight-channel reference ceiling. Every worked program compiles clean under `pnut-ts`;
 resolution figures are qualitative pending hardware characterization. Ships with a downloadable
 example library of every worked program.
