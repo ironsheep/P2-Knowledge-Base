@@ -105,6 +105,8 @@ gotchas:
     text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED — a negative operand becomes a huge positive one. For signed data, take magnitude + sign separately. QVECTOR/QROTATE ARE signed (built for coordinates)."
   - flag: pitfall
     text: "Read each result before the next overwrites it. When pipelining, keep issued-minus-retired within what the pipeline holds, and never let an interrupt stall a pipelined sequence (wrap in REP)."
+  - flag: pitfall
+    text: "Keep hub access OUT of both CORDIC loops — this is correctness, not optimization. Measured on real P2 silicon at 200 MHz: a RDLONG inside the fill loop starts losing results at a fill depth of 2; a register-only fill with a WRLONG in the drain starts losing them at 3; register-only in both loops, with hub traffic batched into one block read before the fill and one block write after the drain, stayed correct through a depth of 7. The failure is SILENT — a full array of plausible-looking numbers with some fraction stale, no fault and no flag. The cause is throughput, not any limit on results in flight: deep pipelining genuinely works, but a fill or drain loop that cannot keep up with the solver's cadence loses results from that phase onward. Index a cog-RAM buffer with ALTS/ALTD in between."
   - flag: tip
     text: "The angle is the whole 32-bit range, so there is no wrap to manage — add/subtract angles freely; overflow IS the wrap you want."
   - flag: hardware
@@ -123,8 +125,9 @@ provenance:
     - "Propeller 2 Datasheet (Parallax Inc.) — CORDIC functions and throughput"
     - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — built-in CORDIC methods"
   community_examples:
-    - "OBEX #2811 Park Transformation (ManAtWork) — the FOC capstone reference"
-    - "OBEX #2812 Binary Floating-Point (Total Spectrum Software)"
-    - "OBEX #5278 compass drivers (polynomial atan2 contrast); OBEX #5361 FFT/IFFT (SaucySoliton)"
+    - "OBEX #2811 Park transformation (ManAtWork) — the FOC capstone reference"
+    - "OBEX #2812 Binary Floating Point Routines (IEEE-32 subset) (ersmith) — CORDIC-based software floating point; fixed-point format discipline"
+    - "OBEX #5278 QMC5883L HMC5883 BMM150 compass drivers (m.k. borri) — polynomial atan2 chosen over the CORDIC for a one-shot use"
+    - "OBEX #5361 FFT IFFT (James Smith) — real-input FFT, windowing, radix-4 digit reversal on the CORDIC butterfly"
   companion_publication:
     - "P2 Assembly Language Reference Manual; P2 Streamer Programming Guide (companion P2 Knowledge Base publications)"

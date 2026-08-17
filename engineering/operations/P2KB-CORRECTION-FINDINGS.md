@@ -1092,8 +1092,40 @@ the companion did not:
 `gotchas:` and `provenance.community_examples:`.
 
 **Action:** carry both into the companion, sourced from the note's v1.0.3 CHANGELOG entry and the
-live OBEX catalog respectively. **Not applied here** — companion edits are YAML-head work and go
-through `yaml-knowledge-base-maintenance` with a plan first.
+live OBEX catalog respectively.
+
+**FIXED 2026-08-17.** Both carried into
+`deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml`:
+
+1. The measured hub-access pitfall is now its own `gotchas` entry, with the silicon-measured failure
+   depths (RDLONG in the fill loop loses results at depth 2; a WRLONG in the drain at 3; register-only
+   in both loops correct through 7, at 200 MHz), the **silent** failure mode, and the actual cause
+   (throughput, not a limit on results in flight). Sourced from `P2AN002.md:322`.
+2. The OBEX attributions now match the live catalog.
+
+**Two MORE disagreements surfaced while fixing it — the finding under-counted.** F-283 named two;
+sweeping the whole `community_examples` block against the live catalog found four entries wrong or
+incomplete, because the finding was written from the two the note happened to call out rather than
+from the block:
+
+| Entry | Companion said | Live catalog |
+|---|---|---|
+| #2811 | Park Transformation (ManAtWork) | ✅ correct |
+| #2812 | Binary Floating-Point (**Total Spectrum Software**) | Binary Floating Point Routines (IEEE-32 subset), **ersmith** |
+| #5278 | "compass drivers", **no author** | QMC5883L HMC5883 BMM150 compass drivers, **m.k. borri** |
+| #5361 | FFT/IFFT (**SaucySoliton**) | FFT IFFT, **James Smith** |
+
+All four verified against the live OBEX catalog via `p2kb_obex_get`, not from this register and not
+from the note — per the standing rule that reader-facing names are verified against the LIVE source.
+The note's own Resources list was already correct on all four; only the companion had drifted.
+
+**Lesson — the same shape as [[F-223]]: a finding derived from the sites a document mentions is not
+a finding about the block.** Audit the FULL structure, then re-derive what is wrong. Two of these
+four would have shipped again had the fix been scoped to the finding as written.
+
+**No document impact** — the note's text was already right, so P2AN002's PDF is unaffected and needs
+no re-render. Validators green after the edit: `verify-yaml-format.py` 1129/1129 parsed clean,
+`validate-crossref-keys.py` all resolved.
 
 **Note on scope:** only P2AN002's companion was checked, because only P2AN002 was in front of me.
 The same drift is plausible in every app note whose doc has advanced since its companion was
