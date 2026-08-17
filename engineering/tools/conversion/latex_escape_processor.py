@@ -193,11 +193,9 @@ def process_latex_escaping(input_file, output_file):
             # Escape the content part but keep header structure
             escaped_content = header_content
             escaped_content = escaped_content.replace('\\', '\\textbackslash{}')
-            escaped_content = escaped_content.replace('^', '\\^{}')
-            escaped_content = escaped_content.replace('\\^{}', 'XPROTECT_CARET_X')
+            # Don't escape carets - Pandoc handles them fine in markdown (F-293)
             escaped_content = escaped_content.replace('{', '\\{')
             escaped_content = escaped_content.replace('}', '\\}')
-            escaped_content = escaped_content.replace('XPROTECT_CARET_X', '\\^{}')
             escaped_content = escaped_content.replace('#', '\\#')
             escaped_content = escaped_content.replace('$', '\\$')
             escaped_content = escaped_content.replace('%', '\\%')
@@ -309,7 +307,7 @@ def process_latex_escaping(input_file, output_file):
                 escaped_content = escaped_content.replace('%', '\\%')
                 escaped_content = escaped_content.replace('&', '\\&')
                 escaped_content = escaped_content.replace('_', '\\_')
-                escaped_content = escaped_content.replace('^', '\\^{}')
+                # Don't escape carets - Pandoc handles them fine in markdown (F-293)
                 # Don't escape tildes - Pandoc handles them fine
                 # escaped_content = escaped_content.replace('~', '\\textasciitilde{}')
                 
@@ -411,17 +409,20 @@ def process_latex_escaping(input_file, output_file):
         # Use a placeholder that won't have its braces escaped
         line = line.replace('\\', 'XTEXTBACKSLASHX')
 
-        # 2. Escape ^ before { } to create \^{} correctly
-        line = line.replace('^', 'XCARETX')
+        # 2. Don't escape carets - Pandoc handles them fine in markdown.
+        # A bare ^ is literal text to Pandoc, which emits \^{} for it on its own.
+        # Pre-escaping it here to \^{} made Pandoc escape our braces in turn,
+        # emitting \^{}\{\} and PRINTING a literal ^{} on the page (F-293:
+        # 8 sites across 3 shipped manuals). Same reasoning as tildes below.
+        # line = line.replace('^', 'XCARETX')
 
         # 3. Escape braces
         line = line.replace('{', '\\{')
         line = line.replace('}', '\\}')
 
-        # 4. Restore backslash and caret with proper LaTeX escapes
+        # 4. Restore backslash with proper LaTeX escape
         # \textbackslash{} needs {} for proper spacing in LaTeX
         line = line.replace('XTEXTBACKSLASHX', '\\textbackslash{}')
-        line = line.replace('XCARETX', '\\^{}')
 
         # 4. Escape other special characters
         line = line.replace('#', '\\#')

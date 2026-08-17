@@ -100,6 +100,16 @@ CHECKS = [
      re.compile(r"\\textbackslash\{\}\\[&%#_$]|\\\\[&%#_](?![a-zA-Z])"),
      False),
 
+    # F-293: the escaper pre-escaped a bare '^' to \^{} in the MARKDOWN, so Pandoc
+    # escaped the braces it found next and emitted \^{}\{\} -- which prints "^{}"
+    # on the page. Eight sites across three manuals. The escaper no longer touches
+    # carets; this is the backstop. A correct literal caret is a bare \^{}, so only
+    # the brace pair that follows one is the defect.
+    ("caret-brace-leak",
+     "'\\^{}' followed by escaped braces (prints a literal '^{}')",
+     re.compile(r"\\\^\{\}\\\{\\\}"),
+     False),
+
     # A raw-latex passthrough block that leaked its own marker.
     ("latex-passthrough-leak",
      "'{=latex}' passthrough marker leaked into output",

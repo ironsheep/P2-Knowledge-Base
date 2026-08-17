@@ -471,7 +471,7 @@ channel, trigger, and capture code shows the live signal.
 Start from the three-channel example. First switch the `Sine` channel from its fixed
 `-1000 1000` range to `AUTO` and watch the trace rescale on its own as you change the
 amplitude argument to `qsin`. Then add a trigger on the sine channel
-(`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
+(``debug(`Waves TRIGGER 0 -500 500 256)``) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
 `SAMPLES-1` to move the trigger point from the right edge to the center to the left
 edge, and see the post-trigger region grow.

@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-293`**
+**Next finding ID: `F-295`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2818,7 +2818,100 @@ from a `...` line-continuation artifact." It did. The creation-line-versus-separ
 chasing the wrong variable; the `...` was dropping the channels, so the REF source was right all
 along and the TO-RECONCILE item closes on evidence rather than another capture.
 
-**Next finding ID after this block: F-293.**
+**Next finding ID after this block: F-295.**
+
+### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
+
+**Found:** 2026-08-17, in the same Debug Window v1.1.3 audit as F-293 — by opening p84 because the
+compile log's largest overfull (57.66pt) pointed there.
+
+**What p84 prints.** The whole "Try it" paragraph of Chapter 7 is wrecked: a sentence-initial stray
+`.`, a font that flips to monospace mid-sentence and stays there for two lines of ordinary prose
+(*"and observe the waveform stand still instead of scrolling. Finally, vary the trigger"*), then
+words fused without spaces — `triggeroffsetbetween0,SAMPLES/2,` and `ANDSAMPLES-1'` — and a stray
+closing quote. It is the most visibly broken paragraph in the manual.
+
+**Mechanism.** `ch07-scope.md:474` wrote a **single**-backtick span whose body contains a backtick:
+
+    (`debug(`Waves TRIGGER 0 -500 500 256)`)
+
+Pandoc closes a single-backtick span at the *first* backtick it meets, so the span is `debug(`; the
+next backtick **opens** a new one that runs until the backtick before `offset`, swallowing two lines
+of prose. Every span in the rest of the paragraph is then inverted — code reads as prose, prose reads
+as code — which is exactly what the page shows.
+
+**Fixed** by the double-backtick form this manual already uses precisely for backtick-bearing content
+(the same form F-291 protected in the escaper): ``` (``debug(`Waves TRIGGER 0 -500 500 256)``) ```.
+Verified balanced.
+
+**Swept fleet-wide.** All 155 master files, paragraph-wise (a code span may legally wrap across
+lines, so a line-wise check false-positives on four innocent sites). **This is the only real
+occurrence.** Two other flagged paragraphs are `CONVENTIONS` authoring headers inside `<!-- -->` in
+the Architect and Getting Started masters — confirmed absent from both shipped PDFs.
+
+**⚠️ This overfull was on record as adjudicated and benign.** It was carried as *"the 57.66pt overfull
+is an unbreakable `\lstinline` prose run, not a code line"* — which is mechanically true and entirely
+misleading: the run is unbreakable **because a span inverted**, and the paragraph around it is
+broken. The note explained the symptom accurately enough to stop anyone opening the page. **An
+explanation is not a verification**, and "already adjudicated" is exactly the label that keeps a
+defect alive — the second time in one audit that a status line was wrong (see F-293 on Assembly).
+
+**Gate gap.** No gate we own sees this: the escaper hands the span through, `audit-tex-artifacts.py`
+sees legal `.tex`, the code-line gate measures code blocks, and the compile is clean. The only signal
+was an overfull box that had been explained away. A paragraph-wise backtick-balance check on the
+masters is the missing instrument.
+
+**Owed:** re-render, then confirm p84's "Try it" paragraph reads as prose throughout.
+
+
+### F-293 — the escaper pre-escapes `^`, so eight exponent expressions across three manuals print a literal `^{}`. `CONFIRMED` — **escaper fixed 2026-08-17; renders owed**
+
+**Found:** 2026-08-17, auditing the Debug Window v1.1.3 render. p107's bullet reads
+`multiplies the FFT output by 2^{}shift` — braces on the page.
+
+**Eight sites, verified by extracting the shipped/staged PDFs — not inferred from source:**
+
+| Manual | Pages | Prints |
+|---|---|---|
+| Debug Window (v1.1.3, staged) | p104, p107 | `2^{}shift` |
+| **Assembly (v3.1.6, rendered + marked releasable)** | p93, p209, p284 ×2, p350 | `2^{}x`, `2^{}128`, `2^{}32-1`, `2^{}32` |
+| IOSP (v1.0.8, RELEASED) | p320 | `2^{}X[3:0]` |
+
+**Mechanism — a double escape, and the sources are innocent.** Every master writes plain `2^shift`
+/ `2^32`. `latex_escape_processor.py` replaced a bare `^` with `\^{}` in the *markdown*; Pandoc then
+read `\^` as an escaped literal caret (emitting `\^{}` itself) and escaped the two braces it found
+next, producing `\^{}\{\}` — which xelatex prints as `^{}`. The escape was correct LaTeX applied one
+stage too early.
+
+**The file already carried the right precedent and did not follow it.** Line 435: *"Don't escape
+tildes - Pandoc handles them fine in markdown."* A bare caret is the identical case. The caret path
+even had a comment naming the failure — *"If we escape ^ to `\^{}`, Pandoc outputs literal `^{}`
+which breaks LaTeX"* — but the guard built from it only protects **matched** `^text^` superscript
+pairs. Unmatched carets, which is how every one of these eight is written, fell straight through.
+
+**Fixed in three places, not one.** The prose path plus two latent copies of the same bug — the
+markdown-header path (whose `XPROTECT_CARET_X` dance defends the escaper against *itself* while
+leaving Pandoc's second pass untouched) and the `\section{...}` content path. No master file changed;
+fixing the tool fixes all eight sites at next render.
+
+**Matched superscript pairs are unaffected** — `2^32^` in IOSP still resolves to true superscript.
+That is why IOSP shows one broken site and not four.
+
+**Owed:** re-render Debug Window, Assembly and IOSP, then confirm the listed pages print a caret and
+no braces. **Pandoc's handling of a bare caret is reasoned, not yet observed** — local Pandoc is
+off-limits, so the round-trip is the proof.
+
+**⚠️ This unblocks nothing and blocks one thing: Assembly v3.1.6 was recorded "verified, releasable,
+nothing blocking." It carries five of the eight sites.** The verification that cleared it was
+thorough about what it looked for — outline, page count, F-288's pages, log signatures — and this was
+not on the list. **A verification pass is only as wide as its checklist**, which is the F-285 lesson
+arriving a second time.
+
+**Noted, not fixed — an authorship inconsistency this exposed.** IOSP's own appendix-c writes
+`2^32^` (true superscript) at lines 35 and 501 but `2^X[3:0]` (literal) at line 171: one document,
+one concept, two renderings. Assembly and Debug Window use the literal form throughout. Whether the
+set should standardize on true superscript is a content decision across three manuals, not a
+by-product of a tool fix. **Not adjudicated.**
 
 ### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
 
