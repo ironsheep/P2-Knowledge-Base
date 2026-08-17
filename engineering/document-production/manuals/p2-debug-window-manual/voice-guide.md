@@ -131,6 +131,7 @@ Considerations:
 | Never write **vague** hedging | "The window might scroll" ❌ | Creates ambiguity about what the tool does. **NOT the same as a calibrated qualifier — see §3.4 (R1).** |
 | Never get chatty/breezy | "You'll love how easy this is" ❌ | Second-person tempts celebration/marketing creep |
 | Never minimize | "Simply configure…" ❌ | Dismissive of real complexity |
+| *(clarifying the row above — added 2026-08-17, «#243»)* | ✅ "the text **simply** never appears" · "the picture **simply** stops moving" | The ban is on *simply* used **imperatively at the reader**, minimizing what they must do. *Simply* meaning **merely / nothing more than**, describing what the **hardware** does, is correct and stays. The first measured pass found nine of these and zero real violations; a word-list sweep would have stripped nine accurate sentences. Judge the sentence, not the word. |
 | Never omit options | document one command of several ❌ | Incomplete |
 | Never assume context | "As you know…" ❌ | Each chapter must stand alone |
 

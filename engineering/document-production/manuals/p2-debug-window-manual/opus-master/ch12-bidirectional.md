@@ -62,7 +62,7 @@ most recent keypress that occurred within the last 100 ms into that long, and
 writes **0 when no key was pressed**. It is not a function that returns the key —
 this is wrong:
 
-```spin2
+```antipattern
 ' WRONG - PC_KEY does not return a value
 key := debug(`Console `PC_KEY)
 ```
@@ -182,7 +182,7 @@ configured.
 (released) or `-1` (pressed). Test it directly — `if mouse[3]` is true when the left
 button is down. Do not mask it:
 
-```spin2
+```antipattern
 ' WRONG - buttons are 0 / -1, not packed bits
 if mouse[3] & 1
 ```

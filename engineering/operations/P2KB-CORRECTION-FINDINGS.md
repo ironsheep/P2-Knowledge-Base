@@ -811,6 +811,16 @@ block, so the pedagogy improves rather than suffers. Convert the Debug Window an
 **Zero platform cost — verified:** `p2kb-streamer-reference.latex:21`, `p2kb-debugwin.latex:23` and
 `p2kb-iosp-reference.latex:22` all already load `p2kb-platform-content.sty`. Markdown-only in all three.
 
+**A fourth Debug Window site is deliberately NOT converted.** `ch08-scope-xy.md:71` pairs a wrong
+line and its corrected form inside a **blockquote** callout (`> ```spin2`). Converting it would make
+`> ```antipattern` the **first instance of that fence-inside-blockquote combination anywhere in the
+set** — `> ```spin2` appears only in this one file (2 uses, shipped in v1.1.2, so that form is
+render-proven; the antipattern form is not). Introducing an unverified fence combination into a
+manual shipping in the current wave risks a silent render defect for a two-line paired contrast that
+already reads correctly. **Action: verify `> ```antipattern` at the next Forge round-trip
+(`forge-test`), then convert if it renders.** Same reasoning as the `\|`-in-a-table-code-span trap:
+no precedent in the set is a render risk, not a green light.
+
 **IOSP is not in the release wave.** Its sites are fixed in opus-master and ship at its next release —
 editing a master is not releasing a document.
 
