@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-295`**
+**Next finding ID: `F-296`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2855,6 +2855,76 @@ chasing the wrong variable; the `...` was dropping the channels, so the REF sour
 along and the TO-RECONCILE item closes on evidence rather than another capture.
 
 **Next finding ID after this block: F-295.**
+
+---
+
+### F-295 — the XBYTE guide framed 32 MB as the ceiling for a guest image, and credited a shared community PSRAM driver to one of its users. `CONFIRMED` — **source fixed 2026-08-18, pre-release; render owed in v1.1.0**
+
+**Surfaced by** Stephen's read pass over §7.3, on the instinct that the passage may "mis-read what
+they are doing" — users run PSRAM setups far larger than an Edge module, e.g. 96 MB.
+
+**Authority: the emulators' own shipped source**, in the guide's own `REF-NO-COMMIT/larger-emulators/`
+— not forum recollection.
+
+| Claim as written (§7.3) | What the source says | Verdict |
+|---|---|---|
+| "the 32 MB module (**P2-EC32MB**) maps all 32 MB as one linear space, room for **any** classic guest and its RAM several times over" | `NeoYume/RAMCONFIG.MD` documents **three** known-good boards — P2EDGE 32 MB (quad-chip, 1 bank, "the most common config"), **Rayslogic 96 MB** (dual-chip, **6 banks**), Rayslogic 24 MB (single-chip, 3 banks) — plus a HyperRAM option. Both repos are titled "…for Parallax P2 **+ memory expansion**" | **over-claim** |
+| "**Capacity is not the contest** — 32 MB holds a large guest and a framebuffer with room to spare" | `neoyume_gamedb.spin2:921` — *"wierd holey memory map, doesn't fit in 32MB when it really should"* (King of Fighters '95). Capacity does bind, and awkward maps are why the bigger boards exist | **over-claim** |
+| "a PSRAM driver that arbitrates between cogs — **MegaYume's** does exactly this" | `psram16drv.spin2` is **byte-identical** in MegaYume and NeoYume (md5 `e162125d…`) and its own header/licence read **"Copyright 2020, 2021, 2022 Roger Loh"** (rogloh). Both emulators carry it unmodified | **mis-attribution** |
+
+**The arbitration behaviour itself was correct** and is now stated from the driver's own header:
+a 3-long **mailbox per cog**, "strict priority and round-robin request polling (selectable per
+COG)", per-cog burst limits, and unserviced cogs removable from the polling loop.
+
+**Fixed in `opus-master/xbyte-body.md`:** §7.3 now names the P2-EC32MB as the usual home rather than
+the ceiling, points at Appendix C for the 24–96 MB and HyperRAM setups, says bandwidth is *usually*
+the contest while capacity *does* bind, and credits the driver as the shared community one both Yume
+emulators use. §C.4 gained the board list and Roger Loh's authorship.
+
+**Checked and NOT changed — the neighbouring MegaYume citation in §7.4 is sound.** Its Z80 dispatch
+loop (`megayume_lower.spin2` ~5070) shows all three cited behaviours in the same few lines:
+`if_ae waitx zk_cycles` + `getct zk_lastwait` (pacing), `incmod zk_refresh,#127` (the 7-bit Z80 `R`
+register), `zbus_request`/`zbus_status` (guest bus arbitration) — and, incidentally, a textbook rung 2:
+`call #zk_readcode` · `push #zk_nextop` · `rdlut` · `execf`. **Note the two are different kinds of
+arbitration** and must not be merged: §7.4 is the *guest's* bus between Z80 and 68000; §7.3 is the
+*P2's* PSRAM bus between cogs.
+
+**Class-wide sweep: no spread.** Every other `32 MB`/`EC32MB` mention across the manual and app-note
+set is a module specification (pin usage, flash size) or unrelated (Debug Window's 96 MB is PLOT
+layer memory). The defect was confined to these two XBYTE paragraphs.
+
+**The configured sizes, read out of each project's own `config.spin2` defaults** — this is the part
+that makes the point, because two of the three do NOT default to an Edge module:
+
+| Project | Enabled width | `PSRAM_BANKS` | Board that matches | Capacity |
+|---|---|---|---|---|
+| MegaYume | `USE_PSRAM16` (quad chip) | 1 | P2-EC32MB Edge | **32 MB** |
+| NeoYume | `USE_PSRAM16` + `NOBANKS` | 1 | P2-EC32MB Edge | **32 MB** |
+| **MisoYume** | `USE_PSRAM8` (dual chip) | **6** | Rayslogic on P2EVAL basepin 0 | **96 MB** |
+
+MisoYume's shipped default (`PSRAM_CLK = 8 addpins 1`, `SELECT = 10`, `BASE = 0`, `BANKS = 6`,
+`DELAY = 17`, both syncs true, `USE_PSRAM_SLOW`) is a byte-for-byte match for the "Rayslogic 96MB
+PSRAM board" stanza in `NeoYume/RAMCONFIG.MD`. **The SNES emulator ships aimed at a 96 MB board.**
+
+The capacity model is consistent across all three documented boards at **8 MB per chip**: width sets
+chips-in-parallel (`PSRAM4`=1, `PSRAM8`=2, `PSRAM16`=4), `PSRAM_BANKS` multiplies them via
+`PSRAM_SELECT`+n. 4x8x1 = 32 MB, 1x8x3 = 24 MB, 2x8x6 = 96 MB — each lands exactly on its board's
+name. (The per-chip figure is documentary for the Edge module — the KB's `edge-32mb-module.yaml`
+gives 64 Mbit/chip, 4 chips; for the third-party boards it is arithmetic from the board name and
+bank count, not a datasheet, and is recorded as such.)
+
+**Currency caveat, stated rather than glossed.** The local snapshot under `REF-NO-COMMIT/` dates
+from **Oct 29 / Nov 3 / Dec 6 2025** (MegaYume / NeoYume / MisoYume) and carries `.gitignore` and
+`.gitattributes` but no `.git`, so there is no commit hash and it cannot be asserted to be current.
+Everything above is true of that snapshot. The guide's prose was deliberately written against the
+*documented* configuration range rather than any project's mutable default, so a newer upstream
+default cannot falsify it — but a re-pull before the next XBYTE release is worth doing.
+
+**The transferable lesson.** The claim was *plausible* and had a real mechanism behind it — which is
+why it survived authoring and a full audit. What broke it was reading the shipped artifact instead of
+the description of it: a config file listing three boards, a game-database comment, and an md5.
+
+**Next finding ID after this block: F-296.**
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 
