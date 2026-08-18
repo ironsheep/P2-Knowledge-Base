@@ -27,7 +27,7 @@ prose), with all per-publication detail in the roster.*
 | I/O & Smart Pins | manual | 1.0.8 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.5 | 503 | ✅ |
 | DeSilva Tutorial | manual | 3.0.6 | 166 | ✅ |
-| Debug Window | manual | 1.1.2 | 168 | ✅ |
+| Debug Window | manual | 1.1.3 | 168 | ✅ |
 | Streamer Guide | manual | 1.0.8 | 73 | ✅ |
 | Architect's Guide | manual | 1.0.3 | 52 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.0.1 | 100 | ✅ |

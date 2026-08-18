@@ -1,5 +1,37 @@
 # P2 Debug Window Manual: Change Log
 
+## v1.1.3 (2026-08-18)
+
+**What an omitted FFT channel argument does.**
+
+### Added
+
+- **FFT channel declarations carry an "If omitted" column** (Chapter 9): every position in
+  `'label' MAG high tall base grid color` states its default
+- **Those defaults** (Chapter 9): magnitude gain `0`, full scale `$7FFF_FFFF`, full plot height,
+  baseline `0`, no grid, next palette color
+- **Omission stops the scan** (Chapter 9): the arguments are positional, so the first one omitted
+  ends the scan and everything after keeps its default
+- **Reaching a later argument means supplying the earlier ones** (Chapter 9), even where you are
+  only restating their defaults
+
+### Changed
+
+- **Wrong-code examples are red anti-pattern blocks** (Chapters 8, 12), each set against the
+  correct form beside it
+
+### Fixed
+
+- **The tools are named `pnut-ts` and `pnut-term-ts`**, hyphenated, throughout — including the
+  command lines you type
+- **The LOGIC, SCOPE and multi-window examples print complete** (Chapters 6, 7, 14): every
+  channel declaration and comment appears on the page
+- **The SPECTRO `MAG` shift reads as a power of two** (Chapter 10): `2^shift^` is set as a
+  superscript wherever it appears
+- **Chapter 7's "Try it" paragraph reads as prose throughout** — the trigger walkthrough is
+  set in the body face from first word to last
+- **Long keyword lists and constant names stay inside the text column** (Chapters 10, 14)
+
 ## v1.1.2 (2026-08-08)
 
 A licensing change. No technical content changed.

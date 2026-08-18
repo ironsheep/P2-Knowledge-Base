@@ -1,6 +1,6 @@
 # P2 Debug Window Manual: Change Log
 
-## v1.1.3 (2026-08-16)
+## v1.1.3 (2026-08-18)
 
 **What an omitted FFT channel argument does.**
 
@@ -17,8 +17,8 @@
 
 ### Changed
 
-- **Chapter 12's `PC_KEY` and mouse-button mistakes** are red anti-pattern blocks, each set against
-  the correct form beside it
+- **Wrong-code examples are red anti-pattern blocks** (Chapters 8, 12), each set against the
+  correct form beside it
 
 ### Fixed
 
@@ -27,9 +27,10 @@
 - **The LOGIC, SCOPE and multi-window examples print complete** (Chapters 6, 7, 14): every
   channel declaration and comment appears on the page
 - **The SPECTRO `MAG` shift reads as a power of two** (Chapter 10): `2^shift^` is set as a
-  superscript in both the keyword table and the prose beside it
+  superscript wherever it appears
 - **Chapter 7's "Try it" paragraph reads as prose throughout** — the trigger walkthrough is
   set in the body face from first word to last
+- **Long keyword lists and constant names stay inside the text column** (Chapters 10, 14)
 
 ## v1.1.2 (2026-08-08)
 
