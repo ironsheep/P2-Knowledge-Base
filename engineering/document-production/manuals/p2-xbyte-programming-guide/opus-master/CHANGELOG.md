@@ -6,23 +6,23 @@
 
 ### Added
 
-- **`set_nz` is written out** (§15.3): four instructions, with the contract that the caller leaves the 8-bit result in `val` and the helper reads only `val`
-- **Why a shared helper is safe inside a skip-built handler** (§15.3): the P2 suspends skipping for the duration of a `CALL` and resumes on return
-- **`_RET_ CALL` never returns** (§15.3, hardware callout): `_RET_` returns only if the instruction did not branch, and `CALL` branches
-- **It assembles clean and nothing faults** (§15.3) — execution runs out of the handler into whatever the assembler placed next
+- **`set_nz` is written out** (§16.3): four instructions, with the contract that the caller leaves the 8-bit result in `val` and the helper reads only `val`
+- **Why a shared helper is safe inside a skip-built handler** (§16.3): the P2 suspends skipping for the duration of a `CALL` and resumes on return
+- **`_RET_ CALL` never returns** (§16.3, hardware callout): `_RET_` returns only if the instruction did not branch, and `CALL` branches
+- **It assembles clean and nothing faults** (§16.3) — execution runs out of the handler into whatever the assembler placed next
 - **Measured on P2 silicon**: an adjacent handler ran whose bytecode was never in the stream, then returned to dispatch and the program finished
 - **The complete community 6502** (§C.5): a full instruction set with decimal mode, the undocumented opcodes, cycle counting and single-step — standing on rung 2, with the loop body that puts it there
 - **A dispatch entry can carry metadata** (§4.5): how many high bits a pattern leaves free depends on the handler's length, and a working emulator packs each opcode's cycle count into bits [31:28]
-- **Chapter 16 is named as the price list** for per-symbol work, from §3.5, §3.6, §13.4 and §18.7
+- **Chapter 17 is named as the price list** for per-symbol work, from §3.5, §3.6, §13.4 and §19.7
 
 ### Changed
 
 - **Handlers end with an explicit `RET` after the call**, throughout the guide's examples
-- **The `_RET_ CALL` callout names its examples** (§15.3): `set_nz` ending `_ret_ muxc`, and the `JMP abs` handler ending `_ret_ rdfast`
-- **§11.1's `CALL`-depth discussion** states what the skip-suspension does *not* license, and points at §15.3
-- **The immediate-load family** (§15.3) shows the shared-body idiom collapsing `LDA`/`LDX`/`LDY`, which differ only in the receiving register
+- **The `_RET_ CALL` callout names its examples** (§16.3): `set_nz` ending `_ret_ muxc`, and the `JMP abs` handler ending `_ret_ rdfast`
+- **§13.1's `CALL`-depth discussion** states what the skip-suspension does *not* license, and points at §16.3
+- **The immediate-load family** (§16.3) shows the shared-body idiom collapsing `LDA`/`LDX`/`LDY`, which differ only in the receiving register
 - **`_RET_`'s semantics are cited to Parallax**: the instruction table in *P2 Instructions v35 – Rev B/C Silicon*, row 410
-- **Per-symbol work is priced, not forbidden** (§3.5, §18.7): two conditions rule the engine out — a stream outside hub RAM, and an unavailable LUT. Work between symbols is a third thing, a budget: it goes inside the handlers and costs from about two clocks a symbol down to nearly nothing when it can be confined to the handlers that matter
+- **Per-symbol work is priced, not forbidden** (§3.5, §19.7): two conditions rule the engine out — a stream outside hub RAM, and an unavailable LUT. Work between symbols is a third thing, a budget: it goes inside the handlers and costs from about two clocks a symbol down to nearly nothing when it can be confined to the handlers that matter
 - **Appendix C states its scope** (§C): it lists the implementations located and read, not a census, and invites additions
 - **Example source is plain ASCII throughout**, so the shipped `.spin2` files open identically in any editor
 
