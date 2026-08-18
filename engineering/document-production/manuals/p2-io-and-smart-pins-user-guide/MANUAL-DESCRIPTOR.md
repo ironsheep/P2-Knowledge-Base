@@ -2,7 +2,7 @@
 manual_slug: p2-io-and-smart-pins-user-guide
 doc_class: reference
 code_line_budget_K: 76
-last_published_tag: p2-io-and-smart-pins-user-guide-v1.0.8 # baseline for Dimension #15 (released 2026-08-08, 396pp)
+last_published_tag: p2-io-and-smart-pins-user-guide-v1.0.9   # baseline for Dimension #15 (released 2026-08-18, 396pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

@@ -2,7 +2,7 @@
 manual_slug: p2-getting-started-guide
 doc_class: reference          # orientation DISTILLATION — facts must trace to the KB (no hallucination/voice pass); see note below
 code_line_budget_K: 76        # creation-guide.md §7 "Max code columns (K): 76"
-last_published_tag: p2-getting-started-guide-v1.0.1  # baseline for Dimension #15 (advanced at the v1.0.1 release, 2026-07-12)
+last_published_tag: p2-getting-started-guide-v1.0.3   # baseline for Dimension #15 (released 2026-08-08, 25pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

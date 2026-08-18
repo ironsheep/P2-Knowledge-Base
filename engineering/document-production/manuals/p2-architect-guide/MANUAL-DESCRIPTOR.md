@@ -2,7 +2,7 @@
 manual_slug: p2-architect-guide
 doc_class: reference            # narrative DESIGN/METHOD book — classed reference for grounding rigor (no hallucination/voice pass); see note below
 code_line_budget_K: 76          # platform reference K; the book carries ZERO code by design (voice-guide §4) — budget applies only if a future snippet is ever added
-last_published_tag: p2-architect-guide-v1.0.1   # baseline for Dimension #15 (advanced at the v1.0.1 release, 2026-07-12)
+last_published_tag: p2-architect-guide-v1.0.3   # baseline for Dimension #15 (released 2026-08-08, 52pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

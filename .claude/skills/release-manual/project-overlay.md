@@ -133,3 +133,45 @@ done
 the file never reached the remote; a `200` with the *wrong* size means a stale
 copy is being served, which is the same defect the currency gate above exists to
 prevent — just one stage later.
+
+## Augments Phase 3 — advance `last_published_tag` to the tag THIS release creates
+
+`MANUAL-DESCRIPTOR.md` carries `last_published_tag`, the baseline every
+diff-since-published audit measures from (Dimension #15, and `audit-changelog`'s
+content check). Nothing in the release process advances it, so **every release
+makes its own descriptor stale the moment it tags** — the baseline still points
+at the version just superseded.
+
+That is not a slow drift; it is manufactured once per release. A fleet sweep
+found **six of nine tagged manuals stale**, two of them freshly broken by the
+releases run minutes earlier, and others two to five versions behind — meaning
+those manuals' "what changed since we published" audits had been reading from
+the wrong point for months.
+
+**So in Phase 3, alongside the roster row, set:**
+
+```
+last_published_tag: <slug>-v<X.Y.Z>   # baseline for Dimension #15 (released <YYYY-MM-DD>, <NN>pp)
+```
+
+- The tag is the one this release creates, not the prior one.
+- **Take the date and page count from git, never from memory or the roster**:
+  `git log -1 --format=%ad --date=short <tag>` and
+  `git show <tag>:deliverables/documents/DOCs/<PDF> | pdfinfo -`.
+  The trailing comment is part of the record — a stale comment beside a corrected
+  value is the same defect wearing a disguise, and three descriptors were found
+  carrying wrong dates, wrong page counts, and one still calling a released
+  manual a maiden release.
+- An unreleased manual (no tag) correctly carries an empty value — leave it.
+
+**Verify the whole fleet, not just the manual you released** — the check is one
+command and it is how the six stale ones surfaced:
+
+```bash
+for d in engineering/document-production/manuals/*/MANUAL-DESCRIPTOR.md; do
+  slug=$(basename $(dirname $d))
+  rec=$(grep -h 'last_published_tag' $d | head -1 | sed -E 's/last_published_tag: *([^ #]*).*/\1/')
+  act=$(git tag | grep "^$slug-v" | sort -V | tail -1)
+  [ "$rec" = "$act" ] || echo "STALE $slug: $rec vs $act"
+done
+```

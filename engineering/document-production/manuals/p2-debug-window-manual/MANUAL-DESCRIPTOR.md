@@ -2,7 +2,7 @@
 manual_slug: p2-debug-window-manual
 doc_class: behavior                               # subsystem-operation manual — grounds against source-extraction (Theory-of-Operations), NOT language YAML
 code_line_budget_K: 76                            # creation-guide "Code Line Budget"; platform-inherited (LM-Mono reference K)
-last_published_tag: p2-debug-window-manual-v1.1.2 # baseline for Dimension #15 (released 2026-08-08, 168pp)
+last_published_tag: p2-debug-window-manual-v1.1.3   # baseline for Dimension #15 (released 2026-08-18, 168pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

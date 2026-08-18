@@ -2,7 +2,7 @@
 manual_slug: p2-pasm-desilva-style
 doc_class: tutorial                               # deSilva teaching voice — tutorial voice IS permitted (Dimension #9)
 code_line_budget_K: 76                            # platform-inherited (creation-guide "Code Line Budget"); LM-Mono calibrated
-last_published_tag: p2-pasm-desilva-style-v3.0.1  # baseline for Dimension #15 (PDF dated 2026-06-25, 162pp)
+last_published_tag: p2-pasm-desilva-style-v3.0.6   # baseline for Dimension #15 (released 2026-08-17, 166pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # thin per-document guide: ADOPT/ADAPT/REJECT against house rules R1-R4 (added 2026-08-15); voice rationale in ./why-desilva-voice-works.md
