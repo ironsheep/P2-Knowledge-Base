@@ -24,7 +24,7 @@ prose), with all per-publication detail in the roster.*
 | Document | Type | Ver | pp | Released |
 |----------|------|-----|:--:|:--:|
 | Getting Started | manual | 1.0.3 | 25 | ✅ |
-| I/O & Smart Pins | manual | 1.0.8 | 396 | ✅ |
+| I/O & Smart Pins | manual | 1.0.9 | 396 | ✅ |
 | Assembly Reference | manual | 3.1.5 | 503 | ✅ |
 | DeSilva Tutorial | manual | 3.0.6 | 166 | ✅ |
 | Debug Window | manual | 1.1.3 | 168 | ✅ |
