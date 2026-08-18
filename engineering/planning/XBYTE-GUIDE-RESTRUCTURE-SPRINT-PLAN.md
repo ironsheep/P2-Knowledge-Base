@@ -31,6 +31,33 @@ ASCII sweep of code blocks and the shipped example source.
 
 ---
 
+## 0. Execution order, and why it is not the section order
+
+Sections below are deliverables; `plan-to-tasks` maps tasks to them. **They are not in
+execution order**, and one ordering constraint is load-bearing:
+
+**The governing documents are updated first.** `creation-guide.md` §2 is what an author
+reads *before* writing into this manual, and it is **stale today** — it still describes
+the v0.1.0 fourteen-chapter, four-Part shape. Executing the cut while the creation guide
+describes a structure that has not existed since v0.1.0 means authoring against a
+document that is wrong in a *new* way. So §7 splits, and its first half leads:
+
+| Order | Work | Constraint |
+|---|---|---|
+| **1** | §7a — `PLANNING.md` records the target structure as a LOCKED decision; `creation-guide.md` §2 rewritten to it | governs authoring; must precede the cut |
+| **2** | §1 — the chapter permutation and Part boundaries | — |
+| **3** | §2 — Part intros, chapter openers, transitions | needs the new order to exist |
+| **4** | §3 — cross-reference sweep, flipped-direction adjudication, Index rebuild | needs the cut complete |
+| **5** | §4, §5, §6 — navigation layer, apparatus, diagrams | **structure-dependent**; built before the cut they would be built twice |
+| **6** | §7b — `voice-guide.md` citations, `MANUAL-DESCRIPTOR.md` chapter pins | cite *content locations*, so they follow the cut |
+| **7** | §8 — front matter, cover title, `request.json` | title wording fixed once structure is final |
+| **8** | §10 — draft render → diagram review → audit → release render | — |
+
+§11 (the scheduled decision) happens before the effort wraps. §12 (hygiene) is
+order-independent.
+
+---
+
 ## 1. The reorder — Part boundaries and the chapter permutation
 
 **Why.** The book argues that most P2 emulator authors land on rung 2 (`EXECF`
@@ -143,23 +170,38 @@ reorder: its last eight entries are out of alphabetical order, and its
 chapters that actually answer the question.
 
 **Current starting point.** `opus-master/xbyte-body.md` Index at `# Index {#index}`;
-61 entries, section-pointers only.
+**58 entries**, section-pointers only.
 
 **Target.** Zero dangling references after the cut. Index sorted, routed to the
 decision chapters, and extended with reader vocabulary (hub · LUT · PSRAM · rung 2 ·
 where to poll · complete emulators) alongside our own.
 
-**A class of change that needs naming: references that flip direction.** Some
-backward references become forward ones. Known instances to adjudicate, not
-mechanically repoint:
+**Computed at plan time — the references that flip direction.** Some backward
+references become forward ones and vice versa. A flipped reference **still resolves
+perfectly**, so no link checker will report it; what changes is whether it promises the
+reader something they have already read or something they have not. Direction is
+`sign(target − container)`, computed before and after the permutation. **The complete
+set is seven**, and each is adjudicated — accept as a forward pointer, or reword —
+never silently repointed:
 
-- §14.2's CHIP-8 row cites compression at §9.3; under the new order the survey (Ch.8)
-  precedes the compression chapter (Ch.11), so this becomes a forward pointer.
-- §13.6 cites the minimal VM and the 6502 capstone, both now later; these were already
-  forward-looking in spirit and read correctly.
+| Body line | Old | New | Was → becomes | Site |
+|---|---|---|---|---|
+| 857 | Ch.11→13 | Ch.13→7 | fwd → **back** | §11 opener, "there is no loop body" |
+| 961 | Ch.—→13 | Ch.—→7 | fwd → **back** | **Part IV intro** — rewritten wholesale by §2 anyway |
+| 961 | Ch.—→14 | Ch.—→8 | fwd → **back** | same passage |
+| 1202 | Ch.13→11 | Ch.7→13 | back → **fwd** | §13.4, the debugging consequence |
+| 1223 | Ch.13→12 | Ch.7→14 | back → **fwd** | §13.6, cites the minimal VM |
+| 1260 | Ch.14→9 | Ch.8→11 | back → **fwd** | §14.2 CHIP-8 row cites compression |
+| 1306 | Ch.14→9 | Ch.8→11 | back → **fwd** | §14.5 tip cites the F bit |
 
-Each flipped reference is either acceptable as a forward pointer or gets reworded. The
-sprint records the adjudication rather than silently repointing.
+Three of the four back→fwd cases (1223, 1260, 1306) read acceptably as forward pointers
+— they name where a thing will be explained. **1202 is the one to watch**: it currently
+reads as a recap of debugging the reader has done, and after the move the reader has not
+done it. That one is reworded, not accepted.
+
+**The Index — measured.** 58 entries. **36 need repointing**; 22 are unaffected.
+**Three are out of alphabetical order** (`Bit 1`, `6502 emulator`, `65816`), which is a
+defect independent of the reorder and is fixed in the same pass.
 
 **Verification.**
 - *Normal:* the cross-reference checker reports 0 dangling, and the resolvable count is
@@ -214,9 +256,37 @@ treat as optional — an in-place example was missed in review for exactly this 
 four lines from the explanation it served. The two decision chapters carry **2,517 and
 2,142 words with 8 and 0 lines of code** between them.
 
-**Current starting point.** Highest-value relocations: §4.5's `##`-counts-two-instructions
-rule and §13.3's auto-fetch-welds-you-to-hub caution — the book's central architectural
-claim, currently a boxed aside.
+**Current starting point — measured at plan time.** 45 boxes: 15 `caution`, 16
+`hardware`, 14 `tip`. **Six carry code.** **Fifteen run to 120 words or more** — essay
+length, which is the population most likely to hold argument rather than aside, and the
+population a scanning reader is most likely to skip:
+
+| Chapter | Kind | Words | Opens with |
+|---|---|---|---|
+| 4 | caution | 183 | a skip pattern counts instructions, not source lines (`##` → two longs) |
+| 4 | hardware | 220 | the spare bit in a table entry |
+| 6 | hardware | 140 | the table is *this* cog's LUT — 256 is the ceiling |
+| 6 | tip | 151 | "this loop is not a stepping stone" |
+| 7 | caution | 177 | fencing an atomic sequence with `REP` |
+| 8 | hardware | 144 | bit 1 selects the index form |
+| 8 | caution | 175 | `SETQ2` does two entirely different jobs |
+| 10 | hardware | 195 | recovering the stream from `PB` after a hub call |
+| 10 | caution | 184 | reclaim the `$1FF` before re-arming |
+| 11 | hardware | 120 | `CALL` depth suspends skipping |
+| 11 | caution | 191 | the landing pad prevents a specific trap |
+| 15 | hardware | 197 | do not fold the return into the call |
+| 15 | tip | 150 | the addressing-mode matrix wants a second dispatch |
+| 17 | hardware | 141 | what a modifier prefix costs under XBYTE |
+| 18 | hardware | 128 | do not interpret at all — the JIT option |
+
+**Highest-value relocations**, both already identified: Ch.4's `##`-counts-two-longs rule
+(183w) and Ch.13's auto-fetch-welds-you-to-hub caution — the book's central architectural
+claim, currently a 51-word boxed aside. Note the asymmetry that shows the problem: the
+central claim gets 51 words in a box while the spare-bit trick gets 220.
+
+**The test for each box**, applied per box rather than by size: does the surrounding text
+still carry the fact if the box is skipped? If not, the fact moves into the text and the
+box keeps only the aside.
 
 **Target.** Load-bearing content moves into running text; boxes keep genuine asides. The
 decision chapters gain code — §13.2's rung-1/rung-2 contrast is the model, because it
@@ -269,14 +339,22 @@ Architecture still describes the v0.1.0 shape — 14 chapters in 4 Parts, with a
 SETQ2 Vignette" chapter — while the shipped book is 20 chapters in 6 Parts. Left alone,
 an author reading it before writing is misdirected.
 
-**Current starting point — chapter-number references that the reorder invalidates:**
+**This section splits, and the halves run at different times** (§0).
 
-| File | Refs | Note |
+**§7a — leads the sprint. These govern authoring.**
+
+| File | Refs | Work |
 |---|---|---|
-| `PLANNING.md` | 37 | standing design record with LOCKED/OPEN markers — **add** the new structure as a LOCKED decision; do not rewrite history |
-| `creation-guide.md` | 19 | §2 architecture section is **stale today**; rewrite to the target structure |
+| `PLANNING.md` | 37 | standing design record with LOCKED/OPEN markers — **add** the target structure as a LOCKED decision; do not rewrite history |
+| `creation-guide.md` | 19 | §2 architecture is **stale today** (describes the v0.1.0 14-chapter/4-Part shape); rewrite to the target structure |
+
+**§7b — follows the cut. These cite content *locations*, so they cannot be written until
+the content has moved.**
+
+| File | Refs | Work |
+|---|---|---|
 | `voice-guide.md` | 11 | chapter citations in voice rules |
-| `MANUAL-DESCRIPTOR.md` | 6 | `high_risk_tables` and `fragile_areas` pin chapter numbers; the Structure line states "20 chapters in 6 parts" |
+| `MANUAL-DESCRIPTOR.md` | 6 | `high_risk_tables` and `fragile_areas` pin chapter numbers; the Structure line states "20 chapters in 6 parts"; `last_published_tag` advances at release |
 
 `PLANNING.md` already records the title/slug decision of record — *"Slug + PDF filename
 stay `p2-xbyte-programming-guide` / `P2-XBYTE-Programming-Guide` (XBYTE = the durable
