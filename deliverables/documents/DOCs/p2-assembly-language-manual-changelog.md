@@ -1,5 +1,27 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.6 (2026-08-18)
+
+**Keep hub access out of both CORDIC loops** — the shape measured clean on silicon.
+
+### Added
+
+- **The CORDIC interrupt fence opens the Q instruction section** and the CORDIC Coprocessor category, both pointing at `REP` for the pattern
+- **A CORDIC command and its `GETQX`/`GETQY` 55 clocks later must not be split by an interrupt**; `REP` is the fence, and Spin2 needs none
+
+### Changed
+
+- **§5.1.6 CORDIC pipelining** issues and retrieves at the eight-clock slot cadence, hub traffic batched outside
+- **The loop is register-only** (§5.1.6): block `RDLONG` in, a `REP` fill/steady/drain over a cog buffer with `ALTS`/`ALTD`, block `WRLONG` out
+- **A hardware callout** (§5.1.6) carries the measured depths, the reason — throughput, not buffer depth — and the silent failure: wrong numbers
+- **Powers of two are set as superscripts** (§5.1 CORDIC table, GETRND, RDLONG/`##count`, XORO32): `2^32^`, `2^128^` and `2^x^` read as exponents on the page
+
+### Fixed
+
+- **The bit-test syntax lines print one form per line** (TESTB, TESTBN, TESTP, TESTPN), each with its effect flags
+- **Appendix G's ADC sampling constants print clear of their values**, every mode field readable beside its name
+- **Long identifiers stay inside the text column** (GETBRK, Appendix H)
+
 ## v3.1.5 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -142,7 +164,7 @@ A licensing change. No technical content changed.
 
 ### Code Verification
 
-- 348 code examples audited with pnut_ts v1.51.7
+- 348 code examples audited with pnut-ts v1.51.7
 - Inline PASM examples: Correctly tagged as Spin2
 
 ---
