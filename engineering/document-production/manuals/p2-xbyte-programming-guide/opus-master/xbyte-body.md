@@ -192,20 +192,11 @@ The first six are ordinary budgeting. The last one is different in kind — not 
 
 ## 3.7 If you're building… {#sec-3-7}
 
-You have probably arrived with an application already in mind. Find it here; the chapters on the right are the ones to read closely first.
+You have probably arrived with an application already in mind, and the front matter's **Intent Index** is where to find it — one entry per kind of project, naming the chapters to read closely first and the alternatives worth a look. It is at the front of the book rather than here because a reader hunting for their own project should not have to reach Chapter 3 to find it.
 
-| If you're building… | XBYTE gives you… | Start at |
-|---------------------|------------------|----------|
-| a **bytecode VM** or scripting language | the whole engine — this is what it was built for | Ch. 14 |
-| a **CPU emulator** | it depends on your guest — often one asset, not both | **Ch. 7, Ch. 8** |
-| a **terminal / ANSI parser** | the *table* as state — `ESC` borrows an alternate table | §19.3 |
-| a **MIDI or protocol decoder** | the *byte* as data — the channel or type rides in `PA` | §19.4 |
-| a **graphics display list** | the *stream* as a movable cursor | §19.5 |
-| a **binary format / TLV decoder** | the byte as a type tag | §19.2 |
-| an **event or animation sequencer** | seek — the read cursor loops and branches for free | §19.2 |
-| something else that walks a byte stream | the general test | §3.5, then §19.7 |
+One entry deserves saying twice, in the chapter that just explained what the engine is.
 
-If your project is a **CPU emulator**, read Chapters 7 and 8 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*.
+If your project is a **CPU emulator**, read Chapters 7 and 8 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*. That is not a caveat on the way to using XBYTE; for many guest CPUs it is the finding, and acting on it early saves rewriting an interpreter around an engine that was never going to fit.
 
 To see what the engine makes possible on real silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
 
@@ -2501,6 +2492,7 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 - **Hardware stack / `$1FF`** — §10.1, §12.1; reclaiming it to re-arm — §12.4, §15.6
 - **Hub RAM** (auto-fetch reads hub and nothing else) — §3.5, §5.1, §7.3
 - **Inline operands** — §5.3, §12.3; two widths in one machine — §15.3
+- **Intent Index** (find the chapter for the thing you are building) — front matter
 - **Interrupts (guest)** — Ch. 17; injecting one — §17.4; halt — §17.5
 - **Interrupts (P2)** — §9.4; the `REP` fence — §9.4
 - **JIT** (translate, don't interpret) — §19.7
@@ -2531,6 +2523,6 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 - **Terminal / ANSI reader** (application) — §19.3
 - **Three decisions** (fetch · dispatch · memory) — §7.1
 - **Variables** (a VM's, addressed by an inline byte) — §15.3
-- **When to reach for XBYTE** — §3.5, §3.7; **the decision framework** — Ch. 7, Ch. 8; the full list — §19.7
+- **When to reach for XBYTE** — §3.5, §3.7, Intent Index; **the decision framework** — Ch. 7, Ch. 8; the full list — §19.7
 - **Where to poll** (interrupt checks with no loop body) — §8.7, §17.3
 - **Z80** (both kinds of prefix) — §18.1, §8.3

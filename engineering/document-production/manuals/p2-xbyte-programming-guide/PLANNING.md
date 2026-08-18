@@ -451,6 +451,30 @@ a living, not by collecting features.
 - The release shape: still one public release, v1.1.0, measured from v1.0.1.
 - Part boundaries, Part names, and the Appendix letters A-D.
 
+## 0-sexies. NAVIGATION LAYER — canonical homes (2026-08-18) — **LOCKED**
+
+Sprint §4 added three navigation surfaces and named one risk: §3.7's "If you're building…"
+table and a new Intent Index must not become two divergent copies of the same lookup. The
+call, and the reasons, so a later author does not re-litigate it:
+
+**The Intent Index in `front-matter.md` is CANONICAL. §3.7 points to it and keeps only its
+argument.** The table is *navigation apparatus*, and a reader who could not find things looks
+at the front of the book, not inside Chapter 3. §3.7 keeps the part that is genuinely an
+argument rather than a lookup — that a CPU-emulator author must read the decision chapters
+before writing a line — and defers the table itself. Nothing is duplicated, so nothing can
+diverge.
+
+**It lives in the front matter, not in a new Appendix A.** The sibling I/O & Smart Pins guide
+puts its Intent Index in Appendix A and describes it from the front matter, which is the better
+shape for a 400-page reference. Here it would force Appendix A–D to re-letter, and §0-quater
+locked the appendix letters as unmoved. At ~100 pages the front matter is reachable, so the
+index goes there and the appendices stay put.
+
+**The brief engine opener does not restate Appendix A.** Appendix A is the lookup card and stays
+the place for the tables. The opener is prose plus one short fragment, whose job is to let a
+reader who wants the concise version get it early instead of leaving for a primary source. Where
+the two touch, the opener cites the appendix rather than copying its rows.
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
