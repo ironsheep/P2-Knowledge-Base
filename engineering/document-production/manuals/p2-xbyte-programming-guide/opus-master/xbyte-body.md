@@ -549,6 +549,10 @@ That independence is the result the rest of the chapter builds on.
 
 Dispatch is not a yes-or-no question about XBYTE. It is a **ladder with three rungs**, and you may stop on any of them.
 
+```{=latex}
+\DiagDispatchLadder
+```
+
 | Rung | What you write | What the P2 does for you |
 |------|----------------|--------------------------|
 | **1 — jump table** | fetch the opcode · index a table · `JMP` through it | nothing special — this works on any processor |
@@ -645,6 +649,10 @@ The three decisions have a natural order, because each one constrains the next.
 3. **Is LUT free?** XBYTE needs 256 longs of it. If your palette, prefetch queue, or line buffer has already claimed LUT, the table goes to hub — and XBYTE cannot read a table in hub. Stop at rung 2.
 
 Three roads to rung 2, and only one combination — **code in hub, little cross-cutting work, LUT free** — arrives at rung 3.
+
+```{=latex}
+\DiagThreeDecisions
+```
 
 That is a precise result, and it maps exactly onto what XBYTE was built for: **an interpreted language.** A bytecode VM keeps its program in hub, does no cycle-accurate anything, and wants its LUT for exactly one thing. It is no coincidence that the P2's own Spin2 interpreter is the engine's showcase — it is the shape XBYTE was designed around, and the shape it serves best.
 
@@ -1914,6 +1922,10 @@ Look at what a prefix actually *does* to the byte that follows it, and they fall
 A **map** prefix genuinely redirects dispatch. After the 6809's `$10`, the byte `$83` names a different instruction than `$83` alone does. You want a different table, and one-shot `SETQ2` hands you one — and reverts on its own.
 
 A **modifier** prefix does *not* want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment register, which is absurd. The right answer is a register (§18.3).
+
+```{=latex}
+\DiagPrefixKinds
+```
 
 ::: caution
 **The Z80 carries both kinds, which makes it the best teacher and a genuine trap.** Its `CB` and `ED` prefixes are **map** prefixes — different opcode tables. Its `DD` and `FD` prefixes are **modifier** prefixes — they retarget `HL` to `IX` or `IY` and leave the opcode map alone.

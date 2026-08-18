@@ -10,14 +10,14 @@
 % Each macro is a self-contained, per-chapter-numbered figure (internal \caption).
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{p2kb-xbyte-diagrams}[2026/06/26 P2KB XBYTE Diagrams Package v0.2]
+\ProvidesPackage{p2kb-xbyte-diagrams}[2026/08/18 P2KB XBYTE Diagrams Package v0.3]
 
 % Shared TikZ palette, node/edge styles, and the \diagramscale shrink-to-fit wrapper.
 \RequirePackage{p2kb-platform-diagrams}
 
-% ==================== Chapter 1 -- the dispatch loop ====================
+% ==================== Chapter 3 -- the dispatch loop ====================
 
-% Fig 1.1 -- the fetch/look-up/dispatch/run loop XBYTE runs in hardware
+% Fig 3.1 -- the fetch/look-up/dispatch/run loop XBYTE runs in hardware
 \newcommand{\DiagXbyteLoop}{%
 \begin{figure}[H]\centering
 \diagramscale{%
@@ -43,9 +43,9 @@
 \caption{The XBYTE dispatch loop: fetch, look up, dispatch, run, repeat}
 \end{figure}}
 
-% ==================== Chapter 4 -- LUT table entry ====================
+% ==================== Chapter 6 -- LUT table entry ====================
 
-% Fig 4.1 -- one dispatch-table entry is an EXECF operand (skip pattern | address)
+% Fig 6.1 -- one dispatch-table entry is an EXECF operand (skip pattern | address)
 \newcommand{\DiagLutEntry}{%
 \begin{figure}[H]\centering
 \diagramscale{%
@@ -64,9 +64,9 @@
 \caption{LUT dispatch-table entry: one EXECF operand}
 \end{figure}}
 
-% ==================== Chapter 5 -- the 8-clock dispatch cycle ====================
+% ==================== Chapter 9 -- the 8-clock dispatch cycle ====================
 
-% Fig 5.1 -- the eight clocks of one dispatch, with the 6-clock overhead braced
+% Fig 9.1 -- the eight clocks of one dispatch, with the 6-clock overhead braced
 \newcommand{\DiagDispatchCycle}{%
 \begin{figure}[H]\centering
 \diagramscale{%
@@ -91,9 +91,9 @@
 \caption{The 8-clock XBYTE dispatch cycle (clock 1 overlaps the prior \texttt{\_RET\_})}
 \end{figure}}
 
-% ==================== Chapter 7 -- the mode operand ====================
+% ==================== Chapter 11 -- the mode operand ====================
 
-% Fig 7.1 -- the SETQ/SETQ2 mode operand %A000000xF (256-entry table form)
+% Fig 11.1 -- the SETQ/SETQ2 mode operand %A000000xF (256-entry table form)
 \newcommand{\DiagModeOperand}{%
 \begin{figure}[H]\centering
 \diagramscale{%
@@ -116,6 +116,128 @@
   \node[flbl, below=1mm of f, text width=14mm] {flag write};
 \end{tikzpicture}}
 \caption{The mode operand \texttt{\%A000000xF} (256-entry table form)}
+\end{figure}}
+
+% ==================== Chapter 7 -- the dispatch ladder ====================
+
+% Fig 7.1 -- the three rungs read as WHO DOES WHICH PART of the loop. This is a
+% grid figure (like the LUT-entry and dispatch-cycle figures), so it defines local
+% cell styles rather than the iospbox/iospkey flow roles. One colour rule carries
+% the whole idea: green = the P2 does it, gray = you write it. Restates the ladder
+% table in Sec 7.2 -- it carries no fact the prose does not also state.
+\newcommand{\DiagDispatchLadder}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[
+  cell/.style={draw=diagram-border, fill=diagram-box, minimum width=27mm,
+               minimum height=12mm, align=center, font=\small, text=diagram-text,
+               inner sep=2pt},
+  hwcell/.style={cell, fill=diagram-highlight},
+  rung/.style={font=\small, text=diagram-text, align=right, anchor=east},
+  colhd/.style={font=\scriptsize\bfseries, text=diagram-text},
+  buys/.style={font=\scriptsize\itshape, text=diagram-text, align=left,
+               anchor=west, text width=34mm}]
+  % ---- rung 1, the bottom of the ladder ----
+  \node[cell] (f1) at (0,0) {your code};
+  \node[cell, right=0pt of f1] (d1) {your code};
+  \node[cell, right=0pt of d1] (h1) {your code};
+  % ---- rung 2 ----
+  \node[cell] (f2) at (0,15mm) {your code};
+  \node[cell, right=0pt of f2] (d2) {your code};
+  \node[cell, right=0pt of d2] (h2) {your code};
+  % ---- rung 3, the top ----
+  \node[hwcell] (f3) at (0,30mm) {hardware};
+  \node[hwcell, right=0pt of f3] (d3) {hardware};
+  \node[cell, right=0pt of d3] (h3) {your code};
+  % ---- what the three columns are ----
+  \node[colhd, above=2mm of f3] {Fetch};
+  \node[colhd, above=2mm of d3] {Dispatch};
+  \node[colhd, above=2mm of h3] {Handler};
+  % ---- the rungs, named ----
+  \node[rung] at ($(f1.west)+(-4mm,0)$) {\textbf{Rung 1}\\jump table};
+  \node[rung] at ($(f2.west)+(-4mm,0)$) {\textbf{Rung 2}\\\texttt{EXECF} dispatch};
+  \node[rung] at ($(f3.west)+(-4mm,0)$) {\textbf{Rung 3}\\XBYTE};
+  % ---- what each rung buys ----
+  \node[buys] at ($(h1.east)+(4mm,0)$) {works on any processor};
+  \node[buys] at ($(h2.east)+(4mm,0)$)
+    {the skip pattern rides along --- one body serves many opcodes};
+  \node[buys] at ($(h3.east)+(4mm,0)$)
+    {fetch and dispatch in six clocks --- nothing to write};
+  % ---- the climb ----
+  \draw[iospflow] (-52mm,-5mm) -- (-52mm,35mm);
+  \node[rotate=90, font=\scriptsize\itshape, text=diagram-text]
+       at (-58mm,15mm) {more of the loop in hardware};
+\end{tikzpicture}}
+\caption{The dispatch ladder: each rung moves more of the loop into hardware}
+\end{figure}}
+
+% ==================== Chapter 7 -- the three decisions ====================
+
+% Fig 7.2 -- Sec 7.5's three questions in their forced order. The shape IS the
+% result: three roads reach rung 2, and only one combination arrives at rung 3.
+\newcommand{\DiagThreeDecisions}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[
+  q/.style={iospbox, minimum width=52mm},
+  edgelbl/.style={wlbl, inner sep=1.5pt}]
+  \node[iospbox, minimum width=30mm] (start) at (0,0) {Your guest};
+  \node[q] (q1) at (0,-18mm) {1. Guest code fits in hub?};
+  \node[q] (q2) at (0,-40mm) {2. Little cross-cutting\\per-instruction work?};
+  \node[q] (q3) at (0,-62mm) {3. LUT free for 256 longs?};
+  \node[iospkey, minimum width=46mm] (r3) at (0,-88mm) {\textbf{Rung 3} --- XBYTE};
+  \node[iospsub, below=1.5mm of r3, text width=68mm]
+    {code in hub $\cdot$ little cross-cutting work $\cdot$ LUT free};
+  \node[iospbox, minimum width=38mm, minimum height=52mm] (r2) at (70mm,-40mm)
+    {\textbf{Rung 2}\\\texttt{EXECF} dispatch};
+  \node[iospsub, below=1.5mm of r2, text width=38mm] {you write the fetch};
+  % the yes road, straight down
+  \draw[iospflow] (start) -- (q1);
+  \draw[iospflow] (q1) -- node[edgelbl, right] {yes} (q2);
+  \draw[iospflow] (q2) -- node[edgelbl, right] {yes} (q3);
+  \draw[iospflow] (q3) -- node[edgelbl, right] {yes} (r3);
+  % three no roads, all arriving at the same rung
+  \draw[iospflow] (q1.east) -- node[edgelbl, above] {no} (q1.east -| r2.west);
+  \draw[iospflow] (q2.east) -- node[edgelbl, above] {no} (q2.east -| r2.west);
+  \draw[iospflow] (q3.east) -- node[edgelbl, above] {no} (q3.east -| r2.west);
+\end{tikzpicture}}
+\caption{The three decisions, in order: three roads stop at rung 2, one reaches rung 3}
+\end{figure}}
+
+% ==================== Chapter 18 -- the two kinds of prefix ====================
+
+% Fig 18.1 -- the taxonomy of Sec 18.1: what the prefix changes decides which tool
+% it wants. The figure deliberately does NOT restate the Z80 trap in words: the
+% caution box sits directly beneath it and said the same thing twice, 2cm apart.
+% The trap stays visible here anyway -- Z80 appears in BOTH example rows.
+\newcommand{\DiagPrefixKinds}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[
+  ex/.style={font=\scriptsize, text=diagram-text, align=center, text width=54mm}]
+  \node[iospbox, minimum width=34mm] (top) at (0,0) {A prefix byte};
+  \node[iospbox, minimum width=44mm] (map) at (-40mm,-22mm) {Map prefix};
+  \node[iospsub, below=1.5mm of map, text width=46mm] (mapsub)
+    {changes \emph{which} handler runs};
+  \node[iospbox, minimum width=44mm] (mod) at (40mm,-22mm) {Modifier prefix};
+  \node[iospsub, below=1.5mm of mod, text width=46mm] (modsub)
+    {changes \emph{how} a handler behaves};
+  \node[iospkey, minimum width=44mm] (setq) at (-40mm,-52mm) {one-shot \texttt{SETQ2}};
+  \node[iospsub, below=1.5mm of setq, text width=50mm]
+    {an alternate table --- reverts on its own};
+  \node[iospkey, minimum width=44mm] (reg) at (40mm,-52mm) {a state register};
+  \node[iospsub, below=1.5mm of reg, text width=50mm]
+    {then re-fetch; each handler consults it};
+  \draw[iospflow] (top.south) -- ++(0,-6mm) -| (map.north);
+  \draw[iospflow] (top.south) -- ++(0,-6mm) -| (mod.north);
+  \draw[iospflow] (mapsub.south) -- (setq.north);
+  \draw[iospflow] (modsub.south) -- (reg.north);
+  \node[ex] at (-40mm,-72mm)
+    {6809 \$10/\$11 $\cdot$ Z80 \texttt{CB}/\texttt{ED} $\cdot$ x86 \$0F};
+  \node[ex] at (40mm,-72mm)
+    {x86 segment override, \texttt{REP}, \texttt{LOCK} $\cdot$ Z80 \texttt{DD}/\texttt{FD}};
+\end{tikzpicture}}
+\caption{The two kinds of prefix, and the tool each one wants}
 \end{figure}}
 
 \endinput
