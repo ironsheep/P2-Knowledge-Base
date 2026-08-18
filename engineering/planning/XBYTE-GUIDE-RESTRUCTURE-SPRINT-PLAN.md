@@ -31,6 +31,45 @@ ASCII sweep of code blocks and the shipped example source.
 
 ---
 
+## Sprint start — build number, tree audit, entry checks
+
+**Started:** 2026-08-18 · **Head/element:** manual · `p2-xbyte-programming-guide`
+
+**Build number — agreed: v1.1.0** (Stephen, 2026-08-18). For a manual the version lives
+in three places, all set at §8: the cover (`front-matter.md`), `request.json`, and the
+CHANGELOG heading. The CHANGELOG already carries `## v1.1.0 (unreleased)`.
+
+**Working-tree audit (sprint-start §2).** The sprint's blast radius —
+`manuals/p2-xbyte-programming-guide/`, `workspace/p2-xbyte-programming-guide/`,
+`engineering/planning/` — is **clean and committed**; no untracked source. One item
+outside it needs a decision: `deliverables/documents/DOCs/P2-XBYTE-Programming-Guide.pdf`
+is modified-uncommitted — a v1.0.2 render of a version that will now never ship.
+*Needs Stephen's accept-or-fix: revert to HEAD so the public tree matches the published
+v1.0.1, or keep.* Not discarded pending his call.
+
+**Entry baseline (sprint-start §4, per the project overlay).** A manual sprint has **no
+local build gate** — manuals render on PDF Forge under the handback model — so the entry
+baseline is the **document's audit state**, not a compiler result. Measured 2026-08-18:
+
+| Gate | Entry state |
+|---|---|
+| Published baseline | v1.0.1, 101pp, tag `p2-xbyte-programming-guide-v1.0.1` |
+| Guide layer (`DOC_AUDIT_COMMAND`) | **PASS** across 45 files; all printed lines are annotated exceptions |
+| Cross-references | **387 resolvable, 0 dangling** |
+| Code-line column budget (K=76) | clean |
+| Non-ASCII in code blocks | clean |
+| Example byte-identity + compile | both examples identical to their blocks; both compile clean under `pnut-ts -d` |
+
+The exit assertion at closeout compares against **this** table, not against a test count.
+
+**Tracking readiness (sprint-start §3).** 28 completed tasks archived to
+`tasks/archives/archive_20260818_042144.md`. No stranded `task_#N_*` context keys — the
+per-action hygiene fired. Context 57 keys (under the 75 audit threshold); `MEMORY.md`
+147 lines (under the 150 threshold). One superseded key pruned. Leftover board items and
+one standing-constraint question are recorded below as needing Stephen's decision.
+
+---
+
 ## 0. Execution order, and why it is not the section order
 
 Sections below are deliverables; `plan-to-tasks` maps tasks to them. **They are not in
