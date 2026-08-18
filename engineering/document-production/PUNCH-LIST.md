@@ -406,3 +406,42 @@ release.
 **Verified consequence for the current wave: none.** All 37 findings were cross-referenced against the
 seven wave elements on 2026-08-17. Exactly two touched them and both were dealt with — F-281 (Debug
 Window, blocking, evidence-blocked) and F-224 (Assembly, fixed into v3.1.6 that same day).
+
+---
+
+## Inline-code URLs cannot break often enough and overhang the right margin — OPEN
+
+**Found** 2026-08-18 during the XBYTE v1.1.0 draft render, by
+`audit-pdf-margin-overflow.py`. **Pre-existing, not a regression** — the identical
+span with the identical overhang is present in the released v1.0.1 PDF (p93 there,
+p107 in the draft), so it has shipped to readers once already.
+
+**The measurement.** `https://github.com/parallaxinc/propeller`, set as inline code in
+XBYTE §C.1, ends at x=573.1pt against a 540pt text-block edge on 612pt paper. It
+intrudes 33.1pt into the 72pt right margin. It is **not** cut at the paper edge, and
+the URL does wrap — but the first fragment overhangs the body text visibly. A second
+URL in §C.2 overhangs 18pt, under the gate's 20pt tolerance, so the gate reports one
+span while two are actually leaning out.
+
+**Why it is not a local text fix.** Inline code has no hyphenation and breaks only at
+`/`. The line-breaker took the last available `/` rather than an earlier one that
+would have fit. Any fix by rewording — dropping the `https://` scheme, shortening the
+lead-in prose, moving the URL later in the sentence — depends on where the line
+happens to wrap, so it can pass today and fail after any edit above it. Dropping the
+scheme would also break the house form: every other URL in Appendix C is a full
+`https://` inline-code span, and one bare exception reads as an error.
+
+**The real fix is platform-level**: give inline-code spans more legal break points
+(a discretionary after `//`, `.` and `/`), so a long URL breaks where it fits instead
+of overrunning. That is a set-wide rendering change with the same profile as the
+fancyvrb `breaklines` work «#250» — it changes line breaks in every manual, so it
+wants the same scheduling rule: land it when no manual is mid-render, adopt per
+manual at its next natural render, and look at re-flowed pages rather than the log.
+
+**Do it with «#250»**, not before — both are inline/verbatim breaking behaviour in
+the shared platform layer, and doing them together means one re-flow review per
+manual instead of two.
+
+**Verify when done:** `audit-pdf-margin-overflow.py` reports zero spans on the XBYTE
+PDF, and the §C.1 and §C.2 URLs both sit inside the text block with their breaks at
+sensible boundaries.
