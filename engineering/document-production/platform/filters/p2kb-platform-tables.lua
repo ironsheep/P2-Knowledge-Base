@@ -934,12 +934,36 @@ local function handle_content_table(el)
       widths[3] = 0.35
     else
       -- Appendix F style: shorter 26-char shifted values
-      -- Column 1 (Constant): 22% - max 24 chars like X_2ADC8_16P_4DAC8_WFLONG
-      -- Column 2 (Value): 32% - 26-char shifted patterns
-      -- Column 3 (Description): 41% - much more room for descriptions
-      widths[1] = 0.22
-      widths[2] = 0.32
-      widths[3] = 0.41
+      -- Column 1 (Constant): 22% - Column 2 (Value): 32% - Column 3: 41%
+      --
+      -- The 22% default does NOT fit the 24 chars its old comment claimed.
+      -- Measured on the shipped PDF: X_2ADC8_16P_4DAC8_WFLONG renders 129.1pt
+      -- wide in IBMPlexMono 9pt, against a 103.0pt column (22% of the 468pt
+      -- block). Column 2 starts at x=186.6 while the symbol runs to x=204.8, so
+      -- the constant printed ON TOP OF its own value and the bit pattern was
+      -- unreadable - in a bit-level constant reference, the one thing the table
+      -- exists to convey. It shipped that way for at least two releases.
+      --
+      -- So size the symbol columns to their content when, and ONLY when, the
+      -- default is too narrow. 468pt / 5.38pt-per-char = 87 chars span the
+      -- block at this size; 103pt holds 19. Tables at or under 19 keep the
+      -- exact fixed widths they render correctly with today.
+      --
+      -- Blast radius measured, not assumed: of 45 Constant|Value|Description
+      -- tables across every master, exactly FOUR exceed 19 chars - two in the
+      -- Assembly manual (Appendix G) and two in the Streamer guide. The other
+      -- 41 take the unchanged branch and are byte-identical.
+      local tok1 = get_max_token_length(el, 1)
+      if tok1 > 19 then
+        local tok2 = get_max_token_length(el, 2)
+        widths[1] = math.min(0.45, (tok1 + 1.5) / 87)
+        widths[2] = math.min(0.40, (tok2 + 1.5) / 87)
+        widths[3] = math.max(0.25, 0.95 - widths[1] - widths[2])
+      else
+        widths[1] = 0.22
+        widths[2] = 0.32
+        widths[3] = 0.41
+      end
     end
     has_widths = true
   elseif is_instr_desc then
