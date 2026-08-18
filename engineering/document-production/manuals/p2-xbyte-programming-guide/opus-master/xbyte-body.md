@@ -1,6 +1,6 @@
 # Part I: The Landscape
 
-This Part is the map. It says what emulation is, why the Propeller 2 is unusually good at it, and the handful of things any emulator of the kind we build must reckon with — all before a single P2 instruction is named. Read it and you will meet the engine in the next Part already knowing what you are pointing it at, and why. If you have built emulators before, skim it; if you have not, it is the ground the rest of the book stands on.
+This Part is the map. It says what emulation is, why the Propeller 2 is unusually good at it, and the handful of things any emulator of the kind we build must reckon with — all before a single P2 instruction is named. Read it and you will meet the P2's dispatch machinery in the next Part already knowing what you are pointing it at, and why. If you have built emulators before, skim it; if you have not, it is the ground the rest of the book stands on.
 
 # Chapter 1: Why Emulate on the P2 {#ch-1}
 
@@ -38,7 +38,7 @@ This guide is written for two readers, and it is one road with two on-ramps.
 
 **If emulation is new to you:** read this Part straight through, then continue in order. It builds the picture — what emulation is, why the P2 suits it, and what any emulator must handle — that every later chapter assumes. You will reach the P2's dispatch engine already understanding what it is *for*, instead of gathering its details and hoping they add up.
 
-**If you have built emulators before:** skim the field above, note that we work **at the instruction level** and reproduce **behavior rather than timing**, and go to the engine (Part II) and then to the decisions chapter (Chapter 13), where the P2-specific judgment lives: *which* of the engine's assets your particular guest can actually use. For many guests the answer is only one of them, not both — and Chapter 13 is where that is worked out.
+**If you have built emulators before:** skim the field above, note that we work **at the instruction level** and reproduce **behavior rather than timing**, and go to the decisions chapter (Chapter 7), where the P2-specific judgment lives: *which* of the engine's assets your particular guest can actually use. It sits deliberately early, ahead of the engine reference in Part IV, because for many guests the answer is only one of the two assets rather than both — and that answer decides how much of Part IV you need.
 
 The next chapter meets you in the middle: it lays out, in plain terms, the handful of concerns every emulator of our kind must answer — and then, at its end, gives you the vocabulary the rest of the book will speak.
 
@@ -104,7 +104,7 @@ With the picture drawn and the words in hand, the next Part is where the P2 earn
 
 # Part II: Dispatch on the P2
 
-This part builds the mental model of the engine. It opens on the one idea XBYTE exists to serve — the loop at the center of every interpreter — then teaches the **skip family** (SKIP, SKIPF, EXECF) that XBYTE is built from, the **FIFO** that feeds it bytecodes, and the **LUT dispatch table** it reads. By the end of Part II, XBYTE itself (Part III) is no longer magic: it is hardware that runs a dispatch you already understand, once per bytecode, at a fixed six-clock cost (§7.2).
+This Part teaches the machinery. It opens on the one idea XBYTE exists to serve — the loop at the center of every interpreter — then teaches the **skip family** (SKIP, SKIPF, EXECF) the engine is built from, the **FIFO** that feeds it bytecodes, and the **LUT dispatch table** it reads. None of it belongs to XBYTE alone: these are the parts you use whether you write your dispatch loop by hand or hand it to the engine, which is why they come before the choice between the two. By the end of Part II you can write that loop yourself — and the engine, when Part IV specifies it, is hardware running a dispatch you already understand, once per bytecode, at a fixed six-clock cost (§9.2).
 
 # Chapter 3: Understanding XBYTE {#ch-3}
 
@@ -211,7 +211,7 @@ To see what the engine makes possible on real silicon — and, just as usefully,
 
 # Chapter 4: The Skip Family {#ch-4}
 
-XBYTE is built out of three related instructions: **SKIP**, **SKIPF**, and **EXECF**. They are useful on their own, and understanding them is the whole secret to understanding the engine — because XBYTE's dispatch *is* an EXECF, and its compact handlers are built with SKIPF. This chapter teaches the family first, as ordinary instructions. The engine in Part III then needs almost no new ideas.
+XBYTE is built out of three related instructions: **SKIP**, **SKIPF**, and **EXECF**. They are useful on their own, and understanding them is the whole secret to understanding the engine — because XBYTE's dispatch *is* an EXECF, and its compact handlers are built with SKIPF. This chapter teaches the family first, as ordinary instructions. The engine, when Part IV specifies it, then needs almost no new ideas.
 
 All three take a pattern of bits and use it to *not execute* selected instructions. The difference is in *how* they skip and *what else* they do.
 
@@ -442,7 +442,7 @@ XBYTE makes this automatic: on every dispatch it writes the FIFO pointer into **
 
 # Chapter 6: LUT Dispatch {#ch-6}
 
-The last piece before the engine itself is the **dispatch table**: how a bytecode becomes a handler address. XBYTE keeps this table in LUT RAM, and its design is the reason dispatch costs only a few clocks.
+The last piece of the shared machinery is the **dispatch table**: how a bytecode becomes a handler address. XBYTE keeps this table in LUT RAM, and its design is the reason dispatch costs only a few clocks — but the table is yours either way, read by the engine or by a loop you write, which is why it comes before the choice between them.
 
 ## 6.1 The table is 256 EXECF operands in LUT {#sec-6-1}
 
@@ -523,7 +523,7 @@ You now know the machinery: the skip family, the bytecode stream, the LUT dispat
 
 # Chapter 7: The Three Decisions {#ch-7}
 
-Everything so far has taught the engine. This chapter is the judgement that comes *before* you use it: which of the engine's assets your guest can actually take. The intuitive test is not the one that decides it.
+You have the machinery — the skip family, the bytecode stream, the LUT table — and §6.4 built a dispatch loop out of it by hand. Chapter 3 told you what the engine is; Part IV is where it is specified. This chapter is the judgement that belongs between the two: which of the engine's assets your guest can actually take, and whether you want them. The intuitive test is not the one that decides it.
 
 The intuitive test is to ask: *does my guest's instruction shape fit the engine?* Byte-stream and opcode-first, and you are in the sweet spot; word opcodes or fixed-width words, and you are not. That test is tidy, but it does not predict what real emulators do. There are working P2 emulators for guests that are *perfectly* byte-stream and opcode-first, and they do not use XBYTE at all. There are others whose instruction shape is a poor fit, and they use half of it very happily.
 
@@ -672,7 +672,7 @@ Be clear about what the capstone is *not*. Our 6502 is a **teaching artifact** �
 
 # Chapter 8: What Will Hurt — A Guest-CPU Survey {#ch-8}
 
-Chapter 13 gave you three decisions. This chapter answers them for the processors people actually emulate, so you can see at a glance what you are signing up for.
+Chapter 7 gave you three decisions. This chapter answers them for the processors people actually emulate, so you can see at a glance what you are signing up for.
 
 Two tables, because a reader arrives with two different questions. The first is *"can I use the engine at all?"* The second is *"what is going to hurt me regardless?"* They are not the same question, so they get separate tables.
 
@@ -797,11 +797,11 @@ Then, whichever rung you land on, the columns of §14.3 are your work list — f
 
 # Part IV: The XBYTE Engine
 
-Part II built the pieces: the skip family, the FIFO stream, the LUT dispatch table. This part is the engine itself — the cycle that runs those pieces in hardware, the single instruction that arms it, the table-size and compression options that shape it, and the rules the handlers must follow. It is the reference for how XBYTE behaves.
+Part II built the pieces: the skip family, the FIFO stream, the LUT dispatch table. Part III weighed them, and if you are reading on, your answers pointed at the engine. This Part is the engine itself — the cycle that runs those pieces in hardware, the single instruction that arms it, the table-size and compression options that shape it, the rules the handlers must follow, and how to see inside a loop that has no body. It is the reference for how XBYTE behaves.
 
 # Chapter 9: The Dispatch Cycle {#ch-9}
 
-XBYTE's dispatch is the hand-written loop of §6.4, executed by hardware as a fixed sequence. The *Parallax Propeller 2 Documentation v35* specifies it as an **8-clock** sequence with a **6-clock overhead** per bytecode. This chapter walks it clock by clock — not because you write any of it, but because knowing exactly what the engine touches, and when, is what lets you reason about `PA`, `PB`, the flags, and timing inside a handler.
+Chapter 7 put the engine on the table and Chapter 8 priced it for the common guests. This chapter is what that choice buys. XBYTE's dispatch is the hand-written loop of §6.4, executed by hardware as a fixed sequence. The *Parallax Propeller 2 Documentation v35* specifies it as an **8-clock** sequence with a **6-clock overhead** per bytecode. This chapter walks it clock by clock — not because you write any of it, but because knowing exactly what the engine touches, and when, is what lets you reason about `PA`, `PB`, the flags, and timing inside a handler.
 
 ## 9.1 The eight clocks {#sec-9-1}
 
@@ -1132,7 +1132,7 @@ h_halt          pop     tmp                 ' reclaim the arming $1FF
 
 You have now written handlers, built a table, and armed the engine. Sooner or later it will not do what you meant, and you will want to look inside it — which is where XBYTE presents its one genuinely awkward property.
 
-**The engine's loop is hardware. There is no loop body.** In a software interpreter you would drop a `debug()` into the dispatch loop and watch every instruction go by. XBYTE has no such place: it goes from your handler's `_RET_` to the next handler's first instruction in six clocks, with nothing of yours in between. (Chapter 13 shows how far the consequences of that reach; this chapter is about living with it.)
+**The engine's loop is hardware. There is no loop body.** In a software interpreter you would drop a `debug()` into the dispatch loop and watch every instruction go by. XBYTE has no such place: it goes from your handler's `_RET_` to the next handler's first instruction in six clocks, with nothing of yours in between. (§7.4 weighed how far the consequences of that reach while you were still deciding; this chapter is about living with them.)
 
 Fortunately, the silicon anticipated this.
 
@@ -1236,9 +1236,9 @@ Two failure modes, two tools. If a **handler** is wrong — the wrong variant ra
 
 # Part V: Building Interpreters and Emulators
 
-Parts II and III explained the engine — and Chapter 11 showed you how to see it running. This part proves it by building. Chapter 12 builds a complete, working bytecode VM from nothing: the smallest thing that exercises the whole engine. Chapter 13 then steps back and asks the question that comes *before* any emulator — which of the engine's assets you can actually take, and what each one costs — and Chapter 14 answers it for the classic guest processors, one by one. Chapters 15 through 17 build a tiny 6502, service its interrupts, and handle prefix bytes with alternate tables. Chapter 18 closes the part by widening the frame off interpreters entirely: the same engine parsing protocols, decoding formats, and driving displays.
+Part IV specified the engine and Chapter 13 showed you how to see it running. This Part proves it by building. Chapter 14 builds a complete, working bytecode VM from nothing: the smallest thing that exercises the whole engine. Chapter 15 turns the same machinery on a real processor with an illustrative slice of a 6502; Chapter 16 services that guest's interrupts, which is the problem the missing loop body makes hard; and Chapter 17 handles prefix bytes with alternate tables. Chapter 18 closes the Part by widening the frame off interpreters entirely: the same engine parsing protocols, decoding formats, and driving displays.
 
-Everything in this part is **tiny and illustrative** — sized to show a technique end to end, not to be a faithful or complete implementation. (The two complete programs, the Chapter 12 VM and the Chapter 18 display list, compile; the shorter handlers elsewhere are representative fragments.) That is a deliberate charter.
+Everything in this Part is **tiny and illustrative** — sized to show a technique end to end, not to be a faithful or complete implementation. (The two complete programs, the Chapter 14 VM and the Chapter 18 display list, compile; the shorter handlers elsewhere are representative fragments.) That is a deliberate charter.
 
 # Chapter 14: A Minimal Custom VM {#ch-14}
 
@@ -1606,7 +1606,7 @@ What it costs is **a decision you would not have had to make** on a software loo
 
 # Chapter 17: Prefixes and Alternate Tables {#ch-17}
 
-Almost every guest processor eventually runs out of opcodes and solves it with a **prefix byte** — a byte that changes the meaning of the byte after it. XBYTE has an instruction that looks made for exactly this: the one-shot **SETQ2** (§8.3), which borrows an alternate dispatch table for precisely one bytecode and then reverts on its own.
+Almost every guest processor eventually runs out of opcodes and solves it with a **prefix byte** — a byte that changes the meaning of the byte after it. XBYTE has an instruction that looks made for exactly this: the one-shot **SETQ2** (§10.3), which borrows an alternate dispatch table for precisely one bytecode and then reverts on its own.
 
 `SETQ2` is *an* answer to prefixes — but only to half of them. Knowing which half is what separates a clean prefix implementation from a tangle.
 
@@ -1701,7 +1701,7 @@ Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, 
 
 # Chapter 18: XBYTE Beyond Interpreters {#ch-18}
 
-Parts II–IV taught XBYTE as the engine under a language or a CPU, because that is what it was built for and where it shines. But strip the word "bytecode" away and the machine is more general: **XBYTE is hardware table-driven dispatch over a byte stream.** It reads the next byte, indexes a table, jumps to a handler, and loops — and nothing in that sentence requires the stream to be a *program*. Any problem shaped like *walk a stream of bytes, and for each one do one of a small set of things* can ride the same six-clock loop. This chapter widens the lens: the engine that runs a VM will also parse a protocol, decode a format, drive a display, or sequence a show.
+Everything so far has taught XBYTE as the engine under a language or a CPU, because that is what it was built for and where it shines. But strip the word "bytecode" away and the machine is more general: **XBYTE is hardware table-driven dispatch over a byte stream.** It reads the next byte, indexes a table, jumps to a handler, and loops — and nothing in that sentence requires the stream to be a *program*. Any problem shaped like *walk a stream of bytes, and for each one do one of a small set of things* can ride the same six-clock loop. This chapter widens the lens: the engine that runs a VM will also parse a protocol, decode a format, drive a display, or sequence a show.
 
 ## 18.1 Two assets, three widening features {#sec-18-1}
 
@@ -1737,7 +1737,7 @@ A survey of where XBYTE earns its keep beyond languages and CPUs. Fit is graded 
 | **Forth inner interpreter** | a threaded word stream | both — but interpreter-adjacent | partial |
 | **Charset map / Morse / template expand** | symbols → output | marginal — a plain `RDLUT` wins unless there is real per-symbol work |
 
-The three sketches that follow take one **strong** case for each widening feature. Each is **tiny and illustrative** — a handful of handlers to show the shape, not a finished driver — the same charter as the rest of Part IV.
+The three sketches that follow take one **strong** case for each widening feature. Each is **tiny and illustrative** — a handful of handlers to show the shape, not a finished driver — the same charter as the rest of Part V.
 
 ## 18.3 A terminal reader — the table as state {#sec-18-3}
 
@@ -1926,7 +1926,7 @@ A quick decision rule: if you can describe the job as *"read a byte from hub, pi
 
 # Part VI: Reference
 
-This part is for lookup. Chapter 19 is the per-instruction reference for everything XBYTE is built from; Chapter 20 collects the configuration values — the mode-operand layout, the registers, and the memory ranges — in one place. The appendices that follow add quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
+This Part is for lookup. Chapter 19 is the per-instruction reference for everything XBYTE is built from; Chapter 20 collects the configuration values — the mode-operand layout, the registers, and the memory ranges — in one place. The appendices that follow add quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 
 # Chapter 19: Instruction Reference {#ch-19}
 
