@@ -24,7 +24,7 @@ Three things draw people to the Propeller 2 for this work — and raw speed is n
 
 - **Full-system emulation.** The guest's processor *together with* its peripherals, timers, and buses, modeled as one whole machine. **We stay at the processor.** Its peripherals you build yourself, out of the P2's own I/O — which on this chip is a strength, not a shortfall.
 
-- **Dynamic binary translation (JIT).** Rather than read and carry out each guest instruction every time it runs, translate whole blocks of guest code into host code *once*, then run the translation. Fast on hot loops; considerably more complex to build. **We interpret; we do not translate.** It is named here so you know the road exists — the closing chapter (Chapter 18) notes where it would branch off.
+- **Dynamic binary translation (JIT).** Rather than read and carry out each guest instruction every time it runs, translate whole blocks of guest code into host code *once*, then run the translation. Fast on hot loops; considerably more complex to build. **We interpret; we do not translate.** It is named here so you know the road exists — the closing chapter (Chapter 19) notes where it would branch off.
 
 - **Static recompilation.** Translate the entire guest program to host code *ahead of time*, offline. **Out of scope** — that is a compiler project, not a runtime, and a different book.
 
@@ -157,7 +157,7 @@ The handlers themselves live in cog or LUT RAM and end in **RET** or **`_RET_`**
 
 ## 3.5 When to reach for XBYTE {#sec-3-5}
 
-XBYTE pays off when dispatch cost dominates — any time your "program" is a stream of byte-sized operations **read from hub memory**, and each one selects a small piece of work. The famous case is an interpreter or VM with many small operations, or a CPU emulator, but it is not the only one: a protocol parser, a data-format decoder, a graphics display list, an event sequencer — anything shaped like *walk a byte stream, dispatch on each byte* is a candidate. Chapter 18 widens the lens well beyond interpreters.
+XBYTE pays off when dispatch cost dominates — any time your "program" is a stream of byte-sized operations **read from hub memory**, and each one selects a small piece of work. The famous case is an interpreter or VM with many small operations, or a CPU emulator, but it is not the only one: a protocol parser, a data-format decoder, a graphics display list, an event sequencer — anything shaped like *walk a byte stream, dispatch on each byte* is a candidate. Chapter 19 widens the lens well beyond interpreters.
 
 It is the **wrong** tool when there is no stream to walk, or when the "dispatch" is really just a lookup with no per-symbol work to do — a plain `RDLUT` is cheaper than arming the engine. And there are two conditions that rule it out entirely, no matter how well your problem fits in every other respect — plus a third that prices it rather than forbidding it. They are worth knowing now, in one sentence each, because they are architectural:
 
@@ -166,9 +166,9 @@ It is the **wrong** tool when there is no stream to walk, or when the "dispatch"
 
 The first two are absolute — no amount of wanting the engine will get you past them. The third is different in kind, and it is the one people argue about:
 
-- **Per-symbol work has no free home.** The engine's loop is *hardware* — there is no loop body, so pacing, tracing, interrupt polling and progress checks have nowhere to *naturally* live. This does not mean they are impossible. It means they cost: you put them inside handlers and pay for them there, from about 2 clocks on every symbol down to nearly nothing if you can confine them to the handlers that matter. Chapter 16 works this out in full for guest interrupts, with the cost of each choice.
+- **Per-symbol work has no free home.** The engine's loop is *hardware* — there is no loop body, so pacing, tracing, interrupt polling and progress checks have nowhere to *naturally* live. This does not mean they are impossible. It means they cost: you put them inside handlers and pay for them there, from about 2 clocks on every symbol down to nearly nothing if you can confine them to the handlers that matter. Chapter 17 works this out in full for guest interrupts, with the cost of each choice.
 
-So: two disqualifiers and one budget. Chapter 7 is where all three come from and §18.7 is the full list; if one of the first two holds, you want the software loop of §6.4 — which is not a consolation prize, but what most working P2 emulators actually ship.
+So: two disqualifiers and one budget. Chapter 7 is where all three come from and §19.7 is the full list; if one of the first two holds, you want the software loop of §6.4 — which is not a consolation prize, but what most working P2 emulators actually ship.
 
 ::: tip
 If you have written an interpreter before: XBYTE replaces your `next:` dispatch label — the `fetch / index / jump` you wrote by hand — with hardware. Your handlers stay yours; you delete the loop between them — including anything else you were keeping there.
@@ -186,7 +186,7 @@ The engine is not free, and its price is paid in cog resources rather than clock
 | **`PA`** (`$1F6`) | overwritten with the current bytecode on **every** dispatch |
 | **`PB`** (`$1F7`) | overwritten with the FIFO read pointer on **every** dispatch |
 | **The cog's FIFO** | held by `RDFAST` for the bytecode stream — so it cannot simultaneously stream video or drive a block move |
-| **The dispatch loop** | **there isn't one.** Per-bytecode work must go inside your handlers and be paid for there (§7.4, Ch. 16) |
+| **The dispatch loop** | **there isn't one.** Per-bytecode work must go inside your handlers and be paid for there (§7.4, Ch. 17) |
 
 The first six are ordinary budgeting. The last one is different in kind — not a resource the engine spends but a place to work that it removes — and it is the subject of §7.4.
 
@@ -198,12 +198,12 @@ You have probably arrived with an application already in mind. Find it here; the
 |---------------------|------------------|----------|
 | a **bytecode VM** or scripting language | the whole engine — this is what it was built for | Ch. 14 |
 | a **CPU emulator** | it depends on your guest — often one asset, not both | **Ch. 7, Ch. 8** |
-| a **terminal / ANSI parser** | the *table* as state — `ESC` borrows an alternate table | §18.3 |
-| a **MIDI or protocol decoder** | the *byte* as data — the channel or type rides in `PA` | §18.4 |
-| a **graphics display list** | the *stream* as a movable cursor | §18.5 |
-| a **binary format / TLV decoder** | the byte as a type tag | §18.2 |
-| an **event or animation sequencer** | seek — the read cursor loops and branches for free | §18.2 |
-| something else that walks a byte stream | the general test | §3.5, then §18.7 |
+| a **terminal / ANSI parser** | the *table* as state — `ESC` borrows an alternate table | §19.3 |
+| a **MIDI or protocol decoder** | the *byte* as data — the channel or type rides in `PA` | §19.4 |
+| a **graphics display list** | the *stream* as a movable cursor | §19.5 |
+| a **binary format / TLV decoder** | the byte as a type tag | §19.2 |
+| an **event or animation sequencer** | seek — the read cursor loops and branches for free | §19.2 |
+| something else that walks a byte stream | the general test | §3.5, then §19.7 |
 
 If your project is a **CPU emulator**, read Chapters 7 and 8 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*.
 
@@ -464,7 +464,7 @@ The *Parallax Propeller 2 Documentation v35* states it directly: the table *"mus
 :::
 
 ::: hardware
-**The table is *this* cog's LUT — and 256 entries is the ceiling.** A bytecode is one byte, so it indexes at most **256** entries, and the engine reads them from the LUT of the cog that is running it. You cannot enlarge the table by *sharing* LUT across two cogs: **`SETLUTS`** mirrors a companion cog's LUT *writes* into this cog's LUT — it does **not** merge the two into one address space, and each cog still has its own 512-long LUT. So when a guest needs **more than 256 distinct opcodes**, the answer is not more LUT but a **prefix bytecode that borrows an alternate table** with one-shot `SETQ2` (§10.3, Chapter 17) — exactly how a CPU's extended-opcode pages are handled. **Compression** (§11.3) is the complementary tool, for when many bytecodes *share* one handler rather than needing new ones.
+**The table is *this* cog's LUT — and 256 entries is the ceiling.** A bytecode is one byte, so it indexes at most **256** entries, and the engine reads them from the LUT of the cog that is running it. You cannot enlarge the table by *sharing* LUT across two cogs: **`SETLUTS`** mirrors a companion cog's LUT *writes* into this cog's LUT — it does **not** merge the two into one address space, and each cog still has its own 512-long LUT. So when a guest needs **more than 256 distinct opcodes**, the answer is not more LUT but a **prefix bytecode that borrows an alternate table** with one-shot `SETQ2` (§10.3, Chapter 18) — exactly how a CPU's extended-opcode pages are handled. **Compression** (§11.3) is the complementary tool, for when many bytecodes *share* one handler rather than needing new ones.
 :::
 
 ## 6.2 Building a table entry {#sec-6-2}
@@ -629,7 +629,7 @@ Consider what that means. In a software interpreter, the dispatch loop is a *pla
 
 That is a great deal of cross-cutting work, in one place, once per instruction. (MegaYume's Z80 core does the bus-arbitration, pacing, and refresh among them — §C.4.)
 
-Under XBYTE, **none of that has a place of its own.** The engine goes from your handler's `_RET_` straight to the next handler's first instruction, in hardware, in six clocks. There is no gap. Every one of those six concerns has to move *inside the handlers* — replicated across all of them, confined to the few where it genuinely matters, or dropped. That is a real cost and sometimes a prohibitive one; Chapter 16 prices it for the commonest case, guest interrupts.
+Under XBYTE, **none of that has a place of its own.** The engine goes from your handler's `_RET_` straight to the next handler's first instruction, in hardware, in six clocks. There is no gap. Every one of those six concerns has to move *inside the handlers* — replicated across all of them, confined to the few where it genuinely matters, or dropped. That is a real cost and sometimes a prohibitive one; Chapter 17 prices it for the commonest case, guest interrupts.
 
 ::: hardware
 This is the trade, stated plainly:
@@ -657,7 +657,7 @@ Chapter 8 turns these three decisions into a per-processor survey: what each cla
 
 ## 7.6 Why the 6502 {#sec-7-6}
 
-The capstone in Chapter 15 is the **6502**, and this chapter's framework makes the choice concrete:
+The capstone in Chapter 16 is the **6502**, and this chapter's framework makes the choice concrete:
 
 - **Its code fits in hub.** A 6502's entire address space is 64 KB — it fits in hub with room to spare, so auto-fetch is genuinely available. This is decision one, and the 6502 passes it where a console does not.
 - **Byte-stream, opcode-first.** Every instruction begins with a one-byte opcode followed by 0–2 operand bytes. `RFBYTE` fetches the opcode; `RFBYTE`/`RFWORD` pull its fixed-width operand bytes — **not** `RFVAR`/`RFVARS`, which decode variable-length (self-sizing) values and would misread any operand byte ≥ `$80`. (`RFVAR` belongs to a bytecode VM's operands — §14.2 — not a fixed-width guest CPU.)
@@ -730,7 +730,7 @@ The rest of this chapter takes each column in turn, because *what the column cos
 
 ## 8.4 Prefixes are two different things {#sec-8-4}
 
-A distinction that is easy to get wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` (286+) — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 17 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
+A distinction that is easy to get wrong: two kinds of prefix that look identical in a hex dump and want opposite treatment. A **map prefix** — 6809 `$10`/`$11`, Z80 `CB`/`ED`, x86 `$0F` (286+) — selects a *different opcode map*, changing *which* handler runs; one-shot `SETQ2` hands you the alternate table. A **modifier prefix** — x86 segment/`REP`/`LOCK`, Z80 `DD`/`FD` — changes *how* a handler behaves, not which one runs, and wants a **state register**, not a table. Confuse the two and you either build a table you never needed or decode the wrong instruction — and the **Z80 carries both**, which makes it the sharpest example. Chapter 18 builds both mechanisms in full; at survey level the cost is simply *knowing which kind each of your guest's prefixes is.*
 
 ## 8.5 Flags — the cost nobody budgets for {#sec-8-5}
 
@@ -756,11 +756,11 @@ The honest advice: **decimal mode is small, fiddly, well-specified, and testable
 
 ## 8.7 Guest interrupts {#sec-8-7}
 
-Every guest but CHIP-8 has them, and servicing them under a *hardware* dispatch loop is the problem Chapter 16 exists to solve. Two things are worth knowing here, at survey level:
+Every guest but CHIP-8 has them, and servicing them under a *hardware* dispatch loop is the problem Chapter 17 exists to solve. Two things are worth knowing here, at survey level:
 
 - **The guest's interrupt-enable flag is just a cog register you own.** `DI` and `EI` become one instruction each.
 - **Where you poll matters more than how.** With a software loop you poll once, in the loop. Under XBYTE **there is no loop** (§7.4) — so the poll must live inside handlers, at points where interrupting is safe. That is a design decision, not a detail, and it is the clearest practical consequence of taking rung 3.
-- **The guest decides *when* it accepts, not just whether.** Enable-delays (the Z80/8080 `EI` waits one instruction), prefix and atomic sequences that hold interrupts off, and interruptible-and-resumable instructions are all part of the guest's architecture — a faithfulness dial most emulators leave off, and one §16.3 shows how to honour when a guest's own code depends on it.
+- **The guest decides *when* it accepts, not just whether.** Enable-delays (the Z80/8080 `EI` waits one instruction), prefix and atomic sequences that hold interrupts off, and interruptible-and-resumable instructions are all part of the guest's architecture — a faithfulness dial most emulators leave off, and one §17.3 shows how to honour when a guest's own code depends on it.
 
 The Z80's three interrupt modes and the 68000's seven vectored levels are more *bookkeeping* than the 6502's single IRQ line, but the mechanism is the same in all of them.
 
@@ -929,7 +929,7 @@ There are two arming instructions, and the choice between them is **orthogonal**
 - **SETQ** arms the **persistent** mode. The configuration is retained and applies to **every** subsequent bytecode. This is how you start the engine and how it stays running.
 - **SETQ2** arms a **one-shot** mode that applies to **exactly the next bytecode**, after which the engine automatically reverts to the mode last set by SETQ — *"without having to restore the original XBYTE mode afterwards."*
 
-The one-shot form lets a VM keep a default dispatch table and *borrow* an alternate table for a single bytecode at a time. The classic use is a **prefix bytecode**: a bytecode whose handler issues `_ret_ setq2` to select an alternate table, so the *following* bytecode dispatches through that alternate table and then control returns to the default. This is exactly how a guest CPU's "extended opcode" pages are handled — the subject of the 6809 vignette in Chapter 17.
+The one-shot form lets a VM keep a default dispatch table and *borrow* an alternate table for a single bytecode at a time. The classic use is a **prefix bytecode**: a bytecode whose handler issues `_ret_ setq2` to select an alternate table, so the *following* bytecode dispatches through that alternate table and then control returns to the default. This is exactly how a guest CPU's "extended opcode" pages are handled — the subject of the 6809 vignette in Chapter 18.
 
 | | SETQ | SETQ2 |
 |---|------|-------|
@@ -1125,7 +1125,7 @@ h_halt          pop     tmp                 ' reclaim the arming $1FF
                 jmp     #idle               ' back to the between-jobs wait
 ```
 
-(Appendix C's minimal community example, §C.9, is a reusable cog that does exactly this.)
+(§15.6 builds a cog that arms twice and shows what the missing `POP` would cost; Appendix C's minimal community example, §C.9, is a real one in the wild.)
 :::
 
 # Chapter 13: Debugging XBYTE {#ch-13}
@@ -1162,7 +1162,7 @@ Fortunately, the silicon anticipated this.
 Between them, these answer *what the engine is doing right now*: whether it is armed, in which mode, and what pattern is currently queued. Note what is **not** among them — how many instructions remain in the current bytecode routine. The queued pattern bits are visible, but a routine ends at its `_RET_`, which is a property of your code, not a length the engine tracks.
 
 ::: hardware
-Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 15's shared `set_nz` helper depends entirely on this. (What it does *not* license is folding the return into the call. `_RET_` returns only if the instruction did not branch, and `CALL` branches — so `_RET_ CALL` never returns, however much it looks like it should. §15.3 has the detail.)
+Notice `D[31:28]` — the `CALL` depth — and the sentence attached to it: **skipping is suspended while it is non-zero.** This is not a debugging curiosity; it is a load-bearing fact about the engine, and it is the reason a handler can `CALL` a shared helper at all. The helper's instructions are **not** eaten by the caller's skip pattern, because the pattern is suspended for the duration of the call. Chapter 16's shared `set_nz` helper depends entirely on this. (What it does *not* license is folding the return into the call. `_RET_` returns only if the instruction did not branch, and `CALL` branches — so `_RET_ CALL` never returns, however much it looks like it should. §16.3 has the detail.)
 :::
 
 ## 13.2 The debugger shows you the engine's state {#sec-13-2}
@@ -1357,7 +1357,7 @@ The VM above arms XBYTE in the same cog that set it up, then parks — ideal for
 
 The shape is always the same. A launching cog builds an image whose LUT already holds the dispatch table, starts a cog on it with **`COGINIT`**, and shares a small **mailbox** in hub — a few longs the two cogs use to say *"here is the program," "here is where to put the result,"* and *"go."* The interpreter cog's *first act* is the arming sequence of Chapter 10; from then on the exit rules of §12.4 — including the re-arm `POP` if it will serve more than one job — are what keep it re-usable.
 
-This guide stops at the engine and leaves cog orchestration (`COGINIT`, mailbox protocols) to the general P2 references. The pattern is named here only because it is where most projects go the moment their first bytecodes run. For a complete, minimal, community-written instance of exactly this shape — a dedicated XBYTE cog fed by a hub mailbox, popping its `$1FF` between jobs — see **Appendix C, §C.9**.
+This guide stops at the engine and leaves cog orchestration (`COGINIT`, mailbox protocols) to the general P2 references. The pattern is named here only because it is where most projects go the moment their first bytecodes run. Chapter 15 takes the first step in that direction: the same VM, grown, running two jobs from one cog and reclaiming its `$1FF` between them (§15.6). For a complete, minimal, community-written instance of the full shape — a dedicated XBYTE cog fed by a hub mailbox, popping its `$1FF` between jobs — see **Appendix C, §C.9**.
 
 # Chapter 15: Growing the VM {#ch-15}
 
@@ -1744,7 +1744,7 @@ The `rfbyte` and the closing call/return are never skipped, so every path reads 
 
 ## 16.4 What this slice shows, and what it omits {#sec-16-4}
 
-The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode (§8.6), correct flag semantics on every operation (§8.5), interrupt servicing (Chapter 16), and accurate timing (§8.8) — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
+The slice demonstrates the full technique: opcode-as-bytecode, operands from the FIFO, PC-as-FIFO-position, branches as `RDFAST`, and shared bodies for regular families. A faithful 6502 adds the rest of the opcode table, the full addressing-mode matrix, decimal mode (§8.6), correct flag semantics on every operation (§8.5), interrupt servicing (Chapter 17), and accurate timing (§8.8) — none of which change the XBYTE technique, all of which are deliberately out of scope here. The point is the shape of the solution, not a finished emulator.
 
 One omission would shape a real build, so it gets its own note.
 
@@ -1762,7 +1762,7 @@ It is the industrial-strength version of the shared-body idiom in §4.4, and it 
 
 # Chapter 17: Servicing Guest Interrupts {#ch-17}
 
-Your guest has an interrupt line. Almost all of them do — and Chapter 15's 6502 is no exception, with its `IRQ` and `NMI` vectors sitting at the top of memory waiting to be honoured.
+Your guest has an interrupt line. Almost all of them do — and Chapter 16's 6502 is no exception, with its `IRQ` and `NMI` vectors sitting at the top of memory waiting to be honoured.
 
 In a software interpreter this is a solved problem so ordinary that nobody writes it down: you check the interrupt line once per pass, at the top of the dispatch loop, and if one is pending you push the guest's program counter and vector to its handler. One check, one place.
 
@@ -1820,7 +1820,7 @@ This is the sharpest practical consequence of taking rung 3 (§7.4). The engine 
 **"Consistent state" is only half the rule — the guest's architecture fixes the other half.** *Where* you may safely inject is a property of *your* handlers; *when the guest will accept* an interrupt is a property of the *guest*, and the two are not the same. Real processors defer, block, or allow interrupts at points their own designers chose, and a faithful emulator honours those rules rather than taking an interrupt wherever a poll happens to fall:
 
 - **Enable-delay.** On the Z80 and 8080, `EI` does not take effect until *after the next instruction* — so `EI` followed by `RET` cannot be interrupted between the two, and interrupt-return code depends on that to finish cleanly. (The 6502 has its own one-instruction quirk around `CLI`/`SEI`.) Model it by making the enable *pending*: a flag that the *following* instruction promotes to "enabled," not the `EI` handler itself. Poll where you like — but gate *acceptance* on the delayed flag.
-- **Atomic sequences that block acceptance.** The Z80 holds interrupts off *across a prefix* — a `DD`/`FD`/`CB`/`ED` byte and the opcode it modifies are indivisible, and no interrupt may land between them. If your prefix handling spans two dispatches (Chapter 17), the poll must not fire on the first.
+- **Atomic sequences that block acceptance.** The Z80 holds interrupts off *across a prefix* — a `DD`/`FD`/`CB`/`ED` byte and the opcode it modifies are indivisible, and no interrupt may land between them. If your prefix handling spans two dispatches (Chapter 18), the poll must not fire on the first.
 - **Interruptible-and-resumable instructions.** The opposite case: the Z80's block moves (`LDIR`) and the x86 string repeats (`REP MOVS`) can be interrupted *partway* and *resumed* — the guest keeps its progress in its own registers and re-enters where it left off. Implement such an instruction as a P2 loop and the interrupt boundary lives *inside* it, at each iteration, not only at its end.
 
 None of this is mandatory. Most P2 emulators poll at convenient points and never reproduce the enable-delay, because the guest software they run does not lean on it. It matters only when the guest's own code does — an interrupt-return that assumes one more instruction runs, a driver that toggles the enable in a tight sequence. Treat it as a **faithfulness dial**, set by what your guest actually needs, exactly like decimal mode (§8.6) or cycle accuracy (§8.8) — but know the dial is here, because the "consistent state" rule above will otherwise let an interrupt through a full instruction too early.
@@ -1894,7 +1894,7 @@ Look at what a prefix actually *does* to the byte that follows it, and they fall
 
 A **map** prefix genuinely redirects dispatch. After the 6809's `$10`, the byte `$83` names a different instruction than `$83` alone does. You want a different table, and one-shot `SETQ2` hands you one — and reverts on its own.
 
-A **modifier** prefix does *not* want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment register, which is absurd. The right answer is a register (§17.3).
+A **modifier** prefix does *not* want dispatch redirected. An x86 segment override does not change *which* instruction runs — it changes *which memory* that instruction touches. Pointing it at an alternate table would mean duplicating every handler once per segment register, which is absurd. The right answer is a register (§18.3).
 
 ::: caution
 **The Z80 carries both kinds, which makes it the best teacher and a genuine trap.** Its `CB` and `ED` prefixes are **map** prefixes — different opcode tables. Its `DD` and `FD` prefixes are **modifier** prefixes — they retarget `HL` to `IX` or `IY` and leave the opcode map alone.
@@ -1969,7 +1969,7 @@ Prefixes are merely the most obvious instance of a much larger idea:
 
 > **The table *is* state.** Change the table and you change what the machine *is* — for one bytecode with `SETQ2`, or for good with `SETQ`.
 
-Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, a parser whose states *are* tables, a decoder that switches interpretation mid-stream. Chapter 18 takes that idea well outside emulation, into some of XBYTE's less obvious uses.
+Seen that way, a whole class of designs opens up: a two-stage bytecode grammar, a parser whose states *are* tables, a decoder that switches interpretation mid-stream. Chapter 19 takes that idea well outside emulation, into some of XBYTE's less obvious uses.
 
 # Chapter 19: XBYTE Beyond Interpreters {#ch-19}
 
@@ -2048,7 +2048,7 @@ This is "the byte is both the selector and an operand" in its cleanest form. Bec
 
 ## 19.5 A display list — the stream as a movable cursor {#sec-19-5}
 
-A **display list** is a stream of drawing commands — set a color, move the pen, draw a run — that a renderer walks once per frame. Each command byte selects a primitive; its parameters follow inline in the stream, pulled with the FIFO reads of Chapter 5. And because the FIFO position *is* the list cursor (§12.3), a "repeat" or "jump" command is nothing but an `RDFAST` to a new address — the very mechanism a guest CPU's branch used in Chapter 15, here doing ordinary graphics:
+A **display list** is a stream of drawing commands — set a color, move the pen, draw a run — that a renderer walks once per frame. Each command byte selects a primitive; its parameters follow inline in the stream, pulled with the FIFO reads of Chapter 5. And because the FIFO position *is* the list cursor (§12.3), a "repeat" or "jump" command is nothing but an `RDFAST` to a new address — the very mechanism a guest CPU's branch used in Chapter 16, here doing ordinary graphics:
 
 Here is the whole thing — the complete **non-interpreter** build, and the counterpart to the VM of Chapter 14. It compiles, and it exercises every asset the engine has:
 
@@ -2133,23 +2133,23 @@ Five commands, five handlers, and the engine walks a stream of *drawing instruct
 
 - **`h_color`** and **`h_moveto`** pull their parameters straight out of the stream with the FIFO reads of Chapter 5 — `RFVAR` for a small value, `RFWORD` for a coordinate. The read cursor advances itself, so the next dispatch lands correctly with no bookkeeping.
 - **`h_hline`** does real work, and shows that a handler is just PASM2 — nothing about it is XBYTE-specific.
-- **`h_repeat`** is the interesting one. It re-points the FIFO at the top of the list, and that single `RDFAST` *is* the loop. The read cursor is a free, movable program counter (§12.3) — the very same mechanism a guest CPU's branch used in Chapter 15, here doing ordinary graphics.
+- **`h_repeat`** is the interesting one. It re-points the FIFO at the top of the list, and that single `RDFAST` *is* the loop. The read cursor is a free, movable program counter (§12.3) — the very same mechanism a guest CPU's branch used in Chapter 16, here doing ordinary graphics.
 - **`h_end`** leaves the engine by simply not returning to `$1FF` (§12.4).
 
 The command stream is *data you emit*, not a program you compile — a scene, a sprite list, a UI layout — yet the engine walks it with the same auto-fetch and dispatch a language gets. This is the mental shift the chapter turns on: XBYTE runs bytecode, and a display list is just bytecode whose "instructions" draw.
 
 ::: hardware
-The FIFO reads (`RFWORD`, `RFVAR`) that pull a command's parameters advance the same read cursor the next dispatch fetches from, so operations and their operands interleave in one stream and the read position takes care of itself — exactly as it did for inline VM operands (§5.3) and guest-CPU operand bytes (§15.1). One mechanism, three very different uses.
+The FIFO reads (`RFWORD`, `RFVAR`) that pull a command's parameters advance the same read cursor the next dispatch fetches from, so operations and their operands interleave in one stream and the read position takes care of itself — exactly as it did for inline VM operands (§5.3) and guest-CPU operand bytes (§16.1). One mechanism, three very different uses.
 :::
 
 ## 19.6 SETQ2 is a general mode switch {#sec-19-6}
 
-Chapter 17 introduced one-shot `SETQ2` through the 6809's prefix pages, where it can read as a CPU-emulation trick. It is neither a trick nor about CPUs. `SETQ2` is the general operation *"dispatch the next byte through a different table, then restore mine"* — and every escape or mode shift in a byte stream is an instance of it:
+Chapter 18 introduced one-shot `SETQ2` through the 6809's prefix pages, where it can read as a CPU-emulation trick. It is neither a trick nor about CPUs. `SETQ2` is the general operation *"dispatch the next byte through a different table, then restore mine"* — and every escape or mode shift in a byte stream is an instance of it:
 
-- the **6809** `$10` / `$11` prefix pages (Chapter 17),
-- an **ANSI terminal**'s `ESC` (§18.3),
+- the **6809** `$10` / `$11` prefix pages (Chapter 18),
+- an **ANSI terminal**'s `ESC` (§19.3),
 - **MIDI** System Exclusive, where `$F0` opens a manufacturer data block a different table consumes,
-- the **Z80** `CB` / `ED` and **x86** `$0F` (286+) escape prefixes (§17.1).
+- the **Z80** `CB` / `ED` and **x86** `$0F` (286+) escape prefixes (§18.1).
 
 It is also how Parallax's own **Spin2 interpreter** works internally: the interpreter uses one-shot `SETQ2` to reach a whole family of *variable-operator* bytecodes through an alternate table, then reverts — the persistent table never has to hold room for them. When you meet a stream where "the next thing means something different," `SETQ2` is the answer, and its automatic revert (§10.3) is what makes the shift free.
 
@@ -2168,7 +2168,7 @@ The engine is not free. Some problems are stream-shaped and still do not want it
 
 | The cost | Why | What it takes |
 |----------|-----|---------------|
-| **Cross-cutting work per symbol** | XBYTE's loop is **hardware**; there is no loop body (§7.4), so cycle pacing, progress counters, timeout checks and tracing have nowhere to live *by default* | put the work **inside handlers** and pay for it there — from ~2 clocks on every symbol, down to nearly free if it can be confined to the handlers that matter. **Chapter 16** works this out in full for guest interrupts. If the work is heavy or must run on *every* symbol, take the software loop (§6.4): three clocks, and you get a place to stand |
+| **Cross-cutting work per symbol** | XBYTE's loop is **hardware**; there is no loop body (§7.4), so cycle pacing, progress counters, timeout checks and tracing have nowhere to live *by default* | put the work **inside handlers** and pay for it there — from ~2 clocks on every symbol, down to nearly free if it can be confined to the handlers that matter. **Chapter 17** works this out in full for guest interrupts. If the work is heavy or must run on *every* symbol, take the software loop (§6.4): three clocks, and you get a place to stand |
 
 **The rest are matters of degree too** — the engine will work, it just will not earn its keep:
 
@@ -2198,7 +2198,7 @@ A quick decision rule: if you can describe the job as *"read a byte from hub, pi
 
 # Part VI: Reference
 
-This Part is for lookup. Chapter 19 is the per-instruction reference for everything XBYTE is built from; Chapter 20 collects the configuration values — the mode-operand layout, the registers, and the memory ranges — in one place. The appendices that follow add quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
+This Part is for lookup. Chapter 20 is the per-instruction reference for everything XBYTE is built from; Chapter 21 collects the configuration values — the mode-operand layout, the registers, and the memory ranges — in one place. The appendices that follow add quick-reference cards, the encoding summary, pointers to community implementations, and troubleshooting.
 
 # Chapter 20: Instruction Reference {#ch-20}
 
@@ -2347,7 +2347,7 @@ The pattern in that table: nearly every emulator keeps the dispatch asset (`EXEC
 Two pieces of first-party code are the best primary sources here.
 
 - **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (`https://github.com/parallaxinc/propeller`), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 9.
-- **The Spin2 interpreter** — the language's own bytecode engine, and the most complete XBYTE program available to study. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§17.4) are all put to full use.
+- **The Spin2 interpreter** — the language's own bytecode engine, and the most complete XBYTE program available to study. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§18.4) are all put to full use.
 
 ## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}
 
@@ -2361,7 +2361,7 @@ A P2 Forum community project (begun 2020), built by **Coley, Baggers, Chip, and 
 
 The P2 Space Invaders / "Spacies" emulators run 8080 arcade ROMs, and they are the clearest example of **rung 3** outside the Spin2 interpreter. The 8080's 64 KB address space fits in hub, so the guest's code can be streamed — and it is.
 
-They are also where three techniques in this book were found: the **guest-interrupt injection** of §16.4, the **halt-and-back-the-stream-up** idiom of §16.5, and — usefully — the **de-arm-and-substitute** debug technique of §13.3, which appears in the source as a commented-out arming pair beside a hand-rolled loop carrying a `debug()`.
+They are also where three techniques in this book were found: the **guest-interrupt injection** of §17.4, the **halt-and-back-the-stream-up** idiom of §17.5, and — usefully — the **de-arm-and-substitute** debug technique of §13.3, which appears in the source as a commented-out arming pair beside a hand-rolled loop carrying a `debug()`.
 
 ## C.4 The "Yume" emulator suite — console emulators on P2 + PSRAM {#sec-c-4}
 
@@ -2377,11 +2377,11 @@ A family of console emulators by **wuerfel_21** (GitHub organization **IRQsome**
 
 MisoYume makes the point sharply: the 65816 is byte-stream and opcode-first — by instruction shape the *ideal* XBYTE guest — and it takes rung 2 anyway. Read **MegaYume's Z80 core** for the dispatch loop that does bus arbitration, cycle pacing, and a refresh register between every guest instruction (§7.4), and for the two-level nibble dispatch its 68000 uses (§8.2).
 
-## C.5 MOS 6502 — the complete emulator behind Chapter 15's slice {#sec-c-5}
+## C.5 MOS 6502 — the complete emulator behind Chapter 16's slice {#sec-c-5}
 
-Chapter 15 builds an illustrative 6502 slice at rung 3. **Marco Maccaferri's `M6502`** is the
+Chapter 16 builds an illustrative 6502 slice at rung 3. **Marco Maccaferri's `M6502`** is the
 complete one — the whole instruction set in a single file, and the natural next thing to read after
-Chapter 15: `https://github.com/maccasoft/P2/blob/master/M6502/m6502.spin2`.
+Chapter 16: `https://github.com/maccasoft/P2/blob/master/M6502/m6502.spin2`.
 
 It carries everything the capstone leaves out by charter: all 256 opcodes including the
 undocumented ones, decimal mode on `ADC`/`SBC` (§8.6), per-instruction cycle counting, and a
@@ -2430,7 +2430,7 @@ A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, w
 
 ## C.8 riscvemu — the road not taken {#sec-c-8}
 
-A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§18.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder, and riscvemu is the P2 example.
+A **RISC-V** emulator for the Propeller by **totalspectrum**: `https://github.com/totalspectrum/riscvemu`. It is here because of what it *does not* do: rather than interpret 32-bit fixed-width instructions, it **translates them to native PASM2** and runs the translation (§19.7). For a regular, fixed-width guest, a JIT beats every rung of the ladder, and riscvemu is the P2 example.
 
 ## C.9 A minimal community example — the "essential XBYTE" VM {#sec-c-9}
 
@@ -2454,8 +2454,8 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 | Dispatch corrupts after a few bytecodes | hardware stack overflow | shorten handler call chains; the stack is 8 levels (§12.1) |
 | A **reusable** interpreter cog drifts or faults after several *jobs* | each arming left its `$1FF` on the stack — the exit never popped it | `POP` the `$1FF` as the halt handler exits, before re-arming (§10.1, §12.4) |
 | Flags behave unexpectedly across bytecodes | F bit set when not intended (or vice-versa) | set/clear bit 0 of the mode operand deliberately (§11.4) |
-| A prefixed/extended opcode decodes as the base opcode | no alternate-table handling | make the prefix a one-shot `SETQ2` handler (§10.3, §17.2) |
-| A prefix corrupts the *next* instruction rather than redirecting it | it is a **modifier** prefix, not a map prefix — `SETQ2` is the wrong tool | set a state register and re-fetch (§17.3) |
+| A prefixed/extended opcode decodes as the base opcode | no alternate-table handling | make the prefix a one-shot `SETQ2` handler (§10.3, §18.2) |
+| A prefix corrupts the *next* instruction rather than redirecting it | it is a **modifier** prefix, not a map prefix — `SETQ2` is the wrong tool | set a state register and re-fetch (§18.3) |
 | Branch goes nowhere | guest PC changed without re-pointing the FIFO | a branch is a `RDFAST` to the new address (§12.3) |
 | Stream resumes at the wrong place after a hub call | the called code left the FIFO elsewhere | re-point from `PB`: `RDFAST #0, PB` on the way out (§12.3) |
 | **A handler is corrupted intermittently, under load** | an **interrupt split an atomic sequence** — a CORDIC command and its result, or a read-modify-write | fence it with a one-iteration `REP` (§9.4). *This is the bug that will cost you the most time, because it is timing-dependent and will not reproduce* |
@@ -2465,18 +2465,19 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 
 # Index {#index}
 
-- **6502 emulator** — Ch. 15; the complete community one (rung 2) — §C.5
-- **6809 / prefix pages** — §17.2
-- **8086 / x86** — §8.2, §17.1, §17.3
+- **6502 emulator** — Ch. 16; the complete community one (rung 2) — §C.5
+- **6809 / prefix pages** — §18.2
+- **8086 / x86** — §8.2, §18.1, §18.3
 - **65816** (byte-stream, but off-chip → rung 2) — §8.2
 - **68000** — §8.2
-- **Addressing-mode matrix** (two-stage dispatch) — §15.4
-- **Application map** (other uses) — Ch. 18, §18.2
+- **Addressing-mode matrix** (two-stage dispatch) — §16.4
+- **Application map** (other uses) — Ch. 19, §19.2
 - **Arming** — Ch. 10; quick card, App. A
 - **Auto-fetch** (the asset, and its cost) — §7.1, §7.3
-- **Beyond interpreters** (applications) — Ch. 18
+- **Beyond interpreters** (applications) — Ch. 19
 - **Bit 1** (index-form select; ignored in 256 mode) — §10.2, §11.2, App. A
 - **Bit 10** (spare flag in a table entry) — §4.5; wider metadata fields — §4.5, §C.5
+- **Branch (guest)** — the FIFO position *is* the program counter — §12.3, §15.4, §16.1
 - **Budget** (what XBYTE costs you) — §3.6
 - **Bytecode** (definition) — Ch. 3; in `PA` — Ch. 6, §12.2
 - **CALL depth** (skipping suspended) — §4.5, §13.1
@@ -2488,45 +2489,48 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 - **Dispatch by hand** (the software loop) — §6.4, §13.3
 - **Dispatch cycle** (8 clocks) — Ch. 9; App. A
 - **Dispatch ladder** (jump table · `EXECF` · XBYTE) — §7.2
-- **Dispatch table** (LUT) — Ch. 6; building entries — §6.2
-- **Display list** (application) — §18.5
-- **EXECF** — §4.3; synthesised operand — §16.4; Ch. 19
-- **F bit** (flags from bytecode) — §11.4, §11.5, §20.1
+- **Dispatch table** (LUT) — Ch. 6; building entries — §6.2; patterns in binary — §15.2
+- **Display list** (application) — §19.5
+- **EXECF** — §4.3; synthesised operand — §17.4; Ch. 20
+- **F bit** (flags from bytecode) — §11.4, §11.5, §21.1
 - **FIFO** — Ch. 5; `RDFAST` — §5.1; resuming after a hub call — §12.3
 - **Flags** (guest) — §8.5
 - **`GETBRK`** — §13.1
-- **GETPTR / PB** — §5.4, §12.3, §20.2
+- **GETPTR / PB** — §5.4, §12.3, §21.2
 - **Guest CPU survey** — Ch. 8
-- **Hardware stack / `$1FF`** — §10.1, §12.1
+- **Hardware stack / `$1FF`** — §10.1, §12.1; reclaiming it to re-arm — §12.4, §15.6
 - **Hub RAM** (auto-fetch reads hub and nothing else) — §3.5, §5.1, §7.3
-- **Inline operands** — §5.3, §12.3
-- **Interrupts (guest)** — Ch. 16; injecting one — §16.4; halt — §16.5
+- **Inline operands** — §5.3, §12.3; two widths in one machine — §15.3
+- **Interrupts (guest)** — Ch. 17; injecting one — §17.4; halt — §17.5
 - **Interrupts (P2)** — §9.4; the `REP` fence — §9.4
-- **JIT** (translate, don't interpret) — §18.7
+- **JIT** (translate, don't interpret) — §19.7
 - **Landing pad** (trailing skip pattern) — §4.5, §13.3; in shipped code — §C.5
-- **Loop body** (there isn't one — what it costs) — §7.4, §3.5, §3.6, §16.3, §18.7
-- **LUT entry format** — §6.1, §20.2
-- **LUT RAM** (home of the dispatch table) — Ch. 6, §6.1, §20.2
+- **Loop body** (there isn't one — what it costs) — §7.4, §3.5, §3.6, §17.3, §19.7
+- **LUT entry format** — §6.1, §21.2
+- **LUT RAM** (home of the dispatch table) — Ch. 6, §6.1, §21.2
 - **Memory model** (where the guest's code lives) — §7.1, §7.3, §8.2
-- **MIDI dispatcher** (application) — §18.4
+- **MIDI dispatcher** (application) — §19.4
 - **Mode operand** — §10.2, Ch. 11; a real one, decoded — §11.5; App. A
 - **Overhead** (6 clocks) — §3.2, §9.2
-- **PA** (current bytecode) — §6.3, §20.2
-- **Prefixes** — the two kinds — §17.1; map — §17.2; modifier — §17.3
+- **PA** (current bytecode) — §6.3, §21.2
+- **Prefixes** — the two kinds — §18.1; map — §18.2; modifier — §18.3
 - **PSRAM** (guests too large for hub; the shared bus) — §7.3, §C.4
+- **Re-arming a cog** (pop the `$1FF` first) — §12.4, §15.6
 - **`REP`** (as an interrupt fence) — §9.4
-- **RFBYTE / RFWORD / RFLONG** — §5.2, Ch. 19
-- **RFVAR / RFVARS** — §5.3, Ch. 19
+- **RFBYTE / RFWORD / RFLONG** — §5.2, Ch. 20
+- **RFVAR / RFVARS** — §5.3, Ch. 20; **one signed byte reaches only -64..+63** — §15.4
 - **Rung 2** (`EXECF` dispatch, fetch by hand) — §7.2, §7.5; who lands there — Ch. 8, App. C
 - **Rung 3** (the full engine) — §7.2, §7.5; the price — §7.4
-- **SETQ / SETQ2** — §10.3, §18.6, Ch. 19; its **two jobs** — §10.3; as grammar — §17.4
-- **Shared-handler idiom** — §4.4, §14.3; industrial form — §15.4
-- **SKIP** — §4.1, Ch. 19
-- **SKIPF** — §4.2, Ch. 19; suspended in a `CALL` — §4.5
-- **State machine** (table-as-state) — §18.3, §18.6, §17.4
+- **SETQ / SETQ2** — §10.3, §19.6, Ch. 20; its **two jobs** — §10.3; as grammar — §18.4
+- **Shared-handler idiom** — §4.4, §14.3; a family running — §15.2; industrial form — §16.4
+- **SKIP** — §4.1, Ch. 20
+- **Skip pattern as a table entry** — §4.4, §6.2; four of them, working — §15.2
+- **SKIPF** — §4.2, Ch. 20; suspended in a `CALL` — §4.5
+- **State machine** (table-as-state) — §19.3, §19.6, §18.4
 - **Table sizes** — §11.2; App. A
-- **Terminal / ANSI reader** (application) — §18.3
+- **Terminal / ANSI reader** (application) — §19.3
 - **Three decisions** (fetch · dispatch · memory) — §7.1
-- **When to reach for XBYTE** — §3.5, §3.7; **the decision framework** — Ch. 7, Ch. 8; the full list — §18.7
-- **Where to poll** (interrupt checks with no loop body) — §8.7, §16.3
-- **Z80** (both kinds of prefix) — §17.1, §8.3
+- **Variables** (a VM's, addressed by an inline byte) — §15.3
+- **When to reach for XBYTE** — §3.5, §3.7; **the decision framework** — Ch. 7, Ch. 8; the full list — §19.7
+- **Where to poll** (interrupt checks with no loop body) — §8.7, §17.3
+- **Z80** (both kinds of prefix) — §18.1, §8.3
