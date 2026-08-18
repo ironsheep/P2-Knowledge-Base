@@ -1,3 +1,22 @@
+'' ===========================================================================
+''
+''   File.......  xbyte-growing-vm.spin2
+''   Purpose....  The minimal VM grown to eleven bytecodes - a shared ALU
+''                body, variables, a branch, and a cog that arms twice
+''   Manual.....  P2 XBYTE Programming Guide
+''   Version....  v1.1.0 (unreleased)
+''   Appears in.  Chapter 15: Growing the VM -- 15.5 The complete program
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Aug 2026
+''   Updated....  Aug 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 CON
   _clkfreq = 200_000_000
 
@@ -151,3 +170,22 @@ prog2           byte    $00, 12             ' PUSHC 12
                                             ' on long boundaries
 vars            long    0[8]                ' the VM's variables
 stack           long    0[16]               ' the VM stack lives in hub
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

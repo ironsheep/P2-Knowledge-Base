@@ -198,12 +198,31 @@ CONFORMANCE_GUIDES:
               RETAINED as the Class 3 taxonomy until that profile is authored upstream.
               Tracked as a task; do NOT delete the local guide before then.
 
-  - surface:  authored .spin2 source (example corpora, verification tests)
+  - surface:  authored .spin2 source (verification tests, utility objects)
     guide:    central:spin2-authoring-guide
     when:     before writing or editing any .spin2 file
     strength: gate
     note:     STYLE_GATE_COMMAND is unset — the gate is OWED, not waived. `pnut-ts`
               proves legality only, never style and never semantics.
+
+  - surface:  manual/app-note EXAMPLE CORPORA (examples-library/*.spin2)
+    guide:    central:spin2-authoring-guide, with §4.2 (file header) and §4.2.1
+              (licence footer) satisfied by GENERATION, not by hand
+    when:     before writing or editing any example file
+    strength: gate
+    note:     RESOLVED 2026-08-18. These files are byte-identical to the listing
+              printed in their document, so a hand-written header cannot exist in
+              them — the two requirements were jointly impossible and the whole
+              fleet silently ran without headers. `engineering/tools/sync-manual-
+              examples.py` now generates the header and footer, and the identity
+              gate asserts the file BODY against the printed block. Everything
+              except `Purpose` is derived, so nothing drifts; `Purpose` lives in
+              each corpus's PURPOSES.md. §1.1 (ASCII) applies to the generated
+              header too — the tool transliterates derived text and refuses what
+              it cannot map. §2.1 (no single-letter names) yields to cross-chapter
+              continuity where a later chapter grows an earlier chapter's program.
+              ADOPTION IS PER-DOCUMENT, at that document's next release: adopted
+              documents are gated hard, un-adopted ones report INFO and pass.
 
 STYLE_GATE_COMMAND:  <unset — owed. Reference implementation: tools/check_style.sh in P2-uSD-FAT32-FS>
 ```

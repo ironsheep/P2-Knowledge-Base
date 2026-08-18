@@ -1259,7 +1259,7 @@ The VM stack is a few longs of cog memory with a pointer. `PUSHC` uses an inline
 
 ## 14.2 The complete program {#sec-14-2}
 
-```spin2
+```{.spin2 caption="xbyte-minimal-vm.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -1461,7 +1461,7 @@ The program below stays inside one byte: its backward branch is -20, assembled a
 
 ## 15.5 The complete program {#sec-15-5}
 
-```spin2
+```{.spin2 caption="xbyte-growing-vm.spin2"}
 CON
   _clkfreq = 200_000_000
 
@@ -2052,7 +2052,7 @@ A **display list** is a stream of drawing commands — set a color, move the pen
 
 Here is the whole thing — the complete **non-interpreter** build, and the counterpart to the VM of Chapter 14. It compiles, and it exercises every asset the engine has:
 
-```spin2
+```{.spin2 caption="xbyte-display-list.spin2"}
 CON
   _clkfreq = 200_000_000
 

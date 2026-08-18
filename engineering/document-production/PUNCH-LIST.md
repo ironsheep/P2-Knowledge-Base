@@ -5,49 +5,64 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
-## Shipped example `.spin2` files conflict with the Spin2 authoring gate — OPEN
+## Shipped example `.spin2` files conflict with the Spin2 authoring gate — RESOLVED 2026-08-18
 
-**Status:** Open — surfaced 2026-08-18 while authoring the XBYTE guide's third example
-(«#263»). **Pre-existing and set-wide**; not caused by that task, and deliberately not
-decided inside it. **Stephen's call** — it is a policy question, not a defect to fix quietly.
+**Resolved by generating the header rather than exempting the file** (Stephen's call). The
+collision was real: guide §4.2/§4.2.1 require a file header and licence footer on every
+`.spin2`, and each example must also be byte-identical to the listing printed in its manual,
+which ~20 lines of boilerplate cannot be. The way out was to stop hand-maintaining the half
+that conflicts.
 
-**The conflict.** `central:spin2-authoring-guide` is a **gate**-strength conformance guide for
-"authored .spin2 source (example corpora, verification tests)" (`.claude/skill-conventions.md`),
-and `STYLE_GATE_COMMAND` is unset, so the gate is **owed, not waived**. Three of its MUST rules
-cannot be satisfied by a file that is also a manual code block:
+**The mechanism.** `engineering/tools/sync-manual-examples.py` generates each example's header
+from what the repo already knows — manual, version, dates, and **where in the manual the block
+sits, read back out of its enclosing heading**. The identity gate moves from *whole file* to
+*file body*, so the reader promise is unchanged. `verify-example-corpus-identity.py` was
+extended (not forked) to strip a generated wrapper before comparing; a file without one is
+compared whole, exactly as before. `Purpose` is the only hand-authored field, kept in
+`examples-library/PURPOSES.md`; the tool refuses to invent one.
 
-| Rule | What it requires | Why an example corpus cannot comply |
+Deriving the location is what settles the "isn't that hard to maintain?" worry: a chapter that
+moves is absorbed by the next sync. This manual renumbered six chapters the same day, which is
+precisely the case a typed citation gets wrong.
+
+**Adoption is per-document, at each document's next release** — that is what keeps 12 published
+corpora from being churned to fix one. Adopted so far: `p2-xbyte-programming-guide` (2026-08-18,
+3 files). Streamer is next. Both gates are wired into `prepare-manual`'s overlay; un-adopted
+documents print `INFO: ... has not adopted` and pass.
+
+**Two things this surfaced,** both recorded below rather than folded in silently.
+
+---
+
+## App-note example corpora have never been gated at all — OPEN
+
+**Status:** Open — found 2026-08-18 while wiring the example-corpus gates. **Pre-existing**;
+nothing to do with header adoption.
+
+`verify-example-corpus-identity.py` pairs a loose `examples-library/*.spin2` to its printed
+listing by a fence caption, ```` ```{.spin2 caption="<name>.spin2"} ````. **The seven app notes
+carry no captioned fences anywhere** — they key examples to recipe IDs (`R1`, `R2`, …) in an
+`examples-library/README.md` table instead. So the gate reports every app-note file as an
+orphan and has never actually asserted anything about them:
+
+| Document | Files | Gate result |
 |---|---|---|
-| §4.2 File Header | `''` doc-comment header: filename, purpose, authors, e-mail, dates | ~10 lines of boilerplate at the top of every printed teaching code block |
-| §4.2.1 File Footer | a `{{ }}` license block, last content in the file | same, at the bottom |
-| §2.1 No single-letter names | no `a`, `b`, `n` in DAT declarations | collides with cross-chapter continuity, where a later chapter grows an earlier chapter's program |
+| P2AN001 · P2AN004 | 3 each | RED — all orphans |
+| P2AN005 | 4 | RED — all orphans |
+| P2AN003 · P2AN006 | 5 each | RED — all orphans |
+| P2AN002 · P2AN007 | 6 each | RED — all orphans |
 
-The binding constraint is **byte-identity**: every example file is byte-identical to the code
-block it appears as in the manual (a named render gate). So the boilerplate either prints in the
-book or breaks byte-identity. There is no third option while both gates stand as written.
+That is **32 files across seven published app notes** with no file-vs-printed-code check. All
+six manuals are GREEN, so this is specifically an app-note-class gap.
 
-**Measured scope.** *Zero* example `.spin2` files in this repo carry the header or footer —
-checked `p2-xbyte-programming-guide/examples/` (3) and `P2AN002/examples-library/` (5). The
-current practice is uniform, so this is an **undocumented project position**, not drift.
+**The decision to make:** adopt captions in the app-note masters (aligns the class with the
+manuals, and is what the tools already expect), or teach the tool the recipe-ID convention
+(cheaper now, keeps two conventions alive). Either way it wants doing before the next app-note
+release, and it pairs naturally with that document's header adoption.
 
-**The decision to make.** One of:
-1. **Record the exemption** — example corpora and manual code blocks are exempt from §4.2 / §4.2.1
-   (and §2.1 where cross-chapter continuity governs), written into `.claude/skill-conventions.md`
-   as a scoped `CONFORMANCE_GUIDES` note. Cheapest, and matches what we already do.
-2. **Split the artifact** — the shipped `.spin2` carries the header/footer and the printed block is
-   a documented excerpt. Costs the byte-identity guarantee, which the examples README sells to
-   readers as the point ("what you read is what builds").
-3. **Propose upstream** — ask the central guide to carve out example corpora. Slowest; correct if
-   other projects ship manual-linked examples too. Never edit the central guide here
-   ([[feedback_never_modify_central_skills]]).
-
-**Recommendation: option 1.** The guide governs *shipped source a user builds on*; a teaching block
-whose whole contract is byte-identity with the page is a different artifact, and the exemption
-should say so in one place rather than being re-litigated per example.
-
-**Until decided,** authors do what «#263» did: apply every rule that does not collide (§1.1 ASCII,
-§4.6/§4.10 declaration and block comments, the K column budget), and say in the task record that
-the collision was escalated rather than silently waived.
+**Note:** `P2AN006/examples-library/isp_stack_check.spin2` is a shipped **utility object**, not
+a manual example — it already carries its own hand-written §4.2 header. Whatever convention is
+chosen must let a corpus hold a non-example file without flagging it.
 
 ---
 

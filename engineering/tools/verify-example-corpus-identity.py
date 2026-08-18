@@ -32,6 +32,7 @@ So it can gate a re-zip / release step:  python3 ... && zip ...
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -78,6 +79,33 @@ def extract_captioned_blocks(md_path: Path):
             i += 1
 
 
+# --- generated-header awareness (see engineering/tools/sync-manual-examples.py) ---
+#
+# A document that has adopted generated example headers ships each file as
+#   <generated header> + <body> + <MIT licence footer>
+# where the BODY is what the manual prints. The identity promise is unchanged --
+# the code you read is the code that builds -- but it is asserted against the
+# body rather than the whole file. A file with no generated header is compared
+# whole, exactly as before, so un-adopted documents are unaffected.
+
+ADOPT_SENTINEL = b"This file is an EXAMPLE from the manual above."
+_BANNER = b"'' ==="
+
+
+def strip_generated_wrapper(raw: bytes) -> bytes:
+    """Return the body of an adopted example file; raw unchanged if not adopted."""
+    if ADOPT_SENTINEL not in raw or not raw.startswith(_BANNER):
+        return raw
+    end = raw.find(b"\n", raw.find(_BANNER, len(_BANNER)))
+    if end == -1:
+        return raw
+    body = raw[end + 1:].lstrip(b"\n")
+    m = re.search(rb"\n\{\{\n(?:.|\n)*?\n\}\}\s*$", body)
+    if m:
+        body = body[:m.start()]
+    return body.rstrip(b"\n") + b"\n"
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Verify examples-library files are byte-identical to their opus-master code blocks."
@@ -120,7 +148,7 @@ def main():
         if caption not in lib_files:
             orphan_block.append((caption, src))
             continue
-        file_bytes = lib_files[caption].read_bytes()
+        file_bytes = strip_generated_wrapper(lib_files[caption].read_bytes())
         if file_bytes == block:
             identical.append(caption)
         else:

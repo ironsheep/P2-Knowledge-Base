@@ -1,8 +1,19 @@
 # XBYTE Guide — worked examples
 
-Every file here is **byte-identical to the code block it appears as in the manual**, and
-each one **compiles clean** with `pnut-ts`. That identity is the point: what you read is
-what builds.
+Each file here carries a short generated header and an MIT licence footer.
+**Everything between them is byte-identical to the code block it appears as in
+the manual**, and each one **compiles clean** with `pnut-ts`. That identity is
+the point: what you read is what builds.
+
+The header is generated, never hand-written — which manual and version the file
+belongs to, where in the manual it appears, and when it was written are all read
+from the repository at sync time, so a chapter that moves does not leave a stale
+citation behind. The only hand-authored field is `Purpose`, kept in
+`PURPOSES.md`. Regenerate with:
+
+```
+python3 engineering/tools/sync-manual-examples.py --doc <this manual's dir>
+```
 
 | File | Manual | What it shows |
 |------|--------|---------------|

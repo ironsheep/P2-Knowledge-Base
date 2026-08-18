@@ -57,6 +57,39 @@ git tag | grep -i "<slug>"          # the definitive list of shipped versions
   - **v1.0.0** (July 2026) — initial release for community review. <what the document is>.
   ```
 
+## Augments Step 6 — the EXAMPLE-CORPUS gate (two tools, one before the other)
+
+A manual that ships an `examples-library/` must not render while its loose files and
+its printed code blocks disagree — the reader downloads the ZIP and gets code the book
+does not show. Two gates, in this order, before the render:
+
+```bash
+# 1. headers current (adopted documents only; un-adopted print INFO and pass)
+python3 engineering/tools/sync-manual-examples.py --doc <manual dir> --check
+
+# 2. file body == printed code block, plus no orphans either way
+python3 engineering/tools/verify-example-corpus-identity.py --manual <manual dir>
+```
+
+**Order matters.** The sync tool can *rewrite* headers; run it first, in `--check` mode,
+so the identity gate reads settled files. If `--check` reports out-of-sync, re-run the
+sync without `--check`, look at the diff, and commit it — never hand-edit a generated
+header, because the next sync silently reverts it.
+
+**Adoption is per-document and deliberate.** Only `p2-xbyte-programming-guide` carries
+generated headers today (adopted 2026-08-18). Every other document prints
+`INFO: ... has not adopted` and passes — that is correct, not a warning to clear. A
+document adopts at *its* next release, with `--adopt`, which is also when its
+`-src.zip` is rebuilt. Streamer is next in line.
+
+**Known gap, not caused by adoption:** the seven app notes (`P2AN001`–`P2AN007`, 32
+files) have **no captioned fences at all** — they key examples to recipe IDs in a
+README table — so `verify-example-corpus-identity.py` reports them RED with all files
+as orphans, and has never actually gated them. Do not "fix" that by deleting files or
+captions; it is on the document-production punch list as its own decision.
+
+---
+
 ## Augments Step 6 — the FONT-GLYPH gate (run it; it is not in the base skill)
 
 The base skill runs two source gates (code-line-length, inline-code-ASCII). There is a

@@ -431,7 +431,7 @@ size**. Part V went from the smallest thing that exercises the engine once, stra
 Chapter 14's own machine, grown to roughly a dozen bytecodes: variables addressed by an
 operand rather than immediates only, a compare, a conditional branch via `RDFAST`, and an
 ALU family folded onto one shared body with skip patterns. Complete and compiling, shipped
-as a third file in `examples/`.
+as a third file in `examples-library/`.
 
 **Chapter 14 stays minimal.** That is its charter and its value to a reader who wants the
 floor; the growth belongs in 15. This is a standing authoring rule for Part V, recorded in
