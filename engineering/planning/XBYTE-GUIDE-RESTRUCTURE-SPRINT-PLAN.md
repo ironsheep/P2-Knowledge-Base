@@ -141,6 +141,12 @@ unchanged; this is a permutation, not a rewrite.
 
 **Eight chapters renumber (7–14). Twelve keep their numbers (1–6, 15–20).**
 
+**The appendices Part renumbers VI → VII.** The table above numbers only the
+chapter-bearing Parts; the appendices keep their own numbered Part, as the shipped book
+and the model manual (the Streamer guide's `Part V: Appendices`) both do, and inserting
+Part III pushes it down one. So the finished book carries **seven** Part headings.
+Appendix letters A–D and their `{#app-x}` anchors do not move.
+
 **Design decision — the Bytecode Stream stays in Part II.** An earlier sketch moved
 the FIFO chapter into the engine Part, on the reasoning that auto-fetch is rung-3
 machinery. **Rejected:** §6.4's hand-written dispatch loop — the passage that teaches
@@ -159,7 +165,8 @@ Chapter 3 does not restate the rung table — one canonical copy, in Chapter 7.
 
 **Verification.**
 - *Normal:* all 20 chapter headings present, in the target order, with the target
-  numbers; six Part headings in the target sequence; anchors `{#ch-N}` / `{#sec-N-M}`
+  numbers; seven Part headings in the target sequence (I–VI chapter-bearing, VII the
+  appendices); anchors `{#ch-N}` / `{#sec-N-M}`
   consistent with their new numbers.
 - *Edge:* Chapters 15–20 keep their numbers, so their anchors must **not** drift; a
   find-and-replace that renumbers them is a defect.

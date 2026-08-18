@@ -293,6 +293,111 @@ vocabulary. One road, two on-ramps; neither audience gets a dumbed-down or bloat
 
 ---
 
+## 0-quater. STRUCTURAL REVISION — **v1.1.0, the decision-first edition** (2026-08-18) — **LOCKED**
+
+> **This section governs v1.1.0 and supersedes §0-ter's Part layout.** It changes
+> *order*, not content: the chapter count stays at 20 and no chapter is rewritten by
+> this decision. Everything §0-ter and §0-bis decided about *what the book says*
+> stands; what changes is *when the reader meets it*.
+
+### Why this revision exists
+
+Community review of the released v1.0.1 showed experienced readers failing to reach
+material the book already contains. One reader could not locate answers and fell back
+to a four-page primary source; another, expert in the field, finished the book holding
+the opposite of its central thesis; a third read it end to end and concluded its
+subject order was wrong. None of that is a content gap — the answers are all in the
+book — so the remedy is structural.
+
+The measurable cause: the book argues that most P2 emulator authors land on **rung 2**
+(`EXECF` dispatch with a hand-rolled fetch) and that the full engine serves a narrower
+case, then organises itself as though the engine were the destination. The decision
+framework that resolves this — v1.0.1's Chapters 13 and 14 — begins on **page 54 of
+101**, behind 43 pages of engine reference a rung-2 reader will never use. A reader
+asking "should I use this?" had to read half the book or follow a forward pointer out
+of Chapter 3.
+
+*(The review analysis itself is held privately outside the repository. This record
+restates its conclusions in its own words and attributes none of them to individuals;
+that is deliberate and is preserved in any revision of this document.)*
+
+### The target structure — LOCKED
+
+The decision Part moves ahead of the engine Part. Eight chapters renumber (new 7–14);
+twelve keep their numbers (1–6, 15–20).
+
+| Part | Title | Chapters |
+|---|---|---|
+| **I** | The Landscape | 1–2 |
+| **II** | Dispatch on the P2 | 3–6 |
+| **III** | Choosing Your Rung | 7–8 |
+| **IV** | The XBYTE Engine | 9–13 |
+| **V** | Building Interpreters and Emulators | 14–18 |
+| **VI** | Reference | 19–20 |
+| **VII** | Appendices | A–D, then the Index |
+
+| New | Title | Was |
+|---|---|---|
+| 1 | Why Emulate on the P2 | 1 |
+| 2 | What This Kind of Emulation Asks of You | 2 |
+| 3 | Understanding XBYTE | 3 |
+| 4 | The Skip Family | 4 |
+| 5 | The Bytecode Stream | 5 |
+| 6 | LUT Dispatch | 6 |
+| **7** | **The Three Decisions** | **13** |
+| **8** | **What Will Hurt — A Guest-CPU Survey** | **14** |
+| **9** | **The Dispatch Cycle** | **7** |
+| **10** | **Arming XBYTE** | **8** |
+| **11** | **Table-Size & Compression Modes** | **9** |
+| **12** | **Bytecode Routines** | **10** |
+| **13** | **Debugging XBYTE** | **11** |
+| **14** | **A Minimal Custom VM** | **12** |
+| 15 | A Tiny CPU Emulator (6502) | 15 |
+| 16 | Servicing Guest Interrupts | 16 |
+| 17 | Prefixes and Alternate Tables | 17 |
+| 18 | XBYTE Beyond Interpreters | 18 |
+| 19 | Instruction Reference | 19 |
+| 20 | Configuration Constants & Patterns | 20 |
+
+**Part II is retitled** from *XBYTE Fundamentals* to *Dispatch on the P2* — naming what
+it actually teaches, which is the machinery both rungs share rather than a preface to
+the engine.
+
+**The appendices Part renumbers to VII.** Inserting Part III pushes it down one. It
+stays a numbered Part, matching the model manual (the Streamer guide, whose appendices
+sit under `Part V: Appendices`); the appendix letters A–D and their anchors do not
+change.
+
+### Two design decisions inside the reorder — LOCKED, do not relitigate
+
+1. **The Bytecode Stream stays in Part II.** An earlier sketch moved the FIFO chapter
+   into the engine Part on the reasoning that auto-fetch is rung-3 machinery.
+   **Rejected:** §6.4's hand-written dispatch loop — the passage that teaches rung 2 —
+   issues `RFBYTE`, so LUT Dispatch cannot precede the stream chapter without breaking
+   a dependency. Part II therefore keeps its four chapters.
+
+2. **Who owns the dispatch ladder.** The three-rung ladder lives at v1.0.1's §13.2,
+   which under the new order is §7.2 — still arriving after Part II has taught the
+   machinery. **Chapter 3 introduces** the ladder in one short passage, so a Part II
+   reader knows what the machinery is *for*; **Chapter 7 decides** with it. Chapter 3
+   does not restate the rung table: one canonical copy, in Chapter 7.
+
+### What this revision does NOT change
+
+- Chapter **count** (20) and chapter **content** — this is a permutation.
+- The title and slug decision of record (see the header): slug and PDF filename stay
+  `p2-xbyte-programming-guide` / `P2-XBYTE-Programming-Guide`.
+- The TINY & ILLUSTRATIVE charter (§3), the skip-family-first pedagogy (§2), and the
+  two-community framing (§0-ter) — all still govern.
+
+### Release shape
+
+One public release, **v1.1.0**, measured as a delta from the published v1.0.1. A
+v1.0.2 was prepared and never tagged; per the changelog style guide it never existed
+for readers, and its content is simply part of v1.1.0.
+
+---
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
