@@ -15,7 +15,7 @@
 
 The document does two jobs, so it speaks in **two registers**:
 
-- A **teaching register** — the conceptual chapter (Ch. 1), the skip-family foundation (Ch. 2), and each chapter's opening orientation — warm, plain-spoken, motivated, for a reader meeting XBYTE for the first time.
+- A **teaching register** — the landscape chapters that open the book (Ch. 1–2), the conceptual chapter (Ch. 3), the skip-family foundation (Ch. 4), and each chapter's opening orientation — warm, plain-spoken, motivated, for a reader meeting XBYTE for the first time.
 - A **reference register** — the dispatch-cycle walk, the mode/encoding tables, the bit-field specifications, and the per-instruction detail — for a reader who already knows what they need and wants it fast. The reference register is authoritative, precise, dense, and practical.
 
 ### 1.2 The Spine (carry it through every chapter)
@@ -26,14 +26,14 @@ XBYTE automates the inner loop of every bytecode VM — *fetch the next bytecode
 
 A **spectrum**, and the two registers serve both ends:
 
-- **Newcomers** — developers who have heard of XBYTE but do not yet know what it is, why the P2 has it, or when to reach for it. The **teaching register** is for them: Chapters 1–2 assume no prior XBYTE knowledge and define unfamiliar terms (bytecode, dispatch, LUT table, SKIPF pattern) as they appear.
+- **Newcomers** — developers who have heard of XBYTE but do not yet know what it is, why the P2 has it, or when to reach for it. The **teaching register** is for them: Chapters 1–4 assume no prior XBYTE knowledge and define unfamiliar terms as they appear — the emulation vocabulary in Part I (§2.7 "The words for all this"), then bytecode, dispatch, LUT table, and SKIPF pattern in Part II.
 - **Builders** — readers who understand P2 cog/hub/LUT architecture and want to implement an interpreter, a custom VM, or a CPU emulator. The **reference register** is for them: quick lookup of the cycle, the modes, the encodings, and the configuration bits.
 
 The teaching layer builds the background a newcomer needs (the FIFO, the LUT, the hardware stack, `_RET_`); the reference layer assumes it. A reader typically starts in the teaching register and graduates into the reference register as they build.
 
 ### 1.4 The Two Registers — Teaching and Reference
 
-**Use the teaching register for:** Chapter 1 (Understanding XBYTE), Chapter 2 (the skip family, the conceptual foundation), the opening orientation of each Part and chapter, and the first explanation of any unfamiliar concept (bytecode dispatch, the LUT table, the auto-XBYTE loop, compression modes).
+**Use the teaching register for:** Part I (Ch. 1–2, the landscape a newcomer needs before any machinery), Chapter 3 (Understanding XBYTE), Chapter 4 (the skip family, the conceptual foundation), the opening orientation of each Part and chapter, and the first explanation of any unfamiliar concept (bytecode dispatch, the LUT table, the auto-XBYTE loop, compression modes).
 
 Teaching-register rules:
 
@@ -207,7 +207,7 @@ measures closing-beat rate and the longest consecutive run.
 ### 5.3 Cross-References — direct
 
 ```
-✅ "See Chapter 7 for the full table-size and compression encodings."
+✅ "See Chapter 11 for the full table-size and compression encodings."
 ✅ "Related: SKIP, SKIPF, EXECF."
 
 ❌ "You might want to check out the modes chapter later..."
