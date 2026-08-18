@@ -2920,9 +2920,33 @@ Everything above is true of that snapshot. The guide's prose was deliberately wr
 *documented* configuration range rather than any project's mutable default, so a newer upstream
 default cannot falsify it — but a re-pull before the next XBYTE release is worth doing.
 
-**The transferable lesson.** The claim was *plausible* and had a real mechanism behind it — which is
-why it survived authoring and a full audit. What broke it was reading the shipped artifact instead of
-the description of it: a config file listing three boards, a game-database comment, and an md5.
+**RESOLUTION AMENDED, 2026-08-18 (Stephen).** The first fix replaced one perishable claim with
+several: it swapped "32 MB is the ceiling" for a vendor name, a 24-96 MB board range, and a HyperRAM
+option. Same defect in a new form — a reader-facing catalog of third-party hardware decays, and a
+decayed claim is an incorrect one. The prose now carries the **mechanism** instead:
+
+> a guest too large for hub lives **whole in an external memory subsystem** and you **fetch from
+> there**; the P2-EC32MB Edge module is a good **starting point**; larger boards come from other
+> vendors and from community builders; a banked driver presents whichever board you have as a single
+> address space. What the board decides is how much you hold and how fast you reach it — what it
+> never changes is that the fetch is yours to write.
+
+Specific third-party capacities and vendor names are **out** of both §7.3 and §C.4. The Parallax part
+number stays: it is a documented product in our own KB, and it gives the reader a concrete place to
+start. The capacity point survives in durable form — *a holey memory map can need far more address
+space than the ROMs add up to* — which teaches the real mechanism instead of citing one game.
+
+**THE RULE THIS ESTABLISHES, worth applying beyond this finding:** do not put anything in a reader
+document that is **subject to becoming incorrect over time** when the durable statement is available.
+Third-party product catalogs, "what is currently available", capacities, and vendor line-ups all
+decay silently — nothing fails, the sentence just quietly stops being true, and no gate can see it.
+Prefer the mechanism, which does not move; name a specific product only as a starting point, and
+only when it is documented in our own sources.
+
+**The transferable lesson on how it was caught.** The original claim was *plausible* and had a real
+mechanism behind it — which is why it survived authoring and a full audit. What broke it was reading
+the shipped artifact instead of the description of it: a config file listing three boards, a
+game-database comment, and an md5.
 
 **Next finding ID after this block: F-296.**
 
