@@ -5,6 +5,52 @@ manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
 ---
 
+## Shipped example `.spin2` files conflict with the Spin2 authoring gate — OPEN
+
+**Status:** Open — surfaced 2026-08-18 while authoring the XBYTE guide's third example
+(«#263»). **Pre-existing and set-wide**; not caused by that task, and deliberately not
+decided inside it. **Stephen's call** — it is a policy question, not a defect to fix quietly.
+
+**The conflict.** `central:spin2-authoring-guide` is a **gate**-strength conformance guide for
+"authored .spin2 source (example corpora, verification tests)" (`.claude/skill-conventions.md`),
+and `STYLE_GATE_COMMAND` is unset, so the gate is **owed, not waived**. Three of its MUST rules
+cannot be satisfied by a file that is also a manual code block:
+
+| Rule | What it requires | Why an example corpus cannot comply |
+|---|---|---|
+| §4.2 File Header | `''` doc-comment header: filename, purpose, authors, e-mail, dates | ~10 lines of boilerplate at the top of every printed teaching code block |
+| §4.2.1 File Footer | a `{{ }}` license block, last content in the file | same, at the bottom |
+| §2.1 No single-letter names | no `a`, `b`, `n` in DAT declarations | collides with cross-chapter continuity, where a later chapter grows an earlier chapter's program |
+
+The binding constraint is **byte-identity**: every example file is byte-identical to the code
+block it appears as in the manual (a named render gate). So the boilerplate either prints in the
+book or breaks byte-identity. There is no third option while both gates stand as written.
+
+**Measured scope.** *Zero* example `.spin2` files in this repo carry the header or footer —
+checked `p2-xbyte-programming-guide/examples/` (3) and `P2AN002/examples-library/` (5). The
+current practice is uniform, so this is an **undocumented project position**, not drift.
+
+**The decision to make.** One of:
+1. **Record the exemption** — example corpora and manual code blocks are exempt from §4.2 / §4.2.1
+   (and §2.1 where cross-chapter continuity governs), written into `.claude/skill-conventions.md`
+   as a scoped `CONFORMANCE_GUIDES` note. Cheapest, and matches what we already do.
+2. **Split the artifact** — the shipped `.spin2` carries the header/footer and the printed block is
+   a documented excerpt. Costs the byte-identity guarantee, which the examples README sells to
+   readers as the point ("what you read is what builds").
+3. **Propose upstream** — ask the central guide to carve out example corpora. Slowest; correct if
+   other projects ship manual-linked examples too. Never edit the central guide here
+   ([[feedback_never_modify_central_skills]]).
+
+**Recommendation: option 1.** The guide governs *shipped source a user builds on*; a teaching block
+whose whole contract is byte-identity with the page is a different artifact, and the exemption
+should say so in one place rather than being re-litigated per example.
+
+**Until decided,** authors do what «#263» did: apply every rule that does not collide (§1.1 ASCII,
+§4.6/§4.10 declaration and block comments, the K column budget), and say in the task record that
+the collision was escalated rather than silently waived.
+
+---
+
 ## Certify the Forge — torture-test the F-286 escaping invariant — OPEN
 
 **Status:** ⏳ Open — queued 2026-08-17 (Stephen's call). **Deliberately sequenced AFTER** the

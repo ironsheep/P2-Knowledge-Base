@@ -77,14 +77,15 @@ PART IV: THE XBYTE ENGINE (reference)
 
 PART V: BUILDING INTERPRETERS AND EMULATORS (practical)
 ├── Chapter 14: A Minimal Custom VM
-├── Chapter 15: A Tiny CPU Emulator (6502 capstone)
-├── Chapter 16: Servicing Guest Interrupts
-├── Chapter 17: Prefixes and Alternate Tables
-└── Chapter 18: XBYTE Beyond Interpreters
+├── Chapter 15: Growing the VM
+├── Chapter 16: A Tiny CPU Emulator (6502 capstone)
+├── Chapter 17: Servicing Guest Interrupts
+├── Chapter 18: Prefixes and Alternate Tables
+└── Chapter 19: XBYTE Beyond Interpreters
 
 PART VI: REFERENCE (lookup)
-├── Chapter 19: Instruction Reference
-└── Chapter 20: Configuration Constants & Patterns
+├── Chapter 20: Instruction Reference
+└── Chapter 21: Configuration Constants & Patterns
 
 PART VII: APPENDICES
 ├── A: XBYTE Quick Reference
@@ -102,9 +103,21 @@ dispatch — which is why it is named for the machinery and not for the engine. 
 is the decision: with the machinery understood, Chapter 7 walks the three-rung ladder
 and Chapter 8 surveys what each guest CPU will cost you. Part IV is the engine
 reference for a reader whose decision landed on rung 3 — the cycle, the arming, the
-modes, the routine rules, and how to debug them. Part V builds: a minimal VM, a tiny
-6502, interrupts, prefixes, and the non-interpreter uses. Part VI is fast lookup, and
-Part VII holds the appendices.
+modes, the routine rules, and how to debug them. Part V builds, and it builds in
+rungs of difficulty: the minimal VM, that same VM grown until its dispatch table has
+to work for a living, a tiny 6502, interrupts, prefixes, and the non-interpreter uses.
+Part VI is fast lookup, and Part VII holds the appendices.
+
+**Why Part V has three complete programs and not two.** Chapter 14 is the floor — the
+smallest thing that exercises the engine once — and Chapter 16's 6502 is deliberately a
+slice, not a whole emulator. Between them the book was asking a reader to step from four
+bytecodes to a real instruction set in one move, and four techniques it *recommends* were
+never shown running anywhere: a shared body with skip patterns across a family, a guest
+branch as `RDFAST`, a second operand width off the FIFO, and exit-and-re-arm end to end.
+Chapter 15 is that missing rung — Chapter 14's own machine grown to about a dozen
+bytecodes. When authoring into Part V, keep Chapter 14 minimal: its value is being the
+floor, and anything that grows belongs in Chapter 15. Added in v1.1.0; the record is
+`PLANNING.md` §0-quinquies.
 
 **Why the decision Part precedes the engine Part.** The book's own argument is that most
 P2 emulator authors land on **rung 2** — `EXECF` dispatch with a hand-rolled fetch — and
@@ -167,7 +180,9 @@ Hallucinations occur **at the moment of writing**. Before writing any XBYTE clai
 
 ### 5.1 The "Tiny & Illustrative" charter (LOCKED)
 
-The minimal VM (Ch. 14), the 6502 capstone (Ch. 15), and the worked 6809 prefix example (§17.2) are **teaching artifacts**: enough to show the technique end-to-end and to compile with `pnut-ts`, explicitly **NOT** complete or faithful emulators. Neither we nor a future contributor should over-build them. Each such chapter states this limit in its opener.
+The minimal VM (Ch. 14), the grown VM (Ch. 15), the 6502 capstone (Ch. 16), and the worked 6809 prefix example (§18.2) are **teaching artifacts**: enough to show the technique end-to-end and to compile with `pnut-ts`, explicitly **NOT** complete or faithful emulators. Neither we nor a future contributor should over-build them. Each such chapter states this limit in its opener.
+
+The charter constrains **faithfulness, not size.** Chapter 15 is the largest program in the book and still sits inside it: it is a complete machine of its own design, which is exactly why it can be complete — it owes fidelity to nothing. What the charter forbids is a *partial* implementation of something real, shipped as though it were whole.
 
 ### 5.2 Chapter / Entry Format
 
@@ -209,6 +224,9 @@ Code boxes do **not** wrap — a typeset wrap can't break a comment and re-inden
 
 ---
 
+*Version: 0.3 — Chapter 15 "Growing the VM" added to §2's architecture and rationale;
+Part V chapter numbers advanced (old 15-20 -> 16-21) in §2 and §5.1; §5.1 now says what the
+tiny-&-illustrative charter actually constrains.*
 *Version: 0.2 — §2 Document Architecture rewritten to the v1.1.0 structure (decision-first);
 stale v0.1.0 chapter numbers corrected in §1.1, §3, §4.1, §5.1.*
 *Created: 2026-06-26 · Revised: 2026-08-18*

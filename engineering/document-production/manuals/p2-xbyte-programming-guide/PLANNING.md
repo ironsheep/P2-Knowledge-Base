@@ -398,6 +398,59 @@ for readers, and its content is simply part of v1.1.0.
 
 ---
 
+## 0-quinquies. CONTENT ADDITION — **Chapter 15, "Growing the VM"** (2026-08-18) — **LOCKED**
+
+> **Additive to §0-quater, which stays locked as written.** §0-quater was a permutation
+> and said so ("chapter count stays at 20"). This section is the one thing that changes
+> that: Part V gains a chapter, so v1.1.0 ships **21 chapters in 7 Parts**, and old
+> chapters 15-20 advance to 16-21. Nothing in §0-quater's ordering decision is reopened.
+
+### The decision
+
+Community review of v1.0.1 suggested adding a small constructed-bytecode-machine example
+as a second worked build. The suggestion was scheduled rather than scoped (sprint plan
+§11) and taken on 2026-08-18. **It was taken in a different shape than proposed**, and the
+reason is worth keeping, because it is a reader-model finding and not a content one.
+
+Read literally, "a small constructed bytecode machine" already exists: Chapter 14's
+four-bytecode stack machine is constructed, complete, and compiles. A second one at the
+same size would duplicate it. What the suggestion was actually reacting to is a **step
+size**. Part V went from the smallest thing that exercises the engine once, straight to a
+6502 slice that is deliberately not a whole program — and four techniques the book
+*recommends* were shown nowhere in running code:
+
+| Technique | Where the book states it | Where a reader could watch it work |
+|---|---|---|
+| shared body + skip pattern across a family | §4.4; §14.3 as a fragment | nowhere — Ch. 14 writes ADD and SUB separately, on purpose |
+| a guest branch as `RDFAST` to a new address | asserted in the 6502 chapter, leaned on by the interrupts chapter | only the graphics display list — not an interpreter |
+| a second operand width off the FIFO | Chapter 5 | Ch. 14 uses one form |
+| exit and re-arm between jobs | §12.4, §14.4 | described, never exercised end to end |
+
+### What Chapter 15 is
+
+Chapter 14's own machine, grown to roughly a dozen bytecodes: variables addressed by an
+operand rather than immediates only, a compare, a conditional branch via `RDFAST`, and an
+ALU family folded onto one shared body with skip patterns. Complete and compiling, shipped
+as a third file in `examples/`.
+
+**Chapter 14 stays minimal.** That is its charter and its value to a reader who wants the
+floor; the growth belongs in 15. This is a standing authoring rule for Part V, recorded in
+`creation-guide.md` §2.
+
+**Deliberately not in Chapter 15:** prefix bytes (Chapter 18 owns them) and guest
+interrupts (Chapter 17). The chapter earns its place by making a dispatch *table* work for
+a living, not by collecting features.
+
+### What this does NOT change
+
+- The TINY & ILLUSTRATIVE charter still governs — and Chapter 15 clarified what it
+  constrains: **faithfulness, not size.** Chapter 15 is the book's largest program and is
+  complete precisely because it is a machine of our own design and owes fidelity to
+  nothing. What the charter forbids is a partial implementation of something real,
+  presented as whole.
+- The release shape: still one public release, v1.1.0, measured from v1.0.1.
+- Part boundaries, Part names, and the Appendix letters A-D.
+
 ## 1. Why this manual exists (LOCKED)
 
 The community wants to understand **XBYTE** — the P2's hardware bytecode-
