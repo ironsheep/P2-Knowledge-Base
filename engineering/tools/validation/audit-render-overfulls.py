@@ -117,6 +117,10 @@ def probe_phrases(chunk):
                 cands.append(s[:60])
             continue
         s = re.sub(r'\\passthrough\{\\lstinline!([^!]*)!\}', r'\1', line)
+        # Un-escape LaTeX specials FIRST. Stripping markup before this turns
+        # "P\_DAC\_DITHER" into " _DAC _DITHER", which matches nothing in the
+        # PDF and reports an unresolvable "page=?" for a findable site.
+        s = re.sub(r'\\([_&#%$])', r'\1', s)
         s = re.sub(r'\\[a-zA-Z]+\*?(\[[^]]*\])?(\{[^}]*\})?', ' ', s)
         s = s.replace('---', '—').replace('``', '"').replace("''", '"')
         s = re.sub(r'[{}\\]', ' ', s)
