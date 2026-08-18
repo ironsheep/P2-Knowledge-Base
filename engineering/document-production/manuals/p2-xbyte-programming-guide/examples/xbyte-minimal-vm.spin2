@@ -11,7 +11,7 @@ start
                 rdfast  #0, ##program       ' FIFO -> bytecode stream
                 push    #$1ff               ' return target per bytecode
         _ret_   setq    #0                  ' arm: 256-entry table @ LUT
-                                            ' $000, F=0 — XBYTE starts now
+                                            ' $000, F=0 - XBYTE starts now
 ' XBYTE now runs the stream; control reaches 'done' only via HALT.
 done
                 jmp     #done               ' park the cog
