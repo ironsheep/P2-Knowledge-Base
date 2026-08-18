@@ -33,6 +33,39 @@ check is **not sufficient** — also verify the example corpus has not drifted:
   — the checker prints GREEN and exits 0 when no corpus is present, so it is safe
   to run unconditionally.
 
+### The identity gate does NOT tell you the published ZIP is current
+
+`verify-example-corpus-identity.py` compares `examples-library/` against
+`opus-master/`. It says **nothing** about `DOCs/<slug>-src.zip`, the archive the
+reader actually downloads. Those are two different questions that read like one
+sentence, and the gap between them shipped:
+
+> **Debug Window v1.1.3** — corpus identity **GREEN 34/34**, while the published
+> ZIP was dated three weeks earlier and **13 example files had changed since**.
+> Several were the F-281/F-290/F-292 repairs, where the old code **compiles clean
+> and runs a different program** than the page shows. It was caught by asking
+> "have examples changed since the last tag?" — a question on nobody's checklist.
+
+**So run BOTH gates. Corpus identity first, then ZIP currency:**
+
+```bash
+python3 engineering/tools/verify-example-corpus-identity.py  --manual <manual-dir>   # corpus ↔ printed blocks
+python3 engineering/tools/validation/verify-published-zip-currency.py --manual <manual-dir>   # ZIP ↔ corpus
+```
+
+- Exit 0 = every shippable corpus file is present in the ZIP **and byte-identical**.
+  It compares bytes, not timestamps — **a ZIP rebuilt from a stale directory has a
+  fresh mtime and stale contents**, so an mtime check would have passed here too.
+- **RED blocks the release.** Rebuild the ZIP from the corpus (identity GREEN
+  first — never zip over a drifted corpus), then re-run until GREEN.
+- Safe to run unconditionally: a manual with no `examples-library/` exits 0.
+- The ZIP filename carries **no date** — it is overwritten in place each release so
+  the published URL never changes.
+
+**Order matters.** Identity green + ZIP stale is the failure that shipped; ZIP
+currency is meaningless if the corpus itself has drifted. Run them in that order,
+and rebuild between them if either is RED.
+
 ## Augments Phase 1 — VERIFY: the in-doc Revision History agreement gate
 
 Every **app note** (and any document that prints a `## Revision History` in its body —
@@ -72,3 +105,31 @@ history contradicts its cover.
 > for the literal `v0.1.0` / "initial draft" and so missed four app notes whose tables say a
 > bare `0.1.0` / "First draft". **Key on the shape of the defect (a version < the cover, or a
 > version with no tag), never on one spelling of it.**
+
+## Augments Phase 5 — the example ZIP is NOT gitignored in this repo
+
+The central skill suggests `git add -f …-src.zip` "for a gitignored example ZIP."
+**In this project the ZIP is tracked normally** — `git check-ignore` returns
+nothing for it, and a plain `git add` stages it. The `-f` is harmless, but the
+premise is not: read it as "the ZIP is excluded from normal staging" and it is
+easy to leave a rebuilt archive out of the release commit entirely, publishing a
+PDF whose linked examples are the previous release's.
+
+So: **stage the ZIP by explicit path in the Phase 5 `git add`, every release that
+rebuilt it**, and confirm it appears in `git diff --cached --name-only` before
+committing.
+
+After the push, verify both published links actually resolve — the PDF and the
+ZIP — rather than assuming the push activated them:
+
+```bash
+for u in ".../DOCs/<PDF>" ".../DOCs/<slug>-src.zip"; do
+  curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' \
+    "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/$u"
+done
+```
+
+`200` plus a byte count matching the local artifact is the proof. A `404` means
+the file never reached the remote; a `200` with the *wrong* size means a stale
+copy is being served, which is the same defect the currency gate above exists to
+prevent — just one stage later.
