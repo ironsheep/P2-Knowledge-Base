@@ -294,9 +294,9 @@ The bytecode that means "subtract" points at `alu_body` with a skip pattern that
 Design handler bodies so the *common* path has the fewest skips. Every kept instruction runs; a skipped one costs almost nothing (§4.2). A well-factored shared body can serve a dozen related bytecodes with one copy of the code.
 :::
 
-## 4.5 Two things a pattern does when you are not looking {#sec-4-5}
+## 4.5 Three things a pattern does when you are not looking {#sec-4-5}
 
-The shared body above depends on one behaviour and must step around one trap. Both matter before you write your own.
+The shared body above depends on one behaviour and must step around two traps. All three matter before you write your own.
 
 **Skipping is suspended inside a `CALL`.**
 
@@ -312,8 +312,7 @@ The pattern is consumed as instructions execute. If it carries more bits than th
 
 Under XBYTE this is harmless — the engine cancels any leftover pattern at clock 1 of the next dispatch (§9.1). But it becomes a real trap the moment you dispatch by hand (§6.4, and Chapter 13, where it bites hardest). The discipline that prevents it is one line long: **size each pattern to the body it belongs to.**
 
-::: caution
-**A skip pattern counts *instructions*, not source lines — and `##` makes one line into two instructions.**
+**A pattern counts *instructions*, not source lines — and `##` makes one line into two.**
 
 A large immediate does not fit in an instruction's 9-bit operand field, so the assembler quietly emits an **`AUGS`** ahead of it to supply the missing bits. One line of source, **two longs of code**:
 
@@ -322,9 +321,12 @@ A large immediate does not fit in an instruction's 9-bit operand field, so the a
                 add     x, ##1000           ' 2 instructions: AUGS, then ADD
 ```
 
-Now count what that does to a hand-written pattern. If a skipped body contains a `##` operand — a large constant, a hub address, a `##`-form jump target — then **every bit of your pattern from that line onwards is off by one**, and the symptom is that the wrong instructions run for reasons the source code does not show.
+Count what that does to a hand-written pattern. If a skipped body contains a `##` operand — a large constant, a hub address, a `##`-form jump target — then **every bit of your pattern from that line onwards is off by one**, and the symptom is that the wrong instructions run for reasons the source code does not show. This is the trap §4.6 returns to, and it is why the patterns in this book's own shared bodies are written against bodies with no `##` in them.
 
-Two defences, and you want both. **Keep large constants out of skipped bodies** (load them into a register before the pattern begins). And when a pattern misbehaves, **count the longs, not the lines** — the debugger's strikethrough view (§13.2) shows you the instructions the hardware actually sees, which is exactly the view you need.
+::: caution
+**Two defences against the `##` miscount, and you want both.**
+
+**Keep large constants out of skipped bodies** — load them into a register before the pattern begins, where the count cannot be disturbed. And when a pattern misbehaves, **count the longs, not the lines**: the debugger's strikethrough view (§13.2) shows you the instructions the hardware actually sees, which is exactly the view you need.
 :::
 
 ::: hardware
@@ -454,8 +456,12 @@ The *Parallax Propeller 2 Documentation v35* states it directly: the table *"mus
 **Do not transpose the two fields.** The address is the **low** 10 bits; the skip pattern is the **high** 22 bits. A handler that lives at LUT address `$200` with no skipping has the entry `$0000_0200`, not the address shifted left. Build entries with the address in the low bits and the pattern shifted up by 10.
 :::
 
+**The table is *this* cog's LUT, and 256 entries is the ceiling.** A bytecode is one byte, so it indexes at most **256** entries, and the engine reads them from the LUT of the cog running it. That number is not a limit you can raise — it is what "one byte of bytecode" means.
+
+It is also why Chapter 18 exists. When a guest needs **more than 256 distinct opcodes**, the answer is not a bigger table but a **prefix bytecode that borrows an alternate table** for the next dispatch, with one-shot `SETQ2` (§10.3, Chapter 18) — exactly how a real CPU's extended-opcode pages work. **Compression** (§11.3) is the complementary tool, for the opposite case: many bytecodes that *share* one handler rather than needing new ones.
+
 ::: hardware
-**The table is *this* cog's LUT — and 256 entries is the ceiling.** A bytecode is one byte, so it indexes at most **256** entries, and the engine reads them from the LUT of the cog that is running it. You cannot enlarge the table by *sharing* LUT across two cogs: **`SETLUTS`** mirrors a companion cog's LUT *writes* into this cog's LUT — it does **not** merge the two into one address space, and each cog still has its own 512-long LUT. So when a guest needs **more than 256 distinct opcodes**, the answer is not more LUT but a **prefix bytecode that borrows an alternate table** with one-shot `SETQ2` (§10.3, Chapter 18) — exactly how a CPU's extended-opcode pages are handled. **Compression** (§11.3) is the complementary tool, for when many bytecodes *share* one handler rather than needing new ones.
+**You cannot enlarge the table by sharing LUT across two cogs.** It is a natural thought — two cogs, two LUTs, twice the table — and it does not work. **`SETLUTS`** mirrors a companion cog's LUT *writes* into this cog's LUT; it does **not** merge the two into one address space, and each cog still has its own 512-long LUT. The ceiling is a property of the bytecode's width, not of how much LUT you can reach.
 :::
 
 ## 6.2 Building a table entry {#sec-6-2}
@@ -590,9 +596,7 @@ Now recall §7.1's measurement — the emulator published in a hub variant and a
 Had they taken auto-fetch, that port would have forced a far larger rewrite — auto-fetch welds the guest's code to hub, and undoing that means replacing the fetch throughout (§8.9 notes the one narrow exception).
 
 ::: caution
-**Auto-fetch is fast, and it welds your guest's code to hub RAM.** A hand-rolled fetch costs you clocks and buys you a **swappable memory backend**.
-
-If there is any chance your guest will outgrow hub, do not take the auto-fetch — undoing it later means a rewrite of the fetch path.
+**Decide this on the first day, not the first port.** If there is any chance your guest will outgrow hub, do not take the auto-fetch. It is the one decision in this chapter that is expensive to reverse — every other rung-3 choice can be walked back by editing a table.
 :::
 
 And there is a second, quieter cost. XBYTE reads its dispatch table from **LUT**, and LUT is a cog resource that the rest of your system also wants — for a prefetch queue, a palette, a line buffer, a sine table. An emulator that needs LUT for one of those must move its dispatch table off LUT, and XBYTE goes with it. The FIFO is contended the same way: a cog streaming a video framebuffer through the FIFO cannot also use it to fetch instructions, even if the guest's code lives in hub. Chapter 3's resource budget (§3.6) is not a formality — it is the second half of this decision.
@@ -732,6 +736,31 @@ For many guests this is the largest hidden cost, and it scales with how faithful
 - **6502** is kind: `N` and `Z` fall out of the result almost free, and `C`/`V` are cheap. A single shared `set_nz` helper serves most of the instruction set.
 - **Z80 and 8080** are not kind. The Z80's `F` register carries **`H` (half-carry)** and **`N` (subtract)** bits that exist for one reason: to make `DAA` work afterwards. They are pure bookkeeping — no program reads them directly — and you must maintain them anyway, on every arithmetic instruction, or `DAA` produces the wrong answer.
 - **x86** is where emulators traditionally cheat, and the cheat has a name: **lazy flags.** Rather than compute all six status flags on every ALU operation, you store the operands and the operation, and only *derive* the flags if something actually reads them. In practice many instructions' flags are never read. It is a large win and a large complication.
+
+The difference is easier to believe in code than in prose. Both fragments below do *the same guest addition*; the only thing that changes is which flags the guest expects afterwards.
+
+```pasm2
+' 6502: N and Z fall out of the result, and one helper serves most opcodes
+set_nz          testb   val, #7      wc      ' C = bit 7 of the result
+                bitc    pf, #7               '   -> guest N
+                test    val, #$ff    wz      ' Z = (result == 0)
+        _ret_   bitz    pf, #1               '   -> guest Z
+```
+
+```pasm2
+' Z80: the same addition, plus two bits no program will ever read
+                mov     lo, a                ' rebuild the low nibbles,
+                and     lo, #$0f             '   because H is a carry
+                mov     t, b                 '   out of bit 3 and the P2
+                and     t, #$0f              '   has no such flag
+                add     lo, t
+                testb   lo, #4       wc      ' C = carry out of bit 3
+                bitc    zf, #4               '   -> H, for DAA's benefit
+                bitl    zf, #1               ' N = 0: this was an add
+                add     a, b         wc      ' ...then the real addition
+```
+
+Nothing in the second fragment is optional. `H` and `N` exist so that a later `DAA` produces the right answer (§8.6), no guest program reads them directly, and omitting them is a bug that appears only in decimal arithmetic, long after the code that caused it. That is the shape of the cost: not one hard instruction, but four extra ones on every arithmetic opcode in the set.
 
 ::: tip
 The F bit (§11.4) can help here, but not as a guest flag register. It does not carry your *guest's* flags — it writes the **bytecode's own low bits** into `C` and `Z` at dispatch. That is a way to let one handler body branch four ways on which opcode selected it; it is not a guest flag register. Your guest's flags live in a cog register you maintain yourself.
@@ -898,20 +927,15 @@ In particular, **a `CALL` will not do the job for you.** A `CALL` pushes *its ow
 The D value handed to SETQ is the **mode operand**. It packs three independent choices, all detailed in Chapter 11:
 
 - the **table base address** in LUT (the high bits),
-- the **table size / compression** selection (which bit pattern), and
+- the **table size / compression** selection (which bit pattern),
+- the **index form** (bit 1) — for every size below 256, whether the table is indexed from the bytecode's *low* bits or its *high* bits, and
 - the **F bit** (bit 0) — whether dispatch writes the flags.
 
 For a full 256-entry table at LUT base `$100` with flags untouched, the operand is `$100` — table base in the high bits, the size/F bits clear. Chapter 11 is the full map.
 
-::: hardware
-**Bit 1 of the mode operand selects the index form.**
+**Bit 1 is worth stating plainly, because it is the one that silently changes what a bytecode means.** With bit 1 clear the table is indexed from the bytecode's low bits (the *primary* form); with it set, from the high bits — which frees the low bits to travel into `PA` as an operand. The §11.2 patterns show it directly: `%AAxx0010F` and `%AAxx0011F` are the *same* 128-entry mode, differing only in this bit. **In 256-entry mode the bytecode already fills all eight index bits, so bit 1 is a genuine don't-care.** Leave it **0** unless you specifically want a smaller table's high-bits form.
 
-Across the smaller-table modes (§11.2), bit 1 chooses *which half* of the bytecode indexes the dispatch table: `0` indexes from the bytecode's **low** bits, `1` from its **high** bits — the latter freeing the low bits as an operand in `PA`. The §11.2 patterns show it directly: `%AAxx0010F` and `%AAxx0011F` are the *same* 128-entry mode, differing only in bit 1.
-
-In the **256-entry mode** the bytecode already fills all eight index bits, so there is no low/high choice to make and **bit 1 is simply ignored** — a genuine don't-care in that mode.
-
-**What to do about it:** leave it **0** unless you specifically want a smaller table's high-bits index form. Every arming idiom in this book leaves it 0, which selects the low-bits form (and in 256 mode makes no difference either way).
-:::
+Every arming idiom in this book leaves bit 1 at 0, which selects the low-bits form — and in 256-entry mode makes no difference either way. If you copy an arming sequence from these pages into a smaller-table design and want the high-bits form, that is the one bit to go back and set deliberately.
 
 ## 10.3 Persistent vs one-shot — SETQ and SETQ2 {#sec-10-3}
 
@@ -1108,15 +1132,19 @@ op_port_write
 
 XBYTE runs until a handler chooses **not** to return to `$1FF`. A "halt" bytecode's handler simply does not end in the dispatch-continuing return — it branches to ordinary code instead, leaving the engine. That is the clean way to exit: one bytecode whose handler jumps out of the loop rather than back into it.
 
-::: caution
-**If the cog will re-arm, reclaim the `$1FF` first.** The arming `$1FF` was never popped (§10.1) — so the moment a handler jumps *out* of the loop instead of returning to it, that `$1FF` is still sitting on the hardware stack. For a **run-once** VM that halts and parks (the shape of §14.2), that is harmless; the cog never touches the stack again. But a **reusable interpreter cog** — one that finishes a job, drops back to an idle wait, and later arms *again* for the next job — must **`POP`** that stale `$1FF` as it exits, or the hardware stack gains one entry per job. With only eight levels, and any handler or between-jobs code that also uses `CALL`/`RET`, that drift eventually starves the stack — and it **wraps with no fault** to warn you. The rule is simple: if you will arm more than once, pop on the way out.
+**If the cog will arm more than once, pop the `$1FF` on the way out.** The arming `PUSH` was never consumed — the return that triggers each dispatch does not pop the stack (§10.1) — so the moment a handler jumps *out* of the loop instead of returning to it, that `$1FF` is still sitting on the hardware stack. A run-once VM that halts and parks never notices. A cog that finishes a job, waits, and arms again for the next one gains an entry per job, on a stack eight deep. Chapter 15 builds exactly that shape and pops (§15.6):
 
 ```pasm2
 h_halt          pop     tmp                 ' reclaim the arming $1FF
                 jmp     #idle               ' back to the between-jobs wait
 ```
 
-(§15.6 builds a cog that arms twice and shows what the missing `POP` would cost; Appendix C's minimal community example, §C.9, is a real one in the wild.)
+::: caution
+**The stack drift wraps with no fault to warn you.**
+
+Nothing reports the leak. The stack is eight levels, any handler or between-jobs code that uses `CALL`/`RET` shares it, and the drift eventually starves it — at which point a `RET` returns somewhere it should not, in a handler that has nothing wrong with it. The bug surfaces far from the missing `POP`, in code that was never edited.
+
+(Appendix C's minimal community example, §C.9, is a reusable cog doing this correctly in the wild.)
 :::
 
 # Chapter 13: Debugging XBYTE {#ch-13}
