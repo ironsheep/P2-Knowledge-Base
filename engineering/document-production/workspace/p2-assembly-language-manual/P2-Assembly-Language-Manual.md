@@ -20659,15 +20659,18 @@ These modes capture data from pins/ADCs and write to hub RAM via WRFAST FIFO.
 
 ## ADC Sampling Modes
 
-These modes capture ADC samples and optionally write to hub RAM.
+These modes capture ADC samples and optionally write to hub RAM. These
+constant names are the longest in the appendix, so the shared `<< 16` shift is
+stated here once rather than repeated in every row: each constant equals the
+mode field below shifted left 16 bits.
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| X_1ADC8_0P_1DAC8_WFBYTE | %1111_0000_0000_0010 << 16 | 1 ADC to 8-bit, 0 pins, 1 DAC, write byte |
-| X_1ADC8_8P_2DAC8_WFWORD | %1111_0000_0000_0011 << 16 | 1 ADC to 8-bit, 8 pins, 2 DACs, write word |
-| X_2ADC8_0P_2DAC8_WFWORD | %1111_0000_0000_0100 << 16 | 2 ADCs to 8-bit, 0 pins, 2 DACs, write word |
-| X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 << 16 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
-| X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 << 16 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
+| X_1ADC8_0P_1DAC8_WFBYTE | %1111_0000_0000_0010 | 1 ADC to 8-bit, 0 pins, 1 DAC, write byte |
+| X_1ADC8_8P_2DAC8_WFWORD | %1111_0000_0000_0011 | 1 ADC to 8-bit, 8 pins, 2 DACs, write word |
+| X_2ADC8_0P_2DAC8_WFWORD | %1111_0000_0000_0100 | 2 ADCs to 8-bit, 0 pins, 2 DACs, write word |
+| X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
+| X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
 
 
 
