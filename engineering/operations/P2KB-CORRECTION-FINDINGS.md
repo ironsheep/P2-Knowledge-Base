@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-296`**
+**Next finding ID: `F-297`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -2949,6 +2949,61 @@ the shipped artifact instead of the description of it: a config file listing thr
 game-database comment, and an md5.
 
 **Next finding ID after this block: F-296.**
+
+---
+
+### F-296 — §7.4 read as a wall when the engine only moves the work, leaving three usable places to put it. `CONFIRMED` — **source fixed 2026-08-18, pre-release; render owed in v1.1.0**
+
+**Surfaced by** Stephen's read pass: "the 7.4 narrative felt too constraining." The section said the
+cross-cutting work must be "replicated across all of them, confined to the few where it genuinely
+matters, or dropped… a real cost and sometimes a prohibitive one," and pointed forward to a chapter
+that **prices** it. A reader who stops at §7.4 concludes the boundary is solid. It is not.
+
+**Three placements, every one built from facts the book already teaches:**
+
+1. **Per family, not per instruction.** The shipped 8080 emulator (rung 3, XBYTE-armed) polls guest
+   interrupts in the shared tail of its **control-flow** handlers — `jatn #int_event` annotated for
+   twelve branch/call/return bytecodes and skipped on the injection path itself. Costs nothing: those
+   instructions had to run anyway. `HLT` gets its own `jnatn`, because a halted guest never branches.
+   Already priced in §17.3's third row ("nearly free") — §7.4 simply never said the answer existed.
+2. **An optional prologue selected by the skip pattern.** `SKIPF` *leaps* rather than cancels, so a
+   skipped prologue costs essentially nothing (§4.2); a second table over the same handler addresses
+   with patterns that *include* it turns the work on — `SETQ` for a mode, `SETQ2` for exactly one
+   bytecode (§10.3). **Two tables at once is shipped practice**: Parallax's Spin2 interpreter, and
+   zog, which defines `RET_START_ALTERNATE`/`RET_CONTINUE_ALTERNATE` as `_ret_ setq2 #$100` against a
+   main table at `setq #$0` — both halves of a 512-long LUT. Both use it to redirect dispatch, not to
+   instrument; **instrumenting is the unexploited step.**
+3. **The cog's own interrupts, which XBYTE never took.** §9.4 already states the engine is
+   interruptible and resumes the stream afterwards. Periodic work — pacing, watchdog, device service
+   — belongs there and costs the dispatch path nothing. §7.4 never connected the two.
+
+**The point that makes placement 2 practical, and which the first draft of this fix got wrong:**
+skipping is **suspended for the duration of a `CALL`** (§13.1, and the reason §16.3's shared `set_nz`
+helper works at all). So the prologue is **one instruction** — a `CALL` — reaching a routine of any
+length whose instructions are immune to the pattern that selected it. One pattern bit buys unbounded
+work. The draft had claimed the prologue "spends pattern bits the body also wants," which is only
+true if you inline it.
+
+**Framing ruling (Stephen).** No verification rig was built, deliberately: *"if somebody's already
+doing it, they'll spend a lot of time verifying it before they publish… We're not speaking for proof;
+we're speaking for ideas and possible ways of doing things."* The distinction the prose must honour —
+and does — is that **every component fact is verified and cited in-book**, while the **composition is
+labelled a shape to consider, not a recipe**, with the reader told to prove it for their own guest.
+That is not an unsourced claim; it is a sourced mechanism with an honestly-marked boundary. Also
+per Stephen: do not characterise the shape as ideal or non-ideal.
+
+**Collateral, verified:** §C.7 now records zog's second dispatch table (the §18.4 idiom in a
+community interpreter rather than Parallax's own). §7.4's "had no choice" for the de-arm-and-trace
+technique became "took the direct route" — the section now names alternatives, so the absolute
+over-claimed. The hardware box no longer says "disaster" and instead names *where* the cost actually
+bites: work that must happen on **every** instruction, cycle-accurate timing above all, is what
+cannot be attached to a family.
+
+**The transferable lesson.** A section can be factually correct and still leave the reader with a
+false conclusion. Nothing in §7.4 was wrong; the omission of the answer did the damage, and only a
+read-through caught it — no gate can test for "this reads as a dead end."
+
+**Next finding ID after this block: F-297.**
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 

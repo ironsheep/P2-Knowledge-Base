@@ -628,17 +628,29 @@ Consider what that means. In a software interpreter, the dispatch loop is a *pla
 
 That is a great deal of cross-cutting work, in one place, once per instruction. (MegaYume's Z80 core does the bus-arbitration, pacing, and refresh among them — §C.4.)
 
-Under XBYTE, **none of that has a place of its own.** The engine goes from your handler's `_RET_` straight to the next handler's first instruction, in hardware, in six clocks. There is no gap. Every one of those six concerns has to move *inside the handlers* — replicated across all of them, confined to the few where it genuinely matters, or dropped. That is a real cost and sometimes a prohibitive one; Chapter 17 prices it for the commonest case, guest interrupts.
+Under XBYTE, **none of that has a place of its own.** The engine goes from your handler's `_RET_` straight to the next handler's first instruction, in hardware, in six clocks. There is no gap. Every one of those six concerns has to move *inside the handlers*.
+
+**That is a relocation, not a wall**, and it is worth saying plainly because the paragraph above reads like one. The work does not become impossible; it loses its free, uniform home and becomes something you place deliberately. Where to place it is a design question with more than one worked answer, and rung-3 emulators have shipped using them.
+
+**The cheapest answer is to stop thinking per-instruction and start thinking per-family.** A shipped 8080 emulator polls for guest interrupts in the shared tail that ends its **control-flow** handlers: a dozen jump, call and return bytecodes route through those same few instructions, so a single `JATN` covers all of them and costs nothing extra, because those instructions had to run anyway. A guest that is about to branch is also a guest whose program counter is unambiguous, which is what makes that placement defensible and not merely cheap. What it buys is *bounded* latency rather than *immediate* latency — the interrupt waits until the guest next branches. Chapter 17 lays the choices out and prices them (§17.3).
+
+**And the skip pattern is a lever most designs never pull.** Every dispatch-table entry carries its own 22-bit skip pattern, and `SKIPF` *leaps* rather than cancels, so instructions a pattern skips cost essentially nothing (§4.2). A handler can therefore be built with an optional prologue in front of its body — present in the code, skipped by the patterns that do not want it. Give a second table the same handler addresses with patterns that *include* that prologue, and changing tables changes whether the cross-cutting work runs: persistent `SETQ` for a mode you enter and leave, one-shot `SETQ2` for exactly one bytecode (§10.3). Two tables at once is established practice — Parallax's Spin2 interpreter and the community's ZPU interpreter both do it (§18.4, §C.7) — though both use the second table to redirect dispatch rather than to instrument it.
+
+**The prologue only needs to be one instruction**, which is what keeps this from being cramped. Skipping is **suspended for the duration of a `CALL`** (§13.1), so a single `CALL` in the prologue reaches a routine of any length, and that routine's instructions are immune to the pattern that selected it. One pattern bit buys unbounded work: beyond the clocks it spends, nothing limits what the call-out does. Three or four separate jobs before the next guest instruction is a design decision, not a budget the engine imposes on you.
+
+Count the costs before building on it. The prologue occupies cog space in every handler that carries it, a second full-size table is another 256 longs out of a 512-long LUT, and everything the call-out does is paid on every dispatch that runs it. **This is a shape to consider, not a recipe**: whether it holds together at your handler sizes and your table size is yours to prove on your own guest.
+
+**And one place to stand was never taken away.** XBYTE leaves the cog's own interrupts working — an interrupt can fire during dispatch, and the engine resumes the bytecode stream afterwards (§9.4). Work that is *periodic* rather than *per-instruction* — pacing against a clock, a watchdog, servicing a device — can live in an interrupt handler and cost the dispatch path nothing at all. It is a different kind of place: asynchronous, landing wherever it lands, which is why §9.4 also tells you where to fence. For anything driven by elapsed time rather than by instruction count, it is the natural home, and the engine never competed for it.
 
 ::: hardware
 This is the trade, stated plainly:
 
 **XBYTE gives you hardware dispatch and takes away the one place where per-instruction work naturally lives.**
 
-A software loop costs you roughly three extra clocks per instruction and gives you **a place to stand**. Whether that is a bargain or a disaster depends entirely on how much cross-cutting work your guest demands — and cycle-accurate emulation of real hardware demands a great deal.
+A software loop costs you roughly three extra clocks per instruction and gives you **a place to stand**. XBYTE hands those clocks back and takes the place away. Whether that suits you turns on how much cross-cutting work your guest demands **and how much of it can attach to a family rather than to every instruction**. Work that must genuinely happen on *every* instruction — cycle-accurate timing above all — is the kind that cannot be confined to a family, and it is where the missing loop body bites hardest.
 :::
 
-The consequence is sharpest in debugging, and it is worth knowing now rather than discovering later. An emulator that *does* use XBYTE, when its author needed to trace guest execution, had no choice: **comment the engine out** and substitute the software dispatch loop of §6.4, with a `debug()` in the middle. There was nowhere else to put it. An emulator that never armed XBYTE simply leaves a `NOP` in its loop and patches it when needed. Same problem; one of them pays nothing. Chapter 13 takes the whole subject up once you have the engine; count it here as part of what rung 3 costs.
+The consequence is sharpest in debugging, and it is worth knowing now rather than discovering later. An emulator that *does* use XBYTE, when its author needed to trace guest execution, took the direct route: **comment the engine out** and substitute the software dispatch loop of §6.4, with a `debug()` in the middle. There was nowhere else to put it. An emulator that never armed XBYTE simply leaves a `NOP` in its loop and patches it when needed. Same problem; one of them pays nothing. Chapter 13 takes the whole subject up once you have the engine; count it here as part of what rung 3 costs.
 
 ## 7.5 Choosing, in order {#sec-7-5}
 
@@ -2457,7 +2469,7 @@ Both are presented in the *Intel 8086 CPU Emulator* thread on the Parallax forum
 
 ## C.7 Zog — the ZPU {#sec-c-7}
 
-A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, with a P2 port maintained by **totalspectrum** (Eric Smith): `https://github.com/totalspectrum/zog`. The ZPU is a byte-opcode stack machine whose memory image fits comfortably in hub, which puts it squarely at **rung 3** — and it arms XBYTE exactly as Chapter 10 describes.
+A **ZPU** (zero-operand stack machine) interpreter — originally by *heater*, with a P2 port maintained by **totalspectrum** (Eric Smith): `https://github.com/totalspectrum/zog`. The ZPU is a byte-opcode stack machine whose memory image fits comfortably in hub, which puts it squarely at **rung 3** — and it arms XBYTE exactly as Chapter 10 describes. It also runs a second dispatch table at a different LUT base, reached by one-shot `SETQ2` through a pair of named macros, which is the two-table idiom of §18.4 in a community interpreter rather than in Parallax's own.
 
 ## C.8 riscvemu — the road not taken {#sec-c-8}
 
