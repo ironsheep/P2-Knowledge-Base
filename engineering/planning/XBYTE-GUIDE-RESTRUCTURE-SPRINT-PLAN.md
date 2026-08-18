@@ -27,7 +27,8 @@ ASCII sweep of code blocks and the shipped example source.
 
 ## Open Questions
 
-**None blocking.** One decision is deliberately scheduled rather than open — §11.
+**None blocking.** The one scheduled decision, §11, was taken on 2026-08-18 and is now
+build work rather than a question.
 
 ---
 
@@ -87,13 +88,14 @@ document that is wrong in a *new* way. So §7 splits, and its first half leads:
 | **2** | §1 — the chapter permutation and Part boundaries | — |
 | **3** | §2 — Part intros, chapter openers, transitions | needs the new order to exist |
 | **4** | §3 — cross-reference sweep, flipped-direction adjudication, Index rebuild | needs the cut complete |
-| **5** | §4, §5, §6 — navigation layer, apparatus, diagrams | **structure-dependent**; built before the cut they would be built twice |
-| **6** | §7b — `voice-guide.md` citations, `MANUAL-DESCRIPTOR.md` chapter pins | cite *content locations*, so they follow the cut |
-| **7** | §8 — front matter, cover title, `request.json` | title wording fixed once structure is final |
-| **8** | §10 — draft render → diagram review → audit → release render | — |
+| **5** | §11 — insert new Ch.15 "Growing the VM", renumber old 15–20 → 16–21, re-sweep | **decided 2026-08-18**; must precede §4/§5/§6/§7b, which encode chapter numbers |
+| **6** | §4, §5, §6 — navigation layer, apparatus, diagrams | **structure-dependent**; built before the cut they would be built twice |
+| **7** | §7b — `voice-guide.md` citations, `MANUAL-DESCRIPTOR.md` chapter pins | cite *content locations*, so they follow the cut |
+| **8** | §8 — front matter, cover title, `request.json` | title wording fixed once structure is final |
+| **9** | §10 — draft render → diagram review → audit → release render | — |
 
-§11 (the scheduled decision) happens before the effort wraps. §12 (hygiene) is
-order-independent.
+§11 was the scheduled decision; it was taken on 2026-08-18 and became build work that
+runs at order 5 — see §11. §12 (hygiene) is order-independent.
 
 ---
 
@@ -519,19 +521,61 @@ content.
 
 ---
 
-## 11. Scheduled decision — a second worked example
+## 11. DECIDED — the middle rung: a second worked build
 
-**Not an open question; a decision deliberately timed.** Community review suggested a
-small constructed-bytecode-machine example as an additional worked build — a shape that
-is unambiguously in the engine's sweet spot and simpler than the CPU capstone.
+**Decided 2026-08-18 (Stephen): take it, and shape it by the story, not by its cost.**
+The scheduled decision resolves to *yes with a different shape than the suggestion*, for a
+reason that only became visible after §1's cut put Part V in its final order.
 
-**This is discussed before the effort wraps, and decided then** (Stephen, 2026-08-18) —
-not scoped in now and not dropped. Deciding it late is deliberate: it is new compiling
-code plus a byte-identity obligation plus an example-ZIP change, and taking it on mid-cut
-risks both it and the restructure.
+### What the review actually found
 
-Whoever picks this up brings: what it would replace or sit beside, where in Part V it
-would land, and what it costs in example-corpus and ZIP terms.
+Community review asked for "a small constructed bytecode machine" as an additional worked
+build. Read literally that is **Chapter 14** — the four-bytecode stack machine
+(`PUSHC`/`ADD`/`SUB`/`HALT`) is a constructed bytecode machine, it is complete, and it
+compiles. A second one at the same size would be a duplicate, not an addition.
+
+The real gap is a **step size**. Part V goes from the smallest thing that exercises the
+engine once, straight to an illustrative slice of a 6502 that is deliberately *not* a whole
+program. Between them sits everything the book recommends and never shows working:
+
+| Technique | Where the book states it | Where a reader can watch it run |
+|---|---|---|
+| shared body + skip pattern across a family | §4.4, and §14.3 as a fragment | **nowhere** — Ch.14's program writes ADD and SUB out separately, on purpose |
+| a guest branch as `RDFAST` to a new address | asserted in §15.1, leaned on by Ch.16 | only Ch.18's display list — a graphics stream, not an interpreter |
+| a second operand width off the FIFO | Chapter 5 | Ch.14 uses one form |
+| exit and re-arm between jobs | §12.4, §14.4 | described, never exercised end to end |
+
+So the addition is not another minimal machine. It is **the same machine grown up** — the
+rung between "smallest" and "real CPU."
+
+### The chapter
+
+**New Chapter 15: "Growing the VM"**, between Ch. 14 (which stays minimal — that is its
+charter and its value to a reader who wants the floor) and the 6502.
+
+It takes Chapter 14's stack machine and grows it to roughly a dozen bytecodes: variables
+addressed by an operand rather than immediates only, a compare, a conditional branch, and an
+ALU family folded onto one shared body with skip patterns. Complete, compiling, shipped as a
+third `examples/` file byte-identical to its code block.
+
+**Deliberately NOT in it:** prefix bytes (Chapter 18 after the renumber owns those; this
+chapter forward-references once and builds nothing), and guest interrupts (Chapter 17). The
+chapter earns its place by making a *table* work hard, not by collecting features.
+
+### What it moves
+
+Inserting at 15 renumbers six chapters — old 15–20 become 16–21 — and Part V's charter
+paragraph, which today names "the two complete programs," now brackets the Part with three.
+That paragraph gets rewritten: the charter was always about *faithfulness* (no complete
+6502), never about size, and it should say so.
+
+### Ordering — this runs BEFORE §4, §5, §6 and §7b
+
+Load-bearing, and the reason the decision could not wait for the wrap after all: §4 (the
+navigation layer), §5, §6 and §7b all encode **chapter numbers**. Built before this insert,
+every one of them is built twice. The insert therefore takes the slot right after §3, and
+inherits §1's atomic-green-unit shape — the renumber leaves the cross-reference checker red
+by construction, and a re-sweep restores it.
 
 ---
 
@@ -560,20 +604,24 @@ Execution order is `seq`, not section number — see §0 for why they differ.
 | 3 | §1 | **The cut** — chapter permutation and Part boundaries | «#253» |
 | 4 | §2 | Part intros, chapter openers, transitions | «#254» |
 | 5 | §3 | **Cross-reference sweep, flipped-direction adjudication, Index rebuild** | «#255» |
-| 6 | §4 | Navigation layer — intent index, brief opener, reading paths | «#256» |
-| 7 | §5 | Apparatus rebalance — boxes into running text, code into the decision chapters | «#257» |
-| 8 | §6 | Diagrams — dispatch ladder, three decisions, two kinds of prefix | «#258» |
-| 9 | §7b | Trailing guide-layer currency — voice-guide, MANUAL-DESCRIPTOR | «#259» |
-| 10 | §8 | Front matter, cover title, `request.json` | «#260» |
-| 11 | §9 | Documentation blast radius — the four artifacts no other task owns | «#261» |
-| 12 | §10a | Draft render + page-level review (diagrams reviewed here) | «#262» |
-| 13 | §11 | Scheduled decision — a second worked example | «#263» |
-| 14 | §10b | Audit, render, **release v1.1.0** | «#264» |
+| 6 | §11 | **The middle rung** — new Ch.15 "Growing the VM" + renumber old 15–20 → 16–21 | «#263» |
+| 7 | §11b | **Re-sweep** — cross-references green again after the insert | «#265» |
+| 8 | §4 | Navigation layer — intent index, brief opener, reading paths | «#256» |
+| 9 | §5 | Apparatus rebalance — boxes into running text, code into the decision chapters | «#257» |
+| 10 | §6 | Diagrams — dispatch ladder, three decisions, two kinds of prefix | «#258» |
+| 11 | §7b | Trailing guide-layer currency — voice-guide, MANUAL-DESCRIPTOR | «#259» |
+| 12 | §8 | Front matter, cover title, `request.json` | «#260» |
+| 13 | §9 | Documentation blast radius — the four artifacts no other task owns | «#261» |
+| 14 | §10a | Draft render + page-level review (diagrams reviewed here) | «#262» |
+| 15 | §10b | Audit, render, **release v1.1.0** | «#264» |
 
-**Atomic green-unit: «#253» → «#255».** The cut renumbers eight chapters, which leaves the
-cross-reference checker red at «#253»'s completion by construction; «#255» restores it. Both
-tasks say so in their own text. Do not treat that red as a regression, and do not "fix" it by
-reverting the cut.
+**Two atomic green-units, same shape: «#253» → «#255», and «#263» → «#265».** Each renumbers
+chapters, which leaves the cross-reference checker red at the first task's completion *by
+construction*; the second restores it. All four tasks say so in their own text. Do not treat
+either red as a regression, and do not "fix" it by reverting the structural change.
+
+**Sprint grew from 14 tasks to 15 on 2026-08-18**, when §11's scheduled decision was taken and
+became build work — see §11.
 
 **Not in this sprint, deliberately.** The fancyvrb `breaklines` platform fix («#250») is a
 set-wide render change carried out of the closed «#249». Adopting it mid-sprint would mean
