@@ -2999,9 +2999,39 @@ over-claimed. The hardware box no longer says "disaster" and instead names *wher
 bites: work that must happen on **every** instruction, cycle-accurate timing above all, is what
 cannot be attached to a family.
 
+**BLAST RADIUS, swept 2026-08-18 on Stephen's prompt — nine downstream sites carried the old claim.**
+Revising a section is only half the job when other chapters cite its conclusion. A text search for
+"7.4" was NOT sufficient: the damaging sites were the ones that echoed the claim in their own words.
+Swept for both, and separated a **structural** statement ("there is no loop body" — still true) from
+a **capability** claim ("there is nowhere to put the work" — no longer true):
+
+| Site | Was | Now |
+|---|---|---|
+| §3.6 | "a place to work that it **removes**" | "a place to work that you **choose rather than inherit**" |
+| §6.4 | "there is **nowhere** to put a `debug()`" | "a `debug()` has no place **in the dispatch itself**" |
+| §8.8 | pacing "has **nowhere to live**" | "has no **cheap** home" + *why*: it is the one kind that cannot be confined to a family, so it is paid on every dispatch |
+| Ch.13 opener | "XBYTE has **no such place**" | "no such place **in the dispatch itself**"; names where it can go |
+| §17.1 | "there is **nowhere to put the check**" | "the check has no **default** home and you place it deliberately" |
+| §17.3 | "**took away** the place where the check belonged" | "**left the check without a place of its own**" |
+| App. D | "there is **no loop body** to instrument" | "the **dispatch itself** has no body to instrument" |
+| §19.7 | remedy column omitted the interrupt route | adds periodic work in a cog interrupt (§9.4) |
+| Index | "Loop body (there isn't one — what it costs)" | "…and where the work goes instead", plus a new **Placing cross-cutting work** entry |
+
+§17.1 was the sharpest: "there is nowhere to put the check" sat two sections ahead of §17.3, which
+exists entirely to say where to put the check. That contradiction pre-dates this sprint.
+
+**Left deliberately unchanged, having been checked:** §3.5 ("This does not mean they are impossible…
+down to nearly nothing if you can confine them") and §19.7's "*by default*" were already calibrated;
+front-matter's "no loop body, because the loop is the silicon", Part IV's "a loop that has no body",
+and §7.4's own title are **structural facts**, not capability claims. Ch.2's "leaves no gap" plants
+the tension the revised §7.4 resolves — that is the intended arc, not a defect. The guide layer
+(voice-guide, creation-guide, descriptor) carries no §7.4 reference at all.
+
 **The transferable lesson.** A section can be factually correct and still leave the reader with a
 false conclusion. Nothing in §7.4 was wrong; the omission of the answer did the damage, and only a
-read-through caught it — no gate can test for "this reads as a dead end."
+read-through caught it — no gate can test for "this reads as a dead end." And when a claim is
+revised, **the sweep must be semantic**: the sites that quietly contradicted the new §7.4 mostly did
+not cite it.
 
 **Next finding ID after this block: F-297.**
 

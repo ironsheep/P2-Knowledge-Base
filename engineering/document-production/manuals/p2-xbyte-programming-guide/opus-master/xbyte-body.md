@@ -188,7 +188,7 @@ The engine is not free, and its price is paid in cog resources rather than clock
 | **The cog's FIFO** | held by `RDFAST` for the bytecode stream — so it cannot simultaneously stream video or drive a block move |
 | **The dispatch loop** | **there isn't one.** Per-bytecode work must go inside your handlers and be paid for there (§7.4, Ch. 17) |
 
-The first six are ordinary budgeting. The last one is different in kind — not a resource the engine spends but a place to work that it removes — and it is the subject of §7.4.
+The first six are ordinary budgeting. The last one is different in kind — not a resource the engine spends but a place to work that you choose rather than inherit — and it is the subject of §7.4.
 
 ## 3.7 If you're building… {#sec-3-7}
 
@@ -508,7 +508,7 @@ Read a byte, use it to index the table, read the entry, execute it. That is fetc
 ::: tip
 **This loop is not a stepping stone.** It is easy to read the next chapter and treat the hand-written version as scaffolding — needed once to understand the engine, never written again. It is the opposite: this loop is one you will come back to, for two reasons. It is:
 
-- **your debug mode.** The engine's loop is hardware and has no body, so there is nowhere to put a `debug()`. To trace which bytecode ran and where in the stream it came from, you take the engine out and run *this* instead (Chapter 13).
+- **your debug mode.** The engine's loop is hardware and has no body, so a `debug()` has no place in the dispatch itself. To trace which bytecode ran and where in the stream it came from, you take the engine out and run *this* instead (Chapter 13).
 - **what most working P2 emulators actually ship.** The engine's auto-fetch requires the guest's code to live in hub — and a console's ROM does not — so they keep the `EXECF` dispatch and write the fetch themselves. That is this loop (Chapter 7).
 
 The engine is a specialisation; this hand-written loop is the general case.
@@ -810,7 +810,7 @@ Ask this question early, because the answer changes your architecture.
 
 **If the guest drives real hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
 
-And now the catch: **that per-instruction pacing has nowhere to live under XBYTE** (§7.4). This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §8.2 carries the caveat it does.
+And now the catch: **that per-instruction pacing has no cheap home under XBYTE** (§7.4). It is the one kind of cross-cutting work that cannot be confined to a family of handlers — by definition it runs on every instruction — so it is paid on every dispatch, which is most of what the software loop was charging for in the first place. This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §8.2 carries the caveat it does.
 
 If your guest is a language runtime, a scripting VM, or a self-contained program with no externally visible timing, you need none of this — and rung 3 is yours.
 
@@ -1171,7 +1171,7 @@ Nothing reports the leak. The stack is eight levels, any handler or between-jobs
 
 You have now written handlers, built a table, and armed the engine. Sooner or later it will not do what you meant, and you will want to look inside it — which is where XBYTE presents its one genuinely awkward property.
 
-**The engine's loop is hardware. There is no loop body.** In a software interpreter you would drop a `debug()` into the dispatch loop and watch every instruction go by. XBYTE has no such place: it goes from your handler's `_RET_` to the next handler's first instruction in six clocks, with nothing of yours in between. (§7.4 weighed how far the consequences of that reach while you were still deciding; this chapter is about living with them.)
+**The engine's loop is hardware. There is no loop body.** In a software interpreter you would drop a `debug()` into the dispatch loop and watch every instruction go by. XBYTE offers no such place in the dispatch itself: it goes from your handler's `_RET_` to the next handler's first instruction in six clocks, with nothing of yours in between. What you want to watch has to be placed inside the handlers, or the engine taken out of the way. (§7.4 weighed how far that reaches while you were still deciding; this chapter is about living with it.)
 
 Fortunately, the silicon anticipated this.
 
@@ -1805,7 +1805,7 @@ Your guest has an interrupt line. Almost all of them do — and Chapter 16's 650
 
 In a software interpreter this is a solved problem so ordinary that nobody writes it down: you check the interrupt line once per pass, at the top of the dispatch loop, and if one is pending you push the guest's program counter and vector to its handler. One check, one place.
 
-**XBYTE has no dispatch loop.** The engine goes from `_RET_` to the next handler in hardware, and there is nowhere to put the check. This chapter is how real emulators solve that.
+**XBYTE has no dispatch loop.** The engine goes from `_RET_` to the next handler in hardware, so the check has no default home and you place it deliberately (§7.4). This chapter is where real emulators put it.
 
 ## 17.1 The guest's interrupt state is just cog registers {#sec-17-1}
 
@@ -1853,7 +1853,7 @@ A shipped 8080 emulator takes the third road: it polls in the shared body that e
 ::: caution
 **Choose the safe points deliberately.** An interrupt must only be taken where the guest's state is *consistent* — the previous instruction fully retired, no half-computed address in a scratch register. Handlers that have already finished their work and are about to return are safe; the middle of a multi-step addressing-mode computation is not.
 
-This is the sharpest practical consequence of taking rung 3 (§7.4). The engine gave you hardware dispatch and took away the place where the check naturally belonged, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
+This is the sharpest practical consequence of taking rung 3 (§7.4). The engine gave you hardware dispatch and left the check without a place of its own, so **you** now decide where interrupt boundaries live. Decide it once, write it down, and be consistent.
 :::
 
 **"Consistent state" is only half the rule — the guest's architecture fixes the other half.** *Where* you may safely inject is a property of *your* handlers; *when the guest will accept* an interrupt is a property of the *guest*, and the two are not the same. Real processors defer, block, or allow interrupts at points their own designers chose, and a faithful emulator honours those rules rather than taking an interrupt wherever a poll happens to fall:
@@ -2211,7 +2211,7 @@ The engine is not free. Some problems are stream-shaped and still do not want it
 
 | The cost | Why | What it takes |
 |----------|-----|---------------|
-| **Cross-cutting work per symbol** | XBYTE's loop is **hardware**; there is no loop body (§7.4), so cycle pacing, progress counters, timeout checks and tracing have nowhere to live *by default* | put the work **inside handlers** and pay for it there — from ~2 clocks on every symbol, down to nearly free if it can be confined to the handlers that matter. **Chapter 17** works this out in full for guest interrupts. If the work is heavy or must run on *every* symbol, take the software loop (§6.4): three clocks, and you get a place to stand |
+| **Cross-cutting work per symbol** | XBYTE's loop is **hardware**; there is no loop body (§7.4), so cycle pacing, progress counters, timeout checks and tracing have nowhere to live *by default* | put the work **inside handlers** and pay for it there — from ~2 clocks on every symbol, down to nearly free if it can be confined to the handlers that matter. **Chapter 17** works this out in full for guest interrupts. Work that is *periodic* rather than per-symbol — a timeout, a pacing tick — can go in a cog interrupt instead and cost the dispatch path nothing (§9.4). If the work is heavy or must run on *every* symbol, take the software loop (§6.4): three clocks, and you get a place to stand |
 
 **The rest are matters of degree too** — the engine will work, it just will not earn its keep:
 
@@ -2504,7 +2504,7 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 | **A handler is corrupted intermittently, under load** | an **interrupt split an atomic sequence** — a CORDIC command and its result, or a read-modify-write | fence it with a one-iteration `REP` (§9.4). *This is the bug that will cost you the most time, because it is timing-dependent and will not reproduce* |
 | Instructions **after** a handler get skipped | the handler's SKIPF pattern was **longer than the handler** and ran on past it | size each pattern to its body; in a hand-rolled loop, add a `NOP` landing pad (§4.5, §13.3) |
 | `SETQ2` did something you did not intend | it does **two** jobs — block-move count, or one-shot mode — and only the *next* instruction decides which | look at the instruction after it (§10.3) |
-| Engine works, but you cannot see what it is doing | there is no loop body to instrument | read the state with `GETBRK`, or de-arm and substitute the software loop (Chapter 13) |
+| Engine works, but you cannot see what it is doing | the dispatch itself has no body to instrument | read the state with `GETBRK`, or de-arm and substitute the software loop (Chapter 13) |
 
 # Index {#index}
 
@@ -2549,7 +2549,8 @@ When the engine misbehaves, the cause is almost always one of a handful of armin
 - **Interrupts (P2)** — §9.4; the `REP` fence — §9.4
 - **JIT** (translate, don't interpret) — §19.7
 - **Landing pad** (trailing skip pattern) — §4.5, §13.3; in shipped code — §C.5
-- **Loop body** (there isn't one — what it costs) — §7.4, §3.5, §3.6, §17.3, §19.7
+- **Loop body** (there isn't one — what it costs, and where the work goes instead) — §7.4, §3.5, §3.6, §17.3, §19.7
+- **Placing cross-cutting work** (a family's shared tail · an optional prologue · the cog's own interrupts) — §7.4, §17.3, §9.4
 - **LUT entry format** — §6.1, §21.2
 - **LUT RAM** (home of the dispatch table) — Ch. 6, §6.1, §21.2
 - **Memory model** (where the guest's code lives) — §7.1, §7.3, §8.2
