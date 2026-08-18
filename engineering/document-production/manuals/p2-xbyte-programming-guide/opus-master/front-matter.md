@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.2\par}
+{\large\color{blue}Version 1.1.0\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -44,10 +44,10 @@
 \textbf{Part I: The Landscape}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Why Emulate on the P2
-\item What Emulation Asks of You
+\item What This Kind of Emulation Asks of You
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part II: XBYTE Fundamentals}
+\textbf{Part II: Dispatch on the P2}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Understanding XBYTE
 \item The Skip Family
@@ -55,7 +55,13 @@
 \item LUT Dispatch
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part III: The XBYTE Engine}
+\textbf{Part III: Choosing Your Rung}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item The Three Decisions
+\item What Will Hurt — A Guest-CPU Survey
+\end{itemize}
+\vspace{0.03cm}
+\textbf{Part IV: The XBYTE Engine}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item The Dispatch Cycle
 \item Arming XBYTE
@@ -66,24 +72,23 @@
 \end{minipage}%
 \hfill%
 \begin{minipage}[t]{0.50\textwidth}
-\textbf{Part IV: Building Interpreters and Emulators}
+\textbf{Part V: Building Interpreters and Emulators}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A Minimal Custom VM
-\item The Three Decisions
-\item What Will Hurt — A Guest-CPU Survey
+\item Growing the VM
 \item A Tiny CPU Emulator (6502)
 \item Servicing Guest Interrupts
-\item Prefixes \& Alternate Tables
+\item Prefixes and Alternate Tables
 \item XBYTE Beyond Interpreters
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part V: Reference}
+\textbf{Part VI: Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Instruction Reference
 \item Configuration Constants \& Patterns
 \end{itemize}
 \vspace{0.03cm}
-\textbf{Part VI: Appendices}
+\textbf{Part VII: Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item A: XBYTE Quick Reference
 \item B: Instruction Encoding Summary
