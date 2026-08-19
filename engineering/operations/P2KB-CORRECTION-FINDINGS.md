@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-302`**
+**Next finding ID: `F-303`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -112,6 +112,60 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   `hardware/edge-32mb-module.yaml` (P38/P39), `hardware/p2-eval-board.yaml` (P56-P63,
   P56/P57 free). **→ manual head.** Surfaced by the v1.16.2 YAML→Manual impact survey.
   Status: `CONFIRMED`.
+
+---
+
+## Forum docs-feedback (2026-08-16) — the DDS LUT is not fixed at 512 entries — F-302
+
+**Origin:** Christof Eb., Parallax forum 2026-08-16, reviewing the *P2 Streamer Programming
+Guide* §17.2. Raw post + full analysis at
+`engineering/document-production/FORUM-NO-COMMMIT/Docs-findings-260819/` (gitignored — find it
+by path). Same reviewer as F-256. His parenthetical *"(No, it does not need to be 512
+entries.)"* is **correct**, and it lands on the KB as well as the manual.
+
+### F-302 — `p2kbArchDdsGoertzel` states the DDS/Goertzel LUT window as a flat `entries: 512`, hiding a selectable 8-way loop size, a bounded-region offset, and a phase-offset field. `CONFIRMED`
+
+**Location:** the DDS/Goertzel architecture YAML behind P2KB key `p2kbArchDdsGoertzel` —
+`lut_setup.entries: 512` and `s_operand.field_11_0: "loop size + LUT window"`.
+
+**What is wrong.** `entries: 512` reads as a hardware requirement; it is only the `%000` case.
+`field_11_0` names the field but carries none of its content, so nothing downstream can use it.
+The KB is *not false* here in the way the manual is (the manual says "**must** contain 512
+entries"), but it is thin in exactly the place the manual went wrong, and it is what a
+downstream author would consult.
+
+**Evidence — Silicon Doc `sources/silicon-doc/p2-documentation.txt:4062-4092`, verbatim table:**
+
+| `S[11:0]` | Loop Size | NCO Bits | LUT Range |
+|---|---|---|---|
+| `%000_TTTTTTTTT` | 512 | 30..22 | `%000000000..%111111111` |
+| `%001_ATTTTTTTT` | 256 | 30..23 | `%A00000000..%A11111111` |
+| `%010_AATTTTTTT` | 128 | 30..24 | `%AA0000000..%AA1111111` |
+| `%011_AAATTTTTT` | 64 | 30..25 | `%AAA000000..%AAA111111` |
+| `%100_AAAATTTTT` | 32 | 30..26 | `%AAAA00000..%AAAA11111` |
+| `%101_AAAAATTTT` | 16 | 30..27 | `%AAAAA0000..%AAAAA1111` |
+| `%110_AAAAAATTT` | 8 | 30..28 | `%AAAAAA000..%AAAAAA111` |
+| `%111_AAAAAAATT` | 4 | 30..29 | `%AAAAAAA00..%AAAAAAA11` |
+
+and (`:4093-4095`, verbatim): *"On each clock, the lookup RAM is read at the 9-bit location
+bound by the %A bits, with the lower bits being the sum of the %T bits and the topmost NCO
+bits. This allows you to set bounded areas within the LUT and to shift or modulate the phase of
+playback."*
+
+**Proposed correction.** Replace `lut_setup.entries: 512` with a `lut_window:` block carrying
+the eight loop sizes and their NCO index bits; expand `s_operand.field_11_0` into the three
+sub-fields — loop-size selector `S[11:9]`, `%A` region-bound bits, `%T` phase-offset bits — and
+state the two capabilities the Silicon Doc names explicitly: **bounded LUT sub-regions** (more
+than one waveform resident at once) and **phase offset / modulation**. Keep `entries: 512` only
+as the `%000` default, labelled as such.
+
+**Why it matters beyond the correction.** The guide's §17.2 headline applications are
+"Function generator, audio synthesis, **RF modulation**" — and the field that does modulation is
+the one neither the KB nor the manual documents.
+
+**Downstream (manual head, not a YAML edit):** *Streamer Guide* §10.2 (`LUT[NCO[30:22]]` stated
+as the general rule), §10.3 ("must contain 512 entries" — **false**), §17.2 tip ("the 512
+entries"). Tracked in the streamer manual's audit folder; fix ships with the same release.
 
 ---
 
