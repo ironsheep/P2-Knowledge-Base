@@ -22,6 +22,7 @@ CHECKS
     2  no finding ID appears as two entries                (protocol says: STOP)
     3  no CLOSED finding sits in a live open-work register (scan noise)
     4  every finding carries a status                      (unreadable state)
+    4b prose claims "fixed" while the status does not       (status needs deciding)
     5  every archive the header names actually exists      (dangling history)
     6  no allocated ID is missing from live + archives     (a finding went silent)
     7  --sweep-check REV: NOTHING from the pre-sweep revision vanished
@@ -57,11 +58,17 @@ STATUS_WORDS = CLOSED_WORDS + ("CONFIRMED", "NEEDS-VERIFICATION", "PARTIAL",
                                "NOTED", "RESOLVED", "TRACKED")
 CLOSED_RE = re.compile(r"`?\b(" + "|".join(CLOSED_WORDS) + r")\b`?")
 STATUS_RE = re.compile(r"`?\b(" + "|".join(STATUS_WORDS) + r")\b`?|TRACKED → ingestion")
-# Headline phrasings that mean "this finding is finished" even when the status
-# token still reads CONFIRMED — the register writes its verdict in bold prose.
-RESOLVED_HEADLINE = re.compile(
+# THE STATUS TOKEN IS AUTHORITATIVE. Prose is not a status.
+# Learned in the 2026-08-19 sweep: 16 findings whose headline read "source fixed" /
+# "tool fixed" were still `CONFIRMED`, and most added "render owed" — a fix applied but
+# not yet validated is NOT done, by this register's own rule. Treating the prose as a
+# verdict would have archived all sixteen with work still owed. So a prose-vs-status
+# mismatch is its own finding (a status that needs deciding), never a licence to sweep.
+FIXED_PROSE = re.compile(
     r"\*\*(?:ALL [A-Z]+ FIXED|FIXED\b|RESOLVED\b|MECHANISM LANDED|source fixed|tool fixed|"
-    r"POLISH, NOT A GATE|no longer blocks)", re.I)
+    r"no longer blocks)", re.I)
+# PARTIAL vetoes an embedded DONE ("manual DONE - KB DONE - one decision open" is PARTIAL).
+PARTIAL_RE = re.compile(r"\bPARTIAL\b")
 
 FINDING_START = re.compile(
     r"^(?:#{3,4}\s+(F-\d+[a-z]?)\s*[—-]"          # heading form:  ### F-300 — ...
@@ -178,8 +185,15 @@ def main():
         if not STATUS_RE.search(body):
             viol.append(("no-status", f"{b['id']} (:{b['line']}) carries no status token"))
         head = b["headline"]
-        if CLOSED_RE.search(head) or RESOLVED_HEADLINE.search(head):
+        if PARTIAL_RE.search(head):
+            continue                      # still owed, whatever else the headline says
+        if CLOSED_RE.search(head):
             closed_live.append((b["id"], b["line"]))
+        elif FIXED_PROSE.search(head):
+            viol.append(("status-hygiene",
+                         f"{b['id']} (:{b['line']}) headline claims it is fixed but its status "
+                         f"token is not DONE/WONTFIX/RESOLVED-INVALID — decide the status "
+                         f"deliberately; do NOT sweep on the prose"))
     for fid, ln in closed_live:
         viol.append(("closed-but-live",
                      f"{fid} (:{ln}) is closed but still in a register that declares "
@@ -234,7 +248,8 @@ def main():
 
     print(f"\nVIOLATIONS ({len(viol)}) — {reg}")
     order = ["sweep-lost-content", "duplicate-id", "counter-behind", "no-counter",
-             "id-went-silent", "dangling-archive", "no-status", "closed-but-live"]
+             "id-went-silent", "dangling-archive", "no-status", "closed-but-live",
+             "status-hygiene"]
     for kind in order:
         hits = [v for k, v in viol if k == kind]
         if hits:
