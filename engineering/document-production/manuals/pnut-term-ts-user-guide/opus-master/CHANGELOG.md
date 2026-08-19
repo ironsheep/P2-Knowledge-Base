@@ -1,5 +1,23 @@
 # PNut-Term-TS User Guide Changelog
 
+## v1.0.0 (2026-08-19): Initial public release
+
+**Initial release.** The operating guide for **PNut-Term-TS** — the downloader, serial
+terminal, and debug display for the Propeller 2, in one program that runs the same way on
+every platform. It replaces Parallax Serial Terminal, hosts the `debug()` display windows
+and the single-step debugger, and does all three without a specific operating system.
+
+The guide forks by intent after a shared orientation: one opening places the tool in your
+workflow, then the reading splits into the GUI path and the headless command-line path so
+you follow only the half you work in. It states the tool's compiler independence outright
+— downloading is the P2's own boot protocol, so a binary from any toolchain downloads and
+runs — and is plain about the one place toolchains differ: PNut and `pnut-ts` images are
+auto-detected and carry their own debug baud rate, and a debug build from anything else
+needs `-b`.
+
+Ships with three TikZ diagrams and five screenshots. Co-released with the *P2 Single-Step
+Debugger Manual*, which covers driving the debugger itself.
+
 ## v0.9.0 (2026-08-12): Tool developer review draft — compiler compatibility
 
 **Not a public release.** This draft circulates only to the outside tool authors

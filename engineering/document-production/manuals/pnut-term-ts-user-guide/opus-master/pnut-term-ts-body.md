@@ -9,8 +9,7 @@
   behavior from memory. Cross-reference (do NOT reproduce) the debug() directive
   spec, the P2 Debug Window Manual, and the P2 Single-Step Debugger Manual.
 
-  DRAFTED SO FAR: Part 1 — Getting Oriented (the shared trunk / Book 0).
-  Books A (GUI), B (Headless), and the reference tail are still to come.
+  COMPLETE as of v1.0.0 (2026-08-19): Parts 1-4, Chapters 1-20, all 8 figures.
 -->
 
 # Part 1: Getting Oriented
@@ -1042,17 +1041,14 @@ one.
 
 <!--
   ===========================================================================
-  END OF DRAFTED CONTENT — full guide (Parts 1–4, Chapters 1–20).
-  Figure status (see PLANNING.md "Open items"): 8 figure slots.
-  - 3 DIAGRAMS authored in TikZ (2026-07-21): tool-chain position [Ch1],
-    three-in-one identity [Ch2], Automatic Window Placement order [Ch8].
-  - ALL 5 SCREENSHOTS wired in (2026-07-21, Stephen's captures in
-    ./REF-NO-COMMIT/screenshots/, staged to workspace assets as
-    inbox/assets/*.png): main-window-and-logger [Ch5] · multi-window-desktop
-    [Ch8] · single-step-debugger [Ch9] · preferences-user-settings [Ch10] ·
-    preferences-propplug [Ch10]. No \placeholderfig remain — all 8 figures
-    (3 diagrams + 5 screenshots) are real.
-  (Recording/playback + performance monitoring were de-emphasized into Ch 11
-  "Further Features" 2026-07-21 — no screenshots for those.)
+  FIGURES — 8 slots, all real (no placeholders).
+  - 3 TikZ diagrams: tool-chain position [Ch1], three-in-one identity [Ch2],
+    Automatic Window Placement order [Ch8].
+  - 5 screenshots (Stephen's captures, staged as inbox/assets/*.png):
+    main-window-and-logger [Ch5] · multi-window-desktop [Ch8] ·
+    single-step-debugger [Ch9] · preferences-user-settings [Ch10] ·
+    preferences-propplug [Ch10].
+  Recording/playback + performance monitoring are de-emphasized into Ch 11
+  "Further Features" — no screenshots for those.
   ===========================================================================
 -->
