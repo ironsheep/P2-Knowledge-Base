@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-299`**
+**Next finding ID: `F-300`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -3125,6 +3125,45 @@ source.
 because the F-297 registration replaced the previous block's marker instead of only appending its
 own. Corrected — F-296's block now closes at F-297. A marker that says the same thing twice is a
 counter that has stopped counting.
+
+**Next finding ID after this block: F-300.**
+
+### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **measured 2026-08-19; platform fix owed, deliberately NOT taken mid-release**
+
+**Surfaced by** the Streamer v1.0.9 daemon pre-verify — a whole-document margin measurement of the
+rendered PDF (every text span's `x1` against the 540pt text edge), not by the compile log, which was
+clean on every serious signature in both the v1 and v2 renders.
+
+**The defect.** Two of the Streamer's wide mode-reference tables push their rightmost column past
+the text block: §6.2 *RDFAST → Pins/DACs* by **6.1pt** (`DAC Bits` header) and §8.x *Pins/DACs →
+Hub* by **5.3pt** (`Hub Write` header). Visible as the table's horizontal rules extending past the
+running-header rule directly above them. The compile log reports these as `Overfull \hbox
+(26.6406pt too wide)` — the larger number is the whole `tblr` box including padding; the visible
+overhang is the 5–6pt the measurement above reports.
+
+**Why it is the platform's, not the manual's.** The column widths are computed by
+`p2kb-platform-tables.lua`, which every manual in the set loads. Nothing in the Streamer's markdown
+sets a width. A manual-side "fix" would mean hand-tuning a table the filter is supposed to own.
+
+**NOT the two tables an earlier note predicted.** The Streamer release note expected the
+`p2kb-platform-tables.lua` column fix to absorb "2 over-wide `Constant | Value | Description`
+tables". These two are **6-column** `Mode | Symbol | Type | Pins | DAC Channels | DAC Bits` tables —
+a different shape the fix does not reach. The prediction was not wrong about its own targets; it
+was applied to the wrong pair. **A status note naming a fix is not evidence the fix covers what you
+are looking at** — measure the artifact ([[feedback_status_line_is_not_evidence]]).
+
+**Deliberately not fixed in this release.** A column-width change in
+`p2kb-platform-tables.lua` reflows tables in **every** manual, so adopting it while Streamer is
+mid-render means re-verifying the whole set against a changed table model for 6pt of rule overhang.
+Same reasoning that parked the fancyvrb `breaklines` work «#250»: schedule it when no manual is
+mid-render, and expect the absorbing manual's next render to shift table layout. **Pair it with
+«#250»** — both are set-wide render changes whose failure mode is a page that looks fine in the log,
+and both want one `forge-test` sweep across the set rather than two.
+
+**Scope when taken:** measure every manual, not just the Streamer — the filter is shared, so any
+manual with a 6-column table is a candidate. The instrument already exists: the whole-document span
+measurement used here (`x1 > pagewidth - 72pt`), which found these when the compile log's
+`Overfull` list alone could not distinguish them from ~60 harmless 1–2pt microtype protrusions.
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 
