@@ -62,6 +62,23 @@ dropped them.
    or an archive. The tool reads the original **out of git** — independently of
    whatever performed the sweep.
 
+### `correction-sweeps/` is GITIGNORED — a second reason `git mv` is not optional
+
+`.gitignore:276` ignores `/engineering/operations/correction-sweeps`. The three archives
+in it are tracked only because each was brought in by a **rename**, and `git mv` forces
+tracking regardless of the ignore rule.
+
+**Create an archive with `cp` and it is silently UNTRACKED** — the register would point
+at a file that is not in the repository, its content living only on one disk, invisible
+to `git log`, to clones, and to `--sweep-check`. Everything would look fine until the
+first time anyone needed the history. `git mv` is what makes the archive *exist* as far
+as the repo is concerned, not merely what makes it complete.
+
+**Verify after every sweep:**
+```bash
+git ls-files --error-unmatch <archive-path>   # must succeed
+```
+
 ### The general trap, worth more than the procedure
 
 **A verification computed from the same model that did the work cannot detect that
