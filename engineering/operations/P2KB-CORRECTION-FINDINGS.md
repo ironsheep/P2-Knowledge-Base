@@ -3218,6 +3218,31 @@ reader-visible, and a stale one ships silently. **Before adopting: audit cover-v
 across all 15 documents and reconcile, then decide which source is authoritative** (the cover is
 what a reader actually sees, so it should win). Do not wire the metadata through without that pass.
 
+**THAT AUDIT IS NOW MEASURED (2026-08-19), and the drift is systemic, not a Streamer typo.** Comparing
+each master's cover block (`\fontsize{36}…\bfseries` title + `{\Large\itshape …}` subtitle) against
+its `request.json` `metadata.subtitle`, over the 15 published documents:
+
+| Verdict | Count | Which |
+|---|---|---|
+| **SAME** | 3 | Architect, Assembly, Getting Started |
+| **DRIFT** | 8 | Debug Window, Streamer, P2AN001, P2AN002, P2AN003, P2AN004, P2AN005, P2AN007 |
+| **cover block not matched by this scan** | 4 | IOSP, deSilva, XBYTE, P2AN006 — a different cover shape, **unresolved, not clean** |
+
+**Two of the drifts are kinds of drift, not typos, and they change what the fix has to decide:**
+1. **The app notes disagree structurally.** `request.json` carries a *catalog label* — "Application
+   Note P2AN001 — No External ADC" — while the cover carries a *reader subtitle*: "No external ADC —
+   a single-pin instrumentation ADC…". Neither is a stale copy of the other. Wiring the cover through
+   verbatim drops the P2AN00N designator from the PDF's Title; wiring `request.json` through gives
+   every app note a title that is not what its cover says. **Decide this before touching the
+   platform** — likely `pdftitle` = title + designator, `pdfsubject` = the reader subtitle.
+2. **Cover strings contain LaTeX.** PNut-Term-TS's cover subtitle carries a literal `\\` line break.
+   PDF info-dictionary fields are plain text, so any such markup must be stripped, not passed through
+   — one more reason `pdfusetitle` (which takes `\title{}` as-is) is not automatically the right
+   mechanism for the subtitle half.
+
+Truncation was not checked: two of these subtitles run past 50 characters and the register scan
+compared full strings, so the counts above are exact for equality but say nothing about length limits.
+
 ### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **POLISH, NOT A GATE FAILURE: it is inside the project's own 20pt tolerance (re-graded 2026-08-19, same day, see the correction at the end)**
 
 **Surfaced by** the Streamer v1.0.9 daemon pre-verify — a whole-document margin measurement of the
