@@ -1024,6 +1024,39 @@ source, which is the "hides the problem" half.
 
 **Adoption reverted; the platform source never carried the patch** (it was tested on the daemon copies
 only, now restored). `fvextra` availability is recorded here only so nobody re-derives it.
+**Re-verified 2026-08-19: the tree is still clean of it.** No `fvextra` in the platform templates, and
+`p2kb-platform-code-coloring.lua` emits `\begin{Verbatim}[xleftmargin=-10pt]` with no break options at
+all 10 sites. The `breaklines=true` at `p2kb-platform-foundation.sty:317` is the pre-existing `\lstset`
+dead code this finding identified — it is NOT residue of the patch, and removing it is not owed.
+
+⚠️ **THE REJECTION DID NOT PROPAGATE, AND THAT IS THE MORE EXPENSIVE DEFECT. Swept 2026-08-19.**
+The rejection landed here and in `PUNCH-LIST.md` on 2026-08-17 at 20:02. It never reached the task
+tracker: todo «#250» was created the next day carrying this finding's **pre-rejection** text verbatim —
+mechanism, `FIX: add breaklines=true`, `USE forge-test` — and from there the dead plan was cited as a
+live commitment in four more places written over the following two days:
+
+| Where | What it claimed | Written |
+|---|---|---|
+| todo «#250» | the fix, as work owed | 2026-08-18 (out of «#249»'s close) |
+| `XBYTE-…-SPRINT-PLAN.md:626` | "not in this sprint" — i.e. still scheduled | 2026-08-18 04:36 |
+| `PUNCH-LIST.md:437` | "same profile as the `breaklines` work «#250»" | 2026-08-18 21:12 |
+| F-300 sequencing (this file) | "three set-wide render changes" | 2026-08-19 |
+| F-299 (this file) | "Pair it with «#250»" | 2026-08-19 |
+| `active_element` resume key | «#250» as "**THE REAL ONE**", top of next-work | 2026-08-19 |
+
+Every one of those was authored **after** the rejection, by reading the task rather than the register.
+Stephen caught it at the next session's resume — the front door recommended, as the single best next
+piece of work, a change he had personally rejected on the render two days earlier.
+
+**The mechanism, and it is general.** A finding's disposition can change after tasks have been cut
+from it. The register is the source of truth, but the tracker is what a resume reads first, so a
+reversal recorded only in the register is invisible where decisions actually get made. **When a
+finding is rejected, reversed, or re-graded, sweep every artifact that carries its plan in the same
+commit** — todo tasks first, then punch list, sprint plans, and any other finding that cites it.
+`grep` for the finding ID *and* for the task number: this one propagated under «#250», not "F-281".
+See [[feedback_classwide_sweep_on_every_finding]]; the class here is *pointers to a decision*, not
+occurrences of a fact. All six sites above are now corrected (dated records — the closed XBYTE sprint
+plan and the Streamer PUBLISH ledger line — are annotated, not rewritten).
 
 **THE FIX IS AUTHORSHIP, as the policy always said.** Over-long lines get shortened in `opus-master` by
 the sanctioned routes — comment moved to full lines above the instruction at its indent, or split with
@@ -1032,10 +1065,15 @@ boundary with the legal Spin2 `...`. The real mechanism is the **gate**, and F-2
 it had been skipping every captioned block, which is why 24 Debug Window and 11 IOSP lines went
 unreported. A working gate plus authorship is the answer; a typeset wrap was never it.
 
-**It also changes what re-authoring F-281 still needs:** with wrapping visible, the SCOPE and LOGIC
-lines are no longer losing content, so shortening them becomes a style choice rather than a repair —
-and the LOGIC case, which could not use the SCOPE fix without changing what the example teaches, stops
-being forced.
+**Re-authoring was therefore REQUIRED, and it was done — all three sites, 2026-08-17.** ⚠️ *This
+paragraph previously read "with wrapping visible, the SCOPE and LOGIC lines are no longer losing
+content, so shortening them becomes a style choice rather than a repair." That was written before the
+rejection and survived it, sitting inside this entry asserting the opposite of the entry's own verdict.
+**Corrected 2026-08-19.*** With the wrap rejected, nothing rescues an over-wide line at render time:
+the SCOPE and LOGIC lines were losing content, shortening them was a repair and not a style choice, and
+the LOGIC case did have to be solved on its own terms. Commits `2747fd91` (the last two over-cliff
+lines) and `1b918d4c` (the LOGIC line) did it. **Verified 2026-08-19, not assumed:**
+`audit-code-line-length.py` runs clean across all 30 Debug Window masters at K=76 — zero violations.
 
 **The declared budget is right; the other 21 over-budget lines are lucky, not correct.** Twenty-four
 lines exceed the manual's declared `code_line_budget_K: 76`. Measured against the shipped PDF, only
@@ -2683,8 +2721,10 @@ as F-284's `Parity of (D & S)` resolving to p414 instead of the instruction page
 **Action:** both IOSP sites are repaired by the sanctioned comment fix (move it above the instruction,
 as `spi_tx_msb_first` on p175 already does — the manual's own neighbouring example shows the form).
 Rides IOSP **v1.0.9**, which is already owed a CHANGELOG entry. Debug Window's trio and its 21 other
-over-budget lines ride **v1.1.3**, and the `breaklines` platform fix may change what re-authoring is
-still needed there.
+over-budget lines ride **v1.1.3**. *(This sentence originally added "and the `breaklines` platform fix
+may change what re-authoring is still needed there." It does not — `breaklines` was **REJECTED** later
+the same day, see [[F-281]]. Nothing at render time rescues an over-wide line; authorship plus this
+repaired gate is the whole mechanism. Corrected 2026-08-19.)*
 
 **Done 2026-08-17 — and the scope was 11, not 2.** Repairing only the two cut sites would have left
 nine lines over budget, one of them (`chapter-07-pulse-transition.md:306`, **88 cols**) past the
@@ -3161,8 +3201,13 @@ rule stands; only its stated justification about PDF properties is wrong. Fix th
 platform fix lands.
 
 **Sequencing.** No manual should re-render just for this. Let it ride with the next render each
-document takes anyway, and take it in the same set-wide sweep as [[F-299]] and the fancyvrb
-`breaklines` work «#250» — one `forge-test` pass, three set-wide render changes.
+document takes anyway, and take it in the same set-wide sweep as [[F-299]] — one `forge-test` pass,
+two set-wide render changes.
+
+> **Stale reference removed 2026-08-19.** This sentence named the fancyvrb `breaklines` work «#250»
+> as a third member of the sweep. That work was **REJECTED 2026-08-17** on the round-trip evidence
+> (see [[F-281]]); the reference was written after the rejection and never checked against it. The
+> sweep is F-300 + F-299, and F-299 is polish. There is no breaklines work to schedule.
 
 ⚠️ **TRAP FOR WHOEVER TAKES THIS FIX — the two title sources already disagree.** Because nothing
 consumes `request.json`'s metadata today, nobody has had to keep it in step with the cover, and it
@@ -3200,10 +3245,14 @@ are looking at** — measure the artifact ([[feedback_status_line_is_not_evidenc
 **Deliberately not fixed in this release.** A column-width change in
 `p2kb-platform-tables.lua` reflows tables in **every** manual, so adopting it while Streamer is
 mid-render means re-verifying the whole set against a changed table model for 6pt of rule overhang.
-Same reasoning that parked the fancyvrb `breaklines` work «#250»: schedule it when no manual is
-mid-render, and expect the absorbing manual's next render to shift table layout. **Pair it with
-«#250»** — both are set-wide render changes whose failure mode is a page that looks fine in the log,
-and both want one `forge-test` sweep across the set rather than two.
+Schedule it when no manual is mid-render, and expect the absorbing manual's next render to shift
+table layout. **Pair it with [[F-300]]** — both are set-wide render changes whose failure mode is a
+page that looks fine in the log, and both want one `forge-test` sweep across the set rather than two.
+
+> **Stale reference removed 2026-08-19.** This paragraph cited the fancyvrb `breaklines` work «#250»
+> as the precedent it followed and the partner to pair with. That work was **REJECTED 2026-08-17**
+> ([[F-281]]) — before this entry was written. The scheduling rule it borrowed is sound and stands on
+> its own; the partner is F-300.
 
 **Scope when taken:** measure every manual, not just the Streamer — the filter is shared, so any
 manual with a 6-column table is a candidate.
@@ -3232,7 +3281,7 @@ readable — with the explicit note that *magnitude is never the verdict*. A 6pt
 overlap is a smaller version of the same accepted case.
 
 **Re-grade: this is POLISH, not a defect owed.** Still worth taking in the set-wide sweep with
-[[F-300]] and «#250» because the fix is cheap once the platform is open anyway — but it must not be
+[[F-300]] because the fix is cheap once the platform is open anyway — but it must not be
 described as a defect blocking anything, and no manual should re-render for it.
 
 **The transferable lesson — the one worth more than the finding.** Reach for the project's own

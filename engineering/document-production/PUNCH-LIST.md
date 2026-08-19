@@ -433,14 +433,24 @@ scheme would also break the house form: every other URL in Appendix C is a full
 
 **The real fix is platform-level**: give inline-code spans more legal break points
 (a discretionary after `//`, `.` and `/`), so a long URL breaks where it fits instead
-of overrunning. That is a set-wide rendering change with the same profile as the
-fancyvrb `breaklines` work «#250» — it changes line breaks in every manual, so it
-wants the same scheduling rule: land it when no manual is mid-render, adopt per
-manual at its next natural render, and look at re-flowed pages rather than the log.
+of overrunning. That is a set-wide rendering change — it changes line breaks in every
+manual, so it wants the set-wide scheduling rule: land it when no manual is mid-render,
+adopt per manual at its next natural render, and look at re-flowed pages rather than
+the log.
 
-**Do it with «#250»**, not before — both are inline/verbatim breaking behaviour in
-the shared platform layer, and doing them together means one re-flow review per
-manual instead of two.
+**This is NOT the rejected `breaklines` change, and must not be used to reopen it.**
+The code-box no-wrap policy exists because a typeset wrap cannot emit a comment's `'`
+prefix or a Spin2 `...` continuation, so wrapped *code* prints wrong and copies as
+broken (F-281, rejected 2026-08-17). A `https://…` URL inside a prose sentence has
+neither of those properties: breaking it after `/` is ordinary typography and copies
+back correctly. The scope here is **inline spans in prose only** — nothing inside a
+code box.
+
+**Scheduling.** It stands alone now. This item previously read *"Do it with «#250»,
+not before"*, pairing it with the fancyvrb `breaklines` work — a task that had already
+been rejected when that text was written. **Corrected 2026-08-19.** Its natural
+partners in one `forge-test` sweep are F-300 (PDF Title/Author metadata) and, as
+polish, F-299 (6-column table overhang).
 
 **Verify when done:** `audit-pdf-margin-overflow.py` reports zero spans on the XBYTE
 PDF, and the §C.1 and §C.2 URLs both sit inside the text block with their breaks at

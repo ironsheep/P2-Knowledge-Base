@@ -627,3 +627,11 @@ became build work — see §11.
 set-wide render change carried out of the closed «#249». Adopting it mid-sprint would mean
 re-checking this manual's code lines against a changed wrapping model for no benefit — its K=76
 budget is already clean. The Streamer Guide («#235») follows this manual; one at a time.
+
+> **ANNOTATED 2026-08-19 — this paragraph was wrong when written, and is left standing as the
+> record.** The `breaklines` change was not "not in this sprint"; it had been **REJECTED outright
+> on 2026-08-17**, the day before this plan was cut, after two Forge round-trips showed a typeset
+> wrap emitting a comment continuation with no `'` and a statement continuation with no Spin2 `...`
+> — code that prints wrong and copies as broken. See F-281. Nothing about the sprint changes: the
+> decision to exclude it was correct, only its stated reason was stale. There is no breaklines work
+> waiting for a later sprint.
