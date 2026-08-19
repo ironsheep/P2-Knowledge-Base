@@ -1,16 +1,22 @@
 # P2 Streamer Programming Guide - Changelog
 
-## v1.0.9 (2026-08-16)
+## v1.0.9 (2026-08-19)
 
-**Goertzel as a protocol you can build from** — what the input selects, how to read the accumulators, and why DEBUG moves your measurements.
+**The input is not where you think it is** — how each ADC path actually selects its pins, one read per Goertzel command, and why DEBUG moves your measurements.
 
 ### Added
 
-- **One `GETXACC` per command** (§17.1): it captures both accumulators and clears them, so read before and after a command and take the difference
-- **An absolute accumulator read fails invisibly** (§17.1) — the number is large, stable and entirely plausible
-- **The input is a four-pin block** (§17.1): `D[22:19]` selects it, base pin `%pppp` × 4; the `S` operand chooses what happens to those four
+- **§9.2 ADC input arrives through the cog's four-channel scope**: `SETSCP` enables it in `D[6]` and names a four-pin block in `D[5:2]`
+- **The command selects the channel in `S[1:0]`** (§9.2), and these modes read an enabled smart pin — `DIRH` is required
+- **Streamer command fields are positional and mode-specific** (§9.2): an idiom correct in one mode is not portable to another
+- **The input is a four-pin block** (§13.4, §17.1): `D[22:19]` selects it, base pin `%pppp` × 4 — `adc_base<<17` is exact only on a multiple of four
+- **`S[15:12]` selects which of the four are summed, and is mandatory** (§17.1): zero sums nothing, and every magnitude reads as noise
 - **Goertzel ADC pins are raw bitstreams** (§17.1): mode field `%00000`, DIR low — an enabled smart pin accumulates nothing. The reverse of §9.2
 - **Gain is a property of the coupling** (§17.1), not of the mode
+- **One `GETXACC` per command** (§17.1): it captures both accumulators and clears them, so read before and after a command and take the difference
+- **An absolute accumulator read fails invisibly** (§17.1): the number is large, stable and entirely plausible
+- **Measured selectivity** (§17.1): a 1 MHz detector read 1,059,000 on tone, 2,575 at double, 286 at half, 430 silent
+- **SINC2 DAC output rails at `$7F` and `$80`** (§17.1): the bytes are emitted with their MSB inverted
 - **§14.5 Debugging Streamer Code**: `-d` puts the highest-priority interrupt in your streaming cog, and `DEBUG_COGS` defaults to all eight
 - **The measured cost** (§14.5): accumulators reading in the millions against true values in the hundreds
 - **The one-`CON`-line fix** (§14.5), and the rule that a hardware sequencer under measurement wants a cog the debugger is not interrupting
@@ -22,7 +28,13 @@
 - **`P_TT_01`, `P_OE` and `P_CHANNEL`** are one bit-field value under three context names
 - **On silicon** the `|` form drove a cog DAC at 6,737 ADC counts against the `+` form's 1,407
 - **§13.4 sets the two forms in adjacent blocks**, the wrong one red — copying that line fails silently and completely
-- **Source documents are named by their official titles**, so a newcomer can search for them
+
+### Fixed
+
+- **Scope-fed ADC modes have no pin field** (§9.2): `D[22:20]` are fixed zeros, so a pin number added to the command selects a different mode
+- **The transfer size is the only symptom** (§9.2): the same block writes 1,024, 2,048 or 4,096 bytes as a pin number is added
+- **The §9.2 example takes its input from the scope**: the streamer command carries the sample count and no pin number
+- **The §16.1 SPI clock pin combines its mode constants with `|`**, so the pin is left in transition mode with its output enabled
 
 ## v1.0.8 (2026-08-08)
 
@@ -44,7 +56,7 @@ A Silicon-Doc accuracy pass across the streamer's timing, worked examples, and m
 - **NCO frequency resolution (Ch 3)**: the phase accumulator masks its MSB each clock, so the average output rate resolves to `sysclk / 2^31` and is essentially exact at any sysclk.
 - **Worked examples (video & SPI)**: the 640×480 VGA driver's field timing and DAC-routed RGB mode word, and the SPI clock setup, are stated as the silicon requires, so the examples drive correct signals.
 - **FIFO wrap mode (Appendix D)**: the wrap-mode buffer start address requirement is long-alignment (address ends in `%00`).
-- **Mode-encoding reference (Appendix A)**: the RFBYTE single-pin + single-DAC mode encodings read per the Silicon Doc.
+- **Mode-encoding reference (Appendix A)**: the RFBYTE single-pin + single-DAC mode encodings read per the *Parallax Propeller 2 Documentation*.
 
 ## v1.0.5 (2026-07-07)
 
@@ -96,12 +108,12 @@ no mode encodings changed.
 ## v1.0.1 (2026-06-19)
 
 Correctness, accuracy-guidance, and presentation update following a full grounding
-audit against the Silicon Doc and a detailed review pass. No new chapters; every
+audit against the *Parallax Propeller 2 Documentation* and a detailed review pass. No new chapters; every
 mode encoding from v1.0.0 is unchanged.
 
 - **Corrected the mode reference tables**: the Pins / DAC-channel / DAC-bit columns
   in the immediate, RDFAST, and pin-capture tables (and Appendix A) now read correctly
-  per the Silicon Doc; some pin and DAC-channel counts had been transposed. The mode
+  per the *Parallax Propeller 2 Documentation*; some pin and DAC-channel counts had been transposed. The mode
   *encodings* themselves were always correct.
 - **Code examples now compile cleanly**: fixed PASM2 label syntax, the `wrlut` and
   `clkfreq` usages, and a few mode/symbol choices across the example programs.
