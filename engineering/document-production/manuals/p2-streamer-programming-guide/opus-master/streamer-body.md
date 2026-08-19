@@ -901,7 +901,7 @@ Use MSB-first (`X_ALT_ON`) for SPI protocols that transmit MSB first.
 
 # Chapter 13: Programming Constants
 
-You rarely build a command word bit by bit. Instead you OR together named constants — `X_RFWORD_RGB16`, `X_PINS_ON`, `X_DACS_3_2_1_0` — and the compiler assembles the value for you. This chapter is the catalog of those built-in symbols and shows how they compose. Skim it once to learn the naming pattern; after that the names read almost like sentences.
+You rarely build a command word bit by bit. Instead you OR together named constants, such as `X_RFWORD_RGB16`, `X_PINS_ON` and `X_DACS_3_2_1_0`, and the compiler assembles the value for you. This chapter is the catalog of those built-in symbols and shows how they compose. Skim it once to learn the naming pattern; after that the names read almost like sentences.
 
 ## 13.1 Mode Symbols {#sec-13-1}
 
@@ -1078,7 +1078,7 @@ The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), an
 - **XINIT**, **XCONT**, **XZERO** execution (these instructions re-arm the events)
 - **POLL**, **WAIT**, or **J** instruction execution for that event
 
-**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by **XINIT**/**XCONT**/**XZERO**. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
+**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by **XINIT**, **XCONT**, or **XZERO**. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
 
 ## 14.4 Synchronization Patterns
 
@@ -1531,7 +1531,7 @@ wait_trigger    testp   #trigger_pin wc         ' wait for the event
 
 # Part V: Appendices
 
-The appendices are lookup material: the complete mode-encoding table, the symbol quick-reference, the frequency-calculation tables, and a troubleshooting guide. Reach for them once you know which mode you need and want the exact bits.
+The appendices are lookup material: the complete mode-encoding table, the symbol quick reference, the frequency-calculation tables, and a troubleshooting guide. Reach for them once you know which mode you need and want the exact bits.
 
 # Appendix A: Complete Mode Encoding Table {#app-a}
 
