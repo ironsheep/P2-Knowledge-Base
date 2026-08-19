@@ -58,7 +58,10 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 Legend: ✅ done · 🔄 in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached. `Chip`/`Comm`
 review are **independent** gates (a manual can be released with chip review still outstanding — see
 Assembly/DeSilva). `Platform` ✅ = on the shared `p2kb-platform` stack (`—` = a class that doesn't
-ride it, e.g. the presentation-class AI Privacy Guide). App notes carry no separate chip-review gate
+ride it, e.g. the presentation-class AI Privacy Guide). It is deliberately **coarse** —
+on the stack or not. **Per-FEATURE adoption state (which shared features a document has
+actually taken) lives in `PLATFORM-FEATURE-ADOPTION.md`**, and that is the table
+`prepare-manual` consults. App notes carry no separate chip-review gate
 (`—`) and ship a YAML companion + example ZIP (the four-artifact model — see `app-notes/README.md`).
 
 ### Detail

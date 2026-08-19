@@ -49,7 +49,24 @@ table refs silently stay dead — so the visual audit MUST include at least one 
 ref. (Discovered 2026-07-02 on the IOSP pilot: matrix cells were dead while 78 body-prose
 `\hyperlink`s worked; root cause was tables-before-crossref ordering.)
 
-## Status
+## Status — MOVED
+
+**Per-document adoption state now lives in `PLATFORM-FEATURE-ADOPTION.md`**, the one
+table that carries every platform feature against every document. This file keeps the
+*mechanism* — what the filter does, and the mandatory filter-ordering rule above.
+
+**Why it moved (F-301).** The rule stated below — *"the next time each manual is
+released, for any reason, its release MUST adopt + audit"* — was correct and was
+passed over roughly a dozen times: Assembly, DeSilva, Debug Window and Getting Started
+each released repeatedly while sitting at ⏳, Architect released without ever being
+revisited, and XBYTE plus the seven app notes were never added to the table at all.
+The statuses were not wrong; nothing read them at the moment of release. State now
+sits where `prepare-manual` consults it.
+
+The table below is the **historical** snapshot, retained as the record of what this
+file tracked. Do not update it — update the matrix.
+
+## Status (historical — see PLATFORM-FEATURE-ADOPTION.md)
 
 | Manual | Cross-ref filter | Notes |
 |--------|------------------|-------|

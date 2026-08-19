@@ -129,6 +129,17 @@ Also compare opus-master modtime/size to workspace working copy to know if a ref
 
 If **either** signal is true, the manual store already holds this document's full stack → **stage ONLY the files that changed since the last manual build.** Do NOT re-stage unchanged templates/filters — that is the Sacred Rule #6 violation. (Tell: re-copying the whole `p2kb-<slug>-*` stack when only a few files changed. Iterating templates/filters via the `forge-test` daemon does NOT seed the manual store — daemon history is irrelevant here.) Treat a build as first-only when BOTH signals are false.
 
+**Feature-adoption check (reads the master list).** Open
+`engineering/document-production/PLATFORM-FEATURE-ADOPTION.md` and find this document's row.
+**Every ⏳ in that row is work owed at THIS release** — that is what the table is for, and the
+reason it exists is that the previous per-feature tracker was correct and still passed over about
+a dozen releases because nothing read it at this moment (F-301). Carry the list into Step 5 and
+name each outstanding feature explicitly; do not silently prepare a document that is behind.
+Mechanical features (metadata single-source) can be adopted in this pass; features needing a
+rendered-PDF audit (cross-ref) need {{USER_NAME}}'s nod because the audit is the adoption.
+**Flip the row to ✅ only after the feature is actually verified in the rendered PDF**, never on
+staging.
+
 **Platform-stack check (content-hash diff — decides which, if any, shared `platform/` files stage).** Only if this manual consumes the platform (its `reference.latex` loads `p2kb-platform-*` or its `request.json` names `p2kb-platform-*` filters). First resolve WHICH platform files it uses: grep `reference.latex` for `\usepackage{p2kb-platform-...}` (→ `platform/templates/*.sty`) and read the `p2kb-platform-*` entries in `request.json` `lua_filters` (→ `platform/filters/*.lua`). Then diff their live content against the store's recorded hashes:
 ```bash
 mcp__todo-mcp__context_get key:"manual_store_platform_hashes"   # stored: "basename md5" per line
@@ -140,7 +151,7 @@ md5sum platform/templates/p2kb-platform-foundation.sty platform/templates/p2kb-p
 
 ### Step 5 — Present the plan and ask for confirmation
 
-**FIRST**, also check for **hardcoded version/date strings in the markdown source** (the cover page is rendered from the markdown, not from `request.json` metadata — `request.json` metadata only affects PDF properties / headers / footers, not the visible cover):
+**FIRST**, also check for **hardcoded version/date strings in the markdown source** (for a document that has NOT adopted metadata single-sourcing, the cover is rendered from hardcoded markdown and must be bumped separately. **The parenthetical here used to claim `request.json` metadata "only affects PDF properties / headers / footers" — both halves were wrong**: until F-300 it reached the PDF properties too, and the running headers carry only `\leftmark` + page number. For an ADOPTED document the cover reads that same metadata, so there is nothing separate to bump):
 
 - **Multi-file manual**: grep `opus-master/front-matter.md` for `Version\|2026\|2025`
 - **Single-file manual**: grep the first ~50 lines of `opus-master/<single>.md`
@@ -149,8 +160,12 @@ Typical pattern is two LaTeX lines inside a `{=latex}` block: `{\large <Month> <
 
 Then ask the user directly in chat (no `AskUserQuestion` in this repo), covering:
 1. **Refresh source?** — show opus-master vs working-copy diff summary (newer/older/same).
-2. **Version bump?** — show CURRENT values in BOTH (a) `request.json` metadata and (b) markdown cover (front-matter file or single-file cover region). If recent commits to opus-master mention a version (e.g., "v2.3.0"), suggest that. Today's month/year as date. Offer: bump both to suggested / keep as-is / custom. Bumping ONE without the other creates a confusing mismatch — flag this risk explicitly if the user wants to do partial.
-3. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files whose **content hash changed** per the Step-4 Platform-stack check (often NONE). **Gate the manual's OWN files on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN content-diff gate (changed-hash only), **independent** of the per-manual seeded/first-build check — a first manual build does NOT drag the platform along if the platform is unchanged. Default: stage just the changed aux files + the markdown (+ only the platform files whose hash changed).
+2. **Version bump?** — show CURRENT values in BOTH (a) `request.json` metadata and (b) markdown cover (front-matter file or single-file cover region). If recent commits to opus-master mention a version (e.g., "v2.3.0"), suggest that. Today's month/year as date. Offer: bump both to suggested / keep as-is / custom. Bumping ONE without the other creates a confusing mismatch — flag this risk explicitly if the user wants to do partial. **This whole dual-update disappears once a document has adopted metadata single-sourcing** (see `PLATFORM-FEATURE-ADOPTION.md`): its cover reads `\DocVersion`/`\DocDate` from `request.json`, so there is exactly ONE place to bump and no mismatch is possible. For a converted document, bump `request.json` only — and note that its `metadata.version` holds the **bare number** (`1.0.9`), because the cover supplies the word "Version".
+3. **Outstanding platform features** — list every ⏳ from this document's row in
+   `PLATFORM-FEATURE-ADOPTION.md`, with what adopting each one costs here. Offer: adopt now /
+   defer with a stated reason. A deferral is {{USER_NAME}}'s call, not a default — record it, so
+   the next prepare does not rediscover it as if it were new.
+4. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files whose **content hash changed** per the Step-4 Platform-stack check (often NONE). **Gate the manual's OWN files on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN content-diff gate (changed-hash only), **independent** of the per-manual seeded/first-build check — a first manual build does NOT drag the platform along if the platform is unchanged. Default: stage just the changed aux files + the markdown (+ only the platform files whose hash changed).
 
 If the user has clearly signaled "just do it" in this session, you may skip confirmation for unambiguous cases — but always show what you're about to do at minimum.
 

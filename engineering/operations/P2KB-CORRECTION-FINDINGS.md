@@ -3168,7 +3168,69 @@ counter that has stopped counting.
 
 **Next finding ID after this block: F-301.**
 
-### F-300 — every published PDF in the set ships with empty Title and Author properties. `CONFIRMED` — **measured 2026-08-19 across all 15 shipped PDFs; one-line platform fix, rides the next render**
+### F-301 — the cross-ref filter's adopt-at-next-release rule was passed over about a dozen times, because nothing read the tracker. `CONFIRMED` — **detected 2026-08-19 by comparing the tracker against every `request.json`**
+
+**The rule, written into `CROSSREF-FILTER-ADOPTION.md` when the filter shipped 2026-06-26:**
+*"The next time each manual is released (for any reason), its release MUST add
+`p2kb-platform-crossref` to that manual's `request.json` `lua_filters` and visually audit the
+rendered PDF."* The tracker even names its own consumer — *"`release-manual` Phase 1/Phase 4
+**should** consult this tracker."*
+
+**Measured, not assumed.** Every workspace `request.json` read directly against the tracker's rows:
+
+| Document | Tracker | In `request.json`? | Releases since the rule |
+|---|---|---|---|
+| Assembly | ⏳ pending, at v3.1.0 | **no** | v3.1.1 → v3.1.6 |
+| DeSilva | ⏳ pending, at v3.0.1 | **no** | v3.0.2 → v3.0.6 |
+| Debug Window | ⏳ pending, at v1.0.1 | **no** | v1.0.2 → v1.1.3 |
+| Getting Started | ⏳ pending, at v1.0.0 | **no** | v1.0.1 → v1.0.3 |
+| Architect | ⏳ "in development" | **no** | released v1.0.3 |
+| XBYTE | **absent from the table** | **no** | v1.0.0, v1.1.0 |
+| 7 app notes | **absent from the table** | **no** | 20+ |
+| IOSP | 🔧 adopting (pilot) | yes, ordering correct | audit never recorded |
+| Streamer | ✅ adopted + audited | yes, ordering correct | — |
+
+**Only two of fifteen ever adopted.** IOSP's row still reads "awaiting Stephen's regen + visual
+audit" although it has released three times since, so its filter has certainly rendered — the
+**audit** is what is unrecorded, and that half is the half that matters (a mis-fired auto-link is
+exactly what the audit exists to catch).
+
+**The statuses are not wrong. Nothing read them.** Every row above is an accurate record of a
+decision that was then never consulted at the moment a release happened. This is the same failure
+as [[F-281]]'s «#250» in a different costume — a correct record that is not where the decision gets
+made — and it is why adoption state moved into `PLATFORM-FEATURE-ADOPTION.md`, which
+`prepare-manual` consults on every prepare rather than "should" consult on release.
+
+**FIX — structural, landed 2026-08-19:** one per-document × per-feature matrix
+(`PLATFORM-FEATURE-ADOPTION.md`), seeded from **detected** state rather than from what each tracker
+claimed, plus a `prepare-manual` check that surfaces a document's outstanding ⏳ features as work
+owed **this** release. `CROSSREF-FILTER-ADOPTION.md` keeps the mechanism (including the mandatory
+crossref-before-tables ordering) and its status table is frozen as history.
+
+**Still owed per document:** the adopt + visual audit itself, at each document's next release —
+that has not been shortcut, only made visible. **ssdb and pnut-term-ts release next and both sit at
+⏳**, so they are the first two chances to stop the count growing.
+
+### F-300 — every published PDF in the set ships with empty Title and Author properties. `CONFIRMED` — **MECHANISM LANDED + PROVEN 2026-08-19; adoption is per document, tracked in `PLATFORM-FEATURE-ADOPTION.md`**
+
+> **RESOLUTION (2026-08-19).** The fix is **not** the one-line `pdfusetitle` this entry proposed —
+> that would have populated the info dictionary and left the cover as a second hand-maintained copy
+> of the same five strings, and would have shipped *wrong* titles on 9 of 15 (see the template table
+> below). What landed instead: **every identity string lives once, in the document's `request.json`
+> metadata, and reaches both the PDF info dictionary and the cover page from there**, via
+> `\DocTitle`/`\DocSubtitle`/`\DocVersion`/`\DocDate`/`\DocAuthor` defined in
+> `p2kb-platform-foundation.sty` (§ DOCUMENT METADATA). The macros carry the *value*; the cover keeps
+> its *presentation*.
+>
+> **Proven on the interactive daemon, four round-trips, by reading the rendered PDF** — not the
+> success flag. Both first converts (Single-Step Debugger, PNut-Term-TS User Guide) came back with
+> compile logs clean on every serious signature and Title/Author/Subject populated for the first
+> time, covers rendered and looked at. Commit `09958b0a`.
+>
+> **Unconverted documents are safe:** the foundation `\providecommand`s all five macros empty, so a
+> template that has not opted in writes exactly what it wrote before. **Per-document adoption state
+> is `PLATFORM-FEATURE-ADOPTION.md`**, and `prepare-manual` now reads it. The analysis below stands
+> as the record of how the fix was found; only the proposed one-liner is superseded.
 
 **Surfaced by** the Streamer v1.0.9 release verification — reading the delivered PDF's metadata
 dictionary, then checking whether it was a Streamer regression. It is not: **all 15 PDFs in
