@@ -2,7 +2,7 @@
 manual_slug: p2-xbyte-programming-guide
 doc_class: reference                              # YAML-backed + Silicon-Doc-backed reference + teaching (two-register), Streamer model
 code_line_budget_K: 76                            # inherits platform reference K (creation-guide §Code Line Budget)
-last_published_tag: p2-xbyte-programming-guide-v1.0.1   # baseline for Dimension #15 (released 2026-08-08, 100pp)
+last_published_tag: p2-xbyte-programming-guide-v1.1.0   # baseline for Dimension #15 (released 2026-08-19, 114pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

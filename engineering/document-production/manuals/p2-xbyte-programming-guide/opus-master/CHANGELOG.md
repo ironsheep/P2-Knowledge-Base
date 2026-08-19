@@ -1,6 +1,6 @@
 # P2 XBYTE Programming Guide - Changelog
 
-## v1.1.0 (unreleased)
+## v1.1.0 (2026-08-19)
 
 **Find your rung before you build** — a Part devoted to the dispatch decision, a second worked program between the smallest build and the hardest, and figures for the ideas the book turns on.
 
@@ -18,7 +18,7 @@
 - **`_RET_ CALL` never returns** (§16.3, hardware callout): `_RET_` returns only if the instruction did not branch, and `CALL` branches
 - **Measured on P2 silicon**: an adjacent handler ran whose bytecode was never in the stream, and the program still finished
 - **A dispatch entry can carry metadata** (§4.5): a working emulator packs each opcode's cycle count into bits [31:28]
-- **Three places for per-instruction work under XBYTE** (§7.4): a family's shared tail, a prologue the skip pattern selects, and the cog's own interrupts
+- **Three places for per-instruction work under XBYTE** (§7.4): a family's shared tail, a gated call-out the skip pattern selects, and the cog's own interrupts
 - **The complete community 6502** (§C.5): decimal mode, undocumented opcodes, cycle counting and single-step, standing on rung 2
 
 ### Changed
@@ -32,6 +32,7 @@
 - **The immediate-load family** (§16.3) shows the shared-body idiom collapsing `LDA`/`LDX`/`LDY`
 - **`_RET_`'s semantics are cited to Parallax**: the instruction table in *P2 Instructions v35 – Rev B/C Silicon*, row 410
 - **Every example carries a header** naming its manual, version, and where in the book its code appears
+- **The VM examples name their operands `x` and `y`**, leaving the letters free for the column map
 - **Guests too large for hub live in an external memory subsystem you fetch from** (§7.3): the Edge module is a starting point
 - **Appendix C states its scope** (§C): it lists the implementations located and read, not a census, and invites additions
 - **Example source is plain ASCII throughout**, so the shipped `.spin2` files open identically in any editor

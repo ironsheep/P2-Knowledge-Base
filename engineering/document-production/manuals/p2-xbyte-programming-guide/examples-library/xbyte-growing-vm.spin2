@@ -4,7 +4,7 @@
 ''   Purpose....  The minimal VM grown to eleven bytecodes - x shared ALU
 ''                body, variables, x branch, and x cog that arms twice
 ''   Manual.....  P2 XBYTE Programming Guide
-''   Version....  v1.1.0 (unreleased)
+''   Version....  v1.1.0 (2026-08-19)
 ''   Appears in.  Chapter 15: Growing the VM -- 15.5 The complete program
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

@@ -4,7 +4,7 @@
 ''   Purpose....  The engine driving a graphics display list - the same
 ''                dispatch with no interpreter in sight
 ''   Manual.....  P2 XBYTE Programming Guide
-''   Version....  v1.1.0 (unreleased)
+''   Version....  v1.1.0 (2026-08-19)
 ''   Appears in.  Chapter 19: XBYTE Beyond Interpreters -- 19.5 A display
 ''                list - the stream as a movable cursor
 ''   Authors....  Iron Sheep Productions, LLC
