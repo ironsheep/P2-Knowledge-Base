@@ -23,6 +23,7 @@
 
 ### Changed
 
+- **The subtitle names skip patterns first**: *Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2*
 - **Seven Parts, ordered by the reader's decision**: the machinery, then the choice, then the engine, then the builds
 - **The facts that carry the argument sit in the running text**, with callout boxes reserved for genuine asides
 - **Per-symbol work is priced, not forbidden**: two conditions rule the engine out, and Chapter 17 prices the rest (§3.5, §13.4, §19.7)

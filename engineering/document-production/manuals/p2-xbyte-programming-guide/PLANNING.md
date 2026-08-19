@@ -9,6 +9,7 @@
 
 - **Slug:** `p2-xbyte-programming-guide` (matches the Streamer guide pattern)
 - **Title (v0.2.0):** *P2 Interpreters & Emulators Guide* — subtitle *The XBYTE Engine and Bytecode Dispatch on the Propeller 2*. XBYTE moved to the subtitle in the v0.2.0 rework: the book teaches building interpreters/emulators, of which XBYTE is the central engine but (per Ch.11) one rung of a ladder, not the whole story. Slug + PDF filename stay `p2-xbyte-programming-guide` / `P2-XBYTE-Programming-Guide` (XBYTE = the durable identifier). *Was, through v0.1.0: "P2 XBYTE Programming Guide".*
+- **Subtitle (v1.1.0, 2026-08-19):** *Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2*. The restructure made skipping a first-class subject rather than a prerequisite — the ladder makes `EXECF` dispatch a real destination and most emulators stop there — so the cover leads with it. Title unchanged; the community rename proposal (*"P2 Instruction Skipping, Interpreters & Emulators Guide"*) was not adopted verbatim: its substance goes in the subtitle rather than leading the title with the least familiar term. Slug + PDF filename still unchanged.
   *Building Interpreters and Emulators on the Propeller 2*
 - **Status:** In progress (roster: `## In progress`, type=manual)
 - **Originated:** 2026-06-26
