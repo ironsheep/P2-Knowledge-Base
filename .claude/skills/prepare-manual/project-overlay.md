@@ -167,3 +167,53 @@ one-line form — a clean compile proves nothing here, and the compiler will nev
 color, and whether a failed count consumes the token is undetermined in the manual's REF. If it
 consumes, the color is lost silently. Treat the explicit count as load-bearing until a bench run
 says otherwise.
+
+---
+
+## Augments Step 7 — outbound is not "staged" until you re-list it
+
+Two staging traps hit in consecutive rounds of the XBYTE v1.1.0 release. Both produce a
+**clean compile log and a plausible PDF of the wrong content**, which is the failure shape
+this project keeps paying for.
+
+### Trap 1 — git-clean is not "the manual store has it"
+
+A template/filter change that has been **committed** reads clean in `git status`, but the
+Forge **manual store** still holds the previous release's copy — and daemon (`forge-test`)
+runs never touch that store. Judging "what changed" from `git status` therefore silently
+under-stages.
+
+**Diff against the last release tag instead**, which is what the store actually reflects:
+
+```bash
+git diff --name-only <slug>-v<last.released>..HEAD -- engineering/document-production/workspace/<slug>/
+```
+
+Caught in the wild: `p2kb-xbyte-diagrams.sty` carried three new figures, was committed, and
+read clean. Staging from `git status` would have generated a PDF missing three figures, with
+nothing in the log to say so.
+
+### Trap 2 — a move can partially succeed, and a collision renames rather than fails
+
+When {{USER_NAME}} moves outbound → Forge, a destination filename collision can be resolved by
+the OS **renaming the incoming file** (macOS Finder appends a time: `<Doc> 18.46.15.md`)
+instead of failing. The result is a **split bundle**: `request.json` and the templates arrive,
+the markdown does not — and `request.json` names an `input` that is no longer present under
+that name, so the build silently renders whatever markdown the store already had.
+
+**So: after {{USER_NAME}} reports the move, re-list outbound before believing it.**
+
+```bash
+ls -la engineering/document-production/outbound/<slug>/
+```
+
+- **Empty (bar `.DS_Store`)** → the move completed; proceed.
+- **A file with a time or " copy" in its name** → a collision rename. The content is normally
+  intact (verify by md5 against a fresh escape), so **restore the canonical name** and ask for
+  that one file to be re-moved. This is not a Sacred-Rule-#5 violation — it is undoing a rename
+  the file never should have had.
+- **Some files gone, others left** → a *partial* move, the dangerous state. Say explicitly which
+  files reached the store and which did not; do not describe the bundle as staged.
+
+Never assume a move is all-or-nothing, and never treat "outbound went empty" as proof for files
+you have not looked at.
