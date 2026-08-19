@@ -37,6 +37,30 @@ agent-collaboration methodology; the closed tool-chain loop is one well-drawn
 element of it, not its whole subject — cite it as "names/describes," not
 "treats in depth.")
 
+> **WHERE the agentic frame is delivered — a hard placement rule (2026-08-19).**
+> Positioning being the guide's job does **not** license positioning in the
+> opening. **No agent, AI assistant, or P2KB MCP may be named before Part 3 —
+> Headless and Automation.** Two reasons, and the second is the load-bearing one:
+>
+> 1. A reader in Part 1 cannot act on any of it. The headless environment is
+>    where the agentic workflow becomes runnable, so that is where it is taught.
+> 2. **The claim is not true yet.** The tool chain's central teaching — *the loop
+>    closes through the log file* — is true for an agent and **false for a person
+>    at the GUI**, whose return path is the screen. Asserting it in Chapter 1
+>    teaches a new reader the wrong loop about the mode they are about to use, and
+>    demotes the terminal and debug windows (the whole of Part 2) to a side effect.
+>
+> Deliver it instead as a **matched pair of figures on one spine**: Ch1 shows
+> *You → compile → observe → P2*, returning to you as terminal + debug windows,
+> with the log written alongside as a record. Ch15 redraws the same spine with the
+> agent and P2KB MCP added and the return leg re-routed through the log — earned
+> by then, because the reader has just watched the screen disappear. The parallel
+> between the two figures is the teaching; keep them structurally identical.
+>
+> The Architect Part-3 cross-reference travels with the Ch15 figure, not the Ch1
+> one. Chapter 19 (Support and Resources) may point at it too — it sits after the
+> gate.
+
 ### Identity — three tools integrated into one
 
 The whole frame of the document. Each leg maps to reader value and to what it
@@ -120,9 +144,12 @@ they do not wrap.
 - Lead each capability with a **task**, then mechanize it.
 - **Worked, runnable command-lines** are the connective tissue — especially one
   complete *"your first automated run"* recipe in the headless branch.
-- **Two positioning diagrams** earn their place in the trunk: (1) the tool-chain
-  diagram (MCP + `pnut-ts` + `pnut-term-ts` + optional VS Code ext, with the
-  P2), and (2) the three-in-one identity diagram.
+- **Two positioning diagrams** earn their place in the trunk: (1) the workflow
+  diagram — you + `pnut-ts` + `pnut-term-ts` + the P2, returning to you as
+  terminal and debug windows — and (2) the three-in-one identity diagram.
+  A **third** positioning diagram, the *agentic* tool chain (the same spine plus
+  P2KB MCP and the agent, returning through the log), belongs in the headless
+  branch, **not** the trunk — see the placement rule in §0.
 - **Annotated screenshots** carry the GUI branch (main window, toolbar, status
   bar, Preferences tabs, PropPlug Management, and **Automatic Window Placement**
   in action) — Stephen captures these externally.
@@ -137,11 +164,13 @@ they do not wrap.
 
 Working outline; see `PLANNING.md` for the chapter-level detail.
 
-- **Book 0 — Orientation (everyone, before the fork).** Tool-chain position (the
-  suite + the Architect Part-3 link); the **three-in-one identity** + the
-  name-as-mnemonic; the **two stances** (headed GUI / headless automation)
-  introduced side by side; then **the fork** — an explicit router ("at your desk
-  → GUI part; automating P2 runs → Headless part").
+- **Book 0 — Orientation (everyone, before the fork).** Workflow position — the
+  compile-then-run-and-observe chain **as a person operates it**, agent-free per
+  §0; the **three-in-one identity** + the name-as-mnemonic; the **two stances**
+  (headed GUI / headless automation) introduced side by side; then **the fork** —
+  an explicit router ("at your desk → GUI part; automating P2 runs → Headless
+  part"). Headless may be *named and described* here — it is a way to launch the
+  tool; what may not appear is who or what is doing the automating.
 - **Book A — GUI branch.** Main window; download; serial terminal; **debug
   windows + Automatic Window Placement** (a headline GUI advantage — no need to
   `POS` every window; drag to read coordinates and bake a `POS` back into
@@ -149,7 +178,9 @@ Working outline; see `PLANNING.md` for the chapter-level detail.
   monitor; settings.
 - **Book B — Headless branch.** Headless invocation; end-markers / timeouts;
   exit codes; **the log as the automation feedback loop**; USB traffic log;
-  CI / agent-in-the-loop patterns.
+  CI / agent-in-the-loop patterns. **This branch carries the entire agentic
+  frame** (§0): the suite-mate P2KB MCP, the agentic tool-chain figure, and the
+  Architect Part-3 link all land here, in the complete-run chapter.
 - **Shared reference tail (both branches point in).** Full CLI reference;
   keyboard shortcuts; settings hierarchy; troubleshooting; support & resources.
 
@@ -157,15 +188,16 @@ Working outline; see `PLANNING.md` for the chapter-level detail.
 
 - **The P2 Architect's Guide, Part 3 (agentic use)** — *bidirectional,
   positioning.* Part 3 says "use this tool chain"; this guide is the tool that
-  delivers it.
+  delivers it. **Cite it only from Part 3 onward** (§0 placement rule).
 - **P2 Debug Window Manual** — the nine display windows this tool *displays and
   produces*; that manual is *what they are and how to author them* (already
   released).
 - **P2 Single-Step Debugger Manual** — the single-step debugger interface this
   tool *renders and drives*; that manual is *how to use the debugger*.
 - **Parallax P2 DEBUG documentation** — the `debug()` display-directive syntax.
-- **Suite-mates named in the trunk:** P2KB MCP, `pnut-ts`, the Spin2 VS Code
-  extension.
+- **Suite-mates, and where each is named:** `pnut-ts` and the Spin2 VS Code
+  extension in the trunk; **P2KB MCP only in the headless branch** (§0 placement
+  rule) — it serves an agent, and no agent exists in this guide before Part 3.
 
 ## 5. Release gate
 

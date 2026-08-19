@@ -9,7 +9,13 @@
   behavior from memory. Cross-reference (do NOT reproduce) the debug() directive
   spec, the P2 Debug Window Manual, and the P2 Single-Step Debugger Manual.
 
-  COMPLETE as of v1.0.0 (2026-08-19): Parts 1-4, Chapters 1-20, all 8 figures.
+  COMPLETE as of v1.0.0 (2026-08-19): Parts 1-4, Chapters 1-19, all 9 figures.
+
+  PLACEMENT RULE (agent material): Parts 1-2 teach a PERSON to operate the tool.
+  AI agents, assistants, and P2KB MCP must not appear before Part 3 — the reader
+  cannot act on them yet, and the log-as-return-path claim is FALSE for a person
+  at the GUI, whose return path is the screen. The agentic tool-chain figure and
+  the Architect Part-3 link live in Ch15, after the headless loop is in hand.
 -->
 
 # Part 1: Getting Oriented
@@ -32,17 +38,15 @@ connection.
 ## The tool it belongs to
 
 PNut-Term-TS does not work alone. It is the runtime end of a small, coherent set
-of tools for developing on the Propeller 2 — the set you reach for whether you
-are working by hand or driving the whole thing from an AI coding assistant:
+of tools for developing on the Propeller 2:
 
 | Tool | Its job |
 |------|---------|
-| **P2KB MCP** | Serves the P2 knowledge base — instructions, the language, the silicon — to an assistant that is writing P2 code. |
 | **`pnut-ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
 | **`pnut-term-ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
 | Spin2 VS Code extension *(optional)* | Your editor, with Spin2 syntax and semantic highlighting. |
 
-Think of the first three as compile, and run-and-observe. `pnut-ts` produces the
+Think of the first two as compile, then run-and-observe. `pnut-ts` produces the
 binary; **PNut-Term-TS is where you watch it come alive.**
 
 ```{=latex}
@@ -50,53 +54,44 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \centering
 \diagramscale{
 \begin{tikzpicture}
-\node[iospbox] (agent) {You / your\\AI agent};
-\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut-ts}\\compiler};
+\node[iospbox] (you) {You};
+\node[iospbox, right=14mm of you] (compile) {\texttt{pnut-ts}\\compiler};
 \node[iospkey, right=16mm of compile] (term) {\texttt{pnut-term-ts}\\download + observe};
 \node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
-\node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
 \node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
 \node[iospsub, below=1.5mm of log] (logsub)
-   {\texttt{debug\_*.log} (GUI)\\\texttt{headless\_*.log} (headless)};
-\draw[iospflow] (mcp) -- (agent);
-\draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
+   {a timestamped record\\of the run};
+\draw[iospflow] (you) -- node[above, font=\scriptsize]{Spin2} (compile);
 \draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
 % The serial link is a TWO-WAY conversation, and both directions terminate at
-% pnut-term-ts -- never at the agent. Drawn as a matched pair rather than one
-% arrow, because the return leg is the whole point of the figure.
+% pnut-term-ts -- never at you. Drawn as a matched pair rather than one arrow,
+% because the return leg is the whole point of the figure.
 \draw[iospflow] ([yshift=2mm]term.east) --
    node[above, font=\scriptsize]{run} ([yshift=2mm]p2.west);
 \draw[iospflow] ([yshift=-2mm]p2.west) --
    node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
 \draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
-\draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
-   node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
-   {the agent reads the log} (agent.south);
+% The return leg to the PERSON is the screen, not the log -- arced over the
+% spine so it does not collide with the .bin arrow running beneath it.
+\draw[iospflow] (term.north) to[out=90, in=90, looseness=0.55]
+   node[pos=0.5, above, inner sep=2pt, font=\scriptsize]
+   {terminal + debug windows} (you.north);
 \end{tikzpicture}
 }
-\caption{Where PNut-Term-TS sits in the P2 agentic tool chain. The loop closes
-through the \emph{log file}, not through a direct line from the chip: everything
-the P2 sends comes back to PNut-Term-TS, which writes it to a log, and it is that
-log the agent reads.}
+\caption{Where PNut-Term-TS sits in the Propeller 2 workflow. \texttt{pnut-ts}
+builds the binary; PNut-Term-TS downloads it, starts it, and shows you what the
+chip sends back — as terminal text and as the debug windows your program draws
+to — while writing the same output to a log file you can keep.}
 \end{figure}
 ```
 
-Follow how that loop closes. The agent does not read the P2 directly.
-**Everything the P2 sends comes back to PNut-Term-TS, which
-writes it to a log file in the `logs` folder — and it is that file the agent
-reads.** The log is not a convenience feature bolted on the side; for an agent it
-*is* the return path. (Logs land next to the run, in `./logs/` relative to the
-folder you launched from, so the evidence stays beside the program that produced
-it. You can point them somewhere else if you would rather.)
-
-If you are building an *agentic* P2 workflow — an assistant that writes code,
-compiles it, runs it on real silicon, and reads the log back to decide what to do
-next — this tool is the piece that lets the assistant *observe the hardware*.
-That agent-in-the-loop way of working is the subject of **The P2 Architect's
-Guide, Part 3**, which names this very tool chain — `pnut-ts`, `pnut-term-ts`,
-and the Knowledge Base — as what lets a hosted agent close that write-compile-run-
-read loop on its own. This guide is the operating manual for the tool that makes
-it possible.
+Follow how that loop closes. **Everything the P2 sends comes back to
+PNut-Term-TS** — there is no second path off the chip. What arrives is shown to
+you as it happens, in the terminal and in the debug windows your program draws
+to, and the same output is written to a log file as it goes, so you have a record
+of the run after the windows are closed. (Logs land next to the run, in `./logs/`
+relative to the folder you launched from, so the evidence stays beside the
+program that produced it. You can point them somewhere else if you would rather.)
 
 # Chapter 2: Three Tools in One
 
@@ -212,15 +207,15 @@ pnut-term-ts -r myprogram.bin   # open the GUI and download this file
 Launch it with `--headless` and there is **no graphical interface at all**. The
 tool downloads your program, captures everything the P2 sends to a timestamped log
 file, and exits on a signal you define. This is the mode built for **continuous
-integration pipelines, containers, and AI coding assistants** running
-hardware-in-the-loop tests — anywhere a program, not a person, is watching.
+integration pipelines, containers, and scripted test runs** on real hardware —
+anywhere a program, not a person, is watching.
 
 ```command
 pnut-term-ts --headless -r test.bin --end-marker
 ```
 
-In headless mode the log file is how an automated caller — or an assistant reading
-back its own program's behavior — sees what the P2 did. The headless part of this
+With no windows, the log file is the only place the run can be seen: it is how
+whatever launched the tool finds out what the P2 did. The headless part of this
 guide covers it in depth.
 
 Between these two poles are a few in-between modes — downloading from the command
@@ -239,7 +234,7 @@ the two jobs genuinely differ. Find yourself below and go there.
 | If you are… | …you want | Go to |
 |-------------|-----------|-------|
 | At your desk, watching a P2 and reacting to what you see | The windows, the toolbar, recording a session, driving the single-step debugger by hand | **Part 2 — Using the GUI** |
-| Automating P2 runs — CI, a container, or an AI assistant in the loop | Launching headless, ending a run cleanly, exit codes, and reading the log | **Part 3 — Headless and Automation** |
+| Automating P2 runs — CI, a container, or a script driving the hardware | Launching headless, ending a run cleanly, exit codes, and reading the log | **Part 3 — Headless and Automation** |
 
 You do not have to read the other path. What both paths share — the full
 command-line reference, keyboard shortcuts, the settings that shape either mode,
@@ -909,7 +904,7 @@ When the marker appears, PNut-Term-TS flushes and exits. The caller then does tw
 things:
 
 1. **Checks the exit code.** `0` means a clean finish; a non-zero code (Chapter
-   14) says what went wrong — `3` for a failed download, `124` for a timeout, and
+   13) says what went wrong — `3` for a failed download, `124` for a timeout, and
    so on — without any need to read the log.
 2. **Reads the log.** The freshest `headless_*.log` in `./logs/` holds the
    program's `DEBUG()` output — the actual behavior of the code under test, ready
@@ -918,6 +913,70 @@ things:
 
 That download → run → marker → read cycle is the loop that lets a program, rather
 than a person, develop and verify P2 code on real silicon.
+
+## The agent in the loop
+
+That cycle is what makes this tool the runtime end of an *agentic* P2 workflow —
+an assistant that writes P2 code, compiles it, runs it on real silicon, and reads
+the log back to decide what to do next. Seen that way, the tool chain of Chapter 1
+gains one more member, because an assistant needs a source for what it is writing
+about:
+
+| Tool | Its job |
+|------|---------|
+| **P2KB MCP** | Serves the P2 knowledge base — the instruction set, the language, the silicon — to an assistant that is writing P2 code. |
+| **`pnut-ts`** | The Spin2 / PASM2 compiler. Turns that source into a binary the P2 can run. |
+| **`pnut-term-ts`** | *This tool.* Downloads the binary, runs it, and writes back what the P2 said. |
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\diagramscale{
+\begin{tikzpicture}
+\node[iospbox] (agent) {your\\AI agent};
+\node[iospbox, right=14mm of agent] (compile) {\texttt{pnut-ts}\\compiler};
+\node[iospkey, right=16mm of compile] (term) {\texttt{pnut-term-ts}\\download + observe};
+\node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
+\node[iospbox, above=9mm of agent] (mcp) {P2KB MCP\\knowledge};
+\node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
+\node[iospsub, below=1.5mm of log] (logsub)
+   {\texttt{headless\_*.log}};
+\draw[iospflow] (mcp) -- (agent);
+\draw[iospflow] (agent) -- node[above, font=\scriptsize]{Spin2} (compile);
+\draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
+% The serial link is a TWO-WAY conversation, and both directions terminate at
+% pnut-term-ts -- never at the agent. Drawn as a matched pair rather than one
+% arrow, because the return leg is the whole point of the figure.
+\draw[iospflow] ([yshift=2mm]term.east) --
+   node[above, font=\scriptsize]{run} ([yshift=2mm]p2.west);
+\draw[iospflow] ([yshift=-2mm]p2.west) --
+   node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
+\draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
+\draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
+   node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
+   {the agent reads the log} (agent.south);
+\end{tikzpicture}
+}
+\caption{Where PNut-Term-TS sits in the P2 agentic tool chain. With no windows to
+watch, the loop closes through the \emph{log file} rather than through a direct
+line from the chip: everything the P2 sends comes back to PNut-Term-TS, which
+writes it to a log, and it is that log the agent reads.}
+\end{figure}
+```
+
+Follow how that loop closes, because the shape of it is the whole point. The agent
+does not read the P2 directly. **Everything the P2 sends comes back to
+PNut-Term-TS, which writes it to a log file in the `logs` folder — and it is that
+file the agent reads.** At your desk that log sits alongside what you are already
+watching on screen, a record you may never open. Here there is no screen, so the
+log is not a convenience bolted on the side: it *is* the return path, and it is
+the reason a program can take the place of the person who used to watch.
+
+That agent-in-the-loop way of working is the subject of **The P2 Architect's
+Guide, Part 3**, which names this very tool chain — `pnut-ts`, `pnut-term-ts`, and
+the Knowledge Base — as what lets a hosted agent close the write-compile-run-read
+loop on its own. This guide is the operating manual for the tool that makes it
+possible.
 
 # Part 4: Reference
 
@@ -1041,9 +1100,12 @@ one.
 
 <!--
   ===========================================================================
-  FIGURES — 8 slots, all real (no placeholders).
-  - 3 TikZ diagrams: tool-chain position [Ch1], three-in-one identity [Ch2],
-    Automatic Window Placement order [Ch8].
+  FIGURES — 9 slots, all real (no placeholders).
+  - 4 TikZ diagrams: workflow position, user-facing [Ch1], three-in-one identity
+    [Ch2], Automatic Window Placement order [Ch8], agentic tool chain [Ch15].
+    Ch1 and Ch15 are a deliberate PAIR on the same spine: same nodes, same
+    left-to-right flow, different return leg — the screen for a person, the log
+    for an agent. Keep them visually parallel; that parallel IS the teaching.
   - 5 screenshots (Stephen's captures, staged as inbox/assets/*.png):
     main-window-and-logger [Ch5] · multi-window-desktop [Ch8] ·
     single-step-debugger [Ch9] · preferences-user-settings [Ch10] ·

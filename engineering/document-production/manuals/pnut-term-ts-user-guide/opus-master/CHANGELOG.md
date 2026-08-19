@@ -15,7 +15,17 @@ runs — and is plain about the one place toolchains differ: PNut and `pnut-ts` 
 auto-detected and carry their own debug baud rate, and a debug build from anything else
 needs `-b`.
 
-Ships with three TikZ diagrams and five screenshots. Co-released with the *P2 Single-Step
+**The opening teaches the loop you can actually see.** Chapter 1 places the tool in the
+workflow as *you* operate it: you compile, PNut-Term-TS downloads and runs, and what the
+P2 sends comes back to your terminal and debug windows, with a log written alongside as a
+record. The automated form of that loop — where an agent stands in for the person, P2KB
+MCP supplies what it knows about the P2, and the log becomes the only return path because
+there is no longer a screen — is taught in Chapter 15, once the headless run, its exit
+codes, and its log are in hand. The two chapters carry matching diagrams of one spine, and
+the difference between them is the lesson: **who is watching decides what the return path
+is.**
+
+Ships with four TikZ diagrams and five screenshots. Co-released with the *P2 Single-Step
 Debugger Manual*, which covers driving the debugger itself.
 
 ## v0.9.0 (2026-08-12): Tool developer review draft — compiler compatibility

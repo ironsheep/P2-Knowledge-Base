@@ -22,10 +22,17 @@ the name is reused as a mnemonic for that scope in the orientation trunk.
 Primary job is **positioning**, not just operation (see `creation-guide.md` §0).
 This tool is the *runtime/observation* leg of the P2 **agentic tool suite**:
 
-- **P2KB MCP** + **`pnut_ts`** + **`pnut_term_ts`** (this tool), optional **Spin2
+- **P2KB MCP** + **`pnut-ts`** + **`pnut-term-ts`** (this tool), optional **Spin2
   VS Code extension**.
 - Delivers the agentic usability described in **The P2 Architect's Guide,
   Part 3** (bidirectional cross-reference).
+
+**But positioning ≠ positioning up front.** Per the `creation-guide.md` §0
+placement rule, the agentic frame — agents, AI assistants, P2KB MCP, and the
+Architect Part-3 link — is delivered **in Book B (headless), never in the
+trunk**. The trunk's tool-chain diagram shows the chain **as a person operates
+it**; Book B redraws the same spine with the agent added. See §0 for why: the
+"loop closes through the log" claim is false for a person at the GUI.
 
 **Identity = three tools in one:** downloader · Parallax Serial Terminal
 replacement · PNut debug-window replacement/production (now cross-platform).
@@ -49,14 +56,16 @@ Pedagogy: teach the conceptual model once, then fork by intent (GUI vs headless)
 See `creation-guide.md` §2–§3.
 
 ### Book 0 — Orientation (everyone reads, before the fork)
-1. Where this sits — the agentic tool suite; the Architect Part-3 link.
+1. Where this sits — the compile / run-and-observe chain **as you operate it**.
+   Agent-free: no agents, no P2KB MCP, no Architect Part-3 link (§0 rule).
 2. Three tools in one — downloader / PST replacement / debug-window engine;
    cross-platform; the name-as-mnemonic.
 3. The two stances — **headed (GUI)** and **headless (automation)**, side by side,
    so the reader self-identifies (both are know-this-immediately facts).
 4. **The fork** — explicit router: at your desk → Book A; automating P2 runs
-   (CI / container / agent-in-the-loop) → Book B.
-   *(Trunk diagrams: (1) tool-chain position; (2) three-in-one identity.)*
+   (CI / container / scripted hardware runs) → Book B.
+   *(Trunk diagrams: (1) workflow position, user-facing; (2) three-in-one
+   identity.)*
 
 ### Book A — GUI branch (Part 2) — AS BUILT
 5. The Main Window — toolbar, text-entry, terminal display, status bar.
