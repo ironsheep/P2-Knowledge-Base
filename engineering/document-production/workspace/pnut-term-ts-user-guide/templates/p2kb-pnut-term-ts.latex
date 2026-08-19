@@ -15,9 +15,20 @@
 \usepackage{p2kb-platform-isp-cover}    % shared: ISP-only cover standard (band, palette, mark placements)
 
 % ==================== DOCUMENT METADATA ====================
-\title{$title$}
-\author{$author$}
-\date{$date$}
+% SINGLE SOURCE (F-300): every identity string comes from request.json metadata
+% and reaches BOTH the PDF info dictionary and the cover page. \renewcommand,
+% not \newcommand — p2kb-platform-foundation has already \providecommand'd these.
+% The macros carry the VALUE; the cover block in front-matter.md keeps its own
+% presentation (the word "Version", any qualifier, colour).
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
 \providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
 
 % Pandoc header-includes (syntax-highlight macros, etc.)

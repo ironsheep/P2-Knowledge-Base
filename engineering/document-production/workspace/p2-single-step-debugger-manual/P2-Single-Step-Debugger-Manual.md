@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.6cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Single-Step Debugger Manual\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape Observe and Control Your Running P2 Code\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.6cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -64,7 +64,7 @@
 \end{tcolorbox}
 \vspace{0.5cm}
 
-{\small Iron Sheep Productions, LLC\par}
+{\small \DocAuthor\par}
 {\small P2 Knowledge Base Project\par}
 \end{center}
 

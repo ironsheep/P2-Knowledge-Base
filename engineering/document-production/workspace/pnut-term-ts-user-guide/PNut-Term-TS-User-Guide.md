@@ -7,13 +7,18 @@
 
 \begin{center}
 \vspace{1.4cm}
-{\fontsize{34}{40}\selectfont\bfseries PNut-Term-TS User Guide\par}
-\vspace{0.35cm}
-{\Large\itshape The Cross-Platform Downloader, Terminal,\\ and Debug Display for the Propeller 2\par}
+{\fontsize{34}{40}\selectfont\bfseries \DocTitle\par}
+% 0.69cm not 0.35cm: the minipage below sets its own first baseline, which
+% consumed 9.5pt of this gap (measured v1 vs v2 on the daemon, 20.8pt -> 11.3pt).
+\vspace{0.69cm}
+% Subtitle measure is PRESENTATION and stays here; the TEXT is single-sourced
+% (\DocSubtitle from request.json). Narrowing the measure balances the two-line
+% break — at full width it breaks after "for the" and orphans "Propeller 2".
+{\Large\itshape\begin{minipage}{0.66\linewidth}\centering \DocSubtitle\end{minipage}\par}
 \vspace{0.9cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{iosp-review-border}\bfseries Version 0.9.0 — Tool Developer Review Draft\par}
+{\large\color{iosp-review-border}\bfseries Version \DocVersion{} — Tool Developer Review Draft\par}
 \vspace{0.15cm}
 {\normalsize\color{iosp-review-border}Circulated to named tool authors for review. Not for public distribution.\par}
 

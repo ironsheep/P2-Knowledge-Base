@@ -271,6 +271,38 @@
   pdfpagemode=UseOutlines
 }
 
+% ==================== DOCUMENT METADATA (single source) ====================
+% F-300. A document's identity strings live in ONE place — its request.json
+% metadata — and reach BOTH the PDF info dictionary (below) and the cover page
+% (via these macros, used in the master's front-matter cover block). The macros
+% carry the VALUE only; the cover keeps its own presentation (e.g. the word
+% "Version", a review-draft qualifier, colour).
+%
+% A template opts in by defining these from its pandoc variables, AFTER loading
+% this package. Use \renewcommand — the \providecommand fallbacks below have
+% already run by then, so \newcommand would abort with "already defined":
+%     \renewcommand{\DocTitle}{$title$}  ... \DocSubtitle / \DocVersion / \DocDate / \DocAuthor
+% Until a template does, the fallbacks below keep it empty — which is exactly
+% the pre-fix behaviour, so an unconverted document is unchanged, never broken.
+% Adoption is per document, tracked in PLATFORM-FEATURE-ADOPTION.md.
+\providecommand{\DocTitle}{}
+\providecommand{\DocSubtitle}{}
+\providecommand{\DocVersion}{}
+\providecommand{\DocDate}{}
+\providecommand{\DocAuthor}{}
+
+% Populate the PDF info dictionary. Deliberately NOT `pdfusetitle`: that reads
+% \@title/\@author and is sensitive to whether they were declared before hyperref
+% loaded. Setting the keys from our own macros at begin-document is
+% order-independent. Empty values write nothing readers did not already have.
+\AtBeginDocument{%
+  \hypersetup{%
+    pdftitle={\DocTitle},%
+    pdfauthor={\DocAuthor},%
+    pdfsubject={\DocSubtitle}%
+  }%
+}
+
 % Force link colors AFTER all packages load (overrides any Pandoc injection)
 \AtBeginDocument{%
   \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hidelinks=false}%
