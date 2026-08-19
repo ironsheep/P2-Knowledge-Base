@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-300`**
+**Next finding ID: `F-301`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -3126,7 +3126,43 @@ because the F-297 registration replaced the previous block's marker instead of o
 own. Corrected — F-296's block now closes at F-297. A marker that says the same thing twice is a
 counter that has stopped counting.
 
-**Next finding ID after this block: F-300.**
+**Next finding ID after this block: F-301.**
+
+### F-300 — every published PDF in the set ships with empty Title and Author properties. `CONFIRMED` — **measured 2026-08-19 across all 15 shipped PDFs; one-line platform fix, rides the next render**
+
+**Surfaced by** the Streamer v1.0.9 release verification — reading the delivered PDF's metadata
+dictionary, then checking whether it was a Streamer regression. It is not: **all 15 PDFs in
+`deliverables/documents/DOCs/` report `(empty)` for both `title` and `author`** — eight manuals and
+seven app notes. Only `creator` (`LaTeX with hyperref`) and `producer` (`xdvipdfmx`) are set.
+
+**What a reader sees.** A PDF viewer's title bar and Document Properties fall back to the *filename*
+instead of the document's name, and anything indexing the file — a search tool, a library, a
+citation manager — finds no title or author to key on.
+
+**The mechanism, traced end to end.** The `.latex` template sets `\title{P2 Streamer Programming
+Guide}` (generated `.tex` line 31), and `p2kb-platform-foundation.sty:259` sets a `\hypersetup`
+block — but that block configures **only** link colors and bookmarks. It never sets `pdftitle` or
+`pdfauthor`, and **hyperref does not derive them from `\title{}` on its own**; that requires either
+`pdfusetitle` or explicit keys. So the title exists in the document body and never reaches the PDF
+info dictionary.
+
+**FIX (one line, in the shared platform):** add `pdfusetitle` — or explicit
+`pdftitle={...}, pdfauthor={...}` — to the `\hypersetup` block at
+`p2kb-platform-foundation.sty:259`. **Zero layout risk**: it writes the PDF info dictionary only and
+cannot reflow a page. This is what distinguishes it from [[F-299]], which is parked because it
+*does* move type.
+
+**Corrects a claim in our own process doc.** The `prepare-manual` skill states that a `request.json`
+metadata change "feeds PDF properties, not just the build." For this manual-production path that is
+**not true** — the template hardcodes `\title{}`, and nothing carries `request.json`'s
+`metadata.{title,author,version}` into the PDF info dictionary. Re-staging `request.json` on a
+document switch is still mandatory for a different and real reason (input/template/filters), so the
+rule stands; only its stated justification about PDF properties is wrong. Fix that sentence when the
+platform fix lands.
+
+**Sequencing.** No manual should re-render just for this. Let it ride with the next render each
+document takes anyway, and take it in the same set-wide sweep as [[F-299]] and the fancyvrb
+`breaklines` work «#250» — one `forge-test` pass, three set-wide render changes.
 
 ### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **measured 2026-08-19; platform fix owed, deliberately NOT taken mid-release**
 
