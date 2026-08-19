@@ -33,7 +33,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Architect's Guide | manual | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | ⏳ | — |
-| **PNut-Term-TS User Guide** | guide | **✅** | ⏳ | — |
+| **PNut-Term-TS User Guide** | guide | **✅** | ⏳ ⁶ | — |
 | P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — |
 | AI Privacy Guide | guide | — | — | — |
@@ -49,6 +49,10 @@ shipped cover reads *"P2 Interpreters & Emulators Guide"*.
 ⁴ All seven share `p2kb-appnote-reference.latex`, which hardcodes
 `\title{P2 Application Note}`. Converting the shared template converts all seven at
 once — `request.json` `metadata.title` already equals each cover title.
+⁶ **Deferred at the v1.0.0 prepare (2026-08-19), Stephen's call, reason recorded:** adopting
+cross-ref requires a visual audit of the auto-links in the rendered PDF, and that audit would gate
+a release explicitly scoped to *not* wait — the same reasoning that removed the reviewer questions.
+Not a silent pass-over (which is what F-301 was); take it at the next release.
 ⁵ P2AN006 reads 1/5 only because `isp_stack_check.spin2` is a shipped utility object
 carrying its own hand-written header, not an example. Treat it as not adopted.
 
