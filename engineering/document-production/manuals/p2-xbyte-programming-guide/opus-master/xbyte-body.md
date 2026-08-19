@@ -275,18 +275,22 @@ entry           long    $120 | (%1110 << 10)    ' "run one line of four"
 The reason the skip family matters to an interpreter is *code sharing*. Many bytecodes differ only slightly — "add," "subtract," "and," "or" might be one routine that loads two operands, performs one ALU operation, and stores the result, where only the middle instruction changes. Rather than write four routines, write one body containing all four ALU operations and give each bytecode a skip pattern that leaves *its* operation and skips the other three.
 
 ```pasm2
-' One shared body for several two-operand ALU bytecodes.
-' Each bytecode's dispatch entry supplies a SKIPF pattern that
-' leaves exactly one of the four ALU lines and skips the rest.
+' One shared body for four two-operand ALU bytecodes. Each bytecode's
+' entry supplies a SKIPF pattern leaving one ALU line and skipping the rest.
+'   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
 alu_body
-                call    #pop_two            ' operands -> a, b
-                add     a, b                 ' "ADD" bytecode keeps this
-                sub     a, b                 ' "SUB" bytecode keeps this
-                and     a, b                 ' "AND" bytecode keeps this
-                or      a, b                 ' "OR"  bytecode keeps this
-                call    #push_a              ' result -> stack
-                ret                          ' back to XBYTE dispatch
+                call    #pop_two    'a b c d   operands -> x, y
+                add     x, y        'a | | |
+                sub     x, y        '| b | |
+                and     x, y        '| | c |
+                or      x, y        '| | | d
+                call    #push_x     'a b c d   result -> stack
+                ret                 'a b c d   back to XBYTE dispatch
 ```
+
+**Reading the column map.** The comment field carries one column per bytecode, keyed to the legend above the body. A **letter** means that bytecode runs the line; **`|`** means its pattern skips it; a **blank** means it is not in play there — it has not entered the body yet, or has already returned. Read *across* a row to see who runs that instruction; read *down* a column to trace one bytecode's whole path.
+
+The map is not decoration. A column **is** that bytecode's skip pattern written out — first line at the bottom bit, `|` for a 1 and a letter for a 0 — so you can check a pattern against its body by eye instead of decoding binary. This is the notation the P2's own Spin2 interpreter uses throughout, and §4.6 turns it into the way you *derive* a pattern rather than merely document one.
 
 The bytecode that means "subtract" points at `alu_body` with a skip pattern that leaps the `add`, `and`, and `or` lines; "add" skips the other three; and so on. Four bytecodes, one body. This is the most common XBYTE handler pattern, and it is pure SKIPF — the engine just supplies the pattern for you, from the table, on every bytecode.
 
@@ -300,7 +304,7 @@ The shared body above depends on one behaviour and must step around two traps. A
 
 **Skipping is suspended inside a `CALL`.**
 
-Look at `alu_body` again. It opens with `call #pop_two` and ends with `call #push_a` followed by `ret`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
+Look at `alu_body` again. It opens with `call #pop_two` and ends with `call #push_x` followed by `ret`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
 
 This is not folklore; the hardware tracks it explicitly. The **`CALL` depth since the pattern began** is one of the fields `GETBRK` reports (§13.1), and **skipping is suspended whenever that depth is non-zero**.
 
@@ -355,7 +359,8 @@ The shared-handler idiom is powerful, but a body serving a dozen bytecodes is on
 1. **Find the family.** Group the bytecodes that do *almost* the same work — same operands fetched, same result stored, differing only in the operation between. An ALU group, a load/store group, a "push small constant" group. The wider and more regular the family, the more one body earns its keep.
 2. **Write the superset body.** Lay every instruction *any* member needs into one straight-line body, in a fixed order. Each member is then a *subset* of that body — its pattern leaves that member's instructions and skips the rest (§4.4).
 3. **Factor shared work into `CALL`s.** Common setup and teardown — pop the operands, push the result — go in subroutines. Skipping is *suspended inside a call* (§4.5), so a helper's instructions never consume pattern bits; the body stays short and every pattern stays simple. This is what makes wide families practical at all.
-4. **Assign each member's pattern, common path first.** A member's pattern skips the instructions it does not want. Order the body so the *most common* members skip the least — under SKIPF every kept instruction runs and every skipped one is free (§4.2). Build the table entry with the handler address in the low 10 bits and the pattern in the high 22 (§6.2).
+4. **Draw the column map, then read the patterns off it.** Do not write the patterns and document them afterwards — build the grid first: **one row per long of the body**, one column per family member, each cell carrying the member's letter where it runs that long and `|` where it skips (§4.4). A column read from the bottom up *is* that member's pattern, `|` for a 1 and a letter for a 0. Order the body so the *most common* members skip the least — under SKIPF every kept instruction runs and every skipped one is free (§4.2). Build the table entry with the handler address in the low 10 bits and the pattern in the high 22 (§6.2).
+   The grid is also the check, which is why it is worth drawing before the patterns exist. **One row per long, not per line**: a `##` immediate occupies two rows, so the off-by-one below stops being something you must remember and becomes something you can see. Leave the map in the source as a comment and it keeps paying — every shared body in this book carries one, and so does every shared body in the Spin2 interpreter.
 5. **When a pattern can't say it, use the flag.** A skip pattern chooses *which instructions* run; it cannot make a kept instruction *behave two ways*. When members differ in behaviour rather than in instruction-selection — a conditional, a loop count, two variants of one operation — carry two selector bits in the bytecode and let the **F bit** deliver them as flags (§11.4). Pattern and flag are complementary selectors; reach for the flag only when the pattern runs out.
 
 **Two ways a pattern misleads you** (both from §4.5): a `##` immediate is *two* longs, so one `##` inside a skipped region throws every bit after it off by one; and a pattern with more bits than its body has instructions spills onto whatever runs next. Count longs, not lines, and size each pattern to its body.
@@ -1323,22 +1328,22 @@ h_pushc                                     ' $00: push inline constant
                 wrlong  v, sp
         _ret_   add     sp, #4
 
-h_add                                       ' $01: pop b, a; push a+b
+h_add                                       ' $01: pop y, x; push x+y
                 sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-                rdlong  a, sp
-                add     a, b
-                wrlong  a, sp
+                rdlong  x, sp
+                add     x, y
+                wrlong  x, sp
         _ret_   add     sp, #4
 
-h_sub                                       ' $02: pop b, a; push a-b
+h_sub                                       ' $02: pop y, x; push x-y
                 sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-                rdlong  a, sp
-                sub     a, b
-                wrlong  a, sp
+                rdlong  x, sp
+                sub     x, y
+                wrlong  x, sp
         _ret_   add     sp, #4
 
 h_halt          jmp     #done               ' $03: exit XBYTE
@@ -1346,8 +1351,8 @@ h_halt          jmp     #done               ' $03: exit XBYTE
 ' ---- cog variables ------------------------------------------------
 sp              long    stack                ' VM stack pointer (hub)
 v               res     1
-a               res     1
-b               res     1
+x               res     1
+y               res     1
 
 ' ---- hub data: dispatch table, program, stack ---------------------
                 orgh
@@ -1377,18 +1382,19 @@ That is a working XBYTE VM. The dispatch table is four longs in hub, loaded into
 `ADD` and `SUB` differ by one instruction. Per §4.4 they can share a body, with each bytecode's table entry carrying the skip pattern that selects its operation:
 
 ```pasm2
-alu                                         ' shared ADD/SUB body
-                sub     sp, #4
-                rdlong  b, sp
-                sub     sp, #4
-                rdlong  a, sp
-                add     a, b                 ' kept by ADD, skipped by SUB
-                sub     a, b                 ' kept by SUB, skipped by ADD
-                wrlong  a, sp
-        _ret_   add     sp, #4
+'   a: ADD   b: SUB        "|" = its pattern skips the line
+alu                         'a b   shared ADD/SUB body
+                sub     sp, #4      'a b
+                rdlong  y, sp       'a b
+                sub     sp, #4      'a b
+                rdlong  x, sp       'a b
+                add     x, y        'a |
+                sub     x, y        '| b
+                wrlong  x, sp       'a b
+        _ret_   add     sp, #4      'a b
 ```
 
-`ADD`'s entry skips the `sub a,b` line; `SUB`'s entry skips the `add a,b` line. The table changes from two handler addresses to two `alu`-with-pattern entries; the body exists once. For two bytecodes the saving is small, but for a dozen ALU operations it is the difference between one routine and a dozen.
+`ADD`'s entry skips the `sub x,y` line; `SUB`'s entry skips the `add x,y` line. The table changes from two handler addresses to two `alu`-with-pattern entries; the body exists once. For two bytecodes the saving is small, but for a dozen ALU operations it is the difference between one routine and a dozen.
 
 ## 14.4 In practice: the engine usually runs in its own cog {#sec-14-4}
 
@@ -1429,13 +1435,15 @@ Two things about that table matter more than its contents. The four ALU codes `$
 Section 4.4 introduced the shared-handler idiom and left it as a sketch. This is the same body, running:
 
 ```pasm2
-alu             call    #pop_two            ' every member runs this
-                add     a, b                ' ADD keeps this line
-                sub     a, b                ' SUB keeps this line
-                and     a, b                ' AND keeps this line
-                or      a, b                ' OR  keeps this line
-                call    #push_a             ' every member runs this
-                ret
+' One column per bytecode; read DOWN a column for that bytecode's path.
+'   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
+alu             call    #pop_two    'a b c d
+                add     x, y        'a | | |
+                sub     x, y        '| b | |
+                and     x, y        '| | c |
+                or      x, y        '| | | d
+                call    #push_x     'a b c d
+                ret                 'a b c d
 ```
 
 Four bytecodes point at `alu`. Each carries a skip pattern that leaves its own operation and skips the other three, and the engine applies that pattern for you on every dispatch — you never write a `SKIPF` (§9.1). The entries are built the way §6.2 specifies, handler address in the low ten bits and pattern in the high twenty-two:
@@ -1451,7 +1459,7 @@ Four bytecodes point at `alu`. Each carries a skip pattern that leaves its own o
 
 Write the patterns in binary rather than hex and each one becomes a picture of the body: one bit per line, a `1` where that line is skipped. `%0011100` is *keep line 0, keep line 1, skip lines 2, 3 and 4* — and lines 5 and 6, the trailing `call` and `ret`, are kept by the zeros above the pattern's used width.
 
-Both `call`s inside the body are free of the pattern. Skipping is suspended for the duration of a call (§4.5), so `pop_two` and `push_a` can be any length and no pattern has to account for them. That is what keeps a shared body short enough for a 22-bit pattern to cover.
+Both `call`s inside the body are free of the pattern. Skipping is suspended for the duration of a call (§4.5), so `pop_two` and `push_x` can be any length and no pattern has to account for them. That is what keeps a shared body short enough for a 22-bit pattern to cover.
 
 **Order the body so bit 0 is never the bit you need.** Bit 0 of the pattern would cancel the body's *first* instruction — the one you branched to in order to run (§4.5). Put an instruction every member of the family needs at the top and the question never arises. Here it is `call #pop_two`; in the branch family below it is the operand read.
 
@@ -1474,14 +1482,14 @@ Two operand forms in one machine, and the choice is the ordinary one: `RFVAR` wh
 A branch under XBYTE re-points the FIFO, because the FIFO's read position *is* where the next bytecode comes from (§12.3). `JMP` and `JZ` differ only in whether anything is tested first, so they share a body the same way the ALU codes do:
 
 ```pasm2
-br              rfvars  off                 ' BOTH keep this: the operand
-                                            ' is consumed either way
-                call    #pop_a              ' JZ keeps: the value to test
-                cmp     a, #0       wz      ' JZ keeps
-        if_nz   ret                         ' JZ keeps: not taken, carry on
-                getptr  ptr                 ' stream position after operand
-                add     ptr, off
-        _ret_   rdfast  #0, ptr             ' taken: re-point the stream
+'   a: JMP   b: JZ        "|" = its pattern skips the line
+br              rfvars  off         'a b   operand consumed either way
+                call    #pop_x      '| b   the value to test
+                cmp     x, #0   wz  '| b
+        if_nz   ret                 '| b   not taken, carry on
+                getptr  ptr         'a b   stream position after operand
+                add     ptr, off    'a b
+        _ret_   rdfast  #0, ptr     'a b   taken: re-point the stream
 ```
 
 `JZ` keeps every line, so its table entry carries no pattern at all. `JMP` skips the three test lines with `%0001110`.
@@ -1527,64 +1535,66 @@ halted          pop     tmp                 ' reclaim it before re-arming
 done            jmp     #done               ' park the cog
 
 ' ---- $00 PUSHC: push an inline constant ---------------------------
-h_pushc         rfvar   a                   ' 1..4 bytes, zero-extended
-                call    #push_a
+h_pushc         rfvar   x                   ' 1..4 bytes, zero-extended
+                call    #push_x
                 ret
 
-' ---- $01 LOADV / $02 STOREV: a variable, by inline index ----------
+' ---- $01 LOADV / $02 STOREV: x variable, by inline index ----------
 h_loadv         call    #var_addr
-                rdlong  a, n
-                call    #push_a
+                rdlong  x, n
+                call    #push_x
                 ret
 
 h_storev        call    #var_addr
-                call    #pop_a
-        _ret_   wrlong  a, n
+                call    #pop_x
+        _ret_   wrlong  x, n
 
 ' ---- $03..$06: ONE body, four skip patterns from the table --------
-alu             call    #pop_two            ' every member runs this
-                add     a, b                ' ADD keeps this line
-                sub     a, b                ' SUB keeps this line
-                and     a, b                ' AND keeps this line
-                or      a, b                ' OR  keeps this line
-                call    #push_a             ' every member runs this
-                ret
+' One column per bytecode; read DOWN a column for that bytecode's path.
+'   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
+alu             call    #pop_two    'a b c d
+                add     x, y        'a | | |
+                sub     x, y        '| b | |
+                and     x, y        '| | c |
+                or      x, y        '| | | d
+                call    #push_x     'a b c d
+                ret                 'a b c d
 
 ' ---- $07 CMPLT: the family stops where the shape stops ------------
 h_cmplt         call    #pop_two
-                cmps    a, b        wc      ' C = a < b, signed
-                mov     a, #0
-        if_c    mov     a, #1
-                call    #push_a
+                cmps    x, y        wc      ' C = x < y, signed
+                mov     x, #0
+        if_c    mov     x, #1
+                call    #push_x
                 ret
 
 ' ---- $08 JMP / $09 JZ: one body, two patterns ---------------------
-br              rfvars  off                 ' BOTH keep this: the operand
-                                            ' is consumed either way
-                call    #pop_a              ' JZ keeps: the value to test
-                cmp     a, #0       wz      ' JZ keeps
-        if_nz   ret                         ' JZ keeps: not taken, carry on
-                getptr  ptr                 ' stream position after operand
-                add     ptr, off
-        _ret_   rdfast  #0, ptr             ' taken: re-point the stream
+'   a: JMP   b: JZ        "|" = its pattern skips the line
+br              rfvars  off         'a b   operand consumed either way
+                call    #pop_x      '| b   the value to test
+                cmp     x, #0   wz  '| b
+        if_nz   ret                 '| b   not taken, carry on
+                getptr  ptr         'a b   stream position after operand
+                add     ptr, off    'a b
+        _ret_   rdfast  #0, ptr     'a b   taken: re-point the stream
 
 ' ---- $0A HALT -----------------------------------------------------
 h_halt          jmp     #halted             ' leave the engine
 
-' ---- helpers: skipping is suspended inside a CALL -----------------
+' ---- helpers: skipping is suspended inside x CALL -----------------
 var_addr        rfbyte  n                   ' the variable's index, inline
                 shl     n, #2               ' longs
         _ret_   add     n, vbase
 
 pop_two         sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-        _ret_   rdlong  a, sp
+        _ret_   rdlong  x, sp
 
-pop_a           sub     sp, #4
-        _ret_   rdlong  a, sp
+pop_x           sub     sp, #4
+        _ret_   rdlong  x, sp
 
-push_a          wrlong  a, sp
+push_x          wrlong  x, sp
         _ret_   add     sp, #4
 
 ' ---- cog variables ------------------------------------------------
@@ -1592,12 +1602,12 @@ sp              long    stack               ' VM stack pointer (hub)
 vbase           long    vars                ' variable block base (hub)
 job             res     1                   ' hub address of this job
 tmp             res     1                   ' the reclaimed arming $1FF
-a               res     1                   ' first operand / result
-b               res     1                   ' second operand
-n               res     1                   ' a variable's index, then its
+x               res     1                   ' first operand / result
+y               res     1                   ' second operand
+n               res     1                   ' x variable's index, then its
                                             ' hub address
 off             res     1                   ' signed branch offset
-ptr             res     1                   ' stream position, for a branch
+ptr             res     1                   ' stream position, for x branch
 
 ' ---- hub data: table, programs, variables, stack ------------------
                 orgh
@@ -1605,7 +1615,7 @@ disp_table      long    h_pushc                 ' $00 PUSHC
                 long    h_loadv                 ' $01 LOADV
                 long    h_storev                ' $02 STOREV
 ' A pattern's bit 0 is the body's FIRST line, bit 1 the second, and so on;
-' a 1 skips that line. Read each pattern right-to-left against `alu`.
+' x 1 skips that line. Read each pattern right-to-left against `alu`.
                 long    alu + (%0011100 << 10)  ' $03 ADD - keeps `add`
                 long    alu + (%0011010 << 10)  ' $04 SUB - keeps `sub`
                 long    alu + (%0010110 << 10)  ' $05 AND - keeps `and`
@@ -1615,7 +1625,7 @@ disp_table      long    h_pushc                 ' $00 PUSHC
                 long    br                      ' $09 JZ  - keeps it all
                 long    h_halt                  ' $0A HALT
 
-' job one: sum 1..5 with a counted loop -> vars[1] = 15
+' job one: sum 1..5 with x counted loop -> vars[1] = 15
 prog1           byte    $00, 5              ' PUSHC 5
                 byte    $02, 0              ' STOREV 0   n := 5
                 byte    $00, 0              ' PUSHC 0

@@ -8,6 +8,7 @@
 
 - **Part III, Choosing Your Rung**: the three decisions that select a dispatch strategy, and what each classic guest CPU costs
 - **Chapter 15, Growing the VM**: eleven bytecodes — an ALU family on one shared body, variables, and a branch that re-points the stream
+- **The column-map notation for shared handler bodies** (§4.4, §4.6): read a skip pattern off the body by eye instead of decoding binary
 - **Three figures**: the dispatch ladder (§7.2), the three decisions (§7.5), and the two kinds of prefix (§18.1)
 - **A navigation layer in the front matter**: an Intent Index by project, three reading paths, and the engine in brief on one page
 - **The Index carries the reader's own vocabulary**: seventy entries pointing at chapters, sections, and the quick-reference card

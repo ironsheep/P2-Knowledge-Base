@@ -42,22 +42,22 @@ h_pushc                                     ' $00: push inline constant
                 wrlong  v, sp
         _ret_   add     sp, #4
 
-h_add                                       ' $01: pop b, a; push a+b
+h_add                                       ' $01: pop y, x; push x+y
                 sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-                rdlong  a, sp
-                add     a, b
-                wrlong  a, sp
+                rdlong  x, sp
+                add     x, y
+                wrlong  x, sp
         _ret_   add     sp, #4
 
-h_sub                                       ' $02: pop b, a; push a-b
+h_sub                                       ' $02: pop y, x; push x-y
                 sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-                rdlong  a, sp
-                sub     a, b
-                wrlong  a, sp
+                rdlong  x, sp
+                sub     x, y
+                wrlong  x, sp
         _ret_   add     sp, #4
 
 h_halt          jmp     #done               ' $03: exit XBYTE
@@ -65,8 +65,8 @@ h_halt          jmp     #done               ' $03: exit XBYTE
 ' ---- cog variables ------------------------------------------------
 sp              long    stack                ' VM stack pointer (hub)
 v               res     1
-a               res     1
-b               res     1
+x               res     1
+y               res     1
 
 ' ---- hub data: dispatch table, program, stack ---------------------
                 orgh

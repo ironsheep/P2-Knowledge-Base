@@ -1,8 +1,8 @@
 '' ===========================================================================
 ''
 ''   File.......  xbyte-growing-vm.spin2
-''   Purpose....  The minimal VM grown to eleven bytecodes - a shared ALU
-''                body, variables, a branch, and a cog that arms twice
+''   Purpose....  The minimal VM grown to eleven bytecodes - x shared ALU
+''                body, variables, x branch, and x cog that arms twice
 ''   Manual.....  P2 XBYTE Programming Guide
 ''   Version....  v1.1.0 (unreleased)
 ''   Appears in.  Chapter 15: Growing the VM -- 15.5 The complete program
@@ -43,64 +43,66 @@ halted          pop     tmp                 ' reclaim it before re-arming
 done            jmp     #done               ' park the cog
 
 ' ---- $00 PUSHC: push an inline constant ---------------------------
-h_pushc         rfvar   a                   ' 1..4 bytes, zero-extended
-                call    #push_a
+h_pushc         rfvar   x                   ' 1..4 bytes, zero-extended
+                call    #push_x
                 ret
 
-' ---- $01 LOADV / $02 STOREV: a variable, by inline index ----------
+' ---- $01 LOADV / $02 STOREV: x variable, by inline index ----------
 h_loadv         call    #var_addr
-                rdlong  a, n
-                call    #push_a
+                rdlong  x, n
+                call    #push_x
                 ret
 
 h_storev        call    #var_addr
-                call    #pop_a
-        _ret_   wrlong  a, n
+                call    #pop_x
+        _ret_   wrlong  x, n
 
 ' ---- $03..$06: ONE body, four skip patterns from the table --------
-alu             call    #pop_two            ' every member runs this
-                add     a, b                ' ADD keeps this line
-                sub     a, b                ' SUB keeps this line
-                and     a, b                ' AND keeps this line
-                or      a, b                ' OR  keeps this line
-                call    #push_a             ' every member runs this
-                ret
+' One column per bytecode; read DOWN a column for that bytecode's path.
+'   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
+alu             call    #pop_two    'a b c d
+                add     x, y        'a | | |
+                sub     x, y        '| b | |
+                and     x, y        '| | c |
+                or      x, y        '| | | d
+                call    #push_x     'a b c d
+                ret                 'a b c d
 
 ' ---- $07 CMPLT: the family stops where the shape stops ------------
 h_cmplt         call    #pop_two
-                cmps    a, b        wc      ' C = a < b, signed
-                mov     a, #0
-        if_c    mov     a, #1
-                call    #push_a
+                cmps    x, y        wc      ' C = x < y, signed
+                mov     x, #0
+        if_c    mov     x, #1
+                call    #push_x
                 ret
 
 ' ---- $08 JMP / $09 JZ: one body, two patterns ---------------------
-br              rfvars  off                 ' BOTH keep this: the operand
-                                            ' is consumed either way
-                call    #pop_a              ' JZ keeps: the value to test
-                cmp     a, #0       wz      ' JZ keeps
-        if_nz   ret                         ' JZ keeps: not taken, carry on
-                getptr  ptr                 ' stream position after operand
-                add     ptr, off
-        _ret_   rdfast  #0, ptr             ' taken: re-point the stream
+'   a: JMP   b: JZ        "|" = its pattern skips the line
+br              rfvars  off         'a b   operand consumed either way
+                call    #pop_x      '| b   the value to test
+                cmp     x, #0   wz  '| b
+        if_nz   ret                 '| b   not taken, carry on
+                getptr  ptr         'a b   stream position after operand
+                add     ptr, off    'a b
+        _ret_   rdfast  #0, ptr     'a b   taken: re-point the stream
 
 ' ---- $0A HALT -----------------------------------------------------
 h_halt          jmp     #halted             ' leave the engine
 
-' ---- helpers: skipping is suspended inside a CALL -----------------
+' ---- helpers: skipping is suspended inside x CALL -----------------
 var_addr        rfbyte  n                   ' the variable's index, inline
                 shl     n, #2               ' longs
         _ret_   add     n, vbase
 
 pop_two         sub     sp, #4
-                rdlong  b, sp
+                rdlong  y, sp
                 sub     sp, #4
-        _ret_   rdlong  a, sp
+        _ret_   rdlong  x, sp
 
-pop_a           sub     sp, #4
-        _ret_   rdlong  a, sp
+pop_x           sub     sp, #4
+        _ret_   rdlong  x, sp
 
-push_a          wrlong  a, sp
+push_x          wrlong  x, sp
         _ret_   add     sp, #4
 
 ' ---- cog variables ------------------------------------------------
@@ -108,12 +110,12 @@ sp              long    stack               ' VM stack pointer (hub)
 vbase           long    vars                ' variable block base (hub)
 job             res     1                   ' hub address of this job
 tmp             res     1                   ' the reclaimed arming $1FF
-a               res     1                   ' first operand / result
-b               res     1                   ' second operand
-n               res     1                   ' a variable's index, then its
+x               res     1                   ' first operand / result
+y               res     1                   ' second operand
+n               res     1                   ' x variable's index, then its
                                             ' hub address
 off             res     1                   ' signed branch offset
-ptr             res     1                   ' stream position, for a branch
+ptr             res     1                   ' stream position, for x branch
 
 ' ---- hub data: table, programs, variables, stack ------------------
                 orgh
@@ -121,7 +123,7 @@ disp_table      long    h_pushc                 ' $00 PUSHC
                 long    h_loadv                 ' $01 LOADV
                 long    h_storev                ' $02 STOREV
 ' A pattern's bit 0 is the body's FIRST line, bit 1 the second, and so on;
-' a 1 skips that line. Read each pattern right-to-left against `alu`.
+' x 1 skips that line. Read each pattern right-to-left against `alu`.
                 long    alu + (%0011100 << 10)  ' $03 ADD - keeps `add`
                 long    alu + (%0011010 << 10)  ' $04 SUB - keeps `sub`
                 long    alu + (%0010110 << 10)  ' $05 AND - keeps `and`
@@ -131,7 +133,7 @@ disp_table      long    h_pushc                 ' $00 PUSHC
                 long    br                      ' $09 JZ  - keeps it all
                 long    h_halt                  ' $0A HALT
 
-' job one: sum 1..5 with a counted loop -> vars[1] = 15
+' job one: sum 1..5 with x counted loop -> vars[1] = 15
 prog1           byte    $00, 5              ' PUSHC 5
                 byte    $02, 0              ' STOREV 0   n := 5
                 byte    $00, 0              ' PUSHC 0

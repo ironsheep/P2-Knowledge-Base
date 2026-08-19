@@ -3033,7 +3033,52 @@ read-through caught it — no gate can test for "this reads as a dead end." And 
 revised, **the sweep must be semantic**: the sites that quietly contradicted the new §7.4 mostly did
 not cite it.
 
-**Next finding ID after this block: F-297.**
+**Next finding ID after this block: F-298.**
+
+---
+
+### F-297 — the book taught the shared-handler idiom without the notation every real shared body uses. `CONFIRMED` — **source fixed 2026-08-19, pre-release; render owed in v1.1.0**
+
+**Surfaced by** Stephen: Chip's skip tables are *deeply documenting*, ours said what each
+instruction does. Should we teach the best-in-class pattern so it is learned?
+
+**What the notation is, verified against `Spin2_interpreter.spin2` (v51):** a fixed column per
+bytecode in the comment field, keyed to a legend. **letter** = that bytecode runs the line ·
+**`|`** = its pattern skips it · **blank** = not in play (not yet entered, or already returned).
+Read across a row for who runs an instruction; read down a column for one bytecode's whole path.
+
+**The load-bearing fact, and how it was actually established.** A column *is* the skip pattern
+written out. First checked against `bc_read` (`%0111001110`) — 10/10 — but **that pattern is a
+palindrome, so the decode agreed regardless of bit order and proved nothing about direction.**
+Re-verified against `bc_var_inc` (`mod_iso | %00011111010110010`, 17 bits, not a palindrome):
+**17/17 positions agree**, LSB-first from the entry point. Only the second test is evidence.
+
+**Why it earns a teaching slot.** §4.6 already carried the design process, and its step 4 said
+"assign each member's pattern" with no *how*, while its own warning — *"a `##` immediate is two
+longs… count longs, not lines"* — was advisory. The map closes both: draw the grid one row per
+long, and read the pattern off it. **You derive the pattern from the map rather than documenting
+it afterwards**, and a `##` visibly occupies two rows, so the off-by-one cannot hide.
+
+**Adopted at:** §4.4 (reading key, where the reader first meets a shared body), §4.6 step 4 (the
+method), §14.3 (two members), §15.2 and §15.4 (in the shipped corpus). §10.2 is a two-line flag
+fragment, not a skip-shared body — deliberately left alone.
+
+**Collateral corrections the adoption forced:**
+- The VM examples named their operand registers `a` and `b`, which **collide with the column
+  letters**. Renamed to `x`/`y` (Chip's own convention) across the corpus and every mirrored block.
+- `push_a` became `push_x` but `pop_a` did not — the rename was inconsistent until swept. Both are
+  now `_x`.
+- **Guest-CPU registers were correctly NOT renamed**: §8.5's Z80 fragment and §16.3's 6502 use
+  `a`/`b` as the *guest's* accumulator and B register. A blanket rename would have corrupted them.
+  This is the whole reason the sweep was scoped by block rather than by regex over the file.
+- The §15.4 excerpt is **uncaptioned**, so the identity gate does not cover it, and it silently
+  drifted from its file during the rename. Found by reading, not by a gate. **Uncaptioned excerpts
+  of captioned files are an unguarded seam** — worth a gate of its own some day.
+
+**Gates:** corpus identity GREEN (3/3 byte-identical), headers synced, all three examples compile
+under `pnut-ts`, K=76 clean.
+
+**Next finding ID after this block: F-298.**
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 
