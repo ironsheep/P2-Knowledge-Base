@@ -3164,6 +3164,15 @@ platform fix lands.
 document takes anyway, and take it in the same set-wide sweep as [[F-299]] and the fancyvrb
 `breaklines` work «#250» — one `forge-test` pass, three set-wide render changes.
 
+⚠️ **TRAP FOR WHOEVER TAKES THIS FIX — the two title sources already disagree.** Because nothing
+consumes `request.json`'s metadata today, nobody has had to keep it in step with the cover, and it
+has drifted. On the Streamer: the **cover** reads *"Comprehensive Reference for Propeller 2 Streamer
+Hardware"* while `request.json` reads *"Comprehensive Reference for the Propeller 2 Streamer"*. The
+moment `pdftitle`/`pdfsubject` start being populated, whichever source the fix wires up becomes
+reader-visible, and a stale one ships silently. **Before adopting: audit cover-vs-`request.json`
+across all 15 documents and reconcile, then decide which source is authoritative** (the cover is
+what a reader actually sees, so it should win). Do not wire the metadata through without that pass.
+
 ### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **measured 2026-08-19; platform fix owed, deliberately NOT taken mid-release**
 
 **Surfaced by** the Streamer v1.0.9 daemon pre-verify — a whole-document margin measurement of the
