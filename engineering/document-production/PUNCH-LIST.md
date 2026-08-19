@@ -392,9 +392,37 @@ Streamer findings carry it (F-259, F-260, F-266) and all three are complete.
 2. Answering "what is outstanding?" costs a full re-read, so nobody does it routinely.
 3. Genuinely deferred work looks identical to finished work.
 
-**The fix.** One `**Status:**` line per finding, fixed vocabulary — `OPEN` · `FIXED-UNRELEASED` ·
-`RELEASED` · `BLOCKED-ON-EVIDENCE` · `PUNCH-LISTED` · `UNVERIFIED` — plus a small validator that
-prints the open set and can be called by the drain gate. **Mark `UNVERIFIED` wherever the state is not
+### ⏳ HALF DELIVERED 2026-08-19 — the validator exists; the vocabulary refactor does not
+
+**The validator asked for here is built:** `engineering/tools/validation/audit-register-hygiene.py`.
+It mechanically detects the exact four-notation problem measured above — every finding carrying **no
+status token**, and every finding whose **prose claims "fixed" while its status token does not**
+(the `MANUAL HALF APPLIED` / `**FIXED**` class that cost real time in the 08-17 audit). It also
+enforces the rules the register states about itself: no duplicate IDs, counter ahead of every
+allocation, no closed finding left in an open-work file, archives resolve, and **no allocated ID
+missing from live + archives**.
+
+**The measurement has moved a long way.** 2026-08-17: *18 of 37 findings unmarked*. 2026-08-19, run
+mechanically: **2 of 43** — `F-272` and `F-203`. Those two are the whole remaining gap, plus one
+**off-legend** status (`F-256` reads `RESOLVED`, which is not among the register's seven declared
+statuses). The 18 shrank because the wave added statuses as it drained findings, and the four
+spot-checked here — F-254, F-255, F-256, F-257 — are all now closed and archived.
+
+**What is still owed, and it is the harder half:**
+1. **One `**Status:**` line per finding, fixed vocabulary** — `OPEN` · `FIXED-UNRELEASED` ·
+   `RELEASED` · `BLOCKED-ON-EVIDENCE` · `PUNCH-LISTED` · `UNVERIFIED`. The tool currently reads the
+   status wherever it sits (title tag or prose) because that is what the register does today; a
+   single canonical location would let it stop guessing. **Mark `UNVERIFIED` wherever the state is
+   not actually checked against the artifact** — a confidently wrong status is the same trap in a
+   new costume.
+2. **Print the open set, and wire it to the drain gate.** The tool reports violations, not the open
+   worklist, so `document-audit`'s YAML-HEAD drain gate — *"no publish while actionable corrections
+   are pending"* — **is still not armed**. That was consequence #1 above and it stands.
+3. **Give F-272 and F-203 a status**, and flip F-256 onto the legend.
+
+**Original fix statement, retained:** one `**Status:**` line per finding, fixed vocabulary — `OPEN` ·
+`FIXED-UNRELEASED` · `RELEASED` · `BLOCKED-ON-EVIDENCE` · `PUNCH-LISTED` · `UNVERIFIED` — plus a small
+validator that prints the open set and can be called by the drain gate. **Mark `UNVERIFIED` wherever the state is not
 actually checked against the artifact**; a confidently wrong status is the same trap in a new costume,
 and this register already teaches that a status line is not evidence.
 

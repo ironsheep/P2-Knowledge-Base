@@ -24,10 +24,14 @@ decisions — see §Open Question 5).
 > Exit: instrument **PASS 0/28**, three entry validators unchanged, **zero opus-master edits**.
 > No versioned artifact shipped. See *Sprint 1 — OUTCOME* and *Carried into Sprint 2* at the end.
 >
-> **SPRINT 2 — the manual work — OPEN.** Sections **§1–§5, §6, §7, §8** and the *Sequencing* block
-> are Sprint 2's, plus the six carry-forwards Sprint 1 produced. Nine targets, seven version bumps.
+> **SPRINT 2 — the manual work — CLOSED 2026-08-19.** All 21 commitments «#218»–«#239» SHIPPED or
+> correctly VOID. Audit:
+> `engineering/history/sprints/2026-08-19-manual-corrections-sprint-2-CLOSEOUT.md`.
+> Shipped: seven wave elements (P2AN001 v1.0.4 · P2AN002 v1.0.3 · deSilva v3.0.6 · Debug Window
+> v1.1.3 · IOSP v1.0.9 · Assembly v3.1.6 · Streamer v1.0.9) plus KB **v1.16.3** and **v1.16.4**,
+> both published ahead of the documents citing them. Exit baseline GREEN and identical to entry.
 >
-> **This plan is therefore NOT archived.** It stays in `engineering/planning/` until Sprint 2 closes.
+> **BOTH SPRINTS ARE NOW CLOSED — this plan is archived.**
 
 ---
 
