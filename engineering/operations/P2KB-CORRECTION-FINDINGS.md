@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-297`**
+**Next finding ID: `F-299`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -3033,7 +3033,7 @@ read-through caught it — no gate can test for "this reads as a dead end." And 
 revised, **the sweep must be semantic**: the sites that quietly contradicted the new §7.4 mostly did
 not cite it.
 
-**Next finding ID after this block: F-298.**
+**Next finding ID after this block: F-297.**
 
 ---
 
@@ -3078,7 +3078,53 @@ fragment, not a skip-shared body — deliberately left alone.
 **Gates:** corpus identity GREEN (3/3 byte-identical), headers synced, all three examples compile
 under `pnut-ts`, K=76 clean.
 
-**Next finding ID after this block: F-298.**
+**Next finding ID after this block: F-299.**
+
+---
+
+### F-298 — §7.4 called the gated call-out a "prologue", contradicting the example it had just cited. `CONFIRMED` — **source fixed 2026-08-19, pre-release; render owed in v1.1.0**
+
+**Surfaced by** Stephen re-reading §7.4 — *"are we convinced that prolog vs epilog is the only
+possible choice?"*, then sharpening it to *"aren't we saying before instruction execution vs.
+after?"* Both halves were right.
+
+**The defect.** F-296's text said a handler "can be built with an optional **prologue** in front
+of its body." Wrong three ways:
+
+1. **Not the only placement.** A pattern bit governs each line *independently*, so the gated line
+   can sit anywhere in the 22-instruction window — and a body can carry **several**
+   independently-switched call-outs, not one.
+2. **It contradicted the worked example two paragraphs above it.** The shipped 8080 emulator puts
+   its `JATN` in the shared **tail**, immediately before the closing `_RET_` — an epilogue. §7.4
+   cited that emulator and then described the opposite placement.
+3. **It landed on the one position the book elsewhere says to avoid.** §4.5: pattern bit 0 governs
+   the line "you jumped there in order to run", so a normal entry leaves it clear — and §4.5 then
+   spends that bit as **per-bytecode metadata** (the 6502 emulator packs cycle counts into the
+   spare high bits the same way). A call-out as instruction 0 collides with both.
+
+**The reframing:** the choice is not *where in the source* but **when relative to the guest
+instruction's work**.
+
+| Placement | Sees | Natural for |
+|---|---|---|
+| **Before** the body's work | the *previous* instruction's completed state | deciding whether to take a pending interrupt — a clean boundary. Must not be the body's first instruction (bit 0) |
+| **After** the work, before the return | *this* instruction's result | cycle accounting, flag/refresh bookkeeping, tracing an outcome. **What the 8080 emulator does** |
+| **Between steps** | mid-operation state | work that must interleave with a multi-step operation |
+
+**Corroboration that "after" is usually right for interrupts:** §17.3's consistent-state rule
+already said a handler that has finished its work and is about to return is a safe boundary, while
+the middle of a multi-step address computation is not. **The book had the answer in Chapter 17 and
+stated its opposite in Chapter 7.**
+
+**The transferable lesson.** Second time this review that §7.4 was *internally* inconsistent rather
+than factually wrong: it cited real evidence and then generalised past it. A worked example and the
+generalisation drawn from it must be checked **against each other**, not only each against the
+source.
+
+**REGISTER HYGIENE, same pass:** two blocks both carried "Next finding ID after this block: F-298"
+because the F-297 registration replaced the previous block's marker instead of only appending its
+own. Corrected — F-296's block now closes at F-297. A marker that says the same thing twice is a
+counter that has stopped counting.
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 
