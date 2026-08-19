@@ -3243,6 +3243,53 @@ its `request.json` `metadata.subtitle`, over the 15 published documents:
 Truncation was not checked: two of these subtitles run past 50 characters and the register scan
 compared full strings, so the counts above are exact for equality but say nothing about length limits.
 
+---
+
+**⚠️ THE SUBTITLE DRIFT IS NOT THE GATE. The gate is the templates, and nobody had looked at them
+(traced 2026-08-19).** `pdfusetitle` populates `pdftitle` from `\title{}` and `pdfauthor` from
+`\author{}` — it never touches the subtitle. So the drift table above gates only a `pdfsubject` we do
+not have to wire. What actually decides whether this fix can be turned on and left to ride is what
+each template declares, and **9 of the 15 declare something wrong:**
+
+| Template `\title{}` | Documents | Verdict |
+|---|---|---|
+| `P2 Application Note` (hardcoded, SHARED) | **all 7 app notes** | **BROKEN** — `pdfusetitle` gives seven distinct documents one identical title. Worse than empty in a library or index. |
+| `P2 XBYTE Programming Guide` | XBYTE | **STALE** — the released v1.1.0 cover reads *"P2 Interpreters & Emulators Guide"*. The template kept the pre-retitle name. |
+| *(no `\title` and no `\author` at all)* | deSilva | **EMPTY** — would stay broken after the fix. |
+| correct, matches cover | Architect, Assembly, Debug Window, Getting Started, IOSP, Streamer | ready |
+
+`\author{Iron Sheep Productions, LLC}` is correct in every live template **except deSilva's**, which
+has none.
+
+**The one fact that makes all of this safe: `\title{}` is never rendered.** Every cover in the set is
+hand-built in the master's `front-matter.md` (`\fontsize{36}{42}\selectfont\bfseries …`). There is no
+`\maketitle` anywhere in the published set — the only one in the tree is in `ai-privacy-guide`, which
+is not a published document. **So `\title{}` is metadata-only, and changing it cannot move a single
+point of type on any page.** That is what turns this from a render-risk change into a ride-along.
+
+**REVISED PLAN — prep in one commit, no renders, then ride:**
+1. **Switch every live template from a hardcoded `\title{…}` to `\title{$title$}` / `\author{$author$}`.**
+   `request.json` becomes the single source and a template can never go stale against its document
+   again — this is what fixes the seven app notes and XBYTE at once, and it is durable rather than a
+   catalog of literals to maintain. Verified safe: **`request.json` `metadata.title` equals the cover
+   title for 14 of 15**, including all seven app notes (the cover carries the designator on its own
+   eyebrow line — *"Propeller 2 • Application Note P2AN006"* — above the title, so nothing is lost).
+2. **deSilva is the one real conflict, and it is BOTH fields.** Released cover: *"P2 Assembly
+   Programming"* / *"A Human-Centered Approach to Parallel Processing"*. `request.json`:
+   *"Discovering P2 Assembly"* / *"Build, Experiment, and Master the Propeller 2"*. The cover wins →
+   update `request.json`, then give `p2kb-desilva.latex` the same `$title$`/`$author$` pair.
+3. **Add `pdfusetitle`** to the `\hypersetup` at `p2kb-platform-foundation.sty:259`.
+4. **Do NOT wire `pdfsubject`.** Leaving it out defers the whole subtitle question above at zero cost;
+   revisit it as its own item whenever someone wants Subject populated.
+5. **Add a `PLATFORM` ledger line and let each document absorb it at its next natural render.**
+   Precedent for the standing: the 2026-07-13 mnemonic-bold line — *live-but-benign, not outstanding
+   debt*. No manual re-renders for this.
+
+**One `forge-test` still confirms three things before adoption**, none of them layout: that `$title$`
+substitution actually reaches `\title{}` on this path, that `&` survives into the info dictionary
+(IOSP *"P2 I/O & Smart Pins User Guide"*, P2AN006 *"Sizing Cog & Task Stacks"*), and that `pdfauthor`
+lands. Read the output PDF's metadata dictionary, not the compile log.
+
 ### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **POLISH, NOT A GATE FAILURE: it is inside the project's own 20pt tolerance (re-graded 2026-08-19, same day, see the correction at the end)**
 
 **Surfaced by** the Streamer v1.0.9 daemon pre-verify — a whole-document margin measurement of the
