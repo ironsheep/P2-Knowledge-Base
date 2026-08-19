@@ -18,9 +18,7 @@
 \vspace{0.9cm}
 {\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{iosp-review-border}\bfseries Version \DocVersion{} — Tool Developer Review Draft\par}
-\vspace{0.15cm}
-{\normalsize\color{iosp-review-border}Circulated to named tool authors for review. Not for public distribution.\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -73,36 +71,6 @@
 
 \clearpage
 \pagestyle{fancy}
-
-% ---- REVIEW-DRAFT ROADMAP -------------------------------------------------
-% Draft scaffolding. Deleted when the reviewers' answers are written in; the
-% release gate fails on any surviving ToolReviewBlock, this one included.
-\begin{ToolReviewBlock}{Marco Maccaferri and Eric Smith}
-Thank you for reading this. PNut-Term-TS downloads and runs binaries from any P2
-compiler, and this guide now says so — which means it makes claims about
-\emph{your} tools. We would rather print your words than our assumptions, so this
-draft goes to you before it goes to anyone else.
-
-\vspace{4pt}
-Violet boxes like this one are questions for you, and each carries the name of the
-person it is meant for. There are four, and they are all short:
-
-\vspace{4pt}
-\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=0pt]
-\item \textbf{Chapter 2} --- \emph{Marco}: we describe Spin Tools IDE as fully
-      supported (debug windows and the debugger). Confirm or correct.
-\item \textbf{Chapter 2} --- \emph{Eric}: what does FlexSpin's \texttt{debug()}
-      output actually reach --- the display windows, or debug text only?
-\item \textbf{Chapter 6} --- \emph{Eric}: we say a FlexSpin binary carries no
-      readable debug baud rate. Is that right?
-\item \textbf{Chapter 9} --- \emph{Eric}: can FlexSpin compile in the debugger
-      kernel the single-step debugger needs?
-\end{itemize}
-
-\vspace{4pt}
-Anything you would like said about your own tool, we will print as you write it.
-Corrections anywhere else in the guide are welcome too.
-\end{ToolReviewBlock}
 
 \clearpage
 
