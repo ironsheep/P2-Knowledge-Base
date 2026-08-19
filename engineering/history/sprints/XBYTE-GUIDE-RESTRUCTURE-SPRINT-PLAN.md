@@ -623,6 +623,14 @@ either red as a regression, and do not "fix" it by reverting the structural chan
 **Sprint grew from 14 tasks to 15 on 2026-08-18**, when §11's scheduled decision was taken and
 became build work — see §11.
 
+> ## SPRINT CLOSED 2026-08-19
+>
+> **14 of 15 commitments SHIPPED; «#252** (workspace hygiene) **REGRESSED** and its root cause —
+> `latex-escape-all.sh` creating a hand-named backup on every run, 90 files across 17 documents —
+> was fixed at closeout. Released **XBYTE Programming Guide v1.1.0**, 114pp, cover retitled *"P2
+> Interpreters & Emulators Guide"*. Exit baseline not worsened on any gate.
+> Audit: `engineering/history/sprints/2026-08-19-xbyte-guide-restructure-CLOSEOUT.md`.
+
 **Not in this sprint, deliberately.** The fancyvrb `breaklines` platform fix («#250») is a
 set-wide render change carried out of the closed «#249». Adopting it mid-sprint would mean
 re-checking this manual's code lines against a changed wrapping model for no benefit — its K=76

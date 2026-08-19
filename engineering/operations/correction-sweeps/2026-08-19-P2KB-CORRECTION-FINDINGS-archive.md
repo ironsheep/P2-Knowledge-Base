@@ -1204,3 +1204,280 @@ campaign closes.
 
 *Move-aside 2026-06-13 after the v1.9.0 release closed out F-001..F-124. The archive holds the full history; this active register carries only the carry-forward guardrails and the ingestion-tracked items. New findings continue at F-125.*
 
+---
+
+## Appended in the same 2026-08-19 sweep — closed at the XBYTE sprint closeout
+
+These four shipped in **XBYTE v1.1.0** and their statuses were flipped from `CONFIRMED`
+("render owed") to `DONE` after the render was verified on the shipped PDF.
+
+### F-295 — the XBYTE guide framed 32 MB as the ceiling for a guest image, and credited a shared community PSRAM driver to one of its users. `CONFIRMED` — `DONE (2026-08-19)` — **RELEASED in XBYTE v1.1.0.** Render verified on the shipped PDF: external memory reads as a subsystem (p16) and the decay-prone "32 MB" ceiling is absent.
+
+**Surfaced by** Stephen's read pass over §7.3, on the instinct that the passage may "mis-read what
+they are doing" — users run PSRAM setups far larger than an Edge module, e.g. 96 MB.
+
+**Authority: the emulators' own shipped source**, in the guide's own `REF-NO-COMMIT/larger-emulators/`
+— not forum recollection.
+
+| Claim as written (§7.3) | What the source says | Verdict |
+|---|---|---|
+| "the 32 MB module (**P2-EC32MB**) maps all 32 MB as one linear space, room for **any** classic guest and its RAM several times over" | `NeoYume/RAMCONFIG.MD` documents **three** known-good boards — P2EDGE 32 MB (quad-chip, 1 bank, "the most common config"), **Rayslogic 96 MB** (dual-chip, **6 banks**), Rayslogic 24 MB (single-chip, 3 banks) — plus a HyperRAM option. Both repos are titled "…for Parallax P2 **+ memory expansion**" | **over-claim** |
+| "**Capacity is not the contest** — 32 MB holds a large guest and a framebuffer with room to spare" | `neoyume_gamedb.spin2:921` — *"wierd holey memory map, doesn't fit in 32MB when it really should"* (King of Fighters '95). Capacity does bind, and awkward maps are why the bigger boards exist | **over-claim** |
+| "a PSRAM driver that arbitrates between cogs — **MegaYume's** does exactly this" | `psram16drv.spin2` is **byte-identical** in MegaYume and NeoYume (md5 `e162125d…`) and its own header/licence read **"Copyright 2020, 2021, 2022 Roger Loh"** (rogloh). Both emulators carry it unmodified | **mis-attribution** |
+
+**The arbitration behaviour itself was correct** and is now stated from the driver's own header:
+a 3-long **mailbox per cog**, "strict priority and round-robin request polling (selectable per
+COG)", per-cog burst limits, and unserviced cogs removable from the polling loop.
+
+**Fixed in `opus-master/xbyte-body.md`:** §7.3 now names the P2-EC32MB as the usual home rather than
+the ceiling, points at Appendix C for the 24–96 MB and HyperRAM setups, says bandwidth is *usually*
+the contest while capacity *does* bind, and credits the driver as the shared community one both Yume
+emulators use. §C.4 gained the board list and Roger Loh's authorship.
+
+**Checked and NOT changed — the neighbouring MegaYume citation in §7.4 is sound.** Its Z80 dispatch
+loop (`megayume_lower.spin2` ~5070) shows all three cited behaviours in the same few lines:
+`if_ae waitx zk_cycles` + `getct zk_lastwait` (pacing), `incmod zk_refresh,#127` (the 7-bit Z80 `R`
+register), `zbus_request`/`zbus_status` (guest bus arbitration) — and, incidentally, a textbook rung 2:
+`call #zk_readcode` · `push #zk_nextop` · `rdlut` · `execf`. **Note the two are different kinds of
+arbitration** and must not be merged: §7.4 is the *guest's* bus between Z80 and 68000; §7.3 is the
+*P2's* PSRAM bus between cogs.
+
+**Class-wide sweep: no spread.** Every other `32 MB`/`EC32MB` mention across the manual and app-note
+set is a module specification (pin usage, flash size) or unrelated (Debug Window's 96 MB is PLOT
+layer memory). The defect was confined to these two XBYTE paragraphs.
+
+**The configured sizes, read out of each project's own `config.spin2` defaults** — this is the part
+that makes the point, because two of the three do NOT default to an Edge module:
+
+| Project | Enabled width | `PSRAM_BANKS` | Board that matches | Capacity |
+|---|---|---|---|---|
+| MegaYume | `USE_PSRAM16` (quad chip) | 1 | P2-EC32MB Edge | **32 MB** |
+| NeoYume | `USE_PSRAM16` + `NOBANKS` | 1 | P2-EC32MB Edge | **32 MB** |
+| **MisoYume** | `USE_PSRAM8` (dual chip) | **6** | Rayslogic on P2EVAL basepin 0 | **96 MB** |
+
+MisoYume's shipped default (`PSRAM_CLK = 8 addpins 1`, `SELECT = 10`, `BASE = 0`, `BANKS = 6`,
+`DELAY = 17`, both syncs true, `USE_PSRAM_SLOW`) is a byte-for-byte match for the "Rayslogic 96MB
+PSRAM board" stanza in `NeoYume/RAMCONFIG.MD`. **The SNES emulator ships aimed at a 96 MB board.**
+
+The capacity model is consistent across all three documented boards at **8 MB per chip**: width sets
+chips-in-parallel (`PSRAM4`=1, `PSRAM8`=2, `PSRAM16`=4), `PSRAM_BANKS` multiplies them via
+`PSRAM_SELECT`+n. 4x8x1 = 32 MB, 1x8x3 = 24 MB, 2x8x6 = 96 MB — each lands exactly on its board's
+name. (The per-chip figure is documentary for the Edge module — the KB's `edge-32mb-module.yaml`
+gives 64 Mbit/chip, 4 chips; for the third-party boards it is arithmetic from the board name and
+bank count, not a datasheet, and is recorded as such.)
+
+**Currency caveat, stated rather than glossed.** The local snapshot under `REF-NO-COMMIT/` dates
+from **Oct 29 / Nov 3 / Dec 6 2025** (MegaYume / NeoYume / MisoYume) and carries `.gitignore` and
+`.gitattributes` but no `.git`, so there is no commit hash and it cannot be asserted to be current.
+Everything above is true of that snapshot. The guide's prose was deliberately written against the
+*documented* configuration range rather than any project's mutable default, so a newer upstream
+default cannot falsify it — but a re-pull before the next XBYTE release is worth doing.
+
+**RESOLUTION AMENDED, 2026-08-18 (Stephen).** The first fix replaced one perishable claim with
+several: it swapped "32 MB is the ceiling" for a vendor name, a 24-96 MB board range, and a HyperRAM
+option. Same defect in a new form — a reader-facing catalog of third-party hardware decays, and a
+decayed claim is an incorrect one. The prose now carries the **mechanism** instead:
+
+> a guest too large for hub lives **whole in an external memory subsystem** and you **fetch from
+> there**; the P2-EC32MB Edge module is a good **starting point**; larger boards come from other
+> vendors and from community builders; a banked driver presents whichever board you have as a single
+> address space. What the board decides is how much you hold and how fast you reach it — what it
+> never changes is that the fetch is yours to write.
+
+Specific third-party capacities and vendor names are **out** of both §7.3 and §C.4. The Parallax part
+number stays: it is a documented product in our own KB, and it gives the reader a concrete place to
+start. The capacity point survives in durable form — *a holey memory map can need far more address
+space than the ROMs add up to* — which teaches the real mechanism instead of citing one game.
+
+**THE RULE THIS ESTABLISHES, worth applying beyond this finding:** do not put anything in a reader
+document that is **subject to becoming incorrect over time** when the durable statement is available.
+Third-party product catalogs, "what is currently available", capacities, and vendor line-ups all
+decay silently — nothing fails, the sentence just quietly stops being true, and no gate can see it.
+Prefer the mechanism, which does not move; name a specific product only as a starting point, and
+only when it is documented in our own sources.
+
+**The transferable lesson on how it was caught.** The original claim was *plausible* and had a real
+mechanism behind it — which is why it survived authoring and a full audit. What broke it was reading
+the shipped artifact instead of the description of it: a config file listing three boards, a
+game-database comment, and an md5.
+
+**Next finding ID after this block: F-296.**
+
+---
+
+### F-296 — §7.4 read as a wall when the engine only moves the work, leaving three usable places to put it. `CONFIRMED` — `DONE (2026-08-19)` — **RELEASED in XBYTE v1.1.0.** Render verified: p40 reads *"That is a relocation, not a wall"*.
+
+**Surfaced by** Stephen's read pass: "the 7.4 narrative felt too constraining." The section said the
+cross-cutting work must be "replicated across all of them, confined to the few where it genuinely
+matters, or dropped… a real cost and sometimes a prohibitive one," and pointed forward to a chapter
+that **prices** it. A reader who stops at §7.4 concludes the boundary is solid. It is not.
+
+**Three placements, every one built from facts the book already teaches:**
+
+1. **Per family, not per instruction.** The shipped 8080 emulator (rung 3, XBYTE-armed) polls guest
+   interrupts in the shared tail of its **control-flow** handlers — `jatn #int_event` annotated for
+   twelve branch/call/return bytecodes and skipped on the injection path itself. Costs nothing: those
+   instructions had to run anyway. `HLT` gets its own `jnatn`, because a halted guest never branches.
+   Already priced in §17.3's third row ("nearly free") — §7.4 simply never said the answer existed.
+2. **An optional prologue selected by the skip pattern.** `SKIPF` *leaps* rather than cancels, so a
+   skipped prologue costs essentially nothing (§4.2); a second table over the same handler addresses
+   with patterns that *include* it turns the work on — `SETQ` for a mode, `SETQ2` for exactly one
+   bytecode (§10.3). **Two tables at once is shipped practice**: Parallax's Spin2 interpreter, and
+   zog, which defines `RET_START_ALTERNATE`/`RET_CONTINUE_ALTERNATE` as `_ret_ setq2 #$100` against a
+   main table at `setq #$0` — both halves of a 512-long LUT. Both use it to redirect dispatch, not to
+   instrument; **instrumenting is the unexploited step.**
+3. **The cog's own interrupts, which XBYTE never took.** §9.4 already states the engine is
+   interruptible and resumes the stream afterwards. Periodic work — pacing, watchdog, device service
+   — belongs there and costs the dispatch path nothing. §7.4 never connected the two.
+
+**The point that makes placement 2 practical, and which the first draft of this fix got wrong:**
+skipping is **suspended for the duration of a `CALL`** (§13.1, and the reason §16.3's shared `set_nz`
+helper works at all). So the prologue is **one instruction** — a `CALL` — reaching a routine of any
+length whose instructions are immune to the pattern that selected it. One pattern bit buys unbounded
+work. The draft had claimed the prologue "spends pattern bits the body also wants," which is only
+true if you inline it.
+
+**Framing ruling (Stephen).** No verification rig was built, deliberately: *"if somebody's already
+doing it, they'll spend a lot of time verifying it before they publish… We're not speaking for proof;
+we're speaking for ideas and possible ways of doing things."* The distinction the prose must honour —
+and does — is that **every component fact is verified and cited in-book**, while the **composition is
+labelled a shape to consider, not a recipe**, with the reader told to prove it for their own guest.
+That is not an unsourced claim; it is a sourced mechanism with an honestly-marked boundary. Also
+per Stephen: do not characterise the shape as ideal or non-ideal.
+
+**Collateral, verified:** §C.7 now records zog's second dispatch table (the §18.4 idiom in a
+community interpreter rather than Parallax's own). §7.4's "had no choice" for the de-arm-and-trace
+technique became "took the direct route" — the section now names alternatives, so the absolute
+over-claimed. The hardware box no longer says "disaster" and instead names *where* the cost actually
+bites: work that must happen on **every** instruction, cycle-accurate timing above all, is what
+cannot be attached to a family.
+
+**BLAST RADIUS, swept 2026-08-18 on Stephen's prompt — nine downstream sites carried the old claim.**
+Revising a section is only half the job when other chapters cite its conclusion. A text search for
+"7.4" was NOT sufficient: the damaging sites were the ones that echoed the claim in their own words.
+Swept for both, and separated a **structural** statement ("there is no loop body" — still true) from
+a **capability** claim ("there is nowhere to put the work" — no longer true):
+
+| Site | Was | Now |
+|---|---|---|
+| §3.6 | "a place to work that it **removes**" | "a place to work that you **choose rather than inherit**" |
+| §6.4 | "there is **nowhere** to put a `debug()`" | "a `debug()` has no place **in the dispatch itself**" |
+| §8.8 | pacing "has **nowhere to live**" | "has no **cheap** home" + *why*: it is the one kind that cannot be confined to a family, so it is paid on every dispatch |
+| Ch.13 opener | "XBYTE has **no such place**" | "no such place **in the dispatch itself**"; names where it can go |
+| §17.1 | "there is **nowhere to put the check**" | "the check has no **default** home and you place it deliberately" |
+| §17.3 | "**took away** the place where the check belonged" | "**left the check without a place of its own**" |
+| App. D | "there is **no loop body** to instrument" | "the **dispatch itself** has no body to instrument" |
+| §19.7 | remedy column omitted the interrupt route | adds periodic work in a cog interrupt (§9.4) |
+| Index | "Loop body (there isn't one — what it costs)" | "…and where the work goes instead", plus a new **Placing cross-cutting work** entry |
+
+§17.1 was the sharpest: "there is nowhere to put the check" sat two sections ahead of §17.3, which
+exists entirely to say where to put the check. That contradiction pre-dates this sprint.
+
+**Left deliberately unchanged, having been checked:** §3.5 ("This does not mean they are impossible…
+down to nearly nothing if you can confine them") and §19.7's "*by default*" were already calibrated;
+front-matter's "no loop body, because the loop is the silicon", Part IV's "a loop that has no body",
+and §7.4's own title are **structural facts**, not capability claims. Ch.2's "leaves no gap" plants
+the tension the revised §7.4 resolves — that is the intended arc, not a defect. The guide layer
+(voice-guide, creation-guide, descriptor) carries no §7.4 reference at all.
+
+**The transferable lesson.** A section can be factually correct and still leave the reader with a
+false conclusion. Nothing in §7.4 was wrong; the omission of the answer did the damage, and only a
+read-through caught it — no gate can test for "this reads as a dead end." And when a claim is
+revised, **the sweep must be semantic**: the sites that quietly contradicted the new §7.4 mostly did
+not cite it.
+
+**Next finding ID after this block: F-297.**
+
+---
+
+### F-297 — the book taught the shared-handler idiom without the notation every real shared body uses. `CONFIRMED` — `DONE (2026-08-19)` — **RELEASED in XBYTE v1.1.0.** Render verified: the column-map notation is taught on p26.
+
+**Surfaced by** Stephen: Chip's skip tables are *deeply documenting*, ours said what each
+instruction does. Should we teach the best-in-class pattern so it is learned?
+
+**What the notation is, verified against `Spin2_interpreter.spin2` (v51):** a fixed column per
+bytecode in the comment field, keyed to a legend. **letter** = that bytecode runs the line ·
+**`|`** = its pattern skips it · **blank** = not in play (not yet entered, or already returned).
+Read across a row for who runs an instruction; read down a column for one bytecode's whole path.
+
+**The load-bearing fact, and how it was actually established.** A column *is* the skip pattern
+written out. First checked against `bc_read` (`%0111001110`) — 10/10 — but **that pattern is a
+palindrome, so the decode agreed regardless of bit order and proved nothing about direction.**
+Re-verified against `bc_var_inc` (`mod_iso | %00011111010110010`, 17 bits, not a palindrome):
+**17/17 positions agree**, LSB-first from the entry point. Only the second test is evidence.
+
+**Why it earns a teaching slot.** §4.6 already carried the design process, and its step 4 said
+"assign each member's pattern" with no *how*, while its own warning — *"a `##` immediate is two
+longs… count longs, not lines"* — was advisory. The map closes both: draw the grid one row per
+long, and read the pattern off it. **You derive the pattern from the map rather than documenting
+it afterwards**, and a `##` visibly occupies two rows, so the off-by-one cannot hide.
+
+**Adopted at:** §4.4 (reading key, where the reader first meets a shared body), §4.6 step 4 (the
+method), §14.3 (two members), §15.2 and §15.4 (in the shipped corpus). §10.2 is a two-line flag
+fragment, not a skip-shared body — deliberately left alone.
+
+**Collateral corrections the adoption forced:**
+- The VM examples named their operand registers `a` and `b`, which **collide with the column
+  letters**. Renamed to `x`/`y` (Chip's own convention) across the corpus and every mirrored block.
+- `push_a` became `push_x` but `pop_a` did not — the rename was inconsistent until swept. Both are
+  now `_x`.
+- **Guest-CPU registers were correctly NOT renamed**: §8.5's Z80 fragment and §16.3's 6502 use
+  `a`/`b` as the *guest's* accumulator and B register. A blanket rename would have corrupted them.
+  This is the whole reason the sweep was scoped by block rather than by regex over the file.
+- The §15.4 excerpt is **uncaptioned**, so the identity gate does not cover it, and it silently
+  drifted from its file during the rename. Found by reading, not by a gate. **Uncaptioned excerpts
+  of captioned files are an unguarded seam** — worth a gate of its own some day.
+
+**Gates:** corpus identity GREEN (3/3 byte-identical), headers synced, all three examples compile
+under `pnut-ts`, K=76 clean.
+
+**Next finding ID after this block: F-299.**
+
+---
+
+### F-298 — §7.4 called the gated call-out a "prologue", contradicting the example it had just cited. `CONFIRMED` — `DONE (2026-08-19)` — **RELEASED in XBYTE v1.1.0.** Render verified by READING the shipped pages, not by assuming: "prologue" still appears on p41 and p114, which is correct — the reframing keeps it as ONE named placement among several. p41 teaches that each gated line has its own bit so a body can carry several independently-switched call-outs, and the Index lists *"a family's shared tail · an optional prologue"* as alternatives. The defect was prologue-as-the-only-placement; that is gone.
+
+**Surfaced by** Stephen re-reading §7.4 — *"are we convinced that prolog vs epilog is the only
+possible choice?"*, then sharpening it to *"aren't we saying before instruction execution vs.
+after?"* Both halves were right.
+
+**The defect.** F-296's text said a handler "can be built with an optional **prologue** in front
+of its body." Wrong three ways:
+
+1. **Not the only placement.** A pattern bit governs each line *independently*, so the gated line
+   can sit anywhere in the 22-instruction window — and a body can carry **several**
+   independently-switched call-outs, not one.
+2. **It contradicted the worked example two paragraphs above it.** The shipped 8080 emulator puts
+   its `JATN` in the shared **tail**, immediately before the closing `_RET_` — an epilogue. §7.4
+   cited that emulator and then described the opposite placement.
+3. **It landed on the one position the book elsewhere says to avoid.** §4.5: pattern bit 0 governs
+   the line "you jumped there in order to run", so a normal entry leaves it clear — and §4.5 then
+   spends that bit as **per-bytecode metadata** (the 6502 emulator packs cycle counts into the
+   spare high bits the same way). A call-out as instruction 0 collides with both.
+
+**The reframing:** the choice is not *where in the source* but **when relative to the guest
+instruction's work**.
+
+| Placement | Sees | Natural for |
+|---|---|---|
+| **Before** the body's work | the *previous* instruction's completed state | deciding whether to take a pending interrupt — a clean boundary. Must not be the body's first instruction (bit 0) |
+| **After** the work, before the return | *this* instruction's result | cycle accounting, flag/refresh bookkeeping, tracing an outcome. **What the 8080 emulator does** |
+| **Between steps** | mid-operation state | work that must interleave with a multi-step operation |
+
+**Corroboration that "after" is usually right for interrupts:** §17.3's consistent-state rule
+already said a handler that has finished its work and is about to return is a safe boundary, while
+the middle of a multi-step address computation is not. **The book had the answer in Chapter 17 and
+stated its opposite in Chapter 7.**
+
+**The transferable lesson.** Second time this review that §7.4 was *internally* inconsistent rather
+than factually wrong: it cited real evidence and then generalised past it. A worked example and the
+generalisation drawn from it must be checked **against each other**, not only each against the
+source.
+
+**REGISTER HYGIENE, same pass:** two blocks both carried "Next finding ID after this block: F-298"
+because the F-297 registration replaced the previous block's marker instead of only appending its
+own. Corrected — F-296's block now closes at F-297. A marker that says the same thing twice is a
+counter that has stopped counting.
+
+**Next finding ID after this block: F-301.**
+
