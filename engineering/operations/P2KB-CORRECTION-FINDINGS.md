@@ -3173,7 +3173,7 @@ reader-visible, and a stale one ships silently. **Before adopting: audit cover-v
 across all 15 documents and reconcile, then decide which source is authoritative** (the cover is
 what a reader actually sees, so it should win). Do not wire the metadata through without that pass.
 
-### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **measured 2026-08-19; platform fix owed, deliberately NOT taken mid-release**
+### F-299 — wide `tblr` tables overhang the right text edge by ~5–6pt, in the platform, not the manual. `CONFIRMED` — **POLISH, NOT A GATE FAILURE: it is inside the project's own 20pt tolerance (re-graded 2026-08-19, same day, see the correction at the end)**
 
 **Surfaced by** the Streamer v1.0.9 daemon pre-verify — a whole-document margin measurement of the
 rendered PDF (every text span's `x1` against the 540pt text edge), not by the compile log, which was
@@ -3206,9 +3206,41 @@ mid-render, and expect the absorbing manual's next render to shift table layout.
 and both want one `forge-test` sweep across the set rather than two.
 
 **Scope when taken:** measure every manual, not just the Streamer — the filter is shared, so any
-manual with a 6-column table is a candidate. The instrument already exists: the whole-document span
-measurement used here (`x1 > pagewidth - 72pt`), which found these when the compile log's
-`Overfull` list alone could not distinguish them from ~60 harmless 1–2pt microtype protrusions.
+manual with a 6-column table is a candidate.
+
+---
+
+⚠️ **CORRECTION, same day, before this entry could mislead anyone — I RE-GRADED MY OWN FINDING.**
+
+I measured this with a hand-rolled PyMuPDF scan at a **4pt** threshold. **The project already has a
+sanctioned instrument for exactly this** — `engineering/tools/validation/audit-pdf-margin-overflow.py`
+— and I did not use it. Run against the shipped v1.0.9 PDF it reports:
+
+```
+text-block right edge: prose 540.0pt, code 540.0pt   (tolerance 20pt)
+CLEAN  nothing crosses the margin (76 pages measured)
+```
+
+**The gate's tolerance is 20pt by design. These tables are 6.1pt and 5.3pt — comfortably inside it.**
+So both statements are true and the second is the one that sets priority: the overhang is real and
+visible if you look for it (the table rule extends a hair past the running-header rule), and it is
+**not** something the project's own margin gate would ever block on.
+
+There is direct precedent for accepting far more: the IOSP v1.0.9 PUBLISH line accepts a chart
+bleeding **~24pt** past the text block on evidence — zero overlapping spans measured, every cell
+readable — with the explicit note that *magnitude is never the verdict*. A 6pt rule overhang with no
+overlap is a smaller version of the same accepted case.
+
+**Re-grade: this is POLISH, not a defect owed.** Still worth taking in the set-wide sweep with
+[[F-300]] and «#250» because the fix is cheap once the platform is open anyway — but it must not be
+described as a defect blocking anything, and no manual should re-render for it.
+
+**The transferable lesson — the one worth more than the finding.** Reach for the project's own
+instrument before hand-rolling a measurement. Mine was not wrong, but it carried **no calibrated
+threshold**, so it reported a number without the judgement that makes the number mean something, and
+I very nearly filed a tolerance-conformant table as a defect owed. A raw measurement is not a
+verdict; the tolerance IS the verdict ([[feedback_validation_tool_verdict_is_a_claim]] — the inverse
+case, where the tool PASSES and the hand-rolled scan is the one overstating).
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
 
