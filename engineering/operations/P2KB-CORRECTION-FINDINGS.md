@@ -431,75 +431,86 @@ DDS pin enables).
 adds what `DIRH` is for and what a DIR-low streamer command looks like on a bench) · `:410` §5.2's
 "the pin columns need none".
 
-*Code blocks that omit the pin enable — **STILL OWED**, routed to «#280»:*
-- `:405` `X_IMM_32X1_LUT` 32-pin · `:435` `X_IMM_4X8_1DAC8` · `:470` `X_RFLONG_4X8_LUT` ·
-  `:497` `X_RFBYTE_8P_1DAC8` — four short "Example:" fragments, none enabling the pins they drive.
-- `:1616` / `:1627` §16.1 SPI — and this one is a **worked** example: the configuration block at
-  `:1600-1607` sets up `spi_clk` and does `drvl #spi_clk`, then never touches `spi_do`, the pin the
-  streamer actually drives. As written the data pin cannot output.
-- `:1443` §15.1 VGA — `m_visible` carries `X_PINS_ON | X_DACS_3_2_1_0`, and the program does the
-  `DRVC` for `vsync_pin` but **no §11.0 DAC-pin setup at all** for the RGB channels. Already inside
-  «#280»'s scope for its undefined `VGA_BASE`/`framebuffer`; this is a third defect in the same block.
-- Assembly Language Reference `part-iii/appendix-g-streamer-constants.md:228`, `:255`, `:289` —
-  `mov mode, ##… | X_PINS_ON` with no pin enable. **RELEASED in v3.1.6**; belongs to that manual's
-  next pass, not this sprint.
+*Code blocks that omitted the pin enable — **ALL FIXED 2026-08-20** («#289»):*
+- `:405` `X_IMM_32X1_LUT` (32-pin) -> `drvl ##31<<6` · `:435` `X_IMM_4X8_1DAC8` (8-pin) ->
+  `drvl #7<<6 + pin` · `:470` `X_RFLONG_4X8_LUT` (32-pin) -> `drvl ##31<<6 + base` ·
+  `:497` `X_RFBYTE_8P_1DAC8` (8-pin) -> `drvl #7<<6 + base`. Span forms compiled before use.
+- §16.1 SPI — the configuration block set up `spi_clk` and never touched `spi_do`, the pin the
+  streamer drives. Fixed earlier the same day.
+- **§15.1 VGA — rebuilt.** It carried **four** defects, not the one this finding named, and they
+  were fixed in a single edit rather than four passes: (1) no §11.0 DAC-pin setup at all for the RGB
+  channels; (2) `VGA_BASE` undefined; (3) `framebuffer` undefined; (4) **a 640×480 framebuffer at
+  16 bpp is 600 KB and hub RAM holds 512 KB** — the program could not have existed as written. It
+  now declares `VGA_BASE = 16` (a multiple of 4, so each pin's low two bits pick its own DAC
+  channel), does the §11.0 setup (`COGID` into `M[3:0]`, `P_CHANNEL`, `DIRH`) across a 4-pin span,
+  and paints 350 lines into a declared `orgh` framebuffer while blanking the rest of an unchanged
+  525-line field — the same trade §15.2's HDMI program already makes for the same reason (§7.1).
+  **Extracted from the manuscript and compiled: 452,096 bytes**, matching §15.2's block exactly.
+  The compiler caught a collision the new `CON` introduced — P2 symbols are case-insensitive, so a
+  `VSYNC_PIN` constant clashed with the `vsync_pin` register; the constant was dropped.
 
-**Why the sweep is routed rather than done here.** «#280» is the next task in the Streamer sprint and
-is *precisely* the block-by-block pass that classifies every code block against the example contract
-— the right place to add a missing line to ten blocks consistently. The enumeration above exists so
-that pass does not re-derive it. This is routing inside one sprint, not deferral across a release:
-none of it ships until v1.1.0. The failure mode being avoided is the one «#282» records — "the
-finding named a row, the fix corrected a row, nobody swept the table."
+*Not touched, and correctly so:* the §7.3 RGB pattern block already carries a `**Pattern**` label
+and points at §11.0 for its DAC pins.
+
+**Why the sweep was routed rather than done at filing time.** It was folded into «#289» and run
+alongside «#280», the pass that reads every code block, so that one hand added the missing line to
+every block under one contract. Routing inside a sprint, not deferral across a release — none of it
+ships until v1.1.0. The failure mode being avoided is the one «#282» records: "the finding named a
+row, the fix corrected a row, nobody swept the table." Worth noting that the sweep *earned its keep* —
+it found §15.1 carrying four defects where this finding had named one, and a fifth `pin<<17` site
+(`:435`) that the original enumeration missed.
 
 **Sprint impact.** This is sprint decision #4 ("Digital ≠ DAC. `X_PINS_ON` needs NO wrpin/dirh"),
 which later tasks were told to respect. **That decision is now half wrong and must not be applied as
 written.** Surfaces at the Streamer v1.1.0 co-release gate («#288») with F-302…F-307.
 
-**Status:** `PARTIAL — prose FIXED 2026-08-20 at streamer-body.md:410 and :834, gates green.
-Confirmed on silicon (EF-062). Code-block sweep (10 blocks enumerated above) OWED, routed to «#280»;
-the Assembly Language Reference's three sites are a separate manual's pass.`
+**Status:** `PARTIAL — the Streamer Guide is DONE: prose at :410 and :834, and every code block
+above, fixed 2026-08-20 with four gates green and §15.1 compiled from the manuscript. Confirmed on
+silicon (EF-062). Open on two counts: the v1.1.0 PDF is not verified yet («#287»), and the Assembly
+Language Reference's three sites are owed at the agreed CO-RELEASE.`
 
 ---
 
-### F-309 — the multi-pin `X_PINS_ON` example lines call the operand `pin` when it must be a **window base**, and compose it with `+`, where an unaligned value silently changes the mode. `CONFIRMED`
+### F-309 — the `pin<<17` caution in §12.0 stops short of the 8-pin-and-wider modes, which is the case that actually fires. `PARTIAL`
 
-**How it surfaced.** VO-J-004, 2026-08-20 — a probe written to de-risk «#289» before it authored
-pin-enable lines into five blocks. Bench-proven as **EF-065**.
+> **This finding was FILED WRONG on 2026-08-20 and is rewritten here in place.** As first written it
+> claimed the multi-pin example lines were defective for naming their operand `pin` rather than
+> `base`, and that the manual carried no caution. **Both claims were false, and a single read of
+> §12.0 would have shown it.** The finding was filed off a grep of example lines. What follows is
+> what is actually owed, which is much narrower.
 
-**This is not a mechanism defect. Chapter 12 is correct and now empirically confirmed** (EF-064):
-§12.1 documents the group field `D[22:20]`, and §12.2 documents sub-pin selection in `D[19:17]`
-*including* the key sentence — as the pin count rises, fewer of those are pin bits and the freed
-ones become DAC-configuration bits. The defect is that the example lines are disconnected from it.
+**What the manual already gets right — do NOT "fix" any of it.**
+- §12.0 *explains and justifies* the naming: `pin<<17` puts `pin>>3` into the group field `D[22:20]`
+  and `pin&7` into the sub-pin field `D[19:17]`, *"which is exactly the decomposition the two fields
+  expect. That is why the idiom appears throughout this book with a plain pin number."* Renaming
+  `pin` to `base` would contradict a deliberate, documented convention.
+- §12.0 already carries a `::: caution` — *"The shift is arithmetic, not a pin-field operator"* —
+  covering the fewer-than-8-pin modes and DDS/Goertzel.
+- §12.1 (group field, 8-pin windows, wrap-around) and §12.2 (sub-pin split per pin count) are
+  correct and are now **empirically confirmed** by **EF-064**.
 
-**Locations** — the composition idiom, in modes where the operand is **not** a pin:
-- `streamer-body.md:892` `X_RFWORD_16P_2DAC8 | … | X_PINS_ON + pin<<17 + count` — **16-pin** mode
-- `streamer-body.md:902` `X_RFLONG_32P_4DAC8 | … | X_PINS_ON + pin<<17 + count` — **32-pin** mode
-- `streamer-body.md:985` `X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count` — **8-pin** mode
+**The actual gap.** That caution enumerated *"the fewer-than-8-pin modes"* and DDS/Goertzel. At
+**eight pins and wider** `D[19:17]` holds **no** pin bits at all — every one of them is mode or
+DAC-configuration — so the operand must be a multiple of 8. That case was not named, and it is the
+one the bench fired: `X_IMM_4X8_1DAC8` with `pin = 20` assembled to `$60B6_FFFF` instead of
+`$60AE_FFFF` and drove **P24..P31**, a different mode (`X_IMM_4X8_4DAC2`) at a different window.
+The `+` composition carried the stray low bits out of `D[19:16]` and into the group field. Proven as
+**EF-065**.
 
-In all three the operand must be a **window base** — a multiple of 8 — yet it is named `pin`, which
-invites exactly the value that breaks it. Correct as-is and **not** to be touched: `:887` and
-`:1110` are 1-pin modes, where `pin<<17` genuinely means the pin (EF-064); `:1107` already names it
-`vga_base`, which is the right instinct.
+**Fix applied 2026-08-20** — one paragraph added to the existing §12.0 caution, stating the
+8-pin-and-wider rule, what an unaligned value actually does (changes the mode, and carries into the
+group), and the general preference for `|` over `+` when composing a mode word. Four gates green.
+No example line was renamed.
 
-**What an unaligned value does — neither form errors, and the compiler sees neither:**
-- with `+` (**the book's idiom**): `$600E_0000 + $0028_0000 = $6036_0000` — carries into `D[19:16]`,
-  yielding `X_IMM_4X8_4DAC2` at the P24–P31 window. Bench: drove **P24..P31**.
-- with `|`: sets a bit the mode template already sets, so the word is **byte-identical** to the
-  aligned base. The unaligned value does not carry — it *vanishes*.
+**Sibling, already in the book:** §9.2 / **EF-059** is the same failure in another mode family
+(`adc_pin<<17` changing the mode of `X_1ADC8_0P_1DAC8_WFBYTE`), and §12.0's first rule already points
+at it. The `|` form fails differently and worse — it sets a bit the mode template already sets, so
+the word is byte-identical to the aligned base and the stray value *vanishes* rather than carrying.
 
-**Proposed correction** (small, and it belongs with the «#289» sweep since it touches the same
-blocks): rename the operand to `base` / `window_base` in the three multi-pin lines, and add one
-caution — a multi-pin mode takes a **window base in steps of 8**, and an unaligned value changes the
-mode rather than the pin, silently. Point it at §12.2, which already explains why. Prefer `|` over
-`+` for composing mode words generally — see **EF-054**, where `P_CHANNEL + P_OE` broke for the same
-arithmetic reason, and the class sweep there found 281 doc config lines using `|` against 2 using `+`.
-
-**Sibling, already recorded:** **EF-059** is this same failure in another mode family
-(`adc_pin<<17` changing the mode of `X_1ADC8_0P_1DAC8_WFBYTE`), and its warning still stands: the
-defect is invisible in testing because the transfer still "works" and merely produces the wrong shape.
-
-**Status:** `CONFIRMED — bench-proven (EF-065). Routed to «#289», which already owns the same blocks.
-Not a Chapter 12 defect; Chapter 12 is confirmed correct by EF-064.`
+**Status:** `PARTIAL — §12.0 caution extended 2026-08-20, four gates green, grounded in EF-064 +
+EF-065. Per this register's own rule — a fix applied but not yet validated is NOT done — it stays
+open until the v1.1.0 PDF is verified at «#287». The naming claim in the original filing was wrong
+and is retracted above.`
 
 ---
 

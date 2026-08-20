@@ -863,9 +863,11 @@ word comes out **byte-identical** to base 16 — an unaligned base composed with
 it silently *vanishes*. Neither form errors, and the compiler cannot see either. **This was caught
 by reading the assembled constant out of the compiler listing before the run, not by the bench** —
 the first draft of the test would have compared two identical command words and called it a result.
-*Grounds:* **F-309** — the Streamer Guide's multi-pin example lines compose the pin field with `+`
-and name the operand `pin` when it must be a **window base** (`:892` 16-pin, `:902` 32-pin, `:985`
-8-pin). §12.2 explains why that is wrong; nothing at those lines connects them to it. This is
+*Grounds:* **F-309** — the Streamer Guide's §12.0 caution covered the fewer-than-8-pin modes and
+DDS/Goertzel but stopped short of **8 pins and wider**, where `D[19:17]` holds no pin bits at all and
+the operand must therefore be a multiple of 8. Extended 2026-08-20. **The book's `pin` naming is
+correct and was not changed** — §12.0 explains that `pin<<17` splits a plain pin number into
+`pin>>3` (group) and `pin&7` (sub-pin), which is exactly what those fields expect. This is
 **EF-059's failure in a second mode family** — there `adc_pin<<17` changed the mode of
 `X_1ADC8_0P_1DAC8_WFBYTE` and the defect was invisible in testing because the capture still "worked".
 *Source:* `campaigns/2026-08-manual-corrections/tests/test-f308-cog-and-pingroup.spin2`.

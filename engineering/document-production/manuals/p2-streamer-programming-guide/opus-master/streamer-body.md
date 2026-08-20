@@ -402,6 +402,7 @@ The pin half needs no pin setup. The DAC half does: a DAC channel these modes fe
 
 ```pasm2
 ' Output 32 1-bit pixels using 2-entry palette at LUT $000
+        drvl    ##31<<6                   ' enable P31..P0 (11.0)
         xinit   ##X_IMM_32X1_LUT | X_PINS_ON + 32, ##$AAAA_5555
 ```
 
@@ -432,6 +433,7 @@ The S operand drives pins and DACs directly without LUT lookup. The DAC-channel 
 
 ```pasm2
 ' Output 4 bytes to an 8-pin group, 8 bits each
+        drvl    #7<<6 + pin               ' enable those 8 pins (11.0)
         xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON + pin<<17 + 4, ##$12345678
 ```
 
@@ -467,6 +469,7 @@ Hub data serves as LUT index values. As in Chapter 5, the DAC side of these mode
         rdfast  #0, ##bitmap_addr
 
 ' Stream 640 pixels through 256-color palette at LUT $000
+        drvl    ##31<<6 + base            ' enable the 32-pin window (11.0)
         xinit   ##X_RFLONG_4X8_LUT | X_PINS_ON + base<<17 + 640, #0
 ```
 
@@ -494,6 +497,7 @@ Hub data drives pins and DACs directly. The DAC-channel columns below reach a pi
 ```pasm2
 ' Stream bytes to 8 pins
         rdfast  #0, ##buffer
+        drvl    #7<<6 + base              ' enable those 8 pins (11.0)
         xinit   ##X_RFBYTE_8P_1DAC8 | X_PINS_ON + base<<17 + 256, #0
 ```
 
@@ -918,6 +922,8 @@ Two rules govern every pin field in this chapter. Both are easier to state here,
 
 ::: caution
 **The shift is arithmetic, not a pin-field operator.** `pin<<17` is correct only when the low bits it lands in are pin bits *for that mode*. In the fewer-than-8-pin modes some of `D[19:17]` are DAC-configuration bits rather than pin bits (§12.2 gives the split per pin count), and in DDS/Goertzel the field is `D[22:19]` holding a four-pin block number — where `base<<17` sets that field correctly only when `base` is a multiple of four (§13.4). Check the field before reusing the shift.
+
+**At eight pins and wider, `D[19:17]` holds no pin bits at all**, so the operand must be a **multiple of 8** — a window base, not an arbitrary pin. An unaligned value there does not merely land on the wrong pins. Its low three bits fall into the mode's own `D[19:16]` template, and because the idiom composes with `+`, they *carry*: a 640-pixel `X_IMM_4X8_1DAC8` written with `pin = 20` assembles to a **different mode** (`X_IMM_4X8_4DAC2`) driving a **different window** (pins 31..24, not 23..16). Nothing warns you — both forms are legal arithmetic and both compile. Prefer `|` over `+` when composing a mode word, and use `+` only for a field you have checked is clear.
 :::
 
 ## 12.1 Pin Group Selection {#sec-12-1}
@@ -1386,27 +1392,36 @@ The program below assumes those four DAC pins are already configured; it shows t
 
 The non-visible intervals — front porch, sync, back porch, and whole blank lines — stream a **fixed DAC level** through an *immediate* mode, `X_IMM_1X32_4DAC8 | X_DACS_3_2_1_0` (`$7F01_0000`). Its S operand is the 32-bit level held across the four DAC channels for `D[15:0]` pixels, so the **horizontal-sync** level is simply a different S value during the sync interval. **Vertical sync is not streamed** — it is a separate pin toggled with `DRVNOT` around the vsync lines.
 
+**The line and field timings are the full VESA 640×480; the painted height is not.** A 640×480 framebuffer at 16 bits per pixel is 600 KB and hub RAM holds 512 KB (§7.1), so the program paints 350 lines and blanks the rest of the field — the same trade §15.2's HDMI program makes, for the same reason. The 525-line field is unchanged, so a monitor still sees standard VGA; it sees black where the framebuffer ran out. The four DAC pins are set up per §11.0 before anything streams: DAC mode carrying this cog's ID, `DIRH`, and a base that is a multiple of 4 so each pin's low two bits land on its own channel.
+
 ```pasm2
+CON   VGA_BASE = 16                     ' four DAC pins, 19..16; a
+                                        '  multiple of 4, so their low
+                                        '  two bits pick DAC0..DAC3 (11.2)
+
 DAT             org
+                ' Four DAC pins, one per streamer DAC channel (11.0)
+                cogid   cogn                      ' this cog, 0..7
+                setnib  dacmode, cogn, #2         ' COGID -> M[3:0]
+                wrpin   dacmode, #3<<6 + VGA_BASE
+                dirh    #3<<6 + VGA_BASE          ' pins 19..16 drive
+
                 setxfrq pixfreq                   ' 25.0 MHz pixel NCO
                                                   ' (2^31-scaled)
-                mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate
+                mov     vsync_pin, #VGA_BASE + 4  ' VSYNC: a separate
                                                   ' digital pin
                 drvc    vsync_pin                 ' establish initial
                                                   ' VSYNC level
 
-vfield          mov     y, #33                    ' vertical back porch
-                                                  ' (lines, follows vsync)
+vfield          mov     y, #90                    ' top blanking lines
                 call    #blank
-                rdfast  #0, ##framebuffer         ' visible pixels stream
-                                                  ' from the FIFO
-                mov     y, #480                   ' visible lines
+                rdfast  ##640*350*2/64, ##framebuffer
+                mov     y, #350                   ' visible lines
 line            call    #hsync
                 xcont   m_visible, #0             ' 640 RGB pixels
                                                   ' (pipeline: Chapter 7)
                 djnz    y, #line
-                mov     y, #10                    ' vertical front porch
-                                                  ' (lines, precedes vsync)
+                mov     y, #83                    ' bottom blanking lines
                 call    #blank
                 drvnot  vsync_pin                 ' VSYNC active
                 mov     y, #2                     ' vertical sync (lines)
@@ -1437,8 +1452,15 @@ m_blank         long    $7F01_0000 + 800
 m_visible       long    $BF85_0000 + 640
 
 pixfreq         long    $0CCC_CCCD                ' 25.0 MHz @ 250 MHz
+dacmode         long    P_DAC_124R_3V | P_CHANNEL
+cogn            res     1
 vsync_pin       res     1
 y               res     1
+
+                orgh    $1000
+' 640 x 350 pixels, 16bpp 5:6:5. At 2 bytes/px a full 640 x 480
+' frame would be 600 KB and would not fit in hub RAM (7.1)
+framebuffer     long    0[640*350/2]
 ```
 
 > For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847).
