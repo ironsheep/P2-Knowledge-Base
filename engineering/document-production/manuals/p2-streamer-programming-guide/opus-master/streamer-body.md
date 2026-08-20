@@ -41,7 +41,7 @@ The streamer works in two directions, and they are different enough that it help
 
 **Input modes capture the world** — pin states recorded into memory (a logic analyzer); ADC readings recorded into memory (an oscilloscope). Here the interesting question is *how the captured data is packed* as it is written back to hub.
 
-Knowing which direction you are working in immediately cuts the mode list roughly in half — you only ever care about one side at a time.
+Knowing which direction you are working in immediately cuts the mode list roughly in half. The split is a guide rather than a rule: DDS/Goertzel generates a waveform on the DAC channels while it measures an input (Chapter 10).
 
 ## 1.5 Why there are so many modes — and why they differ
 
@@ -157,7 +157,7 @@ Hardware frequency detection using Goertzel algorithm. Accumulates sine and cosi
 
 # Chapter 3: NCO and Timing {#ch-3}
 
-The NCO is the streamer's metronome, and it is the single most important thing to understand about the streamer's timing. Everything the streamer does happens on the NCO's beat, so setting its rate correctly is the difference between a steady picture and a rolling one. This chapter shows how the NCO produces that beat and how to compute the value you need for a given rate.
+The NCO is the streamer's metronome, and setting its rate correctly is the difference between a steady picture and a rolling one. This chapter shows how the NCO produces that beat and how to compute the value you need for a given rate.
 
 ## 3.1 NCO Operation
 
@@ -171,6 +171,8 @@ phase = (phase & $7FFF_FFFF) + frequency
 2. The frequency value adds to the phase accumulator
 3. If the new MSB is set, a "rollover" occurs
 4. On rollover, the streamer advances to the next data element
+
+**DDS/Goertzel does not wait for rollover.** That mode advances on every system clock, using the NCO's phase as a running index into the LUT rather than as a step trigger (Chapter 10). Step 4 describes every other mode.
 
 ::: hardware
 **The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2^31`.
