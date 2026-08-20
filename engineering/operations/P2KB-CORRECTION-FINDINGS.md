@@ -163,9 +163,29 @@ as the `%000` default, labelled as such.
 "Function generator, audio synthesis, **RF modulation**" — and the field that does modulation is
 the one neither the KB nor the manual documents.
 
-**Downstream (manual head, not a YAML edit):** *Streamer Guide* §10.2 (`LUT[NCO[30:22]]` stated
-as the general rule), §10.3 ("must contain 512 entries" — **false**), §17.2 tip ("the 512
-entries"). Tracked in the streamer manual's audit folder; fix ships with the same release.
+**Additional YAML sites found by the 2026-08-20 class-wide sweep — these are part of F-302, not
+separate findings.** The correction above named `lut_setup.entries` and `s_operand.field_11_0`
+only; the sweep found the same assumption stated four more times in the same file:
+
+| `architecture/streamer/dds-goertzel.yaml` | What is wrong |
+|---|---|
+| `:57` | `operation.steps` step 1 — `"Read LUT entry at NCO[30:22]"` as an **unconditioned general rule**. This is the KB twin of the manual's §10.2 defect and was **missing from this finding's original correction text.** |
+| `:89` | `' Build 512-entry sine/cosine table` (code example) |
+| `:100` | `repeat i from 0 to 511` in the `sinc2_amplitude` example |
+| `:227` | `usage_pattern.data` comment restating `512-entry LUT window` as fact |
+
+Sibling files verified **correct** and usable as the fix template: `dds-goertzel.yaml:11,:18`
+(`%1111_0ppp_p111` / `%1111_1ppp_p111`, with the correct `D[22:19]` multiple-of-four caveat).
+
+**Downstream (manual head, not a YAML edit):** *Streamer Guide* §10.2 `:648`
+(`LUT[NCO[30:22]]` stated as the general rule), §10.3 `:674` ("must contain 512 entries" —
+**false**), §17.2 tip `:1458` ("the 512 entries"), the `:1424` code comment ("512-entry LUT
+window"), and the `\DiagDdsGoertzel` diagram in
+`workspace/p2-streamer-programming-guide/templates/p2kb-streamer-diagrams.sty` (which renders
+`entry = LUT[NCO[30:22]]`) — plus its **cloned copies** at
+`workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:207` and the staged
+`pdf-forge/interactive-testing/templates/p2kb-torture-diagrams.sty:207`. Tracked in
+`engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md`; fix ships with that release.
 
 ---
 

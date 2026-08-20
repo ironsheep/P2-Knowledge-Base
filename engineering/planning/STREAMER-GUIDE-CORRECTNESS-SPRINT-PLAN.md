@@ -219,6 +219,18 @@ value. It has no per-channel R/G/B fields.
 | 519 | *"**RGBI8 (2:2:2:2):** Two bits each for red, green, and blue, plus a 2-bit intensity field."* | Rewrite to colour-select + 5-bit luminance; state the LUMA8 kinship explicitly |
 | 497 | Mode table Format column: `RGBI 2:2:2:2` | Correct the label |
 | 945 | §13.1 symbol table Description: `RGBI 2:2:2:2` | Correct the label |
+| **diagram** | `\DiagRgbFormats` in `workspace/p2-streamer-programming-guide/templates/p2kb-streamer-diagrams.sty` draws RGBI8 as `R 2 \| G 2 \| B 2 \| I 2` | **Redraw** as colour-select + luminance. Added 2026-08-20 — a fourth in-manual site, and a *template* edit (see the staging note below) |
+
+**A ready-made model exists.** The **P2 Debug Window Manual** (released v1.1.3)
+`ch04-bitmap.md:100` states it correctly — *"Upper 3 bits select a color, lower 5 bits
+are intensity"* — and contrasts it against LUMA8 immediately above. Copy that framing
+rather than re-deriving it.
+
+**Staging consequence.** The diagram lives in the **workspace template**, not in
+`opus-master` (this manual has no `opus-master/templates/`). Fixing it means
+`p2kb-streamer-diagrams.sty` must be **staged to outbound** alongside the markdown — the
+release verification in this plan originally assumed a markdown-only bundle. Same applies
+to §4's diagram fix.
 
 **The tell to keep in the fix:** §7.2 describes LUMA8 **correctly** four lines above
 (`:510`). Say plainly that RGBI8 is that same mechanism with the colour select moved into
@@ -243,7 +255,8 @@ not restate it.
 | 648 | `LUT[NCO[30:22]]` given as *the* indexing rule — true only at loop size 512 |
 | 674 | *"The LUT **must** contain 512 entries"* — **false** |
 | 1458 | §17.2 tip: *"The NCO steps through **the 512 entries**"* |
-| — | `S[11:0]` appears nowhere; only an unexplained code comment at `:1424` hints it exists |
+| **1424** | *"…invert none, **512-entry LUT window**"* — **a defect line, not just a hint.** Corrected classification 2026-08-20: the earlier draft of this plan called it "an unexplained code comment," but it asserts 512 as fact. Fix it, and let it be the place that points at the new section |
+| **diagram** | `\DiagDdsGoertzel` renders `entry = LUT[NCO[30:22]]` — same 512-only claim in the picture. Template edit; see §3's staging note |
 
 **Deliverable is larger than the correction.** Add the `S[11:0]` field to Chapter 10 as
 its own section: the eight loop sizes with their NCO index bits, the `%A` bounded-region
@@ -435,6 +448,166 @@ the rendered PDF is inspected**, never on staging.
 
 ---
 
+## §12 — Finish the voice audit *(2 of 4 mandatory findings never landed)*
+
+`audit/voice-audit-2026-07-21.md` raised four **#9 register failures**. Verified against
+the artifact 2026-08-20, not against the audit's summary:
+
+| Finding | State |
+|---|---|
+| L48 §1.5 *"It is tempting to…"* (banned reader-as-foil) | ✅ fixed |
+| Ch10 *"the streamer's **cleverest** mode"* | ✅ fixed |
+| Ch7 *"Video is the streamer's **headline act**"* | ✅ fixed |
+| **`:160` Ch3 opener — *"the single most important thing"*** | **❌ still present** |
+| **`:44` §1.4 — *"you only ever care about one side at a time"*** | **❌ still present** (the audit's soft quantifier note) |
+
+`:44` is worth more than its size: the audit flagged it as overstating *"against
+DDS/Goertzel's simultaneity"* — and DDS/Goertzel is the exact mode this sprint is
+correcting. Fixing §17.2 while §1.4 still tells the reader the two directions never
+coincide leaves the book arguing with itself.
+
+**Keep `:1364`** — *"the single most common way to build a Goertzel detector that appears
+completely dead"* is technical severity, not self-admiration. The audit's tell was about
+praising the *subject*, not about ranking failure modes.
+
+**Cadence work is explicitly optional** — the audit recorded **PASS (at budget)**, longest
+run 4, and offered margin-thinning as *"not required."* That includes the Ch17 opener
+(`:1346`) and the Ch15→Ch18 four-beat run. **Stephen's call**; not scoped here by default.
+
+**Verification.** *Normal:* both mandatory lines rewritten. *Edge:* `:1364` untouched.
+*Error:* re-run the voice tells listed in the audit's method section — the fix must not
+introduce a replacement tell.
+
+---
+
+## §13 — Class-wide sweep: these errors are NOT confined to this manual **⚠ SCOPE DECISION**
+
+Swept 2026-08-20 across all manuals, app notes, `deliverables/ai/P2/`,
+`engineering/knowledge-base/`, and every workspace diagram template. **The scope
+instruction was "all issues in this manual"; this section is outside it and needs
+Stephen's decision.** It is recorded here because fixing the Streamer Guide alone would
+leave four of these errors live in two *other* released artifacts.
+
+### Released public documents carrying the same errors
+
+| Artifact | Site | Error |
+|---|---|---|
+| **P2 Assembly Language Manual v3.1.6** (released 2026-08-18, 502pp) | `appendix-g-streamer-constants.md:115` | *"Read byte as RGBI 2:2:2:2 (16 colors + intensity)"* — the same fabrication (§3) |
+| **P2 Assembly Language Manual v3.1.6** | `appendix-g-streamer-constants.md:237` | `X_RFBYTE_1P_1DAC1 \| X_DACS_3_2_1_0` with no WRPIN/DIRH — the same omission (§1) |
+
+### The live KB (`deliverables/ai/P2/`, served by `p2kb-mcp`, always "latest")
+
+| File | Site | Error |
+|---|---|---|
+| `language/spin2/symbols/streamer-symbols.yaml` | `:186` | `RFBYTE → RGBI 2:2:2:2` — one wrong row in an otherwise-correct table |
+| `architecture/streamer/modes-reference.yaml` | `:221` | same RGBI8 description, second copy |
+| `architecture/streamer/modes-reference.yaml` | `:88, :93, :98, :330` | `d_19_16` hardcoded where the field has free bits — **the §5 defect, in the KB** |
+| `architecture/streamer/modes-reference.yaml` | `:186, :191, :196, :273, :278, :283` | the **mirror-image** defect — a `p` letter implying a free bit where the field is fully fixed |
+| `architecture/streamer/dds-goertzel.yaml` | `:57` | `"Read LUT entry at NCO[30:22]"` as an unconditioned rule — **a gap in F-302's own proposed correction** |
+| `architecture/streamer/dds-goertzel.yaml` | `:89, :100, :227` | further fixed-512 assumptions |
+
+**KB work belongs to the `yaml` head** (`yaml-knowledge-base-maintenance`), not to this
+manual sprint. It touches 3+ files, so the sprint-plan overlay's **file table +
+design-decisions + wait-for-confirmation** rule applies before any YAML editing begins.
+Pair the releases; do not merge the work.
+
+### A cloned diagram — the duplication trap
+
+`\DiagRgbFormats` and `\DiagDdsGoertzel` were **copy-pasted** into
+`workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty` (`:176`, `:207`),
+carrying both bugs. `\DiagRgbFormats` **is invoked** there
+(`P2-Layout-Torture-Test.md:836`), so the bad diagram renders into every torture-test
+build; `\DiagDdsGoertzel` is currently dead code in that template but is a copy source for
+whatever clones next. A staged mirror also exists at
+`pdf-forge/interactive-testing/templates/p2kb-torture-diagrams.sty:207`.
+
+**This is exactly the duplication the plan-authoring rule warns about:** fixing one copy
+and shipping the other two is the normal outcome. Decide whether the two diagram macros
+become **one shared platform diagram** rather than three copies.
+
+### Verified correct — do not "fix" these
+
+The sweep was careful to distinguish look-alikes, and these survived row-by-row decoding:
+
+- **Assembly Manual Appendix G's "ADC Sampling Modes" (5 rows) and "DDS/Goertzel" tables**
+  — checked explicitly. `D[19:16]` genuinely *is* a fixed sub-mode selector for the ADC
+  family, and the DDS/Goertzel rows are a **named-constant value table**, not a field
+  template, so `p = 0` is an accurate value for that symbol rather than a false claim
+  about the encoding. *Completeness caveat only:* neither table discloses that setting
+  `D[19]` selects the other four-pin block.
+- **`dds-goertzel.yaml:11, :18`** — `%1111_0ppp_p111` / `%1111_1ppp_p111`, exact matches,
+  with the correct `D[22:19]` multiple-of-four caveat. **Use this file as the fix template.**
+- **This manual's own `§4.2` (`:305`), `§10.1` (`:638-639`), `§17.1` (`:1356`), and
+  `§9.2` (`:618`)** all state the field correctly. Appendix A is the outlier — the fix
+  source is already inside the same book.
+- **`wrpin.yaml:54`** documents the DAC/COGID mechanism correctly, and
+  **`dds-goertzel.yaml:203`** carries a complete worked DAC-pin setup. §1's answer was
+  never missing from the repo; it was missing from the manual.
+
+**Verification.** *Normal:* every SAME_ERROR site above is either fixed or explicitly
+deferred with a reason. *Edge:* the CORRECT_HERE list is untouched — a sweep that
+"corrects" a correct table is the worst outcome here. *Error:* re-run the four sweep
+patterns after the fixes and confirm zero SAME_ERROR hits remain.
+
+---
+
+## §14 — Register and audit-record hygiene for this manual
+
+Small, and it prevents the next audit from re-deriving what is already done.
+
+- **`audit/fanout-findings-2026-07-10.md` header is stale.** It says *"Pending human
+  hand-check + class-wide sweep. **Not yet applied to the document.**"* Verified against
+  the artifact: **all 8 survivors were applied** (NCO 32-bit wording `:232`, Appendix D
+  long-alignment `:1684`, VGA porch order, `m_visible` `$B085`→`$BF85`, SPI `wxpin ##1`,
+  §7.3 `xcont`→`xinit`, Appendix A `%pppp`→`%pppa`, §10.4 SINC2 citation). Correct the
+  header to record what landed.
+- **`F-278`'s Streamer annotation is stale.** `:1017` now uses the ```` ```antipattern ````
+  fence and it shipped in v1.0.9. Flip that site.
+
+**The most useful thing in this section is why S-5 happened.** The fanout audit's survivor
+list included *"Appendix A RFBYTE 1-pin `%pppp` should be `pppa`."* **That one row was
+fixed. The other 15 rows of the same table, with the same defect class, were never
+touched** — even though the audit's own header said the class-wide sweep was **owed**. The
+finding named one row; the fix corrected one row; nobody swept the table. Record this in
+the retrospective: it is the class mechanism caught in our own history, and §10's contract
+plus this sprint's sweep are the corrective.
+
+---
+
+## §15 — Index entries for the new material
+
+The Index (`:1731`, 56 hand-authored `- term: link` bullets) needs entries for everything
+this sprint adds: DAC pin configuration / DAC mode, the LUT window and its loop sizes,
+phase offset / modulation, and `S[11:0]`. Index entries are hand-authored, never generated.
+
+**Verification.** *Normal:* every new section is reachable from the Index. *Edge:*
+alphabetical placement and the `\indexletter` groupings stay correct. *Error:* every new
+anchor resolves — a dead Index link is worse than a missing one.
+
+---
+
+## Verified clean — checked this pass, no work owed
+
+Recorded so the next audit does not re-derive it, and because it is the evidence behind
+"correct and re-release" rather than "withdraw."
+
+| Area | Result |
+|---|---|
+| **Appendix C** frequency tables | **All 23 values arithmetically correct** — 8 NCO ratios + 15 video pixel rates, recomputed from `round(2^31 × rate / clock)` |
+| **Appendix B** symbol reference | **Consistent with Appendix A** — 56 modes, no gaps; its extra 22 entries are the control/DAC symbols A correctly omits |
+| **Guide layer** | `audit-guide-conformance.py --inventory` → **PASS across 45 files**; every item `[D1]`–`[D6]` deliberate |
+| **5 of 7 diagrams** | `\DiagStreamerArch`, `\DiagDataFlow`, `\DiagNcoRollover`, `\DiagCommandWord`, `\DiagVgaTiming` all correct. `\DiagVgaTiming` arithmetic checks (800 px @ 25.175 MHz ≈ 31.78 µs) |
+| **Fanout audit (8 survivors)** | All applied — only the header lies |
+| **F-278 wrong-code fencing** | The single wrong-code block correctly uses ```` ```antipattern ```` |
+| **§15.1 VGA mode-long** | `$7F01_0000` intact, and the fanout DAC-routing fix (`$BF85_0000`) landed |
+
+**Two ironies worth keeping in the retrospective.** `\DiagCommandWord` correctly labels
+`D[19:16]` *"mode-specific"* while Appendix A hardcodes it, and `\DiagStreamerArch` labels
+its output *"on DAC-mode pins"* while the prose never states the DAC-mode requirement.
+**Both times the diagram knew and the text did not.**
+
+---
+
 ## Documentation Blast Radius
 
 `DOC_AUDIT_COMMAND` run at plan time —
@@ -457,6 +630,11 @@ references, rules quoted in order to forbid them). **No guide-layer defect is ow
 | `PLATFORM-FEATURE-ADOPTION.md` | **Yes** (Q3) | metadata row → ✅ after PDF inspection |
 | `P2KB-CORRECTION-FINDINGS.md` | **Yes** | F-302 status on KB fix; F-272 status if benched |
 | `voice-guide.md` | **No** | No voice convention changes |
+| `workspace/.../templates/p2kb-streamer-diagrams.sty` | **Yes** | §3 + §4 diagram fixes. **Must be staged to outbound** — the bundle is no longer markdown-only |
+| `audit/fanout-findings-2026-07-10.md` header | **Yes** | §14 — stale "not yet applied" |
+| `workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty` | **§13 decision** | Cloned copies of both wrong diagrams |
+| `p2-assembly-language-manual` Appendix G | **§13 decision** | Released manual, two of the same errors |
+| `deliverables/ai/P2/architecture/streamer/*.yaml`, `language/spin2/symbols/streamer-symbols.yaml` | **§13 decision** | Live KB; `yaml` head owns it |
 | `deliverables/.../DOCs/` PDF + changelog copy | **Yes** | Promoted by `release-manual` |
 | P2KB YAML (`p2kbArchDdsGoertzel`) | **Separate head** | F-302's KB half is `yaml-knowledge-base-maintenance`, not this sprint. Pair the releases; do not merge the work |
 | Counts / sample transcripts | **None** | The manual quotes no tool output and maintains no counts |
