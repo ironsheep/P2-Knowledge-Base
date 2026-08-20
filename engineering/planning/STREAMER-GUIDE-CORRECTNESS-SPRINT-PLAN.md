@@ -2,9 +2,11 @@
 
 **Document:** P2 Streamer Programming Guide (`manual:p2-streamer-programming-guide`)
 **Created:** 2026-08-19
-**Status:** 🟢 **RESEARCH COMPLETE (2026-08-20).** Q1 and Q3 closed; **Q2 (version number) and
-Q4 (second sweep) are the only items outstanding**, both with recommendations. Nothing in the
-plan is blocked on investigation.
+**Status:** 🟢 **RESEARCH COMPLETE — §0 IS EMPTY (2026-08-20).** Q1–Q4 all closed. Two sweeps
+have run (the original class audit and a four-angle second sweep on orthogonal axes), plus a
+cross-artifact sweep. **17 findings** across §1–§16. Ready for `plan-to-tasks`.
+
+**Version: v1.1.0.**
 
 **Scope (Stephen, 2026-08-20):** *this manual only* — correct its content and land every pending
 update it owes. Errors found in **other** artifacts are registered as **F-302…F-305** and
@@ -96,11 +98,15 @@ current state and reasoning; this plan does not restate it. Rig spec: **§1b** b
 cannot be written without it) or the sprint proceeds with §7 held back as a labelled
 fragment. **Recommendation: bench first.**
 
-### Q2 — Release number: **v1.1.0** or v1.0.10? *(Recommendation: v1.1.0.)*
+### Q2 — **CLOSED 2026-08-20: v1.1.0.**
 
-Four wrong facts corrected in a released document, plus genuinely new material (the
-`S[11:0]` field, the DAC-pin requirement, a declared example contract). That is more
-than a patch. **Recommendation: v1.1.0.**
+Four wrong facts corrected in a released document, plus genuinely new material — the
+`S[11:0]` field with its bounded-region and phase-offset bits, the DAC-pin requirement, and a
+declared example contract. More than a patch.
+
+**Bump in one place only** once §11 lands: `request.json` `metadata.version` → `1.1.0`
+(bare, no `v`). The cover reads it from `\DocVersion` after conversion, so there is no second
+location and no mismatch is possible.
 
 ### Q3 — **CLOSED 2026-08-20: included.** Metadata single-source rides along.
 
@@ -119,11 +125,29 @@ Current state, researched rather than assumed:
 The `v` prefix is the trap: converted documents take the bare number, so the conversion is a
 two-part edit, not a one-part one.
 
-### Q4 — Is a second sweep wanted beyond the audit? *(Recommendation: no.)*
+### Q4 — **CLOSED 2026-08-20: the second sweep RAN, and it was right to.** Recommendation reversed.
 
-The audit swept all 37 code blocks and every factual claim across six regions, with an
-adversarial refutation pass. §10's labelling work forces a fresh per-block decision on
-every block anyway, which is a better second look than repeating the same sweep.
+I had recommended **no**, arguing §10's labelling pass was a better second look. **That was
+wrong, and the reasoning was weak in three ways:**
+
+1. **The substitution didn't hold.** §10 is a *code-block* pass. The highest-severity findings —
+   RGBI8, the `SETSCP` literal, Appendix A, the 512 claim — are prose-and-table facts. §10 does
+   not cover that ground.
+2. **The evidence was already in front of me.** Everything found *after* the first sweep, the
+   first sweep had missed: both wrong diagrams (its agents were scoped to `streamer-body.md`;
+   the `.sty` was never in scope), the fourth 512 site at `:1424`, Appendix C's arithmetic,
+   Appendix B's consistency. Its region 6 covered Appendices B and C and reported on neither.
+3. **It reproduced the pathology.** "We already looked" is exactly what was true, and wrong,
+   nine times over in this document's history.
+
+There is also a gap no re-run of the first sweep could close: it checked claims the manual
+**makes**. It structurally cannot find what the manual **never says** — which is how `S[11:0]`
+stayed missing for nine releases. We found that because Christof asked, not because we swept.
+
+**So a second sweep ran on four orthogonal angles** — omissions against the Silicon Doc,
+self-consistency with no external authority, numeric/bit-pattern recomputation, and the non-body
+artifacts. **8 raw findings → 8 CONFIRMED, 0 refuted** by the adversarial pass (two were the same
+contradiction found independently by two angles, so **7 distinct**). Results: **§16**.
 
 ---
 
@@ -656,6 +680,94 @@ phase offset / modulation, and `S[11:0]`. Index entries are hand-authored, never
 **Verification.** *Normal:* every new section is reachable from the Index. *Edge:*
 alphabetical placement and the `\indexletter` groupings stay correct. *Error:* every new
 anchor resolves — a dead Index link is worse than a missing one.
+
+---
+
+## §16 — Second-sweep findings (2026-08-20): 7 distinct, all confirmed
+
+Four orthogonal angles the first audit structurally could not cover. **8 raw → 8 CONFIRMED, 0
+refuted**; two angles independently found the same VGA contradiction, so 7 distinct. The two
+load-bearing ones were re-verified by hand.
+
+### S-11 — CRITICAL — Chapter 15 is titled "Video Output" and never explains the colorspace converter
+
+Its two code blocks call **`SETCMOD`, `SETCFRQ`, `SETCY`, `SETCI`, `SETCQ`** — and the manual
+never says what any of them compute. Absent entirely, verified by grep across body, front matter
+and diagrams:
+
+| Missing | Silicon Doc |
+|---|---|
+| The signed Y/I/Q matrix formulas and the `CMOD[4]` sign/zero-extend switch | `:4760-4776` |
+| The modulator (`PHS = PHS - CFRQ`) and the **1.646 CORDIC scaling factor** | `:4777-4791` |
+| The `FY/FI/FQ/FS/FIQ/FYS/FYC` terms | `:4792-4852` |
+| **The `CMOD[6:5]` table has FOUR modes** — `%00` off, `%01` VGA/HDTV, `%10` Composite **+ S-Video**, `%11` Composite. §15.3 shows only `%11`; **S-Video is never mentioned in the book** | `:4853-4930` |
+| The `CMOD[8:7]` DVI forward/reverse table, its RED±/GRN±/BLU±/CLK± pin assignments, and the **`P[1]` literal-vs-TMDS bit — the mechanism by which sync rides inside an HDMI stream**. §15.2 reduces all of it to *"Eight pins in sequence for TMDS pairs"* | `:4342-4467` |
+
+This is the same shape as `S[11:0]` and larger: an entire subsystem the chapter depends on,
+invisible to any audit that only checks claims the book makes.
+
+### S-12 — MAJOR — `SETDACS` is never introduced
+
+The instruction that sets the background level on any DAC channel the streamer is not overriding.
+Its **only** appearance in the whole manual is a legend bullet at `:764` — *"`--` = No override
+(SETDACS value used)"*. No syntax, no example, no statement that it exists. Yet **every `--` in
+§11.1's routing table depends on it**, and §11.3's own "Stereo Audio" recipe (`X_DACS_X_X_1_0`)
+leaves DAC3/DAC2 undefined without it. Authority: `:2704-2721`.
+
+### S-13 — MAJOR — the flagship VGA program contradicts the book's own timing advice
+
+**Hand-verified.** §3.4 says three times to use 25.0 MHz for VGA on a 20 MHz crystal:
+
+- `:239` table — *"use 25.0 MHz pixel → 10.000 cyc/px, no jitter"*
+- `:245` VGA note — *"**Standard practice is a 25.0 MHz pixel clock at 250 MHz sysclk** — exactly
+  10 cycles per pixel (jitter-free)"*
+- `:259` worked remedy — *"25.0 MHz @ 250 = 10.000 cyc/px → no jitter"*
+
+§15.1 — **the manual's one complete program, and the standard §10 measures every other block
+against** — then ships `pixfreq long $0CE3_BCD3 ' 25.175 MHz @ 250 MHz`: the 9.93-cyc/px value
+§3.4 computes as producing ±1-cycle jitter. Unacknowledged.
+
+**Decide which is right and make them agree.** If §15.1 is deliberate (matching real driver
+practice), it needs one sentence saying so and why. Silent disagreement is the defect.
+
+### S-14 — MINOR (but wrong, and shipped in v1.0.9) — the "$7F/$80 rails" claim
+
+**Hand-verified arithmetic.** `:1429` states *"The DAC bytes are emitted with their MSB inverted,
+so the output rails sit at `$7F` and `$80`, not `$FF` and `$00`."* Applying the manual's own
+formula (§10.2, `DACn := LUT.byte[n] XOR $80`) to the manual's own amplitudes (§10.4):
+
+| Table | DAC codes produced |
+|---|---|
+| SINC1 ±127 | **`$01` … `$FF`** — so `$FF` *is* reached; "not `$FF`" is false |
+| SINC2 ±10 | **`$76` … `$8A`** — neither `$7F` nor `$80` is a rail |
+| input `0` / `-1` | `$80` / `$7F` — **these are the zero-crossing codes** |
+
+The callout conflates the quiescent midpoint with the extremes.
+
+### S-15 · S-16 · S-17 — MINOR omissions
+
+- **S-15** — for the combined ADC+pin modes (`X_1ADC8_8P_2DAC8_WFWORD`,
+  `X_2ADC8_16P_4DAC8_WFLONG`), the manual never says which half of the captured word holds pin
+  data and which holds ADC data, so the buffer cannot be decoded (`:3977-3979`).
+- **S-16** — never states that when the count exceeds the sub-values packed in the source, **the
+  last value repeats** for the remainder — stated by the Silicon Doc for every immediate and
+  RDFAST family (`:3664-3683`), and §5's "small, fixed pattern" framing invites reliance on it.
+- **S-17** — after a **perpetual (`$FFFF`)** command, a buffered `XZERO`/`XCONT` waits only for
+  the *next NCO rollover*, not for completion — the predecessor never reaches a final rollover
+  (`:3505-3512`). §4.7's general rule is stated without this exception.
+
+### The pattern worth carrying to the retrospective
+
+**Two of the errors in this sprint were introduced by v1.0.9 itself** — the `SETSCP` literal
+(§2) and this `$7F/$80` claim (S-14) — the release that rewrote §9.2 and §17.1 from
+hardware-verified work. A pass can be right about the mechanism and wrong about the arithmetic
+in the same paragraph. **Numbers need recomputing even when the physics was measured.**
+
+**Verification (all of §16).** *Normal:* each finding fixed at every location. *Edge:* S-11 is
+scope-sensitive — decide how deep Chapter 15 goes into the colorspace converter versus
+cross-referencing it; "document everything in `:4726-4931`" is not automatically right for a
+*streamer* guide, but "call five instructions and explain none" is not defensible either.
+*Error:* S-13 must end with §3.4 and §15.1 **agreeing**, not with both edited into vagueness.
 
 ---
 
