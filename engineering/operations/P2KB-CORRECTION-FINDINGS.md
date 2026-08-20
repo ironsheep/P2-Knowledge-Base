@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-310`**
+**Next finding ID: `F-311`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -514,6 +514,51 @@ and is retracted above.`
 
 ---
 
+## Manual-side residue of an already-fixed YAML correction (2026-08-20) — F-310
+
+### F-310 — the Streamer Guide sources the SINC2 constant-iteration constraint to a document that does not contain it. `DONE (2026-08-20)`
+
+**Origin:** found while correcting the Streamer Guide's fan-out audit record at «#282». The audit
+record claimed all 8 survivors had been applied; seven had. This is the eighth.
+
+**The claim, as RELEASED in v1.0.9** (`streamer-body.md`, the §10.5 SINC2 caution):
+*"a documented silicon limitation"* … *"(The constant-iteration constraint is recorded in the*
+Parallax Propeller 2 Documentation *Goertzel note dated 2024.12.16.)"*
+
+**Why it is wrong.** The **constraint itself is real and stands** — do not remove it. What is wrong
+is where the manual sends the reader to check it. It is **not** in the released *Parallax Propeller 2
+Documentation*. The 2026-07-10 fan-out audit flagged exactly this and marked it `unverifiable`; the
+v35 text carries only the amplitude caveat (reduce the sine/cosine table from ±127 to ±10), and the
+power-of-2 rule that IS in v35 belongs to the **smart-pin SINC2 sampling mode**, a different
+mechanism. The real source is Chip Gracey, the P2's designer, reporting it on 2024-12-16 — ingested
+at `engineering/ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/`.
+
+**This was already decided once, on the YAML side, and the manual was not swept.** **F-190**
+(`DONE 2026-07-02`, now in the 2026-08-15 archive) put the constraint into
+`language/pasm2/getxacc.yaml` as `sinc2_constraint` and deliberately attributed it to *"Chip Gracey
+(P2 designer), 2024-12-16; not yet in the released Silicon Doc"* — Stephen confirmed at the time that
+the released document lacks the note. Six weeks later the manual still carried the attribution that
+decision had already rejected. **The finding named the YAML, the fix corrected the YAML, nobody swept
+the manual** — the same shape as the Appendix A row that was fixed while fifteen siblings were not.
+
+**Class-wide sweep: done, and the class is small.** Exactly **one** live site, `opus-master/
+streamer-body.md`. No other manual and no app note carries the claim. Deliberately NOT touched: the
+workspace render and the outbound `.tex` (regenerated from the master), the fan-out audit file (a
+historical record of what was found), and the v1.0.3 CHANGELOG entry — which is **correct as
+written**, calling these *"Designer-authoritative guidance additions"* rather than
+documentation-sourced.
+
+**Fix applied 2026-08-20.** Headline now reads *"a silicon limitation reported by the P2's
+designer"*; the closing parenthetical now reads *"Chip Gracey, the P2's designer, reported this
+constraint on 2024-12-16. It has not reached the released* Parallax Propeller 2 Documentation*, so do
+not expect to find it there."* Telling the reader why the citation will not be found there is the
+part that makes the correction useful rather than merely accurate. Four prose gates green.
+
+**Status:** `DONE (2026-08-20) — single site corrected, class swept and empty, source verified live
+against the ingestion tree rather than against this register. Ships in Streamer Guide v1.1.0.`
+
+---
+
 ## Golden-source defect — duplicate EF id (2026-08-15) — F-267
 
 ## ⛔ REVERSAL — a shipped KB correction went the wrong way (2026-08-16) — F-269
@@ -706,7 +751,7 @@ NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explic
 
 ## Open question surfaced by «#221» — does a STREAMER-driven DAC need `P_CHANNEL`? (2026-08-16) — F-272
 
-### F-272 — the `%TT` setting for a DAC pin the STREAMER writes is not stated by any source we hold. `OPEN — question, not a defect claim`
+### F-272 — filed as "the `%TT` setting for a DAC pin the STREAMER writes is not stated by any source we hold." The premise was false, and the bench then confirmed the answer. `RESOLVED-INVALID`
 
 **How it surfaced.** Streamer Guide §17.1 shipped `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins`
 alongside `X_DACS_0N0_0N0` in the command — i.e. a **streamer-driven** differential DAC. «#220»
@@ -739,8 +784,11 @@ recipe we have not seen work is worse than an obviously incomplete one.
 streamer-fed DAC, this question governs it. Settle it on the bench (drive a DAC from the streamer
 with `TT = %00` and with `%01`, compare) before writing the streamer-driven form into any document.
 
-**Status:** `RESOLVED — the premise was false; the mechanism IS stated by sources we hold
-(2026-08-20). Bench confirmation optional, not required.`
+**Status:** `RESOLVED-INVALID (2026-08-20) — the premise was false: the mechanism IS stated by
+sources we hold, in the three places tabled below. The bench then ran anyway and CONFIRMED the
+answer — VO-J-003 → EF-063, arm T0 reading 1 ADC count at %TT = %00 against arm T1 reading 5,330
+at %01. Documentary and empirical agree; nothing is owed. Note this status supersedes the earlier
+"bench confirmation optional, not required" — it was optional, it happened, and it is recorded.`
 
 ### 2026-08-20 — this finding's premise is falsified. The Silicon Doc states the whole mechanism, in three separate places.
 
@@ -970,12 +1018,25 @@ strawman); `:5804`'s impossibility aside. ⚠️ **The reader-celebration at `:5
 voice guide explicitly protects celebration of reader progress as pedagogy, and an early draft of this
 finding wrongly proposed cutting it.
 
-### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `CONFIRMED`
+### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `PARTIAL`
 
-**Locations (7 sites):** Streamer `streamer-body.md:1016` **(NOT RELEASED, v1.0.9)** · Debug Window
-`ch12-bidirectional.md:66`, `:186` **(NOT RELEASED, v1.1.3)** · IOSP
-`part-5-appendices/appendix-e-troubleshooting.md:98`, `:202`, `:278` and
-`part-3-input-modes/chapter-17-serial-receive.md:172` **(RELEASED, v1.0.8)**.
+**Locations (8 sites — the 7 first enumerated, plus the 8th the narrow pattern missed).** Sites are
+named by section rather than by line, because master line numbers move with every content task and a
+stale number sends the next reader to the wrong block. **All 8 are CONVERTED, and 7 of them have
+SHIPPED — verified against the release tags on 2026-08-20 («#282»), not inferred from this register:**
+
+| Manual | Site | State |
+|---|---|---|
+| Streamer | §13.4's `\|`-vs-`+` pair | converted · **RELEASED v1.0.9** (2026-08-19) |
+| Debug Window | `ch12-bidirectional.md`, both sites | converted · **RELEASED v1.1.3** (2026-08-18) |
+| IOSP | `appendix-e-troubleshooting.md` ×3, `chapter-17-serial-receive.md`, `chapter-11-serial-transmit.md` | converted · **RELEASED v1.0.9** (2026-08-18) |
+| Debug Window | `ch08-scope-xy.md` blockquote pair | **deliberately deferred** — see below |
+
+**This annotation used to read `(NOT RELEASED, v1.0.9)` / `(NOT RELEASED, v1.1.3)` / `(RELEASED,
+v1.0.8)`, and all three were stale.** The releases happened on 2026-08-18 and 2026-08-19 and nothing
+came back to say so. Note the direction: the record understated what had been done, so a reader is
+sent to redo finished work. `audit-register-hygiene.py` cannot see this class — it detects only the
+opposite drift, a headline claiming a fix over a status token that does not agree. Same gap as F-272.
 
 The platform provides `AntipatternBlock` (`p2kb-platform-content.sty:277` — red fill, red border, 4 pt
 left rule), reachable as a ```` ```antipattern ```` fence or `::: antipattern` div via
@@ -1006,7 +1067,8 @@ already reads correctly. **Action: verify `> ```antipattern` at the next Forge r
 no precedent in the set is a render risk, not a green light.
 
 **IOSP is not in the release wave.** Its sites are fixed in opus-master and ship at its next release —
-editing a master is not releasing a document.
+editing a master is not releasing a document. *(That next release came: **v1.0.9, 2026-08-18**. All
+five conversions are in the tag.)*
 
 **IOSP RESOLVED 2026-08-17 («#246») — five sites, not four.** The four declared sites are converted.
 A **fifth** turned up because this pass used the broader wrong-code pattern
@@ -1017,6 +1079,12 @@ this finding in two manuals; the enumeration above is the floor, not the census.
 sites carried the wrong and correct forms in **one** block and were split the way Streamer's was —
 ```` ```antipattern ```` then ```` ```spin2 ```` — so the reader gets red-beside-green rather than two
 comments in one box.
+
+**Status:** `PARTIAL — 8 of 8 sites converted; 7 shipped (Streamer v1.0.9, Debug Window v1.1.3, IOSP
+v1.0.9). What remains is ONE site and it is gated, not forgotten: ch08-scope-xy.md's blockquote pair
+waits on verifying that `> ```antipattern` renders, because no manual in the set has ever used that
+fence-inside-blockquote combination. Verify it at the next Debug Window Forge round-trip, convert if
+it renders, and this finding closes.`
 
 ### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `CONFIRMED`
 

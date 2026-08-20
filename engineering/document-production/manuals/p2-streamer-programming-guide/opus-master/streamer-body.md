@@ -753,7 +753,7 @@ repeat i from 0 to 511
 :::
 
 ::: caution
-**SINC2 requires a *constant* iteration count per Goertzel cycle — a documented silicon limitation.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (The constant-iteration constraint is recorded in the *Parallax Propeller 2 Documentation* Goertzel note dated 2024.12.16.)
+**SINC2 requires a *constant* iteration count per Goertzel cycle — a silicon limitation reported by the P2's designer.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (Chip Gracey, the P2's designer, reported this constraint on 2024-12-16. It has not reached the released *Parallax Propeller 2 Documentation*, so do not expect to find it there.)
 
 Three ways to avoid it, most robust first:
 
