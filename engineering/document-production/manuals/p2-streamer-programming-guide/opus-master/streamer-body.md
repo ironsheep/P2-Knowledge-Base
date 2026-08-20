@@ -600,7 +600,7 @@ These modes take their input from the cog's **four-channel scope**, so the pins 
 
 ```pasm2
 ' Route pins 0..3 into the four scope channels and enable the scope
-        setscp  #%1_0000        ' enable, D[5:2]=%0000 -> pin base 0
+        setscp  #%100_0000      ' D[6]=1 enable, D[5:2]=%0000 -> pin base 0
 
 ' Configure the ADC pin and ENABLE it
         wrpin   ##P_ADC_1X, #adc_pin    ' gain matched to the coupling
