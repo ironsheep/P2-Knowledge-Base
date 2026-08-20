@@ -1,0 +1,510 @@
+'' =============================================================================
+''  test-F308 -- (1) does the debug interrupt change the answer?
+''               (2) where does the streamer's pin group actually land?
+'' =============================================================================
+''  WHY THIS RUN EXISTS
+''    EF-062 and EF-063 (2026-08-20) are both graded [M -- single run], and both
+''    carry the same caveat: the rig REPORTED from the cog it MEASURED in, so
+''    the debug interrupt was live in the measuring cog.  That is NOT EF-057's
+''    arrangement, and EF-057 is CONFIRMED: the debug interrupt corrupts
+''    streamer measurements.  The caveat was argued away (no debug() executes
+''    inside a measured window; both controls passed; T1 tracked C to within one
+''    count).  ARGUING IS NOT MEASURING.  Phase 1 measures it.
+''
+''    Phase 2 exists because task «#289» is about to write a pin-enable line
+''    into five code blocks in a released manual, and those lines encode two
+''    things this project has never put on silicon: the SPAN idiom
+''    `drvh #<count-1><<6 + base`, and the claim that `base<<17` selects the
+''    pin group.  EF-059 is the standing warning here -- in one mode `<<17`
+''    landed in D[19:16] and silently selected a DIFFERENT streamer mode.
+''    Authoring five blocks on an unverified idiom is how that repeats.
+''
+''  Build:  pnut-ts -d test-f308-cog-and-pingroup.spin2
+''          The -d is REQUIRED, or every line below prints nothing.
+''
+''  BENCH SETUP: the SAME jumper as before, P0 -> P1.  Nothing else.
+''    Phase 2 touches P8..P31 and NOTHING outside it -- clear of the jumper,
+''    clear of P58..P63 (boot + DEBUG_PIN_TX/RX).  It NEVER drives a pin hard
+''    until it has certified that pin is electrically free, using a 15k drive
+''    that anything real on the board will simply overpower.  If something IS
+''    attached to P8..P31, the program names the pins and stops phase 2 rather
+''    than fighting them.
+''
+''  PREDICTIONS ON RECORD, WITH THEIR FALSIFYING OUTCOMES NAMED.
+''    P1: the two cogs AGREE, and EF-062/EF-063 lose their caveat.
+''        Falsified if they differ at all -- which would mean EF-057's blast
+''        radius reaches further than we thought and BOTH entries need regrading.
+''    P2-B: `drvh #7<<6 + 16` drives EXACTLY P16..P23.
+''        Falsified if the span reaches further, or only one pin.
+''    P2-C: an 8-pin mode at base 16 drives EXACTLY P16..P23.
+''    P2-D: base 20 -- a base that is NOT a multiple of 8 -- is the interesting
+''        one and I do NOT have a confident prediction.  Silicon Doc says the
+''        group select is "%ppp in D[22:20] ... in 8-pin increments", which
+''        would snap 20 down to the P16 group and push the low bits into
+''        D[19:16], the mode-variant field.  The manual and Parallax's own
+''        Spin2 examples write `pin<<17`, which reads as a 6-bit D[22:17].
+''        For a base that IS a multiple of 8 the two are identical, which is
+''        why nobody has ever had to choose.  This run makes it choose.
+''
+''  NOTHING GATES ACROSS PHASES.  Phase 1 failing does not stop phase 2, and
+''  within each phase only that phase's own control can stop it.  Gating a run
+''  on a self-test that tested the wrong path cost two bench slots on 2026-08-20.
+'' =============================================================================
+
+CON
+  _xtlfreq   = 20_000_000                ' P2 Eval/Edge default
+  _clkfreq   = 200_000_000
+
+  '' EF-057: restrict the debug interrupt to the REPORTING cog.  Phase 1's
+  '' whole point is that cog 0 both reports and (in leg A) measures.
+  DEBUG_COGS = %0000_0001
+
+  DAC_PIN    = 0                         ' low two bits %00 -> DAC channel 0
+  ADC_PIN    = 1                         ' jumpered to DAC_PIN
+
+  '' Phase 2 canvas.  P8..P31: 24 pins, none of them the jumper, none of them
+  '' a boot or DEBUG pin.  Held at a 15k low so an undriven pin reads 0 with a
+  '' DEFINED reason rather than floating at whatever charge it kept.
+  CANVAS_LO  = 8
+  CANVAS_N   = 24
+  CANVAS_TOP = CANVAS_LO + CANVAS_N - 1  ' P31
+
+  GRP_BASE   = 16                        ' aligned 8-pin group -- P16..P23
+  GRP_N      = 8
+  PIN_FINE   = 20                        ' unaligned, for the 1-pin mode
+  GRP_OFF    = 20                        ' unaligned, for the 8-pin mode
+
+  '' Expected canvas masks, as pinread() returns them: bit 0 = P8.
+  M_P16_23   = $00_FF00
+  M_P20_27   = $0F_F000
+  M_P24_31   = $FF_0000
+  M_P20      = $00_1000
+
+  HI         = $FF
+  LO         = $00
+  MIN_SPREAD = 500                       ' see EF-062/063: a live DAC swings
+                                         ' ~5,000 counts; noise is far below
+  NCO_SLOW   = $8000_0000 / 1024
+  PERPETUAL  = $FFFF
+
+  '' One pin, for the DIR A/B.  Verified $4080_FFFF from the compiler listing.
+  R_PIN_CMD  = X_IMM_32X1_1DAC1 | X_PINS_ON | (DAC_PIN << 17) | PERPETUAL
+  R_ONES     = $FFFF_FFFF
+  R_ZEROS    = $0000_0000
+
+  X_IMM_LEVEL = $7001_0000               ' X_IMM_1X32_4DAC8
+  X_DACS_CH0  = $0400_0000               ' X_DACS_X_X_X_0
+
+  '' Phase 2's streamer commands.  THE FIRST DRAFT OF THIS TEST WAS VACUOUS AND
+  '' THE COMPILER LISTING CAUGHT IT, NOT THE BENCH.  X_IMM_4X8_1DAC8's template
+  '' is %0110 / %1110 -- Appendix A prints those D[19:16] bits as LITERALS, with
+  '' no `p` letters, meaning this mode has NO pin field down there.  Its group
+  '' select is D[22:20] alone: 8-pin increments.  So `| 20<<17` sets bit 21 and
+  '' bit 19, bit 19 is ALREADY set by the mode template, and the command word
+  '' comes out byte-identical to base 16 ($60AE_FFFF both ways).  An unaligned
+  '' base composed with `|` does not fail -- it silently vanishes.
+  ''
+  '' Which makes the mode-dependence the real subject here:
+  ''   X_IMM_4X8_1DAC8  D[19:16] = %1110 literal -> group is D[22:20], 8-pin
+  ''   X_IMM_32X1_1DAC1 D[19:16] = %pppa         -> pin is D[22:17], ANY pin
+  '' Same `pin<<17` idiom, two different meanings, and nothing in the source
+  '' line says which you got.
+  G_CMD_16   = X_IMM_4X8_1DAC8  | X_PINS_ON | (GRP_BASE << 17) | PERPETUAL
+  G_CMD_FINE = X_IMM_32X1_1DAC1 | X_PINS_ON | (PIN_FINE << 17) | PERPETUAL
+
+  '' THE TRAP, and it is the manual's OWN idiom: every X_PINS_ON line in the
+  '' book composes the pin field with `+`, not `|` (":887", ":985", ":1107" ...).
+  '' With `+`, an unaligned base CARRIES into D[19:16] instead of vanishing:
+  '' $600E_0000 + $0028_0000 = $6036_0000, which is a DIFFERENT MODE
+  '' (X_IMM_4X8_4DAC2, D[19:16] = %0110) at a DIFFERENT GROUP (D[22:20] = %011,
+  '' P24..P31).  This is EF-059's failure exactly, in a second mode family.
+  '' If the bench agrees, «#289» must not write `+ pin<<17` into a block whose
+  '' `pin` a reader can set, and the manual owes a caution.
+  G_CMD_TRAP = X_IMM_4X8_1DAC8  + X_PINS_ON + (GRP_OFF  << 17) + PERPETUAL
+
+  JOB_ANALOG = 1
+  JOB_GROUP  = 2
+
+VAR
+  long stack[128]
+  long job, done
+  long slot[8]                            ' worker -> reporter handoff
+  long legA[8], legB[8]                      ' phase 1 leg A (cog 0) and leg B
+
+
+PUB main() | started
+  debug("=== F-308 follow-up: debug-cog effect, and the pin group ===")
+
+  '' ---------- PHASE 1 -------------------------------------------------------
+  debug("-- Phase 1: the SAME measurement in two cogs --")
+
+  measure_analog()                       ' leg A: cog 0, debug interrupt LIVE
+  longmove(@legA, @slot, 7)
+  release_all()
+
+  started := run_in_free_cog(JOB_ANALOG) ' leg B: launched cog, debug-free
+  longmove(@legB, @slot, 7)
+  report_phase1(started)
+  release_all()
+
+  '' ---------- PHASE 2 -------------------------------------------------------
+  debug("-- Phase 2: where the pin group lands --")
+  started := run_in_free_cog(JOB_GROUP)
+  report_phase2(started)
+  release_all()
+
+  debug("=== complete ===")
+  repeat
+
+
+'' --- the worker harness -----------------------------------------------------
+'' The launched cog never calls debug(), so with DEBUG_COGS=%0000_0001 it
+'' carries no debug interrupt at all.  The reporter waits with a BUDGET, so a
+'' worker that hangs produces a named failure instead of a dead terminal.
+PRI run_in_free_cog(which) : ok | cog
+  job  := which
+  done := 0
+  longfill(@slot, 0, 8)
+  cog := cogspin(NEWCOG, worker(), @stack)
+  if cog < 0
+    debug("   FAILED to start a measurement cog -- no free cog.")
+    return false
+  ok := wait_done(3000)
+  if not ok
+    debug("   the measurement cog did not finish inside 3 s. Results dropped.")
+    cogstop(cog)
+
+
+PRI worker()
+  case job
+    JOB_ANALOG: measure_analog()
+    JOB_GROUP : probe_group()
+  done := 1
+
+
+PRI wait_done(budget_ms) : ok | t
+  t := 0
+  repeat while done == 0 and t < budget_ms
+    waitms(1)
+    t++
+  ok := done <> 0
+
+
+'' ============================================================================
+''  PHASE 1 -- the EF-062 / EF-063 measurement, unchanged in substance
+'' ============================================================================
+PRI measure_analog()
+  slot[0] := arm_jumper() ? 1 : 0        ' 1/0, not Spin2's TRUE = -1
+  slot[1] := arm_plain_drive()
+  slot[2] := arm_stream_digital(false)         ' DIR low
+  slot[3] := arm_stream_digital(true)          ' DIRH
+  slot[4] := sense(level_dac(HI), level_dac(LO))
+  slot[5] := arm_streamer_dac(false)           ' TT=%00
+  slot[6] := arm_streamer_dac(true)            ' TT=%01 P_CHANNEL
+
+
+PRI report_phase1(got_b) | i, differs
+  debug("            legA(cog0,debug)  legB(free cog)")
+  debug("J  jumper  : ", udec_(legA[0]), "                 ", udec_(legB[0]))
+  debug("D1 plain   : ", udec_(legA[1]), " of 8            ", udec_(legB[1]), " of 8")
+  debug("D2 DIR low : ", udec_(legA[2]), " of 8            ", udec_(legB[2]), " of 8")
+  debug("D3 DIRH    : ", udec_(legA[3]), " of 8            ", udec_(legB[3]), " of 8")
+  debug("C  level   : ", udec_(legA[4]), "              ", udec_(legB[4]))
+  debug("T0 TT=%00  : ", udec_(legA[5]), "              ", udec_(legB[5]))
+  debug("T1 TT=%01  : ", udec_(legA[6]), "              ", udec_(legB[6]))
+
+  if not got_b
+    debug("P1 INCONCLUSIVE -- leg B never returned. Leg A stands alone.")
+    return
+
+  if legA[0] == 0 or legA[1] <> 8
+    debug("P1 STOP -- leg A's own controls failed. Fix the bench, not the book.")
+    return
+
+  '' The digital legs are exact counts and must match exactly.  The analog
+  '' legs are ADC readings, so compare them as verdicts, not as integers --
+  '' demanding two spreads match to the count would fail on noise alone.
+  differs := 0
+  repeat i from 0 to 3
+    if legA[i] <> legB[i]
+      differs++
+  if verdict_tt(legA[5], legA[6]) <> verdict_tt(legB[5], legB[6])
+    differs++
+  if (legA[4] >= MIN_SPREAD) <> (legB[4] >= MIN_SPREAD)
+    differs++
+
+  if differs == 0
+    debug("P1 AGREE -- the debug interrupt did not change any answer.")
+    debug("   EF-062 and EF-063 lose their measuring-cog caveat.")
+  else
+    debug("P1 DISAGREE in ", udec_(differs), " place(s). EF-057 reaches further")
+    debug("   than we thought. REGRADE EF-062 and EF-063 -- leg B is the truth.")
+
+
+PRI verdict_tt(t0, t1) : v
+  '' 1 = needs TT=%01 · 2 = needs TT=%00 · 3 = both drove · 0 = neither
+  if t1 >= MIN_SPREAD and t0 < MIN_SPREAD
+    return 1
+  if t0 >= MIN_SPREAD and t1 < MIN_SPREAD
+    return 2
+  if t0 >= MIN_SPREAD and t1 >= MIN_SPREAD
+    return 3
+  return 0
+
+
+'' ============================================================================
+''  PHASE 2 -- the canvas, then three questions asked against it
+'' ============================================================================
+''  THE CANVAS IS THE WHOLE TRICK.  P8..P31 are held at a 15k LOW with DIR
+''  high.  Three things follow:
+''    · an undriven pin reads 0 for a stated reason, not because it floated;
+''    · a pin driven HIGH by anything overpowers 15k and reads 1, so the
+''      readback is a map of exactly which pins were driven;
+''    · anything real attached to those pins overpowers 15k too -- which is
+''      how the certification step below detects it, WEAKLY, before this
+''      program drives anything hard.
+''  DIR high across the canvas is also required for EF-062's reason: the
+''  streamer supplies output STATE, so a canvas pin with DIR low could never
+''  show a streamer write at all and every answer would read as "8 pins".
+PRI probe_group() | held
+  canvas_set()
+  held := pinread(CANVAS_LO addpins CANVAS_N-1)
+  slot[0] := held
+  if held <> 0
+    slot[7] := 1                          ' certification failed
+    return
+
+  '' B -- the SPAN idiom, with no streamer involved.
+  canvas_set()
+  pinhigh(GRP_BASE addpins GRP_N-1)
+  waitms(1)
+  slot[1] := pinread(CANVAS_LO addpins CANVAS_N-1)
+
+  '' C -- an 8-pin streamer mode at an ALIGNED base.
+  canvas_set()
+  stream_start(G_CMD_16, R_ONES)
+  waitms(2)
+  slot[2] := pinread(CANVAS_LO addpins CANVAS_N-1)
+  stream_stop()
+
+  '' D -- a ONE-pin mode at an unaligned pin.  Its D[19:16] is %pppa, so the
+  '' pin field runs D[22:17] and P20 should be reachable exactly.
+  canvas_set()
+  stream_start(G_CMD_FINE, R_ONES)
+  waitms(2)
+  slot[3] := pinread(CANVAS_LO addpins CANVAS_N-1)
+  stream_stop()
+
+  '' E -- the trap: the 8-pin mode, unaligned base, composed with `+` as every
+  '' X_PINS_ON line in the manual composes it.
+  canvas_set()
+  stream_start(G_CMD_TRAP, R_ONES)
+  waitms(2)
+  slot[4] := pinread(CANVAS_LO addpins CANVAS_N-1)
+  stream_stop()
+
+  canvas_release()
+
+
+PRI canvas_set()
+  stream_stop()
+  pinclear(CANVAS_LO addpins CANVAS_N-1)
+  wrpin(CANVAS_LO addpins CANVAS_N-1, P_LOW_15K)
+  pinlow(CANVAS_LO addpins CANVAS_N-1)   ' DIR high, OUT low -> 15k to GIO
+  waitms(1)
+
+
+PRI canvas_release()
+  stream_stop()
+  pinclear(CANVAS_LO addpins CANVAS_N-1)
+
+
+PRI report_phase2(got_it) | m
+  if not got_it
+    debug("P2 INCONCLUSIVE -- the probe cog never returned.")
+    return
+  if slot[7] <> 0
+    debug("P2 STOP -- these P8..P31 pins are held by something external:")
+    debug("   mask(bit0=P8) = ", uhex_long_(slot[0]), " -- nothing was driven hard.")
+    debug("   Remove whatever is on them, or tell me and I will move the group.")
+    return
+
+  debug("   masks below are pinread(P8..P31): bit 0 = P8, bit 23 = P31")
+  debug("P2 canvas, want 0                 : ", uhex_long_(slot[0]))
+  debug("P2-B drvh span, want P16..P23     : ", uhex_long_(slot[1]))
+  debug("P2-C strm 8-pin base 16, want same: ", uhex_long_(slot[2]))
+  debug("P2-D strm 1-pin pin 20, want P20  : ", uhex_long_(slot[3]))
+  debug("P2-E strm 8-pin `+ 20<<17`        : ", uhex_long_(slot[4]))
+
+  '' B IS THE CONTROL FOR C, D AND E, not just another reading.  It puts a
+  '' hard high on canvas pins with no streamer involved, which is the one thing
+  '' C/D/E depend on and cannot themselves prove: that a pin carrying a
+  '' P_LOW_15K drive config can still be driven hard, and that pinread maps
+  '' where I think it does.  If B is wrong, the canvas is wrong, and C/D/E are
+  '' measuring the fixture rather than the silicon.
+  report_mask("B", slot[1], M_P16_23, string("P16..P23"))
+  if slot[1] <> M_P16_23
+    debug("P2 STOP READING HERE -- B is the control and it failed. C/D/E below")
+    debug("   are NOT interpretable; the canvas is the suspect, not the chip.")
+    return
+
+  report_mask("C", slot[2], M_P16_23, string("P16..P23"))
+  report_mask("D", slot[3], M_P20, string("P20 alone"))
+
+  m := slot[4]
+  if m == M_P24_31
+    debug("P2-E drove P24..P31 -- CONFIRMED TRAP. `+ pin<<17` carried into")
+    debug("   D[19:16]: a different MODE at a different GROUP, silently.")
+    debug("   «#289» must not write `+ pin<<17` where a reader sets `pin`.")
+  elseif m == M_P16_23
+    debug("P2-E drove P16..P23 -- the carry did not reach the group select.")
+    debug("   Still a mode change; check what mode actually ran before")
+    debug("   calling this safe.")
+  elseif m == 0
+    debug("P2-E drove NOTHING -- the carry selected a mode that drives no")
+    debug("   pins. Loudest possible version of the same trap.")
+  else
+    debug("P2-E drove an UNEXPECTED set. Record it; do not force a story.")
+
+
+PRI report_mask(label, m, want, wantname)
+  if m == want
+    debug("   ", zstr_(label), ": exactly ", zstr_(wantname), ", as predicted.")
+  elseif m == 0
+    debug("   ", zstr_(label), ": NOTHING drove. Not a width answer -- a failure.")
+  else
+    debug("   ", zstr_(label), ": NOT ", zstr_(wantname), ". Read the mask above.")
+
+
+'' ============================================================================
+''  Arms carried over from the F-272 rig -- substance unchanged
+'' ============================================================================
+PRI arm_jumper() : ok | pull_lo, pull_hi, short_hi, short_lo
+  reset_pins()
+  pull_lo := weak_read(P_LOW_15K, 0)
+  pull_hi := weak_read(P_HIGH_15K, 1)
+  if pull_lo <> 0 or pull_hi <> 1
+    return false
+  short_hi := drive_vs_pull(true, P_LOW_15K, 0)
+  short_lo := drive_vs_pull(false, P_HIGH_15K, 1)
+  reset_pins()
+  ok := (short_hi == 1 and short_lo == 0)
+
+
+PRI weak_read(pull_mode, out_state) : level
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, pull_mode)
+  if out_state
+    pinhigh(ADC_PIN)
+  else
+    pinlow(ADC_PIN)
+  waitms(1)
+  level := pinread(ADC_PIN)
+
+
+PRI drive_vs_pull(drive_high, pull_mode, out_state) : level
+  reset_pins()
+  pinclear(DAC_PIN)
+  if drive_high
+    pinhigh(DAC_PIN)
+  else
+    pinlow(DAC_PIN)
+  level := weak_read(pull_mode, out_state)
+
+
+PRI arm_plain_drive() : hits | i, want
+  repeat i from 0 to 7
+    want := i & 1
+    reset_pins()
+    pinclear(DAC_PIN)
+    if want
+      pinhigh(DAC_PIN)
+    else
+      pinlow(DAC_PIN)
+    waitms(1)
+    if pinread(DAC_PIN) == want
+      hits++
+  reset_pins()
+
+
+PRI arm_stream_digital(set_dir) : hits | i, want
+  repeat i from 0 to 7
+    want := i & 1
+    reset_pins()
+    pinclear(DAC_PIN)
+    if set_dir
+      pinlow(DAC_PIN)
+    stream_start(R_PIN_CMD, want ? R_ONES : R_ZEROS)
+    waitms(2)
+    if pinread(DAC_PIN) == want
+      hits++
+  stream_stop()
+  reset_pins()
+
+
+PRI level_dac(level) : counts
+  reset_pins()
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_DAC_124R_3V | (level << 8))
+  pinlow(DAC_PIN)
+  counts := read_adc()
+
+
+PRI arm_streamer_dac(use_channel) : spread
+  spread := sense(streamer_dac(HI, use_channel), streamer_dac(LO, use_channel))
+
+
+PRI streamer_dac(level, use_channel) : counts | mode
+  reset_pins()
+  mode := P_DAC_124R_3V | (cogid() << 8)
+  if use_channel
+    mode |= P_CHANNEL
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, mode)
+  pinlow(DAC_PIN)
+  stream_start(X_IMM_LEVEL | X_DACS_CH0 | PERPETUAL, level)
+  counts := read_adc()
+  stream_stop()
+
+
+PRI read_adc() : counts
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, P_ADC_1X | P_ADC)
+  wxpin(ADC_PIN, 12)
+  pinhigh(ADC_PIN)
+  waitms(5)
+  counts := rdpin(ADC_PIN) & $7FFF_FFFF
+
+
+PRI sense(x, y) : spread
+  spread := x > y ? x - y : y - x
+
+
+PRI reset_pins()
+  stream_stop()
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+
+
+'' Every phase hands the pins back before the next one starts.  DIR and OUT are
+'' OR'd across cogs, so a pin one cog leaves enabled stays enabled for the next
+'' -- a launched cog cannot undo it, and the next phase would measure the
+'' leftover instead of its own stimulus.
+PRI release_all()
+  stream_stop()
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+  pinclear(CANVAS_LO addpins CANVAS_N-1)
+
+
+PRI stream_start(cmd, sval)
+  org
+    setxfrq ##NCO_SLOW
+    xinit   cmd, sval
+  end
+
+
+PRI stream_stop()
+  org
+    xstop
+  end
