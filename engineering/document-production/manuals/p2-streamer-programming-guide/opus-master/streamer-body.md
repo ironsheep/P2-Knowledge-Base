@@ -359,6 +359,8 @@ Use **XZERO** at video line boundaries to prevent phase drift accumulation acros
 
 ::: caution
 **XCONT and XZERO are for seamless command-to-command continuity, not for starting the streamer.** They wait for the current command's final NCO rollover; if the streamer is already idle (count = 0) there is no wait and the command runs immediately — and XCONT begins with whatever phase remains in the accumulator rather than a known zero. Use **XINIT** to start the streamer from a clean, phase-zeroed state.
+
+**A perpetual command is the third case.** A command issued with the maximal count `$FFFF` (§4.6) runs without decrementing its counter, so it never reaches a final rollover to wait for. A buffered XZERO/XCONT behind one waits only for the **next** NCO rollover and then takes over — one rollover, not the remainder of a transfer.
 :::
 
 # Part II: Mode Reference
@@ -368,6 +370,12 @@ The streamer's modes are the heart of this reference. This Part documents each f
 # Chapter 5: Immediate Modes {#ch-5}
 
 Immediate modes are the simplest place to start. Instead of streaming from memory, the data you want to output is a value you hand the streamer directly, in the S operand. Reach for them when you have a small, fixed pattern to emit — a handful of pixels, a test pattern, a short bit sequence — and do not want to set up a hub buffer. The data can go straight to the pins and DACs, or pass through the LUT for palette expansion.
+
+::: hardware
+**When the count outruns the packed values, the last value repeats.** An immediate mode's S operand holds a fixed number of sub-values — 32 one-bit, 4 eight-bit, 1 thirty-two-bit — but `D[15:0]` can ask for any count. Past the last packed value, that value is re-emitted on every remaining rollover rather than wrapping back to the first. That is what lets a single immediate value hold a steady level for an arbitrary interval: §15.1's blanking and sync intervals use `X_IMM_1X32_4DAC8`, whose S operand is one 32-bit value, and stream it for up to 800 pixels.
+
+The RDFAST families of Chapter 6 behave differently — there the last value triggers the next hub fetch, so they never run out of data to send.
+:::
 
 ## 5.1 Immediate → LUT → Pins/DACs {#sec-5-1}
 
@@ -598,7 +606,9 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 
 **ADC Pin Requirements:** ADC-capable pins must be configured for ADC mode using **WRPIN** before sampling, and the pin must be **enabled** (`DIRH`) — these modes read a smart pin's ADC result, not a raw bitstream. (The DDS/Goertzel mode of Chapter 10 is the opposite case and takes raw pins; see §17.1.)
 
-These modes take their input from the cog's **four-channel scope**, so the pins are routed with `SETSCP` rather than named in the streamer command. `SETSCP` takes the enable in `D[6]` and a **four-pin block** in `D[5:2]`; the streamer command then selects which of those four channels to sample in **`S[1:0]`**.
+These modes take their input from the cog's **four-channel scope**, so the pins are routed with `SETSCP` rather than named in the streamer command. `SETSCP` takes the enable in `D[6]` and a **four-pin block** in `D[5:2]`. Which of those four channels the command samples then depends on how many it captures: the **1-ADC8** modes take the channel number from `S[1:0]`; the **2-ADC8** modes take `S[1]` alone, selecting the upper or the lower pair; and the **4-ADC8** mode captures all four and ignores `S`.
+
+**In the combined modes, pin data occupies the low half of each element and ADC data the high half.** `X_1ADC8_8P_2DAC8_WFWORD` puts the low 8 pins of the `%ppp` group in the low byte of each word and the one scope channel in the high byte; `X_2ADC8_16P_4DAC8_WFLONG` puts the low 16 pins in the low half of each long and the two scope channels in the high half. A buffer cannot be decoded without knowing which half is which.
 
 ## 9.2 ADC Configuration Example
 
@@ -1354,13 +1364,15 @@ The program below assumes those four DAC pins are already configured; it shows t
 
 **Timing Structure (640×480 @ 60 Hz):**
 
-| Element | Pixels | Duration @ 25.175 MHz |
-|---------|--------|----------------------|
-| Visible | 640 | 25.42 µs |
+| Element | Pixels | Duration @ 25.0 MHz |
+|---------|--------|---------------------|
+| Visible | 640 | 25.60 µs |
 | Front porch | 16 | 0.64 µs |
-| Sync pulse | 96 | 3.81 µs |
-| Back porch | 48 | 1.91 µs |
-| **Total line** | **800** | **31.78 µs** |
+| Sync pulse | 96 | 3.84 µs |
+| Back porch | 48 | 1.92 µs |
+| **Total line** | **800** | **32.00 µs** |
+
+**The pixel counts are the VESA standard; the pixel clock is not.** VESA specifies 640×480 at 25.175 MHz, which has no jitter-free sysclk a 20 MHz crystal can reach — so this program runs the 25.0 MHz substitute §3.4 works through, exactly ten sysclk cycles per pixel at 250 MHz. That stretches the line from 31.78 µs to 32.00 and the frame from 59.94 Hz to 59.5, inside the tolerance §3.4 quantifies. Its frequency word is the same `$0CCC_CCCD` §15.2's HDMI program uses, and for the same reason: one pixel every ten clocks.
 
 ```{=latex}
 \DiagVgaTiming
@@ -1372,7 +1384,7 @@ The non-visible intervals — front porch, sync, back porch, and whole blank lin
 
 ```pasm2
 DAT             org
-                setxfrq pixfreq                   ' 25.175 MHz pixel NCO
+                setxfrq pixfreq                   ' 25.0 MHz pixel NCO
                                                   ' (2^31-scaled)
                 mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate
                                                   ' digital pin
@@ -1420,7 +1432,7 @@ m_blank         long    $7F01_0000 + 800
 ' X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 (route RGB to the DACs)
 m_visible       long    $BF85_0000 + 640
 
-pixfreq         long    $0CE3_BCD3                ' 25.175 MHz @ 250 MHz
+pixfreq         long    $0CCC_CCCD                ' 25.0 MHz @ 250 MHz
 vsync_pin       res     1
 y               res     1
 ```
@@ -1655,7 +1667,7 @@ dds_s           long    %0000_0001_000_000000000
 ```
 
 ::: hardware
-**SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full ±127 waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at ±10. The DAC bytes are emitted with their MSB inverted, so the output rails sit at `$7F` and `$80`, not `$FF` and `$00`.
+**SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full ±127 waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at ±10. Either way the DAC bytes are emitted with the MSB inverted — §10.2's `LUT.byte[n] ^ $80` — which puts the waveform's **zero crossing** at `$80` and `$7F`, not its extremes: a ±127 table spans `$01` to `$FF`, and a ±10 table only `$76` to `$8A`.
 :::
 
 ## 17.2 DDS Waveform Generation
@@ -1899,12 +1911,13 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 | Resolution | Pixel Rate | At 250 MHz | At 300 MHz | At 320 MHz |
 |------------|------------|------------|------------|------------|
 | 640×480 | 25.175 MHz | `$0CE3_BCD3` | `$0ABD_C805` | `$0A11_EB85` |
+| 640×480 | 25.000 MHz | `$0CCC_CCCD` | `$0AAA_AAAB` | `$0A00_0000` |
 | 720×480 | 27.000 MHz | `$0DD2_F1AA` | `$0B85_1EB8` | `$0ACC_CCCD` |
 | 800×600 | 40.000 MHz | `$147A_E148` | `$1111_1111` | `$1000_0000` |
 | 1024×768 | 65.000 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
 | 1280×720 | 74.250 MHz | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
 
-Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
+Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are listed for 640×480: 25.175 MHz is the VESA figure, and 25.000 MHz is the substitute §3.4 recommends on a 20 MHz crystal — ten cycles per pixel at 250 MHz, and what §15.1 runs.
 
 # Appendix D: Troubleshooting Guide {#app-d}
 
