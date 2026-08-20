@@ -218,7 +218,7 @@ A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; ever
 
 The `+1` is the rounding-up habit from the pitfall above: `$0CCC_CCCC` is the truncated 1/10 value, and adding 1 makes the streamer roll over on the 10th clock instead of the 11th (and keeps the word off zero). You will see this `+1` throughout the examples.
 
-**Method 2: SETQ before streamer command**
+**Method 2: SETQ before streamer command.** **Pattern** — supply `mode` and `data`.
 
 ```pasm2
         setq    ##$0CCC_CCCC+1        ' Frequency in Q
@@ -398,7 +398,7 @@ The pin half needs no pin setup. The DAC half does: a DAC channel these modes fe
 
 **Operation:** On each NCO rollover, the next index value selects a LUT entry. The LUT long drives all 32 pins and/or DAC channels.
 
-**Example:**
+**Example.** **Pattern** — supply the LUT palette; §10.4 shows a table being built and bulk-loaded.
 
 ```pasm2
 ' Output 32 1-bit pixels using 2-entry palette at LUT $000
@@ -429,7 +429,7 @@ The S operand drives pins and DACs directly without LUT lookup. The DAC-channel 
 
 **S Operand:** Packed data values
 
-**Example:**
+**Example.** **Pattern** — supply `pin`, a multiple of 8 for an 8-pin transfer (§12.0).
 
 ```pasm2
 ' Output 4 bytes to an 8-pin group, 8 bits each
@@ -462,7 +462,7 @@ Hub data serves as LUT index values. As in Chapter 5, the DAC side of these mode
 
 **%a bit:** Alternate bit order (0 = LSB first, 1 = MSB first)
 
-**Example:**
+**Example.** **Pattern** — supply `bitmap_addr`, `base` and the LUT palette.
 
 ```pasm2
 ' Setup FIFO
@@ -492,7 +492,7 @@ Hub data drives pins and DACs directly. The DAC-channel columns below reach a pi
 | `%1011` | `X_RFWORD_16P_2DAC8` | RFWORD | 16 | 2 | 8 |
 | `%1011` | `X_RFLONG_32P_4DAC8` | RFLONG | 32 | 4 | 8 |
 
-**Example:**
+**Example.** **Pattern** — supply `buffer` and `base`, a multiple of 8 for an 8-pin transfer (§12.0).
 
 ```pasm2
 ' Stream bytes to 8 pins
@@ -585,7 +585,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 
 **D[23] = %w:** Must be 1 to enable WRFAST writes
 
-**Example:**
+**Example.** **Pattern** — supply `capture_buffer` and `base`, and size the buffer for 1000 longs.
 
 ```pasm2
 ' Capture 32 pins to Hub at 10 MHz
@@ -617,6 +617,8 @@ These modes take their input from the cog's **four-channel scope**, so the pins 
 **In the combined modes, pin data occupies the low half of each element and ADC data the high half.** `X_1ADC8_8P_2DAC8_WFWORD` puts the low 8 pins of the `%ppp` group in the low byte of each word and the one scope channel in the high byte; `X_2ADC8_16P_4DAC8_WFLONG` puts the low 16 pins in the low half of each long and the two scope channels in the high half. A buffer cannot be decoded without knowing which half is which.
 
 ## 9.2 ADC Configuration Example
+
+**Pattern** — supply `adc_pin`, `adc_buffer` sized for 1024 bytes, and a `cmd` register.
 
 ```pasm2
 ' Route pins 0..3 into the four scope channels and enable the scope
@@ -724,6 +726,8 @@ Because `S` is a command operand, each streamer command carries its own `%T`. Tw
 
 A full-window table holds 512 entries of signed sine/cosine values. A smaller loop size needs only as many entries as its window (§10.3), placed in the region its `%A` bits select:
 
+**Pattern** — supply the `sine_table` array of 512 longs and the `cos`, `sin`, `t` and `i` locals.
+
 ```spin2
 ' Build the sine/cosine table in a hub array, then bulk-load it to LUT
 repeat i from 0 to 511
@@ -759,6 +763,8 @@ Three ways to avoid it, most robust first:
 :::
 
 ## 10.6 Reading Results {#sec-10-6}
+
+**Pattern** — supply the `cos_result`, `sin_result`, `magnitude` and `phase` registers.
 
 ```pasm2
         getxacc cos_result          ' Cosine accumulator → D
@@ -986,7 +992,7 @@ Within the 32-pin window chosen by the group field (§12.1), the D[19:17] region
 
 ## 12.3 Enable Control {#sec-12-3}
 
-**Output Modes:** D[23] must be 1 to drive pins
+**Output Modes.** D[23] must be 1 to drive pins. **Pattern** — supply `pin` and `count`.
 
 ```spin2
 ' Pin output enabled
@@ -996,7 +1002,7 @@ mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
 mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF + pin<<17 + count
 ```
 
-**Input Modes:** D[23] must be 1 to write to hub
+**Input Modes.** D[23] must be 1 to write to hub. **Pattern** — supply `pin` and `count`.
 
 ```spin2
 ' WRFAST enabled
@@ -1110,6 +1116,8 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 
 Build complete commands by combining symbols:
 
+**Pattern** — supply `vga_base`, `spi_pin`, `adc_base` and `cycles`.
+
 ```spin2
 ' VGA 640-pixel visible line
 mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + vga_base<<17 + 640
@@ -1128,6 +1136,8 @@ In that last line `adc_base<<17` is shorthand for the block field `D[22:19]`, an
 The `P_*` constants that configure a pin through `WRPIN` are **bit fields positioned inside the mode word**, not additive flags. Constants drawn from the same "pick one" group occupy the **same bits**, so `+` carries out of the field and lands in a neighbouring mode, while `|` sets the field and is idempotent. There is no assembler error and no warning — the pin simply does something else.
 
 The clearest case is the `%TT` field at bits 7:6, because three of its names look like three separate features:
+
+**Fragment** — the composition alone; supply the `mode` variable that receives the word.
 
 ```spin2
 ' Correct — the field is set to %01 and stays there
@@ -1202,13 +1212,13 @@ The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), an
 
 ## 14.4 Synchronization Patterns
 
-**Wait for completion:**
+**Wait for completion.** **Pattern** — supply `mode` and `data`.
 ```pasm2
         xinit   mode, data
         waitxfi                     ' Block until done
 ```
 
-**Chain commands without gaps:**
+**Chain commands without gaps.** **Pattern** — supply the three `mode` and `data` pairs.
 ```pasm2
         xinit   mode1, data1        ' Start first command
         xcont   mode2, data2        ' Queue second command
@@ -1216,7 +1226,7 @@ The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), an
         waitxfi                     ' Wait for all to finish
 ```
 
-**Video line timing:**
+**Video line timing.** **Pattern** — supply the four interval mode words and `sync_data`; §15.1 works this loop through completely.
 ```pasm2
 line    xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
         xcont   m_back, #0          ' Back porch
@@ -1620,7 +1630,7 @@ Not every streamer job is video or audio. This chapter shows the streamer as a f
 
 The streamer outputs SPI data while a smart pin generates the clock.
 
-**Configuration:**
+**Configuration.** **Pattern** — supply `spi_clk` and `spi_do`.
 
 ```pasm2
                 ' Configure clock pin as transition counter
@@ -1638,7 +1648,7 @@ The streamer outputs SPI data while a smart pin generates the clock.
                 setxfrq ##$4000_0000
 ```
 
-**Single Byte Transfer:**
+**Single Byte Transfer.** **Pattern** — supply `spi_do`, `spi_clk` and a `bmode` register; the byte arrives in `pa`.
 
 ```pasm2
 spi_byte        mov     bmode, ##X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON
@@ -1648,7 +1658,7 @@ spi_byte        mov     bmode, ##X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON
           _ret_ waitxfi
 ```
 
-**Bulk Transfer:**
+**Bulk Transfer.** **Pattern** — supply `spi_do`, `spi_clk` and an `rmode` register; `ptra` points at the 256 bytes.
 
 ```pasm2
 spi_block       rdfast  #0, ptra                ' Point to data
@@ -1662,6 +1672,8 @@ spi_block       rdfast  #0, ptra                ' Point to data
 ## 16.2 Coordinating with WAITXFI
 
 The **WAITXFI** instruction blocks only until the streamer finishes — it has no knowledge of the smart-pin clock. Check the clock's completion separately (e.g. `TESTP` on the clock pin):
+
+**Pattern** — supply `mode`, `data`, `transitions` and `clk_pin`.
 
 ```pasm2
                 xinit   mode, data
@@ -1704,6 +1716,8 @@ The ADC pins feeding Goertzel are **raw delta-sigma bitstreams**. Configure them
 
 Gain is a property of the **coupling**, not of this mode. A high-gain constant such as `P_ADC_100X` saturates on a directly-wired signal and reads a constant; it suits a capacitively-coupled touch pad, which is what the demo shipped with the *Parallax Propeller 2 Documentation* uses. A directly-coupled signal wants low gain.
 
+**Pattern** — supply `adc_pin` and the `sine_table` §10.4 builds.
+
 ```pasm2
                 ' Load sine/cosine table to LUT
                 setq2   #$200-1
@@ -1724,6 +1738,8 @@ The consequence matters more than the mechanism: **`GETXACC` reads a holding reg
 So: **one read per streamer command.** With a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference** — an absolute read in that pattern is not a per-command measurement. It fails invisibly, because the number returned is large, stable and entirely plausible. The `XCONT` loop below reads once per command and subtracts a baseline established on the first pass.
 
 ### Detection loop
+
+**Pattern** — supply `target_freq`, `cycles`, `threshold`, a `#detected` routine, and the `clkf`, `xfrq`, `cos_acc`, `sin_acc` and `magnitude` registers. §17.2 works the same command word through as a complete program.
 
 ```pasm2
 ' Calculate NCO frequency for target (2^31-scaled for the NCO)
@@ -1844,6 +1860,8 @@ The final chapter collects patterns that cut across everything above: double-buf
 
 Use two buffers to allow simultaneous rendering and display:
 
+**Pattern** — supply `buffer_a`, `buffer_b`, `frame_size`, a `#render_frame` routine, and the `display_buf`, `render_buf` and `temp` registers.
+
 ```pasm2
                 ' Buffer addresses
                 mov     display_buf, ##buffer_a
@@ -1874,7 +1892,7 @@ Complex video systems span multiple cogs:
 | 2 | Vertical timing, frame sync |
 | 3 | Sprite rendering |
 
-**Synchronization via hub flags:**
+**Synchronization via hub flags.** **Pattern** — supply the `line_done_flag` hub long and a `temp` register; the two halves run in different cogs.
 
 ```pasm2
 ' Cog 1: Signal line complete
@@ -1890,7 +1908,7 @@ wait_line       rdlong  temp, ##line_done_flag wz
 
 Many applications combine streamer I/O with smart pin timing:
 
-**Pattern: Streamer data with smart pin clock**
+**Streamer data with smart pin clock.** **Pattern** — supply `data_mode`, `clocks` and `clk_pin`; §16.1 configures both pins.
 
 ```pasm2
                 xinit   data_mode, #0           ' Start data output
@@ -1898,7 +1916,7 @@ Many applications combine streamer I/O with smart pin timing:
                 waitxfi                         ' Wait for data complete
 ```
 
-**Pattern: Smart pin trigger for streamer**
+**Smart pin trigger for streamer.** **Pattern** — supply `trigger_pin` and `capture_mode`.
 
 ```pasm2
 wait_trigger    testp   #trigger_pin wc         ' wait for the event
