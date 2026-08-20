@@ -1828,12 +1828,14 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 
 **Check:**
 
-1. LUT contains signed sine/cosine values
-2. ADC pin configured for ADC mode
-3. Sample count adequate for frequency resolution
-4. SINC2 amplitude reduced to ±10 to prevent overflow
-5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.5)
-6. **You compiled with `-d`.** Accumulators reading in the millions where you expect hundreds are the debug interrupt, not your signal — see §14.5
+1. **`S[15:12]`, the summed-pins field, is not zero.** Zero sums nothing, so the accumulators never move and every magnitude reads as noise — the single most common way to build a detector that appears completely dead, with everything else correct and the loop running (§17.1)
+2. **The input pin is RAW — do not enable it.** Goertzel reads a raw delta-sigma bitstream: **WRPIN** an ADC gain constant with the smart-pin mode field at `%00000`, and **leave DIR low**. A smart pin left enabled there accumulates nothing at all. That is the reverse of §9.2's scope-fed ADC modes, which read a smart pin's result and *do* require `DIRH` — so a pin configured the §9.2 way produces exactly this symptom (§17.1)
+3. **Gain matches the coupling.** A high-gain constant such as `P_ADC_100X` saturates on a directly-wired signal and reads a constant; it suits a capacitively-coupled touch pad. A directly-coupled signal wants low gain (§17.1)
+4. LUT contains signed sine/cosine values
+5. Sample count adequate for frequency resolution
+6. SINC2 amplitude reduced to ±10 to prevent overflow
+7. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.5)
+8. **You compiled with `-d`.** Accumulators reading in the millions where you expect hundreds are the debug interrupt, not your signal — see §14.5
 
 ## Symptom: Measurements Change When You Add DEBUG
 
