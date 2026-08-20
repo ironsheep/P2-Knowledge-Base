@@ -1,0 +1,387 @@
+'' =============================================================================
+''  test-F272 -- which %TT does a STREAMER-FED DAC need?
+'' =============================================================================
+''  NOT GATING.  F-272 is already RESOLVED from documentary sources
+''  (P2KB-CORRECTION-FINDINGS.md:521), and the Streamer Guide ships the
+''  documentary answer.  This rig exists because F-264 proved this exact axis
+''  INVERTS: in DAC_MODE with the smart pin off, TT=%01 does not "enable
+''  output" -- it switches the DAC's SOURCE.  So the constant that is mandatory
+''  in one arrangement kills the output in the other, and both forms compile
+''  clean.  A compiler cannot separate them; a jumper can.
+''
+''  WHAT IS AND IS NOT ALREADY MEASURED
+''    EF-054 and EF-055 (2026-08-14) swept %TT on a jumpered cog-DAC pin and on
+''    a level-driven one.  BOTH are graded [M-pre -- streamer-free]: they tested
+''    the PIN arrangement with the streamer uninvolved.  F-272 asks the
+''    streamer-fed question, which is the one arm nobody has run.
+''
+''  RIG: ONE JUMPER, P2 pin to P2 pin.  No external hardware.
+''    DAC_PIN 0 -> ADC_PIN 1.  Pin 0's low two bits are %00, so it carries DAC
+''    channel 0 (see the Streamer Guide 11.2).  Both pins are in the same 8-pin
+''    power group, so they share VIO/GIO.
+''
+''  Build:  pnut-ts -d test-f272-streamer-dac-tt.spin2
+''          The -d is REQUIRED.  Without it the debug() contents are ignored
+''          and every line below prints nothing.
+''
+''  THE ARMS RUN IN THIS ORDER AND THE ORDER IS THE POINT
+''    J   CONTINUITY, DIGITAL.  Certifies the P0-P1 short before anything
+''        analog runs -- the same step EF-054 took ("continuity verified
+''        digitally first") and VO-J-001 bracketed its sweep with.
+''        Both legs, and the OPEN CASE HAS A DEFINED ANSWER, not a float:
+''        the far pin holds the net through a 15k drive while the near pin
+''        drives it hard (~30 ohm).  Shorted, the hard drive wins.  Open, the
+''        15k wins and the reading INVERTS.  One leg alone cannot tell a short
+''        from a stuck pin; two opposite legs can.
+''    D1  DIGITAL control.  No streamer: OUT drives DAC_PIN, pinread reads it
+''        back.  Must pass, or nothing digital below it is interpretable.
+''    D2  the streamer's PIN path with DIR LOW -- what guide 5.1 says works.
+''    D3  the same command with DIRH set first.  D2 vs D3 is an A/B on the
+''        guide's claim; a D3-only pass is a MANUAL FINDING, not a rig note.
+''        D1-D3 are REPORTED, NOT GATES -- see the note above arm D1.  They
+''        exercise the streamer's PIN path; T0/T1 exercise its DAC path.
+''    C   control, ANALOG.  Level-driven DAC exactly as the Parallax
+''        documentation's own worked program does it: TT=%00, no streamer
+''        routing, level written by re-issuing WRPIN with the byte in M[7:0].
+''        Proves DAC + ADC across a wire J has already certified.
+''    T0  streamer-fed DAC, routing X_DACS_X_X_X_0 on, TT=%00.
+''    T1  the same, with P_CHANNEL (TT=%01).
+''
+''  READ IT LIKE THIS -- AND DOUBT THE INSTRUMENT FIRST
+''    If J fails, stop and fix the bench: the program names which failure it
+''    is -- no jumper, or a net something else is holding.  If D1 fails, the
+''    pin cannot drive and read itself and nothing else is worth reading.
+''    D2/D3 failing does NOT stop the run: the DAC path they do not touch is
+''    what the experiment actually needs.  If C fails, THE RIG IS WRONG, NOT
+''    THE SILICON -- and because J already proved the wire, it is NOT the
+''    jumper: suspect DAC_PIN's low two bits against the channel being driven,
+''    or an ADC gain that does not suit a directly-wired signal (a high-gain
+''    constant saturates and reads a constant).  Do NOT interpret T0/T1
+''    against a control that never responded.
+''
+''    EXPECTED: exactly ONE of T0/T1 shows a spread and the other sits flat.
+''    That identifies the required %TT.
+''
+''    If BOTH track, or NEITHER does, that is a real finding and F-272's
+''    premise needs revisiting.  Record it; do not force a conclusion.
+''
+''  WHERE THE RESULT GOES
+''    An EF entry in P2-EMPIRICAL-FINDINGS.md, the test replicated to
+''    engineering/ingestion/external-sources/hardware-verification/, and then
+''    F-272's status updated.  Empirical outranks documentary -- but a rig that
+''    never produced a control reading is not empirical.
+'' =============================================================================
+
+CON
+  _xtlfreq   = 20_000_000                ' P2 Eval/Edge default -- adjust for your board
+  _clkfreq   = 200_000_000
+
+  '' EF-057: the debug interrupt corrupts streamer measurements, and the
+  '' default mask puts it in ALL EIGHT cogs.  Report from cog 0 only.
+  DEBUG_COGS = %0000_0001
+
+  DAC_PIN    = 0                         ' low two bits %00 -> DAC channel 0
+  ADC_PIN    = 1                         ' same 8-pin power group
+
+  HI         = $FF                       ' full scale
+  LO         = $00                       ' zero scale
+
+  '' A spread this small is indistinguishable from no drive.  Sizing it:
+  '' EF-054's readings were 1,408 for a dead pin and 6,737 for a driven one --
+  '' those are ABSOLUTE single readings, not HI-vs-LO spreads, so they do not
+  '' set this constant directly.  What they establish is the SCALE: a live DAC
+  '' swung full range moves the ADC by something on the order of 5,000 counts.
+  '' 500 sits an order of magnitude below that signal and far above the
+  '' run-to-run noise of two readings taken the same way seconds apart.
+  MIN_SPREAD = 500
+
+  '' Streamer NCO at 1/1024 of sysclk.  One perpetual command then lasts far
+  '' longer than the settle-plus-sample below, so the DAC is still being fed
+  '' when the reading is taken.
+  NCO_SLOW   = $8000_0000 / 1024
+
+  '' X_IMM_1X32_4DAC8: one 32-bit immediate held across the four DAC bytes.
+  '' Byte 0 reaches X0, and X_DACS_X_X_X_0 routes X0 to DAC channel 0.
+  X_IMM_LEVEL = $7001_0000
+  X_DACS_CH0  = $0400_0000               ' X_DACS_X_X_X_0
+  PERPETUAL   = $FFFF                    ' 4.6: runs until stopped
+
+  '' Arm R's command.  ONE pin (X_IMM_32X1_1DAC1, %0100) -- NOT the 32-pin
+  '' X_IMM_1X32_4DAC8 the analog arms use.  See arm R's header note: with
+  '' X_PINS_ON that mode drives P0..P31 and fights ADC_PIN through the jumper.
+  '' Pin base is D[22:17]; count is D[15:0].  All fields disjoint, so `|`
+  '' cannot carry the way `+` did in EF-054.
+  R_PIN_CMD   = X_IMM_32X1_1DAC1 | X_PINS_ON | (DAC_PIN << 17) | PERPETUAL
+
+  '' 32 identical one-bit sub-values, so the pin sits at the level from the
+  '' first rollover rather than relying on the last-value-repeats rule (5.2).
+  R_ALL_ONES  = $FFFF_FFFF
+  R_ALL_ZEROS = $0000_0000
+
+PUB main() | d1, d2, d3, c, t0, t1
+  debug("=== F-272: which %TT does a streamer-fed DAC need? ===")
+
+  if not arm_jumper()
+    debug("STOP -- the wire is not certified. Nothing below would mean anything.")
+    repeat
+
+  '' D -- the digital ladder.  REPORTED, NOT A GATE.  T0/T1 exercise the
+  '' streamer's DAC path, which is a different path from its PIN path, so a
+  '' digital failure does not invalidate them.  Gating on it was a design
+  '' error: it stopped two bench runs before the actual experiment.
+  d1 := arm_plain_drive()
+  debug("D1 plain pin drive, no streamer        : ", udec_(d1), " of 8")
+  if d1 <> 8
+    debug("D1 RED -- the pin cannot drive and read itself back. STOP.")
+    repeat
+
+  d2 := arm_stream_digital(false)
+  d3 := arm_stream_digital(true)
+  debug("D2 streamer -> pin, DIR LOW  (5.1 says): ", udec_(d2), " of 8")
+  debug("D3 streamer -> pin, DIR HIGH (dirh set): ", udec_(d3), " of 8")
+  report_digital(d2, d3)
+
+  c := arm_level_dac()
+  debug("C  level DAC, TT=%00, no routing       : spread=", udec_(c))
+  if c < MIN_SPREAD
+    debug("C RED -- the RIG is wrong, not the silicon -- but J proved the wire,")
+    debug("         so it is NOT the jumper. Suspect the DAC channel mapping or")
+    debug("         the ADC gain. See the header. STOP.")
+    repeat
+
+  t0 := arm_streamer_dac(false)
+  t1 := arm_streamer_dac(true)
+  debug("T0 streamer-fed DAC, TT=%00            : spread=", udec_(t0))
+  debug("T1 streamer-fed DAC, TT=%01 P_CHANNEL  : spread=", udec_(t1))
+
+  verdict(t0, t1)
+  debug("=== complete ===")
+  repeat
+
+
+PRI verdict(t0, t1)
+  if t0 >= MIN_SPREAD and t1 < MIN_SPREAD
+    debug("VERDICT: a streamer-fed DAC needs TT=%00 -- P_CHANNEL kills it.")
+  elseif t1 >= MIN_SPREAD and t0 < MIN_SPREAD
+    debug("VERDICT: a streamer-fed DAC needs TT=%01 (P_CHANNEL). Matches F-272.")
+  elseif t0 >= MIN_SPREAD and t1 >= MIN_SPREAD
+    debug("VERDICT: BOTH drove. F-272's premise needs revisiting -- record it.")
+  else
+    debug("VERDICT: NEITHER drove, yet C did. Real finding -- do not force it.")
+
+
+'' --- J: is the jumper actually there? ---------------------------------------
+'' Certifies the short BEFORE anything analog, with BOTH legs, and with a
+'' DEFINED open-circuit answer rather than a float.  ADC_PIN holds the net
+'' through a 15k drive; DAC_PIN drives it hard.  Shorted, the hard drive wins.
+'' Open, the 15k wins and the reading inverts.  A single leg cannot separate
+'' "shorted" from "stuck at that level" -- two opposite legs can.
+PRI arm_jumper() : ok | pull_lo, pull_hi, short_hi, short_lo
+  '' J0 -- certify the instrument before the wire.  With DAC_PIN released, the
+  '' 15k drive alone must own the net.  If it does not, something else is
+  '' holding ADC_PIN and J1/J2 would be reading that, not the jumper.
+  reset_pins()
+  pull_lo := weak_read(P_LOW_15K, 0)              ' expect 0
+  pull_hi := weak_read(P_HIGH_15K, 1)             ' expect 1
+  debug("J0 15k pull alone, DAC_PIN released    : ", udec_(pull_lo), " / ", udec_(pull_hi), "   (want 0 / 1)")
+  if pull_lo <> 0 or pull_hi <> 1
+    debug("J0 RED -- the 15k drive does not own the net; something else holds it. STOP.")
+    return false
+
+  '' J1 / J2 -- now fight that weak drive with a hard one across the wire.
+  short_hi := drive_vs_pull(true, P_LOW_15K, 0)   ' hard HIGH vs 15k low  -> 1 shorted
+  short_lo := drive_vs_pull(false, P_HIGH_15K, 1) ' hard LOW  vs 15k high -> 0 shorted
+  debug("J1 DAC_PIN hard HIGH vs 15k pull-down  : ", udec_(short_hi), "   (1=shorted 0=open)")
+  debug("J2 DAC_PIN hard LOW  vs 15k pull-up    : ", udec_(short_lo), "   (0=shorted 1=open)")
+  reset_pins()
+
+  if short_hi == 1 and short_lo == 0
+    debug("J  CONTINUITY CERTIFIED -- both legs agree the pins are shorted.")
+    return true
+  if short_hi == 0 and short_lo == 1
+    debug("J RED -- THE JUMPER IS NOT CONNECTED. Both legs read the OPEN value.")
+    debug("         Fit a wire P", udec_(DAC_PIN), " to P", udec_(ADC_PIN), " and run again.")
+    return false
+  debug("J RED -- the legs DISAGREE: a pin is stuck, or the net is held elsewhere.")
+  return false
+
+
+'' ADC_PIN drives its own level through 15k, then reads the pad back.  Whoever
+'' wins the net -- this weak drive or something stronger on the wire -- is what
+'' pinread() returns.
+PRI weak_read(pull_mode, out_state) : level
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, pull_mode)
+  if out_state
+    pinhigh(ADC_PIN)                              ' DIR=1 OUT=1 -> 15k to VIO
+  else
+    pinlow(ADC_PIN)                               ' DIR=1 OUT=0 -> 15k to GIO
+  waitms(1)                                       ' 15k into pin+wire C: sub-us
+  level := pinread(ADC_PIN)
+
+
+PRI drive_vs_pull(drive_high, pull_mode, out_state) : level
+  reset_pins()
+  pinclear(DAC_PIN)                               ' mode 0 -> normal hard drive
+  if drive_high
+    pinhigh(DAC_PIN)
+  else
+    pinlow(DAC_PIN)
+  level := weak_read(pull_mode, out_state)
+
+
+'' --- D: does the streamer's PIN path work in this cog at all? ---------------
+'' A LADDER, simplest layer first, and NONE of it gates the experiment.
+''
+'' TWO BENCH RUNS, TWO WRONG ANSWERS FROM ME -- read this before theorising.
+'' Run 1 (13:53) scored 4 of 8.  I explained it: the arm had reused
+'' X_IMM_1X32_4DAC8, which is a 32-PIN mode (guide 5.2 and Appendix A both say
+'' so), so X_PINS_ON drove P0..P31, held ADC_PIN low against DAC_PIN's high,
+'' and the jumper made that a drive fight.  That was a real bug and the one-pin
+'' X_IMM_32X1_1DAC1 is the right fix.  IT WAS NOT THE CAUSE.  Run 2 (14:00) ran
+'' the one-pin mode and scored 3 of 8.
+''
+'' The lesson is in the arithmetic.  4 of 8 is what a CONSTANT readback scores
+'' against an alternating want -- and it is also the expected score of a pin
+'' reading NOTHING IN PARTICULAR.  I read a specific mechanism into a number
+'' that a coin flip produces just as readily, and run 2's 3 of 8 is what an
+'' undriven pin looks like when the charge on it happens to decay.  One number,
+'' two mechanisms, and I picked the interesting one.
+''
+'' So this ladder stops guessing and separates the layers:
+''   D1  no streamer at all -- OUT drives the pin, pinread reads it back.
+''       The control.  Must pass, or nothing below is interpretable.
+''   D2  streamer -> pin with DIR LOW.  This is what the guide's 11.0 callout
+''       says works: "Ordinary pin output through X_PINS_ON ... requires no
+''       WRPIN and no DIRH."  Two runs of this scored 4 and 3.
+''   D3  the same command with DIRH set first.  If D3 passes where D2 fails,
+''       the guide's claim is WRONG ON SILICON and that is a manual finding,
+''       not a rig note.
+''
+'' PREDICTION ON RECORD, SO THE BENCH CAN FALSIFY IT: D3 passes, D2 fails.
+'' Filed as F-308 from the Silicon Doc v35 itself, which says the streamer's
+'' pin data is OR'd "with {OUTB, OUTA} to produce the final 64 pin OUTPUT
+'' STATES", while separately "an I/O pin's output ENABLE is controlled by its
+'' DIR bit".  Streamer -> OUT; DIR still gates the driver.  Nothing gives the
+'' streamer authority over DIR -- only a smart pin's %TT does that, and this
+'' path uses no smart pin.  IF D2 PASSES, F-308 IS WRONG AND GETS REVERSED.
+''
+'' D1 -- the control for the whole ladder.  No streamer anywhere: the pin is
+'' driven by OUT and read straight back.  If this cannot manage 8 of 8 then
+'' nothing about pins on this board is trustworthy and D2/D3 mean nothing.
+PRI arm_plain_drive() : hits | i, want
+  repeat i from 0 to 7
+    want := i & 1
+    reset_pins()
+    pinclear(DAC_PIN)
+    if want
+      pinhigh(DAC_PIN)
+    else
+      pinlow(DAC_PIN)
+    waitms(1)
+    if pinread(DAC_PIN) == want
+      hits++
+  reset_pins()
+
+
+'' D2 / D3 -- the same streamer command, run twice, differing ONLY in whether
+'' the pin was enabled first.  D3 starts with OUT LOW, so if the pin follows
+'' the stream the streamer must have overridden OUT and the result is
+'' unambiguous.  This is the A/B that settles the guide's 5.1 claim.
+PRI arm_stream_digital(set_dir) : hits | i, want
+  repeat i from 0 to 7
+    want := i & 1
+    reset_pins()
+    pinclear(DAC_PIN)
+    if set_dir
+      pinlow(DAC_PIN)                  ' DIR=1, OUT=0 -- streamer must override
+    stream_start(R_PIN_CMD, want ? R_ALL_ONES : R_ALL_ZEROS)
+    waitms(2)
+    if pinread(DAC_PIN) == want
+      hits++
+  stream_stop()
+  reset_pins()
+
+
+PRI report_digital(d2, d3)
+  if d2 == 8 and d3 <> 8
+    debug("D  Streamer pin output works with DIR LOW. REVERSE F-308 -- the")
+    debug("   guide's 11.0 callout is right and the Silicon Doc read was not.")
+  elseif d3 == 8 and d2 <> 8
+    debug("D  F-308 CONFIRMED ON SILICON: streamer pin output NEEDS DIRH.")
+    debug("   Fix streamer-body.md:834 and the F-305 note that repeats it.")
+  elseif d2 == 8 and d3 == 8
+    debug("D  Both drove; DIR is not the variable. Guide 5.1 stands.")
+  else
+    debug("D  NEITHER drove the pin, yet D1 did. The streamer's PIN path is")
+    debug("   not running in this cog. Prime suspect is EF-057: the debug")
+    debug("   interrupt is live in cog 0 and this rig MEASURES in cog 0 --")
+    debug("   the EF-057 fix launches the measurement in another cog.")
+    debug("   NOT fatal here: T0/T1 use the DAC path, and C validates that.")
+
+
+'' --- C: the documentation's own level-driven DAC ----------------------------
+'' TT=%00, so the DAC takes its value from the pin's own M[7:0] level field,
+'' re-written by re-issuing WRPIN.  No streamer, no routing, no COGID.
+PRI arm_level_dac() : spread
+  spread := sense(level_dac(HI), level_dac(LO))
+
+
+PRI level_dac(level) : counts
+  reset_pins()
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, P_DAC_124R_3V | (level << 8))   ' level -> M[7:0]
+  pinlow(DAC_PIN)                                 ' DIRH; pin drives
+  counts := read_adc()
+
+
+'' --- T0 / T1: the streamer feeds the DAC ------------------------------------
+'' The routed channel is this cog's, so M[3:0] carries this cog's ID (11.0).
+PRI arm_streamer_dac(use_channel) : spread
+  spread := sense(streamer_dac(HI, use_channel), streamer_dac(LO, use_channel))
+
+
+PRI streamer_dac(level, use_channel) : counts | mode
+  reset_pins()
+  mode := P_DAC_124R_3V | (cogid() << 8)          ' COGID -> M[3:0]
+  if use_channel
+    mode |= P_CHANNEL                             ' TT=%01
+  pinclear(DAC_PIN)
+  wrpin(DAC_PIN, mode)
+  pinlow(DAC_PIN)                                 ' DIRH; pin drives
+  stream_start(X_IMM_LEVEL | X_DACS_CH0 | PERPETUAL, level)
+  counts := read_adc()
+  stream_stop()
+
+
+'' --- shared measurement -----------------------------------------------------
+PRI read_adc() : counts
+  pinclear(ADC_PIN)
+  wrpin(ADC_PIN, P_ADC_1X | P_ADC)      ' unity gain: a directly-wired signal
+  wxpin(ADC_PIN, 12)                    ' 2^12-clock sample period
+  pinhigh(ADC_PIN)
+  waitms(5)                             ' settle, then one full period
+  counts := rdpin(ADC_PIN) & $7FFF_FFFF ' C rides in bit 31; mask it off
+
+
+PRI sense(a, b) : spread
+  spread := a > b ? a - b : b - a
+
+
+PRI reset_pins()
+  stream_stop()
+  pinclear(DAC_PIN)
+  pinclear(ADC_PIN)
+
+
+PRI stream_start(cmd, sval)
+  org
+    setxfrq ##NCO_SLOW
+    xinit   cmd, sval
+  end
+
+
+PRI stream_stop()
+  org
+    xstop
+  end

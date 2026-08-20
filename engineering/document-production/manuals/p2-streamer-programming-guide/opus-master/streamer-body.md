@@ -407,7 +407,7 @@ The pin half needs no pin setup. The DAC half does: a DAC channel these modes fe
 
 ## 5.2 Immediate → Pins/DACs
 
-The S operand drives pins and DACs directly without LUT lookup. The DAC-channel columns below reach a pin only through the setup in §11.0; the pin columns need none.
+The S operand drives pins and DACs directly without LUT lookup. The DAC-channel columns below reach a pin only through the full setup in §11.0. The pin columns need none of that mode configuration — but they still need the pin **enabled**, because the streamer supplies a pin's output *state*, never its output *enable*. §11.0 draws the line.
 
 | Mode | Symbol | Pins | DAC Channels | DAC Bits |
 |------|--------|------|--------------|----------|
@@ -831,7 +831,9 @@ cogn            res     1
 ```
 
 ::: hardware
-**Digital pin output needs none of this.** Ordinary pin output through `X_PINS_ON` drives the pin bus directly and requires no `WRPIN` and no `DIRH`. The configuration above is for **DAC** output only — adding it to a digital-output example is a different mistake, not a safer one.
+**Digital pin output needs less of this — not none of it.** Ordinary pin output through `X_PINS_ON` requires no `WRPIN`: no DAC mode, no COGID, no channel. The mode configuration above is for **DAC** output only, and adding it to a digital-output example is a different mistake, not a safer one.
+
+**What digital output still needs is `DIRH`.** `X_PINS_ON` enables the streamer's contribution to the pin's output *state* — the same signal `OUT` supplies — and `DIR` remains what enables the pin to drive at all. Until DIR is high, the pin does not drive, exactly as in the list above. A streamer command aimed at a pin whose DIR is low runs to completion and changes nothing: the count decrements, `WAITXFI` returns, and the pin never moves. On the bench that reads as a pin holding whatever charge it had, which looks like noise rather than like a missing step.
 :::
 
 ## 11.1 DAC Routing Table {#sec-11-1}
@@ -1605,6 +1607,10 @@ The streamer outputs SPI data while a smart pin generates the clock.
                                                 ' (2 sysclks/clock cycle =
                                                 ' one NCO-÷2 data bit)
                 drvl    #spi_clk
+
+                ' Enable the DATA pin too. The streamer supplies this pin's
+                ' output state; DIR is still what lets it drive (11.0).
+                drvl    #spi_do
 
                 ' NCO at half clock rate
                 setxfrq ##$4000_0000

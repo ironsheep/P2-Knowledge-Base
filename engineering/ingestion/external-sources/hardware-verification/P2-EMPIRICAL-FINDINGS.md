@@ -785,6 +785,52 @@ in from Spin2 with `@`, or use PTRA.
 
 ---
 
+### EF-062 · Streamer digital pin output through `X_PINS_ON` **requires `DIRH`** — the streamer feeds the pin's output STATE, not its output ENABLE — `CONFIRMED`
+`X_PINS_ON` (`D[23]=1`) enables the streamer's contribution to the pin's **OUT** side; the pin still
+does not drive until **DIR** is high. *How proven:* one streamer command, run twice, differing only
+in whether the pin was enabled first — and the DIR-high leg started from `OUT`=0, so a pass proves
+the streamer overrode `OUT` rather than the `OUT` bit doing the work. Bracketed by a plain-drive
+control (no streamer at all) and by a digital continuity check on the jumper. *Result:* `D1` plain
+pin drive **8 of 8** · `D2` streamer with DIR low **4 of 8** · `D3` same command with `DIRH`
+**8 of 8**. The `4 of 8` is a *constant* readback scored against an alternating expectation — an
+undriven pin, not a partly-working one. *Date/rig:* 2026-08-20, real P2 (Stephen); jumper P0→P1,
+continuity certified digitally first (both legs, with a defined open-circuit answer — see EF-063's
+rig note). [M — **single run**; a confirming run is cheap. The measuring cog also carried the debug
+interrupt (this rig reports from the cog it measures in, which is *not* EF-057's arrangement); no
+`debug()` executes inside any measured window, both controls passed, and EF-063's `T1` tracked its
+control to within 1 count, so the exposure is real but visibly not biting. Re-running the
+measurement in a second cog would retire the caveat.] *Grounds:* **F-308** — corrects the Streamer
+Guide's §11.0 callout at `streamer-body.md:834`, *"Ordinary pin output through `X_PINS_ON` drives the
+pin bus directly and requires no `WRPIN` and no `DIRH`"*, and the note repeating it at
+`P2KB-CORRECTION-FINDINGS.md:251`. **The "no `WRPIN`" half is correct and stands** — digital output
+needs no smart-pin mode, no DAC mode, no COGID, no channel. Only "no `DIRH`" is wrong. This matches
+the Silicon Doc v35 read straight: streamer pin data is OR'd *"with {OUTB, OUTA} to produce the final
+64 pin output states"*, while *"an I/O pin's output enable is controlled by its DIR bit"*. The
+prediction was recorded in the program before the run, with the falsifying outcome named — the bench
+was free to reverse F-308 and did not. *Source:*
+`campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2`.
+
+### EF-063 · A **streamer-fed** DAC needs `%TT = %01` (`P_CHANNEL`); at `%TT = %00` the pin ignores the streamer and holds its own level field — `CONFIRMED`
+Closes the one arm EF-054 and EF-055 did not cover: both are graded `[M-pre — streamer-free]`, having
+swept `%TT` with the streamer uninvolved. *How proven:* a DAC on P0 jumpered to a smart-pin ADC on
+P1, driven full-scale then zero-scale, reading the HI−LO spread; the same routing
+(`X_DACS_X_X_X_0`) and the same streamer immediate at both `%TT` values, against a level-driven
+control that uses no streamer at all. *Result:* control `C` (level-driven DAC, `TT=%00`) spread
+**5,331** · `T0` streamer-fed at `TT=%00` spread **1** · `T1` streamer-fed with `P_CHANNEL` spread
+**5,330**. `T1` tracks the control to within one count; `T0` is flat. *Mechanistically consistent
+with EF-055*, which found `TT=%01` switches the DAC's **source**: at `%00` the pin takes its own
+`M[7:0]` level (here the COGID, so a constant), and only at `%01` does it take the cog DAC channel
+the streamer is feeding. *Date/rig:* 2026-08-20, real P2 (Stephen). [M — single run; see EF-062's
+grade note.] *Rig note worth keeping:* the jumper is certified **digitally, both legs, before
+anything analog** — the far pin holds the net through a 15 kΩ drive while the near pin drives it
+hard, so an open circuit reads the *opposite* value instead of an undefined float (a released P2 pin
+holds its last state on pin capacitance long enough to read back as a false pass). *Grounds:*
+**F-272**, which reached the same answer from documentary sources and is already `RESOLVED`; this is
+the empirical seal, not a change of answer. *Source:*
+`campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2`.
+
+---
+
 
 ## Open / pending empirical questions
 

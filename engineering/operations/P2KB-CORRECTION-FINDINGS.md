@@ -247,9 +247,13 @@ Per **F-272** (resolved 2026-08-20) the correct setup is now fully citable: `%TT
 bits. `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml:203` carries a worked example,
 and `wrpin.yaml:54` documents the field.
 
-**Note the asymmetry that makes this easy to get wrong:** this applies to **DAC** output only.
-Ordinary digital pin output via `X_PINS_ON` (`D[23]=1`) drives the pin bus directly and needs no
-`WRPIN`/`DIRH` — Silicon Doc `:3602-3603`. Do not add pin setup to digital-output examples.
+**Note the asymmetry that makes this easy to get wrong** — and note the half of it that was itself
+wrong until 2026-08-20. The **`WRPIN`** part applies to **DAC** output only: ordinary digital pin
+output via `X_PINS_ON` (`D[23]=1`) needs no DAC mode, no COGID and no channel, so do not add *mode*
+setup to digital-output examples. But it **does** need `DIRH` like any driven pin — `X_PINS_ON`
+enables the streamer's contribution to the pin's output *state*, never its output *enable*. See
+**F-308** / **EF-062** (bench-proven: DIR low 4-of-8, `DIRH` 8-of-8). The citation this note used to
+carry, `Silicon Doc :3602-3603`, resolves to nothing in `engineering/ingestion/` and has been dropped.
 
 ### F-306 — `dds-goertzel.yaml`'s "Typical usage" configures a DAC output pin that nothing ever drives, and the Streamer sprint plan certified it as the fix template. `CONFIRMED`
 
@@ -410,17 +414,50 @@ correctly — *"**`DIRH`** on the pin. Until DIR is high, the pin does not drive
 `WRPIN` (no DAC mode, no COGID, no channel), but it does need `DIRH` like any driven pin. Fix
 F-305's note in the same pass and drop or replace its unresolvable citation.
 
-**Empirical seal is queued, not yet returned.** VO-J-003's rig now runs `D2`/`D3` — the same
-streamer command with DIR low and then `DIRH` — as a direct A/B. **If `D2` passes on the bench, this
-finding is wrong and must be reversed**, because that would mean the streamer does drive with DIR
-low whatever the architecture text implies. Record the D2/D3 result here when it lands.
+**SEALED ON SILICON 2026-08-20 → EF-062.** VO-J-003's run 3 ran the A/B: the same streamer command
+with DIR low and then `DIRH`, the `DIRH` leg starting from `OUT`=0 so a pass proves the streamer
+overrode `OUT`. *Result:* `D1` plain drive (no streamer) **8 of 8** · `D2` DIR low **4 of 8** · `D3`
+`DIRH` **8 of 8**. The prediction and its falsifying outcome ("if `D2` passes, reverse F-308") were
+written into the program before the run; the bench was free to reverse this and did not.
+
+**The class — the book is inconsistent with itself, and the majority of it is already right.**
+
+*Correct, do not touch:* `streamer-body.md:796` ("Until DIR is high, the pin does not drive") ·
+`:1490` the §15.2 HDMI program, which does `drvl #7<<6 + HDMI_BASE` · `:2038` the troubleshooting
+checklist, "Pins configured as outputs (DRVH/DRVL as needed)" · `:623`, `:816`, `:1767` (ADC, DAC,
+DDS pin enables).
+
+*Wrong prose — **FIXED 2026-08-20**:* `:834` the §11.0 callout (rewritten: keeps "no `WRPIN`",
+adds what `DIRH` is for and what a DIR-low streamer command looks like on a bench) · `:410` §5.2's
+"the pin columns need none".
+
+*Code blocks that omit the pin enable — **STILL OWED**, routed to «#280»:*
+- `:405` `X_IMM_32X1_LUT` 32-pin · `:435` `X_IMM_4X8_1DAC8` · `:470` `X_RFLONG_4X8_LUT` ·
+  `:497` `X_RFBYTE_8P_1DAC8` — four short "Example:" fragments, none enabling the pins they drive.
+- `:1616` / `:1627` §16.1 SPI — and this one is a **worked** example: the configuration block at
+  `:1600-1607` sets up `spi_clk` and does `drvl #spi_clk`, then never touches `spi_do`, the pin the
+  streamer actually drives. As written the data pin cannot output.
+- `:1443` §15.1 VGA — `m_visible` carries `X_PINS_ON | X_DACS_3_2_1_0`, and the program does the
+  `DRVC` for `vsync_pin` but **no §11.0 DAC-pin setup at all** for the RGB channels. Already inside
+  «#280»'s scope for its undefined `VGA_BASE`/`framebuffer`; this is a third defect in the same block.
+- Assembly Language Reference `part-iii/appendix-g-streamer-constants.md:228`, `:255`, `:289` —
+  `mov mode, ##… | X_PINS_ON` with no pin enable. **RELEASED in v3.1.6**; belongs to that manual's
+  next pass, not this sprint.
+
+**Why the sweep is routed rather than done here.** «#280» is the next task in the Streamer sprint and
+is *precisely* the block-by-block pass that classifies every code block against the example contract
+— the right place to add a missing line to ten blocks consistently. The enumeration above exists so
+that pass does not re-derive it. This is routing inside one sprint, not deferral across a release:
+none of it ships until v1.1.0. The failure mode being avoided is the one «#282» records — "the
+finding named a row, the fix corrected a row, nobody swept the table."
 
 **Sprint impact.** This is sprint decision #4 ("Digital ≠ DAC. `X_PINS_ON` needs NO wrpin/dirh"),
-which later tasks were told to respect. It belongs at the Streamer v1.1.0 co-release gate («#288»)
-with F-302…F-307.
+which later tasks were told to respect. **That decision is now half wrong and must not be applied as
+written.** Surfaces at the Streamer v1.1.0 co-release gate («#288») with F-302…F-307.
 
-**Status:** `CONFIRMED (documentary) — correction owed in Streamer Guide v1.1.0 §11.0 and in F-305's
-note. Empirical A/B (VO-J-003 D2/D3) queued to seal it; reversible on that result.`
+**Status:** `PARTIAL — prose FIXED 2026-08-20 at streamer-body.md:410 and :834, gates green.
+Confirmed on silicon (EF-062). Code-block sweep (10 blocks enumerated above) OWED, routed to «#280»;
+the Assembly Language Reference's three sites are a separate manual's pass.`
 
 ---
 
