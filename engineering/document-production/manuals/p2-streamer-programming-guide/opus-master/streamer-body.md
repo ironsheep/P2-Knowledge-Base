@@ -1585,7 +1585,7 @@ The **WAITXFI** instruction blocks only until the streamer finishes — it has n
 
 This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts them to work — generating waveforms with a function generator's precision, and detecting specific frequencies for tone decoding, distance sensing, and measurement. Where Chapter 10 explained the mechanism, this chapter shows the applications.
 
-## 17.1 Goertzel Frequency Detection
+## 17.1 Goertzel Frequency Detection {#sec-17-1}
 
 Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on real silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
 
@@ -1670,35 +1670,77 @@ dds_s           long    %0000_0001_000_000000000
 **SINC2 needs a smaller table.** SINC1 accumulates directly and takes the full ±127 waveform amplitude. SINC2 double-integrates for sharper selectivity and overflows on a full-scale table — build it at ±10. Either way the DAC bytes are emitted with the MSB inverted — §10.2's `LUT.byte[n] ^ $80` — which puts the waveform's **zero crossing** at `$80` and `$7F`, not its extremes: a ±127 table spans `$01` to `$FF`, and a ±10 table only `$76` to `$8A`.
 :::
 
-## 17.2 DDS Waveform Generation
+## 17.2 DDS Waveform Generation {#sec-17-2}
 
-DDS synthesizes arbitrary waveforms at precise frequencies.
+DDS synthesizes arbitrary waveforms at precise frequencies. It is the other half of the mode §17.1 uses: the same command word, with the DAC routing field turned on and no input pin summed. Where the detector measures one frequency in a signal, the generator emits one — from a table you write, at a rate the NCO sets.
 
 **Applications:** Function generator, audio synthesis, RF modulation
 
-The output is a DAC channel, so the pin that carries it needs the setup in §11.0 — DAC mode with this cog's ID, `DIRH`, and low two bits selecting the channel — and the command needs a DAC-routing field to turn that channel on.
+### The output path
 
-**Configuration:**
+The output is a DAC channel, so the pin that carries it needs the setup in §11.0 — DAC mode with this cog's ID, `DIRH`, and low two bits selecting the channel — and the command's `%dddd` field has to route a streamer channel onto it. §17.1's detector sets that field to `X_DACS_OFF`; a generator is what turns it on.
+
+Which channel to route follows from the LUT layout. §10.2 sends LUT byte 0 to X0, byte 1 to X1, and so on, so a single-channel generator routes **X0 to DAC0** with `X_DACS_X_X_X_0` (§11.1) and drives a pin whose low two bits are `%00` (§11.2).
+
+### The table
+
+§10.4's build loop already produces exactly the table this needs. There it is called `sine_table`, and its `t.byte[0]` — commented as the optional DAC output — is the sample DAC0 emits here. A full-window generator uses all 512 longs; §10.3's smaller loop sizes let several waveforms sit in the LUT at once, each picked by the `%A` bits of its own command.
+
+Amplitude follows §10.5: SINC1 takes the full ±127. Selecting SINC2 instead means building the table at ±10, for the reason given there.
+
+### A one-channel function generator
 
 ```pasm2
-                ' Load waveform to LUT
+CON   DDS_PIN = 8                       ' low bits %00 -> DAC0
+
+DAT             org
+
+                ' Output pin: DAC mode, this cog's channels, driving
+                cogid   cogn
+                setnib  dacmode, cogn, #2         ' COGID -> M[3:0]
+                wrpin   dacmode, #DDS_PIN
+                dirh    #DDS_PIN
+
+                ' Waveform table -> LUT, all 512 longs
                 setq2   #$200-1
                 rdlong  0, ##waveform_table
 
-                ' Set output frequency (2^31-scaled for the NCO)
-                rdlong  clkf, #$44              ' clkfreq from hub $44
-                qfrac   output_freq, clkf       ' QFRAC = 2^32 × output/clk
+                ' Output frequency, 2^31-scaled for the NCO
+                rdlong  clkf, #$44                ' clkfreq from hub $44
+                qfrac   out_freq, clkf            ' QFRAC = 2^32 x f/clk
                 getqx   xfrq
-                shr     xfrq, #1                ' halve to the NCO's
-                                                ' 2^31 scaling
+                shr     xfrq, #1                  ' halve to the NCO's
+                                                  ' 2^31 scaling
                 setxfrq xfrq
 
-                ' Continuous output
-                xinit   dds_mode, #0
+                ' Run until stopped; DAC0 follows the table
+                xinit   dds_cmd, dds_s
+stay            jmp     #stay
+
+' SINC1, nothing summed, X0 -> DAC0 only, perpetual count
+dds_cmd         long    X_DDS_GOERTZEL_SINC1 | X_DACS_X_X_X_0 + $FFFF
+' S[15:12] = 0 sums no pin: this command generates, it does not measure
+' S[11:0] = %000_000000000 selects the full 512-long window (10.3)
+dds_s           long    %0000_0000_000_000000000
+
+out_freq        long    1_000                     ' 1 kHz
+dacmode         long    P_DAC_124R_3V | P_CHANNEL
+
+cogn            res     1
+clkf            res     1
+xfrq            res     1
+
+                orgh                              ' hub, not cog RAM
+' 512 longs; byte 0 is the sample DAC0 emits. 10.4 builds it
+waveform_table  long    0[512]
 ```
 
+**`S` is zero here on purpose.** §17.1 makes `S[15:12] = 0` the first thing to check when a detector reads noise, and that is right — for a detector. This command only generates and never reads the accumulators, so summing no pin is the correct setting rather than the classic mistake. A command that does both jobs at once supplies an input block in `S[15:12]` *and* a routing field in `%dddd`.
+
+**The count is `$FFFF`,** which runs the command perpetually (§4.6) — a function generator that stops after a fixed number of steps is not one. `XSTOP`, or the next command, ends it.
+
 ::: tip
-The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the window at the programmed rate. That window is the whole 512-long LUT by default and can be set as small as four entries, which is how several waveforms live in the LUT at once (§10.3).
+The table is not restricted to a sine. Square, triangle, or a recorded sample all work the same way: the NCO steps through the window and the routed DAC emits the byte it lands on.
 :::
 
 # Chapter 18: Integration Patterns
@@ -2022,6 +2064,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 - DAC routing table: [11.1](#sec-11-1)
 - DAC symbols: [13.3](#sec-13-3)
 - DDS mode: [Chapter 10](#ch-10)
+- DDS waveform generation: [17.2](#sec-17-2)
 - DEBUG_COGS: [14.5](#sec-14-5)
 - DVI forward/reverse: [15.2](#sec-15-2)
 - Debugging streamer code: [14.5](#sec-14-5)
@@ -2040,12 +2083,14 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 ```
 
 - Frequency calculation: [3.2](#sec-3-2), [3.4](#sec-3-4), [Appendix C](#app-c)
+- Function generator: [17.2](#sec-17-2)
 
 ```{=latex}
 \indexletter{G}
 ```
 
 - GETXACC: [4.7](#sec-4-7), [10.6](#sec-10-6)
+- Goertzel frequency detection: [17.1](#sec-17-1)
 - Goertzel mode: [Chapter 10](#ch-10)
 
 ```{=latex}
