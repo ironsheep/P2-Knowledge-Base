@@ -1475,19 +1475,74 @@ With `P[1]` clear the word holds three 8-bit color channels and the hardware enc
 
 **The system clock is fixed at ten times the pixel rate**, because every pixel becomes ten serial bits: 640×480 digital video has a 25 MHz pixel rate, so the P2 runs at 250 MHz. The streamer's NCO is then set to one tenth of the system clock with `$0CCC_CCCC+1`, where the `+1` forces the initial NCO rollover on the tenth clock.
 
-**Configuration:**
+### A 640x350 image in a 480-line field
+
+The program below has the shape of §15.1's: the same 800-pixel line, the same 525-line field, the same sync-then-stream loop. What changes is the output stage — eight digital pins rather than four DACs — and the visible height, which is 350 lines because a 640x480 framebuffer at 16 bits per pixel is 600 KB and hub RAM is 512 KB (§7.1). The lines left over are blanked, which is what the top and bottom counts do.
 
 ```pasm2
-                ' Enable DVI forward mode
-                setcmod #$100
+CON   HDMI_BASE = 16                    ' must be a multiple of 8
 
-                ' Configure HDMI pins
-                drvl    #7<<6 + hdmi_base
-                wrpin   ##%100100_00_00000_0, #7<<6 + hdmi_base
+DAT             org
 
-                ' NCO for 1/10 rate (TMDS serialization)
-                setxfrq ##$0CCC_CCCC+1
+                ' Eight pins in sequence, 1 mA drive
+                drvl    #7<<6 + HDMI_BASE         ' pins 16..23
+                wrpin   ##P_HIGH_1MA | P_LOW_1MA, #7<<6 + HDMI_BASE
+
+                setcmod #$100                     ' CMOD[8:7] = %10, DVI fwd
+                setxfrq ##$0CCC_CCCC+1            ' 1/10 sysclk = 25 MHz px
+                rdfast  ##640*350*2/64, ##picture ' wrap on the image
+
+vfield          mov     hsync0, sync_000          ' VSYNC inactive
+                mov     hsync1, sync_001
+                callpa  #90, #blank               ' top blanking lines
+                mov     x, #350                   ' visible lines
+line            call    #hsync
+                xcont   m_visible, #0             ' 640 pixels from the FIFO
+                djnz    x, #line
+                callpa  #83, #blank               ' bottom blanking lines
+                mov     hsync0, sync_222          ' VSYNC active
+                mov     hsync1, sync_223
+                callpa  #2, #blank                ' vertical sync lines
+                jmp     #vfield
+
+' One non-visible line: sync, then 640 blanked pixels
+blank           call    #hsync
+                xcont   m_blank, hsync0
+      _ret_     djnz    pa, #blank
+
+' Horizontal sync: 16 before, 96 of sync, 48 after
+hsync           xcont   m_front, hsync0
+                xzero   m_sync,  hsync1
+      _ret_     xcont   m_back,  hsync0
+
+' X_IMM_1X32_4DAC8 | X_PINS_ON ($7081_0000); D[15:0] = pixel count
+m_front         long    $7081_0000 + HDMI_BASE<<17 + 16
+m_sync          long    $7081_0000 + HDMI_BASE<<17 + 96
+m_back          long    $7081_0000 + HDMI_BASE<<17 + 48
+m_blank         long    $7081_0000 + HDMI_BASE<<17 + 640
+' X_RFWORD_RGB16 | X_PINS_ON -- pins only, no DAC routing
+m_visible       long    $B085_0000 + HDMI_BASE<<17 + 640
+
+' Blanking patterns: red, green and blue as ready-made 10-bit
+' codes, sent literally because P[1] = 1
+sync_000        long    %1101010100_1101010100_1101010100_10
+sync_001        long    %1101010100_1101010100_0010101011_10
+sync_222        long    %0101010100_0101010100_0101010100_10
+sync_223        long    %0101010100_0101010100_1010101011_10
+
+x               res     1
+hsync0          res     1
+hsync1          res     1
+
+                orgh    $1000
+' 640 x 350 pixels, 16bpp 5:6:5. At 2 bytes/px a full 640 x 480
+' frame would be 600 KB and would not fit in hub RAM (7.1)
+picture         long    0[640*350/2]
 ```
+
+**The four sync patterns are the `P[1]` mechanism in use.** Each is three 10-bit fields — red, green and blue, in the order the table above gives — with `P[1]` set, so the streamer sends them out literally instead of TMDS-encoding them. `hsync0` carries the pattern for the rest of the line and `hsync1` the one for the sync pulse, and the field loop swaps both when vertical sync begins. The codes themselves are the ones the *Parallax Propeller 2 Documentation*'s HDMI program uses; what a given code means is an HDMI/DVI encoding matter this guide does not cover.
+
+**XZERO** appears once per line, on the sync pulse, which is §4.7's line-boundary practice: the phase is reset where a glitch would be invisible.
 
 ::: hardware
 **One register, two facilities.** `CMOD[8:7]` serializes the streamer's **pin** output; `CMOD[6:5]` and the bits below it transform the cog's **DAC channels** (§15.0). That is why **SETCMOD** appears in an HDMI program that never uses the converter — and it is worth decoding the constant above: `#$100` is `%1_0000_0000`, so `CMOD[8:7]` = `%10` and `CMOD[6:5]` = `%00`, converter off. The *Parallax Propeller 2 Documentation* documents digital video inside its streamer section and the colorspace converter in a section of its own.
@@ -1507,7 +1562,7 @@ Composite video uses the colorspace converter to generate NTSC or PAL signals. I
 
 `CMOD[6:5] = %11` puts the combined composite signal on all four DAC channels. **`%10` is the alternative worth knowing about:** it keeps composite on DAC3 and DAC2 while splitting luma and chroma onto DAC0 and DAC1, so the same four channels also drive an S-Video connector.
 
-**Configuration:**
+**Pattern** — supply `cy_ntsc`, `ci_ntsc` and `cq_ntsc`.
 
 ```pasm2
                 ' Composite mode (NTSC/PAL) — CMOD[6:5] = %11
@@ -1522,6 +1577,14 @@ Composite video uses the colorspace converter to generate NTSC or PAL signals. I
                 setci   ##ci_ntsc
                 setcq   ##cq_ntsc
 ```
+
+**Why the coefficients are left to you.** §15.0 gives the shape they have to take — three signed coefficients and an offset in each of CY, CI and CQ, read according to `CMOD[4]`, with the rotator's 1.646 gain budgeted into CI and CQ so IQ cannot overflow. It does not give a worked NTSC or PAL set, and neither does any other source this guide draws on. Deriving one is a video-encoding exercise rather than a streamer one, and a set lifted from a driver built for a different extension mode, pedestal or DAC loading goes wrong in ways that look like a tint error rather than a fault. So this block shows where each parameter goes, not what to put in it.
+
+It also stops short of a picture. Composite still needs a framebuffer, a streamer command and a line loop around this configuration; §15.1 and §15.2 both work that structure through, and only the output stage differs.
+
+::: caution
+**Composite is where §3.5's crystal-accuracy warning binds.** `CFRQ` is computed from `clkfreq`, so the color subcarrier inherits whatever error the crystal has — and the colorburst is the one video case with only a few ppm of headroom before the hue drifts.
+:::
 
 # Chapter 16: High-Speed Serial (SPI) {#ch-16}
 
