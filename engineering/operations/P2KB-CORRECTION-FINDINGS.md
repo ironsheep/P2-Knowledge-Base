@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-307`**
+**Next finding ID: `F-308`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -310,6 +310,64 @@ of this finding. Corrected in the plan in the same pass that filed this entry.
 
 **Status:** `CONFIRMED — KB fix belongs to the yaml head (yaml-knowledge-base-maintenance), NOT to
 the Streamer manual sprint. Surfaces with F-302…F-305 at that sprint's co-release gate.`
+
+---
+
+### F-307 — six PASM2 instruction YAMLs serve their description with literal backslashes in it: `\"CMOD\"` instead of `"CMOD"`. `CONFIRMED`
+
+**How it surfaced.** Reading the five colorspace-converter instruction YAMLs as background for the
+Streamer Guide's new Chapter 15 section (task «#274», 2026-08-20). The corruption is in the served
+value, not just the file bytes.
+
+**Location:** `deliverables/ai/P2/language/pasm2/` — `setcy.yaml`, `setci.yaml`, `setcq.yaml`,
+`setcfrq.yaml`, `setcmod.yaml` (both `description:` and `oneliner:`), and `wxpin.yaml` (same two
+keys). Eleven string values across six files. The generated
+`deliverables/ai/P2/language/PASM2-ENCODING-REFERENCE.md` carries the same text at `:132-136` and
+in the WXPIN row, so it is a **derived** occurrence that clears when the YAMLs are fixed and the
+artifact is regenerated.
+
+**What is wrong.** Each value is a **single-quoted** YAML scalar containing `\"`:
+
+```yaml
+description: 'Set the colorspace converter \"CMOD\" parameter to D[8:0].'
+oneliner: Set the colorspace converter \"CMOD\" parameter to D[8:0]
+```
+
+In a single-quoted YAML scalar a backslash is a literal character, so this does **not** parse to
+`"CMOD"` — it parses to `\"CMOD\"`, backslashes and all. Confirmed by parsing, not by grep:
+`yaml.safe_load` over the whole `deliverables/ai/P2/` tree returns the backslashes in the value.
+A consuming agent gets `Set the colorspace converter \"CMOD\" parameter to D[8:0]`.
+
+**Authority.** All three documentary sources write plain double quotes:
+
+- `sources/pasm2-manual/pasm2-manual-narrative.txt:8866-8874` — `Set the colorspace converter "CFRQ" parameter to D[31:0].`
+- `sources/p2-datasheet/pasm2-complete-instruction-tables.md:489-493` — same, and `:222` for `Set "X" of smart pins …`
+- `sources/silicon-doc/part2-video-output.txt:188-192` writes it with **no quotes at all**
+
+The YAML's own `documentation_source:` names the PASM2 Manual, which is the first of these. The
+escaping is a transcription artifact of the extraction pipeline, not anything a source states.
+
+**Proposed correction.** Drop the backslashes — write `"CMOD"` in each of the eleven values. The
+single-quoted form needs no other change: a single-quoted YAML scalar holds a bare `"` fine, and it
+is only the backslash that has no meaning there. The bare `oneliner:` values are plain scalars and
+likewise just lose the backslashes. Then regenerate `PASM2-ENCODING-REFERENCE.md`. **Scope is
+exactly these six files** — see below.
+
+**Deliberately NOT in scope — three look-alikes that are correct.** A grep for `\"` across the tree
+returns 37 files; all but these six are legitimate:
+
+- **`hardware/*.yaml`** (`"0.1\" spacing"`, etc.) — `\"` inside a **double-quoted** scalar is the
+  correct escape and parses to `0.1" spacing`.
+- **`language/pasm2/jmp.yaml`** — `"\" forces R = 0.` is *about* the backslash prefix that forces
+  R = 0 in `JMP #\address`. The character is the subject; the text is right.
+- **`language/spin2/constructs/escape-strings.yaml` and `concepts/string_constants.yaml`** — the
+  Spin2 escape-string prefix genuinely **is** `@\"`. Spin2 v55 release notes,
+  `sources/spin2-v55/spin2-v55-text.txt:50`: *"New `@\"string\n"` works like `@"string"`, but
+  allows escape-character sequences."* Backslash-quote opens it and a plain quote closes it. These
+  files are correct and a sweep that "normalizes" them would break real syntax.
+
+**Status:** `CONFIRMED — belongs to the yaml head (yaml-knowledge-base-maintenance). Not a Streamer
+manual defect; the manual does not quote these descriptions.`
 
 ---
 

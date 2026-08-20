@@ -73,7 +73,7 @@
   % routes
   \node[iospbox, right=of imm, text width=20mm] (lut) {LUT index};
   \node[iospbox, below=of lut, text width=20mm] (dir) {Direct};
-  \node[iospbox, below=of dir, text width=24mm] (rgb) {Colorspace\\(RGB)};
+  \node[iospbox, below=of dir, text width=24mm] (rgb) {RGB unpack};
   % destination
   \node[iospkey, right=of dir, text width=18mm] (out) {Pins / DACs};
   \draw[iospflow] (imm)--(lut); \draw[iospflow] (imm.east)--(dir.west);

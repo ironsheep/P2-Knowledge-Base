@@ -93,7 +93,7 @@ And it leans on a few neighboring P2 subsystems:
 | Hub FIFO | the data source / sink, via RDFAST / WRFAST |
 | LUT RAM | palette lookups, sine/cosine tables |
 | DAC channels | analog output for video and audio |
-| Colorspace converter | HDMI encoding and composite video |
+| Colorspace converter | composite video, and color matrixing on the DAC channels |
 | Smart pins | clock generation and timing |
 
 With that picture in place, Chapter 2 opens up the engine itself — the data paths inside the streamer and how the pieces connect.
@@ -124,7 +124,7 @@ The streamer supports multiple data flow configurations:
 2. **Immediate → Pins/DACs**: S operand drives output directly
 3. **RDFAST → LUT → Pins/DACs**: Hub data indexes LUT; LUT data drives output
 4. **RDFAST → Pins/DACs**: Hub data drives output directly
-5. **RDFAST → RGB → Pins/DACs**: Hub data passes through colorspace converter
+5. **RDFAST → RGB → Pins/DACs**: Hub data is unpacked into red, green and blue
 
 **Input Paths (Pins → hub):**
 
@@ -297,7 +297,7 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 | `%0100`-`%0111` | IMM→Direct | S operand | Pins/DACs |
 | `%0111` | RF→LUT | RDFAST | LUT → Pins/DACs |
 | `%1000`-`%1011` | RF→Direct | RDFAST | Pins/DACs |
-| `%1011` | RF→RGB | RDFAST | Colorspace → Pins/DACs |
+| `%1011` | RF→RGB | RDFAST | RGB unpack → Pins/DACs |
 | `%1100`-`%1111` | Capture | Pins | DACs/WRFAST |
 | `%1111` | ADC | ADC | DACs/WRFAST |
 | `%1111_x111` | DDS/Goertzel | LUT | DACs + Analysis |
@@ -489,7 +489,7 @@ Hub data drives pins and DACs directly. The DAC-channel columns below reach a pi
 
 # Chapter 7: RGB Video Modes {#ch-7}
 
-Video earns its own family of modes because pixels are not just bytes. A color pixel must be unpacked into red, green, and blue and pushed out in a form a monitor understands. These RGB modes pull pixel data from a framebuffer and run it through the P2's colorspace converter on the way to the pins — so your code stores a picture and the streamer turns it into a signal. The modes differ mainly in how many bits each pixel uses, trading color depth against memory.
+Video earns its own family of modes because pixels are not just bytes. A color pixel must be unpacked into red, green, and blue and pushed out in a form a monitor understands. These RGB modes pull pixel data from a framebuffer and unpack each pixel into full-width red, green and blue on the way to the pins — so your code stores a picture and the streamer turns it into a signal. That unpacking is the streamer's own; the cog's colorspace converter is a separate stage further downstream, and §15.0 covers it. The modes differ mainly in how many bits each pixel uses, trading color depth against memory.
 
 ## 7.1 RGB Format Modes
 
@@ -1240,7 +1240,105 @@ Here the modes come together into the things people actually build: video, high-
 
 # Chapter 15: Video Output {#ch-15}
 
-Part IV puts the pieces together into real applications, beginning with the streamer's signature use: video. This chapter walks through generating VGA, HDMI, and composite signals — combining the RGB modes of Chapter 7, the NCO timing of Chapter 3, and the sync discipline that keeps a picture stable. The encoding differs by standard, but the shape is always the same: stream a framebuffer, on the beat, line after line.
+Part IV puts the pieces together into real applications, beginning with the streamer's signature use: video. This chapter walks through generating VGA, HDMI, and composite signals — combining the RGB modes of Chapter 7, the NCO timing of Chapter 3, and the sync discipline that keeps a picture stable. The encoding differs by standard, but the shape is always the same: stream a framebuffer, on the beat, line after line. Composite video also depends on a piece of hardware no earlier chapter has needed — the cog's colorspace converter — and HDMI is switched on through the same mode register, so §15.0 covers both first.
+
+## 15.0 The Colorspace Converter {#sec-15-0}
+
+Composite video is produced by hardware the earlier chapters have not described. Each cog has a **colorspace converter**: a pipeline between that cog's four DAC channels and its pins, performing a matrix transformation and a modulation on every clock. Composite uses both. VGA as §15.1 streams it uses neither — the RGB modes have already put red, green and blue where they need to be — and HDMI reaches this same mode register for an unrelated purpose (§15.2). The *Parallax Propeller 2 Documentation* describes the converter as intended for baseband video modulation, and usable as a general-purpose RF modulator.
+
+The converter transforms **DAC channels**, not the streamer's pin data. Whatever arrives at DAC3, DAC2 and DAC1 is what it works on — those three are intended to serve as **R, G and B** — while DAC0 is the fourth input and carries control rather than color. Whenever the converter is in use there is a **group delay of five clocks** from DAC-channel input to output.
+
+Five instructions configure it, each writing one parameter register:
+
+| Instruction | Parameter | Operand | What it holds |
+|-------------|-----------|---------|---------------|
+| **SETCY** | `CY` | `D[31:0]` | the Y row of the matrix, and a Y offset |
+| **SETCI** | `CI` | `D[31:0]` | the I row, and an I offset |
+| **SETCQ** | `CQ` | `D[31:0]` | the Q row, and a Q offset |
+| **SETCFRQ** | `CFRQ` | `D[31:0]` | the modulation frequency |
+| **SETCMOD** | `CMOD` | `D[8:0]` | every mode selection below, and the digital-video field of §15.2 |
+
+### The matrix
+
+CY, CI and CQ each pack **three coefficients and an offset** into 32 bits: the top three bytes are the coefficients applied to DAC3, DAC2 and DAC1, and the low byte is an offset applied later. The three products are summed and divided by 128.
+
+```formula
+Y[7:0] = (DAC3 × CY[31:24] + DAC2 × CY[23:16] + DAC1 × CY[15:8]) / 128
+I[7:0] = (DAC3 × CI[31:24] + DAC2 × CI[23:16] + DAC1 × CI[15:8]) / 128
+Q[7:0] = (DAC3 × CQ[31:24] + DAC2 × CQ[23:16] + DAC1 × CQ[15:8]) / 128
+```
+
+The divide by 128 is what makes a coefficient readable as 128ths — and **`CMOD[4]` decides how those coefficient bytes are read.** Set, they are **sign-extended**, which is the range a color matrix needs, since Y/I/Q rows carry negative terms. Clear, they are **zero-extended**, and the *Parallax Propeller 2 Documentation* states the consequence directly: with zero-extension, using 128 for a term results in no attenuation of the related DAC term. The same byte `$80` is +128 under one setting and −128 under the other, so a coefficient set is only meaningful alongside the `CMOD[4]` it was computed for.
+
+### The modulator
+
+The modulator is what turns the I and Q terms into a color subcarrier. It runs off a phase accumulator named `PHS`, advanced by `CFRQ` rather than by the streamer's NCO frequency word.
+
+```formula
+PHS[31:0] := PHS[31:0] - CFRQ[31:0]
+IQ[7:0]   = the Q of (I,Q) after rotation by PHS[31:24], scaled by 1.646
+```
+
+Subtracting CFRQ each clock is what produces a **clockwise** angle rotation in the upper bits of PHS; `PHS[31:24]` is then the angle by which the coordinate pair (I, Q) is rotated, and the rotated Q coordinate becomes IQ.
+
+**The 1.646 is a rotator artifact you have to budget for.** The rotation is performed by a five-stage CORDIC, which scales its result by 1.646. That gain lands on IQ, so the CI and CQ terms must be computed small enough to absorb it — otherwise IQ overflows, and nothing reports that it did.
+
+::: caution
+**CFRQ is scaled by 2³²; the streamer's NCO is scaled by 2³¹.** The two frequency words look alike and are computed differently, so a value carried from one to the other is wrong by a factor of two.
+
+```formula
+CFRQ      = $1_0000_0000 × modulation_frequency / clock_frequency
+NCO §3.2  = $8000_0000   × desired_rate         / clock_frequency
+```
+
+For the NTSC color subcarrier of 3.579545 MHz at an 80 MHz clock, the *Parallax Propeller 2 Documentation* works this through to `$0B74_5CFE`. §15.3's `$03AA_5B33` is the same subcarrier at 250 MHz.
+:::
+
+### Output selection — `CMOD[6:5]`
+
+Four selections decide which computed term reaches each DAC pin:
+
+| `CMOD[6:5]` | Mode | DAC3 | DAC2 | DAC1 | DAC0 |
+|-------------|------|------|------|------|------|
+| `%00` | off (bypass) | DAC3 | DAC2 | DAC1 | DAC0 |
+| `%01` | VGA (R-G-B) / HDTV (Y-Pb-Pr) | FY (R / Y) | FI (G / Pb) | FQ (B / Pr) | FS (H-Sync) |
+| `%10` | NTSC/PAL Composite + S-Video | FYC (Composite) | FYC (Composite) | FIQ (Chroma) | FYS (Luma) |
+| `%11` | NTSC/PAL Composite | FYC | FYC | FYC | FYC |
+
+**`%00` is the pass-through selection**, and it is the one every DAC example in Chapters 10, 11 and 17 is written for: each channel reaches its pin unmodified. §15.1's VGA program is in that group — it never calls **SETCMOD**, because `X_RFWORD_RGB16` has already put red, green and blue on DAC3, DAC2 and DAC1 and no transformation is wanted. `%01` is for when a transformation *is* wanted on an analog RGB output — component Y-Pb-Pr being the obvious case — and it also puts the converter's own H-sync term on DAC0.
+
+**`%10` is S-Video, and it is the only selection that separates luma from chroma:** DAC1 carries chroma and DAC0 carries luma, while DAC3 and DAC2 still carry the combined composite signal. One four-channel group therefore feeds an S-Video connector and a composite output at the same time. `%11` is composite alone, on all four channels.
+
+### What the low bits of CMOD do
+
+`CMOD[3:0]` control how DAC0 and the offsets enter the output terms:
+
+| Bit | Effect |
+|-----|--------|
+| `CMOD[3]` | adds DAC0 into FY — the R / Y term |
+| `CMOD[2]` | adds DAC0 into FI — the G / Pb term |
+| `CMOD[1]` | adds DAC0 into FQ — the B / Pr term |
+| `CMOD[0]` | selects the polarity of FS, the H-sync term |
+
+Each output term also takes the **low byte of its own parameter as an offset** — FY adds `CY[7:0]`, FI adds `CI[7:0]`, FQ adds `CQ[7:0]`. That is what the fourth byte of a 32-bit CY/CI/CQ value is for, and it is how a pedestal or black level is set.
+
+In the composite selections the luma term is not a single expression. **`DAC0[1:0]` selects between three luma levels** — sync, blank/burst, and visible — which is how composite sync and the color burst are generated without a separate signal path:
+
+| `DAC0[1:0]` | Luma term FYS |
+|-------------|---------------|
+| `%1x` | sync level (zero) |
+| `%01` | blank / burst level — taken from `CI[7:0]` |
+| `%00` | visible — `CY[7:0]` plus the matrix Y |
+
+The composite output is then that luma term plus the modulated chroma: FYC = FYS + IQ.
+
+::: hardware
+**What this guide does not carry.** The exact expressions for the seven output terms — FY, FI, FQ, FS, FIQ, FYS and FYC — are stated bit by bit in the COLORSPACE CONVERTER section of the *Parallax Propeller 2 Documentation v35 - Rev B/C*, and this guide does not reproduce them. Everything above is what a streamer program has to choose: which parameter holds what, which selection routes which term to which pin, and which bits gate DAC0 in.
+
+**Nor does any source here carry a worked NTSC or PAL coefficient set.** The *Parallax Propeller 2 Documentation* gives the mechanism and no coefficients; deriving a set is a video-encoding problem rather than a streamer one, and it depends on the `CMOD[4]` extension mode, the 1.646 rotator gain, and the pedestal the target standard expects.
+:::
+
+`CMOD[8:7]` is not part of any of this — it selects digital-video serialization, which §15.2 covers.
 
 ## 15.1 VGA Output {#sec-15-1}
 
@@ -1331,13 +1429,39 @@ y               res     1
 
 ## 15.2 HDMI/DVI Output {#sec-15-2}
 
-HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
+Digital video is a **streamer** facility rather than a colorspace-converter one, even though it is switched on through the same `CMOD` register. In DVI mode the streamer serializes its internal 32-bit pin output `P[31:0]` into an eight-pin, ten-bit digital-video format: the 32-pin output becomes `$0000_00xx`, and those eight low bits leave as four differential pairs — red, green, blue, and clock.
 
 **Hardware Requirements:**
 
-- Eight pins in sequence for TMDS pairs
+- Eight pins in sequence for the four differential pairs
 - 1 mA pin drive strength
 - System clock = 10 × pixel clock
+
+**`CMOD[8:7]` selects the format, and the pair order is reversible.** Offsets below are from the eight-pin group's base pin; `P[31:8]` passes through in Normal mode and is forced to `$00_0000` in both DVI modes.
+
+| Pin offset | Normal (`%0x`) | DVI fwd (`%10`) | DVI rev (`%11`) |
+|------------|----------------|-----------------|-----------------|
+| +7 | `P[7]` | RED+ | CLK- |
+| +6 | `P[6]` | RED- | CLK+ |
+| +5 | `P[5]` | GRN+ | BLU- |
+| +4 | `P[4]` | GRN- | BLU+ |
+| +3 | `P[3]` | BLU+ | GRN- |
+| +2 | `P[2]` | BLU- | GRN+ |
+| +1 | `P[1]` | CLK+ | RED- |
+| +0 | `P[0]` | CLK- | RED+ |
+
+The two DVI selections put the same eight signals out in opposite order; the block below selects the forward one.
+
+**Sync rides inside the stream, and `P[1]` is what carries it.** Eight-bit red, green and blue pixel data are encoded into 10-bit TMDS patterns for transmission, while control data — the horizontal and vertical syncs — is transmitted literally. `P[1]` of the internal pin-output data selects between the two:
+
+| `P[31:0]` | What the three serial channels carry |
+|-----------|--------------------------------------|
+| `%RRRRRRRR_GGGGGGGG_BBBBBBBB_xxxxxx0x` | each 8-bit channel **gets TMDS-encoded** |
+| `%rrrrrrrrrr_gggggggggg_bbbbbbbbbb_1x` | each 10-bit channel **is sent literally** |
+
+With `P[1]` clear the word holds three 8-bit color channels and the hardware encodes them. With `P[1]` set it holds three ready-made 10-bit patterns and the hardware passes them straight out — which is how a sync interval is expressed as streamed pixel data rather than as a separate pin, the way §15.1's VGA program has to do it.
+
+**The system clock is fixed at ten times the pixel rate**, because every pixel becomes ten serial bits: 640×480 digital video has a 25 MHz pixel rate, so the P2 runs at 250 MHz. The streamer's NCO is then set to one tenth of the system clock with `$0CCC_CCCC+1`, where the `+1` forces the initial NCO rollover on the tenth clock.
 
 **Configuration:**
 
@@ -1354,7 +1478,7 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 ```
 
 ::: hardware
-**HDMI requires the colorspace converter in DVI mode.** In DVI mode, the converter generates TMDS encoding from RGB data.
+**One register, two facilities.** `CMOD[8:7]` serializes the streamer's **pin** output; `CMOD[6:5]` and the bits below it transform the cog's **DAC channels** (§15.0). That is why **SETCMOD** appears in an HDMI program that never uses the converter — and it is worth decoding the constant above: `#$100` is `%1_0000_0000`, so `CMOD[8:7]` = `%10` and `CMOD[6:5]` = `%00`, converter off. The *Parallax Propeller 2 Documentation* documents digital video inside its streamer section and the colorspace converter in a section of its own.
 :::
 
 ::: hardware
@@ -1367,7 +1491,9 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 
 ## 15.3 Composite Video {#sec-15-3}
 
-Composite video uses the colorspace converter to generate NTSC or PAL signals.
+Composite video uses the colorspace converter to generate NTSC or PAL signals. It is the one output in this chapter that needs the whole of §15.0: the matrix to produce Y, I and Q, the modulator to put I and Q on a color subcarrier, and `DAC0[1:0]` to switch the luma term between sync, burst and visible.
+
+`CMOD[6:5] = %11` puts the combined composite signal on all four DAC channels. **`%10` is the alternative worth knowing about:** it keeps composite on DAC3 and DAC2 while splitting luma and chroma onto DAC0 and DAC1, so the same four channels also drive an S-Video connector.
 
 **Configuration:**
 
@@ -1865,9 +1991,13 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 \indexletter{C}
 ```
 
+- CFRQ parameter: [15.0](#sec-15-0)
 - Clock accuracy: [3.5](#sec-3-5)
-- Colorspace converter: [15.2](#sec-15-2), [15.3](#sec-15-3)
+- CMOD register: [15.0](#sec-15-0), [15.2](#sec-15-2)
+- Color matrix (Y/I/Q): [15.0](#sec-15-0)
+- Colorspace converter: [15.0](#sec-15-0), [15.3](#sec-15-3)
 - Command structure: [Chapter 4](#ch-4)
+- Composite video: [15.0](#sec-15-0), [15.3](#sec-15-3)
 - Count field: [4.6](#sec-4-6)
 
 ```{=latex}
@@ -1880,6 +2010,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 - DAC symbols: [13.3](#sec-13-3)
 - DDS mode: [Chapter 10](#ch-10)
 - DEBUG_COGS: [14.5](#sec-14-5)
+- DVI forward/reverse: [15.2](#sec-15-2)
 - Debugging streamer code: [14.5](#sec-14-5)
 - Debug interrupt: [14.5](#sec-14-5)
 - Double buffering: [18.1](#sec-18-1)
@@ -1928,12 +2059,14 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 ```
 
 - LUT setup: [5.1](#sec-5-1), [10.4](#sec-10-4)
+- Luma/chroma separation: [15.0](#sec-15-0), [15.3](#sec-15-3)
 
 ```{=latex}
 \indexletter{M}
 ```
 
 - Mode encoding table: [Appendix A](#app-a)
+- Modulator (colorspace): [15.0](#sec-15-0)
 - Mode field: [4.2](#sec-4-2)
 - Mode symbols: [13.1](#sec-13-1)
 - Multi-cog: [18.2](#sec-18-2)
@@ -1969,6 +2102,9 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 \indexletter{S}
 ```
 
+- S-Video: [15.0](#sec-15-0), [15.3](#sec-15-3)
+- SETCMOD: [15.0](#sec-15-0), [15.2](#sec-15-2)
+- SETCY / SETCI / SETCQ / SETCFRQ: [15.0](#sec-15-0)
 - SETXFRQ: [3.3](#sec-3-3), [4.7](#sec-4-7)
 - Signal processing: [Chapter 17](#ch-17)
 - SINC1/SINC2: [10.5](#sec-10-5)
@@ -1983,6 +2119,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 ```
 
 - TCXO: [3.5](#sec-3-5)
+- TMDS encoding: [15.2](#sec-15-2)
 - Troubleshooting: [Appendix D](#app-d)
 
 ```{=latex}
