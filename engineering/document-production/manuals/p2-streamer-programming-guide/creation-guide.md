@@ -427,12 +427,60 @@ Each mode or mode group follows this structure:
 
 ### 5.2 Code Example Standards
 
-**Requirements:**
-- Must be complete and compilable
-- Must demonstrate core functionality
-- Must include comments explaining purpose (not just restating instruction)
+#### The example contract
+
+Every ` ```pasm2 ` and ` ```spin2 ` block in this manual is one of exactly two
+things, and a reader can tell which without running it.
+
+- A **worked example** — it runs. Every symbol it uses is defined in the block or
+  cross-referenced to the section that defines it; the storage it writes is
+  declared; and where it drives pins or DACs, the pin configuration that makes
+  them emit is shown or cross-referenced. This is the default form, so a block
+  carrying no label is a promise that it works.
+- A **pattern** or **fragment** — it shows a shape rather than a program. It is
+  introduced by a bolded lead-in on the line immediately above the fence, naming
+  what the reader supplies: `**Pattern** — supply <symbols>.` A labelled pattern
+  is a legitimate form and several chapters rely on it. An *unlabelled* one is
+  the defect, because it makes a worked example's promise and cannot keep it.
+
+Both forms obey the same comment standard and the same code-line budget. The
+` ```antipattern ` fence is a third case that labels itself: code shown in order
+to be rejected.
+
+#### The five diagnostics
+
+A block presented as a worked example fails the contract if any of these holds.
+They are what the audit runs, and each one names a defect this manual has
+actually shipped:
+
+| Test | Fails when |
+|------|-----------|
+| Undefined symbol | a symbol is used and never defined — not in the block, and not in anything the block points at |
+| Phantom data | a table or buffer is referenced with no format, no size, and no build code |
+| No output path | the block drives pins or DACs without the configuration step that makes them emit |
+| False constraint | the block or its surrounding prose states a requirement the hardware does not impose |
+| No declared storage | a result is written into storage the block never declares |
+
+The tests are separable: a block can define every symbol and still have no output
+path. Apply all five.
+
+#### Why the contract is written down
+
+Improvement passes on this manual have been finding-driven — each deepened the
+sections it was pointed at and swept none of the others. Because every section
+wears identical furniture, the resulting variance is invisible from inside the
+document: a section rebuilt against hardware measurements and a section never
+edited since its first draft look the same on the page and sit in the same
+chapter. Labelling is what makes the difference visible to a reader, and the five
+diagnostics are what make it visible to an audit.
+
+#### Requirements
+
+- Comments explain purpose, not the instruction they sit beside
 - Prefer PASM2 for low-level control examples
 - Include Spin2 where high-level usage is clearer
+- Code lines do not wrap and stay within the budget (see *Code Line Budget*)
+- Worked examples compile with `pnut-ts` (add `-d` for any block containing `debug()`)
 
 **Example Quality:**
 
@@ -566,7 +614,7 @@ channel number. DAC0 → pins %xxxx00, DAC1 → pins %xxxx01, etc.
 **Per Chapter:**
 - [ ] All modes in category covered
 - [ ] Cross-references valid
-- [ ] Examples demonstrate real usage
+- [ ] Every `pasm2`/`spin2` block satisfies the example contract (§5.2)
 - [ ] Terminology consistent
 
 **Document-Level:**
@@ -577,11 +625,15 @@ channel number. DAC0 → pins %xxxx00, DAC1 → pins %xxxx01, etc.
 
 ### 8.2 Code Testing
 
-All code examples must:
-1. Compile with `pnut-ts` without errors
-2. Be syntactically correct PASM2 or Spin2
-3. Demonstrate the described functionality
-4. Include meaningful comments
+Which test applies depends on which side of the example contract (§5.2) a block
+is on:
+
+1. **Worked examples** compile with `pnut-ts` without errors — add `-d` for any
+   block containing `debug()`, or its contents are ignored
+2. **Patterns and fragments** are read against their lead-in: every symbol the
+   lead-in does *not* hand to the reader must still be defined
+3. Both are syntactically correct PASM2 or Spin2
+4. Both demonstrate the described functionality and carry meaningful comments
 
 ---
 

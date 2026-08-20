@@ -2,7 +2,7 @@
 manual_slug: p2-streamer-programming-guide
 doc_class: reference                              # YAML-backed + Silicon-Doc-backed reference (§3 grounding model)
 code_line_budget_K: 76                            # inherits platform reference K (creation-guide §Code Line Budget); Dimension #3b
-last_published_tag: p2-streamer-programming-guide-v1.0.8   # baseline for Dimension #15 (released 2026-08-08, 73pp)
+last_published_tag: p2-streamer-programming-guide-v1.0.9   # baseline for Dimension #15 (released 2026-08-19, 76pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -20,6 +20,7 @@ high_risk_quant:                                  # Dimension #5 hot spots
   - "Pin-group ranges (§4.5: %000=31..0 … wrap-around groups; F-155 was %101=32 pins)"
   - "Pixel-rate / jitter sysclk-ratio table (§3.4) and clock-accuracy figures (§3.5)"
 fragile_areas:                                    # known-thin / historically-buggy — weight heavily
+  - "EXAMPLE CONTRACT (creation-guide §5.2) — every ```pasm2/```spin2 block is a worked example OR carries a **Pattern**/**Fragment** lead-in naming what the reader supplies. Audit each block against the five diagnostics defined there: undefined symbol · phantom data · no output path · false constraint · no declared storage. An unlabelled block failing any test is a finding; a LABELLED pattern is not — do not 'fix' patterns into fake completeness (nine such findings were refuted 2026-08-19)"
   - "Mode reference pin/DAC-channel columns — origin of F-154 (streamer-symbols transposition) + manual H-4/M-1"
   - "§3.4 Choosing a Pixel Rate + §3.5 Clock Accuracy and Jitter — rewritten in v1.0.1, verify still grounded"
   - "§15.1 VGA sync/blank mode-long — resolved 2026-06-03 (commit bdddd12) vs OBEX vga_tile_driver.spin2; verify intact"

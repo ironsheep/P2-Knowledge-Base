@@ -617,7 +617,7 @@ These modes take their input from the cog's **four-channel scope**, so the pins 
 ::: hardware
 **This mode has no pin field — do not add one.** `X_1ADC8_0P_1DAC8_WFBYTE` encodes as `%1111_DDDD_W000_0010`, in which `D[22:20]` are **fixed zeros**. Writing a pin number into the command (`adc_pin<<17`, the idiom that is correct in the pin-output modes) lands in `D[19:16]`, and the addition carries into the mode bits — **selecting a different streamer mode entirely**, with no error. The effect is measurable in the transfer size alone: with `adc_pin` = 0 the block above writes 1,024 bytes; with 1 it writes 2,048; with 2 it writes 4,096. It appears to work for `adc_pin` = 0 — and even then it never selected the channel, because the channel comes from `S`.
 
-Streamer command fields are **positional and mode-specific**. A field that exists in one mode is fixed or absent in another, so an idiom carried across modes is not portable. Chapter 4 gives the layout; Appendix A gives the per-mode templates.
+This is the general rule biting in one place: streamer command fields are positional and mode-specific. §12.0 states it; Appendix A gives the per-mode templates.
 :::
 
 ::: hardware
@@ -805,6 +805,18 @@ mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 # Chapter 12: Pin Selection and Control {#ch-12}
 
 A streamer command also has to say *which* pins it drives or samples, and that is less obvious than it sounds: the P2 has 64 pins, but a command addresses them 32 at a time, through a window you choose. This chapter covers how to aim the streamer at the right pins, how to enable output, and a few smaller controls such as bit ordering.
+
+## 12.0 Reading a Pin Field {#sec-12-0}
+
+Two rules govern every pin field in this chapter. Both are easier to state here, once, than to rediscover per mode.
+
+**Streamer command fields are positional and mode-specific.** A field that exists in one mode is fixed or absent in another, so an idiom carried across modes is not portable — it does not fail loudly, it selects something else. Chapter 4 gives the layout; Appendix A gives the per-mode templates. §9.2 works through a case where writing a pin number into a mode that has no pin field silently changed the transfer size.
+
+**The `pin<<17` idiom, and why it works.** The pin-group field sits at `D[22:20]` and selects the window in 8-pin increments; the bits below it, `D[19:17]`, resolve the pin within that window for transfers of fewer than eight pins. A single shift therefore splits a pin number across both fields: `pin<<17` puts `pin>>3` into the group field and `pin&7` into the sub-pin field, which is exactly the decomposition the two fields expect. That is why the idiom appears throughout this book with a plain pin number.
+
+::: caution
+**The shift is arithmetic, not a pin-field operator.** `pin<<17` is correct only when the low bits it lands in are pin bits *for that mode*. In the fewer-than-8-pin modes some of `D[19:17]` are DAC-configuration bits rather than pin bits (§12.2 gives the split per pin count), and in DDS/Goertzel the field is `D[22:19]` holding a four-pin block number — where `base<<17` sets that field correctly only when `base` is a multiple of four (§13.4). Check the field before reusing the shift.
+:::
 
 ## 12.1 Pin Group Selection {#sec-12-1}
 
@@ -1001,7 +1013,7 @@ mode := X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
 mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_base<<17 + cycles
 ```
 
-In that last line `adc_base<<17` is shorthand for the block field `D[22:19]`, and it is only correct because `(adc_base>>2)<<19` equals `adc_base<<17` **exactly when `adc_base` is a multiple of four**. The field names a block of four pins, not a pin — §17.1 works through what that means for the input.
+In that last line `adc_base<<17` is shorthand for the block field `D[22:19]`, and it is only correct because `(adc_base>>2)<<19` equals `adc_base<<17` **exactly when `adc_base` is a multiple of four**. The field names a block of four pins, not a pin — §17.1 works through what that means for the input. This is the DDS/Goertzel case of the shift rule in §12.0: the same `<<17` reaches a different field here, so the alignment it needs is different too.
 
 ### Combine pin-mode constants with `|`, never `+`
 
