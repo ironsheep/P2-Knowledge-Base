@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-306`**
+**Next finding ID: `F-307`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -250,6 +250,66 @@ and `wrpin.yaml:54` documents the field.
 **Note the asymmetry that makes this easy to get wrong:** this applies to **DAC** output only.
 Ordinary digital pin output via `X_PINS_ON` (`D[23]=1`) drives the pin bus directly and needs no
 `WRPIN`/`DIRH` — Silicon Doc `:3602-3603`. Do not add pin setup to digital-output examples.
+
+### F-306 — `dds-goertzel.yaml`'s "Typical usage" configures a DAC output pin that nothing ever drives, and the Streamer sprint plan certified it as the fix template. `CONFIRMED`
+
+**How it surfaced.** Authoring the Streamer Guide's new §11.0 (task «#269», 2026-08-20). The sprint
+plan's §13 "Verified correct — do not fix these" list states that
+`deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml:203` *"carries a complete worked DAC-pin
+setup"* and offers it as the answer §1 was missing. Read end to end, it does not.
+
+**Location:** `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml`, `usage_pattern.code`
+step 3 (`:203-204`) read against `usage_pattern.data` (`:225-228`).
+
+**What is wrong.** Step 3 configures the pin and enables it —
+
+```
+' 3. Configure DAC output pin (this one DOES get DIR)
+wrpin   ##P_DAC_124R_3V, #dac_pin
+dirh    #dac_pin
+```
+
+— and **nothing in the example ever puts a value on that pin.** Two independent paths could, and
+the example takes neither:
+
+- **The streamer path is switched off.** The example's own `dds_cmd` is
+  `%1111_0000_0000_0111<<16 + sinc2<<23 + cycles`, whose `%dddd` DAC-routing nibble at `D[27:24]`
+  is **`%0000` = `X_DACS_OFF`**. No streamer DAC channel is routed anywhere.
+- **The level path is never written.** `P_DAC_124R_3V` is defined in Spin2 v55
+  (`sources/spin2-v55/spin2-v55-text.txt:1478`) as
+  `%0000_0000_000_1011000000000_00_00000_0` — `M[12:10] = %101` (DAC_MODE), **`TT = %00`**, and
+  `M[7:0] = 0`. Per Silicon Doc `:7645-7646`, `TT = %00` in DAC_MODE means *"M[7:0] sets DAC level"*
+  — so the pin is level-driven at level **zero**, permanently, unless the level is rewritten.
+  The Silicon Doc's own worked program does rewrite it (`setbyte dacmode,x,#1` / `wrpin
+  dacmode,#dacpin`, `:4225-4305`); **the KB example dropped that step while keeping the setup.**
+
+So an agent following this recipe gets a configured, enabled, silent pin, and no diagnostic. The
+file's `applications:` block advertises `function_generator: "Load waveform to LUT, set output
+frequency"` — the DDS-output half — which this code never enables.
+
+**Evidence that the streamer-fed arrangement is the different one.** `TT = %01` selects a **cog DAC
+channel** as the pin's source, which is the path the streamer overrides (Silicon Doc `:3521-3523`,
+`:7647`, `:2705-2711`; see **F-272**, status `RESOLVED`, `:521`). This is measured, not reasoned:
+**EF-054** swept `%TT` on a jumpered cog-DAC pin and read `%00` = 1,408 (no drive) versus **`%01` =
+6,737**; **EF-055** drove a `P_DAC_124R_3V` pin from its level field and watched the spread collapse
+from 1,305/2,000 samples to 25 when `P_CHANNEL` was added. Both are `[M-pre — streamer-free]`, so
+they isolate the pin arrangement from the streamer entirely.
+
+**Proposed correction.** Decide which arrangement the example is teaching and complete that one:
+
+- If it stays a **Goertzel detector** (its `dds_cmd` says it is), **delete step 3** — the DAC pin is
+  not part of a detector — or keep it and add the level-write the Silicon Doc program uses.
+- If it is meant to show **DDS output**, route the DACs in `dds_cmd` and configure the pin as the
+  streamer-fed arrangement requires: `P_DAC_124R_3V | P_CHANNEL`, the COGID in `M[3:0]`, `DIRH`,
+  channel selected by the pin's two low bits.
+
+**Blast radius — the plan claim must be corrected too, not just the YAML.** The Streamer sprint
+plan's §13 lists this site under "Verified correct — **do not 'fix' these**", and that instruction
+is carried into task «#288»'s co-release gate. Left standing, it tells the next reader the opposite
+of this finding. Corrected in the plan in the same pass that filed this entry.
+
+**Status:** `CONFIRMED — KB fix belongs to the yaml head (yaml-knowledge-base-maintenance), NOT to
+the Streamer manual sprint. Surfaces with F-302…F-305 at that sprint's co-release gate.`
 
 ---
 

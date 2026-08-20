@@ -373,6 +373,8 @@ Immediate modes are the simplest place to start. Instead of streaming from memor
 
 The S operand provides index values into the LUT. LUT data drives pins and DACs.
 
+The pin half needs no pin setup. The DAC half does: a DAC channel these modes feed only becomes a voltage on a pin configured per §11.0.
+
 | Mode | Symbol | Elements | Bits/Element |
 |------|--------|----------|--------------|
 | `%0000` | `X_IMM_32X1_LUT` | 32 | 1 |
@@ -395,7 +397,7 @@ The S operand provides index values into the LUT. LUT data drives pins and DACs.
 
 ## 5.2 Immediate → Pins/DACs
 
-The S operand drives pins and DACs directly without LUT lookup.
+The S operand drives pins and DACs directly without LUT lookup. The DAC-channel columns below reach a pin only through the setup in §11.0; the pin columns need none.
 
 | Mode | Symbol | Pins | DAC Channels | DAC Bits |
 |------|--------|------|--------------|----------|
@@ -433,7 +435,7 @@ RDFAST modes are the workhorse of the streamer. Where immediate modes carry a si
 
 ## 6.1 RDFAST → LUT → Pins/DACs {#sec-6-1}
 
-Hub data serves as LUT index values.
+Hub data serves as LUT index values. As in Chapter 5, the DAC side of these modes needs the pin setup of §11.0 and the pin side does not.
 
 > **Reading the `%MMMM_CCCC` shorthand:** the two underscored nibbles are the **mode** field D[31:28] and the **config** field D[19:16] — *not* a single contiguous byte. D[27:20] sit between them in the command word (they carry DAC routing, enable, and pin-group fields; see [§4.2](#sec-4-2)). The shorthand pairs the two nibbles that pick the mode so a row reads at a glance; [Appendix A](#app-a) lists every field in its own column.
 
@@ -460,7 +462,7 @@ Hub data serves as LUT index values.
 
 ## 6.2 RDFAST → Pins/DACs
 
-Hub data drives pins and DACs directly.
+Hub data drives pins and DACs directly. The DAC-channel columns below reach a pin only through the setup in §11.0.
 
 | Mode | Symbol | Hub Read | Pins | DAC Channels | DAC Bits |
 |------|--------|----------|------|--------------|----------|
@@ -525,6 +527,8 @@ Video earns its own family of modes because pixels are not just bytes. A color p
 **RGB24 (8:8:8):** Eight bits each for R, G, B. True color, one byte wasted per pixel.
 
 ## 7.3 RGB Mode Example
+
+This one routes all four DAC channels (`X_DACS_3_2_1_0`), so the four pins carrying R, G, B and sync must each be configured for DAC output per §11.0 before any of it appears as a voltage. **Pattern** — supply `base`, `framebuffer` and `cmd`; §15.1 works the same arrangement through as a complete program.
 
 ```pasm2
 ' VGA 640×480 RGB16 output (assumes 250 MHz sysclk)
@@ -738,6 +742,55 @@ These chapters cover the choices that apply across modes — where data goes amo
 
 Many modes send data to the DAC channels, but none of them say *which* channels, or *how*. That is this chapter's job. The %dddd routing field is the knob from Chapter 1's stereo example: it decides how the streamer's data spreads across the four 8-bit DAC channels — one channel, a stereo pair, a differential pair, or all four independently. The same data becomes mono, stereo, or four-channel purely by changing this field.
 
+## 11.0 Getting a DAC Channel Onto a Pin {#sec-11-0}
+
+The routing field decides which of the four cog DAC channels the streamer's data lands on. It does not put any of them on a pin. That is a separate step, taken on the pin rather than in the command, and every DAC example in this book assumes it has been done.
+
+The requirement is stated plainly by the hardware documentation: to bring the data out as a voltage on a pin, that pin must be set to DAC mode with the COGID embedded, via `WRPIN`, and `DIR` must be set high. Three things, and all three are needed:
+
+- **DAC mode** — `WRPIN` with a DAC pin-mode constant, which also fixes the drive impedance and full-scale voltage. Four are available: `P_DAC_990R_3V` (990 Ω, 3.3 V peak), `P_DAC_600R_2V` (600 Ω, 2.0 V), `P_DAC_124R_3V` (123.75 Ω, 3.3 V), and `P_DAC_75R_2V` (75 Ω, 2.0 V). Pick for the load being driven.
+- **The COGID**, in `M[3:0]` — which cog's DAC channels this pin listens to. Cogs each have their own set of four.
+- **`DIRH`** on the pin. Until DIR is high, the pin does not drive.
+
+**Which of the four channels a pin takes is decided by the pin, not by the command.** A pin's low two bits select its channel — pin %xxxx00 takes DAC0, %xxxx01 takes DAC1, and so on. §11.2 gives the mapping. This is why `M[3:0]` has room for a cog number: the channel is already chosen by the time the mode word is read.
+
+**Two arrangements, and the same constant inverts between them.** The `%TT` field in the pin's mode word decides where the DAC's value comes from, and DAC mode gives it two meanings that are opposites:
+
+| `%TT` | Source of the DAC value | Constant |
+|-------|-------------------------|----------|
+| `%00` | the pin's **own level field**, `M[7:0]`, written by `WRPIN` | *(none — this is the default)* |
+| `%01` | a **cog DAC channel**, which is what `SETDACS` and the streamer write | `P_CHANNEL` |
+
+A streamer-driven DAC is always the second case: the streamer writes cog DAC channels, so the pin must be listening to one. A level-driven DAC is the first case, and adding `P_CHANNEL` to it **kills its output** — it points the pin at a channel instead of at the level you just wrote. Same constant, opposite effect, decided by who supplies the value. (`P_CHANNEL`, `P_OE` and `P_TT_01` are one bit-field value under three names; §13.4 explains why they must be combined with `|` and never `+`.)
+
+```pasm2
+CON   DAC_PIN = 8            ' low bits %00, so this pin takes DAC0
+
+DAT             org
+                cogid   cogn                      ' this cog, 0..7
+                setnib  dacmode, cogn, #2         ' COGID -> M[3:0]
+                wrpin   dacmode, #DAC_PIN         ' DAC mode + cog source
+                dirh    #DAC_PIN                  ' the pin now drives
+
+dacmode         long    P_DAC_124R_3V | P_CHANNEL
+cogn            res     1
+```
+
+`SETNIB` writes nibble 2 of the mode word, which is `M[3:0]` — the `WRPIN` operand is laid out as `%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0`, so the M field's low nibble sits at bits 11..8.
+
+**What the channel holds when the streamer is not driving it.** `SETDACS` sets the background value of all four channels at once — it writes bytes 3, 2, 1 and 0 of its operand to DAC3, DAC2, DAC1 and DAC0. Those values are output continuously, *except* while the streamer or the colorspace converter overrides them. That is exactly what the `--` entries in §11.1's routing table mean: a channel the streamer does not override keeps emitting its `SETDACS` value. A routing choice such as `X_DACS_X_X_1_0`, which drives only DAC1 and DAC0, leaves DAC3 and DAC2 sitting at whatever `SETDACS` last put there — silence if you set it, and whatever was left over if you did not.
+
+```pasm2
+                setdacs ##$80_80_80_80            ' all four channels to
+                                                  ' mid-scale: the rest
+                                                  ' level for a signed
+                                                  ' waveform (see 10.2)
+```
+
+::: hardware
+**Digital pin output needs none of this.** Ordinary pin output through `X_PINS_ON` drives the pin bus directly and requires no `WRPIN` and no `DIRH`. The configuration above is for **DAC** output only — adding it to a digital-output example is a different mistake, not a safer one.
+:::
+
 ## 11.1 DAC Routing Table {#sec-11-1}
 
 | %dddd | DAC3 | DAC2 | DAC1 | DAC0 | Symbol |
@@ -761,9 +814,11 @@ Many modes send data to the DAC channels, but none of them say *which* channels,
 
 **Legend:**
 
-- `--` = No override (SETDACS value used)
+- `--` = No override — the channel keeps emitting its `SETDACS` background value (§11.0)
 - `!` = One's complement (inverted)
 - `X0`-`X3` = streamer data channels
+
+Every routing choice here still needs the pin-side setup of §11.0 before any of it reaches a voltage.
 
 ## 11.2 DAC Pin Mapping {#sec-11-2}
 
@@ -782,22 +837,24 @@ DAC channels drive pins based on the pin's two LSBs:
 
 ## 11.3 Common DAC Configurations
 
-**Mono Audio (single channel):**
+These are mode words, not programs: each shows the routing choice for one arrangement. The pins they drive must be configured per §11.0 first, and `SETDACS` decides what any channel the routing leaves at `--` emits.
+
+**Mono Audio (single channel).** **Pattern** — supply `pin` and `count`.
 ```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_0_0_0_0 | X_PINS_ON + pin<<17 + count
 ```
 
-**Stereo Audio (two channels):**
+**Stereo Audio (two channels).** **Pattern** — supply `pin` and `count`. DAC3 and DAC2 are left at their `SETDACS` values.
 ```spin2
 mode := X_RFWORD_16P_2DAC8 | X_DACS_X_X_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
-**Differential Output (noise rejection):**
+**Differential Output (noise rejection).** **Pattern** — supply `pin` and `count`. Both pins of the pair need §11.0 setup, and their low two bits must select DAC1 and DAC0.
 ```spin2
 mode := X_RFBYTE_1P_1DAC1 | X_DACS_X_X_0N0 | X_PINS_ON + pin<<17 + count
 ```
 
-**Four-Channel Video (RGB + sync):**
+**Four-Channel Video (RGB + sync).** **Pattern** — supply `pin` and `count`. All four pins need §11.0 setup; §15.1 works this arrangement through completely.
 ```spin2
 mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 ```
@@ -1160,9 +1217,11 @@ VGA uses analog RGB on DAC channels, with **separate** horizontal and vertical s
 
 **Hardware Requirements:**
 
-- Three DAC pins for R, G, B, plus one DAC pin for the horizontal-sync level
-- One additional digital pin for vertical sync (toggled directly, not streamed)
+- Three DAC pins for R, G, B, plus one DAC pin for the horizontal-sync level — each configured per §11.0, with its low two bits selecting the channel it is to carry (§11.2)
+- One additional digital pin for vertical sync (toggled directly, not streamed) — a digital pin, so it needs none of that setup
 - Resistor DAC network or direct DAC output
+
+The program below assumes those four DAC pins are already configured; it shows the streaming, not the pin setup.
 
 **Timing Structure (640×480 @ 60 Hz):**
 
@@ -1446,6 +1505,8 @@ dds_s           long    %0000_0001_000_000000000
 DDS synthesizes arbitrary waveforms at precise frequencies.
 
 **Applications:** Function generator, audio synthesis, RF modulation
+
+The output is a DAC channel, so the pin that carries it needs the setup in §11.0 — DAC mode with this cog's ID, `DIRH`, and low two bits selecting the channel — and the command needs a DAC-routing field to turn that channel on.
 
 **Configuration:**
 

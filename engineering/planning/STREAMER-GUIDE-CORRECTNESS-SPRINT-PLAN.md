@@ -637,9 +637,18 @@ The sweep was careful to distinguish look-alikes, and these survived row-by-row 
 - **This manual's own `§4.2` (`:305`), `§10.1` (`:638-639`), `§17.1` (`:1356`), and
   `§9.2` (`:618`)** all state the field correctly. Appendix A is the outlier — the fix
   source is already inside the same book.
-- **`wrpin.yaml:54`** documents the DAC/COGID mechanism correctly, and
-  **`dds-goertzel.yaml:203`** carries a complete worked DAC-pin setup. §1's answer was
-  never missing from the repo; it was missing from the manual.
+- **`wrpin.yaml:54`** documents the DAC/COGID mechanism correctly. §1's answer was never
+  missing from the repo; it was missing from the manual.
+- ~~**`dds-goertzel.yaml:203`** carries a complete worked DAC-pin setup.~~ **WITHDRAWN
+  2026-08-20 («#269») — this claim was wrong and is now `F-306`.** Read end to end, that
+  example configures and enables a DAC pin that *nothing ever drives*: its own `dds_cmd`
+  has the `%dddd` routing nibble at `%0000` (`X_DACS_OFF`), and `P_DAC_124R_3V` carries
+  `TT = %00` with `M[7:0] = 0`, so the pin is level-driven at zero and the level is never
+  rewritten — the Silicon Doc program's `setbyte`/`wrpin` level-update step was dropped
+  while its setup was kept. **It is not the fix template for §1.** The fix template for the
+  streamer-fed arrangement is F-272's resolution (`%TT = %01`, COGID in `M[3:0]`, `DIRH`,
+  channel by the pin's low two bits), corroborated on silicon by **EF-054** (`%00` = 1,408
+  no-drive vs `%01` = 6,737) and **EF-055**.
 
 **Verification.** *Normal:* every SAME_ERROR site above is either fixed or explicitly
 deferred with a reason. *Edge:* the CORRECT_HERE list is untouched — a sweep that
