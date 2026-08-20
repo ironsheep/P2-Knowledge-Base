@@ -600,7 +600,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 
 ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a cog into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
 
-## 9.1 ADC Capture Modes
+## 9.1 ADC Capture Modes {#sec-9-1}
 
 | Mode | Symbol | ADCs | Pins | Hub Write |
 |------|--------|------|------|-----------|
@@ -2144,6 +2144,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 ```
 
 - ADC sampling modes: [Chapter 9](#ch-9)
+- Alignment (8-pin window base): [12.0](#sec-12-0), [12.2](#sec-12-2)
 - Alternate bit order: [12.4](#sec-12-4)
 - Architecture: [Chapter 2](#ch-2)
 
@@ -2160,6 +2161,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 - CFRQ parameter: [15.0](#sec-15-0)
 - Clock accuracy: [3.5](#sec-3-5)
 - CMOD register: [15.0](#sec-15-0), [15.2](#sec-15-2)
+- COGID (in a pin's mode word): [11.0](#sec-11-0)
 - Color matrix (Y/I/Q): [15.0](#sec-15-0)
 - Colorspace converter: [15.0](#sec-15-0), [15.3](#sec-15-3)
 - Command structure: [Chapter 4](#ch-4)
@@ -2171,16 +2173,18 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 ```
 
 - DAC channels: [Chapter 11](#ch-11)
+- DAC mode configuration: [11.0](#sec-11-0)
 - DAC pin mapping: [11.2](#sec-11-2)
 - DAC routing table: [11.1](#sec-11-1)
 - DAC symbols: [13.3](#sec-13-3)
 - DDS mode: [Chapter 10](#ch-10)
 - DDS waveform generation: [17.2](#sec-17-2)
-- DEBUG_COGS: [14.5](#sec-14-5)
-- DVI forward/reverse: [15.2](#sec-15-2)
-- Debugging streamer code: [14.5](#sec-14-5)
 - Debug interrupt: [14.5](#sec-14-5)
+- DEBUG_COGS: [14.5](#sec-14-5)
+- Debugging streamer code: [14.5](#sec-14-5)
+- DIRH (pin drive enable): [11.0](#sec-11-0)
 - Double buffering: [18.1](#sec-18-1)
+- DVI forward/reverse: [15.2](#sec-15-2)
 
 ```{=latex}
 \indexletter{E}
@@ -2227,17 +2231,20 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 \indexletter{L}
 ```
 
-- LUT setup: [5.1](#sec-5-1), [10.4](#sec-10-4)
+- Loop size (DDS/Goertzel): [10.3](#sec-10-3)
 - Luma/chroma separation: [15.0](#sec-15-0), [15.3](#sec-15-3)
+- LUT setup: [5.1](#sec-5-1), [10.4](#sec-10-4)
+- LUT window: [10.3](#sec-10-3)
 
 ```{=latex}
 \indexletter{M}
 ```
 
 - Mode encoding table: [Appendix A](#app-a)
-- Modulator (colorspace): [15.0](#sec-15-0)
 - Mode field: [4.2](#sec-4-2)
 - Mode symbols: [13.1](#sec-13-1)
+- Modulation (phase offset): [10.3](#sec-10-3)
+- Modulator (colorspace): [15.0](#sec-15-0)
 - Multi-cog: [18.2](#sec-18-2)
 
 ```{=latex}
@@ -2256,8 +2263,13 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 \indexletter{P}
 ```
 
+- `P[1]` (literal-transmit bit): [15.2](#sec-15-2)
+- `P_CHANNEL`: [11.0](#sec-11-0), [13.4](#sec-13-4)
+- Phase offset (`%T`): [10.3](#sec-10-3)
+- Pin field (positional, mode-specific): [12.0](#sec-12-0)
 - Pin group selection: [12.1](#sec-12-1)
 - Pin selection: [Chapter 12](#ch-12)
+- `pin<<17` idiom: [12.0](#sec-12-0), [13.4](#sec-13-4)
 - Pixel rate: [3.4](#sec-3-4)
 
 ```{=latex}
@@ -2272,8 +2284,11 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 ```
 
 - S-Video: [15.0](#sec-15-0), [15.3](#sec-15-3)
+- `S[11:0]` (loop size and LUT window): [10.3](#sec-10-3)
 - SETCMOD: [15.0](#sec-15-0), [15.2](#sec-15-2)
 - SETCY / SETCI / SETCQ / SETCFRQ: [15.0](#sec-15-0)
+- SETDACS: [11.0](#sec-11-0), [11.1](#sec-11-1)
+- SETSCP: [9.1](#sec-9-1)
 - SETXFRQ: [3.3](#sec-3-3), [4.7](#sec-4-7)
 - Signal processing: [Chapter 17](#ch-17)
 - SINC1/SINC2: [10.5](#sec-10-5)
@@ -2304,6 +2319,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are lis
 
 - WAITXFI: [14.2](#sec-14-2)
 - WRFAST modes: [Chapter 8](#ch-8)
+- WRPIN (pin mode configuration): [11.0](#sec-11-0)
 
 ```{=latex}
 \indexletter{X}
