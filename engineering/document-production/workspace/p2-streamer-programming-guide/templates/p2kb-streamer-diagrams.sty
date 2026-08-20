@@ -189,7 +189,7 @@
   op/.style={draw=diagram-border, fill=diagram-box, circle, minimum size=8mm,
              font=\small, inner sep=1pt}]
   \node[iospbox, text width=14mm] (nco) {NCO};
-  \node[iospbox, right=of nco, text width=28mm] (lut) {LUT\\{\scriptsize entry = LUT[NCO[30:22]]}};
+  \node[iospbox, right=of nco, text width=34mm] (lut) {LUT window\\{\scriptsize addr high = \%A\\addr low = \%T + NCO}};
   \node[iospkey, right=of lut, text width=22mm] (dac) {DACs\\{\scriptsize byte $\oplus$ \$80}};
   \draw[iospflow] (nco)--(lut);
   \draw[iospflow] (lut)--(dac);
@@ -203,7 +203,7 @@
   \draw[iospflow] (mul)--(acc);
   \draw[iospflow] (acc)--(gx);
 \end{tikzpicture}}
-\caption{DDS output with Goertzel accumulation (every clock)}
+\caption{DDS output with Goertzel accumulation (every clock). The window is 4 to 512 entries, selected by S[11:9]; \%A bounds it and \%T offsets playback within it.}
 \end{figure}}
 
 % ==================== Chapter 15 -- VGA line timing ====================

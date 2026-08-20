@@ -649,7 +649,7 @@ Both variants share the same mode and config bits; **bit D[23]** alone selects t
 
 On each system clock:
 
-1. NCO phase selects LUT entry: `LUT[NCO[30:22]]`
+1. NCO phase selects a LUT entry — `LUT[NCO[30:22]]` at the default window size of 512. The size is selectable, and the index bits move with it (§10.3).
 2. NCO phase advances: `NCO += frequency`
 3. LUT bytes output to DACs (XOR `$80` for unsigned)
 4. ADC input multiplied by sine/cosine from LUT
@@ -673,9 +673,38 @@ cos_acc += cos × m
 \DiagDdsGoertzel
 ```
 
-## 10.3 LUT Setup {#sec-10-3}
+## 10.3 The LUT Window {#sec-10-3}
 
-The LUT must contain 512 entries with signed sine/cosine values:
+§10.2 gave the index as `LUT[NCO[30:22]]`. That is one case of eight. The `S[11:0]` field of the streamer command selects **how much** of the lookup RAM the NCO walks, **which part** of it, and **where in that part playback starts** — and the last of those is the field that performs the modulation this chapter's applications advertise.
+
+The top three bits pick the loop size. The nine bits below them split into region bits `%A` and offset bits `%T`, and the split moves as the loop size changes:
+
+| `S[11:0]` | Loop size | NCO bits | LUT range |
+|-----------|-----------|----------|-----------|
+| `%000_TTTTTTTTT` | 512 | 30..22 | `%000000000..%111111111` |
+| `%001_ATTTTTTTT` | 256 | 30..23 | `%A00000000..%A11111111` |
+| `%010_AATTTTTTT` | 128 | 30..24 | `%AA0000000..%AA1111111` |
+| `%011_AAATTTTTT` | 64 | 30..25 | `%AAA000000..%AAA111111` |
+| `%100_AAAATTTTT` | 32 | 30..26 | `%AAAA00000..%AAAA11111` |
+| `%101_AAAAATTTT` | 16 | 30..27 | `%AAAAA0000..%AAAAA1111` |
+| `%110_AAAAAATTT` | 8 | 30..28 | `%AAAAAA000..%AAAAAA111` |
+| `%111_AAAAAAATT` | 4 | 30..29 | `%AAAAAAA00..%AAAAAAA11` |
+
+Read a row downward and one pattern runs through all eight: each step halves the loop, drops one NCO bit out of the index, and hands the bit it freed to `%A`. The bits are conserved — the LUT address is always nine bits wide, because the lookup RAM is always 512 longs. What changes is how many of those nine the NCO supplies and how many you supply.
+
+**`%A` — which region.** The `%A` bits are the high bits of the address, and they hold still. A loop size of 64 walks 64 consecutive longs, and `%AAA` says which of the eight 64-long regions. So the LUT can hold eight different 64-entry waveforms at once and a command selects one, with no reloading.
+
+**`%T` — where playback starts, and how it moves.** On each clock the lookup RAM is read at the nine-bit location bound by the `%A` bits, with the lower bits being the sum of the `%T` bits and the topmost NCO bits. `%T` is therefore an offset added to the NCO's position within the window: one step of `%T` shifts playback by one entry, and the `%A` bits bound the result, so the offset moves within the window rather than out of it.
+
+Because `S` is a command operand, each streamer command carries its own `%T`. Two commands over the same waveform with different `%T` values play it from different phases — which is what "shift or modulate the phase of playback" means in practice, and why a chapter whose applications include RF modulation needs this field and not just the default.
+
+::: caution
+**512 is the default, not a requirement.** A loop size of 512 (`S[11:9] = %000`) leaves all nine index bits to the NCO and no `%A` bits at all, so the window is the whole LUT and there is nothing to position. Every smaller size trades NCO index bits for placement. Code written as though 512 were mandatory still works — it is simply using one of the eight settings.
+:::
+
+## 10.4 LUT Setup {#sec-10-4}
+
+A full-window table holds 512 entries of signed sine/cosine values. A smaller loop size needs only as many entries as its window (§10.3), placed in the region its `%A` bits select:
 
 ```spin2
 ' Build the sine/cosine table in a hub array, then bulk-load it to LUT
@@ -688,7 +717,7 @@ repeat i from 0 to 511
   sine_table[i] := t        ' loaded to LUT in §17.1 via SETQ2+RDLONG
 ```
 
-## 10.4 SINC1 vs SINC2 {#sec-10-4}
+## 10.5 SINC1 vs SINC2 {#sec-10-5}
 
 | Characteristic | SINC1 | SINC2 |
 |---------------|-------|-------|
@@ -711,7 +740,7 @@ Three ways to avoid it, most robust first:
 3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT) and keep the measurement period short — on the order of 20 ms or less** — so the per-cycle error cannot accumulate far. This bound is approximate and not part of the documented specification; verify it for your rate.
 :::
 
-## 10.5 Reading Results {#sec-10-5}
+## 10.6 Reading Results {#sec-10-6}
 
 ```pasm2
         getxacc cos_result          ' Cosine accumulator → D
@@ -722,7 +751,7 @@ Three ways to avoid it, most robust first:
         getqy   phase
 ```
 
-## 10.6 Frequency Calculation
+## 10.7 Frequency Calculation
 
 To detect frequency F at clock rate CLK:
 
@@ -1492,7 +1521,8 @@ detect
 
 ' Goertzel, four-pin block 0 (pins 0..3), DAC routing off
 dds_cmd         long    X_DDS_GOERTZEL_SINC1 | X_DACS_OFF
-' sum base pin +0 (S[15:12] = %0001), invert none, 512-entry LUT window
+' sum base pin +0 (S[15:12] = %0001), invert none
+' S[11:9] = %000 selects the full 512-long window, %T = 0 (see 10.3)
 dds_s           long    %0000_0001_000_000000000
 ```
 
@@ -1528,7 +1558,7 @@ The output is a DAC channel, so the pin that carries it needs the setup in §11.
 ```
 
 ::: tip
-The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the 512 entries at the programmed rate.
+The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the window at the programmed rate. That window is the whole 512-long LUT by default and can be set as small as four entries, which is how several waveforms live in the LUT at once (§10.3).
 :::
 
 # Chapter 18: Integration Patterns
@@ -1790,7 +1820,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 2. ADC pin configured for ADC mode
 3. Sample count adequate for frequency resolution
 4. SINC2 amplitude reduced to ±10 to prevent overflow
-5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.4)
+5. **SINC2 only:** iteration count per Goertzel cycle is constant — periodic glitches mean a non-power-of-two rate; run at a power-of-two-relationship clock (e.g. 256 MHz for a 1 MHz target) or switch to SINC1 (§10.5)
 6. **You compiled with `-d`.** Accumulators reading in the millions where you expect hundreds are the debug interrupt, not your signal — see §14.5
 
 ## Symptom: Measurements Change When You Add DEBUG
@@ -1857,7 +1887,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 \indexletter{G}
 ```
 
-- GETXACC: [4.7](#sec-4-7), [10.5](#sec-10-5)
+- GETXACC: [4.7](#sec-4-7), [10.6](#sec-10-6)
 - Goertzel mode: [Chapter 10](#ch-10)
 
 ```{=latex}
@@ -1883,7 +1913,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 \indexletter{L}
 ```
 
-- LUT setup: [5.1](#sec-5-1), [10.3](#sec-10-3)
+- LUT setup: [5.1](#sec-5-1), [10.4](#sec-10-4)
 
 ```{=latex}
 \indexletter{M}
@@ -1927,7 +1957,7 @@ Values are `round($8000_0000 * pixel_rate / clock_frequency)`.
 
 - SETXFRQ: [3.3](#sec-3-3), [4.7](#sec-4-7)
 - Signal processing: [Chapter 17](#ch-17)
-- SINC1/SINC2: [10.4](#sec-10-4)
+- SINC1/SINC2: [10.5](#sec-10-5)
 - Smart pin coordination: [18.3](#sec-18-3)
 - SPI: [Chapter 16](#ch-16)
 - Sub-pin selection: [12.2](#sec-12-2)
