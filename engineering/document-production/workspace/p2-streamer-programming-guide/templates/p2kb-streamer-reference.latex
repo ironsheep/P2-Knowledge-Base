@@ -27,10 +27,20 @@
 \usepackage{p2kb-streamer-diagrams}
 
 % ==================== DOCUMENT METADATA ====================
-% These can be overridden by pandoc metadata
-\title{P2 Streamer Programming Guide}
-\author{Iron Sheep Productions, LLC}
-\date{June 2026}
+% Single-source (F-300): every identity string lives once, in request.json
+% metadata, and reaches BOTH the PDF info dictionary and the cover page.
+% \renewcommand, not \newcommand — p2kb-platform-foundation has already
+% \providecommand'd these. The macros carry the VALUE; the cover block in
+% front-matter.md keeps its own presentation (the word "Version", the colour).
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
 
 % ==================== ADDITIONAL USER GUIDE SETUP ====================
 
