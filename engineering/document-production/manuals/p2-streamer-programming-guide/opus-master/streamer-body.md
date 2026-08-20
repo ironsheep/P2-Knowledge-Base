@@ -638,12 +638,14 @@ This mode does two things at once (Chapter 1 introduced both in plain terms). **
 
 ## 10.1 Mode Variants
 
-| Mode | Symbol | Filter |
-|------|--------|--------|
-| `%1111_0ppp_p111` | `X_DDS_GOERTZEL_SINC1` | SINC1 |
-| `%1111_1ppp_p111` | `X_DDS_GOERTZEL_SINC2` | SINC2 |
+| D[31:16] | Symbol | Filter |
+|----------|--------|--------|
+| `%1111_dddd_0ppp_p111` | `X_DDS_GOERTZEL_SINC1` | SINC1 |
+| `%1111_dddd_1ppp_p111` | `X_DDS_GOERTZEL_SINC2` | SINC2 |
 
-Both variants share the same mode and config bits; **bit D[23]** alone selects the filter — `0` = SINC1, `1` = SINC2.
+That is the whole upper half of the command word, nibble by nibble: mode `%1111`, the DAC routing field `%dddd` (Chapter 11), then D[23] — which alone selects the filter, `0` = SINC1 and `1` = SINC2 — and then the four-pin input block.
+
+**The block selector straddles a nibble boundary, and that is worth seeing.** It is `%pppp` in D[22:19]: three of its bits sit beside D[23], and its low bit lands in D[19], immediately above the fixed `%111`. Appendix A prints only D[19:16] and so shows this row as `%p111` — the same field, seen through a narrower window. §13.4 works through why a selector spanning D[22:19] is what makes `base<<17` require a multiple of four.
 
 ## 10.2 Operation
 
@@ -1638,18 +1640,28 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 
 # Appendix A: Complete Mode Encoding Table {#app-a}
 
+**Reading the D[19:16] column.** It is a template, not a value. Lower-case letters are fields you fill; digits are fixed and must be written as shown:
+
+| Letter | Meaning |
+|--------|---------|
+| `p` | pin-select bit. How many there are depends on the pin count — as the count rises, fewer of these bits select a pin and the freed ones become DAC-configuration bits (§12.2) |
+| `a` | alternate bit order, D[16] — `0` = bottom-first (default), `1` = top-first (§12.4) |
+| `b` | LUT base address bits [8:5], for the modes that index the LUT |
+
+A row with no letters has no field in D[19:16]: those bits are fixed for that mode and writing anything else into them selects a different mode, silently (§12.0). The DDS/Goertzel rows show a single `p` because their four-pin block selector is `D[22:19]`, so its low bit lands here (§13.4).
+
 | D[31:28] | D[19:16] | Mode | Symbol |
 |----------|----------|------|--------|
 | `%0000` | `%bbbb` | IMM 32×1 → LUT | `X_IMM_32X1_LUT` |
 | `%0001` | `%bbbb` | IMM 16×2 → LUT | `X_IMM_16X2_LUT` |
 | `%0010` | `%bbbb` | IMM 8×4 → LUT | `X_IMM_8X4_LUT` |
 | `%0011` | `%bbbb` | IMM 4×8 → LUT | `X_IMM_4X8_LUT` |
-| `%0100` | `%0000` | IMM 32×1 → 1-pin + 1-DAC1 | `X_IMM_32X1_1DAC1` |
-| `%0101` | `%0000` | IMM 16×2 → 2-pin + 2-DAC1 | `X_IMM_16X2_2DAC1` |
-| `%0101` | `%0010` | IMM 16×2 → 2-pin + 1-DAC2 | `X_IMM_16X2_1DAC2` |
-| `%0110` | `%0000` | IMM 8×4 → 4-pin + 4-DAC1 | `X_IMM_8X4_4DAC1` |
-| `%0110` | `%0010` | IMM 8×4 → 4-pin + 2-DAC2 | `X_IMM_8X4_2DAC2` |
-| `%0110` | `%0100` | IMM 8×4 → 4-pin + 1-DAC4 | `X_IMM_8X4_1DAC4` |
+| `%0100` | `%pppa` | IMM 32×1 → 1-pin + 1-DAC1 | `X_IMM_32X1_1DAC1` |
+| `%0101` | `%pp0a` | IMM 16×2 → 2-pin + 2-DAC1 | `X_IMM_16X2_2DAC1` |
+| `%0101` | `%pp1a` | IMM 16×2 → 2-pin + 1-DAC2 | `X_IMM_16X2_1DAC2` |
+| `%0110` | `%p00a` | IMM 8×4 → 4-pin + 4-DAC1 | `X_IMM_8X4_4DAC1` |
+| `%0110` | `%p01a` | IMM 8×4 → 4-pin + 2-DAC2 | `X_IMM_8X4_2DAC2` |
+| `%0110` | `%p10a` | IMM 8×4 → 4-pin + 1-DAC4 | `X_IMM_8X4_1DAC4` |
 | `%0110` | `%0110` | IMM 4×8 → 8-pin + 4-DAC2 | `X_IMM_4X8_4DAC2` |
 | `%0110` | `%0111` | IMM 4×8 → 8-pin + 2-DAC4 | `X_IMM_4X8_2DAC4` |
 | `%0110` | `%1110` | IMM 4×8 → 8-pin + 1-DAC8 | `X_IMM_4X8_1DAC8` |
@@ -1661,14 +1673,14 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%0111` | `%011a` | RFLONG 8×4 → LUT | `X_RFLONG_8X4_LUT` |
 | `%0111` | `%1000` | RFLONG 4×8 → LUT | `X_RFLONG_4X8_LUT` |
 | `%1000` | `%pppa` | RFBYTE → 1-pin + 1-DAC1 | `X_RFBYTE_1P_1DAC1` |
-| `%1001` | `%ppp0` | RFBYTE → 2-pin + 2-DAC1 | `X_RFBYTE_2P_2DAC1` |
-| `%1001` | `%ppp0`+2 | RFBYTE → 2-pin + 1-DAC2 | `X_RFBYTE_2P_1DAC2` |
-| `%1010` | `%pp00` | RFBYTE → 4-pin + 4-DAC1 | `X_RFBYTE_4P_4DAC1` |
-| `%1010` | `%pp00`+2 | RFBYTE → 4-pin + 2-DAC2 | `X_RFBYTE_4P_2DAC2` |
-| `%1010` | `%pp00`+4 | RFBYTE → 4-pin + 1-DAC4 | `X_RFBYTE_4P_1DAC4` |
-| `%1010` | `%p000`+6 | RFBYTE → 8-pin + 4-DAC2 | `X_RFBYTE_8P_4DAC2` |
-| `%1010` | `%p000`+7 | RFBYTE → 8-pin + 2-DAC4 | `X_RFBYTE_8P_2DAC4` |
-| `%1010` | `%p000`+$E | RFBYTE → 8-pin + 1-DAC8 | `X_RFBYTE_8P_1DAC8` |
+| `%1001` | `%pp0a` | RFBYTE → 2-pin + 2-DAC1 | `X_RFBYTE_2P_2DAC1` |
+| `%1001` | `%pp1a` | RFBYTE → 2-pin + 1-DAC2 | `X_RFBYTE_2P_1DAC2` |
+| `%1010` | `%p00a` | RFBYTE → 4-pin + 4-DAC1 | `X_RFBYTE_4P_4DAC1` |
+| `%1010` | `%p01a` | RFBYTE → 4-pin + 2-DAC2 | `X_RFBYTE_4P_2DAC2` |
+| `%1010` | `%p10a` | RFBYTE → 4-pin + 1-DAC4 | `X_RFBYTE_4P_1DAC4` |
+| `%1010` | `%0110` | RFBYTE → 8-pin + 4-DAC2 | `X_RFBYTE_8P_4DAC2` |
+| `%1010` | `%0111` | RFBYTE → 8-pin + 2-DAC4 | `X_RFBYTE_8P_2DAC4` |
+| `%1010` | `%1110` | RFBYTE → 8-pin + 1-DAC8 | `X_RFBYTE_8P_1DAC8` |
 | `%1010` | `%1111` | RFWORD → 16-pin + 4-DAC4 | `X_RFWORD_16P_4DAC4` |
 | `%1011` | `%0000` | RFWORD → 16-pin + 2-DAC8 | `X_RFWORD_16P_2DAC8` |
 | `%1011` | `%0001` | RFLONG → 32-pin + 4-DAC8 | `X_RFLONG_32P_4DAC8` |
@@ -1678,14 +1690,14 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%1011` | `%0101` | RFWORD RGB16 | `X_RFWORD_RGB16` |
 | `%1011` | `%0110` | RFLONG RGB24 | `X_RFLONG_RGB24` |
 | `%1100` | `%pppa` | 1-pin + 1-DAC1 → WFBYTE | `X_1P_1DAC1_WFBYTE` |
-| `%1101` | `%ppp0` | 2-pin + 2-DAC1 → WFBYTE | `X_2P_2DAC1_WFBYTE` |
-| `%1101` | `%ppp0`+2 | 2-pin + 1-DAC2 → WFBYTE | `X_2P_1DAC2_WFBYTE` |
-| `%1110` | `%pp00` | 4-pin + 4-DAC1 → WFBYTE | `X_4P_4DAC1_WFBYTE` |
-| `%1110` | `%pp00`+2 | 4-pin + 2-DAC2 → WFBYTE | `X_4P_2DAC2_WFBYTE` |
-| `%1110` | `%pp00`+4 | 4-pin + 1-DAC4 → WFBYTE | `X_4P_1DAC4_WFBYTE` |
-| `%1110` | `%p000`+6 | 8-pin + 4-DAC2 → WFBYTE | `X_8P_4DAC2_WFBYTE` |
-| `%1110` | `%p000`+7 | 8-pin + 2-DAC4 → WFBYTE | `X_8P_2DAC4_WFBYTE` |
-| `%1110` | `%p000`+$E | 8-pin + 1-DAC8 → WFBYTE | `X_8P_1DAC8_WFBYTE` |
+| `%1101` | `%pp0a` | 2-pin + 2-DAC1 → WFBYTE | `X_2P_2DAC1_WFBYTE` |
+| `%1101` | `%pp1a` | 2-pin + 1-DAC2 → WFBYTE | `X_2P_1DAC2_WFBYTE` |
+| `%1110` | `%p00a` | 4-pin + 4-DAC1 → WFBYTE | `X_4P_4DAC1_WFBYTE` |
+| `%1110` | `%p01a` | 4-pin + 2-DAC2 → WFBYTE | `X_4P_2DAC2_WFBYTE` |
+| `%1110` | `%p10a` | 4-pin + 1-DAC4 → WFBYTE | `X_4P_1DAC4_WFBYTE` |
+| `%1110` | `%0110` | 8-pin + 4-DAC2 → WFBYTE | `X_8P_4DAC2_WFBYTE` |
+| `%1110` | `%0111` | 8-pin + 2-DAC4 → WFBYTE | `X_8P_2DAC4_WFBYTE` |
+| `%1110` | `%1110` | 8-pin + 1-DAC8 → WFBYTE | `X_8P_1DAC8_WFBYTE` |
 | `%1110` | `%1111` | 16-pin + 4-DAC4 → WFWORD | `X_16P_4DAC4_WFWORD` |
 | `%1111` | `%0000` | 16-pin + 2-DAC8 → WFWORD | `X_16P_2DAC8_WFWORD` |
 | `%1111` | `%0001` | 32-pin + 4-DAC8 → WFLONG | `X_32P_4DAC8_WFLONG` |
@@ -1694,8 +1706,8 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%1111` | `%0100` | 2 ADC → WFWORD | `X_2ADC8_0P_2DAC8_WFWORD` |
 | `%1111` | `%0101` | 2 ADC + 16-pin → WFLONG | `X_2ADC8_16P_4DAC8_WFLONG` |
 | `%1111` | `%0110` | 4 ADC → WFLONG | `X_4ADC8_0P_4DAC8_WFLONG` |
-| `%1111` | `%0111` | DDS/Goertzel SINC1 | `X_DDS_GOERTZEL_SINC1` |
-| `%1111` | `%0111` (D[23]=1) | DDS/Goertzel SINC2 | `X_DDS_GOERTZEL_SINC2` |
+| `%1111` | `%p111` | DDS/Goertzel SINC1 | `X_DDS_GOERTZEL_SINC1` |
+| `%1111` | `%p111` (D[23]=1) | DDS/Goertzel SINC2 | `X_DDS_GOERTZEL_SINC2` |
 
 # Appendix B: Symbol Quick Reference {#app-b}
 
