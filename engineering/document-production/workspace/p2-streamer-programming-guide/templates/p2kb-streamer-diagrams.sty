@@ -154,12 +154,10 @@
   % LUMA8 (8)
   \node[rl] at (-1,4) {LUMA8};
   \node[seg, fill=diagram-box, minimum width=32mm, anchor=west] at (0,4) {luma (8)};
-  % RGBI8 2:2:2:2
+  % RGBI8: 3-bit color select + 5-bit luminance (same 8 colors as LUMA8)
   \node[rl] at (-1,3) {RGBI8};
-  \node[rseg, minimum width=8mm, anchor=west] (a0) at (0,3) {R 2};
-  \node[gseg, minimum width=8mm, right=0pt of a0] (a1) {G 2};
-  \node[bseg, minimum width=8mm, right=0pt of a1] (a2) {B 2};
-  \node[iseg, minimum width=8mm, right=0pt of a2] {I 2};
+  \node[gseg, minimum width=12mm, anchor=west] (a0) at (0,3) {color 3};
+  \node[seg, fill=diagram-box, minimum width=20mm, right=0pt of a0] {luma 5};
   % RGB8 3:3:2
   \node[rl] at (-1,2) {RGB8};
   \node[rseg, minimum width=12mm, anchor=west] (b0) at (0,2) {R 3};
@@ -176,7 +174,7 @@
   \node[gseg, minimum width=32mm, right=0pt of d0] (d1) {G 8};
   \node[bseg, minimum width=32mm, right=0pt of d1] {B 8};
 \end{tikzpicture}}
-\caption{RGB source-format bit packing}
+\caption{Source-format bit packing. LUMA8 and RGBI8 both select one of eight colors and carry a luminance value -- LUMA8 takes its color from \texttt{S[2:0]}, RGBI8 from the pixel's top three bits. Only RGB8/16/24 carry per-channel values.}
 \end{figure}}
 
 % ==================== Chapter 10 -- DDS / Goertzel ====================

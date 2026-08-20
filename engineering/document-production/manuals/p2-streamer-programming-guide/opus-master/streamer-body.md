@@ -496,7 +496,7 @@ Video earns its own family of modes because pixels are not just bytes. A color p
 | Mode | Symbol | Hub Read | Format | Bytes/px |
 |------|--------|----------|--------|----------|
 | `%1011_0010` | `X_RFBYTE_LUMA8` | RFBYTE | Luminance 8 | 1 |
-| `%1011_0011` | `X_RFBYTE_RGBI8` | RFBYTE | RGBI 2:2:2:2 | 1 |
+| `%1011_0011` | `X_RFBYTE_RGBI8` | RFBYTE | Color 3 + luma 5 | 1 |
 | `%1011_0100` | `X_RFBYTE_RGB8` | RFBYTE | RGB 3:3:2 | 1 |
 | `%1011_0101` | `X_RFWORD_RGB16` | RFWORD | RGB 5:6:5 | 2 |
 | `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB 8:8:8 | 4 |
@@ -518,7 +518,7 @@ Video earns its own family of modes because pixels are not just bytes. A color p
 | `%010` | Green | | `%110` | Yellow |
 | `%011` | Cyan | | `%111` | White |
 
-**RGBI8 (2:2:2:2):** Two bits each for red, green, and blue, plus a 2-bit intensity field.
+**RGBI8 (color 3 + luminance 5):** The top three bits of each pixel, `P[7:5]`, select one of eight output colors — **the same eight LUMA8 offers** — and the bottom five bits, `P[4:0]`, set that color's intensity. This is LUMA8's mechanism with the color select moved out of `S` and into the pixel: that is what buys per-pixel color, and it costs three of the eight luminance bits. There are no separate red, green and blue fields. The five luminance bits are replicated up to fill each driven channel (`P[4,3,2,1,0,4,3,2]`), so a full-scale pixel still reaches full scale.
 
 **RGB8 (3:3:2):** Three bits red, three bits green, two bits blue. Compact format for 256-color graphics.
 
@@ -1039,8 +1039,8 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 
 | Symbol | Value | Description |
 |--------|-------|-------------|
-| `X_RFBYTE_LUMA8` | `%1011 << 28 + 2<<16` | 8-bit grayscale |
-| `X_RFBYTE_RGBI8` | `%1011 << 28 + 3<<16` | RGBI 2:2:2:2 |
+| `X_RFBYTE_LUMA8` | `%1011 << 28 + 2<<16` | Color from S, luma 8 |
+| `X_RFBYTE_RGBI8` | `%1011 << 28 + 3<<16` | Color 3 + luma 5 |
 | `X_RFBYTE_RGB8` | `%1011 << 28 + 4<<16` | RGB 3:3:2 |
 | `X_RFWORD_RGB16` | `%1011 << 28 + 5<<16` | RGB 5:6:5 |
 | `X_RFLONG_RGB24` | `%1011 << 28 + 6<<16` | RGB 8:8:8 |
