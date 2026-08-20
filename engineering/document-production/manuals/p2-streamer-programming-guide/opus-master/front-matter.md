@@ -178,6 +178,14 @@ Three colored callout boxes set "things to know" apart from the running text:
 - **TIP** (teal) — non-obvious techniques or optimizations
 - **HARDWARE** (graphite) — silicon-level details affecting usage
 
+## Code Blocks
+
+Every PASM2 and Spin2 block in this guide is one of three things, and you can tell which without running it:
+
+- **No label** — a worked example, and the absence of a label is the promise. Every symbol it uses is defined in the block or cross-referenced to the section that defines it; the storage it writes is declared; and where it drives pins or DACs, the configuration that makes them emit is shown or cross-referenced. Nothing is left for you to fill in.
+- **A bolded Pattern or Fragment lead-in on the line above** — a shape rather than a program. The lead-in names exactly what you supply.
+- **ANTIPATTERN** (red) — code shown in order to be rejected, placed beside the form that works.
+
 ```{=latex}
 \clearpage
 ```
