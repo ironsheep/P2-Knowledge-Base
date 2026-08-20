@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-308`**
+**Next finding ID: `F-309`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -368,6 +368,59 @@ returns 37 files; all but these six are legitimate:
 
 **Status:** `CONFIRMED — belongs to the yaml head (yaml-knowledge-base-maintenance). Not a Streamer
 manual defect; the manual does not quote these descriptions.`
+
+---
+
+### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `CONFIRMED`
+
+**How it surfaced.** Two bench runs of the VO-J-003 rig (2026-08-20, logs in that rig's `logs/`).
+Its digital self-test drove `DAC_PIN` through `X_PINS_ON` with DIR left low — on the strength of the
+claim below — and scored **4 of 8** then **3 of 8** toggles, i.e. the pin was never driven and the
+readback was float noise. Going to the primary source to explain it produced this finding.
+
+**Locations (both live):**
+- `engineering/document-production/manuals/p2-streamer-programming-guide/opus-master/streamer-body.md:834`
+  — a `::: hardware` callout in §11.0: *"Ordinary pin output through `X_PINS_ON` drives the pin bus
+  directly and requires no `WRPIN` and no `DIRH`."* **RELEASED in Streamer Guide v1.0.9**; v1.1.0 is
+  in its correctness sprint now.
+- `engineering/operations/P2KB-CORRECTION-FINDINGS.md:251` — F-305's closing note repeats the claim
+  as guidance ("Do not add pin setup to digital-output examples") and cites `Silicon Doc :3602-3603`.
+  **That citation does not resolve** to any extraction in `engineering/ingestion/`.
+
+**What the primary source actually says.** *Parallax Propeller 2 Documentation v35 (Rev B/C
+Silicon)*, text extracted from the shipped `.docx`:
+- STREAMER section: *"Modes which can output to pins OR the streamer pin-output bus **with {OUTB,
+  OUTA}** to produce the final 64 pin **output states** on each clock for the cog. For these modes,
+  %e in D[23] must be '1' to enable pin output."*
+- SMART PINS section: *"Normally, an I/O pin's **output enable is controlled by its DIR bit** and its
+  **output state is controlled by its OUT bit**, while the IN bit returns the pin's read state."*
+
+The streamer's pin data is OR'd into the **output state** — the OUT side. Nothing in the document
+gives the streamer any authority over the output **enable**. The one documented way to drive a pin
+with DIR low is the smart-pin `%TT` field (*"the %TT bits … will govern the pin's output enable,
+regardless of the DIR state"*), and `X_PINS_ON` digital output uses no smart pin. So `DIRH` **is**
+required, and D[23] enables the streamer's contribution to OUT, not the pin's driver.
+
+**The "no `WRPIN`" half is correct** and should survive the fix — no smart-pin mode is needed. Only
+the "no `DIRH`" half is wrong. Note the internal tension the claim already had:
+`streamer-body.md:796`, twenty-eight lines earlier in the same section, states the general rule
+correctly — *"**`DIRH`** on the pin. Until DIR is high, the pin does not drive."*
+
+**Proposed correction.** Rewrite the §11.0 callout so it separates the two: digital output needs no
+`WRPIN` (no DAC mode, no COGID, no channel), but it does need `DIRH` like any driven pin. Fix
+F-305's note in the same pass and drop or replace its unresolvable citation.
+
+**Empirical seal is queued, not yet returned.** VO-J-003's rig now runs `D2`/`D3` — the same
+streamer command with DIR low and then `DIRH` — as a direct A/B. **If `D2` passes on the bench, this
+finding is wrong and must be reversed**, because that would mean the streamer does drive with DIR
+low whatever the architecture text implies. Record the D2/D3 result here when it lands.
+
+**Sprint impact.** This is sprint decision #4 ("Digital ≠ DAC. `X_PINS_ON` needs NO wrpin/dirh"),
+which later tasks were told to respect. It belongs at the Streamer v1.1.0 co-release gate («#288»)
+with F-302…F-307.
+
+**Status:** `CONFIRMED (documentary) — correction owed in Streamer Guide v1.1.0 §11.0 and in F-305's
+note. Empirical A/B (VO-J-003 D2/D3) queued to seal it; reversible on that result.`
 
 ---
 
