@@ -11,7 +11,7 @@
 ''    inside a measured window; both controls passed; T1 tracked C to within one
 ''    count).  ARGUING IS NOT MEASURING.  Phase 1 measures it.
 ''
-''    Phase 2 exists because task «#289» is about to write a pin-enable line
+''    Phase 2 exists because task #289 is about to write a pin-enable line
 ''    into five code blocks in a released manual, and those lines encode two
 ''    things this project has never put on silicon: the SPAN idiom
 ''    `drvh #<count-1><<6 + base`, and the claim that `base<<17` selects the
@@ -118,7 +118,7 @@ CON
   '' $600E_0000 + $0028_0000 = $6036_0000, which is a DIFFERENT MODE
   '' (X_IMM_4X8_4DAC2, D[19:16] = %0110) at a DIFFERENT GROUP (D[22:20] = %011,
   '' P24..P31).  This is EF-059's failure exactly, in a second mode family.
-  '' If the bench agrees, «#289» must not write `+ pin<<17` into a block whose
+  '' If the bench agrees, task #289 must not write `+ pin<<17` into a block whose
   '' `pin` a reader can set, and the manual owes a caution.
   G_CMD_TRAP = X_IMM_4X8_1DAC8  + X_PINS_ON + (GRP_OFF  << 17) + PERPETUAL
 
@@ -242,7 +242,7 @@ PRI report_phase1(got_b) | i, differs
 
 
 PRI verdict_tt(t0, t1) : v
-  '' 1 = needs TT=%01 · 2 = needs TT=%00 · 3 = both drove · 0 = neither
+  '' 1 = needs TT=%01 & 2 = needs TT=%00 & 3 = both drove & 0 = neither
   if t1 >= MIN_SPREAD and t0 < MIN_SPREAD
     return 1
   if t0 >= MIN_SPREAD and t1 < MIN_SPREAD
@@ -257,10 +257,10 @@ PRI verdict_tt(t0, t1) : v
 '' ============================================================================
 ''  THE CANVAS IS THE WHOLE TRICK.  P8..P31 are held at a 15k LOW with DIR
 ''  high.  Three things follow:
-''    · an undriven pin reads 0 for a stated reason, not because it floated;
-''    · a pin driven HIGH by anything overpowers 15k and reads 1, so the
+''    & an undriven pin reads 0 for a stated reason, not because it floated;
+''    & a pin driven HIGH by anything overpowers 15k and reads 1, so the
 ''      readback is a map of exactly which pins were driven;
-''    · anything real attached to those pins overpowers 15k too -- which is
+''    & anything real attached to those pins overpowers 15k too -- which is
 ''      how the certification step below detects it, WEAKLY, before this
 ''      program drives anything hard.
 ''  DIR high across the canvas is also required for EF-062's reason: the
@@ -342,20 +342,20 @@ PRI report_phase2(got_it) | m
   '' P_LOW_15K drive config can still be driven hard, and that pinread maps
   '' where I think it does.  If B is wrong, the canvas is wrong, and C/D/E are
   '' measuring the fixture rather than the silicon.
-  report_mask("B", slot[1], M_P16_23, string("P16..P23"))
+  report_mask(string("B"), slot[1], M_P16_23, string("P16..P23"))
   if slot[1] <> M_P16_23
     debug("P2 STOP READING HERE -- B is the control and it failed. C/D/E below")
     debug("   are NOT interpretable; the canvas is the suspect, not the chip.")
     return
 
-  report_mask("C", slot[2], M_P16_23, string("P16..P23"))
-  report_mask("D", slot[3], M_P20, string("P20 alone"))
+  report_mask(string("C"), slot[2], M_P16_23, string("P16..P23"))
+  report_mask(string("D"), slot[3], M_P20, string("P20 alone"))
 
   m := slot[4]
   if m == M_P24_31
     debug("P2-E drove P24..P31 -- CONFIRMED TRAP. `+ pin<<17` carried into")
     debug("   D[19:16]: a different MODE at a different GROUP, silently.")
-    debug("   «#289» must not write `+ pin<<17` where a reader sets `pin`.")
+    debug("   task #289 must not write `+ pin<<17` where a reader sets `pin`.")
   elseif m == M_P16_23
     debug("P2-E drove P16..P23 -- the carry did not reach the group select.")
     debug("   Still a mode change; check what mode actually ran before")

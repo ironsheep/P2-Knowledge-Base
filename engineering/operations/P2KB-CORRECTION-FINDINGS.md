@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-309`**
+**Next finding ID: `F-310`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -458,6 +458,48 @@ written.** Surfaces at the Streamer v1.1.0 co-release gate («#288») with F-302
 **Status:** `PARTIAL — prose FIXED 2026-08-20 at streamer-body.md:410 and :834, gates green.
 Confirmed on silicon (EF-062). Code-block sweep (10 blocks enumerated above) OWED, routed to «#280»;
 the Assembly Language Reference's three sites are a separate manual's pass.`
+
+---
+
+### F-309 — the multi-pin `X_PINS_ON` example lines call the operand `pin` when it must be a **window base**, and compose it with `+`, where an unaligned value silently changes the mode. `CONFIRMED`
+
+**How it surfaced.** VO-J-004, 2026-08-20 — a probe written to de-risk «#289» before it authored
+pin-enable lines into five blocks. Bench-proven as **EF-065**.
+
+**This is not a mechanism defect. Chapter 12 is correct and now empirically confirmed** (EF-064):
+§12.1 documents the group field `D[22:20]`, and §12.2 documents sub-pin selection in `D[19:17]`
+*including* the key sentence — as the pin count rises, fewer of those are pin bits and the freed
+ones become DAC-configuration bits. The defect is that the example lines are disconnected from it.
+
+**Locations** — the composition idiom, in modes where the operand is **not** a pin:
+- `streamer-body.md:892` `X_RFWORD_16P_2DAC8 | … | X_PINS_ON + pin<<17 + count` — **16-pin** mode
+- `streamer-body.md:902` `X_RFLONG_32P_4DAC8 | … | X_PINS_ON + pin<<17 + count` — **32-pin** mode
+- `streamer-body.md:985` `X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count` — **8-pin** mode
+
+In all three the operand must be a **window base** — a multiple of 8 — yet it is named `pin`, which
+invites exactly the value that breaks it. Correct as-is and **not** to be touched: `:887` and
+`:1110` are 1-pin modes, where `pin<<17` genuinely means the pin (EF-064); `:1107` already names it
+`vga_base`, which is the right instinct.
+
+**What an unaligned value does — neither form errors, and the compiler sees neither:**
+- with `+` (**the book's idiom**): `$600E_0000 + $0028_0000 = $6036_0000` — carries into `D[19:16]`,
+  yielding `X_IMM_4X8_4DAC2` at the P24–P31 window. Bench: drove **P24..P31**.
+- with `|`: sets a bit the mode template already sets, so the word is **byte-identical** to the
+  aligned base. The unaligned value does not carry — it *vanishes*.
+
+**Proposed correction** (small, and it belongs with the «#289» sweep since it touches the same
+blocks): rename the operand to `base` / `window_base` in the three multi-pin lines, and add one
+caution — a multi-pin mode takes a **window base in steps of 8**, and an unaligned value changes the
+mode rather than the pin, silently. Point it at §12.2, which already explains why. Prefer `|` over
+`+` for composing mode words generally — see **EF-054**, where `P_CHANNEL + P_OE` broke for the same
+arithmetic reason, and the class sweep there found 281 doc config lines using `|` against 2 using `+`.
+
+**Sibling, already recorded:** **EF-059** is this same failure in another mode family
+(`adc_pin<<17` changing the mode of `X_1ADC8_0P_1DAC8_WFBYTE`), and its warning still stands: the
+defect is invisible in testing because the transfer still "works" and merely produces the wrong shape.
+
+**Status:** `CONFIRMED — bench-proven (EF-065). Routed to «#289», which already owns the same blocks.
+Not a Chapter 12 defect; Chapter 12 is confirmed correct by EF-064.`
 
 ---
 

@@ -795,11 +795,11 @@ pin drive **8 of 8** · `D2` streamer with DIR low **4 of 8** · `D3` same comma
 **8 of 8**. The `4 of 8` is a *constant* readback scored against an alternating expectation — an
 undriven pin, not a partly-working one. *Date/rig:* 2026-08-20, real P2 (Stephen); jumper P0→P1,
 continuity certified digitally first (both legs, with a defined open-circuit answer — see EF-063's
-rig note). [M — **single run**; a confirming run is cheap. The measuring cog also carried the debug
-interrupt (this rig reports from the cog it measures in, which is *not* EF-057's arrangement); no
-`debug()` executes inside any measured window, both controls passed, and EF-063's `T1` tracked its
-control to within 1 count, so the exposure is real but visibly not biting. Re-running the
-measurement in a second cog would retire the caveat.] *Grounds:* **F-308** — corrects the Streamer
+rig note). [M — **caveat retired 2026-08-20 by VO-J-004**, which ran this identical measurement
+twice in one program: leg A in cog 0 with the debug interrupt live, leg B in a launched debug-free
+cog. Every digital count matched exactly (`D1` 8/8 & 8/8, `D2` 4/8 & 4/8, `D3` 8/8 & 8/8) and the
+analog legs agreed in verdict. The debug interrupt did not change any answer here, and this is also
+the confirming second run — no longer single-run.] *Grounds:* **F-308** — corrects the Streamer
 Guide's §11.0 callout at `streamer-body.md:834`, *"Ordinary pin output through `X_PINS_ON` drives the
 pin bus directly and requires no `WRPIN` and no `DIRH`"*, and the note repeating it at
 `P2KB-CORRECTION-FINDINGS.md:251`. **The "no `WRPIN`" half is correct and stands** — digital output
@@ -820,14 +820,55 @@ control that uses no streamer at all. *Result:* control `C` (level-driven DAC, `
 **5,330**. `T1` tracks the control to within one count; `T0` is flat. *Mechanistically consistent
 with EF-055*, which found `TT=%01` switches the DAC's **source**: at `%00` the pin takes its own
 `M[7:0]` level (here the COGID, so a constant), and only at `%01` does it take the cog DAC channel
-the streamer is feeding. *Date/rig:* 2026-08-20, real P2 (Stephen). [M — single run; see EF-062's
-grade note.] *Rig note worth keeping:* the jumper is certified **digitally, both legs, before
+the streamer is feeding. *Date/rig:* 2026-08-20, real P2 (Stephen). [M — **confirmed twice**; see EF-062's
+grade note. VO-J-004's second run read `C` 5,330 / `T0` 1 / `T1` 5,328 in cog 0 and `C` 5,331 /
+`T0` 1 / `T1` 5,331 in a debug-free cog — same verdict both ways, and matching the first run's
+5,331 / 1 / 5,330.] *Rig note worth keeping:* the jumper is certified **digitally, both legs, before
 anything analog** — the far pin holds the net through a 15 kΩ drive while the near pin drives it
 hard, so an open circuit reads the *opposite* value instead of an undefined float (a released P2 pin
 holds its last state on pin capacitance long enough to read back as a false pass). *Grounds:*
 **F-272**, which reached the same answer from documentary sources and is already `RESOLVED`; this is
 the empirical seal, not a change of answer. *Source:*
 `campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2`.
+
+### EF-064 · Streamer pin placement is **mode-dependent**, and the `DIRx/DRVx` pin-span form works as documented — `CONFIRMED`
+Two facts one probe settled. (a) A **1-pin** mode reaches **any** pin: `X_IMM_32X1_1DAC1` at pin 20
+drove P20 and nothing else, so its pin field spans `D[22:17]`. An **8-pin** mode takes a **window**:
+`X_IMM_4X8_1DAC8` at base 16 drove exactly P16–P23, its group coming from `D[22:20]` in 8-pin steps,
+with `D[19:17]` serving as DAC-configuration rather than pin bits. (b) `DRVH` over a pin span —
+`#(count-1)<<6 + base`, the `+D[10:6]` form — drove exactly P16–P23 and nothing adjacent.
+*How proven:* a **canvas** — P8..P31 held at a 15 kΩ low with `DIR` high, so an undriven pin reads 0
+for a stated reason instead of floating, while any driven pin overpowers the pull and reads 1; the
+readback is then a map of which pins were driven. Every canvas pin was certified free *weakly*
+before anything drove hard. The no-streamer span test is the control the streamer tests depend on
+and cannot prove for themselves. *Result:* canvas `$0000_0000` (all 24 pins free) · span `$0000_FF00`
+· 8-pin mode base 16 `$0000_FF00` · 1-pin mode pin 20 `$0000_1000`. Masks are `pinread(P8..P31)`,
+bit 0 = P8. *Date/rig:* 2026-08-20, real P2 (Stephen). [M — measured in a launched debug-free cog.]
+*Grounds:* **confirms the Streamer Guide's Chapter 12 as written** — §12.1 (group field `D[22:20]`)
+and §12.2 (sub-pin `D[19:17]`, and its statement that as the pin count rises those bits become
+DAC-config bits) are correct and now empirically backed. It also dissolves an apparent conflict
+between the Silicon Doc's *"%ppp in D[22:20] … in 8-pin increments"* and the manual's `pin<<17`
+idiom: they never disagreed, the field is mode-dependent. *Source:*
+`campaigns/2026-08-manual-corrections/tests/test-f308-cog-and-pingroup.spin2`.
+
+### EF-065 · Composing an **unaligned** pin base with `+` in a multi-pin streamer mode silently selects a **different mode at a different pin group** — `CONFIRMED`
+`X_IMM_4X8_1DAC8 + X_PINS_ON + 20<<17` assembles to `$60B6_FFFF`, not the intended
+`$60AE_FFFF`: `20<<17` sets bit 19, `D[19:16]` already holds the mode template `%1110`, and the `+`
+**carries** — leaving `D[19:16] = %0110` (`X_IMM_4X8_4DAC2`, a different mode) and `D[22:20] = %011`
+(the P24–P31 window, not P16–P23). *How proven:* run it against the EF-064 canvas and read which
+pins moved. *Result:* **`$00FF_0000` — P24..P31**, exactly the predicted wrong answer; the aligned
+control drove P16–P23 in the same run. *Date/rig:* 2026-08-20, real P2 (Stephen). [M]
+*The `|` form fails differently and worse:* `| 20<<17` sets a bit the template already sets, so the
+word comes out **byte-identical** to base 16 — an unaligned base composed with `|` does not carry,
+it silently *vanishes*. Neither form errors, and the compiler cannot see either. **This was caught
+by reading the assembled constant out of the compiler listing before the run, not by the bench** —
+the first draft of the test would have compared two identical command words and called it a result.
+*Grounds:* **F-309** — the Streamer Guide's multi-pin example lines compose the pin field with `+`
+and name the operand `pin` when it must be a **window base** (`:892` 16-pin, `:902` 32-pin, `:985`
+8-pin). §12.2 explains why that is wrong; nothing at those lines connects them to it. This is
+**EF-059's failure in a second mode family** — there `adc_pin<<17` changed the mode of
+`X_1ADC8_0P_1DAC8_WFBYTE` and the defect was invisible in testing because the capture still "worked".
+*Source:* `campaigns/2026-08-manual-corrections/tests/test-f308-cog-and-pingroup.spin2`.
 
 ---
 
