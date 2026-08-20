@@ -2,7 +2,14 @@
 
 **Document:** P2 Streamer Programming Guide (`manual:p2-streamer-programming-guide`)
 **Created:** 2026-08-19
-**Status:** 🟡 PLAN — open questions in §0 must close before `sprint-start`.
+**Status:** 🟢 **RESEARCH COMPLETE (2026-08-20).** Q1 and Q3 closed; **Q2 (version number) and
+Q4 (second sweep) are the only items outstanding**, both with recommendations. Nothing in the
+plan is blocked on investigation.
+
+**Scope (Stephen, 2026-08-20):** *this manual only* — correct its content and land every pending
+update it owes. Errors found in **other** artifacts are registered as **F-302…F-305** and
+deliberately excluded here; the co-release judgement is taken at the release gate (§13 and
+release-verification step 6).
 **Entry state:** v1.0.9 released 2026-08-19 07:29, 76pp (`PUBLICATION-ROSTER.md:46,95`).
 Roster: Draft ✅ Assets ✅ Platform ✅ **Chip ⏳** Comm ✅ Released ✅.
 
@@ -39,7 +46,28 @@ therefore off the table — this sprint corrects and re-releases.
 
 ## §0 Open Questions — must reach empty before `sprint-start`
 
-### Q1 — The F-272 bench run — **ANSWERED 2026-08-19: approved in principle.**
+### Q1 — **CLOSED 2026-08-20. F-272 is resolved from documentary sources; nothing is gated.**
+
+The research pass falsified F-272's own premise. It had recorded that the `%TT` setting for a
+streamer-driven DAC *"is not stated by any source we hold."* It is — in three separate Silicon Doc
+statements that together determine the whole arrangement. See the register entry; not restated
+here.
+
+**Consequences for this plan:**
+
+- **§1b and §7 are NO LONGER GATED.** The streamer-fed DAC setup can be authored from documentary
+  authority now.
+- **The bench run becomes optional confirmation**, not a decision. It still qualifies under
+  Stephen's policy and is still *recommended* — **F-264** proved this exact axis inverts (a
+  constant mandatory in one DAC arrangement kills the output in the other), so a jumper-rig check
+  is cheap insurance. But the sprint no longer waits on it.
+- **§17.1's original form was right.** It shipped `P_DAC_124R_3V | P_CHANNEL` alongside
+  `X_DACS_0N0_0N0`; «#221» doubted it only because the documentary basis had not been found.
+
+*(Superseded text kept below for the reasoning that led here — the bench-policy criteria still
+govern any future run.)*
+
+### Q1 (superseded) — The F-272 bench run — approved in principle 2026-08-19.
 
 Stephen's standing policy, stated this session: *bench runs are allowed for any code
 that needs no special hardware external to the P2, but the run has to prove useful,
@@ -74,12 +102,22 @@ Four wrong facts corrected in a released document, plus genuinely new material (
 `S[11:0]` field, the DAC-pin requirement, a declared example contract). That is more
 than a patch. **Recommendation: v1.1.0.**
 
-### Q3 — Does the metadata single-source conversion ride along? *(Recommendation: yes.)*
+### Q3 — **CLOSED 2026-08-20: included.** Metadata single-source rides along.
 
-`PLATFORM-FEATURE-ADOPTION.md` shows this document **⏳ on metadata single-source**
-(cross-ref already ✅). Every ⏳ is work owed at *this* release, and `prepare-manual`
-Step 4 will surface it anyway. F-301's lesson is that deferring it is precisely how it
-gets passed over. **Recommendation: include as §11.** Mechanical; no render risk.
+Stephen's instruction — *"get all pending updates for manuals that this needs, done"* — settles
+it. `PLATFORM-FEATURE-ADOPTION.md` has this document **⏳ on metadata single-source** (cross-ref
+already ✅); that is a pending update this manual owes, so it is in scope as **§11**.
+
+Current state, researched rather than assumed:
+
+| Where | Now | After |
+|---|---|---|
+| `request.json` `metadata.version` | `"v1.0.9"` — **carries a `v` prefix** | the **bare** number (the cover supplies the word "Version") |
+| `front-matter.md:24` | hardcoded `{\large August 2026\par}` | `\DocDate` |
+| `front-matter.md:26` | hardcoded `{\large\color{blue}Version 1.0.9\par}` | `\DocVersion` |
+
+The `v` prefix is the trap: converted documents take the bare number, so the conversion is a
+two-part edit, not a one-part one.
 
 ### Q4 — Is a second sweep wanted beyond the audit? *(Recommendation: no.)*
 
@@ -125,10 +163,28 @@ routing table, stating the WRPIN-DAC-mode + `DIRH` requirement with the citation
 Cross-reference it from every DAC-routing example: §5.1, §5.2, §6.1, §6.2, §7.3, §11.3
 (all four), §15.1, §17.2.
 
-**§1b — the bench run that settles the streamer-fed DAC mode constant (F-272).**
+**§1b — the streamer-fed DAC setup — NOW CITABLE (F-272 resolved 2026-08-20).**
 
-The open half is the `%TT` field for a DAC pin the **streamer** writes. Both candidate
-forms compile, so only silicon decides.
+What §11.0 must teach, all of it from the Silicon Doc (see the F-272 register entry for the
+verbatim quotes and line numbers — this plan points, it does not restate):
+
+- **`%TT = %01`** (`P_CHANNEL`) is the cog-DAC-channel arrangement — required whenever the
+  streamer supplies the value.
+- **`M[3:0]` carries the COGID** — the cog whose DAC channels drive this pin.
+- **`DIRH`** the pin.
+- **The channel is chosen by the pin's two low bits**, not by the mode word — which is why
+  §11.2's existing channel↔pin-LSB table is correct and becomes load-bearing here.
+- **The contrast that makes it stick:** the *level-driven* DAC is `%TT = %00` with `M[7:0]` as
+  the level and **no `P_CHANNEL`** — and per **F-264**, adding `P_CHANNEL` there **kills** the
+  output. Same constant, opposite effect, decided by who supplies the value. Teach both, adjacent.
+
+Pick the impedance constant from the four the KB carries: `P_DAC_124R_3V`, `P_DAC_990R_3V`,
+`P_DAC_600R_2V`, `P_DAC_75R_2V`.
+
+**§1b-bench — optional confirmation (recommended, not gating).**
+
+Given F-264's demonstrated inversion on this exact axis, confirm on silicon before release.
+It is one jumper and no external hardware, so it clears Stephen's policy.
 
 **Rig — one jumper, no external hardware.** Strap a DAC-capable pin to an ADC-capable
 pin on the same P2 (`dac_pin` → `adc_pin`, respecting §11.2's channel/pin-LSB rule).
@@ -331,7 +387,7 @@ none.
 
 ---
 
-## §7 — Rebuild §17.2 DDS Waveform Generation *(gated on Q1/F-272)*
+## §7 — Rebuild §17.2 DDS Waveform Generation *(UNGATED — F-272 resolved 2026-08-20)*
 
 **Finding S-7 (major).** `git log -S` on its opening sentence returns exactly one commit:
 `10bb35d5 "Add P2 Streamer Programming Guide (WIP)"`. **Never edited since.**
@@ -350,11 +406,17 @@ its amplitude rule (SINC1 ±127 / SINC2 ±10, currently only in §17.1's `::: ha
 block), and declared `res` storage. Cross-reference §10.3's build loop rather than
 duplicating it.
 
+**The DAC setup this example needs is now citable** — `%TT = %01` (`P_CHANNEL`), COGID in
+`M[3:0]`, `DIRH`, channel by pin LSBs (§1b). §17.1's original `P_DAC_124R_3V | P_CHANNEL`
+form was correct; reuse it here rather than re-deriving.
+
 **Verification.** *Normal:* every symbol defined or cross-referenced; `pnut-ts -q`
 compiles the assembled example clean. *Edge:* the §17.1 forward promise is now kept —
-read both sections in sequence. *Error:* if F-272 is unresolved, this section ships as an
-explicitly **labelled fragment** under §10's contract, not as a worked example wearing
-worked-example furniture. That is the whole lesson of this sprint.
+read both sections in sequence. *Error:* if the optional §1b-bench run contradicts the
+documentary reading, **stop and confirm the measurement** before changing the text —
+empirical outranks documentary here, but a rig that never produced a control reading is
+not empirical. Should it survive confirmation and still disagree, that is a new register
+finding, not a quiet edit.
 
 ---
 
@@ -435,12 +497,17 @@ who never opens Chapter 9 can still learn it.
 
 ---
 
-## §11 — Platform: metadata single-source adoption *(pending Q3)*
+## §11 — Platform: metadata single-source adoption *(IN SCOPE — Q3 closed)*
 
-`PLATFORM-FEATURE-ADOPTION.md` carries this document **⏳** on metadata single-source
-(cross-ref ✅). Convert per the mechanism recorded there: identity strings live once in
-`request.json` metadata and reach both the PDF info dictionary and the cover.
-`metadata.version` becomes the **bare** number for a converted document.
+Convert per the mechanism recorded in `PLATFORM-FEATURE-ADOPTION.md`: identity strings live
+once in `request.json` metadata and reach both the PDF info dictionary and the cover via
+`\DocTitle`/`\DocSubtitle`/`\DocVersion`/`\DocDate`/`\DocAuthor`. Three edits — the two
+hardcoded cover lines at `front-matter.md:24,26`, and **stripping the `v` prefix** from
+`request.json`'s `"version": "v1.0.9"` (converted documents carry the bare number; the cover
+supplies the word "Version").
+
+The macros carry the **value**; the cover keeps its **presentation** — do not move the
+formatting into the metadata.
 
 **Verification.** *Normal:* rendered PDF has populated Title/Author/Subject. *Edge:*
 cover text unchanged in presentation. *Error:* flip the tracker row to ✅ **only after
@@ -480,36 +547,42 @@ introduce a replacement tell.
 
 ---
 
-## §13 — Class-wide sweep: these errors are NOT confined to this manual **⚠ SCOPE DECISION**
+## §13 — Errors found in OTHER artifacts: tracked, deliberately NOT in this sprint
 
 Swept 2026-08-20 across all manuals, app notes, `deliverables/ai/P2/`,
-`engineering/knowledge-base/`, and every workspace diagram template. **The scope
-instruction was "all issues in this manual"; this section is outside it and needs
-Stephen's decision.** It is recorded here because fixing the Streamer Guide alone would
-leave four of these errors live in two *other* released artifacts.
+`engineering/knowledge-base/`, and every workspace diagram template. **The same four errors
+live outside this manual — in a second released manual and in the live KB.**
 
-### Released public documents carrying the same errors
+**Scope decision (Stephen, 2026-08-20): this sprint stays on this manual.** Those findings
+are **registered, not scoped here**, so they cannot be lost:
 
-| Artifact | Site | Error |
-|---|---|---|
-| **P2 Assembly Language Manual v3.1.6** (released 2026-08-18, 502pp) | `appendix-g-streamer-constants.md:115` | *"Read byte as RGBI 2:2:2:2 (16 colors + intensity)"* — the same fabrication (§3) |
-| **P2 Assembly Language Manual v3.1.6** | `appendix-g-streamer-constants.md:237` | `X_RFBYTE_1P_1DAC1 \| X_DACS_3_2_1_0` with no WRPIN/DIRH — the same omission (§1) |
+| Finding | What it covers |
+|---|---|
+| **F-303** | RGBI8 `2:2:2:2` in the **released** Assembly Language Reference v3.1.6, in two live KB files, and in the cloned torture-test diagram |
+| **F-304** | `modes-reference.yaml` hardcoding `D[19:16]` — plus its **mirror image**, inventing a free bit where the field is fixed |
+| **F-305** | The Assembly Manual's streamer-DAC example with no `WRPIN`/`DIRH` |
+| **F-302** | Widened the same day to carry the four extra `dds-goertzel.yaml` sites the sweep found |
 
-### The live KB (`deliverables/ai/P2/`, served by `p2kb-mcp`, always "latest")
+Site-by-site detail, authorities, and the fix templates live in the register entries. **This
+plan points at them and does not restate them** — the register is where their status stays
+current.
 
-| File | Site | Error |
-|---|---|---|
-| `language/spin2/symbols/streamer-symbols.yaml` | `:186` | `RFBYTE → RGBI 2:2:2:2` — one wrong row in an otherwise-correct table |
-| `architecture/streamer/modes-reference.yaml` | `:221` | same RGBI8 description, second copy |
-| `architecture/streamer/modes-reference.yaml` | `:88, :93, :98, :330` | `d_19_16` hardcoded where the field has free bits — **the §5 defect, in the KB** |
-| `architecture/streamer/modes-reference.yaml` | `:186, :191, :196, :273, :278, :283` | the **mirror-image** defect — a `p` letter implying a free bit where the field is fully fixed |
-| `architecture/streamer/dds-goertzel.yaml` | `:57` | `"Read LUT entry at NCO[30:22]"` as an unconditioned rule — **a gap in F-302's own proposed correction** |
-| `architecture/streamer/dds-goertzel.yaml` | `:89, :100, :227` | further fixed-512 assumptions |
+### The release gate — a required step, not a reminder
 
-**KB work belongs to the `yaml` head** (`yaml-knowledge-base-maintenance`), not to this
-manual sprint. It touches 3+ files, so the sprint-plan overlay's **file table +
-design-decisions + wait-for-confirmation** rule applies before any YAML editing begins.
-Pair the releases; do not merge the work.
+**Before this manual releases, re-read F-302…F-305 and decide whether the affected artifacts
+co-release.** That decision is Stephen's and is taken *at the gate*, when the corrected
+Streamer Guide is in hand and the blast radius is visible — not now, and not by default.
+
+Two facts to carry into that decision:
+
+- The Assembly Language Reference (v3.1.6, 502pp) is **currently shipping with the RGBI8
+  fabrication and a DAC example that cannot work**. It is the larger and more heavily used of
+  the two manuals.
+- The **live KB is served on push** — `deliverables/ai/P2/` is always "latest", so its errors
+  reach agents the moment they are fixed, with no release cycle to wait for. KB work belongs
+  to the `yaml` head (`yaml-knowledge-base-maintenance`); it touches 3+ files, so the
+  sprint-plan overlay's **file table + design-decisions + wait-for-confirmation** rule applies
+  before any YAML editing begins.
 
 ### A cloned diagram — the duplication trap
 
@@ -661,7 +734,12 @@ One Forge round-trip after **all** items land.
 5. `audit-pdf-margin-overflow.py` — tolerance is the verdict. F-299's two 6-column mode
    tables (6.1/5.3pt) are **polish, inside tolerance**; do not re-render for them, but
    confirm the §5 Appendix A edits did not push them past 20pt.
-6. `release-manual` for promotion, roster, and the ledger line.
+6. **THE CO-RELEASE GATE — do not skip.** With the corrected PDF in hand, re-read
+   **F-302 · F-303 · F-304 · F-305** and put the decision to Stephen: do the *Assembly Language
+   Reference* and the live-KB fixes release alongside this manual, or separately? This is the
+   step §13 exists to protect — the findings were kept out of this sprint's scope precisely so
+   this judgement could be made once, here, with the blast radius visible.
+7. `release-manual` for promotion, roster, and the ledger line.
 
 **Known non-goals.** Chip review (roster `⏳`) is not gated on this sprint. F-299 is
 polish. The 11 pre-existing `audit-register-hygiene.py` violations in

@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-303`**
+**Next finding ID: `F-306`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -186,6 +186,70 @@ window"), and the `\DiagDdsGoertzel` diagram in
 `workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:207` and the staged
 `pdf-forge/interactive-testing/templates/p2kb-torture-diagrams.sty:207`. Tracked in
 `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md`; fix ships with that release.
+
+---
+
+## Class-wide sweep of the Streamer findings — the same errors live in OTHER artifacts (2026-08-20) — F-303…F-305
+
+**Origin.** The Streamer Guide's 2026-08-19 class audit produced four confirmed factual errors.
+Sweeping them across every manual, app note, `deliverables/ai/P2/`, and workspace diagram template
+found them **outside** that manual as well. Recorded here — **not** scoped into the Streamer
+sprint, which is deliberately confined to its own document. **Stephen decides at that sprint's
+release gate whether the affected artifacts co-release.** Full sweep detail + the verified-correct
+list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
+
+> **Before fixing any of these, read the "verified correct" list in that plan section.** The sweep
+> deliberately separated look-alikes: the Assembly Manual's Appendix G **ADC Sampling Modes** and
+> **DDS/Goertzel** *constant-value* tables were decoded row by row and are **correct** — they are
+> named-symbol value tables, not field-encoding templates. Do not "fix" them.
+
+### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `CONFIRMED`
+
+The truth (Silicon Doc `p2-documentation.txt:3800`): RGBI8 is a **3-bit colour select + 5-bit
+luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B fields.
+
+| Location | Status |
+|---|---|
+| `manuals/p2-assembly-language-manual/opus-master/part-iii/appendix-g-streamer-constants.md:115` — *"Read byte as RGBI 2:2:2:2 (16 colors + intensity)"* | **RELEASED** — Assembly Language Reference v3.1.6, 2026-08-18, 502pp |
+| `deliverables/ai/P2/language/spin2/symbols/streamer-symbols.yaml:186` — `"RFBYTE → RGBI 2:2:2:2"` | **LIVE KB** (served by `p2kb-mcp`); the one wrong row in an otherwise-correct table |
+| `deliverables/ai/P2/architecture/streamer/modes-reference.yaml:221` — same description, second copy | **LIVE KB** |
+| `workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:176` — `\DiagRgbFormats` cloned, draws `R 2 \| G 2 \| B 2 \| I 2` | not released, but **invoked** at `P2-Layout-Torture-Test.md:836`, so it renders into every build |
+
+**Fix template already exists, in a released manual:** *P2 Debug Window Manual* v1.1.3
+`ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
+contrasts RGBI8 against LUMA8 immediately above. Copy that framing.
+
+### F-304 — `modes-reference.yaml` hardcodes the streamer `D[19:16]` field, and elsewhere invents a free bit that does not exist. `CONFIRMED`
+
+The KB twin of the Streamer Guide's Appendix A defect. Authority: Silicon Doc `:2995-3020` and
+`:3125-3145` both print the field sequence
+`pppa · pp0a · pp1a · p00a · p01a · p10a · 0110 · 0111 · 1110 · 1111 · 0000 · 0001`;
+`%a` is `D[16]` (`:3653-3654`); DDS/Goertzel is `1111 dddd 0ppp p111` (`:3484`).
+
+| `deliverables/ai/P2/architecture/streamer/modes-reference.yaml` | Defect |
+|---|---|
+| `:88`, `:93`, `:98` | IMM 4-pin rows give `d_19_16` as fixed `%0000`/`%0010`/`%0100`; truth is `p00a`/`p01a`/`p10a` |
+| `:330` | `X_DDS_GOERTZEL_SINC1` `d_19_16: "%0111"`; truth is `p111` — `D[19]` is the low bit of the `D[22:19]` four-pin-block selector |
+| `:186`, `:191`, `:196`, `:273`, `:278`, `:283` | **The mirror-image defect** — `"%p000 + 6"` etc. imply a free `D[19]` bit for the 8-pin RFBYTE/WFBYTE variants, where truth is **fully fixed** (`0110`/`0111`/`1110`) |
+
+**Fix template in the same directory:** `dds-goertzel.yaml:11,:18` carry the correct encodings
+plus the correct `D[22:19]` multiple-of-four caveat.
+
+### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `CONFIRMED`
+
+`manuals/p2-assembly-language-manual/opus-master/part-iii/appendix-g-streamer-constants.md:237`
+shows `mov mode, ##X_RFBYTE_1P_1DAC1 | X_DACS_3_2_1_0` with no `WRPIN` DAC-mode configuration and
+no `DIRH` — the same omission the Streamer sprint fixes book-wide. **RELEASED** in Assembly
+Language Reference v3.1.6.
+
+Per **F-272** (resolved 2026-08-20) the correct setup is now fully citable: `%TT = %01`
+(`P_CHANNEL`) with the COGID in `M[3:0]`, `DIRH` the pin, channel selected by the pin's two low
+bits. `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml:203` carries a worked example,
+and `wrpin.yaml:54` documents the field.
+
+**Note the asymmetry that makes this easy to get wrong:** this applies to **DAC** output only.
+Ordinary digital pin output via `X_PINS_ON` (`D[23]=1`) drives the pin bus directly and needs no
+`WRPIN`/`DIRH` — Silicon Doc `:3602-3603`. Do not add pin setup to digital-output examples.
 
 ---
 
@@ -414,8 +478,51 @@ recipe we have not seen work is worse than an obviously incomplete one.
 streamer-fed DAC, this question governs it. Settle it on the bench (drive a DAC from the streamer
 with `TT = %00` and with `%01`, compare) before writing the streamer-driven form into any document.
 
-**Status:** `OPEN`. Not a defect claim against any current text — the manual no longer makes the
-claim in either direction.
+**Status:** `RESOLVED — the premise was false; the mechanism IS stated by sources we hold
+(2026-08-20). Bench confirmation optional, not required.`
+
+### 2026-08-20 — this finding's premise is falsified. The Silicon Doc states the whole mechanism, in three separate places.
+
+The entry above says *"the `%TT` setting for a DAC pin the STREAMER writes is not stated by any
+source we hold."* That was written from the Goertzel demo alone. A targeted re-read found the
+mechanism stated outright — not inferred, not assembled from reasoning, but three verbatim
+statements that together answer it:
+
+| Silicon Doc | Verbatim | Answers |
+|---|---|---|
+| `:7647` | *"01 = OUT enables ADC, **M[3:0] selects cog DAC channel**"* (under `for DAC_MODE:`, smart pin off) | `%TT = %01` **is** the cog-DAC-channel arrangement — i.e. `P_CHANNEL` **is required** |
+| `:3523` | *"that pin must be set to DAC mode **with the COGID embedded**, via WRPIN, and **DIR must be set high**"* | what `M[3:0]` carries, and that `DIRH` is required |
+| `:2705-2711` | *"Each cog outputs four 8-bit DAC channels… **DAC0 can drive the DAC's of all pins numbered %XXXX00**"* (DAC1→`%XXXX01`, DAC2→`%XXXX10`, DAC3→`%XXXX11`) | the channel is chosen by the **pin's two LSBs**, not by the mode word — which is why `M[3:0]` has room for the cog |
+
+**So the two arrangements are different modes, and both are documented:**
+
+- **Level-driven** (the Goertzel demo, and what the original entry analysed): `%TT = %00`,
+  `M[7:0]` *is* the level. **No `P_CHANNEL`** — and per **F-264** adding it here kills the output.
+- **Streamer/cog-channel-driven** (DDS, VGA, any `X_DACS_*` routing): `%TT = %01` (`P_CHANNEL`),
+  `M[3:0]` = the **COGID**, `DIRH` the pin, channel selected by the pin's low two bits.
+
+**Corroboration (upstream lead, NOT authority).** `flexprop/samples/vga/vga_tile_driver.spin2`
+does exactly this: its comment reads `' put our COG id into the DAC info`, it `or`s `mycogid`
+into the mode word (`:140-144`), its `dacmode_s` long carries `…_01_00000_0` — **`%TT = %01`,
+smart pin off** (`:205`) — and it `wrpin`s + `dirh`s pins 0..3 to take the four channels
+(`:166-176`). Community code is a lead only; it is cited here because it independently matches all
+three Silicon Doc statements, not as the basis for the claim.
+
+**Consequence.** The Streamer Guide's §17.1 original form (`P_DAC_124R_3V | P_CHANNEL` alongside
+`X_DACS_0N0_0N0`) was **right**, and «#221» was correct to doubt only because the *documentary
+basis* had not been found — not because the code was wrong. The sprint may now author the
+streamer-fed DAC setup from documentary authority.
+
+**A bench run is no longer required, but is still recommended** — this is the exact axis where
+**F-264** proved the two arrangements invert (a constant that is mandatory in one context kills
+the output in the other), so a jumper-rig confirmation is cheap insurance. It confirms rather than
+decides. Rig spec: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §1b.
+
+**Still genuinely unstated by any source:** nothing load-bearing. `M[3:0]` is described as
+carrying the COGID; no source decomposes it further, and none needs to.
+
+**Downstream:** the P2AN001 / P2AN003 / P2AN004 cog-DAC re-audit named under **F-264** is
+unblocked by this — it was waiting on this question.
 
 ---
 
