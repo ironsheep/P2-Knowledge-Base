@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-316`**
+**Next finding ID: `F-317`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -957,6 +957,69 @@ one way and treat lookups as case-insensitive until it is. No tags need to be cr
 a fact about the repository. A grep locates; it never concludes. This is the same failure mode as
 "a status line is not evidence," and it was caught only because a later task put the full `git tag`
 output on screen for an unrelated reason.
+
+---
+
+## Published PDFs carry no machine-readable rights (2026-08-21) — F-316
+
+### F-316 — every published PDF states CC BY-SA 4.0 and a joint copyright on its own page, and carries neither in its metadata. `CONFIRMED`
+
+**How it surfaced.** Stephen, reading the Streamer v1.1.0 metadata at the «#287» gate, asked whether
+the PDF's rights should name both companies. The `Author` field is correct as written — Iron Sheep
+Productions is the author, and authorship is not copyright — but the question exposed that the
+copyright and licence are **absent from the metadata entirely**.
+
+**Measured on the returned v1.1.0 PDF:**
+
+```
+Title:            P2 Streamer Programming Guide
+Subject:          Comprehensive Reference for Propeller 2 Streamer Hardware
+Author:           Iron Sheep Productions, LLC
+Custom Metadata:  no
+Metadata Stream:  no          <- no XMP at all
+```
+
+while `front-matter.md:112` reads *"Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc."*
+and the page below it grants **CC BY-SA 4.0**. Nothing in
+`platform/templates/p2kb-platform-foundation.sty` sets `pdfkeywords`, and `hyperxmp` is not loaded,
+so no `dc:rights` is emitted.
+
+**Why it matters more than its size suggests.** CC BY-SA exists to be machine-readable. An
+aggregator, a search index or a model crawler reading these files sees a document with no licence —
+so a deliberately-open set reads as unlicensed, which is the opposite of the intent.
+
+**The split is real, and the fix must respect it.** Surveyed 2026-08-21 across every manuscript:
+
+| Population | Count | Copyright line |
+|---|---|---|
+| Manuals, guides and all 7 app notes | 17 | Iron Sheep Productions, LLC **and Parallax Inc.** |
+| `pnut-term-ts-user-guide` | 1 | Iron Sheep Productions, LLC **only** |
+| `Donna-Manuscript` | 1 | private, separate author — out of scope |
+| `p2-layout-torture-test` | 1 | instrument, no copyright page — out of scope |
+
+So the string **must be single-sourced per document from `request.json`**, never hardcoded in the
+platform. A platform constant would silently attribute Parallax to the one document they have no
+part in — precisely the class of defect the metadata single-sourcing work («#283») was built to end.
+
+**Proposed correction.** Two new `request.json` metadata keys (`copyright`, `license`), consumed the
+way `\DocTitle` / `\DocAuthor` already are. Emit through `\hypersetup{pdfkeywords=…}`, which needs no
+new package; add XMP `dc:rights` via `hyperxmp` **only if** the Forge's TeX Live carries it — that is
+unverifiable from the container and must be probed on the interactive daemon rather than discovered
+in a production build.
+
+**Sequencing — IN THIS WAVE. Stephen's call, 2026-08-21, overriding a first recommendation to
+defer it.** The initial reasoning was that a platform change invalidates the built Streamer PDF and
+everything queued behind it. That is true and it is the wrong trade: **this wave is the metadata wave
+by design** — «#283» converted identity strings to platform single-sourcing and this release is the
+first time the full metadata set reaches the documents. Deferring rights to a later adoption round
+means a SECOND metadata round-trip for every document, and an interval in which every published PDF
+carries half its metadata. One round-trip, complete, is cheaper and correct. Get it right the first
+time it ships.
+
+**Not a manuscript defect.** Every copyright page is already correct and states both parties where
+both apply. Nothing in any master needs editing.
+
+**Status:** `CONFIRMED — platform mechanism + per-document request.json keys, IN the current wave.`
 
 ## Open — enhancement proposals (new content, not corrections)
 

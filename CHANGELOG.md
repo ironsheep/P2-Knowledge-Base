@@ -20,6 +20,23 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.17.0] - 2026-08-21
+
+**Streamer encodings, object lifetime, and example code that compiles**
+
+### Added
+- DDS/Goertzel LUT window: all eight loop sizes with their NCO index bits and LUT ranges, plus the bounded-region and phase-offset controls that S[11:0] carries
+- Object singleton guidance: when an object resolves to a single instance, both ways a program can end up with a count it did not intend, and the forwarding-constant completeness rule for multi-tier object trees
+- A field-notation legend for the streamer mode table, defining the pin-select, fixed, alternate-bit-order and LUT-base symbols the D[19:16] column uses
+- Streamer DAC-output pin setup, documented alongside the Goertzel detector pattern
+
+### Changed
+- RGBI8 is documented as a 3-bit colour select with 5-bit luminance, matching LUMA8's structure
+- The streamer D[19:16] column carries the silicon's field encoding across the immediate, hub-read and hub-write mode families
+- PASM2 examples read the system clock from hub long $14; Spin2 examples use `getct()`/`waitct()` deadlines and `QSIN` for waveform generation
+- Colorspace-converter and smart-pin X-register instruction descriptions serve their parameter names as plain quoted text
+- `singleton`, `override forwarding` and related terms reach the object-lifetime documentation
+
 ## [1.16.4] - 2026-08-16
 
 **`_RET_` returns only if the instruction did not branch**
