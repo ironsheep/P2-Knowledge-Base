@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-08-16",
-    "last_updated": "2026-08-16T05:47:55.354872",
+    "release_date": "2026-08-21",
+    "last_updated": "2026-08-21T23:15:55.978561",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-08-16T05:47:55.354872",
+    "extraction_date": "2026-08-21T23:15:55.978561",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -15509,7 +15509,7 @@
             "mnemonic": "SETCY",
             "syntax": "SETCY   {#}D",
             "brief_description": "",
-            "oneliner": "Set the colorspace converter \\\"CY\\\" parameter to D[31:0]",
+            "oneliner": "Set the colorspace converter \"CY\" parameter to D[31:0]",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000111000",
@@ -15519,7 +15519,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set the colorspace converter \\\"CY\\\" parameter to D[31:0].",
+            "description": "Set the colorspace converter \"CY\" parameter to D[31:0].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15555,7 +15555,7 @@
             "mnemonic": "SETCFRQ",
             "syntax": "SETCFRQ {#}D",
             "brief_description": "",
-            "oneliner": "Set the colorspace converter \\\"CFRQ\\\" parameter to D[31:0]",
+            "oneliner": "Set the colorspace converter \"CFRQ\" parameter to D[31:0]",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000111011",
@@ -15565,7 +15565,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set the colorspace converter \\\"CFRQ\\\" parameter to D[31:0].",
+            "description": "Set the colorspace converter \"CFRQ\" parameter to D[31:0].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15599,7 +15599,7 @@
             "mnemonic": "SETCQ",
             "syntax": "SETCQ   {#}D",
             "brief_description": "",
-            "oneliner": "Set the colorspace converter \\\"CQ\\\" parameter to D[31:0]",
+            "oneliner": "Set the colorspace converter \"CQ\" parameter to D[31:0]",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000111010",
@@ -15609,7 +15609,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set the colorspace converter \\\"CQ\\\" parameter to D[31:0].",
+            "description": "Set the colorspace converter \"CQ\" parameter to D[31:0].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15645,7 +15645,7 @@
             "mnemonic": "SETCI",
             "syntax": "SETCI   {#}D",
             "brief_description": "",
-            "oneliner": "Set the colorspace converter \\\"CI\\\" parameter to D[31:0]",
+            "oneliner": "Set the colorspace converter \"CI\" parameter to D[31:0]",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000111001",
@@ -15655,7 +15655,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set the colorspace converter \\\"CI\\\" parameter to D[31:0].",
+            "description": "Set the colorspace converter \"CI\" parameter to D[31:0].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15691,7 +15691,7 @@
             "mnemonic": "SETCMOD",
             "syntax": "SETCMOD {#}D",
             "brief_description": "",
-            "oneliner": "Set the colorspace converter \\\"CMOD\\\" parameter to D[8:0]",
+            "oneliner": "Set the colorspace converter \"CMOD\" parameter to D[8:0]",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000111100",
@@ -15701,7 +15701,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set the colorspace converter \\\"CMOD\\\" parameter to D[8:0].",
+            "description": "Set the colorspace converter \"CMOD\" parameter to D[8:0].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -17136,7 +17136,7 @@
             "mnemonic": "WXPIN",
             "syntax": "WXPIN   {#}D,{#}S",
             "brief_description": "",
-            "oneliner": "Set \\\"X\\\" of smart pins S[10:6]+S[5:0]",
+            "oneliner": "Set \"X\" of smart pins S[10:6]+S[5:0]",
             "encoding": [
               {
                 "bits": "EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS",
@@ -17146,7 +17146,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set \\\"X\\\" of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].",
+            "description": "Set \"X\" of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -18389,7 +18389,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-08-16T05:47:55.354872",
+    "extraction_date": "2026-08-21T23:15:55.978561",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22758,7 +22758,7 @@
               "Result = length * sin(angle).",
               "Returns the Y (sine) component; QCOS returns the X (cosine) component of the same rotation."
             ],
-            "source": "Parallax Spin2 Language Reference v51a (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts v1.55.0",
+            "source": "Parallax Spin2 Language Reference v51a (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts",
             "timing": {
               "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
               "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
@@ -28062,7 +28062,7 @@
               "Result = length * cos(angle).",
               "Returns the X (cosine) component; QSIN returns the Y (sine) component of the same rotation."
             ],
-            "source": "Parallax Spin2 Language Reference v51a (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0",
+            "source": "Parallax Spin2 Language Reference v51a (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts",
             "timing": {
               "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
               "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
