@@ -273,7 +273,14 @@ REF-NO-COMMIT/
 engineering/ingestion/extracted-documentation/extraction_update_report.yaml
 engineering/planning/yaml-audit-report.yaml
 /engineering/ingestion/external-inputs/appNote-fodder-NO-COMMIT
-/engineering/operations/correction-sweeps
+# Correction-sweep working scratch is ignored, but the ARCHIVES are not: the
+# rename-then-trim discipline proves losslessness with `git show <rev>:<register>`,
+# which only works while the archive is versioned. The bare directory rule (added
+# 2026-07-07, cc13b11a) grandfathered the three archives that already existed and
+# would have silently dropped every future one -- git cannot re-include a file whose
+# parent DIRECTORY is excluded, so the rule matches the contents instead.
+/engineering/operations/correction-sweeps/*
+!/engineering/operations/correction-sweeps/*-archive.md
 /engineering/document-production/manuals/p2-debug-window-manual/figure-generators/screenshots-OLD-PNut-windows
 /engineering/document-production/manuals/p2-debug-window-manual/figure-generators/screenshots-OLD
 /engineering/document-production/manuals/p2-debug-window-manual/REF/robot-dog
