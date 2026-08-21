@@ -106,6 +106,56 @@ history contradicts its cover.
 > bare `0.1.0` / "First draft". **Key on the shape of the defect (a version < the cover, or a
 > version with no tag), never on one spelling of it.**
 
+## Augments Phase 1 — VERIFY: the PDF metadata gate (MANDATORY, every release)
+
+**This is a gate, not a look.** Streamer v1.0.9 shipped with an **empty** Title, Subject and
+Author — and so did every other manual in the set (F-300). Nothing caught it for months, because
+nothing looked: the compile log is clean, the page count is right, every page reads correctly, and
+the defect lives in a dictionary no reader ever opens.
+
+`«#283»` then made every identity string on the cover a macro fed from `request.json`. That closed
+the emptiness and opened a sharper failure: if the Forge's `p2kb-platform-foundation.sty` predates
+the DOCUMENT METADATA section, the `\renewcommand`s have nothing to renew and **the cover renders
+BLANK — not stale, blank** — while the compile still exits 0. A page-count check cannot see that.
+Neither can the glyph audit.
+
+Run it on the RETURNED PDF, before promoting anything:
+
+```bash
+python3 engineering/tools/validation/audit-pdf-metadata.py \
+    deliverables/documents/DOCs/<DocName>.pdf \
+    --request engineering/document-production/workspace/<slug>/request.json \
+    --prior <previously-released-version>
+```
+
+What it enforces:
+
+| Check | Why it exists |
+|---|---|
+| Title / Subject / Author non-empty | the F-300 class — ships invisibly |
+| each AGREES with `request.json` | `request.json` is the single source; the cover keeps only PRESENTATION |
+| page 1 carries the version and date | the blank-cover failure, which a page count cannot see |
+| no PRIOR version anywhere in the text | the template used to carry a third, drifted copy of the version |
+| rights present, and agreeing with the copyright page | F-316 |
+
+**`--prior` is not optional in practice.** Pass the version this release supersedes. A surviving
+literal means a copy of the version escaped the single source.
+
+**Rights are advisory until `--require-rights`.** Add that flag for any document whose
+`request.json` carries `copyright`/`license` — F-316's mechanism — and the gate then fails when the
+value was authored but never emitted. That distinction is the point: **it reads the ARTIFACT, never
+`request.json`, for what the PDF carries.** An earlier draft of this gate passed a document because
+its `request.json` declared rights, which proves intent and nothing else.
+
+**Exit 1 means STOP.** The repair is `request.json` or a current platform foundation — never editing
+an identity string back onto the cover. That is the drift `«#283»` removed.
+
+**It uses poppler (`pdfinfo`/`pdftotext`), deliberately.** `audit-pdf-margin-overflow.py` needs
+PyMuPDF, which is **not in the devcontainer image** — found 2026-08-21 when that gate failed closed
+mid-release. A gate that cannot run is worse than no gate, because its silence reads as a pass.
+
+---
+
 ## Augments Phase 5 — the example ZIP is NOT gitignored in this repo
 
 The central skill suggests `git add -f …-src.zip` "for a gitignored example ZIP."
