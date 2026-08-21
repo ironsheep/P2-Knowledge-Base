@@ -7,7 +7,6 @@
 title: "Data Structures with the New Language Facilities"
 subtitle: "Spin2 STRUCT for in-cog records — and the worked code for sharing them safely across cogs"
 doc_id: P2AN007
-version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -100,7 +99,7 @@ runnable_code:
     - {id: locked-multiwriter-queue, file: locked-multiwriter-queue.spin2, note: "R4 — many writers -> one queue guarded by a P2 hardware lock (LOCKNEW/LOCKTRY/LOCKREL)"}
     - {id: single-long-packed-record, file: single-long-packed-record.spin2, note: "R5 — {Spin2_v54} member bitfields; a WHOLE command record (opcode/arg/seq) packed into one long, staged privately and published in ONE whole-struct store; reader snapshots in ONE load"}
     - {id: packed-header-offsets,    file: packed-header-offsets.spin2,    note: "R6 — {Spin2_v53} OFFSETOF; compiler-computed member offsets over a packed wire header, plus a ^struct pointer view of the same bytes (SIZEOF locates the payload)"}
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; R1-R4 open with {Spin2_v45} (STRUCT), R6 needs {Spin2_v53} (OFFSETOF), R5 needs {Spin2_v54} (member bitfields); all use debug() so compile with -d"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000; R1-R4 open with {Spin2_v45} (STRUCT), R6 needs {Spin2_v53} (OFFSETOF), R5 needs {Spin2_v54} (member bitfields); all use debug() so compile with -d"
 
 key_parameters:
   version_gate: "STRUCT requires {Spin2_v45} as the first source line. Two later additions are covered and raise the floor ONLY for the file that uses them: OFFSETOF = v53 (R6); member bitfields = v54 (R5). R1-R4 remain v45. NOTE: the v54 bitfield syntax parses UNCONDITIONALLY (there is no level54_symbols table), so {Spin2_v54} is a declaration of intent, NOT an enforced gate — a clean compile does not prove the toolchain is new enough."
@@ -148,8 +147,7 @@ gotchas:
     text: "R1: SIZEOF(reading_t)=9, value=i*i. R2: consumed value = seq*10, seq monotonic (a mismatch = publish order wrong). R3: 5 exec lines op 1..5, a0=op*100, a1=op*1000. R4: writer-1/writer-2 jobs interleaved, no duplicated/skipped slot (a collision = enqueue ran without the lock). R5: 5 exec lines op 1..5 with arg=op*100 (an arg belonging to a different op = the record reached the shared long field-by-field instead of staged+stored once). R6: OFFSETOF magic=0 length=4 kind=6 flags=7, SIZEOF(hdr_t)=8, payload at +8."
 
 hardware_status: |
-  Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
-  _clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
+  Every embedded block and every examples-library program compiles clean under pnut_ts -d (_clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
   SILICON with two cogs actually contending (2026-07-13; empirical ledger EF-036..EF-040; rigs +
   golden analysis under external-sources/hardware-verification/campaigns/2026-07-cross-cog-data-structures/).
   Each discipline was measured against a deliberately-broken control, and the control was REQUIRED to
@@ -168,7 +166,7 @@ provenance:
   primary_sources:
     - "Spin2 Language Documentation, v45 and later (Chip Gracey, Parallax Inc.) — the STRUCT facility (declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET"
   tool_ground_truth:
-    - "pnut_ts v1.55.0 — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods (F-199)"
+    - "pnut_ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods (F-199)"
   cross_check_sources:
     - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
   companion_publication:

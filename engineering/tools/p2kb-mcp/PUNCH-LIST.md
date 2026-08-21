@@ -11,7 +11,7 @@ Backlog of improvements, fixes, and audit tasks for the P2KB MCP / Download-on-D
 
 ### PL-004: Remove version/currency stamps from the published YAMLs — the KB is always "latest"
 
-**Priority:** Low (deliberately deferred — see Timing)
+**Priority:** Low — **PARTS 1 AND 3 DONE 2026-08-21; PART 2 STILL OPEN**
 **Discovered:** 2026-08-16, from F-271 (`P2KB-CORRECTION-FINDINGS.md`)
 **Decided:** 2026-08-16 by Stephen
 
@@ -41,10 +41,32 @@ not exist. **Delete the shape, do not maintain it.**
   History, per the three-version-locations rule), and the roster tracks those. This item is about
   the **KB/YAML layer only**, which ships continuously rather than in editions.
 
-**Timing — do NOT pull this forward.** Stephen, 2026-08-16: *"we punch list it at this point because
-we are trying to get to released documents, and we are not there yet given our task list. We should
-stay away from any diversions at this point in time."* Sprint 2's release wave comes first. Pick this
-up after «#235».
+**Timing — gate DISCHARGED.** Stephen, 2026-08-16: *"we punch list it at this point because we are
+trying to get to released documents, and we are not there yet given our task list."* Sprint 2's
+release wave came first, and **Sprint 2 closed 2026-08-19**, so the condition was met.
+
+**DONE 2026-08-21 — parts 1 and 3.**
+- **Part 1:** the bare `version:` deleted from all seven app-note companions. Verified by parsing:
+  no `version` key remains in any of them; `doc_id` untouched.
+- **Part 3:** 25 build stamps rewritten across the tree, plus the `version_info` block in
+  `tools/pnut-ts-compiler.yaml` — which read **v1.51.5, four minor versions behind** and was itself
+  the proof of the principle. The line applied throughout is **cite the EDITION, never the BUILD**:
+  `Spin2 v55` / `Added in PNut v47` / `{Spin2_v54}` / `minimum_version:` state a fact about the
+  LANGUAGE that a reader can hit — all **278** survive untouched — while `compile-verified with
+  pnut_ts v1.55.0` records only what someone happened to run. The seven app-note `toolchain:` lines
+  were EDITED rather than deleted: their `-d` requirement, `_clkfreq` value and
+  `{Spin2_v45}`/`{Spin2_v47}` gating are durable and load-bearing; only the `1.55` clause went.
+- Removed under the same principle: `object-image-dedup.yaml`'s `toolchain:` line, which said
+  *"pnut-ts v1.55.0 … re-verify on a compiler version bump"* while the installed compiler was
+  v1.55.3 — the bump had happened, the re-verification had not, and the stamp had triggered nothing.
+  A `method:` line saying how to measure replaced it. See **G-006**.
+
+**STILL OPEN — part 2.** The other 17 `version:`/`last_updated:` bearers
+(`architecture/smart_pins.yaml`, `architecture/streamer/_index.yaml`, `spin2/conventions/*`,
+`guides/*`, the `_index.yaml` files) use the field as a *file revision* — a different population with
+a coherent internal convention. The grounded per-population decision this item requires has NOT been
+made, and they were deliberately not swept on the app-note reading (F-211's lesson). Also still open:
+the prose sweep for "as of" / "current as of" / "latest version is".
 
 ---
 

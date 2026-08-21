@@ -37,7 +37,7 @@ notes:
   - "stepsInCircle = 0 selects a full circle of $1_0000_0000 (2^32) steps; stepsInCircle is unsigned."
   - "Result = length * cos(angle)."
   - "Returns the X (cosine) component; QSIN returns the Y (sine) component of the same rotation."
-source: "Parallax Spin2 Language Reference v51a (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0"
+source: "Parallax Spin2 Language Reference v51a (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts"
 timing:
   description: "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
   see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."

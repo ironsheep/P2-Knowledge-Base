@@ -7,7 +7,6 @@
 title: "DAC & Analog Signal Generation"
 subtitle: "Sample playback, waveform synthesis, dithering, and mixing from a single P2 pin's DAC"
 doc_id: P2AN003
-version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -87,7 +86,7 @@ runnable_code:
     - {id: mixing-panning,      file: dac-mixing-panning.spin2,      note: "Recipe 5 — three voices summed and panned to a stereo pair of DAC pins"}
   ceiling_reference:
     note: "32-stream software audio mixer to 1-8 output pins (volume/pan/pitch/format) + MOD player — DESCRIBED/LINKED only; complete impl is OBEX #2861 reSound (Johannes Ahlebrand, ~955 lines)"
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
 
 key_parameters:
   dac_native_bits: 8

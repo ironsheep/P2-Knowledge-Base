@@ -235,49 +235,6 @@ luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B 
 `ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
 contrasts RGBI8 against LUMA8 immediately above. Copy that framing.
 
-### F-304 — `modes-reference.yaml` hardcodes the streamer `D[19:16]` field, and elsewhere invents a free bit that does not exist. `DONE (2026-08-21)` — **and the row count was 28, not the 10 this finding listed**
-
-> **APPLIED 2026-08-21, after auditing the WHOLE column instead of the named rows.** This entry
-> named ten rows. Reading all 56 `d_19_16` values against the Silicon Doc's three field
-> sequences — `:3004-3015` (Immediate), `:3128-3139` (RDFAST), `:3292-3303` (WRFAST), each the
-> identical twelve-row `pppa · pp0a · pp1a · p00a · p01a · p10a · 0110 · 0111 · 1110 · 1111 ·
-> 0000 · 0001` — found **28** wrong, in three families rather than one:
->
-> | Family | Wrong rows | Example of the error |
-> |---|---|---|
-> | Immediate ⇢ Pins/DACs | 6 (`:73 :78 :83 :88 :93 :98`) | `%0000` where truth is `pppa` |
-> | RDFAST ⇢ Pins/DACs | 10 (`:156`…`:201`) | `%pppp` for a field that is `pppa`; `%p000 + 6` for a FIXED `0110` |
-> | Pins ⇢ DACs/WRFAST | 10 (`:243`…`:288`) | the same, mirrored |
-> | DDS/Goertzel | 2 (`:330 :336`) | `%0111` where D[19] is the low bit of the D[22:19] block selector → `p111` |
->
-> **Two families were audited and found CORRECT — do not 'fix' them:** the RGB colour modes
-> (`:217`…`:237`) and the ADC capture modes (`:304`…`:324`) both carry `0010 0011 0100 0101 0110`,
-> which is exactly what `:3192+` and `:3438+` print. The LUT-indexed rows (`:134`…`:150`) carry
-> `001a / 010a / 011a / 1000` and match `:3072-3075`.
->
-> **A legend was added, because the corrected notation is unreadable without one.** The file used
-> `%pppp`, `%bbbb` and `%001a` already and never said what they meant. `encoding.field_notation`
-> now defines `0/1`, `p`, `a` and `b`, states that the number of `p` bits SHRINKS as the pin group
-> widens and reaches zero at eight pins — which is *why* an unaligned base pin changes the MODE
-> rather than the pin — and carries the `|`-not-`+` rule with its EF-065 grounding.
->
-> This is the thirteenth time a finding's own enumeration has come up short. Re-derive from the
-> artifact.
-
-The KB twin of the Streamer Guide's Appendix A defect. Authority: Silicon Doc `:2995-3020` and
-`:3125-3145` both print the field sequence
-`pppa · pp0a · pp1a · p00a · p01a · p10a · 0110 · 0111 · 1110 · 1111 · 0000 · 0001`;
-`%a` is `D[16]` (`:3653-3654`); DDS/Goertzel is `1111 dddd 0ppp p111` (`:3484`).
-
-| `deliverables/ai/P2/architecture/streamer/modes-reference.yaml` | Defect |
-|---|---|
-| `:88`, `:93`, `:98` | IMM 4-pin rows give `d_19_16` as fixed `%0000`/`%0010`/`%0100`; truth is `p00a`/`p01a`/`p10a` |
-| `:330` | `X_DDS_GOERTZEL_SINC1` `d_19_16: "%0111"`; truth is `p111` — `D[19]` is the low bit of the `D[22:19]` four-pin-block selector |
-| `:186`, `:191`, `:196`, `:273`, `:278`, `:283` | **The mirror-image defect** — `"%p000 + 6"` etc. imply a free `D[19]` bit for the 8-pin RFBYTE/WFBYTE variants, where truth is **fully fixed** (`0110`/`0111`/`1110`) |
-
-**Fix template in the same directory:** `dds-goertzel.yaml:11,:18` carry the correct encodings
-plus the correct `D[22:19]` multiple-of-four caveat.
-
 ### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `CONFIRMED`
 
 `manuals/p2-assembly-language-manual/opus-master/part-iii/appendix-g-streamer-constants.md:237`
@@ -297,146 +254,6 @@ setup to digital-output examples. But it **does** need `DIRH` like any driven pi
 enables the streamer's contribution to the pin's output *state*, never its output *enable*. See
 **F-308** / **EF-062** (bench-proven: DIR low 4-of-8, `DIRH` 8-of-8). The citation this note used to
 carry, `Silicon Doc :3602-3603`, resolves to nothing in `engineering/ingestion/` and has been dropped.
-
-### F-306 — `dds-goertzel.yaml`'s "Typical usage" configures a DAC output pin that nothing ever drives, and the Streamer sprint plan certified it as the fix template. `DONE (2026-08-21)`
-
-> **APPLIED 2026-08-21 — Stephen chose "delete step 3", conditional on the example still being
-> enough for an agent to write correct Goertzel code.** That condition is what made this a real
-> gate: testing it instead of assuming it found that the example did not compile AT ALL, two
-> steps earlier, because step 4 used `clkfreq` as a PASM2 operand (**F-311**). Deleting step 3
-> alone would have satisfied the letter of the finding and left the example unusable.
->
-> Step 3 is gone and the steps renumbered. Two new keys say what the example IS — a detector,
-> whose own `%dddd` is `X_DACS_OFF` — and what the OUTPUT arrangement would additionally need
-> (`P_CHANNEL`, COGID in M[3:0], DIRH), grounded in EF-054/EF-055 rather than described. The
-> `applications.function_generator` entry no longer implies this example covers the output half.
->
-> **Verified the way the condition demanded:** the `usage_pattern` code and data blocks were
-> extracted verbatim from the YAML, wrapped, and compiled — 2,196 bytes, clean.
-
-**How it surfaced.** Authoring the Streamer Guide's new §11.0 (task «#269», 2026-08-20). The sprint
-plan's §13 "Verified correct — do not fix these" list states that
-`deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml:203` *"carries a complete worked DAC-pin
-setup"* and offers it as the answer §1 was missing. Read end to end, it does not.
-
-**Location:** `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml`, `usage_pattern.code`
-step 3 (`:203-204`) read against `usage_pattern.data` (`:225-228`).
-
-**What is wrong.** Step 3 configures the pin and enables it —
-
-```
-' 3. Configure DAC output pin (this one DOES get DIR)
-wrpin   ##P_DAC_124R_3V, #dac_pin
-dirh    #dac_pin
-```
-
-— and **nothing in the example ever puts a value on that pin.** Two independent paths could, and
-the example takes neither:
-
-- **The streamer path is switched off.** The example's own `dds_cmd` is
-  `%1111_0000_0000_0111<<16 + sinc2<<23 + cycles`, whose `%dddd` DAC-routing nibble at `D[27:24]`
-  is **`%0000` = `X_DACS_OFF`**. No streamer DAC channel is routed anywhere.
-- **The level path is never written.** `P_DAC_124R_3V` is defined in Spin2 v55
-  (`sources/spin2-v55/spin2-v55-text.txt:1478`) as
-  `%0000_0000_000_1011000000000_00_00000_0` — `M[12:10] = %101` (DAC_MODE), **`TT = %00`**, and
-  `M[7:0] = 0`. Per Silicon Doc `:7645-7646`, `TT = %00` in DAC_MODE means *"M[7:0] sets DAC level"*
-  — so the pin is level-driven at level **zero**, permanently, unless the level is rewritten.
-  The Silicon Doc's own worked program does rewrite it (`setbyte dacmode,x,#1` / `wrpin
-  dacmode,#dacpin`, `:4225-4305`); **the KB example dropped that step while keeping the setup.**
-
-So an agent following this recipe gets a configured, enabled, silent pin, and no diagnostic. The
-file's `applications:` block advertises `function_generator: "Load waveform to LUT, set output
-frequency"` — the DDS-output half — which this code never enables.
-
-**Evidence that the streamer-fed arrangement is the different one.** `TT = %01` selects a **cog DAC
-channel** as the pin's source, which is the path the streamer overrides (Silicon Doc `:3521-3523`,
-`:7647`, `:2705-2711`; see **F-272**, status `RESOLVED`, `:521`). This is measured, not reasoned:
-**EF-054** swept `%TT` on a jumpered cog-DAC pin and read `%00` = 1,408 (no drive) versus **`%01` =
-6,737**; **EF-055** drove a `P_DAC_124R_3V` pin from its level field and watched the spread collapse
-from 1,305/2,000 samples to 25 when `P_CHANNEL` was added. Both are `[M-pre — streamer-free]`, so
-they isolate the pin arrangement from the streamer entirely.
-
-**Proposed correction.** Decide which arrangement the example is teaching and complete that one:
-
-- If it stays a **Goertzel detector** (its `dds_cmd` says it is), **delete step 3** — the DAC pin is
-  not part of a detector — or keep it and add the level-write the Silicon Doc program uses.
-- If it is meant to show **DDS output**, route the DACs in `dds_cmd` and configure the pin as the
-  streamer-fed arrangement requires: `P_DAC_124R_3V | P_CHANNEL`, the COGID in `M[3:0]`, `DIRH`,
-  channel selected by the pin's two low bits.
-
-**Blast radius — the plan claim must be corrected too, not just the YAML.** The Streamer sprint
-plan's §13 lists this site under "Verified correct — **do not 'fix' these**", and that instruction
-is carried into task «#288»'s co-release gate. Left standing, it tells the next reader the opposite
-of this finding. Corrected in the plan in the same pass that filed this entry.
-
-**Status:** `CONFIRMED — KB fix belongs to the yaml head (yaml-knowledge-base-maintenance), NOT to
-the Streamer manual sprint. Surfaces with F-302…F-305 at that sprint's co-release gate.`
-
----
-
-### F-307 — six PASM2 instruction YAMLs serve their description with literal backslashes in it: `\"CMOD\"` instead of `"CMOD"`. `DONE (2026-08-21)`
-
-> **APPLIED 2026-08-21.** All eleven values corrected across the six files and confirmed by
-> `yaml.safe_load` — the SERVED string now reads `Set the colorspace converter "CMOD"…`, not a
-> grep of the bytes. The three look-alike populations this finding excluded were left untouched,
-> verified by `git status`: only the six intended files changed. `PASM2-ENCODING-REFERENCE.md`
-> regenerated — and regenerating it is what uncovered **F-314**.
-
-**How it surfaced.** Reading the five colorspace-converter instruction YAMLs as background for the
-Streamer Guide's new Chapter 15 section (task «#274», 2026-08-20). The corruption is in the served
-value, not just the file bytes.
-
-**Location:** `deliverables/ai/P2/language/pasm2/` — `setcy.yaml`, `setci.yaml`, `setcq.yaml`,
-`setcfrq.yaml`, `setcmod.yaml` (both `description:` and `oneliner:`), and `wxpin.yaml` (same two
-keys). Eleven string values across six files. The generated
-`deliverables/ai/P2/language/PASM2-ENCODING-REFERENCE.md` carries the same text at `:132-136` and
-in the WXPIN row, so it is a **derived** occurrence that clears when the YAMLs are fixed and the
-artifact is regenerated.
-
-**What is wrong.** Each value is a **single-quoted** YAML scalar containing `\"`:
-
-```yaml
-description: 'Set the colorspace converter \"CMOD\" parameter to D[8:0].'
-oneliner: Set the colorspace converter \"CMOD\" parameter to D[8:0]
-```
-
-In a single-quoted YAML scalar a backslash is a literal character, so this does **not** parse to
-`"CMOD"` — it parses to `\"CMOD\"`, backslashes and all. Confirmed by parsing, not by grep:
-`yaml.safe_load` over the whole `deliverables/ai/P2/` tree returns the backslashes in the value.
-A consuming agent gets `Set the colorspace converter \"CMOD\" parameter to D[8:0]`.
-
-**Authority.** All three documentary sources write plain double quotes:
-
-- `sources/pasm2-manual/pasm2-manual-narrative.txt:8866-8874` — `Set the colorspace converter "CFRQ" parameter to D[31:0].`
-- `sources/p2-datasheet/pasm2-complete-instruction-tables.md:489-493` — same, and `:222` for `Set "X" of smart pins …`
-- `sources/silicon-doc/part2-video-output.txt:188-192` writes it with **no quotes at all**
-
-The YAML's own `documentation_source:` names the PASM2 Manual, which is the first of these. The
-escaping is a transcription artifact of the extraction pipeline, not anything a source states.
-
-**Proposed correction.** Drop the backslashes — write `"CMOD"` in each of the eleven values. The
-single-quoted form needs no other change: a single-quoted YAML scalar holds a bare `"` fine, and it
-is only the backslash that has no meaning there. The bare `oneliner:` values are plain scalars and
-likewise just lose the backslashes. Then regenerate `PASM2-ENCODING-REFERENCE.md`. **Scope is
-exactly these six files** — see below.
-
-**Deliberately NOT in scope — three look-alikes that are correct.** A grep for `\"` across the tree
-returns 37 files; all but these six are legitimate:
-
-- **`hardware/*.yaml`** (`"0.1\" spacing"`, etc.) — `\"` inside a **double-quoted** scalar is the
-  correct escape and parses to `0.1" spacing`.
-- **`language/pasm2/jmp.yaml`** — `"\" forces R = 0.` is *about* the backslash prefix that forces
-  R = 0 in `JMP #\address`. The character is the subject; the text is right.
-- **`language/spin2/constructs/escape-strings.yaml` and `concepts/string_constants.yaml`** — the
-  Spin2 escape-string prefix genuinely **is** `@\"`. Spin2 v55 release notes,
-  `sources/spin2-v55/spin2-v55-text.txt:50`: *"New `@\"string\n"` works like `@"string"`, but
-  allows escape-character sequences."* Backslash-quote opens it and a plain quote closes it. These
-  files are correct and a sweep that "normalizes" them would break real syntax.
-
-**Status:** `DONE (2026-08-21) — applied by the yaml head; all eleven values parse clean. Never was a
-Streamer manual defect; the manual does not quote these descriptions.`
-
----
 
 ### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `PARTIAL — Streamer Guide DONE and bench-sealed (EF-062); the v1.1.0 PDF is unverified and the Assembly Language Reference's three sites are owed at the co-release`
 
@@ -754,6 +571,19 @@ better-labelled one. **Delete the shape rather than maintain it.**
 **Deferred deliberately, not forgotten** — *"we are trying to get to released documents, and we are
 not there yet given our task list. We should stay away from any diversions at this point in time."*
 Sprint 2's release wave comes first.
+
+> **PL-004 PARTS 1 AND 3 EXECUTED 2026-08-21.** The "Sprint 2's release wave comes first" gate
+> discharged when Sprint 2 closed 2026-08-19. **Part 1:** the bare `version:` is deleted from all
+> seven companions. **Part 3:** 25 build stamps rewritten plus the stale `version_info` block in
+> `tools/pnut-ts-compiler.yaml` (which read v1.51.5, four minor versions behind) removed. The
+> dividing line applied throughout — **cite the EDITION, never the BUILD**: `Spin2 v55`,
+> `Added in PNut v47`, `{Spin2_v54}`, `minimum_version:` are facts about the LANGUAGE that a
+> reader can hit, and all 278 survive untouched; `compile-verified with pnut_ts v1.55.0` is a
+> record of what someone happened to run, and is gone. The seven app-note `toolchain:` lines were
+> EDITED, not deleted — their `-d` requirement, `_clkfreq` and `{Spin2_v45}` gating are durable
+> and load-bearing; only the `1.55` clause went. **Part 2 (the other 17 `version:`/`last_updated:`
+> bearers) remains open** and still needs the per-population decision PL-004 requires; it was
+> deliberately not swept on the app-note reading.
 
 **Carried to → `engineering/tools/p2kb-mcp/PUNCH-LIST.md` PL-004**, which holds the full scope
 (7 companions to strip; the other 17 `version:`/`last_updated:` bearers to review per-population,
@@ -1128,245 +958,33 @@ a fact about the repository. A grep locates; it never concludes. This is the sam
 "a status line is not evidence," and it was caught only because a later task put the full `git tag`
 output on screen for an unrelated reason.
 
-### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `DONE (2026-08-17)` — companion brought into agreement on four entries; agreement gate GREEN (was written `FIXED`, which is not a token in this register's legend, so the status check could not read it)
-
-**Found:** 2026-08-17, running the doc↔companion agreement check while preparing P2AN002 v1.0.3 for
-the release wave.
-
-`MANUAL-DESCRIPTOR.md` states the gate: *"doc and `companion_yaml` must AGREE (composition recipe,
-key parameters, gotchas)."* Two disagreements, both introduced when the note advanced to v1.0.3 and
-the companion did not:
-
-1. **The measured pitfall is missing.** The note's v1.0.3 headline is that hub access inside either
-   CORDIC loop loses results, and does so **silently** — measured on real silicon at 200 MHz, with
-   the failure depths stated (`P2AN002.md:322`). The companion's `gotchas:` block carries the
-   pipelining entry as *"keep issued-minus-retired within what the pipeline holds"* and says nothing
-   about hub traffic. An agent reading only the companion gets the recipe that was measured wrong.
-2. **The OBEX #2812 attribution contradicts the note.** The note credits **ersmith** and uses the
-   live catalog title *Binary Floating Point Routines (IEEE-32 subset)* — a v1.0.3 correction made
-   against the live catalog. The companion's `community_examples:` still reads *"OBEX #2812 Binary
-   Floating-Point (Total Spectrum Software)."*
-
-**Location:** `deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml` —
-`gotchas:` and `provenance.community_examples:`.
-
-**Action:** carry both into the companion, sourced from the note's v1.0.3 CHANGELOG entry and the
-live OBEX catalog respectively.
-
-**FIXED 2026-08-17.** Both carried into
-`deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml`:
-
-1. The measured hub-access pitfall is now its own `gotchas` entry, with the silicon-measured failure
-   depths (RDLONG in the fill loop loses results at depth 2; a WRLONG in the drain at 3; register-only
-   in both loops correct through 7, at 200 MHz), the **silent** failure mode, and the actual cause
-   (throughput, not a limit on results in flight). Sourced from `P2AN002.md:322`.
-2. The OBEX attributions now match the live catalog.
-
-**Two MORE disagreements surfaced while fixing it — the finding under-counted.** F-283 named two;
-sweeping the whole `community_examples` block against the live catalog found four entries wrong or
-incomplete, because the finding was written from the two the note happened to call out rather than
-from the block:
-
-| Entry | Companion said | Live catalog |
-|---|---|---|
-| #2811 | Park Transformation (ManAtWork) | ✅ correct |
-| #2812 | Binary Floating-Point (**Total Spectrum Software**) | Binary Floating Point Routines (IEEE-32 subset), **ersmith** |
-| #5278 | "compass drivers", **no author** | QMC5883L HMC5883 BMM150 compass drivers, **m.k. borri** |
-| #5361 | FFT/IFFT (**SaucySoliton**) | FFT IFFT, **James Smith** |
-
-All four verified against the live OBEX catalog via `p2kb_obex_get`, not from this register and not
-from the note — per the standing rule that reader-facing names are verified against the LIVE source.
-The note's own Resources list was already correct on all four; only the companion had drifted.
-
-**Lesson — the same shape as [[F-223]]: a finding derived from the sites a document mentions is not
-a finding about the block.** Audit the FULL structure, then re-derive what is wrong. Two of these
-four would have shipped again had the fix been scoped to the finding as written.
-
-**No document impact** — the note's text was already right, so P2AN002's PDF is unaffected and needs
-no re-render. Validators green after the edit: `verify-yaml-format.py` 1129/1129 parsed clean,
-`validate-crossref-keys.py` all resolved.
-
-**Note on scope:** only P2AN002's companion was checked, because only P2AN002 was in front of me.
-The same drift is plausible in every app note whose doc has advanced since its companion was
-written — a names-only pass on one file is not coverage of the category.
-
-
-
----
-
-## KB code that does not compile — surfaced by Stephen's Goertzel condition (2026-08-21) — F-311…F-313
-
-**Origin.** Stephen approved F-306's "delete step 3" *"as long as the agent can create Goertzel code
-correctly."* Testing that condition rather than assuming it meant extracting `dds-goertzel.yaml`'s
-example and putting it through `pnut-ts`. It failed **before** step 3 mattered, and the cause turned
-out to be a class.
-
-> **Nothing in this project compiles KB code examples.** These three are what one keyword's sweep
-> found. The population is **1913 code-shaped blocks across 438 files**, of which only 118 are
-> complete programs — the rest are fragments needing a synthesized context. A gating compile step is
-> scoped as its own effort (prototype validated 2026-08-21: it asks the compiler which identifiers
-> are declarable rather than carrying a keyword list that would rot; 4/4 known-bad caught, 4/4
-> known-good passed). Until it exists, this class is unbounded and these three are a floor.
-
-### F-311 — `clkfreq` is a RESERVED WORD in pnut-ts, and eleven PASM2 sites across eight KB files use it as an operand or a symbol name. None of them assemble. `DONE (2026-08-21)`
-
-> **APPLIED 2026-08-21.** All eleven sites corrected. PASM2 now reads the value out of hub
-> (`rdlong clkf, #$14`) and divides with `qdiv`/`getqx` where a window was written as
-> `##clkfreq/10`; the illegal DAT symbol in `smart-pin-00110` is renamed `clkf` and carries a
-> comment saying why. **Verified by compiling, not by grepping:** the five replacement idioms
-> were compiled BEFORE being applied anywhere, and the repaired blocks from 10111, 00110, 10010,
-> 10101 and 10110 were then each compiled by hand with proper declarations. The 81 Spin2 and
-> prose occurrences of `clkfreq` are untouched and correct.
-
-**Evidence — pnut-ts v1.55.3, every form probed rather than inferred:**
-
-| Written | Result |
-|---|---|
-| `qfrac target_freq, clkfreq` | `error: Expected a constant, unary operator, or "("` |
-| `qfrac target_freq, CLKFREQ` | same |
-| `qfrac target_freq, ##clkfreq` | same |
-| `wxpin ##clkfreq/10, #signal_pin` | same |
-| `clkfreq LONG 200_000_000` (a DAT **definition**) | `error: Expected a unique name, BYTE, WORD, LONG, or assembly instruction` |
-| the same code with the register renamed `clkf` | **assembles** |
-
-`clkfreq` is legal in **Spin2** (`clkfreq := 200_000_000` assembles), so the 81 other occurrences in
-the tree — Spin2 code, prose formulas, cross-reference paths — are correct and deliberately out of
-scope.
-
-**The eleven sites:**
-
-| File | Line | Code |
-|---|---|---|
-| `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml` | 113 | `clkfreq LONG 200_000_000` — illegal symbol name |
-| " | 122 | `QFRAC freq_hz, clkfreq` |
-| " | 148 | `QFRAC carrier, clkfreq` |
-| `architecture/smart-pins/smart-pin-01101-a-rise-inc-dec-by-b.yaml` | 64 | `wxpin ##clkfreq/10, #step_pin` |
-| `architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml` | 60 | `wxpin ##clkfreq/10, #freq_pin` |
-| `architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml` | 74 | `wxpin ##clkfreq/10, #signal_pin` |
-| `architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml` | 75 | `wxpin ##clkfreq/10, #signal_pin` |
-| `architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml` | 72 | `wxpin ##clkfreq, #signal_pin` |
-| `architecture/streamer/dds-goertzel.yaml` | 150 | `qfrac ##40000, clkfreq` |
-| " | 208 | `qfrac target_freq, clkfreq` |
-| `language/pasm2/hubset.yaml` | 70 | `WAITX ##clkfreq/100` |
-
-**Correction.** PASM2 must read the value out of hub — the Spin2 startup writes clkfreq to hub long
-`$14`, so `rdlong clkf, #$14` — and the holding register must be named anything but `clkfreq`.
-
-### F-312 — `getxacc.yaml`'s first example does not assemble, and its Goertzel read-back is backwards. `DONE (2026-08-21)`
-
-> **APPLIED 2026-08-21.** `examples[0]` now uses the idiom `dds-goertzel.yaml` already proved:
-> `getxacc x_val` / `mov y_val, 0-0` / `qvector x_val, y_val`, with comments naming what `0-0`
-> is and stating that D is X and S is Y. Compiled clean.
-
-**Location:** `deliverables/ai/P2/language/pasm2/getxacc.yaml`, `examples[0]`.
-
-```
-getxacc x_val             ' X into x_val, Y into next S
-qvector y_val             ' Y from S, compute magnitude/phase
-```
-
-`qvector y_val` → `error: Expected ","`. **And the semantics are inverted.** The file's own
-`description` is correct — *"write the captured cosine (X) accumulation into D and place the
-captured sine (Y) accumulation into the next instruction's S value"* — so `QVECTOR D,S` needs
-**D = X**. The example puts `y_val` in D, and nothing ever loads `y_val`.
-
-**The correct idiom is already in the KB**, in `architecture/streamer/dds-goertzel.yaml`:
-`getxacc cos_acc` / `mov sin_acc, 0-0` / `qvector cos_acc, sin_acc` — compile-verified 2026-08-21.
-The page that DEFINES the idiom is the one that gets it wrong. `examples[1]` assembles and is fine.
-
-### F-313 — a Spin2 pattern file ships Propeller **1** code. `DONE (2026-08-21)`
-
-**Location:** `language/spin2/patterns/applications/audio_processor.yaml:18` —
-`waitcnt(clkfreq/SAMPLE_RATE + cnt)`. `waitcnt` and `cnt` are P1 constructs; P2 uses `waitct()` and
-`getct()`. → `error: Expected an instruction or variable`. P1/P2 conflation is the specific failure
-this knowledge base exists to prevent, so it is worth more than its single line.
-
-> **APPLIED 2026-08-21 — and the block had THREE defects, not the one this finding named.**
-> Fixing the P1 wait exposed the rest, because a block that has never been compiled has no
-> reason to have only one thing wrong with it:
-> 1. `waitcnt(clkfreq/SAMPLE_RATE + cnt)` — P1. Now a `getct()` deadline + `waitct(deadline)`.
-> 2. **`sin()` is not a Spin2 builtin** (`error: Expected an expression term`). Replaced with
->    `QSIN($7FFF, t, $1_0000) + $8000`, following the contract in `methods/qsin.yaml`
->    (`y := length * sin(step/stepsInCircle * 2Pi)`) — the KB's own documented form, not an
->    invented one. `$1_0000` steps per circle makes `t` a 16-bit brad angle, which is exactly
->    what the existing `freq * $1_0000 / SAMPLE_RATE` increment already produced.
-> 3. `step` as a local name — **reserved**. See **F-315**.
->
-> The whole `implementation:` block now compiles clean, extracted verbatim from the YAML.
-
----
-
-## A correction applied to a GENERATED artifact is deleted by the next generation (2026-08-21) — F-314
-
-### F-314 — `PASM2-ENCODING-REFERENCE.md` had been hand-edited twice, and regenerating it silently reverted both. `DONE (2026-08-21)`
-
-**How it surfaced.** F-307 requires regenerating this file. Regenerating it destroyed content.
-
-**What was at risk.** **F-273's `_RET_` correction** — a twelve-line blockquote carrying *two*
-Parallax citations (Assembly Language Manual p.68; P2 Instructions v35 Rev B/C row 410) and the
-EF-058 silicon corroboration — existed **only** in the generated markdown, applied there by
-`af2de70a`. Meanwhile `conditional_execution.yaml` already carried the entire rule under
-`ret_prefix_rule:` — `rule`, `full_semantics`, `on_branching_instructions`, `correct_form`,
-`why_it_matters`, `source` — and **nothing read it**. The generator emitted a hardcoded short form
-instead. So the KB was right, the derived artifact was right, and the pipeline between them would
-have thrown the correction away on the next run.
-
-**What was WRONG in the same file.** Four rows had been hand-widened to *"event flag is set **or
-clear**"* — `JFBW`, `JQMT`, `JXMT`, `JXRL`. Both primary sources contradict it:
-`sources/p2-datasheet/pasm2-complete-instruction-tables.md:341` reads *"Jump to S\*\* if FBW event
-flag is set."*, and `sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:214`
-agrees; `JNFBW`/`JNQMT`/`JNXMT`/`JNXRL` exist for the inverse case. Regeneration therefore
-**corrected** four rows that had been silently wrong.
-
-**Fix applied 2026-08-21.** The generator now emits `ret_prefix_rule` from the YAML with its citation
-structure preserved (indentation decides block boundaries, so the EF corroboration no longer folds
-into the last citation and reads as if that source made the claim); the four `J*` rows come from
-their own YAMLs; the header carries a DO-NOT-HAND-EDIT warning naming both incidents; and the usage
-line now states that the output path is argv[1] and silently defaults to `/tmp` — which is why an
-earlier regeneration appeared to do nothing at all. Verified idempotent: two consecutive runs are
-byte-identical.
-
-**The general rule this establishes.** A generated artifact is not a place to apply a correction.
-Fix the source and regenerate — and if the source has no field for the correction, that absence IS
-the finding.
-
----
-
----
-
-## Reserved Spin2 words used as identifiers in KB examples (2026-08-21) — F-315
-
-### F-315 — three KB examples declare a local named `step` or `next`; both are reserved, so none of the three compile. `DONE (2026-08-21)`
-
-**How it surfaced.** Fixing F-313's P1 code produced `error: Expected a unique variable name…
-(m241)` on a line that had nothing to do with the P1 code. The culprit was the local named `step`,
-which had never been legal.
-
-**Method — the reserved list was asked of the compiler, not recalled.** Eighteen candidate names
-were each compile-probed as a local; `step`, `next`, `field`, `res`, `quit`, `from`, `to`, `case`,
-`repeat`, `until`, `while`, `other`, `send`, `recv`, `addpins`, `clkfreq`, `clkmode` and `abort` all
-reject. A hardcoded keyword list would have drifted — `field` became reserved after examples in this
-tree were written, and `clkfreq` is the subject of **F-311**.
-
-**The three sites, found by sweeping all eighteen names across every `PUB`/`PRI` signature:**
-
-| File | Line | Declared |
-|---|---|---|
-| `language/spin2/patterns/applications/audio_processor.yaml` | 12 | `\| t, step, deadline` |
-| `language/spin2/concepts/timing_operations.yaml` | 302 | `\| period, next, overhead` |
-| " | 392 | `\| next` |
-
-**Fix applied 2026-08-21.** `step` → `phase_step`, `next` → `deadline` (which also reads better: the
-variable holds a `getct()` deadline, and `next` in a `REPEAT` body already means the loop keyword).
-All three blocks extracted from their YAML and compiled clean. Re-swept: no reserved name remains as
-a declared local or parameter anywhere in `deliverables/ai/P2/`.
-
-**Why this is its own finding rather than a footnote.** It is a *language-version* defect, not a
-typo: these names were legal when the examples were written. That makes it recurrent by nature —
-every pnut-ts release can reserve another word and silently invalidate prose that nothing compiles.
-It is the strongest single argument for the gating compile step scoped alongside F-311…F-313.
-
 ## Open — enhancement proposals (new content, not corrections)
+
+- **ENH-03 — a gating compile step for every code block in `deliverables/ai/P2/`.** *Filed 2026-08-21;
+  Stephen's call, and he asked for it in these words: "we must, for all code in YAML files, compile
+  that code and assure ourselves that it compiles correctly. We do not publish a release unless all
+  the code publishes correctly."* Nothing in this project compiles KB code examples, which is how
+  F-311…F-313 and F-315 shipped. **Census: 1913 code-shaped blocks across 438 files; only 118 are
+  complete programs, so 1795 need a synthesized context.** Design points already settled:
+  - **The blocker is not the compiler, it is that the KB never declares which strings are code.** A
+    heuristic sweep pulled 166 of 541 PASM2-shaped blocks out of *prose* fields. So the first
+    deliverable is a per-block marker — `compile: program` / `compile: fragment` /
+    `compile: never` + reason — not a runner. A guessing gate cries wolf, and a gate that cries wolf
+    gets ignored.
+  - **`compile: never` must be ASSERTED TO FAIL**, not skipped. The KB teaches anti-patterns; a
+    wrong-code example that quietly starts compiling means the wrongness was edited away.
+  - **It proves LEGALITY, not correctness**, and must never be cited otherwise. F-312 is the proof:
+    fixing `qvector y_val` so it assembles would have left X and Y still swapped.
+  - **No build stamps** (PL-004). The gate runs against whatever compiler is installed; a bump that
+    breaks something turns the release red, which is the gate working. That is also what makes the
+    surviving `re-verify on a compiler version bump` notes deletable.
+  - Prototype validated 2026-08-21: it asks the compiler which identifiers are declarable rather than
+    carrying a keyword list that would rot. 4/4 known-bad caught, 4/4 known-good passed. Its known
+    weakness is auto-declaration colliding with symbols a block defines itself, which produced
+    `Symbol is already defined` on blocks that compile correctly by hand — fix that before trusting
+    any pass-rate number from it.
+  - Hooks: `release-yamls` as a hard gate (~0.8 s/block, ~25 min full sweep), and
+    `yaml-knowledge-base-maintenance` on touched files so it fails at edit time, not release time.
 
 - **ENH-02 — make the platform fail loudly on a code line that cannot fit.** *Filed 2026-08-21 when F-281 closed.* F-281's three over-wide lines were fixed and v1.1.3 shipped margin-clean, but **nothing stops the class recurring**: `p2kb-platform-code-coloring.lua` emits `\begin{Verbatim}[xleftmargin=-10pt]` with no break options at all ten sites, and the `breaklines=true` at `p2kb-platform-foundation.sty:317` is a pre-existing `\lstset` that the Verbatim path never consults. So an over-long line silently runs off the page and the compile log stays clean — the exact shape of every render defect this project has shipped. The source-side `audit-code-line-length.py` gate catches most of it, and `audit-pdf-margin-overflow.py` catches it after the fact; what is missing is the platform refusing to typeset it. Not a defect in any document — an absent guard.
 
@@ -1480,10 +1098,6 @@ It is the strongest single argument for the gating compile step scoped alongside
 **Manual side (→ ch05-post #195-C):** add the same orientation fact to the ch05-plot.md POLAR section — re-scoped from "optional enhancement" to **required gap-fill**.
 
 **Grounding:** Test J (empirical > documentary). Cite the EF once promoted.
-
-## YAML additions & enrichments (gaps) — G-001…G-005
-
-> **Surfaced by the Titus rev5 cross-source Q&A + IOSP cross-audit (2026-06-12/13).** These are **additions** (content the KB does not yet carry), not corrections — filed here so the v1.10.1 sweep executes them alongside the F-corrections. G-001 was previously named only in the head dashboards; now formally logged. Per-item gating noted; the gated parts do **not** block the rest.
 
 ## Systematic `P_*` constant-name audit (2026-07-01) — F-177…F-183
 

@@ -8,7 +8,12 @@ aliases:
   - image deduplication
   - shared DAT collapse
   - multi-bus forking
-toolchain: "pnut-ts v1.55.0 (measured 2026-06-30) — compiler-coupled; re-verify on a compiler version bump"
+  - singleton
+  - exactly-once instantiation
+  - override forwarding
+  - hardware driver singleton
+  - accidental second instance
+  - guarantee one instance
 
 description: |
   How pnut-ts decides whether two OBJ instantiations of the same source file share one
@@ -25,16 +30,49 @@ description: |
   holds only while the image is unique. A CON override forks a per-instance DAT region IF
   AND ONLY IF it changes the image bytes.
 
+singleton_rule:
+  rule: |
+    An object is a singleton when EVERY declaration of it in the program resolves to
+    the same EFFECTIVE override set. The number of declarations is irrelevant: ten
+    collapse to one instance if their effective overrides match.
+  effective_means: |
+    Resolved through the forwarding constants, not read off the OBJ line. Two sites
+    can spell their overrides differently and still be identical — one may name a CON
+    explicitly at its default value while the other omits it. Measured: a direct
+    `| MAX_B = 6` and a tier forwarding `| MAX_A = MID_A, MAX_B = MID_B` produced ONE
+    shared image, because the resolved values matched.
+  why_state_it_this_way: |
+    Identical overrides is the SUFFICIENT, source-checkable condition, and it is the
+    one to apply. The underlying mechanism is image-byte identity (see description),
+    but reasoning "my overrides differ yet I believe the bytes match" is exactly what
+    produces the accidental second instance. Check the override sets; do not predict
+    the bytes.
+  which_cons_matter: |
+    Only an override that CHANGES THE IMAGE BYTES can fork an object — in practice,
+    any CON that sizes a DAT array. A CON affecting only runtime values (a loop bound,
+    a timeout) is safe to override on one branch alone. The two look identical in an
+    OBJ line and only one of them can split your object in half.
+
 forking_a_dat_region:
   to_force_a_fork: |
     Seed a DAT long from the overridable CON so the image genuinely differs per override:
       CON  BUS_TAG = -1            ' parent overrides:  child : "drv" | BUS_TAG = n
       DAT  tag  LONG  BUS_TAG      ' SEEDED -> image bytes differ -> independent DAT
   the_silent_trap: |
-    An override declared but never referenced (or that otherwise leaves the bytes identical)
-    does NOT fork — the two "independent" buses silently collapse onto one shared DAT, a
-    corruption that mimics flaky hardware with NO compiler error. The seed line is
-    load-bearing; comment it with WHY it exists.
+    WANTED TWO, GOT ONE. An override declared but never referenced (or that otherwise
+    leaves the bytes identical) does NOT fork — the two "independent" buses silently
+    collapse onto one shared DAT, a corruption that mimics flaky hardware with NO
+    compiler error. The seed line is load-bearing; comment it with WHY it exists.
+  the_other_silent_trap: |
+    WANTED ONE, GOT TWO — the mirror, and the more dangerous of the pair when the
+    object owns hardware. An override applied to one declaration of an object and not
+    to another in the same program FORKS what was meant to be a singleton: two images,
+    two DAT regions, two cog_ids, two sets of state, no diagnostic. If the object owns
+    a bus, both instances drive it. That is not a degraded mode, it is an invalid
+    program.
+      OBJ  a : "drv" | MAX_B = 6
+           b : "drv"                 ' <- forgot it here: two images, silently
+    Measured: Objects 3 vs 2, and 348 vs 216 bytes CODE/DATA, for that one omission.
 
 cascade_through_tiers:
   description: |
@@ -48,18 +86,40 @@ cascade_through_tiers:
     ' top — one override cascades through every tier below:
     OBJ  a : "casc_mid" | MID_TAG = 1
          b : "casc_mid" | MID_TAG = 2
+  completeness_rule: |
+    EVERY CON that sizes a DAT array needs its OWN forwarding constant at EVERY tier,
+    and each tier's default must equal the target's own default. Forwarding some and
+    not others leaves the pattern half-applied: a parent that overrides one of the
+    unforwarded CONs CANNOT COMPLY, because there is no constant to pass. The omission
+    is invisible at the call site — the OBJ line looks complete.
+      ' driver has TWO DAT-sizing CONs; the tier forwards only one:
+      CON  MID_A = 4                            ' MAX_B has no forwarding constant
+      OBJ  lf : "leaf" | MAX_A = MID_A
+      ' a caller needing MAX_B = 6 now cannot make the two declarations agree
+    Measured, forwarding one of two: Objects 4, 372 bytes, two driver images.
+    Adding the missing forwarding constant: Objects 3, 240 bytes, one image.
   naming_gotcha: |
     Each tier needs a DISTINCT constant name. The self-named forward
     `leaf : "casc_leaf" | TAG = TAG` (same token both sides) fails to parse with
     `error:Expected a symbol (m190)`. Use `| LEAF_TAG = MID_TAG` (child name <- this tier).
 
 verification:
+  method: |
+    Compile with -m and read the .map `Objects:` count and the DAT symbol addresses.
+    Compiler-coupled behaviour: re-measure rather than assume if a result surprises you.
   measured: |
-    Reproduced with pnut-ts v1.55.0 (-m, reading the .map Objects: count + DAT addresses):
       - identical overrides (100,100), seeded probe         -> Objects: 2, one shared DAT
       - differing overrides (100,200), seeded probe         -> Objects: 3, two independent DAT
       - differing overrides (100,200), override unreferenced -> Objects: 2, silently merged
       - one top override through a 3-tier seeded+forwarding chain -> Objects: 5 (every DAT tier forked)
+      - two DIFFERING overrides of a CON the object never references -> Objects: 2, ONE image,
+        and the binaries are md5-identical to the same program with the overrides made equal.
+        This is why the rule is stated over EFFECTIVE OVERRIDE SETS while the mechanism is
+        image-byte identity: differing overrides are not sufficient to fork.
+      - one declaration overridden, its sibling not -> Objects: 3, 348 bytes (the mirror trap);
+        the same override applied to both -> Objects: 2, 216 bytes
+      - a tier forwarding one of the object's TWO DAT-sizing CONs -> Objects: 4, 372 bytes, two
+        driver images; adding the missing forwarding constant -> Objects: 3, 240 bytes, one
   map_caveat: |
     In the multi-instance .map, the instance-name / source-name columns can be internally
     inconsistent — do NOT trust those labels. The reliable signals are the Objects: count
@@ -75,9 +135,14 @@ related:
   - language/spin2/keywords/OBJ.yaml
   - language/spin2/concepts/method-pointers.yaml
 
+enforcement: |
+    Checkable at source level with no build: resolve the effective override set at
+    every declaration site, following forwarding constants down the graph, and fail
+    when two sites disagree. Predicting image bytes is not required and not advisable.
+
 see_also:
   - "Why N identical shared buses break the DAT-singleton and how to re-encode: p2kbArchSharedBusReplication"
   - "Force 1 — one owner per bus (the rule the singleton serves): p2kbArchResourceOwnership"
   - "The configurable_object archetype this fork mechanism underpins: p2kbSpin2ObjectArchetypes"
 
-oneliner: "pnut-ts dedups object images by compiled-image content, not override-set — a CON override forks an independent DAT region only if it changes the image bytes (seed a DAT long to force it); an override that doesn't change the bytes silently merges the buses."
+oneliner: "An object is a singleton when every declaration resolves to the same EFFECTIVE override set; the compiler dedups by compiled-image content, so a CON override forks an independent DAT region only if it changes the image bytes (seed a DAT long to force it) — and an override applied to one declaration but not another silently forks what was meant to be one instance."

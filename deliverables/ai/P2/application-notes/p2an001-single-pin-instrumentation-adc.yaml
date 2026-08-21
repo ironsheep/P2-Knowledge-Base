@@ -7,7 +7,6 @@
 title: "Single-Pin Instrumentation ADC"
 subtitle: "Absolute microvolt measurement on one P2 pin, no external ADC"
 doc_id: P2AN001
-version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER (same shape as the OBEX / Quick Byte catalog entries) ----
@@ -73,7 +72,7 @@ runnable_code:                     # reference to the validated artifact — NOT
       note: "Recipe 5 — integrate exactly one mains cycle so 50/60 Hz pickup nulls (CON-delta on base)"
   ceiling_reference:
     note: "8-pin bytecode-interpreter ADC (Chip Gracey, EightPinADC.spin2) — DESCRIBED/LINKED only, not rebuilt in-note"
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000, compiled with -d (uses debug())"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000, compiled with -d (uses debug())"
 
 key_parameters:
   clock_hz: 200_000_000

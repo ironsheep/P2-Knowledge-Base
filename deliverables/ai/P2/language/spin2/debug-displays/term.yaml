@@ -9,7 +9,7 @@ description: |
   holds only pixels + cursor/color state, not a readable character grid).
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (TERM display implementation: numeric control codes; size range cols/rows 1..256) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (TERM display implementation: numeric control codes; size range cols/rows 1..256) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts"
 
 aliases:
   - terminal

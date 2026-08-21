@@ -86,8 +86,7 @@ compiler_note: >
   syntax — it will NOT compile with pnut_ts, so do not use it in P2KB example
   code. Inside the block, method parameters, the return value, and locals are
   addressed by NAME (first param = PR0, second = PR1, return overlaps PR0);
-  do not route them through PTRA/PTRB. Example above compile-verified with
-  pnut_ts v1.55.0.
+  do not route them through PTRA/PTRB. Example above compile-verified with pnut_ts.
 
 see_also:
   - "Canonical inline-PASM construct (ORG..END, execution model, register mapping): p2kbSpin2InlinePasm"

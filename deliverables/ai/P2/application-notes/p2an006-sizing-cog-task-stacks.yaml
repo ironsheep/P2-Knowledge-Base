@@ -7,7 +7,6 @@
 title: "Sizing Cog & Task Stacks"
 subtitle: "Give every cog and task exactly the stack it needs — and catch an overflow before it corrupts memory"
 doc_id: P2AN006
-version: "0.1.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -68,7 +67,7 @@ runnable_code:
     - {id: high-water-mark,      file: high-water-mark.spin2,      note: "R2 — reportStackUse reads the high-water mark; right-size to ~1.5x N"}
     - {id: pinpoint-overflow,    file: pinpoint-overflow.spin2,    note: "R3 — granular checkStack between init calls localizes the overrunning routine"}
     - {id: size-task-stack,      file: size-task-stack.spin2,      note: "R4 — the same technique on a TASKSPIN task stack ({Spin2_v47})"}
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; each recipe OBJ-includes isp_stack_check.spin2 (uses debug()) so compile with -d. R1-R3 need no directive; R4 needs {Spin2_v47}"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000; each recipe OBJ-includes isp_stack_check.spin2 (uses debug()) so compile with -d. R1-R3 need no directive; R4 needs {Spin2_v47}"
 
 key_parameters:
   constants: "isp_stack_check: NOT_WRITTEN_MARK = $a5a50df0 (fill every stack long before launch); DO_NOT_WRITE_MARK = $addee5e5 (sentinel in the long JUST PAST the buffer)"
@@ -114,7 +113,7 @@ provenance:
   primary_sources:
     - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — cogspin/coginit stack requirements, TASKSPIN task stacks, and the parameters-then-results-then-locals stack layout"
   tool_ground_truth:
-    - "pnut_ts v1.55.0 — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
+    - "pnut_ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
   cross_check_sources:
     - "P2 Knowledge Base cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
   community_examples:

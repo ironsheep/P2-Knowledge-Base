@@ -7,7 +7,6 @@
 title: "Cooperative Multitasking with Spin2 TASK Methods"
 subtitle: "Run several cooperative jobs in one cog — launch, yield, halt, resume, and stop them through Spin2's TASK methods"
 doc_id: P2AN005
-version: "0.1.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -79,7 +78,7 @@ runnable_code:
     - {id: cooperative-yield,    file: cooperative-yield.spin2,    note: "R2 — a long computation yields on a YIELD_EVERY cadence so a second task stays responsive"}
     - {id: halt-resume-flow,     file: halt-resume-flow.spin2,     note: "R3 — consumer halts/wakes its producer (TASKHALT/TASKCONT/TASKCHK/THISTASK) + synchronized start"}
     - {id: task-dashboard,       file: task-dashboard.spin2,       note: "R4 — live TASKCHK/TASKHLT census, TASKID self-ID, clean TASKSTOP(THISTASK) shutdown"}
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; all four recipes use debug() so compile with -d"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000; all four recipes use debug() so compile with -d"
 
 key_parameters:
   version_gate: "{Spin2_v47} MUST be the first source line — the TASK methods are a Spin2 v47 language feature; without it the keywords are unrecognized"
@@ -99,7 +98,7 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "TASKWAIT does NOT exist in Spin2 — compile-probed (pnut_ts v1.55.0) to 'Expected an instruction or variable'. Some older material documents it; never use it. The wait-with-yield idiom is a TASKCHK/TASKNEXT poll loop."
+    text: "TASKWAIT does NOT exist in Spin2 — compile-probed (pnut_ts) to 'Expected an instruction or variable'. Some older material documents it; never use it. The wait-with-yield idiom is a TASKCHK/TASKNEXT poll loop."
   - flag: pitfall
     text: "The {Spin2_v47} directive must be the FIRST line of the file. Without it the compiler doesn't know TASKSPIN/TASKNEXT/etc. and reports 'expected an instruction' on correct-looking lines."
   - flag: pitfall
@@ -118,8 +117,7 @@ gotchas:
     text: "R1: two LEDs blink at independent rates (interleaving proof); only one blinking means a task never yields. R2: the heartbeat line advances between crunch-pass lines (responsiveness). R3: the producer flips TASKCHK state 1<->2 as the ring fills/drains. R4: census shows running=workers+1 (the supervisor counts itself), then worker-census=0 after shutdown."
 
 hardware_status: |
-  Every embedded block and every examples-library program compiles clean under pnut_ts -d (v1.55.0,
-  _clkfreq = 200_000_000), and the whole TASK* family (TASKSPIN expression + statement forms,
+  Every embedded block and every examples-library program compiles clean under pnut_ts -d (_clkfreq = 200_000_000), and the whole TASK* family (TASKSPIN expression + statement forms,
   TASKNEXT, TASKHALT/TASKCONT, TASKCHK, TASKID, TASKSTOP, NEWTASK, THISTASK, TASKHLT read/write) was
   compile-verified. LIVE scheduling behavior — true interleaving, the halt/resume timing, the
   "all tasks halted -> wait for interrupt" edge, and "the last task's return stops the cog" — is a
@@ -131,7 +129,7 @@ provenance:
     - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $200)"
     - "Spin2 v55 keyword table (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149) — the authoritative TASK keyword list (TASKWAIT is absent)"
   tool_ground_truth:
-    - "pnut_ts v1.55.0 — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword (F-196)"
+    - "pnut_ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword (F-196)"
   cross_check_sources:
     - "P2 Knowledge Base cooperative-tasking pattern (patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
   companion_publication:

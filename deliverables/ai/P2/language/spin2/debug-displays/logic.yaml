@@ -8,7 +8,7 @@ description: |
   timing-measurement/analysis tools.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (LOGIC display implementation: channel def, TRIGGER/detect, HOLDOFF, SetPack) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (LOGIC display implementation: channel def, TRIGGER/detect, HOLDOFF, SetPack) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts"
 
 aliases:
   - logic analyzer

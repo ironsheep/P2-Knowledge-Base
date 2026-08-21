@@ -7,7 +7,6 @@
 title: "Frequency / Rotation / RC-Timing Measurement"
 subtitle: "Read a resistive, capacitive, light, or rotary sensor directly on a P2 pin — the smart pin does the measuring"
 doc_id: P2AN004
-version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -79,7 +78,7 @@ runnable_code:
     - {id: rc-decay-reader,     file: rc-decay-reader.spin2,     note: "R1 — time a capacitor's discharge through a resistive/capacitive sensor (P_HIGH_TICKS)"}
     - {id: light-to-freq-reader, file: light-to-freq-reader.spin2, note: "R2 — reciprocal frequency counter turns a TSL235R's output frequency into an irradiance"}
     - {id: quadrature-knob,     file: quadrature-knob.spin2,     note: "R3 — drop-in encoder knob (detent normalize, preset, clamp, debounced button) with a two-jumper self-test"}
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
 
 key_parameters:
   r1_mode: "P_HIGH_TICKS (%10001) — Z = duration of the high state in clocks; IN raised on the high->low crossing only; RC_MODE = P_HIGH_TICKS | P_SCHMITT_A | P_OE | P_LOW_FLOAT"

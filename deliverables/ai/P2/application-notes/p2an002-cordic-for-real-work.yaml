@@ -7,7 +7,6 @@
 title: "CORDIC for Real Work"
 subtitle: "Distance, rotation, waveforms and fixed-point math from the P2's hardware solver"
 doc_id: P2AN002
-version: "1.0.0"
 kind: application-note
 
 # ---- DISCOVERY TIER ----
@@ -76,7 +75,7 @@ runnable_code:
     - {id: pipeline-throughput, file: cordic-pipeline-throughput.spin2, note: "Recipe 6 — fill/steady/drain: one result ~every 8 clocks"}
   ceiling_reference:
     note: "Three-phase field-oriented motor control (Park transform = QROTATE ops) — DESCRIBED/LINKED only; complete impl is OBEX #2811 (ManAtWork)"
-  toolchain: "pnut_ts 1.55, _clkfreq = 200_000_000, compiled with -d (uses debug())"
+  toolchain: "pnut_ts, _clkfreq = 200_000_000, compiled with -d (uses debug())"
 
 key_parameters:
   pipeline_stages: 54
