@@ -27,15 +27,20 @@ The master filename `P2-Streamer-Programming-Guide.md` is sacred — never renam
 
 ## Template stack
 
-| File | Role |
-|------|------|
-| `templates/p2kb-streamer-reference.latex` | Main template (11pt book, loads the three `.sty`) |
-| `templates/p2kb-streamer-foundation.sty` | Pandoc compatibility + core packages |
-| `templates/p2kb-streamer-content.sty` | Colors, code blocks (Spin2 blue / PASM2 green), reference blocks (syntax slate / layout bronze / formula indigo), part handling |
-| `templates/p2kb-streamer-diagrams.sty` | TikZ stub (inert — no `\Diag*` macros used yet) |
-| `filters/p2kb-streamer-code-coloring.lua` | Colors `` ```pasm2 ``/`` ```spin2 `` + `` ```syntax/layout/formula `` blocks |
-| `filters/p2kb-streamer-{figures,tables,mnemonic-bold,pagination}.lua` | Family filters |
-| `request.json` | PDF Forge build request |
+**This manual is the platform-unification pilot**, so most of the stack is shared and lives in
+`../../platform/`, not here. Only three files in this workspace belong to this manual alone.
+
+| File | Where it lives | Role |
+|------|----------------|------|
+| `templates/p2kb-streamer-reference.latex` | here | Main template (11pt book). Loads the two platform `.sty` plus the two local ones, and defines `\DocTitle`/`\DocSubtitle`/`\DocVersion`/`\DocDate`/`\DocAuthor` from the `request.json` metadata |
+| `templates/p2kb-streamer-local.sty` | here | Per-manual skins / local tail — thin for this twin |
+| `templates/p2kb-streamer-diagrams.sty` | here | **Live TikZ content, not a stub.** Defines `\DiagVgaTiming`, `\DiagRgbFormats`, `\DiagDdsGoertzel`, `\DiagDataFlow`. **This manual has no `opus-master/templates/` copy, so a diagram edit exists only here — and a changed diagram MUST be staged to outbound or the PDF renders the previous picture.** |
+| `p2kb-platform-foundation.sty`, `p2kb-platform-content.sty` | `../../platform/templates/` | Shared geometry, penalties, hyperref, code/reference box family, and the document-metadata macros |
+| `p2kb-platform-{figures,crossref,tables,mnemonic-bold,code-coloring,pagination}.lua` | `../../platform/filters/` | The six filters `request.json` actually names |
+| `request.json` | here | PDF Forge build request. `metadata.version` is the **single** home of the version — bare number, no `v`, because the cover supplies the word "Version" |
+
+The `filters/p2kb-streamer-*.lua` directory holds the **pre-unification** forks. `request.json`
+names none of them; they are kept as history and are never staged.
 
 ## Document Status
 
@@ -46,7 +51,7 @@ The master filename `P2-Streamer-Programming-Guide.md` is sacred — never renam
 | Front matter (house standard) | **Complete** |
 | Code/reference-block tagging | **Complete** |
 | LaTeX escaping + outbound staging | run `prepare-manual` |
-| First Forge build | pending (verify checklist in the audit doc) |
+| Forge builds | **released through v1.0.9** (2026-08-19, 76pp); v1.1.0 staged 2026-08-21 |
 
 ## Notes for first build
 
