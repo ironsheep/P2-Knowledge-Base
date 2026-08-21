@@ -28,6 +28,17 @@ CHECKS
     7  --sweep-check REV: NOTHING from the pre-sweep revision vanished
     8  no `##` section header outlives every finding it names   (dead scaffolding)
     9  no live finding sits under a header that does not name it (mis-filed entry)
+   10  a finding's HEADLINE status agrees with its body `**Status:**` line
+
+CHECK 10 — THE UNDERSTATING DIRECTION  (learned 2026-08-21, from F-271)
+    4b catches a headline claiming MORE than the status token supports. Nothing
+    caught the reverse, and the reverse is the one that wastes work: F-271's
+    headline reads `CONFIRMED — scope decision owed, deliberately NOT swept`
+    while its own body ends `**Status:** RESOLVED — DECIDED AND PUNCH-LISTED`,
+    with Stephen's decision recorded in full and the work carried to a punch-list
+    item. Anyone scanning headlines — which is what the register is FOR — reads a
+    decision as still owed and re-opens a settled question. The scannable layer
+    and the authoritative layer must not disagree in EITHER direction.
 
 SECTION STRUCTURE — WHY 8 AND 9 EXIST  (learned 2026-08-21)
     Checks 1-7 read `###` finding entries and never looked at the `##` section
@@ -86,6 +97,18 @@ FIXED_PROSE = re.compile(
     r"no longer blocks)", re.I)
 # PARTIAL vetoes an embedded DONE ("manual DONE - KB DONE - one decision open" is PARTIAL).
 PARTIAL_RE = re.compile(r"\bPARTIAL\b")
+# A body-level `**Status:** X` line. This is the finding's own considered verdict,
+# written after the analysis; the headline is the scannable summary. When they
+# disagree the register misreports itself to every reader who scans.
+BODY_STATUS = re.compile(r"^\*\*Status:\*\*\s*`?\s*([A-Z][A-Z-]*)", re.M)
+
+
+def lead_status(s):
+    """The first status token in a string, or None."""
+    m = STATUS_RE.search(s)
+    if not m:
+        return None
+    return (m.group(1) or m.group(0)).strip("` ")
 
 # Both series the register allocates: F-### corrections and G-### gap/enrichment
 # entries. G was absent here until 2026-08-21, which made every G finding invisible
@@ -249,6 +272,17 @@ def main():
         if not STATUS_RE.search(body):
             viol.append(("no-status", f"{b['id']} (:{b['line']}) carries no status token"))
         head = b["headline"]
+
+        # --- 10: the scannable layer must agree with the authoritative one ------
+        body_tokens = {t for t in BODY_STATUS.findall(body) if t in STATUS_WORDS}
+        head_token = lead_status(head)
+        if body_tokens and head_token and head_token not in body_tokens:
+            viol.append(("status-disagrees-with-body",
+                         f"{b['id']} (:{b['line']}) headline reads {head_token} but its own "
+                         f"`**Status:**` line reads {'/'.join(sorted(body_tokens))} — a reader "
+                         f"scanning headlines gets the wrong answer; reconcile the two, and if "
+                         f"the body is right the headline is what needs rewriting"))
+
         if PARTIAL_RE.search(head):
             continue                      # still owed, whatever else the headline says
         if CLOSED_RE.search(head):
@@ -342,7 +376,8 @@ def main():
     print(f"\nVIOLATIONS ({len(viol)}) — {reg}")
     order = ["sweep-lost-content", "duplicate-id", "counter-behind", "no-counter",
              "id-went-silent", "dangling-archive", "no-status", "closed-but-live",
-             "orphaned-section", "section-scope-drift", "status-hygiene"]
+             "status-disagrees-with-body", "orphaned-section", "section-scope-drift",
+             "status-hygiene"]
     for kind in order:
         hits = [v for k, v in viol if k == kind]
         if hits:
