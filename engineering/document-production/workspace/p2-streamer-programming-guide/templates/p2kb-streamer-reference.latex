@@ -37,6 +37,8 @@
 \renewcommand{\DocVersion}{$version$}
 \renewcommand{\DocDate}{$date$}
 \renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
 
 \title{\DocTitle}
 \author{\DocAuthor}

@@ -290,6 +290,13 @@
 \providecommand{\DocVersion}{}
 \providecommand{\DocDate}{}
 \providecommand{\DocAuthor}{}
+% F-316. Rights are NOT authorship: \DocAuthor is who wrote the document (Iron Sheep
+% Productions), \DocCopyright is who holds it — for most documents in this set, Iron
+% Sheep AND Parallax jointly, but NOT for all of them. They therefore come per
+% document from its own request.json and are never a platform constant: a hardcoded
+% string would attribute Parallax to the one guide they have no part in.
+\providecommand{\DocCopyright}{}
+\providecommand{\DocLicense}{}
 
 % Populate the PDF info dictionary. Deliberately NOT `pdfusetitle`: that reads
 % \@title/\@author and is sensitive to whether they were declared before hyperref
@@ -301,6 +308,39 @@
     pdfauthor={\DocAuthor},%
     pdfsubject={\DocSubtitle}%
   }%
+}
+
+% F-316. Rights into the info dictionary. Every document in this set states a
+% copyright and grants CC BY-SA on its own page, and carried NEITHER in its metadata
+% — so a crawler, an index or a model reading the file saw a document with no
+% licence, which is the opposite of the intent of publishing it openly.
+%
+% The copyright STRING in request.json deliberately writes "Copyright 2026 ..." with
+% no © glyph. The printed page keeps ©; this is a machine field, the word carries
+% the same meaning, and a non-ASCII character in pdfkeywords depends on hyperref's
+% pdfencoding under xelatex — an avoidable risk for zero gain. audit-pdf-metadata.py
+% compares rights with the symbol normalised away, so the two forms agree.
+%
+% pdfkeywords is used because it needs nothing beyond the hyperref already loaded.
+% A full XMP dc:rights record would be better and requires hyperxmp; that is a
+% separate step, gated on confirming the package exists in the Forge's TeX Live —
+% not on assuming it does.
+%
+% Each branch is guarded: a document that has not adopted these keys writes no
+% pdfkeywords at all, exactly as before, so an unconverted document is unchanged
+% rather than given a malformed rights string.
+\AtBeginDocument{%
+  \ifx\DocCopyright\@empty
+    \ifx\DocLicense\@empty\else
+      \hypersetup{pdfkeywords={\DocLicense}}%
+    \fi
+  \else
+    \ifx\DocLicense\@empty
+      \hypersetup{pdfkeywords={\DocCopyright}}%
+    \else
+      \hypersetup{pdfkeywords={\DocCopyright. Licensed under \DocLicense}}%
+    \fi
+  \fi
 }
 
 % Force link colors AFTER all packages load (overrides any Pandoc injection)

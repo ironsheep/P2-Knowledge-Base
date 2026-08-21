@@ -100,6 +100,13 @@ def page_text(pdf, first=None, last=None):
     return run(cmd + [str(pdf), "-"])
 
 
+def norm_rights(s):
+    """Compare rights on WHO holds them, not on how the symbol was typeset.
+    ©, (c) and an omitted symbol are a rendering detail; the holders are the fact."""
+    s = re.sub(r"\s*(?:©|\(c\))\s*", " ", (s or ""), flags=re.I)
+    return norm(s).rstrip(".").lower()
+
+
 def norm(s):
     """Compare on visible content: collapse whitespace, unify dashes and quotes."""
     s = (s or "").replace("—", "-").replace("–", "-")
@@ -233,7 +240,8 @@ def main():
             ("rights-missing", msg) if args.require_rights else msg)
     elif page_cr and meta.get("copyright"):
         # both exist — they must not disagree about WHO holds it
-        if norm(meta["copyright"]) not in norm(page_cr) and norm(page_cr) not in norm(meta["copyright"]):
+        a, b = norm_rights(meta["copyright"]), norm_rights(page_cr)
+        if a not in b and b not in a:
             viol.append(("rights-disagree",
                          f"metadata rights and the copyright page name different holders.\n"
                          f"        page         : {page_cr!r}\n"
