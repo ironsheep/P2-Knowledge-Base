@@ -45,12 +45,26 @@ So: pass --templates with the .sty directories the document actually loads. Ever
 flag and the audit stays conservative (font-only), which can over-report.
 
 USAGE
-    python3 audit-font-glyphs.py <assembled.md> [--source-dir <opus-master>]
+    python3 audit-font-glyphs.py <assembled.md> [<assembled.md> ...]
+                                                [--source-dir <opus-master>]
                                                 [--templates <dir> [<dir> ...]]
+
+MULTIPLE FILES  (fixed 2026-08-21 — it used to audit only the first)
+    Hand-rolled argv parsing took `[a for a in argv if not a.startswith("--")][0]`
+    and dropped every later file WITHOUT SAYING SO. Its three sibling gates all take
+    lists, so a caller batching four documents past this one got a clean report on
+    file 1 and no report at all on 2-4 — a gate silently narrower than the wave it
+    was guarding. It could not simply be looped, either: `--source-dir DIR` put DIR
+    in that same positional list, so the obvious fix would have audited the source
+    directory as if it were a document. argparse separates flag values from
+    positionals, which is the actual repair. Every file is audited; the exit code is
+    the WORST across them, and the trailer prints the count so output lines can be
+    counted against input files.
 
 EXIT
     0 = clean    1 = offending glyphs found    2 = bad usage
 """
+import argparse
 import re
 import sys
 import pathlib
@@ -126,30 +140,8 @@ def offending(ch: str, covered=None):
     return None
 
 
-def main() -> int:
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if not args:
-        print(__doc__)
-        return 2
-
-    assembled = pathlib.Path(args[0])
-    if not assembled.is_file():
-        print(f"ERROR: not a file: {assembled}")
-        return 2
-
-    source_dir = None
-    if "--source-dir" in sys.argv:
-        source_dir = pathlib.Path(sys.argv[sys.argv.index("--source-dir") + 1])
-
-    # --templates <dir> [<dir> ...] : .sty stacks this document loads. Any
-    # \newunicodechar they declare supplies a glyph the font lacks, so it renders.
-    template_dirs = []
-    if "--templates" in sys.argv:
-        for a in sys.argv[sys.argv.index("--templates") + 1:]:
-            if a.startswith("--"):
-                break
-            template_dirs.append(a)
-    covered = covered_by_templates(template_dirs)
+def audit_one(assembled: pathlib.Path, source_dir, covered) -> int:
+    """Audit ONE assembled document. 0 = clean, 1 = defects found."""
 
     # Map each offending character back to the chapter that authored it.
     def chapters_containing(ch: str):
@@ -218,6 +210,42 @@ def main() -> int:
         "font carries (e.g. 'to the power n' instead of a superscript n; drop the emoji).\n"
     )
     return 1
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("assembled", nargs="+", metavar="assembled.md",
+                    help="assembled markdown to audit; MULTIPLE FILES ARE AUDITED, "
+                         "one report each")
+    ap.add_argument("--source-dir", metavar="DIR",
+                    help="opus-master dir, to name the chapter that authored each hit")
+    ap.add_argument("--templates", nargs="+", default=[], metavar="DIR",
+                    help="REQUIRED in practice: the .sty stacks this document loads; "
+                         "a \\newunicodechar there means the glyph renders")
+    args = ap.parse_args()
+
+    source_dir = pathlib.Path(args.source_dir) if args.source_dir else None
+    # Template coverage is a property of the STACK, not of any one document, so it
+    # is resolved once and shared. Auditing documents with different stacks in one
+    # invocation would silently apply the wrong exemptions — run those separately.
+    covered = covered_by_templates(args.templates)
+
+    worst = 0
+    for name in args.assembled:
+        path = pathlib.Path(name)
+        if not path.is_file():
+            print(f"ERROR: not a file: {path}")
+            worst = max(worst, 2)
+            continue
+        worst = max(worst, audit_one(path, source_dir, covered))
+
+    # Say how many were audited. The defect this replaced was SILENT: the count is
+    # what lets a caller check output against input instead of trusting the tool.
+    n = len(args.assembled)
+    print(f"\naudited {n} file{'' if n == 1 else 's'}"
+          f" — worst exit {worst}")
+    return worst
 
 
 if __name__ == "__main__":

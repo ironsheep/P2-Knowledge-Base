@@ -26,6 +26,23 @@ CHECKS
     5  every archive the header names actually exists      (dangling history)
     6  no allocated ID is missing from live + archives     (a finding went silent)
     7  --sweep-check REV: NOTHING from the pre-sweep revision vanished
+    8  no `##` section header outlives every finding it names   (dead scaffolding)
+    9  no live finding sits under a header that does not name it (mis-filed entry)
+
+SECTION STRUCTURE — WHY 8 AND 9 EXIST  (learned 2026-08-21)
+    Checks 1-7 read `###` finding entries and never looked at the `##` section
+    headers above them. A trim-style archive sweep removes entries; it does not
+    remove the section header and origin prose that introduced them. What is left
+    is a header, in a register that declares it carries OPEN work only, asserting
+    a defect that was closed months ago — e.g. "`architecture/xbyte_engine.yaml` —
+    all three programming examples are broken", whose findings all closed
+    2026-07-14/16. Every check above passed on it, because there was no entry left
+    to check. A reader scanning for "what is still owed" reads the header.
+    The mirror failure is 9: when a section's own findings are archived but LATER
+    findings were appended beneath it, those inherit a header about something else
+    entirely — 14 platform/escaper findings reading as part of a community bench
+    review. Both are invisible to an entry-level check and obvious to a span-level
+    one.
 
 ARCHIVING WITHOUT LOSING CONTENT  (learned 2026-08-15, the expensive way)
     Do the sweep as RENAME-THEN-TRIM, never build-the-output:
@@ -70,10 +87,52 @@ FIXED_PROSE = re.compile(
 # PARTIAL vetoes an embedded DONE ("manual DONE - KB DONE - one decision open" is PARTIAL).
 PARTIAL_RE = re.compile(r"\bPARTIAL\b")
 
+# Both series the register allocates: F-### corrections and G-### gap/enrichment
+# entries. G was absent here until 2026-08-21, which made every G finding invisible
+# to every check — G-004 sat live and `DONE` through a sweep that was looking for
+# exactly that. The two are SEPARATE NUMBER SPACES: they are counted, gap-checked
+# and reported apart, never merged into one range.
 FINDING_START = re.compile(
-    r"^(?:#{3,4}\s+(F-\d+[a-z]?)\s*[—-]"          # heading form:  ### F-300 — ...
-    r"|-\s+\*\*(F-\d+[a-z]?)\s+[—-])")          # bulleted ENTRY: - **F-250 — ...
+    r"^(?:#{3,4}\s+([FG]-\d+[a-z]?)\s*[—-]"         # heading form:  ### F-300 — ...
+    r"|-\s+\*\*([FG]-\d+[a-z]?)\s+[—-])")           # bulleted ENTRY: - **F-250 — ...
                                                     # (NOT "- **F-256** — ", a reference)
+
+# A `##` section header, not a `###` finding entry.
+SECTION_START = re.compile(r"^##\s+(?!#)")
+# IDs a section header claims, including ranges: "F-303…F-305", "G-001…G-005",
+# "F-217, F-218". Leading zeros are stripped so a header's `G-001…G-005` and an
+# entry's `### G-004` compare equal — the padding differs in the register today.
+ID_RANGE = re.compile(r"\b([FG])-0*(\d+)\s*(?:…|\.{3})\s*[FG]-0*(\d+)\b")
+ID_ONE = re.compile(r"\b([FG])-0*(\d+)\b")
+
+
+def canon(fid):
+    """'G-004' -> 'G-4'; 'F-302' -> 'F-302'. Strips padding and any letter suffix."""
+    m = re.match(r"([FG])-0*(\d+)", fid)
+    return f"{m.group(1)}-{int(m.group(2))}" if m else fid
+
+
+def header_ids(header):
+    """The set of canonical IDs a section header claims, ranges expanded."""
+    ids = set()
+    for pre, lo, hi in ID_RANGE.findall(header):
+        ids.update(f"{pre}-{n}" for n in range(int(lo), int(hi) + 1))
+    for pre, n in ID_ONE.findall(header):
+        ids.add(f"{pre}-{int(n)}")
+    return ids
+
+
+def sections(lines, blocks):
+    """[(line_no, header, [blocks inside its span])] for headers that name IDs."""
+    starts = [i for i, ln in enumerate(lines, 1) if SECTION_START.match(ln)]
+    out = []
+    for k, i in enumerate(starts):
+        end = starts[k + 1] if k + 1 < len(starts) else len(lines) + 1
+        header = lines[i - 1]
+        if not header_ids(header):
+            continue                     # a generic header claims nothing; nothing to drift
+        out.append((i, header, [b for b in blocks if i < b["line"] < end]))
+    return out
 
 
 def parse(path):
@@ -143,13 +202,13 @@ def main():
             archives.append(os.path.normpath(os.path.join(base, rel)))
 
     # --- 5: archives exist ------------------------------------------------------
-    archived_ids = set()
+    archived_ids = set()                 # canonical ids, e.g. {"F-302", "G-4"}
     for a in archives:
         if not os.path.exists(a):
             viol.append(("dangling-archive", f"header names `{a}` but it does not exist"))
             continue
-        archived_ids.update(int(n) for n in re.findall(
-            r"F-0*(\d+)", open(a, encoding="utf-8", errors="replace").read()))
+        archived_ids.update(f"{p}-{int(n)}" for p, n in re.findall(
+            r"\b([FG])-0*(\d+)\b", open(a, encoding="utf-8", errors="replace").read()))
     say(f"archives          : {len(archives)} declared, "
         f"{len(archived_ids)} archived IDs seen")
 
@@ -164,7 +223,12 @@ def main():
                          f"the protocol says STOP, do not choose between them"))
 
     # --- 1: next-ID counter ahead of every allocation ---------------------------
-    nums = [int(re.sub(r"\D", "", f)) for f in seen]
+    # F and G are separate number spaces; the declared counter governs F only.
+    live_by_series = {}
+    for fid in seen:
+        pre, n = canon(fid).split("-")
+        live_by_series.setdefault(pre, set()).add(int(n))
+    nums = sorted(live_by_series.get("F", set()))
     m = re.search(r"\*\*Next finding ID:\s*`?F-(\d+)`?\*\*", text)
     if not m:
         viol.append(("no-counter", "register declares no `Next finding ID:` line"))
@@ -200,17 +264,46 @@ def main():
                      f"it carries OPEN work only — sweep it to an archive"))
 
     # --- 6: no allocated ID went silent -----------------------------------------
-    if nums:
-        live = {int(re.sub(r"\D", "", f)) for f in seen}
-        known = live | archived_ids
-        gaps = [f"F-{n}" for n in range(1, max(nums) + 1) if n not in known]
-        say(f"ID coverage       : {len(live)} live, {len(archived_ids)} archived, "
+    # Per series, so an F gap is never masked by a G that happens to share a number.
+    live_ids = {canon(f) for f in seen}
+    known = live_ids | archived_ids
+    gaps = []
+    for pre, live_nums in sorted(live_by_series.items()):
+        ceiling = max(live_nums | {int(n.split("-")[1]) for n in archived_ids
+                                   if n.startswith(pre + "-")} or {0})
+        gaps += [f"{pre}-{n}" for n in range(1, ceiling + 1)
+                 if f"{pre}-{n}" not in known]
+    if live_ids:
+        say(f"ID coverage       : {len(live_ids)} live, {len(archived_ids)} archived, "
             f"{len(gaps)} unaccounted")
         if gaps:
             viol.append(("id-went-silent",
                          f"{len(gaps)} allocated IDs are in neither the register nor any "
                          f"archive: {', '.join(gaps[:12])}"
                          f"{' …' if len(gaps) > 12 else ''}"))
+
+    # --- 8 + 9: section structure -----------------------------------------------
+    # A `##` header that names IDs is a CLAIM about what lives under it. Both
+    # failures below are invisible to every entry-level check above, because the
+    # evidence is the header, not any entry.
+    for ln, header, kids in sections(lines, blocks):
+        named = header_ids(header)
+        inside = {canon(b["id"]) for b in kids}
+        label = header[3:].strip()
+        label = (label[:88] + "…") if len(label) > 88 else label
+        if not (named & inside):
+            viol.append(("orphaned-section",
+                         f"(:{ln}) names {', '.join(sorted(named))} — NONE is a live entry, "
+                         f"so the header and its origin prose are all that is left of closed "
+                         f"work, in a register that carries OPEN work only: {label!r}"))
+        stray = sorted({canon(b["id"]) for b in kids} - named)
+        if stray:
+            viol.append(("section-scope-drift",
+                         f"(:{ln}) names {', '.join(sorted(named))} but {len(stray)} live "
+                         f"{'entry' if len(stray) == 1 else 'entries'} beneath it "
+                         f"{'is' if len(stray) == 1 else 'are'} outside that set "
+                         f"({', '.join(stray)}) — extend the header's range, or move them: "
+                         f"{label!r}"))
 
     # --- 7: sweep-loss check, read independently out of git ---------------------
     if args.sweep_check:
@@ -249,7 +342,7 @@ def main():
     print(f"\nVIOLATIONS ({len(viol)}) — {reg}")
     order = ["sweep-lost-content", "duplicate-id", "counter-behind", "no-counter",
              "id-went-silent", "dangling-archive", "no-status", "closed-but-live",
-             "status-hygiene"]
+             "orphaned-section", "section-scope-drift", "status-hygiene"]
     for kind in order:
         hits = [v for k, v in viol if k == kind]
         if hits:
