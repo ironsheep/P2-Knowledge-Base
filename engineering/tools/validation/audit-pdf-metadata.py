@@ -51,9 +51,30 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Fields the info dictionary must carry, mapped to the request.json key that owns them.
-# request.json is the ONE home for these strings; the cover keeps only PRESENTATION.
-REQUIRED = {"Title": "title", "Subject": "subtitle", "Author": "author"}
+# HOW EACH request.json METADATA KEY MUST SHOW UP IN THE FINISHED PDF.
+#
+# The checklist is DERIVED FROM request.json, not hardcoded here: every key the
+# document declares must be accounted for by this table, and a key that is not is
+# reported as `unverified-metadata-field` rather than ignored. That is deliberate —
+# the metadata set is growing (F-316 adds copyright and licence), and a gate whose
+# coverage depends on someone remembering to extend a list will silently stop
+# covering the newest field, which is the one most likely to be wrong.
+#
+#   "info"   -> must appear in the PDF info dictionary under this exact key
+#   "cover"  -> must appear in the rendered text of page 1 (macro-fed; blank if the
+#               platform foundation is stale, which no page count can detect)
+#   "rights" -> must be reachable from Keywords or an XMP stream
+#   None     -> declared for the build, deliberately not emitted into the PDF
+FIELD_MAP = {
+    "title":     ("info", "Title"),
+    "subtitle":  ("info", "Subject"),
+    "author":    ("info", "Author"),
+    "keywords":  ("info", "Keywords"),
+    "copyright": ("rights", None),
+    "license":   ("rights", None),
+    "version":   ("cover", None),
+    "date":      ("cover", None),
+}
 
 
 def run(cmd):
@@ -117,32 +138,55 @@ def main():
     full = page_text(pdf)
     viol, notes = [], []
 
-    # --- 1 + 2: present, and agreeing with the single source -------------------
-    for field, key in REQUIRED.items():
+    # --- 1: EVERY declared field is accounted for ------------------------------
+    # Walk what the document actually declares. An unknown key fails loudly, so a
+    # newly-added metadata field cannot slip past this gate unverified.
+    unknown = [k for k in meta if k not in FIELD_MAP]
+    for k in sorted(unknown):
+        viol.append(("unverified-metadata-field",
+                     f"request.json declares `{k}` = {meta[k]!r} and this gate has no rule for "
+                     f"verifying it reached the PDF. Add it to FIELD_MAP — as \"info\" with its "
+                     f"info-dictionary key, \"cover\" if it must render on page 1, \"rights\", or "
+                     f"None if it is build-only and deliberately not emitted. Do not skip it: an "
+                     f"unchecked field is exactly where the next empty-metadata release comes from"))
+
+    checked = []
+    # --- 2 + 3: info-dictionary fields — present, and agreeing with the source --
+    for key, (kind, field) in FIELD_MAP.items():
+        if kind != "info" or key not in meta:
+            continue
         got, want = info.get(field, ""), meta.get(key, "")
+        checked.append(f"{field}<-{key}")
+        if not want:
+            continue
         if not got:
             viol.append((f"{field.lower()}-empty",
                          f"PDF info dictionary has no {field}. This is the F-300 class: it ships "
                          f"invisibly, because no page shows it. request.json says {want!r}"))
-        elif not want:
-            notes.append(f"request.json declares no `{key}`, so {field} could not be checked "
-                         f"against a source (PDF carries {got!r})")
         elif norm(got) != norm(want):
             viol.append((f"{field.lower()}-mismatch",
                          f"{field} disagrees with request.json, which is the single source.\n"
                          f"        PDF          : {got!r}\n"
                          f"        request.json : {want!r}"))
+    # An info field the PDF carries that NOTHING declared is drift in the other
+    # direction — a value from somewhere other than the single source.
+    for key, (kind, field) in FIELD_MAP.items():
+        if kind == "info" and key not in meta and info.get(field):
+            viol.append((f"{field.lower()}-undeclared",
+                         f"the PDF carries {field} = {info[field]!r}, and request.json declares no "
+                         f"`{key}`. The value came from somewhere other than the single source"))
 
-    # --- 3: the cover actually rendered its identity ---------------------------
-    # A blank cover is the one defect a page count cannot see. Both strings are
+    # --- 4: the cover actually rendered its identity ---------------------------
+    # A blank cover is the one defect a page count cannot see. These strings are
     # macro-fed, so if the foundation .sty is stale they vanish together.
-    for key, label in (("version", "version"), ("date", "date")):
-        want = meta.get(key, "")
-        if not want:
+    for key, (kind, _) in FIELD_MAP.items():
+        if kind != "cover" or not meta.get(key):
             continue
+        want = meta[key]
+        checked.append(f"page1<-{key}")
         if norm(want) not in norm(p1):
-            viol.append((f"cover-{label}-missing",
-                         f"page 1 does not carry the {label} {want!r} that request.json declares. "
+            viol.append((f"cover-{key}-missing",
+                         f"page 1 does not carry the {key} {want!r} that request.json declares. "
                          f"An EMPTY cover field means the Forge's p2kb-platform-foundation.sty "
                          f"predates the DOCUMENT METADATA section, so the \\renewcommands had "
                          f"nothing to renew — that is a PLATFORM problem, not a manuscript one. "
@@ -197,8 +241,11 @@ def main():
 
     # --- report ----------------------------------------------------------------
     print(f"{pdf.name}: {info.get('Pages','?')} pages, checked against {Path(args.request).name}")
-    for f in REQUIRED:
-        print(f"  {f:8s}: {info.get(f) or '(EMPTY)'}")
+    print(f"  declared fields : {', '.join(sorted(meta))}")
+    print(f"  verified        : {', '.join(sorted(checked)) or '(none)'}")
+    for key, (kind, field) in sorted(FIELD_MAP.items()):
+        if kind == "info" and key in meta:
+            print(f"  {field:9s}: {info.get(field) or '(EMPTY)'}")
     for n in notes:
         print(f"  note    : {n}")
     if not viol:
