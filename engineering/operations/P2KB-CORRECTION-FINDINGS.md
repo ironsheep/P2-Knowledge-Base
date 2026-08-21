@@ -123,7 +123,17 @@ Guide* §17.2. Raw post + full analysis at
 by path). Same reviewer as F-256. His parenthetical *"(No, it does not need to be 512
 entries.)"* is **correct**, and it lands on the KB as well as the manual.
 
-### F-302 — `p2kbArchDdsGoertzel` states the DDS/Goertzel LUT window as a flat `entries: 512`, hiding a selectable 8-way loop size, a bounded-region offset, and a phase-offset field. `CONFIRMED`
+### F-302 — `p2kbArchDdsGoertzel` states the DDS/Goertzel LUT window as a flat `entries: 512`, hiding a selectable 8-way loop size, a bounded-region offset, and a phase-offset field. `PARTIAL — KB DONE 2026-08-21; the manual half ships with Streamer v1.1.0`
+
+> **KB APPLIED 2026-08-21.** All six sites. `entries: 512` is now `entries_default` plus an
+> `entries_note` saying it is the %000 case, beside a `lut_window:` block carrying all eight
+> loop sizes with their NCO index bits and LUT ranges, and named `capabilities` for the two
+> things the %A and %T bits actually buy — bounded sub-regions and phase offset/modulation.
+> `s_operand.field_11_0` is split into `field_11_9` (loop-size selector) and `field_8_0` (%A/%T),
+> quoting Silicon Doc :4093-4095 verbatim. `operation.steps.1` no longer states NCO[30:22] as a
+> general rule. The two `repeat i from 0 to 511` loops are correct FOR the %000 case and now say
+> so rather than reading as the only option. **The table and the quote were re-read out of
+> `p2-documentation.txt:4058-4095` before being written, not copied from this register.**
 
 **Location:** the DDS/Goertzel architecture YAML behind P2KB key `p2kbArchDdsGoertzel` —
 `lut_setup.entries: 512` and `s_operand.field_11_0: "loop size + LUT window"`.
@@ -203,7 +213,13 @@ list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
 > **DDS/Goertzel** *constant-value* tables were decoded row by row and are **correct** — they are
 > named-symbol value tables, not field-encoding templates. Do not "fix" them.
 
-### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `CONFIRMED`
+### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — both KB files DONE 2026-08-21; the Assembly Language Reference site is owed at the co-release`
+
+> **KB APPLIED 2026-08-21.** `streamer-symbols.yaml:186` and `modes-reference.yaml:221` both now
+> read *"upper 3 bits select a colour, lower 5 bits are intensity"*, the framing the released
+> Debug Window Manual v1.1.3 already uses. Swept: `2:2:2:2` no longer appears anywhere in
+> `deliverables/ai/P2/`. Still owed: `appendix-g-streamer-constants.md:115` in the Assembly
+> Language Reference, and the `\DiagRgbFormats` clone in the torture-test template.
 
 The truth (Silicon Doc `p2-documentation.txt:3800`): RGBI8 is a **3-bit colour select + 5-bit
 luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B fields.
@@ -219,7 +235,34 @@ luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B 
 `ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
 contrasts RGBI8 against LUMA8 immediately above. Copy that framing.
 
-### F-304 — `modes-reference.yaml` hardcodes the streamer `D[19:16]` field, and elsewhere invents a free bit that does not exist. `CONFIRMED`
+### F-304 — `modes-reference.yaml` hardcodes the streamer `D[19:16]` field, and elsewhere invents a free bit that does not exist. `DONE (2026-08-21)` — **and the row count was 28, not the 10 this finding listed**
+
+> **APPLIED 2026-08-21, after auditing the WHOLE column instead of the named rows.** This entry
+> named ten rows. Reading all 56 `d_19_16` values against the Silicon Doc's three field
+> sequences — `:3004-3015` (Immediate), `:3128-3139` (RDFAST), `:3292-3303` (WRFAST), each the
+> identical twelve-row `pppa · pp0a · pp1a · p00a · p01a · p10a · 0110 · 0111 · 1110 · 1111 ·
+> 0000 · 0001` — found **28** wrong, in three families rather than one:
+>
+> | Family | Wrong rows | Example of the error |
+> |---|---|---|
+> | Immediate ⇢ Pins/DACs | 6 (`:73 :78 :83 :88 :93 :98`) | `%0000` where truth is `pppa` |
+> | RDFAST ⇢ Pins/DACs | 10 (`:156`…`:201`) | `%pppp` for a field that is `pppa`; `%p000 + 6` for a FIXED `0110` |
+> | Pins ⇢ DACs/WRFAST | 10 (`:243`…`:288`) | the same, mirrored |
+> | DDS/Goertzel | 2 (`:330 :336`) | `%0111` where D[19] is the low bit of the D[22:19] block selector → `p111` |
+>
+> **Two families were audited and found CORRECT — do not 'fix' them:** the RGB colour modes
+> (`:217`…`:237`) and the ADC capture modes (`:304`…`:324`) both carry `0010 0011 0100 0101 0110`,
+> which is exactly what `:3192+` and `:3438+` print. The LUT-indexed rows (`:134`…`:150`) carry
+> `001a / 010a / 011a / 1000` and match `:3072-3075`.
+>
+> **A legend was added, because the corrected notation is unreadable without one.** The file used
+> `%pppp`, `%bbbb` and `%001a` already and never said what they meant. `encoding.field_notation`
+> now defines `0/1`, `p`, `a` and `b`, states that the number of `p` bits SHRINKS as the pin group
+> widens and reaches zero at eight pins — which is *why* an unaligned base pin changes the MODE
+> rather than the pin — and carries the `|`-not-`+` rule with its EF-065 grounding.
+>
+> This is the thirteenth time a finding's own enumeration has come up short. Re-derive from the
+> artifact.
 
 The KB twin of the Streamer Guide's Appendix A defect. Authority: Silicon Doc `:2995-3020` and
 `:3125-3145` both print the field sequence
@@ -255,7 +298,21 @@ enables the streamer's contribution to the pin's output *state*, never its outpu
 **F-308** / **EF-062** (bench-proven: DIR low 4-of-8, `DIRH` 8-of-8). The citation this note used to
 carry, `Silicon Doc :3602-3603`, resolves to nothing in `engineering/ingestion/` and has been dropped.
 
-### F-306 — `dds-goertzel.yaml`'s "Typical usage" configures a DAC output pin that nothing ever drives, and the Streamer sprint plan certified it as the fix template. `CONFIRMED`
+### F-306 — `dds-goertzel.yaml`'s "Typical usage" configures a DAC output pin that nothing ever drives, and the Streamer sprint plan certified it as the fix template. `DONE (2026-08-21)`
+
+> **APPLIED 2026-08-21 — Stephen chose "delete step 3", conditional on the example still being
+> enough for an agent to write correct Goertzel code.** That condition is what made this a real
+> gate: testing it instead of assuming it found that the example did not compile AT ALL, two
+> steps earlier, because step 4 used `clkfreq` as a PASM2 operand (**F-311**). Deleting step 3
+> alone would have satisfied the letter of the finding and left the example unusable.
+>
+> Step 3 is gone and the steps renumbered. Two new keys say what the example IS — a detector,
+> whose own `%dddd` is `X_DACS_OFF` — and what the OUTPUT arrangement would additionally need
+> (`P_CHANNEL`, COGID in M[3:0], DIRH), grounded in EF-054/EF-055 rather than described. The
+> `applications.function_generator` entry no longer implies this example covers the output half.
+>
+> **Verified the way the condition demanded:** the `usage_pattern` code and data blocks were
+> extracted verbatim from the YAML, wrapped, and compiled — 2,196 bytes, clean.
 
 **How it surfaced.** Authoring the Streamer Guide's new §11.0 (task «#269», 2026-08-20). The sprint
 plan's §13 "Verified correct — do not fix these" list states that

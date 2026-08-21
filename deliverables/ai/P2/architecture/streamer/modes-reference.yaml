@@ -8,6 +8,27 @@ description: All streamer mode encodings with D[31:28] and D[19:16] fields
 encoding:
   mode_field: "D[31:28]"
   config_field: "D[19:16]"
+
+  # How to read the d_19_16 column. Every symbol below is one BIT of D[19:16],
+  # written MSB-first, exactly as the Silicon Doc prints it (p2-documentation.txt
+  # :3004-3015 immediate, :3128-3139 RDFAST, :3292-3303 WRFAST).
+  field_notation:
+    "0 / 1": "a FIXED bit. The mode template sets it; you do not."
+    "p": >-
+      a PIN-SELECT bit, part of the base-pin number. The count of p's SHRINKS as the
+      pin group widens -- 3 p's for a 1-pin mode, 2 for 2-pin, 1 for 4-pin, and NONE
+      at 8 pins and wider, where every bit of D[19:16] is fixed. This is why an
+      unaligned base pin silently selects a DIFFERENT MODE rather than a different
+      pin: the stray low bits have nowhere to go and carry up into D[22:20].
+    "a": >-
+      the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc :3653-3654). It is NOT a pin
+      bit. Writing a 4th p where an `a` belongs is the specific error F-304 records.
+    "b": "a LUT base-address bit, in the LUT-indexed modes only."
+  field_notation_caveat: >-
+    Compose a mode word with `|`, not `+`. With `+`, a base pin that is not a
+    multiple of the group width carries out of the pin field and changes the mode
+    (EF-065). See language/pasm2/concepts and streamer/dds-goertzel.yaml:11,:18 for
+    the DDS/Goertzel D[22:19] multiple-of-four form.
   
 # Mode categories by D[31:28]
 categories:
@@ -70,32 +91,32 @@ modes:
   - mode: "%0100"
     symbol: X_IMM_32X1_1DAC1
     description: "32×1-bit immediate → 1 pin, 1 DAC ch × 1 bit"
-    d_19_16: "%0000"
+    d_19_16: "%pppa"
     
   - mode: "%0101"
     symbol: X_IMM_16X2_2DAC1
     description: "16×2-bit immediate → 2 pins, 2 DAC ch × 1 bit"
-    d_19_16: "%0000"
+    d_19_16: "%pp0a"
     
   - mode: "%0101"
     symbol: X_IMM_16X2_1DAC2
     description: "16×2-bit immediate → 2 pins, 1 DAC ch × 2 bits"
-    d_19_16: "%0010"
+    d_19_16: "%pp1a"
     
   - mode: "%0110"
     symbol: X_IMM_8X4_4DAC1
     description: "8×4-bit immediate → 4 pins, 4 DAC ch × 1 bit"
-    d_19_16: "%0000"
+    d_19_16: "%p00a"
     
   - mode: "%0110"
     symbol: X_IMM_8X4_2DAC2
     description: "8×4-bit immediate → 4 pins, 2 DAC ch × 2 bits"
-    d_19_16: "%0010"
+    d_19_16: "%p01a"
     
   - mode: "%0110"
     symbol: X_IMM_8X4_1DAC4
     description: "8×4-bit immediate → 4 pins, 1 DAC ch × 4 bits"
-    d_19_16: "%0100"
+    d_19_16: "%p10a"
 
   - mode: "%0110"
     symbol: X_IMM_4X8_4DAC2
@@ -153,52 +174,52 @@ modes:
   - mode: "%1000"
     symbol: X_RFBYTE_1P_1DAC1
     description: "RFBYTE → 1 pin, 1 DAC ch × 1 bit"
-    d_19_16: "%pppp (sub-pin select)"
+    d_19_16: "%pppa"
     
   - mode: "%1001"
     symbol: X_RFBYTE_2P_2DAC1
     description: "RFBYTE → 2 pins, 2 DAC ch × 1 bit"
-    d_19_16: "%ppp0"
+    d_19_16: "%pp0a"
     
   - mode: "%1001"
     symbol: X_RFBYTE_2P_1DAC2
     description: "RFBYTE → 2 pins, 1 DAC ch × 2 bits"
-    d_19_16: "%ppp0 + 2"
+    d_19_16: "%pp1a"
     
   - mode: "%1010"
     symbol: X_RFBYTE_4P_4DAC1
     description: "RFBYTE → 4 pins, 4 DAC ch × 1 bit"
-    d_19_16: "%pp00"
+    d_19_16: "%p00a"
     
   - mode: "%1010"
     symbol: X_RFBYTE_4P_2DAC2
     description: "RFBYTE → 4 pins, 2 DAC ch × 2 bits"
-    d_19_16: "%pp00 + 2"
+    d_19_16: "%p01a"
     
   - mode: "%1010"
     symbol: X_RFBYTE_4P_1DAC4
     description: "RFBYTE → 4 pins, 1 DAC ch × 4 bits"
-    d_19_16: "%pp00 + 4"
+    d_19_16: "%p10a"
     
   - mode: "%1010"
     symbol: X_RFBYTE_8P_4DAC2
     description: "RFBYTE → 8 pins, 4 DAC ch × 2 bits"
-    d_19_16: "%p000 + 6"
+    d_19_16: "%0110"
     
   - mode: "%1010"
     symbol: X_RFBYTE_8P_2DAC4
     description: "RFBYTE → 8 pins, 2 DAC ch × 4 bits"
-    d_19_16: "%p000 + 7"
+    d_19_16: "%0111"
     
   - mode: "%1010"
     symbol: X_RFBYTE_8P_1DAC8
     description: "RFBYTE → 8 pins, 1 DAC ch × 8 bits"
-    d_19_16: "%p000 + $E"
+    d_19_16: "%1110"
     
   - mode: "%1010"
     symbol: X_RFWORD_16P_4DAC4
     description: "RFWORD → 16 pins, 4 DAC ch × 4 bits"
-    d_19_16: "%0000 + $F"
+    d_19_16: "%1111"
     
   - mode: "%1011"
     symbol: X_RFWORD_16P_2DAC8
@@ -218,7 +239,7 @@ modes:
     
   - mode: "%1011"
     symbol: X_RFBYTE_RGBI8
-    description: "RFBYTE → RGBI 2:2:2:2 → RGB"
+    description: "RFBYTE → RGBI8: upper 3 bits select a colour, lower 5 bits are intensity → RGB"
     d_19_16: "%0011"
     
   - mode: "%1011"
@@ -240,52 +261,52 @@ modes:
   - mode: "%1100"
     symbol: X_1P_1DAC1_WFBYTE
     description: "1 pin, 1 DAC ch × 1 bit → WFBYTE"
-    d_19_16: "%pppp"
+    d_19_16: "%pppa"
     
   - mode: "%1101"
     symbol: X_2P_2DAC1_WFBYTE
     description: "2 pins, 2 DAC ch × 1 bit → WFBYTE"
-    d_19_16: "%ppp0"
+    d_19_16: "%pp0a"
 
   - mode: "%1101"
     symbol: X_2P_1DAC2_WFBYTE
     description: "2 pins, 1 DAC ch × 2 bits → WFBYTE"
-    d_19_16: "%ppp0 + 2"
+    d_19_16: "%pp1a"
     
   - mode: "%1110"
     symbol: X_4P_4DAC1_WFBYTE
     description: "4 pins, 4 DAC ch × 1 bit → WFBYTE"
-    d_19_16: "%pp00"
+    d_19_16: "%p00a"
 
   - mode: "%1110"
     symbol: X_4P_2DAC2_WFBYTE
     description: "4 pins, 2 DAC ch × 2 bits → WFBYTE"
-    d_19_16: "%pp00 + 2"
+    d_19_16: "%p01a"
 
   - mode: "%1110"
     symbol: X_4P_1DAC4_WFBYTE
     description: "4 pins, 1 DAC ch × 4 bits → WFBYTE"
-    d_19_16: "%pp00 + 4"
+    d_19_16: "%p10a"
 
   - mode: "%1110"
     symbol: X_8P_4DAC2_WFBYTE
     description: "8 pins, 4 DAC ch × 2 bits → WFBYTE"
-    d_19_16: "%p000 + 6"
+    d_19_16: "%0110"
 
   - mode: "%1110"
     symbol: X_8P_2DAC4_WFBYTE
     description: "8 pins, 2 DAC ch × 4 bits → WFBYTE"
-    d_19_16: "%p000 + 7"
+    d_19_16: "%0111"
 
   - mode: "%1110"
     symbol: X_8P_1DAC8_WFBYTE
     description: "8 pins, 1 DAC ch × 8 bits → WFBYTE"
-    d_19_16: "%p000 + $E"
+    d_19_16: "%1110"
     
   - mode: "%1110"
     symbol: X_16P_4DAC4_WFWORD
     description: "16 pins, 4 DAC ch × 4 bits → WFWORD"
-    d_19_16: "%0000 + $F"
+    d_19_16: "%1111"
     
   - mode: "%1111"
     symbol: X_16P_2DAC8_WFWORD
@@ -327,13 +348,13 @@ modes:
   - mode: "%1111"
     symbol: X_DDS_GOERTZEL_SINC1
     description: "DDS output + Goertzel SINC1"
-    d_19_16: "%0111"
+    d_19_16: "%p111"
     details: dds-goertzel.yaml
     
   - mode: "%1111"
     symbol: X_DDS_GOERTZEL_SINC2
     description: "DDS output + Goertzel SINC2"
-    d_19_16: "%0111 (with D[23]=1 — SINC2 select)"
+    d_19_16: "%p111 (with D[23]=1 — SINC2 select)"
     details: dds-goertzel.yaml
 
 # Quick mode selection guide

@@ -41,8 +41,25 @@ adc_input_pins:
   s_operand:
     field_19_16: "which of the four pins are INVERTED (allows subtraction of a channel)"
     field_15_12: "which of the four pins are SUMMED — MANDATORY; S[15:12] = 0 sums nothing and the analyzer accumulates zero"
-    field_11_0: "loop size + LUT window"
-    source: "Silicon Doc p2-documentation.txt:4002-4006"
+    field_11_9: >-
+      LOOP-SIZE SELECTOR. Chooses how many LUT entries one NCO cycle walks, and
+      therefore which NCO bits index the LUT. See lut_setup.lut_window for the
+      eight settings. %000 (512 entries) is only the default, not a requirement.
+    field_8_0: >-
+      Split by the loop-size selector into %A region-bound bits and %T phase-offset
+      bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits BOUND the
+      read to a sub-region of the LUT, so more than one waveform can be resident at
+      once; the %T bits are ADDED to the topmost NCO bits, which shifts or modulates
+      the phase of playback. Silicon Doc p2-documentation.txt:4093-4095, verbatim:
+      "On each clock, the lookup RAM is read at the 9-bit location bound by the %A
+      bits, with the lower bits being the sum of the %T bits and the topmost NCO
+      bits. This allows you to set bounded areas within the LUT and to shift or
+      modulate the phase of playback."
+    field_11_0_note: >-
+      RF modulation -- named in this mode's own applications list -- is done with the
+      %T bits. Nothing downstream can do it while S[11:0] is described only as a
+      label.
+    source: "Silicon Doc p2-documentation.txt:4002-4006 and :4062-4095"
   bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (p2-documentation.txt:3999-4001)."
   gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
 
@@ -54,7 +71,11 @@ operation:
     and analysis.
     
   steps:
-    1: "Read LUT entry at NCO[30:22]"
+    1: >-
+      Read the LUT entry indexed by the NCO bits the LOOP-SIZE selector chooses --
+      NCO[30:22] for the %000 (512-entry) default, NCO[30:29] at the other extreme.
+      See lut_setup.lut_window. The read is bounded by the %A bits and offset by the
+      %T bits of S[11:0].
     2: "Advance NCO phase: NCO += frequency"
     3: "Output LUT bytes to DACs (XOR $80 for unsigned)"
     4: "Multiply ADC input by sine/cosine"
@@ -76,7 +97,27 @@ operation:
 
 # LUT setup requirements
 lut_setup:
-  entries: 512
+  entries_default: 512
+  entries_note: >-
+    512 is the %000 case of the loop-size selector, NOT a hardware requirement. The
+    table below is the full set. A 512-long table needs `orgh`: 512 longs overflows
+    cog RAM (compiler m113).
+  lut_window:
+    description: >-
+      S[11:9] selects the loop size; the remaining S[8:0] bits split into %A region
+      bounds and %T phase offset. Silicon Doc p2-documentation.txt:4062-4092.
+    settings:
+      - {s_11_0: "%000_TTTTTTTTT", loop_size: 512, nco_bits: "30..22", lut_range: "%000000000..%111111111"}
+      - {s_11_0: "%001_ATTTTTTTT", loop_size: 256, nco_bits: "30..23", lut_range: "%A00000000..%A11111111"}
+      - {s_11_0: "%010_AATTTTTTT", loop_size: 128, nco_bits: "30..24", lut_range: "%AA0000000..%AA1111111"}
+      - {s_11_0: "%011_AAATTTTTT", loop_size:  64, nco_bits: "30..25", lut_range: "%AAA000000..%AAA111111"}
+      - {s_11_0: "%100_AAAATTTTT", loop_size:  32, nco_bits: "30..26", lut_range: "%AAAA00000..%AAAA11111"}
+      - {s_11_0: "%101_AAAAATTTT", loop_size:  16, nco_bits: "30..27", lut_range: "%AAAAA0000..%AAAAA1111"}
+      - {s_11_0: "%110_AAAAAATTT", loop_size:   8, nco_bits: "30..28", lut_range: "%AAAAAA000..%AAAAAA111"}
+      - {s_11_0: "%111_AAAAAAATT", loop_size:   4, nco_bits: "30..29", lut_range: "%AAAAAAA00..%AAAAAAA11"}
+    capabilities:
+      bounded_regions: "The %A bits confine playback to a LUT sub-region, so several waveforms can be resident at once."
+      phase_offset: "The %T bits are added to the topmost NCO bits — this is the phase shift / modulation control."
   format: "32-bit long per entry"
   
   byte_layout:
@@ -86,7 +127,8 @@ lut_setup:
     byte_0: "Optional (can be output waveform)"
     
   example: |
-    ' Build 512-entry sine/cosine table
+    ' Build a 512-entry sine/cosine table — matches the %000 loop size (S[11:9] = %000).
+    ' A different loop size needs a table of that many entries, not 512.
     repeat i from 0 to 511
       cos, sin := polxy(127, i << 23)
       t.byte[3] := sin      ' Sine for Goertzel
@@ -96,7 +138,7 @@ lut_setup:
       wrlut(t, i)
       
   sinc2_amplitude: |
-    ' For SINC2 mode, reduce amplitude to prevent overflow
+    ' For SINC2 mode, reduce amplitude to prevent overflow (512-entry / %000 loop size)
     repeat i from 0 to 511
       cos, sin := polxy(10, i << 23)  ' ±10 max
       ...
@@ -188,7 +230,11 @@ applications:
     
   function_generator:
     description: "Synthesize arbitrary waveforms"
-    pattern: "Load waveform to LUT, set output frequency"
+    pattern: "Load waveform to LUT, set output frequency, ROUTE THE DACS in %dddd"
+    note: >-
+      This is the DDS-OUTPUT direction. usage_pattern below is a DETECTOR and does
+      not enable it — its %dddd is X_DACS_OFF. See usage_pattern.dac_output_pin_setup
+      for what the output arrangement additionally needs.
 
 # Typical usage
 usage_pattern:
@@ -201,23 +247,19 @@ usage_pattern:
     '    Match the gain to the coupling; a directly-wired signal wants low gain.
     wrpin   ##P_ADC_1X, #adc_pin
 
-    ' 3. Configure DAC output pin (this one DOES get DIR)
-    wrpin   ##P_DAC_124R_3V, #dac_pin
-    dirh    #dac_pin
-
-    ' 4. Set the streamer NCO frequency (2^31 scaling — see `frequency:` above)
+    ' 3. Set the streamer NCO frequency (2^31 scaling — see `frequency:` above)
     rdlong  clkf, #$14             ' clkfreq lives at hub long $14
     qfrac   target_freq, clkf      ' 2^32 * target/clkfreq
     getqx   xfrq
     shr     xfrq, #1               ' halve to the NCO's 2^31 scaling
     setxfrq xfrq
 
-    ' 5. Start DDS/Goertzel. S IS MANDATORY: S[15:12] selects which of the four
+    ' 4. Start DDS/Goertzel. S IS MANDATORY: S[15:12] selects which of the four
     '    block pins are summed. S = 0 sums nothing and accumulates zero.
     setword dds_cmd, cycles, #0
     xcont   dds_cmd, dds_s
 
-    ' 6. Read once per command; the read returns the PRIOR command's capture
+    ' 5. Read once per command; the read returns the PRIOR command's capture
     getxacc cos_acc
     mov     sin_acc, 0-0
     qvector cos_acc, sin_acc
@@ -226,9 +268,26 @@ usage_pattern:
   data: |
     ' Goertzel mode, four-pin block 0 (pins 0..3), %111 config bits in D[18:16]
     dds_cmd     long    %1111_0000_0000_0111<<16 + sinc2<<23 + cycles
-    ' input on base pin +0 (S[15:12] = %0001), invert none, 512-entry LUT window
+    ' input on base pin +0 (S[15:12] = %0001), invert none,
+    ' S[11:9] = %000 -> 512-entry loop size, %A/%T both zero (whole LUT, no phase offset)
     dds_s       long    %0000_0001_000_000000000
 
+  what_this_example_is: >-
+    A GOERTZEL DETECTOR, and only that. Its own dds_cmd sets %dddd = %0000
+    (X_DACS_OFF), so no streamer DAC channel is routed anywhere, and it reads the
+    result back with GETXACC/QVECTOR. It therefore configures NO DAC output pin.
+    Until 2026-08-21 it did -- `wrpin ##P_DAC_124R_3V` plus `dirh` on a pin that
+    nothing in the program ever drove, giving a configured, enabled, silent pin and
+    no diagnostic (F-306). If you want the DDS OUTPUT half instead, that is a
+    different arrangement, not a line to add here: route the DACs in %dddd and set
+    the pin up as a streamer-fed DAC -- see dac_output_pin_setup below.
+  dac_output_pin_setup: >-
+    For the DDS-output direction the pin must be a COG DAC CHANNEL the streamer can
+    override: P_DAC_124R_3V | P_CHANNEL, with COGID in M[3:0] and DIRH on the pin,
+    the channel chosen by the pin's own two low bits. Measured, not reasoned --
+    EF-054 swept %TT on a jumpered cog-DAC pin (%00 = 1,408, no drive; %01 = 6,737)
+    and EF-055 watched the spread collapse from 1,305/2,000 samples to 25 once
+    P_CHANNEL was added. See F-272 and language/pasm2/wrpin.yaml:54.
   source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, p2-documentation.txt:4170-4185 (setup) and :4289-4305 (mode/data longs)."
 
 see_also:

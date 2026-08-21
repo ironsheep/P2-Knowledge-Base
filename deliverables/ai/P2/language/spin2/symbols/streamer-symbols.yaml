@@ -183,7 +183,7 @@ rgb_video_modes:
   - symbol: X_RFBYTE_RGBI8
     value: "$B003_0000"
     encoding: "%1011 << 28 + 3<<16"
-    description: "RFBYTE → RGBI 2:2:2:2"
+    description: "RFBYTE → RGBI8: upper 3 bits select a colour, lower 5 bits are intensity"
     
   - symbol: X_RFBYTE_RGB8
     value: "$B004_0000"
