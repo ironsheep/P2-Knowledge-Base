@@ -299,19 +299,19 @@ patterns:
   - pattern: "overhead_compensation"
     description: "Compensate for execution overhead"
     code: |
-      PUB precise_interval() | period, next, overhead
+      PUB precise_interval() | period, deadline, overhead
         ' Measure overhead once
-        next := getct()
-        waitct(next)
-        overhead := getct() - next
+        deadline := getct()
+        waitct(deadline)
+        overhead := getct() - deadline
 
         period := clkfreq / 1000       ' 1ms period
-        next := getct()
+        deadline := getct()
 
         REPEAT
-          next += period - overhead
+          deadline += period - overhead
           do_work()
-          waitct(next)
+          waitct(deadline)
 
   - pattern: "time_measurement"
     description: "Measure operation duration"
@@ -389,12 +389,12 @@ anti_patterns:
           do_work()
           waitms(100)                ' 100ms AFTER work completes (drifts)
     correct: |
-      PUB precise_periodic() | next
-        next := getct()
+      PUB precise_periodic() | deadline
+        deadline := getct()
         REPEAT
-          next += clkfreq / 10       ' 100ms interval
+          deadline += clkfreq / 10   ' 100ms interval
           do_work()
-          waitct(next)               ' Wait until next period
+          waitct(deadline)           ' Wait until the next period
 
   - anti_pattern: "integer_truncation"
     severity: "precision_loss"

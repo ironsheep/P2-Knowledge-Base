@@ -61,7 +61,10 @@ code_examples:
         org
         dirl    #step_pin                        ' Reset smart pin
         wrpin   ##P_REG_UP_DOWN | P_PLUS1_B, #step_pin
-        wxpin   ##clkfreq/10, #step_pin          ' 100ms periods
+        rdlong  clkf, #$14                       ' clkfreq lives at hub long $14
+        qdiv    clkf, #10
+        getqx   window                           ' 100ms periods
+        wxpin   window, #step_pin
         dirh    #step_pin                        ' Enable counter
       .loop
         testp   #step_pin wc                     ' Wait for period end

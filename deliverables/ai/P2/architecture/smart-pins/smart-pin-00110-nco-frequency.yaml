@@ -110,7 +110,8 @@ pasm2_complete: |
   ' Pin and mode configuration
   nco_pin       LONG  48
   nco_mode      LONG  P_NCO_FREQ | P_OE
-  clkfreq       LONG  200_000_000
+  clkf          LONG  200_000_000  ' `clkfreq` is RESERVED and cannot name a symbol;
+                                   ' keep this equal to _clkfreq, or RDLONG hub $14
   
   ' Generate specific frequency
   gen_frequency
@@ -119,7 +120,7 @@ pasm2_complete: |
           WRPIN nco_mode, pin         ' Configure
           
           ' Calculate Y value
-          QFRAC freq_hz, clkfreq      ' freq/clkfreq
+          QFRAC freq_hz, clkf         ' freq/clkfreq
           GETQX y_value               ' Get fraction
           
           WXPIN #1, pin               ' Base period = 1
@@ -145,7 +146,7 @@ pasm2_complete: |
   
   ' Phase modulation
   phase_mod
-          QFRAC carrier, clkfreq
+          QFRAC carrier, clkf
           GETQX carrier_y
           
   .loop   RDPIN phase, mod_pin        ' Read modulation

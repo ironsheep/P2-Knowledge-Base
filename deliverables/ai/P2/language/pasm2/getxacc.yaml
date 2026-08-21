@@ -36,8 +36,10 @@ examples:
   - context: DTMF tone detection with magnitude calculation
     code: |
       ' Detect DTMF tone after sampling period
-      getxacc x_val             ' X into x_val, Y into next S
-      qvector y_val             ' Y from S, compute magnitude/phase
+      getxacc x_val             ' X (cosine) into x_val; Y (sine) is injected into
+                                '   the NEXT instruction's S field, so one must follow
+      mov     y_val, 0-0        ' 0-0 is the S field GETXACC writes Y into
+      qvector x_val, y_val      ' QVECTOR D,S -- D is X, S is Y. Not the other way round.
       getqx   magnitude         ' Get magnitude (tone strength)
       getqy   phase             ' Get phase angle
     notes: QVECTOR computes sqrt(X^2 + Y^2) magnitude

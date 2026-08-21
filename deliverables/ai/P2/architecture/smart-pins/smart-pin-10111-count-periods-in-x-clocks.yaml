@@ -69,7 +69,8 @@ code_examples:
         org
         dirl    #signal_pin                      ' Reset smart pin
         wrpin   ##P_COUNTER_PERIODS, #signal_pin
-        wxpin   ##clkfreq, #signal_pin           ' 1-second minimum window
+        rdlong  clkf, #$14                       ' clkfreq lives at hub long $14
+        wxpin   clkf, #signal_pin                ' 1-second minimum window
         wypin   #%00, #signal_pin                ' Rise to rise
         dirh    #signal_pin                      ' Start measurement
       .loop

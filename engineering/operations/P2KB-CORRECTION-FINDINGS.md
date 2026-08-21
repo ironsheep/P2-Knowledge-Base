@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-315`**
+**Next finding ID: `F-316`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -1151,7 +1151,15 @@ out to be a class.
 > are declarable rather than carrying a keyword list that would rot; 4/4 known-bad caught, 4/4
 > known-good passed). Until it exists, this class is unbounded and these three are a floor.
 
-### F-311 — `clkfreq` is a RESERVED WORD in pnut-ts, and eleven PASM2 sites across eight KB files use it as an operand or a symbol name. None of them assemble. `CONFIRMED`
+### F-311 — `clkfreq` is a RESERVED WORD in pnut-ts, and eleven PASM2 sites across eight KB files use it as an operand or a symbol name. None of them assemble. `DONE (2026-08-21)`
+
+> **APPLIED 2026-08-21.** All eleven sites corrected. PASM2 now reads the value out of hub
+> (`rdlong clkf, #$14`) and divides with `qdiv`/`getqx` where a window was written as
+> `##clkfreq/10`; the illegal DAT symbol in `smart-pin-00110` is renamed `clkf` and carries a
+> comment saying why. **Verified by compiling, not by grepping:** the five replacement idioms
+> were compiled BEFORE being applied anywhere, and the repaired blocks from 10111, 00110, 10010,
+> 10101 and 10110 were then each compiled by hand with proper declarations. The 81 Spin2 and
+> prose occurrences of `clkfreq` are untouched and correct.
 
 **Evidence — pnut-ts v1.55.3, every form probed rather than inferred:**
 
@@ -1187,7 +1195,11 @@ scope.
 **Correction.** PASM2 must read the value out of hub — the Spin2 startup writes clkfreq to hub long
 `$14`, so `rdlong clkf, #$14` — and the holding register must be named anything but `clkfreq`.
 
-### F-312 — `getxacc.yaml`'s first example does not assemble, and its Goertzel read-back is backwards. `CONFIRMED`
+### F-312 — `getxacc.yaml`'s first example does not assemble, and its Goertzel read-back is backwards. `DONE (2026-08-21)`
+
+> **APPLIED 2026-08-21.** `examples[0]` now uses the idiom `dds-goertzel.yaml` already proved:
+> `getxacc x_val` / `mov y_val, 0-0` / `qvector x_val, y_val`, with comments naming what `0-0`
+> is and stating that D is X and S is Y. Compiled clean.
 
 **Location:** `deliverables/ai/P2/language/pasm2/getxacc.yaml`, `examples[0]`.
 
@@ -1205,12 +1217,25 @@ captured sine (Y) accumulation into the next instruction's S value"* — so `QVE
 `getxacc cos_acc` / `mov sin_acc, 0-0` / `qvector cos_acc, sin_acc` — compile-verified 2026-08-21.
 The page that DEFINES the idiom is the one that gets it wrong. `examples[1]` assembles and is fine.
 
-### F-313 — a Spin2 pattern file ships Propeller **1** code. `CONFIRMED`
+### F-313 — a Spin2 pattern file ships Propeller **1** code. `DONE (2026-08-21)`
 
 **Location:** `language/spin2/patterns/applications/audio_processor.yaml:18` —
 `waitcnt(clkfreq/SAMPLE_RATE + cnt)`. `waitcnt` and `cnt` are P1 constructs; P2 uses `waitct()` and
 `getct()`. → `error: Expected an instruction or variable`. P1/P2 conflation is the specific failure
 this knowledge base exists to prevent, so it is worth more than its single line.
+
+> **APPLIED 2026-08-21 — and the block had THREE defects, not the one this finding named.**
+> Fixing the P1 wait exposed the rest, because a block that has never been compiled has no
+> reason to have only one thing wrong with it:
+> 1. `waitcnt(clkfreq/SAMPLE_RATE + cnt)` — P1. Now a `getct()` deadline + `waitct(deadline)`.
+> 2. **`sin()` is not a Spin2 builtin** (`error: Expected an expression term`). Replaced with
+>    `QSIN($7FFF, t, $1_0000) + $8000`, following the contract in `methods/qsin.yaml`
+>    (`y := length * sin(step/stepsInCircle * 2Pi)`) — the KB's own documented form, not an
+>    invented one. `$1_0000` steps per circle makes `t` a 16-bit brad angle, which is exactly
+>    what the existing `freq * $1_0000 / SAMPLE_RATE` increment already produced.
+> 3. `step` as a local name — **reserved**. See **F-315**.
+>
+> The whole `implementation:` block now compiles clean, extracted verbatim from the YAML.
 
 ---
 
@@ -1249,6 +1274,40 @@ Fix the source and regenerate — and if the source has no field for the correct
 the finding.
 
 ---
+
+---
+
+## Reserved Spin2 words used as identifiers in KB examples (2026-08-21) — F-315
+
+### F-315 — three KB examples declare a local named `step` or `next`; both are reserved, so none of the three compile. `DONE (2026-08-21)`
+
+**How it surfaced.** Fixing F-313's P1 code produced `error: Expected a unique variable name…
+(m241)` on a line that had nothing to do with the P1 code. The culprit was the local named `step`,
+which had never been legal.
+
+**Method — the reserved list was asked of the compiler, not recalled.** Eighteen candidate names
+were each compile-probed as a local; `step`, `next`, `field`, `res`, `quit`, `from`, `to`, `case`,
+`repeat`, `until`, `while`, `other`, `send`, `recv`, `addpins`, `clkfreq`, `clkmode` and `abort` all
+reject. A hardcoded keyword list would have drifted — `field` became reserved after examples in this
+tree were written, and `clkfreq` is the subject of **F-311**.
+
+**The three sites, found by sweeping all eighteen names across every `PUB`/`PRI` signature:**
+
+| File | Line | Declared |
+|---|---|---|
+| `language/spin2/patterns/applications/audio_processor.yaml` | 12 | `\| t, step, deadline` |
+| `language/spin2/concepts/timing_operations.yaml` | 302 | `\| period, next, overhead` |
+| " | 392 | `\| next` |
+
+**Fix applied 2026-08-21.** `step` → `phase_step`, `next` → `deadline` (which also reads better: the
+variable holds a `getct()` deadline, and `next` in a `REPEAT` body already means the loop keyword).
+All three blocks extracted from their YAML and compiled clean. Re-swept: no reserved name remains as
+a declared local or parameter anywhere in `deliverables/ai/P2/`.
+
+**Why this is its own finding rather than a footnote.** It is a *language-version* defect, not a
+typo: these names were legal when the examples were written. That makes it recurrent by nature —
+every pnut-ts release can reserve another word and silently invalidate prose that nothing compiles.
+It is the strongest single argument for the gating compile step scoped alongside F-311…F-313.
 
 ## Open — enhancement proposals (new content, not corrections)
 

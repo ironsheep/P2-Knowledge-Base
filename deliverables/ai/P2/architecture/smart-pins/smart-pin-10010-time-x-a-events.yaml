@@ -57,7 +57,10 @@ code_examples:
         org
         dirl    #freq_pin
         wrpin   ##P_EVENTS_TICKS, #freq_pin
-        wxpin   ##clkfreq/10, #freq_pin          ' 100ms timeout
+        rdlong  clkf, #$14                       ' clkfreq lives at hub long $14
+        qdiv    clkf, #10
+        getqx   window                           ' 100ms timeout
+        wxpin   window, #freq_pin
         wypin   #%101, #freq_pin                 ' Timeout on missing edge
         dirh    #freq_pin
       .loop

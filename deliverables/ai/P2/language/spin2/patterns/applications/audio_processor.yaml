@@ -9,13 +9,18 @@ implementation: |
   VAR
     word audio_buffer[256]
     
-  PUB play_tone(freq, duration) | t, step
-    step := freq * $1_0000 / SAMPLE_RATE
+  PUB play_tone(freq, duration) | t, phase_step, deadline
+    phase_step := freq * $1_0000 / SAMPLE_RATE  ' phase increment, 16-bit brads per sample
     t := 0
+    deadline := getct()
     repeat duration * SAMPLE_RATE / 1000
-      audio_buffer[0] := sin(t) >> 16 + $8000
-      t += step
-      waitcnt(clkfreq/SAMPLE_RATE + cnt)
+      ' QSIN(length, step, stepsInCircle) -> length * sin(step/stepsInCircle * 2Pi).
+      ' $1_0000 steps per circle makes t a 16-bit brad angle; +$8000 recentres the
+      ' signed result into the unsigned word the buffer holds.
+      audio_buffer[0] := QSIN($7FFF, t, $1_0000) + $8000
+      t += phase_step
+      deadline += clkfreq / SAMPLE_RATE
+      waitct(deadline)
 resources:
   pins: "1-2 DAC outputs"
   memory: "512+ bytes buffer"

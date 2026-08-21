@@ -67,7 +67,10 @@ safe_clock_switching:
     step_2:
       description: "Wait for PLL to stabilize"
       code: |
-        WAITX   ##clkfreq/100         ' Wait ~10ms for PLL lock
+        RDLONG  clkf, #$14            ' clkfreq lives at hub long $14
+        QDIV    clkf, #100
+        GETQX   pll_wait
+        WAITX   pll_wait              ' Wait ~10ms for PLL lock
     step_3:
       description: "Switch to PLL"
       code: |
