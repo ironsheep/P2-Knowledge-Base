@@ -29,7 +29,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Assembly Reference | manual | ⏳ | ⏳ | — |
 | DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ |
-| Streamer Guide | manual | ⏳ | ✅ | — |
+| **Streamer Guide** | manual | **✅** ⁷ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | ⏳ | — |
@@ -55,6 +55,9 @@ a release explicitly scoped to *not* wait — the same reasoning that removed th
 Not a silent pass-over (which is what F-301 was); take it at the next release.
 ⁵ P2AN006 reads 1/5 only because `isp_stack_check.spin2` is a shipped utility object
 carrying its own hand-written header, not an example. Treat it as not adopted.
+
+
+⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. **Rights metadata is still absent (F-316)** and ships as its own feature.
 
 ---
 
