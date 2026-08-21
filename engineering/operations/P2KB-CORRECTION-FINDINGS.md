@@ -344,53 +344,13 @@ it found §15.1 carrying four defects where this finding had named one, and a fi
 which later tasks were told to respect. **That decision is now half wrong and must not be applied as
 written.** Surfaces at the Streamer v1.1.0 co-release gate («#288») with F-302…F-307.
 
-**Status:** `PARTIAL — the Streamer Guide is DONE: prose at :410 and :834, and every code block
-above, fixed 2026-08-20 with four gates green and §15.1 compiled from the manuscript. Confirmed on
-silicon (EF-062). Open on two counts: the v1.1.0 PDF is not verified yet («#287»), and the Assembly
-Language Reference's three sites are owed at the agreed CO-RELEASE.`
-
----
-
-### F-309 — the `pin<<17` caution in §12.0 stops short of the 8-pin-and-wider modes, which is the case that actually fires. `PARTIAL`
-
-> **This finding was FILED WRONG on 2026-08-20 and is rewritten here in place.** As first written it
-> claimed the multi-pin example lines were defective for naming their operand `pin` rather than
-> `base`, and that the manual carried no caution. **Both claims were false, and a single read of
-> §12.0 would have shown it.** The finding was filed off a grep of example lines. What follows is
-> what is actually owed, which is much narrower.
-
-**What the manual already gets right — do NOT "fix" any of it.**
-- §12.0 *explains and justifies* the naming: `pin<<17` puts `pin>>3` into the group field `D[22:20]`
-  and `pin&7` into the sub-pin field `D[19:17]`, *"which is exactly the decomposition the two fields
-  expect. That is why the idiom appears throughout this book with a plain pin number."* Renaming
-  `pin` to `base` would contradict a deliberate, documented convention.
-- §12.0 already carries a `::: caution` — *"The shift is arithmetic, not a pin-field operator"* —
-  covering the fewer-than-8-pin modes and DDS/Goertzel.
-- §12.1 (group field, 8-pin windows, wrap-around) and §12.2 (sub-pin split per pin count) are
-  correct and are now **empirically confirmed** by **EF-064**.
-
-**The actual gap.** That caution enumerated *"the fewer-than-8-pin modes"* and DDS/Goertzel. At
-**eight pins and wider** `D[19:17]` holds **no** pin bits at all — every one of them is mode or
-DAC-configuration — so the operand must be a multiple of 8. That case was not named, and it is the
-one the bench fired: `X_IMM_4X8_1DAC8` with `pin = 20` assembled to `$60B6_FFFF` instead of
-`$60AE_FFFF` and drove **P24..P31**, a different mode (`X_IMM_4X8_4DAC2`) at a different window.
-The `+` composition carried the stray low bits out of `D[19:16]` and into the group field. Proven as
-**EF-065**.
-
-**Fix applied 2026-08-20** — one paragraph added to the existing §12.0 caution, stating the
-8-pin-and-wider rule, what an unaligned value actually does (changes the mode, and carries into the
-group), and the general preference for `|` over `+` when composing a mode word. Four gates green.
-No example line was renamed.
-
-**Sibling, already in the book:** §9.2 / **EF-059** is the same failure in another mode family
-(`adc_pin<<17` changing the mode of `X_1ADC8_0P_1DAC8_WFBYTE`), and §12.0's first rule already points
-at it. The `|` form fails differently and worse — it sets a bit the mode template already sets, so
-the word is byte-identical to the aligned base and the stray value *vanishes* rather than carrying.
-
-**Status:** `PARTIAL — §12.0 caution extended 2026-08-20, four gates green, grounded in EF-064 +
-EF-065. Per this register's own rule — a fix applied but not yet validated is NOT done — it stays
-open until the v1.1.0 PDF is verified at «#287». The naming claim in the original filing was wrong
-and is retracted above.`
+**Status:** `PARTIAL — the Streamer Guide half is COMPLETE AND VALIDATED; only the Assembly Language
+Reference's three sites remain, owed at the agreed CO-RELEASE.` The v1.1.0 PDF was read at «#287»
+2026-08-21 and the §11.0 callout renders as the corrected split — *"X_PINS_ON requires no WRPIN: no
+DAC mode, no COGID, no channel… What digital output still needs is DIRH. X_PINS_ON enables the
+streamer's contribution… Until DIR is high, the pin does not drive."* The no-`WRPIN` half survived,
+the no-`DIRH` half is gone, exactly as EF-062 sealed it. Still owed:
+`part-iii/appendix-g-streamer-constants.md:228/:255/:289`, RELEASED in v3.1.6.
 
 ---
 
