@@ -338,7 +338,12 @@
     \ifx\DocLicense\@empty
       \hypersetup{pdfkeywords={\DocCopyright}}%
     \else
-      \hypersetup{pdfkeywords={\DocCopyright. Licensed under \DocLicense}}%
+      % Semicolon, not a full stop: a copyright string normally ENDS in one
+      % ("...Parallax Inc."), and appending another produced "Inc.. Licensed"
+      % in the first build that carried rights. A semicolon reads correctly whether
+      % or not the value is terminated, and pdfkeywords is conventionally a
+      % separated list anyway.
+      \hypersetup{pdfkeywords={\DocCopyright; licensed under \DocLicense}}%
     \fi
   \fi
 }

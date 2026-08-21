@@ -177,8 +177,13 @@ def main():
                          f"        request.json : {want!r}"))
     # An info field the PDF carries that NOTHING declared is drift in the other
     # direction — a value from somewhere other than the single source.
+    rights_declared = bool(meta.get("copyright") or meta.get("license"))
     for key, (kind, field) in FIELD_MAP.items():
         if kind == "info" and key not in meta and info.get(field):
+            # Keywords legitimately carries copyright/licence when those are declared;
+            # it is a derived field then, not drift.
+            if field == "Keywords" and rights_declared:
+                continue
             viol.append((f"{field.lower()}-undeclared",
                          f"the PDF carries {field} = {info[field]!r}, and request.json declares no "
                          f"`{key}`. The value came from somewhere other than the single source"))
@@ -229,6 +234,15 @@ def main():
                      f"carries no Keywords and no XMP stream — the value was authored but never "
                      f"emitted. Check that the template consumes it and that the Forge's platform "
                      f"foundation is current"))
+
+    for key in ("copyright", "license"):
+        if meta.get(key):
+            checked.append(f"Keywords<-{key}")
+            if norm(meta[key]) not in norm(rights_blob) and not has_xmp:
+                viol.append((f"{key}-not-in-pdf",
+                             f"request.json declares {key} = {meta[key]!r} but the PDF's Keywords "
+                             f"do not contain it.\n"
+                             f"        Keywords: {rights_blob!r}"))
 
     if not has_meta_rights and not has_xmp:
         msg = ("the PDF carries NO machine-readable copyright or licence — no Keywords, no XMP "
