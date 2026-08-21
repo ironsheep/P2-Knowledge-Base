@@ -12,7 +12,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **One finding lives in exactly one place.** When a finding is revised, **rewrite its entry in place**; never append a correction below the entry it corrects. The prior text is in git and in the archives.
 - Consultation protocol (status-before-content, duplicate IDs are a STOP): `.claude/skills/REGISTER-CONSULTATION.md`.
 
-**Status legend:** `CONFIRMED` (verified against an authority; ready to fix) · `NEEDS-VERIFICATION` (suspected; must be checked before acting) · `PARTIAL` (some of it applied; the rest still owed) · `DONE` (corrected + verified) · `WONTFIX` (investigated, not a defect) · `RESOLVED-INVALID` (the reported defect does not exist) · `TRACKED → ingestion` (real, but the resolution lives in the ingestion head).
+**Status legend:** `CONFIRMED` (verified against an authority; ready to fix) · `NEEDS-VERIFICATION` (suspected; must be checked before acting) · `PARTIAL` (some of it applied; the rest still owed) · `PENDING-VALIDATION` (the fix is fully applied; only its validation — a render, a release, a re-test — is owed. Added 2026-08-21: the rule below already described this state and there was no token for it, so nine findings sat as `CONFIRMED` with "render owed" prose and tripped the hygiene gate on every run) · `DONE` (corrected + verified) · `WONTFIX` (investigated, not a defect) · `RESOLVED-INVALID` (the reported defect does not exist) · `TRACKED → ingestion` (real, but the resolution lives in the ingestion head).
 
 **A fix applied but not yet validated is NOT done** — it stays here until its validation lands (the `[~]` rule from `punch-list-maintenance`). That covers a YAML edit awaiting its EF entry, and a manual fix awaiting its re-test.
 
@@ -189,7 +189,7 @@ window"), and the `\DiagDdsGoertzel` diagram in
 
 ---
 
-## Class-wide sweep of the Streamer findings — the same errors live in OTHER artifacts (2026-08-20) — F-303…F-305
+## Class-wide sweep of the Streamer findings — the same errors live in OTHER artifacts (2026-08-20) — F-303…F-309
 
 **Origin.** The Streamer Guide's 2026-08-19 class audit produced four confirmed factual errors.
 Sweeping them across every manual, app note, `deliverables/ai/P2/`, and workspace diagram template
@@ -375,7 +375,7 @@ manual defect; the manual does not quote these descriptions.`
 
 ---
 
-### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `CONFIRMED`
+### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `PARTIAL — Streamer Guide DONE and bench-sealed (EF-062); the v1.1.0 PDF is unverified and the Assembly Language Reference's three sites are owed at the co-release`
 
 **How it surfaced.** Two bench runs of the VO-J-003 rig (2026-08-20, logs in that rig's `logs/`).
 Its digital self-test drove `DAC_PIN` through `X_PINS_ON` with DIR left low — on the strength of the
@@ -514,55 +514,6 @@ and is retracted above.`
 
 ---
 
-## Manual-side residue of an already-fixed YAML correction (2026-08-20) — F-310
-
-### F-310 — the Streamer Guide sources the SINC2 constant-iteration constraint to a document that does not contain it. `DONE (2026-08-20)`
-
-**Origin:** found while correcting the Streamer Guide's fan-out audit record at «#282». The audit
-record claimed all 8 survivors had been applied; seven had. This is the eighth.
-
-**The claim, as RELEASED in v1.0.9** (`streamer-body.md`, the §10.5 SINC2 caution):
-*"a documented silicon limitation"* … *"(The constant-iteration constraint is recorded in the*
-Parallax Propeller 2 Documentation *Goertzel note dated 2024.12.16.)"*
-
-**Why it is wrong.** The **constraint itself is real and stands** — do not remove it. What is wrong
-is where the manual sends the reader to check it. It is **not** in the released *Parallax Propeller 2
-Documentation*. The 2026-07-10 fan-out audit flagged exactly this and marked it `unverifiable`; the
-v35 text carries only the amplitude caveat (reduce the sine/cosine table from ±127 to ±10), and the
-power-of-2 rule that IS in v35 belongs to the **smart-pin SINC2 sampling mode**, a different
-mechanism. The real source is Chip Gracey, the P2's designer, reporting it on 2024-12-16 — ingested
-at `engineering/ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/`.
-
-**This was already decided once, on the YAML side, and the manual was not swept.** **F-190**
-(`DONE 2026-07-02`, now in the 2026-08-15 archive) put the constraint into
-`language/pasm2/getxacc.yaml` as `sinc2_constraint` and deliberately attributed it to *"Chip Gracey
-(P2 designer), 2024-12-16; not yet in the released Silicon Doc"* — Stephen confirmed at the time that
-the released document lacks the note. Six weeks later the manual still carried the attribution that
-decision had already rejected. **The finding named the YAML, the fix corrected the YAML, nobody swept
-the manual** — the same shape as the Appendix A row that was fixed while fifteen siblings were not.
-
-**Class-wide sweep: done, and the class is small.** Exactly **one** live site, `opus-master/
-streamer-body.md`. No other manual and no app note carries the claim. Deliberately NOT touched: the
-workspace render and the outbound `.tex` (regenerated from the master), the fan-out audit file (a
-historical record of what was found), and the v1.0.3 CHANGELOG entry — which is **correct as
-written**, calling these *"Designer-authoritative guidance additions"* rather than
-documentation-sourced.
-
-**Fix applied 2026-08-20.** Headline now reads *"a silicon limitation reported by the P2's
-designer"*; the closing parenthetical now reads *"Chip Gracey, the P2's designer, reported this
-constraint on 2024-12-16. It has not reached the released* Parallax Propeller 2 Documentation*, so do
-not expect to find it there."* Telling the reader why the citation will not be found there is the
-part that makes the correction useful rather than merely accurate. Four prose gates green.
-
-**Status:** `DONE (2026-08-20) — single site corrected, class swept and empty, source verified live
-against the ingestion tree rather than against this register. Ships in Streamer Guide v1.1.0.`
-
----
-
-## Golden-source defect — duplicate EF id (2026-08-15) — F-267
-
-## ⛔ REVERSAL — a shipped KB correction went the wrong way (2026-08-16) — F-269
-
 ## YAML→Manual impact survey — KB v1.16.3 (2026-08-16, `release-yamls` §8)
 
 Delta: `spin2/methods/wrpin.yaml` · `architecture/smart_pins.yaml` ·
@@ -628,11 +579,9 @@ the durable fix; scope it as its own item rather than folding it into a correcti
 
 ---
 
-## A shipped YAML companion contradicts its own released app note (2026-08-16) — F-270
-
 ## The whole app-note companion set is version-frozen (2026-08-16) — F-271
 
-### F-271 — every `application-notes/*.yaml` companion still carries its maiden `version:` while the note it ships with has moved on, so an agent cannot tell which edition it holds. `CONFIRMED — scope decision owed, deliberately NOT swept`
+### F-271 — every `application-notes/*.yaml` companion still carries its maiden `version:` while the note it ships with has moved on, so an agent cannot tell which edition it holds. `RESOLVED — DECIDED 2026-08-16 (Stephen); the KB has one edition, so the field is deleted rather than maintained. Carried to PUNCH-LIST.md PL-004; its "Sprint 2 first" gate discharged when Sprint 2 closed 2026-08-19, and PL-004 parts 1 + 3 are being worked now.`
 
 **Surfaced by:** the F-270 content probe against the published MCP. The corrected SINC2 line came
 back live and correct — sitting four lines under `version: "1.0.0"`, in a companion to a note that
@@ -749,94 +698,6 @@ NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explic
 
 ---
 
-## Open question surfaced by «#221» — does a STREAMER-driven DAC need `P_CHANNEL`? (2026-08-16) — F-272
-
-### F-272 — filed as "the `%TT` setting for a DAC pin the STREAMER writes is not stated by any source we hold." The premise was false, and the bench then confirmed the answer. `RESOLVED-INVALID`
-
-**How it surfaced.** Streamer Guide §17.1 shipped `wrpin ##P_DAC_124R_3V + P_CHANNEL, dac_pins`
-alongside `X_DACS_0N0_0N0` in the command — i.e. a **streamer-driven** differential DAC. «#220»
-corrected the `+` to `|` (value-neutral). «#221» then had to decide whether `P_CHANNEL` belongs
-there at all, and **could not ground it either way.**
-
-**What the authority actually shows.** The Silicon Doc's worked Goertzel program
-(`p2-documentation.txt:4225-4305`) does **not** drive its DAC from the streamer. Its command long is
-`dds_d = %1111_0000_0000_0111<<16 + sinc2<<23 + cycles` — **DAC routing nibble `%0000`, i.e.
-`X_DACS_OFF`** — and the DAC pin is updated by re-issuing `WRPIN` with the power byte inserted into
-the mode word (`setbyte dacmode,x,#1` / `wrpin dacmode,#dacpin`). Its `dacmode` long is
-`%0000_0000_000_10110_00000000_00_00000_0`: **`TT = %00`, smart pin off, DAC_MODE**, level driven
-from `M[7:0]`. Per F-264 that is exactly the context where adding `P_OE`/`P_CHANNEL` **kills** the
-output. So for the *level-driven* DAC the answer is settled: no `P_CHANNEL`.
-
-**What remains open:** the guide's arrangement was a *different* one — DAC values supplied by the
-**streamer** through the DAC-routing field. In that arrangement the pin must take its value from a
-cog DAC channel, which is precisely what `P_CHANNEL` (`%01`) selects — so `P_CHANNEL` may well be
-**required** there. No source we hold works that arrangement, and it was never on the bench.
-
-**Resolution taken in the manual — avoid, do not guess.** §17.1 is titled *Goertzel Frequency
-Detection*, so it was rewritten as a **detector**: DAC routing off (`X_DACS_OFF`), input pin only,
-every line traceable to the Silicon Doc program. The generate-while-measuring case moved to a
-forward reference to §17.2. **Nothing asserts a `%TT` value for a streamer-driven DAC**, which is
-the honest state. [[feedback_understand_mechanism_before_documenting]] — a corrected-*looking*
-recipe we have not seen work is worse than an obviously incomplete one.
-
-**Why keep the question.** It is the same axis as **F-264**, whose impact survey already flagged
-**P2AN001 / P2AN003 / P2AN004** for re-audit on cog-DAC configuration. If any of them configures a
-streamer-fed DAC, this question governs it. Settle it on the bench (drive a DAC from the streamer
-with `TT = %00` and with `%01`, compare) before writing the streamer-driven form into any document.
-
-**Status:** `RESOLVED-INVALID (2026-08-20) — the premise was false: the mechanism IS stated by
-sources we hold, in the three places tabled below. The bench then ran anyway and CONFIRMED the
-answer — VO-J-003 → EF-063, arm T0 reading 1 ADC count at %TT = %00 against arm T1 reading 5,330
-at %01. Documentary and empirical agree; nothing is owed. Note this status supersedes the earlier
-"bench confirmation optional, not required" — it was optional, it happened, and it is recorded.`
-
-### 2026-08-20 — this finding's premise is falsified. The Silicon Doc states the whole mechanism, in three separate places.
-
-The entry above says *"the `%TT` setting for a DAC pin the STREAMER writes is not stated by any
-source we hold."* That was written from the Goertzel demo alone. A targeted re-read found the
-mechanism stated outright — not inferred, not assembled from reasoning, but three verbatim
-statements that together answer it:
-
-| Silicon Doc | Verbatim | Answers |
-|---|---|---|
-| `:7647` | *"01 = OUT enables ADC, **M[3:0] selects cog DAC channel**"* (under `for DAC_MODE:`, smart pin off) | `%TT = %01` **is** the cog-DAC-channel arrangement — i.e. `P_CHANNEL` **is required** |
-| `:3523` | *"that pin must be set to DAC mode **with the COGID embedded**, via WRPIN, and **DIR must be set high**"* | what `M[3:0]` carries, and that `DIRH` is required |
-| `:2705-2711` | *"Each cog outputs four 8-bit DAC channels… **DAC0 can drive the DAC's of all pins numbered %XXXX00**"* (DAC1→`%XXXX01`, DAC2→`%XXXX10`, DAC3→`%XXXX11`) | the channel is chosen by the **pin's two LSBs**, not by the mode word — which is why `M[3:0]` has room for the cog |
-
-**So the two arrangements are different modes, and both are documented:**
-
-- **Level-driven** (the Goertzel demo, and what the original entry analysed): `%TT = %00`,
-  `M[7:0]` *is* the level. **No `P_CHANNEL`** — and per **F-264** adding it here kills the output.
-- **Streamer/cog-channel-driven** (DDS, VGA, any `X_DACS_*` routing): `%TT = %01` (`P_CHANNEL`),
-  `M[3:0]` = the **COGID**, `DIRH` the pin, channel selected by the pin's low two bits.
-
-**Corroboration (upstream lead, NOT authority).** `flexprop/samples/vga/vga_tile_driver.spin2`
-does exactly this: its comment reads `' put our COG id into the DAC info`, it `or`s `mycogid`
-into the mode word (`:140-144`), its `dacmode_s` long carries `…_01_00000_0` — **`%TT = %01`,
-smart pin off** (`:205`) — and it `wrpin`s + `dirh`s pins 0..3 to take the four channels
-(`:166-176`). Community code is a lead only; it is cited here because it independently matches all
-three Silicon Doc statements, not as the basis for the claim.
-
-**Consequence.** The Streamer Guide's §17.1 original form (`P_DAC_124R_3V | P_CHANNEL` alongside
-`X_DACS_0N0_0N0`) was **right**, and «#221» was correct to doubt only because the *documentary
-basis* had not been found — not because the code was wrong. The sprint may now author the
-streamer-fed DAC setup from documentary authority.
-
-**A bench run is no longer required, but is still recommended** — this is the exact axis where
-**F-264** proved the two arrangements invert (a constant that is mandatory in one context kills
-the output in the other), so a jumper-rig confirmation is cheap insurance. It confirms rather than
-decides. Rig spec: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §1b.
-
-**Still genuinely unstated by any source:** nothing load-bearing. `M[3:0]` is described as
-carrying the COGID; no source decomposes it further, and none needs to.
-
-**Downstream:** the P2AN001 / P2AN003 / P2AN004 cog-DAC re-audit named under **F-264** is
-unblocked by this — it was waiting on this question.
-
----
-
-## ROOT CAUSE of the XBYTE `_RET_ CALL` defect — the KB dropped a qualifier (2026-08-16) — F-273
-
 ## IOSP suppressed-qualifier probe (2026-08-16, «#230») — F-274…F-275
 
 > **Method and full result:** `engineering/analysis/2026-08-16-iosp-suppressed-qualifier-probe.md`.
@@ -947,7 +808,7 @@ for the choice, not a resolution of it.
 
 ---
 
-## Stephen's review of the Sprint 2 gate release (2026-08-16, «#234») — F-276…F-279
+## Stephen's review of the Sprint 2 gate release (2026-08-16, «#234») — F-276…F-283
 
 > **Full dispositions and reasoning:** `engineering/planning/SPRINT2-VISUAL-REVIEW-NOTES-2026-08-16.md`.
 > Eight observations (V-1…V-8) worked one at a time against the gate commit `fea28f1c`. Four became
@@ -1141,188 +1002,6 @@ at its next visit — this row is what makes sure the visit knows.
 **The correction is one substitution** — `pnut_ts` → `pnut-ts` — with no prose consequence. Check each
 site is the *command*; the project name in running text is properly **PNut-TS**.
 
-### F-281 — three code lines run off the page in the RELEASED Debug Window PDF, taking part of the program with them. `CONFIRMED` — **ALL THREE FIXED 2026-08-17; no longer blocks v1.1.3**
-
-**Found:** 2026-08-17 running the wave's code-line gate before staging («#235»).
-**RELEASED (v1.1.2), and v1.1.3 would re-publish it unchanged.**
-
-**Looked at, not inferred.** Page 80 of `deliverables/documents/DOCs/P2-Debug-Window-Manual.pdf`
-rendered at 130 dpi: the `DEBUG(\`Waves 'Sine' …` line of the "complete worked example" overruns the
-blue code box, overprints the right margin, and is cut off at the paper edge — the third channel's
-`200 0 $00AAFF)` is simply not on the page. A reader copying that example gets a program that does
-not compile and an example that promises three channels while showing two and a fraction.
-(`pdftotext` was the first signal, but it is only a claim; the page image is the evidence. An earlier
-`pdftotext` hit on page 76 was a **different**, correctly-rendered passage — checking the image is
-what separated them.)
-
-**The three sites, all in captioned `.spin2` blocks with example-library twins. All three pages were
-rendered and looked at; the severities are NOT equal:**
-
-| Site | Len | Survives | What is lost | Program? |
-|---|---|---|---|---|
-| `ch07-scope.md:272` | 121 | ~101 | `100 200 0 $00AAFF)` — the **third SCOPE channel** | **BROKEN** — example promises three channels, shows two and a fraction |
-| `ch06-logic.md:310` | 113 | ~101 | `SI' 1 $FFFF00)` — the **third LOGIC channel + the closing paren** | **BROKEN** — line does not even close |
-| `ch14-multiwindow-pasm.md:299` | 110 | ~94 | `' fresh status block` — a **trailing comment only** | **INTACT** — code complete through its `)` |
-
-**So only two of the three are functionally broken.** The ch14 site loses a comment and looks wrong;
-its program is whole. That matters for triage: ch07 and ch06 hand the reader code that cannot run.
-
-**Capacity is ~101 columns, measured from the left edge INCLUDING indentation.** That is why ch14 cuts
-at 94 rather than 101 — it sits four spaces deeper. The budget is a *column* budget, not a
-content-length budget, so a deeply nested line has less room than a top-level one.
-
-**MECHANISM — and it points at a one-line platform fix.** Code blocks do **not** render through
-`listings`. `p2kb-platform-code-coloring.lua` emits every block as
-`\begin{Spin2Block}\begin{Verbatim}[xleftmargin=-10pt]…` — **fancyvrb's `Verbatim`, which has no line
-breaking by default.** The `breaklines=true` in `p2kb-platform-foundation.sty`'s `\lstset` (line 317)
-is **dead code for these blocks**; it configures a package this path never reaches. An over-wide line
-therefore runs off the page instead of wrapping, and nothing stops the build.
-
-**PROVEN ON THE DAEMON 2026-08-17 — and the fix is NOT what this finding first said.** Adding
-`breaklines=true` to the filter's `Verbatim` options converts silent truncation into visible wrapping
-across the whole document set and demotes K from a correctness cliff to a style budget. Confirmed by
-round-trip, not by reading.
-
-**Correction: `breaklines` is NOT a base-fancyvrb option.** The first attempt (`breaklines-v1`) failed
-outright — `! Package keyval Error: breaklines undefined`, `No pages of output`. The Forge's
-`fancyvrb.sty` does not know the key; `breaklines`, `breakanywhere`, `breaksymbolright` and
-`breakindent` come from **`fvextra`**. So the platform change is TWO edits, not one:
-1. `\RequirePackage{fvextra}` in `p2kb-platform-foundation.sty` (fvextra IS present in the Forge's
-   TeX Live — verified), and
-2. the options on every `Verbatim` the code-coloring filter emits (**10 sites**, not one).
-
-**What it looks like (`breaklines-v2`, clean build, page rendered and READ).** Options used:
-`breaklines=true, breakanywhere=false, breaksymbolright=\tiny\ensuremath{\hookrightarrow},
-breakindent=2em`. Every previously-lost fragment came back:
-
-| Case | Before | After |
-|---|---|---|
-| SCOPE, 121 cols | third channel gone | `'Noise' -1000 1000 100 200 0 $00AAFF)` visible, closing paren included |
-| LOGIC, 113 cols | third channel + `)` gone | `'MOSI' 1 $FFFF00)` visible |
-| IOSP, 103 cols (F-289) | comment cut at `bits 0..` | `(REV n covers bits 0..n)` visible |
-| normal-width control | — | untouched: no wrap, no marker |
-
-`breakanywhere=false` keeps breaks on whitespace, so no token is split mid-word, and the `↪` marker
-appears at BOTH the break and the indented continuation — a reader cannot mistake a wrap for authored
-structure, which was the open worry.
-
-**REJECTED 2026-08-17 — and the round-trip is what disproved it.** Stephen: *"one thing we shouldn't
-ever do is wrap code or comments within the code."* That policy is DECLARED, in two places, with this
-exact reasoning: `p2kb-platform-code-coloring.lua`'s header (*"a typeset wrap can't break a comment and
-re-indent it, nor add a language line continuation, so it produces wrong-looking code AND hides the
-problem"*) and `audit-code-line-length.py`'s own docstring. It was proposed and tested against a
-declared decision without that check being run first.
-
-**The render is the evidence the policy is right.** Both failure modes the policy names showed up in
-`breaklines-v2`:
-
-| Case | What the continuation line actually printed | Why it is wrong |
-|---|---|---|
-| C (comment) | `(REV n covers bits 0..n)` | **no `'` prefix** — a comment's tail rendered as though it were code |
-| A (statement) | `$FF0000 'Noise' -1000 1000 100 200 0 $00AAFF)` | **no Spin2 `...` continuation** — copy-paste yields a syntax error |
-
-Worse than truncation in one specific way: a truncated line is *visibly* broken, so a reader notices.
-A wrapped line looks complete and copies as broken. And it would have removed the pressure to fix the
-source, which is the "hides the problem" half.
-
-**Adoption reverted; the platform source never carried the patch** (it was tested on the daemon copies
-only, now restored). `fvextra` availability is recorded here only so nobody re-derives it.
-**Re-verified 2026-08-19: the tree is still clean of it.** No `fvextra` in the platform templates, and
-`p2kb-platform-code-coloring.lua` emits `\begin{Verbatim}[xleftmargin=-10pt]` with no break options at
-all 10 sites. The `breaklines=true` at `p2kb-platform-foundation.sty:317` is the pre-existing `\lstset`
-dead code this finding identified — it is NOT residue of the patch, and removing it is not owed.
-
-⚠️ **THE REJECTION DID NOT PROPAGATE, AND THAT IS THE MORE EXPENSIVE DEFECT. Swept 2026-08-19.**
-The rejection landed here and in `PUNCH-LIST.md` on 2026-08-17 at 20:02. It never reached the task
-tracker: todo «#250» was created the next day carrying this finding's **pre-rejection** text verbatim —
-mechanism, `FIX: add breaklines=true`, `USE forge-test` — and from there the dead plan was cited as a
-live commitment in four more places written over the following two days:
-
-| Where | What it claimed | Written |
-|---|---|---|
-| todo «#250» | the fix, as work owed | 2026-08-18 (out of «#249»'s close) |
-| `XBYTE-…-SPRINT-PLAN.md:626` | "not in this sprint" — i.e. still scheduled | 2026-08-18 04:36 |
-| `PUNCH-LIST.md:437` | "same profile as the `breaklines` work «#250»" | 2026-08-18 21:12 |
-| F-300 sequencing (this file) | "three set-wide render changes" | 2026-08-19 |
-| F-299 (this file) | "Pair it with «#250»" | 2026-08-19 |
-| `active_element` resume key | «#250» as "**THE REAL ONE**", top of next-work | 2026-08-19 |
-
-Every one of those was authored **after** the rejection, by reading the task rather than the register.
-Stephen caught it at the next session's resume — the front door recommended, as the single best next
-piece of work, a change he had personally rejected on the render two days earlier.
-
-**The mechanism, and it is general.** A finding's disposition can change after tasks have been cut
-from it. The register is the source of truth, but the tracker is what a resume reads first, so a
-reversal recorded only in the register is invisible where decisions actually get made. **When a
-finding is rejected, reversed, or re-graded, sweep every artifact that carries its plan in the same
-commit** — todo tasks first, then punch list, sprint plans, and any other finding that cites it.
-`grep` for the finding ID *and* for the task number: this one propagated under «#250», not "F-281".
-See [[feedback_classwide_sweep_on_every_finding]]; the class here is *pointers to a decision*, not
-occurrences of a fact. All six sites above are now corrected (dated records — the closed XBYTE sprint
-plan and the Streamer PUBLISH ledger line — are annotated, not rewritten).
-
-**THE FIX IS AUTHORSHIP, as the policy always said.** Over-long lines get shortened in `opus-master` by
-the sanctioned routes — comment moved to full lines above the instruction at its indent, or split with
-the continuation comment's `'` aligned to the inline `'` column; a statement broken at a logical
-boundary with the legal Spin2 `...`. The real mechanism is the **gate**, and F-289 just repaired it:
-it had been skipping every captioned block, which is why 24 Debug Window and 11 IOSP lines went
-unreported. A working gate plus authorship is the answer; a typeset wrap was never it.
-
-**Re-authoring was therefore REQUIRED, and it was done — all three sites, 2026-08-17.** ⚠️ *This
-paragraph previously read "with wrapping visible, the SCOPE and LOGIC lines are no longer losing
-content, so shortening them becomes a style choice rather than a repair." That was written before the
-rejection and survived it, sitting inside this entry asserting the opposite of the entry's own verdict.
-**Corrected 2026-08-19.*** With the wrap rejected, nothing rescues an over-wide line at render time:
-the SCOPE and LOGIC lines were losing content, shortening them was a repair and not a style choice, and
-the LOGIC case did have to be solved on its own terms. Commits `2747fd91` (the last two over-cliff
-lines) and `1b918d4c` (the LOGIC line) did it. **Verified 2026-08-19, not assumed:**
-`audit-code-line-length.py` runs clean across all 30 Debug Window masters at K=76 — zero violations.
-
-**The declared budget is right; the other 21 over-budget lines are lucky, not correct.** Twenty-four
-lines exceed the manual's declared `code_line_budget_K: 76`. Measured against the shipped PDF, only
-these three are actually lost — the real overflow threshold sits between 100 and 110 characters. That
-is exactly why K is set conservatively at 76, and the twenty-one between 77 and 100 should come down
-at the manual's next authoring pass. **They are not part of this fix**; only demonstrable breakage is.
-
-**Why this is not a one-line edit.** These are compilable examples under a byte-identity gate, so any
-change lands in `examples-library/*.spin2` too, and the shortened form has to be one that *works* —
-not merely one that fits.
-
-**The SCOPE fix is determined at the source level.** `vIndex` (the active-channel count) is set to `0`
-in `SetDefaults` only, which runs **once at window creation** (`SCOPE_Theory_of_Operations.md` §21.1,
-`DebugDisplayUnit.pas` 2880-2917). Nothing resets it per update message, and the channel-def branch
-only ever increments it (`if vIndex <> Channels then Inc(vIndex)`, 1219). So three separate update
-messages accumulate to three channels, identical to one message declaring three:
-
-```spin2
-debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00)
-debug(`Waves 'Tri'   -1000 1000 100 100 0 $FF0000)
-debug(`Waves 'Noise' -1000 1000 100 200 0 $00AAFF)
-```
-
-Roughly 50 characters each. **Not applied**, because the mechanism being understood is not the same as
-having seen it run, and a corrected-looking recipe is worse than a visibly broken one. This needs one
-bench execution to close — the window either shows three stacked traces or it does not.
-
-**A splice on one physical line is NOT available, and the control proved it.** `-` as a continuation
-inside the backtick string **compiles clean and silently changes the program**: 9,338 bytes against
-9,408 for the one-line form, the trailing channels dropped. A clean `pnut-ts` compile is legality,
-never semantics — the byte-compare is what caught it.
-
-**LOGIC checked and cleared — not the same defect.** `ch06-logic.md:310` puts channel labels on the
-LOGIC *create* line, which for SCOPE would abort window creation entirely (EF-003). LOGIC's
-Theory-of-Operations shows the opposite: labels belong on its create line, and only `TRIGGER` must be
-split out — which this example already does correctly. **LOGIC's problem is length alone.** Because
-its labels cannot move to a second message, the fix there is authorial (shorten `TITLE`, or drop the
-explicit colors and take the defaults) and changes what the example teaches. `ch14`'s TERM site needs
-its own positional check against `TERM_Theory_of_Operations.md` before being split.
-
-**Platform observation worth its own look:** the overflow is *silent at build time*. The compile log
-was clean, the Forge reported success, and the manual shipped. A code line that runs off the page with
-no overfull-hbox stop is a render failure that only a human looking at the page will catch — which is
-the whole reason the "verify the rendered PDF, not the log" rule exists, and an argument for making
-the platform's listing environment fail loudly instead.
-
 ### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED` — **the 3 release-wave descriptors corrected 2026-08-17**
 
 > **Wave descriptors fixed 2026-08-17**, each checked against `git tag` rather than against the file's
@@ -1454,6 +1133,8 @@ written — a names-only pass on one file is not coverage of the category.
 
 ## Open — enhancement proposals (new content, not corrections)
 
+- **ENH-02 — make the platform fail loudly on a code line that cannot fit.** *Filed 2026-08-21 when F-281 closed.* F-281's three over-wide lines were fixed and v1.1.3 shipped margin-clean, but **nothing stops the class recurring**: `p2kb-platform-code-coloring.lua` emits `\begin{Verbatim}[xleftmargin=-10pt]` with no break options at all ten sites, and the `breaklines=true` at `p2kb-platform-foundation.sty:317` is a pre-existing `\lstset` that the Verbatim path never consults. So an over-long line silently runs off the page and the compile log stays clean — the exact shape of every render defect this project has shipped. The source-side `audit-code-line-length.py` gate catches most of it, and `audit-pdf-margin-overflow.py` catches it after the fact; what is missing is the platform refusing to typeset it. Not a defect in any document — an absent guard.
+
 - **ENH-01 — Harvest the Architect's Guide *project front-end* into a new KB node set.** *Scheduled
   2026-07-08 (deferred from the Architect's Guide v1.0.0 release); Stephen go/no-go before authoring.*
   Source: *The P2 Architect's Guide* v1.0.0, **Part I (Act I)**. The decomposition-reasoning layer
@@ -1569,37 +1250,6 @@ written — a names-only pass on one file is not coverage of the category.
 
 > **Surfaced by the Titus rev5 cross-source Q&A + IOSP cross-audit (2026-06-12/13).** These are **additions** (content the KB does not yet carry), not corrections — filed here so the v1.10.1 sweep executes them alongside the F-corrections. G-001 was previously named only in the head dashboards; now formally logged. Per-item gating noted; the gated parts do **not** block the rest.
 
-### G-004 — `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` X/Y/Z registers were one-line stubs — `DONE (2026-08-16)`
-
-> **APPLIED 2026-08-16 («#218»).** The `open_questions:` block (`:60-64`) is deleted and replaced by
-> a single `electrical_characteristics:` routing line: the J/K/SE0/SE1 detector thresholds are
-> datasheet territory, and the programming interface above is complete. A *routing* statement, not
-> an *unknown* statement — which is the whole distinction this entry turned on. Verified by re-read:
-> `deliverables/ai/P2/` now contains **no** `open_questions:` block. Closes G-004 in full.
-
-> **Rewritten in place 2026-08-15. There is nothing Chip-gated here, and there never really was**
-> (Stephen, 2026-08-15). The "gated remainder" was *receiver analog front-end detail and the exact
-> electrical thresholds of the J/K/SE0/SE1 line-state detectors.* Those are **electrical
-> characteristics, not programming facts** — out of scope for this KB. A programmer using the USB
-> smart-pin mode sets baud / host-device / FS-LS, sends line states, and reads the 16-bit status
-> word, all of which shipped 2026-06-20. Anyone needing a comparator threshold wants the datasheet,
-> not us. So the content is complete and this is no longer PARTIAL on any gate.
->
-> **What IS owed, and it is a defect rather than a gap:** the file ships an `open_questions:` block
-> (`:60-64`) announcing what we do not know. In an **agent-consumed** deliverable that is a hedge in
-> the one place hedges are unusable — an agent cannot act on it, it reads as a gap in the *P2* rather
-> than in *our sourcing*, and it invites a later fill-in from inference. A class-wide sweep found it
-> is the **only** such block in `deliverables/ai/P2/`, so it is an outlier, not a convention.
-> **Correction:** delete the block; if anything replaces it, a one-line pointer that electrical
-> characteristics live in the datasheet — a *routing* statement, which is legitimate, rather than an
-> *unknown* statement, which is not. Rides this sprint's YAML patch release.
->
-> **Note the precedent one entry below.** G-005 sat "OPEN pending hardware" while the hardware answer
-> had been on the ledger since 2026-06-17. Both entries were stale rather than blocked, and the
-> 2026-06-20 archival deferral was conditioned on exactly these two.
-> **APPLIED 2026-06-20 (provable part):** replaced the one-line X/Y/Z stubs with the full Silicon-confirmable register layer — WXPIN config word (D[15] host/device, D[14] FS/LS, D[13:0] baud = 16-bit sysclk fraction, two MSBs 0), WYPIN line-state D-values (0=IDLE, 1=SE0, 2=K, 3=J, 4=EOP, $80=SOP) + packet-send protocol, the 16-bit RX status word (all 10 documented bit-fields), and per-pin IN semantics (odd/DP = TX-buffer-empty; even/DM = RX-status-change; C = RX error). All WXPIN/WYPIN/RDPIN issued on the lower/even pin. Authority: Silicon `p2-documentation.txt:8886-9006` (verbatim). **STILL OPEN (Chip-gated):** logged an in-file `open_questions:` block — RX analog front-end / line-state detector thresholds / any scope-style filter taps are NOT in Silicon and remain in the expert queue. This finding stays PARTIAL.
-- The USB-host/device mode carries no register detail. **Add the Silicon-Doc-confirmable layer now:** WXPIN config word (D[15]=host/device, D[14]=FS/LS, D[13:0]=baud), WYPIN line-state D-values (0=IDLE…$80=SOP), RX 16-bit status word, per-pin IN semantics (odd/DP = TX-buffer-empty, even/DM = RX-status-change). **Authority:** Silicon `p2-documentation.txt:8886–8960`. **Gated remainder:** any figure not in Silicon (e.g. scope-style filter taps) stays in the expert queue (Chip). (IOSP RA-38/40/42/43/46/47.)
-
 ## Systematic `P_*` constant-name audit (2026-07-01) — F-177…F-183
 
 > **Origin & method (Stephen's call).** After F-174/175/176 kept surfacing fictitious `P_*`
@@ -1678,7 +1328,7 @@ written — a names-only pass on one file is not coverage of the category.
 
 ## Quantitative hardware-table audit batch (2026-07-07) — F-203
 
-### F-203 — 4-manual fan-out audit of quantitative hardware tables vs trusted ingested sources — `14 CONFIRMED_WRONG (hand-verified) + 8 AT_RISK; fixes in progress`
+### F-203 — 4-manual fan-out audit of quantitative hardware tables vs trusted ingested sources — `PARTIAL — 14 CONFIRMED_WRONG (hand-verified) + 8 AT_RISK; the IOSP and deSilva cells are fixed, the Streamer and Debug cells need their own patches`
 > **Method:** 9-unit fan-out (IOSP ×5 parts, Streamer, Debug ×2, deSilva) enumerating every quantitative/encoding
 > table cell, each classified GROUNDED/DERIVED/AT_RISK/WRONG against **ingested sources only** (Silicon Doc,
 > Spin2 v55, P2 datasheet), then adversarially verified. Full verdicts: workflow `wx8vrj00a` output. 1 false
@@ -1745,16 +1395,14 @@ D[25]. The two are different facts about different bits, and our doc appears to 
   tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
   instead of being trusted.
 
-## `architecture/xbyte_engine.yaml` — all three programming examples are broken (2026-07-14) — F-220…F-223
+## CORDIC interrupt hazard — documented on one page, missing from the pages that need it (2026-07-14) — F-224
 
-> **Origin.** Chasing an open question for the XBYTE Guide (*what does Chip's "no stack pop" mean?*), the
-> authoritative KB entry `p2kbArchXbyteEngine` was consulted — and **every one of its three
-> `programming_examples` is wrong.** This is the YAML an agent would use to generate XBYTE code.
-> Ground truth used below: the **Silicon Doc** narrative + demo, **Chip's own Spin2 interpreter**,
-> **Parallax's official `xbyte.spin2`**, plus Zog and the 8080 emulator — nine implementations, all
-> agreeing. Evidence: `manuals/p2-xbyte-programming-guide/TECHNIQUE-MINING.md`.
->
-> **File:** `deliverables/ai/P2/architecture/xbyte_engine.yaml`
+> **This header replaced a stale one on 2026-08-21.** F-224 had been sitting under
+> *"`architecture/xbyte_engine.yaml` — all three programming examples are broken"*, whose four
+> findings (F-220…F-223) all closed 2026-07-14/16 and were archived 2026-08-15 — leaving a live
+> register asserting that three KB examples were broken when the file had been fixed for a month.
+> Verified fixed in `xbyte_engine.yaml` at commits `31bffdce` (F-220/221/222) and `bb02525a`
+> (F-223). Detected by `audit-register-hygiene.py` checks 8 and 9.
 
 ### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `CONFIRMED` (low severity, cross-reference gap)
 
@@ -1804,8 +1452,6 @@ element with no prose change, so it costs nothing to carry.
 `p2-assembly-language-manual/opus-master/part-ii/`. They are **untracked** — `git ls-files` returns
 zero — so nothing ships and no glob in the assemble scripts reaches them (those use explicit
 `REQUIRED_FILES[]`). Working-tree clutter only; worth sweeping, not a release concern.
-
-## Interactive DEBUG examples never ran — `PC_KEY`/`PC_MOUSE` shipped without their escape backtick (2026-07-26) — F-227
 
 ## Forum docs-feedback sweep (2026-08-14) — F-254…F-258
 
@@ -1866,22 +1512,19 @@ no answer is asserted here.**
 ledger either way. **A load-bearing idiom in a guide under community review must not stay
 unverified.** If it fails, §15.3 and the Chapter 9 explanation both need rework.
 
-## Community bench review — refaQtor, P2 Rev C @ 300 MHz (2026-08-14) — F-259…F-263
+## Render-verification wave — defects found by READING the generated PDFs (2026-08-17/19) — F-284…F-294, F-299…F-301
 
-**Origin:** `p2-manuals-review-findings.md` (posted as `p2-manuals-review-findings.zip`, forum
-#108), reviewing the manuals **as downloaded 2026-08-13**. Author states every claim has a
-committed harness + log on **real P2 Rev C silicon at 300 MHz, pnut_ts 1.55**.
+**Origin.** Verifying the six generated wave PDFs page by page rather than reading their compile
+logs. Every finding below was invisible to a clean log: LaTeX ate an operator, a filter split a
+line, a glyph printed nothing, a gate skipped the blocks it was built to check. F-295…F-298 closed
+at the XBYTE sprint closeout and are archived.
 
-> **Trust note.** This is a *third party's* bench, not ours. It is far stronger than a forum
-> opinion — reproducible rigs with logs — but it is **not** an accepted P2KB empirical finding and
-> must **not** be written into `P2-EMPIRICAL-FINDINGS.md` as if it were our own test. Treat each
-> claim as a **high-quality lead**: verify against our sources (done below), fix the documentation
-> defect where the source proves it, and **replicate on our bench** anything we intend to cite as
-> ground truth. His §5 "confirmations" are likewise corroboration, not EF entries.
+> **These sat under the wrong header until 2026-08-21.** The 2026-08-19 sweep archived
+> F-259…F-263 but left their `## Community bench review — refaQtor` header in place, so all
+> fourteen read as part of a third party's bench review. That header is now in the archive with
+> the findings it introduced. Detected by `audit-register-hygiene.py` check 9.
 
-**All five below are in RELEASED manuals.**
-
-### F-284 — the 9-column encoding-table filter never escaped `&`, so two shipped instruction definitions print with the AND operator eaten by LaTeX. `CONFIRMED` — **fixed 2026-08-17; Assembly must re-render**
+### F-284 — the 9-column encoding-table filter never escaped `&`, so two shipped instruction definitions print with the AND operator eaten by LaTeX. `PENDING-VALIDATION` — **fixed 2026-08-17; Assembly must re-render**
 
 **Found:** 2026-08-17, verifying the six generated wave PDFs page by page. The compile log
 reported **zero errors**; the defect was visible only on the page.
@@ -1923,7 +1566,7 @@ check compile logs, and this defect is invisible to both. It was found by render
 looking at it, prompted by triaging an overfull-hbox count. **An overfull hbox in a table is worth
 opening**; it is the only signal this failure emits.
 
-### F-286 — the escaping that stops F-284's class was per-call-site discretion, so it drifted to five more raw-emission sites. `CONFIRMED` — **fixed 2026-08-17; needs the Assembly render to validate**
+### F-286 — the escaping that stops F-284's class was per-call-site discretion, so it drifted to five more raw-emission sites. `PENDING-VALIDATION` — **fixed 2026-08-17; needs the Assembly render to validate**
 
 **Found:** 2026-08-17, asking the process question after F-284/F-285: *what would routinely catch
 these?* The answer turned out to be a structural fix rather than a checklist.
@@ -1990,40 +1633,6 @@ Part titles and table captions still render as before.
    log carries 7,056 overfulls of which 36 are ≥20pt, so ranking is tractable where listing is not.
 4. **`release-manual` 1d′ — read the whole page you opened.** F-285 cost nothing because it sat on
    F-284's page; a narrowly-scoped check would have passed it through again.
-
-### F-287 — the P2AN001 companion states the ~15 mV error floor as fact; the note marks it designer-stated. `CONFIRMED` — **fixed 2026-08-17**
-
-**Found:** 2026-08-17, acting on F-283's own scope note ("the same drift is plausible in every app
-note whose doc has advanced since its companion was written"). P2AN001 was in the release flight, so
-its pair was checked before shipping.
-
-**The disagreement.** `P2AN001.md:626` is careful about provenance: *"The P2's designer reports having
-seen pins read as much as 15 mV apart in absolute terms (Reference 2) — a designer-stated figure for
-the pin-to-pin spread, **not a characterized specification**."* The companion's `gotchas` carried the
-number flat — *"different pins can read up to ~15 mV apart in absolute terms. A hardware limit"* —
-with no provenance at all.
-
-**Why it matters more than a missing word.** An agent reading only the companion cites ~15 mV as a
-specification. That is the **confidence/source mismatch** that this project treats as a trust-killer,
-and it is the same failure as F-273: the qualifier is the half that goes missing, and its absence
-reads as a stronger claim rather than an incomplete one. The note also names where the front-end
-limits and calibration guidance live (I/O and Smart Pins User Guide §16.8); the companion did not.
-
-**Fixed:** the `gotchas` entry now carries the designer-stated qualifier, the explicit "NOT a
-characterized specification", the hardware-limit-not-noise distinction, the per-pin calibration
-remedy, and the §16.8 pointer.
-
-**Category swept, and it is otherwise clean.** All seven app-note companions were checked for OBEX
-citations: P2AN001/005/006/007 carry none; P2AN002 had four wrong or incomplete (F-283); P2AN003 (4
-citations) and P2AN004 (2) were verified against the live catalog and are **correct** — #2860 EZ Sound
-(Jon McPhalen / jonnymac), #2831 P2_rctime (phonoclese), #2829 Quadrature Encoder (Jon McPhalen /
-jonnymac), #2861 reSound. So the drift was specific to P2AN002, not systemic.
-
-**One open question, deliberately NOT edited.** P2AN003's companion credits OBEX #2861 reSound to
-**"Johannes Ahlebrand"**; the live catalog's author field reads only **"Johannes"**. The surname may
-be correct from the object's own source header, and absence from the catalog field is not proof it is
-wrong — so this is not treated as a defect to fix silently in a **published** note. Needs Stephen's
-call: verify against the object source, or fall back to the catalog form.
 
 ### F-288 — an effect group in slash form is shaped exactly like a dual mnemonic, so 16 syntax forms print split across two lines. `CONFIRMED` — **filter fixed 2026-08-17; needs the Assembly render**
 
@@ -2098,7 +1707,7 @@ code read.
 shows the four TESTP forms each on one line in the production build; deSilva, P2AN001 and P2AN002 are
 unaffected (this filter is Assembly-local) and release without it.
 
-### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `CONFIRMED` — **tool fixed 2026-08-17; all 11 IOSP sites repaired 2026-08-17, render owed**
+### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `PENDING-VALIDATION` — **tool fixed 2026-08-17; all 11 IOSP sites repaired 2026-08-17, render owed**
 
 **Found:** 2026-08-17, asking a plain status question about Debug Window and IOSP while waiting on the
 Assembly render. Debug Window's code-line audit reported **clean** at K=76; measuring the same files
@@ -2289,7 +1898,7 @@ render — red antipattern box, correctly indented inside the quote, trailing qu
 `ch08-scope-xy.md`'s wrong/right pair is split: the wrong form is an `antipattern` block, the
 correct form a `spin2` block beside it, matching the Chapter 12 treatment. Rides v1.1.3.
 
-### F-292 — six printed snippets teach a `...` continuation inside `debug()`, so each one silently ships a different program. `CONFIRMED` — **all six fixed 2026-08-17**
+### F-292 — six printed snippets teach a `...` continuation inside `debug()`, so each one silently ships a different program. `PENDING-VALIDATION` — **all six fixed 2026-08-17; the example-library half shipped in Debug Window v1.1.3, the printed snippets are unconfirmed on the page**
 
 **Found:** 2026-08-17, answering "any more outstanding issues with this manual?" after F-290
 established that a `debug()` directive cannot be continued at all. Searching the masters for the
@@ -2380,7 +1989,7 @@ crossref-before-tables ordering) and its status table is frozen as history.
 that has not been shortcut, only made visible. **ssdb and pnut-term-ts release next and both sit at
 ⏳**, so they are the first two chances to stop the count growing.
 
-### F-300 — every published PDF in the set ships with empty Title and Author properties. `CONFIRMED` — **MECHANISM LANDED + PROVEN 2026-08-19; adoption is per document, tracked in `PLATFORM-FEATURE-ADOPTION.md`**
+### F-300 — every published PDF in the set ships with empty Title and Author properties. `PENDING-VALIDATION` — **MECHANISM LANDED + PROVEN 2026-08-19; adoption is per document, tracked in `PLATFORM-FEATURE-ADOPTION.md`**
 
 > **RESOLUTION (2026-08-19).** The fix is **not** the one-line `pdfusetitle` this entry proposed —
 > that would have populated the info dictionary and left the cover as a second hand-maintained copy
@@ -2594,7 +2203,7 @@ I very nearly filed a tolerance-conformant table as a defect owed. A raw measure
 verdict; the tolerance IS the verdict ([[feedback_validation_tool_verdict_is_a_claim]] — the inverse
 case, where the tool PASSES and the hand-rolled scan is the one overstating).
 
-### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `CONFIRMED` — **source fixed 2026-08-17; render owed**
+### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `PENDING-VALIDATION` — **source fixed 2026-08-17; the Debug Window instance shipped verified in v1.1.3, p84 still unconfirmed**
 
 **Found:** 2026-08-17, in the same Debug Window v1.1.3 audit as F-293 — by opening p84 because the
 compile log's largest overfull (57.66pt) pointed there.
@@ -2692,7 +2301,7 @@ notation decision is separate from it and is now made, not deferred.
 render into no PDF (verified across all four), and it is a released entry — rewriting shipped history
 to fix text nobody renders is churn, not quality.
 
-### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `CONFIRMED` — **source fixed 2026-08-17; Assembly needs one more render**
+### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `PENDING-VALIDATION` — **source fixed 2026-08-17; Assembly needs one more render**
 
 **Found:** 2026-08-17, verifying the Assembly re-render for F-284. The F-284 fix was confirmed
 good on p.326 and p.329 — and p.329 put this defect on screen at the same time. It is unrelated to

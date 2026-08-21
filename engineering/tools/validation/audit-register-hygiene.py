@@ -23,6 +23,8 @@ CHECKS
     3  no CLOSED finding sits in a live open-work register (scan noise)
     4  every finding carries a status                      (unreadable state)
     4b prose claims "fixed" while the status does not       (status needs deciding)
+       -- declare PENDING-VALIDATION when the fix IS applied and only its
+          validation (a render, a release) is owed; that is a decision, not a dodge
     5  every archive the header names actually exists      (dangling history)
     6  no allocated ID is missing from live + archives     (a finding went silent)
     7  --sweep-check REV: NOTHING from the pre-sweep revision vanished
@@ -83,7 +85,7 @@ import sys
 # but only as whole words, so "RESOLVED" inside prose does not read as a status.
 CLOSED_WORDS = ("DONE", "WONTFIX", "RESOLVED-INVALID")
 STATUS_WORDS = CLOSED_WORDS + ("CONFIRMED", "NEEDS-VERIFICATION", "PARTIAL",
-                               "NOTED", "RESOLVED", "TRACKED")
+                               "PENDING-VALIDATION", "NOTED", "RESOLVED", "TRACKED")
 CLOSED_RE = re.compile(r"`?\b(" + "|".join(CLOSED_WORDS) + r")\b`?")
 STATUS_RE = re.compile(r"`?\b(" + "|".join(STATUS_WORDS) + r")\b`?|TRACKED → ingestion")
 # THE STATUS TOKEN IS AUTHORITATIVE. Prose is not a status.
@@ -95,8 +97,14 @@ STATUS_RE = re.compile(r"`?\b(" + "|".join(STATUS_WORDS) + r")\b`?|TRACKED → i
 FIXED_PROSE = re.compile(
     r"\*\*(?:ALL [A-Z]+ FIXED|FIXED\b|RESOLVED\b|MECHANISM LANDED|source fixed|tool fixed|"
     r"no longer blocks)", re.I)
-# PARTIAL vetoes an embedded DONE ("manual DONE - KB DONE - one decision open" is PARTIAL).
-PARTIAL_RE = re.compile(r"\bPARTIAL\b")
+# An explicitly-declared still-owed state vetoes both the embedded-DONE read
+# ("manual DONE - KB DONE - one decision open" is PARTIAL) and the fixed-prose check.
+# PENDING-VALIDATION exists because the register already HAD this state and no token
+# for it: "a fix applied but not yet validated is NOT done". Nine findings carried
+# `CONFIRMED` + "render owed" prose, so 4b fired on all nine, every run, forever --
+# and a gate that reports nine things you are meant to ignore is training to ignore
+# the gate. Naming the state makes it machine-readable and silences nothing real.
+OWED_RE = re.compile(r"\b(PARTIAL|PENDING-VALIDATION)\b")
 # A body-level `**Status:** X` line. This is the finding's own considered verdict,
 # written after the analysis; the headline is the scannable summary. When they
 # disagree the register misreports itself to every reader who scans.
@@ -283,7 +291,7 @@ def main():
                          f"scanning headlines gets the wrong answer; reconcile the two, and if "
                          f"the body is right the headline is what needs rewriting"))
 
-        if PARTIAL_RE.search(head):
+        if OWED_RE.search(head):
             continue                      # still owed, whatever else the headline says
         if CLOSED_RE.search(head):
             closed_live.append((b["id"], b["line"]))
