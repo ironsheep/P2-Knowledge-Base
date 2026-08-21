@@ -177,6 +177,14 @@ def parse(path):
             if cur:
                 blocks.append(cur)
             cur = {"id": fid, "line": i, "headline": ln, "body": [ln]}
+        elif SECTION_START.match(ln):
+            # A new `##` section ENDS the finding above it. Without this a block ran
+            # on until the next finding and absorbed whatever lay between -- which is
+            # how F-283 passed the status check for months: it carries `FIXED`, which
+            # is not a status token, and borrowed the word TRACKED out of the heading
+            # "## Open -- TRACKED in the ingestion head" two sections below it.
+            if cur:
+                blocks.append(cur); cur = None
         elif cur:
             cur["body"].append(ln)
     if cur:

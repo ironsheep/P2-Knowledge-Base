@@ -14,13 +14,14 @@ cond_rows = []
 try:
     with open(CONDSRC) as f:
         cdata = yaml.safe_load(f)
+    ret_rule = cdata.get("ret_prefix_rule") or {}
     for c in (cdata.get("condition_codes") or []):
         val = str(c.get("value", "")).replace("%", "")
         primary = c.get("primary") or (c.get("aliases") or [""])[0]
         aliases = ", ".join(a for a in (c.get("aliases") or []) if a != primary)
         cond_rows.append((val, primary, c.get("condition", ""), aliases))
 except Exception as e:
-    cond_rows = []
+    cond_rows, ret_rule = [], {}
 
 recs = []
 missing_encoding = []
@@ -95,7 +96,17 @@ def esc(s):
 lines = []
 lines.append("# PASM2 Instruction Encoding Reference (for disassembly)\n")
 lines.append("**Generated from** `deliverables/ai/P2/language/pasm2/*.yaml` — the per-instruction")
-lines.append("knowledge-base YAMLs. Regenerate with `engineering/tools/gen-pasm2-encoding-reference.py`.")
+lines.append("knowledge-base YAMLs. Regenerate with")
+lines.append("`engineering/tools/gen-pasm2-encoding-reference.py <this-file>` — it takes the output")
+lines.append("path as its FIRST ARGUMENT and defaults to `/tmp` if you omit it.")
+lines.append("")
+lines.append("> **DO NOT HAND-EDIT THIS FILE.** Every edit made here is deleted the next time it is")
+lines.append("> generated, silently. That has already happened twice: F-273's `_RET_` correction —")
+lines.append("> two Parallax citations and a silicon corroboration — was applied here instead of to")
+lines.append("> `conditional_execution.yaml`, where the full rule already existed unread; and four")
+lines.append("> `J*` rows were hand-widened to \"set or clear\", which the datasheet instruction")
+lines.append("> tables and the v35 instruction CSV both contradict. Correct the YAML, then regenerate.")
+lines.append("")
 lines.append("One row per instruction;")
 lines.append("the **Encoding** column is the authoritative 32-bit bit pattern.\n")
 lines.append("## How to read the encoding\n")
@@ -120,7 +131,38 @@ if cond_rows:
     for val, primary, cond, aliases in cond_rows:
         lines.append(f"| `{val}` | {esc(primary)} | {esc(cond)} | {esc(aliases)} |")
     lines.append("")
-    lines.append("> `%0000` is exclusively the `_RET_` prefix (always-execute + return); it is NOT")
+    # The _RET_ qualifier, emitted FROM THE KB rather than written here. F-273's
+    # correction was hand-applied to the generated markdown in af2de70a while this
+    # generator kept emitting the short form, so every regeneration silently deleted
+    # a sourced, twice-cited correction. The rule and both citations already lived in
+    # conditional_execution.yaml:ret_prefix_rule; nothing read them. Now they do.
+    if ret_rule:
+        para = " ".join((ret_rule.get("full_semantics") or "").split())
+        branch = " ".join((ret_rule.get("on_branching_instructions") or "").split())
+        lines.append(f"> **{esc(ret_rule.get('rule','').rstrip('.'))}** {esc(para)}")
+        if branch:
+            lines.append(f">\n> {esc(branch)}")
+        # Keep the source block's own line structure: it is a lead-in plus two
+        # citation bullets plus an EF corroboration. Flattening it to one paragraph
+        # is how a citation stops looking like a citation.
+        srcs = [l.rstrip() for l in (ret_rule.get("source") or "").splitlines() if l.strip()]
+        if srcs:
+            lines.append(">")
+            # Indentation carries the structure: a bullet or an un-indented line
+            # starts a new block; a deeper-indented line continues the one above.
+            # Without this the trailing EF corroboration folds into the last
+            # citation and reads as if that source made the claim.
+            buf = ""
+            for ln in srcs:
+                stripped = ln.strip()
+                starts_block = stripped.startswith("- ") or not ln.startswith((" ", "\t"))
+                if starts_block and buf:
+                    lines.append("> " + esc(buf)); buf = ""
+                buf = stripped if starts_block else (buf + " " + stripped).strip()
+            if buf:
+                lines.append("> " + esc(buf))
+        lines.append("")
+    lines.append("> `%0000` is exclusively the `_RET_` prefix; it is NOT")
     lines.append("> the encoding for `IF_NEVER`. `IF_NEVER` assembles to EEEE=`%1111` (always),")
     lines.append("> identical to the bare no-prefix form, regardless of whether `WC`/`WZ` are written")
     lines.append("> (pnut-ts boundary-probed). `%1111` is the default (always), printed with no `IF_` prefix.\n")

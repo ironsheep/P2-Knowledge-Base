@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-311`**
+**Next finding ID: `F-315`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -317,7 +317,13 @@ the Streamer manual sprint. Surfaces with F-302…F-305 at that sprint's co-rele
 
 ---
 
-### F-307 — six PASM2 instruction YAMLs serve their description with literal backslashes in it: `\"CMOD\"` instead of `"CMOD"`. `CONFIRMED`
+### F-307 — six PASM2 instruction YAMLs serve their description with literal backslashes in it: `\"CMOD\"` instead of `"CMOD"`. `DONE (2026-08-21)`
+
+> **APPLIED 2026-08-21.** All eleven values corrected across the six files and confirmed by
+> `yaml.safe_load` — the SERVED string now reads `Set the colorspace converter "CMOD"…`, not a
+> grep of the bytes. The three look-alike populations this finding excluded were left untouched,
+> verified by `git status`: only the six intended files changed. `PASM2-ENCODING-REFERENCE.md`
+> regenerated — and regenerating it is what uncovered **F-314**.
 
 **How it surfaced.** Reading the five colorspace-converter instruction YAMLs as background for the
 Streamer Guide's new Chapter 15 section (task «#274», 2026-08-20). The corruption is in the served
@@ -370,8 +376,8 @@ returns 37 files; all but these six are legitimate:
   allows escape-character sequences."* Backslash-quote opens it and a plain quote closes it. These
   files are correct and a sweep that "normalizes" them would break real syntax.
 
-**Status:** `CONFIRMED — belongs to the yaml head (yaml-knowledge-base-maintenance). Not a Streamer
-manual defect; the manual does not quote these descriptions.`
+**Status:** `DONE (2026-08-21) — applied by the yaml head; all eleven values parse clean. Never was a
+Streamer manual defect; the manual does not quote these descriptions.`
 
 ---
 
@@ -1065,7 +1071,7 @@ a fact about the repository. A grep locates; it never concludes. This is the sam
 "a status line is not evidence," and it was caught only because a later task put the full `git tag`
 output on screen for an unrelated reason.
 
-### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `FIXED (2026-08-17)` — companion brought into agreement on four entries; agreement gate GREEN
+### F-283 — the P2AN002 YAML companion disagrees with the note it ships beside, on both a measured pitfall and an attribution. `DONE (2026-08-17)` — companion brought into agreement on four entries; agreement gate GREEN (was written `FIXED`, which is not a token in this register's legend, so the status check could not read it)
 
 **Found:** 2026-08-17, running the doc↔companion agreement check while preparing P2AN002 v1.0.3 for
 the release wave.
@@ -1131,6 +1137,119 @@ written — a names-only pass on one file is not coverage of the category.
 
 ---
 
+## KB code that does not compile — surfaced by Stephen's Goertzel condition (2026-08-21) — F-311…F-313
+
+**Origin.** Stephen approved F-306's "delete step 3" *"as long as the agent can create Goertzel code
+correctly."* Testing that condition rather than assuming it meant extracting `dds-goertzel.yaml`'s
+example and putting it through `pnut-ts`. It failed **before** step 3 mattered, and the cause turned
+out to be a class.
+
+> **Nothing in this project compiles KB code examples.** These three are what one keyword's sweep
+> found. The population is **1913 code-shaped blocks across 438 files**, of which only 118 are
+> complete programs — the rest are fragments needing a synthesized context. A gating compile step is
+> scoped as its own effort (prototype validated 2026-08-21: it asks the compiler which identifiers
+> are declarable rather than carrying a keyword list that would rot; 4/4 known-bad caught, 4/4
+> known-good passed). Until it exists, this class is unbounded and these three are a floor.
+
+### F-311 — `clkfreq` is a RESERVED WORD in pnut-ts, and eleven PASM2 sites across eight KB files use it as an operand or a symbol name. None of them assemble. `CONFIRMED`
+
+**Evidence — pnut-ts v1.55.3, every form probed rather than inferred:**
+
+| Written | Result |
+|---|---|
+| `qfrac target_freq, clkfreq` | `error: Expected a constant, unary operator, or "("` |
+| `qfrac target_freq, CLKFREQ` | same |
+| `qfrac target_freq, ##clkfreq` | same |
+| `wxpin ##clkfreq/10, #signal_pin` | same |
+| `clkfreq LONG 200_000_000` (a DAT **definition**) | `error: Expected a unique name, BYTE, WORD, LONG, or assembly instruction` |
+| the same code with the register renamed `clkf` | **assembles** |
+
+`clkfreq` is legal in **Spin2** (`clkfreq := 200_000_000` assembles), so the 81 other occurrences in
+the tree — Spin2 code, prose formulas, cross-reference paths — are correct and deliberately out of
+scope.
+
+**The eleven sites:**
+
+| File | Line | Code |
+|---|---|---|
+| `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml` | 113 | `clkfreq LONG 200_000_000` — illegal symbol name |
+| " | 122 | `QFRAC freq_hz, clkfreq` |
+| " | 148 | `QFRAC carrier, clkfreq` |
+| `architecture/smart-pins/smart-pin-01101-a-rise-inc-dec-by-b.yaml` | 64 | `wxpin ##clkfreq/10, #step_pin` |
+| `architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml` | 60 | `wxpin ##clkfreq/10, #freq_pin` |
+| `architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml` | 74 | `wxpin ##clkfreq/10, #signal_pin` |
+| `architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml` | 75 | `wxpin ##clkfreq/10, #signal_pin` |
+| `architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml` | 72 | `wxpin ##clkfreq, #signal_pin` |
+| `architecture/streamer/dds-goertzel.yaml` | 150 | `qfrac ##40000, clkfreq` |
+| " | 208 | `qfrac target_freq, clkfreq` |
+| `language/pasm2/hubset.yaml` | 70 | `WAITX ##clkfreq/100` |
+
+**Correction.** PASM2 must read the value out of hub — the Spin2 startup writes clkfreq to hub long
+`$14`, so `rdlong clkf, #$14` — and the holding register must be named anything but `clkfreq`.
+
+### F-312 — `getxacc.yaml`'s first example does not assemble, and its Goertzel read-back is backwards. `CONFIRMED`
+
+**Location:** `deliverables/ai/P2/language/pasm2/getxacc.yaml`, `examples[0]`.
+
+```
+getxacc x_val             ' X into x_val, Y into next S
+qvector y_val             ' Y from S, compute magnitude/phase
+```
+
+`qvector y_val` → `error: Expected ","`. **And the semantics are inverted.** The file's own
+`description` is correct — *"write the captured cosine (X) accumulation into D and place the
+captured sine (Y) accumulation into the next instruction's S value"* — so `QVECTOR D,S` needs
+**D = X**. The example puts `y_val` in D, and nothing ever loads `y_val`.
+
+**The correct idiom is already in the KB**, in `architecture/streamer/dds-goertzel.yaml`:
+`getxacc cos_acc` / `mov sin_acc, 0-0` / `qvector cos_acc, sin_acc` — compile-verified 2026-08-21.
+The page that DEFINES the idiom is the one that gets it wrong. `examples[1]` assembles and is fine.
+
+### F-313 — a Spin2 pattern file ships Propeller **1** code. `CONFIRMED`
+
+**Location:** `language/spin2/patterns/applications/audio_processor.yaml:18` —
+`waitcnt(clkfreq/SAMPLE_RATE + cnt)`. `waitcnt` and `cnt` are P1 constructs; P2 uses `waitct()` and
+`getct()`. → `error: Expected an instruction or variable`. P1/P2 conflation is the specific failure
+this knowledge base exists to prevent, so it is worth more than its single line.
+
+---
+
+## A correction applied to a GENERATED artifact is deleted by the next generation (2026-08-21) — F-314
+
+### F-314 — `PASM2-ENCODING-REFERENCE.md` had been hand-edited twice, and regenerating it silently reverted both. `DONE (2026-08-21)`
+
+**How it surfaced.** F-307 requires regenerating this file. Regenerating it destroyed content.
+
+**What was at risk.** **F-273's `_RET_` correction** — a twelve-line blockquote carrying *two*
+Parallax citations (Assembly Language Manual p.68; P2 Instructions v35 Rev B/C row 410) and the
+EF-058 silicon corroboration — existed **only** in the generated markdown, applied there by
+`af2de70a`. Meanwhile `conditional_execution.yaml` already carried the entire rule under
+`ret_prefix_rule:` — `rule`, `full_semantics`, `on_branching_instructions`, `correct_form`,
+`why_it_matters`, `source` — and **nothing read it**. The generator emitted a hardcoded short form
+instead. So the KB was right, the derived artifact was right, and the pipeline between them would
+have thrown the correction away on the next run.
+
+**What was WRONG in the same file.** Four rows had been hand-widened to *"event flag is set **or
+clear**"* — `JFBW`, `JQMT`, `JXMT`, `JXRL`. Both primary sources contradict it:
+`sources/p2-datasheet/pasm2-complete-instruction-tables.md:341` reads *"Jump to S\*\* if FBW event
+flag is set."*, and `sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:214`
+agrees; `JNFBW`/`JNQMT`/`JNXMT`/`JNXRL` exist for the inverse case. Regeneration therefore
+**corrected** four rows that had been silently wrong.
+
+**Fix applied 2026-08-21.** The generator now emits `ret_prefix_rule` from the YAML with its citation
+structure preserved (indentation decides block boundaries, so the EF corroboration no longer folds
+into the last citation and reads as if that source made the claim); the four `J*` rows come from
+their own YAMLs; the header carries a DO-NOT-HAND-EDIT warning naming both incidents; and the usage
+line now states that the output path is argv[1] and silently defaults to `/tmp` — which is why an
+earlier regeneration appeared to do nothing at all. Verified idempotent: two consecutive runs are
+byte-identical.
+
+**The general rule this establishes.** A generated artifact is not a place to apply a correction.
+Fix the source and regenerate — and if the source has no field for the correction, that absence IS
+the finding.
+
+---
+
 ## Open — enhancement proposals (new content, not corrections)
 
 - **ENH-02 — make the platform fail loudly on a code line that cannot fit.** *Filed 2026-08-21 when F-281 closed.* F-281's three over-wide lines were fixed and v1.1.3 shipped margin-clean, but **nothing stops the class recurring**: `p2kb-platform-code-coloring.lua` emits `\begin{Verbatim}[xleftmargin=-10pt]` with no break options at all ten sites, and the `breaklines=true` at `p2kb-platform-foundation.sty:317` is a pre-existing `\lstset` that the Verbatim path never consults. So an over-long line silently runs off the page and the compile log stays clean — the exact shape of every render defect this project has shipped. The source-side `audit-code-line-length.py` gate catches most of it, and `audit-pdf-margin-overflow.py` catches it after the fact; what is missing is the platform refusing to typeset it. Not a defect in any document — an absent guard.
@@ -1152,7 +1271,7 @@ written — a names-only pass on one file is not coverage of the category.
 
 ## Open — TRACKED in the ingestion head (resolution lives there, not in a YAML edit)
 
-- **F-123 — TAQOZ-Forth / ROM-Monitor capability detail rests partly on preliminary web research.** Grounding plan in `engineering/ingestion/sources/taqoz/taqoz-content-gaps-and-grounding-plan.md` (mine `ROM_Booter.lst`; verify vs Peter Jakacki's `TAQOZ.spin2`).
+- **F-123 — TAQOZ-Forth / ROM-Monitor capability detail rests partly on preliminary web research.** `TRACKED → ingestion` Grounding plan in `engineering/ingestion/sources/taqoz/taqoz-content-gaps-and-grounding-plan.md` (mine `ROM_Booter.lst`; verify vs Peter Jakacki's `TAQOZ.spin2`).
 
 ---
 

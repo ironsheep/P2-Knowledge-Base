@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Set the colorspace converter \"CMOD\" parameter to D[8:0].'
+description: 'Set the colorspace converter "CMOD" parameter to D[8:0].'
 flags_affected:
   C: No effect
   Z: No effect
@@ -25,4 +25,4 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.457030'
 category: Color Space Converter
-oneliner: Set the colorspace converter \"CMOD\" parameter to D[8:0]
+oneliner: Set the colorspace converter "CMOD" parameter to D[8:0]

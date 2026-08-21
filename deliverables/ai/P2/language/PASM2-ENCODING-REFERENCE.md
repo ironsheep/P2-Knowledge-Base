@@ -1,7 +1,17 @@
 # PASM2 Instruction Encoding Reference (for disassembly)
 
 **Generated from** `deliverables/ai/P2/language/pasm2/*.yaml` — the per-instruction
-knowledge-base YAMLs. Regenerate with `engineering/tools/gen-pasm2-encoding-reference.py`.
+knowledge-base YAMLs. Regenerate with
+`engineering/tools/gen-pasm2-encoding-reference.py <this-file>` — it takes the output
+path as its FIRST ARGUMENT and defaults to `/tmp` if you omit it.
+
+> **DO NOT HAND-EDIT THIS FILE.** Every edit made here is deleted the next time it is
+> generated, silently. That has already happened twice: F-273's `_RET_` correction —
+> two Parallax citations and a silicon corroboration — was applied here instead of to
+> `conditional_execution.yaml`, where the full rule already existed unread; and four
+> `J*` rows were hand-widened to "set or clear", which the datasheet instruction
+> tables and the v35 instruction CSV both contradict. Correct the YAML, then regenerate.
+
 One row per instruction;
 the **Encoding** column is the authoritative 32-bit bit pattern.
 
@@ -29,7 +39,7 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 
 | EEEE | Mnemonic | Condition | Aliases |
 |------|----------|-----------|---------|
-| `0000` | _RET_ | Always; then return **if the instruction did not branch** | IF_RET |
+| `0000` | _RET_ | Always; then return IF THE INSTRUCTION DID NOT BRANCH | IF_RET |
 | `0001` | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_A, IF_GT, IF_00 |
 | `0010` | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
 | `0011` | IF_NC | C=0 | IF_AE, IF_GE, IF_0X |
@@ -46,17 +56,15 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 | `1110` | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_BE, IF_LE, IF_NOT_00 |
 | `1111` | IF_ALWAYS | Always | (no prefix) |
 
-> **`_RET_` returns only if the instruction did not branch.** The prefixed
-> instruction always executes; the return then happens **only if that instruction
-> did not branch**, popping `stack[19:0]` into PC with no C/Z context restore.
-> On a branching instruction the branch stands and **no return occurs** — so
-> `_RET_ CALL #target` assembles clean and is silently a plain `CALL`, and
-> execution falls out of the routine into whatever follows it. Use
-> `CALL #target` + `RET`. Sources: *P2 Assembly Language Manual* (Parallax,
-> 2022-11-01) condition table p.68 — *"always; execute instruction then return if
-> no branch; no context restore"*; *P2 Instructions v35 Rev B/C Silicon* row 410 —
-> *"Execute `<inst>` always and return if no branch. If `<inst>` is not branching
-> then return by popping stack[19:0] into PC."*
+> **_RET_ RETURNS ONLY IF THE INSTRUCTION DID NOT BRANCH** _RET_ is the EEEE=%0000 condition prefix. The prefixed instruction ALWAYS executes. A return is then performed ONLY IF that instruction did not branch: the return pops stack[19:0] into PC, with no C/Z context restore. If the instruction DID branch, the branch stands and NO return happens.
+>
+> _RET_ ON A BRANCH NEVER RETURNS, AND IT ASSEMBLES CLEAN. '_RET_ CALL #target' is silently just 'CALL #target': the CALL pushes the address of the NEXT instruction and jumps, so when the callee returns, execution resumes at that next instruction -- falling THROUGH the end of the routine instead of returning from it. Whatever the assembler placed next then executes. The same holds for JMP and the other branching instructions.
+>
+> Two independent Parallax primary sources state the qualifier:
+> - P2 Assembly Language Manual (Parallax, 2022-11-01), condition table p.68: "_RET_  %0000  always; execute instruction then return if no branch; no context restore"
+> - P2 Instructions v35 - Rev B/C Silicon spreadsheet, row 410 (encoding "0000 ------- --- --------- ---------", stack effect "Pop"): "Execute <inst> always and return if no branch. If <inst> is not branching then return by popping stack[19:0] into PC."
+> Corroborated on real P2 silicon 2026-08-14 (EF-058): a handler ending in
+> '_RET_ CALL' fell through into the following handler, which executed in full.
 
 > `%0000` is exclusively the `_RET_` prefix; it is NOT
 > the encoding for `IF_NEVER`. `IF_NEVER` assembles to EEEE=`%1111` (always),
@@ -129,11 +137,11 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 
 | Mnemonic | Encoding | Operands | Flags | Cyc | Summary |
 |----------|----------|----------|-------|-----|---------|
-| **SETCFRQ** | `EEEE 1101011 00L DDDDDDDDD 000111011` | D/#0..511 | -- | 2 | Set the colorspace converter \"CFRQ\" parameter to D[31:0] |
-| **SETCI** | `EEEE 1101011 00L DDDDDDDDD 000111001` | D/#0..511 | -- | 2 | Set the colorspace converter \"CI\" parameter to D[31:0] |
-| **SETCMOD** | `EEEE 1101011 00L DDDDDDDDD 000111100` | D/#0..511 | -- | 2 | Set the colorspace converter \"CMOD\" parameter to D[8:0] |
-| **SETCQ** | `EEEE 1101011 00L DDDDDDDDD 000111010` | D/#0..511 | -- | 2 | Set the colorspace converter \"CQ\" parameter to D[31:0] |
-| **SETCY** | `EEEE 1101011 00L DDDDDDDDD 000111000` | D/#0..511 | -- | 2 | Set the colorspace converter \"CY\" parameter to D[31:0] |
+| **SETCFRQ** | `EEEE 1101011 00L DDDDDDDDD 000111011` | D/#0..511 | -- | 2 | Set the colorspace converter "CFRQ" parameter to D[31:0] |
+| **SETCI** | `EEEE 1101011 00L DDDDDDDDD 000111001` | D/#0..511 | -- | 2 | Set the colorspace converter "CI" parameter to D[31:0] |
+| **SETCMOD** | `EEEE 1101011 00L DDDDDDDDD 000111100` | D/#0..511 | -- | 2 | Set the colorspace converter "CMOD" parameter to D[8:0] |
+| **SETCQ** | `EEEE 1101011 00L DDDDDDDDD 000111010` | D/#0..511 | -- | 2 | Set the colorspace converter "CQ" parameter to D[31:0] |
+| **SETCY** | `EEEE 1101011 00L DDDDDDDDD 000111000` | D/#0..511 | -- | 2 | Set the colorspace converter "CY" parameter to D[31:0] |
 
 ## Debug Directives  (1)
 
@@ -153,7 +161,7 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 | **JCT1** | `EEEE 1011110 01I 000000001 SSSSSSSSS` | S/# | -- | 2 | Jump if counter 1 event flag is set |
 | **JCT2** | `EEEE 1011110 01I 000000010 SSSSSSSSS` | S/# | -- | 2 | Jump if counter 2 event flag is set |
 | **JCT3** | `EEEE 1011110 01I 000000011 SSSSSSSSS` | S/# | -- | 2 | Jump if counter 3 event flag is set |
-| **JFBW** | `EEEE 1011110 01I 000001001 SSSSSSSSS` | S/# | -- | 2 | Jump if FIFO interface block wrap event flag is set or clear |
+| **JFBW** | `EEEE 1011110 01I 000001001 SSSSSSSSS` | S/# | -- | 2 | Jump if FIFO interface block wrap event flag is set |
 | **JINT** | `EEEE 1011110 01I 000000000 SSSSSSSSS` | S/# | -- | 2 | Jump if INT event flag is set |
 | **JNATN** | `EEEE 1011110 01I 000011110 SSSSSSSSS` | S/# | -- | 2 | Jump if ATN event flag is clear |
 | **JNCT1** | `EEEE 1011110 01I 000010001 SSSSSSSSS` | S/# | -- | 2 | Branch |
@@ -172,14 +180,14 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 | **JNXRL** | `EEEE 1011110 01I 000011101 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer LUT RAM rollover event flag set or clear |
 | **JNXRO** | `EEEE 1011110 01I 000011100 SSSSSSSSS` | S/# | -- | 2 | Branch |
 | **JPAT** | `EEEE 1011110 01I 000001000 SSSSSSSSS` | S/# | -- | 2 | Branch |
-| **JQMT** | `EEEE 1011110 01I 000001111 SSSSSSSSS` | S/# | -- | 2 | Jump if CORDIC-read-but-empty event flag set or clear |
+| **JQMT** | `EEEE 1011110 01I 000001111 SSSSSSSSS` | S/# | -- | 2 | Jump if CORDIC-read-but-empty event flag set |
 | **JSE1** | `EEEE 1011110 01I 000000100 SSSSSSSSS` | S/# | -- | 2 | Branch |
 | **JSE2** | `EEEE 1011110 01I 000000101 SSSSSSSSS` | S/# | -- | 2 | Branch |
 | **JSE3** | `EEEE 1011110 01I 000000110 SSSSSSSSS` | S/# | -- | 2 | Branch |
 | **JSE4** | `EEEE 1011110 01I 000000111 SSSSSSSSS` | S/# | -- | 2 | Branch |
 | **JXFI** | `EEEE 1011110 01I 000001011 SSSSSSSSS` | S/# | -- | 2 | Branch |
-| **JXMT** | `EEEE 1011110 01I 000001010 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer empty event flag set or clear |
-| **JXRL** | `EEEE 1011110 01I 000001101 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer LUT RAM rollover event flag set or clear |
+| **JXMT** | `EEEE 1011110 01I 000001010 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer empty event flag set |
+| **JXRL** | `EEEE 1011110 01I 000001101 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer LUT RAM rollover event flag set |
 | **JXRO** | `EEEE 1011110 01I 000001100 SSSSSSSSS` | S/# | -- | 2 | Jump if streamer NCO rollover (XRO) event flag set |
 | **POLLATN** | `EEEE 1101011 CZ0 000001110 000100100` | operand_pollwait | C,Z | 2 | Retrieve and clear attention flag |
 | **POLLCT1** | `EEEE 1101011 CZ0 000000001 000100100` | operand_pollwait | C,Z | 2 | Retrieve and clear CT1 event flag |
@@ -498,7 +506,7 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 | **SETDACS** | `EEEE 1101011 00L DDDDDDDDD 000011100` | D/#0..511 | -- | 2 | DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0] |
 | **SETSCP** | `EEEE 1101011 00L DDDDDDDDD 001110000` | D/#0..511 | -- | 2 | Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2] |
 | **WRPIN** | `EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS` | D/#,S/# | -- | 2 | Set mode of smart pins S[10:6]+S[5:0] |
-| **WXPIN** | `EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS` | D/#,S/# | -- | 2 | Set \"X\" of smart pins S[10:6]+S[5:0] |
+| **WXPIN** | `EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS` | D/#,S/# | -- | 2 | Set "X" of smart pins S[10:6]+S[5:0] |
 | **WYPIN** | `EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS` | D/#,S/# | -- | 2 | Set "Y" register of smart pins S[10:6]+S[5:0] |
 
 ## Streamer  (6)

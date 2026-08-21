@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Set the colorspace converter \"CQ\" parameter to D[31:0].'
+description: 'Set the colorspace converter "CQ" parameter to D[31:0].'
 flags_affected:
   C: No effect
   Z: No effect
@@ -27,4 +27,4 @@ syntax_variants:
 - SETCQ {#}D
 last_updated: '2025-09-19T16:04:17.336648'
 category: Color Space Converter
-oneliner: Set the colorspace converter \"CQ\" parameter to D[31:0]
+oneliner: Set the colorspace converter "CQ" parameter to D[31:0]

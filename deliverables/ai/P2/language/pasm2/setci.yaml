@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Set the colorspace converter \"CI\" parameter to D[31:0].'
+description: 'Set the colorspace converter "CI" parameter to D[31:0].'
 flags_affected:
   C: No effect
   Z: No effect
@@ -27,4 +27,4 @@ syntax_variants:
 - SETCI {#}D
 last_updated: '2025-09-19T16:04:17.439699'
 category: Color Space Converter
-oneliner: Set the colorspace converter \"CI\" parameter to D[31:0]
+oneliner: Set the colorspace converter "CI" parameter to D[31:0]
