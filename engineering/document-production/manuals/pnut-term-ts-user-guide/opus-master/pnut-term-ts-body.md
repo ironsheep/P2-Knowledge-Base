@@ -497,9 +497,10 @@ So `-b` (`--baud`) is the answer in three situations:
 - **A program that just writes to the serial port** — no debug involved at all,
   and the rate is whatever its own code set.
 
-> The flag used to be spelled `--debugbaud`, and that spelling still works. The
-> name was misleading: this rate carries *everything* the P2 sends back, debug
-> output and plain serial text alike, so it is now `--baud`.
+> The flag used to be spelled `--debugbaud`. That spelling is **deprecated** but
+> still accepted, so existing scripts keep running. The old name was misleading:
+> this rate carries *everything* the P2 sends back — `debug()` output and plain
+> serial text alike — so it is now `--baud`.
 
 Either way you have two ways to say it: `-b` for one session, or the **Serial
 Baud Rate** preference if you would rather set it once and forget it.
@@ -515,10 +516,43 @@ warns you — the P2 will transmit at its own compiled rate regardless, and the
 mismatch would make the output unreadable. When text comes out garbled, the first
 thing to try is *dropping* `-b`.
 
+**The accepted range is 300 to 20,000,000**, and its two ends mean quite different
+things — neither of them a statement about how fast your link will actually go.
+
+The floor is framing, not speed. PNut-Term-TS configures 8N1 exclusively (Chapter
+7), and 300 baud is the lowest rate it can reach at all: every slower historic rate
+needs framing this tool does not produce — the 110-baud Teletype wanted two stop
+bits for its carriage, and Baudot below that is a five-bit code entirely.
+
+The ceiling is a **corruption guard**, not a capability claim. When PNut-Term-TS
+takes a rate out of a binary, that value has to be sanity-checked — a damaged image
+can carry anything at all in that field, and past 20,000,000 a number has stopped
+being a baud rate and started being a symptom. It is not a promise that your machine
+can drive 20 Mbaud.
+
+What *can* be said about speed is narrower, and more useful: **2,000,000 is the
+highest rate this app has been verified to carry**, measured on hardware without
+loss. Ask for more and PNut-Term-TS accepts it, tries it, and warns you — because
+above that line nobody has run the experiment. It marks the edge of the evidence,
+not the edge of the capability.
+
+So the honest position is the one the warning states: **unverified above 2 Mbaud.**
+It may carry your stream perfectly. It may drop data. Nobody knows yet — and the
+warning asks you to report what you observe, which is how the real ceiling for each
+platform will eventually get established.
+
+If it *does* go wrong, know what to look for, because it will not announce itself. A
+host that cannot keep up does not garble the text — that is what a *mismatched* rate
+does. It loses pieces of it: the stream still reads as ordinary, well-formed output,
+with lines simply absent. That is a failure that looks like a bug in your program
+long before it looks like a baud rate.
+
 ## The download baud rate — lower it when the link cannot keep up
 
-The download rate is the one you are least likely to touch, and the one worth
-knowing about when a download misbehaves.
+The download rate governs **the boot-loader exchange and nothing else** — the
+conversation that gets your program onto the chip, over before your program starts.
+It is the rate you are least likely to touch, and the one worth knowing about when a
+download misbehaves.
 
 PNut-Term-TS downloads at **2,000,000** bits per second by default. That is not an
 arbitrary choice: it is the top of the range the P2's boot ROM can lock onto, so it
@@ -808,11 +842,13 @@ binary can *state* the rate its output will use:
 
 | | Serial baud | Download baud |
 |---|---|---|
+| Carries | `debug()` output and terminal traffic | the boot-loader exchange only |
 | Command line | `-b`, `--baud` | `--downloadbaud` |
 | Preference | Serial Baud Rate | Download Baud Rate |
 | Resolves | command line → the binary → project → user → default | command line → project → user → default |
-| Range | 300 – 20,000,000 | 9600 – 2,000,000 |
-| Default | 2,000,000 | 2,000,000 |
+| Default | 2,000,000, or the binary's `DEBUG_BAUD` when you download | 2,000,000 |
+| Limits | 300 – 20,000,000 | 9600 – 2,000,000 |
+| Warns | above 2,000,000 | never |
 
 Nothing inside a binary can say what rate it should have been *downloaded* at — you
 would have to be reading it already to find out — which is why the download rate has
@@ -1167,8 +1203,8 @@ pnut-term-ts [options]
 | `-r` | `--ram` | file | Download the file to **RAM** and run |
 | `-f` | `--flash` | file | Download the file to **FLASH** and run |
 | `-p` | `--plug` | device | Use the device at `<device>` (path or serial; partial match OK). Auto-detects if exactly one is present |
-| `-b` | `--baud` | rate | The **serial** baud rate, 300–20000000 — normally unnecessary (Chapter 6). Accepts the old spelling `--debugbaud` |
-| | `--downloadbaud` | rate | The **download** baud rate, 9600–2000000 — lower it when the link cannot hold 2 Mbaud (Chapter 6) |
+| `-b` | `--baud` | rate | The **serial** baud rate — `debug()` output and terminal traffic. 300–20000000; warns above 2000000, the highest verified (Chapter 6). `--debugbaud` still accepted, deprecated |
+| | `--downloadbaud` | rate | The **download** baud rate — the boot-loader exchange only. 9600–2000000; lower it when the link cannot hold 2 Mbaud (Chapter 6) |
 | `-n` | `--dvcnodes` | | List detected USB serial devices and exit |
 | `-m` | `--match-vendor-only` | | With `-n`, list any FTDI device, not just PropPlugs |
 | `-d` | `--debug` | | Emit detailed diagnostic messages |
