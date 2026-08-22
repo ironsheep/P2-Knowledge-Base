@@ -1,3 +1,23 @@
+'' ===========================================================================
+''
+''   File.......  ch01-button-led.spin2
+''   Purpose....  A pin read and a pin driven, with no smart pin involved
+''                - the baseline everything later is measured against
+''   Manual.....  P2 I/O & Smart Pins User Guide
+''   Version....  v1.0.9 (2026-08-18)
+''   Appears in.  Chapter 1: Direct I/O - The Foundation -- 1.11 Common
+''                Patterns
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jun 2026
+''   Updated....  Jun 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 CON
   _clkfreq = 200_000_000
   BUTTON_PIN = 10
@@ -9,3 +29,22 @@ PUB main()
       PINHIGH(LED_PIN)
     else
       PINLOW(LED_PIN)
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

@@ -1,7 +1,7 @@
 '' fig-06-logic-spi-bus.spin2  ->  fig-06-logic-spi-bus.bmp
-'' LOGIC window — Chapter 6 SPI-bus example, the KEPT variant: TRIGGER-aligned +
+'' LOGIC window - Chapter 6 SPI-bus example, the KEPT variant: TRIGGER-aligned +
 '' named per-channel colours (Stephen 2026-07-11: keep the triggered/colour trace
-'' as the pedagogically-better ch06 figure → re-capture on hardware, then refresh
+'' as the pedagogically-better ch06 figure -> re-capture on hardware, then refresh
 '' the manual's ch06 LOGIC figure to this image). Create-line + TRIGGER + emit()
 '' byte-preserved from examples-library/ch06-logic-spi-bus.spin2; infinite `repeat`
 '' bounded to 40 bytes (enough for several complete TRIGGER-aligned frames to
@@ -21,8 +21,8 @@ PUB main() | tx_byte, i, cs, clk, mosi, b
   tx_byte := $A5
   ' bounded (example loops forever). 40 bytes = 800 samples = 4x the 200-deep
   ' window, so several complete TRIGGER-aligned frames scroll through before
-  ' SAVE. At exactly 200 samples (10 bytes) the trigger — which only evaluates
-  ' once the window is full and needs 32 post-trigger samples (offset) — can
+  ' SAVE. At exactly 200 samples (10 bytes) the trigger - which only evaluates
+  ' once the window is full and needs 32 post-trigger samples (offset) - can
   ' never complete a frame, and the trace renders blank.
   repeat b from 0 to 39
     ' idle: CS high, CLK low

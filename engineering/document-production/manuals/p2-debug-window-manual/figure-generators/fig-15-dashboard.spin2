@@ -1,5 +1,5 @@
 '' fig-15-dashboard.spin2  ->  fig-15-dashboard.bmp
-'' TERM window — Chapter 15 fixed-field dashboard example, instrumented for capture.
+'' TERM window - Chapter 15 fixed-field dashboard example, instrumented for capture.
 '' Static labels + per-field overprint byte-preserved from
 '' examples-library/ch15-dashboard.spin2; infinite `repeat` bounded to 30 frames,
 '' then SAVE + DEBUG_END_SESSION.

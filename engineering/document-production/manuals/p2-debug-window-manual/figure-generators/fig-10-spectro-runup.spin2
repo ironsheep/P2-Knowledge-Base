@@ -1,7 +1,7 @@
 '' fig-10-spectro-runup.spin2  ->  fig-10-spectro-runup.bmp
-'' SPECTRO window — Chapter 10 motor run-up example, the KEPT divergence variant:
+'' SPECTRO window - Chapter 10 motor run-up example, the KEPT divergence variant:
 '' RANGE 500 + TRACE 8 + LUMA8X (differs from fig-10-spectro.spin2's LUMA8W BLUE;
-'' Stephen elected 2026-07-11 to KEEP it → must be hardware-re-tested before ship).
+'' Stephen elected 2026-07-11 to KEEP it -> must be hardware-re-tested before ship).
 '' Create + FFT-window feed + inline-PASM sine() byte-preserved from
 '' examples-library/ch10-spectro-runup.spin2; infinite `repeat` bounded to 78
 '' feed-windows (one full run-up just before CLEAR), then SAVE + DEBUG_END_SESSION.

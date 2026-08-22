@@ -1,5 +1,5 @@
 '' fig-01-getting-started-term.spin2  ->  fig-01-getting-started-term.bmp
-'' TERM window — Chapter 1 "getting started" example, instrumented for capture.
+'' TERM window - Chapter 1 "getting started" example, instrumented for capture.
 '' Create + feed are byte-preserved from examples-library/ch01-getting-started-term.spin2;
 '' the reader's window-alive `repeat` is replaced by SAVE + DEBUG_END_SESSION.
 

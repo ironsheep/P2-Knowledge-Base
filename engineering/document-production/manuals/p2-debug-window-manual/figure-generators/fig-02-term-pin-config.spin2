@@ -1,5 +1,5 @@
 '' fig-02-term-pin-config.spin2  ->  fig-02-term-pin-config.bmp
-'' TERM window — Chapter 2 debug-link/pin-config example, instrumented for capture.
+'' TERM window - Chapter 2 debug-link/pin-config example, instrumented for capture.
 '' Create + feed (and the DEBUG_PIN_*/DEBUG_BAUD link CONs) byte-preserved from
 '' examples-library/ch02-term-pin-config.spin2; window-alive `repeat` -> SAVE + END.
 

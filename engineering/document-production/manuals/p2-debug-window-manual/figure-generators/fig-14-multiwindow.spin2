@@ -1,5 +1,5 @@
 '' fig-14-multiwindow.spin2  ->  fig-14-multiwindow-scope.bmp + ...-term.bmp
-'' SCOPE + TERM — Chapter 14 two-independent-windows example. Both create lines
+'' SCOPE + TERM - Chapter 14 two-independent-windows example. Both create lines
 '' (SCOPE channel-def on a SEPARATE feed, RC-2) + per-frame feed byte-preserved from
 '' examples-library/ch14-multiwindow.spin2; infinite `repeat` bounded to 120 frames,
 '' both windows saved, then DEBUG_END_SESSION.

@@ -12,7 +12,7 @@ PUB main() | temp
   debug(`TERM Status SIZE 40 20 BACKCOLOR WHITE COLOR BLACK WHITE)
   temp := 25
   ' lead with control codes: 0 = clear+home (fills BACKCOLOR), 4 = select colour pair 0.
-  ' (text came back blank with no leading code — canonical TERM feeds always lead with one.)
+  ' (text came back blank with no leading code - canonical TERM feeds always lead with one.)
   ' matches ch03's first value-substitution example: shows "Temperature: 25 C".
   debug(`Status 0 4 'Temperature: `(temp) C')
 

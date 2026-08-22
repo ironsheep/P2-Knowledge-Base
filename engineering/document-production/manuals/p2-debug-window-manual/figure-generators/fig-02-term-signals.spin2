@@ -1,5 +1,5 @@
 '' fig-02-term-signals.spin2  ->  fig-02-term-signals.bmp
-'' TERM window — Chapter 2 "live signals" example, instrumented for capture.
+'' TERM window - Chapter 2 "live signals" example, instrumented for capture.
 '' Create + per-frame feed byte-preserved from examples-library/ch02-term-signals.spin2;
 '' the reader's infinite `repeat` is bounded to 40 frames, then SAVE + END.
 

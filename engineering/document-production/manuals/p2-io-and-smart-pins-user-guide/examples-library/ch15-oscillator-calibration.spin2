@@ -1,3 +1,23 @@
+'' ===========================================================================
+''
+''   File.......  ch15-oscillator-calibration.spin2
+''   Purpose....  Measuring a reference against the system clock to find
+''                the error in parts per million
+''   Manual.....  P2 I/O & Smart Pins User Guide
+''   Version....  v1.0.9 (2026-08-18)
+''   Appears in.  Chapter 15: Frequency Measurement - Periods, Duty &
+''                Reciprocal Counting -- 15.6 Application Examples
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jun 2026
+''   Updated....  Jul 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 CON
   _clkfreq = 200_000_000
   REF_PIN = 20                                ' Reference signal input
@@ -32,3 +52,22 @@ PUB oscillator_calibration() | measured, error_ppm, periods
       error_ppm := ((TARGET_FREQ - measured) * 1_000_000) / TARGET_FREQ
       DEBUG("Measured: ", UDEC_(measured), ...
             " Hz (-", UDEC_(error_ppm), " ppm)")
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

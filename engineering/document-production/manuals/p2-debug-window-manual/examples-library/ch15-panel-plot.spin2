@@ -1,3 +1,24 @@
+'' ===========================================================================
+''
+''   File.......  ch15-panel-plot.spin2
+''   Purpose....  A compact plot panel with the axes hidden, sized to sit
+''                alongside other windows
+''   Manual.....  P2 Debug Window Manual
+''   Version....  v1.1.3 (2026-08-18)
+''   Appears in.  Chapter 15: Building Control and Status Panels - From
+''                Text Dashboards to Sprite-Blitted Instruments -- A
+''                status panel is positioned output, refreshed in place
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jun 2026
+''   Updated....  Jun 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 {Spin2_v50}
 CON _clkfreq = 200_000_000
 
@@ -27,3 +48,22 @@ PRI show3(value) | d, col, x, div
     x := 50 + col * 36                        ' on-screen slot
     debug(`Panel CROP 2 `(d * 30, 0, 30, 48, x, 28))
     div /= 10
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

@@ -1,5 +1,5 @@
 '' fig-13-packed-logic-multi.spin2  ->  fig-13-packed-logic-multi.bmp
-'' LOGIC window — Chapter 13 packed two-channel (2-bit) example, instrumented for capture.
+'' LOGIC window - Chapter 13 packed two-channel (2-bit) example, instrumented for capture.
 '' Create + full-window array feed byte-preserved from
 '' examples-library/ch13-packed-logic-multi.spin2; infinite `repeat` bounded to 3
 '' frames, then SAVE + DEBUG_END_SESSION.
@@ -7,7 +7,7 @@
 '' Same 32-bit-per-long packing budget as the single-channel LONGS_1BIT stream, but
 '' spent across TWO channels: LONGS_2BIT packs 16 two-bit sample-pairs per long
 '' (bit 0 -> D0, bit 1 -> D1). Packed data is still streamed as an ARRAY
-'' (uhex_long_array_) — one full window per message; feeding one packed long at a
+'' (uhex_long_array_) - one full window per message; feeding one packed long at a
 '' time via `(x) does NOT accumulate (only a fragment of the last long renders).
 
 CON _clkfreq = 200_000_000

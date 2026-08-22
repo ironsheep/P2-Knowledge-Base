@@ -104,19 +104,35 @@ def main():
     if args.repack:
         if not os.path.isdir(args.outdir):
             sys.exit(f"ERROR: not a directory: {args.outdir}")
-        files = sorted(f for f in os.listdir(args.outdir)
-                       if f.endswith('.spin2') and not f.startswith('.'))
-        if not files:
+        # Ship EVERYTHING the corpus carries for the reader, not just .spin2.
+        # A corpus can hold assets an example loads -- the Debug Window library
+        # ships digits.bmp and panel_bg.bmp for its BITMAP chapters, and a
+        # .spin2-only repack silently dropped them (caught 2026-08-22 by
+        # verify-published-zip-currency.py the moment the archive was rebuilt).
+        #
+        # The exclusions mirror that checker's `shippable()` deliberately, so the
+        # two tools cannot disagree about what belongs in the archive -- the same
+        # failure PURPOSES.md caused when only one of them knew to skip it.
+        SKIP_NAMES = {'.DS_Store', '.vscode', '__pycache__', 'PURPOSES.md'}
+        SKIP_EXT = {'.bin', '.lst', '.zip'}
+        entries = sorted(
+            f for f in os.listdir(args.outdir)
+            if not f.startswith('.')
+            and f not in SKIP_NAMES
+            and os.path.splitext(f)[1].lower() not in SKIP_EXT
+            and os.path.isfile(os.path.join(args.outdir, f)))
+        examples = [f for f in entries if f.endswith('.spin2')]
+        if not examples:
             sys.exit(f"ERROR: no .spin2 files in {args.outdir} -- refusing to "
                      f"write an empty archive")
         zippath = args.zippath or (args.outdir.rstrip('/') + '.zip')
         with zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for fn in files:
+            for fn in entries:
                 zf.write(os.path.join(args.outdir, fn), arcname=fn)
-            readme = os.path.join(args.outdir, 'README.md')
-            if os.path.isfile(readme):
-                zf.write(readme, arcname='README.md')
-        print(f"Repacked {len(files)} example(s) from {args.outdir}")
+        extra = len(entries) - len(examples)
+        print(f"Repacked {len(examples)} example(s)"
+              + (f" + {extra} companion file(s)" if extra else "")
+              + f" from {args.outdir}")
         print(f"  ZIP: {zippath}")
         if not os.path.isfile(os.path.join(args.outdir, 'README.md')):
             print(f"  NOTE: no README.md index in {args.outdir}")

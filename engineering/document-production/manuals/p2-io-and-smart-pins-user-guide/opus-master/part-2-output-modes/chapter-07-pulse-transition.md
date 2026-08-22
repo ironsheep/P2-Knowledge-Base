@@ -301,9 +301,9 @@ Edge period = 1000 / 200MHz = 5 µs
 CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
-  STEP_PERIOD = 400                       ' 2 µs period
-  STEP_LOW = 200                          ' X[31:16] compare = 1 µs low time
-  ' (high time = 400-200 = 200 = 1 µs, 50% duty)
+  STEP_PERIOD = 400                       ' 2 us period
+  STEP_LOW = 200                          ' X[31:16] compare = 1 us low time
+  ' (high time = 400-200 = 200 = 1 us, 50% duty)
 
 PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)

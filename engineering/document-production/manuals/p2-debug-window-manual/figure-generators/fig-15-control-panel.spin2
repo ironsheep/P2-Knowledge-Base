@@ -5,7 +5,7 @@
 '' the SAME PLOT coordinate space as the draws (both bottom-left/Y-up, no external
 '' artwork), so NO flip is needed and the panel is internally consistent. The
 '' event-log proves it on hardware: clicking the LEFT (minus) region must DECREASE
-'' value and the RIGHT (plus) region must INCREASE it — a mismatch would be a real
+'' value and the RIGHT (plus) region must INCREASE it - a mismatch would be a real
 '' bottom-left/top-left mouse-vs-draw inversion.
 '' Create + poll + hit-test + draw byte-preserved from
 '' examples-library/ch15-control-panel.spin2. ADDS: DEBUG[DBG_INPUT] logging of each

@@ -1,11 +1,11 @@
 '' fig-12-mouse-pointer.spin2  ->  DBG_INPUT event log (INTERACTIVE, no screenshot)
 '' PC_MOUSE certification harness for Chapter 12's mouse-pointer example.
-'' HARD CHECKS (structural, vs REF/robot-dog/test_dog_panel.spin2) — both PASS:
+'' HARD CHECKS (structural, vs REF/robot-dog/test_dog_panel.spin2) - both PASS:
 ''   (1) 7 CONSECUTIVE longs: `mouse[7]` local array == 7 longs (mx,my,mwheel,
 ''       mlb,mmb,mrb,mpix); PC_MOUSE(@mouse) is LAST in its statement.
 ''   (2) Y-flip: this example is a TERM text read-out (it prints the reported
 ''       coords, it does NOT draw a pointer onto a PLOT), so no bottom-left/top-left
-''       mapping exists to flip — correct as-is. (The flip idiom lives in the PLOT
+''       mapping exists to flip - correct as-is. (The flip idiom lives in the PLOT
 ''       panel example, ch15-control-panel.)
 '' TERM create + PC_MOUSE read-out byte-preserved from
 '' examples-library/ch12-mouse-pointer.spin2. ADDS: DEBUG[DBG_INPUT] logging of the

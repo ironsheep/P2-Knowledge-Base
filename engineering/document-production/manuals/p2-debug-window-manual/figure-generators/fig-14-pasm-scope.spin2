@@ -1,5 +1,5 @@
 '' fig-14-pasm-scope.spin2  ->  fig-14-pasm-scope.bmp
-'' SCOPE window fed from a PASM cog (coginit) — Chapter 14 example. The DAT PASM
+'' SCOPE window fed from a PASM cog (coginit) - Chapter 14 example. The DAT PASM
 '' cog (create with config only + channel-def on a SEPARATE feed, RC-2; then feed
 '' a ramp) is byte-preserved from examples-library/ch14-pasm-scope.spin2. The Spin
 '' cog's keep-alive `repeat` is replaced by a bounded wait, then it stops the feed

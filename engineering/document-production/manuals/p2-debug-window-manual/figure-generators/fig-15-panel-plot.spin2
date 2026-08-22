@@ -1,5 +1,5 @@
 '' fig-15-panel-plot.spin2  ->  fig-15-panel-plot.bmp
-'' PLOT window with two external-BMP LAYERs — Chapter 15 example (PRIORITY:
+'' PLOT window with two external-BMP LAYERs - Chapter 15 example (PRIORITY:
 '' LAYER/external-BMP surface). Requires panel_bg.bmp + digits.bmp in the run
 '' directory (both live in examples-library/). Create + LAYER load + CROP-blit
 '' byte-preserved from examples-library/ch15-panel-plot.spin2; infinite `repeat`

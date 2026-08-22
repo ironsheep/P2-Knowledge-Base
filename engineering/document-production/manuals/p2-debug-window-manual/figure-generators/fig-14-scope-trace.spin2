@@ -1,5 +1,5 @@
 '' fig-14-scope-trace.spin2  ->  fig-14-scope-trace-scope.bmp + ...-term.bmp
-'' SCOPE + TERM — Chapter 14 coordinated scope/status-panel example (RC-2: SCOPE
+'' SCOPE + TERM - Chapter 14 coordinated scope/status-panel example (RC-2: SCOPE
 '' channel-def on a SEPARATE feed). Byte-preserved from
 '' examples-library/ch14-scope-trace.spin2; infinite `repeat` bounded to 256 frames
 '' (fills the 256-sample window), both windows saved, then DEBUG_END_SESSION.

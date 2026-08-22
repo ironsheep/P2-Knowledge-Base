@@ -8,7 +8,7 @@ CON
 
 PUB main() | p1, p2, p3, s, i
   ' SAMPLES n {first last}: display bins first..last. Default is 0..255, which would
-  ' clip tone 3 at bin 280 — so show 0..320 to keep all three peaks on screen.
+  ' clip tone 3 at bin 280 - so show 0..320 to keep all three peaks on screen.
   debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 0 320 LINESIZE -3 LOGSCALE COLOR WHITE GRAY)
   ' one channel: label, MAG=0, full-scale 1000 (canonical; NOT $7FFFFFFF which made
   ' peaks vanish), 230 tall, baseline 12, grid, blue

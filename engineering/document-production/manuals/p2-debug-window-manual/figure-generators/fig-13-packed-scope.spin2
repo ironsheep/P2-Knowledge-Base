@@ -1,11 +1,11 @@
 '' fig-13-packed-scope.spin2  ->  fig-13-packed-scope.bmp
-'' SCOPE window — Chapter 13 packed-samples example (RC-2: channel-defs on a
+'' SCOPE window - Chapter 13 packed-samples example (RC-2: channel-defs on a
 '' SEPARATE feed, NOT the create line; each channel-def carries a range per EF-003
 '' + the working ch07 SCOPE examples). Create + full-window array feed
 '' byte-preserved from examples-library/ch13-packed-scope.spin2; infinite `repeat`
 '' bounded to 2 frames, then SAVE + DEBUG_END_SESSION.
 ''
-'' Packed data must be streamed as an ARRAY (uhex_long_array_) — one full window
+'' Packed data must be streamed as an ARRAY (uhex_long_array_) - one full window
 '' per message. Feeding one packed long at a time via `(x) does NOT accumulate.
 
 CON _clkfreq = 200_000_000

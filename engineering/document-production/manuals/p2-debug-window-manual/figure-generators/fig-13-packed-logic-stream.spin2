@@ -1,11 +1,11 @@
 '' fig-13-packed-logic-stream.spin2  ->  fig-13-packed-logic-stream.bmp
-'' LOGIC window — Chapter 13 packed 1-bit stream example, instrumented for capture.
+'' LOGIC window - Chapter 13 packed 1-bit stream example, instrumented for capture.
 '' Create + full-window array feed byte-preserved from
 '' examples-library/ch13-packed-logic-stream.spin2; infinite `repeat` bounded to 3
 '' frames, then SAVE + DEBUG_END_SESSION.
 ''
-'' Packed data must be streamed as an ARRAY (uhex_long_array_) — one full window
-'' per message — matching the only packed-LOGIC pattern in the Spin2 v51/v55 docs.
+'' Packed data must be streamed as an ARRAY (uhex_long_array_) - one full window
+'' per message - matching the only packed-LOGIC pattern in the Spin2 v51/v55 docs.
 '' Feeding one packed long at a time via `(x) does NOT accumulate (only a fragment
 '' of the last long renders).
 

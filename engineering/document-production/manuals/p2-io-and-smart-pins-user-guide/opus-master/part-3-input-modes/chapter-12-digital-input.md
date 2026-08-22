@@ -419,7 +419,7 @@ PUB main()
 
   ' Configure button with pull-up and Schmitt trigger
   WRPIN(BUTTON_PIN, P_SCHMITT_A | P_HIGH_15K)
-  ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+  ' DIR=1, OUT=1 -> 15kohm drive-high pull-up
   PINHIGH(BUTTON_PIN)
 
   ' Main loop

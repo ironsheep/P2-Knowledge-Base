@@ -7,7 +7,7 @@ CON
 
 PUB main() | ang, i
   ' Create the window with CONFIG ONLY; the channel-def must be a SEPARATE feed to the
-  ' window name. Every canonical v55 example does this — a channel-def on the SCOPE
+  ' window name. Every canonical v55 example does this - a channel-def on the SCOPE
   ' creation line is ignored, so PNut drew an empty plot.
   debug(`SCOPE Sig SIZE 400 200 SAMPLES 256 COLOR WHITE GRAY)
   debug(`Sig 'Wave' -1100 1100 180 10 15 BLUE)   ' name lo hi tall base grid colour

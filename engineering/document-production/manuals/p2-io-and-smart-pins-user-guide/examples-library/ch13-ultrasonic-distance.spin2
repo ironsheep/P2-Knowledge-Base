@@ -1,3 +1,22 @@
+'' ===========================================================================
+''
+''   File.......  ch13-ultrasonic-distance.spin2
+''   Purpose....  Pulse-width measurement turning an echo into a distance,
+''                timed by the pin and not by a loop
+''   Manual.....  P2 I/O & Smart Pins User Guide
+''   Version....  v1.0.9 (2026-08-18)
+''   Appears in.  Chapter 13: Timing Measurement -- 13.7 Worked Examples
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jun 2026
+''   Updated....  Jun 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 CON
   _clkfreq = 200_000_000
   TRIG_PIN = 20
@@ -9,7 +28,7 @@ PUB measure_distance_cm() : distance | echo_us
   WRPIN(ECHO_PIN, P_HIGH_TICKS | P_SCHMITT_A)
   PINLOW(ECHO_PIN)
 
-  ' Send 10µs trigger pulse
+  ' Send 10us trigger pulse
   PINHIGH(TRIG_PIN)
   WAITUS(10)
   PINLOW(TRIG_PIN)
@@ -19,5 +38,24 @@ PUB measure_distance_cm() : distance | echo_us
 
   echo_us := (RDPIN(ECHO_PIN) & $7FFF_FFFF) / (_clkfreq / 1_000_000)
 
-  ' Distance = (echo_time / 2) / 29.1 µs/cm
+  ' Distance = (echo_time / 2) / 29.1 us/cm
   distance := echo_us / 58
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

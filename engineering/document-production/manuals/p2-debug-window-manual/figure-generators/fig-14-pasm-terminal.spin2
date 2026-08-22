@@ -1,5 +1,5 @@
 '' fig-14-pasm-terminal.spin2  ->  fig-14-pasm-terminal.bmp
-'' TERM window fed from a PASM cog (coginit) — Chapter 14 example. The DAT PASM cog
+'' TERM window fed from a PASM cog (coginit) - Chapter 14 example. The DAT PASM cog
 '' (create TERM, then count) is byte-preserved from
 '' examples-library/ch14-pasm-terminal.spin2. The Spin cog's keep-alive `repeat` is
 '' replaced by a bounded wait, then it stops the feed cog for a stable capture and

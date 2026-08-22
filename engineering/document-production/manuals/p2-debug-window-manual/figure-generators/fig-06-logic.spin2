@@ -9,7 +9,7 @@ CON
 PUB main() | tx_byte, i, cs, clk, mosi, b
   ' LOGIC declares its channels ON the creation line (unlike SCOPE/FFT, whose
   ' channel-defs are a separate feed). v55 grammar: "If no names are given, a single
-  ' group of 32 channels will be established" — that fallback was the 32-channel bug.
+  ' group of 32 channels will be established" - that fallback was the 32-channel bug.
   ' Names-only gives three single-bit channels with default (distinct) colours.
   debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 COLOR WHITE GRAY 'CS' 'CLK' 'MOSI')
 

@@ -1,5 +1,5 @@
 '' fig-14-pasm-inline.spin2  ->  fig-14-pasm-inline.bmp
-'' TERM window fed from an inline-PASM org/end block — Chapter 14 example.
+'' TERM window fed from an inline-PASM org/end block - Chapter 14 example.
 '' Create + inline org/end DEBUG byte-preserved from
 '' examples-library/ch14-pasm-inline.spin2; the reader's infinite `repeat` around
 '' the org/end block is bounded to 12 iterations, then SAVE + DEBUG_END_SESSION.

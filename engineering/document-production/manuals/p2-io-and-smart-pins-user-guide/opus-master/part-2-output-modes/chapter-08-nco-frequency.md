@@ -224,7 +224,7 @@ CON
 PUB three_phase_nco() | y_val, phase_120, phase_240
   y_val := FREQ_HZ FRAC _clkfreq
   
-  ' Phase offsets: 0°, 120°, 240°
+  ' Phase offsets: 0 deg, 120 deg, 240 deg
   phase_120 := 65536 / 3                  ' 21845
   phase_240 := 65536 * 2 / 3              ' 43690
   
@@ -237,9 +237,9 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   WRPIN(PHASE_B, P_NCO_FREQ | P_OE)
   WRPIN(PHASE_C, P_NCO_FREQ | P_OE)
   
-  WXPIN(PHASE_A, 1 | (0 << 16))           ' 0° phase
-  WXPIN(PHASE_B, 1 | (phase_120 << 16))   ' 120° phase
-  WXPIN(PHASE_C, 1 | (phase_240 << 16))   ' 240° phase
+  WXPIN(PHASE_A, 1 | (0 << 16))           ' 0 deg phase
+  WXPIN(PHASE_B, 1 | (phase_120 << 16))   ' 120 deg phase
+  WXPIN(PHASE_C, 1 | (phase_240 << 16))   ' 240 deg phase
   
   ' Same frequency for all
   WYPIN(PHASE_A, y_val)

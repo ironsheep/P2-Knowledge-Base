@@ -491,7 +491,7 @@ PUB measure_distance_cm() : distance | echo_us
   WRPIN(ECHO_PIN, P_HIGH_TICKS | P_SCHMITT_A)
   PINLOW(ECHO_PIN)
 
-  ' Send 10µs trigger pulse
+  ' Send 10us trigger pulse
   PINHIGH(TRIG_PIN)
   WAITUS(10)
   PINLOW(TRIG_PIN)
@@ -501,7 +501,7 @@ PUB measure_distance_cm() : distance | echo_us
 
   echo_us := (RDPIN(ECHO_PIN) & $7FFF_FFFF) / (_clkfreq / 1_000_000)
 
-  ' Distance = (echo_time / 2) / 29.1 µs/cm
+  ' Distance = (echo_time / 2) / 29.1 us/cm
   distance := echo_us / 58
 ```
 

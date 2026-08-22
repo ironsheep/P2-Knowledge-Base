@@ -1,5 +1,5 @@
 '' fig-02-term-print-value.spin2  ->  fig-02-term-print-value.bmp
-'' TERM window — Chapter 2 "print a value" example, instrumented for capture.
+'' TERM window - Chapter 2 "print a value" example, instrumented for capture.
 '' Create + feed byte-preserved from examples-library/ch02-term-print-value.spin2;
 '' window-alive `repeat` -> SAVE + DEBUG_END_SESSION.
 

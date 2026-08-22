@@ -1,5 +1,5 @@
 '' fig-13-packed-bitmap-frame.spin2  ->  fig-13-packed-bitmap-frame.bmp
-'' BITMAP window — Chapter 13 LUT1 + LUTCOLORS packed-pixel example (PRIORITY:
+'' BITMAP window - Chapter 13 LUT1 + LUTCOLORS packed-pixel example (PRIORITY:
 '' LUT/LUTCOLORS surface). Create + LUTCOLORS + per-row packing byte-preserved from
 '' examples-library/ch13-packed-bitmap-frame.spin2; infinite `repeat` bounded to 2
 '' frames, then SAVE + DEBUG_END_SESSION.

@@ -25,10 +25,10 @@ each feature's *mechanism* stays in its own document, linked below.
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
 |---|---|:--:|:--:|:--:|:--:|
 | Getting Started | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
-| I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | ⏳ |
+| I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | 🔧 ¹¹ |
 | **Assembly Reference** | manual | **✅** ⁹ | **✅** ⁹ | **✅** ⁹ | — |
 | DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | **✅** ¹⁰ |
-| Debug Window | manual | ⏳ | ⏳ | ⏳ | ⏳ |
+| Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
@@ -91,6 +91,24 @@ back to the **slug**. The first sync wrote `Manual..... p2-getting-started-guide
 reader opens. Fixed in `sync-manual-examples.py` to match all three, re-synced, and XBYTE
 regression-checked unchanged. Had it gone unnoticed, the slug would have shipped in 49 more
 headers at the Debug Window / IOSP adoption.
+
+¹¹ **I/O & Smart Pins — headers adopted in source 2026-08-22, ZIP DELIBERATELY NOT REPUBLISHED.**
+Unlike the other three, IOSP's ASCII fixes changed the example BODIES (`µs`->`us`, `°`->` deg`,
+`→`->`->`, `Ω`->`ohm` in comments), so the printed listings in `opus-master` changed with them.
+The **shipped v1.0.9 PDF still prints the old characters.** Republishing the archive now would
+hand a reader a file that disagrees with the book it came from, which is the one promise the
+corpus makes. So `p2-io-and-smart-pins-user-guide-src.zip` is knowingly left stale and
+`verify-published-zip-currency.py` reads **RED for this document by design** until IOSP renders.
+
+At that render, in order: re-run `sync-manual-examples.py --check` (the header carries the
+released version, so it needs a re-sync once the version bumps), then repack the ZIP, then
+confirm currency GREEN. Everything else is done and gated: identity 15/15 body-compared, ASCII
+clean, 15/15 compile.
+
+Contrast Debug Window, adopted the same day and flipped to ✅: its 34 ASCII violations were all
+in `figure-generators/` and `audit/verification-tests/` — internal tooling, never printed and
+never shipped — so its example bodies never moved and its archive still matches the shipped
+v1.1.3 PDF exactly.
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.
 
