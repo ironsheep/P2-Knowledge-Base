@@ -213,7 +213,10 @@ list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
 > **DDS/Goertzel** *constant-value* tables were decoded row by row and are **correct** — they are
 > named-symbol value tables, not field-encoding templates. Do not "fix" them.
 
-### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — KB DONE 2026-08-21; Assembly source fixed 2026-08-22, PENDING the v3.1.7 render; the torture-test diagram clone is Stephen's design call`
+### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — KB DONE 2026-08-21; Assembly RESOLVED 2026-08-22 (v3.1.7); the torture-test diagram clone is Stephen's design call`
+
+> **VALIDATED on the returned v3.1.7 PDF, 2026-08-22 (505pp, read on the page).** p475 prints *"Read byte as color + intensity: P[7:5] selects the color, P[4:0] is the intensity"*, and `2:2:2:2` appears **zero** times in 505 pages. The LUMA8 row beside it now reads *"the color is selected by S[2:0]"*.
+
 
 > **Assembly fixed 2026-08-22 (v3.1.7).** `appendix-g-streamer-constants.md:115` now reads *"Read byte as color + intensity: P[7:5] selects the color, P[4:0] is the intensity"*, with a paragraph above the table contrasting RGBI8 against LUMA8. Sourced live from Silicon Doc `p2-documentation.txt:3800`, which also shows the colour table has **eight** entries — so the old row was wrong on the colour count as well as the field split.
 
@@ -237,7 +240,10 @@ luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B 
 `ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
 contrasts RGBI8 against LUMA8 immediately above. Copy that framing.
 
-### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `PENDING-VALIDATION — source fixed 2026-08-22; needs the v3.1.7 render`
+### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `RESOLVED 2026-08-22 (v3.1.7)`
+
+> **VALIDATED on the returned v3.1.7 PDF, 2026-08-22 (505pp, read on the page).** The Audio DAC example on p480 carries `COGID` / `SETNIB` / `WRPIN` / `DIRH`, and its routing reads `X_DACS_X_X_X_0` — one channel for a one-channel mode.
+
 
 > **Fixed 2026-08-22 (v3.1.7).** The "Audio DAC Output" example now carries the full `cogid` / `setnib` / `wrpin` / `dirh` sequence per F-272, and the example compiles under `pnut-ts` v1.55.3.
 >
@@ -261,7 +267,10 @@ enables the streamer's contribution to the pin's output *state*, never its outpu
 **F-308** / **EF-062** (bench-proven: DIR low 4-of-8, `DIRH` 8-of-8). The citation this note used to
 carry, `Silicon Doc :3602-3603`, resolves to nothing in `engineering/ingestion/` and has been dropped.
 
-### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `PARTIAL — Streamer Guide DONE and bench-sealed (EF-062); Assembly source fixed 2026-08-22, PENDING the v3.1.7 render`
+### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `RESOLVED 2026-08-22 — Streamer bench-sealed (EF-062), Assembly shipped in v3.1.7`
+
+> **VALIDATED on the returned v3.1.7 PDF, 2026-08-22 (505pp, read on the page).** `DIRH` appears **8 times** across Appendix G (pp.471-482): all four usage examples, the `HARDWARE` callout carrying the EF-062 numbers, and the control-flag prose. The no-`WRPIN` half survives intact.
+
 
 > **Assembly fixed 2026-08-22 (v3.1.7).** All three example sites now `DIRH` their pins, and a `::: hardware` callout under the control-flag table states the state-vs-enable distinction with the EF-062 numbers. The **no-`WRPIN`** half is preserved.
 >
@@ -354,8 +363,13 @@ it found §15.1 carrying four defects where this finding had named one, and a fi
 which later tasks were told to respect. **That decision is now half wrong and must not be applied as
 written.** Surfaces at the Streamer v1.1.0 co-release gate («#288») with F-302…F-307.
 
-**Status:** `PARTIAL — the Streamer Guide half is COMPLETE AND VALIDATED; only the Assembly Language
-Reference's three sites remain, owed at the agreed CO-RELEASE.` The v1.1.0 PDF was read at «#287»
+**Status:** `RESOLVED 2026-08-22 — BOTH halves complete and validated on their returned PDFs.` The
+Assembly Language Reference's sites shipped in **v3.1.7** and were read on the page: `DIRH` appears
+8 times across Appendix G (pp.471-482) — all four usage examples, the `HARDWARE` callout carrying
+the EF-062 numbers, and the control-flag prose — while the no-`WRPIN` half survives intact. The
+enumeration named three sites; two more carried the same wrong model as a gloss
+(`appendix-g:203`, `part-i/chapter-05-hardware.md:347`) and were corrected in the same pass.
+The v1.1.0 PDF was read at «#287»
 2026-08-21 and the §11.0 callout renders as the corrected split — *"X_PINS_ON requires no WRPIN: no
 DAC mode, no COGID, no channel… What digital output still needs is DIRH. X_PINS_ON enables the
 streamer's contribution… Until DIR is high, the pin does not drive."* The no-`WRPIN` half survived,
@@ -425,7 +439,10 @@ branch. (`a gate must read the artifact`; `prove with a negative control`.)
 
 ## Appendix G's mode tables misdecode the naming convention the same appendix documents (2026-08-22) — F-318
 
-### F-318 — 31 of 36 streamer mode-table rows state a wrong pin count, a wrong DAC-channel count, or both, and every usage example in the appendix cannot run as printed. `PENDING-VALIDATION — source fixed 2026-08-22; needs the v3.1.7 render`
+### F-318 — 31 of 36 streamer mode-table rows state a wrong pin count, a wrong DAC-channel count, or both, and every usage example in the appendix cannot run as printed. `RESOLVED 2026-08-22 (v3.1.7)`
+
+> **VALIDATED on the returned v3.1.7 PDF, 2026-08-22 (505pp, read on the page).** Appendix G grew 9pp -> 12pp (pp.471-482) and **that +3 is the manual's ENTIRE page delta** — no other section moved. The decode rule now opens the appendix; all 36 rows read correctly; the four rebuilt examples print with `SETXFRQ`, an OR-ed `D[15:0]` count and `DIRH`. `SETLUTS`-for-streamer-LUT and *"Appendix F (Streamer Mode Constants)"* both appear **zero** times. Column separation measured: tightest constant->value gap **+14.1pt**, so the v3.1.5 overlap class is absent.
+
 
 **How it surfaced.** Fixing F-303's single row in `appendix-g-streamer-constants.md` and then re-deriving the
 rest of the table from the artifact instead of trusting the enumeration. **The register named one wrong row in

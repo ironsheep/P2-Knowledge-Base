@@ -26,7 +26,7 @@ each feature's *mechanism* stays in its own document, linked below.
 |---|---|:--:|:--:|:--:|:--:|
 | Getting Started | manual | ⏳ | ⏳ | ⏳ | ⏳ |
 | I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | ⏳ |
-| Assembly Reference | manual | 🔧 ⁹ | 🔧 ⁹ | 🔧 ⁹ | — |
+| **Assembly Reference** | manual | **✅** ⁹ | **✅** ⁹ | **✅** ⁹ | — |
 | DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | ⏳ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | ⏳ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
@@ -85,7 +85,23 @@ text, which prints *"Version 3.1.7"*, and a leading `v` would never be found the
 **Negative control run 2026-08-22** against the *released v3.1.6* PDF with the new `request.json`:
 the gate reported `title-empty`, `subject-empty`, `author-empty`, `cover-version-missing`,
 `stale-version`, `rights-declared-not-emitted` and `rights-missing` — it reads the artifact, not the
-declaration, and it is armed. Flips to ✅ only when the returned v3.1.7 PDF passes it.
+declaration, and it is armed.
+
+**✅ PROVEN on the returned v3.1.7 PDF, 2026-08-22 (505pp).** `audit-pdf-metadata.py --prior 3.1.6
+--require-rights` reads **CLEAN**, all seven declared fields verified in the artifact: Title *"P2
+Assembly Language Reference Manual"*, Subject *"Complete PASM2 Instruction Set Documentation"*,
+Author, and Keywords *"Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed
+under CC BY-SA 4.0"* — where v3.1.6 carried **none of the four**. Cover page 1 reads
+`August 2026` / `Version 3.1.7`, and `3.1.6` appears **zero** times across all 505 pages.
+Cross-ref filter live at **+87 internal links** (3142 → 3229).
+
+**Adoption took TWO parts, and the first render proved it.** Declaring the keys in `request.json`
+is only half: the manual's own `*-reference.latex` must bind pandoc variables to the platform
+macros with seven `\renewcommand{\Doc*}` lines. Assembly's template instead hardcoded
+`\title`/`\author`/`\date{December 2025}`, which are **inert** here because the foundation
+populates the info dictionary from `\Doc*` and deliberately not from `\@title`/`\@author`. Render 1
+came back with all four fields EMPTY and `Keywords` reading literally `"; licensed under "`.
+**Any document adopting this must edit its template, not just its request.json.**
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 
