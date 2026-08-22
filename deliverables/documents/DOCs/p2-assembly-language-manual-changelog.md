@@ -1,5 +1,34 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.7 (2026-08-22)
+
+**Every streamer constant reads the way its name is built**, and the examples carry the setup that makes them run.
+
+### Added
+
+- **The mode-constant decode rule opens Appendix G**: `_nP` is a pin count, `_kDACb` is k DAC channels of b bits each
+- **`D[22:20]` selects the pin group**, in 8-pin increments, for transfers of up to 32 pins
+- **`D[15:0]` holds the transfer count**, and `SETXFRQ` holds the data rate
+- **The ADC sampling modes name their prerequisites**: `SETSCP` for the four-pin block, an ADC smart pin mode per pin
+- **The DDS/Goertzel modes carry their block field**, `D[22:19]`, with the base pin at four times the block number
+- **The streamer DAC example configures its pin**: `WRPIN` with a DAC mode and this cog's ID, then `DIRH`
+- **Every Appendix G example enables its pins** with `DIRH` before streaming to them
+
+### Changed
+
+- **The mode tables state pins, DAC channels, and bits per channel** across the immediate, RDFAST and WRFAST families
+- **`X_RFBYTE_RGBI8`**: a color in `P[7:5]` and an intensity in `P[4:0]`, giving eight colors at 32 levels each
+- **`X_RFBYTE_LUMA8`**: luminance in the pixel byte, with the color selected by `S[2:0]`
+- **The video modes** share one 32-bit output word carrying 24 bits of color
+- **`X_PINS_ON` and `X_WRITE_ON`** are the two names of `D[23]`, read according to the mode's direction
+- **`X_PINS_ON`** enables the streamer's contribution to a pin's output state; `DIRH` enables the pin to drive
+- **The LUT modes**: the width figure is the lookup index size, and the LUT entry reaches the pins
+- **§5.3.4** groups the streamer constant families as the hardware does, and points to Appendix G by name
+- **The front matter names each appendix** as that appendix titles itself
+- **The PDF carries its title, subject and author**, fed from a single source
+- **The PDF carries machine-readable rights**: joint copyright and the CC BY-SA 4.0 grant
+- **Cross-references render as links** throughout the manual
+
 ## v3.1.6 (2026-08-18)
 
 **Keep hub access out of both CORDIC loops** — the shape measured clean on silicon.
