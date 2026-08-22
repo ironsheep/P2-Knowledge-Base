@@ -82,11 +82,45 @@ def extract_examples(md_text):
 
 def main():
     ap = argparse.ArgumentParser(description="Extract a manual's worked-example code blocks into a curated example library + ZIP.")
-    ap.add_argument('markdown', help='the manual markdown to scan')
+    ap.add_argument('markdown', help='the manual markdown to scan '
+                                     "(pass '-' with --repack)")
     ap.add_argument('outdir', help='examples-library directory to write files into')
+    ap.add_argument('--repack', action='store_true',
+                    help='do NOT extract; rebuild the ZIP from the corpus already '
+                         'on disk. For a document whose printed fences carry no '
+                         'caption= yet, where extraction would find nothing and '
+                         'produce an EMPTY library.')
     ap.add_argument('--zip', dest='zippath', default=None,
                     help='ZIP path to (re)build (default: <outdir>.zip)')
     args = ap.parse_args()
+
+    # --repack: the corpus on disk IS the source. Used where the document's fences
+    # are not caption-tagged yet, so extraction would find zero examples and write
+    # an empty library over a good one -- verified 2026-08-22 by dry-running the
+    # extractor against P2AN003, which found none of its six real examples.
+    # Ships exactly what the extract path ships: the .spin2 files plus a curated
+    # README.md, flat, in sorted order. PURPOSES.md is an authoring input and is
+    # deliberately NOT packed.
+    if args.repack:
+        if not os.path.isdir(args.outdir):
+            sys.exit(f"ERROR: not a directory: {args.outdir}")
+        files = sorted(f for f in os.listdir(args.outdir)
+                       if f.endswith('.spin2') and not f.startswith('.'))
+        if not files:
+            sys.exit(f"ERROR: no .spin2 files in {args.outdir} -- refusing to "
+                     f"write an empty archive")
+        zippath = args.zippath or (args.outdir.rstrip('/') + '.zip')
+        with zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for fn in files:
+                zf.write(os.path.join(args.outdir, fn), arcname=fn)
+            readme = os.path.join(args.outdir, 'README.md')
+            if os.path.isfile(readme):
+                zf.write(readme, arcname='README.md')
+        print(f"Repacked {len(files)} example(s) from {args.outdir}")
+        print(f"  ZIP: {zippath}")
+        if not os.path.isfile(os.path.join(args.outdir, 'README.md')):
+            print(f"  NOTE: no README.md index in {args.outdir}")
+        return
 
     if not os.path.isfile(args.markdown):
         sys.exit(f"ERROR: markdown not found: {args.markdown}")

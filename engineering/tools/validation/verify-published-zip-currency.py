@@ -49,7 +49,19 @@ import tempfile
 import zipfile
 
 # Never expected inside the published archive.
-EXCLUDE_NAMES = {'.DS_Store', '.vscode', '__pycache__'}
+#
+# PURPOSES.md is an AUTHORING INPUT, not a reader artifact: it supplies the one
+# human field sync-manual-examples.py cannot derive (a file's Purpose line), and
+# once the header is generated the reader has that text IN the file. Shipping it
+# would hand readers an internal worklist.
+#
+# It is excluded here because build-example-library.py already declines to pack
+# it -- that builder ships the .spin2 files plus a curated README.md and nothing
+# else. The two tools disagreeing made XBYTE, the ONE document that had adopted
+# generated headers, read RED for carrying the very file that adoption requires.
+# Left unfixed it would have failed every document the header sweep touches, for
+# the same wrong reason. (Found 2026-08-22 sizing that sweep.)
+EXCLUDE_NAMES = {'.DS_Store', '.vscode', '__pycache__', 'PURPOSES.md'}
 EXCLUDE_EXT = {'.bin', '.lst', '.zip'}
 
 
