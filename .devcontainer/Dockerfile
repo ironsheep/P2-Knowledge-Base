@@ -82,11 +82,16 @@ RUN printf '%s\n' \
     'Venv: /opt/pdf-tools/venv   Models: /opt/pdf-tools/models (DOCLING_ARTIFACTS_PATH)' \
     > /opt/pdf-tools/README.md
 
-# --- per-user tooling baked into the image (Claude CLI + PyYAML) ----------------
+# --- per-user tooling baked into the image (Claude CLI + repo tooling deps) -----
 # Installed as the runtime user so it lands in /home/vscode and is on PATH.
+# These are what engineering/tools/ runs under the SYSTEM python3. Note pymupdf is
+# also in /opt/pdf-tools/venv above, but that venv is isolated -- the validation
+# gates import it as plain `fitz`, so it must exist here too or they fail closed
+# ("PyMuPDF is required") mid-release. audit-pdf-margin-overflow.py hit exactly that
+# in a fresh container on 2026-08-21.
 USER vscode
 RUN curl -fsSL https://claude.ai/install.sh | bash \
     && grep -q '\.local/bin' ~/.bashrc 2>/dev/null \
        || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc \
-    && pip install --user --no-cache-dir PyYAML
+    && pip install --user --no-cache-dir PyYAML pymupdf
 USER root
