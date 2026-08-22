@@ -25,6 +25,20 @@
 \renewcommand{\DocVersion}{$version$}
 \renewcommand{\DocDate}{$date$}
 \renewcommand{\DocAuthor}{$author$}
+% F-316/F-319 rights. Rights are NOT authorship: \DocAuthor is who WROTE the guide,
+% \DocCopyright is who HOLDS it. Binding these two was missed when the other five
+% were wired, and five-of-seven is the dangerous shape — the cover renders, the info
+% dictionary carries Title/Subject/Author, and only the rights field is wrong, so
+% nothing on the page shows it. Unbound, they sit at the platform's
+% \providecommand defaults and the foundation's guard fails open (F-319: the
+% defaults are \long macros, \@empty is not, so \ifx never tests equal), emitting
+% the literal "; licensed under ".
+%
+% This is the ONE document in the set that is IRON SHEEP ALONE — no Parallax — per
+% its own licence page (opus-master/front-matter.md:102). The values therefore come
+% from THIS document's request.json and must never be copied from a sibling manual.
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
 
 \title{\DocTitle}
 \author{\DocAuthor}

@@ -33,7 +33,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | ⏳ | ⏳ | — |
-| **PNut-Term-TS User Guide** | guide | **✅** | ⏳ ¹² | ⏳ ⁶ | — |
+| **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | ⏳ ⁶ | — |
 | P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -110,27 +110,37 @@ in `figure-generators/` and `audit/verification-tests/` — internal tooling, ne
 never shipped — so its example bodies never moved and its archive still matches the shipped
 v1.1.3 PDF exactly.
 
-¹² **PNut-Term-TS — rights are HALF-WIRED, and rendering it as-is would ship a MALFORMED rights
-string.** Found 2026-08-22 while re-opening the guide for its visual pass. Its template
-`p2kb-pnut-term-ts.latex` binds **five** of the seven `\Doc*` macros — Title, Subtitle, Version,
-Date, Author (`:23-27`) — and binds **neither `\DocCopyright` nor `\DocLicense`**. `request.json`
-declares no `copyright`/`license` either.
+¹² **PNut-Term-TS — rights were HALF-WIRED; FIXED 2026-08-22, before any render.** Found while
+re-opening the guide for its visual pass. Its template `p2kb-pnut-term-ts.latex` bound **five** of
+the seven `\Doc*` macros — Title, Subtitle, Version, Date, Author (`:23-27`) — and **neither
+`\DocCopyright` nor `\DocLicense`**. `request.json` declared no `copyright`/`license` either.
 
 That combination is exactly **F-319**: the platform's rights guard does not fire for a document
 whose rights macros sit at their `\providecommand{}` defaults, so `pdfkeywords` is emitted anyway
 and comes out as the literal `"; licensed under "` — which is what Assembly's first v3.1.7 render
 produced. **This guide is F-319's first live victim, not merely a candidate.**
 
-Fix BOTH halves before the render (the two-part rule, and here it is 5-of-7 rather than 0-of-7,
-which is harder to spot):
-1. add `\renewcommand{\DocCopyright}{$copyright$}` and `\renewcommand{\DocLicense}{$license$}`
-   to the template beside the other five;
-2. add to `request.json` metadata, sourced from **this guide's own** licence page — it is the ONE
-   document in the set that is **Iron Sheep ALONE**, no Parallax:
+BOTH halves were fixed (the two-part rule, and here it was 5-of-7 rather than 0-of-7, which is
+harder to spot):
+1. added `\renewcommand{\DocCopyright}{$copyright$}` and `\renewcommand{\DocLicense}{$license$}`
+   to the template beside the other five — now 7/7;
+2. added to `request.json` metadata, sourced from **this guide's own** licence page
+   (`opus-master/front-matter.md:102`) — it is the ONE document in the set that is **Iron Sheep
+   ALONE**, no Parallax:
    `"copyright": "Copyright 2026 Iron Sheep Productions, LLC"`, `"license": "CC BY-SA 4.0"`.
 
-Then `audit-pdf-metadata.py --require-rights` gates it. Note this also removes the guide as a
-possible negative control for F-319 — use the layout torture test instead.
+**Verified before the render, not after:** `audit-pdf-metadata.py`'s own `norm_rights()` was run
+over the declared string and the copyright page's `Copyright © 2026 Iron Sheep Productions, LLC.`
+— both normalise to `copyright 2026 iron sheep productions, llc`, so check 6 (metadata rights
+AGREE with the document's own copyright page) will pass. The artifact check still has to happen on
+the returned PDF; this only rules out a mismatch that would have been guaranteed to fail.
+
+**This does NOT close F-319.** The shared guard in `p2kb-platform-foundation.sty:332-350` is still
+broken for every document that has not wired these two macros — the `⏳` rows in the Rights column
+above. Adopting the guide out of the victim pool also removes it as a possible **negative control**
+for F-319; the Layout Torture Test is the remaining candidate.
+
+From here on `audit-pdf-metadata.py --require-rights` gates this guide's rights on every render.
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.
 

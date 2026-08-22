@@ -23,7 +23,9 @@
         "subtitle": "The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2",
         "author": "Iron Sheep Productions, LLC",
         "version": "1.0.0",
-        "date": "August 2026"
+        "date": "August 2026",
+        "copyright": "Copyright 2026 Iron Sheep Productions, LLC",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

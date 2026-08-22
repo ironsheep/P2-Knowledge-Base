@@ -516,12 +516,27 @@ documents load, using an idiom that **cannot be tested in this container** (no T
 manual is mid-render. Landing it blind risks breaking rights emission for Streamer and the
 Single-Step Debugger, which are proven working today.
 
-**A LIVE VICTIM, found 2026-08-22.** `pnut-term-ts-user-guide` is about to render for its v1.0.0
-release and its template binds five of the seven `\Doc*` macros but neither rights macro, with no
-`copyright`/`license` in its `request.json` either — so it would emit the malformed
-`"; licensed under "` exactly as Assembly's first v3.1.7 render did. Recorded with its fix in
-`PLATFORM-FEATURE-ADOPTION.md` footnote ¹². Fixing it there also removes that guide from the pool
-of possible negative controls for this finding.
+**A LIVE VICTIM, found 2026-08-22 — and FIXED the same day, before it rendered.**
+`pnut-term-ts-user-guide` was about to render for its v1.0.0 release with five of the seven `\Doc*`
+macros bound and neither rights macro, and no `copyright`/`license` in its `request.json` either —
+so it would have emitted the malformed `"; licensed under "` exactly as Assembly's first v3.1.7
+render did. Both halves are now wired (template 7/7; `request.json` carrying
+`"Copyright 2026 Iron Sheep Productions, LLC"` + `"CC BY-SA 4.0"`, the one ISP-alone document in
+the set). Detail in `PLATFORM-FEATURE-ADOPTION.md` footnote ¹².
+
+**The mechanism hypothesis above is now believed CONFIRMED by reading, though still not executed.**
+`\providecommand` routes through `\newcommand`, which defines a **`\long`** macro; `\@empty` is
+`\def\@empty{}` and is not `\long`. `\ifx` compares that prefix as part of the meaning, so
+`\ifx\DocCopyright\@empty` can never be true for a macro declared this way — the guard takes the
+both-present branch **every** time, for **every** unadopted document. That is consistent with the
+only artifact evidence in hand (Assembly's `"; licensed under "`). Still unexecuted: no TeX engine
+in this container. `EXEC_ENV_CANONICAL` has one.
+
+**Consequence of fixing the victim:** the pool of available negative controls shrank again. Neither
+Assembly nor PNut-Term-TS can serve — an adopted document never takes the guarded branch, so it
+proves nothing. The **Layout Torture Test** is now the only candidate named for this purpose. A fix
+to the shared guard must be validated by rendering an *unadopted* document and confirming the
+returned PDF carries **no** Keywords at all.
 
 **What it needs instead — and this is the point:** its own change, with a **negative control** that
 Assembly can no longer provide. Render an *unadopted* document (the layout torture test is the
