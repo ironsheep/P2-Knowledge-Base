@@ -67,7 +67,7 @@ For each instruction:
 1. Start with generated template
 2. Add missing encoding details from CSV
 3. Include practical examples
-4. Verify with pnut_ts compiler
+4. Verify with pnut-ts compiler
 5. Move to completed/ when done
 
 ### Step 4: Combine into Manual
@@ -99,7 +99,7 @@ Look at the generated templates in:
 ### 2. Edit Individual Instructions
 - Pick an instruction you know well
 - Edit its template to add details
-- Test examples with pnut_ts
+- Test examples with pnut-ts
 - Move to completed/ folder
 
 ### 3. Batch Processing
@@ -125,7 +125,7 @@ For similar instructions (e.g., all math instructions), you can:
 
 1. **Modular** - Each instruction is independent
 2. **Version Controlled** - Git tracks all changes
-3. **Quality Assured** - Test with pnut_ts before including
+3. **Quality Assured** - Test with pnut-ts before including
 4. **Collaborative** - Multiple people can work on different instructions
 5. **Incremental** - Can publish partial manual as sections complete
 6. **Reusable** - Templates can be updated without regenerating everything
@@ -145,7 +145,7 @@ For similar instructions (e.g., all math instructions), you can:
 - [x] 168/170 weak instructions found in manual
 - [x] High-quality template examples created
 - [ ] All 491 instructions have templates
-- [ ] Examples verified with pnut_ts
+- [ ] Examples verified with pnut-ts
 - [ ] Cross-references validated
 - [ ] Final manual assembled
 - [ ] PDF generation successful

@@ -630,8 +630,14 @@ The sweep was careful to distinguish look-alikes, and these survived row-by-row 
   — checked explicitly. `D[19:16]` genuinely *is* a fixed sub-mode selector for the ADC
   family, and the DDS/Goertzel rows are a **named-constant value table**, not a field
   template, so `p = 0` is an accurate value for that symbol rather than a false claim
-  about the encoding. *Completeness caveat only:* neither table discloses that setting
-  `D[19]` selects the other four-pin block.
+  about the encoding. *Completeness caveat, CORRECTED 2026-08-22:* this previously read
+  *"neither table discloses that setting `D[19]` selects the other four-pin block."* Checked
+  live against the Silicon Doc, that is wrong on both halves. `D[22:19]` is a **four-bit block
+  number** whose base pin is the number times four (`:3997`), and it belongs to **DDS/Goertzel
+  only** — the ADC sampling modes take their four-pin block from **`SETSCP`** instead
+  (`:3968-3977`), plus an ADC smart pin mode on each sampled pin. Both are now documented in
+  Appendix G (F-318). The wrong form reached a draft of that fix before being caught: verify a
+  ledger claim against the live source before writing it into a manual.
 - **`dds-goertzel.yaml:11, :18`** — `%1111_0ppp_p111` / `%1111_1ppp_p111`, exact matches,
   with the correct `D[22:19]` multiple-of-four caveat. **Use this file as the fix template.**
 - **This manual's own `§4.2` (`:305`), `§10.1` (`:638-639`), `§17.1` (`:1356`), and

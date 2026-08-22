@@ -13,6 +13,7 @@
       ],
       "lua_filters": [
         "p2kb-platform-figures",
+        "p2kb-platform-crossref",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
@@ -24,8 +25,10 @@
         "title": "P2 Assembly Language Reference Manual",
         "subtitle": "Complete PASM2 Instruction Set Documentation",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v3.1.6",
-        "date": "August 2026"
+        "version": "3.1.7",
+        "date": "August 2026",
+        "copyright": "Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

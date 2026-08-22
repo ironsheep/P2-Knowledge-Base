@@ -26,7 +26,7 @@ each feature's *mechanism* stays in its own document, linked below.
 |---|---|:--:|:--:|:--:|:--:|
 | Getting Started | manual | ⏳ | ⏳ | ⏳ | ⏳ |
 | I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | ⏳ |
-| Assembly Reference | manual | ⏳ | ⏳ | ⏳ | — |
+| Assembly Reference | manual | 🔧 ⁹ | 🔧 ⁹ | 🔧 ⁹ | — |
 | DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | ⏳ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | ⏳ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
@@ -59,6 +59,19 @@ carrying its own hand-written header, not an example. Treat it as not adopted.
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.
 
+
+⁹ **Assembly Reference — declared 2026-08-22 for v3.1.7, NOT yet proven.** All three land in one
+`request.json` edit: `p2kb-platform-crossref` added second in `lua_filters` (the Streamer's adopted
+ordering), and `copyright` + `license` added to `metadata`. The copyright string is sourced from
+**this document's own** licence page — *Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax
+Inc.* — a year RANGE, unlike the Streamer's single 2026; the gate's check 6 compares metadata rights
+against that page, so the range is what has to be declared. `version` also changed form, from
+`"v3.1.6"` to `"3.1.7"`: the gate substring-matches the declared version against page 1's rendered
+text, which prints *"Version 3.1.7"*, and a leading `v` would never be found there.
+**Negative control run 2026-08-22** against the *released v3.1.6* PDF with the new `request.json`:
+the gate reported `title-empty`, `subject-empty`, `author-empty`, `cover-version-missing`,
+`stale-version`, `rights-declared-not-emitted` and `rights-missing` — it reads the artifact, not the
+declaration, and it is armed. Flips to ✅ only when the returned v3.1.7 PDF passes it.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 

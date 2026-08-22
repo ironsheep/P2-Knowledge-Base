@@ -9,7 +9,7 @@ This folder contains the work-in-progress replacement for the Parallax P2 Assemb
 
 - Accurate syntax and encoding information
 - Clear explanations of each instruction's behavior
-- Practical code examples (validated with pnut_ts compiler)
+- Practical code examples (validated with pnut-ts compiler)
 - Use cases and related instruction cross-references
 
 ## Source Material
@@ -53,7 +53,7 @@ p2-assembly-language-manual/
 
 1. **Template Generation** - Auto-generate templates from extracted data
 2. **Manual Enhancement** - Fill gaps, add examples, verify accuracy
-3. **Validation** - Test all code examples with pnut_ts compiler
+3. **Validation** - Test all code examples with pnut-ts compiler
 4. **Assembly** - Combine into complete alphabetical reference
 5. **PDF Generation** - Deploy to PDF Forge for final output
 
@@ -84,7 +84,7 @@ These are complementary documents:
 
 - [ ] All 491 instructions have templates
 - [ ] 100% encoding accuracy vs CSV
-- [ ] All examples compile with pnut_ts
+- [ ] All examples compile with pnut-ts
 - [ ] Cross-references validated
 - [ ] PDF generation successful
 

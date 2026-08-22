@@ -334,7 +334,7 @@ The streamer supports multiple operating modes, each optimized for specific data
 | RF mode | Radio frequency output generation | RF signal generation, modulation |
 | Goertzel mode | DSP filtering during transfer | Frequency detection, tone decoding |
 
-Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns.
+Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets its data differently: the LUT modes use each field as a lookup index, the RGB modes expand each pixel into red, green and blue bytes, and the plain pin/DAC modes split the data straight across pins and DAC channels.
 
 ### 5.3.4 Streamer Configuration
 
@@ -344,12 +344,12 @@ Streamer commands are built by combining mode constants using OR operations. The
 - **X_RFBYTE/RFWORD/RFLONG_** - Read from FIFO (hub RAM) with specified data width
 - **X_..._WFBYTE/WFWORD/WFLONG** - Write to FIFO (hub RAM) for capture operations
 - **X_DACS_** - DAC channel selection and configuration
-- **X_PINS_ON/OFF** - Enable/disable pin outputs
-- **X_WRITE_ON/OFF** - Enable/disable hub RAM writes
+- **X_PINS_ON/OFF** - Streamer drives, or does not drive, the pin group's output state. It is not the pin's output enable — `DIRH` is still what lets a pin drive.
+- **X_WRITE_ON/OFF** - Captured data is, or is not, written to hub RAM. This is the same bit as X_PINS_ON, read according to the mode's direction.
 
-The naming pattern `X_[source][size]_[pins]P_[dacs]DAC[bits]` describes the complete data path. For example, `X_RFBYTE_RGB8` reads bytes from hub RAM and interprets them as RGB 3:3:2 color values.
+The naming pattern `X_[source][size]_[pins]P_[dacs]DAC[bits]` describes the complete data path. In `X_RFBYTE_8P_2DAC4`, for instance, `RFBYTE` reads bytes from hub RAM, `8P` drives eight pins, and `2DAC4` feeds two DAC channels of four bits each — the last field is a channel count followed by a bit width, not two counts.
 
-**Complete X_* constant documentation, including all 78 mode constants with values and descriptions, appears in Appendix F (Streamer Mode Constants).** That appendix provides the detailed reference needed to configure the streamer for specific applications, including usage examples for video streaming, audio DAC output, and ADC capture.
+**Every X_* mode constant, with its value and description, appears in Appendix G (Streamer Mode Constants).** That appendix provides the detailed reference needed to configure the streamer for specific applications, including usage examples for video streaming, audio DAC output, and ADC capture.
 
 
 ## 5.4 Events and Interrupts
@@ -833,7 +833,7 @@ DEBUG_MASK and DEBUG_COGS operate at different levels:
 
 For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing cog must have its bit set in DEBUG_COGS.
 
-**See:** Appendix E (Debug Configuration Constants) for complete constant documentation including DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD, and breakpoint configuration.
+**See:** Appendix E (Predefined Constants) for the debug configuration symbols — DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD — and breakpoint configuration.
 
 
 ```{=latex}

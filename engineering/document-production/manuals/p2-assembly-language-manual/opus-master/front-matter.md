@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.1.6\par}
+{\large\color{blue}Version 3.1.7\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -209,16 +209,16 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 **Part III: Appendices** — Quick reference materials:
 
-- Appendix A: Instruction Encoding Summary
+- Appendix A: Instruction Encoding Master Table
 - Appendix B: Condition Code Reference
 - Appendix C: Categorical Instruction Index
-- Appendix D: Special Registers Reference
+- Appendix D: Special Registers Quick Reference
 - Appendix E: Predefined Constants
 - Appendix F: Smart Pin Mode Constants
 - Appendix G: Streamer Mode Constants
 - Appendix H: Reserved Words Reference
-- Appendix I: Glossary
-- Appendix J: Known Bugs
+- Appendix I: Glossary of Encoding Terms
+- Appendix J: Known Silicon Bugs
 
 ## Quick Navigation Guide
 

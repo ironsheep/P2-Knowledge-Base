@@ -100,7 +100,7 @@ Based on the examples (ADDSX, ALIGNL, ALTI), we have different template structur
    - Add diagrams where helpful
 
 3. **Quality checks**
-   - Test code examples with pnut_ts compiler
+   - Test code examples with pnut-ts compiler
    - Cross-reference with datasheet
    - Verify encoding against CSV data
 
@@ -156,7 +156,7 @@ def generate_manual():
 ### Validation Steps
 1. **Syntax validation** - All templates follow structure
 2. **Encoding verification** - Match CSV spreadsheet
-3. **Example testing** - Compile with pnut_ts
+3. **Example testing** - Compile with pnut-ts
 4. **Cross-reference check** - All "Related" links valid
 5. **Coverage audit** - Track missing instructions
 
@@ -217,7 +217,7 @@ With template approach:
 
 - [ ] All 491 instructions have templates
 - [ ] 100% encoding accuracy vs CSV
-- [ ] All examples compile with pnut_ts
+- [ ] All examples compile with pnut-ts
 - [ ] Cross-references validated
 - [ ] PDF generation successful
 - [ ] Manual reviewed by P2 experts

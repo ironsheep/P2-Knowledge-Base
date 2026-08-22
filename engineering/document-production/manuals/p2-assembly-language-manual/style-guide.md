@@ -600,7 +600,7 @@ Never use a different table format for encoding data. If a simpler display is ne
 
 **Problem solved:** Tables with narrow columns (e.g., 10% width) caused text overlap when content exceeded the allocated space.
 
-**Solution:** Minimum column widths of 15% for text-containing columns. This is enforced in the `p2kb-pasm2-tables.lua` filter which processes Pandoc-generated tables.
+**Solution:** Minimum column widths of 15% for text-containing columns. This is enforced in the shared `p2kb-platform-tables.lua` filter which processes Pandoc-generated tables. (It lived in a per-manual `p2kb-pasm2-tables.lua` before the 2026-06-10 platform migration; that filter no longer exists.)
 
 **Rationale:**
 - 10% of `\linewidth` ≈ 0.6 inches - too narrow for most text
@@ -613,9 +613,9 @@ Never use a different table format for encoding data. If a simpler display is ne
 
 **Solution:** All tables use `\linewidth` (respects current text margins) rather than `\textwidth` (full page width). This ensures tables stay within the content column.
 
-**Implementation:** The encoding table environments in `p2kb-pasm2-content.sty` explicitly use:
+**Implementation:** The `encodingtable` environment in `p2kb-pasm2-local.sty` explicitly sets:
 ```latex
-\begin{tabularx}{\linewidth}{...}
+\begin{tblr}{ width=\linewidth, ... }
 ```
 
 #### 7.4.4 Visual Consistency Across Document Sections

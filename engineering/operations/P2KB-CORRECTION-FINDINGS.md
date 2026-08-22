@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-318`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-319`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -213,7 +213,9 @@ list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
 > **DDS/Goertzel** *constant-value* tables were decoded row by row and are **correct** — they are
 > named-symbol value tables, not field-encoding templates. Do not "fix" them.
 
-### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — both KB files DONE 2026-08-21; the Assembly Language Reference site is owed at the co-release`
+### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — KB DONE 2026-08-21; Assembly source fixed 2026-08-22, PENDING the v3.1.7 render; the torture-test diagram clone is Stephen's design call`
+
+> **Assembly fixed 2026-08-22 (v3.1.7).** `appendix-g-streamer-constants.md:115` now reads *"Read byte as color + intensity: P[7:5] selects the color, P[4:0] is the intensity"*, with a paragraph above the table contrasting RGBI8 against LUMA8. Sourced live from Silicon Doc `p2-documentation.txt:3800`, which also shows the colour table has **eight** entries — so the old row was wrong on the colour count as well as the field split.
 
 > **KB APPLIED 2026-08-21.** `streamer-symbols.yaml:186` and `modes-reference.yaml:221` both now
 > read *"upper 3 bits select a colour, lower 5 bits are intensity"*, the framing the released
@@ -235,7 +237,11 @@ luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B 
 `ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
 contrasts RGBI8 against LUMA8 immediately above. Copy that framing.
 
-### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `CONFIRMED`
+### F-305 — the Assembly Manual teaches a streamer DAC example without the pin-setup step. `PENDING-VALIDATION — source fixed 2026-08-22; needs the v3.1.7 render`
+
+> **Fixed 2026-08-22 (v3.1.7).** The "Audio DAC Output" example now carries the full `cogid` / `setnib` / `wrpin` / `dirh` sequence per F-272, and the example compiles under `pnut-ts` v1.55.3.
+>
+> **A second defect in the same example, not in the original enumeration:** the mode was `X_RFBYTE_1P_1DAC1` — one DAC channel — routed with `X_DACS_3_2_1_0`, which the appendix's own table defines as four channels. Now `X_DACS_X_X_X_0`. Fixing the pin setup alone would have shipped a half-corrected example.
 
 `manuals/p2-assembly-language-manual/opus-master/part-iii/appendix-g-streamer-constants.md:237`
 shows `mov mode, ##X_RFBYTE_1P_1DAC1 | X_DACS_3_2_1_0` with no `WRPIN` DAC-mode configuration and
@@ -255,7 +261,11 @@ enables the streamer's contribution to the pin's output *state*, never its outpu
 **F-308** / **EF-062** (bench-proven: DIR low 4-of-8, `DIRH` 8-of-8). The citation this note used to
 carry, `Silicon Doc :3602-3603`, resolves to nothing in `engineering/ingestion/` and has been dropped.
 
-### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `PARTIAL — Streamer Guide DONE and bench-sealed (EF-062); the v1.1.0 PDF is unverified and the Assembly Language Reference's three sites are owed at the co-release`
+### F-308 — "digital pin output through `X_PINS_ON` requires no `DIRH`" is wrong: the streamer feeds the pin's output STATE, and DIR is still the output ENABLE. `PARTIAL — Streamer Guide DONE and bench-sealed (EF-062); Assembly source fixed 2026-08-22, PENDING the v3.1.7 render`
+
+> **Assembly fixed 2026-08-22 (v3.1.7).** All three example sites now `DIRH` their pins, and a `::: hardware` callout under the control-flag table states the state-vs-enable distinction with the EF-062 numbers. The **no-`WRPIN`** half is preserved.
+>
+> **Two sites the enumeration missed**, both glossing `X_PINS_ON` as *"Enable pin outputs"* — `appendix-g-streamer-constants.md:203` and `part-i/chapter-05-hardware.md:347`. Source-faithful to the Silicon Doc's encoding wording, and the exact phrasing that installs the wrong model in a reader; both now say the streamer drives the pin's output *state*.
 
 **How it surfaced.** Two bench runs of the VO-J-003 rig (2026-08-20, logs in that rig's `logs/`).
 Its digital self-test drove `DAC_PIN` through `X_PINS_ON` with DIR left low — on the strength of the
@@ -353,6 +363,75 @@ the no-`DIRH` half is gone, exactly as EF-062 sealed it. Still owed:
 `part-iii/appendix-g-streamer-constants.md:228/:255/:289`, RELEASED in v3.1.6.
 
 ---
+
+## Appendix G's mode tables misdecode the naming convention the same appendix documents (2026-08-22) — F-318
+
+### F-318 — 31 of 36 streamer mode-table rows state a wrong pin count, a wrong DAC-channel count, or both, and every usage example in the appendix cannot run as printed. `PENDING-VALIDATION — source fixed 2026-08-22; needs the v3.1.7 render`
+
+**How it surfaced.** Fixing F-303's single row in `appendix-g-streamer-constants.md` and then re-deriving the
+rest of the table from the artifact instead of trusting the enumeration. **The register named one wrong row in
+that file; thirty-one more were wrong.** Fourteenth instance of the class — see the F-304 note.
+
+**The rule (Silicon Doc `part2-pixel-ops.txt:139-227`).** Every streamer mode is listed as `<n>-pin + <k>-DAC<b>`
+— *n pins, k DAC channels, b bits per channel* — under column headers reading literally `Pins | DAC Channels`.
+Appendix G's own "Mode Naming Convention" stated the same rule: *"`_nP` Number of pins used · `_nDACn` Number of
+DAC channels, bits per channel."*
+
+**The defect.** Every description read `kDACb` as *"k pins, b DAC channels"* — the channel count taken for a pin
+count, the bit width taken for a channel count. Where the name carried an explicit `nP`, the description
+**ignored it**. `X_RFBYTE_8P_2DAC4` — 8 pins, 2 channels at 4 bits — printed as *"2 pins, 4 DAC channels"*.
+
+| Table | Rows | Wrong |
+|---|:--:|:--:|
+| Immediate to Pins/DACs | 12 | 11 |
+| RDFAST Byte Operations | 9 | 8 |
+| RDFAST Word/Long | 3 | 2 |
+| WRFAST Operations (capture) | 12 | 10 |
+| **Total** | **36** | **31** |
+
+**The `Value` column was correct throughout** — every encoding checks out against the Silicon Doc. The bits were
+right and the prose describing them was wrong, which is why nothing downstream caught it.
+
+**Root cause is layout, and the fix addresses it.** The naming convention sat **180 lines below** the tables that
+needed it, so whoever wrote the descriptions did not have the decode rule in view. It now **opens** the appendix,
+names `_kDACb` as the field that gets misread, and works three same-pin-count examples (`8P_1DAC8` / `8P_2DAC4` /
+`8P_4DAC2`) that can only be told apart by decoding it correctly.
+
+**Found in the same pass, same file:**
+
+- **`X_RFBYTE_LUMA8` was described as grayscale.** Silicon Doc `part2-more-content.txt:48`: *"LUMA8 mode uses
+  three bits in S[2:0] as colors and the 8-bit pixels as luminance values."* The colour comes from the `XINIT`
+  **S operand**. FABRICATED, and the exact mirror of F-303: LUMA8 takes its colour from S, RGBI8 from the pixel.
+- **All four Usage Examples could not run as printed.** Each put a frequency in `XINIT`'s `S` operand — which is
+  mode-specific data, not the rate (`SETXFRQ` owns that) — and none set `D[15:0]`, so the transfer count was
+  zero and the streamer stops immediately. All four rebuilt and compiled under `pnut-ts` v1.55.3.
+- **`SETLUTS #0` was captioned *"Use LUT for color palette"*.** `SETLUTS` enables LUT **sharing between adjacent
+  cog pairs** and has nothing to do with streamer LUT lookup; `#0` is its *disable* value (Silicon Doc `:995-1000`).
+  A fabricated claim attached to a real instruction. Removed — the streamer LUT modes need no enabling
+  instruction, only the palette present in lookup RAM.
+- **The ADC sampling modes never named their prerequisites** — `SETSCP` to point the SCOPE pipe at a four-pin
+  block, and an ADC smart pin mode on each sampled pin (Silicon Doc `:3968-3977`). Same missing-setup class as F-305.
+- **`D[22:20]` (pin group, 8-pin increments, "in every mode" — `:3606`) and `D[15:0]` (transfer count) were
+  documented nowhere**, though every constant leaves both at zero.
+- **`X_PINS_ON` and `X_WRITE_ON` print the same value** and were presented as two unrelated flags. They are one
+  bit, `D[23]`, read by the mode's direction (`%e` / `%w`, `:3602-3604`).
+- **Chapter 5 §5.3.4 pointed at "Appendix F (Streamer Mode Constants)"** — Appendix F is *Smart Pin* Mode
+  Constants; the streamer appendix is G. A broken cross-reference in a released manual. It also claimed "78 mode
+  constants" (there are 79); the count is now gone rather than maintained, per the perishable-catalog rule.
+- **§5.3.4 also described mode families that do not exist** — *"NCO mode uses data as frequency control words, RF
+  mode uses data as modulation patterns."* `RF` is Read-from-FIFO; there is no NCO mode. FABRICATED.
+- **The front matter named four appendices differently from their own titles** (A, D, I, J) — the reader's first
+  navigation page disagreeing with the pages it indexes.
+
+**A correction to the sweep plan's own caveat.** `STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13 carried a
+completeness note that *"neither table discloses that setting `D[19]` selects the other four-pin block."*
+Checked live against the Silicon Doc, that is wrong on both halves: `D[22:19]` is a **four-bit block number**
+(base pin = number x 4) and it belongs to **DDS/Goertzel only** (`:3997`) — the ADC sampling modes take their
+block from `SETSCP` instead. The caveat was carried into a draft of this fix and removed before it shipped.
+**Verify a ledger claim against the live source before writing it into a manual.**
+
+**Verified correct and deliberately untouched:** the ADC Sampling Modes table (decodes `kDAC8` correctly), the
+DDS/Goertzel constant values, and the RDFAST-to-LUT encodings — all re-checked row by row this pass.
 
 ## YAML→Manual impact survey — KB v1.16.3 (2026-08-16, `release-yamls` §8)
 
@@ -843,7 +922,7 @@ to the published `p2anNNN-changelog.md` beside its PDF.
 |---|---|
 | Getting Started Guide | `getting-started-body.md` ×1 — **highest reader risk**: a beginner's first compile |
 | Architect's Guide | `architect-guide-body.md` ×1, `CHANGELOG.md` ×2 |
-| Assembly Language Manual | `CHANGELOG.md` ×1 |
+| ~~Assembly Language Manual~~ | ~~`CHANGELOG.md` ×1~~ — **CLEAR, verified 2026-08-22**: `pnut_ts` appears nowhere in `opus-master/`. (Its three *process* docs carried 10 tool-invocation uses; corrected the same day. The remaining hits in `audit/`, `archive/` and `code-validation/` are frozen records, and `external-inputs/pnut_ts_facts/` is a real path — all correctly left alone.) |
 | PNut-Term-TS Guide | `CHANGELOG.md` ×1 (the body was swept at `c203fa52`; its CHANGELOG was missed) |
 | deSilva | `archived-2025/README-COMBINED-MASTER.md` ×3 — **archived scaffolding, not shipped; excluded** |
 | P2AN003 – P2AN007 | body ×17, `CHANGELOG.md` ×5 |
@@ -1346,7 +1425,9 @@ D[25]. The two are different facts about different bits, and our doc appears to 
 > Verified fixed in `xbyte_engine.yaml` at commits `31bffdce` (F-220/221/222) and `bb02525a`
 > (F-223). Detected by `audit-register-hygiene.py` checks 8 and 9.
 
-### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `CONFIRMED` (low severity, cross-reference gap)
+### F-224 — Assembly Manual: the CORDIC interrupt hazard is documented on the `REP` page, but **not on the CORDIC pages** — `RESOLVED 2026-08-17, shipped in v3.1.6`
+
+> **Status heading corrected 2026-08-22.** It read `CONFIRMED` while this entry's own body recorded the resolution — the entry contradicted itself, and a status line is not evidence. The body below is unchanged.
 
 **Raised by F-217's class-wide sweep.** Having found that the XBYTE Guide sold interruptibility as a
 pure benefit, the same question was asked of every other manual: *does anything show a CORDIC
@@ -1466,7 +1547,10 @@ at the XBYTE sprint closeout and are archived.
 > fourteen read as part of a third party's bench review. That header is now in the archive with
 > the findings it introduced. Detected by `audit-register-hygiene.py` check 9.
 
-### F-284 — the 9-column encoding-table filter never escaped `&`, so two shipped instruction definitions print with the AND operator eaten by LaTeX. `PENDING-VALIDATION` — **fixed 2026-08-17; Assembly must re-render**
+### F-284 — the 9-column encoding-table filter never escaped `&`, so two shipped instruction definitions print with the AND operator eaten by LaTeX. `RESOLVED`
+
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). pp.326/329 print `Parity of (D & S)` and `Parity of ((D & !S) == 0)` with the operator intact and the columns in register.
+
 
 **Found:** 2026-08-17, verifying the six generated wave PDFs page by page. The compile log
 reported **zero errors**; the defect was visible only on the page.
@@ -1508,7 +1592,10 @@ check compile logs, and this defect is invisible to both. It was found by render
 looking at it, prompted by triaging an overfull-hbox count. **An overfull hbox in a table is worth
 opening**; it is the only signal this failure emits.
 
-### F-286 — the escaping that stops F-284's class was per-call-site discretion, so it drifted to five more raw-emission sites. `PENDING-VALIDATION` — **fixed 2026-08-17; needs the Assembly render to validate**
+### F-286 — the escaping that stops F-284's class was per-call-site discretion, so it drifted to five more raw-emission sites. `RESOLVED`
+
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). Assembly exercises the class: headings `2.2.2 The _RET_ Condition`, `3.3.1 The IF_x Prefix`, `B.3 The _RET_ Condition (EEEE=0000)` and `Mode %00000 - %00011: ...` all print correctly in the body **and** in the TOC, and a whole-document sweep finds **zero** literal `\_`, `\%`, `\&` or `\#` escape leakage.
+
 
 **Found:** 2026-08-17, asking the process question after F-284/F-285: *what would routinely catch
 these?* The answer turned out to be a structural fix rather than a checklist.
@@ -1576,7 +1663,10 @@ Part titles and table captions still render as before.
 4. **`release-manual` 1d′ — read the whole page you opened.** F-285 cost nothing because it sat on
    F-284's page; a narrowly-scoped check would have passed it through again.
 
-### F-288 — an effect group in slash form is shaped exactly like a dual mnemonic, so 16 syntax forms print split across two lines. `CONFIRMED` — **filter fixed 2026-08-17; needs the Assembly render**
+### F-288 — an effect group in slash form is shaped exactly like a dual mnemonic, so 16 syntax forms print split across two lines. `RESOLVED`
+
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). All 16 forms print on one line each — `TESTP {#}Dest WC/WZ`, `TESTP {#}Dest ANDC/ANDZ`, and the TESTB/TESTBN/TESTPN sets beside them.
+
 
 **Found:** 2026-08-17, during release verification of Assembly v3.1.6. Found by **reading the whole
 of p.329** while confirming the F-285 repair — the repair itself is correct; this was the rest of the
@@ -2189,7 +2279,10 @@ masters is the missing instrument.
 **Owed:** re-render, then confirm p84's "Try it" paragraph reads as prose throughout.
 
 
-### F-293 — the escaper pre-escapes `^`, so eight exponent expressions across three manuals print a literal `^{}`. `CONFIRMED` — **escaper fixed 2026-08-17; renders owed**
+### F-293 — the escaper pre-escapes `^`, so eight exponent expressions across three manuals print a literal `^{}`. `PARTIAL — Assembly VALIDATED 2026-08-22; the IOSP site is still owed`
+
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). `^{}` appears **zero** times across all 502 pages, closing the Assembly rows (p93, p209, p284 x2, p350). **Still open: IOSP p320** (`2^{}X[3:0]`), which absorbs the escaper fix at its next render.
+
 
 **Found:** 2026-08-17, auditing the Debug Window v1.1.3 render. p107's bullet reads
 `multiplies the FFT output by 2^{}shift` — braces on the page.
@@ -2243,7 +2336,10 @@ notation decision is separate from it and is now made, not deferred.
 render into no PDF (verified across all four), and it is a released entry — rewriting shipped history
 to fix text nobody renders is churn, not quality.
 
-### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `PENDING-VALIDATION` — **source fixed 2026-08-17; Assembly needs one more render**
+### F-285 — `&nbsp;` prints literally in 16 instruction-syntax lines of a RELEASED manual. `RESOLVED`
+
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). `nbsp` appears **zero** times across all 502 pages.
+
 
 **Found:** 2026-08-17, verifying the Assembly re-render for F-284. The F-284 fix was confirmed
 good on p.326 and p.329 — and p.329 put this defect on screen at the same time. It is unrelated to

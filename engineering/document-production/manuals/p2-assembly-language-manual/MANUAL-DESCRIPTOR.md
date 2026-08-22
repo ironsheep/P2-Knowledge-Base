@@ -26,6 +26,7 @@ fragile_areas:
   - "Ch.3 FLAG-BEHAVIOR narrative + branchless idiom examples (§3.2 effects, §3.3 conditional-execution timing, §3.4 flag-by-category tables, §3.5 idioms) — worked examples ARE claims; 2026-07-09 forum report found fabrications here (§3.5.4 ABS 'C indicates edge case' — WRONG, C = original sign; §3.2.6 'TEST*' over-generalized; §3.3.x cycle-count-vs-instruction-count)"
   - "Ch.4 TIMING narrative, esp. hub-access/latency-hiding prose (§4.6) — 2026-07-09: §4.6.2 'pipelined hub access' FABRICATION (a plain RDLONG blocks; only FIFO/streamer + SETQ-burst hide latency; CORDIC §4.6.3 is the real parallel case). Watch parallel/overlap/pipelined claims (methodology §2.1)"
   - "Operator notation in flag/behavior descriptions AND Spin2 code examples — comparison predicates must be '==' not '=' (methodology §6.4); 'receives' '=' stays; ':='/'==' strict in fenced Spin2 code"
+  - "Appendix G mode-table DESCRIPTIONS (the Value column has always been right; the prose gloss was not). 2026-08-22: 31 of 36 rows decoded `_kDACb` as \"k pins, b DAC channels\" instead of \"k DAC channels, b bits each\", and every Usage Example put a rate in XINIT's S operand and set no D[15:0] count. Re-derive any row from Silicon Doc part2-pixel-ops.txt:139-227; the decode rule now heads the appendix"
   - "PART I NARRATIVE PROSE was never claim-level audited (prior Part I audit = curated 8-feature checklist over-attested as 'examined ALL'; see ./audit/root-cause-2026-07-09-part-i-prose-never-claim-audited.md). Ch.1-6 need exhaustive claim extraction per methodology §5.4"
 ---
 
@@ -40,8 +41,13 @@ from the central `document-audit` skill body + the guides referenced above.
 index). Tutorial voice is NOT permitted here (Dimension #9).
 
 **Unreleased efforts since `last_published_tag`** (the changeset-integrity baseline, Dimension #15):
-**IN FLIGHT — fabrication-audit sprint (Group 1, 2026-07-09).** Part I claim-level
-trust-chain corrections (forum-defect report + full Part I audit) + operator-notation
-class sweep. This is a **content bump, not a patch** (systemic; per methodology §9.2),
-released in the coordinated program release sweep. Next release deltas against the
-v3.1.2 tag. Plan: `engineering/planning/FABRICATION-AUDIT-AND-CORRECTNESS-SWEEP-SPRINT-PLAN.md`.
+**IN FLIGHT — streamer-correctness co-release (v3.1.7, opened 2026-08-22).** The Assembly
+half of the Streamer Guide v1.1.0 sweep: F-303 (RGBI8), F-305 (DAC pin setup) and F-308
+(`X_PINS_ON` needs `DIRH`), plus F-318 — the Appendix G mode-table decode defect those
+three surfaced. Also adopts three platform features owed at this release: metadata
+single-sourcing (F-300), rights metadata (F-316) and the cross-reference filter (F-301).
+Next release deltas against the **v3.1.6** tag. Inventory:
+`engineering/analysis/2026-08-22-assembly-v3.1.7-finalize-inventory.md`.
+
+The 2026-07-09 fabrication-audit sprint referenced here previously **shipped** in v3.1.3–v3.1.6;
+its "deltas against the v3.1.2 tag" line was stale from v3.1.3 onward.
