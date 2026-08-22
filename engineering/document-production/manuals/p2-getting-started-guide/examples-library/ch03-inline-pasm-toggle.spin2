@@ -1,3 +1,23 @@
+'' ===========================================================================
+''
+''   File.......  ch03-inline-pasm-toggle.spin2
+''   Purpose....  The same blink with one native instruction dropped
+''                inline, showing where Spin2 ends and PASM2 begins
+''   Manual.....  Getting Started with the Propeller 2
+''   Version....  v1.0.3 (2026-08-08)
+''   Appears in.  Chapter 3: Putting It to Work -- Spin2 or PASM2? A
+''                decision, not a syntax tour
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jun 2026
+''   Updated....  Jul 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 CON
   _clkfreq = 200_000_000
   LED      = 56
@@ -11,3 +31,22 @@ PRI toggleFast(pin)
   org
     drvnot  pin                 ' one native instruction, full speed
   end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

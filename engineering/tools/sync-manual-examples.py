@@ -282,9 +282,22 @@ def doc_meta(doc: Path):
         if not ch.is_file():
             continue
         txt = ch.read_text(encoding="utf-8")
-        m = re.search(r"^#\s+(.+?)[\s\-\u2013\u2014]*[Cc]hangelog\s*$", txt, re.M)
-        if m:
-            title = m.group(1).strip(" -")
+        # The H1 is authored per manual and comes in three shapes across this
+        # fleet, so match all of them rather than the one this was written
+        # against. Measured 2026-08-22:
+        #   "P2 XBYTE Programming Guide - Changelog"          title first
+        #   "P2 Debug Window Manual: Change Log"              colon, TWO words
+        #   "Changelog: Getting Started with the Propeller 2" title LAST
+        # Only the first matched before, so Getting Started, Debug Window and
+        # IOSP silently fell back to the SLUG -- and the slug is what would have
+        # been written into 49 shipped example headers a reader opens.
+        CL = r"[Cc]hange\s*[Ll]og"
+        for pat in (rf"^#\s+{CL}\s*[:\-\u2013\u2014]\s*(.+?)\s*$",   # Changelog: Title
+                    rf"^#\s+(.+?)[\s:\-\u2013\u2014]*{CL}\s*$"):      # Title - Changelog
+            m = re.search(pat, txt, re.M)
+            if m and m.group(1).strip(" -:"):
+                title = m.group(1).strip(" -:")
+                break
         v = re.search(r"^##\s*\[?v?(\d+\.\d+\.\d+)\]?\s*(?:\(([^)]*)\))?", txt, re.M)
         if v:
             version = "v" + v.group(1)

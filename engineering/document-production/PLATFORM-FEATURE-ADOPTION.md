@@ -24,10 +24,10 @@ each feature's *mechanism* stays in its own document, linked below.
 
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
 |---|---|:--:|:--:|:--:|:--:|
-| Getting Started | manual | ⏳ | ⏳ | ⏳ | ⏳ |
+| Getting Started | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | ⏳ |
 | **Assembly Reference** | manual | **✅** ⁹ | **✅** ⁹ | **✅** ⁹ | — |
-| DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | ⏳ |
+| DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | ⏳ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
@@ -70,6 +70,27 @@ have written an empty library over a good corpus; use `--repack` until then. And
 own hand-written header, not an example — it is why P2AN006 reads 4+1 rather than 5, and
 whatever convention lands must let a corpus hold a non-example file without flagging it.
 
+
+¹⁰ **Getting Started + DeSilva — generated example headers adopted 2026-08-22, and this is the
+one feature whose proof is NOT a rendered PDF.** `--adopt` writes only the `.spin2` files; it
+never touches `opus-master`, and the identity gate compares the **body** once a file carries a
+generated header. So the header exists solely in the archive a reader downloads, the printed
+listing is unchanged, and **no re-render was needed or performed** — which is exactly why these
+two could go first while their manuals stay unreleased.
+
+Verified on the shipped artifacts instead: corpus identity GREEN (4/4 and 3/3, body-compared),
+all 7 files compile clean on pnut-ts, the `.spin2` ASCII gate passes, and both `-src.zip`
+archives were repacked and re-verified byte-identical to their corpora with the fleet still at
+12/12 current.
+
+**A defect caught before it spread.** The header's `Manual.....` line is derived from the
+CHANGELOG H1, and the regex only matched `<Title> - Changelog`. This fleet writes three shapes —
+`P2 Debug Window Manual: Change Log` (colon, two words) and `Changelog: Getting Started with the
+Propeller 2` (title last) also occur — so Getting Started, Debug Window and IOSP silently fell
+back to the **slug**. The first sync wrote `Manual..... p2-getting-started-guide` into files a
+reader opens. Fixed in `sync-manual-examples.py` to match all three, re-synced, and XBYTE
+regression-checked unchanged. Had it gone unnoticed, the slug would have shipped in 49 more
+headers at the Debug Window / IOSP adoption.
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.
 
