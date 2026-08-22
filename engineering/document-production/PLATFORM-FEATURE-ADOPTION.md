@@ -22,21 +22,21 @@ each feature's *mechanism* stays in its own document, linked below.
 
 ## The table
 
-| Document | Type | Metadata single-source | Cross-ref filter | Generated example headers |
-|---|---|:--:|:--:|:--:|
-| Getting Started | manual | ⏳ | ⏳ | ⏳ |
-| I/O & Smart Pins | manual | ⏳ | ✅ ¹ | ⏳ |
-| Assembly Reference | manual | ⏳ | ⏳ | — |
-| DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ |
-| Debug Window | manual | ⏳ | ⏳ | ⏳ |
-| **Streamer Guide** | manual | **✅** ⁷ | ✅ | — |
-| Architect's Guide | manual | ⏳ | ⏳ | — |
-| Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ✅ |
-| **Single-Step Debugger** | manual | **✅** | ⏳ | — |
-| **PNut-Term-TS User Guide** | guide | **✅** | ⏳ ⁶ | — |
-| P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ ⁵ |
-| Layout Torture Test | instrument | — | — | — |
-| AI Privacy Guide | guide | — | — | — |
+| Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
+|---|---|:--:|:--:|:--:|:--:|
+| Getting Started | manual | ⏳ | ⏳ | ⏳ | ⏳ |
+| I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | ⏳ |
+| Assembly Reference | manual | ⏳ | ⏳ | ⏳ | — |
+| DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | ⏳ |
+| Debug Window | manual | ⏳ | ⏳ | ⏳ | ⏳ |
+| **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
+| Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
+| Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
+| **Single-Step Debugger** | manual | **✅** | ⏳ | ⏳ | — |
+| **PNut-Term-TS User Guide** | guide | **✅** | ⏳ | ⏳ ⁶ | — |
+| P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
+| Layout Torture Test | instrument | — | — | — | — |
+| AI Privacy Guide | guide | — | ⏳ | — | — |
 
 ¹ Wired in `request.json` with the correct filter ordering and shipped in released
 PDFs, **but no visual audit is recorded** — the pilot row was left mid-flight. Close
@@ -58,6 +58,9 @@ carrying its own hand-written header, not an example. Treat it as not adopted.
 
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. **Rights metadata is still absent (F-316)** and ships as its own feature.
+
+
+⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 
 ---
 

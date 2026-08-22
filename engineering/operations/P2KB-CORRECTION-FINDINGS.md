@@ -922,7 +922,7 @@ output on screen for an unrelated reason.
 
 ## Published PDFs carry no machine-readable rights (2026-08-21) — F-316
 
-### F-316 — every published PDF states CC BY-SA 4.0 and a joint copyright on its own page, and carries neither in its metadata. `CONFIRMED`
+### F-316 — every published PDF states CC BY-SA 4.0 and a joint copyright on its own page, and carries neither in its metadata. `PARTIAL — mechanism DONE and PROVEN 2026-08-22; adoption is per document`
 
 **How it surfaced.** Stephen, reading the Streamer v1.1.0 metadata at the «#287» gate, asked whether
 the PDF's rights should name both companies. The `Author` field is correct as written — Iron Sheep
@@ -979,7 +979,28 @@ time it ships.
 **Not a manuscript defect.** Every copyright page is already correct and states both parties where
 both apply. Nothing in any master needs editing.
 
-**Status:** `CONFIRMED — platform mechanism + per-document request.json keys, IN the current wave.`
+**Status:** `PARTIAL — the mechanism is DONE and PROVEN on a returned PDF; the other 17 documents adopt at their next render.`
+
+> **PROVEN 2026-08-22 on the returned Streamer v1.1.0 PDF — read from the artifact, not the log.**
+> `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed
+> under CC BY-SA 4.0"*. `\DocCopyright`/`\DocLicense` join the `\Doc*` family, fed per document
+> from its own `request.json`.
+>
+> **The build is byte-stable**: 91 pages, 24,737 words, and **ZERO pages whose text differs**
+> from the pre-rights build — which is what a guarded metadata-only platform change should
+> produce, and is now measured rather than assumed.
+>
+> **Two defects were caught by arming the gate against the returned build**, both mine, and both
+> would have shipped: the first emitted string read *"Parallax Inc.. Licensed under"* because the
+> template appended a full stop to a value that already ended in one (now a semicolon, fixed in
+> the platform so none of the 17 documents still to adopt inherits it); and the gate itself was
+> checking only that SOMETHING rights-shaped was present, never that the declared values actually
+> arrived. It now verifies each one round-tripped. That is the second time in one day this gate
+> passed on intent rather than artifact — worth remembering as a shape, not an incident.
+>
+> **Owed:** the other 17 documents, tracked in `PLATFORM-FEATURE-ADOPTION.md`'s new Rights column;
+> and XMP `dc:rights`, which needs `hyperxmp` and stays gated on confirming that package exists in
+> the Forge's TeX Live rather than assuming it. `Keywords` is the carrier today.
 
 ## Open — enhancement proposals (new content, not corrections)
 
