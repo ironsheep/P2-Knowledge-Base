@@ -99,8 +99,40 @@ def in_box_range(cp):
     return any(lo <= cp <= hi for lo, hi in BOX_RANGES)
 
 
-def comment_mask(text):
-    """Per-character 'is inside a comment' mask for the WHOLE file.
+CODE, COMMENT, STRING, DEBUG_STRING = 0, 1, 2, 3
+
+CONTEXT_NAME = {
+    CODE:         "in CODE",
+    COMMENT:      "in a comment",
+    STRING:       "in a STRING LITERAL",
+    DEBUG_STRING: "in a DEBUG() STRING",
+}
+
+# Why the context matters, and why a clean compile does not settle it.
+#
+#   DEBUG_STRING  the byte goes out the debug link at RUNTIME. A codepoint above
+#                 127 arrives as multi-byte UTF-8, so the terminal can take the
+#                 stream as BINARY rather than ASCII, mis-render, or act on an
+#                 escape it was never sent. The expected output is destroyed and
+#                 nothing in the build says so.
+#   STRING        same class wherever the string is finally emitted.
+#   CODE          identifier / operator position: the compiler's problem.
+#   COMMENT       never reaches the P2; the cost is the reader's own editor, and
+#                 byte-identity with the printed block in the manual.
+#
+# `pnut-ts` exiting 0 proves NONE of the first three are harmless -- it proves the
+# file parsed. Severity is a runtime property, so the report states the context
+# and lets the reader weigh it.
+CONTEXT_SEVERITY = {
+    DEBUG_STRING: "RUNTIME - corrupts debug output / terminal state",
+    STRING:       "RUNTIME - corrupts emitted text",
+    CODE:         "COMPILE / semantics",
+    COMMENT:      "portability - reader's editor + printed-block identity",
+}
+
+
+def context_mask(text):
+    """Per-character context code for the WHOLE file (CODE/COMMENT/STRING/DEBUG_STRING).
 
     Spin2 comments come in two shapes and only one of them is line-bounded:
         '  ''        to end of line
@@ -111,15 +143,50 @@ def comment_mask(text):
     example uses. A single-line approximation rejected every such diagram --
     caught by the negative control, not by reading the code.
 
-    Strings are tracked so a brace inside "..." cannot open a phantom comment.
+    Strings are tracked so a brace inside "..." cannot open a phantom comment --
+    and so a non-ASCII byte inside one can be reported as the runtime defect it is
+    rather than lumped in with comment prose.
+
+    A string counts as a DEBUG string when it sits inside a `debug(...)` call.
+    `debug()` cannot be continued across lines, so its span is found per line.
     """
-    mask = bytearray(len(text))
+    mask = bytearray(len(text))     # default CODE (0)
+    debug_spans = []
+    pos = 0
+    for line in text.splitlines(keepends=True):
+        low = line.lower()
+        k = 0
+        while True:
+            k = low.find("debug", k)
+            if k < 0:
+                break
+            j = k + 5
+            while j < len(line) and line[j] in " \t":
+                j += 1
+            # `debug(` or `debug[n](` both count
+            if j < len(line) and line[j] in "([":
+                depth, m = 0, j
+                while m < len(line):
+                    if line[m] in "([":
+                        depth += 1
+                    elif line[m] in ")]":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    m += 1
+                debug_spans.append((pos + k, pos + min(m + 1, len(line))))
+            k += 5
+        pos += len(line)
+
+    def in_debug(idx):
+        return any(lo <= idx < hi for lo, hi in debug_spans)
+
     i, n = 0, len(text)
     depth = 0                       # brace-comment nesting depth
     while i < n:
         ch = text[i]
         if depth:
-            mask[i] = 1
+            mask[i] = COMMENT
             if ch == "{":
                 depth += 1
             elif ch == "}":
@@ -130,21 +197,38 @@ def comment_mask(text):
             j = text.find("\n", i)
             j = n if j < 0 else j
             for k in range(i, j):
-                mask[k] = 1
+                mask[k] = COMMENT
             i = j
             continue
         if ch == "{":
             depth = 1
-            mask[i] = 1
+            mask[i] = COMMENT
             i += 1
             continue
         if ch == '"':               # string literal -- single line in Spin2
+            kind = DEBUG_STRING if in_debug(i) else STRING
             j = i + 1
             while j < n and text[j] != '"' and text[j] != "\n":
+                mask[j] = kind
                 j += 1
-            i = j + 1 if j < n and text[j] == '"' else j
+            mask[i] = kind
+            if j < n and text[j] == '"':
+                mask[j] = kind
+                i = j + 1
+            else:
+                i = j
             continue
         i += 1
+
+    # INSIDE debug(...) NOTHING IS A COMMENT ({{USER_NAME}}, 2026-08-22).
+    # Everything between the parens is payload bound for the debug link, so text
+    # that merely LOOKS like commentary is transmitted, not stripped. Marking the
+    # whole span DEBUG_STRING does two things at once: it raises the severity to
+    # runtime, and it withdraws the box-drawing exception there -- a diagram is
+    # fine in a comment and is multi-byte UTF-8 down the wire in a debug().
+    for lo, hi in debug_spans:
+        for idx in range(lo, min(hi, n)):
+            mask[idx] = DEBUG_STRING
     return mask
 
 
@@ -155,20 +239,23 @@ def audit_file(path: pathlib.Path):
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return [(0, 0, "", "file is not valid UTF-8 -- cannot be ASCII either", "")]
-    mask = comment_mask(text)
-    lineno, col, base = 1, 1, 0
+    mask = context_mask(text)
+    lineno, col = 1, 1
     for idx, ch in enumerate(text):
         if ch == "\n":
             lineno, col = lineno + 1, 1
             continue
         cp = ord(ch)
         if cp >= 128:
+            ctx = mask[idx]
             if in_box_range(cp):
-                if not mask[idx]:
-                    hits.append((lineno, col, ch,
-                                 "box-drawing character OUTSIDE a comment", ""))
+                # Permitted ONLY in a comment. In a string it still reaches the
+                # terminal as multi-byte UTF-8, so the exception does not apply.
+                if ctx != COMMENT:
+                    hits.append((lineno, col, ch, ctx,
+                                 "box-drawing character " + CONTEXT_NAME[ctx], ""))
             else:
-                hits.append((lineno, col, ch,
+                hits.append((lineno, col, ch, ctx,
                              unicodedata.name(ch, "unnamed codepoint"),
                              SUGGEST.get(cp, "")))
         col += 1
@@ -224,16 +311,21 @@ def main() -> int:
         return 2
 
     total = 0
+    by_ctx = {}
     for f in files:
         hits = audit_file(f)
         if not hits:
             continue
         total += len(hits)
         rel = f.relative_to(root) if root in f.resolve().parents else f
-        for lineno, col, ch, why, fix in hits:
+        for lineno, col, ch, ctx, why, fix in hits:
+            if not ch:                      # file-level problem (bad encoding)
+                print(f"{rel}: {why}")
+                continue
+            by_ctx[ctx] = by_ctx.get(ctx, 0) + 1
             tail = f"  ->  use {fix!r}" if fix else ""
-            print(f"{rel}:{lineno}:{col}: U+{ord(ch):04X} {ch!r} {why}{tail}"
-                  if ch else f"{rel}: {why}")
+            print(f"{rel}:{lineno}:{col}: U+{ord(ch):04X} {ch!r} {why} "
+                  f"[{CONTEXT_NAME[ctx]}]{tail}")
 
     # Say what was audited. A gate whose coverage is invisible is a gate that can
     # silently stop covering the thing most likely to be wrong.
@@ -245,7 +337,14 @@ def main() -> int:
                 print(f"  {g}")
             print("excluded by rule: " + ", ".join(p.strip('/') for p in EXCLUDE_PARTS))
     if total:
+        # Severity is a property of WHERE the byte sits, not of the count. A
+        # debug string reaches the terminal at runtime; a comment never leaves
+        # the repo. Break the total out so the reader can triage.
         print(f"\nFAIL  {total} violation(s) across {len(files)} audited file(s)")
+        for ctx in (DEBUG_STRING, STRING, CODE, COMMENT):
+            if by_ctx.get(ctx):
+                print(f"      {by_ctx[ctx]:4d}  {CONTEXT_NAME[ctx]:<22} "
+                      f"{CONTEXT_SEVERITY[ctx]}")
         return 1
     print(f"PASS  {len(files)} file(s) conformant "
           f"(spin2-authoring-guide Sec 1.1: ASCII only, "

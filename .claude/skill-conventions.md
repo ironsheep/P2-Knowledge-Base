@@ -203,12 +203,24 @@ CONFORMANCE_GUIDES:
     when:     before writing or editing any .spin2 file
     strength: gate
     note:     ARMED 2026-08-22 by `audit-spin2-ascii.py` (see STYLE_GATE_COMMAND below),
-              which enforces §1.1 mechanically over the authored corpus. `pnut-ts` proves
-              legality only — MEASURED the same day: it compiles `µ`, `°`, `→` and `Ω`
-              in comments clean, so §1.1's comment clause is a PORTABILITY rule for files
-              readers open in their own editor, not a compile-break rule. The guide's
-              blanket wording ("cause silent corruption or compile errors") overstates
-              that half. §1.1's other rules remain unenforced pending further work.
+              which enforces §1.1 mechanically over the authored corpus and reports each
+              violation's CONTEXT, because that is what sets its severity:
+                • debug() payload / string literal -> RUNTIME. A codepoint above 127 goes
+                  out the debug link as multi-byte UTF-8: the terminal can take the stream
+                  as BINARY rather than ASCII, mis-render, or act on an escape nobody sent.
+                  Expected output is destroyed and NOTHING in the build says so.
+                • code -> compile / semantics.
+                • comment -> portability (the reader's own editor) + byte-identity with
+                  the printed block.
+              **Non-ASCII is acceptable ONLY in a comment**, and the box-drawing exception
+              (U+2500-257F / U+2580-259F) is a comment-only exception. **Inside `debug(...)`
+              nothing is a comment** — text that merely LOOKS like commentary is payload and
+              is transmitted ({{USER_NAME}}, 2026-08-22).
+              `pnut-ts` exiting 0 proves NONE of this; it proves the file parsed. An earlier
+              draft of this note read the compile result as evidence that the comment clause
+              was "portability, not compile-break" — that inverted the guide and is wrong:
+              the guide's "silent corruption" wording is about the runtime, where it is
+              exactly right. §1.1's other rules remain unenforced pending further work.
 
   - surface:  manual/app-note EXAMPLE CORPORA (examples-library/*.spin2)
     guide:    central:spin2-authoring-guide, with §4.2 (file header) and §4.2.1

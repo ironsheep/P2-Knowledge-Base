@@ -216,7 +216,9 @@ In order (each step depends on the previous):
    ```
    - **Clean (exit 0)** — proceed.
    - **Violations (exit 1)** — the located `file:line:col` list names each character and its ASCII replacement. Fix in the `.spin2` **and** in the printed code block in `opus-master` **in the same pass** — those two are byte-identical by contract, so moving one without the other breaks the corpus-identity gate. Then re-run both this gate and `verify-example-corpus-identity.py`.
-   - **Do not "fix" a compile failure that isn't one.** MEASURED 2026-08-22: `pnut-ts` compiles `µ`, `°`, `→` and `Ω` in comments **clean**. §1.1's comment clause is a *portability* rule about the reader's editor, not a compile-break rule — the guide's blanket "cause silent corruption or compile errors" overstates that half. It is still a gate; just do not report it as a build break.
+   - **Read the CONTEXT the gate prints — it is what sets severity.** A byte above 127 inside a `debug()` payload or a string literal goes out the debug link at **runtime** as multi-byte UTF-8: the terminal can take the stream as BINARY rather than ASCII, mis-render, or act on an escape nobody sent, and **nothing in the build reports it**. In code it is a compile/semantics problem. In a comment it never reaches the P2 and the cost is the reader's own editor plus printed-block identity. Triage in that order.
+   - **Non-ASCII is acceptable ONLY in a comment, and `debug(...)` contains no comments.** Everything between those parens is payload, so a run that merely *looks* like commentary is transmitted — and the box-drawing exception does not apply there either ({{USER_NAME}}, 2026-08-22).
+   - **A clean `pnut-ts` compile settles none of this.** It proves the file parsed. `pnut-ts` compiles `µ`, `°`, `→` and `Ω` in a comment with exit 0 — which says nothing about what the same bytes do in a debug string at runtime.
    - A manual with no `examples-library/` and no `audit/verification-tests/` has nothing in scope — say so and move on.
 
 8. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
