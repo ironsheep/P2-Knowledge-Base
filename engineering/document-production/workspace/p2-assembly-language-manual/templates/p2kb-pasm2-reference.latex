@@ -29,10 +29,28 @@
 \usepackage{p2kb-pasm2-diagrams}
 
 % ==================== DOCUMENT METADATA ====================
-% These can be overridden by pandoc metadata
-\title{P2 Assembly Language Reference Manual}
-\author{Iron Sheep Productions, LLC}
-\date{December 2025}
+% Single-source (F-300): every identity string lives once, in request.json
+% metadata, and reaches BOTH the PDF info dictionary and the cover page.
+% \renewcommand, not \newcommand — p2kb-platform-foundation has already
+% \providecommand'd these. The macros carry the VALUE; the cover block in
+% front-matter.md keeps its own presentation (the word "Version", the colour).
+%
+% These three lines previously hardcoded the title, author and a date of
+% "December 2025". They were inert for metadata — the platform populates the
+% info dictionary from \Doc* and deliberately not from \@title/\@author — so
+% v3.1.6 shipped with EMPTY Title, Subject and Author, and the stale date was a
+% third copy of a value that lives in request.json.
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
 
 % ==================== ADDITIONAL REFERENCE MANUAL SETUP ====================
 

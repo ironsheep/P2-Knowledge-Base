@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-319`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-320`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -363,6 +363,65 @@ the no-`DIRH` half is gone, exactly as EF-062 sealed it. Still owed:
 `part-iii/appendix-g-streamer-constants.md:228/:255/:289`, RELEASED in v3.1.6.
 
 ---
+
+## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
+
+### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `CONFIRMED — carved out of v3.1.7 deliberately; see "Why not fixed here"`
+
+**How it surfaced.** The Assembly Language Reference v3.1.7 render (2026-08-22) came back with
+`Keywords: "; licensed under "` — the both-values-present branch, with both values empty.
+
+**Proven from the artifact, not inferred.** That exact string is what
+`\hypersetup{pdfkeywords={\DocCopyright; licensed under \DocLicense}}` produces when both macros
+expand to nothing. For it to be emitted at all, **both** `\ifx` tests must have taken their
+not-empty path — so the guard did not fire.
+
+**The guard (`:332-350`) and the defaults (`:288-299`):**
+
+```latex
+\providecommand{\DocCopyright}{}       % and \DocLicense, \DocTitle, ...
+...
+\ifx\DocCopyright\@empty ... \else ... \fi
+```
+
+The comment above it claims *"a document that has not adopted these keys writes no pdfkeywords at
+all, exactly as before, so an unconverted document is unchanged rather than given a malformed
+rights string."* **The artifact falsifies that claim.**
+
+**Hypothesis for the mechanism — NOT proven, no TeX engine in this container.** `\providecommand`
+routes through `\newcommand`, which defines a `\long` macro; `\@empty` is `\def\@empty{}` and is
+not `\long`. `\ifx` compares the prefix as well as the body, so `\long macro:->` never tests equal
+to `macro:->`. Plausible and consistent with the evidence, but **verify before relying on it**
+(`EXEC_ENV_CANONICAL` has the engine).
+
+**Proposed fix — correct under EITHER explanation**, because it normalises by full expansion rather
+than depending on how the default was declared:
+
+```latex
+\AtBeginDocument{%
+  \edef\P@rc{\DocCopyright}\edef\P@rl{\DocLicense}%
+  \ifx\P@rc\@empty ... \fi
+}
+```
+
+**Blast radius.** Every document that loads the platform foundation and has **not** wired the seven
+`\renewcommand{\Doc*}` lines into its own `*-reference.latex`. Per
+`PLATFORM-FEATURE-ADOPTION.md` that is every row except Streamer, Single-Step Debugger and now
+Assembly — so **~14 documents**, each at its next render. Assembly is simply the first unadopted
+document to render since the foundation gained this code, which is why it had not shown before.
+
+**Why not fixed in v3.1.7 (explicit carve-out).** Assembly's own template is now wired, so its
+rights emit correctly and this release ships clean — the defect is genuinely separable and is not
+holding the quality bar for this document. Fixing it means editing a **shared** file that all 18
+documents load, using an idiom that **cannot be tested in this container** (no TeX engine), while a
+manual is mid-render. Landing it blind risks breaking rights emission for Streamer and the
+Single-Step Debugger, which are proven working today.
+
+**What it needs instead — and this is the point:** its own change, with a **negative control** that
+Assembly can no longer provide. Render an *unadopted* document (the layout torture test is the
+natural candidate) and confirm the returned PDF carries **no** Keywords at all. A fix validated only
+against an adopted document proves nothing, because an adopted document never takes the guarded
+branch. (`a gate must read the artifact`; `prove with a negative control`.)
 
 ## Appendix G's mode tables misdecode the naming convention the same appendix documents (2026-08-22) — F-318
 

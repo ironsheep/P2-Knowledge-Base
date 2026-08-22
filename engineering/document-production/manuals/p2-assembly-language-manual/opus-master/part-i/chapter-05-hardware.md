@@ -833,7 +833,7 @@ DEBUG_MASK and DEBUG_COGS operate at different levels:
 
 For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing cog must have its bit set in DEBUG_COGS.
 
-**See:** Appendix E (Predefined Constants) for the debug configuration symbols — DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD — and breakpoint configuration.
+**See:** Appendix E (Predefined Constants) for complete constant documentation including DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD, and breakpoint configuration.
 
 
 ```{=latex}
