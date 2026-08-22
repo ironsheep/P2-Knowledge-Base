@@ -13,9 +13,21 @@
 
   PLACEMENT RULE (agent material): Parts 1-2 teach a PERSON to operate the tool.
   AI agents, assistants, and P2KB MCP must not appear before Part 3 — the reader
-  cannot act on them yet, and the log-as-return-path claim is FALSE for a person
-  at the GUI, whose return path is the screen. The agentic tool-chain figure and
-  the Architect Part-3 link live in Ch15, after the headless loop is in hand.
+  cannot act on them yet. The agentic tool-chain figure and the Architect Part-3
+  link live in Ch15, after the headless loop is in hand.
+
+  REVISED 2026-08-22 (Stephen's visual pass, V-1). This rule used to continue:
+  "...and the log-as-return-path claim is FALSE for a person at the GUI, whose
+  return path is the screen." That half is now WRONG and has been removed. A
+  person at the GUI does read the log — Fig 1.1 draws that leg, and the reader
+  and the IDE study each run's log alongside the terminal and the debug windows.
+
+  What still separates Ch1 from Ch15 is NOT whether the log is read. It is how
+  MANY ways back there are: at the desk the log is ONE OF TWO (screen while the
+  run is live, log afterwards); headless has no screen, so there the log is the
+  ONLY way back. Keep the two figures parallel on THAT difference. If you find
+  yourself about to delete Ch1's log return leg to restore the old rule: don't.
+  The rule above is the whole rule; the leg is deliberate.
 -->
 
 # Part 1: Getting Oriented
@@ -54,7 +66,12 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \centering
 \diagramscale{
 \begin{tikzpicture}
-\node[iospbox] (you) {You};
+% You are not a bare figure at the left edge -- you work in an editor, and that
+% editor drives both tools. Naming it here matters because the IDE is already in
+% the prose table above (the Spin2 VS Code extension) and was missing only from
+% the picture. Deliberately "your IDE" and not a product: the guide never
+% requires one editor.
+\node[iospbox, align=center] (you) {you\\in your IDE};
 \node[iospbox, right=14mm of you] (compile) {\texttt{pnut-ts}\\compiler};
 \node[iospkey, right=16mm of compile] (term) {\texttt{pnut-term-ts}\\download + observe};
 \node[iospbox, right=26mm of term] (p2) {Propeller~2\\silicon};
@@ -71,27 +88,43 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \draw[iospflow] ([yshift=-2mm]p2.west) --
    node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
 \draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
-% The return leg to the PERSON is the screen, not the log -- arced over the
-% spine so it does not collide with the .bin arrow running beneath it.
+% TWO return legs reach you, and that is the point of this figure. The screen is
+% the live one -- arced OVER the spine so it does not collide with the .bin arrow
+% running beneath it.
 \draw[iospflow] (term.north) to[out=90, in=90, looseness=0.55]
    node[pos=0.5, above, inner sep=2pt, font=\scriptsize]
    {terminal + debug windows} (you.north);
+% The log is the second one, and it is NOT merely a keepsake: you and the IDE go
+% back over it after the run. Arced UNDER the spine, mirroring the screen arc
+% above, so the figure reads as two ways back rather than one. Ch15 draws this
+% same leg as the ONLY way back, because headless has no screen -- keep the two
+% figures recognisably parallel.
+\draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
+   node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
+   {you and your IDE read the log} (you.south);
 \end{tikzpicture}
 }
-\caption{Where PNut-Term-TS sits in the Propeller 2 workflow. \texttt{pnut-ts}
-builds the binary; PNut-Term-TS downloads it, starts it, and shows you what the
-chip sends back — as terminal text and as the debug windows your program draws
-to — while writing the same output to a log file you can keep.}
+\caption{Where PNut-Term-TS sits in the Propeller 2 workflow. You work in the
+editor of your choice, and it drives both tools: \texttt{pnut-ts} builds the
+binary; PNut-Term-TS downloads it, starts it, and shows you what the chip sends
+back — as terminal text and as the debug windows your program draws to — while
+writing the same output to a log file. Two paths lead back to you: the screen
+while the run is live, and the log afterwards.}
 \end{figure}
 ```
 
 Follow how that loop closes. **Everything the P2 sends comes back to
 PNut-Term-TS** — there is no second path off the chip. What arrives is shown to
 you as it happens, in the terminal and in the debug windows your program draws
-to, and the same output is written to a log file as it goes, so you have a record
-of the run after the windows are closed. (Logs land next to the run, in `./logs/`
-relative to the folder you launched from, so the evidence stays beside the
-program that produced it. You can point them somewhere else if you would rather.)
+to, and the same output is written to a log file as it goes.
+
+That log is not just a keepsake. It is the second way the run reaches you: you
+watch the windows while the program is live, then go back over the log to compare
+this run against the last one, or to find what scrolled past while you were
+looking elsewhere. The editor you work in can read it too — it is an ordinary
+text file. (Logs land next to the run, in `./logs/` relative to the folder you
+launched from, so the evidence stays beside the program that produced it. You can
+point them somewhere else if you would rather.)
 
 # Chapter 2: Three Tools in One
 
@@ -165,6 +198,14 @@ part of why the tool takes the form it does.
    {Serial terminal\\{\scriptsize replaces Parallax Serial Terminal}};
 \node[iospbox, align=center] (dbg) at (0,-1.9)
    {Debug-window display\\{\scriptsize replaces PNut's --- now cross-platform}};
+% Direction belongs to the ROLE, not to where the box sits. These cues are
+% deliberately parked on the FAR SIDE from the dashed lines: the dashes carry no
+% traffic (see above), and an annotation touching them would be read as flow.
+% The terminal is TWO-WAY on purpose -- you can type back to the program (Ch6),
+% so it must not be flattened to an output.
+\node[iospsub, left=2.5mm of dl]   {to the chip};
+\node[iospsub, left=2.5mm of term] {both ways};
+\node[iospsub, left=2.5mm of dbg]  {from the chip};
 \node[iospkey, align=center, minimum height=15mm, minimum width=30mm] (one) at (7,0)
    {\textbf{PNut-Term-TS}};
 \node[iospsub, below=1.5mm of one] {one app \textperiodcentered\ Windows \textperiodcentered\ macOS \textperiodcentered\ Linux};
@@ -373,6 +414,34 @@ Parallax PropPlugs and most FTDI adapters use **DTR**; some clones need **RTS**.
 The line is remembered per device (Chapter 10), and you can override it for one
 session with `--rts`.
 
+## Which PropPlug — you usually do not have to choose
+
+With a single PropPlug connected there is nothing to decide. PNut-Term-TS finds
+the one device and uses it, with no flag from you — and that is how most runs go.
+
+It only becomes a question when **more than one** USB serial device is present:
+two boards on the bench, or yesterday's plug still in the hub. Then you say which
+one you mean with `-p`, giving either the device path or its serial number — a
+case-insensitive partial match is enough, so the first few characters usually do.
+
+To find those serial numbers, ask:
+
+```command
+pnut-term-ts -n                           # list connected devices
+pnut-term-ts -p P9cektn7 -r myprogram.bin  # then name the one you want
+```
+
+`-n` (`--dvcnodes`) lists the USB serial devices PNut-Term-TS can see and exits
+without touching the P2, so it is safe to run at any time. It is also the first
+thing to try when a board is not detected at all. Add `-m` if you want every FTDI
+device listed rather than PropPlugs alone.
+
+If you reach for the same plug every day, you need not pass `-p` at all: set a
+**Default PropPlug** in **User Settings** for all your projects, or in **Project
+Settings** for one. Chapter 10 gives the full order these resolve in, and is also
+where you give a plug a friendly name — so that a serial number becomes something
+you can recognise.
+
 ## The debug baud rate — you should not need to set it
 
 When you download a binary that PNut-Term-TS recognises, **it reads the debug baud
@@ -407,7 +476,13 @@ cannot tell us about:
   has to come from you.
 
 Either way you have two ways to say it: `-b` for one session, or the **Default
-Baud Rate** preference (Chapter 10) if you would rather set it once and forget it.
+Baud Rate** preference if you would rather set it once and forget it.
+
+That preference has a *scope*, which is what keeps it off your command line for
+good. Set it in **User Settings** and it applies to every project you open. Set it
+in **Project Settings** and it overrides that default for the current project
+only — so a board that needs an unusual rate can carry it without following you
+into your other work. Chapter 10 has the full order in which these resolve.
 
 If you pass `-b` and it disagrees with the binary you are downloading, PNut-Term-TS
 warns you — the P2 will transmit at its own compiled rate regardless, and the
@@ -663,7 +738,7 @@ defaults:
 | Group | Setting | Default |
 |-------|---------|---------|
 | Terminal | Mode / Theme / Font size / Font family / Cog prefixes / Local echo | PST · Green on Black · 14 · Default · on · off |
-| Serial Port | Default PropPlug / Default baud / Reset P2 on App Startup | Auto-detect · — · on |
+| Serial Port | Default PropPlug / Default Baud Rate / Reset P2 on App Startup | Auto-detect · — · on |
 | Logging | Log Directory / Auto-Save Debug Output / Enable USB Traffic Logging | `./logs/` · on · off |
 | Recordings | Recordings Directory | `./recordings/` |
 | Debug Logger | History Lines (100–10000) | 1000 |
@@ -695,13 +770,17 @@ Select a row to give it a **Friendly Name** (e.g. "Workbench Plug"), choose its
 **Control Line** (DTR or RTS), view its VID/PID, and **Save Changes** or **Delete
 Device**.
 
-When you have more than one device, which one a run uses is decided in this order:
+With exactly one device connected there is nothing to resolve — PNut-Term-TS uses
+it, and most runs never get further than that (Chapter 6). The order below is what
+settles it when **several** are connected, most specific first:
 
 1. A command-line `-p <device>` — an exact match, or a case-insensitive partial
-   match on the path or serial number.
+   match on the path or serial number. Run `pnut-term-ts -n` to list the connected
+   devices and their serial numbers.
 2. A project device override, if one is set.
 3. Your user default.
-4. Auto-detect — used when exactly one device is connected.
+4. Auto-detect — used when exactly one device is connected. This is the ordinary
+   case, reached whenever you have said nothing more specific.
 5. Otherwise, you are asked to choose (or the run errors if nothing matches).
 
 ```{=latex}
@@ -967,10 +1046,11 @@ writes it to a log, and it is that log the agent reads.}
 Follow how that loop closes, because the shape of it is the whole point. The agent
 does not read the P2 directly. **Everything the P2 sends comes back to
 PNut-Term-TS, which writes it to a log file in the `logs` folder — and it is that
-file the agent reads.** At your desk that log sits alongside what you are already
-watching on screen, a record you may never open. Here there is no screen, so the
-log is not a convenience bolted on the side: it *is* the return path, and it is
-the reason a program can take the place of the person who used to watch.
+file the agent reads.** At your desk that log is one of two ways back — the one
+you turn to after the run, alongside what you were watching live on screen. Here
+there is no screen, so the log is not one path among several: it *is* the return
+path, and it is the reason a program can take the place of the person who used to
+watch.
 
 That agent-in-the-loop way of working is the subject of **The P2 Architect's
 Guide, Part 3**, which names this very tool chain — `pnut-ts`, `pnut-term-ts`, and
@@ -1061,8 +1141,9 @@ and passed `-b`, **try dropping it** — those images are auto-detected and carr
 their own debug baud (Chapter 6); watch for the warning that `-b` disagrees with
 the binary. If you built with **any other toolchain**, or you are attaching to an
 *already-running* P2, there is no rate for us to read, so it is the opposite move:
-set the rate yourself with `-b` or the Default Baud Rate preference. Common
-rates are 115200, 921600, and 2000000.
+set the rate yourself with `-b`, or set the **Default Baud Rate** preference — for
+the current project or for every project (Chapter 10) — if it is a board you come
+back to. Common rates are 115200, 921600, and 2000000.
 
 **The P2 does not reset or the program does not start.** The reset control line
 may be wrong for your adapter. Set **DTR** or **RTS** for the device in PropPlug
