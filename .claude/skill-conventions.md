@@ -202,8 +202,13 @@ CONFORMANCE_GUIDES:
     guide:    central:spin2-authoring-guide
     when:     before writing or editing any .spin2 file
     strength: gate
-    note:     STYLE_GATE_COMMAND is unset — the gate is OWED, not waived. `pnut-ts`
-              proves legality only, never style and never semantics.
+    note:     ARMED 2026-08-22 by `audit-spin2-ascii.py` (see STYLE_GATE_COMMAND below),
+              which enforces §1.1 mechanically over the authored corpus. `pnut-ts` proves
+              legality only — MEASURED the same day: it compiles `µ`, `°`, `→` and `Ω`
+              in comments clean, so §1.1's comment clause is a PORTABILITY rule for files
+              readers open in their own editor, not a compile-break rule. The guide's
+              blanket wording ("cause silent corruption or compile errors") overstates
+              that half. §1.1's other rules remain unenforced pending further work.
 
   - surface:  manual/app-note EXAMPLE CORPORA (examples-library/*.spin2)
     guide:    central:spin2-authoring-guide, with §4.2 (file header) and §4.2.1
@@ -224,7 +229,7 @@ CONFORMANCE_GUIDES:
               ADOPTION IS PER-DOCUMENT, at that document's next release: adopted
               documents are gated hard, un-adopted ones report INFO and pass.
 
-STYLE_GATE_COMMAND:  <unset — owed. Reference implementation: tools/check_style.sh in P2-uSD-FAT32-FS>
+STYLE_GATE_COMMAND:  python3 engineering/tools/validation/audit-spin2-ascii.py
 ```
 
 **Never copy a `central:` guide into this repo** — a copy is a fork. The one

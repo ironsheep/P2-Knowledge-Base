@@ -645,7 +645,7 @@ CON
 
 VAR
   long stack[64]
-  long count                    ' a hub variable — every cog can see it
+  long count                    ' a hub variable - every cog can see it
 
 PUB main()
   cogspin(NEWCOG, ticker(@count), @stack)   ' worker updates count in hub

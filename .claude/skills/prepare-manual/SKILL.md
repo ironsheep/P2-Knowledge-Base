@@ -209,8 +209,18 @@ In order (each step depends on the previous):
    - **Clean (exit 0)** — proceed.
    - **Violations (exit 1)** — STOP. Relay the located `file:line:col` list; fix in **opus-master** by replacing each char with its ASCII form (`-` for U+2212 minus, `...` for U+2026 ellipsis, plain `'`/`"` for smart quotes) or moving it out of the code span. Re-assemble and re-run. Do not escape/stage with violations outstanding.
    - SCOPE is **inline only**, on purpose: fenced code BLOCKS become `lstlisting`, which tolerates the intentional non-ASCII this stack uses (`×`, `→`, `µ`, `°` in formula/diagram blocks) — flagging those would be false positives. Only `\lstinline` is strict.
-7. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
-8. **Escape** the markdown into outbound:
+7. **Spin2 ASCII gate — only if this manual ships an example corpus or carries verification rigs.** The `.spin2` files a reader unzips are opened in *their* editor, not ours, so a non-ASCII character there is a portability defect in a shipped artifact. `central:spin2-authoring-guide` §1.1 forbids every codepoint above 127 except box drawing (U+2500-257F / U+2580-259F) in comments. Run the project's style gate:
+   ```bash
+   python3 engineering/tools/validation/audit-spin2-ascii.py            # the authored roots
+   python3 engineering/tools/validation/audit-spin2-ascii.py <path> ... # or scope it
+   ```
+   - **Clean (exit 0)** — proceed.
+   - **Violations (exit 1)** — the located `file:line:col` list names each character and its ASCII replacement. Fix in the `.spin2` **and** in the printed code block in `opus-master` **in the same pass** — those two are byte-identical by contract, so moving one without the other breaks the corpus-identity gate. Then re-run both this gate and `verify-example-corpus-identity.py`.
+   - **Do not "fix" a compile failure that isn't one.** MEASURED 2026-08-22: `pnut-ts` compiles `µ`, `°`, `→` and `Ω` in comments **clean**. §1.1's comment clause is a *portability* rule about the reader's editor, not a compile-break rule — the guide's blanket "cause silent corruption or compile errors" overstates that half. It is still a gate; just do not report it as a build break.
+   - A manual with no `examples-library/` and no `audit/verification-tests/` has nothing in scope — say so and move on.
+
+8. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
+9. **Escape** the markdown into outbound:
    ```bash
    cd workspace/<slug>
    ../../../tools/conversion/latex-escape-all.sh \
@@ -218,7 +228,7 @@ In order (each step depends on the previous):
        ../../outbound/<slug>/<DocName>.md
    ```
    The escape script creates its own backup of the workspace source — that's expected, harmless.
-9. **Stage changed aux files** confirmed in Step 5:
+10. **Stage changed aux files** confirmed in Step 5:
    ```bash
    cp workspace/<slug>/templates/<file> outbound/<slug>/        # FLAT — no templates/ subdir
    cp workspace/<slug>/filters/<file>   outbound/<slug>/        # FLAT — no filters/ subdir
@@ -226,7 +236,7 @@ In order (each step depends on the previous):
    ```
    **Always** run that `request.json` copy on a document switch (the Step 4 check), even with no git change — otherwise Forge builds with the previous document's directive.
    For asset changes: `cp workspace/<slug>/assets/<file> outbound/<slug>/assets/` (the `assets/` subdir IS used in outbound).
-10. **Stage the shared platform files — ONLY the ones whose hash changed** (per the Step-4 content-hash diff). Usually this list is **empty** → stage nothing here. Copy each changed file from `platform/`, FLAT into outbound:
+11. **Stage the shared platform files — ONLY the ones whose hash changed** (per the Step-4 content-hash diff). Usually this list is **empty** → stage nothing here. Copy each changed file from `platform/`, FLAT into outbound:
    ```bash
    # ONLY for each platform file whose live md5 != stored md5 (Step 4):
    cp engineering/document-production/platform/templates/p2kb-platform-<changed>.sty outbound/<slug>/
