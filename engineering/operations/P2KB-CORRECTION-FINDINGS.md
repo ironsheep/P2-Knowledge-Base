@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-317`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-318`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -1001,6 +1001,55 @@ both apply. Nothing in any master needs editing.
 > **Owed:** the other 17 documents, tracked in `PLATFORM-FEATURE-ADOPTION.md`'s new Rights column;
 > and XMP `dc:rights`, which needs `hyperxmp` and stays gated on confirming that package exists in
 > the Forge's TeX Live rather than assuming it. `Keywords` is the carrier today.
+
+---
+
+## Nine documents carry a request.json subtitle their own cover contradicts (2026-08-22) — F-317
+
+### F-317 — the subtitle in `request.json` disagrees with the printed cover in 9 of 15 published documents, and adopting metadata single-sourcing is what makes that visible. `CONFIRMED`
+
+**How it surfaced.** Stephen: *"fix README if needed, always."* Sweeping the public index's
+subtitle lines against the PDFs found 10 apparent mismatches — but checking them against
+`request.json` was the wrong comparison, because **`request.json` only reaches the PDF for a
+document that has ADOPTED metadata single-sourcing**, and only three have. Re-run against the
+**printed cover**, the picture inverted: the README was right in almost every case, and it is
+`request.json` that is out of step.
+
+**The real defect, and it is latent rather than shipped.** For an unadopted document
+`request.json`'s subtitle reaches nothing, so the disagreement is invisible. The moment that
+document adopts — `\DocSubtitle` → `pdfsubject` — that string **becomes the PDF's Subject** and
+contradicts the subtitle printed on its own cover. **This already happened once**: «#283» hit it
+on the Streamer Guide, and the rule recorded then is **the cover wins**.
+
+| Document | `request.json` subtitle | printed cover says |
+|---|---|---|
+| `p2-pasm-desilva-style` | Build, Experiment, and Master the Propeller 2 | A Human-Centered Approach to Parallel Processing |
+| `p2-debug-window-manual` | See What Your Program Is Doing — Nine Display Windows for the Propeller 2 | See What Your Program Is Doing |
+| P2AN001 | Application Note P2AN001 — No External ADC | Measure an Absolute Voltage in Microvolts on a P2 Pin |
+| P2AN002 | Application Note P2AN002 — Hardware Math on the P2 | CORDIC for Real Work |
+| P2AN003 | Application Note P2AN003 — No External DAC | Generate Analog Waveforms and Audio on a P2 Pin |
+| P2AN004 | Application Note P2AN004 — No External Counter or ADC | Read Real-World Sensors by Frequency, Rotation, and RC Timing on a P2 Pin |
+| P2AN005 | Application Note P2AN005 — Run Several Jobs in One Cog | Cooperative Multitasking with Spin2 TASK Methods |
+| P2AN006 | Application Note P2AN006 — Size Every Stack, Catch Every Overflow | Sizing Cog & Task Stacks |
+| P2AN007 | Application Note P2AN007 — STRUCT Records, Shared Safely Across Cogs | Data Structures with the New Language Facilities |
+
+**Correction.** Before each document adopts metadata single-sourcing, bring its `request.json`
+subtitle to the string its cover prints — **the cover wins**, per «#283». Doing it at adoption
+time is the natural moment: that is the render where the value first matters, and
+`audit-pdf-metadata.py` will compare the Subject against `request.json` on the returned PDF, so a
+wrong value fails the gate rather than shipping. For the seven app notes, note their cover puts a
+*descriptive line* under the title — decide per document whether that line or the catalog tagline
+is the subtitle, rather than sweeping one reading across all seven.
+
+**Also fixed here (2026-08-22):** the public index's bold line for the Streamer Guide read *"A
+Guide to the Propeller 2 Streamer, Its Modes and Function"* while the document it links to prints
+*"Comprehensive Reference for Propeller 2 Streamer Hardware"*. That one WAS shipped drift — the
+catalog misdescribing the download — and is corrected. Every other index line was verified against
+its cover and is correct; the app notes deliberately use `Application Note P2ANxxx · <topic>` as an
+index label while their **heading** carries the cover's title, which is a consistent scheme, not
+drift.
+
+**Status:** `CONFIRMED — latent until adoption; resolve each document's subtitle at the render that adopts it.`
 
 ## Open — enhancement proposals (new content, not corrections)
 
