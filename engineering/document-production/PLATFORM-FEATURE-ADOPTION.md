@@ -53,8 +53,22 @@ once — `request.json` `metadata.title` already equals each cover title.
 cross-ref requires a visual audit of the auto-links in the rendered PDF, and that audit would gate
 a release explicitly scoped to *not* wait — the same reasoning that removed the reviewer questions.
 Not a silent pass-over (which is what F-301 was); take it at the next release.
-⁵ P2AN006 reads 1/5 only because `isp_stack_check.spin2` is a shipped utility object
-carrying its own hand-written header, not an example. Treat it as not adopted.
+⁵ **App notes owe a PREREQUISITE before this column can move: fence captions.**
+`sync-manual-examples.py` and `verify-example-corpus-identity.py` both pair a corpus file to
+its printed listing by ```` ```{.spin2 caption="<name>.spin2"} ````, and **no app-note master
+carries a single caption** — so identity reads RED (every file an orphan) and header adoption
+cannot even be attempted. **At each app note's next adjustment or update, add the captions to
+its printed fences.** Measured 2026-08-22: **31 of the 32 files are already byte-identical to
+a printed fence**, so this is annotation only — no code moves, and it flips that note's
+identity gate to GREEN. Per-note counts and the full rationale: `PUNCH-LIST.md` -> "App-note
+example corpora have never been gated at all".
+
+Two cautions for whoever does it. **Do not run `build-example-library.py` on an app note
+before its captions exist** — dry-run against P2AN003 found ZERO of its six examples and would
+have written an empty library over a good corpus; use `--repack` until then. And
+`P2AN006/examples-library/isp_stack_check.spin2` is a shipped **utility object** carrying its
+own hand-written header, not an example — it is why P2AN006 reads 4+1 rather than 5, and
+whatever convention lands must let a corpus hold a non-example file without flagging it.
 
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.

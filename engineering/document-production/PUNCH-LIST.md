@@ -60,6 +60,38 @@ manuals, and is what the tools already expect), or teach the tool the recipe-ID 
 (cheaper now, keeps two conventions alive). Either way it wants doing before the next app-note
 release, and it pairs naturally with that document's header adoption.
 
+### MEASURED 2026-08-22 — the evidence points hard at captions
+
+The bodies already agree. Comparing each corpus file against every printed `spin2` fence in
+its own master: **31 of the 32 files are ALREADY byte-identical to a printed fence.** Nothing
+has drifted; the only thing missing is the `caption="<name>.spin2"` attribute that lets the
+tool see the pairing.
+
+| Document | Files | Printed fences | Already byte-identical | Captions |
+|---|---:|---:|---:|---:|
+| P2AN001 | 3 | 8 | 3 | 0 |
+| P2AN002 | 6 | 7 | 6 | 0 |
+| P2AN003 | 5 | 7 | 5 | 0 |
+| P2AN004 | 3 | 3 | 3 | 0 |
+| P2AN005 | 4 | 4 | 4 | 0 |
+| P2AN006 | 5 | 6 | 4 + 1 utility object | 0 |
+| P2AN007 | 6 | 7 | 6 | 0 |
+| **Total** | **32** | **42** | **31** | **0** |
+
+So "adopt captions" is a **pure annotation task** — 31 fence attributes, no code moves, no
+reformatting — and it converts a RED gate to GREEN without touching a shipped byte. Teaching
+the tool recipe IDs would keep a second convention alive to describe files that already match
+the first one.
+
+**A trap for whoever does this.** Do NOT reach for `build-example-library.py` on an app note
+before its captions exist. Dry-run 2026-08-22 against P2AN003: the extractor found **zero** of
+its six real examples and would have written an **empty** library over a good corpus. Until
+captions land, repackaging goes through `build-example-library.py --repack` (added the same
+day), which rebuilds the archive from the corpus on disk and refuses to write an empty one.
+
+**Not blocking the ZIPs.** Published-archive currency is a separate axis and is now GREEN for
+all 12 documents (2026-08-22) — this gap is about the file-vs-printed-code assertion only.
+
 **Note:** `P2AN006/examples-library/isp_stack_check.spin2` is a shipped **utility object**, not
 a manual example — it already carries its own hand-written §4.2 header. Whatever convention is
 chosen must let a corpus hold a non-example file without flagging it.
