@@ -689,6 +689,49 @@ local function handle_auto_shrink_table(el)
           local need = hard and math.ceil(#unit * HARD_FACTOR) or math.min(#unit, SOFT_FLOOR)
           if need > maxtok[i] then maxtok[i] = need end
         end
+        -- INLINE CODE IS ONE UNBREAKABLE UNIT, hyphens included.
+        --
+        -- The split above breaks on "-" because prose hyphens are real break
+        -- points. Inside \texttt they are NOT: typewriter text does not
+        -- hyphenate, and a hyphen in a code span is part of the identifier. So
+        -- `pnut-term-ts` was measured as pnut|term|ts -- three SOFT words, floor
+        -- 4 chars -- while it renders 12 monospace characters wide. The column
+        -- was reserved at about a third of what the token needs and the token
+        -- ran into the next column (Ch15's tool table: "pnut-term-ts" printed
+        -- over "This tool."). Ch1's identical table escaped only because a
+        -- long plain row -- "Spin2 VS Code extension (optional)" -- happened to
+        -- widen the same column.
+        --
+        -- Measure every Code span whole, at HARD_FACTOR: monospace glyphs are
+        -- wider than the mixed-case average the cpl constants are calibrated for.
+        -- This is ADDITIVE -- it can only RAISE a column's floor, and only for
+        -- cells that actually contain code -- so no table that fits today gets
+        -- narrower. Same class as the 6.2 token-aware fix, which covered
+        -- is_instr_desc col-1 but never this generic path.
+        -- A Cell's contents are BLOCKS, so wrap in a Div and walk_block (which
+        -- descends into inlines). Wrapping in a Span would throw on block
+        -- content -- and the pcall would then silently hide the real fix behind
+        -- the fallback, which is exactly the failure this comment exists to stop.
+        local ok_walk = pcall(function()
+          pandoc.walk_block(pandoc.Div(cell.contents), {
+            Code = function(c)
+              local need = math.ceil(#c.text * HARD_FACTOR)
+              if need > maxtok[i] then maxtok[i] = need end
+            end
+          })
+        end)
+        if not ok_walk then
+          -- Fallback for a pandoc whose walk_block will not take a synthetic Div:
+          -- treat any hyphenated alphanumeric run in the flattened cell as one
+          -- hard unit. Coarser than the Code walk (it also catches prose
+          -- hyphenates), but it errs toward a WIDER column, never a narrower one.
+          for unit in t:gmatch("%S+") do
+            if unit:match("%-") and unit:match("%w") then
+              local need = math.ceil(#unit * HARD_FACTOR)
+              if need > maxtok[i] then maxtok[i] = need end
+            end
+          end
+        end
       end
     end
   end

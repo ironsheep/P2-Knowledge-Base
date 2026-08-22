@@ -77,7 +77,7 @@ will be written into both; the two co-release.
 
 **Platform:** new `ToolReviewBlock` in `p2kb-platform-content.sty` (violet, square
 corners, dashed border — deliberately unlike the rounded advisory family, so it
-reads as scaffolding) and the `::: {.tool-review who="…"}` fence in
+reads as scaffolding) and the `::: {.tool-review who="..."}` fence in
 `p2kb-platform-code-coloring.lua`. There is **no draft switch that hides these**,
 because a hidden question is one nobody answers; instead
 `tools/validation/audit-review-scaffolding.py` **fails the release** while any box

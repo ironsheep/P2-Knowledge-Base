@@ -1100,8 +1100,8 @@ Putting Part 3 together, here is the shape of a hardware-in-the-loop run an
 assistant or a CI job can drive end to end: **download, run, stop on a marker,
 then read the log.**
 
-Have your program print a known phrase when it finishes — for example a line
-containing `DEBUG_END_SESSION` — so the run ends by itself. Then:
+Have your program print a known phrase when it finishes — say a line containing
+`DEBUG_END_SESSION` — so the run ends by itself. Then:
 
 ```command
 pnut-term-ts --headless -r build/test.bin -p P9cektn7 --end-marker
@@ -1110,9 +1110,12 @@ pnut-term-ts --headless -r build/test.bin -p P9cektn7 --end-marker
 When the marker appears, PNut-Term-TS flushes and exits. The caller then does two
 things:
 
-1. **Checks the exit code.** `0` means a clean finish; a non-zero code (Chapter
-   13) says what went wrong — `3` for a failed download, `124` for a timeout, and
-   so on — without any need to read the log.
+1. **Checks the exit code.** `0` means a clean finish; a non-zero code
+   (Chapter 13) says what went wrong — `3` for a failed download, `124` for a
+   timeout, and so on — without any need to read the log.
+   <!-- Keep "(Chapter 13)" off the START of a wrapped line. Markdown reads a
+        leading "13)" as an ordered-list marker, which silently turned this
+        cross-reference into a spurious nested list item numbered 13. -->
 2. **Reads the log.** The freshest `headless_*.log` in `./logs/` holds the
    program's `DEBUG()` output — the actual behavior of the code under test, ready
    to be parsed, compared against an expected result, or fed back to the
