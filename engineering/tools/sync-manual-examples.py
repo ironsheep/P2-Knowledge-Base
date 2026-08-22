@@ -55,6 +55,7 @@ Exit: 0 clean / 1 out of sync or missing input / 2 usage error.
 
 import argparse
 import re
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -111,13 +112,62 @@ def asciify(text):
     return re.sub(r"\s{2,}", " ", text).strip()
 
 
+class GitUnavailable(RuntimeError):
+    """git could not be RUN. Distinct from git running and having no answer."""
+
+
 def git(*args, default=""):
+    """Run a git query. A git that CANNOT RUN is a hard error, not a default.
+
+    WHY THIS IS NOT A try/except-return-default (learned the expensive way,
+    2026-08-22). Every header field below `Purpose` is DERIVED from git --
+    Started, Updated, the licence year. The previous form swallowed every
+    exception and substituted the default, which conflated two situations that
+    must never be conflated:
+
+      git ran, and has no answer   -> legitimate. A never-committed file has no
+                                      first-commit date. `default` is correct.
+      git could not run at all     -> the environment is broken. `default` is a
+                                      LIE, and it gets written into the file.
+
+    In this devcontainer git intermittently fails with "dubious ownership", so
+    the second case is real, not theoretical. Observed consequence: `--check`
+    reported the ONE adopted document RED six times, then GREEN twelve times,
+    with nothing on disk changing -- reproduced deterministically by stubbing
+    git to exit 128. The verdict of a release gate depended on whether git
+    happened to work that second.
+
+    The unshipped half is worse. Under `--adopt` the same substitution would
+    have written `Started.... unknown` / `Updated.... unknown` into the header
+    of every file it touched -- 88 files across 11 documents were queued for
+    exactly that sweep -- and the next run, with git working, would have called
+    them all out of sync.
+
+    So: raise. A caller that genuinely wants a fallback can catch it.
+    """
+    # Declare THIS repo safe for the duration of the call, via environment
+    # rather than a config file. Not a workaround hiding a risk: the ownership
+    # genuinely matches (checked 2026-08-22 -- repo, .git and the running user
+    # are all vscode:vscode), the "dubious ownership" refusal comes from the
+    # sandbox wrapper, and ~/.gitconfig is not writable here to fix it the usual
+    # way. GIT_CONFIG_COUNT/KEY/VALUE is git's own supported no-file mechanism,
+    # so this asserts something true and leaves the user's config untouched.
+    env = dict(os.environ)
+    n0 = int(env.get("GIT_CONFIG_COUNT", "0"))
+    env["GIT_CONFIG_COUNT"] = str(n0 + 1)
+    env[f"GIT_CONFIG_KEY_{n0}"] = "safe.directory"
+    env[f"GIT_CONFIG_VALUE_{n0}"] = str(REPO)
     try:
         out = subprocess.run(["git", "-C", str(REPO), *args],
-                             capture_output=True, text=True, check=True)
-        return out.stdout.strip() or default
-    except Exception:
-        return default
+                             capture_output=True, text=True, env=env)
+    except OSError as e:                      # git missing / not executable
+        raise GitUnavailable(f"cannot execute git: {e}") from e
+    if out.returncode != 0:
+        raise GitUnavailable(
+            f"git {' '.join(args)} exited {out.returncode}: "
+            f"{(out.stderr or '').strip()}")
+    # Ran fine and simply had nothing to say -- THAT is what `default` is for.
+    return out.stdout.strip() or default
 
 
 def blocks_with_context(md: Path):
@@ -341,4 +391,15 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # A broken git must stop the run with an explanation, never degrade into a
+    # verdict. Exit 2 = "could not determine", distinct from 1 = "out of sync".
+    try:
+        sys.exit(main())
+    except GitUnavailable as e:
+        print(f"ERROR: {e}")
+        print("  Every derived header field (Started / Updated / licence year) "
+              "comes from git,")
+        print("  so this tool cannot report a verdict while git is failing -- "
+              "and MUST NOT")
+        print("  write a header built from placeholder values. Fix git, re-run.")
+        sys.exit(2)

@@ -119,6 +119,30 @@ def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Dict[str, str]
     return aliases
 
 
+# Assert THIS repo safe for every git subprocess, via environment rather than a
+# config file. The sandbox here intermittently refuses git with "dubious
+# ownership" even though the ownership matches (repo, .git and the running user
+# are all the same), and ~/.gitconfig is not writable to fix it the usual way.
+#
+# Why it matters HERE specifically: both helpers below fall back on failure --
+# get_git_mtime() to filesystem mtime, get_git_blob_sha256() to working-tree
+# bytes. Those fallbacks are correct for a NEVER-COMMITTED file, which is what
+# they were written for. They are wrong for a git that simply could not run:
+# every timestamp would silently become a filesystem mtime, and every published
+# hash would be of working-tree bytes rather than the committed blob that
+# raw.githubusercontent.com actually serves -- and consumers verify against that
+# hash to detect a stale or poisoned cache. Removing the spurious failure keeps
+# the fallbacks scoped to the case they were designed for.
+def _git_env():
+    env = dict(os.environ)
+    n = int(env.get("GIT_CONFIG_COUNT", "0"))
+    env["GIT_CONFIG_COUNT"] = str(n + 1)
+    env[f"GIT_CONFIG_KEY_{n}"] = "safe.directory"
+    # Resolved from this file's own location: engineering/tools/<script>.
+    env[f"GIT_CONFIG_VALUE_{n}"] = str(Path(__file__).resolve().parents[2])
+    return env
+
+
 def get_git_mtime(filepath: Path) -> int:
     """Get the git commit timestamp for a file (Unix timestamp)."""
     try:
@@ -126,7 +150,8 @@ def get_git_mtime(filepath: Path) -> int:
             ['git', 'log', '-1', '--format=%ct', '--', str(filepath)],
             capture_output=True,
             text=True,
-            cwd=filepath.parent
+            cwd=filepath.parent,
+            env=_git_env()
         )
         if result.returncode == 0 and result.stdout.strip():
             return int(result.stdout.strip())
@@ -149,7 +174,8 @@ def get_git_blob_sha256(repo_rel_path: str) -> str:
     try:
         result = subprocess.run(
             ['git', 'show', f'HEAD:{repo_rel_path}'],
-            capture_output=True
+            capture_output=True,
+            env=_git_env()
         )
         if result.returncode == 0:
             return hashlib.sha256(result.stdout).hexdigest()
