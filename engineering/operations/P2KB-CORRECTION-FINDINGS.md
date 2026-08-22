@@ -516,6 +516,13 @@ documents load, using an idiom that **cannot be tested in this container** (no T
 manual is mid-render. Landing it blind risks breaking rights emission for Streamer and the
 Single-Step Debugger, which are proven working today.
 
+**A LIVE VICTIM, found 2026-08-22.** `pnut-term-ts-user-guide` is about to render for its v1.0.0
+release and its template binds five of the seven `\Doc*` macros but neither rights macro, with no
+`copyright`/`license` in its `request.json` either — so it would emit the malformed
+`"; licensed under "` exactly as Assembly's first v3.1.7 render did. Recorded with its fix in
+`PLATFORM-FEATURE-ADOPTION.md` footnote ¹². Fixing it there also removes that guide from the pool
+of possible negative controls for this finding.
+
 **What it needs instead — and this is the point:** its own change, with a **negative control** that
 Assembly can no longer provide. Render an *unadopted* document (the layout torture test is the
 natural candidate) and confirm the returned PDF carries **no** Keywords at all. A fix validated only
