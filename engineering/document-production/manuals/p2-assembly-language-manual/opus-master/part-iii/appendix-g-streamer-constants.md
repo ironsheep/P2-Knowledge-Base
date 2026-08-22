@@ -381,12 +381,15 @@ Streamer mode and control flags are combined using OR:
 
 ## Related Instructions
 
-- [XINIT](#xinit) — Initialize streamer with mode and NCO rate
-- [XCONT](#xcont) — Continue streamer with new parameters
-- [XSTOP](#xstop) — Stop streamer operation
-- [XZERO](#xzero) — Zero streamer and stop
+- [XINIT](#xinit) — Issue a streamer command immediately, phase reset to zero
+- [XZERO](#xzero) — Buffer a streamer command with phase reset to zero
+- [XCONT](#xcont) — Buffer a streamer command continuing from the current phase
+- [XSTOP](#xstop) — Halt the active streamer operation immediately
+- [SETXFRQ](#setxfrq) — Set the NCO frequency that paces the transfer
 - [RDFAST](#rdfast) — Set up hub-to-FIFO reading
 - [WRFAST](#wrfast) — Set up FIFO-to-hub writing
-- [SETLUTS](#setluts) — Configure LUT for streamer use
+- [SETDACS](#setdacs) — Set the background value of all four DAC channels
+- [SETSCP](#setscp) — Point the SCOPE data pipe at a four-pin block, for the ADC modes
+- [WRLUT](#wrlut) — Write a long into lookup RAM, for the LUT modes
 
 
