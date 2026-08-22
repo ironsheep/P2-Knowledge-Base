@@ -28,7 +28,7 @@ prose), with all per-publication detail in the roster.*
 | Assembly Reference | manual | 3.1.6 | 502 | ✅ |
 | DeSilva Tutorial | manual | 3.0.6 | 166 | ✅ |
 | Debug Window | manual | 1.1.3 | 168 | ✅ |
-| Streamer Guide | manual | 1.0.9 | 76 | ✅ |
+| Streamer Guide | manual | 1.1.0 | 91 | ✅ |
 | Architect's Guide | manual | 1.0.3 | 52 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.1.0 | 114 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.4 | 20 | ✅ |

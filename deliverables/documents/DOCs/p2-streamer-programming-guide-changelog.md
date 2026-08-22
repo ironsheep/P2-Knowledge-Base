@@ -1,5 +1,44 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.1.0 (2026-08-22)
+
+**Getting the signal out of the chip** — the pin-side setup every DAC example depends on, the LUT window's eight loop sizes, and streamer behavior confirmed on P2 silicon.
+
+### Added
+
+- **§11.0 Getting a DAC Channel Onto a Pin**: `WRPIN` with a DAC pin-mode constant, this cog's ID in `M[3:0]`, and `DIRH`
+- **A pin's low two bits choose its DAC channel** (§11.0, §11.2), so a four-channel arrangement takes a base that is a multiple of four
+- **`%TT` decides where a DAC's value comes from** (§11.0): `%01` (`P_CHANNEL`) for a streamer-driven DAC, `%00` for the pin's own level field
+- **`SETDACS` sets what the untouched channels emit** (§11.0, §11.1): a routing field that drives two channels leaves the other two at that value
+- **`X_PINS_ON` supplies a pin's output state; `DIR` enables it to drive** (§11.0): on silicon, eight of eight pins drove with `DIRH` and four with DIR low
+- **§10.3 The LUT Window**: `S[11:0]` selects one of eight loop sizes, the `%A` region bits that place it, and the `%T` offset that shifts playback phase
+- **§12.0 Reading a Pin Field**: streamer command fields are positional and mode-specific, and `pin<<17` splits a pin number across `D[22:20]` and `D[19:17]`
+- **§15.0 The Colorspace Converter**: the `CY`/`CI`/`CQ` matrix, the modulator, and `CMOD[6:5]` output selection including the S-Video split
+- **§15.2 carries a complete HDMI/DVI program**, the pair order `CMOD[8:7]` selects, and the `P[1]` bit that sends a channel literally rather than TMDS-encoded
+- **§15.3 gives composite video's configuration and names what you supply**: `CMOD[6:5]` = `%11`, and why the NTSC/PAL coefficients are yours to derive
+- **§17.2 is a one-channel function generator**: DAC-pin setup, `X_DACS_X_X_X_0`, and the `$FFFF` count that runs a command perpetually
+- **Every code block declares what it is** (front matter, *Code Blocks*): an unlabelled block leaves nothing for you to supply, a **Pattern** lead-in names what you do
+- **The *Goertzel Results Invalid* checklist covers all three dominant causes** (Appendix D)
+- **The Index reaches the new material**, including the LUT window, the pin field, and the DAC-pin procedure
+
+### Changed
+
+- **RGBI8 carries a 3-bit color select and a 5-bit luminance** (§7.2, Appendix A, Appendix B)
+- **Appendix A's `D[19:16]` column reads per the *Parallax Propeller 2 Documentation*** across the single-pin and single-DAC modes
+- **The SINC2 constant-iteration constraint is the P2 designer's, reported 2024-12-16** (§10.5), and is not in the released *Parallax Propeller 2 Documentation*
+- **§3.1 states the every-clock exception**: DDS/Goertzel advances on every system clock rather than on NCO rollover
+- **The colorspace converter and the streamer's RGB unpacking are separate stages** (Chapter 7, §15.0), sharing only the `CMOD` register
+- **The guide identifies itself in a reader or library**: its title, subtitle, author, version and date fill the PDF's properties and match the cover
+- **The PDF states its copyright and CC BY-SA 4.0 licence in its own metadata**, so the terms travel with the file rather than only on the page
+
+### Fixed
+
+- **§9.2's `SETSCP` literal enables the scope**: `#%100_0000` sets `D[6]` and puts the four-pin block at base 0
+- **§15.1 is a complete VGA program**: 640×350 painted into the full 525-line field at 25.0 MHz, with its four DAC pins configured for output
+- **A 640×480 framebuffer at 16 bits per pixel is 600 KB** (§7.1, §15.1, §15.2), so both video programs paint 350 lines and blank the rest
+- **§12.0 gives the alignment rule for eight pins and wider**: `D[19:17]` holds no pin bits there, so the operand is a multiple of 8
+- **Compose a mode word with `|`, not `+`** (§12.0, §13.4): an unaligned value added to one carries into the mode field, selecting a different mode and window
+
 ## v1.0.9 (2026-08-19)
 
 **The input is not where you think it is** — how each ADC path actually selects its pins, one read per Goertzel command, and why DEBUG moves your measurements.

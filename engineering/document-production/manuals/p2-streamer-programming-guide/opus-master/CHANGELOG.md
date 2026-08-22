@@ -1,6 +1,6 @@
 # P2 Streamer Programming Guide - Changelog
 
-## v1.1.0 (2026-08-21)
+## v1.1.0 (2026-08-22)
 
 **Getting the signal out of the chip** — the pin-side setup every DAC example depends on, the LUT window's eight loop sizes, and streamer behavior confirmed on P2 silicon.
 
@@ -28,7 +28,8 @@
 - **The SINC2 constant-iteration constraint is the P2 designer's, reported 2024-12-16** (§10.5), and is not in the released *Parallax Propeller 2 Documentation*
 - **§3.1 states the every-clock exception**: DDS/Goertzel advances on every system clock rather than on NCO rollover
 - **The colorspace converter and the streamer's RGB unpacking are separate stages** (Chapter 7, §15.0), sharing only the `CMOD` register
-- **Title, subtitle, version and date come from one place**, so the cover and the PDF properties agree
+- **The guide identifies itself in a reader or library**: its title, subtitle, author, version and date fill the PDF's properties and match the cover
+- **The PDF states its copyright and CC BY-SA 4.0 licence in its own metadata**, so the terms travel with the file rather than only on the page
 
 ### Fixed
 
