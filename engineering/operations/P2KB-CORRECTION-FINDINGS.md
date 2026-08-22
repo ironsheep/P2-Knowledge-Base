@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-320`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-321`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -377,6 +377,91 @@ the no-`DIRH` half is gone, exactly as EF-062 sealed it. Still owed:
 `part-iii/appendix-g-streamer-constants.md:228/:255/:289`, RELEASED in v3.1.6.
 
 ---
+
+## `object-image-dedup.yaml`'s map_caveat goes stale when pnut-ts 1.55.4 ships (2026-08-22) — F-320
+
+### F-320 — `p2kbSpin2ObjectImageDedup`'s `map_caveat` warns readers off .map labels that 1.55.4 makes correct, while the limitation that SURVIVES the fix is documented nowhere. `CONFIRMED — HELD by decision (Stephen, 2026-08-22) until the new compiler and its fixture set are in hand`
+
+**Origin.** `engineering/ingestion/external-inputs/p2kb-update-requests/P2KB-map-caveat-retraction-1.55.4.md`
+— an upstream request from the pnut-ts side proposing an amendment. Treated as **input, not
+authority** ([[feedback_upstream_input_docs_not_authority]]): its finding was checked here, its
+proposed text was not adopted.
+
+**The site.** `deliverables/ai/P2/language/spin2/concepts/object-image-dedup.yaml:123-126` — the only
+copy. Four other files reference the entry (`method-pointers`, `object_archetypes`, `OBJ`,
+`shared-bus-replication`) but none duplicate the caveat.
+
+### Measured HERE on pnut-ts 1.55.3, 2026-08-22 — the "before" baseline
+
+Rebuilt the entry's own `cascade_through_tiers` fixture and read it as `verification.method` says
+to. **The label defect reproduces, and is worse than the request describes:**
+
+```
+  case4  (1 methods)
+      +-- A : casc_mid
+      |   \-- LEAF : object_3          <- placeholder name
+      |       \-- child_0 : object_4   <- a tier that DOES NOT EXIST
+      \-- B : casc_leaf                <- wrong SOURCE FILE (B is casc_mid)
+```
+
+B's real child is absent and an extra tier is invented. **Send upstream as a 1.55.4 regression
+check** if their fixtures do not already cover the invented-tier and wrong-source-file shapes.
+
+Two things confirmed independently of the fix, and they are why the entry is otherwise sound:
+
+- **`Objects: 5`** — exactly the entry's measured value. The count IS reliable, as the caveat says.
+- **`SYMBOL INDEX` carries ONE `MTAG` ($00034) and ONE `LTAG` ($00048)** while `MEMORY LAYOUT`
+  shows two images of each source. The second image's DAT addresses appear nowhere in that section.
+  This is **structural — symbols are stored per source file — so it is NOT version-coupled and
+  survives the 1.55.4 fix.** It is documented in no punch list here despite the request saying it is
+  tracked, so this entry is also that gap's only record.
+
+### The proposed text is REJECTED — it reinstates the shape PL-004 just stripped from this file
+
+The request asks for prose reading *"Fixed in pnut-ts 1.55.4. Through 1.55.3 the multi-instance .map
+could show… As of 1.55.4…"*, and offers a `verification.method` line *"confirmed correct at pnut-ts
+1.55.4"* as an alternative anchor. **Both are build stamps.**
+
+`[[reference_kb_is_always_latest_no_version_citations]]` — *cite the EDITION, never the BUILD* — uses
+**this exact file** as its worked example: it said *"re-verify on a compiler version bump"* pinned at
+v1.55.0 while v1.55.3 was installed; the bump had happened and the re-verify had not. PL-004 removed
+the `toolchain:` field for that reason, and `verification.method` now carries the durable
+replacement: *"Compiler-coupled behaviour: re-measure rather than assume if a result surprises you."*
+
+The request understood half of it — it dropped its own `toolchain:` proposal as moot — then moved the
+build numbers into prose. Same rot, different field.
+
+### Amendment to apply (current-state only, nothing to maintain at the next bump)
+
+```yaml
+  map_caveat: |
+    SYMBOL INDEX reports one row per SOURCE FILE, so when an override forks a file into
+    several images only the first image's DAT address appears there. For per-instance DAT
+    addresses read MEMORY LAYOUT or ADDRESS INDEX, which list every image. The Objects:
+    count is reliable.
+```
+
+Nothing else in the entry needs changing: `description`, THE RULE, `singleton_rule`,
+`forking_a_dat_region`, `the_silent_trap`, `the_other_silent_trap`, `cascade_through_tiers`,
+`completeness_rule` and `verification.measured` all re-read clean against the request's own
+re-measurement.
+
+### Why it is HELD, and what releases it
+
+**Sequencing is the whole reason.** On 1.55.3 the labels genuinely ARE wrong — measured above — so
+dropping the warning while readers are still on 1.55.3 publishes guidance that is wrong for them.
+The amendment is only correct once 1.55.4 is what people have.
+
+Release conditions, both required:
+
+1. **pnut-ts 1.55.4 is in this devcontainer**, so the fix can be verified here rather than taken on
+   the request's word. The container is on 1.55.3 (`Build date: 8/9/2026`) as of filing.
+2. **The compiler side's test source set is in hand** — offered 2026-08-22 and expected to evidence
+   the new map details directly, so the fixtures do not have to be reconstructed from the entry's
+   prose. Re-run the "before" shapes above against it; every one should invert.
+
+Then: apply the amendment, and record the result in `verification.measured` **without a build
+number**.
 
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
