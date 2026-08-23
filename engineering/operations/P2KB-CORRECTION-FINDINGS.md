@@ -123,7 +123,12 @@ Guide* §17.2. Raw post + full analysis at
 by path). Same reviewer as F-256. His parenthetical *"(No, it does not need to be 512
 entries.)"* is **correct**, and it lands on the KB as well as the manual.
 
-### F-302 — `p2kbArchDdsGoertzel` states the DDS/Goertzel LUT window as a flat `entries: 512`, hiding a selectable 8-way loop size, a bounded-region offset, and a phase-offset field. `PARTIAL — KB DONE 2026-08-21; the manual half ships with Streamer v1.1.0`
+### F-302 — `p2kbArchDdsGoertzel` states the DDS/Goertzel LUT window as a flat `entries: 512`, hiding a selectable 8-way loop size, a bounded-region offset, and a phase-offset field. `RESOLVED 2026-08-22 — KB applied 2026-08-21; the manual half shipped in Streamer Guide v1.1.0`
+
+> **MANUAL HALF SHIPPED 2026-08-22, Streamer Guide v1.1.0 (91pp).** §10.3 "LUT Window" is
+> a new section carrying all eight loop sizes with the `%A` region bits and the `%T` phase
+> offset, and §17.2 was rebuilt on top of it — the flat "must contain 512 entries" claim is
+> gone from the manual as it is from the KB.
 
 > **KB APPLIED 2026-08-21.** All six sites. `entries: 512` is now `entries_default` plus an
 > `entries_note` saying it is the %000 case, beside a `lut_window:` block carrying all eight
@@ -213,7 +218,16 @@ list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
 > **DDS/Goertzel** *constant-value* tables were decoded row by row and are **correct** — they are
 > named-symbol value tables, not field-encoding templates. Do not "fix" them.
 
-### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `PARTIAL — KB DONE 2026-08-21; Assembly RESOLVED 2026-08-22 (v3.1.7); the torture-test diagram clone is Stephen's design call`
+### F-303 — the RGBI8 `2:2:2:2` fabrication is in a second released manual and in two live KB files. `RESOLVED 2026-08-22 — every released and live-KB site corrected; KB 2026-08-21, Assembly v3.1.7`
+
+> **CLOSED 2026-08-23.** Both live-KB sites applied 2026-08-21 (`2:2:2:2` re-swept 2026-08-23:
+> **zero** occurrences in `deliverables/ai/P2/`), and the Assembly Language Reference's site
+> shipped in v3.1.7 and was read on p475 of the returned PDF. **The fourth row of the table below
+> is NOT a correctness finding and never gated this one**: the P2 Layout Torture Test is an
+> internal test instrument, never released and not consistency-bound (roster: *"serves the manual
+> layout-standards effort, not the community"*). Its stale `\DiagRgbFormats` clone is recorded as
+> instrument-local housekeeping in `PUNCH-LIST.md`, not as pending correction work — an instrument
+> must never hold a published-artifact finding open.
 
 > **VALIDATED on the returned v3.1.7 PDF, 2026-08-22 (505pp, read on the page).** p475 prints *"Read byte as color + intensity: P[7:5] selects the color, P[4:0] is the intensity"*, and `2:2:2:2` appears **zero** times in 505 pages. The LUMA8 row beside it now reads *"the color is selected by S[2:0]"*.
 
@@ -223,8 +237,9 @@ list: `engineering/planning/STREAMER-GUIDE-CORRECTNESS-SPRINT-PLAN.md` §13.
 > **KB APPLIED 2026-08-21.** `streamer-symbols.yaml:186` and `modes-reference.yaml:221` both now
 > read *"upper 3 bits select a colour, lower 5 bits are intensity"*, the framing the released
 > Debug Window Manual v1.1.3 already uses. Swept: `2:2:2:2` no longer appears anywhere in
-> `deliverables/ai/P2/`. Still owed: `appendix-g-streamer-constants.md:115` in the Assembly
-> Language Reference, and the `\DiagRgbFormats` clone in the torture-test template.
+> `deliverables/ai/P2/`. *(Still-owed list as written on 2026-08-21, both since discharged:
+> `appendix-g-streamer-constants.md:115` shipped in Assembly v3.1.7, and the torture-test clone
+> is instrument-local — see the CLOSED note above.)*
 
 The truth (Silicon Doc `p2-documentation.txt:3800`): RGBI8 is a **3-bit colour select + 5-bit
 luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B fields.
@@ -234,7 +249,7 @@ luminance** format, structurally the same as LUMA8. It has no per-channel R/G/B 
 | `manuals/p2-assembly-language-manual/opus-master/part-iii/appendix-g-streamer-constants.md:115` — *"Read byte as RGBI 2:2:2:2 (16 colors + intensity)"* | **RELEASED** — Assembly Language Reference v3.1.6, 2026-08-18, 502pp |
 | `deliverables/ai/P2/language/spin2/symbols/streamer-symbols.yaml:186` — `"RFBYTE → RGBI 2:2:2:2"` | **LIVE KB** (served by `p2kb-mcp`); the one wrong row in an otherwise-correct table |
 | `deliverables/ai/P2/architecture/streamer/modes-reference.yaml:221` — same description, second copy | **LIVE KB** |
-| `workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:176` — `\DiagRgbFormats` cloned, draws `R 2 \| G 2 \| B 2 \| I 2` | not released, but **invoked** at `P2-Layout-Torture-Test.md:836`, so it renders into every build |
+| `workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:176` — `\DiagRgbFormats` cloned, draws `R 2 \| G 2 \| B 2 \| I 2` | **NOT A FINDING SITE** — internal test instrument, never released. Housekeeping only; tracked in `PUNCH-LIST.md` |
 
 **Fix template already exists, in a released manual:** *P2 Debug Window Manual* v1.1.3
 `ch04-bitmap.md:100` — *"Upper 3 bits select a color, lower 5 bits are intensity"* — and it
@@ -941,7 +956,13 @@ for the choice, not a resolution of it.
 
 **Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` — §*"What You Are
 Buying With That"* (`:5993-6001`), with the same shape at `:225`, `:6001`, `:6049`.
-**NOT RELEASED** — written during Sprint 2, committed at `fea28f1c`, ships in v3.0.6.
+**RELEASED — and the blast radius grew while this line said otherwise.** Written during Sprint 2,
+committed at `fea28f1c`, and **v3.0.6 PUBLISHED 2026-08-17** (166pp). This annotation read
+`NOT RELEASED … ships in v3.0.6` until 2026-08-23; it was a *prediction*, correct when written and
+false the moment v3.0.6 shipped, and nothing came back to update it. The finding is **still open** —
+re-verified against the master 2026-08-23, the shape survives at `:229` (*"Your sensor sampling never
+misses a deadline"*) and `:6061` (*"missed timing deadlines"*). `:5995` uses "deadline" in the
+project-schedule sense and `:4279` in the counter-wraparound sense — both legitimate, leave them.
 
 The section argues that conventional MCUs turn hard real-time into a scheduling problem with "a long
 tail of *why did that deadline slip once an hour?*", and that the P2 therefore "raises your odds of
@@ -1062,10 +1083,22 @@ waits on verifying that `> ```antipattern` renders, because no manual in the set
 fence-inside-blockquote combination. Verify it at the next Debug Window Forge round-trip, convert if
 it renders, and this finding closes.`
 
-### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `CONFIRMED`
+### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `RESOLVED — fixed in the v1.1.0 restructure, shipped 2026-08-19; closed on re-verification 2026-08-23`
 
-**Location:** `manuals/p2-xbyte-programming-guide/opus-master/xbyte-body.md:1427`.
-**NOT RELEASED** — written during Sprint 2 («#227»), ships in v1.0.2.
+> **CLOSED 2026-08-23, verified against the master, not inferred.** The circular citation is **gone**:
+> *"P2 Assembly Language Reference"* now appears **zero** times in `xbyte-body.md`. The `_RET_ CALL`
+> hazard moved to §16.3 in the v1.1.0 restructure and is grounded on a **primary** source —
+> *"Parallax's instruction table (P2 Instructions v35 – Rev B/C Silicon, row 410) defines `_RET_` as
+> 'execute `<inst>` always and return if no branch.'"* That is exactly the fix this finding asked for.
+>
+> **This finding read `CONFIRMED` / `NOT RELEASED … ships in v1.0.2` for four days after it was done.**
+> Two independent staleness paths crossed here: the fix rode a restructure that renumbered the target
+> version (v1.0.2 was never published — **v1.1.0** shipped 2026-08-19 instead), and the cited line
+> `:1427` now points at unrelated content because the restructure moved everything. A finding pinned to
+> a line number and an unshipped version number is a finding nobody can re-check cheaply.
+
+**Location (as filed):** `manuals/p2-xbyte-programming-guide/opus-master/xbyte-body.md:1427` — line
+reference is **historical**; the restructure invalidated it.
 
 The `_RET_ CALL` hazard block cites *"the condition table in the **P2 Assembly Language Reference
 Manual**"* for `_RET_`'s branch-conditional semantics. That title is **not fabricated** — it is the cover

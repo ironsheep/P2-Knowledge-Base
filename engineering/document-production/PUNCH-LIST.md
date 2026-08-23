@@ -3,6 +3,19 @@
 Cross-cutting document-production cleanup items that are **not** specific to a single
 manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 
+**This file is also the home for pending PLATFORM DECISIONS** — a proposed change to the
+shared `p2kb-platform` stack that is waiting on Stephen's approval. Those used to be recorded
+in prose inside whichever document surfaced them (a footnote in
+`PLATFORM-FEATURE-ADOPTION.md`, a status line in `P2KB-CORRECTION-FINDINGS.md`), where nothing
+re-read them. **A decision nobody is holding is a decision that never gets made.** Every
+heading here ends in its own state (`— OPEN` / `— RESOLVED <date>`), so this file needs no
+summary table to stay honest — deliberately, because a hand-maintained status index is the
+very drift this list already tracks twice.
+
+**Scope note:** the **P2 Layout Torture Test** is an internal test instrument — never released,
+not consistency-bound, serving the layout-standards effort rather than the community. Items
+about it are housekeeping and **never** gate a publication or hold a correction finding open.
+
 ---
 
 ## Shipped example `.spin2` files conflict with the Spin2 authoring gate — RESOLVED 2026-08-18
@@ -515,3 +528,121 @@ polish, F-299 (6-column table overhang).
 **Verify when done:** `audit-pdf-margin-overflow.py` reports zero spans on the XBYTE
 PDF, and the §C.1 and §C.2 URLs both sit inside the text block with their breaks at
 sensible boundaries.
+
+---
+
+## Pending platform decision — teach the cross-ref filter to treat `SoftBreak` as `Space` — OPEN
+
+**Status:** ⏳ Open — **Stephen's call, never put to him.** Recommendation raised 2026-08-23 during
+the PNut-Term-TS User Guide's cross-ref adoption; recorded until now only in footnote ⁶ of
+`PLATFORM-FEATURE-ADOPTION.md`, which is prose nobody re-reads. **That is why it is here** — a
+pending *platform* decision needs a home in a list, not a footnote inside a per-feature matrix.
+
+**The mechanism.** `p2kb-platform-crossref.lua` matches `Chapter` + *Space* + number. When an author's
+source wraps a reference across a line —
+
+```
+...configures 8N1 exclusively (Chapter
+7), and 300 baud is...
+```
+
+— pandoc emits `Str "(Chapter"` · **SoftBreak** · `Str "7),"`. A SoftBreak is not a Space, so the
+reference is invisible to the filter and simply does not link.
+
+**Why it matters more than one missed link.** **The failure is SILENT** — nothing in the build reports
+a reference that failed to link. The PNut-Term-TS guide rendered 26 of 27 and the miss was found only
+because the adoption audit counted them. Any adopting manual can lose links this way, invisibly, and
+the trigger is *source line-wrapping* — something an author cannot see and has no reason to think about.
+
+**Not a filter bug.** The filter matched what it was told to match; the source shape changed. Fixed in
+that manual by reflowing the paragraph, which then read 27 of 27.
+
+**Cost of doing it: measured, and it is zero.** All four adopted manuals were swept for the pattern —
+**zero occurrences elsewhere**, so the change is a **no-op for every adopted document today** and
+carries **no re-render debt**. It was deliberately not smuggled into a manual's release, because a
+platform change belongs with a platform decision.
+
+**The ask:** approve the filter change, then it lands on its own and any future adopter is robust to
+rewrapping.
+
+---
+
+## Layout Torture Test instrument — stale `\DiagRgbFormats` clone — OPEN (housekeeping)
+
+**Status:** ⏳ Open, **low priority, not a correctness finding and not a release gate.** The P2 Layout
+Torture Test is an **internal test instrument** — never released, not consistency-bound, serving the
+manual layout-standards effort rather than the community. It is recorded here so the item is not lost,
+**not** because anything is owed to a reader.
+
+`workspace/p2-layout-torture-test/templates/p2kb-torture-diagrams.sty:176` still draws
+`R 2 | G 2 | B 2 | I 2`, the RGBI8 field split that **F-303** established is a fabrication (the format
+is a 3-bit colour select + 5-bit luminance, Silicon Doc `p2-documentation.txt:3800`). The macro is
+invoked at `P2-Layout-Torture-Test.md:836`, so the wrong diagram renders into every torture-test build.
+A copy of the macro is also staged at `pdf-forge/interactive-testing/templates/p2kb-torture-diagrams.sty:161`.
+**The published half of F-303 is closed** — both live-KB sites and the Assembly Language Reference
+(v3.1.7, read on p475) are corrected; this instrument copy never gated that and F-303 no longer carries it.
+
+**The origin is worth keeping:** the correct macro lives in
+`workspace/p2-streamer-programming-guide/templates/p2kb-streamer-diagrams.sty` and was fixed there.
+The torture-test file is a **copy-paste clone** of it, which is how one wrong diagram became two.
+If these diagram macros are ever promoted into the shared platform stack, the duplication goes away by
+construction — worth considering when the platform diagram set is next touched, but **not** work to
+schedule on its own account.
+
+---
+
+## A status line that encodes a FUTURE release event goes stale silently — OPEN
+
+**Status:** ⏳ Open — diagnosed 2026-08-23, and it is the **root cause of a real rediscovery cost**
+paid that day. Companion to *"The corrections register has no machine-readable status"* above; that
+item's owed work does **not** cover this case.
+
+**What happened.** `#288`'s whole substance — the Streamer/Assembly co-release decision and both
+releases — completed 2026-08-22. On 2026-08-23 the state had to be **reconstructed from `git log`, the
+roster's PUBLISH prose, and a live `grep` of the KB**, because no register said so plainly. Specifically
+**F-302** still read `PARTIAL … the manual half ships with Streamer v1.1.0` — after v1.1.0 shipped.
+
+**Then the class was swept, and it was not one entry — it was three, drifting in BOTH directions:**
+
+| Finding | Said | Actually | Direction of the lie |
+|---|---|---|---|
+| **F-302** | `PARTIAL … ships with Streamer v1.1.0` | v1.1.0 shipped 2026-08-22; fully resolved | **understates** — sends you to redo finished work |
+| **F-279** | `CONFIRMED` · `NOT RELEASED … ships in v1.0.2` | fixed in the v1.1.0 restructure, shipped 2026-08-19 | **understates** — a *closed* finding read as open for four days |
+| **F-276** | `NOT RELEASED … ships in v3.0.6` | v3.0.6 **published 2026-08-17**; defect still open | **overstates safety** — a flawed argument was in a released manual while the register said it was not |
+
+**F-276 is the dangerous one.** The other two waste time; that one **understated the blast radius of a
+live defect in a shipped PDF.** And F-279 shows the compounding case: its fix rode a *restructure* that
+renumbered the target version (v1.0.2 was never published — v1.1.0 was) **and** invalidated the line
+number the finding was pinned to, so the entry became uncheckable from both ends at once.
+
+**This is the fourth recorded instance of the family.** F-278 already carries the same correction in its
+own body — *"This annotation used to read `(NOT RELEASED, v1.0.9)` … and all three were stale … the
+record understated what had been done, so a reader is sent to redo finished work"* — and it names this
+same tool gap explicitly. A defect class that has now been hand-corrected four times is a defect in the
+process, not in four entries.
+
+**Why the validator did not catch it, and this is the point.**
+`audit-register-hygiene.py` reports **CLEAN** on this register (44 live IDs, 0 unaccounted, no
+status/prose conflict). It cannot catch this class:
+
+- The status token said `PARTIAL` and the prose said *"ships with v1.1.0"* — **future tense**. There is
+  no contradiction *at the moment of writing*; the entry becomes false later, when the event occurs.
+- A status containing a **promise about a version** has an implicit expiry that nothing watches. The
+  register has no link from "finding F-302" to "release v1.1.0 happened."
+
+**The general defect:** *a status line that describes a future event is correct when written and wrong
+forever after, and no hygiene rule that compares a finding against itself can see it.*
+
+**Consequence measured, not assumed:** a completed task read as open at session resume, and closing it
+required a full re-derivation from primary artifacts.
+
+**Proposed fix** (small, and it fits the existing tool):
+1. **Ban the shape.** No status may name an unshipped version as its completion condition. Use
+   `FIXED-UNRELEASED` + a `ships-in:` field, which is a *fact* about the fix, not a *prediction*.
+2. **Teach `audit-register-hygiene.py` a release cross-check** — for every finding carrying
+   `ships-in: vX`, if the roster shows `vX` PUBLISHED, flag the finding as **status-expired**. This is
+   mechanically checkable today: the roster's Freshness Ledger already carries dated `PUBLISH` lines.
+3. Run it as part of `release-manual`, so **shipping a release is what re-reads the findings that named it.**
+
+This closes consequence #1 of the companion item from a different direction: rather than printing the
+open worklist, it makes the register *notice* when the world moved past one of its claims.
