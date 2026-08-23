@@ -77,11 +77,34 @@ reports a reference that failed to link. Fixed by reflowing the paragraph; the s
 then read 27 of 27.
 
 Swept all four adopted manuals for the same pattern afterwards: **zero** elsewhere, so this was
-a one-off rather than a fleet condition. **Worth considering a platform fix** — teaching the
-filter to treat SoftBreak as Space would make it robust to source rewrapping, which authors
-cannot see. It would be a **no-op for all four adopted manuals today** (all measured clean), so
-it carries no re-render debt; it is not done here because it is a platform change and belongs
-with a platform decision, not smuggled into a manual's release.
+a one-off rather than a fleet condition.
+
+> **✅ PLATFORM FIX APPROVED AND LANDED 2026-08-23** (Stephen's call). The filter now accepts a
+> **Space OR a SoftBreak** between the keyword and its number, so a reference that straddles a
+> line break in the author's source links like any other.
+>
+> **Proven by a before/after round-trip on the interactive daemon, read off the ARTIFACT** — a
+> purpose-built 4-page document carrying eight cases: three ordinary-space controls, three
+> line-wrapped cases, and **two negative controls** (`Chapter 99` plain, `Chapter 98` wrapped)
+> targeting headings that do not exist.
+>
+> | Run | Filter | Body links on the case page | Wrapped cases | Negative controls |
+> |---|---|:--:|---|---|
+> | `crossref-softbreak-v1` | before | **3** | all three DEAD | correctly plain |
+> | `crossref-softbreak-v2` | after | **6** | all three link, correct targets | **still correctly plain** |
+>
+> The negative controls are the load-bearing half: the SoftBreak branch still honours the
+> target-must-exist rule, so the fix did not turn the filter into something that links anything
+> that looks like a reference. Compile log clean on all five serious signatures. **Visually
+> confirmed on the rendered page: no visual change at all** — a wrapped reference sets as
+> ordinary inline prose, because pandoc's LaTeX writer emits a newline for SoftBreak and TeX
+> reads that as a space, which is exactly what the emitted Space produces.
+>
+> **Re-swept the WHOLE corpus at landing, not just the adopted four: ZERO wrapped-reference
+> sites in any manual or app note.** So this is a **pure no-op today** and carries **no
+> re-render debt for anyone** — it is preventive, protecting future authoring rather than fixing
+> present output. **Adoption stays per manual, at each one's next release** (Stephen, 2026-08-23);
+> no document is re-rendered on account of this change.
 
 *Prior state, for the record:* deferred at the v1.0.0 prepare (2026-08-19) because the audit
 would have gated a release scoped not to wait. That reason expired once this build needed a

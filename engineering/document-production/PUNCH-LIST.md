@@ -531,9 +531,33 @@ sensible boundaries.
 
 ---
 
-## Pending platform decision — teach the cross-ref filter to treat `SoftBreak` as `Space` — OPEN
+## Pending platform decision — teach the cross-ref filter to treat `SoftBreak` as `Space` — RESOLVED 2026-08-23
 
-**Status:** ⏳ Open — **Stephen's call, never put to him.** Recommendation raised 2026-08-23 during
+> **✅ APPROVED (Stephen) AND LANDED 2026-08-23, same day it was surfaced.** The filter accepts a
+> Space **or** a SoftBreak between the keyword and its number. **Proven by a before/after
+> round-trip on the interactive daemon, measured on the artifact, not asserted:**
+> `crossref-softbreak-v1` (before) linked **3 of 6** — every line-wrapped reference dead;
+> `crossref-softbreak-v2` (after) linked **6 of 6**, each to the correct target, while **both
+> negative controls** (`Chapter 99` plain, `Chapter 98` wrapped — headings that do not exist)
+> **stayed plain text**. That second half is the one that matters: the new branch still honours
+> the target-must-exist rule. Compile log clean; rendered page inspected and **visually
+> unchanged**.
+>
+> **Whole-corpus re-sweep at landing: ZERO wrapped-reference sites in any manual or app note** —
+> a pure no-op today, no re-render debt for any document. It is preventive, not corrective.
+> **Adoption remains per manual at each one's next release** (Stephen's direction); nothing is
+> re-rendered for this.
+>
+> **The fixture is TRACKED so the proof outlives the run:**
+> `engineering/document-production/platform/tests/crossref-softbreak-test.md`, with its README
+> giving the eight cases, the expected 6-link result, and how to re-run it. The daemon runs
+> themselves (`interactive-testing/test-runs/crossref-softbreak-v{1,2}_*/`) are **git-ignored
+> and expire in 7 days** — which is exactly why the fixture was promoted out of there. A
+> platform change is permanent; the evidence it works has to be at least as durable.
+
+*Original entry retained below for the record.*
+
+**Status:** ~~⏳ Open~~ — **Stephen's call, never put to him.** Recommendation raised 2026-08-23 during
 the PNut-Term-TS User Guide's cross-ref adoption; recorded until now only in footnote ⁶ of
 `PLATFORM-FEATURE-ADOPTION.md`, which is prose nobody re-reads. **That is why it is here** — a
 pending *platform* decision needs a home in a list, not a footnote inside a per-feature matrix.

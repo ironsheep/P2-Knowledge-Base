@@ -37,6 +37,11 @@
       the explicit Table handler never double-wraps.
     * Pandoc strips leading numbers from section identifiers, so we map the section
       NUMBER -> the real identifier pandoc assigned (never guess the anchor text).
+    * ROBUST TO SOURCE LINE-WRAPPING: the separator between the keyword and its
+      number may be a Space or a SoftBreak. A reference that happens to straddle a
+      line break in the author's markdown still links. Before 2026-08-23 it did not,
+      and the miss was SILENT — the build reports nothing when a reference fails to
+      link, so it is only ever caught by counting links in the rendered PDF.
 
   ADOPTION (platform note): opt-in per manual via request.json `lua_filters`.
   Auto-linking can mis-fire (e.g. a manual using "Chapter N" to mean another
@@ -101,8 +106,16 @@ local function rewrite(inlines)
       -- Form A: keyword + Space + token  (Chapter 8 / Appendix C / Section 8.2)
       -- allow a leading-punct prefix on the keyword token, e.g. "(Chapter"
       local pfx, kw = el.text:match("^(.-)(%a+)$")
+      -- The separator may be a Space OR a SoftBreak: if the AUTHOR'S SOURCE happens
+      -- to wrap the line between the keyword and its number, pandoc emits
+      -- Str "(Chapter" · SoftBreak · Str "7)," and a Space-only test misses it.
+      -- That failure is SILENT — nothing in the build reports a reference that did
+      -- not link — and the trigger (source line-wrapping) is invisible to the author.
+      -- Both render identically: pandoc's LaTeX writer emits a newline for SoftBreak,
+      -- which TeX reads as a space, so the emitted Space below is the same output.
+      local sep = inlines[i+1]
       if kw and (kw == "Chapter" or kw == "Ch" or kw == "Appendix" or kw == "Section")
-         and inlines[i+1] and inlines[i+1].t == "Space"
+         and sep and (sep.t == "Space" or sep.t == "SoftBreak")
          and inlines[i+2] and inlines[i+2].t == "Str" then
         local id, core, rest = resolve(kw, inlines[i+2].text)
         if id then
