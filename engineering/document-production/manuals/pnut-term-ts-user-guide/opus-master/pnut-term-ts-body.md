@@ -1350,8 +1350,14 @@ anything went missing. That is how the verified ceiling gets raised.
 - **The single-step debugger** — the **P2 Single-Step Debugger Manual**.
 - **Agentic P2 development** — **The P2 Architect's Guide, Part 3**, for the
   tool-chain workflow this guide's tool takes part in.
-- **The Propeller 2** — the Parallax Propeller 2 documentation, and the Parallax
-  Forums at <https://forums.parallax.com/>.
+- **The Propeller 2** — Parallax's own documentation and the community-maintained
+  references, and the Parallax Forums at <https://forums.parallax.com/>.
+  <!-- Deliberately unlinked and deliberately PLURAL. Two sources dominate: one at
+       parallax.com, one a head post in a forum thread. Linking either would rank
+       them, which is not this guide's call to make; the community knows both.
+       The plural phrasing exists so a newcomer does not go hunting for a single
+       canonical link and conclude they missed it. Do not "fix" this by adding a
+       URL. (Stephen, 2026-08-23.) -->
 
 <!--
   ===========================================================================
