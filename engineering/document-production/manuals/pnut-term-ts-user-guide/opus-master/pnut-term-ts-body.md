@@ -519,10 +519,11 @@ thing to try is *dropping* `-b`.
 **The accepted range is 300 to 20,000,000**, and its two ends mean quite different
 things — neither of them a statement about how fast your link will actually go.
 
-The floor is framing, not speed. PNut-Term-TS configures 8N1 exclusively (Chapter
-7), and 300 baud is the lowest rate it can reach at all: every slower historic rate
-needs framing this tool does not produce — the 110-baud Teletype wanted two stop
-bits for its carriage, and Baudot below that is a five-bit code entirely.
+The floor is framing, not speed. PNut-Term-TS configures 8N1 exclusively
+(Chapter 7), and 300 baud is the lowest rate it can reach at all: every slower
+historic rate needs framing this tool does not produce — the 110-baud Teletype
+wanted two stop bits for its carriage, and Baudot below that is a five-bit code
+entirely.
 
 The ceiling is a **corruption guard**, not a capability claim. When PNut-Term-TS
 takes a rate out of a binary, that value has to be sanity-checked — a damaged image
@@ -583,6 +584,19 @@ are independent: one governs getting the program *onto* the chip, the other gove
 reading what it says once it is running. A slow download still yields a
 full-speed conversation.
 
+Both rates sit together in Preferences, each with the tool's own one-line summary of
+what it governs — the same division of labour this chapter has been describing, in
+the place you will actually set it (Chapter 10 covers the dialog itself).
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.82\linewidth]{inbox/assets/preferences-scrolled-to-serial.png}
+\caption{The two baud rates in User Settings --- serial for the running program,
+download for the boot-loader exchange.}
+\end{figure}
+```
+
 # Chapter 7: The Serial Terminal
 
 Once your program runs, its text appears in the terminal, and you can type back.
@@ -618,7 +632,7 @@ shape day-to-day reading are:
 | Setting | Choices | Default |
 |---------|---------|---------|
 | Terminal Mode | PST, ANSI | PST |
-| Color Theme | Green / White / Amber on Black | Green on Black |
+| Color Theme | Green / White / Amber on Black | Amber on Black |
 | Font Size | 10–24 | 14 |
 | Font Family | Default, Parallax, IBM 3270 (+ Green / Amber) | Default |
 | Show Cog Prefixes | on / off | on |
@@ -860,7 +874,7 @@ defaults:
 
 | Group | Setting | Default |
 |-------|---------|---------|
-| Terminal | Mode / Theme / Font size / Font family / Cog prefixes / Local echo | PST · Green on Black · 14 · Default · on · off |
+| Terminal | Mode / Theme / Font size / Font family / Cog prefixes / Local echo | PST · Amber on Black · 14 · Default · on · off |
 | Serial Port | Default PropPlug / Serial Baud Rate / Download Baud Rate / Reset P2 on App Startup | Auto-detect · 2000000 · 2000000 · on |
 | Logging | Log Directory / Auto-Save Debug Output / Enable USB Traffic Logging | `./logs/` · on · off |
 | Recordings | Recordings Directory | `./recordings/` |
@@ -1089,6 +1103,15 @@ One consequence is worth remembering: **an empty USB traffic log is meaningful.*
 It means the P2 never produced any runtime traffic — most often because the
 download failed and the program never started.
 
+That case is exactly what `--diag-serial` is for. It logs the serial-channel detail
+the USB log leaves out — the download handshake steps among them — which is where
+the answer lives when the program never started and the runtime log has nothing to
+show you.
+
+When what you want is throughput rather than content, add `--usb-counts-only`
+alongside `-u`. It records receive timestamps and byte counts and skips the hex
+dump, which keeps a long capture readable and small.
+
 # Chapter 15: A Complete Automated Run
 
 Putting Part 3 together, here is the shape of a hardware-in-the-loop run an
@@ -1211,6 +1234,8 @@ pnut-term-ts [options]
 | `-v` | `--verbose` | | Emit verbose messages |
 | `-q` | `--quiet` | | Suppress the banner and non-error text |
 | `-u` | `--log-usb-trfc` | | Write a timestamped USB-traffic log |
+| | `--usb-counts-only` | | With `-u`: log receive timestamps and byte counts only, no hex dump — for throughput measurement |
+| | `--diag-serial` | | Log serial-channel troubleshooting detail, including the P2 download handshake steps |
 | | `--ide` | | IDE-integration mode (minimal UI) |
 | | `--rts` | | Use RTS instead of DTR for reset (overrides the per-device setting) |
 | | `--console-mode` | | Console output mode |
@@ -1361,16 +1386,21 @@ anything went missing. That is how the verified ceiling gets raised.
 
 <!--
   ===========================================================================
-  FIGURES — 9 slots, all real (no placeholders).
+  FIGURES — 10 slots, all real (no placeholders).
   - 4 TikZ diagrams: workflow position, user-facing [Ch1], three-in-one identity
     [Ch2], Automatic Window Placement order [Ch8], agentic tool chain [Ch15].
     Ch1 and Ch15 are a deliberate PAIR on the same spine: same nodes, same
     left-to-right flow, different return leg — the screen for a person, the log
     for an agent. Keep them visually parallel; that parallel IS the teaching.
-  - 5 screenshots (Stephen's captures, staged as inbox/assets/*.png):
-    main-window-and-logger [Ch5] · multi-window-desktop [Ch8] ·
-    single-step-debugger [Ch9] · preferences-user-settings [Ch10] ·
-    preferences-propplug [Ch10].
+  - 6 screenshots (Stephen's captures, staged as inbox/assets/*.png):
+    main-window-and-logger [Ch5] · preferences-scrolled-to-serial [Ch6] ·
+    multi-window-desktop [Ch8] · single-step-debugger [Ch9] ·
+    preferences-user-settings [Ch10] · preferences-propplug [Ch10].
+    The two preferences shots are one scrolling pane caught at two positions:
+    Ch10's ends mid-way through the Serial Baud Rate helper text, Ch6's picks
+    that text up in full and carries on to Download Baud Rate. Both were
+    recaptured from v1.0.3 on 2026-08-23 — the pre-v1.0.3 User Settings shot
+    showed a single "Default Baud Rate" control that no longer exists.
   Recording/playback + performance monitoring are de-emphasized into Ch 11
   "Further Features" — no screenshots for those.
   ===========================================================================

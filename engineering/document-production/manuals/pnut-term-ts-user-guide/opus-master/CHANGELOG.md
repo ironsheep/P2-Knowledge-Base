@@ -25,7 +25,7 @@ codes, and its log are in hand. The two chapters carry matching diagrams of one 
 the difference between them is the lesson: **who is watching decides what the return path
 is.**
 
-Ships with four TikZ diagrams and five screenshots. Co-released with the *P2 Single-Step
+Ships with four TikZ diagrams and six screenshots. Co-released with the *P2 Single-Step
 Debugger Manual*, which covers driving the debugger itself.
 
 ## v0.9.0 (2026-08-12): Tool developer review draft — compiler compatibility
@@ -55,7 +55,7 @@ requirement.
 previously hedged — `-b` existed for "a toolchain we do not recognize" — which
 named a limitation without telling anyone it was about them. PNut and `pnut-ts`
 write the debug baud rate into the image; a FlexSpin binary does not carry a rate
-this tool can read, so that user sets it with `-b` or the Default Baud Rate
+this tool can read, so that user sets it with `-b` or the Serial Baud Rate
 preference. Chapter 18's garbled-text entry now routes both ways from the same
 fact: drop `-b` if you built with PNut/`pnut-ts`, supply it if you built with
 FlexSpin.

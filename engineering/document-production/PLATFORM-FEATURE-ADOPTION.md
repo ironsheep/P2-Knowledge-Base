@@ -33,7 +33,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | ⏳ | ⏳ | — |
-| **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | ⏳ ⁶ | — |
+| **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -49,10 +49,44 @@ shipped cover reads *"P2 Interpreters & Emulators Guide"*.
 ⁴ All seven share `p2kb-appnote-reference.latex`, which hardcodes
 `\title{P2 Application Note}`. Converting the shared template converts all seven at
 once — `request.json` `metadata.title` already equals each cover title.
-⁶ **Deferred at the v1.0.0 prepare (2026-08-19), Stephen's call, reason recorded:** adopting
-cross-ref requires a visual audit of the auto-links in the rendered PDF, and that audit would gate
-a release explicitly scoped to *not* wait — the same reasoning that removed the reviewer questions.
-Not a silent pass-over (which is what F-301 was); take it at the next release.
+⁶ **ADOPTED AND AUDITED 2026-08-23 — verified on the returned PDF, 27 of 27.**
+`p2kb-platform-crossref` now sits between `figures` and `tables` in `request.json`, the ordering
+the three adopted manuals share; it MUST precede `tables`, which flattens each cell to a string
+and would leave table-borne refs dead. The filter itself was already in the manual store
+(hash match), so only `request.json` staged.
+
+**Full accounting of all 47 `Chapter N` occurrences in the generated `.tex`: 19 are chapter
+headings (never self-linked, by design), 27 are linked, 1 is a LaTeX comment.** The artifact
+itself carries 201 `/Link` annotations and 250 `/GoTo` actions, so the links exist in the PDF
+and not merely in the markup. **Zero mis-fires** — every reference is a self-reference, and the
+one external pointer (*The P2 Architect's Guide, **Part 3***) says "Part", which the filter
+does not match.
+
+**The first pass linked only 26 of 27, and the miss is worth carrying forward as a hazard for
+every adopting manual.** The source had wrapped a reference across a line:
+
+```
+...configures 8N1 exclusively (Chapter
+7), and 300 baud is...
+```
+
+Pandoc renders that as `Str "(Chapter"` · **SoftBreak** · `Str "7),"`, and the filter matches
+`Chapter` + *Space* + number — a SoftBreak is not a Space, so the reference is invisible to it.
+**Not a filter bug: a source line-wrap artifact, and a SILENT one** — nothing in the build
+reports a reference that failed to link. Fixed by reflowing the paragraph; the second render
+then read 27 of 27.
+
+Swept all four adopted manuals for the same pattern afterwards: **zero** elsewhere, so this was
+a one-off rather than a fleet condition. **Worth considering a platform fix** — teaching the
+filter to treat SoftBreak as Space would make it robust to source rewrapping, which authors
+cannot see. It would be a **no-op for all four adopted manuals today** (all measured clean), so
+it carries no re-render debt; it is not done here because it is a platform change and belongs
+with a platform decision, not smuggled into a manual's release.
+
+*Prior state, for the record:* deferred at the v1.0.0 prepare (2026-08-19) because the audit
+would have gated a release scoped not to wait. That reason expired once this build needed a
+Forge round-trip for two recaptured figures. **That deferral was recorded as Stephen's call and
+should not have been** — the reasoning was sound, the attribution was not his.
 ⁵ **App notes owe a PREREQUISITE before this column can move: fence captions.**
 `sync-manual-examples.py` and `verify-example-corpus-identity.py` both pair a corpus file to
 its printed listing by ```` ```{.spin2 caption="<name>.spin2"} ````, and **no app-note master
