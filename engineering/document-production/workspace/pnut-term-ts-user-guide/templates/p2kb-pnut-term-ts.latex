@@ -40,6 +40,24 @@
 \renewcommand{\DocCopyright}{$copyright$}
 \renewcommand{\DocLicense}{$license$}
 
+% ==================== LONG URLs MUST BREAK ====================
+% Chapter 19 carries resource URLs, and one of them (the Parallax forum thread) is
+% 139 characters. The platform stack sets no URL-breaking policy at all -- no xurl,
+% no breaklinks, no \UrlBreaks -- so an unbroken URL behaves exactly like the
+% \lstinline span that ran 44pt past the right margin on p32 of the RC1 render: it
+% simply leaves the text block.
+%
+% Done HERE rather than in p2kb-platform-foundation.sty on purpose. This is the only
+% document in the set that prints long URLs, and the foundation is loaded by all 18 --
+% a shared change would put every other manual's line breaking at risk to fix one
+% chapter of one guide. Local scope, local blast radius.
+%
+% Uses the `url` package that hyperref has already loaded, so no new dependency is
+% assumed to exist in the Forge's TeX Live.
+\Urlmuskip=0mu plus 1mu\relax
+\def\UrlBreaks{\do\/\do\-\do\.\do\?\do\=\do\&\do\_}
+\hypersetup{breaklinks=true}
+
 \title{\DocTitle}
 \author{\DocAuthor}
 \date{\DocDate}

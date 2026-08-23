@@ -1309,14 +1309,49 @@ one.
 
 # Chapter 19: Support and Resources
 
-- **Report an issue** — the PNut-Term-TS GitHub issue tracker.
+## Where the tools come from
+
+Each address below is a **releases** page rather than any particular version, so it
+stays right as new builds appear.
+
+- **PNut-Term-TS** — this tool.\
+  <https://github.com/ironsheep/PNut-Term-TS/releases>
+- **`pnut-ts`** — the Spin2 / PASM2 compiler of Chapter 1.\
+  <https://github.com/ironsheep/PNut-TS/releases>
+- **P2KB MCP** — the knowledge-base server an assistant reads from, Chapter 15.\
+  <https://github.com/ironsheep/P2-Knowledge-Base-MCP/releases>
+
+## Reporting a problem, or asking
+
+Two routes, and either is welcome. Use the issue tracker when something is wrong
+and you can describe it; use the forum when you would rather talk it through.
+
+**Issues** — on whichever repository the trouble belongs to:
+
+- <https://github.com/ironsheep/PNut-Term-TS/issues>
+- <https://github.com/ironsheep/PNut-TS/issues>
+- <https://github.com/ironsheep/P2-Knowledge-Base-MCP/issues>
+
+**Forum threads** — each tool has one, and they are where announcements land:
+
+- PNut-Term-TS —
+  <https://forums.parallax.com/discussion/177897/new-pnut-term-ts-downloader-debug-application-for-p2-development-on-windows-mac-linux-yes-rpi>
+- `pnut-ts` —
+  <https://forums.parallax.com/discussion/175988/new-pnut-ts-compiler-for-p2-development-on-windows-mac-linux-yes-rpi>
+
+If you run the serial line above 2,000,000 baud, the report the warning asks for
+goes to either of these (Chapter 6) — what you ran, on what platform, and whether
+anything went missing. That is how the verified ceiling gets raised.
+
+## Reading further
+
 - **The `debug()` display directives** — the official Parallax P2 DEBUG
   documentation, and the **P2 Debug Window Manual** for the display windows.
 - **The single-step debugger** — the **P2 Single-Step Debugger Manual**.
 - **Agentic P2 development** — **The P2 Architect's Guide, Part 3**, for the
   tool-chain workflow this guide's tool takes part in.
-- **The Propeller 2** — the Parallax Propeller 2 documentation and the Parallax
-  Forums.
+- **The Propeller 2** — the Parallax Propeller 2 documentation, and the Parallax
+  Forums at <https://forums.parallax.com/>.
 
 <!--
   ===========================================================================
