@@ -255,6 +255,15 @@ git commit -m "Regenerate published index + AI reference for v<X.Y.Z>"
 
 The tag must point at the index commit — that's the state consumers will fetch.
 
+> **This is the irreversible step, and it is a sprint stop.** A pushed tag is
+> public and is what `p2kb-mcp` serves — push IS publish. `github.com` is on the
+> **standing** grant (`NETWORK_GRANT_ROSTER`), but a standing grant authorizes the
+> *destination*, never the *act*: an irreversible action is **sprint stop 2** and
+> needs {{USER_NAME}}'s explicit go **every time**, not once. Knowing how to push
+> does not authorize pushing. (Concept: *scoped grants* in
+> `skills-docs/SKILLS-AUTHORING.md`.) Present the commands; let him run them, or
+> wait for his word.
+
 ```bash
 git tag -a v<X.Y.Z> -m "P2 Knowledge Base v<X.Y.Z>"
 git push origin main

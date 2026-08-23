@@ -170,7 +170,13 @@ rebuilt it**, and confirm it appears in `git diff --cached --name-only` before
 committing.
 
 After the push, verify both published links actually resolve — the PDF and the
-ZIP — rather than assuming the push activated them:
+ZIP — rather than assuming the push activated them.
+
+> **Outward reach.** `raw.githubusercontent.com` is on this project's **standing**
+> grant (`NETWORK_GRANT_ROSTER`), so this read needs no per-run permission — it is
+> read-only, and it touches only paths this release just published. (Concept:
+> *scoped grants* in `skills-docs/SKILLS-AUTHORING.md`.) Do not widen it: a host
+> that is not on the roster does not join it by being convenient here.
 
 ```bash
 for u in ".../DOCs/<PDF>" ".../DOCs/<slug>-src.zip"; do

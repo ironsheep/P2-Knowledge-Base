@@ -27,29 +27,20 @@ global build version. Identify the head/element, then resolve from
 `RELEASE_NOTES_AUDIENCE` is "the P2 developer community" for manual and
 YAML release notes.
 
-## Augments §3 — changelog class profile and mode
+## Augments §3 — this project's two changelog coordinates
 
-Central §3 reads the changelog's `CONFORMANCE_GUIDES` row, which names
-`central:changelog-voicing`. This project's coordinates in that guide's two axes:
+Central §3 now carries the partial-coverage rule itself (read both rows; the
+shared core governs voice, the local profile governs shape). Only the project's
+own coordinates are left here:
 
 - **Class 3 — Published document**, for every manual and app-note `CHANGELOG.md`.
-  Part-based taxonomy; entries lead with the instruction, directive, or
-  component; the full prior-state ban including "no longer."
-- **Mode: Released**, for every element already in `deliverables/documents/`.
-  An element still in development is Mode: Development until its first public
-  release, and the roster's status section is what decides which.
+- **Mode: Released** for every element already in `deliverables/documents/`;
+  **Mode: Development** until an element's first public release.
+  **`PUBLICATION-ROSTER.md`'s status section is what decides which** — do not
+  infer the mode from whether a CHANGELOG already has entries.
 
-**Adoption is incomplete and the gap is upstream, not here.** Central's Class 3
-profile is an unauthored stub. Until it is written, the guide's shared core
-(§1–§4) governs voice and the project's own
-`engineering/document-production/methodology/changelog-style-guide.md` supplies
-the Class 3 taxonomy — the section structure, entry formats, and length budgets.
-That local file is **retained deliberately**, not by oversight; do not delete it
-as a redundant copy. It is also the natural source text for the upstream Class 3
-profile.
-
-**Heading form is already aligned** — the local guide and central §1.5 both
-mandate `## vX.Y.Z (YYYY-MM-DD)`, so §7.1's silent-reader-breakage risk does not
-apply to this project's existing readers. What central adds that the local guide
-does not is the mandatory **theme line** under the heading as the
-machine-readable release summary; write one on every entry.
+**One live gap while the trim is owed.** The local class-3 profile predates
+central §1.5 and is silent on the mandatory **theme line**, so an author who
+reads only the profile will omit it. Write one under every version heading.
+*This note expires when the profile is trimmed to central's complement* — after
+which the profile carries no voice rules at all and §1.5 is the only source.

@@ -670,3 +670,45 @@ required a full re-derivation from primary artifacts.
 
 This closes consequence #1 of the companion item from a different direction: rather than printing the
 open worklist, it makes the register *notice* when the world moved past one of its claims.
+
+---
+
+## Retire `changelog-style-guide.md` once central authors the Class 3 profile — OPEN
+
+**Raised 2026-08-23** by the v8→v9 overlay reconcile, per central adoption action **v9(a)**.
+
+`engineering/document-production/methodology/changelog-style-guide.md` is **retained
+deliberately** and must not be deleted as a redundant copy of `central:changelog-voicing`.
+The reason is recorded in `.claude/skill-conventions.md` as a second `CONFORMANCE_GUIDES`
+row: central's guide fully authors changelog classes 1 and 2, and leaves **class 3
+(Published document)** — this project's class, for every manual and app-note CHANGELOG —
+declared in its own §5 as `Status: unauthored stub`. Deleting the local file would leave
+every manual CHANGELOG governed by three sentences.
+
+This is central's *partial coverage* case, not a fork. The guide's own class section is
+the authority for whether it applies, so the call is mechanical rather than a judgement
+someone has to re-make each time.
+
+**Two pieces of work, in order:**
+
+1. **Trim the local guide to central's complement** — delete the sections central §1–§4
+   already carry (prior-state ban, never-shipped versions, aggregate-into-themes,
+   current-state language, the two-question gate, initial-releases-describe-the-document),
+   leaving only the class-3 profile: the Part-based section structure, the entry-format
+   catalog, and the length budgets. Two constraints on that pass:
+   - **Four skills hard-depend on this file** — `audit-changelog` (5 references, including
+     a hard-stop if the file is absent), `release-yamls`, `release-manual`, and the
+     `prepare-manual` overlay. Every citation must still resolve afterward.
+   - The guide layer is a **gated** surface — `DOC_AUDIT_COMMAND` must read 0 findings
+     after the edit.
+   Until this runs, the profile is silent on central §1.5's mandatory **theme line**; the
+   `build-wrapup` overlay carries an expiring note covering the gap.
+
+2. **Retire the file entirely** when central authors the Class 3 profile — move any genuine
+   residue into the `build-wrapup` overlay first, then delete the file, drop its
+   `CONFORMANCE_GUIDES` row, and repoint the four skills above.
+
+**Trigger for step 2:** `~/.claude/skills-docs/guides/changelog-voicing.md` §5 Class 3 no
+longer reads `Status: unauthored stub`. Nothing here is owed until then — but the local
+guide is also the natural **source text** for that upstream profile, so proposing it is a
+standing promotion candidate.

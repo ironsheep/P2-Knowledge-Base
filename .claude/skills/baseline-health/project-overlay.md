@@ -34,6 +34,27 @@ a manual's rendered PDF (Forge) and any hardware-observed P2 behavior. Never let
 a green validator run stand in for either — label those provisional and name the
 environment that closes them.
 
+## Augments §2c — the per-task free checks, for THIS project
+
+Central §2c splits audit cadence by cost and says the every-task free list is
+overlay material. Here it is, and every entry is a grep or a count — no build,
+no render, no board. Each hunts the same shape: **a check that reports green
+because it never ran.**
+
+| Free check | The silent-green it catches |
+|---|---|
+| Read the **files-checked count**, not just the verdict | The coverage trap below, in its general form. `Files checked: 0 / ALL VALID` is the canonical instance, and it looks identical to a pass. |
+| Compile `debug()` code with **`pnut-ts -d`** | Without `-d` the compiler *ignores the contents of every `debug()` statement*. It exits 0. The exact "a flag that silently did not reach the compile line" shape. |
+| A new YAML file → **regenerate the index before trusting crossref** | `validate-crossref-keys.py` resolves against the index, so a brand-new file reads as an unresolved target. Red here is an indexing artifact; green *before* the regen means the file was never seen. |
+| A touched example `.spin2` → confirm it appears in the corpus **inventory** | `sync-manual-examples.py` and the identity gate work from a derived file list. A file the list never picked up is neither headered nor identity-checked, and nothing says so. |
+| A touched guide → confirm `audit-guide-conformance.py --inventory` **names it** | The instrument globs its file set and prints its exclusions by name. A guide that landed outside the glob is ungated while the gate reads clean. |
+| A new/renamed chapter in `opus-master` → confirm the assembler picks it up | A chapter absent from the assembled `.md` renders a perfectly clean PDF with the chapter missing — Forge reports 100% success. Check the assembled file, not the log. |
+
+The block-level audit (full validators + `validate-dod-release.py`) still runs at
+block boundaries per central §2c. **The manual and hardware verdicts are never
+part of a block audit** — they are `EXEC_ENV_CANONICAL` and cost a round trip
+through {{USER_NAME}}; §2b governs them.
+
 ## The coverage trap (why this overlay exists)
 
 `validate-yaml-syntax.py` looks like the content-YAML syntax gate. It is **not**:

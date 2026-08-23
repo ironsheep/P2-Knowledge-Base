@@ -121,6 +121,78 @@ around it. **Stopping at the outbound bundle is a complete outcome**
 Forge log is provisional**: it proves legality and exit-0, never semantics and
 never that the page rendered — the PDF that comes back must be *looked at*.
 
+## Execution posture — blast radius
+
+A **different axis** from the two-environment split above: that one says what a
+session *can* do, this one says what it may *destroy*. Central v9
+(`execution-posture`). The invariant is **bypassed ⟺ containerized** — every
+session in this repo runs in the devcontainer, so bypassed is correct here and a
+host-native session running bypassed on this tree is a hard stop.
+
+```yaml
+WRITE_SCOPE:           the working tree at /workspaces/P2-Knowledge-Base, plus the
+                       PDF Forge exchange directories bind-mounted into the container
+                       (the mount IS the authorization). Everything else is outward —
+                       including Stephen's host filesystem, which the container can
+                       often reach even when nothing is mounted from it.
+
+NETWORK_GRANT_ROSTER:  github.com / raw.githubusercontent.com   # origin remote (push only when
+                                                                # Stephen asks) + published-link
+                                                                # verification in release-manual
+                       obex.parallax.com                        # OBEX object fetch, via the
+                                                                # p2kb-mcp OBEX tools only
+```
+
+**`forums.parallax.com` is named-excluded, not merely absent.** It is treated as
+an attack target: never probe, crawl, or enumerate it. Forum material enters this
+repo only as a URL Stephen supplies, pasted into `DRAFTS/`. An exclusion stated
+by name survives a future roster edit in a way that silence does not.
+
+The **enforcement layer is not deployed** — `/etc/claude-code/managed-settings.json`
+is absent and no `PreToolUse` guard is installed, so the posture rules here are
+**discipline, not enforcement**. That is a reported gap, not this file's to close
+(central v9 action (i): infrastructure work does not happen in a skills session).
+A session should describe itself as running on discipline rather than as constrained.
+
+## Task dispatch — who holds the context
+
+The **third** axis (central v9). `EXCLUSIVE_RESOURCES` is enumerated and
+**closed** — derived by the four sweeps, not grown by remembering.
+
+```yaml
+EXCLUSIVE_RESOURCES:
+  # 1. generated / tool-rewritten wholesale
+  deliverables/ai/p2kb-index.json (+ its .gz)   # generate-p2kb-index.py rewrites entire
+  manual example corpora (examples-library/*.spin2 headers/footers)  # sync-manual-examples.py
+  # 2. single-file artifacts many tasks land in
+  engineering/operations/P2KB-CORRECTION-FINDINGS.md    # the corrections register
+  engineering/document-production/PUBLICATION-ROSTER.md # every-folder-appears-once invariant
+  engineering/document-production/PUNCH-LIST.md
+  engineering/ingestion/README.md                       # the ingestion dashboard
+  deliverables/documents/README.md                      # the release index
+  each manual's opus-master/COMPLETE-OPUS-MASTER.md and its CHANGELOG.md
+  # 3. exclusive runners and devices  — PHYSICAL, never engineerable away
+  PDF Forge (one queue, one daemon, Stephen's host)
+  real P2 silicon (one board on the bench)
+  # 4. monotonic allocators
+  F-NNN in P2KB-CORRECTION-FINDINGS.md          # at F-294
+  EF-NNN in P2-EMPIRICAL-FINDINGS.md            # at EF-065
+  G-NNN / Q-NNN in the ingestion registers
+  manual + P2KB version numbers
+
+DISPATCH_MODEL:  arbiter-serial by default; conductor-parallel ON THE INGESTION HEAD ONLY
+```
+
+**Why two values and not a sentinel.** Both are literal and known, so this is a
+stated split rather than a routing sentinel. The ingestion head earned
+`conductor-parallel` by actually building the machinery central asks for:
+`ingest-conductor` allocates every sequential ID **before** fan-out, stages each
+source per-agent, and hands the shared writes to `ingest-wrap-reduce` as a
+single-writer merge — which is why no fanned-out agent touches a register. Every
+other head is `arbiter-serial`, and the reason is physical: one Forge queue and
+one P2 board cannot be made concurrent by any design, and a manual's
+`COMPLETE-OPUS-MASTER.md` is one file every task in a sprint lands in.
+
 ## Domain authority
 
 ```yaml
@@ -187,16 +259,34 @@ CONFORMANCE_GUIDES:
     when:     any edit to a guide
     strength: gate      # DOC_AUDIT_COMMAND is the instrument; must read 0 findings
 
+  # ---- changelogs: TWO rows by design (central v9 partial coverage) ----
+  # Central authors the VOICE; it leaves class 3 an unauthored stub, so the local
+  # file authors the SHAPE. Both are read. This is the one case where a local guide
+  # standing beside a `central:` row is NOT a fork — and it is not a judgement call:
+  # changelog-voicing §5 Class 3 declares its own status, and it says stub.
+
   - surface:  every CHANGELOG.md (manuals, app notes, the P2KB YAML set, repo root)
-    guide:    central:changelog-voicing        # mode: Released · class: 3 (Published document)
+    guide:    central:changelog-voicing §1–§4   # the SHARED CORE — voice
     when:     before writing any changelog entry
     strength: reference
-    note:     ADOPTION INCOMPLETE — central's Class 3 profile is an unauthored stub
-              ("to be authored when a manual release calls for it"). The shared core
-              (§1–§4) governs now; the project's local
-              engineering/document-production/methodology/changelog-style-guide.md is
-              RETAINED as the Class 3 taxonomy until that profile is authored upstream.
-              Tracked as a task; do NOT delete the local guide before then.
+    note:     mode: Released for anything already in deliverables/documents/;
+              Mode: Development until an element's first public release, and
+              PUBLICATION-ROSTER.md's status section is what decides which.
+
+  - surface:  every CHANGELOG.md — the class-3 PROFILE half (structure, not voice)
+    guide:    engineering/document-production/methodology/changelog-style-guide.md
+    when:     with the row above, never instead of it
+    strength: reference
+    note:     RETAINED DELIBERATELY under central v9(a) — do not delete it as a
+              redundant copy, and do not let sprint-closeout's fork check fire on
+              it. It supplies what central's Class 3 stub does not: the Part-based
+              section structure, the entry-format catalog, and the length budgets.
+              Four skills hard-depend on it (`audit-changelog` — including a
+              hard-stop on the file's absence — plus `release-yamls`,
+              `release-manual`, and the `prepare-manual` overlay).
+              OWED: trim it to central's complement (delete what §1–§4 already
+              carry) and punch-list its retirement. Retirement fires when central
+              authors the Class 3 profile — see PUNCH-LIST.md.
 
   - surface:  authored .spin2 source (verification tests, utility objects)
     guide:    central:spin2-authoring-guide
@@ -244,10 +334,18 @@ CONFORMANCE_GUIDES:
 STYLE_GATE_COMMAND:  python3 engineering/tools/validation/audit-spin2-ascii.py
 ```
 
-**Never copy a `central:` guide into this repo** — a copy is a fork. The one
-`SPIN2-AUTHORING-GUIDE.md` under `engineering/ingestion/external-inputs/` is a
-*received* external artifact inside an ingestion handoff package, not a project
-guide; it stays where it is as part of that record.
+**Never copy a `central:` guide into this repo** — a copy is a fork, with exactly
+two exceptions, both above and both declared:
+
+1. **Partial coverage** (central v9). Where a shared guide marks *this project's
+   class* an unauthored stub, the local file is the class profile, not a copy of
+   central's half. It gets its own row, scoped to that class, trimmed to central's
+   complement. The guide's own class section is the authority for whether this
+   applies — never a reader's judgement.
+2. The one `SPIN2-AUTHORING-GUIDE.md` under
+   `engineering/ingestion/external-inputs/` is a *received* external artifact
+   inside an ingestion handoff package, not a project guide; it stays where it is
+   as part of that record.
 
 ## Promotion role
 

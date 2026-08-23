@@ -7,7 +7,7 @@ head, naming the head/element in the filename. The slots that are still routing
 sentinels (`BUILD_VERSION_*`, `PUNCH_LIST_DOC`, `RELEASE_NOTES_DOC`, `SPEC_DOC`)
 resolve per head via `.claude/skills/HEAD-DISPATCH-DRAFT.md`.
 
-## Augments §plan-authoring — flag design decisions before large YAML changes
+## Augments §4 (write the plan document) — flag design decisions before large YAML changes
 
 When the sprint will **edit 3+ YAML files in the P2KB set, or introduce a
 new concept/file**, the plan doc must carry, *before any editing begins*:
@@ -66,6 +66,12 @@ Before any scope claim, name the artifact and derive from it:
 before.** The same asymmetry holds for every row: a narrative citing a finding is evidence the
 finding existed, never evidence of its current state.
 
+Run the pickaxe on the *actual text* of the thing being investigated before you fix a window:
+
+```
+git log --oneline --date=short --format='%h %ad %s' -S'<the rule/claim text>' -- <the file>
+```
+
 *Certified 2026-08-15 («#214»).* The study and the task body both scoped a damage investigation to
 "since `acf3b4a2` (2026-07-20)". Pickaxing the rule text instead dated it to each guide's **birth**
 — Streamer `10bb35d5` (2026-01-22), Assembly `1e51f086` (2025-11-26); `acf3b4a2` was the
@@ -78,7 +84,7 @@ check: one command.
 register carried the current verdicts. Four findings were tasked backwards, one already-filed KB
 defect was re-derived from scratch, and the wrong app note was placed in the release wave.
 
-## Augments §plan-authoring — plans POINT at registers, they never restate them
+## Augments §4 (write the plan document) — plans POINT at registers, they never restate them
 
 A plan names a finding and its status; it does not reproduce the finding's verdict, reasoning, or
 numbers. See `.claude/skills/REGISTER-CONSULTATION.md` §4 for why, with the live example — this
@@ -86,22 +92,3 @@ plan's own bench-results table contradicted the register within a day.
 
 **Applies retroactively:** when revising a plan that already carries restated register state,
 **delete the restatement** rather than updating it. Updating it preserves the shape that drifts.
-
-Run the pickaxe on the *actual text* of the thing being investigated before you
-fix a window:
-
-```
-git log --oneline --date=short --format='%h %ad %s' -S'<the rule/claim text>' -- <the file>
-```
-
-**A cited SHA is evidence that something changed then. It is never evidence that
-nothing changed before.** The two are constantly confused, and the confusion is
-invisible in the finished plan — the window simply looks authoritative.
-
-*Certified 2026-08-15 («#214»).* The study and the task body both scoped a damage
-investigation to "since `acf3b4a2` (2026-07-20)". Pickaxing the rule text instead
-dated it to each guide's **birth** — Streamer `10bb35d5` (2026-01-22), Assembly
-`1e51f086` (2025-11-26); `acf3b4a2` was the **corrective**, not the cause. Real
-window 7–9 months, not 3–4 weeks. Executed as written the task would have scanned
-~1 commit instead of ~120 and returned a NIL that cleared nothing. Cost of the
-check: one command.

@@ -35,8 +35,14 @@ cannot be produced without doing the reading:
    read `resolution deferred until the bench campaign closes` ({{USER_NAME}}'s standing rule), which
    blocked most of the sprint being tasked.
 
-**Any contradiction found is a STOP, not an input to weigh.** Surface it and wait. Choosing the
-entry that suits the plan is how a duplicate becomes a decision.
+**Any contradiction found is not an input to weigh.** It is **sprint stop 4** — *a contradiction
+of what planning assumed* (*the stop roster*, `skills-docs/SKILLS-AUTHORING.md`); the roster is
+closed and this overlay cites it rather than minting one. Surface it and wait. Choosing the entry
+that suits the plan is how a duplicate becomes a decision.
+
+The check itself failing is **not** a stop: a register you cannot parse or a plan whose newest
+block you cannot date is a *step halt* — diagnose it and re-route. Only a genuine contradiction
+between the plan and the register reaches {{USER_NAME}}.
 
 **Why this shape:** an instruction to "read carefully" cannot be checked by anyone, including the
 agent following it. A required artifact can — a missing or vague currency check is visible in the
