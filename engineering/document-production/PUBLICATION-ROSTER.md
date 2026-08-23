@@ -7,8 +7,12 @@ the top, abandoned work last:
 **Done** (shipped) → **In progress** (actively being built) → **Upcoming** (planned,
 not started) → **Abandoned** (retired, last).
 
-Within each status, the **Type** column groups the three kinds of document —
-**manual · app-note · guide · instrument**. Every tracked document keeps its
+Within each status, the **Type** column groups the kinds of document —
+**manual · app-note · guide · tool-guide · instrument** (the count was written as "three"
+while four were listed; it is five now, so it is stated as a list and not a number).
+A **`tool-guide`** is a guide to a tool used with the P2, owned by Iron Sheep alone — it
+ships to the same tree as everything else but is announced differently; see
+**Distribution and announcement** below. Every tracked document keeps its
 **checkbox gate row** (Draft · Assets · Platform · Chip · Comm · Released), so you can
 still scan any gate down a column.
 
@@ -63,6 +67,48 @@ on the stack or not. **Per-FEATURE adoption state (which shared features a docum
 actually taken) lives in `PLATFORM-FEATURE-ADOPTION.md`**, and that is the table
 `prepare-manual` consults. App notes carry no separate chip-review gate
 (`—`) and ship a YAML companion + example ZIP (the four-artifact model — see `app-notes/README.md`).
+
+### Distribution and announcement — two axes, decided separately
+
+**Established 2026-08-23 (Stephen), when the PNut-Term-TS User Guide made it a live question
+and more ISP tool guides became likely.** The rule exists so the answer is not re-argued per
+document. The mistake it prevents is collapsing two independent questions into one:
+
+| Axis | Question | Decides |
+|---|---|---|
+| **Subject** | Is this about the P2? | **WHERE THE FILE LIVES** |
+| **Ownership** | ISP-only, or ISP + Parallax? | **HOW IT IS ANNOUNCED** |
+
+**Subject decides the tree.** A document about the P2 — including a guide to a *tool* for the
+P2 — ships to `deliverables/documents/DOCs/` beside every other P2 PDF, with the usual
+`<slug>-changelog.md` alongside it. A document not about the P2 goes elsewhere: the **AI Privacy
+Guide** is ISP-only *and* off-topic, which is why it lives in
+`deliverables/developer-docs/ai-development/`. **Its separate tree is about SUBJECT, not
+ownership** — do not read it as a precedent that ISP-only documents live apart. They do not.
+
+**Ownership decides the front.** A `tool-guide` is catalogued everywhere the others are (repo
+README, the deliverables documents index) but is **not** announced as part of the P2
+documentation set; its announcement belongs on the front appropriate to that tool. Announcing
+an ISP-only guide alongside the ISP+Parallax set would re-imply the affiliation its cover
+deliberately removes.
+
+**Co-location is safe because the file carries its own identity — in three places, one of them
+machine-readable.** The ISP cover standard (maroon band, ISP mark, **no** KB banner, **no**
+Parallax mark, **no** AI strapline), the copyright page, and — since **F-316** — the PDF's own
+`Keywords` metadata, which reads *"Copyright 2026 Iron Sheep Productions, LLC"* where the joint
+documents read *"…LLC and Parallax Inc."* A crawler, an index, or a model reading the file gets
+the right answer regardless of which directory it sat in. **The directory is a filesystem, not a
+claim.** (Before F-316 this was NOT true — co-location was then the only signal a machine had.)
+
+**The consequence to hold onto:** once the tree is shared, **the index page is the only
+human-facing disambiguation left**, which makes its labelling load-bearing rather than
+cosmetic. A `tool-guide` must therefore get its **own subsection** in the deliverables index —
+never be filed under *"Documents in Community Review"*, whose heading asserts a gate these
+documents do not carry (`Comm` blank, `Chip` `—` for want of P2 silicon claims).
+
+**Type `tool-guide`:** a guide to a tool used with the P2, owned by Iron Sheep alone. First
+member: `pnut-term-ts-user-guide`. Identity class detail (which documents are ISP-only, and the
+cover standard serving them) is per-document and remains Stephen's call.
 
 ### Detail
 
@@ -150,7 +196,7 @@ tool serving an effort, never released — carried here while it's actively used
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | Single-Step Debugger | manual | draft | ✅ | ✅ | ✅ | ⏳ | ⏳ | |
-| PNut-Term-TS User Guide | guide | 0.1.0 | | | | — | | |
+| PNut-Term-TS User Guide | tool-guide | 0.1.0 | | | | — | | |
 | P2 Layout Torture Test | instrument | — | ✅ | ✅ | ✅ | — | — | — |
 
 ### Detail
@@ -158,7 +204,7 @@ tool serving an effort, never released — carried here while it's actively used
 **P2 Single-Step Debugger Manual** · `p2-single-step-debugger-manual` · manual
 On shared platform stack (foundation/content/diagrams); awaiting chip + community review.
 
-**PNut-Term-TS User Guide** · `pnut-term-ts-user-guide` · guide
+**PNut-Term-TS User Guide** · `pnut-term-ts-user-guide` · tool-guide
 User guide for **PNut-Term-TS**, the cross-platform desktop debug terminal for the P2 — a *tool* guide (`doc_class: behavior`), not a P2 silicon/language reference. Subtitle: *The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2*. **Purpose = positioning within the P2 agentic tool chain** (P2KB MCP + `pnut_ts` + `pnut_term_ts`, optional Spin2 VS Code extension); delivers the agentic usability that **The P2 Architect's Guide, Part 3** describes. Identity = **three tools in one** (downloader · Parallax Serial Terminal replacement · PNut debug-window replacement/production, now cross-platform). Pedagogy = **shared orientation trunk → fork by intent** (GUI vs headless). Seeded 2026-07-21 (standing structure only, no content drafted); grounded on two feeds snapshotted from the PNut-Term-TS repo (v0.10.3) in its `REF-NO-COMMIT/`. Chip review n/a (no P2 silicon claims). Expected to ride the `p2kb-platform` stack (ships code + screenshots), unlike the off-platform AI Privacy Guide — Forge template wiring TBD at first render. Closest sibling for voice/scaffolding: the Single-Step Debugger Manual (same host application). **Release sequencing — NOT a gate** (clarified by Stephen 2026-08-23): this guide and the P2 Single-Step Debugger Manual are expected to release **in sequence with nothing else between them**, because they document the same host application and land best together. **Neither is held for the other.** Either may ship as soon as it is ready. The earlier wording here read *"Release gate: co-releases with…"*, and that word cost real time — a 2026-08-23 resume reported this guide as blocked on a decision that was never a blocker. **Sequencing preference ≠ dependency; do not record a preference in gate language.**
 
 **P2 Layout Torture Test** · `p2-layout-torture-test` · instrument
