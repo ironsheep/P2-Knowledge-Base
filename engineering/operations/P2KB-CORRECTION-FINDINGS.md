@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-321`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-327`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,6 +50,178 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **F-093 (`WONTFIX`):** `lockrel.yaml` C-flag polarity — the appendix's "inverted" claim is the error; the YAML is correct (C = lock-was-held).
 - **F-114b (`RESOLVED-INVALID`):** the MIDI display modes KEYBOARD / GRID / ROLL / MONITOR do **not** exist in PNut v55 — do **not** add them to `midi.yaml` (it carries an explicit `not_supported:` claim).
 - **Verified-resolved (don't re-chase):** the Jan-2026 streamer KB audit's issues were all reconciled in the 2026-05/06 passes (DAC routing, 32-pin groups, mode encoding, xcont/xzero phase wording, setxfrq 2³¹ formula, streamer symbols). Only the XZERO concept text was open and is fixed (F-003).
+
+---
+
+## Pin drive-strength documented as bias resistors (2026-08-24, agent-report sweep) — F-321…F-326
+
+> **Origin.** An agent consuming the published KB could not work out how to use pull-ups and
+> pull-downs, and reported conflicts around the smart-pin area (relayed by Stephen, 2026-08-24).
+> Agent report is a lead, not a source; every item below was re-derived from
+> `{{DOMAIN_AUTHORITY}}` before filing.
+>
+> **Root cause, one sentence:** *the P2 has no pull-up or pull-down resistors, and the KB
+> documents a whole family of them.* `P_HIGH_*` / `P_LOW_*` select **drive strength** — how hard
+> the pin drives **while it is driving** — and the KB reframes them as always-on bias resistors.
+> Every downstream error in this sweep follows from that one reframing.
+>
+> **NOT a regression of the 2026-07-01 `P_*` audit (F-177…F-183).** That audit's question was
+> *"is this constant NAME legal in v55?"* — arbiter `pnut-ts`, enumeration the v55 manual — and
+> its answer still holds: every name here is legal. It never asked whether the KB's **description**
+> of a constant matches the source's. `P_HIGH_15K` is a legal name carrying a wrong definition,
+> which the name audit cannot see by construction. **Name coverage is not semantic coverage.**
+> This sweep is the first evidence of that gap having live consequences, and it is the case that
+> motivates the source-fidelity gate.
+>
+> **Primary source for the whole sweep:**
+> `engineering/ingestion/smart-pins-catalog/ingestionSources/basic-io/spin2-v51-extract.md`,
+> the predefined-label tables at lines ~150–195, plus
+> `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt` for the DIR/output rule.
+
+### F-321 — the 16 `P_HIGH_*` / `P_LOW_*` drive-strength selectors are documented as pull-up/pull-down resistors — `CONFIRMED`
+
+> **Where:** `language/spin2/concepts/basic-io.yaml:203-213` (`pull_up_modes:` / `pull_down_modes:`)
+> and `language/pasm2/concepts/basic-io.yaml:271-281` (same two blocks, same values).
+>
+> **What is wrong.** The source names these by what they do; the KB renames them by what a reader
+> coming from another MCU expects:
+>
+> | Constant | Source wording | KB wording |
+> |---|---|---|
+> | `P_HIGH_1K5` | Drive high 1.5kΩ | "1.5kΩ **pull-up** (strong)" |
+> | `P_HIGH_15K` | Drive high 15kΩ | "15kΩ **pull-up** (medium)" |
+> | `P_HIGH_150K` | Drive high 150kΩ | "150kΩ **pull-up** (weak)" |
+> | `P_HIGH_1MA` | Drive high 1mA | "1mA constant current **pull-up**" |
+> | `P_LOW_1K5` | Drive low 1.5kΩ | "1.5kΩ **pull-down** (strong)" |
+> | `P_LOW_15K` | Drive low 15kΩ | "15kΩ **pull-down** (medium)" |
+> | `P_LOW_150K` | Drive low 150kΩ | "150kΩ **pull-down** (weak)" |
+> | `P_LOW_1MA` | Drive low 1mA | "1mA constant current **pull-down**" |
+>
+> The KB also drops the two ends of each ladder entirely — `P_*_FAST` (drive fast, 30mA; the
+> default) and `P_*_FLOAT` (float) — and omits `P_*_100UA` / `P_*_10UA` from these blocks.
+>
+> **Why it matters, not just a wording preference.** A pull-up is active whenever the pin is not
+> driven. A drive-strength selector applies **only while the pin drives that direction**. The two
+> behave differently in exactly the case a reader reaches for a pull-up — a released bus, a button
+> to ground — so the rename does not simplify the model, it inverts it. F-322 is the direct
+> consequence.
+>
+> **Correction.** Restate all sixteen in the source's own terms — drive strength for the high side
+> and the low side, selected independently — and delete the `pull_up_modes:` / `pull_down_modes:`
+> framing. Where the reader's *intent* is a pull-up, document the idiom, not a fictional component
+> (see F-325). Match the source's wording, not an interpretive paraphrase.
+
+### F-322 — every worked pull-up example disables the drive it just configured, so none of them work — `CONFIRMED`
+
+> **Where — 8 sites, 3 files:**
+> `language/spin2/concepts/basic-io.yaml:218-219, 229-230, 296-297, 377-378` ·
+> `language/pasm2/concepts/basic-io.yaml:286-287, 348-349` ·
+> `architecture/smart-pins/smart-pin-00000-normal-mode.yaml:53-54, 84-85`
+>
+> **The shape, in every one of them:**
+> ```spin2
+> PINSTART(16, P_HIGH_15K, 0, 0)   ' "15kΩ pull-up"
+> PINFLOAT(16)                     ' "Input with pull-up"
+> ```
+> and its PASM2 twin, `WRPIN ##P_HIGH_15K` followed by `DIRL`.
+>
+> **Evidence it cannot work.** `part4-smart-pins.txt:74` — *"for smart pin mode off
+> (%SSSSS = %00000): **DIR enables output**."* `PINFLOAT` / `DIRL` set DIR=0. With the output
+> disabled the drive-high selector is inactive, so the pin is plain high-impedance: **no pull-up
+> of any strength.** An agent following any of these ships a floating input whose reads depend on
+> whatever is on the board.
+>
+> **What the source actually prescribes** — same file, §"Weak Pull-Up":
+> ```spin2
+> ' 15kΩ pull-up, float when driving low
+> WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)
+> ```
+> The `P_LOW_FLOAT` half is what makes the behaviour survive OUT=0, and DIR must be **high**, not
+> low. `P_LOW_FLOAT` appears in 5 files corpus-wide and in **none** of the pull-up examples.
+>
+> **Correction.** Rewrite all eight against the source idiom, with DIR high and the low side
+> floated, and say plainly why DIR=0 defeats it — that sentence is the one a reader needs and no
+> file currently contains it.
+
+### F-323 — the two `basic-io.yaml` files give contradictory mechanisms for the same feature — `CONFIRMED`
+
+> **Where:** `language/spin2/concepts/basic-io.yaml:197-201` says internal bias is enabled
+> *"via **PINSTART()** with special modes"*; `language/pasm2/concepts/basic-io.yaml:265-269` says
+> *"via **WRPIN** smart pin modes."* Same concept, two files, two mechanisms.
+>
+> **Both are wrong, in different directions**, which is why this is filed separately from F-321.
+> `WRPIN` alone sets the configuration but leaves DIR untouched. `PINSTART` is the *smart-pin*
+> start sequence (WRPIN + WXPIN + WYPIN + DIRH) — using it to set a **non**-smart-pin drive
+> strength starts a smart pin that was never wanted, and its DIRH is then immediately undone by
+> the `PINFLOAT` on the next line (F-322).
+>
+> **This is the conflict the reporting agent hit.** It is the only true *conflict* in this sweep;
+> everything else here is unanimous error, which is why a conflict-detection gate alone would not
+> have caught the rest.
+>
+> **Correction.** One mechanism, stated once, in the file that owns the concept; the other file
+> points at it rather than restating it.
+
+### F-324 — `bits_M_6_0: "Control drive strength"` is wrong at both ends — `CONFIRMED`
+
+> **Where:** `language/pasm2/concepts/basic-io.yaml:262`.
+>
+> **Evidence, decoded from the source's own bit patterns** (13-bit `%M..M` field, M12…M0):
+>
+> | Constant | Source pattern (M field) | Bits set |
+> |---|---|---|
+> | `P_HIGH_1K5` | `0000000001000` | M[3] |
+> | `P_HIGH_150K` | `0000000011000` | M[4:3] |
+> | `P_HIGH_FLOAT` | `0000000111000` | M[5:3] |
+> | `P_LOW_1K5` | `0000000000001` | M[0] |
+> | `P_LOW_FLOAT` | `0000000000111` | M[2:0] |
+> | `P_INVERT_OUTPUT` | `0000001000000` | M[6] |
+>
+> So **drive-high = M[5:3]**, **drive-low = M[2:0]**, and the source's own encoding notes agree
+> (`%…xxxxxxxHHHxxx…` and `%…xxxxxxxxxxLLL…`). **M[6] is output polarity, not drive strength.**
+> The KB's `M[6:0]` wrongly annexes the polarity bit and erases the high/low split that makes the
+> field usable.
+>
+> **Correction.** State the two 3-bit sub-fields with their positions. Also fix the companion
+> dangling pointer at `language/spin2/concepts/basic-io.yaml:195` —
+> *"Consult smart pin mode documentation for drive strength bit encoding"* — which points at
+> nothing that exists (F-325 is what it should point at).
+
+### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `CONFIRMED`
+
+> **What is missing.** Eight high-side values and eight low-side values, each with its bit pattern
+> and its meaning — `FAST (30mA)` · `1K5` · `15K` · `150K` · `1MA` · `100UA` · `10UA` · `FLOAT` —
+> plus the sub-mode selectors that share the field (`P_SYNC_IO`, `P_INVERT_IN`,
+> `P_INVERT_OUTPUT`, the `P_TT_*` / `P_OE` / `P_BITDAC` DIR-OUT controls).
+>
+> **Where it already exists:** `basic-io/spin2-v51-extract.md:150-195`, as clean tables. It was
+> extracted and never promoted into a YAML. Sixteen shipped files *use* these constants; **no
+> shipped file defines them.**
+>
+> **Correction.** Promote the ladder into the KB. Placement is a design decision to settle before
+> editing (new `architecture/pin-drive-configuration.yaml` vs. extending the `basic-io` pair) —
+> flag it per the `sprint-plan` overlay's design-decision rule rather than deciding it in passing.
+> The pull-up/pull-down *idiom* belongs here too, stated as a composition of drive settings
+> (`P_HIGH_15K | P_LOW_FLOAT`, DIR high) rather than as a component the chip does not have.
+
+### F-326 — `wrpin.yaml` expands three of its six D-operand fields and stubs the one that carries the pin configuration — `CONFIRMED`
+
+> **Where:** `language/pasm2/wrpin.yaml`, `d_operand_format.fields`. `AAAA`, `BBBB` and `FFF` get
+> full treatment — `input_selectors` enumerates all eight source-select encodings and the invert
+> bit. The 13-bit field is one line: **`M: "13-bit low-level pin control + smart-pin mode"`**.
+> `language/spin2/methods/wrpin.yaml` should be checked for the same shape.
+>
+> **Why it happened, and why it is still ours to fix.** The Silicon Doc defers at exactly this
+> field — *"In the Spin2 documentation, there are many predefined labels documented, which cover
+> these pin configurations"* (`part4-smart-pins.txt`, after the `%FFF` table). The ingestion
+> followed the source faithfully to the deferral and then **stopped at the pointer instead of
+> following it**, even though the target was itself ingested (F-325). `wrpin.yaml` is where an
+> agent asking "how do I configure a pin" lands, so the stub sits directly on the path that
+> generated this whole sweep.
+>
+> **Correction.** Expand the field, or point it at the file F-325 creates — but not at prose that
+> does not exist. **A deferral in a source is a work item, not an answer**, and this sweep is the
+> cost of treating one as an answer.
 
 ---
 
