@@ -81,19 +81,6 @@ related_methods:
   - "GETCT"
   - "POLLCT"
 
-notes:
-  - "Blocks execution - cog cannot do other work during delay"
-  - "Not suitable for precise timing critical operations"
-  - "Maximum delay ~4,294 seconds (71 minutes)"
-  - "For delays less than 1ms, use WAITUS"
-  - "For cycle-accurate timing, use WAITCT"
-  - "Delay is relative to call time, not absolute"
-
-limitations:
-  - "1ms minimum resolution"
-  - "Blocking operation"
-  - "Subject to small jitter from hub timing"
-
 anti_patterns:
   - anti_pattern: "periodic_drift"
     description: "Using WAITMS in loops causes timing drift"

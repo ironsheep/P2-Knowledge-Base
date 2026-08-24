@@ -89,26 +89,6 @@ related_methods:
   - "GETCT"
   - "POLLCT"
 
-notes:
-  - "Blocks execution - cog cannot do other work during delay"
-  - "Resolution limited by clock frequency (1µs requires ≥1MHz clock)"
-  - "For delays > 1000µs, consider using WAITMS"
-  - "For cycle-accurate timing, use WAITCT"
-  - "Very short delays may be dominated by overhead"
-  - "Delay is relative to call time, not absolute"
-
-limitations:
-  - "1µs minimum resolution (at sufficient clock speed)"
-  - "Blocking operation"
-  - "Subject to small jitter from hub timing"
-  - "Resolution degrades at low clock frequencies"
-
-clock_frequency_impact:
-  - "200MHz: 1µs = 200 clocks (excellent resolution)"
-  - "80MHz: 1µs = 80 clocks (good resolution)"
-  - "20MHz: 1µs = 20 clocks (marginal resolution)"
-  - "1MHz: 1µs = 1 clock (poor resolution)"
-
 see_also:
   - "language/spin2/methods/waitms.yaml"
   - "language/spin2/methods/waitct.yaml"

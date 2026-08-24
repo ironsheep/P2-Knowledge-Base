@@ -94,22 +94,6 @@ prerequisites:
   - "The P2 smart-pin measurement modes at the mechanism level — this note USES them; IOSP Ch.13-15 teach them"
   - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
 
-gotchas:
-  - flag: pitfall
-    text: "P_B_A_INPUT does not exist (undefined in pnut_ts). Single-pin routing is the BARE mode constant (A and B default to the local pin) plus P_MINUS1_A|P_MINUS1_B for the reciprocal periods cell, or P_PLUS1_B for quadrature. Never add P_B_A_INPUT."
-  - flag: pitfall
-    text: "R1 depends on P_LOW_FLOAT: when OUT goes low the pin must FLOAT so the capacitor discharges through the sensor. Drop it and a low output drives the node to ground — you time the pin's driver, not the sensor, and the count collapses to near zero."
-  - flag: pitfall
-    text: "An open sensor (or too-short charge) HANGS R1's poll loop — P_HIGH_TICKS raises IN only on a high->low crossing, so if the node never falls, RDPIN is never reached. The symptom is a hang, not a max ($8000_0000) reading."
-  - flag: pitfall
-    text: "R3 P_PLUS1_B reads B from ENC_A+1, so the encoder's B line must sit on the pin just above A (or pick the routing modifier that matches your wiring). A detented encoder is 4 counts/detent; `sar 2` normalizes it — an un-detented encoder wants no shift."
-  - flag: hardware
-    text: "TSL235R runs at 2.7-5.5 V (fine at 3.3 V); a 0.1 uF cap close to the sensor keeps its output clean. Its dark output is a few hertz (0.4-10 Hz), not zero — treat a very low reading as near-dark, not a fault."
-  - flag: tip
-    text: "R2's reciprocal method beats a fixed gate at low frequency (it counts whole periods and the exact time they took), but it reports a mean over the window and hides cycle-to-cycle jitter. Choose GATE_MS for your range."
-  - flag: verify
-    text: "R3 Tier-0: jumper 40->32 and 41->33 and run; the stimulus drives 5 detents forward then 2 back and the reads are the known answers 5 then 3. A wrong sign means the A/B pair is reversed; 4x the magnitude means detent normalization (sar) is off; erratic means add P_FILT1_AB. R1/R2 absolute calibration defers to hardware."
-
 hardware_status: |
   R3 (quadrature) is Tier-0 self-verified: a two-jumper stimulus drives a known detent count (5 fwd,
   2 back -> reads 5 then 3) on a bare Edge board with no encoder, exercising the mode config, the

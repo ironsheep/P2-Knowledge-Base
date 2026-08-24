@@ -13,21 +13,6 @@ aliases:
   - VIO supply mapping
   - Edge LDO group
 
-description: |
-  THERE ARE TWO GROUPINGS AND THEY ARE DIFFERENT NUMBERS. Read which one you need.
-
-  SILICON (the P2X8C4M64P chip): I/O pins are powered in ISOLATED GROUPS OF FOUR —
-  pins 0-3, 4-7, 8-11, ..., 60-63 — each group sharing one VIO/GIO supply pair. Sixteen
-  domains across 64 pins. This is the grouping a pin's ADC references.
-
-  BOARD (P2 Edge modules and breakouts): eight independent 3.3 V LDO regulators, one per
-  EIGHT-pin header group — P0-7, P8-15, ..., P56-63, 300 mA each. One Edge LDO feeds TWO
-  silicon VIO pins, which is why the boards present 8-pin headers while the chip has 16
-  domains.
-
-  Use the SILICON grouping for anything about ADC references and measurement layout; use
-  the BOARD grouping for current budgeting on Edge hardware.
-
 silicon_power_grouping:
   scope: "The P2X8C4M64P package itself — true on every board."
   group_size: 4
@@ -39,15 +24,6 @@ silicon_power_grouping:
     P(n+2), P(n+3), VDD — so each VIO pin sits centred inside the exact four I/O pins
     it names. The package accounts for exactly 100 pins: 64 I/O + 16 VIO + 16 VDD +
     TEST + RESN + XI + XO. GIO is internal and consumes no package pins.
-
-board_power_grouping:
-  scope: "P2 Edge modules (standard and 32MB) and the Edge Mini Breakout — NOT a property of the chip."
-  group_size: 8
-  regulators: "8 independent 3.3 V LDOs"
-  supply_mapping: "V00 powers P0-P7; V08 powers P8-P15; V16, V24, V32, V40, V48, V56 likewise through P56-P63 — each also feeding its header supply."
-  current_limits: "300 mA total per 8-pin group; 30 mA source/sink per pin."
-  relationship_to_silicon: "One Edge LDO net feeds TWO silicon VIO pins (V00 -> VIO_0_3 + VIO_4_7). Pins in adjacent silicon groups therefore share an LDO net on an Edge, but not the same package pin or bond wire."
-  caution: "Do not join Vxx pins together — the isolation between board groups is intentional."
 
 adc_reference:
   fact: |

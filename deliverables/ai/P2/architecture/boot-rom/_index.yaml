@@ -22,12 +22,6 @@ version: "1.0"
 last_updated: "2026-05-23"
 
 # Boot timing (from Hardware Manual)
-boot_timing:
-  reset_to_clock: "3 ms delay after power-up/reset trigger before fast clock engages"
-  bootloader_load: "2 ms for Cog 0 to load ROM-resident Bootloader"
-  total_to_user_decision: "~5 ms from reset to boot-pattern-selection logic"
-
-# Boot pin overview (full details: boot-pattern-selection.yaml)
 boot_pins:
   range: "P58-P63 serve boot functions; become general-purpose after boot completes"
   pattern_pins: "P59-P61 read as a 3-bit pattern (each pin: float / pull-up / pull-down) to select boot source"
@@ -152,21 +146,3 @@ related:
   - architecture/hub.yaml
 
 # Boot path summary (orientation for new readers)
-boot_paths_summary:
-  serial:
-    pins: "P63 (RX), P62 (TX)"
-    triggered_when: "Pattern P61=float and P59 not pulled down (covers serial-only and serial-with-fallback patterns)"
-    timeout_options: "100 ms (if flash also enabled) or 60 s (serial-priority patterns)"
-    canonical_entry: ../serial_loader.yaml
-
-  spi_flash:
-    pins: "P61 (CS), P60 (CK), P59 (DI), P58 (DO)"
-    triggered_when: "Pattern P61=pull-up, P60=any, P59=float or pull-down"
-    fallback: "Serial 60s if pattern allows it; otherwise shutdown on flash failure"
-    canonical_entry: spi-flash-boot.yaml
-
-  sd_card:
-    pins: "Routed via the SD card interface on capable boards"
-    triggered_when: "Pattern P60=pull-up"
-    fallback: "Serial 60s if pattern allows it; otherwise shutdown on SD failure"
-    canonical_entry: sd-card-boot.yaml

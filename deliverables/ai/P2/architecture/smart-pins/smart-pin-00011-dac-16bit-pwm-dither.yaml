@@ -18,12 +18,6 @@ dac_requirement: |
   Other DAC options: P_DAC_990R_3V, P_DAC_600R_2V, P_DAC_75R_2V
 
 # Operation
-operation: |
-  Outputs 16-bit DAC value using 8-bit DAC with PWM dithering.
-  Dithers between adjacent DAC levels using PWM pattern.
-  Better dynamic range than pseudo-random, but adds Fclock/256 tone at -48dB.
-  Maximum 2 transitions per 256 clocks (vs random transitions).
-
 accuracy_caveat: |
   The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
   the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
@@ -52,13 +46,6 @@ in_flag: |
   Use to synchronize value updates
 
 # Pin Behavior
-pin_behavior:
-  reset_state: "IN=0, Y[15:0] captured during reset"
-  output: "8-bit DAC PWM-dithered for 16-bit resolution"
-  feedback: "OUT=1 enables ADC for load measurement"
-  pwm_frequency: "Fclock/256 component at -48dB"
-
-# Complete Spin2 Example
 spin2_complete: |
   CON
     DAC_PIN = 48
@@ -185,11 +172,6 @@ pwm_advantages: |
   Only 2 transitions per 256 clocks
   Cleaner spectrum for audio applications
   Lower switching noise
-  
-pwm_characteristics: |
-  Fclock/256 frequency component at -48dB
-  Integral PWM steps require X[7:0]=0
-  256 clock minimum period
   
 synchronization: |
   IN flag indicates sample period complete

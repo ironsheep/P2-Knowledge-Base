@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-333`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-334`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -292,7 +292,31 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 ---
 
 
-## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327, F-329
+## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327, F-329, F-333
+
+> 🔴 **SCOPE OF F-321/F-323 CHANGED BY «#293» — MEASURED BY THE ARBITER 2026-08-24, READ THIS
+> BEFORE WORKING «#296».** «#293» removed the uncited `pull_up_modes:` / `pull_down_modes:` blocks
+> from `language/spin2/concepts/basic-io.yaml` and `language/pasm2/concepts/basic-io.yaml` as part
+> of the §4 purge. Those blocks were carrying most of the mislabel, so the deletion resolved much
+> of F-321/F-323 as a side effect:
+>
+> | `audit-constant-fidelity.py` | at «#293» entry | after «#293» |
+> |---|---|---|
+> | `[CONTRADICT]` (Tier 2) | **23** | **5** |
+> | `[UNDEFINED]` (Tier 1) | **50** | **55** |
+>
+> **«#296»'s verify criterion is therefore `5 → 0`, not `23 → 0`.** Do not read the remaining 5 as
+> a partial failure of anything.
+>
+> **And «#295» must now define 55, not 50.** The five that newly became `[UNDEFINED]` are
+> `P_HIGH_150K` · `P_HIGH_15K` · `P_HIGH_1K5` · `P_LOW_15K` · `P_LOW_1K5` — drive-strength
+> selectors whose ONLY definition in the shipped set lived inside the deleted mislabel blocks, so
+> removing the wrong description removed the only definition with it. That is remove-all working as
+> designed, not a regression: «#295» defines them from the source, in the source's own words.
+>
+> The «#293» executor did not surface this — it never ran `audit-constant-fidelity.py`, which is
+> not in its task's verify list. The arbiter measured it at the boundary by diffing HEAD against
+> the working tree. A dispatched agent sees one task, not the dependency graph.
 
 > **Origin.** An agent consuming the published KB could not work out how to use pull-ups and
 > pull-downs, and reported conflicts around the smart-pin area (relayed by Stephen, 2026-08-24).
@@ -466,7 +490,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > does not exist. **A deferral in a source is a work item, not an answer**, and this sweep is the
 > cost of treating one as an answer.
 
-### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `CONFIRMED`
+### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `PARTIAL`
 
 > **Where:** `architecture/io_pin_timing.yaml:200-233` (`drive_strength_configurations:`)
 > and `:234-246` (`slew_rate_control:`).
@@ -495,10 +519,20 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > about how the text arose, not a source.
 >
 > **The tell that makes this mechanically detectable.** The same file cites sources where it
-> has them — `absolute_maximum_ratings:` names the Parallax Datasheet (`:267`),
-> `special_timing_modes:` names Silicon Doc v35 (`:296`). The two fabricated blocks carry **no
-> `source:` field at all**. A file that demonstrates it knows how to cite, and then states six
-> quantities and a whole feature without citing anything, is flagging itself.
+> has them — `absolute_maximum_ratings:` names the Parallax Datasheet (`:267`), and
+> `input_voltage_and_protection:` names Silicon Doc v35 in its `latchup_context.source` (`:296`).
+> The two fabricated blocks carry **no `source:` field at all**. A file that demonstrates it knows
+> how to cite, and then states six quantities and a whole feature without citing anything, is
+> flagging itself.
+>
+> ⚠️ **ATTRIBUTION CORRECTED 2026-08-24 (arbiter, during «#293»).** This paragraph originally
+> credited `:296` to **`special_timing_modes:`**. That was wrong, and it mattered: at the HEAD this
+> finding was written against, `:296` is a `source:` nested under `latchup_context:` inside the
+> **preceding** block `input_voltage_and_protection:` (`:276-297`); `special_timing_modes:` began at
+> `:298` and was itself **genuinely uncited** — which is why the sourcing tool flagged it and «#293»
+> removed it. The finding's conclusion is unaffected (`:267` does cite, and both fabricated blocks
+> do not). Only the second example was misattributed, by exactly the off-by-one-block error that
+> **citing a register finding by line number instead of by ID** produces. Resolve findings by ID.
 >
 > **Correction.** `slew_rate_control:` has no correct form — **delete it outright**; there is
 > nothing to align it to. `drive_strength_configurations:` is replaced by the real ladder,
@@ -520,7 +554,21 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > (`architect-guide-body.md`'s "slew" hits are rate-adapters in a dataflow sense — unrelated.)
 > This class is confined to the YAML, so no manual corrections wave follows from it.
 
-### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `CONFIRMED`
+> **APPLIED «#293» 2026-08-24 — REMOVED, repopulation owed.** Both named blocks are gone from
+> `architecture/io_pin_timing.yaml`, removed as whole top-level blocks at their entry-state ranges:
+> `drive_strength_configurations:` **`:200-233`** (34 lines, 21 quantities) and `slew_rate_control:`
+> **`:234-246`** (13 lines, 2 quantities). Removed under the sprint's remove-all rule (D7), **not**
+> corrected in place — this entry's proposed "replaced by the real ladder" is withdrawn as
+> claim-first; `.claude/skills/SOURCE-REPAIR-ORDER.md` §2 governs, and «#299» re-derives from the
+> repaired source or not at all. `slew_rate_control:` is **never** repopulated.
+>
+> **The zero-hit `slew` claim re-verified at HEAD**, now across five source trees rather than three
+> — `sources/silicon-doc`, `sources/spin2-v51`, `smart-pins-catalog`, and both of this sprint's
+> re-ingestions, `sources/p2-datasheet` and `sources/p2-hardware-manual`: **0 hits each**.
+>
+> `PARTIAL` because the removal is applied and the repopulation is owed to «#299».
+
+### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `PARTIAL`
 
 > **Found:** 2026-08-24, by the DOCX-primary re-ingestion of `p2-hardware-manual` (the source
 > plan §8 names as the datasheet's cross-check partner). This is **additive to F-327, not a
@@ -606,6 +654,62 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > two of them was **inside a table nested in another table's cell** and **inside a figure**.
 > A finding's location line is where it was *seen*, never the extent of the defect —
 > sweep the file, not the line range.
+
+> **APPLIED «#293» 2026-08-24 — REMOVED, one item owed.** All four locations this entry names sit
+> inside the single top-level block `timing_specifications:` (`:90-172` at entry state), which was
+> removed whole — 83 lines, 45 quantities — taking `:96-105`, `:108-113`, `:118-137` and `:145-158`
+> with it. Six further uncited quantitative blocks in the same file went in the same pass, per this
+> entry's own "sweep the file, not the line range": `clock_relationships:` `:173-199`,
+> `input_characteristics:` `:247-262`, `special_timing_modes:` `:298-320`,
+> `protocol_timing_examples:` `:321-337`, `compensation_techniques:` `:359-374`,
+> `best_practices:` `:375-391`. The file went 433 → 175 lines (`wc -l`).
+>
+> **The impossible page citation is gone in both of its two locations** — the header comment
+> (`# Datasheet Reference: pages 42-45, 76-78, Electrical Specifications`) *and* its restatement
+> inside `extraction_metadata.source_documents` as a `- document: "P2 Datasheet"` entry listing the
+> same two ranges plus "Timing characteristics tables". This entry named only the header; sweeping
+> the file found the second copy, which is this entry's own lesson applied to itself.
+>
+> **`instruction_to_pin_timing:` survived, as this entry requires** — it is intact at `:15` and was
+> never flagged (it states delay in clocks, which carry no unit token). Its citation is owed to
+> «#299», and its corroboration is already found and recorded here.
+>
+> `PARTIAL` because the removals are applied and the `instruction_to_pin_timing:` citation is owed.
+
+### F-333 — the fabricated slew-rate claim ALSO stood in `io_pin_timing.yaml`'s top-level `description:`, where no instrument could see it, because it carries no unit — `PARTIAL`
+
+> **Found:** 2026-08-24, by «#293», *after* removing every block F-327 and F-329 name. A residual
+> `grep -i slew` over the file — run because F-329's lesson says to sweep the file, not the line
+> range — returned one surviving hit that both prior findings had walked past.
+>
+> **Where:** `architecture/io_pin_timing.yaml:9-14`, the top-level `description:` block, reading
+> *"Each pin can be configured for different drive strengths, slew rates, and input
+> characteristics."* Removed whole (6 lines). The file now returns **0** hits for `slew`.
+>
+> **Why no instrument caught it, and this is the point of the finding.**
+> `audit-yaml-claim-sourcing.py` fires on an uncited block that states a **physical quantity**, and
+> a quantity requires a **unit token** — that is what makes the gate mechanical rather than a matter
+> of taste. This sentence names the fabricated *mechanism* and attaches **no number to it at all**,
+> so it scores zero quantities and is structurally invisible to the gate, exactly as
+> `audit-constant-fidelity.py` was structurally blind to F-327 for naming no constants.
+>
+> **Both of this sprint's instruments therefore share one shape of blind spot:** each keys off a
+> *token* — a constant name, a unit — and a fabrication written in plain prose carries neither. The
+> gate is still worth having; it found 59 blocks in these four trees. But **passing it is not
+> evidence that a file is free of fabrication**, and no release note should imply otherwise.
+>
+> **No new evidence is owed.** The claim is F-327's, already `CONFIRMED`, and «#293» re-verified its
+> zero-hit basis across five source trees at HEAD. This entry records a third *location*, not a new
+> claim.
+>
+> **Consequence for «#299»:** `io_pin_timing.yaml` now has no top-level `description:`. Whatever is
+> written back must not restore "slew rates", and must come from the repaired Hardware Manual /
+> Datasheet rather than from the removed text.
+>
+> `PARTIAL` — the removal is applied and verified (`grep -ci slew` on the file = 0). What is
+> still owed is the replacement: the file now has **no** top-level `description:` at all, and
+> «#299» owes it one written from the repaired source. Tracked here with F-327 and F-329
+> rather than archived, because it is the same root cause, the same file and the same owner.
 
 
 ---

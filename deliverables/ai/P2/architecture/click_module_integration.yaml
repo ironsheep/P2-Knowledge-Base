@@ -182,31 +182,6 @@ configuration_api_patterns:
             displayWidth := TYPE_B_WIDTH
             displayHeight := TYPE_B_HEIGHT
 
-best_practices:
-  portability:
-    - Always use offset constants, never hardcode pins
-    - Support all three P2 Eval adapter positions
-    - Make base pin a runtime parameter
-    - Document Click module pin usage clearly
-    
-  error_handling:
-    - Validate base pin selection
-    - Check for PIN_NOT_USED before using pins
-    - Return error codes for invalid configurations
-    - Provide debug output for pin conflicts
-    
-  documentation:
-    - Include ASCII art of Click module pinout
-    - Document which pins are used/unused
-    - Note any pin swaps (like UART RX/TX)
-    - Specify voltage requirements (3.3V vs 5V)
-    
-  initialization:
-    - Reset Click module during init if RST pin available
-    - Configure all pins before enabling module
-    - Set safe default states for outputs
-    - Verify module presence if possible
-
 common_click_modules:
   examples:
     - eINK Click: SPI-based e-paper display

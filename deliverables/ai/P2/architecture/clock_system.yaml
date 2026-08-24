@@ -19,40 +19,6 @@ description: |
   stable timing for CPU cores and peripherals.
 
 # Compile-time configuration constants (defined in top-level CON block)
-configuration_constants:
-  _clkfreq:
-    description: "Desired system frequency in Hz"
-    range: "3,333,333 Hz to 500,000,000 Hz"
-    behavior: "Compiler calculates PLL settings; assumes 20 MHz crystal if alone"
-  _xtlfreq:
-    description: "External crystal frequency in Hz"
-    range: "1-60 MHz typical"
-    behavior: "Alone = direct crystal; with _clkfreq = PLL input"
-    capacitor_selection:
-      gte_16mhz: "15pF internal caps"
-      lt_16mhz: "30pF internal caps"
-  _xinfreq:
-    description: "External clock input frequency in Hz"
-    range: "250 kHz to 500 MHz"
-    behavior: "For external oscillator modules or shared clocks"
-  _errfreq:
-    description: "Allowable PLL frequency error in Hz"
-    default: "1,000,000 Hz (1 MHz)"
-  _rcfast:
-    description: "Use internal RCFAST oscillator (~20 MHz)"
-    note: "Overrides other clock settings"
-  _rcslow:
-    description: "Use internal RCSLOW oscillator (~20 kHz)"
-    note: "Overrides other clock settings"
-
-configuration_rules:
-  - "Only ONE clock configuration per program (in top-level object)"
-  - "_clkfreq alone assumes 20 MHz crystal input"
-  - "_xtlfreq or _xinfreq alone runs at that frequency (no PLL)"
-  - "Combining _clkfreq with _xtlfreq or _xinfreq enables PLL"
-  - "_rcfast and _rcslow override all other clock settings"
-  - "DEBUG statements with no clock specified defaults to 20 MHz"
-
 hub_variables:
   CLKFREQ:
     address: "$00044"
@@ -95,71 +61,6 @@ clock_sources:
     duty_cycle: "40-60% recommended"
     note: "DC-200 MHz is the direct-drive-into-XI limit (P2 datasheet AC Characteristics). 350 MHz is the absolute VCO/1 overclock ceiling, NOT the XI-input limit; PLL output max = 320 MHz (180 MHz typical)."
 
-pll_system:
-  constraints:
-    input_frequency: "250 kHz to 500 MHz"
-    output_frequency: "3.333 MHz to 500 MHz"
-    vco_range: "99 MHz to 201 MHz (or up to requested + error)"
-    fpfd_minimum: "250 kHz (feedback frequency)"
-
-  input_divider:
-    range: "1-64"
-    bits: "6 bits (D[23:18], stored as divider-1)"
-
-  vco_multiplier:
-    range: "1-1024"
-    bits: "10 bits (D[17:8], stored as multiplier-1)"
-
-  vco_frequency:
-    nominal_range: "99-201 MHz"
-    equation: "f_vco = f_input / divider * multiplier"
-
-  post_divider:
-    values: [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
-    bits: "4 bits (D[7:4], stored as divider-1)"
-
-  output_frequency:
-    equation: "f_out = f_vco / post_divider"
-    max_recommended: "180 MHz"
-    max_overclock: "350 MHz"
-
-  error_budget:
-    description: "Compiler iterates through PLL configurations to find closest match"
-    default_error: "1 MHz"
-    tighter_tolerance: "May fail if no valid configuration exists"
-
-hubset_configuration:
-  instruction: "HUBSET {#}D"
-  immediate_mode: "HUBSET ##config"
-  
-  # Clock-mode operand layout: %0000_000E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS
-  config_fields:
-    d31: "Must be 0 in clock mode; D[31]=1 selects PRNG-seed mode (%1DDD...). Chip reset is a SEPARATE HUBSET mode: HUBSET ##$1000_0000 (D[31:28]=%0001 = hard reset), NOT bit 31 alone."
-    d30_25: "Reserved (must be zero for the clock-mode operand)"
-    d24: "E -- PLL enable (0=PLL off, 1=PLL on)"
-    d23_18: "DDDDDD -- XI input divider /1..64 (stored as divider-1)"
-    d17_8: "MMMMMMMMMM -- VCO multiplier x1..1024 (stored as multiplier-1)"
-    d7_4: "PPPP -- VCO post-divider (0=VCO/2, 1=VCO/4, ..., 14=VCO/30, 15=VCO/1)"
-    d3_2: "CC -- crystal/cap config (%00=Hi-Z, %01=1MΩ no caps, %10=1MΩ 15pF, %11=1MΩ 30pF)"
-    d1_0: "SS -- clock source (%00=RCFAST, %01=RCSLOW, %10=XI, %11=PLL)"
-
-clock_modes:
-  crystal_config:
-    cc_field: "D[3:2]"
-    modes:
-      0b00: "XI/XO pins Hi-Z (oscillator off)"
-      0b01: "XI/XO with 1MΩ feedback, no caps"
-      0b10: "XI/XO with 1MΩ feedback, 15pF caps"
-      0b11: "XI/XO with 1MΩ feedback, 30pF caps"
-      
-  source_select:
-    ss_field: "D[1:0]"
-    modes:
-      0b00: "RCFAST (20-30 MHz)"
-      0b01: "RCSLOW (~20 kHz)"
-      0b10: "Crystal/External on XI"
-      0b11: "PLL output"
-
 clock_switching:
   glitch_free: true
   automatic_fallback: "Falls back to RCFAST if PLL/crystal fails"
@@ -171,12 +72,6 @@ clock_switching:
     - "Wait for stabilization"
     - "Switch to new source"
     - "Optional: Disable old source"
-
-stabilization_timing:
-  crystal: "~10 ms typical startup"
-  pll_lock: "~10 microseconds"
-  rcfast: "Immediate (always running)"
-  rcslow: "~100 microseconds"
 
 programming_examples:
   basic_crystal_20mhz:
@@ -250,21 +145,6 @@ frequency_measurement:
       SUB     end_count, start_count
       ' Frequency = end_count / (measure_time / nominal_freq)
 
-clock_specifications:
-  max_frequency:
-    recommended: "180 MHz"
-    typical_overclock: "250 MHz"
-    absolute_max: "350 MHz (may be unstable)"
-    
-  frequency_vs_voltage:
-    1v8_core: "180 MHz max recommended"
-    overvolting: "Not recommended"
-    
-  temperature_effects:
-    rcfast: "Frequency decreases with temperature"
-    crystal: "Depends on crystal specifications"
-    pll: "VCO frequency varies with temperature"
-
 related_systems:
   counter_system: "64-bit free-running counter"
   event_system: "CT events for timing"
@@ -275,27 +155,6 @@ debugging:
   clock_output: "Can output clock on pins for measurement"
   pll_lock_detection: "Check PLL stability before switching"
   fallback_mode: "System always falls back to RCFAST if clock fails"
-
-anti_patterns:
-  conflicting_definitions:
-    wrong: "_rcfast = TRUE with _clkfreq = 200_000_000"
-    reason: "Cannot combine internal oscillator with PLL"
-
-  missing_crystal_frequency:
-    wrong: "_clkfreq = 200_000_000 with non-20MHz crystal"
-    correct: "Specify _xtlfreq to match actual crystal"
-
-  hardcoded_timing:
-    wrong: "waitx(200_000) assumes 200 MHz"
-    correct: "waitx(clkfreq / 1000) works at any frequency"
-
-  no_pll_lock_wait:
-    wrong: "HUBSET to PLL then immediate operation"
-    correct: "Wait ~10ms for PLL to stabilize before switching"
-
-  clkfreq_before_init:
-    wrong: "Using CLKFREQ before clock is configured"
-    correct: "Initialize peripherals after clock is stable"
 
 related:
   - language/pasm2/hubset.yaml

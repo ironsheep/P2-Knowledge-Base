@@ -26,13 +26,6 @@ authority:
     shipping flash-boot binary.
 
 # When this path is taken
-boot_pattern_trigger:
-  see: architecture/boot-rom/boot-pattern-selection.yaml
-  flash_priority_patterns:
-    - "P61=up, P60=any, P59=float → serial 100ms then flash (fallback on serial)"
-    - "P61=up, P60=any, P59=down → fast flash boot, shutdown on failure"
-
-# Fixed pin assignment (silicon)
 pin_assignment:
   spi_cs: "P61 — chip select (P2 → flash, active low)"
   spi_ck: "P60 — serial clock (P2 → flash)"

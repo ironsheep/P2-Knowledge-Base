@@ -88,19 +88,6 @@ runnable_code:
     note: "32-stream software audio mixer to 1-8 output pins (volume/pan/pitch/format) + MOD player — DESCRIBED/LINKED only; complete impl is OBEX #2861 reSound (Johannes Ahlebrand, ~955 lines)"
   toolchain: "pnut_ts, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
 
-key_parameters:
-  dac_native_bits: 8
-  dac_output_bits: "16-bit nominal, dithered and time-averaged (no ENOB/SNR/THD figure printed — defers to a hardware run)"
-  dither_modes:
-    - "P_DAC_DITHER_PWM (%00011): cleanest spectrum, lowest switching noise; adds a Fclock/256 line at -48 dB; X period MUST be a multiple of 256 (256 min). Best for audio."
-    - "P_DAC_DITHER_RND (%00010): no periodic tone, slightly more broadband noise; X=1 updates every clock. Best for control DC."
-    - "plain 8-bit DAC noise mode %00001 (Sec 18.3)"
-  output_configs: "P_DAC_990R_3V / P_DAC_600R_2V / P_DAC_124R_3V / P_DAC_75R_2V (990/600/124/75 ohm; 3.3 V or 2.0 V peak) — trade drive impedance vs peak voltage"
-  voltage_math: "V = (code / 65536) * Vfs; $8000 -> 1.65 V, $4000 -> 0.825 V at Vfs = 3.3 V"
-  sample_clock: "period set by WXPIN; the pin raises IN once per period; 200 MHz / 256 clocks = 781_250 samples/s"
-  dds_phase_increment: "inc = f * 2^32 / sample_rate, computed with Spin2 `frac` (unsigned (x<<32)/y); top bits of a 32-bit phase index a table or feed the CORDIC"
-  adc_passthrough_config: "SINC2 filtering, X[5:4]=%01, period X[3:0]=8 -> 2^8=256 clocks (matched to the DAC's 256); the raw per-period differential is already ~16-bit full scale (raw width = 2*log2(N)), so it drives the DAC directly"
-
 prerequisites:
   - "Configuring a smart pin (WRPIN/WXPIN/WYPIN, raise DIR to enable) and starting a cog with COGINIT"
   - "The P2 DAC modes at the mechanism level — this note USES the DAC; IOSP Ch.10/Sec 18.3 teach it"

@@ -5,19 +5,6 @@ compatible_languages: ["Spin2", "PASM2"]
 
 brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
-detailed_description:
-  operation: |
-    Configures two adjacent pins as a USB differential pair (D-/D+) for USB host or device
-    operation. Requires even/odd pin pair configuration where even pin is DM (D-) and odd pin
-    is DP (D+). OUT signals are overridden to control the USB differential signaling. Handles
-    USB low-level protocol timing and signaling automatically in hardware.
-  
-  timing: |
-    USB signaling handled by smart pin hardware
-    Supports USB 1.1 Full Speed (12 Mbps) and Low Speed (1.5 Mbps)
-    Differential pair timing meets USB specifications
-    IN flag signals USB events
-
 registers:
   # All WXPIN/WYPIN/RDPIN for USB are issued on the LOWER (even / DM) pin.
   # Silicon Doc p2-documentation.txt:8886-9006.

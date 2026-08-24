@@ -37,55 +37,6 @@ core_concept_configuration_vs_operation:
       - "FLTL - Float to high-impedance"
     behavior: "Normal digital I/O with configured electrical characteristics"
 
-pin_architecture:
-  pin_count: 64
-  pin_range: "P0 to P63"
-  register_split:
-    dira_outa_ina: "Control pins P0-P31"
-    dirb_outb_inb: "Control pins P32-P63"
-  
-  per_pin_capabilities:
-    direction: "Input or output (via DIR bit)"
-    output_state: "High or low (via OUT bit)"
-    drive_strength: "1.5mA to 150mA (configurable)"
-    pull_resistors: "1.5kΩ, 15kΩ, 150kΩ, or current-mode (configurable)"
-    tristate: "High-impedance float mode"
-
-control_registers:
-  dira:
-    address: "$1FA"
-    controls: "Pins P31-P0"
-    bits: "Bit 0=P0, bit 31=P31"
-    state_0: "Input (high-impedance)"
-    state_1: "Output (drives OUT value)"
-    
-  dirb:
-    address: "$1FB"
-    controls: "Pins P63-P32"
-    bits: "Bit 0=P32, bit 31=P63"
-    
-  outa:
-    address: "$1FC"
-    controls: "Output state for P31-P0"
-    effect: "When DIR=1, pin drives this state"
-    state_0: "Drive low (0V)"
-    state_1: "Drive high (3.3V)"
-    
-  outb:
-    address: "$1FD"
-    controls: "Output state for P63-P32"
-    
-  ina:
-    address: "$1FE"
-    controls: "Read state of P31-P0"
-    read_only: true
-    reflects: "Actual pin voltage level"
-    
-  inb:
-    address: "$1FF"
-    controls: "Read state of P63-P32"
-    read_only: true
-
 single_pin_operations:
   set_output_high:
     instruction: "DRVH"
@@ -238,64 +189,6 @@ pin_span_setq_override:
     setq_first: "SETQ value takes precedence over instruction's embedded field"
     no_setq: "Use instruction's embedded ADDPINS or constant field normally"
 
-drive_strength_configuration:
-  concept: |
-    Configure pin drive strength via WRPIN before performing I/O operations.
-    Drive strength setting persists during normal I/O - this is CONFIGURATION, not operation.
-    
-  strengths_available:
-    "1.5mA": "Lowest power, ~2000Ω impedance"
-    "3.0mA": "Low power, ~1000Ω impedance"
-    "15mA": "Standard digital, ~200Ω impedance"
-    "30mA": "Fast digital/LED drive, ~100Ω impedance"
-    "75mA": "High-speed signals, ~40Ω impedance"
-    "150mA": "Maximum drive, ~20Ω impedance"
-    
-  configuration_sequence:
-    example: |
-      DIRL  #16                    ' REQUIRED: Reset pin first
-      WRPIN drive_config, #16      ' Configure drive strength
-      DRVH  #16                    ' Now use as normal I/O
-      ' Drive strength remains active during all subsequent I/O
-      
-  wrpin_encoding:
-    bits_M_6_0: "Control drive strength"
-    encoding_varies: "See drive strength modes in smart pin documentation"
-
-internal_pull_resistors:
-  concept: |
-    Enable internal pull-up or pull-down resistors via WRPIN smart pin modes.
-    Once enabled, pin still operates as normal I/O with bias resistor active.
-    This is CONFIGURATION that persists, not an autonomous smart pin mode.
-    
-  pull_up_modes:
-    P_HIGH_1K5: "1.5kΩ pull-up (strong)"
-    P_HIGH_15K: "15kΩ pull-up (medium)"
-    P_HIGH_150K: "150kΩ pull-up (weak)"
-    P_HIGH_1MA: "1mA constant current pull-up"
-    
-  pull_down_modes:
-    P_LOW_1K5: "1.5kΩ pull-down (strong)"
-    P_LOW_15K: "15kΩ pull-down (medium)"
-    P_LOW_150K: "150kΩ pull-down (weak)"
-    P_LOW_1MA: "1mA constant current pull-down"
-    
-  configuration_sequence:
-    example: |
-      DIRL  #16                    ' REQUIRED: Reset pin first
-      WRPIN ##P_HIGH_15K, #16      ' Enable 15kΩ pull-up
-      DIRL  #16                    ' Use as input with pull-up
-      TESTP #16 WC                 ' Read pin (pulled high if floating)
-      ' OR
-      DRVH  #16                    ' Drive high with pull-up active
-      DRVL  #16                    ' Drive low (overrides pull-up)
-      
-  use_cases:
-    - "Button inputs without external resistors"
-    - "I2C/SPI bus lines"
-    - "Unused pins (prevent floating)"
-    - "Weak drive for bidirectional buses"
-
 smart_pin_to_basic_io_transition:
   clearing_smart_pin:
     instruction: "WRPIN #0, pin"
@@ -367,12 +260,6 @@ common_patterns:
       MOV   data, INA           ' Read all pins
       SHR   data, #16           ' Position to bits 0-7
       AND   data, ##$FF         ' Mask to byte
-
-timing_considerations:
-  instruction_timing: "2 clock cycles per instruction"
-  register_access: "Immediate (same cog)"
-  pin_propagation: "3-7ns output delay"
-  input_synchronization: "2-3 clock cycles for external signals"
 
 hardware_specifications:
   voltage_levels: "3.3V I/O"

@@ -477,11 +477,3 @@ related:
   - architecture/boot-rom/spi-flash-boot.yaml
   - code-examples/flash-loader-case-study.yaml
 
-protocol_client_code_note: |
-  This page covers the smart-pin / streamer side of protocol implementation.
-  Client code (Spin2 driving these modes — SPI flash, sync/async serial, etc.)
-  typically also needs timing/timeout idioms outside the smart-pin itself
-  (busy-wait, response timeout, retry intervals). For multi-second protocol
-  timeouts, use GETMS rather than GETCT — GETCT-based deadlines silently
-  overflow past ~10 s at 200 MHz. See timing_operations.yaml method_selection
-  for the full rule.

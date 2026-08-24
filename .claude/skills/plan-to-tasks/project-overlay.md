@@ -159,3 +159,49 @@ extract carries the (S) Smart Pin Modes table, per-mode narrative for every `%SS
 Table 16 — the `%AAAA`/`%BBBB` input selector that closes G-001 outright, cell-identical to the
 datasheet's. **One confident sentence, written without opening the artifact, cost six rows.**
 Require the check to be run against the extract, not against a belief about what the document is.
+
+---
+
+## Augments §2 — every task body carries the WHOLE standing verification sweep, not just its own gate
+
+**A task body's VERIFY line names the gate that proves *this* task's goal. That is necessary and
+it is not sufficient. The body must also carry the project's six standing verifications, because
+a change can move an instrument the task never mentions — and the executor will not run a tool it
+was not told about.**
+
+Measured at «#293» (2026-08-24). Its body's verify criteria named
+`audit-yaml-claim-sourcing.py` (the goal) and `validate-crossref-keys.py` (the error case). The
+agent ran both, correctly, and reported green. It never ran `audit-constant-fidelity.py` — not in
+its list — and that instrument had moved:
+
+| after «#293»'s removals | entry | after |
+|---|---|---|
+| `[CONTRADICT]` | 23 | **5** |
+| `[UNDEFINED]` | 50 | **55** |
+
+Deleting the uncited `pull_up_modes:`/`pull_down_modes:` blocks resolved 18 of the 23 mislabel
+rows as a side effect, and simultaneously orphaned five drive-strength constants whose only
+definition lived inside those same blocks. **Two downstream tasks had their scope changed by a
+task that did not know it had touched them** — «#296»'s criterion became `5 → 0` rather than
+`23 → 0`, and «#295» must now define 55 constants rather than 50. The arbiter caught it by
+diffing HEAD against the working tree at the boundary. Nothing in the task would have.
+
+**The rule.** Paste the six standing verifications into every task body's VERIFY block (plus
+`audit-extraction-digit-density.py --all` on any ingestion task), each with its **expected** value
+at entry — not merely "run these." An expected value is what makes a moved number visible; a bare
+list of commands produces "all green" from an agent that has no idea what green looked like before.
+Where a sprint has known-failing instruments, say so in the body: *"`constant-fidelity` exits 1 with
+50 T1 / 23 T2 at entry — that is the starting condition, not breakage. If your change moves either
+number, report the delta and the reason; do not silently absorb it."*
+
+**Why this belongs in the generator and not in the executing skill.** Same mechanism as the
+ingestion-deliverable rule above: under `arbiter-serial` the task body IS the dispatch prompt, so a
+sweep that lives only in the arbiter's resume key is invisible to every agent that executes. This is
+the second instance of that class found in one day, which is what makes it structural rather than a
+one-off — **any requirement that must reach an executor has to be in the body.**
+
+**The general shape, worth stating once:** a dispatched agent sees one task, never the dependency
+graph. It cannot know that the block it deleted was another task's definition, or that the number
+it moved was another task's target. So the body must carry the instruments, and the arbiter must
+measure the deltas at the boundary. Those are two different jobs and neither substitutes for the
+other.
