@@ -92,6 +92,8 @@ it. (`task-execution` dispatch contract §2 — dispatch does not transfer autho
   A cheap proxy that works for this trap: **digit density** — a hardware document whose
   extraction is nearly digit-free has failed, not been read. It catches *total* numeral loss,
   not partial, so it is a smoke alarm and never a clean bill of health.
+  Executable since 2026-08-24: `engineering/tools/validation/audit-extraction-digit-density.py`,
+  mandatory on every pass-1 extraction (`ingest-source` §2a). Run it; don't reason about it.
 
 ## 6. What the closeout must report
 

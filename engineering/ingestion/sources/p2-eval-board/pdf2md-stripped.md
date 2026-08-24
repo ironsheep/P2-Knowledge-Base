@@ -1,0 +1,382 @@
+<!-- page 1 -->
+
+Web Store: www.parallax.com Web Store: www.parallax.com
+
+Tech Support: support@parallax.com
+
+Fax:  (916) 624-8003
+
+;
+
+YN 7
+
+## Propeller  2  Eval  Board Rev C (64000)
+
+This document supports the Rev C PCB. Please see version 1.0 for Rev  A  PCB support, or version 2.0 for Rev B PCB support.
+
+Note:  commenting is enabled, so  please feel free to  request clarification on  any point.
+
+The  Propeller 2  Eval  Board  is  designed for experimentation and  characterization of the Propeller 2  multicore microcontroller. The  Propeller 2 features a  user-code adjustable operating frequency, and  has been  designed to operate at  a  maximum  recommended clock frequency of 180 MHz.
+
+Multiple ground  points,  power supplies, and  power enable &amp; breakout headers are included for simpler testing and  interfacing with standard test equipment. The  PCB is organized to  keep each subsystem clearly defined  in groups, and spaced well apart, making room for test probes to be attached.
+
+The eight  I/O  Pin  Breakout Edge  Headers accommodate the 2x6  pass-through headers on eight different accessory add-ons, for experimenting with  HyperBus memory, audio, video, and  more. See the  Propeller 2  product family page for options.
+
+
+
+<!-- page 2 -->
+## P2-ES Eval Board Features
+
+- e@ Propeller 2  multicore microcontroller engineering sample,  Rev  C  silicon  approved for production
+- e@ 20  MHz crystal
+- e Adjustable operating frequency; recommended maximum  180 MHz clock
+- e Overclocking possible beyond 300 MHz
+- @ 16  MB SPI  Flash  memory
+- e@ 64 Smart I/O  pins  brought out to edge  headers, with 58 fully free
+- e Buffered  LEDs on top eight  I/O  pins
+- @ Onboard  1.8 V 2-Amp switching regulator with short-circuit and  over-current fault protection for P2 VDD, and  brownout detection connected to  Propeller reset
+- e Onboard  LDO 3.3 V regulators for P2 VIOs
+- e Power headers for current measurement and alternative voltage source injection
+- e Dual  power inputs via  micro-USB sockets; suitable for USB charger (not supplied) or host computer USB port connection
+- e@ Built-in  FTDI  to  USB  programming interface, with TX/RX activity indicator LED
+- e USB current limiters with short-circuit and  over-current fault protection
+- e USB active and  USB fault LEDs
+- e MicroSD card socket with  power-cycle function when  reset button  is  pressed
+- @ WX Compatible for programming the P2  microcontroller over WiFi with the WX WiFi SIP  Module (#32420S -  not included)
+
+## Key Specifications
+
+- e Voltage input requirements:  USB 5 VDC, absolute  maximum 5.5 VDC
+- e USB protection: current-limiter and  short-circuit detection
+- e@ Propeller 2  chip:  P2X8C4M64PES (8 cogs,  512  KB  hub  RAM, 64 smart pins)
+- @ Non-volatile  Memory:  16  MB  (128  Mb) SPI  Flash
+- @ Crystal:  20  MHz SMT
+- e@ Smart I/O  pins:  64 accessible,  58 fully free, grouped  in  8  sets of 8 via  headers
+- @ Smart I/O  pin  supply voltage:  3.3 V
+- e Core supply voltage:  1.8 V
+- e Input Current limits:
+- © 500 mA from PC USB port
+- © 2000 mA from AUX USB port
+- e VDD Power Supply:  1.8 V up to 2 A,  1  MHz  nominal switching frequency
+- e@ VIO  Power Supplies:  3.3V up to 300 mA per 8 I/O  pins
+- e@ Programming: Serial over micro-USB
+- e USB programming and serial data speed:  User selectable up to  3  Mbps
+- e@ Operating temperature:  -40 to +185 °F  (-40 to +85 °C)
+- e PCB  Dimensions: 3.55' x 3.55' (90 x 90 cm)
+
+<!-- page 3 -->
+## What's New for Rev C?
+
+- e Production-approved P2X8C4M64P Engineering Sample Rev  C silicon
+- e@e PO-P15  and  P32-P47  are  trace-length  matched  for  high-speed  data  experiments (such  as  HyperRAM).
+- e BOD  (Brown  Out  Detection)  is  removed from the dip switch and  instead,  Propeller RESn  is  permanently  connected  to  the  1.8V  regulator  PG  (Power  Good)  signal, which will  hold the  P2  in  reset if the  regulator voltage drops below ~1.5V.
+- e USB  RES  is  on  the  dip  switch,  which  enables  the  user to disconnect the  USB  reset (DTR) signal  from the  Propeller RESn  pin.
+- @ The  5V  pin  which  was  next  to  P30  has  been removed,  and  that  pin is  now unconnected.
+- e@ The  5V  pin  which  was  next  to  P62  has  been  replaced  with  a  RESET  input to  the Propeller RESn.
+- e@ The  unpopulated  DTR/RESn  pads  which  RevB  had  (near the  SD socket)  have  been removed.
+- e Improvements  to  the  USB  power  circuit  to  improve  protection  from  edge-case faults.
+- e WX WiFi  Compatible -The P56-P63 edge header works with the Parallax SIP WiFi module  for  wireless  programming.  More  details  will  follow  after  the  Rev  C  Eval board  is  released.
+
+<!-- page 4 -->
+## Feature Descriptions Feature Descriptions
+
+Read the full explanation of each  labeled feature on the pages that follow this diagram.
+
+
+## 1.  Propeller  2  P2X8C4M64P - Engineering Sample (Rev C Silicon)
+
+This  is  the  3rd  edition,  production-approved  Rev C Silicon  engineering  sample  of  the Propeller  2  microcontroller. The  Propeller  2  has  8  cores,  512  KB  of  hub  RAM,  and  64 Smart  I/O  pins.  See  the  draft  Propeller  2  (Rev  B/C  Silicon)  Google  Document for detailed information  about  this  device.  Be  aware  that  this  is  an  engineering  sample  and  not  a production chip.
+
+PNUT P2  programming software version v34s or greater recommended  : https://drive.google.com/file/d/1VBu5loIMkVPxPBrgwD9MvGVzEslaYELu
+
+<!-- page 5 -->
+During  active development, the latest version and  history of PNUT can  be found  in  the 1st post on  page one of this forum thread  :  http://forums.parallax.com/discussion/171196 During active development, the latest version and history of PNUT can be found in the 1st
+
+## 2.  LDO VIN  Male Header
+
+The 2-pin  LDO VIN  power breakout header is  used to connect the common 5V USB supply to the 3.3V LDO  regulators powering VIO, microSD card, and flash  memory chip.
+
+In  normal  use a  jumper would  be connected across the 2-pin  header.  For experimentation, the jumper could  be  removed and  an  external  power source or inline current meter could  be connected  here,  instead.
+
+Note:  Power MUST be  connected  at the  LDO VIN  header for the Propeller P2 to operate.
+
+## 3.  ACC HDR Male Header
+
+The 2-pin ACC HDR power breakout header is  used to connect the common 5V USB supply directly to every 5V pin  on the edge expansion  headers.
+
+The P2-EVAL board is supplied with the jumper located on the 5V pin  only, and  not connected to the ACC HDR pin. This is the 'OFF' position, and means that power is  not routed from the 5V output pin to each of the edge headers via the ACC HDR pin.
+
+
+
+To enable the 5V supply at the edge  headers,  move the jumper across both  pins to join them together. Certain accessory boards require a  5V supply, such  as the USB accessory part-number 64006-ES(b).
+
+For experimentation, the jumper could  be  removed and  an  external  power source or inline current meter connected  here instead.
+
+Note:  If 5V supply is not required at the edge headers, the jumper can be removed for safety.
+
+## 4.  PC USB Port
+
+The microUSB PC USB port can  perform the following functions:
+
+- e Load  programs from a  computer into the  Propeller 2  microcontroller
+- e Support serial-over-USB communications to a  terminal  program on  a  computer
+- e Supply 5 V power from a  computer's USB  port
+
+<!-- page 6 -->
+The  PC-USB port includes protection that will  disable the supply if 500  mA current draw is exceeded.  When  using  the  Propeller  2  with  an  external  USB  hub, be sure  to  use  a powered hub.
+
+If  an  alternative  power  source  is  connected  to  the  AUX  USB  Port,  that  port  will  take precedence  and  power  from  the  PC  USB  socket  will  be  disabled.  However, the  PC  USB socket  will  continue  to  function  as  a  serial  connection  to  the  computer, and  the  PC  USB 'ON'  LED  will  remain  lit  while  the  PC  USB  port  is  connected  to  your  computer  and  is active.
+
+While  transmitting  or  receiving  data,  the  ACT  (blue) LED  will blink  to  indicate  your computer is  communicating with the  P2-EVAL Board.
+
+When a short  circuit, over-current, or over-temperature fault condition  is detected  by the USB  protection  circuit,  power will  be  disconnected  and  the  corresponding  red  fault  LED, marked  by a  warning triangle  label, will  light  until the fault is  remedied.
+
+In  the  special  case  that  the  PC  USB  connection  is  suspended  by your computer, the  'ON' LED  will  go  off,  and  the  blue  ACT  LED  may  glow  dimly.  It  would  usually  be  necessary to unplug/reconnect  the  USB  cable  in  this  situation,  so  that the  computer  can  renegotiate the  USB connection.
+
+## 5.  USB Logic &amp; Protection
+
+The  USB  Logic  and  Protection  section  is  the  bridge  between  the  USB  power sources  and the  common  5V  rail  which  provides power to the  LDO VIN  header, ACC HDR and the VDD Power Supply.
+
+The USB power  source  is  selected  automatically,  either  from  the  PC  USB  socket  or preferentially from  the  AUX  USB  port  if a  higher current power supply is  connected.  Each power source has its own current limit:  PC-USB is  500 mA, AUX-USB is  2000 mA.
+
+In  case  of  over-current,  short-circuit,  or  over-temperature,  the  USB  Logic  IC's  will  shut down, disconnect power, and  light the corresponding fault LED to indicate the problem.
+
+## 6.  VDD  Power Supply
+
+The  VDD  power supply  is  for the  Propeller 2  core. This onboard  power supply is  based  on a  switching  buck  regulator, capable  of delivering  2  A  at  1.8  V.  Short  circuit,  over-current protection and  brownout detection are also included.
+
+VDD  is  typically  expected  to  be  1.8  V.  This  voltage  powers the  internal  circuits  of the  P2 microcontroller. In  case  of a  serious  prolonged short-circuit or over-voltage condition, the VDD  regulator  will  shutdown  and  remain  locked  off  to  prevent  any  serious  damage.  In
+
+<!-- page 7 -->
+this  case,  the  short-circuit  should  be  remedied,  and  then  the  power supply will  need  to be  power-cycled  to  attempt  a  restart.  If  the  fault  remains,  then  the  VDD  regulator  will immediately go into the shut-down and  locked off state again.
+
+The  VDD  power  supply  includes  Brown-out  Detection,  which  will  keep  the  P2  in  reset whilst VDD is  below approximately 1.5V.
+
+
+Important!  In  case  of experimentation with the VDD voltage  level via the VDD Male  Header (explained  below), the absolute  maximum voltage you should set or connect to P2 VDD is 2.2V.
+
+## VDD Male Header
+
+The  2-pin  VDD  male  header  is  used  to  connect the  switching  regulator output to the  Propeller 2  VDD  input  pins.  In  normal  use  a jumper spans the 2-pin VDD  header. For experimentation, the  jumper  may  be removed and an external power source or inline current meter connected  here  instead.  Note:  Power  MUST  be  connected  at the VDD header for the Propeller P2 to operate.
+
+## 7.  Ground Test Posts
+
+The  four ground  test  posts  are  suitable  for test  clips  and  scope  probes; one is  positioned at each  edge of the  board.
+
+## 8.  Crystal
+
+The P2-ES Eval Board is equipped  with a 20 MHz  crystal, as well as  XO  /  XI  pad connections. Operational frequency is adjustable; for full operating frequency configuration  details,  options,  and  limits,  refer  to  the  Propeller  2  (Rev  B  Silicon)  Google Document.
+
+The  Propeller 2's  on-chip  crystal  oscillator with  internal  9  pF  load  capacitance  drives  the 20  MHz  crystal  to  provide  a  base  clock frequency for the  Propeller. The  actual  operating frequency  is  selected  in  code,  and  can  be  almost  any value  or fractional  value  by  using three special  multiply and  divide  registers.
+
+## XO / XI  Pads
+
+The  pads  marked  XO  and  XI  above the  oscillator are  connected  directly to  the  on-board oscillator  and  the  Propeller 2  XO  (Xtal  Out,  physical  pin  50)  and XI  (Xtal  In,  physical  pin  51)
+
+
+<!-- page 8 -->
+pins.  Test  equipment  could  be  connected  to  these  pads,  or  an  alternative  clock  source connected  to  XI.  Note  that  the  P2-ES  Eval  board  has  a  20  MHz  crystal,  and  the  clock source  type  and  frequency  must  be  specified  in  the  user  code;  refer to  the Propeller  2 (Rev B  Silicon) Google  Document. pins. Test equipment could be connected to these pads, or an alternative clock source
+
+## Overclocking
+
+The  clock  frequency  of  Propeller  2 is  defined by  user  code.  It  can  be  adjusted  very precisely  using  three  multiply  and  divide  registers that set the actual operating frequency based on  a  function  of the crystal  oscillator frequency.
+
+All  this  means  that  overclocking  is  possible  and  early  unsupported  experiments  have been  running the  Propeller 2  overclocked at 390 MHz without significant heat rise!
+
+While  special  cooling  arrangements  are  not  typically  required  when  operating  at  the recommended  maximum  clock  frequency  of  180  MHz,  the  Propeller  2  ES  Evaluation Board  bottom  layer features  a  continuous 4  oz copper ground  plane which  is  designed to remove  heat  from  the  Propeller  2.  There  are  also  four  mounting  holes  spaced  40mm apart, which could accommodate a  50 mm fan or heatsink.
+
+## 9.  AUX Power Header Pads  (Customer Option)
+
+Marked  5V and  GND, these  0.1'  spaced  pads  connect  directly to  the  AUX-USB  5V power rail  to  provide  a  convenient  power  source  for  an  external  fan  when  an  AUX-USB  power source is  connected.
+
+These same 5V and GND pads could also be used to connect a  power source to  power the P2-EVAL  PCB,  instead  of  using  the  AUX-USB  port.  In  this  case,  the  supply voltage  range can  be 4.5V to 5.5V, and  MUST NOT exceed 5.5V!
+
+When  used  to  provide  power to  the  Eval  board,  the  Auxiliary  power  pads  are  protected by  the  same  USB  protection  circuit  as  the  AUX  USB  Port;  refer  to  the  AUX  USB  Port description for more details.
+
+
+Warning! DO NOT connect a  power source to both the USB socket and 5V pads  at  the  same  time!  Users  wanting  to  use  this  functionality  should refer to the P2-ES Eval  Board schematic and proceed at their own risk.
+
+## 10. AUX USB Port
+
+The  microUSB AUX  USB  Port  is for power input only, and  is  provided as a  means to attach a  high  current power supply to the  P2-EVAL PCB. A  2-Amp  rated  device is  recommended.
+
+<!-- page 9 -->
+When  power  is  connected  to  AUX  USB,  this  will  automatically  take  priority  over  power from  the  lower  current  PC-USB  port.  The  AUX  USB  port  includes  protection  that  will disable the supply if 2A current draw is exceeded.
+
+When a  short-circuit,  over-current or  over-temperature fault condition  is  detected  by the USB  protection  circuit,  power  will  be  disconnected*  and  the  corresponding  fault  LED, marked  by a  warning triangle label, will  light until the fault is  remedied.
+
+* Note:  Power  disconnection  occurs  at  the  Eval  board  USB  protection  circuit.  The Auxiliary  power  header  pads  are  located  before that  protection  circuit  because  they are in parallel  with  the  Aux  USB  Port  to  provide  both  a  power  input  and  output.  As  such, when  power  disconnection  occurs  in  a  fault  condition,  the  Auxiliary  power  header  pads will  be  able to continue sourcing power.
+
+## 11.  I/O  Pin  Breakout Edge Headers (with 5V output)
+
+Each  of the  64  smart I/O  pins  is  connected to an  edge  header, in  specific groups of eight.
+
+Each edge header  also provides  two  GND  connections,  a Vxxxx output pin supplying the voltage from the corresponding  3.3  V  LDO  voltage  regulator, described  above in LDO  regulators  for  I/O  Pin  Voltage,  and  optionally a 5  V output connection  (controlled  by the ACC HDR  Male  Header).
+
+There are two special  usage  edge  header  banks which do  not supply  the  5V  output.  Refer  to  the  details  here:  11a.  I/O  Pin Breakout Edge  Headers (without 5V output)
+
+
+
+DO  NOT APPLY VOLTAGE TO THE Vxxxx Pin; it is  a  voltage output! Be aware that some  I/O  pins  are  also  connected to other peripheral circuits; see the 1/O  Pin Assignments section.
+
+## 11a. I/O Pin Breakout  Edge Headers (without  5V output)
+
+There  are  two  edge  headers  which  do  not  have  5V  routed  to them.
+
+The  header for  P24 to  P31 is shown with a  white silk square for the pin beside the Vxxxx pin. This unlabelled pin is unconnected,  but  could  be  used for connecting a  user signal or voltage to a  user accessory board or prototype board.
+
+
+<!-- page 10 -->
+The header for P56 to  P63  has the RES  pin  beside the V5663 pin. The  RES  pin  is  active  low, and  is  connected to the  Propeller 2  microcontroller RESn circuit.  Momentarily set this pin  low to reset the  Propeller. This header is  ideal for connecting to a  WiFi module (such as the  Parallax WX Module  :
+
+https://www.parallax.com/product/32420s), in  order to program the  Propeller 2 wirelessly.
+
+Tip: When using wireless programming it is  recommended to switch  off the  USB  Reset 'USB RES' feature at the  Mode Selection Switch  Bank.
+
+## 12.  LED Bank
+
+This  bank  of  eight  LEDs  is  connected  via  an LED  Buffer  to  pins  P56  through  P63.  The buffer  isolates  the LEDs  so  they  will  not  influence  the  I/O  signals.  P56-P63  LEDs  are connected  to  the  USB  data  and  P2  memory  signals  (see  !/O  Pin  Assignments)  so  these LEDs will  be  especially active at  power-up and  after a  reset.
+
+After  start-up,  some  of  the  LEDs  can be  used  as  user-programmable  indicators. For example,  P56 and  P57 are free by default.
+
+## 13.  Reset Button
+
+Use  the  Reset button  button to  restart the  Propeller 2  microcontroller's program and  also power  cycle the flash memory  and microSD socket. Press and hold to keep  the microcontroller  in  reset.  Press  and  release to  reset  and  execute the  selected  Propeller 2 boot sequence; see the  Boot Mode Selection for the necessary switch settings.
+
+## 14.  LDO regulators for I/O  Pin Voltage
+
+The  LDO regulators are fixed 3.3 V  low-noise regulators,  which power  the P2 1/O smart-pins.  Each  regulator  has  short-circuit and  over-current protection. You  may see this voltage referred to as VIO (Voltage for IO),  or by group of I/O  pins in  the format Vxxxx.
+
+At the  actual  microcontroller, the  Propeller 2  Smart I/O  pins are grouped such that each 4 |/O's  have  a  dedicated  voltage  supply  connection.  If you  refer to  the  diagram  Propeller 2 Physical Pins  you  will  see  the  voltage  supply  connections  labelled  as  VO003,  V0407, V0811, etc.
+
+
+<!-- page 11 -->
+This  allows  pins  that will  be  performing sensitive analog functions to  use dedicated  quiet, local  3.3V regulation.
+
+With  the  P2-EVAL PCB,  the  voltage  supply  connections  have  been  brought  out  in  groups of 8 I/O pins each. Each group has a VIO  output labelled Vxxxx  at each of  the corresponding  !/O  Pin  Breakout  Edge  Headers,  which  describes  the  I/O  range  that  the LDO supplies.  For example, V0815 would  mean VIO voltage for I/O  pins 8 to  15.
+
+Note:  While  it  would  also  be  typical  to  have  a  single  larger  switching  regulator to  power all  the  3.3  V  I/O  supplies,  the  distributed  LDO's  allow  for  better  local  regulation,  low noise,  isolation  of  I|/O  groups,  improved  protection,  less  voltage  drop  under  load,  and better thermal characteristics.
+
+## 15.  Mounting  Holes
+
+The  four plated mounting  holes  are  attached to  the  ground plane. See  the  PCB Dimensions section for mounting hole spacing.
+
+## 16.  Mode Selection Switch Bank
+
+This  bank  of dip  switches  controls the  USB  Reset and  Boot  Mode Selection functions. The dip  switches  are  not  set  to  any  particular  state  on  a  new  Eval  board,  although  the  four switches will  all  usually be  set to the OFF  position.
+
+## USB RES (USB Reset Connection)
+
+This  switch  controls the  connection  of the  USB  'DTR'  Reset  signal  to  the  Propeller  reset circuit.  Switch  ON  to allow the  PC-USB  interface to  reset the  propeller by toggling the  DTR signal  (as  required for  PC-USB  programming). Switch  OFF to disable that reset signal.
+
+This  switch  would  usually  be  kept  switched  ON  for  programming via  PC-USB  cable,  and switched OFF  for  programming  via an external serial programmer  or  WiFi  module connected to the top-left (P62/P63) edge header.
+
+## Boot Mode Selection
+
+Upon  startup  or  after  reset,  the  Propeller  2  will  always  proceed  according  to  the  boot mode selection  table  shown  below. The three  switches labelled  Flash,  P59  A and  P59  V are  used  to  select  the  Boot  Mode,  and  the  options  include  booting  (loading  code)  from USB-Serial, SD card or SPI  Flash  memory.
+
+Important! To avoid inconsistent behavior, only switch one of the P59 dip-switches ON.
+
+<!-- page 12 -->
+| Boot Mode Selection                                                                           | FLASH     | P59 A   | P59 V   |
+|-----------------------------------------------------------------------------------------------|-----------|---------|---------|
+| Serial window of 60 seconds, default. (When SD card is NOT inserted)                          | OFF       | OFF     | OFF     |
+| Serial window of 60 seconds, overrides SPI Flash and SD card.                                 | ON or OFF | ON      | OFF     |
+| Serial window of 100 ms, then SPI flash. If SPI flash fails then serial window of 60 seconds. | ON        | OFF     | OFF     |
+| SPI flash only (fast boot), no serial window. If SPI flash fails then shutdown.               | ON        | OFF     | ON      |
+| SD card with serial window on failure. If SD card fails then serial window of 60 seconds.     | OFF       | OFF     | OFF     |
+| SD card only, no serial window. If SD card fails then shutdown.                               | OFF       | OFF     | ON      |
+
+Note:  A  switch  is  in  the  'off'  position  when  the  actuator  is  pointing  toward  the corresponding pcb label.
+
+## 17.  Flash  Memory
+
+The  flash memory  can  be  used  to  store  user  code  or  data,  and  is  selectable  as  the prefered Boot  device,  See  the  Boot  Mode  Selection  section  for  the  necessary  switch settings.
+
+The device uses SPI protocol, with 16 MB (128 Mbit) capacity. W25Q128JVSIM manufacturer datasheet for full details. Refer to the
+
+## 18.  microSD Card Socket
+
+A  microSD  card  can  be  used  to  store the  code  which  is  run  by the  P2  when  it  starts  up, provided  the  proper  Boot  Mode  is  selected.  The  same  card  can  also  be  used  to  store (read  or  write)  user  data  during  run  time.  Uses  include  accessing  large  lookup  tables, playing audio files,  and  data  logging.
+
+This socket is  hardwired to four Propeller 2  I/O  pins:
+
+- e P58 -  DI/CD (data  in  and  card  detect)
+- e P59 -  DO  (data  out)
+- e P60 -/CS (active low chip select).
+- @ P61 -  CLK (clock)
+
+<!-- page 13 -->
+Power for the  microSD card  socket  is  supplied  by the  Common  LDO  regulator, which  has an  optional  connection  to  P57  that  would  allow  user  code  to  toggle  power on/off.  Refer to the Common  LDO regulator section for more details.
+
+## 19.  Common LDO regulator
+
+The  Common  LDO  regulator  is a fixed 3.3  V  low-noise regulator. It  powers the  microSD card and SPI  Flash  memory chip,  and  also  provides  a  common  pull-up voltage for  boot mode features.
+
+R803  is  an  unpopulated  pad  that  would  connect  P57 to the Common  LDO  enable  pin.  This  would  allow  the  user  to power-cycle the microSD card, perhaps for code development and experimentation.
+
+
+One  option  to  use  this  feature  would  be  to  move  R802  to  R803, and then  install  an  0402 100  kQ  resistor  at  R801.  It  is  not  recommended  to  keep  both  R802  and  R803  installed. Consult the schematic before making adjustments and  proceed at your own  risk!
+
+## 20.  LED Buffer
+
+The  LED  buffer  is  an  octal  line  driver that  has  high  impedance  connections  to  P56-P63, and  drives  the  corresponding status  LED  in  the  LED  Bank on when the  P2  I/O signal  line  is low.
+
+All  1/O  signals  from  the  P2  microcontroller are  high  impedance  by  default,  which  means the LEDs  will be  sensitive  to  objects  moving  close  to  the  top-left  edge  header  that provides access to the P56-P63  pins.
+
+In  user  code  those  pins  could  be  driven  high  or low, or have  I/O  pin  pull-ups activated, to control  the  LEDs  without  the  high-impedance  behaviour. Another option  is  for the  user application  or  breakout  board  to  add  pull-up  resistors  at  the  relevant edge  header  pins. This  design  choice  means  that those  8  I/O  pins  are  not  impacted  by the  presence  of the LEDs  or  external  pull-up  resistors  by  default,  and  are  completely flexible  and  free for the user to  use as  required.
+
+<!-- page 14 -->
+## Propeller 2  Physical  Pins Propeller 2 Physical Pins
+
+This  illustration  identifies  the  physical  pins  on  the  Propeller  2. See  the  draft  Propeller  2 (Rev  B/C  Silicon)  Google  Document  for  detailed  information  about  the  device. In  this document,  see  the  !/O  Pin  Assignments  section  for  details  on  how they are  used  on  the Propeller 2  ES  Evaluation  Board.
+
+
+<!-- page 15 -->
+## I/O  Pin Assignments
+
+Smart  I/O  pins  PO-P55  are  fully  free;  P56--P63  are  routed  to  peripheral  circuits  and/or have  special  functions  related  to  Propeller  2  boot  sequence  options. Each  smart  I/O  pin is  capable  of  many autonomous analog and  digital functions.  Examples include ADC,  DAC, PWM,  USB,  SERIAL,  Waveform  generation,  SMPS,  Comparator,  SCHMITT  and  LOGIC modes.
+
+See  the  draft  Propeller  2  (Rev  B/C  Silicon)  Google  Document  for  detailed  information about the full  capabilities  of the  Propeller  2  Smart  I/O  pins. Refer to sections VDD -  1V8 Male  Header  and  LDO  VIN  Male  Header for instructions on applying power to enable the Smart  I/O  pins. This  capability  was  added  to  the  Eval  PCB  for  evaluation  and  testing  of the  P2  ES  engineering sample.
+
+| /O Pin   | &#124;Description                                                                                                                                                          | &#124;Description                                                                                                                                                          | &#124;Description                                                                                                                                                          |
+|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| P0-P7    | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin VO007. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin VO007. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin VO007. |
+| P8-P15   | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V0815. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V0815. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V0815. |
+| P16-P23  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V1623. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V1623. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V1623. |
+| P24-P31  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V2431. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V2431. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V2431. |
+| P32-P39  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V3239. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V3239. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V3239. |
+| P40-P47  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V4047. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V4047. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V4047. |
+| P48-P55  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300mA total, shared by this I/O pin group and edge header pin V4855.  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300mA total, shared by this I/O pin group and edge header pin V4855.  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300mA total, shared by this I/O pin group and edge header pin V4855.  |
+| P56-P63  | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V5663. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V5663. | Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge header pin V5663. |
+|          | Alternative functions for P56-P63                                                                                                                                          | Alternative functions for P56-P63                                                                                                                                          | Alternative functions for P56-P63                                                                                                                                          |
+| P56      | No alternative function                                                                                                                                                    |                                                                                                                                                                            | Buffered LED                                                                                                                                                               |
+| P57      | Routed to Common LDO enable pin (not connected by default, user option)                                                                                                    |                                                                                                                                                                            | Buffered LED                                                                                                                                                               |
+| P58      | microSD MISO (SDO)                                                                                                                                                         | Flash SPI DO                                                                                                                                                               | Buffered LED                                                                                                                                                               |
+| P59      | microSD MOSI (SDI)                                                                                                                                                         | Flash SPI Dl                                                                                                                                                               | Buffered LED                                                                                                                                                               |
+| P60      | microSD CS                                                                                                                                                                 | Flash SPI CLK                                                                                                                                                              | Buffered LED                                                                                                                                                               |
+| P61      | microSD CLK                                                                                                                                                                | Flash SPI CS                                                                                                                                                               | Buffered LED                                                                                                                                                               |
+| P62      | PC-USB RXD (P2 TXD)                                                                                                                                                        |                                                                                                                                                                            | Buffered LED                                                                                                                                                               |
+
+<!-- page 16 -->
+| P63        | PC-USB TXD (P2 RXD)                                                                                                                                                                                                                                    | Buffered LED                                                                                                                                                                                                                                           |                                                                                                                                                                                                                                                        |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Other Pins | Description                                                                                                                                                                                                                                            | Description                                                                                                                                                                                                                                            | Description                                                                                                                                                                                                                                            |
+| TEST       | MUST be connected to Ground for P2 to operate correctly.                                                                                                                                                                                               | MUST be connected to Ground for P2 to operate correctly.                                                                                                                                                                                               | MUST be connected to Ground for P2 to operate correctly.                                                                                                                                                                                               |
+| XO         | Xtal Out for clock source. (Connected to 20MHz crystal oscillator and XO header pad)                                                                                                                                                                   | Xtal Out for clock source. (Connected to 20MHz crystal oscillator and XO header pad)                                                                                                                                                                   | Xtal Out for clock source. (Connected to 20MHz crystal oscillator and XO header pad)                                                                                                                                                                   |
+| Xl         | Xtal In for clock source. (Connected to 20MHz crystal oscillator and XI header pad)                                                                                                                                                                    | Xtal In for clock source. (Connected to 20MHz crystal oscillator and XI header pad)                                                                                                                                                                    | Xtal In for clock source. (Connected to 20MHz crystal oscillator and XI header pad)                                                                                                                                                                    |
+| RESn       | MUST be pulled up, typically with 10K resistor. P2 will reset wnen RESn driven low.                                                                                                                                                                    | MUST be pulled up, typically with 10K resistor. P2 will reset wnen RESn driven low.                                                                                                                                                                    | MUST be pulled up, typically with 10K resistor. P2 will reset wnen RESn driven low.                                                                                                                                                                    |
+| GND        | Ground pad is under the chip, and must be connected to PCB ground. Provides common signal and supply voltage ground, and important path for heat dissipation. Connection to solid ground plane under the P2 chip and on an external layer recommended. | Ground pad is under the chip, and must be connected to PCB ground. Provides common signal and supply voltage ground, and important path for heat dissipation. Connection to solid ground plane under the P2 chip and on an external layer recommended. | Ground pad is under the chip, and must be connected to PCB ground. Provides common signal and supply voltage ground, and important path for heat dissipation. Connection to solid ground plane under the P2 chip and on an external layer recommended. |
+
+<!-- page 17 -->
+## PCB Dimensions PCB Dimensions
+
+
+## Revision History
+
+Version  1.0:  Please see the version  1.0 document for Rev A PCB support.
+
+Version 2.0: Supports the P2-ES Rev  B silicon  and the  Eval  Board  Rev B.
+
+Version 3.0: Supports the  P2-ES  Rev  C silicon  and the  Eval  Board  Rev C.
+

@@ -191,6 +191,10 @@ them are required for a new document.
   requirement. **Keep `<src>-text.txt`:** that is the *raw* layout-preserving extract
   (pdftotext/`pdf-layout`), a different artifact from the curated markdown and still
   required.
+- **Pass 1 is not finished until the digit-density gate passes (§2a).** A pass-1
+  artifact that scores below the floor is a **failed extraction**, not a source
+  that is silent — and nothing downstream (pass 5's audit, pass 7's dashboard
+  row) may be written on top of it. `audit-extraction-digit-density.py`.
 - **The central extraction matrices are a cross-source rollup.** The per-source
   outputs are `assets/images-*/image-catalog.md` + `assets/code-*/`. The central
   `…-EXTRACTION-MATRIX.md` rows named above are an *aspirational* label — the active
@@ -279,6 +283,55 @@ ladder below).
     part numbers) against a second signal (the table from the broken stream
     decodes consistently; a mechanical/pad drawing; the schematic) and flag any
     residual OCR-risk strings as a gap.
+  - **A text layer can be BROKEN WITHOUT LOOKING BROKEN (F-250, 2026-08-24).**
+    The #64004-ES case above garbles visibly, so a human sample catches it. The
+    #64000 P2 Eval Board guide failed the *invisible* way: its body font maps
+    letters but **not numerals**, so `pdftotext` exited 0 and returned fluent,
+    well-formed English with **every digit silently deleted** — *"The Propeller
+    has cores, KB of hub RAM, and Smart I/O pins"*. A page-1 eyeball sample
+    reads clean. It shipped at `100% (stated)` for eleven months, and its lost
+    pin map was recorded as the **source being silent**. A mangled extraction
+    looks exactly like a fact that was never there. **Hence the gate below.**
+
+### 2a. The digit-density gate — MANDATORY on every pass-1 extraction
+
+**Run it. It is not optional and it is not a note.** The moment a pass-1 text
+artifact exists — before pass 5, before any downstream reads it:
+
+```bash
+python3 engineering/tools/validation/audit-extraction-digit-density.py \
+        engineering/ingestion/sources/<src>
+```
+
+- **Exit 0** → record the measured density in the extraction audit **together
+  with the tool's own caveat**. Do not paraphrase it into a pass mark.
+- **Exit 1** → the extraction has **FAILED**, not been read. Do **not** log the
+  missing numbers as gaps and do **not** proceed to pass 5. Go back up the
+  ladder (`--force-ocr`, `camelot`, `pdf-layout`, a DOCX edition, a rendered-page
+  read) until it passes, then re-verify every fact already derived from the bad
+  capture. `SOURCE-REPAIR-ORDER.md` §4 governs what happens if the ladder runs
+  out. An artifact with **no substantive lines at all** exits 1 too — an
+  extraction that produced nothing is the most complete failure there is.
+- **Exit 2** → **NOTHING WAS MEASURED**, and this is *not* a pass. No recognised
+  extraction artifact was found under the path you gave: either the path is
+  wrong, or the extraction you meant to check does not exist yet. Fix the
+  invocation and run it again. **Never record an exit 2 as a clean pass** — an
+  unrun check reporting success is the same defect class as the digit-free
+  capture that made this gate necessary.
+
+**It is a smoke alarm, never a certificate.** It detects *total* numeral loss and
+is blind to partial loss — a table that came through while a figure did not, one
+transposed value. **Never report a pass as evidence that a source is completely
+extracted**, and never write it up as a clean bill of health for its peers.
+
+**What a forced-OCR run owes on top of the gate — triple validation.** OCR text ∩
+the original text layer ∩ **the rendered page image**. The legs are often
+complementary rather than redundant: on #64000 the body font kept letters and
+dropped digits while the *table* font kept digits and dropped letters, so each
+covered the other's hole. The third leg is not optional — reading the rendered
+page is what caught OCR misreading the silkscreen triangles `△`/`▽` as the
+letters `A`/`V` in a boot-mode table, and it is the only place edge-header pin
+*order* exists at all.
 
 ```bash
 # Extract DOCX media (pass 3 inputs) and inspect:
@@ -399,6 +452,9 @@ engineering/ingestion/sources/<src>/
 
 Report:
 - Passes completed (1–7) and per-pass counts: paragraphs/tables, code examples (extracted / pnut_ts-validated / failed), images (extracted / quality-passed / OCR-cataloged).
+- **The digit-density measurement (§2a)** — the number, the artifact it was measured on,
+  and the command. Not "gate passed": a status line is not evidence. Carry the tool's
+  caveat with it (total loss only, never partial; never a completeness certificate).
 - Completeness % + gate status written to `README.md` (the dashboard).
 - Q&A audit summary: prior questions answered, new questions, **conflicts routed to `P2KB-CORRECTION-FINDINGS.md`** (with IDs).
 - **Gap ledger + questions-for-experts updated in `KNOWLEDGE-GAPS.md`** (answered rows moved, new raised, reviewer notes harvested, expert-only questions routed).
@@ -433,6 +489,8 @@ that improvement here, and in the source docs, is part of finishing the work.
 - **Don't single-source a verification** — use every eligible source (§4); a lone citation is not corroboration.
 - **Don't treat "PDF-first for code" / "PyMuPDF for images" as laws** — they are fallbacks now (§2, §3).
 - **Don't skip `pnut_ts` validation of extracted code** (use `-d` for DEBUG code), or ship a code example that did not compile clean.
+- **Don't skip the digit-density gate (§2a), and don't let a pass turn into a completeness claim.** A hardware document whose extraction is nearly digit-free has **failed**, not been read — record the number and the caveat, never "gate passed".
+- **Don't record a number the extraction lost as a gap in the source.** Confirm the measurement against the rendered page before concluding a fact is absent; a mangled extraction and a silent source look identical.
 - **Don't mark a source complete with open gates** — completeness % and gate status on the dashboard are load-bearing for `whats-next` resume.
 - **Don't bury a conflict** — inter-source disagreement is an outcome to surface, not smooth over.
 - **Don't let a forum-thread figure graduate to a publishable number** — quarantine it (§5),

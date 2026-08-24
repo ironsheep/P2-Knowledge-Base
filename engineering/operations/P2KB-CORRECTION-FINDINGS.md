@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-328`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-329`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,6 +50,70 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **F-093 (`WONTFIX`):** `lockrel.yaml` C-flag polarity — the appendix's "inverted" claim is the error; the YAML is correct (C = lock-was-held).
 - **F-114b (`RESOLVED-INVALID`):** the MIDI display modes KEYBOARD / GRID / ROLL / MONITOR do **not** exist in PNut v55 — do **not** add them to `midi.yaml` (it carries an explicit `not_supported:` claim).
 - **Verified-resolved (don't re-chase):** the Jan-2026 streamer KB audit's issues were all reconciled in the 2026-05/06 passes (DAC routing, 32-pin groups, mode encoding, xcont/xzero phase wording, setxfrq 2³¹ formula, streamer symbols). Only the XZERO concept text was open and is fixed (F-003).
+
+---
+
+## `hardware/p2-eval-board.yaml` describes a board the #64000 guide does not (2026-08-24, F-250 re-ingestion) — F-328
+
+> **Origin.** Repairing the #64000 source (F-250 — its extraction had lost every numeral)
+> made it possible, for the first time, to check the board YAML against what the guide
+> actually says. Every item below was read off the repaired capture
+> (`engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md`) and
+> confirmed on the rendered page. **Nothing here is fixed in this filing** — the ingestion
+> head produces raw source data; the YAML is the purge/repopulate tasks' work.
+
+- **F-328 — `deliverables/ai/P2/hardware/p2-eval-board.yaml` carries claims the #64000 Rev C
+  guide contradicts, plus whole blocks describing hardware the board does not have; and the
+  guide itself contradicts itself on one pin pair.** Two separable halves.
+
+  **(a) The source contradicts itself — a genuine documentary conflict, not an extraction
+  defect.** The #64000 guide's §18 "microSD Card Socket" (p.12) lists *"P58 - DI/CD (data in
+  and card detect); P59 - DO (data out); P60 - /CS; P61 - CLK"*. Its own I/O Pin Assignments
+  table (p.15) lists *"P58 microSD MISO (SDO); P59 microSD MOSI (SDI); P60 microSD CS; P61
+  microSD CLK"*. P60/P61 agree; **P58 and P59 are opposite in direction between the two
+  places**. Both readings are confirmed on the rendered pages and in the original text layer
+  (whose table font preserved the fragments `" D MI O ( DO)"` / `" D MO I ( DI)"`). The guide
+  does not resolve it, and this source alone **cannot** settle which is right. Resolve against
+  a stronger authority — the board schematic, the boot-ROM SD sequence in the silicon sources,
+  or the bench — **not** by picking the more plausible-looking of the two. Until then the KB
+  must not assert a direction for P58/P59 as if the guide were unambiguous (it currently
+  does: `P58: "microSD MISO (SDO) / Flash SPI DO"`).
+
+  **(b) The YAML asserts hardware the guide does not describe.** Uncited *and* wrong, which is
+  why it is filed rather than left to the uncited-block purge — a purge keyed on missing
+  citations will not necessarily reach a scalar or a whole fabricated section:
+  - `specifications.microcontroller.revision: "Rev D"` — the guide is **Rev C silicon**
+    throughout (`P2X8C4M64PES`, "Rev C Silicon", "Rev C silicon approved for production").
+  - `clock_speed: "20MHz crystal, PLL to 320MHz"` — the guide states 20 MHz crystal,
+    **recommended maximum 180 MHz**, "overclocking possible beyond 300 MHz", and a **390 MHz**
+    experiment. `320MHz` appears nowhere.
+  - `built_in_peripherals.proto_area.breadboard_section: "Basic prototyping area"` — **the
+    #64000 has no prototyping area.** Fabricated whole.
+  - the `video_audio:` block (`vga_support` / `hdmi_support` / `audio_output`) — the guide
+    never mentions VGA, HDMI, video, or resistor DACs. Fabricated whole.
+  - `connectivity.programming` lists a **Prop Plug (#32201) on a "4-pin header"** and
+    `connector: "USB-B or USB-C"` — the guide describes **micro-USB** only, plus the WX WiFi
+    SIP module (#32420S) on the P56–P63 header. It never mentions a Prop Plug.
+  - `switches.user_switches: "TBD quantity"` — there are none; the switches are the reset
+    button and a **4-position mode dip bank** (USB RES · FLASH · P59 △ · P59 ▽).
+  - `headers.connector_type: "Standard 0.1 inch headers"` — the I/O breakout headers are
+    **2×6 edge headers** (eight of them); the 0.1″-spaced feature is the AUX power **pads**.
+  - `flash_size: "TBD - check documentation"`, `physical.dimensions: TBD`,
+    `temperature_range: "Commercial grade"`, `current_consumption: "TBD"` — the guide states
+    **16 MB (128 Mbit) W25Q128JVSIM**, **3.55″ × 3.55″** with four mounting holes 40 mm apart,
+    and **−40 to +85 °C**. These are `TBD` only because the extraction had no digits in it.
+  - `supply_voltage: "5V or USB powered"` — the guide: **two micro-USB** inputs (PC-USB
+    500 mA, AUX-USB 2000 mA), absolute maximum **5.5 VDC**, plus optional 5V/GND AUX pads at
+    4.5–5.5 V. There is **no barrel jack**.
+  - `expansion_ecosystem.individual_addons` names #64032 HUB75 and #64008 MicroBUS — not in
+    this source (they may be sourced elsewhere; that is the repopulation step's call).
+
+  **→ the sprint's purge/repopulate tasks** (remove-all, then re-derive source-first from the
+  repaired capture). Do **not** cite-in-place: half of (b) would then acquire a citation to a
+  guide that says the opposite. Half (a) is **blocked on a stronger authority** and must be
+  carried as an explicit open question, not resolved by preference.
+  Status: `CONFIRMED` — (a) source-internal conflict verified on the rendered pages and needs
+  a stronger authority; (b) verified against the repaired source, ready to fix.
 
 ---
 
@@ -309,7 +373,52 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   re-verify every numeric claim already derived from it, and — the general lesson —
   **add a digit-density sanity check to the ingestion pass**: a hardware document whose
   extraction is nearly digit-free has failed, not been read. Worth spot-checking the other
-  board/hardware sources for the same font family. Status: `CONFIRMED`.
+  board/hardware sources for the same font family.
+  >
+  > **INGESTION HALF APPLIED 2026-08-24** (sprint task #306, ahead of the #294 purge — under
+  > remove-all, whatever this failed to recover would have been *permanently* gone).
+  >
+  > - **Re-ingested, forced OCR.** `pdf-ocr --force-ocr --deskew` → `pdftotext -layout` →
+  >   `engineering/ingestion/sources/p2-eval-board/p2-eval-board-text.txt`. Density
+  >   **1.5% → 56.5%** on the gate tool's metric (lines of ≥12 chars), **10.0% → 52.6%** on
+  >   non-blank lines — the frame this filing used above, where its 91/1315 counted every
+  >   line including blanks. Quote the metric with the number; they are not interchangeable.
+  >   In the 29–58% peer band. Prior capture archived, not deleted:
+  >   `sources/p2-eval-board/archive/` (+ `archive/README.md` pointer, + a fresh `pdftotext`
+  >   run kept as the evidence exhibit).
+  > - **Recovered, triple-validated** (OCR ∩ original text layer ∩ rendered page — the two
+  >   text layers are complementary here: the body font keeps letters and drops digits, the
+  >   *table* font keeps digits and drops letters). Both ruled tables re-cut with
+  >   `camelot lattice`; `pdf2md`/docling added as a fourth leg across all 17 pages (whole-doc
+  >   runs OOM'd; `pdfseparate` + one page at a time got through) and agrees throughout.
+  >   **All 17 pages read against their rendered image; nothing
+  >   unrecoverable.** Curated capture: `sources/p2-eval-board/complete-p2-eval-board-reference.md`.
+  >   Two things only the rendered page could give: the edge-header **pin order** (in no text
+  >   layer at all), and that the boot-mode switch columns are the silkscreen triangles
+  >   **P59 △ / P59 ▽** — OCR reads them as the letters "A"/"V".
+  > - **Downstream re-verified.** `sources/p2-eval-board/p2-eval-board-rev-c-complete-extraction-audit.md`
+  >   (its false "100% across the board" replaced by measured coverage) and
+  >   `sources/p2-eval-board/p2-eval-board-cross-source-analysis.md` (which had described a
+  >   board with a barrel jack, a proto area and VGA/HDMI — none of it in the source).
+  >   `engineering/ingestion/README.md:51` no longer reads `100% (stated)`.
+  > - **The general lesson is now an instrument, not a note.**
+  >   `engineering/tools/validation/audit-extraction-digit-density.py`, wired into
+  >   `.claude/skills/ingest-source/SKILL.md` **§2a as a mandatory pass-1 gate** (plus the
+  >   pass-1 convention list, the §7 hand-back, and *What NOT to do*). Corpus sweep
+  >   `--all`: **clean, 53 artifacts**, 4 hand-written folder descriptions exempted by name
+  >   with reasons. Negative control: the archived lossy artifact scores 1.5% and exits 1.
+  > - **Spot-check of the other board/hardware sources: `p2-eval-board` was the only
+  >   outlier** (10% against 29–58% across eleven peers). **This is not a clean bill of
+  >   health for the other eleven** — digit density catches *total* numeral loss, never
+  >   partial. It is a smoke alarm.
+  >
+  > **What is still owed, and by whom:** the #64000 board YAML itself. Re-verification found
+  > claims the repaired source contradicts or does not contain — filed separately as
+  > **F-328**, and repaired by the sprint's purge/repopulate tasks, not here. The ingestion
+  > head is done with this one.
+  >
+  Status: `PARTIAL` — ingestion half complete 2026-08-24; the KB-side re-derivation it
+  exposed is carried by F-328.
 
 - **F-251 — the "why do the LEDs glow when I touch a pin" explanation must account for the
   LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** The #64000 guide
