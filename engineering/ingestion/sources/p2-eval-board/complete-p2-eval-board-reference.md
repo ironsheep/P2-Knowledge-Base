@@ -283,6 +283,17 @@ extraction defects and must not be silently "cleaned up" downstream.
    are confirmed against the rendered pages and against the original text layer (whose table
    font preserved the fragments " D MI O ( DO)" / " D MO I ( DI)"). The guide does not resolve
    it. → filed as **F-328**.
+   **RESOLVED 2026-08-24 against stronger authority — the p.15 table is right, §18 is wrong.**
+   `sources/rom-booter/rom_booter_v33_01j.lst:135-138` (the P2's own boot ROM) declares
+   `spi_di = 59 'pin SPI memory data in (also sd_di)` and `spi_do = 58 'pin SPI memory data
+   out (also sd_do)`, and `sources/silicon-doc/p2-documentation.txt:9281-9302` maps
+   `P59 (output)` → SD `DI (input)` and `P58 (input)` → SD `DO (output)`. The vocabulary key
+   that makes the two statements comparable comes from
+   `sources/p2-microSD-addon/64009-P2-microSD-AddOn-Guide-v1.0.md:41-42`: card `DI` ≡ bus
+   `MOSI`, card `DO` ≡ bus `MISO`. **So P58 = MISO (card DO, P2 input); P59 = MOSI (card DI,
+   P2 output).** When citing this signal, cite the ROM booter or the silicon-doc boot table —
+   **never §18**. (Note the same silicon-doc row independently confirms §18's *other* half:
+   P61 = SD CLK, P60 = SD CSn.)
 2. **"58 fully free" vs "P0–P55 are fully free".** p.2 says 64 accessible / **58** fully free
    (twice). p.15 says **P0–P55** are fully free, with P56–P63 routed to peripherals. §12 adds a
    third statement: *"P56 and P57 are free by default"*. *(Observation, not the source's: the

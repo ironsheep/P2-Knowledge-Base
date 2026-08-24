@@ -73,11 +73,40 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   microSD CLK"*. P60/P61 agree; **P58 and P59 are opposite in direction between the two
   places**. Both readings are confirmed on the rendered pages and in the original text layer
   (whose table font preserved the fragments `" D MI O ( DO)"` / `" D MO I ( DI)"`). The guide
-  does not resolve it, and this source alone **cannot** settle which is right. Resolve against
-  a stronger authority — the board schematic, the boot-ROM SD sequence in the silicon sources,
-  or the bench — **not** by picking the more plausible-looking of the two. Until then the KB
-  must not assert a direction for P58/P59 as if the guide were unambiguous (it currently
-  does: `P58: "microSD MISO (SDO) / Flash SPI DO"`).
+  does not resolve it, and this source alone cannot settle which is right.
+
+  **RESOLVED 2026-08-24 by cross-source normalization — no bench, no schematic needed.** The
+  answer is **P58 = MISO** (card `DO`, a P2 *input*) and **P59 = MOSI** (card `DI`, a P2
+  *output*). The guide's own p.15 I/O table is **correct**; its §18 bullet list is a
+  **documentary error in the source** and is recorded as errata. Five independent authorities
+  agree, in descending strength:
+  1. **`engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138`** — the P2's
+     own boot ROM, which is the implementation itself and therefore conclusive:
+     `spi_cs = 61 'pin SPI memory select (also sd_ck)` · `spi_ck = 60 '...clock (also sd_cs)` ·
+     `spi_di = 59 'pin SPI memory data in (also sd_di)` · `spi_do = 58 'pin SPI memory data
+     out (also sd_do)`. It names `sd_di` = **59** and `sd_do` = **58** outright.
+  2. **`sources/silicon-doc/p2-documentation.txt:9281-9302`** — the boot-pin table, flattened
+     by extraction but unambiguous once re-columned: `P59 (output)` ↔ SPI flash `DI (input)` ↔
+     SD card `DI (input)`; `P58 (input)` ↔ flash `DO (output)` ↔ SD `DO (output)`. Note the SD
+     column swaps CLK/CSn relative to flash (P61 = SD CLK, P60 = SD CSn), which independently
+     corroborates §18's *"P60 - /CS; P61 - CLK"*.
+  3. **`sources/p2-eval-board/complete-p2-eval-board-reference.md`** (the repaired capture of
+     this very guide) — p.15 I/O table: P58 microSD MISO (SDO), P59 microSD MOSI (SDI).
+  4. **`sources/p2-microSD-addon/64009-P2-microSD-AddOn-Guide-v1.0.md:41-42`** — supplies the
+     vocabulary key that makes the two statements comparable at all: *"MOSI → Connects to
+     SD-DI (CMD/MOSI)"* and *"MISO → Series 240R from SD-DO (MISO)"*. So card `DI` ≡ bus
+     `MOSI` and card `DO` ≡ bus `MISO`; the two guides are not using different conventions.
+  5. **`sources/p2-board-pin-mapping-knowledge.md:129-130`** — P58 = Flash SPI DO/MISO,
+     P59 = Flash SPI DI/MOSI.
+
+  **Consequence: the KB is already correct and must NOT be changed.**
+  `P58: "microSD MISO (SDO) / Flash SPI DO"` stands, now with an authority behind it rather
+  than a coin flip. Half (a) is therefore **not** a KB defect and is **not** work for the
+  repopulation tasks — it is a source errata plus a citation. When «#307» repopulates the
+  microSD block, cite the ROM booter (1) or the silicon-doc boot table (2), **never §18**.
+  *Lesson worth keeping: the apparent contradiction was legible only after a third source
+  supplied the DI/DO ↔ MOSI/MISO vocabulary key. A two-source conflict is sometimes a missing
+  translation, not a disagreement — check for the key before escalating to the bench.*
 
   **(b) The YAML asserts hardware the guide does not describe.** Uncited *and* wrong, which is
   why it is filed rather than left to the uncited-block purge — a purge keyed on missing
@@ -110,10 +139,13 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
   **→ the sprint's purge/repopulate tasks** (remove-all, then re-derive source-first from the
   repaired capture). Do **not** cite-in-place: half of (b) would then acquire a citation to a
-  guide that says the opposite. Half (a) is **blocked on a stronger authority** and must be
-  carried as an explicit open question, not resolved by preference.
-  Status: `CONFIRMED` — (a) source-internal conflict verified on the rendered pages and needs
-  a stronger authority; (b) verified against the repaired source, ready to fix.
+  guide that says the opposite. Half (a) is **closed** — see the resolution above; it needs a
+  citation swap, not a decision.
+  Status: `PARTIAL` — **(a) RESOLVED 2026-08-24** by cross-source normalization against the ROM
+  booter and the silicon-doc boot table: P58 = MISO / P59 = MOSI, the KB is already correct and
+  stands unchanged, and the guide's §18 is source errata. Nothing remains open on (a) and it is
+  **not** blocked on the bench. **(b) CONFIRMED and OPEN** — verified against the repaired
+  source, ready to fix in «#294»/«#307».
 
 ---
 
