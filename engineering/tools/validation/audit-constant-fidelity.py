@@ -65,9 +65,11 @@ TWO TIERS, SPLIT BY WHAT EACH CAN BE CERTAIN ABOUT
     only the verb differs.
 
 SCOPE
-    Truth side  : pipe tables in the ingestion tree that DEFINE constants.
-                  Auto-discovered; printed by name under --inventory. Never
-                  hand-maintained, so it cannot silently stop covering a file.
+    Truth side  : pipe tables, bullet lines, and heading-form entries in the
+                  ingestion tree that DEFINE constants (heading form is a
+                  fallback -- see harvest_source). Auto-discovered; printed
+                  by name under --inventory. Never hand-maintained, so it
+                  cannot silently stop covering a file.
     Claim side  : every .yaml under deliverables/ai/P2/.
 
     A constant is "defined" by the KB only in Form A (a YAML mapping whose KEY
@@ -84,11 +86,17 @@ UNICODE
 
 KNOWN LIMITATIONS -- stated, because a silent one reads as coverage
     1. Source definitions written as a HEADING (`### P_DAC_DITHER_PWM`, with the
-       description in following prose) are not harvested. Only pipe-table and
-       bullet forms are. Consequence: such a constant reports [ORPHAN] when it
-       is in fact defined. Known instance at first run: P_DAC_DITHER_PWM, at
+       description in following prose under a **Description**: label) ARE now
+       harvested, but only as a FALLBACK -- used solely when no pipe-table or
+       bullet form defines the same name anywhere in the truth tree. Fixed
+       2026-08-24; the known instance was P_DAC_DITHER_PWM, at
        smart-pins-catalog/ingestionSources/mode-00011-.../spin2-v51-extract.md:11.
-       Adjudicate ORPHAN by hand until the heading form is parsed.
+       Closing this gap also retired the silence around every OTHER
+       constant defined only this way: nine more (P_STATE_TICKS, P_HIGH_TICKS,
+       P_EVENTS_TICKS, P_PERIODS_TICKS, P_PERIODS_HIGHS, P_COUNTER_TICKS,
+       P_COUNTER_HIGHS, P_COUNTER_PERIODS, P_DAC_DITHER_RND) turned out to be
+       used by the KB and never formally defined by it -- real [UNDEFINED],
+       not a fix side effect.
     2. Tier 2's concept lexicon is a fixed list. It catches the drive-vs-bias and
        invert-vs-true confusions it was built from; it is not a general semantic
        comparator and does not claim to be. A constant passing Tier 2 is NOT
@@ -97,6 +105,22 @@ KNOWN LIMITATIONS -- stated, because a silent one reads as coverage
        "the pin can be configured as an input with a bias resistor" -- is
        invisible to this tool. Name coverage is not semantic coverage, and that
        cuts both ways.
+    4. THE TRUTH SIDE READS `*.md` ONLY, and ROW_RE additionally requires the
+       constant in COLUMN 1 of a line beginning with `|`. Measured consequence,
+       2026-08-24: the CURRENT-EDITION Spin2 v55 symbol table is not on the
+       truth side at all. It lives in `sources/spin2-v55/spin2-v55-text.txt`
+       (a .txt, so never globbed) and its rows are TAB-indented with the %value
+       in column 1 and the NAME in column 2 (so ROW_RE would not match it even
+       if the glob did). That table carries 100 distinct P_ constants; the truth
+       side currently merges 120, drawn from v51-era .md extracts. So wherever
+       v55 ADDED or RE-DESCRIBED a constant, this instrument is auditing the KB
+       against the SUPERSEDED edition and cannot say so.
+       This is a FILE-TYPE and ROW-SHAPE gap -- emphatically NOT a TRUTH_ROOTS
+       question. The roots are correct and must not be widened (see above).
+       Left unfixed by the §10a detector pass deliberately: out of that task's
+       stated scope, and widening the harvest moves the counts. Closing it is a
+       scope decision that belongs with §10b, because arming this as a blocking
+       gate certifies a harvest that never read the current authority edition.
 
 EXIT STATUS
     0  no Tier 1 violations (Tier 2 advisories may still be printed)
@@ -144,7 +168,7 @@ TRUTH_EXCLUDED = [
     (INGEST_ROOT / "extracted-documentation", "raw extraction staging, superseded by sources/"),
 ]
 
-# Rows/lines that DEFINE a constant. FOUR shapes live in the tree, and the
+# Rows/lines that DEFINE a constant. FIVE shapes live in the tree, and the
 # first pass of this tool only handled the first two -- which manufactured
 # false ORPHANs for every constant defined in the other two. An incomplete
 # truth side does not read as "unknown", it reads as "the KB invented this".
@@ -156,6 +180,19 @@ TRUTH_EXCLUDED = [
 _N = r"[`*]{0,2}\s*([A-Z][A-Z0-9_]{2,})\s*[`*]{0,2}"
 ROW_RE = re.compile(rf"^\|\s*{_N}\s*(?:\((?:default|alias)\))?\s*\|(.+)$")
 BULLET_RE = re.compile(rf"^\s*[-*]\s*{_N}\s*:\s*(.+?)\s*$")
+
+# Heading form -- `### NAME` on its own line, definition in the prose that
+# follows under a **Description**: label, before the next heading or a rule.
+# THIS IS A FALLBACK, harvested in a pass that runs only after every
+# row/bullet definition has already claimed its name (see harvest_source) --
+# a table or bullet always outranks a heading, regardless of which file the
+# scan visits first. Without this a constant defined ONLY this way reads as
+# source-silent: [ORPHAN] when the KB defines it too (P_DAC_DITHER_PWM,
+# smart-pins-catalog/.../mode-00011-.../spin2-v51-extract.md:11), or simply
+# invisible when the KB uses it without ever defining it.
+HEADING_RE = re.compile(rf"^#{{1,6}}\s*{_N}\s*$")
+HEADING_DESC_RE = re.compile(r"^\*\*Description\*\*:\s*(.+?)\s*$")
+HEADING_BOUNDARY_RE = re.compile(r"^(#{1,6}\s|-{3,}\s*$)")
 
 # Form A: a YAML mapping whose key IS the constant.
 DEF_RE = re.compile(r'^\s*"?([A-Z][A-Z0-9_]{2,})"?\s*:\s*(.+?)\s*$')
@@ -240,6 +277,7 @@ def strip_desc(raw):
 def harvest_source(prefix):
     """Build the truth table from ingestion pipe tables. Auto-discovered."""
     truth, files = {}, []
+    pending_headings = {}        # heading-form defs, merged after the walk (see below)
     candidates = sorted({p for root in TRUTH_ROOTS if root.is_dir()
                          for p in root.rglob("*.md")})
     for path in candidates:
@@ -259,10 +297,36 @@ def harvest_source(prefix):
             if not desc or set(desc) <= set("-: "):
                 continue
             rows[name] = (desc, f"{path.relative_to(REPO)}:{n}")
-        if rows:
-            files.append((path.relative_to(REPO), len(rows)))
-            for name, val in rows.items():
-                truth.setdefault(name, val)
+        heading_rows = {}
+        for n, line in enumerate(lines, 1):
+            hm = HEADING_RE.match(line)
+            if not hm or not hm.group(1).startswith(prefix):
+                continue
+            for look in lines[n:n + 20]:
+                if HEADING_BOUNDARY_RE.match(look):
+                    break
+                dm = HEADING_DESC_RE.match(look)
+                if dm:
+                    desc = strip_desc(dm.group(1))
+                    if desc and not set(desc) <= set("-: "):
+                        heading_rows[hm.group(1)] = (desc, f"{path.relative_to(REPO)}:{n}")
+                    break
+
+        if rows or heading_rows:
+            files.append((path.relative_to(REPO), len(rows) + len(heading_rows)))
+        for name, val in rows.items():
+            truth.setdefault(name, val)
+        for name, val in heading_rows.items():
+            pending_headings.setdefault(name, val)
+
+    # Heading form is a FALLBACK, and this is where that is enforced: the merge
+    # runs only after EVERY row/bullet definition in the whole truth tree has
+    # claimed its name above, so a heading can fill a name still missing but can
+    # never override one. Deliberate, and independent of which directory the
+    # filesystem walk happens to visit first -- which is exactly why the merge
+    # lives out here rather than inside the loop.
+    for name, val in pending_headings.items():
+        truth.setdefault(name, val)
     return truth, files
 
 

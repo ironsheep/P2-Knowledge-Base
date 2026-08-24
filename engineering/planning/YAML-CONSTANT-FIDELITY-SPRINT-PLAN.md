@@ -42,7 +42,7 @@ recorded as a gap. A sprint that closes 51 findings by guessing at some of them 
 fixed 51 findings — it has replaced defects we could see with defects we cannot.
 
 This is stated as its own rule because **volume is the specific pressure that produces
-inference.** 51 findings, 155 flagged blocks and 41 undefined constants create a real pull
+inference.** 51 findings, 155 flagged blocks and 50 undefined constants create a real pull
 toward batch-fixing by pattern — and the pattern will be right most of the time, which is
 what makes it dangerous. Every defect in this sprint's own origin story was written by
 someone reasoning plausibly: `P_HIGH_15K` *behaves a bit like* a pull-up; a drive ladder
@@ -79,6 +79,17 @@ confident ones, and the closeout reports it that way.
 
 The first four are green and must still be green at exit. The last two are new; driving
 them to exit 0 with **no tolerance recorded** is the sprint.
+
+**Post-«#292» restatement — the fidelity figure above is the ENTRY measurement and stays
+as the historical record; it is no longer the live one.** Closing §10a's heading-form
+harvest gap did what fixing a detector is supposed to do: it made the truth side see
+definitions it had been blind to, and the Tier-1 count went **42 → 50** (the one false
+`[ORPHAN]` cleared, `[UNDEFINED]` 41 → 50). The nine additions were verified on three legs
+before being accepted: each is a genuine Spin2 constant carried by the v55 symbol table, each
+is **used** by the shipped KB, and none is **defined** by it. They were not created by the
+fix; they were unmasked by it, which is precisely why §10a runs first. Tier 2 held at 23 and
+the Tier-2 block is byte-identical. **§6's workload is therefore 50 constants, not 41** — §6
+carries the roster and the source lines.
 
 ## 3. Scope
 
@@ -158,10 +169,18 @@ drive-strength selectors. **Correction is by deletion** — the `pull_up_modes:`
 
 **Findings:** F-325, F-326.
 
-**Starting point.** 41 constants referenced across the shipped set and defined in none of it
-(`P_ADC_1X` in 7 files; `P_ADC_GIO`, `P_ADC_VIO` in 7 each). Source tables exist at
+**Starting point.** **50** constants referenced across the shipped set and defined in none of
+it (`P_ADC_1X` in 7 files; `P_ADC_GIO`, `P_ADC_VIO` in 7 each). Source tables exist at
 `smart-pins-catalog/ingestionSources/basic-io/spin2-v51-extract.md:150-195` and
 `sources/spin2-v51/spin2-builtin-symbols-tables.md`.
+
+**This was 41 at entry and is 50 after «#292».** The nine the detector fix unmasked —
+`P_STATE_TICKS`, `P_HIGH_TICKS`, `P_EVENTS_TICKS`, `P_PERIODS_TICKS`, `P_PERIODS_HIGHS`,
+`P_COUNTER_TICKS`, `P_COUNTER_HIGHS`, `P_COUNTER_PERIODS`, `P_DAC_DITHER_RND` — are the
+time/counter and DAC-dither families, and their definitions are in the v55 symbol table at
+`sources/spin2-v55/spin2-v55-text.txt:1532` and `:1546-1553` (verified 2026-08-24). They are
+in scope here on exactly the same terms as the original 41; do not treat the growth as a
+regression or as licence to stop at 41. See §2's post-«#292» restatement.
 
 **Target (D1).** Extend `language/spin2/symbols/spin2-builtin-symbols-complete.yaml` from 68
 records to cover all 122 referenced constants — it already words them from the source
@@ -248,8 +267,24 @@ silent deletion. *Error:* `audit-register-hygiene.py` exits 0.
 **Target.** `audit-constant-fidelity.py` and `audit-yaml-claim-sourcing.py` run in
 `release-yamls` and `validate-dod-release.py`, **failing the release on any Tier 1
 violation**. No grandfathered baseline and no tolerance value: §4 removes the existing
-population first, so there is nothing to tolerate. Close the known heading-form harvest gap
-in the fidelity tool (its one false ORPHAN).
+population first, so there is nothing to tolerate. ~~Close the known heading-form harvest gap
+in the fidelity tool (its one false ORPHAN).~~ **DONE in «#292»** — the heading-form gap is
+closed and the false `[ORPHAN]` is gone.
+
+**One harvest gap remains OPEN and «#305» must dispose of it before arming.** Recorded as
+`KNOWN LIMITATIONS` item 4 in the tool itself, found while verifying «#292»: the truth side
+globs `*.md` **only**, and `ROW_RE` additionally requires the constant in **column 1** of a
+line beginning with `|`. The current-edition Spin2 v55 symbol table satisfies neither — it
+lives in `sources/spin2-v55/spin2-v55-text.txt` (a `.txt`) and its rows are tab-indented with
+the `%value` in column 1 and the name in column 2. That table carries **100** distinct `P_`
+constants while the truth side currently merges **120**, drawn from v51-era `.md` extracts.
+So wherever v55 added or re-described a constant, this instrument is auditing the KB against
+the **superseded** edition and cannot say so. **This is a file-type and row-shape gap, NOT a
+`TRUTH_ROOTS` question — the roots are correct and must not be widened.** It was left unfixed
+in «#292» deliberately (outside that task's stated scope, and widening the harvest moves the
+counts), but arming a blocking gate on a harvest that never read the current authority
+edition is the same defect class §10a exists to prevent — so «#305» either closes it or
+records, in writing, why arming without it is acceptable.
 
 **Verification.** *Normal:* both exit 0 in the release path. *Edge:* each tool's
 `--negative-control` passes in CI — a check that cannot fail has not been verified, it has
@@ -259,7 +294,7 @@ a pass.
 ## 11. Give the KB a release-notes home
 
 **Why.** `deliverables/ai/` has no CHANGELOG, and the `build-wrapup` overlay records the YAML
-head's version and release-notes homes as `TBD`. This sprint deletes blocks, adds 41
+head's version and release-notes homes as `TBD`. This sprint deletes blocks, adds 50
 definitions and corrects 23 sites — reaching every `p2kb-mcp` consumer with **nothing saying
 what changed**. A sprint that materially rewrites the deliverable is the one that must fix it.
 
@@ -347,7 +382,7 @@ below. «#308» was raised as a proposal and **approved 2026-08-24**._
 | §8 (1/2) | **Complete the `p2-datasheet` ingestion** — all ten broken tables | «#297» | 4 | 5h |
 | §4 (1/2) | Remove ALL uncited blocks — `architecture` · `language` · `guides` · `application-notes` (65) | «#293» | 5 | 4h |
 | §4 (2/2) | Remove ALL uncited blocks — `hardware/` (48) | «#294» | 6 | 3h |
-| §6 | Define the 41 constants; one definition home **(two-phase)** | «#295» | 7 | 3h |
+| §6 | Define the 50 constants; one definition home **(two-phase)** | «#295» | 7 | 3h |
 | §5 | Correct the drive-strength mislabel class by deletion + repoint | «#296» | 8 | 2h 30m |
 | §7 | Promotion filter — survivors **and** every repopulation candidate | «#298» | 9 | 3h |
 | §8 (2/2) | **Repopulate** `architecture` · `language` · `guides` · `application-notes` | «#299» | 10 | 3h |
@@ -367,6 +402,10 @@ execution order.
 1. **§10 split, and its detector half moved to first.** `audit-constant-fidelity.py`
    carries one known false `[ORPHAN]`, and that false positive sits inside the Tier-1
    count §6 has to drive to zero. A detector is fixed before anything trusts its zero.
+   **Vindicated on execution («#292», 2026-08-24):** the fix cleared the false `[ORPHAN]`
+   *and* unmasked nine genuine `[UNDEFINED]` constants the incomplete harvest had been
+   hiding, taking Tier 1 from 42 to 50. Had §6 run first it would have driven a count that
+   was wrong in both directions to a zero that meant nothing.
 2. **§6 moved before §5.** §5's target is *"the files point at the single definition
    home (§6)"*. Run in section order, §5 would repoint at a file that does not exist
    yet, fail `validate-crossref-keys.py`, and could not end at a protection point.
@@ -454,10 +493,16 @@ No atomic green-unit was needed. The **four entry gates**
 `audit-guide-conformance.py --inventory`) exit 0 at entry and must exit 0 at the end of
 **every** task — that is the protection point each one ends at.
 
-The **two new instruments exit 1 at entry by design** (42 / 23 and 113 / 91). A task that
-leaves them non-zero has not broken anything: it is counting down against a recorded
-baseline, and the gates are not armed until «#305». Every task states this so an executor
-does not read progress as regression, or "fix" it by weakening the change just made.
+The **two new instruments exit 1 at entry by design** (42 / 23 and 113 / 91; the fidelity
+figure is **50 / 23** from «#292» onward — see §2). A task that leaves them non-zero has not
+broken anything: it is counting down against a recorded baseline, and the gates are not armed
+until «#305». Every task states this so an executor does not read progress as regression, or
+"fix" it by weakening the change just made.
+
+**A count that goes UP is not automatically a regression either.** «#292» raised Tier 1 from
+42 to 50 by repairing the harvest behind it, and that was the intended effect of running the
+detector fix first. The test is not the direction the number moved — it is whether the move
+is explained and the explanation is verified against the source.
 
 ### Dispatch shape
 
