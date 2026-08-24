@@ -1,0 +1,5 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+COGINIT #1, #$100			'load and start cog 1 from hub address $100

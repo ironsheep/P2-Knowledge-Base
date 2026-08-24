@@ -1,0 +1,733 @@
+[
+ {
+  "id": 1,
+  "head": "CONVENTIONS",
+  "lines": [
+   "ex: %0101 and %11000111"
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 12,
+  "head": "Hub Execution",
+  "lines": [
+   "RDFAST / WRFAST / FBLOCK",
+   "RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS",
+   "WFBYTE / WFWORD / WFLONG"
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 13,
+  "head": "Starting And Stopping Cogs",
+  "lines": [
+   "COGINIT id, addr WC\t\t'(id=$30) start a free cog at addr, C=0 and id=Cog ID if okay"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "addr",
+   "id"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk013.spin2"
+ },
+ {
+  "id": 14,
+  "head": "Starting And Stopping Cogs",
+  "lines": [
+   "COGINIT #1, #$100\t\t\t'load and start cog 1 from hub address $100"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk014.spin2"
+ },
+ {
+  "id": 15,
+  "head": "Starting And Stopping Cogs",
+  "lines": [
+   "SETQ    ptra_val\t\t\t'ptra_val will go into target cog's PTRA register",
+   "COGINIT #%0_1_0000, addr\t\t'load and start a free cog at addr"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "addr",
+   "ptra_val"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk015.spin2"
+ },
+ {
+  "id": 16,
+  "head": "Starting And Stopping Cogs",
+  "lines": [
+   "COGID   myID\t\t\t\t'my cog ID is written to myID"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "myID"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk016.spin2"
+ },
+ {
+  "id": 17,
+  "head": "Starting And Stopping Cogs",
+  "lines": [
+   "COGID   myID\t\t\t\t'get my ID",
+   "COGSTOP myID\t\t\t\t'halt myself"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "myID"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk017.spin2"
+ },
+ {
+  "id": 18,
+  "head": "Cog Attention",
+  "lines": [
+   "COGATN   #00001100\t\t\t'Get attention of cogs 2 and 3"
+  ],
+  "class": "code",
+  "status": "FAIL",
+  "declared": [],
+  "debug_flag": false,
+  "err": "blk018.spin2:5:error:Constant must be from 0 to 511 (m130)",
+  "file": "blk018.spin2",
+  "note": "SOURCE ERRATUM: '#00001100' is decimal 1100 (exceeds the 0..511 immediate range). The comment 'Get attention of cogs 2 and 3' requires bits 2 and 3, i.e. %00001100 = 12. A '%' is missing."
+ },
+ {
+  "id": 19,
+  "head": "Cog Attention",
+  "lines": [
+   "POLLATN         WC\t\t\t'has attention been requested?",
+   "WAITATN\t\t\t\t'wait for attention request",
+   "JATN     addr\t\t\t'jump to addr if attention requested",
+   "JNATN    addr\t\t\t'jump to addr if attention not requested"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "addr"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk019.spin2"
+ },
+ {
+  "id": 20,
+  "head": "System Counter",
+  "lines": [
+   "GETCT  X         \t\t\t'read lower 32-bits (CT) of system counter into X register"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "X"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk020.spin2"
+ },
+ {
+  "id": 21,
+  "head": "System Counter",
+  "lines": [
+   "GETCT  X      WC\t\t\t'read upper 32-bits (CTH) of system counter into X register",
+   "GETCT  Y      \t\t\t'read lower 32-bits (CT) of system counter into Y register",
+   "GETCT   x\t\t\t\t'get current CT",
+   "ADDCT1  x,#500\t\t\t'make target 500 cycles later (CT1)",
+   "WAITCT1\t\t\t\t'wait for CT to pass CT1 target"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "X",
+   "Y"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk021.spin2"
+ },
+ {
+  "id": 23,
+  "head": "Pseudo-Random Number Generator",
+  "lines": [
+   "HUBSET  x       \t\t\t'seed 32 bits of the Xoroshiro128** state"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "x"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk023.spin2"
+ },
+ {
+  "id": 29,
+  "head": "System Clock Configuration",
+  "lines": [
+   "        HUBSET  ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS     'set clock mode"
+  ],
+  "class": "bitfield-template",
+  "status": "not-compiled"
+ },
+ {
+  "id": 31,
+  "head": "PLL Example",
+  "lines": [
+   "        HUBSET  #$F0                                'set 20 MHz+ (RCFAST) mode",
+   "        HUBSET  ##%1_100111_0100101000_1111_10_00   'enable crystal+PLL, stay in RCFAST mode",
+   "        WAITX   ##20_000_000/100                    'wait ~10ms for crystal+PLL to stabilize",
+   "        HUBSET  ##%1_100111_0100101000_1111_10_11   'now switch to PLL running at 148.5 MHz"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk031.spin2"
+ },
+ {
+  "id": 32,
+  "head": "Locks (Semaphores)",
+  "lines": [
+   "LOCKNEW    D {WC}",
+   "LOCKRET {#}D",
+   "LOCKTRY {#}D {WC}",
+   "LOCKREL {#}D {WC}"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 33,
+  "head": "Lock Usage",
+  "lines": [
+   ".try            LOCKTRY write_lock WC",
+   "        IF_NC   JMP #.try"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "write_lock"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk033.spin2"
+ },
+ {
+  "id": 36,
+  "head": "Multiply",
+  "lines": [
+   "QMUL    D/#,S/#\t\t- Multiply D by S"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 37,
+  "head": "Multiply",
+  "lines": [
+   "\tGETQX   lower_long",
+   "\tGETQY   upper_long"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "lower_long",
+   "upper_long"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk037.spin2"
+ },
+ {
+  "id": 38,
+  "head": "Divide",
+  "lines": [
+   "\tQDIV    D/#,S,#\t\t- Divide {$00000000:D} by S"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 39,
+  "head": "Divide",
+  "lines": [
+   "\tSETQ    Q/#\t\t\t- Set top part of numerator",
+   "\tQDIV    D/#,S,#\t\t- Divide {Q:D} by S"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 40,
+  "head": "Divide",
+  "lines": [
+   "\tQFRAC   D/#,S,#\t\t- Divide {D:$00000000} by S"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 41,
+  "head": "Divide",
+  "lines": [
+   "\tSETQ    Q/#\t\t\t- Set bottom part of numerator",
+   "\tQFRAC   D/#,S,#\t\t- Divide {D:Q} by S"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 42,
+  "head": "Divide",
+  "lines": [
+   "\tGETQX   quotient",
+   "\tGETQY   remainder"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "quotient",
+   "remainder"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk042.spin2"
+ },
+ {
+  "id": 43,
+  "head": "Square Root",
+  "lines": [
+   "QSQRT   D/#,S,#\t\t- Compute square root of {S:D}",
+   "\tGETQX   root"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 44,
+  "head": "Rotation",
+  "lines": [
+   "\tSETQ    Q/#\t\t\t- Set Y",
+   "\tQROTATE D/#,S,#\t\t- Rotate (D,Q) by S",
+   "\tGETQX   X",
+   "\tGETQY   Y"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 45,
+  "head": "Cartesian to Polar",
+  "lines": [
+   "\tQVECTOR D/#,S,#\t\t- (X=D,Y=S) cartesian into (length,angle) polar",
+   "\tGETQX   length",
+   "\tGETQY   angle"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 46,
+  "head": "Polar to Cartesian",
+  "lines": [
+   "\tQROTATE D/#,S,#\t\t- Rotate (D,$00000000) by S",
+   "\tGETQX   X",
+   "\tGETQY   Y"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 47,
+  "head": "Integer to Logarithm",
+  "lines": [
+   "\tQLOG    D/#\t\t\t- Compute log base 2 of D",
+   "\tGETQX   logarithm"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 48,
+  "head": "Logarithm to Integer",
+  "lines": [
+   "\tQEXP    D/#\t\t\t- Compute 2 to the power of D",
+   "\tGETQX   integer"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 58,
+  "head": "Smart Modes",
+  "lines": [
+   "    WRPIN   D/#,S/#         - Set smart pin S/# mode to D/#, ack pin",
+   "    WXPIN   D/#,S/#         - Set smart pin S/# parameter X to D/#, ack pin",
+   "    WYPIN   D/#,S/#         - Set smart pin S/# parameter Y to D/#, ack pin",
+   "    RDPIN   D,S/# {WC}      - Get smart pin S/# result Z into D, flag into C, ack pin",
+   "    RQPIN   D,S/# {WC}      - Get smart pin S/# result Z into D, flag into C, don't ack pin",
+   "    AKPIN   S/#             - Acknowledge pin S/#"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 60,
+  "head": "Smart Modes",
+  "lines": [
+   "       WRPIN                           'acknowledge smart pin, releases IN from high",
+   "       NOP                             'elapse 2 clocks (or more)",
+   "       TESTP   pin     WC              'IN can now be polled again"
+  ],
+  "class": "illustrative-fragment",
+  "status": "not-compiled",
+  "declared": [
+   "pin"
+  ],
+  "debug_flag": false,
+  "err": "blk060.spin2:5:error:Expected a constant, unary operator, or \"(\"",
+  "file": "blk060.spin2",
+  "note": "bare WRPIN: operands deliberately omitted to stand for 'a WRPIN acknowledge of any pin'. WRPIN has only the form WRPIN {#}D,{#}S (P2 Instructions v35 row 217) - no zero-operand alias, so it cannot compile as printed."
+ },
+ {
+  "id": 71,
+  "head": "NCO Frequency (%00110)",
+  "lines": [
+   "Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase setting."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 74,
+  "head": "NCO Duty (%00111)",
+  "lines": [
+   "Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase setting."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 100,
+  "head": "About SINC2 and SINC3 filtering",
+  "lines": [
+   "       RDPIN   x,#adcpin              'get SINC2 accumulator",
+   "       SHL     x,#5                   'prescale 27-bit to 32-bit",
+   "       SUB     x,diff                 'compute sample",
+   "       ADD     diff,x                 'update diff value"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin",
+   "diff",
+   "x"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk100.spin2"
+ },
+ {
+  "id": 101,
+  "head": "About SINC2 and SINC3 filtering",
+  "lines": [
+   "       RDPIN   x,#adcpin              'get SINC2 accumulator",
+   "       SUB     x,diff                 'compute sample",
+   "       ADD     diff,x                 'update diff value",
+   "       ZEROX   x,#26                  'trim to 27-bit"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin",
+   "diff",
+   "x"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk101.spin2"
+ },
+ {
+  "id": 103,
+  "head": "SINC2 Sampling Mode (%00)",
+  "lines": [
+   "       WRPIN   ##%100011_0000000_00_11000_0,adcpin    'configure ADC+sample pin(s)",
+   "       WXPIN   #%00_0111,adcpin                       'SINC2 sampling at 8 bits",
+   "       DIRH    adcpin                                 'enable smart pin(s)"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk103.spin2"
+ },
+ {
+  "id": 104,
+  "head": "SINC2 Sampling Mode (%00)",
+  "lines": [
+   "       RDPIN   sample,adcpin                          'read sample at any time"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin",
+   "sample"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk104.spin2"
+ },
+ {
+  "id": 105,
+  "head": "SINC2 Filtering Mode (%01)",
+  "lines": [
+   "       WRPIN   ##%100011_0000000_00_11000_0,#adcpin   'configure ADC+filter pin(s)",
+   "       WXPIN   #%01_0111,#adcpin                      'SINC2 filtering at 128 clocks",
+   "       DIRH    #adcpin                                'enable smart pin(s)"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk105.spin2"
+ },
+ {
+  "id": 106,
+  "head": "SINC2 Filtering Mode (%01)",
+  "lines": [
+   "       SETSE1  #%001<<6 + adcpin                      'SE1 triggers on pin high",
+   ".loop  WAITSE1                                        'wait for sample period done",
+   "       RDPIN   x,#adcpin                              'get SINC2 accumulator",
+   "       SUB     x,diff                                 'compute sample",
+   "       ADD     diff,x                                 'update diff value",
+   "       SHR     x,#6                                   'justify 8-bit sample",
+   "       ZEROX   x,#7                                   'trim 8-bit sample",
+   "       JMP     #.loop                                 'loop for next period",
+   "x      RES     1                                      'sample value",
+   "diff   RES     1                                      'diff value"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk106.spin2"
+ },
+ {
+  "id": 107,
+  "head": "SINC3 Filtering Mode (%10)",
+  "lines": [
+   "       WRPIN   ##%100011_0000000_00_11000_0,#adcpin   'configure ADC+filter pin(s)",
+   "       WXPIN   #%10_0111,#adcpin                      'SINC3 filtering at 128 clocks",
+   "       DIRH    #adcpin                                'enable smart pin(s)"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk107.spin2"
+ },
+ {
+  "id": 108,
+  "head": "SINC3 Filtering Mode (%10)",
+  "lines": [
+   "       SETSE1  #%001<<6 + adcpin                      'SE1 triggers on pin high",
+   ".loop  WAITSE1                                        'wait for sample period done",
+   "       RDPIN   x,#adcpin                              'get SINC3 accumulator",
+   "       SUB     x,diff1                                'compute sample",
+   "       ADD     diff1,x                                'update diff1 value",
+   "       SUB     x,diff2                                'compute sample",
+   "       ADD     diff2,x                                'update diff2 value",
+   "       SHR     x,#7                                   'justify 14-bit sample",
+   "       ZEROX   x,#13                                  'trim 14-bit sample",
+   "       JMP     #.loop                                 'loop for next period",
+   "x      RES     1                                      'sample value",
+   "diff1  RES     1                                      'diff1 value",
+   "diff2  RES     1                                      'diff2 value"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk108.spin2"
+ },
+ {
+  "id": 110,
+  "head": "Bitstream Capturing Mode (%11)",
+  "lines": [
+   "       WRPIN   ##%100011_0000000_00_11000_0,adcpin    'configure ADC+sample pin(s)",
+   "       WXPIN   #%11_0101,adcpin                       'raw sampling every 32 clocks",
+   "       DIRH    adcpin                                 'enable smart pin(s)",
+   "       RDPIN   bitstream,adcpin                       'get snapshot of ADC bitstream"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "adcpin",
+   "bitstream"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk110.spin2"
+ },
+ {
+  "id": 112,
+  "head": "ADC Scope With Trigger (%11010)",
+  "lines": [
+   "WXPIN is used to configure this mode."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 113,
+  "head": "ADC Scope With Trigger (%11010)",
+  "lines": [
+   "RDPIN / RQPIN always returns the 8-bit sample, along with the 'armed' state in the C flag."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 114,
+  "head": "SCOPE Data Pipe",
+  "lines": [
+   "        RQPIN   x,#pinblock | 3     'read pin3 long into x",
+   "        ROLBYTE y,x                 'rotate pin3 byte into y",
+   "        RQPIN   x,#pinblock | 2     'read pin2 long into x",
+   "        ROLBYTE y,x                 'rotate pin2 byte into y",
+   "        RQPIN   x,#pinblock | 1     'read pin1 long into x",
+   "        ROLBYTE y,x                 'rotate pin1 byte into y",
+   "        RQPIN   x,#pinblock | 0     'read pin0 long into x",
+   "        ROLBYTE y,x                 'rotate pin0 byte into y"
+  ],
+  "class": "code",
+  "status": "FAIL",
+  "declared": [
+   "pinblock",
+   "x",
+   "y"
+  ],
+  "debug_flag": false,
+  "err": "blk114.spin2:6:error:Expected \",\"",
+  "file": "blk114.spin2",
+  "note": "SOURCE ERRATUM: 'ROLBYTE y,x' is a 2-operand form. ROLBYTE has only ROLBYTE D,{#}S,#N and the ALTGB-alias ROLBYTE D (P2 Instructions v35 rows 94/95). Intent per the comments ('rotate pinN byte into y', reading the RDPIN lower byte) is ROLBYTE y,x,#0. Occurs 4x in this block."
+ },
+ {
+  "id": 119,
+  "head": "USB Host/Device (%11011)",
+  "lines": [
+   "       SHR     D,#8    WC      'get byte into D, get toggle bit into C",
+   "       CMPX    flag,#1 WZ      'compare toggle bit to flag, new byte if Z",
+   "IF_Z   XOR     flag,#1         'if new byte, toggle flag",
+   "IF_Z   <use byte>              'if new byte, do something with it"
+  ],
+  "class": "syntax-notation",
+  "status": "not-compiled"
+ },
+ {
+  "id": 123,
+  "head": "Synchronous Serial Transmit (%11100)",
+  "lines": [
+   "If you intend to send MSB-first data, you must first shift and then reverse it. For example, if you had a byte in D that you wanted to send MSB-first, you would do a 'SHL D,#32-8' and then a 'REV D'."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 125,
+  "head": "Synchronous Serial Receive (%11101)",
+  "lines": [
+   "If you received LSB-first data, it will require right-shifting, unless the word size was 32 bits. For a word size of 8 bits, you would need to do a 'SHR D,#32-8' to get the data LSB-justified."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 130,
+  "head": "Asynchronous Serial Transmit (%11110)",
+  "lines": [
+   "       WYPIN   x,#txpin        'load output word",
+   "       WAITX   #1              'wait 2+1 clocks before polling busy",
+   "wait   RDPIN   x,#txpin  WC    'get busy flag into C",
+   "IF_C   JMP     #wait           'loop until C = 0"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [
+   "txpin",
+   "x"
+  ],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk130.spin2"
+ },
+ {
+  "id": 132,
+  "head": "Asynchronous Serial Receive (%11111)",
+  "lines": [
+   "RDPIN / RQPIN is used to read the received word. The word must be shifted right by 32 minus the word size. For example, to LSB-justify an 8-bit word received, you would do a 'SHR D,#32-8'."
+  ],
+  "class": "prose-in-monospace",
+  "status": "dropped",
+  "reason": "all lines read as prose"
+ },
+ {
+  "id": 140,
+  "head": "Prop_Hex",
+  "lines": [
+   "DAT\tORG",
+   "\tnot\tdirb\t\t\t'all outputs",
+   ".lp\tnot\toutb\t\t\t'toggle states (blinks leds on Prop123 & P2 Eval boards)",
+   "\twaitx\t##20_000_000/4\t'wait \u00bc second",
+   "\tjmp\t#.lp\t\t\t'loop"
+  ],
+  "class": "code",
+  "status": "PASS",
+  "declared": [],
+  "debug_flag": false,
+  "err": "",
+  "file": "blk140.spin2"
+ }
+]

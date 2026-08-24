@@ -1,0 +1,10 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       WRPIN   ##%100011_0000000_00_11000_0,adcpin    'configure ADC+sample pin(s)
+       WXPIN   #%11_0101,adcpin                       'raw sampling every 32 clocks
+       DIRH    adcpin                                 'enable smart pin(s)
+       RDPIN   bitstream,adcpin                       'get snapshot of ADC bitstream
+adcpin	RES	1
+bitstream	RES	1

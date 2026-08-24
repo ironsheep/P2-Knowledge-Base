@@ -1,0 +1,6 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+COGID   myID				'my cog ID is written to myID
+myID	RES	1

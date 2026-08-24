@@ -1,0 +1,10 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       WYPIN   x,#txpin        'load output word
+       WAITX   #1              'wait 2+1 clocks before polling busy
+wait   RDPIN   x,#txpin  WC    'get busy flag into C
+IF_C   JMP     #wait           'loop until C = 0
+txpin	RES	1
+x	RES	1

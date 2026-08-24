@@ -1,0 +1,11 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+GETCT  X      WC			'read upper 32-bits (CTH) of system counter into X register
+GETCT  Y      			'read lower 32-bits (CT) of system counter into Y register
+GETCT   x				'get current CT
+ADDCT1  x,#500			'make target 500 cycles later (CT1)
+WAITCT1				'wait for CT to pass CT1 target
+X	RES	1
+Y	RES	1

@@ -1,0 +1,9 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+POLLATN         WC			'has attention been requested?
+WAITATN				'wait for attention request
+JATN     addr			'jump to addr if attention requested
+JNATN    addr			'jump to addr if attention not requested
+addr	RES	1

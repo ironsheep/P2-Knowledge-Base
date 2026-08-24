@@ -1,0 +1,8 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+SETQ    ptra_val			'ptra_val will go into target cog's PTRA register
+COGINIT #%0_1_0000, addr		'load and start a free cog at addr
+addr	RES	1
+ptra_val	RES	1

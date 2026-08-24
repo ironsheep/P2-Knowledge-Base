@@ -1,0 +1,15 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       SETSE1  #%001<<6 + adcpin                      'SE1 triggers on pin high
+.loop  WAITSE1                                        'wait for sample period done
+       RDPIN   x,#adcpin                              'get SINC2 accumulator
+       SUB     x,diff                                 'compute sample
+       ADD     diff,x                                 'update diff value
+       SHR     x,#6                                   'justify 8-bit sample
+       ZEROX   x,#7                                   'trim 8-bit sample
+       JMP     #.loop                                 'loop for next period
+x      RES     1                                      'sample value
+diff   RES     1                                      'diff value
+adcpin	RES	1

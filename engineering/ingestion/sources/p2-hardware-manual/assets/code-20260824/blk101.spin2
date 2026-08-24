@@ -1,0 +1,11 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       RDPIN   x,#adcpin              'get SINC2 accumulator
+       SUB     x,diff                 'compute sample
+       ADD     diff,x                 'update diff value
+       ZEROX   x,#26                  'trim to 27-bit
+adcpin	RES	1
+diff	RES	1
+x	RES	1

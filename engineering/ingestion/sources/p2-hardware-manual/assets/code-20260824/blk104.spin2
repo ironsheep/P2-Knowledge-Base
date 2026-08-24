@@ -1,0 +1,7 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       RDPIN   sample,adcpin                          'read sample at any time
+adcpin	RES	1
+sample	RES	1

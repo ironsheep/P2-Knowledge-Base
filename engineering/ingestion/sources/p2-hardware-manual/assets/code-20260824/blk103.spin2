@@ -1,0 +1,8 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+       WRPIN   ##%100011_0000000_00_11000_0,adcpin    'configure ADC+sample pin(s)
+       WXPIN   #%00_0111,adcpin                       'SINC2 sampling at 8 bits
+       DIRH    adcpin                                 'enable smart pin(s)
+adcpin	RES	1

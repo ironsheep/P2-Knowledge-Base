@@ -1,3 +1,25 @@
+> **SUPERSEDED 2026-08-24 by the DOCX-primary re-ingestion — kept in place, not archived.**
+>
+> This 2025-08-15 file is an *analysis summary*, not an extraction: the numbers in it were produced
+> by a run whose output was never committed, so nothing here can be read back to the source. The
+> actual extraction now lives beside it:
+>
+> - `p2-hardware-manual-text.txt` — full ordered text (159,098 chars), losslessness proven
+> - `complete-tables-reference.md` — all **53** tables, including the 4 nested inside another
+>   table's cell (the pin drive-strength ladder is one of them)
+> - `assets/code-20260824/` — 51 monospace blocks classified, 24 `pnut-ts`-validated
+> - `assets/images-p2-hardware-manual-20260824/` — 37 figures + `image-catalog.md`
+> - `p2-hardware-manual-complete-extraction-audit.md` — **the audit of record**
+>
+> Its headline claims are corrected there (§0). Notably *"NO CONFLICTS FOUND ✅"* below is not a
+> finding this run reproduces: see F-329 in `engineering/operations/P2KB-CORRECTION-FINDINGS.md`
+> and G-016/G-017/G-018 in `engineering/ingestion/KNOWLEDGE-GAPS.md`.
+>
+> **Why it is still here:** `engineering/planning/YAML-CONSTANT-FIDELITY-SPRINT-PLAN.md` §8 and
+> `sources/p2-eval-board/p2-eval-board-cross-source-analysis.md` reference this path. Per
+> `ingest-source` §0.6 (Titus rev5 refinement) the physical archive-move is gated on redirecting
+> those references first; until then it is marked in place.
+
 # Propeller 2 Hardware Manual 2022-11-01 - Extraction & Analysis
 *CRITICAL NEW SOURCE - Hardware-focused documentation*
 *Date Extracted: 2025-08-15*

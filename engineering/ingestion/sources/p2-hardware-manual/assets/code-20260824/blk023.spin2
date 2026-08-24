@@ -1,0 +1,6 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+HUBSET  x       			'seed 32 bits of the Xoroshiro128** state
+x	RES	1

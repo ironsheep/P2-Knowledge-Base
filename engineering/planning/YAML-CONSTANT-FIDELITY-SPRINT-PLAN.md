@@ -478,8 +478,24 @@ what makes it matter:
   rather than by fighting `camelot` — it converts «#297» from an extraction fight into a
   corroboration. Raised as «#308» because it widens scope (stop 1, his call), and **approved
   2026-08-24**. Two copies of that DOCX exist with **different byte counts** — 6,751,607 in
-  `sources/p2-hardware-manual/` and 6,993,299 in `external-inputs/p2/` — so which is canonical
-  is determined at ingestion, on evidence, not assumed from the dashboard's note.
+  `sources/p2-hardware-manual/` and ~~6,993,299~~ **6,697,923** in `external-inputs/p2/` — so
+  which is canonical is determined at ingestion, on evidence, not assumed from the dashboard's
+  note.
+
+  **SETTLED 2026-08-24 at «#308», and this paragraph was itself wrong twice over.** (1) The
+  6,993,299 figure was a **misattribution**: it is the size of `Parallax Spin2 Documentation
+  v51.docx`, a different document sitting in the same `external-inputs/p2/` folder. The real
+  second copy is 6,697,923 bytes. The wrong number was written here at planning time and then
+  carried verbatim into the «#308» dispatch — a fabricated-by-misattribution quantity in the
+  sprint's own plan, which is precisely the defect class the sprint exists to remove. (2) The
+  dashboard's "older export" note was **also** wrong: the two copies are the **same edition
+  exported twice**. Verified independently by the arbiter — extracted text byte-identical
+  (md5 match, 144,300 chars by `w:t` concatenation, 5,209 digits), identical structure
+  (3,198 paragraphs · 53 tables · 280 rows), identical tracked changes (10 `w:ins`, 3 `w:del`),
+  identical media md5 *set* across 39 files. Only the container differs: fonts re-embedded,
+  media renumbered, `styles.xml`/`settings.xml` re-serialized. **Canonical = the `sources/`
+  copy.** *Lesson: a byte count is a measurement of a path, and a path is easy to mis-copy —
+  neither number here had been read off disk since it was written down.*
 
 **And there is no DOCX edition of the datasheet.** Every `.docx` in the ingestion tree was
 enumerated at tasking; the datasheet is not among them. So «#297» has no structured-source

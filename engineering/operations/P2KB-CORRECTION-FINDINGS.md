@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-329`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-330`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -149,12 +149,16 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
-## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327
+## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327, F-329
 
 > **Origin.** An agent consuming the published KB could not work out how to use pull-ups and
 > pull-downs, and reported conflicts around the smart-pin area (relayed by Stephen, 2026-08-24).
 > Agent report is a lead, not a source; every item below was re-derived from
 > `{{DOMAIN_AUTHORITY}}` before filing.
+>
+> **F-329 was added to this section 2026-08-24**, after the `p2-hardware-manual` DOCX re-ingestion
+> found the *same* fabricated ladder in three further blocks of `io_pin_timing.yaml` that F-327's
+> location line does not cover. It belongs to this root cause, not a new one.
 >
 > **Root cause, one sentence:** *the P2 has no pull-up or pull-down resistors, and the KB
 > documents a whole family of them.* `P_HIGH_*` / `P_LOW_*` select **drive strength** — how hard
@@ -372,6 +376,94 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > opus-master carries the fabricated ladder, the impedance table, or a pin slew-rate claim.
 > (`architect-guide-body.md`'s "slew" hits are rate-adapters in a dataflow sense — unrelated.)
 > This class is confined to the YAML, so no manual corrections wave follows from it.
+
+### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `CONFIRMED`
+
+> **Found:** 2026-08-24, by the DOCX-primary re-ingestion of `p2-hardware-manual` (the source
+> plan §8 names as the datasheet's cross-check partner). This is **additive to F-327, not a
+> re-file**: F-327's location line is `:200-233` + `:234-246`, and every claim below sits
+> **outside** those ranges. Applied literally to the lines it names, F-327's fix would leave the
+> fabricated ladder standing in two other blocks of the same file.
+>
+> **Where — three blocks, none of them named by F-327:**
+>
+> | Lines | Block | What it carries |
+> |---|---|---|
+> | `:96-105` | `timing_specifications.output_timing.propagation_delay.fast_mode` / `.normal_mode` | `2.5/3.5/5.0 ns` and `3.5/5.0/7.0 ns` |
+> | `:108-113` | `…propagation_delay.drive_strength_impact` | **2nd copy of the fabricated ladder** — `1.5mA · 3.0mA · 15mA · 30mA · 75mA · 150mA`, each with a ns delta |
+> | `:118-137` | `…output_timing.rise_time.configurations` | **3rd copy** — five `drive:` entries `150mA/75mA/30mA/15mA/1.5mA`, each with a `15pF` load and a ns rise time |
+> | `:145-158` | `timing_specifications.input_timing.propagation_delay` | `2.0/3.0/4.5 ns`, `3.5/5.0/7.0 ns` |
+>
+> **None of these blocks carries a `source:` field** — the same self-flagging tell F-327 identified.
+>
+> **1. The cited datasheet pages do not exist.** Line 3 reads
+> `# Datasheet Reference: pages 42-45, 76-78, Electrical Specifications`.
+> `Propeller2-P2X8C4M64P-Datasheet-20221101.pdf` is **50 pages** (`pdfinfo`). Pages 76-78 cannot
+> exist. Its electrical tables are **DC Characteristics on p.47 and AC Characteristics on p.48**;
+> pages 42-45 are not them. This is not an off-by-a-few citation — it points outside the document.
+>
+> **2. Neither of the two independent extraction paths carries I/O-pin timing in nanoseconds.**
+>
+> - **Path A — P2 Hardware Manual (2022/11/01), re-ingested DOCX-primary 2026-08-24.** Its
+>   *I/O Pin Timing* section states delay **only in clock cycles** ("three additional clocks",
+>   "three clocks before", "two clocks before"). Its three timing diagrams
+>   (`assets/images-p2-hardware-manual-20260824/fig-34..36`, newly extracted — this source had
+>   **no image catalog at all** before) are clock-numbered `0..6` with **no nanosecond axis**;
+>   `fig-34` was rendered and read to confirm. Across the whole extract
+>   (`p2-hardware-manual-text.txt`, 159,098 chars) the unit tokens present are
+>   `MHz · V · ms · kΩ · kHz · Ω · µA · pF · mA` — **`ns` appears zero times, and so does the word
+>   "nanosecond"**. The document has no nanosecond quantity anywhere in it.
+> - **Path B — P2 Datasheet.** Its AC Characteristics table contains exactly **two** symbols:
+>   `Freq` (oscillator frequency) and `Cin` (XI/XO pin capacitance). There is no propagation-delay,
+>   rise-time or input-timing row anywhere in it.
+>
+> **Stated as a measurement, not a verdict:** the datasheet's extraction is the known-broken
+> `p2-datasheet-narrative.txt`, so "the datasheet does not say X" is weaker evidence than
+> "the hardware manual says Y". The AC table's *content* is present in that extract (all symbols,
+> parameters, conditions, values and units, merely column-linearized) and it is the only AC table
+> in a 50-page document — but **the `camelot lattice` pass owed by plan §8 is what settles it**.
+> The drive-ladder half below does not depend on that and is decisive on its own.
+>
+> **3. The relabeling is decisive on documentary grounds.** The P2 Hardware Manual gives the pin
+> drive ladder in two independent places within itself, and both are **resistive**:
+>
+> - **Table 18's nested legend** (`complete-tables-reference.md`, Table 21 — a table nested inside
+>   a cell, which is why a naive DOCX walk drops it): `HHH/LLL` = `000 Fast · 001 1.5 kΩ ·
+>   010 15 kΩ · 011 150 kΩ · 100 1 mA · 101 100 µA · 110 10 µA · 111 Float`.
+> - **The equivalent-schematic figures** (`fig-10`..`fig-33`), whose on-diagram legend reads
+>   `000 Digital · 001 1.5k · 010 15k · 011 150k · 100 1mA · 101 100uA · 110 10uA · 111 Float`.
+>
+> The KB's `1.5mA / 15mA / 150mA` reuse the numerals of the **kΩ** rungs with the unit changed.
+> This is the third source to say so, after F-324's bit-pattern decode and F-327's silicon-doc
+> image catalog.
+>
+> **4. Two of the fabricated rungs exceed the device's rated maximum.** Both sources agree the
+> **maximum current per I/O pin is ±30 mA** (Hardware Manual *Specifications* table, verbatim
+> `Max current per I/O | +/- 30mA`; the datasheet's DC Characteristics characterises `Vol`/`Voh`
+> at sinking/sourcing 1 mA, 10 mA and 30 mA — 30 mA is the top of its own characterisation).
+> A `75mA` or `150mA` per-pin drive mode is not a P2 capability, so `rise_time` rows keyed to
+> them describe nothing.
+>
+> **What is NOT wrong in this file, and must survive the purge.** `instruction_to_pin_timing:`
+> (`:16-89`) is **exactly corroborated** by the Hardware Manual, clause for clause: output latency
+> 3 clocks after the instruction; `INx` reads 3 clocks stale; `TESTP`/`TESTPN` 2 clocks stale
+> ("fresher than INx"); smart-pin IN drop 2 clocks after `WRPIN/WXPIN/WYPIN/RDPIN/AKPIN`. That is
+> the corroborated core of the file and it is *un*cited today — it needs a citation added, not
+> removal. **Recording this is the point of running the ingestion before the purge**: without it,
+> a remove-all sweep over uncited quantitative blocks takes the good half with the bad.
+>
+> **Correction.** Remove `:96-105`, `:108-113`, `:118-137` and `:145-158` under the sprint's
+> source-first rule (an uncited claim is removed, not rewritten). Fix or delete the impossible
+> page citation on line 3. Re-derive `instruction_to_pin_timing:` in place with a citation to
+> the Hardware Manual's *I/O Pin Timing* section. Fold the drive-ladder occurrences into whatever
+> single definition home F-325 creates rather than leaving a fourth, fifth and sixth copy.
+>
+> **Lesson for the sweep that follows.** F-327 found this class and named two blocks; the same
+> fabrication was sitting in three more blocks of the same file, and the deciding evidence for
+> two of them was **inside a table nested in another table's cell** and **inside a figure**.
+> A finding's location line is where it was *seen*, never the extent of the defect —
+> sweep the file, not the line range.
+
 
 ---
 

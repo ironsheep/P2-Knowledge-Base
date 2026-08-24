@@ -1,0 +1,7 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+COGID   myID				'get my ID
+COGSTOP myID				'halt myself
+myID	RES	1

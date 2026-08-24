@@ -1,0 +1,6 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+GETCT  X         			'read lower 32-bits (CT) of system counter into X register
+X	RES	1

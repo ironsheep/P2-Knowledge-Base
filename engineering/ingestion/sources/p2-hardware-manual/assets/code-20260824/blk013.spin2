@@ -1,0 +1,7 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+COGINIT id, addr WC		'(id=$30) start a free cog at addr, C=0 and id=Cog ID if okay
+addr	RES	1
+id	RES	1

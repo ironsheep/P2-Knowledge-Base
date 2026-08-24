@@ -1,0 +1,7 @@
+CON
+  _clkfreq = 180_000_000
+DAT
+        ORG
+.try            LOCKTRY write_lock WC
+        IF_NC   JMP #.try
+write_lock	RES	1
