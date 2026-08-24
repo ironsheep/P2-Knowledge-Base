@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-327`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-328`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -53,7 +53,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
-## Pin drive-strength documented as bias resistors (2026-08-24, agent-report sweep) — F-321…F-326
+## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327
 
 > **Origin.** An agent consuming the published KB could not work out how to use pull-ups and
 > pull-downs, and reported conflicts around the smart-pin area (relayed by Stephen, 2026-08-24).
@@ -222,6 +222,60 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > **Correction.** Expand the field, or point it at the file F-325 creates — but not at prose that
 > does not exist. **A deferral in a source is a work item, not an answer**, and this sweep is the
 > cost of treating one as an answer.
+
+### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `CONFIRMED`
+
+> **Where:** `architecture/io_pin_timing.yaml:200-233` (`drive_strength_configurations:`)
+> and `:234-246` (`slew_rate_control:`).
+>
+> **This is a different and more severe class than F-321.** F-321 is a *mislabel* — the KB
+> renamed a real mechanism. This is **fabrication**: the KB describes a mechanism that does
+> not exist. Four claims, none of which any authoritative source states:
+>
+> | KB claim | Source check |
+> |---|---|
+> | Drive ladder `1.5mA · 3.0mA · 15mA · 30mA · 75mA · 150mA` | **Not in any source.** The real ladder is `FAST (30mA) · 1.5kΩ · 15kΩ · 150kΩ · 1mA · 100µA · 10µA · FLOAT`, eight values per side. |
+> | Impedance table `~2000Ω · ~1000Ω · ~200Ω · ~100Ω · ~40Ω · ~20Ω` | **Zero hits** for this framing in `sources/silicon-doc/`. |
+> | `WRPIN_bits: "M[6:5,4:3,2:1,0]"` | Wrong. Drive-high is `M[5:3]`, drive-low `M[2:0]`, and `M[6]` is output polarity (see F-324). |
+> | `slew_rate_control:` — fast/slow slew, `<2ns` / `5-10ns`, EMI trade-off | **The string "slew" appears ZERO times** across `sources/silicon-doc/`, `sources/spin2-v51/`, and `smart-pins-catalog/`. The P2 has no documented programmable slew rate. |
+>
+> **Independent confirmation of the real encoding**, from a second source not used for F-324 —
+> `sources/silicon-doc/assets/images-20260706/P2-Silicon-Doc-v35_image_catalog.md:139,161`
+> describes the WRPIN figure's own legend: *"HHH/LLL Drive-strength"* and *"the H/L → DRIVE
+> strength table (000 Digital, 001 1.5k, 010 15k, 011 150k, …)"*. Three bits per side, and the
+> ladder is resistive, exactly as the Spin2 label table has it.
+>
+> **Likely provenance, offered as a lead and not as a finding:** `150mA` *does* appear in the
+> sources — as the **VIO group current budget** (`p2-complete-signal-flow-matrix.md:193-200`),
+> a board-power fact about eight-pin groups. A per-pin drive ladder built from a per-group
+> power limit would explain the shape. Do not act on this without checking; it is a hypothesis
+> about how the text arose, not a source.
+>
+> **The tell that makes this mechanically detectable.** The same file cites sources where it
+> has them — `absolute_maximum_ratings:` names the Parallax Datasheet (`:267`),
+> `special_timing_modes:` names Silicon Doc v35 (`:296`). The two fabricated blocks carry **no
+> `source:` field at all**. A file that demonstrates it knows how to cite, and then states six
+> quantities and a whole feature without citing anything, is flagging itself.
+>
+> **Correction.** `slew_rate_control:` has no correct form — **delete it outright**; there is
+> nothing to align it to. `drive_strength_configurations:` is replaced by the real ladder,
+> which after F-325 lands should be a pointer to the single definition home rather than a
+> fourth copy. Neither block is "corrected in place": an unsourced claim is removed, not
+> rewritten, per this register's no-inference rule.
+>
+> **Why the fidelity instrument did not catch this, and what it means for the gate.**
+> `audit-constant-fidelity.py` compares the KB's description of a *named constant* against the
+> source's. These blocks **name no constants** — they describe the mechanism in prose and
+> numbers. That is limitation 3 in the tool's own docstring, and it proved itself within the
+> hour of being written: *name coverage is not semantic coverage, and that cuts both ways.*
+> Detecting this class needs a second detector — **an uncited quantitative claim in a file that
+> cites elsewhere** — which is the "information that should no longer be in the files" half of
+> the release gate, and is now sprint scope rather than a nice-to-have.
+>
+> **Class-wide sweep result (2026-08-24): the manuals are CLEAN.** No manual or app-note
+> opus-master carries the fabricated ladder, the impedance table, or a pin slew-rate claim.
+> (`architect-guide-body.md`'s "slew" hits are rate-adapters in a dataflow sense — unrelated.)
+> This class is confined to the YAML, so no manual corrections wave follows from it.
 
 ---
 
