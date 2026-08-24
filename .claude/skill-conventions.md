@@ -288,6 +288,25 @@ CONFORMANCE_GUIDES:
               carry) and punch-list its retirement. Retirement fires when central
               authors the Class 3 profile — see PUNCH-LIST.md.
 
+  - surface:  the shipped P2KB YAML set — deliverables/ai/P2/**.yaml
+    guide:    engineering/standards/documentation-standards/P2KB-YAML-AUTHORING-GUIDE.md
+    when:     before authoring or editing ANY shipped YAML; re-read at release
+    strength: gate      # instruments below; R6/R7/R9 have none and are held by review
+    note:     ADDED 2026-08-24. Until then this was the ONE governed surface with no
+              row — our most-consumed deliverable, carrying the strict agent-consumer
+              cite-or-omit bar, and the least governed. Seven defects (F-321…F-327)
+              passed every release because nothing in the release path asked whether
+              the KB says TRUE things, only whether it parses and its keys resolve.
+              Every rule in the guide is the general form of one of those defects.
+              GATE INSTRUMENTS (all must read clean):
+                • engineering/tools/validation/audit-constant-fidelity.py   (R1, R4, R5)
+                • engineering/tools/validation/audit-yaml-claim-sourcing.py (R2, R3)
+                • pnut-ts, add -d for debug() — legality only, never semantics (R8)
+              NOT gated by DOC_AUDIT_COMMAND: that instrument globs the
+              document-production prose-guide layer only. This guide lives in the
+              standards tree, whose instrument coverage is a known open punch-list
+              item — so this row names its own instruments rather than inheriting one.
+
   - surface:  authored .spin2 source (verification tests, utility objects)
     guide:    central:spin2-authoring-guide
     when:     before writing or editing any .spin2 file
