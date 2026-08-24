@@ -469,6 +469,37 @@ writer at a time. `conductor-parallel` belongs to the ingestion head, which buil
 allocate-before-fan-out and single-writer-reduce machinery that makes it safe; this head
 has not.
 
+🔴 **`arbiter-serial` means ONE AGENT AT A TIME — not that the arbiter does the work.**
+That misreading is `inline`, and `inline` is the verdict only when no Agent tool exists
+(`task-execution` contract §6). **Every one of the 17 tasks is dispatched to a fresh
+agent**, one after another. The task body IS the dispatch prompt — that is what §2's
+standalone requirement was buying all along. What the arbiter keeps is fixed by contract
+§2 and is not negotiable under time pressure: todo-mcp protocol and the resume key, the
+plan and dispatch order, **verification**, the boundary commit, and any decision that is
+Stephen's.
+
+**Verification is the carve-out, and it is unusually cheap here.** `baseline-health` §2c
+splits re-verification by cost because a clean build plus full suite after every task is
+unaffordable in most projects. **This project is the exception**: the four entry gates are
+Python validators over a YAML tree — seconds, no build, no test fleet — and so are the two
+new instruments. So the arbiter re-runs *all six* after every task rather than batching
+them into block audits. `relay nothing, re-run it` (§1b) costs us almost nothing, and the
+§2c trade-off of bisecting two-to-four commits after a red block audit does not need to be
+taken.
+
+The §2c free-list rule still bites, though: the list of per-task greps is **overlay
+material**, and this project has **no `task-execution` project-overlay**. Its anchor case
+is already documented — `BUILD_COMMAND` was `validate-yaml-syntax.py` until 2026-08-15 and
+reported *"0 files checked / ALL VALID"* over the content tree, a textbook green-because-it-
+never-ran. Standing that overlay up is separable from this sprint and is named here rather
+than folded in.
+
+🔴 **DISPATCH DOES NOT TRANSFER A STOP.** Three tasks — «#306», «#308», «#297» — carry the
+D8 ingestion gate, whose escalation is **sprint stop 1, a decision Stephen owns**. A
+dispatched agent that exhausts its extraction paths escalates to the **arbiter**, not to
+Stephen; the arbiter judges whether the paths are genuinely exhausted and only then raises
+it. Contract §2: dispatch does not transfer authority it never had.
+
 **Two-phase:** «#295» only. Its shape — where a definition lives, what a definition record
 looks like, what the idiom pages contain — is what «#296», «#298» and «#299» build on.
 Design first, review, then implement.
