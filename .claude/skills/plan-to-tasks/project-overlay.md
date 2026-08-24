@@ -85,3 +85,33 @@ hand pass barely sampled — **62 codename sites** against the 5 the plan named 
 hand. `«#207»`/`«#208»` had already been sized against the subset. The same plan
 had ordered the instrument first *precisely because* hand counts had been wrong
 four times in that study, and still inherited their numbers.
+
+## Augments §3a — a seventh rework pattern: source repair before destructive sweep
+
+Central §3a lists six conflict patterns the rework pass checks for. This project needs a
+seventh, and it is the one that cost a re-task on 2026-08-24:
+
+> **Source repair before destructive sweep** — a task that REPAIRS a source (re-ingestion,
+> forced OCR, a structured-format re-extraction) scheduled *after* a task that DELETES content
+> the source is supposed to ground. The deletion then decides dispositions against a damaged
+> authority, and where the purged class has no repopulation route the loss is permanent.
+
+It reads like central's *discovery before utilization*, and it is not the same check. Discovery
+asks whether a needed **fact** arrives before its consumer. This asks whether the **authority
+itself** is repaired before a step that destroys what it grounds — and it can fire even when
+every fact is nominally available, because an ingested-but-lossy source looks available.
+
+**How to run the check.** For each destructive task in the set: name the authorities it will
+decide against; confirm each is fully ingested; confirm a **restore path exists for that class**.
+Where one class has a repopulation route and another does not, that asymmetry is the finding.
+On 2026-08-24 the datasheet class had one and the board-guide class did not, and the ordering
+was a defect rather than a preference precisely because of it.
+
+**A register finding can BE an ordering instruction.** F-250 read *"re-ingest this source with
+forced OCR, re-verify every numeric claim already derived from it"* — the first tasking read
+that as a work item and scheduled it nine tasks after the sweep that consumed those facts. When
+a finding's disposition names a sequence, honor the sequence.
+
+**The full rule is `.claude/skills/SOURCE-REPAIR-ORDER.md`** — stated once there, including why
+cite-in-place is claim-first, and the completeness gate's stop vocabulary. Do not restate it in
+a plan or a task; point at it, the way tasks point at the register.

@@ -68,6 +68,32 @@ related:
 
 Use **full paths** (`language/spin2/methods/exp.yaml`), not bare names (`EXP`). Full paths bypass index-generator/validator key-transformation inconsistencies.
 
+## Repairing UNSOURCED content — re-ingest, remove all, re-derive
+
+**The full rule, with its rationale and its stop-vocabulary, is
+`.claude/skills/SOURCE-REPAIR-ORDER.md`. Read it before any sweep that repairs unsourced or
+wrong content. It is stated once there and deliberately not restated here.**
+
+The one line that changes what you do in this skill:
+
+> **Never cite an existing block in place.** Repair is *re-ingest the source → remove ALL of
+> it → repopulate by re-deriving from the source.* Opening a block and hunting for an authority
+> that supports it is claim-first, and it produces a wrong claim that now looks grounded.
+
+Two consequences that land inside this skill's own steps:
+
+- **§2 "Edit in place" does not apply to an unsourced-content repair.** In-place editing is for
+  correcting a *sourced* entry. An uncited quantitative block is removed, not edited — and it
+  returns, if it returns, through a separate repopulation pass reading the source.
+- **Sacred Rule #7 binds harder at removal volume.** Removing many blocks orphans many
+  `related:` entries. Repoint every one with a full path to where the concept IS documented,
+  even where a later repopulation pass will re-add the target — never leave a dangling key
+  between passes, and never delete the reference.
+
+Before starting such a sweep, confirm a **restore path exists for every class being purged**.
+Where one class has a repopulation route and another does not, the ordering is not a
+preference — see `SOURCE-REPAIR-ORDER.md` §3.
+
 ## 1. Understand the change scope
 
 Before editing, identify:

@@ -136,6 +136,33 @@ Every supersession **obsoletes prior information** — and the prior info is han
 
 **This run's case (Titus re-extraction):** prior artifacts = the PDF-scraped Titus extraction in `engineering/ingestion/smart-pins-catalog/` (21 recovered examples, `john-titus-extract.md` per mode, the recovery scripts, `TITUS-CODE-RECOVERY.md`). After the new DOCX extraction validates: archive those with a pointer to the new; then **re-validate any Titus-derived YAML / Smart Pins manual content against the new authoritative extraction** (this dovetails with the Smart Pins manual certification audit) — route conflicts to the corrections register; record in `DOCUMENT-LINEAGE`.
 
+## 0.7 When a DESTRUCTIVE downstream step depends on this ingestion — completeness becomes a gate
+
+Normally an unrecoverable section is recorded as a gap and the ingestion proceeds. **That
+disposition changes when a downstream step will DELETE content this source is supposed to
+ground** — a KB repair sweep that removes every uncited block, for example. Then whatever this
+ingestion fails to recover is not merely ungrounded, it is **permanently gone**.
+
+So: **ask whether a destructive consumer is waiting on this run.** If one is, ingestion
+completeness is a precondition of that step rather than a best effort, and an unrecovered
+section escalates instead of being gapped.
+
+**The rule, its escalation vocabulary, and the extraction ladder to exhaust first are stated
+once in `.claude/skills/SOURCE-REPAIR-ORDER.md` §4** — read it there; it is deliberately not
+restated here. The short form: exhausting the extraction paths is a **step halt** and never
+interrupts Stephen; only genuinely unrecoverable content reaches him, as **sprint stop 1**; a
+plain capability limit is a named non-stop. Nothing here mints a new stop.
+
+Two things from that file that bear directly on this skill's own judgement calls:
+
+- **A source can be dashboard-green and still unable to carry the fact.** F-250: a board guide
+  whose extraction tool dropped every numeral, shipping at `100% (stated)`. Digit density is a
+  cheap smoke alarm for that class — near-zero digits in a hardware document means the
+  extraction failed, not that the document is silent. It catches *total* loss, never partial.
+- **A DOCX edition is part of the ladder, not a luxury.** It carries table structure a PDF text
+  layer cannot, and is often the difference between a recovered table and a permanent gap.
+  Check whether one is staged before declaring a table unrecoverable.
+
 ## 1. The passes a complete document needs
 
 A "complete" ingestion is not one extraction — it is **seven passes**. All of
