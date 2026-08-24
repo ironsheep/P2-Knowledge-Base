@@ -115,3 +115,47 @@ a finding's disposition names a sequence, honor the sequence.
 **The full rule is `.claude/skills/SOURCE-REPAIR-ORDER.md`** — stated once there, including why
 cite-in-place is claim-first, and the completeness gate's stop vocabulary. Do not restate it in
 a plan or a task; point at it, the way tasks point at the register.
+
+---
+
+## Augments §2 — the ingestion-task deliverable shape: the gap ledger is never optional
+
+**Every task whose subject is a source — an ingestion, a re-ingestion, an extraction repair —
+names `engineering/ingestion/KNOWLEDGE-GAPS.md` in its deliverables, with BOTH halves stated:
+the holes this source OPENS, and the holes it now CLOSES in sources already ingested.**
+
+**Why this has to live here rather than in the skill.** `ingest-source`'s completion checklist
+already requires it, and has for months. It still did not happen — three times in one day:
+
+| 2026-08-24 | dug | filled |
+|---|---|---|
+| «#306» `p2-eval-board` forced-OCR re-ingest (`8167f233`) | — | — |
+| «#308» `p2-hardware-manual` DOCX-primary (`ece5c74a`) | G-016/017/018 | — |
+| «#297» `p2-datasheet` table recovery | — | — |
+
+Under `DISPATCH_MODEL: arbiter-serial` **the task body IS the dispatch prompt**, and a
+dispatched agent reads the body, not the skill. So a requirement that lives only in a skill
+checklist is a requirement a dispatch silently drops — every time, invisibly, and the executor
+is not at fault. A requirement that must survive the context boundary has to be **in the body**,
+and the body is generated here. This is the same shape as fixing the `Dockerfile` rather than
+the README it bakes: repair the generator, not the artifact.
+
+**What the deliverable must demand — the part that makes it real.** Naming the file is not
+enough; "reviewed the ledger, nothing applied" is the exact sentence that produced the table
+above. The task must require the agent to report, per row it examined:
+
+- rows **moved** OPEN→ANSWERED, each with the source **@ edition** and a `file:line` trace
+  (the ledger's own header requires this so a later supersession can RE-OPEN the row); and
+- rows **re-tested and deliberately LEFT open**, naming what was read and why it fell short.
+
+The second list is the load-bearing one. It is the only thing that distinguishes a pass that ran
+from a pass that was skipped, and it is what a soft closure cannot fake. A ledger padded with
+weak closures is worse than one left stale, because it stops anyone looking again.
+
+**The failure mode to name in the task body.** «#308» wrote *"G-001..G-015 are Smart-Pins-detail
+and add-on-board questions this document does not address; it is a hardware overview, not a
+smart-pin reference"* (`p2-hardware-manual-complete-extraction-audit.md:262-263`). Its own
+extract carries the (S) Smart Pin Modes table, per-mode narrative for every `%SSSSS` mode, and
+Table 16 — the `%AAAA`/`%BBBB` input selector that closes G-001 outright, cell-identical to the
+datasheet's. **One confident sentence, written without opening the artifact, cost six rows.**
+Require the check to be run against the extract, not against a belief about what the document is.

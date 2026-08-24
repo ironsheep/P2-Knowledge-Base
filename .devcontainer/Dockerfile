@@ -76,7 +76,8 @@ RUN printf '%s\n' \
     '' \
     '- pdf2md <file.pdf>        : best fidelity -> Markdown (tables + fenced code). [docling]' \
     '- pdf-layout <file.pdf>    : plain text preserving indentation, for PASM2/Spin2 listings. [pdftotext -layout]' \
-    '- camelot --pages all --format csv lattice <file.pdf> : surgical ruled-table -> CSV.' \
+    '- camelot lattice -p all -f csv -o <out.csv> <file.pdf> : surgical ruled-table -> CSV.' \
+    '  (options belong to the SUBCOMMAND; `camelot --pages ...` is rejected with exit 2.)' \
     '- pdf-ocr <in.pdf> <out.pdf> : OCR a scanned PDF, then run pdf2md on the output. [ocrmypdf]' \
     '' \
     'Venv: /opt/pdf-tools/venv   Models: /opt/pdf-tools/models (DOCLING_ARTIFACTS_PATH)' \

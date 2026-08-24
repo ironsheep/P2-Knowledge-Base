@@ -229,7 +229,7 @@ broken-tables problem (`identified-broken-tables.md`), so the numbers are curren
 **unverifiable, not disproven**.
 
 **Target.** Extract the electrical-characteristics tables with
-`camelot --pages all --format csv lattice` (ruled tables; `pdf2md` mangles them) from
+`camelot lattice -p all -f csv -o <out.csv>` (ruled tables; `pdf2md` mangles them) from
 `external-inputs/archive/Propeller2-P2X8C4M64P-Datasheet-20221101.pdf`. Cross-check against
 the second candidate source, `sources/p2-hardware-manual/hardware-manual-2022-extraction.md`.
 Then restore into the KB **only** blocks that both verify and pass §7 — each carrying its

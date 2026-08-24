@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-330`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-333`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -148,6 +148,149 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   source, ready to fix in «#294»/«#307».
 
 ---
+
+## The P2 Hardware Manual states a VCO range the datasheet and the Silicon Doc both contradict (2026-08-24, `p2-datasheet` re-ingestion) — F-330
+
+> **Origin.** The `p2-datasheet` table recovery (plan §8) cross-checked every recovered table
+> against the DOCX-derived `p2-hardware-manual` tables. Nine of ten comparisons agreed cell for
+> cell. This is the one that did not. **Nothing is fixed in this filing** — the ingestion head
+> produces source data; any YAML consequence belongs to the purge/repopulate tasks.
+
+- **F-330 — Two Parallax documents of the SAME edition date (2022/11/01) give different
+  recommended VCO ranges in the same `%MMMMMMMMMM` table note, and the P2 Hardware Manual is
+  the outlier.** — `CONFIRMED`
+
+  **The identical sentence, two numbers:**
+
+  | Source | Sentence, verbatim |
+  |---|---|
+  | **P2 Datasheet**, p.18 (`sources/p2-datasheet/p2-datasheet-text.txt:793`) | "The VCO frequency should be kept within 100 MHz to **200 MHz**." |
+  | **P2 Datasheet**, p.19 PLL Example (`:850`) | "The PLL's VCO is designed to run between 100 MHz and **200 MHz** and should be kept within that range." |
+  | **Propeller 2 Documentation v35 Rev B/C** (`sources/silicon-doc/part3-interrupts.txt:545` area) | "The VCO frequency should be kept within 100 MHz to **200 MHz**." |
+  | **Propeller 2 Documentation v35 Rev B/C** (`sources/silicon-doc/p2-documentation.txt:6233`) | "The PLL's VCO is designed to run between 100 MHz and **200 MHz** and should be kept within that range." |
+  | **P2 Hardware Manual**, Table 10 (`sources/p2-hardware-manual/complete-tables-reference.md:107`) | "The VCO frequency should be kept within 100 MHz to **350 MHz**." |
+
+  **Verified at the source, not only in the extract.** The manual's `350` was read directly out
+  of `word/document.xml` of
+  `sources/p2-hardware-manual/Propeller 2 Hardware Manual - 20221101.docx`, so it is the
+  document's own text and not a DOCX-walk artifact.
+
+  🔴 **DECISIVE, AND ADDED BY THE ARBITER'S RE-RUN: THE HARDWARE MANUAL CONTRADICTS ITSELF.**
+  The filing above frames this as three documents against one, which would leave it a question
+  of relative document authority. It is not — the manual states **both** numbers, twelve
+  paragraphs apart, in the same voice:
+
+  | Same document, two numbers | Sentence, verbatim |
+  |---|---|
+  | **Table 10 note** (`sources/p2-hardware-manual/p2-hardware-manual-text.txt:574`) | "The VCO frequency should be kept within 100 MHz to **350 MHz**." |
+  | **Its own PLL prose** (`sources/p2-hardware-manual/p2-hardware-manual-text.txt:603`) | "The PLL's VCO is designed to run between 100 MHz and **200 MHz** and should be kept within that range." |
+
+  Line 603 is verbatim identical to the datasheet's `:850` and the Silicon Doc's `:6233`. So the
+  manual's own body text agrees with the other two sources and disagrees with its own table note.
+  That settles it without weighing authority at all: **the Table 10 note is a localized
+  substitution error inside an otherwise-correct document**, which is exactly what "source
+  errata" means and is why G-016/G-017-class upstream reporting is the right disposition rather
+  than any re-ranking of the manual as a source.
+
+  **Where 350 legitimately belongs — the vocabulary key.** 350 MHz is a real P2 number, but it
+  is the **overclock ceiling**, not the recommended range. The Silicon Doc says so in the very
+  next row of the very same table, against `%PPPP`: *"For fastest overclocking, the PLL can be
+  pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."* Spin2 v51's clock-setup symbols
+  carry the same bound as a compiler constraint
+  (`sources/spin2-v51/complete-clock-setup-symbols.md:276`, "MUST be between 100 MHz and
+  350 MHz"). The Hardware Manual appears to have substituted the overclock ceiling into the
+  *recommendation* sentence, which is why this is a defect rather than two documents describing
+  two different things: both sentences make the same claim ("should be kept within") with
+  different numbers, and they cannot both be the recommended range.
+
+  **Resolution for downstream use.** Recommended/design VCO range = **100–200 MHz** (datasheet
+  and Silicon Doc, two independent sources, each stating it twice). **350 MHz** = the VCO/1
+  overclock ceiling and the Spin2 solver's upper bound. Treat the Hardware Manual's Table 10
+  note as **source errata**; do not cite it to raise a recommended-range figure.
+
+  **KB impact: NONE — recorded so it is not "corrected" later.**
+  `deliverables/ai/P2/architecture/clock_system.yaml` already draws the line correctly
+  (`vco_range: "99 MHz to 201 MHz"`, `max_overclock: "350 MHz"`,
+  `absolute_max: "350 MHz (may be unstable)"`, and an explicit note distinguishing the two).
+  **This finding exists to prevent a future agent from "fixing" that 200 to 350 on the Hardware
+  Manual's authority.** No YAML edit is owed.
+
+---
+
+
+## WRPIN D-operand field map: three field descriptions wrong in the YAML, ten mode numbers footnote-fused in an ingestion artifact (2026-08-24, `KNOWLEDGE-GAPS` pass-6 catch-up) — F-331, F-332
+
+> **Origin.** The pass-6 gap-ledger catch-up read the WRPIN bit-field map in both 2026-08-24
+> repaired captures (P2 Datasheet pp.23-25, P2 Hardware Manual Tables 16-25) to close
+> `KNOWLEDGE-GAPS.md` **G-001** and **G-008**. Both defects below were found while doing that
+> reading. **Nothing is fixed in this filing.**
+
+### F-331 — `pasm2/wrpin.yaml` mislabels three of the six WRPIN D-operand fields; two agreeing Parallax sources and the YAML's own sibling file all say otherwise — `CONFIRMED`
+
+**Location:** `deliverables/ai/P2/language/pasm2/wrpin.yaml:34-36` (the `d_operand_format.fields:` map).
+
+**What the two sources say, verbatim and identically** — P2 Datasheet @ 2022/11/01 p.23
+(`engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1054-1059`) and P2 Hardware
+Manual @ 2022/11/01 (`engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:786-791`):
+`A` = PIN input selector · `B` = ADJ input selector · `F` = PIN and ADJ input logic/filtering ·
+**`M` = pin mode** · **`T` = pin DIR/OUT control (default = %00)** · **`S` = smart mode**.
+
+| Field | YAML says | Both sources say |
+|---|---|---|
+| `M` | "13-bit low-level pin control **+ smart-pin mode**" | **pin mode** — the smart mode is `S`, a different field |
+| `TT` | "**DAC/output mode**" | **pin DIR/OUT control** (default `%00`) |
+| `SSSSS` | "**DAC/output value or pin-output bit selection**" | **smart mode** (the 32 `%SSSSS` modes) |
+
+**The file's own sibling already has all six right** —
+`deliverables/ai/P2/language/spin2/methods/wrpin.yaml:28-35` reads "Bits 20:8 (M): Low-level pin
+control", "Bits 7:6 (TT): Pin DIR/OUT control", "Bits 5:1 (SSSSS): Smart pin mode selector
+(5 bits, 32 modes)". So the two WRPIN entries in the shipped KB describe the same 32-bit word
+differently, and an agent that reads the PASM2 one is told `SSSSS` selects a DAC value.
+
+**Not the whole file** — the same file's `input_selectors:` block (`:37-56`) is **correct** and
+matches both sources including the two rows Titus rev5 had swapped (`x101` = relative −3,
+`x111` = relative −1). Only the three `fields:` descriptions are wrong; do not purge the block.
+
+**Proposed correction:** replace the three descriptions with the sources' own words (`M` = pin
+mode; `TT` = pin DIR/OUT control, default `%00`; `SSSSS` = smart mode), keeping the existing
+bit-range annotations from the Spin2 sibling. **Closes the last open half of `KNOWLEDGE-GAPS`
+G-008.**
+
+### F-332 — the P2 Hardware Manual's table artifact carries ten six-digit `%SSSSS` values for a five-bit field, with no reconciliation note — `CONFIRMED`
+
+**Location:** `engineering/ingestion/sources/p2-hardware-manual/complete-tables-reference.md:287-314`
+(Table 25) and the same table in
+`engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1030-1036, 1053, 1054, 1056`.
+
+**Ten values, each a 5-bit mode with its superscript footnote `¹` fused on:** `001001` `001011`
+`001101` `001111` `010001` `010011` `010101` `110111` `111001` `111101` — correctly
+`%00100¹` `%00101¹` `%00110¹` `%00111¹` `%01000¹` `%01001¹` `%01010¹` `%11011¹` `%11100¹`
+`%11110¹`, footnote 1 being *"OUT signal overridden"* (the artifact carries that footnote
+immediately below the table).
+
+**This is a known, already-adjudicated class — and the adjudication is in the wrong file.** The
+`p2-datasheet` artifact names the identical defect as reconciliations **R1** and **R2**
+(`sources/p2-datasheet/complete-tables-reference.md:49-50`), decided by three of four extraction
+paths plus a visual read of the rendered pp.34-35, and its **R8** even records that "The Hardware
+Manual's DOCX (Table 9) carries the identical fusion, so this reconciliation applies to both
+sources" — for Table 9's `INA`/`INB` only. **No such note exists anywhere in the Hardware
+Manual's own artifact** (a case-insensitive search of that file for *footnote*, *superscript*,
+*reconcil*, and *OUT signal overridden* returns nothing).
+
+**KB impact: NONE today — recorded so it stays that way.** No fused value reached
+`deliverables/ai/P2/` (grepped for all ten; the only near-hits are COGINIT mode bits in
+`spin2/patterns/implementation/spin2_cog_management.yaml`, unrelated). The exposure is forward:
+an agent deriving smart-pin YAML from the Hardware Manual artifact alone gets `%001001` for
+pulse/cycle output.
+
+**Proposed correction (ingestion head, not a YAML edit):** add the R1/R2 reconciliation note to
+`sources/p2-hardware-manual/complete-tables-reference.md` beside Table 25, in the form the
+datasheet artifact already uses. **Wider question worth one pass:** the DOCX walk drops
+superscript markers into the adjacent numeral generally — Table 9's `INA1`/`INB2` is the same
+mechanism, so Table 25 is unlikely to be the only other instance.
+
+---
+
 
 ## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327, F-329
 
@@ -1320,10 +1463,21 @@ tell them a boundary exists.
 on the Titus document — an **upstream lead, not a citation**, and not something to carry into
 reader-facing prose as fact. Doing so would trade a silence for an unsourced claim.
 
+🟢 **NEW EVIDENCE 2026-08-24 (`KNOWLEDGE-GAPS` pass-6 catch-up) — the correction is no longer
+stuck between a silence and an unsourced number.** The DOCX-primary **P2 Hardware Manual @
+2022/11/01** *does* state a sysclk dependency for USB, authoritatively and quantitatively:
+the baud field is a 16-bit fraction of the system clock "whose two MSBs must be 0, **necessitating
+that the baud rate be less than 1/4th of the system clock frequency**", with a worked 12 MHz-at-80
+MHz full-speed example (`engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1489`).
+That is a citable hardware constraint the chapter can state on its own authority. It is **not** the
+Granville floor and must not be presented as one — the > 80 MHz claim stays unsourced (`Q-003`),
+and G-005 stays `PARTIAL` for exactly that reason.
+
 **Proposed correction:** rework the worked example at a clock unambiguously clear of the question
-(the chapter's own Spin2 example at `:264` already runs at 200 MHz), and state that USB signaling
-needs sysclk headroom with the exact floor unsettled. §19.4's existing transmit-pacing `::: caution`
-is the shape to copy — it already names its own limit correctly.
+(the chapter's own Spin2 example at `:264` already runs at 200 MHz), and state the **documented**
+dependency — baud < sysclk/4, cited to the Hardware Manual — while saying the practical floor for
+reliable FS signaling is unsettled. §19.4's existing transmit-pacing `::: caution` is the shape to
+copy — it already names its own limit correctly.
 
 **Not in scope of this finding:** the register-layer content (WXPIN config word, WYPIN line states,
 the 16-bit RX status word, per-pin IN semantics) is properly sourced to Silicon

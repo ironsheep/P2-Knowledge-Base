@@ -98,8 +98,29 @@ Also surface any `in_progress` / next task from `context_resume` scoped to
 the element's tag (`mcp__todo-mcp__todo_next tags:["<tag>"]`).
 
 Then report plainly: **"Here's what you've been working on: `<element>` —
-`<state summary>` — last activity `<recent commits>`. Resume this, or pick
-up something else?"** Ask in chat (this repo has no AskUserQuestion).
+`<state summary>` — last activity `<recent commits>`."**
+
+**Then decide whether an ask is owed at all — usually it is not.** If the
+resolved state already names the next action — a mid-sprint checkpoint whose
+resume key says *"NEXT: «#N»"*, a task already `in_progress`, a standing sprint
+whose go was given — that action is an **already-authorized step**, which the
+closed stop roster names as a **non-stop** (*Named non-stops*,
+`skills-docs/SKILLS-AUTHORING.md`). Report the state and **proceed into it**.
+
+Asking *"resume this, or pick up something else?"* there mints a stop the
+roster does not carry, and it is expensive in the exact way that doc measures:
+{{USER_NAME}} runs four or five agents at once, so a stopped agent does **not**
+have his attention — it goes idle, and his answer latency becomes the
+bottleneck for all of them. The tie-breaker settles it: *a stop must buy
+quality that continuing would lose.* Re-confirming an instruction he already
+gave buys none.
+
+Ask only when the pickup is genuinely undetermined: no pointer at all; a
+pointer whose element is finished; a checkpoint that names no next action; the
+element is one {{USER_NAME}} parked pending an answer he owes; or the registry
+flags the target as retired (§4). Then ask in prose — this repo has no
+AskUserQuestion — in the *Shared conduct* form: one question, self-contained,
+every option with trade-offs both ways, your recommendation, then stop.
 
 ## 3. If unset, or {{USER_NAME}} picks something else — choose a target
 

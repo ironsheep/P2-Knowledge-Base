@@ -1,5 +1,43 @@
 # Datasheet Audit Report
 
+> 🔴 **SUPERSEDED 2026-08-24. This is a historical record, not the audit of record.**
+> The audit of record is **`p2-datasheet-complete-extraction-audit.md`**. Read that first; this file
+> is kept because the ingestion convention archives a prior capture rather than deleting it, and
+> because *what it got wrong is itself evidence*.
+>
+> **Three of its headline claims were measured false on 2026-08-24:**
+>
+> | Claim below | Measured |
+> |---|---|
+> | *"Tables preserved: 85%"* / *"Content Extraction ✅ 95%"* | **Ten** tables had lost their column structure (`identified-broken-tables.md`, filed three weeks after this audit), and **no table artifact existed in the repository at all** — only the column-linearized `p2-datasheet-narrative.txt`. There was nothing to preserve 85% of. |
+> | *"Consistency ✅ 100% — Zero contradictions found"* | A cross-check against the DOCX-derived P2 Hardware Manual found **one real conflict**, now filed as **F-330** (the VCO recommended-range sentence: 200 MHz vs 350 MHz). It lives in a table this pass never extracted, which is why it could not be seen. |
+> | *"Overall Health Score: 94%"* | A percentage computed over work that had not been done. The dashboard carried it for eleven months. |
+>
+> **What it got right and what still stands:** the style analysis, the observation that pp.27-32 and
+> the packaging drawing are visual-only, and the note that "some complex tables lost formatting" —
+> which was the true statement, and the one nobody acted on.
+>
+> **Corrections to specific statements below**, so this file does not mislead if read alone:
+> * *"Missing/Partial: Pin equivalent schematics (pages 27-32) - visual only"* — correct, and they
+>   **were** captured as images on 2025-09-06 (25 files for pp.26-32).
+> * *"Timing diagrams - not text extractable"* — correct; and one of the three page-22 timing
+>   figures had **never been extracted at all**. Recovered 2026-08-24 into `assets/images-20260824/`.
+> * *"Extract visual elements (pin diagrams) - Manual capture required"* — done 2025-09-06.
+> * *"Format tables properly"* / *"Reformat critical specification tables"* — **done 2026-08-24**;
+>   see `complete-tables-reference.md`.
+>
+> **The 20 questions listed near the end WERE routed** — to
+> `engineering/ingestion/central-analysis/marketing-docs-cross-source-qa.md`, under *"New Questions
+> Raised by These Sources — From Datasheet (20 questions)"*. Checked 2026-08-24; the earlier draft of
+> this banner said they had gone nowhere and that was wrong. They remain **open leads, not
+> findings**. Several (thermal dissipation at 320 MHz, PCB layout, decoupling placement, trace
+> lengths, EMI) are outside what any Parallax P2 document answers; they belong to a board-design
+> source, not to the datasheet.
+
+---
+
+## Original 2025-08-14 audit follows, unaltered
+
 **Source**: Propeller2-P2X8C4M64P-Datasheet-20221101.pdf
 **Extraction Date**: 2025-08-14
 **Auditor**: Claude

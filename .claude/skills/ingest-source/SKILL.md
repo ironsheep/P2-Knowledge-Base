@@ -261,7 +261,7 @@ ladder below).
   corrupt-text-layer note below):
   - **Content + tables (pass 1) → `pdf2md`** (docling) as the default — it
     recovers real tables and fenced code. For a stubborn *ruled* table (board
-    pin maps, electrical specs), `camelot --pages all --format csv lattice
+    pin maps, electrical specs), `camelot lattice -p all -f csv -o <out.csv>
     <file.pdf>` extracts it surgically to CSV.
   - **Code listings (pass 2) → `pdf-layout`**, which preserves column/indent
     layout for whitespace-sensitive PASM2/Spin2, then validate with `pnut_ts`
