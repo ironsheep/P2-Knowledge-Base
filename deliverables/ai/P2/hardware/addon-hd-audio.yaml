@@ -16,17 +16,6 @@ aliases:
   - "64014"
   - "#64014 add-on board"
 
-description: >-
-  Two-board audio kit. The ADC board is a 4-channel, 32-bit, 192 kHz audio ADC
-  built on the AKM AK5704EN codec (I2C control + I2S/TDM audio). The DAC board is
-  a 2-channel audio DAC built directly on P2 Smart Pin DAC modes (no codec chip).
-  Both boards use a standard 2x6 0.1" accessory passthrough socket and are
-  designed to sit side-by-side at a dual port. Usable with any 3.3V-signal MCU.
-
-set_contents:
-  - "ADC board (AK5704EN codec) - 4ch, 32-bit, 192 kHz"
-  - "DAC board (P2 Smart Pin DAC) - 2ch"
-
 # === ADC BOARD (AK5704EN) ===
 adc_board:
   codec: "AKM AK5704EN (28-pin QFN), 32-bit 4ch ADC with MIC pre-amplifier"
@@ -75,63 +64,12 @@ adc_board:
     features: "VAD (voice activity detection); ultrasonic recording; configurable MIC pull-up for analog mics"
     pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
 
-# === DAC BOARD (P2 Smart Pin DAC) ===
-dac_board:
-  codec: "none - the P2 Smart Pin DACs ARE the converter"
-  eval_header_occupant: true
-  pin_group:
-    size: 8
-    addressing: "actual_P2_pin = base_pin + offset; single 8-pin accessory-header group."
-  channels: 2
-  signal_map:
-    - {offset: 0, signal: "DAC_R", direction: out, notes: "Right channel (4 pins +3..+0 wired in parallel)."}
-    - {offset: 1, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
-    - {offset: 2, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
-    - {offset: 3, signal: "DAC_R", direction: out, notes: "Right channel (paralleled)."}
-    - {offset: 4, signal: "DAC_L", direction: out, notes: "Left channel (4 pins +7..+4 wired in parallel)."}
-    - {offset: 5, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
-    - {offset: 6, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
-    - {offset: 7, signal: "DAC_L", direction: out, notes: "Left channel (paralleled)."}
-  power_signals:
-    VIO3V3: "Not Connected on the DAC board."
-    GND: "Common ground."
-  specs:
-    vpp_output: "2 V or 3 V configurable"
-    drive_impedance: "18.75 ohms to 990 ohms, configurable in 16 steps"
-    pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
-  drive_strength_design:
-    smartpin_dac_base_modes:
-      - "P_DAC_990R_3V  - 990 ohms, 3.3 V peak"
-      - "P_DAC_600R_2V  - 600 ohms, 2.0 V peak"
-      - "P_DAC_124R_3V  - 123.75 ohms, 3.3 V peak"
-      - "P_DAC_75R_2V   - 75 ohms, 2.0 V peak"
-    sixteen_steps: >-
-      The guide's '16 steps' = these 4 P2 Smart-Pin DAC base modes EACH divided
-      across 1-4 paralleled pins (4 modes x 4 divider values). Effective impedance
-      = base-mode impedance / number of paralleled pins. Confirmed by the official
-      #64014 4DAC_Analog_Driver.spin2 / AK5704_Driver.spin2 (the P_DAC_* constants
-      + an impedance_divider argument of 1..4). This resolves the board guide's
-      'only 4 of 16 stated' gap (G-014).
-    parallel_technique: >-
-      Each L/R channel parallels up to 4 Smart-Pin outputs to lower output
-      impedance. Total impedance = base-mode impedance / paralleled-pin count.
-      Example: P_DAC_124R_3V on 4 pins = 123.75 / 4 = ~30.9 ohms (drives 31-ohm
-      headphones directly) - the driver's start() default.
-
 specifications:
   requires_host: true
   supply_voltage: "+3.3 VDC (both boards)"
   connector: "dual 2x6-pin female passthrough headers, 0.1\" spacing (each board)"
   mounting_hole: "3.2 mm diameter"
   operating_temp: "-40 to +85 C (-40 to +185 F)"
-
-use_cases:
-  primary:
-    - "Multi-channel audio capture (voice recognition, conferencing, recording)"
-    - "Line/headphone audio output via P2 Smart Pin DACs"
-    - "Ultrasonic capture (ADC up to 192 kHz)"
-  secondary:
-    - "Robotics / interactive-display / industrial audio I/O"
 
 limitations:
   - "AK5704 register bit-level detail is in the AK5704 datasheet (the board guide is board-level)"

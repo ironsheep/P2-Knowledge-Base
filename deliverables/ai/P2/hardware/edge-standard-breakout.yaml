@@ -20,25 +20,6 @@ basic_info:
   description: "Full-featured carrier board providing access to all 64 P2 pins"
   category: "carrier_board_full"
   form_factor: "standard_breakout"
-  
-specifications:
-  requires_module: true
-  compatible_modules:
-    - "P2-EC (Standard Edge Module)"
-    - "P2-EC32MB (32MB Edge Module)"
-    
-  physical:
-    dimensions:
-      length: "4.0 inches"
-      width: "1.4 inches"  
-      height: "0.5 inches (with module)"
-    weight: "TBD"
-    mounting: "Standard PCB mounting holes"
-    
-  electrical:
-    supply_voltage: "5V or USB powered"
-    module_supply: "3.3V to module"
-    current_capability: "Adequate for full P2 usage"
     
 pin_access:
   total_accessible: 64
@@ -46,23 +27,6 @@ pin_access:
   header_configuration: "All pins broken out to headers"
   header_type: "Standard 0.1 inch pitch"
   pin_organization: "Logical grouping by function"
-  
-connectivity:
-  programming:
-    - type: "USB"
-      connector: "USB connector onboard"
-      driver: "Built-in USB-to-serial"
-    - type: "Prop Plug"
-      connector: "4-pin header (optional)"
-  
-  headers:
-    pin_headers: "All 64 pins accessible"
-    power_headers: "3.3V, 5V, GND distribution"
-    programming_header: "Prop Plug compatible"
-    
-  expansion:
-    addon_compatibility: "Limited - designed for Edge modules"
-    breadboard_friendly: "Standard header spacing"
     
 module_compatibility:
   optimal_pairing:
@@ -161,12 +125,6 @@ optimal_configurations:
     - module: "P2-EC32MB"
       total_cost: "Higher cost, oversized"
       use_case: "Standard form factor with memory needs"
-      
-power_management:
-  input: "5V USB or barrel jack"
-  regulation: "Onboard 3.3V for module"
-  distribution: "Power headers for external circuits"
-  current_budget: "Adequate for full P2 + moderate external loads"
   
 documentation:
   primary: "64029-P2-Edge-Breakout-Board-Guide"

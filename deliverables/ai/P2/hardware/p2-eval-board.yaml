@@ -20,39 +20,6 @@ basic_info:
   description: "Integrated P2 development platform with built-in peripherals"
   category: "development_board_integrated"
   form_factor: "all_in_one_board"
-  
-specifications:
-  microcontroller:
-    chip: "P2X8C4M64P"
-    revision: "Rev D"
-    architecture: "32-bit multi-cog"
-    clock_speed: "20MHz crystal, PLL to 320MHz"
-    cores: 8
-    io_pins: 64
-    smart_pins: 64
-    integration: "Soldered directly on board"
-    
-  memory:
-    flash_type: "SPI Flash"
-    flash_size: "TBD - check documentation"
-    flash_organization: "Boot partition + user space"
-    ram_hub: "512KB"
-    ram_cog: "2KB per cog (8 cogs)"
-    ram_lut: "16KB (2KB per cog)"
-    
-  physical:
-    dimensions:
-      length: "TBD"
-      width: "TBD"  
-      height: "TBD"
-    weight: "TBD"
-    mounting: "Standard PCB with mounting holes"
-    
-  electrical:
-    supply_voltage: "5V or USB powered"
-    core_voltage: "1.8V (onboard regulator)"
-    current_consumption: "TBD - depends on usage"
-    temperature_range: "Commercial grade"
     
 built_in_peripherals:
   leds:

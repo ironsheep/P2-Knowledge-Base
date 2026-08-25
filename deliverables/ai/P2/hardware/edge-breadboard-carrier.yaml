@@ -21,28 +21,6 @@ basic_info:
   description: "Professional prototyping platform with integrated breadboard and servo ports"
   category: "carrier_board_professional"
   form_factor: "breadboard_platform"
-  
-specifications:
-  requires_module: true
-  compatible_modules:
-    - "P2-EC (Standard Edge Module)"
-    - "P2-EC32MB (32MB Edge Module)"
-    
-  physical:
-    dimensions:
-      length: "8.0 inches"
-      width: "3.5 inches"  
-      height: "0.75 inches (with module)"
-    weight: "TBD"
-    mounting: "Multiple mounting options"
-    area: "28.0 square inches"
-    size_comparison: "6x larger than Mini Breakout"
-    
-  electrical:
-    supply_voltage: "6-9V external or USB powered"
-    module_supply: "3.3V regulated to module"
-    servo_power: "Separate 5V servo supply"
-    current_capability: "High current for complex projects"
     
 pin_access:
   total_accessible: 64
@@ -69,26 +47,6 @@ connectivity:
     breadboard: "Integrated full-size breadboard"
     servo_ports: "8 dedicated servo connections"
     addon_compatibility: "Limited - focus on breadboard"
-    
-specialized_features:
-  breadboard:
-    type: "Full-size solderless breadboard"
-    tie_points: "~830 tie points"
-    power_rails: "Dedicated +3.3V, +5V, GND"
-    pin_access: "Direct P2 pin connections"
-    
-  servo_system:
-    ports: 8
-    connector_type: "3-pin servo headers"
-    power_supply: "Separate 5V rail"
-    current_capability: "Adequate for 8 servos"
-    pin_assignment: "Configurable P2 pin mapping"
-    
-  power_management:
-    regulators: "Multiple onboard regulators"
-    voltage_rails: "3.3V, 5V servo, breadboard power"
-    current_monitoring: "Visual power indicators"
-    protection: "Overcurrent and reverse polarity"
     
 module_compatibility:
   excellent_pairing:
@@ -205,23 +163,6 @@ optimal_configurations:
     - module: "Either module"
       use_case: "Servo-based robotics"
       advantages: "8 servo ports + breadboard"
-      
-power_specifications:
-  input_options:
-    - "USB (limited current)"
-    - "6-9V barrel jack (recommended)"
-    - "External lab supply"
-  
-  output_rails:
-    - "3.3V regulated (P2 and logic)"
-    - "5V regulated (servos and sensors)"
-    - "Breadboard power distribution"
-    
-  current_budget:
-    p2_system: "Adequate for full P2 operation"
-    servos: "Up to 8 standard servos"
-    breadboard: "Moderate current for sensors/logic"
-    total: "Professional-grade power system"
     
 educational_value:
   learning_objectives:

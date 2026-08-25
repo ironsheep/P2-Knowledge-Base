@@ -13,14 +13,6 @@ aliases:
   - "64006B"
   - "#64006 add-on board"
 
-description: >-
-  Twin USB Type-A host sockets, each with a current-limited load switch
-  (up to 500 mA continuous; reverse-current, short-circuit, over-temperature,
-  and VBUS soft-start protection) and a user-controllable blue activity LED.
-  Lets two USB devices connect at once (e.g. keyboard and mouse). REQUIRES 5V
-  to function: with the P2-ES Eval Board Rev B, a shunt jumper must connect that
-  board's ACC HDR and 5V pins to supply 5V to the I/O breakout edge headers.
-
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -33,94 +25,6 @@ pin_group:
   base_pin_caution: >-
     Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
     serial pins - not recommended.
-
-signal_map:
-  - offset: 0
-    signal: "Blue activity LED (channel 1)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light; PWM-capable for brightness."
-  - offset: 1
-    signal: "USB channel 1 - 5V enable"
-    direction: out
-    notes: "Active high; set high to enable 5V output on channel 1."
-  - offset: 2
-    signal: "USB channel 1 - Data D-"
-    direction: bidir
-    notes: "USB-A host data line (D-)."
-  - offset: 3
-    signal: "USB channel 1 - Data D+"
-    direction: bidir
-    notes: "USB-A host data line (D+)."
-  - offset: 4
-    signal: "Blue activity LED (channel 2)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light; PWM-capable for brightness."
-  - offset: 5
-    signal: "USB channel 2 - 5V enable"
-    direction: out
-    notes: "Active high; set high to enable 5V output on channel 2."
-  - offset: 6
-    signal: "USB channel 2 - Data D-"
-    direction: bidir
-    notes: "USB-A host data line (D-)."
-  - offset: 7
-    signal: "USB channel 2 - Data D+"
-    direction: bidir
-    notes: "USB-A host data line (D+)."
-
-specifications:
-  requires_host: true
-  io_pins_used: 8
-  compatible_hosts:
-    - "P2 Eval Board (64000)"
-    - "P2 Edge Module Breadboard (64020)"
-    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
-  electrical:
-    supply_voltage: "5V required (critical requirement)"
-    current_per_port: "Up to 500mA continuous"
-    total_current: "Up to 1A for both ports"
-    led_current: "~2mA per LED when active"
-    power_configuration: "5V shunt jumper required on P2-ES Eval Board Rev B"
-  physical:
-    size: "Small module"
-    connector: "2x6 pass-through socket"
-    mounting: "Single M3 mounting hole connected to GND"
-    mounting_hardware: "M3 or UNC 4-40"
-    hole_diameter: "3.2mm (126 mil)"
-    pad_ring: "5mm (200 mil)"
-    standoff_recommendation: "9.5mm long standoff for support"
-
-usb_host_capabilities:
-  ports:
-    quantity: 2
-    connector_type: "USB Type-A sockets"
-    simultaneous_devices: "2 devices can be connected at once"
-    examples: "Keyboard and mouse, or two storage devices"
-  power_management:
-    current_limiting: "500mA per port (USB specification compliant)"
-    overcurrent_protection: "Automatic shutdown on overcurrent"
-    reverse_current_blocking: "Prevents damage from faulty devices"
-    short_circuit_protection: "Built-in protection circuitry"
-    thermal_protection: "Over-temperature protection"
-    vbus_soft_start: "Gradual power-up prevents inrush current"
-  enable_control:
-    channel1_enable: "offset 1 (active high)"
-    channel2_enable: "offset 5 (active high)"
-    power_sequence: "Set enable pin high to activate USB power"
-    disable_capability: "Can disable ports via software control"
-
-power_requirements:
-  critical_note: "5V supply absolutely required - board will not function without it"
-  eval_board_configuration:
-    board_type: "P2-ES Eval Board Rev B"
-    requirement: "Shunt jumper must connect ACC HDR and 5V pins"
-    purpose: "Supply 5V to I/O Pin Breakout Edge Headers"
-    consequence_if_missing: "USB host ports will not power up"
-  current_budget:
-    per_port: "500mA maximum continuous"
-    both_ports: "1A total maximum"
-    led_current: "~2mA per LED when active"
-    control_logic: "Minimal additional current"
 
 use_cases:
   primary:
@@ -152,15 +56,6 @@ code_patterns:
       ' Channel 2: base+6 (D-), base+7 (D+)
       ' Smart Pin modes can be used for USB signaling.
 
-development_workflow:
-  - "Verify 5V power supply availability"
-  - "Configure shunt jumper if using P2-ES Eval Board Rev B"
-  - "Connect to host board via 2x6 connector"
-  - "Enable desired USB ports (set base+1 and/or base+5 high)"
-  - "Implement USB host protocol in software"
-  - "Monitor activity LEDs for device communication"
-  - "Handle device enumeration and data transfer"
-
 advantages:
   - "True USB host capability (not just device)"
   - "Dual ports for multiple simultaneous devices"
@@ -169,13 +64,6 @@ advantages:
   - "Activity LEDs for visual feedback"
   - "USB specification compliant power management"
   - "Comprehensive protection circuitry"
-
-limitations:
-  - "Requires 5V supply (critical - will not work on 3.3V only)"
-  - "500mA current limit per port (some devices need more)"
-  - "Uses all 8 available I/O pins"
-  - "Complex USB protocol implementation required in software"
-  - "P2-ES Eval Board Rev B requires shunt jumper configuration"
 
 compatibility:
   stacking:

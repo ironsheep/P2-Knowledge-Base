@@ -13,13 +13,6 @@ aliases:
   - "64006F"
   - "#64006 add-on board"
 
-description: >-
-  Two microUSB-type device sockets, each with two activity LEDs (red and blue),
-  that let the P2 behave as up to two USB-type devices connecting to a USB host
-  (PC, laptop, or other host). The P2 handles the USB device enumeration
-  protocol in software. Each activity LED has a 1 kOhm series resistor and is
-  asserted high to light.
-
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -33,40 +26,6 @@ pin_group:
     Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
     serial pins - not recommended.
 
-signal_map:
-  - offset: 0
-    signal: "Blue activity LED (channel 1)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light."
-  - offset: 1
-    signal: "Red activity LED (channel 1)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light."
-  - offset: 2
-    signal: "USB channel 1 - Data D-"
-    direction: bidir
-    notes: "microUSB device data line (D-)."
-  - offset: 3
-    signal: "USB channel 1 - Data D+"
-    direction: bidir
-    notes: "microUSB device data line (D+)."
-  - offset: 4
-    signal: "USB channel 2 - Data D-"
-    direction: bidir
-    notes: "microUSB device data line (D-)."
-  - offset: 5
-    signal: "USB channel 2 - Data D+"
-    direction: bidir
-    notes: "microUSB device data line (D+)."
-  - offset: 6
-    signal: "Blue activity LED (channel 2)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light."
-  - offset: 7
-    signal: "Red activity LED (channel 2)"
-    direction: out
-    notes: "1 kOhm series resistor; assert high to light."
-
 usb_device_capabilities:
   ports:
     quantity: 2
@@ -78,31 +37,6 @@ usb_device_capabilities:
     host_connection: "Connect to PC, laptop, or other USB host"
     device_types: "HID, CDC, custom device classes"
     enumeration: "P2 handles the USB device enumeration protocol"
-
-specifications:
-  requires_host: true
-  io_pins_used: 8
-  compatible_hosts:
-    - "P2 Eval Board (64000)"
-    - "P2 Edge Module Breadboard (64020)"
-    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
-  electrical:
-    supply_voltage: "3.3V from host"
-    current_consumption: "Low power (USB device mode, bus-powered)"
-  physical:
-    size: "Small module"
-    connector: "2x6 pass-through socket"
-    mounting: "Single M3 mounting hole connected to GND"
-    mounting_hardware: "M3 or UNC 4-40"
-    hole_diameter: "3.2mm (126 mil)"
-    pad_ring: "5mm (200 mil)"
-    standoff_recommendation: "9.5mm long standoff for support"
-
-# Rev-B 5V note: on the P2-ES Eval Board Rev B (v1.1), the ACC HDR / 5V shunt
-# jumper applies to the Serial boards.
-rev_b_5v_note: >-
-  On the P2-ES Eval Board Rev B (v1.1), the ACC HDR / 5V shunt jumper supplies
-  5V to the accessory header; this note applies to the Serial Device boards.
 
 use_cases:
   primary:

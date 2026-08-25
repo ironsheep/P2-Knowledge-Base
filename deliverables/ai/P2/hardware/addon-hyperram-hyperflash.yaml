@@ -23,11 +23,6 @@ description: >-
   (upper) = HyperFlash 32 MB. Each device may be RAM, Flash, or dual-memory
   (de-/re-soldering required); the PCB carries configuration options for each.
 
-host_note: >-
-  Targets the #64000-ES (limited-edition ES) P2 Eval Board specifically. The
-  board does NOT source power via the passthrough header's 5V socket, so the
-  P2-ES Eval Board Rev B's ACC HDR jumper can remain in its default off position.
-
 # --- Eval-header board model (uniform across all eval-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -69,34 +64,6 @@ devices:
     position: "upper"
     preinstalled: "HyperFlash, 32 MB"
   note: "Each device may be a RAM, Flash, or dual-memory; memory-type configuration resistors set CS# routing per device."
-
-specifications:
-  ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
-  flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
-  voltage: "+3.3 VDC (supplied by the P2-ES Eval Board I/O LDO regulator)"
-  max_clock_rate: "100 MHz (200 MB/s) at 3.0 Vcc"
-  ram_current: "60 mA peak burst, 600 uA standby (CS# = High)"
-  flash_current: "100 mA peak burst, 25 uA standby (CS# = High)"
-  flash_endurance: "100,000 program/erase cycles"
-  flash_retention: "20-year data retention"
-  form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
-  mounting_hole: "2.5 mm (100 mil) hole, pad ring 4.5 mm (180 mil), connected to GND"
-  operating_temp: "-40 to +85 C (-40 to +185 F)"
-  pcb_dimensions: "1.0 x 1.9 in (25.4 x 48.3 mm)"
-
-configuration:
-  reset_pads: >-
-    Optional RES / GND pads access the HyperBUS reset signal. Standard: a shunt
-    across the center-and-right pads holds the module in reset until IO+15 is
-    asserted High. Alternate: move the shunt to left-and-center -> module
-    normally active; assert IO+15 or the RES pad Low to reset.
-  memory_type_resistors: >-
-    Per-device 2-position shunts (FLS/RAM) set device memory type by routing CS#
-    to the appropriate pin. Pre-installed device A = HyperRAM (shunt = RAM);
-    device B = HyperFlash (shunt = FLS).
-  series_resistors: "Each device has a 10K pull-up (CS# to 3.3V), a 10 ohm series on RWDS, and a 10 ohm series on CK."
-  decoupling: "Each HyperBUS memory has four decoupling caps - a 100 nF and a 1 uF per VccQ pin."
-  optional_pads: "Extra HyperBUS signals (INT / RSTO / CSx-BR / CSx-AF) for experimenting with alternate memory types; not supported/warrantied by Parallax."
 
 quick_start:
   - "Place the add-on PCB chip-side-up over a pair of P2-ES Eval Board edge headers; align pins, press gently."

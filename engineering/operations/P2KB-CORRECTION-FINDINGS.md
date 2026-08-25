@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-334`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-336`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -141,11 +141,306 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   repaired capture). Do **not** cite-in-place: half of (b) would then acquire a citation to a
   guide that says the opposite. Half (a) is **closed** — see the resolution above; it needs a
   citation swap, not a decision.
+
+  > **PURGE PASS APPLIED 2026-08-24 («#294») — it reached FOUR of the ten (b) items; SIX stand.**
+  > The uncited-block purge removed exactly one top-level block from this file,
+  > `specifications` (was `:24-56`, 33 lines). **What that took out (4 of 10):** the `Rev D`
+  > scalar (`specifications.microcontroller.revision`, was `:27`); `clock_speed: "20MHz crystal,
+  > PLL to 320MHz"` (was `:29`); `supply_voltage: "5V or USB powered"` (was `:52`); and the four
+  > TBDs whose answers are in the repaired guide — `flash_size` (was `:37`), `physical.dimensions`
+  > (was `:44-48`), `current_consumption` (was `:54`), `temperature_range` (was `:55`).
+  >
+  > **What SURVIVES the purge, untouched, and is therefore still owed to «#307»** (post-purge
+  > line numbers, file is now 172 lines):
+  > - `built_in_peripherals.proto_area` (`:54-56`) — the **fabricated prototyping area**.
+  > - `switches.user_switches: "TBD quantity"` (`:48`).
+  > - `headers.connector_type: "Standard 0.1 inch headers"` (`:52`).
+  > - the whole `video_audio:` block — `vga_support` / `hdmi_support` / `audio_output`
+  >   (`:70-73`). Fabricated whole; still standing.
+  > - `connectivity.programming` (`:58-65`) — `connector: "USB-B or USB-C"` and Prop Plug
+  >   **#32201**.
+  > - `expansion_ecosystem.individual_addons` (`:127-134`) — #64032 HUB75 / #64008 MicroBUS.
+  >
+  > **Why all six were missed — one reason, measured, not the one that looks likely.** Each of
+  > the four surviving blocks (`built_in_peripherals`, `connectivity`, `video_audio`,
+  > `expansion_ecosystem`) states **zero unit-bearing quantities**: "0.1 inch", "16 MB", "32 MB",
+  > "4-pin", "#32201" carry no unit the gate counts (inch, MB and bare integers are structure by
+  > design). A quantity-keyed gate therefore never looks at any of them. Note what is NOT the
+  > cause: `built_in_peripherals` does carry a genuine `source:` for the LED bank (`:45`), which
+  > would have silenced it too — but that is belt-and-braces, not the operative reason, and the
+  > other three carry no citation at all and were still passed over.
+  >
+  > **The generalizable lesson:** a purge keyed on MISSING CITATIONS is orthogonal to a WRONG
+  > SCALAR and to an INVENTED SECTION. It caught the four items that happened to carry volts,
+  > megahertz, or a `TBD` inside a quantitative block, and passed over the six that are pure
+  > prose — including both wholly fabricated sections. Removal is not a substitute for the
+  > re-derivation; it guarantees only that what remains was never *uncited*, never that it is
+  > *true*.
+
   Status: `PARTIAL` — **(a) RESOLVED 2026-08-24** by cross-source normalization against the ROM
   booter and the silicon-doc boot table: P58 = MISO / P59 = MOSI, the KB is already correct and
   stands unchanged, and the guide's §18 is source errata. Nothing remains open on (a) and it is
   **not** blocked on the bench. **(b) CONFIRMED and OPEN** — verified against the repaired
   source, ready to fix in «#294»/«#307».
+
+---
+
+## The `hardware/` uncited-block purge — the removal record, and a citation token that silences the gate (2026-08-24, «#294») — F-334
+
+> **Origin.** Plan §4 part 2 removed all 48 Tier-1 uncited quantitative blocks from
+> `deliverables/ai/P2/hardware/`, taking `audit-yaml-claim-sourcing.py` to **0 Tier 1 / exit 0**
+> across 1129 files for the first time. Two things are recorded here: the **removal record**,
+> which is «#307»'s working list (F8 — «#307» must not have to do git archaeology), and a
+> detector defect the pass proved while working inside these files.
+
+### Removal record — 48 blocks, 16 files, 2026-08-24
+
+Line ranges are **pre-removal** (`git show 15c84de5:<path>` reproduces them). Every removal is a
+whole top-level YAML key, the unit the gate measures. Nothing was reworded, repointed, or
+partially trimmed; surviving keys were verified byte-equal at the parse against the
+`.backups/…20260824-233259` copies.
+
+  | File (`deliverables/ai/P2/hardware/`) | n | Blocks removed (pre-removal line range) |
+  |---|---|---|
+  | `addon-goertzel-touch.yaml` | 1 | `specifications` (74-87) |
+  | `addon-hd-audio.yaml` | 4 | `description` (19-25) · `set_contents` (26-30) · `dac_board` (79-120) · `use_cases` (128-135) |
+  | `addon-hyperram-hyperflash.yaml` | 2 | `specifications` (73-86) · `configuration` (87-100) |
+  | `addon-motor-driver.yaml` | 6 | `signal_map` (45-62) · `power_signals` (63-68) · `pwm_control` (69-81) · `current_sense` (82-86) · `specifications` (87-110) · `protection` (111-116) |
+  | `addon-rtc.yaml` | 3 | `description` (18-24) · `power_signals` (52-55) · `specifications` (97-113) |
+  | `addon-serial-device.yaml` | 2 | `description` (16-23) · `signal_map` (36-69) |
+  | `addon-serial-host.yaml` | 2 | `signal_map` (37-70) · `usb_host_capabilities` (93-111) |
+  | `addon-wx-wifi.yaml` | 3 | `part_variants` (3-5) · `pin_descriptions` (78-91) · `specifications` (97-108) |
+  | `edge-32mb-module.yaml` | 5 | `specifications` (44-255) · `pin_mapping` (256-405) · `boot_modes` (406-444) · `limitations` (665-675) · `development_workflow` (676-686) |
+  | `edge-breadboard-carrier.yaml` | 3 | `specifications` (25-46) · `specialized_features` (73-92) · `power_specifications` (209-225) |
+  | `edge-mini-breakout.yaml` | 3 | `specifications` (24-43) · `connectivity` (52-68) · `power_management` (184-190) |
+  | `edge-standard-breakout.yaml` | 3 | `specifications` (24-42) · `connectivity` (50-66) · `power_management` (165-170) |
+  | `edge-standard-module.yaml` | 3 | `specifications` (43-183) · `pin_mapping` (184-315) · `boot_modes` (316-354) |
+  | `hub75_adapter.yaml` | 4 | `description` (13-17) · `specifications` (49-66) · `software_features` (135-185) · `notes` (212-219) |
+  | `p2-eval-board.yaml` | 1 | `specifications` (24-56) |
+  | `programming-prop-plug.yaml` | 3 | `description` (21-30) · `reset_option` (45-52) · `specifications` (53-64) |
+
+**Findings that name content in this record:** F-328(b) (`p2-eval-board.yaml specifications` —
+see that entry for the four items removed and the six that survive) · F-251 and F-252 (the Edge
+module LED facts — both annotated in place with their new addresses). **The two heaviest losses
+for «#307» to price:** `edge-32mb-module.yaml` 744→321 lines and `edge-standard-module.yaml`
+582→270, because in both the entire `pin_mapping` went. Board-level pin maps **pass** the
+actionability test (they change which pin numbers appear in generated code), so these are
+high-priority repopulation, source-first from the Edge module guides.
+
+- **F-334 — `audit-yaml-claim-sourcing.py` treats a board REVISION (`Rev B` / `Rev C`) and a
+  POWER `source:` as citations, which silences the gate on 11 quantitative blocks that are as
+  uncited as the 48 just removed.** — the gate's `INLINE_CITE_RE` includes `rev\s*[BC]\b`, which
+  is a reasonable citation token in `Silicon Doc Rev C` prose and a **false positive** in a
+  hardware file, where `Rev B` is the board's own identity: `board_revision: "Rev B (Guide
+  v2.0)"`, or plain description text *"Goertzel experimenter board (Rev B) with pads…"*.
+  Separately, `CITE_RE` matches any `source:` key — including
+  `hub75_adapter.yaml` `source: P2 development board 5V supply` and
+  `source: External 5V power supply (required)`, where "source" means a **power** source.
+
+  **Both fire in the citation half only**, so the effect is a **false negative**: one such token
+  anywhere in a top-level block marks the whole block cited and the gate never inspects it.
+  **Measured, whole-KB, 2026-08-24 (after the purge):**
+
+  | File | Block | qty | silenced by |
+  |---|---|---|---|
+  | `hardware/addon-hyperram-hyperflash.yaml` | `host_note` | 1 | `Rev B` |
+  | `hardware/addon-serial-device.yaml` | `specifications` | 1 | `Rev B` |
+  | `hardware/addon-serial-device.yaml` | `rev_b_5v_note` | 2 | `Rev B` |
+  | `hardware/addon-serial-host.yaml` | `description` | 4 | `Rev B` |
+  | `hardware/addon-serial-host.yaml` | `specifications` | 5 | `Rev B` |
+  | `hardware/addon-serial-host.yaml` | `power_requirements` | 6 | `Rev B` |
+  | `hardware/addon-serial-host.yaml` | `development_workflow` | 1 | `Rev B` |
+  | `hardware/addon-serial-host.yaml` | `limitations` | 3 | `Rev B` |
+  | `hardware/edge-standard-module.yaml` | `revision_history` | 6 | `Rev B`, `Rev C` |
+  | `hardware/hub75_adapter.yaml` | `power_requirements` | 12 | the two power-`source:` keys |
+  | `language/spin2/methods/getct.yaml` | `description` | 1 | `Rev B` |
+
+  **Why «#294» did not act on it.** Three reasons, in order. (1) Its authority to touch the
+  detector was bounded to a **proven false positive** — a block wrongly *flagged*; this is the
+  opposite direction. (2) `hardware/addon-serial-host.yaml` alone would gain 5 blocks, and the
+  purge's own success criterion is `hardware/` = 0, so acting would have made the task's gate
+  unreadable mid-flight. (3) One of the 11 — `language/spin2/methods/getct.yaml` — is **outside
+  `hardware/`**, in a tree «#293» already closed, which «#294» was forbidden to touch; fixing
+  the detector without it would have left Tier 1 at 1 and the tool at exit 1, i.e. a green task
+  reported red for a reason unrelated to its work.
+
+  **Repaired 2026-08-24.** Both patterns were tightened around one principle: **a citation names
+  a DOCUMENT, or an empirical record — not a hardware revision, and not a physical supply.**
+
+  - `rev\s*[BC]\b` is **gone** from `INLINE_CITE_RE`. It was not replaced with an
+    adjacent-to-a-document-word variant because the corpus says that is unnecessary: **every**
+    real citation in all 1129 files that carries a revision also names the document it is a
+    revision *of* — `"P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"`, `"Propeller 2
+    Documentation v35 - Rev B/C Silicon"`, `"#64000 … Eval Board Rev C Guide v2.0"` — so each is
+    still recognised by `silicon doc`, `p2 documentation`, or the `guide` value token. Measured
+    before deciding: **0 blocks and 0 files** in the KB rested on the revision token as their
+    only *genuine* citation signal.
+  - `CITE_RE` is replaced by `CITE_KEY_RE` + **`CITE_VALUE_RE`**: the key name is no longer the
+    test, the **value** is. A key that introduces structure (`sources:` + a list, `source: |` +
+    a block scalar) is tested against its nested body, which is where the document is named.
+    The accept-vocabulary is drawn from the 88 corpus values that *are* citations, so every real
+    short form still passes (`"P2 Datasheet"`, `"Silicon Doc v35"`, `"Hardware Manual
+    2022-11-01"`, `"PNut v47 release notes"`, `flash_loader.spin2`, `parallax-quick-bytes`,
+    `complete-builtin-symbols.md`, `…/P2-EMPIRICAL-FINDINGS.md EF-053`). Of the **312** cite-key
+    lines in the corpus, **224 name no document at all** — power supplies, pattern-category tags
+    (`source: motor_control`), event-name lists (`sources: ["CT-passed-CT1", …]`), compiler
+    search paths (`source: "-I directories"`).
+
+  **Negative control: 12 → 25 cases, 0 FAIL** (`--negative-control`, which now prints the count
+  and its split: quantity 5 · region 7 · citation 13). The thirteen citation cases each state a
+  real quantity, so none of them can pass by having nothing to find — what they measure is purely
+  whether the block is judged *cited*. Six of them **FAIL against the shipped detector and PASS
+  against the repaired one** (board revision · silicon revision in prose · `source:` naming a
+  power supply · `source:` naming a host rail · `source:` naming a pattern category · `sources:`
+  listing event names); the other seven prove a real citation is still recognised in each of its
+  corpus spellings — short form, versioned, a genuine citation that *also* carries `Rev C`,
+  `derived_from:` with a file+line, `verified_against:` with an EF number, a `sources:` list, and
+  bare inline attribution with no cite key at all. No MUST-NOT-FIRE case regressed.
+
+  **The instrument, before and after.** The repaired detector reported **4 Tier 1 / exit 1**, and
+  the union of Tier 1 + Tier 2 went **84 → 95**: exactly the 11 blocks below became visible and
+  **nothing disappeared**. After the removals it reads **0 Tier 1 / exit 0** with Tier 2 back at
+  exactly **84** — which is the cross-check this entry asked for, satisfied: no file silently
+  changed tier, the eleven were removed rather than demoted. The zero is now a *true* zero: the
+  same tool failed, on this tree, an hour earlier.
+
+### Removal record — 11 blocks, 6 files, 2026-08-24 (the same purge, finishing)
+
+Line ranges are **pre-removal**. Every removal is a whole top-level YAML key; surviving keys were
+verified parse-identical to the `.backups/…20260824-235306` copies (`yaml.safe_load` diff: only
+the named keys gone, no key added, no surviving value changed). No `related:`/`see_also:` line
+falls inside any removal range, and no file anywhere deep-links one of these keys — both checked
+programmatically before deleting.
+
+  | File | Block (pre-removal range) | What went | Repopulates under |
+  |---|---|---|---|
+  | `hardware/addon-hyperram-hyperflash.yaml` | `host_note` (26-30) | 5V-socket / ACC-HDR jumper guidance | «#307» |
+  | `hardware/addon-serial-device.yaml` | `specifications` (41-59) | 3.3V, 3.2mm, 5mm, 9.5mm | «#307» |
+  | `hardware/addon-serial-device.yaml` | `rev_b_5v_note` (60-65) | Rev-B 5V shunt note | «#307» |
+  | `hardware/addon-serial-host.yaml` | `description` (16-23) | 500 mA load-switch limit | «#307» |
+  | `hardware/addon-serial-host.yaml` | `specifications` (37-58) | 500mA/1A/~2mA + physical dims | «#307» |
+  | `hardware/addon-serial-host.yaml` | `power_requirements` (59-71) | the same current budget again | «#307» |
+  | `hardware/addon-serial-host.yaml` | `development_workflow` (102-110) | 5V-availability checklist | «#307» |
+  | `hardware/addon-serial-host.yaml` | `limitations` (120-126) | 500mA per-port limit | «#307» |
+  | `hardware/edge-standard-module.yaml` | `revision_history` (204-235) | VIN 5.5V→16V, 2A→3A, 2.5MHz→750kHz | «#307» |
+  | `hardware/hub75_adapter.yaml` | `power_requirements` (127-139) | 35mA @ 35MHz + the four panel budgets | «#307» |
+  | `language/spin2/methods/getct.yaml` | `description` (8-15) | "~21 seconds at 200MHz" wrap figure | «#299» |
+
+**Sources to repopulate from:** the `#64006 Series` and `#64004-ES` product guides (already cited
+in each file's own `documentation.primary`), the P2-EC Edge Module guide's revision table, the
+HUB75 driver study, and — for `getct` — the Spin2 language reference. **`getct.yaml` is the one
+outside `hardware/`**: it is «#299»'s, and its wrap figure is *derived* (2³² ÷ 200 MHz), so it
+needs a source that states it or a rewrite that does not compute.
+
+  **Three of the dispatched candidates were NOT violations** and were left alone — measured, not
+  assumed: `architecture/smart_pin_patterns.yaml` `timing_patterns` and `language/pasm2/waitx.yaml`
+  `examples` state **zero** quantities once code regions are stripped (their numbers are all
+  inside example bodies), and `architecture/boot-rom/spi-flash-boot.yaml`
+  `phase_2_post_load_state` is **correctly** silenced: its `cog_clock.source:` attributes the
+  20-30 MHz figure to `architecture/clock_system.yaml`, which does carry it
+  (`frequency: "20-30 MHz across process/voltage/temperature"`, line 35). So no `architecture/`
+  block was in scope after all — the finding is 11, in two trees, not three.
+
+  Status: `PARTIAL` — the detector repair and all 11 removals are applied and verified; the
+  repopulation is owed to «#307» (10) and «#299» (1). See **F-335**, which this repair exposed.
+
+---
+
+## `audit-yaml-claim-sourcing.py` does not know the `documentation: primary:` citation spelling, so a whole class of board file is mis-tiered into the advisory lane (2026-08-24, F-334 repair) — F-335
+
+> 🔴 **TWO FURTHER DEFECT CLASSES, ADDED BY THE ARBITER'S RE-RUN 2026-08-25. «#305» MUST DISPOSE OF
+> ALL OF THEM BEFORE ARMING — THEY ARE NOT INDEPENDENT, AND ONE PAIR CANCELS.**
+>
+> **(c) An escaped single-line string hides example code from `strip_code_regions`.** The stripper
+> recognises **block scalars** (`|`). `language/pasm2/waitx.yaml`'s `examples:` stores its PASM2 as a
+> double-quoted single-line string with literal `\n` escapes, so the stripper never sees a code
+> region and the gate reads **4 quantities** out of PASM2 *comments* — `' For 1kHz PWM at 200MHz
+> clock:` and `' 100us @ 200MHz`. Those are chosen demo parameters, which the tool's own header says
+> it exists to skip. Measured: 4 quantities raw, **4 surviving the strip** (compare
+> `architecture/smart_pin_patterns.yaml timing_patterns`, where 1 raw → **0** stripped, correctly).
+>
+> **(d) A slug still passes as a citation, so (c) is currently masked.** `waitx.yaml examples` carries
+> `source: hub75_driver` · `source: inline_pasm2_pattern` · `source: bit_bang_spi` ·
+> `source: software_pwm` · `source: input_debounce` — **pattern-category tags, not documents**. These
+> are the same shape as `source: motor_control`, which F-334's repair added as a control and rejects;
+> the filename/slug accept-branch lets these through. So the block is not flagged.
+>
+> 🔴 **THE POINT IS NOT EITHER BUG — IT IS THAT THEY CANCEL.** A quantity-side false positive is
+> being hidden by a citation-side false negative, and the block reads clean for two wrong reasons.
+> Fix either one alone and the gate starts failing on a block that was never a real violation. That
+> is why (a)-(d) must be dispositioned **together**, in the order this finding sets out, and why the
+> current `PASS  no Tier 1 violations` — while true for the two paths F-334 repaired — is **not yet a
+> safe thing to arm a release gate on.**
+>
+> **What IS settled and should not be re-litigated:** F-334's two repairs are proven. The arbiter ran
+> the five false-negative cases against the pre-repair detector loaded side-by-side: all five scored
+> *cited* before and *uncited* after, while three real citation forms — short form, an EF record, and
+> one that itself carries `Rev C` — still score cited. 25 controls, 0 FAIL.
+
+> **Origin.** Surfaced while repairing F-334. Removing the `Rev B` token from `INLINE_CITE_RE`
+> dropped `addon-serial-host.yaml` and `addon-serial-device.yaml` out of "citing" entirely — and
+> that is **wrong**, because both files cite perfectly well, three lines from the bottom. The
+> detector simply does not recognise the spelling. Filed rather than fixed: the fix is measured
+> below and it is **not safe to arm as-is**, for a reason that is itself a finding.
+
+- **F-335 — the eval add-on board files cite as `documentation:` → `primary: "<doc>"`, a spelling
+  no citation key in the tool matches, so files that DO know the citing convention are scored as
+  wholly-uncited and their F-327-shaped blocks land in Tier 2 (advisory) instead of Tier 1
+  (blocking).** — `addon-serial-host.yaml:171-172` is the type case:
+
+  ```yaml
+  documentation:
+    primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  ```
+
+  That is a citation by any reading, and it is the ONLY one in the file. `CITE_KEY_RE` knows
+  `source`/`sources`/`reference`/`references`/`authority`/`derived_from`/`verified_against` and
+  not `documentation`, so `file_cites` is false, so **the file's own other sections cannot act as
+  the control** and Tier 1 — the tier the release gate «#305» will arm on — never applies to it.
+  Until F-334 was repaired the effect was invisible: the `Rev B` token was propping these files
+  up in Tier 1 by accident, for entirely the wrong reason.
+
+  **Measured, whole-KB, 2026-08-24.** Adding `documentation` to the key vocabulary (value-tested
+  exactly like the others) moves **Tier 1 from 4 to 34 and Tier 2 from 91 to 61** — thirty
+  blocks across eight board files that have sat in the advisory lane throughout this sprint:
+  `addon-av-breakout` (3), `addon-control-board` (6), `addon-digital-video-out` (4),
+  `addon-led-matrix` (3), `addon-microsd` (1), `addon-mini-prototyping` (5), `addon-wx-adapter`
+  (1), plus the two serial boards already purged under F-334.
+
+  **Why it was NOT applied in the same pass, and this is the real content of the finding.**
+  Reading those thirty blocks shows most of them are not claims at all — they are the **quantity**
+  half over-firing, which is a different defect in the other half of the same tool:
+
+  | Kind | Example | Why it is not a measurement |
+  |---|---|---|
+  | part number | `addon-control-board.yaml:2` `part_number: "64006A"` | `QTY_RE` reads `64006A` as **64006 amperes**. Same string flagged again in `aliases` and in `availability.part_lookup`. |
+  | rail NAME | `supply_voltage: "3.3V from host"`, `label: "5V"`, `voltage: "3.3V (VIO)"` | `3.3V`/`5V` here name the rail, the way `GND` names a net. Present in nearly every board file. |
+  | connector NAME | `addon-digital-video-out.yaml:83` `name: "5V (5V-arrow)"` | a silkscreen label. |
+
+  Arming the key widening without repairing `QTY_RE` first would therefore force the deletion of
+  a board's `part_number` and `aliases` blocks to reach zero — **content destruction to satisfy
+  an instrument defect**, which is the exact inversion of what this sprint is for.
+
+  **The scope this finding must own, because it is wider than it looks.** The rail-name over-fire
+  is not confined to the thirty: it is also why three of F-334's eleven removals went
+  (`addon-hyperram-hyperflash.host_note` on a "5V socket", `addon-serial-host.development_workflow`
+  and `addon-serial-device.rev_b_5v_note`, all on rail names with no measurement in them), and it
+  reaches back into the 48 (`addon-rtc.power_signals` was removed for
+  `VIO3V3: "3.3V supply; powers the RTC…"`). Those removals were made **deliberately, for
+  consistency** with the 48 already accepted — but they are the same shape, and the decision
+  about rail names should be made **once, globally**, not differently at each task boundary.
+
+  **What is owed, in this order.** (1) Decide the rail-name question: is `3.3V` naming a supply
+  rail a claim that must be sourced, or is it structure like a pin number? Whichever way it goes,
+  it applies to the 48, to F-334's eleven, and to the Tier 2 population alike. (2) Fix `QTY_RE`
+  so a part number (`64006A`) is not a current — that one has no second side, it is simply wrong.
+  (3) Only then add `documentation` to `CITE_KEY_RE`, with negative-control cases for the
+  spelling, and re-run. **«#305» should not arm the release gate on Tier 1 until (3) lands** —
+  not because the gate is wrong today, but because eight board files are currently exempt from it
+  for a reason nobody chose.
+
+  Status: `CONFIRMED` — measured whole-KB with the repaired detector; deliberately not fixed,
+  the ordering above is the reason.
 
 ---
 
@@ -803,8 +1098,25 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   pull-ups) is right; the mechanism is wrong. **→ manual head:** correct the aside in the
   next DeSilva patch. Also worth stating there that on the #64000 **P58-P63 are shared with
   the USB-data and memory signals**, so those LEDs are active at power-up and after reset by
-  design — a second, entirely non-mysterious reason a reader sees lit LEDs. Status:
-  `CONFIRMED`.
+  design — a second, entirely non-mysterious reason a reader sees lit LEDs.
+
+  > **EVIDENCE BASE MOVED 2026-08-24 by the «#294» uncited-block purge — read before citing.**
+  > This finding's premise says *"the #64000 guide (feature 12) and **both Edge module YAMLs**
+  > describe the onboard LEDs as buffered."* **The Edge half of that is no longer true of the
+  > KB.** The purge removed `pin_mapping` from both Edge module YAMLs, and with them every
+  > `led_buffered` entry; `buffer` now matches nothing LED-related in either file (only
+  > unrelated "framebuffer" prose).
+  > **What still stands, and is the stronger citation anyway:**
+  > `hardware/p2-eval-board.yaml:27` `type: "Buffered LED bank"` and `:29` `buffer: "Driven
+  > through an LED buffer that isolates them from the I/O signals"` — inside the
+  > `built_in_peripherals` block, which survived the purge *and* carries a real `source:` line
+  > (`:45`) naming the #64000 Rev C Guide feature 12. The P58-P63 shared-signal point this
+  > finding also wants stated is at `:31-34` (`power_at_startup`), same block, same citation.
+  > So the manual fix is **not blocked** — cite the eval-board file, not the Edge files. If the
+  > buffered-LED fact is wanted for the Edge modules specifically, it is «#307» repopulation
+  > work, source-first from the Edge module guides.
+
+  Status: `CONFIRMED`.
 
 - **F-252 — the Getting Started guide hardcodes `LED = 56` with no board caveat (same class
   as the DeSilva fix).** `p2-getting-started-guide/opus-master/getting-started-body.md:558`
@@ -817,6 +1129,26 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   sidetrack). Sources now in the KB: `hardware/edge-standard-module.yaml` (P56/P57),
   `hardware/edge-32mb-module.yaml` (P38/P39), `hardware/p2-eval-board.yaml` (P56-P63,
   P56/P57 free). **→ manual head.** Surfaced by the v1.16.2 YAML→Manual impact survey.
+
+  > **TWO OF THE THREE NAMED SOURCES MOVED 2026-08-24 («#294» uncited-block purge). The fact
+  > survives; the addresses changed.** Verified line by line against the post-purge files:
+  > - `hardware/edge-32mb-module.yaml` (P38/P39) — **gone from this file entirely.** The purge
+  >   removed its `pin_mapping` block (which held `led_buffered: 2  # P38-P39` and the P38/P39
+  >   pin entries) and its `boot_modes` block (which held the `LED:` DIP-switch line naming
+  >   P38/P39). `P38`/`P39` now match **nothing** in that file.
+  > - `hardware/edge-standard-module.yaml` (P56/P57) — **survives, at a new address.** Its own
+  >   `pin_mapping` went too, but the `comparison_with_32mb` block was not flagged and stands:
+  >   `:158` `led_pins: "P56, P57"` and `:164` `led_pins: "P38, P39"`. That single surviving
+  >   block now carries **both** boards' LED pins, so it alone can source the whole caveat.
+  > - `hardware/p2-eval-board.yaml` (P56-P63, P56/P57 free) — **survives untouched** at `:28`
+  >   (`pins: "P56-P63 (one LED per pin)"`) and `:31-34`, inside the cited
+  >   `built_in_peripherals` block.
+  >
+  > **The manual fix is not blocked** — every pin number the caveat needs is still in the KB.
+  > Cite `edge-standard-module.yaml:158,164` for the Edge pair and `p2-eval-board.yaml:28` for
+  > the eval board. When «#307» repopulates `edge-32mb-module.yaml`, P38/P39 must come back
+  > there source-first; until it does, do not cite that file for this fact.
+
   Status: `CONFIRMED`.
 
 ---

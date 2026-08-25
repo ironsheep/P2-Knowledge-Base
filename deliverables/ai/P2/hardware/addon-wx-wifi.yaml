@@ -1,8 +1,5 @@
 component: Parallax WX ESP8266 Wi-Fi Module
 part_number: "32420"
-part_variants:
-  - "32420D (DIP, 2 mm, 3.3 V - Propeller Activity Board WX socket)"
-  - "32420S (SIP, 0.1\", 3.3-5 V - breadboard; rides the P2 WX Adapter #64007)"
 series: "Parallax Wireless"
 manufacturer: "Parallax Inc."
 status: "active_production"
@@ -73,38 +70,10 @@ command_protocol:
   network_commands: "HTTP / WebSocket / TCP, e.g. POST /wx/setting?name=...&value=... (case-sensitive)"
   reference: "full command + argument token list in the 32420 Firmware/API Guide"
 
-# Module pin descriptions (authoritative table from the guide, p11).
-# SIP Pin / DIP Pin = physical pin numbers on each form factor.
-pin_descriptions:
-  - {pin: "VIN",  direction: "power in", sip: 1,  dip: 1,  esp: "-",    function: "(SIP) 3.3-5 V; (DIP) 3.3 V power input"}
-  - {pin: "/PGM", direction: "in",       sip: 2,  dip: 20, esp: "IO0",  function: "Held low at power-up: boot for serial firmware load. Pulse low 4x rapidly to force AP+STA mode."}
-  - {pin: "DBG",  direction: "out",      sip: 3,  dip: 9,  esp: "IO2",  function: "Transmits info about host-MCU exchanges."}
-  - {pin: "ASC",  direction: "out",      sip: 4,  dip: 15, esp: "IO5",  function: "Associate - high/low patterns indicate Wi-Fi mode + connection state."}
-  - {pin: "/CTS", direction: "in/out",   sip: 5,  dip: 12, esp: "IO13", function: "User-configurable pin (used as target-reset control on the P2 WX Adapter)."}
-  - {pin: "/RTS", direction: "out",      sip: 6,  dip: 16, esp: "IO15", function: "User-configurable pin."}
-  - {pin: "DO",   direction: "out",      sip: 7,  dip: 2,  esp: "TXD",  function: "Transmits serial data to the host MCU."}
-  - {pin: "DI",   direction: "in",       sip: 8,  dip: 3,  esp: "RXD",  function: "Receives serial data from the host MCU."}
-  - {pin: "/RES", direction: "in",       sip: 9,  dip: 5,  esp: "EN",   function: "Active-low reset."}
-  - {pin: "GND",  direction: "power in", sip: 10, dip: 10, esp: "GND",  function: "Ground."}
-  - {pin: "PS",   direction: "out",      sip: "-", dip: 7, esp: "IO4",  function: "May be used in future to remotely switch a WX carrier board's programming source from USB to Wi-Fi."}
-  - {pin: "DTR",  direction: "out",      sip: "-", dip: 18, esp: "IO12", function: "Toggles the microcontroller reset line in a WX carrier board."}
-
 prop_plug_compat: >-
   On the SIP/breadboard header the first four pins GND, RES, DI, DO are
   compatible with the Parallax Prop Plug (#32201) for firmware reprogramming.
   See hardware/programming-prop-plug.yaml.
-
-specifications:
-  voltage_sip: "+3.3 to +5 VDC"
-  voltage_dip: "+3.3 VDC"
-  current: "typical 75 mA; Wi-Fi transmit peaks up to 360 mA"
-  logic_levels_sip: "output high = Vin (3.3 or 5.0 V); input high > Vin/2"
-  logic_levels_dip: "output high 3.3 V; input high > 1.5 V"
-  form_factor_sip: "0.1\" (2.54 mm) row of 10 right-angle pins"
-  form_factor_dip: "0.078\" (2 mm) dual row of 10 straight pins (Activity Board WX socket)"
-  pcb_dimensions: "~1.0 x 1.5 in (26 x 37.5 mm)"
-  operating_temp: "0 to +70 C (+32 to +158 F)"
-  dip_incompatibility: "DIP (#32420D) is NOT compatible with Parallax XBee adapter boards."
 
 p2_support: "via the P2 WX Adapter (#64007)"
 p2_support_note: >-

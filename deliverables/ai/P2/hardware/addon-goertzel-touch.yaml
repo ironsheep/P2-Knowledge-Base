@@ -71,20 +71,6 @@ p2_goertzel_capability: >-
   circuit operation is a P2 silicon feature, not a property of this board -
   consult the PASM2/architecture references for it.
 
-specifications:
-  requires_host: true
-  io_pins_used: 8
-  compatible_hosts:
-    - "P2 Eval Board (64000)"
-    - "P2 Edge Module Breadboard (64020)"
-    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
-  electrical:
-    supply_voltage: "3.3V from host"
-  physical:
-    connector: "2x6 pass-through socket"
-    mounting: "Single M3 mounting hole connected to GND"
-    mounting_hardware: "M3 or UNC 4-40"
-
 use_cases:
   primary:
     - "Non-contact switching"

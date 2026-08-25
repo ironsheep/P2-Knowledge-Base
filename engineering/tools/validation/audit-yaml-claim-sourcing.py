@@ -71,6 +71,23 @@ WHAT COUNTS AS A QUANTITY -- and what deliberately does not
         word in the knowledge base.
       * version numbers, dates, byte/bit widths
 
+WHAT COUNTS AS A CITATION -- and what deliberately does not
+    A citation names a DOCUMENT, or an empirical record. It is not a hardware
+    revision and it is not a physical supply. Both of those were read as
+    citations by the shipped detector (F-334) and both silenced the gate:
+
+      * `Rev B` / `Rev C` was an INLINE citation token. On a board file that is
+        the board's own identity -- `"5V shunt jumper required on P2-ES Eval
+        Board Rev B"` -- and it marked the block cited.
+      * ANY key literally named `source:` was a citation, whatever it named.
+        `source: External 5V power supply (required)` is a POWER source, and it
+        passed a block stating twelve currents.
+
+    Both are false NEGATIVES: they do not produce a wrong finding, they produce
+    no finding, which is worse. A gate that cannot fail manufactures confidence.
+
+    So the key name is not the test; the VALUE is. See CITE_VALUE_RE.
+
 EXIT STATUS
     0  no Tier 1 violations
     1  one or more Tier 1 violations
@@ -88,11 +105,50 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 KB_ROOT = REPO / "deliverables" / "ai" / "P2"
 
-# A citation, in any of the spellings the corpus actually uses.
-CITE_RE = re.compile(
-    r"^\s*(source|sources|source_document|source_documents|citation|citations|"
-    r"reference|references|authority|derived_from|verified_against)\s*:",
+# A citation KEY, in any of the spellings the corpus actually uses. The key name
+# alone is NOT the test -- see CITE_VALUE_RE.
+CITE_KEY_RE = re.compile(
+    r"^(\s*)-?\s*(source|sources|source_document|source_documents|citation|citations|"
+    r"reference|references|authority|derived_from|verified_against)\s*:\s*(.*)$",
     re.IGNORECASE)
+
+# ...because `source:` is the most overloaded key in this knowledge base. Of the
+# 312 cite-KEY lines in the corpus, 224 do not name a document at all:
+#
+#     hub75_adapter.yaml:133   source: External 5V power supply (required)
+#     hub75_adapter.yaml:129   source: P2 development board 5V supply
+#     smart_pin_patterns.yaml  source: motor_control
+#     event_system.yaml        sources: ["CT-passed-CT1", "CT-passed-CT2", ...]
+#     external-symbols.yaml    source: "-I directories"
+#
+# The first two are a POWER source. The rest are pattern-category tags, event
+# names and compiler search paths. Every one of them silenced the block it sat
+# in -- `hub75_adapter.yaml` `power_requirements` states twelve currents
+# (35mA, 1.5A/4A peak, ... 5A/20A peak) and was passed by the gate because a
+# 5V supply was named as its "source".
+#
+# So a cite key counts only when its VALUE names a DOCUMENT (or an empirical
+# record). This vocabulary is drawn from the 88 values in the corpus that ARE
+# citations, not from intuition -- it covers every short form they actually use
+# (`"P2 Datasheet"`, `"Silicon Doc v35"`, `"Hardware Manual 2022-11-01"`,
+# `"PNut v47 release notes"`, `flash_loader.spin2`, `parallax-quick-bytes`,
+# `complete-builtin-symbols.md`, `…/P2-EMPIRICAL-FINDINGS.md EF-053`) as well as
+# the long ones. A key that introduces STRUCTURE (`sources:` + a list, `source:
+# |` + a block scalar) is tested against its nested body, which is where the
+# document is actually named.
+CITE_VALUE_RE = re.compile(
+    r"(doc\b|docs\b|documentation|datasheet|data\s*sheet|manual|guide|guides|"
+    r"reference|spec\b|specification|book|tutorial|release\s*notes|symbol\s*table|"
+    r"spreadsheet|schematic|app(lication)?\s*note|whitepaper|study|standard|errata|"
+    r"silicon|parallax|chip\s+gracey|spin2|pasm2|pnut|obex|titus|"
+    r"EF-\d+|empirical|hardware[- ]verified|verif|validat|measured|verbatim|"
+    r"clarification|"
+    r"\.(md|ya?ml|txt|spin2|pas|pdf|docx?|csv|py|json)\b|https?://|"
+    r"\bline[s]?\s+\d|\bp\.\s*\d|\brow\s+\d|:\d+[-:]\d+|\bv\d{2}\b|\bv\d\.\d)",
+    re.IGNORECASE)
+
+# The YAML spellings that mean "the value is below, not here".
+_STRUCTURE_VALUE = {"", "|", ">", ">-", ">+", "|-", "|+"}
 
 # Physical quantities. Unit REQUIRED -- a bare number is structure, not a claim.
 QTY_RE = re.compile(
@@ -142,10 +198,57 @@ CODE_MARKER_RE = re.compile(r"^\s*(?:'|(?:PUB|PRI)\s+\w)")
 # Demanding one particular spelling would turn a correctly-attributed claim into
 # a violation, which teaches people the gate is wrong rather than that the claim
 # was.
+# `rev\s*[BC]\b` was in this vocabulary and is deliberately NOT any more. It was
+# reasoning from `Silicon Doc Rev C` prose, but in a hardware file `Rev B` is the
+# board's OWN IDENTITY, not a document reference --
+#     power_configuration: "5V shunt jumper required on P2-ES Eval Board Rev B"
+# -- and that one string marked the whole `specifications` block cited, hiding
+# 500mA/1A/~2mA. It did its worst damage exactly where it fired most: the board
+# tree, where every file legitimately names a board revision.
+#
+# Nothing genuine was lost with it. Measured across all 1129 files: every real
+# citation in the corpus that contains a revision also names the document it is
+# a revision OF -- `"P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"`,
+# `"Propeller 2 Documentation v35 - Rev B/C Silicon"`, `"#64000 Propeller 2 Eval
+# Board Rev C Guide v2.0"` -- so each is still recognised by `silicon doc`,
+# `p2 documentation` or the `guide` value token. The ten blocks the token was
+# holding up were board and silicon revisions, every one.
 INLINE_CITE_RE = re.compile(
     r"(silicon\s*doc|datasheet|data\s*sheet|spin2\s*v\d|p2\s*documentation|"
     r"hardware[- ]verified|empirical|EF-\d+|per\s+the\s+doc|verbatim|"
-    r"parallax\s+p2|rev\s*[BC]\b)", re.IGNORECASE)
+    r"parallax\s+p2)", re.IGNORECASE)
+
+
+def _nested_body(lines, i, indent):
+    """The lines below `i` that belong to it -- the body of a key whose value is
+    a list or a map or a block scalar."""
+    out, j = [], i + 1
+    while j < len(lines):
+        bare = lines[j].strip()
+        if bare and (len(lines[j]) - len(lines[j].lstrip())) <= indent:
+            break
+        out.append(lines[j])
+        j += 1
+    return "\n".join(out)
+
+
+def cites_in(lines, lo=0, hi=None):
+    """True when some line in [lo, hi) is a citation: a cite KEY whose VALUE
+    names a document or an empirical record. The value test is the whole point
+    -- `source: External 5V power supply (required)` is a power source, and
+    reading it as a citation is what let an uncited twelve-quantity block pass."""
+    if hi is None:
+        hi = len(lines)
+    for i in range(lo, min(hi, len(lines))):
+        m = CITE_KEY_RE.match(lines[i])
+        if not m:
+            continue
+        value = m.group(3).strip()
+        if value in _STRUCTURE_VALUE:
+            value = _nested_body(lines, i, len(m.group(1)))
+        if CITE_VALUE_RE.search(value):
+            return True
+    return False
 
 
 def top_level_blocks(lines):
@@ -256,7 +359,7 @@ def audit():
             continue
         scanned += 1
         rel = path.relative_to(REPO)
-        file_cites = (any(CITE_RE.match(ln) for ln in lines)
+        file_cites = (cites_in(lines)
                       or bool(INLINE_CITE_RE.search("\n".join(lines))))
         prose = strip_code_regions(lines)
 
@@ -265,7 +368,7 @@ def audit():
             qty = quantities_in(body)
             if not qty:
                 continue
-            block_cites = (any(CITE_RE.match(ln) for ln in lines[start:end])
+            block_cites = (cites_in(lines, start, end)
                            or bool(INLINE_CITE_RE.search(body)))
             if block_cites:
                 continue
@@ -326,10 +429,82 @@ def negative_control():
         ok &= good
         print(f"  [{'PASS' if good else 'FAIL'}] {label}: fired={fired} expected={want}")
 
-    print("\n" + ("Negative control PASSED -- quantities detected, P2 syntax not "
-                  "mistaken for units, code/comment regions skipped WITHOUT "
-                  "silencing prose claims." if ok else
-                  "Negative control FAILED -- do not trust this run."))
+    # Citation cases -- these exercise the OTHER half of the gate, the half
+    # F-334 proved was broken. Every case carries a real quantity, so nothing
+    # here can pass by having nothing to find: what is being measured is purely
+    # whether the block is judged CITED. `fired` = the gate would report it.
+    #
+    # MUST-FIRE means "this is not a citation, so the claim is uncited".
+    # MUST-NOT-FIRE means "this IS a citation and must still be recognised" --
+    # one per spelling the corpus actually uses, which is what stops the value
+    # test from being tightened into a gate that fires on correctly-sourced work.
+    print()
+    cite_cases = [
+        ("board revision `Rev B` is the board's identity, not a document — MUST FIRE",
+         ['specifications:',
+          '  electrical:',
+          '    current_per_port: "Up to 500mA continuous"',
+          '    power_configuration: "5V shunt jumper required on P2-ES Eval Board Rev B"'], True),
+        ("silicon revision `Rev B/C` in prose is not a document — MUST FIRE",
+         ['description: |',
+          '  The counter is free-running (Rev B/C silicon) and wraps around',
+          '  approximately every 21 seconds at 200MHz.'], True),
+        ("`source:` naming a POWER supply is not a citation — MUST FIRE",
+         ['power_requirements:',
+          '  led_panels:',
+          '    source: External 5V power supply (required)',
+          '    current_per_panel: "1.5A typical, 4A peak"'], True),
+        ("`source:` naming a host power rail is not a citation — MUST FIRE",
+         ['adapter_board:',
+          '  source: P2 development board 5V supply',
+          '  current: 35mA typical @ 35MHz'], True),
+        ("`source:` naming a pattern CATEGORY is not a citation — MUST FIRE",
+         ['timing:', '  source: motor_control', '  settle: "20 ms debounce"'], True),
+        ("`sources:` listing EVENT NAMES is not a citation — MUST FIRE",
+         ['events:', '  sources: ["CT-passed-CT1", "CT-passed-CT2"]',
+          '  resolution: "1 clock at 160MHz"'], True),
+        ("short-form document citation — MUST NOT FIRE",
+         ['absolute_maximum:', '  source: "P2 Datasheet"',
+          '  vdd_max: "3.6V"'], False),
+        ("versioned document citation — MUST NOT FIRE",
+         ['timing:', '  source: "P2 Silicon Doc v35"',
+          '  branch: "13 clocks at 160MHz"'], False),
+        ("a GENUINE citation that also carries a revision — MUST NOT FIRE",
+         ['known_bug:', '  source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"',
+          '  delta: "PTRx advances 4 ns later"'], False),
+        ("`derived_from:` naming a source file + line — MUST NOT FIRE",
+         ['loader:', '  derived_from: "Parallax P2 flash_loader.spin2 line 259"',
+          '  spi_clock: "2 MHz"'], False),
+        ("`verified_against:` naming the empirical ledger — MUST NOT FIRE",
+         ['drive:',
+          '  verified_against: "engineering/ingestion/external-sources/'
+          'hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-053 (2026-08-14)"',
+          '  sink: "50 mA"'], False),
+        ("`sources:` introducing a LIST of documents — MUST NOT FIRE",
+         ['adc:', '  sources:',
+          '    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey)"',
+          '  sample_period: "1024 clocks at 160MHz"'], False),
+        ("inline attribution with no cite key at all — MUST NOT FIRE",
+         ['branch_cost: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"'],
+         False),
+    ]
+    for label, lines, want in cite_cases:
+        body = "\n".join(strip_code_regions(lines))
+        assert quantities_in(body), f"control case states no quantity: {label}"
+        cited = cites_in(lines) or bool(INLINE_CITE_RE.search(body))
+        fired = not cited
+        good = fired == want
+        ok &= good
+        print(f"  [{'PASS' if good else 'FAIL'}] {label}: fired={fired} expected={want}")
+
+    total = len(cases) + len(region_cases) + len(cite_cases)
+    print(f"\n{total} case(s): quantity {len(cases)} · region {len(region_cases)} "
+          f"· citation {len(cite_cases)}")
+    print("Negative control PASSED -- quantities detected, P2 syntax not "
+          "mistaken for units, code/comment regions skipped WITHOUT silencing "
+          "prose claims, and a board revision / a power supply no longer read "
+          "as a citation while every real citation form still is."
+          if ok else "Negative control FAILED -- do not trust this run.")
     return 0 if ok else 1
 
 

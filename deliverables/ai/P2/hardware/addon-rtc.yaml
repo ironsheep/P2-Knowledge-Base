@@ -15,12 +15,6 @@ aliases:
   - "64013"
   - "#64013 add-on board"
 
-description: >-
-  Single-accessory add-on adding a battery-backed real-time clock + calendar +
-  alarm to a P2 system. Built around the NXP PCF8523 CMOS RTC, controlled over
-  I2C. An on-board rechargeable lithium cell (Seiko MS421R) keeps time across
-  power loss, trickle-charged from the 3.3V rail while the host is powered.
-
 # --- Eval-header board model (uniform across accessory-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -48,10 +42,6 @@ signal_map:
   - {offset: 5, signal: "Not Connected", direction: na, notes: "N/C."}
   - {offset: 6, signal: "Not Connected", direction: na, notes: "N/C."}
   - {offset: 7, signal: "Not Connected", direction: na, notes: "N/C."}
-
-power_signals:
-  VIO3V3: "3.3V supply; powers the RTC and trickle-charges the backup battery."
-  GND: "Common ground."
 
 interface: i2c
 pin_mode_tip: >-
@@ -93,23 +83,6 @@ rtc_chip:
     "0Fh": "Tmr_CLKOUT_ctrl (COF[2:0] CLKOUT freq, timer-A/B mode)"
     "10h-13h": "Timer A freq/reg, Timer B freq/reg"
   clkout_frequencies_hz: [32768, 16384, 8192, 4096, 1024, 32, 1, 0]
-
-specifications:
-  requires_host: true
-  io_pins_used: 2
-  supply_voltage: "+3.3 VDC"
-  battery:
-    cell: "Seiko MS421R rechargeable lithium-metal (built-in, non-removable)"
-    capacity: "1.5 mAh nominal, 0.11 g"
-    backup_current_typ: "150 nA"
-  physical:
-    connector: "dual 2x6-pin female passthrough headers, 0.1\" spacing (stackable)"
-    mounting_hole: "3.2 mm diameter"
-    pcb_dimensions: "0.8 x 1 in (20.32 x 25.4 mm)"
-    operating_temp: "-20 to +60 C (-4 to +140 F)"
-  transport_note: >-
-    Built-in lithium-metal cell (<=1 g lithium) meets UN Manual of Tests &
-    Criteria Part III sec 38.3; transportable as Class 9 Dangerous Goods.
 
 use_cases:
   primary:
