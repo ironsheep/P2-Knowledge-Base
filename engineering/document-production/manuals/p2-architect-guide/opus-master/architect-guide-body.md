@@ -16,7 +16,7 @@ Orientation (ex-Ch 1-3: Meet the P2 / Reading Code / Putting It to Work) lives i
 
 CONVENTIONS (front matter documents them):
   - "P1 note" sidebars: fenced div  ::: p1note ... :::  (filters/p2kb-architect-local.lua)
-  - Code fenced ```spin2 / ```pasm2, pnut_ts-verified (never code-divisions)
+  - Code fenced ```spin2 / ```pasm2, pnut-ts-verified (never code-divisions)
   - Figures deferred (DD5): > **[Figure - <description>]** + log to PUNCH-LIST.md
   - Parts are `# Part N` headers -> \manualpart (p2kb-platform-pagination.lua); chapters are
 %    `# Chapter N: Title` (the pagination filter splits a ' -- Subtitle' into \chaptersubtitle,

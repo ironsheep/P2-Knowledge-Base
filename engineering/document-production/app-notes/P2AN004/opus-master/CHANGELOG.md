@@ -24,7 +24,7 @@ through three runnable instruments the reader selects among by transducer: an RC
 times a capacitor's discharge for any resistive or capacitive sensor, a light-to-frequency reader
 that turns a TSL235R's output frequency into an irradiance with a reciprocal frequency counter, and
 a drop-in quadrature-knob instrument with detent normalization, preset, range clamp, and a debounced
-button. Every worked program compiles clean under `pnut_ts`; the encoder recipe self-verifies on a
+button. Every worked program compiles clean under `pnut-ts`; the encoder recipe self-verifies on a
 bare board with two jumper wires and a known-answer detent count, while the analog recipes' absolute
 calibration defers to a hardware pass and carries no invented readings. Circuit schematics (RC-decay
 network, TSL235R hookup) and a quadrature timing diagram are rendered inline. Ships with a

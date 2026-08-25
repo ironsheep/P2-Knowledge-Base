@@ -119,13 +119,21 @@ The USB mode uses the smart pin registers for configuration and data:
 
 #### Baud Rate — Worked Example
 
-The baud fraction's top two bits must be zero, so the baud rate must stay below ¼ of sysclk. For 12 Mbps (full-speed) on an 80 MHz clock:
+The baud field is a 16-bit fraction of the system clock whose top two bits must be zero, so **the bit rate must stay below ¼ of `clkfreq`**. That is a hardware constraint, not a convention — it falls straight out of the field's width. (Source: *P2 Hardware Manual*, 2022/11/01, §*USB Host/Device (%11011)*.)
+
+For 12 Mbps (full-speed) at this chapter's 200 MHz clock:
 
 ```formula
-baud_fraction = 12,000,000 / 80,000,000 × $10000 = $2666
+baud_fraction = 12,000,000 / 200,000,000 × $10000 = $0F5C
 ```
 
-Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$E666** (`$C000 | $2666`).
+Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$CF5C** (`$C000 | $0F5C`).
+
+The arithmetic is the same at any clock: divide the target bit rate by `clkfreq`, multiply by $10000, and confirm the result still fits in 14 bits.
+
+::: caution
+**Clearing the ÷4 rule is not the same as having enough clock.** The ¼-`clkfreq` ceiling is the only sysclk dependency any Parallax source states for this mode, and full speed clears it on every clock above 48 MHz. But that is a bound on the *baud generator* — it says nothing about how reliably the line itself signals at that rate, and no published source settles what full-speed work needs in practice. So treat a low clock as untested rather than as supported: run with real margin (this chapter uses 200 MHz throughout), and if a design must go slower, prove the link on hardware before depending on it.
+:::
 
 #### Y Register — Line States and Packet Output (WYPIN)
 
@@ -360,6 +368,10 @@ Choose USB pins based on:
 - USB 3.x SuperSpeed
 - Isochronous transfers with guaranteed timing (challenging)
 
+### Clock Requirements
+
+The baud field is a 16-bit fraction of `clkfreq` with its top two bits forced to zero, so the bit rate must stay below `clkfreq`/4 — full speed (12 Mbps) therefore needs a clock above 48 MHz. That ceiling is the only sysclk dependency the P2 documentation states; how much *more* clock reliable full-speed signaling wants is not published. See §19.4.
+
 ### Software Requirements
 
 Implementing USB requires:
@@ -404,6 +416,7 @@ PINHIGH(even_pin+1)                       ' Enable DP
 - Software must implement full USB protocol stack
 - Use existing libraries when possible
 - Supports USB 1.1 Full Speed and Low Speed only
+- Bit rate must stay below `clkfreq`/4 — full speed needs a clock above 48 MHz (§19.4)
 - OUT signals are overridden by USB mode
 - Limited official documentation - community resources essential
 

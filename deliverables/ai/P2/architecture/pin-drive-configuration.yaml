@@ -194,10 +194,16 @@ idioms:
     Both compositions below were run on real P2 silicon. Neither is a documentary
     idiom: the Spin2 v55 symbol table defines each constant individually and composes
     them into no idiom at all, so what is stated here is the hardware-verified form.
-  source: "Hardware-verified: EF-063 and EF-064 in
-    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840
-    (date/rig 2026-08-20, real P2). Field semantics from the P2 Datasheet 2022/11/01
-    p.24 Pin Mode Legend, p2-datasheet-text.txt:1131-1147. Constant wording from the
+  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend
+    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147) for the field
+    semantics and the drive ladder, and the Spin2 v55 built-in symbol table
+    (sources/spin2-v55/spin2-v55-text.txt:1500-1509) for each constant's wording. THAT IS THE
+    AUTHORITY FOR THIS FILE -- documentary, not empirical. EF-063 and EF-064
+    (P2-EMPIRICAL-FINDINGS.md:827,840, real P2, 2026-08-20) corroborate that the MECHANISM behaves
+    as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it
+    -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements
+    (a jumper-continuity check and streamer pin placement). Neither is a pull-up/drive-strength
+    finding, and the ledger contains none; see the gap noted under not_documented_here. Constant wording from the
     Spin2 v55 symbol table, spin2-v55-text.txt:1504 and :1514."
 
   weak_high:
@@ -240,7 +246,17 @@ idioms:
       code above is the same rig routine, called with P_LOW_15K at
       test-f272-streamer-dac-tt.spin2:184 and :192. Date/rig 2026-08-20, real P2."
 
-  not_documented_here:
+  gap_no_dedicated_bench_test:
+  note: "The fact this file rests on -- P_HIGH_*/P_LOW_* select DRIVE STRENGTH and the P2 has no
+    bias resistors -- has never been the subject of a dedicated hardware verification. It is
+    documentary (Datasheet Pin Mode Legend + Spin2 v55 wording), corroborated only incidentally by
+    rigs built for other purposes. A direct measurement would settle it outright: drive a pin
+    P_HIGH_15K with DIR high, measure the current a hard-driven opposing pin sinks, and confirm it
+    matches a 15 kOhm source rather than an internal resistor to VIO."
+  would_settle_it: "a bench run on real P2 silicon; jumper-only, no external instrument beyond a
+    second pin"
+
+not_documented_here:
     why: "Named so the omissions are deliberate rather than silent. No Parallax source
       states any of these as a composition of the pin-mode field, and this file ships
       only what a source states."

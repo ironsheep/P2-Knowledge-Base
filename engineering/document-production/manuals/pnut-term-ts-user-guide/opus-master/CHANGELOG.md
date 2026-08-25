@@ -103,7 +103,7 @@ Seeded:
 
 **Design intent settled** the same day (see `creation-guide.md` / `PLANNING.md`):
 - **Purpose = positioning** within the P2 agentic tool chain (P2KB MCP +
-  `pnut_ts` + `pnut_term_ts`, optional Spin2 VS Code extension); delivers the
+  `pnut-ts` + `pnut-term-ts`, optional Spin2 VS Code extension); delivers the
   agentic usability of **The P2 Architect's Guide, Part 3**.
 - **Identity = three tools in one**: downloader · Parallax Serial Terminal
   replacement · PNut debug-window replacement/production (now cross-platform).

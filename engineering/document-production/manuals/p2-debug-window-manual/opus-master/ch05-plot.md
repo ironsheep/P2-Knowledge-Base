@@ -360,6 +360,14 @@ So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
 centered both ways.
 
+Read those alignment names as *where the ink lands relative to the anchor point* — not
+as which edge of the text the anchor sits on. The two readings describe the same pixels
+in opposite words, which is exactly how a table like this gets written down backwards.
+Concretely: horizontal `2` puts the text to the **right** of the anchor, so the anchor
+is the text's *left* edge; vertical `2` puts the text **above** the anchor, so the
+anchor is its *bottom* edge. If a label lands on the wrong side of its point, you have
+almost certainly read the row in the other vocabulary rather than found a bug.
+
 The weight field selects a *nominal* font weight, but the DEBUG display font does
 not render it as a weight progression: `$00` looks identical to the `$01` default,
 and `$02`/`$03` are *not* heavier — if anything they render with slightly less ink,

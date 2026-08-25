@@ -42,7 +42,7 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `<name> - TERM` | The window's title-bar text |
 | `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
-| `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
+| `TEXTSIZE` | `points` | `10` | Font size (6–200); the default tracks the editor's text-size preference, which is itself 10. The window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
 | `BACKCOLOR` | `rgb` | black | The canvas background — the fill used for clear and scroll (not the per-character background) |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |

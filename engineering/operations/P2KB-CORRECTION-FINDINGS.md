@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-356`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-357`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -91,6 +91,67 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **F-093 (`WONTFIX`):** `lockrel.yaml` C-flag polarity — the appendix's "inverted" claim is the error; the YAML is correct (C = lock-was-held).
 - **F-114b (`RESOLVED-INVALID`):** the MIDI display modes KEYBOARD / GRID / ROLL / MONITOR do **not** exist in PNut v55 — do **not** add them to `midi.yaml` (it carries an explicit `not_supported:` claim).
 - **Verified-resolved (don't re-chase):** the Jan-2026 streamer KB audit's issues were all reconciled in the 2026-05/06 passes (DAC routing, 32-pin groups, mode encoding, xcont/xzero phase wording, setxfrq 2³¹ formula, streamer symbols). Only the XZERO concept text was open and is fixed (F-003).
+
+---
+
+## The "masters are clean of the drive-strength mislabel" measurement is wrong (2026-08-25, «#301») — F-356
+
+### F-356 — the drive-strength mislabel is alive in the IOSP master at 23 sites, including the one composition this sprint forbids by name — `CONFIRMED`
+
+**How this surfaced.** «#301» was told, as a *measured result and not an assumption*, that a
+class-wide sweep on 2026-08-24 found the manual and app-note masters **clean** of this sprint's
+defect class (the drive-strength mislabel, the fabricated ladder, pin slew-rate claims) — which is
+why Plan §3 excludes manual prose from that class. Working F-251 required reading the deSilva Ch.1
+LED aside, whose closing sentence turned out to state the mislabel outright. One site is an
+anomaly; the sweep it implied is what produced this finding.
+
+**What was measured.** A sweep of every `opus-master/` body and CHANGELOG across all manuals and all
+seven app notes (excluding `archived-2025/` scaffolding and the non-P2 `Donna-Manuscript`) for
+pull-up / pull-down language, then each hit graded by hand as *external component* (correct) or
+*`P_HIGH_*`/`P_LOW_*` glossed as a bias resistor* (wrong):
+
+| Site class | Count | Where |
+|---|---|---|
+| A `P_HIGH_*`/`P_LOW_*` constant glossed as a **pull-up/pull-down resistor** | **23 lines** | IOSP `appendix-b-p-constants.md` ×7 · `chapter-12-digital-input.md` ×5 · `chapter-02-enhanced-direct-io.md` ×7 · `chapter-06-digital-output.md` ×2 · `appendix-a-intent-index.md:56` · `part-5-appendices/index.md:221` |
+| **"internal pull-up/pull-down"** asserted as a P2 feature | **5 lines** | `chapter-06-digital-output.md:137`, `:144`, `:441` · `chapter-02-enhanced-direct-io.md:431`, `:479` |
+| The composition this sprint says to **never** write | **4 sites** | `chapter-02-enhanced-direct-io.md:94`, `:399`, `:439`, `:480` — `P_HIGH_15K \| P_LOW_FLOAT` |
+
+**Why each class is wrong.** A pull-up is active whenever the pin is *not* driven; a drive-strength
+selector applies **only while the pin drives that direction** — DIR high, per the Pin Mode Legend
+(`deliverables/ai/P2/architecture/pin-drive-configuration.yaml:41-43`, `:166-171`; P2 Datasheet
+2022/11/01 p.24). This is F-321's reasoning exactly, and F-321 was applied to
+`deliverables/ai/P2/` and **only** there. `chapter-02-enhanced-direct-io.md:53` is the cleanest
+example: it prints `| P_HIGH_15K | %010 | Resistive | ~200µA / 15kΩ | **Pull-up resistor** |` — a
+component the chip does not have, in a table of things it does. `:441`'s
+*"Open-drain + internal pull-up"* is the F-322 inversion in a summary row. And
+`P_HIGH_15K | P_LOW_FLOAT` is the composition whose "high side weak, low side floated" variant
+`pin-drive-configuration.yaml:250-252` records as having **no Parallax documentary statement and no
+empirical record** — the manual teaches it four times, once as a recipe headed **"Pull-Up
+Resistor:"**.
+
+**Scope note — this is filed, NOT fixed, and the distinction is deliberate.** Plan §3 puts this
+defect class out of scope for manual prose in this sprint, and «#301» was told scope is Stephen's.
+So the correct act is to **falsify the measurement the exclusion rests on** and hand it over, not to
+widen a roster. The two sites «#301» *did* fix are the ones inside its own roster's findings:
+deSilva `COMPLETE-OPUS-MASTER.md:294` (inside F-251's aside), and `:2881` was checked and left
+because it is already **correct** (*"No pullup/pulldown by default — Use external resistors or
+configure smart pin modes"*).
+
+**What would settle it.** Nothing further to establish — the mechanism is closed (F-321 applied, the
+Pin Mode Legend cited, the idioms hardware-verified in
+`pin-drive-configuration.yaml:203-239`). What is needed is a decision on **when** the IOSP master
+takes the correction, because it is not a token substitution: two constant tables, a chapter section
+heading (*"### Button Input with Internal Pull-Up"*), four worked recipes and an intent-index row all
+have to be restated in drive-strength terms, and the four `P_LOW_FLOAT` recipes need a form that has
+a source behind it. That is a chapter-scale pass on Chapters 2, 6 and 12 plus two appendices, not a
+sweep.
+
+**Related:** F-321 (same mislabel, KB side, applied) · F-322 (the disable-the-drive inversion) ·
+F-325 (the ladder absent from the shipped KB) · F-336 (`P_HIGH_15K | P_LOW_FLOAT` has neither a
+Parallax statement nor a bench result) · F-341 (the same mislabel in our own derived analysis docs) ·
+`SOURCE-ERRATA.md` E-004 and **E-010** (Parallax's own guides state it).
+
+Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns the IOSP manual head.
 
 ---
 
@@ -2228,7 +2289,49 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   > buffered-LED fact is wanted for the Edge modules specifically, it is «#307» repopulation
   > work, source-first from the Edge module guides.
 
-  Status: `CONFIRMED`.
+  > **RE-MEASURED 2026-08-25 («#301»). The mechanism half was ALREADY FIXED — and the sentence this
+  > finding called "right" is the one that was wrong.**
+  >
+  > **What was already done, on 2026-08-17.** Commit `a0fb4884` (*"DeSilva v3.0.5: the LEDs are
+  > buffered — correcting the aside I shipped hours ago"*) rewrote the Ch.1 aside. It now teaches
+  > exactly the buffered mechanism this finding asked for — *"Your P2 pin doesn't feed the LED
+  > directly; it feeds the *input* of a buffer… It takes very little to push that floating input past
+  > the buffer's threshold, and when it crosses, the buffer switches: the LED doesn't glimmer, it
+  > comes **on**"* — and it carries the P58–P63 shared-signal point this finding also wanted, as a
+  > second, non-mysterious cause. Nothing was owed on the mechanism.
+  >
+  > 🔴 **What was NOT done, and was a live defect until today.** This entry ends by saying *"the
+  > aside's conclusion (floating pins have no opinion; drive them or use pull-ups) is right."*
+  > **The pull-up half is not right, and the aside shipped it**: `COMPLETE-OPUS-MASTER.md:294` read
+  > *"If you want a pin held at a known level **without driving it**, the P2 gives you pull-ups and
+  > pull-downs for exactly that."* The P2 has **no bias resistors at all** — `P_HIGH_*`/`P_LOW_*`
+  > select **drive strength**, and per the Pin Mode Legend a drive selection is live **only while DIR
+  > is high** (`deliverables/ai/P2/architecture/pin-drive-configuration.yaml:41-43`, `:166-171`,
+  > sourced to P2 Datasheet 2022/11/01 p.24). So the sentence was wrong twice over: it invents a
+  > component, and its "without driving it" framing is the exact inversion F-322 exists to kill.
+  > This entry predates that determination, which is why it blessed the sentence.
+  >
+  > **Fixed, and used as the teaching moment rather than deleted** — the reader is standing in front
+  > of a floating pin, which is the best possible moment to learn this: *"…if you are reaching for the
+  > pull-up resistor you would have switched on somewhere else — there isn't one. The P2 has no bias
+  > resistors at all. What it has instead is a choice of *how hard to drive*: the same `drvh`, but
+  > through 15 kΩ rather than through a fast transistor, if you ask for it (Chapter 14)… a weak drive
+  > is still a drive, so `dir` stays high either way."* Chapter 14 verified as the manual's smart-pin
+  > /`WRPIN` chapter (`:4614`). The wording is aligned to the KB's `weak_high` idiom
+  > (`pin-drive-configuration.yaml:203-222`) rather than inventing a third form.
+  >
+  > **Cross-checked and deliberately left alone:** `COMPLETE-OPUS-MASTER.md:2881` ("Common I/O
+  > Gotchas" #2) already says *"**No pullup/pulldown by default** — Use external resistors or
+  > configure smart pin modes"*, which is **correct**. The two sites disagreed with each other; now
+  > they do not.
+  >
+  > **Owed to «#302»/release:** page-level confirmation of the reflowed `::: sidetrack` in Ch.1, then
+  > release. The eval-board citation this entry recommends is re-verified live at
+  > `hardware/p2-eval-board.yaml:109-111` (`type: "Buffered LED bank"`, `pins: "P56-P63 (one LED per
+  > pin)"`) and `:124` (P58–P63 shared with USB data and P2 memory signals) — note both moved from
+  > the `:27`/`:29`/`:31-34` this entry recorded.
+
+  Status: `PARTIAL — mechanism fixed 2026-08-17; the pull-up sentence this entry called "right" was wrong and is fixed 2026-08-25 («#301»); render + release owed`.
 
 - **F-252 — the Getting Started guide hardcodes `LED = 56` with no board caveat (same class
   as the DeSilva fix).** `p2-getting-started-guide/opus-master/getting-started-body.md:558`
@@ -2261,7 +2364,40 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   > the eval board. When «#307» repopulates `edge-32mb-module.yaml`, P38/P39 must come back
   > there source-first; until it does, do not cite that file for this fact.
 
-  Status: `CONFIRMED`.
+  > **APPLIED 2026-08-25 («#301») — and the "do not cite that file" warning above is now STALE, which
+  > is why every locator was re-verified on disk before use rather than copied from this entry.**
+  >
+  > **`edge-32mb-module.yaml` has been repopulated.** The 2026-08-24 annotation says P38/P39 *"match
+  > **nothing** in that file"*. Today they match plenty, source-first as required: `:140-141`
+  > (`P38: "Buffered LED"`, `P39: "Buffered LED"`), `:165` (`pins: "P38, P39"`), `:201` (the `LED`
+  > DIP switch), all under a real `source:` at `:175` naming *P2-EC32MB Edge Module Rev B Guide v2.0,
+  > §7 LED Buffer and §8 LEDs P38 and P39*. So the per-board file **is** citable again and was cited.
+  > The other two locators also moved: `edge-standard-module.yaml:145` (`pins: "P56, P57"`, now with
+  > its own `warning:` at `:146-148` — *"DIFFERENT PINS from the P2-EC32MB module… Confusing the two
+  > puts an LED write on a PSRAM data line"*) and `p2-eval-board.yaml:110`
+  > (`pins: "P56-P63 (one LED per pin)"`).
+  >
+  > **The PSRAM claim was verified, not assumed:** `edge-32mb-module.yaml:137` reads
+  > `"P56": "PSRAM CLK (Common)"`. So `LED = 56` on that board really does drive a memory clock line.
+  >
+  > **Fix, in the shape this finding specified** — one bullet, not a sidetrack — added to the bullet
+  > list under the first runnable program in `getting-started-body.md`: *"**One board check before you
+  > run it.** `56` is the LED pin on a P2 Eval Board and on the standard P2 Edge Module, but the **P2
+  > Edge 32MB Module** puts its two LEDs on **P38 and P39** — and P56 there is a PSRAM clock line, so
+  > as written this program would light nothing and write to the memory bus instead. Change `LED` to
+  > match your board."*
+  >
+  > **The code block was deliberately NOT touched.** It is captioned `ch03-blink-led.spin2`, so it is
+  > byte-identity-paired to an example file; changing `LED = 56` there would have broken that pairing
+  > and made the guide's first program board-specific in a different direction. The caveat is prose
+  > beside the listing, which is what this finding asked for. `sync-manual-examples.py --check`
+  > reports **no** "BODY differs" for the guide, so the pairing is intact. The other `LED = 56` sites
+  > (`:339` skeleton, `:644`, `:704`, and `LED_A = 56` at `:603`) are left alone on purpose: the
+  > caveat belongs once, at the first program a newcomer actually runs.
+  >
+  > **Owed to «#302»/release:** confirm the added bullet sets on the page, then release.
+
+  Status: `PARTIAL — caveat added to opus-master 2026-08-25 («#301»); render + release owed`.
 
 ---
 
@@ -3034,7 +3170,7 @@ NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explic
 > **Neither finding ships in the current wave.** IOSP left it when F-261 reversed into F-269, so
 > both wait for IOSP's next release rather than being force-fitted into this one.
 
-### F-274 — IOSP Ch.19 §19.4 teaches an FS-USB configuration at exactly the clock its own source flags, and states no sysclk dependency anywhere. `CONFIRMED`
+### F-274 — IOSP Ch.19 §19.4 teaches an FS-USB configuration at exactly the clock its own source flags, and states no sysclk dependency anywhere. `PARTIAL — corrected in opus-master 2026-08-25 («#301»); render + release owed`
 
 **Location:** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-4-special-modes/chapter-19-usb.md:122-128`.
 **RELEASED (v1.0.8).**
@@ -3070,7 +3206,40 @@ copy — it already names its own limit correctly.
 the 16-bit RX status word, per-pin IN semantics) is properly sourced to Silicon
 `p2-documentation.txt:8886-9006` and was verified sound during the probe. It is not implicated.
 
-### F-275 — IOSP Ch.19 §19.5 states the P2 provides USB bus power; §19.8 correctly says it does not. `CONFIRMED`
+> **APPLIED IN OPUS-MASTER 2026-08-25 («#301») — RENDER OWED, so this is NOT closed.**
+> All three legs of the proposed correction are in
+> `…/opus-master/part-4-special-modes/chapter-19-usb.md`:
+> - **The worked example moved off the boundary.** §19.4's baud example now computes 12 Mbps at
+>   **200 MHz** — the clock the chapter's own Spin2 example (`:264`) and Quick Reference already
+>   use — giving `$0F5C` and a host WXPIN word of `$CF5C`. Arithmetic re-derived on disk, not
+>   copied: `12_000_000 / 200_000_000 × $10000 = 3932 = $0F5C`; `$C000 | $0F5C = $CF5C`.
+>   The old 80 MHz / `$2666` / `$E666` figures were correct *as arithmetic* (they are the Hardware
+>   Manual's own worked example) — they were removed because the clock, not the maths, was the
+>   defect.
+> - **The documented dependency is now stated WITH its citation**, which it was not: the ¼-`clkfreq`
+>   ceiling is attributed in-text to the *P2 Hardware Manual* 2022/11/01 §*USB Host/Device
+>   (%11011)*. Verified live at `engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1489`
+>   — *"a 16-bit fraction of the system clock, whose two MSBs must be 0, necessitating that the baud
+>   rate be less than 1/4th of the system clock frequency."*
+> - **The unsettled floor is named as unsettled, and carries no number.** A new `::: caution`
+>   ("Clearing the ÷4 rule is not the same as having enough clock") says the ÷4 ceiling is the only
+>   sysclk dependency any Parallax source states, that full speed clears it above 48 MHz — which is
+>   that stated rule applied to the stated 12 Mbps, not a new claim — and that **no published source
+>   settles what full-speed work needs in practice**. The Granville *> 80 MHz* figure is **not**
+>   carried, in line with this finding's own instruction and `Q-003`.
+> - **Discoverability fixed too**, which was half the complaint: the dependency was absent from
+>   §19.9 and the Quick Reference, so a reader scanning limitations never met it. §19.9 gains a
+>   **Clock Requirements** subsection and §19.10 a Key Points bullet, both pointing back at §19.4.
+>
+> **Gates:** `audit-code-line-length.py --budget 76` and `audit-inline-code-ascii.py` both exit 0 on
+> the chapter (each proved able to fail on a negative control the same session). **No code block was
+> touched** — the one edited line inside a fence is the ` ```formula ` block, which pairs to no
+> example file — so byte-identity is untouched and `pnut-ts` does not apply.
+> **Owed to «#302»:** confirm on the rendered page that the new `::: caution` and the §19.9
+> subsection set, and that the reflowed §19.4 does not push the following table. `G-005` stays
+> `PARTIAL` and `Q-003` stays open; neither is this finding's to close.
+
+### F-275 — IOSP Ch.19 §19.5 states the P2 provides USB bus power; §19.8 correctly says it does not. `RESOLVED — verified IN THE RELEASE TAG 2026-08-25 («#301»), not inferred from this entry`
 
 **Location:** `…/chapter-19-usb.md:210` against `:329`. **RELEASED (v1.0.8).**
 
@@ -3134,6 +3303,16 @@ enumeration of what the silicon allows, which is unchanged.
 it, and that prose then read as settled. A sentence that exists only to excuse a choice is a marker
 for the choice, not a resolution of it.
 
+> **CLOSED 2026-08-25 («#301») — and the closure was measured against the TAG, because this entry's
+> own text is what went stale.** The body above said *"IOSP is not in the release wave, so it ships
+> at IOSP's next release"* and then nothing came back when that release happened. It did:
+> `git show p2-io-and-smart-pins-user-guide-v1.0.9:…/chapter-19-usb.md` carries **all three** halves
+> of the fix — the wrong bullet is gone, the replacement sentence stands at `:214` (*"Bus power is a
+> board responsibility, not a P2 one… the P2 cannot source it — its I/O operates at 3.3V"*), and the
+> examples are on the 5V-bearing pair at `:54` / `:266` (`USB_DM = 8`). Nothing is owed: master
+> fixed **and** shipped. Same drift direction as F-278 — the record understated what had been done,
+> which sends the next reader to redo finished work.
+
 **Next finding ID after this block: F-276.**
 
 ---
@@ -3152,7 +3331,7 @@ for the choice, not a resolution of it.
 > part: F-277's site sits in body text no Sprint 2 task touched. A findings-driven sweep sees the
 > diff; it does not see the document.
 
-### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `CONFIRMED`
+### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `PARTIAL — all three sites corrected in opus-master (Appendix A 2026-08-17, the two residual shapes 2026-08-25 «#301»); render + release owed`
 
 **Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` — §*"What You Are
 Buying With That"* (`:5993-6001`), with the same shape at `:225`, `:6001`, `:6049`.
@@ -3187,7 +3366,42 @@ cogs, pins and locks, which the reader has earned over sixteen chapters. The sec
 alone for a reader who never opens that book. Sweep the same shape at `:225`, `:6001`, `:6049`;
 `:4275` uses "deadline" legitimately (delta-vs-absolute comparison under counter wraparound) — leave it.
 
-### F-277 — deSilva tells the reader that peripheral conflicts are impossible on the P2. They are not, and our own published manual documents why. `CONFIRMED`
+> **ALL THREE SITES NOW CORRECTED — the main one was ALREADY DONE and this entry did not know.**
+> Re-measured on disk 2026-08-25 («#301»), and split into what was already fixed and what was not:
+>
+> **§*"What You Are Buying With That"* was rebuilt on 2026-08-17** by `361ac02a` (*"deSilva voice
+> pass, part 2: Appendix A rebuilt"*), and it was rebuilt on **exactly the composability argument
+> this finding proposed** — *"Put eight jobs on one processor and they are sharing it… Give each job
+> its own cog and that simply stops being true — adding the eighth cog does not disturb the first
+> seven, because they were never sharing anything to disturb."* It also does the two things the
+> finding asked for and did not spell out: it concedes the P2 is *"often neither"* faster nor
+> cheaper, and it hands the reader to an ESP32 where an ESP32 is the right answer. No "forces", no
+> "cadence boundary". Nothing was owed here and nobody had said so.
+>
+> **The two residual shapes were real, and are fixed now** (`COMPLETE-OPUS-MASTER.md`, master
+> line numbers as found today, not as this entry recorded them):
+> - **`:229`** (Ch.1 *"Why P2?"*) read *"Your serial handler never delays your motor control. Your
+>   sensor sampling never misses a deadline."* Both halves overreach: a cog can miss a deadline
+>   perfectly well if the code in it is too slow. Replaced with the mechanism instead of the
+>   promise — the handler *cannot* delay the motor control **because it is not on the same processor
+>   to delay it**, and *"add another job later and the ones already running keep the timing they had
+>   — they were never sharing anything for the new one to take."* Same claim as the rebuilt Appendix,
+>   arriving 5,700 lines earlier, in Chapter 1 vocabulary.
+> - **`:6061`** (Summary) read *"Engineers who've fought … missed timing deadlines … find P2
+>   refreshing. You spend your time solving your actual problem, not fighting your MCU."* That is
+>   defect 2 of this finding verbatim — an unfalsifiable project-outcome claim in an engineering
+>   voice. Replaced with reader-recognition that keeps the pedagogy and drops the marketing: *"If you
+>   have ever re-tuned a whole interrupt priority table because you added one handler… The work does
+>   not disappear — you will still write the driver, and you will still get the timing wrong the
+>   first time. What changes is that you stop having to redo it every time the design grows."*
+>
+> **`:5995` and `:4279` were re-read and deliberately left**, as this entry instructs: the first uses
+> "deadline" in the project-schedule sense, the second in the counter-wraparound sense.
+> **Gates:** `audit-code-line-length.py --budget 76` and `audit-inline-code-ascii.py` exit 0 on the
+> master; no code block touched, so byte-identity is untouched. **Owed to «#302»/release:** the
+> master is 166 pp at v3.0.6 and these are body-text reflows — confirm on the page, then release.
+
+### F-277 — deSilva tells the reader that peripheral conflicts are impossible on the P2. They are not, and our own published manual documents why. `RESOLVED — fixed 2026-08-17, shipped in v3.0.6; the owed class-wide check RUN and CLEAN 2026-08-25 («#301»)`
 
 **Location:** `…/COMPLETE-OPUS-MASTER.md:6045` — *"**64 smart pins** means peripheral conflicts become
 impossible"* — and `:5940` — *"I/O flexibility that eliminates peripheral conflicts."*
@@ -3214,6 +3428,34 @@ at `:5911` (5911 is right); `:3729` "impossible to achieve this precision with i
 strawman); `:5804`'s impossibility aside. ⚠️ **The reader-celebration at `:5804` STAYS** — deSilva's
 voice guide explicitly protects celebration of reader progress as pedagogy, and an early draft of this
 finding wrongly proposed cutting it.
+
+> **CLOSED 2026-08-25 («#301»). Both named sites and all four related sites were fixed on
+> 2026-08-17 by `9f4ddb4f` — the commit is literally named *"deSilva voice pass, part 1: F-277 and
+> the claims that overreached"* — and shipped in **v3.0.6** the same day. This entry was left saying
+> `CONFIRMED` for eight days.** Verified by reading the commit's diff, not by trusting its message:
+> `-**64 smart pins** means peripheral conflicts become impossible` → `+ … means no function is ever
+> stuck waiting for the one pin that supports it`; `-I/O flexibility that eliminates peripheral
+> conflicts` → `+ … and no more shuffling functions around to find pins that support them`;
+> `-one that eliminates entire categories of problems` → `+ … one that changes which problems you
+> spend your time on`; and the `:3897` / `:3729` absolutes are gone.
+>
+> **The `:5804` ⚠️ was honoured, and that is worth recording because it is the part a sweep gets
+> wrong.** The celebration was **reshaped, not cut**: *"You're not just another embedded programmer
+> anymore. You think in parallel. You see solutions that others miss."* survives verbatim; only the
+> false-impossibility tail (*"When someone says 'that's impossible in real-time,' you know better"*)
+> was replaced, with a move rather than a boast — *"When someone starts sketching an interrupt scheme
+> to keep one job on time, you reach for a different move first — give that job a cog of its own."*
+>
+> **THE CLASS-WIDE CHECK THIS FINDING DECLARED OWED IS NOW RUN, and it is clean.** Swept **every**
+> `opus-master/` body and CHANGELOG across all manuals and all seven app notes for
+> `conflicts (become) impossible` / `eliminates … conflicts` and, more broadly, for the bare word
+> *impossible*: **zero** conflict-impossibility claims anywhere in the P2 set. The only surviving
+> `impossible` uses are legitimate — `architect-guide-body.md:101`/`:116`/`:358`/`:959` (a datasheet
+> that is hard to find, a hand-wiring limit, a cohesion argument, and a torn read under a
+> sequence/**acknowledge** handshake, which P2AN007 R3 `:214` confirms is the load-bearing part) and
+> `xbyte-body.md:169`/`:638`, which *argue against* impossibility framing rather than assert it.
+> (`Donna-Manuscript` hits are a private non-P2 book and out of scope.) Verified rather than assumed,
+> which is the standard this finding set for itself.
 
 ### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `PARTIAL`
 
@@ -3277,11 +3519,33 @@ sites carried the wrong and correct forms in **one** block and were split the wa
 ```` ```antipattern ```` then ```` ```spin2 ```` — so the reader gets red-beside-green rather than two
 comments in one box.
 
-**Status:** `PARTIAL — 8 of 8 sites converted; 7 shipped (Streamer v1.0.9, Debug Window v1.1.3, IOSP
-v1.0.9). What remains is ONE site and it is gated, not forgotten: ch08-scope-xy.md's blockquote pair
-waits on verifying that `> ```antipattern` renders, because no manual in the set has ever used that
-fence-inside-blockquote combination. Verify it at the next Debug Window Forge round-trip, convert if
-it renders, and this finding closes.`
+> **RE-MEASURED 2026-08-25 («#301») — the 8th site is ALREADY CONVERTED IN THE MASTER, so what is
+> owed has changed shape.** `ch08-scope-xy.md:70` now reads `> ```antipattern` (with its `> ```spin2`
+> twin at `:74`), converted by `f769b46a` on 2026-08-17 — i.e. it went in **ahead of the render gate
+> this finding set for it**, not after. The status text below still describes a decision
+> ("convert if it renders"); the decision is made and the code is in the file. Grep confirms this is
+> still the **only** fence-inside-blockquote construction in the whole set: `> ``` ` matches
+> `ch08-scope-xy.md` and nothing else, at exactly those four lines.
+>
+> **So the risk this finding identified is now live rather than avoided**, and that is the honest
+> reading: an unproven fence combination is sitting in a master that will render. Nothing here can
+> settle it — a PDF is produced on the Forge, not in this container.
+>
+> **Owed to «#302» / the next Debug Window `forge-test`, and this is the whole of it:** open the
+> rendered page for §SCOPE_XY's create-line callout and confirm the `> ```antipattern` block renders
+> as an AntipatternBlock **inside** the blockquote — red fill, red border, left rule — rather than
+> collapsing to a plain quote, swallowing the fence markers, or breaking out of the callout. If it
+> renders, this finding closes with no further edit. If it does not, revert `:70`/`:74` to
+> `> ```spin2` and record the platform limitation. `p2kb-debugwin.latex:23` already loads
+> `p2kb-platform-content.sty`, so a failure would be a filter/blockquote interaction, not a missing
+> package.
+>
+> **The other 7 sites are re-confirmed shipped** and are not part of what is owed.
+
+**Status:** `PARTIAL — 8 of 8 sites converted IN SOURCE; 7 shipped (Streamer v1.0.9, Debug Window
+v1.1.3, IOSP v1.0.9). The 8th (ch08-scope-xy.md's blockquote pair) is converted but its render is
+UNPROVEN — it is the only `> ```antipattern` in the set. Verify it on the page at the next Debug
+Window Forge round-trip; that render is the only thing between this finding and closure.`
 
 ### F-279 — the XBYTE guide grounds a load-bearing hardware claim on a sibling manual in the same family, without disclosing it. `RESOLVED — fixed in the v1.1.0 restructure, shipped 2026-08-19; closed on re-verification 2026-08-23`
 
@@ -3316,7 +3580,7 @@ citation authority, and this guide has shipped fabricated names before (Appendix
 sound: deSilva `:5845` uses the Parallax name correctly, and the remainder are our own cover title and a
 CHANGELOG font note.
 
-### F-280 — `pnut_ts` survives in 16 masters as a command that does not run. `CONFIRMED`
+### F-280 — `pnut_ts` survives in 16 masters as a command that does not run. `PARTIAL — the whole declared sweep APPLIED in opus-master 2026-08-25 («#301»); publication owed, per document`
 
 **Found:** 2026-08-17 during the P2AN001/P2AN002 voice pass («#247»), by checking the compiler name
 the two notes hand the reader against the name of the binary that exists.
@@ -3349,6 +3613,60 @@ at its next visit — this row is what makes sure the visit knows.
 
 **The correction is one substitution** — `pnut_ts` → `pnut-ts` — with no prose consequence. Check each
 site is the *command*; the project name in running text is properly **PNut-TS**.
+
+> **SWEEP APPLIED 2026-08-25 («#301»). The conform-on-touch deferral above is discharged: the visit
+> came.** All 27 reader-facing occurrences substituted across **14 files**, line counts unchanged
+> (4,907 before and after), diff is exactly 27 insertions / 27 deletions.
+>
+> **⚠️ The row header's own arithmetic was wrong, and re-measuring it is how the extra defect turned
+> up.** It reads *"Remaining (31 sites, 16 files)"*; the table under it sums to **30 sites / 15
+> files**, because the `~~Assembly Language Manual~~ CHANGELOG ×1` row was struck through as CLEAR on
+> 2026-08-22 and the header was never re-totalled. Measured on disk today: **30** occurrences across
+> **15** files under `opus-master/`, of which **3** in **1** file are the excluded deSilva
+> `archived-2025/README-COMBINED-MASTER.md` — leaving **27 in 14**, which is what was fixed. The
+> table's per-element counts were all correct: Getting Started ×1, Architect body ×1 + CHANGELOG ×2,
+> PNut-Term-TS CHANGELOG ×1, P2AN003–007 body ×17 + CHANGELOG ×5.
+>
+> **A second wrong name rode along on one of the lines, and is fixed with it.**
+> `pnut-term-ts-user-guide/opus-master/CHANGELOG.md:106` carried *"`pnut_ts` + `pnut_term_ts`"* —
+> **both** underscore forms, in the guide whose own `MANUAL-DESCRIPTOR.md:28` and `voice-guide.md:83`
+> declare *"the underscore forms `pnut_ts` / `pnut_term_ts` are wrong and no such executable is
+> installed."* `command -v pnut-term-ts` finds nothing under that spelling either; the installed
+> binary is `/usr/local/bin/pnut-ts`. Corrected to `pnut-term-ts` in the same pass — leaving it would
+> have fixed half a sentence.
+>
+> **Every site was checked for sense, not just substituted** — this finding requires it ("check each
+> site is the *command*"). Counted off the pre-edit backups: **23 of the 27 are inside backticks**
+> (13 as `` `pnut_ts -d` ``, 10 as bare `` `pnut_ts` ``), unambiguously the command. The **other 4**
+> are the compound adjective *"pnut_ts-verified"* — `architect-guide/CHANGELOG.md:102` and `:114`,
+> `architect-guide-body.md:19`, `getting-started-body.md:17`. Those are the one shape where this
+> finding says **PNut-TS** might be proper instead; they were still taken to `pnut-ts` because
+> "verified by running it" names the *binary*, and that is the form already shipping in running text
+> at `p2-assembly-language-manual/opus-master/CHANGELOG.md:196` ("348 code examples audited with
+> pnut-ts v1.51.7"). Two of the four (`architect-guide-body.md:19`,
+> `getting-started-body.md:17`) sit inside the masters' `<!-- CONVENTIONS -->` authoring comments and
+> reach no reader — corrected anyway, because a convention block that names a non-existent binary is
+> how the next author reintroduces it. The result matches the form P2AN001/P2AN002 already ship
+> (`P2AN001/opus-master/P2AN001.md:622`, `P2AN002/opus-master/P2AN002.md:357`), so the set no longer
+> teaches both spellings. `grep -c pnut_ts` over `manuals/*/opus-master/` + `app-notes/*/opus-master/`
+> is now **0** outside `archived-2025/`.
+>
+> **Deliberately NOT swept, and why:** the 3 sites in
+> `p2-pasm-desilva-style/opus-master/archived-2025/README-COMBINED-MASTER.md` — archived scaffolding
+> that ships to nobody, excluded by this finding's own table. Frozen records under `audit/`,
+> `archive/` and `code-validation/`, and the real path `external-inputs/pnut_ts_facts/`, are likewise
+> untouched.
+>
+> **Gates:** `audit-code-line-length.py --budget 76` and `audit-inline-code-ascii.py` exit 0 on all
+> 14 files. **No occurrence was inside a code fence** — verified by mapping every changed line number
+> against the files' fence ranges — so no example file changed, byte-identity is untouched, and
+> `pnut-ts` compilation does not apply to this finding.
+>
+> **What remains is publication, not authorship.** Nine reader-facing documents now carry the
+> correction in source and none of them has been re-released: Getting Started, Architect's Guide,
+> PNut-Term-TS Guide, and P2AN003–P2AN007. Each ships it at its next release. **This is not a render
+> gate** — a token substitution has no layout consequence — so «#302» need not look at it; it is a
+> release-wave item.
 
 ### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED` — **the 3 release-wave descriptors corrected 2026-08-17**
 
@@ -3944,6 +4262,105 @@ drift.
 >
 > **KB-side verdict: nothing is owed.** Status stays `PARTIAL` **for the manual cells only** (Streamer §12.2
 > sub-pin selection, Debug ch05/ch14, and the remaining IOSP AT_RISK numbers), all of which are «#301»'s.
+
+> ### 🟢 MANUAL-SIDE DISPOSITION 2026-08-25 («#301») — every remaining cell settled; ONE edit, and it went the OPPOSITE way to what this entry says
+>
+> Each cell was opened **on disk first** and graded against its authority, not applied from this
+> entry's verdict. That order mattered: **six of the ten manual cells were already fixed and nobody
+> had said so**, and of the four that looked outstanding, **three were RESOLVED-INVALID and applying
+> them would have damaged correct pages.** The «#300» warning generalised exactly as it said it would.
+>
+> **Already fixed — verified in the master, not inferred (6):**
+> - **Streamer §12.2 sub-pin selection** — `streamer-body.md:958` now states the correction verbatim:
+>   *"It is **not** a uniform 3-bit selector across all pin counts: as the pin count rises, fewer of
+>   these bits are pin-select bits and the freed low bits become **DAC-configuration** bits."* The
+>   three tables under it (`:960-989`) give 1-pin = 3 pin bits, 2-pin = `D[19:18]` + `D[17]` config,
+>   4-pin = `D[19]` + `D[18:17]` config. Checked against the silicon column at
+>   `sources/silicon-doc/p2-documentation.txt:3004-3009` — `pppa / pp0a / pp1a / p00a / p01a / p10a` —
+>   which is the 3/2/1 shrink exactly. Recorded in Streamer `CHANGELOG.md:102-105`.
+> - **IOSP `ch02` drive impedance** — `chapter-02-enhanced-direct-io.md:51`/`:66` read `~30mA / ~17Ω`.
+> - **IOSP `ch18` hub access** — `chapter-18-repository.md:346` reads `9-16 clocks/access`.
+> - **deSilva `SETSE %000`** — `:5026` reads *"LUT read/write & hub-lock events (not a pin event)"*.
+> - **deSilva `EVENT_INT %0000`** — `:5041` reads *"…as a POLL/WAIT event it means an interrupt
+>   occurred"*; **`EVENT_QMT %1111`** — `:5056` reads *"GETQX/GETQY read with no CORDIC result
+>   available"* (the inverse meaning, correctly stated).
+> - **Debug `ch14` `LOCK[15]` and `~10,000 msg/s`** — **gone**. `grep` for either across the whole
+>   Debug Window `opus-master/` returns nothing. The ungrounded throughput number is not in the book.
+>
+> **AT_RISK numbers — all already dispositioned exactly as this entry directed (4):** and the IOSP
+> `CHANGELOG.md:53` records the pass, naming Chapters 7, 10, 12, 16.
+> - `ch16` **`~500kΩ` input impedance — removed.** `grep "500k"` over the IOSP master returns
+>   nothing; `chapter-16-adc.md:598` now says *"The 1× range presents a **high input impedance**"*
+>   qualitatively, with the divider consequence. (This entry's KB-side item (e) called it
+>   "manual-only → «#301»"; the manual had already dropped it.)
+> - `ch16` **`~15mV` error floor — removed and REPLACED WITH THE BENCH RESULT.** `:599` now reads
+>   *"a few millivolts (**≤ ~9 mV measured on real P2 silicon**; representative, not a guaranteed
+>   spec)"*, with pin-to-pin spread named as the larger effect. That is EF-024 / VO-J-002, i.e. the
+>   manual and the KB now agree, and neither quotes 15 mV as a specification.
+> - `ch10` **DAC "Max Load"** — the column is renamed **"Min Load (guideline)"** and
+>   `chapter-10-dac-output.md` states outright that it *"is a **rule-of-thumb guideline** (roughly
+>   10× the output impedance), not a hard specification."*
+> - `ch12` **"input buffer ~2ns" — gone.** No `2ns` anywhere in the IOSP master.
+> - `ch07` **"180 MHz rated / 250 overclock" — now CITED, both ends.**
+>   `chapter-07-pulse-transition.md:271` attributes 180 MHz to the P2 Datasheet and the ~350 MHz
+>   ceiling to the Silicon Doc, and frames 250 MHz as *"commonly used"* rather than as a rating.
+>   Both citations verified live: `sources/p2-datasheet/p2-datasheet-text.txt:2209` (*"Nominal PLL
+>   frequency (system clock speed) is 180 MHz at up to 105 °C"*) and
+>   `sources/silicon-doc/part3-interrupts.txt:545` (*"the PLL can be pushed to 350 MHz"*).
+>
+> **🔴 RESOLVED-INVALID for the MANUAL too — do not apply these; two of them would break correct pages (3):**
+> - **Debug `ch05` PLOT `TEXTSTYLE` alignment, BOTH axes — `RESOLVED-INVALID`.** This entry says
+>   horizontal 2/3 and vertical 2/3 are each swapped in `ch05`. They are not. `ch05-plot.md:356-357`
+>   reads horizontal `2`=right / `3`=left and vertical `2`=top / `3`=bottom — **ink-side vocabulary,
+>   used consistently on both axes**, which is the same convention `plot.yaml:67` uses and which the
+>   Pascal-derived authority confirms: `REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md:797-828` gives
+>   horizontal `%10` → `tx := 0` → *"the text sits to the **RIGHT** of the anchor"* and vertical
+>   `%10` → `ty := h` → *"the text sits **ABOVE** the anchor"*. `ch05-plot.md:360`'s downstream prose
+>   *"`$20` right-aligns"* is therefore also **correct** ( `$20` → bits 4-5 = `%10` → ink to the
+>   right), not the error this entry records. Applying the swap would have inverted a correct table
+>   and a correct sentence. Same vocabulary collision «#300» found on the KB side; the matrix's own
+>   red warning says this ambiguity *"is what caused this row to be documented backwards."*
+> - **Debug `ch05` weight `"thin"→"light"` — `RESOLVED-INVALID`.** `ch05-plot.md:353` reads
+>   `0`=thin, `1`=normal, `2`=bold, `3`=heavy. Against the Pascal
+>   (`weight: array [0..3] = (100, 400, 700, 900)`, matrix `:797`), **100 is OpenType *Thin*** —
+>   *Light* is 300 — so the manual is right and the proposed change would have introduced the error.
+>   ("heavy" for 900 is an accepted synonym of Black; not a defect.)
+> - **Debug `ch03` TERM `TEXTSIZE`** — this one is `RESOLVED-INVALID` **and the manual had already
+>   taken the invalid change**, so it needed reverting rather than leaving. See below.
+>
+> **The single edit made, and it runs OPPOSITE to this entry (1):**
+> `ch03-term.md:45` had a Default column reading **"editor text size"** — i.e. exactly the swap this
+> entry proposed, already applied at some earlier pass. «#300»(c) ruled that
+> `RESOLVED-INVALID` because it *"deleted a true number and replaced it with a vaguer phrase"*, and
+> the authority agrees: `REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md:502-512` states the global `FontSize`
+> preference (default **10**, user-adjustable) and `DefaultTextSize = 10` both default to **10**, and
+> its per-window table lists **TERM `FontSize` = 10** (Pascal 2186). Restored to `10`, with the
+> preference stated too so both halves are on the page: *"the default tracks the editor's text-size
+> preference, which is itself 10."* Per C4, the REF matrix outranks the v55 prose the old wording came
+> from.
+>
+> **Raised, not just corrected (F2):** `ch05-plot.md` gains a short paragraph after the style table
+> making the alignment vocabulary explicit — *"Read those alignment names as where the ink lands
+> relative to the anchor point, not as which edge of the text the anchor sits on… If a label lands on
+> the wrong side of its point, you have almost certainly read the row in the other vocabulary rather
+> than found a bug."* The rows were already right; what was missing was the disambiguation that
+> caused this cell to be filed as a defect twice. Stating both halves is what the authority itself
+> does, and why.
+>
+> **Gates:** `audit-code-line-length.py --budget 76` and `audit-inline-code-ascii.py` exit 0 on
+> `ch03-term.md` and `ch05-plot.md`; `sync-manual-examples.py --check` reports **no** "BODY differs"
+> for the Debug Window manual, so no printed listing drifted from its example file.
+>
+> **STILL OWED (1 cell, and it is not this finding's to close):** IOSP `appendix-b` + `appendix-c`
+> ADC-range cells (table **and** the `input_max = 3300mV/gain` formula). They are the **F-202**
+> recurrence and ride that finding's nominal-table fix across §16.2 + both appendices. F-202 is
+> `PARTIALLY CONFIRMED` with the exact centered endpoints **UNVERIFIED — no trusted numeric source**,
+> so what would settle it is the hardware campaign F-202 names, not an edit here. Touching the
+> appendices ahead of F-202 would put a third unsourced framing in the book.
+>
+> **Manual-side verdict: 6 already fixed · 4 AT_RISK already dispositioned · 3 RESOLVED-INVALID
+> (2 of which would have introduced defects) · 1 corrected back toward the authority · 1 owed to
+> F-202.** Render owed for the Debug Window edits → «#302».
 
 ## XBYTE technique-mining sweep — reference implementations expose two doc defects (2026-07-14) — F-217, F-218
 

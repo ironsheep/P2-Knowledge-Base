@@ -14,7 +14,7 @@ CONVENTIONS:
   - "P1 note" migration sidebars use a fenced div:  ::: p1note … :::
     (mapped by filters/p2kb-getting-started-local.lua → P1NoteBlock)
   - Tip asides use ::: tip fenced callouts (platform-styled box, not raw emoji)
-  - Code is fenced ```spin2 / ```pasm2 and pnut_ts-verified (never code-divisions)
+  - Code is fenced ```spin2 / ```pasm2 and pnut-ts-verified (never code-divisions)
 ================================================================================
 -->
 
@@ -576,6 +576,11 @@ program:
   point; the chip runs it on Cog 0 when your program loads.
 - `pinhigh`, `pinlow`, and `waitms` are built-in Spin2 methods. Driving a pin really
   is that direct — name the pin, set it high or low.
+- **One board check before you run it.** `56` is the LED pin on a P2 Eval Board and on
+  the standard P2 Edge Module, but the **P2 Edge 32MB Module** puts its two LEDs on
+  **P38 and P39** — and P56 there is a PSRAM clock line, so as written this program
+  would light nothing and write to the memory bus instead. Change `LED` to match your
+  board.
 
 ::: tip
 You don't load this onto the chip by hand — your development tool

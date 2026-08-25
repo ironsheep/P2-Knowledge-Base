@@ -23,7 +23,7 @@ recipes the reader selects among by need: a two-task round-robin (two independen
 cog), a cooperative yield inside a long computation (keeping a second job responsive), halt/resume
 flow control (a consumer that pauses and wakes its producer, plus a synchronized start), and a task
 dashboard (a live TASKCHK/TASKHLT census with a clean TASKSTOP shutdown). Every worked program
-compiles clean under `pnut_ts -d`; the `TASKWAIT` keyword documented in some older material was
+compiles clean under `pnut-ts -d`; the `TASKWAIT` keyword documented in some older material was
 compile-probed, found not to exist in Spin2, and excluded. Scheduling and runtime behaviors are
 described from the Spin2 v47+ documentation; hardware confirmation of live scheduling defers to a
 bench pass. Ships with a downloadable example library of all four programs.

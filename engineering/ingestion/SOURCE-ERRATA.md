@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-010`**
+> **Next erratum ID: `E-011`**
 
 ## What this register is for
 
@@ -92,6 +92,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-007 | Hardware Manual vs Datasheet | clock limits — recommended-use vs absolute-limit framing | follows, unlabelled | `RESOLVED` |
 | E-008 | #64010 Universal Motor Driver Guide | pin-definitions table duplicates channel X on offsets 9/8 and omits channel U | never carried | `RESOLVED` |
 | E-009 | #64000 Eval Board Rev C Guide | board size printed as "3.55″ × 3.55″ (90 x 90 cm)" — the metric unit is wrong | never carried | `RESOLVED` |
+| E-010 | P2 Edge Module (#P2-EC) v3.0 **and** P2-EC32MB Rev B v2.0 | "have I/O pin **pull-ups** activated" — the P2 has none; they are drive strengths, live only with DIR high | ⚠️ **diverges** — carried verbatim in **both** `hardware/` Edge YAMLs | `CONFIRMED` |
 
 ---
 
@@ -151,7 +152,7 @@ Parallax documents, each stating it twice. · **Reached our KB?** Follows the 10
 | The claim | **#64013 P2 RTC Add-on Board Guide**, v1.0 | §**Code Tip** (under *"The SCL, INT and CLKOUT functions share a single IO pin"*) | *"To use the I2C SCL function, set the I2C **output mode** to use **3.3 k-ohm pull-up**."* and *"…set the P2 Smartpin (or equivalent) **input mode** to **150 k-ohm pull-up**."* | `sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:74-77` |
 | Against | **Spin2 v55** built-in symbols table | the `P_HIGH_150K` row | *"Drive high 150kΩ"* — a **drive strength**, not a resistor | `sources/spin2-v55/spin2-v55-text.txt:1505` |
 | Against | **P2 Datasheet**, 2022-11-01 | **p.24**, Pin Mode legend | *"DIR = direction bit; 0: input (float), 1: output (drive)"* | `p2-datasheet-text.txt:1144` |
-| Against (empirical) | **P2-EMPIRICAL-FINDINGS** | **EF-063 / EF-064** | *"P8..P31 held at a 15 kΩ low with `DIR` **high**"* — drive is live only with DIR high | `external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840` |
+| Against (mechanism, incidental) | **P2-EMPIRICAL-FINDINGS** | **EF-063 / EF-064** | *"P8..P31 held at a 15 kΩ low with `DIR` **high**"* — real silicon, so the drive-with-DIR-high mechanism demonstrably works. ⚠️ **These are NOT pull-up findings.** EF-063 certifies jumper continuity; EF-064 establishes streamer pin placement. The weak drive is their **rig apparatus**, not their subject, and the ledger holds **no** dedicated drive-strength finding. Corroboration, never the authority. | `external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840` |
 
 **OUR FINDING.** Wrong twice. **(1) The P2 has no pull-up resistors** — `P_HIGH_150K` selects a
 150 kΩ *drive strength*. **(2) Input mode means `DIR` low, and a drive selection is inactive while
@@ -271,6 +272,41 @@ is wrong by a factor of ten; 90 cm would be a board nearly a metre across. **Quo
 **Evidence tier:** internal contradiction plus an in-document unit anchor (the 1.5748 in = 40.00 mm
 label). · **Reached our KB?** Never carried — `hardware/p2-eval-board.yaml` `specifications.physical`
 states the inch figure and carries a `dimensions_note` pointing here.
+
+## E-010 — both Edge Module guides tell the reader to "activate I/O pin pull-ups", and our KB repeats it verbatim · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **P2 Edge Module (#P2-EC) Product Guide**, v3.0 (2022-06-03) | §**7. LED Buffer** | *"In user code those pins could be driven high or low, or **have I/O pin pull-ups activated**, to control the LEDs without the high-impedance behavior."* | `sources/edge-standard-module/edge-standard-module-narrative.txt:266-267` |
+| The claim (again) | **P2-EC32MB Edge Module Rev B Guide**, v2.0 (2022-05-23) | §**7. LED Buffer** | *"In user code those pins could be driven high or low, or **have I/O pin pull-ups activated**, to control the LEDs without the high-impedance behaviour."* | `sources/edge-32mb-module/edge-32mb-module-narrative.txt:313-314` |
+| Against | **P2 Datasheet**, 2022-11-01 | **p.24**, (M) Pin Mode table + Pin Mode Legend | The whole field is enumerated — C, I, O, HHH, LLL — and **there is no bias-resistor selector among them**; `HHH`/`LLL` are drive strengths | `p2-datasheet-text.txt:1131-1147` |
+| Against | **P2 Datasheet**, 2022-11-01 | **p.24**, Pin Mode Legend | *"DIR = direction bit; 0: input (float), 1: output (drive)"* — a drive selection is inactive while the pin is an input | `p2-datasheet-text.txt:1144` |
+| Against | **Spin2 v55** built-in symbols table | the `P_HIGH_15K` row | *"Drive high 15kΩ"* — a **drive strength**, not a resistor | `sources/spin2-v55/spin2-v55-text.txt:1504` |
+
+**OUR FINDING.** Same defect class as **E-004**, in two more Parallax guides. **The P2 has no
+pull-up or pull-down resistors to activate.** What exists is a per-side **drive-strength** selector
+— eight rungs from FAST through 1.5 kΩ / 15 kΩ / 150 kΩ / 1 mA / 100 µA / 10 µA to float, chosen
+independently for the high side (`HHH`) and the low side (`LLL`) — and a selection is live **only
+while the pin is driving**, i.e. `DIR` high. So the guide's phrasing offers a third option
+("driven high or low, **or** pull-ups activated") where there are only two, and the alternative it
+names is the first option under another name. The **substance** of the sentence is fine — you can
+hold an Edge LED pin deterministically with a weak drive — and the working form is `P_HIGH_15K`
+with `DIR` **high**, exactly the `weak_high` idiom at
+`deliverables/ai/P2/architecture/pin-drive-configuration.yaml:203-222`.
+
+*Note the same guides get the neighbouring fact right:* they say the LED pins are *"not impacted by
+the presence of the LEDs or **external** pull-up resistors"* — external ones, correctly. It is only
+the P2-side capability that is misnamed.
+
+**Evidence tier:** documentary, two agreeing Parallax sources against the guides. · **Reached our
+KB?** ⚠️ **YES — diverges, carried verbatim, both files.**
+`deliverables/ai/P2/hardware/edge-standard-module.yaml:155` and
+`deliverables/ai/P2/hardware/edge-32mb-module.yaml:171` both end their `led_pins.mechanism` with
+*"Drive the pins high or low (**or enable a pin pull-up**) to control the LEDs deterministically."*
+Faithful ingestion of a wrong sentence. This is **not** covered by F-321, whose applied sweep was
+scoped to `language/` — these are `hardware/` files, and the phrase carries no `P_*` constant, so
+`audit-constant-fidelity.py` cannot see it either. Routed to the corrections register alongside
+**F-356**, which records the parallel manual-side survival of the same class.
 
 ---
 

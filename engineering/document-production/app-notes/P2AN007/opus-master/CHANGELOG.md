@@ -29,4 +29,4 @@ required to fail before the result was accepted.
 
 Implementation-only by design: the note teaches the worked code and defers the *contract decision*
 (which structure to use and why, copy vs. reference) to the P2 Architect's Guide. Every recipe
-compiles clean under `pnut_ts -d`. Ships with a downloadable example library of all six programs.
+compiles clean under `pnut-ts -d`. Ships with a downloadable example library of all six programs.

@@ -16,6 +16,6 @@ stack with a known pattern and watch a sentinel just past its end) applied throu
 recipes: instrument a new-cog stack against overflow, find the high-water mark and right-size,
 pinpoint which routine overran the stack, and size a cooperative task's stack (the companion to
 P2AN005). Built around the MIT-licensed `isp_stack_check` utility (Stephen M. Moraco), which ships
-in the example library. Every recipe compiles clean under `pnut_ts -d`; the overflow-detection and
+in the example library. Every recipe compiles clean under `pnut-ts -d`; the overflow-detection and
 halt behavior is described from the utility's design, with observing it fire noted as a bench step.
 Ships with a downloadable example library of the utility plus all four programs.
