@@ -24,10 +24,45 @@ basic_info:
 pin_access:
   total_accessible: 40
   pin_range: "P0-P31, P56-P63"
-  blocked_pins: "P32-P55 (not accessible)"
+  blocked_pins: "P32-P55 are not brought out to headers; the guide says they may be reached by adding jumper wires on the bottom side of the PCB to the mini prototyping sections"
   header_configuration: "40 pins broken out to headers"
   header_type: "Standard 0.1 inch pitch"
   pin_organization: "Logical grouping by availability"
+
+connectivity:
+  source: >-
+    64019 P2 Edge Mini Breakout Board Guide v1.1 (Parallax Inc., 2020-11-30) --
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:16-33
+    (overview + accessible pins), :34-45 (Features), :54-65 (Key Specifications).
+  accessible_pins:
+    count: 40
+    range: "P0-P31 and P56-P63 are available at pin headers"
+    inaccessible: >-
+      P32-P55 are NOT brought out to headers. The guide states they "may be
+      accessed by adding jumper wires on the bottom side of the PCB to the mini
+      prototyping sections" - so they are reachable, but only by soldering, never
+      by plugging an accessory in.
+  headers:
+    count: "five 0.1 inch pin header sockets"
+    accessory_headers: "four, arranged to accept single or dual P2 accessory boards (2x6 way)"
+    programming_header: >-
+      the fifth single header breaks out the programming pins and is compatible
+      with wireless programming using the P2 WX Adapter (#64007) with a Parallax
+      WX ESP8266 SIP module (#32420S)
+    prop_plug_header: "a dedicated Parallax Prop Plug (#32201) header for system programming and debugging"
+  prototyping: "two 0.1 inch pitch 4x5 matrix prototyping sections, one either side of the edge connector"
+  power_input: "center-positive 2.1 mm barrel jack for an external 5 VDC supply"
+  reset: "on-board reset button"
+  addon_compatibility: >-
+    Accessories fitting the 2x6 accessory headers include the #64006-ES P2-ES Eval
+    Board Accessory Set (eight boards), the HyperRAM & HyperFLASH add-on and the
+    Protoboard add-on; the P2 to MicroBUS Click Adapter (#64008) adds mikroBUS
+    Click module support.
+  programming_note: >-
+    This carrier has NO built-in USB-to-serial converter. "USB programming: Serial
+    up to 2 MBaud; requires Prop Plug (#32201) programming adapter." Wireless
+    programming (up to 2 MBaud) requires the P2 WX WiFi Adapter (#64007) plus the
+    WX WiFi SIP module (#32420S).
     
 module_compatibility:
   optimal_pairing:
@@ -61,7 +96,7 @@ advantages:
   - "Lower cost than full breakout"
   - "Portable and lightweight"
   - "Adequate for many P2 projects"
-  - "USB programming integrated"
+  - "Dedicated Prop Plug (#32201) programming header, plus a wireless-programming header for the P2 WX Adapter (#64007)"
   
 limitations:
   - "Only 40 pins accessible (P32-P55 blocked)"
@@ -74,15 +109,15 @@ limitations:
 development_workflow:
   - "Select 32MB module for optimal pairing"
   - "Insert module into edge connector"
-  - "Connect USB for programming and power"
+  - "Power from the 2.1 mm barrel jack (5 VDC); connect a Prop Plug (#32201) to the programming header for loading and debug"
   - "Access 40 pins via headers (P0-P31, P56-P63)"
   - "Develop compact applications"
   - "Focus on memory-intensive features"
   
 programming:
   methods:
-    - "USB (primary - built-in)"
-    - "Prop Plug (optional backup)"
+    - "Prop Plug (#32201) on the dedicated programming header - the only wired method; the board has no on-board USB-to-serial converter"
+    - "Wireless, via the P2 WX Adapter (#64007) + WX WiFi SIP module (#32420S), up to 2 MBaud"
   tools:
     - "PropellerTool"
     - "PNut" 

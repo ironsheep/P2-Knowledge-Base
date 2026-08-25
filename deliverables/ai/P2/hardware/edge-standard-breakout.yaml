@@ -27,6 +27,32 @@ pin_access:
   header_configuration: "All pins broken out to headers"
   header_type: "Standard 0.1 inch pitch"
   pin_organization: "Logical grouping by function"
+
+connectivity:
+  source: >-
+    64029 P2 Edge Breakout Board Guide v1.0 (Parallax Inc., 2023-03-01) --
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:11-22
+    (overview + accessible pins), :24-35 (Features), :42-64 (Key Specifications).
+  accessible_pins:
+    count: 64
+    range: "all 64 P2 Edge Smart I/O pins are available at eight 0.1 inch pin header sockets"
+  headers:
+    count: "eight 2x6 way 0.1 inch P2 accessory headers"
+    accessory_headers: "all eight are arranged to accept single or dual P2 accessory boards"
+    last_header: >-
+      The last header includes the programming and memory pins (P58-P63) and the
+      reset signal (RES), for wireless programming with the P2 WX Adapter (#64007)
+      and a Parallax WX ESP8266 SIP module (#32420S).
+    prop_plug_header: "a dedicated Parallax Prop Plug (#32201) header for system programming and debugging"
+  power_input: "center-positive 2.1 mm barrel jack for an external 5 VDC supply"
+  power_header: "flexible 0.1 inch 2x3 way power header, allowing an external switch or power supply"
+  reset: "on-board reset button"
+  io_electrical: "Smart I/O pins: 3.3 V logic level, source or sink 30 mA per I/O pin (module-supplied)"
+  programming_note: >-
+    This carrier has NO built-in USB-to-serial converter. "USB programming: Serial
+    up to 2 MBaud; requires Prop Plug (#32201) programming adapter." Wireless
+    programming (up to 2 MBaud) requires the P2 WX WiFi Adapter (#64007) plus the
+    WX WiFi SIP module (#32420S).
     
 module_compatibility:
   optimal_pairing:
@@ -58,7 +84,7 @@ advantages:
   - "Perfect match for P2-EC standard module"
   - "Enhanced power distribution"
   - "Proper pin organization and labeling"
-  - "USB programming integrated"
+  - "Dedicated Prop Plug (#32201) programming header; the last accessory header also carries P58-P63 + RES for wireless programming"
   
 limitations:
   - "Larger than necessary for 32MB module (40-pin usage)"
@@ -70,15 +96,15 @@ limitations:
 development_workflow:
   - "Select appropriate Edge module (P2-EC recommended)"
   - "Insert module into edge connector"
-  - "Connect USB for programming and power"
+  - "Power from the 2.1 mm barrel jack (5 VDC); connect a Prop Plug (#32201) to the programming header for loading and debug"
   - "Access all 64 pins via labeled headers"
   - "Develop using full P2 capabilities"
   - "Test complex multi-peripheral designs"
   
 programming:
   methods:
-    - "USB (primary - built-in)"
-    - "Prop Plug (optional backup)"
+    - "Prop Plug (#32201) on the dedicated programming header - the only wired method; the board has no on-board USB-to-serial converter"
+    - "Wireless, via the P2 WX Adapter (#64007) + WX WiFi SIP module (#32420S), up to 2 MBaud"
   tools:
     - "PropellerTool"
     - "PNut"

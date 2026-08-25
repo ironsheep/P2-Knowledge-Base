@@ -11,6 +11,106 @@ category: addon
 manufacturer: Iron Sheep Productions, LLC
 status: "retiring_limited_stock"
 
+description:
+  source: >-
+    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
+    Productions LLC (the board's manufacturer) --
+    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:13-33, :55-61.
+  text: >-
+    Adapter board that connects HUB75 RGB LED matrix panels to a Propeller 2. It
+    provides robust 3.3 V to 5 V level shifting for ALL HUB75 signals at the HUB75
+    connector, so no P2-side level handling is needed. Dual 2x6-pin female
+    pass-through headers on the P2 side, a standard HUB75 16-pin IDC connector on
+    the panel side. Supports panels using A-B-C (8 row scan, 16-row panels),
+    A-B-C-D (16 row scan, 32-row panels) and A-B-C-D-E (32 row scan, 64-row panels)
+    address lines.
+
+specifications:
+  source: >-
+    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
+    Productions LLC (the board's manufacturer) --
+    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:15-33, :122-126;
+    pin-offset map at
+    engineering/ingestion/sources/p2-hub75-adapter-complete-pinout.md:8-27, :105-115.
+  physical:
+    pcb_dimensions: "1.9 x 2.8 inches (48 x 71 mm)"
+    form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
+    panel_connector: "standard HUB75 16-pin IDC connector"
+  electrical:
+    operating_voltage: "+5 VDC, supplied by the P2 development board"
+    board_consumption: "under 50 mA (level shifters and support circuitry)"
+    max_clock_rate: "70 MHz, limited by the level shifter ICs"
+    level_shifting: "3.3 V to 5 V for all HUB75 signals; all signals are P2 outputs, so no bi-directional capability is required"
+  address_line_support:
+    - {lines: "A-B-C", scan: "8 row scan", panels: "16-row panels"}
+    - {lines: "A-B-C-D", scan: "16 row scan", panels: "32-row panels"}
+    - {lines: "A-B-C-D-E", scan: "32 row scan", panels: "64-row panels"}
+  compatible_hosts:
+    - "P2 Eval Board (#64000)"
+    - "P2 Edge Module Breadboard (#64020) with a P2 Edge Module (#P2-EC)"
+    - "P2 Edge Mini Breakout Board (#64019) with a P2 Edge Module (#P2-EC)"
+  pin_budget: "uses 14 of the 16 pins in a dual-header block; offsets 14 and 15 are spare"
+  gap_max_clock: >-
+    The KB previously shipped "40 MHz max (35 MHz reliable), 13 ns propagation
+    delay, 2x 74HCT244". Only the level-shifter part number survives elsewhere in
+    this file; the 40/35 MHz and 13 ns figures appear in NO ingested source, and
+    the manufacturer's own specification says 70 MHz. They were removed rather
+    than reconciled. What would settle it: a level-shifter datasheet or a measured
+    result in the hardware-verification ledger.
+
+software_features:
+  source: >-
+    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
+    Productions LLC, "Software Support" and "Performance Specifications" --
+    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:144-192.
+  driver: "ISP HUB75 Driver (P2 OBEX / GitHub) - see resources"
+  capabilities:
+    - "Multiple panel support (daisy-chain and grid configurations)"
+    - "Automatic panel detection"
+    - "PWM brightness control (0-255 levels)"
+    - "Color correction and gamma adjustment"
+    - "Double-buffering for flicker-free updates"
+    - "Text rendering with multiple fonts"
+    - "Graphic primitives (lines, circles, rectangles)"
+    - "BMP image display support"
+  measured_refresh_rates:
+    note: "typical, 24-bit colour, with the P2 at 200 MHz"
+    rates:
+      - {panel: "32x32", refresh: "120 Hz"}
+      - {panel: "64x32", refresh: "100 Hz"}
+      - {panel: "64x64", refresh: "60 Hz"}
+      - {panel: "128x64", refresh: "30 Hz"}
+  bandwidth_model: >-
+    Bandwidth = Width x Height x Colors x RefreshRate x ScanRate. Worked example
+    for a 64x32 panel: 64 x 32 x 3 bytes x 100 Hz x (1/16 scan) = 38.4 KB/s.
+  gap_pulse_widths: >-
+    The KB previously shipped clock/latch/OE pulse-width minimums (15 ns / 200 ns
+    / 100 ns) and a per-panel refresh table keyed on 3-bit and 8-bit colour depth.
+    No ingested source states either. They were removed rather than reconciled.
+    What would settle it: ingesting the ISP HUB75 driver's own documentation
+    (github.com/ironsheep/P2-HUB75-LED-Matrix-Driver) into
+    engineering/ingestion/sources/.
+
+notes:
+  source: >-
+    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
+    Productions LLC --
+    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:22-27, :24-27,
+    :128-142; and
+    engineering/ingestion/sources/p2-hub75-adapter-complete-pinout.md:112-115.
+  items:
+    - "LED panels require a separate 5 V power supply. Never power a panel through the P2 board - the adapter passes 5 V through from the P2 board only for its own level shifters and the connector."
+    - "Panel scan patterns follow the address lines fitted: A-B-C is a 1/8 scan, A-B-C-D a 1/16 scan, A-B-C-D-E a 1/32 scan."
+    - "Panels are daisy-chainable for larger displays."
+    - "Use thick power cables (18 AWG or larger), distribute power injection across multiple panels, and add capacitors near panel power inputs."
+    - "Maximum clock rate is 70 MHz, set by the level shifter ICs."
+  gap_chain_limit: >-
+    The KB previously shipped "Maximum 3 chains supported (3 adapter boards)" and
+    "Driver does not use P2 streamer (bit-bang approach)". Neither is in any
+    ingested source, and the pinout capture argues the other way for the second
+    ("6-bit parallel data perfect for P2 streamer"). Both removed rather than
+    reconciled. What would settle it: the ISP HUB75 driver documentation, ingested.
+
 # --- Eval-header board model (uniform across all eval-header occupants) ---
 eval_header_occupant: true
 pin_group:

@@ -15,6 +15,23 @@ aliases:
   - "64013"
   - "#64013 add-on board"
 
+description:
+  source: >-
+    P2 RTC Add-on (#64013) Guide v1.0 (Parallax Inc., 2022-11-29) --
+    engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:15-37.
+  text: >-
+    "The P2 RTC Add-On Board provides a real time clock with calendar and alarm
+    functionality to the Propeller 2 (P2X8C4M64P) multicore microcontroller." Built
+    around the NXP PCF8523 CMOS RTC and talked to over I2C. The small board includes
+    a rechargeable lithium battery that is kept charged while the RTC is powered and
+    lets the RTC keep time while power is disconnected. It fits any standard single
+    Parallax P2 accessory socket - the connector is a standard 2x6-way 0.1 inch pitch
+    socket - and can be used with a wide range of microcontrollers employing 3.3 V
+    signal levels. Data is transferred serially over an I2C bus at up to 1000 kbit/s;
+    alarm and timer functions can generate a wake-up signal on an interrupt pin, an
+    offset register allows fine-tuning of the clock, and a backup-battery switchover
+    circuit detects power failures and automatically switches to the battery supply.
+
 # --- Eval-header board model (uniform across accessory-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -44,11 +61,41 @@ signal_map:
   - {offset: 7, signal: "Not Connected", direction: na, notes: "N/C."}
 
 interface: i2c
-pin_mode_tip: >-
-  SCL, INT, and CLKOUT share the single +0 IO pin (board-author guidance):
-  to use I2C SCL, set I2C output mode with a 3.3 kohm pull-up; to use INT or
-  CLKOUT, first configure them over I2C per the RTC datasheet, then disable I2C
-  and set the P2 pin to input mode with a 150 kohm pull-up.
+pin_mode_tip:
+  source: >-
+    Board fact from the Parallax P2 RTC Add-on (#64013) Guide v1.0 (2022-11-29),
+    "Code Tip" --
+    engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:72-77.
+    The P2-side mechanism is corrected against the Spin2 v55 built-in symbol table
+    (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1500-1509), the
+    P2 Datasheet Pin Mode legend
+    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144), and
+    empirical findings EF-063 / EF-064
+    (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840).
+  board_fact: >-
+    SCL, INT and CLKOUT share the single +0 IO pin, so only one of the three can
+    be in use at a time. To use INT or CLKOUT, first configure them over I2C per
+    the PCF8523 datasheet API, then stop driving SCL and read +0 while holding it
+    weakly high (the RTC drives INT/CLKOUT open-drain).
+  p2_side_mechanism: >-
+    Hold the pin weakly high with P_HIGH_150K and DIR HIGH: the pin then drives
+    high through 150 kOhm, weak enough for the RTC's open-drain output to pull it
+    low, while IN still reports the pin state.
+  do_not_copy_the_guides_wording: >-
+    The #64013 Code Tip says "set the P2 Smartpin (or equivalent) input mode to
+    150 k-ohm pull-up". That cannot work on a P2 and must not be copied. (1) The
+    P2 has NO pull-up resistors - P_HIGH_150K selects a 150 kOhm DRIVE STRENGTH
+    ("Drive high 150k-ohm" in the Spin2 v55 symbol table). (2) Input mode is DIR
+    LOW, and every drive selection is inactive while the pin is an input; the pin
+    simply floats. Filed as engineering/ingestion/SOURCE-ERRATA.md E-004.
+  scl_pull_up_caveat: >-
+    The same Code Tip prescribes a "3.3 k-ohm pull-up" for I2C SCL. The P2 drive
+    ladder has no 3.3 kOhm rung: its drive-high selections are FAST (30 mA),
+    1.5 kOhm, 15 kOhm, 150 kOhm, 1 mA, 100 uA, 10 uA and float. Use the nearest
+    rung the bus timing tolerates (P_HIGH_1K5 or P_HIGH_15K), again with DIR HIGH,
+    or an external pull-up. GAP: the #64013 guide does not say whether the RTC
+    board carries its own SDA/SCL pull-ups, and no ingested source states it - the
+    board schematic would settle it.
 
 rtc_chip:
   part: "NXP PCF8523"
@@ -65,7 +112,9 @@ rtc_chip:
     datasheet); resolved from the NXP PCF8523 datasheet (Table 46 slave address;
     register-overview Table 5, addresses 00h-13h) and CORROBORATED by the
     official Parallax 64013 RTC driver (64013_RTC_Driver.spin2, M. Mulholland /
-    JonnyMac) which uses $68 at 400 kHz with a 3.3K pull-up. (Gap G-013
+    JonnyMac) which uses $68 at 400 kHz with its "3.3K pull-up" setting. (That is
+    the driver library's own term for a pull-up strength; on the P2 there is no
+    pull-up resistor and no 3.3 kOhm rung - see pin_mode_tip.) (Gap G-013
     resolved.)
   register_map:
     "00h": "Control_1 (CAP_SEL, STOP, SR, 12_24, SIE, AIE, CIE)"
@@ -103,7 +152,7 @@ documentation:
 resources:
   product_page: "www.parallax.com (search 64013) - latest guide, schematic, example code"
   rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
-  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c at 400 kHz, 3.3K pull-up"
+  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c at 400 kHz with that library's 3.3K pull-up setting (see pin_mode_tip for what the P2 actually does)"
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
 
 see_also:

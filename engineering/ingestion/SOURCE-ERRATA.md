@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-008`**
+> **Next erratum ID: `E-010`**
 
 ## What this register is for
 
@@ -86,10 +86,12 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-001 | P2 Hardware Manual | `COGATN` constant lost its `%` and does not assemble | never carried | `RESOLVED` |
 | E-002 | P2 Hardware Manual | `ROLBYTE y,x` — no such two-operand form | never carried | `RESOLVED` |
 | E-003 | P2 Hardware Manual | VCO "kept within 350 MHz" contradicts its own PLL Example | follows the majority | `RESOLVED` |
-| E-004 | #64013 RTC Add-on Guide | pull-up mislabel, prescribed in input mode where it cannot work | ⚠️ **diverges — KB repeats it** | `RESOLVED` |
+| E-004 | #64013 RTC Add-on Guide | pull-up mislabel, prescribed in input mode where it cannot work | diverged; **KB fixed 2026-08-25** | `RESOLVED` |
 | E-005 | #64000 Eval Board Rev C Guide | §18 reverses the SPI/SD pin directions | never carried | `RESOLVED` |
 | E-006 | #64006 Eval Add-on Guide | button "active-high" *and* "driven low when asserted" | ⚠️ **diverges** | `RESEARCHING` |
 | E-007 | Hardware Manual vs Datasheet | clock limits — recommended-use vs absolute-limit framing | follows, unlabelled | `RESOLVED` |
+| E-008 | #64010 Universal Motor Driver Guide | pin-definitions table duplicates channel X on offsets 9/8 and omits channel U | never carried | `RESOLVED` |
+| E-009 | #64000 Eval Board Rev C Guide | board size printed as "3.55″ × 3.55″ (90 x 90 cm)" — the metric unit is wrong | never carried | `RESOLVED` |
 
 ---
 
@@ -157,9 +159,20 @@ the pin is an input**, so the second tip cannot work on its own terms. The worki
 `P_HIGH_150K` with **DIR high**.
 
 **Evidence tier:** empirical (strongest), corroborated documentarily. · **Reached our KB?**
-⚠️ **Diverges — and the KB currently repeats the guide**, at
-`deliverables/ai/P2/hardware/addon-rtc.yaml` `pin_mode_tip`. Deliberately not rewritten yet under
-D3/R9; owed to «#307» as a correction-register item.
+**Diverged; fixed 2026-08-25 by «#307».** `deliverables/ai/P2/hardware/addon-rtc.yaml`
+`pin_mode_tip` no longer repeats the guide. It is now a map carrying (a) the board fact — SCL, INT
+and CLKOUT share the single +0 pin, so only one can be in use at a time; (b) the working P2-side
+mechanism — **`P_HIGH_150K` with `DIR` HIGH**, so the pin drives high through 150 kΩ, weak enough
+for the RTC's open-drain output to pull low while `IN` still reports the pin state; and (c) an
+explicit `do_not_copy_the_guides_wording` key quoting the guide's *"input mode to 150 k-ohm
+pull-up"* and stating both errors, pointing here. The same block also records a **second, milder
+mismatch this fix surfaced**: the Code Tip's companion *"3.3 k-ohm pull-up"* for SCL names a value
+the P2 drive ladder does not carry at all — its drive-high rungs are FAST (30 mA), 1.5 kΩ, 15 kΩ,
+150 kΩ, 1 mA, 100 µA, 10 µA and float (`sources/spin2-v55/spin2-v55-text.txt:1500-1509`) — and it
+carries a GAP: the #64013 guide does not say whether the RTC board provides its own SDA/SCL
+pull-ups, and no ingested source does either; the board schematic would settle it. Two prose
+mentions of the driver library's "3.3K pull-up" setting elsewhere in the same file were relabelled
+so they cannot be read as a P2 capability. Filed to the corrections register as part of **F-353**.
 
 ## E-005 — §18 reverses the SPI/SD pin directions · `RESOLVED`
 
@@ -219,6 +232,45 @@ only the *input* limits need the label.
 
 **Evidence tier:** both documents read directly; no contradiction once the framings are named. ·
 **Reached our KB?** Follows — but unlabelled today.
+
+## E-008 — the motor-driver pin table duplicates channel X and loses channel U · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **#64010 Universal Motor Driver P2 Add-on Board Guide**, v2.0 (Rev B) | §**Pin Definitions for the P2 Dual Accessory Header Block 15–8** (p.10 table, last two rows) | pin **9** = `PWM_XH`, "PWM input for X channel High-side MOSFET driver"; pin **8** = `PWM_XL`, "…Low-side…" | `sources/p2-universal-motor-driver/p2-universal-motor-driver-text.txt:637-646` |
+| Against (same document) | **#64010 …Guide**, v2.0 | §**1. Dual 2x6 way P2 Accessory Headers** (p.5 header pinout table) | the row reads `PWM_UH` &#124; 9 &#124; 8 &#124; `PWM_UL` | `sources/p2-universal-motor-driver/p2-universal-motor-driver-text.txt:238-244`; recovered table at `complete-p2-universal-motor-driver-content.md:143` |
+| Against (same document) | **#64010 …Guide**, v2.0 | §**4. MOSFET Drivers** | *"One driver controls each of the 4 output channels labeled: U, V, W, X"* | `complete-p2-universal-motor-driver-content.md:164` |
+
+**OUR FINDING.** **Offset +9 is `PWM_UH` and offset +8 is `PWM_UL`.** The board has four channels
+and eight PWM pins; the p.10 table's last two rows repeat the X-channel labels from its first two
+rows, which would leave channel **U** undocumented and channel X documented twice. The p.5 header
+pinout is right.
+
+> ⚠️ **This is the SOURCE's defect, not ours — and our own audit says otherwise.**
+> `sources/p2-universal-motor-driver/p2-universal-motor-driver-complete-extraction-audit.md:45`
+> records it as a *"docling table copy-error"*. It is not: the plain `pdftotext` text layer carries
+> the same duplication (`…-text.txt:637-646`), so it is in the PDF. The audit reaches the right
+> **answer** (use the U-channel values) for the wrong **reason**, and the reason matters — a
+> docling artifact would be fixed by re-extracting, while a source defect never will be. The
+> ingestion tree is evidence and was not edited; the ingestion head owns correcting that audit line.
+
+**Evidence tier:** self-contradiction, confirmed in the original text layer as well as in the
+recovered tables. · **Reached our KB?** Never carried — `hardware/addon-motor-driver.yaml`
+`signal_map` was written from the p.5 pinout and records this erratum in a `pin_label_errata` key.
+
+## E-009 — the eval board's own dimension line prints centimetres for millimetres · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **#64000 Propeller 2 Eval Board Rev C Guide**, v2.0 (29/6/2020) | **p.2**, Key Specifications, *PCB dimensions* row | *"3.55″ × 3.55″ (90 x 90 cm)"* | `sources/p2-eval-board/complete-p2-eval-board-reference.md:62`, errata note at `:302-303` |
+| Against (same document) | **#64000 …Guide**, v2.0 | **p.17**, PCB Dimensions drawing | overall width labelled **3.55 in**; the bottom-right chamfer is labelled **1.5748 in = 40.00 mm**, which fixes the drawing's unit scale | `sources/p2-eval-board/complete-p2-eval-board-reference.md:253-266` |
+
+**OUR FINDING.** The board is **3.55 in × 3.55 in ≈ 90 mm × 90 mm**. The parenthetical unit on p.2
+is wrong by a factor of ten; 90 cm would be a board nearly a metre across. **Quote the inch figure.**
+
+**Evidence tier:** internal contradiction plus an in-document unit anchor (the 1.5748 in = 40.00 mm
+label). · **Reached our KB?** Never carried — `hardware/p2-eval-board.yaml` `specifications.physical`
+states the inch figure and carries a `dimensions_note` pointing here.
 
 ---
 

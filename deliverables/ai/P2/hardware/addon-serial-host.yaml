@@ -26,6 +26,58 @@ pin_group:
     Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
     serial pins - not recommended.
 
+signal_map:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), Serial Host I/O Pin table --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:118-134.
+  pins:
+    - {offset: 0, signal: "Blue LED", direction: out, notes: "1 kOhm series resistor. Assert high to light. Use PWM for brightness control."}
+    - {offset: 1, signal: "Serial channel 1 : Enable", direction: out, notes: "Active high. Drive high to enable the channel-1 5 V output."}
+    - {offset: 2, signal: "Serial channel 1 : Data D-", direction: bidir, notes: "USB host channel 1, negative half of the differential pair."}
+    - {offset: 3, signal: "Serial channel 1 : Data D+", direction: bidir, notes: "USB host channel 1, positive half of the differential pair."}
+    - {offset: 4, signal: "Blue LED", direction: out, notes: "1 kOhm series resistor. Assert high to light. Use PWM for brightness control."}
+    - {offset: 5, signal: "Serial channel 2 : Enable", direction: out, notes: "Active high. Drive high to enable the channel-2 5 V output."}
+    - {offset: 6, signal: "Serial channel 2 : Data D-", direction: bidir, notes: "USB host channel 2, negative half of the differential pair."}
+    - {offset: 7, signal: "Serial channel 2 : Data D+", direction: bidir, notes: "USB host channel 2, positive half of the differential pair."}
+  usb_pin_pairing_note: >-
+    Each channel's D-/D+ occupy an adjacent even/odd pin pair (offsets 2/3 and
+    6/7), which is the ordering the P2 USB smart-pin mode requires.
+
+usb_host_capabilities:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Serial Host Add-on Board (#64006B)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-115.
+  ports: "twin USB-type A sockets, allowing two USB-type devices to be connected simultaneously (for example a keyboard and a mouse)"
+  power_switch: >-
+    Each socket is protected by a current-limited load switch that allows up to
+    500 mA continuous current, subject to overall available system power.
+  protection: "reverse current blocking, short-circuit protection, over-temperature protection, and VBUS soft start"
+  enable_sequence: >-
+    "To enable the Serial Host 5V power output on each channel, set the
+    corresponding channel enable pin high. I/O pin 1 for channel 1, and I/O pin 5
+    for channel 2." In base+offset terms: drive base+1 and/or base+5 high.
+  requires_5v: >-
+    The board requires 5 V to function. When used with the P2-ES Eval Board Rev B,
+    the shunt jumper must connect that board's ACC HDR and 5V pins to supply 5 V to
+    its I/O Pin Breakout Edge Headers.
+
+development_workflow:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-115
+    (enable pins and the 5 V requirement) and :24-46 (host compatibility, the 8-pin
+    header block, and the auxiliary-power recommendation).
+  steps:
+    - "Confirm the host supplies 5 V to the accessory header. On a P2-ES Eval Board Rev B this means fitting the shunt jumper across ACC HDR and 5V."
+    - "Connect the auxiliary power supply to the P2-EVAL board's P2-USB socket; accessory current may exceed what the PC-USB socket provides."
+    - "Plug the board onto one 2x6 accessory header; it uses that header's eight I/O pins (offsets 0-7)."
+    - "Enable the desired USB ports by driving base+1 (channel 1) and/or base+5 (channel 2) high."
+    - "Drive base+0 and base+4 high to light the per-channel activity LEDs, or use PWM on them for brightness."
+    - "Implement USB host signalling on the D-/D+ pairs at base+2/base+3 and base+6/base+7."
+
 use_cases:
   primary:
     - "USB keyboard and mouse input"

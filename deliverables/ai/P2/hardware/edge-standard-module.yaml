@@ -38,6 +38,171 @@ basic_info:
   pcb_layers: 6
 
 # =============================================================================
+# KEY SPECIFICATIONS
+# =============================================================================
+specifications:
+  source: >-
+    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03) --
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:73-90
+    (Key Specifications), :50-71 (Features), :169-173 (5. Flash Memory),
+    :470-509 (Recommend and Absolute Maximum Ratings).
+  propeller_chip: "P2X8C4M64P (8 cogs, 512 KB shared hub RAM, 64 smart pins)"
+  chip_marking_note: >-
+    A limited number of P2 Rev C chips carry the extended part number
+    P2X8C4M64PES instead of P2X8C4M64P. The guide states the two are identical
+    other than the part marking (narrative.txt:104-107).
+  oscillator: "TCXO 20 MHz +/-0.5 PPM (high-precision temperature-compensated crystal oscillator)"
+  crystal_load_capacitance: "9 pF, internal to the P2's on-chip crystal oscillator"
+  clock:
+    recommended_maximum: "180 MHz"
+    overclocking: >-
+      Feature list: "Overclocking possible beyond 300 MHz". The Overclocking
+      section adds that the nominal maximum is 180 MHz "though many early users
+      have been running the Propeller 2 overclocked at 320 MHz".
+  memory:
+    non_volatile: "16 MB (128 Mb) SPI Flash"
+    flash_part: "W25Q128JVSIM"
+    volatile: "none -- this module has no PSRAM (contrast the P2-EC32MB)"
+  smart_io_pins: "64 accessible at the edge connector, 56 fully free, grouped in 8 sets of 8 I/Os"
+  io_logic_voltage: "3.3 V"
+  power:
+    input_voltage: "5-16 VDC, with reverse-polarity protection"
+    input_current: "recommended minimum 100 mA; typical experimentation 500-1000 mA; maximum according to customer application"
+    vdd_supply: "1.8 V up to 3 A, 750 kHz nominal switching frequency (switching buck regulator for the P2 core)"
+    io_preregulator: "an additional 3 A switcher supplies conditioned voltage to the 3.3 V VIO LDO regulators (3.8 V rail)"
+    vio_supplies: "low-noise LDO 3.3 V up to 300 mA per 8 I/O pins; eight regulators, one per 8-pin group"
+    brownout: "brown-out detection holds the P2 in reset while VDD is below approximately 1.5 V"
+    short_circuit_behavior: >-
+      On a prolonged short circuit the VDD regulator shuts down for 20 ms, then
+      attempts to restart for 2.5 ms, repeating the cycle until the short is
+      remedied.
+  edge_connector: "double-sided 80-way 0.05 inch (1.27 mm) pitch edge slot, 40 connections per side"
+  programming: "serial up to 2 Mbaud; compatible with the Parallax Prop-Plug #32201"
+  operating_temperature: "-40 to +85 C (-40 to +185 F)"
+  pcb: "1.45 in x 2.04 in (37 mm x 51.7 mm); 6-layer with integrated thermal planes"
+  ratings:
+    vin: "5 V recommended, 16 V maximum"
+    any_io_pin_p0_p63: "3.3 V recommended, 3.6 V maximum"
+    resn: "3.3 V recommended, 3.6 V maximum"
+
+# =============================================================================
+# EDGE CONNECTOR PIN ASSIGNMENTS
+# =============================================================================
+pin_mapping:
+  source: >-
+    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03) --
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:343-425
+    (Edge Connector Pin Assignments), :433-457 (Other Pins),
+    :297-312 (12. microSD card socket), :129-146 (3. LDO regulators for I/O Pin Voltage).
+  summary: >-
+    "Smart I/O pins P0-P55 are fully free; P56-P63 are routed to peripheral
+    circuits and/or have special functions related to Propeller 2 boot sequence
+    options."
+  free_pins: "P0-P55"
+  io_group_electrical: >-
+    Every group carries the same description: "Smart I/O pins, 3.3 V logic level,
+    source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA
+    total, shared by this I/O pin group and edge connector pin Vxx."
+  io_groups:
+    - {pins: "P0-P7",   vio_edge_pin: "V00"}
+    - {pins: "P8-P15",  vio_edge_pin: "V08"}
+    - {pins: "P16-P23", vio_edge_pin: "V16"}
+    - {pins: "P24-P31", vio_edge_pin: "V24", caution: "Avoid using these I/O pins for high speed digital functions where multiple pins are simultaneously switching together at near the system clock frequency."}
+    - {pins: "P32-P39", vio_edge_pin: "V32"}
+    - {pins: "P40-P47", vio_edge_pin: "V40"}
+    - {pins: "P48-P55", vio_edge_pin: "V48"}
+    - {pins: "P56-P63", vio_edge_pin: "V56"}
+  vio_naming: >-
+    At the chip, each 4 I/Os have a dedicated voltage supply connection (V0003,
+    V0407, V0811, ...). On this module the supplies are brought out in groups of
+    8 I/O pins, labelled Vxx at the edge connector, where the two digits name the
+    FIRST of the 8 pins that LDO powers (V08 = VIO for I/O pins 8 to 15).
+  alternative_functions:
+    P56: "Buffered LED"
+    P57: "Buffered LED"
+    P58: "Flash SPI DO (MISO), microSD SPI DAT0 / MISO"
+    P59: "Flash SPI DI (MOSI), microSD SPI CMD / MOSI"
+    P60: "Flash SPI CLK, microSD SPI DAT3 / CS"
+    P61: "Flash SPI CS, microSD SPI CLK"
+    P62: "Prop-Plug RX (P2 TX)"
+    P63: "Prop-Plug TX (P2 RX)"
+  boot_pin_direction_note: >-
+    P58 is the P2 INPUT (flash/card data OUT, i.e. MISO) and P59 the P2 OUTPUT
+    (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two boot
+    sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
+    and microSD CLK on P61. The P2 boot ROM listing states both directly --
+    engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138.
+  microsd_socket:
+    added_in: "Rev C"
+    power: "supplied by the VIO5663 LDO regulator"
+    pins:
+      P58: "DAT0/MISO"
+      P59: "CMD/MOSI"
+      P60: "CD/DAT3/CS (active low chip select)"
+      P61: "CLK (clock)"
+    card_not_included: "a suitable 8 GB microSDHC card (#32328) is available from Parallax"
+  led_pins:
+    pins: "P56, P57"
+    warning: >-
+      DIFFERENT PINS from the P2-EC32MB module, whose LEDs are on P38/P39.
+      Confusing the two puts an LED write on a PSRAM data line.
+    mechanism: >-
+      A dual Schmitt-trigger LED buffer presents a high-impedance connection to
+      P56/P57 and drives the corresponding status LED ON when the P2 I/O signal
+      line is HIGH. Because P2 I/O is high-impedance by default, the LEDs are
+      sensitive to objects moving close to the P56/P57 edge-connector pins; the
+      buffer isolates the LEDs so they do not influence the I/O signals. Drive the
+      pins high or low (or enable a pin pull-up) to control the LEDs deterministically.
+    disable: "the DIP switch marked LED removes power from both LEDs"
+    source: >-
+      P2-EC Edge Module Rev D Product Guide v3.0, 7. LED Buffer and 8. LEDs P56 and P57 --
+      engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:257-282.
+  other_pins:
+    RESn: >-
+      Internally pulled up to 3.3 V with a 10K resistor. The Propeller chip resets
+      when RESn is driven low; all cogs are disabled and I/O pins float. The
+      Propeller restarts 3 ms after RESn transitions from low to high.
+    VIN: >-
+      "5-16 VIN" power input pads. Connect BOTH edge connector pads to a good
+      quality supply in the range 5-16 VDC. The supply voltage MUST NOT exceed
+      16 V. Recommended minimum supply current 100 mA, up to 3 A depending on
+      customer code and circuit.
+    GND: "common signal and supply voltage ground; connect all edge connector GND pads to a solid ground plane"
+    NC: "Not Connected, reserved for future use; the guide recommends 'Do Not Connect' in customer designs"
+
+# =============================================================================
+# BOOT MODE SELECTION
+# =============================================================================
+boot_modes:
+  source: >-
+    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03),
+    6. Mode Selection Switch Bank --
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:174-255.
+  switch_bank: >-
+    Four DIP switches control LED power and boot-mode selection. They are not set
+    to any particular state on a new module, although all four are usually OFF.
+  led_switch: "controls power to the two on-board LEDs on P56/P57: ON enables, OFF disables"
+  boot_switches: "FLASH, P59 up-triangle, P59 down-triangle"
+  p59_note: >-
+    Both triangle switches connect to P2 I/O pin P59 -- one through a pull-up to
+    3.3 V, the other through a pull-down to GND. Other documentation refers to
+    them as "P59 up" and "P59 down". To avoid inconsistent behavior, switch only
+    ONE of the two ON.
+  table:
+    - {flash: "OFF",       p59_up: "OFF", p59_down: "OFF", behavior: "Serial window of 60 seconds, default. (When SD card is NOT inserted)"}
+    - {flash: "ON or OFF", p59_up: "ON",  p59_down: "OFF", behavior: "Serial window of 60 seconds, overrides SPI Flash and SD card."}
+    - {flash: "ON",        p59_up: "OFF", p59_down: "OFF", behavior: "Serial window of 100 ms, then SPI flash. If SPI flash fails then serial window of 60 seconds."}
+    - {flash: "ON",        p59_up: "OFF", p59_down: "ON",  behavior: "SPI flash only (fast boot), no serial window. If SPI flash fails then shutdown."}
+    - {flash: "OFF",       p59_up: "OFF", p59_down: "OFF", behavior: "SD card with serial window on failure. If SD card fails then serial window of 60 seconds."}
+    - {flash: "OFF",       p59_up: "OFF", p59_down: "ON",  behavior: "SD card only, no serial window. If SD card fails then shutdown."}
+  table_note: >-
+    Rows 1 and 5 carry the SAME switch setting (all three OFF). The source
+    disambiguates them by card presence: row 1 is annotated "(When SD card is NOT
+    inserted)". With a card present the same setting boots the SD card and falls
+    back to a serial window. This is the source's own wording, not a reconciliation.
+  printed_reference: "the correct DIP-switch settings for microSD boot are also printed on the back of the Edge module"
+
+# =============================================================================
 # PROTOCOL CONSTRAINTS - FOR DRIVER DEVELOPMENT
 # =============================================================================
 protocol_constraints:
@@ -160,9 +325,15 @@ comparison_with_32mb:
 
   ec32mb_module:
     psram: "32MB (4x 8MB QSPI)"
-    fully_free_pins: 38
+    fully_free_pins: 40
+    accessible_pins: 46
     led_pins: "P38, P39"
     psram_pins: "P40-P57 dedicated"
+    source: >-
+      P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
+      engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:120
+      ("Smart I/O pins: 46 accessible, 40 fully free") and :417 ("P0-P39 are fully
+      free"). The value shipped here was 38, which no source states.
 
   note: "Choose P2-EC for maximum GPIO, P2-EC32MB for external memory"
 

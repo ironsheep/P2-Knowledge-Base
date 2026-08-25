@@ -65,6 +65,76 @@ devices:
     preinstalled: "HyperFlash, 32 MB"
   note: "Each device may be a RAM, Flash, or dual-memory; memory-type configuration resistors set CS# routing per device."
 
+specifications:
+  source: >-
+    64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0
+    (Parallax Inc., board Rev A) --
+    engineering/ingestion/sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md:25-39
+    (Specifications table) and
+    engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:22
+    (target board). The capture was made with forced OCR because the PDF's embedded
+    text layer is ciphered; part numbers and URLs carrying transcription risk are
+    flagged [VERIFY] in the datasheets block below.
+  ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
+  flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
+  supply_voltage: "+3.3 VDC, supplied by the P2-ES Eval Board I/O LDO regulator"
+  max_clock_rate: "100 MHz (200 MB/s) at 3.0 Vcc"
+  ram_current: "60 mA peak burst; 600 uA standby (CS# = High)"
+  flash_current: "100 mA peak burst; 25 uA standby (CS# = High)"
+  flash_endurance: "100,000 program/erase cycles"
+  flash_retention: "20-year data retention"
+  form_factor: "dual 2x6-pin female passthrough headers, 0.1 inch spacing"
+  mounting_hole: "2.5 mm (100 mil) hole with a 4.5 mm (180 mil) pad ring, connected to GND"
+  operating_temperature: "-40 to +85 C (-40 to +185 F)"
+  pcb_dimensions: "1.0 x 1.9 in (25.4 x 48.3 mm)"
+  stacking: "up to four add-on boards can be stacked, one per side of the P2-ES Eval Board"
+
+configuration:
+  source: >-
+    64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0
+    (Parallax Inc., board Rev A), Feature Descriptions sections 3-8 --
+    engineering/ingestion/sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md:57-85.
+  reset_pads:
+    label: "Optional RES / GND pads (section 3) -- access to the HyperBUS reset signal."
+    standard: >-
+      A shunt resistor across the CENTER-and-RIGHT pads keeps the module held in
+      reset until IO+15 (RESET#) is asserted HIGH. This is the shipped position:
+      an emitted driver MUST drive IO+15 high before the memory will respond.
+    alternate: >-
+      Move the shunt to LEFT-and-CENTER: the module is normally active, and
+      asserting IO+15 OR the RES pad LOW resets it.
+  memory_type_resistors:
+    device_b: >-
+      Section 5 -- below the "FLS B RAM" silk label; a 2-position shunt sets the
+      device-B memory type by connecting CS# to the appropriate pin (HyperRAM and
+      HyperFlash use different CS# pins). Pre-installed device B is HyperFlash,
+      so the shunt is pre-set to FLS.
+    device_a: >-
+      Section 7 -- above the "FLS A RAM" silk label; the same 2-position shunt for
+      device A. Pre-installed device A is HyperRAM, so the shunt is pre-set to RAM.
+  per_device_resistors:
+    label: '"+ R C" configuration resistors (section 6) -- three per HyperBUS device, on the right side.'
+    plus: "10 kOhm pull-up connecting CS# to 3.3 V"
+    r: "10 Ohm series resistor connecting RWDS to IO+10 (device A) or IO+11 (device B)"
+    c: "10 Ohm series resistor connecting CK to IO+8 (device A) or IO+9 (device B)"
+  optional_pads:
+    label: "Optional Configuration Pads (section 4): INT / RSTO / CSx-BR / CSx-AF"
+    purpose: >-
+      Extra HyperBUS signals for users experimenting with alternate memory types.
+      Provided in the spirit of openness; not supported or warrantied by Parallax.
+    pads:
+      - {pad: "INT", p2_role: "input (MISO)", hyperbus: "INT# (Flash only)", device: "A", notes: "Interrupt output, open-drain."}
+      - {pad: "RSTO", p2_role: "input (MISO)", hyperbus: "RSTO# (Flash only)", device: "B", notes: "Power-On-Reset indicator, open-drain; high-Z after the internal POR timeout, so an external pull-up drives it High to signal Standby."}
+      - {pad: "RSTO", p2_role: "input (MISO)", hyperbus: "RSTO# (Flash only)", device: "A", notes: "As above, device A."}
+      - {pad: "CSx BR", p2_role: "output (MOSI)", hyperbus: "CS#", device: "B", notes: "Applies when device B is a HyperRAM."}
+      - {pad: "CSx AF", p2_role: "output (MOSI)", hyperbus: "CS#", device: "A", notes: "Applies when device A is a HyperFlash."}
+    rsto_routing: >-
+      In the standard Parallax configuration the RSTO# signals are split: device A
+      RSTO# goes to the right-hand RSTO pad and device B RSTO# to the left-hand
+      one. They can be joined via the unpopulated 0603 resistor pad under the RSTO pads.
+  decoupling: "section 8 -- each HyperBUS memory has four decoupling capacitors: a 100 nF and a 1 uF per VccQ pin, per the HyperBUS memory chip datasheet."
+  mounting_hole_note: "section 9 -- the mounting hole is plated and attached to the ground plane."
+
 quick_start:
   - "Place the add-on PCB chip-side-up over a pair of P2-ES Eval Board edge headers; align pins, press gently."
   - "Strongly recommended: connect the auxiliary power supply to the P2-EVAL board's AUX USB port (power needs may exceed PC-USB)."

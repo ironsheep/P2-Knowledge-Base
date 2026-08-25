@@ -13,6 +13,31 @@ aliases:
   - "64006G"
   - "#64006 add-on board"
 
+specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:24-46
+    (shared connector / compatibility / mounting facts) and :290-317 (the Goertzel
+    board and its I/O pin table); per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-goertzel-64006g.md.
+  io_pins_used: 8
+  pin_addressing: "the 8 I/O pins (0-7) of one 2x6 header block, addressed as base_pin + offset"
+  connector: "2x6 pass-through socket, compatible with any Propeller 2 development board carrying a 2x6 accessory header"
+  compatible_hosts:
+    - "P2 Eval Board (#64000)"
+    - "P2 Edge Module Breadboard (#64020) with a P2 Edge Module (#P2-EC)"
+    - "P2 Edge Mini Breakout Board (#64019) with a P2 Edge Module (#P2-EC)"
+  mounting_hole: "3.2 mm (126 mil) hole with a 5 mm (200 mil) pad ring, connected to GND, suitable for M3 (UNC 4-40) hardware; fits a 9.5 mm standoff used as a leg"
+  pcb_size_class: >-
+    Medium. The guide groups the eight boards into three sizes -- A/V module
+    (large), Goertzel (medium), the rest (small) -- and gives numeric dimensions
+    only in a drawing, which the capture did not resolve to numbers.
+  power_note: >-
+    The guide strongly recommends connecting the auxiliary power supply to the
+    P2-EVAL board's P2-USB socket when experimenting with accessory boards, as
+    power requirements may exceed what the PC-USB socket supplies.
+
 description: >-
   Goertzel experimenter board (Rev B) with pads for non-contact switching and
   position sensing. Pads 0-3 and 7 form a Goertzel sense set (compass-style

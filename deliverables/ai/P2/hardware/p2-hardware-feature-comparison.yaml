@@ -24,110 +24,158 @@ comparison_categories:
   - "cost_tier"
 
 edge_modules:
+  source: >-
+    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03) --
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:73-90;
+    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
+    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:113-127,
+    :417.
   p2_ec_standard:
     part_number: "P2-EC"
-    flash_memory: "16MB"
-    psram_memory: "0MB"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "Integrated 3.3V"
-    dimensions: "27×40mm"
-    io_pins_total: 64
+    flash_memory: "16 MB (128 Mb) SPI flash"
+    psram_memory: "none"
+    crystal_frequency: "20 MHz TCXO (+/-0.5 PPM)"
+    voltage_regulation: "on-board VDD 1.8 V up to 3 A; eight LDO VIO regulators, 3.3 V up to 300 mA per 8 I/O pins; input 5-16 VDC"
+    dimensions: "1.45 x 2.04 in (37 x 51.7 mm)"
+    io_pins_accessible: 64
+    io_pins_fully_free: 56
     smart_pins: 64
-    form_factor: "Edge connector module"
+    form_factor: "Edge connector module, double-sided 80-way 0.05 in (1.27 mm) edge slot"
     carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
     cost_tier: "budget"
     primary_applications: ["general_purpose", "education", "prototyping"]
     educational_rating: "excellent"
-    
+
   p2_ec_32mb:
     part_number: "P2-EC32MB"
-    flash_memory: "16MB"
-    psram_memory: "32MB"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "Integrated 3.3V"
-    dimensions: "27×40mm"
-    io_pins_total: 64
+    flash_memory: "16 MB (128 Mb) SPI flash"
+    psram_memory: "32 MB (256 Mb) PSRAM, four 8 MB chips"
+    crystal_frequency: "20 MHz TCXO (+/-0.5 PPM)"
+    voltage_regulation: "on-board VDD 1.8 V up to 3 A; eight LDO VIO regulators, 3.3 V up to 300 mA per 8 I/O pins; input 5-16 VDC"
+    dimensions: "1.45 x 2.04 in (37 x 51.7 mm)"
+    io_pins_accessible: 46
+    io_pins_fully_free: 40
     smart_pins: 64
-    form_factor: "Edge connector module"
+    psram_pins: "P40-P57 are dedicated to the on-module RAM and do not reach the edge connector"
+    form_factor: "Edge connector module, double-sided 80-way 0.05 in (1.27 mm) edge slot"
     carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
     cost_tier: "premium"
     primary_applications: ["advanced_projects", "large_programs", "data_logging"]
     educational_rating: "good"
+  corrections_applied_2026_08_25: >-
+    Both modules shipped dimensions "27x40mm" (the guides say 37 x 51.7 mm) and
+    io_pins_total 64 for the P2-EC32MB (only 46 reach the edge connector).
+    Corrected from the guides above; see P2KB-CORRECTION-FINDINGS.md.
 
 development_boards:
+  source: >-
+    #64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax Inc., 2020-06-29) --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:43-84,
+    :103-127, :253-269 (the forced-OCR re-ingestion, F-250);
+    64029 P2 Edge Breakout Board Guide v1.0 (2023-03-01) --
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:11-64;
+    64019 P2 Edge Mini Breakout Board Guide v1.1 (2020-11-30) --
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:16-65;
+    64020 P2 Edge Module Breadboard Product Guide v1.2 (2021-01-07) --
+    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:20-69.
   p2_eval_board:
-    part_number: "64000-ES"
-    flash_memory: "16MB (with P2-EC)"
-    psram_memory: "0MB"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "Multiple rails (1.8V, 3.3V, 5V)"
-    dimensions: "127×89mm"
-    io_pins_total: 64
+    part_number: "64000"
+    part_number_note: "the limited-edition engineering-sample board is #64000-ES; the Rev C guide documents #64000"
+    p2_chip: "P2X8C4M64PES soldered on the board -- this is NOT an edge-module carrier"
+    flash_memory: "16 MB (128 Mbit) SPI flash, W25Q128JVSIM, on the board itself"
+    psram_memory: "none"
+    crystal_frequency: "20 MHz SMT crystal"
+    voltage_regulation: "1.8 V 2 A switching regulator for VDD; LDO 3.3 V VIO regulators, 300 mA per 8 I/O pins; 5 V from USB"
+    dimensions: "3.55 x 3.55 in (octagonal outline; the guide prints '(90 x 90 cm)' -- a source typo for 90 mm)"
+    io_pins_accessible: 64
     smart_pins: 64
-    usb_connectivity: "USB-C programming + micro-USB serial"
-    sd_card_support: "microSD socket"
-    addon_headers: "Two 2x6 headers for add-on boards"
+    usb_connectivity: "two micro-USB sockets -- PC USB (programming + serial + power, 500 mA limit) and AUX USB (power only, 2000 mA limit). No USB-C and no barrel jack."
+    programming: "built-in FTDI USB-to-serial, user selectable up to 3 Mbps"
+    sd_card_support: "microSD socket, power-cycled when the reset button is pressed"
+    addon_headers: "eight I/O Pin Breakout Edge Headers, each taking a 2x6 pass-through accessory board; together they cover all 64 I/O pins in 8 groups of 8"
     form_factor: "Full development board"
-    expansion_options: ["addon_boards", "breadboard", "headers"]
+    expansion_options: ["addon_boards", "edge_headers", "aux_power_pads"]
     cost_tier: "mid_range"
-    primary_applications: ["full_development", "education", "prototyping", "production"]
+    primary_applications: ["full_development", "education", "prototyping", "characterization"]
     educational_rating: "excellent"
-    
+
   standard_breakout:
-    part_number: "P2-EVAL-STD-BREAKOUT"
-    flash_memory: "Depends on edge module"
-    psram_memory: "Depends on edge module"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "5V input, 3.3V regulated"
-    dimensions: "76×51mm"
-    io_pins_total: 64
+    part_number: "64029"
+    name: "P2 Edge Breakout Board"
+    flash_memory: "depends on the fitted edge module"
+    psram_memory: "depends on the fitted edge module"
+    crystal_frequency: "n/a -- the crystal is on the edge module"
+    voltage_regulation: "5 VDC input (absolute maximum 5.5 VDC) via a centre-positive 2.1 mm barrel jack; VIO 3.3 V up to 300 mA per 8 I/O pins comes from the edge module"
+    dimensions: "4 x 1.4 in (101.6 x 35.6 mm)"
+    io_pins_accessible: 64
     smart_pins: 64
-    usb_connectivity: "None (requires external programming)"
-    pin_access: "All 64 pins broken out to headers"
-    breadboard_compatible: "Yes"
-    form_factor: "Breakout board"
-    expansion_options: ["breadboard", "wire_connections"]
+    usb_connectivity: "none -- programming requires a Prop Plug (#32201) on the dedicated header, serial up to 2 MBaud"
+    pin_access: "all 64 pins at eight 2x6 way 0.1 in accessory headers"
+    mounting_holes: "four 3.2 mm diameter plated holes connected to GND"
+    form_factor: "Edge module carrier / breakout board"
+    expansion_options: ["accessory_headers", "wire_connections"]
     cost_tier: "budget"
     primary_applications: ["custom_circuits", "embedded_systems", "production"]
     educational_rating: "good"
-    
+
   mini_breakout:
-    part_number: "P2-EVAL-MINI-BREAKOUT"
-    flash_memory: "Depends on edge module"
-    psram_memory: "Depends on edge module"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "3.3V input only"
-    dimensions: "38×25mm"
-    io_pins_total: 64
+    part_number: "64019"
+    name: "P2 Edge Mini Breakout Board"
+    flash_memory: "depends on the fitted edge module"
+    psram_memory: "depends on the fitted edge module"
+    crystal_frequency: "n/a -- the crystal is on the edge module"
+    voltage_regulation: "5 VDC input (absolute maximum 5.5 VDC) via a centre-positive 2.1 mm barrel jack; VIO 3.3 V up to 300 mA per 8 I/O pins comes from the edge module"
+    dimensions: "3.15 x 1.4 in (80 x 35.5 mm)"
+    io_pins_accessible: 40
     smart_pins: 64
-    usb_connectivity: "None (requires external programming)"
-    pin_access: "All 64 pins on edge castellations"
-    surface_mount: "Castellation mounting"
-    form_factor: "Compact breakout"
-    expansion_options: ["surface_mount", "wire_connections"]
+    usb_connectivity: "none -- programming requires a Prop Plug (#32201) on the dedicated header, serial up to 2 MBaud"
+    pin_access: "40 pins (P0-P31 and P56-P63) at five 0.1 in header sockets -- four accessory headers plus one programming header. P32-P55 reach no header; the guide says they may be picked up with jumper wires on the bottom side of the PCB."
+    prototyping: "two 0.1 in pitch 4x5 matrix prototyping sections, either side of the edge connector"
+    form_factor: "Compact edge module carrier"
+    expansion_options: ["accessory_headers", "jumper_wires"]
     cost_tier: "budget"
     primary_applications: ["space_constrained", "embedded", "production"]
     educational_rating: "fair"
-    
+
   breadboard_carrier:
-    part_number: "P2-EVAL-BREADBOARD-CARRIER"
-    flash_memory: "Depends on edge module"
-    psram_memory: "Depends on edge module"
-    crystal_frequency: "20MHz"
-    voltage_regulation: "5V input, 3.3V regulated"
-    dimensions: "83×56mm"
-    io_pins_total: 64
+    part_number: "64020"
+    name: "P2 Edge Module Breadboard"
+    flash_memory: "depends on the fitted edge module"
+    psram_memory: "depends on the fitted edge module"
+    crystal_frequency: "n/a -- the crystal is on the edge module"
+    voltage_regulation: "5 VDC input (absolute maximum 5.5 VDC) via a centre-positive 2.1 mm barrel jack; VIO 3.3 V up to 300 mA per 8 I/O pins comes from the edge module"
+    dimensions: "3.5 x 8 in (88.9 x 203.2 mm)"
+    io_pins_accessible: 64
     smart_pins: 64
-    usb_connectivity: "None (requires external programming)"
-    breadboard_mounting: "Direct solderless breadboard mounting"
-    pin_access: "Selected pins brought to breadboard rails"
-    form_factor: "Breadboard-mounted carrier"
-    expansion_options: ["breadboard", "jumper_wires"]
+    usb_connectivity: "none -- programming requires a Prop Plug (#32201) on the dedicated header, serial up to 2 MBaud"
+    breadboard_mounting: "large integrated solderless breadboard; dual 30 x 5-socket rows in 2 columns, 60 rows total"
+    pin_access: "all 64 pins at 0.1 in pin sockets around the breadboard and at eight 2x6 way accessory headers"
+    servo_ports: "eight 5V servo/sensor ports with series resistors for compatibility with the 3.3 V P2 I/Os"
+    form_factor: "Breadboard carrier"
+    expansion_options: ["breadboard", "accessory_headers", "servo_ports", "jumper_wires"]
     cost_tier: "budget"
     primary_applications: ["education", "rapid_prototyping", "learning"]
     educational_rating: "excellent"
+  corrections_applied_2026_08_25: >-
+    Removed and corrected against the sources above: the eval board's fabricated
+    "USB-C programming", "Two 2x6 headers", "127x89mm", "16MB (with P2-EC)" and
+    part number "64000-ES" (F-350); and the three carriers' fabricated part
+    numbers P2-EVAL-STD-BREAKOUT / P2-EVAL-MINI-BREAKOUT /
+    P2-EVAL-BREADBOARD-CARRIER, their wrong dimensions, the mini breakout's
+    "3.3V input only" and "All 64 pins on edge castellations", and the
+    "crystal_frequency: 20MHz" attributed to carriers that carry no crystal.
+    See P2KB-CORRECTION-FINDINGS.md.
 
 addon_boards:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:9-19
+    (the eight part numbers), :52-89 (Control), :94-134 (Serial Host),
+    :139-197 (LED Matrix), :201-221 (Digital Video Out), :227-247 (Mini
+    Prototyping), :253-284 (Serial Device), :290-316 (Goertzel), :322-375 (A/V
+    Breakout). Every board occupies ONE 2x6 accessory header and uses its eight
+    I/O pins (offsets 0-7).
   control_board:
     part_number: "64006A"
     component_type: "LEDs + Switches"
@@ -135,8 +183,8 @@ addon_boards:
     switch_count: 4
     analog_inputs: 0
     digital_ios: 8
-    special_features: "Current limiting resistors (470 ohm in series with each LED and each switch)"
-    power_consumption: "40mA maximum"
+    pins_required: 8
+    special_features: "470 ohm series resistor on each LED and on each push switch; LEDs and switches are both described as active-high"
     educational_concepts: ["Digital I/O", "LED control", "Switch input"]
     primary_applications: ["basic_io", "education", "status_display"]
     complexity_level: "beginner"
@@ -145,10 +193,12 @@ addon_boards:
     part_number: "64006B"
     component_type: "USB Host Ports"
     usb_ports: 2
-    port_type: "USB-A female"
-    power_supply: "5V, 500mA per port"
+    port_type: "USB-type A"
+    power_supply: "5 V per port through a current-limited load switch, up to 500 mA continuous, subject to available system power"
     led_indicators: 2
-    special_features: "Current limiting, device enumeration"
+    pins_required: 8
+    enable_pins: "offset +1 (channel 1) and offset +5 (channel 2), active high"
+    special_features: "reverse current blocking, short-circuit protection, over-temperature protection, VBUS soft start; requires 5 V to function"
     educational_concepts: ["USB host", "Device enumeration", "Power management"]
     primary_applications: ["usb_host", "device_testing", "communication"]
     complexity_level: "advanced"
@@ -156,11 +206,14 @@ addon_boards:
   led_matrix:
     part_number: "64006C"
     component_type: "LED Matrix"
-    matrix_size: "8×7"
+    matrix_size: "8 x 7"
     total_leds: 56
-    control_method: "Charlieplexing"
+    led_colour: "green"
+    control_method: "Charlieplexing -- one pin HIGH, one pin LOW lights one LED; set both pins to INPUT to extinguish it"
     pins_required: 8
-    special_features: "Charlieplex lookup table, timing control"
+    refresh_minimum: "switch each LED on and off at least 50 times a second (50 Hz) and flicker should not be noticeable"
+    current: "approximately 4 mA per lit LED; 224 mA if all 56 were lit at once, but Charlieplexing lights only one at a time so the instantaneous draw stays at about 4 mA"
+    special_features: "the guide carries a full row/column HIGH-LOW lookup table for all 56 LEDs"
     educational_concepts: ["Charlieplexing", "Matrix control", "Multiplexing"]
     primary_applications: ["displays", "graphics", "education"]
     complexity_level: "intermediate"
@@ -169,9 +222,10 @@ addon_boards:
     part_number: "64006D"
     component_type: "Digital Video Interface"
     connector_type: "HDMI-type"
-    signal_type: "Differential digital"
+    signal_type: "Differential digital -- offsets 0/1 = CLK-/CLK+, 2/3 = D0-/D0+, 4/5 = D1-/D1+, 6/7 = D2-/D2+"
     pins_required: 8
-    special_features: "Differential signaling, video protocols"
+    unused_pads: "CEC, RSVD, SCL, SDA, 5V-out, HPD on an unpopulated 0.1 in row of 6 pads, plus an 'ACC 5V' pad beside the 5V-out pad for monitors that need 5 V"
+    special_features: "Differential signaling driven by the P2 streamer"
     educational_concepts: ["Digital video", "Differential signals", "Protocols"]
     primary_applications: ["video_output", "display_interface", "experimentation"]
     complexity_level: "advanced"
@@ -179,9 +233,10 @@ addon_boards:
   mini_prototyping:
     part_number: "64006E"
     component_type: "Prototyping Area"
-    grid_size: "8×12 tie points"
-    connections: "All pins accessible"
-    special_features: "PCB layout guides, connection groups"
+    grid_size: "8 x 12 plated thru-holes"
+    pins_required: 8
+    connections: "the eight header I/O pins (0-7), 5V and VIO are brought to holes inside white silk boxes; holes joined by silk dashes are joined to each other but to no signal"
+    special_features: "ground holes connected on both sides; bottom-side copper traces isolated for easy cutting; one exposed bottom-side ground strip. This is the only #64006 board with no mounting hole."
     educational_concepts: ["Circuit building", "Hardware design", "Connections"]
     primary_applications: ["custom_circuits", "prototyping", "modification"]
     complexity_level: "intermediate"
@@ -190,41 +245,60 @@ addon_boards:
     part_number: "64006F"
     component_type: "USB Device Ports"
     usb_ports: 2
-    port_type: "micro-USB"
-    device_modes: ["HID", "CDC", "custom"]
+    port_type: "microUSB-type"
     led_indicators: 4
-    special_features: "Device emulation, activity indicators"
+    pins_required: 8
+    led_detail: "one blue and one red LED per socket, each with a 1 kOhm series resistor, asserted high to light (offsets 0, 1, 6, 7)"
+    data_pins: "channel 1 D-/D+ at offsets 2/3; channel 2 D-/D+ at offsets 4/5"
+    special_features: "lets the P2 behave as up to two USB-type devices connecting to a USB host"
     educational_concepts: ["USB device", "HID/CDC protocols", "Emulation"]
     primary_applications: ["usb_device", "emulation", "communication"]
     complexity_level: "advanced"
     
-  digital_io_board:
-    part_number: "64006G"  
-    component_type: "Combined Digital I/O"
-    led_count: 4
-    switch_count: 4
-    shared_pins: 4
-    special_features: "Bi-directional I/O, electrical isolation"
-    educational_concepts: ["Bi-directional I/O", "Mode switching", "Isolation"]
-    primary_applications: ["interactive_io", "user_interface", "status_control"]
-    complexity_level: "intermediate"
+  goertzel:
+    part_number: "64006G"
+    component_type: "Goertzel experimenter board (Rev B)"
+    pins_required: 8
+    pads: "non-contact switching / position sensing pads. Offsets 0-3 and 7 are Goertzel input pads (E, W, N, S and a centre common pad C); offsets 4, 5 and 6 are switch-style pads (Left, Right, common reference)."
+    special_features: "Rev B replaced the 2020 edition's probe posts with touch switch pads"
+    educational_concepts: ["Goertzel correlation", "Non-contact sensing", "Position sensing"]
+    primary_applications: ["touch_sensing", "proximity", "position_sensing"]
+    complexity_level: "advanced"
+    correction_note: >-
+      This entry previously described 64006G as a "Combined Digital I/O" board
+      with 4 LEDs and 4 switches. No such board exists in the #64006 series;
+      64006G is the Goertzel board. Same fabrication family as F-121.
     
   av_breakout:
     part_number: "64006H"
     component_type: "Audio/Video Interface"
-    vga_output: "15-pin D-sub"
-    rca_outputs: 3
+    vga_output: "15-pin VGA socket"
+    rca_outputs: 4
     audio_jacks: 2
-    pins_required: 16
-    special_features: "Multiple A/V standards, mode switching"
+    pins_required: 8
+    rca_mode_switch: "a dip switch swaps the four RCA sockets between AUDIO and VIDEO mode; in AUDIO mode each RCA socket is fed through a 22 uF capacitor"
+    audio_detail: "amplified audio out (80 mW) on a 3.5 mm stereo headphone jack (tip = left, ring = right, sleeve = ground); audio/microphone input on a 3.5 mm mono jack (tip = signal, sleeve = ground), fed through a 1 uF capacitor"
+    special_features: "some features share the same I/O pins and sockets; the guide advises using the P2-EVAL 3.3V LDO power selection when working with audio"
     educational_concepts: ["A/V interfaces", "Signal generation", "Multiple standards"]
     primary_applications: ["audio_video", "multimedia", "interface_testing"]
     complexity_level: "advanced"
 
 feature_matrix:
+  source: >-
+    P2-EC Edge Module Rev D Product Guide v3.0 --
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:50-90,
+    :162-168; P2-EC32MB Edge Module Rev B Guide v2.0 --
+    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:71-127,
+    :209-214; #64000 Propeller 2 Eval Board Rev C Guide v2.0 --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:43-84,
+    :103-127; the three carrier guides at
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:42-64,
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:54-65 and
+    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:60-69.
   processing_capability:
-    all_boards: "P2 8-COG multiprocessor @ 200MHz"
+    all_boards: "P2 8-cog multiprocessor; recommended maximum 180 MHz clock, overclocking possible beyond 300 MHz"
     smart_pins: "64 Smart Pins on all platforms"
+    hub_ram: "512 KB shared hub RAM, internal to the P2"
     cordic_solver: "Available on all platforms"
     
   memory_comparison:
@@ -234,23 +308,29 @@ feature_matrix:
     
   connectivity_options:
     programming_interfaces:
-      eval_board: "USB-C + micro-USB + PropPlug header"
-      breakouts: "PropPlug header only"
-      note: "External programmer required for breakout boards"
+      eval_board: "built-in FTDI USB-to-serial over micro-USB, user selectable up to 3 Mbps. No USB-C, no Prop Plug header."
+      breakouts: "Prop Plug (#32201) header only, serial up to 2 MBaud; optional wireless via the P2 WX Adapter (#64007) + WX WiFi SIP module (#32420S)"
+      note: "External programmer required for all three Edge carriers"
     expansion_interfaces:
-      eval_board: "2×6 add-on headers, breadboard area, general I/O"
-      breakouts: "Raw pin access, breadboard compatibility"
+      eval_board: "eight 2x6 I/O Pin Breakout Edge Headers covering all 64 pins, plus AUX 5V/GND power pads. The #64000 has no prototyping area."
+      breakouts: "2x6 accessory headers; the #64020 breadboard carrier adds a solderless breadboard and eight servo ports"
       
   power_specifications:
     input_voltages:
-      eval_board: "5V USB or 6-15V barrel jack"
-      standard_breakout: "5V regulated input"
-      mini_breakout: "3.3V regulated input only"
-      breadboard_carrier: "5V regulated input"
-    power_consumption:
-      base_system: "200mA @ 3.3V typical"
-      with_addons: "Up to 500mA with high-power add-ons"
+      eval_board: "5 VDC from either micro-USB socket, absolute maximum 5.5 VDC. Optional AUX 5V/GND pads accept 4.5-5.5 V. There is NO barrel jack on the #64000."
+      standard_breakout: "5 VDC, absolute maximum 5.5 VDC, centre-positive 2.1 mm barrel jack"
+      mini_breakout: "5 VDC, absolute maximum 5.5 VDC, centre-positive 2.1 mm barrel jack"
+      breadboard_carrier: "5 VDC, absolute maximum 5.5 VDC, centre-positive 2.1 mm barrel jack"
+      edge_module_direct: "5-16 VDC at the module's own VIN pads (P2-EC and P2-EC32MB)"
+    supply_current:
+      eval_board: "PC-USB input limited to 500 mA; AUX-USB input limited to 2000 mA"
+      edge_carriers: "recommended minimum 100 mA; maximum according to the customer application (the #64020 guide adds 'typical 1000 mA')"
+      vio_budget: "3.3 V up to 300 mA per 8 I/O pins, on every board"
       
+  authored_here_note: >-
+    educational_progression and application_domains below are guidance authored
+    in this knowledge base, not statements from any ingested document.
+
   educational_progression:
     beginner_path: ["breadboard_carrier", "control_board", "mini_prototyping"]
     intermediate_path: ["eval_board", "led_matrix", "digital_io_board"]
@@ -265,6 +345,13 @@ feature_matrix:
     user_interfaces: ["control_board", "digital_io_board", "led_matrix"]
 
 selection_criteria:
+  source: >-
+    The part numbers are from the Parallax P2 Eval Add-on Boards (#64006 Series)
+    Product Guide v2.0 --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:9-19.
+    The recommendations, cost tiers and rationales are authored in this knowledge
+    base and have NO upstream source in the ingestion tree (F-352 sub-rule P):
+    treat them as guidance, not as documented fact.
   by_experience_level:
     beginner:
       recommended: ["P2 Eval Board + Control Board"]
@@ -312,10 +399,36 @@ compatibility_matrix:
       mini_breakout: "optimal"
       breadboard_carrier: "good"
       
+  source: >-
+    #64000 Propeller 2 Eval Board Rev C Guide v2.0 --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:35-36,
+    :109-119, :162-171; P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:24-46.
   eval_board_addons:
-    simultaneous_connection: "Up to 2 add-on boards"
-    power_budget: "Total 500mA @ 5V for add-ons"
-    pin_allocation: "A-side (P32-P39) + B-side (P24-P31)"
+    simultaneous_connection: >-
+      Eight I/O Pin Breakout Edge Headers, so all eight #64006 boards can be
+      connected at the same time. Two small modules, or one large and one small,
+      fit side by side on each edge of the board.
+    pin_allocation: >-
+      One 8-pin group per header, covering all 64 pins: P0-P7, P8-P15, P16-P23,
+      P24-P31, P32-P39, P40-P47, P48-P55, P56-P63. Each header also carries two
+      GND and one Vxxxx (3.3 V LDO) pin.
+    five_volt_availability: >-
+      The 5 V pin on each header is gated by the ACC HDR jumper, shipped in the
+      OFF position. Two headers have no 5 V pin at all: on P24-P31 that position
+      is unconnected, and on P56-P63 it is RES.
+    power_budget: >-
+      Board-level, not per-add-on: the PC-USB input is limited to 500 mA and the
+      AUX-USB input to 2000 mA. The #64006 guide strongly recommends connecting
+      the auxiliary supply to the P2-EVAL P2-USB socket when using accessory
+      boards, as their current may exceed what PC-USB provides.
+    caution: >-
+      The P56-P63 group carries the USB serial link, the SPI flash and the microSD
+      signals -- avoid it for accessory boards.
+    correction_note: >-
+      This entry previously read "Up to 2 add-on boards" with a pin allocation of
+      "A-side (P32-P39) + B-side (P24-P31)". The #64000 has eight headers covering
+      all 64 pins. F-350.
     
   recommended_combinations:
     education_starter:

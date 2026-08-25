@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-353`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-356`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -43,6 +43,47 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
+
+## The hygiene gate cannot see the new errata register, so its monotonic allocator is ungoverned (2026-08-25, arbiter, during «#307») — F-355
+
+- **F-355 — `audit-register-hygiene.py` is hard-coded to one register's vocabulary, so
+  `engineering/ingestion/SOURCE-ERRATA.md` has an unchecked monotonic allocator.** — `CONFIRMED`
+
+  **The defect.** The tool's counter check is `re.search(r"\*\*Next finding ID:\s*`?F-(\d+)`?\*\*", text)`
+  (`audit-register-hygiene.py:271`) and it emits `no-counter` when absent. The errata register
+  declares **`Next erratum ID: \`E-NNN\``** — different label, different prefix — so the gate
+  reports nothing about it at all. Every protection it provides for `F-NNN` (counter ahead of every
+  allocation, orphaned sections, duplicate IDs, unaccounted coverage) is simply absent for `E-NNN`.
+
+  **Why it matters more than it looks.** The whole reason this project re-checks the next-ID before
+  every dispatch is that two agents allocating from a stale number collide silently. The errata
+  register is now a live input to «#307» and to every future ingestion, and it allocates two ID
+  families (`E-NNN` and `D-NNN`). It is exactly the artifact that needs the gate.
+
+  **This is the arbiter's gap, created the same day.** I stood the register up and gave it a
+  counter in a vocabulary no instrument reads — the same class as declaring a section header for an
+  ID with no live entry, which this very tool caught me doing hours earlier.
+
+  **Interim, done rather than assumed:** the errata register's IDs were verified by hand at filing
+  time — `E-001`…`E-009` present and contiguous, no duplicates, header counter at `E-010` = max+1.
+  Command: a parse of `^## (E-\d{3})` against the `Next erratum ID:` header. That is a one-off
+  check, not a gate, and it does not survive the next person who forgets.
+
+  **The fix for «#305», specified so it needs no rediscovery:** parameterise the prefix and label —
+  take `(label, prefix)` pairs per register file rather than hard-coding `Next finding ID` / `F-`,
+  and run the same four checks over each. `SOURCE-ERRATA.md` needs **two** families registered
+  (`E-` for errata, `D-` for the open questions in Part B). **Do not "fix" this by renaming the
+  errata register's counter to `Next finding ID:`** — that would make two different registers claim
+  the same allocator name and is a worse defect than the one it closes.
+
+  ⚠️ Add a **negative control** with the fix: a register with a deliberately stale counter must
+  FAIL, and *"the file was not examined at all"* must be a distinct non-zero exit rather than a
+  pass. That is the standing lesson from the digit-density gate — a gate that measures nothing and
+  exits 0 manufactures confidence.
+
+  Status: `CONFIRMED` — open, owned by «#305».
+
+---
 ## Carry-forward guardrails — investigated and settled; do NOT re-file (full detail in the archive)
 
 - **F-002 (`WONTFIX`):** `?` / `||` operator-form failures were an agent usage error — the KB is correct (`??var` = XORO32 random; `ABS()` not `||`; `?` is the ternary operator).
@@ -262,7 +303,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 >
 > `PENDING-VALIDATION` — the KB edit is applied and gate-verified; only the YAML release is owed.
 
-### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PARTIAL`
+### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PENDING-VALIDATION`
 
 > **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml`,
 > `development_boards.p2_eval_board` and `compatibility_matrix.eval_board_addons`. Backup at
@@ -290,6 +331,21 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > see a wrong scalar or an invented section. This adds the sibling: **a finding scoped to one file
 > cannot see the same fabrication copied into another.** The class-wide sweep is what found it, and it
 > is the only thing that would have.
+>
+> **APPLIED 2026-08-25 («#307»).** All five keys re-derived from the repaired capture and cited, in
+> `development_boards` and `compatibility_matrix` — `dimensions` → 3.55 in x 3.55 in ·
+> `usb_connectivity` → two micro-USB (PC-USB 500 mA / AUX-USB 2000 mA), no USB-C, no barrel jack ·
+> `addon_headers` → eight I/O Pin Breakout Edge Headers · `flash_memory` → 16 MB on the board, the
+> P2 soldered on (not an edge-module carrier) · `eval_board_addons` → eight headers in 8 groups of 8
+> covering all 64 pins, replacing "Up to 2 add-on boards" and the invented A-side/B-side split.
+> **And the class ran wider than five:** the same read found invented carrier part numbers, wrong
+> carrier and edge-module dimensions, a fabricated "3.3V input only / edge castellations" mini
+> breakout, an eval board with a barrel jack it does not have, and **`64006G` described as a
+> "Combined Digital I/O" board** — it is the Goertzel board, i.e. the F-121 fabricated-name family
+> in a file F-121 never named. Full list in the file's own `corrections_applied_2026_08_25` keys and
+> in **F-353**. The file now cites per block; its six Tier-2 blocks left the advisory lane.
+>
+> Status: `PENDING-VALIDATION` — applied and gate-verified; only the YAML release is owed.
 
 ### F-351 — the sourcing gate reads Parallax part numbers, Unicode code points and an ISO designator as amperes; 12 blocks are pure instrument artifacts — `CONFIRMED`
 
@@ -375,6 +431,115 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > 2026-08-24). The counter is stale by one and the next free gap ID is **G-008**. «#299» allocated no
 > G-number rather than collide; the header is left for whoever owns that ledger to correct
 > deliberately.
+
+---
+
+## `hardware/` repopulated from the board guides — the return record, and the wrong scalars the source-first read exposed (2026-08-25, «#307» Plan §8 part 2) — F-353 · F-354
+
+> **Origin.** «#294» removed 59 quantitative blocks from `deliverables/ai/P2/hardware/` (F-334, two
+> records: 48/16 files and 11/6 files). «#298» dispositioned every one. «#307» worked the **board
+> guides**, not the removal list, and wrote back what each guide states. One of the 11 —
+> `language/spin2/methods/getct.yaml description` — is outside this tree and belongs to «#299», so
+> **58** were in scope here. Every line number below was read off disk 2026-08-25.
+
+### F-353 — the 58 in-scope blocks: 34 returned cited, 24 held in the ingestion tree, 0 whole-block gaps — and six wrong scalars in SURVIVING blocks that only a source-first read could find — `PENDING-VALIDATION`
+
+> **THE THREE NUMBERS.** **34 restored with a trace · 24 held in ingestion · 0 gap.** 34 + 24 = 58;
+> plus «#299»'s `getct.yaml description` = F-334's 59. Every ACTIONABLE block came back; no
+> ACTIONABLE block failed to verify.
+>
+> **Restored (34), each written from the guide named in its own `source:` key:**
+>
+> | File (`deliverables/ai/P2/hardware/`) | Blocks returned | Written from |
+> |---|---|---|
+> | `edge-32mb-module.yaml` | `specifications` · `pin_mapping` · `boot_modes` · `limitations` · `development_workflow` | P2-EC32MB Edge Module Rev B Guide v2.0 — `sources/edge-32mb-module/edge-32mb-module-narrative.txt` |
+> | `edge-standard-module.yaml` | `specifications` · `pin_mapping` · `boot_modes` | P2-EC Edge Module Rev D Product Guide v3.0 — `sources/edge-standard-module/edge-standard-module-narrative.txt` |
+> | `p2-eval-board.yaml` | `specifications` | #64000 Eval Board Rev C Guide v2.0 — `sources/p2-eval-board/complete-p2-eval-board-reference.md` (the F-250 forced-OCR re-ingestion) |
+> | `addon-motor-driver.yaml` | `signal_map` · `pwm_control` · `current_sense` · `specifications` | #64010 Universal Motor Driver Guide v2.0 — `sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md` |
+> | `hub75_adapter.yaml` | `description` · `specifications` · `software_features` · `notes` | #64032 HUB75 Adapter Official Specifications — `sources/p2-hub75-adapter-official-specs.md` |
+> | `programming-prop-plug.yaml` | `description` · `reset_option` · `specifications` | #32201 Prop Plug Guide v3.0 Rev E — `sources/propplug-rev-e/complete-propplug-rev-e-reference.md` |
+> | `addon-serial-host.yaml` | `signal_map` · `usb_host_capabilities` · `development_workflow` | #64006 Series Guide v2.0 — `sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-134` |
+> | `addon-serial-device.yaml` | `description` · `signal_map` | same guide, `:253-284` |
+> | `addon-goertzel-touch.yaml` | `specifications` | same guide, `:24-46` + `:290-317` |
+> | `addon-hd-audio.yaml` | `description` · `dac_board` | #64014 HD Audio Guide v1.0 — `sources/P2-HD-Audio-Add-on/P2-HD-Audio-Add-on-text.txt` |
+> | `addon-hyperram-hyperflash.yaml` | `specifications` · `configuration` | #64004-ES Guide v1.0 — `sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md` |
+> | `addon-rtc.yaml` | `description` | #64013 RTC Guide v1.0 — `sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:15-37` |
+> | `addon-wx-wifi.yaml` | `pin_descriptions` | #32420 WX Wi-Fi Module Guide v1.0 — `sources/parallax-wx-wifi/complete-wx-wifi-reference.md:96-114` |
+> | `edge-mini-breakout.yaml` | `connectivity` | #64019 Mini Breakout Guide v1.1 — `sources/edge-mini-breakout/edge-mini-breakout-narrative.txt` |
+> | `edge-standard-breakout.yaml` | `connectivity` | #64029 Breakout Board Guide v1.0 — `sources/edge-breakout-board/edge-breakout-board-narrative.txt` |
+>
+> **Held in ingestion (24)** — CORRECT-BUT-NOT-ACTIONABLE per «#298», and each one's content is
+> demonstrably still readable in the ingestion tree, so removing it from the KB lost nothing:
+> `addon-hd-audio` `set_contents` (`P2-HD-Audio-Add-on-text.txt:17`) · `use_cases` (`:32-35`) ·
+> `addon-motor-driver` `power_signals` (`complete-p2-universal-motor-driver-content.md:154-160`) ·
+> `protection` (`:41`, `:170`) · `addon-rtc` `power_signals` (`P2-RTC-Add-on-text.txt:56`, `:68`) ·
+> `specifications` (`:41-52`, `:89-93`) · `addon-wx-wifi` `part_variants`
+> (`complete-wx-wifi-reference.md:5`, `:26-29`) · `specifications` (`:44-61`) ·
+> `edge-breadboard-carrier` `power_specifications` / `specialized_features` / `specifications`
+> (`edge-module-breadboard-narrative.txt:53-57`, `:60-69`, `:163`, `:167-171`) ·
+> `edge-mini-breakout` `power_management` / `specifications`
+> (`edge-mini-breakout-narrative.txt:43`, `:54-65`) · `edge-standard-breakout` `power_management` /
+> `specifications` (`edge-breakout-board-narrative.txt:35-36`, `:42-64`, `:191`) ·
+> `addon-hyperram-hyperflash` `host_note` (`complete-hyperram-hyperflash-reference.md:95-96`) ·
+> `addon-serial-device` `rev_b_5v_note` (`p2-eval-add-on-boards-text.txt:113-115`;
+> `boards/addon-serial-device-64006f.md:25`) · `specifications` (`:39-42` — see F-354 for the one
+> item of it that is NOT there) · `addon-serial-host` `description` / `limitations` /
+> `power_requirements` / `specifications` (`:99-115`, `:39-42`) · `edge-standard-module`
+> `revision_history` (`edge-standard-module-narrative.txt:519-551`) · `hub75_adapter`
+> `power_requirements` (`p2-hub75-adapter-official-specs.md:128-142`, with the caveat in F-354).
+>
+> 🔴 **SIX WRONG SCALARS IN BLOCKS THE PURGE NEVER TOUCHED.** Reading the guides rather than the
+> removal list is what surfaced these; a citation-keyed purge is structurally blind to all of them
+> (the same lesson F-328(b) records). All six are **corrected in place** and cited:
+>
+> | Where | Shipped | The guide says |
+> |---|---|---|
+> | `edge-32mb-module.yaml` `alternate_part` + one alias + `availability.part_lookup` | `64000-ES` | The guide names this module **#P2-EC32MB** throughout (`edge-32mb-module-narrative.txt:17`, `:41`, `:46`, `:557`). **#64000-ES is a different product** — the limited-edition P2-ES *Eval Board* (`p2-eval-add-on-boards-text.txt:42`; `hyperram-hyperflash-text.txt:22`). A search for the eval board was landing on the edge module. The bad identity traces to a derived analysis file, `sources/edge-32mb-module/edge-32mb-cross-source-analysis.md:16`, not to the guide. |
+> | `edge-standard-module.yaml` `comparison_with_32mb.ec32mb_module.fully_free_pins` | `38` | **40** — "Smart I/O pins: 46 accessible, 40 fully free" (`edge-32mb-module-narrative.txt:120`) and "P0-P39 are fully free" (`:417`). The same file's own `compatibility.alternatives.tradeoff` already said 40, so the file contradicted itself. |
+> | `edge-mini-breakout.yaml`, `edge-standard-breakout.yaml`, `edge-breadboard-carrier.yaml` — `advantages`, `development_workflow`, `programming.methods`, and the carrier's `connectivity.programming` | "USB programming integrated", "USB (primary - built-in)", "Built-in USB-to-serial", "Connect USB for programming and power" | **None of the three Edge carriers has a USB-to-serial converter.** All three guides say the same thing: "Programming: Serial up to 2 MBaud; **requires** Prop Plug (#32201) programming adapter" (`edge-mini-breakout-narrative.txt:60-61`, `edge-breakout-board-narrative.txt:59`, `edge-module-breadboard-narrative.txt:67`). An agent told the board has built-in USB emits no Prop Plug step at all. Class-wide sweep run: `grep -rn "built-in\|integrated" … hardware/` — the only remaining "USB (primary method)" is `p2-eval-board.yaml:190`, where it is **correct** (the #64000 does carry a built-in FTDI-to-USB interface, `complete-p2-eval-board-reference.md:78`). |
+> | `edge-mini-breakout.yaml` `pin_access.blocked_pins` | `P32-P55 (not accessible)` | "Pins P32–P55 **may be accessed** by adding jumper wires on the bottom side of the PCB to the mini prototyping sections" (`edge-mini-breakout-narrative.txt:31-33`). Not accessible *at a header*; not unreachable. |
+>
+> **F-350's five, and eleven more of the same class, in `p2-hardware-feature-comparison.yaml`.**
+> F-350 named five wrong keys still shipping in that file. Correcting them source-first meant
+> reading every quantity in the file, and the fabrication went well past five — see the file's own
+> `corrections_applied_2026_08_25` keys for the full list. Beyond F-350's five: all three Edge
+> carriers carried **invented part numbers** (`P2-EVAL-STD-BREAKOUT`, `P2-EVAL-MINI-BREAKOUT`,
+> `P2-EVAL-BREADBOARD-CARRIER` — the real parts are #64029, #64019, #64020) and wrong dimensions;
+> the mini breakout was described as "3.3V input only" with "All 64 pins on edge castellations"
+> (it is 5 VDC via a barrel jack, with 40 pins at 0.1″ headers); both edge modules carried
+> `27×40mm` (the guides say 37 × 51.7 mm); the eval board's programming interface read "USB-C +
+> micro-USB + PropPlug header" and its power input "5V USB or 6-15V barrel jack" (the #64000 has
+> **two micro-USB sockets and no barrel jack at all**); and **`64006G` was described as a "Combined
+> Digital I/O" board with 4 LEDs and 4 switches** — #64006G is the **Goertzel** board, which is the
+> F-121 fabricated-board-name family reappearing in a file F-121 never named. All corrected or
+> removed against the guides, with a `source:` per block.
+>
+> **Gate effect, measured.** `audit-yaml-claim-sourcing.py` Tier 1 stayed at **0** across all edits.
+> Tier 2 moved **84 → 78**: the six `p2-hardware-feature-comparison.yaml` blocks left the advisory
+> lane because that file now cites. The `hardware/` share went 39 → 33. Nothing changed tier in the
+> other direction, and no block was demoted.
+>
+> Status: `PENDING-VALIDATION` — every edit is applied and gate-verified; only the YAML release is owed.
+
+### F-354 — seven content-level holes inside blocks that DID come back, and one held block whose content is only three-quarters in the ingestion tree — `CONFIRMED`
+
+> **Why these are not "gaps" in the three-number sense.** Every ACTIONABLE block returned. What did
+> not return is *material inside* those blocks — figures the KB shipped that no ingested source
+> states. Each is recorded in the YAML itself, at the point of use, with what would settle it, so a
+> reader meets the hole where the fact would have been rather than in a register they may not open.
+>
+> | Hole | Where it is recorded | What would settle it |
+> |---|---|---|
+> | HUB75 max clock **40 MHz (35 MHz reliable)** and **13 ns propagation delay** | `hub75_adapter.yaml` `specifications.gap_max_clock` | A level-shifter datasheet, or a measured result in `P2-EMPIRICAL-FINDINGS.md`. ⚠️ The manufacturer's own capture says **70 MHz** (`p2-hub75-adapter-official-specs.md:22`) — the two differ by ~2x and the KB now carries only the sourced figure. |
+> | HUB75 **clock/latch/OE pulse-width minimums** (15 ns / 200 ns / 100 ns) and the 3-bit/8-bit refresh table | `hub75_adapter.yaml` `software_features.gap_pulse_widths` | Ingesting the ISP HUB75 driver's own documentation into `engineering/ingestion/sources/`. |
+> | HUB75 **"maximum 3 chains"** and **"driver does not use the P2 streamer"** | `hub75_adapter.yaml` `notes.gap_chain_limit` | Same ingestion. The pinout capture argues the opposite for the second (`p2-hub75-adapter-complete-pinout.md:90`, "6-bit parallel data perfect for P2 streamer"). |
+> | HUB75 **board current 35 mA @ 35 MHz** and the per-panel typical currents | `hub75_adapter.yaml` `power_requirements` is HELD, but its ingestion home states **under 50 mA** and **1-2 A** where the KB said 35 mA and 1.5 A (`p2-hub75-adapter-official-specs.md:126`, `:131-136`) | Same ingestion. The held block's numbers are NOT the ingestion tree's numbers — a re-check before anyone quotes the removed values from git. |
+> | **"One cog consumed by the PSRAM driver"** on the 32 MB module | `edge-32mb-module.yaml` `development_workflow.psram_driver_note` | The #P2-EC32MB guide neither ships nor describes a PSRAM driver. Ingesting the OBEX `psram.spin2` driver documentation would ground it (and the API already sitting in that file's `code_patterns`). |
+> | Whether the **#64013 RTC board carries its own SDA/SCL pull-ups** | `addon-rtc.yaml` `pin_mode_tip.scl_pull_up_caveat` | The #64013 board schematic (referenced by the guide, not ingested). |
+> | Numeric **PCB dimensions for the #64006 add-on boards** | `addon-goertzel-touch.yaml` `specifications.pcb_size_class` | The guide gives only a drawing and a three-size classification (`p2-eval-add-on-boards-text.txt:45-46`, `:381-396`); the drawing was never resolved to numbers. Re-cutting that page, or the board schematics. |
+> | `addon-serial-device.yaml` `specifications` — **the "3.3 V supply" item** | held block | `grep -n -i "3\.3 *v\|3v3"` over the whole #64006 guide and all eight per-board captures returns **one** hit, and it is the A/V board's audio tip. The mounting-hole figures (3.2 mm / 5 mm / 9.5 mm) ARE in the ingestion tree at `:39-42`; the supply voltage is not. Three-quarters held, one quarter a gap. What would settle it: the #64006 board schematics. |
+>
+> Status: `CONFIRMED`.
 
 ---
 
@@ -502,11 +667,21 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   > re-derivation; it guarantees only that what remains was never *uncited*, never that it is
   > *true*.
 
-  Status: `PARTIAL` — **(a) RESOLVED 2026-08-24** by cross-source normalization against the ROM
-  booter and the silicon-doc boot table: P58 = MISO / P59 = MOSI, the KB is already correct and
-  stands unchanged, and the guide's §18 is source errata. Nothing remains open on (a) and it is
-  **not** blocked on the bench. **(b) CONFIRMED and OPEN** — verified against the repaired
-  source, ready to fix in «#294»/«#307».
+  > **(b) CLOSED OUT 2026-08-25 («#298» + «#307»).** «#298» removed five of the six surviving
+  > items as UNSOURCED and kept `expansion_ecosystem.individual_addons` (a cross-reference roster,
+  > not a fabrication). «#307» then wrote the TRUE replacements back as a cited `specifications`
+  > block on `p2-eval-board.yaml`, source-first from the repaired capture: Rev C silicon
+  > (P2X8C4M64PES), 20 MHz crystal with a recommended maximum of 180 MHz, 16 MB W25Q128JVSIM,
+  > 3.55 in x 3.55 in, -40 to +85 C, two micro-USB inputs (500 mA / 2000 mA) with an absolute
+  > maximum of 5.5 VDC, eight I/O Pin Breakout Edge Headers, and the four-switch mode bank
+  > (USB RES · FLASH · P59 up · P59 down) in place of the "TBD quantity" user switches. The
+  > fabricated prototyping area, VGA/HDMI/audio block, USB-B/USB-C connector and Prop Plug #32201
+  > are gone and were not written back. See **F-353**.
+
+  Status: `PENDING-VALIDATION` — **(a) RESOLVED 2026-08-24** by cross-source normalization against
+  the ROM booter and the silicon-doc boot table: P58 = MISO / P59 = MOSI, the KB is already correct
+  and stands unchanged, and the guide's §18 is source errata. **(b) applied 2026-08-25** as
+  described above; only the YAML release is owed.
 
 ---
 
@@ -808,8 +983,15 @@ needs a source that states it or a rewrite that does not compute.
   (`frequency: "20-30 MHz across process/voltage/temperature"`, line 35). So no `architecture/`
   block was in scope after all — the finding is 11, in two trees, not three.
 
-  Status: `PARTIAL` — the detector repair and all 11 removals are applied and verified; the
-  repopulation is owed to «#307» (10) and «#299» (1). See **F-335**, which this repair exposed.
+  **REPOPULATION EXECUTED 2026-08-25 («#307» and «#299»).** All 48 + 11 blocks are dispositioned
+  and disposed of: in `hardware/`, 34 returned cited and 24 are held in the ingestion tree
+  (**F-353**, with the per-block table and the seven content-level holes in **F-354**); outside it,
+  `language/spin2/methods/getct.yaml description` was «#299»'s and is recorded with F-347/F-352.
+  Nothing on either record is still owed.
+
+  Status: `PENDING-VALIDATION` — the detector repair, all 59 removals and the whole repopulation
+  are applied and gate-verified; only the YAML release is owed. See **F-335**, which this repair
+  exposed.
 
 ---
 

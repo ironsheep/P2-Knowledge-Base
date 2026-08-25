@@ -16,6 +16,21 @@ aliases:
   - "64014"
   - "#64014 add-on board"
 
+description:
+  source: >-
+    P2 HD Audio Add-on Set (#64014) Guide v1.0 (Parallax Inc., 2022-10-26) --
+    engineering/ingestion/sources/P2-HD-Audio-Add-on/P2-HD-Audio-Add-on-text.txt:14-35
+    and :111-118.
+  text: >-
+    Two-board kit. "The P2 HD Audio Add-On Set comprises a 4-channel 32 bit 192 k
+    Audio ADC (Analog to Digital Converter) and a 2-channel 16-bit 18-990 ohm Audio
+    DAC (Digital to Analog Converter)." The ADC board is built on the AKM AK5704EN
+    codec; the DAC board has NO codec IC at all - it is built directly on P2 Smart
+    Pin DAC modes, so the P2 pins ARE the DAC. Each board carries a standard
+    2x6-way 0.1 inch pitch socket compatible with any standard single Parallax P2
+    accessory socket, and the two are designed to fit side by side at a dual port.
+    Usable with any microcontroller that uses 3.3 V signal levels.
+
 # === ADC BOARD (AK5704EN) ===
 adc_board:
   codec: "AKM AK5704EN (28-pin QFN), 32-bit 4ch ADC with MIC pre-amplifier"
@@ -62,6 +77,63 @@ adc_board:
     max_snr: "105 dB"
     mic_gain: "+30 dB to 0 dB, 3 dB step"
     features: "VAD (voice activity detection); ultrasonic recording; configurable MIC pull-up for analog mics"
+    pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
+
+# === DAC BOARD (P2 Smart Pin DAC - no codec IC) ===
+dac_board:
+  source: >-
+    P2 HD Audio Add-on Set (#64014) Guide v1.0 (Parallax Inc., 2022-10-26),
+    "P2 HD Audio DAC" Features / Key Specifications / Pin Connections --
+    engineering/ingestion/sources/P2-HD-Audio-Add-on/P2-HD-Audio-Add-on-text.txt:106-169;
+    curated capture at
+    engineering/ingestion/sources/P2-HD-Audio-Add-on/complete-P2-HD-Audio-Add-on-reference.md:77-121.
+    The P_DAC_* constant NAMES below come from the Spin2 v55 built-in symbol table --
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1476-1479 -- which
+    lists exactly the four drive options this guide enumerates.
+  codec: "none - the board is designed to leverage the Parallax P2 Smart Pin DAC modes"
+  eval_header_occupant: true
+  pin_group:
+    size: 8
+    addressing: "actual_P2_pin = base_pin + offset; single 8-pin accessory-header group."
+  outputs: "2 output channels via one stereo 3.5 mm jack socket, or unpopulated 0.1 inch 3-way header pads"
+  signal_map:
+    - {offset: 0, signal: "DAC_R", direction: out, notes: "Common DAC Right Channel input (wired in parallel with offsets 1, 2, 3)."}
+    - {offset: 1, signal: "DAC_R", direction: out, notes: "Same R channel."}
+    - {offset: 2, signal: "DAC_R", direction: out, notes: "Same R channel."}
+    - {offset: 3, signal: "DAC_R", direction: out, notes: "Same R channel."}
+    - {offset: 4, signal: "DAC_L", direction: out, notes: "Common DAC Left Channel input (wired in parallel with offsets 5, 6, 7)."}
+    - {offset: 5, signal: "DAC_L", direction: out, notes: "Same L channel."}
+    - {offset: 6, signal: "DAC_L", direction: out, notes: "Same L channel."}
+    - {offset: 7, signal: "DAC_L", direction: out, notes: "Same L channel."}
+  power_signals:
+    VIO3V3: "N/C - Not Connected on the DAC board."
+    GND: "Common Ground reference connection."
+  drive_options:
+    note: >-
+      "Each P2 SmartPin can output with these options" -- the guide's four
+      impedance/peak-voltage pairs, with the Spin2 constant that selects each.
+    options:
+      - {impedance: "990 ohms", vpeak: "3.3 V", spin2_constant: "P_DAC_990R_3V"}
+      - {impedance: "600 ohms", vpeak: "2.0 V", spin2_constant: "P_DAC_600R_2V"}
+      - {impedance: "123.75 ohms", vpeak: "3.3 V", spin2_constant: "P_DAC_124R_3V"}
+      - {impedance: "75 ohms", vpeak: "2.0 V", spin2_constant: "P_DAC_75R_2V"}
+  parallel_drive_rule: >-
+    "Drive line level or headphone level devices by using 1, 2, 3 or 4 channels
+    simultaneously to set the required output drive impedance and max Vpp."
+    Because the four pins of a channel are wired in parallel, N pins driven with
+    the same mode give an output impedance of (mode impedance) / N.
+  worked_example: >-
+    "For 31 ohms drive (which is common for many headphones), set the 123.75 ohms
+    mode on 4 channels and calculate with ohm's law for the total output impedance
+    as 123.75 / 4 = 30.9375 ohms. With this setting you could plug the headphones
+    directly into the audio jack on the DAC board!"
+  specs:
+    supply_voltage: "+3.3 VDC"
+    vpp_output: "2 V or 3 V configurable"
+    drive_impedance: "18.75 ohms to 990 ohms, configurable in 16 steps"
+    form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
+    mounting_hole: "3.2 mm diameter"
+    operating_temperature: "-40 to +85 C (-40 to +185 F)"
     pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
 
 specifications:

@@ -75,6 +75,38 @@ prop_plug_compat: >-
   compatible with the Parallax Prop Plug (#32201) for firmware reprogramming.
   See hardware/programming-prop-plug.yaml.
 
+pin_descriptions:
+  source: >-
+    32420 Parallax WX Wi-Fi Module Guide v1.0 (Parallax Inc., 2016-05-12),
+    Pin Descriptions table (p.11) and Functional components 10 --
+    engineering/ingestion/sources/parallax-wx-wifi/complete-wx-wifi-reference.md:96-114,
+    :80-82; module raw text at
+    engineering/ingestion/sources/parallax-wx-wifi/parallax-wx-wifi-text.txt.
+  columns: "module pin, direction (as seen by the module), SIP pin number, DIP pin number, ESP8266 pin, function"
+  pins:
+    - {pin: "VIN",  direction: "power input",  sip: 1,  dip: 1,  esp8266: "-",    function: "(SIP) 3.3 V or 5 V power input; (DIP) 3.3 V power input"}
+    - {pin: "/PGM", direction: "input",        sip: 2,  dip: 20, esp8266: "IO0",  function: "If held low during power-up, the ESP8266 boots ready for a serial firmware load. Can also be pulled low rapidly, 4x in a row, to put the module into AP+STA mode."}
+    - {pin: "DBG",  direction: "output",       sip: 3,  dip: 9,  esp8266: "IO2",  function: "Transmits information about exchanges with the host microcontroller."}
+    - {pin: "ASC",  direction: "output",       sip: 4,  dip: 15, esp8266: "IO5",  function: "Associate - high/low patterns indicating Wi-Fi mode and connection state."}
+    - {pin: "/CTS", direction: "input/output", sip: 5,  dip: 12, esp8266: "IO13", function: "User configurable pin."}
+    - {pin: "/RTS", direction: "output",       sip: 6,  dip: 16, esp8266: "IO15", function: "User configurable pin."}
+    - {pin: "DO",   direction: "output",       sip: 7,  dip: 2,  esp8266: "TXD",  function: "Transmits serial data to the microcontroller host."}
+    - {pin: "DI",   direction: "input",        sip: 8,  dip: 3,  esp8266: "RXD",  function: "Receives serial data from the microcontroller host."}
+    - {pin: "/RES", direction: "input",        sip: 9,  dip: 5,  esp8266: "EN",   function: "Active-low reset line."}
+    - {pin: "GND",  direction: "power input",  sip: 10, dip: 10, esp8266: "GND",  function: "Ground."}
+    - {pin: "PS",   direction: "output",       sip: "-", dip: 7, esp8266: "IO4",  function: "May be used in future to remotely switch a WX carrier board's programming source from USB to Wi-Fi."}
+    - {pin: "DTR",  direction: "output",       sip: "-", dip: 18, esp8266: "IO12", function: "Toggles the microcontroller reset line in a WX carrier board."}
+  uart_orientation: >-
+    DO is the module's transmit and DI its receive, so a host's TX goes to DI and
+    a host's RX comes from DO. /RES resets the module; /PGM selects serial-firmware
+    load at power-up and, pulsed low four times rapidly, forces AP+STA mode.
+  prop_plug_note: >-
+    On the SIP breadboard header the first four pins - GND, /RES, DI, DO - are
+    compatible with the Parallax Prop Plug (#32201) for firmware reprogramming.
+  schematic_caution: >-
+    The guide's schematic pinout figure OCR'd to noisy labels; the Pin Descriptions
+    table above is the authoritative source and the figure is illustrative only.
+
 p2_support: "via the P2 WX Adapter (#64007)"
 p2_support_note: >-
   The module's built-in firmware loader (proploader; the 'baud-rate' /

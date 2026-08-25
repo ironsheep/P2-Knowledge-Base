@@ -31,11 +31,18 @@ pin_access:
   
 connectivity:
   programming:
-    - type: "USB"
-      connector: "USB connector onboard"
-      driver: "Built-in USB-to-serial"
-    - type: "Prop Plug"
-      connector: "4-pin header (backup)"
+    # Corrected 2026-08-25: this board has NO on-board USB-to-serial converter.
+    # 64020 P2 Edge Module Breadboard Product Guide v1.2 (Parallax, 2021-01-07):
+    # "Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming
+    # adapter" -- engineering/ingestion/sources/edge-module-breadboard/
+    # edge-module-breadboard-narrative.txt:67, and "3. Prop Plug Programming
+    # Header" at :101-108.
+    - type: "Prop Plug (#32201)"
+      connector: "dedicated 4-way header, pins marked up-triangle / down-triangle / RES / VSS"
+      note: "the only wired programming path; serial up to 2 MBaud"
+    - type: "Wireless"
+      connector: "P2 WX Adapter (#64007) + Parallax WX ESP8266 SIP module (#32420S)"
+      note: "unplug the Prop Plug when using the WX Adapter"
   
   headers:
     pin_headers: "All 64 pins accessible"
@@ -100,8 +107,8 @@ development_workflow:
   
 programming:
   methods:
-    - "USB (primary - built-in)"
-    - "Prop Plug (professional backup)"
+    - "Prop Plug (#32201) on the dedicated programming header - the only wired method; the board has no on-board USB-to-serial converter"
+    - "Wireless, via the P2 WX Adapter (#64007) + WX WiFi SIP module (#32420S)"
   tools:
     - "PropellerTool"
     - "PNut"

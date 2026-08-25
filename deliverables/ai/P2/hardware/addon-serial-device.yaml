@@ -13,6 +13,18 @@ aliases:
   - "64006F"
   - "#64006 add-on board"
 
+description:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Serial Device Add-on Board (#64006F)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:253-284.
+  text: >-
+    Two microUSB-type sockets, each with two activity LEDs, letting the Propeller 2
+    behave as up to two USB-type devices connecting to a USB host (a computer or
+    another USB-capable microcontroller). Two user-controlled activity LEDs (red and
+    blue) sit beside each microUSB socket; each LED has a 1 kOhm series resistor and
+    is asserted HIGH to light.
+
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
 pin_group:
@@ -25,6 +37,25 @@ pin_group:
   base_pin_caution: >-
     Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
     serial pins - not recommended.
+
+signal_map:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), Serial Device I/O Pin table --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:268-284.
+  pins:
+    - {offset: 0, signal: "Blue LED", direction: out, notes: "1 kOhm series resistor. Assert high to light."}
+    - {offset: 1, signal: "Red LED", direction: out, notes: "1 kOhm series resistor. Assert high to light."}
+    - {offset: 2, signal: "Serial channel 1 : Data D-", direction: bidir, notes: "USB device channel 1, negative half of the differential pair."}
+    - {offset: 3, signal: "Serial channel 1 : Data D+", direction: bidir, notes: "USB device channel 1, positive half of the differential pair."}
+    - {offset: 4, signal: "Serial channel 2 : Data D-", direction: bidir, notes: "USB device channel 2, negative half of the differential pair."}
+    - {offset: 5, signal: "Serial channel 2 : Data D+", direction: bidir, notes: "USB device channel 2, positive half of the differential pair."}
+    - {offset: 6, signal: "Blue LED", direction: out, notes: "1 kOhm series resistor. Assert high to light."}
+    - {offset: 7, signal: "Red LED", direction: out, notes: "1 kOhm series resistor. Assert high to light."}
+  usb_pin_pairing_note: >-
+    Each channel's D-/D+ occupy an adjacent even/odd pin pair (offsets 2/3 and
+    4/5), which is the ordering the P2 USB smart-pin mode requires -- the even pin
+    of the pair is the one named when configuring the mode.
 
 usb_device_capabilities:
   ports:

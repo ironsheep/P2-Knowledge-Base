@@ -20,6 +20,88 @@ basic_info:
   description: "Integrated P2 development platform with built-in peripherals"
   category: "development_board_integrated"
   form_factor: "all_in_one_board"
+
+# =============================================================================
+# KEY SPECIFICATIONS
+# =============================================================================
+specifications:
+  source: >-
+    #64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax Inc., 2020-06-29) --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:43-84
+    (Key Specifications + Feature list, p.2), :103-127 (the 20 numbered features),
+    :151-194 (I/O Pin Assignments, pp.15-16), :253-269 (PCB Dimensions, p.17).
+    That capture is the forced-OCR re-ingestion (F-250); every quantity in it is
+    triple-validated against the OCR text, the original text layer, and the
+    rendered page.
+  microcontroller:
+    part: "P2X8C4M64PES"
+    silicon_revision: "Rev C silicon, approved for production (engineering sample, not a production chip)"
+    resources: "8 cogs, 512 KB shared hub RAM, 64 smart pins"
+    part_number_note: >-
+      The source is inconsistent: p.2 key spec and the p.4 diagram callout read
+      P2X8C4M64PES; the p.4 section heading, the p.3 bullet and the p.17 board
+      silkscreen read P2X8C4M64P.
+  clock:
+    crystal: "20 MHz SMT crystal; on-chip oscillator internal 9 pF load capacitance; XO = physical pin 50, XI = physical pin 51"
+    recommended_maximum: "180 MHz"
+    overclocking: >-
+      "Overclocking possible beyond 300 MHz"; feature 8 records early unsupported
+      experiments that ran at 390 MHz without significant heat rise.
+  memory:
+    flash: "16 MB (128 Mbit) SPI Flash, W25Q128JVSIM"
+    hub_ram: "512 KB (in the P2 itself)"
+  smart_io_pins: >-
+    64 accessible, grouped in 8 sets of 8 via the edge headers. The source states
+    the free count two different ways and does not reconcile them: p.2 says
+    "58 fully free" (twice), p.15 says "P0-P55 are fully free" with P56-P63 routed
+    to peripheral circuits, and feature 12 adds "P56 and P57 are free by default".
+  io_logic_voltage: "3.3 V"
+  core_voltage: "1.8 V"
+  power:
+    inputs: "two micro-USB sockets -- PC USB (programming + serial + power) and AUX USB (power input only)"
+    supply_voltage: "USB 5 VDC, absolute maximum 5.5 VDC"
+    pc_usb_current_limit: "500 mA (the protection circuit disables the supply above 500 mA)"
+    aux_usb_current_limit: "2000 mA (a 2 A rated device is recommended; AUX takes priority over PC-USB)"
+    aux_pads: "optional 5V + GND pads at 0.1 inch spacing; input range 4.5 V to 5.5 V and MUST NOT exceed 5.5 V. Do not connect a source to both the USB socket and the 5 V pads at once."
+    vdd_supply: "switching buck regulator, 1.8 V up to 2 A, 1 MHz nominal switching frequency; absolute maximum voltage set or connected to P2 VDD is 2.2 V"
+    vio_supplies: "LDO 3.3 V up to 300 mA per 8 I/O pins"
+    brownout: "RESn is permanently connected to the 1.8 V regulator Power-Good signal, holding the P2 in reset if the regulator voltage drops below ~1.5 V"
+    io_drive: "3.3 V logic level, source or sink 30 mA per I/O pin (per the p.15 I/O Pin Assignments table)"
+  programming:
+    interface: "built-in FTDI-to-USB, serial over micro-USB, with a TX/RX activity indicator LED"
+    speed: "user selectable up to 3 Mbps"
+    wireless_option: "WX compatible -- the P56-P63 edge header works with the Parallax WX WiFi SIP Module (#32420S, not included)"
+  operating_temperature: "-40 to +85 C (-40 to +185 F)"
+  physical:
+    dimensions: "3.55 in x 3.55 in"
+    dimensions_note: >-
+      The source prints "(90 x 90 cm)" beside the inch figure; 3.55 in is 90 mm,
+      not 90 cm. The metric parenthetical is a source typo -- quote the inch figure.
+      Recorded in engineering/ingestion/SOURCE-ERRATA.md.
+    outline: "octagon (a square with chamfered corners)"
+    mounting_holes: "four plated holes attached to the ground plane, spaced 40 mm apart; the spacing could accommodate a 50 mm fan or heatsink"
+    ground_plane: "continuous 4 oz copper on the bottom layer"
+    ground_test_posts: "four, one at each edge of the board"
+  headers:
+    io_breakout: >-
+      Eight I/O Pin Breakout Edge Headers, one per group of eight smart I/O pins.
+      They accommodate the 2x6 pass-through headers used by the #64006 add-on boards.
+    per_header_pins: >-
+      Each header carries 2x GND, 8x I/O, one Vxxxx output from the corresponding
+      3.3 V LDO, and one of: a 5 V output (gated by the ACC HDR jumper), an
+      unconnected pin (the P24-P31 header), or RES (the P56-P63 header).
+    vio_edge_pins: "V0007, V0815, V1623, V2431, V3239, V4047, V4855, V5663 -- one per 8-pin group"
+    aux_power_pads: "the 0.1 inch spaced feature on this board is the AUX power pad pair (5V + GND), not the I/O headers"
+    acc_hdr: "2-pin male header routing the common 5 V USB supply to every 5 V pin on the edge headers; shipped in the OFF position (jumper on the 5 V pin only)"
+    ldo_vin: "2-pin male header connecting the common 5 V USB supply to the 3.3 V LDO regulators; power MUST be connected here for the P2 to operate"
+  switches:
+    reset_button: "restarts the program and power-cycles the flash memory and microSD socket"
+    mode_selection: >-
+      Four DIP switches: USB RES, FLASH, P59 up-triangle, P59 down-triangle.
+      Usually all OFF on a new board; switch only ONE of the two P59 switches ON.
+      There are no general-purpose user switches on this board.
+  storage:
+    microsd: "microSD card socket with a power-cycle function when the reset button is pressed; powered by the Common LDO, with an optional connection to P57 to toggle that power"
     
 built_in_peripherals:
   leds:
@@ -27,6 +109,16 @@ built_in_peripherals:
     type: "Buffered LED bank"
     pins: "P56-P63 (one LED per pin)"
     buffer: "Driven through an LED buffer that isolates them from the I/O signals"
+    buffer_polarity: >-
+      The buffer is an octal line driver with high-impedance connections to
+      P56-P63, and it drives the status LED ON when the P2 I/O signal line is
+      LOW. NOTE this is the OPPOSITE polarity to the P2 Edge modules, whose
+      dual Schmitt-trigger buffer lights the LED when the pin is HIGH.
+    floating_pin_behavior: >-
+      Because P2 I/O pins are high-impedance by default, the LEDs are sensitive
+      to objects near the top-left edge header -- the floating BUFFER INPUT picks
+      up the coupling and the buffer then drives the LED at full strength. Those
+      eight I/O pins are not impacted by the LEDs by default.
     purpose: "Debug indication, user interface"
     power_at_startup: |
       P58-P63 are shared with the USB data and P2 memory signals, so these LEDs are
@@ -42,7 +134,12 @@ built_in_peripherals:
       P62: "PC-USB RXD (P2 TXD)"
       P63: "PC-USB TXD (P2 RXD)"
     caution: "P62/P63 carry the PC-USB serial link -- driving them disturbs programming"
-    source: "#64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax, 2020), feature 12 'LED Bank' + the P56-P63 alternative-function table"
+    source: >-
+      #64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax, 2020), feature 12
+      "LED Bank" and feature 20 "LED Buffer", plus the P56-P63 alternative-function
+      table --
+      engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:119
+      (feature 12), :127 (feature 20), :173-184 (alternative functions).
   switches:
     reset_switch: "Hardware reset"
     purpose: "User input, mode selection"
