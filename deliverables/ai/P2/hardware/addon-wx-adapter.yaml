@@ -48,6 +48,10 @@ signal_map:
   - {offset: 7, signal: "DO (-> WiFi module TXD)", direction: in, notes: "module -> P2 serial (module TXD)."}
 
 power_signals:
+  source: >-
+    64007 P2 WX Adapter Guide v1.0 (Parallax Inc.), accessory-header pin table --
+    engineering/ingestion/sources/p2-wx-adapter/p2-wx-adapter-text.txt:68
+    ("VIO3V3 | 3.3V | Supply voltage to WiFi module").
   VIO3V3: "3.3V supply to the Wi-Fi module."
   GND: "Common ground."
 

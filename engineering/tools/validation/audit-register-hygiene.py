@@ -17,8 +17,19 @@ WHY THIS EXISTS
     "We can't afford to use a process that misses things, ever." — so the rules
     that must not be missed stop being things a reader has to notice.
 
+EVERY CHECK IS PER-REGISTER, IN THAT REGISTER'S OWN VOCABULARY
+    The ID families and the counter LABEL are read off the file being audited --
+    `**Next finding ID: F-357**` in the corrections register, `**Next erratum ID:
+    E-011**` in the ingestion errata register. Before 2026-08-25 both were
+    hard-coded to `Next finding ID` / `F-`, so the errata register was invisible
+    to every check below and its monotonic allocator was ungoverned (F-355). The
+    fix was NOT to rename that counter to match: two registers claiming one
+    allocator name is a worse defect than the one it closes.
+
 CHECKS
     1  next-ID counter is ahead of every allocated ID      (allocation drift)
+       -- for EVERY series the register declares, and a series that is allocated
+          with no counter declared is itself a violation
     2  no finding ID appears as two entries                (protocol says: STOP)
     3  no CLOSED finding sits in a live open-work register (scan noise)
     4  every finding carries a status                      (unreadable state)
@@ -76,6 +87,8 @@ EXIT
 """
 
 import argparse
+import contextlib
+import io
 import os
 import re
 import subprocess
@@ -84,8 +97,16 @@ import sys
 # Statuses appear backticked (`DONE`) and bare (DONE (2026-08-16) — ...). Match both,
 # but only as whole words, so "RESOLVED" inside prose does not read as a status.
 CLOSED_WORDS = ("DONE", "WONTFIX", "RESOLVED-INVALID")
+# `RESEARCHING` is the ingestion errata register's middle lifecycle state
+# (OPEN -> RESEARCHING -> RESOLVED | GAP). Its two neighbours are DELIBERATELY
+# absent: `OPEN` and `GAP` are ordinary English in the corrections register's
+# prose (8 whole-word uppercase occurrences today — "This file carries OPEN work
+# only", "Recorded as a GAP, not restored"), and admitting them as status tokens
+# would let a finding that carries NO status pass check 4 on a stray word. A
+# vocabulary that silences a check is worse than one that is short.
 STATUS_WORDS = CLOSED_WORDS + ("CONFIRMED", "NEEDS-VERIFICATION", "PARTIAL",
-                               "PENDING-VALIDATION", "NOTED", "RESOLVED", "TRACKED")
+                               "PENDING-VALIDATION", "NOTED", "RESOLVED", "TRACKED",
+                               "RESEARCHING")
 CLOSED_RE = re.compile(r"`?\b(" + "|".join(CLOSED_WORDS) + r")\b`?")
 STATUS_RE = re.compile(r"`?\b(" + "|".join(STATUS_WORDS) + r")\b`?|TRACKED → ingestion")
 # THE STATUS TOKEN IS AUTHORITATIVE. Prose is not a status.
@@ -118,28 +139,76 @@ def lead_status(s):
         return None
     return (m.group(1) or m.group(0)).strip("` ")
 
-# Both series the register allocates: F-### corrections and G-### gap/enrichment
-# entries. G was absent here until 2026-08-21, which made every G finding invisible
-# to every check — G-004 sat live and `DONE` through a sweep that was looking for
-# exactly that. The two are SEPARATE NUMBER SPACES: they are counted, gap-checked
-# and reported apart, never merged into one range.
-FINDING_START = re.compile(
-    r"^(?:#{3,4}\s+([FG]-\d+[a-z]?)\s*[—-]"         # heading form:  ### F-300 — ...
-    r"|-\s+\*\*([FG]-\d+[a-z]?)\s+[—-])")           # bulleted ENTRY: - **F-250 — ...
-                                                    # (NOT "- **F-256** — ", a reference)
+# THE SERIES A REGISTER ALLOCATES ARE READ OFF THE REGISTER, NOT HARD-CODED.
+#
+# This tool knew exactly two letters, `F` and `G`, and one counter spelling,
+# `**Next finding ID: F-NNN**`. So `engineering/ingestion/SOURCE-ERRATA.md` --
+# which declares `**Next erratum ID: `E-011`**` and allocates `E-NNN` -- was
+# invisible to every check here: counter drift, duplicate IDs, orphaned section
+# headers, unaccounted coverage, all simply absent for it (F-355). The whole
+# reason this project re-checks the next-ID before every dispatch is that two
+# agents allocating from a stale number collide silently, and that register is a
+# live input to every ingestion.
+#
+# The fix is NOT to rename that register's counter to `Next finding ID:` -- two
+# registers claiming one allocator name is a worse defect than the one it closes.
+# It is to take (label, prefix) FROM THE FILE: the counter line declares both,
+# and the ID shapes are built from the series actually present. A register that
+# introduces a third family is covered on the day it is written.
+COUNTER_RE = re.compile(r"\*\*Next\s+(\w+)\s+ID:\s*`?([A-Z])-0*(\d+)`?\*\*")
+_ENTRY_HEAD = (r"^(?:#{2,4}\s+(<P>-\d+[a-z]?)\s*[—-]"
+               r"|-\s+\*\*(<P>-\d+[a-z]?)\s+[—-])")
 
-# A `##` section header, not a `###` finding entry.
+
+def series_in(text, declared=None):
+    """Every ID family a register uses: the one its counter declares, plus any
+    that actually HEAD an entry. Restricted to letters seen in those two
+    positions, so a stray `P-2` in prose cannot invent a family."""
+    found = set(declared or ())
+    found.update(re.findall(r"^#{2,4}\s+([A-Z])-\d+", text, re.M))
+    found.update(re.findall(r"^-\s+\*\*([A-Z])-\d+\s+[—-]", text, re.M))
+    return found or {"F"}
+
+
+def build_id_res(series):
+    """(FINDING_START, ID_RANGE, ID_ONE) for one register's series set.
+
+    `#{2,4}`, not `#{3,4}`: the corrections register heads a finding with `###`,
+    the errata register with `##`. An entry heading is tested BEFORE a section
+    heading (see parse), so `## E-001 -- ...` reads as a finding rather than a
+    section -- which is what lets checks 8 and 9 work on both files."""
+    cls = "[" + "".join(sorted(series)) + "]"
+    return (re.compile(_ENTRY_HEAD.replace("<P>", cls)),
+            re.compile(r"\b(" + cls + r")-0*(\d+)\s*(?:…|\.{3})\s*" + cls + r"-0*(\d+)\b"),
+            re.compile(r"\b(" + cls + r")-0*(\d+)\b"),
+            # Guardrail IDs are matched WHOLE, letter suffix included: the
+            # register retains `F-114b` as a do-not-re-file guardrail, and an ID
+            # regex that drops the `b` stops exempting it -- which reads as a
+            # brand-new unaccounted finding.
+            re.compile(r"\b" + cls + r"-\d+[a-z]?\b"))
+
+
+# Defaults, replaced per-register in main() once the file has been read. The
+# corrections register's two families (F-### corrections, G-### gap/enrichment)
+# stay SEPARATE NUMBER SPACES: counted, gap-checked and reported apart, never
+# merged into one range. G was absent from this tool until 2026-08-21, which made
+# every G finding invisible to every check -- G-004 sat live and `DONE` through a
+# sweep looking for exactly that.
+FINDING_START, ID_RANGE, ID_ONE, GUARD_RE = build_id_res({"F", "G"})
+
+# A `##` section header, not a finding entry.
 SECTION_START = re.compile(r"^##\s+(?!#)")
-# IDs a section header claims, including ranges: "F-303…F-305", "G-001…G-005",
-# "F-217, F-218". Leading zeros are stripped so a header's `G-001…G-005` and an
-# entry's `### G-004` compare equal — the padding differs in the register today.
-ID_RANGE = re.compile(r"\b([FG])-0*(\d+)\s*(?:…|\.{3})\s*[FG]-0*(\d+)\b")
-ID_ONE = re.compile(r"\b([FG])-0*(\d+)\b")
 
 
 def canon(fid):
-    """'G-004' -> 'G-4'; 'F-302' -> 'F-302'. Strips padding and any letter suffix."""
-    m = re.match(r"([FG])-0*(\d+)", fid)
+    """'G-004' -> 'G-4'; 'F-302' -> 'F-302'. Strips padding and any letter suffix.
+
+    ANY single-letter series, not just F and G. While this hard-coded `[FG]` the
+    errata register's `E-001` fell through unchanged, so the canonical live set
+    held `E-001` while the gap scan looked for `E-1` — and all ten entries were
+    reported as "went silent" while sitting in plain view. A canonicaliser that
+    silently declines to canonicalise is worse than one that raises."""
+    m = re.match(r"([A-Z])-0*(\d+)", fid)
     return f"{m.group(1)}-{int(m.group(2))}" if m else fid
 
 
@@ -155,7 +224,8 @@ def header_ids(header):
 
 def sections(lines, blocks):
     """[(line_no, header, [blocks inside its span])] for headers that name IDs."""
-    starts = [i for i, ln in enumerate(lines, 1) if SECTION_START.match(ln)]
+    starts = [i for i, ln in enumerate(lines, 1)
+              if SECTION_START.match(ln) and not FINDING_START.match(ln)]
     out = []
     for k, i in enumerate(starts):
         end = starts[k + 1] if k + 1 < len(starts) else len(lines) + 1
@@ -166,12 +236,13 @@ def sections(lines, blocks):
     return out
 
 
-def parse(path):
+def parse(path, finding_start=None):
     """Split a register into (id, headline, body, line_no) blocks."""
+    finding_start = finding_start or FINDING_START
     lines = open(path, encoding="utf-8").read().splitlines()
     blocks, cur = [], None
     for i, ln in enumerate(lines, 1):
-        m = FINDING_START.match(ln)
+        m = finding_start.match(ln)
         if m:
             fid = m.group(1) or m.group(2)
             if cur:
@@ -202,18 +273,108 @@ def guardrail_ids(lines):
         if inside and ln.startswith("## "):
             break
         if inside:
-            ids.update(re.findall(r"F-\d+[a-z]?", ln))
+            ids.update(GUARD_RE.findall(ln))
     return ids
+
+
+
+def negative_control():
+    """A check that cannot fail has not been verified, it has been RUN.
+
+    Every case below is a register defect this tool exists to catch, built as a
+    throwaway file and fed through the real `parse`/`series_in`/counter path --
+    not through a re-implementation, which would prove only that the copy agrees
+    with itself."""
+    import tempfile
+    print("NEGATIVE CONTROL -- proving the gate can fail, on both register dialects\n")
+    ok = True
+    cases = [
+        # Numbered from 1 with no archive: check 6 (no allocated ID went silent)
+        # is real, and a fixture starting at F-299 with nothing archived is a
+        # register with 298 genuinely missing IDs, not a clean one.
+        ("corrections dialect, counter AHEAD — MUST BE CLEAN",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n### F-001 — a thing · `CONFIRMED`\n\nbody\n", False),
+        ("corrections dialect, counter BEHIND — MUST FAIL",
+         "> **Next finding ID: `F-001`**\n\n"
+         "## A section — F-001\n\n### F-001 — a thing · `CONFIRMED`\n\nbody\n", True),
+        ("errata dialect, counter AHEAD — MUST BE CLEAN",
+         "> **Next erratum ID: `E-003`**\n\n"
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n"
+         "## E-002 — another · `RESEARCHING`\n\nbody\n", False),
+        ("errata dialect, counter BEHIND — MUST FAIL",
+         "> **Next erratum ID: `E-002`**\n\n"
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n"
+         "## E-002 — another · `RESEARCHING`\n\nbody\n", True),
+        ("errata dialect, NO counter at all — MUST FAIL",
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n", True),
+        ("a series allocated with no counter declared — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "### F-001 — a thing · `CONFIRMED`\n\nbody\n"
+         "### D-001 — an open question · `CONFIRMED`\n\nbody\n", True),
+        ("an entry carrying no status token — MUST FAIL",
+         "> **Next erratum ID: `E-002`**\n\n## E-001 — a thing\n\nbody\n", True),
+        ("a duplicate ID — MUST FAIL",
+         "> **Next erratum ID: `E-002`**\n\n"
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n"
+         "## E-001 — again · `RESOLVED`\n\nbody\n", True),
+    ]
+    for label, text, want_fail in cases:
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,
+                                         encoding="utf-8") as fh:
+            fh.write(text)
+            path = fh.name
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = _audit_register(path, [], quiet=True, sweep_rev=None, extra_series=[])
+        os.unlink(path)
+        good = (rc != 0) == want_fail
+        ok &= good
+        print(f"  [{'PASS' if good else 'FAIL'}] {label}: exit={rc}")
+
+    # "The file was not examined at all" must be a DISTINCT non-zero exit, not a
+    # pass and not an ordinary violation -- the standing lesson from the
+    # digit-density gate, which shipped able to exit 0 having measured nothing.
+    missing = os.path.join(tempfile.gettempdir(), "no-such-register-negative-control.md")
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = main_on(missing)
+    good = rc == 2
+    ok &= good
+    print(f"  [{'PASS' if good else 'FAIL'}] an unreadable register exits 2, "
+          f"distinct from a violation: exit={rc}")
+
+    print("\n" + ("Negative control PASSED -- the gate fails on a stale counter, an "
+                   "undeclared allocator, a missing status and a duplicate ID, in BOTH "
+                   "register dialects, and refuses to pass a file it never read."
+                   if ok else "Negative control FAILED -- do not trust this run."))
+    return 0 if ok else 1
+
+
+def main_on(register):
+    """Run the gate on one path exactly as the CLI would. Used by the control so
+    the control exercises the shipped entry point, not a copy of it."""
+    if not os.path.isfile(register):
+        return 2
+    return _audit_register(register, [], quiet=True, sweep_rev=None, extra_series=[])
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("register")
+    ap.add_argument("register", nargs="?",
+                    help="the register to audit (omit only with --negative-control)")
     ap.add_argument("--archive", action="append", default=[],
                     help="archive file holding closed findings (repeatable); "
                          "default: read them from the register header")
     ap.add_argument("--quiet", action="store_true", help="print violations + summary only")
+    ap.add_argument("--series", action="append", default=[], metavar="LETTER",
+                    help="an ID family this register allocates that has no entries "
+                         "and no counter yet (repeatable). Series are normally read "
+                         "off the register itself; this is for a family declared "
+                         "before its first filing.")
+    ap.add_argument("--negative-control", action="store_true",
+                    help="prove the tool can fail; audits no register")
     ap.add_argument("--sweep-check", metavar="REV",
                     help="prove an archive sweep lost nothing: every substantive line of the "
                          "register AT REV must still exist in the live file or an archive. "
@@ -223,8 +384,46 @@ def main():
                          "rewrite as unaccounted, which is churn, not loss.")
     args = ap.parse_args()
 
+    if args.negative_control:
+        return negative_control()
+    if not args.register:
+        ap.error("a register path is required unless --negative-control is given")
+
+    return _audit_register(args.register, args.archive, quiet=args.quiet,
+                           sweep_rev=args.sweep_check, extra_series=args.series)
+
+
+def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
+                    extra_series=None):
+    """The whole gate, on one register. `main` is a thin CLI over this so the
+    negative control can drive the SHIPPED path rather than a copy of it."""
+    class _A:
+        pass
+    args = _A()
+    args.register = register
+    args.archive = list(archive_paths or [])
+    args.quiet = quiet
+    args.sweep_check = sweep_rev
+    args.series = list(extra_series or [])
+
     reg = args.register
-    lines, blocks = parse(reg)
+    if not os.path.isfile(reg):
+        print(f"ERROR  {reg}: not a readable file — the register was NOT examined. "
+              f"That is a tooling failure, never a pass.")
+        return 2
+
+    # Read the register's OWN allocator vocabulary before parsing it (F-355).
+    # `**Next finding ID: F-357**` and `**Next erratum ID: `E-011`**` are two
+    # legitimate spellings of the same contract; a tool that knows only the first
+    # reports nothing at all about the second, which is how the errata register
+    # ended up with an ungoverned monotonic allocator.
+    global FINDING_START, ID_RANGE, ID_ONE, GUARD_RE
+    raw = open(reg, encoding="utf-8").read()
+    counters = {p: (label, int(n)) for label, p, n in COUNTER_RE.findall(raw)}
+    FINDING_START, ID_RANGE, ID_ONE, GUARD_RE = build_id_res(
+        series_in(raw, declared=set(counters) | set(args.series or ())))
+
+    lines, blocks = parse(reg, FINDING_START)
     text = "\n".join(lines)
     guards = guardrail_ids(lines)
     viol = []
@@ -246,8 +445,8 @@ def main():
         if not os.path.exists(a):
             viol.append(("dangling-archive", f"header names `{a}` but it does not exist"))
             continue
-        archived_ids.update(f"{p}-{int(n)}" for p, n in re.findall(
-            r"\b([FG])-0*(\d+)\b", open(a, encoding="utf-8", errors="replace").read()))
+        archived_ids.update(f"{p}-{int(n)}" for p, n in ID_ONE.findall(
+            open(a, encoding="utf-8", errors="replace").read()))
     say(f"archives          : {len(archives)} declared, "
         f"{len(archived_ids)} archived IDs seen")
 
@@ -262,22 +461,36 @@ def main():
                          f"the protocol says STOP, do not choose between them"))
 
     # --- 1: next-ID counter ahead of every allocation ---------------------------
-    # F and G are separate number spaces; the declared counter governs F only.
+    # Each series is its own number space. EVERY counter the register declares is
+    # checked, in whatever label it uses -- so `Next erratum ID: E-011` is
+    # governed exactly as `Next finding ID: F-357` is.
     live_by_series = {}
     for fid in seen:
         pre, n = canon(fid).split("-")
         live_by_series.setdefault(pre, set()).add(int(n))
-    nums = sorted(live_by_series.get("F", set()))
-    m = re.search(r"\*\*Next finding ID:\s*`?F-(\d+)`?\*\*", text)
-    if not m:
-        viol.append(("no-counter", "register declares no `Next finding ID:` line"))
-    elif nums:
-        nxt, top = int(m.group(1)), max(nums)
-        say(f"next-ID counter   : F-{nxt} (highest allocated F-{top})")
+    if not counters:
+        viol.append(("no-counter",
+                     "register declares no `**Next <thing> ID: X-NNN**` line — its "
+                     "allocator is ungoverned and two filers will collide silently"))
+    for pre, (label, nxt) in sorted(counters.items()):
+        nums = sorted(live_by_series.get(pre, set()))
+        if not nums:
+            say(f"next-ID counter   : {pre}-{nxt} (`Next {label} ID`; no live "
+                f"{pre}- entries)")
+            continue
+        top = max(nums)
+        say(f"next-ID counter   : {pre}-{nxt} (`Next {label} ID`; highest "
+            f"allocated {pre}-{top})")
         if nxt <= top:
             viol.append(("counter-behind",
-                         f"counter reads F-{nxt} but F-{top} is already allocated — "
-                         f"the next filing collides"))
+                         f"counter reads {pre}-{nxt} but {pre}-{top} is already "
+                         f"allocated — the next filing collides"))
+    ungoverned = sorted(set(live_by_series) - set(counters))
+    if ungoverned:
+        viol.append(("no-counter",
+                     f"register allocates {', '.join(f'{p}-NNN' for p in ungoverned)} "
+                     f"but declares no counter for {'it' if len(ungoverned) == 1 else 'them'} "
+                     f"— that allocator is ungoverned"))
 
     # --- 3 + 4: closed-but-live, and missing status -----------------------------
     closed_live = []

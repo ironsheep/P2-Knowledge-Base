@@ -18,7 +18,9 @@ description: >-
   signal pins carry the TMDS clock plus three data lanes as differential pairs,
   driven by the P2 streamer. Unused connector signals (CEC, RSVD, SCL, SDA, 5V,
   HPD) sit on an unpopulated 0.1 inch pad row; an adjacent ACC 5V pad lets the
-  5V line be bridged when a monitor needs 5V.
+  5V line be bridged when a monitor needs 5V — per the Parallax P2 Eval Add-on
+  Boards (#64006 Series) Product Guide v2.0, "P2 Eval Digital Video Out Add-on
+  Board (#64006D)".
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -70,6 +72,13 @@ signal_map:
 # Connector signals brought out to an unpopulated 0.1 inch pad row but NOT wired
 # to any P2 pin. These are board detail, not part of the 8-pin signal_map.
 unused_connector_signals:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Digital Video Out Add-on Board (#64006D)" unused-signal
+    note --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:201-226;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-digital-video-out-64006d.md.
   description: "Additional HDMI connector signals available on an unpopulated 0.1 inch pad row, not connected to P2 pins."
   pads:
     - name: "CEC"
@@ -92,6 +101,16 @@ unused_connector_signals:
     note: "Some monitors require 5V on the 5V line for proper operation."
 
 specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:201-226
+    (the Digital Video Out board) and :24-46 (shared connector / compatibility /
+    mounting facts); per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-digital-video-out-64006d.md.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -148,7 +167,7 @@ advantages:
   - "All TMDS clock and data lanes brought out to P2 pins"
   - "Flexible video standard support via software"
   - "Low power consumption (signal level only)"
-  - "Optional monitor power supply connection via ACC 5V bridge"
+  - "Optional monitor power supply via the ACC bridge (see `unused_connector_signals`)"
   - "Educational value for digital video concepts"
 
 limitations:

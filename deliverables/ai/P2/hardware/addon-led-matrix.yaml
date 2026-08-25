@@ -19,7 +19,9 @@ description: >-
   of P2 pins: to light one LED, drive one pin HIGH and one LOW per the lookup
   table, set both to INPUT to turn it off. Only one LED is lit at a time;
   multiplexing faster than ~50 Hz removes visible flicker. Each lit LED draws
-  ~4 mA, so instantaneous current stays ~4 mA (vs ~224 mA if all 56 were on).
+  ~4 mA, so instantaneous current stays ~4 mA (vs ~224 mA if all 56 were on)
+  — per the Parallax P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0,
+  "P2 Eval LED Matrix Add-on Board (#64006C)".
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -71,6 +73,16 @@ display_specifications:
   simultaneous_leds: 1
 
 specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:140-183
+    (the LED Matrix board and its per-LED current) and :24-46 (shared connector /
+    compatibility / mounting facts); per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-led-matrix-64006c.md.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -155,7 +167,7 @@ use_cases:
 
 advantages:
   - "56 LEDs from only 8 I/O pins (Charlieplexing)"
-  - "Low instantaneous current (~4 mA, one LED at a time)"
+  - "Low instantaneous current — one LED lit at a time (figure stated under `description`)"
   - "OBEX driver provides text, scrolling, and graphics"
 
 limitations:

@@ -428,15 +428,29 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
             timeout=60
         )
 
-        # Parse output for resolution rate
+        # Parse output for resolution rate. A MISSING rate line is a failure,
+        # not a pass: a validator that printed no measurement audited nothing,
+        # and "nothing audited" reading as green is the digit-density lesson.
+        rate_seen = False
         for line in proc.stdout.split('\n'):
             if 'Resolution rate' in line:
+                rate_seen = True
                 result.info(line.strip())
                 if '100.0%' in line:
-                    result.ok("All cross-references resolve")
+                    # SCOPE, NOT A CLEAN BILL (F-340). This validator walks
+                    # TOP-LEVEL fields only; nested reference sites are not read
+                    # at all — which is how two fabricated constant names sat in
+                    # a `related_symbols:` list the tool names in its own
+                    # vocabulary. Say what resolved, never "references are clean".
+                    result.ok("All TOP-LEVEL cross-references resolve")
                 else:
                     result.fail("Some cross-references failed to resolve")
                 break
+            if 'SCOPE:' in line:
+                result.info(line.strip())
+        if not rate_seen:
+            result.fail("Cross-reference validator printed no resolution rate — "
+                        "nothing audited, which is not a pass")
 
         if proc.returncode != 0 and 'Resolution rate: 100.0%' not in proc.stdout:
             result.fail("Cross-reference validation failed")
@@ -449,6 +463,96 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
     except Exception as e:
         result.fail(f"Failed to run validation: {e}")
 
+    return result
+
+
+def _run_gate(result: ValidationResult, script: Path, args: List[str],
+              label: str, verbose: bool) -> None:
+    """Run one instrument and let its EXIT STATUS decide the release.
+
+    Three outcomes, and the third is the one that has to be spelled out:
+      0  -> pass
+      1  -> Tier 1 violations; the release FAILS
+      2+ -> the tool could not audit (no truth table, KB tree missing, crash).
+            THAT ALSO FAILS. "Nothing audited" is never a pass -- the standing
+            lesson from the digit-density gate, which shipped able to exit 0
+            having measured nothing at all. A gate must read the artifact.
+    """
+    if not script.exists():
+        result.fail(f"{label}: instrument not found at {script}")
+        return
+    try:
+        proc = subprocess.run(['python3', str(script)] + args,
+                              capture_output=True, text=True, timeout=300)
+    except subprocess.TimeoutExpired:
+        result.fail(f"{label}: timed out — nothing audited, which is not a pass")
+        return
+    except Exception as e:                                   # noqa: BLE001
+        result.fail(f"{label}: failed to run ({e}) — nothing audited, not a pass")
+        return
+
+    tail = [ln for ln in proc.stdout.strip().split('\n') if ln.strip()]
+    # The VERDICT line, not the last line. Both instruments print a scope note
+    # after their verdict — deliberately, so a green never reads as a guarantee —
+    # and reporting the last line would surface the note's final sentence as the
+    # gate's result. A summary must quote the measurement, not whatever printed
+    # most recently.
+    verdict = next((ln.strip() for ln in reversed(tail)
+                    if ln.strip().startswith(("PASS", "FAIL", "ERROR",
+                                              "Negative control"))), None)
+    if proc.returncode == 0:
+        result.ok(f"{label}: {verdict or 'exit 0'}")
+        if verbose:
+            for ln in tail[-6:]:
+                result.info(ln.strip())
+        return
+
+    if proc.returncode == 1:
+        result.fail(f"{label}: {verdict or 'exit 1'}")
+    else:
+        result.fail(f"{label}: exited {proc.returncode} — the instrument could "
+                    f"not audit. Nothing audited is never a pass.")
+    for ln in tail[-15:]:
+        result.info(ln.strip())
+    if proc.stderr.strip():
+        for ln in proc.stderr.strip().split('\n')[-5:]:
+            result.info(ln.strip())
+
+
+def validate_constant_fidelity(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does the KB's description of a named constant match the source's?
+
+    No grandfathered baseline and no tolerance value: the purge removed the
+    existing population first, so there is nothing to tolerate. A Tier 1
+    violation fails the release, on the first one.
+
+    The `--negative-control` run is part of the gate, not a nicety. A check that
+    cannot fail has not been verified, it has been RUN -- so the release proves
+    the instrument still discriminates before it trusts the instrument's pass.
+    """
+    result = ValidationResult("Constant Fidelity (P_* named constants)")
+    script = Path("engineering/tools/validation/audit-constant-fidelity.py")
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, [], "audit", verbose)
+    result.info("Scope: NAMED CONSTANTS only. Prose that describes a behaviour "
+                "without naming one passes untouched.")
+    return result
+
+
+def validate_claim_sourcing(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does a quantitative claim in the shipped KB say where it came from?
+
+    Tier 1 only — a block carrying physical quantities inside a file that
+    demonstrably knows the citing convention, so the file's own other sections
+    are the control. Tier 2 (a file that cites nothing anywhere) stays advisory
+    and does NOT block; its population is not zero and the tool prints it.
+    """
+    result = ValidationResult("Claim Sourcing (quantitative claims)")
+    script = Path("engineering/tools/validation/audit-yaml-claim-sourcing.py")
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, [], "audit", verbose)
+    result.info("Scope: QUANTITATIVE CLAIMS only, and only that a citation is "
+                "PRESENT — nothing here reads the cited document.")
     return result
 
 
@@ -564,6 +668,8 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_timestamps,
         validate_metadata_filter,
         validate_cross_references,
+        validate_constant_fidelity,
+        validate_claim_sourcing,
         validate_fetch_script_parity,
     ]
 

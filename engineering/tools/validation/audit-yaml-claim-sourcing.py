@@ -105,11 +105,34 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 KB_ROOT = REPO / "deliverables" / "ai" / "P2"
 
+# Printed on EVERY run, pass or fail. This gate is armed and blocking in
+# `release-yamls` and in `validate-dod-release.py`, and a green from a blocking
+# gate gets read as a guarantee unless the gate says what it did not look at.
+SCOPE_NOTE = (
+    "WHAT THIS GREEN DOES NOT CERTIFY\n"
+    "  This instrument checks QUANTITATIVE CLAIMS -- a block carrying physical\n"
+    "  quantities, in a file that demonstrably knows the citing convention.\n"
+    "  Prose that describes a behaviour without stating a number passes\n"
+    "  untouched, and Tier 2 (a file that cites nothing anywhere) is ADVISORY:\n"
+    "  it does not block, and its population is not zero.\n"
+    "  A citation being PRESENT is not the same as the citation being RIGHT --\n"
+    "  nothing here reads the cited document. Guide rules R6, R7 and R9 have no\n"
+    "  instrument and are held by review. A clean run means NOT CAUGHT BY THESE\n"
+    "  CHECKS -- never `correct`.")
+
 # A citation KEY, in any of the spellings the corpus actually uses. The key name
-# alone is NOT the test -- see CITE_VALUE_RE.
+# alone is NOT the test -- see CITE_VALUE_RE and is_citation().
+#
+# `documentation` was added 2026-08-25 (F-335a). The eval add-on board files cite
+# as `documentation:` -> `primary: "<doc>"`, a spelling no key here matched, so
+# eight board files that DO know the citing convention scored as wholly-uncited
+# and their blocks could never reach Tier 1 -- the file's own other sections
+# could not act as the control. Until F-334's repair the `Rev B` token was
+# propping those files up in Tier 1 by accident, for entirely the wrong reason,
+# which is why the gap was invisible.
 CITE_KEY_RE = re.compile(
     r"^(\s*)-?\s*(source|sources|source_document|source_documents|citation|citations|"
-    r"reference|references|authority|derived_from|verified_against)\s*:\s*(.*)$",
+    r"reference|references|authority|derived_from|verified_against|documentation)\s*:\s*(.*)$",
     re.IGNORECASE)
 
 # ...because `source:` is the most overloaded key in this knowledge base. Of the
@@ -151,17 +174,40 @@ CITE_VALUE_RE = re.compile(
 _STRUCTURE_VALUE = {"", "|", ">", ">-", ">+", "|-", "|+"}
 
 # Physical quantities. Unit REQUIRED -- a bare number is structure, not a claim.
+#
+# The NUMBER accepts thousands separators (F-351, second artifact): without them
+# `range: "3,333,333 Hz to 500,000,000 Hz"` split into the tokens `333 Hz` and
+# `000 Hz`, which made no false finding but inflated every advisory's per-block
+# count -- a number printed by a gate that nobody can reproduce by hand.
 QTY_RE = re.compile(
     r"(?<![\w%$])"                       # not inside a %binary or $hex literal
-    r"~?\d+(?:\.\d+)?\s*"
+    r"~?(\d+(?:,\d{3})*(?:\.\d+)?)\s*"
     r"(mA|uA|µA|μA|nA|A|kΩ|kOhm|kohm|Ω|Ohm|ohm|mV|uV|µV|V|"
     r"ns|us|µs|μs|ms|MHz|kHz|Hz|dB|pF|nF|uF|µF|Mbps|kbps|bps)"
     r"(?![\w])")
+
+# THE BARE AMPERE IS THE ONE UNIT A PART NUMBER CAN IMPERSONATE (F-351).
+# `A` is a single letter and the guard on the number's left edge passes at the
+# start of a string and after `+`, so the detector read:
+#     part_number: "64006A"      -> 64006 amperes   (a Parallax part number)
+#     ISO/IEC 14443 A/MIFARE     -> 14443 amperes   (an RFID standard)
+# Ten Tier-2 blocks KB-wide stated no quantity at all and were pure artifacts of
+# this, every one of them in `hardware/`, the tree where part numbers are densest.
+#
+# The discriminator is magnitude, not vocabulary: a current claim in this domain
+# is written with at most three integer digits (`150mA`, `1.5A`, `20A`, `4A`),
+# while a part number or a standard designator is a four-or-more digit run. So a
+# bare `A` preceded by >=4 integer digits is not a current. Deliberately NOT
+# applied to the other units -- `500,000,000 Hz` and `2000Ohm` are real claims.
+AMPERE_DIGIT_LIMIT = 3
 
 # P2 binary literal -- masked out before scanning so `%0000_0000` never reads
 # as a percentage and `%01` never reads as a quantity.
 BINARY_RE = re.compile(r"%[01_]+")
 HEX_RE = re.compile(r"\$[0-9A-Fa-f_]+")
+# A Unicode code point is a code point, not a current: `unicode: "U+221A"` (the
+# SQUARE ROOT sign) read as 221 amperes. Same masking treatment as $hex (F-351).
+CODEPOINT_RE = re.compile(r"U\+[0-9A-Fa-f]+")
 
 # A quantity inside an EXAMPLE is a chosen parameter, not a claim about the
 # silicon. `WAITX ##25_000_000` and `_clkfreq = 180 MHz` are the author picking
@@ -192,6 +238,21 @@ CODE_KEY_RE = re.compile(
 BLOCK_SCALAR_RE = re.compile(r"^(\s*)-?\s*[\w.-]+\s*:\s*[|>][-+0-9]*\s*(#.*)?$")
 CODE_MARKER_RE = re.compile(r"^\s*(?:'|(?:PUB|PRI)\s+\w)")
 
+# ...and a block scalar is not the only way this KB stores an example. F-335(c):
+# `language/pasm2/waitx.yaml` keeps its PASM2 in a DOUBLE-QUOTED scalar with
+# literal `\n` escapes --
+#     code: "' HUB75 panel driver clock generation\nrgb_clock_cycle\n  ..."
+# -- so BLOCK_SCALAR_RE never matched, the region was never stripped, and the
+# gate read FOUR quantities out of PASM2 COMMENTS (`' For 1kHz PWM at 200MHz
+# clock:`, `' 100us @ 200MHz`). Those are the demo's chosen parameters, which
+# this tool's own header says it exists to skip.
+#
+# Note the key here IS in CODE_KEY_RE's vocabulary (`code:`) and that did not
+# help: CODE_KEY_RE requires the VALUE to be empty or a block indicator. The
+# lesson is the one already learned above -- the shape of the value decides, not
+# the name of the key -- applied to the other value shape.
+QUOTED_SCALAR_RE = re.compile(r'^(\s*)-?\s*[\w.-]+\s*:\s*"')
+
 # An INLINE attribution is a citation. The question this tool asks is "does this
 # claim say where it came from", and `"343.75ns at 160MHz (55 clocks per Silicon
 # Doc v35 verbatim)"` answers it perfectly well without a `source:` field.
@@ -217,6 +278,93 @@ INLINE_CITE_RE = re.compile(
     r"(silicon\s*doc|datasheet|data\s*sheet|spin2\s*v\d|p2\s*documentation|"
     r"hardware[- ]verified|empirical|EF-\d+|per\s+the\s+doc|verbatim|"
     r"parallax\s+p2)", re.IGNORECASE)
+
+# ---------------------------------------------------------------------------
+# A CITATION POINTS **AT** A SOURCE FOR THE CLAIM. THREE THINGS POINT AWAY.
+#
+# F-334 patched two of them (a board revision, a power supply) and F-335 then
+# found three more (a deferral, a slug, a missing key spelling). That is the
+# signal: every one of these detectors matched on THE PRESENCE OF A TOKEN and
+# never on whether the sentence attributes the block to a document. Patching the
+# sixth instance would have found a seventh, so the two vetoes below are written
+# against the SHAPE rather than against the instances.
+#
+#   DEFERRAL (F-335e) -- an instruction to go look elsewhere. `max_current_total:
+#   "Check datasheet for package limits"` scored a whole block cited, which is
+#   how `max_current_per_pin: "150mA"` shipped against the datasheet's stated
+#   `Max. allowable current per I/O pin ±30 mA` -- FIVE TIMES the absolute
+#   maximum, in the exact number a reader uses to size an LED series resistor,
+#   through two purges. A deferral names a document CLASS and a topic to look
+#   up; a citation names a document. So the veto fires only when the value
+#   carries NO identity at all -- no proper name, no version, no date, no page
+#   or line locator, no filename, no URL. `"See P2 Silicon Doc v35 §4.2"` is an
+#   attribution phrased as an instruction and still counts.
+#
+#   SLUG (F-335d) -- `source: hub75_driver`, `source: inline_pasm2_pattern`,
+#   `source: lock_validation`: a pattern-category tag, not a document. These are
+#   the same shape as `source: motor_control`, which F-334's controls already
+#   reject; the ones that got through did so because a bare `pasm2` / `validat`
+#   token happens to sit INSIDE the identifier. A lowercase snake_case
+#   identifier with no extension, no space and no version is a category name.
+#   `flash_loader.spin2` (extension) and `parallax-quick-bytes` (hyphenated
+#   product name) are unaffected.
+#
+# The slug veto matters for a second reason: it was MASKING a quantity-side
+# false positive. `waitx.yaml examples` was scored cited by its slugs while the
+# gate read four quantities out of PASM2 comments (F-335c) -- the block read
+# clean for two wrong reasons that cancelled. Repairing either alone would have
+# started failing a block that was never a real violation, so (c) and (d) land
+# together or not at all.
+# Matched as a PHRASE, not anchored at the start of the value. The deferral that
+# shipped `150mA` was `"Check datasheet for package limits"` (anchored), but the
+# same sentence reads `"Sinks 150mA per pin; see the datasheet for package
+# limits."` just as easily -- and an anchor would miss it, which is how a veto
+# becomes another one-off patch. `per the doc` is deliberately ABSENT: that form
+# attributes, and `INLINE_CITE_RE` already accepts it.
+DEFERRAL_RE = re.compile(
+    r"\b(?:check|see|refer\s+to|consult|look\s*up|lookup|read|review|contact|"
+    r"visit|ask)\s+(?:the\s+|a\s+|an\s+|your\s+|its\s+)?(?:\w+\s+){0,2}?"
+    r"(?:doc|docs|documentation|datasheet|data\s*sheet|manual|guide|spec|"
+    r"specification|reference|errata|schematic)\b", re.IGNORECASE)
+IDENTITY_RE = re.compile(
+    r"(parallax|silicon|spin2|pasm2|pnut|obex|titus|chip\s+gracey|propeller|"
+    r"\bp1\b|\bp2\b|EF-\d+|\bv\d|\d{4}-\d{2}-\d{2}|\bp\.\s*\d|\blines?\s+\d|:\d+|"
+    r"\.(md|ya?ml|txt|spin2|pas|pdf|docx?|csv|py|json)\b|https?://)", re.IGNORECASE)
+SLUG_RE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$")
+
+
+def points_away(value):
+    """True when the text points the reader ELSEWHERE instead of attributing the
+    claim to a source. Shape-based, so it does not need a new case per token."""
+    v = value.strip().strip('"').strip("'").strip()
+    if not v:
+        return True
+    if SLUG_RE.match(v):
+        return True
+    return bool(DEFERRAL_RE.search(v)) and not bool(IDENTITY_RE.search(v))
+
+
+def is_citation(value):
+    """A cite key's VALUE counts only when it names a document (or an empirical
+    record) AND that naming attributes the claim rather than deferring it."""
+    v = value.strip().strip('"').strip("'").strip()
+    if points_away(v):
+        return False
+    return bool(CITE_VALUE_RE.search(v))
+
+
+def inline_cite(text):
+    """An inline attribution, judged PER LINE so a deferral cannot silence the
+    line it sits on. `INLINE_CITE_RE` matched the bare word `datasheet` anywhere
+    in a block body, which is the other half of how F-335(e) passed."""
+    for ln in text.split("\n"):
+        if not INLINE_CITE_RE.search(ln):
+            continue
+        seg = ln.split(":", 1)[1] if ":" in ln else ln
+        if points_away(seg):
+            continue
+        return True
+    return False
 
 
 def _nested_body(lines, i, indent):
@@ -246,7 +394,15 @@ def cites_in(lines, lo=0, hi=None):
         value = m.group(3).strip()
         if value in _STRUCTURE_VALUE:
             value = _nested_body(lines, i, len(m.group(1)))
-        if CITE_VALUE_RE.search(value):
+            # A key that introduces STRUCTURE is tested line by line: its body
+            # holds one document per line (`documentation:` -> `primary: "..."`,
+            # `sources:` -> a list), and judging the whole body as one string
+            # would let a deferral on one line be rescued by an identity token
+            # on another.
+            if any(is_citation(ln.split(":", 1)[-1]) for ln in value.split("\n")):
+                return True
+            continue
+        if is_citation(value):
             return True
     return False
 
@@ -287,6 +443,62 @@ def _scalar_code_regions(lines):
     return blank
 
 
+def _quoted_scalar_regions(lines):
+    """Indices of DOUBLE-QUOTED scalar bodies whose content is code (F-335c).
+
+    The same question `_scalar_code_regions` asks of a `|` block, asked of the
+    other way this KB stores an example: one quoted scalar carrying literal `\\n`
+    escapes. The scalar is split on those escapes and the resulting logical lines
+    are tested with the SAME `CODE_MARKER_RE` -- so a quoted region is judged
+    code by exactly the criterion a block region is, never by its key's name."""
+    blank = set()
+    i, n = 0, len(lines)
+    while i < n:
+        m = QUOTED_SCALAR_RE.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        # Walk to the closing quote, honouring backslash escapes. A trailing
+        # backslash at end-of-line escapes the line break (YAML's continuation),
+        # so escape state does not survive into the next line's first character.
+        body, end, esc = [], None, False
+        for j in range(i, n):
+            seg = lines[j][m.end(0):] if j == i else lines[j]
+            for k, ch in enumerate(seg):
+                if esc:
+                    esc = False
+                    continue
+                if ch == "\\":
+                    esc = True
+                    continue
+                if ch == '"':
+                    body.append(seg[:k])
+                    end = j
+                    break
+            if end is not None:
+                break
+            body.append(seg)
+            esc = False
+        if end is None:                  # unterminated -- leave the region alone
+            i += 1
+            continue
+        joined = "".join(body)
+        # A LITERAL `\n` ESCAPE IS REQUIRED, and it is not a formality. Without
+        # it this rule blanked `p2an003-dac-analog-signal-generation.yaml:118`,
+        # a `source_statement:` holding a QUOTED SENTENCE that opens with an
+        # apostrophe -- which `CODE_MARKER_RE` reads as a Spin2 comment. That is
+        # prose, and blanking it is the "turn the gate off by stealth" failure
+        # this file's block-scalar rule already warns about, reproduced in the
+        # other value shape. A stored code example is MULTI-LINE by construction;
+        # a quoted sentence is not.
+        logical = re.split(r"\\n", joined)
+        if len(logical) > 1 and any(CODE_MARKER_RE.match(x.replace("\\", ""))
+                                    for x in logical):
+            blank.update(range(i, end + 1))
+        i = end + 1
+    return blank
+
+
 def strip_yaml_comment(line):
     """Drop a YAML `#` comment, respecting quotes. A comment is invisible to
     every consumer of this KB -- the MCP and every reader see PARSED yaml, where
@@ -318,8 +530,9 @@ def strip_yaml_comment(line):
 
 
 def strip_code_regions(lines):
-    """Drop block-scalar example bodies. A demo's chosen numbers are not claims."""
-    scalar_code = _scalar_code_regions(lines)
+    """Drop example bodies in either scalar shape. A demo's chosen numbers are
+    not claims about the silicon, and nobody cites their own example."""
+    scalar_code = _scalar_code_regions(lines) | _quoted_scalar_regions(lines)
     out, skip_indent = [], None
     for idx, line in enumerate(lines):
         if idx in scalar_code:
@@ -343,9 +556,15 @@ def strip_code_regions(lines):
 
 
 def quantities_in(text):
+    """The physical quantities a region states, as unit tokens."""
     decommented = "\n".join(strip_yaml_comment(ln) for ln in text.split("\n"))
-    masked = HEX_RE.sub(" ", BINARY_RE.sub(" ", decommented))
-    return QTY_RE.findall(masked)
+    masked = CODEPOINT_RE.sub(" ", HEX_RE.sub(" ", BINARY_RE.sub(" ", decommented)))
+    out = []
+    for num, unit in QTY_RE.findall(masked):
+        if unit == "A" and len(num.split(".")[0].replace(",", "")) > AMPERE_DIGIT_LIMIT:
+            continue                     # a part number or a standard designator
+        out.append(unit)
+    return out
 
 
 def audit():
@@ -359,8 +578,7 @@ def audit():
             continue
         scanned += 1
         rel = path.relative_to(REPO)
-        file_cites = (cites_in(lines)
-                      or bool(INLINE_CITE_RE.search("\n".join(lines))))
+        file_cites = cites_in(lines) or inline_cite("\n".join(lines))
         prose = strip_code_regions(lines)
 
         for name, start, end in top_level_blocks(lines):
@@ -368,8 +586,7 @@ def audit():
             qty = quantities_in(body)
             if not qty:
                 continue
-            block_cites = (cites_in(lines, start, end)
-                           or bool(INLINE_CITE_RE.search(body)))
+            block_cites = cites_in(lines, start, end) or inline_cite(body)
             if block_cites:
                 continue
             units = sorted({u for u in qty})
@@ -393,6 +610,21 @@ def negative_control():
         ("P2 binary literal — MUST NOT fire", 'bit_pattern: "%0000_0000_000_0000000101000_00_00000_0"', False),
         ("pin numbers and counts — MUST NOT fire", 'pins: 64\nrange: "0-63"\ncogs: 8', False),
         ("hex constant — MUST NOT fire", 'value: "$0000_2800"', False),
+        # F-351: three things that are not amperes. Ten Tier-2 blocks stated no
+        # quantity at all and were pure artifacts of the bare `A` unit.
+        ("Parallax part number `64006A` — MUST NOT fire", 'part_number: "64006A"', False),
+        ("Unicode code point `U+221A` — MUST NOT fire", 'unicode: "U+221A"', False),
+        ("ISO designator `14443 A` — MUST NOT fire", 'std: "ISO/IEC 14443 A/MIFARE"', False),
+        ("a REAL bare-ampere current — MUST STILL FIRE",
+         'current_per_panel: "1.5A typical, 4A peak"', True),
+        ("a REAL three-digit ampere — MUST STILL FIRE", 'inrush: "100A for 2ms"', True),
+        # The rail-name decision, recorded as a control so it cannot flip in
+        # silence: a voltage designator in a hardware file is a CLAIM about a
+        # physical board and stays in scope. Deciding otherwise would disarm the
+        # gate on `vdd_max` / `VOH_min` — the exact F-348 shape that shipped a
+        # figure five times the datasheet's absolute maximum.
+        ("a rail NAME is still a claim — MUST STILL FIRE", 'label: "5V"', True),
+        ("an absolute-maximum rating — MUST STILL FIRE", 'vdd_max: "3.6V"', True),
     ]
     ok = True
     for label, text, want in cases:
@@ -422,6 +654,15 @@ def negative_control():
          ["encoding: |", "  %00 = 1.5mA (impedance ~2000Ohm)"], True),
         ("a `#` inside a quoted value is not a comment — MUST STILL FIRE",
          ['note: "clamp #1 draws 10 mA"'], True),
+        # F-335(c): the OTHER value shape. A code example stored as a quoted
+        # scalar with literal `\n` escapes was invisible to the region stripper.
+        ("PASM2 in a QUOTED scalar with `\\n` escapes — MUST NOT fire",
+         ['code: "\' HUB75 clock gen\\nrgb_cycle\\n  waitx #2   \' Hold 100us @ 200MHz\\n"'],
+         False),
+        # ...and the guard that keeps that rule from disarming the gate: a quoted
+        # SENTENCE opening with an apostrophe is prose, not a Spin2 comment.
+        ("a quoted sentence that OPENS with an apostrophe — MUST STILL FIRE",
+         ['source_statement: "\'PWM dithering gives better range at 200MHz\'"'], True),
     ]
     for label, lines, want in region_cases:
         fired = bool(quantities_in("\n".join(strip_code_regions(lines))))
@@ -487,11 +728,39 @@ def negative_control():
         ("inline attribution with no cite key at all — MUST NOT FIRE",
          ['branch_cost: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"'],
          False),
+        # F-335(e) — a DEFERRAL points the reader AWAY. This one shipped
+        # `max_current_per_pin: "150mA"` against the datasheet's ±30 mA through
+        # two purges, because the bare word `datasheet` marked the block cited.
+        ("`source:` that DEFERS to a datasheet is not a citation — MUST FIRE",
+         ['absolute_maximum:',
+          '  max_current_per_pin: "150mA"',
+          '  max_current_total: "Check datasheet for package limits"'], True),
+        ("an inline deferral in prose is not a citation — MUST FIRE",
+         ['note: "Sinks 150mA per pin; see the datasheet for package limits."'], True),
+        ("a deferral that NAMES the document IS an attribution — MUST NOT FIRE",
+         ['timing:', '  source: "See the P2 Silicon Doc v35, KNOWN BUGS"',
+          '  branch: "13 clocks at 160MHz"'], False),
+        # F-335(d) — a slug names a pattern CATEGORY, not a document. These got
+        # through because a bare `pasm2` / `validat` token sits INSIDE the
+        # identifier, and they were masking (c) in `waitx.yaml`.
+        ("`source:` naming a slug with an embedded language token — MUST FIRE",
+         ['timing:', '  source: inline_pasm2_pattern',
+          '  hold: "100us @ 200MHz"'], True),
+        ("`source:` naming a slug with an embedded `validat` token — MUST FIRE",
+         ['timing:', '  source: lock_validation',
+          '  settle: "20 ms"'], True),
+        # F-335(a) — the spelling eight board files actually use. Without it they
+        # scored wholly-uncited, so Tier 1 could never apply to them at all.
+        ("`documentation:` -> `primary: \"<doc>\"` IS a citation — MUST NOT FIRE",
+         ['documentation:',
+          '  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"',
+          'specifications:',
+          '  supply_voltage: "3.3V from host"'], False),
     ]
     for label, lines, want in cite_cases:
         body = "\n".join(strip_code_regions(lines))
         assert quantities_in(body), f"control case states no quantity: {label}"
-        cited = cites_in(lines) or bool(INLINE_CITE_RE.search(body))
+        cited = cites_in(lines) or inline_cite(body)
         fired = not cited
         good = fired == want
         ok &= good
@@ -500,6 +769,8 @@ def negative_control():
     total = len(cases) + len(region_cases) + len(cite_cases)
     print(f"\n{total} case(s): quantity {len(cases)} · region {len(region_cases)} "
           f"· citation {len(cite_cases)}")
+    print()
+    print(SCOPE_NOTE)
     print("Negative control PASSED -- quantities detected, P2 syntax not "
           "mistaken for units, code/comment regions skipped WITHOUT silencing "
           "prose claims, and a board revision / a power supply no longer read "
@@ -549,7 +820,10 @@ def main():
     if tier1:
         print(f"FAIL  {len(tier1)} Tier 1 violation(s) across {scanned} file(s)")
         return 1
-    print(f"PASS  no Tier 1 violations across {scanned} file(s)")
+    print(f"PASS  no Tier 1 violations across {scanned} file(s); "
+          f"{len(tier2)} Tier 2 advisory block(s) remain (advisory, not blocking)")
+    print()
+    print(SCOPE_NOTE)
     return 0
 
 

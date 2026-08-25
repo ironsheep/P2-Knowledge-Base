@@ -271,25 +271,55 @@ population first, so there is nothing to tolerate. ~~Close the known heading-for
 in the fidelity tool (its one false ORPHAN).~~ **DONE in «#292»** — the heading-form gap is
 closed and the false `[ORPHAN]` is gone.
 
-**One harvest gap remains OPEN and «#305» must dispose of it before arming.** Recorded as
-`KNOWN LIMITATIONS` item 4 in the tool itself, found while verifying «#292»: the truth side
-globs `*.md` **only**, and `ROW_RE` additionally requires the constant in **column 1** of a
-line beginning with `|`. The current-edition Spin2 v55 symbol table satisfies neither — it
-lives in `sources/spin2-v55/spin2-v55-text.txt` (a `.txt`) and its rows are tab-indented with
-the `%value` in column 1 and the name in column 2. That table carries **100** distinct `P_`
-constants while the truth side currently merges **120**, drawn from v51-era `.md` extracts.
-So wherever v55 added or re-described a constant, this instrument is auditing the KB against
-the **superseded** edition and cannot say so. **This is a file-type and row-shape gap, NOT a
-`TRUTH_ROOTS` question — the roots are correct and must not be widened.** It was left unfixed
-in «#292» deliberately (outside that task's stated scope, and widening the harvest moves the
-counts), but arming a blocking gate on a harvest that never read the current authority
-edition is the same defect class §10a exists to prevent — so «#305» either closes it or
-records, in writing, why arming without it is acceptable.
+~~**One harvest gap remains OPEN and «#305» must dispose of it before arming.**~~
+**CLOSED in «#305», 2026-08-25.** The truth side globbed `*.md` only and required the
+constant in **column 1** of a line beginning with `|`; the current-edition Spin2 v55 symbol
+table satisfies neither (a `.txt`, tab-indented, `%value` in column 1 and the name in column
+2), so the instrument audited the KB against the **superseded** v51 edition and could not
+say so. Closed by reading `.txt` as well and parsing pipe rows **by cell**, with **edition
+precedence** so a later edition of the same source family supersedes an earlier one.
+`TRUTH_ROOTS` was **not** widened.
+
+Measured, not estimated:
+
+| | Stated at planning | Measured 2026-08-25 |
+|---|---|---|
+| v55 `P_` constants | 100 | **116** over 114 rows (two rows carry a name *and* a brevity alias) — F-339 |
+| constants v55 **adds** | "added or re-described" | **0** — every one was already on the truth side |
+| constants v55 **re-describes** | — | **20**; 19 visibly, plus `P_OR_AB` invisibly (`strip_desc` truncates "Select A \| B, B" identically in both editions — self-cancelling, not a defect) |
+| truth-side merge | 120 | **120**, unchanged |
+| Tier 1 / Tier 2 | 0 / 0 | **0 / 0**, unchanged — the KB side was already on the v55 wording |
+
+**And the gap woke a latent one (F-341).** Six of our own derived analysis documents sit at
+the top level of `ingestion/sources/`. They contributed 0 truth entries under the old row
+shape; under the repaired one, `p2-complete-signal-flow-matrix.md:100` — a *signal-flow*
+table whose last cell happens to be a constant name — defined `P_PWM_SAWTOOTH` as **"P38"**.
+Closed structurally rather than by a list of six names: **an ingested source is a directory**,
+so a loose file at the root of a truth root is not one. Two guards, both with controls: the
+depth rule, and a name cell bounded to the first two columns (a constant in the last column
+is a *use*, not a definition).
 
 **Verification.** *Normal:* both exit 0 in the release path. *Edge:* each tool's
-`--negative-control` passes in CI — a check that cannot fail has not been verified, it has
-been run. *Error:* a tool that errors (exit 2) fails the release; "nothing audited" is never
-a pass.
+`--negative-control` runs **inside** the release path — `validate-dod-release.py` proves the
+instrument still discriminates before it trusts the instrument's pass, because a check that
+cannot fail has not been verified, it has been run. *Error:* a tool that errors (exit 2)
+fails the release; "nothing audited" is never a pass.
+
+**Armed, 2026-08-25.** Both instruments run as blocking checks in
+`engineering/tools/validate-dod-release.py` (`validate_constant_fidelity`,
+`validate_claim_sourcing`, each running its negative control first) and are listed in
+`release-yamls` at Step 1 and in the Step 5.5 pre-flight certification gate. No baseline, no
+tolerance, no ratchet.
+
+**What arming cost on the content side, and why it was not a regression.** Recognising the
+`documentation:` → `primary:` citation spelling (F-335a) moved **20 blocks across 7 board
+files** out of the advisory lane and into blocking Tier 1 — blocks that had been exempt from
+the gate for a reason nobody chose. They were drained source-first, the same way «#307»
+drained the Goertzel board: 17 gained a per-block `source:` naming the #64006 / #64009 /
+#64007 guide with a line range, and three unsourced inferences were removed outright
+(`~4 mA, ~2.0 V LED drop` and a `~20 ms` debounce interval on the Control board, whose guide
+states **470 Ω and nothing else**; the `current_per_led_ma` / `total_current_ma` pair from
+the same inference). Nothing supported by a source was deleted.
 
 ## 11. Give the KB a release-notes home
 
@@ -363,6 +393,21 @@ instrument and are held by review.
 **Name coverage is not semantic coverage, and neither is description coverage.** A clean run
 means *not caught by these checks*, never *correct*. Say so at closeout, or the green will be
 read as a guarantee nobody made.
+
+**Three more things the green does not certify, added when the gates were armed («#305»):**
+
+1. **The sourcing gate checks that a citation is PRESENT, never that it is RIGHT.** Nothing
+   reads the cited document. A block citing the wrong page passes.
+2. **Tier 2 is advisory and its population is not zero** — 49 blocks in wholly-uncited files
+   at arming. The release is green with those outstanding, by design.
+3. **`validate-crossref-keys.py` walks TOP-LEVEL fields only (F-340).** Measured 2026-08-25:
+   3161 reference sites read, **688 nested sites not read** — 82% coverage. The invisible
+   share is where F-338's two fabricated constant names hid. The validator now **counts and
+   prints** what it cannot see, and its banner reads *"ALL TOP-LEVEL CROSS-REFERENCES
+   RESOLVE"* rather than the former *"ALL CROSS-REFERENCES VALIDATED SUCCESSFULLY"*.
+   **"3161 refs, 0 unresolved" must never be reported as "cross-references are clean."**
+   The traversal repair remains owed under F-340; measured cost of landing it today is **54
+   nested references that do not resolve**, which is content triage, not instrument work.
 
 ---
 

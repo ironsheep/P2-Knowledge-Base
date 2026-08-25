@@ -488,6 +488,40 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
 
             has_refs = False
 
+            # F-340 — MEASURE WHAT THIS TRAVERSAL CANNOT SEE, AND PRINT IT.
+            #
+            # Every CROSS_REF_FIELDS entry is looked up in the file's TOP-LEVEL
+            # mapping and nowhere else. Reference sites nested inside records are
+            # invisible, and that is not a corner case: measured 2026-08-25,
+            # `language/spin2/symbols/spin2-builtin-symbols-complete.yaml` holds
+            # 135 `related_symbols:` lists, every one nested, and this validator
+            # reports `related_symbols: 7 resolved` for the whole corpus -- the
+            # seven entries of the ONE top-level occurrence in the KB. That is
+            # exactly how F-338's two fabricated constant names survived: they sat
+            # in a field this tool NAMES in its own vocabulary, in the file
+            # holding 99% of that field's instances.
+            #
+            # Walking them is owed (F-340) and is NOT done here: with the walk
+            # enabled, 54 nested references do not resolve today, and triaging
+            # those is content work, not instrument work. Until then the honest
+            # move is to stop the number reading as total coverage -- so the
+            # unseen sites are COUNTED and REPORTED, and "0 unresolved" is
+            # reported with its scope attached rather than as "clean".
+            def _count_nested(node, depth=0):
+                n = 0
+                if isinstance(node, dict):
+                    for k, v in node.items():
+                        if k in CROSS_REF_FIELDS and v and depth > 0:
+                            n += len(v) if isinstance(v, (list, dict)) else 1
+                        else:
+                            n += _count_nested(v, depth + 1)
+                elif isinstance(node, list):
+                    for x in node:
+                        n += _count_nested(x, depth + 1)
+                return n
+            results['unseen_nested_refs'] = (results.get('unseen_nested_refs', 0)
+                                             + _count_nested(content))
+
             for field_name, field_type in CROSS_REF_FIELDS.items():
                 if field_name not in content or not content[field_name]:
                     continue
@@ -704,6 +738,19 @@ def print_report(results: Dict):
     resolution_rate = (results['resolved_refs'] / results['total_refs'] * 100) if results['total_refs'] > 0 else 0
     print(f"\n📊 Resolution rate: {resolution_rate:.1f}%")
 
+    # SCOPE, PRINTED WITH THE NUMBER IT QUALIFIES (F-340). A rate computed over
+    # the sites this traversal can see must never be read as "cross-references
+    # are clean" -- it means "the share this instrument looks at resolves".
+    unseen = results.get('unseen_nested_refs', 0)
+    seen = results['total_refs']
+    if unseen:
+        cover = seen / (seen + unseen) * 100
+        print(f"⚠️  SCOPE: this traversal reads TOP-LEVEL fields only. "
+              f"{unseen} nested reference site(s) were NOT checked "
+              f"({cover:.0f}% of {seen + unseen} coverage).")
+        print("    A 100% rate above means the top-level share resolves. It is "
+              "not a statement about the nested share (F-340).")
+
     print("\n" + "-" * 70)
     print("RESOLUTION BY FIELD:")
     print("-" * 70)
@@ -753,7 +800,9 @@ def print_report(results: Dict):
     print("\n" + "=" * 70)
     total_issues = len(results['unresolved_refs']) + len(bad_format_refs)
     if total_issues == 0:
-        print("✅ ALL CROSS-REFERENCES VALIDATED SUCCESSFULLY")
+        unseen = results.get('unseen_nested_refs', 0)
+        print("✅ ALL TOP-LEVEL CROSS-REFERENCES RESOLVE"
+              + (f"  —  {unseen} nested site(s) NOT checked (F-340)" if unseen else ""))
     else:
         print(f"⚠️  {total_issues} REFERENCES NEED ATTENTION")
         if bad_format_refs:

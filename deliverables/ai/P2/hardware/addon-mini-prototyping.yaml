@@ -15,9 +15,11 @@ aliases:
 
 description: >-
   An 8x12 grid of plated thru-holes for custom prototyping. The 8 header I/O
-  pins (offsets 0-7) plus 5V, VIO, and GND are brought to the grid. There is no
-  fixed signal assignment - the eight I/O pins are raw, uncommitted prototyping
-  I/O whose function is determined entirely by the user's wiring.
+  pins (offsets 0-7) plus 5V, VIO, and GND are brought to the grid — per the
+  Parallax P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0, "P2 Eval
+  Mini Prototyping Add-on Board (#64006E)". There is no fixed signal assignment
+  - the eight I/O pins are raw, uncommitted prototyping I/O whose function is
+  determined entirely by the user's wiring.
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -60,6 +62,15 @@ signal_map:
 
 # --- Power/ground rails available at the grid ---
 power_rails:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Mini Prototyping Add-on Board (#64006E)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:227-252;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-mini-prototyping-64006e.md.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   ground:
     label: "GND"
     marking: "White silk blocks on the top side"
@@ -76,6 +87,12 @@ power_rails:
 
 # --- Prototyping grid + joined-hole / ground-strip detail ---
 prototyping_grid:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Mini Prototyping Add-on Board (#64006E)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:227-252;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-mini-prototyping-64006e.md.
   dimensions: "8x12 grid of plated thru-holes"
   total_holes: 96
   hole_spacing: "0.1 inch (2.54mm) standard"
@@ -94,6 +111,17 @@ prototyping_grid:
     thru-holes to Ground.
 
 specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Mini Prototyping Add-on Board (#64006E)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:227-252;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-mini-prototyping-64006e.md.
+    Shared connector / compatibility / mounting facts at
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:24-46.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -122,7 +150,7 @@ use_cases:
 advantages:
   - "Flexible prototyping platform with organized connections"
   - "All eight header I/O pins (offsets 0-7) directly accessible"
-  - "Both 3.3V (VIO) and 5V power supplies available at the grid"
+  - "Both host power rails available at the grid (named under `power_rails`)"
   - "Ground connections distributed throughout the grid"
   - "Modifiable interconnections via bottom-side trace cutting"
   - "Standard 0.1 inch hole spacing"

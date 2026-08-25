@@ -45,7 +45,14 @@ This skill enforces the correct order:
 Before bumping anything, confirm the working tree reflects a clean YAML-maintenance pass:
 - `deliverables/ai/P2/` edits are made and ready
 - YAML format clean: `python engineering/tools/verify-yaml-format.py`
-- Cross-references clean: `python engineering/tools/validate-crossref-keys.py`
+- Cross-references resolve: `python engineering/tools/validate-crossref-keys.py`
+  — note the scope line it prints. This validator walks **top-level fields only**;
+  nested reference sites are counted and reported but **not checked** (F-340).
+  "0 unresolved" means *the share it looks at resolves*, never "references are clean."
+- **Constant fidelity clean (BLOCKING):**
+  `python engineering/tools/validation/audit-constant-fidelity.py`
+- **Claim sourcing clean (BLOCKING):**
+  `python engineering/tools/validation/audit-yaml-claim-sourcing.py`
 - No `*.backup.*` files staged (they're git-ignored, but verify with `git status`)
 
 Note: `yaml-knowledge-base-maintenance` may have left a working-tree-state index file (`deliverables/ai/p2kb-index.json` showing as modified) from a throwaway regen used for validation. That's fine — DO NOT stage it. This skill will overwrite it with a post-commit regen in Step 6b.
@@ -162,13 +169,29 @@ python engineering/tools/generate-p2kb-index.py                  # working-tree 
 gzip -c deliverables/ai/p2kb-index.json > deliverables/ai/p2kb-index.json.gz   # keep .gz in lock-step
 python engineering/tools/verify-yaml-format.py                   # expect 0 parse failures
 python engineering/tools/validate-crossref-keys.py               # expect 100% — new files now resolve
+python engineering/tools/validation/audit-constant-fidelity.py --negative-control
+python engineering/tools/validation/audit-yaml-claim-sourcing.py --negative-control
 python engineering/tools/validate-dod-release.py                 # expect ALL VALIDATIONS PASSED
 ```
 
 **Both the index AND its `.gz` must be regenerated together** — the DoD
 "Gzip Compression" check fails if they drift, and that failure is easy to miss if
 you only regen the `.json`. Regenerating the `.gz` here is part of the gate, not
-just Step 6b.
+just Step 6b. This is not hypothetical: the committed `.gz` was found four days
+behind its `.json` on 2026-08-25, which had the whole DoD suite red on a stale
+derived artifact while every content check passed.
+
+**The two content instruments run inside `validate-dod-release.py` and BLOCK the
+release.** They are listed separately above only so their `--negative-control`
+runs happen too: *a check that cannot fail has not been verified, it has been
+run.* The DoD suite invokes each instrument's negative control before it trusts
+that instrument's pass, so running them by hand here is belt-and-braces for an
+interactive release, not a second gate.
+
+**No grandfathered baseline and no tolerance value.** The purge removed the
+existing population first, so there is nothing to tolerate; the first Tier 1
+violation fails the release. A tool that **errors** (exit 2 — no truth table, no
+KB tree) also fails: *"nothing audited" is never a pass.*
 
 **Gate outcome:**
 - **ALL PASS** → the release is certified; proceed to Step 6. Do **not** stage the
@@ -179,6 +202,22 @@ just Step 6b.
   point: catch it here, never in committed history.
 
 This gate makes Step 6c a confirmation, not a discovery.
+
+### What a green gate does NOT certify
+
+Carry this wording into the release note and the closeout; a blocking gate's
+green gets read as a guarantee unless it says what it did not look at.
+
+These two instruments check **named constants** and **quantitative claims**.
+Prose that describes a behaviour without naming a constant or stating a number
+**passes untouched** — which is exactly how F-327's fabricated drive ladder sat
+in a released file until a human read it. The sourcing gate checks only that a
+citation is **present**; nothing reads the cited document. Tier 2 is **advisory**
+and its population is not zero. Guide rules R6, R7 and R9 have no instrument and
+are held by review.
+
+**Name coverage is not semantic coverage, and neither is description coverage.**
+A clean run means *not caught by these checks*, never *correct*.
 
 ## 6. Execute the two-commit release
 
@@ -237,11 +276,15 @@ did change, its regenerator was skipped — do not proceed.
 ### 6c. Validate the fresh index
 
 ```bash
-python engineering/tools/validate-crossref-keys.py    # expect 100% resolution
+python engineering/tools/validate-crossref-keys.py    # expect 100% of the TOP-LEVEL share
 python engineering/tools/validate-dod-release.py      # expect ALL VALIDATIONS PASSED
 ```
 
-Both must pass. If validation fails, fix the underlying issue and re-regen the index. Do NOT proceed to the index commit with validation errors.
+Both must pass. `validate-dod-release.py` carries the two blocking content gates
+(Constant Fidelity, Claim Sourcing) plus their negative controls, so this run
+re-proves them against the committed state. If validation fails, fix the
+underlying issue and re-regen the index. Do NOT proceed to the index commit with
+validation errors.
 
 ### 6d. Commit the derived artifacts
 
@@ -350,6 +393,13 @@ Report:
 
 ## Error handling
 
+- A content gate (Constant Fidelity / Claim Sourcing) reports **Tier 1** → STOP. There is no
+  tolerance value and no baseline to grandfather against; fix the content or the finding is
+  the release. Never disable the gate to ship.
+- A content gate **errors (exit 2)** → STOP. It audited nothing, which is not a pass — check
+  the truth root and the KB tree exist before re-running.
+- A gate's **negative control** fails → STOP and do not trust that run's pass. The instrument
+  can no longer discriminate, so its green means nothing.
 - No git tags matching `^v[0-9]` → stop, ask user for bootstrap version
 - README badge URL doesn't match the expected `version-X.Y.Z` pattern → stop, ask user how to handle
 - CHANGELOG `## [X.Y.Z]` heading convention doesn't match → stop, ask

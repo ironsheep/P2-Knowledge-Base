@@ -41,52 +41,71 @@ dip_switch:
   common_note: "The VGA connections (offsets 0-4) remain active regardless of the switch."
 
 signal_map:
-  - offset: 0
-    signal: "VGA HSync (+ DIP-selected RCA socket 0)"
-    direction: out
-    common: "VGA HSync (15-pin VGA socket)"
-    modes:
-      video: "RCA socket 0 (H - HSync)"
-      audio: "RCA socket 0 (audio out via 22 uF cap)"
-  - offset: 1
-    signal: "VGA Blue (+ DIP-selected RCA socket 1)"
-    direction: out
-    common: "VGA Blue"
-    modes:
-      video: "RCA socket 1 (B - Blue)"
-      audio: "RCA socket 1 (audio out via 22 uF cap)"
-  - offset: 2
-    signal: "VGA Green (+ DIP-selected RCA socket 2)"
-    direction: out
-    common: "VGA Green"
-    modes:
-      video: "RCA socket 2 (G - Green)"
-      audio: "RCA socket 2 (audio out via 22 uF cap)"
-  - offset: 3
-    signal: "VGA Red (+ DIP-selected RCA socket 3)"
-    direction: out
-    common: "VGA Red"
-    modes:
-      video: "RCA socket 3 (R - Red)"
-      audio: "RCA socket 3 (audio out via 22 uF cap)"
-  - offset: 4
-    signal: "VGA VSync"
-    direction: out
-    notes: "Always active (not affected by the DIP switch)."
-  - offset: 5
-    signal: "Microphone input (via 1 uF cap)"
-    direction: in
-    notes: "3.5 mm mono microphone jack; Tip = signal, Sleeve = ground. Read via ADC."
-  - offset: 6
-    signal: "Audio amplifier output (Left)"
-    direction: out
-    notes: "80 mW amplified audio; 3.5 mm stereo headphone jack, Tip = Left."
-  - offset: 7
-    signal: "Audio amplifier output (Right)"
-    direction: out
-    notes: "3.5 mm stereo headphone jack, Ring = Right; Sleeve = ground."
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), A/V Breakout board and its dip-switch I/O Pin table --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:322-369;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-av-breakout-64006h.md
+    (22 uF RCA coupling caps, 1 uF microphone cap, 80 mW amplifier, jack wiring).
+  pins:
+    - offset: 0
+      signal: "VGA HSync (+ DIP-selected RCA socket 0)"
+      direction: out
+      common: "VGA HSync (15-pin VGA socket)"
+      modes:
+        video: "RCA socket 0 (H - HSync)"
+        audio: "RCA socket 0 (audio out via 22 uF cap)"
+    - offset: 1
+      signal: "VGA Blue (+ DIP-selected RCA socket 1)"
+      direction: out
+      common: "VGA Blue"
+      modes:
+        video: "RCA socket 1 (B - Blue)"
+        audio: "RCA socket 1 (audio out via 22 uF cap)"
+    - offset: 2
+      signal: "VGA Green (+ DIP-selected RCA socket 2)"
+      direction: out
+      common: "VGA Green"
+      modes:
+        video: "RCA socket 2 (G - Green)"
+        audio: "RCA socket 2 (audio out via 22 uF cap)"
+    - offset: 3
+      signal: "VGA Red (+ DIP-selected RCA socket 3)"
+      direction: out
+      common: "VGA Red"
+      modes:
+        video: "RCA socket 3 (R - Red)"
+        audio: "RCA socket 3 (audio out via 22 uF cap)"
+    - offset: 4
+      signal: "VGA VSync"
+      direction: out
+      notes: "Always active (not affected by the DIP switch)."
+    - offset: 5
+      signal: "Microphone input (via 1 uF cap)"
+      direction: in
+      notes: "3.5 mm mono microphone jack; Tip = signal, Sleeve = ground. Read via ADC."
+    - offset: 6
+      signal: "Audio amplifier output (Left)"
+      direction: out
+      notes: "80 mW amplified audio; 3.5 mm stereo headphone jack, Tip = Left."
+    - offset: 7
+      signal: "Audio amplifier output (Right)"
+      direction: out
+      notes: "3.5 mm stereo headphone jack, Ring = Right; Sleeve = ground."
 
 specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:322-369
+    (the A/V Breakout board and its "use the P2-EVAL 3.3 V LDO power selection"
+    tip) and :24-46 (shared connector / compatibility / mounting facts);
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-av-breakout-64006h.md.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -104,6 +123,13 @@ specifications:
     mounting_hardware: "M3 or UNC 4-40"
 
 audio_capabilities:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval A/V Breakout Add-on Board (#64006H)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:322-369;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-av-breakout-64006h.md
+    (80 mW amplified audio, 1 uF microphone coupling, 22 uF RCA coupling, jack wiring).
   output:
     amplifier: "80 mW amplified audio output"
     connector: "3.5 mm stereo headphone jack"

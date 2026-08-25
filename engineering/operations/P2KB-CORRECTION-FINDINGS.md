@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-357`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-358`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -43,6 +43,43 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
+
+## The published index and its gzip drifted apart in committed history, and the release validator has been red on it (2026-08-25, «#305», arming the content gates) — F-357
+
+- **F-357 — `deliverables/ai/p2kb-index.json.gz` is four days behind `deliverables/ai/p2kb-index.json`
+  in committed history, so `validate-dod-release.py` fails its Gzip Compression check on a clean
+  tree.** — `RESOLVED`
+
+  **How it surfaced.** «#305» armed two content gates inside `validate-dod-release.py` and ran the
+  suite to prove the release path green. Every content check passed and the suite still reported
+  **❌ VALIDATION FAILURES - DO NOT RELEASE**. The failure was not the new gates.
+
+  **Measured at `HEAD`, before any edit this session:** the `.json` declares
+  `generated: 2026-08-25T05:35:28`, 1130 entries; the `.gz` decompresses to
+  `generated: 2026-08-21T23:15:55`, **1129** entries. One key present only in the `.json`
+  (`p2kbArchPinDriveConfiguration`) and **181** entries differing between the two. Both files are
+  unmodified in the working tree — the drift is committed.
+
+  **Cause.** A task regenerated the index and committed the `.json` without regenerating the `.gz`.
+  `release-yamls` Step 5.5 already warns that "both the index AND its `.gz` must be regenerated
+  together — that failure is easy to miss if you only regen the `.json`". It was missed anyway,
+  and nothing caught it because the DoD suite is not run outside a release.
+
+  **Fixed** by regenerating the `.gz` from the committed `.json`
+  (`gzip -c deliverables/ai/p2kb-index.json > deliverables/ai/p2kb-index.json.gz`); the pair is now
+  byte-identical on decompression and the suite exits 0. Derived artifact, no content implication.
+
+  **Why it is filed rather than just fixed.** A *published* index and its *published* gzip
+  disagreed for four days, and `p2kb-mcp` serves the published state. Any consumer taking the `.gz`
+  path saw a 1129-entry index missing a file this sprint added. The `release-yamls` warning
+  (2026-08-25 revision) now names this incident so the next reader knows it is not hypothetical.
+
+  **What is NOT closed by this entry:** nothing forces the two into lock-step outside a release
+  run. The DoD suite catches it, but only when someone runs it.
+
+  Status: `RESOLVED`
+
+---
 
 ## The hygiene gate cannot see the new errata register, so its monotonic allocator is ungoverned (2026-08-25, arbiter, during «#307») — F-355
 
@@ -81,7 +118,42 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   pass. That is the standing lesson from the digit-density gate — a gate that measures nothing and
   exits 0 manufactures confidence.
 
-  Status: `CONFIRMED` — open, owned by «#305».
+  **RESOLVED 2026-08-25 by «#305»**, parameterised exactly as specified and NOT by renaming the
+  errata counter. `(label, prefix)` are read off the register itself — `COUNTER_RE` matches
+  `**Next <word> ID: X-NNN**` in any spelling — and the ID shapes are built from the series the
+  file actually uses (`series_in` / `build_id_res`). **Every** declared counter is now checked,
+  and a series that is allocated with **no** counter declared is itself a violation, which is
+  the general form of this defect.
+
+  **Two further hard-codings surfaced while doing it, both of which would have made the new
+  coverage lie:**
+  - `canon()` matched `([FG])-0*(\d+)` and returned the ID **unchanged** for anything else. So
+    the errata register's canonical live set held `E-001` while the gap scan looked for `E-1`,
+    and all ten entries were reported as "went silent" while sitting in plain view. A
+    canonicaliser that silently declines to canonicalise is worse than one that raises.
+  - The finding heading pattern required `###`. The errata register heads an entry with `##`,
+    which the section-structure checks would then have read as a section header. Entry headings
+    are now tested first, and `#{2,4}` is accepted.
+
+  **`RESEARCHING` added to `STATUS_WORDS`** (the errata lifecycle's middle state). `OPEN` and
+  `GAP` were deliberately **not** added: both occur as ordinary uppercase English in the
+  corrections register's prose (8 whole-word occurrences today), and admitting them would let a
+  finding carrying no status pass check 4 on a stray word. A vocabulary that silences a check is
+  worse than one that is short.
+
+  **`D-` was not registered, because it does not exist.** This finding says the errata register
+  "allocates two ID families (`E-NNN` and `D-NNN`)". Measured on disk: `D-` appears **zero**
+  times, and Part B's open-question table keys off `E-006`. A `--series` flag exists for a family
+  declared before its first filing; nothing needed it.
+
+  **Negative control added, as this finding required:** nine cases through the shipped entry
+  point — a stale counter and a clean one in **both** dialects, a register with no counter, a
+  series with no counter declared, a missing status, a duplicate ID, and an unreadable register,
+  which exits **2** distinctly from a violation's 1. Both live registers verified CLEAN
+  afterwards, with the corrections register's numbers unchanged from entry (80 live, 300
+  archived, 0 unaccounted, 5 guardrails exempt).
+
+  Status: `RESOLVED`
 
 ---
 ## Carry-forward guardrails — investigated and settled; do NOT re-file (full detail in the archive)
@@ -408,7 +480,21 @@ Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns t
 >
 > Status: `PENDING-VALIDATION` — applied and gate-verified; only the YAML release is owed.
 
-### F-351 — the sourcing gate reads Parallax part numbers, Unicode code points and an ISO designator as amperes; 12 blocks are pure instrument artifacts — `CONFIRMED`
+### F-351 — the sourcing gate reads Parallax part numbers, Unicode code points and an ISO designator as amperes; 12 blocks are pure instrument artifacts — `RESOLVED`
+
+> **RESOLVED 2026-08-25 by «#305»**, both repairs as suggested here plus the thousands-separator
+> one. A bare `A` now requires at most three integer digits (a current in this domain is
+> `1.5A`/`20A`/`100A`; a part number or standard designator is a four-or-more digit run);
+> `U+XXXX` is masked alongside `%binary` and `$hex`; the number pattern accepts `,` groups so
+> `3,333,333 Hz` is one token rather than `333 Hz` + `000 Hz`. Deliberately NOT applied to the
+> other units — `500,000,000 Hz` and `2000Ohm` are real claims.
+>
+> **Measured: 9 blocks, not 10.** The tenth on this finding's list
+> (`hardware/p2-hardware-feature-comparison.yaml` `selection_criteria`) had already been drained
+> by an earlier task and was not in the population when «#305» ran. The other nine are exactly
+> as listed. Five negative-control cases were added — the three artifacts MUST NOT fire, and a
+> real `1.5A`/`4A` current and a `100A` inrush MUST STILL fire, so the fix cannot be widened
+> into a disarm.
 
 > **Instrument:** `engineering/tools/validation/audit-yaml-claim-sourcing.py`, `QTY_RE`. **Do not fix
 > here — «#305» owns instrument repair** (see F-335/339/340/341). Filed so the Tier-2 count is read
@@ -1177,8 +1263,62 @@ needs a source that states it or a rewrite that does not compute.
   not because the gate is wrong today, but because eight board files are currently exempt from it
   for a reason nobody chose.
 
-  Status: `CONFIRMED` — measured whole-KB with the repaired detector; deliberately not fixed,
-  the ordering above is the reason.
+  **RESOLVED 2026-08-25 by «#305», (a)–(e) together, in the order this finding set out.**
+
+  1. **The rail-name question, decided: a voltage designator in a hardware file IS a claim.**
+     It asserts a fact about a physical board — what is printed on it, what it connects to —
+     and a reader wires hardware from it. The alternative disarms the gate on `vdd_max` /
+     `VOH_min`, which is the exact F-348 shape that shipped a figure five times the
+     datasheet's absolute maximum. It is also the reading already applied to the 48 and to
+     F-334's eleven, so nothing already accepted has to be re-litigated. Recorded as two
+     standing negative-control cases (`label: "5V"` and `vdd_max: "3.6V"` MUST STILL FIRE)
+     so the decision cannot flip in silence.
+  2. **(b) / F-351 — `QTY_RE` repaired.** A bare `A` preceded by four or more integer digits
+     is a part number or a standard designator, not a current; `U+XXXX` is masked alongside
+     `%binary` and `$hex`; the number accepts thousands separators. Measured: **9 blocks**
+     that stated no quantity at all left the advisory lane (`addon-control-board` ×3,
+     `hardware-compatibility-matrix` ×2, `p2-hardware-selection-guide` ×2,
+     `p1_rom_font_character_set`, `obex/objects/4070`). F-351 listed ten; the tenth
+     (`p2-hardware-feature-comparison` `selection_criteria`) had already been drained by an
+     earlier task, so it was not in today's population.
+  3. **(c) and (d) landed in the same edit, because they cancel.** (c): a code example stored
+     as a **double-quoted scalar with literal `\n` escapes** was invisible to the region
+     stripper, which now judges a quoted scalar by the same `CODE_MARKER_RE` test it applies
+     to a `|` block — plus a guard requiring a real `\n` escape, without which the rule
+     blanked `p2an003-dac-analog-signal-generation.yaml:118`, a `source_statement:` holding a
+     quoted SENTENCE that opens with an apostrophe. Blanking prose is the "turn the gate off
+     by stealth" failure, reproduced in the other value shape. (d): a lowercase snake_case
+     slug is a pattern-category tag, not a document — vetoed by shape rather than by token.
+  4. **(e) — a deferral is not a citation.** Vetoed as a PHRASE (`check|see|refer to|consult
+     |look up|read|review` + a document noun) rather than anchored at the start of the value,
+     because *"Sinks 150mA per pin; see the datasheet for package limits"* reads the same way
+     and an anchor would miss it. A deferral that NAMES the document (`"See P2 Silicon Doc
+     v35"`) is an attribution and still counts. Applied to the inline path per LINE, which is
+     the half that actually fired.
+  5. **(a) — `documentation` added to `CITE_KEY_RE` last, as this finding required.**
+
+  ⚠️ **TWO CORRECTIONS TO THIS FINDING'S OWN TEXT, measured against the tree 2026-08-25.**
+  - (d) attributes the leak to "the filename/slug accept-branch". It is not that: of the five
+    slugs on `waitx.yaml`, **only `inline_pasm2_pattern` passed**, and it passed because the
+    bare `pasm2` token in `CITE_VALUE_RE` matches INSIDE the identifier. The corpus carried
+    exactly two such values (the other is `lock_validation` at `lockrel.yaml:70`, via
+    `validat`). `hub75_driver`, `bit_bang_spi`, `software_pwm` and `input_debounce` never
+    passed at all.
+  - (c) states `waitx.yaml` reads "4 quantities raw, 4 surviving the strip". **That does not
+    reproduce**: with the pre-repair detector loaded side by side, the file yields **0**
+    quantities raw and 0 after the strip. The PASM2 comments carrying `1kHz` / `200MHz` /
+    `100us` sit after `#pwm_loop` on the same physical line, and `strip_yaml_comment` reads
+    that `#` as a YAML comment and drops the rest. So the block read clean for a THIRD wrong
+    reason, not two. The underlying defect in (c) is real and is fixed; its stated symptom
+    was masked by an unrelated accident.
+
+  **Measured effect of (a)–(e) together, instrument only, against the committed tree:**
+  Tier 1 **0 → 20**, Tier 2 **78 → 49**. The 29 that left Tier 2 are the 20 re-tiered by (a)
+  plus the 9 artifacts removed by (b). The 20 were then drained source-first (see F-335's
+  disposition in the sprint plan §10): 17 blocks gained a per-block `source:`, three unsourced
+  inferences were removed. Final state: **0 Tier 1, 49 Tier 2**, and both gates armed.
+
+  Status: `RESOLVED`
 
 ---
 
@@ -1458,7 +1598,16 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > sprint exists to repair, one level up.**
 > detection gap is dispositioned.
 
-### F-339 — `audit-constant-fidelity.py`'s own docstring misstates the size and the shape of the blind spot it declares — `CONFIRMED`
+### F-339 — `audit-constant-fidelity.py`'s own docstring misstates the size and the shape of the blind spot it declares — `RESOLVED`
+
+> **RESOLVED 2026-08-25 by «#305».** Both numbers re-measured against disk before the
+> docstring was rewritten: the v55 table carries **116** distinct `P_` constants over **114**
+> rows (two rows name a constant *and* its brevity alias), **ADDED = 0**, **RE-DESCRIBED =
+> 20**. This finding's figures are confirmed exactly; the task body dispatched with «#305»
+> repeated the wrong 100 and was corrected. 19 of the 20 move visibly once v55 is on the truth
+> side; `P_OR_AB` is the twentieth and moves invisibly for the self-cancelling `strip_desc`
+> reason this finding already documents — left alone, as instructed. `KNOWN LIMITATIONS`
+> item 4 now records the closure and the measured cost instead of the estimate.
 
 > **Location:** `engineering/tools/validation/audit-constant-fidelity.py`, `KNOWN LIMITATIONS`
 > item 4 (around `:114`). For **«#305»**, which arms this gate; **do not fix it inside a task that
@@ -1488,7 +1637,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > ("Select A | B, B") does, the tool truncates both sides identically, and it self-cancels. The
 > shipped record is correct as written; do not align it to the tool's displayed `"B, B"`.
 
-### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `CONFIRMED`
+### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `PARTIAL`
 
 > **Location:** `engineering/tools/validate-crossref-keys.py:491-492` —
 > `if field_name not in content or not content[field_name]: continue`, where `content` is the
@@ -1507,8 +1656,73 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > mapping — and add a negative control that plants a known-bad name in a nested list and proves
 > the walk fails on it. A field that reports "resolved" while reading none of the corpus is worse
 > than no check: it reads as coverage.
+>
+> **«#305» DISPOSITION, 2026-08-25 — the SCOPE half is done; the TRAVERSAL half is still owed.**
+>
+> This finding was assigned to «#305» because that task arms two release gates and must not
+> arm anything on a number that reads wider than it is. What «#305» did:
+>
+> - **The blind spot is now MEASURED AND PRINTED on every run.** The validator counts the
+>   reference sites its traversal cannot reach and reports them beside the rate:
+>   *"⚠️ SCOPE: this traversal reads TOP-LEVEL fields only. 688 nested reference site(s) were
+>   NOT checked (82% of 3849 coverage)."* A gate must read the artifact; a blind spot that is
+>   counted is no longer silent.
+> - **The inflated banner is gone.** `✅ ALL CROSS-REFERENCES VALIDATED SUCCESSFULLY` now reads
+>   `✅ ALL TOP-LEVEL CROSS-REFERENCES RESOLVE — 688 nested site(s) NOT checked (F-340)`, and
+>   `validate-dod-release.py` reports *"All TOP-LEVEL cross-references resolve"* rather than
+>   *"All cross-references resolve"*. The same wording is carried into `release-yamls` Step 1
+>   and into the sprint plan's *what a green exit does not certify* section.
+> - **A missing measurement now FAILS the release.** The DoD check previously passed silently
+>   when the validator printed no resolution rate at all; a validator that printed no
+>   measurement audited nothing, and that now fails.
+>
+> **Why the traversal itself was NOT landed here, measured rather than assumed.** With the
+> nested walk enabled, **54 references do not resolve** — 26 `related_symbols` (including four
+> JSON-Schema keywords, `type`/`items`/`description`/`required`, which the walk reaches inside
+> `spin2-language-schema.yaml` and which are not references at all), 15 `related_documentation`
+> (descriptive text such as *"P2 Silicon Documentation"*, *"Pin mapping references"*), 2
+> `related_pasm`, and the rest spread thin. Roughly half are content triage and half are a
+> field-typing question (should `related_documentation` be `'text'` like `see_also`?). That is
+> a task, not a side effect of arming a different gate, and landing it inside «#305» would have
+> turned a green release path red on 54 items with no owner.
+>
+> ⚠️ **Counting units differ between this entry and «#305»'s measurement, and both are right.**
+> This finding counts **sites** (742 seen / 230 unseen, 76%). «#305» counts **individual
+> references** (3161 seen / 688 unseen, 82%). Same defect, same dominant field
+> (`related_symbols`), different denominators — do not treat one as correcting the other.
+>
+> Status: `PARTIAL` — scope stated, measured and printed; the nested traversal + its negative
+> control remain owed, with the 54 unresolved references above as the known entry cost.
 
-### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `CONFIRMED`
+### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `PARTIAL`
+
+> 🔴 **THE LATENT DISARM WENT ACTIVE, EXACTLY AS THIS FINDING PREDICTED — and is now closed
+> at the instrument (2026-08-25, «#305»).** This entry says the disarm is "a shape away, not a
+> policy away". «#305» changed the shape (the harvest had to read the current-edition v55
+> table, whose rows put the name in column 2), and with the repaired parser and no guard,
+> `p2-complete-signal-flow-matrix.md:100` — a **signal-flow** table whose last cell happens to
+> hold a constant name — defined `P_PWM_SAWTOOTH` as **"P38"**, the pin number in the
+> neighbouring cell. One of our own derived documents teaching the instrument our own
+> inference, in the first run after the shape changed.
+>
+> **Closed structurally, not by a list of six names.** An ingested source **is a directory**:
+> every real source under `sources/` lives in its own folder because that is what the ingestion
+> process creates, so a loose file at the root of a truth root was put there by something else
+> and is not an ingested source document (`MIN_DEPTH_BELOW_ROOT`). That rule excludes all
+> **twelve** loose files at `sources/` top level, not just these six, and it catches the next
+> stray file without an edit. A second, independent guard bounds the name cell to the first two
+> columns — a constant in the last column is a *use*, not a definition. Both carry negative
+> controls, including the exact `P_PWM_SAWTOOTH | P38` row.
+>
+> **`TRUTH_ROOTS` was NOT widened or narrowed** — the roots are unchanged; only what counts as
+> a file inside them is now defined.
+>
+> **Still open, and it is the half this finding actually asked for:** the six documents remain
+> at `sources/` top level, still asserting a 15 kΩ internal pull-up the P2 does not have. The
+> instrument can no longer be misled by them; a reader still can. Relocating them to a derived/
+> analysis area, or repairing them against the Datasheet legend, is unchanged and unowned.
+>
+> Status: `PARTIAL` — instrument disarm closed and controlled; the content relocation is owed.
 
 > **The six**, all at `engineering/ingestion/sources/` top level, all self-describing as
 > generated cross-references rather than Parallax publications:

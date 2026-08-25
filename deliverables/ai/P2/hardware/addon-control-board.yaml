@@ -17,7 +17,9 @@ description: >-
   Four push-buttons and four blue LEDs for simple user-interface control. Each
   active-high blue LED has a 470 ohm series resistor and sits next to a button;
   each active-high tactile push switch has a 470 ohm series resistor so the I/O
-  pin reads high while the button is pressed.
+  pin reads high while the button is pressed — per the Parallax P2 Eval Add-on
+  Boards (#64006 Series) Product Guide v2.0, "P2 Eval Control Add-on Board
+  (#64006A)".
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -33,38 +35,45 @@ pin_group:
     serial pins - not recommended.
 
 signal_map:
-  - offset: 0
-    signal: "Blue LED 0"
-    direction: out
-    notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness (P_PWM_SAWTOOTH | P_OE). ~4 mA, ~2.0 V LED drop."
-  - offset: 1
-    signal: "Blue LED 1"
-    direction: out
-    notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
-  - offset: 2
-    signal: "Blue LED 2"
-    direction: out
-    notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
-  - offset: 3
-    signal: "Blue LED 3"
-    direction: out
-    notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
-  - offset: 4
-    signal: "Tactile push switch 0"
-    direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Hold the pin low with a weak drive (WRPIN P_LOW_15K, then PINLOW so DIR is high) so an unpressed switch reads 0; software debounce (~20 ms)."
-  - offset: 5
-    signal: "Tactile push switch 1"
-    direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
-  - offset: 6
-    signal: "Tactile push switch 2"
-    direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
-  - offset: 7
-    signal: "Tactile push switch 3"
-    direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), Control board I/O Pin table --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:52-93;
+    per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md.
+  pins:
+    - offset: 0
+      signal: "Blue LED 0"
+      direction: out
+      notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness (P_PWM_SAWTOOTH | P_OE)."
+    - offset: 1
+      signal: "Blue LED 1"
+      direction: out
+      notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
+    - offset: 2
+      signal: "Blue LED 2"
+      direction: out
+      notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
+    - offset: 3
+      signal: "Blue LED 3"
+      direction: out
+      notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness."
+    - offset: 4
+      signal: "Tactile push switch 0"
+      direction: in
+      notes: "470 ohm series resistor; active high (pressed = high). Hold the pin low with a weak drive (WRPIN P_LOW_15K, then PINLOW so DIR is high) so an unpressed switch reads 0; software debounce."
+    - offset: 5
+      signal: "Tactile push switch 1"
+      direction: in
+      notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
+    - offset: 6
+      signal: "Tactile push switch 2"
+      direction: in
+      notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
+    - offset: 7
+      signal: "Tactile push switch 3"
+      direction: in
+      notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
 
 # Physical placement differs from pin order; the OBEX driver remaps to MSB..LSB
 # (left-to-right, top-to-bottom). Offsets above are the electrical truth.
@@ -77,6 +86,16 @@ physical_layout_remap:
   button_remap: {logical_0: "base+5", logical_1: "base+4", logical_2: "base+7", logical_3: "base+6"}
 
 specifications:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:52-93
+    (the Control board) and :24-46 (shared connector / compatibility / mounting
+    facts); per-board capture at
+    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md.
+    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
+    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -85,8 +104,6 @@ specifications:
     - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
   electrical:
     supply_voltage: "3.3V from host"
-    current_per_led_ma: 4
-    total_current_ma: 16
   physical:
     connector: "2x6 pass-through socket"
     mounting: "Single M3 mounting hole connected to GND"

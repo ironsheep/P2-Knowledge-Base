@@ -48,6 +48,13 @@ signal_map:
   - {offset: 7, signal: "Not Connected", direction: na, notes: "N/C."}
 
 power_signals:
+  source: >-
+    64009 P2 microSD Add-on Guide v1.0 (Parallax Inc.), accessory-header signal
+    table --
+    engineering/ingestion/sources/p2-microSD-addon/p2-microSD-addon-text.txt:68-85
+    ("3.3V voltage required to power the microSD card"; "Do not supply power to
+    both the accessory header pin and SIP breakout pad at the same time"; the 5V
+    pin "Not Connected and Not Labelled").
   VIO3V3: "3.3V supply to the microSD card (required to power the card). Do NOT supply power to both the accessory-header pin and the SIP breakout pad at once."
   5V: "Not Connected (and not labelled) on this board."
   GND: "Common ground."
