@@ -124,6 +124,23 @@ a plan or a task; point at it, the way tasks point at the register.
 names `engineering/ingestion/KNOWLEDGE-GAPS.md` in its deliverables, with BOTH halves stated:
 the holes this source OPENS, and the holes it now CLOSES in sources already ingested.**
 
+**And it names `engineering/ingestion/SOURCE-ERRATA.md` (added 2026-08-25).** Three registers, three
+different questions, and a source task can produce all three in one pass:
+
+| Finding | Register | Test |
+|---|---|---|
+| our shipped KB is wrong | `operations/P2KB-CORRECTION-FINDINGS.md` | fix it here |
+| no source tells us | `KNOWLEDGE-GAPS.md` | fill it, or ask an expert |
+| **the source document is wrong** | **`SOURCE-ERRATA.md`** | **report upstream; never edit the source** |
+
+**The test, stated in the task body so the executor does not have to derive it: *if Parallax fixed
+their document tomorrow, would this entry disappear?*** Yes → erratum. No → our correction, or a
+gap. Getting this wrong is not a filing-cabinet problem — a source erratum filed to the corrections
+register sends the next agent hunting for a YAML edit that must not happen, and filed as a gap it
+inverts its own meaning. Require the executor to record `Reached our KB?` (follows / diverges /
+never carried) on every erratum: that column is what turns the register into a map of where this
+project knowingly departs from Parallax, which is the half that compounds.
+
 **Why this has to live here rather than in the skill.** `ingest-source`'s completion checklist
 already requires it, and has for months. It still did not happen — three times in one day:
 

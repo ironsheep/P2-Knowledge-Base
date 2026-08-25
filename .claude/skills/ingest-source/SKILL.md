@@ -50,6 +50,7 @@ that pass. The standing docs:
 | `AUTHORITATIVE-SOURCES.md` | trust catalog — per-source tier (the dashboard's Auth column reads from here) |
 | `DOCUMENT-LINEAGE.md` | editions/supersession + source→output + derived cross-source facts |
 | `KNOWLEDGE-GAPS.md` | the moving **gap ledger** + **questions-for-experts** (pass-6 output home) |
+| `SOURCE-ERRATA.md` | **defects in the ingested document itself** (pass-6 output home). A conflict that resolves to *"the source is wrong"* files HERE — not the corrections register (nothing in our tree to fix) and not the gap ledger (a gap says *we do not know*; an erratum says *we know, and the document is wrong*). |
 
 > **This skill is written to current tooling and SUPERSEDES two legacy
 > constraints those docs still carry** (see §8). When this skill and a legacy
@@ -407,6 +408,16 @@ source *answers* prior holes AND *opens* new ones, so a source that surfaces
 zero answered/new questions is the exception to justify, not the default.
 1. **Answer prior open questions** — review `KNOWLEDGE-GAPS.md` (the gap ledger) + prior audits; mark what this source answers by moving its ledger row **OPEN→ANSWERED** (page/section ref + the edition that filled it).
 2. **Raise new questions** this source surfaces → add to `KNOWLEDGE-GAPS.md` (Part A gap ledger, status OPEN).
+2a. **File defects in the SOURCE ITSELF** → `engineering/ingestion/SOURCE-ERRATA.md` (ID `E-NNN`).
+   **The test for which register: if Parallax fixed their document tomorrow, would the entry
+   disappear?** Yes → an erratum. No → our correction (`P2KB-CORRECTION-FINDINGS.md`) or a gap.
+   A source erratum has **no fix in our tree** — filing it to the corrections register sends the
+   next agent looking for a YAML edit that must not happen, and filing it as a gap inverts its
+   meaning (a gap says *we do not know*; an erratum says *we know, and the document is wrong*).
+   ⚠️ **Confirm it is THEIR defect and not OUR extraction defect** before filing: check the
+   original capture, not the derived summary. Record `Reached our KB?` — follows / diverges /
+   never carried — because that column is what makes the register a divergence map rather than a
+   complaint list. **Never edit an ingested source to "fix" it.**
 3. **Harvest embedded reviewer notes as credible feedback** — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). **Extraction:** `word/comments.xml` holds the comment bodies (author/date/id); the comment *anchor* (what text each is attached to) comes from the `commentRangeStart/End` id markers in `word/document.xml` — pair them so each note carries its commented context. _(Certified on Smart Pins (Titus) rev 5's 27 comments — one, #21, surfaced a real bit-field error confirmed against the Silicon Doc.)_
 4. **Flag conflicts** — `Source A says … / Source B says … / Resolution (which is authoritative and why)`. **A conflict that touches published P2KB YAML is a corrections-register entry** — append it to `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (`NEEDS-VERIFICATION`) for the YAML head to work via `yaml-knowledge-base-maintenance`. This skill does **not** edit `deliverables/ai/P2/` itself.
 5. **Unresolved / expert-only:** where a fact is unresolved across all eligible sources, ask the user rather than guess (plain chat — no AskUserQuestion here); if only the designer can settle it, record it in `KNOWLEDGE-GAPS.md` **Part B** (questions-for-experts + who-to-ask).
@@ -458,6 +469,7 @@ Report:
 - Completeness % + gate status written to `README.md` (the dashboard).
 - Q&A audit summary: prior questions answered, new questions, **conflicts routed to `P2KB-CORRECTION-FINDINGS.md`** (with IDs).
 - **Gap ledger + questions-for-experts updated in `KNOWLEDGE-GAPS.md`** (answered rows moved, new raised, reviewer notes harvested, expert-only questions routed).
+- **Source errata filed in `SOURCE-ERRATA.md`** — every defect found in the document ITSELF, each with the verbatim quote, its `file:line`, the evidence tier, and `Reached our KB?` (follows / diverges / never carried). **An empty result is a real and common answer; say so explicitly rather than omitting the line.**
 - Trust tier set in `AUTHORITATIVE-SOURCES.md`; lineage/supersession recorded in `DOCUMENT-LINEAGE.md` if an updated edition.
 - Suggested next step (e.g. the YAML head working any routed conflicts; or central-repository-build integration).
 
