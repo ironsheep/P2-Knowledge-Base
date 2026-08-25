@@ -2628,6 +2628,29 @@ Release conditions, both required:
 Then: apply the amendment, and record the result in `verification.measured` **without a build
 number**.
 
+> ### GAP RECORDED 2026-08-25 («#300») — the HELD decision stands, and both release conditions were MEASURED
+>
+> This finding was on «#300»'s roster and **closes this sprint as a recorded gap, not as work**. Stephen's
+> 2026-08-22 decision to hold it was **not re-opened, not re-argued, and the amendment was not applied.**
+> The only thing done here was to check — rather than assume — whether the two release conditions this entry
+> names have since been met. **Both are still unmet:**
+>
+> 1. **pnut-ts 1.55.4 is NOT in this devcontainer.** `pnut-ts --version` → **`PNut-TS: v1.55.3`**. The
+>    compiler that makes the amended text true is still not the one installed, so publishing the amendment
+>    now would hand 1.55.3 readers guidance that is wrong *for them* — the exact sequencing risk this entry
+>    was held on.
+> 2. **The compiler side's test source set is NOT in hand.**
+>    `engineering/ingestion/external-inputs/p2kb-update-requests/` contains only the originating request,
+>    `P2KB-map-caveat-retraction-1.55.4.md`. No fixture set accompanied it.
+>
+> **What would settle it:** both conditions together — 1.55.4 installed here, plus the fixtures — after which
+> the entry's own "before" shapes (placeholder name, invented tier, wrong source file) are re-run and every
+> one should invert. **Until then this is a gap, and the KB text stays as it is.**
+>
+> **The half that is NOT version-coupled remains this entry's only record**, and is unaffected by the hold:
+> `SYMBOL INDEX` stores symbols **per source file**, so a forked file's second image has no row there. That
+> survives 1.55.4 and is documented nowhere else.
+
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
 ### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `CONFIRMED — carved out of v3.1.7 deliberately; see "Why not fixed here"`
@@ -2843,6 +2866,22 @@ address through PTRA/PTRB.
 **Still owed (manual head, NOT tasked in Sprint 2):** our guides present standalone-PASM fragments
 without saying so. A class-wide sweep of `##hubsym`-style fragments across the live manual set is
 the durable fix; scope it as its own item rather than folding it into a correction task.
+
+> **KB + KB-GUIDE HALVES RE-VERIFIED ON DISK 2026-08-25 («#300») — both clean; only the MANUAL sweep remains.**
+>
+> - **KB half — DONE, confirmed at the file.**
+>   `deliverables/ai/P2/language/spin2/integration/spin2-pasm2-integration.yaml:427-436` carries
+>   `integration_rules.hub_address_resolution` complete: the rule, `correct_in` (standalone PASM),
+>   `why_it_bites`, the `workaround` (pass `@` in from Spin2, or address through PTRA/PTRB), the
+>   `measured` figures (`@disp` `$1AF9` vs `##disp` `$0651`, 5,288 bytes apart) and
+>   `source: … P2-EMPIRICAL-FINDINGS.md EF-060 (2026-08-14)`. The findability pointer is live at
+>   `language/spin2/special-symbols/at.yaml:219`.
+> - **KB-guide half — NOTHING OWED, and this was measured rather than assumed.** Swept
+>   `deliverables/ai/P2/guides/` for `##`-prefixed hub-symbol fragments: **zero hits**. The KB's guide layer
+>   does not present any standalone-PASM fragment that would carry this defect, so there is no guide-side
+>   sweep to run.
+> - **What is left is the MANUAL set only** — the class-wide sweep named above, which is «#301»'s scope,
+>   not a KB item. Status stays `PARTIAL` for that reason alone.
 
 ---
 
@@ -3555,6 +3594,15 @@ drift.
 ## Open — TRACKED in the ingestion head (resolution lives there, not in a YAML edit)
 
 - **F-123 — TAQOZ-Forth / ROM-Monitor capability detail rests partly on preliminary web research.** `TRACKED → ingestion` Grounding plan in `engineering/ingestion/sources/taqoz/taqoz-content-gaps-and-grounding-plan.md` (mine `ROM_Booter.lst`; verify vs Peter Jakacki's `TAQOZ.spin2`).
+  > **Routing re-verified 2026-08-25 («#300») — still live, and one of its two inputs is missing.** The
+  > routing target resolves: the grounding plan exists at the path above, and the first input is in hand —
+  > `engineering/ingestion/sources/rom-booter/ROM_Booter.lst` **and** `rom_booter_v33_01j.lst` are both
+  > present (the `v33_01j` copy is the one E-005 cites, so it is the mined edition). **The second input is
+  > NOT in hand:** no `TAQOZ*.spin2` exists anywhere in the repo, so the *"verify vs Peter Jakacki's
+  > `TAQOZ.spin2`"* half cannot run today. **What would settle it:** obtain Jakacki's `TAQOZ.spin2` source;
+  > until then the ROM-monitor half is groundable from `ROM_Booter.lst` alone and the Forth-vocabulary half
+  > is not. Stays `TRACKED → ingestion` — the preliminary web-research material
+  > (`taqoz-web-research-preliminary.md`) remains community-tier and is still not citable.
 
 ---
 
@@ -3648,6 +3696,18 @@ drift.
 
 **Grounding:** Test J (empirical > documentary). Cite the EF once promoted.
 
+> **KB HALF RE-VERIFIED ON DISK 2026-08-25 («#300») — DONE, and richer than the entry proposed. No KB work
+> is owed.** Read at the file, not from the status note above:
+> `deliverables/ai/P2/language/spin2/debug-displays/plot.yaml:62` now carries **both** repairs this finding
+> asked for, plus a distinction the proposal did not make:
+> *"twopi = full-circle units (default $100000000): **0 => +$100000000** (default, counter-clockwise
+> winding), **-1 => -$100000000** (reversed, clockwise winding) — **0 and -1 are NOT equivalent**; any other
+> value is taken literally (e.g. 360 = degrees). **Orientation: theta=0 points East (+x)**; positive twopi
+> increases theta counter-clockwise, negative twopi clockwise."*
+> The murky `"twopi -1/0"` shorthand this finding named is gone, θ=0 is stated, and the sign-based rule
+> replaced it. **Status stays `CONFIRMED` only because the manual half is still owed** — routed to «#301»,
+> which owns the ch05-plot.md POLAR section. **This entry is not a KB item; do not re-file it as one.**
+
 ## Systematic `P_*` constant-name audit (2026-07-01) — F-177…F-183
 
 > **Origin & method (Stephen's call).** After F-174/175/176 kept surfacing fictitious `P_*`
@@ -3660,8 +3720,38 @@ drift.
 > the manuals are clean in body (they'd already removed these — see F-176 vindication). Two
 > non-blocking findings remain: **F-182** (coverage gap) and **F-183** (donor staleness).
 
-### F-183 — count-mode *concise donors* (10100/10101/10110/10111) are broadly stale/divergent from published — `TRACKED → ingestion`
-> Carved from F-176. The 4 donors carry undefined **mode-name** constants (`P_PERIODS_STATES`, `P_PERIODS_CLOCKS_TIME/STATES/PERIODS`) **and** a different mode taxonomy than the (hand-corrected) published files, on top of the now-removed `P_B_A_INPUT`. Published diverged from them long ago (proving the concise-YAML pipeline isn't re-run for these), so reseed-risk is currently latent. A **full donor↔published resync** (mode names + taxonomy) belongs to the ingestion/smart-pins-catalog head, not a published-YAML edit. Tracked, not release-blocking.
+### F-183 — count-mode *concise donors* (10100/10101/10110/10111) are broadly stale/divergent from published — `RESOLVED 2026-08-25 («#300») — re-verified on disk; the defect this tracked no longer exists`
+> **CLOSED ON RE-VERIFICATION, not on assumption.** Four checks were run against the four donor
+> directories under `engineering/ingestion/smart-pins-catalog/ingestionSources/` (16 files), and all four
+> legs of this finding came back clean:
+>
+> 1. **The undefined mode-name constants are GONE from the donors.** A Unicode-tolerant sweep
+>    (`grep -rniE "PERIODS.{0,3}STATES|PERIODS.{0,3}CLOCKS|B.{0,3}A.{0,3}INPUT"` over all four donor dirs
+>    — deliberately loose, because `smartpin-symbols.txt` has a history of zero-width characters defeating
+>    an exact grep) returns **only folder-name echoes in `source-metadata.md`**, never a constant. The
+>    donors now carry exactly the legal names published uses: `P_PERIODS_HIGHS`, `P_COUNTER_TICKS`,
+>    `P_COUNTER_HIGHS`, `P_COUNTER_PERIODS`.
+> 2. **Nothing leaked into the shipped KB.** `P_PERIODS_STATES` / `P_PERIODS_CLOCKS_*` appear nowhere in
+>    `deliverables/ai/P2/`. `P_B_A_INPUT` appears once, at
+>    `application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml:101`, and it is a **guard**
+>    — *"P_B_A_INPUT does not exist … Never add P_B_A_INPUT"* — i.e. the anti-pattern, correctly stated.
+> 3. **The reseed vector is gone.** This entry's worry was that the concise-YAML pipeline would re-emit the
+>    donors over published. There are **0 `.yaml` files anywhere under `smart-pins-catalog/`**; the donors
+>    are now `.md` extracts only. There is nothing left to reseed *from*.
+> 4. **The "different taxonomy" is a phrasing difference, not a correctness defect** — and this is the leg
+>    that had to be checked source-first rather than taken from the entry. The **donor folder names track
+>    the Silicon Doc's wording literally** (`part4-smart-pins.txt:130-133`: *"%10100 = for X periods, count
+>    states"* · *"%10101 = for periods in X+ clocks, count time"* · `%10110` *count states* · `%10111`
+>    *count periods*), while the **published titles paraphrase the same semantics** (`%10100` *"Sum Pulse
+>    Duration Over X Periods"* … `%10110` *"Count Highs Over Periods Within X Clocks"* — "highs" being the
+>    A-input's high **state**). Both sides agree with the primary source. The entry's framing — published
+>    hand-corrected *away* from stale donors — reads as though one side were wrong; on the evidence
+>    **neither is**.
+>
+> **Nothing is owed at the ingestion head.** Retired rather than left `TRACKED` indefinitely: a tracked
+> item whose subject no longer exists is a false open, and it costs every future reader the same check.
+>
+> Original text, kept for the record: Carved from F-176. The 4 donors carry undefined **mode-name** constants (`P_PERIODS_STATES`, `P_PERIODS_CLOCKS_TIME/STATES/PERIODS`) **and** a different mode taxonomy than the (hand-corrected) published files, on top of the now-removed `P_B_A_INPUT`. Published diverged from them long ago (proving the concise-YAML pipeline isn't re-run for these), so reseed-risk is currently latent. A **full donor↔published resync** (mode names + taxonomy) belongs to the ingestion/smart-pins-catalog head, not a published-YAML edit. Tracked, not release-blocking.
 
 ## ADC gain-mode input ranges framed ground-referenced, not centered on VIO/2 (2026-07-07) — F-202
 
@@ -3722,6 +3812,48 @@ drift.
 > **CLOSED for release** and now hardware-grounded (not merely derived). VO-X-001 (absolute tolerance across
 > parts) remains the optional datasheet-grade upgrade.
 
+> ### KB-SIDE SECONDARY CHECK DISCHARGED 2026-08-25 («#300») — and this entry's HEADLINE is stale
+>
+> 🔴 **Read the headline against this block.** The heading still says *"exact centered endpoints UNVERIFIED
+> (no trusted numeric source) → **hardware campaign required**"*. **That campaign already ran.** The
+> `SILICON-CONFIRMED 2026-07-07 (EF-024)` note immediately above is the result, and
+> `VERIFICATION-OPPORTUNITIES.md:38` records **VO-J-001 → DONE → EF-024**. A top-down reader stops at the
+> heading and concludes this is blocked on silicon we cannot reach; it is not. **This is exactly the failure
+> mode REGISTER-CONSULTATION §1 exists for** — the status sits at the end, and here the end supersedes the
+> front. The heading is left in place rather than rewritten because the entry is mid-flight on the manual
+> side, but nothing downstream should quote it.
+>
+> **KB FIX APPLIED — the "Secondary check" line above, now discharged.**
+> `deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml`:
+> - `:143-151` — `adc_input_modes` no longer calls GIO/VIO input ranges. `P_ADC_GIO` / `P_ADC_VIO` now read
+>   *"…calibration reference to the ADC (a calibration **SOURCE**, not an input range)"*, and `P_ADC_FLOAT`
+>   states its actual purpose. Grounded in-file on **Silicon Doc `p2-documentation.txt:452`** — *"Delta-sigma
+>   ADC with 5 ranges, 2 **sources**, and **VIO/GIO calibration**"* — with the mode-name glosses cited to
+>   **`spin2-v55-text.txt:1466-1473`** (*"ADC GIO → IN"* / *"ADC VIO → IN"* / *"ADC FLOAT → IN"*), and
+>   `P_ADC_FLOAT`'s bias-point role to **`p2-documentation.txt:188-190`** (Rev C: *"…but floats the ADC input.
+>   This mode is now useful for determining the floating bias point of the ADC."*).
+> - `:168-169` — **the range claim that depended on the ground-referenced framing is gone.** The old note
+>   *"ADC input modes (GIO/VIO/gain) affect voltage range and sensitivity"* lumped the calibration sources in
+>   with the gain ladder as if all of them set a range. It now separates them, and a second note carries the
+>   structural EF-024 result: *"The gain-mode window is **CENTERED ON MID-SUPPLY (~VIO/2)**, not referenced up
+>   from 0V … centered at ~1.64V for every gain (EF-024). A ground-referenced small-signal source needs a
+>   mid-rail bias network before it can be read through a gain mode"* — which is the trap that made this
+>   finding's worked examples unrunnable.
+> - **Only the structural half of EF-024 was carried into the KB, deliberately.** EF-024 grades the centering
+>   as *[structural, definitive]* but its window endpoints as a **representative single sample (N=1)**. The
+>   centering is stated; **the N=1 endpoint numbers are NOT printed in the KB**, because a bare table there
+>   would read as a specification. Printing them, labelled, is step (c) above — **manual-side, «#301»**.
+> - Verified after the edit: `validate-crossref-keys.py` 3161 refs / 0 unresolved ·
+>   `audit-yaml-claim-sourcing.py` 0 Tier-1, Tier-2 unchanged at 78 · `verify-yaml-format.py` clean.
+>
+> **THE GAP THAT ACTUALLY REMAINS — and it is NOT the centering.** It is **VO-X-001**, cataloged at
+> `VERIFICATION-OPPORTUNITIES.md:51`: *tolerance-bounded **absolute** endpoints across parts and
+> temperatures.* **What would settle it:** a calibrated, traceable external voltage reference plus a
+> precision meter, exercised across several parts — **external hardware, which this container cannot reach**
+> and which is `CATALOGED`, not committed. Its own entry says it is *"not needed for correctness."*
+> **No endpoint number was supplied here, and none should be** — the measured N=1 windows in EF-024 are the
+> only figures with evidence behind them, and they are labelled as such at their source.
+
 ---
 
 ## Quantitative hardware-table audit batch (2026-07-07) — F-203
@@ -3751,6 +3883,68 @@ drift.
 >
 > **AT_RISK (unsourced specifics — disposition per finding):** IOSP `ch16` §16.8 ADC "input impedance ~500kΩ" + "absolute-error floor ~15mV" (from P2AN001, not in EF ledger — **jumper-only verifiable, VO-J candidate**); `ch10` DAC "Max Load >10kΩ…" (10× rule-of-thumb heuristic); `ch12` "input buffer ~2ns" (sub-component; 3-clk total IS grounded); `ch07` "180MHz rated / 250 overclock" (only 350 grounded; 180 cites external datasheet); Debug `ch05` weight "100/400/700/900" (OpenType nums unsourced; "thin"→"light"); Debug `ch14` "LOCK[15]" + "~10,000 msg/s" (tool/throughput, ungrounded). Disposition: remove the unsourced number or soften to qualitative; the ~15mV/~500kΩ ADC pair → VO-J jumper test.
 
+> ### 🔴 KB-SIDE DISPOSITION 2026-08-25 («#300») — TWO OF THIS ENTRY'S OWN SUB-CLAIMS DO NOT SURVIVE THE SOURCE
+>
+> Only the **KB-side** halves are dispositioned here; the IOSP / deSilva / Streamer manual cells stay with
+> «#301». Every item below was checked **source-first**, and two of them inverted. **Anyone working the
+> manual half must read this block before "fixing" the manual to match this entry — two of these
+> corrections would introduce a defect, not remove one.**
+>
+> **(a) Debug `ch05` PLOT `TEXTSTYLE` vertical align — `RESOLVED-INVALID`. The KB is CORRECT; the "swap" is a
+> vocabulary collision.** This entry grades the vertical pair against the v55 published text
+> (`spin2-v55-text.txt:1282`: *"%YY is vertical justification: %00 = middle, %10 = bottom, %11 = top"*) and
+> calls our `%10=top / %11=bottom` a swap. It is not. **The Pascal-derived matrix is the authority for the
+> DEBUG windows** — this register's own *AUTHORITY CORRECTION (2026-06-14)* established that, and said the
+> published v55 text is the derivative that carries the off-by-ones — and the matrix
+> (`p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md:797-828`, from `AngleTextOut`, 3483-3516)
+> states **both halves for every value** precisely so this cannot be misread:
+>
+> > vertical `%10` → `ty := h` (3509) → *"the text sits **ABOVE** the anchor point"*, i.e. *"the anchor is the
+> > text's **BOTTOM** edge"*; vertical `%11` → `ty := 0` (3510) → *"the text sits **BELOW** the anchor"*, i.e.
+> > *"the anchor is the text's **TOP** edge"*.
+>
+> The matrix carries an explicit red warning that **"`%10` = left" (anchor-edge vocabulary) and "`%10` = right"
+> (ink-side vocabulary) describe the same pixels**, and that this ambiguity *"is what caused this row to be
+> documented backwards."* v55 uses **anchor-edge** words for the vertical axis and **ink-side** words for the
+> horizontal one, in the same sentence. `plot.yaml:67` uses **ink-side consistently on both axes** — and it
+> says so, prefixing the pair with *"Align value->direction"*. Under that vocabulary `%10 = top` (ink above
+> the anchor) is **right**. Same for the horizontal pair, which this entry and the KB already agree on.
+> **No KB edit made. Making the "fix" would have broken a correct file** — the E-005 lesson (*look for the
+> vocabulary key before escalating a two-source conflict*) one register over.
+>
+> **(b) Debug `ch05` weight `"thin"→"light"` — `RESOLVED-INVALID`, and the numbers are NOT unsourced.** The
+> matrix quotes the Pascal array directly: `weight: array [0..3] of integer = (100, 400, 700, 900);` (3485),
+> applied as `NewLogFont.lfWeight := weight[style and 3];` (3494). So **100/400/700/900 are sourced**, and
+> **100 is OpenType `Thin`** (300 is `Light`) — our `plot.yaml:67` gloss *"0=thin, 1=normal, 2=bold, 3=heavy"*
+> is correct against the Pascal. v55's *"%00 = light"* is the outlier. **No KB edit made.**
+>
+> **(c) Debug `ch03` TERM `TEXTSIZE` default `10` → "editor text size" — `RESOLVED-INVALID` as written; both
+> statements are true and the KB's is not wrong.** The matrix settles it at
+> `DEBUG-WINDOW-DIRECTIVE-MATRIX.md:502-512`: *"The global `FontSize` preference (set in `EditorUnit`, default
+> **10**, user-adjustable 1–72) and the `DefaultTextSize = 10` constant both default to **10**, so every
+> display window starts at **10 pt** except MIDI"* — and its per-window table lists **TERM `FontSize` = 10**
+> (2186) alongside LOGIC/SCOPE/SCOPE_XY/FFT/PLOT, all 10. v55's *"editor text size"* names the **preference**;
+> `10` is that preference's **default**. `term.yaml:32` (*"6..200 (default 10)"*) is therefore accurate.
+> Swapping it for *"editor text size"* would have **deleted a true number and replaced it with a vaguer
+> phrase**. **No KB edit made.** *(Available enhancement, not a defect and not done here: the six
+> debug-display YAMLs could add that the default tracks a user-adjustable editor preference. It applies
+> identically to all six, so it is an all-or-none consistency change outside this finding's scope.)*
+>
+> **(d) IOSP `ch16` §16.8 ADC `~15mV` absolute-error floor — ALREADY SATISFIED in the KB, and refuted on
+> silicon.** The VO-J test this entry proposed **was run**: `VERIFICATION-OPPORTUNITIES.md:39` records
+> **VO-J-002 → DONE → EF-024** — *"Single-pin abs error **≤9 mV** (reproducible) → does NOT support a ~15 mV
+> single-pin floor"*, with the pin-to-pin-spread half reclassified to external-hardware **VO-X-002**. The KB
+> already carries exactly this, correctly hedged, at
+> `application-notes/p2an001-single-pin-instrumentation-adc.yaml:100`: *"…the ratiometric single-pin absolute
+> error was <=9 mV … the wider '~15 mV pin-to-pin spread' figure is a designer report that the bench has NOT
+> yet reproduced … **Do not quote 15 mV as a specification.**"* **No KB work owed.**
+>
+> **(e) IOSP `ch16` §16.8 ADC `~500kΩ` input impedance — never reached the KB.** Swept
+> `deliverables/ai/P2/`: no `500k` input-impedance claim exists. It is a manual-only item → «#301».
+>
+> **KB-side verdict: nothing is owed.** Status stays `PARTIAL` **for the manual cells only** (Streamer §12.2
+> sub-pin selection, Debug ch05/ch14, and the remaining IOSP AT_RISK numbers), all of which are «#301»'s.
+
 ## XBYTE technique-mining sweep — reference implementations expose two doc defects (2026-07-14) — F-217, F-218
 
 > **Origin.** Stephen asked for a per-processor "what will hurt when you emulate this" table in the XBYTE
@@ -3761,7 +3955,7 @@ drift.
 > the lineage lives). **Note the path:** it lives at the manual **root**, not in `audit/`, because
 > `.gitignore:175` ignores `manuals/*/audit/` — a durable source-of-record cannot live there.
 
-### F-218 — `SingleStep-Debugger-Theory-of-Operations.md` §6.4 mislabels `GETBRK` D[25] as "C,Z affected by XBYTE" — `NEEDS-VERIFICATION`
+### F-218 — `SingleStep-Debugger-Theory-of-Operations.md` §6.4 mislabels `GETBRK` D[25] as "C,Z affected by XBYTE" — `CONFIRMED` — **VERIFIED against the Silicon Doc 2026-08-25 («#300»); the KB was already correct, so no KB work is owed**
 
 **Our own ingested doc says:**
 
@@ -3792,6 +3986,57 @@ D[25]. The two are different facts about different bits, and our doc appears to 
 - **Wider lesson (already a standing rule, freshly demonstrated):** our own ingested derivations are **peer
   tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
   instead of being trusted.
+
+> ### ✅ VERIFICATION PERFORMED 2026-08-25 («#300») — this entry's `NEEDS-VERIFICATION` is discharged
+>
+> The original entry rested on **P2KB** (`p2kbPasm2Getbrk`), which is circular inside this project — the KB
+> is what we publish. So it was re-grounded on the **Silicon Doc primary extraction**, and both halves of
+> the claim were checked independently. **What could have come back the other way:** had the Silicon Doc's
+> own `D[25]` line read *"C,Z affected by XBYTE"*, the finding would have become `RESOLVED-INVALID` and the
+> doc would have been right. It does not.
+>
+> **Half 1 — what D[25] actually is.** `engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:445-446`,
+> verbatim, under `GETBRK D WC`:
+>
+> > `D[25] = 1 if top of stack = $001FF, indicating XBYTE will execute on next _RET_/RET`
+> > `D[24:16] = 9-bit XBYTE mode, established by '_RET_ SETQ/SETQ2' when top of stack = $001FF`
+>
+> **Half 2 — where "C,Z affected by XBYTE" really lives.** It is the `%F` bit, and `%F` is the **LSB of the
+> 9-bit mode**, so it lands at **D[16]**. `silicon-doc/p2-documentation.txt:2196-2202`, verbatim:
+>
+> > *"The %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of
+> > the bytecode."* — with the table `%xxxxxxxx0` = *"Do not affect flags on XBYTE"* · `%xxxxxxxx1` =
+> > *"Write the bytecode's index LSBs to C and Z"*.
+>
+> **VERDICT: `CONFIRMED`.** D[25] and D[16] are different bits with different meanings, and §6.4 fuses them.
+> The entry's premise holds on the primary source, not merely on P2KB.
+>
+> **A SECOND SITE, same root cause, found by sweeping the doc (class-wide rule).** The same file's field-map
+> row contradicts its own body: `SingleStep-Debugger-Theory-of-Operations.md:1298` states
+> *"XBYTE (bits 25..16)"* — a **ten**-bit field that swallows D[25] into the mode — while `:763` computes the
+> field as `DebuggerMsg[mBRKC] >> 16 AND $1FF`, i.e. **D[24:16]**, which is correct. `:765` is the §6.4
+> sentence this finding names. So the defect is **two sites plus a self-contradiction**, not one sentence.
+>
+> **🟢 NO KB WORK IS OWED — verified on disk, not assumed.**
+> `deliverables/ai/P2/language/pasm2/getbrk.yaml:33` already reads
+> *"…D[26] = LUT sharing enabled, **D[25] = XBYTE pending on next `_RET_`/`RET`**, D[24:16]…"* — correct, and
+> matching the Silicon Doc. No published manual carries the wrong gloss either (swept: zero hits for
+> `C,Z affected` across `manuals/*/opus-master/`). **The defect never reached anything we ship**, which is
+> why this closes without a KB edit rather than being left open for one.
+>
+> **RESIDUAL GAP — narrowed, not closed, and it is not ours.** Which of the two repairs §6.4 needs still
+> depends on the **host display source**: if PNut/term-ts really tests bit 25, the *caption* is wrong; if it
+> tests bit 16, the *bit index* is wrong. **What would settle it:** the host-side display routine that draws
+> the XBYTE checkmark (PNut Pascal or the term-ts mirror), which this repo does not hold — `REF/` under
+> `p2-single-step-debugger-manual` carries only the user manual, a screenshot and an audit, no Pascal.
+> **This is an upstream document defect with no consumer here**, so it is routed, not worked: the bit
+> semantics above are now settled and citable regardless of which repair is chosen.
+>
+> **Not relocated to `SOURCE-ERRATA.md`, deliberately.** That register's own test is *"if **Parallax** fixed
+> their document tomorrow, would this entry disappear?"* — and all nine of its entries are Parallax
+> documents. This document is the **pnut-ts side's** (`external-inputs/pnut_ts_facts/`, not a registered
+> ingested source), so it fails that test. It is also not a `PNUT-TS-PUNCH-LIST.md` item — that list is
+> compiler-behaviour items carrying a runnable repro, not documentation defects. Flagged here as the record.
 
 ## CORDIC interrupt hazard — documented on one page, missing from the pages that need it (2026-07-14) — F-224
 
@@ -4611,6 +4856,21 @@ threshold**, so it reported a number without the judgement that makes the number
 I very nearly filed a tolerance-conformant table as a defect owed. A raw measurement is not a
 verdict; the tolerance IS the verdict ([[feedback_validation_tool_verdict_is_a_claim]] — the inverse
 case, where the tool PASSES and the hand-rolled scan is the one overstating).
+
+> ### DISPOSITION CONFIRMED 2026-08-25 («#300») — the re-grade stands; nothing re-measured, nothing re-argued
+>
+> Carried on «#300»'s roster and **closed here as POLISH, per the same-day correction above.** The 6.1pt and
+> 5.3pt overhangs sit inside this project's **20pt** margin tolerance, so
+> `audit-pdf-margin-overflow.py` — the sanctioned instrument — reports the shipped v1.0.9 PDF **CLEAN across
+> all 76 pages**. **The tolerance IS the verdict.**
+>
+> **Deliberately NOT re-measured.** A disposition already made on evidence does not get re-litigated by a
+> later agent hoping for a different number; re-running the hand-rolled 4pt scan would only reproduce the
+> mistake the correction above documents. **No PDF was re-graded and no manual re-rendered for this.**
+>
+> **Not a gap and not a defect owed** — it is scheduled work with no blocker: take it in the set-wide
+> `p2kb-platform-tables.lua` sweep, paired with **F-300**, when no manual is mid-render. Nothing in this
+> sprint is waiting on it, and **no document may cite it as blocking**.
 
 ### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `PENDING-VALIDATION` — **source fixed 2026-08-17; the Debug Window instance shipped verified in v1.1.3, p84 still unconfirmed**
 
