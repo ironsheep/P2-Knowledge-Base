@@ -1,108 +1,246 @@
-# Source Errata — defects in the documents we ingest
+# Source Errata — where our sources are wrong, and what we established instead
 
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-008`** · **Next open-question ID: `D-002`**
+> **Next erratum ID: `E-008`**
 
-## Why this is its own register
+## What this register is for
 
-Three registers already exist and none of them fits a defect that lives in **someone else's
-document**:
+**A source says something wrong. We research it. What we establish becomes a trusted fact —
+citable, and the thing the KB and the manuals are built on.** All three stages live in one row, so
+the chain from *"the guide is wrong"* to *"here is what is true, and here is why"* never sits in
+someone's head or in a closed conversation.
+
+**An erratum is not a complaint, it is the start of a fact.** The value is not in cataloguing
+Parallax's mistakes — it is that each one forces a question to be settled, and a settled question
+outlives the document that got it wrong.
+
+Three registers, three questions. **The test: if Parallax fixed their document tomorrow, would this
+entry disappear?** Yes → erratum. No → our correction, or a gap.
 
 | Register | Answers | Disposition |
 |---|---|---|
 | `operations/P2KB-CORRECTION-FINDINGS.md` | what is wrong in **our** shipped KB | fix it here |
 | `KNOWLEDGE-GAPS.md` | what **no source** tells us | fill it, or ask an expert |
-| **this** | what a **source document** gets wrong | **report upstream; never silently "fix" the source** |
+| **this** | what a **source document** gets wrong | **research it; record what is true** |
 
-Filing a source erratum in the corrections register mis-states the work: there is nothing in our
-tree to correct, and an agent reading it looks for a YAML edit that must not happen. Filing it as a
-knowledge gap is worse — a gap says *we do not know*, while an erratum says *we know, and the
-document is wrong*. Those are opposite states and they were being recorded in the same column.
+## Every entry cites all sides, in each document's own terms
 
-**This register serves two purposes, and the second is the one that compounds.**
+An entry is only useful if you can **open the actual document and point at the sentence**. So each
+one carries a **competing-claims table**: every side, with
 
-1. **Things we can clear up.** Each entry is drafted so it can be sent to Parallax as-is: what the
-   document says verbatim, why it is wrong, and what the correct statement is, with evidence.
-   Errata we report get fixed in the next edition, and every reader benefits — not just us.
-2. **A map of where our understanding sits relative to our sources.** Every row records whether
-   our KB **follows** the source, **diverges** from it, or **never carried it**. That map is the
-   thing no single finding can give you: it shows, in one place, every point at which this project
-   has knowingly departed from a Parallax document — and why it was entitled to.
+- the **document and edition**,
+- **where it lives in that document** — the section heading, table, or page a reader can navigate
+  to. This is the locator to quote when confirming with Parallax;
+- the **verbatim sentence**;
+- our **extraction locator** (`file:line`), which is *ours*, for re-verification only — never quote
+  it outside this project.
 
-The second purpose is why a row stays here after it is reported. A reported erratum is not a closed
-one; it closes when a **new edition** of the document fixes it, and closing it is what triggers a
-re-ingestion check.
+Where a claim has no navigable locator (OCR text with no headings), that is said, so nobody
+presents a guess as a citation.
 
-## Precedent — this is a form Parallax already uses
+## Lifecycle
 
-Parallax publishes errata against its own manuals, and we have ingested one:
-`sources/p1-propeller-manual-errata-v1.1/` (from `122-32000-Propeller-Manual-v1.1-Supp-Errata.pdf`).
-So an erratum report is a document type they recognise and act on, not an unsolicited critique.
+```
+OPEN  ──►  RESEARCHING  ──►  RESOLVED   the fact is established; cite E-NNN
+                         └►  GAP        not settleable from what we hold; what would settle it is
+                                        named, and it also lands in KNOWLEDGE-GAPS Part B
+```
+
+**`RESOLVED` carries OUR FINDING** — one statement of what is true, with the evidence behind it.
+That statement is a trusted fact and may be cited in shipped YAML and manual prose as
+`SOURCE-ERRATA.md E-NNN`, the way an empirical result is cited as `EF-NNN`.
+
+**Where it sits in the authority order.** A resolved erratum is **adjudication, not a new primary
+source.** It ranks by the evidence behind it, never above it:
+
+- settled on the **bench** → it is an empirical finding. Record it in `P2-EMPIRICAL-FINDINGS.md` as
+  `EF-NNN`; this row cites that rather than becoming a second home for the same fact.
+- settled by **another Parallax document**, or by **the document contradicting itself** → cite the
+  documentary source; this row records the adjudication and why the outlier loses.
+- settled by **`pnut-ts`** → legality only, never semantics.
+
+`E-NNN` is a **pointer with the reasoning attached**, and the reasoning is the part that exists
+nowhere else. It is never licence to state a fact no evidence supports — that is a `GAP`.
 
 ## Rules
 
-- **Never edit an ingested source to "fix" an erratum.** The ingestion tree is a faithful capture;
-  editing it destroys the only record of what the document actually said and silently rewrites the
-  evidence for every finding that cites it.
-- **Verbatim, with a locator.** Quote the source exactly and cite `file:line` in the ingestion
-  tree, so the claim can be re-checked after the register moves.
-- **Name the evidence tier** that establishes the correction — empirical/hardware-verified,
-  `pnut-ts` legality, another Parallax document, or the document contradicting itself. A
-  self-contradiction is the strongest report you can send, because it needs no external authority.
-- **Distinguish OUR extraction defect from THEIR document defect.** If our derived extract says
-  something the source does not, that is a correction-register item, not an erratum. Check the
-  original capture before filing — E-006 was filed only after confirming the contradiction is
-  verbatim in the 2020-edition text and not introduced by our summarisation.
-- **`Reached our KB?` is mandatory.** It is what makes this a divergence map rather than a
-  complaint list.
-
-## Status vocabulary
-
-`OPEN` — confirmed, not yet reported · `DRAFTED` — report text ready to send ·
-`REPORTED <date>` — sent to Parallax · `ACKNOWLEDGED` — Parallax has responded ·
-`FIXED <edition>` — corrected in a later edition; triggers a re-ingestion check ·
-`WONTFIX` — Parallax has declined, and we carry the divergence permanently.
+- **Never edit an ingested source to "fix" an erratum.** The capture is evidence; editing it
+  rewrites the basis of every finding that cites it.
+- **Distinguish OUR extraction defect from THEIR document defect.** Check the **original capture**,
+  not the derived summary — E-006 was filed only after confirming the contradiction is verbatim in
+  the 2020-edition text.
+- **`Reached our KB?` is mandatory** — follows / diverges / never carried. That column is the map of
+  where this project knowingly departs from Parallax.
+- **A row closes on `RESOLVED`, not on "reported".** If a later edition fixes the document, note it;
+  that triggers a re-ingestion check.
+- **`OUR FINDING` is one statement, not a discussion.** If it needs hedging, it is not resolved.
 
 ---
 
-## Part A — confirmed errata
+## Index
 
-| # | Document @ edition | What it says (verbatim) | Why it is wrong | Evidence tier | Reached our KB? | Status |
-|---|---|---|---|---|---|---|
-| **E-001** | **P2 Hardware Manual** 2022-11-01, *Cog Attention* | `COGATN   #00001100` with the comment *"Get attention of cogs 2 and 3"* | Cogs 2 and 3 mean bits 2 and 3 = `%00001100` = 12. As printed, `#00001100` is **decimal 1,100** and does not assemble — *Constant must be from 0 to 511 (m130)*. **A `%` is missing.** | `pnut-ts` v1.55.3 rejects it (legality); confirmed verbatim in `word/document.xml`, so not an extraction artifact | **No** — never carried | `OPEN` |
-| **E-002** | **P2 Hardware Manual** 2022-11-01, *SCOPE Data Pipe* (4 occurrences) | `ROLBYTE y,x` | `ROLBYTE` has exactly two legal forms — `ROLBYTE D,{#}S,#N` and the `ALTGB`-alias `ROLBYTE D`. The two-operand form errors *Expected ","*. Per the block's own comments (*"rotate pinN byte into y"*, reading the `RDPIN` lower byte) the intended form is **`ROLBYTE y,x,#0`**. | `pnut-ts` v1.55.3 rejects it; P2 Instructions v35 rows 94/95; confirmed in `word/document.xml` | **No** — never carried | `OPEN` |
-| **E-003** | **P2 Hardware Manual** 2022-11-01, Table 10 (`%MMMMMMMMMM` note) | *"The VCO frequency should be kept within 100 MHz to **350 MHz**."* | **The manual contradicts itself twelve paragraphs later**: its own PLL prose (`p2-hardware-manual-text.txt:603`) reads *"designed to run between 100 MHz and **200 MHz** and should be kept within that range"* — verbatim identical to the Datasheet (`:850`) and the Silicon Doc (`:6233`). 350 MHz is real but it is the **VCO/1 overclock ceiling**, not the recommended range; the Silicon Doc says so in the very next row. The note substitutes the ceiling into the recommendation sentence. | **Self-contradiction** — needs no external authority. Corroborated by two other Parallax documents. | **No** — the KB follows the 100–200 MHz majority | `OPEN` |
-| **E-004** | **#64013 P2 RTC Add-on Board Guide** v1.0 | *"…set the P2 Smartpin … **input mode** to 150 k-ohm pull-up"* (`P2-RTC-Add-on-text.txt:74-77`) | Wrong twice. (1) **The P2 has no pull-up resistors** — `P_HIGH_150K` selects a 150 kΩ *drive strength*; this is the exact mislabel F-321 exists to kill, appearing in a Parallax document. (2) **Input mode means `DIR` low**, and a drive selection does nothing while the pin is an input — so the prescribed configuration cannot work even on its own terms. | Empirical: **EF-063/EF-064** (`P2-EMPIRICAL-FINDINGS.md:827,840`) establish drive-with-DIR-high on silicon. Spin2 v55 `:1504` words it *"Drive high 150kΩ"*. | **Yes, open** — `hardware/addon-rtc.yaml` `pin_mode_tip` repeats it; deliberately **not** rewritten under D3/R9 pending this report. Owed to «#307». | `OPEN` |
-| **E-005** | **#64000 P2 Eval Board Rev C Guide** §18 | SPI/SD pin directions for P58/P59 | The guide's §18 misstates the directions. Settled conclusively the other way: **P58 = MISO** (card DO, P2 input), **P59 = MOSI** (card DI, P2 output). | ROM booter listing `rom_booter_v33_01j.lst:135-138` declares `spi_di = 59` / `spi_do = 58`; the Silicon Doc boot table agrees and independently confirms P61=CLK, P60=CSn | **No** — the KB was already correct and stands unchanged. **Never cite §18** for these directions. | `OPEN` |
-| **E-006** | **#64006 P2 Eval Add-on Boards Guide** 2020 edition | *"Each **active-high** push-button has a 470 Ω series resistor to allow the I/O pin to be **driven low** while the button is asserted."* (`p2-eval-add-on-boards-2020-edition-ocr-text.txt:45`) | **Active-high and driven-low-when-asserted cannot both be true of the same switch.** One sentence, both claims. | **Self-contradiction.** ⚠️ Verified as Parallax's, not ours: the contradiction is verbatim in the original capture, not introduced by our summarisation. | **Diverges** — `hardware/addon-control-board.yaml` says the pin *reads high* while pressed, resolving it the opposite way to the guide's second half. **See D-001 below — which reading is right is not yet settled.** | `OPEN` |
-
-## Part B — framing differences, not errors
-
-Two documents can both be right and still mislead a reader who takes one as "the range". These are
-recorded so the KB **labels the distinction** rather than silently picking a side.
-
-| # | Documents | The difference | What the KB must do | Status |
+| # | Document | In one line | Reached our KB? | State |
 |---|---|---|---|---|
-| **E-007** | **P2 Hardware Manual** *Specifications* vs **P2 Datasheet** *AC Characteristics* (p.48) | Manual: *"10–20 MHz crystal (PLL enabled) or 0 to 180 MHz (nominal) clock oscillator"*. Datasheet: Crystal (XI–XO) **1 min / 50 max MHz**; Direct drive **DC / 200 MHz**; PLL **3.33 / 320 MHz**. These are **recommended-use vs absolute-limit** statements, not a contradiction. | State which framing it is quoting, every time. Both sources agree on **180 MHz @ 105 °C nominal system clock**, so only the *input* limits need the label. | `OPEN` |
-
-## Part C — open questions the errata raise
-
-A defect in a source sometimes reveals that **nobody knows** the answer, ours included.
-
-| # | Question | Why it is open | What would settle it |
-|---|---|---|---|
-| **D-001** | On the **#64006A Control** board, does a pressed button make the P2 pin read **high** or **low**? | E-006 shows the guide asserting both in one sentence. Our KB resolved it as *reads high*; the guide's mechanical description (470 Ω series resistor, *driven low while asserted*) implies *reads low*. **This determines whether generated code tests for high or low**, so it is actionable, not cosmetic. | A **bench test** on a #64006A — the board is a jumper-only rig, so this is runnable rather than catalogue-only. Or the board schematic from Parallax. |
+| E-001 | P2 Hardware Manual | `COGATN` constant lost its `%` and does not assemble | never carried | `RESOLVED` |
+| E-002 | P2 Hardware Manual | `ROLBYTE y,x` — no such two-operand form | never carried | `RESOLVED` |
+| E-003 | P2 Hardware Manual | VCO "kept within 350 MHz" contradicts its own PLL Example | follows the majority | `RESOLVED` |
+| E-004 | #64013 RTC Add-on Guide | pull-up mislabel, prescribed in input mode where it cannot work | ⚠️ **diverges — KB repeats it** | `RESOLVED` |
+| E-005 | #64000 Eval Board Rev C Guide | §18 reverses the SPI/SD pin directions | never carried | `RESOLVED` |
+| E-006 | #64006 Eval Add-on Guide | button "active-high" *and* "driven low when asserted" | ⚠️ **diverges** | `RESEARCHING` |
+| E-007 | Hardware Manual vs Datasheet | clock limits — recommended-use vs absolute-limit framing | follows, unlabelled | `RESOLVED` |
 
 ---
 
-## How an erratum gets here
+## E-001 — `COGATN` constant lost its `%` · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **P2 Hardware Manual**, 2022-11-01 | §**Cog Attention** (Heading 2) | `COGATN   #00001100` — commented *"Get attention of cogs 2 and 3"* | `sources/p2-hardware-manual/p2-hardware-manual-text.txt:481` (section) |
+| Against | **`pnut-ts` v1.55.3** | assembling the line as printed | *Constant must be from 0 to 511 (m130)* | — |
+
+**OUR FINDING.** The intended constant is **`%00001100`** (bits 2 and 3 = 12), matching the code's
+own comment. As printed, `#00001100` is **decimal 1,100** and out of range. **A `%` is missing.**
+
+**Evidence tier:** `pnut-ts` legality. Confirmed verbatim in the DOCX `word/document.xml`, so it is
+the document's defect and not an extraction artifact. · **Reached our KB?** Never carried.
+
+## E-002 — `ROLBYTE y,x` has no legal form · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **P2 Hardware Manual**, 2022-11-01 | §**SCOPE Data Pipe** (Heading 4) — 4 occurrences | `ROLBYTE y,x` | `p2-hardware-manual-text.txt:1460` (section) |
+| Against | **P2 Instructions v35** | rows 94 / 95 | the only forms are `ROLBYTE D,{#}S,#N` and the `ALTGB`-alias `ROLBYTE D` | — |
+| Against | **`pnut-ts` v1.55.3** | assembling the 2-operand form | *Expected ","* | — |
+
+**OUR FINDING.** The intended form is **`ROLBYTE y,x,#0`** — fixed by the block's own comments
+(*"rotate pinN byte into y"*, reading the `RDPIN` lower byte).
+
+**Evidence tier:** `pnut-ts` legality + the instruction table. Verbatim in `word/document.xml`. ·
+**Reached our KB?** Never carried.
+
+## E-003 — the VCO note contradicts the manual's own PLL Example · `RESOLVED`
+
+**This is the strongest kind to raise: the document disagrees with itself, and the other two
+Parallax documents side against the outlier.**
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| **Outlier** | **P2 Hardware Manual**, 2022-11-01 | **Table 10**, the `%MMMMMMMMMM` row of the `HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS 'set clock mode` table | *"The VCO frequency should be kept within 100 MHz to **350 MHz**."* | `p2-hardware-manual-text.txt:574` |
+| **Same manual** | **P2 Hardware Manual**, 2022-11-01 | §**PLL Example** (Heading 3) | *"The PLL's VCO is designed to run between 100 MHz and **200 MHz** and should be kept within that range."* | `:603` |
+| Agrees | **P2 Datasheet** (P2X8C4M64P), 2022-11-01 | **p.18** | *"…frequency should be kept within 100 MHz to **200 MHz**."* | `p2-datasheet-text.txt:793` |
+| Agrees | **P2 Datasheet**, 2022-11-01 | **p.19**, §PLL Example | *"…designed to run between 100 MHz and **200 MHz** and should be kept within that range."* | `:850` |
+| Agrees | **Propeller 2 Documentation** v35 Rev B/C | §**PLL Example** | same sentence, **200 MHz** | `silicon-doc/p2-documentation.txt:6233` |
+| Context | **Propeller 2 Documentation** v35 Rev B/C | the `%PPPP` row, immediately after | *"For fastest **overclocking**, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."* | — |
+
+**OUR FINDING.** The recommended VCO range is **100–200 MHz**. **350 MHz is the VCO/1 overclock
+ceiling, not a recommendation** — the manual's Table 10 note substituted the ceiling into the
+recommendation sentence. (Spin2 v51's clock solver also carries 350 MHz as its *upper bound*, which
+is a third context in which the number is legitimate.)
+
+**Evidence tier:** self-contradiction — needs no external authority — corroborated by two other
+Parallax documents, each stating it twice. · **Reached our KB?** Follows the 100–200 MHz majority.
+
+## E-004 — the pull-up mislabel, in a Parallax guide, prescribed where it cannot work · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **#64013 P2 RTC Add-on Board Guide**, v1.0 | §**Code Tip** (under *"The SCL, INT and CLKOUT functions share a single IO pin"*) | *"To use the I2C SCL function, set the I2C **output mode** to use **3.3 k-ohm pull-up**."* and *"…set the P2 Smartpin (or equivalent) **input mode** to **150 k-ohm pull-up**."* | `sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:74-77` |
+| Against | **Spin2 v55** built-in symbols table | the `P_HIGH_150K` row | *"Drive high 150kΩ"* — a **drive strength**, not a resistor | `sources/spin2-v55/spin2-v55-text.txt:1505` |
+| Against | **P2 Datasheet**, 2022-11-01 | **p.24**, Pin Mode legend | *"DIR = direction bit; 0: input (float), 1: output (drive)"* | `p2-datasheet-text.txt:1144` |
+| Against (empirical) | **P2-EMPIRICAL-FINDINGS** | **EF-063 / EF-064** | *"P8..P31 held at a 15 kΩ low with `DIR` **high**"* — drive is live only with DIR high | `external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840` |
+
+**OUR FINDING.** Wrong twice. **(1) The P2 has no pull-up resistors** — `P_HIGH_150K` selects a
+150 kΩ *drive strength*. **(2) Input mode means `DIR` low, and a drive selection is inactive while
+the pin is an input**, so the second tip cannot work on its own terms. The working form is
+`P_HIGH_150K` with **DIR high**.
+
+**Evidence tier:** empirical (strongest), corroborated documentarily. · **Reached our KB?**
+⚠️ **Diverges — and the KB currently repeats the guide**, at
+`deliverables/ai/P2/hardware/addon-rtc.yaml` `pin_mode_tip`. Deliberately not rewritten yet under
+D3/R9; owed to «#307» as a correction-register item.
+
+## E-005 — §18 reverses the SPI/SD pin directions · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **#64000 P2 Eval Board Rev C Guide** | **§18** | states the P58/P59 directions the other way round | — |
+| Against | **P2 boot ROM listing** v33_01j | the pin-equate block | `spi_di = 59 (also sd_di)` · `spi_do = 58 (also sd_do)` | `sources/rom-booter/rom_booter_v33_01j.lst:135-138` |
+| Against | **Propeller 2 Documentation** v35 Rev B/C | the boot-pattern table | agrees on P58/P59, and shows both `CSn (input)` and `CLK (input)` roles per boot source | `silicon-doc/p2-documentation.txt:9281-9302` |
+
+**OUR FINDING.** **P58 = MISO** (card DO → P2 input); **P59 = MOSI** (card DI ← P2 output).
+**Never cite §18 for these directions.**
+
+> 🔴 **And do not carry a companion error while fixing this one.** P58/P59 hold their roles across
+> both boot sources, but **P60 and P61 SWAP** depending on which one you are booting:
+> **Flash SPI — P61 = CSn, P60 = CLK. SD — P61 = CLK, P60 = CSn.** The ROM booter states both in one
+> line each: `spi_cs = 61  'also sd_ck` and `spi_ck = 60  'also sd_cs`
+> (`rom_booter_v33_01j.lst:135-136`). Our KB has this right at
+> `deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml:84`. **An earlier draft of
+> this very entry stated "P61 = CLK, P60 = CSn" flatly — which is the SD case written as though it
+> were universal.** Same trap as the DI/DO note below, one pin pair over.
+
+> *An apparent conflict here dissolved once **DI/DO ≡ MOSI/MISO** was recognised — SD-card
+> vocabulary and SPI vocabulary naming the same two wires from opposite ends. It had been filed as
+> needing a schematic or the bench; it needed neither. **Look for the vocabulary key before
+> escalating a two-source conflict.***
+
+**Evidence tier:** the ROM booter is the authority that actually runs. · **Reached our KB?** Never
+carried — the KB was already correct and stands unchanged.
+
+## E-006 — "active-high" and "driven low when asserted", in one sentence · `RESEARCHING`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **#64006 P2 Eval Add-on Boards Guide**, 2020 ed. | the **Control accessory board** description (*"The Control accessory board includes four push-buttons and four blue LEDs"*). ⚠️ **No navigable heading in the capture — OCR text.** Cite by the paragraph text. | *"Each **active-high** push-button has a 470 Ω series resistor to allow the I/O pin to be **driven low** while the button is asserted."* | `sources/p2-eval-add-on-boards/p2-eval-add-on-boards-2020-edition-ocr-text.txt:45` |
+| Same guide | **#64006 …Guide**, 2020 ed. | next paragraph | *"The LEDs are active-high…"* — so the guide does use the term precisely elsewhere | `:47` |
+| Our KB says | `hardware/addon-control-board.yaml` | — | *"the I/O pin **reads high** while the button is pressed"* | — |
+
+**OUR FINDING — NOT YET ESTABLISHED.** The two halves cannot both be true, and **which one holds
+decides whether generated code tests for high or low.** Our KB resolved it opposite to the guide's
+mechanical description.
+
+**Evidence tier:** self-contradiction confirmed verbatim in the **original** capture — not
+introduced by our summarisation. Nothing yet settles which half is right. · **Reached our KB?**
+⚠️ Diverges. · **See Part B.**
+
+## E-007 — clock limits: a framing difference, not an error · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| Framing A | **P2 Hardware Manual**, 2022-11-01 | §**Specifications** (Heading 2) | *"10 – 20 MHz crystal (P2 Clock PLL enabled) or 0 to 180 MHz (nominal) clock oscillator"* | `p2-hardware-manual-text.txt:195` (section) |
+| Framing B | **P2 Datasheet**, 2022-11-01 | **p.48**, §AC Characteristics | Crystal (XI–XO) **1 / 50 MHz**; Direct drive (into XI) **DC / 200 MHz**; PLL **3.33 / 320 MHz** | `p2-datasheet-text.txt:2188` |
+
+**OUR FINDING.** **Not an error.** The manual states **recommended use**; the datasheet states
+**absolute limits**. Both are correct, and a reader taking either as "the range" is misled. **The KB
+must label which framing it quotes.** Both agree on **180 MHz @ 105 °C nominal system clock**, so
+only the *input* limits need the label.
+
+**Evidence tier:** both documents read directly; no contradiction once the framings are named. ·
+**Reached our KB?** Follows — but unlabelled today.
+
+---
+
+## Part B — what would settle the open ones
+
+| # | The question | What would settle it | Runnable here? |
+|---|---|---|---|
+| **E-006** | On the **#64006A Control** board, does a pressed button make the P2 pin read **high** or **low**? | A **bench test**: configure the pin, press the button, read `INA`. Or the board schematic from Parallax. | **Yes** — jumper-only rig, no external instrument. The result becomes an `EF-NNN` empirical finding and E-006 cites it. |
+
+---
+
+## How an erratum gets here, and what happens after `RESOLVED`
 
 `ingest-source` pass 6 (cross-source conflict audit) is the normal entry point: a conflict that
-resolves to *"the source is wrong"* rather than *"our KB is wrong"* or *"nobody documents this"*
-files here rather than to the corrections register or the gap ledger. A defect found later — during
-a manual audit, a semantic read of an example, or a repopulation pass — files here too.
+resolves to *"the source is wrong"* files here rather than to the corrections register or the gap
+ledger. Defects found later — a manual audit, a semantic read of an example, a repopulation pass —
+file here too.
 
-**The test for which register:** *if Parallax fixed their document tomorrow, would this entry
-disappear?* Yes → it is an erratum. No → it is our correction, or a gap.
+**Reaching `RESOLVED` is not the end.** Three follow-ons, and the first is the one that gets skipped:
+
+1. **If the KB `Diverges` from, or `Follows`, a wrong source — that is a correction.** File it to
+   `P2KB-CORRECTION-FINDINGS.md` and fix the KB. **E-004 is the live example.**
+2. **If a manual repeats it**, it is a manual correction too; route it the same way.
+3. **If it was settled on the bench**, the result belongs in `P2-EMPIRICAL-FINDINGS.md` as `EF-NNN`,
+   and this row cites it rather than restating it.
