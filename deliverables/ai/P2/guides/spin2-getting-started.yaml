@@ -2,6 +2,10 @@ title: Spin2 Getting Started - Core Language Essentials
 id: spin2-getting-started
 version: 1.2.0
 content_base: "/deliverables/ai/P2/language/spin2"
+# content_base names where this guide's subject content lives; it is NOT a resolution
+# base. Every path in this file is repo-absolute and resolves on its own. Do not write a
+# path relative to content_base: entries here point outside it (architecture/), so a
+# reader cannot tell which base a bare path meant.
 layer: "Foundation - Language Mechanics"
 purpose: Minimal viable knowledge for writing functional Spin2 code
 target_audience: AI code generators and developers new to Spin2
@@ -22,7 +26,7 @@ knowledge_progression:
   pre_requisite:
     ESSENTIAL:
       - name: "P2 Architecture Mental Model"
-        content: "architecture/p2-architecture-mental-model.yaml"
+        content: "/deliverables/ai/P2/architecture/p2-architecture-mental-model.yaml"
         key: p2kbArchP2ArchitectureMentalModel
         why: "Understand COG independence, Spin2 vs PASM2 execution models, shared resources, and when to use inline PASM2. Must read BEFORE writing code."
         when: "Read first, before this guide"
@@ -30,13 +34,13 @@ knowledge_progression:
   immediate_next_steps:
     REQUIRED:
       - name: "Basic I/O Concepts"
-        content: "concepts/basic-io.yaml"
+        content: "/deliverables/ai/P2/language/spin2/concepts/basic-io.yaml"
         why: "Essential for any pin I/O - covers pin groups, ADDPINS, registers, and drive strength"
         when: "Read immediately after Getting Started, before writing I/O code"
         
     RECOMMENDED:
       - name: "Formatting Standards"
-        content: "conventions/spin2-formatting-standards.yaml"
+        content: "/deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml"
         when: "Want consistent, professional code structure"
       - name: "Documentation Styles"
         when: "Need inline documentation (JonnyMac or VS Code style)"
@@ -497,12 +501,12 @@ debugging_support:
 
 next_steps:
   essential_reading:
-    - "concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "/deliverables/ai/P2/language/spin2/concepts/basic-io.yaml - REQUIRED before any I/O work"
     - "Full Spin2 method reference - for complete language details"
-  
+
   code_style:
-    - "spin2-formatting-standards.yaml - professional structure"
-    - "spin2-docs-jonnymac.yaml or vscode-pnut-documentation-style.yaml - documentation style"
+    - "/deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml - professional structure"
+    - "/deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml or /deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml - documentation style"
   
   advanced_features:
     - "Smart Pin methods - hardware-assisted operations"

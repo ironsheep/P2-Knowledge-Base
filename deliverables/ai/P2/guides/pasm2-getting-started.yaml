@@ -2,6 +2,10 @@ title: PASM2 Getting Started - Core Assembly Essentials
 id: pasm2-getting-started
 version: 1.2.0
 content_base: "/deliverables/ai/P2/language/pasm2"
+# content_base names where this guide's subject content lives; it is NOT a resolution
+# base. Every path in this file is repo-absolute and resolves on its own. Do not write a
+# path relative to content_base: entries here point outside it (architecture/), so a
+# reader cannot tell which base a bare path meant.
 layer: "Foundation - Assembly Mechanics"
 purpose: Minimal viable knowledge for writing functional PASM2 code
 target_audience: AI code generators and developers new to PASM2 assembly
@@ -22,7 +26,7 @@ knowledge_progression:
   pre_requisite:
     ESSENTIAL:
       - name: "P2 Architecture Mental Model"
-        content: "architecture/p2-architecture-mental-model.yaml"
+        content: "/deliverables/ai/P2/architecture/p2-architecture-mental-model.yaml"
         key: p2kbArchP2ArchitectureMentalModel
         why: "Understand COG independence, execution models (cogexec vs hubexec), Egg Beater timing, shared resources, and smart pin offloading. Must read BEFORE writing code."
         when: "Read first, before this guide"
@@ -30,7 +34,7 @@ knowledge_progression:
   immediate_next_steps:
     REQUIRED:
       - name: "Basic I/O Concepts"
-        content: "concepts/basic-io.yaml"
+        content: "/deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml"
         why: "Essential for any pin I/O - covers multi-pin operations, ADDPINS, and drive strength"
         when: "Read immediately after Getting Started, before writing I/O code"
         
@@ -327,13 +331,13 @@ core_instructions:
     RDLONG:
       syntax: "RDLONG  D, PTRA/PTRB/address"
       description: "Read long (32-bit) from hub memory"
-      timing: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdlong.yaml encoding"
+      timing: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per /deliverables/ai/P2/language/pasm2/rdlong.yaml encoding"
       example: "RDLONG  value, PTRA++"
       
     WRLONG:
       syntax: "WRLONG  D, PTRA/PTRB/address"
       description: "Write long to hub memory"
-      timing: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrlong.yaml encoding"
+      timing: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per /deliverables/ai/P2/language/pasm2/wrlong.yaml encoding"
       example: "WRLONG  result, PTRA"
       
     RDBYTE:
@@ -452,8 +456,9 @@ inline_pasm2_in_spin2:
 labels_and_symbols:
   overview: |
     PASM2 uses global and local labels for code organization. Local labels enable
-    reuse of common names (.loop, .done) without collision. See concepts/labels.yaml
-    for complete scoping rules and reference operators.
+    reuse of common names (.loop, .done) without collision. See
+    /deliverables/ai/P2/language/pasm2/concepts/labels.yaml for complete scoping
+    rules and reference operators.
 
   global_labels:
     syntax: "labelname"
@@ -485,7 +490,7 @@ labels_and_symbols:
     "@label": "Hub address of label"
     "$": "Current COG address"
 
-  detailed_reference: "concepts/labels.yaml"
+  detailed_reference: "/deliverables/ai/P2/language/pasm2/concepts/labels.yaml"
 
 assembler_directives:
   ORG:
@@ -628,8 +633,8 @@ timing_considerations:
 
 next_steps:
   essential_reading:
-    - "concepts/basic-io.yaml - REQUIRED before any I/O work"
-    - "concepts/labels.yaml - Label scoping rules and reference operators"
+    - "/deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "/deliverables/ai/P2/language/pasm2/concepts/labels.yaml - Label scoping rules and reference operators"
     - "Full PASM2 instruction reference - for detailed documentation"
 
   advanced_features:

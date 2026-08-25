@@ -24,7 +24,7 @@ core_concept_configuration_vs_operation:
   configuration_layer:
     purpose: "Set electrical characteristics"
     methods:
-      - "WRPIN - Configure drive strength (see architecture/pin-drive-configuration.yaml)"
+      - "WRPIN - Configure drive strength (see /deliverables/ai/P2/architecture/pin-drive-configuration.yaml)"
     persistence: "Settings remain active during basic I/O"
     
   operation_layer:
@@ -46,10 +46,10 @@ pin_architecture:
   per_pin_capabilities:
     direction: "DIR bit -- 0: input (float), 1: output (drive)"
     output_state: "OUT bit -- 0: low, 1: high; the corresponding DIR bit must be high to enable output"
-    drive_modes: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float. The eight rungs, their %HHH/%LLL encodings and their P_* constant names are defined once in architecture/pin-drive-configuration.yaml."
+    drive_modes: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float. The eight rungs, their %HHH/%LLL encodings and their P_* constant names are defined once in /deliverables/ai/P2/architecture/pin-drive-configuration.yaml."
     input_modes: "Logic, Schmitt, pin-to-pin-comparator, and 8-bit-level-comparator input modes"
     power_grouping: "Externally powered in blocks of 4 for clean analog Vdd reference"
-  no_milliamp_ladder: "The datasheet's drive list is the whole list. No per-pin milliamp drive ladder and no programmable slew rate exists; see architecture/pin-drive-configuration.yaml no_other_rungs."
+  no_milliamp_ladder: "The datasheet's drive list is the whole list. No per-pin milliamp drive ladder and no programmable slew rate exists; see /deliverables/ai/P2/architecture/pin-drive-configuration.yaml no_other_rungs."
 
 control_registers:
   source: "P2 Datasheet 2022/11/01 -- Special-Purpose Registers p.13 :579-586 and I/O Pin Registers p.21 :981-986 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt; the same table on the reconstructed path at engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164"
@@ -243,7 +243,7 @@ internal_pull_resistors:
     high-impedance input with the selection INACTIVE. This was measured on real
     silicon (EF-063, EF-064, 2026-08-20); it is the reason the older form of this
     block -- weak drive followed by a float -- does not work.
-  ladder_definition_home: architecture/pin-drive-configuration.yaml
+  ladder_definition_home: /deliverables/ai/P2/architecture/pin-drive-configuration.yaml
   substitute_for_a_pull_up:
     intent: "hold a line high weakly, so a stronger external drive can overpower it"
     mode_word: "P_HIGH_15K"

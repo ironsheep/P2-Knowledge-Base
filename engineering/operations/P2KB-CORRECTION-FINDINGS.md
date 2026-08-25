@@ -1423,6 +1423,39 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > **Why this is `PARTIAL` and not closed: the class is still undetectable.** Nothing found these
 > for years, and nothing would find the next one — see **F-340**. This entry stays open until that
+
+> 🔴 **MEASURED BY THE ARBITER 2026-08-25 (during «#304») — THE EXPOSURE IS 24% OF ALL REFERENCE
+> SITES, AND THE GATE'S GREEN IS NOT A STATEMENT ABOUT THEM.**
+>
+> `validate-crossref-keys.py` iterates a **fixed 15-name `CROSS_REF_FIELDS` dict** and tests
+> `if field_name not in content` — `content` being the **top level** of each document (`:447-492`).
+> So a reference field is checked only when it is a top-level key, and any reference nested below
+> that is invisible. Counted across `deliverables/ai/P2/`:
+>
+> | | sites |
+> |---|---|
+> | reference-field occurrences the validator **sees** (top level) | **742** |
+> | occurrences it **structurally cannot see** (nested) | **230** |
+> | **coverage** | **76%** |
+>
+> Nested, by field: `related_symbols` **136** · `related` 57 · `see_also` 25 ·
+> `related_instructions` 6 · `cross_references` 3 · `related_pasm` 2 · `combines_with` 1.
+>
+> **`related_symbols` alone is 136 unchecked sites, and that is exactly where the two fabricated
+> names (`P_LEVEL_B`, `P_SCHMITT_B`) lived undetected.** They were not missed by bad luck; they
+> were in a field the instrument does not read.
+>
+> ⚠️ **AND «#304» FOUND THE SECOND HALF OF THE SAME HOLE:** a field that is not in the dict at all
+> is invisible even at top level. `knowledge_progression:` and `next_steps:` in
+> `guides/*-getting-started.yaml` carried the citations that route every new agent into
+> `concepts/basic-io.yaml` — **the validator could not have reported them wherever they pointed.**
+> Its exit 0 was silence, not a verdict.
+>
+> **For «#305»: `3161 refs, 0 unresolved` must not be read, or reported at release, as
+> "cross-references are clean."** It means *the 76% the instrument looks at resolve.* Either widen
+> the traversal to nested occurrences and unknown reference-shaped fields, or state the scope
+> wherever the number is quoted. **A gate whose green is narrower than its name is the defect this
+> sprint exists to repair, one level up.**
 > detection gap is dispositioned.
 
 ### F-339 — `audit-constant-fidelity.py`'s own docstring misstates the size and the shape of the blind spot it declares — `CONFIRMED`

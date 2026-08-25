@@ -272,6 +272,13 @@ CONFORMANCE_GUIDES:
     note:     mode: Released for anything already in deliverables/documents/;
               Mode: Development until an element's first public release, and
               PUBLICATION-ROSTER.md's status section is what decides which.
+              ONE EXCEPTION, by design: the P2KB YAML set has exactly ONE release
+              record — the repo-root CHANGELOG.md, whose own scope note says its
+              semver entries track the knowledge base itself, and which is what
+              `release-yamls` §4 writes. `deliverables/ai/P2/CHANGELOG.md` is a
+              POINTER holding no entries, co-located so a consumer who downloads
+              the served content can find the record. Do not write entries into it
+              and do not voice it as a changelog — one fact, one home.
 
   - surface:  every CHANGELOG.md — the class-3 PROFILE half (structure, not voice)
     guide:    engineering/document-production/methodology/changelog-style-guide.md
@@ -291,7 +298,7 @@ CONFORMANCE_GUIDES:
   - surface:  the shipped P2KB YAML set — deliverables/ai/P2/**.yaml
     guide:    engineering/standards/documentation-standards/P2KB-YAML-AUTHORING-GUIDE.md
     when:     before authoring or editing ANY shipped YAML; re-read at release
-    strength: gate      # instruments below; R6/R7/R9 have none and are held by review
+    strength: gate      # DECLARED, not yet wired — see ARMING below
     note:     ADDED 2026-08-24. Until then this was the ONE governed surface with no
               row — our most-consumed deliverable, carrying the strict agent-consumer
               cite-or-omit bar, and the least governed. Seven defects (F-321…F-327)
@@ -302,10 +309,48 @@ CONFORMANCE_GUIDES:
                 • engineering/tools/validation/audit-constant-fidelity.py   (R1, R4, R5)
                 • engineering/tools/validation/audit-yaml-claim-sourcing.py (R2, R3)
                 • pnut-ts, add -d for debug() — legality only, never semantics (R8)
+              Run each for its live numbers; never transcribe a count into this row.
               NOT gated by DOC_AUDIT_COMMAND: that instrument globs the
               document-production prose-guide layer only. This guide lives in the
               standards tree, whose instrument coverage is a known open punch-list
               item — so this row names its own instruments rather than inheriting one.
+
+              ARMING — NOT YET DONE, and the distinction is load-bearing.
+              Both instruments exit non-zero on a Tier 1 violation when invoked, but
+              NOTHING IN THE RELEASE PATH INVOKES THEM: `release-yamls/SKILL.md`
+              does not mention either tool. So `strength: gate` above is a
+              DECLARATION of the bar, not evidence that anything enforces it — a
+              gate must read the artifact, never the declaration. Wiring them in is
+              plan §10b, owned by «#305», together with the disposition of the
+              harvest gaps below. Until that lands, treat a clean run as something
+              an author chose to do, not something the release refused to skip.
+
+              «#292» (2026-08-24) CHANGED audit-constant-fidelity.py's behaviour:
+              source definitions written in HEADING form are now harvested, as a
+              strict FALLBACK applied only after every pipe-table/bullet definition
+              in the truth tree has claimed its name. TRUTH_ROOTS is untouched —
+              this was a parser change, not a roots change. The repair RAISED the
+              Tier 1 count, which is the repair working, not a regression.
+
+              OPEN HARVEST GAP, and it is why arming is conditional: the truth side
+              globs `*.md` only and ROW_RE wants the constant in column 1, so the
+              CURRENT-EDITION Spin2 v55 symbol table — a `.txt`, tab-indented, with
+              the value in column 1 — is not on the truth side at all. The
+              instrument is therefore auditing the KB against a superseded edition
+              and cannot say so. The register has since measured the real exposure
+              (nothing v55 ADDED is missing; the exposure is entirely constants v55
+              RE-DESCRIBED) — read it there rather than restating it here, and note
+              that the tool's own KNOWN LIMITATIONS text still carries the
+              pre-measurement figure. Correcting that text is «#305»'s, not a
+              consumer's.
+
+              Two further scope facts an author needs, neither of them instrumented:
+              R3a, R5a, R6, R7, R9 and R10 have NO instrument and are held by review;
+              and `validate-crossref-keys.py` examines a fixed list of TOP-LEVEL
+              fields only, so a citation nested inside `knowledge_progression:`,
+              `next_steps:` or a `content:` entry is never read and cannot be
+              reported unresolved. Its exit 0 is silence about those fields, not a
+              verdict on them.
 
   - surface:  authored .spin2 source (verification tests, utility objects)
     guide:    central:spin2-authoring-guide

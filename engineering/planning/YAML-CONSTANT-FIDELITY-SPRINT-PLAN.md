@@ -316,7 +316,7 @@ open punch-list item), so the rest of this section is enumerated by hand and by 
 | Artifact | Why it is in the radius |
 |---|---|
 | `deliverables/ai/P2/**.yaml` | the deliverable itself |
-| `guides/spin2-getting-started.yaml:33,500` · `guides/pasm2-getting-started.yaml:33,645` | **cite `concepts/basic-io.yaml` as "REQUIRED before any I/O work"** — they route every new agent into the file carrying the broken examples. Found by producer/consumer inventory; absent from the first draft's file table. |
+| `guides/spin2-getting-started.yaml:33,500` · `guides/pasm2-getting-started.yaml:33,631` | **cite `concepts/basic-io.yaml` as "REQUIRED before any I/O work"** — they route every new agent into the file carrying the broken examples. Found by producer/consumer inventory; absent from the first draft's file table. |
 | `deliverables/ai/P2/README.md` · `deliverables/ai/README.md` | describe the set to consumers |
 | KB release notes | does not exist — §11 creates it |
 | `engineering/ingestion/README.md` (p2-datasheet row, scheduled-work table) | §8 moves coverage |
