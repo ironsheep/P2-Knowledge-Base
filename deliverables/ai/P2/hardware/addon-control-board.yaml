@@ -52,19 +52,19 @@ signal_map:
   - offset: 4
     signal: "Tactile push switch 0"
     direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Use internal pull-down (P_LOW_15K); software debounce (~20 ms)."
+    notes: "470 ohm series resistor; active high (pressed = high). Hold the pin low with a weak drive (WRPIN P_LOW_15K, then PINLOW so DIR is high) so an unpressed switch reads 0; software debounce (~20 ms)."
   - offset: 5
     signal: "Tactile push switch 1"
     direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Internal pull-down; software debounce."
+    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
   - offset: 6
     signal: "Tactile push switch 2"
     direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Internal pull-down; software debounce."
+    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
   - offset: 7
     signal: "Tactile push switch 3"
     direction: in
-    notes: "470 ohm series resistor; active high (pressed = high). Internal pull-down; software debounce."
+    notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
 
 # Physical placement differs from pin order; the OBEX driver remaps to MSB..LSB
 # (left-to-right, top-to-bottom). Offsets above are the electrical truth.
@@ -120,9 +120,9 @@ code_patterns:
       PUB init_control_board(base_pin)
         ' LEDs: base..base+3
         PINLOW(base_pin ADDPINS 3)       ' Set LEDs low (off)
-        ' Buttons: base+4..base+7 with internal pull-downs
-        WRPIN(base_pin+4 ADDPINS 3, P_LOW_15K)
-        PINLOW(base_pin+4 ADDPINS 3)     ' Activate pull-downs
+        ' Buttons: base+4..base+7 held low by a weak drive
+        WRPIN(base_pin+4 ADDPINS 3, P_LOW_15K)   ' Drive low 15kOhm
+        PINLOW(base_pin+4 ADDPINS 3)     ' DIR=1, OUT=0 - a drive is live only while DIR is high
     led_control: |
       PUB led_on(base_pin, led_num)
         PINHIGH(base_pin + led_num)

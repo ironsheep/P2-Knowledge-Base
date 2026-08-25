@@ -138,7 +138,7 @@ addon_boards:
     switch_count: 4
     analog_inputs: 0
     digital_ios: 8
-    special_features: "Current limiting resistors, pull-up resistors"
+    special_features: "Current limiting resistors (470 ohm in series with each LED and each switch)"
     power_consumption: "40mA maximum"
     educational_concepts: ["Digital I/O", "LED control", "Switch input"]
     primary_applications: ["basic_io", "education", "status_display"]

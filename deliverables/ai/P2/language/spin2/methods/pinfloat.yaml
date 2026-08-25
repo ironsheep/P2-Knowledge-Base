@@ -64,7 +64,7 @@ common_uses:
   - "Configure pins as inputs"
   - "Charlieplexing LED matrices"
   - "Tri-state bus operations"
-  - "Allow pull-up/pull-down resistors to set level"
+  - "Allow external pull-up/pull-down resistors to set level"
   - "Switch from output to input mode"
 
 related_methods:
@@ -76,6 +76,7 @@ related_methods:
 notes:
   - "Pin becomes an input and can be read with PINREAD"
   - "External pull-up/pull-down resistors will determine the level"
+  - "A drive-strength selection (P_HIGH_*/P_LOW_*) applies only while the pin drives, so floating the pin makes it inactive - see architecture/pin-drive-configuration.yaml"
   - "Pin will not drive any current in this state"
   - "Smart pin modes may still operate while DIR=0"
   - "Essential for bidirectional communication protocols"
@@ -83,5 +84,6 @@ notes:
 
 see_also:
   - "language/pasm2/fltl.yaml"
+  - "architecture/pin-drive-configuration.yaml"
   - "language/spin2/methods/pinread.yaml"
   - "language/spin2/methods/pinhigh.yaml"

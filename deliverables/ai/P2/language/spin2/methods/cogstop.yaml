@@ -107,7 +107,7 @@ best_practices:
 
 warnings:
   - "Stopping a cog doesn't clean up its resources"
-  - "Pins float - may need pull-up/down resistors"
+  - "Pins float - may need external pull-up/down resistors"
   - "Cannot recover cog state after stopping"
   - "No notification to other cogs"
 

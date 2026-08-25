@@ -293,28 +293,31 @@ pasm2_documentation:
     - Focus on register usage and algorithm explanation
     
   inline_pasm2_example: |
-    pub read_sensor() : sensor_value | pin_config
+    con
     
-    '' Read sensor value using custom timing
+      SENSOR_DELAY = 1_000                     ' clocks between sample points
+    
+    pub read_sensor(sensor_pin) : sensor_value | pin_config, delay_count, bit_counter
+    
+    '' Read one byte from a bit-banged sensor
     '' -- requires precise bit-banging for this sensor type
+    '' -- the sensor line idles high and the sensor pulls it low
     
       org
-        ' Configure sensor pin for input with pullup
-        mov     pin_config, ##P_HIGH_150K      ' 150K pullup resistor  
+        ' Hold the line high through a weak drive so the sensor can pull it low
+        mov     pin_config, ##P_HIGH_15K       ' drive high 15 kOhm
         wrpin   pin_config, sensor_pin         ' apply to sensor pin
+        drvh    sensor_pin                     ' DIR=1, OUT=1 - a drive is live only while DIR is high
         
         ' Timing loop for sensor reading
-        mov     delay_count, ##sensor_delay    ' load delay constant
+        mov     delay_count, ##SENSOR_DELAY    ' load delay constant
         mov     bit_counter, #8                ' read 8 bits
         
     read_loop
         waitx   delay_count                    ' precise timing delay
-        rdpin   sensor_bit, sensor_pin         ' read current bit
-        shl     sensor_value, #1               ' shift previous bits
-        or      sensor_value, sensor_bit       ' add new bit
+        testp   sensor_pin              wc     ' sample the line into C
+        rcl     sensor_value, #1               ' shift C in as the next bit, msb first
         djnz    bit_counter, #read_loop        ' continue for all bits
-        
-        wrlong  sensor_value, ptra             ' write to SPIN2 variable
       end
       
   what_to_comment:

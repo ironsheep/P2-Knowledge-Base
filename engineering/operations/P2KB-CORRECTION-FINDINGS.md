@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-342`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-347`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,6 +50,111 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **F-093 (`WONTFIX`):** `lockrel.yaml` C-flag polarity — the appendix's "inverted" claim is the error; the YAML is correct (C = lock-was-held).
 - **F-114b (`RESOLVED-INVALID`):** the MIDI display modes KEYBOARD / GRID / ROLL / MONITOR do **not** exist in PNut v55 — do **not** add them to `midi.yaml` (it carries an explicit `not_supported:` claim).
 - **Verified-resolved (don't re-chase):** the Jan-2026 streamer KB audit's issues were all reconciled in the 2026-05/06 passes (DAC routing, 32-pin groups, mode encoding, xcont/xzero phase wording, setxfrq 2³¹ formula, streamer symbols). Only the XZERO concept text was open and is fixed (F-003).
+
+---
+
+## Five defects surfaced while ending the drive-strength mislabel class (2026-08-25, «#296» §5) — F-342…F-346
+
+> **Origin.** All five were found while correcting F-321…F-324 — three of them only because
+> R8 forces a **semantic read** of every example after it compiles. Three are fixed in that same
+> pass and marked so; two are not this task's repair and are filed for the head that owns them.
+> Every line number below was read off disk on 2026-08-25.
+
+### F-342 — a Parallax board guide states the pull-up mislabel itself, and prescribes it in the one configuration where it cannot work — `CONFIRMED`
+
+> **Where the KB carries it:** `deliverables/ai/P2/hardware/addon-rtc.yaml:49-51` (`pin_mode_tip`).
+>
+> **Where it comes from:** `engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:74-77`
+> — *"To use the I2C SCL function, set the I2C output mode to use 3.3 k-ohm pull-up. … then disable
+> I2C and set the P2 Smartpin (or equivalent) **input mode** to 150 k-ohm pull-up."*
+> (P2 RTC Add-on Board #64013, v1.0 11/29/2022, page 2.) The KB is quoting its source faithfully.
+>
+> **Why it is a finding and not a KB defect.** Two things are wrong in the source itself:
+>
+> 1. **The mislabel, from Parallax.** There is no 150 kΩ pull-up on the P2. `P_HIGH_150K` is
+>    *"Drive high 150kΩ"* (`sources/spin2-v55/spin2-v55-text.txt:1505`) — a drive-strength
+>    selector. This is F-321's exact rename, in a Parallax document.
+> 2. **It is F-322-shaped.** "input mode … 150 k-ohm pull-up" is a contradiction on this silicon:
+>    input mode is DIR = 0, and the Pin Mode Legend states *"DIR = direction bit; 0: input (float),
+>    1: output (drive)"* (`sources/p2-datasheet/p2-datasheet-text.txt:1144`; identical at
+>    `sources/p2-hardware-manual/p2-hardware-manual-text.txt:871`). With DIR = 0 the drive-high
+>    selection is inactive and the pin is plain high-impedance — the INT/CLKOUT line would float.
+>
+> **Deliberately NOT rewritten** (D3/R9): a source's wording is not ours to silently improve, and
+> the correct replacement is a behaviour claim about the #64013 board that no source states.
+>
+> **What is owed.** Adjudicate whether the KB should (a) keep the quote and add a note that the
+> weak high drive requires DIR high, citing the legend line above, or (b) route the discrepancy
+> upstream as a board-guide erratum. This is the second Parallax-source-level instance of the
+> F-321 class after F-341's derived-analysis documents, and the first in a *published Parallax
+> document* rather than one of ours.
+
+### F-343 — the KB credited the 64006A Control Board with pull-up resistors its own board guide does not give it — `PENDING-VALIDATION`
+
+> **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml:141` —
+> `special_features: "Current limiting resistors, pull-up resistors"`.
+>
+> **What the source says.** `engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md:16-23`
+> (Product Guide v2.0, 1/12/2021) gives every one of the eight I/O pins **one** component: a
+> *470 Ω series resistor*. Pull-up and pull-down appear **nowhere** in that board's source. The
+> KB's own `hardware/addon-control-board.yaml` agrees — 470 Ω series resistors on all eight pins,
+> no bias network.
+>
+> **Two KB files disagreed about a physical board**, and the wrong one is the comparison table an
+> agent reads to pick a board.
+>
+> **APPLIED 2026-08-25 by «#296» §5**, by deleting the unsupported half:
+> `special_features: "Current limiting resistors (470 ohm in series with each LED and each switch)"`.
+
+### F-344 — the derived board extract contradicts itself in one sentence about switch polarity — `CONFIRMED`
+
+> **Where:** `engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md:9-11`
+> — *"each **active-high** push-button has a **470 Ω series resistor** so the I/O pin is **driven
+> low** while the button is asserted."*
+>
+> **Active-high and driven-low-when-asserted cannot both be true of the same switch.** The rest of
+> that same file says active high in the pin map (`:20-23`), and the shipped
+> `hardware/addon-control-board.yaml:16-20` says *"the I/O pin reads high while the button is
+> pressed"* — so the KB already resolved it the other way. The extract's own summary sentence is
+> the outlier.
+>
+> **Ingestion-tree defect, not a YAML edit** — this file is derived source-research and is frozen
+> to KB maintenance. Same class as **F-341** (our own derived documents inside the truth root).
+> **What is owed:** re-read the #64006A Product Guide v2.0 page and correct the extract's summary
+> sentence, or record why the guide itself says both.
+
+### F-345 — a worked example read a button with inverted flag polarity, under a comment asserting the opposite — `PENDING-VALIDATION`
+
+> **Where:** `deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml`, `common_patterns.button_read`
+> (`:243` before the fix): `TESTP #button_pin WZ      ' Z=1 if button pressed (low)`.
+>
+> **Evidence.** `TESTP` sets the flag **to** the pin state, not to its complement —
+> `deliverables/ai/P2/language/pasm2/testp.yaml` encoding table: `c: IN[D[5:0]]`, `z: IN[D[5:0]]`;
+> Silicon Doc, `sources/silicon-doc/part2-video-output.txt:291` — *"read pin D bit in INx and
+> affect C or Z"*, with `TESTPN` (`:292`) as the inverting form. So `Z = 1` means the pin is
+> **high** — the button **released**. The example ran its handler on exactly the wrong half of the
+> input, and the following `IF_Z CALL` compiled perfectly.
+>
+> **This is why a clean compile is not a verification** — the same lesson as F-322, by a different
+> mechanism (flag polarity rather than DIR state), found only on the semantic read.
+>
+> **APPLIED 2026-08-25 by «#296» §5:** `TESTP #button_pin WC ' C = pin state` / `IF_NC CALL
+> #button_action ' a press shorts the pin to ground`. Swept: `TESTP`/`TESTPN` with a
+> polarity-claiming comment appears nowhere else in the shipped set.
+
+### F-346 — three worked examples were structurally unrunnable, and one rule contradicted its own two examples — `PENDING-VALIDATION`
+
+> **All four found by reading examples I had just compiled successfully.** None was caught by any
+> gate; `pnut-ts` is the legality half only.
+>
+> | Where | What was wrong | Fix applied |
+> |---|---|---|
+> | `language/pasm2/concepts/basic-io.yaml` `common_patterns.led_blink` | `JMP #$ ' Repeat` — `$` is the **current** instruction's address, so this is a jump to self. The LED blinked once and the cog hung. Proved by byte-identity: `JMP #$` at cog address 1 compiles identically to `JMP #1`, and differently from `JMP #0`. | labelled `blink`, `JMP #blink` |
+> | `language/pasm2/concepts/basic-io.yaml` `common_patterns.led_blink`, `.button_read` | neither fragment compiled — a bare `name = value` line with no `CON`, then `ORG` with no `DAT`; `button_read` also called an undefined `#button_action` | `CON`/`DAT` headers added; poll loop and a `button_action` stub added |
+> | `architecture/smart-pins/smart-pin-00000-normal-mode.yaml` `pasm2_complete` | `ORG` was followed immediately by `led_pin LONG 56`, so **execution began on data** (cog address 0 held `$38`), and nothing ever called `setup_pins` — the pins the listing exists to configure were never configured | entry point added (`CALL #setup_pins` / `JMP #main_loop`); the two `LONG`s moved below the code beside `pin RES 1` |
+> | `language/pasm2/concepts/basic-io.yaml` `safe_initialization_patterns.avoid_glitches` | `rule: "Set DIR before OUT to prevent output glitches"` — while **both** of its own examples set OUT first and DIR second. An agent reading the `rule:` string alone would do the opposite of what the file demonstrates. | `rule: "Set OUT to the desired state while the pin is still floating, then raise DIR"`, and the `wrong:` comment restated to name the actual failure (raising DIR latches the wrong level onto the pin) |
+>
+> **All four sites recompiled from the shipped YAML bytes after the fix**, and re-read.
 
 ---
 
@@ -864,7 +969,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > the predefined-label tables at lines ~150–195, plus
 > `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt` for the DIR/output rule.
 
-### F-321 — the 16 `P_HIGH_*` / `P_LOW_*` drive-strength selectors are documented as pull-up/pull-down resistors — `CONFIRMED`
+### F-321 — the 16 `P_HIGH_*` / `P_LOW_*` drive-strength selectors are documented as pull-up/pull-down resistors — `PENDING-VALIDATION`
 
 > **Where:** `language/spin2/concepts/basic-io.yaml:203-213` (`pull_up_modes:` / `pull_down_modes:`)
 > and `language/pasm2/concepts/basic-io.yaml:271-281` (same two blocks, same values).
@@ -896,8 +1001,54 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > and the low side, selected independently — and delete the `pull_up_modes:` / `pull_down_modes:`
 > framing. Where the reader's *intent* is a pull-up, document the idiom, not a fictional component
 > (see F-325). Match the source's wording, not an interpretive paraphrase.
+>
+> **APPLIED 2026-08-25 by «#296» §5, across three tasks.** «#293» deleted the two `pull_up_modes:` /
+> `pull_down_modes:` blocks; «#295» re-defined all sixteen from the source in the single home
+> (`language/spin2/symbols/spin2-builtin-symbols-complete.yaml`); «#296» removed the surviving
+> mislabel from every remaining site. `audit-constant-fidelity.py` `[CONTRADICT]` **5 → 0**
+> (`PASS  no Tier 1 violations across 120 source-defined constant(s); 0 Tier 2`).
+>
+> **Sites corrected in this pass, with the source line each was matched against** — all four
+> quantities re-read on disk 2026-08-25, and v55 (current edition) preferred over the v51 extract
+> the tool cites:
+>
+> | Site | Was | Now | Source |
+> |---|---|---|---|
+> | `language/spin2/conventions/johnny-mac-documentation-style.yaml:303` | "150K pullup resistor" | `P_HIGH_15K` · "drive high 15 kOhm" | `sources/spin2-v55/spin2-v55-text.txt:1504` |
+> | `language/spin2/conventions/spin2-docs-jonnymac.yaml:196` | "150K pullup resistor" | `P_HIGH_15K` · "drive high 15 kOhm" | `spin2-v55-text.txt:1504` |
+> | `architecture/smart-pins/smart-pin-00000-normal-mode.yaml:53` | "Add pull-up" | "Drive high 15kOhm" | `spin2-v55-text.txt:1504` |
+> | `architecture/smart-pins/smart-pin-00000-normal-mode.yaml:84` | "With pull-up" | "Drive high 15kOhm" | `spin2-v55-text.txt:1504` |
+> | `language/pasm2/concepts/basic-io.yaml:241` | "Enable pull-up" | "Drive high 15kOhm" | `spin2-v55-text.txt:1504` |
+>
+> **Why the two `conventions/*.yaml` rows also change CONSTANT.** Their example is a bit-banged
+> sensor read on a timing loop, and both were rewritten to the verified `weak_high` composition
+> that `architecture/pin-drive-configuration.yaml` ships — which is stated with `P_HIGH_15K`
+> (EF-063). `P_HIGH_150K` is the weakest resistive rung but one; holding a bit-banged line through
+> it is not a composition any source or bench result states, so keeping the name would have meant
+> shipping an unverified idiom to preserve a constant that was only ever incidental to a
+> *documentation-style* example. The rung actually verified on silicon is what ships.
+>
+> **Plus eleven sites the instrument cannot see** (its limitation 3 — prose that names no constant,
+> and a comment on the line *above* the constant rather than at end-of-line): the
+> "internal pull resistors" framing in both `concepts/basic-io.yaml` summary/description/
+> critical_distinction blocks and their `configuration_layer.methods` lists, the two
+> `guides/*-getting-started.yaml` "pull resistors" blurbs, `hardware/addon-control-board.yaml`'s
+> "internal pull-down (P_LOW_15K)" notes (×4 + 2 code comments),
+> `hardware/p2-hardware-feature-comparison.yaml:141` (see **F-343**),
+> `language/spin2/methods/pinfloat.yaml:67`, `language/spin2/methods/cogstop.yaml:110` and
+> `code-examples/smart-pins-002-button-reading.yaml:62` (the last three said "pull-up/pull-down
+> resistors" without saying *external*, which in a P2 file reads as a chip feature — each now says
+> **external**, matching `pinfloat.yaml:78`'s own already-correct wording).
+>
+> **Not rewritten, because the source itself carries the mislabel:** `hardware/addon-rtc.yaml:49-51`
+> — filed as **F-342**.
+>
+> **Verified, not asserted.** The zero was proved non-vacuous by a negative control: the mislabel was
+> re-inserted into all five flagged files, `audit-constant-fidelity.py` reported exactly those five
+> `[CONTRADICT]` rows, and the files were restored (`git status --short deliverables/ai/P2` back to
+> the 12 intended files). A gate that cannot fail has not been verified.
 
-### F-322 — every worked pull-up example disables the drive it just configured, so none of them work — `CONFIRMED`
+### F-322 — every worked pull-up example disables the drive it just configured, so none of them work — `PENDING-VALIDATION`
 
 > **Where — 8 sites, 3 files:**
 > `language/spin2/concepts/basic-io.yaml:218-219, 229-230, 296-297, 377-378` ·
@@ -917,19 +1068,69 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > of any strength.** An agent following any of these ships a floating input whose reads depend on
 > whatever is on the board.
 >
-> **What the source actually prescribes** — same file, §"Weak Pull-Up":
-> ```spin2
-> ' 15kΩ pull-up, float when driving low
-> WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)
-> ```
-> The `P_LOW_FLOAT` half is what makes the behaviour survive OUT=0, and DIR must be **high**, not
-> low. `P_LOW_FLOAT` appears in 5 files corpus-wide and in **none** of the pull-up examples.
+> **What ships instead** ⚠️ *(this paragraph REWRITTEN IN PLACE by the arbiter 2026-08-25 during
+> «#296». What stood here — a `WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)` attributed to a Silicon Doc
+> §"Weak Pull-Up" — was **wrong about its source and is not shipped**. The section-preamble block
+> above carries the full measurement. It is rewritten rather than annotated because a reader
+> arriving top-down would otherwise act on a false claim before reaching the note that retracts
+> it — which is the same two-places-drift defect this whole section is about.)*
+>
+> There is **no** Silicon Doc §"Weak Pull-Up"; `sources/silicon-doc/part4-smart-pins.txt` returns
+> zero hits for pull-up/pull-down. Spin2 **v55** — the current edition — defines the two constants
+> individually (`spin2-v55-text.txt:1504` *"Drive high 15kΩ"*, `:1519` *"Float low"*) and composes
+> them into **no idiom at all**. The composition, and the word "pull-up" attached to it, are ours.
+>
+> The correct composition is **hardware-verified, which outranks documentary here** — EF-063/EF-064
+> (`external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840`): `WRPIN` with
+> `P_HIGH_15K`, then **DIR high** (`PINHIGH` / `DRVH`), and **no `P_LOW_FLOAT`**.
+>
+> 🔴 **The part of the original paragraph that was RIGHT, and is the finding's actual substance:
+> DIR must be HIGH, not low.** A drive-strength selection does nothing while the pin is floated —
+> that is precisely what F-322's `PINFLOAT`/`DIRL` examples destroyed, and why a clean compile
+> proved nothing about them. Shipped in `architecture/pin-drive-configuration.yaml` as the
+> `weak_high` / `weak_low` idioms, DIR stated in both.
 >
 > **Correction.** Rewrite all eight against the source idiom, with DIR high and the low side
 > floated, and say plainly why DIR=0 defeats it — that sentence is the one a reader needs and no
 > file currently contains it.
+>
+> 🔴 **The "What the source actually prescribes" paragraph above is SUPERSEDED** by the arbiter's
+> attribution correction at the head of this section (2026-08-25). `P_HIGH_15K | P_LOW_FLOAT` under
+> a §"Weak Pull-Up" heading is **our own** derived catalog extract, not a Parallax statement, and it
+> was **not** shipped. Read that block before this one.
+>
+> **APPLIED 2026-08-25 by «#296» §5.** Four sites survived «#293»'s purge; all four were rewritten to
+> the **hardware-verified** composition (EF-063 / EF-064,
+> `external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840`) that
+> `architecture/pin-drive-configuration.yaml` already ships — `P_HIGH_15K` with **DIR high**, and no
+> `P_LOW_FLOAT`. Every one now carries the DIR sentence explicitly:
+> *"DIR=1, OUT=1 - a drive is live only while DIR is high."*
+>
+> | Site | Was | Now |
+> |---|---|---|
+> | `architecture/smart-pins/smart-pin-00000-normal-mode.yaml:53-54` | `WRPIN(...P_HIGH_15K)` + `PINFLOAT` | `WRPIN` + `PINHIGH` |
+> | `architecture/smart-pins/smart-pin-00000-normal-mode.yaml:84-85` | `WRPIN ##...P_HIGH_15K` + `DIRL` | `WRPIN` + `DRVH` |
+> | `language/pasm2/concepts/basic-io.yaml` `button_read` | `WRPIN ##P_HIGH_15K` + `DIRL` | `DIRL` (pre-config) → `WRPIN` → `DRVH` |
+> | `language/spin2/concepts/basic-io.yaml` `button_read` | `PINSTART(...)` + `PINFLOAT` | `PINCLEAR` → `WRPIN` → `PINHIGH` |
+>
+> **Plus one the finding's location line did not cover:** `language/spin2/concepts/basic-io.yaml`
+> `application_examples.matrix_keypad` had the identical `PINSTART(... P_HIGH_15K ...)` +
+> `PINFLOAT(...)` pair on the column pins, so the whole scan read undriven pins. Rewritten to the
+> same idiom.
+>
+> **And the two `conventions/*.yaml` style files** carried the same shape a third way: they
+> configured `P_HIGH_150K` and never raised DIR at all, then read the pin with `RDPIN` — which
+> returns the *smart pin's* Z register and is meaningless with the smart pin off
+> (`%SSSSS = %00000`). Both rewritten: `P_HIGH_15K` → `WRPIN` → `DRVH` → `TESTP … WC` → `RCL`.
+>
+> **Compiled AND read for semantics, separately — a clean compile is not a verification, and this
+> finding is why.** All nine touched examples compile under `pnut-ts v1.55.3` from the *shipped YAML
+> bytes* (extracted with `yaml.safe_load`, not retyped). `P_HIGH_15K` was confirmed to be `$1000`
+> and `##P_NORMAL | P_HIGH_15K` confirmed to bind the `##` to the whole expression, by byte-identity
+> of the compiled binaries against `##$1000` — and against `##($C0 | $1000)` for `P_TT_11`, so the
+> control has a non-zero left operand.
 
-### F-323 — the two `basic-io.yaml` files give contradictory mechanisms for the same feature — `CONFIRMED`
+### F-323 — the two `basic-io.yaml` files give contradictory mechanisms for the same feature — `PENDING-VALIDATION`
 
 > **Where:** `language/spin2/concepts/basic-io.yaml:197-201` says internal bias is enabled
 > *"via **PINSTART()** with special modes"*; `language/pasm2/concepts/basic-io.yaml:265-269` says
@@ -947,8 +1148,29 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > **Correction.** One mechanism, stated once, in the file that owns the concept; the other file
 > points at it rather than restating it.
+>
+> **APPLIED 2026-08-25 by «#296» §5 — by deletion and repointing, not by rewording both copies.**
+> «#293» deleted both `internal_pull_resistors:` sections, which carried the two contradictory
+> mechanism sentences. «#296» removed what survived them: the residual
+> `- "PINSTART() - Enable internal pull resistors"` (spin2, `:29`) and
+> `- "WRPIN - Enable internal pull resistors"` (pasm2, `:29`), plus the "pull resistors" phrase in
+> both files' `summary:`, `description:` and `critical_distinction:`.
+>
+> **Neither file restates the mechanism now.** Both point at the single home built by «#295»:
+> `deliverables/ai/P2/architecture/pin-drive-configuration.yaml` (index key
+> `p2kbArchPinDriveConfiguration`), added as a **full path** in each file's `see_also:` alongside
+> `.../spin2-builtin-symbols-complete.yaml`; the surviving `WRPIN` line names the target inline.
+> Same repointing added to `architecture/smart-pins/smart-pin-00000-normal-mode.yaml` (`related:`)
+> and `language/spin2/methods/pinfloat.yaml` (`see_also:`).
+>
+> 🔴 **No constant name was written as a YAML key anywhere in this pass.** That shape is what
+> `audit-constant-fidelity.py`'s `DEF_RE` reads as a *definition*, and using it would have
+> re-manufactured this very finding inside the task chartered to end it. Verified mechanically:
+> the tool still attributes **120 source-defined constants** and reports **0** `DIVERGENT`.
+>
+> `validate-crossref-keys.py`: **3149 → 3156** references, **0 unresolved**, 100.0%.
 
-### F-324 — `bits_M_6_0: "Control drive strength"` is wrong at both ends — `CONFIRMED`
+### F-324 — `bits_M_6_0: "Control drive strength"` is wrong at both ends — `PENDING-VALIDATION`
 
 > **Where:** `language/pasm2/concepts/basic-io.yaml:262`.
 >
@@ -972,6 +1194,25 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > dangling pointer at `language/spin2/concepts/basic-io.yaml:195` —
 > *"Consult smart pin mode documentation for drive strength bit encoding"* — which points at
 > nothing that exists (F-325 is what it should point at).
+>
+> **APPLIED 2026-08-25, in two tasks — verified on disk, not carried from the plan.**
+>
+> - **The wrong field itself is gone.** `bits_M_6_0: "Control drive strength"` was inside the
+>   `wrpin_encoding:` block that «#293» deleted from `language/pasm2/concepts/basic-io.yaml`; the
+>   companion dangling pointer at `language/spin2/concepts/basic-io.yaml:195` went with the same
+>   purge. Confirmed by `grep -n 'wrpin_encoding\|bits_M_6_0'` over both files — **zero hits** —
+>   and against `git show 15c84de5~1:` for what was removed.
+> - **The correct layout ships**, stated by position, in the home «#295» built:
+>   `architecture/pin-drive-configuration.yaml` `sub_fields:` — `output_polarity` **M[6]**,
+>   `drive_high` **M[5:3]** (legend `HHH`), `drive_low` **M[2:0]** (legend `LLL`), plus `C` M[8],
+>   `I` M[7] and the mode-select bits. The two sources that independently confirm the split are both
+>   cited there: the Spin2 v55 symbol-table masks
+>   (`sources/spin2-v55/spin2-v55-text.txt:1501` `%…xxxxxxxHHHxxx…`, `:1511` `%…xxxxxxxxxxLLL…`,
+>   `:1497` the `O` polarity bit) and the P2 Datasheet 2022/11/01 p.24 Pin Mode Legend
+>   (`sources/p2-datasheet/p2-datasheet-text.txt:1131-1147`), cell-identical in the P2 Hardware
+>   Manual (`sources/p2-hardware-manual/p2-hardware-manual-text.txt:847-873`).
+> - **Nothing in «#296» re-states it.** Per R4 the touched files point at that home rather than
+>   carrying a second copy of the bit ranges.
 
 ### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `PENDING-VALIDATION`
 

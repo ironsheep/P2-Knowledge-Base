@@ -59,7 +59,7 @@ application_context:
   hardware_requirements:
     - "P2 microcontroller"
     - "Button or switch connected to pin 32"
-    - "Pull-up or pull-down resistor as needed"
+    - "External pull-up or pull-down resistor as needed"
 
 validation_status:
   syntax_validated: true

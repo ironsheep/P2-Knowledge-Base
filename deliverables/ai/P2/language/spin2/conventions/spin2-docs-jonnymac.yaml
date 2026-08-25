@@ -187,27 +187,30 @@ pasm2_documentation:
     - "Redundant information restating the instruction"
     
   inline_example: |
-    PUB read_sensor() : sensor_value | pin_config
-    '' Read sensor value using custom timing
+    CON
+    
+      SENSOR_DELAY = 1_000                     ' clocks between sample points
+    
+    PUB read_sensor(sensor_pin) : sensor_value | pin_config, delay_count, bit_counter
+    '' Read one byte from a bit-banged sensor
     '' -- requires precise bit-banging for this sensor type
+    '' -- the sensor line idles high and the sensor pulls it low
     
       ORG
-        ' Configure sensor pin for input with pullup
-        MOV     pin_config, ##P_HIGH_150K      ' 150K pullup resistor
+        ' Hold the line high through a weak drive so the sensor can pull it low
+        MOV     pin_config, ##P_HIGH_15K       ' drive high 15 kOhm
         WRPIN   pin_config, sensor_pin         ' apply to sensor pin
+        DRVH    sensor_pin                     ' DIR=1, OUT=1 - a drive is live only while DIR is high
         
         ' Timing loop for sensor reading
-        MOV     delay_count, ##sensor_delay    ' load delay constant
+        MOV     delay_count, ##SENSOR_DELAY    ' load delay constant
         MOV     bit_counter, #8                ' read 8 bits
         
     read_loop
         WAITX   delay_count                    ' precise timing delay
-        RDPIN   sensor_bit, sensor_pin         ' read current bit
-        SHL     sensor_value, #1               ' shift previous bits
-        OR      sensor_value, sensor_bit       ' add new bit
+        TESTP   sensor_pin              WC     ' sample the line into C
+        RCL     sensor_value, #1               ' shift C in as the next bit, msb first
         DJNZ    bit_counter, #read_loop        ' continue for all bits
-        
-        WRLONG  sensor_value, PTRA             ' write to SPIN2 variable
       END
 
 constants_and_variables:

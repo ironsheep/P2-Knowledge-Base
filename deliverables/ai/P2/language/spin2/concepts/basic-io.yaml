@@ -7,26 +7,24 @@ purpose: Essential knowledge for basic digital I/O before smart pin autonomous m
 
 summary: |
   Foundational digital I/O operations in Spin2. Covers single-pin and multi-pin control,
-  direction management, drive strength configuration, internal pull resistors, and the
-  critical distinction between pin configuration (electrical characteristics) and pin
-  operation (read/write).
+  direction management, drive strength configuration, and the critical distinction
+  between pin configuration (electrical characteristics) and pin operation (read/write).
 
 description: |
   P2 provides 64 general-purpose I/O pins (P0-P63) that can be controlled individually
-  or in groups. Each pin can be configured for drive strength and pull resistors, then
+  or in groups. Each pin can be configured for drive strength, then
   operated as simple digital I/O. This is distinct from autonomous smart pin modes where
   the pin operates independently.
 
 core_concept_configuration_vs_operation:
   critical_distinction: |
-    Pin electrical characteristics (drive strength, pull resistors) are CONFIGURATION
+    Pin electrical characteristics such as drive strength are CONFIGURATION
     that persists while you perform normal I/O operations. These are not autonomous modes.
     
   configuration_layer:
     purpose: "Set electrical characteristics"
     methods:
-      - "WRPIN() - Configure drive strength"
-      - "PINSTART() - Enable internal pull resistors"
+      - "WRPIN() - Configure drive strength (see architecture/pin-drive-configuration.yaml)"
     persistence: "Settings remain active during basic I/O"
     
   operation_layer:
@@ -183,12 +181,13 @@ common_patterns:
         BUTTON_PIN = 0
         
       PUB main()
-        ' Enable pull-up on button pin
-        PINSTART(BUTTON_PIN, P_HIGH_15K, 0, 0)
-        PINFLOAT(BUTTON_PIN)
+        ' Hold the button pin weakly high; the button shorts it to ground
+        PINCLEAR(BUTTON_PIN)              ' clear any previous smart-pin configuration
+        WRPIN(BUTTON_PIN, P_HIGH_15K)     ' Drive high 15kOhm
+        PINHIGH(BUTTON_PIN)               ' DIR=1, OUT=1 - a drive is live only while DIR is high
         
         REPEAT
-          IF !PINREAD(BUTTON_PIN)  ' Active low (pulled up)
+          IF !PINREAD(BUTTON_PIN)  ' Active low: a press pulls the pin to ground
             buttonPressed()
             
   parallel_bus_write:
@@ -256,9 +255,10 @@ application_examples:
         COL_BASE = 4    ' Columns on P4-P7
         
       PUB scanKeypad() : key | row, col
-        ' Enable pull-ups on columns
-        PINSTART(COL_BASE ADDPINS 3, P_HIGH_15K, 0, 0)
-        PINFLOAT(COL_BASE ADDPINS 3)
+        ' Hold the columns weakly high; a pressed key ties one to the row driven low
+        PINCLEAR(COL_BASE ADDPINS 3)
+        WRPIN(COL_BASE ADDPINS 3, P_HIGH_15K)  ' Drive high 15kOhm
+        PINHIGH(COL_BASE ADDPINS 3)            ' DIR=1, OUT=1 - a drive is live only while DIR is high
         
         REPEAT row FROM 0 TO 3
           PINLOW(ROW_BASE + row)      ' Drive row low
@@ -393,6 +393,8 @@ related_concepts:
   - "Multi-cog pin coordination with locks"
 
 see_also:
+  - "deliverables/ai/P2/architecture/pin-drive-configuration.yaml"
+  - "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml"
   - "deliverables/ai/P2/guides/spin2-getting-started.yaml"
   - "deliverables/ai/P2/language/spin2/methods/pinhigh.yaml"
   - "deliverables/ai/P2/language/spin2/methods/pinlow.yaml"

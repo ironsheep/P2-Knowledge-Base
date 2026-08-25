@@ -31,7 +31,7 @@ knowledge_progression:
     REQUIRED:
       - name: "Basic I/O Concepts"
         content: "concepts/basic-io.yaml"
-        why: "Essential for any pin I/O - covers multi-pin operations, ADDPINS, drive strength, pull resistors"
+        why: "Essential for any pin I/O - covers multi-pin operations, ADDPINS, and drive strength"
         when: "Read immediately after Getting Started, before writing I/O code"
         
     THEN_CHOOSE:
