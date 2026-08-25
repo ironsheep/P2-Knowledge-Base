@@ -94,7 +94,7 @@ ANALYSIS_DIR:  engineering/analysis/
 PLAN_DIR:           engineering/planning/   # SINGLE dir for ALL engineering heads (decided 2026-06-11 — unify; supersedes the per-head sentinel). Stragglers in operations/planning + operations/sprints migrate here (separable cleanup). Archive stays PLAN_ARCHIVE_DIR.
 PLAN_ARCHIVE_DIR:   engineering/history/sprints/
 PUNCH_LIST_DOC:     <per-head — one per manual, per ingestion source, and for the P2KB YAML set; P2KB-CORRECTION-FINDINGS.md is the YAML-set register; see skill overlay>
-RELEASE_NOTES_DOC:  <per-head — manual CHANGELOG, or P2KB YAML release notes; N/A for ingestion (uses completeness dashboard); see skill overlay>
+RELEASE_NOTES_DOC:  <per-head — manual CHANGELOG; for the P2KB YAML set the record is the repo-root `CHANGELOG.md` (release-yamls §4 writes it), and `deliverables/ai/P2/CHANGELOG.md` is a co-located POINTER holding no entries; N/A for ingestion (uses completeness dashboards); see skill overlay>
 SPEC_DOC:           <per-head — N/A for ingestion; see skill overlay>
 ```
 

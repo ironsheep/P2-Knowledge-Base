@@ -20,6 +20,29 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.18.0] - 2026-08-25
+
+**Smart-pin drive strength, per-pin current limits, and timing bounds documented as the silicon defines them.**
+
+### Added
+
+- **55 additional Spin2 built-in constants** are documented from the Spin2 v55 specification, all 116 findable by name
+
+### Changed
+
+- **Quantitative specifications** across architecture, language, hardware, and guide content trace to a cited source; figures that could not be verified are not carried
+
+### Fixed
+
+- **`P_HIGH_*` / `P_LOW_*`** select the smart pin's drive strength — the P2 has no internal pull-up or pull-down resistors
+- **ADC smart-pin `P_ADC_GIO` / `P_ADC_VIO` / `P_ADC_FLOAT`** select a calibration reference, not an input range — the gain settings (`P_ADC_1X`…`P_ADC_100X`) set the range
+- **The `P_ADC_3X`–`P_ADC_100X` gain windows center near mid-supply** (~1.64 V on 3.3 V), not 0 V — measured on P2 silicon
+- **Per-I/O-pin current** is documented at ±30 mA, the datasheet's absolute maximum rating
+- **`WAITMS` / `WAITUS`** document their bound in clocks (`$8000_0000`, about 10.7 seconds at 200 MHz)
+- **`#64006G`** (Goertzel/Touch Sensing Add-on Board) is documented as its own board; its LEDs and switches belong to the separate `#64006A` Control Add-on Board
+
+---
+
 ## [1.17.0] - 2026-08-21
 
 **Streamer encodings, object lifetime, and example code that compiles**

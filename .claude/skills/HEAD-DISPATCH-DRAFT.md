@@ -61,13 +61,19 @@ pass) — resolution rule **TBD** (brainstorm).
 
 | Sentinel slot | MANUAL | YAML (KB) | INGESTION |
 |---|---|---|---|
-| `BUILD_VERSION_LOCATION` | the manual's `CHANGELOG.md` (+ `deliverables/documents/README.md` version line) | the YAML set's latest **git tag** (mirrored by the `deliverables/ai/P2` README badge + the YAML `CHANGELOG.md` top entry) — per `release-yamls` | **N/A — version-less** |
-| `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | the latest git tag (= CHANGELOG top heading) | **N/A** |
-| `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | e.g. `v1.9.1` | **N/A** |
+| `BUILD_VERSION_LOCATION` | the manual's `CHANGELOG.md` (+ `deliverables/documents/README.md` version line) | the YAML set's latest **git tag** — mirrored by the top-level `README.md` version badge and the top-level `CHANGELOG.md` top entry, both updated by `release-yamls` | **N/A — version-less** |
+| `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | the latest git tag (= top-level CHANGELOG top heading) | **N/A** |
+| `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | e.g. `v1.17.0` — resolve with `--sort=-v:refname`, never a lexicographic `tail` (see note below) | **N/A** |
 | `PLAN_DIR` | **RESOLVED — single unified dir `engineering/planning/` for all heads** (decided 2026-06-11; supersedes the former per-head sentinel; name the head/element in the filename) | ditto | ditto |
 | `PUNCH_LIST_DOC` | the manual's punch list — **location TBD per manual** | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | the source's `README.md` (ingestion dashboard) row + `sources/<src>/<src>-complete-extraction-audit.md` |
-| `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | the YAML set's `CHANGELOG.md` (top entry mirrors the git tag) | **N/A — uses completeness dashboard** |
+| `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | **the repo-root `CHANGELOG.md`** — its own scope note says the semver entries track the knowledge base itself, and `release-yamls` §4 writes there, so it IS the YAML set's record. `deliverables/ai/P2/CHANGELOG.md` is a **pointer only** — co-located so a consumer who downloads the served content can find the record; it deliberately holds no entries, because a second copy nothing writes is guaranteed drift. |
 | `SPEC_DOC` | the manual's `creation-guide.md` (candidate) | **TBD** | **N/A — gates + dashboard instead** |
+
+**Resolving `BUILD_VERSION_EXAMPLE`/`BUILD_VERSION_LOCATION` for the YAML head —
+sort correctly, don't tail.** `git tag --list 'v1.*' --sort=-v:refname` then take
+the top line. A plain `... | tail -1` sorts *lexicographically* and returns
+`v1.9.1` on this repo's actual tag set, even though `v1.17.0` is the real
+latest — `"9"` outranks `"17"` as a string. Verified live 2026-08-25.
 
 ## Head-specific notes
 
