@@ -22,6 +22,14 @@ version: "1.0"
 last_updated: "2026-05-23"
 
 # Boot timing (from Hardware Manual)
+boot_timing:
+  source: "P2 Hardware Manual, Boot Up -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:262-263"
+  trigger: "Upon any power-up, reset (RESn) pin low-to-high, or software reset event."
+  sequence: "The Propeller 2 delays for 3 ms, engages the fast clock, then loads up Cog 0 with the ROM-resident Bootloader within 2 ms."
+  reset_to_bootloader: "Within 5 ms, the Propeller 2 loads its Bootloader into cog 0. -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:436"
+  serial_loader_active: "Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released. -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1595"
+
+# Boot pin overview (full details: boot-pattern-selection.yaml)
 boot_pins:
   range: "P58-P63 serve boot functions; become general-purpose after boot completes"
   pattern_pins: "P59-P61 read as a 3-bit pattern (each pin: float / pull-up / pull-down) to select boot source"
@@ -146,3 +154,22 @@ related:
   - architecture/hub.yaml
 
 # Boot path summary (orientation for new readers)
+boot_paths_summary:
+  source: "P2 Hardware Manual, Boot Up -- Boot Pattern table -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:269-282; Host Serial and Boot Memory Connections table -- :285-291"
+  pattern_notation: "Set by floating connection 'f', pull-up resistor 'up', or pull-down resistor 'down'. Don't care is 'any'."
+  serial:
+    pins: "P63 (in) = TX from host; P62 (out) = RX at host"
+    triggered_when: "P61=f P60=f P59=f -- Program from serial within 60 s window; and P61=any P60=any P59=up -- Program from serial within 60 s window; no flash or microSD card boot."
+    also_reached_as: "The 100 ms window that precedes flash boot, and the 60 s fallback window after a failed flash or microSD boot."
+    canonical_entry: architecture/serial_loader.yaml
+
+  spi_flash:
+    pins: "P61 (out) = CSn, P60 (out) = CLK, P59 (out) = DI, P58 (in) = DO -- named from the flash chip's side, so P59 carries data into the flash (MOSI) and P58 carries data out of it (MISO)."
+    triggered_when: "P61=up P60=any P59=f -- Program from serial within 100 ms or boot from flash. If fails, program from serial within 60 s window. And P61=up P60=any P59=down -- Fast boot from flash; no serial. If it fails, shutdown."
+    canonical_entry: architecture/boot-rom/spi-flash-boot.yaml
+
+  sd_card:
+    pins: "P61 (out) = CLK, P60 (out) = CSn, P59 (out) = DI, P58 (in) = DO"
+    triggered_when: "P61=f or down, P60=up, P59=f -- Boot from microSD card. If fails, program from serial within 60 s window. And P61=f or down, P60=up, P59=down -- Boot from microSD card. If it fails, shutdown."
+    p60_pullup_note: "The P60 pull-up is built into the microSD card."
+    canonical_entry: architecture/boot-rom/sd-card-boot.yaml

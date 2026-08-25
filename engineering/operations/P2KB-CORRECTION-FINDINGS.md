@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-352`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-353`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -213,7 +213,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > **Owed:** «#299» decides whether anything returns in their place, source-first from the datasheet
 > lines above. Nothing may return that states a per-pin current above ±30 mA.
 
-### F-349 — PLL lock time is stated as ~10 microseconds in one place and ~10 milliseconds in four others; it is a delay an agent emits — `CONFIRMED`
+### F-349 — PLL lock time is stated as ~10 microseconds in one place and ~10 milliseconds in four others; it is a delay an agent emits — `PENDING-VALIDATION`
 
 > **The outlier:** `architecture/clock_system.yaml` `stabilization_timing` — `pll_lock: "~10 microseconds"`.
 > Removed by «#293» (`15c84de5`), so it is **not currently shipping** — but it is a Population-2
@@ -230,8 +230,37 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > configuring the PLL and switching to it. A three-orders-of-magnitude error in the short direction
 > switches the clock source before lock.
 >
-> **Owed:** resolve against a Parallax source before «#299» returns `stabilization_timing`. None of the
-> five locations carries a citation, so the resolution needs a source, not a vote.
+> **RESOLVED 2026-08-25 by «#299» — the answer is 10 ms, and it is stated outright, not inferred.**
+> Three Parallax documents state it, and each was read on **two independent extraction paths** (the
+> raw docling text and the reconstructed table):
+> - **P2 Datasheet 2022/11/01** p.18 — %E row: *"XI input must be enabled by %CC. Allow 10ms for
+>   crystal+PLL to stabilize before switching over to PLL clock source."*
+>   (`sources/p2-datasheet/p2-datasheet-text.txt:783-785`; same cell at
+>   `sources/p2-datasheet/complete-tables-reference.md:133`). %SS row: *"CC != %00 and E=1, allow
+>   10ms for crystal+PLL to stabilize before switching to PLL"* (`:828`, `:151`).
+> - **Propeller 2 Documentation v35** — identical wording (`sources/silicon-doc/part3-interrupts.txt:528-529,:576`).
+> - **P2 Hardware Manual 2022/11/01** — identical wording
+>   (`sources/p2-hardware-manual/p2-hardware-manual-text.txt:572,:592`; `complete-tables-reference.md:105,:123`).
+>
+> All three also *emit* the wait in their own worked example: `WAITX ##20_000_000/100` — 10 ms at the
+> RCFAST rate the code is still running at (`p2-datasheet-text.txt:857-859`;
+> `silicon-doc/p2-documentation.txt:6266`; Spin2 v55 states the same line twice, once for `clkmode_`
+> and once for `ASMCLK`, `sources/spin2-v55/spin2-v55-text.txt:1725,:1738`). The crystal-only case is
+> **5 ms** (`p2-datasheet-text.txt:830`). The `~10 microseconds` figure has no source and is not
+> restored; `architecture/clock_system.yaml stabilization_timing` returned carrying the 10 ms / 5 ms
+> pair with the citation and a `conflict_resolved` note.
+>
+> 🔴 **A FIFTH LOCATION THIS FINDING DID NOT NAME, found by working the file rather than the list.**
+> `architecture/clock_system.yaml programming_examples` carried **`WAITX ##20_000_000/10000  ' Wait
+> 100µs for PLL lock`** in TWO examples — `pll_160mhz_from_20mhz_crystal` and `overclock_250mhz`. The
+> sourcing gate cannot see them because they sit inside a code region, which the gate strips by
+> design; that is the same blind spot F-333 records for prose. Both corrected in place to
+> `WAITX ##20_000_000/100  ' Wait ~10ms for crystal+PLL to stabilize`. **Class-wide sweep run:**
+> `grep -rn "PLL lock\|PLL to lock\|pll_lock\|for PLL" --include=*.yaml deliverables/ai/P2/` — the
+> only remaining hits are the four surviving millisecond statements this finding already named, plus
+> the new cited block. No sixth location.
+>
+> `PENDING-VALIDATION` — the KB edit is applied and gate-verified; only the YAML release is owed.
 
 ### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PARTIAL`
 
@@ -299,6 +328,53 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > boundary that is not a digit-run continuation (a part number is `\d{4,}[A-Z]`), and mask `U+XXXX`
 > alongside the existing `%binary`/`$hex` masking. Both are testable with the negative-control harness
 > the tool already carries.
+
+## Provenance holes the repopulation could not fill (2026-08-25, «#299» Plan §8 part 2) — F-352
+
+> **Origin.** «#299» rebuilt `architecture/`, `language/`, `guides/` and `application-notes/` from
+> the repaired sources, source-first. Forty-five of F-347's sixty blocks came back cited. Two did
+> not, for the same reason — the KB was their only home — and the rule set had no branch for that
+> once the purge had already removed them. Line numbers below were read off disk 2026-08-25.
+
+### F-352 — two shipped KB areas are authored-here content with NO upstream anywhere in the ingestion tree, and once their blocks were purged the promotion filter's sub-rule P had no branch left for them — `CONFIRMED`
+
+> **Found:** 2026-08-25 by «#299», working the sources tree-by-tree rather than the removal list.
+> Two of F-347's 60 rows could not be returned source-first, for the same underlying reason, and
+> «#298»'s sub-rule P (*presence before removal*) does not cover the case because the removal has
+> **already happened**.
+>
+> | Where | «#298» disposition | What «#299» found |
+> |---|---|---|
+> | `architecture/click_module_integration.yaml` `best_practices` | **ACTIONABLE** | **No ingested source states any of it.** The file's own `documentation_source: code_analysis` points at `engineering/ingestion/sources/code-analysis/`, which holds exactly three files — `bldc-motor-control-analysis.md`, `debugger-analysis.md`, `flash-loader-analysis.md` — and `grep -rln -i "click\|mikrobus"` over that directory returns **nothing**. The MikroBUS pinout, the P2 Eval Click Adapter offsets and the "three adapter positions" claim the block depends on have no upstream at all. **Recorded as a GAP, not restored.** |
+> | `architecture/io_pin_timing.yaml` `best_practices` | **CORRECT BUT NOT ACTIONABLE** | Generic PCB-layout lore — match trace lengths, 22-33 Ω source termination, ~1 ns rise per 10 pF. `grep -rn "22-33\|150 ps\|150ps\|source termination\|match_trace"` over `engineering/ingestion/sources/` returns **zero**. **Held out, and deliberately NOT written to the ingestion tree.** |
+>
+> 🔴 **Why the io_pin_timing block was not "written to the ingestion tree first".** The C6 instruction
+> offers that as the fix for a not-actionable block with no ingestion home. It is the wrong move here,
+> and the reason generalises: **`engineering/ingestion/sources/` mirrors INGESTED SOURCE DOCUMENTS.**
+> Writing authored-here electronics lore into it would manufacture a Parallax-tier authority out of
+> nothing — and that tree is inside `audit-constant-fidelity.py`'s declared *Parallax documentary*
+> truth root, which is precisely the defect F-341 already files against six of our own derived
+> analysis documents sitting at that tree's root. Curing a provenance hole by inventing provenance is
+> worse than the hole. The block stays out; git holds it at `15c84de5^` for anyone who wants it.
+>
+> **The generalizable half — sub-rule P needs a fourth branch, not a third.** «#298»'s *Sharpening*
+> §3 already added *"authored-here content with no upstream at all — stays, and say why"*. That
+> branch assumes the block is still **in** the KB, where "stays" is an available answer. Once a purge
+> has removed it, "stays" is gone and the only choices are *invent an upstream* or *record the
+> absence*. The rule wants: **authored-here, no upstream, ALREADY REMOVED → record it as a gap with
+> the acquisition that would close it; never manufacture the source.**
+>
+> **What would settle each:**
+> - *Click*: ingest the Parallax **P2 Eval Click Adapter** product documentation (the MikroBUS
+>   offset map and the adapter's base-pin positions). That single ingestion would ground both this
+>   block and the `p2_adapter_mapping` offsets the file already ships uncited.
+> - *io_pin_timing*: nothing Parallax can settle — it is not a P2 fact. It closes by staying closed.
+>
+> ⚠️ **Also found while filing:** this register's header reads **`Next gap ID: G-007`**, but
+> `engineering/ingestion/KNOWLEDGE-GAPS.md` already allocates **G-007** (Smart Pins / ADC, ANSWERED
+> 2026-08-24). The counter is stale by one and the next free gap ID is **G-008**. «#299» allocated no
+> G-number rather than collide; the header is left for whoever owns that ledger to correct
+> deliberately.
 
 ---
 
@@ -459,7 +535,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 >
 
 - **F-347 — «#293»'s removal record was never written, so 60 removed blocks existed only in a git
-  diff and in a transcript that does not survive.** — `PARTIAL`
+  diff and in a transcript that does not survive.** — `PENDING-VALIDATION`
 
   «#293» removed 59-60 uncited quantitative blocks from `architecture/`, `language/`, `guides/`
   and `application-notes/`, and its PROTECTION POINT required that every removal be recorded with
@@ -480,8 +556,29 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   and a list nobody can find is a list that gets re-derived under time pressure by whoever needs
   it next.
 
-  Closes when «#299» has executed against the table and every row carries a returned /
-  not-returned outcome.
+  **EXECUTED 2026-08-25 by «#299». Every one of the 60 rows now carries an outcome, and the
+  count is stated in four numbers rather than one total:**
+
+  | Outcome | Count | What it means |
+  |---|---|---|
+  | **restored with a trace** | **45** | The repaired source states it and it is ACTIONABLE. Every returned block carries a `source:` naming the document and a `file:line`. |
+  | **held out — no ingestion home** | **1** | `architecture/io_pin_timing.yaml best_practices` (generic PCB-layout advice). CORRECT-BUT-NOT-ACTIONABLE per «#298»; see F-352 for why it was not written to the ingestion tree either. |
+  | **gap** | **1** | `architecture/click_module_integration.yaml best_practices` — ACTIONABLE per «#298», but no ingested source states any of it. See F-352 for what would settle it. |
+  | **never returns (UNSOURCED)** | **13** | The F-327 fabrication family, ruled by «#298». Re-verified absent at HEAD: all nine `io_pin_timing.yaml` keys and all four `basic-io.yaml` twins return `grep -c` = 0, and `grep -rn "150mA\|75mA\|~2000Ω\|3-7ns\|pull_up_modes\|pull_down_modes"` over `deliverables/ai/P2/` returns **0**. |
+
+  45 + 1 + 1 + 13 = 60. **The dispatch's own numbers were checked against disk:** the body's "65
+  blocks" is wrong (it is 60, as this entry already recorded), and the register header's
+  **`Next gap ID: G-007` is stale** — `engineering/ingestion/KNOWLEDGE-GAPS.md` already allocates
+  G-007 (Smart Pins / ADC, ANSWERED 2026-08-24). No G-number was allocated by «#299» for that
+  reason; its gap is filed as F-352 instead.
+
+  Two blocks were returned **corrected rather than verbatim**, as C4 required: both
+  `internal_pull_resistors` blocks now teach the hardware-verified `P_HIGH_15K` + DIR-high /
+  `P_LOW_15K` + DIR-low form from `architecture/pin-drive-configuration.yaml idioms` (EF-063,
+  EF-064), and neither reintroduces a `pull_up_modes:` / `pull_down_modes:` key. Both
+  `pin_architecture` blocks returned without the `drive_strength: 1.5mA to 150mA` line.
+
+  `PENDING-VALIDATION` — the record is written and executed against; only the YAML release is owed.
 
 ### Removal record — «#293», reconstructed by the arbiter 2026-08-25
 
@@ -1594,7 +1691,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > does not exist. **A deferral in a source is a work item, not an answer**, and this sweep is the
 > cost of treating one as an answer.
 
-### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `PARTIAL`
+### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `PENDING-VALIDATION`
 
 > **Where:** `architecture/io_pin_timing.yaml:200-233` (`drive_strength_configurations:`)
 > and `:234-246` (`slew_rate_control:`).
@@ -1670,7 +1767,18 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > — `sources/silicon-doc`, `sources/spin2-v51`, `smart-pins-catalog`, and both of this sprint's
 > re-ingestions, `sources/p2-datasheet` and `sources/p2-hardware-manual`: **0 hits each**.
 >
-> `PARTIAL` because the removal is applied and the repopulation is owed to «#299».
+> **«#299» 2026-08-25 — the repopulation decision is made and it is NOTHING.** Working the sources
+> rather than the blocks, no Parallax document states a per-pin milliamp drive ladder, an impedance
+> table, or a slew rate; the datasheet states drive as eight named MODES
+> (*"Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA /
+> 10 µA / float"*, `sources/p2-datasheet/p2-datasheet-text.txt:117`), which already ship cited in
+> `architecture/pin-drive-configuration.yaml drive_ladder`. **None of F-327's or F-329's nine
+> `io_pin_timing.yaml` blocks returned**, nor the four `basic-io.yaml` copies. Instead, the two
+> `pin_architecture` blocks came back carrying a `no_milliamp_ladder:` key that states the absence
+> and points at the definition home, so the next agent to look finds a denial rather than a silence.
+>
+> `PENDING-VALIDATION` — the removal is applied, the repopulation question is answered, and only
+> the YAML release is owed.
 
 ### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `PARTIAL`
 
@@ -1780,7 +1888,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > `PARTIAL` because the removals are applied and the `instruction_to_pin_timing:` citation is owed.
 
-### F-333 — the fabricated slew-rate claim ALSO stood in `io_pin_timing.yaml`'s top-level `description:`, where no instrument could see it, because it carries no unit — `PARTIAL`
+### F-333 — the fabricated slew-rate claim ALSO stood in `io_pin_timing.yaml`'s top-level `description:`, where no instrument could see it, because it carries no unit — `PENDING-VALIDATION`
 
 > **Found:** 2026-08-24, by «#293», *after* removing every block F-327 and F-329 name. A residual
 > `grep -i slew` over the file — run because F-329's lesson says to sweep the file, not the line
@@ -1810,10 +1918,23 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > written back must not restore "slew rates", and must come from the repaired Hardware Manual /
 > Datasheet rather than from the removed text.
 >
-> `PARTIAL` — the removal is applied and verified (`grep -ci slew` on the file = 0). What is
-> still owed is the replacement: the file now has **no** top-level `description:` at all, and
-> «#299» owes it one written from the repaired source. Tracked here with F-327 and F-329
-> rather than archived, because it is the same root cause, the same file and the same owner.
+> **REPLACEMENT WRITTEN 2026-08-25 by «#299».** `architecture/io_pin_timing.yaml` now carries a
+> top-level `description:` derived from the repaired P2 Datasheet, cited to
+> `sources/p2-datasheet/p2-datasheet-text.txt:117` and `:2126-2149`. It says what the file carries
+> (instruction-to-pin latency, absolute maximum ratings, 5 V handling) and then says outright what
+> it does NOT carry and where those live — drive strength at
+> `architecture/pin-drive-configuration.yaml`, and slew rate nowhere, because there is none.
+>
+> ⚠️ **THE ZERO-HIT CRITERION IN THIS ENTRY IS NOW WRONG AND MUST NOT BE RE-RUN AS WRITTEN.**
+> `grep -ci slew` on `io_pin_timing.yaml` returns **2**, and both hits are the new description
+> **naming slew rate in order to forbid it** — the same deliberate-mention shape
+> `audit-guide-conformance.py` already classifies as `[D6] named in order to forbid it`, and the
+> same shape `pin-drive-configuration.yaml not_documented_here` uses. The correct check is that no
+> hit ASSERTS a slew rate. Stated here explicitly so a later sweep does not "fix" the denial back
+> into a silence, which is what let this claim survive two purges in the first place.
+>
+> `PENDING-VALIDATION` — the removal and the replacement are both applied; only the YAML release
+> is owed.
 
 
 ---

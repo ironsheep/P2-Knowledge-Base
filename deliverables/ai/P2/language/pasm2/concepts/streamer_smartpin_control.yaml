@@ -462,6 +462,12 @@ references:
   - isp_bldc_motor.spin2: PWM and ADC patterns
   - Spin2_debugger.spin2: Debug infrastructure
 
+protocol_client_code_note:
+  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547,553"
+  scope: "This page covers the smart-pin / streamer side of protocol implementation. Client code driving these modes (SPI flash, sync/async serial) typically also needs timing/timeout idioms outside the smart pin itself: busy-wait, response timeout, retry intervals."
+  which_timebase: "GETCT() is \"Get 32-bit system counter\"; GETMS() is \"Get milliseconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 49.7 days.\" A multi-second protocol timeout belongs on GETMS -- a GETCT deadline is bounded by that 32-bit counter and fails silently past its signed half."
+  full_rule: language/spin2/concepts/timing_operations.yaml
+
 related:
   - language/spin2/concepts/timing_operations.yaml
   - language/spin2/methods/getct.yaml

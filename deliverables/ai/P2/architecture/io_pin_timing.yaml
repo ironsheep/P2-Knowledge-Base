@@ -6,6 +6,26 @@ component_name: "I/O Pin Timing"
 
 component_type: "pin_timing_specifications"
 
+description: |
+  What this file carries: the clock-cycle latency between an instruction writing DIRx/OUTx
+  and the pin actually moving, the P2 Datasheet's absolute maximum electrical ratings for
+  an I/O pin, and what those ratings imply for driving a 3.3 V pin from a 5 V signal.
+
+  What it deliberately does NOT carry, and where those live instead:
+    - Drive strength. The datasheet states it as a set of DRIVE MODES, not a current
+      ladder: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k /
+      1 mA / 100 µA / 10 µA / float"
+      (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117). The eight
+      rungs, their %HHH/%LLL encodings and their P_* constant names are defined once, in
+      architecture/pin-drive-configuration.yaml.
+    - Slew rate. There is none to document. "slew" returns zero hits across every ingested
+      Parallax source -- the Silicon Doc, both Spin2 editions, the smart-pins catalog, the
+      re-ingested P2 Datasheet and the re-ingested P2 Hardware Manual. A prior form of this
+      description asserted configurable slew rates; it was fabrication (F-327, F-333) and is
+      not restored.
+    - Propagation, rise and fall figures per drive setting. No Parallax source states them.
+  source: "P2 Datasheet 2022/11/01 feature list and Absolute Maximum Electrical Ratings -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117, :2126-2149"
+
 instruction_to_pin_timing:
   description: |
     Critical clock cycle timing between instruction execution and physical pin state.

@@ -5,6 +5,21 @@ compatible_languages: ["Spin2", "PASM2"]
 
 brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
+detailed_description:
+  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/p2-documentation.txt:8881-8904; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140"
+  pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
+  which_pin_is_which:
+    upper_odd_pin: "The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin."
+    lower_even_pin: "The lower (even) pin is the DM pin. This pin's IN is raised whenever a change of status occurs in the receiver, at which point a RDPIN/RQPIN can be used on this pin to read the 16-bit status word. WXPIN is used on this pin to set the NCO baud rate."
+    caveat: "These DP/DM electrical designations can actually be switched by swapping low-speed and full-speed modes, due to USB's complementary line signalling."
+  configuration:
+    wrpin_data: "They can be configured via WRPIN with identical D data of %1_11011_0. Using D data of %0_11011_0 will disable output drive and effectively create a USB 'sniffer'. A new WRPIN can be done to effect such a change without resetting the smart pin."
+    wxpin_data: "WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for 'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system clock, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency."
+    worked_example: "For example, if the main clock is 80MHz and you want a 12MHz baud rate (full-speed), use 12,000,000 / 80,000,000 * $10000 = 9830, or $2666. To use this baud rate and select 'host' mode and 'full-speed', you could do 'WXPIN ##$E666,lowerpin'."
+  start_sequence: "To start USB, clear the DIR bits of the intended two pins and configure them each via WRPIN. Use WXPIN on the lower pin to set the mode and baud rate. Then, set the pins' DIR bits. You are now ready to read the receiver status via RDPIN/RQPIN and set output states and send packets via WYPIN, both on the lower pin."
+  state_machines: "There are separate state machines for transmitting and receiving. Only the baud generator is common between them. Note that the receiver receives not just input from another host/device, but all local output, as well."
+  fpga_note: "In Propeller 2 emulation on an FPGA, there are no built-in 1.5k and 15k resistors, like the ASIC smart pins have, so it is up to you to install these yourself on the DP and DM lines."
+
 registers:
   # All WXPIN/WYPIN/RDPIN for USB are issued on the LOWER (even / DM) pin.
   # Silicon Doc p2-documentation.txt:8886-9006.

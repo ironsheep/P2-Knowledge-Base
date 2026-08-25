@@ -18,6 +18,14 @@ dac_requirement: |
   Other DAC options: P_DAC_990R_3V, P_DAC_600R_2V, P_DAC_75R_2V
 
 # Operation
+operation:
+  source: "Propeller 2 Documentation v35, %00011 and DAC_MODE = DAC 16-bit with PWM dither -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:284-308"
+  what_it_does: "This mode overrides M[7:0] to feed the pin's 8-bit DAC with PWM-dithered data on every clock. M[12:10] must be set to %101 to configure the low-level pin for DAC output."
+  sample_period: "X[15:0] establishes the sample period in clock cycles. The sample period must be a multiple of 256 (X[7:0]=0), so that an integral number of 256 steps are afforded the PWM, which dithers the DAC between adjacent 8-bit levels."
+  output_value: "Y[15:0] establishes the DAC output value which gets captured at each sample period and used for its duration."
+  completion: "On completion of each sample period, Y[15:0] is captured for the next output value and IN is raised. Therefore, you would coordinate updating Y[15:0] with IN going high."
+  versus_pseudo_random: "PWM dithering will give better dynamic range than pseudo-random dithering, since a maximum of only two transitions occur for every 256 clocks. This means, though, that a frequency of Fclock/256 will be present in the output at -48dB."
+
 accuracy_caveat: |
   The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
   the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
@@ -46,6 +54,12 @@ in_flag: |
   Use to synchronize value updates
 
 # Pin Behavior
+pin_behavior:
+  source: "Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:286-287, :305-308"
+  reset_state: "During reset (DIR=0), IN is low and Y[15:0] is captured."
+  adc_feedback: "If OUT is high, the ADC will be enabled and RDPIN/RQPIN can be used to retrieve the 16-bit ADC accumulation from the last sample period. This can be used to measure loading on the DAC pin."
+  low_level_pin_requirement: "M[12:10] must be set to %101 to configure the low-level pin for DAC output."
+
 spin2_complete: |
   CON
     DAC_PIN = 48
@@ -167,6 +181,12 @@ spin2_inline: |
     END
 
 # Key Points
+pwm_characteristics:
+  source: "Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:290-291, :301-302"
+  sample_period_constraint: "The sample period must be a multiple of 256 (X[7:0]=0), so that an integral number of 256 steps are afforded the PWM."
+  transition_bound: "A maximum of only two transitions occur for every 256 clocks."
+  spectral_cost: "A frequency of Fclock/256 will be present in the output at -48dB."
+
 pwm_advantages: |
   Better dynamic range than pseudo-random
   Only 2 transitions per 256 clocks

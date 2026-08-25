@@ -7,6 +7,40 @@ source: "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code t
 
 syntax: "PC_KEY(pointer_to_long)"
 
+description: |
+  PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()
+  display. Spin2 v55 states it as: "FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be
+  the last command in a DEBUG() statement. Returns any new host-PC keypress that
+  occurred within the last 100ms into a long inside the chip. The DEBUG() Display
+  must have focus for keypresses to be noticed."
+  The 100 ms latch is what sets the poll rate: a loop that polls more slowly than
+  that will miss keypresses, and one that polls faster simply reads 0 between them.
+  Source: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004
+
+usage_rules:
+  source: "Parallax Spin2 Documentation v55 -- PC_KEY entry engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004; backtick-escape mechanism :1084 and :1094"
+  rules:
+    - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS."
+    - "Must be the last command in a DEBUG() statement."
+    - "The DEBUG() Display must have focus for keypresses to be noticed."
+    - "Returns any new host-PC keypress that occurred within the last 100ms; otherwise the long reads 0."
+    - "If used in Spin2 code, the long must be in the hub (use @key as the pointer). If used in PASM code, the long must be a cog register (use #key as the pointer)."
+  backtick_rule:
+    why: |
+      Inside a backtick display message the source states that everything is text
+      unless a further backtick escapes it back into a command: "This syntax is
+      invoked when the first character in the DEBUG() command is the backtick. This
+      causes everything in the DEBUG() command to be viewed as a string, except when
+      subsequent backticks act as 'escape' characters to allow normal or shorthand
+      DEBUG() commands." (:1084) — and "Regular DEBUG() commands can follow the
+      backtick, as well." (:1094)
+    consequence: |
+      PC_KEY needs its OWN backtick inside a display message —
+      DEBUG(`MyTerm `PC_KEY(@key)). Written without it, the text is sent to the
+      window as literal characters, no command runs, and the long is never written.
+      It compiles clean, so the failure is silent and only visible at runtime.
+
+
 pointer:
   spin2: "The long must be in hub RAM -- pass @key."
   pasm2: "The long must be a cog register -- pass #key."

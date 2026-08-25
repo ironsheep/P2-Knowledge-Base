@@ -29,6 +29,153 @@ hub_variables:
     description: "Current clock mode register value"
     access: "Read/Write"
 
+# Compile-time clock-setup symbols. The definition home for these symbols is
+# language/spin2/constants/special-configuration-symbols.yaml; this block names the
+# set and the source that defines it, rather than carrying a second copy.
+configuration_constants:
+  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1715-1725"
+  definition_home: language/spin2/constants/special-configuration-symbols.yaml
+  symbols:
+    - "_clkfreq -- desired system clock frequency"
+    - "_xtlfreq -- XI/XO crystal frequency"
+    - "_xinfreq -- XI input frequency"
+    - "_errfreq -- allowable frequency error; defaults to 1_000_000 when not declared"
+    - "_rcfast -- internal RCFAST oscillator"
+    - "_rcslow -- internal RCSLOW oscillator"
+    - "_AUTOCLK -- declare = 0 to inhibit the auto-prepended clock-setter program in PASM-only programs"
+  compiler_defined_symbols:
+    clkmode_: "The compiled clock mode, settable via HUBSET. Also stored in the hub variable 'clkmode'."
+    clkfreq_: "The compiled clock frequency. Also stored in the hub variable 'clkfreq'."
+    inheritance: "Both values may differ in each file of the application hierarchy; files below the top-level file do not inherit the top-level file's value."
+
+# The legal CON declaration combinations and the clock mode each selects.
+# v55 states these as a closed set: "These symbols must be defined in one of the
+# following combinations." Rule text and %CC_SS values are the source's own.
+configuration_rules:
+  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1716-1725"
+  closed_set: "These symbols must be defined in one of the following combinations."
+  combinations:
+    - declaration: "_clkfreq (with optional _errfreq)"
+      effect: "Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+      hubset_cc_ss: "10_11"
+    - declaration: "_xtlfreq + _clkfreq (with optional _errfreq)"
+      effect: "Selects XI/XO-crystal-plus-PLL mode, along with frequencies. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+      hubset_cc_ss: "1x_11"
+    - declaration: "_xinfreq + _clkfreq (with optional _errfreq)"
+      effect: "Selects XI-input-plus-PLL mode, along with frequencies. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+      hubset_cc_ss: "01_11"
+    - declaration: "_xtlfreq alone"
+      effect: "Selects XI/XO-crystal mode and frequency."
+      hubset_cc_ss: "1x_10"
+    - declaration: "_xinfreq alone"
+      effect: "Selects XI-input mode and frequency."
+      hubset_cc_ss: "01_10"
+    - declaration: "_rcslow"
+      effect: "Selects internal RCSLOW oscillator which runs at ~20 KHz."
+      hubset_cc_ss: "00_01"
+    - declaration: "_rcfast"
+      effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
+      hubset_cc_ss: "00_00"
+    - declaration: "No symbol and not DEBUG mode"
+      effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
+      hubset_cc_ss: "00_00"
+    - declaration: "No symbol and DEBUG mode"
+      effect: "Selects XI/XO-crystal mode and 20 MHz to facilitate DEBUG."
+      hubset_cc_ss: "10_10"
+  cap_selection: "If _xtlfreq >= 16_000_000 then x=0 for 15pF per XI/XO, else x=1 for 30pF per XI/XO."
+  errfreq_default: "The _errfreq declaration is optional, since _errfreq defaults to 1_000_000."
+
+pll_system:
+  source: "P2 Datasheet pp.18-19 HUBSET bit fields and PLL Example -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:783-790, :841-856; independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:528-556"
+  enable:
+    field: "%E"
+    values: "0/1 -- PLL off/on"
+    note: "XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source."
+  input_divider:
+    field: "%DDDDDD"
+    values: "0..63"
+    effect: "1..64 division of XI pin frequency"
+    note: "This divided XI frequency feeds into the phase-frequency comparator's 'reference' input."
+  vco_multiplier:
+    field: "%MMMMMMMMMM"
+    values: "0..1023"
+    effect: "1..1024 division of VCO frequency"
+    note: "This divided VCO frequency feeds into the phase-frequency comparator's 'feedback' input. This frequency division has the effect of multiplying the divided XI frequency (per %DDDDDD) inside the VCO."
+  vco_range: "The PLL's VCO is designed to run between 100 MHz and 200 MHz and should be kept within that range."
+  post_divider:
+    field: "%PPPP"
+    mapping:
+      0: "VCO / 2"
+      1: "VCO / 4"
+      2: "VCO / 6"
+      3: "VCO / 8"
+      4: "VCO / 10"
+      5: "VCO / 12"
+      6: "VCO / 14"
+      7: "VCO / 16"
+      8: "VCO / 18"
+      9: "VCO / 20"
+      10: "VCO / 22"
+      11: "VCO / 24"
+      12: "VCO / 26"
+      13: "VCO / 28"
+      14: "VCO / 30"
+      15: "VCO / 1"
+    note: "This divided VCO frequency is selectable as the system clock when SS = %11."
+  equations:
+    vco: "VCO = Freq(XI) * (%MMMMMMMMMM + 1) / (%DDDDDD + 1)"
+    pll_when_pppp_is_15: "PLL = VCO"
+    pll_otherwise: "PLL = VCO / ((%PPPP + 1) * 2)"
+  overclocking: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
+  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574). Filed as F-330; the 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
+
+hubset_configuration:
+  source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:520"
+  instruction: "HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS   'set clock mode"
+  fields:
+    E: "PLL off/on"
+    DDDDDD: "1..64 division of XI pin frequency"
+    MMMMMMMMMM: "1..1024 division of VCO frequency"
+    PPPP: "VCO post-divider select"
+    CC: "XI/XO crystal and loading-cap configuration"
+    SS: "clock source select"
+  safe_switching_warning: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit. In order to safely switch, always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW). -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:837-839"
+  deglitching: "The clock selector controlled by the %SS bits has a deglitching circuit which waits for a positive edge on the old clock source before disengaging, holding its output high, and then waiting for a positive edge on the new clock source before switching over to it. It is necessary to select mode %00 or %01 while waiting for the crystal and/or PLL to settle into operation, before switching over to either. -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:866-869"
+  worked_sequence:
+    description: "The datasheet's own worked example: a 20 MHz crystal driven to 148.5 MHz, %DDDDDD = 39, %MMMMMMMMMM = 296, %PPPP = %1111."
+    source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:851-864"
+    code: |
+      HUBSET    #$F0                                         'set 20 MHz+ (RCFAST) mode
+      HUBSET    ##%1_100111_0100101000_1111_10_00            'enable crystal+PLL, stay in RCFAST mode
+      WAITX     ##20_000_000/100                             'wait ~10ms for crystal+PLL to stabilize
+      HUBSET    ##%1_100111_0100101000_1111_10_11            'now switch to PLL running at 148.5 MHz
+
+clock_modes:
+  source: "P2 Datasheet p.18 %CC and %SS tables -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:812-834; independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:562-580"
+  crystal_config:
+    field: "%CC"
+    modes:
+      "%00": {xi_status: "ignored", xo_status: "float", xi_xo_impedance: "Hi-Z", loading_caps: "OFF"}
+      "%01": {xi_status: "input", xo_status: "600-ohm drive", xi_xo_impedance: "1M-ohm", loading_caps: "OFF"}
+      "%10": {xi_status: "input", xo_status: "600-ohm drive", xi_xo_impedance: "1M-ohm", loading_caps: "15pF per pin"}
+      "%11": {xi_status: "input", xo_status: "600-ohm drive", xi_xo_impedance: "1M-ohm", loading_caps: "30pF per pin"}
+  source_select:
+    field: "%SS"
+    modes:
+      "%11": {clock_source: "PLL", notes: "CC != %00 and E=1, allow 10ms for crystal+PLL to stabilize before switching to PLL"}
+      "%10": {clock_source: "XI", notes: "CC != %00, allow 5ms for crystal to stabilize before switching to XI pin"}
+      "%01": {clock_source: "RCSLOW", notes: "~20 kHz, can be switched to at any time, low-power"}
+      "%00": {clock_source: "RCFAST", notes: "20+ MHz (nominally ~24 MHz) can be switched to at any time -- used on boot up."}
+
+stabilization_timing:
+  source: "P2 Datasheet p.18 %SS clock-source table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:828-834; independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:576-580"
+  crystal_plus_pll: "Allow 10ms for crystal+PLL to stabilize before switching to PLL (%SS = %11)."
+  crystal_only: "Allow 5ms for crystal to stabilize before switching to XI pin (%SS = %10)."
+  rcfast: "Can be switched to at any time."
+  rcslow: "Can be switched to at any time."
+  emitted_wait: "WAITX ##20_000_000/100 -- the wait the sources themselves emit for the 10ms case, computed at the RCFAST rate the code is still running at."
+  conflict_resolved: "An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source. See F-349."
+
 clock_sources:
   rcfast:
     description: "Internal RC oscillator - fast mode"
@@ -90,7 +237,7 @@ programming_examples:
       WAITX   ##20_000_000/100                      ' Wait 10ms
       HUBSET  ##%10_10                              ' Switch to crystal (XI)
       HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1010  ' PLL on, /1 * 16 / 2, source still XI
-      WAITX   ##20_000_000/10000                    ' Wait 100µs for PLL lock
+      WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
       HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1011  ' Switch to PLL output
       
   overclock_250mhz:
@@ -102,8 +249,25 @@ programming_examples:
       WAITX   ##20_000_000/100                      ' Wait 10ms
       HUBSET  ##%10_10                              ' Switch to crystal (XI)
       HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1010  ' PLL on, /1 * 25 / 2, source still XI
-      WAITX   ##20_000_000/10000                    ' Wait 100µs for PLL lock
+      WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
       HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1011  ' Switch to PLL output
+
+clock_specifications:
+  source: "P2 Datasheet, DC and AC Characteristics -- Oscillator Frequency table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2195-2209"
+  measurement_condition: "Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated."
+  oscillator_frequency:
+    rcslow_internal: {min: "12 kHz", typ: "20 kHz", max: "30 kHz"}
+    rcfast_internal: {min: "20 MHz", typ: "24 MHz", max: "30 MHz"}
+    direct_drive_into_xi: {min: "DC", max: "200 MHz"}
+    crystal_between_xi_and_xo: {min: "1 MHz", max: "50 MHz"}
+    pll_fed_by_direct_drive_or_crystal: {min: "3.33 MHz", typ: "180 MHz", max: "320 MHz"}
+  pll_typ_footnote: "Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC."
+  xi_xo_pin_capacitance:
+    mode_0_disabled: "2 pF (1M-ohm feedback resistor off)"
+    mode_1_direct_drive: "2 pF"
+    mode_2_crystal_ge_16mhz: "15 pF"
+    mode_3_crystal_lt_16mhz: "30 pF"
+  overclock_ceiling: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
 
 clock_distribution:
   system_clock: "Main clock for all COGs"
@@ -155,6 +319,32 @@ debugging:
   clock_output: "Can output clock on pins for measurement"
   pll_lock_detection: "Check PLL stability before switching"
   fallback_mode: "System always falls back to RCFAST if clock fails"
+
+# Only the wrong/correct pairs the sources state. Two entries carried by the pre-purge
+# form of this block -- a hardcoded-WAITX pattern and a use-CLKFREQ-before-init pattern --
+# are authored advice that no ingested source states, and are not restored.
+anti_patterns:
+  conflicting_definitions:
+    wrong: "_rcfast together with _clkfreq"
+    reason: "v55 states the clock-setup symbols as a closed set of combinations: \"These symbols must be defined in one of the following combinations.\" _rcfast and _rcslow each appear alone."
+    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1716-1725"
+
+  missing_crystal_frequency:
+    wrong: "_clkfreq alone on a board whose crystal is not 20 MHz"
+    correct: "Declare _xtlfreq to match the actual crystal, alongside _clkfreq."
+    reason: "_clkfreq alone \"Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal.\""
+    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718"
+
+  no_stabilization_wait:
+    wrong: "HUBSET to the PLL clock source in the same step that enables the crystal and PLL."
+    correct: "Enable crystal+PLL while staying in RCFAST, WAITX ##20_000_000/100 for ~10ms, then HUBSET again to switch to the PLL."
+    source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:851-864"
+
+  unsafe_switch_away_from_pll:
+    wrong: "Switching directly from %SS = %11 to another clock source."
+    correct: "Always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW)."
+    reason: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit."
+    source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:837-839"
 
 related:
   - language/pasm2/hubset.yaml

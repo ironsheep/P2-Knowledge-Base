@@ -8,6 +8,31 @@ description: |
   9600 to 2 Mbaud. Provides terminal-friendly protocol for loading code and
   configuring the P2 chip via serial connection.
 
+boot_sequence:
+  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt"
+  see_pattern_table: architecture/boot-rom/boot-pattern-selection.yaml
+
+  serial_triggered_when:
+    - "P61=float, P60=float, P59=float -- Program from serial within 60 s window."
+    - "P61=any, P60=any, P59=pull-up -- Program from serial within 60 s window; no flash or microSD card boot."
+    - "P61=pull-up, P60=any, P59=float -- Program from serial within 100 ms or boot from flash."
+    - "As the 60 s fallback window after a failed flash boot (P61=pull-up, P59=float) or a failed microSD boot (P60=pull-up, P59=float)."
+
+  serial_pins:
+    p63: "Serial in -- 'the Propeller 2 can be loaded via asynchronous serial stream into P63'"
+    p62: "Serial out -- \"The loader's response messages are sent back serially over P62 at the same baud rate that the sender used.\" P62 is normally driven continuously during the serial protocol, but will go into open-drain mode when either the INA or INB mask of a command is non-0 (for multiprogramming)."
+
+  line_format: "8 data bits, no parity, 1 stop bit, 9,600 to 2,000,000 baud. The signal should be inverted; start bit is low, stop bit is high, and data bits are high for 0 and low for 1."
+
+  timing:
+    loader_active: "Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released."
+    short_window: "100 ms -- the serial window that precedes a flash boot attempt."
+    long_window: "60 s -- the serial-primary window, and the fallback window after a failed flash or microSD boot."
+
+  execution:
+    target: "On a valid checksum \"the booter will perform a COGINIT #0,#0 instruction to relaunch cog 0 (currently running the loader program) with the new program starting at $00000.  When invalid, the booter will wait for another command.\""
+    rom_listing_confirmation: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst:750-752 -- serial_done calls reset_pins, then 'if_z jmp #0' -- 'if SPI program, run it, else shut down'."
+
 auto_baud_detection:
   mechanism: "Measures bit timing from CR character"
   trigger: "'> ' followed by space (0x3E, 0x20)"

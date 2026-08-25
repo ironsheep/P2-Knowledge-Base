@@ -94,6 +94,22 @@ prerequisites:
   - "The P2 smart-pin measurement modes at the mechanism level — this note USES them; IOSP Ch.13-15 teach them"
   - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
 
+gotchas:
+  source: "Legality checked with pnut-ts v1.55.3 (compiler, legality only); pin-drive semantics from the P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, and hardware-verified in EF-063/EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840; A/B input selectors from Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:13-36"
+  items:
+    - flag: pitfall
+      text: "P_B_A_INPUT does not exist -- it is undefined in pnut-ts and appears in no Parallax symbol table. Single-pin routing is the bare mode constant (the %AAAA and %BBBB selectors both default to 'this pin's read state') plus P_MINUS1_A|P_MINUS1_B for the reciprocal-periods cell, or P_PLUS1_B for quadrature. Never add P_B_A_INPUT."
+    - flag: pitfall
+      text: "An RC-discharge measurement depends on P_LOW_FLOAT. The Pin Mode Legend makes the low side's drive a selectable rung of the same eight-rung ladder as the high side, and 'Float' is one of those rungs: selecting it means that when OUT goes low the pin stops driving and the capacitor discharges through the sensor. With any other low-side rung the pin drives the node toward ground and you time the driver, not the sensor."
+    - flag: pitfall
+      text: "An open sensor, or too short a charge, hangs a poll loop that waits on a high-to-low crossing: if the node never falls, IN is never raised and the RDPIN is never reached. The symptom is a hang, not a maximum reading."
+    - flag: pitfall
+      text: "P_PLUS1_B reads the B input from 'relative +1 pin's read state', so a quadrature encoder's B line must sit on the pin immediately above A -- or pick the routing modifier that matches the wiring (the selectors cover relative -3..+3 and this pin's OUT bit)."
+    - flag: tip
+      text: "Detent normalization is a property of the encoder, not of the P2: a 4-counts-per-detent encoder needs the count shifted right by 2, an un-detented one needs no shift. Getting this wrong shows up as exactly 4x the expected magnitude."
+    - flag: gap
+      text: "Sensor-specific electrical figures (supply range, dark output, decoupling) belong to the sensor's own datasheet, which is not in this project's ingestion tree. They are deliberately not restated here."
+
 hardware_status: |
   R3 (quadrature) is Tier-0 self-verified: a two-jumper stimulus drives a known detent count (5 fwd,
   2 back -> reads 5 then 3) on a bare Edge board with no encoder, exercising the mode config, the

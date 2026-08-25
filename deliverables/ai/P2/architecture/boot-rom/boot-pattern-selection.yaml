@@ -61,6 +61,31 @@ boot_pattern_table:
       fallback: "If SD fails: shutdown"
 
 # Boot-time clock state — applies to ALL ROM boot paths
+boot_time_clock_state:
+  source: "P2 Datasheet %SS clock-source table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:834; P2 Hardware Manual, Download Propeller Application -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1593; Parallax ROM_Booter.lst -- engineering/ingestion/sources/rom-booter/ROM_Booter.lst:146,426"
+  oscillator_at_boot: "RCFAST -- '20+ MHz (nominally ~24 MHz) can be switched to at any time— used on boot up.'"
+  loader_time_base: "The loader adapts its baud rate from every '>' character 'to keep the baud rate tightly calibrated to the internal RC oscillator that the loader uses during the boot process.'"
+  rcfast_range_to_calibrate_against: "20 MHz min / 24 MHz typ / 30 MHz max -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199"
+  rom_own_calibration: "The boot ROM sizes its serial timeouts against the RCFAST maximum, not a nominal value: 'rc_max = 30_000_000 -- max frequency of RC oscillator' and 'timeout_per long rc_max/10 -- 100ms timeout for serial receive'."
+  implication: "Boot-time code (flash loaders, serial download stubs, SD loaders) runs under RCFAST. Timing-sensitive boot-time activity must be calibrated for the RCFAST range, not for the frequency the user application will later select."
+  the_one_boot_time_clock_change: "The serial loader's Prop_Clk command changes the clock setting before any application runs -- 'Change Clock Setting: Prop_Clk <INAmask> <INAdata> <INBmask> <INBdata> <HUBSETclocksetting>' (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1610-1611). The ROM performs it with the same two-step the datasheet prescribes: HUBSET to the requested setting with the source bits cleared ('switch to partial setting, but in RC fast mode'), WAITX ##rc_max/200 ('wait 5ms'), then HUBSET to the full setting (engineering/ingestion/sources/rom-booter/ROM_Booter.lst:578-587)."
+  shutdown_clock: "On shutdown the ROM issues HUBSET #1 -- 'set 20KHz oscillator' -- before COGSTOP floats the pins (engineering/ingestion/sources/rom-booter/ROM_Booter.lst:754-756)."
+  see_also:
+    - architecture/clock_system.yaml
+    - architecture/boot-rom/spi-flash-boot.yaml
+
+# Pins serve multiple roles in sequence
+pin_triple_duty:
+  source: "P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1881, and the Host Serial and Boot Memory Connections table :285-291; P2 Datasheet pin table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:294"
+  statement: "P58–P63 : upon power-up/reset the pins have the special purpose of detecting the boot up configuration and communicating with an external flash or SD memory, or with a host system for programming.  After boot up, they become general purpose for the user application (aside from that imposed by any hardware attached to them)."
+  datasheet_restatement: "P58-P63 serve in the boot process, then general purpose after."
+  roles:
+    role_1: "Boot pattern selector -- P59, P60, P61 are read as the 3-state Boot Pattern."
+    role_2: "Boot memory or host interface -- Flash SPI: P61 CSn, P60 CLK, P59 DI, P58 DO. SD SPI: P61 CLK, P60 CSn, P59 DI, P58 DO. Host Serial: P63 in, P62 out."
+    role_3: "General purpose I/O once the user application is running."
+  custom_board_implication: "A custom board that boots from flash must wire P58-P61 to the flash chip AND set the Boot Pattern on P59-P61 with the pull-up/pull-down resistors the pattern table names."
+
+# Parallax Edge module switch implementation
 edge_module_switch_mapping:
   source: "edge-standard-module and edge-32mb-module narratives"
   switchable:

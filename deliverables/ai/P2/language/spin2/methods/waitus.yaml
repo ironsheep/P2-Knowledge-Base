@@ -1,5 +1,5 @@
 # Spin2 Method: WAITUS
-# Source: Spin2 v51 documentation
+# Source: Parallax Spin2 Documentation v55, Timing Methods table
 # Purpose: Delay execution for specified microseconds
 
 method: "WAITUS"
@@ -16,7 +16,10 @@ parameters:
   - name: "Microseconds"
     type: "long"
     description: |
-      Number of microseconds to delay (1-4,294,967,295 range).
+      Number of microseconds to delay. The bound the source states is in CLOCKS,
+      not microseconds: "Wait Microseconds, uses CLKFREQ, duration must not
+      exceed $8000_0000 clocks." The microsecond ceiling therefore scales with
+      CLKFREQ -- see the `limitations` block below.
       Can be a constant, variable, or expression.
       Value is treated as unsigned.
 
@@ -88,6 +91,28 @@ related_methods:
   - "WAITCT"
   - "GETCT"
   - "POLLCT"
+
+notes:
+  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550"
+  v55_definition: "WAITUS(Microseconds) -- Wait Microseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks."
+  choosing_between_waits:
+    - "For millisecond-scale delays use WAITMS(Milliseconds) -- same $8000_0000-clock bound. -- :551"
+    - "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'. -- :549"
+  blocking: "The cog is stopped in the wait for its duration."
+
+limitations:
+  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550"
+  hard_bound: "duration must not exceed $8000_0000 clocks"
+  ceiling_formula: "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)"
+  resolution: "1 µs -- the argument's unit"
+  correction_2026_08_25: "The pre-purge form of this block claimed a range of 1-4,294,967,295 microseconds. That is the 32-bit unsigned range of the argument, not the wait the chip performs; the source's bound is $8000_0000 CLOCKS. Not restored."
+
+clock_frequency_impact:
+  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550 (\"uses CLKFREQ\")"
+  what_scales: "WAITUS converts its argument through CLKFREQ, so both the granularity and the ceiling move with the clock."
+  clocks_per_microsecond: "CLKFREQ / 1_000_000"
+  granularity_floor: "At a clock below 1 MHz, one microsecond is less than one clock and WAITUS cannot resolve its own unit."
+  when_to_use_waitx_instead: "For a delay expressed directly in clocks -- the form the Parallax sources themselves emit during boot, e.g. WAITX ##20_000_000/100 -- use WAITX and skip the CLKFREQ conversion."
 
 see_also:
   - "language/spin2/methods/waitms.yaml"

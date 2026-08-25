@@ -145,6 +145,51 @@ pin_control_instructions:
     testp: "Test smart pin IN flag"
     testpn: "Test smart pin IN flag (not)"
 
+input_routing:
+  source: "Propeller 2 Documentation v35, Smart Pins -- the %AAAA / %BBBB / %FFF selectors -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:13-52; the %FFF rows appear identically in the P2 Datasheet at engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1084-1087 and in the P2 Hardware Manual at engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:817-820. Filter defaults from Propeller 2 Documentation v35, Configuring the Digital Filters for Smart Pins -- engineering/ingestion/sources/silicon-doc/part3-pages-37-38.txt:20-68."
+  a_input:
+    field: "%AAAA (D[31:28] of the WRPIN operand)"
+    polarity: {"0xxx": "true (default)", "1xxx": "inverted"}
+    selection:
+      "x000": "this pin's read state (default)"
+      "x001": "relative +1 pin's read state"
+      "x010": "relative +2 pin's read state"
+      "x011": "relative +3 pin's read state"
+      "x100": "this pin's OUT bit from cogs"
+      "x101": "relative -3 pin's read state"
+      "x110": "relative -2 pin's read state"
+      "x111": "relative -1 pin's read state"
+  b_input:
+    field: "%BBBB (D[27:24])"
+    selection: "Identical to the 'A' input selector above, with the same polarity bit."
+  input_logic_and_filtering:
+    field: "%FFF (D[23:21]) -- 'A' and 'B' input logic/filtering (after 'A' and 'B' input selectors)"
+    modes:
+      "000": "A, B (default)"
+      "001": "A AND B, B"
+      "010": "A OR B, B"
+      "011": "A XOR B, B"
+      "100": "A, B, both filtered using global filt0 settings"
+      "101": "A, B, both filtered using global filt1 settings"
+      "110": "A, B, both filtered using global filt2 settings"
+      "111": "A, B, both filtered using global filt3 settings"
+    non_smart_pin_note: "The resultant 'A' will drive the IN signal in non-smart-pin modes."
+  global_digital_filters:
+    what_they_are: "There are four global digital filter settings which can be used by each smart pin to low-pass filter its incoming pin states. Each filter setting includes a filter length and a timing tap. The filter length is 2, 3, 5, or 8 flipflops, selected by values 0..3. The timing tap is one of the lower 32 bits of CT, selected by values 0..31."
+    configured_by:
+      - "HUBSET ##$4000_0000 + Length<<5 + Tap    'set filt0"
+      - "HUBSET ##$4000_0080 + Length<<5 + Tap    'set filt1"
+      - "HUBSET ##$4000_0100 + Length<<5 + Tap    'set filt2"
+      - "HUBSET ##$4000_0180 + Length<<5 + Tap    'set filt3"
+    length_encoding: "\"Length\" is 0..3 for 2, 3, 5, or 8 flipflops."
+    tap_encoding: "\"Tap\" is 0..31 for every single clock, every 2nd clock, every 4th clock,... every 2,147,483,648th clock."
+    reset_defaults:
+      note: "The filters are set to the following defaults on reset. The low-pass times below are the source's own, quoted at 6.25ns/clock -- they scale with the system clock."
+      filt0: {length: "0 (2 flipflops)", tap: "0 (1:1)", low_pass_time: "12.5ns (6.25ns * 2 * 1)"}
+      filt1: {length: "1 (3 flipflops)", tap: "5 (32:1)", low_pass_time: "600ns (6.25ns * 3 * 32)"}
+      filt2: {length: "2 (5 flipflops)", tap: "19 (512K:1)", low_pass_time: "16.4ms (6.25ns * 5 * 512K)"}
+      filt3: {length: "3 (8 flipflops)", tap: "22 (4M:1)", low_pass_time: "210ms (6.25ns * 8 * 4M)"}
+
 configuration_format:
   wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
 
@@ -386,6 +431,14 @@ pin_pairing:
   differential: "Adjacent pins for differential signals"
   quadrature: "Two pins for A/B encoder"
 
+# Cross-reference index (apparatus) -- navigation edges out of this file, not claims.
+related_components:
+  cogs: "Configure and control smart pins via WRPIN/WXPIN/WYPIN/RDPIN/RQPIN/AKPIN"
+  architecture/streamer/overview.yaml: "Can bypass smart pins"
+  events: "Smart pin IN flags trigger events"
+  interrupts: "Can trigger COG interrupts"
+  language/spin2/concepts/timing_operations.yaml: "Timing-method selection for client-code protocol timeouts -- use GETMS for multi-second timeouts; the GETCT safe-window ceiling is in that file's method_selection decision table"
+
 pin_output_hierarchy:
   source: "Silicon Doc v35"
   description: "How cog OUT, streamer, and smart pin outputs combine at each pin"
@@ -471,6 +524,16 @@ live_update_behavior:
       wypin: "Not used"
       wxpin: "Changes baud rate and bit count — avoid mid-transfer"
   caution: "Changing WXPIN on serial modes mid-transfer corrupts in-progress data. Change between transactions after IN signals completion."
+
+electrical_limits:
+  source: "P2 Datasheet 2022/11/01, Absolute Maximum Ratings -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2130,2140,2142; DC Characteristics VIO supply -- :2161"
+  io_voltage: "Vxxyy (VIO Supply Voltage) min 3.15 V / typ 3.3 V / max 3.45 V. The P2 is a 3.3 V I/O device and is NOT natively 5 V-tolerant."
+  pin_voltage_limit: "Voltage on all other pins with respect to GND: -0.3 V to (Vxxyy + 0.3 V). Note: I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
+  protection_diode_limit: "Max DC current into an input pin with internal protection diode forward biased: ±10 mA"
+  per_pin_current: "Max. allowable current per I/O pin: ±30 mA"
+  full_ratings: "architecture/io_pin_timing.yaml absolute_maximum_ratings and input_voltage_and_protection carry the complete table and the series-resistor technique for 5 V signals."
+  related:
+    - architecture/io_pin_timing.yaml
 
 related:
   - architecture/pin-drive-configuration.yaml

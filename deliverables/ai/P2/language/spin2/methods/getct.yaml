@@ -98,6 +98,29 @@ notes:
   - "Not affected by cog start/stop"
   - "Resolution equals clock period"
 
+pitfalls:
+  - title: "GETCT deadlines are bounded by the 32-bit counter, not by the 64-bit one"
+    severity: "logic_error"
+    source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547,552-553"
+    what_the_source_says: |
+      GETCT() : Count -- "Get 32-bit system counter."
+      GETMS() : Milliseconds -- "Get milliseconds since booting, uses 64-bit system
+      counter and CLKFREQ, rolls over every 49.7 days."
+      GETSEC() : Seconds -- "Get seconds since booting, uses 64-bit system counter
+      and CLKFREQ, rolls over every 136 years."
+    consequence: |
+      The common timeout idiom `target := GETCT() + (CLKFREQ / 1000) * timeout_ms`
+      and the wrap-aware compare `(GETCT() - target) < 0` are both bounded by that
+      32-bit counter, so a deadline further out than its signed half cannot be
+      expressed or checked. GETMS and GETSEC read the 64-bit counter instead and
+      carry the far larger rollovers the source states.
+    rule: "Use GETMS for protocol timeouts that may run to seconds (SPI/SD read response, busy-wait, multi-second retries); keep GETCT for cycle-accurate measurement and short waits."
+    per_frequency_ceilings: "The safe-window figures per clock frequency are tabulated once, in language/spin2/concepts/timing_operations.yaml method_selection; this entry points there rather than carrying a second copy."
+    see_also:
+      - language/spin2/methods/getms.yaml
+      - language/spin2/concepts/timing_operations.yaml
+
+
 wraparound_handling: |
   The 32-bit subtraction naturally handles wraparound:
   If end_time < start_time (wrapped), the result is still correct

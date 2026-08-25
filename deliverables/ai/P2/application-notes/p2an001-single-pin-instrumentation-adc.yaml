@@ -89,6 +89,22 @@ prerequisites:
   - "Starting code in another cog with COGINIT"
   - "P2 ADC modes at the mechanism level (this note APPLIES them; the mechanism is owned by IOSP Ch.16)"
 
+gotchas:
+  source: "P2 Datasheet 2022/11/01 feature list and AC characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:110,:116,:2199; Propeller 2 Documentation v35, ADC sample/filter/capture -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:811-816,:860-864; hardware-verified absolute error from engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:962-964"
+  items:
+    - flag: hardware
+      text: "Keep a multi-pin measurement inside ONE four-pin silicon power domain. The datasheet states the grouping twice: 'Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins' and 'Externally powered in blocks of 4 for clean analog Vdd reference'. Straddling a boundary (e.g. pins 3 and 4) mixes supply domains. The 8-pin grouping on P2 Edge boards is the board LDO/header layer, not the ADC's reference domain -- see architecture/pin-power-domains.yaml."
+    - flag: hardware
+      text: "Feed VIO from a clean supply. The ADC references the VIO/GIO rails of its own group -- the datasheet's own words for the grouping are 'for clean analog Vdd reference' -- so a noisy VIO degrades every reading."
+    - flag: pitfall
+      text: "Absolute accuracy has a measured floor. Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin absolute error was <=9 mV, reproducible, with a small positive offset at low V and ~0 at mid/high. It is an offset, not noise, so averaging does not remove it -- calibrate each pin once against a known voltage for absolute work. NOTE: the wider '~15 mV pin-to-pin spread' figure is a designer report that the bench has NOT yet reproduced; the multi-pin extension that would settle it is still open (P2-EMPIRICAL-FINDINGS.md:962-964). Do not quote 15 mV as a specification."
+    - flag: pitfall
+      text: "Stay inside the clock the datasheet states. The AC characteristics give the PLL system clock as min 3.33 MHz / typ 180 MHz / max 320 MHz, with the footnote 'Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC'. Reach for integration time, not clock rate, when you want resolution."
+    - flag: tip
+      text: "X[3:0]'s power-of-two restriction is not a ceiling on every mode. 'WXPIN sets the mode to X[5:4] and the sample period to POWER(2, X[3:0])' -- but 'For modes other than SINC2 Sampling (X[5:4] > %00), WYPIN may be used after WXPIN to override the initial period established by X[3:0] and replace it with the arbitrary value in Y[13:0].' The accumulators are 27 bits wide, allowing 'up to 2^(27/3), or 512, clocks per decimation in SINC3 filtering mode and up to 2^(27/2), or 11,585, clocks in SINC2 filtering mode.' So the power-of-two restriction binds SINC2 SAMPLING only."
+    - flag: hardware
+      text: "Mode selection: 'For the internally-clocked mode, the A-input will be sampled on every clock and should be a pin configured for ADC operation (M[12:10] = %100). In the externally-clocked mode, the A-input will be sampled on each B-input rise, so that an external delta-sigma ADC may be employed.'"
+
 hardware_status: |
   ENOB / resolution claims in the note are QUALITATIVE (mechanism, not measured) — hardware
   characterization is pending. Do NOT treat any resolution ceiling as a measured/guaranteed

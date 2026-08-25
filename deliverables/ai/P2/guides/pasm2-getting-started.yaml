@@ -45,6 +45,58 @@ knowledge_progression:
   
   note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
 
+file_structure:
+  source: "Parallax Spin2 Documentation v55 -- Minimal PASM Program engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188; DAT Cog-exec / Hub-exec directive tables :310-323; Clock Setup :1716-1725; clock-setter prepending :1735-1736. Register map from the P2 Datasheet 2022/11/01 pp.13-14 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:553-586."
+
+  overview: |
+    PASM2 code lives in a DAT block of a Spin2 source file; there is no separate
+    PASM2-only file format. A PASM-only program is a file whose DAT block begins
+    with ORG (cog-exec) or ORGH (hub-exec) and which has no PUB method.
+
+  minimal_program:
+    description: "The Parallax minimal PASM-only program, verbatim from Spin2 v55:188 -- reproduced here in its own line layout."
+    example: |
+      DAT             ORG                      'start PASM at hub $00000 for cog $000
+      loop            DRVRND  #0 ADDPINS 7     'write a random pattern to P7..P0
+                      WAITX   ##clkfreq_/10    'wait 100ms (## for >9 bits), loop
+                      JMP     #loop
+    why_waitx_not_waitms: "WAITMS and WAITUS are Spin2 METHODS, not PASM2 instructions. In a PASM-only program the delay is WAITX, whose operand is a clock count -- which is why the source's own example computes it from the compiler-defined constant clkfreq_."
+
+  clock_setup:
+    default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+ (v55:1723). _clkfreq is NOT required."
+    when_declared: "PASM-only programs which use any non-RCFAST clock mode get a 16-long clock-setter program automatically prepended, which sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT #0,#0, to effect a normal start. (v55:1735)"
+    inhibiting_it: "Declare _AUTOCLK = 0 to stop the clock-setter program from being prepended; your code then begins executing with the default RCFAST mode. (v55:1736)"
+    compiler_constants: "clkfreq_ (compiled clock frequency) and clkmode_ (compiled clock mode) are defined by the compiler and may be referenced as constants in PASM-only programs. (v55:1725-1726)"
+
+  cog_vs_hub_execution:
+    cog_exec:
+      directive: "ORG"
+      v55_statement: "ORG -- set cog-exec mode, cog address = $000, cog limit = $1F8 (reg, both defaults)"
+      variants:
+        - "ORG $100 -- cog address = $100, cog limit = $1F8 (reg, default limit)"
+        - "ORG $100,$120 -- cog address = $100, cog limit = $120 (reg)"
+        - "ORG $200 -- cog address = $200, cog limit = $400 (LUT, default limit)"
+        - "ORG $300,$380 -- cog address = $300, cog limit = $380 (LUT)"
+      no_symbol_before: "No symbol allowed before ORG."
+      origin_step: "$ is the current origin, which steps by 1 with each cog-exec instruction."
+      alignment: "In cog-exec mode, instructions force alignment to cog/LUT registers."
+    hub_exec:
+      directive: "ORGH"
+      v55_statement: "ORGH -- set hub-exec mode, hub origin = $00400, origin limit = $100000 (both defaults)"
+      variants:
+        - "ORGH $1000 -- hub origin = $01000, origin limit = $100000 (default limit)"
+        - "ORGH $FC000,$FC800 -- hub origin = $FC000, origin limit = $FC800"
+      no_symbol_before: "No symbol allowed before ORGH."
+      origin_step: "$ is the current origin, which steps by 4 with each hub-exec instruction."
+
+  size_checking:
+    fit: "FIT $020 -- test to make sure cog address has not exceeded $020. FIT $2000 -- test to make sure hub address has not exceeded $2000."
+    matching_the_default: "ORG's default cog limit is $1F8, so FIT $1F8 is the check that matches an unqualified ORG."
+    why_1F8: "Registers $1F8 through $1FF give mapped access to eight special-purpose functions (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) -- when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register, not just the underlying RAM. Registers $1F0 through $1F7 may either be used as general-purpose registers, or may be used as special-purpose registers (IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB) if their associated functions are enabled -- so code that uses no interrupts and no PA/PB may run up to $1F8."
+    correction_2026_08_25: "The pre-purge form of this block stated 'FIT $1F0 (496 longs)'. v55 states the default cog limit as $1F8; $1F0..$1F7 are dual-use RAM, not reserved. Not restored."
+    orgf: "ORGF $040 -- fill to cog address $040 with zeros (no symbol allowed before ORGF)."
+    res: "x RES 1 -- reserve 1 register, advance cog address by 1, don't advance hub address."
+
 instruction_format:
   basic_syntax:
     format: "INSTRUCTION  destination, source"

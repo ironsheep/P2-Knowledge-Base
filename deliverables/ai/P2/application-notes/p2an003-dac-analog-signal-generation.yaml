@@ -109,6 +109,23 @@ gotchas:
   - flag: verify
     text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — proves the whole path with no bench gear. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
 
+key_parameters:
+  source: "Propeller 2 Documentation v35 -- DAC dither modes engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:253-269 (pseudo-random) and :284-308 (PWM); ADC sample/filter/capture :811-864; DAC pin-mode constants from the Spin2 v55 symbol table -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1454-1519"
+  dac_native_bits: 8
+  dac_output_bits: "16-bit nominal, produced by dithering the 8-bit DAC between adjacent levels and time-averaging. No ENOB/SNR/THD figure is stated by any source and none is asserted here."
+  dither_modes:
+    - mode: "%00011 with DAC_MODE -- DAC 16-bit with PWM dither (P_DAC_DITHER_PWM)"
+      source_statement: "'PWM dithering will give better dynamic range than pseudo-random dithering, since a maximum of only two transitions occur for every 256 clocks. This means, though, that a frequency of Fclock/256 will be present in the output at -48dB.'"
+      period_rule: "The sample period must be a multiple of 256 (X[7:0]=0)."
+    - mode: "%00010 with DAC_MODE -- DAC 16-bit with pseudo-random dither (P_DAC_DITHER_RND)"
+      source_statement: "'Pseudo-random dithering does not require any kind of fixed period, as it randomly dithers the 8-bit DAC between adjacent' levels."
+    - mode: "%00001 with DAC_MODE -- plain 8-bit DAC"
+  low_level_pin_requirement: "For every DAC smart-pin mode, M[12:10] must be set to %101 to configure the low-level pin for DAC output."
+  output_configs: "P_DAC_990R_3V / P_DAC_600R_2V / P_DAC_124R_3V / P_DAC_75R_2V -- the four DAC output configurations, trading drive impedance against peak voltage. Per-constant definitions live in language/spin2/symbols/spin2-builtin-symbols-complete.yaml."
+  sample_clock: "The period is set by WXPIN; on completion of each sample period Y[15:0] is captured for the next output value and IN is raised, so an update is coordinated with IN going high."
+  adc_passthrough_config: "SINC2 filtering is X[5:4]=%01; the period is POWER(2, X[3:0]), so X[3:0]=8 gives 256 clocks, matching the PWM-dither DAC's 256-clock minimum. In filtering mode WYPIN after WXPIN can replace that period with any value in Y[13:0] up to 11,585 clocks."
+  formulas_note: "The V = code/65536 * Vfs conversion and the DDS phase-increment inc = f * 2^32 / sample_rate are the arithmetic of a 16-bit code and a 32-bit phase accumulator, not statements taken from a Parallax source. They are kept out of this block; the streamer NCO's own source-stated scaling rule is in language/pasm2/setxfrq.yaml frequency_formula."
+
 hardware_status: |
   The Tier-0 DAC->ADC loopback known-answer (fixed code -> computable DC, read back by a P2AN001
   ADC on a jumpered pin) proves the code and arithmetic with no bench instruments. Numeric

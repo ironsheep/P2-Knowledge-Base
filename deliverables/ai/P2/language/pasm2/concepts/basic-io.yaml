@@ -35,6 +35,48 @@ core_concept_configuration_vs_operation:
       - "FLTL - Float to high-impedance"
     behavior: "Normal digital I/O with configured electrical characteristics"
 
+pin_architecture:
+  source: "P2 Datasheet 2022/11/01 -- features summary p.2 :107,:117; Special-Purpose Registers table p.13 :579-586; I/O Pin Registers table p.21 :981-986 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt. The register table appears identically on the reconstructed path, engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164."
+  pin_count: 64
+  pin_range: "P0 to P63"
+  datasheet_statement: "64 Smart I/O pins, each with: ... Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float"
+  register_split:
+    dira_outa_ina: "P0-P31"
+    dirb_outb_inb: "P32-P63"
+  per_pin_capabilities:
+    direction: "DIR bit -- 0: input (float), 1: output (drive)"
+    output_state: "OUT bit -- 0: low, 1: high; the corresponding DIR bit must be high to enable output"
+    drive_modes: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float. The eight rungs, their %HHH/%LLL encodings and their P_* constant names are defined once in architecture/pin-drive-configuration.yaml."
+    input_modes: "Logic, Schmitt, pin-to-pin-comparator, and 8-bit-level-comparator input modes"
+    power_grouping: "Externally powered in blocks of 4 for clean analog Vdd reference"
+  no_milliamp_ladder: "The datasheet's drive list is the whole list. No per-pin milliamp drive ladder and no programmable slew rate exists; see architecture/pin-drive-configuration.yaml no_other_rungs."
+
+control_registers:
+  source: "P2 Datasheet 2022/11/01 -- Special-Purpose Registers p.13 :579-586 and I/O Pin Registers p.21 :981-986 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt; the same table on the reconstructed path at engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164"
+  addressing_note: "RAM registers $1F8 through $1FF give mapped access to eight special-purpose functions. In general, when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register."
+  dira:
+    address: "$1FA"
+    purpose: "Output enable bits for P0..P31 (active high)"
+  dirb:
+    address: "$1FB"
+    purpose: "Output enable bits for P32..P63 (active high)"
+  outa:
+    address: "$1FC"
+    purpose: "Output state bits for P0..P31 (corresponding DIRA bit must be high to enable output)"
+  outb:
+    address: "$1FD"
+    purpose: "Output state bits for P32..P63 (corresponding DIRB bit must be high to enable output)"
+  ina:
+    address: "$1FE"
+    purpose: "Input state bits for P0..P31"
+    read_only: true
+  inb:
+    address: "$1FF"
+    purpose: "Input state bits for P32..P63"
+    read_only: true
+  debug_overlap: "Note that $1FE (INA) and $1FF (INB) are also the debug interrupt call address and return address, respectively. -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:542"
+  bit_to_pin_mapping: "Bit n of DIRA/OUTA/INA is pin Pn; bit n of DIRB/OUTB/INB is pin P(n+32)."
+
 single_pin_operations:
   set_output_high:
     instruction: "DRVH"
@@ -186,6 +228,47 @@ pin_span_setq_override:
   priority:
     setq_first: "SETQ value takes precedence over instruction's embedded field"
     no_setq: "Use instruction's embedded ADDPINS or constant field normally"
+
+internal_pull_resistors:
+  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, :117; hardware-verified idioms EF-063 and EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840"
+  there_is_no_bias_resistor_selector: |
+    The P2 has no internal pull-up/pull-down resistor network. The Pin Mode Legend
+    enumerates the whole %M..M field -- C, I, O, HHH, LLL -- and there is no
+    bias-resistor selector among them. What the P2 offers instead is a per-side
+    DRIVE STRENGTH: the high side and the low side each pick one rung of the same
+    eight-rung ladder (logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float).
+  the_dir_rule: |
+    A drive selection is a property of DRIVING, so it is live only while the pin
+    drives. Configuring a weak drive and then dropping DIR gives a plain
+    high-impedance input with the selection INACTIVE. This was measured on real
+    silicon (EF-063, EF-064, 2026-08-20); it is the reason the older form of this
+    block -- weak drive followed by a float -- does not work.
+  ladder_definition_home: architecture/pin-drive-configuration.yaml
+  substitute_for_a_pull_up:
+    intent: "hold a line high weakly, so a stronger external drive can overpower it"
+    mode_word: "P_HIGH_15K"
+    required_pin_state: "DIR = 1, OUT = 1"
+    example: |
+      WRPIN   ##P_HIGH_15K, #16    ' high side drives through 15 kOhm
+      DRVH    #16                  ' DIR = 1, OUT = 1 -- REQUIRED; DIRL here floats the pin
+      TESTP   #16 WC               ' C = 1 unless something stronger holds the line low
+  substitute_for_a_pull_down:
+    intent: "hold a line low weakly, so an undriven pin reads 0 for a stated reason"
+    mode_word: "P_LOW_15K"
+    required_pin_state: "DIR = 1, OUT = 0"
+    example: |
+      WRPIN   ##P_LOW_15K, #16     ' low side drives through 15 kOhm
+      DRVL    #16                  ' DIR = 1, OUT = 0 -- REQUIRED
+      TESTP   #16 WC               ' C = 0 unless something stronger holds the line high
+  corrected_2026_08_25: |
+    The pre-purge form of this block showed 'DIRL #16  -- Use as input with pull-up'
+    and named the P_HIGH_*/P_LOW_* constants as pull-up / pull-down modes. Both are
+    wrong: DIR = 0 deactivates the drive, and the constants are drive-strength
+    selectors, not bias resistors. Returned in the hardware-verified form instead.
+  use_cases:
+    - "Button inputs without external resistors -- weak high drive, DIR high, button pulls to ground"
+    - "Holding an unused or undriven line at a known level for a stated reason"
+    - "Weak side of a bidirectional line, so an external driver can overpower it"
 
 smart_pin_to_basic_io_transition:
   clearing_smart_pin:

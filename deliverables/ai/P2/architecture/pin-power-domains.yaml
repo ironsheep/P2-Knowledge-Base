@@ -13,6 +13,27 @@ aliases:
   - VIO supply mapping
   - Edge LDO group
 
+description: |
+  P2 I/O pin power comes in TWO layers, and they are different sizes.
+
+  SILICON layer (true on every board): "the Propeller 2 Smart I/O pins are grouped
+  such that each 4 I/O's have a dedicated voltage supply connection" — VIO_0_3 /
+  GIO_0_3 through VIO_60_63 / GIO_60_63, sixteen groups across the 64 pins.
+  Source: engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:133-135;
+  and the P2 Datasheet features summary, "Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins."
+
+  BOARD layer (P2 Edge modules): "the voltage supply connections have been brought
+  out in groups of 8 I/O pins each. Each group has a dedicated LDO regulator with
+  the VIO output labeled Vxx at the edge connector."
+  Source: engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:138-141.
+
+  The distinction decides which pins may be grouped for an absolute (ratiometric)
+  ADC measurement: the ADC references its own SILICON group, so a shared-node
+  measurement must stay within four pins even though the board wires eight to one
+  LDO. The Edge narrative says as much of its own scheme: "The distributed power
+  scheme is not a requirement of the P2 microprocessor; rather a design choice for
+  this particular module." (:145-146)
+
 silicon_power_grouping:
   scope: "The P2X8C4M64P package itself — true on every board."
   group_size: 4
@@ -41,6 +62,25 @@ adc_reference:
     package pin and bond wire, so IR drop and bond-wire drop still differ between them.
     STAY WITHIN FOUR — that rule is correct on every board. "Within eight" is an
     Edge-specific relaxation and is not the chip's behaviour.
+
+board_power_grouping:
+  scope: "P2 Edge modules (standard and 32MB) — the BOARD layer, not the chip."
+  source: "engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:86,130,138-141,356-392"
+  regulator_count: "The 8 LDO regulators are fixed 3.3 V low-noise regulators, which power the P2 I/O smart-pins. Each regulator has short-circuit and over-current protection."
+  per_group_current: "VIO Power Supplies: Low noise LDO 3.3V up to 300 mA per 8 I/O pins."
+  naming_rule: "The two digits after the V refer to the first of 8 I/O pins that the LDO provides power to. For example, V08 would mean VIO voltage for I/O pins 8 to 15."
+  map:
+    V00: "P0-P7"
+    V08: "P8-P15"
+    V16: "P16-P23"
+    V24: "P24-P31"
+    V32: "P32-P39"
+    V40: "P40-P47"
+    V48: "P48-P55"
+    V56: "P56-P63"
+  per_pin_current: "Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge connector pin Vxx."
+  silicon_absolute_maximum: "Max. allowable current per I/O pin ±30 mA; max DC current into an input pin with internal protection diode forward biased ±10 mA — engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2140,2142"
+  budget_rule: "Eight pins at the 30 mA per-pin figure is 240 mA, inside the 300 mA the group's LDO supplies — but the edge-connector Vxx pin draws from the same 300 mA, so an add-on board powered from Vxx spends the same budget the eight pins do."
 
 evidence:
   - "P2 Silicon Doc v35, Part 1 page 9 — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."

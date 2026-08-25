@@ -248,6 +248,13 @@ synchronization:
       ' This order prevents data corruption
     source: flash_loader.spin2
     
+notes:
+  - "Each smart pin has an outgoing 33-bit bus which conveys its Z result and a special flag. RDPIN and RQPIN are used to multiplex and read these buses, so that a pin's Z result is read into D and its special flag can be read into C. -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:1-3"
+  - "Long-repository mode (%SSSSS = %00001..%00011 with M[12:10] != %101) turns the smart pin into a long repository, where WXPIN writes the long and RDPIN/RQPIN can read the long -- the cog-to-cog mailbox pattern. -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:222-224"
+  - "Streamer/smart-pin configuration order is critical for SPI: configure and start the smart pin before XINIT starts the streamer. The worked sequence and its source (Parallax flash_loader.spin2) are in the streamer_smartpin_sync pattern above."
+  - "Client code using these protocols (SPI / sync-serial / async-serial) typically needs timing/timeout idioms. For multi-second protocol timeouts (SD card busy-wait, slow peripheral response), use GETMS -- a GETCT-based deadline has a safe window of only 2^31 / CLKFREQ seconds and fails silently past it. The per-frequency ceilings are in language/spin2/concepts/timing_operations.yaml method_selection."
+
+
 related:
   - language/spin2/concepts/timing_operations.yaml
   - language/spin2/methods/getct.yaml

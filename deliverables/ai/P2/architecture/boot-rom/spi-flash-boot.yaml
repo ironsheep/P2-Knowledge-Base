@@ -26,6 +26,16 @@ authority:
     shipping flash-boot binary.
 
 # When this path is taken
+boot_pattern_trigger:
+  source: "P2 Hardware Manual, Boot Up -- Boot Pattern table -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:275-276"
+  see: architecture/boot-rom/boot-pattern-selection.yaml
+  flash_priority_patterns:
+    - pattern: "P61=pull-up, P60=don't care, P59=float"
+      procedure: "Program from serial within 100 ms or boot from flash.  If fails, program from serial within 60 s window."
+    - pattern: "P61=pull-up, P60=don't care, P59=pull-down"
+      procedure: "Fast boot from flash; no serial.  If it fails, shutdown."
+
+# Fixed pin assignment (silicon)
 pin_assignment:
   spi_cs: "P61 — chip select (P2 → flash, active low)"
   spi_ck: "P60 — serial clock (P2 → flash)"
