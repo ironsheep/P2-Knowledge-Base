@@ -226,17 +226,6 @@ method_vs_register_tradeoffs:
       - "Less readable"
     use_when: "Performance critical or complex bit patterns needed"
 
-hardware_specifications:
-  voltage_levels: "3.3V I/O"
-  input_thresholds:
-    VIL_max: "0.8V"
-    VIH_min: "2.0V"
-  output_levels:
-    VOL_max: "0.4V at rated current"
-    VOH_min: "2.4V at rated current"
-  max_current_per_pin: "150mA"
-  max_current_total: "Check datasheet for package limits"
-
 application_examples:
   seven_segment_display:
     code: |

@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-347`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-352`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -158,6 +158,150 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
+## Four defects surfaced by the whole-KB promotion filter (2026-08-25, «#298» Plan §7) — F-348…F-351
+
+> **Origin.** «#298» applied the belonging test — *can this block change the code an agent emits?* —
+> to every quantitative block in the shipped KB (114) and every block the sprint's two purges removed
+> (119). Three of these four are content defects the purge could not see; the fourth is an instrument
+> artifact that inflates the Tier-2 count. The dispositioned list is
+> `engineering/analysis/2026-08-25-whole-kb-promotion-filter.md`. Every line number below was read off
+> disk on 2026-08-25.
+
+### F-348 — a *cited* block shipped a pin-current limit five times the datasheet's absolute maximum, plus TTL logic levels the P2 datasheet does not contain — `PARTIAL`
+
+> **Where:** `deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml` and
+> `deliverables/ai/P2/language/spin2/concepts/basic-io.yaml`, both `hardware_specifications`
+> (11 lines, byte-identical twins). **Removed 2026-08-25**; backups at
+> `.backups/deliverables/ai/P2/language/{pasm2,spin2}/concepts/basic-io.yaml.20260825-082653`.
+>
+> **What was wrong — five of six values:**
+>
+> | Shipped | P2 Datasheet |
+> |---|---|
+> | `max_current_per_pin: "150mA"` | **±30 mA** max allowable current per I/O pin — `sources/p2-datasheet/p2-datasheet-text.txt:2142` |
+> | `VIL_max: "0.8V"` / `VIH_min: "2.0V"` | no such pair; a single ratiometric **Vih = Vxxyy × 0.3 / 0.5 / 0.7** — `:2163` |
+> | `VOL_max: "0.4V at rated current"` | **15 mV** drop at 1 mA sinking, 510 mV at 30 mA — `:2172`, `:2174` |
+> | `VOH_min: "2.4V at rated current"` | **−6 mV** drop at 1 mA sourcing, −580 mV at 30 mA — `:2176`, `:2178` |
+>
+> The four thresholds are 5 V-TTL boilerplate. The `150mA` is the F-327 drive-ladder fabrication's
+> top rung, and it is **the number an agent uses to size an LED series resistor** — a 5× error in the
+> direction that damages silicon.
+>
+> **Why two purges and a whole-class drive-strength sweep all missed it — measured, and it is a
+> citation false negative, not a coverage gap.** `audit-yaml-claim-sourcing.py` judged the block
+> **cited** because `INLINE_CITE_RE` matched the word **`datasheet`** inside
+> `max_current_total: "Check datasheet for package limits"`. That is a **deferral**, not an
+> attribution. Verified across the whole cited population: of the 30 cited quantitative blocks in the
+> KB, this pair are the **only** two whose citation token identifies **no document at all** — every
+> other one resolves to a named document ("P2 Datasheet", "Silicon Doc v35", "AKM AK5704 datasheet",
+> "NXP PCF8523 datasheet", "W25Q128JV datasheet"). The nearest neighbour, and the one to watch, is
+> `hardware/addon-rtc.yaml` `pin_mode_tip` — it defers to *"the RTC datasheet"*, which is also a
+> deferral, but it identifies the document by role and its sibling `rtc_chip` block names it outright
+> (NXP PCF8523). That is the line: **naming a document, however briefly, versus naming the class of
+> document**. This is the same principle F-334 established — *a citation names a DOCUMENT* — in its
+> remaining uncovered form.
+>
+> Note also that `4cecb02c` ("Correct the drive-strength mislabel class; both fidelity tiers now read
+> zero") swept the class and did not reach these, because the fidelity tool is keyed on **named
+> constants** and this block names none.
+>
+> **Nothing was lost.** The correct facts already ship, cited, in
+> `deliverables/ai/P2/architecture/io_pin_timing.yaml` `absolute_maximum_ratings` (±30 mA per pin,
+> ±10 mA diode) and `input_voltage_and_protection`. No `related:`/`see_also:` anywhere referenced
+> `hardware_specifications`; `validate-crossref-keys.py` re-ran clean (3156 refs, 0 unresolved).
+>
+> **Owed:** «#299» decides whether anything returns in their place, source-first from the datasheet
+> lines above. Nothing may return that states a per-pin current above ±30 mA.
+
+### F-349 — PLL lock time is stated as ~10 microseconds in one place and ~10 milliseconds in four others; it is a delay an agent emits — `CONFIRMED`
+
+> **The outlier:** `architecture/clock_system.yaml` `stabilization_timing` — `pll_lock: "~10 microseconds"`.
+> Removed by «#293» (`15c84de5`), so it is **not currently shipping** — but it is a Population-2
+> repopulation candidate and would return the contradiction.
+>
+> **The four that ship, all agreeing on milliseconds:**
+> - `language/spin2/methods/clkset.yaml` `timing` — `cycles: "~10-20ms for PLL lock"`
+> - `language/spin2/system-variables/clkmode.yaml` `notes` — *"PLL must lock before switching to PLL source (~10ms)"*
+> - `language/pasm2/hubset.yaml` `safe_clock_switching` — *"Wait for PLL to lock (~10ms)"*, and its
+>   step_2 code computes `clkfreq/100` clocks = 10 ms
+> - `language/pasm2/asmclk.yaml` `expansion_details` — emits `WAITX ##20_000_000/100`, a 10 ms wait at 20 MHz
+>
+> **Why it matters:** this is not a documentation nicety. It is the literal WAITX operand between
+> configuring the PLL and switching to it. A three-orders-of-magnitude error in the short direction
+> switches the clock source before lock.
+>
+> **Owed:** resolve against a Parallax source before «#299» returns `stabilization_timing`. None of the
+> five locations carries a citation, so the resolution needs a source, not a vote.
+
+### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PARTIAL`
+
+> **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml`,
+> `development_boards.p2_eval_board` and `compatibility_matrix.eval_board_addons`. Backup at
+> `.backups/deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml.20260825-082759`.
+>
+> F-328(b) catalogued invented #64000 hardware in `p2-eval-board.yaml`. Sweeping the **class** rather
+> than the occurrence found the same invented peripherals in a second file, which F-328 never named.
+>
+> **Removed 2026-08-25 (fabricated — the board has none of them; `grep -rn -i "\bVGA\b\|HDMI\|resistor
+> DAC\|audio\|prototyp\|breadboard"` over `sources/p2-eval-board/complete-p2-eval-board-reference.md`
+> returns zero hits):** `audio_capability: "Stereo DAC output"` · `video_capability: "VGA output"` ·
+> `breadboard_area: "Large prototyping area"`.
+>
+> **Still shipping and WRONG — owed to «#307», needs re-derivation from the repaired capture, not deletion:**
+>
+> | Key | Ships | `complete-p2-eval-board-reference.md` |
+> |---|---|---|
+> | `development_boards.p2_eval_board.dimensions` | `127×89mm` | **3.55″ × 3.55″** (`:62`, `:260`) ≈ 90 × 90 mm |
+> | `…usb_connectivity` | `USB-C programming + micro-USB serial` | **two micro-USB** (`:59`, `:76`); no USB-C anywhere |
+> | `…addon_headers` | `Two 2x6 headers for add-on boards` | **eight** I/O Pin Breakout Edge Headers (`:35`, `:52`) |
+> | `…flash_memory` | `16MB (with P2-EC)` | 16 MB correct; the P2 is **soldered on-board** (`:124`), not an edge module |
+> | `compatibility_matrix.eval_board_addons` | `Up to 2 add-on boards`; `A-side (P32-P39) + B-side (P24-P31)` | **8 sets of 8** covering all 64 pins (`:52`) |
+>
+> **The generalizable half.** F-328(b)'s own lesson was that a purge keyed on missing citations cannot
+> see a wrong scalar or an invented section. This adds the sibling: **a finding scoped to one file
+> cannot see the same fabrication copied into another.** The class-wide sweep is what found it, and it
+> is the only thing that would have.
+
+### F-351 — the sourcing gate reads Parallax part numbers, Unicode code points and an ISO designator as amperes; 12 blocks are pure instrument artifacts — `CONFIRMED`
+
+> **Instrument:** `engineering/tools/validation/audit-yaml-claim-sourcing.py`, `QTY_RE`. **Do not fix
+> here — «#305» owns instrument repair** (see F-335/339/340/341). Filed so the Tier-2 count is read
+> correctly in the meantime.
+>
+> **Mechanism.** `QTY_RE` accepts a bare `A` as amperes with only `(?<![\w%$])` guarding the number's
+> left edge. That guard passes at a string's start and after `+`, so:
+>
+> | Text | Read as | Real meaning |
+> |---|---|---|
+> | `"64006A"` | 64006 amperes | a Parallax part number |
+> | `unicode: "U+221A"` | 221 amperes | the SQUARE ROOT code point |
+> | `ISO/IEC 14443 A/MIFARE` | 14443 amperes | the RFID standard's designator |
+>
+> **Measured, whole-KB:** **10 of the 84 Tier-2 blocks** state no quantity at all — every token in them
+> is one of the three artifacts above: `hardware/addon-control-board.yaml` `part_number`, `aliases`,
+> `availability` · `hardware/hardware-compatibility-matrix.yaml` `physical_stacking_constraints`,
+> `optimal_configurations` · `hardware/p2-hardware-feature-comparison.yaml` `selection_criteria` ·
+> `hardware/p2-hardware-selection-guide.yaml` `decision_tree`, `application_specific_guides` ·
+> `hardware/p1_rom_font_character_set.yaml` `character_categories` ·
+> `community/obex/objects/4070.yaml` `object_metadata`. Two further **cited** blocks are the same
+> artifact (`community/quick-bytes/{five-buttons-on-one-pin,leds-beyond-the-basics}.yaml` `quick_byte`,
+> both on `related_boards: 64006A`). **Twelve blocks KB-wide.**
+>
+> **So the true Tier-2 advisory population is 74, not 84** — the gate's own number over-reports by 12%,
+> and every one of the ten sits in `hardware/`, the tree where part numbers are densest.
+>
+> **A second, milder artifact: thousands separators split.** `range: "3,333,333 Hz to 500,000,000 Hz"`
+> in `language/spin2/constants/special-configuration-symbols.yaml` `clock_configuration` yields the
+> tokens `333 Hz` and `000 Hz`. This does not create a false finding (the block carries real MHz) but
+> it inflates the per-block quantity count the advisory prints.
+>
+> **Suggested repair for «#305» to adjudicate:** require the ampere unit to be preceded by a word
+> boundary that is not a digit-run continuation (a part number is `\d{4,}[A-Z]`), and mask `U+XXXX`
+> alongside the existing `%binary`/`$hex` masking. Both are testable with the negative-control harness
+> the tool already carries.
+
+---
+
 ## `hardware/p2-eval-board.yaml` describes a board the #64000 guide does not (2026-08-24, F-250 re-ingestion) — F-328
 
 > **Origin.** Repairing the #64000 source (F-250 — its extraction had lost every numeral)
@@ -287,6 +431,127 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   stands unchanged, and the guide's §18 is source errata. Nothing remains open on (a) and it is
   **not** blocked on the bench. **(b) CONFIRMED and OPEN** — verified against the repaired
   source, ready to fix in «#294»/«#307».
+
+---
+
+## The `architecture/`/`language/`/`guides/`/`application-notes/` uncited-block purge — the removal record «#293» owed and did not write (2026-08-25, arbiter) — F-347
+
+> **Why this exists.** «#293»'s own PROTECTION POINT required *"every removal recorded with its
+> origin so «#299» can work from a list rather than from git archaeology."* It was not written —
+> its executor mirrored only the `io_pin_timing.yaml` portion into the register and left the rest
+> in its transcript, which does not survive. **The arbiter verified that task green without
+> checking that specific deliverable; that is the miss, and it is the arbiter's, not the
+> executor's.** Caught at «#298»'s entry, because «#298» population 2 and «#299» both consume this
+> list.
+>
+> **Reconstructed mechanically** from `git show --unified=0 15c84de5 -- deliverables/ai/P2/`,
+> taking every removed line that begins a top-level YAML key. Nothing is lost — the purge is fully
+> recoverable from git — but recoverable is not the same as recorded, and a list nobody can find
+> is a list that gets re-derived under time pressure.
+>
+> ⚠️ **COUNT DISCREPANCY, STATED RATHER THAN SMOOTHED: this reconstruction yields 60 top-level key
+> deletions; the executor reported 59 blocks.** The likely cause is one key counted differently
+> (a `description:` removed as part of a larger block, or a nested key at column 0). «#298» and
+> «#299» should work the 60 and treat any that resolves to "was never a block" as a no-op rather
+> than assume the reconstruction is wrong. Do not reconcile to 59 by deleting a row.
+>
+> **Sibling records:** «#294»'s two are in F-334 above (48 blocks / 16 files, and 11 / 6).
+>
+
+- **F-347 — «#293»'s removal record was never written, so 60 removed blocks existed only in a git
+  diff and in a transcript that does not survive.** — `PARTIAL`
+
+  «#293» removed 59-60 uncited quantitative blocks from `architecture/`, `language/`, `guides/`
+  and `application-notes/`, and its PROTECTION POINT required that every removal be recorded with
+  its origin *"so «#299» can work from a list rather than from git archaeology."* The executor
+  mirrored only the `io_pin_timing.yaml` portion into the register. The remainder was left in its
+  transcript.
+
+  **The arbiter passed that task green without checking that deliverable.** The other protection
+  criteria — the four entry gates, the zero Tier-1 count, the crossref clean — were all verified
+  and all held; the *record* was the one criterion nobody re-ran, because it is the only one with
+  no instrument behind it. That is the generalizable lesson: **a protection-point criterion that
+  no tool can check is the criterion that silently does not happen**, and it needs a named,
+  eyes-on verification step rather than inheriting the confidence of the gates around it.
+
+  Reconstructed mechanically at «#298»'s entry (the first task to consume it) from
+  `git show --unified=0 15c84de5 -- deliverables/ai/P2/`. The table above is that reconstruction.
+  Nothing was lost — a purge is fully recoverable from git — but *recoverable* is not *recorded*,
+  and a list nobody can find is a list that gets re-derived under time pressure by whoever needs
+  it next.
+
+  Closes when «#299» has executed against the table and every row carries a returned /
+  not-returned outcome.
+
+### Removal record — «#293», reconstructed by the arbiter 2026-08-25
+
+| File | Top-level block removed | pre-removal line | span |
+|---|---|---|---|
+| `application-notes/p2an001-single-pin-instrumentation-adc.yaml` | `gotchas` | 92 | 16 |
+| `application-notes/p2an002-cordic-for-real-work.yaml` | `gotchas` | 102 | 14 |
+| `application-notes/p2an003-dac-analog-signal-generation.yaml` | `key_parameters` | 91 | 13 |
+| `application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml` | `gotchas` | 97 | 16 |
+| `architecture/boot-rom/_index.yaml` | `boot_timing` | 25 | 6 |
+| `architecture/boot-rom/_index.yaml` | `boot_paths_summary` | 155 | 18 |
+| `architecture/boot-rom/boot-pattern-selection.yaml` | `boot_time_clock_state` | 64 | 27 |
+| `architecture/boot-rom/boot-pattern-selection.yaml` | `pin_triple_duty` | 64 | 27 |
+| `architecture/boot-rom/spi-flash-boot.yaml` | `boot_pattern_trigger` | 29 | 7 |
+| `architecture/click_module_integration.yaml` | `best_practices` | 185 | 25 |
+| `architecture/clock_system.yaml` | `configuration_constants` | 22 | 34 |
+| `architecture/clock_system.yaml` | `configuration_rules` | 22 | 34 |
+| `architecture/clock_system.yaml` | `pll_system` | 98 | 65 |
+| `architecture/clock_system.yaml` | `hubset_configuration` | 98 | 65 |
+| `architecture/clock_system.yaml` | `clock_modes` | 98 | 65 |
+| `architecture/clock_system.yaml` | `stabilization_timing` | 175 | 6 |
+| `architecture/clock_system.yaml` | `clock_specifications` | 253 | 15 |
+| `architecture/clock_system.yaml` | `anti_patterns` | 279 | 21 |
+| `architecture/io_pin_timing.yaml` | `description` | 10 | 6 |
+| `architecture/io_pin_timing.yaml` | `timing_specifications` | 90 | 173 |
+| `architecture/io_pin_timing.yaml` | `clock_relationships` | 90 | 173 |
+| `architecture/io_pin_timing.yaml` | `drive_strength_configurations` | 90 | 173 |
+| `architecture/io_pin_timing.yaml` | `slew_rate_control` | 90 | 173 |
+| `architecture/io_pin_timing.yaml` | `input_characteristics` | 90 | 173 |
+| `architecture/io_pin_timing.yaml` | `special_timing_modes` | 298 | 40 |
+| `architecture/io_pin_timing.yaml` | `protocol_timing_examples` | 298 | 40 |
+| `architecture/io_pin_timing.yaml` | `compensation_techniques` | 359 | 33 |
+| `architecture/io_pin_timing.yaml` | `best_practices` | 359 | 33 |
+| `architecture/pin-power-domains.yaml` | `description` | 16 | 15 |
+| `architecture/pin-power-domains.yaml` | `board_power_grouping` | 43 | 9 |
+| `architecture/serial_loader.yaml` | `boot_sequence` | 11 | 26 |
+| `architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml` | `operation` | 21 | 6 |
+| `architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml` | `pin_behavior` | 55 | 7 |
+| `architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml` | `pwm_characteristics` | 189 | 5 |
+| `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` | `detailed_description` | 8 | 13 |
+| `architecture/smart_pin_patterns.yaml` | `notes` | 251 | 9 |
+| `architecture/smart_pins.yaml` | `input_routing` | 148 | 19 |
+| `architecture/smart_pins.yaml` | `related_components` | 405 | 7 |
+| `architecture/smart_pins.yaml` | `electrical_limits` | 504 | 4 |
+| `guides/pasm2-getting-started.yaml` | `file_structure` | 48 | 66 |
+| `language/pasm2/concepts/basic-io.yaml` | `pin_architecture` | 40 | 49 |
+| `language/pasm2/concepts/basic-io.yaml` | `control_registers` | 40 | 49 |
+| `language/pasm2/concepts/basic-io.yaml` | `drive_strength_configuration` | 241 | 58 |
+| `language/pasm2/concepts/basic-io.yaml` | `internal_pull_resistors` | 241 | 58 |
+| `language/pasm2/concepts/basic-io.yaml` | `timing_considerations` | 371 | 6 |
+| `language/pasm2/concepts/streamer_smartpin_control.yaml` | `protocol_client_code_note` | 480 | 8 |
+| `language/pasm2/setxfrq.yaml` | `common_values` | 53 | 13 |
+| `language/spin2/concepts/basic-io.yaml` | `pin_architecture` | 40 | 43 |
+| `language/spin2/concepts/basic-io.yaml` | `control_registers` | 40 | 43 |
+| `language/spin2/concepts/basic-io.yaml` | `drive_strength_configuration` | 173 | 66 |
+| `language/spin2/concepts/basic-io.yaml` | `internal_pull_resistors` | 173 | 66 |
+| `language/spin2/concepts/basic-io.yaml` | `timing_considerations` | 339 | 8 |
+| `language/spin2/debug-commands/pc_key.yaml` | `description` | 4 | 5 |
+| `language/spin2/debug-commands/pc_key.yaml` | `usage_rules` | 15 | 8 |
+| `language/spin2/methods/getct.yaml` | `pitfalls` | 120 | 19 |
+| `language/spin2/methods/waitms.yaml` | `notes` | 84 | 13 |
+| `language/spin2/methods/waitms.yaml` | `limitations` | 84 | 13 |
+| `language/spin2/methods/waitus.yaml` | `notes` | 92 | 20 |
+| `language/spin2/methods/waitus.yaml` | `limitations` | 92 | 20 |
+| `language/spin2/methods/waitus.yaml` | `clock_frequency_impact` | 92 | 20 |
+
+**60 top-level blocks across 25 files.**
+
+> **Disposition.** `PARTIAL` — the record exists now and is usable; it closes when «#299» has
+> executed against it and every row carries a returned/not-returned outcome.
 
 ---
 
@@ -452,6 +717,34 @@ needs a source that states it or a rewrite that does not compute.
 ---
 
 ## `audit-yaml-claim-sourcing.py` does not know the `documentation: primary:` citation spelling, so a whole class of board file is mis-tiered into the advisory lane (2026-08-24, F-334 repair) — F-335
+
+> 🔴 **(e) A DEFERRAL READS AS A CITATION — ADDED BY THE ARBITER 2026-08-25 (during «#298»), AND IT
+> IS THE ONE THAT ACTUALLY HURT SOMEBODY.** `CITE_KEY_RE`/`INLINE_CITE_RE` match the bare word
+> *datasheet* anywhere in a block. `language/pasm2/concepts/basic-io.yaml` and its Spin2 twin each
+> carried:
+>
+> ```yaml
+>   max_current_per_pin: "150mA"
+>   max_current_total: "Check datasheet for package limits"
+> ```
+>
+> The second line is a **deferral — an instruction to go look elsewhere** — and it scored the whole
+> block as cited. So the block sailed through «#293» *and* «#294» while asserting
+> **`max_current_per_pin: "150mA"` against the datasheet's stated `Max. allowable current per I/O
+> pin ±30 mA`** (`sources/p2-datasheet/p2-datasheet-text.txt:2163`). **Five times the absolute
+> maximum, in the exact number a reader uses to size an LED series resistor.** The same block
+> shipped `VOL_max: "0.4V"` / `VOH_min: "2.4V"` — 5 V-TTL thresholds the P2 datasheet does not
+> contain (its real figures are millivolt drops: Vol 15 mV sinking 1 mA, `:2172-2178`).
+>
+> **This is the third member of the same family**, after (F-334) a board revision `Rev B`/`Rev C`
+> and a power `source:`. The pattern is now explicit and should drive the repair rather than three
+> more one-off patches: **the citation side matches on the PRESENCE OF A TOKEN, never on whether
+> the sentence actually attributes the block to a document.** *"Check datasheet for…"*, *"see the
+> datasheet"*, *"per the manual"* are pointers away from the block; a citation points *at* a source
+> for the claim being made. Fixing (a)-(e) individually will keep finding a sixth.
+>
+> Removed under «#298» (both copies, pure deletion) and filed as **F-348**. The correct facts
+> already ship, cited, in `architecture/io_pin_timing.yaml absolute_maximum_ratings`.
 
 > 🔴 **TWO FURTHER DEFECT CLASSES, ADDED BY THE ARBITER'S RE-RUN 2026-08-25. «#305» MUST DISPOSE OF
 > ALL OF THEM BEFORE ARMING — THEY ARE NOT INDEPENDENT, AND ONE PAIR CANCELS.**

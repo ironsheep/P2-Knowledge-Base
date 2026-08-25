@@ -45,33 +45,15 @@ built_in_peripherals:
     source: "#64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax, 2020), feature 12 'LED Bank' + the P56-P63 alternative-function table"
   switches:
     reset_switch: "Hardware reset"
-    user_switches: "TBD quantity"
     purpose: "User input, mode selection"
   headers:
     pin_access: "All 64 P2 pins accessible"
-    connector_type: "Standard 0.1 inch headers"
     expansion: "Compatible with add-on boards"
-  proto_area:
-    breadboard_section: "Basic prototyping area"
-    size: "TBD"
-    
 connectivity:
-  programming:
-    - type: "USB"
-      connector: "USB-B or USB-C"
-      driver: "Built-in USB programming"
-    - type: "Prop Plug"
-      connector: "4-pin header"
-      part: "32201 (optional)"
   expansion:
     addon_boards: "Compatible with #64006 add-on kit"
     headers: "Standard 2x6 expansion headers"
     
-video_audio:
-  vga_support: "With resistor DACs"
-  hdmi_support: "With appropriate circuitry"
-  audio_output: "PWM or DAC-based"
-  
 use_cases:
   primary:
     - "P2 learning and education"

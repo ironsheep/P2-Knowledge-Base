@@ -65,10 +65,7 @@ development_boards:
     io_pins_total: 64
     smart_pins: 64
     usb_connectivity: "USB-C programming + micro-USB serial"
-    audio_capability: "Stereo DAC output"
-    video_capability: "VGA output"
     sd_card_support: "microSD socket"
-    breadboard_area: "Large prototyping area"
     addon_headers: "Two 2x6 headers for add-on boards"
     form_factor: "Full development board"
     expansion_options: ["addon_boards", "breadboard", "headers"]
