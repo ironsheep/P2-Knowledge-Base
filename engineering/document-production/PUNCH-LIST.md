@@ -18,6 +18,54 @@ about it are housekeeping and **never** gate a publication or hold a correction 
 
 ---
 
+## Review ALL manual content against the YAML-fidelity release — OPEN
+
+**Status:** Open — raised by Stephen 2026-08-25, **owed AFTER that release ships**, not before.
+Deliberately deferred: the release is being reviewed and shipped first, and the manual sweep is a
+separate pass so it is not rushed alongside it.
+
+**Why it is owed.** The `yaml-fidelity` sprint rewrote the shipped KB on a scale that has no
+precedent here — every uncited quantitative block removed and then repopulated source-first, 55
+constants defined that the set used and defined nowhere, and a class of mislabel corrected that
+had been in the KB for months. **The manuals were authored against the KB as it was.** Anywhere a
+manual repeats a fact that changed, it is now wrong, and nothing in the release path checks that.
+
+**The specific class already proven, so this is not speculative.** Plan §3 excluded manual prose
+from this sprint on the strength of a 2026-08-24 sweep that reported the masters clean. **That
+measurement is false and is filed as F-356.** The IOSP master is split per chapter under
+`part-*/` directories, and a flat glob misses it; searching recursively finds **23 mislabel lines,
+5 "internal pull-up" assertions, and four sites teaching `WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)`** —
+a composition no Parallax source states, which the KB has now removed but a published manual still
+teaches. If the sweep was wrong about the manual it was most likely to be wrong about, it is not
+evidence about the other eleven.
+
+**What the review must cover** — the KB changes a manual could be repeating:
+
+| Class | What changed in the KB | Where a manual is likely to repeat it |
+|---|---|---|
+| Drive strength vs bias resistors | `P_HIGH_*`/`P_LOW_*` are drive-strength selectors; the P2 has **no** pull-up/pull-down resistors, and a drive is inactive while `DIR` is low | any I/O, button, or open-collector discussion |
+| The `P_HIGH_15K \| P_LOW_FLOAT` idiom | removed — it is **our** invention, not a Parallax statement | weak-pull-up examples |
+| Absolute-max pin current | `150mA` deleted; the datasheet says **±30 mA** | LED and series-resistor worked examples — **this one damages hardware if repeated** |
+| `WAITMS`/`WAITUS` bounds | the real limit is `$8000_0000` **clocks**, not a fixed millisecond ceiling | delay/timing examples |
+| PLL lock time | settled at **10 ms**; the µs figure has no source | clock-setup sequences and their `WAITX` operands |
+| Board facts | part numbers, dimensions, connector types and pin maps re-derived from the guides; **#64006G is the Goertzel board**, not a digital-I/O board | board-specific chapters and getting-started material |
+| Source errata | `SOURCE-ERRATA.md` now records where a Parallax document is itself wrong — a manual may have faithfully repeated one | anywhere a guide was the cited source |
+
+**Do not run this as a grep sweep alone.** The mislabel survives in prose that never names a
+constant — *"activate the pull-ups"*, *"the internal resistor holds the line"* — which is how
+E-010 stayed invisible to both instruments. Read the chapters that teach these subjects.
+
+**Where the truth now lives**, so the review has one place to check against:
+`deliverables/ai/P2/architecture/pin-drive-configuration.yaml` (field, ladder, DIR/OUT rule, the
+two verified idioms) · `deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml`
+(all 116 constants, one definition each) · `engineering/ingestion/SOURCE-ERRATA.md` (where a source
+is wrong and what is true instead).
+
+**Related:** F-356 (the falsified sweep) · F-322 (the idiom's corrected attribution) · E-004, E-006,
+E-010 (source errata a manual may repeat).
+
+---
+
 ## Shipped example `.spin2` files conflict with the Spin2 authoring gate — RESOLVED 2026-08-18
 
 **Resolved by generating the header rather than exempting the file** (Stephen's call). The
