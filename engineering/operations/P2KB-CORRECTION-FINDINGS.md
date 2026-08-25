@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-359`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-361`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -46,6 +46,124 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 ---
 
 
+
+
+## Duplicate YAML keys silently destroy content, and no gate can see them (2026-08-25, found by the release-review change ledger) — F-360
+
+- **F-360 — Five duplicate-key sites in the shipped set discard a block's content at parse time,
+  and `verify-yaml-format.py` passes every one of them because duplicate keys are legal YAML.** —
+  `CONFIRMED`
+
+  **The mechanism.** YAML resolves a repeated key by **last-one-wins**, silently. The earlier
+  block is not merged and not flagged — it simply does not exist for any consumer. `yaml.safe_load`
+  succeeds, so a format gate that asks *"does this parse?"* answers yes. **This is a check that
+  cannot fail**, and it was proven so rather than assumed: planting `test_dup: 1` / `test_dup: 2`
+  into `architecture/locks.yaml` left `verify-yaml-format.py` at **exit 0**.
+
+  **Found on the arbiter's own work first.** `architecture/pin-drive-configuration.yaml` — the file
+  «#295» created as the single definition home for the fact this whole sprint turns on — carried a
+  duplicate `note:` under `idioms:`. It was introduced **by the arbiter** hours earlier, while
+  correcting the EF-063/EF-064 attribution: `gap_no_dedicated_bench_test:` was written with no
+  indented body, so its intended children became siblings, and the new `note:` collided with
+  `idioms.note`. **What was destroyed was the corrective sentence itself** — that `%M..M` selects
+  drive strength, that the Pin Mode Legend contains no bias-resistor selector, and that the two
+  idioms below are hardware-verified rather than documentary. A consumer parsing the file got the
+  gap note in its place. **Fixed** (restructured as a proper nested mapping; `idioms.note` restored,
+  0 duplicates in that file).
+
+  **Four more are pre-existing and still stand.** Swept all **1130** shipped YAMLs:
+
+  | File | Duplicate key | What is discarded |
+  |---|---|---|
+  | `architecture/lookup_ram.yaml:90` | `operation` | an entire block-scalar description |
+  | `architecture/lookup_ram.yaml:93` | `usage_example` | an entire worked example |
+  | `hardware/edge-breadboard-carrier.yaml:174` | `educational_value` | a **structured block**, replaced by the scalar `"excellent"` |
+  | `language/pasm2/drvl.yaml:4` | `timing` | a `timing:` block on a PASM2 instruction, where timing is load-bearing |
+
+  **NOT FIXED — deliberately, and this is a decision for Stephen at the release review.** Resolving
+  each is a content judgement (which of the two blocks is the intended one), and **arming a
+  duplicate-key check would turn the release red on four pre-existing files.** Doing that silently
+  at the gate is the same move this sprint spent itself repairing. His options: fix the four and
+  arm, arm and accept the red until they are fixed, or ship and schedule both.
+
+  **The "lack".** The format gate asks whether a document *parses*, which duplicate keys do. Nobody
+  asked whether it *says what it appears to say*. Sibling to F-335's family — an instrument
+  answering a narrower question than its name implies — and to the standing lesson that a gate must
+  read the artifact rather than a property of it.
+
+  **Recommended repair when it is armed:** duplicate-key detection belongs in
+  `verify-yaml-format.py` (it already loads every file), as a distinct violation class, with a
+  negative control that plants a duplicate and requires a non-zero exit.
+
+  Status: `CONFIRMED` — one site fixed, four open, gate unarmed pending Stephen's scope decision.
+
+---
+## The bulk-generation commit wrote FABRICATED PROVENANCE HEADERS, and those headers are what make seven `architecture/` files look cited (2026-08-25, Stephen's question at the release review) — F-359
+
+- **F-359 — Seven `architecture/` files carry a provenance header citing source files that have
+  never existed and datasheet pages beyond the end of the datasheet; the header itself satisfies
+  the citation regex, so six of the seven still pass the gate today.** — `CONFIRMED`
+
+  **How it surfaced.** Stephen asked whether `io_pin_timing.yaml`'s content might have come from
+  our own I/O & Smart Pins manual rather than a Parallax source — i.e. whether the provenance was
+  circular. **The answer is no, and the truth is worse.**
+
+  **The timeline rules the manual out.** `io_pin_timing.yaml` was created **2025-11-29** in
+  `e271cab0`; the IOSP manual's first commit is **2026-01-25**, nearly two months later. Causality
+  therefore runs **KB → manual**, not manual → KB. Where that manual repeats the drive-strength
+  mislabel (F-356), it most likely **inherited it from this file**, which inverts the assumption
+  behind the post-release manual review.
+
+  **Nor did it come from what it cites. Every citation in the header is false:**
+
+  | Header line | Reality |
+  |---|---|
+  | `Silicon Doc Reference: part3-pins.txt` | **no such file has ever existed** (nor `part1-cog.txt`, nor `part3-smartpins.txt`, nor `part2-cog.txt`) |
+  | `Datasheet Reference: pages 42-45` | those pages are the **PASM2 instruction listing** |
+  | `Datasheet Reference: … 76-78` | **the datasheet is 50 pages** |
+  | `Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet` | the values (`2.5/3.5/5.0 ns`, the mA ladder, "slew") appear **zero times** in any ingested source |
+
+  **It is a class of seven, and we purged one.** All seven were written in the same commit —
+  `e271cab0`, 2025-11-29, *"Implement DOD v3.0"*, which touched **1,323 files and 973 YAMLs in a
+  single commit**. Each carries the same header shape, each names a non-existent silicon-doc file,
+  and **each cites a second datasheet range beyond page 50**:
+
+  | File | Cites | Impossible page range | Quantities today |
+  |---|---|---|---|
+  | `architecture/io_pin_timing.yaml` | `part3-pins.txt` | 76-78 | purged this sprint |
+  | `architecture/cog_attention.yaml` | `part1-cog.txt` | 73 | 0 |
+  | `architecture/debug_interrupt.yaml` | `part1-cog.txt` | — | 0 |
+  | `architecture/event_system.yaml` | `part1-cog.txt` | 74-75 | **6** |
+  | `architecture/interrupts.yaml` | `part1-cog.txt` | 71-72 | **2** |
+  | `architecture/locks.yaml` | `part1-cog.txt` | 82 | 0 |
+  | `architecture/lookup_ram.yaml` | `part1-cog.txt` | 67-68 | **1** |
+
+  🔴 **THE MECHANISM — the fabricated header IS the citation that silences the gate.** Measured
+  against `audit-yaml-claim-sourcing.py`'s own regex: all three header forms return
+  `INLINE_CITE = True`, because the matcher fires on the tokens *"Silicon Doc"* and *"Datasheet"*
+  wherever they appear. **A header that invents its sources reads to the instrument exactly like a
+  header that names real ones.** This is F-335's pattern — the citation side matching on the
+  presence of a token rather than on whether the sentence attributes the block to a document —
+  applied to the KB's original sin rather than to a later edit.
+
+  **Consequence for the release, stated plainly:** at least **9 quantities** across three of these
+  files stand under a header citing a file that does not exist, and the current `0 Tier 1` does not
+  contradict that — the gate is satisfied by the fabrication. `io_pin_timing.yaml` was caught only
+  because it *also* had blocks with no header coverage at all.
+
+  **The "lack" this traces to.** Nothing checked generated content against a source at creation
+  time, and **the citation header was generated along with the content it claims to source**. A
+  fabricated citation is not an error in sourcing; it is the signature of never having sourced.
+  973 YAMLs in one commit is the scale at which that becomes invisible.
+
+  **NOT FIXED — this is a scope decision Stephen owns**, raised at the release review he called
+  for. Purging six more files is a widening at the gate, and the release is his call. Options are
+  his: purge the class now, ship and schedule it, or re-derive those six from the real sources.
+  What must NOT happen is shipping while believing the `0 Tier 1` covers them.
+
+  Status: `CONFIRMED` — open, awaiting Stephen's scope decision.
+
+---
 ## The published index and its gzip drifted apart in committed history, and the release validator has been red on it (2026-08-25, «#305», arming the content gates) — F-357
 
 - **F-357 — `deliverables/ai/p2kb-index.json.gz` is four days behind `deliverables/ai/p2kb-index.json`
