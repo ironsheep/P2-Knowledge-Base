@@ -224,10 +224,32 @@ last_published_tag: <slug>-v<X.Y.Z>   # baseline for Dimension #15 (released <YY
 command and it is how the six stale ones surfaced:
 
 ```bash
-for d in engineering/document-production/manuals/*/MANUAL-DESCRIPTOR.md; do
+for d in engineering/document-production/manuals/*/MANUAL-DESCRIPTOR.md \
+         engineering/document-production/app-notes/*/MANUAL-DESCRIPTOR.md; do
   slug=$(basename $(dirname $d))
   rec=$(grep -h 'last_published_tag' $d | head -1 | sed -E 's/last_published_tag: *([^ #]*).*/\1/')
-  act=$(git tag | grep "^$slug-v" | sort -V | tail -1)
+  act=$(git tag | grep -i "^$slug-v" | sort -V | tail -1)
   [ "$rec" = "$act" ] || echo "STALE $slug: $rec vs $act"
 done
 ```
+
+⚠️ **Both details in that loop are load-bearing, and each one hid a real defect
+until 2026-08-25 (F-282).**
+
+- **`app-notes/*/` must be in the glob.** The loop shipped covering `manuals/*/`
+  only, so the seven app-note descriptors were outside every run of it. All seven
+  still read `last_published_tag: unreleased` while `p2an001-v1.0.4` …
+  `p2an007-v1.0.1` had been tagged for weeks — meaning each app note's
+  "what changed since we published" audit was reading the **whole document** as
+  unreviewed change. A fleet check that cannot see part of the fleet reports
+  CLEAN and proves nothing; that is the same shape as the gate this file's
+  Phase 3 exists to replace.
+- **`grep -i`, because the app-note tag namespace is case-split.**
+  `P2AN001-v1.0.0`/`-v1.0.1` are uppercase; `p2an001-v1.0.2` onward are lowercase
+  (the namespace switched at the 2026-07-12 fleet release). The directory is
+  uppercase `P2AN001`, so a case-**sensitive** lookup keyed on the directory name
+  resolves to the pre-July tag and silently reports a current descriptor as
+  matching an obsolete one. This is exactly what produced F-282's original wrong
+  filing — a probe's *absence of a result* was read as a fact about the repo.
+  **Until the case is settled one way, every tag lookup in this project is
+  case-insensitive.**

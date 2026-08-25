@@ -53,6 +53,18 @@ CHECK 10 — THE UNDERSTATING DIRECTION  (learned 2026-08-21, from F-271)
     decision as still owed and re-opens a settled question. The scannable layer
     and the authoritative layer must not disagree in EITHER direction.
 
+    WIDENED 2026-08-25 («#302»), AND IT HAD NEVER FIRED. The matcher required
+    `**Status:**` at column 0. The corrections register declares its verdict four
+    other ways — indented under a bullet entry, inside a blockquote, bold or bare,
+    and sometimes as `**Disposition.**`. Measured then: 20 status-declaration
+    lines, 5 visible to this check, 15 invisible. Both live disagreements in the
+    file were in the invisible 15 (F-355 headline `CONFIRMED` / body `RESOLVED`;
+    F-347 headline `PENDING-VALIDATION` / disposition `PARTIAL`). The check
+    designed to catch exactly that had been reporting CLEAN on three quarters of
+    the bodies, and it had NO negative-control case, so nothing ever asked it to
+    fail. It now has three (both failing spellings, plus an agreeing one so an
+    over-eager matcher is caught on the other side).
+
 SECTION STRUCTURE — WHY 8 AND 9 EXIST  (learned 2026-08-21)
     Checks 1-7 read `###` finding entries and never looked at the `##` section
     headers above them. A trim-style archive sweep removes entries; it does not
@@ -126,10 +138,23 @@ FIXED_PROSE = re.compile(
 # and a gate that reports nine things you are meant to ignore is training to ignore
 # the gate. Naming the state makes it machine-readable and silences nothing real.
 OWED_RE = re.compile(r"\b(PARTIAL|PENDING-VALIDATION)\b")
-# A body-level `**Status:** X` line. This is the finding's own considered verdict,
-# written after the analysis; the headline is the scannable summary. When they
-# disagree the register misreports itself to every reader who scans.
-BODY_STATUS = re.compile(r"^\*\*Status:\*\*\s*`?\s*([A-Z][A-Z-]*)", re.M)
+# A body-level status line. This is the finding's own considered verdict, written
+# after the analysis; the headline is the scannable summary. When they disagree the
+# register misreports itself to every reader who scans.
+#
+# EVERY SPELLING THE REGISTER ACTUALLY USES, not just the one this pattern started
+# with (widened 2026-08-25, «#302»). It matched `**Status:**` at column 0 only, and
+# the corrections register writes its verdict four other ways: indented under a
+# bullet entry (`  Status: `RESOLVED``), inside a blockquote (`> Status: …`), bold
+# or bare, and occasionally as `**Disposition.**`. Measured at the time of the
+# widening: **20 status-declaration lines, of which check 10 could see 5.** The 15
+# it could not see included both live disagreements in the file — F-355 (headline
+# `CONFIRMED`, body `RESOLVED`) and F-347 (headline `PENDING-VALIDATION`,
+# disposition `PARTIAL`) — so the check that exists precisely to catch a headline
+# out of step with its body had been blind to three quarters of the bodies.
+# A check that cannot fail has not been verified, it has been RUN.
+BODY_STATUS = re.compile(
+    r"^[ \t>]*(?:\*\*)?(?:Status:|Disposition\.)(?:\*\*)?[ \t]*`?\s*([A-Z][A-Z-]*)", re.M)
 
 
 def lead_status(s):
@@ -263,6 +288,36 @@ def parse(path, finding_start=None):
     return lines, blocks
 
 
+def scannable_head(block):
+    """The whole headline a reader scans, not just its first physical line.
+
+    A `###` finding heading is one line and is returned unchanged. A bullet-form
+    entry (`- **F-357 — …**  — `RESOLVED``) routinely WRAPS, and the register puts
+    the status token at the end of the bold lead-in -- which lands on line 2, 3 or
+    4. Everything above read `block["headline"]`, i.e. line 1 only, so for a wrapped
+    entry the headline status was simply absent: `lead_status` returned None, check
+    10 skipped the entry entirely, and 4b had nothing to test.
+
+    That is the OTHER half of the check-10 blind spot found 2026-08-25 («#302»).
+    F-355 carried `CONFIRMED` on line 2 of its headline and `RESOLVED` in its body:
+    invisible on the body side (column-0-only matcher) AND invisible on the headline
+    side (line-1-only read). Widening only one of the two would have left the
+    disagreement undetected and the fix falsely reported as complete.
+
+    The lead-in ends where its bold closes, so accumulate lines until the `**`
+    markers balance."""
+    lines_ = block["body"]
+    if not lines_ or not lines_[0].lstrip().startswith("-"):
+        return block["headline"]
+    acc = []
+    for ln in lines_:
+        acc.append(ln)
+        joined = " ".join(acc)
+        if joined.count("**") >= 2 and joined.count("**") % 2 == 0:
+            break
+    return " ".join(acc)
+
+
 def guardrail_ids(lines):
     """IDs deliberately retained in the live file as do-not-re-file guardrails."""
     ids, inside = set(), False
@@ -318,6 +373,35 @@ def negative_control():
          "> **Next erratum ID: `E-002`**\n\n"
          "## E-001 — a thing · `RESOLVED`\n\nbody\n"
          "## E-001 — again · `RESOLVED`\n\nbody\n", True),
+        # CHECK 10 HAD NO CONTROL AT ALL, which is how its column-0-only matcher
+        # stayed blind through two live disagreements (F-355, F-347). These three
+        # pin the widened matcher: the two spellings the register actually uses
+        # must FAIL when they contradict the headline, and must stay CLEAN when
+        # they agree -- an over-eager matcher is the failure mode on the other side.
+        ("check 10, INDENTED `Status:` disagreeing with the headline — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "- **F-001 — a thing.** — `CONFIRMED`\n\n  body\n\n  Status: `RESOLVED`\n", True),
+        ("check 10, blockquoted `**Disposition.**` disagreeing — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "- **F-001 — a thing.** — `PENDING-VALIDATION`\n\n  body\n\n"
+         "> **Disposition.** `PARTIAL` — the rest is owed.\n", True),
+        ("check 10, indented `Status:` AGREEING with the headline — MUST BE CLEAN",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "- **F-001 — a thing.** — `PARTIAL`\n\n  body\n\n  Status: `PARTIAL` — rest owed.\n", False),
+        # THE OTHER HALF OF THE SAME BLIND SPOT. A wrapped bullet headline puts its
+        # status token on line 2+, and the checks read line 1 only -- so F-355 was
+        # invisible on the headline side as well as the body side, and widening
+        # either one alone would have left it undetected while reporting the fix
+        # complete. `scannable_head` reads the whole bold lead-in; this pins it.
+        ("check 10, WRAPPED headline whose status is on line 2 — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "- **F-001 — a thing whose headline wraps onto\n"
+         "  a second line where the status lives.** — `CONFIRMED`\n\n"
+         "  body\n\n  Status: `RESOLVED`\n", True),
     ]
     for label, text, want_fail in cases:
         with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,
@@ -500,7 +584,7 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
         body = "\n".join(b["body"])
         if not STATUS_RE.search(body):
             viol.append(("no-status", f"{b['id']} (:{b['line']}) carries no status token"))
-        head = b["headline"]
+        head = scannable_head(b)
 
         # --- 10: the scannable layer must agree with the authoritative one ------
         body_tokens = {t for t in BODY_STATUS.findall(body) if t in STATUS_WORDS}
@@ -508,7 +592,7 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
         if body_tokens and head_token and head_token not in body_tokens:
             viol.append(("status-disagrees-with-body",
                          f"{b['id']} (:{b['line']}) headline reads {head_token} but its own "
-                         f"`**Status:**` line reads {'/'.join(sorted(body_tokens))} — a reader "
+                         f"Status/Disposition line reads {'/'.join(sorted(body_tokens))} — a reader "
                          f"scanning headlines gets the wrong answer; reconcile the two, and if "
                          f"the body is right the headline is what needs rewriting"))
 

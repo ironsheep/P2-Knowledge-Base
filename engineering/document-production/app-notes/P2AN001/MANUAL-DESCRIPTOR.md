@@ -3,7 +3,7 @@ manual_slug: P2AN001
 doc_class: reference                              # app note — YAML/Silicon/IOSP-backed; verifies claims against KB YAML (§3 grounding)
 element_type: application-note                    # ships doc + first-party YAML companion (four-artifact model)
 code_line_budget_K: 76                            # inherits platform K (creation-guide §6.3); Dimension #3b
-last_published_tag: unreleased                    # first release (v1.0.0); Dimension #15 baseline = whole doc
+last_published_tag: p2an001-v1.0.4   # baseline for Dimension #15 (released 2026-08-17, 20pp)
 guide_paths:
   creation_guide: ../APP-NOTE-CREATION-GUIDE.md   # shared app-note class guide (governs all P2ANxxx)
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md         # shared app-note voice

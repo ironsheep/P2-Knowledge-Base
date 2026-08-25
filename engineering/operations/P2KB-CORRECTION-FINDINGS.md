@@ -12,7 +12,9 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - **One finding lives in exactly one place.** When a finding is revised, **rewrite its entry in place**; never append a correction below the entry it corrects. The prior text is in git and in the archives.
 - Consultation protocol (status-before-content, duplicate IDs are a STOP): `.claude/skills/REGISTER-CONSULTATION.md`.
 
-**Status legend:** `CONFIRMED` (verified against an authority; ready to fix) · `NEEDS-VERIFICATION` (suspected; must be checked before acting) · `PARTIAL` (some of it applied; the rest still owed) · `PENDING-VALIDATION` (the fix is fully applied; only its validation — a render, a release, a re-test — is owed. Added 2026-08-21: the rule below already described this state and there was no token for it, so nine findings sat as `CONFIRMED` with "render owed" prose and tripped the hygiene gate on every run) · `DONE` (corrected + verified) · `WONTFIX` (investigated, not a defect) · `RESOLVED-INVALID` (the reported defect does not exist) · `TRACKED → ingestion` (real, but the resolution lives in the ingestion head).
+**Status legend:** `CONFIRMED` (verified against an authority; ready to fix) · `NEEDS-VERIFICATION` (suspected; must be checked before acting) · `PARTIAL` (some of it applied; the rest still owed) · `PENDING-VALIDATION` (the fix is fully applied; only its validation — a render, a release, a re-test — is owed. Added 2026-08-21: the rule below already described this state and there was no token for it, so nine findings sat as `CONFIRMED` with "render owed" prose and tripped the hygiene gate on every run) · `DONE` (corrected + verified) · `WONTFIX` (investigated, not a defect) · `RESOLVED-INVALID` (the reported defect does not exist) · `TRACKED → ingestion` (real, but the resolution lives in the ingestion head) · **`RESOLVED`** (the defect is gone AND its validation has landed — the render/release/re-test was RUN and the artifact READ; a fix applied but unvalidated is `PENDING-VALIDATION`, never this. **Added to this legend 2026-08-25 («#302»): it was already the file's MOST-USED token — 31 of 82 entries — and the legend had never defined it, so a third of the register could not be classified by the very vocabulary this line exists to declare**) · `PARTIALLY CONFIRMED` (a ONE-OFF variant used only by F-202, where part of the claim is grounded in a source and part awaits silicon; it classifies as **`CONFIRMED` — open** — do not spread it).
+
+⚠️ **`RESOLVED` entries are CLOSED and are awaiting the next archive sweep, not awaiting work.** **31 of the 82 live entries are `RESOLVED`, so "how many are outstanding?" is 51, not 82** (measured 2026-08-25, «#302»). The hygiene gate deliberately does NOT treat `RESOLVED` as closed-but-live (only `DONE` / `WONTFIX` / `RESOLVED-INVALID` trip check 3), which is why they accumulate silently between sweeps.
 
 **A fix applied but not yet validated is NOT done** — it stays here until its validation lands (the `[~]` rule from `punch-list-maintenance`). That covers a YAML edit awaiting its EF entry, and a manual fix awaiting its re-test.
 
@@ -20,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-358`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-359`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -84,7 +86,15 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 ## The hygiene gate cannot see the new errata register, so its monotonic allocator is ungoverned (2026-08-25, arbiter, during «#307») — F-355
 
 - **F-355 — `audit-register-hygiene.py` is hard-coded to one register's vocabulary, so
-  `engineering/ingestion/SOURCE-ERRATA.md` has an unchecked monotonic allocator.** — `CONFIRMED`
+  `engineering/ingestion/SOURCE-ERRATA.md` has an unchecked monotonic allocator.** — `RESOLVED`
+
+  > **Headline corrected 2026-08-25 («#302»).** It read `CONFIRMED` while this entry's own closing
+  > line read `Status: RESOLVED` — the scannable layer and the authoritative layer disagreeing, in
+  > the *understating* direction that check 10 exists to catch. **Check 10 could not see it:**
+  > `BODY_STATUS` matches `^**Status:**` at column 0, and every bullet-form entry in this register
+  > (this one included) writes an indented, unbolded `Status:` instead. Verified against the
+  > shipped tool source, not inferred. The blind spot is closed in the same pass — see the
+  > negative-control note added to the tool.
 
   **The defect.** The tool's counter check is `re.search(r"\*\*Next finding ID:\s*`?F-(\d+)`?\*\*", text)`
   (`audit-register-hygiene.py:271`) and it emits `no-counter` when absent. The errata register
@@ -152,6 +162,67 @@ outstanding?" of this file alone — never re-derive completion state from an ar
   which exits **2** distinctly from a violation's 1. Both live registers verified CLEAN
   afterwards, with the corrections register's numbers unchanged from entry (80 live, 300
   archived, 0 unaccounted, 5 guardrails exempt).
+
+  Status: `RESOLVED`
+
+---
+## Check 10 had never once been able to fire, on either side of the comparison it makes (2026-08-25, «#302», the whole-register reconciliation) — F-358
+
+- **F-358 — `audit-register-hygiene.py`'s headline-vs-body check reads `**Status:**` at column 0
+  only and the *first physical line* of a headline only, so in this register it could see 5 of 20
+  status declarations and missed every wrapped headline — including both live disagreements it
+  exists to catch.** — `RESOLVED`
+
+  **How it surfaced.** «#302»'s job was to leave all 81 status tokens accurate. Deriving the state
+  per entry by hand — rather than trusting the gate that reports the file CLEAN — turned up two
+  entries whose headline and body contradicted each other:
+
+  | Finding | Headline said | Its own body said |
+  |---|---|---|
+  | **F-355** | `CONFIRMED` (on line **2** of a wrapped headline) | `Status: RESOLVED` (indented) |
+  | **F-347** | `PENDING-VALIDATION` (line 2) | `**Disposition.** PARTIAL` (blockquoted) |
+
+  Check 10 exists for exactly this and reported CLEAN on both, every run, since it was written.
+
+  **Two independent blind spots, and each alone was sufficient to hide F-355.**
+
+  1. **Body side — `BODY_STATUS = ^\*\*Status:\*\*` matched column 0 only.** This register declares
+     a verdict four other ways: indented under a bullet entry (`  Status: …`), inside a blockquote
+     (`> Status: …`), and as `**Disposition.**`. **Measured on the file: 20 status-declaration
+     lines, 5 visible, 15 invisible** — three quarters of the bodies.
+  2. **Headline side — the checks read `block["headline"]`, which `parse()` sets to the FIRST LINE.**
+     Bullet entries routinely wrap and the register puts the status at the end of the bold lead-in,
+     i.e. on line 2, 3 or 4. For every wrapped entry `lead_status()` returned `None`, so check 10
+     skipped it outright and 4b had nothing to test.
+
+  **F-355 was invisible on BOTH sides simultaneously**, which is why fixing either one alone would
+  have left the disagreement standing while reporting the repair complete — the failure mode this
+  project already names as *a check derived from the thing it is checking*.
+
+  **The root cause is not either regex. It is that check 10 shipped with no negative control.**
+  Every other check here has one; this one was reasoned about and never asked to fail. **A check
+  that cannot fail has not been verified, it has been RUN** — the standing lesson from the
+  digit-density gate, arriving again in the tool that was built to stop this class.
+
+  **Fixed** by widening `BODY_STATUS` to every spelling the register actually uses, and by adding
+  `scannable_head()`, which accumulates the headline until its `**` markers balance so the whole
+  bold lead-in is read. **Both proven before/after:** a fixture carrying an indented-`Status:`
+  disagreement passed **CLEAN** through the pre-widening tool (read out of `.backups/`) and **FAILS**
+  through the fixed one; a second fixture with the status on line 2 of a wrapped headline did the
+  same. Four permanent cases were added to `--negative-control` — the two failing spellings, the
+  wrapped-headline case, and an **agreeing** case so an over-eager matcher is caught on the other
+  side. The control now runs **13** cases and all pass.
+
+  **Both live registers verified CLEAN afterwards** with the widened checks — corrections (81 live,
+  300 archived, 0 unaccounted) and `SOURCE-ERRATA.md` (10 live, next `E-011`) — and the errata
+  register is unaffected, since it carries its status in the `##` entry heading and declares no
+  `Status:` lines at all.
+
+  **Consequence for the register itself, applied in the same pass:** with the checks able to see
+  every headline, **6 entries were found carrying no status token in their scannable headline at
+  all** (F-250, F-251, F-252, F-328, F-334, F-335) — a reader scanning headlines got nothing, which
+  is worse than a disagreement because there is no signal to notice. All six now carry their body's
+  token in the lead-in. **All 81 entries now carry a scannable status that agrees with their body.**
 
   Status: `RESOLVED`
 
@@ -234,7 +305,31 @@ Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns t
 > pass and marked so; two are not this task's repair and are filed for the head that owns them.
 > Every line number below was read off disk on 2026-08-25.
 
-### F-342 — a Parallax board guide states the pull-up mislabel itself, and prescribes it in the one configuration where it cannot work — `CONFIRMED`
+### F-342 — a Parallax board guide states the pull-up mislabel itself, and prescribes it in the one configuration where it cannot work — `RESOLVED — the adjudication this entry owed was made and executed BOTH ways; the source-defect half now lives in the errata register`
+
+> **RELOCATED + CLOSED 2026-08-25 («#302»). Pointer left behind rather than a move, because the
+> reasoning above is the origin of the erratum and is worth reading in place.**
+>
+> This entry is a **source-document defect** by the three-register test — *if Parallax fixed the
+> #64013 guide tomorrow, would it disappear?* **Yes.** Its home is
+> **`engineering/ingestion/SOURCE-ERRATA.md` → `E-004` (`RESOLVED`)**, *"the pull-up mislabel, in a
+> Parallax guide, prescribed where it cannot work"*, which carries the same two locators
+> (`P2-RTC-Add-on-text.txt:74-77`, `spin2-v55-text.txt:1505`), the same Pin-Mode-Legend counter-cite,
+> and the empirical corroboration with its ⚠️ scoping (EF-063/EF-064 are rig apparatus, never the
+> authority). That register did not exist when this was filed — it was created 2026-08-25.
+>
+> **The adjudication this entry left open is settled, and NOT by picking one branch.** It asked for
+> (a) keep the quote and add a DIR-high note, or (b) route it upstream as a board-guide erratum.
+> **Both were done.** (b) is `E-004`. (a) is applied and **verified on the artifact, not on a status
+> line**: `deliverables/ai/P2/hardware/addon-rtc.yaml` `pin_mode_tip` is no longer the guide's
+> sentence — it is a map carrying `source:` (all four citations), `board_fact:` (SCL/INT/CLKOUT
+> share the single +0 pin, so only one is usable at a time), `p2_side_mechanism:` (*"Hold the pin
+> weakly high with P_HIGH_150K and DIR HIGH"*), and an explicit
+> `do_not_copy_the_guides_wording` key quoting the wrong text so it cannot be re-adopted. The KB
+> half is tracked under **F-353**.
+>
+> **The D3/R9 restraint held:** the source's wording was never silently improved — it is quoted,
+> labelled wrong, and answered.
 
 > **Where the KB carries it:** `deliverables/ai/P2/hardware/addon-rtc.yaml:49-51` (`pin_mode_tip`).
 >
@@ -701,7 +796,7 @@ Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns t
 
 - **F-328 — `deliverables/ai/P2/hardware/p2-eval-board.yaml` carries claims the #64000 Rev C
   guide contradicts, plus whole blocks describing hardware the board does not have; and the
-  guide itself contradicts itself on one pin pair.** Two separable halves.
+  guide itself contradicts itself on one pin pair.** — `PENDING-VALIDATION` · Two separable halves.
 
   **(a) The source contradicts itself — a genuine documentary conflict, not an extraction
   defect.** The #64000 guide's §18 "microSD Card Socket" (p.12) lists *"P58 - DI/CD (data in
@@ -857,7 +952,21 @@ Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns t
 >
 
 - **F-347 — «#293»'s removal record was never written, so 60 removed blocks existed only in a git
-  diff and in a transcript that does not survive.** — `PENDING-VALIDATION`
+  diff and in a transcript that does not survive.** — `PARTIAL`
+
+  > **Headline corrected `PENDING-VALIDATION` → `PARTIAL` 2026-08-25 («#302»), to agree with this
+  > entry's own Disposition line.** `PENDING-VALIDATION` asserts the fix is fully applied and only
+  > its validation is owed; that is not this entry's state. The Disposition sets the closing
+  > condition as *"every row carries a returned/not-returned outcome"*, and **the reconstructed
+  > table below still has four columns — File · block · pre-removal line · span — and no outcome
+  > column at all.** «#299» did execute against it (F-352: *"Forty-five of F-347's sixty blocks came
+  > back cited. Two did not"*), so **47 of the 60 rows are accounted for in narrative** — but the
+  > record itself carries no outcome column, and the remaining **13 rows are not accounted for by
+  > that sentence** (whether each is held in the ingestion tree or simply unstated was NOT
+  > determined here — that determination is part of the work this entry still owes). Writing the
+  > outcomes onto the rows is **work**, not validation. This disagreement was invisible to check 10 for the same
+  > reason as F-355's: the entry declares its status as an indented `Disposition.`/`Status:` line
+  > rather than a column-0 `**Status:**`.
 
   «#293» removed 59-60 uncited quantitative blocks from `architecture/`, `language/`, `guides/`
   and `application-notes/`, and its PROTECTION POINT required that every removal be recorded with
@@ -1018,7 +1127,7 @@ high-priority repopulation, source-first from the Edge module guides.
 
 - **F-334 — `audit-yaml-claim-sourcing.py` treats a board REVISION (`Rev B` / `Rev C`) and a
   POWER `source:` as citations, which silences the gate on 11 quantitative blocks that are as
-  uncited as the 48 just removed.** — the gate's `INLINE_CITE_RE` includes `rev\s*[BC]\b`, which
+  uncited as the 48 just removed.** — `PENDING-VALIDATION` — the gate's `INLINE_CITE_RE` includes `rev\s*[BC]\b`, which
   is a reasonable citation token in `Silicon Doc Rev C` prose and a **false positive** in a
   hardware file, where `Rev B` is the board's own identity: `board_revision: "Rev B (Guide
   v2.0)"`, or plain description text *"Goertzel experimenter board (Rev B) with pads…"*.
@@ -1210,7 +1319,7 @@ needs a source that states it or a rewrite that does not compute.
 - **F-335 — the eval add-on board files cite as `documentation:` → `primary: "<doc>"`, a spelling
   no citation key in the tool matches, so files that DO know the citing convention are scored as
   wholly-uncited and their F-327-shaped blocks land in Tier 2 (advisory) instead of Tier 1
-  (blocking).** — `addon-serial-host.yaml:171-172` is the type case:
+  (blocking).** — `RESOLVED` — `addon-serial-host.yaml:171-172` is the type case:
 
   ```yaml
   documentation:
@@ -1331,7 +1440,48 @@ needs a source that states it or a rewrite that does not compute.
 
 - **F-330 — Two Parallax documents of the SAME edition date (2022/11/01) give different
   recommended VCO ranges in the same `%MMMMMMMMMM` table note, and the P2 Hardware Manual is
-  the outlier.** — `CONFIRMED`
+  the outlier.** — `RESOLVED — relocated to the errata register as E-003; the guard this entry existed to be is now served there`
+
+  > **RELOCATED + CLOSED 2026-08-25 («#302»), pointer left behind, never a silent move.**
+  >
+  > By the three-register test — *if Parallax fixed the Hardware Manual's Table 10 note tomorrow,
+  > would this disappear?* — **yes**, so this is an **erratum**, not a KB correction. This entry
+  > says so itself: *"Treat the Hardware Manual's Table 10 note as source errata."* It now lives at
+  > **`engineering/ingestion/SOURCE-ERRATA.md` → `E-003` (`RESOLVED`)**, *"the VCO note contradicts
+  > the manual's own PLL Example"*, which carries all six rows of evidence (including the decisive
+  > self-contradiction at `:574` vs `:603`), the same 100–200 MHz verdict, the same 350 MHz =
+  > VCO/1-overclock-ceiling disambiguation, and the Spin2 v51 solver bound as the third legitimate
+  > context for the number. That register was created 2026-08-25, after this was filed.
+  >
+  > **The guard function is preserved, which is the only thing this entry was for.** It carried
+  > **no owed KB work** — *"KB impact: NONE"*, `clock_system.yaml` already draws the line correctly
+  > — and existed solely *"to prevent a future agent from 'fixing' that 200 to 350 on the Hardware
+  > Manual's authority."* `E-003` performs exactly that guard, in the register an ingestion agent
+  > actually consults before trusting a source.
+  >
+  > ⚠️ **THIS ENTRY'S OWN DESCRIPTION OF THE KB IS STALE, AND WAS CORRECTED ONLY BECAUSE THE FILE WAS
+  > RE-READ.** It states the KB carries `vco_range: "99 MHz to 201 MHz"`, `max_overclock: "350 MHz"`
+  > and `absolute_max: "350 MHz (may be unstable)"`. **None of those three keys exists on disk today**
+  > — `clock_system.yaml` was rewritten during this sprint's uncited-block purge (F-347's removal
+  > record lists `configuration_constants`, `pll_system`, `clock_specifications` and `anti_patterns`
+  > among the blocks removed from this very file). Repeating the entry's own text as verification
+  > would have published a false confirmation of a file nobody had opened.
+  >
+  > **What is actually there, measured 2026-08-25 — and it is STRONGER than what this entry
+  > described:**
+  > - `:104` `vco_range:` now quotes the source verbatim — *"The PLL's VCO is designed to run between
+  >   100 MHz and 200 MHz and should be kept within that range."*
+  > - `:129` `overclocking:` and `:270` `overclock_ceiling:` carry the 350 MHz VCO/1 figure **with its
+  >   Silicon Doc locator**, kept separate from the recommendation.
+  > - `:209` states the third context explicitly — *"350 MHz is the absolute VCO/1 overclock ceiling,
+  >   NOT the XI-input limit."*
+  > - `:130` `cross_source_conflict:` **names F-330 by ID inside the shipped YAML** and states the
+  >   resolution. **The guard is now in the artifact itself**, which is a better place for it than any
+  >   register — it reaches the agent at the moment of use.
+  >
+  > **Consequence for whoever maintains that file:** `:130` points at `F-330`. That pointer still
+  > resolves — this entry stays in place — but the evidence now lives at `E-003`, so a future
+  > citation refresh should carry the reader on to the errata register.
 
   **The identical sentence, two numbers:**
 
@@ -2444,7 +2594,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > which is how the PWM example survived to a reader.
 
 - **F-250 — the #64000 Eval Board Rev C guide was ingested with EVERY DIGIT MISSING; any
-  numeric fact traced to it is unsafe.** `engineering/ingestion/sources/p2-eval-board/`
+  numeric fact traced to it is unsafe.** — `PARTIAL` · `engineering/ingestion/sources/p2-eval-board/`
   was extracted with a text-layer tool, but that PDF's font encoding does not map numerals —
   `pdftotext` silently drops them. Evidence: the shipped `p2-eval-board-narrative.txt` has
   digits on **91 of 1315 lines**; `pdf-ocr --force-ocr` + re-extract yields **368**. Lines
@@ -2507,7 +2657,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   exposed is carried by F-328.
 
 - **F-251 — the "why do the LEDs glow when I touch a pin" explanation must account for the
-  LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** The #64000 guide
+  LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** — `PARTIAL` · The #64000 guide
   (feature 12) and both Edge module YAMLs describe the onboard LEDs as **buffered** — the P2
   pin drives a buffer *input*, and the buffer drives the LED. DeSilva v3.0.5's new Chapter 1
   aside "Why Your LEDs Glow When You Touch Them" instead explains the effect as microamps
@@ -2581,7 +2731,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   Status: `PARTIAL — mechanism fixed 2026-08-17; the pull-up sentence this entry called "right" was wrong and is fixed 2026-08-25 («#301»); render + release owed`.
 
 - **F-252 — the Getting Started guide hardcodes `LED = 56` with no board caveat (same class
-  as the DeSilva fix).** `p2-getting-started-guide/opus-master/getting-started-body.md:558`
+  as the DeSilva fix).** — `PARTIAL` · `p2-getting-started-guide/opus-master/getting-started-body.md:558`
   declares `LED = 56  ' the pin our LED is on`, used by the blink examples at `:493` and
   `:408`. On a **P2 Edge 32MB PSRAM Module** P56 is the PSRAM **clock** — the example lights
   nothing and drives the memory bus; the LEDs there are **P38/P39**. This is exactly the
@@ -3915,7 +4065,48 @@ site is the *command*; the project name in running text is properly **PNut-TS**.
 > gate** — a token substitution has no layout consequence — so «#302» need not look at it; it is a
 > release-wave item.
 
-### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `CONFIRMED` — **the 3 release-wave descriptors corrected 2026-08-17**
+### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `RESOLVED` — **the whole fleet corrected and the guard's own blind spot closed 2026-08-25 («#302»)**
+
+> **CLOSED 2026-08-25 («#302») — both halves, measured against `git tag` rather than against any
+> file's own claim.**
+>
+> **(a) Eight descriptors were still stale at HEAD, and seven of them were invisible to the check
+> built to catch this.** Measured before any edit:
+>
+> | Element | Descriptor said | Actually tagged | |
+> |---|---|---|---|
+> | Assembly | `…-v3.1.6` | **`…-v3.1.7`** | 1 release behind |
+> | P2AN001 | `unreleased` | **`p2an001-v1.0.4`** | whole doc read as unreviewed |
+> | P2AN002 | `unreleased` | **`p2an002-v1.0.3`** | ” |
+> | P2AN003 | `unreleased` | **`p2an003-v1.0.2`** | ” |
+> | P2AN004 | `unreleased` | **`p2an004-v1.0.2`** | ” |
+> | P2AN005 | `unreleased` | **`p2an005-v1.0.2`** | ” |
+> | P2AN006 | `unreleased` | **`p2an006-v1.0.1`** | ” |
+> | P2AN007 | `unreleased` | **`p2an007-v1.0.1`** | ” |
+>
+> All eight advanced, each with its trailing comment rebuilt from git — `git log -1 --format=%ad`
+> for the date and `git show <tag>:…pdf | pdfinfo -` for the page count, never from memory or the
+> roster, because *a stale comment beside a corrected value is the same defect wearing a disguise*.
+> The two genuinely-unreleased seeds (Single-Step Debugger, PNut-Term-TS) correctly carry an empty
+> value and were left alone. **All 17 descriptors now match.**
+>
+> **(b) THE DURABLE GUARD HAD THE SAME HOLE THE FINDING DESCRIBES.** `release-manual`'s
+> project-overlay added the Phase-3 advance and a fleet-verification loop — but that loop globs
+> `manuals/*/MANUAL-DESCRIPTOR.md` **only**, so all seven app-note descriptors sat outside every run
+> of it, and it keys a **case-sensitive** `grep "^$slug-v"` off an uppercase directory (`P2AN001`)
+> against a tag namespace that went lowercase at the 2026-07-12 fleet release — the exact
+> case-split this finding already identified as what produced its own original wrong filing. Run as
+> written it reported **one** stale element; run corrected it reports **eight**. A fleet check that
+> cannot see part of the fleet exits 0 and proves nothing.
+>
+> Both defects fixed in `.claude/skills/release-manual/project-overlay.md`: the glob now covers
+> `app-notes/*/` and the lookup is `grep -i`, with the reasoning recorded inline so neither is
+> re-simplified away.
+>
+> **Proven able to fail (F3).** After the fix the corrected sweep reports **no** stale elements; a
+> negative control that reverted P2AN006 to `p2an006-v1.0.0` made it fire —
+> `STALE P2AN006: 'p2an006-v1.0.0' vs 'p2an006-v1.0.1'` — and the file was restored. A check that
+> cannot fail has not been verified, it has been run.
 
 > **Wave descriptors fixed 2026-08-17**, each checked against `git tag` rather than against the file's
 > own claim: Debug Window `v1.0.0`→**`v1.1.2`**, IOSP `unreleased`→**`v1.0.8`**, Assembly
@@ -4062,11 +4253,36 @@ both apply. Nothing in any master needs editing.
 > and XMP `dc:rights`, which needs `hyperxmp` and stays gated on confirming that package exists in
 > the Forge's TeX Live rather than assuming it. `Keywords` is the carrier today.
 
+> **ADOPTION MEASURED ON THE ARTIFACTS, 2026-08-25 («#302»).** `pdfinfo` over all 15 files in
+> `deliverables/documents/DOCs/`: **2 carry a rights `Keywords` string, 13 carry none.**
+>
+> - **Assembly Reference** — *"Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.;
+>   licensed under CC BY-SA 4.0"*
+> - **Streamer Guide** — *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed
+>   under CC BY-SA 4.0"*
+> - **EMPTY:** Getting Started · I/O & Smart Pins · DeSilva · Debug Window · Architect's Guide ·
+>   XBYTE · P2AN001…P2AN007
+>
+> Both adopted strings use the **semicolon** form, so the *"Parallax Inc.. Licensed under"*
+> double-stop defect is confirmed absent from everything that has shipped — the platform fix held,
+> and none of the 13 still to adopt can inherit it.
+>
+> **The `pnut-term-ts-user-guide` split is intact and is the reason this must never become a
+> platform constant:** its row is ✅ in the adoption table with the ISP-only string, distinct from
+> the 17 joint-copyright documents.
+>
+> **Two things remain owed, and NEITHER can be discharged in this container:**
+> 1. **13 published documents adopt at their next render** on `EXEC_ENV_CANONICAL`.
+> 2. **XMP `dc:rights` stays gated on whether `hyperxmp` exists in the Forge's TeX Live** — a probe
+>    on the interactive daemon, Stephen's side. Until then `Keywords` is the carrier and
+>    `Metadata Stream: no` is expected, not a defect. **Do not "fix" this by loading `hyperxmp`
+>    speculatively in a production build.**
+
 ---
 
 ## Nine documents carry a request.json subtitle their own cover contradicts (2026-08-22) — F-317
 
-### F-317 — the subtitle in `request.json` disagrees with the printed cover in 9 of 15 published documents, and adopting metadata single-sourcing is what makes that visible. `CONFIRMED`
+### F-317 — the subtitle in `request.json` disagrees with the printed cover in 9 of 15 published documents, and adopting metadata single-sourcing is what makes that visible. `CONFIRMED` — **all 9 re-measured 2026-08-25 («#302»): unchanged, still drifting, none adopted**
 
 **How it surfaced.** Stephen: *"fix README if needed, always."* Sweeping the public index's
 subtitle lines against the PDFs found 10 apparent mismatches — but checking them against
@@ -4109,7 +4325,27 @@ its cover and is correct; the app notes deliberately use `Application Note P2ANx
 index label while their **heading** carries the cover's title, which is a consistent scheme, not
 drift.
 
-**Status:** `CONFIRMED — latent until adoption; resolve each document's subtitle at the render that adopts it.`
+> **RE-MEASURED 2026-08-25 («#302») — all nine `request.json` subtitles read off disk: every one is
+> UNCHANGED from the table above. The drift is intact, and none of the nine has adopted.** So the
+> defect is still latent rather than shipped, exactly as recorded — but see the sharpening below,
+> which changes when it stops being latent.
+>
+> ⚠️ **`pdfsubject` IS wired, so "latent until adoption" now means "fires at the very next
+> adoption".** This entry was written while F-300 step 4 said *"Do NOT wire `pdfsubject`"*. The two
+> adopted PDFs measured today both carry a populated `Subject` (Assembly: *"Complete PASM2
+> Instruction Set Documentation"*; Streamer: *"Comprehensive Reference for Propeller 2 Streamer
+> Hardware"* — the **cover** string, i.e. «#283»'s cover-wins rule already applied). Neither is in
+> the drift table, which is why nothing has shipped wrong yet. **That is luck of ordering, not a
+> guard.** The next of the nine to render will publish its `request.json` subtitle as the PDF
+> Subject and contradict its own cover.
+>
+> **So the correction is now a PRE-RENDER step, not a same-render one:** bring the `request.json`
+> subtitle to the cover string **before** staging that document, and let `audit-pdf-metadata.py`
+> confirm it on the returned PDF. The seven app-note rows still need the per-document decision this
+> entry calls for (cover descriptive line vs catalog tagline) — **do not sweep one reading across
+> all seven.**
+
+**Status:** `CONFIRMED — resolve each document's subtitle to its printed cover BEFORE the render that adopts metadata single-sourcing; all 9 rows verified still drifting 2026-08-25.`
 
 ## Open — enhancement proposals (new content, not corrections)
 
@@ -5025,7 +5261,7 @@ code read.
 shows the four TESTP forms each on one line in the production build; deSilva, P2AN001 and P2AN002 are
 unaffected (this filter is Assembly-local) and release without it.
 
-### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `PENDING-VALIDATION` — **tool fixed 2026-08-17; all 11 IOSP sites repaired 2026-08-17, render owed**
+### F-289 — the code-line gate skipped every CAPTIONED code block, so it reported clean on the manual whose pages were losing channels. `RESOLVED — gate repaired and all 11 IOSP sites brought under K 2026-08-17; VALIDATED ON THE RENDERED PAGES p163 + p178 of released v1.0.9, 2026-08-25 («#302»)`
 
 **Found:** 2026-08-17, asking a plain status question about Debug Window and IOSP while waiting on the
 Assembly render. Debug Window's code-line audit reported **clean** at K=76; measuring the same files
@@ -5105,9 +5341,30 @@ lockstep with their masters.
 mid-word at "multipl"** — the text object exists off-page, so extraction is not evidence of what
 prints. The page image is.
 
-**Still owed:** render v1.0.9 and confirm p163 and p178 on the page.
+> **CLOSED 2026-08-25 («#302») — CONFIRMED ON THE PAGE, not on the changelog line.** IOSP
+> **v1.0.9** rendered and released 2026-08-18 (`deliverables/documents/DOCs/P2-IO-and-Smart-Pins-User-Guide.pdf`,
+> 396pp). Both sites this finding left owed were **rasterised at 150dpi and looked at**, because
+> this entry's own lesson is that `pdftotext` reported the p163 comment complete while the page cut
+> it mid-word:
+>
+> - **p163** (`Chapter 10: DAC Output`, Example 2) — the three-line comment *"Initialize audio DAC.
+>   The PWM-dither sample period must be a multiple / of 256 clocks, so 44.1 kHz is not exactly
+>   achievable: truncating the / period to 4352 clocks yields ~46 kHz (200 MHz / 4352)."* sits
+>   **above** the instruction and every line ends inside the code box. The `' Period, rounded down
+>   to a 256-clock multiple` line — the one that used to be cut at *"multipl"* — is complete.
+> - **p178** (`Chapter 11: Serial Transmission`, Example 2) — `' MSB first: reverse the 8 data bits
+>   (REV n covers bits 0..n)` prints in full, closing paren included, with `reversed := value REV 7`
+>   on its own line below it.
+>
+> **The first-match trap this entry warned about was honoured:** `reversed := value REV 7` occurs on
+> **both** p175 and p178 in v1.0.9, and p178 — the later, formerly-broken one — is the page verified.
+>
+> **The repaired gate is still clean at source:** `audit-code-line-length.py` over all 30 IOSP
+> masters exits 0, "no code line over K=76" (was 11 failures). Debug Window's masters likewise exit 0.
 
-### F-290 — nothing continues a `debug()` directive line: the Spin2 `...` and CON symbols both compile clean and ship a different program. `CONFIRMED` — **mechanism established 2026-08-17; prepare-manual guidance corrected**
+**Owed: nothing.**
+
+### F-290 — nothing continues a `debug()` directive line: the Spin2 `...` and CON symbols both compile clean and ship a different program. `RESOLVED` — **mechanism established 2026-08-17; guidance corrected at ALL THREE touch points 2026-08-25 («#302»); the repaired line verified on the released page**
 
 **Found:** 2026-08-17, looking for a way to bring `ch06-logic.md:310` (113 cols) under K without
 losing what the example teaches. Both candidate fixes were compiled and the emitted binary inspected
@@ -5162,7 +5419,37 @@ probably load-bearing in every channel declaration in the manual.
 `ch07-scope.md:272` (121, the SCOPE channel case, source-determined split available) and
 `ch14-multiwindow-pasm.md:299` (110, trailing comment only, comment-above fix).
 
-### F-291 — the escaper missed two code contexts, so five lines of a released manual print a literal backslash. `CONFIRMED` — **escaper fixed, sweep extended, sites verified clean 2026-08-17**
+> **CLOSED 2026-08-25 («#302»). The mechanism half was done on 2026-08-17; the GUIDANCE half was
+> only half done, and that is what this closure completes.**
+>
+> **The guidance defect was still live in the place a reader actually reaches.** This entry recorded
+> the fix as *"Corrected in the prepare-manual project overlay"* — and it was. But
+> `.claude/skills/prepare-manual/SKILL.md` still stated the destroying rule **twice, unqualified**:
+> `:194` (Step 4, code-line gate) — *"for a code overflow, break at a logical boundary with the
+> legal Spin2 `...` line-continuation (or aggregate into a named CON)"* — and `:201` (Step 5,
+> compile certification) — *"A long line is shortened with the legal Spin2 line continuation `...`
+> … (verified: compiles to the identical value)"*, whose verification is exactly the clean-compile
+> this finding proves is worthless here. A rule stated correctly in the overlay and incorrectly in
+> the body is the drift shape this project already named: **three touch points, and only one was
+> fixed.** Both now carry the `debug()` carve-out inline and point at the overlay for the evidence.
+>
+> **The manual-side line is verified on the artifact, not the changelog.** The repaired form is
+> byte-identical across all three places it must agree:
+> - master `ch06-logic.md:311`
+> - `examples-library/ch06-logic-spi-bus.spin2:25`
+> - **released v1.1.3 PDF** (`P2-Debug-Window-Manual.pdf`), which prints
+>   `` DEBUG(`LOGIC SPIbus 'CS' 1 $00FFFF 'CLK' 1 $00FF00 'MOSI' 1 $FFFF00) `` — all three named
+>   channels with their exact hex colors, the outcome the `...` form destroyed.
+>
+> **Both cliff lines are gone at source:** `audit-code-line-length.py` over the Debug Window masters
+> exits 0, "no code line over K=76" — so the 23-over-budget population and both >101-col cases are
+> closed, not merely reduced.
+>
+> **The bench question is NOT closed by this entry and is deliberately carried:** whether a failed
+> `KeyValWithin(v, 1, 32)` count consumes its token is still undetermined, so the explicit `1` in
+> every channel declaration stays load-bearing and must not be dropped to save columns.
+
+### F-291 — the escaper missed two code contexts, so five lines of a released manual print a literal backslash. `RESOLVED` — **escaper fixed + sweep extended 2026-08-17; BOTH RELEASED PAGES CONFIRMED CLEAN in v1.1.3, 2026-08-25 («#302»)**
 
 **Found:** 2026-08-17, testing F-278's deferred question (does `> ```antipattern` render inside a
 blockquote?) on the daemon before risking a production render. The answer is **yes** — but the test
@@ -5216,7 +5503,24 @@ render — red antipattern box, correctly indented inside the quote, trailing qu
 `ch08-scope-xy.md`'s wrong/right pair is split: the wrong form is an `antipattern` block, the
 correct form a `spin2` block beside it, matching the Chapter 12 treatment. Rides v1.1.3.
 
-### F-292 — six printed snippets teach a `...` continuation inside `debug()`, so each one silently ships a different program. `PENDING-VALIDATION` — **all six fixed 2026-08-17; the example-library half shipped in Debug Window v1.1.3, the printed snippets are unconfirmed on the page**
+> **CLOSED 2026-08-25 («#302») — measured on the RELEASED v1.1.3 PDF with the same instrument that
+> found the defect.** This finding was detected by extracting the shipped v1.1.2 PDF and counting
+> literal `\_`; the count was **5**. Re-run over `P2-Debug-Window-Manual.pdf` at v1.1.3: **0**, in
+> all 168 pages. Both named pages were then rasterised and looked at (the page numbers moved by one
+> between releases, so they were re-located by content rather than reused):
+>
+> - **p87** (was p88) — `` DEBUG(`SCOPE_XY W 128 'A') `` prints a clean underscore, inside the red
+>   antipattern box, with `' WRONG -- 128 follows no keyword` beside it. The fence-in-blockquote
+>   combination and F-278's conversion both render as designed.
+> - **p159** — `PC_KEY`, `PC_MOUSE` and `DEBUG_END_SESSION` all print clean underscores in the
+>   Appendix A command list, including inside the double-backtick spans that were the second blind
+>   spot.
+>
+> **The extended `audit-tex-artifacts.py` sweep is the durable half** and is unaffected by this
+> closure: it now scans verbatim regions for exactly `\_ \& \# \% \$`, which is what makes this
+> class visible at source instead of only on a returned PDF.
+
+### F-292 — six printed snippets teach a `...` continuation inside `debug()`, so each one silently ships a different program. `RESOLVED — all six repaired 2026-08-17 and shipped in Debug Window v1.1.3; ALL SIX PRINTED SNIPPETS CONFIRMED ON THE PAGE 2026-08-25 («#302»)`
 
 **Found:** 2026-08-17, answering "any more outstanding issues with this manual?" after F-290
 established that a `debug()` directive cannot be continued at all. Searching the masters for the
@@ -5259,6 +5563,25 @@ original `fig-07` failure — a creation-line channel def drawing an empty "Chan
 from a `...` line-continuation artifact." It did. The creation-line-versus-separate-feed debate was
 chasing the wrong variable; the `...` was dropping the channels, so the REF source was right all
 along and the TO-RECONCILE item closes on evidence rather than another capture.
+
+> **CLOSED 2026-08-25 («#302») — every one of the six read off the RENDERED PAGE of the released
+> Debug Window **v1.1.3** (`P2-Debug-Window-Manual.pdf`, 168pp, cover states "Version 1.1.3"). Pages
+> rasterised at 130dpi and looked at, not extracted:
+>
+> | Site | Page | What the page now prints |
+> |---|---|---|
+> | `ch07-scope.md:109` | **p76** | all **three** SCOPE channels — `'Sine'`, `'Tri'`, `'Noise'` — as three separate feed lines under the create line |
+> | `ch09-fft.md:163` | **p97** | both `'Left'` **and** `'Right'` declared, then the interleaved sample loop |
+> | `ch04-bitmap.md:144` | **p35** | `LUTCOLORS $000000 $FF0000 $00FF00 $0000FF` — the whole 4-entry LUT2 palette in one statement, pixels `& $03` |
+> | `ch03-term.md:166` | **p27** | all eight `COLOR` values on one line, closing paren inside the box; the two comment lines above name all four pairs |
+> | `ch10-spectro.md:145` | **p106** | `SPECTRO Vert … TRACE 12 RANGE $20000 HSV16X LOGSCALE` — everything after `TRACE 12` present |
+> | `ch10-spectro.md:166` | **p106** | `SPECTRO Slow … RATE 512 TRACE 8 RANGE $80000 LUMA8X` — everything after `TRACE 8` present |
+>
+> **Zero literal `...` continuations remain in any `debug()` directive across the masters.** Swept
+> all 26 Debug Window master `.md` files: five lines end in `...` and **none is a directive** — a Spin2
+> *expression* continuation in an ordinary assignment (`ch13-packed-data.md:189`, legal), a syntax
+> notation (`ch05-plot.md:499` `SPRITEDEF … pixels... colors...`), two elision markers
+> (`ch15-panels.md:305`, `ch12-bidirectional.md:75`) and a comment (`ch01-foundation.md:261`).
 
 **Next finding ID after this block: F-295.**
 
@@ -5307,7 +5630,52 @@ crossref-before-tables ordering) and its status table is frozen as history.
 that has not been shortcut, only made visible. **ssdb and pnut-term-ts release next and both sit at
 ⏳**, so they are the first two chances to stop the count growing.
 
-### F-300 — every published PDF in the set ships with empty Title and Author properties. `PENDING-VALIDATION` — **MECHANISM LANDED + PROVEN 2026-08-19; adoption is per document, tracked in `PLATFORM-FEATURE-ADOPTION.md`**
+> **RE-MEASURED 2026-08-25 («#302») — read out of every workspace `request.json`, not off the
+> tracker, and the two agree row for row.** `p2kb-platform-crossref` present in the `lua_filters`
+> list:
+>
+> | | Documents |
+> |---|---|
+> | **ADOPTED (4)** | Assembly Reference · I/O & Smart Pins · Streamer Guide · **PNut-Term-TS User Guide** |
+> | **⏳ still owed (11 P2 documents)** | Architect's Guide · Debug Window · Getting Started · DeSilva · XBYTE · Single-Step Debugger · P2AN001…P2AN007 |
+> | out of scope | `ai-privacy-guide`, `Donna-Manuscript` (private, non-P2), `p2-layout-torture-test` (instrument) |
+>
+> **The count stopped growing, which is the first evidence the structural fix works.**
+> `pnut-term-ts-user-guide` was one of the two "first chances" this entry named, and it **took**
+> the feature — adopted **and audited 27 of 27 on the returned PDF** (2026-08-23), the audit half
+> that IOSP's pilot row never recorded. The other named chance, **Single-Step Debugger, is still
+> ⏳** and is the next test of it.
+>
+> **This stays `CONFIRMED` because the per-document work is genuinely outstanding, not because
+> anything is unknown.** Two things ride every future adoption and must not be dropped:
+> **`p2kb-platform-crossref` MUST sit between `figures` and `tables`** (`tables` flattens each cell
+> to a string and would leave table-borne refs dead — verified ordering in all four adopted
+> `request.json`s), and **the visual audit on the returned PDF is the half that matters**, because
+> a mis-fired auto-link is exactly what it exists to catch.
+
+### F-300 — every published PDF in the set ships with empty Title and Author properties. `PENDING-VALIDATION` — **MECHANISM LANDED + PROVEN 2026-08-19; 2 of the 15 published PDFs have adopted, 13 owed at their next render (measured 2026-08-25, «#302»)**
+
+> **ADOPTION MEASURED ON THE ARTIFACTS, 2026-08-25 («#302») — `pdfinfo` over every file in
+> `deliverables/documents/DOCs/`, not read off the tracker.**
+>
+> | State | Count | Which |
+> |---|---|---|
+> | **Title + Author + Subject + Keywords populated** | **2** | Assembly Reference (`P2 Assembly Language Reference Manual` / `Iron Sheep Productions, LLC`), Streamer Guide (`P2 Streamer Programming Guide` / same) |
+> | **all four fields still EMPTY** | **13** | Getting Started · I/O & Smart Pins · DeSilva · Debug Window · Architect's Guide · XBYTE · P2AN001…P2AN007 |
+>
+> The mechanism is also proven on two documents that are **not yet published to `DOCs/`**
+> (Single-Step Debugger, PNut-Term-TS User Guide), so four conversions exist in total.
+>
+> **This stays `PENDING-VALIDATION`, and it closes per document, on a render — never on an edit
+> here.** Each of the 13 adopts by rendering on `EXEC_ENV_CANONICAL`; there is no container-side
+> action that can advance it. Per-document state is `PLATFORM-FEATURE-ADOPTION.md`, which
+> `prepare-manual` consults, and the measurement above agrees with it row for row.
+>
+> ⚠️ **`pdfsubject` IS being populated**, contrary to this entry's step 4 (*"Do NOT wire
+> `pdfsubject`"*): both adopted PDFs carry a `Subject`. That does not misreport either of them —
+> neither appears in **F-317**'s drift table — but it means F-317 is **live at every adoption**, not
+> deferred, and each of the 13 must have its `request.json` subtitle reconciled to its printed cover
+> **before** it renders.
 
 > **RESOLUTION (2026-08-19).** The fix is **not** the one-line `pdfusetitle` this entry proposed —
 > that would have populated the info dictionary and left the cover as a second hand-maintained copy
@@ -5536,7 +5904,7 @@ case, where the tool PASSES and the hand-rolled scan is the one overstating).
 > `p2kb-platform-tables.lua` sweep, paired with **F-300**, when no manual is mid-render. Nothing in this
 > sprint is waiting on it, and **no document may cite it as blocking**.
 
-### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `PENDING-VALIDATION` — **source fixed 2026-08-17; the Debug Window instance shipped verified in v1.1.3, p84 still unconfirmed**
+### F-294 — a backtick inside a single-backtick span inverts every code span after it, printing seven lines of prose as code. `RESOLVED — span repaired at source 2026-08-17; p84 CONFIRMED ON THE RENDERED PAGE of released v1.1.3, 2026-08-25 («#302»)`
 
 **Found:** 2026-08-17, in the same Debug Window v1.1.3 audit as F-293 — by opening p84 because the
 compile log's largest overfull (57.66pt) pointed there.
@@ -5577,12 +5945,55 @@ sees legal `.tex`, the code-line gate measures code blocks, and the compile is c
 was an overfull box that had been explained away. A paragraph-wise backtick-balance check on the
 masters is the missing instrument.
 
-**Owed:** re-render, then confirm p84's "Try it" paragraph reads as prose throughout.
+> **CLOSED 2026-08-25 («#302») — p84 rasterised and READ, because this defect is a font change and
+> text extraction cannot see one.** In released **v1.1.3** the whole "Try it" paragraph reads as
+> prose in the body face, with only the genuine code spans set in monospace: `Sine`, `-1000 1000`,
+> `AUTO`, `qsin`, `` DEBUG(`Waves TRIGGER 0 -500 500 256) ``, `offset`, `0`, `SAMPLES/2`,
+> `SAMPLES-1`. **Every symptom this entry listed is gone** — no sentence-initial stray `.`, no
+> monospace run through *"and observe the waveform stand still instead of scrolling. Finally, vary
+> the trigger"*, no fused `triggeroffsetbetween0,SAMPLES/2,` or `ANDSAMPLES-1'`, no stray closing
+> quote. The span inversion is fully unwound.
+>
+> **The double-backtick form held through the render**, which is what the fix depended on and had
+> never been observed end-to-end.
+>
+> **THE GATE GAP THIS ENTRY NAMES IS ALSO CLOSED — and the first draft of this note said the
+> opposite, which is worth recording.** This closure was initially written as *"a paragraph-wise
+> backtick-balance check on the masters remains unbuilt"*. **Checked against the disk instead of
+> against this entry's prose: `engineering/tools/validation/audit-backtick-balance.py` exists**,
+> its docstring opens *"WHY THIS EXISTS — F-294"*, and it implements exactly the specified
+> instrument, paragraph-wise for exactly the stated reason (a code span may legally wrap across a
+> newline). Run over **every** manual `opus-master` tree: **CLEAN, exit 0.**
+>
+> ⚠️ **But it was BUILT AND NEVER WIRED.** No skill invoked it — `grep` over `.claude/skills/`
+> returned nothing but the file itself. It had to be run by hand, and nobody had. **A gate nobody
+> invokes is a gate that does not exist**, which is F-301's defect in a different costume: a
+> correct artifact that is not where the decision gets made. **Now armed** as
+> `prepare-manual` **Step 6b**, beside the width/compile/ASCII source gates, so it runs before a
+> render is spent rather than after a page ships wrecked.
+
+**Owed: nothing.** Page validated; the declared instrument exists, is clean, and is now armed.
 
 
-### F-293 — the escaper pre-escapes `^`, so eight exponent expressions across three manuals print a literal `^{}`. `PARTIAL — Assembly VALIDATED 2026-08-22; the IOSP site is still owed`
+### F-293 — the escaper pre-escapes `^`, so eight exponent expressions across three manuals print a literal `^{}`. `RESOLVED — all three manuals VALIDATED on their released PDFs; the last site closed 2026-08-25 («#302»)`
 
-> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). `^{}` appears **zero** times across all 502 pages, closing the Assembly rows (p93, p209, p284 x2, p350). **Still open: IOSP p320** (`2^{}X[3:0]`), which absorbs the escaper fix at its next render.
+> **VALIDATED against the released v3.1.6 PDF, 2026-08-22** (502pp, text-extracted; the render happened 2026-08-18, after the 2026-08-17 fix). `^{}` appears **zero** times across all 502 pages, closing the Assembly rows (p93, p209, p284 x2, p350).
+>
+> **THE IOSP SITE WAS ALREADY CLOSED WHEN THIS ENTRY SAID IT WAS OWED — 2026-08-25 («#302»).** This
+> entry predicted the site "absorbs the escaper fix at its next render"; **that render happened on
+> 2026-08-18** (IOSP v1.0.9), eight days before anyone checked, and the entry was never advanced.
+> A status line lying in the *hides-work-that-is-done* direction, which is the harder direction to
+> notice.
+>
+> **Measured, then looked at.** `^{}` across **all 15 published PDFs in `deliverables/documents/DOCs/`:
+> zero, in every one** — not just the three manuals this finding named. **IOSP p320** was then
+> rasterised: *"period = 2^X[3:0]^ clocks"* prints as a **true raised superscript**, no braces, no
+> circumflex — the notation the entry's 2026-08-17 decision standardised on. (`chapter-16-adc.md:601`
+> writes the same expression inside a **code span**, where the literal caret is correct and
+> deliberate; it is not a residual site.)
+>
+> **The deliberate exclusion still stands:** `p2-pasm-desilva-style/opus-master/CHANGELOG.md:98`
+> (`2^x`) renders into no PDF and is released history — untouched.
 
 
 **Found:** 2026-08-17, auditing the Debug Window v1.1.3 render. p107's bullet reads
@@ -5616,9 +6027,12 @@ fixing the tool fixes all eight sites at next render.
 **Matched superscript pairs are unaffected** — `2^32^` in IOSP still resolves to true superscript.
 That is why IOSP shows one broken site and not four.
 
-**Owed:** re-render Debug Window, Assembly and IOSP, then confirm the listed pages print a caret and
-no braces. **Pandoc's handling of a bare caret is reasoned, not yet observed** — local Pandoc is
-off-limits, so the round-trip is the proof.
+**Owed: nothing.** ~~re-render Debug Window, Assembly and IOSP, then confirm the listed pages print a
+caret and no braces~~ — **all three rendered and all three confirmed** (Debug Window v1.1.3
+2026-08-17, Assembly v3.1.6 2026-08-18, IOSP v1.0.9 2026-08-18; verified 2026-08-22 and 2026-08-25).
+**Pandoc's handling of a bare caret is no longer "reasoned, not yet observed"** — the round-trip
+happened and the observation is the zero-count across all 15 published PDFs plus the rasterised
+p320. Local Pandoc remains off-limits and was not used.
 
 **⚠️ This unblocks nothing and blocks one thing: Assembly v3.1.6 was recorded "verified, releasable,
 nothing blocking." It carries five of the eight sites.** The verification that cleared it was
