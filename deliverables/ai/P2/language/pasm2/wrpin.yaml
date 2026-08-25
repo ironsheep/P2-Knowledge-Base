@@ -28,12 +28,17 @@ d_operand_format:
   # Silicon Doc part4-smart-pins.txt:6-47
   layout: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
   fields:
-    AAAA: "'A' input selector (see input_selectors)"
-    BBBB: "'B' input selector (see input_selectors)"
-    FFF: "A/B input logic/filter combining (000 = A,B straight-through)"
-    M: "13-bit low-level pin control + smart-pin mode"
-    TT: "DAC/output mode"
-    SSSSS: "DAC/output value or pin-output bit selection"
+    # One home per fact. All six fields, with their bit ranges and purposes, live in
+    # architecture/smart_pins.yaml; the 13-bit %M..M field's internals live in
+    # architecture/pin-drive-configuration.yaml. Restating them here is what let three
+    # of the six drift wrong (F-331).
+    reference: "architecture/smart_pins.yaml (configuration_format.fields) -- all six
+      fields, with bit ranges and purposes. Silicon Doc v35 part4-smart-pins.txt:10, 13,
+      26, 39, 55, 63, 107; P2 Datasheet 2022/11/01 p.23, p2-datasheet-text.txt:1052-1059."
+    m_sub_fields: "architecture/pin-drive-configuration.yaml -- the 13-bit %M..M field:
+      its sub-fields with bit ranges, the drive ladder stated by encoding, and the
+      DIR/OUT rule that decides when a drive setting is active."
+    input_selectors: "see input_selectors below -- the AAAA/BBBB encoding, in full"
 input_selectors:
   # Silicon Doc part4-smart-pins.txt:13-36. AAAA and BBBB share this encoding.
   description: |
@@ -124,3 +129,5 @@ aliases:
 related:
   - architecture/smart_pin_patterns.yaml
   - architecture/smart_pins.yaml
+  - architecture/pin-drive-configuration.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml

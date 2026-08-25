@@ -20,7 +20,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-336`** · **Next gap ID: `G-007`**
+**Next finding ID: `F-342`** · **Next gap ID: `G-007`**
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -520,7 +520,26 @@ needs a source that states it or a rewrite that does not compute.
 > `KNOWLEDGE-GAPS.md` **G-001** and **G-008**. Both defects below were found while doing that
 > reading. **Nothing is fixed in this filing.**
 
-### F-331 — `pasm2/wrpin.yaml` mislabels three of the six WRPIN D-operand fields; two agreeing Parallax sources and the YAML's own sibling file all say otherwise — `CONFIRMED`
+### F-331 — `pasm2/wrpin.yaml` mislabels three of the six WRPIN D-operand fields; two agreeing Parallax sources and the YAML's own sibling file all say otherwise — `PENDING-VALIDATION`
+
+> **APPLIED 2026-08-25 by «#295» phase 2 — REPOINTED, not re-worded.** The `d_operand_format.fields:`
+> map no longer restates the six fields at all. It now carries three pointers:
+> `reference:` → `architecture/smart_pins.yaml (configuration_format.fields)`, which already has all
+> six right; `m_sub_fields:` → the new `architecture/pin-drive-configuration.yaml`; and
+> `input_selectors:` → the block below it, which was correct and is untouched.
+>
+> **Why repoint rather than re-word.** The three sources word `M` two ways ("pin mode" /
+> "low-level pin control"), so re-wording means picking one; pointing at the single home means
+> picking none, and it removes the third copy that made the drift possible. Deletion is the
+> correction.
+>
+> **Evidence is triple-sourced, one better than this finding records** — the Silicon Doc agrees
+> with the datasheet and the Hardware Manual: `part4-smart-pins.txt:55` reads *"%M..M: low-level pin
+> control"* and `:63` reads *"%TT: pin DIR/OUT control (default = %00)"*, with `%SSSSS` at `:107`.
+> None of the three says "DAC/output mode", "DAC/output value", or "+ smart-pin mode".
+> (This finding's own body cites `:59` for the `%TT` line; measured, it is `:63`.)
+>
+> **Owed:** index regeneration + `validate-crossref-keys.py` after the boundary commit.
 
 **Location:** `deliverables/ai/P2/language/pasm2/wrpin.yaml:34-36` (the `d_operand_format.fields:` map).
 
@@ -587,7 +606,212 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 ---
 
 
+## Six defects surfaced while building the single constant-definition home (2026-08-25, «#295» phase 2) — F-336…F-341
+
+> **Origin.** All six were found while implementing «#295» — promoting the drive ladder into the
+> KB and collapsing two `P_*` definition homes into one. Two are fixed in that same pass and are
+> marked so; four are not this task's repair and are filed for the task that owns them. Every
+> number below was measured against disk on 2026-08-25, not carried from the design.
+
+### F-336 — the weak-drive idiom set is one composition wide: `P_HIGH_15K | P_LOW_FLOAT` has neither a Parallax statement nor a bench result, and the ladder has never been swept against a load — `CONFIRMED`
+
+> **This is a GAP, filed instead of content.** Read the arbiter's F-322 attribution correction in
+> the section below first — it settles where the `P_HIGH_15K | P_LOW_FLOAT` string comes from
+> (`smart-pins-catalog/ingestionSources/basic-io/spin2-v51-extract.md:284-287`, our own derived
+> catalog extract) and it is not re-filed here.
+>
+> **What is missing, stated positively.** Spin2 v55 — the current edition — defines both constants
+> individually (`spin2-v55-text.txt:1504` `P_HIGH_15K | Drive high 15kΩ`; `:1519` `P_LOW_FLOAT |
+> Float low`) and composes them into **no idiom at all**. The empirical ledger carries the
+> *other* composition: EF-063 and EF-064 both use `P_HIGH_15K` / `P_LOW_15K` with **DIR high** and
+> **never** `P_LOW_FLOAT` (`P2-EMPIRICAL-FINDINGS.md:827,840`). So the one-sided variant — weak on
+> one side, floating on the other, which is what an open-drain-style idiom actually needs — is
+> asserted by nothing.
+>
+> **What is owed, and it is a bench item.** Extend the EF-063/EF-064 rig
+> (`campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2:212-220` is the
+> routine) to (a) run `P_HIGH_15K | P_LOW_FLOAT` with DIR high against a known load and record
+> whether it behaves as a one-sided weak drive, and (b) sweep all eight ladder rungs on both sides
+> against the same load, so the KB can say what each rung does rather than only what the legend
+> calls it. Until then `architecture/pin-drive-configuration.yaml` ships the two verified idioms
+> and names this omission in its own `idioms.not_documented_here:` block.
+>
+> **«#296» must not ship the `P_HIGH_15K | P_LOW_FLOAT` string as sourced.**
+
+### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `CONFIRMED`
+
+> **Two disagreements, both in the `(T) Pin DIR/OUT Control` table, both about whether it is the
+> DAC or the ADC that gets enabled.**
+>
+> | Context | Datasheet 2022/11/01 + Hardware Manual 2022/11/01 | Silicon Doc v35 |
+> |---|---|---|
+> | smart pin off, DAC_MODE, `%TT = 00` | **`DIR enables DAC`**, M[7:0] sets DAC level | **`OUT enables ADC`**, M[7:0] sets DAC level |
+> | DAC smart-pin modes (`%SSSSS = %00001..%00011`), `0x` | `OUT enables **DAC** in DAC_MODE`, M[7:0] overridden | `OUT enables **ADC** in DAC_MODE`, M[7:0] overridden |
+>
+> **Verbatim locations, all four read this session:**
+> `engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1175` and `:1183` ·
+> `engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:897` and `:905` ·
+> `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:83` and `:98`.
+>
+> **Where the KB stands.** `deliverables/ai/P2/architecture/smart_pins.yaml`
+> `configuration_format.fields.tt.behavior_by_context` carries the **Silicon Doc** wording in both
+> places (`dac_mode."%00": "OUT enables ADC, M[7:0] sets DAC level"` and
+> `dac_smart_pin_modes.adc_control: "0x=OUT enables ADC..."`). Two agreeing 2022/11/01 sources say
+> otherwise, and this is the field an agent reads to work out why a DAC will not drive.
+>
+> **Not resolved here, and not guessable.** EF-054/EF-055 already probed this bit family
+> empirically (they established that `%01` switches the DAC's *source*), so the ledger may already
+> settle it or be one short rig away from settling it. Empirical outranks both documentary
+> sources; that is the route, not picking the majority.
+
+### F-338 — `P_LEVEL_B` and `P_SCHMITT_B` do not exist: two fabricated constant names stood in four `related_symbols:` lists, and nothing in the toolchain could see them — `PARTIAL`
+
+> **Evidence, three ways.** Neither name is in the Spin2 v55 symbol table (114 rows, 116 distinct
+> names, `spin2-v55-text.txt:1419-1562`). Neither is on `audit-constant-fidelity.py`'s 120-name
+> truth side. `pnut-ts` v1.55.3 **rejects both** as `PUB main()` / `wrpin(0, NAME)`, while
+> accepting all seven of the legal siblings they are near-misses on — `P_LEVEL_A`,
+> `P_LEVEL_A_FBN`, `P_LEVEL_B_FBP`, `P_LEVEL_B_FBN`, `P_SCHMITT_A`, `P_SCHMITT_A_FB`,
+> `P_SCHMITT_B_FB`. That seven-accept control is what proves the harness discriminates rather than
+> rejecting everything.
+>
+> ⚠️ **A naive grep says both names EXIST.** They are substrings of the `_FB` / `_FBP` / `_FBN`
+> forms, so `grep P_LEVEL_B` returns hits for `P_LEVEL_B_FBP` and `P_LEVEL_B_FBN`. Match on word
+> boundaries — `grep -P '\bP_LEVEL_B\b(?!_)'` — or this reads as a false clear.
+>
+> **APPLIED 2026-08-25:** all four entries deleted from
+> `language/spin2/symbols/spin2-builtin-symbols-complete.yaml`, **substituting nothing** (a
+> substitution would be an inference about what the author meant). Whole-tree re-grep with word
+> boundaries: **0 hits**.
+>
+> **Why this is `PARTIAL` and not closed: the class is still undetectable.** Nothing found these
+> for years, and nothing would find the next one — see **F-340**. This entry stays open until that
+> detection gap is dispositioned.
+
+### F-339 — `audit-constant-fidelity.py`'s own docstring misstates the size and the shape of the blind spot it declares — `CONFIRMED`
+
+> **Location:** `engineering/tools/validation/audit-constant-fidelity.py`, `KNOWN LIMITATIONS`
+> item 4 (around `:114`). For **«#305»**, which arms this gate; **do not fix it inside a task that
+> is being measured by it.**
+>
+> | The docstring says | Measured 2026-08-25 |
+> |---|---|
+> | the v55 table "carries 100 distinct `P_` constants" | **116** (114 table rows; two rows carry a name *and* a brevity alias — `P_TRUE_OUTPUT`/`P_TRUE_OUT`, `P_INVERT_OUTPUT`/`P_INVERT_OUT`) |
+> | the blind spot is "wherever v55 ADDED or RE-DESCRIBED a constant" | **ADDED is 0** — every one of the 116 is already on the truth side. **RE-DESCRIBED is 20**, and that is the entire exposure |
+>
+> **So the gap is not missing names, it is 20 superseded descriptions**, and framing it as
+> add-or-redescribe hides which half matters. The 20, measured by loading the tool's own
+> `harvest_source()` and diffing it against a hand parse of `spin2-v55-text.txt:1419-1562`:
+> `P_ADC`, `P_ADC_EXT`, `P_ASYNC_RX`, `P_ASYNC_TX`, `P_COUNT_HIGHS`, `P_COUNT_RISES`,
+> `P_INVERT_OUT`, `P_NCO_DUTY`, `P_NCO_FREQ`, `P_OR_AB`, `P_PULSE`, `P_PWM_SAWTOOTH`,
+> `P_PWM_SMPS`, `P_PWM_TRIANGLE`, `P_QUADRATURE`, `P_REG_UP`, `P_REG_UP_DOWN`, `P_SYNC_RX`,
+> `P_SYNC_TX`, `P_TRUE_OUT`. Four v51-only names are absent from v55 — `P_COMPARATOR`,
+> `P_COMPARATOR_FB`, `P_FLOAT`, `P_PASS` — and the KB references and defines none of them.
+>
+> **The KB side is already at v55**, as of «#295» phase 2: all 116 records carry the v55 wording.
+> Verified before adopting it that this moves nothing — 0 `QUANTITY` clashes and 0 `CONTRADICT`
+> clashes across all 116 when the v55 text is compared against the v51 truth side. So closing this
+> is a docstring-and-harvest repair, not a content change.
+>
+> **One artifact that is NOT a defect and must not be "fixed".** `strip_desc()` keeps the *last*
+> pipe-delimited cell, so a description containing a `|` is truncated. Only `P_OR_AB`
+> ("Select A | B, B") does, the tool truncates both sides identically, and it self-cancels. The
+> shipped record is correct as written; do not align it to the tool's displayed `"B, B"`.
+
+### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `CONFIRMED`
+
+> **Location:** `engineering/tools/validate-crossref-keys.py:491-492` —
+> `if field_name not in content or not content[field_name]: continue`, where `content` is the
+> parsed file's **top-level** mapping. Every `CROSS_REF_FIELDS` entry is looked up there and
+> nowhere else. For **«#305»**.
+>
+> **Measured consequence.** `language/spin2/symbols/spin2-builtin-symbols-complete.yaml` carries
+> **135 `related_symbols:` lists**, every one nested inside a record, and the validator reports
+> `related_symbols: 7 resolved` for the whole KB. Those 7 are the seven entries of the **one**
+> top-level `related_symbols:` in the entire corpus — `language/pasm2/asmclk.yaml:76-83` — and this
+> file contributes **zero** references to the count. **This is exactly how F-338
+> survived**: two names that do not exist, sitting in a field the validator names in its own
+> vocabulary, in the file that holds 99% of that field's instances.
+>
+> **What is owed.** Walk nested structures for the cross-reference fields, not just the top-level
+> mapping — and add a negative control that plants a known-bad name in a nested list and proves
+> the walk fails on it. A field that reports "resolved" while reading none of the corpus is worse
+> than no check: it reads as coverage.
+
+### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `CONFIRMED`
+
+> **The six**, all at `engineering/ingestion/sources/` top level, all self-describing as
+> generated cross-references rather than Parallax publications:
+> `p2-board-addon-compatibility-matrix.md` · `p2-complete-signal-flow-matrix.md` ·
+> `p2-hardware-validation-checklist.md` · `p2-board-power-analysis-matrix.md` ·
+> `p2-board-pin-mapping-knowledge.md` · `p2-addon-board-circuit-knowledge.md`.
+> Their own subtitles give them away — *"Complete cross-reference for automatic code generation"*,
+> *"Comprehensive testing procedures"*, *"Knowledge Base"*. No Parallax document is named on any
+> of them.
+>
+> **What they assert.** The F-321 mislabel, verbatim and repeatedly:
+> `p2-complete-signal-flow-matrix.md:127` *"WRPIN(pin, P_HIGH_15K) ' 15kΩ pull-up"*, `:62`
+> *"Input Type: Digital with internal pull-up"*, `:65` *"220µA through pull-up when pressed"*;
+> `p2-board-power-analysis-matrix.md:79` *"Internal pull-up: 15kΩ to 3.3V"*;
+> `p2-board-addon-compatibility-matrix.md:84` *"8 × 220µA pull-up current = 1.76mA"*;
+> `p2-hardware-validation-checklist.md:198` *"Enable internal pull-ups"*. The P2 has no such
+> component — `P_HIGH_15K` selects **drive strength**, per the Datasheet p.24 Pin Mode Legend
+> (`p2-datasheet-text.txt:1139-1147`). The 220 µA and 1.76 mA figures are stated by no Parallax
+> source.
+>
+> **Why it is more than stale prose.** `audit-constant-fidelity.py` scopes its truth side to
+> `TRUTH_ROOTS = [ingestion/sources, ingestion/smart-pins-catalog]` with a comment explaining that
+> an unauthoritative source does not add a wrong answer, it **DISARMS the check** — that is why
+> `external-inputs/` was excluded. These six are unauthoritative and are *inside* the root.
+> **Measured today: they contribute 0 entries to the truth table**, because their pull-up lines do
+> not happen to match `ROW_RE` or `BULLET_RE`. The disarm is latent, not active — a shape away, not
+> a policy away.
+>
+> **What is owed.** Decide what these files are and put them where that is true: relocate to a
+> derived/analysis area outside `sources/`, or repair them against the Datasheet legend and label
+> their provenance. Either way they must stop reading as Parallax documentary sources.
+> **Same class as the arbiter's F-322 correction** — a derived extract inside the ingestion tree
+> mistaken for the source it was derived from. Two instances in two days makes it a class, not an
+> accident: an audit of what actually lives under `ingestion/sources/` is owed.
+
+---
+
 ## Pin drive-strength documented as bias resistors, and one block fabricated outright (2026-08-24, agent-report sweep) — F-321…F-327, F-329, F-333
+
+> 🔴 **F-322's SOURCE ATTRIBUTION IS WRONG — CORRECTED BY THE ARBITER 2026-08-25 (during «#295»
+> phase 1). The finding's VERDICT stands; its cited evidence does not, and «#296» must not inherit
+> the string.**
+>
+> F-322 reads: *"What the source actually prescribes — same file, §'Weak Pull-Up':
+> `WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)`"*, citing `sources/silicon-doc/part4-smart-pins.txt`.
+> **There is no such section in that file.** Case-insensitive search for *pull-up* / *pull up* /
+> *pullup* / *pull-down* across `part4-smart-pins.txt` returns **zero hits**.
+>
+> **Where the string actually comes from, measured:** `engineering/ingestion/smart-pins-catalog/
+> ingestionSources/basic-io/spin2-v51-extract.md:284-287` — a **derived catalog extract**, not a
+> Parallax document, carrying a `### Weak Pull-Up` heading over
+> `WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)` with the hand-written comment *"15kΩ pull-up, float when
+> driving low"*. Its neighbours (*"Hysteresis for noisy signals"*, *"Maximum drive strength
+> (default)"*) are the same authored-commentary shape. **This is our own writing, not the source's.**
+>
+> ⚠️ **AND THE OPPOSITE OVERSTATEMENT IS ALSO WRONG.** «#295»'s design concluded *"no Parallax
+> documentary source states a `P_HIGH_15K | P_LOW_FLOAT` idiom."* Too strong as worded — the string
+> does exist in the ingestion tree, at the line above. The accurate statement is narrower and is
+> what phase 2 must carry: **Spin2 v55 — the current edition, which supersedes v51 — defines both
+> constants individually and composes them into no idiom at all.** `spin2-v55-text.txt:1504`
+> = *"P_HIGH_15K | Drive high 15kΩ"*; `:1519` = *"P_LOW_FLOAT | Float low"*. The composition, and
+> the word "pull-up" attached to it, are ours.
+>
+> **Disposition, unchanged in outcome:** under D4 the idiom does not ship as documentary. What ships
+> instead is stronger — **EF-063/EF-064**, hardware-verified on real silicon
+> (`external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840`), which state
+> `P_HIGH_15K` with **DIR high** and do **not** use `P_LOW_FLOAT`. Empirical outranks documentary
+> here, so the substitution is an upgrade rather than a workaround.
+>
+> 🔴 **THIS IS THE SECOND CONFIRMED FINDING TODAY WHOSE EVIDENCE CITATION WAS WRONG** — F-327's
+> `:296` attribution was the first, corrected in this same section. Both were caught by
+> re-verification during execution, not by review at filing time. A finding's VERDICT and its
+> CITED EVIDENCE are separately fallible, and this register's own citations need the same
+> hand-verification we apply to the KB's. Route to «#300»/«#302» as a register-wide evidence audit.
 
 > 🔴 **SCOPE OF F-321/F-323 CHANGED BY «#293» — MEASURED BY THE ARBITER 2026-08-24, READ THIS
 > BEFORE WORKING «#296».** «#293» removed the uncited `pull_up_modes:` / `pull_down_modes:` blocks
@@ -749,7 +973,40 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > *"Consult smart pin mode documentation for drive strength bit encoding"* — which points at
 > nothing that exists (F-325 is what it should point at).
 
-### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `CONFIRMED`
+### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `PENDING-VALIDATION`
+
+> **APPLIED 2026-08-25 by «#295» phase 2, in two homes with a boundary between them.**
+>
+> - **`language/spin2/symbols/spin2-builtin-symbols-complete.yaml`** — 68 records added, so the
+>   file now defines **all 116** `P_*` constants the Spin2 v55 symbol table carries
+>   (`spin2-v55-text.txt:1419-1562`), each with the source's own wording, its 32-bit value and its
+>   bit pattern. `audit-constant-fidelity.py` `[UNDEFINED]` **55 → 0**, exit 1 → 0. Fourteen
+>   pre-existing glossed descriptions were re-worded to v55 in the same pass, and a top-level
+>   `aliases:` block was added so those 116 names are reachable through the published index at all —
+>   `generate-p2kb-index.py` harvests top-level `aliases:` only, and this file had none, so not one
+>   of its constants was findable by name.
+> - **`architecture/pin-drive-configuration.yaml`** *(new)* — the `%M..M` field: every sub-field
+>   with its bit range (this is also F-324's "state the two 3-bit sub-fields"), the eight-rung drive
+>   ladder, and the DIR/OUT rule.
+>
+> 🔴 **The ladder is stated BY ENCODING, never as `NAME: "description"`.** That shape is what
+> `audit-constant-fidelity.py` reads as a *definition*, so writing the ladder the natural way would
+> have made the new file a **second definition home** for 16 constants and re-manufactured
+> F-321/F-323 inside the task chartered to end them. Verified mechanically, not by eye: the tool's
+> own `DEF_RE`/`RECORD_RE` match **0** lines in the new file, and the tool attributes **0**
+> definitions to it. Measured after: **116 constants defined in the KB, 0 with more than one
+> definition, 0 defined outside the single home** (down from 58 defined across two homes with 7
+> duplicated).
+>
+> **The pull-up idiom this finding asks for is NOT shipped as documentary** — see the arbiter's
+> F-322 attribution correction above. What ships is the hardware-verified composition
+> (EF-063/EF-064): `P_HIGH_15K` / `P_LOW_15K` with **DIR high**, and no `P_LOW_FLOAT`. Both idioms
+> carry DIR explicitly, because omitting it is exactly F-322. Both compile under `pnut-ts` v1.55.3
+> and were read for semantics; the unverified `P_HIGH_15K | P_LOW_FLOAT` variant is filed as a gap
+> (**F-336**), not shipped as content.
+>
+> **Owed:** index regeneration + `validate-crossref-keys.py` after the boundary commit — the new
+> file's index key `p2kbArchPinDriveConfiguration` does not exist until then.
 
 > **What is missing.** Eight high-side values and eight low-side values, each with its bit pattern
 > and its meaning — `FAST (30mA)` · `1K5` · `15K` · `150K` · `1MA` · `100UA` · `10UA` · `FLOAT` —
@@ -766,7 +1023,25 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > The pull-up/pull-down *idiom* belongs here too, stated as a composition of drive settings
 > (`P_HIGH_15K | P_LOW_FLOAT`, DIR high) rather than as a component the chip does not have.
 
-### F-326 — `wrpin.yaml` expands three of its six D-operand fields and stubs the one that carries the pin configuration — `CONFIRMED`
+### F-326 — `wrpin.yaml` expands three of its six D-operand fields and stubs the one that carries the pin configuration — `PENDING-VALIDATION`
+
+> **APPLIED 2026-08-25 by «#295» phase 2. The deferral now has somewhere to go.** The stub
+> `M: "13-bit low-level pin control + smart-pin mode"` is gone; `pasm2/wrpin.yaml`'s
+> `d_operand_format.fields:` now points at `architecture/pin-drive-configuration.yaml` for the
+> field's internals and at `architecture/smart_pins.yaml` for all six field ranges. The finding's
+> own instruction — *"point it at the file F-325 creates, but not at prose that does not exist"* —
+> is what was done. `architecture/smart_pins.yaml` gained the reciprocal pointer inside
+> `configuration_format.fields.m:`.
+>
+> **The companion check this finding asks for was done too.** `language/spin2/methods/wrpin.yaml`
+> had the same shape *and worse*: `common_smart_modes:` (13 keys) and `tt_field.constants:`
+> (4 keys) were **17 second definitions** of constants the symbols file also defines. Both blocks
+> are replaced with pointers; the four `P_TT_*` keep their values, binaries and `P_OE`/`P_CHANNEL`/
+> `P_BITDAC` aliases in `smart_pins.yaml`, so nothing is lost. Everything else in `tt_field:` —
+> `context_dependent:`, `p_oe_required_for:`, `one_bit_three_names:`, `when_smart_pin_on:`,
+> `source_selection:` — is field *behaviour*, is cited and correct, and is untouched.
+>
+> **Owed:** index regeneration + `validate-crossref-keys.py` after the boundary commit.
 
 > **Where:** `language/pasm2/wrpin.yaml`, `d_operand_format.fields`. `AAAA`, `BBBB` and `FFF` get
 > full treatment — `input_selectors` enumerates all eight source-select encodings and the invert

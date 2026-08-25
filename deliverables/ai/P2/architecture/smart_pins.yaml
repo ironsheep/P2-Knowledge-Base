@@ -210,6 +210,9 @@ configuration_format:
       bits: "20:8"
       width: 13
       purpose: "Low-level pin control (drive strength, DAC, ADC)"
+      sub_fields_reference: "architecture/pin-drive-configuration.yaml -- the internals of
+        this field: every sub-field with its bit range, the eight-rung drive ladder stated
+        by encoding, and the DIR/OUT rule that decides when a drive setting is active"
       dac_mode_trigger: "M[12:10] = %101 enables DAC_MODE"
       bit_dac: "BIT_DAC outputs {2{M[7:4]}} for high or {2{M[3:0]}} for low in DAC_MODE"
     tt:
@@ -468,6 +471,12 @@ live_update_behavior:
       wypin: "Not used"
       wxpin: "Changes baud rate and bit count — avoid mid-transfer"
   caution: "Changing WXPIN on serial modes mid-transfer corrupts in-progress data. Change between transactions after IN signals completion."
+
+related:
+  - architecture/pin-drive-configuration.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
+  - language/pasm2/wrpin.yaml
+  - language/spin2/methods/wrpin.yaml
 
 see_also:
   - "Smart pin mode reference (modes/ directory)"

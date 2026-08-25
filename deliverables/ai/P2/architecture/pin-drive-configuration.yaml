@@ -1,0 +1,259 @@
+# Pin Drive Configuration - the WRPIN %M..M field
+# Single definition home for the 13-bit low-level pin-control field: its sub-fields,
+# the drive ladder stated BY ENCODING, and the DIR/OUT rule that governs when a
+# drive setting is active.
+#
+# NOT a definition home for any constant. Per-constant definitions live in
+# language/spin2/symbols/spin2-builtin-symbols-complete.yaml. This file names a
+# constant only as a VALUE or in prose, never as a defining key, so there is exactly
+# one place in the knowledge base where a P_* name is defined.
+
+component: Pin_Drive_Configuration
+category: io_system
+version: "1.0"
+last_updated: "2026-08-25"
+
+aliases:
+  - "pin drive configuration"
+  - "drive strength"
+  - "drive ladder"
+  - "weak drive"
+  - "pull-up"
+  - "pull-down"
+  - "open drain"
+  - "M field"
+  - "HHH"
+  - "LLL"
+  - "WRPIN M field"
+  - "PIN_DRIVE_CONFIGURATION"
+
+description: |
+  Thirteen bits of the WRPIN D operand -- %M..M, D[20:8] -- set the low-level pin
+  mode: how the pin senses its input, whether IN and the output are inverted, and how
+  hard each side of the output driver drives. The P2 Datasheet names the field
+  "(M) Pin Mode"; the Silicon Doc names it "low-level pin control".
+
+  The high side and the low side each get their own three-bit selector, HHH and LLL,
+  and each selector picks one rung of the same eight-rung ladder that runs from a fast
+  digital drive down to float. The two sides are chosen independently: a pin can drive
+  hard one way and weakly the other.
+
+  A drive selection is only ever a property of DRIVING. Per the datasheet legend, DIR
+  is the direction bit -- input (float) or output (drive) -- so a pin configured with a
+  weak drive and then left with DIR low is simply a high-impedance input, and the
+  selection does nothing.
+
+source: "Parallax P2 Datasheet 2022/11/01 p.24, the (M) Pin Mode table and the Pin Mode
+  Legend, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1095-1147;
+  cell-identical in the P2 Hardware Manual 2022/11/01,
+  engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:828-873;
+  Silicon Doc v35, engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:10-76;
+  sub-field masks from the Spin2 v55 symbol table,
+  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1454-1519"
+
+field_position:
+  wrpin_d_operand: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  bits: "20:8"
+  width: 13
+  numbering: "M[12] is the most significant bit of the field, M[0] the least"
+  purpose: "low-level pin control"
+  full_word_reference: "architecture/smart_pins.yaml (configuration_format) carries the
+    whole 32-bit word: all six fields, their bit ranges, the composition rule, and the
+    %TT behaviour-by-context table"
+  source: "Silicon Doc v35, part4-smart-pins.txt:10 (the D operand layout) and :55-58
+    (%M..M: low-level pin control, and the deferral to the Spin2 predefined labels);
+    P2 Datasheet 2022/11/01 p.23, p2-datasheet-text.txt:1052-1059; P2 Hardware Manual
+    2022/11/01, p2-hardware-manual-text.txt:785-791"
+
+sub_fields:
+  how_the_field_is_stated: |
+    The datasheet states %M..M as a set of M[12:0] bit patterns, one per pin-mode
+    family, not as one fixed split -- a wider mode code leaves fewer bits for the
+    letters below. Read off the datasheet table verbatim, the families are:
+      0000_CIOHHHLLL .. 0111_CIOHHHLLL   logic / Schmitt / pin-to-pin comparator
+      100000_OHHHLLL .. 100111_OHHHLLL   ADC input
+      10100_DDDDDDDD .. 10111_DDDDDDDD   DAC output
+      1100_CDDDDDDDD .. 1111_CDDDDDDDD   level comparison
+    The Spin2 v55 symbol table states the same letters as masks over the whole D
+    operand, which is where each position below comes from.
+  source: "P2 Datasheet 2022/11/01 p.24 (M) Pin Mode, p2-datasheet-text.txt:1100-1123,
+    and the Pin Mode Legend at :1131-1147; identical rows in the P2 Hardware Manual,
+    p2-hardware-manual-text.txt:832-835 and legend at :847-873; Spin2 v55 sub-mode
+    masks, spin2-v55-text.txt:1464, 1474, 1480, 1486, 1489, 1493, 1497, 1501, 1511"
+
+  mode_select:
+    bits: "M[12:9] for the logic / Schmitt / comparator family and for the
+      level-comparison family; M[12:7] for the ADC family; M[12:8] for the DAC family
+      (the leading bits of each datasheet pattern above)"
+    purpose: "selects the low-level pin mode"
+
+  in_out_sampling:
+    bits: "M[8]"
+    legend: "C"
+    values:
+      "0": "Live"
+      "1": "Clocked"
+    footnotes: "Live is used for feedback operations and provides a continuous
+      (non-clocked) signal; Clocked updates on clock edge only"
+    also_named: "the Spin2 v55 table calls this same bit the Sync mode bit, selected by
+      the two constants in the Sync Mode group"
+    applies_to: "the logic / Schmitt / comparator and level-comparison families"
+
+  in_polarity:
+    bits: "M[7]"
+    legend: "I"
+    values:
+      "0": "True"
+      "1": "Not (inverted)"
+    applies_to: "the logic / Schmitt / comparator families"
+
+  output_polarity:
+    bits: "M[6]"
+    legend: "O"
+    values:
+      "0": "True"
+      "1": "Not (inverted)"
+    applies_to: "the logic / Schmitt / comparator and ADC families"
+
+  drive_high:
+    bits: "M[5:3]"
+    legend: "HHH"
+    selects: "one rung of the drive ladder below, for the high side of the driver"
+
+  drive_low:
+    bits: "M[2:0]"
+    legend: "LLL"
+    selects: "one rung of the drive ladder below, for the low side of the driver"
+
+  dac_level:
+    bits: "M[7:0]"
+    legend: "DDDDDDDD"
+    meaning: "8-bit DAC value, in the DAC output family"
+
+  comparison_level:
+    bits: "M[7:0]"
+    legend: "LLLLLLLL in the Spin2 v55 mask, DDDDDDDD in the datasheet pattern"
+    meaning: "8-bit Level, in the level-comparison family"
+
+drive_ladder:
+  applies_to: "HHH (M[5:3], high side) and LLL (M[2:0], low side). The two selectors are
+    independent and take the same eight encodings."
+  what_it_selects: "how hard the pin drives WHILE IT DRIVES -- not a bias network that
+    is present when the pin is an input. See dir_and_out_rule below."
+  encoding:
+    - { bits: "%000", drive: "Fast",   high_constant: "P_HIGH_FAST",  low_constant: "P_LOW_FAST" }
+    - { bits: "%001", drive: "1.5 kΩ", high_constant: "P_HIGH_1K5",   low_constant: "P_LOW_1K5" }
+    - { bits: "%010", drive: "15 kΩ",  high_constant: "P_HIGH_15K",   low_constant: "P_LOW_15K" }
+    - { bits: "%011", drive: "150 kΩ", high_constant: "P_HIGH_150K",  low_constant: "P_LOW_150K" }
+    - { bits: "%100", drive: "1 mA",   high_constant: "P_HIGH_1MA",   low_constant: "P_LOW_1MA" }
+    - { bits: "%101", drive: "100 µA", high_constant: "P_HIGH_100UA", low_constant: "P_LOW_100UA" }
+    - { bits: "%110", drive: "10 µA",  high_constant: "P_HIGH_10UA",  low_constant: "P_LOW_10UA" }
+    - { bits: "%111", drive: "Float",  high_constant: "P_HIGH_FLOAT", low_constant: "P_LOW_FLOAT" }
+  definitions_live_in: "language/spin2/symbols/spin2-builtin-symbols-complete.yaml -- the
+    per-constant record for each name above, with its wording, value and bit pattern"
+  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend, HHH / LLL Drive table,
+    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1139-1147; the same
+    eight rows in the P2 Hardware Manual 2022/11/01,
+    engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:859-861;
+    reconciled table at
+    engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:257-268; the
+    same ladder is drawn on the equivalent-schematic figures, datasheet pp.27-32, read at
+    complete-tables-reference.md:326-338; and the datasheet feature list states it in one
+    line at p2-datasheet-text.txt:117"
+  no_other_rungs: "The legend enumerates these eight and no others. Any per-pin current
+    or impedance figure beyond them is not in the source."
+
+dir_and_out_rule:
+  why_this_block_exists: |
+    A drive-strength selection is a property of driving, so it is live only while the
+    pin drives. Configuring a drive strength and then leaving DIR low gives a plain
+    high-impedance input with the selection inactive. This is a restatement of the two
+    cited legend lines below, not an addition to them.
+  dir: "direction bit; 0: input (float), 1: output (drive)"
+  dir_exception: "DAC modes use DIR as 0: disable, 1: enable"
+  out: "output latch bit; 0: low, 1: high."
+  out_exception: "DAC modes use OUT as 0: disable, 1: enable"
+  oe: "digital output enable (when DIR bit high)"
+  smart_pin_mode_off: "for smart pin mode off (%SSSSS = %00000): DIR enables output"
+  tt_field_reference: "architecture/smart_pins.yaml
+    (configuration_format.fields.tt.behavior_by_context) -- %TT does not have one
+    meaning; which of the four meaning-sets applies depends on whether the smart pin is
+    on and whether DAC_MODE is active"
+  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend, p2-datasheet-text.txt:1134,
+    1141-1142, 1144, 1146; identical in the P2 Hardware Manual 2022/11/01,
+    p2-hardware-manual-text.txt:867, 870-871; Silicon Doc v35,
+    part4-smart-pins.txt:73-76"
+
+idioms:
+  note: |
+    %M..M selects DRIVE STRENGTH, and the Pin Mode Legend enumerates the whole field --
+    C, I, O, HHH, LLL -- with no bias-resistor selector among them. A design that wants
+    a line held high or low weakly gets it by driving weakly in that direction, and the
+    drive is live only while DIR is high.
+
+    Both compositions below were run on real P2 silicon. Neither is a documentary
+    idiom: the Spin2 v55 symbol table defines each constant individually and composes
+    them into no idiom at all, so what is stated here is the hardware-verified form.
+  source: "Hardware-verified: EF-063 and EF-064 in
+    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840
+    (date/rig 2026-08-20, real P2). Field semantics from the P2 Datasheet 2022/11/01
+    p.24 Pin Mode Legend, p2-datasheet-text.txt:1131-1147. Constant wording from the
+    Spin2 v55 symbol table, spin2-v55-text.txt:1504 and :1514."
+
+  weak_high:
+    intent: "hold a line high weakly, so a stronger external drive can overpower it"
+    mode_word: "P_HIGH_15K"
+    dir: "1 -- required; with DIR = 0 the pin floats and the drive is inactive"
+    out: "1 -- the output latch selects the high side"
+    drive_high: "%010 = 15 kΩ (M[5:3])"
+    drive_low: "%000 = Fast (M[2:0], the default) -- reached only if OUT goes to 0"
+    spin2: |
+      pinclear(pin)                 ' clear any previous smart-pin configuration
+      wrpin(pin, P_HIGH_15K)        ' high side drives through 15 kOhm
+      pinhigh(pin)                  ' DIR = 1, OUT = 1 -- without this the pin floats
+      waitms(1)                     ' settle: a weak drive into pin and wire capacitance
+      level := pinread(pin)         ' reads 1 unless something stronger holds the line low
+    evidence: "Hardware-verified. EF-063 certifies a jumper digitally by holding the net
+      through a 15 kOhm drive at one pin while the other drives it hard, so an open
+      circuit reads the opposite value instead of an undefined float
+      (P2-EMPIRICAL-FINDINGS.md:827). The code above is the rig routine that did it --
+      weak_read() at
+      engineering/ingestion/external-sources/hardware-verification/campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2:212-220,
+      called with P_HIGH_15K at :185 and :193. Date/rig 2026-08-20, real P2."
+
+  weak_low:
+    intent: "hold a line low weakly, so an undriven pin reads 0 for a stated reason"
+    mode_word: "P_LOW_15K"
+    dir: "1 -- required; with DIR = 0 the pin floats and the drive is inactive"
+    out: "0 -- the output latch selects the low side"
+    drive_low: "%010 = 15 kΩ (M[2:0])"
+    drive_high: "%000 = Fast (M[5:3], the default) -- reached only if OUT goes to 1"
+    spin2: |
+      pinclear(pin)                 ' clear any previous smart-pin configuration
+      wrpin(pin, P_LOW_15K)         ' low side drives through 15 kOhm
+      pinlow(pin)                   ' DIR = 1, OUT = 0 -- without this the pin floats
+      waitms(1)                     ' settle: a weak drive into pin and wire capacitance
+      level := pinread(pin)         ' reads 0 unless something stronger holds the line high
+    evidence: "Hardware-verified. EF-064 held P8..P31 at a 15 kOhm low with DIR high as a
+      canvas, so an undriven pin reads 0 for a stated reason instead of floating, while
+      any driven pin overpowers the pull and reads 1 (P2-EMPIRICAL-FINDINGS.md:840). The
+      code above is the same rig routine, called with P_LOW_15K at
+      test-f272-streamer-dac-tt.spin2:184 and :192. Date/rig 2026-08-20, real P2."
+
+  not_documented_here:
+    why: "Named so the omissions are deliberate rather than silent. No Parallax source
+      states any of these as a composition of the pin-mode field, and this file ships
+      only what a source states."
+    open_drain: "not stated by any Parallax source as a P_* composition"
+    open_source: "not stated by any Parallax source as a P_* composition"
+    keeper_or_bus_hold: "no source"
+    high_side_weak_with_low_side_floated: "the P_HIGH_15K with P_LOW_FLOAT variant has no
+      Parallax documentary statement and no empirical record; a gap is filed for it in
+      engineering/operations/P2KB-CORRECTION-FINDINGS.md rather than content shipped here"
+    per_pin_current_or_impedance: "nothing beyond the eight ladder rungs the legend states"
+
+related:
+  - architecture/smart_pins.yaml
+  - language/pasm2/wrpin.yaml
+  - language/spin2/methods/wrpin.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml

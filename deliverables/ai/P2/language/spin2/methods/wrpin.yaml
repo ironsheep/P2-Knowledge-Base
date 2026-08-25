@@ -39,15 +39,16 @@ returns: "none"
 tt_field:
   bits: "7:6"
   purpose: "Pin DIR/OUT control"
-  constants:
-    P_TT_00: {value: "$00", binary: "%00", effect: "Default - DIR controls output enable"}
-    P_TT_01: {value: "$40", binary: "%01", aliases: ["P_OE", "P_CHANNEL"], effect: "Output enabled regardless of DIR, SMART/OUT drives"}
-    P_TT_10: {value: "$80", binary: "%10", aliases: ["P_BITDAC"], effect: "Output disabled, OTHER source selected"}
-    P_TT_11: {value: "$C0", binary: "%11", effect: "Output enabled regardless of DIR, SMART/OTHER drives"}
+  constants_reference: "architecture/smart_pins.yaml
+    (configuration_format.fields.tt.constants) -- P_TT_00, P_TT_01, P_TT_10 and P_TT_11
+    with their values, binaries and the P_OE / P_CHANNEL / P_BITDAC aliases. The
+    per-constant definitions are in
+    language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Defined once, in those
+    two places, and pointed at from here."
   context_dependent: |
     %TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by
     whether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.
-    The `constants:` effects above are the SMART-PIN-ON, non-DAC_MODE meanings only.
+    The per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.
     The four contexts:
       1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives
       2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;
@@ -96,19 +97,15 @@ examples:
     description: "Disable smart pin mode"
 
 common_smart_modes:
-  P_NORMAL: "%00000 - Normal I/O"
-  P_REPOSITORY: "%00001 - Long repository"
-  P_DAC_NOISE: "%00010 - DAC noise"
-  P_DAC_DITHER_PWM: "%00011 - DAC with dither"
-  P_PULSE: "%00100 - Pulse/cycle output"
-  P_TRANSITION: "%00101 - Transition output"
-  P_NCO_FREQ: "%00110 - NCO frequency"
-  P_NCO_DUTY: "%00111 - NCO duty"
-  P_PWM_TRIANGLE: "%01000 - PWM triangle"
-  P_PWM_SAWTOOTH: "%01001 - PWM sawtooth"
-  P_ASYNC_TX: "%11110 - Async serial transmit"
-  P_ASYNC_RX: "%11111 - Async serial receive"
-  P_QUADRATURE: "%01011 - Quadrature decode"
+  # Removed 2026-08-25. This block defined thirteen P_* constants a second time, in
+  # wording that had drifted from the source (F-321/F-323 class). Every smart-pin mode
+  # constant is now defined exactly once, with the Spin2 v55 wording, its 32-bit value
+  # and its bit pattern.
+  reference: "language/spin2/symbols/spin2-builtin-symbols-complete.yaml -- all 32
+    %SSSSS mode constants (subcategory operating_modes), each with its value, bit
+    pattern and the source's own wording"
+  mode_selector_field: "architecture/smart_pins.yaml
+    (configuration_format.fields.sssss) -- the 5-bit field itself"
 
 smart_pin_workflow:
   1_configure: "WRPIN(pin, mode) - Set mode"
@@ -153,6 +150,11 @@ warnings:
   - "Some modes conflict with normal I/O"
   - "Mode bits must be valid for hardware"
   - "Incorrect mode can damage external circuits"
+
+related:
+  - architecture/smart_pins.yaml
+  - architecture/pin-drive-configuration.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
 
 see_also:
   - "language/spin2/methods/wxpin.yaml"
