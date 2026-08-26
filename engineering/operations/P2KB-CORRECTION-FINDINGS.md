@@ -95,7 +95,9 @@ in the dashboard, which is what the next session reads.
 
 ## The TAQOZ author says ROM TAQOZ is an EARLY build, not just a cut-down one (2026-08-26, «#317») — F-370
 
-### F-370 — `taqoz-forth.yaml` calls ROM TAQOZ "the finite, fixed version"; its author says it is also an **early** version — `CONFIRMED`
+### F-370 — `taqoz-forth.yaml` calls ROM TAQOZ "the finite, fixed version"; its author says it is also an **early** version — `RESOLVED`
+
+**APPLIED 2026-08-26 («#319») — `RESOLVED`, and RE-SCOPED BY STEPHEN.** He ruled on this directly: *"do not put quality information like that in the [YAMLs]. All we want to know is that TAQOZ exists, how you get to it, and what it is useful for."* So the ROM-vs-RELOADED comparison this finding proposed — cut-down, early build, words may behave differently — **was NOT carried**, and the finding's original recommendation is superseded. What went in is the half that is utility: a `useful_for:` block giving the author's own guidance (use ROM TAQOZ for hardware debugging, especially when a larger environment will not load) plus what the resident interpreter is good for. The file already covered existence and access. Rule saved to auto-memory as `feedback_kb_entries_state_existence_access_utility`.
 
 **How this surfaced.** The Bit Bashers Guide DOCX carries two reviewer comments, both anchored to
 the same paragraph — the one marked *"(not in ROM)"*. A reader hit exactly that limit; **the author
@@ -170,7 +172,9 @@ as **needs Stephen's accept-or-fix**.
 — the `p2-qa-spreadsheet` row sits at 80% and was listed in this sprint's plan as having *no primary
 document staged*. It has one. That plan line is wrong and is corrected in «#318».
 
-### F-368 — `getbrk.yaml` drops the Z value for the pattern-queued case, and declares `Z: No effect` for an instruction that requires a flag effect — `CONFIRMED`
+### F-368 — `getbrk.yaml` drops the Z value for the pattern-queued case, and declares `Z: No effect` for an instruction that requires a flag effect — `RESOLVED`
+
+**APPLIED 2026-08-26 («#319») — `RESOLVED`.** The dropped branch is restored: `or 0 if a pattern IS queued (D <> 0)`. `flags_affected` no longer says `Z: No effect` for an instruction that requires a flag effect — it now carries a `note:` that GETBRK has no no-effect form, a per-flag description of what WC and WZ each select, and a `source:` at `silicon-doc-text.txt:2591`.
 
 **The source** (`sources/silicon-doc/silicon-doc-text.txt`, GETBRK D WZ):
 
@@ -191,7 +195,9 @@ The file contradicts itself.
 **Fix (YAML head).** Restore the branch — `or 0 if pattern queued (D <> 0)` — and reconcile
 `flags_affected` with the instruction's own requirement.
 
-### F-369 — the smart-pin DIR-reset behaviour is in the Silicon Doc and carried nowhere in the KB — `CONFIRMED`
+### F-369 — the smart-pin DIR-reset behaviour is in the Silicon Doc and carried nowhere in the KB — `RESOLVED`
+
+**APPLIED 2026-08-26 («#319») — `RESOLVED`, and it carried more than the finding recorded.** Added `critical_requirements.reset_without_reconfiguring` to `architecture/smart_pins.yaml`. Reading the source paragraph in full turned up the **mechanism** behind a rule the KB already asserted without explaining: each smart pin holds **126 bits of state data** separate from its WRPIN configuration, and WRPIN *multiplexes* those bits to the subcircuit chosen by `%SSSSS`. Issuing WRPIN while DIR is high remaps them underneath live state — *"unpredictable and quite certainly useless behavior"*. So the existing *"configure only while DIR is low"* rule is a consequence of the multiplexing, not a convention, and that is now recorded as `why_this_is_the_rule`.
 
 **The source:** *"Once a smart pin is configured via WRPIN and then started by making its DIR bit
 high, it can be reset at any time by making its DIR bit low. It does not lose its configuration set
@@ -282,7 +288,9 @@ after this finding is worked, not before.
 
 ## The COG register map's PA/PB row lost the return-vs-parameter distinction, and its index dangles 13 of 16 pointers (2026-08-26, silicon-doc DOCX re-extraction) — F-363 · F-364
 
-### F-363 — `complete-system-registers-index.yaml` says PA/PB hold the "CALLD-imm parameter"; all three authorities say **return** — `CONFIRMED`
+### F-363 — `complete-system-registers-index.yaml` says PA/PB hold the "CALLD-imm parameter"; all three authorities say **return** — `RESOLVED`
+
+**APPLIED 2026-08-26 («#319») — `RESOLVED`.** `$1F6` → `CALLD-imm return, CALLPA parameter, or LOC address`; `$1F7` → `...CALLPB...`. Both rows now carry a `source:` naming all three authorities and a `note:` stating why the rows are deliberately not identical. **Citation drift caught while applying:** this finding cited `silicon-doc-text.txt:313-314`, which was the numbering BEFORE «#310» re-emitted that artifact; the live locations are `:452-453`, verified by reading them. The Hardware Manual (`:357`) and Datasheet (`:564-565`) locators were unaffected and re-verified.
 
 **How this surfaced.** «#310» reconciled the prior PDF-era artifact `COG-RAM-REGISTER-MAP.md`
 against the new DOCX extraction of the Silicon Doc. The `$1F6`/`$1F7` rows disagreed.

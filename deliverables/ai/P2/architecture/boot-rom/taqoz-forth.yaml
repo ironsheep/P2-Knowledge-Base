@@ -34,6 +34,23 @@ relationship_to_p2_monitor:
     monitor: "Memory inspector / manipulator"
     taqoz: "Interactive Forth programming environment"
 
+useful_for:
+  source: >-
+    Peter Jakacki (the author of TAQOZ), reviewer comment in "The Bit Bashers Guide to the
+    Parallax P2 - Using TAQOZ ROM Forth" --
+    engineering/ingestion/sources/TAQOZ-Forth-Bitbashers-Guide/reviewer-comments-harvest-2026-08-26.md,
+    comment [1], 2023-04-06.
+  primary_use: >-
+    Debugging hardware directly from the chip, with no toolchain, no download and no host
+    build step. It is resident, so it is available on any P2 the moment the part is
+    powered and reachable over serial.
+  author_guidance: >-
+    Use ROM TAQOZ for hardware debugging, and especially when a larger environment will
+    not load -- it is the fallback that is always there.
+  also: >-
+    Interactive exploration of the chip: poke pins, read registers and try smart-pin
+    configurations from a prompt, without writing, compiling and loading a program.
+
 rom_residence:
   location: "P2 boot ROM (mask ROM)"
   identical_across_units: true

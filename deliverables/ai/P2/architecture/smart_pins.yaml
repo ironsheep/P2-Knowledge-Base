@@ -131,6 +131,31 @@ critical_requirements:
       - "Configuration conflicts between old and new settings"
       - "Smart pin malfunction or incorrect operation"
       - "Possible corruption of internal state machines"
+    why_this_is_the_rule:
+      source: >-
+        Propeller 2 Documentation v35 (Rev B/C) --
+        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3856.
+      mechanism: >-
+        Each smart pin carries 126 bits of state data, separate from its WRPIN
+        configuration. WRPIN does not merely select a mode: it MULTIPLEXES those 126 bits
+        to the subcircuit chosen by the five %SSSSS mode bits. Issuing WRPIN while DIR is
+        high changes that mapping underneath live state, which the source calls
+        "unpredictable and quite certainly useless behavior in the newly-selected smart
+        pin mode". The rule above is a consequence of that multiplexing, not a convention.
+
+  reset_without_reconfiguring:
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C) --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3856.
+    behavior: >-
+      A configured, running smart pin can be RESET AT ANY TIME by taking its DIR bit low,
+      and it does NOT lose the configuration set by the last WRPIN. Some mode-related
+      state bits are cleared while DIR is low; when DIR returns high the pin resumes in
+      the same mode, with some state data reset.
+    why_it_matters: >-
+      A driver can restart a smart pin mid-flight with DIRL/DIRH alone -- no WRPIN, WXPIN
+      or re-setup required. Re-issuing WRPIN while DIR is high is the thing that must NOT
+      be done. Useful for clearing a stuck serial or counter mode without a full rebuild.
 
 pin_control_instructions:
   configuration:

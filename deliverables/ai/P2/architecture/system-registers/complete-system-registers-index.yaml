@@ -70,13 +70,36 @@ dual_purpose_registers:
   "$1F6":
     normal_use: "General-purpose RAM"
     special_function: "PA"
-    description: "CALLD-imm parameter, or LOC address"
+    description: "CALLD-imm return, CALLPA parameter, or LOC address"
+    source: >-
+      Cell-identical in three ingested authorities: Propeller 2 Documentation v35 (Rev
+      B/C), engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:452; P2
+      Hardware Manual 2022/11/01,
+      engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:357;
+      P2 Datasheet 2022/11/01,
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:564.
+    note: >-
+      PA holds the RETURN address written by a CALLD with an immediate operand -- it is
+      not that instruction's parameter. Separately, PA is the parameter register read by
+      CALLPA. Both roles are real and they are different; earlier text here collapsed
+      them into "CALLD-imm parameter", which named neither.
     yaml_file: "dual-pa-register.yaml"
-    
+
   "$1F7":
     normal_use: "General-purpose RAM"
-    special_function: "PB" 
-    description: "CALLD-imm parameter, or LOC address"
+    special_function: "PB"
+    description: "CALLD-imm return, CALLPB parameter, or LOC address"
+    source: >-
+      Cell-identical in three ingested authorities: Propeller 2 Documentation v35 (Rev
+      B/C), engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:453; P2
+      Hardware Manual 2022/11/01,
+      engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:357;
+      P2 Datasheet 2022/11/01,
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:565.
+    note: >-
+      PB mirrors PA: the CALLD-imm return address, and the parameter register read by
+      CALLPB (not CALLPA). These two rows are deliberately NOT identical -- an earlier
+      revision made them so, which lost the CALLPA/CALLPB distinction the sources draw.
     yaml_file: "dual-pb-register.yaml"
 
 # Special-Purpose Registers ($1F8-$1FF)

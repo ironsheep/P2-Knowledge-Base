@@ -33,16 +33,28 @@ description: 'Get cog status / debug-break information into D according to the f
   mode, D[26] = LUT sharing enabled, D[25] = XBYTE pending on next _RET_/RET, D[24:16]
   = 9-bit XBYTE mode, D[15:00] = 16 event-trap flags.
 
-  - WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or pattern queued
-  if D <> 0. D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first.
+  - WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or 0 if a pattern
+  IS queued (D <> 0). D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first.
 
 
   Essential for debug infrastructure and for inspecting skip/XBYTE state.
 
   '
 flags_affected:
-  C: No effect
-  Z: No effect
+  note: >-
+    GETBRK REQUIRES a flag effect -- WC, WZ or WCZ -- and each selects a DIFFERENT
+    result, so "no effect" is never the whole answer for this instruction. The rows
+    below describe the flag when its effect is specified.
+  C: >-
+    With WC: set from the break/status word GETBRK returns. GETBRK has no no-effect
+    form, so C is only meaningful when WC or WCZ is written.
+  Z: >-
+    With WZ: Z = 1 when NO SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), and
+    Z = 0 when a pattern IS queued (D <> 0).
+  source: >-
+    Propeller 2 Documentation v35 (Rev B/C), GETBRK D WZ --
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2591: "Z = 1 if no
+    SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0)".
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
