@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-26T08:32:28.787493",
+    "generated": "2026-08-26T09:17:03.753944",
     "total_entries": 1132,
     "total_categories": 59,
     "total_aliases": 2061,
@@ -8476,13 +8476,13 @@
     },
     "p2kbHwAddonWxAdapterAddonWxAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-wx-adapter.yaml",
-      "mtime": 1787695381,
-      "sha256": "0f7b5e2183bb995dfc0e1dc4a158974edcb9e455d194141a73341e8d542e50ca"
+      "mtime": 1787735549,
+      "sha256": "b304374dde4266066ece48ebbb53d97ab4643a06878e0531cb1afe011e85504a"
     },
     "p2kbHwAddonWxWifiAddonWxWifi": {
       "path": "deliverables/ai/P2/hardware/addon-wx-wifi.yaml",
-      "mtime": 1787686929,
-      "sha256": "87acbde01f982a5a233621cd60444f22172f4d174bf1b28fff82fb44053513ea"
+      "mtime": 1787735549,
+      "sha256": "4512a69f6a19b3e412a4f96da9757a3d5b10c6a6fcd8f10e64b761dff30d1b9b"
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
