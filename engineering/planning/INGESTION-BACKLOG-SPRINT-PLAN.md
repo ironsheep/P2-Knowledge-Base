@@ -37,10 +37,18 @@ those verdicts against it is the *filling*, and the second half is where the val
 
 ### Out
 
-- Sources with **no primary document staged**: `iron-sheep-compiler`, `quick-bytes-code`,
+- ~~Sources with **no primary document staged**: `iron-sheep-compiler`, `quick-bytes-code`,
   `p2docs-github-io`, `taqoz`, `rom-booter`, `flash-loader`, `p2-qa-spreadsheet`,
-  `pnut-ts-pasm-ref`, and the queued P1 datasheet/manual. Several need an external fetch;
-  **not done unattended.**
+  `pnut-ts-pasm-ref`, and the queued P1 datasheet/manual.~~
+
+  ⚠️ **CORRECTED 2026-08-26 («#318») — this line was wrong on five of eight (→ F-371).** It came
+  from testing for a document-shaped file (`-name '*.pdf' -o -name '*.docx'`) applied to sources
+  whose primary artifact is a `.lst` listing, a `.spin2` source, a JSON database, an `.xlsx`, or
+  code archives. `rom-booter`, `flash-loader`, `pnut-ts-pasm-ref`, `p2-qa-spreadsheet` and
+  `quick-bytes-code` all hold their primary artifact and are **not blocked**; `taqoz` was ingested
+  in «#317». **Genuinely needing an external fetch: `p2docs-github-io` and `iron-sheep-compiler`
+  only**, plus P1 (tracked separately). The authoritative list is now the *"What is actually
+  outstanding"* section of `engineering/ingestion/README.md`.
 - Rows at 95–99% that are residual-gap percentages on already-re-ingested sources
   (p2-datasheet, p2-hardware-manual, the add-on wave) — re-running buys nothing.
 - **No YAML edits.** `ingest-source` routes conflicts to the corrections register; the YAML

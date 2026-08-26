@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-371`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-372`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,51 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The sprint plan's "8 blocked sources" was wrong on five of them (2026-08-26, «#318») — F-371
+
+### F-371 — a document-shaped-file test was applied to sources whose primary artifact is not a document — `RESOLVED`
+
+**This is my own error, in the plan I wrote, and it materially misinformed the reader.** The
+ingestion-backlog sprint plan told Stephen that **8 sources are blocked — "no primary document
+staged"** and named them. The classification came from one test:
+
+```
+find <src> -maxdepth 1 \( -name '*.pdf' -o -name '*.docx' \)
+```
+
+That is a test for a **document-shaped file**. Five of the eight sources have a primary artifact
+that is not a document, so the test returned nothing and the absence was read as *blocked*.
+
+| Source | What it actually holds | Verdict |
+|---|---|---|
+| `rom-booter` | `ROM_Booter.lst` **411 KB** + `rom_booter_v33_01j.lst` **432 KB** | **not blocked** — needs audit + cross-source |
+| `flash-loader` | `flash_loader.spin2` + a 38 KB Theory-of-Operations | **not blocked** — needs audit + cross-source |
+| `pnut-ts-pasm-ref` | `PASM2-Instruction-Database.json` **322 KB** | **not blocked** — needs an audit rollup |
+| `p2-qa-spreadsheet` | the `.xlsx` in `external-inputs/p2/`; **991 rows already extracted, audit present** | **not blocked** — needs cross-source |
+| `quick-bytes-code` | 3 code archives + a `.spin2` | **not blocked, and mis-scoped** — a *community artifact* to catalogue, not a 7-pass ingestion |
+| `p2docs-github-io` | narrative + validation report only | **blocked** — needs the site |
+| `iron-sheep-compiler` | one condition-codes `.md` | **blocked** — needs compiler output |
+
+**Two genuinely blocked, not eight.**
+
+**The dashboard said so all along.** `rom-booter`'s note reads *".lst assembly; no audit /
+cross-source"* and `p2-qa-spreadsheet`'s reads *"991 rows; audit present; no cross-source"*. **The
+rows I was classifying already carried the answer**; the test I ran did not read them. A second
+error compounded it — an inventory using `find ! -name '*.md'` hid `p2-qa-spreadsheet`'s extraction
+and audit, because both are `.md`.
+
+**Why this is filed rather than quietly corrected.** It is the same defect class this sprint kept
+finding in the dashboard — **a number or a status produced by a check that was not measuring what
+its label claimed**. F-250's `100% (stated)` over digit-free text, the PASM2 Manual's 64% measuring
+the document rather than the capture, `quick-bytes-code`'s 15% grading a catalogue task on an
+ingestion scale, and now a *blocked* label produced by a filename pattern. **Writing my own instance
+of it into the same register is the only thing that makes the pattern visible as a pattern.**
+
+**Fixed** in `engineering/ingestion/README.md` — a new *"What is actually outstanding, and what would
+unblock it"* section gives each source its real primary artifact, what is genuinely missing, and
+whether it needs anything from outside the repo. **Status `RESOLVED`:** the plan's claim is corrected
+in the dashboard, which is what the next session reads.
 
 ## The TAQOZ author says ROM TAQOZ is an EARLY build, not just a cut-down one (2026-08-26, «#317») — F-370
 
