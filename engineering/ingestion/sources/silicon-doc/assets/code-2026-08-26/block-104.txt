@@ -1,0 +1,6 @@
+    WRPIN   D/#,S/#         - Set smart pin S/# mode to D/#, ack pin
+    WXPIN   D/#,S/#         - Set smart pin S/# parameter X to D/#, ack pin
+    WYPIN   D/#,S/#         - Set smart pin S/# parameter Y to D/#, ack pin
+    RDPIN   D,S/# {WC}      - Get smart pin S/# result Z into D, flag into C, ack pin
+    RQPIN   D,S/# {WC}      - Get smart pin S/# result Z into D, flag into C, don't ack pin
+    AKPIN   S/#             - Acknowledge pin S/#

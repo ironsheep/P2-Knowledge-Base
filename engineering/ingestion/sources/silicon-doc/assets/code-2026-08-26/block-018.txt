@@ -1,0 +1,2 @@
+ALTSN   index,#base		'set next D field to base+index[11:3], next N to index[2:0]
+SETNIB  value			'set nibble to value ('SETNIB S/#' = 'SETNIB 0,S/#,#0')

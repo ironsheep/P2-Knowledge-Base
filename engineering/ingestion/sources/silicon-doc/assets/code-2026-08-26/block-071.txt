@@ -1,0 +1,4 @@
+                                 'int1 isr, runs once every 50 clocks
+isr1    drvnot  #1               'toggle p1
+        addct1  ct1,#50          'update ct1 target
+        reti1	                    'return to main program

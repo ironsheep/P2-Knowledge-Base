@@ -1,0 +1,6 @@
+    S = 0 for PTRA, 1 for PTRB
+    U = 0 to keep PTRx same, 1 to update PTRx (PTRx += INDEX*SCALE)
+    P = 0 to use PTRx + INDEX*SCALE, 1 to use PTRx (post-modify)
+    IIIIII = INDEX6, uses %100000..%111111 for -32..-1 and %000000..%011111 for 0..31
+    NNNNN = INDEX, uses %00001..%01111 for 1..15 and %00000 for 16
+    nnnnn = -INDEX, uses %10000..%11111 for -16..-1

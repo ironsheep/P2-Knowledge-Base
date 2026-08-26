@@ -1,0 +1,4 @@
+       RDPIN   x,#adcpin              'get SINC2 accumulator
+       SHL     x,#5                   'prescale 27-bit to 32-bit
+       SUB     x,diff                 'compute sample
+       ADD     diff,x                 'update diff value

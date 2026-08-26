@@ -1,0 +1,6 @@
+                 ____0     ____1     ____2     ____3     ____4     ____5     
+Clock:          /    \____/    \____/    \____/    \____/    \____/    \____/
+DIRA:           |         |  DIRA-->|   REG-->|   REG-->|   REG-->| P0 DRIV |
+OUTA:           |         |  OUTA-->|   REG-->|   REG-->|   REG-->| P0 HIGH |
+                |                   |
+Instruction:    | DRVH #0           |                                        

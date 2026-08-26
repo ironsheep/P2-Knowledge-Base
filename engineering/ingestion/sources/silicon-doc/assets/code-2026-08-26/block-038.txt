@@ -1,0 +1,4 @@
+        JMP     #hub    '$FD9FFFEC      hub to hub, relative
+        JMP     #\hub   '$FD802000      hub to hub, force absolute
+        JMP     #@hub   '$FD9FFFE4      hub to hub, relative
+        JMP     #\@hub  '$FD802000      hub to hub, force absolute

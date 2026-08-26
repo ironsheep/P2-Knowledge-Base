@@ -1,0 +1,2 @@
+ALTGB   index,#base		'set next S field to base+index[10:2], next N to index[1:0]
+GETBYTE value			'get byte into value ('GETBYTE D' = 'GETBYTE D,0,#0')

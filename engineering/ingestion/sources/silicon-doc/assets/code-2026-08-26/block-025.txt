@@ -1,0 +1,2 @@
+ALTGW   index,#base		'set next S field to base+index[9:1], next N to index[0]
+GETWORD value			'get word into value ('GETWORD D' = 'GETWORD D,0,#0')

@@ -1,0 +1,8 @@
+$1F0		RAM / IJMP3		interrupt call   address for INT3
+$1F1		RAM / IRET3		interrupt return address for INT3
+$1F2		RAM / IJMP2		interrupt call   address for INT2
+$1F3		RAM / IRET2		interrupt return address for INT2
+$1F4		RAM / IJMP1		interrupt call   address for INT1
+$1F5		RAM / IRET1		interrupt return address for INT1
+$1F6		RAM / PA		CALLD-imm return, CALLPA parameter, or LOC address
+$1F7		RAM / PB		CALLD-imm return, CALLPB parameter, or LOC address

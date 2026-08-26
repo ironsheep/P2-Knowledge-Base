@@ -1,0 +1,2 @@
+ALTSB   index,#base		'set next D field to base+index[10:2], next N to index[1:0]
+SETBYTE value			'set byte to value ('SETBYTE S/#' = 'SETBYTE 0,S/#,#0')

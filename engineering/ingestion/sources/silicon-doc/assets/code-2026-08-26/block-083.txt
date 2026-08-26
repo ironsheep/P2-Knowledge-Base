@@ -1,0 +1,5 @@
+    $000..$1FF		- register whose 20 LSBs will be used as the hub address
+    #$00..$FF			- 8-bit immediate hub address
+    ##$00000..$FFFFF	- 20-bit immediate hub address (invokes AUGS)
+    PTRx {[index5]}		- PTR expression with a 5-bit scaled index
+    PTRx {[##index20]}	- PTR expression with a 20-bit unscaled index (invokes AUGS)

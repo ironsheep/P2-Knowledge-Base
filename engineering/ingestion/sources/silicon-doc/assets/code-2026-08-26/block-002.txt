@@ -1,0 +1,3 @@
+	AUGS	#$FFFFF123	'This AUGS is intended for the ADD instruction.
+	ALTD	index,#base	'Look out! AUGS will affect #base, too. Use a register, instead.
+	ADD	0-0,#$123	'#$123 will be augmented by the AUGS and cancel the AUGS.

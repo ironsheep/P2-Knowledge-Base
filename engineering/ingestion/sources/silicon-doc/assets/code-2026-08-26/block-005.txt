@@ -1,0 +1,2 @@
+COGID   myID			'reload and restart me at PTRB
+COGINIT myID,PTRB

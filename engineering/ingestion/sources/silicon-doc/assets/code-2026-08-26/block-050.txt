@@ -1,0 +1,3 @@
+loop		RFBYTE	i		'get a bytecode
+RDLUT	e,i		'lookup long in LUT
+EXECF	e		'jump to e[9:0] and SKIPF e[31:10], RETs branch to 'loop'

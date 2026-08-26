@@ -1,0 +1,3 @@
+SHL	i,#1		'index - zero to two of these three (4 possibilities)
+SHL	i,#2
+ADD	m,i

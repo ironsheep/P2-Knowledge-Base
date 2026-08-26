@@ -1,0 +1,3 @@
+       WRPIN/WXPIN/WYPIN/RDPIN/AKPIN   'acknowledge smart pin, releases IN from high
+       NOP                             'elapse 2 clocks (or more)
+       TESTP   pin     WC              'IN can now be polled again

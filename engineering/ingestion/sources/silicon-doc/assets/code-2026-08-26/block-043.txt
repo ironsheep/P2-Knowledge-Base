@@ -1,0 +1,3 @@
+addr		RFBYTE	m		'offset - one of these three (3 possibilities)
+RFWORD	m
+RFLONG	m

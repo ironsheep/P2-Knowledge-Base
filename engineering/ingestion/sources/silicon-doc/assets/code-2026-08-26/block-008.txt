@@ -1,0 +1,8 @@
+$1F8		PTRA			pointer A to hub RAM
+$1F9		PTRB			pointer B to hub RAM
+$1FA		DIRA			output enables for P31..P0
+$1FB		DIRB			output enables for P63..P32
+$1FC		OUTA			output states for P31..P0
+$1FD		OUTB			output states for P63..P32
+$1FE		INA *			input states for P31..P0
+$1FF		INB **			input states for P63..P32

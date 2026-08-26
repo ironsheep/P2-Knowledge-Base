@@ -1,0 +1,2 @@
+        GETCT   x               'get initial CT
+        ADDCT1  x,#500          'make initial CT1 target

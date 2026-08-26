@@ -1,0 +1,2 @@
+ALTI    inst,#%101_100_100	'execute inst (same as 'ALTI inst')
+NOP				'NOP becomes inst

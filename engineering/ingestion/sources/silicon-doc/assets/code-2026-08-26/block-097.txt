@@ -1,0 +1,2 @@
+	GETQX   lower_long
+	GETQY   upper_long

@@ -1,0 +1,12 @@
+1000 dddd eppp pppa   -    1/8 RFBYTE ->  1-pin + 1-DAC1         1 out   %00000000_00000000_00000000_aaaaaaaa
+1001 dddd eppp pp0a   -    1/4 RFBYTE ->  2-pin + 2-DAC1         2 out   %00000000_00000000_bbbbbbbb_aaaaaaaa
+1001 dddd eppp pp1a   -    1/4 RFBYTE ->  2-pin + 1-DAC2         2 out   %00000000_00000000_00000000_babababa
+1010 dddd eppp p00a   -    1/2 RFBYTE ->  4-pin + 4-DAC1         4 out   %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+1010 dddd eppp p01a   -    1/2 RFBYTE ->  4-pin + 2-DAC2         4 out   %00000000_00000000_dcdcdcdc_babababa
+1010 dddd eppp p10a   -    1/2 RFBYTE ->  4-pin + 1-DAC4         4 out   %00000000_00000000_00000000_dcbadcba
+1010 dddd eppp 0110   -        RFBYTE ->  8-pin + 4-DAC2         8 out   %hghghghg_fefefefe_dcdcdcdc_babababa
+1010 dddd eppp 0111   -        RFBYTE ->  8-pin + 2-DAC4         8 out   %00000000_00000000_hgfehgfe_dcbadcba
+1010 dddd eppp 1110   -        RFBYTE ->  8-pin + 1-DAC8         8 out   %00000000_00000000_00000000_hgfedcba
+1010 dddd eppp 1111   -        RFWORD -> 16-pin + 4-DAC4        16 out   %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+1011 dddd eppp 0000   -        RFWORD -> 16-pin + 2-DAC8        16 out   %00000000_00000000_ponmlkji_hgfedcba
+1011 dddd eppp 0001   -        RFLONG -> 32-pin + 4-DAC8        32 out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba

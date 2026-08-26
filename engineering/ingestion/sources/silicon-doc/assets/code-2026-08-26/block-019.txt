@@ -1,0 +1,2 @@
+ALTGN   index,#base		'set next S field to base+index[11:3], next N to index[2:0]
+GETNIB  value			'get nibble into value ('GETNIB D' = 'GETNIB D,0,#0')

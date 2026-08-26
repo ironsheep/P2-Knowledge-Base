@@ -1,0 +1,3 @@
+SETS    D,S/#			'set D[8:0] to S/#[8:0]
+SETD    D,S/#			'set D[17:9] to S/#[8:0]
+SETR    D,S/#			'set D[27:19] to S/#[8:0]

@@ -1,0 +1,2 @@
+ALTD    index,#table	'set next D field to table+index
+MOV     0,INA			'write INA to register[table+index]

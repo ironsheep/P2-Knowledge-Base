@@ -1,0 +1,4 @@
+       RDPIN   x,#adcpin              'get SINC2 accumulator
+       SUB     x,diff                 'compute sample
+       ADD     diff,x                 'update diff value
+       ZEROX   x,#26                  'trim to 27-bit

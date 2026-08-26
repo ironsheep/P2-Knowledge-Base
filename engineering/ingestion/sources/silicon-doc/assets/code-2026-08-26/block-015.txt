@@ -1,0 +1,2 @@
+ALTR    pointer		'set next write to pointer
+XOR     INA,INB		'write INA^INB to register[pointer]

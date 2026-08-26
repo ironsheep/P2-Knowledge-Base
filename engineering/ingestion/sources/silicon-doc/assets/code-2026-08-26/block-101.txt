@@ -1,0 +1,2 @@
+	SETQ    Q/#			- Set Y
+	QROTATE D/#,S,#		- Rotate (D,Q) by S

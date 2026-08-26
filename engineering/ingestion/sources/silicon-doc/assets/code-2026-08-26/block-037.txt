@@ -1,0 +1,4 @@
+hub     JMP     #cog    '$FD800000      hub to cog, always absolute
+        JMP     #\cog   '$FD800000      hub to cog, always absolute
+        JMP     #@cog   '$FD9FEFF4      hub to hub, relative
+        JMP     #\@cog  '$FD801000      hub to hub, force absolute

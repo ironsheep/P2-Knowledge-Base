@@ -1,0 +1,4 @@
+        HUBSET  #$F0                                'set 20 MHz+ (RCFAST) mode
+        HUBSET  ##%1_100111_0100101000_1111_10_00   'enable crystal+PLL, stay in RCFAST mode
+        WAITX   ##20_000_000/100                    'wait ~10ms for crystal+PLL to stabilize
+        HUBSET  ##%1_100111_0100101000_1111_10_11   'now switch to PLL running at 148.5 MHz

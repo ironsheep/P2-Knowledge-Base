@@ -1,0 +1,3 @@
+	SETQ	#16-1		'ready to load 16 longs
+	ALTD	start_reg	'alter start register (ALTD cancels block-size PTRx deltas)
+	RDLONG	0,ptra++	'ptra will only be incremented by 4 (1 long), not 16*4 as anticipated!!!

@@ -1,0 +1,5 @@
+SETCY   {#}D		- Set colorspace converter CY parameter to D[31:0]
+SETCI   {#}D		- Set colorspace converter CI parameter to D[31:0]
+SETCQ   {#}D		- Set colorspace converter CQ parameter to D[31:0]
+SETCFRQ {#}D		- Set colorspace converter CFRQ parameter to D[31:0]
+SETCMOD {#}D		- Set colorspace converter CMOD parameter to D[8:0]

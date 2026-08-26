@@ -1,0 +1,7 @@
+SKIP	#%010110	'initiate skip sequence (skip 2nd, 3rd, 5th instruction)
+DRVN	#0		'drive and invert pin 0 (executes)
+DRVN	#1		'drive and invert pin 1 (NOP)
+DRVN	#2		'drive and invert pin 2 (NOP)
+DRVN	#3		'drive and invert pin 3 (executes)
+DRVN	#4		'drive and invert pin 4 (NOP)
+DRVN	#5		'drive and invert pin 5 (executes)

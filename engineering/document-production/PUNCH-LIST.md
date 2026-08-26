@@ -1,5 +1,7 @@
 # Document Production — Punch List
 
+- **`enhance_smartpins_context_from_docx.py` is dead code** — OPEN. `engineering/tools/extraction/enhance_smartpins_context_from_docx.py` (174 lines) hardcodes `/Users/stephen/Projects/...` absolute paths that do not exist in the devcontainer, so it cannot run here. It also does not parse DOCX despite its name — it reads an already-extracted text file. Noticed 2026-08-26 while checking for reuse before writing `docx_walk.py`. Decide: repath it, or retire it to `archive/`.
+
 Cross-cutting document-production cleanup items that are **not** specific to a single
 manual. Per-manual items live in each `workspace/<slug>/PUNCH-LIST.md`.
 

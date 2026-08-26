@@ -1,0 +1,4 @@
+SETR    inst,op		'set register[27:19] to op[8:0]
+NOP				'first spacer instruction, could be anything
+NOP				'second spacer instruction, could be anything
+inst	MOV     x,y			'operate on x using y, MOV can become AND/OR/XOR/etc.

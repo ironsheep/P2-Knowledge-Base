@@ -1,0 +1,2 @@
+	SETQ    #x				'x = number of longs, minus 1
+	RDLONG  first_reg,PTRA++		'read x+1 longs from PTRA, PTRA += (x+1)*4

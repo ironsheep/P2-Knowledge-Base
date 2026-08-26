@@ -1,0 +1,5 @@
+         for odd pins,  'OTHER' = even pin's NOT output state (diff source)
+         for even pins, 'OTHER' = unique pseudo-random bit (noise source)
+         for all pins,  'SMART' = smart pin output which overrides OUT/OTHER
+         'DAC_MODE' is enabled when M[12:10] = %101
+         'BIT_DAC' outputs {2{M[7:4]}} for 'high' or {2{M[3:0]}} for 'low' in DAC_MODE

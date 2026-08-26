@@ -1,0 +1,4 @@
+       SHR     D,#8        WC   'get byte into D, get toggle bit into C
+       RCL     flags,#1         'rotate toggle bit into buffer
+       TEST    flags,#%11  WC   'if new and old toggle bits differ, C = 1
+IF_C   <use byte in D>          'if new byte, do something with it

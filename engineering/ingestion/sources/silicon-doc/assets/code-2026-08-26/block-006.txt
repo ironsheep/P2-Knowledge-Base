@@ -1,0 +1,2 @@
+COGID   myID			'stop me
+COGSTOP myID

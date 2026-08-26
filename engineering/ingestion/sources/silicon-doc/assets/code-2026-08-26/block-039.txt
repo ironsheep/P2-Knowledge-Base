@@ -1,0 +1,2 @@
+REP     #1,##1000		'toggle pin 0 1000 times (1 instruction x 1000)
+DRVNOT  #0			'output and toggle pin 0 (2 clocks per toggle)

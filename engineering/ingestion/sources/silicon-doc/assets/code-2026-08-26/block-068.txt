@@ -1,0 +1,4 @@
+ .loop  WAITCT1                 'wait for CT to pass CT1 target
+        ADDCT1  x,#500          'update CT1 target
+        DRVNOT  #0              'toggle P0
+        JMP     #.loop          'loop to the WAITCT1

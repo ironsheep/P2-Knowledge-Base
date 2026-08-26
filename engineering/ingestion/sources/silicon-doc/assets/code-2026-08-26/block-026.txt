@@ -1,0 +1,2 @@
+ALTGW   index,#base		'set next S field to base+index[9:1], next N to index[0]
+ROLWORD value			'ROL word into value ('ROLWORD D' = 'ROLWORD D,0,#0')

@@ -1,0 +1,4 @@
+    #%0AAAAAAAA					- No AUGS, 8-bit immediate address
+    #%1SUPNNNNN					- No AUGS, PTR expression with a 5-bit scaled index
+    ##%000000000000AAAAAAAAAAA_AAAAAAAAA	- AUGS, 20-bit immediate address
+    ##%000000001SUPNNNNNNNNNNN_NNNNNNNNN	- AUGS, PTR expression with a 20-bit unscaled index

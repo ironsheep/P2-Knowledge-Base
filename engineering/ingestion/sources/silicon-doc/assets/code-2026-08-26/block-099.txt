@@ -1,0 +1,2 @@
+	SETQ    Q/#			- Set bottom part of numerator
+	QFRAC   D/#,S,#		- Divide {D:Q} by S

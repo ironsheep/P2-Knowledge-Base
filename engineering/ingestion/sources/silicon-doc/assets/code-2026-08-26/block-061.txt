@@ -1,0 +1,3 @@
+%xxxx_0xxx	Base pin +3 is ignored
+%0xxx_1xxx	Base pin +3 is summed
+%1xxx_1xxx	Base pin +3 is inverted and summed

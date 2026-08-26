@@ -1,0 +1,2 @@
+ALTD    pointer		'set next D field to pointer
+MOV     0,INA			'write INA to register[pointer]

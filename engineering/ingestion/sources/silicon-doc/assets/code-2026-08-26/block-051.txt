@@ -1,0 +1,2 @@
+        PUSH    #$1FF		'push #$1FF onto the hardware stack
+_RET_   SETQ    #$100		'256-long EXECF table at LUT $100, start XBYTE

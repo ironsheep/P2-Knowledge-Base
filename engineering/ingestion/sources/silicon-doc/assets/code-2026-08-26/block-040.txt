@@ -1,0 +1,4 @@
+REP     @.end,reps		'repeat instruction block 'reps' times
+WFBYTE  x			'write x to next byte in hub
+ADD     x,#1			'increment x
+.end

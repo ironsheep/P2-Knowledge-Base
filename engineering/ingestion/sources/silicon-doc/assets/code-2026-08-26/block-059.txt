@@ -1,0 +1,12 @@
+1100 dddd wppp pppa   -         1-pin -> 1-DAC1 + 1/8 WFBYTE     1 in    %00000000_00000000_00000000_aaaaaaaa
+1101 dddd wppp pp0a   -         2-pin -> 2-DAC1 + 1/4 WFBYTE     2 in    %00000000_00000000_bbbbbbbb_aaaaaaaa
+1101 dddd wppp pp1a   -         2-pin -> 1-DAC2 + 1/4 WFBYTE     2 in    %00000000_00000000_00000000_babababa
+1110 dddd wppp p00a   -         4-pin -> 4-DAC1 + 1/2 WFBYTE     4 in    %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+1110 dddd wppp p01a   -         4-pin -> 2-DAC2 + 1/2 WFBYTE     4 in    %00000000_00000000_dcdcdcdc_babababa
+1110 dddd wppp p10a   -         4-pin -> 1-DAC4 + 1/2 WFBYTE     4 in    %00000000_00000000_00000000_dcbadcba
+1110 dddd wppp 0110   -         8-pin -> 4-DAC2 + WFBYTE         8 in    %hghghghg_fefefefe_dcdcdcdc_babababa
+1110 dddd wppp 0111   -         8-pin -> 2-DAC4 + WFBYTE         8 in    %00000000_00000000_hgfehgfe_dcbadcba
+1110 dddd wppp 1110   -         8-pin -> 1-DAC8 + WFBYTE         8 in    %00000000_00000000_00000000_hgfedcba
+1110 dddd wppp 1111   -        16-pin -> 4-DAC4 + WFWORD        16 in    %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+1111 dddd wppp 0000   -        16-pin -> 2-DAC8 + WFWORD        16 in    %00000000_00000000_ponmlkji_hgfedcba
+1111 dddd wppp 0001   -        32-pin -> 4-DAC8 + WFLONG        32 in    %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba

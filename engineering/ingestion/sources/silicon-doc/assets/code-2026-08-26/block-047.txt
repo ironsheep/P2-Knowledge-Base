@@ -1,0 +1,3 @@
+NOP			'index
+SHL	i,#2
+ADD	m,i

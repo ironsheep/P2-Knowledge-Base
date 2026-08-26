@@ -1,0 +1,3 @@
+SKIP    {#}D		'skip by cancelling instructions sequentially per D[0]..D[31]
+SKIPF   {#}D		'like SKIP, but fast due to PC steps of 1..8 - cog/LUT only!
+EXECF   {#}D		'jump to D[9:0] in cog/LUT and initiate SKIPF using D[31:10]

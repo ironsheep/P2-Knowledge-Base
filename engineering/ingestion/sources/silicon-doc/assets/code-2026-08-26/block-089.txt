@@ -1,0 +1,2 @@
+	SETQ2   #x				'x = number of longs, minus 1, to read
+	RDLONG  first_lut,S/#/PTRx		'read x+1 longs starting at first_lut

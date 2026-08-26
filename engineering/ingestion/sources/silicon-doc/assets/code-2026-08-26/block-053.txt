@@ -1,0 +1,4 @@
+ADDPIX  D,S/#			'add bytes with saturation
+MULPIX  D,S/#			'multiply bytes ($FF = 1.0)
+BLNPIX  D,S/#			'alpha-blend bytes according to SETPIV value
+MIXPIX  D,S/#			'mix bytes according to SETPIX/SETPIV value

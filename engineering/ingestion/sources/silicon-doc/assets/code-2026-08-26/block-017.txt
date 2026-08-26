@@ -1,0 +1,2 @@
+ALTB    bitindex		'set next D field to bitindex[13:5]
+TESTB   0,bitindex	WC	'read bit[bitindex[4:0]] into C

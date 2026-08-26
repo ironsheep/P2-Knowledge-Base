@@ -1,0 +1,5 @@
+1111 dddd w--- 0010   ss           1-ADC8 -> 1-DAC8 + WFBYTE     8 in    %00000000_00000000_00000000_hgfedcba
+1111 dddd wppp 0011   ss   1-ADC8 + 8-pin -> 2-DAC8 + WFWORD    16 in    %00000000_00000000_ponmlkji_hgfedcba
+1111 dddd w--- 0100   s-           2-ADC8 -> 2-DAC8 + WFWORD    16 in    %00000000_00000000_ponmlkji_hgfedcba
+1111 dddd wppp 0101   s-  2-ADC8 + 16-pin -> 4-DAC8 + WFLONG    32 in    %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+1111 dddd w--- 0110   --           4-ADC8 -> 4-DAC8 + WFLONG    32 in    %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba

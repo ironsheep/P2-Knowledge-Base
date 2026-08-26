@@ -1,0 +1,2 @@
+MOV	qval,#0		'reset qval
+MUXQ	qval,##$FFFFFFFF	'for each '1' bit in Q, set the same bit in qval

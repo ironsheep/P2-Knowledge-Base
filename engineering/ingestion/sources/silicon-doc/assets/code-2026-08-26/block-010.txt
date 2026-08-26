@@ -1,0 +1,2 @@
+ALTS    index,#table	'set next S field to table+index
+MOV     OUTA,0		'output register[table+index] to OUTA

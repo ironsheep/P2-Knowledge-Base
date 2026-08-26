@@ -1,0 +1,5 @@
+SETXFRQ D/#		- Set NCO frequency
+XINIT   D/#,S/#	- Issue command immediately, zeroing phase
+XZERO   D/#,S/#	- Issue command on final NCO rollover (waits), zeroing phase
+XCONT   D/#,S/#	- Issue command on final NCO rollover (waits), continuing phase
+GETXACC D		- Get Goertzel X into D and Y into next S, clear X and Y

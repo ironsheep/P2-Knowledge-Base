@@ -1,0 +1,12 @@
+0100 dddd eppp pppa   <long>   imm 32 x 1  ->  1-pin + 1-DAC1    1 out   %00000000_00000000_00000000_aaaaaaaa
+0101 dddd eppp pp0a   <long>   imm 16 x 2  ->  2-pin + 2-DAC1    2 out   %00000000_00000000_bbbbbbbb_aaaaaaaa
+0101 dddd eppp pp1a   <long>   imm 16 x 2  ->  2-pin + 1-DAC2    2 out   %00000000_00000000_00000000_babababa
+0110 dddd eppp p00a   <long>   imm  8 x 4  ->  4-pin + 4-DAC1    4 out   %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+0110 dddd eppp p01a   <long>   imm  8 x 4  ->  4-pin + 2-DAC2    4 out   %00000000_00000000_dcdcdcdc_babababa
+0110 dddd eppp p10a   <long>   imm  8 x 4  ->  4-pin + 1-DAC4    4 out   %00000000_00000000_00000000_dcbadcba
+0110 dddd eppp 0110   <long>   imm  4 x 8  ->  8-pin + 4-DAC2    8 out   %hghghghg_fefefefe_dcdcdcdc_babababa
+0110 dddd eppp 0111   <long>   imm  4 x 8  ->  8-pin + 2-DAC4    8 out   %00000000_00000000_hgfehgfe_dcbadcba
+0110 dddd eppp 1110   <long>   imm  4 x 8  ->  8-pin + 1-DAC8    8 out   %00000000_00000000_00000000_hgfedcba
+0110 dddd eppp 1111   <long>   imm  2 x 16 -> 16-pin + 4-DAC4   16 out   %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+0111 dddd eppp 0000   <long>   imm  2 x 16 -> 16-pin + 2-DAC8   16 out   %00000000_00000000_ponmlkji_hgfedcba
+0111 dddd eppp 0001   <long>   imm  1 x 32 -> 32-pin + 4-DAC8   32 out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba

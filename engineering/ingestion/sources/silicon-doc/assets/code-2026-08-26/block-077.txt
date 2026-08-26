@@ -1,0 +1,2 @@
+        SETB    x,#31   'set the MSB of x to make a PRNG seed command
+        HUBSET  x       'seed 32 bits of the Xoroshiro128** state

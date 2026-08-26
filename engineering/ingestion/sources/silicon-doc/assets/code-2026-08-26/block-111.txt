@@ -1,0 +1,8 @@
+.loop  WAITSE1                                        'wait for sample period done
+       RDPIN   x,#adcpin                              'get SINC2 accumulator
+       SUB     x,diff                                 'compute sample
+       ADD     diff,x                                 'update diff value
+       SHR     x,#6                                   'justify 8-bit sample
+       ZEROX   x,#7                                   'trim 8-bit sample
+       'use x here                                    'use sample somehow
+       JMP     #.loop                                 'loop for next period

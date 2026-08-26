@@ -1,0 +1,3 @@
+       WRPIN   ##%100011_0000000_00_11000_0,#adcpin   'configure ADC+filter pin(s)
+       WXPIN   #%10_0111,#adcpin                      'SINC3 filtering at 128 clocks
+       DIRH    #adcpin                                'enable smart pin(s)

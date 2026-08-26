@@ -1,0 +1,2 @@
+        ORGH    $01000
+        ORG     0       'cog code

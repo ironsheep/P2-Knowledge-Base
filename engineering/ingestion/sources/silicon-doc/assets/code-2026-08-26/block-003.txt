@@ -1,0 +1,2 @@
+D/# = 	%0_x_xxxx	The target cog loads its own registers $000..$1F7 from the hub,
+starting at address S/#, then begins execution at register address $000.

@@ -1,0 +1,2 @@
+        HUBSET  ##$2001_FFFF    'enable debug interrupts for cogs 15..0
+                                '..and write-protect the last 16KB of hub RAM

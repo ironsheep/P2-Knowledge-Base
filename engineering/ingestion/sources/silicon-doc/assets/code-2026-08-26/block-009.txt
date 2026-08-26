@@ -1,0 +1,2 @@
+	SETLUTS #0				'disallow writes from other cog (default)
+	SETLUTS #1				'allow writes from other cog

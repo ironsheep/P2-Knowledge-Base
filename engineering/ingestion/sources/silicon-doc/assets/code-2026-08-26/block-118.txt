@@ -1,0 +1,5 @@
+$09	TAB
+$0A	LF
+$0D	CR
+$20	SP
+$3D	"="	(may be present in Base64 data)

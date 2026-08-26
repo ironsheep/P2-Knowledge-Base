@@ -1,0 +1,2 @@
+REP	#1,#8		'pre-stuff 8-level hardware stack with 'loop' address
+PUSH	#loop		'all RETs without CALLs will branch to 'loop'

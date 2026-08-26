@@ -1,0 +1,4 @@
+        HUBSET  ##$4000_0000 + Length<<5 + Tap      'set filt0
+        HUBSET  ##$4000_0080 + Length<<5 + Tap      'set filt1
+        HUBSET  ##$4000_0100 + Length<<5 + Tap      'set filt2
+        HUBSET  ##$4000_0180 + Length<<5 + Tap      'set filt3

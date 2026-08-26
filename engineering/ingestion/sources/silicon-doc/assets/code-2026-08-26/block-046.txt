@@ -1,0 +1,4 @@
+RFBYTE	m		'offset
+ADD	m,pbase	'base
+SHL	i,#2		'index
+ADD	m,i

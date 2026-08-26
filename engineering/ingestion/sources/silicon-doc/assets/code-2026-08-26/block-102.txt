@@ -1,0 +1,2 @@
+	GETQX   X
+	GETQY   Y

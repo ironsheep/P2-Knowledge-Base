@@ -1,0 +1,2 @@
+ALTGN   index,#base		'set next S field to base+index[11:3], next N to index[2:0]
+ROLNIB  value			'ROL nibble into value ('ROLNIB D' = 'ROLNIB D,0,#0')

@@ -1,0 +1,3 @@
+                                 'main program, gets interrupted
+loop    drvnot  #0               'toggle p0
+        jmp     #loop            'loop

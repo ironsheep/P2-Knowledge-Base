@@ -1,0 +1,2 @@
+ALTS    pointer		'set next S field to pointer
+MOV     OUTA,0		'output register[pointer] to OUTA

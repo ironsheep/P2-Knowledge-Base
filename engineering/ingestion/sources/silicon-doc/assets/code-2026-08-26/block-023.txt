@@ -1,0 +1,2 @@
+ALTGB   index,#base		'set next S field to base+index[10:2], next N to index[1:0]
+ROLBYTE value			'ROL byte into value ('ROLBYTE D' = 'ROLBYTE D,0,#0')

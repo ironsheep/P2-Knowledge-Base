@@ -1,0 +1,2 @@
+	SETQ    Q/#			- Set top part of numerator
+	QDIV    D/#,S,#		- Divide {Q:D} by S

@@ -1,0 +1,2 @@
+ALTB    bitindex,#base	'set next D field to base+bitindex[13:5]
+BITC    0,bitindex		'write C to bit[bitindex[4:0]]
