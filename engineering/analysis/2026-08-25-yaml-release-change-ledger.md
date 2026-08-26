@@ -1676,3 +1676,82 @@ that DID come back**, which is a category this ledger's key-level accounting can
 
 *Written 2026-08-25 from `v1.17.0..0a5323ab`. Every quantity re-derived from git and from parsed
 YAML at the time of writing. No YAML was edited in the making of this document.*
+
+
+---
+
+# ADDENDUM — commit `ad4f974f`, added after this ledger was first written
+
+> ⚠️ **This ledger was built against the range ending at `43061dad`.** One further commit has since
+> touched the shipped set, and it is included here so the review covers the whole release. Nothing
+> above is changed by it.
+
+**`ad4f974f` — "Document what the streamer captures, and why a smart-pin bus must be watched from
+next door"** · 12 YAML files · **+741 / −75**
+
+## The reason, and the lack behind it
+
+Stephen asked a research question — *can four smart pins running SPI be traced through their
+nearest neighbours via the streamer, at Nyquist rates?* Answering it required four facts. The KB
+carried two well, one half, and **one not at all**: that on a pin running a smart-pin mode, `IN` is
+the smart pin's event flag rather than the pin's logic level.
+
+**The lack:** the KB stated only the harmless half of that fact — *"the resultant 'A' will drive
+the IN signal in non-smart-pin modes"* — as an aside inside the input-selector discussion. **Nothing
+stated the contrapositive**, which is the operative half. A reader could conclude direct capture
+works, build it, and record ready-pulses instead of traffic. Nothing checked for a missing
+contrapositive because no instrument can.
+
+## What changed
+
+| File | |
+|---|---|
+| `architecture/streamer/pin-capture.yaml` | +312 / −0 |
+| `architecture/streamer/pin-selection.yaml` | +188 / −57 |
+| `architecture/smart_pins.yaml` | +85 / −0 |
+| `architecture/streamer/modes-reference.yaml` | +42 / −7 |
+| `architecture/streamer/_index.yaml` | +25 / −0 |
+| `language/spin2/debug-displays/logic.yaml` | +22 / −0 |
+| `architecture/streamer/overview.yaml` | +21 / −4 |
+| `architecture/streamer/dds-goertzel.yaml` | +15 / −3 |
+| `architecture/streamer/nco-timing.yaml` | +11 / −2 |
+| `architecture/streamer/dac-routing.yaml` | +10 / −2 |
+| `language/pasm2/wrpin.yaml` | +9 / −0 |
+| `architecture/pin-drive-configuration.yaml` | +1 / −0 |
+
+**Added.** `architecture/streamer/pin-capture.yaml` (new) — why capturing a smart-pin bus directly
+fails, the neighbour-routing composition, the alignment rule restated where it would be copied, and
+an explicit refusal to state a sample-rate ceiling no source gives.
+`smart_pins.yaml` gains `in_signal_semantics:`. All seven streamer files gain `aliases:` — they had
+**none**, so none was reachable by name.
+
+**Corrected.** `pin-selection.yaml`'s `input_modes:` said only *"WRFAST enabled"*; it now states
+what is read, the widths, and the accrual rule. Its `sub_pin_selection` table gave a dense-slot
+mapping contradicting the 8-pin-increment rule **and printed the unaligned-base trap as the line a
+reader copies** — filed as **F-361**. `smart_pins.yaml`'s `in_flag.clearing` listed three
+instructions; the source gives five.
+
+**Judgement, not correction.** `logic analyzer` now resolves to **both** the capture page and the
+DEBUG LOGIC window, rather than one replacing the other — a capture and its display compose.
+
+## Two claims of mine this commit corrected
+
+1. I reported that `logic analyzer` misrouted to a Spin2 `LOGIC` **operator**. **No such operator
+   exists in the KB** — it resolves to the DEBUG LOGIC display window, which is the P2's actual
+   logic-analyser. The alias was right all along; I had diagnosed a confident wrong answer and
+   produced one.
+2. I wrote that `RQPIN` lowers the `IN` flag. The Silicon Doc says read-quiet **does not
+   acknowledge** — which is precisely why many cogs can use it at once.
+
+## Status of this material — read before relying on it
+
+An external project building the same instrument has since reported a bench result that would
+**contradict the mechanism above** — that the streamer reads the pin rather than `IN`, making
+neighbour routing ineffective. **Stephen has withdrawn that report as not yet reliable**
+(2026-08-26): their tool is still being brought up, and real findings will follow.
+
+**So this content stands as shipped** — it is sourced to the Silicon Doc (`p2-documentation.txt:3961`,
+`:7833`, `:7615`) and correctly cited — **but it is the documentary reading, and a bench result
+outranks it in this project's authority order.** `VO-J-005` is written and its arm D is close to the
+deciding experiment. Treat this section as the one place in the release where a known challenge is
+outstanding.
