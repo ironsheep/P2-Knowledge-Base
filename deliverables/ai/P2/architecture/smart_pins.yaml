@@ -230,8 +230,8 @@ in_signal_semantics:
   source: "Propeller 2 Documentation v35, Smart Pins -- the IN-signal handshake at
     engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157 (same text
     in the whole-document extraction at
-    engineering/ingestion/sources/silicon-doc/p2-documentation.txt:7833-7838), and the
-    non-smart-pin case at part4-smart-pins.txt:50 (p2-documentation.txt:7615)."
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3845), and the
+    non-smart-pin case at part4-smart-pins.txt:50 (silicon-doc-text.txt:3767)."
 
   rule: |
     A pin's IN signal does not mean one thing. What it carries depends entirely on
@@ -279,7 +279,7 @@ in_signal_semantics:
     signal and its output state, as read from an adjacent pin\" --
     engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144. The pin-capture
     read source is Propeller 2 Documentation v35, Pins => DACs/WRFAST,
-    engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961."
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535."
 
   related:
     - architecture/streamer/pin-capture.yaml
@@ -465,7 +465,7 @@ in_flag:
     whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on it. This causes the smart
     pin to lower its IN signal...\" and the RQPIN exception, at
     engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-153
-    (p2-documentation.txt:7833-7837). The list previously named only RDPIN and AKPIN."
+    (silicon-doc-text.txt:3845). The list previously named only RDPIN and AKPIN."
 
   event_driven_waiting:
     description: "Use events instead of polling for efficient waiting"

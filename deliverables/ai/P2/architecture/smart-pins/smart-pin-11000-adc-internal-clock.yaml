@@ -143,11 +143,11 @@ configuration_constants:
   adc_input_modes:
     # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the
     # ADC's input. Only the 1x..100x entries are pin-input gain ranges.
-    # Silicon Doc p2-documentation.txt:452 - "Delta-sigma ADC with 5 ranges, 2 sources,
+    # Silicon Doc silicon-doc-text.txt:200 - "Delta-sigma ADC with 5 ranges, 2 sources,
     # and VIO/GIO calibration." Mode-name glosses: spin2-v55-text.txt:1466-1473.
     - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
     - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
-    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range (Silicon Doc p2-documentation.txt:188-190)"
+    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range (Silicon Doc silicon-doc-text.txt:115)"
     - "P_ADC_1X - 1x gain"
     - "P_ADC_3X - 3.16x gain (sqrt-10-spaced ladder)"
     - "P_ADC_10X - 10x gain"

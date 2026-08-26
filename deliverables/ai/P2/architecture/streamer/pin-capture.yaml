@@ -50,7 +50,7 @@ description: |
   pin's level, and the capture records the waveform.
 
 source: "Propeller 2 Documentation v35 -- the capture path at
-  engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961-3966, the %w rule
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535, the %w rule
   at :3604-3605, the pin-group and alignment rules at :3606-3651 and :3653, and the
   IN-signal handshake at :7833-7838 with the non-smart-pin case at :7615 (section
   extraction: engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157

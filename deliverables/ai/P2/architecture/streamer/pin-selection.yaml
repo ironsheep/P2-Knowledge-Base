@@ -11,7 +11,7 @@ description: Pin group selection via %ppp field and sub-pin selection
 
 source: "Propeller 2 Documentation v35, Streamer -- the %ppp pin-group rule and the
   sub-8-pin resolution rule at
-  engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3606-3651 and :3653;
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443 and :3653;
   the %e / %w meanings at :3603-3605; per-mode D[19:16] templates from the Spin2 v55
   streamer symbol table, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1637."
 
@@ -116,7 +116,7 @@ sub_pin_selection:
     mode families (EF-065, EF-059)."
   source: "Propeller 2 Documentation v35: \"In every mode, the three %ppp bits in
     D[22:20] select the pin group, in 8-pin increments\"
-    (engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3606) and \"For
+    (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443) and \"For
     modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
     used to further resolve the pin number(s)\" (:3653). Per-width templates from the
     Spin2 v55 streamer symbol table -- X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA,
@@ -150,7 +150,7 @@ enable_control:
       EF-062; grounds F-308). The DIR-high leg started from OUT = 0, so passing proves
       the streamer overrode OUT rather than the OUT bit doing the work."
     source: "Propeller 2 Documentation v35,
-      engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3602-3603 for the
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1439 for the
       OR rule and the %e requirement; EF-062 for the DIR result."
 
   input_modes:
@@ -190,7 +190,7 @@ enable_control:
       architecture/streamer/pin-capture.yaml; the IN rule itself is in
       architecture/smart_pins.yaml in_signal_semantics."
     source: "Propeller 2 Documentation v35, Pins => DACs/WRFAST at
-      engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961-3966 (the read
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535 (the read
       source, the widths, the %w rule and the accrual rule), the %w statement at
       :3604-3605, the bit-order rule at :3654-3655, and the WRFAST prerequisite at
       :3661-3662 with the WRFAST operand definitions at :6693-6701."

@@ -21,7 +21,7 @@ encoding:
   config_field: "D[19:16]"
 
   # How to read the d_19_16 column. Every symbol below is one BIT of D[19:16],
-  # written MSB-first, exactly as the Silicon Doc prints it (p2-documentation.txt
+  # written MSB-first, exactly as the Silicon Doc prints it (silicon-doc-text.txt
   # :3004-3015 immediate, :3128-3139 RDFAST, :3292-3303 WRFAST).
   field_notation:
     "0 / 1": "a FIXED bit. The mode template sets it; you do not."

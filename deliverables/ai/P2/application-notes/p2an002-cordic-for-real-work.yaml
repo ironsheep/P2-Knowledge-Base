@@ -100,7 +100,7 @@ prerequisites:
   - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Propeller 2 Documentation v35 -- CORDIC solver summary engineering/ingestion/sources/silicon-doc/p2-documentation.txt:425,:434, and the GETQX/GETQY no-result event at :5145,:5401; hardware-verified pipeline behaviour EF-053 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:637-655"
+  source: "Propeller 2 Documentation v35 -- CORDIC solver summary engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175,:434, and the GETQX/GETQY no-result event at :5145,:5401; hardware-verified pipeline behaviour EF-053 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:637-655"
   items:
     - flag: pitfall
       text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED -- a negative operand becomes a huge positive one. For signed data take magnitude and sign separately. QVECTOR/QROTATE ARE signed, being built for coordinates."

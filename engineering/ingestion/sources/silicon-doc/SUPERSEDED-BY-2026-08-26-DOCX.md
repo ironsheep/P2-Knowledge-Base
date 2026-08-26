@@ -39,9 +39,18 @@ re-pointed, and not before.
 Spot-checked 2026-08-26: the sampled shipped-KB locators (`:188`, `:3602`, `:3606`, `:3961`,
 `:3997`, `:3999`) all resolve to content that matches what cites them. **They are not broken.**
 The concern is lineage rather than correctness — they cite a capture now known to be lossy,
-and that capture has produced at least one demonstrated error. Re-anchoring them to
-`silicon-doc-text.txt` is tracked as **F-365**; it is hygiene work, not an emergency, and
-nothing here should be read as saying those 23 citations are currently wrong.
+and that capture has produced at least one demonstrated error. **F-365 is now DONE (2026-08-26, «#320»): all 23 have been re-anchored to `silicon-doc-text.txt`,
+each verified by reading the old target's content and finding it in the new artifact rather than
+translating line numbers.** The shipped KB no longer references this file at all.
+
+**One re-anchor did not resolve, and it was the valuable one.** `%11011 USB`'s sentence *"A new
+WRPIN can be done to effect such a change without resetting the smart pin"* exists here at `:8886`
+and **nowhere in the DOCX capture** — the two editions of v35 write that paragraph differently, and
+the DOCX both adds material (DM/DP naming, `%HHH_LLL` override) and drops that sentence, which
+contradicts the general WRPIN rule. Filed as **F-372** / **G-027**.
+
+**The physical archive-move is still gated**, now on the 266 `engineering/` working-doc references
+rather than on shipped KB citations.
 
 ## Prior derived artifacts in this folder
 

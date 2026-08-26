@@ -38,7 +38,7 @@ adc_input_pins:
     The ADC pins feeding Goertzel are RAW delta-sigma bit streams: configure them for ADC
     mode (a P_ADC_* constant) with smart-pin mode field %00000, and DO NOT set DIR.
     A smart pin left enabled on these pins produces no Goertzel accumulation.
-  source: "Silicon Doc p2-documentation.txt:3997-3998 (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected')"
+  source: "Silicon Doc silicon-doc-text.txt:1563 (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected')"
   source_tension: |
     The Silicon Doc's STREAMER intro (part2-pixel-ops.txt:82) says Goertzel works "from smart
     pins configured as ADC's". That wording is loose and MISLEADS: the DDS/Goertzel section
@@ -62,7 +62,7 @@ adc_input_pins:
       bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits BOUND the
       read to a sub-region of the LUT, so more than one waveform can be resident at
       once; the %T bits are ADDED to the topmost NCO bits, which shifts or modulates
-      the phase of playback. Silicon Doc p2-documentation.txt:4093-4095, verbatim:
+      the phase of playback. Silicon Doc silicon-doc-text.txt:1602, verbatim:
       "On each clock, the lookup RAM is read at the 9-bit location bound by the %A
       bits, with the lower bits being the sum of the %T bits and the topmost NCO
       bits. This allows you to set bounded areas within the LUT and to shift or
@@ -71,8 +71,8 @@ adc_input_pins:
       RF modulation -- named in this mode's own applications list -- is done with the
       %T bits. Nothing downstream can do it while S[11:0] is described only as a
       label.
-    source: "Silicon Doc p2-documentation.txt:4002-4006 and :4062-4095"
-  bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (p2-documentation.txt:3999-4001)."
+    source: "Silicon Doc silicon-doc-text.txt:1565 and :4062-4095"
+  bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (silicon-doc-text.txt:1563)."
   gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
 
 # Operation (every clock cycle)
@@ -117,7 +117,7 @@ lut_setup:
   lut_window:
     description: >-
       S[11:9] selects the loop size; the remaining S[8:0] bits split into %A region
-      bounds and %T phase offset. Silicon Doc p2-documentation.txt:4062-4092.
+      bounds and %T phase offset. Silicon Doc silicon-doc-text.txt:1597.
     settings:
       - {s_11_0: "%000_TTTTTTTTT", loop_size: 512, nco_bits: "30..22", lut_range: "%000000000..%111111111"}
       - {s_11_0: "%001_ATTTTTTTT", loop_size: 256, nco_bits: "30..23", lut_range: "%A00000000..%A11111111"}
@@ -176,7 +176,7 @@ reading_results:
     read in that pattern is not a per-command measurement and looks plausible while
     being meaningless. The XCONT-loop form in the Silicon Doc demo reads once per
     command and subtracts a first-pass baseline.
-  source: "Silicon Doc p2-documentation.txt:4096-4099"
+  source: "Silicon Doc silicon-doc-text.txt:1604"
 
   example: |
     getxacc cos_result       ' Cosine → D
@@ -300,7 +300,7 @@ usage_pattern:
     EF-054 swept %TT on a jumpered cog-DAC pin (%00 = 1,408, no drive; %01 = 6,737)
     and EF-055 watched the spread collapse from 1,305/2,000 samples to 25 once
     P_CHANNEL was added. See F-272 and language/pasm2/wrpin.yaml:54.
-  source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, p2-documentation.txt:4170-4185 (setup) and :4289-4305 (mode/data longs)."
+  source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, silicon-doc-text.txt:1636 (setup) and :4289-4305 (mode/data longs)."
 
 see_also:
   - architecture/streamer/modes-reference.yaml

@@ -1,0 +1,102 @@
+component: P2X8C4M64P Package and Mechanical
+part_number: "P2X8C4M64P"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwPackageMechanical"
+category: hardware
+aliases:
+  - "package"
+  - "package dimensions"
+  - "TQFP"
+  - "TQFP-100"
+  - "TQFP100"
+  - "mechanical drawing"
+  - "case outline"
+  - "footprint"
+  - "land pattern"
+  - "pin pitch"
+  - "PCB footprint"
+  - "package outline"
+
+description:
+  source: >-
+    ON Semiconductor MECHANICAL CASE OUTLINE / PACKAGE DIMENSIONS sheet, reproduced in the
+    Propeller 2 Documentation v35 (Rev B/C Silicon) -- extracted as
+    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png.
+    CASE 932BR, ISSUE O, dated 03 JUL 2018, document 98AON94348G.
+  text: >-
+    The P2X8C4M64P ships in a 100-pin TQFP, 14x14 mm body on a 0.5 mm pitch. This record
+    carries the package outline and the recommended mounting footprint.
+
+package:
+  type: "TQFP-100"
+  body_size: "14 x 14 mm"
+  pitch: "0.5 mm"
+  pin_count: 100
+  case_designation: "CASE 932BR, ISSUE O"
+  drawing_document: "98AON94348G (ON Semiconductor), 03 JUL 2018"
+  controlling_dimension: "millimetres"
+  tolerancing_standard: "ASME Y14.5M, 1994"
+
+# Read off the rendered drawing TWICE -- whole sheet, then the dimension table at 3.5x --
+# with both reads agreeing. Deliberately NOT OCR'd: tesseract misreads digits on these
+# sheets (@/Q for 0, 4 for 1), and these are precision values.
+dimensions_mm:
+  source: >-
+    ON Semiconductor CASE 932BR ISSUE O dimension table, read from the rendered drawing at
+    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png;
+    transcription verified in
+    engineering/analysis/2026-08-26-silicon-doc-retest-of-source-silent-verdicts.md.
+  table:
+    - {dim: "A",  min: null,   nom: null,   max: 1.20,  note: "overall height"}
+    - {dim: "A1", min: 0.05,   nom: null,   max: 0.15,  note: "standoff"}
+    - {dim: "A2", min: 0.95,   nom: 1.00,   max: 1.05,  note: "body thickness"}
+    - {dim: "b",  min: 0.17,   nom: 0.22,   max: 0.27,  note: "lead width"}
+    - {dim: "c",  ref: 0.20,                            note: "lead thickness (REF)"}
+    - {dim: "D",  min: 15.80,  nom: 16.00,  max: 16.20, note: "overall, lead tip to lead tip"}
+    - {dim: "D1", min: 13.80,  nom: 14.00,  max: 14.20, note: "body"}
+    - {dim: "D2", ref: 9.50,                            note: "exposed pad (REF)"}
+    - {dim: "E",  min: 15.80,  nom: 16.00,  max: 16.20, note: "overall, lead tip to lead tip"}
+    - {dim: "E1", min: 13.80,  nom: 14.00,  max: 14.20, note: "body"}
+    - {dim: "E2", ref: 9.50,                            note: "exposed pad (REF)"}
+    - {dim: "e",  bsc: 0.50,                            note: "lead pitch (BSC)"}
+    - {dim: "L",  min: 0.45,   nom: 0.60,   max: 0.75,  note: "foot length"}
+    - {dim: "L1", ref: 1.00,                            note: "REF"}
+    - {dim: "M",  min: "0 deg", nom: null,  max: "7 deg", note: "lead angle"}
+
+recommended_mounting_footprint:
+  source: >-
+    Same drawing, RECOMMENDED MOUNTING FOOTPRINT panel --
+    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png.
+  outer_span: "16.83 mm"
+  inner_span: "9.60 mm"
+  pad_length: "1.49 mm (100X)"
+  pad_width: "0.28 mm (100X)"
+  pitch: "0.50 mm"
+
+pin_numbering:
+  source: >-
+    Same drawing, TOP VIEW -- corner pin callouts and the PIN ONE INDICATOR.
+  corners: "pins 1, 25, 26, 50, 51, 75, 76, 100"
+  pin_one: "marked by a PIN ONE INDICATOR on the top view"
+  note: >-
+    This record covers the PACKAGE. Which P2 signal appears on which package pin is a
+    different question -- see hardware/p2-eval-board.yaml and the boot-pin records for
+    signal-level pin assignments.
+
+thermal_note:
+  source: >-
+    Absence measured 2026-08-26 across the completed silicon-doc extraction and the
+    P2 Datasheet -- see engineering/ingestion/KNOWLEDGE-GAPS.md G-020.
+  status: >-
+    The drawing gives the exposed-pad dimensions (D2/E2, 9.50 REF) but NO thermal resistance
+    figure, derating curve, or land-pattern thermal-via guidance exists in any ingested source.
+    Do not infer a thermal solution from the pad size alone. G-020 remains open.
+
+see_also:
+  - hardware/p2-eval-board.yaml
+  - hardware/edge-standard-module.yaml
+
+ecosystem_position: "silicon_package"
+hardware_family: "p2_silicon"
+interface_type: "package_mechanical"

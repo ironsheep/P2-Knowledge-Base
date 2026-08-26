@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-372`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-373`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,50 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Our USB smart-pin entry states as fact a sentence the DOCX edition dropped, and it contradicts the general WRPIN rule (2026-08-26, «#320» citation re-anchor) — F-372
+
+### F-372 — `%11011` says a new WRPIN needs no reset; the same document's general rule says the opposite — `CONFIRMED`
+
+**How this surfaced.** F-365's re-anchoring reads each stale citation's old target and finds that
+content in the new artifact. Twenty-two of twenty-three matched. **One did not exist in the new
+artifact at all**, which looked like an extraction defect and is not one.
+
+**What the two editions actually say.** Both are labelled *Propeller 2 Documentation v35 (Rev B/C)*.
+
+| | |
+|---|---|
+| **PDF-derived capture** `p2-documentation.txt:8886` | *"…will disable output drive and effectively create a USB 'sniffer'. **A new WRPIN can be done to effect such a change without resetting the smart pin.** NOTE: In Propeller 2 emulation on an FPGA…"* |
+| **DOCX capture** `silicon-doc-text.txt:4579` | *"…will disable the output drive and effectively create a USB 'sniffer'. NOTE: In Propeller 2 emulation on an FPGA…"* — **the sentence is absent** |
+
+The DOCX paragraph is not merely shorter; it is **differently written**, and it *adds* material:
+`%HHH_LLL` drive modes are overridden alongside OUT, and *"The lower pin in the pair is DM, while
+the upper pin is DP, per USB naming convention"* — neither of which the PDF version carries. The
+heading differs too (`%11011 = USB host/device` vs `%11011 = USB host or device, full-speed
+(12Mbps) or low-speed (1.5Mbps)`). **These are two revisions of one document, both claiming v35.**
+
+**Why it matters beyond bookkeeping.** The dropped sentence **contradicts the general rule** this
+same document states at `silicon-doc-text.txt:3856` and that «#319» just applied to
+`architecture/smart_pins.yaml` as F-369: a WRPIN issued while DIR is high remaps 126 bits of state
+underneath a running mode, producing *"unpredictable and quite certainly useless behavior"*, which
+is why modes are configured only while DIR is low.
+
+Two readings, and **documents cannot separate them**:
+
+1. **USB is a genuine exception** — the sniffer change is a drive-enable flip rather than a mode
+   change, so the multiplexing hazard does not apply, and the DOCX simply lost the sentence.
+2. **The sentence was removed because it was wrong**, and the general rule governs `%11011` like
+   everything else.
+
+**Reached our KB?** **Yes — as settled fact.**
+`architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` `configuration.wrpin_data` ends with
+the sentence verbatim, with no caveat, cited to the PDF-derived capture that is now superseded.
+
+**Applied here:** the claim keeps its place — it may well be right, and deleting a plausible
+documented behaviour is its own kind of damage — but it now carries the conflict, cites both
+editions, and points at the gap. **Routed to `KNOWLEDGE-GAPS` as G-027: bench-testable and
+jumper-only** — configure a USB pair, issue a new WRPIN with DIR high, and observe whether the pin
+continues or breaks. That is the only thing that settles it.
 
 ## The sprint plan's "8 blocked sources" was wrong on five of them (2026-08-26, «#318») — F-371
 
