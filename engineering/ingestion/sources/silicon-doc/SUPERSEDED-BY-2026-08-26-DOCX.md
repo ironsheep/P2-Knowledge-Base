@@ -47,6 +47,8 @@ nothing here should be read as saying those 23 citations are currently wrong.
 
 `COG-RAM-REGISTER-MAP.md`, `INSTRUCTION-TIMING-AND-ENCODING.md`, `WW-FIELD-ENCODING.md`,
 `KNOWN-BUGS-CRITICAL.md`, `instruction-encodings-for-verification.md`,
-`silicon-doc-v35-facts-only.md` and the `silicon-doc-v35-*` analyses were all built from the
-superseded capture. They were reconciled against the new extraction in «#310»; the one
+`silicon-doc-v35-facts-only.md`, the `silicon-doc-v35-*` analyses, and the two legacy audit files
+(`silicon-extraction-audit.md` 2025-08-14, and the 2025-08-15 audit of record now preserved at
+`archive/silicon-doc-complete-extraction-audit-2025-08-15.md`) were all built from the superseded
+capture. They were reconciled against the new extraction in «#310»; the one
 substantive disagreement found is F-363. They remain in place for lineage.

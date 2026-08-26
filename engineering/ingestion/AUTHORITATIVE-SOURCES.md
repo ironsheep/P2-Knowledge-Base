@@ -36,7 +36,7 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 ## Per-source trust assignments  ‹seeded — re-ground in the research pass›
 | Source | Tier | Origin / rationale | Edition |
 |--------|------|--------------------|---------|
-| silicon-doc | 🏆 | Chip Gracey — P2 architecture reference | v35 _(verify)_ |
+| silicon-doc | 🏆 | Chip Gracey — P2 architecture reference | **v35 (Rev B/C silicon), CONFIRMED 2026-08-26** — re-extracted DOCX-primary from `Parallax Propeller 2 Documentation v35 - Rev B_C Silicon.docx`; edition read off the document itself (`v35 (Rev B/C silicon)`, `P2X8C4M64PES`, `LPD1941 (Rev B) or LHU2019 (Rev C)`, dated 2021-05-18). Tier unchanged at 🏆 and now better earned: 48/48 tables recovered where the prior capture had none. **One qualification worth carrying:** the document is not self-consistent everywhere — E-012, E-013 and E-014 are self-contradictions or omissions found in this edition, and E-015 is a section the designer himself says is incomplete. 🏆 means highest available authority, not inerrant. |
 | hardware-verification | 🏆 | **empirical** — the chip's own behavior, proven by test (`external-sources/hardware-verification/`) | running ledger |
 | Spin2 Language Reference | 🏆 | Parallax/Chip — language spec; matched-compiler edition | v55 |
 | pnut-ts-pasm-ref | 🏆 | matched compiler — ratified authority for PASM | _(verify)_ |
