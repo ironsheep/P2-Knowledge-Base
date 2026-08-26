@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-366`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-367`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,46 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The TQFP-100 package drawing was in the Silicon Doc all along — G-021 closes, and G-019 was overstated (2026-08-26, «#312») — F-366
+
+### F-366 — the shipped KB has no package-dimension record, and the source to write one has been in the repo unextracted — `CONFIRMED`
+
+**How this surfaced.** «#312» re-tested every source-silent verdict against the completed
+silicon-doc extraction, because all of them were reached while the Tier-1 authority was 75%
+ingested and contributing **none** of its 48 tables.
+
+**G-021 is OVERTURNED.** `assets/images-silicon-doc-2026-08-26/silicon-034.png` is the ON
+Semiconductor **MECHANICAL CASE OUTLINE / PACKAGE DIMENSIONS** sheet — **TQFP100 14×14, 0.5P, CASE
+932BR, ISSUE O**, 03 JUL 2018, document **98AON94348G** — carrying the complete millimetre table.
+Read off the rendered drawing twice (whole page, then the table at 3.5× zoom), both reads agreeing,
+and **not OCR'd**: tesseract misreads digits on these sheets and these are precision values.
+
+Full transcription is in
+`engineering/analysis/2026-08-26-silicon-doc-retest-of-source-silent-verdicts.md`. Headline values:
+`D`/`E` 15.80/16.00/16.20 · `D1`/`E1` 13.80/14.00/14.20 · `e` 0.50 BSC · `b` 0.17/0.22/0.27 ·
+`L` 0.45/0.60/0.75 · `A` max 1.20 · `M` 0°–7°.
+
+**What is owed (YAML head).** `deliverables/ai/P2/` has **no package/mechanical record at all**.
+The dimensions are now sourced and citable; a record should be written and cited to this drawing.
+This task does not edit shipped YAML, so it is handed over rather than applied.
+
+**Also corrected, and this half matters as much.** **G-019 was overstated.** Its clause *"no
+per-drive-mode current in mA anywhere in the corpus"* is false against the completed extract: the
+drive ladder is stated outright at `silicon-doc-text.txt:206`, and **Table 30** gives digital
+input-filter low-pass times computed in the document (`6.25ns × 32 × 3 = 600ns`). The *core* of
+G-019 survives — `propagation delay`, `rise time`, `fall time`, `slew rate` all return zero hits,
+and all 9 `ns` quantities were read individually and none is a pin-driver AC spec. But a register
+row carrying a claim broader than its evidence is a false negative someone will later rely on, so
+the row was corrected rather than left.
+
+**Why this is filed as a finding and not just a gap update.** Two of the three re-tested gaps moved
+because **the corpus was incomplete, not because the analysis was poor** — and Table 30, the thing
+that corrected G-019, lives *inside a table cell*, which is exactly the content class that no
+PDF-era capture could carry and that our own first DOCX pass flattened until «#310» fixed the
+walker. **The lesson is about sequencing, not diligence: a "source is silent" verdict is only as
+good as the extraction it was drawn against**, and this project now has a worked example of that in
+both directions.
 
 ## 23 shipped-KB citations point into the superseded lossy silicon-doc capture (2026-08-26, «#310») — F-365
 
