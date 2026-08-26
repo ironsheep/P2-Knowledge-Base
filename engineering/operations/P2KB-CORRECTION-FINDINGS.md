@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-370`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-371`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,47 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The TAQOZ author says ROM TAQOZ is an EARLY build, not just a cut-down one (2026-08-26, «#317») — F-370
+
+### F-370 — `taqoz-forth.yaml` calls ROM TAQOZ "the finite, fixed version"; its author says it is also an **early** version — `CONFIRMED`
+
+**How this surfaced.** The Bit Bashers Guide DOCX carries two reviewer comments, both anchored to
+the same paragraph — the one marked *"(not in ROM)"*. A reader hit exactly that limit; **the author
+of TAQOZ answered.**
+
+| | |
+|---|---|
+| **[0]** Anonymous, 2023-03-30 | *"This did not work for me. I got `??? .D ???` instead of `--- 1234...`"* |
+| **[1]** **Peter Jakacki**, 2023-04-06 | *"The ROM version is not only a cut-down version but also **an early version**. Use ROM version for debugging hardware etc especially when you can't seem to load the RELOADED version which can then be backed up to Flash or SD."* |
+
+**Why the tier is high.** Peter Jakacki **is** the author of TAQOZ. For TAQOZ specifically he stands
+where Chip Gracey stands for P2 silicon — this is designer testimony inside the document's own
+review thread, not a forum lead.
+
+**What our KB says** (`deliverables/ai/P2/architecture/boot-rom/taqoz-forth.yaml:47-50`):
+
+> *"ROM TAQOZ is the finite, fixed version; TAQOZ Reloaded is the actively-developed environment.
+> The two have different word sets."*
+
+**Correct as far as it goes, and it misses the consequence.** "Finite and fixed" reads as *a subset,
+frozen* — which invites the assumption that a word present in both behaves the same in both. The
+author says ROM is also an **earlier build**. **A shared word may therefore differ in behaviour, not
+just in presence**, and the KB's framing gives a reader no reason to suspect that.
+
+**Fix (YAML head).** Carry the author's wording and its consequence into
+`taqoz-forth.yaml`, cited to
+`sources/TAQOZ-Forth-Bitbashers-Guide/reviewer-comments-harvest-2026-08-26.md`. Also worth carrying
+his usage guidance, which is practical and nowhere in our tree: **use ROM TAQOZ for hardware
+debugging, especially when RELOADED will not load.**
+
+**The file's own chase plan is executable today, and nobody has run it.** Its
+`knowledge_gaps.rom_vs_reloaded_word_diff` says *"Which specific words are in ROM TAQOZ vs. only in
+TAQOZ Reloaded is not documented"*, with the chase *"Extract ROM dictionary from `ROM_Booter.lst`;
+compare with TAQOZ Reloaded glossary"*. **We hold `ROM_Booter.lst`** —
+`engineering/ingestion/sources/rom-booter/ROM_Booter.lst`, 411,535 bytes, **48 TAQOZ mentions**. The
+first half of that chase needs no new source. Not run in this pass — this is an ingestion task and
+the chase is YAML-head work — but recorded as **actionable now** rather than blocked.
 
 ## Two same-named Silicon Doc DOCX copies disagree, and the KB garbled a flag semantic from that passage (2026-08-26, «#314» pre-flight) — F-367 · F-368 · F-369
 
