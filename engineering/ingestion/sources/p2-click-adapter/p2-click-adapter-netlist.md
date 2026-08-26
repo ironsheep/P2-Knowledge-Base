@@ -165,3 +165,7 @@ Recorded so these are not later mistaken for schematic-sourced facts:
 - **Which base pins the adapter may be plugged into.** The sheet is base-relative throughout; the
   set of legal `base_pin` values is a property of the host board, not of this adapter.
 - **Any current limit, pull-up, or termination.** No passives appear on the sheet.
+- **Whether the four no-connect positions pass through.** J101 pins 7-10 reach no mikroBUS
+  signal, but the sheet shows sockets only and draws no pass-through path, so it does not
+  establish that `IO+12`..`IO+15` are reachable while the adapter is seated. "Spare" here means
+  *occupied but unused*, which is all the catalog's "4 spare I/Os" is corroborated to mean.

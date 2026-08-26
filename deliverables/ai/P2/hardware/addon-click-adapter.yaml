@@ -44,14 +44,32 @@ pin_group:
     offsets 8..15. base_pin is the first pin of that 16-pin block.
   total_pins_used: 12
   base_pin_options: [0, 16, 32, 48]
+  base_pin_options_provenance: >-
+    NOT stated on the schematic, which is base-relative throughout. This value
+    follows the three other dual-header eval-header boards (#64010, #64004-ES,
+    #64032, all [0, 16, 32, 48]) and is independently corroborated by the
+    P2-Click-eInk driver's own enum (PINS_P0_P15 / PINS_P16_P31 / PINS_P32_P47 ->
+    0 / 16 / 32). The P2 Eval Board carries eight headers, one per group of eight
+    pins, so a 16-pin board occupies two of them; whether every adjacent PAIR is
+    physically usable (base 8, 24, 40) is not established by any source held here.
   base_pin_note: >-
     Needs 16 consecutive I/O pins (two adjacent 8-pin headers). Offsets +12..+15
-    are brought to the socket's header-B positions as no-connects and are free for
-    other use -- the catalog's "4 spare I/Os".
+    are drawn as no-connects on the adapter -- they reach no mikroBUS signal. This
+    is what the catalog counts as "4 spare I/Os" (16 positions occupied, 12 used).
+    The sheet does NOT show a pass-through, so do not assume those four P2 pins are
+    reachable while the adapter is seated.
 
 # Signal names as drawn on the 64008 Rev A schematic. "mikrobus_pin" is the
 # MikroElektronika standard socket numbering, supplied for cross-reference; it is
 # not printed on the Parallax sheet.
+#
+# DIRECTION PROVENANCE: the `direction` values below come from the mikroBUS ROLE
+# convention, NOT from the Parallax sheet. The sheet's arrows are net-label
+# pointers (J102's point left because its labels are on the left, J103's point
+# right for the same reason) and carry no signal-direction information. On a
+# passive adapter direction is a property of the Click module anyway, so treat
+# these as the conventional role and confirm against the module's datasheet.
+# The two UART lines are deliberately `na` -- see uart_direction_caveat.
 signal_map:
   - {offset: 0,  signal: "SDA (I2C data)",        mikrobus_pin: 11, direction: bidir, notes: "Header A."}
   - {offset: 1,  signal: "SCL (I2C clock)",       mikrobus_pin: 12, direction: bidir, notes: "Header A."}
