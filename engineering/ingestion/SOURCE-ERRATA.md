@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-016`**
+> **Next erratum ID: `E-017`**
 
 ## What this register is for
 
@@ -97,6 +97,14 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 ---
 
 ## E-001 — `COGATN` constant lost its `%` · `RESOLVED`
+
+> **Corroborated across documents 2026-08-26 (pasm2-manual DOCX ingestion).** The **PASM2 Manual**
+> prints the same example CORRECTLY — `COGATN   #%00100010   'Get attention of cogs 1 and 5`
+> (`sources/pasm2-manual/pasm2-manual-text.txt:1854`), with the `%` present. Two Parallax documents,
+> the same construct, one with the binary signifier and one without: that settles it as a **typo in
+> the Hardware Manual**, not an alternative notation. (Reviewer comment [1] in the PASM2 DOCX,
+> Wuerfel21 2022-11-09, is anchored to that very `%` — *"missing the binary literal signifier"* —
+> suggesting the same defect was caught and fixed there.)
 
 | Side | Document @ edition | Where in that document | Verbatim | Our locator |
 |---|---|---|---|---|
@@ -307,6 +315,36 @@ Faithful ingestion of a wrong sentence. This is **not** covered by F-321, whose 
 scoped to `language/` — these are `hardware/` files, and the phrase carries no `P_*` constant, so
 `audit-constant-fidelity.py` cannot see it either. Routed to the corrections register alongside
 **F-356**, which records the parallel manual-side survival of the same class.
+
+## E-016 — the PASM2 Manual's ADDS prose says C is **signed overflow**; its own table on the same page says **sign of (D + S)** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **P2 Assembly Language (PASM2) Manual**, 2022-11-01 | **ADDS**, Explanation paragraph | *"If the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a **signed overflow (signed carry)**, or is cleared (0) if no overflow."* | `sources/pasm2-manual/pasm2-manual-text.txt:898` |
+| Against (the same page) | same | **ADDS**, Table 8, `C Flag` column | **`sign of (D + S)`** | `sources/pasm2-manual/pasm2-manual-text.txt:893` |
+| Raised by | reviewer comment **[0]**, Wuerfel21, 2022-11-15, anchored to that exact sentence | — | *"Incorrect, is WC is result sign bit"* | `word/comments.xml` id 0 |
+
+**OUR FINDING.** **The reviewer is right and the manual contradicts itself within a dozen lines.**
+The C flag on `ADDS` is the **true sign of the result** — the sign of `(D + S)` at full precision,
+overflow-corrected — **not** a signed-overflow indicator. Those are different quantities: for
+operands whose sum overflows the 32-bit signed range, the result's stored sign bit and the true sign
+disagree, which is precisely why the distinction matters and precisely the case the prose gets
+wrong. The manual's own `C Flag` column states the correct semantic.
+
+**Evidence tier:** the document contradicts itself on the same page, and the table is the more
+precise of the two statements. · **Reached our KB?** **DIVERGES — deliberately, and it was already
+right before this ingestion.** `deliverables/ai/P2/language/pasm2/adds.yaml` states *"the C flag is
+set to the true sign of the result — the sign of (D + S) at full precision (overflow-corrected)
+(C=1 if negative, C=0 if non-negative). **C is NOT a signed-overflow indicator**"*, and its
+`flags_affected.C` repeats the negation. **What was missing was not the fix but the record:** the
+KB had quietly diverged from a Parallax document with nothing saying why, which is exactly the
+divergence this register exists to map. Filed now so the next reader knows the difference is
+intentional.
+
+**Sibling check owed:** `ADDSX`, `SUBS`, `SUBSX` and the `SUM*` family share this prose pattern in
+the same manual. Not swept in this pass — recorded here so the sweep is not lost.
+
+---
 
 ## E-012 — the hub-address operand list omits **RDLUT** and **WRLUT**, which the document's own encoding table shows take `S/#/PTRx` · `CONFIRMED`
 

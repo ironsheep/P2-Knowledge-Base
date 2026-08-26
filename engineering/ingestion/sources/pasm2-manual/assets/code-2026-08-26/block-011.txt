@@ -1,0 +1,2 @@
+BITH Dest, {#}Src {WCZ}
+BITL Dest, {#}Src {WCZ}

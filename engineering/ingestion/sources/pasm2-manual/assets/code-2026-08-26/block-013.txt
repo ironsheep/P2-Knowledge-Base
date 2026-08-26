@@ -1,0 +1,2 @@
+COGATN strobes the attention signal for one or more cogs.  Dest bit positions 7:0 represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal.  The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
+COGATN   #%00100010			'Get attention of cogs 1 and 5

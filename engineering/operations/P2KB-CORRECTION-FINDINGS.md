@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-367`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-370`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,77 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Two same-named Silicon Doc DOCX copies disagree, and the KB garbled a flag semantic from that passage (2026-08-26, «#314» pre-flight) — F-367 · F-368 · F-369
+
+### F-367 — `external-inputs/p2/` and `sources/silicon-doc/` hold DIFFERENT documents under the same filename — `CONFIRMED`
+
+**How this surfaced.** «#314» went looking for a PASM2 DOCX and found `external-inputs/p2/` holds
+DOCX originals for several sources — **including a second copy of the Silicon Doc**, same filename,
+different size (4,919,444 vs 4,814,991 bytes).
+
+**Measured, not assumed.** Both carry 48 tables and 34 media, so a structural check calls them
+identical. Extracting text from each and diffing says otherwise: **972 characters differ across 4
+sites.**
+
+| Site | `sources/` (the copy used for the 2026-08-26 re-extraction) | `external-inputs/` |
+|---|---|---|
+| GETBRK WZ | `Z = 1 if no … pattern queued (D = 0) or **0** if pattern queued (D <> 0)` | `… or **1** if pattern queued (D <> 0)` |
+| smart-pin reset | **carries a full paragraph**: *"Once a smart pin is configured via WRPIN and then started by making its DIR bit high, it can be reset at any time by making its DIR bit low. It does not lose its configuration…"* | **paragraph absent** |
+| PWM dither rationale | *"a maximum of only two adjacent 8-bit DAC levels are set for every 2…"* | *"a maximum of only two transitions occur for every 256 clocks"* |
+| typo | `cog regis+ters:` | `cog registers:` |
+
+**Which is right, and why it is decidable without a third source.** The `external-inputs/` GETBRK
+line sets **Z = 1 in both branches**, which makes `WZ` useless and cannot be what the silicon does;
+`sources/` gives `Z = 1 / Z = 0`, which is also the conventional Z semantic (`D = 0 → Z = 1`).
+**The copy used for the re-extraction is the correct one**, and it additionally carries a paragraph
+the other lacks. No prior work is invalidated.
+
+**Why it still matters.** Two files with one name, differing on a flag semantic, is a silent
+corruption waiting for whoever opens the wrong one. `external-inputs/p2/` is not a source folder and
+carries no dashboard row, no audit and no trust tier — it is a staging area that has quietly become
+a second, unlabelled copy of the corpus. **Disposition is Stephen's:** label `external-inputs/p2/`
+as staging-only with a pointer to the canonical `sources/` copies, or reconcile the copies. Recorded
+as **needs Stephen's accept-or-fix**.
+
+**Also found there and NOT blocked as previously reported:** `Propeller 2 Questions & Answers.xlsx`
+— the `p2-qa-spreadsheet` row sits at 80% and was listed in this sprint's plan as having *no primary
+document staged*. It has one. That plan line is wrong and is corrected in «#318».
+
+### F-368 — `getbrk.yaml` drops the Z value for the pattern-queued case, and declares `Z: No effect` for an instruction that requires a flag effect — `CONFIRMED`
+
+**The source** (`sources/silicon-doc/silicon-doc-text.txt`, GETBRK D WZ):
+
+> `Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0)`
+
+**The shipped YAML** (`deliverables/ai/P2/language/pasm2/getbrk.yaml:36-37`):
+
+> `- WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or pattern queued if D <> 0.`
+
+**The `0` is gone.** *"or 0 if pattern queued"* became *"or pattern queued if"* — which is not a Z
+assignment at all. A reader learns what Z is when no pattern is queued and **nothing** about the
+other branch, in the one sentence that exists to tell them.
+
+**Second defect, same file:** `flags_affected: Z: No effect` (`:45`), while `:13` of the same file
+states *"GETBRK REQUIRES a flag effect (WC, WZ, or WCZ)"* and `:36` describes what WZ does to Z.
+The file contradicts itself.
+
+**Fix (YAML head).** Restore the branch — `or 0 if pattern queued (D <> 0)` — and reconcile
+`flags_affected` with the instruction's own requirement.
+
+### F-369 — the smart-pin DIR-reset behaviour is in the Silicon Doc and carried nowhere in the KB — `CONFIRMED`
+
+**The source:** *"Once a smart pin is configured via WRPIN and then started by making its DIR bit
+high, it can be reset at any time by making its DIR bit low. It does not lose its configuration set
+by the last WRPIN…"* (`sources/silicon-doc/silicon-doc-text.txt:3360`).
+
+**Measured:** `grep -rl` across all of `deliverables/ai/P2/` for `DIR bit low`, `reset at any time`
+and `does not lose its configuration` returns **zero files**.
+
+This is an operational fact a driver author needs — that a smart pin can be reset mid-flight without
+re-issuing WRPIN — and it is one of the paragraphs the `external-inputs/` copy is missing, which is
+plausibly why it never reached the KB. **Fix (YAML head):** carry it into
+`architecture/smart_pins.yaml` with this citation.
 
 ## The TQFP-100 package drawing was in the Silicon Doc all along — G-021 closes, and G-019 was overstated (2026-08-26, «#312») — F-366
 

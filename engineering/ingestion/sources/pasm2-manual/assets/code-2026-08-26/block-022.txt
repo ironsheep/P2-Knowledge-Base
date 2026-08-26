@@ -1,0 +1,5 @@
+SETD can also be used in self-modifying Reg RAM code.  Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist.  Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+	        SETD    inst, op	'set "inst" register[17:9] to op[8:0]
+	        NOP	'first spacer instruction, could be anything
+	        NOP	'second spacer instruction, could be anything
+	  inst  MOV     x, y	'operate on x using y; x may become any register per SETD

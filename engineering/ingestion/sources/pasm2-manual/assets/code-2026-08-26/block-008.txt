@@ -1,0 +1,8 @@
+Both samples below use greater-than 9-bit literals (via AUGD functionality).  The first is more convenient and readable than using the AUGD instruction directly.
+		  PUSHA   ##$ABCDEF	'2+3..10 cycles (in Cog RAM)
+		  QMUL    ##8192, #4	'2+2..9 cycles
+is the same as:
+		  AUGD    #$ABCDEF	'2 cycles
+		  PUSHA   #$ABCDEF & $1FF	'3..10 cycles (in Cog RAM)
+		  AUGD    #8192	'2 cycles
+		  QMUL    #8192 & $1FF, #4 	'2..9 cycles 

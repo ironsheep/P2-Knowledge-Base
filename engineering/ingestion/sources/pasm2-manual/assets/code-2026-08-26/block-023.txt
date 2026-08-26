@@ -1,0 +1,5 @@
+SETR can also be used in self-modifying Reg RAM code, though it won't affect the Register field (which doesn't exist in instruction opcodes) but rather will affect the Instr field and the upper two bits of the FX field.  Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist.  Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+	        SETR    inst, op	'set "inst" register[27:19] to op[8:0]
+	        NOP	'first spacer instruction, could be anything
+	        NOP	'second spacer instruction, could be anything
+	  inst  MOV     x, y	'operate on x using y; MOV can become AND/OR/etc. per SETR

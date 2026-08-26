@@ -1,0 +1,3 @@
+	  COGINIT #HUBEXEC+5, PTRA
+	  SETQ    ptra_val	'ptra_val will go into target cog's PTRA register
+	  COGINIT #%0_1_0000, addr	'load and start a free cog at addr

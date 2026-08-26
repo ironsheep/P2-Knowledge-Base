@@ -1,0 +1,8 @@
+	GETRND	Get Xoroshiro128** random value
+	XORO32	Create Xoroshiro32+ random value from D and store in next instruction's S value
+	CRCBIT	Iterate CRC value with 1-bit injection against 32-bit polynomial
+	CRCNIB	Iterate CRC value with 4-bit injection against 32-bit polynomial
+	PUSH	Place value onto hardware stack
+	POP	Remove value from hardware stack
+	LOC	Create relative or absolutable address for relocatable code
+	NOP	No operation, just elapse two cycles

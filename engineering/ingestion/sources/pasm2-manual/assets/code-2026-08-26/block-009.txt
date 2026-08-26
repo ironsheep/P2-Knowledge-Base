@@ -1,0 +1,3 @@
+Both samples below use greater-than 9-bit literals (via AUGS functionality).  The first is more convenient and readable than using the AUGS instruction directly.
+		  AND   address, ##$FFFFF	'2+2 cycles
+	  DJNZ  idx, ##far_away	'2+(2 or 4) cycles (in Cog RAM)

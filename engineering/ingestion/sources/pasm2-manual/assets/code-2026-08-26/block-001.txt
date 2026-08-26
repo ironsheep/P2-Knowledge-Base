@@ -1,0 +1,4 @@
+	SETQ	Set Q register for companion instruction
+	SETQ2	Set Q register for LUT RAM companion instruction
+	AUGS	Augment next literal Src to 32-bits
+	AUGD	Augment next literal Dest to 32-bits

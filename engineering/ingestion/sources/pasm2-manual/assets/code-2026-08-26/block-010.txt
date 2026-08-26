@@ -1,0 +1,4 @@
+	  AUGS  #$FFFFF	'2 cycles
+	  AND   address, #$FFFFF & $1FF	'2 cycles
+	  AUGS  #far_away	'2 cycles
+	  DJNZ  idx, #far_away & $1FF	'2 or 4 cycles (in Cog RAM)

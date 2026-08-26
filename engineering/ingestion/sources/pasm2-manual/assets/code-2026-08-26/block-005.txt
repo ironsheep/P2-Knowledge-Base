@@ -1,0 +1,2 @@
+	ALTD Dest, {#}Src
+	ALTD Dest

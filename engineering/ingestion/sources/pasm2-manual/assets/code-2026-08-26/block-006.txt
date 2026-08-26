@@ -1,0 +1,4 @@
+	  ALTI    ptrs,#%111_111	'set next D and S fields, increment ptrs[17:9] and ptrs[8:0]
+	  ADD     0,0	'add registers
+	  ALTI    inst	'execute inst; same as ALTI inst, #%101_100_100
+	  NOP	'NOP becomes inst

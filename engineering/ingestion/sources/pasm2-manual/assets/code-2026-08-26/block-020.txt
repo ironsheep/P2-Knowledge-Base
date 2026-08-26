@@ -1,0 +1,2 @@
+DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction and to a high or low output level; i.e. alters the pin's direction and output registers.  All other pins are left unchanged.  Each of these instructions, DRVH and DRVL, can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.
+DRVH or DRVL achieves the same effect as two instructions- OUTH, or OUTL, followed by DIRH.

@@ -1,250 +1,88 @@
-# PASM2 Manual 2022 - Complete Extraction & Audit
-*Massive instruction reference with 219 tables*
-*Date: 2025-08-15*
+# PASM2 Manual — Extraction Audit (DOCX re-extraction)
 
-## Document Metadata
-- **Title**: Propeller 2 Assembly Language (PASM2) Manual
-- **Format**: .docx (from Google Docs)
-- **Date**: November 1, 2022
-- **Size**: 10,771 paragraphs (HUGE!)
-- **Tables**: 219 (as expected!)
-- **Code Examples**: 231
-- **Instructions Documented**: 315 of 491 (64.2%)
-- **Status**: PRELIMINARY (but substantial)
+**Source:** `Propeller 2 Assembly Language (PASM2) Manual - 20221101.docx` — Parallax Inc.,
+Nov 1 2022 release, 2,049,128 bytes. **PRELIMINARY draft.**
+**Mode:** re-extraction, DOCX-primary. **Extraction date:** 2026-08-26.
+**Tooling:** `engineering/tools/extraction/docx_walk.py` · `pnut-ts v1.55.3 -d` ·
+`audit-extraction-digit-density.py`
 
-## 🎯 MAJOR FINDING: 315 INSTRUCTIONS DOCUMENTED!
+> **Predecessor.** The 2025-08-15 audit of the same name recorded a `.docx` extraction, but **no
+> DOCX was ever in the source folder** — only the PDF. The DOCX was found in
+> `engineering/ingestion/external-inputs/p2/` during this pass and is now staged alongside the PDF.
+> That folder turning out to hold un-staged originals is **F-367**.
 
-**This reduces our instruction gap from 290 to 176!**
+## The dashboard's "64%" was measuring the wrong thing
 
-## 1. EXTRACTION QUALITY AUDIT
+The row read **64%** in a column that means *extraction completeness*. Its source is the 2025
+audit's line **"Instructions Documented: 315 of 491 (64.2%)"** — a property of **the document**
+(a preliminary draft covering 315 of the P2's 491 instructions), not of our capture of it.
 
-### Extraction Metrics
-| Metric | V1 (PDF partial) | V2 (.docx) | Improvement |
-|--------|------------------|------------|-------------|
-| Instructions | ~100 partial | **315 documented** | **+215%** |
-| Tables | Few broken | **219 perfect** | **Massive** |
-| Code Examples | ~50 | 231 | **+362%** |
-| Encoding Info | Minimal | 291 instructions | **Complete** |
-| Timing Info | Scattered | 186 instructions | **Systematic** |
-| Flag Effects | Few | 367 references | **Comprehensive** |
+**These are different quantities and must not share a cell.** Our extraction of this document is
+now essentially complete; the document's own coverage of PASM2 is 64% and cannot be improved by
+any amount of ingestion. Corrected in the dashboard row.
 
-## 2. CONTENT CONTRIBUTION AUDIT
+## Pre-flight
 
-### What This Document Uniquely Provides
+Text layer probed with `pdftotext -f 1 -l 1` on the PDF: clean English **with digits intact**
+(`+1 888-512-1024`, `2022/11/01`) — no F-250-class invisible numeral loss. DOCX used regardless,
+being the better source for tables and whitespace.
 
-#### A. Instruction Documentation (315 Instructions!)
-Complete documentation including:
-- **Encoding format** for 291 instructions
-- **Timing information** for 186 instructions
-- **Flag effects** for most instructions
-- **Usage examples** throughout
-- **Alphabetical reference** structure
+| | |
+|---|---|
+| `<w:p>` paragraphs | 10,867 |
+| `<w:tbl>` tables | **219** |
+| `word/media` | 2 |
+| `word/comments.xml` | **present — 2 comments** |
 
-#### B. Instruction Categories Covered
-From ABS to ZEROX, including:
-- Arithmetic: ADD, SUB, MUL, DIV, etc.
-- Logic: AND, OR, XOR, NOT, etc.
-- Bit operations: TESTB, BITL, BITH, etc.
-- Flow control: JMP, CALL, RET, etc.
-- Hub operations: RDLONG, WRLONG, etc.
-- Smart pins: WRPIN, WXPIN, WYPIN, etc.
-- CORDIC: QMUL, QDIV, QROTATE, etc.
-- Events: POLLATN, WAITCT, etc.
+## Digit-density gate (§2a)
 
-#### C. Documentation Depth
-Each instruction typically includes:
-- Syntax format
-- Encoding details
-- Description
-- Flag effects
-- Timing cycles
-- Usage notes
-- Example code
+| artifact | lines | w/digit | density |
+|---|---|---|---|
+| `pasm2-manual-text.txt` (DOCX, new) | 5,529 | 3,388 | **61.3%** |
+| `complete-pasm2-manual-reference.md` (new) | 5,310 | 2,947 | 55.5% |
+| `pasm2-manual-narrative.txt` (prior, PDF-derived) | 6,023 | 3,035 | 50.4% |
 
-## 3. QUESTIONS ANSWERED AUDIT
+**Exit 0.** The tool's own caveat travels with the number: this detects **total** numeral loss
+only, is **blind to partial loss**, and is **never a completeness certificate**.
 
-### Instruction Questions RESOLVED
+**The DOCX capture carries more words in fewer characters** than the PDF-derived narrative —
+77,248 words / 424,536 chars against 72,228 / 552,998 — i.e. more content with less layout padding.
 
-✅ **315 Instructions Now Documented**
-- What does [instruction] do? → Answered for 315
-- Encoding format? → 291 documented
-- Timing cycles? → 186 documented
-- Flag effects? → Comprehensive coverage
+## Coverage
 
-✅ **Usage Patterns**
-- How to use instructions? → 231 code examples
-- Common patterns? → Examples throughout
-- Best practices? → Notes included
+219/219 tables, 259 headings, document order preserved, intra-cell newlines preserved (26 tables
+have multi-line cells and are rendered as fenced blocks rather than squeezed into table rows).
 
-## 4. CONFLICTS AUDIT
+## Pass 2 — code
 
-### Conflicts with Other Sources
-**NO CONFLICTS FOUND** ✅
+30 blocks extracted (25 paragraph-hosted, **5 cell-hosted**), **10 compile clean** under a harness.
+All 20 non-compiling blocks were inspected and none is an extraction defect — 4 instruction summary
+tables, 2 alphabetical mnemonic indexes, 5 mixed prose+code, 9 harness limits. Detail in
+`assets/code-2026-08-26/README.md`.
 
-### Perfect Alignment
-- Instruction list matches CSV spreadsheet ✅
-- Encoding matches spreadsheet ✅
-- Architecture aligns with Silicon Doc ✅
+## Pass 3 — images
 
-## 5. MISSING INFORMATION AUDIT
+2/2 media extracted. This is a text-and-table manual; it carries almost no figures.
 
-### Still Missing
+## Pass 6 — findings
 
-#### Instructions Not Documented (176 remaining)
-Out of 491 total instructions, still missing:
-- Some specialized instructions
-- Newer additions
-- Variant forms
+**2 reviewer comments, both by Wuerfel21, both substantive — a 100% signal rate.**
 
-#### Documentation Gaps
-⚠️ Some instructions have partial documentation
-⚠️ Not all have complete timing
-⚠️ Some missing examples
+- **[0]** → **E-016**. Anchored to the ADDS explanation: *"Incorrect, is WC is result sign bit"*.
+  Verified — the manual's prose says C is **signed overflow** while its own Table 8 says
+  **`sign of (D + S)`**, a dozen lines apart. Our KB already had this right and explicitly rebuts
+  the prose; what was missing was the **record** of a deliberate divergence.
+- **[1]** → strengthens **E-001**. Anchored to the `%` in `COGATN #%00100010`. The PASM2 Manual
+  prints this **correctly**, where the Hardware Manual drops the `%` and does not assemble. Two
+  Parallax documents, same construct, one right and one wrong — which settles E-001 as a typo
+  rather than an alternative notation.
 
-## 6. CROSS-REFERENCE AUDIT
+**Gap ledger, both halves.** Opened: none unique to this source. Closed: none — this is a
+preliminary draft superseded as the PASM2 reference by our own Assembly manual, so it is a
+corroboration source rather than a gap-filler. Stated explicitly rather than omitted.
 
-### Coverage Verification
-| Source | Total Instructions | PASM2 Manual | Gap |
-|--------|-------------------|--------------|-----|
-| CSV Spreadsheet | 491 | 315 | 176 |
-| Encoding Info | 491 | 291 | 200 |
-| Timing Info | 491 | 186 | 305 |
+## Trust
 
-## 7. COMPLETENESS AUDIT
-
-### Documentation Quality by Category
-
-| Category | Instructions | Documented | Coverage |
-|----------|-------------|------------|----------|
-| Basic ALU | ~50 | ~45 | 90% |
-| Bit Operations | ~40 | ~35 | 87% |
-| Flow Control | ~85 | ~70 | 82% |
-| Hub Operations | ~35 | ~30 | 86% |
-| Smart Pins | ~10 | 10 | 100% |
-| CORDIC | ~15 | ~12 | 80% |
-| Events | ~60 | ~40 | 67% |
-| Special | ~196 | ~73 | 37% |
-
-**Overall Instruction Coverage: 64.2%**
-
-## 8. VALUE CONTRIBUTION AUDIT
-
-### Unique Value This Document Adds
-1. **Largest instruction reference** - 315 documented
-2. **Systematic documentation** - Consistent format
-3. **Encoding details** - Binary formats
-4. **Flag documentation** - C/Z effects
-5. **Code examples** - 231 samples
-
-### What We Can't Get Elsewhere
-- Detailed instruction semantics
-- Flag effect documentation
-- Timing cycle counts
-- Usage examples
-- Implementation notes
-
-## 9. TRUST ZONE ASSESSMENT
-
-**Trust Level: HIGH**
-- Publisher: Parallax official
-- Date: Recent (2022)
-- Quality: Professional
-- Status: Preliminary but substantial
-
-**Confidence Ratings:**
-- Documented instructions: 95%
-- Encoding accuracy: 100%
-- Examples: 90%
-- Overall: 92%
-
-## 10. INTEGRATION RECOMMENDATIONS
-
-### How to Use This Document
-1. **PRIMARY SOURCE** for 315 instructions
-2. **REFERENCE** for encoding/timing
-3. **EXAMPLES** source for patterns
-4. **COMPLEMENT** to CSV spreadsheet
-
-### Best Combined With
-- **CSV Spreadsheet** - For complete list
-- **Silicon Doc** - For context
-- **Smart Pins** - For I/O operations
-
-## 11. EXTRACTION HEALTH METRICS
-
-| Health Indicator | Status | Score |
-|-----------------|--------|-------|
-| Tables Extracted | ✅ | 100% |
-| Instructions Found | ✅ | 64% |
-| Examples Preserved | ✅ | 100% |
-| Encoding Correct | ✅ | 100% |
-| No Data Loss | ✅ | 100% |
-
-**Overall Extraction Health: 93%**
-
-## 12. ACTIONABLE FINDINGS
-
-### Major Achievement
-✅ **315 instructions now have documentation!**
-- Reduced unknown instructions from 391 to 176
-- Comprehensive encoding information
-- Extensive examples
-
-### Questions ELIMINATED
-- ✅ 315 instruction semantics - DOCUMENTED
-- ✅ Encoding formats - PROVIDED
-- ✅ Flag effects - EXPLAINED
-- ✅ Usage patterns - DEMONSTRATED
-
-### Still Need
-- 176 instruction descriptions
-- Complete timing for all
-- More advanced examples
-
-## COMPARISON WITH EXPECTATIONS
-
-### Expected vs Reality
-| Expectation | Reality | Assessment |
-|-------------|---------|------------|
-| 219 tables | 219 tables | ✅ Perfect |
-| ~200 instructions | 315 instructions | ✅ Better! |
-| Complete manual | Preliminary | ⚠️ But substantial |
-| All 491 instructions | 315 documented | 64% coverage |
-
-## SUMMARY METRICS
-
-### Before PASM2 Manual V2
-- ~100 instructions partially known
-- Few examples
-- Broken tables
-- ~20% coverage
-
-### After PASM2 Manual V2
-- **315 instructions documented**
-- **231 code examples**
-- **219 perfect tables**
-- **64.2% coverage**
-
-**Knowledge Gain: +44% instruction coverage!**
-
----
-
-## 🎯 KEY FINDING
-
-**The PASM2 Manual provides our largest instruction documentation source!**
-
-With 315 of 491 instructions documented:
-- We've reduced unknowns from 391 to 176
-- Most common instructions are covered
-- Specialized instructions remain gaps
-
-Combined with:
-- CSV (all 491 listed)
-- PASM2 Manual (315 described)
-- We have syntax for 100%, semantics for 64%
-
-**This is workable for AI code generation!**
-
----
-
-*This audit confirms PASM2 Manual as primary instruction reference*
+**🏆 with a standing qualification.** Official Parallax, but **PRELIMINARY** and superseded as the
+PASM2 reference by our Assembly manual. It does not automatically win against `pnut-ts` or the
+Silicon Doc, and E-016 is a worked example of it being wrong against its own table.

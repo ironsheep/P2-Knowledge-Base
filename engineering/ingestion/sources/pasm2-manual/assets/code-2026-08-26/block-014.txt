@@ -1,0 +1,2 @@
+	  COGINIT #COGEXEC+1,#$100
+	  COGINIT #%1_0_0101, PTRA	'skip load and start Cog 5 at PTRA

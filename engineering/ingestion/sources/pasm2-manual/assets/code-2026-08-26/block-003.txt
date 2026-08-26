@@ -1,0 +1,3 @@
+	Instructions to retrieve the current clock value or wait for a future clock value.  Also see xxxCT event instructions for handling timed events.
+	GETCT	Get lower/upper 32-bits of System Counter
+	WAITX	Wait for fixed or range-limited random number of clocks

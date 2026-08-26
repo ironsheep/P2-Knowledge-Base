@@ -1,0 +1,9 @@
+	AKPIN	Acknowledge smart pin(s)
+	RQPIN	Read smart pin result and mode flag; no acknowledge (quiet)
+	RDPIN	Read smart pin result and mode flag, then acknowledge
+	WRPIN	Set smart pin(s) mode and acknowledge
+	WXPIN	Set smart pin(s) "X" value and acknowledge
+	WYPIN	Set smart pin(s) "Y" value and acknowledge
+	SETDACS	Set smart pin digital to analog converters (DACs)
+	SETSCP	Enable/disable four-channel oscilloscope pins
+	GETSCP	Get four-channel oscilloscope samples

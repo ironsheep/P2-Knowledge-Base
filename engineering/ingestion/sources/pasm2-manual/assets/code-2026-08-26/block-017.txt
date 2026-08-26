@@ -1,0 +1,2 @@
+	  COGINIT #HUBEXEC_NEW_PAIR, addr
+	  COGINIT id, addr  WC	'(id=HUBEXEC_NEW) skip load, start a free cog at addr
