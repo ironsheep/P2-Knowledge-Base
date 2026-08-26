@@ -1,0 +1,5 @@
+DAT ORG
+not dirb 'all outputs
+.lp not outb 'toggle states (blinks leds on Prop123 & P2 Eval boards)
+waitx ##20_000_000/4 'wait ¼ second
+jmp #.lp 'loop

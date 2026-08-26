@@ -48,14 +48,25 @@ def is_monospace(p):
     return False
 
 def walk_table(tbl, depth=0):
-    """Yield ('table', rows, depth) for this table AND every table nested in a cell."""
+    """Yield ('table', rows, depth) for this table AND every table nested in a cell.
+
+    Cell text KEEPS its internal newlines. This is not cosmetic: in the Silicon Doc
+    one cell holds the entire PASM2 instruction encoding listing -- 636 lines,
+    32,199 chars. Collapsing whitespace inside a cell (the obvious way to make a
+    markdown row) destroys the most important reference content in the document and
+    leaves it un-greppable line by line, while the table COUNT still reads 48/48.
+    Callers decide how to render a multi-line cell; the walker must not decide for
+    them by throwing the structure away.
+    """
     rows, nested = [], []
     for tr in tbl.findall(W+'tr'):
         cells = []
         for tc in tr.findall(W+'tc'):
-            # cell text = its direct paragraphs only
-            ct = ' '.join(text_of(p).strip() for p in tc.findall(W+'p'))
-            cells.append(re.sub(r'\s+', ' ', ct).strip())
+            # one entry per direct paragraph, newlines preserved between them
+            ct = '\n'.join(text_of(p).rstrip() for p in tc.findall(W+'p'))
+            # collapse runs of spaces/tabs, but NEVER newlines
+            ct = re.sub(r'[ \t]+', ' ', ct).strip()
+            cells.append(ct)
             # a table INSIDE this cell -- the case a naive walk loses
             for inner in tc.findall(W+'tbl'):
                 nested.append(inner)

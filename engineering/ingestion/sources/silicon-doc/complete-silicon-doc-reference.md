@@ -3,6 +3,11 @@
 **Source:** `Parallax Propeller 2 Documentation v35 - Rev B_C Silicon.docx` (Parallax Inc.)
 **Extracted:** 2026-08-26, DOCX-primary, document order preserved, nested-in-cell tables walked.
 
+> **Multi-line table cells are rendered as fenced blocks, not squeezed into a markdown row.**
+> One cell in this document holds the whole PASM2 instruction encoding listing (636 lines).
+> Flattening it to fit a table row would destroy the document's central reference content while
+> still counting as a table.
+
 Parallax Propeller 2
 Documentation
 2021-05-18
@@ -17,24 +22,165 @@ PHILIPPINES
 
 **Table 1**
 
-| Date | Progress |
-|---|---|
-| 2018_04_25 | Verilog design files sent to On Semi for Rev A silicon (8 cogs, 512KB hub, 64 smart pins) |
-| 2018_05_29 | Final ROM data sent to On Semi |
-| 2018_07_09 | Final Sign-off with On Semi, reticles being made |
-| 2018_09_11 | Wafers done! Only took 9 weeks, instead of 14. |
-| 2018_09_27 | Received 10 glob-top prototype chips from On Semi. Chips are functional, but sign-extension problems in Verilog source files caused the following problems: Cogs' IQ modulators' outputs are nonsensical. Smart pin measurement modes which are supposed to count by +1/-1 are counting by +1/+3. ALTx instructions aren't sign-extending S[17:09] before adding into D. These sign-extension problems have already been fixed in the Verilog source files and tested on the FPGA. There is also a low-glitch-on-high-to-float problem on some I/O pins due to a race condition between DIR and OUT signals. This will be fixed by timing constraints in the next silicon. A respin of the silicon is planned after more testing. |
-| 2018_11_13 | Received 135 Amkor-packaged prototype chips from On Semi. These chips will have better heat dissipation than the glob-top prototypes. |
-| 2019_04_11 | Rev B respin entered the fab and is due out July 15. Ten glob-top prototypes should arrive on August 1, with 2,400 production chips to follow in a few weeks. The following improvements were made to the chip: All known prior bugs fixed. Clock-gating implemented, reduces power by ~40%. PLL filter modified to reduce jitter and improve lock. System counter extended to 64 bits. GETCT WC retrieves upper 32-bits. Streamer has many new modes with SINC1/SINC2 ADC conversions for Goertzel mode. HDMI mode added to streamer with ascending and descending pinouts for easy PCB layout. SINC2/SINC3 filters added to smart pins for improving ENOB in ADC conversions. Each cog has four 8-bit sample-per-clock ADC channels that feed from new smart pin 'SCOPE' modes. BITL/BITH/BITC/BITNC/BITZ/BITNZ/BITRND/BITNOT can now work on a span of bits (+S[9:5] bits). Prior SETQ overrides S[9:5]. DIRx/OUTx/FLTx/DRVx can now work on a span of pins (+D[10:6] pins). Prior SETQ overrides D[10:6]. WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins (+S[10:6] pins). Prior SETQ overrides S[10:6]. BIT_DAC output now has two 4-bit settings for low and high states, instead of one 8-bit high-state setting. RDxxxx/WRxxxx+PTRx expressions now index -16..+16 with updating and -32..+31 without updating. Sensible PTRx behavior implemented for 'SETQ(2) + RDLONG/WRLONG/WMLONG' operations. RDLUT/WRLUT can now handle PTRx expressions. Cog LUT sharing is now glitch-free. POP now returns Z=1 if result=0, used to return result[30]. XORO32 improved. Main PRNG upgraded to "Xoroshiro128**". The core logic increased by a net 15%, even with significant logic reductions resulting from clock-gating. Fortunately, ON Semi was able to make it all fit within the original die area. |
-| 2019_07_13 | Wafers out of fab. Packaging underway. |
-| 2019_08_01 | Received 10 glob-top prototype chips from ON Semi. All bugs from prior silicon are fixed. All new features work as expected. PLL jitter is <2ns @100us at all divide/multiply settings. Power is reduced by ~50%. The new silicon works much better than expected with the improved PLL filter and new clock gating. At room temperature, the silicon runs at 390MHz and is barely warm to the touch, with the PLL now being the speed limiter, instead of the logic. |
-| 2019_08_19 | One of the six new wafers exhibits frequent VIO-to-GND shorts in the 5-20 ohm range. ON Semi is looking into the cause. We know that the design is good, so we are anxious to see ON Semi resume yield testing on the other wafers, in order to get as many Amkor-packaged parts as soon as possible. The new P2 Eval board is ready to be built. |
-| 2019_08_29 | ON Semi has done failure analysis on the new chips which were exhibiting VIO shorts and it's been determined that there are latch-up problems originating from differently-biased N-wells that lie adjacent to each other. The relatively low resistivity of the new wafers caused this latent design defect to emerge. We will need to modify the full-custom pad ring to fix these N-well problems. We will soon discuss with ON Semi how many reticles this is going to involve. We will need another fab run, as well, to realize the changes. |
-| 2019_09_13 | ON Semi recently discovered that a voltage-stress test had been applied to the new silicon which was driving the VDD and VIO pins to +40% nominal voltages. The 4.62V on VIO was triggering the latch-up problem. The first two wafers which had been probed with this new test had developed many bad dies, as a result. ON Semi probed six remaining virgin wafers without the voltage-stress test and yielded over 1,000 good dies. These have been sent off to Amkor for packaging. From these chips, we will be able to build new P2 Eval boards and supply low volumes of chips. As for the latch-up problem, it was determined by ON Semi that latch-up was occurring as early as 4.3V on VIO. Rather than do a respin, we could lower the voltage-stress test from +40% to +25%, which would result in a peak VIO test voltage of 4.125V. Depending on what we see in the field with these new chips, we may do a respin to accommodate ON Semi's standard +40% voltage-stress test, or just lower the voltage-stress test to +25%. ON Semi's standard of +40% is quite exceptional and some other vendors only guarantee +20%. So, +25% may be just fine. We need to get the new silicon out to customers and see if anyone experiences any trouble with VIO-triggered latch-up. ON Semi is also going to run a standard latch-up test on the new silicon to ensure there is no other latent problem. The silicon has already passed ESD tests with 4kV human body model and 2kV machine model. |
-| 2019_10_16 | We will be receiving about 1,000 Rev B P2 chips on 10/22. Our plan is to build 191 more P2 Eval boards and supply small quantities of P2 chips to interested customers. |
-| 2019_10_23 | We received 1,000 Rev B chips. Aside from building 191 more P2 Eval boards, we will offer 125 packs of four P2 chips for $100 to interested customers. If anyone needs more than four chips, please contact Ken Gracey (kgracey@parallax.com). |
-| 2020_02_24 | Received 10 Rev C chips which fix the adjacent-pin ADC crosstalk problem on prior revisions. Smart pin mode %100010_OHHHLLL no longer connects the ADC to the adjacent pin, but floats the ADC input. This mode is now useful for determining the floating bias point of the ADC. Several thousand Rev C chips will be arriving from ON Semi over the next two months. |
-| 2020_06_01 | Received 7,000 Rev C chips from ON Semi. |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Date
+
+*r1c2:* Progress
+
+*r2c1:* 2018_04_25
+
+*r2c2:*
+```
+Verilog design files sent to On Semi for Rev A silicon
+(8 cogs, 512KB hub, 64 smart pins)
+```
+
+*r3c1:* 2018_05_29
+
+*r3c2:* Final ROM data sent to On Semi
+
+*r4c1:* 2018_07_09
+
+*r4c2:* Final Sign-off with On Semi, reticles being made
+
+*r5c1:* 2018_09_11
+
+*r5c2:* Wafers done! Only took 9 weeks, instead of 14.
+
+*r6c1:* 2018_09_27
+
+*r6c2:*
+```
+Received 10 glob-top prototype chips from On Semi.
+
+Chips are functional, but sign-extension problems in Verilog source files caused the following problems:
+
+Cogs' IQ modulators' outputs are nonsensical.
+Smart pin measurement modes which are supposed to count by +1/-1 are counting by +1/+3.
+ALTx instructions aren't sign-extending S[17:09] before adding into D.
+
+These sign-extension problems have already been fixed in the Verilog source files and tested on the FPGA.
+
+There is also a low-glitch-on-high-to-float problem on some I/O pins due to a race condition between DIR and OUT signals. This will be fixed by timing constraints in the next silicon.
+
+A respin of the silicon is planned after more testing.
+```
+
+*r7c1:* 2018_11_13
+
+*r7c2:* Received 135 Amkor-packaged prototype chips from On Semi. These chips will have better heat dissipation than the glob-top prototypes.
+
+*r8c1:* 2019_04_11
+
+*r8c2:*
+```
+Rev B respin entered the fab and is due out July 15.
+
+Ten glob-top prototypes should arrive on August 1, with 2,400 production chips to follow in a few weeks.
+
+The following improvements were made to the chip:
+
+All known prior bugs fixed.
+Clock-gating implemented, reduces power by ~40%.
+PLL filter modified to reduce jitter and improve lock.
+System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.
+Streamer has many new modes with SINC1/SINC2 ADC conversions for Goertzel mode.
+HDMI mode added to streamer with ascending and descending pinouts for easy PCB layout.
+SINC2/SINC3 filters added to smart pins for improving ENOB in ADC conversions.
+Each cog has four 8-bit sample-per-clock ADC channels that feed from new smart pin 'SCOPE' modes.
+BITL/BITH/BITC/BITNC/BITZ/BITNZ/BITRND/BITNOT can now work on a span of bits (+S[9:5] bits). Prior SETQ overrides S[9:5].
+DIRx/OUTx/FLTx/DRVx can now work on a span of pins (+D[10:6] pins). Prior SETQ overrides D[10:6].
+WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins (+S[10:6] pins). Prior SETQ overrides S[10:6].
+BIT_DAC output now has two 4-bit settings for low and high states, instead of one 8-bit high-state setting.
+RDxxxx/WRxxxx+PTRx expressions now index -16..+16 with updating and -32..+31 without updating.
+Sensible PTRx behavior implemented for 'SETQ(2) + RDLONG/WRLONG/WMLONG' operations.
+RDLUT/WRLUT can now handle PTRx expressions.
+Cog LUT sharing is now glitch-free.
+POP now returns Z=1 if result=0, used to return result[30].
+XORO32 improved.
+Main PRNG upgraded to "Xoroshiro128**".
+
+The core logic increased by a net 15%, even with significant logic reductions resulting from clock-gating. Fortunately, ON Semi was able to make it all fit within the original die area.
+```
+
+*r9c1:* 2019_07_13
+
+*r9c2:* Wafers out of fab. Packaging underway.
+
+*r10c1:* 2019_08_01
+
+*r10c2:*
+```
+Received 10 glob-top prototype chips from ON Semi.
+
+All bugs from prior silicon are fixed.
+All new features work as expected.
+PLL jitter is <2ns @100us at all divide/multiply settings.
+Power is reduced by ~50%.
+
+The new silicon works much better than expected with the improved PLL filter and new clock gating. At room temperature, the silicon runs at 390MHz and is barely warm to the touch, with the PLL now being the speed limiter, instead of the logic.
+```
+
+*r11c1:* 2019_08_19
+
+*r11c2:*
+```
+One of the six new wafers exhibits frequent VIO-to-GND shorts in the 5-20 ohm range. ON Semi is looking into the cause.
+
+We know that the design is good, so we are anxious to see ON Semi resume yield testing on the other wafers, in order to get as many Amkor-packaged parts as soon as possible. The new P2 Eval board is ready to be built.
+```
+
+*r12c1:* 2019_08_29
+
+*r12c2:*
+```
+ON Semi has done failure analysis on the new chips which were exhibiting VIO shorts and it's been determined that there are latch-up problems originating from differently-biased N-wells that lie adjacent to each other. The relatively low resistivity of the new wafers caused this latent design defect to emerge.
+
+We will need to modify the full-custom pad ring to fix these N-well problems. We will soon discuss with ON Semi how many reticles this is going to involve. We will need another fab run, as well, to realize the changes.
+```
+
+*r13c1:* 2019_09_13
+
+*r13c2:*
+```
+ON Semi recently discovered that a voltage-stress test had been applied to the new silicon which was driving the VDD and VIO pins to +40% nominal voltages. The 4.62V on VIO was triggering the latch-up problem. The first two wafers which had been probed with this new test had developed many bad dies, as a result.
+
+ON Semi probed six remaining virgin wafers without the voltage-stress test and yielded over 1,000 good dies. These have been sent off to Amkor for packaging. From these chips, we will be able to build new P2 Eval boards and supply low volumes of chips.
+
+As for the latch-up problem, it was determined by ON Semi that latch-up was occurring as early as 4.3V on VIO. Rather than do a respin, we could lower the voltage-stress test from +40% to +25%, which would result in a peak VIO test voltage of 4.125V.
+
+Depending on what we see in the field with these new chips, we may do a respin to accommodate ON Semi's standard +40% voltage-stress test, or just lower the voltage-stress test to +25%. ON Semi's standard of +40% is quite exceptional and some other vendors only guarantee +20%. So, +25% may be just fine.
+
+We need to get the new silicon out to customers and see if anyone experiences any trouble with VIO-triggered latch-up. ON Semi is also going to run a standard latch-up test on the new silicon to ensure there is no other latent problem. The silicon has already passed ESD tests with 4kV human body model and 2kV machine model.
+```
+
+*r14c1:* 2019_10_16
+
+*r14c2:*
+```
+We will be receiving about 1,000 Rev B P2 chips on 10/22.
+
+Our plan is to build 191 more P2 Eval boards and supply small quantities of P2 chips to interested customers.
+```
+
+*r15c1:* 2019_10_23
+
+*r15c2:* We received 1,000 Rev B chips. Aside from building 191 more P2 Eval boards, we will offer 125 packs of four P2 chips for $100 to interested customers. If anyone needs more than four chips, please contact Ken Gracey (kgracey@parallax.com).
+
+*r16c1:* 2020_02_24
+
+*r16c2:*
+```
+Received 10 Rev C chips which fix the adjacent-pin ADC crosstalk problem on prior revisions. Smart pin mode %100010_OHHHLLL no longer connects the ADC to the adjacent pin, but floats the ADC input. This mode is now useful for determining the floating bias point of the ADC.
+
+Several thousand Rev C chips will be arriving from ON Semi over the next two months.
+```
+
+*r17c1:* 2020_06_01
+
+*r17c2:* Received 7,000 Rev C chips from ON Semi.
+
 
 
 ### KNOWN SILICON BUGS
@@ -159,7 +305,7 @@ Clock can be stopped for lowest power until reset (100 µA, due to leakage)
 | RESn | I | 0 | Reset (active low). When low, resets the Propeller chip: all cogs disabled and I/O pins floating. Propeller restarts 3 ms after RESn transitions from low to high. |
 
 
-**Table 4** _(nested at depth 1 inside a table cell)_
+**Table 4** _(nested at depth 1)_
 
 | P58-P63 | Boot source(s). See BOOT PROCESS. |
 |---|---|
@@ -171,11 +317,68 @@ There are three memory regions: cog RAM, lookup RAM, and hub RAM.  Each cog has 
 
 **Table 5**
 
-| Memory Region | Memory Width | Memory Depth | Instruction D/S Address Ranges | Program Counter Address Ranges |
-|---|---|---|---|---|
-| COG | 32 bits | 512 | $000..$1FF | $00000..$001FF |
-| LOOKUP | 32 bits | 512 | $000..$1FF | $00200..$003FF |
-| HUB | 8 bits | 1,048,576 (*) | $00000..$FFFFF | $00400..$FFFFF |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Memory
+Region
+```
+
+*r1c2:*
+```
+Memory
+Width
+```
+
+*r1c3:*
+```
+Memory
+Depth
+```
+
+*r1c4:*
+```
+Instruction D/S
+Address Ranges
+```
+
+*r1c5:*
+```
+Program Counter
+Address Ranges
+```
+
+*r2c1:* COG
+
+*r2c2:* 32 bits
+
+*r2c3:* 512
+
+*r2c4:* $000..$1FF
+
+*r2c5:* $00000..$001FF
+
+*r3c1:* LOOKUP
+
+*r3c2:* 32 bits
+
+*r3c3:* 512
+
+*r3c4:* $000..$1FF
+
+*r3c5:* $00200..$003FF
+
+*r4c1:* HUB
+
+*r4c2:* 8 bits
+
+*r4c3:* 1,048,576 (*)
+
+*r4c4:* $00000..$FFFFF
+
+*r4c5:* $00400..$FFFFF
+
 
 (*) 1,048,576 bytes is the maximum size supported.  However, some variants may have less available.  See the Hub Memory section below for more details.
 
@@ -187,22 +390,88 @@ The available instruction set can be found at Parallax Propeller 2 Instruction S
 
 **Table 6**
 
-| Key | Description |
-|---|---|
-| EEEE | Conditional test (see "Instruction Prefix" list at bottom of the instruction set spreadsheet) |
-| C | 0: Do not update the "C" register 1: Update the "C" register. In the instruction syntax, this is denoted by "WC" or "WCZ". |
-| Z | 0: Do not update the "Z" register 1: Update the "Z" register. In the instruction syntax, this is denoted by "WZ" or "WCZ". |
-| I | 0: Source field is a register address 1: Source field is a literal value. In the instruction syntax, this is denoted by the "#" character. |
-| L | 0: Destination field is a register address 1: Destination field is a literal value. In the instruction syntax, this is denoted by the "#" character. |
-| R | 0: 20-bit Address field is relative to current PC. 1: 20-bit Address field is absolute. |
-| WW | Index of special register (PA, PB, PTRA, or PTRB) to write. |
-| DDDDDDDDD | Destination field |
-| SSSSSSSSS | Source field |
-| AAAAAAA... | 20-bit Address field |
-| nnnnnn... | 23-bit augment number field |
-| N,NN,NNN | Index number. This is only used for instructions with a third operand to specify word, byte, or nibble. |
-| cccc | conditional test used to update C (%0000=clear, %1111=set, all others per EEEE) |
-| zzzz | conditional test used to update Z (%0000=clear, %1111=set, all others per EEEE) |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Key
+
+*r1c2:* Description
+
+*r2c1:* EEEE
+
+*r2c2:* Conditional test (see "Instruction Prefix" list at bottom of the instruction set spreadsheet)
+
+*r3c1:* C
+
+*r3c2:*
+```
+0: Do not update the "C" register
+1: Update the "C" register. In the instruction syntax, this is denoted by "WC" or "WCZ".
+```
+
+*r4c1:* Z
+
+*r4c2:*
+```
+0: Do not update the "Z" register
+1: Update the "Z" register. In the instruction syntax, this is denoted by "WZ" or "WCZ".
+```
+
+*r5c1:* I
+
+*r5c2:*
+```
+0: Source field is a register address
+1: Source field is a literal value. In the instruction syntax, this is denoted by the "#" character.
+```
+
+*r6c1:* L
+
+*r6c2:*
+```
+0: Destination field is a register address
+1: Destination field is a literal value. In the instruction syntax, this is denoted by the "#" character.
+```
+
+*r7c1:* R
+
+*r7c2:*
+```
+0: 20-bit Address field is relative to current PC.
+1: 20-bit Address field is absolute.
+```
+
+*r8c1:* WW
+
+*r8c2:* Index of special register (PA, PB, PTRA, or PTRB) to write.
+
+*r9c1:* DDDDDDDDD
+
+*r9c2:* Destination field
+
+*r10c1:* SSSSSSSSS
+
+*r10c2:* Source field
+
+*r11c1:* AAAAAAA...
+
+*r11c2:* 20-bit Address field
+
+*r12c1:* nnnnnn...
+
+*r12c2:* 23-bit augment number field
+
+*r13c1:* N,NN,NNN
+
+*r13c2:* Index number. This is only used for instructions with a third operand to specify word, byte, or nibble.
+
+*r14c1:* cccc
+
+*r14c2:* conditional test used to update C (%0000=clear, %1111=set, all others per EEEE)
+
+*r15c1:* zzzz
+
+*r15c2:* conditional test used to update Z (%0000=clear, %1111=set, all others per EEEE)
+
 
 
 ### INSTRUCTION MODES
@@ -1102,16 +1371,121 @@ XBYTE performs the following steps to make a complete bytecode executor:
 
 **Table 8**
 
-| Clock | Phase | XBYTE Activity | Description |
-|---|---|---|---|
-| 1 | go | RFBYTE bytecode SKIPF #0 | Last clock of the RET/_RET_ to $1FF Fetch bytecode from FIFO (initialized via prior RDFAST). Cancel any SKIPF pattern in progress (from prior bytecode). |
-| 2 | get | MOV PA,bytecode RDLUT (per bytecode) | 1st clock of 1st canceled instruction Write bytecode to PA ($1F6). Read lookup-table RAM according to bytecode and mode. |
-| 3 | go | RDLUT (data → D) | 2nd clock of 1st canceled instruction Get lookup RAM long into D for EXECF. |
-| 4 | get | EXECF D (begin) | 1st clock of 2nd canceled instruction Execute EXECF. |
-| 5 | go | MOV PB,(GETPTR) MODCZ bit1,bit0 {WCZ} EXECF D (branch) | 2nd clock of 2nd canceled instruction Write FIFO pointer to PB ($1F7). Write C,Z with bit1,bit0 of RDLUT address, if enabled. Do EXECF branch. |
-| 6 | get | flush pipeline | 1st clock of 3rd canceled instruction |
-| 7 | go | reload pipeline | 2nd clock of 3rd canceled instruction |
-| 8 | get | <none> | 1st clock of 1st instruction of bytecode routine Loop to clock 1 if _RET_ or RET |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Clock
+
+*r1c2:* Phase
+
+*r1c3:* XBYTE Activity
+
+*r1c4:* Description
+
+*r2c1:* 1
+
+*r2c2:* go
+
+*r2c3:*
+```
+RFBYTE bytecode
+SKIPF #0
+```
+
+*r2c4:*
+```
+Last clock of the RET/_RET_ to $1FF
+Fetch bytecode from FIFO (initialized via prior RDFAST).
+Cancel any SKIPF pattern in progress (from prior bytecode).
+```
+
+*r3c1:* 2
+
+*r3c2:* get
+
+*r3c3:*
+```
+MOV PA,bytecode
+RDLUT (per bytecode)
+```
+
+*r3c4:*
+```
+1st clock of 1st canceled instruction
+Write bytecode to PA ($1F6).
+Read lookup-table RAM according to bytecode and mode.
+```
+
+*r4c1:* 3
+
+*r4c2:* go
+
+*r4c3:* RDLUT (data → D)
+
+*r4c4:*
+```
+2nd clock of 1st canceled instruction
+Get lookup RAM long into D for EXECF.
+```
+
+*r5c1:* 4
+
+*r5c2:* get
+
+*r5c3:* EXECF D (begin)
+
+*r5c4:*
+```
+1st clock of 2nd canceled instruction
+Execute EXECF.
+```
+
+*r6c1:* 5
+
+*r6c2:* go
+
+*r6c3:*
+```
+MOV PB,(GETPTR)
+MODCZ bit1,bit0 {WCZ}
+EXECF D (branch)
+```
+
+*r6c4:*
+```
+2nd clock of 2nd canceled instruction
+Write FIFO pointer to PB ($1F7).
+Write C,Z with bit1,bit0 of RDLUT address, if enabled.
+Do EXECF branch.
+```
+
+*r7c1:* 6
+
+*r7c2:* get
+
+*r7c3:* flush pipeline
+
+*r7c4:* 1st clock of 3rd canceled instruction
+
+*r8c1:* 7
+
+*r8c2:* go
+
+*r8c3:* reload pipeline
+
+*r8c4:* 2nd clock of 3rd canceled instruction
+
+*r9c1:* 8
+
+*r9c2:* get
+
+*r9c3:* <none>
+
+*r9c4:*
+```
+1st clock of 1st instruction of bytecode routine
+Loop to clock 1 if _RET_ or RET
+```
+
 
 The bytecode translation table in LUT memory must consist of long data which EXECF would use, where the 10 LSBs are an address to jump to in cog/LUT RAM and the 22 MSBs are a SKIPF pattern to be applied.
 Starting XBYTE and establishing its operating mode is done all at once by a  '_RET_ SETQ {#}D' instruction, with the top of the hardware stack holding $1FF.
@@ -1120,28 +1494,170 @@ To alter the XBYTE mode for the next bytecode, only, a '_RET_ SETQ2 {#}D' instru
 
 **Table 9**
 
-| Bits | SETQ/SETQ2 {#}D value | LUT base address | LUT index b = bytecode | LUT EXECF address |
-|---|---|---|---|---|
-| 8 | %A000000xF | %A00000000 | I = b[7:0] | AIIIIIIII |
-| 8 | %ABBBB00xF %BBBB > 0 | %A00000000 | if b[7:4] < %BBBB then I = b[7:0] if b[7:4] >= %BBBB then I = b[7:4] - %BBBB | %AIIIIIIII %ABBBBIIII |
-| 7 | %AAxx0010F | %AA0000000 | I = b[6:0] | %AAIIIIIII |
-| 7 | %AAxx0011F | %AA0000000 | I = b[7:1] | %AAIIIIIII |
-| 6 | %AAAx1010F | %AAA000000 | I = b[5:0] | %AAAIIIIII |
-| 6 | %AAAx1011F | %AAA000000 | I = b[7:2] | %AAAIIIIII |
-| 5 | %AAAAx100F | %AAAA00000 | I = b[4:0] | %AAAAIIIII |
-| 5 | %AAAAx101F | %AAAA00000 | I = b[7:3] | %AAAAIIIII |
-| 4 | %AAAAA110F | %AAAAA0000 | I = b[3:0] | %AAAAAIIII |
-| 4 | %AAAAA111F | %AAAAA0000 | I = b[7:4] | %AAAAAIIII |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Bits
+
+*r1c2:*
+```
+SETQ/SETQ2
+{#}D value
+```
+
+*r1c3:*
+```
+LUT base
+address
+```
+
+*r1c4:*
+```
+LUT index
+b = bytecode
+```
+
+*r1c5:*
+```
+LUT EXECF
+address
+```
+
+*r2c1:* 8
+
+*r2c2:* %A000000xF
+
+*r2c3:* %A00000000
+
+*r2c4:* I = b[7:0]
+
+*r2c5:* AIIIIIIII
+
+*r3c1:* 8
+
+*r3c2:*
+```
+%ABBBB00xF
+%BBBB > 0
+```
+
+*r3c3:* %A00000000
+
+*r3c4:*
+```
+if b[7:4] < %BBBB then I = b[7:0]
+if b[7:4] >= %BBBB then I = b[7:4] - %BBBB
+```
+
+*r3c5:*
+```
+%AIIIIIIII
+%ABBBBIIII
+```
+
+*r4c1:* 7
+
+*r4c2:* %AAxx0010F
+
+*r4c3:* %AA0000000
+
+*r4c4:* I = b[6:0]
+
+*r4c5:* %AAIIIIIII
+
+*r5c1:* 7
+
+*r5c2:* %AAxx0011F
+
+*r5c3:* %AA0000000
+
+*r5c4:* I = b[7:1]
+
+*r5c5:* %AAIIIIIII
+
+*r6c1:* 6
+
+*r6c2:* %AAAx1010F
+
+*r6c3:* %AAA000000
+
+*r6c4:* I = b[5:0]
+
+*r6c5:* %AAAIIIIII
+
+*r7c1:* 6
+
+*r7c2:* %AAAx1011F
+
+*r7c3:* %AAA000000
+
+*r7c4:* I = b[7:2]
+
+*r7c5:* %AAAIIIIII
+
+*r8c1:* 5
+
+*r8c2:* %AAAAx100F
+
+*r8c3:* %AAAA00000
+
+*r8c4:* I = b[4:0]
+
+*r8c5:* %AAAAIIIII
+
+*r9c1:* 5
+
+*r9c2:* %AAAAx101F
+
+*r9c3:* %AAAA00000
+
+*r9c4:* I = b[7:3]
+
+*r9c5:* %AAAAIIIII
+
+*r10c1:* 4
+
+*r10c2:* %AAAAA110F
+
+*r10c3:* %AAAAA0000
+
+*r10c4:* I = b[3:0]
+
+*r10c5:* %AAAAAIIII
+
+*r11c1:* 4
+
+*r11c2:* %AAAAA111F
+
+*r11c3:* %AAAAA0000
+
+*r11c4:* I = b[7:4]
+
+*r11c5:* %AAAAAIIII
+
 
 The %ABBBB00xF setting allows sets of 16 bytecodes, which would use identical LUT values, to be represented by a single LUT value, effectively compressing blocks of 16 LUT values into single LUT values. This is useful when the bytecode, which is always written to PA, is used as an operand within the bytecode routine.
 The %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of the bytecode. This is useful for having the flags differentiate behavior within a bytecode routine, especially in cases of conditional looping, where a SKIPF pattern would have been insufficient, on its own:
 
 **Table 10**
 
-| SETQ/SETQ2 {#}D value | Flag Writing |
-|---|---|
-| %xxxxxxxx0 | Do not affect flags on XBYTE |
-| %xxxxxxxx1 | Write the bytecode's index LSBs to C and Z |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+SETQ/SETQ2
+{#}D value
+```
+
+*r1c2:* Flag Writing
+
+*r2c1:* %xxxxxxxx0
+
+*r2c2:* Do not affect flags on XBYTE
+
+*r3c1:* %xxxxxxxx1
+
+*r3c2:* Write the bytecode's index LSBs to C and Z
+
 
 To start executing bytecodes, use the following instruction sequence, but with the appropriate SETQ operand:
 ```
@@ -1153,15 +1669,125 @@ _RET_   SETQ    #$100		'256-long EXECF table at LUT $100, start XBYTE
 
 **Table 11**
 
-| con _clkfreq = 10_000_000 ' ' ** XBYTE Demo ** ' Automatically executes bytecodes via RET/_RET_ to $1FF. ' Overhead is 6 clocks, including _RET_ at the end of each bytecode routine. ' dat org asmclk 'set clock up setq2 #$FF 'load bytecode table into LUT $100..$1FF rdlong $100,#bytetable rdfast #0,#bytecodes 'init fifo read at start of bytecodes push #$1FF 'push $1FF for xbyte _ret_ setq #$100 'start xbyte with LUT base = $100, no stack pop ' ' Bytecode routines ' r0 _ret_ drvnot #0 'toggle pin 0 r1 _ret_ drvnot #1 'toggle pin 1 r2 _ret_ drvnot #2 'toggle pin 2 r3 _ret_ drvnot #3 'toggle pin 3 r4 rfvars pa 'get offset add pb,pa 'add offset _ret_ rdfast #0,pb 'init fifo read at new address ' ' Bytecodes that form the XBYTE program in hub ' orgh bytecodes byte 0 'toggle pin 0 byte 1 'toggle pin 1 byte 2 'toggle pin 2 byte 3 'toggle pin 3 byte 4,(bytecodes-$) & $7F 'relative branch, loop to bytecodes ' ' Bytecode EXECF data, moved into lut $100..$1FF (no SKIPF patterns are used in this example) ' bytetable long r0 '#0 toggle pin 0 long r1 '#1 toggle pin 1 long r2 '#2 toggle pin 2 long r3 '#3 toggle pin 3 long r4 '#4 relative branch { clock phase hidden description ------------------------------------------------------------------------------------------------- 1 go RFBYTE byte last clock of instruction which is executing a RET/_RET_ to $1FF 2 get RDLUT @byte, write byte to PA 1st clock of 1st canceled instruction 3 go LUT long --> next D 2nd clock of 1st canceled instruction 4 get EXECF D, 1st clock of 2nd canceled instruction 5 go EXECF D, write GETPTR to PB 2nd clock of 2nd canceled instruction 6 get flush pipe 1st clock of 3rd canceled instruction 7 go flush pipe 2nd clock of 3rd canceled instruction 8 get 1st clock of 1st instruction of bytecode routine, loop to (clock) 1 if _RET_ } |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+con _clkfreq = 10_000_000
+'
+' ** XBYTE Demo **
+' Automatically executes bytecodes via RET/_RET_ to $1FF.
+' Overhead is 6 clocks, including _RET_ at the end of each bytecode routine.
+'
+dat org
+
+ asmclk 'set clock up
+
+ setq2 #$FF 'load bytecode table into LUT $100..$1FF
+ rdlong $100,#bytetable
+
+ rdfast #0,#bytecodes 'init fifo read at start of bytecodes
+
+ push #$1FF 'push $1FF for xbyte
+ _ret_ setq #$100 'start xbyte with LUT base = $100, no stack pop
+'
+' Bytecode routines
+'
+r0 _ret_ drvnot #0 'toggle pin 0
+
+r1 _ret_ drvnot #1 'toggle pin 1
+
+r2 _ret_ drvnot #2 'toggle pin 2
+
+r3 _ret_ drvnot #3 'toggle pin 3
+
+r4 rfvars pa 'get offset
+ add pb,pa 'add offset
+ _ret_ rdfast #0,pb 'init fifo read at new address
+'
+' Bytecodes that form the XBYTE program in hub
+'
+ orgh
+
+bytecodes byte 0 'toggle pin 0
+ byte 1 'toggle pin 1
+ byte 2 'toggle pin 2
+ byte 3 'toggle pin 3
+ byte 4,(bytecodes-$) & $7F 'relative branch, loop to bytecodes
+'
+' Bytecode EXECF data, moved into lut $100..$1FF (no SKIPF patterns are used in this example)
+'
+bytetable long r0 '#0 toggle pin 0
+ long r1 '#1 toggle pin 1
+ long r2 '#2 toggle pin 2
+ long r3 '#3 toggle pin 3
+ long r4 '#4 relative branch
+
+{
+clock phase hidden description
+-------------------------------------------------------------------------------------------------
+1 go RFBYTE byte last clock of instruction which is executing a
+ RET/_RET_ to $1FF
+
+2 get RDLUT @byte, write byte to PA 1st clock of 1st canceled instruction
+3 go LUT long --> next D 2nd clock of 1st canceled instruction
+4 get EXECF D, 1st clock of 2nd canceled instruction
+5 go EXECF D, write GETPTR to PB 2nd clock of 2nd canceled instruction
+6 get flush pipe 1st clock of 3rd canceled instruction
+7 go flush pipe 2nd clock of 3rd canceled instruction
+
+8 get 1st clock of 1st instruction of bytecode routine,
+ loop to (clock) 1 if _RET_
+}
+```
+
 
 While developing XBYTE code, you may want to single-step the bytecode execution, in order to inspect what is happening. To do this, you must simulate normal XBYTE operation using a small program. Below is an example of how to do this for the simplest case of the full-8-bit mode which doesn't write the LSBs of the LUT address to C and Z.
 
 **Table 12**
 
-| ' Normal XBYTE or single-step bytecode executor (must run from registers or LUT) rdfast #0,bytecodes 'start FIFO read at bytecodes ' push #$1FF 'start xbyte UNCOMMENT FOR NORMAL XBYTE ' _ret_ setq #$000 '(full 8-bit lookup at LUT $000) UNCOMMENT FOR NORMAL XBYTE rep @.r,#8 'prepare to single-step by stuffing stack with byteloop address push ##byteloop '(bottom stack value gets copied each _RET_ / RET) .r byteloop nop '21-NOP landing strip for any trailing skip pattern nop 'that XBYTE would have canceled on _RET_ / RET nop nop nop nop nop nop nop nop nop nop nop nop nop nop nop nop nop nop nop rfbyte pa 'get next bytecode into pa getptr pb 'get next bytecode address into pb debug(uhex_byte(pa),uhex_long(pb)) 'show bytecode and next bytecode address rdlut temp,pa 'lookup EXECF long from LUT execf temp 'do EXECF to execute bytecode, returns to byteloop |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+' Normal XBYTE or single-step bytecode executor (must run from registers or LUT)
+
+ rdfast #0,bytecodes 'start FIFO read at bytecodes
+
+' push #$1FF 'start xbyte UNCOMMENT FOR NORMAL XBYTE
+' _ret_ setq #$000 '(full 8-bit lookup at LUT $000) UNCOMMENT FOR NORMAL XBYTE
+
+ rep @.r,#8 'prepare to single-step by stuffing stack with byteloop address
+ push ##byteloop '(bottom stack value gets copied each _RET_ / RET)
+.r
+byteloop nop '21-NOP landing strip for any trailing skip pattern
+ nop 'that XBYTE would have canceled on _RET_ / RET
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ rfbyte pa 'get next bytecode into pa
+ getptr pb 'get next bytecode address into pb
+ debug(uhex_byte(pa),uhex_long(pb)) 'show bytecode and next bytecode address
+ rdlut temp,pa 'lookup EXECF long from LUT
+ execf temp 'do EXECF to execute bytecode, returns to byteloop
+```
+
 
 
 ### SETQ CONSIDERATIONS
@@ -1221,12 +1847,56 @@ Here are the DMIX and SMIX terms, according to each instruction:
 
 **Table 13**
 
-|   | DMIX | SMIX |
-|---|---|---|
-| ADDPIX | $FF | $FF |
-| MULPIX | S[byte] | $00 |
-| BLNPIX | !V | V |
-| MIXPIX | M[5:3] = %000 → $00 M[5:3] = %001 → $FF M[5:3] = %010 → V M[5:3] = %011 → !V M[5:3] = %100 → S[byte] M[5:3] = %101 → !S[byte] M[5:3] = %110 → D[byte] M[5:3] = %111 → !D[byte] | M[2:0] = %000 → $00 M[2:0] = %001 → $FF M[2:0] = %010 → V M[2:0] = %011 → !V M[2:0] = %100 → S[byte] M[2:0] = %101 → !S[byte] M[2:0] = %110 → D[byte] M[2:0] = %111 → !D[byte] |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c2:* DMIX
+
+*r1c3:* SMIX
+
+*r2c1:* ADDPIX
+
+*r2c2:* $FF
+
+*r2c3:* $FF
+
+*r3c1:* MULPIX
+
+*r3c2:* S[byte]
+
+*r3c3:* $00
+
+*r4c1:* BLNPIX
+
+*r4c2:* !V
+
+*r4c3:* V
+
+*r5c1:* MIXPIX
+
+*r5c2:*
+```
+M[5:3] = %000 → $00
+M[5:3] = %001 → $FF
+M[5:3] = %010 → V
+M[5:3] = %011 → !V
+M[5:3] = %100 → S[byte]
+M[5:3] = %101 → !S[byte]
+M[5:3] = %110 → D[byte]
+M[5:3] = %111 → !D[byte]
+```
+
+*r5c3:*
+```
+M[2:0] = %000 → $00
+M[2:0] = %001 → $FF
+M[2:0] = %010 → V
+M[2:0] = %011 → !V
+M[2:0] = %100 → S[byte]
+M[2:0] = %101 → !S[byte]
+M[2:0] = %110 → D[byte]
+M[2:0] = %111 → !D[byte]
+```
+
 
 
 ### DACs
@@ -1781,8 +2451,80 @@ The program below demonstrates both SINC1 and SINC2 modes in a looped Goertzel m
 
 **Table 19**
 
-| ' Goertzel input and display con adcpin = 0 dacpin = 1 cycles = 100 'number of cycles to measure sinc2 = 0 '0 for SINC1, 1 for SINC2 ampl = sinc2 ? 10 : 127 'small sin/cos amplitude for SINC2 shifts = sinc2 ? 23 : 12 'more right-shifts for SINC2 acc's _clkfreq = 256_000_000 ' Setup dat org wrpin adcmode,#adcpin 'init ADC pin dirh #dacpin 'enable DAC pin setxfrq freq 'set streamer NCO frequency ' Make sine and cosine tables in LUT bytes 3 and 2 mov z,#$1FF 'make 512-sample sin/cos table in LUT sincos shl z,#32-9 'get angle into top 9 bits of z qrotate #ampl,z 'rotate (ampl,0) by z shr z,#32-9 'restore z getqy y 'get y getqx x 'get x shl y,#24 'y into byte3 setbyte y,x,#2 'x into byte2 wrlut y,z 'write sin:cos:0:0 into LUT djnf z,#sincos 'loop until 512 samples ' Input Goertzel measurements from adcpin and output power level to dacpin loop xcont dds_d,dds_s 'issue Goertzel command getxacc x 'get prior Goertzel acc's, cos first mov y,0 '..then sin modc sinc2 * %1111 wc 'if SINC2, get differences if_c sub x,xdiff if_c add xdiff,x if_c sub y,ydiff if_c add ydiff,y qvector x,y 'convert (x,y) to (rho,theta) getqx x 'get rho (power measurement) shr x,#shifts 'shift power down to byte setbyte dacmode,x,#1 'insert into dacmode wrpin dacmode,#dacpin 'update DAC pin jmp #loop 'loop 'Data adcmode long %0000_0000_000_100011_0000000_00_00000_0 'ADC mode dacmode long %0000_0000_000_10110_00000000_00_00000_0 'DAC mode freq long round(1_000_000.0/256_000_000.0 * 65536.0 * 32768.0) '1.000000 MHz dds_d long %1111_0000_0000_0111<<16 + sinc2<<23 + cycles 'Goertzel mode, pin 0..3 in dds_s long %0000_0001_000_000000000 'input on pin +0, 512 table x res 1 y res 1 z res 1 xdiff res 1 ydiff res 1 |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+' Goertzel input and display
+
+con adcpin = 0
+ dacpin = 1
+ cycles = 100 'number of cycles to measure
+ sinc2 = 0 '0 for SINC1, 1 for SINC2
+ ampl = sinc2 ? 10 : 127 'small sin/cos amplitude for SINC2
+ shifts = sinc2 ? 23 : 12 'more right-shifts for SINC2 acc's
+ _clkfreq = 256_000_000
+
+' Setup
+
+dat org
+
+ wrpin adcmode,#adcpin 'init ADC pin
+ dirh #dacpin 'enable DAC pin
+
+ setxfrq freq 'set streamer NCO frequency
+
+' Make sine and cosine tables in LUT bytes 3 and 2
+
+ mov z,#$1FF 'make 512-sample sin/cos table in LUT
+sincos shl z,#32-9 'get angle into top 9 bits of z
+ qrotate #ampl,z 'rotate (ampl,0) by z
+ shr z,#32-9 'restore z
+ getqy y 'get y
+ getqx x 'get x
+ shl y,#24 'y into byte3
+ setbyte y,x,#2 'x into byte2
+ wrlut y,z 'write sin:cos:0:0 into LUT
+ djnf z,#sincos 'loop until 512 samples
+
+' Input Goertzel measurements from adcpin and output power level to dacpin
+
+loop xcont dds_d,dds_s 'issue Goertzel command
+ getxacc x 'get prior Goertzel acc's, cos first
+ mov y,0 '..then sin
+
+ modc sinc2 * %1111 wc 'if SINC2, get differences
+ if_c sub x,xdiff
+ if_c add xdiff,x
+ if_c sub y,ydiff
+ if_c add ydiff,y
+
+ qvector x,y 'convert (x,y) to (rho,theta)
+ getqx x 'get rho (power measurement)
+
+ shr x,#shifts 'shift power down to byte
+ setbyte dacmode,x,#1 'insert into dacmode
+ wrpin dacmode,#dacpin 'update DAC pin
+
+ jmp #loop 'loop
+
+'Data
+
+adcmode long %0000_0000_000_100011_0000000_00_00000_0 'ADC mode
+dacmode long %0000_0000_000_10110_00000000_00_00000_0 'DAC mode
+
+freq long round(1_000_000.0/256_000_000.0 * 65536.0 * 32768.0) '1.000000 MHz
+
+dds_d long %1111_0000_0000_0111<<16 + sinc2<<23 + cycles 'Goertzel mode, pin 0..3 in
+dds_s long %0000_0001_000_000000000 'input on pin +0, 512 table
+
+x res 1
+y res 1
+z res 1
+xdiff res 1
+ydiff res 1
+```
+
 
 ```
 In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V frequency-swept sine wave into the ADC input pin, going from 950-1050KHz over 12ms, while the program measures the energy level at 1MHz:
@@ -1808,10 +2550,56 @@ Eight-bit red, green, and blue pixel data are encoded into 10-bit TMDS patterns 
 
 **Table 21**
 
-| P[31:0] | RED+/- serial | GRN+/- serial | BLU+/- serial |
-|---|---|---|---|
-| %RRRRRRRR_GGGGGGGG_BBBBBBBB_xxxxxx0x | %RRRRRRRR gets encoded | %GGGGGGGG gets encoded | %BBBBBBBB gets encoded |
-| %rrrrrrrrrr_gggggggggg_bbbbbbbbbb_1x | %rrrrrrrrrr is sent literally | %gggggggggg is sent literally | %bbbbbbbbbb is sent literally |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* P[31:0]
+
+*r1c2:* RED+/- serial
+
+*r1c3:* GRN+/- serial
+
+*r1c4:* BLU+/- serial
+
+*r2c1:* %RRRRRRRR_GGGGGGGG_BBBBBBBB_xxxxxx0x
+
+*r2c2:*
+```
+%RRRRRRRR
+gets encoded
+```
+
+*r2c3:*
+```
+%GGGGGGGG
+gets encoded
+```
+
+*r2c4:*
+```
+%BBBBBBBB
+gets encoded
+```
+
+*r3c1:* %rrrrrrrrrr_gggggggggg_bbbbbbbbbb_1x
+
+*r3c2:*
+```
+%rrrrrrrrrr
+is sent literally
+```
+
+*r3c3:*
+```
+%gggggggggg
+is sent literally
+```
+
+*r3c4:*
+```
+%bbbbbbbbbb
+is sent literally
+```
+
 
 Digital video output mode requires that the P2 clock frequency be 10x the pixel rate. For standard-compliant 640x480 digital video, which has a pixel rate of 25MHz, the P2 chip should be clocked at 250MHz.
 The NCO frequency must be set to 1/10 of the main clock using the value $0CCCCCCC+1, where the +1 forces initial NCO rollover on the 10th clock.
@@ -1819,8 +2607,98 @@ The following program displays a 16bpp image in 640x480 HDMI mode:
 
 **Table 22**
 
-| '******************************************** '* VGA 640 x 480 x 16bpp 5:6:5 RGB - HDMI * '******************************************** CON hdmi_base = 16 'must be a multiple of 8 DAT org ' ' ' Setup ' hubset ##%1_000001_0000011000_1111_10_00 'config PLL, 20MHz/2*25*1 = 250MHz waitx ##20_000_000 / 200 'allow crystal+PLL 5ms to stabilize hubset ##%1_000001_0000011000_1111_10_11 'switch to PLL rdfast ##640*350*2/64,##$1000 'set rdfast to wrap on bitmap setxfrq ##$0CCCCCCC+1 'set streamer freq to 1/10th clk setcmod #$100 'enable HDMI mode drvl #7<<6 + hdmi_base 'enable HDMI pins wrpin ##%100100_00_00000_0,#7<<6 + hdmi_base 'set 1mA drive on HDMI pins ' ' ' Field loop ' fieldloop mov hsync0,sync_000 'vsync off mov hsync1,sync_001 callpa #90,#blank 'top blanks mov x,#350 'set visible lines line call #hsync 'do horizontal sync xcont m_rf,#0 'do visible line djnz x,#line 'another line? callpa #83,#blank 'bottom blanks mov hsync0,sync_222 'vsync on mov hsync1,sync_223 callpa #2,#blank 'vertical sync blanks jmp #fieldloop 'loop ' ' ' Subroutines ' blank call #hsync 'blank lines xcont m_vi,hsync0 _ret_ djnz pa,#blank hsync xcont m_bs,hsync0 'horizontal sync xzero m_sn,hsync1 _ret_ xcont m_bv,hsync0 ' ' ' Initialized data ' sync_000 long %1101010100_1101010100_1101010100_10 ' sync_001 long %1101010100_1101010100_0010101011_10 ' hsync sync_222 long %0101010100_0101010100_0101010100_10 'vsync sync_223 long %0101010100_0101010100_1010101011_10 'vsync + hsync m_bs long $70810000 + hdmi_base<<17 + 16 'before sync m_sn long $70810000 + hdmi_base<<17 + 96 'sync m_bv long $70810000 + hdmi_base<<17 + 48 'before visible m_vi long $70810000 + hdmi_base<<17 + 640 'visible m_rf long $B0850000 + hdmi_base<<17 + 640 'visible rfword rgb16 (5:6:5) ' ' ' Uninitialized data ' x res 1 hsync0 res 1 hsync1 res 1 ' ' ' Bitmap ' orgh $1000 - 70 'justify pixels at $1000 file "birds_16bpp.bmp" 'rayman's picture (640 x 350) |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+'********************************************
+'* VGA 640 x 480 x 16bpp 5:6:5 RGB - HDMI *
+'********************************************
+
+CON hdmi_base = 16 'must be a multiple of 8
+
+DAT org
+'
+'
+' Setup
+'
+ hubset ##%1_000001_0000011000_1111_10_00 'config PLL, 20MHz/2*25*1 = 250MHz
+ waitx ##20_000_000 / 200 'allow crystal+PLL 5ms to stabilize
+ hubset ##%1_000001_0000011000_1111_10_11 'switch to PLL
+
+ rdfast ##640*350*2/64,##$1000 'set rdfast to wrap on bitmap
+
+ setxfrq ##$0CCCCCCC+1 'set streamer freq to 1/10th clk
+
+ setcmod #$100 'enable HDMI mode
+
+ drvl #7<<6 + hdmi_base 'enable HDMI pins
+
+ wrpin ##%100100_00_00000_0,#7<<6 + hdmi_base 'set 1mA drive on HDMI pins
+'
+'
+' Field loop
+'
+fieldloop mov hsync0,sync_000 'vsync off
+ mov hsync1,sync_001
+
+ callpa #90,#blank 'top blanks
+
+ mov x,#350 'set visible lines
+line call #hsync 'do horizontal sync
+ xcont m_rf,#0 'do visible line
+ djnz x,#line 'another line?
+
+ callpa #83,#blank 'bottom blanks
+
+ mov hsync0,sync_222 'vsync on
+ mov hsync1,sync_223
+
+ callpa #2,#blank 'vertical sync blanks
+
+ jmp #fieldloop 'loop
+'
+'
+' Subroutines
+'
+blank call #hsync 'blank lines
+ xcont m_vi,hsync0
+ _ret_ djnz pa,#blank
+
+hsync xcont m_bs,hsync0 'horizontal sync
+ xzero m_sn,hsync1
+ _ret_ xcont m_bv,hsync0
+'
+'
+' Initialized data
+'
+sync_000 long %1101010100_1101010100_1101010100_10 '
+sync_001 long %1101010100_1101010100_0010101011_10 ' hsync
+sync_222 long %0101010100_0101010100_0101010100_10 'vsync
+sync_223 long %0101010100_0101010100_1010101011_10 'vsync + hsync
+
+m_bs long $70810000 + hdmi_base<<17 + 16 'before sync
+m_sn long $70810000 + hdmi_base<<17 + 96 'sync
+m_bv long $70810000 + hdmi_base<<17 + 48 'before visible
+m_vi long $70810000 + hdmi_base<<17 + 640 'visible
+
+m_rf long $B0850000 + hdmi_base<<17 + 640 'visible rfword rgb16 (5:6:5)
+'
+'
+' Uninitialized data
+'
+x res 1
+
+hsync0 res 1
+hsync1 res 1
+'
+'
+' Bitmap
+'
+ orgh $1000 - 70 'justify pixels at $1000
+ file "birds_16bpp.bmp" 'rayman's picture (640 x 350)
+```
+
 
 
 ### COLORSPACE CONVERTER
@@ -1893,12 +2771,132 @@ The final output terms are selected by CMOD[6:5]:
 
 **Table 23**
 
-| CMOD[6:5] | Mode | DAC3 | DAC2 | DAC1 | DAC0 |
-|---|---|---|---|---|---|
-| 00 | <off> | DAC3 (bypass) | DAC2 (bypass) | DAC1 (bypass) | DAC0 (bypass) |
-| 01 | VGA (R-G-B) / HDTV (Y-Pb-Pr) | FY (R / Y) | FI (G / Pb) | FQ (B / Pr) | FS (H-Sync) |
-| 10 | NTSC/PAL Composite + S-Video | FYC (Composite) | FYC (Composite) | FIQ (Chroma) | FYS (Luma) |
-| 11 | NTSC/PAL Composite | FYC (Composite) | FYC (Composite) | FYC (Composite) | FYC (Composite) |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* CMOD[6:5]
+
+*r1c2:* Mode
+
+*r1c3:* DAC3
+
+*r1c4:* DAC2
+
+*r1c5:* DAC1
+
+*r1c6:* DAC0
+
+*r2c1:* 00
+
+*r2c2:* <off>
+
+*r2c3:*
+```
+DAC3
+(bypass)
+```
+
+*r2c4:*
+```
+DAC2
+(bypass)
+```
+
+*r2c5:*
+```
+DAC1
+(bypass)
+```
+
+*r2c6:*
+```
+DAC0
+(bypass)
+```
+
+*r3c1:* 01
+
+*r3c2:* VGA (R-G-B) / HDTV (Y-Pb-Pr)
+
+*r3c3:*
+```
+FY
+(R / Y)
+```
+
+*r3c4:*
+```
+FI
+(G / Pb)
+```
+
+*r3c5:*
+```
+FQ
+(B / Pr)
+```
+
+*r3c6:*
+```
+FS
+(H-Sync)
+```
+
+*r4c1:* 10
+
+*r4c2:* NTSC/PAL Composite + S-Video
+
+*r4c3:*
+```
+FYC
+(Composite)
+```
+
+*r4c4:*
+```
+FYC
+(Composite)
+```
+
+*r4c5:*
+```
+FIQ
+(Chroma)
+```
+
+*r4c6:*
+```
+FYS
+(Luma)
+```
+
+*r5c1:* 11
+
+*r5c2:* NTSC/PAL Composite
+
+*r5c3:*
+```
+FYC
+(Composite)
+```
+
+*r5c4:*
+```
+FYC
+(Composite)
+```
+
+*r5c5:*
+```
+FYC
+(Composite)
+```
+
+*r5c6:*
+```
+FYC
+(Composite)
+```
+
 
 
 ### I/O PIN TIMING
@@ -2299,12 +3297,34 @@ Each cog has an execute-only ROM in cog registers $1F8..$1FF which contains spec
 
 **Table 24**
 
-| Execute-only ROM in cog registers $1F8..$1FF (%cccc = !CogNumber) |
-|---|
-| Debug ISR Entry - IJMP0 is initialized to $1F8 on COGINIT |
-| $1F8 - SETQ #$0F 'save registers $000..$00F $1F9 - WRLONG 0,* '* = %1111_1111_1ccc_c000_0000 $1FA - SETQ #$0F 'load program into $000..$00F $1FB - RDLONG 0,* '* = %1111_1111_1ccc_c100_0000 $1FC - JMP #0 'jump to loaded program |
-| Debug ISR Exit - Jump here to exit your debug ISR |
-| $1FD - SETQ #$0F 'restore registers $000..$00F $1FE - RDLONG 0,* '* = %1111_1111_1ccc_c000_0000 $1FF - RETI0 'CALLD IRET0,IRET0 WCZ |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Execute-only ROM in cog registers $1F8..$1FF
+(%cccc = !CogNumber)
+```
+
+*r2c1:* Debug ISR Entry - IJMP0 is initialized to $1F8 on COGINIT
+
+*r3c1:*
+```
+$1F8 - SETQ #$0F 'save registers $000..$00F
+$1F9 - WRLONG 0,* '* = %1111_1111_1ccc_c000_0000
+$1FA - SETQ #$0F 'load program into $000..$00F
+$1FB - RDLONG 0,* '* = %1111_1111_1ccc_c100_0000
+$1FC - JMP #0 'jump to loaded program
+```
+
+*r4c1:* Debug ISR Exit - Jump here to exit your debug ISR
+
+*r5c1:*
+```
+$1FD - SETQ #$0F 'restore registers $000..$00F
+$1FE - RDLONG 0,* '* = %1111_1111_1ccc_c000_0000
+$1FF - RETI0 'CALLD IRET0,IRET0 WCZ
+```
+
 
 During a debug ISR, INA and INB, normally read-only input-pin registers, become readable/writable RAM registers named IJMP0 and IRET0, and are used by the debug interrupt as jump and return addresses. On COGINIT, IJMP0 is initialized to $1F8 which is the debug-ISR-entry routine's address.
 When a debug interrupt occurs with IJMP0 pointing to $1F8, the following sequence happens:
@@ -2319,16 +3339,70 @@ Here is a table of the hub RAM locations used by each cog for register save/rest
 
 **Table 25**
 
-| Cog | Save/Restore in Hub RAM for Registers $000..$00F | ISR image in Hub RAM for Registers $000..$00F |
-|---|---|---|
-| 7 | $FFC00..$FFC3F | $FFC40..$FFC7F |
-| 6 | $FFC80..$FFCBF | $FFCC0..$FFCFF |
-| 5 | $FFD00..$FFD3F | $FFD40..$FFD7F |
-| 4 | $FFD80..$FFDBF | $FFDC0..$FFDFF |
-| 3 | $FFE00..$FFE3F | $FFE40..$FFE7F |
-| 2 | $FFE80..$FFEBF | $FFEC0..$FFEFF |
-| 1 | $FFF00..$FFF3F | $FFF40..$FFF7F |
-| 0 | $FFF80..$FFFBF | $FFFC0..$FFFFF |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Cog
+
+*r1c2:*
+```
+Save/Restore in Hub RAM
+for Registers $000..$00F
+```
+
+*r1c3:*
+```
+ISR image in Hub RAM
+for Registers $000..$00F
+```
+
+*r2c1:* 7
+
+*r2c2:* $FFC00..$FFC3F
+
+*r2c3:* $FFC40..$FFC7F
+
+*r3c1:* 6
+
+*r3c2:* $FFC80..$FFCBF
+
+*r3c3:* $FFCC0..$FFCFF
+
+*r4c1:* 5
+
+*r4c2:* $FFD00..$FFD3F
+
+*r4c3:* $FFD40..$FFD7F
+
+*r5c1:* 4
+
+*r5c2:* $FFD80..$FFDBF
+
+*r5c3:* $FFDC0..$FFDFF
+
+*r6c1:* 3
+
+*r6c2:* $FFE00..$FFE3F
+
+*r6c3:* $FFE40..$FFE7F
+
+*r7c1:* 2
+
+*r7c2:* $FFE80..$FFEBF
+
+*r7c3:* $FFEC0..$FFEFF
+
+*r8c1:* 1
+
+*r8c2:* $FFF00..$FFF3F
+
+*r8c3:* $FFF40..$FFF7F
+
+*r9c1:* 0
+
+*r9c2:* $FFF80..$FFFBF
+
+*r9c3:* $FFFC0..$FFFFF
+
 
 Though the first debug interrupt upon cog (re)start will always use the debug-ISR-entry routine at $1F8, you may redirect IJMP0 during any debug ISR to point elsewhere for use by subsequent debug interrupts. This would mean that you would lose the initial register-saving function provided by the small ROM starting at $1F8, so you would have to use some cog registers for debugger-state storage that don't interfere with the cog program that is being debugged. If no register saving/restoring or host communications are required, your debug ISR may execute very quickly.
 What terminates a debug interrupt is not only RETI0 (CALLD INB,INB WCZ), but any D-register variant (CALLD anyreg,INB WCZ). For example RESI0 (CALLD INA,INB WCZ) may be used to resume next time from where this debug ISR left off, but this would imply that you are not using the debug-ISR-entry and -exit routines in the cog-register ROM and have, instead, permanently located debugger code into some cog registers, so that your debugger program is already present at the start of the debug interrupt.
@@ -2571,22 +3645,153 @@ The tables below explain the various bit fields within the HUBSET operand:
 
 **Table 26**
 
-| PLL Setting | Value | Effect | Notes |
-|---|---|---|---|
-| %E | 0/1 | PLL off/on | XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source. |
-| %DDDDDD | 0..63 | 1..64 division of XI pin frequency | This divided XI frequency feeds into the phase-frequency comparator's 'reference' input. |
-| %MMMMMMMMMM | 0..1023 | 1..1024 division of VCO frequency | This divided VCO frequency feeds into the phase-frequency comparator's 'feedback' input. This frequency division has the effect of multiplying the divided XI frequency (per %DDDDDD) inside the VCO. The VCO frequency should be kept within 100 MHz to 200 Mhz. |
-| %PPPP | 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 | VCO / 2 VCO / 4 VCO / 6 VCO / 8 VCO / 10 VCO / 12 VCO / 14 VCO / 16 VCO / 18 VCO / 20 VCO / 22 VCO / 24 VCO / 26 VCO / 28 VCO / 30 VCO / 1 | This divided VCO frequency is selectable as the system clock when SS = %11. For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* PLL Setting
+
+*r1c2:* Value
+
+*r1c3:* Effect
+
+*r1c4:* Notes
+
+*r2c1:* %E
+
+*r2c2:* 0/1
+
+*r2c3:* PLL off/on
+
+*r2c4:* XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.
+
+*r3c1:* %DDDDDD
+
+*r3c2:* 0..63
+
+*r3c3:* 1..64 division of XI pin frequency
+
+*r3c4:* This divided XI frequency feeds into the phase-frequency comparator's 'reference' input.
+
+*r4c1:* %MMMMMMMMMM
+
+*r4c2:* 0..1023
+
+*r4c3:* 1..1024 division of VCO frequency
+
+*r4c4:* This divided VCO frequency feeds into the phase-frequency comparator's 'feedback' input. This frequency division has the effect of multiplying the divided XI frequency (per %DDDDDD) inside the VCO. The VCO frequency should be kept within 100 MHz to 200 Mhz.
+
+*r5c1:* %PPPP
+
+*r5c2:*
+```
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+```
+
+*r5c3:*
+```
+VCO / 2
+VCO / 4
+VCO / 6
+VCO / 8
+VCO / 10
+VCO / 12
+VCO / 14
+VCO / 16
+VCO / 18
+VCO / 20
+VCO / 22
+VCO / 24
+VCO / 26
+VCO / 28
+VCO / 30
+VCO / 1
+```
+
+*r5c4:*
+```
+This divided VCO frequency is selectable as the system clock when SS = %11.
+
+For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15).
+```
+
 
 
 **Table 27**
 
-| %CC | XI status | XO status | XI / XO impedance | XI / XO loading caps |
-|---|---|---|---|---|
-| %00 | ignored | float | Hi-Z | OFF |
-| %01 | input | 600-ohm drive | 1M-ohm | OFF |
-| %10 | input | 600-ohm drive | 1M-ohm | 15pF per pin |
-| %11 | input | 600-ohm drive | 1M-ohm | 30pF per pin |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* %CC
+
+*r1c2:* XI status
+
+*r1c3:* XO status
+
+*r1c4:*
+```
+XI / XO
+impedance
+```
+
+*r1c5:*
+```
+XI / XO
+loading caps
+```
+
+*r2c1:* %00
+
+*r2c2:* ignored
+
+*r2c3:* float
+
+*r2c4:* Hi-Z
+
+*r2c5:* OFF
+
+*r3c1:* %01
+
+*r3c2:* input
+
+*r3c3:* 600-ohm drive
+
+*r3c4:* 1M-ohm
+
+*r3c5:* OFF
+
+*r4c1:* %10
+
+*r4c2:* input
+
+*r4c3:* 600-ohm drive
+
+*r4c4:* 1M-ohm
+
+*r4c5:* 15pF per pin
+
+*r5c1:* %11
+
+*r5c2:* input
+
+*r5c3:* 600-ohm drive
+
+*r5c4:* 1M-ohm
+
+*r5c5:* 30pF per pin
+
 
 
 **Table 28**
@@ -2709,12 +3914,108 @@ The filters are set to the following defaults on reset:
 
 **Table 30**
 
-| Filter | Tap (clocks per sample) | Length (flipflops) | Low-pass time (at 6.25ns/clock) |
-|---|---|---|---|
-| filt0 | 0 (1:1) | %00 (2 flipflops) | 6.25ns * 1 * 2 = 12.5ns |
-| filt1 | 5 (32:1) | %01 (3 flipflops) | 6.25ns * 32 * 3 = 600ns |
-| filt2 | 19 (512K:1) | %10 (5 flipflops) | 6.25ns * 512K * 5 = 16.4ms |
-| filt3 | 22 (4M:1) | %11 (8 flipflops) | 6.25ns * 4M * 8 = 210ms |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Filter
+
+*r1c2:*
+```
+Tap
+(clocks per sample)
+```
+
+*r1c3:*
+```
+Length
+(flipflops)
+```
+
+*r1c4:*
+```
+Low-pass time
+(at 6.25ns/clock)
+```
+
+*r2c1:* filt0
+
+*r2c2:*
+```
+0
+(1:1)
+```
+
+*r2c3:*
+```
+%00
+(2 flipflops)
+```
+
+*r2c4:*
+```
+6.25ns * 1 * 2 =
+12.5ns
+```
+
+*r3c1:* filt1
+
+*r3c2:*
+```
+5
+(32:1)
+```
+
+*r3c3:*
+```
+%01
+(3 flipflops)
+```
+
+*r3c4:*
+```
+6.25ns * 32 * 3 =
+600ns
+```
+
+*r4c1:* filt2
+
+*r4c2:*
+```
+19
+(512K:1)
+```
+
+*r4c3:*
+```
+%10
+(5 flipflops)
+```
+
+*r4c4:*
+```
+6.25ns * 512K * 5 =
+16.4ms
+```
+
+*r5c1:* filt3
+
+*r5c2:*
+```
+22
+(4M:1)
+```
+
+*r5c3:*
+```
+%11
+(8 flipflops)
+```
+
+*r5c4:*
+```
+6.25ns * 4M * 8 =
+210ms
+```
+
 
 
 #### Seeding the Xoroshiro128** PRNG
@@ -2746,15 +4047,240 @@ Here are the hub memory maps for the various FPGA boards currently being support
 
 **Table 31**
 
-| FPGA Board | Hub RAM | Cogs/ Slices | W | Lower RAM | Gap (reads $00) | Top 16KB RAM |
-|---|---|---|---|---|---|---|
-| DE0-Nano | 32KB | 1 | 0 1 | $00000..$07FFF $00000..$03FFF | $08000..$FBFFF $04000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| BeMicro-A2 | 128KB | 1 | 0 1 | $00000..$1FFFF $00000..$1BFFF | $20000..$FBFFF $1C000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| DE2-115 | 256KB | 4 | 0 1 | $00000..$3FFFF $00000..$3BFFF | $40000..$FBFFF $3C000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| Prop123-A7 | 512KB | 4 | 0 1 | $00000..$7FFFF $00000..$7BFFF | $80000..$FBFFF $7C000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| Prop123-A9 BeMicro-A9 | 512KB | 8 | 0 1 | $00000..$7FFFF $00000..$7BFFF | $80000..$FBFFF $7C000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| Prop123-A9 BeMicro-A9 | 1024KB | 16 | 0 1 | $00000..$FFFFF | none, full map | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
-| P2X8C4M64PES <silicon> | 512KB | 8 | 0 1 | $00000..$7FFFF $00000..$7BFFF | $80000..$FBFFF $7C000..$FBFFF | $FC000..$FFFFF, R/W $FC000..$FFFFF, Read |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* FPGA Board
+
+*r1c2:* Hub RAM
+
+*r1c3:*
+```
+Cogs/
+Slices
+```
+
+*r1c4:* W
+
+*r1c5:* Lower RAM
+
+*r1c6:* Gap (reads $00)
+
+*r1c7:* Top 16KB RAM
+
+*r2c1:* DE0-Nano
+
+*r2c2:* 32KB
+
+*r2c3:* 1
+
+*r2c4:*
+```
+0
+1
+```
+
+*r2c5:*
+```
+$00000..$07FFF
+$00000..$03FFF
+```
+
+*r2c6:*
+```
+$08000..$FBFFF
+$04000..$FBFFF
+```
+
+*r2c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r3c1:* BeMicro-A2
+
+*r3c2:* 128KB
+
+*r3c3:* 1
+
+*r3c4:*
+```
+0
+1
+```
+
+*r3c5:*
+```
+$00000..$1FFFF
+$00000..$1BFFF
+```
+
+*r3c6:*
+```
+$20000..$FBFFF
+$1C000..$FBFFF
+```
+
+*r3c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r4c1:* DE2-115
+
+*r4c2:* 256KB
+
+*r4c3:* 4
+
+*r4c4:*
+```
+0
+1
+```
+
+*r4c5:*
+```
+$00000..$3FFFF
+$00000..$3BFFF
+```
+
+*r4c6:*
+```
+$40000..$FBFFF
+$3C000..$FBFFF
+```
+
+*r4c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r5c1:* Prop123-A7
+
+*r5c2:* 512KB
+
+*r5c3:* 4
+
+*r5c4:*
+```
+0
+1
+```
+
+*r5c5:*
+```
+$00000..$7FFFF
+$00000..$7BFFF
+```
+
+*r5c6:*
+```
+$80000..$FBFFF
+$7C000..$FBFFF
+```
+
+*r5c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r6c1:*
+```
+Prop123-A9
+BeMicro-A9
+```
+
+*r6c2:* 512KB
+
+*r6c3:* 8
+
+*r6c4:*
+```
+0
+1
+```
+
+*r6c5:*
+```
+$00000..$7FFFF
+$00000..$7BFFF
+```
+
+*r6c6:*
+```
+$80000..$FBFFF
+$7C000..$FBFFF
+```
+
+*r6c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r7c1:*
+```
+Prop123-A9
+BeMicro-A9
+```
+
+*r7c2:* 1024KB
+
+*r7c3:* 16
+
+*r7c4:*
+```
+0
+1
+```
+
+*r7c5:* $00000..$FFFFF
+
+*r7c6:* none, full map
+
+*r7c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
+*r8c1:*
+```
+P2X8C4M64PES
+<silicon>
+```
+
+*r8c2:* 512KB
+
+*r8c3:* 8
+
+*r8c4:*
+```
+0
+1
+```
+
+*r8c5:*
+```
+$00000..$7FFFF
+$00000..$7BFFF
+```
+
+*r8c6:*
+```
+$80000..$FBFFF
+$7C000..$FBFFF
+```
+
+*r8c7:*
+```
+$FC000..$FFFFF, R/W
+$FC000..$FFFFF, Read
+```
+
 
 
 #### THE COG -to- HUB RAM INTERFACE
@@ -2825,12 +4351,94 @@ This table shows the relationship between upcoming bytes in the FIFO and what RF
 
 **Table 32**
 
-| FIFO 1st Byte | FIFO 2nd Byte | FIFO 3rd Byte | FIFO 4th Byte | RFVAR Returns RFVARS Returns |
-|---|---|---|---|---|
-| %0SAAAAAA | - | - | - | %00000000_00000000_00000000_0SAAAAAA %SSSSSSSS_SSSSSSSS_SSSSSSSS_SSAAAAAA |
-| %1AAAAAAA | %0SBBBBBB | - | - | %00000000_00000000_00SBBBBB_BAAAAAAA %SSSSSSSS_SSSSSSSS_SSSBBBBB_BAAAAAAA |
-| %1AAAAAAA | %1BBBBBBB | %0SCCCCCC | - | %00000000_000SCCCC_CCBBBBBB_BAAAAAAA %SSSSSSSS_SSSSCCCC_CCBBBBBB_BAAAAAAA |
-| %1AAAAAAA | %1BBBBBBB | %1CCCCCCC | %SDDDDDDD | %000SDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA %SSSSDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+FIFO
+1st Byte
+```
+
+*r1c2:*
+```
+FIFO
+2nd Byte
+```
+
+*r1c3:*
+```
+FIFO
+3rd Byte
+```
+
+*r1c4:*
+```
+FIFO
+4th Byte
+```
+
+*r1c5:*
+```
+RFVAR Returns
+ RFVARS Returns
+```
+
+*r2c1:* %0SAAAAAA
+
+*r2c2:* -
+
+*r2c3:* -
+
+*r2c4:* -
+
+*r2c5:*
+```
+%00000000_00000000_00000000_0SAAAAAA
+%SSSSSSSS_SSSSSSSS_SSSSSSSS_SSAAAAAA
+```
+
+*r3c1:* %1AAAAAAA
+
+*r3c2:* %0SBBBBBB
+
+*r3c3:* -
+
+*r3c4:* -
+
+*r3c5:*
+```
+%00000000_00000000_00SBBBBB_BAAAAAAA
+%SSSSSSSS_SSSSSSSS_SSSBBBBB_BAAAAAAA
+```
+
+*r4c1:* %1AAAAAAA
+
+*r4c2:* %1BBBBBBB
+
+*r4c3:* %0SCCCCCC
+
+*r4c4:* -
+
+*r4c5:*
+```
+%00000000_000SCCCC_CCBBBBBB_BAAAAAAA
+%SSSSSSSS_SSSSCCCC_CCBBBBBB_BAAAAAAA
+```
+
+*r5c1:* %1AAAAAAA
+
+*r5c2:* %1BBBBBBB
+
+*r5c3:* %1CCCCCCC
+
+*r5c4:* %SDDDDDDD
+
+*r5c5:*
+```
+%000SDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA
+%SSSSDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA
+```
+
 
 Once WRFAST has been used to configure the hub FIFO interface for writing, you can enable the streamer for any hub-writing modes or use the following instructions to manually write sequential data:
 ```
@@ -3252,8 +4860,264 @@ Because each cog's hub slot comes around every 1/2/4/8/16 clocks (8 clocks for t
 
 **Table 33**
 
-| ' ' CORDIC overlapping command demo ' ' - outputs 32 sine waves of increasing frequency on P0..P31 using 990-ohm DACs ' - uses SETQ+QROTATE+GETQY+GETQX, the most input/output-intensive CORDIC command ' con _clkfreq = 256_000_000 'clock frequency clks = 3*256 'clocks per frame, 3 complete DAC cycles f = 100 frac (_clkfreq / clks) '100 Hz, gets multiplied by 100, 101, 102.. dacmode = %10100_00000000_01_00011_0 '990-ohm DAC + pwm-dithered 16-bit DAC mode dat org wrpin ##dacmode,pins32 'set 16-bit pwm-dither DAC mode for P0..P31 wxpin ##clks,pins32 'set period for three pwm-dithered DAC cycles dirh pins32 'enable smart pins ' ' ' Rotate 32 sets of (x,y) coordinates at different rates ' by overlapping CORDIC commands and result fetches ' ' 'clk sum ' 'w=wait !=cordic tick ' loop setq y+00 '2 ? begin first 8 commands qrotate x+00,a+00 '?w+2 2! setq y+01 '2 4 qrotate x+01,a+01 '4w+2 10! setq y+02 '2 12 qrotate x+02,a+02 '4w+2 18! setq y+03 '2 20 qrotate x+03,a+03 '4w+2 26! setq y+04 '2 28 qrotate x+04,a+04 '4w+2 34! setq y+05 '2 36 qrotate x+05,a+05 '4w+2 42! setq y+06 '2 44 qrotate x+06,a+06 '4w+2 50! setq y+07 '2 52 qrotate x+07,a+07 '4w+2 58! result 00 is ready at 54!!! getqy y+00 '2 60 get result 00, no waiting!!! getqx x+00 '2 62 setq y+08 '2 64 begin overlapping commands and results qrotate x+08,a+08 '2 66! getqy y+01 '2 68 getqx x+01 '2 70 setq y+09 '2 72 qrotate x+09,a+09 '2 74! getqy y+02 '2 76 getqx x+02 '2 78 setq y+10 '2 80 qrotate x+10,a+10 '2 82! getqy y+03 '2 84 getqx x+03 '2 86 setq y+11 '2 88 qrotate x+11,a+11 '2 90! getqy y+04 '2 92 getqx x+04 '2 94 setq y+12 '2 96 qrotate x+12,a+12 '2 98! getqy y+05 '2 100 getqx x+05 '2 102 setq y+13 '2 104 qrotate x+13,a+13 '2 106! getqy y+06 '2 108 getqx x+06 '2 110 setq y+14 '2 112 qrotate x+14,a+14 '2 114! getqy y+07 '2 116 getqx x+07 '2 118 setq y+15 '2 120 qrotate x+15,a+15 '2 122! getqy y+08 '2 124 getqx x+08 '2 126 setq y+16 '2 128 qrotate x+16,a+16 '2 130! getqy y+09 '2 132 getqx x+09 '2 134 setq y+17 '2 136 qrotate x+17,a+17 '2 138! getqy y+10 '2 140 getqx x+10 '2 142 setq y+18 '2 144 qrotate x+18,a+18 '2 146! getqy y+11 '2 148 getqx x+11 '2 150 setq y+19 '2 152 qrotate x+19,a+19 '2 154! getqy y+12 '2 156 getqx x+12 '2 158 setq y+20 '2 160 qrotate x+20,a+20 '2 162! getqy y+13 '2 164 getqx x+13 '2 166 setq y+21 '2 168 qrotate x+21,a+21 '2 170! getqy y+14 '2 172 getqx x+14 '2 174 setq y+22 '2 176 qrotate x+22,a+22 '2 178! getqy y+15 '2 180 getqx x+15 '2 182 setq y+23 '2 184 qrotate x+23,a+23 '2 186! getqy y+16 '2 188 getqx x+16 '2 190 setq y+24 '2 192 qrotate x+24,a+24 '2 194! getqy y+17 '2 196 getqx x+17 '2 198 setq y+25 '2 200 qrotate x+25,a+25 '2 202! getqy y+18 '2 204 getqx x+18 '2 206 setq y+26 '2 208 qrotate x+26,a+26 '2 210! getqy y+19 '2 212 getqx x+19 '2 214 setq y+27 '2 216 qrotate x+27,a+27 '2 218! getqy y+20 '2 220 getqx x+20 '2 222 setq y+28 '2 224 qrotate x+28,a+28 '2 226! getqy y+21 '2 228 getqx x+21 '2 230 setq y+29 '2 232 qrotate x+29,a+29 '2 234! getqy y+22 '2 236 getqx x+22 '2 238 setq y+30 '2 240 qrotate x+30,a+30 '2 242! getqy y+23 '2 244 getqx x+23 '2 246 setq y+31 '2 248 qrotate x+31,a+31 '2 250! getqy y+24 '2 252 get 8 trailing results getqx x+24 '2 254 getqy y+25 '4w+2 260 getqx x+25 '2 262 getqy y+26 '4w+2 268 getqx x+26 '2 270 getqy y+27 '4w+2 276 getqx x+27 '2 278 getqy y+28 '4w+2 284 getqx x+28 '2 286 getqy y+29 '4w+2 292 getqx x+29 '2 294 getqy y+30 '4w+2 300 getqx x+30 '2 302 getqy y+31 '4w+2 308 getqx x+31 '2 310 ' ' ' Wait for next DAC frame ' .wait testp #0 wc 'check ina[0] if_nc jmp #.wait ' ' ' Output y[00..31] (sines) to P0..P31 DACs ' rep @.r,#32 'ready to update 32 DACs alts i,#y 'get y[00..31] into next s and inc i getword j,0-0,#1 'get upper word of y bitnot j,#15 'convert signed word to unsigned word for DAC output wypin j,i 'update DAC output value incmod i,#31 'inc index, wrap to 0 .r drvnot #32 'toggle P32 on each iteration jmp #loop 'loop for another sample set ' ' ' Data ' pins32 long 0 addpins 31 'pin range for P0..P31 i long 0 'index j long 0 'misc x long $7F000000[32] 'initial (x,y) coordinates y long $00000000[32] a long 100*f,101*f,102*f,103*f,104*f,105*f,106*f,107*f 'ascending frequencies long 108*f,109*f,110*f,111*f,112*f,113*f,114*f,115*f long 116*f,117*f,118*f,119*f,120*f,121*f,122*f,123*f long 124*f,125*f,126*f,127*f,128*f,129*f,130*f,131*f |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+'
+' CORDIC overlapping command demo
+'
+' - outputs 32 sine waves of increasing frequency on P0..P31 using 990-ohm DACs
+' - uses SETQ+QROTATE+GETQY+GETQX, the most input/output-intensive CORDIC command
+'
+con _clkfreq = 256_000_000 'clock frequency
+ clks = 3*256 'clocks per frame, 3 complete DAC cycles
+ f = 100 frac (_clkfreq / clks) '100 Hz, gets multiplied by 100, 101, 102..
+ dacmode = %10100_00000000_01_00011_0 '990-ohm DAC + pwm-dithered 16-bit DAC mode
+
+
+dat org
+
+ wrpin ##dacmode,pins32 'set 16-bit pwm-dither DAC mode for P0..P31
+ wxpin ##clks,pins32 'set period for three pwm-dithered DAC cycles
+ dirh pins32 'enable smart pins
+'
+'
+' Rotate 32 sets of (x,y) coordinates at different rates
+' by overlapping CORDIC commands and result fetches
+'
+' 'clk sum
+' 'w=wait !=cordic tick
+'
+loop setq y+00 '2 ? begin first 8 commands
+ qrotate x+00,a+00 '?w+2 2!
+
+ setq y+01 '2 4
+ qrotate x+01,a+01 '4w+2 10!
+
+ setq y+02 '2 12
+ qrotate x+02,a+02 '4w+2 18!
+
+ setq y+03 '2 20
+ qrotate x+03,a+03 '4w+2 26!
+
+ setq y+04 '2 28
+ qrotate x+04,a+04 '4w+2 34!
+
+ setq y+05 '2 36
+ qrotate x+05,a+05 '4w+2 42!
+
+ setq y+06 '2 44
+ qrotate x+06,a+06 '4w+2 50!
+
+ setq y+07 '2 52
+ qrotate x+07,a+07 '4w+2 58! result 00 is ready at 54!!!
+
+ getqy y+00 '2 60 get result 00, no waiting!!!
+ getqx x+00 '2 62
+
+ setq y+08 '2 64 begin overlapping commands and results
+ qrotate x+08,a+08 '2 66!
+
+ getqy y+01 '2 68
+ getqx x+01 '2 70
+
+ setq y+09 '2 72
+ qrotate x+09,a+09 '2 74!
+
+ getqy y+02 '2 76
+ getqx x+02 '2 78
+
+ setq y+10 '2 80
+ qrotate x+10,a+10 '2 82!
+
+ getqy y+03 '2 84
+ getqx x+03 '2 86
+
+ setq y+11 '2 88
+ qrotate x+11,a+11 '2 90!
+
+ getqy y+04 '2 92
+ getqx x+04 '2 94
+
+ setq y+12 '2 96
+ qrotate x+12,a+12 '2 98!
+
+ getqy y+05 '2 100
+ getqx x+05 '2 102
+
+ setq y+13 '2 104
+ qrotate x+13,a+13 '2 106!
+
+ getqy y+06 '2 108
+ getqx x+06 '2 110
+
+ setq y+14 '2 112
+ qrotate x+14,a+14 '2 114!
+
+ getqy y+07 '2 116
+ getqx x+07 '2 118
+
+ setq y+15 '2 120
+ qrotate x+15,a+15 '2 122!
+
+ getqy y+08 '2 124
+ getqx x+08 '2 126
+
+ setq y+16 '2 128
+ qrotate x+16,a+16 '2 130!
+
+ getqy y+09 '2 132
+ getqx x+09 '2 134
+
+ setq y+17 '2 136
+ qrotate x+17,a+17 '2 138!
+
+ getqy y+10 '2 140
+ getqx x+10 '2 142
+
+ setq y+18 '2 144
+ qrotate x+18,a+18 '2 146!
+
+ getqy y+11 '2 148
+ getqx x+11 '2 150
+
+ setq y+19 '2 152
+ qrotate x+19,a+19 '2 154!
+
+ getqy y+12 '2 156
+ getqx x+12 '2 158
+
+ setq y+20 '2 160
+ qrotate x+20,a+20 '2 162!
+
+ getqy y+13 '2 164
+ getqx x+13 '2 166
+
+ setq y+21 '2 168
+ qrotate x+21,a+21 '2 170!
+
+ getqy y+14 '2 172
+ getqx x+14 '2 174
+
+ setq y+22 '2 176
+ qrotate x+22,a+22 '2 178!
+
+ getqy y+15 '2 180
+ getqx x+15 '2 182
+
+ setq y+23 '2 184
+ qrotate x+23,a+23 '2 186!
+
+ getqy y+16 '2 188
+ getqx x+16 '2 190
+
+ setq y+24 '2 192
+ qrotate x+24,a+24 '2 194!
+
+ getqy y+17 '2 196
+ getqx x+17 '2 198
+
+ setq y+25 '2 200
+ qrotate x+25,a+25 '2 202!
+
+ getqy y+18 '2 204
+ getqx x+18 '2 206
+
+ setq y+26 '2 208
+ qrotate x+26,a+26 '2 210!
+
+ getqy y+19 '2 212
+ getqx x+19 '2 214
+
+ setq y+27 '2 216
+ qrotate x+27,a+27 '2 218!
+
+ getqy y+20 '2 220
+ getqx x+20 '2 222
+
+ setq y+28 '2 224
+ qrotate x+28,a+28 '2 226!
+
+ getqy y+21 '2 228
+ getqx x+21 '2 230
+
+ setq y+29 '2 232
+ qrotate x+29,a+29 '2 234!
+
+ getqy y+22 '2 236
+ getqx x+22 '2 238
+
+ setq y+30 '2 240
+ qrotate x+30,a+30 '2 242!
+
+ getqy y+23 '2 244
+ getqx x+23 '2 246
+
+ setq y+31 '2 248
+ qrotate x+31,a+31 '2 250!
+
+ getqy y+24 '2 252 get 8 trailing results
+ getqx x+24 '2 254
+
+ getqy y+25 '4w+2 260
+ getqx x+25 '2 262
+
+ getqy y+26 '4w+2 268
+ getqx x+26 '2 270
+
+ getqy y+27 '4w+2 276
+ getqx x+27 '2 278
+
+ getqy y+28 '4w+2 284
+ getqx x+28 '2 286
+
+ getqy y+29 '4w+2 292
+ getqx x+29 '2 294
+
+ getqy y+30 '4w+2 300
+ getqx x+30 '2 302
+
+ getqy y+31 '4w+2 308
+ getqx x+31 '2 310
+'
+'
+' Wait for next DAC frame
+'
+.wait testp #0 wc 'check ina[0]
+ if_nc jmp #.wait
+'
+'
+' Output y[00..31] (sines) to P0..P31 DACs
+'
+ rep @.r,#32 'ready to update 32 DACs
+ alts i,#y 'get y[00..31] into next s and inc i
+ getword j,0-0,#1 'get upper word of y
+ bitnot j,#15 'convert signed word to unsigned word for DAC output
+ wypin j,i 'update DAC output value
+ incmod i,#31 'inc index, wrap to 0
+.r
+ drvnot #32 'toggle P32 on each iteration
+
+ jmp #loop 'loop for another sample set
+'
+'
+' Data
+'
+pins32 long 0 addpins 31 'pin range for P0..P31
+
+i long 0 'index
+j long 0 'misc
+
+x long $7F000000[32] 'initial (x,y) coordinates
+y long $00000000[32]
+
+a long 100*f,101*f,102*f,103*f,104*f,105*f,106*f,107*f 'ascending frequencies
+ long 108*f,109*f,110*f,111*f,112*f,113*f,114*f,115*f
+ long 116*f,117*f,118*f,119*f,120*f,121*f,122*f,123*f
+ long 124*f,125*f,126*f,127*f,128*f,129*f,130*f,131*f
+```
+
 
 
 ### LOCKS
@@ -3878,25 +5742,242 @@ WXPIN sets the mode to X.[5..4] and the sample period to POWER(2, X.[3..0]). Not
 
 **Table 34**
 
-|   | X.[5..4] → Mode → | %00 SINC2 Sampling | %01 SINC2 Filtering | %10 SINC3 Filtering | %11 Bitstream capturing |
-|---|---|---|---|---|---|
-| X.[3..0] | Sample Period | Sample Resolution | Post-diff ENOB* | Post-diff ENOB* | (LSB = oldest bit) |
-| %0000 | 1 clock | impractical | impractical | impractical | 1 new bit |
-| %0001 | 2 clocks | 2 bits | impractical | impractical | 2 new bits |
-| %0010 | 4 clocks | 3 bits | impractical | impractical | 4 new bits |
-| %0011 | 8 clocks | 4 bits | 4 | impractical | 8 new bits |
-| %0100 | 16 clocks | 5 bits | 5 | 8 | 16 new bits |
-| %0101 | 32 clocks | 6 bits | 6 | 10 | 32 new bits |
-| %0110 | 64 clocks | 7 bits | 7 | 12 | overflow |
-| %0111 | 128 clocks | 8 bits | 8 | 14 | overflow |
-| %1000 | 256 clocks | 9 bits | 9 | 16 | overflow |
-| %1001 | 512 clocks | 10 bits | 10 | 18 | overflow |
-| %1010 | 1,024 clocks | 11 bits | 11 | overflow | overflow |
-| %1011 | 2,048 clocks | 12 bits | 12 | overflow | overflow |
-| %1100 | 4,096 clocks | 13 bits | 13 | overflow | overflow |
-| %1101 | 8,192 clocks | 14 bits | 14 | overflow | overflow |
-| %1110 | 16,384 clocks | overflow | overflow | overflow | overflow |
-| %1111 | 32,768 clocks | overflow | overflow | overflow | overflow |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c2:*
+```
+X.[5..4] →
+Mode →
+```
+
+*r1c3:*
+```
+%00
+SINC2 Sampling
+```
+
+*r1c4:*
+```
+%01
+SINC2 Filtering
+```
+
+*r1c5:*
+```
+%10
+SINC3 Filtering
+```
+
+*r1c6:*
+```
+%11
+Bitstream capturing
+```
+
+*r2c1:* X.[3..0]
+
+*r2c2:* Sample Period
+
+*r2c3:* Sample Resolution
+
+*r2c4:* Post-diff ENOB*
+
+*r2c5:* Post-diff ENOB*
+
+*r2c6:* (LSB = oldest bit)
+
+*r3c1:* %0000
+
+*r3c2:* 1 clock
+
+*r3c3:* impractical
+
+*r3c4:* impractical
+
+*r3c5:* impractical
+
+*r3c6:* 1 new bit
+
+*r4c1:* %0001
+
+*r4c2:* 2 clocks
+
+*r4c3:* 2 bits
+
+*r4c4:* impractical
+
+*r4c5:* impractical
+
+*r4c6:* 2 new bits
+
+*r5c1:* %0010
+
+*r5c2:* 4 clocks
+
+*r5c3:* 3 bits
+
+*r5c4:* impractical
+
+*r5c5:* impractical
+
+*r5c6:* 4 new bits
+
+*r6c1:* %0011
+
+*r6c2:* 8 clocks
+
+*r6c3:* 4 bits
+
+*r6c4:* 4
+
+*r6c5:* impractical
+
+*r6c6:* 8 new bits
+
+*r7c1:* %0100
+
+*r7c2:* 16 clocks
+
+*r7c3:* 5 bits
+
+*r7c4:* 5
+
+*r7c5:* 8
+
+*r7c6:* 16 new bits
+
+*r8c1:* %0101
+
+*r8c2:* 32 clocks
+
+*r8c3:* 6 bits
+
+*r8c4:* 6
+
+*r8c5:* 10
+
+*r8c6:* 32 new bits
+
+*r9c1:* %0110
+
+*r9c2:* 64 clocks
+
+*r9c3:* 7 bits
+
+*r9c4:* 7
+
+*r9c5:* 12
+
+*r9c6:* overflow
+
+*r10c1:* %0111
+
+*r10c2:* 128 clocks
+
+*r10c3:* 8 bits
+
+*r10c4:* 8
+
+*r10c5:* 14
+
+*r10c6:* overflow
+
+*r11c1:* %1000
+
+*r11c2:* 256 clocks
+
+*r11c3:* 9 bits
+
+*r11c4:* 9
+
+*r11c5:* 16
+
+*r11c6:* overflow
+
+*r12c1:* %1001
+
+*r12c2:* 512 clocks
+
+*r12c3:* 10 bits
+
+*r12c4:* 10
+
+*r12c5:* 18
+
+*r12c6:* overflow
+
+*r13c1:* %1010
+
+*r13c2:* 1,024 clocks
+
+*r13c3:* 11 bits
+
+*r13c4:* 11
+
+*r13c5:* overflow
+
+*r13c6:* overflow
+
+*r14c1:* %1011
+
+*r14c2:* 2,048 clocks
+
+*r14c3:* 12 bits
+
+*r14c4:* 12
+
+*r14c5:* overflow
+
+*r14c6:* overflow
+
+*r15c1:* %1100
+
+*r15c2:* 4,096 clocks
+
+*r15c3:* 13 bits
+
+*r15c4:* 13
+
+*r15c5:* overflow
+
+*r15c6:* overflow
+
+*r16c1:* %1101
+
+*r16c2:* 8,192 clocks
+
+*r16c3:* 14 bits
+
+*r16c4:* 14
+
+*r16c5:* overflow
+
+*r16c6:* overflow
+
+*r17c1:* %1110
+
+*r17c2:* 16,384 clocks
+
+*r17c3:* overflow
+
+*r17c4:* overflow
+
+*r17c5:* overflow
+
+*r17c6:* overflow
+
+*r18c1:* %1111
+
+*r18c2:* 32,768 clocks
+
+*r18c3:* overflow
+
+*r18c4:* overflow
+
+*r18c5:* overflow
+
+*r18c6:* overflow
+
 
 * ENOB = Effective Number of Bits, or the sample resolution
 For modes other than SINC2 Sampling (X.[5..4]  > %00), WYPIN may be used after WXPIN to override the initial period established by X.[3..0] and replace it with the arbitrary value in Y.[13..0]. For example, if you'd like to do SINC3 filtering with a period of 320 clocks, you could follow the WXPIN with a 'WYPIN #320,adcpin'.  The smart pin accumulators are 27 bits wide.  This allows up to 2^(27/3), or 512, clocks per decimation in SINC3 filtering mode and up to 2^(27/2), or 11,585, clocks in SINC2 filtering mode.
@@ -4085,10 +6166,38 @@ The scope trigger function is set by two 6-bit parameters, A and B, which MSB-ju
 
 **Table 35**
 
-| A and B relationship | Arming Event (initial / after trigger) | Trigger Event (after arming) |
-|---|---|---|
-| A > B | sample.[7..2] => A | sample.[7..2] < B |
-| A <= B | sample.[7..2] < A | sample.[7..2] => B |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+A and B
+relationship
+```
+
+*r1c2:*
+```
+Arming Event
+(initial / after trigger)
+```
+
+*r1c3:*
+```
+Trigger Event
+(after arming)
+```
+
+*r2c1:* A > B
+
+*r2c2:* sample.[7..2] => A
+
+*r2c3:* sample.[7..2] < B
+
+*r3c1:* A <= B
+
+*r3c2:* sample.[7..2] < A
+
+*r3c3:* sample.[7..2] => B
+
 
 WXPIN is used to configure this mode.
 X.[15..10] sets the B trigger value.
@@ -4264,14 +6373,88 @@ RDPIN/RQPIN is used to read the received word. The word must be shifted right by
 
 **Table 36**
 
-| Boot Pattern Set By Resistors | P61 | P60 | P59 |
-|---|---|---|---|
-| Serial window of 60s, default. | none | none | none |
-| Serial window of 60s, overrides SPI and SD. | ignored | ignored | pull-up |
-| Serial window of 100ms, then SPI flash. If SPI flash fails then serial window of 60s. | pull-up | ignored | none |
-| SPI flash only (fast boot), no serial window. If SPI flash fails then shutdown. | pull-up | ignored | pull-down |
-| SD card with serial window on failure. If SD card fails then serial window of 60s. | no pull-up | pull-up (built into SD card) | none |
-| SD card only, no serial window. If SD card fails then shutdown. | no pull-up | pull-up (built into SD card) | pull-down |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:* Boot Pattern Set By Resistors
+
+*r1c2:* P61
+
+*r1c3:* P60
+
+*r1c4:* P59
+
+*r2c1:* Serial window of 60s, default.
+
+*r2c2:* none
+
+*r2c3:* none
+
+*r2c4:* none
+
+*r3c1:* Serial window of 60s, overrides SPI and SD.
+
+*r3c2:* ignored
+
+*r3c3:* ignored
+
+*r3c4:* pull-up
+
+*r4c1:*
+```
+Serial window of 100ms, then SPI flash.
+If SPI flash fails then serial window of 60s.
+```
+
+*r4c2:* pull-up
+
+*r4c3:* ignored
+
+*r4c4:* none
+
+*r5c1:*
+```
+SPI flash only (fast boot), no serial window.
+If SPI flash fails then shutdown.
+```
+
+*r5c2:* pull-up
+
+*r5c3:* ignored
+
+*r5c4:* pull-down
+
+*r6c1:*
+```
+SD card with serial window on failure.
+If SD card fails then serial window of 60s.
+```
+
+*r6c2:* no pull-up
+
+*r6c3:*
+```
+pull-up
+(built into SD card)
+```
+
+*r6c4:* none
+
+*r7c1:*
+```
+SD card only, no serial window.
+If SD card fails then shutdown.
+```
+
+*r7c2:* no pull-up
+
+*r7c3:*
+```
+pull-up
+(built into SD card)
+```
+
+*r7c4:* pull-down
+
 
 
 **Table 37**
@@ -4361,8 +6544,14 @@ The Prop_Chk command returns CR+LF+"Prop_Ver"+SP+VerChr+CR+LF. VerChr is "A".."Z
 
 **Table 39**
 
-| Sender: "> Prop_Chk 0 0 0 0"+CR Loader: CR+LF+"Prop_Ver G"+CR+LF |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Sender: "> Prop_Chk 0 0 0 0"+CR
+Loader: CR+LF+"Prop_Ver G"+CR+LF
+```
+
 
 
 #### Prop_Clk
@@ -4382,8 +6571,17 @@ To update the clock source per PLL Example:
 
 **Table 40**
 
-| Sender: "> Prop_Clk 0 0 0 0 19D28F8"+CR Loader: "." Sender: (wait ~10ms) Sender: "> Prop_Clk 0 0 0 0 19D28FB"+CR Loader: "." |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Sender: "> Prop_Clk 0 0 0 0 19D28F8"+CR
+Loader: "."
+Sender: (wait ~10ms)
+Sender: "> Prop_Clk 0 0 0 0 19D28FB"+CR
+Loader: "."
+```
+
 
 ```
 NOTE: An initial "Prop_Clk 0 0 0 0 F0" is not required since the clock circuit starts up in this mode.
@@ -4395,8 +6593,14 @@ To return to the clock configuration on bootup:
 
 **Table 41**
 
-| Sender: "> Prop_Clk 0 0 0 0 F0"+CR Loader: "." |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Sender: "> Prop_Clk 0 0 0 0 F0"+CR
+Loader: "."
+```
+
 
 
 #### Prop_Hex
@@ -4408,8 +6612,17 @@ To demonstrate hex loading, consider this small program:
 
 **Table 42**
 
-| DAT ORG not dirb 'all outputs .lp not outb 'toggle states (blinks leds on Prop123 & P2 Eval boards) waitx ##20_000_000/4 'wait ¼ second jmp #.lp 'loop |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+DAT ORG
+not dirb 'all outputs
+.lp not outb 'toggle states (blinks leds on Prop123 & P2 Eval boards)
+waitx ##20_000_000/4 'wait ¼ second
+jmp #.lp 'loop
+```
+
 
 It assembles to:
 
@@ -4429,8 +6642,14 @@ In the case of our assembled program, there are 5 little-endian longs which sum 
 
 **Table 45**
 
-| Sender: "> Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD 24 D8 A0 89 ?" Loader: "." |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Sender: "> Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD 24 D8 A0 89 ?"
+Loader: "."
+```
+
 
 It's a good idea to start each hex data line with a  ">" character, to keep the baud rate tightly calibrated.
 
@@ -4465,8 +6684,14 @@ To add the embedded checksum:
 
 **Table 47**
 
-| Sender: "> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?" Loader: "." |
-|---|
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+Sender: "> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?"
+Loader: "."
+```
+
 
 It's a good idea to start each Base64 data line with a ">" character, to keep the baud rate tightly calibrated.
 
@@ -4487,9 +6712,649 @@ Below are the contents of the instructions.txt file which include assembly instr
 
 **Table 48**
 
-| ------------------ instruction timing ------------------ clk _________------------____________------------____________------------____________------------____________------------____________------------____________- | | | | | | | rdRAM Ib |-------+ | rdRAM Ic |-------+ | rdRAM Id |-------+ | rdRAM Ie | | | | | | | | | | | latch Da |---+ +----> rdRAM Db |------------> latch Db |---+ +----> rdRAM Dc |------------> latch Dc |---+ +----> rdRAM Dd |------------> latch Dd | latch Sa |---+ +----> rdRAM Sb |------------> latch Sb |---+ +----> rdRAM Sc |------------> latch Sc |---+ +----> rdRAM Sd |------------> latch Sd | latch Ia |---+ +----> latch Ib |------------> latch Ib |---+ +----> latch Ic |------------> latch Ic |---+ +----> latch Id |------------> latch Id | | | | | | | | | | | | +------------------ALU-----------> wrRAM Ra | +------------------ALU-----------> wrRAM Rb | +------------------ALU-----------> wrRAM Rc | | | | | | | | | | stall/done = 'gox' | | stall/done = 'gox' | | stall/done = 'gox' | | 'get' | done = 'go' | 'get' | done = 'go' | 'get' | done = 'go' | ------------ instructions ------------ EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS ROR D,S/# {WC/WZ/WCZ} EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS ROL D,S/# {WC/WZ/WCZ} EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS SHR D,S/# {WC/WZ/WCZ} EEEE 0000011 CZI DDDDDDDDD SSSSSSSSS SHL D,S/# {WC/WZ/WCZ} EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS RCR D,S/# {WC/WZ/WCZ} EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS RCL D,S/# {WC/WZ/WCZ} EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS SAR D,S/# {WC/WZ/WCZ} EEEE 0000111 CZI DDDDDDDDD SSSSSSSSS SAL D,S/# {WC/WZ/WCZ} EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS ADD D,S/# {WC/WZ/WCZ} EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS ADDX D,S/# {WC/WZ/WCZ} EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS ADDS D,S/# {WC/WZ/WCZ} EEEE 0001011 CZI DDDDDDDDD SSSSSSSSS ADDSX D,S/# {WC/WZ/WCZ} EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS SUB D,S/# {WC/WZ/WCZ} EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS SUBX D,S/# {WC/WZ/WCZ} EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS SUBS D,S/# {WC/WZ/WCZ} EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS SUBSX D,S/# {WC/WZ/WCZ} EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS CMP D,S/# {WC/WZ/WCZ} EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS CMPX D,S/# {WC/WZ/WCZ} EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS CMPS D,S/# {WC/WZ/WCZ} EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS CMPSX D,S/# {WC/WZ/WCZ} EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS CMPR D,S/# {WC/WZ/WCZ} EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS CMPM D,S/# {WC/WZ/WCZ} EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS SUBR D,S/# {WC/WZ/WCZ} EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS CMPSUB D,S/# {WC/WZ/WCZ} EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS FGE D,S/# {WC/WZ/WCZ} EEEE 0011001 CZI DDDDDDDDD SSSSSSSSS FLE D,S/# {WC/WZ/WCZ} EEEE 0011010 CZI DDDDDDDDD SSSSSSSSS FGES D,S/# {WC/WZ/WCZ} EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS FLES D,S/# {WC/WZ/WCZ} EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS SUMC D,S/# {WC/WZ/WCZ} EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS SUMNC D,S/# {WC/WZ/WCZ} EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS SUMZ D,S/# {WC/WZ/WCZ} EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS SUMNZ D,S/# {WC/WZ/WCZ} EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# WC/WZ EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# WC/WZ EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# ANDC/ANDZ EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# ANDC/ANDZ EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# ORC/ORZ EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# ORC/ORZ EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# XORC/XORZ EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# XORC/XORZ EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS BITL D,S/# {WCZ} EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS BITH D,S/# {WCZ} EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS BITC D,S/# {WCZ} EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS BITNC D,S/# {WCZ} EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS BITZ D,S/# {WCZ} EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS BITNZ D,S/# {WCZ} EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS BITRND D,S/# {WCZ} EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS BITNOT D,S/# {WCZ} EEEE 0101000 CZI DDDDDDDDD SSSSSSSSS AND D,S/# {WC/WZ/WCZ} EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS ANDN D,S/# {WC/WZ/WCZ} EEEE 0101010 CZI DDDDDDDDD SSSSSSSSS OR D,S/# {WC/WZ/WCZ} EEEE 0101011 CZI DDDDDDDDD SSSSSSSSS XOR D,S/# {WC/WZ/WCZ} EEEE 0101100 CZI DDDDDDDDD SSSSSSSSS MUXC D,S/# {WC/WZ/WCZ} EEEE 0101101 CZI DDDDDDDDD SSSSSSSSS MUXNC D,S/# {WC/WZ/WCZ} EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS MUXZ D,S/# {WC/WZ/WCZ} EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS MUXNZ D,S/# {WC/WZ/WCZ} EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS MOV D,S/# {WC/WZ/WCZ} EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS NOT D,S/# {WC/WZ/WCZ} EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS ABS D,S/# {WC/WZ/WCZ} EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS NEG D,S/# {WC/WZ/WCZ} EEEE 0110100 CZI DDDDDDDDD SSSSSSSSS NEGC D,S/# {WC/WZ/WCZ} EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS NEGNC D,S/# {WC/WZ/WCZ} EEEE 0110110 CZI DDDDDDDDD SSSSSSSSS NEGZ D,S/# {WC/WZ/WCZ} EEEE 0110111 CZI DDDDDDDDD SSSSSSSSS NEGNZ D,S/# {WC/WZ/WCZ} EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS INCMOD D,S/# {WC/WZ/WCZ} EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS DECMOD D,S/# {WC/WZ/WCZ} EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS ZEROX D,S/# {WC/WZ/WCZ} EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS SIGNX D,S/# {WC/WZ/WCZ} EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS ENCOD D,S/# {WC/WZ/WCZ} EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS ONES D,S/# {WC/WZ/WCZ} EEEE 0111110 CZI DDDDDDDDD SSSSSSSSS TEST D,S/# {WC/WZ/WCZ} EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS TESTN D,S/# {WC/WZ/WCZ} EEEE 100000N NNI DDDDDDDDD SSSSSSSSS SETNIB D,S/#,#N EEEE 100001N NNI DDDDDDDDD SSSSSSSSS GETNIB D,S/#,#N EEEE 100010N NNI DDDDDDDDD SSSSSSSSS ROLNIB D,S/#,#N EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS SETBYTE D,S/#,#N EEEE 1000111 NNI DDDDDDDDD SSSSSSSSS GETBYTE D,S/#,#N EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS ROLBYTE D,S/#,#N EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS SETWORD D,S/#,#N EEEE 1001001 1NI DDDDDDDDD SSSSSSSSS GETWORD D,S/#,#N EEEE 1001010 0NI DDDDDDDDD SSSSSSSSS ROLWORD D,S/#,#N EEEE 1001010 10I DDDDDDDDD SSSSSSSSS ALTSN D,S/# EEEE 1001010 11I DDDDDDDDD SSSSSSSSS ALTGN D,S/# EEEE 1001011 00I DDDDDDDDD SSSSSSSSS ALTSB D,S/# EEEE 1001011 01I DDDDDDDDD SSSSSSSSS ALTGB D,S/# EEEE 1001011 10I DDDDDDDDD SSSSSSSSS ALTSW D,S/# EEEE 1001011 11I DDDDDDDDD SSSSSSSSS ALTGW D,S/# EEEE 1001100 00I DDDDDDDDD SSSSSSSSS ALTR D,S/# EEEE 1001100 01I DDDDDDDDD SSSSSSSSS ALTD D,S/# EEEE 1001100 10I DDDDDDDDD SSSSSSSSS ALTS D,S/# EEEE 1001100 11I DDDDDDDDD SSSSSSSSS ALTB D,S/# EEEE 1001101 00I DDDDDDDDD SSSSSSSSS ALTI D,S/# EEEE 1001101 01I DDDDDDDDD SSSSSSSSS SETR D,S/# EEEE 1001101 10I DDDDDDDDD SSSSSSSSS SETD D,S/# EEEE 1001101 11I DDDDDDDDD SSSSSSSSS SETS D,S/# EEEE 1001110 00I DDDDDDDDD SSSSSSSSS DECOD D,S/# EEEE 1001110 01I DDDDDDDDD SSSSSSSSS BMASK D,S/# EEEE 1001110 10I DDDDDDDDD SSSSSSSSS CRCBIT D,S/# EEEE 1001110 11I DDDDDDDDD SSSSSSSSS CRCNIB D,S/# EEEE 1001111 00I DDDDDDDDD SSSSSSSSS MUXNITS D,S/# EEEE 1001111 01I DDDDDDDDD SSSSSSSSS MUXNIBS D,S/# EEEE 1001111 10I DDDDDDDDD SSSSSSSSS MUXQ D,S/# EEEE 1001111 11I DDDDDDDDD SSSSSSSSS MOVBYTS D,S/# EEEE 1010000 0ZI DDDDDDDDD SSSSSSSSS MUL D,S/# {WZ} EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS MULS D,S/# {WZ} EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS SCA D,S/# {WZ} EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS SCAS D,S/# {WZ} EEEE 1010010 00I DDDDDDDDD SSSSSSSSS ADDPIX D,S/# EEEE 1010010 01I DDDDDDDDD SSSSSSSSS MULPIX D,S/# EEEE 1010010 10I DDDDDDDDD SSSSSSSSS BLNPIX D,S/# EEEE 1010010 11I DDDDDDDDD SSSSSSSSS MIXPIX D,S/# EEEE 1010011 00I DDDDDDDDD SSSSSSSSS ADDCT1 D,S/# EEEE 1010011 01I DDDDDDDDD SSSSSSSSS ADDCT2 D,S/# EEEE 1010011 10I DDDDDDDDD SSSSSSSSS ADDCT3 D,S/# EEEE 1010011 11I DDDDDDDDD SSSSSSSSS WMLONG D,S/#/PTRx EEEE 1010100 C0I DDDDDDDDD SSSSSSSSS RQPIN D,S/# {WC} EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS RDPIN D,S/# {WC} EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS RDLUT D,S/#/PTRx {WC/WZ/WCZ} EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS RDBYTE D,S/#/PTRx {WC/WZ/WCZ} EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS RDWORD D,S/#/PTRx {WC/WZ/WCZ} EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS RDLONG D,S/#/PTRx {WC/WZ/WCZ} EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS CALLD D,S/#rel9 {WC/WZ/WCZ} EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS CALLPA D/#,S/#rel9 EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS CALLPB D/#,S/#rel9 EEEE 1011011 00I DDDDDDDDD SSSSSSSSS DJZ D,S/#rel9 EEEE 1011011 01I DDDDDDDDD SSSSSSSSS DJNZ D,S/#rel9 EEEE 1011011 10I DDDDDDDDD SSSSSSSSS DJF D,S/#rel9 EEEE 1011011 11I DDDDDDDDD SSSSSSSSS DJNF D,S/#rel9 EEEE 1011100 00I DDDDDDDDD SSSSSSSSS IJZ D,S/#rel9 EEEE 1011100 01I DDDDDDDDD SSSSSSSSS IJNZ D,S/#rel9 EEEE 1011100 10I DDDDDDDDD SSSSSSSSS TJZ D,S/#rel9 EEEE 1011100 11I DDDDDDDDD SSSSSSSSS TJNZ D,S/#rel9 EEEE 1011101 00I DDDDDDDDD SSSSSSSSS TJF D,S/#rel9 EEEE 1011101 01I DDDDDDDDD SSSSSSSSS TJNF D,S/#rel9 EEEE 1011101 10I DDDDDDDDD SSSSSSSSS TJS D,S/#rel9 EEEE 1011101 11I DDDDDDDDD SSSSSSSSS TJNS D,S/#rel9 EEEE 1011110 00I DDDDDDDDD SSSSSSSSS TJV D,S/#rel9 EEEE 1011110 01I 000000000 SSSSSSSSS JINT S/#rel9 EEEE 1011110 01I 000000001 SSSSSSSSS JCT1 S/#rel9 EEEE 1011110 01I 000000010 SSSSSSSSS JCT2 S/#rel9 EEEE 1011110 01I 000000011 SSSSSSSSS JCT3 S/#rel9 EEEE 1011110 01I 000000100 SSSSSSSSS JSE1 S/#rel9 EEEE 1011110 01I 000000101 SSSSSSSSS JSE2 S/#rel9 EEEE 1011110 01I 000000110 SSSSSSSSS JSE3 S/#rel9 EEEE 1011110 01I 000000111 SSSSSSSSS JSE4 S/#rel9 EEEE 1011110 01I 000001000 SSSSSSSSS JPAT S/#rel9 EEEE 1011110 01I 000001001 SSSSSSSSS JFBW S/#rel9 EEEE 1011110 01I 000001010 SSSSSSSSS JXMT S/#rel9 EEEE 1011110 01I 000001011 SSSSSSSSS JXFI S/#rel9 EEEE 1011110 01I 000001100 SSSSSSSSS JXRO S/#rel9 EEEE 1011110 01I 000001101 SSSSSSSSS JXRL S/#rel9 EEEE 1011110 01I 000001110 SSSSSSSSS JATN S/#rel9 EEEE 1011110 01I 000001111 SSSSSSSSS JQMT S/#rel9 EEEE 1011110 01I 000010000 SSSSSSSSS JNINT S/#rel9 EEEE 1011110 01I 000010001 SSSSSSSSS JNCT1 S/#rel9 EEEE 1011110 01I 000010010 SSSSSSSSS JNCT2 S/#rel9 EEEE 1011110 01I 000010011 SSSSSSSSS JNCT3 S/#rel9 EEEE 1011110 01I 000010100 SSSSSSSSS JNSE1 S/#rel9 EEEE 1011110 01I 000010101 SSSSSSSSS JNSE2 S/#rel9 EEEE 1011110 01I 000010110 SSSSSSSSS JNSE3 S/#rel9 EEEE 1011110 01I 000010111 SSSSSSSSS JNSE4 S/#rel9 EEEE 1011110 01I 000011000 SSSSSSSSS JNPAT S/#rel9 EEEE 1011110 01I 000011001 SSSSSSSSS JNFBW S/#rel9 EEEE 1011110 01I 000011010 SSSSSSSSS JNXMT S/#rel9 EEEE 1011110 01I 000011011 SSSSSSSSS JNXFI S/#rel9 EEEE 1011110 01I 000011100 SSSSSSSSS JNXRO S/#rel9 EEEE 1011110 01I 000011101 SSSSSSSSS JNXRL S/#rel9 EEEE 1011110 01I 000011110 SSSSSSSSS JNATN S/#rel9 EEEE 1011110 01I 000011111 SSSSSSSSS JNQMT S/#rel9 EEEE 1011110 1LI DDDDDDDDD SSSSSSSSS <empty> D/#,S/# EEEE 1011111 0LI DDDDDDDDD SSSSSSSSS <empty> D/#,S/# EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS SETPAT D/#,S/# EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS WRPIN D/#,S/# EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS WXPIN D/#,S/# EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS WYPIN D/#,S/# EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS WRLUT D/#,S/#/PTRx EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS WRBYTE D/#,S/#/PTRx EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS WRWORD D/#,S/#/PTRx EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS WRLONG D/#,S/#/PTRx EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS RDFAST D/#,S/# EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS WRFAST D/#,S/# EEEE 1100100 1LI DDDDDDDDD SSSSSSSSS FBLOCK D/#,S/# EEEE 1100101 0LI DDDDDDDDD SSSSSSSSS XINIT D/#,S/# EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS XZERO D/#,S/# EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS XCONT D/#,S/# EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS REP D/#,S/# EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS COGINIT D/#,S/# {WC} EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS QMUL D/#,S/# EEEE 1101000 1LI DDDDDDDDD SSSSSSSSS QDIV D/#,S/# EEEE 1101001 0LI DDDDDDDDD SSSSSSSSS QFRAC D/#,S/# EEEE 1101001 1LI DDDDDDDDD SSSSSSSSS QSQRT D/#,S/# EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS QROTATE D/#,S/# EEEE 1101010 1LI DDDDDDDDD SSSSSSSSS QVECTOR D/#,S/# EEEE 1101011 00L DDDDDDDDD 000000000 HUBSET D/# EEEE 1101011 C0L DDDDDDDDD 000000001 COGID D/# {WC} EEEE 1101011 00L DDDDDDDDD 000000011 COGSTOP D/# EEEE 1101011 C00 DDDDDDDDD 000000100 LOCKNEW D {WC} EEEE 1101011 00L DDDDDDDDD 000000101 LOCKRET D/# EEEE 1101011 C0L DDDDDDDDD 000000110 LOCKTRY D/# {WC} EEEE 1101011 00L DDDDDDDDD 000000111 LOCKREL D/# {WC} EEEE 1101011 00L DDDDDDDDD 000001110 QLOG D/# EEEE 1101011 00L DDDDDDDDD 000001111 QEXP D/# EEEE 1101011 CZ0 DDDDDDDDD 000010000 RFBYTE D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000010001 RFWORD D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000010010 RFLONG D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000010011 RFVAR D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000010100 RFVARS D {WC/WZ/WCZ} EEEE 1101011 00L DDDDDDDDD 000010101 WFBYTE D/# EEEE 1101011 00L DDDDDDDDD 000010110 WFWORD D/# EEEE 1101011 00L DDDDDDDDD 000010111 WFLONG D/# EEEE 1101011 CZ0 DDDDDDDDD 000011000 GETQX D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000011001 GETQY D {WC/WZ/WCZ} EEEE 1101011 C00 DDDDDDDDD 000011010 GETCT D {WC} EEEE 1101011 CZL DDDDDDDDD 000011011 GETRND {D} {WC/WZ/WCZ} EEEE 1101011 00L DDDDDDDDD 000011100 SETDACS D/# EEEE 1101011 00L DDDDDDDDD 000011101 SETXFRQ D/# EEEE 1101011 000 DDDDDDDDD 000011110 GETXACC D EEEE 1101011 CZL DDDDDDDDD 000011111 WAITX D/# {WC/WZ/WCZ} EEEE 1101011 00L DDDDDDDDD 000100000 SETSE1 D/# EEEE 1101011 00L DDDDDDDDD 000100001 SETSE2 D/# EEEE 1101011 00L DDDDDDDDD 000100010 SETSE3 D/# EEEE 1101011 00L DDDDDDDDD 000100011 SETSE4 D/# EEEE 1101011 CZ0 000000000 000100100 POLLINT {WC/WZ/WCZ} EEEE 1101011 CZ0 000000001 000100100 POLLCT1 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000010 000100100 POLLCT2 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000011 000100100 POLLCT3 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000100 000100100 POLLSE1 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000101 000100100 POLLSE2 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000110 000100100 POLLSE3 {WC/WZ/WCZ} EEEE 1101011 CZ0 000000111 000100100 POLLSE4 {WC/WZ/WCZ} EEEE 1101011 CZ0 000001000 000100100 POLLPAT {WC/WZ/WCZ} EEEE 1101011 CZ0 000001001 000100100 POLLFBW {WC/WZ/WCZ} EEEE 1101011 CZ0 000001010 000100100 POLLXMT {WC/WZ/WCZ} EEEE 1101011 CZ0 000001011 000100100 POLLXFI {WC/WZ/WCZ} EEEE 1101011 CZ0 000001100 000100100 POLLXRO {WC/WZ/WCZ} EEEE 1101011 CZ0 000001101 000100100 POLLXRL {WC/WZ/WCZ} EEEE 1101011 CZ0 000001110 000100100 POLLATN {WC/WZ/WCZ} EEEE 1101011 CZ0 000001111 000100100 POLLQMT {WC/WZ/WCZ} EEEE 1101011 CZ0 000010000 000100100 WAITINT {WC/WZ/WCZ} EEEE 1101011 CZ0 000010001 000100100 WAITCT1 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010010 000100100 WAITCT2 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010011 000100100 WAITCT3 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010100 000100100 WAITSE1 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010101 000100100 WAITSE2 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010110 000100100 WAITSE3 {WC/WZ/WCZ} EEEE 1101011 CZ0 000010111 000100100 WAITSE4 {WC/WZ/WCZ} EEEE 1101011 CZ0 000011000 000100100 WAITPAT {WC/WZ/WCZ} EEEE 1101011 CZ0 000011001 000100100 WAITFBW {WC/WZ/WCZ} EEEE 1101011 CZ0 000011010 000100100 WAITXMT {WC/WZ/WCZ} EEEE 1101011 CZ0 000011011 000100100 WAITXFI {WC/WZ/WCZ} EEEE 1101011 CZ0 000011100 000100100 WAITXRO {WC/WZ/WCZ} EEEE 1101011 CZ0 000011101 000100100 WAITXRL {WC/WZ/WCZ} EEEE 1101011 CZ0 000011110 000100100 WAITATN {WC/WZ/WCZ} EEEE 1101011 000 000100000 000100100 ALLOWI EEEE 1101011 000 000100001 000100100 STALLI EEEE 1101011 000 000100010 000100100 TRGINT1 EEEE 1101011 000 000100011 000100100 TRGINT2 EEEE 1101011 000 000100100 000100100 TRGINT3 EEEE 1101011 000 000100101 000100100 NIXINT1 EEEE 1101011 000 000100110 000100100 NIXINT2 EEEE 1101011 000 000100111 000100100 NIXINT3 EEEE 1101011 00L DDDDDDDDD 000100101 SETINT1 D/# EEEE 1101011 00L DDDDDDDDD 000100110 SETINT2 D/# EEEE 1101011 00L DDDDDDDDD 000100111 SETINT3 D/# EEEE 1101011 00L DDDDDDDDD 000101000 SETQ D/# EEEE 1101011 00L DDDDDDDDD 000101001 SETQ2 D/# EEEE 1101011 00L DDDDDDDDD 000101010 PUSH D/# EEEE 1101011 CZ0 DDDDDDDDD 000101011 POP D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000101100 JMP D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000101101 CALL D {WC/WZ/WCZ} EEEE 1101011 CZ1 000000000 000101101 RET {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000101110 CALLA D {WC/WZ/WCZ} EEEE 1101011 CZ1 000000000 000101110 RETA {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 000101111 CALLB D {WC/WZ/WCZ} EEEE 1101011 CZ1 000000000 000101111 RETB {WC/WZ/WCZ} EEEE 1101011 00L DDDDDDDDD 000110000 JMPREL D/# EEEE 1101011 00L DDDDDDDDD 000110001 SKIP D/# EEEE 1101011 00L DDDDDDDDD 000110010 SKIPF D/# EEEE 1101011 00L DDDDDDDDD 000110011 EXECF D/# EEEE 1101011 000 DDDDDDDDD 000110100 GETPTR D EEEE 1101011 CZ0 DDDDDDDDD 000110101 GETBRK D WC/WZ/WCZ EEEE 1101011 00L DDDDDDDDD 000110101 COGBRK D/# EEEE 1101011 00L DDDDDDDDD 000110110 BRK D/# EEEE 1101011 00L DDDDDDDDD 000110111 SETLUTS D/# EEEE 1101011 00L DDDDDDDDD 000111000 SETCY D/# EEEE 1101011 00L DDDDDDDDD 000111001 SETCI D/# EEEE 1101011 00L DDDDDDDDD 000111010 SETCQ D/# EEEE 1101011 00L DDDDDDDDD 000111011 SETCFRQ D/# EEEE 1101011 00L DDDDDDDDD 000111100 SETCMOD D/# EEEE 1101011 00L DDDDDDDDD 000111101 SETPIV D/# EEEE 1101011 00L DDDDDDDDD 000111110 SETPIX D/# EEEE 1101011 00L DDDDDDDDD 000111111 COGATN D/# EEEE 1101011 CZL DDDDDDDDD 001000000 TESTP D/# WC/WZ EEEE 1101011 CZL DDDDDDDDD 001000001 TESTPN D/# WC/WZ EEEE 1101011 CZL DDDDDDDDD 001000010 TESTP D/# ANDC/ANDZ EEEE 1101011 CZL DDDDDDDDD 001000011 TESTPN D/# ANDC/ANDZ EEEE 1101011 CZL DDDDDDDDD 001000100 TESTP D/# ORC/ORZ EEEE 1101011 CZL DDDDDDDDD 001000101 TESTPN D/# ORC/ORZ EEEE 1101011 CZL DDDDDDDDD 001000110 TESTP D/# XORC/XORZ EEEE 1101011 CZL DDDDDDDDD 001000111 TESTPN D/# XORC/XORZ EEEE 1101011 CZL DDDDDDDDD 001000000 DIRL D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000001 DIRH D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000010 DIRC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000011 DIRNC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000100 DIRZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000101 DIRNZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000110 DIRRND D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001000111 DIRNOT D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001000 OUTL D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001001 OUTH D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001010 OUTC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001011 OUTNC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001100 OUTZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001101 OUTNZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001110 OUTRND D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001001111 OUTNOT D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010000 FLTL D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010001 FLTH D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010010 FLTC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010011 FLTNC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010100 FLTZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010101 FLTNZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010110 FLTRND D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001010111 FLTNOT D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011000 DRVL D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011001 DRVH D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011010 DRVC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011011 DRVNC D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011100 DRVZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011101 DRVNZ D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011110 DRVRND D/# {WCZ} EEEE 1101011 CZL DDDDDDDDD 001011111 DRVNOT D/# {WCZ} EEEE 1101011 000 DDDDDDDDD 001100000 SPLITB D EEEE 1101011 000 DDDDDDDDD 001100001 MERGEB D EEEE 1101011 000 DDDDDDDDD 001100010 SPLITW D EEEE 1101011 000 DDDDDDDDD 001100011 MERGEW D EEEE 1101011 000 DDDDDDDDD 001100100 SEUSSF D EEEE 1101011 000 DDDDDDDDD 001100101 SEUSSR D EEEE 1101011 000 DDDDDDDDD 001100110 RGBSQZ D EEEE 1101011 000 DDDDDDDDD 001100111 RGBEXP D EEEE 1101011 000 DDDDDDDDD 001101000 XORO32 D EEEE 1101011 000 DDDDDDDDD 001101001 REV D EEEE 1101011 CZ0 DDDDDDDDD 001101010 RCZR D {WC/WZ/WCZ} EEEE 1101011 CZ0 DDDDDDDDD 001101011 RCZL D {WC/WZ/WCZ} EEEE 1101011 000 DDDDDDDDD 001101100 WRC D EEEE 1101011 000 DDDDDDDDD 001101101 WRNC D EEEE 1101011 000 DDDDDDDDD 001101110 WRZ D EEEE 1101011 000 DDDDDDDDD 001101111 WRNZ D EEEE 1101011 CZ1 0cccczzzz 001101111 MODCZ c,z {WC/WZ/WCZ} EEEE 1101011 00L DDDDDDDDD 001110000 SETSCP D/# EEEE 1101011 000 DDDDDDDDD 001110001 GETSCP D EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA JMP #{\}A EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA CALL #{\}A EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA CALLA #{\}A EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA CALLB #{\}A EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA CALLD register,#{\}A EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA LOC register,#{\}A EEEE 11110NN NNN NNNNNNNNN NNNNNNNNN AUGS #N EEEE 11111NN NNN NNNNNNNNN NNNNNNNNN AUGD #N ------------------- instruction aliases ------------------- NOP = $00000000 NOT register = NOT register,register ABS register = ABS register,register NEG register = NEG register,register NEGC register = NEGC register,register NEGNC register = NEGNC register,register NEGZ register = NEGZ register,register NEGNZ register = NEGNZ register,register ENCOD register = ENCOD register,register ONES register = ONES register,register TEST register = TEST register,register SETNIB register/# = SETNIB 0,register/#,#0 (use after ALTSN) GETNIB register = GETNIB register,0,#0 (use after ALTGN) ROLNIB register = ROLNIB register,0,#0 (use after ALTGN) SETBYTE register/# = SETBYTE 0,register/#,#0 (use after ALTSB) GETBYTE register = GETBYTE register,0,#0 (use after ALTGB) ROLBYTE register = ROLBYTE register,0,#0 (use after ALTGB) SETWORD register/# = SETWORD 0,register/#,#0 (use after ALTSW) GETWORD register = GETWORD register,0,#0 (use after ALTGW) ROLWORD register = ROLWORD register,0,#0 (use after ALTGW) ALTSN register = ALTSN register,#0 ALTGN register = ALTGN register,#0 ALTSB register = ALTSB register,#0 ALTGB register = ALTGB register,#0 ALTSW register = ALTSW register,#0 ALTGW register = ALTGW register,#0 ALTR register = ALTR register,#0 ALTD register = ALTD register,#0 ALTS register = ALTS register,#0 ALTB register = ALTB register,#0 ALTI register = ALTI register,#%101_100_100 (substitute register for next instruction) DECOD register = DECOD register,register BMASK register = BMASK register,register POPA register = RDLONG register,--PTRA POPB register = RDLONG register,--PTRB RESI3 = CALLD $1F0,$1F1 WCZ RESI2 = CALLD $1F2,$1F3 WCZ RESI1 = CALLD $1F4,$1F5 WCZ RESI0 = CALLD INA,INB WCZ RETI3 = CALLD INB,$1F1 WCZ RETI2 = CALLD INB,$1F3 WCZ RETI1 = CALLD INB,$1F5 WCZ RETI0 = CALLD INB,INB WCZ AKPIN register/# = WRPIN #1,register/# PUSHA register/# = WRLONG register/#,PTRA++ PUSHB register/# = WRLONG register/#,PTRB++ XSTOP = XINIT #0,#0 MODC c = MODCZ c,0 {WC} MODZ z = MODCZ 0,z {WZ} --------------- MODCZ constants --------------- _CLR = %0000 _NC_AND_NZ = %0001 _NZ_AND_NC = %0001 _GT = %0001 _NC_AND_Z = %0010 _Z_AND_NC = %0010 _NC = %0011 _GE = %0011 _C_AND_NZ = %0100 _NZ_AND_C = %0100 _NZ = %0101 _NE = %0101 _C_NE_Z = %0110 _Z_NE_C = %0110 _NC_OR_NZ = %0111 _NZ_OR_NC = %0111 _C_AND_Z = %1000 _Z_AND_C = %1000 _C_EQ_Z = %1001 _Z_EQ_C = %1001 _Z = %1010 _E = %1010 _NC_OR_Z = %1011 _Z_OR_NC = %1011 _C = %1100 _LT = %1100 _C_OR_NZ = %1101 _NZ_OR_C = %1101 _C_OR_Z = %1110 _Z_OR_C = %1110 _LE = %1110 _SET = %1111 Examples: MODCZ _CLR, _Z_OR_C WCZ 'C = 0, Z |= C MODCZ _NZ,0 WC 'C = !Z MODCZ 0,_SET WZ 'Z = 1 MODC _NZ_AND_C WC 'C = !Z & C MODZ _Z_NE_C WZ 'Z = Z ^ C ----- notes ----- A symbol declared under ORGH will return its hub address when referenced. A symbol declared under ORG will return its cog address when referenced, but can return its hub address, instead, if preceded by '@': COGINIT #0,#@newcode For immediate-branch and LOC address operands, "#" is used before the address. In cases where there is an option between absolute and relative addressing, the assembler will choose absolute addressing when the branch crosses between cog and hub domains, or relative addressing when the branch stays in the same domain. Absolute addressing can be forced by following "#" with "\". CALLPA/CALLPB/DJZ..JNXRL/JNATN/JNQMT - rel_imm9/ind_reg20 JMP/CALL/CALLA/CALLB/CALLD - abs_imm20/rel_imm20/ind_reg20 LOC - abs_imm20/rel_imm20 If a constant larger than 9 bits is desired in an instruction, use "##", instead of "#" to invoke AUGS/AUGD: AND address,##$FFFFF DJNZ register,##far_away The following assembler directives exist: ORGH {hub_address} Set hub mode and an optional address to fill to with $00 bytes. ORG {cog_address {,cog_address_limit}} Set cog mode with optional cog address and limit. Defaults to $000,$200. If $200..$3FF used for cog address, LUT range selected. Doesn't generate any data. ORGF cog_address Fill to cog_address with $00 bytes. Must be in cog mode. RES cog_registers Reserve cog registers. Doesn't generate any data. Must be in cog mode. FIT cog_or_hub_address Make sure cog code fits within cog or hub address. ALIGNW/ALIGNL Align to next word/long in hub. BYTE data{[count]}{,data{[count]}...} WORD data{[count]}{,data{[count]}...} LONG data{[count]}{,data{[count]}...} Generate byte/word/long data with optional repeat count. |
-|---|
-|   |
+_Multi-line cells — rendered as fenced blocks to preserve line structure._
+
+*r1c1:*
+```
+------------------
+instruction timing
+------------------
+
+clk
+_________------------____________------------____________------------____________------------____________------------____________------------____________-
+
+ | | | | | | |
+rdRAM Ib |-------+ | rdRAM Ic |-------+ | rdRAM Id |-------+ | rdRAM Ie |
+ | | | | | | | | | |
+latch Da |---+ +----> rdRAM Db |------------> latch Db |---+ +----> rdRAM Dc |------------> latch Dc |---+ +----> rdRAM Dd |------------> latch Dd |
+latch Sa |---+ +----> rdRAM Sb |------------> latch Sb |---+ +----> rdRAM Sc |------------> latch Sc |---+ +----> rdRAM Sd |------------> latch Sd |
+latch Ia |---+ +----> latch Ib |------------> latch Ib |---+ +----> latch Ic |------------> latch Ic |---+ +----> latch Id |------------> latch Id |
+ | | | | | | | | | |
+ | +------------------ALU-----------> wrRAM Ra | +------------------ALU-----------> wrRAM Rb | +------------------ALU-----------> wrRAM Rc |
+ | | | | | | |
+ | | stall/done = 'gox' | | stall/done = 'gox' | | stall/done = 'gox' |
+ | 'get' | done = 'go' | 'get' | done = 'go' | 'get' | done = 'go' |
+
+
+------------
+instructions
+------------
+
+EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS ROR D,S/# {WC/WZ/WCZ}
+EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS ROL D,S/# {WC/WZ/WCZ}
+EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS SHR D,S/# {WC/WZ/WCZ}
+EEEE 0000011 CZI DDDDDDDDD SSSSSSSSS SHL D,S/# {WC/WZ/WCZ}
+EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS RCR D,S/# {WC/WZ/WCZ}
+EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS RCL D,S/# {WC/WZ/WCZ}
+EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS SAR D,S/# {WC/WZ/WCZ}
+EEEE 0000111 CZI DDDDDDDDD SSSSSSSSS SAL D,S/# {WC/WZ/WCZ}
+
+EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS ADD D,S/# {WC/WZ/WCZ}
+EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS ADDX D,S/# {WC/WZ/WCZ}
+EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS ADDS D,S/# {WC/WZ/WCZ}
+EEEE 0001011 CZI DDDDDDDDD SSSSSSSSS ADDSX D,S/# {WC/WZ/WCZ}
+
+EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS SUB D,S/# {WC/WZ/WCZ}
+EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS SUBX D,S/# {WC/WZ/WCZ}
+EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS SUBS D,S/# {WC/WZ/WCZ}
+EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS SUBSX D,S/# {WC/WZ/WCZ}
+
+EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS CMP D,S/# {WC/WZ/WCZ}
+EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS CMPX D,S/# {WC/WZ/WCZ}
+EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS CMPS D,S/# {WC/WZ/WCZ}
+EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS CMPSX D,S/# {WC/WZ/WCZ}
+
+EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS CMPR D,S/# {WC/WZ/WCZ}
+EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS CMPM D,S/# {WC/WZ/WCZ}
+EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS SUBR D,S/# {WC/WZ/WCZ}
+EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS CMPSUB D,S/# {WC/WZ/WCZ}
+
+EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS FGE D,S/# {WC/WZ/WCZ}
+EEEE 0011001 CZI DDDDDDDDD SSSSSSSSS FLE D,S/# {WC/WZ/WCZ}
+EEEE 0011010 CZI DDDDDDDDD SSSSSSSSS FGES D,S/# {WC/WZ/WCZ}
+EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS FLES D,S/# {WC/WZ/WCZ}
+
+EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS SUMC D,S/# {WC/WZ/WCZ}
+EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS SUMNC D,S/# {WC/WZ/WCZ}
+EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS SUMZ D,S/# {WC/WZ/WCZ}
+EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS SUMNZ D,S/# {WC/WZ/WCZ}
+
+EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# WC/WZ
+EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# WC/WZ
+EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# ANDC/ANDZ
+EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# ANDC/ANDZ
+EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# ORC/ORZ
+EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# ORC/ORZ
+EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS TESTB D,S/# XORC/XORZ
+EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS TESTBN D,S/# XORC/XORZ
+
+EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS BITL D,S/# {WCZ}
+EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS BITH D,S/# {WCZ}
+EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS BITC D,S/# {WCZ}
+EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS BITNC D,S/# {WCZ}
+EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS BITZ D,S/# {WCZ}
+EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS BITNZ D,S/# {WCZ}
+EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS BITRND D,S/# {WCZ}
+EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS BITNOT D,S/# {WCZ}
+
+EEEE 0101000 CZI DDDDDDDDD SSSSSSSSS AND D,S/# {WC/WZ/WCZ}
+EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS ANDN D,S/# {WC/WZ/WCZ}
+EEEE 0101010 CZI DDDDDDDDD SSSSSSSSS OR D,S/# {WC/WZ/WCZ}
+EEEE 0101011 CZI DDDDDDDDD SSSSSSSSS XOR D,S/# {WC/WZ/WCZ}
+
+EEEE 0101100 CZI DDDDDDDDD SSSSSSSSS MUXC D,S/# {WC/WZ/WCZ}
+EEEE 0101101 CZI DDDDDDDDD SSSSSSSSS MUXNC D,S/# {WC/WZ/WCZ}
+EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS MUXZ D,S/# {WC/WZ/WCZ}
+EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS MUXNZ D,S/# {WC/WZ/WCZ}
+
+EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS MOV D,S/# {WC/WZ/WCZ}
+EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS NOT D,S/# {WC/WZ/WCZ}
+EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS ABS D,S/# {WC/WZ/WCZ}
+EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS NEG D,S/# {WC/WZ/WCZ}
+
+EEEE 0110100 CZI DDDDDDDDD SSSSSSSSS NEGC D,S/# {WC/WZ/WCZ}
+EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS NEGNC D,S/# {WC/WZ/WCZ}
+EEEE 0110110 CZI DDDDDDDDD SSSSSSSSS NEGZ D,S/# {WC/WZ/WCZ}
+EEEE 0110111 CZI DDDDDDDDD SSSSSSSSS NEGNZ D,S/# {WC/WZ/WCZ}
+
+EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS INCMOD D,S/# {WC/WZ/WCZ}
+EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS DECMOD D,S/# {WC/WZ/WCZ}
+EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS ZEROX D,S/# {WC/WZ/WCZ}
+EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS SIGNX D,S/# {WC/WZ/WCZ}
+
+EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS ENCOD D,S/# {WC/WZ/WCZ}
+EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS ONES D,S/# {WC/WZ/WCZ}
+EEEE 0111110 CZI DDDDDDDDD SSSSSSSSS TEST D,S/# {WC/WZ/WCZ}
+EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS TESTN D,S/# {WC/WZ/WCZ}
+
+EEEE 100000N NNI DDDDDDDDD SSSSSSSSS SETNIB D,S/#,#N
+EEEE 100001N NNI DDDDDDDDD SSSSSSSSS GETNIB D,S/#,#N
+EEEE 100010N NNI DDDDDDDDD SSSSSSSSS ROLNIB D,S/#,#N
+EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS SETBYTE D,S/#,#N
+EEEE 1000111 NNI DDDDDDDDD SSSSSSSSS GETBYTE D,S/#,#N
+EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS ROLBYTE D,S/#,#N
+EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS SETWORD D,S/#,#N
+EEEE 1001001 1NI DDDDDDDDD SSSSSSSSS GETWORD D,S/#,#N
+EEEE 1001010 0NI DDDDDDDDD SSSSSSSSS ROLWORD D,S/#,#N
+EEEE 1001010 10I DDDDDDDDD SSSSSSSSS ALTSN D,S/#
+EEEE 1001010 11I DDDDDDDDD SSSSSSSSS ALTGN D,S/#
+EEEE 1001011 00I DDDDDDDDD SSSSSSSSS ALTSB D,S/#
+EEEE 1001011 01I DDDDDDDDD SSSSSSSSS ALTGB D,S/#
+EEEE 1001011 10I DDDDDDDDD SSSSSSSSS ALTSW D,S/#
+EEEE 1001011 11I DDDDDDDDD SSSSSSSSS ALTGW D,S/#
+EEEE 1001100 00I DDDDDDDDD SSSSSSSSS ALTR D,S/#
+EEEE 1001100 01I DDDDDDDDD SSSSSSSSS ALTD D,S/#
+EEEE 1001100 10I DDDDDDDDD SSSSSSSSS ALTS D,S/#
+EEEE 1001100 11I DDDDDDDDD SSSSSSSSS ALTB D,S/#
+EEEE 1001101 00I DDDDDDDDD SSSSSSSSS ALTI D,S/#
+EEEE 1001101 01I DDDDDDDDD SSSSSSSSS SETR D,S/#
+EEEE 1001101 10I DDDDDDDDD SSSSSSSSS SETD D,S/#
+EEEE 1001101 11I DDDDDDDDD SSSSSSSSS SETS D,S/#
+EEEE 1001110 00I DDDDDDDDD SSSSSSSSS DECOD D,S/#
+EEEE 1001110 01I DDDDDDDDD SSSSSSSSS BMASK D,S/#
+EEEE 1001110 10I DDDDDDDDD SSSSSSSSS CRCBIT D,S/#
+EEEE 1001110 11I DDDDDDDDD SSSSSSSSS CRCNIB D,S/#
+EEEE 1001111 00I DDDDDDDDD SSSSSSSSS MUXNITS D,S/#
+EEEE 1001111 01I DDDDDDDDD SSSSSSSSS MUXNIBS D,S/#
+EEEE 1001111 10I DDDDDDDDD SSSSSSSSS MUXQ D,S/#
+EEEE 1001111 11I DDDDDDDDD SSSSSSSSS MOVBYTS D,S/#
+
+EEEE 1010000 0ZI DDDDDDDDD SSSSSSSSS MUL D,S/# {WZ}
+EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS MULS D,S/# {WZ}
+EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS SCA D,S/# {WZ}
+EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS SCAS D,S/# {WZ}
+
+EEEE 1010010 00I DDDDDDDDD SSSSSSSSS ADDPIX D,S/#
+EEEE 1010010 01I DDDDDDDDD SSSSSSSSS MULPIX D,S/#
+EEEE 1010010 10I DDDDDDDDD SSSSSSSSS BLNPIX D,S/#
+EEEE 1010010 11I DDDDDDDDD SSSSSSSSS MIXPIX D,S/#
+
+EEEE 1010011 00I DDDDDDDDD SSSSSSSSS ADDCT1 D,S/#
+EEEE 1010011 01I DDDDDDDDD SSSSSSSSS ADDCT2 D,S/#
+EEEE 1010011 10I DDDDDDDDD SSSSSSSSS ADDCT3 D,S/#
+EEEE 1010011 11I DDDDDDDDD SSSSSSSSS WMLONG D,S/#/PTRx
+
+EEEE 1010100 C0I DDDDDDDDD SSSSSSSSS RQPIN D,S/# {WC}
+EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS RDPIN D,S/# {WC}
+EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS RDLUT D,S/#/PTRx {WC/WZ/WCZ}
+
+EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS RDBYTE D,S/#/PTRx {WC/WZ/WCZ}
+EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS RDWORD D,S/#/PTRx {WC/WZ/WCZ}
+EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS RDLONG D,S/#/PTRx {WC/WZ/WCZ}
+
+EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS CALLD D,S/#rel9 {WC/WZ/WCZ}
+
+EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS CALLPA D/#,S/#rel9
+EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS CALLPB D/#,S/#rel9
+
+EEEE 1011011 00I DDDDDDDDD SSSSSSSSS DJZ D,S/#rel9
+EEEE 1011011 01I DDDDDDDDD SSSSSSSSS DJNZ D,S/#rel9
+EEEE 1011011 10I DDDDDDDDD SSSSSSSSS DJF D,S/#rel9
+EEEE 1011011 11I DDDDDDDDD SSSSSSSSS DJNF D,S/#rel9
+
+EEEE 1011100 00I DDDDDDDDD SSSSSSSSS IJZ D,S/#rel9
+EEEE 1011100 01I DDDDDDDDD SSSSSSSSS IJNZ D,S/#rel9
+
+EEEE 1011100 10I DDDDDDDDD SSSSSSSSS TJZ D,S/#rel9
+EEEE 1011100 11I DDDDDDDDD SSSSSSSSS TJNZ D,S/#rel9
+EEEE 1011101 00I DDDDDDDDD SSSSSSSSS TJF D,S/#rel9
+EEEE 1011101 01I DDDDDDDDD SSSSSSSSS TJNF D,S/#rel9
+EEEE 1011101 10I DDDDDDDDD SSSSSSSSS TJS D,S/#rel9
+EEEE 1011101 11I DDDDDDDDD SSSSSSSSS TJNS D,S/#rel9
+EEEE 1011110 00I DDDDDDDDD SSSSSSSSS TJV D,S/#rel9
+
+EEEE 1011110 01I 000000000 SSSSSSSSS JINT S/#rel9
+EEEE 1011110 01I 000000001 SSSSSSSSS JCT1 S/#rel9
+EEEE 1011110 01I 000000010 SSSSSSSSS JCT2 S/#rel9
+EEEE 1011110 01I 000000011 SSSSSSSSS JCT3 S/#rel9
+EEEE 1011110 01I 000000100 SSSSSSSSS JSE1 S/#rel9
+EEEE 1011110 01I 000000101 SSSSSSSSS JSE2 S/#rel9
+EEEE 1011110 01I 000000110 SSSSSSSSS JSE3 S/#rel9
+EEEE 1011110 01I 000000111 SSSSSSSSS JSE4 S/#rel9
+EEEE 1011110 01I 000001000 SSSSSSSSS JPAT S/#rel9
+EEEE 1011110 01I 000001001 SSSSSSSSS JFBW S/#rel9
+EEEE 1011110 01I 000001010 SSSSSSSSS JXMT S/#rel9
+EEEE 1011110 01I 000001011 SSSSSSSSS JXFI S/#rel9
+EEEE 1011110 01I 000001100 SSSSSSSSS JXRO S/#rel9
+EEEE 1011110 01I 000001101 SSSSSSSSS JXRL S/#rel9
+EEEE 1011110 01I 000001110 SSSSSSSSS JATN S/#rel9
+EEEE 1011110 01I 000001111 SSSSSSSSS JQMT S/#rel9
+
+EEEE 1011110 01I 000010000 SSSSSSSSS JNINT S/#rel9
+EEEE 1011110 01I 000010001 SSSSSSSSS JNCT1 S/#rel9
+EEEE 1011110 01I 000010010 SSSSSSSSS JNCT2 S/#rel9
+EEEE 1011110 01I 000010011 SSSSSSSSS JNCT3 S/#rel9
+EEEE 1011110 01I 000010100 SSSSSSSSS JNSE1 S/#rel9
+EEEE 1011110 01I 000010101 SSSSSSSSS JNSE2 S/#rel9
+EEEE 1011110 01I 000010110 SSSSSSSSS JNSE3 S/#rel9
+EEEE 1011110 01I 000010111 SSSSSSSSS JNSE4 S/#rel9
+EEEE 1011110 01I 000011000 SSSSSSSSS JNPAT S/#rel9
+EEEE 1011110 01I 000011001 SSSSSSSSS JNFBW S/#rel9
+EEEE 1011110 01I 000011010 SSSSSSSSS JNXMT S/#rel9
+EEEE 1011110 01I 000011011 SSSSSSSSS JNXFI S/#rel9
+EEEE 1011110 01I 000011100 SSSSSSSSS JNXRO S/#rel9
+EEEE 1011110 01I 000011101 SSSSSSSSS JNXRL S/#rel9
+EEEE 1011110 01I 000011110 SSSSSSSSS JNATN S/#rel9
+EEEE 1011110 01I 000011111 SSSSSSSSS JNQMT S/#rel9
+
+EEEE 1011110 1LI DDDDDDDDD SSSSSSSSS <empty> D/#,S/#
+EEEE 1011111 0LI DDDDDDDDD SSSSSSSSS <empty> D/#,S/#
+
+EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS SETPAT D/#,S/#
+
+EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS WRPIN D/#,S/#
+EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS WXPIN D/#,S/#
+EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS WYPIN D/#,S/#
+EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS WRLUT D/#,S/#/PTRx
+
+EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS WRBYTE D/#,S/#/PTRx
+EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS WRWORD D/#,S/#/PTRx
+EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS WRLONG D/#,S/#/PTRx
+
+EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS RDFAST D/#,S/#
+EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS WRFAST D/#,S/#
+EEEE 1100100 1LI DDDDDDDDD SSSSSSSSS FBLOCK D/#,S/#
+
+EEEE 1100101 0LI DDDDDDDDD SSSSSSSSS XINIT D/#,S/#
+EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS XZERO D/#,S/#
+EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS XCONT D/#,S/#
+
+EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS REP D/#,S/#
+
+EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS COGINIT D/#,S/# {WC}
+EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS QMUL D/#,S/#
+EEEE 1101000 1LI DDDDDDDDD SSSSSSSSS QDIV D/#,S/#
+EEEE 1101001 0LI DDDDDDDDD SSSSSSSSS QFRAC D/#,S/#
+EEEE 1101001 1LI DDDDDDDDD SSSSSSSSS QSQRT D/#,S/#
+EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS QROTATE D/#,S/#
+EEEE 1101010 1LI DDDDDDDDD SSSSSSSSS QVECTOR D/#,S/#
+
+EEEE 1101011 00L DDDDDDDDD 000000000 HUBSET D/#
+EEEE 1101011 C0L DDDDDDDDD 000000001 COGID D/# {WC}
+EEEE 1101011 00L DDDDDDDDD 000000011 COGSTOP D/#
+EEEE 1101011 C00 DDDDDDDDD 000000100 LOCKNEW D {WC}
+EEEE 1101011 00L DDDDDDDDD 000000101 LOCKRET D/#
+EEEE 1101011 C0L DDDDDDDDD 000000110 LOCKTRY D/# {WC}
+EEEE 1101011 00L DDDDDDDDD 000000111 LOCKREL D/# {WC}
+EEEE 1101011 00L DDDDDDDDD 000001110 QLOG D/#
+EEEE 1101011 00L DDDDDDDDD 000001111 QEXP D/#
+
+EEEE 1101011 CZ0 DDDDDDDDD 000010000 RFBYTE D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000010001 RFWORD D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000010010 RFLONG D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000010011 RFVAR D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000010100 RFVARS D {WC/WZ/WCZ}
+
+EEEE 1101011 00L DDDDDDDDD 000010101 WFBYTE D/#
+EEEE 1101011 00L DDDDDDDDD 000010110 WFWORD D/#
+EEEE 1101011 00L DDDDDDDDD 000010111 WFLONG D/#
+
+EEEE 1101011 CZ0 DDDDDDDDD 000011000 GETQX D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000011001 GETQY D {WC/WZ/WCZ}
+
+EEEE 1101011 C00 DDDDDDDDD 000011010 GETCT D {WC}
+EEEE 1101011 CZL DDDDDDDDD 000011011 GETRND {D} {WC/WZ/WCZ}
+
+EEEE 1101011 00L DDDDDDDDD 000011100 SETDACS D/#
+EEEE 1101011 00L DDDDDDDDD 000011101 SETXFRQ D/#
+EEEE 1101011 000 DDDDDDDDD 000011110 GETXACC D
+EEEE 1101011 CZL DDDDDDDDD 000011111 WAITX D/# {WC/WZ/WCZ}
+
+EEEE 1101011 00L DDDDDDDDD 000100000 SETSE1 D/#
+EEEE 1101011 00L DDDDDDDDD 000100001 SETSE2 D/#
+EEEE 1101011 00L DDDDDDDDD 000100010 SETSE3 D/#
+EEEE 1101011 00L DDDDDDDDD 000100011 SETSE4 D/#
+
+EEEE 1101011 CZ0 000000000 000100100 POLLINT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000001 000100100 POLLCT1 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000010 000100100 POLLCT2 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000011 000100100 POLLCT3 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000100 000100100 POLLSE1 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000101 000100100 POLLSE2 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000110 000100100 POLLSE3 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000000111 000100100 POLLSE4 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001000 000100100 POLLPAT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001001 000100100 POLLFBW {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001010 000100100 POLLXMT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001011 000100100 POLLXFI {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001100 000100100 POLLXRO {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001101 000100100 POLLXRL {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001110 000100100 POLLATN {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000001111 000100100 POLLQMT {WC/WZ/WCZ}
+
+EEEE 1101011 CZ0 000010000 000100100 WAITINT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010001 000100100 WAITCT1 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010010 000100100 WAITCT2 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010011 000100100 WAITCT3 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010100 000100100 WAITSE1 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010101 000100100 WAITSE2 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010110 000100100 WAITSE3 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000010111 000100100 WAITSE4 {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011000 000100100 WAITPAT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011001 000100100 WAITFBW {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011010 000100100 WAITXMT {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011011 000100100 WAITXFI {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011100 000100100 WAITXRO {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011101 000100100 WAITXRL {WC/WZ/WCZ}
+EEEE 1101011 CZ0 000011110 000100100 WAITATN {WC/WZ/WCZ}
+
+EEEE 1101011 000 000100000 000100100 ALLOWI
+EEEE 1101011 000 000100001 000100100 STALLI
+
+EEEE 1101011 000 000100010 000100100 TRGINT1
+EEEE 1101011 000 000100011 000100100 TRGINT2
+EEEE 1101011 000 000100100 000100100 TRGINT3
+
+EEEE 1101011 000 000100101 000100100 NIXINT1
+EEEE 1101011 000 000100110 000100100 NIXINT2
+EEEE 1101011 000 000100111 000100100 NIXINT3
+
+EEEE 1101011 00L DDDDDDDDD 000100101 SETINT1 D/#
+EEEE 1101011 00L DDDDDDDDD 000100110 SETINT2 D/#
+EEEE 1101011 00L DDDDDDDDD 000100111 SETINT3 D/#
+
+EEEE 1101011 00L DDDDDDDDD 000101000 SETQ D/#
+EEEE 1101011 00L DDDDDDDDD 000101001 SETQ2 D/#
+
+EEEE 1101011 00L DDDDDDDDD 000101010 PUSH D/#
+EEEE 1101011 CZ0 DDDDDDDDD 000101011 POP D {WC/WZ/WCZ}
+
+EEEE 1101011 CZ0 DDDDDDDDD 000101100 JMP D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000101101 CALL D {WC/WZ/WCZ}
+EEEE 1101011 CZ1 000000000 000101101 RET {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000101110 CALLA D {WC/WZ/WCZ}
+EEEE 1101011 CZ1 000000000 000101110 RETA {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 000101111 CALLB D {WC/WZ/WCZ}
+EEEE 1101011 CZ1 000000000 000101111 RETB {WC/WZ/WCZ}
+
+EEEE 1101011 00L DDDDDDDDD 000110000 JMPREL D/#
+EEEE 1101011 00L DDDDDDDDD 000110001 SKIP D/#
+EEEE 1101011 00L DDDDDDDDD 000110010 SKIPF D/#
+EEEE 1101011 00L DDDDDDDDD 000110011 EXECF D/#
+
+EEEE 1101011 000 DDDDDDDDD 000110100 GETPTR D
+EEEE 1101011 CZ0 DDDDDDDDD 000110101 GETBRK D WC/WZ/WCZ
+EEEE 1101011 00L DDDDDDDDD 000110101 COGBRK D/#
+EEEE 1101011 00L DDDDDDDDD 000110110 BRK D/#
+EEEE 1101011 00L DDDDDDDDD 000110111 SETLUTS D/#
+
+EEEE 1101011 00L DDDDDDDDD 000111000 SETCY D/#
+EEEE 1101011 00L DDDDDDDDD 000111001 SETCI D/#
+EEEE 1101011 00L DDDDDDDDD 000111010 SETCQ D/#
+EEEE 1101011 00L DDDDDDDDD 000111011 SETCFRQ D/#
+EEEE 1101011 00L DDDDDDDDD 000111100 SETCMOD D/#
+
+EEEE 1101011 00L DDDDDDDDD 000111101 SETPIV D/#
+EEEE 1101011 00L DDDDDDDDD 000111110 SETPIX D/#
+
+EEEE 1101011 00L DDDDDDDDD 000111111 COGATN D/#
+
+EEEE 1101011 CZL DDDDDDDDD 001000000 TESTP D/# WC/WZ
+EEEE 1101011 CZL DDDDDDDDD 001000001 TESTPN D/# WC/WZ
+EEEE 1101011 CZL DDDDDDDDD 001000010 TESTP D/# ANDC/ANDZ
+EEEE 1101011 CZL DDDDDDDDD 001000011 TESTPN D/# ANDC/ANDZ
+EEEE 1101011 CZL DDDDDDDDD 001000100 TESTP D/# ORC/ORZ
+EEEE 1101011 CZL DDDDDDDDD 001000101 TESTPN D/# ORC/ORZ
+EEEE 1101011 CZL DDDDDDDDD 001000110 TESTP D/# XORC/XORZ
+EEEE 1101011 CZL DDDDDDDDD 001000111 TESTPN D/# XORC/XORZ
+
+EEEE 1101011 CZL DDDDDDDDD 001000000 DIRL D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000001 DIRH D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000010 DIRC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000011 DIRNC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000100 DIRZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000101 DIRNZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000110 DIRRND D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001000111 DIRNOT D/# {WCZ}
+
+EEEE 1101011 CZL DDDDDDDDD 001001000 OUTL D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001001 OUTH D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001010 OUTC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001011 OUTNC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001100 OUTZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001101 OUTNZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001110 OUTRND D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001001111 OUTNOT D/# {WCZ}
+
+EEEE 1101011 CZL DDDDDDDDD 001010000 FLTL D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010001 FLTH D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010010 FLTC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010011 FLTNC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010100 FLTZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010101 FLTNZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010110 FLTRND D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001010111 FLTNOT D/# {WCZ}
+
+EEEE 1101011 CZL DDDDDDDDD 001011000 DRVL D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011001 DRVH D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011010 DRVC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011011 DRVNC D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011100 DRVZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011101 DRVNZ D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011110 DRVRND D/# {WCZ}
+EEEE 1101011 CZL DDDDDDDDD 001011111 DRVNOT D/# {WCZ}
+
+EEEE 1101011 000 DDDDDDDDD 001100000 SPLITB D
+EEEE 1101011 000 DDDDDDDDD 001100001 MERGEB D
+EEEE 1101011 000 DDDDDDDDD 001100010 SPLITW D
+EEEE 1101011 000 DDDDDDDDD 001100011 MERGEW D
+EEEE 1101011 000 DDDDDDDDD 001100100 SEUSSF D
+EEEE 1101011 000 DDDDDDDDD 001100101 SEUSSR D
+EEEE 1101011 000 DDDDDDDDD 001100110 RGBSQZ D
+EEEE 1101011 000 DDDDDDDDD 001100111 RGBEXP D
+EEEE 1101011 000 DDDDDDDDD 001101000 XORO32 D
+EEEE 1101011 000 DDDDDDDDD 001101001 REV D
+EEEE 1101011 CZ0 DDDDDDDDD 001101010 RCZR D {WC/WZ/WCZ}
+EEEE 1101011 CZ0 DDDDDDDDD 001101011 RCZL D {WC/WZ/WCZ}
+EEEE 1101011 000 DDDDDDDDD 001101100 WRC D
+EEEE 1101011 000 DDDDDDDDD 001101101 WRNC D
+EEEE 1101011 000 DDDDDDDDD 001101110 WRZ D
+EEEE 1101011 000 DDDDDDDDD 001101111 WRNZ D
+EEEE 1101011 CZ1 0cccczzzz 001101111 MODCZ c,z {WC/WZ/WCZ}
+
+EEEE 1101011 00L DDDDDDDDD 001110000 SETSCP D/#
+EEEE 1101011 000 DDDDDDDDD 001110001 GETSCP D
+
+EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA JMP #{\}A
+EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA CALL #{\}A
+EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA CALLA #{\}A
+EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA CALLB #{\}A
+
+EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA CALLD register,#{\}A
+EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA LOC register,#{\}A
+
+EEEE 11110NN NNN NNNNNNNNN NNNNNNNNN AUGS #N
+EEEE 11111NN NNN NNNNNNNNN NNNNNNNNN AUGD #N
+
+
+-------------------
+instruction aliases
+-------------------
+
+NOP = $00000000
+
+NOT register = NOT register,register
+ABS register = ABS register,register
+NEG register = NEG register,register
+NEGC register = NEGC register,register
+NEGNC register = NEGNC register,register
+NEGZ register = NEGZ register,register
+NEGNZ register = NEGNZ register,register
+ENCOD register = ENCOD register,register
+ONES register = ONES register,register
+TEST register = TEST register,register
+
+SETNIB register/# = SETNIB 0,register/#,#0 (use after ALTSN)
+GETNIB register = GETNIB register,0,#0 (use after ALTGN)
+ROLNIB register = ROLNIB register,0,#0 (use after ALTGN)
+
+SETBYTE register/# = SETBYTE 0,register/#,#0 (use after ALTSB)
+GETBYTE register = GETBYTE register,0,#0 (use after ALTGB)
+ROLBYTE register = ROLBYTE register,0,#0 (use after ALTGB)
+
+SETWORD register/# = SETWORD 0,register/#,#0 (use after ALTSW)
+GETWORD register = GETWORD register,0,#0 (use after ALTGW)
+ROLWORD register = ROLWORD register,0,#0 (use after ALTGW)
+
+ALTSN register = ALTSN register,#0
+ALTGN register = ALTGN register,#0
+ALTSB register = ALTSB register,#0
+ALTGB register = ALTGB register,#0
+ALTSW register = ALTSW register,#0
+ALTGW register = ALTGW register,#0
+ALTR register = ALTR register,#0
+ALTD register = ALTD register,#0
+ALTS register = ALTS register,#0
+ALTB register = ALTB register,#0
+ALTI register = ALTI register,#%101_100_100 (substitute register for next instruction)
+
+DECOD register = DECOD register,register
+BMASK register = BMASK register,register
+
+POPA register = RDLONG register,--PTRA
+POPB register = RDLONG register,--PTRB
+
+RESI3 = CALLD $1F0,$1F1 WCZ
+RESI2 = CALLD $1F2,$1F3 WCZ
+RESI1 = CALLD $1F4,$1F5 WCZ
+RESI0 = CALLD INA,INB WCZ
+
+RETI3 = CALLD INB,$1F1 WCZ
+RETI2 = CALLD INB,$1F3 WCZ
+RETI1 = CALLD INB,$1F5 WCZ
+RETI0 = CALLD INB,INB WCZ
+
+AKPIN register/# = WRPIN #1,register/#
+
+PUSHA register/# = WRLONG register/#,PTRA++
+PUSHB register/# = WRLONG register/#,PTRB++
+
+XSTOP = XINIT #0,#0
+
+MODC c = MODCZ c,0 {WC}
+MODZ z = MODCZ 0,z {WZ}
+
+
+---------------
+MODCZ constants
+---------------
+
+_CLR = %0000
+_NC_AND_NZ = %0001
+_NZ_AND_NC = %0001
+_GT = %0001
+_NC_AND_Z = %0010
+_Z_AND_NC = %0010
+_NC = %0011
+_GE = %0011
+_C_AND_NZ = %0100
+_NZ_AND_C = %0100
+_NZ = %0101
+_NE = %0101
+_C_NE_Z = %0110
+_Z_NE_C = %0110
+_NC_OR_NZ = %0111
+_NZ_OR_NC = %0111
+_C_AND_Z = %1000
+_Z_AND_C = %1000
+_C_EQ_Z = %1001
+_Z_EQ_C = %1001
+_Z = %1010
+_E = %1010
+_NC_OR_Z = %1011
+_Z_OR_NC = %1011
+_C = %1100
+_LT = %1100
+_C_OR_NZ = %1101
+_NZ_OR_C = %1101
+_C_OR_Z = %1110
+_Z_OR_C = %1110
+_LE = %1110
+_SET = %1111
+
+
+Examples:
+
+MODCZ _CLR, _Z_OR_C WCZ 'C = 0, Z |= C
+MODCZ _NZ,0 WC 'C = !Z
+MODCZ 0,_SET WZ 'Z = 1
+
+MODC _NZ_AND_C WC 'C = !Z & C
+MODZ _Z_NE_C WZ 'Z = Z ^ C
+
+
+-----
+notes
+-----
+
+A symbol declared under ORGH will return its hub address when referenced.
+
+A symbol declared under ORG will return its cog address when referenced,
+but can return its hub address, instead, if preceded by '@':
+
+ COGINIT #0,#@newcode
+
+
+For immediate-branch and LOC address operands, "#" is used before the
+address. In cases where there is an option between absolute and relative
+addressing, the assembler will choose absolute addressing when the branch
+crosses between cog and hub domains, or relative addressing when the
+branch stays in the same domain. Absolute addressing can be forced by
+following "#" with "\".
+
+ CALLPA/CALLPB/DJZ..JNXRL/JNATN/JNQMT - rel_imm9/ind_reg20
+ JMP/CALL/CALLA/CALLB/CALLD - abs_imm20/rel_imm20/ind_reg20
+ LOC - abs_imm20/rel_imm20
+
+
+If a constant larger than 9 bits is desired in an instruction, use "##",
+instead of "#" to invoke AUGS/AUGD:
+
+ AND address,##$FFFFF
+ DJNZ register,##far_away
+
+
+The following assembler directives exist:
+
+ ORGH {hub_address}
+
+ Set hub mode and an optional address to fill to with $00 bytes.
+
+
+ ORG {cog_address {,cog_address_limit}}
+
+ Set cog mode with optional cog address and limit. Defaults to $000,$200.
+ If $200..$3FF used for cog address, LUT range selected. Doesn't generate
+ any data.
+
+
+ ORGF cog_address
+
+ Fill to cog_address with $00 bytes. Must be in cog mode.
+
+
+ RES cog_registers
+
+ Reserve cog registers. Doesn't generate any data. Must be in cog mode.
+
+
+ FIT cog_or_hub_address
+
+ Make sure cog code fits within cog or hub address.
+
+
+ ALIGNW/ALIGNL
+
+ Align to next word/long in hub.
+
+
+ BYTE data{[count]}{,data{[count]}...}
+ WORD data{[count]}{,data{[count]}...}
+ LONG data{[count]}{,data{[count]}...}
+
+ Generate byte/word/long data with optional repeat count.
+```
+
 
 
 ## Boot ROM / Debug ROM

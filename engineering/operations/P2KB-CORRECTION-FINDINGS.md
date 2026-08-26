@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-363`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-366`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,115 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## 23 shipped-KB citations point into the superseded lossy silicon-doc capture (2026-08-26, «#310») — F-365
+
+### F-365 — the shipped KB cites `p2-documentation.txt`, the PDF-era extraction now known to be lossy — `CONFIRMED`
+
+**What was measured.** References to the superseded artifact, outside its own folder:
+
+| Referencing | Count |
+|---|---|
+| shipped KB `deliverables/ai/P2/` | **24** — of which **23 carry `:line` locators** |
+| other `deliverables/` | 3 |
+| `engineering/` working docs | 266 |
+| **total** | **293** |
+
+**Severity, stated honestly rather than inflated.** The sampled shipped locators (`:188`,
+`:3602`, `:3606`, `:3961`, `:3997`, `:3999`) were each read back 2026-08-26 and **all resolve to
+content that matches what cites them.** These citations are **not broken**. This is lineage
+hygiene, not a correctness emergency, and it should not be reported as though 23 facts were
+wrong.
+
+**Why it still matters.** The cited capture is PDF-derived, carries **zero of the document's 48
+tables**, and splits code lines. It has already produced one wrong fact that reached the shipped
+KB — **F-363**, the `$1F6`/`$1F7` PA/PB row — and the mechanism is visible in the artifact:
+`p2-documentation.txt:907-908` are the bare token `CALLD-imm` alone, its table row shredded. A
+citation into that capture is a citation into a source we now know drops structure silently.
+
+**Fix (YAML head).** Re-anchor the 23 locators to `silicon-doc-text.txt`, verifying each against
+the new artifact rather than translating line numbers — the two files do not share numbering, and
+"verify citations live, not from a ledger" applies exactly here.
+
+**The old artifact is deliberately NOT archived.** `ingest-source` §0.6 gates the archive-move on
+first re-pointing downstream references; with 293 of them a move would strand every one, which is
+a Sacred Rule #7 violation. Marked in place instead —
+`engineering/ingestion/sources/silicon-doc/SUPERSEDED-BY-2026-08-26-DOCX.md`. The move happens
+after this finding is worked, not before.
+
+## The COG register map's PA/PB row lost the return-vs-parameter distinction, and its index dangles 13 of 16 pointers (2026-08-26, silicon-doc DOCX re-extraction) — F-363 · F-364
+
+### F-363 — `complete-system-registers-index.yaml` says PA/PB hold the "CALLD-imm parameter"; all three authorities say **return** — `CONFIRMED`
+
+**How this surfaced.** «#310» reconciled the prior PDF-era artifact `COG-RAM-REGISTER-MAP.md`
+against the new DOCX extraction of the Silicon Doc. The `$1F6`/`$1F7` rows disagreed.
+
+**What each source says.**
+
+| Source | `$1F6` (PA) |
+|---|---|
+| **silicon-doc** (DOCX, 2026-08-26) `silicon-doc-text.txt:313` | `CALLD-imm return, CALLPA parameter, or LOC address` |
+| **p2-hardware-manual** `p2-hardware-manual-text.txt:357` | `CALLD-imm return, CALLPA parameter, or LOC address` |
+| **p2-datasheet** `p2-datasheet-text.txt:564` | `CALLD-imm return, CALLPA parameter, or LOC address` |
+| **our shipped YAML** `complete-system-registers-index.yaml:73` | `CALLD-imm parameter, or LOC address` |
+
+`$1F7` (PB) is the same, with `CALLPB`. **Three independent ingested authorities agree
+verbatim, cell-identical, and the shipped KB disagrees with all three.**
+
+**Two distinct defects in one line.**
+1. **`return` became `parameter`.** PA holds the **return address** written by a `CALLD`
+   with an immediate operand. Calling it the parameter inverts what the register receives.
+2. **The `CALLPA`/`CALLPB` role was dropped entirely** — and with it the PA/PB distinction.
+   Our two rows are byte-identical to each other; the sources' are not.
+
+**Where it came from — the mechanism, not just the fact.** The prior PDF-era capture shredded
+that table: `p2-documentation.txt:907-908` contain the bare token `CALLD-imm` alone on a line,
+its row torn away. The prior artifact then reconstructed a plausible sentence from the fragment,
+and the reconstruction is what shipped. **This is the F-250 class in a new place** — a lossy
+extraction that reads as fluent, correct-looking prose. The DOCX capture keeps the row intact
+because it carries real table structure.
+
+**Reached our KB?** Yes — 2 sites, both in
+`deliverables/ai/P2/architecture/system-registers/complete-system-registers-index.yaml`
+(`:73`, `:79`). Class sweep for `CALLD-imm` across `deliverables/ai/P2/` returns exactly those
+two. No other file carries the wording.
+
+**Fix (YAML head, not this task).** `$1F6` → `CALLD-imm return, CALLPA parameter, or LOC
+address`; `$1F7` → `CALLD-imm return, CALLPB parameter, or LOC address`. Triple-sourced, so no
+further research is owed.
+
+### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `CONFIRMED`
+
+**What was measured.** Every `yaml_file:` pointer in
+`complete-system-registers-index.yaml`, resolved against its own directory:
+
+| | |
+|---|---|
+| pointers declared | **16** |
+| resolve | **3** |
+| **dangle** | **13** (11 distinct filenames) |
+
+Missing: `dual-ijmp3` · `dual-iret3` · `dual-ijmp2` · `dual-iret2` · `dual-ijmp1` ·
+`dual-iret1` · `dual-pa` · `dual-pb` · `ptrb-register` · `outa-outb-registers` (×2) ·
+`ina-inb-registers` (×2). The directory contains exactly three files:
+`complete-system-registers-index.yaml`, `dira-dirb-registers.yaml`, `ptra-register.yaml`.
+
+**Why no gate caught it.** `validate-crossref-keys.py` exits 0 on this tree and has throughout.
+It validates `related:` keys; **`yaml_file:` is a different pointer field and nothing checks
+it.** So an index can promise thirteen files that were never written and every instrument stays
+green — the same shape as F-362 (a register gate reporting CLEAN on entries it never read) and
+F-359 (headers citing sources that do not exist). An agent following `yaml_file: dual-pa-register.yaml`
+to resolve F-363's own defect would find nothing there.
+
+**Disposition owed — this is a scope call, not a mechanical fix.** Either the eleven files get
+written (they are real registers and deserve entries), or the pointers are removed and the index
+carries the content inline. **Removing a pointer is not automatically Sacred Rule #7's forbidden
+delete** — that rule protects a `related:` link to a concept documented *elsewhere*, and here
+there is no elsewhere. But which way to go is {{USER_NAME}}'s call and is recorded as
+**needs Stephen's accept-or-fix**, not decided here.
+
+**Instrument gap, filed with it:** whatever the disposition, `yaml_file:` pointers should be
+resolved by a gate. Today nothing reads them.
 
 ## The hygiene gate reports CLEAN on the register that owns the `G-`/`Q-` allocators while reading none of its entries (2026-08-26, p2-click-adapter ingestion) — F-362
 

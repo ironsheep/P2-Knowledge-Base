@@ -54,3 +54,31 @@ reason this re-extraction was worth running.
 **These blocks are captured and catalogued, not published.** Nothing here is promoted into
 `deliverables/ai/P2/`; a fragment that compiles under a synthesised harness has been shown
 syntactically faithful, which is not the same as being a shippable example.
+
+---
+
+## CORRECTION, 2026-08-26 («#310») — pass 2 had missed the document's best code
+
+The extraction above walked **paragraphs only**. The Silicon Doc keeps its worked examples
+**inside table cells**, so pass 2 never saw them. Six cell-hosted listings, 121 code lines,
+were recovered — and they are the flagship examples, not scraps:
+
+| File | Lines | What it is | `pnut-ts -d` |
+|---|---|---|---|
+| `cell-01.txt` | 66 | **XBYTE demo** (`con _clkfreq = 10_000_000`) | **COMPILES CLEAN** |
+| `cell-02.txt` | 36 | XBYTE / single-step bytecode executor | fragment — starts mid-program, by design |
+| `cell-03.txt` | 68 | **Goertzel input and display** | **COMPILES CLEAN** |
+| `cell-04.txt` | 86 | HDMI base config | code faithful; `DAT file not found [birds_16bpp.bmp]` — an external asset the document does not ship |
+| `cell-05.txt` | 252 | **VGA 640×480×16bpp 5:6:5 RGB — HDMI** | **COMPILES CLEAN** |
+| `cell-06.txt` | 5 | `DAT ORG` snippet | **COMPILES CLEAN** |
+
+**4 of 6 compile clean under `pnut-ts v1.55.3 -d`**, with no synthesised harness and no declared
+symbols — these are whole programs, not fragments. That is a far stronger fidelity result than
+the harnessed 67/106 above, because nothing was added to make them work.
+
+**Why this was missed, and why it matters beyond this source.** The walker collapsed whitespace
+inside table cells, so a 636-line cell became one 32,199-character line. The table COUNT was
+still right (48/48) and the digit-density gate still passed — both true statements about a
+mangled artifact. `docx_walk.py` now preserves intra-cell newlines, and the pass-2 extractor
+reads cells as well as paragraphs. **31 of this document's 48 tables have multi-line cells**, so
+this was not an edge case.
