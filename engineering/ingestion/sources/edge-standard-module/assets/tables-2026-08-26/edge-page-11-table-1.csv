@@ -1,0 +1,14 @@
+"Other
+Pins","Description"
+"RESn","Internally pulled up to 3.3V with 10K resistor.
+Propeller chip will reset when RESn is driven low; all cogs disabled and I/O pins floating.
+Propeller restarts 3 ms after RESn transitions from low to high."
+"5-16 VIN","Power input pins for the Edge Module. Connect both edge connector pads to a good quality
+supply in the range of 5–16 VDC. The supply voltage MUST NOT exceed 16V!
+Recommended minimum supply current 100mA, up to 3A depending on customer code and
+circuit. Factors contributing to current requirements include operating frequency, number of
+operating cogs, smart pin instruction types and external I/O circuitry."
+"GND","Provides common signal and supply voltage ground. Connection of all edge connector GND
+pads to a solid ground plane on an external layer recommended."
+"NC","Not Connected. Reserved for future use.
+Recommended “Do Not Connect” in customer designs."

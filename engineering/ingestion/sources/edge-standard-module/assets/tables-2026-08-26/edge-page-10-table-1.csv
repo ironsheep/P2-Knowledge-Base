@@ -1,0 +1,28 @@
+"I/O Pin","Description"
+"P0-P7","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V00."
+"P8-P15","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V08."
+"P16-P23","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V16."
+"P24-P31","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V24.
+Note: Avoid using these I/O pins for high speed digital functions where multiple pins are
+simultaneously switching together at near the system clock frequency."
+"P32-P39","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V32."
+"P40-P47","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V40."
+"P48-P55","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300mA total, shared by this I/O pin group and edge connector pin V48."
+"P56-P63","Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V56."
+"","Alternative functions for P56-P63"
+"P56","Buffered LED"
+"P57","Buffered LED"
+"P58","Flash SPI DO (MISO),   microSD SPI DAT0 / MISO"
+"P59","Flash SPI DI (MOSI),   microSD SPI CMD / MOSI"
+"P60","Flash SPI CLK,   microSD SPI DAT3 / CS"
+"P61","Flash SPI CS,   microSD SPI CLK"
+"P62","Prop-Plug RX (P2 TX)"
+"P63","Prop-Plug TX (P2 RX)"

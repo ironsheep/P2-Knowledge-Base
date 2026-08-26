@@ -1,0 +1,12 @@
+"Boot Mode Selection","FLASH","△","▽"
+"Serial window of 60 seconds, default.
+(When SD card is NOT inserted)","OFF","OFF","OFF"
+"Serial window of 60 seconds, overrides SPI Flash and SD card.","ON or OFF","ON","OFF"
+"Serial window of 100 ms, then SPI flash.
+If SPI flash fails then serial window of 60 seconds.","ON","OFF","OFF"
+"SPI flash only (fast boot), no serial window.
+If SPI flash fails then shutdown.","ON","OFF","ON"
+"SD card with serial window on failure.
+If SD card fails then serial window of 60 seconds.","OFF","OFF","OFF"
+"SD card only, no serial window.
+If SD card fails then shutdown.","OFF","OFF","ON"

@@ -1,0 +1,4 @@
+"Symbol","Quantity","Recommended","Maximum","Units"
+"5-16 VIN","DC Supply Voltage","5","16","V"
+"P0 - P63","Any I/O Pin","3.3","3.6","V"
+"RESn","Reset input, active low","3.3","3.6","V"
