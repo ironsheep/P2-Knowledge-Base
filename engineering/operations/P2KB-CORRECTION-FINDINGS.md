@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-374`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-375`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,35 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The shipped set scores and star-rates hardware, which the KB entry rule excludes and no source authorises (2026-08-26, «#322» verification) — F-374
+
+### F-374 — 40 quality-score sites across 18 shipped files state a judgement, not a fact — `CONFIRMED`
+
+**The rule this violates** (Stephen, 2026-08-26, saved as `feedback_kb_entries_state_existence_access_utility`): a KB entry states **existence, access and utility**. Never quality commentary, never version comparison. It was given while re-scoping F-370, which had wanted to call ROM TAQOZ *"cut-down"* — and the same shape turns out to be spread across the hardware tree.
+
+**Measured 2026-08-26 by walking every parsed node of all 1132 shipped files:**
+
+| Key | Sites | Example value |
+|---|---|---|
+| `rating` | 13 | `5_stars_perfect`, `2_stars_limited`, `5_stars_professional` |
+| `educational.value` | 8 | `high`, `very_high` |
+| `educational_value` | 7 | `10`, `9` (under `quality_metrics`), `high` |
+| `quality_rating` | 6 | `production`, `professional`, `specialized_excellent` |
+| `recommendation_score` | 6 | `5` |
+
+**40 sites, 18 files — 16 under `hardware/`, 2 under `code-examples/`.**
+
+**Why this is a defect and not a style preference.** Two independent reasons, either sufficient:
+
+1. **Nothing sources it.** `5_stars_perfect` and `recommendation_score: 5` trace to no Parallax document and no measurement. They are our opinion, shipped into a set whose bar is cite-or-omit. `audit-yaml-claim-sourcing.py` does not catch them because they carry no digits it recognises as a quantitative claim — a scoring adjective is an unsourced claim wearing a data key.
+2. **The consumer cannot act on it.** `deliverables/ai/P2/` is read by remote agents generating code. An agent asked to pick a carrier board can do something with *"has 8 LDOs, one per 8-pin group"*; it can do nothing correct with *"5 stars"* except launder our preference into its own output as fact.
+
+**Scope boundary — do NOT widen this sweep, and this half matters as much as the other.** The same rule *permits* utility, and the tree is full of legitimate utility statements that must survive untouched: `best_for` (6 sites), `recommendation` (20 sites, e.g. *"Use OBEX driver — do not attempt to implement HUB75 timing manually"*), and `advantages` (30 sites) all answer **what is this good for**, which is exactly the third thing an entry is supposed to state. A sweep that removes them replaces one defect with a worse one. The class here is **scores and ratings**, not guidance.
+
+**Fix.** Per site, one of two: delete the key where the judgement carries nothing (`recommendation_score: 5` on three boards that all score 5 says nothing at all), or replace it with the sourced fact the score was standing in for — `quality_rating: production` on `edge-standard-module.yaml` is presumably reaching for something real about the module's intended use, and the board guide can say it properly.
+
+**How this surfaced.** «#322» dropped a stray `educational_value: "excellent"` from `edge-breadboard-carrier.yaml` as a duplicate-key repair (F-360), noticed the surviving scalar was also bare quality commentary, and reported the pattern as corpus-wide. Arbiter verification measured it: a first pass matching the bare key `value` returned 299 sites and was thrown out as over-broad — most are legitimate — and the count above is the narrowed, defensible class.
 
 ## `validate-crossref-keys.py` exempts three top-level fields from resolving, and 14 shipped file paths sitting in them point at nothing (2026-08-26, «#321» verification) — F-373
 
@@ -652,7 +681,31 @@ three registers exit 0 under the gate afterwards.
   `verify-yaml-format.py` (it already loads every file), as a distinct violation class, with a
   negative control that plants a duplicate and requires a non-zero exit.
 
-  Status: `CONFIRMED` — one site fixed, four open, gate unarmed pending Stephen's scope decision.
+  **RESOLVED 2026-08-26 — gate armed, all sites fixed, and the count was wrong.** The gate shipped
+  as its own instrument, `engineering/tools/validation/audit-yaml-duplicate-keys.py` (armed in
+  `02ff61b7`), not folded into `verify-yaml-format.py`. Armed, it found **3 files / 4 sites**, not
+  the five this finding recorded: the `pin-drive-configuration.yaml` site was already fixed, and
+  the node-tree walk found nothing the manual sweep had missed. `deliverables/ai/P2` now returns
+  **0 duplicate keys across 1132 files**.
+
+  **In every one of the four, the surviving value had to be adjudicated — and in two of them the
+  value consumers see today was the wrong one:**
+
+  | Site | Kept | Why |
+  |---|---|---|
+  | `architecture/lookup_ram.yaml` `operation` (90 vs 98) | the **earlier**, discarded block | Lines 98-114 were the orphaned body of a **removed** pseudo-instruction for LUT-to-DAC streaming: its `- instruction:`/`encoding:`/`description:` header had been replaced by a comment, leaving `operation:`/`usage_example:` to be absorbed into the **SETLUTS** entry above and overwrite it. Consumers were reading streamer setup as SETLUTS's operation. SETLUTS's own content restored; the orphan deleted (its substance is already carried, with correct constant names, by `programming_patterns.waveform_generation` and `architecture.special_features` (feature: `LUT_to_DAC_streaming`) in the same file). |
+  | `architecture/lookup_ram.yaml` `usage_example` (93 vs 102) | the **earlier**, discarded block | Same orphan, same repair. |
+  | `hardware/edge-breadboard-carrier.yaml` `educational_value` (174 vs 205) | the **earlier**, structured block | The scalar `"excellent"` that was winning is also bare quality commentary, which the KB entry rule (existence / access / utility) excludes. Dropped. |
+  | `language/pasm2/drvl.yaml` `timing` (4 vs 35) | the **earlier**, richer block | The later block was a strict subset (`cycles`/`type`); the earlier one additionally carried `pin_output_latency`. The discarded block is byte-identical to the one that is **live** in its twin `drvh.yaml`, so DRVL and DRVH were silently disagreeing about pin timing. The claim is sourced — P2 Documentation v35 Rev B/C (`silicon-doc-text.txt:1987`) and the P2 Hardware Manual (`p2-hardware-manual-text.txt:967`) both state the three-clock DIRx/OUTx transition delay — and that citation was added to **both** twins, which carried the claim uncited. |
+
+  **Still open, and it is the same class of lack this finding is about:** the armed gate is **not**
+  wired into `validate-dod-release.py`. That validator runs 11 checks and calls two sibling audits
+  (`audit-constant-fidelity.py`, `audit-claim-sourcing.py`) as blocking gates; the duplicate-key
+  audit is not among them, so a duplicate reintroduced tomorrow turns nothing red at release. The
+  gate exists and passes — but nothing makes it run.
+
+  Status: `RESOLVED` — 4/4 sites fixed, gate armed and returning 0; wiring it into
+  `validate-dod-release.py` remains open.
 
 ---
 ## The bulk-generation commit wrote FABRICATED PROVENANCE HEADERS, and those headers are what make seven `architecture/` files look cited (2026-08-25, Stephen's question at the release review) — F-359
@@ -1409,7 +1462,7 @@ Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns t
 > | `edge-standard-module.yaml` | `specifications` · `pin_mapping` · `boot_modes` | P2-EC Edge Module Rev D Product Guide v3.0 — `sources/edge-standard-module/edge-standard-module-narrative.txt` |
 > | `p2-eval-board.yaml` | `specifications` | #64000 Eval Board Rev C Guide v2.0 — `sources/p2-eval-board/complete-p2-eval-board-reference.md` (the F-250 forced-OCR re-ingestion) |
 > | `addon-motor-driver.yaml` | `signal_map` · `pwm_control` · `current_sense` · `specifications` | #64010 Universal Motor Driver Guide v2.0 — `sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md` |
-> | `hub75_adapter.yaml` | `description` · `specifications` · `software_features` · `notes` | #64032 HUB75 Adapter Official Specifications — `sources/p2-hub75-adapter-official-specs.md` |
+> | `hub75_adapter.yaml` | `description` · `specifications` · `software_features` · `notes` | #64032 HUB75 Adapter Official Specifications — `sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md` |
 > | `programming-prop-plug.yaml` | `description` · `reset_option` · `specifications` | #32201 Prop Plug Guide v3.0 Rev E — `sources/propplug-rev-e/complete-propplug-rev-e-reference.md` |
 > | `addon-serial-host.yaml` | `signal_map` · `usb_host_capabilities` · `development_workflow` | #64006 Series Guide v2.0 — `sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-134` |
 > | `addon-serial-device.yaml` | `description` · `signal_map` | same guide, `:253-284` |

@@ -92,26 +92,13 @@ instructions:
       Enables RDLUTS instruction operation
     usage_example: |
       SETLUTS #1              ' Enable LUT sharing
-  
+
   # Note: LUT-to-DAC streaming is done via Streamer configuration (XINIT/XCONT),
-  # not a dedicated instruction. The Streamer can be configured to read from LUT.
-    operation: |
-      Configure streamer to read LUT sequentially
-      Output to DAC channels for waveform generation
-      LUT acts as waveform buffer
-    usage_example: |
-      ' Load waveform into LUT
-      SETQ2   #511            ' Load 512 longs
-      RDLONG  $200, waveform_ptr
-      
-      ' Configure streamer for LUT output
-      WRPIN   dac_mode, #0    ' Setup DAC on pin 0
-      WXPIN   #0, #0
-      WYPIN   #0, #0
-      DIRH    #0
-      
-      ' Start streaming from LUT
-      XINIT   lut_mode, #0    ' Begin LUT streaming
+  # not a dedicated instruction, so it has no entry in this list. The streamer
+  # setup and a worked example live in architecture.access_modes (mode: streamer),
+  # architecture.special_features (feature: LUT_to_DAC_streaming), and
+  # programming_patterns (pattern: waveform_generation) below.
+
 
 memory_map:
   lut_space:

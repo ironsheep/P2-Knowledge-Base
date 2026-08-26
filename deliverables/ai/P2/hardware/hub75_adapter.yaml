@@ -15,7 +15,7 @@ description:
   source: >-
     P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
     Productions LLC (the board's manufacturer) --
-    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:13-33, :55-61.
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:13-33, :55-61.
   text: >-
     Adapter board that connects HUB75 RGB LED matrix panels to a Propeller 2. It
     provides robust 3.3 V to 5 V level shifting for ALL HUB75 signals at the HUB75
@@ -29,9 +29,9 @@ specifications:
   source: >-
     P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
     Productions LLC (the board's manufacturer) --
-    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:15-33, :122-126;
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:15-33, :122-126;
     pin-offset map at
-    engineering/ingestion/sources/p2-hub75-adapter-complete-pinout.md:8-27, :105-115.
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:8-27, :105-115.
   physical:
     pcb_dimensions: "1.9 x 2.8 inches (48 x 71 mm)"
     form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
@@ -62,7 +62,7 @@ software_features:
   source: >-
     P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
     Productions LLC, "Software Support" and "Performance Specifications" --
-    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:144-192.
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:144-192.
   driver: "ISP HUB75 Driver (P2 OBEX / GitHub) - see resources"
   capabilities:
     - "Multiple panel support (daisy-chain and grid configurations)"
@@ -95,9 +95,9 @@ notes:
   source: >-
     P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
     Productions LLC --
-    engineering/ingestion/sources/p2-hub75-adapter-official-specs.md:22-27, :24-27,
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:22-27, :24-27,
     :128-142; and
-    engineering/ingestion/sources/p2-hub75-adapter-complete-pinout.md:112-115.
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:112-115.
   items:
     - "LED panels require a separate 5 V power supply. Never power a panel through the P2 board - the adapter passes 5 V through from the P2 board only for its own level shifters and the connector."
     - "Panel scan patterns follow the address lines fitted: A-B-C is a 1/8 scan, A-B-C-D a 1/16 scan, A-B-C-D-E a 1/32 scan."

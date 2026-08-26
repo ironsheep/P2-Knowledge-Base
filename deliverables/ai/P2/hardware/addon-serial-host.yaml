@@ -13,6 +13,21 @@ aliases:
   - "64006B"
   - "#64006 add-on board"
 
+description:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12), "P2 Eval Serial Host Add-on Board (#64006B)" --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:94-115.
+  text: >-
+    Twin USB-type A sockets that let the Propeller 2 act as the USB host for two
+    USB-type devices connected at the same time, such as a keyboard and a mouse.
+    Each socket is protected by a current-limited load switch allowing up to 500 mA
+    continuous current, subject to overall available system power, with reverse
+    current blocking, short-circuit protection, over-temperature protection and VBUS
+    soft start. Two user-controlled blue activity LEDs sit beside the USB-type A
+    sockets. The board requires 5 V to function; each channel's 5 V output is turned
+    on by driving that channel's enable pin high.
+
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
 pin_group:

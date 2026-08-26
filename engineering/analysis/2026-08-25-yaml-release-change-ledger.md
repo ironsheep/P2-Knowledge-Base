@@ -137,7 +137,7 @@ Ordered by what a consumer of the KB would hit.
 
 11. 🟡 **A `#64006` add-on YAML now cites loose files at the ingestion root.**
     `hardware/hub75_adapter.yaml`'s new `source:` keys point at
-    `engineering/ingestion/sources/p2-hub75-adapter-official-specs.md` and
+    `engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md` and
     `…-complete-pinout.md` — loose files at the truth root, which is the shape `F-341` flags and
     which `43b0ede2` structurally excluded from the constant-fidelity truth side. For this board
     they are the *manufacturer's own* specification (Iron Sheep Productions), so the citation is

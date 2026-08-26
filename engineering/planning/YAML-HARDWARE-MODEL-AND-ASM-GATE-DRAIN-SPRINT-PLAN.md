@@ -85,7 +85,7 @@ Everything ships in **one YAML release / one commit-release session**.
 | 2 | `hardware/hardware-compatibility-matrix.yaml`, `edge-mini-breakout.yaml`, `edge-standard-breakout.yaml` | **Remove** `pin_efficiency` (keep `pin_access`) | F-160 (unsourced) |
 | 3 | `hardware/addon-{control-board,serial-host,led-matrix,digital-video-out,mini-prototyping,serial-device,goertzel-touch,av-breakout}.yaml` (×8) | Verify vs source; add `pin_group`+`signal_map`+`direction`+`eval_header_occupant`+`addressing` | `sources/p2-eval-add-on-boards/boards/addon-*-64006*.md` |
 | 4 | `hardware/addon-hyperram-hyperflash.yaml` | **Author** (16-pin; park `[VERIFY]` OCR fields); fix bare name `p2-eval-board.yaml:145` | `sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md` |
-| 5 | `hardware/hub75_adapter.yaml` | Touch-up: flat `pin_offsets:` → standard `signal_map`+`direction`; add `eval_header_occupant`+`pin_group:16` | `sources/p2-hub75-adapter-complete-pinout.md` |
+| 5 | `hardware/hub75_adapter.yaml` | Touch-up: flat `pin_offsets:` → standard `signal_map`+`direction`; add `eval_header_occupant`+`pin_group:16` | `sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md` |
 | 6 | `hardware/{7_segment_display,buttons_board,switches_and_leds,switches_board}.yaml` (×4) | **Delete** (zero cross-refs) | F-121 (not #64006) |
 | 7 | `engineering/tools/p2kb-categories.json` | **Consolidate** to one `hardware/eval_addon_boards` category = the 10 eval-header occupants (drop 4 orphans, fold in HUB75, add HyperRAM) | consumer of #4 + #6 |
 | 8 | `engineering/operations/YAML-HEAD-DASHBOARD.md` | **Create** (engineering tree): release ledger + known-hardware inventory | git tags + this release |

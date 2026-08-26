@@ -131,7 +131,17 @@ spin2_builtin_symbols:
   schema_version: "1.0.0"
   extraction_date: "2025-09-06"
   source_document: "complete-builtin-symbols.md"
-  total_symbols: 1224
+  # Count of the records actually present in this file's `symbols:` list below,
+  # derived by walking that list -- not the size of the upstream symbol universe.
+  # This field read 1224 until 2026-08-26; 1224 is the sum of
+  # the top-level `category_summary.*.total_symbols` (the source document's own
+  # tally of every symbol it names). The `clock` category alone accounts for 1044
+  # of that, of which 1024 are the XMUL1..XMUL1024 PLL multipliers; exactly one
+  # XMUL record is carried here, so the old tally contradicted the 136 records
+  # sitting directly underneath it.
+  total_symbols: 136
+  # 6 categories are described in `category_summary`; 5 of them have records here
+  # (`math` is described but has no symbol records yet).
   categories: 6
   
   # Complete symbol definitions organized by category
@@ -1972,5 +1982,8 @@ extraction_metadata:
   validation_status: "draft"
   completeness_score: 95
   technical_accuracy: "spin2_v55_verified for the 116 P_* smart-pin configuration symbols; spin2_v51 for the remainder"
-  total_symbols_extracted: 1224
+  # Records in `spin2_builtin_symbols.symbols`. See the note on
+  # `spin2_builtin_symbols.total_symbols` for why this was 1224.
+  total_symbols_extracted: 136
   categories_covered: 6
+  categories_with_records: 5
