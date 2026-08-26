@@ -2,9 +2,36 @@ concept: click_module_integration
 title: MikroElektronika Click Module Integration Patterns
 category: hardware_interface
 description: Standard patterns for integrating Click modules with P2 using offset-based pin mapping
-documentation_source: code_analysis
+documentation_source: schematic_primary
 documentation_level: comprehensive
 created: 2025-09-09
+updated: 2026-08-26
+p2kb_key: "p2kbArchClickModuleIntegration"
+aliases:
+  - "Click module"
+  - "Click board"
+  - "mikroBUS"
+  - "mikroBUS pinout"
+  - "Click adapter pinout"
+  - "MikroElektronika Click"
+  - "Click pin offsets"
+  - "CLICK_OFST"
+
+provenance:
+  pin_offsets: >-
+    The twelve CLICK_OFST_* values below are established by the 64008 Rev A
+    schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0) --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+    They were originally derived from the P2-Click-eInk driver by code analysis;
+    the 2026-08-26 schematic ingestion confirmed all twelve exactly, with zero
+    corrections. The driver-derived values and the primary source agree.
+  mikrobus_signal_meanings: >-
+    Signal MEANINGS on the Click side come from the MikroElektronika mikroBUS
+    standard, which is NOT held in this repo. The Parallax schematic supplies the
+    P2-side offsets only. See uart_direction_caveat.
+  code_patterns: >-
+    The Spin2 patterns below remain code_analysis, sourced from the P2-Click-eInk
+    driver. They are idiom examples, not authority.
 
 overview: |
   Click modules from MikroElektronika provide standardized hardware interfaces
@@ -28,8 +55,8 @@ click_standard:
     Right Side (top to bottom):
       PWM - PWM output
       INT - Interrupt
-      RX  - UART Receive (marked TX on Click)
-      TX  - UART Transmit (marked RX on Click)
+      RX  - UART Receive (see uart_direction_caveat)
+      TX  - UART Transmit (see uart_direction_caveat)
       SCL - I2C Clock
       SDA - I2C Data
       5V0 - Power (if needed)
@@ -54,7 +81,21 @@ p2_adapter_mapping:
       CLICK_OFST_SDA  = 0     ' Mikroe pin 11
       
       PIN_NOT_USED = -1
-  source: P2-Click-eInk
+  source: >-
+    64008 Rev A schematic (Parallax Inc., 2020-08-10) --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md,
+    "Consolidated offset map". All twelve offsets confirmed against the sheet
+    2026-08-26. Constant NAMES and the Spin2 idiom are from the P2-Click-eInk driver.
+  header_span: >-
+    The adapter occupies TWO adjacent 2x6 accessory headers -- 16 consecutive P2
+    I/O -- and uses 12 of them. Offsets +12..+15 are no-connects at the socket
+    (the catalog's "4 spare I/Os"). Offsets +0..+7 are on header A; +8..+15 on
+    header B, so the SPI four (CS/SCK/MISO/MOSI at +8..+11) sit entirely in
+    header B while every other signal sits in header A. Where a host maps each
+    accessory header to its own pin-power group, the Click socket straddles two.
+  orientation: >-
+    Schematic note, verbatim: "If this adapter is plugged into the P2-EVAL top
+    edge, then P2 MISO/MOSI are aligned with the mikroBUS MISO/MOSI".
 
 implementation_patterns:
   base_pin_configuration:
@@ -122,6 +163,9 @@ implementation_patterns:
     
   uart_click_pattern:
     description: "Standard UART Click module initialization"
+    source: >-
+      P2-Click-eInk driver (code analysis). The CROSSOVER below is driver-derived,
+      NOT schematic-derived -- see uart_direction_caveat before relying on it.
     code: |
       PRI initializeUART(basePin) | rxPin, txPin
         ' Calculate actual pins (note the swap!)
@@ -215,14 +259,32 @@ debugging:
       else
         debug("No Click module found")
 
+uart_direction_caveat:
+  source: >-
+    Absence established by reading the 64008 Rev A schematic --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md
+    ("What this sheet does NOT establish").
+  caveat: >-
+    The Parallax schematic gives UART net NAMES only (TX -> offset +2, RX ->
+    offset +3). Whether "TX" denotes the P2's transmit or the Click module's
+    transmit is NOT settled by any Parallax source held in this repo. The
+    MikroElektronika mikroBUS standard is the authority and is not held here.
+    The crossover shown in uart_click_pattern comes from working driver code --
+    a peer derivation, credible but not authoritative. Verify against the
+    specific Click module's datasheet before wiring a UART Click.
+
 related_concepts:
   - spi_communication: SPI protocol for Click modules
   - i2c_communication: I2C protocol for Click modules
   - smart_pin_uart: UART for Click modules
   - enum_based_apis: Type-safe configuration
 
+see_also:
+  - hardware/addon-click-adapter.yaml
+
 references:
-  - MikroElektronika Click board standard
-  - P2 Eval Click Adapter documentation
-  - P2-Click-eInk implementation
-  - Iron Sheep Productions Click drivers
+  - "64008 Rev A schematic (Parallax, 2020-08-10, CC BY-SA 4.0) - PRIMARY for the P2-side pin offsets"
+  - "MikroElektronika mikroBUS standard - authority for Click-side pin meanings; NOT held in this repo"
+  - "P2 to mikroBUS Click Adapter product page (Parallax) - board narrative and host compatibility"
+  - "P2-Click-eInk implementation - origin of the constant names and Spin2 idiom"
+  - "Iron Sheep Productions Click drivers"

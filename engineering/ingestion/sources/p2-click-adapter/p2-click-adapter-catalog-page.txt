@@ -1,0 +1,20 @@
+Product Description
+P2 to MikroBUS Click Adapter Overview:
+The P2 to MikroBUS Click Adapter connects MicroE Click series modules to our most popular Propeller 2 development systems for quick multicore prototyping and project design.
+
+Compatible development systems include the P2 Eval Board Rev C (#64000), and the P2 Edge Module Breadboard (#64020) or P2 Edge Mini Breakout Board (#64019) with a P2 Edge Module (#P2-EC).
+
+This fully-assembled adapter plugs directly into two of the P2 board’s 2×6 accessory headers to provide a Click-ready socket of 12 signals (with 4 spare I/Os), 5V, 3V and ground connections.
+
+The P2 to MikroBUS Click Adapter is affordably priced to encourage application development. Each of the Click boards sold by Parallax includes example Spin2 objects. Nearly 1,000 Click modules are available through Digi-Key, Mouser and RS Components if you don’t find what you need from Parallax.
+
+Features:
+Compatible with MikroE Click modules
+Low-insertion force adapter provides quick and reliable connection to P2 development systems
+Ships completely assembled by Parallax
+P2 to MikroBUS Click Adapter Specifications:
+Operating temperature: -40 to +185 °F (-40 to +85 °C)
+PCB dimensions: 1.9 x 1.7 in (48.26 x 43.18 mm)
+RoHS CE and UKCA Declarations of Conformity are available under the Downloads tab.
+
+PCBs assembled, tested, and completed in Rocklin, California, USA.

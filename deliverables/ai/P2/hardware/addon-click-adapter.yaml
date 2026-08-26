@@ -1,0 +1,177 @@
+component: P2 to mikroBUS Click Adapter
+part_number: "64008"
+series: "P2 Accessory Add-on Boards"
+manufacturer: "Parallax Inc."
+status: "active_production"
+p2kb_key: "p2kbHwAddonClickAdapter"
+category: addon
+aliases:
+  - "Click adapter"
+  - "mikroBUS adapter"
+  - "P2 to mikroBUS Click Adapter"
+  - "MikroE Click adapter"
+  - "Click board adapter"
+  - "mikroBUS socket"
+  - "Click module socket"
+  - "64008"
+  - "#64008 add-on board"
+
+description:
+  source: >-
+    P2 to mikroBUS Click Adapter product page (Parallax Inc.) --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-catalog-page.txt:1-12;
+    wiring from 64008 Rev A schematic (Parallax Inc., 2020-08-10, Open Source
+    Hardware CC BY-SA 4.0) --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  text: >-
+    Passive adapter that presents a MikroElektronika mikroBUS socket on two adjacent
+    P2 2x6 accessory headers, letting MikroE Click series modules plug into a P2
+    development board. "This fully-assembled adapter plugs directly into two of the
+    P2 board's 2x6 accessory headers to provide a Click-ready socket of 12 signals
+    (with 4 spare I/Os), 5V, 3V and ground connections." The board carries no
+    programmable logic, no level shifting and no passives - it is pure signal
+    routing between the accessory headers and the mikroBUS socket. Nearly 1,000
+    Click modules are available from Digi-Key, Mouser and RS Components; Click
+    boards sold by Parallax include example Spin2 objects.
+
+# --- Eval-header board model (uniform across accessory-header occupants) ---
+eval_header_occupant: true
+pin_group:
+  size: 16
+  addressing: >-
+    actual_P2_pin = base_pin + offset (IO+0 .. IO+15). Spans two adjacent accessory
+    headers (16 consecutive pins): header A carries offsets 0..7, header B carries
+    offsets 8..15. base_pin is the first pin of that 16-pin block.
+  total_pins_used: 12
+  base_pin_options: [0, 16, 32, 48]
+  base_pin_note: >-
+    Needs 16 consecutive I/O pins (two adjacent 8-pin headers). Offsets +12..+15
+    are brought to the socket's header-B positions as no-connects and are free for
+    other use -- the catalog's "4 spare I/Os".
+
+# Signal names as drawn on the 64008 Rev A schematic. "mikrobus_pin" is the
+# MikroElektronika standard socket numbering, supplied for cross-reference; it is
+# not printed on the Parallax sheet.
+signal_map:
+  - {offset: 0,  signal: "SDA (I2C data)",        mikrobus_pin: 11, direction: bidir, notes: "Header A."}
+  - {offset: 1,  signal: "SCL (I2C clock)",       mikrobus_pin: 12, direction: bidir, notes: "Header A."}
+  - {offset: 2,  signal: "TX (UART)",             mikrobus_pin: 13, direction: na,    notes: "Header A. Direction semantics not settled by the schematic -- see uart_direction_caveat."}
+  - {offset: 3,  signal: "RX (UART)",             mikrobus_pin: 14, direction: na,    notes: "Header A. Direction semantics not settled by the schematic -- see uart_direction_caveat."}
+  - {offset: 4,  signal: "INT (interrupt)",       mikrobus_pin: 15, direction: in,    notes: "Header A. Module-driven."}
+  - {offset: 5,  signal: "PWM",                   mikrobus_pin: 16, direction: out,   notes: "Header A."}
+  - {offset: 6,  signal: "AN (analog)",           mikrobus_pin: 1,  direction: in,    notes: "Header A."}
+  - {offset: 7,  signal: "RST (reset)",           mikrobus_pin: 2,  direction: out,   notes: "Header A."}
+  - {offset: 8,  signal: "CS (SPI chip select)",  mikrobus_pin: 3,  direction: out,   notes: "Header B."}
+  - {offset: 9,  signal: "SCK (SPI clock)",       mikrobus_pin: 4,  direction: out,   notes: "Header B."}
+  - {offset: 10, signal: "MISO (SPI data in)",    mikrobus_pin: 5,  direction: in,    notes: "Header B."}
+  - {offset: 11, signal: "MOSI (SPI data out)",   mikrobus_pin: 6,  direction: out,   notes: "Header B."}
+  - {offset: 12, signal: "Not Connected",         direction: na, notes: "Spare -- schematic marks J101 pin 7 no-connect."}
+  - {offset: 13, signal: "Not Connected",         direction: na, notes: "Spare -- schematic marks J101 pin 8 no-connect."}
+  - {offset: 14, signal: "Not Connected",         direction: na, notes: "Spare -- schematic marks J101 pin 9 no-connect."}
+  - {offset: 15, signal: "Not Connected",         direction: na, notes: "Spare -- schematic marks J101 pin 10 no-connect."}
+
+interface: multi_protocol
+
+header_split:
+  source: >-
+    64008 Rev A schematic, connectors J100/J101 vs J102/J103 --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  fact: >-
+    The four SPI signals (CS +8, SCK +9, MISO +10, MOSI +11) all land on header B;
+    every other mikroBUS signal lands on header A. The schematic establishes the
+    split by rail naming: J100 carries 5V_A / VIO_3V3_A, J101 carries 5V_B /
+    VIO_3V3_B.
+  consequence: >-
+    On hosts where each accessory header maps to its own pin-power group, the Click
+    socket straddles two groups, and the SPI bus sits entirely in the second one.
+
+power:
+  source: >-
+    64008 Rev A schematic, J102 pin 2 and J103 pin 2 --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  mikrobus_3v3: "Fed from VIO_3V3_A -- header A's 3.3 V rail."
+  mikrobus_5v: "Fed from 5V_A -- header A's 5 V rail."
+  ground: "Vss, common to both headers and both mikroBUS rows."
+  not_established: >-
+    The sheet draws no connection from 5V_B / VIO_3V3_B (present on header B) to the
+    mikroBUS socket, and does not show whether the _A and _B rails are commoned.
+
+orientation:
+  source: >-
+    64008 Rev A schematic, note printed on the sheet --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  note: >-
+    "If this adapter is plugged into the P2-EVAL top edge, then P2 MISO/MOSI are
+    aligned with the mikroBUS MISO/MOSI" -- verbatim from the schematic sheet.
+
+uart_direction_caveat:
+  source: >-
+    Absence established by reading the 64008 Rev A schematic --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md
+    ("What this sheet does NOT establish").
+  caveat: >-
+    The schematic gives UART net NAMES only (TX -> IO+2, RX -> IO+3). Whether "TX"
+    denotes the P2's transmit or the Click module's transmit is NOT settled by any
+    Parallax source held in this repo; the MikroElektronika mikroBUS standard is the
+    authority for that and is not held here. Driver code in the field crosses them
+    (P2 RX <- offset +2, P2 TX -> offset +3), but that is a peer derivation, not an
+    authority. Verify against the specific Click module's datasheet before wiring a
+    UART Click.
+
+specifications:
+  requires_host: true
+  io_pins_used: 12
+  io_pins_occupied: 16
+  headers_required: 2
+  physical:
+    p2_connector: "2x 2x6 female socket, 0.1 inch spacing, standard P2 accessory-compatible"
+    click_connector: "MikroE mikroBUS socket (2x 8-pin)"
+    pcb_dimensions: "1.9 x 1.7 in (48.26 x 43.18 mm)"
+    operating_temp: "-40 to +85 C (-40 to +185 F)"
+    insertion: "Low-insertion-force adapter; ships completely assembled by Parallax"
+    assembly: "PCBs assembled, tested, and completed in Rocklin, California, USA"
+
+compatible_hosts:
+  source: >-
+    P2 to mikroBUS Click Adapter product page --
+    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-catalog-page.txt:5.
+  boards:
+    - "P2 Eval Board Rev C (#64000)"
+    - "P2 Edge Module Breadboard (#64020) with a P2 Edge Module (#P2-EC)"
+    - "P2 Edge Mini Breakout Board (#64019) with a P2 Edge Module (#P2-EC)"
+
+use_cases:
+  primary:
+    - "Plugging MikroElektronika Click modules into a P2 development board"
+    - "Rapid prototyping against the ~1,000-module Click ecosystem"
+  secondary:
+    - "SPI / I2C / UART / analog / PWM peripheral bring-up without custom wiring"
+
+limitations:
+  - "Passive adapter - no level shifting; the mikroBUS socket runs at whatever the host header's VIO rail supplies (see the power block, which carries the citation)"
+  - "Occupies two adjacent accessory headers (16 consecutive pins) to deliver 12 signals"
+  - "SPI signals sit in header B, the rest in header A - relevant where headers map to separate pin-power groups"
+  - "UART TX/RX direction semantics are not settled by any Parallax source held here (see uart_direction_caveat)"
+  - "Click module itself is not included"
+
+documentation:
+  primary: "64008 Rev A schematic (Parallax, 2020-08-10) - Open Source Hardware, CC BY-SA 4.0"
+  note: >-
+    There is no Parallax user guide for this board. The schematic plus the
+    MikroElektronika mikroBUS standard are the complete documentation set - the
+    schematic supplies the P2-side offsets, and the Click standard supplies the
+    module-side pin meanings.
+
+resources:
+  product_page: "https://www.parallax.com/product/p2-to-mikrobus-click-adapter"
+  mikrobus_standard: "MikroElektronika mikroBUS specification (www.mikroe.com) - authoritative for Click-side pin meanings and UART direction"
+
+see_also:
+  - architecture/click_module_integration.yaml
+  - hardware/p2-eval-board.yaml
+  - hardware/hardware-compatibility-matrix.yaml
+
+ecosystem_position: "peripheral_expansion"
+hardware_family: "p2_accessory_addons"
+size_class: "small_addon"
+interface_type: "mikrobus_adapter"

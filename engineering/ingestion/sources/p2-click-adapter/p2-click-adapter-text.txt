@@ -1,0 +1,21 @@
+=== TEXT LAYER, 64008-RevA-P2-Click-Adapter-SCHEMATIC-OS.pdf (pdftotext -layout) ===
+=== NOTE: this is the TITLE BLOCK ONLY. The schematic body is vector art with
+===       its text converted to curves -- 0 image XObjects, 0 body text in the
+===       text layer. See p2-click-adapter-netlist.md for the schematic content.
+
+P2 mikroBUS Adapter
+
+
+
+
+Parallax Inc.                                                                                                  Part Number: 64008
+599 Menlo Drive
+                           P2 mikroBUS Adapter                                                                 Revision: A
+Rocklin, CA 95765
+                           Copyright 2020 Parallax Incorporated. All Rights Reserved.
+                           This is Open Source Hardware. This work is licensed under a Creative Commons
+(916) 624-8333                                                                                                 Last Update: 10 Aug 2020 (MM)
+                           Attribution-ShareAlike 4.0 International License. The full text of the license is
+http://www.parallax.com/
+                           available from: http://creativecommons.org/licenses/by-sa/4.0
+

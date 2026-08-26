@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-362`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-363`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,75 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The hygiene gate reports CLEAN on the register that owns the `G-`/`Q-` allocators while reading none of its entries (2026-08-26, p2-click-adapter ingestion) — F-362
+
+### F-362 — `audit-register-hygiene.py` reports CLEAN on the register that owns the `G-` and `Q-` allocators while reading zero of its entries — `CONFIRMED`
+
+**How this surfaced.** The p2-click-adapter ingestion (2026-08-26) needed a new gap ID. Allocating
+it by hand-reading the maximum `G-` in the table is exactly the two-writer collision the register
+discipline exists to prevent, so the gate was run on `KNOWLEDGE-GAPS.md` to confirm the allocation.
+It reported one violation (`no-counter`) and, once that was fixed, **CLEAN** — while its own summary
+line read `findings : 0 entries, 0 distinct IDs` against a register holding **22 `G-` rows and 8
+`Q-` rows**.
+
+**What was measured.** `_ENTRY_HEAD` models exactly two entry dialects:
+
+```
+_ENTRY_HEAD = (r"^(?:#{2,4}\s+(<P>-\d+[a-z]?)\s*[—-]"      # heading form  (## F-001 — …)
+               r"|-\s+\*\*(<P>-\d+[a-z]?)\s+[—-])")        # bullet form   (- **F-357 — …)
+```
+
+`KNOWLEDGE-GAPS.md` uses a **third** dialect exclusively — the markdown table row
+(`| G-019 | Domain | … |`) — for both Part A gaps and Part B expert questions. Neither pattern
+matches it, so `parse()` returns zero blocks and every per-entry check (duplicate IDs, status
+presence, headline-vs-body agreement, ID coverage, orphaned sections) is skipped. Only the counter
+check runs.
+
+**Negative control — the proof, not the inference.** A duplicate `G-019` row was planted directly
+beneath the real one in a copy of the register and the gate re-run:
+
+```
+$ python3 engineering/tools/validation/audit-register-hygiene.py <copy-with-planted-duplicate-G-019>
+  next-ID counter   : G-23 (`Next gap ID`; no live G- entries)
+  findings          : 0 entries, 0 distinct IDs
+  CLEAN  …: no register-hygiene violations
+  exit=0
+```
+
+**A duplicate ID in a register passes CLEAN with exit 0.** This is the same class as F-359 and the
+`logic analyzer` misroute: the instrument answers with the wrong thing rather than nothing, and
+"CLEAN" on an unread file is more dangerous than an error, because it is indistinguishable from a
+verified pass. A prototype that adds the table-row alternative to `_ENTRY_HEAD` (plus
+`m.group(3)` in `parse()`) makes the planted duplicate fire at **exit 1**, confirming the dialect
+gap is the whole cause.
+
+**Why the fix is not the one-line dialect add.** With entries visible, the status checks fire on
+every row, because `STATUS_WORDS` is a single module-global tuple carrying the *corrections*
+register's vocabulary. `KNOWLEDGE-GAPS.md` uses its own lifecycle — `OPEN` / `ANSWERED` /
+`STILL-UNKNOWN` / `RELOCATED` / `PARTIAL` — and `OPEN` is **deliberately excluded** from
+`STATUS_WORDS`, for a documented reason that is still correct: in the corrections register `OPEN`
+is ordinary English prose (8 whole-word uppercase occurrences), and admitting it globally would let
+a finding carrying **no** status pass check 4 on a stray word. So the real fix is a **per-register
+status vocabulary**, selected the way the ID families already are — read off the counter label the
+file declares (`Next gap ID` vs `Next finding ID` vs `Next erratum ID`) rather than hard-coded.
+The hook exists: `main()` already rebuilds `FINDING_START` / `ID_RANGE` / `ID_ONE` / `GUARD_RE`
+per register from `COUNTER_RE`; `STATUS_RE` needs to join them.
+
+**Scope note.** Deliberately **not** applied in the p2-click-adapter commit. Widening a
+module-global status vocabulary that 85 live findings are graded against is a regression surface
+that wants its own verification pass (baseline captured: all three registers exit 0, the tool's
+`--negative-control` suite passes 13 checks), not a bolt-on at a release boundary. What WAS fixed
+in that commit is the allocator defect this finding surfaced — see below.
+
+**Fixed alongside (allocator ownership).** `KNOWLEDGE-GAPS.md` declared **no** counter at all, and
+`P2KB-CORRECTION-FINDINGS.md` declared `Next gap ID: G-008` — **stale by fourteen** against the
+gaps register's actual `G-022`, and a second register claiming an allocator it does not own. F-352
+caught the smaller instance of this same drift (`G-007`) and corrected the number rather than the
+ownership, so it recurred. Now: `KNOWLEDGE-GAPS.md` declares `Next gap ID: G-023` ·
+`Next expert-question ID: Q-009` and states outright that it owns the `G-` and `Q-` allocators;
+the corrections register's duplicate `Next gap ID` clause is retired with a pointer to it. All
+three registers exit 0 under the gate afterwards.
 
 ## `pin-selection.yaml` printed the streamer's sub-pin table with the wrong bit weights, and shipped the EF-065 trap as its worked example (2026-08-26, found while composing the streamer pin-capture page) — F-361
 
@@ -472,6 +541,42 @@ sweep.
 F-325 (the ladder absent from the shipped KB) · F-336 (`P_HIGH_15K | P_LOW_FLOAT` has neither a
 Parallax statement nor a bench result) · F-341 (the same mislabel in our own derived analysis docs) ·
 `SOURCE-ERRATA.md` E-004 and **E-010** (Parallax's own guides state it).
+
+> 🔴 **F-341 IS SHARPER THAN "LATENT" — THOSE FILES INVENT PARALLAX PART NUMBERS. Confirmed by
+> Stephen 2026-08-26.**
+>
+> Asked whether our board coverage was complete, the inventory turned up three part numbers with
+> **zero occurrences in any ingested source directory** — i.e. in any actual captured Parallax
+> document. They exist only in the loose analysis files at `engineering/ingestion/sources/`:
+>
+> | Invented | Where it appears | What it actually is |
+> |---|---|---|
+> | **#64025 "LED Board"** | `p2-hardware-validation-checklist.md:102`, `p2-board-power-analysis-matrix.md` | **does not exist** — the real board is **#64006C LED Matrix** |
+> | **#64026 "7-Segment Display"** | `p2-hardware-validation-checklist.md:150` | **does not exist** |
+> | **#64027 "Switches Board"** | `p2-hardware-validation-checklist.md:191` | **does not exist** — switches are on the **#64006A Control** add-on |
+>
+> **Stephen, asked directly: "LED board, no. 7-segment, no. Switches, no."**
+>
+> **Why this is worse than a wrong name.** The inventions are *plausible* — they describe real
+> capabilities (LEDs, a display, switches) that map onto real boards, at part numbers adjacent to
+> the real #64019/#64020/#64029 range. And `#64027`'s validation section is headed **"Test 1:
+> Pull-up Test"**, so the fabricated board carries the fabricated mechanism. A reader has nothing to
+> catch it with.
+>
+> **None of the four files names a Parallax document anywhere.** Their headers are
+> *"Comprehensive testing procedures…"*, *"Complete power budget calculations…"*, *"Complete
+> cross-reference for automatic code generation"* — authored analysis, with no provenance, sitting
+> in the directory reserved for captured sources. **Location is doing the work of attribution.**
+>
+> 🟢 **CONTAINMENT VERIFIED: zero leakage.** `grep -rl` for all three across `deliverables/ai/P2/`
+> returns **0 files**. The shipped KB never carried them, and «#305» had already excluded loose
+> root files from the fidelity tool's truth side. The damage is confined to the ingestion tree.
+>
+> **Still open, and it is a scope call:** the four files remain where sources live, they still assert
+> the pull-up mislabel, and the compatibility/power matrices cross-reference boards that do not
+> exist — so anything derived from them is derived from fiction. Options: correct them in place and
+> relabel as analysis, relocate them out of `sources/`, or retire them. **Not actioned pending
+> Stephen's decision.**
 
 Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns the IOSP manual head.
 

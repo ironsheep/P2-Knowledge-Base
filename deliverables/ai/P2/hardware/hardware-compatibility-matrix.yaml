@@ -149,6 +149,23 @@ addon_board_host_compatibility:
         size: "large_module (70x70 mm)"
         conflicts: "uses a full dual header; high-current - check power budget"
 
+      - part: "64008"
+        name: "P2 to mikroBUS Click Adapter"
+        pins_used: "16 pins (dual accessory header); 12 signals used, +12..+15 spare"
+        note: "SPI four (CS/SCK/MISO/MOSI) land on the upper header (+8..+11); all other signals on the lower (+0..+7)"
+        conflicts: "uses a full dual header"
+
+      - part: "64004-ES"
+        name: "HyperRAM + HyperFlash Add-on"
+        pins_used: "16 pins (two adjacent 8-pin edge headers)"
+        conflicts: "uses a full dual header"
+
+      - part: "64032"
+        name: "HUB75 Adapter"
+        pins_used: "16 pins (dual accessory header); 14 signals used, offsets 14-15 unused"
+        note: "All 14 used signals are P2 outputs via 2x 74HCT244 level shifters"
+        conflicts: "uses a full dual header; check panel power budget separately"
+
   edge_carrier_compatibility:
     breadboard_carrier:
       host: "P2 Edge Module Breadboard (64020)"
@@ -237,8 +254,16 @@ power_compatibility:
 
 pin_usage_analysis:
   addon_pin_assignments:
-    all_addons_use: "P0-P7 (8 pins each)"
-    conflicts: "Direct pin conflicts when multiple add-ons used"
+    single_header_addons: >-
+      Most add-on boards occupy ONE 8-pin accessory header (base_pin + 0..7), and
+      may be placed at any of the 8 header positions.
+    dual_header_addons: >-
+      Four boards span TWO adjacent headers (16 consecutive pins, base_pin in
+      [0, 16, 32, 48]): #64010 Universal Motor Driver, #64008 Click Adapter,
+      #64004-ES HyperRAM+HyperFlash, and #64032 HUB75 Adapter. Each consumes two
+      of the eight header positions, halving the simultaneous-capacity budget for
+      every one fitted.
+    conflicts: "Direct pin conflicts when multiple add-ons share a header position"
     solution: "Physical separation on different header positions"
     
   host_pin_availability:
