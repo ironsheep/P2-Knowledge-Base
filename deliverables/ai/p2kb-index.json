@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-26T01:21:29.105578",
-    "total_entries": 1131,
+    "generated": "2026-08-26T08:32:28.787493",
+    "total_entries": 1132,
     "total_categories": 59,
-    "total_aliases": 2029,
+    "total_aliases": 2061,
     "multi_target_aliases": 97,
     "source": "deliverables/ai/P2/"
   },
@@ -734,6 +734,12 @@
     "#64007 add-on board": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
+    "#64008 ADD-ON BOARD": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "#64008 add-on board": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
     "#64009 ADD-ON BOARD": [
       "p2kbHwAddonMicrosdAddonMicrosd"
     ],
@@ -826,6 +832,9 @@
     ],
     "64007": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
+    ],
+    "64008": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
     ],
     "64009": [
       "p2kbHwAddonMicrosdAddonMicrosd"
@@ -1175,6 +1184,30 @@
     "CHOOSE P2 BOARD": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
+    "CLICK ADAPTER": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "CLICK ADAPTER PINOUT": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "CLICK BOARD": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "CLICK BOARD ADAPTER": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "CLICK MODULE": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "CLICK MODULE SOCKET": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "CLICK PIN OFFSETS": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "CLICK_OFST": [
+      "p2kbArchClickModuleIntegration"
+    ],
     "CLKFREQ": [
       "p2kbArchClockSystem"
     ],
@@ -1304,6 +1337,27 @@
     ],
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "Click adapter": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "Click adapter pinout": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "Click board": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "Click board adapter": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "Click module": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "Click module socket": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "Click pin offsets": [
+      "p2kbArchClickModuleIntegration"
     ],
     "DAC CHANNEL ROUTING": [
       "p2kbArchDacRouting"
@@ -2179,6 +2233,24 @@
     "MIDI": [
       "p2kbSpin2Midi"
     ],
+    "MIKROBUS": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "MIKROBUS ADAPTER": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "MIKROBUS PINOUT": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "MIKROBUS SOCKET": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "MIKROE CLICK ADAPTER": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "MIKROELEKTRONIKA CLICK": [
+      "p2kbArchClickModuleIntegration"
+    ],
     "MINI BREAKOUT BOARD": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
     ],
@@ -2257,6 +2329,12 @@
     ],
     "MUXZ": [
       "p2kbPasm2Muxz"
+    ],
+    "MikroE Click adapter": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "MikroElektronika Click": [
+      "p2kbArchClickModuleIntegration"
     ],
     "NAMELESS STRUCT MEMBER": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -2551,6 +2629,9 @@
     "P2 RTC Add-on Board": [
       "p2kbHwAddonRtcAddonRtc"
     ],
+    "P2 TO MIKROBUS CLICK ADAPTER": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
     "P2 WX ADAPTER": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
@@ -2586,6 +2667,9 @@
     ],
     "P2 programmer": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "P2 to mikroBUS Click Adapter": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
     ],
     "P2-EC": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
@@ -5526,6 +5610,18 @@
     "microvolt measurement": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
+    "mikroBUS": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "mikroBUS adapter": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
+    "mikroBUS pinout": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "mikroBUS socket": [
+      "p2kbHwAddonClickAdapterAddonClickAdapter"
+    ],
     "mini breakout board": [
       "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
     ],
@@ -6970,8 +7066,8 @@
     },
     "p2kbArchClickModuleIntegration": {
       "path": "deliverables/ai/P2/architecture/click_module_integration.yaml",
-      "mtime": 1787604352,
-      "sha256": "0e2fbfa8c40f11b34051f1659c1cd5a120587ed6c3b3a6b45ee9deb6bc5ee6c3"
+      "mtime": 1787732317,
+      "sha256": "bdb8ff90ff9fe4bdf74d2b58d840b671c1cee0ab878ab6b16489d706525b10c4"
     },
     "p2kbArchClockSystem": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
@@ -8313,6 +8409,11 @@
       "mtime": 1787695381,
       "sha256": "41c2f96980d8c585bb98a642e1094db955738ea57ba5025cd3cad56272d74742"
     },
+    "p2kbHwAddonClickAdapterAddonClickAdapter": {
+      "path": "deliverables/ai/P2/hardware/addon-click-adapter.yaml",
+      "mtime": 1787732950,
+      "sha256": "5854fa633118c681ff97a8c2307e4f051fcc4cdb6ed28f1e5807133716d65530"
+    },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
       "mtime": 1787695381,
@@ -8410,8 +8511,8 @@
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1782768130,
-      "sha256": "c44e5b03bb2df119a18305ad240bb64d8a4ab9b4cd18aa5aa3d85a2ed0eb4d65"
+      "mtime": 1787732317,
+      "sha256": "5fa36847afb0e5bc2ae906bf94b4c0aad17de4a63b1fd78c6e6ee0db7699b345"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
