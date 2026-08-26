@@ -30,6 +30,36 @@ description: >-
 # P2 WX Adapter #64007). See related: hardware/addon-wx-adapter.yaml.
 eval_header_occupant: false
 
+form_factors:
+  source: >-
+    32420 Parallax WX WiFi Module Guide v1.0 (Parallax Inc.) --
+    engineering/ingestion/sources/parallax-wx-wifi/parallax-wx-wifi-text.txt:29-30
+    ("32420D ... a 3.3 V, 2 mm DIP package designed to work with the socket on the
+    Propeller Activity Board, both original 32910 and WX #32912") and :136
+    ("The DIP version plugs straight into the Propeller Activity Board WX
+    2 x 10 x 2mm socket"). P2 side from the 64007 P2 WX Adapter Guide v1.0 --
+    engineering/ingestion/sources/p2-wx-adapter/p2-wx-adapter-text.txt:10
+    ("connects a Parallax ESP8266 WX WiFi SIP module to any P2 development board
+    with a standard 2x6 way accessory header") and :21 ("10-pin SIP socket with
+    0.1\" spacing for the Parallax WX WiFi ESP8266 SIP Module (#32420S)").
+  variants:
+    - part: "32420S"
+      package: "SIP, 10-pin 0.1 inch"
+      host: >-
+        The P2 WX Adapter (#64007), which carries the 2x6 accessory-header
+        footprint -- this is the variant used on P2. Also works directly on a
+        breadboard.
+    - part: "32420D"
+      package: "DIP, 2x10, 2 mm"
+      host: >-
+        The Propeller Activity Board socket (original #32910 and Activity Board
+        WX #32912) -- P1 boards. Not compatible with Parallax XBee adapter boards.
+  p2_note: >-
+    Only the SIP variant has a P2 accessory-header path. #64007 is the sole P2 WX
+    adapter and it takes the SIP module; there is no DIP equivalent with the eval
+    header footprint. The DIP package exists to serve the P1 Activity Board socket,
+    which is why both form factors appear in the module guide.
+
 core:
   chip: "ESP8266-WROOM-02 (32-bit MCU + Wi-Fi, embedded TCP/IP, 16 Mbit SPI flash)"
   firmware: >-

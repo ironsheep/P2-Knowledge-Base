@@ -94,6 +94,20 @@ use_cases:
   secondary:
     - "Untethered debug / data viewing over Wi-Fi"
 
+sole_p2_wx_adapter:
+  source: >-
+    64007 P2 WX Adapter Guide v1.0 (Parallax Inc.) --
+    engineering/ingestion/sources/p2-wx-adapter/p2-wx-adapter-text.txt:10, :21;
+    DIP-variant host from the 32420 module guide --
+    engineering/ingestion/sources/parallax-wx-wifi/parallax-wx-wifi-text.txt:29-30, :136.
+  note: >-
+    The WX module ships in two form factors, but only the SIP one has a P2
+    accessory-header path. #64007 carries the 2x6 footprint and takes the SIP
+    module (#32420S); the DIP module (#32420D) is built for the Propeller
+    Activity Board / Activity Board WX socket, which are P1 boards. Do not look
+    for a DIP P2 adapter -- the second form factor exists for P1, not for a
+    second P2 board. See hardware/addon-wx-wifi.yaml form_factors.
+
 limitations:
   - "Passive adapter - requires the #32420S Wi-Fi module (not included)"
   - "Wireless programming needs the RES-logo P56-P63 header + special P2 Wi-Fi firmware"
