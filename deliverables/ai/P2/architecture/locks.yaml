@@ -1,7 +1,13 @@
 # P2 Hardware Locks System
-# Silicon Doc Reference: part1-cog.txt, pages 17-18
-# Datasheet Reference: pages 34-35, 82
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# never existed and datasheet pages beyond the end of a 50-page datasheet):
+#   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOCKS --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3673-3700
+#   Instruction encodings, same document, PASM2 encoding table --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5236-5239
+#   P2X8C4M64P Datasheet 2022/11/01, "Locks" p.19-20 --
+#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:877-905
+#     and the PASM2 instruction table p.42 -- p2-datasheet-text.txt:1791-1797
 
 component_name: "Hardware Locks"
 
@@ -45,16 +51,18 @@ architecture:
 
 instructions:
   - instruction: "LOCKTRY"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 0000LLLLL"
-    description: "Try to acquire lock L, result in D, C=success"
+    encoding: "EEEE 1101011 C0L DDDDDDDDD 000000110"
+    description: "Try to take lock D[3:0]. C = 1 if the lock was taken."
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3688; encoding at
+      silicon-doc-text.txt:5238; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1796-1797.
     operation: |
-      IF lock[L] is available THEN
-        lock[L] := this_cog_id
-        D := this_cog_id
-        C := 1 (success)
-      ELSE
-        D := owning_cog_id
-        C := 0 (failure)
+      Attempt to take lock D[3:0].
+      C := 1 if the lock was successfully taken (it is now held by this cog)
+      C := 0 if it was not taken -- another cog holds it, or it is not allocated
+      D is not written by LOCKTRY.
     flags_affected: "C"
     timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
     usage_example: |
@@ -63,16 +71,21 @@ instructions:
       ' Lock was busy, owner ID is in lock_num
   
   - instruction: "LOCKREL"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 0001LLLLL"
-    description: "Release lock L if owned by this COG"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
+    description: >-
+      Release lock D[3:0]. With WC and a register D, also reports the lock's status in C
+      and its current/last owner in D.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3696, :3700; encoding at
+      silicon-doc-text.txt:5239; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1792-1795.
     operation: |
-      IF lock[L] owner = this_cog_id THEN
-        lock[L] := available
-        D := this_cog_id
-        C := 1 (released)
-      ELSE
-        D := current_owner_id
-        C := 0 (not owner)
+      Release lock D[3:0]. Only the cog holding the lock can release it.
+      With WC: C := 1 if the lock is currently taken, 0 if it is not.
+      With WC and D a register (not an immediate): D := the cog ID of the
+      current owner (if held) or the last owner (if released).
+      A cog that is itself holding the lock still releases it in this form.
     flags_affected: "C"
     timing: "2 clocks (range 2...9, +2 if WC; per lockrel.yaml encoding)"
     usage_example: |
@@ -80,17 +93,18 @@ instructions:
       IF_NC   JMP #not_owner   ' Jump if we didn't own it
   
   - instruction: "LOCKNEW"
-    encoding: "EEEE 1101101 C0L DDDDDDDDD 000000000"
+    encoding: "EEEE 1101011 C00 DDDDDDDDD 000000100"
     description: "Find and acquire first available lock"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Allocating Locks --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3684; encoding at
+      silicon-doc-text.txt:5236; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1791.
     operation: |
-      Search locks 0-15 for first available
-      IF found THEN
-        lock[n] := this_cog_id
-        D := n (lock number acquired)
-        C := 0 (success -- lock allocated)
-      ELSE
-        D := $FFFFFFFF
-        C := 1 (all locks already allocated)
+      Allocate a lock from the hub's pool of 16.
+      If an unallocated lock is available, its number is written into D.
+      With WC: C := 0 if a lock was allocated, 1 if all locks are already allocated.
+      A cog may allocate more than one lock.
     flags_affected: "C"
     timing: "4 clocks (range 4...11; per locknew.yaml encoding)"
     usage_example: |
@@ -99,27 +113,41 @@ instructions:
       ' Lock number is in my_lock
   
   - instruction: "LOCKRET"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 0010LLLLL"
-    description: "Return (release) lock L unconditionally"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000000101"
+    description: "Return lock D[3:0] to the unallocated lock pool for reallocation"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Allocating Locks --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686; encoding at
+      silicon-doc-text.txt:5237; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1794.
     operation: |
-      lock[L] := available
-      D := previous_owner_id (or $FFFFFFFF if was free)
+      Return lock D[3:0] to the unallocated lock pool. Any cog can return an
+      allocated lock, even one it did not allocate with LOCKNEW.
+      D is not written by LOCKRET.
     timing: "2 clocks (range 2...9; per lockret.yaml encoding)"
     usage_example: |
       LOCKRET lock_num         ' Force release lock
       ' Previous owner (if any) is returned in lock_num
 
-  - instruction: "LOCKTRY (WC mode)"
-    encoding: "EEEE 1101011 10L DDDDDDDDD 0000LLLLL"
-    description: "Check lock owner without trying to acquire"
+  - instruction: "LOCKREL (query form)"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
+    description: >-
+      LOCKREL is the instruction that reports lock status and ownership -- LOCKTRY has no
+      status-only form. LOCKTRY always attempts to take the lock.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3700.
     operation: |
-      D := current_owner_id (or $FFFFFFFF if free)
-      C := 1 if free, 0 if owned
+      C := 1 if the lock is currently taken, 0 if it is not.
+      D (a register, not an immediate) := cog ID of the current owner (if held)
+      or of the last owner (if released).
+      NOTE: this is not a passive query -- if the cog executing it is holding the
+      lock, the normal LOCKREL behaviour still happens and the lock IS released.
     flags_affected: "C"
-    timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
+    timing: "2 clocks (range 2...9, +2 if result; per lockrel.yaml encoding)"
     usage_example: |
-      LOCKTRY lock_num WC      ' Just check lock status
-      IF_C    JMP #lock_free   ' Jump if lock is available
+      LOCKREL lock_num WC      ' Read lock status/owner (and release if we hold it)
+      IF_NC   JMP #lock_free   ' C=0 means the lock is not currently taken
 
 programming_patterns:
   - pattern: "basic_mutex"
@@ -278,10 +306,11 @@ performance_considerations:
 
 debugging_tips:
   - tip: "lock_ownership_tracking"
-    description: "Use LOCKTRY with WC to check current lock owner"
+    description: >-
+      Use LOCKREL with WC and a register operand to read a lock's status and owner. Note
+      that this also releases the lock if the querying cog is the one holding it.
     code: |
-      LOCKTRY lock_num WC      ' Check who owns lock
-      ' lock_num now contains owner COG ID or -1 if free
+      LOCKREL lock_num WC      ' C = lock currently taken; lock_num = current/last owner
   
   - tip: "deadlock_detection"
     description: "Implement timeouts on lock acquisition"
@@ -312,13 +341,20 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
+    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
+      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
-        - "part1-cog.txt, Lock Instructions"
-        - "Hardware lock system details"
-    - document: "P2 Datasheet"
+        - "LOCKS, incl. Allocating Locks and Using Locks -- lines 3673-3700"
+        - "PASM2 encoding table, LOCKNEW/LOCKRET/LOCKTRY/LOCKREL -- lines 5236-5239"
+    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
+      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
-        - "Pages 34-35: Lock instruction reference"
-        - "Page 82: Lock system architecture"
-  confidence: "high"
-  last_updated: "2024-12-30"
+        - "Locks, p.19-20 -- lines 877-905"
+        - "PASM2 instruction table, lock rows, p.42 -- lines 1791-1797"
+  re_derivation_note: >-
+    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    `part1-cog.txt` (a file that has never existed) and datasheet pages 34-35 and 82
+    (the datasheet is 50 pages). All four lock-instruction encodings were wrong and have
+    been replaced from the encoding table above; the "LOCKTRY (WC mode) = check without
+    acquiring" entry contradicted the source and was replaced by LOCKREL's documented
+    query form.

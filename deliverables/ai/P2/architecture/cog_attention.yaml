@@ -1,7 +1,16 @@
 # P2 COG Attention System
-# Silicon Doc Reference: part1-cog.txt, pages 19-20
-# Datasheet Reference: pages 35-36, 73
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# never existed and a datasheet page beyond the end of a 50-page datasheet):
+#   Propeller 2 Documentation v35 (Rev B/C Silicon), section COG ATTENTION --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2013-2033
+#   Event numbering, same document, section EVENTS --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2053 (Event 14 = ATN)
+#   Instruction encodings, same document, PASM2 encoding table --
+#     silicon-doc-text.txt:5351 (COGATN), :5283 (POLLATN), :5300 (WAITATN),
+#     :5181 (JATN), :5198 (JNATN), :5234 (COGID)
+#   P2X8C4M64P Datasheet 2022/11/01, "Cog Attention" p.15-16 --
+#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:681-695
+#     and the PASM2 instruction table -- p2-datasheet-text.txt:1854, :1893, :1914
 
 component_name: "COG Attention System"
 
@@ -16,6 +25,11 @@ description: |
 
 architecture:
   signal_matrix: "8×8 (any COG to any COGs)"
+  operand_field: >-
+    COGATN's D operand carries the cog-select bit pattern; bit N selects cog N. The P2
+    Datasheet describes the lower 8 bits and a composite set of 8 strobes
+    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692), which is
+    the shape the eight physical cogs use.
   
   attention_flags:
     per_cog: 1
@@ -53,77 +67,128 @@ architecture:
 
 instructions:
   - instruction: "COGATN"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 000001110"
-    description: "Signal attention to specified COG(s)"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000111111"
+    description: "Strobe the attention signal of the cog(s) selected by D"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2017, :2020;
+      encoding at silicon-doc-text.txt:5351; P2 Datasheet 2022/11/01 "Cog Attention" --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692.
     operation: |
-      FOR each bit N in D[7:0]:
-        IF D[N] = 1 THEN
-          COG[N].attention := 1
-      Can signal multiple COGs simultaneously
-    timing: "2 clock cycles"
+      FOR each set bit N in D:
+        strobe cog N's attention signal
+      The receiving cog latches the strobe, setting its attention event flag.
+      The attention strobe outputs of all cogs are OR'd together into one
+      composite set of strobes, from which each cog receives its own.
+      Multiple cogs can be signalled by one COGATN.
+    timing: "2 clocks"
     usage_example: |
       COGATN  #%00000010      ' Signal COG 1
       COGATN  #%11111110      ' Signal COGs 1-7
       COGATN  cog_mask        ' Signal COGs in mask
   
   - instruction: "POLLATN"
-    encoding: "EEEE 1101011 000 000000000 000000000 WC"
-    description: "Poll own attention flag"
+    encoding: "EEEE 1101011 CZ0 000001110 000100100"
+    description: "Get the attention-requested event flag into C and/or Z, then clear it"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2061, :2078, :2200-2204;
+      encoding at silicon-doc-text.txt:5283; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1893.
     operation: |
-      C := attention_flag
-      IF (WC) THEN attention_flag := 0
-    flags_affected: "C = attention state"
-    timing: "2 clock cycles"
+      C and/or Z := attention-requested event flag (per WC / WZ / WCZ)
+      The event flag is then cleared, unless the event sensor is setting it again
+      on the same clock.
+    flags_affected: "C and/or Z = attention-requested event flag"
+    timing: "2 clocks"
     usage_example: |
       POLLATN WC              ' Check and clear ATN
       IF_C    JMP #handle_atn ' Jump if attention set
   
   - instruction: "WAITATN"
-    encoding: "EEEE 1101011 001 000000000 000000000"
-    description: "Wait for attention flag to be set"
+    encoding: "EEEE 1101011 CZ0 000011110 000100100"
+    description: "Wait for the attention-requested event flag, then clear it"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2082, :2100;
+      encoding at silicon-doc-text.txt:5300; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1914.
     operation: |
-      WHILE attention_flag = 0: wait
-      attention_flag := 0 (auto-clear)
-    timing: "2+ clocks (waits until ATN set)"
+      Wait until the attention-requested event flag is set (it may already be),
+      then clear it, unless the event sensor is setting it again on the same clock.
+      A SETQ executed immediately before WAITATN supplies a future CT target that
+      ends the wait early; with 'WAITATN WC', C is set if that timeout occurred
+      before the event.
+    timing: "2+ clocks (waits for the event)"
     usage_example: |
       WAITATN                 ' Wait for attention
       ' Attention received, continue execution
   
-  - instruction: "RDCOGID"
-    encoding: "EEEE 0000011 CZI DDDDDDDDD 000000001"
-    description: "Read COG ID (useful with attention)"
+  - instruction: "JATN"
+    encoding: "EEEE 1011110 01I 000001110 SSSSSSSSS"
+    description: "Jump to S/# if the attention-requested event flag is set"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2028; EVENTS --
+      silicon-doc-text.txt:2104, :2120; encoding at silicon-doc-text.txt:5181.
     operation: |
-      D := this_cog_id (0-7)
-    flags_affected: "C, Z optionally"
-    timing: "2 clock cycles"
+      IF attention-requested event flag is set THEN jump to S/#
+      The flag is cleared whether or not the branch is taken, unless the event
+      sensor is setting it again on the same clock.
     usage_example: |
-      COGID   my_id           ' Get own COG ID
-  
+      JATN    #handle_atn     ' Branch if attention has been requested
+
+  - instruction: "JNATN"
+    encoding: "EEEE 1011110 01I 000011110 SSSSSSSSS"
+    description: "Jump to S/# if the attention-requested event flag is clear"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2030; EVENTS --
+      silicon-doc-text.txt:2104, :2120; encoding at silicon-doc-text.txt:5198.
+    usage_example: |
+      JNATN   #keep_working   ' Branch if no attention has been requested
+
   - instruction: "COGID"
-    encoding: "EEEE 0000011 CZI DDDDDDDDD 000000001"
-    description: "Alias for RDCOGID"
+    encoding: "EEEE 1101011 C0L DDDDDDDDD 000000001"
+    description: >-
+      Write this cog's ID into D (D a register, WC omitted), or with WC report whether
+      the cog selected by D[2:0] is running.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), PASM2 encoding table --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5234; and this
+      knowledge base's own language/pasm2/cogid.yaml.
+    flags_affected: "C (with WC) = 1 if the D[2:0] cog is running, 0 if stopped"
+    timing: "2 clocks"
     usage_example: |
-      COGID   pa WC           ' Get ID, C=0 always
+      COGID   my_id           ' Get own cog ID into my_id
 
 event_configuration:
   attention_event:
-    event_number: 15
-    trigger: "ATN flag transitions from 0 to 1"
+    event_number: 14
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS -- "Event 14 = Attention was
+      requested by another cog or other cogs",
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2053; and the
+      INTERRUPTS event-source table, silicon-doc-text.txt:2290. Event 15 is
+      GETQX/GETQY-with-no-CORDIC-result, not attention.
+    trigger: "An attention strobe from another cog sets this cog's ATN event flag"
     
     setup_for_interrupt: |
       ' Configure ATN to trigger interrupt
       MOV     IJMP1, #atn_handler  ' Set ISR address
-      SETINT1 #%1111               ' ATN event (#15)
+      SETINT1 #14                  ' INT1 event source 14 = attention requested
       
       atn_handler:
           ' Handle attention signal
           ' ATN flag auto-cleared by WAITATN
           RETI1
     
-    setup_for_event: |
-      ' Configure ATN as event source
-      SETSE1  #%11_111111          ' ATN event
-      WAITSE1                      ' Wait for ATN
+    setup_for_event: >-
+      Attention is NOT one of the events SETSE1..4 can select. SETSEn selects LUT
+      read/write events, hub-lock events, and pin rise/fall/change/high/low events only
+      (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2246-2260).
+      Attention is tracked as event 14 in its own right and is reached with
+      POLLATN / WAITATN / JATN / JNATN, or as interrupt source 14 via SETINTx.
 
 programming_patterns:
   - pattern: "master_slave_coordination"
@@ -193,7 +258,7 @@ programming_patterns:
     code: |
       ' Setup attention interrupt
               MOV     IJMP3, #atn_isr
-              SETINT3 #%1111          ' ATN event
+              SETINT3 #14             ' INT3 event source 14 = attention requested
               
       ' Main code continues normally
       main_loop:
@@ -329,7 +394,7 @@ related_topics:
     relationship: "ATN can trigger interrupts via event system"
   
   - topic: "events"
-    relationship: "ATN is event source #15"
+    relationship: "ATN is event source 14"
   
   - topic: "hub_mailboxes"
     relationship: "Often paired with ATN for data transfer"
@@ -339,13 +404,23 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
+    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
+      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
-        - "part1-cog.txt, COG Attention System"
-        - "Attention instructions and signaling"
-    - document: "P2 Datasheet"
+        - "COG ATTENTION -- lines 2013-2033"
+        - "EVENTS, event numbering and POLL/WAIT/J flag rules -- lines 2037-2260"
+        - "PASM2 encoding table -- lines 5181, 5198, 5234, 5283, 5300, 5351"
+    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
+      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
-        - "Pages 35-36: Attention instructions"
-        - "Page 73: Attention event configuration"
-  confidence: "high"
-  last_updated: "2024-12-30"
+        - "Cog Attention, p.15-16 -- lines 681-695"
+        - "PASM2 instruction table -- lines 1854, 1893, 1914"
+  re_derivation_note: >-
+    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    `part1-cog.txt` (a file that has never existed) and datasheet page 73 (the datasheet
+    is 50 pages). Corrected in this pass: all three attention-instruction encodings; the
+    attention event number (was 15, is 14) and the two SETINTx examples that used it; a
+    `setup_for_event` block configuring SETSE1 for attention, which SETSEn cannot select;
+    and the COGID entry, which carried a wrong encoding and claimed C=0 always. The
+    fabricated mnemonic RDCOGID was removed -- it is in no Parallax source, in no other
+    file of this knowledge base, and pnut-ts does not accept it as an instruction.

@@ -99,7 +99,10 @@ quick_byte_metadata:
     
   hardware:
     - part: "P2 RTC Add-on Board"
-      parallax_id: "64025"
+      parallax_id: "64013"   # corrected 2026-08-26 (F-341): #64025 does not exist.
+                             # The real P2 RTC Add-on Board is #64013 --
+                             # engineering/ingestion/sources/edge-breakout-board/
+                             # edge-breakout-board-narrative.txt:137
     - part: "P2 Edge Module"
       parallax_id: "P2-EC"
       

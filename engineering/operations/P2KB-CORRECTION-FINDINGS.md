@@ -471,7 +471,7 @@ two. No other file carries the wording.
 address`; `$1F7` → `CALLD-imm return, CALLPB parameter, or LOC address`. Triple-sourced, so no
 further research is owed.
 
-### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `CONFIRMED`
+### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `RESOLVED`
 
 **What was measured.** Every `yaml_file:` pointer in
 `complete-system-registers-index.yaml`, resolved against its own directory:
@@ -501,8 +501,25 @@ delete** — that rule protects a `related:` link to a concept documented *elsew
 there is no elsewhere. But which way to go is {{USER_NAME}}'s call and is recorded as
 **needs Stephen's accept-or-fix**, not decided here.
 
-**Instrument gap, filed with it:** whatever the disposition, `yaml_file:` pointers should be
-resolved by a gate. Today nothing reads them.
+🟢 **RESOLVED 2026-08-26 («#323») — the thirteen dangling pointers were removed; the content
+stays inline.** Writing eleven thin files would have put one fact in two homes, which is the
+defect class this project keeps finding. **The index already holds everything a per-register file
+would need** — address, normal use, special function, description, access, category and key
+features — for every register it lists; that is now stated in `metadata.per_register_files`, so
+anyone who later wants per-register files can generate them from this file without new research.
+The three pointers that resolve (`ptra-register.yaml`, `dira-dirb-registers.yaml` ×2) were left
+untouched.
+
+Measured after: `yaml_file:` pointers across all of `deliverables/ai/P2/` — **3 declared, 3
+resolve, 0 dangle**. The resolver was shown to be live by pointing one of the three at a
+non-existent file, which it reported as DANGLE before being restored.
+
+**Instrument gap, still filed:** whatever the disposition, `yaml_file:` pointers should be
+resolved by a gate. Today nothing in the shipped tool set reads them — the resolution above was
+done by an ad-hoc walker, not by an armed check. With 3/3 resolving, arming it is cheap now.
+
+Status: `RESOLVED` — 13 dangling pointers removed, content kept inline, 3/3 remaining pointers
+resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 ## The hygiene gate reports CLEAN on the register that owns the `G-`/`Q-` allocators while reading none of its entries (2026-08-26, p2-click-adapter ingestion) — F-362
 
@@ -712,7 +729,7 @@ three registers exit 0 under the gate afterwards.
 
 - **F-359 — Seven `architecture/` files carry a provenance header citing source files that have
   never existed and datasheet pages beyond the end of the datasheet; the header itself satisfies
-  the citation regex, so six of the seven still pass the gate today.** — `CONFIRMED`
+  the citation regex, so six of the seven still pass the gate today.** — `RESOLVED`
 
   **How it surfaced.** Stephen asked whether `io_pin_timing.yaml`'s content might have come from
   our own I/O & Smart Pins manual rather than a Parallax source — i.e. whether the provenance was
@@ -771,7 +788,104 @@ three registers exit 0 under the gate afterwards.
   his: purge the class now, ship and schedule it, or re-derive those six from the real sources.
   What must NOT happen is shipping while believing the `0 Tier 1` covers them.
 
-  Status: `CONFIRMED` — open, awaiting Stephen's scope decision.
+  🟢 **RESOLVED 2026-08-26 («#323») — the third option was taken: all six re-derived from the
+  real sources.** The silicon doc is now fully extracted, which is what made this tractable;
+  every claim below was read off `sources/silicon-doc/silicon-doc-text.txt` or
+  `sources/p2-datasheet/p2-datasheet-text.txt` live, and every citation written into the six
+  files was then re-read at the line it names.
+
+  **What the re-derivation actually found is worse than the header.** The fabricated citation was
+  the signature, not the extent. Across the six files:
+
+  | | Before | After |
+  |---|---|---|
+  | `- instruction:` entries carrying an `encoding:` | 47 | 45 |
+  | encoding **verbatim-identical** to the silicon doc's PASM2 encoding table | **2** (`RDLUT`, `SETSE1`) | **45** |
+  | encoding **wrong** | **41** | **0** |
+  | mnemonic **not in the encoding table at all** | **4** | **0** |
+
+  The four absent mnemonics are `RDCOGID`, `RDLUTS`, `NIXINT0` and `TRGINT0`. Each was checked
+  three ways: absent from `silicon-doc-text.txt`, absent from every other file under
+  `deliverables/ai/P2/`, and not accepted as an instruction by pnut-ts v1.55.3 (`nixint0` and
+  `trgint0` assemble to a zero-byte binary because the compiler reads them as labels; `rdcogid`
+  and `rdluts` are hard errors). The four RETIx encodings come from this knowledge base's own
+  `language/pasm2/reti0..3.yaml`, since RETIx are CALLD aliases and appear in the silicon doc as
+  alias definitions (`:5483-5486`) rather than as encoding-table rows.
+
+  Plus these semantic inversions, each of which a code-generating agent would have acted on:
+  * `interrupts.yaml` had the **IJMPx/IRETx address map inverted** — it called `$1F0` IJMP1 where
+    three authorities (silicon-doc `:2296-2301`, datasheet `:558-563`, and the RETIx alias
+    definitions at silicon-doc `:5483-5485`) all say `$1F0` is IJMP3.
+  * `interrupts.yaml` claimed **per-level shadow registers** for PA/PB/PTRA/PTRB/Q. There are
+    none; the CALLD dispatch saves the return address and C/Z into IRETx and nothing else
+    (silicon-doc `:2294`, `:2359`).
+  * `lookup_ram.yaml` had **LUT sharing backwards** — it described reading the neighbour's LUT.
+    Sharing is a WRITE path into the paired cog's LUT (silicon-doc `:491-500`). It also had
+    **WRLUT's operands reversed** (D is the data, S is the address).
+  * `locks.yaml` carried a `LOCKTRY (WC mode)` entry meaning "check the owner without acquiring".
+    LOCKTRY always attempts to take, and C=1 means *taken* (silicon-doc `:3688`); the query form
+    is LOCKREL with WC and a register D (`:3700`).
+  * `cog_attention.yaml` had **ATN as event 15**; it is event 14 (`:2053`, `:2290`), and both
+    SETINTx examples used the wrong number. Its `setup_for_event` configured SETSE1 for
+    attention, which SETSEn cannot select at all (`:2246-2260`).
+  * `debug_interrupt.yaml` invented three **"configuration registers"** (BRK as a register with a
+    `[31:20]` flags field, plus SKIP and SKIPF as debug registers). BRK is an instruction whose D
+    operand is `%aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA` (`:2498-2517`), and GETBRK reads cog status
+    in three forms rather than reading back a break configuration (`:2527-2593`).
+  * `event_system.yaml` carried an invented event taxonomy ("Edge-detect", "IN-rise",
+    "CORDIC-done") in place of the sixteen the source enumerates (`:2037-2054`), and its
+    pattern-match example selected **mismatch** mode while its comment said match — SETPAT reads
+    C and Z as inputs, and takes no WC/WZ effect (confirmed against pnut-ts).
+
+  **The header was replaced in both places it lived** — the leading comment block AND
+  `extraction_metadata.source_documents`, which carried the same `part1-cog.txt` and the same
+  impossible page ranges. Each file now names the real document, the real section, and a live
+  line range, and carries a `re_derivation_note` stating what was corrected.
+
+  ⚠️ **THE GATE IS STILL NOT THE EVIDENCE.** `audit-yaml-claim-sourcing.py` read `0 Tier 1`
+  before this work and reads `0 Tier 1` after it, because none of the six carries a
+  unit-bearing quantity block. That green says nothing about whether these files are cited; the
+  evidence is that every `<file>:<line>` written into them was re-read at the line it names. The
+  instrument was separately shown to be live on these files: a planted two-quantity block in
+  `locks.yaml` produced `TIER 1 ... 1 violation` and exit 1, and removing it returned exit 0.
+
+  **Eight claims could NOT be re-derived and were NOT deleted — deletion is Stephen's.** Each was
+  searched for in the silicon doc, the datasheet and this KB's own per-instruction YAMLs before
+  being listed:
+  1. `locks.yaml` `architecture.state_bits: 4` with the comment "3 bits COG ID + 1 bit owned
+     flag". No source gives a lock any internal bit-width; both authorities say only "16
+     semaphore bits" (silicon-doc `:3674`, datasheet `:878`).
+  2. `lookup_ram.yaml` `performance_characteristics.power_consumption` (active "similar to COG
+     RAM access", idle "static power only"). Zero hits for LUT power in either document.
+  3. `lookup_ram.yaml` `bandwidth.streaming: "32 bits per clock (via streamer)"`. That figure is
+     the **hub RAM** rate (silicon-doc `:2999`, `:3003`); nothing states it for a LUT-sourced
+     streamer.
+  4. `lookup_ram.yaml` `bandwidth.internal: "32 bits per 2-3 clocks"` — a restatement of the
+     RDLUT/WRLUT timings as a bandwidth, which no source makes.
+  5. `debug_interrupt.yaml` `memory_usage.trace_buffer: "Typically 4KB-16KB in hub"`.
+  6. `debug_interrupt.yaml` `memory_usage.debug_state: "~100 longs for full state capture"` —
+     the source describes 16 longs saved by the ROM routine and 64 bytes per cog per area.
+  7. `debug_interrupt.yaml` `limitations.streamer_interaction: "Debug can disrupt streamer
+     operations"`. The source makes the opposite kind of claim about the hub FIFO — the scheme
+     runs in cog register space precisely so it does *not* disturb it (`:2484`) — and says
+     nothing about the streamer.
+  8. `cog_attention.yaml` `performance_characteristics.response_latency.waiting: "0 clocks after
+     signal arrives"`. The datasheet gives WAITATN as `2+` (`:1914`).
+
+  Not listed above, and deliberately: the `programming_patterns`, `common_applications`,
+  `best_practices` and `debugging_tips` sections of all six files are authored guidance rather
+  than source claims. They were corrected wherever they encoded one of the defects above (wrong
+  event number, fabricated mnemonic, inverted sharing direction, mismatch-mode SETPAT), and
+  otherwise left alone.
+
+  **Fabricated NAMES were deleted rather than escalated**, under Stephen's standing rule *"no
+  fabricated names in the KB tree -- delete invalid names outright"* — the same rule this
+  sprint's C3 applies to the invented part numbers. The four mnemonics were checked three ways
+  first: absent from the silicon doc, absent from every other file in `deliverables/ai/P2/`, and
+  not accepted as instructions by pnut-ts v1.55.3.
+
+  Status: `RESOLVED` — all six re-derived and cited against live sources; eight non-derivable
+  claims listed above are left in place for Stephen's delete-or-keep call.
 
 ---
 ## The published index and its gzip drifted apart in committed history, and the release validator has been red on it (2026-08-25, «#305», arming the content gates) — F-357
@@ -1057,6 +1171,41 @@ Parallax statement nor a bench result) · F-341 (the same mislabel in our own de
 > exist — so anything derived from them is derived from fiction. Options: correct them in place and
 > relabel as analysis, relocate them out of `sources/`, or retire them. **Not actioned pending
 > Stephen's decision.**
+>
+> 🟢 **THE INVENTED-PART-NUMBER HALF IS CLOSED 2026-08-26 («#323»).** Stephen's standing rule —
+> *"no fabricated names in the KB tree, delete invalid names outright"* — settled the disposition
+> without needing a further decision, so it was executed. **Every `#64025` / `#64026` / `#64027`
+> site in the repository was worked**, which was more than the three the finding names:
+>
+> | File | What was there | What was done |
+> |---|---|---|
+> | `sources/p2-hardware-validation-checklist.md` | three validation sections (`:102`, `:150`, `:191`), incl. the `#64027` "Pull-up Test" that carries the F-321 mislabel | sections deleted, dated removal note left in place |
+> | `sources/p2-board-power-analysis-matrix.md` | three power-analysis sections, two `case` arms in worked code, five Quick-Reference rows | all deleted, removal note left |
+> | `sources/p2-complete-signal-flow-matrix.md` | three signal-path sections, a VIO-load `case`, three `ADDON_*` constants, an impedance-detect routine returning two of the invented boards | all deleted, removal note left |
+> | `sources/p2-board-addon-compatibility-matrix.md` | three grid rows, five detailed configurations across two boards, three power rows, three `case` arms | all deleted, removal notes left |
+> | `plans/quick-bytes-ingestion-plan.md` | `parallax_id: "64025"` against **"P2 RTC Add-on Board"** | **corrected to `64013`** — the real part number, from `sources/edge-breakout-board/edge-breakout-board-narrative.txt:137` |
+> | `knowledge-base/P2-support/extractors/hardware-specs-extractor.py` | a YAML **generator** with all three baked in, emitting them under `source: P2 Documentation Collection` | the three entries deleted, note left |
+>
+> **Deleted rather than relabelled, deliberately.** The nearest real boards are the **#64006C LED
+> Matrix** (an 8×7 Charlieplexed grid driven on 8 pins) and the **#64006A Control** add-on (four
+> buttons and four LEDs); there is no 7-segment board in the #64006 series at all. The removed pin
+> maps, currents and test procedures described none of those, so relabelling would have attached
+> fabricated numbers to real boards — a worse defect than the one being fixed.
+>
+> After: `grep -rn '64025\|64026\|64027'` across the repository returns **no hit that presents a
+> board**. Every surviving occurrence is one of four kinds: a dated removal note at the site the
+> content was cut from, the `#64013` correction comment, the sprint plan's task row, or this
+> register's own documentation above. Deliberately stated as classes rather than a count — the
+> count changes every time this register is edited, and a self-referential tally is stale the
+> moment it is written. (Arbiter check, «#323»: the figure first written here was 11; the live
+> number was already 15, because writing the table above added hits to the thing being counted.)
+>
+> **Two halves remain open**, both unchanged by this pass: the four files still sit at
+> `sources/` top level asserting the pull-up mislabel (the relocate-or-repair-or-retire call), and
+> the *same class* of unverified part numbers survives in them — `#64028` "Buttons Board",
+> `#64029` relabelled "Switches and LEDs Combo", `#40003` "Protoboard", `#40007` "Digital I/O
+> Board". Those four were left strictly alone because Stephen confirmed three numbers, not seven,
+> and «#323» would have been widening its own scope to act on them.
 
 Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns the IOSP manual head.
 
@@ -2636,7 +2785,10 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > instrument can no longer be misled by them; a reader still can. Relocating them to a derived/
 > analysis area, or repairing them against the Datasheet legend, is unchanged and unowned.
 >
-> Status: `PARTIAL` — instrument disarm closed and controlled; the content relocation is owed.
+> Status: `PARTIAL` — instrument disarm closed and controlled; the invented-part-number half
+> is closed at every site in the repository (2026-08-26, «#323» — see the boxed note under
+> F-356); the content relocation, and the four further unverified part numbers those files
+> carry (#64028, #64029-as-combo, #40003, #40007), are owed.
 
 > **The six**, all at `engineering/ingestion/sources/` top level, all self-describing as
 > generated cross-references rather than Parallax publications:

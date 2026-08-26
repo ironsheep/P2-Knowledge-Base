@@ -1,7 +1,20 @@
 # P2 Interrupt System
-# Silicon Doc Reference: part1-cog.txt, pages 22-26
-# Datasheet Reference: pages 36-38, 71-72
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# never existed and datasheet pages beyond the end of a 50-page datasheet):
+#   Propeller 2 Documentation v35 (Rev B/C Silicon), section INTERRUPTS --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2262-2392
+#     (event-source table :2274-2291; IJMPx/IRETx map :2296-2301;
+#      RETIx/RESIx aliases :2304-2317; deferral conditions :2349-2354;
+#      dispatch mechanism :2359)
+#   Instruction encodings, same document, PASM2 encoding table --
+#     silicon-doc-text.txt:5302-5315 (ALLOWI/STALLI/TRGINTx/NIXINTx/SETINTx)
+#     and :5478-5486 (RESIx/RETIx alias definitions)
+#   Per-instruction encodings for the RETIx aliases are carried in this knowledge
+#     base's own language/pasm2/reti0..3.yaml
+#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has NO interrupt section; it
+#     carries the IJMPx/IRETx register rows at
+#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:558-563 and
+#     the interrupt instructions in the PASM2 table at :1954
 
 component_name: "Interrupt System"
 
@@ -24,175 +37,242 @@ architecture:
     level_3: "Interrupt 3 (lowest normal priority)"
     lowest: "Main code (non-interrupt)"
   
-  shadow_registers:
-    description: "Each interrupt level has shadows of key registers"
-    shadowed:
-      - "IJMP3/2/1 - Interrupt jump addresses"
-      - "IRET3/2/1 - Interrupt return addresses"
-      - "PA/PB - Parameter registers"
-      - "PTRA/PTRB - Pointer registers"
-      - "Q - CORDIC result"
-      - "C/Z flags - Condition flags"
-    
-    context_switch_time: "0 clocks (automatic hardware swap)"
+  automatic_state_save:
+    description: >-
+      There are no shadow register banks. An interrupt branch is realised by inserting a
+      'CALLD IRETx,IJMPx WCZ' into the instruction pipeline, and that CALLD is the whole
+      of the automatic save: the return address and the C and Z flags are written into
+      the level's dedicated IRETx register. Nothing else is preserved by hardware -- PA,
+      PB, PTRA, PTRB, the CORDIC result queue and every general register are shared with
+      the interrupted code and must be saved by the ISR if it disturbs them.
+    saved_automatically:
+      - "Return address -- into IRETx"
+      - "C and Z flags -- into IRETx (the CALLD carries WCZ)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2294 and :2359.
+    context_switch_time: "0 clocks -- IJMPx/IRETx are dedicated registers; nothing is swapped"
   
   interrupt_sources:
     total_sources: 16
-    
+    selection: "A 4-bit pattern, 0..15, written by SETINT1 / SETINT2 / SETINT3"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS -- the sixteen interrupt event
+      sources, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2274-2291.
+      The full list is in `interrupt_sources_detail` below.
     source_types:
+      - type: "off"
+        sources: ["0 = <off>"]
+        description: "Default on cog start for all three levels"
+      
       - type: "timer"
-        sources: ["CT-passed-CT1", "CT-passed-CT2", "CT-passed-CT3"]
-        description: "Counter timer comparisons"
+        sources: ["1 = CT-passed-CT1", "2 = CT-passed-CT2", "3 = CT-passed-CT3"]
+        description: "Free-running counter comparisons, established by ADDCT1/2/3"
       
-      - type: "pattern_match"
-        sources: ["PAT-match", "PAT-mismatch"]
-        description: "Pin pattern detection"
+      - type: "selectable_events"
+        sources: ["4 = SE1", "5 = SE2", "6 = SE3", "7 = SE4"]
+        description: >-
+          The four per-cog selectable events, established by SETSE1..4 -- each may be a
+          LUT read/write, a hub-lock transition, or a pin rise/fall/change/high/low
       
-      - type: "edge_detect"
-        sources: ["Any-edge-on-SELH", "POS-edge-on-SELH", "NEG-edge-on-SELH"]
-        description: "Pin edge detection on selected pins"
+      - type: "pin_pattern"
+        sources: ["8 = pin pattern match or mismatch"]
+        description: "Established by SETPAT"
       
-      - type: "hub_events"
-        sources: ["Hub-CORDIC-finished", "Streamer-finished", "Streamer-empty"]
-        description: "Hub subsystem completion events"
+      - type: "hub_fifo"
+        sources: ["9 = hub RAM FIFO interface wrapped and reloaded"]
+        description: "Established by RDFAST / WRFAST / FBLOCK"
       
-      - type: "pin_events"
-        sources: ["SE1-event", "SE2-event", "SE3-event", "SE4-event"]
-        description: "Smart pin events"
+      - type: "streamer"
+        sources:
+          - "10 = streamer ready for another command"
+          - "11 = streamer ran out of commands"
+          - "12 = streamer NCO rolled over"
+          - "13 = streamer read location $1FF of lookup RAM"
+        description: "Established by XINIT / XZERO / XCONT"
       
       - type: "attention"
-        sources: ["ATN-event"]
-        description: "Inter-COG attention signal"
+        sources: ["14 = attention requested by other cog(s)"]
+        description: "Inter-cog attention signal, raised by COGATN"
       
-      - type: "fifo"
-        sources: ["Hub-FIFO-interface"]
-        description: "Hub FIFO events"
+      - type: "cordic"
+        sources: ["15 = GETQX/GETQY executed with no CORDIC result available or in progress"]
+        description: "A CORDIC result was read when none was pending -- not a completion event"
 
 configuration_registers:
-  - register: "IJMP1"
-    address: "$1F0"
-    description: "Interrupt 1 jump address"
-    format: "20-bit address in hub or cog memory"
-  
-  - register: "IJMP2"
-    address: "$1F2"
-    description: "Interrupt 2 jump address"
-    format: "20-bit address in hub or cog memory"
-  
-  - register: "IJMP3"
-    address: "$1F4"
-    description: "Interrupt 3 jump address"
-    format: "20-bit address in hub or cog memory"
-  
-  - register: "IRET1"
-    address: "$1F1"
-    description: "Interrupt 1 return address (automatic)"
-    format: "20-bit address with C/Z flags in bits [31:30]"
-  
-  - register: "IRET2"
-    address: "$1F3"
-    description: "Interrupt 2 return address (automatic)"
-    format: "20-bit address with C/Z flags in bits [31:30]"
-  
-  - register: "IRET3"
-    address: "$1F5"
-    description: "Interrupt 3 return address (automatic)"
-    format: "20-bit address with C/Z flags in bits [31:30]"
+  source: >-
+    Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2296-2301; P2 Datasheet
+    2022/11/01 cog special-purpose register table --
+    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:558-563. Both list
+    INT3 at the LOWEST addresses and INT1 at the highest; the RETIx alias definitions at
+    silicon-doc-text.txt:5483-5485 agree (RETI1 = CALLD INB,$1F5).
+  registers:
+    - register: "IJMP3"
+      address: "$1F0"
+      description: "Interrupt call (jump) address for INT3"
+      format: "20-bit address in hub or cog memory"
+    
+    - register: "IRET3"
+      address: "$1F1"
+      description: "Interrupt return address for INT3 (written by the dispatched CALLD)"
+      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
+    
+    - register: "IJMP2"
+      address: "$1F2"
+      description: "Interrupt call (jump) address for INT2"
+      format: "20-bit address in hub or cog memory"
+    
+    - register: "IRET2"
+      address: "$1F3"
+      description: "Interrupt return address for INT2 (written by the dispatched CALLD)"
+      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
+    
+    - register: "IJMP1"
+      address: "$1F4"
+      description: "Interrupt call (jump) address for INT1"
+      format: "20-bit address in hub or cog memory"
+    
+    - register: "IRET1"
+      address: "$1F5"
+      description: "Interrupt return address for INT1 (written by the dispatched CALLD)"
+      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
 
 instructions:
   - instruction: "STALLI"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100100001"
-    description: "Stall interrupts to prevent triggering"
+    encoding: "EEEE 1101011 000 000100001 000100100"
+    description: "Stall INT1/INT2/INT3 interrupt BRANCHES indefinitely, until ALLOWI"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2272, :2344;
+      encoding at silicon-doc-text.txt:5303.
     operation: |
-      Prevents any new interrupt from triggering
-      Currently executing interrupts continue
-      Interrupts remain pending but don't trigger
+      Hold off the interrupt branch for all three levels indefinitely.
+      Events still occur and interrupts still become pending; what is stalled is
+      the branch. STALLI being active is itself one of the conditions that defers
+      an interrupt branch.
     usage_example: |
       STALLI                   ' Stop new interrupts
       ' ... critical section ...
       ALLOWI                   ' Re-enable interrupts
   
   - instruction: "ALLOWI"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100100000"
-    description: "Allow interrupts to trigger"
+    encoding: "EEEE 1101011 000 000100000 000100100"
+    description: "Allow stalled and future interrupt branches to occur (default on cog start)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2272, :2343;
+      encoding at silicon-doc-text.txt:5302.
     operation: |
-      Enables interrupt triggering
-      Any pending interrupts trigger immediately
+      Release the STALLI hold. Any interrupt already pending may then branch,
+      with priority given to INT1, then INT2, then INT3.
     usage_example: |
       ALLOWI                   ' Enable interrupts
   
   - instruction: "SETINT1"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001000SSS"
-    description: "Configure interrupt 1 source"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100101"
+    description: "Set the INT1 event source to D[3:0] (0..15)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2322-2324 and the
+      event-source table :2274-2291; encoding at silicon-doc-text.txt:5313; P2 Datasheet
+      2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1954.
     operation: |
-      Set interrupt 1 to trigger from source S[3:0]
-      S = %0000: Disable interrupt 1
-      S = %0001-%1111: Select from 15 interrupt sources
+      Set the INT1 event source to D[3:0].
+      0 = <off>, the default on cog start.
+      1..15 select one of the fifteen event sources listed above.
     usage_example: |
       SETINT1 #%0001          ' INT1 from CT-passed-CT1
   
   - instruction: "SETINT2"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001001SSS"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100110"
     description: "Configure interrupt 2 source"
     usage_example: |
       SETINT2 #%0010          ' INT2 from CT-passed-CT2
   
   - instruction: "SETINT3"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001010SSS"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100111"
     description: "Configure interrupt 3 source"
     usage_example: |
       SETINT3 #%0011          ' INT3 from CT-passed-CT3
   
   - instruction: "TRGINT1"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100101100"
+    encoding: "EEEE 1101011 000 000100010 000100100"
     description: "Trigger interrupt 1 by software"
     operation: "Force interrupt 1 to trigger immediately"
     usage_example: |
       TRGINT1                 ' Software trigger INT1
   
   - instruction: "TRGINT2"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100101101"
+    encoding: "EEEE 1101011 000 000100011 000100100"
     description: "Trigger interrupt 2 by software"
   
   - instruction: "TRGINT3"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100101110"
+    encoding: "EEEE 1101011 000 000100100 000100100"
     description: "Trigger interrupt 3 by software"
   
   - instruction: "NIXINT1"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100101111"
+    encoding: "EEEE 1101011 000 000100101 000100100"
     description: "Cancel pending interrupt 1"
     operation: "Clear interrupt 1 pending flag"
   
   - instruction: "NIXINT2"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100110000"
+    encoding: "EEEE 1101011 000 000100110 000100100"
     description: "Cancel pending interrupt 2"
   
   - instruction: "NIXINT3"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100110001"
+    encoding: "EEEE 1101011 000 000100111 000100100"
     description: "Cancel pending interrupt 3"
   
   - instruction: "RETI0"
-    encoding: "EEEE 1101101 CZ1 111111111 000101101"
-    description: "Return from interrupt with flags restore"
+    encoding: "EEEE 1011001 110 111111111 111111111"
+    description: >-
+      Return from the DEBUG interrupt -- not from INT1/INT2/INT3. RETI0 is an alias for
+      `CALLD INB,INB WCZ`; INB and INA become the writable IRET0/IJMP0 registers only
+      inside a debug ISR.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), alias definitions --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5486; DEBUG INTERRUPT
+      -- silicon-doc-text.txt:2420, :2439, :2482. Encoding from this knowledge base's own
+      language/pasm2/reti0.yaml.
     operation: |
-      Pop from interrupt stack
-      Restore C/Z flags from IRET register
-      Continue main code execution
-    flags_affected: "C, Z (restored)"
+      RETI0 = CALLD INB,INB WCZ
+      Returns to the interrupted cog program and restores C and Z from IRET0.
+    flags_affected: "C, Z (restored from IRET0)"
+    timing: "4 clocks"
     usage_example: |
-      RETI0                   ' Return and restore flags
+      RETI0                   ' Return from a debug ISR
   
   - instruction: "RETI1"
-    encoding: "EEEE 1101101 CZ1 111111111 000101110"
-    description: "Return from interrupt 1"
+    encoding: "EEEE 1011001 110 111111111 111110101"
+    description: "Return from INT1 -- an alias for `CALLD INB,IRET1 WCZ` (IRET1 = $1F5)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
+      definition at silicon-doc-text.txt:5485. Encoding from this knowledge base's own
+      language/pasm2/reti1.yaml.
+    timing: "4 clocks"
   
   - instruction: "RETI2"
-    encoding: "EEEE 1101101 CZ1 111111111 000101111"
-    description: "Return from interrupt 2"
+    encoding: "EEEE 1011001 110 111111111 111110011"
+    description: "Return from INT2 -- an alias for `CALLD INB,IRET2 WCZ` (IRET2 = $1F3)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
+      definition at silicon-doc-text.txt:5484. Encoding from this knowledge base's own
+      language/pasm2/reti2.yaml.
+    timing: "4 clocks"
   
   - instruction: "RETI3"
-    encoding: "EEEE 1101101 CZ1 111111111 000110000"
-    description: "Return from interrupt 3"
+    encoding: "EEEE 1011001 110 111111111 111110001"
+    description: "Return from INT3 -- an alias for `CALLD INB,IRET3 WCZ` (IRET3 = $1F1)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
+      definition at silicon-doc-text.txt:5483. Encoding from this knowledge base's own
+      language/pasm2/reti3.yaml.
+    timing: "4 clocks"
 
 interrupt_sources_detail:
   - source_id: "%0000"
@@ -216,7 +296,9 @@ interrupt_sources_detail:
   
   - source_id: "%0100"
     name: "SE1-event"
-    description: "Smart pin event 1 (IN rise on SELH pins)"
+    description: >-
+      Selectable event 1 occurred, as configured by SETSE1 -- a LUT read/write by this or
+      the companion cog, a hub-lock rise/fall/change, or a pin rise/fall/change/high/low
   
   - source_id: "%0101"
     name: "SE2-event"
@@ -259,8 +341,10 @@ interrupt_sources_detail:
     description: "Attention (ATN) from another COG"
 
   - source_id: "%1111"
-    name: "QMT-CORDIC-done"
-    description: "CORDIC operation complete (solver empty)"
+    name: "QMT-CORDIC-read-with-no-result"
+    description: >-
+      GETQX/GETQY executed without any CORDIC result available or in progress. This fires
+      on a read that had nothing to read -- it is NOT a "CORDIC finished" event.
 
 programming_patterns:
   - pattern: "timer_interrupt"
@@ -282,13 +366,12 @@ programming_patterns:
     code: |
       ' Setup pin change interrupt
               MOV     IJMP2, #pin_isr      ' Set ISR address
-              SETSE1  #%01_000000 | PIN    ' Positive edge on PIN
-              SETINT2 #%0100               ' SE1 event
+              SETSE1  #%001_000000 + PIN   ' SE1 = INA/INB bit of PIN rises
+              SETINT2 #%0100               ' INT2 from SE1
               
       pin_isr:
-              ' Handle pin change
-              AKPIN   PIN                  ' Acknowledge smart pin
-              ' Process event
+              ' Handle pin change. POLLSE1 clears the SE1 event flag.
+              POLLSE1
               RETI2                        ' Return
   
   - pattern: "nested_interrupts"
@@ -336,8 +419,11 @@ best_practices:
     rationale: "Prevents immediate re-triggering"
   
   - practice: "save_registers"
-    description: "Only PA/PB/PTRA/PTRB/Q/C/Z are auto-saved"
-    rationale: "Must manually save other registers if needed"
+    description: >-
+      Hardware saves ONLY the return address and the C/Z flags, into IRETx. PA, PB, PTRA,
+      PTRB, the CORDIC queue and every general register are shared with the interrupted
+      code -- an ISR that touches them must save and restore them itself.
+    rationale: "There are no shadow register banks (silicon-doc-text.txt:2294, :2359)"
   
   - practice: "avoid_hub_ops"
     description: "Minimize hub operations in ISRs"
@@ -420,13 +506,30 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
+    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
+      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
-        - "part1-cog.txt, Interrupt System"
-        - "Interrupt instructions and sources"
-    - document: "P2 Datasheet"
+        - "INTERRUPTS -- lines 2262-2392"
+        - "PASM2 encoding table -- lines 5302-5315"
+        - "RESIx / RETIx alias definitions -- lines 5478-5486"
+    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
+      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
-        - "Pages 36-38: Interrupt instructions"
-        - "Pages 71-72: Interrupt architecture"
+        - "Cog special-purpose register table, IJMPx/IRETx -- lines 558-563"
+        - "PASM2 instruction table, SETINTx -- line 1954"
+    - document: "This knowledge base's own per-instruction YAMLs"
+      path: "deliverables/ai/P2/language/pasm2/"
+      sections:
+        - "reti0.yaml, reti1.yaml, reti2.yaml, reti3.yaml -- alias encodings"
+  re_derivation_note: >-
+    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    `part1-cog.txt` (a file that has never existed) and datasheet pages 71-72 (the
+    datasheet is 50 pages; it has no interrupt section at all). Corrected in this pass:
+    the IJMPx/IRETx address map, which was inverted -- $1F0 is IJMP3 and $1F4 is IJMP1,
+    not the reverse; a `shadow_registers` block claiming per-level shadows of PA, PB,
+    PTRA, PTRB and Q, which no source describes and the dispatch mechanism contradicts;
+    a fabricated interrupt-source taxonomy naming sources ("Any-edge-on-SELH",
+    "Hub-CORDIC-finished") that are not in the sixteen; source 15, described as "CORDIC
+    operation complete" when it is the opposite; and all fifteen instruction encodings.
   confidence: "high"
   last_updated: "2024-12-30"

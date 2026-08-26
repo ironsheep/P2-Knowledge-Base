@@ -87,30 +87,11 @@ def extract_hardware_specs():
     
     # Add-on boards
     addon_boards = [
-        {
-            'name': 'Control Board',
-            'part_number': '64025',
-            'category': 'addon',
-            'description': '8 LEDs add-on board',
-            'pins_used': 8,
-            'interface': '12-pin header'
-        },
-        {
-            'name': '7-Segment Display',
-            'part_number': '64026',
-            'category': 'addon',
-            'description': '6-digit 7-segment display',
-            'pins_used': 14,
-            'interface': '12-pin header'
-        },
-        {
-            'name': 'Switches Board',
-            'part_number': '64027',
-            'category': 'addon',
-            'description': '8 DIP switches',
-            'pins_used': 8,
-            'interface': '12-pin header'
-        },
+        # REMOVED 2026-08-26 (F-341): three add-on entries were deleted here.
+        # Their part numbers appear in no captured Parallax document and Stephen
+        # confirmed on 2026-08-26 that they are invented. This generator was
+        # emitting them into hardware YAML under `source: P2 Documentation
+        # Collection`, i.e. a fabricated provenance for a fabricated board.
         {
             'name': 'Buttons Board',
             'part_number': '64028',

@@ -24,70 +24,8 @@
 
 ## Detailed Power Consumption by Add-on Board
 
-### 64025 LED Board Power Analysis
+> **Removed 2026-08-26 (F-341, task «#323»).** Content describing Parallax part numbers **#64025 "LED Board"**, **#64026 "7-Segment Display"** and **#64027 "Switches Board"** was deleted from this section. Those three part numbers appear in no captured Parallax document; Stephen confirmed on 2026-08-26 that they are invented. The real boards nearest to what they claimed are the **#64006C LED Matrix** (an 8x7 Charlieplexed grid on 8 pins, not eight discrete LEDs) and the **#64006A Control** add-on (four buttons and four LEDs, not eight switches); there is no 7-segment board in the #64006 series. The removed pin maps, currents and test procedures described none of those, so they were deleted rather than relabelled -- relabelling would have attached fabricated numbers to real boards.
 
-#### Current Draw Per LED
-```
-Forward Voltage: 2.1V (red), 3.3V (blue/green)
-Series Resistor: 330Ω
-Current = (3.3V - Vf) / R
-
-Red LED: (3.3 - 2.1) / 330 = 3.6mA
-Blue/Green: (3.3 - 3.3) / 330 = ~1mA (dim)
-Typical mixed: 15-20mA per LED
-```
-
-#### Total Board Power
-| Scenario | Current | VIO Group Load | Safe? |
-|----------|---------|----------------|-------|
-| All OFF | 0mA | 0% | ✅ |
-| 1 LED ON | 20mA | 13% | ✅ |
-| 4 LEDs ON | 80mA | 53% | ✅ |
-| 6 LEDs ON | 120mA | 80% | ✅ |
-| 8 LEDs ON | 160mA | 107% | ⚠️ Exceeds sustained |
-
-**Recommendation**: Limit to 6 LEDs simultaneously or use PWM
-
-### 64026 7-Segment Display Power Analysis
-
-#### Per Segment Current
-```
-Segment LED: 20mA @ 3.3V through current limiting resistor
-Decimal point: 20mA
-Per digit (all segments): 8 × 20mA = 160mA
-```
-
-#### Multiplexed Operation
-```
-6 digits multiplexed at 1/6 duty cycle:
-Peak current: 160mA (one digit active)
-Average current: 160mA / 6 = 27mA
-```
-
-| Display Mode | Peak | Average | VIO Groups Used | Safe? |
-|--------------|------|---------|-----------------|-------|
-| Static 1 digit | 160mA | 160mA | 2 (segments + digit) | ⚠️ |
-| Multiplex 6 | 160mA | 27mA | 2 | ✅ |
-| Multiplex 4 | 160mA | 40mA | 2 | ✅ |
-
-**Recommendation**: Always use multiplexing
-
-### 64027 Switches Board Power Analysis
-
-#### Pull-up Current
-```
-Internal pull-up: 15kΩ to 3.3V
-Current per switch (pressed): 3.3V / 15kΩ = 220µA
-All 8 switches pressed: 8 × 220µA = 1.76mA
-```
-
-| Switch State | Current | VIO Load | Safe? |
-|--------------|---------|----------|-------|
-| All open | 0mA | 0% | ✅ |
-| 1 pressed | 0.22mA | 0.15% | ✅ |
-| All pressed | 1.76mA | 1.2% | ✅ |
-
-**Verdict**: Negligible power consumption
 
 ### 64028 Buttons Board Power Analysis
 
@@ -176,14 +114,6 @@ CON
   
 PUB calculate_revc_load(addon) : vio0_load, vio1_load
   case addon
-    ADDON_64025_LED:
-      vio0_load := 160  ' 8 LEDs on VIO_0
-      vio1_load := 0
-      
-    ADDON_64026_7SEG:
-      vio0_load := 160  ' Segments on VIO_0
-      vio1_load := 30   ' Digit drives on VIO_1
-      
     ADDON_64029_COMBO:
       vio0_load := 2    ' Switches
       vio1_load := 80   ' LEDs
@@ -201,14 +131,6 @@ CON
   
 PUB calculate_edge_load(addon) : vio4_load, vio5_load
   case addon
-    ADDON_64025_LED:
-      vio4_load := 160  ' 8 LEDs on VIO_4
-      vio5_load := 0
-      
-    ADDON_64026_7SEG:
-      vio4_load := 160  ' Segments on VIO_4
-      vio5_load := 30   ' Digit drives on VIO_5
-      
     ADDON_64029_COMBO:
       vio4_load := 82   ' All on VIO_4
       vio5_load := 0
@@ -380,12 +302,7 @@ External protection recommended:
 
 | Board | Add-on | Typical mA | Peak mA | VIO Groups | Safe? | Notes |
 |-------|--------|------------|---------|------------|-------|-------|
-| Rev C | 64025 LED | 80 | 160 | 1 | ⚠️ | Use PWM |
-| Rev C | 64026 7-Seg | 27 | 160 | 2 | ✅ | Multiplexed |
-| Rev C | 64027 Switch | 1 | 2 | 1 | ✅ | Minimal |
 | Rev C | 64029 Combo | 42 | 82 | 2 | ✅ | Balanced |
-| Edge | 64025 LED | 80 | 160 | 1 | ⚠️ | Use PWM |
-| Edge | 64026 7-Seg | 27 | 160 | 2 | ✅ | Multiplexed |
 | Edge | 40004 Goertzel | 10 | 15 | 1 | ✅ | Analog |
 | All | 40003 Proto | Variable | Variable | Variable | - | User defined |
 

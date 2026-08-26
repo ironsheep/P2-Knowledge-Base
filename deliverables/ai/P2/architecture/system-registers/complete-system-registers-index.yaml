@@ -8,6 +8,15 @@ metadata:
   source: "Silicon Doc v35"
   extraction_date: "2025-09-06"
   total_registers: "16 special-purpose + 8 dual-purpose + 496 general-purpose"
+  per_register_files: >-
+    This index carries the full content for every register it lists -- address, normal and
+    special function, description, access, category and key features -- inline. It is
+    self-sufficient; nothing here defers to a per-register file. Three per-register files
+    exist alongside it (ptra-register.yaml, dira-dirb-registers.yaml) and are pointed to
+    by `yaml_file:` where they do. Thirteen further `yaml_file:` pointers, naming eleven
+    files that were never written, were removed on 2026-08-26 under F-364 rather than
+    satisfied by writing thin stubs: that would put one fact in two homes. If per-register
+    files are ever wanted, everything needed to generate them is already in this file.
 
 # Memory Map Overview
 memory_regions:
@@ -35,37 +44,31 @@ dual_purpose_registers:
     normal_use: "General-purpose RAM"
     special_function: "IJMP3"
     description: "Interrupt call address for INT3"
-    yaml_file: "dual-ijmp3-register.yaml"
     
   "$1F1":
     normal_use: "General-purpose RAM"
     special_function: "IRET3"
     description: "Interrupt return address for INT3"
-    yaml_file: "dual-iret3-register.yaml"
     
   "$1F2":
     normal_use: "General-purpose RAM"
     special_function: "IJMP2"
     description: "Interrupt call address for INT2"
-    yaml_file: "dual-ijmp2-register.yaml"
     
   "$1F3":
     normal_use: "General-purpose RAM"
     special_function: "IRET2"
     description: "Interrupt return address for INT2"
-    yaml_file: "dual-iret2-register.yaml"
     
   "$1F4":
     normal_use: "General-purpose RAM" 
     special_function: "IJMP1"
     description: "Interrupt call address for INT1"
-    yaml_file: "dual-ijmp1-register.yaml"
     
   "$1F5":
     normal_use: "General-purpose RAM"
     special_function: "IRET1"
     description: "Interrupt return address for INT1"
-    yaml_file: "dual-iret1-register.yaml"
     
   "$1F6":
     normal_use: "General-purpose RAM"
@@ -83,7 +86,6 @@ dual_purpose_registers:
       not that instruction's parameter. Separately, PA is the parameter register read by
       CALLPA. Both roles are real and they are different; earlier text here collapsed
       them into "CALLD-imm parameter", which named neither.
-    yaml_file: "dual-pa-register.yaml"
 
   "$1F7":
     normal_use: "General-purpose RAM"
@@ -100,7 +102,6 @@ dual_purpose_registers:
       PB mirrors PA: the CALLD-imm return address, and the parameter register read by
       CALLPB (not CALLPA). These two rows are deliberately NOT identical -- an earlier
       revision made them so, which lost the CALLPA/CALLPB distinction the sources draw.
-    yaml_file: "dual-pb-register.yaml"
 
 # Special-Purpose Registers ($1F8-$1FF)
 special_purpose_registers:
@@ -121,7 +122,6 @@ special_purpose_registers:
     description: "Pointer B to hub RAM"
     access: "Read/Write"
     category: "hub_access"
-    yaml_file: "ptrb-register.yaml"
     key_features:
       - "32-bit hub RAM pointer"
       - "Auto-increment/decrement support"
@@ -157,7 +157,6 @@ special_purpose_registers:
     description: "Output states for P31..P0"
     access: "Read/Write"
     category: "io_control"
-    yaml_file: "outa-outb-registers.yaml"
     key_features:
       - "Output logic levels for pins P31-P0"
       - "1=high output, 0=low output"
@@ -169,7 +168,6 @@ special_purpose_registers:
     description: "Output states for P63..P32"
     access: "Read/Write" 
     category: "io_control"
-    yaml_file: "outa-outb-registers.yaml"
     key_features:
       - "Output logic levels for pins P63-P32"
       - "1=high output, 0=low output"  
@@ -181,7 +179,6 @@ special_purpose_registers:
     description: "Input states for P31..P0"
     access: "Read Only"
     category: "io_status"
-    yaml_file: "ina-inb-registers.yaml"
     special_mode: "Becomes IJMP0 (R/W) during debug ISR"
     key_features:
       - "Read actual pin states P31-P0"
@@ -194,7 +191,6 @@ special_purpose_registers:
     description: "Input states for P63..P32"
     access: "Read Only"
     category: "io_status"
-    yaml_file: "ina-inb-registers.yaml"
     special_mode: "Becomes IRET0 (R/W) during debug ISR"
     key_features:
       - "Read actual pin states P63-P32"

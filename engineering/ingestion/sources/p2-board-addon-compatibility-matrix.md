@@ -16,9 +16,6 @@ This matrix provides the complete mapping from any board+addon combination to:
 
 | Add-on Board | Rev C | Edge Mini | Edge Standard | Edge Breadboard |
 |-------------|-------|-----------|---------------|-----------------|
-| 64025 LEDs | ✅ P0-P7 | ✅ P32-P39 | ✅ P32-P39 | ✅ P32-P39 |
-| 64026 7-Segment | ✅ P0-P13 | ✅ P32-P45 | ✅ P32-P45 | ✅ P32-P45 |
-| 64027 Switches | ✅ P0-P7 | ✅ P32-P39 | ✅ P32-P39 | ✅ P32-P39 |
 | 64028 Buttons | ✅ P0-P7 | ✅ P32-P39 | ✅ P32-P39 | ✅ P32-P39 |
 | 64029 Switches+LEDs | ✅ P0-P11 | ✅ P32-P43 | ✅ P32-P43 | ✅ P32-P43 |
 | 40003 Protoboard | ✅ All 12 | ✅ All 12 | ✅ All 12 | ✅ All 12 |
@@ -33,55 +30,8 @@ This matrix provides the complete mapping from any board+addon combination to:
 
 ### Rev C Board (#64006-ES) with Add-ons
 
-#### With 64025 LED Board
-```spin2
-CON
-  ' Physical: Header pins 1-8 → P2 ports P0-P7
-  LED_BASE = 0
-  LED_COUNT = 8
-  
-PUB led_init()
-  PINL(LED_BASE ADDPINS (LED_COUNT-1))  ' All LEDs off
-  DIRL(LED_BASE ADDPINS (LED_COUNT-1))  ' Set as outputs
+> **Removed 2026-08-26 (F-341, task «#323»).** Content describing Parallax part numbers **#64025 "LED Board"**, **#64026 "7-Segment Display"** and **#64027 "Switches Board"** was deleted from this section. Those three part numbers appear in no captured Parallax document; Stephen confirmed on 2026-08-26 that they are invented. The real boards nearest to what they claimed are the **#64006C LED Matrix** (an 8x7 Charlieplexed grid on 8 pins, not eight discrete LEDs) and the **#64006A Control** add-on (four buttons and four LEDs, not eight switches); there is no 7-segment board in the #64006 series. The removed pin maps, currents and test procedures described none of those, so they were deleted rather than relabelled -- relabelling would have attached fabricated numbers to real boards.
 
-PUB led_pattern(pattern)
-  OUTH(LED_BASE ADDPINS 7) := pattern   ' Write 8-bit pattern
-```
-**Power**: 8 LEDs × 20mA = 160mA max @ 3.3V
-
-#### With 64026 7-Segment Display Board
-```spin2
-CON
-  ' Physical: Header pins 1-12 + extras → P2 ports P0-P13
-  SEG_BASE = 0      ' Segments start at P0
-  DIGIT_BASE = 8    ' Digit selects start at P8
-  DIGITS = 6        ' 6 digits
-  
-PUB display_init()
-  PINL(SEG_BASE ADDPINS 13)   ' All outputs low
-  DIRL(SEG_BASE ADDPINS 13)   ' Set as outputs
-  
-PUB display_digit(digit, segments) | mask
-  PINL(DIGIT_BASE ADDPINS (DIGITS-1))     ' All digits off
-  OUTH(SEG_BASE ADDPINS 7) := segments    ' Set segment pattern
-  PINHIGH(DIGIT_BASE + digit)             ' Enable selected digit
-```
-**Power**: 8 segments × 20mA + digit driver = 180mA per active digit
-
-#### With 64027 Switches Board
-```spin2
-CON
-  ' Physical: Header pins 1-8 → P2 ports P0-P7
-  SW_BASE = 0
-  SW_COUNT = 8
-  
-PUB switches_init()
-  WRPIN(SW_BASE ADDPINS (SW_COUNT-1), P_HIGH_15K)  ' Enable pull-ups
-  
-PUB read_switches() : state
-  state := INA[SW_BASE ADDPINS (SW_COUNT-1)] ^ $FF  ' Read and invert
-```
-**Power**: 8 × 220µA pull-up current = 1.76mA
 
 #### With 64028 Buttons Board
 ```spin2
@@ -128,59 +78,8 @@ PUB mirror_switches_to_leds() | state
 
 ### Edge Mini Breakout Board (#64019) with Add-ons
 
-#### With 64025 LED Board
-```spin2
-CON
-  ' Physical: Header pins 1-8 → P2 ports P32-P39
-  LED_BASE = 32
-  LED_COUNT = 8
-  
-PUB led_init()
-  PINL(LED_BASE ADDPINS (LED_COUNT-1))  ' All LEDs off
-  DIRL(LED_BASE ADDPINS (LED_COUNT-1))  ' Set as outputs
+> **Removed 2026-08-26 (F-341, task «#323»).** Content describing Parallax part numbers **#64025 "LED Board"**, **#64026 "7-Segment Display"** and **#64027 "Switches Board"** was deleted from this section. Those three part numbers appear in no captured Parallax document; Stephen confirmed on 2026-08-26 that they are invented. The real boards nearest to what they claimed are the **#64006C LED Matrix** (an 8x7 Charlieplexed grid on 8 pins, not eight discrete LEDs) and the **#64006A Control** add-on (four buttons and four LEDs, not eight switches); there is no 7-segment board in the #64006 series. The removed pin maps, currents and test procedures described none of those, so they were deleted rather than relabelled -- relabelling would have attached fabricated numbers to real boards.
 
-PUB led_chase(delay_ms)
-  repeat
-    repeat led from 0 to 7
-      PINHIGH(LED_BASE + led)
-      waitms(delay_ms)
-      PINLOW(LED_BASE + led)
-```
-**Power**: Same as Rev C (160mA max)
-
-#### With 64026 7-Segment Display Board  
-```spin2
-CON
-  ' Physical: Header pins 1-12 + extras → P2 ports P32-P45
-  SEG_BASE = 32     ' Segments at P32-P39
-  DIGIT_BASE = 40   ' Digits at P40-P45
-  DIGITS = 6
-  
-  ' 7-segment patterns (active high, DP-G-F-E-D-C-B-A)
-  DIGIT_0 = %00111111
-  DIGIT_1 = %00000110
-  DIGIT_2 = %01011011
-  DIGIT_3 = %01001111
-  DIGIT_4 = %01100110
-  DIGIT_5 = %01101101
-  DIGIT_6 = %01111101
-  DIGIT_7 = %00000111
-  DIGIT_8 = %01111111
-  DIGIT_9 = %01101111
-  
-PUB display_number(value) | digit, digits[6], i
-  ' Convert number to digits
-  repeat i from 0 to 5
-    digits[i] := value // 10
-    value /= 10
-    
-  ' Multiplex display
-  repeat 100  ' Show for ~100ms
-    repeat digit from 0 to 5
-      display_digit(digit, lookup(digits[digit]: DIGIT_0..DIGIT_9))
-      waitus(2777)  ' ~6 digits @ 60Hz refresh
-```
-**Power**: 180mA per active digit (multiplex reduces average)
 
 #### With 40004 Goertzel Board
 ```spin2
@@ -253,10 +152,7 @@ PUB jonny_mac_init()
 
 | Board | Add-on | Peak Current | Sustained | Notes |
 |-------|--------|--------------|-----------|-------|
-| Rev C | 64025 LEDs | 160mA | 80mA | Typical 50% duty |
-| Rev C | 64026 7-Seg | 180mA | 30mA | Multiplexed |
 | Rev C | 64029 Combo | 82mA | 42mA | 4 LEDs + switches |
-| Edge Mini | 64025 LEDs | 160mA | 80mA | Check VIO group |
 | Edge Mini | 40004 Goertzel | 15mA | 10mA | Analog circuits |
 | All | 40003 Proto | Variable | Variable | User-defined |
 
@@ -288,12 +184,8 @@ PUB init(board, addon)
       base_pin := 32
       
   case addon_type
-    ADDON_64025_LED:
-      init_leds(base_pin)
-    ADDON_64026_7SEG:
-      init_7segment(base_pin)
-    ADDON_64027_SWITCH:
-      init_switches(base_pin)
+    ' NOTE 2026-08-26 (F-341): three case arms were removed here --
+    ' the add-on part numbers they named are invented.
     ADDON_64028_BUTTON:
       init_buttons(base_pin)
     ADDON_64029_COMBO:

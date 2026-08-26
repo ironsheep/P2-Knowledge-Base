@@ -1,7 +1,19 @@
 # P2 Debug Interrupt System
-# Silicon Doc Reference: part1-cog.txt, pages 26-28
-# Datasheet Reference: pages 39-40
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# never existed):
+#   Propeller 2 Documentation v35 (Rev B/C Silicon), section DEBUG INTERRUPT --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2393-2593
+#     (enable + per-cog scope :2395-2397; upper-hub buffer :2399;
+#      $1F8..$1FF ROM routines :2401-2421; IJMP0/IRET0 remap :2423-2439;
+#      per-cog save/restore map, table 25 :2446-2477; RETI0/RESI0 :2482;
+#      BRK D format :2489-2517; COGBRK :2520-2524; GETBRK :2527-2596)
+#   Instruction encodings, same document, PASM2 encoding table --
+#     silicon-doc-text.txt:5337 (GETBRK), :5338 (COGBRK), :5339 (BRK)
+#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has no debug-interrupt
+#     section; it names the mechanism in the feature list at
+#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:74, notes the
+#     INA/INB remap at :542, and carries BRK/COGBRK/GETBRK in the PASM2 table at
+#     :1938-1944
 
 component_name: "Debug Interrupt"
 
@@ -16,101 +28,184 @@ description: |
 architecture:
   priority: "Highest (above INT1/2/3)"
   
-  trigger_modes:
-    - mode: "single_step"
-      description: "Interrupt after each instruction execution"
-      use_case: "Step through code instruction by instruction"
-    
-    - mode: "break_on_address"
-      description: "Interrupt when PC matches break address"
-      use_case: "Set breakpoints at specific code locations"
-    
-    - mode: "break_on_instruction"
-      description: "Interrupt before executing specific instruction"
-      use_case: "Break on specific operations like COGINIT"
-    
-    - mode: "async_trigger"
-      description: "External trigger via COGBRK instruction"
-      use_case: "Break from another COG or external event"
+  enable: >-
+    Debug interrupts are enabled per cog via HUBSET. A debug-enabled cog takes a debug
+    interrupt on every (re)start from a COGINIT exercised upon it. Each debug ISR must set
+    the trigger condition(s) for the NEXT debug interrupt with BRK before it exits; if it
+    sets none, no further debug interrupts occur until the cog is restarted.
   
-  shadow_registers:
-    description: "Debug has its own shadow register set"
-    registers:
-      - "IRET0 - Debug return address and flags"
-      - "PA/PB - Preserved parameter registers"
-      - "PTRA/PTRB - Preserved pointer registers"
-      - "C/Z flags - Preserved condition flags"
+  trigger_modes:
+    source: >-
+      The complete set, taken from the BRK D-operand format --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2500-2512. There are
+      exactly these conditions; each is one enable bit in BRK's D operand.
+    modes:
+    - mode: "breakpoint_address_match"
+      bit: "%K"
+      description: "Interrupt when execution reaches the 20-bit address in D[31:12]"
+    
+    - mode: "event_code_match"
+      bit: "%J"
+      description: "Interrupt on the 4-bit event code %eeee in D[15:12]"
+    
+    - mode: "asynchronous_breakpoint"
+      bit: "%I"
+      description: "Interrupt when another cog aims a COGBRK at this cog"
+    
+    - mode: "isr_entry"
+      bit: "%H / %G / %F"
+      description: "Interrupt on entry to the INT3 / INT2 / INT1 ISR"
+    
+    - mode: "brk_instruction"
+      bit: "%E"
+      description: "Interrupt when the debugged program executes a BRK instruction"
+    
+    - mode: "single_step"
+      bit: "%D / %C / %B / %A"
+      description: >-
+        Interrupt on each instruction of INT3 ISR code / INT2 ISR code / INT1 ISR code /
+        non-ISR code -- the four single-step scopes are enabled independently
+  
+  register_handling:
+    description: >-
+      There is no debug shadow register set. Two things happen instead. First, INA and
+      INB -- normally read-only input registers -- become the readable/writable registers
+      IJMP0 and IRET0 for the duration of the debug ISR, and IJMP0 is initialised to $1F8
+      on COGINIT. Second, an execute-only ROM at cog registers $1F8..$1FF provides
+      entry/exit routines that copy cog registers $000..$00F out to hub RAM and back.
+      Nothing preserves PA, PB, PTRA, PTRB or any other register automatically.
+    isr_entry_rom: "$1F8..$1FC -- saves $000..$00F to hub, loads the debugger, JMP #0"
+    isr_exit_rom: "$1FD..$1FF -- restores $000..$00F from hub, then RETI0"
+    hub_save_area: >-
+      Registers $000..$00F are saved at ($FF800 + !CogNumber << 7) and the ISR image is
+      loaded from ($FF840 + !CogNumber << 7). The last 16KB of hub RAM, also mapped at
+      $FC000..$FFFFF, holds these buffers and the initial debug ISR code, and can be
+      write-protected so that it is writable only from within a debug ISR.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2401,
+      :2411-2420, :2423-2439, and the per-cog address table at :2446-2477.
 
 configuration:
-  - register: "BRK"
-    description: "Breakpoint configuration register"
+  note: >-
+    The debug interrupt has no configuration REGISTERS. It is configured by the D operand
+    of a BRK instruction executed inside a debug ISR, and IJMP0/IRET0 (INA/INB remapped)
+    hold its vectors. SKIP and SKIPF are ordinary PASM2 instructions with no debug role.
+  brk_operand_format:
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > BRK D/# --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2498-2517.
+    layout: "%aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA"
     fields:
-      - bits: "[19:0]"
-        name: "break_address"
-        description: "20-bit address to break on"
-      - bits: "[31:20]"
-        name: "break_flags"
-        description: "Break condition flags"
-  
-  - register: "SKIP"
-    description: "Skip pattern for conditional execution"
-    usage: "Controls which instructions to skip during debug"
-  
-  - register: "SKIPF"
-    description: "Skip flags for instruction masking"
-    usage: "Fine control over instruction skipping"
+      - bits: "D[31:12]"
+        name: "address_or_event"
+        description: "20-bit breakpoint address, or a 4-bit event code %eeee in D[15:12]"
+      - bits: "D[11]"
+        name: "L"
+        description: >-
+          1 = map INA/INB normally so pin input states can be read; 0 = map IJMP0/IRET0
+          at INA/INB (the default during a debug ISR). If set to 1, it MUST be reset to 0
+          before the debug ISR exits, so that RETI0 can see IJMP0 and IRET0.
+      - bits: "D[10]"
+        name: "K"
+        description: "1 = enable interrupt on breakpoint address match"
+      - bits: "D[9]"
+        name: "J"
+        description: "1 = enable interrupt on event %eeee"
+      - bits: "D[8]"
+        name: "I"
+        description: "1 = enable interrupt on asynchronous breakpoint (COGBRK from another cog)"
+      - bits: "D[7:5]"
+        name: "H / G / F"
+        description: "1 = enable interrupt on INT3 / INT2 / INT1 ISR entry"
+      - bits: "D[4]"
+        name: "E"
+        description: "1 = enable interrupt on the BRK instruction"
+      - bits: "D[3:0]"
+        name: "D / C / B / A"
+        description: >-
+          1 = enable single-step interrupt on INT3 ISR code / INT2 ISR code / INT1 ISR
+          code / non-ISR code
+    on_entry: >-
+      Bits L through A are cleared to 0 on debug-ISR entry, so a BRK must be executed
+      before exiting the ISR if another debug interrupt is wanted.
 
 instructions:
   - instruction: "BRK"
-    encoding: "EEEE 0110110 CZI DDDDDDDDD SSSSSSSSS"
-    description: "Configure debug break conditions"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000110110"
+    description: >-
+      Two different jobs depending on where it runs. In normal code, BRK raises a debug
+      interrupt carrying an 8-bit code. Inside a debug ISR, BRK establishes the next
+      debug interrupt's trigger condition(s).
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > BRK D/# --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2489-2512; encoding
+      at silicon-doc-text.txt:5339; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1938-1939.
     operation: |
-      If D[20] = 1: Enable single-stepping mode
-      If D[20] = 0: Set breakpoint at address D[19:0]
-      Additional modes in D[31:21] for instruction matching
+      In normal program execution:
+        D/# = %BBBBBBBB, an 8-bit BRK code readable inside the debug ISR.
+        The interrupt fires regardless of the instruction's execution condition,
+        provided the BRK-instruction trigger was enabled by a prior debug ISR;
+        the execution condition only gates the writing of the 8-bit code.
+      Inside a debug ISR:
+        D/# carries the next-interrupt condition word -- see
+        configuration.brk_operand_format above.
     usage_example: |
-      BRK     #$100           ' Break at COG address $100
-      BRK     ##$1_00000      ' Enable single-stepping
+      ' In the debugged program: raise a debug interrupt carrying code $2A
+      BRK     #$2A
+      ' Inside a debug ISR: break next at address $00100 (%K set, bit 10)
+      BRK     ##($00100 << 12) | (1 << 10)
   
   - instruction: "COGBRK"
-    encoding: "EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS"
-    description: "Trigger debug interrupt in specified COG"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000110101"
+    description: "Trigger an asynchronous breakpoint in another cog"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > COGBRK D/# --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2520-2524; encoding
+      at silicon-doc-text.txt:5338; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1942.
     operation: |
-      Trigger debug interrupt in COG number D[2:0]
-      Can break any COG from any other COG
+      D/# = %CCCC, the cog in which to trigger an asynchronous breakpoint.
+      TWO preconditions, both required:
+        - the cog EXECUTING COGBRK must itself be inside its own debug ISR, and
+        - the TARGET cog must have its asynchronous-breakpoint interrupt enabled
+          (BRK's %I bit, set from within that cog's own prior debug ISR).
     usage_example: |
-      COGBRK  #2              ' Break COG 2
-      COGBRK  cognum          ' Break COG in cognum variable
+      COGBRK  #2              ' From inside our debug ISR, break cog 2
   
   - instruction: "GETBRK"
-    encoding: "EEEE 1101011 CZ1 DDDDDDDDD 0010101DD"
-    description: "Read break configuration"
+    encoding: "EEEE 1101011 CZ0 DDDDDDDDD 000110101"
+    description: >-
+      Read cog status. GETBRK does NOT read back a break configuration -- the effect
+      selector chooses which of three unrelated status words it returns.
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > GETBRK --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2527-2593; encoding
+      at silicon-doc-text.txt:5337; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1944.
     operation: |
-      D := current break configuration
-      Returns address and mode bits
-    flags_affected: "C, Z optionally"
+      GETBRK D WCZ  -- cog internal status:
+        C = 1 if STALLI mode, 0 if ALLOWI mode; Z = 1 if started in hubexec
+        D[22] colorspace converter active, D[21] streamer active,
+        D[20] WRFAST(1)/RDFAST(0), D[19:16]/[15:12]/[11:08] INT3/INT2/INT1
+        selectors, D[07:06]/[05:04]/[03:02] INT3/INT2/INT1 state,
+        D[01] STALLI mode, D[00] started in hubexec.
+        Inside a debug ISR it additionally returns C = 1 if the debug interrupt
+        came from a COGINIT, D[31:24] = the last BRK code, D[23] = COGINIT flag.
+      GETBRK D WC   -- SKIP/SKIPF/EXECF/XBYTE state plus the 16 event-trap flags
+        in D[15:00]; C = LSB of the skip pattern.
+      GETBRK D WZ   -- the 32-bit SKIP/SKIPF/EXECF/XBYTE pattern;
+        Z = 1 if no pattern is queued.
+    flags_affected: "C and/or Z, per the form selected -- see above"
     usage_example: |
-      GETBRK  break_config WC ' Get config, C = enabled
-  
-  - instruction: "NIXINT0"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100110010"
-    description: "Cancel pending debug interrupt"
-    operation: "Clear debug interrupt pending flag"
-    usage_example: |
-      NIXINT0                 ' Cancel debug interrupt
-  
-  - instruction: "TRGINT0"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 100110011"
-    description: "Trigger debug interrupt by software"
-    operation: "Force debug interrupt immediately"
-    usage_example: |
-      TRGINT0                 ' Software debug break
+      GETBRK  status WCZ      ' Cog internal status; C = STALLI mode
 
 debug_modes:
   - mode: "single_step"
     configuration: |
-      BRK     ##$1_00000      ' Enable single-step (inside Debug ISR)
-      ALLOWI                  ' Allow interrupts
+      ' Inside the debug ISR: enable single-step on non-ISR code (%A, bit 0)
+      BRK     #%0000_0000_0001
     
     handler: |
       debug_isr:
@@ -127,8 +222,8 @@ debug_modes:
   
   - mode: "address_breakpoint"
     configuration: |
-      BRK     #break_addr     ' Set break address (inside Debug ISR)
-      ALLOWI                  ' Allow interrupts
+      ' Inside the debug ISR: break at a 20-bit address (%K, bit 10)
+      BRK     ##(break_addr << 12) | (1 << 10)
     
     handler: |
       debug_isr:
@@ -144,31 +239,34 @@ debug_modes:
       - "Loop iteration counting"
       - "Conditional breakpoints"
   
-  - mode: "instruction_break"
+  - mode: "brk_instruction_break"
     configuration: |
-      BRK     ##$2_00000 | instruction_pattern  ' Inside Debug ISR
-      ALLOWI
+      ' Inside the debug ISR: break when the program executes BRK (%E, bit 4)
+      BRK     #%0000_0001_0000
     
     handler: |
       debug_isr:
-          ' Specific instruction intercepted
-          ' Can modify operation or log
+          GETBRK  status WCZ           ' D[31:24] = the 8-bit code the BRK carried
+          SHR     status, #24
+          ' dispatch on the code
           RETI0
     
     use_cases:
+      - "Software-planted breakpoints carrying an 8-bit code"
       - "System call interception"
-      - "Instruction profiling"
-      - "Operation validation"
+    note: >-
+      There is no "break on a matching instruction pattern" trigger. The eight trigger
+      conditions are exactly those in architecture.trigger_modes.
 
 programming_patterns:
   - pattern: "execution_tracer"
     description: "Trace program execution to hub memory"
     code: |
-      ' Setup execution trace
-              MOV     IJMP0, #trace_isr    ' Debug ISR
+      ' All of this runs INSIDE a debug ISR -- IJMP0/IRET0 exist only there,
+      ' as INA/INB remapped, and BRK's condition bits are cleared on ISR entry.
+              MOV     IJMP0, #trace_isr    ' Redirect subsequent debug ISRs
               MOV     trace_ptr, ##TRACE_BUFFER
-              BRK     ##$1_00000           ' Single-step mode (inside Debug ISR)
-              ALLOWI                       ' Start tracing
+              BRK     #%0000_0000_0001     ' Single-step non-ISR code (%A)
               
       trace_isr:
               WRLONG  IRET0, trace_ptr     ' Save PC
@@ -208,7 +306,8 @@ programming_patterns:
   - pattern: "remote_debugging"
     description: "Debug COG from another COG"
     code: |
-      ' Debugger COG
+      ' Debugger COG -- COGBRK is legal only from inside our OWN debug ISR,
+      ' and the target must have its asynchronous-breakpoint bit (%I) enabled.
       debug_control:
               COGBRK  #target_cog          ' Break target
               ' Wait for target to hit breakpoint
@@ -307,12 +406,29 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
+    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
+      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
-        - "part1-cog.txt, Debug Interrupt System"
-        - "Debug instructions and modes"
-    - document: "P2 Datasheet"
+        - "DEBUG INTERRUPT -- lines 2393-2593"
+        - "PASM2 encoding table -- lines 5337 (GETBRK), 5338 (COGBRK), 5339 (BRK)"
+    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
+      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
-        - "Pages 39-40: Debug interrupt details"
+        - "Feature list, hidden debug interrupt -- line 74"
+        - "Cog register note, INA/INB as debug call/return -- line 542"
+        - "PASM2 instruction table, BRK/COGBRK/GETBRK -- lines 1938-1944"
+  re_derivation_note: >-
+    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    `part1-cog.txt`, a file that has never existed. Corrected in this pass: a
+    `shadow_registers` block claiming debug shadows of PA/PB/PTRA/PTRB, replaced by the
+    real mechanism (INA/INB remapped to IJMP0/IRET0, plus the $1F8..$1FF ROM and the
+    upper-hub save area); three fabricated "configuration registers" (BRK as a register
+    with a [31:20] flags field, and SKIP/SKIPF as debug registers), replaced by BRK's
+    actual 20-bit-address + twelve-enable-bit operand format; the BRK, COGBRK and GETBRK
+    encodings; GETBRK's operation, which is a cog-status read in three forms and not a
+    read-back of the break configuration; and COGBRK's two preconditions, which were
+    missing. The fabricated mnemonics NIXINT0 and TRGINT0 were removed -- they are in no
+    Parallax source, in no other file of this knowledge base, and pnut-ts does not accept
+    either as an instruction.
   confidence: "high"
   last_updated: "2024-12-30"

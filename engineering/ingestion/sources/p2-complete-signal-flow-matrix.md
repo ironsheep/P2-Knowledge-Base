@@ -10,84 +10,8 @@
 
 ## Complete Signal Path Tables
 
-### LED Signal Paths (64025 Board)
+> **Removed 2026-08-26 (F-341, task «#323»).** Content describing Parallax part numbers **#64025 "LED Board"**, **#64026 "7-Segment Display"** and **#64027 "Switches Board"** was deleted from this section. Those three part numbers appear in no captured Parallax document; Stephen confirmed on 2026-08-26 that they are invented. The real boards nearest to what they claimed are the **#64006C LED Matrix** (an 8x7 Charlieplexed grid on 8 pins, not eight discrete LEDs) and the **#64006A Control** add-on (four buttons and four LEDs, not eight switches); there is no 7-segment board in the #64006 series. The removed pin maps, currents and test procedures described none of those, so they were deleted rather than relabelled -- relabelling would have attached fabricated numbers to real boards.
 
-| LED # | Circuit Element | Header Pin | Board Location | P2 Port | Smart Pin Mode | Cog Access |
-|-------|----------------|------------|----------------|---------|----------------|------------|
-| LED0 | 330Ω→LED→GND | Pin 1 | Rev C: P0 | P0 | P_NORMAL | OUTH[0] |
-| | | | Edge: P32 | P32 | P_NORMAL | OUTH[32] |
-| LED1 | 330Ω→LED→GND | Pin 2 | Rev C: P1 | P1 | P_NORMAL | OUTH[1] |
-| | | | Edge: P33 | P33 | P_NORMAL | OUTH[33] |
-| LED2 | 330Ω→LED→GND | Pin 3 | Rev C: P2 | P2 | P_NORMAL | OUTH[2] |
-| | | | Edge: P34 | P34 | P_NORMAL | OUTH[34] |
-| LED3 | 330Ω→LED→GND | Pin 4 | Rev C: P3 | P3 | P_NORMAL | OUTH[3] |
-| | | | Edge: P35 | P35 | P_NORMAL | OUTH[35] |
-| LED4 | 330Ω→LED→GND | Pin 5 | Rev C: P4 | P4 | P_NORMAL | OUTH[4] |
-| | | | Edge: P36 | P36 | P_NORMAL | OUTH[36] |
-| LED5 | 330Ω→LED→GND | Pin 6 | Rev C: P5 | P5 | P_NORMAL | OUTH[5] |
-| | | | Edge: P37 | P37 | P_NORMAL | OUTH[37] |
-| LED6 | 330Ω→LED→GND | Pin 7 | Rev C: P6 | P6 | P_NORMAL | OUTH[6] |
-| | | | Edge: P38 | P38 | P_NORMAL | OUTH[38] |
-| LED7 | 330Ω→LED→GND | Pin 8 | Rev C: P7 | P7 | P_NORMAL | OUTH[7] |
-| | | | Edge: P39 | P39 | P_NORMAL | OUTH[39] |
-
-**Signal Characteristics:**
-- Output Type: Digital push-pull
-- Drive Current: 20mA nominal, 50mA absolute max
-- Logic Levels: 0V (OFF), 3.3V (ON)
-- Rise/Fall Time: <2ns at 50Ω load
-
-### Switch Signal Paths (64027 Board)
-
-| Switch # | Circuit Element | Header Pin | Board Location | P2 Port | Smart Pin Mode | Cog Access |
-|----------|----------------|------------|----------------|---------|----------------|------------|
-| SW0 | Switch→GND | Pin 1 | Rev C: P0 | P0 | P_HIGH_15K | INA[0] |
-| | 10kΩ Pull-up | | Edge: P32 | P32 | P_HIGH_15K | INA[32] |
-| SW1 | Switch→GND | Pin 2 | Rev C: P1 | P1 | P_HIGH_15K | INA[1] |
-| | 10kΩ Pull-up | | Edge: P33 | P33 | P_HIGH_15K | INA[33] |
-| SW2 | Switch→GND | Pin 3 | Rev C: P2 | P2 | P_HIGH_15K | INA[2] |
-| | 10kΩ Pull-up | | Edge: P34 | P34 | P_HIGH_15K | INA[34] |
-| SW3 | Switch→GND | Pin 4 | Rev C: P3 | P3 | P_HIGH_15K | INA[3] |
-| | 10kΩ Pull-up | | Edge: P35 | P35 | P_HIGH_15K | INA[35] |
-| SW4 | Switch→GND | Pin 5 | Rev C: P4 | P4 | P_HIGH_15K | INA[4] |
-| | 10kΩ Pull-up | | Edge: P36 | P36 | P_HIGH_15K | INA[36] |
-| SW5 | Switch→GND | Pin 6 | Rev C: P5 | P5 | P_HIGH_15K | INA[5] |
-| | 10kΩ Pull-up | | Edge: P37 | P37 | P_HIGH_15K | INA[37] |
-| SW6 | Switch→GND | Pin 7 | Rev C: P6 | P6 | P_HIGH_15K | INA[6] |
-| | 10kΩ Pull-up | | Edge: P38 | P38 | P_HIGH_15K | INA[38] |
-| SW7 | Switch→GND | Pin 8 | Rev C: P7 | P7 | P_HIGH_15K | INA[7] |
-| | 10kΩ Pull-up | | Edge: P39 | P39 | P_HIGH_15K | INA[39] |
-
-**Signal Characteristics:**
-- Input Type: Digital with internal pull-up
-- Logic Levels: 0V (pressed), 3.3V (released)
-- Debounce Required: 10-50ms typical
-- Current Draw: 220µA through pull-up when pressed
-
-### 7-Segment Display Signal Paths (64026 Board)
-
-| Signal | Function | Circuit | Header Pin | P2 Port (Rev C) | P2 Port (Edge) | Drive Required |
-|--------|----------|---------|------------|-----------------|----------------|----------------|
-| A | Segment A | LED+Resistor | Pin 1 | P0 | P32 | 20mA |
-| B | Segment B | LED+Resistor | Pin 2 | P1 | P33 | 20mA |
-| C | Segment C | LED+Resistor | Pin 3 | P2 | P34 | 20mA |
-| D | Segment D | LED+Resistor | Pin 4 | P3 | P35 | 20mA |
-| E | Segment E | LED+Resistor | Pin 5 | P4 | P36 | 20mA |
-| F | Segment F | LED+Resistor | Pin 6 | P5 | P37 | 20mA |
-| G | Segment G | LED+Resistor | Pin 7 | P6 | P38 | 20mA |
-| DP | Decimal Point | LED+Resistor | Pin 8 | P7 | P39 | 20mA |
-| DIG0 | Digit 0 Enable | Transistor | Pin 9 | P8 | P40 | 5mA (base) |
-| DIG1 | Digit 1 Enable | Transistor | Pin 10 | P9 | P41 | 5mA (base) |
-| DIG2 | Digit 2 Enable | Transistor | Pin 11 | P10 | P42 | 5mA (base) |
-| DIG3 | Digit 3 Enable | Transistor | Pin 12 | P11 | P43 | 5mA (base) |
-| DIG4 | Digit 4 Enable | Extra 1 | P12 | P44 | 5mA (base) |
-| DIG5 | Digit 5 Enable | Extra 2 | P13 | P45 | 5mA (base) |
-
-**Multiplexing Requirements:**
-- Refresh Rate: >60Hz to avoid flicker
-- Duty Cycle: 1/6 for 6 digits (16.7%)
-- Peak Current: 8 segments × 20mA = 160mA per digit
-- Average Current: 160mA / 6 = 27mA continuous
 
 ### Analog Signal Paths (40004 Goertzel Board)
 
@@ -210,12 +134,6 @@ CON
   
 PUB calculate_vio_load(board_type, addon_type) : total_ma
   case addon_type
-    ADDON_64025_LED:
-      total_ma := LED_CURRENT * 8
-    ADDON_64026_7SEG:
-      total_ma := SEGMENT_CURRENT * 8  ' Per digit when active
-    ADDON_64027_SWITCH:
-      total_ma := PULLUP_CURRENT * 8
     ADDON_64029_COMBO:
       total_ma := (LED_CURRENT * 4) + (PULLUP_CURRENT * 8)
     ADDON_40004_GOERTZEL:
@@ -286,9 +204,8 @@ CON
   
   ' Addon type detection
   ADDON_UNKNOWN = 0
-  ADDON_64025_LED = 1
-  ADDON_64026_7SEG = 2
-  ADDON_64027_SWITCH = 3
+  ' NOTE 2026-08-26 (F-341): three ADDON_* constants were removed here --
+  ' the part numbers they named are invented and name no Parallax board.
   ADDON_64028_BUTTON = 4
   ADDON_64029_COMBO = 5
   ADDON_40003_PROTO = 6
@@ -322,24 +239,10 @@ PRI detect_addon_signature() : addon_type | z_test
   ' Check natural state
   z_test := INA[base_pin ADDPINS 7]
   
-  case z_test
-    $FF:  ' All high = external pull-ups
-      return ADDON_64027_SWITCH
-    $00:  ' All low = LEDs or no connection
-      return detect_led_vs_none()
-    other:
-      return ADDON_UNKNOWN
-      
-PRI detect_led_vs_none() : addon_type
-  ' Try to detect LED forward voltage
-  WRPIN(base_pin, P_HIGH_1K5)  ' Weak pull-up
-  DIRH(base_pin)
-  waitms(1)
-  
-  if INA[base_pin] == 0  ' Current flowing
-    return ADDON_64025_LED
-  else
-    return ADDON_UNKNOWN
+  ' NOTE 2026-08-26 (F-341): the impedance-signature branch returned two invented
+  ' add-on boards, so it was removed along with them. No Parallax source describes
+  ' detecting an add-on board by pin impedance.
+  return ADDON_UNKNOWN
 ```
 
 This completes the comprehensive signal flow matrix showing the complete path from physical devices through all stages to the P2 processor core!

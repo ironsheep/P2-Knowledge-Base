@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-017`**
+> **Next erratum ID: `E-018`**
 
 ## What this register is for
 
@@ -93,6 +93,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-008 | #64010 Universal Motor Driver Guide | pin-definitions table duplicates channel X on offsets 9/8 and omits channel U | never carried | `RESOLVED` |
 | E-009 | #64000 Eval Board Rev C Guide | board size printed as "3.55″ × 3.55″ (90 x 90 cm)" — the metric unit is wrong | never carried | `RESOLVED` |
 | E-010 | P2 Edge Module (#P2-EC) v3.0 **and** P2-EC32MB Rev B v2.0 | "have I/O pin **pull-ups** activated" — the P2 has none; they are drive strengths, live only with DIR high | diverges (fixed 2026-08-26) | `RESOLVED` |
+| E-017 | P2 Datasheet 2022/11/01 | `COGATN` operand width: its prose says **lower 8 bits / 8 strobes**, its own instruction table says **D[15:0]**, and the Silicon Doc says **16** | matches the datasheet prose | `CONFIRMED` |
 
 ---
 
@@ -458,6 +459,37 @@ what conditions RDFAST corrupts, and how many clock cycles suffice — is routed
 **Evidence tier:** designer confirmation in the source document's own review thread. ·
 **Reached our KB?** **Never carried** — `deliverables/ai/P2/` has no RDFAST hazard note, which is
 itself the gap, not a divergence.
+
+---
+
+## E-017 — `COGATN`'s operand width: the Datasheet's prose says **8 bits**, its own instruction table says **D[15:0]**, and the Silicon Doc says **16** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **P2 Datasheet**, 2022/11/01 | Cog Attention (p.15-16) | *"One or more of the D operand's **lower 8 bits** may be set high (1) to signal the corresponding cog or cogs… the attention strobe outputs from all cogs are OR'd together to form a composite set of **8 strobes**"* | `sources/p2-datasheet/p2-datasheet-text.txt:682-692` |
+| Against (the **same** document) | same | instruction summary table | `COGATN {#}D — Strobe "attention" of all cogs whose corresponding bits are high in **D[15:0]**.` | `sources/p2-datasheet/p2-datasheet-text.txt:1854` |
+| Against (other document) | **Propeller 2 Documentation**, v35 (Rev B/C) | COG ATTENTION | *"The D/# operand supplies a **16-bit** value in which bits 0..15 represent cogs 0..15… a composite set of **16** strobes"*, with the example `COGATN #%0000_0000_1111_0000` | `sources/silicon-doc/silicon-doc-text.txt:2020` |
+| Bounding fact | **P2 Datasheet**, 2022/11/01 | part summary line | *"Propeller 2 — **8 cogs** (processors), 4 Mbit Hub RAM (512 KB), 64 smart I/O pins"* | `sources/p2-datasheet/p2-datasheet-text.txt:31` |
+
+**OUR FINDING.** **The Datasheet contradicts itself**, and that self-contradiction is the erratum:
+one document, two widths, eleven hundred lines apart. The Silicon Doc is consistent with the
+Datasheet's *table* and not with its *prose*.
+
+The likeliest reading — and it is a reading, not something either document states — is that the
+architectural operand is 16 bits wide while the **P2X8C4M64P carries 8 cogs**, so only D[7:0] can
+strobe anything on this part. **Neither source says that.** Specifically, neither states what
+happens to bits set in D[15:8] on an 8-cog part: ignored, aliased onto cogs 0..7, or undefined.
+That is the open question, and it is **bench-testable without external hardware** — set a high bit,
+poll ATN on every cog, print the result — so it belongs on the empirical ledger rather than in a
+guess here.
+
+**Evidence tier:** two Parallax documentary sources, one of which disagrees with itself; no
+empirical result yet. · **Reached our KB?** **Yes, and matching the Datasheet prose** —
+`deliverables/ai/P2/language/pasm2/cogatn.yaml:6` says *"Dest bit positions 7:0"* and
+`architecture/cog_attention.yaml` records the 8-bit form with the conflict noted inline. That is
+the right choice for the shipped part, so **no KB change is owed**; what is owed is that the KB
+should not be the only place the conflict is written down. Filed 2026-08-26 during «#323»
+verification, after re-deriving `cog_attention.yaml` from the Silicon Doc surfaced the mismatch.
 
 ---
 

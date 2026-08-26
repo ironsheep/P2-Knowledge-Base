@@ -1,7 +1,18 @@
 # P2 Event System
-# Silicon Doc Reference: part1-cog.txt, pages 20-22
-# Datasheet Reference: pages 37-39, 74-75
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# never existed and datasheet pages beyond the end of a 50-page datasheet):
+#   Propeller 2 Documentation v35 (Rev B/C Silicon), section EVENTS --
+#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2035-2261
+#     (the sixteen events :2037-2054; POLLxxx :2061-2079; WAITxxx :2082-2100;
+#      Jxxx/JNxxx :2104-2121; per-flag detail :2124-2213;
+#      Selectable Events + SETSEn encoding :2230-2260)
+#   Pattern-match (PAT) event rules -- silicon-doc-text.txt:2155-2161
+#   Instruction encodings, same document, PASM2 encoding table --
+#     silicon-doc-text.txt:5264-5267 (SETSEn), :5273-5276 (POLLSEn),
+#     :5290-5293 (WAITSEn), :5204 (SETPAT)
+#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has no events section; it
+#     carries SETPAT's C/Z selection rule in the PASM2 table at
+#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1909
 
 component_name: "Event System"
 
@@ -18,22 +29,33 @@ architecture:
   event_sources: 16
   selectable_events: 4  # SE1-SE4
   
-  event_categories:
-    - category: "timer_events"
-      sources: ["CT-passed-CT1", "CT-passed-CT2", "CT-passed-CT3"]
-      description: "System counter comparison events"
-    
-    - category: "pin_events"
-      sources: ["PAT-match", "Edge-detect", "State-change"]
-      description: "Pin state and pattern events"
-    
-    - category: "smart_pin_events"
-      sources: ["IN-rise", "IN-fall", "IN-change"]
-      description: "Smart pin status events"
-    
-    - category: "system_events"
-      sources: ["CORDIC-done", "Streamer-done", "FIFO-event", "ATN-received"]
-      description: "Subsystem completion and communication events"
+  the_sixteen_events:
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS -- "Cogs monitor and track 16
+      different background events, numbered 0..15",
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2037-2054.
+    list:
+      - {event: 0,  name: "interrupt occurred",        poll: "POLLINT"}
+      - {event: 1,  name: "CT passed CT1",             poll: "POLLCT1"}
+      - {event: 2,  name: "CT passed CT2",             poll: "POLLCT2"}
+      - {event: 3,  name: "CT passed CT3",             poll: "POLLCT3"}
+      - {event: 4,  name: "selectable event 1 occurred", poll: "POLLSE1"}
+      - {event: 5,  name: "selectable event 2 occurred", poll: "POLLSE2"}
+      - {event: 6,  name: "selectable event 3 occurred", poll: "POLLSE3"}
+      - {event: 7,  name: "selectable event 4 occurred", poll: "POLLSE4"}
+      - {event: 8,  name: "pattern match or mismatch on INA or INB", poll: "POLLPAT"}
+      - {event: 9,  name: "hub FIFO block-wrap -- new start address and block count loaded", poll: "POLLFBW"}
+      - {event: 10, name: "streamer command buffer empty, ready for a new command", poll: "POLLXMT"}
+      - {event: 11, name: "streamer finished -- out of commands, now idle", poll: "POLLXFI"}
+      - {event: 12, name: "streamer NCO rollover occurred", poll: "POLLXRO"}
+      - {event: 13, name: "streamer read lookup RAM location $1FF", poll: "POLLXRL"}
+      - {event: 14, name: "attention requested by another cog or cogs", poll: "POLLATN"}
+      - {event: 15, name: "GETQX/GETQY executed with no CORDIC result available", poll: "POLLQMT"}
+    note: >-
+      Every event but 15 also has a matching WAITxxx and a Jxxx/JNxxx branch. There is no
+      WAITQMT, because that event cannot occur while waiting
+      (silicon-doc-text.txt:2102). Events 0-3 and 8-15 are fixed sensors; only events 4-7
+      are programmable, via SETSE1..4.
   
   event_routing:
     - destination: "interrupts"
@@ -76,6 +98,11 @@ instructions:
   - instruction: "SETSE1"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100000"
     description: "Configure selectable event 1"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS > Selectable Events --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2230-2260; encodings
+      for SETSE1..4 at silicon-doc-text.txt:5264-5267, for POLLSE1..4 at :5273-5276, for
+      WAITSE1..4 at :5290-5293.
     operation: |
       SE1 := D[8:0] event configuration (9 bits)
       SETSE can ONLY configure pin, LUT, or lock events (NOT timer/ATN/pattern events)
@@ -100,74 +127,87 @@ instructions:
       SETSE1  #%000_01_0101    ' Lock 5 rises
   
   - instruction: "SETSE2"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001100001"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100001"
     description: "Configure selectable event 2"
     operation: "Similar to SETSE1 for event selector 2"
   
   - instruction: "SETSE3"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001100010"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100010"
     description: "Configure selectable event 3"
   
   - instruction: "SETSE4"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001100011"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100011"
     description: "Configure selectable event 4"
   
   - instruction: "POLLSE1"
-    encoding: "EEEE 1101011 CZ0 000000000 001100100"
-    description: "Poll selectable event 1"
+    encoding: "EEEE 1101011 CZ0 000000100 000100100"
+    description: "Get the SE1 event flag into C and/or Z, then clear it"
     operation: |
-      C := event1_flag
-      event1_flag := 0 (cleared)
-    flags_affected: "C = event occurred"
-    timing: "2 clock cycles"
+      C and/or Z := SE1 event flag (per WC / WZ / WCZ)
+      The flag is then cleared, unless the event sensor is setting it again on
+      the same clock. SE1 is also cleared by WAITSE1/JSE1/JNSE1 and by SETSE1.
+    flags_affected: "C and/or Z = SE1 event flag"
+    timing: "2 clocks"
     usage_example: |
       POLLSE1 WC              ' Check SE1
       IF_C    JMP #event1_handler
   
   - instruction: "POLLSE2"
-    encoding: "EEEE 1101011 CZ0 000000000 001100101"
+    encoding: "EEEE 1101011 CZ0 000000101 000100100"
     description: "Poll selectable event 2"
   
   - instruction: "POLLSE3"
-    encoding: "EEEE 1101011 CZ0 000000000 001100110"
+    encoding: "EEEE 1101011 CZ0 000000110 000100100"
     description: "Poll selectable event 3"
   
   - instruction: "POLLSE4"
-    encoding: "EEEE 1101011 CZ0 000000000 001100111"
+    encoding: "EEEE 1101011 CZ0 000000111 000100100"
     description: "Poll selectable event 4"
   
   - instruction: "WAITSE1"
-    encoding: "EEEE 1101011 CZ0 000000000 001101000"
-    description: "Wait for selectable event 1"
+    encoding: "EEEE 1101011 CZ0 000010100 000100100"
+    description: "Wait for the SE1 event flag, then clear it"
     operation: |
-      Wait until event1_flag = 1
-      event1_flag := 0 (auto-clear)
-    timing: "2+ cycles (waits for event)"
+      Wait until the SE1 event flag is set (it may already be), then clear it.
+      A SETQ immediately before supplies a future CT target that ends the wait
+      early; with WC, C is set if that timeout occurred before the event.
+    timing: "2+ clocks (waits for the event)"
     usage_example: |
       WAITSE1                 ' Wait for event 1
       ' Event occurred, continue
   
   - instruction: "WAITSE2"
-    encoding: "EEEE 1101011 CZ0 000000000 001101001"
+    encoding: "EEEE 1101011 CZ0 000010101 000100100"
     description: "Wait for selectable event 2"
   
   - instruction: "WAITSE3"
-    encoding: "EEEE 1101011 CZ0 000000000 001101010"
+    encoding: "EEEE 1101011 CZ0 000010110 000100100"
     description: "Wait for selectable event 3"
   
   - instruction: "WAITSE4"
-    encoding: "EEEE 1101011 CZ0 000000000 001101011"
+    encoding: "EEEE 1101011 CZ0 000010111 000100100"
     description: "Wait for selectable event 4"
   
   - instruction: "SETPAT"
-    encoding: "EEEE 1101011 00L DDDDDDDDD SSSSSSSSS"
-    description: "Set pin pattern for pattern matching"
+    encoding: "EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS"
+    description: "Set the pin pattern that raises the PAT event (event 8)"
+    source: >-
+      Propeller 2 Documentation v35 (Rev B/C), EVENTS > POLLPAT/WAITPAT event flag --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2155-2161; encoding
+      at silicon-doc-text.txt:5204; P2 Datasheet 2022/11/01 PASM2 table --
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1909.
     operation: |
-      Configure pattern match for pins
-      D = pattern mask
-      S = pattern value
+      D = mask, S = match value.
+      C and Z are read as INPUTS at the moment SETPAT executes -- they are not
+      effect flags, and pnut-ts rejects `SETPAT D,S WC/WZ/WCZ`. Set them first:
+        C=0, Z=0  ->  event set whenever (INA & D) != S
+        C=0, Z=1  ->  event set whenever (INA & D) == S
+        C=1, Z=0  ->  event set whenever (INB & D) != S
+        C=1, Z=1  ->  event set whenever (INB & D) == S
+      SETPAT also clears the PAT event flag.
     usage_example: |
-      SETPAT  mask, pattern   ' Set pattern to detect
+      CMP     mask, mask WCZ  ' C := 0 (watch INA), Z := 1 (fire on ==)
+      SETPAT  mask, pattern   ' Set the pattern to detect
 
 event_configurations:
   pin_edge_detection:
@@ -210,11 +250,14 @@ event_configurations:
     note: "Pattern match uses WAITPAT directly - SETSE cannot configure pattern events"
 
     setup_example: |
-      ' Wait for pins 7:0 = $A5
+      ' Wait for INA[7:0] == $A5.
+      ' C and Z are INPUTS to SETPAT: C picks INA(0)/INB(1), Z picks !=(0)/==(1).
+      ' They must be set BEFORE SETPAT -- SETPAT takes no WC/WZ effect.
       MOV     mask, #$FF
       MOV     pattern, #$A5
+      CMP     mask, mask WCZ  ' C := 0 (INA), Z := 1 (fire on equality)
       SETPAT  mask, pattern
-      WAITPAT                 ' Wait for pattern match (dedicated instruction)
+      WAITPAT                 ' Wait for (INA & mask) == pattern
   
   timer_events:
     description: "Events based on counter comparisons using dedicated WAITCTn (not SETSE)"
@@ -428,8 +471,10 @@ performance_characteristics:
   simultaneous_events: "All 4 SE events tracked independently"
   
   overhead:
-    configuration: "2 clocks per SETSE instruction"
-    monitoring: "2 clocks per POLL, 0 for WAIT"
+    configuration: "2 clocks per SETSEn instruction"
+    monitoring: >-
+      2 clocks per POLLSEn. A WAITSEn costs 2 clocks once the flag is already set, and
+      stalls the cog for as long as it is not -- there is no separate per-wait overhead.
 
 limitations:
   - limitation: "four_selectable_events"
@@ -489,13 +534,22 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
+    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
+      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
-        - "part1-cog.txt, Event System"
-        - "Event instructions and configurations"
-    - document: "P2 Datasheet"
+        - "EVENTS -- lines 2035-2260"
+        - "PASM2 encoding table -- lines 5204, 5264-5267, 5273-5276, 5290-5293"
+    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
+      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
-        - "Pages 37-39: Event instructions"
-        - "Pages 74-75: Event architecture"
+        - "PASM2 instruction table, SETPAT -- line 1909"
+  re_derivation_note: >-
+    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    `part1-cog.txt` (a file that has never existed) and datasheet pages 74-75 (the
+    datasheet is 50 pages; it has no events section). Corrected in this pass: an invented
+    event taxonomy naming events the P2 does not have ("Edge-detect", "IN-rise",
+    "CORDIC-done"), replaced by the sixteen the source enumerates; eleven of the twelve
+    SE/PAT instruction encodings; and SETPAT's C/Z selection, which the file omitted --
+    the worked example it shipped selected mismatch mode while its comment said match.
   confidence: "high"
   last_updated: "2024-12-30"
