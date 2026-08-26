@@ -95,7 +95,7 @@ prerequisites:
   - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Legality checked with pnut-ts v1.55.3 (compiler, legality only); pin-drive semantics from the P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, and hardware-verified in EF-063/EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840; A/B input selectors from Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:13-36"
+  source: "Legality checked with pnut-ts v1.55.3 (compiler, legality only); pin-drive semantics from the P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147 (documentary, and the authority for the pin-drive statements here; EF-063 and EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840 -- corroborate the mechanism only INCIDENTALLY, as rig apparatus for a streamer-fed DAC %TT finding (:813) and a streamer pin-placement finding (:834); neither is a drive-strength finding); A/B input selectors from Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:13-36"
   items:
     - flag: pitfall
       text: "P_B_A_INPUT does not exist -- it is undefined in pnut-ts and appears in no Parallax symbol table. Single-pin routing is the bare mode constant (the %AAAA and %BBBB selectors both default to 'this pin's read state') plus P_MINUS1_A|P_MINUS1_B for the reciprocal-periods cell, or P_PLUS1_B for quadrature. Never add P_B_A_INPUT."

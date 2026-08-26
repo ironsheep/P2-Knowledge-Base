@@ -152,7 +152,17 @@ pin_mapping:
       line is HIGH. Because P2 I/O is high-impedance by default, the LEDs are
       sensitive to objects moving close to the P56/P57 edge-connector pins; the
       buffer isolates the LEDs so they do not influence the I/O signals. Drive the
-      pins high or low (or enable a pin pull-up) to control the LEDs deterministically.
+      pins high or low to control the LEDs deterministically.
+    do_not_copy_the_guides_wording: >-
+      The guide adds a third option: those pins "could be driven high or low, or
+      have I/O pin pull-ups activated, to control the LEDs without the
+      high-impedance behavior". The second alternative does not exist on this
+      part -- the P2 has NO pull-up resistor to enable. A line is held weakly
+      high or low by DRIVING weakly in that direction with DIR high; the %M..M
+      drive ladder and the DIR/OUT rule that governs it are stated once in
+      architecture/pin-drive-configuration.yaml (idioms.weak_high /
+      idioms.weak_low, and drive_ladder.no_other_rungs). Filed as
+      engineering/ingestion/SOURCE-ERRATA.md E-010.
     disable: "the DIP switch marked LED removes power from both LEDs"
     source: >-
       P2-EC Edge Module Rev D Product Guide v3.0, 7. LED Buffer and 8. LEDs P56 and P57 --

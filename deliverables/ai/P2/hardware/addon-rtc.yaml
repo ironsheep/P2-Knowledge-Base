@@ -69,9 +69,12 @@ pin_mode_tip:
     The P2-side mechanism is corrected against the Spin2 v55 built-in symbol table
     (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1500-1509), the
     P2 Datasheet Pin Mode legend
-    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144), and
-    empirical findings EF-063 / EF-064
-    (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840).
+    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144). Those
+    documentary sources are the authority. EF-063 and EF-064
+    (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840,
+    real P2, 2026-08-20) corroborate the mechanism only INCIDENTALLY: they are rig
+    apparatus for a streamer-fed DAC %TT finding (:813) and a streamer
+    pin-placement finding (:834). Neither is a drive-strength finding.
   board_fact: >-
     SCL, INT and CLKOUT share the single +0 IO pin, so only one of the three can
     be in use at a time. To use INT or CLKOUT, first configure them over I2C per

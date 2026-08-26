@@ -230,7 +230,7 @@ pin_span_setq_override:
     no_setq: "Use instruction's embedded ADDPINS or constant field normally"
 
 internal_pull_resistors:
-  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, :117; hardware-verified idioms EF-063 and EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840"
+  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, :117. THAT IS THE AUTHORITY HERE -- documentary, not empirical. EF-063 and EF-064 (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840, real P2, 2026-08-20) corroborate that the mechanism behaves as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements: EF-063 is a streamer-fed DAC %TT finding (:813) and EF-064 a streamer pin-placement finding (:834). Neither is a pull-up/drive-strength finding, and the ledger contains none."
   there_is_no_bias_resistor_selector: |
     The P2 has no internal pull-up/pull-down resistor network. The Pin Mode Legend
     enumerates the whole %M..M field -- C, I, O, HHH, LLL -- and there is no
@@ -240,8 +240,13 @@ internal_pull_resistors:
   the_dir_rule: |
     A drive selection is a property of DRIVING, so it is live only while the pin
     drives. Configuring a weak drive and then dropping DIR gives a plain
-    high-impedance input with the selection INACTIVE. This was measured on real
-    silicon (EF-063, EF-064, 2026-08-20); it is the reason the older form of this
+    high-impedance input with the selection INACTIVE. The authority for that is
+    the Datasheet Pin Mode Legend -- "DIR = direction bit; 0: input (float),
+    1: output (drive)", engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144
+    -- and NOT a bench measurement. EF-063 and EF-064 use a weak drive with DIR
+    HIGH as rig apparatus for other measurements, and neither reports a result
+    taken with DIR dropped, so they corroborate the drive mechanism incidentally
+    and settle nothing about this rule. It is the reason the older form of this
     block -- weak drive followed by a float -- does not work.
   ladder_definition_home: /deliverables/ai/P2/architecture/pin-drive-configuration.yaml
   substitute_for_a_pull_up:

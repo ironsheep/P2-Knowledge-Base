@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-373`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-374`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,59 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## `validate-crossref-keys.py` exempts three top-level fields from resolving, and 14 shipped file paths sitting in them point at nothing (2026-08-26, «#321» verification) — F-373
+
+### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `CONFIRMED`
+
+**Not F-340.** F-340 is the **nested-traversal** blind spot, and it is *disclosed on every run*:
+the banner reads `✅ ALL TOP-LEVEL CROSS-REFERENCES RESOLVE — 692 nested site(s) NOT checked
+(F-340)`. The sites here are **top-level and ARE traversed** — they are simply exempted from
+having to resolve, and that exemption is disclosed nowhere. F-340's own text treats this typing
+as the accepted baseline (*"should `related_documentation` be `'text'` like `see_also`?"*), which
+is why it has never been filed as a defect in its own right.
+
+**The mechanism.** `engineering/tools/validate-crossref-keys.py` `CROSS_REF_FIELDS` types
+`'see_also': 'text'`, `'references': 'text'` and `'related_concepts': 'text'` (*"informational
+only"*), and the resolver then does `if ref_type == 'text': continue`. A value in one of those
+fields is never looked up, whether it is prose or an unmistakable file path.
+
+**Measured 2026-08-26 over all 1132 shipped files.** 760 top-level values sit in the three
+text-typed fields. 160 of them are path-shaped. Resolving each against the KB root, the citing
+file's own directory, and the repo root, and setting aside 3 intentional globs
+(`architecture/smart-pins/*.yaml`):
+
+> **14 shipped `see_also:` file paths resolve to nothing, with the gate green.**
+
+| Citing file | Value | Why it fails |
+|---|---|---|
+| `hardware/addon-motor-driver.yaml`, `addon-microsd.yaml`, `addon-hd-audio.yaml`, `addon-rtc.yaml` | `language/spin2/methods/_index.yaml` | no such file (4 sites) |
+| `language/pasm2/concepts/labels.yaml` | `jmp.yaml`, `call.yaml`, `djnz.yaml`, `rep.yaml` | **bare names**; the files are at `language/pasm2/` |
+| `language/spin2/symbols/streamer-symbols.yaml` | `../../architecture/streamer/modes-reference.yaml`, `…/dac-routing.yaml` | relative depth off by one — both targets exist |
+| `language/spin2/methods/cogspin.yaml` | `concepts/multi_cog_synchronization.yaml` | no such file |
+| `language/spin2/methods/pinstart.yaml` | `concepts/inline_pasm2.yaml` | no such file; the concept is in `language/spin2/constructs/inline_pasm.yaml` |
+| `guides/spin2-getting-started.yaml`, `pasm2-getting-started.yaml` | `manifests/P2/language/*-manifest.yaml` | outside `deliverables/ai/P2/` entirely |
+
+**This is a live negative control, not a hypothetical.** The gate exits 0 and prints
+`ALL TOP-LEVEL CROSS-REFERENCES RESOLVE` while fourteen top-level references do not. The banner
+is therefore wrong in a second way that F-340's disclosure does not cover, and
+`validate-dod-release.py` inherits it. *A gate must read the artifact* — here it reads the
+artifact and then declines to check what it read.
+
+**Fix (two parts, neither is "delete the reference" — Sacred Rule #7).**
+1. **Instrument:** resolve any text-typed value that is unmistakably a path (ends `.yaml`, no
+   glob), leaving genuine prose alone; and say so in the banner, the way F-340's scope line does.
+   A negative control is owed with it.
+2. **Content:** repoint all 14. Most targets exist and only need the right path — bare names to
+   full paths (Sacred Rule #7's stated form), the streamer pair one level up,
+   `inline_pasm2.yaml` to `language/spin2/constructs/inline_pasm.yaml`. The `_index.yaml` and
+   `multi_cog_synchronization.yaml` targets do not exist, so those redirect to where the content
+   **is** documented.
+
+**How this surfaced.** Dispatched work on «#321» reported the `'text'` typing as an out-of-scope
+observation, proven by injection into a scratch copy. Arbiter verification replaced the injection
+with a measurement of the live tree, which is what turned a design question into fourteen shipped
+defects.
 
 ## Our USB smart-pin entry states as fact a sentence the DOCX edition dropped, and it contradicts the general WRPIN rule (2026-08-26, «#320» citation re-anchor) — F-372
 
@@ -257,7 +310,14 @@ plausibly why it never reached the KB. **Fix (YAML head):** carry it into
 
 ## The TQFP-100 package drawing was in the Silicon Doc all along — G-021 closes, and G-019 was overstated (2026-08-26, «#312») — F-366
 
-### F-366 — the shipped KB has no package-dimension record, and the source to write one has been in the repo unextracted — `CONFIRMED`
+### F-366 — the shipped KB has no package-dimension record, and the source to write one has been in the repo unextracted — `RESOLVED`
+
+**APPLIED 2026-08-26 («#320») — `RESOLVED`.** `deliverables/ai/P2/hardware/p2-package-mechanical.yaml`
+now exists (commit `491d033b`), carrying the millimetre dimension rows off the ON Semiconductor
+sheet with its aliases, and stating what the drawing does **not** give — there is no thermal data
+on it, so **G-020 stays open**. The status flip was missed at the time and is made here during
+«#321» verification: the artifact and its commit were checked directly, not taken from a closing
+report.
 
 **How this surfaced.** «#312» re-tested every source-silent verdict against the completed
 silicon-doc extraction, because all of them were reached while the Tier-1 authority was 75%
@@ -297,7 +357,16 @@ both directions.
 
 ## 23 shipped-KB citations point into the superseded lossy silicon-doc capture (2026-08-26, «#310») — F-365
 
-### F-365 — the shipped KB cites `p2-documentation.txt`, the PDF-era extraction now known to be lossy — `CONFIRMED`
+### F-365 — the shipped KB cites `p2-documentation.txt`, the PDF-era extraction now known to be lossy — `RESOLVED`
+
+**APPLIED 2026-08-26 («#320») — `RESOLVED`.** All 23 citations re-anchored to
+`silicon-doc-text.txt`, each verified by reading the old target and finding the same content in
+the new artifact — line numbers were never translated. **Measured during «#321» verification:**
+`grep -rn p2-documentation.txt deliverables/ai/P2/` returns **1**, down from **24 across 10 files**
+at `36196329`. The one that remains is deliberate —
+`architecture/smart-pins/smart-pin-11011-usb-host-device.yaml:19` names the superseded capture on
+purpose, because F-372 / G-027 is precisely a conflict *between* the two captures of the same v35
+document. The status flip was missed at the time and is made here.
 
 **What was measured.** References to the superseded artifact, outside its own folder:
 

@@ -268,6 +268,19 @@ addon_boards:
       This entry previously described 64006G as a "Combined Digital I/O" board
       with 4 LEDs and 4 switches. No such board exists in the #64006 series;
       64006G is the Goertzel board. Same fabrication family as F-121.
+      The name also stood in two feature_matrix guidance lists
+      (educational_progression.intermediate_path and
+      application_domains.user_interfaces) and was removed from both on
+      2026-08-26. It was NOT renamed to `goertzel` there: the reason 64006G had
+      been placed in those lists was the fabricated "4 LEDs and 4 switches"
+      feature set, and this board's own record above rates it
+      complexity_level "advanced", so neither placement survives the correction.
+      Sweeping the same class across the whole file on 2026-08-26 found two more
+      guidance slugs naming no board key: `eval_board` (4 sites) where the key is
+      `p2_eval_board`, and `breakouts` (1 site) where the file defines
+      `mini_breakout` and `standard_breakout` separately. Both repaired. Nothing
+      validates these lists -- `feature_matrix` slugs are not cross-reference
+      fields -- which is why a fabricated name survived here in the first place.
     
   av_breakout:
     part_number: "64006H"
@@ -333,16 +346,16 @@ feature_matrix:
 
   educational_progression:
     beginner_path: ["breadboard_carrier", "control_board", "mini_prototyping"]
-    intermediate_path: ["eval_board", "led_matrix", "digital_io_board"]
-    advanced_path: ["breakouts", "serial_host", "digital_video_out", "av_breakout"]
+    intermediate_path: ["p2_eval_board", "led_matrix"]
+    advanced_path: ["mini_breakout", "standard_breakout", "serial_host", "digital_video_out", "av_breakout"]
     
   application_domains:
-    education: ["eval_board", "breadboard_carrier", "control_board"]
-    prototyping: ["eval_board", "standard_breakout", "mini_prototyping"]
+    education: ["p2_eval_board", "breadboard_carrier", "control_board"]
+    prototyping: ["p2_eval_board", "standard_breakout", "mini_prototyping"]
     embedded_systems: ["mini_breakout", "standard_breakout"]
-    multimedia: ["eval_board", "av_breakout", "digital_video_out"]
+    multimedia: ["p2_eval_board", "av_breakout", "digital_video_out"]
     communications: ["serial_host", "serial_device"]
-    user_interfaces: ["control_board", "digital_io_board", "led_matrix"]
+    user_interfaces: ["control_board", "led_matrix"]
 
 selection_criteria:
   source: >-

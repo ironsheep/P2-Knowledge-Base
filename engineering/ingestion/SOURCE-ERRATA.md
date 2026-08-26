@@ -92,7 +92,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-007 | Hardware Manual vs Datasheet | clock limits — recommended-use vs absolute-limit framing | follows, unlabelled | `RESOLVED` |
 | E-008 | #64010 Universal Motor Driver Guide | pin-definitions table duplicates channel X on offsets 9/8 and omits channel U | never carried | `RESOLVED` |
 | E-009 | #64000 Eval Board Rev C Guide | board size printed as "3.55″ × 3.55″ (90 x 90 cm)" — the metric unit is wrong | never carried | `RESOLVED` |
-| E-010 | P2 Edge Module (#P2-EC) v3.0 **and** P2-EC32MB Rev B v2.0 | "have I/O pin **pull-ups** activated" — the P2 has none; they are drive strengths, live only with DIR high | ⚠️ **diverges** — carried verbatim in **both** `hardware/` Edge YAMLs | `CONFIRMED` |
+| E-010 | P2 Edge Module (#P2-EC) v3.0 **and** P2-EC32MB Rev B v2.0 | "have I/O pin **pull-ups** activated" — the P2 has none; they are drive strengths, live only with DIR high | diverges (fixed 2026-08-26) | `RESOLVED` |
 
 ---
 
@@ -281,7 +281,7 @@ is wrong by a factor of ten; 90 cm would be a board nearly a metre across. **Quo
 label). · **Reached our KB?** Never carried — `hardware/p2-eval-board.yaml` `specifications.physical`
 states the inch figure and carries a `dimensions_note` pointing here.
 
-## E-010 — both Edge Module guides tell the reader to "activate I/O pin pull-ups", and our KB repeats it verbatim · `CONFIRMED`
+## E-010 — both Edge Module guides tell the reader to "activate I/O pin pull-ups" · `RESOLVED`
 
 | Side | Document @ edition | Where in that document | Verbatim | Our locator |
 |---|---|---|---|---|
@@ -300,21 +300,39 @@ while the pin is driving**, i.e. `DIR` high. So the guide's phrasing offers a th
 names is the first option under another name. The **substance** of the sentence is fine — you can
 hold an Edge LED pin deterministically with a weak drive — and the working form is `P_HIGH_15K`
 with `DIR` **high**, exactly the `weak_high` idiom at
-`deliverables/ai/P2/architecture/pin-drive-configuration.yaml:203-222`.
+`deliverables/ai/P2/architecture/pin-drive-configuration.yaml` `idioms.weak_high`.
+(The line range recorded here on 2026-08-25, `:203-222`, had already drifted; that
+block sits at `:210-230` today, which is why the key path replaces it.)
 
 *Note the same guides get the neighbouring fact right:* they say the LED pins are *"not impacted by
 the presence of the LEDs or **external** pull-up resistors"* — external ones, correctly. It is only
 the P2-side capability that is misnamed.
 
 **Evidence tier:** documentary, two agreeing Parallax sources against the guides. · **Reached our
-KB?** ⚠️ **YES — diverges, carried verbatim, both files.**
-`deliverables/ai/P2/hardware/edge-standard-module.yaml:155` and
-`deliverables/ai/P2/hardware/edge-32mb-module.yaml:171` both end their `led_pins.mechanism` with
-*"Drive the pins high or low (**or enable a pin pull-up**) to control the LEDs deterministically."*
-Faithful ingestion of a wrong sentence. This is **not** covered by F-321, whose applied sweep was
-scoped to `language/` — these are `hardware/` files, and the phrase carries no `P_*` constant, so
-`audit-constant-fidelity.py` cannot see it either. Routed to the corrections register alongside
-**F-356**, which records the parallel manual-side survival of the same class.
+KB?** **diverges (fixed 2026-08-26).**
+
+*How it got in, and why nothing caught it.* Both
+`deliverables/ai/P2/hardware/edge-standard-module.yaml` and
+`deliverables/ai/P2/hardware/edge-32mb-module.yaml` ended their
+`pin_mapping.led_pins.mechanism` with *"Drive the pins high or low (**or enable a pin
+pull-up**) to control the LEDs deterministically."* — faithful ingestion of a wrong
+sentence, and **re-written with the phrase intact** during the 2026-08-25 hardware
+repair, which is how it survived a release that was looking for exactly this class.
+It is **not** covered by F-321, whose applied sweep was scoped to `language/`; these
+are `hardware/` files, and the phrase carries no `P_*` constant, so
+`audit-constant-fidelity.py` cannot see it either. Routed to the corrections register
+alongside **F-356**, which records the parallel manual-side survival of the same class.
+
+**FIXED 2026-08-26.** The parenthetical is gone from both files — each
+`led_pins.mechanism` now ends *"Drive the pins high or low to control the LEDs
+deterministically."* — and each `led_pins` gained a
+`do_not_copy_the_guides_wording:` key that quotes the guide's third option, states
+that the P2 has no pull-up resistor to enable, and points at
+`architecture/pin-drive-configuration.yaml` (`idioms.weak_high` / `idioms.weak_low`,
+`drive_ladder.no_other_rungs`) rather than restating the ladder a second time. Same
+shape as the E-004 repair in `hardware/addon-rtc.yaml`. Verify with
+`grep -rn 'enable a pin pull-up' deliverables/ai/P2/` — it returned two hits before
+the fix and returns none after.
 
 ## E-016 — the PASM2 Manual's ADDS prose says C is **signed overflow**; its own table on the same page says **sign of (D + S)** · `CONFIRMED`
 

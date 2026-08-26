@@ -5,6 +5,30 @@
 method: "GETCT"
 category: "timing"
 type: "method"
+description: |
+  Get the 32-bit system counter. Parallax Spin2 Documentation v55 states it as
+  "GETCT() : Count -- Get 32-bit system counter."
+  The counter itself is wider than the value this method returns. The P2 Datasheet
+  lists "64-bit free-running counter which increments every clock, cleared on
+  reset", and Propeller 2 Documentation v35 records the change as "System counter
+  extended to 64 bits. GETCT WC retrieves upper 32-bits." The Datasheet's GETCT
+  row states "Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full
+  CT. CT=0 on reset, CT++ on every clock."
+  GETCT() in Spin2 returns the CT[31:0] half only. The upper half is reachable
+  from PASM2 via the GETCT D WC form -- see language/pasm2/getct.yaml.
+  Because the returned value is the low half, any deadline built from GETCT() is
+  bounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.
+  See the `pitfalls` block below.
+
+  Sources: Parallax Spin2 Documentation v55, Timing Methods --
+  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547, and :552-553
+  for GETSEC and GETMS, each of which "uses 64-bit system counter and CLKFREQ".
+  P2 Datasheet 2022/11/01 --
+  engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:95 (counter
+  width and behaviour), :2084-2085 (GETCT row).
+  Propeller 2 Documentation v35 Rev B/C --
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55.
+
 syntax: "GETCT() : Count"
 
 parameters: "none"
