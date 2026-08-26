@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-26T09:17:03.753944",
-    "total_entries": 1132,
+    "generated": "2026-08-26T20:26:10.902460",
+    "total_entries": 1133,
     "total_categories": 59,
-    "total_aliases": 2061,
+    "total_aliases": 2082,
     "multi_target_aliases": 97,
     "source": "deliverables/ai/P2/"
   },
@@ -1175,6 +1175,9 @@
     "CARTESIAN TO POLAR": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "CASE OUTLINE": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "CHARLIEPLEX LED BOARD": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
@@ -1738,6 +1741,9 @@
     "FLTZ": [
       "p2kbPasm2Fltz"
     ],
+    "FOOTPRINT": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "FRAMEBUFFER": [
       "p2kbSpin2Bitmap"
     ],
@@ -2060,6 +2066,9 @@
     "JXRO": [
       "p2kbPasm2Jxro"
     ],
+    "LAND PATTERN": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "LATEST-WINS MAILBOX": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
@@ -2205,6 +2214,9 @@
     ],
     "MEASURING STACK SPACE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "MECHANICAL DRAWING": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
     "MEMBER BITFIELDS": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -2689,6 +2701,15 @@
     "P8X32A font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
+    "PACKAGE": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "PACKAGE DIMENSIONS": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "PACKAGE OUTLINE": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "PACKED RECORD": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
@@ -2700,6 +2721,12 @@
     ],
     "PARK TRANSFORM": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "PCB FOOTPRINT": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "PCB footprint": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
     "PCF8523 BOARD": [
       "p2kbHwAddonRtcAddonRtc"
@@ -2739,6 +2766,9 @@
     ],
     "PIN GROUP": [
       "p2kbArchPinSelection"
+    ],
+    "PIN PITCH": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
     "PIN POWER DOMAINS": [
       "p2kbArchPinPowerDomains"
@@ -4172,6 +4202,15 @@
     "TOUCH SENSING ADD-ON": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
+    "TQFP": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "TQFP-100": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "TQFP100": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "TRACE PINS": [
       "p2kbArchPinCapture"
     ],
@@ -4876,6 +4915,9 @@
     "cartesian to polar": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "case outline": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "child object declaration": [
       "p2kbSpin2KwOBJ"
     ],
@@ -5235,6 +5277,9 @@
     "fltz": [
       "p2kbPasm2Fltz"
     ],
+    "footprint": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "framebuffer": [
       "p2kbSpin2Bitmap"
     ],
@@ -5478,6 +5523,9 @@
     "jxro": [
       "p2kbPasm2Jxro"
     ],
+    "land pattern": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "latest-wins mailbox": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
@@ -5579,6 +5627,9 @@
     ],
     "measuring stack space": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "mechanical drawing": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
     "member bitfields": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -5834,6 +5885,15 @@
     "override forwarding": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "package": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "package dimensions": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "package outline": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
     "packed record": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
@@ -5878,6 +5938,9 @@
     ],
     "pin group": [
       "p2kbArchPinSelection"
+    ],
+    "pin pitch": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
     "pin power domains": [
       "p2kbArchPinPowerDomains"
@@ -7001,8 +7064,8 @@
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
-      "mtime": 1787684528,
-      "sha256": "0cb06520bca382bd2037417679842cfc7412d72a300d386c688e948a9a08c051"
+      "mtime": 1787775765,
+      "sha256": "dd378e474b0d0680076b4e2ef94a40939ddfdbaada988495d6101a1945179a93"
     },
     "p2kbAppNoteP2an003DacAnalogSignalGeneration": {
       "path": "deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml",
@@ -7061,8 +7124,8 @@
     },
     "p2kbArchTaqozForth": {
       "path": "deliverables/ai/P2/architecture/boot-rom/taqoz-forth.yaml",
-      "mtime": 1781325191,
-      "sha256": "9f23bc8c1debc4a71c7726b700e56e8ee6f096587b829a93788a0392d543a2dd"
+      "mtime": 1787775442,
+      "sha256": "fb31258dc6c721ec096a9eca0d09ba6cf19f6f2928e0cb1f4486363124ad6fcf"
     },
     "p2kbArchClickModuleIntegration": {
       "path": "deliverables/ai/P2/architecture/click_module_integration.yaml",
@@ -7391,8 +7454,8 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1787688676,
-      "sha256": "57f08cd80e74ee73d98a997e2d61a380cea142459954e5fd11be51c78d8212e9"
+      "mtime": 1787775765,
+      "sha256": "dcf85d7c168b2c3bec20c800c664cd138a6bbcb712f14530fed811f54f2b1c85"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
@@ -7406,8 +7469,8 @@
     },
     "p2kbArchSmartPin11011UsbHostDevice": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11011-usb-host-device.yaml",
-      "mtime": 1787684528,
-      "sha256": "a1d8ef5e6c573820bac2ed8517831b4ecb6c9fe58241053670e007090a19295f"
+      "mtime": 1787775765,
+      "sha256": "c015ce7dda33cc736f870b82efe24449166b0157169f14c2208dc4c7357426e3"
     },
     "p2kbArchSmartPin11100SyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml",
@@ -7441,8 +7504,8 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1787707066,
-      "sha256": "7c9f5ec45884ade8cd5707eeb974f20475b1de3f77e10514fc3571ea6138f543"
+      "mtime": 1787775765,
+      "sha256": "4b618deb3236a8eb2636de5d7f621054364de8eccbbb72f0103e91a47aef655e"
     },
     "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -7456,13 +7519,13 @@
     },
     "p2kbArchDdsGoertzel": {
       "path": "deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml",
-      "mtime": 1787707066,
-      "sha256": "61e349817f609ccfc03b1d736c26daa4cfe66ad9ce901075ef4219e0340c9dac"
+      "mtime": 1787775765,
+      "sha256": "de4c600c7c3ca3ecbc8f09a84a9e70ac778c792189648dde1411be60052367cd"
     },
     "p2kbArchModesReference": {
       "path": "deliverables/ai/P2/architecture/streamer/modes-reference.yaml",
-      "mtime": 1787707066,
-      "sha256": "43ccae217f19892afb3cceeb82e94d0bcf5aa87f0fb9bd56b3c86a792644dbe2"
+      "mtime": 1787775765,
+      "sha256": "c465fe6872cd8fb1ce20c7fe1993be8cde1fa1b84a10fb1558ceb0c4b2a8ae5c"
     },
     "p2kbArchNcoTiming": {
       "path": "deliverables/ai/P2/architecture/streamer/nco-timing.yaml",
@@ -7476,18 +7539,18 @@
     },
     "p2kbArchPinCapture": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-capture.yaml",
-      "mtime": 1787707066,
-      "sha256": "3841ca8401941728ed9440334fa1dd033c5d524e4dfc6e36dda94590c5915d0d"
+      "mtime": 1787775765,
+      "sha256": "1a1c562366c7c6d0698434d3aa90ee503d2ce2c304cff1ed5fd2de9c1a281f0f"
     },
     "p2kbArchPinSelection": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-selection.yaml",
-      "mtime": 1787707066,
-      "sha256": "a61311ee644ae7cf44a9d59ef14ce8455f40f4fc068df5c48b844f67e948c621"
+      "mtime": 1787775765,
+      "sha256": "c78539dfef5398897387d8febeb93dd0b1548f82a135af8a2d5296b6a64f1fac"
     },
     "p2kbArchCompleteSystemRegistersIndex": {
       "path": "deliverables/ai/P2/architecture/system-registers/complete-system-registers-index.yaml",
-      "mtime": 1764449566,
-      "sha256": "5f55b85c3a94a67384b70d3ec77d6b92cee7c8dc42dac439ee2911b01061387a"
+      "mtime": 1787775442,
+      "sha256": "38d9ff8d334456d69bf4bb2c40ee75119fc0aa1d8af41fa1405f0462574d6211"
     },
     "p2kbArchDiraDirbRegisters": {
       "path": "deliverables/ai/P2/architecture/system-registers/dira-dirb-registers.yaml",
@@ -8539,6 +8602,11 @@
       "mtime": 1781981347,
       "sha256": "44f8988be8e0d9b09f1eb0866774a87e3a04cc7e40830e2c8dcf594f6762464e"
     },
+    "p2kbHwP2PackageMechanicalP2PackageMechanical": {
+      "path": "deliverables/ai/P2/hardware/p2-package-mechanical.yaml",
+      "mtime": 1787775765,
+      "sha256": "e389eb2b9c56af1ca1cc1dee1d297b88b365b44320fe117eaddd25f43d9560a4"
+    },
     "p2kbHwProgrammingPropPlugProgrammingPropPlug": {
       "path": "deliverables/ai/P2/hardware/programming-prop-plug.yaml",
       "mtime": 1787686929,
@@ -9191,8 +9259,8 @@
     },
     "p2kbPasm2Getbrk": {
       "path": "deliverables/ai/P2/language/pasm2/getbrk.yaml",
-      "mtime": 1782356009,
-      "sha256": "903387a80094964ca98fd3d78af1cc753fe22d72de08b0090a98e889d20692e2"
+      "mtime": 1787775442,
+      "sha256": "b2856f595b6ffc616de667e5d8dcf1a897c6e85346b632db39ff326efe1e3e84"
     },
     "p2kbPasm2Getbyte": {
       "path": "deliverables/ai/P2/language/pasm2/getbyte.yaml",
@@ -9241,8 +9309,8 @@
     },
     "p2kbPasm2Getxacc": {
       "path": "deliverables/ai/P2/language/pasm2/getxacc.yaml",
-      "mtime": 1787351063,
-      "sha256": "3b51fd3663c804027470cfde0c83bca79ae2b942673ce65ec599fe7f0e1aa6bf"
+      "mtime": 1787775765,
+      "sha256": "05f70b7ed9f76d3d9edffcd7d41aa2fd7b8a809afdb6f24d9930ac154f1509ef"
     },
     "p2kbPasm2CounterEventJumps": {
       "path": "deliverables/ai/P2/language/pasm2/groups/counter_event_jumps.yaml",
@@ -11731,8 +11799,8 @@
     },
     "p2kbSpin2Wrpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wrpin.yaml",
-      "mtime": 1787635833,
-      "sha256": "16e22fb0fae1c25dae1d359d5ebbfcbd45e074e80cbfae344c69d131fd72ffd6"
+      "mtime": 1787775765,
+      "sha256": "9f2e1e617710dd101fc6166ebbcf5dbff4a4993b384de0b3ac393af3f4e4de54"
     },
     "p2kbSpin2Wxpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wxpin.yaml",
