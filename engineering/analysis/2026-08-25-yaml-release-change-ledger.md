@@ -102,12 +102,21 @@ Ordered by what a consumer of the KB would hit.
    `hardware/addon-rtc.yaml:73`.
    `grep -rn 'EF-063\|EF-064' deliverables/ai/P2/`
 
-6. 🟠 **Shapes changed under consumers, in 24 files, and nothing checks shape.** 30 keys changed
-   YAML type this release — `list → dict` mostly, plus `str → dict` for five hardware `description:`
-   keys. `signal_map:` is now a mapping in 5 hardware files and a bare list in 9; at `v1.17.0` all
-   14 were lists. `gotchas:` is a mapping in 3 application notes and a list in 4. This is a
-   **judgement, not a correction** — it was made to give each block a `source:` key — and it is the
-   change most likely to break something downstream. See §1.10.
+6. ✅ **MEASURED-SAFE 2026-08-26 — no decision needed. Shapes changed under consumers, and every
+   consumer was executed against them.** Filed as needing a preference; it did not need one.
+   `engineering/analysis/2026-08-26-yaml-shape-change-consumer-audit.md` runs all five consumers —
+   `generate-p2kb-index.py`, `fetch-kb-file.sh`, `validate-crossref-keys.py`,
+   `audit-yaml-claim-sourcing.py`, the p2kb-mcp fetch contract — and **nothing breaks**. Each was
+   also made to fail on a shape it cannot handle, so the greens are discriminating rather than
+   silent. The mixture is **deliberate and rule-determined**: with the citations moved to the
+   uniform-shape alternative this section proposes (a sibling `signal_map_source:` key),
+   `audit-yaml-claim-sourcing.py` goes **red with 22 Tier 1 violations** — the reshape was forced by
+   the armed gate, not chosen. And **0 of the 28** blocks still carrying the old shape is one the
+   gate would demand a reshape for. See §1.10 and the audit.
+   **Figures re-derived at HEAD and three corrections:** it is **34** keys, not 30 (four landed after
+   this ledger was written); the file count was **21**, not 24, when this was written; and one of the
+   34 (`edge-breadboard-carrier.yaml educational_value`) is **not a reshape** — it is a duplicate
+   top-level key whose shadowing scalar was removed.
 
 7. 🟠 **A board file that had a wrong number now has no number.**
    `hardware/edge-breadboard-carrier.yaml` shipped *"6-9V barrel jack (recommended)"*; the #64020
@@ -578,15 +587,37 @@ navigable terms — so a claim can be confirmed with Parallax by opening the pag
 in 9. `gotchas` is a mapping in 3 application notes and a list in 4. `description` is a mapping in 5
 hardware files and a string in 11. **At `v1.17.0` each of these was uniform.**
 
+> **Re-derived at HEAD, 2026-08-26** (`2026-08-26-yaml-shape-change-consumer-audit.md` §2). The
+> splits above are right in the scope they mean and wrong KB-wide. `signal_map` is `dict` ×5 /
+> `list` ×**10** — the tenth is `addon-click-adapter.yaml`, added this release and born a list.
+> `description` in `hardware/` is `dict` ×**8** / `str` ×**14**, not 5/11. And **`gotchas` was
+> already mixed at `v1.17.0`** — `typed-pointers.yaml`, `STRUCT.yaml` and
+> `smart-pin-11110-async-serial-transmit.yaml` were mappings before this release, so "at `v1.17.0`
+> each of these was uniform" holds only when `gotchas` is scoped to application-notes.
+
 **🔴 The lack.** *There is no schema for these files and no instrument reads shape.* Both armed
 gates read *content* — quantities and constant names. A key can change from a list to a mapping,
 in half the files of a region, and nothing anywhere notices. Any consumer that iterates
 `signal_map` as a list (or reads `description` as a string) now works on some hardware files and
 not others.
 
+> **Measured 2026-08-26: no such consumer exists in this project.** All five were executed against
+> the current shapes and none reads any of the 34 keys except `audit-yaml-claim-sourcing.py`, which
+> is line-based and is the instrument that *demanded* the reshape. The lack of a shape instrument is
+> still real; the harm it was expected to permit has not occurred. Full evidence, including how each
+> consumer was made to fail:
+> `engineering/analysis/2026-08-26-yaml-shape-change-consumer-audit.md`.
+
 **Marked as a judgement** because it was a deliberate authoring choice made to satisfy the citation
 rule, not a defect being corrected — and because the alternative (a sibling `signal_map_source:`
 key) would have left the shapes uniform. Worth a decision either way; it should not drift further.
+
+> **The alternative was measured and it does not work.** Moving each citation from inside its block
+> to a top-level sibling `<key>_source:` makes `audit-yaml-claim-sourcing.py` return **exit 1 with
+> 22 Tier 1 violations**, including all 19 blocks the in-block form silences. The uniform-shape
+> option does not satisfy the armed gate, so this was not a free choice. "It should not drift
+> further" stands as the open item — no instrument holds the rule, only the citation gate does, and
+> that gate enforces citation rather than uniformity.
 
 ---
 

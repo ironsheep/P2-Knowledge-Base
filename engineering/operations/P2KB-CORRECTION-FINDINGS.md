@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-375`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-377`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,86 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The delivery filter strips `documentation_source:` from every file it serves, and 706 of those values are real citations (2026-08-26, «#324» verification) — F-375
+
+### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `CONFIRMED`
+
+**The mechanism.** Both delivery paths run the same five-pattern line filter:
+`engineering/tools/p2kb/fetch-kb-file.sh:189` and the `FilterMetadata` contract recorded in
+`engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md`, designed in
+`engineering/tools/p2kb/METADATA-FILTER-DESIGN.md`, which describes `documentation_source` as
+*"Original doc reference"* — internal bookkeeping not worth shipping.
+
+**That premise is false for the overwhelming majority of them.** Measured 2026-08-26 across all
+1133 shipped files:
+
+> **706 `documentation_source:` / `enhancement_source:` values are citation-shaped** — they name a
+> document, an edition, a page or a line. **47 are the bare internal tokens the filter was designed
+> for** (`enhanced` 16, `original` 15, `p2_datasheet` 8, `code_analysis` 2, and three singletons).
+> The citation-shaped values sit in **383 distinct files**.
+
+Examples of what is deleted on the way out:
+
+| File | Value stripped in delivery |
+|---|---|
+| `language/spin2/assembly-directives/alignl.yaml` | `PASM2 Manual 2022/11/01 Pages 31-147` |
+| `language/spin2/registers/pr-registers.yaml` | `PASM2 Manual 2022/11/01 Page 118` |
+| `language/spin2/debug-commands/pc_key.yaml` | `Spin2 v51 (debug-section.txt) + PNut v55 directive matrix` |
+| `language/spin2/statements/debug.yaml` | `PNut v55 compiler source (p2com.asm: check_word_chr_initial/check_word_chr @8888, debug_symbols table @19335, parse_debug_string, symbol_size_limit=30); hardware-isolated on real silicon 2026-07-27` |
+
+**Why this is the sharpest form of a defect this project already knows.** The shipped set carries
+the **agent-consumer** bar — *cite or omit*, because a remote agent cannot weigh a hedge and a
+wrong fact becomes silently authoritative in generated code. The filter takes files that satisfy
+that bar on disk and delivers them **not satisfying it**. Every gate we run reads the tree; the
+consumer reads the filtered stream; nothing compares the two. The KB is cited. What we *serve* is
+not.
+
+**Second half, and it is why this was never caught.** `validate-dod-release.py`'s
+`validate_metadata_filter` (lines 352-396) checks *which line-patterns the filter removes* and
+never re-parses the filtered payload — there is no `yaml.safe_load` and no type comparison anywhere
+in the function. «#324» proved the consequence: a block whose only child is `documentation_source:`
+is delivered as `null`, and the check passes clean. **The filter is indentation-blind, so it can
+destroy a block outright**, and the gate that exists to watch it is measuring the wrong thing.
+*A gate must read the artifact* — this one reads the pattern list.
+
+**Fix (two parts).**
+1. **Filter:** stop deleting `documentation_source:` / `enhancement_source:` wholesale. Either
+   deliver them, or delete only the 47 bare-token values and keep every citation-shaped one. The
+   cleanest form is the one the project already uses everywhere else — rename the real ones to
+   `source:` and let the filter keep its narrow meaning. That is 383 files, so it is a task.
+2. **Gate:** `validate_metadata_filter` must re-parse the filtered payload and compare top-level
+   types against the on-disk file, with a negative control that proves it fires. The `shape_probe`
+   case from «#324» is a ready-made control.
+
+**How this surfaced.** «#324» was measuring whether 34 YAML shape changes break any consumer. They
+do not. But running the real fetch script against the real tree — rather than reading it — showed
+what the delivery path does to files that were never part of the shape question at all.
+
+---
+
+## Two silent-failure bugs in the KB tooling (2026-08-26, «#324» verification) — F-376
+
+### F-376 — `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0; the index generator swallows parse errors — `CONFIRMED`
+
+Two unrelated bugs, same shape: **the failure is silent and the exit code is 0.**
+
+**1. `engineering/tools/p2kb/fetch-kb-file.sh` double-shifts its verbose flag.** The
+`--verbose|-v)` case runs `shift` at `:439`, and the argument loop shifts again at `:466`. So the
+flag consumes the key that follows it: `fetch-kb-file.sh -v language/pasm2/add.yaml` drops the
+key, fetches nothing, and exits 0. Any user or script that puts `-v` before the key gets silence
+rather than an error. **Fix:** delete the `shift` inside the `--verbose|-v)` case.
+
+**2. `engineering/tools/generate-p2kb-index.py` swallows every parse failure during alias
+harvest** — the harvest ends `except Exception as e: # Silently skip files that can't be parsed /
+pass` (~`:116`). A syntactically invalid YAML is still indexed with its path and sha256, silently
+loses all of its aliases, and the run exits 0 printing nothing. Since `aliases:` is the mechanism
+the whole KB's findability rests on, a file can go unfindable without anything saying so.
+**Fix:** count and report skipped files, and fail the run if any file the index claims to cover
+could not be parsed.
+
+**Neither is in this sprint's repair scope** — both are tooling, and «#324» was a measurement task.
+Recorded here so they are not rediscovered.
 
 ## The shipped set scores and star-rates hardware, which the KB entry rule excludes and no source authorises (2026-08-26, «#322» verification) — F-374
 
