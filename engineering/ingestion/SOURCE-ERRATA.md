@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-012`**
+> **Next erratum ID: `E-016`**
 
 ## What this register is for
 
@@ -307,6 +307,103 @@ Faithful ingestion of a wrong sentence. This is **not** covered by F-321, whose 
 scoped to `language/` — these are `hardware/` files, and the phrase carries no `P_*` constant, so
 `audit-constant-fidelity.py` cannot see it either. Routed to the corrections register alongside
 **F-356**, which records the parallel manual-side survival of the same class.
+
+## E-012 — the hub-address operand list omits **RDLUT** and **WRLUT**, which the document's own encoding table shows take `S/#/PTRx` · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C) | hub-address operand forms | *"In the case of the 'S/#/PTRx' operand used by **RDBYTE, RDWORD, RDLONG, WRBYTE, WRWORD, WRLONG, and WMLONG**, there are five ways to express a hub address"* | `sources/silicon-doc/silicon-doc-text.txt:3153` |
+| Against (the same document) | same | instruction encoding master table | `EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS  RDLUT  D,**S/#/PTRx** {WC/WZ/WCZ}` | `sources/silicon-doc/silicon-doc-text.txt:5140` |
+| Against (the same document) | same | instruction encoding master table | `EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS  WRLUT  D/#,**S/#/PTRx**` | `sources/silicon-doc/silicon-doc-text.txt:5209` |
+| Raised by | reviewer comment **[21]**, Bart Grantham, 2024-10-01, anchored to that very list | — | *"This list should include RDLUT and WRLUT"* | `word/comments.xml` id 21 |
+
+**OUR FINDING.** **The reviewer is right, and the document contradicts itself.** The prose list
+names seven instructions; the encoding table two thousand lines later gives `RDLUT` and `WRLUT` the
+same `S/#/PTRx` operand form. A reader who trusts the list will not know the PTRx expressions are
+available on the LUT accessors. Note the list is about *hub* addresses and RDLUT/WRLUT address the
+LUT — which is presumably why they were left out — but the operand *form* being described is
+shared, and comment **[22]** (same reviewer, same day) proposes the precise repair: *"(or LUT
+address for RDLUT/WRLUT)"*.
+
+**Evidence tier:** the document's own encoding table, extracted DOCX-primary. No external source
+needed. · **Reached our KB?** **Never carried** — `deliverables/ai/P2/` has no equivalent list, so
+nothing shipped inherited the omission.
+
+---
+
+## E-013 — *"In every mode, the three %ppp bits"* is false; the document's own four-pin input block uses **%pppp in D[22:19]** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C) | Streamer, pin-group selection | *"**In every mode**, the three %ppp bits in D[22:20] select the pin group, in 8-pin increments, which will be used as outputs or inputs, for up to 32-pin transfers. The selection wraps around"* | `sources/silicon-doc/silicon-doc-text.txt:1443` |
+| Against (the same document) | same | the four-pin input block | *"The **four-pin** input block is selected by the **%pppp** bits in **D/#[22:19]**, where %pppp\*4 is the base pin."* | `sources/silicon-doc/silicon-doc-text.txt:1563` |
+| Raised by | reviewer comment **[15]**, Christof Eberspaecher, 2022-10-28, anchored to the words *"every mode"* | — | *"This is at least highly misleading as for Goertzel there are 4-bit groups, which do not overlap or wrap around."* | `word/comments.xml` id 15 |
+
+**OUR FINDING.** **"In every mode" is false by the document's own text**, and the exception is not
+obscure — it is the four-pin ADC/Goertzel input block, which uses a *four*-bit selector in a
+*different* bit range (`D[22:19]`, not `D[22:20]`) at *four*-pin granularity rather than eight. The
+"wraps around" clause is asserted for the eight-pin form and is what the reviewer disputes for the
+four-pin form. **This is the EF-065 hazard family** — a mis-stated pin-group selector silently
+selects a different group, and nothing errors.
+
+**Evidence tier:** the document's own text, two statements 120 lines apart. · **Reached our KB?**
+**Needs checking by the YAML head** — `architecture/streamer/pin-selection.yaml` documents the pin
+selector, and whether it inherited the over-general "every mode" phrasing was not determined in this
+pass. Recorded rather than assumed.
+
+---
+
+## E-014 — the boot description omits **microSD boot** entirely, which the Hardware Manual documents with a pin-selection table · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C) | *"the booter program (ROM_Booter.spin2) performs the following steps"* | The steps describe **only** SPI (pull-up on P61, then P60) and serial (P63). **No microSD path appears anywhere in the sequence.** | `sources/silicon-doc/silicon-doc-text.txt:4799-4816` |
+| Against | **P2 Hardware Manual** @ 2022-11-01 | Boot-source selection table, columns `P61 / P60 / P59` | a row reads *"Program from serial within 60 s window; **no flash or microSD card boot**"* — i.e. microSD boot is one of the selectable outcomes | `sources/p2-hardware-manual/p2-hardware-manual-text.txt:272-274` |
+| Against | **ROM_Booter** listing | feature summary | *"SD card boot (FAT32 support)"*, *"SD card file system navigation"*, *"Boot source selection based on pin states"* | `sources/rom-booter/rom-booter-narrative.txt:23,29` |
+| Raised by | reviewer comment **[25]**, Nicolas Benezan, 2021-08-04, anchored to the boot *"steps"* | — | *"The check for pulldown at P60 (SD card) is missing in this description. It would be also very helpful to add a note that booting from SD card is possi…"* | `word/comments.xml` id 25 |
+
+**OUR FINDING.** **The reviewer is right about the omission.** The Silicon Doc's boot sequence is
+incomplete: it documents the SPI and serial paths and never mentions microSD, while both the
+Hardware Manual's boot-source table and the ROM booter itself treat microSD as a first-class boot
+source. **The commenter's specific mechanism — a pull-DOWN on P60 — is NOT corroborated here and is
+not adopted:** the Silicon Doc describes a pull-**up** on P60 (SPI_CK) selecting *run the SPI
+program*, and the Hardware Manual expresses selection as a three-pin table rather than a single
+pull-down. **What is established is the omission; the exact pin condition for microSD boot is
+routed to `KNOWLEDGE-GAPS` (G-026), not asserted here.**
+
+**Evidence tier:** two independent sources (Hardware Manual table, ROM booter listing) against the
+Silicon Doc's silence. · **Reached our KB?** **Follows the better sources** — the boot-source table
+in the KB derives from the Hardware Manual, not from this passage, so the omission did not
+propagate. Worth stating because the reverse would have been easy.
+
+---
+
+## E-015 — **KNOWN SILICON BUGS** omits the RDFAST corruption bug, which the designer confirms in the document's own comment thread · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C) | section **KNOWN SILICON BUGS** | the section does not list any RDFAST/FIFO corruption entry | `sources/silicon-doc/silicon-doc-text.txt`, KNOWN SILICON BUGS section |
+| Against (designer) | same document, comment thread anchored to that heading | comment **[1]**, **Chip Gracey**, 2024-12-11, replying to *"Should add the RDFAST corruption bug here"* | *"**Yes**, but I can't explain it well. Would you mind writing something here and I'll approve it when you're done?"* | `word/comments.xml` ids 0–4 |
+| Against (designer, mitigation) | same thread | comment **[3]**, **Chip Gracey**, 2025-01-02 | *"Or just allow enough clock cycles before using the FIFO, like the instruction mode requires."* | `word/comments.xml` id 3 |
+
+**OUR FINDING.** **The bug is real on the designer's own word, and the section that exists to list
+such bugs does not list it.** The thread is unusual evidence and worth weighing carefully: the
+*reporter* (Wuerfel21, comment [0]/[2]/[4]) is a community contributor and would normally be an
+upstream lead only — but **Chip Gracey answers "Yes"**, which is designer confirmation, and then
+supplies a mitigation. Chip is the domain authority for P2 silicon; a community claim he affirms is
+no longer a community claim.
+
+**What is NOT established:** the mechanism. Chip says outright he *"can't explain it well"* and the
+reporter says the same. So this erratum records **that the section is incomplete** and **that a
+mitigation exists**, and does not attempt to state the failure mode. The residual question — under
+what conditions RDFAST corrupts, and how many clock cycles suffice — is routed to
+`KNOWLEDGE-GAPS` **Q-009** (expert: Chip Gracey), where it belongs.
+
+**Evidence tier:** designer confirmation in the source document's own review thread. ·
+**Reached our KB?** **Never carried** — `deliverables/ai/P2/` has no RDFAST hazard note, which is
+itself the gap, not a divergence.
+
+---
 
 ## E-011 — the Spin2 v55 LOGIC example says the streamer does an **RFBYTE** to save captured pin data; a capture mode does a **WFBYTE** · `RESOLVED`
 
