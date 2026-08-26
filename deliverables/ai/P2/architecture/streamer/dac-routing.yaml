@@ -4,6 +4,14 @@
 component: streamer_dac
 description: DAC channel routing via %dddd field in D[27:24]
 
+aliases:
+  - "streamer DAC routing"
+  - "DAC channel routing"
+  - "dddd field"
+  - "streamer DAC channels"
+  - "X0 X1 X2 X3"
+  - "streamer analog output"
+
 # DAC channel basics
 dac_channels:
   count: 4
@@ -179,5 +187,5 @@ common_configs:
     description: "R, G, B, Sync on separate channels"
 
 see_also:
-  - pin-selection.yaml
-  - modes-reference.yaml
+  - architecture/streamer/pin-selection.yaml
+  - architecture/streamer/modes-reference.yaml

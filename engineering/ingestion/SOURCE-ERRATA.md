@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-011`**
+> **Next erratum ID: `E-012`**
 
 ## What this register is for
 
@@ -307,6 +307,30 @@ Faithful ingestion of a wrong sentence. This is **not** covered by F-321, whose 
 scoped to `language/` — these are `hardware/` files, and the phrase carries no `P_*` constant, so
 `audit-constant-fidelity.py` cannot see it either. Routed to the corrections register alongside
 **F-356**, which records the parallel manual-side survival of the same class.
+
+## E-011 — the Spin2 v55 LOGIC example says the streamer does an **RFBYTE** to save captured pin data; a capture mode does a **WFBYTE** · `RESOLVED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | **LOGIC Display** section, the paragraph introducing the high-speed-capture example | *"Every time it gets four two-bit sample sets, it does an **RFBYTE** to save them to hub RAM, forming contiguous bytes, words, and longs."* | `sources/spin2-v55/spin2-v55-text.txt:1144` |
+| Against (same paragraph's own code) | **Parallax Spin2 Documentation**, v55 | the example immediately below it | the program sets up the FIFO for **writing** — `wrfast #0,buffaddr` — and the mode word `$D0800000` is `X_2P_2DAC1_WFBYTE \| X_WRITE_ON` | `sources/spin2-v55/spin2-v55-text.txt:1144` (same line in our extraction) |
+| Against (primary) | **Propeller 2 Documentation**, v35 | Streamer, **Pins ⇢ DACs/WRFAST** | *"If the %w bit in D[23] is high, **WFBYTE/WFWORD/WFLONG** operations will be done automatically to record the pin data. In the case of 1/2/4-pin modes, a **WFBYTE** will be done each time 8 bits of pin data accrue."* | `sources/silicon-doc/p2-documentation.txt:3961-3966` |
+| Against (primary) | **Propeller 2 Documentation**, v35 | Streamer, the %e / %w field rule | *"For WRFAST modes, it is necessary to do a WRFAST sometime beforehand, to ensure that the hub RAM FIFO is ready to receive data."* — RF\* instructions read the FIFO; WF\* write it | `sources/silicon-doc/p2-documentation.txt:3604-3605`, `:3661` |
+
+**OUR FINDING.** **A capture mode writes with `WFBYTE`.** `RFBYTE` reads the hub FIFO and belongs to
+the RDFAST (output) direction; the sentence has the right mechanism and the wrong mnemonic, one
+letter out. The rest of that paragraph is correct and is in fact the clearest statement Parallax
+makes of the fact this project needed — that the streamer records *"the smart pin's IN signal and
+its output state, as read from an adjacent pin"* — so the paragraph is worth quoting, with this one
+word flagged.
+
+**Evidence tier:** the source contradicts itself within the same example (prose says RFBYTE, code
+says `wrfast`), and two primary Silicon Doc statements settle it. · **Reached our KB?** **No, and
+deliberately not.** `deliverables/ai/P2/architecture/streamer/pin-capture.yaml` quotes the paragraph
+in `parallax_worked_example` and carries a `known_source_defect_in_that_passage` key naming this
+erratum, so the quote can be used without propagating the word. The accrual rule itself is stated in
+`architecture/streamer/pin-selection.yaml` `enable_control.input_modes` from the Silicon Doc, not
+from this paragraph.
 
 ---
 

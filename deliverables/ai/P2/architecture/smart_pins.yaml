@@ -18,6 +18,12 @@ aliases:
   - OUTPUT_ENABLE
   - SMART_PIN_CONFIGURATION
   - PIN_OUTPUT_HIERARCHY
+  - "IN signal"
+  - "IN flag"
+  - "smart pin IN"
+  - "IN signal semantics"
+  - "smart pin handshake"
+  - "SSSSS field"
 change_log:
   - version: "1.1"
     date: "2025-11-25"
@@ -190,6 +196,71 @@ input_routing:
       filt2: {length: "2 (5 flipflops)", tap: "19 (512K:1)", low_pass_time: "16.4ms (6.25ns * 5 * 512K)"}
       filt3: {length: "3 (8 flipflops)", tap: "22 (4M:1)", low_pass_time: "210ms (6.25ns * 8 * 4M)"}
 
+in_signal_semantics:
+  # ONE HOME for what a pin's IN signal MEANS. The %FFF discussion above states
+  # only the non-smart-pin half, as an aside ("non_smart_pin_note"). The operative
+  # half is the contrapositive, and it decides whether any INA/INB sampler --
+  # TESTP, WAITSE, or the streamer's pin-capture path -- is reading traffic or a
+  # handshake.
+  source: "Propeller 2 Documentation v35, Smart Pins -- the IN-signal handshake at
+    engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157 (same text
+    in the whole-document extraction at
+    engineering/ingestion/sources/silicon-doc/p2-documentation.txt:7833-7838), and the
+    non-smart-pin case at part4-smart-pins.txt:50 (p2-documentation.txt:7615)."
+
+  rule: |
+    A pin's IN signal does not mean one thing. What it carries depends entirely on
+    whether that pin is running a smart-pin mode -- that is, on its %SSSSS field.
+
+  when_smart_pin_mode_is_ON:
+    condition: "%SSSSS > %00000 -- the pin is running one of the smart-pin modes"
+    what_in_carries: "a HANDSHAKE, not the pin's logic level"
+    raised_by: "the smart pin itself. Verbatim: \"When a mode-related event occurs in
+      a smart pin, it raises its IN signal to alert the cog(s) that new data is ready,
+      new data can be loaded, or some process has finished.\""
+    lowered_by: "WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on that pin. Verbatim: \"A cog
+      acknowledges a smart pin whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN
+      on it. This causes the smart pin to lower its IN signal so that it can be raised
+      again on the next event.\""
+    rqpin_does_not_lower_it: "RQPIN is the deliberate exception. Verbatim: \"Note that
+      since the RQPIN instruction (read quiet) does not do an acknowledge, it can be
+      used by any number of cogs, concurrently, to read a pin without bus conflict.\""
+    drop_latency: "\"After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it will take two clocks for
+      IN to drop, before it can be polled again\" -- see language/pasm2/wrpin.yaml
+      timing.in_flag_reset_latency for the NOP-padded polling sequence."
+
+  when_smart_pin_mode_is_OFF:
+    condition: "%SSSSS = %00000 -- smart pin mode off"
+    what_in_carries: "the pin's logic level, after the %AAAA input selector and the
+      %FFF input logic/filtering have been applied. Verbatim: \"The resultant 'A' will
+      drive the IN signal in non-smart-pin modes.\""
+    which_pin_that_level_came_from: "NOT necessarily this pin. %AAAA can route 'A'
+      from a neighbour at +-1, +-2 or +-3, or from this pin's own OUT bit. The
+      encoding is in input_routing.a_input above and in language/pasm2/wrpin.yaml
+      input_selectors."
+
+  consequence_for_anything_that_samples_in: |
+    Everything that reads INA/INB reads the signal described above and cannot tell
+    which of the two it got: TESTP, the IN-rise/fall/change event sources, and the
+    streamer's pin-capture path, which "reads pins from {INB, INA}".
+
+    So sampling a pin that is RUNNING a smart-pin mode yields that smart pin's
+    event flag -- the ready/done pulses -- and never the waveform on the wire. To
+    observe the wire, sample a pin whose %SSSSS is %00000 and whose %AAAA routes
+    'A' from the pin you want to watch. That composition is written up in
+    architecture/streamer/pin-capture.yaml.
+  consequence_source: "The streamer half is stated by Parallax in the Spin2 v55 LOGIC
+    display section: \"On every clock, the streamer will record the smart pin's IN
+    signal and its output state, as read from an adjacent pin\" --
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144. The pin-capture
+    read source is Propeller 2 Documentation v35, Pins => DACs/WRFAST,
+    engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961."
+
+  related:
+    - architecture/streamer/pin-capture.yaml
+    - architecture/streamer/pin-selection.yaml
+    - language/pasm2/wrpin.yaml
+    - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
 configuration_format:
   wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
 
@@ -352,10 +423,24 @@ x_y_z_registers:
 in_flag:
   purpose: "Signals operation complete"
   setting: "Mode-specific conditions"
+  what_it_is: "the IN signal of a pin whose %SSSSS is greater than %00000. What IN
+    carries on a pin with smart pin mode OFF is a different thing entirely -- see
+    in_signal_semantics above, which is the one home for that distinction."
   clearing:
+    - "WRPIN instruction"
+    - "WXPIN instruction"
+    - "WYPIN instruction"
     - "RDPIN instruction"
     - "AKPIN instruction"
     - "Smart pin reset"
+  not_clearing:
+    - "RQPIN (read quiet) -- it does NOT acknowledge, which is what lets any number
+      of cogs read the pin concurrently without bus conflict"
+  clearing_source: "Propeller 2 Documentation v35 -- \"A cog acknowledges a smart pin
+    whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on it. This causes the smart
+    pin to lower its IN signal...\" and the RQPIN exception, at
+    engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-153
+    (p2-documentation.txt:7833-7837). The list previously named only RDPIN and AKPIN."
 
   event_driven_waiting:
     description: "Use events instead of polling for efficient waiting"

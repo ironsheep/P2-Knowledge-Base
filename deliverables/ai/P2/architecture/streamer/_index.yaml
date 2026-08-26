@@ -4,6 +4,13 @@
 
 component: streamer
 description: High-speed NCO-driven DMA engine for autonomous I/O
+
+aliases:
+  - "streamer index"
+  - "streamer documentation index"
+  - "streamer files"
+  - "streamer manifest"
+
 version: "2.0"
 last_updated: "2026-01-22"
 
@@ -69,6 +76,20 @@ files:
       - Frequency calculation formula
       - Common frequency values table
 
+  pin_capture:
+    path: pin-capture.yaml
+    size: ~310 lines
+    use_when:
+      - "Capturing digital pin state into hub RAM"
+      - "Monitoring or sniffing a bus that smart pins are already running"
+      - "Building a logic-analyzer-style capture on the P2"
+      - "Wondering why streaming INA of a smart pin returns flags, not traffic"
+    contains:
+      - Why direct capture of a smart-pin pin yields the IN handshake
+      - The neighbour-routing composition that captures the waveform instead
+      - The base-pin alignment constraint at the point of use
+      - What is bench-verified here and what is not
+
   goertzel:
     path: dds-goertzel.yaml
     size: ~80 lines
@@ -89,6 +110,8 @@ decision_tree:
   "Which pins will be used?": pin-selection.yaml
   "What frequency value for X rate?": nco-timing.yaml
   "How does Goertzel analysis work?": dds-goertzel.yaml
+  "How do I capture pin state into hub RAM?": pin-capture.yaml
+  "How do I watch a bus my smart pins are running?": pin-capture.yaml
 
 # Related resources outside this directory
 related:
@@ -103,3 +126,5 @@ related:
   - language/spin2/symbols/streamer-symbols.yaml
   # Related components
   - architecture/event_system.yaml
+  - architecture/smart_pins.yaml
+  - language/spin2/debug-displays/logic.yaml

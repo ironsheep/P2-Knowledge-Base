@@ -4,6 +4,17 @@
 component: streamer_modes
 description: All streamer mode encodings with D[31:28] and D[19:16] fields
 
+aliases:
+  - "streamer modes"
+  - "streamer mode table"
+  - "streamer encoding"
+  - "XINIT mode"
+  - "XZERO mode"
+  - "XCONT mode"
+  - "streamer command word"
+  - "capture modes"
+  - "WFBYTE modes"
+
 # Mode field location
 encoding:
   mode_field: "D[31:28]"
@@ -25,10 +36,30 @@ encoding:
       bit. Writing a 4th p where an `a` belongs is the specific error F-304 records.
     "b": "a LUT base-address bit, in the LUT-indexed modes only."
   field_notation_caveat: >-
-    Compose a mode word with `|`, not `+`. With `+`, a base pin that is not a
-    multiple of the group width carries out of the pin field and changes the mode
-    (EF-065). See language/pasm2/concepts and streamer/dds-goertzel.yaml:11,:18 for
-    the DDS/Goertzel D[22:19] multiple-of-four form.
+    Compose a mode word with `|`, not `+`, and check the base pin's alignment before
+    you compose at all. With `+`, a base pin that is not a multiple of the group
+    width carries out of the pin field and changes the mode (EF-065). With `|` it
+    does not carry -- it can instead set bits the template already sets and VANISH,
+    producing a word byte-identical to the aligned base (also EF-065). Neither form
+    errors and the compiler sees neither.
+  field_notation_caveat_second_proof: >-
+    This is not a one-off. EF-059 is the same failure in a different mode family and
+    was proven by a signature no analog rig was needed for: in
+    X_1ADC8_0P_1DAC8_WFBYTE the template is %1111_DDDD_W000_0010 -- D[22:20] are
+    fixed zeros and there is no pin field at all, the ADC channel being selected by
+    S[1:0] -- so `adc_pin<<17` landed inside D[19:16] and the add carried. The three
+    modes it could reach write 1, 2 and 4 bytes per NCO rollover, so the byte count
+    read out which mode the silicon actually ran: adc_pin 0 gave 1,024 bytes, 1 gave
+    2,048, 2 gave 4,096, and the corrected form gave 1,024. Reproduced four times.
+    The defect is invisible in testing -- the capture "works", the buffer fills, and
+    the data is simply the wrong shape.
+  field_notation_caveat_source: >-
+    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md
+    -- EF-065 (grounds F-309) and EF-059 (grounds F-260), both real P2, 2026-08-20 and
+    2026-08-14. Per-width alignment rules are in
+    architecture/streamer/pin-selection.yaml sub_pin_selection.bits_free_by_width; the
+    DDS/Goertzel D[22:19] multiple-of-four form is in
+    architecture/streamer/dds-goertzel.yaml adc_input_pins.pin_block_selection.
   
 # Mode categories by D[31:28]
 categories:
@@ -368,7 +399,11 @@ selection_guide:
   adc_capture: "X_1ADC8_0P_1DAC8_WFBYTE - Single ADC"
   frequency_detect: "X_DDS_GOERTZEL_SINC1 - Tone detection"
 
+related:
+  - architecture/streamer/pin-capture.yaml
+  - architecture/streamer/overview.yaml
+
 see_also:
-  - dac-routing.yaml
-  - pin-selection.yaml
-  - ../language/spin2/symbols/streamer-symbols.yaml
+  - architecture/streamer/dac-routing.yaml
+  - architecture/streamer/pin-selection.yaml
+  - language/spin2/symbols/streamer-symbols.yaml

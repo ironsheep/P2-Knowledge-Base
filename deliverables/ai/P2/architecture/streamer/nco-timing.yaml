@@ -4,6 +4,15 @@
 component: streamer_nco
 description: Numerically-Controlled Oscillator timing control
 
+aliases:
+  - "streamer NCO"
+  - "NCO timing"
+  - "SETXFRQ"
+  - "streamer frequency"
+  - "streamer sample rate"
+  - "NCO rollover"
+  - "streamer phase accumulator"
+
 # NCO operation
 operation:
   description: |
@@ -140,5 +149,5 @@ precision:
     Monitors tolerate small variations. Use closest achievable rate.
 
 see_also:
-  - overview.yaml
-  - modes-reference.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/streamer/modes-reference.yaml

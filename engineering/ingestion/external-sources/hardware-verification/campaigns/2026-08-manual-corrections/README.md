@@ -12,6 +12,23 @@ grounded in our own sources and does **not** need the bench.
 | 2 | `test-f256-retcall-xbyte.spin2` | F-256 | bare board | whether XBYTE §15.3 is patched or restructured |
 | 3 | `test-f260-goertzel.spin2` | F-260 | **one jumper: pin 0 → pin 1** | whether the Streamer DDS mode can be presented as buildable |
 
+### Added after the original three (same campaign, same tests/ folder)
+
+The roster above is the 2026-08-13 bench session. Three more probes were authored into this folder
+afterwards and were not listed here, which made the directory and the roster disagree. Listed now,
+with their outcomes, so this table is what it claims to be.
+
+| # | Probe | Finding / question | Rig | Outcome |
+|---|---|---|---|---|
+| 4 | `test-f272-streamer-dac-tt.spin2` | F-272 — which `%TT` a streamer-fed DAC needs (VO-J-003) | one jumper: P0 → P1 | **DONE** — `%TT = %01`, run 3 on 2026-08-20 → **EF-063**, plus the unlooked-for **EF-062** (streamer pin output needs `DIRH`) |
+| 5 | `test-f308-cog-and-pingroup.spin2` | debug-cog effect, and where the streamer's pin group lands (VO-J-004) | one jumper: P0 → P1 | **DONE** — 2026-08-20, first run clean → **EF-064 + EF-065**; the unaligned-base trap fired exactly as predicted (→ F-309) |
+| 6 | `test-vo-j-005-streamer-pin-capture.spin2` | VO-J-005 — does the streamer capture digital pin state into hub RAM, and does capturing a **smart** pin give the flag while capturing its **neighbour** gives the waveform? | **bare board — no jumper, no instrument** | **NOT YET RUN.** Authored + compiled 2026-08-26 under `pnut-ts -d` (1.55.3) |
+
+**Probe 6 needs no wiring at all.** The stimulus is generated on-chip by a TRANSITION-mode smart
+pin and observed on-chip through the `%AAAA` input selector, so there is nothing to fit and nothing
+to certify electrically except that P8..P15 are free — which the program checks weakly, itself,
+before it drives anything hard. Run it whenever the board is powered; it needs no bench setup.
+
 **F-259 and F-263 are CLOSED — do not re-run them.** F-259: the guide's recipe drives (TT=%01 →
 6,737 vs 1,408 off); the defect is `+` composition carrying into `P_BITDAC`. F-263: ARM D clean
 through FILL=7 — Chip's model holds, and the rule is no hub access inside either CORDIC loop.
@@ -45,6 +62,15 @@ probe reports its control **first** and tells you when the rest of its output is
 - **F-259** — the no-`P_OE` row and the `P_OE` row **must differ substantially**. If every row reads
   alike, the jumper is missing or the ADC is not converting — and a dead rig's null result looks
   exactly like the broken-mode null result Part 2 is hunting.
+- **VO-J-005** — **two** controls, because the headline result is a lane comparison and a lane
+  comparison fails silently if the lanes are mislabelled. **(a)** Arm A captures four *statically
+  driven* pins twice, with opposite ends of the block high, and **gates the whole run**: a capture
+  that returns the same bytes for different pin levels is not reading pins, and a buffer still
+  holding its `$A5` sentinel means the streamer never wrote at all — which is a different failure
+  from capturing zeros, and the sentinel is the only thing that separates them. **(b)** A **null
+  lane rides inside the measurement itself**: P11 is driven low and captured alongside the three
+  live lanes, so if the silent lane is not silent, that buffer's lane mapping is wrong and arm D
+  reports itself void rather than reporting a contrast.
 
 ## Round 1 (2026-08-13) — all three VOID, all three fixed
 

@@ -12,10 +12,31 @@ source: "PNut/Spin2 v55 DebugDisplayUnit.pas (LOGIC display implementation: chan
 
 aliases:
   - logic analyzer
+  - logic analyser
   - digital signals
   - waveform
   - LOGIC
   - DEBUG LOGIC
+  - logic analyzer display
+
+# "logic analyzer" is a two-part question on the P2 and this file answers one part.
+# LOGIC is the DISPLAY. What it displays has to be CAPTURED first, and the capture
+# is a streamer job with a trap in it (on a pin running a smart-pin mode, IN is the
+# smart pin's flag, not the pin's level). Both keys carry the alias deliberately;
+# each says here what the other covers, so an agent that lands on the wrong half is
+# told so in the first block it reads rather than answering confidently from it.
+where_the_data_comes_from:
+  capture_side: "architecture/streamer/pin-capture.yaml -- how to record digital pin
+    state into hub RAM with the streamer, including why capturing a pin that is
+    running a smart-pin mode yields that smart pin's event flag instead of the
+    waveform, and the neighbour-routing composition that captures the waveform."
+  this_file_is_the_display_side: "LOGIC draws packed sample longs that something else
+    already put in hub RAM. It does not sample pins and it has no acquisition
+    settings; SAMPLES/SPACING/TRIGGER all act on data you feed it."
+  parallax_worked_example: "The Spin2 v55 LOGIC section builds both halves together --
+    a smart pin transmitting async serial, the streamer capturing it through an
+    adjacent non-smart pin, and this display unpacking the result with LONGS_2BIT.
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144."
 
 syntax:
   create: "DEBUG(`LOGIC MyLog <config directives> <channel-def strings>)"
@@ -103,6 +124,7 @@ notes:
   - "To FILL a scrolling LOGIC window with packed data, feed the whole window as an array in one message -- `uhex_long_array_(@buff, N)`; a single packed long advances the window by one column only. On unpack: invoking LONGS_2BIT has the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long; LONGS_1BIT translates each value into 32 separate 1-bit values, starting from the LSB."
 
 related:
+  - architecture/streamer/pin-capture.yaml
   - language/spin2/statements/debug.yaml
   - language/spin2/debug-commands/debug.yaml
   - language/spin2/debug-displays/scope.yaml

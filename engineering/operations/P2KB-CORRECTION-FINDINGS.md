@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-361`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
+**Next finding ID: `F-362`** · **Next gap ID: `G-008`** (was `G-007`; corrected 2026-08-25 — `KNOWLEDGE-GAPS.md` already allocates G-007, see F-352)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,67 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## `pin-selection.yaml` printed the streamer's sub-pin table with the wrong bit weights, and shipped the EF-065 trap as its worked example (2026-08-26, found while composing the streamer pin-capture page) — F-361
+
+- **F-361 — Two defects in `deliverables/ai/P2/architecture/streamer/pin-selection.yaml`: a
+  `sub_pin_selection` table that contradicts both the Silicon Doc and the bench, and a
+  `pin_base_encoding` example that is the EF-065 misalignment trap written out for a reader to
+  copy.** — `PENDING-VALIDATION` (both fixed 2026-08-26; a direct bench check of the sub-pin
+  weights is arm B of VO-J-005 and has not been run)
+
+  **Defect 1 — the sub-pin table.** The block stated `field: "D[19:17] within mode config"` and then
+  gave a **dense slot** mapping: for 2-pin modes `%001 = Pins 3..2`, `%010 = Pins 5..4` … `%111 =
+  Pins 15..14`; for 4-pin modes `%001 = Pins 7..4` … `%111 = Pins 31..28`. Both columns are wrong,
+  and wrong in a way that matters: they imply a 4-pin capture can be based anywhere in a 32-pin
+  window, which is exactly the belief that produces a misaligned base.
+
+  **What the sources say.** Propeller 2 Documentation v35: *"In every mode, the three %ppp bits in
+  D[22:20] select the pin group, in 8-pin increments"*
+  (`engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3606`) and *"For modes which
+  involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are used to further resolve the
+  pin number(s)"* (`:3653`). So the pin number is ONE six-bit field at D[22:17] — `pin << 17` —
+  and D[19:17] is `pin & 7`, not a slot index. The Spin2 v55 streamer symbol table states the same
+  thing per mode, as the bit templates themselves:
+  `X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA`, `X_2P_2DAC1_WFBYTE %1101_DDDD_WPPP_PP0A`,
+  `X_4P_4DAC1_WFBYTE %1110_DDDD_WPPP_P00A`, `X_8P_4DAC2_WFBYTE %1110_DDDD_WPPP_0110`
+  (`engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1613`). The fixed zeros at
+  D[17] and D[18:17] ARE the alignment rule, stated by encoding.
+
+  **The bench already agreed with the sources, in two mode families.** EF-064: a 1-pin mode with
+  `20<<17` drove **P20 exactly**. EF-065: an 8-pin mode with `+ 20<<17` drove **P24..P31** — the
+  carry model, not the slot model. Under the table's dense reading neither result follows.
+
+  **Defect 2 — the worked example.** `pin_base_encoding.example` read
+  `mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count`: an **8-pin** mode at a base that is not
+  a multiple of 8, composed with `+`. That is EF-065 verbatim, in a third mode family, printed as
+  the line a reader copies. Assembled with `pnut-ts` v1.55.3 to check rather than assert:
+
+  ```
+  X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + $FFFF   ->  $A0B6_FFFF
+  X_RFBYTE_8P_1DAC8 | X_PINS_ON | (16<<17) | $FFFF ->  $A0AE_FFFF
+  X_RFBYTE_8P_1DAC8 | X_PINS_ON | (20<<17) | $FFFF ->  $A0AE_FFFF
+  ```
+
+  `$A0B6_FFFF` is D[19:16] = `%0110` (**X_RFBYTE_8P_4DAC2**, a different mode) at D[22:20] = `%011`
+  (**P24..P31**, a different group). And the third line is the other half of EF-065: with `|` the
+  misaligned base is **byte-identical** to base 16 — it does not carry, it silently vanishes. Both
+  compile clean.
+
+  **Applied 2026-08-26.** `sub_pin_selection` rewritten to state the rule and the per-width free
+  bits by encoding, with a worked mapping only for the 1-pin case (the one width where all three
+  bits are free and no mode caveat applies), plus a `what_a_misaligned_base_does` pointer.
+  `pin_base_encoding` now carries the alignment rule, the composition rule, an **aligned** example,
+  and both failure modes with their assembled words. `common_configs` re-composed with `|` and each
+  base annotated with the rule it satisfies. The file also gained a `source:` (it had none) and the
+  capture-path facts this sprint's Section B added.
+
+  **What is still owed.** A bench confirmation of the 2-pin/4-pin sub-field weights specifically.
+  EF-064/EF-065 cover the 1-pin and 8-pin families; the 4-pin family is **arm B of VO-J-005**
+  (`engineering/ingestion/external-sources/hardware-verification/VERIFICATION-OPPORTUNITIES.md`),
+  which captures at base 12 against two distinct static pin patterns and names the reversing
+  outcome: if the buffer returns the P8..P11 pattern rather than the P12..P15 pattern, this finding
+  is backwards and must be reverted before anything built on it ships.
 
 ## Duplicate YAML keys silently destroy content, and no gate can see them (2026-08-25, found by the release-review change ledger) — F-360
 

@@ -1,0 +1,312 @@
+# Streamer Pin Capture -- recording digital pin state into hub RAM
+#
+# The composed answer to "can I watch a bus my smart pins are already running?"
+# It is composed rather than quoted: the parts live in smart_pins.yaml (what IN
+# means), pin-selection.yaml (what the capture path reads and writes), and
+# pasm2/wrpin.yaml (the %AAAA input selector). This file is the one place they
+# are put together, because the two central facts are only dangerous apart.
+#
+# NOT a definition home for any constant. Per-constant definitions live in
+# language/spin2/symbols/spin2-builtin-symbols-complete.yaml (the P_* names) and
+# language/spin2/symbols/streamer-symbols.yaml (the X_* names). This file names a
+# constant only as a VALUE or in prose, never as a defining key, so there is
+# exactly one place in the knowledge base where each name is defined.
+
+component: Streamer_Pin_Capture
+category: dma_engine
+version: "1.0"
+last_updated: "2026-08-26"
+
+aliases:
+  - "pin capture"
+  - "capture pin state"
+  - "streamer capture"
+  - "sample pins"
+  - "trace pins"
+  - "bus monitor"
+  - "sniff spi"
+  - "spi capture"
+  - "protocol capture"
+  - "logic analyzer"
+  - "logic analyser"
+  - "capture pins to hub"
+  - "record pin state"
+  - "watch a running bus"
+  - "nearest neighbor capture"
+  - "neighbour pin capture"
+  - "STREAMER_PIN_CAPTURE"
+
+description: |
+  The streamer can record digital pin state into hub RAM at up to one sample set
+  per system clock. The mechanism is simple and the trap in it is not: the streamer
+  reads {INB, INA}, and on a pin that is running a smart-pin mode, IN is that smart
+  pin's event flag rather than the pin's logic level.
+
+  So pointing the capture path straight at a working SPI, serial or I2C bus records
+  ready-pulses, not traffic -- and it records them without error, without warning,
+  and with a buffer that fills exactly as expected. The fix is not a workaround: you
+  capture a NEIGHBOURING pin whose smart-pin mode is off and whose %AAAA input
+  selector routes 'A' from the bus pin. That neighbour's IN then carries the bus
+  pin's level, and the capture records the waveform.
+
+source: "Propeller 2 Documentation v35 -- the capture path at
+  engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961-3966, the %w rule
+  at :3604-3605, the pin-group and alignment rules at :3606-3651 and :3653, and the
+  IN-signal handshake at :7833-7838 with the non-smart-pin case at :7615 (section
+  extraction: engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157
+  and :50). The composition itself is stated and worked by Parallax in the Spin2 v55
+  LOGIC display section, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144.
+  Encoding hazards are hardware-verified: EF-065, EF-059, EF-062, EF-057 in
+  engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
+
+the_question_this_answers: |
+  "My smart pins are running an SPI interface on four pins. Can I capture their pin
+  state with the streamer, at a useful sample rate?"
+
+  Yes -- but not by naming those four pins in the streamer command. Read
+  why_direct_capture_fails first; it is the half that decides the design.
+
+why_direct_capture_fails:
+  headline: "On a pin running a smart-pin mode, IN is the smart pin's handshake, not
+    the pin's logic level -- and the streamer's capture path reads IN."
+  the_two_facts_that_collide:
+    what_the_streamer_reads: "Verbatim: \"Initially, and on each subsequent NCO
+      rollover, 1/2/4/8/16/32 pins are read from {INB, INA}...\" -- so the capture
+      samples the cog's IN registers, not the pads."
+    what_in_carries_on_a_smart_pin: "Verbatim: \"When a mode-related event occurs in a
+      smart pin, it raises its IN signal to alert the cog(s) that new data is ready,
+      new data can be loaded, or some process has finished.\" It is lowered by a WRPIN,
+      WXPIN, WYPIN, RDPIN or AKPIN on that pin -- not by anything the wire does."
+    what_in_carries_otherwise: "Verbatim: \"The resultant 'A' will drive the IN signal
+      in non-smart-pin modes.\" Only with %SSSSS = %00000 does IN follow the pin's
+      level, and then it follows the level chosen by %AAAA and shaped by %FFF."
+  what_you_would_actually_capture: "one bit per bus pin that sits low while a transfer
+    is in flight and pulses high at each byte boundary -- a transaction-completion
+    trace. It is real data about the smart pin, and it is not the bus."
+  why_this_is_easy_to_miss: "Nothing errors. The command assembles, the streamer runs,
+    the hub buffer fills with plausible-looking bytes at the expected rate. The only
+    tell is that the data does not look like the protocol -- which a reader who has
+    not been told this rule will attribute to a clocking or alignment mistake and
+    chase for a long time."
+  rule_home: "architecture/smart_pins.yaml in_signal_semantics -- the rule, both
+    halves, with the verbatim source lines."
+
+neighbour_capture_composition:
+  why_this_is_the_mechanism_and_not_a_workaround: "The %AAAA input selector exists to
+    let a pin's logic take its 'A' input from a neighbour; that is how P2 SPI is wired
+    up in the first place (a data pin takes its clock from the pin next door -- see
+    architecture/smart_pin_patterns.yaml spi_patterns). Capture uses exactly the same
+    routing, in the same direction. The monitor pin is not a substitute for the bus
+    pin; it is the only pin whose IN can carry the bus pin's level while the bus pin
+    is busy being a smart pin."
+  steps:
+    - step: 1
+      do: "Pick a monitor pin within +-3 of the bus pin you want to watch. That range
+        is the whole reach of the input selector; there is no way to route further."
+    - step: 2
+      do: "Configure the monitor pin with smart-pin mode OFF and the A-input selector
+        pointing back at the bus pin. Mode field %SSSSS must be %00000 -- that is the
+        condition under which the resultant 'A' drives IN at all."
+    - step: 3
+      do: "Leave the monitor pin's DIR low. It is an input; it must not drive the net
+        it is watching. (EF-062's DIRH requirement is about the streamer's pin OUTPUT
+        path and does not apply to capture -- see dir_rule_does_not_apply_here below.)"
+    - step: 4
+      do: "Execute a WRFAST from cog RAM to aim the hub FIFO at your buffer, then start
+        the streamer in a Pins-to-WRFAST mode with the write bit set and the base pin
+        set to the monitor pin (or to the aligned base of the block containing it)."
+    - step: 5
+      do: "Read the buffer. Each captured bit is the bus pin's level as the monitor
+        pin's IN saw it."
+  monitor_pin_configuration:
+    smart_pin_mode_field: "%SSSSS = %00000 (smart pin mode off)"
+    a_input_selector_field: "%AAAA, D[31:28] of the WRPIN mode word"
+    which_offset_to_use: "the offset FROM the monitor pin TO the bus pin. A monitor at
+      bus_pin+1 selects relative -1; a monitor at bus_pin-2 selects relative +2."
+    constant_for_relative_minus_1: "P_MINUS1_A"
+    constant_for_relative_minus_2: "P_MINUS2_A"
+    constant_for_relative_minus_3: "P_MINUS3_A"
+    constant_for_relative_plus_1: "P_PLUS1_A"
+    constant_for_relative_plus_2: "P_PLUS2_A"
+    constant_for_relative_plus_3: "P_PLUS3_A"
+    encoding_and_definitions: "the %AAAA/%BBBB encoding table is in
+      language/pasm2/wrpin.yaml input_selectors and architecture/smart_pins.yaml
+      input_routing; each constant's own definition is in
+      language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Not restated here."
+    b_input_is_free: "%BBBB is untouched by this composition, so a monitor pin can
+      still take a second signal on 'B' if some other mechanism needs it."
+  multi_channel_layout:
+    problem: "A four-wire bus needs four monitor pins, and the streamer captures a
+      contiguous, aligned block."
+    consequence: "Lay the bus and its monitors out so the monitors form one aligned
+      block of the width the capture mode needs -- for example four bus pins with
+      their four monitors adjacent, monitors on an address that is a multiple of 4 for
+      a 4-pin capture mode. Interleaving bus and monitor pins one-for-one wastes half
+      the capture width on pins whose IN carries flags."
+    alignment_is_not_advisory: "see alignment_constraint below -- an unaligned base
+      does not round and does not error."
+  filtering_note: "%FFF (D[23:21]) applies input logic and optional global filtering
+    AFTER the A/B selectors, and the resultant 'A' is what drives IN. Leaving %FFF at
+    its default %000 keeps the path unfiltered. Any filt setting inserts flipflops in
+    the sampled path; the filter lengths and taps are in architecture/smart_pins.yaml
+    input_routing.global_digital_filters. Whether a filt selection adds enough delay
+    to skew one captured channel against another is NOT established -- see
+    what_is_not_established_here."
+
+parallax_worked_example:
+  what_it_is: "Parallax's own Spin2 v55 documentation builds exactly this composition
+    -- a smart pin transmitting async serial, captured by the streamer through a
+    non-smart neighbour, displayed in a DEBUG LOGIC window. It is the closest thing to
+    a canonical form we have, and it predates this file."
+  verbatim: "\"The LOGIC display can be used to display data that was captured at high
+    speed. In the example below, the P2 is generating 8-N-1 serial at 333 Mbaud using a
+    smart pin. This bit stream can be captured by the streamer. On every clock, the
+    streamer will record the smart pin's IN signal and its output state, as read from
+    an adjacent pin. Every time it gets four two-bit sample sets, it does an RFBYTE to
+    save them to hub RAM, forming contiguous bytes, words, and longs.\""
+  read_that_sentence_carefully: "\"the smart pin's IN signal AND its output state, as
+    read from an adjacent pin\" -- two channels, two different things. One captured pin
+    is the smart pin, and what that lane holds is the flag. The other is the adjacent
+    non-smart pin, and what that lane holds is the waveform. The distinction this whole
+    file is about is stated by Parallax in one clause."
+  the_shape_of_the_example: |
+    Two pins captured together in a 2-pin mode: the async-TX smart pin, and the pin
+    below it configured with its A input taken from +1. The pair's base is the lower
+    (even) pin, and D[23] carries the write-enable bit.
+
+      rxpin  -- non-smart, A input selected from relative +1  (P_PLUS1_A)
+      txpin  -- rxpin + 1, async serial transmit smart pin
+      mode   -- a 2-pin Pins-to-WRFAST capture, write enabled, base = rxpin
+      buffer -- WRFAST issued at the buffer before XINIT
+  known_source_defect_in_that_passage: "The sentence says \"it does an RFBYTE\". The
+    mode is a WRFAST (capture) mode and the code in the same example issues WRFAST, so
+    the write is a WFBYTE. Recorded as E-011 in engineering/ingestion/SOURCE-ERRATA.md;
+    quote the mechanism, not that word."
+  locator: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144"
+
+what_the_capture_path_writes:
+  one_home: "architecture/streamer/pin-selection.yaml enable_control.input_modes carries
+    the full statement -- the read source, the widths, the WFBYTE/WFWORD/WFLONG rule,
+    the accrual rule, the bit order and the WRFAST prerequisite. It is not restated
+    here."
+  the_two_lines_you_need_while_reading_this_file:
+    - "the capture reads {INB, INA}, which is why everything above matters"
+    - "for 1/2/4-pin modes a WFBYTE happens each time 8 bits of pin data accrue, so
+      samples PACK into bytes rather than each taking one"
+
+alignment_constraint:
+  why_restated_here: "This is the point of use. A capture layout is chosen by picking
+    pins, and the pin you pick becomes the base of a streamer command -- which is
+    exactly where the hazard lives."
+  the_rule: "The base pin must be a multiple of the capture mode's pin width: any pin
+    for a 1-pin mode, even for 2-pin, a multiple of 4 for 4-pin, a multiple of 8 for
+    8-pin and wider. At 8 pins and wider D[19:16] holds no pin bits at all -- the
+    8-pin-increment group select in D[22:20] is the only pin field there is."
+  failure_with_plus: "the stray low bits CARRY out of the pin field into D[19:16],
+    which is the mode field. You get a different mode at a different pin group.
+    Hardware-verified: EF-065 ran an 8-pin immediate mode at base 20 composed with `+`
+    and the silicon drove P24..P31, against an aligned control in the same run that
+    drove P16..P23."
+  failure_with_or: "the stray low bits set bits the mode template already sets, so they
+    VANISH and the command word comes out byte-identical to the aligned base. Also
+    EF-065. This is the worse failure, because two different-looking source lines
+    produce the same machine word."
+  neither_errors: "Both compile clean. The compiler cannot see either, and there is no
+    runtime check. EF-065's own rig would have compared two identical command words and
+    called it a result -- the compiler LISTING caught that, not the bench."
+  second_family_second_proof: "EF-059 is the same failure in the ADC capture family,
+    proven by the bytes-per-rollover signature. See
+    architecture/streamer/modes-reference.yaml field_notation_caveat_second_proof."
+  practical_form: "Compose with `|`, check the alignment before composing, and read the
+    assembled constant out of a compiler listing before trusting a new layout."
+  detail_home: "architecture/streamer/pin-selection.yaml pin_base_encoding and
+    sub_pin_selection."
+
+dir_rule_does_not_apply_here:
+  the_confusion: "EF-062 established that a streamer pin OUTPUT does not drive until
+    DIR is raised -- the streamer feeds the pin's output STATE, not its output ENABLE."
+  why_it_does_not_apply: "That is the output path (%e, D[23] in an output mode). Capture
+    is the input path (%w, D[23] in a capture mode). A monitor pin is an input: its DIR
+    stays low, and raising it would make the monitor drive the very net it is watching."
+  what_does_still_apply: "If the same program ALSO drives pins with the streamer, that
+    output leg needs DIR high. The two legs do not share the rule."
+  source: "EF-062 (grounds F-308) in
+    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md;
+    the output-side statement is in architecture/streamer/pin-selection.yaml
+    enable_control.output_modes."
+
+measurement_hygiene:
+  debug_interrupt: "Compiling with -d -- the normal way to debug -- puts the P2's
+    highest-priority interrupt inside the cog running your streamer, by default.
+    Restrict it to the reporting cog before believing any capture you take under the
+    debugger."
+  how: "set DEBUG_COGS to the reporting cog only, e.g. %0000_0001 for cog 0"
+  what_it_cost_when_ignored: "streamer measurements taken before this was found were
+    confounded outright -- Goertzel accumulators reading 1,000,000-7,000,000 of
+    corruption that collapsed to their true values in the hundreds once the mask was
+    restricted."
+  detail_home: "architecture/streamer/overview.yaml debug_interaction -- the full EF-057
+    write-up, the CON snippet and the general rule."
+  source: "EF-057 (grounds F-266) in
+    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"
+
+displaying_a_capture:
+  debug_logic_window: "The P2's DEBUG LOGIC display is the digital-waveform window built
+    for exactly this data: it takes packed sample longs and draws them as multi-channel
+    waveforms, with a mask/match EDGE trigger and holdoff. Parallax's worked example
+    above feeds it directly, using the LONGS_2BIT packed-data mode to unpack two-bit
+    sample sets."
+  what_it_is_not: "It is raw sample display. There are NO protocol decoders (I2C / SPI
+    / UART / CAN), no automatic baud detection and no timing-measurement tools -- so a
+    captured SPI transaction is shown as waveforms and bus values, and decoding it is
+    the reader's job."
+  detail_home: "language/spin2/debug-displays/logic.yaml"
+
+verification_status:
+  what_is_bench_proven: "The ENCODING HAZARDS around this path are proven on real P2
+    silicon -- EF-065 and EF-059 for base-pin composition, EF-062 for the streamer's
+    output-side DIR requirement, EF-057 for the debug interrupt. Those transfer to
+    capture because they are properties of the command word and the cog, not of the
+    data direction."
+  what_is_not_proven_here: "The digital pin-capture path itself. Every streamer finding
+    this project holds is an OUTPUT or an ADC result; no test in our ledger has
+    exercised Pins-to-WRFAST digital capture into hub RAM, and none has measured the
+    IN-repurposing contrast on silicon. The mechanism above is documentary -- Propeller
+    2 Documentation v35 plus Parallax's own worked Spin2 v55 example -- and is
+    presented as documentary."
+  what_would_settle_it: "VO-J-005 in
+    engineering/ingestion/external-sources/hardware-verification/VERIFICATION-OPPORTUNITIES.md
+    -- a jumper-free bench rig that captures a smart-pin lane and a neighbour-routed
+    lane in the SAME buffer, so the contrast is one result rather than two runs
+    compared."
+
+what_is_not_established_here:
+  why_named: "So the omissions are deliberate rather than silent."
+  sustained_sample_rate_ceiling: "NOT STATED. The NCO can be set to roll over every
+    system clock, and the accrual rule says how many rollovers make a hub write -- but
+    no Parallax source states a sustained capture rate the hub FIFO can hold, and this
+    project has never measured one. Any figure here would be invented. VO-J-005 is
+    written to measure it."
+  filter_latency_and_inter_channel_skew: "NOT STATED. Whether a %FFF filt selection on
+    one monitor pin delays that lane relative to an unfiltered lane, and by how much,
+    is not stated by any source we hold and has not been measured. VO-J-005 carries a
+    lane for it."
+  protocol_decoding: "Out of scope entirely. Neither the streamer nor the DEBUG LOGIC
+    window decodes SPI, I2C, UART or CAN; a capture yields levels over time."
+
+related:
+  - architecture/smart_pins.yaml
+  - architecture/smart_pin_patterns.yaml
+  - architecture/streamer/pin-selection.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/streamer/nco-timing.yaml
+  - language/pasm2/wrpin.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - language/spin2/debug-displays/logic.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
+  - language/spin2/symbols/streamer-symbols.yaml
+
+see_also:
+  - architecture/streamer/_index.yaml
+  - architecture/pin-drive-configuration.yaml

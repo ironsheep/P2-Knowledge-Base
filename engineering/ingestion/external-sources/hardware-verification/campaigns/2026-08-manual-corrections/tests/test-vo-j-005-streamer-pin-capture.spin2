@@ -1,0 +1,699 @@
+'' =============================================================================
+''  test-VO-J-005 -- does the streamer capture DIGITAL PIN STATE into hub RAM,
+''                   and does capturing a SMART pin give the flag while capturing
+''                   its NEIGHBOUR gives the waveform?
+'' =============================================================================
+''  WHY THIS RUN EXISTS
+''    Every streamer finding in our ledger is an OUTPUT result or an ADC result.
+''    EF-054/055/059/062/063/064/065 -- not one of them has ever put the
+''    Pins-to-WRFAST digital capture path on silicon.  The encoding hazards we
+''    hold transfer to it (they are properties of the command word), but the
+''    capture path itself is documentary only.
+''
+''    And the fact that decides how you USE it is documentary only too:
+''
+''      Silicon Doc v35 : "Initially, and on each subsequent NCO rollover,
+''                         1/2/4/8/16/32 pins are read from {INB, INA}"
+''      Silicon Doc v35 : "When a mode-related event occurs in a smart pin, it
+''                         raises its IN signal to alert the cog(s)..."
+''      Silicon Doc v35 : "The resultant 'A' will drive the IN signal in
+''                         non-smart-pin modes."
+''
+''    Put together: capture reads IN, and on a pin RUNNING a smart-pin mode IN is
+''    the smart pin's handshake, not the wire.  So streaming INA of a live SPI bus
+''    records ready-pulses, not traffic.  Parallax states the same thing in one
+''    clause in the Spin2 v55 LOGIC section -- "the streamer will record the smart
+''    pin's IN signal and its output state, as read from an adjacent pin" -- and
+''    ships a worked example built on it.  Nobody here has measured it.
+''
+''    This run measures it, with BOTH signals in the SAME buffer at the SAME
+''    instant, so the contrast is one result rather than two runs compared.
+''
+''  Build:  pnut-ts -d test-vo-j-005-streamer-pin-capture.spin2
+''          The -d is REQUIRED, or every line below prints nothing.
+''
+''  BENCH SETUP: BARE BOARD.  No jumper.  No external instrument.
+''    The stimulus is generated on-chip by a smart pin and observed on-chip
+''    through the %AAAA input selector, so nothing has to be wired.
+''    Pins touched: P8..P15 and NOTHING else -- clear of P0..P7 (where the earlier
+''    campaign rigs put their jumper), clear of P58..P63 (boot + DEBUG_PIN_TX/RX).
+''    P8..P15 are certified electrically free, WEAKLY, before anything is driven
+''    hard.  If something is attached, the program names the pins and stops.
+''
+''  PIN MAP -- the whole experiment is in this table
+''    P8  BUS    smart pin, TRANSITION output mode.  It generates a square wave AND
+''               it is the pin whose IN is the smart pin's completion flag.
+''    P9  MON_R  smart pin mode OFF, A input selected from relative -1 (P_MINUS1_A).
+''               Its IN therefore carries P8's PIN STATE.  Unfiltered.
+''    P10 MON_F  smart pin mode OFF, A input from relative -2 (P_MINUS2_A), with
+''               filt0 selected (P_FILT0_AB).  Same signal, filtered path.
+''    P11 NULL   plain pin, no routing, driven low.  It rides along INSIDE the same
+''               capture and MUST read all zeros.  If it does not, the lane mapping
+''               is wrong and no other lane in that buffer can be believed.
+''    P12..P15   used only by arm B, to find out where an unaligned base lands.
+''
+''  PREDICTIONS ON RECORD, WITH THEIR FALSIFYING OUTCOMES NAMED
+''    A  (control) a 4-pin capture of statically driven pins returns those levels,
+''       and returns DIFFERENT bytes for different levels.
+''       Falsified if A1 == A2, or if any buffer comes back still full of sentinel.
+''       IF A FAILS, NOTHING BELOW IS INTERPRETABLE and the program says so.
+''    B  a 4-pin capture at base 12 reads P12..P15, not P8..P11.
+''       Falsified by reading P8..P11 -- which would mean D[19:17] is a DENSE slot
+''       selector rather than pin&7, and P2KB finding F-361 is backwards.
+''    C  (no streamer at all) over a 20 ms window the cog sees P9 CHANGE about 40
+''       times and P8 change ONCE.  Same contrast, no streamer involved, so it
+''       isolates the IN rule from the capture path -- the simplest layer answers
+''       first.  Count CHANGES, not levels: both signals sit high for about half
+''       the window, so level counts cannot tell a flag from a square wave.
+''       Falsified if P8 changes as often as P9 -- IN is then NOT repurposed, and
+''       the KB block this test was written to ground (smart_pins.yaml
+''       in_signal_semantics) is wrong.
+''    D  THE HEADLINE.  In ONE capture: the MON_R lane shows the square wave
+''       (~10 edges), the MON_F lane shows the same wave, the BUS lane shows at
+''       most ONE edge -- the flag rising when the burst completes mid-window --
+''       and the NULL lane shows none.
+''       Falsified if the BUS lane matches MON_R: IN is not repurposed.
+''       Falsified differently if BUS and MON_R are BOTH flat: the stimulus never
+''       ran; arm C's result decides which.
+''       The burst is deliberately armed to END INSIDE the window so the BUS lane
+''       carries exactly one edge.  A lane with one edge is a LIVE lane carrying a
+''       different signal -- not a dead lane.  That distinction is the whole reason
+''       the burst is not left running.
+''    E  edge spacing scales with the NCO ratio, exactly, until it does not.
+''       The fastest ratio where measured spacing still equals the predicted
+''       spacing IS the sustained ceiling, measured rather than asserted.
+''       No ceiling is predicted here.  I could not establish one from any source
+''       and will not invent one.
+''
+''  MEASURING COG == REPORTING COG, deliberately.
+''    EF-057 is real: -d puts the highest-priority interrupt in the streamer's cog.
+''    DEBUG_COGS below restricts it to cog 0, and cog 0 is where this measures.
+''    VO-J-004 ran exactly this arrangement against a launched debug-free cog and
+''    every digital count matched (EF-064), which is why a second cog is not built
+''    here.  If any arm below returns jittery or irreproducible counts, that
+''    judgement is what to revisit first -- move the measurement to a launched cog.
+''
+''  NOTHING GATES ACROSS ARMS except arm A, which gates by design: it is the only
+''  arm that establishes the lane mapping every other arm reads through.
+'' =============================================================================
+
+CON
+  _xtlfreq   = 20_000_000                ' P2 Eval/Edge default
+  _clkfreq   = 200_000_000               ' 5 ns per clock
+
+  '' EF-057: keep the debug interrupt out of every cog but the reporting one.
+  DEBUG_COGS = %0000_0001
+
+  BUS        = 8                         ' smart pin: TRANSITION output
+  MON_R      = 9                         ' BUS + 1 -> selects A from relative -1
+  MON_F      = 10                        ' BUS + 2 -> selects A from relative -2
+  NULLPIN    = 11                        ' rides in the capture, must read 0
+
+  BASE       = 8                         ' capture base: multiple of 4, as a 4-pin
+                                         ' mode requires (D[18:17] are fixed zeros)
+  ALT_BASE   = 12                        ' arm B: the next legal 4-pin base up
+
+  GUARD_LO   = 8                         ' pins this program will touch: P8..P15
+  GUARD_N    = 8
+
+  '' Buffer.  A 4-pin mode packs TWO samples per byte, so 512 bytes is 1024
+  '' sample sets.  Declared as longs so the buffer is long-aligned.
+  BUF_LONGS  = 128
+  BUF_BYTES  = BUF_LONGS * 4
+  SAMPLES    = BUF_BYTES * 2
+
+  SENTINEL   = $A5                       ' not $00, not $FF, not $55, not $AA,
+                                         ' and not any nibble pattern this rig
+                                         ' can legitimately produce ($11/$88/
+                                         ' $33/$CC).  A buffer still holding it
+                                         ' means the streamer never wrote.
+
+  '' Streamer command words.  Both verified from the compiler listing before the
+  '' run, which is how EF-065's vacuous first draft was caught:
+  ''   X_4P_4DAC1_WFBYTE | X_WRITE_ON | (8<<17)  = $E090_0000
+  ''   X_4P_4DAC1_WFBYTE | X_WRITE_ON | (12<<17) = $E098_0000
+  '' Composed with `|`, never `+`.  Both bases are multiples of 4; an unaligned
+  '' base in this mode does not round and does not error -- it changes the mode
+  '' (EF-065) or vanishes (EF-065's `|` half).
+  CAP_BASE   = X_4P_4DAC1_WFBYTE | X_WRITE_ON | (BASE     << 17) | SAMPLES
+  CAP_ALT    = X_4P_4DAC1_WFBYTE | X_WRITE_ON | (ALT_BASE << 17) | SAMPLES
+
+  '' NCO.  frequency = $8000_0000 * (sample_rate / clkfreq).
+  NCO_1_1    = $8000_0000                ' one sample every clock
+  NCO_1_2    = $4000_0000
+  NCO_1_4    = $2000_0000
+  NCO_1_8    = $1000_0000
+  NCO_1_16   = $0800_0000
+
+  '' TRANSITION output: X[15:0] is the base period in clocks; each transition
+  '' happens one base period after the last; IN rises when Y transitions are done.
+  '' X IS SIXTEEN BITS. "X[15:0] establishes a base period in clock cycles" --
+  '' anything above 65,535 is silently truncated, which would move arm C's half
+  '' period without saying so. Every period below is inside that range.
+  FAST_PER   = 64                        ' clocks per half-cycle for arms D and E
+  SLOW_PER   = 60_000                    ' 300 us per half-cycle, for arm C
+  BURST_D    = 10                        ' 10 * 64 = 640 clocks: ENDS INSIDE the
+                                         ' 1024-clock arm-D window, on purpose
+  BURST_E    = 600                       ' 600 * 64 = 38,400 clocks: outlasts even
+                                         ' the slowest arm-E window (16,384)
+  BURST_C    = 40                        ' 40 * 300 us = 12 ms, inside arm C's
+                                         ' 20 ms observation window
+  C_SAMPLES  = 400                       ' arm C: 400 reads, 50 us apart = 20 ms.
+                                         ' 50 us against a 300 us half period is
+                                         ' six samples per half cycle -- clear of
+                                         ' the aliasing that a 100 us interval
+                                         ' would have flirted with
+  C_INTERVAL = 50                        ' microseconds between arm C reads
+
+  '' Expected whole-byte values for arm A.  A 4-pin sample is {P11,P10,P9,P8};
+  '' bit 0 of the sample is the BASE pin.  Two samples per byte, and the Silicon
+  '' Doc says shifted modes use "bits bottom-first, by default" (X_ALT_OFF), so
+  '' the earlier sample occupies the LOW nibble.  With a STATIC pattern both
+  '' nibbles are identical, which is why arm A cannot test that ordering claim --
+  '' see the note in report_A.
+  BYTE_NONE  = $00                       ' nibble %0000
+  BYTE_P8    = $11                       ' nibble %0001 -- only the base pin high
+  BYTE_P11   = $88                       ' nibble %1000 -- only the top pin high
+  BYTE_LOW2  = $33                       ' nibble %0011 -- P8,P9 high
+  BYTE_TOP2  = $CC                       ' nibble %1100 -- P14,P15 high (arm B)
+
+  CAP_BUDGET = 2_000_000                 ' 10 ms ceiling on any one capture; a
+                                         ' streamer that never starts must not
+                                         ' hang the session (round-1 lesson:
+                                         ' WAITXFI unbounded cost a bench slot)
+
+VAR
+  long bufl[BUF_LONGS]                   ' the capture buffer, long-aligned
+
+
+PUB main() | ok
+
+  debug("=== VO-J-005: streamer digital pin capture, and the IN contrast ===")
+  debug("    clk=200MHz  base=P8  4-pin capture  1024 samples  512 bytes")
+
+  if not certify_pins_free()
+    debug("STOP -- P8..P15 are not electrically free. Nothing was driven hard.")
+    terminator()
+    return
+
+  ok := arm_A_calibrate()
+  if not ok
+    debug("STOP -- arm A is the control for every lane reading below.")
+    debug("   Arms B, D and E read the buffer through the mapping A establishes.")
+    debug("   Running them now would produce numbers with no meaning. Stopping.")
+    terminator()
+    return
+
+  arm_B_unaligned_base()
+  arm_C_cog_level_contrast()
+  arm_D_streamer_contrast()
+  arm_E_rate_ladder()
+
+  release_all()
+  terminator()
+
+
+PRI terminator()
+  debug("@@@ TEST COMPLETE: VO-J-005 streamer pin capture @@@")
+  debug("@@@ nothing further will print - safe to stop the session @@@")
+  repeat
+
+
+'' ============================================================================
+''  Pin certification -- weakly, before anything is driven hard
+'' ============================================================================
+''  P8..P15 are held at a 15 kOhm LOW with DIR high.  An undriven pin then reads
+''  0 for a stated reason instead of floating at whatever charge it kept, and
+''  anything real attached to those pins overpowers 15 kOhm and reads 1.  That is
+''  how a board with something on P8..P15 is detected BEFORE this program drives
+''  those pins hard.  Same apparatus as EF-064's canvas.
+PRI certify_pins_free() : ok | held
+  pinclear(GUARD_LO addpins GUARD_N-1)
+  wrpin(GUARD_LO addpins GUARD_N-1, P_LOW_15K)
+  pinlow(GUARD_LO addpins GUARD_N-1)     ' DIR high, OUT low -> 15k to GIO
+  waitms(1)
+  held := pinread(GUARD_LO addpins GUARD_N-1)
+  pinclear(GUARD_LO addpins GUARD_N-1)
+  if held <> 0
+    debug("   pins held by something external, mask(bit0=P8) = ", uhex_byte_(held))
+    return false
+  return true
+
+
+'' ============================================================================
+''  ARM A -- the control, and the lane calibration everything else reads through
+'' ============================================================================
+''  No smart pins.  No input routing.  Four pins driven hard to known levels and
+''  captured.  This arm answers three separate questions at once:
+''    1. does the Pins-to-WRFAST path write hub RAM at all?      (sentinel)
+''    2. does it read the pins rather than returning a constant? (A1 vs A2)
+''    3. which bit of a captured sample is which pin?            (A2 vs A3)
+''  A rig that cannot fail proves nothing: A2 and A3 drive OPPOSITE ENDS of the
+''  captured block, so a capture that always returns the same thing fails one of
+''  them by construction.
+PRI arm_A_calibrate() : ok | b1, b2, b3, u1, u2, u3, wrote1, wrote2, wrote3, late1, late2, late3
+
+  debug("-- Arm A: capture-path control and lane calibration --")
+
+  drive_static(0)                                  ' P8..P11 all low
+  wrote1, late1 := capture(CAP_BASE, NCO_1_4, 0)
+  b1, u1 := uniform_byte()
+
+  drive_static(%0001)                              ' P8 high only
+  wrote2, late2 := capture(CAP_BASE, NCO_1_4, 0)
+  b2, u2 := uniform_byte()
+
+  drive_static(%1000)                              ' P11 high only
+  wrote3, late3 := capture(CAP_BASE, NCO_1_4, 0)
+  b3, u3 := uniform_byte()
+
+  release_all()
+
+  if late1 or late2 or late3
+    debug("A NOTE -- a capture hit its 10 ms budget without the streamer ever")
+    debug("   signalling XFI. Bytes may still have landed; read the counts, but")
+    debug("   treat any width or edge number below as suspect.")
+  debug("   each row: bytes written, first byte, bytes unlike it, byte wanted")
+  debug("A1 all low  : ", udec_(wrote1), " ", uhex_byte_(b1), " ", udec_(u1), " want ", uhex_byte_(BYTE_NONE))
+  debug("A2 P8 high  : ", udec_(wrote2), " ", uhex_byte_(b2), " ", udec_(u2), " want ", uhex_byte_(BYTE_P8))
+  debug("A3 P11 high : ", udec_(wrote3), " ", uhex_byte_(b3), " ", udec_(u3), " want ", uhex_byte_(BYTE_P11))
+
+  if u1 <> 0 or u2 <> 0 or u3 <> 0
+    debug("A FAILED -- a capture of STATIC pin levels came back non-uniform. The")
+    debug("   pins did not move, so the buffer must not either. Something is")
+    debug("   corrupting the capture; read the raw bytes before going further.")
+    dump_head(string("A3"))
+    return false
+
+  if wrote1 == 0 or wrote2 == 0 or wrote3 == 0
+    debug("A FAILED -- a buffer came back still full of sentinel. The streamer")
+    debug("   never wrote hub RAM. This is NOT a lane-mapping problem: the")
+    debug("   capture path did not run. Check WRFAST, the command word, and that")
+    debug("   the inline PASM really executed from cog RAM.")
+    return false
+
+  if b1 == b2
+    debug("A FAILED -- A1 and A2 returned the SAME byte with different pin levels.")
+    debug("   The capture is not reading the pins. Everything else is void.")
+    return false
+
+  if b2 == BYTE_P8 and b3 == BYTE_P11
+    debug("A PASSED -- path writes, discriminates, and lane N = pin BASE+N.")
+    return true
+
+  if b2 == BYTE_P11 and b3 == BYTE_P8
+    debug("A FAILED (mapping) -- the lanes are REVERSED: the top pin landed in")
+    debug("   bit 0. Not a bench fault -- our reading of the sample bit order is")
+    debug("   backwards. Record it, flip the mapping, re-run. Do not reinterpret")
+    debug("   arms B/D/E by hand.")
+    return false
+
+  debug("A FAILED -- unexpected bytes. Do not force a story; record them.")
+  dump_head(string("A3"))
+  return false
+
+
+'' ============================================================================
+''  ARM B -- where does a base of 12 actually land?
+'' ============================================================================
+''  A 4-pin mode's D[19:16] template is %p00a: ONE pin bit at D[19], and D[18:17]
+''  fixed zero.  Read with the Silicon Doc's rule -- D[22:20] is the group in
+''  8-pin increments, D[19:17] resolves within it -- base 12 means D[22:20]=%001
+''  (group base 8) and D[19]=1 (+4), so P12..P15.  The KB's old table said
+''  something else.  This settles it without a jumper: give P8..P11 one pattern,
+''  P12..P15 another, capture at base 12, and see which pattern comes back.
+PRI arm_B_unaligned_base() | b, odd, wrote, late
+
+  debug("-- Arm B: which four pins does base 12 read? --")
+
+  drive_pattern(BASE,     %0011)         ' P8,P9 high  -> byte $33 if read here
+  drive_pattern(ALT_BASE, %1100)         ' P14,P15 high -> byte $CC if read there
+  wrote, late := capture(CAP_ALT, NCO_1_4, 0)
+  b, odd := uniform_byte()
+  release_all()
+
+  debug("B base 12   : bytes ", udec_(wrote), " first ", uhex_byte_(b), " unlike ", udec_(odd))
+  if wrote == 0
+    debug("B INCONCLUSIVE -- sentinel intact; nothing was captured.")
+    return
+  if b == BYTE_TOP2
+    debug("B -> P12..P15, as predicted. D[19] is pin bit 2 and the base pin is")
+    debug("   simply pin<<17. Confirms the F-361 correction to pin-selection.yaml.")
+  elseif b == BYTE_LOW2
+    debug("B -> P8..P11. THE PREDICTION IS WRONG. D[19:17] is behaving as a dense")
+    debug("   slot selector, the old KB table was right, and F-361 must be")
+    debug("   REVERSED before anything built on it ships.")
+  else
+    debug("B -> neither pattern. Record the byte; do not force a story.")
+    dump_head(string("B"))
+
+
+'' ============================================================================
+''  ARM C -- the same contrast with NO STREAMER INVOLVED
+'' ============================================================================
+''  If the IN rule is real, it is visible to a plain cog read: while the smart pin
+''  is toggling its pin, pinread() of THAT pin returns the smart pin's completion
+''  flag (low for the whole burst) while pinread() of the routed neighbour returns
+''  the pin's level (toggling).  Establishing that here means arm D's result
+''  cannot be blamed on the capture path, and vice versa -- the simplest layer
+''  answers first.
+''  COUNT CHANGES, NOT LEVELS.  Over a 20 ms window containing a 10 ms burst,
+''  BOTH signals spend about half the window high -- the flag because it rises at
+''  burst end and stays up, the waveform because it is a square wave.  Level
+''  counts therefore look ALIKE for the two things this arm exists to separate.
+''  The number that separates them is how many TIMES each changed: the flag
+''  changes once, the waveform changes once per half period.
+PRI arm_C_cog_level_contrast() | i, bus_ch, mon_ch, bus_p, mon_p, v
+
+  debug("-- Arm C: cog-level contrast, no streamer --")
+
+  setup_stimulus_and_monitors(SLOW_PER)
+  wypin(BUS, BURST_C)                    ' WYPIN(PinField, Data): start a 10 ms burst
+
+  bus_p := pinread(BUS)
+  mon_p := pinread(MON_R)
+  repeat i from 0 to C_SAMPLES-1
+    v := pinread(BUS)
+    if v <> bus_p
+      bus_ch++
+      bus_p := v
+    v := pinread(MON_R)
+    if v <> mon_p
+      mon_ch++
+      mon_p := v
+    waitus(C_INTERVAL)
+
+  release_all()
+
+  debug("   half period 300 us, sampled every 50 us, 12 ms burst in a 20 ms window")
+  debug("C P8 (smart pin IN) changes : ", udec_(bus_ch), "  expect 1")
+  debug("C P9 (routed -1)    changes : ", udec_(mon_ch), "  expect about 40")
+
+  if mon_ch >= 20 and bus_ch <= 2
+    debug("C AS PREDICTED -- the routed neighbour tracked the wire while the smart")
+    debug("   pin's own IN changed once. IN on that pin is the completion flag.")
+  elseif mon_ch >= 20 and bus_ch >= 20
+    debug("C REFUTED at cog level -- P8's IN tracked the waveform too. The")
+    debug("   IN-repurposing rule does not hold for this mode. Arm D will agree;")
+    debug("   the KB blocks that rest on it must be regraded.")
+  elseif mon_ch < 4
+    debug("C STIMULUS DID NOT RUN -- P9 never changed. The TRANSITION smart pin is")
+    debug("   not toggling: check P_OE, that DIR went high, and that WYPIN came")
+    debug("   AFTER DIRH. Arm D's flat lanes would mean the same thing, and would")
+    debug("   NOT be evidence about the IN rule.")
+  else
+    debug("C UNEXPECTED. Record both counts; do not force a story.")
+
+
+'' ============================================================================
+''  ARM D -- THE HEADLINE. Both signals, one buffer, one instant.
+'' ============================================================================
+PRI arm_D_streamer_contrast() | wrote, late, t0, o0, e0, z0, t1, o1, e1, z1, t2, o2, e2, z2, t3, o3, e3, z3
+
+  debug("-- Arm D: smart-pin lane vs neighbour lane, in ONE capture --")
+
+  setup_stimulus_and_monitors(FAST_PER)
+  wrote, late := capture(CAP_BASE, NCO_1_1, BURST_D)
+  release_all()
+
+  if wrote == 0
+    debug("D INCONCLUSIVE -- sentinel intact; the streamer never wrote.")
+    return
+  if late
+    debug("D NOTE -- the capture hit its budget without XFI. Read on, but the")
+    debug("   transfer may have been cut short; check the raw dump below.")
+
+  t0, o0, e0, z0 := lane_stats(0)        ' P8  BUS   -- expect the FLAG
+  t1, o1, e1, z1 := lane_stats(1)        ' P9  MON_R -- expect the WAVEFORM
+  t2, o2, e2, z2 := lane_stats(2)        ' P10 MON_F -- waveform, filtered path
+  t3, o3, e3, z3 := lane_stats(3)        ' P11 NULL  -- expect nothing at all
+
+  debug("   1024 samples, one per clock. edges = 0<->1 changes in that lane.")
+  debug("   each row: edges, highs, index of first edge")
+  debug("D P8  BUS  smartpin : ", udec_(t0), " ", udec_(o0), " ", udec_(e0))
+  debug("D P9  MON_R route-1 : ", udec_(t1), " ", udec_(o1), " ", udec_(e1))
+  debug("D P10 MON_F filt0   : ", udec_(t2), " ", udec_(o2), " ", udec_(e2))
+  debug("D P11 NULL  control : ", udec_(t3), " ", udec_(o3), " ", udec_(e3))
+  dump_head(string("D"))
+
+  '' The in-buffer control first. If the lane that must be silent is not, the
+  '' lane mapping in this buffer is wrong and no other lane here means anything.
+  if t3 <> 0 or o3 <> 0
+    debug("D VOID -- the NULL lane (P11, driven low) carries data. The lane")
+    debug("   mapping is wrong for THIS capture even though arm A passed.")
+    debug("   Nothing else in arm D is interpretable.")
+    return
+
+  if t1 == 0
+    debug("D STIMULUS DEAD -- the neighbour lane is flat, so nothing was toggling.")
+    debug("   Read arm C: if C also saw no toggling, fix the smart pin, not the")
+    debug("   capture. This is NOT evidence about the IN rule either way.")
+    return
+
+  if t0 <= 1 and t1 >= 8
+    debug("D CONFIRMED -- the smart pin's lane carries at most ONE edge while its")
+    debug("   neighbour's lane carries the waveform. Capturing a pin that is")
+    debug("   running a smart-pin mode yields the IN handshake, not the traffic;")
+    debug("   capturing a neighbour routed from it yields the traffic.")
+    debug("   -> smart_pins.yaml in_signal_semantics and streamer/pin-capture.yaml")
+    debug("      are grounded. Replicate as an EF entry.")
+  elseif t0 >= 8
+    debug("D REFUTED -- the smart pin's lane carries the WAVEFORM too. IN is NOT")
+    debug("   repurposed by this smart-pin mode. STOP: smart_pins.yaml")
+    debug("   in_signal_semantics and streamer/pin-capture.yaml both rest on the")
+    debug("   opposite claim and must be regraded before anything ships.")
+  else
+    debug("D PARTIAL -- edge counts fall between the two predictions. Record them")
+    debug("   and the raw bytes above; do not round toward either story.")
+
+  if t2 > 0 and e2 >= e1
+    debug("D SKEW: filtered lane's first edge is later by samples: ", udec_(e2 - e1))
+    debug("   One sample = one clock = 5 ns here. That number is MEASURED;")
+    debug("   no source we hold states a filter latency to compare it against.")
+  elseif t2 > 0
+    debug("D SKEW: filtered lane's first edge is EARLIER than unfiltered. That")
+    debug("   cannot be a filter delay -- record it, do not explain it away.")
+  else
+    debug("D SKEW: not measurable -- the filtered lane carried no edge.")
+
+
+'' ============================================================================
+''  ARM E -- how fast can this be sustained? MEASURED, not asserted.
+'' ============================================================================
+''  The stimulus toggles every FAST_PER clocks.  At a sample every N clocks the
+''  recovered half-cycle must be exactly FAST_PER/N samples wide.  If the path
+''  cannot sustain a rate, the recovered spacing stops matching -- dropped samples
+''  shrink it, a stalled streamer stretches it.  The fastest ratio that still
+''  matches IS the ceiling, and nothing here predicts what that will be.
+PRI arm_E_rate_ladder()
+  debug("-- Arm E: sustained rate. predicted vs measured half-cycle width --")
+  debug("   stimulus toggles every ", udec_(FAST_PER), " clocks throughout.")
+  rate_leg(string("1:16"), NCO_1_16, FAST_PER / 16)
+  rate_leg(string("1:8 "), NCO_1_8,  FAST_PER / 8)
+  rate_leg(string("1:4 "), NCO_1_4,  FAST_PER / 4)
+  rate_leg(string("1:2 "), NCO_1_2,  FAST_PER / 2)
+  rate_leg(string("1:1 "), NCO_1_1,  FAST_PER)
+  debug("   The fastest row whose measured width equals its predicted width is")
+  debug("   the sustained ceiling for a 4-pin capture on this board. Report the")
+  debug("   ROW, not a rounded number.")
+
+
+PRI rate_leg(label, xfrq, want_width) | wrote, late, edges, highs, first, last, width
+
+  setup_stimulus_and_monitors(FAST_PER)
+  wrote, late := capture(CAP_BASE, xfrq, BURST_E)
+  release_all()
+
+  if wrote == 0
+    debug("E ", zstr_(label), " : sentinel intact -- nothing captured.")
+    return
+  if late
+    debug("E ", zstr_(label), " : hit the budget without XFI -- row is suspect.")
+
+  edges, highs, first, last := lane_stats(1)   ' the unfiltered neighbour lane
+  if edges < 2
+    debug("E ", zstr_(label), " : ", udec_(edges), " edge(s) -- cannot measure a width.")
+    return
+
+  '' Mean samples per half-cycle, measured BETWEEN the first and last edge. Using
+  '' the whole buffer instead would fold in the lead-in before the first edge and
+  '' the tail after the last, and bias every row low by a couple of samples --
+  '' enough to make a correct row look like a failed one.
+  width := (last - first) / (edges - 1)
+  debug("E ", zstr_(label), " bytes ", udec_(wrote), " edges ", udec_(edges))
+  debug("        width ", udec_(width), " want ", udec_(want_width), " highs ", udec_(highs))
+
+
+'' ============================================================================
+''  Stimulus and monitors
+'' ============================================================================
+''  Order matters and is the project's universal one: reset (DIRL) -> configure
+''  (WRPIN/WXPIN) -> enable (DIRH) -> operate (WYPIN).  WYPIN comes AFTER DIRH;
+''  a WYPIN issued before enable is lost in the trigger modes (EF-011), and
+''  TRANSITION is one of them.
+PRI setup_stimulus_and_monitors(period)
+  release_all()
+
+  '' P8: TRANSITION output. P_OE is required or the smart pin does not drive the
+  '' pin at all, and then every monitor lane reads a pin nobody is driving.
+  pinclear(BUS)
+  wrpin(BUS, P_TRANSITION | P_OE)
+  wxpin(BUS, period)                     ' X[15:0] = base period in clocks
+  pinlow(BUS)                            ' DIR high, OUT low: enable the smart
+                                         ' pin. TRANSITION mode overrides OUT
+                                         ' anyway, and "during reset the output
+                                         ' is low", so this is the state the
+                                         ' mode itself starts from. WYPIN, which
+                                         ' actually starts it, comes AFTER this.
+
+  '' P9: smart pin mode OFF (%SSSSS = %00000) with the A input selected from
+  '' relative -1. THAT is the whole mechanism: with the mode field zero, "the
+  '' resultant 'A' will drive the IN signal", and 'A' is P8's read state.
+  '' DIR stays LOW -- a monitor must not drive the net it is watching.
+  pinclear(MON_R)
+  wrpin(MON_R, P_MINUS1_A)
+
+  '' P10: the same signal two pins away, through filt0, so arm D can measure any
+  '' added latency as a lane-to-lane skew.
+  pinclear(MON_F)
+  wrpin(MON_F, P_MINUS2_A | P_FILT0_AB)
+
+  '' P11: no routing, no smart pin, driven low. The lane that must stay silent.
+  pinclear(NULLPIN)
+  pinlow(NULLPIN)
+
+  waitms(1)
+
+
+PRI drive_static(nib)
+  drive_pattern(BASE, nib)
+
+
+'' Drive four consecutive pins to the levels in the low four bits of `nib`,
+'' bit 0 -> first pin. Plain pins: no smart mode, no routing, DIR high.
+PRI drive_pattern(first_pin, nib) | i
+  repeat i from 0 to 3
+    pinclear(first_pin + i)
+    if nib & (1 << i)
+      pinhigh(first_pin + i)
+    else
+      pinlow(first_pin + i)
+  waitms(1)
+
+
+PRI release_all()
+  org
+    xstop
+  end
+  pinclear(GUARD_LO addpins GUARD_N-1)
+
+
+'' ============================================================================
+''  The capture itself
+'' ============================================================================
+''  WRFAST establishes the hub FIFO for writing -- "For WRFAST modes, it is
+''  necessary to do a WRFAST sometime beforehand" -- with D = block count 0
+''  (no wrapping, sequence the whole map) and S = the hub start address.
+''  XINIT then runs for D[15:0] NCO rollovers and stops itself.
+''
+''  The wait is BOUNDED. WAITXFI would be the natural instruction and it is what
+''  Parallax's own example uses, but an unbounded WAITXFI on a streamer that
+''  never starts hangs the session with no diagnostic -- which cost this campaign
+''  a bench slot in round 1. POLLXFI inside a budgeted loop gives the same answer
+''  and a named failure instead of a dead terminal.
+''
+''  A LEFTOVER FLAG CANNOT END THE WAIT EARLY, and that is not an assumption: the
+''  Silicon Doc says the POLLXFI/WAITXFI event flag is "Cleared on
+''  XINIT/XZERO/XCONT". The XINIT below therefore clears whatever the previous
+''  capture left set, so the first POLLXFI that returns C is reporting THIS
+''  transfer and not the last one.
+''
+''  The trailing WAITX is the FIFO drain. The Silicon Doc's own guidance for a
+''  cog that has been writing via WRFAST is a WAITX before it stops; 10,000
+''  clocks is 500x that, which costs 50 us and removes the question.
+PRI capture(mode, xfrq, ycnt) : written, late | addr, budget, t0, t1
+
+  bytefill(@bufl, SENTINEL, BUF_BYTES)
+  addr   := @bufl
+  budget := CAP_BUDGET
+
+  org
+    setxfrq xfrq
+    wrfast  #0, addr
+    getct   t0
+    xinit   mode, #0
+    wypin   ycnt, #BUS          ' starts the burst; harmless when ycnt = 0
+.wait
+    getct   t1
+    sub     t1, t0
+    cmp     t1, budget      wc
+    if_nc   mov     late, #1        ' streamer never signalled XFI in budget
+    if_nc   jmp     #.done
+    pollxfi                 wc
+    if_nc   jmp     #.wait
+.done
+    waitx   ##10_000
+    xstop
+  end
+
+  written := bytes_written()
+
+
+'' How many bytes of the buffer are no longer the sentinel. This separates
+'' "captured zeros" from "captured nothing" -- the distinction EF-059's rig was
+'' built around, and the one a buffer of $00 cannot make on its own.
+PRI bytes_written() : n | i
+  repeat i from 0 to BUF_BYTES-1
+    if byte[@bufl][i] <> SENTINEL
+      n++
+
+
+'' The buffer's first byte, and how many bytes differ from it. Arms A and B drive
+'' STATIC levels, so every captured byte must be identical; `odd` counts the ones
+'' that are not, and a non-zero count is itself the finding.
+'' An earlier draft folded this into a -1 return, which printed as $FF and was
+'' indistinguishable from a legitimate all-high capture. Report both numbers.
+PRI uniform_byte() : v, odd | i
+  v := byte[@bufl][0]
+  repeat i from 1 to BUF_BYTES-1
+    if byte[@bufl][i] <> v
+      odd++
+
+
+'' Per-lane statistics over all SAMPLES sample sets.
+''   lane 0 = pin BASE+0 ... lane 3 = pin BASE+3   (established by arm A)
+''   trans  = number of 0<->1 changes
+''   highs  = number of samples reading 1
+''   first  = index of the first change, or SAMPLES if the lane never changed
+''   last   = index of the last change, or SAMPLES if the lane never changed
+PRI lane_stats(lane) : trans, highs, first, last | i, v, prev
+  first := SAMPLES
+  last  := SAMPLES
+  prev  := sample_bit(0, lane)
+  if prev
+    highs := 1
+  repeat i from 1 to SAMPLES-1
+    v := sample_bit(i, lane)
+    if v
+      highs++
+    if v <> prev
+      trans++
+      if first == SAMPLES
+        first := i
+      last := i
+      prev := v
+
+
+'' One 4-bit sample set per NCO rollover, two per byte, earlier sample in the low
+'' nibble (bits bottom-first, X_ALT_OFF). Bit 0 of the sample is the base pin.
+PRI sample_bit(n, lane) : v | b
+  b := byte[@bufl][n >> 1]
+  if n & 1
+    b >>= 4
+  v := (b >> lane) & 1
+
+
+PRI dump_head(label) | i
+  debug("   raw ", zstr_(label), " first 16 bytes:")
+  repeat i from 0 to 15
+    debug("      ", udec_(i), ": ", uhex_byte_(byte[@bufl][i]))

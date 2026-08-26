@@ -1,8 +1,31 @@
 # Pin Selection and Control
 # D[22:20] pin group and D[19:16] sub-pin selection
+#
+# NOT a definition home for any constant. Per-constant definitions live in
+# language/spin2/symbols/streamer-symbols.yaml and
+# language/spin2/symbols/spin2-builtin-symbols-complete.yaml. This file names an
+# X_* constant only as a VALUE or in prose, never as a defining key.
 
 component: streamer_pins
 description: Pin group selection via %ppp field and sub-pin selection
+
+source: "Propeller 2 Documentation v35, Streamer -- the %ppp pin-group rule and the
+  sub-8-pin resolution rule at
+  engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3606-3651 and :3653;
+  the %e / %w meanings at :3603-3605; per-mode D[19:16] templates from the Spin2 v55
+  streamer symbol table, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1637."
+
+aliases:
+  - "streamer pin selection"
+  - "streamer pin group"
+  - "pin group"
+  - "ppp field"
+  - "sub-pin selection"
+  - "streamer base pin"
+  - "pin base"
+  - "X_PINS_ON"
+  - "X_WRITE_ON"
+  - "alternate bit order"
 
 # Pin group selection (32-pin blocks)
 pin_groups:
@@ -43,50 +66,66 @@ pin_groups:
       description: "Wrap-around (32 pins)"
 
 # Sub-pin selection (for <8 pin modes)
+#
+# CORRECTED 2026-08-26 (F-361). This block previously printed a DENSE slot table
+# -- 2-pin "%001 = Pins 3..2", 4-pin "%111 = Pins 31..28" -- which no source
+# states and which the bench contradicts. See below.
 sub_pin_selection:
-  field: "D[19:17] within mode config"
-  description: "Selects specific pins within the 32-pin group"
-  
-  table:
-    - bits: "%000"
-      1_pin: "Pin 0"
-      2_pin: "Pins 1..0"
-      4_pin: "Pins 3..0"
-      
-    - bits: "%001"
-      1_pin: "Pin 1"
-      2_pin: "Pins 3..2"
-      4_pin: "Pins 7..4"
-      
-    - bits: "%010"
-      1_pin: "Pin 2"
-      2_pin: "Pins 5..4"
-      4_pin: "Pins 11..8"
-      
-    - bits: "%011"
-      1_pin: "Pin 3"
-      2_pin: "Pins 7..6"
-      4_pin: "Pins 15..12"
-      
-    - bits: "%100"
-      1_pin: "Pin 4"
-      2_pin: "Pins 9..8"
-      4_pin: "Pins 19..16"
-      
-    - bits: "%101"
-      1_pin: "Pin 5"
-      2_pin: "Pins 11..10"
-      4_pin: "Pins 23..20"
-      
-    - bits: "%110"
-      1_pin: "Pin 6"
-      2_pin: "Pins 13..12"
-      4_pin: "Pins 27..24"
-      
-    - bits: "%111"
-      1_pin: "Pin 7"
-      2_pin: "Pins 15..14"
-      4_pin: "Pins 31..28"
+  field: "D[19:17], the low three bits of the six-bit pin number in D[22:17]"
+  rule: |
+    The pin number is ONE six-bit field spread across D[22:17]. D[22:20] selects the
+    8-pin group ("%ppp ... in 8-pin increments"); D[19:17] resolves the pin within
+    that group. So the whole field is just `pin << 17`, and D[19:17] = pin & 7.
+
+    How many of those three bits a mode leaves free is what changes with the pin
+    width, because the mode template occupies the rest. Read the per-mode template
+    off architecture/streamer/modes-reference.yaml's d_19_16 column: a `p` is yours, a `0`/`1` is the
+    mode's.
+  bits_free_by_width:
+    - width: "1 pin"
+      template: "%pppa"
+      free_bits: "D[19:17]"
+      base_must_be: "any pin"
+    - width: "2 pins"
+      template: "%pp0a"
+      free_bits: "D[19:18] -- D[17] is a fixed 0"
+      base_must_be: "a multiple of 2; the mode captures/drives base and base+1"
+    - width: "4 pins"
+      template: "%p00a"
+      free_bits: "D[19] -- D[18:17] are fixed 0"
+      base_must_be: "a multiple of 4; the mode covers base..base+3"
+    - width: "8 pins and wider"
+      template: "all four D[19:16] bits are fixed by the mode"
+      free_bits: "none"
+      base_must_be: "a multiple of 8 -- the group select D[22:20] is the ONLY pin field"
+  worked_1_pin_mapping:
+    note: "The 1-pin case is the only width where all three bits are free, so it is
+      the one that can be tabulated without a mode caveat. Offsets are from the
+      group's base pin, which is D[22:20] * 8."
+    "%000": "group base + 0"
+    "%001": "group base + 1"
+    "%010": "group base + 2"
+    "%011": "group base + 3"
+    "%100": "group base + 4"
+    "%101": "group base + 5"
+    "%110": "group base + 6"
+    "%111": "group base + 7"
+  what_a_misaligned_base_does: "It does not error and it does not round. The stray low
+    bits land in D[19:16], which is the MODE field -- see pin_base_encoding below and
+    architecture/streamer/modes-reference.yaml field_notation_caveat. Bench-proven, twice, in two different
+    mode families (EF-065, EF-059)."
+  source: "Propeller 2 Documentation v35: \"In every mode, the three %ppp bits in
+    D[22:20] select the pin group, in 8-pin increments\"
+    (engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3606) and \"For
+    modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
+    used to further resolve the pin number(s)\" (:3653). Per-width templates from the
+    Spin2 v55 streamer symbol table -- X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA,
+    X_2P_2DAC1_WFBYTE %1101_DDDD_WPPP_PP0A, X_4P_4DAC1_WFBYTE %1110_DDDD_WPPP_P00A,
+    X_8P_4DAC2_WFBYTE %1110_DDDD_WPPP_0110 --
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1613. Hardware
+    corroboration: EF-064 (1-pin mode reached P20 exactly) and EF-065 (an 8-pin mode
+    at base 20 landed at P24..P31),
+    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
 
 # Enable control
 enable_control:
@@ -98,13 +137,63 @@ enable_control:
     value_1: "Pin output enabled"
     symbol_0: X_PINS_OFF
     symbol_1: X_PINS_ON
-    
+    what_it_enables: "the streamer's contribution to the pin's OUT side. Verbatim:
+      the streamer's pin data is OR'd \"with {OUTB, OUTA} to produce the final 64 pin
+      output states on each clock for the cog. For these modes, %e in D[23] must be
+      '1' to enable pin output.\""
+    dir_is_still_required: "%e enables the streamer's OUT contribution; it does NOT
+      enable the pin's output driver. DIR still gates that, so a streamer pin drives
+      nothing until DIR is raised. Hardware-verified: EF-062 measured one streamer
+      command twice, differing only in DIR -- 4 of 8 with DIR low, 8 of 8 with DIRH,
+      against an 8-of-8 plain-drive control
+      (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md,
+      EF-062; grounds F-308). The DIR-high leg started from OUT = 0, so passing proves
+      the streamer overrode OUT rather than the OUT bit doing the work."
+    source: "Propeller 2 Documentation v35,
+      engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3602-3603 for the
+      OR rule and the %e requirement; EF-062 for the DIR result."
+
   input_modes:
     bit_name: "%w"
     value_0: "WRFAST disabled (DACs only)"
     value_1: "WRFAST enabled"
     symbol_0: X_WRITE_OFF
     symbol_1: X_WRITE_ON
+    # WHAT IS CAPTURED, AND FROM WHERE. Naming the bit and stopping left a reader
+    # unable to tell what lands in hub RAM -- and unable to see that the source is
+    # {INB, INA}, which is the fact that decides whether a capture reads traffic or
+    # a smart pin's handshake.
+    what_is_read: "{INB, INA} -- the cog's IN registers, not the pins' raw pads.
+      Verbatim: \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
+      are read from {INB, INA} and X3, X2, X1, and X0 are updated using the read data.\""
+    widths: "1, 2, 4, 8, 16 or 32 pins, set by the mode -- see
+      architecture/streamer/modes-reference.yaml, the %1100..%1111 capture block."
+    what_is_written: "Verbatim: \"If the %w bit in D[23] is high, WFBYTE/WFWORD/WFLONG
+      operations will be done automatically to record the pin data.\" Which of the
+      three is used is fixed by the mode; the mode symbol names it (…_WFBYTE,
+      …_WFWORD, …_WFLONG)."
+    accrual_rule: "Verbatim: \"In the case of 1/2/4-pin modes, a WFBYTE will be done
+      each time 8 bits of pin data accrue.\" So a 1-pin mode writes one byte per 8
+      NCO rollovers, a 2-pin mode per 4, a 4-pin mode per 2 -- samples pack into the
+      byte, they are not one byte each."
+    bit_order_within_the_byte: "bottom-first by default; the %a bit in D[16] reorders
+      to top-first. See alt_bit_order below."
+    prerequisite: "A WRFAST must have been executed beforehand, from cog RAM.
+      Verbatim: \"For WRFAST modes, it is necessary to do a WRFAST sometime beforehand,
+      to ensure that the hub RAM FIFO is ready to receive data.\" WRFAST's D operand is
+      the block count (0 = no wrapping) and its S operand is the hub start address."
+    what_this_does_NOT_capture: "the logic level of any pin that is running a smart-pin
+      mode. On such a pin IN is the smart pin's event flag, so the capture records
+      ready/done pulses instead of the waveform. This is not a corner case -- it is the
+      normal outcome of pointing the capture path at a working bus. The mechanism, and
+      the neighbour-routing composition that gets the waveform instead, are in
+      architecture/streamer/pin-capture.yaml; the IN rule itself is in
+      architecture/smart_pins.yaml in_signal_semantics."
+    source: "Propeller 2 Documentation v35, Pins => DACs/WRFAST at
+      engineering/ingestion/sources/silicon-doc/p2-documentation.txt:3961-3966 (the read
+      source, the widths, the %w rule and the accrual rule), the %w statement at
+      :3604-3605, the bit-order rule at :3654-3655, and the WRFAST prerequisite at
+      :3661-3662 with the WRFAST operand definitions at :6693-6701."
 
 # Alternate bit order
 alt_bit_order:
@@ -123,27 +212,69 @@ alt_bit_order:
   use_case: "Use X_ALT_ON for SPI protocols that transmit MSB first"
 
 # Pin base calculation
+#
+# CORRECTED 2026-08-26 (F-361). The worked example here used to be
+# `X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count` -- an 8-pin mode at a base that
+# is not a multiple of 8, composed with `+`. That is the EF-065 trap verbatim, in a
+# second mode family, printed as the example a reader copies.
 pin_base_encoding:
-  description: "Pin base is encoded in upper bits of D[22:17]"
+  description: "Pin base is encoded in D[22:17]: D[22:20] is the 8-pin group,
+    D[19:17] resolves within it. How many of D[19:17] a mode leaves free depends on
+    the pin width -- see sub_pin_selection.bits_free_by_width above."
   formula: "pin_base << 17"
+  alignment_rule: "pin_base must be a multiple of the mode's pin width: any pin for
+    1-pin modes, even for 2-pin, a multiple of 4 for 4-pin, a multiple of 8 for 8-pin
+    and wider."
+  composition_rule: "Compose the pin base with `|`, and only after checking the
+    alignment rule. `|` cannot carry, so a misaligned base is at worst lost rather
+    than turned into a different mode -- but LOST IS ALSO SILENT, so `|` is the safer
+    operator and not a safe one."
   example: |
-    ' For pin 20 as base:
-    mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count
+    ' 8-pin mode. Base MUST be a multiple of 8; 16 is, 20 is not.
+    mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON | (16<<17) | count
+  what_goes_wrong_at_an_unaligned_base:
+    with_plus: "`X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + $FFFF` assembles to
+      $A0B6_FFFF, not $A0AE_FFFF. Bit 19 is already set by the mode template %1110,
+      so the `+` CARRIES: D[19:16] becomes %0110 (X_RFBYTE_8P_4DAC2, a different
+      mode) and D[22:20] becomes %011 (the P24..P31 group). A different mode at a
+      different group, with no diagnostic."
+    with_or: "`X_RFBYTE_8P_1DAC8 | X_PINS_ON | (20<<17) | $FFFF` assembles to
+      $A0AE_FFFF -- BYTE-IDENTICAL to the same expression with base 16. The
+      misaligned bits set bits the template already sets, so the base silently
+      vanishes and the transfer runs at P16..P23."
+    neither_errors: "Both forms compile clean. No compiler can separate them, and no
+      runtime check exists. Alignment is the reader's obligation."
+    source: "Command words above assembled with pnut-ts v1.55.3 from the exact
+      expressions shown. The mechanism is hardware-verified in a different mode family
+      by EF-065 (X_IMM_4X8_1DAC8 + 20<<17 drove P24..P31 against an aligned control
+      that drove P16..P23) and, in a third, by EF-059 (adc_pin<<17 in
+      X_1ADC8_0P_1DAC8_WFBYTE changed the mode, proven by the bytes-per-rollover
+      signature: 1,024 / 2,048 / 4,096 bytes at adc_pin 0 / 1 / 2) --
+      engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
 
 # Common pin configurations
 common_configs:
+  note: "Each base below satisfies the alignment rule for its mode's pin width. `|`
+    is used throughout, per pin_base_encoding.composition_rule."
   vga_pins_0_3:
-    description: "VGA on pins 0-3 (R,G,B,Sync)"
-    code: "mode + 0<<17"
-    
+    description: "VGA on pins 0-3 (R,G,B,Sync) -- 4-pin mode, base 0, a multiple of 4"
+    code: "mode | (0<<17)"
+
   hdmi_pins_8_15:
-    description: "HDMI on 8-pin block starting at pin 8"
-    code: "mode + 8<<17"
-    
+    description: "HDMI on 8-pin block starting at pin 8 -- 8-pin mode, base 8, a
+      multiple of 8"
+    code: "mode | (8<<17)"
+
   spi_single_pin:
-    description: "SPI data on single pin"
-    code: "X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON + pin<<17"
+    description: "SPI data on a single pin -- 1-pin mode, so any pin is a legal base"
+    code: "X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON | (pin<<17)"
+
+related:
+  - architecture/streamer/pin-capture.yaml
+  - architecture/smart_pins.yaml
+  - language/spin2/symbols/streamer-symbols.yaml
 
 see_also:
-  - dac-routing.yaml
-  - modes-reference.yaml
+  - architecture/streamer/dac-routing.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/overview.yaml

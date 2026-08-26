@@ -25,6 +25,7 @@ aliases:
   - "HHH"
   - "LLL"
   - "WRPIN M field"
+  - "pin-drive-configuration"
   - "PIN_DRIVE_CONFIGURATION"
 
 description: |

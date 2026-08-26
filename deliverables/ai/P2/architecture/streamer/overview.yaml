@@ -3,6 +3,19 @@
 
 component: streamer
 category: dma_engine
+
+aliases:
+  - "streamer"
+  - "streamer overview"
+  - "DMA engine"
+  - "XINIT"
+  - "XZERO"
+  - "XCONT"
+  - "XSTOP"
+  - "SETXFRQ"
+  - "hub FIFO streaming"
+  - "background I/O"
+
 description: |
   High-speed data streaming engine with NCO timing control. Operates 
   independently of COG execution for zero-overhead I/O operations.
@@ -153,8 +166,12 @@ events:
   EVENT_XRL: "Read LUT address $1FF (event 13)"
 
 # See also
+related:
+  - architecture/streamer/pin-capture.yaml
+  - architecture/smart_pins.yaml
+
 see_also:
-  - modes-reference.yaml
-  - dac-routing.yaml
-  - pin-selection.yaml
-  - nco-timing.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/dac-routing.yaml
+  - architecture/streamer/pin-selection.yaml
+  - architecture/streamer/nco-timing.yaml

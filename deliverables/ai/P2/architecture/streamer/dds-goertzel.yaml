@@ -4,6 +4,18 @@
 component: streamer_dds_goertzel
 description: Combined waveform synthesis and frequency detection
 
+aliases:
+  - "DDS"
+  - "Goertzel"
+  - "DDS Goertzel"
+  - "frequency detection"
+  - "tone detection"
+  - "waveform synthesis"
+  - "synchronous detection"
+  - "lock-in amplifier"
+  - "SINC1"
+  - "SINC2"
+
 # Mode variants
 modes:
   sinc1:
@@ -291,6 +303,6 @@ usage_pattern:
   source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, p2-documentation.txt:4170-4185 (setup) and :4289-4305 (mode/data longs)."
 
 see_also:
-  - modes-reference.yaml
-  - nco-timing.yaml
-  - ../../language/pasm2/getxacc.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/nco-timing.yaml
+  - language/pasm2/getxacc.yaml
