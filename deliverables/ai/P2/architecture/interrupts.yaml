@@ -24,7 +24,8 @@ description: |
   The P2 provides a sophisticated three-level interrupt system plus debug interrupt capability 
   for each COG. Interrupts enable event-driven programming with automatic context switching,
   allowing COGs to respond quickly to hardware events while preserving their execution state.
-  Each interrupt level has its own set of shadow registers for zero-overhead context switching.
+  Each level has its own dedicated IJMPx/IRETx pair. It does NOT have a shadow register bank --
+  see automatic_state_save below, which states what the hardware does and does not preserve.
 
 architecture:
   interrupt_levels: 3

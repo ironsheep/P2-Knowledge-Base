@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-377`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-378`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,50 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
+
+### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `CONFIRMED`
+
+**Part 1 — the re-anchor residue.** F-365 moved 23 shipped citations from the superseded
+`p2-documentation.txt` to `silicon-doc-text.txt`, and its own instruction was explicit: *verify each
+against the new artifact; never translate line numbers.* Some were translated anyway.
+
+`architecture/streamer/dds-goertzel.yaml:74` cites `silicon-doc-text.txt:1565 and :4062-4095`.
+**`:1565` is correct** — it carries *"S[19:0] supplies a 20-bit value which is used to configure the
+DDS/Goertzel mode"*. **`:4062` is a blank line.** The same file's `:303` cites `:1636` (`' Setup`,
+plausible) and `:4289-4305`, where `:4289` reads `[t34 r3c1] %0000` — a table-cell marker, not the
+mode/data longs claimed. `application-notes/p2an002…:103` carries two more of the same shape.
+
+**No instrument can catch this, and that is the point.** A class-wide range check over every
+`silicon-doc-text.txt:NNN` citation in the shipped set — **113 citations, file is 5626 lines** —
+returns **0 out of range**. A translated locator lands inside the file and reads as valid to
+anything that checks bounds. Only opening the line catches it. The suspect set is bounded and
+small: the 23 citations F-365 moved.
+
+**Fix.** Re-verify those 23 by *reading* each cited line and confirming it carries the content the
+citing block claims — the discipline F-365 stated and did not fully execute. Where it does not,
+locate the content in the artifact; do not adjust the number.
+
+**Part 2 — an eighth fabricated-provenance file.** F-359 named seven `architecture/` files carrying
+headers that cite silicon-doc part files which have never existed; one was purged and «#323»
+re-derived the other six. **`architecture/io_pin_timing.yaml` is an eighth and was never in the
+list.** It carries `# Silicon Doc Reference: part3-pins.txt, pages 5-8` at `:2` and
+`"part3-pins.txt, Pin Timing Specifications"` at `:193`. The silicon-doc folder contains
+`part3-end.txt`, `part3-interrupts.txt`, `part3-pages-37-38.txt`, `part4-locks.txt` and
+`part4-smart-pins.txt` — **there is no `part3-pins.txt`**. Same defect, same mechanism: the header
+satisfies the citation regex, so the sourcing gate reads the file as cited.
+
+**Fix.** Re-derive it against `silicon-doc-text.txt` exactly as «#323» did the six, and collect
+anything that cannot be re-derived rather than deleting it.
+
+**Also repaired on the spot during this verification** (not deferred, one line):
+`architecture/interrupts.yaml:27` asserted *"Each interrupt level has its own set of shadow
+registers"* while `:43` of the same file, rewritten by «#323» from the source, states *"There are
+no shadow register banks."* «#323» corrected the detailed block and left the summary paragraph
+contradicting it. The summary now points at `automatic_state_save` instead of restating it.
+A prose self-contradiction is invisible to every gate here — the encoding check that verified this
+file cannot read sentences.
 
 ## The delivery filter strips `documentation_source:` from every file it serves, and 706 of those values are real citations (2026-08-26, «#324» verification) — F-375
 
