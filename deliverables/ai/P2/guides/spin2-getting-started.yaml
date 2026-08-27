@@ -53,13 +53,27 @@ core_block_types:
   CON:
     purpose: "Define compile-time constants"
     syntax: "CON { optional label }"
-    required_constant:
+    clock_setup_constants:
+      source: "Parallax Spin2 Documentation v55, section 'Clock Setup' -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726. Frequency ceiling from the P2 Datasheet 2022/11/01, AC Characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200, footnote 2 at :2209."
+      is_a_clock_symbol_required: "No. With no clock-setup symbol declared and DEBUG mode off, the compiler selects internal RCFAST, which runs at 20 MHz+ (v55:1718). Declaring a clock symbol is how you choose something OTHER than RCFAST; it is not a precondition for compiling or running."
       _clkfreq:
-        description: "System clock frequency in Hz - REQUIRED for timing"
-        typical_values:
+        description: "Target system clock frequency in Hz. Optional. Declared on its own it selects XI/XO-crystal-plus-PLL mode and assumes a 20 MHz crystal, and the compiler computes the optimal PLL setting to achieve it; compilation fails if _clkfreq +/- _errfreq is unachievable. (v55:1711)"
+        common_values:
           - "200_000_000 (200 MHz)"
           - "300_000_000 (300 MHz)"
-        note: "Affects WAITMS, WAITUS, baud rate calculations, and all timing"
+        upper_bound: "P2 Datasheet AC Characteristics give the PLL absolute maximum as 320 MHz with a typical of 180 MHz, so a _clkfreq above 320 MHz is outside the datasheet's limits even where the compiler accepts it."
+        why_you_usually_do_declare_it: "clkfreq is the divisor behind WAITMS, WAITUS, baud-rate calculations and every other timed operation. Leaving the clock at its RCFAST default while sizing delays for 200 MHz makes every delay wrong by an order of magnitude, silently."
+      all_legal_combinations: "There are exactly nine legal clock-setup declaration combinations, each with its own effect and HUBSET %CC_SS value. The full table is not duplicated here; see the two entries below."
+      see_also:
+        full_declaration_table:
+          key: p2kbGuidePasm2GettingStarted
+          path: deliverables/ai/P2/guides/pasm2-getting-started.yaml
+          description: "file_structure.clock_setup -- all nine CON declaration combinations with their effects and HUBSET %CC_SS values, plus ASMCLK and _AUTOCLK"
+        per_symbol_reference:
+          key: p2kbSpin2SpecialConfigurationSymbols
+          path: deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml
+          description: "_clkfreq, _xtlfreq, _xinfreq, _errfreq, _rcfast, _rcslow, _AUTOCLK -- one entry per symbol"
+      correction_2026_08_27: "This entry previously sat under a key named required_constant and read 'System clock frequency in Hz - REQUIRED for timing', and the example below repeated ' Required: system clock frequency'. v55:1718 states the opposite -- no clock symbol is required. Corrected source-first here; the same claim was corrected in guides/pasm2-getting-started.yaml in the same pass."
     common_uses:
       - Pin assignments
       - Configuration values
@@ -67,7 +81,7 @@ core_block_types:
       - Enumeration definitions
     example: |
       CON
-        _clkfreq = 200_000_000    ' Required: system clock frequency
+        _clkfreq = 200_000_000    ' optional: crystal+PLL, assumes a 20 MHz crystal
 
       CON { pin assignments }
         LED_PIN = 56

@@ -62,3 +62,34 @@ Per the corpus-accumulation model: each ingested source *answers* some prior ope
 
 ### Conflicts (leg 1 — done in the delta audit)
 3 routed to the corrections register (F-098/099/100); 4 features confirmed correct. See above.
+
+---
+
+## Extraction defect — a table cell split across Word runs (found 2026-08-27, «#326»)
+
+**`spin2-v55-text.txt:1713` and `:1738` render the XI-input-plus-PLL clock mode's `%CC_SS` value as
+`01_1 1`. The true value is `%01_11`.** The space is ours, not Parallax's.
+
+**Evidence, from `word/document.xml` of `Parallax Spin2 Documentation v55.docx`:**
+
+| Check | Result |
+|---|---|
+| `01_11` as a whole run | **0 occurrences** |
+| `01_1` immediately followed by a separate `1` run | **2 occurrences** — the two places the table appears |
+| every other `%CC_SS` value (`10_11`, `1x_11`, `1x_10`, `01_10`, `00_01`, `00_00`, `10_10`) as a whole run | present, 1–3 occurrences each |
+| the literal string `01_1 1` anywhere in the DOCX | **0 occurrences** |
+
+So this is one cell split across two Word runs, it is the **only** one of the nine so split, and our
+extractor joined the runs with a space. **Not a SOURCE-ERRATA item** — the source document is
+correct; the defect is in our capture.
+
+**Consequence, and why this is recorded rather than left.** The shipped KB deliberately carries the
+correct `%01_11` (`deliverables/ai/P2/guides/pasm2-getting-started.yaml`,
+`file_structure.clock_setup.declaration_combinations`), which means the KB and this extraction
+**disagree on purpose**. Without this note a later reconciliation pass would "fix" the KB to match
+the text and introduce a bit pattern that does not exist. See F-378 in
+`engineering/operations/P2KB-CORRECTION-FINDINGS.md`.
+
+**Owed to the ingestion head:** the run-joining rule in the DOCX walker inserts a separator at run
+boundaries inside a cell. Whether other tables in this or other sources are affected has **not**
+been measured — this was found by reading one value, not by a sweep.

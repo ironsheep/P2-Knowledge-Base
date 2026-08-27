@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-378`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-379`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,42 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## The KB ships the compiler's acceptance range as a frequency ceiling, 180 MHz past the silicon limit (2026-08-27, «#326» verification) — F-378
+
+### F-378 — `_CLKFREQ range: "3,333,333 Hz to 500,000,000 Hz"` carries no silicon limit, and a remote agent will act on it — `CONFIRMED`
+
+`deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml:59` gives `_CLKFREQ`
+a `range:` of **3,333,333 Hz to 500,000,000 Hz**, sourced to the pnut-ts clock-configuration guide.
+That figure is real, and it is the **compiler's acceptance range** — «#326» confirmed empirically
+that `_clkfreq = 400_000_000` assembles clean, exit 0.
+
+**The P2 Datasheet's AC Characteristics give the PLL absolute maximum as 320 MHz** (`3.33` min /
+`180` typical / `320` max, `p2-datasheet-text.txt:2200`, with footnote 2 at `:2209` stating
+*"Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 °C"*).
+
+**Why this is a defect rather than a difference.** The entry does not say which of the two it is
+quoting. A remote agent reading only this entry — which is exactly how the shipped set is consumed
+— will emit a `_clkfreq` up to 500 MHz, get a clean compile, and ship silicon running 180 MHz past
+the datasheet maximum. Nothing anywhere in the path says otherwise: the compiler accepts it and the
+KB's own stated range endorses it.
+
+**This is E-007's rule, not a new one.** `SOURCE-ERRATA.md` E-007 settled that where two documents
+frame a limit differently, the KB must **label which framing it is quoting**. That ruling was
+applied to the clock limits in the Hardware Manual; it was never applied here.
+
+**Fix.** Keep the compiler range — it is true and useful — and label it, adding the datasheet
+ceiling beside it, the way «#326» did for `guides/pasm2-getting-started.yaml`
+`timing_considerations.clock_frequency`. Sweep the same question across every `range:` in the
+shipped set that came from a compiler guide rather than a datasheet.
+
+**Related, and it must not be silently "corrected" back.** «#326» deliberately shipped `%01_11` for
+the XI-input-plus-PLL clock mode where our own `spin2-v55-text.txt:1713` and `:1738` read
+`01_1 1`. That space is **our extractor's**, not the source's: the arbiter confirmed against
+`word/document.xml` that the value is one cell split across two Word runs, that it is the only one
+of the nine so split, and that the literal `01_1 1` appears **nowhere** in the DOCX. Recorded in
+`engineering/ingestion/sources/spin2-v55/spin2-v55-complete-extraction-audit.md`. A future pass that
+"reconciles" the KB to the extraction would introduce a bit pattern that does not exist.
+
 ## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
 
 ### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `CONFIRMED`
@@ -71,6 +107,22 @@ small: the 23 citations F-365 moved.
 **Fix.** Re-verify those 23 by *reading* each cited line and confirming it carries the content the
 citing block claims — the discipline F-365 stated and did not fully execute. Where it does not,
 locate the content in the artifact; do not adjust the number.
+
+**Two more of the same shape, found by «#326» and confirmed by the arbiter — and note they are NOT
+F-365 residue, which widens the class.** `architecture/clock_system.yaml`
+`anti_patterns.conflicting_definitions.source` cites `spin2-v55-text.txt:1716-1725` for the
+sentence *"These symbols must be defined in one of the following combinations"* — that sentence is
+at **`:1709`**; `:1716` is the `_rcslow` table row. And `anti_patterns.missing_crystal_frequency.source`
+cites `:1718` for the verbatim *"Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal"* —
+that is the `_clkfreq`-alone row at **`:1711`**; `:1718` reads *"No symbol and not DEBUG mode"*.
+Both quotes are accurate, both locators point at a different row. `«#326»` also found the same
+shape in the differential-read artifact it was handed (a datasheet footnote given as `:2205`, the
+`Cin` Mode 3 row, where footnote 2 is at `:2209`).
+
+**So the class is wider than F-365's 23.** Any citation written by translating a number rather than
+locating content has this shape, whatever pass wrote it. The sweep should cover every
+`spin2-v55-text.txt:` and `p2-datasheet-text.txt:` locator in the shipped set, not only the
+re-anchored ones.
 
 **Part 2 — an eighth fabricated-provenance file.** F-359 named seven `architecture/` files carrying
 headers that cite silicon-doc part files which have never existed; one was purged and «#323»

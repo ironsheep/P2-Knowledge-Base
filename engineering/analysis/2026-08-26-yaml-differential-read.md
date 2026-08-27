@@ -5,6 +5,9 @@
 > **If you are `«#326»` and reading this cold: your entire scope is §1, "The one gutted file."**
 > Everything else in this document is diagnosis that needs no repair. §4 and §5.2 list defects found
 > in passing — they are real, but they are *surviving* content, not removals, and they are not yours.
+>
+> ✅ **«#326» has run (2026-08-27). The one gutted file is RESTORED; nothing in this document is
+> still open as `gutted`. See §8 for what came back, from which source lines, and where it was put.**
 
 Stephen chose this read over the other recovery strategies offered:
 
@@ -103,7 +106,7 @@ That is the single most likely source of a `gutted` verdict, and it is where thi
 | **stronger** | 74 | 87% |
 | **equal** | 6 | 7% |
 | **thinner-but-honest** | **0 at file level** — see the note below | — |
-| 🔴 **gutted** | **1** — `guides/pasm2-getting-started.yaml` | 1% |
+| ✅ **gutted → RESTORED** | **1** — `guides/pasm2-getting-started.yaml`, restored by «#326» 2026-08-27 (§8) | 1% |
 | *new file, no baseline* | 4 | 5% |
 | **Total** | **85** | |
 
@@ -115,7 +118,7 @@ That is the single most likely source of a `gutted` verdict, and it is where thi
 > dispositioned block-by-block in §3. Reporting only the file-level number would hide them, so both
 > are given.
 
-### The one gutted file
+### The one gutted file — ✅ RESTORED by «#326», 2026-08-27 (§8)
 
 **`deliverables/ai/P2/guides/pasm2-getting-started.yaml` — the CON clock-setup declarations.**
 
@@ -154,7 +157,12 @@ guide**, which is the artefact an agent starting PASM2 actually reads.
 
 Legal ceiling for any `_clkfreq` value:
 `engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200` — PLL fed by direct drive or
-crystal, min 3.33 / typ 180 / **max 320 MHz**; footnote at `:2205`.
+crystal, min 3.33 / typ 180 / **max 320 MHz**; footnote 2 at `:2209`.
+
+> **Locator correction («#326», 2026-08-27).** This entry originally gave the footnote as `:2205`.
+> Re-read live: `:2205` is the `Cin` *Mode 3: Crystal < 16MHz — 30 pF* row. Footnote 2 —
+> *"Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 °C"* — is at **`:2209`**.
+> In range, wrong content: the F-377 shape, caught before it was carried into a shipped file.
 
 🔴 **Do not restore verbatim.** The deleted text said `_clkfreq` is *"REQUIRED for timing"*.
 `spin2-v55-text.txt:1718` states the opposite — with no symbol and not in DEBUG mode the compiler
@@ -300,11 +308,11 @@ was read.
 | `p2an003-dac-analog-signal-generation.yaml` | 9 | stronger | `key_parameters` returns with verbatim dither text plus a new sourced `M[12:10]=%101` requirement. |
 | `p2an004-frequency-rotation-rc-timing-measurement.yaml` | 9 | stronger | Gotchas re-anchored to the datasheet Pin Mode Legend and the `%AAAA`/`%BBBB` table. Carries a self-contradiction — §5. |
 
-### 2.10 `guides/` — 2 files · 1 gutted · 1 equal · and `code-examples/` — 1 file · 1 equal
+### 2.10 `guides/` — 2 files · 1 gutted *(now restored, §8)* · 1 equal · and `code-examples/` — 1 file · 1 equal
 
 | File | GONE | Verdict | Reason |
 |---|---|---|---|
-| 🔴 `guides/pasm2-getting-started.yaml` | 24 | **gutted** | The CON clock-setup declarations. Net a large improvement everywhere else, which is exactly why a gate would have passed it. **§1.** |
+| ✅ `guides/pasm2-getting-started.yaml` | 24 | **gutted → RESTORED** | The CON clock-setup declarations. Net a large improvement everywhere else, which is exactly why a gate would have passed it. **§1**; restored source-first by «#326» 2026-08-27, **§8**. |
 | `guides/spin2-getting-started.yaml` | 7 | equal | Relative→absolute path re-anchors, all targets verified present, plus dropping "pull resistors" from a routing blurb — honest, since `basic-io.yaml` now states the P2 has no internal pull network. |
 | `code-examples/smart-pins-002-button-reading.yaml` | 1 | equal | One word: "Pull-up or pull-down resistor" → "**External** …", so it cannot be read as an internal P2 pull. |
 
@@ -575,3 +583,116 @@ and were green throughout the range in which `guides/pasm2-getting-started.yaml`
 description of how to set the clock. Every gate passed a guide that will make an agent emit code
 running twenty times slower than it computed its delays for. **No gate here measures whether a file
 still says what a reader needs — only a read does.**
+
+---
+
+## 8 — Resolution: what «#326» restored, 2026-08-27
+
+**Entry:** tree clean at `4caeb6cc`, all nine standing instruments green (§7).
+**Scope:** exactly the one `gutted` entry in §1, plus the two-file class it belongs to and one
+cite-or-omit fold-in the dispatch attached to the same file. **Nothing else was widened into.**
+
+### 8.1 The restoration — `guides/pasm2-getting-started.yaml`, `file_structure.clock_setup`
+
+**Restored, not reverted.** The deleted block's own wording (`_clkfreq` *"Required: system clock"* /
+*"REQUIRED for timing"*) was **not** brought back; §1 was right that the source contradicts it. What
+came back is the thing the file was actually missing: **how to declare a non-RCFAST mode at all.**
+
+| What returned | From (re-read live at `4caeb6cc`) | Where it now lives |
+|---|---|---|
+| All **nine** legal CON declaration combinations, each with its verbatim effect and its `HUBSET %CC_SS` value | `spin2-v55-text.txt:1710-1719` | `file_structure.clock_setup.declaration_combinations` (a 9-element list; each element carries `con_symbols`, `effect`, `hubset_cc_ss`, and the `v55_line` it came from) |
+| `_errfreq` is optional; defaults to `1_000_000` | `:1721` | `…clock_setup.errfreq_is_optional` |
+| The `**` footnote — `x`=0/15 pF at `_xtlfreq >= 16_000_000`, else `x`=1/30 pF | `:1722` | `…clock_setup.the_x_bit` |
+| ASMCLK: no operands, conditional prefix allowed, assembles to one or six PASM instructions | `:1734`, `:1738-1740` | `…clock_setup.asmclk` |
+| The `clkmode_` manual crystal/PLL switch sequence (`HUBSET ##clkmode_ & !%11` / `WAITX` / `HUBSET`) | `:1725`, `:1738` | `…clock_setup.manual_switch` + `manual_switch_example` |
+| PLL ceiling for a legal `_clkfreq` value | `p2-datasheet-text.txt:2200`, footnote 2 at `:2209` | `…clock_setup.what_value_is_legal` |
+| Reciprocal cross-refs by index key | — | `…clock_setup.see_also` → `p2kbPasm2Asmclk`, `p2kbPasm2Hubset`, `p2kbSpin2SpecialConfigurationSymbols`, `p2kbArchClockSystem` |
+
+Pre-existing keys were kept and two were repaired in place:
+
+- `default:` cited **`v55:1723`**, which is *"During compilation, two constant symbols are defined…"*
+  — in range, wrong content, the F-377 shape. Re-anchored to **`:1718`** (the *"No symbol and not
+  DEBUG mode"* row that actually states it), and the DEBUG-mode row at `:1719` added, since the
+  original sentence silently dropped the other half of the default.
+- The file's `file_structure.source:` cited **"Clock Setup :1716-1725"**, a range that begins at the
+  `_rcslow` row — it never covered the table header or the first five combinations, i.e. it cited
+  the content that had been deleted while pointing past most of it. Widened to **`:1708-1726`** and
+  **`:1734-1740`**.
+
+**One divergence from the plain-text extraction, recorded in the file itself.** `spin2-v55-text.txt`
+writes the XI-input-plus-PLL row's mode value as **`01_1 1`** at both `:1713` and `:1738`. That is an
+extraction artifact, not the source: in `Parallax Spin2 Documentation v55.docx` the cell is one table
+cell split across two Word runs (`01_1` + `1`), and checking `word/document.xml` for all nine values
+shows it is **the only** split one — the other eight are whole runs. The file carries **`%01_11`**
+and states this in `clock_setup.extraction_note_2026_08_27`. *(The extraction defect itself belongs
+to the ingestion head — see the «#326» DEVIATIONS.)*
+
+### 8.2 The class sweep — `guides/spin2-getting-started.yaml`
+
+`grep -rn "REQUIRED for timing\|Required: system clock" deliverables/ai/P2 --include=*.yaml` returned
+**two** hits, both in this file, and a widened sweep for any *"`_clkfreq` … required/mandatory/must"*
+phrasing across the shipped set returned nothing further.
+
+- `core_block_types.CON.required_constant` — the **key name itself** carried the wrong claim. Renamed
+  `clock_setup_constants`, given its own `source:`, and re-headed with
+  `is_a_clock_symbol_required: "No…"` anchored to `v55:1718`.
+- The CON `example:` comment `' Required: system clock frequency` → `' optional: crystal+PLL, assumes
+  a 20 MHz crystal` (`v55:1711`).
+- The nine-combination table is **not duplicated** here; a keyed `see_also` points at
+  `p2kbGuidePasm2GettingStarted` and `p2kbSpin2SpecialConfigurationSymbols`.
+
+Side effect worth recording: this file cited **nothing anywhere** before, so it sat in
+`audit-yaml-claim-sourcing`'s Tier 2. It now cites, which promotes its quantity-bearing block into
+Tier 1's reach — and it passes, because the citation was added *inside* that block. Tier 2 went
+49 → 48; Tier 1 stayed at 0.
+
+### 8.3 Fold-in — `timing_considerations.clock_frequency`, same file, cite-or-omit
+
+Not a `gutted` entry; surviving uncited content the dispatch attached to this task. It read
+`default: "20 MHz crystal with PLL"` / `typical: "200-300 MHz system clock"` /
+`maximum: "340+ MHz (silicon dependent)"`, uncited. All three were **replaced source-first, not
+restored**:
+
+- *"default: 20 MHz crystal with PLL"* — contradicted this same file's `clock_setup`. The compiler
+  default is **RCFAST** (`v55:1718`); a 20 MHz crystal is only what `_clkfreq`-alone *assumes*
+  (`v55:1711`).
+- *"typical: 200-300 MHz"* — no source we hold states it; the datasheet's typical is **180 MHz**.
+- *"maximum: 340+ MHz"* — `340 MHz` appears in our holdings **only** in
+  `TAQOZ-Forth-Bitbashers-Guide/taqoz-bitbashers-text.txt:608,614` as an overclocking anecdote:
+  community material, an upstream lead, never a citable authority. The datasheet maximum is
+  **320 MHz**.
+
+The block now carries the full AC Characteristics min/typ/max for RCFAST, RCSLOW, crystal, direct
+drive and PLL from `p2-datasheet-text.txt:2196-2200` + footnote 2 at `:2209`, **labelled as the
+datasheet's absolute limits rather than the Hardware Manual's recommended-use range** — the labelling
+`SOURCE-ERRATA.md` **E-007** requires — and a `correction_2026_08_27:` note saying what was removed
+and why.
+
+### 8.4 Re-verdicts
+
+**None.** The single `gutted` entry held up on re-read: both halves of §1's test were still met at
+`4caeb6cc`, so it was restored rather than demoted to `thinner-but-honest`. No other file in this
+document was found to be `gutted`.
+
+### 8.5 Legality checks (pnut-ts v1.55.3 — legality only, never semantics)
+
+Every declaration form written into the KB was assembled inside a PASM-only file:
+
+- all **nine** combinations → exit 0;
+- the three PLL forms **without** `_errfreq` → exit 0, which is what
+  `errfreq_is_optional` asserts;
+- `_AUTOCLK`: `_xtlfreq = 16_000_000` builds **80 bytes**, the same file plus `_AUTOCLK = 0` builds
+  **16 bytes** — a difference of exactly **16 longs**, the auto-prepended clock-setter;
+- `ASMCLK` under an external-clock declaration with `_AUTOCLK = 0` grows the build by exactly
+  **6 longs** (4 → 28 bytes), which is why `asmclk` says *six*, not the three source lines v55 prints;
+- `_clkfreq = 400_000_000` assembles, which is why `what_value_is_legal` says the datasheet ceiling
+  binds *"even where the compiler accepts it"*.
+
+### 8.6 Sweep at exit
+
+All nine instruments re-run. **No delta from §7.** The two blocking gates were shown able to fail
+before the green was accepted: a scratch file with the F-327 shape (a citing file plus an uncited
+`150mA`/`2000Ohm`/`2ns` block) drove `audit-yaml-claim-sourcing` to **Tier 1 = 1, exit 1**, and a
+doubled key in the same file drove `audit-yaml-duplicate-keys` to **exit 1**; both returned to 0 when
+it was deleted. `audit-register-hygiene.py … P1-CORRECTION-FINDINGS.md` remains exit 1 `no-counter` —
+pre-existing, out of scope, unchanged.

@@ -50,7 +50,7 @@ knowledge_progression:
   note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
 
 file_structure:
-  source: "Parallax Spin2 Documentation v55 -- Minimal PASM Program engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188; DAT Cog-exec / Hub-exec directive tables :310-323; Clock Setup :1716-1725; clock-setter prepending :1735-1736. Register map from the P2 Datasheet 2022/11/01 pp.13-14 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:553-586."
+  source: "Parallax Spin2 Documentation v55 -- Minimal PASM Program engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188; DAT Cog-exec / Hub-exec directive tables :310-323; Clock Setup :1708-1726; ASMCLK, clock-setter prepending and _AUTOCLK :1734-1740. Register map from the P2 Datasheet 2022/11/01 pp.13-14 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:553-586."
 
   overview: |
     PASM2 code lives in a DAT block of a Spin2 source file; there is no separate
@@ -67,10 +67,78 @@ file_structure:
     why_waitx_not_waitms: "WAITMS and WAITUS are Spin2 METHODS, not PASM2 instructions. In a PASM-only program the delay is WAITX, whose operand is a clock count -- which is why the source's own example computes it from the compiler-defined constant clkfreq_."
 
   clock_setup:
-    default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+ (v55:1723). _clkfreq is NOT required."
-    when_declared: "PASM-only programs which use any non-RCFAST clock mode get a 16-long clock-setter program automatically prepended, which sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT #0,#0, to effect a normal start. (v55:1735)"
-    inhibiting_it: "Declare _AUTOCLK = 0 to stop the clock-setter program from being prepended; your code then begins executing with the default RCFAST mode. (v55:1736)"
-    compiler_constants: "clkfreq_ (compiled clock frequency) and clkmode_ (compiled clock mode) are defined by the compiler and may be referenced as constants in PASM-only programs. (v55:1725-1726)"
+    source: "Parallax Spin2 Documentation v55, section 'Clock Setup' -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726 (the CON declaration table, its two footnotes, and the compiler-defined constants) and :1734-1740 (ASMCLK, the auto-prepended clock-setter, _AUTOCLK). Frequency limits from the P2 Datasheet 2022/11/01, AC Characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 and footnote 2 at :2209."
+    default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+ (v55:1718). No clock symbol is required: _clkfreq is OPTIONAL, and a PASM-only program that declares none compiles and runs at RCFAST. With no symbol but DEBUG mode active, the compiler instead selects XI/XO-crystal mode at 20 MHz to facilitate DEBUG (v55:1719)."
+    why_the_default_bites: "The default is silent. A PASM-only program whose WAITX operands were computed for 200 MHz, but which declares no clock symbol, runs at RCFAST (20 MHz+, datasheet typical 24 MHz) and every delay is wrong by an order of magnitude with no diagnostic. Either declare the mode you intend (below), or compute delays from the compiler constant clkfreq_, which always tracks the mode actually compiled."
+    how_to_declare: "The clock is selected at COMPILE time by declaring CON symbols. The compiler recognises the following combinations and no others; the HUBSET %CC_SS column is the clock-mode value the compiler derives, which is what the compiler constant clkmode_ carries and what HUBSET is invoked with. (v55:1709-1710, :1725)"
+    declaration_combinations:
+      - con_symbols: "CON _clkfreq = 250_000_000, _errfreq = 0"
+        effect: "Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+        hubset_cc_ss: "%10_11"
+        v55_line: 1711
+      - con_symbols: "CON _xtlfreq = 12_000_000, _clkfreq = 148_500_000, _errfreq = 150_000"
+        effect: "Selects XI/XO-crystal-plus-PLL mode, along with frequencies. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+        hubset_cc_ss: "%1x_11"
+        v55_line: 1712
+      - con_symbols: "CON _xinfreq = 32_000_000, _clkfreq = 297_500_000, _errfreq = 100_000"
+        effect: "Selects XI-input-plus-PLL mode, along with frequencies. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
+        hubset_cc_ss: "%01_11"
+        v55_line: 1713
+      - con_symbols: "CON _xtlfreq = 16_000_000"
+        effect: "Selects XI/XO-crystal mode and frequency."
+        hubset_cc_ss: "%1x_10"
+        v55_line: 1714
+      - con_symbols: "CON _xinfreq = 100_000_000"
+        effect: "Selects XI-input mode and frequency."
+        hubset_cc_ss: "%01_10"
+        v55_line: 1715
+      - con_symbols: "CON _rcslow"
+        effect: "Selects internal RCSLOW oscillator which runs at ~20 KHz."
+        hubset_cc_ss: "%00_01"
+        v55_line: 1716
+      - con_symbols: "CON _rcfast"
+        effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
+        hubset_cc_ss: "%00_00"
+        v55_line: 1717
+      - con_symbols: "No symbol and not DEBUG mode"
+        effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
+        hubset_cc_ss: "%00_00"
+        v55_line: 1718
+      - con_symbols: "No symbol and DEBUG mode"
+        effect: "Selects XI/XO-crystal mode and 20 MHz to facilitate DEBUG."
+        hubset_cc_ss: "%10_10"
+        v55_line: 1719
+    extraction_note_2026_08_27: "The %01_11 value for the XI-input-plus-PLL row is written '01_1 1' in our plain-text extraction of v55 (spin2-v55-text.txt:1713 and :1738). That is an extraction artifact, not the source: in the DOCX the cell is one table cell split across two Word runs ('01_1' + '1'), and it is the only one of the nine %CC_SS cells that is split. Verified directly against word/document.xml of engineering/ingestion/sources/spin2-v55/Parallax Spin2 Documentation v55.docx. The value carried here is %01_11."
+    errfreq_is_optional: "_errfreq is optional wherever the table shows it; it defaults to 1_000_000 (v55:1721). All three PLL forms above were confirmed to compile without it."
+    the_x_bit: "In the %1x_ CC values, x is the crystal-loading bit: if _xtlfreq >= 16_000_000 then x=0, for 15 pF per XI/XO; otherwise x=1, for 30 pF per XI/XO. (v55:1722)"
+    combinations_are_compiler_verified: "Every form above was assembled clean by pnut-ts (v1.55.3) inside a PASM-only file. That establishes LEGALITY only -- the effect and %CC_SS columns are v55's statements, not the compiler's."
+    when_declared: "PASM-only programs which use any non-RCFAST clock mode get a 16-long clock-setter program automatically prepended, which sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT #0,#0, to effect a normal start. This is why ASMCLK is no longer needed at the start of a PASM-only program (as of v35v). (v55:1735)"
+    inhibiting_it: "Declare _AUTOCLK = 0 to stop the clock-setter program from being prepended; your code then begins executing with the default RCFAST mode. If you then want another clock mode you must configure the clock yourself, perhaps using ASMCLK. (v55:1736)"
+    asmclk: "ASMCLK is a PASM-only pseudo-instruction that sets the clock mode named by the clock-setup symbols. It has no operands but may take a conditional prefix, and assembles to one or six PASM instructions depending on the mode: HUBSET #0 for _rcfast, HUBSET #1 for _rcslow, and the six-long crystal/PLL start sequence shown under manual_switch_example for every external-clock form. (v55:1734, :1738-1740). Measured: with _AUTOCLK = 0 and an external-clock declaration, adding ASMCLK grew a pnut-ts build by exactly 6 longs; with _rcfast it grew it by 1."
+    manual_switch: "Without the prepended clock-setter (or with _AUTOCLK = 0), a pure PASM program moves off its initial RCFAST setting to the compiled crystal/PLL setting with the sequence v55 gives for clkmode_ (v55:1725)."
+    manual_switch_example: |
+      HUBSET  ##clkmode_ & !%11   'start crystal/PLL, stay in RCFAST mode
+      WAITX   ##20_000_000/100    'allow 10ms for the external clock to stabilise
+      HUBSET  ##clkmode_          'switch to crystal/PLL
+    compiler_constants: "clkfreq_ (compiled clock frequency) and clkmode_ (compiled clock mode) are defined by the compiler and may be referenced as constants in PASM-only programs. Both may differ per file in the application hierarchy; files below the top-level file do not inherit the top-level value. (v55:1725-1726)"
+    what_value_is_legal: "The P2 Datasheet AC Characteristics give the PLL absolute maximum as 320 MHz (typical 180 MHz), so a _clkfreq above 320 MHz is outside the datasheet's limits even where the compiler accepts it. The full min/typ/max table for every oscillator source is under timing_considerations.clock_frequency in this file."
+    see_also:
+      asmclk_instruction:
+        key: p2kbPasm2Asmclk
+        path: deliverables/ai/P2/language/pasm2/asmclk.yaml
+        description: "ASMCLK -- full instruction entry"
+      hubset_instruction:
+        key: p2kbPasm2Hubset
+        path: deliverables/ai/P2/language/pasm2/hubset.yaml
+        description: "HUBSET -- the instruction the %CC_SS clock-mode value is written with"
+      per_symbol_reference:
+        key: p2kbSpin2SpecialConfigurationSymbols
+        path: deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml
+        description: "_clkfreq, _xtlfreq, _xinfreq, _errfreq, _rcfast, _rcslow, _AUTOCLK -- one entry per symbol"
+      clock_system:
+        key: p2kbArchClockSystem
+        path: deliverables/ai/P2/architecture/clock_system.yaml
+        description: "the P2 clock system -- oscillators, PLL, and mode switching"
 
   cog_vs_hub_execution:
     cog_exec:
@@ -618,9 +686,15 @@ timing_considerations:
     multiply: "MUL 2 clocks; QMUL via CORDIC: 55-clock latency, 8-clock issue interval"
     
   clock_frequency:
-    default: "20 MHz crystal with PLL"
-    typical: "200-300 MHz system clock"
-    maximum: "340+ MHz (silicon dependent)"
+    source: "P2 Datasheet 2022/11/01, AC Characteristics (p.48) -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200, footnote 2 at :2209. Compiler default from Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718."
+    framing: "These are the DATASHEET's absolute limits, not the Hardware Manual's recommended-use range. The two documents differ in framing, not in fact; see engineering/ingestion/SOURCE-ERRATA.md E-007."
+    compiler_default: "RCFAST -- selected whenever no clock-setup symbol is declared and DEBUG mode is off (v55:1718). It is NOT a crystal-plus-PLL default. Its frequency is the rcfast row below: 20 MHz min, 24 MHz typical, 30 MHz max. See file_structure.clock_setup above for how to declare something else."
+    rcfast: "20 MHz min, 24 MHz typical, 30 MHz max (internal)."
+    rcslow: "12 kHz min, 20 kHz typical, 30 kHz max (internal)."
+    crystal_input: "1 MHz to 50 MHz between XI and XO."
+    direct_drive_input: "DC to 200 MHz into XI."
+    pll_system_clock: "3.33 MHz min, 180 MHz typical, 320 MHz max. Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC."
+    correction_2026_08_27: "This block previously read default '20 MHz crystal with PLL', typical '200-300 MHz system clock', maximum '340+ MHz (silicon dependent)' -- all three uncited. The 'default' contradicted this same file's clock_setup block (the compiler default is RCFAST); '200-300 MHz typical' has no source we hold and the datasheet's typical is 180 MHz; '340+ MHz' appears in our holdings only as a TAQOZ overclocking anecdote (community material, an upstream lead, never a citable authority), against a datasheet maximum of 320 MHz. Replaced source-first, not restored."
     
   precise_timing:
     WAITX: "Accurate delay in clock cycles"
