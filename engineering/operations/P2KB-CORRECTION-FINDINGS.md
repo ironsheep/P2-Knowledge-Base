@@ -22,7 +22,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-379`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-380`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,57 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## `ADDSX` and `SUBSX` ship the PASM2 Manual's wrong C-flag sentence while contradicting it in the same file (2026-08-27, «#328» E-016 sibling sweep) — F-379
+
+### F-379 — the two instructions v1.11.1's signed-flag repair skipped, plus two malformed `SUM*` encoding fields — `RESOLVED`
+
+**This is the outcome the E-016 sibling sweep existed to find: the manual is wrong AND our KB followed it.**
+
+E-016 established that the PASM2 Manual's *prose* describes the signed-add/subtract C flag one way
+while the manual's *own table on the same page* says something different and more precise, and that
+the table is the more precise statement. `adds.yaml` and `subs.yaml` already rebut the prose. The
+sweep found two siblings that do not:
+
+| File | `description` said | its own `flags_affected.C` / `encoding[0].c` said |
+|---|---|---|
+| `language/pasm2/addsx.yaml` | *"the C flag is set (1) if the result is negative (Result[31] = 1)"* | `sign of (D+S+C)` |
+| `language/pasm2/subsx.yaml` | the same sentence verbatim | `sign of D-(S+C)` |
+
+**Each file contradicted itself**, and a reader who reads the `description` — the field a consuming
+agent is most likely to surface — learned the wrong quantity. It is wrong in exactly the case that
+matters: `Result[31]` and the true sign differ **only on overflow**, which is the condition `TJV`
+exists to detect.
+
+**Refuted three times inside the manual itself**, so this needed no external source: Table 9 at
+`sources/pasm2-manual/pasm2-manual-text.txt:912` and Table 169 at `:3983` give the true-sign form;
+the manual's own `TJV` description at `:4196` (restated `:5168`) says the jump *"requires that C be
+updated (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx"* —
+which could never fire if C were `Result[31]`; and the manual's summary tables at `:4482` and
+`:4809` say **"correct sign"**.
+
+**Root cause, and it is the useful part.** Commit `87511c99` (v1.11.1, *"signed flags"*) repaired
+this exact class across `adds · cmps · cmpsx · subs · sumc · sumnc · sumnz · sumz` — **and skipped
+`addsx` and `subsx`**. A class-wide sweep that misses two members leaves a defect that now looks
+deliberate, because every neighbour is correct.
+
+**Two further defects in the same family, found in the same pass and fixed with it** — both
+column-split artifacts from the original CSV import, both in fields no gate reads:
+`sumz.yaml` `encoding[0].z` read `1 then D = D - S, else D = D + S` — the *C column's condition
+text* sitting in the Z field, where the manual's Table 172 (`:4039`) gives `Result = 0`. That one
+was wrong, not merely malformed. `sumc.yaml` `encoding[0].c` carried the same condition prose welded
+in front of a correct C semantic. `sumnc.yaml` and `sumnz.yaml` are clean — the four `SUM*` files
+are asymmetric because v1.11.1 rewrote only two of them.
+
+**Applied 2026-08-27.** All four corrected; `addsx`/`subsx` now carry the true-sign statement in the
+wording `adds`/`subs` already use, each naming the manual table that overrides the prose and pointing
+at E-016. `grep -rn 'Result\[31\] = 1' deliverables/ai/P2/` returns nothing outside the new
+rebuttals.
+
+**What no gate could see.** Every instrument in this project passed all four files throughout:
+they parse, their keys resolve, their citations are present, and `pnut-ts` assembles the
+instructions regardless — a compiler proves legality, never a flag's meaning. Only reading the
+`description` against the same file's `flags_affected` catches a file disagreeing with itself.
 
 ## The KB ships the compiler's acceptance range as a frequency ceiling, 180 MHz past the silicon limit (2026-08-27, «#326» verification) — F-378
 
@@ -503,7 +554,7 @@ The file contradicts itself.
 
 **The source:** *"Once a smart pin is configured via WRPIN and then started by making its DIR bit
 high, it can be reset at any time by making its DIR bit low. It does not lose its configuration set
-by the last WRPIN…"* (`sources/silicon-doc/silicon-doc-text.txt:3360`).
+by the last WRPIN…"* (`sources/silicon-doc/silicon-doc-text.txt:3856`; this entry originally recorded `:3360`, which today reads `(X,Y) ROTATION` — corrected 2026-08-27 during «#328» verification. The shipped YAML always cited `:3856`, so nothing downstream inherited it).
 
 **Measured:** `grep -rl` across all of `deliverables/ai/P2/` for `DIR bit low`, `reset at any time`
 and `does not lose its configuration` returns **zero files**.

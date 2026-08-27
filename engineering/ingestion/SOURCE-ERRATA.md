@@ -99,7 +99,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-013 | P2 Documentation v35 (Rev B/C) | *"in every mode, the three %ppp bits"* — its own four-pin input block uses **%pppp in D[22:19]** | see entry | `CONFIRMED` |
 | E-014 | P2 Documentation v35 (Rev B/C) | the booter description omits **microSD boot**, which the Hardware Manual documents with a pin table | follows the better sources | `CONFIRMED` |
 | E-015 | P2 Documentation v35 (Rev B/C) | **KNOWN SILICON BUGS** omits the RDFAST corruption bug the designer confirms in the document's own comments | never carried | `CONFIRMED` |
-| E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* | diverges, deliberately | `CONFIRMED` |
+| E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* — **sibling sweep done 2026-08-27**: same defect in `SUBS`, `ADDSX`, `SUBSX`; `SUM*` (4) and `CMPS`/`CMPSX` clean | diverges deliberately on ADDS/SUBS · **ADDSX + SUBSX copied the wrong sentence** → corrections register | `CONFIRMED` |
 
 ---
 
@@ -366,8 +366,56 @@ KB had quietly diverged from a Parallax document with nothing saying why, which 
 divergence this register exists to map. Filed now so the next reader knows the difference is
 intentional.
 
-**Sibling check owed:** `ADDSX`, `SUBS`, `SUBSX` and the `SUM*` family share this prose pattern in
-the same manual. Not swept in this pass — recorded here so the sweep is not lost.
+### Sibling sweep — **DONE 2026-08-27**. Seven instructions, three outcomes, and one of them is ours
+
+The sweep this entry recorded as owed has run. Each instruction's **Explanation prose** was read
+against **its own encoding table on the same page** in `sources/pasm2-manual/pasm2-manual-text.txt`,
+and both against the shipped YAML.
+
+**How the `SUM*` family was enumerated** — not from this entry's own list, which names no members.
+Three independent enumerations, all agreeing on exactly **four**: the v35 instruction master table
+(`sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:54-57` — the only
+four rows whose mnemonic begins `SUM`), the Silicon Doc encoding table
+(`sources/silicon-doc/silicon-doc-text.txt:5038-5041`), and the shipped set
+(`deliverables/ai/P2/language/pasm2/sum{c,nc,z,nz}.yaml` — four files, no others). The manual gives
+them **two combined entries**, `SUMC / SUMNC` and `SUMZ / SUMNZ`, so a per-mnemonic search finds
+only an index listing; the entries are at `:4008` and `:4027`.
+
+| Instruction | Manual prose (`pasm2-manual-text.txt`) | Its own table, same page | Shipped YAML | Verdict |
+|---|---|---|---|---|
+| **ADDS** | `:898` *"…set (1) if the summation results in a **signed overflow (signed carry)**"* | `:894` Table 8 — `sign of (D + S)` | `adds.yaml` — *"true sign … **NOT** a signed-overflow indicator"* | **manual wrong, KB right** — the entry above |
+| **SUBS** | `:3969` *"…set (1) if the subtraction results in a **signed underflow (signed borrow)**"* | `:3965` Table 168 — `sign of (D - S)` | `subs.yaml:10-12` — *"the true sign of the result … at full precision (overflow-corrected) … it is **NOT** a signed-underflow or borrow indicator"* | **manual wrong, KB right** — identical shape to ADDS, and already rebutted in the same words |
+| **ADDSX** | `:916` *"…set (1) if the result is negative (**Result[31] = 1**)"* | `:912` Table 9 — `sign of (D+S+C)` | `addsx.yaml:5` **carries the manual's sentence verbatim, `Result[31] = 1` and all**, while `:14`/`:24` of the same file say `sign of (D+S+C)` | **manual wrong, and the KB followed it** — routed to the corrections register |
+| **SUBSX** | `:3987` *"…set (1) if the result is negative (**Result[31] = 1**)"* | `:3983` Table 169 — `sign of D-(S+C)` | `subsx.yaml:9` **carries the manual's sentence verbatim**, while `:26`/`:36` say `sign of D-(S+C)` | **manual wrong, and the KB followed it** — routed to the corrections register |
+| **SUMC** | `:4025` *"…set (1) if the result is negative, or is cleared (0) if positive"* | `:4020` Table 171 — `sign of (D +/- S)` | `sumc.yaml:15` — `Set to true sign of result (D +/- S)` | **manual self-consistent** — prose and table name the same quantity |
+| **SUMNC** | `:4025` (same combined entry) | `:4021` Table 171 — `sign of (D +/- S)` | `sumnc.yaml:21` — `Set to true sign of result (D +/- S)` | **manual self-consistent** |
+| **SUMZ** | `:4044` *"…set (1) if the result is negative, or is cleared (0) if positive"* | `:4039` Table 172 — `sign of (D +/- S)` | `sumz.yaml:15` — `Set to true sign of result (D +/- S)` | **manual self-consistent** |
+| **SUMNZ** | `:4044` (same combined entry) | `:4040` Table 172 — `sign of (D +/- S)` | `sumnz.yaml:21` — `Set to true sign of result (D +/- S)` | **manual self-consistent** |
+
+**Why `Result[31]` is wrong and not a paraphrase — decided inside the same document.** The
+manual's **TJV** page states it outright: *"TJV tests the value in Dest against C and jumps … if
+Dest has overflowed (**Dest[31] != C**). This instruction requires that C be updated (**to the
+correct sign**) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx instruction."*
+(`:4196`; restated at `:5168`). If C were `Result[31]`, `Dest[31] != C` could never be true and TJV
+could never fire. The manual's own instruction-summary table agrees — `C = **correct** sign of
+(D + S + C)` for ADDSX (`:4482`), `C = **correct** sign of (D - (S + C))` for SUBSX (`:4809`) — as
+does the v35 master table (`p2-instructions-csv/…Sheet1.csv:37, :41`). So `ADDSX`/`SUBSX` have
+**three** internal statements against the one wrong sentence, and the wrong sentence is the one our
+YAML copied.
+
+**Reached our KB? Split.** ADDS and SUBS were repaired in **v1.11.1** (*"PASM2 reference accuracy
+(GETBRK, program counter, signed flags)"*, commit `87511c99`), which touched
+`adds · cmps · cmpsx · subs · sumc · sumnc · sumnz · sumz` — **eight of the ten signed-flag files,
+skipping exactly `addsx` and `subsx`**. That is why the two extended forms still carry the
+manual's sentence today. The defect is **not** in their `flags_affected` or `encoding` blocks,
+which are right; it is in `description`, and each file therefore contradicts itself — the same
+shape as F-368 in `getbrk.yaml`. Routed to `operations/P2KB-CORRECTION-FINDINGS.md` (ID allocated
+there, not here).
+
+**`CMPS`/`CMPSX` checked too, though not on the owed list** — TJV names them in the same breath.
+Both are **self-consistent**: prose *"set (1) if Dest is less than Src"* (`:1785`) against Table 50
+`Signed (D < S)` (`:1781`); prose *"set (1) if Dest is less than Src + C"* (`:1820`) against Table 52
+`Signed (D < S+C)` (`:1816`). Different prose pattern, no divergence.
 
 ---
 

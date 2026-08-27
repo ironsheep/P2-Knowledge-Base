@@ -3,7 +3,7 @@ syntax: SUMC    D,{#}S   {WC/WZ/WCZ}
 encoding:
 - bits: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: 1 then D = D - S, else D = D + S. C = true sign of (D +/- S)
+  c: true sign of (D +/- S)
   z: Result == 0
   clocks: '2'
 timing:
