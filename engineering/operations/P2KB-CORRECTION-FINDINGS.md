@@ -699,7 +699,7 @@ resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 ## The hygiene gate reports CLEAN on the register that owns the `G-`/`Q-` allocators while reading none of its entries (2026-08-26, p2-click-adapter ingestion) — F-362
 
-### F-362 — `audit-register-hygiene.py` reports CLEAN on the register that owns the `G-` and `Q-` allocators while reading zero of its entries — `CONFIRMED`
+### F-362 — `audit-register-hygiene.py` reports CLEAN on the register that owns the `G-` and `Q-` allocators while reading zero of its entries — `RESOLVED`
 
 **How this surfaced.** The p2-click-adapter ingestion (2026-08-26) needed a new gap ID. Allocating
 it by hand-reading the maximum `G-` in the table is exactly the two-writer collision the register
@@ -765,6 +765,47 @@ ownership, so it recurred. Now: `KNOWLEDGE-GAPS.md` declares `Next gap ID: G-023
 `Next expert-question ID: Q-009` and states outright that it owns the `G-` and `Q-` allocators;
 the corrections register's duplicate `Next gap ID` clause is retired with a pointer to it. All
 three registers exit 0 under the gate afterwards.
+
+**Status:** `RESOLVED` — fixed and verified 2026-08-27 («#327»). Three shapes the tool did not
+model, all repaired in `engineering/tools/validation/audit-register-hygiene.py`:
+
+1. **The table-row entry dialect.** `_ENTRY_HEAD` gained `| G-019 | … |`, and `parse()` now also
+   returns each row's **status CELL**, located from the table's own `Status` / `State` column
+   heading. The cell, not the row, is what the status checks read — because the ledger's own
+   lifecycle word `open` is *also* ordinary English in its prose ("_Still open:_ …"), so a
+   vocabulary carrying it, searched over a whole row, would have made check 4 unfailable and
+   re-created this very finding in a new costume.
+2. **Per-register status vocabulary**, selected off the counter label exactly as the ID families
+   already were. `OPEN` **stays excluded** from the corrections vocabulary; the ledgers get their
+   own (`OPEN` · `ANSWERED` · `STILL-UNKNOWN` · `RELOCATED` · `NARROWED` · `PARTIAL` · `RESOLVED` ·
+   `ASKED`, case-folded, with `sweep=False` because a moving ledger keeps an answered row on
+   purpose). An unknown label falls back to the corrections vocabulary, which fails loudly on a
+   foreign lifecycle rather than passing it.
+3. **An ID family is a prefix string, not a letter** — so the P1 quad's namespaced `F-P1-` /
+   `G-P1-` / `Q-P1-` allocators parse. Those two registers also declared `**Next ID:`** with no
+   `<thing>` word; they were corrected to the convention rather than the pattern loosened, because
+   the label now *selects the vocabulary*, and `P1-KNOWLEDGE-GAPS.md` had written that same
+   nameless counter twice in one file for two different families. The gate still refuses the
+   labelless form — proven by a control case.
+
+**Proof, both directions.** The planted-duplicate `G-019` fixture passes **CLEAN at exit 0**
+through the pre-fix tool (read out of `.backups/`, which reports `0 entries, 0 distinct IDs`) and
+**fails at exit 1 with `duplicate-id`** through the fixed one. Five registers now exit 0 with the
+gate actually reading them: corrections **102 live / 294 archived / 0 unaccounted** (unchanged),
+`SOURCE-ERRATA` **17 live** (unchanged), `KNOWLEDGE-GAPS` **36 live** (was `0 entries`),
+`P1-CORRECTION-FINDINGS` **0 entries, counter governed** (was exit 1), `P1-KNOWLEDGE-GAPS`
+**14 live** (was exit 1 and `0 entries`). `--negative-control` carries **11 new permanent cases**
+(24 total), including the planted-duplicate shape itself, a blank status cell, a status word in a
+row's prose with the cell blank, two families on one counter line, and both sides of the `OPEN`
+exclusion.
+
+**Surfaced but NOT filed** (allocator belongs to the sprint arbiter): the corrections register
+carries a third ID series, `ENH-NN`, with **no declared counter** — and live `ENH-02` / `ENH-03`
+name different proposals than the archived `ENH-02` / `ENH-03` in
+`correction-sweeps/2026-08-15-…-archive.md`, i.e. the allocator has already collided across the
+archive boundary. The gate deliberately does not model that family (doing so turns it red over a
+defect whose remedy is renumbering live entries), but it now prints an `unmodelled series :
+ENH-NNN` report line on every run so the question surfaces instead of staying silent.
 
 ## `pin-selection.yaml` printed the streamer's sub-pin table with the wrong bit weights, and shipped the EF-065 trap as its worked example (2026-08-26, found while composing the streamer pin-capture page) — F-361
 

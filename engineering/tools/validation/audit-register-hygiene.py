@@ -26,6 +26,29 @@ EVERY CHECK IS PER-REGISTER, IN THAT REGISTER'S OWN VOCABULARY
     fix was NOT to rename that counter to match: two registers claiming one
     allocator name is a worse defect than the one it closes.
 
+    WIDENED AGAIN 2026-08-27 (F-362), AND IT HAD BEEN REPORTING CLEAN ON A FILE IT
+    NEVER READ. Three register shapes existed that this tool did not model:
+      * the ENTRY DIALECT. It knew the heading (`## F-001 —`) and the bullet
+        (`- **F-357 —`). Both gap ledgers carry every entry as a markdown TABLE ROW,
+        so `parse` returned zero blocks, every check ran over nothing, and the
+        summary printed `0 entries, 0 distinct IDs` against 36 rows — while the
+        verdict line said CLEAN. A planted duplicate `G-019` passed at exit 0.
+      * the STATUS VOCABULARY, which was one module-global tuple carrying the
+        corrections register's words. It is now selected per-register off the
+        counter LABEL, the way the ID families already were. `OPEN` stays OUT of
+        the corrections vocabulary and IS in the ledgers'. See the vocabulary note
+        below for why a wider global tuple would have been the worse fix.
+      * the ID FAMILY, which was a single LETTER. The P1 quad namespaces its
+        allocators — `F-P1-NNN`, `G-P1-NNN`, `Q-P1-NNN` — so `P1-CORRECTION-
+        FINDINGS.md` and `P1-KNOWLEDGE-GAPS.md` both reported `0 entries` and
+        exit 1 `no-counter`. A family is now a PREFIX STRING.
+    Those two P1 registers also declared their counters as `**Next ID: X**`, with no
+    `<thing>` word. They were CORRECTED to the convention rather than the pattern
+    widened to accept them: the label now selects the status vocabulary, so a
+    nameless allocator is unresolvable, and `P1-KNOWLEDGE-GAPS.md` had written that
+    same nameless counter twice in one file for two different families. The gate
+    still refuses the labelless form, and the control pins it.
+
 CHECKS
     1  next-ID counter is ahead of every allocated ID      (allocation drift)
        -- for EVERY series the register declares, and a series that is allocated
@@ -119,8 +142,78 @@ CLOSED_WORDS = ("DONE", "WONTFIX", "RESOLVED-INVALID")
 STATUS_WORDS = CLOSED_WORDS + ("CONFIRMED", "NEEDS-VERIFICATION", "PARTIAL",
                                "PENDING-VALIDATION", "NOTED", "RESOLVED", "TRACKED",
                                "RESEARCHING")
-CLOSED_RE = re.compile(r"`?\b(" + "|".join(CLOSED_WORDS) + r")\b`?")
-STATUS_RE = re.compile(r"`?\b(" + "|".join(STATUS_WORDS) + r")\b`?|TRACKED → ingestion")
+
+
+def build_status_res(words, closed, fold_case=False):
+    """(status_re, closed_re) for one register's vocabulary.
+
+    Built by ONE function so a new register's vocabulary cannot quietly acquire a
+    different matching rule from the one the corrections register is graded by."""
+    flags = re.I if fold_case else 0
+    status = re.compile(r"`?\b(" + "|".join(words) + r")\b`?|TRACKED → ingestion", flags)
+    # An EMPTY closed-set must match nothing. `"|".join(())` would produce `\b()\b`,
+    # which matches at every word boundary -- i.e. every entry would read as closed.
+    closed_re = (re.compile(r"`?\b(" + "|".join(closed) + r")\b`?", flags)
+                 if closed else re.compile(r"(?!x)x"))
+    return status, closed_re
+
+
+# THE STATUS VOCABULARY IS PER-REGISTER, SELECTED OFF THE COUNTER LABEL (F-362).
+#
+# It used to be one module-global tuple carrying the CORRECTIONS register's words,
+# applied to every file. That was survivable only because the two registers it could
+# see happened to share a lifecycle. `engineering/ingestion/KNOWLEDGE-GAPS.md` does
+# not: its rows move `OPEN` -> `ANSWERED` | `PARTIAL` | `NARROWED` | `STILL-UNKNOWN`
+# | `RELOCATED` | `RESOLVED`, and its Part-B questions move `open` -> `asked` ->
+# `answered` in LOWER CASE. Not one of those is in the corrections vocabulary, so the
+# day that register became visible to `parse` (below), check 4 would have fired on
+# every one of its 36 rows.
+#
+# `OPEN` STAYS OUT OF THE CORRECTIONS VOCABULARY. That exclusion is deliberate and
+# still correct: in `P2KB-CORRECTION-FINDINGS.md` "OPEN" is ordinary English prose
+# ("This file carries OPEN work only"), and admitting it globally would let a finding
+# carrying NO status at all pass check 4 on a stray word. A vocabulary that silences
+# a check is worse than one that is short. The fix is therefore NOT to widen the
+# global tuple -- it is to select the vocabulary the way the ID families already are:
+# read off the counter LABEL the file declares (`Next gap ID` vs `Next finding ID` vs
+# `Next erratum ID`). A label this table does not know falls back to the corrections
+# vocabulary, which FAILS LOUDLY (no-status on every entry) rather than passing.
+#
+# AND THE VOCABULARY ALONE IS NOT ENOUGH. The ledger's lowercase `open` is the same
+# string as the word "open" in its own prose ("_Still open:_ ...", "holes open as new
+# sources arrive"), so a vocabulary containing it, searched over a whole entry, would
+# make check 4 vacuous for that register -- re-creating F-362 in a new costume. So a
+# ledger entry's status is read from the ROW'S STATUS CELL, located from the table's
+# own header (see `parse`), never from the row's prose. That is what makes it safe to
+# admit a lowercase token, and it is what lets check 4 still FAIL on a blank cell.
+def _vocab(words, closed=CLOSED_WORDS, sweep=True, fold_case=False):
+    status_re, closed_re = build_status_res(words, closed, fold_case)
+    return {"words": frozenset(words), "status": status_re,
+            "closed": closed_re, "sweep": sweep}
+
+
+DEFAULT_VOCAB = _vocab(STATUS_WORDS)
+
+# The gap/expert-question ledgers. `sweep=False`: unlike the corrections register,
+# these are MOVING LEDGERS that deliberately retain a closed row with its answer --
+# "Row kept here, not deleted, so the ID resolves" (KNOWLEDGE-GAPS.md, G-016..G-018).
+# A row reading ANSWERED is the ledger working, not scan noise, so check 3 must not
+# fire; those words are still the register's TERMINAL states, so check 4b accepts
+# them as a decided verdict rather than reporting "claims fixed, status says
+# otherwise" on every answered row.
+LEDGER_WORDS = ("OPEN", "ANSWERED", "STILL-UNKNOWN", "RELOCATED", "NARROWED",
+                "PARTIAL", "RESOLVED", "ASKED")
+LEDGER_CLOSED = ("ANSWERED", "RESOLVED", "RELOCATED")
+LEDGER_VOCAB = _vocab(LEDGER_WORDS, closed=LEDGER_CLOSED, sweep=False, fold_case=True)
+
+VOCAB_BY_LABEL = {
+    "gap": LEDGER_VOCAB,
+    "expert-question": LEDGER_VOCAB,
+    "P1-gap": LEDGER_VOCAB,
+    "P1-expert-question": LEDGER_VOCAB,
+}
+
+STATUS_RE = DEFAULT_VOCAB["status"]    # the DEFAULT only; every check reads `v["status"]`
 # THE STATUS TOKEN IS AUTHORITATIVE. Prose is not a status.
 # Learned in the 2026-08-19 sweep: 16 findings whose headline read "source fixed" /
 # "tool fixed" were still `CONFIRMED`, and most added "render owed" — a fix applied but
@@ -157,9 +250,9 @@ BODY_STATUS = re.compile(
     r"^[ \t>]*(?:\*\*)?(?:Status:|Disposition\.)(?:\*\*)?[ \t]*`?\s*([A-Z][A-Z-]*)", re.M)
 
 
-def lead_status(s):
-    """The first status token in a string, or None."""
-    m = STATUS_RE.search(s)
+def lead_status(s, status_re=None):
+    """The first status token in a string, or None — in the REGISTER'S vocabulary."""
+    m = (status_re or STATUS_RE).search(s)
     if not m:
         return None
     return (m.group(1) or m.group(0)).strip("` ")
@@ -180,19 +273,68 @@ def lead_status(s):
 # It is to take (label, prefix) FROM THE FILE: the counter line declares both,
 # and the ID shapes are built from the series actually present. A register that
 # introduces a third family is covered on the day it is written.
-COUNTER_RE = re.compile(r"\*\*Next\s+(\w+)\s+ID:\s*`?([A-Z])-0*(\d+)`?\*\*")
+#
+# AN ID FAMILY IS A PREFIX STRING, NOT A LETTER (F-362, second half). `[A-Z]` modelled
+# `F-`, `G-`, `E-`, `Q-` and nothing else, so the P1 quad's NAMESPACED families --
+# `F-P1-NNN` (P1-CORRECTION-FINDINGS.md), `G-P1-NNN` / `Q-P1-NNN` (P1-KNOWLEDGE-GAPS.md)
+# -- were unparseable: `canon` declined to canonicalise them, `ID_ONE` matched nothing,
+# and both files reported `0 entries` while holding 14 rows between them. Renaming those
+# families to single letters is not on the table: they exist precisely so the P1 and P2
+# allocators cannot collide, and the charter declares them (P1-KB-BOOTSTRAP-CHARTER §6).
+#
+# The LABEL, by contrast, is still required. `**Next ID: `F-P1-001`**` names no
+# allocator at all, and P1-KNOWLEDGE-GAPS.md wrote that same nameless counter TWICE in
+# one file for two different families -- the "two registers claiming one allocator name"
+# defect this tool's header calls worse than the one it closes, in one file. Since the
+# label now also SELECTS THE STATUS VOCABULARY, a nameless counter is no longer merely
+# untidy; it is unresolvable. So the registers were corrected to the declared
+# convention, and this pattern still REFUSES the labelless form. The negative control
+# pins both directions.
+#
+# THE MODELLED SHAPE IS THE DECLARED CONVENTION: a single-letter family root, with
+# optional namespace segments -- `F`, `G`, `Q`, `E`, `F-P1`, `G-P1`, `Q-P1`. It is
+# deliberately NOT "any run of capitals". The corrections register also carries an
+# `ENH-NN` enhancement-proposal series which that broader shape would sweep in, and
+# doing so turns a green gate red over a defect whose remedy is renumbering live
+# entries -- an allocator decision that belongs to the register's owner, not to this
+# tool. That family is reported below as UNMODELLED on every run rather than silently
+# dropped, so the question surfaces instead of being re-derived.
+_SERIES = r"([A-Z](?:-[A-Z][A-Z0-9]*)*)"
+_ANY_SERIES = r"([A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*)"   # report-only, never a check
+COUNTER_RE = re.compile(r"\*\*Next\s+([\w-]+)\s+ID:\s*`?" + _SERIES + r"-0*(\d+)`?\*\*")
+# THE THIRD ENTRY DIALECT — THE MARKDOWN TABLE ROW (F-362). This modelled exactly two
+# shapes, the heading (`## F-001 —`) and the bullet (`- **F-357 —`). Both gap ledgers
+# carry every one of their entries as a table ROW instead, in BOTH halves (Part A gaps
+# and Part B expert questions), so `parse` returned zero blocks and every check below
+# was computed over nothing -- while the tool printed CLEAN. A planted duplicate G-019
+# passed at exit 0.
 _ENTRY_HEAD = (r"^(?:#{2,4}\s+(<P>-\d+[a-z]?)\s*[—-]"
-               r"|-\s+\*\*(<P>-\d+[a-z]?)\s+[—-])")
+               r"|-\s+\*\*(<P>-\d+[a-z]?)\s+[—-]"
+               r"|\|\s*(<P>-\d+[a-z]?)\s*\|)")
+ROW_GROUP = 3                            # which _ENTRY_HEAD group is the table dialect
 
 
 def series_in(text, declared=None):
     """Every ID family a register uses: the one its counter declares, plus any
-    that actually HEAD an entry. Restricted to letters seen in those two
-    positions, so a stray `P-2` in prose cannot invent a family."""
+    that actually HEAD an entry. Restricted to prefixes seen in those positions,
+    so a stray `P-2` in prose cannot invent a family."""
     found = set(declared or ())
-    found.update(re.findall(r"^#{2,4}\s+([A-Z])-\d+", text, re.M))
-    found.update(re.findall(r"^-\s+\*\*([A-Z])-\d+\s+[—-]", text, re.M))
+    found.update(re.findall(r"^#{2,4}\s+" + _SERIES + r"-\d+", text, re.M))
+    found.update(re.findall(r"^-\s+\*\*" + _SERIES + r"-\d+\s+[—-]", text, re.M))
+    found.update(re.findall(r"^\|\s*" + _SERIES + r"-\d+[a-z]?\s*\|", text, re.M))
     return found or {"F"}
+
+
+def unmodelled_series(text, modelled):
+    """ID-shaped entry heads whose family this tool does not model. REPORT ONLY —
+    never a violation. See the `_SERIES` note: an unmodelled family is a question
+    for the register's owner, and silence is what let it become one."""
+    found = set()
+    for pat in (r"^#{2,4}\s+" + _ANY_SERIES + r"-\d+",
+                r"^-\s+\*\*" + _ANY_SERIES + r"-\d+\s+[—-]",
+                r"^\|\s*" + _ANY_SERIES + r"-\d+[a-z]?\s*\|"):
+        found.update(re.findall(pat, text, re.M))
+    return sorted(found - set(modelled))
 
 
 def build_id_res(series):
@@ -201,8 +343,12 @@ def build_id_res(series):
     `#{2,4}`, not `#{3,4}`: the corrections register heads a finding with `###`,
     the errata register with `##`. An entry heading is tested BEFORE a section
     heading (see parse), so `## E-001 -- ...` reads as a finding rather than a
-    section -- which is what lets checks 8 and 9 work on both files."""
-    cls = "[" + "".join(sorted(series)) + "]"
+    section -- which is what lets checks 8 and 9 work on both files.
+
+    `series` holds PREFIX STRINGS (`F`, `G`, `E`, `F-P1`), matched longest-first so
+    `F-P1-001` cannot be read as an `F-` allocation with junk after it."""
+    cls = "(?:" + "|".join(re.escape(p) for p in
+                           sorted(series, key=lambda s: (-len(s), s))) + ")"
     return (re.compile(_ENTRY_HEAD.replace("<P>", cls)),
             re.compile(r"\b(" + cls + r")-0*(\d+)\s*(?:…|\.{3})\s*" + cls + r"-0*(\d+)\b"),
             re.compile(r"\b(" + cls + r")-0*(\d+)\b"),
@@ -232,9 +378,17 @@ def canon(fid):
     errata register's `E-001` fell through unchanged, so the canonical live set
     held `E-001` while the gap scan looked for `E-1` — and all ten entries were
     reported as "went silent" while sitting in plain view. A canonicaliser that
-    silently declines to canonicalise is worse than one that raises."""
-    m = re.match(r"([A-Z])-0*(\d+)", fid)
+    silently declines to canonicalise is worse than one that raises.
+
+    ANY prefix, not any single LETTER: `G-P1-004` -> `G-P1-4`. The same silent
+    decline had the P1 quad's namespaced families falling through unchanged."""
+    m = re.match(_SERIES + r"-0*(\d+)", fid)
     return f"{m.group(1)}-{int(m.group(2))}" if m else fid
+
+
+def series_of(fid):
+    """The ID family a finding belongs to: 'G-004' -> 'G', 'G-P1-004' -> 'G-P1'."""
+    return canon(fid).rsplit("-", 1)[0]
 
 
 def header_ids(header):
@@ -261,18 +415,64 @@ def sections(lines, blocks):
     return out
 
 
+TABLE_SEP = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
+STATUS_COL = re.compile(r"\b(status|state)\b", re.I)
+
+
+def cells(row):
+    """A markdown table row split into its cells, outer pipes stripped.
+
+    Tolerates a ragged tail: three rows of KNOWLEDGE-GAPS.md carry a trailing
+    relocation note after the last declared column. The status column is left of
+    it, so its index is still right."""
+    r = row.strip()
+    if r.startswith("|"):
+        r = r[1:]
+    if r.endswith("|"):
+        r = r[:-1]
+    return [c.strip() for c in r.split("|")]
+
+
 def parse(path, finding_start=None):
-    """Split a register into (id, headline, body, line_no) blocks."""
+    """Split a register into (id, headline, body, line_no) blocks.
+
+    A TABLE-DIALECT entry additionally carries `status_cell`: the text of the cell
+    under the table's own `Status` / `State` heading. The checks read the STATUS
+    from that cell and from nowhere else -- see the vocabulary note above; reading
+    a row's prose instead is what would make check 4 unfailable on a ledger.
+
+    AN INDEX ROW IS NOT A SECOND ENTRY. `SOURCE-ERRATA.md` heads each erratum with
+    `## E-001 —` and ALSO carries an `## Index` table with one `| E-001 | … |` row
+    per erratum. Admitting the table dialect blindly turned all 11 of those into
+    duplicate-ID violations in a register that is in fact clean. So a table row
+    whose ID is already defined by a prose entry in the same file is a REFERENCE to
+    that entry. A table row whose ID has no prose entry is an entry -- which is why
+    the gap ledgers are read, and why a genuine duplicate ROW is still caught."""
     finding_start = finding_start or FINDING_START
     lines = open(path, encoding="utf-8").read().splitlines()
-    blocks, cur = [], None
+    prose_ids = {m.group(1) or m.group(2) for m in
+                 (finding_start.match(ln) for ln in lines)
+                 if m and m.group(ROW_GROUP) is None}
+    blocks, cur, status_col = [], None, None
     for i, ln in enumerate(lines, 1):
+        if ln.lstrip().startswith("|") and i < len(lines) and TABLE_SEP.match(lines[i]):
+            hdr = cells(ln)               # a header row: fixes the status column
+            status_col = next((k for k, c in enumerate(hdr) if STATUS_COL.search(c)),
+                              None)
         m = finding_start.match(ln)
+        if m and m.group(ROW_GROUP) is not None and m.group(ROW_GROUP) in prose_ids:
+            m = None                      # an index row pointing at a prose entry
         if m:
-            fid = m.group(1) or m.group(2)
+            fid = m.group(1) or m.group(2) or m.group(ROW_GROUP)
+            cell = None
+            if m.group(ROW_GROUP) is not None:
+                row = cells(ln)
+                cell = (row[status_col] if status_col is not None
+                        and status_col < len(row) else "")
             if cur:
                 blocks.append(cur)
-            cur = {"id": fid, "line": i, "headline": ln, "body": [ln]}
+            cur = {"id": fid, "line": i, "headline": ln, "body": [ln],
+                   "status_cell": cell}
         elif SECTION_START.match(ln):
             # A new `##` section ENDS the finding above it. Without this a block ran
             # on until the next finding and absorbed whatever lay between -- which is
@@ -341,7 +541,7 @@ def negative_control():
     not through a re-implementation, which would prove only that the copy agrees
     with itself."""
     import tempfile
-    print("NEGATIVE CONTROL -- proving the gate can fail, on both register dialects\n")
+    print("NEGATIVE CONTROL -- proving the gate can fail, on all three register dialects\n")
     ok = True
     cases = [
         # Numbered from 1 with no archive: check 6 (no allocated ID went silent)
@@ -402,6 +602,95 @@ def negative_control():
          "- **F-001 — a thing whose headline wraps onto\n"
          "  a second line where the status lives.** — `CONFIRMED`\n\n"
          "  body\n\n  Status: `RESOLVED`\n", True),
+
+        # ------------------------------------------------------------------
+        # F-362 — THE TABLE DIALECT, AND THE PER-REGISTER STATUS VOCABULARY.
+        #
+        # `KNOWLEDGE-GAPS.md` and `P1-KNOWLEDGE-GAPS.md` carry every entry as a
+        # markdown table ROW, a shape this tool did not model. `parse` returned
+        # zero blocks, every check ran over nothing, and the summary line read
+        # `0 entries, 0 distinct IDs` while the file held 36 rows -- printing
+        # CLEAN. A planted duplicate G-019 passed at exit 0. That is the defect
+        # this whole block exists so nobody has to re-discover.
+        ("ledger dialect, table rows ARE entries, counter ahead — MUST BE CLEAN",
+         "> **Next gap ID: `G-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole | OPEN | 2026-01-01 |\n", False),
+        # THE FIXTURE THAT PASSED CLEAN BEFORE THE FIX. Keep it forever.
+        ("ledger dialect, a DUPLICATE table row — MUST FAIL",
+         "> **Next gap ID: `G-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole | OPEN | 2026-01-01 |\n"
+         "| G-001 | a domain | the same ID again | OPEN | 2026-01-02 |\n", True),
+        ("ledger dialect, counter BEHIND — MUST FAIL",
+         "> **Next gap ID: `G-001`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole | OPEN | 2026-01-01 |\n", True),
+        ("ledger dialect, a row with a BLANK status cell — MUST FAIL",
+         "> **Next gap ID: `G-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole |  | 2026-01-01 |\n", True),
+        # THE STATUS IS THE CELL, NOT THE ROW. The ledger's own lifecycle word
+        # `open` is also ordinary English in its prose, so a vocabulary carrying
+        # it, searched over a whole row, would make check 4 unfailable -- F-362
+        # in a new costume. This row baits exactly that and must still FAIL.
+        ("ledger dialect, status word in the row's PROSE but cell blank — MUST FAIL",
+         "> **Next gap ID: `G-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | this hole is still OPEN and no source answers it |"
+         "  | 2026-01-01 |\n", True),
+        # ONE REGISTER, TWO ID FAMILIES, TWO COUNTERS ON ONE LINE -- and the two
+        # tables put their status column at DIFFERENT indices, so a status column
+        # remembered from the first table reads `Chip` for the second and fails.
+        ("ledger dialect, TWO families + two counters on one line — MUST BE CLEAN",
+         "> **Next gap ID: `G-002`** · **Next expert-question ID: `Q-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole | OPEN | 2026-01-01 |\n\n"
+         "| # | Question | Why no source settles it | Who to ask | State |\n"
+         "|---|---|---|---|---|\n"
+         "| Q-001 | a question | no source covers it | Chip | open |\n", False),
+        ("ledger dialect, second family allocated with NO counter — MUST FAIL",
+         "> **Next gap ID: `G-002`**\n\n"
+         "| # | Domain | The gap | Status | Opened |\n"
+         "|---|---|---|---|---|\n"
+         "| G-001 | a domain | a hole | OPEN | 2026-01-01 |\n\n"
+         "| # | Question | Why no source settles it | Who to ask | State |\n"
+         "|---|---|---|---|---|\n"
+         "| Q-001 | a question | no source covers it | Chip | open |\n", True),
+        # THE TWO SIDES OF THE PER-REGISTER VOCABULARY, as one pair. `OPEN` must
+        # stay OUT of the corrections vocabulary (there it is ordinary prose, and
+        # admitting it globally would let an entry with no status pass on a stray
+        # word) and must be IN the ledger's (there it is the opening state).
+        ("corrections vocabulary: `OPEN` is NOT a status token — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "### F-001 — a thing that is still OPEN\n\nbody\n", True),
+        # NAMESPACED ID FAMILIES (the P1 quad). `[A-Z]` could not model `F-P1-`,
+        # so P1-CORRECTION-FINDINGS.md and P1-KNOWLEDGE-GAPS.md both reported
+        # `0 entries` and exit 1 `no-counter`.
+        ("namespaced family `F-P1-NNN` with a labelled counter — MUST BE CLEAN",
+         "> **Next P1-finding ID: `F-P1-002`**\n\n"
+         "### F-P1-001 — a thing · `CONFIRMED`\n\nbody\n", False),
+        # ...and the malformed form the P1 registers were CORRECTED off must
+        # still be caught, or correcting them was unenforced.
+        ("a labelless `**Next ID:`** names no allocator — MUST FAIL",
+         "**Next ID: `F-P1-001`**\n\n"
+         "### F-P1-001 — a thing · `CONFIRMED`\n\nbody\n", True),
+        # An INDEX table is not a second filing. SOURCE-ERRATA.md heads each
+        # erratum `## E-001 —` AND lists it in an `## Index` table; admitting the
+        # table dialect blindly reported all 11 as duplicate IDs.
+        ("an index row repeating a prose entry is NOT a duplicate — MUST BE CLEAN",
+         "> **Next erratum ID: `E-002`**\n\n"
+         "## Index\n\n"
+         "| # | Document | State |\n|---|---|---|\n"
+         "| E-001 | a doc | `RESOLVED` |\n\n"
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n", False),
     ]
     for label, text, want_fail in cases:
         with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,
@@ -429,8 +718,10 @@ def negative_control():
           f"distinct from a violation: exit={rc}")
 
     print("\n" + ("Negative control PASSED -- the gate fails on a stale counter, an "
-                   "undeclared allocator, a missing status and a duplicate ID, in BOTH "
-                   "register dialects, and refuses to pass a file it never read."
+                   "undeclared allocator, a nameless one, a missing status and a "
+                   "duplicate ID, in ALL THREE register dialects (heading, bullet, "
+                   "table row) and in each register's OWN status vocabulary, and "
+                   "refuses to pass a file it never read."
                    if ok else "Negative control FAILED -- do not trust this run."))
     return 0 if ok else 1
 
@@ -504,8 +795,13 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
     global FINDING_START, ID_RANGE, ID_ONE, GUARD_RE
     raw = open(reg, encoding="utf-8").read()
     counters = {p: (label, int(n)) for label, p, n in COUNTER_RE.findall(raw)}
-    FINDING_START, ID_RANGE, ID_ONE, GUARD_RE = build_id_res(
-        series_in(raw, declared=set(counters) | set(args.series or ())))
+    # And its own STATUS vocabulary, off the same labels (F-362). A label this
+    # table does not know falls back to the corrections vocabulary, which fails
+    # loudly on a foreign lifecycle rather than passing it.
+    vocabs = {p: VOCAB_BY_LABEL.get(label, DEFAULT_VOCAB)
+              for p, (label, _n) in counters.items()}
+    modelled = series_in(raw, declared=set(counters) | set(args.series or ()))
+    FINDING_START, ID_RANGE, ID_ONE, GUARD_RE = build_id_res(modelled)
 
     lines, blocks = parse(reg, FINDING_START)
     text = "\n".join(lines)
@@ -550,7 +846,7 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
     # governed exactly as `Next finding ID: F-357` is.
     live_by_series = {}
     for fid in seen:
-        pre, n = canon(fid).split("-")
+        pre, n = canon(fid).rsplit("-", 1)   # rsplit: `G-P1-4` is family `G-P1`, no. 4
         live_by_series.setdefault(pre, set()).add(int(n))
     if not counters:
         viol.append(("no-counter",
@@ -581,14 +877,24 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
     for b in blocks:
         if b["id"] in guards:
             continue
+        # The register's OWN vocabulary, chosen by the counter label that governs
+        # this entry's family -- so one file declaring two families (`Next gap ID`
+        # + `Next expert-question ID` on one line) grades each in its own terms.
+        v = vocabs.get(series_of(b["id"]), DEFAULT_VOCAB)
         body = "\n".join(b["body"])
-        if not STATUS_RE.search(body):
-            viol.append(("no-status", f"{b['id']} (:{b['line']}) carries no status token"))
+        cell = b.get("status_cell")
+        # A table-dialect entry's status is its status CELL. A prose entry has no
+        # cell, so it is graded over its whole body / scannable headline, exactly
+        # as before -- the corrections and errata registers are untouched by this.
+        status_scope = body if cell is None else cell
         head = scannable_head(b)
+        head_scope = head if cell is None else cell
+        if not v["status"].search(status_scope):
+            viol.append(("no-status", f"{b['id']} (:{b['line']}) carries no status token"))
 
         # --- 10: the scannable layer must agree with the authoritative one ------
-        body_tokens = {t for t in BODY_STATUS.findall(body) if t in STATUS_WORDS}
-        head_token = lead_status(head)
+        body_tokens = {t for t in BODY_STATUS.findall(body) if t in v["words"]}
+        head_token = lead_status(head, v["status"])
         if body_tokens and head_token and head_token not in body_tokens:
             viol.append(("status-disagrees-with-body",
                          f"{b['id']} (:{b['line']}) headline reads {head_token} but its own "
@@ -596,11 +902,15 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
                          f"scanning headlines gets the wrong answer; reconcile the two, and if "
                          f"the body is right the headline is what needs rewriting"))
 
-        if OWED_RE.search(head):
+        if OWED_RE.search(head_scope):
             continue                      # still owed, whatever else the headline says
-        if CLOSED_RE.search(head):
-            closed_live.append((b["id"], b["line"]))
-        elif FIXED_PROSE.search(head):
+        if v["closed"].search(head_scope):
+            # `sweep` is False for a MOVING LEDGER, which keeps an answered row on
+            # purpose. It is True for an open-work register, where a closed entry
+            # still sitting live is the scan noise check 3 exists to remove.
+            if v["sweep"]:
+                closed_live.append((b["id"], b["line"]))
+        elif FIXED_PROSE.search(head_scope):
             viol.append(("status-hygiene",
                          f"{b['id']} (:{b['line']}) headline claims it is fixed but its status "
                          f"token is not DONE/WONTFIX/RESOLVED-INVALID — decide the status "
@@ -616,8 +926,8 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
     known = live_ids | archived_ids
     gaps = []
     for pre, live_nums in sorted(live_by_series.items()):
-        ceiling = max(live_nums | {int(n.split("-")[1]) for n in archived_ids
-                                   if n.startswith(pre + "-")} or {0})
+        ceiling = max(live_nums | {int(n.rsplit("-", 1)[1]) for n in archived_ids
+                                   if n.rsplit("-", 1)[0] == pre} or {0})
         gaps += [f"{pre}-{n}" for n in range(1, ceiling + 1)
                  if f"{pre}-{n}" not in known]
     if live_ids:
@@ -682,6 +992,11 @@ def _audit_register(register, archive_paths, quiet=False, sweep_rev=None,
     # --- report -----------------------------------------------------------------
     say(f"findings          : {len(blocks)} entries, {len(seen)} distinct IDs "
         f"({len(guards)} carry-forward guardrails exempt)")
+    unmodelled = unmodelled_series(text, modelled)
+    if unmodelled:
+        say(f"unmodelled series : {', '.join(f'{p}-NNN' for p in unmodelled)} — "
+            f"ID-shaped entries this gate does NOT check. Not a violation; a "
+            f"question for the register's owner (declare a counter, or move them).")
     if not viol:
         print(f"CLEAN  {reg}: no register-hygiene violations")
         return 0

@@ -94,6 +94,12 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-009 | #64000 Eval Board Rev C Guide | board size printed as "3.55″ × 3.55″ (90 x 90 cm)" — the metric unit is wrong | never carried | `RESOLVED` |
 | E-010 | P2 Edge Module (#P2-EC) v3.0 **and** P2-EC32MB Rev B v2.0 | "have I/O pin **pull-ups** activated" — the P2 has none; they are drive strengths, live only with DIR high | diverges (fixed 2026-08-26) | `RESOLVED` |
 | E-017 | P2 Datasheet 2022/11/01 | `COGATN` operand width: its prose says **lower 8 bits / 8 strobes**, its own instruction table says **D[15:0]**, and the Silicon Doc says **16** | matches the datasheet prose | `CONFIRMED` |
+| E-011 | Spin2 Documentation v55 | the LOGIC capture example says the streamer does an **RFBYTE** to save captured data; a capture mode does a **WFBYTE** | never carried | `RESOLVED` |
+| E-012 | P2 Documentation v35 (Rev B/C) | the hub-address operand list omits **RDLUT/WRLUT**, which its own encoding table gives `S/#/PTRx` | never carried | `CONFIRMED` |
+| E-013 | P2 Documentation v35 (Rev B/C) | *"in every mode, the three %ppp bits"* — its own four-pin input block uses **%pppp in D[22:19]** | see entry | `CONFIRMED` |
+| E-014 | P2 Documentation v35 (Rev B/C) | the booter description omits **microSD boot**, which the Hardware Manual documents with a pin table | follows the better sources | `CONFIRMED` |
+| E-015 | P2 Documentation v35 (Rev B/C) | **KNOWN SILICON BUGS** omits the RDFAST corruption bug the designer confirms in the document's own comments | never carried | `CONFIRMED` |
+| E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* | diverges, deliberately | `CONFIRMED` |
 
 ---
 

@@ -12,7 +12,7 @@
 > community flexspin compiler).
 
 ## Open findings
-**Next ID: `F-P1-001`** (none yet — the P1 YAML KB doesn't exist to correct until the campaign populates it).
+**Next P1-finding ID: `F-P1-001`** (none yet — the P1 YAML KB doesn't exist to correct until the campaign populates it).
 
 | ID | Finding | Where (`deliverables/ai/P1/…`) | Evidence / authority | Status |
 |----|---------|--------------------------------|----------------------|--------|

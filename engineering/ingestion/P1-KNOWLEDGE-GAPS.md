@@ -9,7 +9,7 @@
 > exception to justify" defect the mature-corpus rule flags.
 
 ## Part A — Gap-evolution ledger
-**Next ID: `G-P1-012`** — seeded 2026-06-22 by the backbone ingestion (P1 Propeller Manual v1.2); G-P1-008..011 added 2026-06-27 by the app-notes wave. Per
+**Next P1-gap ID: `G-P1-012`** — seeded 2026-06-22 by the backbone ingestion (P1 Propeller Manual v1.2); G-P1-008..011 added 2026-06-27 by the app-notes wave. Per
 charter §6, doc #1 only *raises* gaps; each is fillable by another golden P1 source (not designer-only).
 
 | # | Domain | The gap (question / missing fact) | Status | Filled by (source @ edition) | Opened | Closed |
@@ -27,7 +27,7 @@ charter §6, doc #1 only *raises* gaps; each is fillable by another golden P1 so
 | G-P1-011 | Spin1 / PASM1 semantics | Language/arch details the app notes lean on but the P1 ledger doesn't yet carry: the Spin1 **`?` LFSR pseudo-random operator** (AN004); **`JMPRET` + the 4-stage pipeline** read-before-write that underpins all P1 self-modifying-code idioms, and the **C/Z flag-preservation idioms** across cooperative switches (AN014 `muxnz`/`muxc`/`test #0-0`). | OPEN | P1 Manual (Spin/PASM reference) + AN014 | 2026-06-27 | — |
 
 ## Part B — Questions for experts (answerable only by the designer/community)
-**Next ID: `Q-P1-004`** — Q-P1-001..003 added 2026-06-27 by the app-notes wave.
+**Next P1-expert-question ID: `Q-P1-004`** — Q-P1-001..003 added 2026-06-27 by the app-notes wave.
 
 **Who-to-ask routing:** P1 silicon/semantics → **Chip Gracey** (P1 designer); P1 idiom/pedagogy → P1 community
 (deSilva, Parallax forums). 
