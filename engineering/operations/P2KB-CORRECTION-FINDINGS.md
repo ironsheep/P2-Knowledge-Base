@@ -923,7 +923,7 @@ ENH-NNN` report line on every run so the question surfaces instead of staying si
 
 - **F-360 — Five duplicate-key sites in the shipped set discard a block's content at parse time,
   and `verify-yaml-format.py` passes every one of them because duplicate keys are legal YAML.** —
-  `CONFIRMED`
+  `RESOLVED`
 
   **The mechanism.** YAML resolves a repeated key by **last-one-wins**, silently. The earlier
   block is not merged and not flagged — it simply does not exist for any consumer. `yaml.safe_load`
