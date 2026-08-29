@@ -98,9 +98,14 @@ import/
 # skill overlays and full SKILL.md overrides going forward. That is the accepted
 # consequence, not an oversight.
 #
-# Project CONTENT that used to live here moved into the tree and stays tracked:
-# HEAD-DISPATCH-DRAFT.md, REGISTER-CONSULTATION.md and SOURCE-REPAIR-ORDER.md are
-# now in engineering/operations/process/.
+# Nothing was carved out. The evaluation this rule asks for was run and reached
+# the WRONG answer first: HEAD-DISPATCH-DRAFT.md, REGISTER-CONSULTATION.md and
+# SOURCE-REPAIR-ORDER.md were briefly moved to engineering/operations/process/ as
+# project "content". Stephen corrected that -- they are skills-related, so they
+# are agent configuration like everything else here and stay untracked with it.
+# The test is not "is a human interested in it" but "is it part of the agent's
+# operating configuration". All three are read BY skills, and one of them exists
+# only to resolve slots the skills carry.
 .claude/
 CLAUDE.md
 .ai-manifest.json

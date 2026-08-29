@@ -329,7 +329,8 @@ definitions and corrects 23 sites — reaching every `p2kb-mcp` consumer with **
 what changed**. A sprint that materially rewrites the deliverable is the one that must fix it.
 
 **Governing guide:** `central:changelog-voicing` §1–§4 plus the retained class profile.
-Resolve the `TBD` in `engineering/operations/process/HEAD-DISPATCH-DRAFT.md` in the same pass.
+Resolve the `TBD` in the project's head-dispatch table (agent-side; not shipped with this
+repo) in the same pass.
 
 **Verification.** *Normal:* a release note exists and carries the mandatory theme line.
 *Edge:* the KB is always "latest" — no version citations inside the content itself.
