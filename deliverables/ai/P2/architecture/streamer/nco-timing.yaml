@@ -93,9 +93,11 @@ common_values:
 
 # Video pixel rates
 video_rates:
-  derivation: |
-    Every value below is computed from the rule in frequency_calculation above, not
-    read from a table: D = pixel_rate * $8000_0000 / clkfreq, truncated, then
+  source: |
+    Parallax Propeller 2 Documentation v35, Streamer NCO --
+    engineering/ingestion/sources/silicon-doc/part2-pixel-ops.txt:104-117 and :121.
+    Every value below is computed from the rule stated there, not read from a
+    table: D = pixel_rate * $8000_0000 / clkfreq, truncated, then
     incremented by 1 when that division leaves a remainder
     (engineering/ingestion/sources/silicon-doc/part2-pixel-ops.txt:117 and :121 —
     "For fractions with remainders, the computed D/# value should be incremented, in

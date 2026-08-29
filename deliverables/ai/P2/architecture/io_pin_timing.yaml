@@ -1,6 +1,15 @@
 # P2 I/O Pin Timing
-# Silicon Doc Reference: part3-pins.txt, pages 5-8
-# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+# Sources, each verified at the line it names (2026-08-29, F-377/F-380 pass):
+#   engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt
+#     :1987 DIRx/OUTx write latency · :1997 INx read latency
+#     :2005 TESTP/TESTPN read latency · :3847 smart-pin IN flag reset
+#     :101  VIO latch-up onset
+#   engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt
+#     :117 drive modes · :2126-2149 Absolute Maximum Electrical Ratings
+# This header previously read "part3-pins.txt, pages 5-8". No such file exists in
+# sources/silicon-doc/ and none ever did; the citation was fabricated, which is what
+# made the sourcing gate count this file as cited. The CONTENT below was checked and
+# is genuine — every claim is anchored to a real line above.
 
 component_name: "I/O Pin Timing"
 
@@ -28,8 +37,8 @@ description: |
 
 instruction_to_pin_timing:
   description: |
-    Critical clock cycle timing between instruction execution and physical pin state.
-    Source: Smart Pins documentation (verified from silicon behavior).
+    Clock-cycle timing between instruction execution and physical pin state.
+  source: "Parallax Propeller 2 Documentation v35, pin timing -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987, :1997, :2005, and :3847. Each of the four blocks below cites its own line."
 
   output_latency:
     description: |
@@ -37,6 +46,7 @@ instruction_to_pin_timing:
       additional system-clock cycles AFTER the instruction before the pin starts to
       transition to its new state.
     clock_cycles: 3
+    source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987 -- \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\""
     applies_to:
       - "DRVH, DRVL, DRVC, DRVNC, DRVZ, DRVNZ"
       - "OUTH, OUTL, OUTC, OUTNC, OUTZ, OUTNZ"
@@ -47,7 +57,7 @@ instruction_to_pin_timing:
       NOP                     ' Clock 1 after instruction
       NOP                     ' Clock 2 after instruction
       NOP                     ' Clock 3 - pin NOW starts to transition
-    total_latency: "5 clocks from instruction start to pin transition start"
+    total_latency: "5 clocks from instruction start to pin transition start -- this is the sum of a 2-clock DRVH and the source's THREE additional clocks, not a figure the source states. The source states only the THREE."
 
   input_latency_inx_register:
     description: |
@@ -55,6 +65,7 @@ instruction_to_pin_timing:
       the processor receives the state of the pins as they existed THREE (3) system-clock
       cycles BEFORE the start of the instruction.
     clock_cycles: 3
+    source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1997 -- \"When an INx register is read by an instruction, it will reflect the state of the pins registered THREE clocks before the start of the instruction.\""
     data_age: "3 clocks old"
     applies_to:
       - "TESTB INA/INB, #pin"
@@ -69,6 +80,7 @@ instruction_to_pin_timing:
       cycles BEFORE the start of the instruction. TESTP/TESTPN gather "fresher" INx
       data than is available via the INx registers.
     clock_cycles: 2
+    source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2005 -- \"When a TESTP/TESTPN instruction is used to read a pin, the value read will reflect the state of the pin registered TWO clocks before the start of the instruction. So, TESTP/TESTPN get fresher INx data than is available via the INx registers.\""
     data_age: "2 clocks old"
     applies_to:
       - "TESTP pin WC/WZ"
@@ -81,6 +93,7 @@ instruction_to_pin_timing:
       Smart Pin requires TWO (2) system-clock cycles to reset the IN flag to logic-0
       before a program can poll the flag again.
     clock_cycles: 2
+    source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3847 -- \"After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it will take two clocks for IN to drop, before it can be polled again.\""
     applies_to:
       - "WRPIN"
       - "WXPIN"
@@ -104,7 +117,7 @@ absolute_maximum_ratings:
   description: |
     Stress ratings from the P2 datasheet. Stresses beyond these can cause permanent
     damage; they are absolute stress limits, NOT operating conditions.
-  source: "Parallax P2 Datasheet (Absolute Maximum Electrical Ratings table + footnote 1)"
+  source: "Parallax P2 Datasheet 2022/11/01, Absolute Maximum Electrical Ratings table + footnote 1 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2126-2149. Every figure below re-read at that table 2026-08-29 and matching it verbatim. The table states four further limits this file does not carry (total power dissipation 2.5 W, max current out of GND 4 A, max current into VDD pins and into Vxxyy pins 120 mA per pin) -- they are package/supply limits rather than I/O pin limits, which is this file's subject."
   voltage_on_VDD_vs_GND: "-0.3 V to +2.2 V"
   voltage_on_VIO_Vxxyy_vs_GND: "-0.3 V to +4.0 V"
   voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V) -- about 3.6 V at the nominal 3.3 V I/O supply"
@@ -132,8 +145,8 @@ input_voltage_and_protection:
       (e.g. >= 1 kohm) for margin so diode current stays well within the +/-10 mA limit.
     caveat: "A series resistor protects the pin electrically; it does not make the pin truly '5 V tolerant.' For sustained 5 V interfacing prefer a proper level shifter or resistor divider."
   latchup_context:
-    note: "The Silicon Doc reports VIO-triggered latch-up onset as early as ~4.3 V on VIO -- reinforcing that this is a 3.3 V part; do not over-drive the rails."
-    source: "P2 Silicon Doc v35"
+    note: "The Silicon Doc reports VIO-triggered latch-up onset as early as ~4.3 V on VIO -- reinforcing that this is a 3.3 V part; do not over-drive the rails. Read it in context: the figure comes from ON Semi failure analysis of a specific wafer lot, quoted in the document's revision history, not from a characterised electrical limit table."
+    source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:101 -- \"it was determined by ON Semi that latch-up was occurring as early as 4.3V on VIO\""
 
 timing_measurement_techniques:
   using_counters: |
@@ -171,7 +184,7 @@ timing_violations_debug:
 
 related_topics:
   - topic: "smart_pins"
-    relationship: "Smart pins add ~1-2ns to base timing"
+    relationship: "Smart pins are configured and read through WRPIN/WXPIN/WYPIN/RDPIN; their IN-flag reset timing is the smart_pin_in_flag_reset block above. A prior form of this line claimed smart pins add ~1-2 ns to base timing -- no Parallax source states any nanosecond figure for this, so it is not carried (cite-or-omit; same class as F-327/F-333)."
   
   - topic: "clock_system"
     relationship: "Pin timing scales with system clock"
@@ -188,9 +201,11 @@ related_topics:
 
 extraction_metadata:
   source_documents:
-    - document: "Silicon Doc v35"
-      sections:
-        - "part3-pins.txt, Pin Timing Specifications"
-        - "Electrical characteristics"
-  confidence: "high"
+    - document: "Parallax Propeller 2 Documentation v35"
+      file: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      lines: ":1987, :1997, :2005, :3847 (pin timing); :101 (VIO latch-up onset)"
+    - document: "Parallax P2 Datasheet 2022/11/01"
+      file: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      lines: ":117 (drive modes); :2126-2149 (Absolute Maximum Electrical Ratings)"
+  confidence: "high -- every claim re-read at its cited line 2026-08-29"
   last_updated: "2024-12-30"
