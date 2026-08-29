@@ -51,12 +51,20 @@ aliases:
 
 # Clock Configuration Constants
 # Source: pnut_ts Clock-Configuration-Usage-Guide.md (compiler-verified)
+#
+# READ THE `range:` FIELDS AS COMPILER LIMITS, NOT SILICON LIMITS. Every range in
+# this block is what pnut-ts ACCEPTS; the P2's own limits are lower in all three
+# cases and are stated beside each one, cited to the datasheet. A value the
+# compiler accepts can still be past what the silicon is rated for -- it compiles
+# clean and says nothing. The silicon figures live in full, with the whole AC
+# table, in architecture/clock_system.yaml.
 clock_configuration:
   _CLKFREQ:
     description: |
       Desired system clock frequency in Hz. The compiler calculates PLL settings
       to achieve this frequency. If used alone, assumes 20 MHz crystal input.
-    range: "3,333,333 Hz to 500,000,000 Hz"
+    range: "3,333,333 Hz to 500,000,000 Hz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
+    silicon_limit: "The P2 Datasheet rates the PLL at 3.33 MHz min, 180 MHz typical, 320 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200), with the note that nominal PLL frequency is 180 MHz at up to 105 degC (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2209). The Parallax Propeller 2 Documentation adds that for fastest overclocking the PLL can be pushed to 350 MHz using the 'VCO / 1' mode, %PPPP = 15 (engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545). So the compiler will accept a _clkfreq 180 MHz above the datasheet maximum and 150 MHz above the documented overclock ceiling."
     example: "CON _clkfreq = 200_000_000  ' 200 MHz using PLL"
     notes:
       - "Used by timing functions (WAITMS, WAITUS, WAITX)"
@@ -72,7 +80,8 @@ clock_configuration:
       External crystal oscillator frequency in Hz. Use when your crystal is not
       the default 20 MHz. Can be used alone (direct crystal, no PLL) or with
       _clkfreq (crystal + PLL multiplication).
-    range: "1 MHz to 60 MHz typical"
+    range: "1 MHz to 60 MHz typical -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
+    silicon_limit: "The P2 Datasheet rates a crystal between XI and XO at 1 MHz min to 50 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199). The compiler accepts 10 MHz beyond that."
     example: "CON _xtlfreq = 25_000_000  ' 25 MHz crystal"
     notes:
       - "Crystals >= 16 MHz use 15pF internal loading capacitors"
@@ -84,7 +93,8 @@ clock_configuration:
     description: |
       External clock input frequency in Hz. Use when driving XI pin from an
       external oscillator or clock source instead of a crystal.
-    range: "250 kHz to 500 MHz"
+    range: "250 kHz to 500 MHz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
+    silicon_limit: "The P2 Datasheet rates direct drive into XI at DC to 200 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2198). The compiler accepts 300 MHz beyond that."
     example: "CON _xinfreq = 10_000_000  ' 10 MHz external clock"
     notes:
       - "For external oscillator modules or shared clock sources"
@@ -144,6 +154,7 @@ clock_configuration:
       - "Contains PLL dividers, multipliers, and source selection"
 
 clock_configuration_rules:
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   rule_1:
     description: "Only ONE clock configuration per program"
     note: "Define clock constants in top-level object's CON block only"
@@ -167,6 +178,7 @@ clock_configuration_rules:
     note: "Internal oscillators ignore crystal/PLL configuration"
 
 clock_configuration_examples:
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   common_200mhz:
     description: "Most common: 200 MHz with default 20 MHz crystal"
     code: |
@@ -199,6 +211,7 @@ clock_configuration_examples:
         _rcslow = TRUE  ' ~20 kHz internal
 
 clock_anti_patterns:
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   conflicting_sources:
     wrong: |
       CON
@@ -300,6 +313,7 @@ debug_serial:
     default: "62"
 
 debug_output_control:
+  source: "Spin2 v55 language documentation -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1018 (DEBUG_TIMESTAMP: \"each DEBUG message will be time-stamped with the 64-bit CT value\") and :1027 (DEBUG_MASK: a 32-bit mask gating individual DEBUG statements via DEBUG[bit]). The 64-bit CT is the system counter of Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55."
   DEBUG_TIMESTAMP:
     description: Adds 64-bit CT timestamp to each DEBUG message
     default: "undefined"

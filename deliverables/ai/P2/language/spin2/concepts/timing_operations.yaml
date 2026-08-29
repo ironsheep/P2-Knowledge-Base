@@ -3,8 +3,15 @@ type: concept
 category: Timing
 
 description: |
-  Comprehensive timing operations for the Propeller 2. The P2 provides a 32-bit
-  system counter that increments every clock cycle, plus convenient time-unit
+  Comprehensive timing operations for the Propeller 2. The P2's system counter is
+  64 bits wide and increments every clock cycle; GETCT returns its LOW 32 bits and
+  GETCT WC returns the upper 32 (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 -- "System counter extended to 64 bits.
+  GETCT WC retrieves upper 32-bits."). Everything below about rollover concerns the
+  32-bit value GETCT returns on its own, which is what a Spin2 program normally works
+  with; the counter itself does not wrap on these timescales. Every period and cycle
+  time in this file is arithmetic on that width and CLKFREQ -- 2^32 / CLKFREQ and
+  1 / CLKFREQ -- not a figure any source states. The frequencies used are the P2
+  Datasheet's rated clock sources (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200). Spin2 also provides time-unit
   functions for delays and measurements.
 
   Timing Categories:
@@ -16,10 +23,13 @@ description: |
 
 system_counter:
   description: |
-    The 32-bit system counter increments every clock cycle continuously from boot.
-    All cogs see the same counter value. Not affected by cog start/stop.
+    The system counter increments every clock cycle continuously from boot. All cogs
+    see the same counter value; it is not affected by cog start/stop. The counter is
+    64 bits wide -- GETCT reads the low 32 bits, GETCT WC the upper 32. The rollover
+    table below is 2^32 / CLKFREQ, computed, and applies to the 32-bit GETCT value.
+  source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 -- \"System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.\" Rollover periods and cycle times below are arithmetic on that width and the P2 Datasheet's rated clock frequencies (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200), not figures either source states."
   resolution: "Single clock cycle"
-  range: "0 to $FFFF_FFFF (2^32 - 1)"
+  range: "GETCT alone returns 0 to $FFFF_FFFF (2^32 - 1); the full counter is 64-bit"
 
   rollover_table:
     - clock_freq: "20 MHz"
@@ -81,6 +91,7 @@ timing_functions:
     use_for: "Uptime, coarse timestamps"
 
 method_selection:
+  derived_from: "Arithmetic on the 32-bit GETCT value and CLKFREQ (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter; engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 for the rated frequencies). The safe-span figures are 2^31 / CLKFREQ, computed here -- no source states them."
   description: |
     GETCT, GETMS, and GETSEC return time at three different scales. The choice
     is not just about resolution — each has a different safe-span ceiling driven
@@ -129,6 +140,7 @@ method_selection:
     straightforward. See anti_patterns.getct_long_timeout below.
 
 time_conversions:
+  derived_from: "Arithmetic on the 32-bit GETCT value and CLKFREQ (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55). The ~10_737 ms overflow bound at 200 MHz is 2^31 / (CLKFREQ/1000), computed here -- no source states it."
   formulas:
     - from: "milliseconds"
       to: "cycles"
@@ -171,29 +183,32 @@ time_conversions:
 
 minimum_resolution:
   description: |
-    Minimum delay resolution depends on clock frequency.
-    Spin2 interpreter overhead adds several microseconds to any operation.
+    One clock cycle is the counter's resolution at a given frequency. A prior form of
+    this block also carried a `min_practical` column (~1 us / ~100 ns / ~50 ns /
+    ~30 ns) and the claim that "Spin2 interpreter overhead adds several microseconds
+    to any operation". No Parallax source states either and no bench result here
+    measures them, so neither is carried (cite-or-omit). Interpreter overhead is real;
+    a figure for it has to be measured on silicon before the KB can state one.
+  derived_from: "one_cycle is 1 / CLKFREQ, computed. Frequencies are the P2 Datasheet's rated clock sources (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200)."
   table:
     - clock_freq: "20 MHz"
       one_cycle: "50 ns"
-      min_practical: "~1 us"
     - clock_freq: "100 MHz"
       one_cycle: "10 ns"
-      min_practical: "~100 ns"
     - clock_freq: "200 MHz"
       one_cycle: "5 ns"
-      min_practical: "~50 ns"
     - clock_freq: "300 MHz"
       one_cycle: "3.3 ns"
-      min_practical: "~30 ns"
 
 patterns:
   - pattern: "periodic_execution"
+    derived_from: "Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter width; the interval bound below is 2^31 / (CLKFREQ/1000), computed here, not a figure any source states."
     description: "Jitter-free periodic task execution"
     key_insight: "Add period to target, don't wait after work"
     constraints: |
       interval_ms must satisfy (clkfreq/1000) * interval_ms < 2^31. At 200 MHz
-      that caps interval_ms at ~10_737 (~10.7 s). For longer periods, drive the
+      that caps interval_ms at ~10_737 (~10.7 s) -- computed from the 32-bit GETCT
+      width (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55), not a figure any source states. For longer periods, drive the
       loop with GETMS-based deadlines instead — see method_selection above.
     code: |
       PUB run_periodic(interval_ms) | period, next_tick
@@ -335,6 +350,10 @@ anti_patterns:
       PUB good_wait(ms)
         waitms(ms)
 
+  # Every quantity in this block is arithmetic on the 32-bit GETCT value and CLKFREQ
+  # (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter width;
+  #  engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 for the rated frequencies).
+  # No source states these bounds; they are computed.
   - anti_pattern: "ignoring_rollover"
     severity: "logic_error"
     description: "Comparing counter values instead of subtracting"

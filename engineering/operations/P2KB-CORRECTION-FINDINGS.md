@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-381`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-382`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,57 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Citing ONE block in a wholly-uncited file turns its other blocks Tier-1 RED — 32 uncited quantity blocks across 24 files are structurally invisible to the blocking gate (2026-08-29, «#334», proved by accident) — F-381
+
+### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `CONFIRMED`
+
+**How this was proved, rather than argued.** «#334» added silicon-limit citations to three clock
+files. `audit-yaml-claim-sourcing.py` went from **0 Tier-1 violations to 12** — not because
+anything was broken, but because the three files had previously cited *nothing anywhere*, which
+put every quantity block in them in **Tier 2 (advisory, non-blocking)**. Adding one real citation
+made each file "a file that cites", and the gate's own Tier-1 rule then applied:
+
+> block `X` states N quantities with no source; **this file DOES cite elsewhere — its own other
+> sections are the control**
+
+All 12 blocks had been uncited the whole time. Nothing changed about them. What changed is that
+they became *visible*.
+
+**The measurement, taken at HEAD after «#334» closed.** 32 advisory blocks across **24 files**:
+
+| area | files | note |
+|---|---|---|
+| `architecture/decomposition/` | 5 | the reasoning layer — Hz/ms budgets in worked derivations |
+| `architecture/smart-pins/` | 8 | mode pages: `detailed_description`, `code_examples`, `notes` |
+| `community/obex/objects/` | 3 | object metadata (MHz, Mbps) — community-sourced provenance |
+| `hardware/` | 2 | `hardware-compatibility-matrix` (V, mA, Hz), `p2-hardware-selection-guide` (A, V, mA) |
+| `language/` clock + timing | 6 | `hubset`, `asmclk`, `clkset`, `waitct`, `clkfreq`, `single_communication` |
+
+Each is one citation away from turning that file's remaining blocks red. The count of blocks that
+would surface is **not** 32 — 32 is only what the gate can currently *name*; the true number is
+whatever those 24 files hold, and the «#334» sample turned 3 files into 12 blocks.
+
+**Why this is a gate-design finding and not just a backlog.** The tool's banner says Tier 2 is
+"advisory by design, non-blocking, and its population is not zero", which reads as a considered
+exemption. It is not one. The exemption exists because the gate judges a block against **its own
+file's other sections as the control**, and a wholly-uncited file supplies no control. That is a
+sound reason to avoid a false positive and an unsound reason to conclude the block is fine —
+`audit-constant-fidelity` has the same shape and the same banner ("name coverage is not semantic
+coverage"). The practical consequence: **the least-sourced files in the corpus are the ones the
+blocking gate cannot block on.**
+
+**Related and distinct.** F-353 counted in-scope blocks that returned cited. F-375 is the delivery
+filter stripping citations that ARE present. This one is about blocks that were never cited and
+cannot be reported as blocking. F-340/F-373 are the cross-reference analogue — a gate printing
+green over sites it does not read.
+
+**Not started.** Deciding whether all 24 get cited, or whether some areas carry a declared
+exemption (OBEX object metadata is community-sourced and may not have a Parallax citation to give;
+the decomposition layer is a reasoning layer, not an extraction), is a scope call, not a repair to
+start unasked. What «#334» fixed is only the three files it touched.
+
+---
 
 ## The SETXFRQ increment rule is quoted in three files and applied in none of their pixel-rate tables — 9 wrong NCO words in the shipped KB, 8 more in a released manual (2026-08-29, «#332» release-review recomputation) — F-380
 
@@ -172,7 +223,7 @@ instructions regardless — a compiler proves legality, never a flag's meaning. 
 
 ## The KB ships the compiler's acceptance range as a frequency ceiling, 180 MHz past the silicon limit (2026-08-27, «#326» verification) — F-378
 
-### F-378 — `_CLKFREQ range: "3,333,333 Hz to 500,000,000 Hz"` carries no silicon limit, and a remote agent will act on it — `CONFIRMED`
+### F-378 — `_CLKFREQ range: "3,333,333 Hz to 500,000,000 Hz"` carries no silicon limit, and a remote agent will act on it — `RESOLVED`
 
 `deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml:59` gives `_CLKFREQ`
 a `range:` of **3,333,333 Hz to 500,000,000 Hz**, sourced to the pnut-ts clock-configuration guide.
@@ -205,6 +256,40 @@ the XI-input-plus-PLL clock mode where our own `spin2-v55-text.txt:1713` and `:1
 of the nine so split, and that the literal `01_1 1` appears **nowhere** in the DOCX. Recorded in
 `engineering/ingestion/sources/spin2-v55/spin2-v55-complete-extraction-audit.md`. A future pass that
 "reconciles" the KB to the extraction would introduce a bit pattern that does not exist.
+
+**APPLIED 2026-08-29 («#334»). The sweep this entry called for was run, and `_CLKFREQ` was one site
+of five.** Every `range:` in the shipped set traceable to the pnut-ts guide rather than a datasheet
+was checked against the P2 Datasheet's AC Characteristics table:
+
+| symbol | shipped range (= pnut-ts acceptance) | datasheet rating | gap |
+|---|---|---|---|
+| `_CLKFREQ` | 3,333,333 Hz – **500,000,000 Hz** | PLL max **320 MHz** (`p2-datasheet-text.txt:2200`) | +180 MHz |
+| `_XINFREQ` | 250 kHz – **500 MHz** | direct drive into XI max **200 MHz** (`:2198`) | +300 MHz |
+| `_XTLFREQ` | 1 MHz – **60 MHz** "typical" | crystal max **50 MHz** (`:2199`) | +10 MHz |
+
+Two further sites stated the compiler figure as if it were silicon:
+`language/spin2/system-variables/clkmode.yaml` PLL `use_case: "High-speed operation (up to
+500 MHz)"`, and `language/spin2/concepts/timing_operations.yaml`'s rollover table carrying a
+**500 MHz** row — a frequency no P2 clock source is rated to reach. The rollover row is now 320 MHz
+(13.4 s, 3.125 ns), recomputed.
+
+All five now state the compiler range labelled as the compiler range, with the datasheet rating
+beside it and each cited to its own line. The Parallax Propeller 2 Documentation's overclock note
+is carried too — the PLL can be pushed to **350 MHz** in `VCO / 1` mode, `%PPPP = 15`
+(`part3-interrupts.txt:545`) — so a reader sees the rated maximum, the documented overclock
+ceiling, and the compiler limit as three different things, which is what E-007 asks for.
+
+**Two further defects surfaced in the same files while citing them, both fixed in the same pass:**
+`timing_operations.yaml` described the system counter as **32-bit**; the Silicon Doc states it was
+*"extended to 64 bits. GETCT WC retrieves upper 32-bits"* (`silicon-doc-text.txt:55`), so the file
+now says the counter is 64-bit and that the rollover discussion concerns the 32-bit value GETCT
+returns alone. And its `minimum_resolution` block carried a `min_practical` column (~1 us / ~100 ns
+/ ~50 ns / ~30 ns) plus *"Spin2 interpreter overhead adds several microseconds to any operation"* —
+**no source states either and no bench result here measures them**; removed under cite-or-omit, with
+a note that the overhead is real and needs a silicon measurement before the KB can give a figure.
+
+**This pass is what produced F-381** — citing these three files promoted them out of Tier 2 and
+exposed 12 always-uncited blocks as Tier-1 blocking. All 12 are now cited or removed.
 
 ## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
 
