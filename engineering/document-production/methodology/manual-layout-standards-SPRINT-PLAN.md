@@ -2,7 +2,7 @@
 
 **Status:** Confirmed (2026-06-05)
 **Effort home:** this `methodology/` folder (cross-manual effort — belongs to no single manual)
-**Type:** cross-element manual-head sprint (see `.claude/skills/HEAD-DISPATCH-DRAFT.md`)
+**Type:** cross-element manual-head sprint (see `engineering/operations/process/HEAD-DISPATCH-DRAFT.md`)
 
 **Source inputs (already generated — this plan builds on them, does not restate them):**
 - `manual-layout-standards-INPUTS.md` + `manual-layout-standards-USER-PREFERENCES.md` — the layout **standards** (widow/orphan control, part-intro→chapter flow, keep-together, code-block page-spanning + continuation markers, concerns C1–C11).

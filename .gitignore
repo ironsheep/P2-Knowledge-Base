@@ -89,11 +89,19 @@ import/
 /engineering/ingestion/external-inputs/source-code/external-projects/
 /engineering/ingestion/external-inputs/source-code/obex-projects/
 
-# Claude's private reference materials (not versioned)
-.claude/*
-!.claude/skills
-!.claude/skill-conventions.md
-!.claude/skills-reconciled.md
+# Agent configuration is not part of what this repo ships (central skill-set v10).
+# Using this codebase does not require an agent, so `.claude/` and `CLAUDE.md` stay
+# out of the commit surface. History is NOT rewritten -- the 29 artifacts tracked
+# until 2026-08-29 remain reachable in it.
+#
+# NOTE: this makes `fleet-skill-survey`'s dated harvest the only backup of the
+# skill overlays and full SKILL.md overrides going forward. That is the accepted
+# consequence, not an oversight.
+#
+# Project CONTENT that used to live here moved into the tree and stays tracked:
+# HEAD-DISPATCH-DRAFT.md, REGISTER-CONSULTATION.md and SOURCE-REPAIR-ORDER.md are
+# now in engineering/operations/process/.
+.claude/
 CLAUDE.md
 .ai-manifest.json
 engineering/document-production/repo-voice-profile.md

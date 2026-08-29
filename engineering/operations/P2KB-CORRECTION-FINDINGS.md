@@ -10,7 +10,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - Each finding gets an ID, a status, the exact location, what is wrong, the evidence, and the proposed correction.
 - **Annotate as you fix, in the same pass** — flip the status, add an applied-note and source trace, and log newly-surfaced defects as new findings. A register whose statuses lag the YAML lies and invites re-chasing.
 - **One finding lives in exactly one place.** When a finding is revised, **rewrite its entry in place**; never append a correction below the entry it corrects. The prior text is in git and in the archives.
-- Consultation protocol (status-before-content, duplicate IDs are a STOP): `.claude/skills/REGISTER-CONSULTATION.md`.
+- Consultation protocol (status-before-content, duplicate IDs are a STOP): `engineering/operations/process/REGISTER-CONSULTATION.md`.
 
 **Status legend:** `CONFIRMED` (verified against an authority; ready to fix) · `NEEDS-VERIFICATION` (suspected; must be checked before acting) · `PARTIAL` (some of it applied; the rest still owed) · `PENDING-VALIDATION` (the fix is fully applied; only its validation — a render, a release, a re-test — is owed. Added 2026-08-21: the rule below already described this state and there was no token for it, so nine findings sat as `CONFIRMED` with "render owed" prose and tripped the hygiene gate on every run) · `DONE` (corrected + verified) · `WONTFIX` (investigated, not a defect) · `RESOLVED-INVALID` (the reported defect does not exist) · `TRACKED → ingestion` (real, but the resolution lives in the ingestion head) · **`RESOLVED`** (the defect is gone AND its validation has landed — the render/release/re-test was RUN and the artifact READ; a fix applied but unvalidated is `PENDING-VALIDATION`, never this. **Added to this legend 2026-08-25 («#302»): it was already the file's MOST-USED token — 31 of 82 entries — and the legend had never defined it, so a third of the register could not be classified by the very vocabulary this line exists to declare**) · `PARTIALLY CONFIRMED` (a ONE-OFF variant used only by F-202, where part of the claim is grounded in a source and part awaits silicon; it classifies as **`CONFIRMED` — open** — do not spread it).
 
@@ -3584,7 +3584,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > `drive_strength_configurations:` **`:200-233`** (34 lines, 21 quantities) and `slew_rate_control:`
 > **`:234-246`** (13 lines, 2 quantities). Removed under the sprint's remove-all rule (D7), **not**
 > corrected in place — this entry's proposed "replaced by the real ladder" is withdrawn as
-> claim-first; `.claude/skills/SOURCE-REPAIR-ORDER.md` §2 governs, and «#299» re-derives from the
+> claim-first; `engineering/operations/process/SOURCE-REPAIR-ORDER.md` §2 governs, and «#299» re-derives from the
 > repaired source or not at all. `slew_rate_control:` is **never** repopulated.
 >
 > **The zero-hit `slew` claim re-verified at HEAD**, now across five source trees rather than three
