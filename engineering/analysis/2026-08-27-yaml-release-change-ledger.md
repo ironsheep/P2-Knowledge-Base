@@ -9,9 +9,11 @@ see from a diffstat?"*
 not annotated as fixed. If you want the history of what was once outstanding, read the archived
 predecessor named below and the git log — not this file.
 
-**Range.** `v1.17.0` (`7ff76b30`, 2026-08-21) `..` `b466a538` (2026-08-27).
-**Re-derived on disk 2026-08-27.** Every count below was measured from git and from the parsed YAML
-at HEAD. Where a project record, a commit message or a companion analysis disagrees with the
+**Range.** `v1.17.0` (`7ff76b30`, 2026-08-21) `..` `efc683a8` (2026-08-29).
+**Re-derived on disk 2026-08-29.** Every count below was measured from git and from the parsed YAML
+at HEAD. *(The 2026-08-27 revision of this document measured the range ending at `b466a538`; the
+2026-08-29 pre-release fix pass added three commits touching KB YAML — §1.18 — and every count in
+§0.1, §0.4 and §0.5 was re-measured, not adjusted.)* Where a project record, a commit message or a companion analysis disagrees with the
 artifact, the artifact is reported and the disagreement is named (§0.2).
 
 **Supersedes** `engineering/analysis/2026-08-25-yaml-release-change-ledger.md`, archived to
@@ -25,7 +27,7 @@ after it. It was **re-derived, not patched** — hand-patching a derived documen
 the drift this re-derivation exists to remove.
 
 **Two views of the same facts.** Part 1 groups by *reason* — a class usually crosses regions.
-Part 2 goes region → file, all 89, **each carrying its differential-read verdict**.
+Part 2 goes region → file, all 92, **each carrying its differential-read verdict**.
 
 ---
 
@@ -35,14 +37,14 @@ Part 2 goes region → file, all 89, **each carrying its differential-read verdi
 
 | Quantity | Measured | Command |
 |---|---|---|
-| Commits touching KB YAML | **24** | `git log --oneline v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
-| Commits in the range, all paths | **107** | `git log --oneline v1.17.0..HEAD \| wc -l` |
-| YAML files changed | **89** | `git diff --name-only v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
-| Lines | **+6246 / −3355** | `git diff --numstat … \| awk '{a+=$1;r+=$2} END{print a,r}'` |
+| Commits touching KB YAML | **27** | `git log --oneline v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
+| Commits in the range, all paths | **118** | `git log --oneline v1.17.0..HEAD \| wc -l` |
+| YAML files changed | **92** | `git diff --name-only v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
+| Lines | **+6363 / −3402** | `git diff --numstat … \| awk '{a+=$1;r+=$2} END{print a,r}'` |
 | New files | **4** | `git diff --diff-filter=A --name-only …` |
 | Deleted / renamed files | **0 / 0** | `git diff --diff-filter=DR -M --name-status …` |
 | Shipped set size | **1129 → 1133 files** | `git archive` both revisions, count `*.yaml` |
-| Region spread | hardware 27 · architecture 14 · language/spin2 12 · language/pasm2 12 · architecture/streamer 8 · architecture/smart-pins 4 · architecture/boot-rom 4 · application-notes 4 · guides 2 · code-examples 1 · architecture/system-registers 1 | `… \| awk -F/ …` |
+| Region spread | hardware 27 · architecture 14 · language/spin2 15 · language/pasm2 12 · architecture/streamer 8 · architecture/smart-pins 4 · architecture/boot-rom 4 · application-notes 4 · guides 2 · code-examples 1 · architecture/system-registers 1 | `… \| awk -F/ …` |
 
 The four new files: `architecture/pin-drive-configuration.yaml`,
 `architecture/streamer/pin-capture.yaml`, `hardware/addon-click-adapter.yaml`,
@@ -103,11 +105,11 @@ re-derived in this document.
 |---|---|---|
 | `verify-yaml-format.py` | 1133 scanned, 1133 parsed clean, 0 failures | 0 |
 | `validate-crossref-keys.py` | ALL TOP-LEVEL CROSS-REFERENCES RESOLVE — **698 nested sites NOT checked (F-340)** | 0 |
-| `validation/audit-yaml-claim-sourcing.py` | Tier 1 **none** across 1133 files; **48 Tier-2 advisory** blocks in wholly-uncited files | 0 |
+| `validation/audit-yaml-claim-sourcing.py` | Tier 1 **none** across 1133 files; **32 Tier-2 advisory** blocks in **24** wholly-uncited files (was 48 on 2026-08-27; §1.18 cited three of those files, moving 16 blocks out of the advisory class — and see **F-381**, which is what that move exposed) | 0 |
 | `validation/audit-constant-fidelity.py` | Tier 1 none, Tier 2 none, across 120 source-defined constants; truth side 35 files, editions `spin2-v51` + `spin2-v55` | 0 |
 | `validation/audit-extraction-digit-density.py --all` | CLEAN, 65 artifacts at or above the 20% floor, 4 declared exempt | 0 |
 | `validation/audit-yaml-duplicate-keys.py` | 1132 scanned, **0 files with duplicate keys** | 0 |
-| `validation/audit-register-hygiene.py` ×3 | corrections **103 live / 294 archived / 0 unaccounted**, next `F-380` · gaps **36 live**, next `G-28` / `Q-10` · errata **17 live**, next `E-18` | 0, 0, 0 |
+| `validation/audit-register-hygiene.py` ×3 | corrections **105 live / 294 archived / 0 unaccounted**, next `F-382` · gaps **36 live**, next `G-28` / `Q-10` · errata **17 live**, next `E-18` | 0, 0, 0 |
 | `validate-dod-release.py` | **11 checks, all PASS** — READY FOR RELEASE | 0 |
 
 `deliverables/ai/p2kb-index.json.gz` decompresses **byte-identical** to `p2kb-index.json`
@@ -121,6 +123,15 @@ F-377 that a locator can be in range and still point at the wrong line. The cons
 *named constants*; name coverage is not semantic coverage. `b466a538` is the current proof: four
 files that parsed, resolved, carried citations and assembled under `pnut-ts` while each contradicted
 itself about a flag's meaning. **No instrument in this project can read a sentence.**
+
+**2026-08-29 adds a second, sharper proof, and it is the reason to distrust a green here.** §1.18
+recomputed the SETXFRQ NCO class instead of re-reading the two values a prior pass had named. Nine
+shipped values were wrong — an off-by-one in bit 0 of a 31-bit phase word — in files that parsed,
+resolved, carried correct citations, and **quoted the very rule they were violating**. Every gate in
+this table was green before that fix and is green after it. The same pass found the KB describing the
+64-bit system counter as 32-bit, and a `~1-2 ns` smart-pin figure that exists in no Parallax source.
+None of it was detectable by any instrument listed above. **Read this table as "not caught by these
+checks", never as "correct" — the gates themselves say so in their own closing banners.**
 
 ### 0.5 What is still open — the pre-ship list, as it actually stands at HEAD
 
@@ -159,19 +170,29 @@ What follows is what a release reviewer would still hit.
 
 **🟠 Real defects in the shipped set, scoped and unstarted**
 
-5. **F-377 part 1 — translated locators.** F-365 re-anchored 23 citations from the superseded
+5. **F-377 part 1 — translated locators. STILL OPEN — this is the largest unstarted item.** F-365 re-anchored 23 citations from the superseded
    `p2-documentation.txt` and instructed that line numbers must never be translated; some were.
    `streamer/dds-goertzel.yaml:74` cites `:4062`, a blank line, beside a correct `:1565`. A
    class-wide range check over all **113** `silicon-doc-text.txt` citations returns **0 out of
    range** — a translated locator lands inside the file and reads as valid to anything checking
    bounds. Two more of the same shape in `clock_system.yaml` are **not** F-365 residue, which
    widens the class beyond the 23. Only opening the line catches it. `CONFIRMED`.
-6. **F-377 part 2 — an eighth fabricated-provenance file.** `architecture/io_pin_timing.yaml` cites
-   `part3-pins.txt` at `:2` and `:193`. No such file exists in `sources/silicon-doc/`. F-359 named
-   seven; this one was never on the list, and its quantitative blocks were purged, so nothing reads
-   the header as evidence today — but the header is still what makes the sourcing gate call the
-   file cited. `CONFIRMED`.
-7. **F-378 — the KB ships the compiler's acceptance range as a frequency ceiling.**
+6. ~~**F-377 part 2 — an eighth fabricated-provenance file.**~~ **CLOSED 2026-08-29 («#333»,
+   §1.18).** `architecture/io_pin_timing.yaml`'s `part3-pins.txt` citation is gone. The content was
+   checked and proved genuine, so it was re-anchored rather than removed: the four timing claims now
+   cite `silicon-doc-text.txt:1987`, `:1997`, `:2005` and `:3847`, each re-read at the line, and the
+   latch-up figure cites `:101` with the note that it comes from ON Semi failure analysis of one
+   wafer lot quoted in the revision history, not a characterised limit. Reading the file also killed
+   an unsourced `~1-2 ns` smart-pin timing claim and labelled a `5 clocks` total the source never
+   states as the sum it is.
+7. ~~**F-378 — the KB ships the compiler's acceptance range as a frequency ceiling.**~~ **CLOSED
+   2026-08-29 («#334», §1.18)** — and it was five sites, not one. The sweep F-378's own text called
+   for found `_CLKFREQ` (500 MHz vs the datasheet's 320), `_XINFREQ` (500 vs 200 for direct drive),
+   `_XTLFREQ` (60 vs 50 for a crystal), `clkmode.yaml`'s "up to 500 MHz", and a 500 MHz row in
+   `timing_operations.yaml`'s rollover table. All five now state the compiler range labelled as the
+   compiler range, the datasheet rating beside it, and the Silicon Doc's 350 MHz `VCO / 1` overclock
+   ceiling — three different numbers a reader was previously handed as one. **Superseded text
+   follows for the record only:**
    `language/spin2/constants/special-configuration-symbols.yaml:59` gives `_CLKFREQ` a range of
    3,333,333 Hz to **500,000,000 Hz**, unlabelled. That is pnut-ts's acceptance range; the
    datasheet's PLL absolute maximum is **320 MHz**. An agent reading only that entry emits a
@@ -200,13 +221,31 @@ What follows is what a release reviewer would still hit.
     use rather than in a separate document, plus one held block only three-quarters present in the
     ingestion tree. `CONFIRMED`.
 
+12b. **F-381 — the Tier-2 advisory class is "no control available", not "reviewed and accepted",
+    and it hides uncited quantity blocks from the blocking gate.** Proved by accident on 2026-08-29:
+    adding silicon-limit citations to three clock files took `audit-yaml-claim-sourcing.py` from
+    **0 Tier-1 violations to 12**. Nothing broke. Those files had cited *nothing anywhere*, which
+    parks every quantity block in Tier 2; the gate judges a block against **its own file's other
+    sections as the control**, and a wholly-uncited file supplies none. One real citation turns the
+    rest of the file red. The 12 were always uncited — they were merely invisible. **32 advisory
+    blocks across 24 files remain in that state**, and 32 is only what the gate can *name*: the true
+    figure is whatever those 24 files hold, and the three-file sample yielded twelve. The 24 split
+    into ordinary citation debt (8 smart-pin mode pages, 6 clock/timing language files) and content
+    that may need a *declared exemption* rather than a citation (3 OBEX object-metadata files,
+    5 `architecture/decomposition/` reasoning-layer files, 2 hardware guides — one of which is
+    already item 17 below). **Deciding which is a scope call, not a repair to start unasked.**
+    `CONFIRMED`.
+
 **🟡 Residues named by the differential read and still open at HEAD** — each re-checked in the tree
 today; the two that `ca07aaf7` closed have been dropped from this list.
 
-13. `language/pasm2/setxfrq.yaml common_values` — two of four values contradict the rounding rule
-    the block itself cites (`$0CE3_BCD3` where the source rule gives `$0CE3_BCD4`; `$0005_C7C0`
-    where it gives `$0005_C7C1`). **Two-file class** — `streamer/nco-timing.yaml video_rates:92`
-    carries the same `$0CE3_BCD3`. Pre-existing; surfaced by attaching the cited rule to it.
+13. ~~`language/pasm2/setxfrq.yaml common_values` — two of four values…~~ **CLOSED 2026-08-29
+    («#332», §1.18), and the class was eight times the size recorded here.** This entry named 2
+    values in 2 files. Recomputing the whole class instead of re-reading the named values found
+    **9 wrong in the shipped KB** (setxfrq 2 of 4, `nco-timing.yaml video_rates` **7 of 12**) and
+    **8 more in the published Streamer Guide v1.1.0**, which also taught the rule as `round()` in
+    three places. Filed **F-380**. ⚠️ **A Streamer Guide re-release is owed** — the master is fixed,
+    the shipped PDF is not. *This is the clearest instance of the counting lesson in §0.6.*
 14. `application-notes/p2an004-…yaml` contradicts itself: `:111` says the sensor's electrical
     figures are "deliberately not restated here", `:87` restates them, `:127` cites the datasheet by
     document number.
@@ -246,10 +285,42 @@ today; the two that `ca07aaf7` closed have been dropped from this list.
     by the armed gate, not chosen. And **0 of the 28** blocks still carrying the old shape is one the
     gate would demand a reshape for. Verdict: **MEASURED-SAFE.** What it does not settle is that
     nothing enforces or records the rule; if a schema is ever wanted, that is the rule to write down.
-22. **48 Tier-2 advisory blocks** remain in wholly-uncited files. Advisory by design, non-blocking,
-    and its population is not zero.
+22. **32 Tier-2 advisory blocks** remain in wholly-uncited files (48 on 2026-08-27; §1.18 cited
+    three of those files). Advisory by design, non-blocking, and its population is not zero.
+    ⚠️ **Re-graded 2026-08-29 — this is no longer "known, measured and NOT blocking".** See
+    **F-381** / item 12b: the advisory class is not an accepted exemption, and citing any one of
+    those 24 files turns its remaining blocks Tier-1 RED. It is listed here because it does not
+    block *today*, not because it has been adjudicated.
 23. **698 nested cross-reference sites are never checked** (F-340) and three top-level fields are
     exempt (F-373). `validate-crossref-keys.py`'s exit 0 covers less than it reads as covering.
+
+---
+
+## 0.6 The 2026-08-29 pre-release fix pass — and the counting lesson it kept teaching
+
+**Why there is a second pass at all.** The 2026-08-27 review left this document at release position
+with §0.5 as the pre-ship list. Reading that list rather than trusting it turned up defects the list
+had *named* but under-counted, every single time. In three consecutive cases the real class was
+larger than the entry recorded:
+
+| §0.5 entry | recorded | actually found | ratio |
+|---|---|---|---|
+| item 13 — SETXFRQ rounding | 2 values, 2 files | **17 values, 3 files** (incl. a published manual) | 8.5× |
+| item 7 — F-378 compiler range | 1 site | **5 sites** | 5× |
+| item 6 — F-377 pt2 fabricated header | header only | header **+ 2 further defects in the file** | — |
+
+**The lesson, stated so the next pass does not relearn it: §0.5's counts are what the differential
+read NAMED, not the size of the class.** The differential read examined the files that changed; a
+defect class does not respect that boundary. Every entry here should be treated as *"at least this
+many"* and the class recomputed from the rule, not from the list. Three of the four biggest finds in
+this pass were invisible to every gate and would have shipped.
+
+**A second-order lesson, from F-381.** Fixing a file can *reveal* defects rather than introduce
+them. Citing three previously-uncited files moved them out of the sourcing gate's advisory class and
+turned 12 always-uncited blocks into blocking violations. A gate going red after a repair is not
+necessarily a regression — check whether the repair changed what the gate can *see* before treating
+it as one.
+
 
 ---
 
@@ -791,6 +862,90 @@ nobody had looked at had the same defect. The ID family is a prefix **string** n
 namespaced allocators are governed rather than renamed. **All five registers now exit 0 with the gate
 actually reading them.**
 
+## 1.18 The 2026-08-29 pre-release fix pass — 6 files, 3 commits, all source-first
+
+Every change below was made against a source read **at the line**, and the source is quoted in the
+file. Nothing was inferred, and no value was changed to make a gate pass.
+
+**`856ef2f2` — the SETXFRQ increment rule (F-380).** The *Parallax Propeller 2 Documentation* v35
+states one rule for the streamer NCO word (`part2-pixel-ops.txt:117`, continuing at `:121` — one
+sentence split by a page break): *"For fractions with remainders, the computed D/# value should be
+incremented, in order to produce proper initial rollover behavior."* Its own table applies it —
+`1/3` is `$2AAA_AAAA+1`, `1/5` is `$1999_9999+1`, while `1/2`, `1/4`, `1/8` carry nothing. So the
+rule is **truncate, then increment on a remainder**; it is **not** round-to-nearest, which agrees
+with the source only when the remainder happens to exceed half.
+
+| file | wrong / total | what it also got wrong |
+|---|---|---|
+| `language/pasm2/setxfrq.yaml` | 2 of 4 | stated the rule **twice, differently** — `source:` quoted the footnote, `computation:` said `round()`; and cited `nco-timing.yaml` as a cross-check that "the two agree" while that file carried the same wrong value |
+| `architecture/streamer/nco-timing.yaml` | **7 of 12** | its own ratio table is correct at **all 8** entries — the file applied the rule in one block and not the next |
+| *(not KB)* Streamer Guide v1.1.0 master | **8 of 18** | taught `round()` in three places, incl. a worked example printing the wrong result |
+
+*The lack:* nothing in this project can detect an off-by-one in bit 0 of a 31-bit phase word. The
+values are well-formed hex of the right magnitude, they carry citations, and they compile. Only
+recomputing from the quoted rule finds it. **⚠️ A Streamer Guide re-release is owed.**
+
+**`9723e482` — `architecture/io_pin_timing.yaml`, the eighth fabricated-provenance file (F-377 pt2).**
+Header cited `part3-pins.txt, pages 5-8`; no such file exists under `sources/silicon-doc/` and none
+ever did. F-359 named seven such files. **The content proved genuine** — all four timing claims are
+really in the Silicon Doc — so it was re-anchored, not removed: `:1987` (DIRx/OUTx three-clock
+latency), `:1997` (INx read), `:2005` (TESTP read), `:3847` (smart-pin IN-flag reset), `:101`
+(latch-up onset, now labelled as ON Semi wafer-lot failure analysis quoted in the revision history
+rather than a characterised limit). Reading it found two more: **`"Smart pins add ~1-2ns to base
+timing"` has no source** — zero nanosecond figures for this exist in any ingested Parallax source,
+removed under cite-or-omit (F-327/F-333 class) — and `total_latency: 5 clocks` is a sum of a 2-clock
+`DRVH` and the source's THREE, which the source never states as a total. The abs-max table was
+re-read against `p2-datasheet-text.txt:2126-2149` and matches verbatim; the four package-and-supply
+limits stated beside it are now named as deliberately out of scope, so their absence reads as a
+choice rather than a gap.
+
+*The lack:* a fabricated citation satisfies the sourcing gate exactly as well as a real one. The
+gate checks that a citation is present; it never opens the file named.
+
+**`efc683a8` — whose limit is it, the compiler's or the silicon's (F-378, and F-381 as a by-product).**
+
+| symbol | shipped range (= pnut-ts acceptance) | P2 Datasheet rating | over by |
+|---|---|---|---|
+| `_CLKFREQ` | 3,333,333 Hz – **500,000,000 Hz** | PLL max **320 MHz** (`p2-datasheet-text.txt:2200`) | 180 MHz |
+| `_XINFREQ` | 250 kHz – **500 MHz** | direct drive into XI max **200 MHz** (`:2198`) | 300 MHz |
+| `_XTLFREQ` | 1 – **60 MHz** "typical" | crystal max **50 MHz** (`:2199`) | 10 MHz |
+
+Plus `clkmode.yaml`'s PLL `use_case: "High-speed operation (up to 500 MHz)"` and a **500 MHz row**
+in `timing_operations.yaml`'s rollover table — a speed no P2 clock source is rated to reach (now
+320 MHz: 13.4 s rollover, 3.125 ns cycle, recomputed). All five now carry the compiler range
+*labelled as the compiler range*, the datasheet rating beside it, and the *Parallax Propeller 2
+Documentation*'s 350 MHz `VCO / 1` overclock ceiling (`part3-interrupts.txt:545`) — three distinct
+numbers the reader was previously handed as one. This is **E-007's label-which-framing rule**, which
+had been settled for the Hardware Manual's clock limits and never applied here.
+
+Two further defects, found by reading the files while citing them: `timing_operations.yaml`
+described the system counter as **32-bit** where the Silicon Doc says it was *"extended to 64 bits.
+GETCT WC retrieves upper 32-bits"* (`silicon-doc-text.txt:55`) — the file now says the counter is
+64-bit and that the rollover discussion concerns the 32-bit value `GETCT` returns alone; and its
+`minimum_resolution` block carried a `min_practical` column (~1 us / ~100 ns / ~50 ns / ~30 ns) plus
+*"Spin2 interpreter overhead adds several microseconds to any operation"*, **neither of which any
+source states nor any bench result here measures**. Removed, with a note that the overhead is real
+and wants a silicon measurement before the KB prints a figure for it.
+
+*The lack:* nothing compares a `range:` against the silicon rating for the same quantity, and
+nothing flags that a range's source is a **compiler guide**. Both numbers are true; the entry never
+said which question it was answering.
+
+**Per-file, this pass:**
+
+| file | +/− | new to the change set? | verdict |
+|---|---|---|---|
+| `language/pasm2/setxfrq.yaml` | +18/−15 | no (already in the 89) | **stronger** — 2 wrong values, rule restated, self-corroborating cross-check removed |
+| `architecture/streamer/nco-timing.yaml` | +28/−10 | no | **stronger** — 7 wrong values, `source:` added to `video_rates` |
+| `architecture/io_pin_timing.yaml` | +29/−14 | no | **stronger** — provenance re-anchored, 1 unsourced claim removed |
+| `language/spin2/constants/special-configuration-symbols.yaml` | +17/−3 | **yes** | **stronger** — 3 ranges labelled, 4 blocks cited |
+| `language/spin2/concepts/timing_operations.yaml` | +31/−12 | **yes** | **stronger** — counter width corrected, unsourced estimates removed, 6 blocks cited |
+| `language/spin2/system-variables/clkmode.yaml` | +3/−2 | **yes** | **stronger** — PLL ceiling corrected, 2 blocks cited |
+
+**Registers moved:** `F-380` filed (SETXFRQ class) · `F-381` filed (Tier-2 structural) · `F-378`
+rewritten in place and **RESOLVED** · next finding ID now `F-382`.
+
+
 ---
 
 # PART 2 — By region → file
@@ -866,10 +1021,13 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 | `smart_pin_patterns.yaml` | +5/−7 | 7 | stronger | Generic unsourced notes replaced by verbatim cited statements; the timing cross-reference kept **and** promoted into `related:`. |
 | `pin-drive-configuration.yaml` | **+277/−0** | — | *new file* | Eight real rungs, cited, expressed by encoding. §1.5. Its duplicate `note:` — which silently discarded the sprint's own central corrective sentence — was found and fixed by `43061dad`. |
 
-## `language/spin2/` — 12 files · 11 stronger · 1 equal
+## `language/spin2/` — 15 files · 14 stronger · 1 equal
 
 | File | ± | GONE | Verdict | What changed |
 |---|---|---|---|---|
+| `concepts/timing_operations.yaml` | +31/−12 | 2 | stronger | **§1.18.** System counter corrected from 32-bit to **64-bit** (`silicon-doc-text.txt:55`, "GETCT WC retrieves upper 32-bits"), with the rollover discussion scoped to the 32-bit value GETCT returns alone. The 500 MHz rollover row → 320 MHz, recomputed. The 2 GONE are the unsourced `min_practical` column and "Spin2 interpreter overhead adds several microseconds" — **no source states either**. Six blocks gained `derived_from:`/`source:`; those blocks were always uncited and were invisible until the file gained its first citation (F-381). |
+| `constants/special-configuration-symbols.yaml` | +17/−3 | 0 | stronger | **§1.18.** `_CLKFREQ`, `_XINFREQ` and `_XTLFREQ` ranges labelled as **pnut-ts acceptance ranges**, each with the P2 Datasheet's rating beside it (320 / 200 / 50 MHz) — the compiler accepts 180, 300 and 10 MHz beyond them respectively. Four further blocks cited to the compiler guide's own rules 1-5 and to `spin2-v55-text.txt:1018`/`:1027`. |
+| `system-variables/clkmode.yaml` | +3/−2 | 0 | stronger | **§1.18.** PLL `use_case` no longer says "up to 500 MHz"; states the datasheet's 320 MHz max and 180 MHz typical plus the 350 MHz `VCO / 1` overclock ceiling. `bit_fields` and the PLL-lock `~10 ms` note cited (`silicon-doc-text.txt:2621`, `:2687`, `:2635`). |
 | `symbols/spin2-builtin-symbols-complete.yaml` | +1052/−23 | 20 | stronger | 874 → 1937 leaves carrying v55's own wording; **all 116 v55 constants defined exactly once**, plus a top-level `aliases:` block of 116 names that makes them reachable at all. The 20 GONE are 3 corrected counts, 13 rewordings and **4 fabricated symbol names** — zero real losses. The `1224` record count corrected to 136 with its provenance (`e9dc9507`). |
 | `concepts/basic-io.yaml` | +89/−121 | 59 | stronger | Source-first rebuild; three disproven blocks deleted incl. `max_current_per_pin: 150mA` — **five times the datasheet's ±30 mA absolute maximum**, in the exact number used to size an LED resistor. |
 | `methods/getct.yaml` | +45/−25 | 4 | stronger | Derived figures replaced by cited v55 + datasheet statements. Its `description` was purged and not returned for a while; **restored by `75971308`**, quoted rather than derived. |
@@ -1106,14 +1264,15 @@ manual is wrong **and our KB followed it**, in two of the eight files in the fam
 ## How to re-derive every number in this document
 
 ```bash
-G="git -c safe.directory=/workspaces/P2-Knowledge-Base"
+G="git"   # the -c safe.directory workaround is retired: /etc/gitconfig carries
+         # safe.directory=/workspaces/* at system scope (8778e6a2). Do not re-add it.
 
 # Scope (§0.1)
-$G diff --name-only  v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 89
-$G log  --oneline    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 24
-$G log  --oneline    v1.17.0..HEAD | wc -l                                       # 107
+$G diff --name-only  v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 92
+$G log  --oneline    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 27
+$G log  --oneline    v1.17.0..HEAD | wc -l                                       # 118
 $G diff --numstat    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \
-   | awk '{a+=$1;r+=$2} END{print a,r}'                                          # 6246 3355
+   | awk '{a+=$1;r+=$2} END{print a,r}'                                          # 6363 3402
 $G diff --diff-filter=A  --name-only    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml'   # 4
 $G diff --diff-filter=DR -M --name-status v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' # empty
 
@@ -1140,4 +1299,10 @@ gzip -cd deliverables/ai/p2kb-index.json.gz | cmp - deliverables/ai/p2kb-index.j
 ```
 
 **The tree is at release position and is deliberately unreleased.** No version bump, no tag, no push.
-What still needs Stephen is in `engineering/analysis/2026-08-27-awaiting-stephen.md`.
+What still needs Stephen is in `engineering/analysis/2026-08-27-awaiting-stephen.md` — noting that
+its item 1 predates the 2026-08-29 fix pass (§0.6), so read that item's *options* as still live but
+its "already done" paragraph as superseded by §0.1 and §0.5 here.
+
+**Reviewing this document is the release gate.** Stephen, 2026-08-29: *"we don't release until my
+visual check of the all changes document confirms the content."* Nothing is tagged or pushed until
+that read happens.
