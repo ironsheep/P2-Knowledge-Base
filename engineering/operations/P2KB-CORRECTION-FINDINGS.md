@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-380`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-381`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,76 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The SETXFRQ increment rule is quoted in three files and applied in none of their pixel-rate tables — 9 wrong NCO words in the shipped KB, 8 more in a released manual (2026-08-29, «#332» release-review recomputation) — F-380
+
+### F-380 — `SETXFRQ` values computed by truncation or by `round()`, where the source requires truncate-then-increment — `RESOLVED`
+
+**The rule, read at the line.** *Parallax Propeller 2 Documentation* v35, Streamer NCO —
+`engineering/ingestion/sources/silicon-doc/part2-pixel-ops.txt:104-117`, with the footnote at
+`:117` continuing at `:121` (one sentence, split by a page break):
+
+> "For fractions with remainders, the computed D/# value should be incremented, in order to
+> produce proper initial rollover behavior."
+
+The source's own table shows it applied: `1/3` is given as `$2AAA_AAAA+1`, `1/5` as
+`$1999_9999+1`, `1/6` and `1/7` likewise, while the exact divisions `1/2`, `1/4` and `1/8` carry
+no increment. So the rule is **truncate, then increment when the division leaves a remainder** —
+equivalently a ceiling. It is **not round-to-nearest**: a remainder below half still increments.
+That distinction is the whole defect.
+
+**What was wrong.** Every affected block *quoted or paraphrased the correct rule* and then failed
+to apply it to its own numbers. Nothing detected this: the values are well-formed hex in the right
+magnitude, they carry citations, and an off-by-one in bit 0 of a 31-bit phase word is invisible to
+every gate we run.
+
+*Shipped KB — `language/pasm2/setxfrq.yaml`, 2 of 4 `common_values`:*
+
+| target @ 250 MHz | rule | shipped |
+|---|---|---|
+| 25.175 MHz | `$0CE3_BCD4` | `$0CE3_BCD3` |
+| 44.1 kHz | `$0005_C7C1` | `$0005_C7C0` |
+
+The other two (`$0CCC_CCCD`, `$0006_4A9D`) were right, and their `arithmetic:` notes said
+"remainder rounded up per the source footnote" — the two wrong ones carried no such note. That is
+the signature: the increment was applied where someone wrote it down and skipped where they did not.
+The file also stated **two different rules** — `computation:` said `D = round(...)` while `source:`
+quoted the round-up footnote — and its `cross_checked_against:` cited `nco-timing.yaml` as
+agreement, which was self-corroboration: that file carried the same wrong value.
+
+*Shipped KB — `architecture/streamer/nco-timing.yaml`, 7 of 12 `video_rates`:* 25.175 MHz at all
+three system clocks (`$0CE3_BCD4` / `$0ABD_C806` / `$0A11_EB86`), 40.000 MHz @ 300 (`$1111_1112`),
+65.000 MHz @ 250 (`$2147_AE15`), 74.250 MHz @ 250 (`$2604_1894`) and @ 320 (`$1DB3_3334`). The
+same file's `common_values` ratio table is **fully correct at all 8 ratios** and its
+`frequency_calculation.note` stated the rule — the file applied it in one block and not the other.
+
+*Released manual — `p2-streamer-programming-guide` v1.1.0 (published 2026-08-22, 91pp), 8 of 18
+values in Appendix C's "Common Video Pixel Rates" table,* plus the rule stated as
+`round($8000_0000 * pixel_rate / clock_frequency)` in **three** places (the §-body prose, the
+worked Example 2, and the table caption). The worked example prints
+`word = round($8000_0000 × 25.175 / 250) = $0CE3_BCD3` — teaching the wrong rule and the wrong
+result in one line. Wrong rows: 640×480 @25.175 (all three clocks), 720×480 @27.000 MHz @300,
+800×600 @300, 1024×768 @250, 1280×720 @250 and @320.
+
+**How it surfaced.** The 2026-08-27 release review flagged `setxfrq common_values` as a two-value,
+two-file residue (§0.5 item 13 of the change ledger). Recomputing the whole class rather than the
+two named values found 9 wrong in the KB and 8 more in a released manual — the ledger's count was
+low because it checked the values the differential read had named, not the class.
+
+**Applied 2026-08-29 («#332»).** All 9 KB values corrected; both files' rule statements rewritten
+to state truncate-then-increment explicitly, with the citation and the page-break note; the
+`round()` wording removed from `setxfrq.yaml`'s `computation:`, its top-level `description:` and
+`frequency_formula.formula`; the self-corroborating `cross_checked_against:` rewritten to say the
+source is the authority, not the agreement; a `derivation:` block added to `nco-timing.yaml`
+`video_rates` naming which two entries divide exactly; and `nco-timing.yaml`'s note changed from a
+list of special cases (1/3, 1/5, 1/10) to the general rule. Manual master
+`manuals/p2-streamer-programming-guide/opus-master/streamer-body.md` corrected at all 8 values and
+all 3 rule statements — **the workspace render was NOT edited; it regenerates from the master.**
+
+**⚠️ OWED: a Streamer Guide re-release.** The corrected values are in the master; the published
+v1.1.0 PDF still carries the 8 wrong ones. Scheduling that release is Stephen's.
+
+---
 
 ## `ADDSX` and `SUBSX` ship the PASM2 Manual's wrong C-flag sentence while contradicting it in the same file (2026-08-27, «#328» E-016 sibling sweep) — F-379
 

@@ -246,17 +246,19 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 
 > **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
 
-The **SETXFRQ** word for any combination is `round($8000_0000 * pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+The **SETXFRQ** word for any combination is `$8000_0000 * pixel_clock / sysclk`, truncated, and then incremented by 1 if that division left a remainder — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
 ```formula
 Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
-  word     = round($8000_0000 × 40 / 320) = $8000_0000/8 = $1000_0000
+  word     = $8000_0000 × 40 / 320 = $8000_0000/8 = $1000_0000
+             divides exactly, so no increment
   achieved = 320 × $1000_0000 / $8000_0000 = 40.000 MHz   (exact)
   cyc/px   = 320 / 40 = 8.000   -> no jitter
 
 Example 2 — non-integer ratio: VGA 640×480, 25.175 MHz @ 250 MHz
-  word     = round($8000_0000 × 25.175 / 250) = $0CE3_BCD3
-  achieved = 250 × $0CE3_BCD3 / $8000_0000 = 25.175 MHz   (<0.01 ppm)
+  word     = $8000_0000 × 25.175 / 250 = $0CE3_BCD3 remainder
+             remainder is non-zero, so increment  -> $0CE3_BCD4
+  achieved = 250 × $0CE3_BCD4 / $8000_0000 = 25.175 MHz   (<0.01 ppm)
   cyc/px   = 250 / 25.175 = 9.93   -> ±1-cycle jitter (~10% of pixel)
   remedy   = 25.0 MHz @ 250 = 10.000 cyc/px   -> no jitter
 ```
@@ -2063,14 +2065,14 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 
 | Resolution | Pixel Rate | At 250 MHz | At 300 MHz | At 320 MHz |
 |------------|------------|------------|------------|------------|
-| 640×480 | 25.175 MHz | `$0CE3_BCD3` | `$0ABD_C805` | `$0A11_EB85` |
+| 640×480 | 25.175 MHz | `$0CE3_BCD4` | `$0ABD_C806` | `$0A11_EB86` |
 | 640×480 | 25.000 MHz | `$0CCC_CCCD` | `$0AAA_AAAB` | `$0A00_0000` |
-| 720×480 | 27.000 MHz | `$0DD2_F1AA` | `$0B85_1EB8` | `$0ACC_CCCD` |
-| 800×600 | 40.000 MHz | `$147A_E148` | `$1111_1111` | `$1000_0000` |
-| 1024×768 | 65.000 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
-| 1280×720 | 74.250 MHz | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
+| 720×480 | 27.000 MHz | `$0DD2_F1AA` | `$0B85_1EB9` | `$0ACC_CCCD` |
+| 800×600 | 40.000 MHz | `$147A_E148` | `$1111_1112` | `$1000_0000` |
+| 1024×768 | 65.000 MHz | `$2147_AE15` | `$1BBB_BBBC` | `$1A00_0000` |
+| 1280×720 | 74.250 MHz | `$2604_1894` | `$1FAE_147B` | `$1DB3_3334` |
 
-Values are `round($8000_0000 * pixel_rate / clock_frequency)`. Two rates are listed for 640×480: 25.175 MHz is the VESA figure, and 25.000 MHz is the substitute §3.4 recommends on a 20 MHz crystal — ten cycles per pixel at 250 MHz, and what §15.1 runs.
+Values are `$8000_0000 * pixel_rate / clock_frequency`, **truncated, then incremented by 1 whenever that division leaves a remainder** — the increment is required, not a refinement, and it is not the same as rounding to nearest: a remainder well below half still increments. Only three entries in this table divide exactly and take no increment — 25.000, 40.000 and 65.000 MHz, each at 320 MHz. Every other value here carries the +1. Two rates are listed for 640×480: 25.175 MHz is the VESA figure, and 25.000 MHz is the substitute §3.4 recommends on a 20 MHz crystal — ten cycles per pixel at 250 MHz, and what §15.1 runs.
 
 # Appendix D: Troubleshooting Guide {#app-d}
 
