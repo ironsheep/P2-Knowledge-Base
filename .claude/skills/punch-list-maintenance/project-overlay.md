@@ -1,20 +1,32 @@
 # P2-Knowledge-Base overlay — punch-list-maintenance
 
-> **Status (2026-06-22).** The Work Type Routing model is adopted (multi-head
-> dispatch + `whats-next` front door). Still open: per-manual and per-ingestion
-> punch-list homes remain `TBD` in `HEAD-DISPATCH-DRAFT.md`, and the punch-list
-> relocation cleanup is recorded as separable debt in `skill-conventions.md`.
-> (The YAML head's punch list is resolved: `P2KB-CORRECTION-FINDINGS.md`.)
+> **Status (2026-08-29).** The Work Type Routing model is adopted (multi-head
+> dispatch + `whats-next` front door). **All three punch-list homes are now
+> resolved** in `HEAD-DISPATCH-DRAFT.md` — the manual home was carried as `TBD`
+> long after the tree had settled on it, which central v10(r) made expensive by
+> giving the sentinel two new readers (`sprint-plan` §1, `sprint-retrospective`
+> §5) that would have read nothing. The punch-list relocation cleanup remains
+> separable debt, recorded in `skill-conventions.md`.
 
 ## Augments Step 0a — resolving the per-head `PUNCH_LIST_DOC` sentinel
 
 There is **no single project punch list.** Each head/element has its own:
-- **MANUAL** — the manual's own punch list (location `TBD` per manual).
+- **MANUAL** — `engineering/document-production/workspace/<slug>/PUNCH-LIST.md`,
+  **plus** `engineering/document-production/PUNCH-LIST.md` for anything spanning
+  manuals (including pending platform decisions). Both are in scope at a read;
+  the cross-cutting file states the split in its own header.
 - **YAML (KB)** — `engineering/operations/P2KB-CORRECTION-FINDINGS.md`.
-- **INGESTION** — per ingestion source (location `TBD`).
+- **INGESTION** — the dashboard row in `engineering/ingestion/README.md` plus
+  `sources/<src>/<src>-complete-extraction-audit.md`; the standing deferred-work
+  registers are `KNOWLEDGE-GAPS.md` (holes) and `SOURCE-ERRATA.md` (the source is
+  wrong), which the `plan-to-tasks` overlay already makes a mandatory deliverable
+  of every source task.
 
 Identify the head/element first, then resolve the punch list from
-`.claude/skills/HEAD-DISPATCH-DRAFT.md`. A `TBD` home → ask {{USER_NAME}}.
+`.claude/skills/HEAD-DISPATCH-DRAFT.md`. If a home ever reads `TBD` again, that is
+a step halt — resolve it from the tree before reporting an empty list, because an
+unresolved sentinel and a genuinely empty punch list are indistinguishable in the
+output.
 
 ## Augments the sweep — `P2KB-CORRECTION-FINDINGS` is a punch list
 

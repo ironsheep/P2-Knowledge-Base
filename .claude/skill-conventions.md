@@ -193,6 +193,28 @@ other head is `arbiter-serial`, and the reason is physical: one Forge queue and
 one P2 board cannot be made concurrent by any design, and a manual's
 `COMPLETE-OPUS-MASTER.md` is one file every task in a sprint lands in.
 
+**Who decided this, and when** (recorded 2026-08-29 for central v11(a), which asks
+every project to make its dispatch model traceable to {{USER_NAME}} rather than to
+an agent's own reading). **Stephen, 2026-08-27:** *"You execute tasks by handing it
+off to an agent and waiting on the return"* — said while correcting a sprint that
+had been running inline and had disclosed it as such. So the value is his, it is
+dated, and it is **dispatch**: `arbiter-serial` means one agent at a time, never
+in-session execution. `inline` has never been this project's value and must not be
+written onto the slot by an agent.
+
+**Precedence — the standing directive does not countermand this slot.** The harness
+carries a standing *"do not call the Agent tool unless the user requested it."* That
+guards against unsolicited fan-out; it does not govern task execution here, because
+**setting this slot IS the request**, made once at project level instead of once per
+task (central v10, §*honor the toolkit*). Do not re-litigate it per sprint. What the
+directive still forbids is fan-out nobody asked for — which is also why a dispatched
+agent is told not to spawn its own subagents (one did), and why the authority to
+dispatch is the arbiter's and does not travel down a dispatch chain (v11).
+
+**What the arbiter keeps regardless:** todo-mcp protocol, the plan, **verification**
+(the agent's report is a claim — re-run every CLAIMS command and write what *you*
+observed), the boundary commit, the monotonic allocators, and index regeneration.
+
 ## Domain authority
 
 ```yaml
