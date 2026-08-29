@@ -69,10 +69,10 @@ standing activity), so it gets its **own in-repo skill** — not an overload of
 (locate+download → study → delineate → fork). The two proven NOTES are the ground
 truth to extract from: `app-notes/P2AN001/P2AN001-NOTES.md`,
 `app-notes/P2AN002/P2AN002-NOTES.md` (esp. their "Boundary delineation" + "Sources to
-mine" + "Source traceability" sections). Skill layout convention:
-`.claude/skills/<name>/SKILL.md` (+ `project-overlay.md`).
+mine" + "Source traceability" sections). Skill layout convention: one `SKILL.md`
+(+ optional `project-overlay.md`) per skill, agent-side and not shipped with this repo.
 
-**Target.** `.claude/skills/mine-and-delineate/SKILL.md` covering:
+**Target.** the `mine-and-delineate` skill (agent-side) covering:
 1. **Single-source mode** — one region: locate+download examples (OBEX #/QB/external)
    → study → delineate → emit the standard artifact.
 2. **The mergeable output contract** *(the linchpin)* — a uniform

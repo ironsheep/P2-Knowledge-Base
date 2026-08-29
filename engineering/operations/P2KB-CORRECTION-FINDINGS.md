@@ -3823,7 +3823,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   >   `engineering/ingestion/README.md:51` no longer reads `100% (stated)`.
   > - **The general lesson is now an instrument, not a note.**
   >   `engineering/tools/validation/audit-extraction-digit-density.py`, wired into
-  >   `.claude/skills/ingest-source/SKILL.md` **§2a as a mandatory pass-1 gate** (plus the
+  >   the `ingest-source` skill (agent-side) **§2a as a mandatory pass-1 gate** (plus the
   >   pass-1 convention list, the §7 hand-back, and *What NOT to do*). Corpus sweep
   >   `--all`: **clean, 53 artifacts**, 4 hand-written folder descriptions exempted by name
   >   with reasons. Negative control: the archived lossy artifact scores 1.5% and exits 1.
@@ -5283,7 +5283,7 @@ site is the *command*; the project name in running text is properly **PNut-TS**.
 > written it reported **one** stale element; run corrected it reports **eight**. A fleet check that
 > cannot see part of the fleet exits 0 and proves nothing.
 >
-> Both defects fixed in `.claude/skills/release-manual/project-overlay.md`: the glob now covers
+> Both defects fixed in the `release-manual` skill overlay (agent-side): the glob now covers
 > `app-notes/*/` and the lookup is `grep -i`, with the reasoning recorded inline so neither is
 > re-simplified away.
 >
@@ -6608,7 +6608,7 @@ probably load-bearing in every channel declaration in the manual.
 >
 > **The guidance defect was still live in the place a reader actually reaches.** This entry recorded
 > the fix as *"Corrected in the prepare-manual project overlay"* — and it was. But
-> `.claude/skills/prepare-manual/SKILL.md` still stated the destroying rule **twice, unqualified**:
+> the `prepare-manual` skill (agent-side) still stated the destroying rule **twice, unqualified**:
 > `:194` (Step 4, code-line gate) — *"for a code overflow, break at a logical boundary with the
 > legal Spin2 `...` line-continuation (or aggregate into a named CON)"* — and `:201` (Step 5,
 > compile certification) — *"A long line is shortened with the legal Spin2 line continuation `...`
@@ -7149,7 +7149,7 @@ masters is the missing instrument.
 > instrument, paragraph-wise for exactly the stated reason (a code span may legally wrap across a
 > newline). Run over **every** manual `opus-master` tree: **CLEAN, exit 0.**
 >
-> ⚠️ **But it was BUILT AND NEVER WIRED.** No skill invoked it — `grep` over `.claude/skills/`
+> ⚠️ **But it was BUILT AND NEVER WIRED.** No skill invoked it — `grep` over the skill set
 > returned nothing but the file itself. It had to be run by hand, and nobody had. **A gate nobody
 > invokes is a gate that does not exist**, which is F-301's defect in a different costume: a
 > correct artifact that is not where the decision gets made. **Now armed** as

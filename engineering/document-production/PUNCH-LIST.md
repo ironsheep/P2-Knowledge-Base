@@ -729,7 +729,8 @@ open worklist, it makes the register *notice* when the world moved past one of i
 
 `engineering/document-production/methodology/changelog-style-guide.md` is **retained
 deliberately** and must not be deleted as a redundant copy of `central:changelog-voicing`.
-The reason is recorded in `.claude/skill-conventions.md` as a second `CONFORMANCE_GUIDES`
+The reason is recorded in the project's `skill-conventions.md` (agent-side; not shipped with
+this repo) as a second `CONFORMANCE_GUIDES`
 row: central's guide fully authors changelog classes 1 and 2, and leaves **class 3
 (Published document)** — this project's class, for every manual and app-note CHANGELOG —
 declared in its own §5 as `Status: unauthored stub`. Deleting the local file would leave
@@ -758,7 +759,8 @@ someone has to re-make each time.
    residue into the `build-wrapup` overlay first, then delete the file, drop its
    `CONFORMANCE_GUIDES` row, and repoint the four skills above.
 
-**Trigger for step 2:** `~/.claude/skills-docs/guides/changelog-voicing.md` §5 Class 3 no
+**Trigger for step 2:** the central `changelog-voicing` guide (fleet-side, outside this repo)
+§5 Class 3 no
 longer reads `Status: unauthored stub`. Nothing here is owed until then — but the local
 guide is also the natural **source text** for that upstream profile, so proposing it is a
 standing promotion candidate.

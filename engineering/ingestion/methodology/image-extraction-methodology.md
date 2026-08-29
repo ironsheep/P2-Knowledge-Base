@@ -4,7 +4,7 @@
 
 > **SUPERSEDED for DOCX sources 2026-06-10 (Spin2 v55 ingestion).** When the
 > source is a **DOCX**, the authoritative procedure is the **`ingest-source`
-> skill** (`.claude/skills/`): pull the original embedded assets losslessly from
+> skill** (agent-side; not shipped with this repo): pull the original embedded assets losslessly from
 > `word/media/` (one `unzip`), then analyze with the **`image-tools-mcp`** server.
 > This **eliminates the v3.0 failure class at the source** — there is no PyMuPDF
 > extraction, so no black images, no full-page mis-captures, no false-success

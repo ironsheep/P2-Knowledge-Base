@@ -61,7 +61,7 @@ each closeout; the list above carries only **outstanding** work.
 
 - [x] **FIXED (test-v1 fatal):** inline code `` `org … end` `` (Ch2/now Ch3) used a Unicode
       ellipsis U+2026 → `\lstinline` undefined-control-sequence under `--listings`. Changed to
-      `org ... end`. (Generalized rule now lives in `.claude/skills/forge-test/project-overlay.md`.)
+      `org ... end`. (Generalized rule now lives in the `forge-test` skill overlay — agent-side, not shipped.)
 - [x] **FIXED (test-v2 silent drop):** the Appendix A 12-row terminology table overflowed a
       non-breaking `tblr` and clipped its last two rows (GALS, Place-and-route). Split into two
       6-row tables; all 12 terms verified present. *(The underlying platform-filter cause stays

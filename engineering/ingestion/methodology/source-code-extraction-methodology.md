@@ -16,7 +16,8 @@ Systematic workflow for extracting, validating, and cataloging source code snipp
 
 > **SUPERSEDED 2026-06-10 (Spin2 v55 ingestion).** The original "PDF-First /
 > request-a-PDF-if-only-DOCX" rule was a tooling-era workaround. The
-> authoritative procedure is now the **`ingest-source` skill** (`.claude/skills/`),
+> authoritative procedure is now the **`ingest-source` skill** (agent-side; not
+> shipped with this repo),
 > which is **DOCX-primary, validator-driven**. Rationale below.
 
 **DOCX-primary, `pnut_ts`-validated** (not PDF-first):

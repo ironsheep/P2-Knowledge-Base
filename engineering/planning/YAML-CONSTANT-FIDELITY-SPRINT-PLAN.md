@@ -352,7 +352,7 @@ open punch-list item), so the rest of this section is enumerated by hand and by 
 | `engineering/ingestion/README.md` (p2-datasheet row, scheduled-work table) | §8 moves coverage |
 | `datasheet-audit-report.md` · `identified-broken-tables.md` · the source extraction-audit | §8 changes what they report |
 | `P2KB-YAML-AUTHORING-GUIDE.md` | any rule this sprint revises |
-| `.claude/skill-conventions.md` `CONFORMANCE_GUIDES` | the gate row names the instruments |
+| `skill-conventions.md` `CONFORMANCE_GUIDES` (agent-side) | the gate row names the instruments |
 | `P2KB-CORRECTION-FINDINGS.md` | 51 findings annotated |
 | Manuals / app notes | **swept: clean.** Checked, not assumed. |
 
